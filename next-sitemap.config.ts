@@ -604,7 +604,7 @@ function getMuseumEntityPaths(
     let canonicalRoute: string | null = null;
     if (
       entity.entityType === "WORK" &&
-      /^6529NM-W-[0-9]{4}$/u.test(entity.id)
+      /^6529NM-W-\d{4}$/u.test(entity.id)
     ) {
       canonicalRoute = `/museum/network/works/${entity.id}`;
     } else if (entity.entityType === "ARTIST" && entity.slug) {

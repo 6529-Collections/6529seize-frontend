@@ -109,5 +109,5 @@ export function getNftSitemapFocuses(
 
   return [...allFocuses]
     .filter((focus) => getNftFocusPolicy(collection, focus).includeInSitemap)
-    .sort();
+    .sort((left, right) => left.localeCompare(right));
 }
