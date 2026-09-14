@@ -3,9 +3,17 @@ import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { BaseNFT } from "@/entities/INFT";
 import { serializeJsonLd } from "@/lib/structured-data/json-ld";
 import { buildNftPageJsonLd } from "@/lib/structured-data/nft";
+import {
+  buildMuseumArtistPageJsonLd,
+  buildMuseumWorkPageJsonLd,
+} from "@/lib/structured-data/museum";
 import { buildProfilePageJsonLd } from "@/lib/structured-data/profile";
+import type {
+  MuseumArtist,
+  MuseumPublicWork,
+} from "@/lib/museum/publication/types";
 import type { JsonLdObject } from "@/lib/structured-data/types";
-import { CC0_LICENSE_URL } from "@/lib/structured-data/utils";
+import { canonicalUrl, CC0_LICENSE_URL } from "@/lib/structured-data/utils";
 
 describe("structured data helpers", () => {
   it("serializes JSON-LD with script-breaking characters escaped", () => {
@@ -76,7 +84,108 @@ describe("structured data helpers", () => {
       additionalType: ApiProfileClassification.Ai,
     });
   });
+
+  it("builds a Museum Work graph without conflating its public record with custody or rights", () => {
+    const data = buildMuseumWorkPageJsonLd({
+      work: buildMuseumWork(),
+      path: "/museum/network/works/6529NM-W-0001",
+    });
+    const nodes = graph(data);
+    const artwork = findGraphNode(nodes, "VisualArtwork");
+    const breadcrumbs = findGraphNode(nodes, "BreadcrumbList");
+
+    expect(artwork).toMatchObject({
+      "@id": `${canonicalUrl(
+        "/museum/network/works/6529NM-W-0001"
+      )}#museum-work`,
+      name: "Example Work",
+      artMedium: "Digital image",
+      image: "https://images.example.test/work.png",
+    });
+    expect(artwork).not.toHaveProperty("creator");
+    expect(artwork).not.toHaveProperty("license");
+    expect(artwork).not.toHaveProperty("copyrightHolder");
+    expect(artwork).not.toHaveProperty("ownershipFundingInfo");
+    expect(artwork).not.toHaveProperty("dateCreated");
+    expect(breadcrumbs?.["itemListElement"]).toEqual([
+      expect.objectContaining({ name: "6529 Network Museum" }),
+      expect.objectContaining({ name: "Works" }),
+      expect.objectContaining({ name: "Example Work" }),
+    ]);
+  });
+
+  it("models a governed artist record as a Thing without assuming personhood", () => {
+    const data = buildMuseumArtistPageJsonLd({
+      artist: buildMuseumArtist(),
+      path: "/museum/network/artists/example-artist",
+    });
+    const artist = findGraphNode(graph(data), "Thing");
+
+    expect(artist).toMatchObject({
+      "@id": `${canonicalUrl("/museum/network")}#artist-artist-example`,
+      name: "Example Artist",
+      url: canonicalUrl("/museum/network/artists/example-artist"),
+    });
+    expect(artist?.["@type"]).not.toBe("Person");
+    expect(artist).not.toHaveProperty("sameAs");
+  });
 });
+
+function buildMuseumArtist(): MuseumArtist {
+  return {
+    id: "artist-example",
+    slug: "example-artist",
+    preferredName: "Example Artist",
+    projectIds: [],
+    artworkIds: [],
+    documentIds: [],
+    sourcePaths: ["records/artists/example.json"],
+  };
+}
+
+function buildMuseumWork(): MuseumPublicWork {
+  return {
+    kind: "work",
+    id: "6529NM-W-0001",
+    slug: "example-work",
+    title: "Example Work",
+    medium: "Digital image",
+    artistId: "artist-example",
+    projectId: null,
+    status: "selected_through_acquisition_program_acquisition_pending",
+    statusAsOf: "2026-09-14T00:00:00Z",
+    acquisitionIds: [],
+    programIds: [],
+    media: [
+      {
+        id: "media-example",
+        artworkId: "6529NM-W-0001",
+        kind: "still",
+        role: "source",
+        custody: "upstream",
+        url: "https://images.example.test/work.png",
+        preservationStatus: "not_retained",
+        sha256: null,
+        upstreamProvider: "museum_public_derivative",
+        mediaType: "image/png",
+        width: 100,
+        height: 100,
+        altText: "Example work",
+        credit: {
+          creditLine: "Example credit",
+          licenseLabel: null,
+          licenseUrl: null,
+          rightsExpressionId: null,
+          sourcePath: "records/rights/example.json",
+        },
+        sourcePath: "records/media/example.json",
+      },
+    ],
+    documentIds: [],
+    qualifiers: [],
+    sourcePaths: ["records/works/example.json"],
+  };
+}
 
 function graph(data: JsonLdObject): readonly JsonLdObject[] {
   return data["@graph"] as readonly JsonLdObject[];
