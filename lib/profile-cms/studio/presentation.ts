@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import type { CmsBlockV1, CmsPackageV1 } from "@/lib/profile-cms/protocol/v1";
+import { CMS_STUDIO_COLORWAYS, type CmsColorwayId } from "./palettes";
 
 export const CMS_STUDIO_LAYOUTS = [
   "signature",
@@ -21,6 +22,34 @@ export const CMS_STUDIO_SPANS = [
   "two_thirds",
 ] as const;
 export const CMS_STUDIO_ROLES = ["body", "hero", "kicker", "card"] as const;
+export const CMS_STUDIO_DESIGNS = [
+  "personal-v2",
+  "artist-v2",
+  "collector-v2",
+  "meme-v2",
+  "organization-v2",
+  "fund-v2",
+] as const;
+export type CmsStudioDesign = (typeof CMS_STUDIO_DESIGNS)[number];
+export const CMS_APPROVED_VARIANTS = [
+  "hero",
+  "intro",
+  "feature",
+  "artwork",
+  "gallery",
+  "cards",
+  "stats",
+  "schedule",
+  "timeline",
+  "people",
+  "contact",
+  "ledger",
+  "note",
+  "project",
+  "poster",
+  "biography",
+  "list",
+] as const;
 
 export const cmsStudioThemeTokenPatchSchema = z
   .object({
@@ -29,6 +58,8 @@ export const cmsStudioThemeTokenPatchSchema = z
     studio_palette: z.enum(CMS_STUDIO_PALETTES).optional(),
     studio_type: z.enum(CMS_STUDIO_TYPES).optional(),
     studio_density: z.enum(CMS_STUDIO_DENSITIES).optional(),
+    studio_design: z.enum(CMS_STUDIO_DESIGNS).optional(),
+    studio_colorway: z.enum(CMS_STUDIO_COLORWAYS).optional(),
   })
   .strict();
 
@@ -38,6 +69,8 @@ export interface CmsStudioPresentation {
   readonly studio_palette: (typeof CMS_STUDIO_PALETTES)[number];
   readonly studio_type: (typeof CMS_STUDIO_TYPES)[number];
   readonly studio_density: (typeof CMS_STUDIO_DENSITIES)[number];
+  readonly studio_design?: CmsStudioDesign;
+  readonly studio_colorway?: CmsColorwayId;
 }
 
 export const DEFAULT_CMS_STUDIO_PRESENTATION: CmsStudioPresentation = {
@@ -54,6 +87,12 @@ export function getCmsStudioPresentation(
 ): CmsStudioPresentation | null {
   const tokens = cmsPackage.site.theme.tokens;
   if (tokens?.["studio_revision"] !== 1) return null;
+  const design = CMS_STUDIO_DESIGNS.find(
+    (value) => value === tokens["studio_design"]
+  );
+  const colorway = CMS_STUDIO_COLORWAYS.find(
+    (value) => value === tokens["studio_colorway"]
+  );
   return {
     studio_revision: 1,
     studio_layout: readChoice(
@@ -72,6 +111,8 @@ export function getCmsStudioPresentation(
       tokens["studio_density"],
       "balanced"
     ),
+    ...(design ? { studio_design: design } : {}),
+    ...(colorway ? { studio_colorway: colorway } : {}),
   };
 }
 

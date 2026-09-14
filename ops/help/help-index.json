@@ -1,17 +1,116 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-08-11T15:43:52Z",
-  "commit_sha": "21d60faed6a5",
+  "generated_at": "2026-09-13T00:57:50Z",
+  "commit_sha": "b9baa5abf7a4418b9dbd0ef21933fb57e92b4aa1",
   "base_url": "https://6529.io",
   "records": [
     {
+      "id": "nft.meebits-445",
+      "kind": "workflow",
+      "title": "Meebits card 445 ETH price and animated background",
+      "aliases": [
+        "Red Light, Green Light",
+        "Meebits price tracker",
+        "card 445 background"
+      ],
+      "keywords": [
+        "Meebits",
+        "DocLove",
+        "445",
+        "ETH",
+        "price",
+        "background",
+        "interactive"
+      ],
+      "facts": [
+        "The Memes card 445, Red Light, Green Light by Meebits x DocLove, uses a compatibility viewer for its published interactive artwork. It displays Coinbase ETH/USD and the 24-hour percentage change, refreshing about once a minute.",
+        "The artwork, animated background and controls load without waiting for prices. If the price feed is unavailable, the viewer reports that prices are unavailable, retains its current colors and retries automatically. Pause stops cube, background and lighting motion, and the viewer respects reduced-motion preferences.",
+        "The card's Details tab preserves links to the original Arweave artwork and metadata. The compatibility viewer repairs the display on 6529.io; it does not replace the original token metadata or the artwork displayed on other sites."
+      ],
+      "canonical_path": "/the-memes/445",
+      "link_label": "Open Red Light, Green Light",
+      "related_paths": [
+        "/the-memes/445?focus=the-art"
+      ],
+      "tags": [
+        "nft",
+        "memes",
+        "media"
+      ],
+      "source_refs": [
+        "components/nft-image/renderers/NFTHTMLRenderer.tsx",
+        "public/artwork/the-memes/445.html",
+        "ops/docs/media/rendering/feature-interactive-html-rendering.md"
+      ]
+    },
+    {
+      "id": "nft.artwork-sharing",
+      "kind": "workflow",
+      "title": "Share artwork to social apps",
+      "aliases": [
+        "share artwork",
+        "share a Meme Card",
+        "share a Gradient",
+        "share a NextGen token",
+        "post artwork to Instagram",
+        "share art on Twitter",
+        "share art on Facebook",
+        "download a Story image"
+      ],
+      "keywords": [
+        "artwork",
+        "share",
+        "Instagram",
+        "IG",
+        "Twitter",
+        "X",
+        "Facebook",
+        "FB",
+        "Farcaster",
+        "caption",
+        "download",
+        "feed",
+        "Story"
+      ],
+      "facts": [
+        "Individual Meme, 6529 Gradient, and NextGen pages have a share icon labeled Share artwork in their existing media controls. It appears with the controls over the artwork on Meme and Gradient pages, and in the control strip below the artwork on NextGen pages. It opens an artwork-sharing dialog on desktop, mobile web, and the native app, separate from navigation page sharing.",
+        "The dialog shows a large preview beside the controls on desktop and above them on mobile. The Image format menu defaults to Feed · 4:5 at 1080x1350. Other formats are Square · 1:1 at 1080x1080, Story · 9:16 at 1080x1920, and Landscape · 1.91:1 at 1200x630. Exports are PNG still images that preserve the artwork proportions and include artwork information and available artist credit.",
+        "Wait for the selected format's preview. On the web, the primary action is Share image when file sharing is supported, with a supporting Download image link; otherwise the primary action is Download image. The native app offers Save or share image through its system share sheet.",
+        "Caption and link starts collapsed. Its adjacent Copy button copies the artwork title, available artist credit, collection, and URL without expanding it. Select Caption and link to inspect or manually copy the full text.",
+        "The Share a link section groups X, Facebook, Farcaster, and More apps when system link sharing is available. X, Facebook, and Farcaster open link-sharing destinations where the user reviews and finishes the post. More apps opens the system share sheet for the artwork link. These link actions do not attach the prepared image.",
+        "The copy icon beside the Artwork link field copies the main artwork URL on https://6529.io without the current tab, query filters, or profile-return context. The read-only URL can also be selected and copied manually.",
+        "For Instagram, copy the caption, choose a feed or Story format, then save or share the image. Select the saved image in Instagram if needed and paste the caption before publishing. Available share targets depend on the device and installed apps; Instagram and automatic caption insertion are not guaranteed.",
+        "Image preparation failure leaves link and caption actions available and offers Try again. If web image sharing fails or is unavailable, download the image and upload it in the destination app. Native sharing errors allow another attempt. Copy failures select the exact text for manual copying and automatically expand a collapsed caption.",
+        "Canceling a share sheet is silent. Opening a composer or completing a file handoff does not mean a post was published; users finish publishing in the destination service. The feature does not automatically post, record animation, or replace the artwork viewer's original-media downloads."
+      ],
+      "canonical_path": "/the-memes/{id}",
+      "link_label": "Open the artwork and select its share icon",
+      "related_paths": ["/6529-gradient/{id}", "/nextgen/token/{token}"],
+      "tags": ["nft", "share", "memes", "gradients", "nextgen", "social"],
+      "source_refs": [
+        "components/artwork-share/ArtworkShareButton.tsx",
+        "components/the-memes/MemePageArtViewer.tsx",
+        "components/nextGen/collections/nextgenToken/NextGenTokenArt.tsx",
+        "components/artwork-share/ArtworkShareActions.tsx",
+        "components/artwork-share/ArtworkShareCopy.tsx",
+        "components/artwork-share/ArtworkShareExport.tsx",
+        "components/artwork-share/artworkShare.ts",
+        "ops/docs/media/nft/feature-artwork-sharing.md"
+      ]
+    },
+    {
       "id": "nft.market-depth",
       "kind": "workflow",
-      "title": "Card market depth",
+      "title": "Listings and offers",
       "aliases": [
+        "listings and offers",
         "order book",
         "market depth",
         "asks and bids",
+        "lowest listing",
+        "highest offer",
+        "individual listings and offers",
+        "about these prices",
         "buying pressure",
         "sell orders"
       ],
@@ -20,6 +119,8 @@
         "depth",
         "OpenSea",
         "orders",
+        "listings",
+        "offers",
         "asks",
         "bids",
         "liquidity",
@@ -27,37 +128,55 @@
         "quantity"
       ],
       "facts": [
-        "The Memes, Meme Lab, Gradients and NextGen card pages show captured OpenSea market depth with best quoted asks and bids, price levels, remaining quantities, cumulative quoted quantities and snapshot freshness.",
-        "Currencies are shown separately, including ETH and WETH. A unit price applies to one edition; partially filled orders contribute only their remaining quantity.",
-        "Quoted quantities are not guaranteed executable liquidity. Several listings may share seller inventory, several offers may share bidder funding, and a collection offer has one shared budget across eligible cards.",
-        "Private, inactive and expired orders do not contribute to current public depth. Trait offers whose eligibility is unverified appear separately from the price levels.",
-        "Unavailable capture differs from a completed empty snapshot. Stale data shows an older snapshot time. Retry failed requests and reload order pagination if the book changes.",
-        "Recorded marketplace actions appear alongside on-chain transactions in NFT Activity and supported card activity sections. Off-chain actions may have no Ethereum transaction hash."
+        "The Memes, Meme Lab, Gradients and NextGen card pages show captured OpenSea quotes in the Listings & offers tab. Opening the tab immediately shows the lowest ETH listing, highest WETH offer and price levels without another accordion. View listings & offers beside Collect selects the exact card’s market tab and focuses the market section. On Memes and Meme Lab, traits, metadata and original files follow the description in Overview; existing focus=the-art links open Overview. focus=listings-and-offers opens the market tab. Primary and History tab switches keep the tab row visible with the selected section at its top. Switching tabs retains market selection and active review state.",
+        "Each price list starts with up to ten levels; Show all levels reveals the complete list and Show fewer levels restores the short view. The summaries show the lowest captured ETH listing and highest captured WETH offer. Currencies stay separate; a unit price applies to one edition and partially filled orders contribute only their remaining quantity. On narrow screens, quantity and cumulative total appear below the exact price, with a separate Collect or Sell button. Compact and expanded order actions use the same blue buttons; busy checks disable the action while keeping its accessible name.",
+        "On Memes, Meme Lab and Gradient cards, artwork details retain mint, edition, collector and TDH information where applicable. Prices appear in Listings & offers, without another price summary or market-cap estimate in artwork details. Memes supply shows Edition size, Ex. research, Ex. museum & research, and Holding wallets. Excluded counts remove burned editions and the named reserve holdings; the combined count excludes each reserve once. These are supply counts, not listed inventory. Supply details & rankings shows exclusions and ranks Ex. research and Ex. museum & research: smallest first, equal supplies share a rank and subsequent ranks skip ties. A card without a recorded ranking shows Unranked.",
+        "Expand a price row to inspect quoted remaining quantity, expiry, scope and applicability. Order information reveals the wallet, order reference and currency contract. Up to ten orders appear initially; Show all orders reveals the rest. Orders requiring verification are separate because they do not contribute to displayed price levels. Order details load a complete snapshot; a changed snapshot triggers one automatic refresh before offering Retry details.",
+        "On Memes, Meme Lab, Gradients and Pebbles cards, Collect appears beside listing prices and Sell beside offer prices. One loaded order can be selected directly; a level containing several orders opens them for an explicit choice. Expanded order actions appear before Order information. The exact listing is checked before selection. Set Quantity for supported editions; some listings require a complete lot. Remove takes an order out of the selection. Review selected listings checks every chosen order and opens one purchase review with separate paying and delivery wallets, Price breakdown, Exact amounts and Contract details. Continue in wallet rechecks the exact orders; changed terms require another review. Supported purchases and deliveries all succeed together or all revert; a revert can cost gas. No unavailable listing is silently replaced or removed.",
+        "Memes, Meme Lab, Gradients and Pebbles share the same market controls and trade review layout. NextGen has a Listings & offers token view at /nextgen/token/{token}/listings-and-offers. View listings & offers selects it from About, Provenance, Display Center or Rarity. Token navigation preserves the chosen view and existing query context. Gradient keeps artwork and identity information above Overview and Listings & offers; description and card activity remain in Overview.",
+        "Listings from the same seller can share inventory, so this card's selection does not combine them. A unique NFT can be selected only once. Quoted cumulative quantities do not guarantee that every copy can be collected together.",
+        "Sell is available for supported WETH offers on this specific card. Connect the wallet that holds the NFT; a different consolidated wallet cannot sign for it. Supported editions allow a quantity within the signing wallet's holdings and the offer's remaining amount. Review net WETH received after fees, token permissions and gas. Sale proceeds go to the signing wallet. Purchase delivery and gifting controls do not apply to accepting an offer. Collection-wide and verified trait offers can be accepted for the NFT on the current page without choosing another token. The site checks that exact NFT against the signed criteria before review. Unverified eligibility stays unavailable. Meme Lab uses the same purchase, listing and offer controls as Memes, including edition quantities and delivery choices.",
+        "These are captured OpenSea quotes, not guaranteed executable liquidity. Several listings may share seller inventory, several offers may share bidder funding, and a collection offer has one shared budget across eligible cards, so quoted quantities can overlap.",
+        "Private, inactive and expired orders do not contribute to current public depth. An unavailable capture differs from a completed update with no matching price levels; individual unpriced or unverified offers may still be available. Stale data is marked with its older Updated time. While the market tab is visible and idle, prices update periodically without a Refresh button. Updates pause for expanded order details, a selected listing or open trade review and do not replace that choice. Use Try again or Retry details after a retrieval failure or changed snapshot, as shown. Captured quotes still require exact order checks before wallet approval.",
+        "Recorded marketplace actions appear alongside on-chain transactions in NFT Activity and supported card activity sections. Off-chain actions may have no Ethereum transaction hash.",
+        "Gradients and Pebbles show the title and artwork before trading actions; the full market stays in the lower Listings & offers tab. An unlisted artwork keeps Make an offer and applicable owner actions without an empty Collect, quantity or delivery form. Loading, retrieval failure and no matching supported listing remain distinct states.",
+        "Selected-listing purchase review fills the screen, with Back to collecting at the top. Deliver all to applies one destination to every item; Change delivery for this artwork shows exceptions and split allocations. Remove checks the existing review and requotes the remaining exact orders, retaining their quantities and destinations. Failed updates preserve the original review. Removing the last item closes only after confirming there is no pending purchase. These edits are unavailable during sending or outcome recovery."
       ],
       "canonical_path": "/the-memes/{id}",
-      "link_label": "Open the card's market depth",
+      "link_label": "Open the card's listings and offers",
       "related_paths": [
         "/meme-lab/{id}",
         "/6529-gradient/{id}",
         "/nextgen/token/{token}",
         "/nft-activity"
       ],
-      "tags": ["nft", "market", "memes", "gradients", "nextgen"],
+      "tags": [
+        "nft",
+        "market",
+        "memes",
+        "gradients",
+        "nextgen"
+      ],
       "source_refs": [
         "components/nft-market-depth/MarketDepthPanel.tsx",
         "components/nft-market-activity/NftMarketActivity.tsx",
-        "ops/docs/media/feature-card-market-depth.md"
+        "ops/docs/media/feature-card-market-depth.md",
+        "components/memelab/MemeLabCardHeader.tsx",
+        "components/nft-market-depth/market-depth-trade.helpers.ts"
       ]
     },
     {
       "id": "artwork-documentation.overview",
       "kind": "workflow",
-      "title": "Artwork documentation and publication preparation",
+      "title": "Write, read and confirm an artwork record",
       "aliases": [
         "my artwork documentation",
         "artist dossier",
         "Keys and Gates documentation",
-        "artwork provenance"
+        "artwork provenance",
+        "read the draft",
+        "saved publication preview",
+        "confirmed artwork record"
       ],
       "keywords": [
         "artwork",
@@ -68,42 +187,98 @@
         "rights",
         "consent",
         "preservation",
-        "Keys and Gates"
+        "Keys and Gates",
+        "chapters",
+        "worked examples",
+        "translations",
+        "submission reference",
+        "museum record",
+        "mixed media",
+        "AN ALTERATION",
+        "dossier",
+        "custom interview",
+        "Content Credentials",
+        "presentation scenes"
       ],
       "facts": [
-        "When the server enables artwork documentation for a profile, My artwork documentation appears in the account menu and opens /artwork-documentation. Eligible owned artwork menus also offer Artwork documentation on desktop and mobile.",
-        "New publication forms collect one artwork record: identity, story and process, public credits, final files, rights intentions, preservation and an optional interview. All answers and selected files are intended for publication with the work.",
-        "Documentation can begin independently or in a supported submission form and can continue afterward. It is optional during submission. A successful artwork post is not retried when its documentation source link needs recovery.",
-        "Drafts save to the database. Unsaved text is not persisted in browser local storage. Keep the window open when saving fails or authentication expires, and resolve a version conflict before continuing.",
+        "When artwork documentation is enabled for a profile, My artwork documentation appears in the account menu and opens /artwork-documentation. Eligible owned artwork menus also offer Artwork documentation on desktop and mobile. Sign in with the profile that owns the work; Wave administration alone does not give documentation access.",
+        "Authorized program viewers can read artwork records, files, confirmed versions and Questions for the team through their profile or an assigned group. My artwork documentation returns to the list of records you can access. Access to one program record does not by itself grant access to the whole program list. Viewers do not see writing, save, upload, source-import, question or reply, resolution or artist-confirmation controls. Separate editing, review and coordination permissions remain unchanged; answers outside an editor's scope appear as readable text. Adding viewer access does not make newly visible fields, files or conversations editable.",
+        "An artwork record brings together the artist's account, credits, final files, rights intentions and display guidance so viewers can understand the work and future custodians can preserve the choices that matter. All answers and selected files in a new publication form are intended for publication with the work.",
+        "Required, conditional and already answered questions stay visible. Other questions open under headings such as More about the work or Additional rights details, with a question count. Optional details can be left unanswered and revisited. For an unanswered question, Not known or not applicable? opens permitted answer-status choices and an explanation. Once recorded, Answer options holds these choices and Leave unanswered; recorded statuses and explanations remain readable with the options closed.",
+        "Dates can record a year, year and month, exact date or range, with This date is approximate when appropriate. For an answer with multiple languages, Language and translations holds the Primary language selector, authorship, artist review and Add a translation. Selecting an existing primary version preserves every version's language, text and review information. Other versions are labelled Version with a number and language; an original account keeps that credit even when another language is shown first. Change language lets artists choose a language by name; Other language reveals Language tag for the full supported range. Apply language changes only that version's tag. Invalid or duplicate tags remain in the dialog until corrected or cancelled.",
+        "Open an assigned record with Open record to continue. Existing records appear before new-record controls. The project team prepares program records for invited artists. Start documenting and Document this work for another context offer standalone records only when self-service creation is available. An existing source-linked record is opened instead of duplicated when it appears in the list. If it may be on a later page, use Load more to finish looking before starting a new record. Documentation can also begin in a supported submission form and continue afterward. It is optional during submission. A successful artwork post is not retried when its documentation source link needs recovery.",
+        "Drafts save with 6529 during preparation. Check the save status or use Save and exit before leaving. After pending changes save, Save and exit returns to My artwork documentation so the same record can be reopened. A list-loading error does not mean artwork answers failed to save; Try again reloads the list, and an unavailable program list offers a return to your own records. Keep the window open when saving fails or sign-in expires, and resolve a version conflict before continuing. Unsaved text is not kept after the window is closed.",
         "Drafts remain stored with 6529 during preparation. New publication forms have no per-field privacy choices or private evidence uploads. Earlier records preserve their original publication choices; restricted material is never silently converted.",
-        "File transfer, checksum verification, inspection and malware screening have separate statuses. Upload limits are 4 GiB per file, 20 GiB of stored and reserved files per context, 100 files and five simultaneous upload sessions per context.",
-        "Only the artist can confirm a documentation revision through a direct authenticated session. Confirmation preserves a dated immutable version in the database; it is not a wallet signature, mint instruction, or automatic effect of a proposed license. Curatorial, technical and rights reviews are separate.",
-        "New edits preserve earlier confirmed versions. Shared artist information is versioned and pinned per work. Keys and Gates uses a photography documentation profile; selection does not establish minting, purchase or Museum accession.",
-        "Every section offers a complete fictional worked example for The Space Between by Ari Example. Empty sections open the example; existing records can reopen it. Examples never automatically save artist facts. Selected empty narrative fields offer an unsaved writing structure; explicit Use my answer adds only the artist-reviewed answer to ordinary autosave.",
+        "Selecting a different final artwork file after confirmation asks why it is being replaced. Explain the change in 20–1,000 characters before it can save. Choosing another replacement clears the earlier explanation; returning to the saved file removes the prompt.",
+        "Check your existing information lets authorized editors compare In the record with From the source, select permitted information and choose Use selected information. Submission references gives viewers the comparison without import controls. Source information is never copied automatically.",
+        "The Keys and Gates program list shows authorized artwork records. Find a record filters confirmation and review status; each entry offers Open record and Review status details. Preferred artist credit or display name identifies the record, with an explicitly labelled Artist profile handle as a fallback. Submitted as shows an original submission title separately when no artwork title has been entered. Record for appears on the personal documentation list only when standalone creation is enabled; it does not offer program profiles that need a separate invitation.",
+        "Submission reference images come from the original Wave submission and are not automatically chosen as final artwork files. The selected ready file is labelled Selected artwork file in the record. Source images are not substituted into draft reading views, the saved publication preview or confirmed versions when no artwork file is selected. An unavailable image preview does not prevent opening the record.",
+        "Read the draft opens a reading view without form controls and Return to writing resumes editing. It includes unsaved form edits in the current window, with a notice distinguishing saved and unsaved content. In The complete record (Review the record on earlier forms), Preview saved publication content shows only the saved content intended for publication, excluding unsaved edits and Questions for the team. Save first to preview the latest version; Return to the draft closes this publication preview. Reading or previewing does not save, confirm or publish the record.",
         "Questions for the team at the end of review are a separate drafting conversation. Questions and replies are excluded from artwork answers, confirmed versions and future publication. Resolved questions remain available as drafting history and can be reopened. Resolve questions before finalizing and add relevant public answers to the artwork form.",
-        "Mint preparation and on-chain, IPFS or Arweave publication are deferred. The documentation form does not perform them."
+        "Only the artist can confirm a documentation version. Save all changes first; confirmation preserves a specific dated account for review without publishing the work or making a proposed license effective. Curatorial, technical and rights reviews are separate. Later edits create a newer draft without rewriting earlier confirmed versions. A confirmed version presents its dated answers and selected files, with identifying details and checksum under Confirmed record details.",
+        "Each received interview recording or transcript needs publication permission before confirmation or dossier export. Link the exact file to a session with publication permission in The conversation, or record a publication grant for that file in Credits & terms. The final chapter’s warning leads back to these sections. Uploading may come first; files remain available while these details are completed.",
+        "Manage this record in The complete record (Review the record on earlier forms) offers archive or restore when access permits. Archiving preserves the record and does not publish it.",
+        "Shared artist information is versioned and each work keeps its selected version. Keys and Gates includes the commission's photography questions and connection to its theme; selection does not by itself establish purchase or Museum accession. Publication remains a separate later step.",
+        "The complete artist record is one reusable form for photography, digital art, video, audio, HTML, generative, interactive, spatial, text and installation. Select all media that apply; their questions combine without deleting earlier answers. Keys and Gates uses the same form with photography and fixed project CC0 artwork terms.",
+        "The complete record chapters are The work, The artist’s account, Materials & versions, The conversation, Presentation & care, Credits & terms, and The complete record. Existing earlier forms retain their six chapters. Extend this artist record offers an explicit update preview. Owners of earlier project records can apply the reviewed update within the same project while fixed terms remain. Restricted legacy answers need a coordinator’s review and block conversion; confirmed versions are preserved.",
+        "Long writing fields preserve complete documents and transcripts. Read this text opens a reading view, and Write returns to the field. Import text accepts UTF-8 text or Markdown for review, then Use this text replaces the field or Add after my writing appends it. Imported text is separate until chosen. HTML is shown as text. Over-limit writing is retained for correction before saving.",
+        "See an example for this answer opens a precise excerpt from AN ALTERATION where available. Other media-specific answers use clearly labeled invented examples about illustrative works. Read the complete example opens AN ALTERATION’s standalone illustrated record with the full supplied prose, print instructions and interview. It is an illustrative (fictional) record. Only supplied writing and preview image are included; named masters, source files and prints have not been received or verified. Its print-custody discrepancy remains explicit. Examples do not fill answers or confirm facts.",
+        "Materials & versions distinguishes uploaded originals, described materials and physical objects. Batch file selection uploads in order using the selected role and pauses on a problem. Edit file details records source, terms and derivations. Current limits are 8 GiB per original, 128 GiB per record, 1,000 files and five simultaneous uploads, subject to the displayed policy and format rules.",
+        "Open the player uses approved passive audio or video with native controls and no autoplay. Linked WebVTT captions load after an access check; Captions selects among supplied files and Read the transcript opens a linked readable conversation. Missing alternatives are explained; no captions or transcription are invented. Try again retries media or caption loading. Unsupported codecs can use the original download or a separate display derivative. HTML, SVG and code never execute in the record. File integrity shows measured properties, checksums and credential status without claiming custody, authorship or archival suitability. Embedded-manifest integrity does not establish signer trust or truth of claims.",
+        "Catalogue & history stores separately attributed Museum entries with dates, status and evidence. Only staff with the relevant review lanes see entry writing controls. Save the Museum entry is deliberate and separate from artist autosave; its draft remains across chapter navigation. Museum additions do not rewrite confirmed artist text.",
+        "Take the record with you prepares a portable dossier from a fresh saved record, received files, checksums and Museum entries. Resolve reported export issues, choose Prepare the dossier and then Download the dossier when ready. Refreshing the same tab recovers its export for the same signed-in profile and record. Retry the dossier request recovers an interrupted request without starting another one. A failed or expired package can be prepared again. Exporting does not publish, mint, establish custody or accession."
       ],
       "canonical_path": "/artwork-documentation",
       "link_label": "My artwork documentation",
-      "related_paths": ["/waves"],
-      "tags": ["artwork", "artists", "documentation", "privacy", "museum"],
+      "related_paths": [
+        "/waves",
+        "/artwork-documentation/example/an-alteration"
+      ],
+      "tags": [
+        "artwork",
+        "artists",
+        "documentation",
+        "privacy",
+        "museum"
+      ],
       "source_refs": [
         "ops/docs/artwork-documentation.md",
         "app/artwork-documentation/page.tsx",
         "components/header/user/HeaderArtworkDocumentationLink.tsx",
-        "components/waves/drops/WaveDropDocumentationAction.tsx"
+        "components/waves/drops/WaveDropDocumentationAction.tsx",
+        "components/artwork-documentation/ArtworkDocumentationWorkspace.tsx",
+        "components/artwork-documentation/DocumentationModules.tsx",
+        "components/artwork-documentation/DocumentationListRecord.tsx",
+        "components/artwork-documentation/DocumentationArtworkPreview.tsx",
+        "components/artwork-documentation/DocumentationReview.tsx",
+        "components/artwork-documentation/DocumentationValueEditor.tsx",
+        "components/artwork-documentation/DocumentationWorkedExample.tsx",
+        "components/artwork-documentation/DocumentationSources.tsx",
+        "components/artwork-documentation/DocumentationUpload.tsx",
+        "components/artwork-documentation/DocumentationAssetDetails.tsx"
       ]
     },
     {
       "id": "waves.memes.submission-identity",
       "kind": "workflow",
-      "title": "Memes submission profile and wallet confirmation",
-      "aliases": ["submitting as", "submit artwork", "Memes submission wallet"],
+      "title": "Memes submission profile and wallet signing",
+      "aliases": [
+        "submitting as",
+        "submit artwork",
+        "Memes submission wallet",
+        "Submit a Meme Card to The Memes",
+        "Memes submission signature"
+      ],
       "keywords": [
         "memes",
         "submission",
         "profile",
         "wallet",
+        "signature",
+        "eip-712",
+        "typed data",
+        "terms",
+        "expiry",
         "eligible",
         "amber",
         "green"
@@ -113,14 +288,22 @@
         "The connection dot on the avatar is amber when the active profile's wallet is not connected and green when it is connected. Hover, keyboard focus, or tap the avatar reveals Connect a wallet to submit or Wallet connected. The footer does not show a Submitting as label, wallet address, or wallet-provider name. Back actions use a quiet text style while Preview stays outlined and the primary action stays filled.",
         "Connect Wallet replaces Submit Artwork when the active profile has no signing connection. Connecting never starts artwork submission automatically; review the profile and click Submit Artwork separately.",
         "Connecting B's wallet while A remains the active authenticated profile leaves A in the strip with an amber dot. Explicitly switching the active profile updates the strip and checks that profile's eligibility before allowing submission.",
-        "The primary action stays disabled during upload, signing, and processing, with phase-specific progress text."
+        "The primary action stays disabled during upload, signing, and processing, with phase-specific progress text.",
+        "If the destination wave or submission terms change while drafting, the form returns to Agreement and requires review and agreement again. Artwork and additional information stay in the draft; only the exact accepted wave and terms can be submitted.",
+        "The Memes Main Stage requests an EIP-712 typed-data signature with the action Submit a Meme Card to The Memes. Review the Artwork title, Destination wave and Agreement to The Memes submission terms before signing. The Notice confirms this submission signature does not mint an NFT, approve token spending or transfer wallet assets, and signing requires no gas fee.",
+        "ExpiresAt is the deadline for using the signature to submit: five minutes after the signing request is created. Expiry does not expire a completed submission or the agreement to the terms. If authorization expires before submission completes, retry from the draft and review a new signature request.",
+        "Verification groups the signing wallet, wave and site identifiers, timestamps and hashes binding the submission and terms. Wallets control their own layout, field expansion and signature classification.",
+        "Canceling in the wallet stops submission and shows Signature request was canceled in your wallet. The draft stays available while the submission modal remains open; closing the modal discards it. Failed or unsupported typed-data signing stops the attempt without automatically switching to a text signature."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/waves"],
       "tags": ["waves", "memes", "submission"],
       "source_refs": [
         "ops/docs/waves/memes/feature-memes-preview-and-submit-states.md",
-        "components/waves/memes/submission/ui/SubmissionIdentityPanel.tsx"
+        "components/waves/memes/submission/ui/SubmissionIdentityPanel.tsx",
+        "components/waves/memes/submission/hooks/useArtworkSubmissionForm.ts",
+        "services/wallet-signatures/memes-submission-signature.ts",
+        "hooks/drops/useDropSignature.ts"
       ]
     },
     {
@@ -166,16 +349,20 @@
         "Group direct messages and shared Waves remain usable and are not muted as a whole. Blocked-author posts stay hidden and do not create ordinary notifications, push notifications, or direct-message unread counts for the blocker; other members behave normally.",
         "Globally quarantined or moderator-removed posts cannot be revealed. Primary Wave chat keeps author, time, and Wave context while replacing only the body; compact secondary surfaces use a redacted tombstone.",
         "The author can still see their own globally moderated post and its moderation state; other viewers receive redacted content.",
-        "Only server-authorized moderators see and can use the WatchTower side-navigation item at /content-moderation on desktop, mobile browser, and mobile app. It is not in the profile menu. The page heading is WatchTower - Content Moderation.",
-        "WatchTower identifies both the author and reporter, separates Open reports, Resolved reports, Suspended profiles, and Block activity, and lets moderators select one explained content decision, optionally add an internal note, and apply it once. All tabs share the standard bordered page frame.",
-        "WatchTower tabs have direct URLs: /content-moderation/open-reports, /content-moderation/resolved-reports, /content-moderation/suspended-profiles, and /content-moderation/block-activity. Switching tabs updates the URL without reloading the page. Direct links and refresh open the selected tab, browser Back and Forward restore tab selections, and /content-moderation defaults to Open reports. Moderator authorization applies to every tab URL.",
+        "Only profiles whose membership in the 6529 Dev Team group is confirmed by the server see and can use the WatchTower side-navigation item at /content-moderation on desktop, mobile browser, and mobile app. Sign in with a wallet linked to that profile and use a direct profile session outside proxy mode. WatchTower is not in the profile menu. The page heading is WatchTower - Content Moderation.",
+        "WatchTower identifies author and reporter and separates Open reports, Checks, Resolved reports, Suspended profiles, and Block activity. Review evidence and decide opens revision-scoped Checks detail. Review actions require a reason and confirmation. All tabs share the standard bordered page frame; mobile uses a view selector.",
+        "WatchTower tabs have direct URLs: /content-moderation/open-reports, /content-moderation/checks, /content-moderation/resolved-reports, /content-moderation/suspended-profiles, and /content-moderation/block-activity. Switching tabs updates the URL without reloading the page. Direct links and refresh open the selected tab, browser Back and Forward restore tab selections, and /content-moderation defaults to Open reports. Moderator authorization applies to every tab URL.",
         "Block activity is a newest-first, continuously loaded moderator trail showing who blocked or unblocked whom in the same feed. Aligned rows link both available profiles without truncating handles and show the event date. Blocked uses red text and a closed lock; Unblocked uses green text and an open lock. Only actual relationship transitions are recorded; unblocking preserves the earlier block in history. The feed remains independent from reports, AI assessment, content decisions, and suspension.",
         "Allow keeps or restores a post to visible and closes its reports; Quarantine hides it globally while reports remain open; Remove hides it globally and closes its reports as removed.",
-        "Profile suspension is separate from the post decision, prevents future creates and edits without changing existing posts, and can be reversed from the central Suspended profiles view or a moderator-only profile action. A moderator's personal Blocked state remains independent.",
+        "Profile suspension is separate from the post decision, prevents future creates and edits without changing existing posts, and can be reversed by opening Checks from the Suspended profiles view or a moderator-only profile action. A moderator's personal Blocked state remains independent.",
+        "Checks filters saved moderation by content type, outcome, policy, trigger, review status, UTC date range, profile ID, or subject ID. Summary totals show items needing review, quarantined posts, rejected checks today, and evaluator failures today. Selected checks have direct links and show inert saved evidence, current state, evaluation history, decision history, and valid review actions.",
+        "Public-facing text is the stricter policy for REP categories, About text, and group names. Wave safety is the permissive policy for posts and reports. Re-evaluation adds a new evaluator result without undoing explicit human decisions.",
+        "Approve exact resubmission publishes nothing from WatchTower. It gives the same author a single-use, seven-day permit to submit identical rejected About text, group name, or post content in the same context. Other posting permissions and safety checks still apply. A REP category allow or block rule affects future exact category use without changing existing ratings. Published About and group fields can be suppressed or restored for their reviewed revision without overwriting stored text.",
+        "Checks uses a side-by-side list and detail on desktop and a full detail view with a section selector on mobile. External evidence links stay collapsed until explicitly opened. Changed revisions require loading the latest version before deciding; expired evidence is labelled and evidence-dependent actions are unavailable. Identity changes, proxy mode, sign-out, and lost moderator access clear private review data.",
         "WatchTower omits the neutral AI category NONE and labels a substantive AI result as a Potential category because the moderator decision remains authoritative.",
         "A still-valid saved session can authorize posting and other authenticated actions without an active wallet connection or supported signing network. If the session expires, the app preserves the connection and profile selection, checks that signing is available before invalidating the expired session, and requests a new signature only when it can safely continue.",
         "WatchTower shows a red navigation indicator while open reports need review and refreshes that lightweight state periodically while the app is active.",
-        "Someone who opens /content-moderation without moderator access sees a countdown and is redirected home; a failed access check shows an error instead of being treated as a denial."
+        "Someone who opens /content-moderation without moderator access sees the 6529 Dev Team group and direct-profile sign-in requirements, with time to switch profiles, leave proxy mode, or choose Go home. A failed permission check shows an error and Retry permission check instead of being treated as a denial. Private review data stays hidden during failure and retry until the server confirms access."
       ],
       "canonical_path": "/preferences",
       "link_label": "Preferences",
@@ -184,6 +371,7 @@
         "/preferences?tab=reports",
         "/content-moderation",
         "/content-moderation/open-reports",
+        "/content-moderation/checks",
         "/content-moderation/resolved-reports",
         "/content-moderation/suspended-profiles",
         "/content-moderation/block-activity",
@@ -1367,6 +1555,7 @@
       ],
       "facts": [
         "Wallet authentication lets a user connect, sign in, and act as a 6529 profile.",
+        "After connecting an unauthenticated wallet, the Sign in to 6529 dialog shows the wallet address and explains: Sign a message to confirm this address is yours. Choose Sign message, then confirm in the wallet when Check your wallet appears. Signing in creates no transaction, costs no gas, and approves no tokens. Cancel or Escape before signing returns to browsing; after rejection, reconnect and retry.",
         "Profile switching and account controls live in the wallet/account area of the app header.",
         "In the app sidebar, selecting another connected profile switches to it and closes the drawer; the add-profile button closes the drawer as the wallet connection flow opens.",
         "In Capacitor, Connect and add-profile open a shared Connect sheet with App Wallets, External Wallets, and Scan Connection QR options.",
@@ -2957,6 +3146,7 @@
       ],
       "facts": [
         "The wave composer is where users post drops and replies inside a wave.",
+        "Signed-out viewers of a public wave can choose the blue Sign in to 6529 to post button in the footer. New here? Sign a message with your wallet to get started explains the wallet signature, with no transaction or gas fees. The existing wallet chooser and sign-in dialog handle authentication. Posting access is checked again after sign-in, and wallets without a profile still need profile setup.",
         "If a wave has guidelines and the profile has posted neither a chat message nor a participation drop there, submitting its first chat message opens a Wave guidelines dialog before the message is sent.",
         "Agree sends the pending first message and prevents repeat prompts in that wave. Decline or dismissing the dialog does not send the message, keeps the draft, and shows the guidelines again on the next submit attempt.",
         "Composer docs cover markdown, mentions, NFT hashtag references, curation URLs, media uploads, and Enter-key behavior.",
@@ -4712,6 +4902,7 @@
         "Mobile web and native app sharing use their existing header placement and open the platform system share sheet directly.",
         "The profile menu contains Profile and Connect Device; connection targets never appear in the Share modal.",
         "Wave-specific link sharing also exists in the wave header.",
+        "Individual Meme, Gradient, and NextGen pages also offer a Share artwork icon in the artwork's media controls: over the artwork on Meme and Gradient pages, and below it on NextGen pages. That separate dialog supports copied captions and formatted still-image exports on desktop, mobile web, and native apps; use the artwork-sharing guide for Instagram image posts.",
         "Use share controls when users ask how to copy a route or send someone a page."
       ],
       "canonical_path": "/waves",
@@ -5481,13 +5672,13 @@
       ],
       "facts": [
         "Open /{user}/cms/builder directly to build or edit a profile-owned website. A profile with an available published website shows Website in its header; that link opens the published site.",
-        "The studio has 39 complete visual templates: 23 original compositions and 16 inspired by credited CC0 cards from The Memes. Templates and point-and-click editing work without an AI agent.",
+        "The studio offers six fully populated templates: Personal, Artist, Collector, Meme, Organization, and Fund / DAO. Templates and point-and-click editing work without an AI agent.",
         "Use Pages for page titles, addresses, menu labels, duplication, removal, and choosing the homepage. Use Content to edit sections and Design for site name, layout, palette, typography, spacing, and accent color.",
         "Preview all pages in Desktop and Phone views. Review and replace sample names, writing, artwork, claims, and links before confirming the sample-content review for publication.",
         "Saving, image upload, server validation, and publishing require the connected non-proxy owner profile. Publishing uploads content and asks the wallet to sign; saving alone does not publish.",
         "Versions contains saved drafts and publications. Editing a publication creates a new draft when saved; the active site remains until a replacement is published. Browser recovery is local to the current browser and account context.",
         "Restore selects a previous publication. Unpublish removes the active website pointer but does not delete immutable content, uploaded images, or version history.",
-        "More tools contains optional JSON and Agent file workflows. A connected MCP agent service is not available."
+        "More tools contains optional JSON and Agent workflows. Bring your own agent through a complete website file kit or temporary access to one saved draft with the downloadable local MCP adapter. Saving and publication remain owner actions."
       ],
       "canonical_path": "/{user}/cms/builder",
       "related_paths": ["/{user}"],
@@ -6621,7 +6812,9 @@
         "Meme Card preview/data surfaces expose fields such as edition size, TDH rate, season, mint date, and supply when available.",
         "Upcoming unresolved Meme Card pages show mint timing and subscription awareness; positive card ids also show a Distribution Plan link for that card.",
         "The backend public data catalog can answer public aggregate or specific Meme Card lookup questions for TDH/HODL rate, edition size, and supply.",
-        "Card tabs and focus links are documented for deep-linking into card page sections.",
+        "Card tabs are Overview, Listings & offers, Collectors, and History. Overview contains original files, metadata, properties and artwork statistics below the description; existing /the-memes/{id}?focus=the-art links open Overview. focus=listings-and-offers opens the market and its prices immediately without another accordion. Switching primary or History tabs keeps the tab row visible and shows the selected section from its top, including while it loads. Switching tabs retains market selection and active review.",
+        "Overview shows More by {artist}: up to four other Meme Cards per credited artist, newest card first. View all expands the artist's other cards in place; Show fewer restores the preview. The current card is excluded, and artists without other cards have no gallery.",
+        "References: Meme Lab & ReMemes is a collapsed section below the artist galleries in Overview. Expand it to see works linked to this card; /the-memes/{id}?focus=references opens it directly. References is not a primary tab.",
         "If a Meme Card fails to load, the card page replaces the loading state with a Try again action.",
         "Distribution details for a Meme Card use /the-memes/{id}/distribution."
       ],
@@ -6668,16 +6861,37 @@
         "mint page",
         "the memes mint",
         "mint route",
-        "mint current card"
+        "mint current card",
+        "mint confirmation",
+        "wallet not showing",
+        "mint submitted",
+        "seized",
+        "minted to"
       ],
-      "keywords": ["memes", "mint", "minting", "route", "current"],
+      "keywords": [
+        "memes",
+        "mint",
+        "minting",
+        "route",
+        "current",
+        "confirmation",
+        "quantity",
+        "recipient",
+        "transaction"
+      ],
       "facts": [
         "The Memes mint route lives at /the-memes/mint.",
         "Mint flow docs explain entry points, common scenarios, and recovery.",
         "If a remembered profile's authorized wallet is disconnected, the mint page hides the duplicate Connect control; selecting SEIZE opens wallet connection and continues when the same wallet reconnects and transaction details are unchanged.",
         "Selecting a different already-authenticated wallet switches the active profile and cancels the old pending mint so refreshed recipient, eligibility, price, and transaction details can be reviewed before selecting SEIZE again; an unauthenticated wallet must complete normal authentication first.",
         "Wallet confirmation, submitted, successful, and on-chain error states appear in the shared transaction modal; local recipient and mint-count validation stays inline.",
-        "The shared transaction modal identifies the current card as Mint: The Memes #{id} when a valid token ID is available, and otherwise keeps the generic Mint The Memes title.",
+        "For transaction errors, the modal identifies the card as Mint: The Memes #{id} when a valid token ID is available, and otherwise keeps the generic Mint The Memes title.",
+        "Confirm in your wallet asks users to review and confirm the mint in their wallet, with artwork details, Quantity, and the full destination address under Recipient. Wallet not showing? expands instructions to open the wallet app or browser extension to find the request; the help control does not open the wallet itself. Reject the request in the wallet to stop before submission.",
+        "Once submitted, the modal title is Mint submitted with the message Waiting for network confirmation. The same artwork, quantity, and Recipient remain visible, the window updates automatically, and View transaction opens an available transaction link in a new browser tab. The submitted state remains visible while receipt status updates until confirmation or an error.",
+        "Wallet confirmation and submitted states have no close or Done control, and Escape or clicking outside does not dismiss them. Before submission, reject the wallet request in the wallet to stop; after submission, wait for confirmation or an error.",
+        "After receipt confirmation, the modal headline is SEIZED! with the message Your mint is confirmed. It shows artwork details, Quantity, and the full destination wallet address under Minted to. These details describe the submitted mint, including when minting for another wallet.",
+        "Done closes the success confirmation and returns to the mint page. View transaction opens the transaction in a new browser tab; checking it is optional. The close control and Escape also dismiss the success confirmation.",
+        "Artwork preview unavailable means only the image could not be displayed in a wallet-request, submitted, or success modal. Quantity, destination, and available transaction links remain accessible, and the transaction status is unchanged. Missing artwork titles use Artwork.",
         "Mint eligibility is separate from subscription mode and allowlist rules."
       ],
       "canonical_path": "/the-memes/mint",
@@ -6801,18 +7015,35 @@
         "meme lab card tabs",
         "meme lab distribution"
       ],
-      "keywords": ["meme", "lab", "card", "tabs", "distribution"],
+      "keywords": [
+        "meme",
+        "lab",
+        "card",
+        "tabs",
+        "distribution"
+      ],
       "facts": [
         "Meme Lab card pages live at /meme-lab/{id}.",
         "Meme Lab distribution pages live at /meme-lab/{id}/distribution.",
-        "Meme Lab routes are separate from The Memes routes."
+        "Meme Lab routes are separate from The Memes routes. Its card tabs are Overview, Listings & offers, Collectors, History and References. Original files, metadata, properties and card details follow the description in Overview; existing /meme-lab/{id}?focus=the-art links open Overview. focus=listings-and-offers opens the market tab directly without another accordion. Primary and History tab switches keep the tab row visible with the selected section at its top.",
+        "Meme Lab cards use the same marketplace controls as The Memes. Collect shows the lowest supported listing and Other listings exposes alternatives. Make an offer opens a WETH offer for the exact card. List requires the wallet holding the editions. In Listings & offers, Collect selects an exact listing and Sell opens an eligible offer; orders sharing a price require an explicit choice. Edition quantities are supported. Collection-wide and trait offers are checked for this exact Meme Lab card before review.",
+        "Purchase review separates Pay with and Deliver to. Choose a confirmed profile wallet or Send to a fren, check the resolved destination and review fees before authorizing. Expand a delivery row in any supported purchase review to change those copies' destination without starting over, including selected listings and split deliveries. Current terms are checked again automatically before wallet authorization; changed terms require another review. Meme Lab trading is available on card pages; set planning, Lowest listings and TDH tools continue to cover Memes, Gradients and Pebbles."
       ],
       "canonical_path": "/meme-lab/{id}",
-      "related_paths": ["/meme-lab/{id}/distribution", "/meme-lab"],
-      "tags": ["meme-lab", "card"],
+      "related_paths": [
+        "/meme-lab/{id}/distribution",
+        "/meme-lab"
+      ],
+      "tags": [
+        "meme-lab",
+        "card"
+      ],
       "source_refs": [
         "app/meme-lab/[id]/page.tsx",
-        "ops/docs/media/collections/feature-meme-lab-card-route-tabs-and-navigation.md"
+        "ops/docs/media/collections/feature-meme-lab-card-route-tabs-and-navigation.md",
+        "components/memelab/MemeLabCardHeader.tsx",
+        "components/collect/CollectDetailActions.tsx",
+        "components/collect/CollectReviewRecipient.tsx"
       ]
     },
     {
@@ -6983,6 +7214,7 @@
         "Token download options show Loading while availability is checked, a file size when available, and Coming Soon only when an output is missing.",
         "Token lightbox and blackbox viewers fill the viewport, center the artwork, and lock page scrolling until closed.",
         "Token and collection provenance sections show explicit loading and no-entry states.",
+        "Pebbles token pages use the same Collect, Make an offer and owner List controls as Memes and Gradients. View listings & offers selects the Listings & offers tab from About, Provenance, Display Center or Rarity. Its direct path is /nextgen/token/{token}/listings-and-offers. Prices appear immediately without another accordion. Switching views retains market selection and review; previous/next token arrows preserve the chosen view and existing query context.",
         "When indexed token data is unavailable, the on-chain fallback keeps the standard token-page frame and shows fetching, not-found, or indexing-in-progress status."
       ],
       "canonical_path": "/nextgen/token/{token}",
@@ -6990,6 +7222,8 @@
       "tags": ["nextgen", "token", "media"],
       "source_refs": [
         "app/nextgen/token/[token]/[[...view]]/page.tsx",
+        "components/nextGen/collections/nextgenToken/NextGenToken.tsx",
+        "ops/docs/nextgen/flow-nextgen-collection-and-token-media.md",
         "ops/docs/nextgen/feature-token-media-rendering.md"
       ]
     },
@@ -7689,15 +7923,8 @@
         "Apply changes or Discard form changes before saving, publishing, switching panels, or Undo. Unapplied page, section, and design fields are not autosaved; browser recovery keeps the applied document. Finish or cancel an image upload before leaving its panel."
       ],
       "canonical_path": "/{user}/cms/builder",
-      "related_paths": [
-        "/{user}"
-      ],
-      "tags": [
-        "profiles",
-        "cms",
-        "sharing",
-        "search"
-      ],
+      "related_paths": ["/{user}"],
+      "tags": ["profiles", "cms", "sharing", "search"],
       "source_refs": [
         "components/profile-cms-builder/studio/StudioPageSettings.tsx",
         "components/profile-cms-builder/studio/StudioForm.tsx",
@@ -7728,22 +7955,39 @@
         "organization",
         "fund",
         "DAO",
-        "visual editor"
+        "visual editor",
+        "project mockup",
+        "book catalogue",
+        "color scheme",
+        "palette",
+        "custom accent",
+        "website colors"
       ],
       "facts": [
-        "Browse 39 templates in People & ideas, Collections, Artists, Organizations, Funds & collecting groups, and The Memes. Open a full example, explore its pages, then choose Use this template.",
-        "Artist examples cover studios, portfolios, exhibitions, medium studies, process journals, editions, and retrospectives. Organization examples include professional practices, nonprofits, crypto protocols, NFT projects, funds, collecting DAOs, and institutional collections.",
+        "Browse six complete examples: Personal, Artist, Collector, Meme, Organization, and Fund / DAO. Open a full example, explore its pages and artwork, then choose Use this template.",
+        "Artist includes three bodies of work and nine individual works; Collector includes nineteen works, four curated sets and collecting notes; Fund / DAO includes seventeen works, exhibition notes, a mandate, members and decision records. The other examples provide personal projects and experience, a digital art club, and an artist-run organization's programme and visitor information.",
         "All templates use visually editable content. Click a section or select it in Content to edit supported text, images, captions, credits, links, widths, and treatments. Add, duplicate, remove, and reorder sections with the controls.",
-        "Pages supports adding and duplicating pages, page settings, choosing the home page, showing a page in the site menu, and changing menu order. A referenced page cannot be removed until its remaining links or homepage reference are changed.",
+        "Edit a gallery's works, titles, credits, categories and detail-page links in Content. Edit record rows in their section and full artwork descriptions in Pages. Archive sections can provide search, categories and grid or list views. Editing one artwork page preserves the other pages.",
+        "Personal includes project planner and book catalogue portfolio illustrations. Select their section in Content to edit the title, small label, mockup heading, date or period, description and footer note. Mockup style switches between Project planner and Book catalogue. Edit rows for tasks and statuses or books, authors and loan notes, then choose Apply changes.",
+        "Pages supports adding and duplicating pages, page settings, choosing the home page, showing a page in the site menu, and changing menu order. A page referenced by another link, gallery work, record or the homepage cannot be removed until those references are changed.",
         "Design restyles the current site. Start a new site replaces the draft with a new template after confirmation; save or download the current draft first. This is not automatic content-preserving template conversion.",
-        "The Memes examples preserve card titles, artist credits, and source links. Static previews avoid autoplaying animated originals. Template use does not claim token ownership, authorship, or artist endorsement."
+        "In Design, all 18 color schemes are available on each of the six complete templates, including Original and 6529. Original uses the template's original color family with contrast adjustments. A scheme updates backgrounds, text, borders, controls and the default accent across all pages while preserving artwork colors, content, layout, typography and spacing. Built-in schemes target WCAG AAA text contrast of at least 7:1 for normal text and 4.5:1 for large text; controls and focus indicators target at least 3:1 against adjacent colors. Uploaded artwork and embedded content need separate review; choosing a palette does not certify a complete website's accessibility.",
+        "Selecting a color scheme changes the scheme and accent together in one Undo step; Redo restores both. Edit Accent color and choose Apply changes for a custom accent. Selecting another color scheme replaces that custom accent with the new scheme's default. Apply changes or Discard form changes before selecting a scheme if design fields are unfinished.",
+        "Opening an existing saved draft or published site preserves its appearance until a color scheme is explicitly selected. Save and publish the revision to change the public site. Older template designs retain the Ink, Paper, Stone and Night palette controls.",
+        "Examples include generated original artwork and credited CC0 works from The Memes and Blitmap. Animated originals use still previews with original-media links. Sample people, organizations, records and edition offers are fictional; replace their claims and contact details before publishing. Template use does not claim NFT ownership, authorship or artist endorsement."
       ],
       "canonical_path": "/{user}/cms/builder",
       "related_paths": ["/{user}"],
       "tags": ["profiles", "cms", "templates"],
       "source_refs": [
         "lib/profile-cms/studio/templates.ts",
+        "lib/profile-cms/studio/templates-approved.ts",
+        "lib/profile-cms/studio/approved-assets.ts",
         "components/profile-cms-builder/studio/StudioTemplateLibrary.tsx",
+        "components/profile-cms-builder/studio/StudioDesignPanel.tsx",
+        "components/profile-cms-builder/studio/StudioCollectionFields.tsx",
+        "components/profile-cms-builder/studio/StudioBlockInspector.tsx",
+        "components/profile-cms/approved-renderer/ProjectMockup.tsx",
         "components/profile-cms-builder/studio/StudioPageActions.tsx",
         "ops/docs/profiles/feature-profile-cms-builder.md"
       ]
@@ -7793,7 +8037,7 @@
     {
       "id": "profiles.cms-agent-files",
       "kind": "workflow",
-      "title": "Use your own agent through website files",
+      "title": "Bring your own agent to the website studio",
       "aliases": [
         "bring your own agent",
         "CMS AI",
@@ -7814,27 +8058,31 @@
       ],
       "facts": [
         "The visual website studio works without an agent. More tools opens optional JSON and Agent workspaces for users who bring their own external agent or local tool.",
-        "Download Package JSON, Source packet JSON, and Schema bundle JSON. Review their draft content and wallet-source details before sharing them with an external tool; the source packet does not replace the complete package.",
-        "Paste or upload an agent-patch JSON file up to 2 MiB, choose Review patch, inspect the changes and validation findings, then choose Apply to draft. Applying a patch is local editing and cannot save, sign, or publish.",
-        "The current patch importer edits supported first-page metadata and block fields, block additions/removals/reordering, the first menu label, and the theme accent. It is not a general multipage API; use the visual editor or full-package JSON import for broader changes.",
-        "Stale draft IDs, versions, base hashes, unsupported operations, and invalid results are rejected. Re-review against the current draft after changes.",
-        "A complete replacement package can be pasted into JSON and imported for the current profile handle. Preserve a saved or downloaded copy before broad replacement.",
-        "There is no connected MCP service, automatic agent session, or built-in paid inference provider. File exchange does not require sharing website session tokens, wallet private keys, or recovery phrases. Publication remains a separate owner-reviewed wallet-signing step."
+        "Exchange a file: Download agent kit includes the complete multipage website, schemas and editing instructions without credentials. Review its draft content and wallet-source details before sharing it with your external agent. Upload proposal accepts the kit's JSON proposal format up to 1 MiB. Review all changes and page previews, then choose Use in draft to apply it locally; save and publish separately.",
+        "Connect an agent: sign in as the non-proxy profile owner, save current changes as a draft, name the connection, choose 1 hour, 4 hours or 24 hours, then Create access key. Copy the one-time key into the agent client's private environment settings and follow Setup guide with Download local MCP adapter. It requires Node.js 22 or newer and a client supporting local stdio MCP 2025-11-25.",
+        "Temporary access permits reading one exact saved draft, validating complete revisions, submitting proposals and reading their status. It cannot save or overwrite drafts, upload media or permanent publication content, sign, publish, unpublish or change the profile. Revoke access stops future requests; submitted proposals remain reviewable after revocation or expiry.",
+        "Both workflows can change pages, navigation, copy, blocks and design while preserving website identity and the existing ordered artwork catalog. Add new artwork in the studio, save a fresh base and create new access or a new kit. Stale or invalid proposals are rejected. Apply or discard pending JSON before accepting a replacement.",
+        "Refresh retrieves proposals for the selected draft. Review shows Current draft, Proposed website, every page and All changes; the summary was written by the external agent. Save proposed draft saves the exact reviewed revision as a draft. Reject proposal declines it. Publication remains a separate owner-reviewed wallet-signing step.",
+        "After an uncertain save, Retry save confirmation checks the same revision without creating another draft. A local recovery record blocks new connected-proposal saves while the result is unresolved. Keep that record and inspect Versions; do not repeat from another browser. Retry status update records a confirmed save without changing the open document. If another session rejected the proposal, retry closes its recovery record without loading rejected content or writing again; any earlier saved draft remains in Versions. Safe connected-proposal saving requires browser local storage and Web Locks.",
+        "Advanced source and legacy patches retains Package JSON, Source packet JSON, Schema bundle JSON and the older first-page-only patch format, with its 2 MiB limit. Use the full agent kit for multipage proposals.",
+        "Use your own agent subscription or API account. The local adapter makes no model calls or background retries. File exchange does not require a session token; connected access uses a separate temporary key. Keep keys out of prompts and website files. Neither workflow requires wallet private keys or recovery phrases."
       ],
       "canonical_path": "/{user}/cms/builder",
       "related_paths": ["/{user}"],
       "tags": ["profiles", "cms", "agents"],
       "source_refs": [
-        "components/profile-cms-builder/ProfileCmsAgentPanel.tsx",
-        "lib/profile-cms/builder/agent-patch-operations.ts",
-        "components/profile-cms-builder/ProfileCmsBuilderJsonPanel.tsx",
+        "components/profile-cms-builder/agent/ProfileCmsAgentWorkspace.tsx",
+        "components/profile-cms-builder/agent/CmsAgentConnection.tsx",
+        "lib/profile-cms/agent-kit.ts",
+        "lib/profile-cms/builder/agent-save.ts",
+        "standalone/profile-cms-agent/README.md",
         "ops/docs/profiles/feature-profile-cms-builder-ai-agent-affordances.md"
       ]
     },
     {
       "id": "collect.overview",
       "kind": "workflow",
-      "title": "Collect artwork and complete profile sets",
+      "title": "Collecting tools and profile set completion",
       "aliases": [
         "buy 6529 NFTs",
         "sell NFTs",
@@ -7843,7 +8091,15 @@
         "complete a season",
         "complete Pebbles",
         "lowest cost TDH",
-        "gift a purchase"
+        "gift a purchase",
+        "complete my set",
+        "collecting tools",
+        "lowest listings",
+        "purchase price breakdown",
+        "quote expired",
+        "paying and receiving wallets",
+        "change purchase recipient",
+        "send to a fren"
       ],
       "keywords": [
         "Collect",
@@ -7862,35 +8118,217 @@
         "TDH"
       ],
       "facts": [
-        "Collect at /collect supports The Memes, 6529 Gradient and NextGen Pebbles. Browse artwork, compare observed low-price listings, find specific tokens, analyze season/full-set/artist/Pebbles trait goals and compare additional TDH.",
-        "All set collecting uses the profile across its confirmed consolidated wallets. Wallets identify custody, funding, signing or receipt; selecting a custody wallet does not redefine the primary collecting scope.",
-        "Purchase recipients follow minting: choose a profile wallet or enter a third-party wallet. Review the exact address. The purchase transaction delivers the NFT directly to that one recipient without a separate onward transfer. A gift outside the profile does not advance that profile’s projected completion or TDH.",
+        "Collect in the NFT navigation opens /collect, the set planner for The Memes, 6529 Gradient and NextGen Pebbles. Choose Complete a set, Lowest listings or TDH. One shared Collection selector keeps the chosen collection across these tools, daily TDH and Reach target TDH. Incompatible goals switch to that collection’s full-set or Pebbles-set options. The Memes offers Full set, Season and Artist under Build toward. Season, artist and Pebbles set selectors support typing to find an option by name, with clear empty and no-match states. The planner has no duplicate artwork catalogue. Collecting options show a loading state while the catalog arrives; Try again retries an initial failure without treating the set as empty.",
+        "Browse artworks on /the-memes, /6529-gradient and /nextgen/collection/pebbles. Complete my set on The Memes carries the selected season, or its full set when no season is selected; the Gradients link opens its full set and the Pebbles link opens its trait-set planner. The View collection link returns from Collecting tools to the selected collection page; on narrow screens it appears as an accessible arrow.",
+        "Supported artwork cards place a priced Collect action near the artwork summary, before artwork details and Listings & offers. Gradients and Pebbles put the title and artwork first, followed by the actions and lower tabs. The lowest supported listing is selected automatically; Other listings exposes alternatives. Listing prices load before wallet connection with distinct loading, failed and empty states. If no listing is returned, This artwork is not currently listed replaces empty Collect, quantity and delivery controls; Make an offer and applicable owner actions remain available. Unsupported or own-wallet listings have a separate no-matching-listing message. Connection is required before purchase review. Deliver to appears below an available Collect action; Change opens the mint-style destination picker. Collect rechecks the exact selected order and changed terms require another review. View listings & offers selects the market tab and focuses it. Switching tabs retains market selection and review.",
+        "Artwork actions appear in the order Collect, Make an offer, then List. List appears when a confirmed wallet in the profile holds the NFT; connect that holding wallet to list it. Before connecting, List opens the wallet connection flow so ownership can be checked. While ownership is loading it stays visible but unavailable; a failed check offers Try again. The more-actions menu contains Review offers. Offer and listing dialogs show loading or retry states; Close or Escape returns to the opener. Closing during loading cancels that attempt and does not open a delayed review.",
+        "Artwork listing availability updates quietly while the page is visible and idle. An active purchase choice or review is preserved instead of being replaced by a background update. A failed request offers Try again; an empty result has no routine Refresh action. Collect still checks the exact order before opening a review.",
+        "Lowest listings shows each NFT once at its lowest supported purchase price, including the quantity of an indivisible lot. Cards in Lowest listings and TDH use compact ETH prices with up to four decimal places rounded upward; positive amounts below 0.0001 ETH show <0.0001 ETH. Expand a shortened price for Exact amounts. Listing prices and purchase quantities remain unchanged. Open the artwork image or title for its native card page, or choose Add to add it to your selection. Selected and a checkmark identify an added item; press it again to remove it. The selection stays available across Lowest listings and TDH, with its actions kept in view while scrolling. Both tools request up to 48 source entries at a time; filtering and duplicate artworks can leave fewer cards. The displayed count reports actual artworks shown, and Load more artwork retrieves another page when available. Review purchase lets you select all or some items; Plan offers opens individual NFT prices instead. An empty result does not prove that no orders exist elsewhere. Try again retries a failed listing request.",
+        "All set collecting uses the profile across its confirmed consolidated wallets. For The Memes, Copies per NFT is the total you want to hold of each required NFT, including copies already in your profile. Unique Gradients and Pebbles use one copy and have no copies input. Wallets identify custody, funding, signing or receipt; selecting a custody wallet does not redefine the primary collecting scope.",
+        "Purchase recipients follow minting and show the profile's confirmed wallets automatically. Choose one, or use Send to a fren to search a profile or ENS name, or enter another wallet. Review the full resolved address; the paying wallet is separate from the recipient. A multiple-item review starts with one delivery address and allows a different address per NFT or an edition quantity split across addresses. Allocations must equal the purchased quantity. Delivery occurs in the purchase transaction without onward transfers. A gift outside the profile does not advance that profile’s projected completion or TDH.",
         "Pebbles is the current NextGen project. Palette, Size, Traced and Ultimate goals extend its existing Trait Sets. Ultimate can satisfy multiple trait requirements with one token.",
-        "Completion plans show missing requirements and incomplete coverage. The initial scan checks one best exact OpenSea listing per artwork; it does not exhaust market depth. Each planned purchase gets a fresh quote and wallet approval, and several orders use separate transactions.",
+        "A usable completion plan collapses setup so the results have room; Edit goal restores the saved inputs and Hide setup closes them. Loading and failed plans keep setup visible. Proposed purchases appear first, other priced missing requirements next, and unpriced requirements afterward. Already in your profile is collapsed. Thumbnails and names open card pages. Rows show quantities priced for the goal, proposed purchase quantities and compact estimates, with exact amounts retained for review and accessible detail. The summary separates NFT cost and gas reserve and shows projected profile completion. Budget cap is optional. When set, Within your budget is selected initially and Available for your goal compares an uncapped option from the same listings. Choosing that option explicitly changes the scenario. Availability does not exhaust market depth and a missing price is never zero. Collect now opens selection of some or all purchases. Make offers includes required NFTs without supported listings; trait alternatives use the chosen NFTs.",
+        "Review live total checks every selected exact ETH listing before a multiple-item purchase. Supported selections use one Ethereum transaction: all selected purchases and recipient deliveries succeed together or all revert, although a revert can cost gas. The site does not silently substitute listings, drop items or split the selection into several transactions. Review each artwork's quantities and delivery allocations, the paying wallet, total, included fees and network fee cap. Continue in wallet refreshes the complete quote and compares it with the reviewed terms; changed terms require another review. Orders confirms the purchase only after verifying all selected deliveries.",
         "Supported execution uses Ethereum mainnet, exact NFTs, explicit quantities and ETH or WETH. Fixed-price offers use WETH and receive NFTs in the signing wallet. Profile consolidation and social proxy access do not grant trading authority over another wallet.",
-        "Review the total price, fees, seller net where applicable, recipient and token approval scope. New listings include configured creator support; standard offers include required provider fees; purchases and accepted offers preserve their signed fees. The 6529 platform fee is zero.",
-        "Orders at /collect/orders tracks operation recovery. Potential offer exposure begins when signable terms are revealed, even if no signature or publication is confirmed. A quote freshness timer does not expire a signed order.",
-        "If a wallet may have submitted a transaction but its hash was not returned, the review shows Checking the outcome and blocks another send for that operation across browsers. Copy the hash from wallet activity into Transaction hash from your wallet and select Check this transaction. The site verifies the exact transaction; this does not send a replacement. Approvals and recovery without local browser data use the same flow.",
+        "An individual purchase summary shows artwork and quantity, with separate Pay with and Deliver to rows even when both use the same wallet. Click or tap each profile wallet name or abbreviated address to reveal the full checksummed address and copy control. Purchase price includes signed order fees. Network fee cap includes required approvals when quoted. An ETH Maximum total appears only with complete fee caps; summary caps round upward without changing submitted amounts. Rounded item prices show ≈, announced as Approximately. Missing caps say Not available yet; WETH prices and ETH gas stay separate. Price breakdown shows seller proceeds and included fees; nested Exact amounts retains unrounded amounts, network and approval fee caps and the maximum where available.",
+        "Every supported purchase review allows choosing a new destination from its expanded delivery row, including individual artworks, selected listings, purchases from Collect and saved purchase reviews in Orders. Send to me shows the profile's confirmed wallets. Send to a fren supports searching a profile or ENS name, or entering a wallet address. Choose the receiving wallet and check its full resolved address; an address outside the profile requires confirmation. Use this address applies that destination and prepares a fresh review without signing or sending. Review the updated address and terms before Continue in wallet. Cancel retains the current destination. Delivery editing is unavailable while a wallet transaction or outcome recovery is in progress. For multiple NFTs or split deliveries, each row changes only those copies and retains the other items and destinations. Choosing another existing destination for the same NFT combines its copies. The review explains that copies delivered outside the profile do not count toward its collecting goals or TDH. After a confirmed purchase, calculate a new TDH projection using the updated holdings.",
+        "The expanded destination chooser shows the selected profile's picture, name, profile level and profile TDH where available. Level belongs to the profile. Individual wallet rows show Wallet TDH when that wallet's value is known. These details help identify the profile; they do not replace checking the full resolved destination address before applying it.",
+        "Continue in wallet stays disabled until the destination edit is applied or cancelled. Applying keeps confirmation unavailable while the new destination review prepares.",
+        "Contract details preserves NFT and exchange contracts, fee recipients, approval scope and order identifiers separately from prices. Known Ethereum addresses receive names for their applicable roles: The Memes, Meme Lab, 6529 Gradient, NextGen, Seaport 1.6 and OpenSea. Expand the contract row for its full address, copy it or open the explorer. Unfamiliar addresses keep generic labels; a display name does not replace exact-address checks or grant spending permission. New listings include configured creator support; standard offers include required provider fees; purchases and accepted offers preserve signed fees. The 6529 platform fee is zero.",
+        "Reviews stay available while you read. Continue in wallet checks current terms and automatically refreshes execution quotes when needed for purchases, listings, offers, accepting offers and cancellations, including supported multiple-item purchases. Unchanged terms proceed to the wallet without a separate Refresh quote action. Changed prices, fees, quantities, recipients or approval scopes require another review and consent. A lower network fee quote can proceed within the reviewed limits; an increased network fee limit pauses to review the updated maximum. Checking terms never signs or sends by itself. Execution quote freshness is separate from the signed order’s expiry; refreshing does not extend the order.",
+        "Orders at /collect/orders tracks operation recovery. Potential offer exposure begins when signable terms are revealed, even if no signature or publication is confirmed. Execution quote freshness does not expire a signed order.",
+        "Continue in wallet waits until the connected wallet is ready on Ethereum. A connecting wallet or wrong network has an explicit message, and declining a request keeps the current choices. A saved transaction hash is checked automatically: Your transaction hash is saved means the site is checking that same transaction and must not send it again. Normal wallet requests and known-hash checks do not ask for manual hash entry. If the wallet may have submitted without returning a hash, Checking the outcome blocks another send for that operation across browsers. After the active wallet step ends, copy the hash from wallet activity into Transaction hash from your wallet and select Check this transaction. The site verifies the exact transaction without sending a replacement. Approvals and recovery without local browser data use the same flow. A failed recovery check retains the unresolved transaction for another attempt.",
         "If publication or broadcast is uncertain, retain the order or transaction hash and reconcile it instead of sending a duplicate purchase. Cancellation can lose a race to a fill and is effective only after chain verification. Revoking an approval or pausing new trading does not permanently cancel signed orders.",
-        "TDH comparisons use a verified official snapshot and include changes to bonuses on existing holdings. The ranking is best among observed candidates, includes an estimated gas reserve, and is not a guarantee of future TDH or complete market coverage.",
+        "TDH opens listings for the chosen collection immediately, defaulting to The Memes, ranked by base TDH per full held day per ETH without requiring a profile, budget or horizon. The shared collection choice also applies to daily TDH and Reach target TDH. Each NFT appears at its best supported indexed ETH ask including signed fees; gas is checked at purchase. The rate excludes seller TDH and profile/set multipliers. How TDH value works explains coverage. Find your daily TDH links editable Base TDH per day and Purchase budget (ETH): editing either automatically estimates the other for actual NFT quantities after a short pause, with a connected profile and profile-wallet delivery. Personal boost/rate effects and changes to already accumulated TDH are shown separately. Reach target TDH remains a separate future total/timeframe projection. Back to TDH listings returns to browsing and the daily tool.",
         "A Safe can receive a gift purchase. Execution from smart contract wallets and inside the native app is unavailable until those paths are supported. Programmatic preparation still requires owner review and wallet authorization; the backend does not hold user signing keys.",
-        "Saved rules freeze exact targets, funding wallet, recipient, unit and total review limits, gas reserve, expiry and action count. They prepare one ETH purchase at a time for wallet approval. Pause and expiry retain unresolved operations, and confirmed acquisitions count permanently even if the NFT is later sold or transferred. Rules do not grant unattended wallet execution authority."
+        "Saved rules freeze exact targets, funding wallet, recipient, unit and total review limits, gas reserve, expiry and action count. They prepare one ETH purchase at a time for wallet approval. Pause and expiry retain unresolved operations, and confirmed acquisitions count permanently even if the NFT is later sold or transferred. Rules do not grant unattended wallet execution authority.",
+        "Offers and listings support 1, 7 or 30 days or Custom… with an exact local date and time. The displayed time zone applies. Custom times must be at least five minutes away and within the supported 30-day window; invalid, missing or repeated daylight-saving times require a different time. Quote refresh does not extend a signed order. Eligible collection-wide or verified trait offers can be accepted through Sell or Accept offer for the NFT on the current artwork page. The holding wallet signs and receives sale proceeds; profile consolidation does not transfer signing authority.",
+        "Meme Lab cards at /meme-lab/{id} share the Memes trading controls, edition quantities and purchase review. This card-level trading support does not add Meme Lab to the set planner, Lowest listings or TDH tools.",
+        "Selection purchase review fills the screen with artwork rows, a purchase summary and Back to collecting at the top. Deliver all to prepares one destination for every item, while Change delivery for this artwork retains exceptions or split deliveries. Applying a common destination combines each item’s copies at that address. Remove beside an artwork checks the existing unsigned review and prepares a new quote for the remaining exact orders, quantities and allocations. A failed update retains the original review. Removing the last item closes only after pending-purchase checks. Confirmation and removal remain unavailable during destination editing; preparation, wallet steps and unresolved transactions preserve their recovery state."
       ],
       "canonical_path": "/collect",
-      "link_label": "Collect",
+      "link_label": "Open collecting tools",
       "related_paths": [
         "/collect/orders",
         "/the-memes",
         "/6529-gradient",
-        "/nextgen"
+        "/nextgen/collection/pebbles"
       ],
-      "tags": ["collections", "marketplace", "profiles", "TDH", "wallets"],
+      "tags": [
+        "collections",
+        "marketplace",
+        "profiles",
+        "TDH",
+        "wallets"
+      ],
       "source_refs": [
         "ops/docs/media/collecting.md",
         "app/collect/page.tsx",
         "app/collect/orders/page.tsx",
         "components/collect/CollectPageClient.tsx",
-        "components/collect/useMarketExecution.ts"
+        "components/collect/CollectPageView.tsx",
+        "components/collect/CollectEntryLink.tsx",
+        "components/collect/CollectDetailActions.tsx",
+        "components/collect/CollectTradeSheet.tsx",
+        "components/collect/CollectPurchaseSummary.tsx",
+        "components/collect/CollectReviewWallet.tsx",
+        "components/collect/CollectRecipientPicker.tsx",
+        "components/collect/CollectOrderSummary.tsx",
+        "components/collect/CollectBatchQuoteReview.tsx",
+        "components/collect/collect-contract-identity.ts",
+        "components/collect/market-batch-execution.ts",
+        "components/collect/useCollectCatalog.ts",
+        "components/collect/useMarketExecution.ts",
+        "components/collect/CollectOfferWorkspace.tsx",
+        "components/collect/CollectTdhWorkspace.tsx",
+        "components/collect/useCollectBatchRecipientUpdate.ts",
+        "components/collect/CollectCheckoutScreen.tsx",
+        "components/collect/useMarketWalletScope.ts",
+        "components/collect/collect-navigation.ts",
+        "components/collect/market-review-caps.ts"
+      ]
+    },
+    {
+      "id": "collect.offer-planning",
+      "kind": "workflow",
+      "title": "Plan individual NFT offers from a selection",
+      "aliases": [
+        "plan offers",
+        "group offers",
+        "make offers for missing NFTs",
+        "manual price for each NFT",
+        "match best WETH offer",
+        "offer above a bid",
+        "offer below an ask",
+        "allocate an offer budget"
+      ],
+      "keywords": [
+        "Collect",
+        "offers",
+        "WETH",
+        "bids",
+        "asks",
+        "price",
+        "quantity",
+        "budget",
+        "pending",
+        "expiry"
+      ],
+      "facts": [
+        "Select NFTs from Lowest listings or TDH, then choose Plan offers. Completion results offer Collect now, At WETH offer, WETH + %, Ask − %, and Blended. Price methods populate proposals automatically after selecting a method or editing inputs; no initial Calculate prices click is needed. Make offers also includes required NFTs without supported listings. Trait requirements use chosen artworks rather than every alternative. Thumbnails and names identify each NFT. Search the plan and select all or only the NFTs you want.",
+        "Enter each price is the default for a general selection. Set WETH per NFT, quantity and a default expiry of 1, 7 or 30 days or Custom… with a local date and time. Details & expiry changes one NFT’s expiry. An edition offer’s unit price is multiplied by copies. A budget constrains allocation; it does not replace per-NFT prices. Manual prices stay pinned when proposals update until Use calculated price releases them. Invalid or ambiguous daylight-saving times need another time, and refreshing does not shift the chosen absolute expiry.",
+        "Price method includes Match observed WETH offer, Above observed WETH offer by an entered percentage, and Below observed ask by an entered percentage. Changing inputs updates editable proposals after a short pause. Refresh prices requests another observation; this does not publish or automatically chase later bids. References are applicable observed exact-NFT orders. Native ETH asks are compared with WETH at 1:1 before wrapping costs.",
+        "Conservative allocation proposes opening prices within an Offer budget (WETH), using available reference evidence and preserving manual prices. It can leave WETH unused. Missing or stale references need a manual price or another calculation. Observed prices do not confirm maker funding, seller acceptance, fill probability or a globally optimal allocation.",
+        "Blended offers Conservative, Base and Aggressive, initially Base. It uses each NFT’s own observed bid and exact whole-quantity listed cost. Conservative matches the bid and suggests buying within a 2% gap; Base proposes one third of the way to the listed cost and buys within 8%; Aggressive proposes two thirds and buys within 20%. With only a listing, Conservative proposes 70%, Base 85%, and Aggressive suggests buying. With only a bid all match it; missing or conflicting references need a manual price or refresh. Per-edition offers round down. These editable defaults do not predict acceptance or value. Manual prices and route choices remain unchanged by strategy updates. Final offer funding checks preserve the original reference deadline.",
+        "Check amounts and WETH checks manual prices; calculated methods update automatically after input edits and Refresh prices requests another check. Generated Blended offer prices receive a separate exact-amount, funding and budget check before review. WETH funding belongs to the paying wallet, not a pooled profile balance. Pending and published potential exposure remains counted; an explicit offer budget constrains manual and calculated amounts. Analysis never publishes an order or requests a wallet signature.",
+        "Review offer opens one NFT's exact quantity, price, fees and expiry for wallet authorization. Quantity is fixed during review; return to the offer plan to change copies. Each NFT offer is signed separately and may fill independently; a group of offers has no all-or-revert guarantee. Offers receive NFTs in the signing wallet. The allocation's remaining cap does not permit a reviewed row to spend another NFT's allocation.",
+        "Awaiting offer status remains committed, and Check offer status reopens that same offer. Pending and published amounts remain counted against the allocation budget across selection changes and Back to collecting in the same workspace. Closing a review does not release its amount. After reload, enter a fresh budget and check funding again; authoritative potential exposure still applies. Changing profile or paying wallet starts a separate workspace.",
+        "A signed offer may fill while you are away. Uncertain publication keeps potential exposure until reconciliation. Cancellation can race a fill; only verified cancellation, expiry or fill resolves the applicable liability. Clearing the UI or revoking an approval does not permanently cancel a signed offer. Orders at /collect/orders provides recovery.",
+        "Blended purchases use a separate ETH summary and review; Offer budget (WETH, optional) covers offers only. Exact priced listings must cover each requested quantity. An unavailable selected buy blocks review instead of silently dropping that NFT. Pending or published offers block purchases of the same NFT. Opening purchase review reserves its NFTs from offers while retained, including after closing; it does not mean a transaction was sent. Resume purchase review restores it; Resume prior plan review explicitly restores the original NFTs/address after a goal, scenario or recipient change. Discard purchase draft releases reservations before live review begins, as does confirmed settlement. Purchases and offers have no combined hard budget or atomic transaction."
+      ],
+      "canonical_path": "/collect",
+      "link_label": "Open collecting tools",
+      "related_paths": ["/collect/orders"],
+      "tags": ["collections", "marketplace", "offers", "wallets"],
+      "source_refs": [
+        "ops/docs/media/collecting.md",
+        "components/collect/CollectOfferWorkspace.tsx",
+        "components/collect/OfferPlanPanel.tsx",
+        "components/collect/collect-offer-selection.helpers.ts",
+        "components/collect/analyze-collect-offers.ts",
+        "components/collect/collect-offer-analysis.adapter.ts",
+        "components/collect/CollectTradeController.tsx"
+      ]
+    },
+    {
+      "id": "collect.tdh-daily",
+      "kind": "workflow",
+      "title": "Link daily TDH and purchase budget",
+      "aliases": [
+        "find your daily TDH",
+        "base TDH per day",
+        "daily TDH target",
+        "ETH budget for daily TDH",
+        "daily earning rate"
+      ],
+      "keywords": [
+        "Collect",
+        "TDH",
+        "daily",
+        "budget",
+        "boost",
+        "profile",
+        "recipient",
+        "stock"
+      ],
+      "facts": [
+        "In Collecting tools, choose TDH. Find your daily TDH has editable Base TDH per day and Purchase budget (ETH) fields. The field edited last drives the calculation after a short pause; the other shows the result for the actual NFT quantities found. No calculate click is required. Connect a profile to calculate and use Deliver to for one of its confirmed wallets.",
+        "Base TDH per day is the selected new NFTs’ base earning rate per full held day, before personal boosts. The purchase estimate includes signed listing fees and excludes gas, which is quoted at review. Discrete NFT quantities can leave budget unused or exceed a daily-rate target. The result retains any remaining shortfall and describes the bounded indexed coverage, rather than promising a global minimum cost.",
+        "Personal effects show the profile boost and boosted daily rate before and after the proposed purchase. The change to accumulated TDH on existing holdings is shown separately as a stock adjustment, not daily earnings. Signed changes retain their sign rather than being shown as automatic gains.",
+        "The proposed plan shows exact artworks, quantities and listing costs. Review purchase sends that selection to the shared review for fresh price, availability, funding and gas checks. Plan offers for these artworks requires the projected destination to match the paying wallet, because offers deliver to the signer. Offers require separate signatures and add TDH only after a fill; no acceptance or fill time is forecast.",
+        "Changing profile, membership, collection, destination or the driving input clears incompatible results. Old responses cannot replace the current input. Recalculate refreshes the current target or budget without re-entering it. Loading, invalid input and failed calculations are distinct; Try again retries a failure. The daily tool does not change the separate Reach target TDH screen for a future total at a chosen horizon."
+      ],
+      "canonical_path": "/collect?intent=tdh",
+      "link_label": "Find your daily TDH",
+      "related_paths": [
+        "/collect?intent=tdh&view=projection",
+        "/collect/orders"
+      ],
+      "tags": ["collections", "TDH", "profiles", "wallets"],
+      "source_refs": [
+        "ops/docs/media/collecting.md",
+        "components/collect/CollectTdhDailyController.tsx",
+        "components/collect/CollectTdhDailyControls.tsx",
+        "components/collect/CollectTdhDailyWorkspace.tsx",
+        "components/collect/CollectTdhDailyResults.tsx",
+        "components/collect/collect-tdh-daily.helpers.ts"
+      ]
+    },
+    {
+      "id": "collect.tdh-target",
+      "kind": "workflow",
+      "title": "Reach a profile TDH target within a timeframe",
+      "aliases": [
+        "reach target TDH",
+        "how much TDH can I get",
+        "budget to reach TDH",
+        "TDH in 30 days",
+        "future TDH target",
+        "additional TDH",
+        "TDH purchase plan"
+      ],
+      "keywords": [
+        "Collect",
+        "TDH",
+        "target",
+        "timeframe",
+        "baseline",
+        "projection",
+        "budget",
+        "profile",
+        "recipient",
+        "offers"
+      ],
+      "facts": [
+        "In Collecting tools, choose TDH then Reach target TDH. Enter Target TDH and a timeframe of 1, 30, 90 or 365 days. The shared Collection selector keeps The Memes, Gradients or Pebbles selected from the other tools. Defaults are Total TDH at the end and 30 days; an unqualified visit uses The Memes. Back to TDH listings returns to the immediate base TDH/day per ETH listing comparison, which needs no profile, budget or timeframe.",
+        "The target projection uses the profile's holdings across confirmed consolidated wallets and a verified official snapshot, including changes to bonuses on existing holdings. Deliver to must be a wallet in that profile; a gift outside it adds no profile TDH. Purchase funding and delivery wallets can differ.",
+        "Advanced options includes Additional TDH above my baseline, measured above the no-purchase baseline at the same future date. Maximum purchase budget (ETH) is optional: leave it blank to estimate the purchase budget for the target. An entered limit includes signed listing fees and excludes gas, which is quoted at purchase review. Analysis is not spending authorization.",
+        "Results show baseline, proposed TDH and target on the stated UTC date. No purchases needed means the baseline already meets the target. Otherwise Best purchase plan found or Closest purchase plan found shows exact NFTs, quantities, estimated subtotal and any remaining TDH gap. The bounded search does not prove a global minimum cost or that an unmet target is impossible. Projection assumptions and coverage describes the indexed asks and snapshot used.",
+        "Review purchase brings the proposed exact acquisitions into the shared purchase review. Current prices, availability, gas and funding are checked before wallet approval. Changing NFTs, quantities or delivery wallet requires a new projection before relying on its TDH result. Changing target, timeframe, profile or confirmed wallet membership invalidates the old result.",
+        "Plan offers for these artworks opens per-NFT offer prices only when the projected destination matches the paying wallet, because offers deliver to the signer. If another profile wallet was selected, choose the paying wallet and run the projection again first. Offers add TDH only when they fill; later fills leave less holding time. The purchase projection does not predict whether or when offers fill."
+      ],
+      "canonical_path": "/collect?intent=tdh&view=projection",
+      "link_label": "Reach target TDH",
+      "related_paths": ["/collect", "/collect/orders"],
+      "tags": ["collections", "TDH", "profiles", "wallets"],
+      "source_refs": [
+        "ops/docs/media/collecting.md",
+        "components/collect/CollectTdhWorkspace.tsx",
+        "components/collect/CollectTdhTargetController.tsx",
+        "components/collect/CollectTdhTargetForm.tsx",
+        "components/collect/CollectTdhTargetDelivery.tsx",
+        "components/collect/CollectTdhTargetResults.tsx",
+        "components/collect/collect-tdh-target.helpers.ts"
       ]
     }
   ]

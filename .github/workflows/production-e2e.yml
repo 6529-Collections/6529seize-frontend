@@ -7,12 +7,20 @@ on:
         description: Successful Web Deploy - PROD run ID; supplied automatically, required for a manual rerun
         type: string
         required: true
+      scope:
+        description: Post-deploy validation or the daily canary pack set
+        type: choice
+        options: [post-deploy, canary]
+        default: post-deploy
+  schedule:
+    # Daily broad read-only coverage between frontend deployments.
+    - cron: "30 5 * * *"
 
 permissions:
   actions: read
   contents: read
 
-run-name: Production E2E ${{ inputs.automatic_deploy_run_id && format('automatic {0}', inputs.automatic_deploy_run_id) || 'manual' }}
+run-name: Production E2E ${{ github.event_name == 'schedule' && 'daily canary' || inputs.scope == 'canary' && format('canary {0}', inputs.automatic_deploy_run_id) || format('automatic {0}', inputs.automatic_deploy_run_id) }}
 
 concurrency:
   group: production-e2e
@@ -34,10 +42,20 @@ jobs:
         id: source
         env:
           AUTOMATIC_DEPLOY_RUN_ID: ${{ inputs.automatic_deploy_run_id }}
+          EVENT_NAME: ${{ github.event_name }}
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           test "$GITHUB_REF" = refs/heads/main
+          if [ "$EVENT_NAME" = schedule ]; then
+            # Discovery only: the selected run and canonical deploy job are
+            # independently verified below, then checked against the live site.
+            gh api "repos/${GITHUB_REPOSITORY}/actions/workflows/build-upload-deploy-prod.yml/runs?branch=main&event=workflow_dispatch&status=success&per_page=100" > "$RUNNER_TEMP/deploy-runs.json"
+            AUTOMATIC_DEPLOY_RUN_ID="$(jq -er '
+              [.workflow_runs[] | select(.status == "completed" and .conclusion == "success")]
+              | sort_by(.run_started_at) | last | .id // empty
+            ' "$RUNNER_TEMP/deploy-runs.json")"
+          fi
           [[ "$AUTOMATIC_DEPLOY_RUN_ID" =~ ^[1-9][0-9]{0,19}$ ]]
           gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${AUTOMATIC_DEPLOY_RUN_ID}" > "$RUNNER_TEMP/deploy-run.json"
           deployed_sha="$(jq -er \
@@ -66,6 +84,7 @@ jobs:
             )] | length == 1
           ' "$RUNNER_TEMP/deploy-jobs.json" >/dev/null
           echo "sha=$deployed_sha" >> "$GITHUB_OUTPUT"
+          echo "deploy-run-id=$AUTOMATIC_DEPLOY_RUN_ID" >> "$GITHUB_OUTPUT"
 
       - name: Check out trusted version verifier
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
@@ -100,7 +119,10 @@ jobs:
       - name: Verify exact deployed source
         env:
           EXPECTED_SHA: ${{ steps.source.outputs.sha }}
-        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          git merge-base --is-ancestor "$EXPECTED_SHA" origin/main
 
       - name: Install Node.js
         uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
@@ -128,7 +150,7 @@ jobs:
         id: museum-selection
         env:
           DEPLOYED_SHA: ${{ steps.source.outputs.sha }}
-          DEPLOY_RUN_ID: ${{ inputs.automatic_deploy_run_id }}
+          DEPLOY_RUN_ID: ${{ steps.source.outputs.deploy-run-id }}
           GH_TOKEN: ${{ github.token }}
           MUSEUM_RELEASE_TIER_MODE: ${{ vars.MUSEUM_RELEASE_TIER_MODE || 'tiered' }}
         run: |
@@ -250,6 +272,7 @@ jobs:
         run: ./bin/6529 exec playwright install chromium
 
       - name: Run read-only production packs
+        if: github.event_name != 'schedule' && inputs.scope != 'canary'
         env:
           MUSEUM_SELECTED_PACKS_JSON: ${{ steps.museum-selection.outputs.selected_packs }}
           MUSEUM_PUBLICATION_EXPECTED_COMMIT: ${{ steps.museum-publication.outputs.publication_commit }}
@@ -270,6 +293,17 @@ jobs:
           done
           DEPLOYMENT_E2E_SOURCE_SHA="$DEPLOYED_SHA" \
             ./bin/6529 run e2e:packs -- "${args[@]}"
+
+      - name: Run daily read-only production canary packs
+        if: github.event_name == 'schedule' || inputs.scope == 'canary'
+        env:
+          MUSEUM_PUBLICATION_EXPECTED_COMMIT: ${{ steps.museum-publication.outputs.publication_commit }}
+          DEPLOYMENT_E2E_SOURCE_SHA: ${{ steps.source.outputs.sha }}
+        run: |
+          ./bin/6529 run e2e:packs -- \
+            --env production --trigger cron \
+            --artifact-root production-e2e-artifacts \
+            --parallel 3 --retry-failed-packs 1
 
       - name: Preserve Museum selection and publication evidence
         if: always()
@@ -298,7 +332,7 @@ jobs:
   notify-ci-wave:
     name: Notify CI wave about production WEB validation
     needs: readonly
-    if: always()
+    if: always() && github.event_name != 'schedule' && inputs.scope != 'canary'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -328,4 +362,37 @@ jobs:
           CI_PIPELINES_SHA: ${{ needs.readonly.outputs.expected-sha }}
           CI_PIPELINES_PARENT_DEPLOY_RUN_ID: ${{ inputs.automatic_deploy_run_id }}
           CI_PIPELINES_VALIDATION_PACK: all
+        run: node .ci-wave-notifier/scripts/notify-ci-wave.mjs
+
+  notify-canary-failure:
+    name: Notify CI wave about a production canary failure
+    needs: readonly
+    if: always() && (github.event_name == 'schedule' || inputs.scope == 'canary') && needs.readonly.result == 'failure'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Check out CI wave notifier
+        continue-on-error: true
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          ref: ${{ github.workflow_sha }}
+          persist-credentials: false
+          path: .ci-wave-notifier
+          sparse-checkout: scripts/notify-ci-wave.mjs
+          sparse-checkout-cone-mode: false
+
+      - name: Post production canary failure
+        if: always() && hashFiles('.ci-wave-notifier/scripts/notify-ci-wave.mjs') != ''
+        continue-on-error: true
+        env:
+          CI_PIPELINES_ALERT_URL: ${{ vars.CI_PIPELINES_ALERT_URL }}
+          CI_PIPELINES_ALERT_SECRET: ${{ secrets.CI_PIPELINES_ALERT_SECRET }}
+          CI_PIPELINES_ALERT_API_AUTH: ${{ secrets.CI_PIPELINES_ALERT_API_AUTH }}
+          CI_PIPELINES_ALERT_TYPE: workflow
+          CI_PIPELINES_TARGET_ENV: production
+          CI_PIPELINES_STATUS: failure
+          CI_PIPELINES_TITLE: "Production E2E: read-only canary failed"
+          CI_PIPELINES_SERVICE: web-canary
+          CI_PIPELINES_SHA: ${{ needs.readonly.outputs.expected-sha }}
         run: node .ci-wave-notifier/scripts/notify-ci-wave.mjs

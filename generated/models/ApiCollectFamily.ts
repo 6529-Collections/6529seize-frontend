@@ -13,8 +13,12 @@
 
 import { HttpFile } from '../http/http';
 
+/**
+* Meme Lab is supported for explicit artwork lookup and card trading; it is not part of collection goals or TDH planning.
+*/
 export enum ApiCollectFamily {
     Memes = 'memes',
     Gradients = 'gradients',
-    Pebbles = 'pebbles'
+    Pebbles = 'pebbles',
+    Memelab = 'memelab'
 }

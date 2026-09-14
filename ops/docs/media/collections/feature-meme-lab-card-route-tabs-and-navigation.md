@@ -32,15 +32,20 @@ pagination.
 
 1. Open `/meme-lab/{id}`.
 2. The route reads `focus` and resolves one visible tab:
-   `Overview`, `Collectors`, `History`, or `References`.
+   `Overview`, `Listings & offers`, `Collectors`, `History`, or `References`.
 3. If `focus` is missing or unsupported, the page opens `Overview`.
 4. Switch tabs from the tab row; each switch rewrites `focus` in place while
-   preserving supported `locale` query values.
+   preserving supported `locale` query values. Primary and History tab switches
+   keep the tab row visible with the new section at its top.
 5. Use previous/next arrows to move to adjacent card IDs while keeping the
    current query string.
 6. On `Overview`, review card stats, collection links, ownership summary when
    connected, original media controls, and marketplace shortcuts when available.
-7. Legacy `focus=the-art` URLs open `Overview` with additional details expanded.
+7. Original files, metadata, properties and card details follow the description
+   in Overview. Existing `focus=the-art` URLs open Overview. The
+   `focus=listings-and-offers` tab shows market prices immediately without a
+   second accordion. **View listings & offers** beside the artwork actions opens
+   this tab and focuses its market section.
 8. On `Collectors`, review the holder leaderboard.
 9. On `References`, review linked The Memes cards referenced by the Meme Lab
    card.
@@ -48,6 +53,29 @@ pagination.
     when wallet transactions are available, or `Timeline`.
 11. On `Card Activity`, filter transaction types, review rows, and paginate.
 12. On `Timeline`, review card history milestones.
+
+### Collect, list or make an offer
+
+Meme Lab cards use the same trading controls and purchase review as The Memes.
+**Collect** near the artwork shows the lowest supported listing; **Other listings**
+shows alternatives. **Make an offer** opens a WETH offer for this exact card.
+**List** checks ownership and requires the wallet holding the editions to sign.
+Prices can load before connecting; reviewing a trade requires a connected wallet.
+
+In **Listings & offers**, choose **Collect** beside a listing or **Sell** beside
+an eligible offer. When several orders share a price, choose the exact order from
+the expanded row. Set a supported edition quantity and review the selected
+listings together. Collection-wide or trait offers are checked for this exact
+Meme Lab card before review.
+
+Purchases show separate **Pay with** and **Deliver to** wallets. Choose a confirmed
+profile wallet or **Send to a fren**; a purchase review also lets you
+change delivery from its expanded **Deliver to** row. Review quantities, fees and
+the resolved destination before continuing in your wallet. Prices and availability
+are checked again automatically, and changed terms require another review.
+
+See [Listings and Offers](../feature-card-market-depth.md) for selection rules and
+[Collecting Tools](../collecting.md) for wallet support and transaction recovery.
 
 ### Distribution Route `/meme-lab/{id}/distribution`
 
@@ -79,12 +107,11 @@ pagination.
 - If card metadata does not resolve for `{id}`, the route can render only the
   page heading, with no inline not-found panel.
 - Previous/next arrows are disabled at the first and last available card index.
-- `The Art` can still open in animated mode when top-level `animation` is
-  blank but metadata provides `animation` or `animation_url`.
-- If only one original media URL resolves, `The Art` shows just that media
-  slide and its matching download/link row.
-- `File Type` and `Dimensions` rows appear only when the active `The Art`
-  slide has usable metadata values.
+- Artwork details in Overview resolve animation media from metadata when top-level `animation`
+  is blank but metadata provides `animation` or `animation_url`.
+- Only available original media links appear, with matching open/download
+  actions.
+- File type and dimensions use available metadata; missing values show `N/A`.
 - `Card Activity` can show a loading spinner first, then an empty-state panel
   when no rows are available.
 - `/meme-lab/{id}/distribution` with non-positive or invalid IDs shows the
@@ -121,6 +148,8 @@ criteria.` even when unfiltered distribution data exists.
   is available for that card, and preserves supported non-default `locale`
   query values.
 - Marketplace shortcuts are hidden on iOS unless detected country is `US`.
+- Meme Lab trading is available from individual card pages. The set planner,
+  Lowest listings and TDH tools continue to cover Memes, Gradients and Pebbles.
 - Card and distribution data are API-backed snapshots and can lag briefly.
 - Card-level ownership chips, marketplace details, media fallback, and transfer
   behavior are owned by media NFT feature pages.

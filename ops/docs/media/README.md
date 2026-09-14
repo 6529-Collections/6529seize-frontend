@@ -12,15 +12,15 @@
 
 - [Collect](collecting.md): `/collect` and `/collect/orders`, profile set
   completion, marketplace trades and TDH comparisons.
-- [Card Market Depth](feature-card-market-depth.md): quoted asks, bids, quantities
-  and snapshot freshness on supported card pages.
+- [Listings and Offers](feature-card-market-depth.md): quoted prices, quantities
+  and update times on supported card pages.
 - [Memes](memes/README.md): `/the-memes`, `/the-memes/{id}`,
   `/the-memes/{id}/distribution`, `/the-memes/mint`, and `/meme-calendar`.
 - [Collections](collections/README.md): `/meme-lab`, `/meme-lab/{id}`,
   `/meme-lab/collection/{collection}`, `/meme-lab/{id}/distribution`,
   `/rememes`, `/rememes/{contract}/{id}`, and `/rememes/add`.
 - [NFT](nft/README.md): shared ownership indicators, source fallbacks,
-  marketplace shortcuts, and transfer actions across media routes plus adjacent
+  artwork sharing, marketplace shortcuts, and transfer actions across media routes plus adjacent
   collected and NextGen token routes.
 - [Rendering](rendering/README.md): interactive HTML rendering rules (including
   sandboxed and non-sandboxed paths) plus `/6529-gradient` list sorting and

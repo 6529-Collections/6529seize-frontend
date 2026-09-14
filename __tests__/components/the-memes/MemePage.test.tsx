@@ -34,10 +34,39 @@ jest.mock("@/services/api/common-api", () => ({
 }));
 
 jest.mock("@/components/the-memes/MemePageLive", () => ({
-  MemePageLiveRightMenu: ({ show }: any) =>
-    show ? <div data-testid="live-right">Live</div> : null,
-  MemePageLiveSubMenu: ({ show }: any) =>
-    show ? <div data-testid="live-sub">Live Sub</div> : null,
+  MemePageLiveRightMenu: ({ show, nft, onMarketChange }: any) =>
+    show ? (
+      <div data-testid="live-right" data-token-id={nft?.id}>
+        <button type="button" onClick={onMarketChange}>
+          Settle market change
+        </button>
+      </div>
+    ) : null,
+  MemePageLiveSubMenu: ({ show, nft, marketRefreshVersion }: any) =>
+    show ? (
+      <div
+        data-market-refresh-version={marketRefreshVersion}
+        data-testid="live-sub"
+        data-token-id={nft?.id}
+      >
+        Live Sub
+      </div>
+    ) : null,
+}));
+
+jest.mock("@/components/nft-market-depth/MarketDepthPanel", () => ({
+  __esModule: true,
+  default: ({
+    active,
+    onReveal,
+  }: {
+    readonly active: boolean;
+    readonly onReveal: () => void;
+  }) => (
+    <div data-testid="market-depth" hidden={!active}>
+      <button onClick={onReveal}>Reveal market</button>
+    </div>
+  ),
 }));
 
 jest.mock("@/components/the-memes/MemePageYourCards", () => ({
@@ -70,13 +99,19 @@ jest.mock("@/components/the-memes/MemePageArtViewer", () => ({
 }));
 
 jest.mock("@/components/the-memes/MemePageArt", () => ({
-  MemePageArt: ({ show }: any) =>
-    show ? <div data-testid="art">Art</div> : null,
+  MemePageArt: ({ locale }: { readonly locale: string }) => (
+    <div data-testid="art-details" data-locale={locale} />
+  ),
 }));
 
 jest.mock("@/components/the-memes/MemePageReferences", () => ({
   MemePageReferencesSubMenu: ({ show }: any) =>
     show ? <div data-testid="references-sub">References</div> : null,
+}));
+
+jest.mock("@/components/the-memes/MemePageArtistWorks", () => ({
+  __esModule: true,
+  default: () => <div data-testid="artist-works">Artist works</div>,
 }));
 
 jest.mock("@/components/the-memes/MemePageTimeline", () => ({
@@ -293,6 +328,26 @@ function renderPage(initialData?: {
           <MemePage nftId="1" initialData={initialData} />
         </AuthContext.Provider>
       ),
+    rerenderForToken: (
+      nextNftId: string,
+      nextInitialData: {
+        readonly nft: typeof nft;
+        readonly nftMeta: typeof nftMeta;
+        readonly nftNotFound: false;
+      }
+    ) =>
+      page.rerender(
+        <AuthContext.Provider value={mockAuthContext as any}>
+          <MemePage
+            nftId={nextNftId}
+            initialData={
+              nextInitialData as React.ComponentProps<
+                typeof MemePage
+              >["initialData"]
+            }
+          />
+        </AuthContext.Provider>
+      ),
   };
 }
 
@@ -319,9 +374,9 @@ describe("MemePage tab navigation", () => {
   });
 
   it.each([
+    ["Listings & offers", MEME_FOCUS.MARKET, "market-depth"],
     ["Collectors", MEME_FOCUS.COLLECTORS, "collectors-sub"],
     ["History", MEME_FOCUS.ACTIVITY, "activity"],
-    ["References", MEME_FOCUS.REFERENCES, "references-sub"],
   ])(
     "selecting %s shows component and updates query",
     async (label, focus, testId) => {
@@ -342,10 +397,77 @@ describe("MemePage tab navigation", () => {
       page.rerenderPage();
 
       await waitFor(() => {
-        expect(screen.getByTestId(testId)).toBeInTheDocument();
+        expect(screen.getByTestId(testId)).toBeVisible();
       });
     }
   );
+
+  it("opens legacy artwork links in Overview with locale and artwork details preserved", async () => {
+    currentFocus = MEME_FOCUS.THE_ART;
+    currentLocale = "de-DE";
+    renderPage();
+    expect(await screen.findByTestId("art-details")).toHaveAttribute(
+      "data-locale",
+      "de-DE"
+    );
+    expect(screen.getByRole("button", { name: "Overview" })).toHaveAttribute(
+      "aria-current",
+      "page"
+    );
+    expect(screen.getByTestId("live-sub")).toBeVisible();
+    expect(screen.getByTestId("market-depth")).not.toBeVisible();
+    expect(
+      screen.queryByRole("button", { name: "Details" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("keeps references below artist works and expands them in Overview", async () => {
+    const page = renderPage();
+    const references = await screen.findByRole("button", {
+      name: "References: Meme Lab & ReMemes",
+    });
+    expect(references).toHaveAttribute("aria-expanded", "false");
+    expect(screen.queryByTestId("references-sub")).not.toBeInTheDocument();
+    expect(
+      screen.getByTestId("artist-works").compareDocumentPosition(references) &
+        Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+
+    expect(
+      references.compareDocumentPosition(screen.getByTestId("art-details")) &
+        Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+
+    await userEvent.click(references);
+    page.rerenderPage();
+    expect(await screen.findByTestId("references-sub")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Overview" })).toHaveAttribute(
+      "aria-current",
+      "page"
+    );
+    expect(references).toHaveAttribute("aria-expanded", "true");
+    const panel = screen.getByRole("region", {
+      name: "References: Meme Lab & ReMemes",
+    });
+    expect(references).toHaveAttribute("aria-controls", panel.id);
+    expect(panel).toContainElement(screen.getByTestId("references-sub"));
+
+    await userEvent.click(references);
+    page.rerenderPage();
+    expect(screen.queryByTestId("references-sub")).not.toBeInTheDocument();
+    expect(screen.getByTestId("artist-works")).toBeInTheDocument();
+  });
+
+  it("opens existing reference deep links inside Overview", async () => {
+    currentFocus = MEME_FOCUS.REFERENCES;
+    renderPage();
+    expect(await screen.findByTestId("references-sub")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Overview" })).toHaveAttribute(
+      "aria-current",
+      "page"
+    );
+    expect(screen.getByTestId("artist-works")).toBeInTheDocument();
+  });
 
   it("selects the Timeline history subtab", async () => {
     const page = renderPage();
@@ -474,6 +596,7 @@ describe("MemePage search params handling", () => {
     );
     expect(detailsColumn?.className).toContain("tw-contents");
     expect(detailsColumn?.className).toContain("[&>*:first-child]:tw-order-1");
+    expect(detailsColumn?.className).toContain("[&>*:nth-child(2)]:tw-order-3");
     expect(artworkColumn).toHaveClass("tw-order-2");
     expect(artworkColumn).toHaveClass("lg:tw-self-stretch");
   });
@@ -513,13 +636,78 @@ describe("MemePage search params handling", () => {
       expect(screen.getByTestId("mint-countdown")).toBeInTheDocument()
     );
 
-    const referencesButton = screen.getByRole("button", { name: "References" });
+    const referencesButton = screen.getByRole("button", {
+      name: "References: Meme Lab & ReMemes",
+    });
     await userEvent.click(referencesButton);
 
     expect(mockReplaceState).toHaveBeenCalledWith(
       null,
       "",
       `/the-memes/1?focus=${MEME_FOCUS.REFERENCES}`
+    );
+  });
+
+  it("keeps one persistent artwork action wired to token-safe market refreshes", async () => {
+    const page = renderPage({ nft, nftMeta, nftNotFound: false });
+
+    const action = await screen.findByRole("button", {
+      name: "Settle market change",
+    });
+    const liveRight = screen.getByTestId("live-right");
+    const liveSub = screen.getByTestId("live-sub");
+    expect(
+      screen.getAllByRole("button", { name: "Settle market change" })
+    ).toHaveLength(1);
+    expect(liveRight).toContainElement(action);
+    expect(liveRight).toHaveAttribute("data-token-id", "1");
+    expect(liveSub).toHaveAttribute("data-token-id", "1");
+    expect(liveSub).toHaveAttribute("data-market-refresh-version", "0");
+
+    await userEvent.click(action);
+    expect(screen.getByTestId("live-sub")).toHaveAttribute(
+      "data-market-refresh-version",
+      "1"
+    );
+
+    await userEvent.click(screen.getByRole("button", { name: "Collectors" }));
+    page.rerenderPage();
+    expect(screen.queryByTestId("live-sub")).not.toBeInTheDocument();
+    expect(
+      screen.getAllByRole("button", { name: "Settle market change" })
+    ).toHaveLength(1);
+
+    await userEvent.click(screen.getByRole("button", { name: "Overview" }));
+    page.rerenderPage();
+    expect(screen.getByTestId("live-sub")).toHaveAttribute(
+      "data-market-refresh-version",
+      "1"
+    );
+
+    const nextNft = { ...nft, id: 2, name: "Next Meme" };
+    const nextNftMeta = {
+      ...nftMeta,
+      id: 2,
+      meme: 2,
+      meme_name: "Next Meme",
+      collection_size: 2,
+    };
+    page.rerenderForToken("2", {
+      nft: nextNft,
+      nftMeta: nextNftMeta,
+      nftNotFound: false,
+    });
+    expect(screen.getByTestId("live-right")).toHaveAttribute(
+      "data-token-id",
+      "2"
+    );
+    expect(screen.getByTestId("live-sub")).toHaveAttribute(
+      "data-token-id",
+      "2"
+    );
+    expect(screen.getByTestId("live-sub")).toHaveAttribute(
+      "data-market-refresh-version",
+      "1"
     );
   });
 

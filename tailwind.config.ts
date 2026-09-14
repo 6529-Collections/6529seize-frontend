@@ -46,7 +46,7 @@ const tailwindConfig: Config = {
       colors: {
         "primary-300": "#84ADFF",
         "primary-400": "#528BFF",
-        "primary-500": "#406AFE",
+        "primary-500": "#3F69FC",
         "primary-600": "#395FE4",
         error: "#F97066",
         success: "#83BF6E",

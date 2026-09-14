@@ -7,8 +7,10 @@ import type { ApiCollectCatalog } from "@/generated/models/ApiCollectCatalog";
 import { ApiCollectKind } from "@/generated/models/ApiCollectKind";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import { formatDecimalString, formatNumber } from "@/i18n/format";
 import {
   MEMES_CONTRACT,
+  MEMELAB_CONTRACT,
   GRADIENT_CONTRACT,
   NEXTGEN_CONTRACT,
 } from "@/constants/constants";
@@ -22,6 +24,7 @@ import type {
 export function collectAssetHref(asset: ApiCollectAsset): string {
   const token = encodeURIComponent(asset.token_id);
   if (asset.family === ApiCollectFamily.Memes) return `/the-memes/${token}`;
+  if (asset.family === ApiCollectFamily.Memelab) return `/meme-lab/${token}`;
   if (asset.family === ApiCollectFamily.Gradients)
     return `/6529-gradient/${token}`;
   return `/nextgen/token/${token}`;
@@ -40,6 +43,7 @@ export function collectAssetIdentity(
     return null;
   const families: Readonly<Record<string, ApiCollectFamily>> = {
     [MEMES_CONTRACT.toLowerCase()]: ApiCollectFamily.Memes,
+    [MEMELAB_CONTRACT.toLowerCase()]: ApiCollectFamily.Memelab,
     [GRADIENT_CONTRACT.toLowerCase()]: ApiCollectFamily.Gradients,
     [NEXTGEN_CONTRACT.toLowerCase()]: ApiCollectFamily.Pebbles,
   };
@@ -167,8 +171,8 @@ export function collectAnalysisView(
     title,
     profile,
     coverageLabel: t(locale, "collect.goal.coverage", {
-      owned: analysis.satisfied_count,
-      total: analysis.required_count,
+      owned: formatNumber(locale, analysis.satisfied_count),
+      total: formatNumber(locale, analysis.required_count),
     }),
     snapshotLabel: t(locale, "collect.goal.snapshot", {
       block: analysis.holdings_snapshot.block_number ?? "—",
@@ -176,9 +180,15 @@ export function collectAnalysisView(
     requirements: analysis.requirements.map((requirement) => ({
       id: requirement.id,
       label: requirement.label,
+      ...(requirement.asset_keys.length === 1
+        ? {
+            assetKey: requirement.asset_keys[0]!,
+            artworkKeys: requirement.asset_keys,
+          }
+        : {}),
       detail: t(locale, "collect.goal.requirement", {
-        owned: requirement.owned_quantity,
-        target: requirement.target_quantity,
+        owned: formatDecimalString(locale, requirement.owned_quantity),
+        target: formatDecimalString(locale, requirement.target_quantity),
       }),
       status: requirement.missing_quantity === "0" ? "owned" : "missing",
     })),

@@ -1,4 +1,5 @@
 import { QueryClient } from "@tanstack/react-query";
+import { QueryKey } from "@/components/react-query-wrapper/query-keys";
 import { invalidateContentModerationPresentation } from "@/services/content-moderation/content-moderation-query";
 
 describe("content moderation query invalidation", () => {
@@ -13,6 +14,14 @@ describe("content moderation query invalidation", () => {
       invalidateContentModerationPresentation(queryClient)
     ).resolves.toBeUndefined();
 
-    expect(invalidateSpy).toHaveBeenCalledTimes(9);
+    expect(invalidateSpy).toHaveBeenCalledTimes(13);
+    for (const queryKey of [
+      QueryKey.PROFILE_CIC_STATEMENTS,
+      QueryKey.PROFILE,
+      QueryKey.GROUP,
+      QueryKey.GROUPS,
+    ]) {
+      expect(invalidateSpy).toHaveBeenCalledWith({ queryKey: [queryKey] });
+    }
   });
 });

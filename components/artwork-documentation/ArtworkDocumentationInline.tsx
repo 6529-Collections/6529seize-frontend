@@ -1,31 +1,14 @@
 "use client";
 
-import { isPublicationOnly } from "@/lib/artwork-documentation/intake";
-
-import Link from "next/link";
-import {
-  forwardRef,
-  useEffect,
-  useImperativeHandle,
-  useRef,
-  useState,
-} from "react";
+import { forwardRef, useEffect, useRef, useState } from "react";
 import { ApiArtworkDocumentationCreateWorkStartModeEnum } from "@/generated/models/ApiArtworkDocumentationCreateWork";
-import { ApiArtworkDocumentationOperationOpEnum } from "@/generated/models/ApiArtworkDocumentationOperation";
-import {
-  ApiArtworkDocumentationAnswerStatusEnum,
-  ApiArtworkDocumentationAnswerIntendedVisibilityEnum,
-} from "@/generated/models/ApiArtworkDocumentationAnswer";
 import type { ApiArtworkDocumentationContext } from "@/generated/models/ApiArtworkDocumentationContext";
-import { useDocumentationDraft } from "@/hooks/artwork-documentation/useDocumentationDraft";
-import {
-  associateDocumentationSource,
-  createDocumentationWork,
-  documentationWorkspacePath,
-} from "@/services/api/artwork-documentation-api";
+import { createDocumentationWork } from "@/services/api/artwork-documentation-api";
 import DocumentationAuthGate from "./DocumentationAuthGate";
-import DocumentationModules from "./DocumentationModules";
-import DocumentationSaveStatus from "./DocumentationSaveStatus";
+import ArtworkDocumentationRecord, {
+  type ArtworkDocumentationInfo,
+  type ArtworkDocumentationRecordHandle,
+} from "./ArtworkDocumentationRecord";
 import {
   DocumentationButton,
   DocumentationNotice,
@@ -33,24 +16,13 @@ import {
   useDocumentationMessages,
 } from "./DocumentationControls";
 
-export interface ArtworkDocumentationInlineHandle {
-  onDropSubmitted(
-    dropId: string
-  ): Promise<{ linked: boolean; contextId: string; workId: string }>;
-  flush(): Promise<boolean>;
-}
+export type ArtworkDocumentationInlineHandle = ArtworkDocumentationRecordHandle;
 interface ArtworkDocumentationInlineProps {
   readonly profileId: string;
   readonly profileVersion: number;
   readonly programId?: string | undefined;
-  readonly sourceProposal?:
-    | {
-        readonly title?: string | undefined;
-        readonly caption?: string | undefined;
-        readonly description?: string | undefined;
-        readonly preferredCredit?: string | undefined;
-      }
-    | undefined;
+  readonly initialMediaProfiles?: readonly string[] | undefined;
+  readonly sourceProposal?: ArtworkDocumentationInfo | undefined;
   readonly onContextCreated?:
     | ((context: ApiArtworkDocumentationContext) => void)
     | undefined;
@@ -121,10 +93,11 @@ const InlineStart = forwardRef<
       </p>
       {error && <DocumentationNotice error>{msg("error")}</DocumentationNotice>}
       {context ? (
-        <InlineEditor
+        <ArtworkDocumentationRecord
           ref={ref}
-          initial={context}
-          sourceProposal={props.sourceProposal}
+          context={context}
+          artworkInfo={props.sourceProposal}
+          initialMediaProfiles={props.initialMediaProfiles}
         />
       ) : (
         <DocumentationButton
@@ -142,128 +115,3 @@ const InlineStart = forwardRef<
 });
 
 InlineStart.displayName = "ArtworkDocumentationInlineStart";
-
-const InlineEditor = forwardRef<
-  ArtworkDocumentationInlineHandle,
-  {
-    readonly initial: ApiArtworkDocumentationContext;
-    readonly sourceProposal: ArtworkDocumentationInlineProps["sourceProposal"];
-  }
->(({ initial, sourceProposal }, ref) => {
-  const { msg } = useDocumentationMessages();
-  const draft = useDocumentationDraft(initial);
-  const { controller } = draft;
-  const seeded = useRef(false);
-  const sourceSeed = useRef(sourceProposal).current;
-  useEffect(() => {
-    if (seeded.current || !sourceSeed) return;
-    seeded.current = true;
-    const answer = (value: unknown) => ({
-      status: ApiArtworkDocumentationAnswerStatusEnum.Provided,
-      value,
-      intended_visibility:
-        ApiArtworkDocumentationAnswerIntendedVisibilityEnum.PublicRecord,
-    });
-    if (sourceSeed.title)
-      controller.edit("artwork", {
-        op: ApiArtworkDocumentationOperationOpEnum.Set,
-        field: "title",
-        answer: answer(sourceSeed.title),
-      });
-    if (sourceSeed.preferredCredit)
-      controller.edit("identity", {
-        op: ApiArtworkDocumentationOperationOpEnum.Set,
-        field: "preferred_credit",
-        answer: answer(sourceSeed.preferredCredit),
-      });
-    const caption = sourceSeed.caption ?? sourceSeed.description;
-    if (caption)
-      controller.edit("context", {
-        op: ApiArtworkDocumentationOperationOpEnum.Set,
-        field: "caption",
-        answer: answer({
-          primary_language: "en",
-          versions: [
-            {
-              language: "en",
-              text: caption,
-              authorship: "original",
-              approved_by_artist: false,
-            },
-          ],
-        }),
-      });
-    return () => {
-      seeded.current = false;
-    };
-  }, [controller, sourceSeed]);
-  useImperativeHandle(
-    ref,
-    () => ({
-      flush: () => controller.flush(),
-      onDropSubmitted: async (dropId) => {
-        const linked = await controller.mutate((current, signal) =>
-          associateDocumentationSource(
-            current.id,
-            dropId,
-            current.draft_version,
-            signal
-          )
-        );
-        const current = controller.snapshot().context;
-        return { linked, contextId: current.id, workId: current.work_id };
-      },
-    }),
-    [controller]
-  );
-  return (
-    <div className="tw-space-y-4">
-      <DocumentationNotice>
-        {msg(
-          isPublicationOnly(draft.context.profile)
-            ? "publication.help"
-            : "privacy"
-        )}
-      </DocumentationNotice>
-      <p className="tw-text-xs tw-text-iron-400">{msg("sourceProposal")}</p>
-      <DocumentationSaveStatus snapshot={draft} controller={controller} />
-      <DocumentationModules
-        context={draft.context}
-        edits={draft.edits}
-        inlineFields={[
-          "context.caption",
-          "process.process_description",
-          "identity.preferred_credit",
-        ]}
-        onChange={(moduleId, operation) => controller.edit(moduleId, operation)}
-        onBlur={() => {
-          void controller.flush();
-        }}
-      />
-      <Link
-        href={documentationWorkspacePath(
-          draft.context.work_id,
-          draft.context.id
-        )}
-        className="tw-inline-flex tw-min-h-11 tw-items-center tw-text-sm tw-font-semibold tw-text-primary-300"
-        onClick={(event) => {
-          if (draft.dirty) {
-            event.preventDefault();
-            void controller.flush().then((saved) => {
-              if (saved)
-                globalThis.location.assign(
-                  documentationWorkspacePath(
-                    draft.context.work_id,
-                    draft.context.id
-                  )
-                );
-            });
-          }
-        }}
-      >
-        {msg("inlineOpen")}
-      </Link>
-    </div>
-  );
-});
-InlineEditor.displayName = "ArtworkDocumentationInlineEditor";

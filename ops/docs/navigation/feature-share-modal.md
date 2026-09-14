@@ -2,7 +2,7 @@
 
 ## Overview
 
-6529 exposes two separate flows:
+The navigation controls expose two separate flows:
 
 - `Share` publishes the exact shareable web URL through copy, QR code, X,
   Farcaster, or the `More` system-share action when the platform allows it.
@@ -11,8 +11,13 @@
 
 Desktop page sharing and device connection use the same accessible dialog
 foundation and one consistent content inset, but never show each other's
-controls. Mobile web and the native app bypass the Share dialog and open the
-platform share sheet directly.
+controls. Page sharing on mobile web and in the native app bypasses the Share
+dialog and opens the platform share sheet directly.
+
+Individual Meme, Gradient, and NextGen pages also have a `Share artwork` icon
+in their artwork media controls. It opens a separate dialog for credited
+image exports and captions. See
+[Artwork Sharing](../media/nft/feature-artwork-sharing.md) for that flow.
 
 ## Location in the Site
 
@@ -172,6 +177,7 @@ No copy-page, social, or current-page Share actions appear in this dialog.
 ## Related Pages
 
 - [Navigation Index](README.md)
+- [Artwork Sharing](../media/nft/feature-artwork-sharing.md)
 - [Web Sidebar Navigation](feature-sidebar-navigation.md)
 - [Wallet and Account Controls](feature-wallet-account-controls.md)
 - [App Header Context](feature-app-header-context.md)

@@ -49,9 +49,14 @@ export interface ProfileDefaults {
   readonly aboutArtist?: string;
 }
 
+export interface SubmissionAgreement {
+  readonly waveId: string;
+  readonly terms: string | null;
+}
+
 export type FormAction =
   | { type: "SET_STEP"; payload: SubmissionStep }
-  | { type: "SET_AGREEMENTS"; payload: boolean }
+  | { type: "SET_AGREEMENTS"; payload: SubmissionAgreement | null }
   | { type: "SET_ADDITIONAL_ACTION_PROMISED"; payload: boolean }
   | { type: "APPLY_PROFILE_DEFAULTS"; payload: ProfileDefaults }
   | {
@@ -84,7 +89,7 @@ export type FormAction =
 
 export interface FormState {
   currentStep: SubmissionStep;
-  agreements: boolean;
+  acceptedAgreement: SubmissionAgreement | null;
   artworkUploaded: boolean;
   artworkUrl: string;
   uploadArtworkUrl: string;
@@ -365,7 +370,7 @@ export const createInitialState = ({
 
   const state: FormState = {
     currentStep: SubmissionStep.AGREEMENT,
-    agreements: false,
+    acceptedAgreement: null,
     artworkUploaded: Boolean(existingMedia),
     artworkUrl: existingMedia?.url ?? "",
     uploadArtworkUrl: "",
@@ -394,7 +399,11 @@ export function formReducer(state: FormState, action: FormAction): FormState {
       return { ...state, currentStep: action.payload };
 
     case "SET_AGREEMENTS":
-      return { ...state, agreements: action.payload };
+      return {
+        ...state,
+        acceptedAgreement: action.payload,
+        currentStep: SubmissionStep.AGREEMENT,
+      };
 
     case "SET_ADDITIONAL_ACTION_PROMISED":
       return { ...state, isAdditionalActionPromised: action.payload };

@@ -1,9 +1,13 @@
 import { ARTWORK_DOCUMENTATION_GUIDANCE_MESSAGES } from "./artwork-documentation-guidance";
-import { ARTWORK_DOCUMENTATION_EXAMPLE_MESSAGES } from "./artwork-documentation-examples";
+import { ARTWORK_DOCUMENTATION_EDITORIAL_MESSAGES } from "./artwork-documentation-editorial";
+import { ARTWORK_DOCUMENTATION_CHAPTER_MESSAGES } from "./artwork-documentation-chapters";
+import { ARTWORK_DOCUMENTATION_MUSEUM_MESSAGES } from "./artwork-documentation-museum";
 
 export const ARTWORK_DOCUMENTATION_MESSAGES = {
   ...ARTWORK_DOCUMENTATION_GUIDANCE_MESSAGES,
-  ...ARTWORK_DOCUMENTATION_EXAMPLE_MESSAGES,
+  ...ARTWORK_DOCUMENTATION_EDITORIAL_MESSAGES,
+  ...ARTWORK_DOCUMENTATION_CHAPTER_MESSAGES,
+  ...ARTWORK_DOCUMENTATION_MUSEUM_MESSAGES,
   "artworkDocumentation.interviewEvidenceHelp":
     "Before selecting a recording or transcript, add the interview date, at least one participant and permission for that material. Choose permission for a future public record only when the participants have agreed to that use; otherwise keep the material restricted for private review.",
   "artworkDocumentation.all": "All",
@@ -51,11 +55,31 @@ export const ARTWORK_DOCUMENTATION_MESSAGES = {
   "artworkDocumentation.privacy":
     "Your documentation is stored privately with 6529 for now. You choose which material is intended for a future public record. Nothing is published on-chain or to IPFS/Arweave by completing this form.",
   "artworkDocumentation.start": "Start documenting",
+  "artworkDocumentation.entry.assignedRecords":
+    "Open an assigned record to continue. The project team prepares new program records for invited artists.",
+  "artworkDocumentation.entry.assignedEmpty":
+    "No artwork records are assigned to this profile yet. If you have been invited, check that you are signed in with the invited profile or contact the project team.",
+  "artworkDocumentation.entry.sourceMore":
+    "This submission may already have a record on a later page. Use Load more below to find it.",
+  "artworkDocumentation.entry.sourceRecord":
+    "This submission already has a documentation record. Open it to continue where you left off.",
+  "artworkDocumentation.entry.listUnavailable":
+    "This record list is not available to your profile. Return to My artwork documentation to open records you can access.",
+  "artworkDocumentation.entry.readError":
+    "We could not load all the information for this list. Try again, or open a record that is already shown.",
+  "artworkDocumentation.entry.createError":
+    "We could not open a new documentation record. Try again to continue the same request.",
+  "artworkDocumentation.entry.creationDisabled":
+    "New standalone records are not available right now. Open an assigned record or contact the project team.",
+  "artworkDocumentation.entry.programInvitation":
+    "The project team prepares program records for invited artists. Open your assigned record, or contact the team if it is missing.",
+  "artworkDocumentation.entry.directArtist":
+    "Sign in directly with the artist profile to start a record. A delegated profile cannot create one.",
   "artworkDocumentation.continue": "Continue documentation",
   "artworkDocumentation.empty":
     "The next chapter starts here. Add the story, files and choices behind a work, then return whenever you have more to share.",
   "artworkDocumentation.signIn":
-    "Sign in to your artist profile to open your private documentation.",
+    "Sign in to your profile to open your artwork records.",
   "artworkDocumentation.connect": "Sign in",
   "artworkDocumentation.unavailable":
     "Artwork documentation is not available for this profile yet.",
@@ -64,7 +88,11 @@ export const ARTWORK_DOCUMENTATION_MESSAGES = {
     "We could not complete that request. Your unsaved changes remain in this window. Please try again.",
   "artworkDocumentation.retry": "Try again",
   "artworkDocumentation.back": "My artwork documentation",
-  "artworkDocumentation.untitled": "Work awaiting a title",
+  "artworkDocumentation.backToResults": "Back to results",
+  "artworkDocumentation.backToList": "Back to list",
+  "artworkDocumentation.viewOnly":
+    "You have view-only access to this artwork record.",
+  "artworkDocumentation.untitled": "Title not yet provided",
   "artworkDocumentation.profile": "Documentation profile",
   "artworkDocumentation.program": "Program",
   "artworkDocumentation.allPrograms": "All programs",
@@ -196,7 +224,7 @@ export const ARTWORK_DOCUMENTATION_MESSAGES = {
   "artworkDocumentation.review.accepted": "Accepted",
   "artworkDocumentation.review.changes_requested": "Changes requested",
   "artworkDocumentation.reviewScope":
-    "Review decisions apply to the confirmed version shown. They do not change the artist's words.",
+    "Review decisions apply to the latest confirmed version. They do not change the artist's words.",
   "artworkDocumentation.assign": "Assign access",
   "artworkDocumentation.profileId": "Participant profile ID",
   "artworkDocumentation.role": "Role",
@@ -231,7 +259,7 @@ export const ARTWORK_DOCUMENTATION_MESSAGES = {
     "This step prepares the artwork's documentation. Mint arrangements will be handled separately.",
   "artworkDocumentation.upload": "Add an original file",
   "artworkDocumentation.uploadHelp":
-    "Keep the original dimensions; there is no need to upscale. The original is kept byte for byte. A preview, when available, is a separate file.",
+    "Add the file exactly as you want it preserved. The original is kept byte for byte. A preview, when available, is separate from the original.",
   "artworkDocumentation.uploadPrivacy":
     "Original files can contain location or other embedded information. They are restricted here; any preview is separate from the original.",
   "artworkDocumentation.uploadRole": "What is this file for?",
@@ -258,6 +286,8 @@ export const ARTWORK_DOCUMENTATION_MESSAGES = {
   "artworkDocumentation.canonical": "Use as final artwork",
   "artworkDocumentation.canonicalReason":
     "Why are you replacing the confirmed final file?",
+  "artworkDocumentation.canonicalReasonHelp":
+    "Explain the change in 20–1,000 characters. This explanation becomes part of the record’s history.",
   "artworkDocumentation.fileLabel": "File label",
   "artworkDocumentation.fileDescription": "File description",
   "artworkDocumentation.masterHelp":
@@ -275,7 +305,7 @@ export const ARTWORK_DOCUMENTATION_MESSAGES = {
   "artworkDocumentation.approved": "Approved by the artist",
   "artworkDocumentation.primaryLanguage": "Primary language",
   "artworkDocumentation.captionHelp":
-    "Give a reader a way into the work. For Keys and Gates, aim for 75–150 words in your chosen language.",
+    "Give a reader a way into the work. Aim for 75–150 words in your chosen language.",
   "artworkDocumentation.captureHelp":
     "When was the photograph made? A year or approximate range is useful if you do not know the exact date.",
   "artworkDocumentation.locationHelp":

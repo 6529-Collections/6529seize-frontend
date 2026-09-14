@@ -22,54 +22,54 @@ export const MEME_ARTIST_TEMPLATES: readonly CmsStudioTemplate[] = [
     siteTitle: "After Hours Studio",
     family: "artist",
     description:
-      "An energetic studio with a large visual reference, a work sequence, and short notes from the desk.",
+      "A dark artist portfolio for digital work, new experiments and short studio updates.",
     presentation: style("gallery", "night", "sans", "compact"),
     accent: "#ff8b70",
     pages: [
       page(
         "studio",
-        "Still making, after hours.",
-        "An example studio for experiments in color, repetition, and the feeling an image leaves behind.",
-        kicker("Work / Play / Repeat"),
+        "After Hours Studio",
+        "Digital experiments made in the evenings and on weekends.",
+        kicker("Digital art / Studies / Studio notes"),
         memeImage(5, "two_thirds"),
         text(
-          "The studio starts with a mark and follows the energy. Some days it becomes a finished work; on others, a page of studies is the whole point.",
+          "I draw, scan and edit images after my day job. I’m working on a set of small prints; this notebook brings the plans, studies and credited references together.",
           "third"
         ),
-        pageLink("Selected experiments", "works"),
-        pageLink("From the desk", "notebook"),
+        pageLink("View the work", "works"),
+        pageLink("Read studio notes", "notebook"),
         memeCredit(5)
       ),
       page(
         "works",
-        "Three experiments, one restless line.",
-        "Original example assets arranged as a small studio portfolio.",
+        "Studies and references",
+        "Three references for the next set of prints: reflections, city lights and drawn lines.",
         image(ART.afterimage, ART_CAPTIONS.afterimage, "half"),
         image(ART.grid, ART_CAPTIONS.grid, "half"),
         image(ART.signal, ART_CAPTIONS.signal),
         card(
-          "Sequence note",
-          "Warm reflection, compressed rhythm, then an open line. The order moves from intensity toward a longer breath."
+          "The next three studies",
+          "I’m planning a folded-paper study using Afterimage’s orange and silver, a drawing of street lights after Night Grid, and a blue ink study after Quiet Signal. The images above are the references I’m working from."
         ),
-        pageLink("How the sequence developed", "notebook")
+        pageLink("Read the studio notebook", "notebook")
       ),
       page(
         "notebook",
-        "Keep the first attempt.",
-        "A studio note about the useful part of a mistake.",
-        kicker("Study 014 / A line that went elsewhere"),
+        "Studio notebook",
+        "A short update from an evening at the desk.",
+        kicker("Study 014 / Trying a different crop"),
         text(
-          "I wanted a clean edge and found an interruption. The interruption changed the pace of the whole image, so I kept it and began another study around it."
+          "I spent most of the evening moving the crop a few pixels at a time. I saved both versions so I can look again tomorrow."
         ),
         quote(
-          "A study can succeed by asking a better question.",
+          "The first version might still be the better one.",
           "Studio notebook"
         ),
-        heading("Next on the desk"),
+        heading("Next session"),
         text(
-          "Repeat the form at a different scale. Remove a color. Put two versions beside each other and describe the difference before deciding which one works."
+          "Try a smaller print, check the color in daylight and choose a version for the series."
         ),
-        pageLink("Return to the works", "works")
+        pageLink("Back to the work", "works")
       ),
     ],
   }),
@@ -79,56 +79,56 @@ export const MEME_ARTIST_TEMPLATES: readonly CmsStudioTemplate[] = [
     siteTitle: "Open Horizon",
     family: "artist",
     description:
-      "A cinematic photographic exhibition with spacious image-and-essay pages and a field process.",
+      "A photography portfolio with large images, a project page and notes about your process.",
     presentation: style("gallery", "night", "serif", "airy"),
     accent: "#7ccee1",
     pages: [
       page(
         "studio",
-        "Beyond the familiar route.",
-        "An exhibition-shaped site about landscape, attention, and the distance between an encounter and an image.",
+        "Landscape photography",
+        "Weekend walks with a camera, route notes and photographs I’m studying.",
         memeImage(48, "two_thirds"),
         text(
-          "The route is part of the work: the waiting, the return, and the decision to keep looking after the first photograph. This site gives the image room, then follows it into the field notes.",
+          "I’m planning a series along the ridge above my town, returning to the same route through the year. Cath Simard’s Freedom to Explore is a reference I’ve saved while preparing the project.",
           "third"
         ),
-        pageLink("Enter the expedition", "expedition"),
-        pageLink("Read the process", "process"),
+        pageLink("Read about the ridge project", "expedition"),
+        pageLink("Open the field notes", "process"),
         memeCredit(48)
       ),
       page(
         "expedition",
-        "A place, encountered twice.",
-        "A sample exhibition essay built around a credited work from the cultural commons.",
-        kicker("Room 01 / Looking outward"),
+        "The ridge project",
+        "A planned series following one walking route through the year.",
+        kicker("Reference / Freedom to Explore by Cath Simard"),
         memeImage(48),
         text(
-          "Freedom to Explore by Cath Simard is the reference work for this composition. The surrounding writing is sample editorial context, not an account of the artist's journey or a claim to have made the image."
+          "Freedom to Explore by Cath Simard is pictured here as a reference. My own ridge project is still at the scouting stage; this photograph is not part of that series."
         ),
-        heading("A slower second look"),
+        heading("The first walk"),
         text(
-          "A landscape image can move between scale and detail. After the first impression, give the eye time to follow the smaller relationships within the frame."
+          "I walked the route without a camera first and marked three places to return to: the bend above the trees, the old fence and the view from the last rise. I’ll begin with those rather than trying to photograph everything."
         ),
         memeCredit(48),
-        pageLink("From encounter to sequence", "process")
+        pageLink("Read the field notes", "process")
       ),
       page(
         "process",
-        "What the final image leaves out.",
-        "A process page for the observations, choices, and practical context behind a body of work.",
+        "Field notes",
+        "The ridge project: what I’ve checked and what I’m trying next.",
         card(
-          "In the field",
-          "Record location where appropriate, conditions, access considerations, and the questions that shaped the visit."
+          "Route check",
+          "The return walk took longer than I expected. I’ll leave enough daylight for the descent and take a smaller camera bag on the next visit."
         ),
         card(
-          "At the edit",
-          "Keep contact sheets and describe the sequence. Explain how one image changes the reading of the next."
+          "First contact sheet",
+          "I want to compare the same three viewpoints before changing the route. The first edit will have one frame from each stop, with the date beside it."
         ),
         card(
-          "In the archive",
-          "Keep original files, captions, credits, and edition details together. Distinguish the photographer's record from later interpretation."
+          "Print plan",
+          "I’m planning small unframed proofs to pin above the desk. Once I have a few visits to compare, I’ll decide which photographs belong together."
         ),
-        pageLink("Return to the exhibition", "expedition")
+        pageLink("Back to the ridge project", "expedition")
       ),
     ],
   }),
@@ -138,64 +138,64 @@ export const MEME_ARTIST_TEMPLATES: readonly CmsStudioTemplate[] = [
     siteTitle: "Human Interface",
     family: "artist",
     description:
-      "An art-led charcoal studio for mixed media, unfinished processes, and a tightly edited body of work.",
+      "A dark portfolio for mixed-media artwork, with a gallery and a step-by-step process page.",
     presentation: style("gallery", "ink", "mono", "balanced"),
     accent: "#d2bca6",
     pages: [
       page(
         "studio",
-        "The hand remains in the system.",
-        "A mixed-media studio for images that sit between a human gesture and a machine process.",
-        kicker("Input / Interruption / Output"),
+        "Drawing, scanning and starting again",
+        "Paper drawings, scanned textures and a new set of small prints.",
+        kicker("Drawings / Digital work / Process"),
         memeImage(537, "half"),
         text(
-          "The work begins where a process becomes visible: a repeated mark, an imperfect surface, a rule that almost holds. The studio keeps those traces in view.",
+          "I work with pencil, ink and cut paper before moving to the screen. At the moment I’m testing how much of a hand-drawn line survives scanning and printing. The credited works here are references for that project.",
           "half"
         ),
-        pageLink("Inside the process", "process"),
-        pageLink("Selected studies", "works"),
+        pageLink("See the process", "process"),
+        pageLink("Browse the work", "works"),
         memeCredit(537)
       ),
       page(
         "process",
-        "Leave a trace of the decision.",
-        "Three stages in an example mixed-media process.",
-        heading("Input"),
+        "From sketch to finished image",
+        "Notes from the first round of ink drawings and print tests.",
+        heading("On paper"),
         text(
-          "Begin with a small set of materials and a clear constraint. Record the source of each material before it becomes part of the composition."
+          "I make a page of small drawings with ink and pencil. I scan the whole sheet before choosing which parts to use."
         ),
-        heading("Interruption"),
+        heading("On screen"),
         text(
-          "Introduce an action that changes the system: a cut, a shift in scale, an unexpected interval. Keep the earlier state beside the new one."
+          "I cut out a few shapes, move them around and save several arrangements. Keeping the versions makes it easier to compare them later."
         ),
-        heading("Output"),
+        heading("In print"),
         text(
-          "Choose the form that lets the work be encountered on its own terms. A process note should add context without becoming a requirement for looking."
+          "I print a small proof before settling on the final file. Some marks that look good on a screen disappear on paper."
         ),
-        pageLink("See the resulting studies", "works")
+        pageLink("See the project references", "works")
       ),
       page(
         "works",
-        "Studies in surface and repetition.",
-        "Three original example images showing how a simple rule can produce different rhythms.",
+        "Studies and references",
+        "The images on my reference board while I plan the next print tests.",
         gallery(
-          "The study wall",
+          "Project reference board",
           [ART.grid, ART.signal, ART.afterimage],
           "editorial"
         ),
         card(
-          "Surface",
-          "A reflected shape changes as the eye moves across it."
+          "Materials on the desk",
+          "Blue drawing ink, soft pencils, cream paper and a small flatbed scanner. I’m testing narrow lines first, then adding denser areas to see where the scan loses detail."
         ),
         card(
-          "Interval",
-          "A repeated mark creates a pace, and a small interruption makes that pace visible."
+          "Next print test",
+          "Two A5 proofs of the same drawing: one on smooth paper and one on a rougher stock. I’ll compare the fine lines before choosing paper for the full set."
         ),
         quote(
-          "The method is a tool; the work has to stand on its own.",
-          "Studio note"
+          "I’m keeping the paper originals alongside the final files.",
+          "Print notebook"
         ),
-        pageLink("Return to the process", "process")
+        pageLink("Back to the process", "process")
       ),
     ],
   }),
@@ -205,57 +205,57 @@ export const MEME_ARTIST_TEMPLATES: readonly CmsStudioTemplate[] = [
     siteTitle: "The Witness",
     family: "artist",
     description:
-      "A monochrome photographic portfolio with a vertical feature, documentary series, and precise field notes.",
+      "A light photography portfolio with a featured image, a series page and a field notebook.",
     presentation: style("gallery", "paper", "serif", "airy"),
     accent: "#3e3e3e",
     pages: [
       page(
         "studio",
-        "Attend to what is there.",
-        "A photographic portfolio shaped by patient observation, clear captions, and room around the image.",
+        "Photographs and field notes",
+        "A new street photography project, with a notebook from the early visits.",
         memeImage(540, "two_thirds"),
         text(
-          "A photograph is an encounter and a choice. This portfolio keeps the image first, with a concise record of the context that helps a viewer return to it.",
+          "I’m starting a series about the market before it opens: stalls going up, empty tables and deliveries arriving. Tears of the Desert by Ebrahim_Elmi is a photograph I’ve saved as a reference while I plan the work.",
           "third"
         ),
-        pageLink("Open the series", "series"),
-        pageLink("Read the field book", "field-book"),
+        pageLink("Read about the market project", "series"),
+        pageLink("Open the field notebook", "field-book"),
         memeCredit(540)
       ),
       page(
         "series",
-        "The distance between looking and knowing.",
-        "A sample exhibition sequence centered on a credited photographic work.",
-        kicker("Plate 01 / A reference image"),
+        "Before the market opens",
+        "Notes for a series about the hour before the first customers arrive.",
+        kicker("Reference / Tears of the Desert by Ebrahim_Elmi"),
         memeImage(540, "half"),
         text(
-          "Tears of the Desert by Ebrahim_Elmi appears here as a CC0 reference. Its title and artist credit travel with the image; the template's surrounding prose is not a statement by the photographer.",
+          "Tears of the Desert by Ebrahim_Elmi is the credited reference shown here. My market photographs are a separate project that is still in progress.",
           "half"
         ),
-        heading("Space for the next plate"),
+        heading("What I’m photographing"),
         text(
-          "A finished series can add related photographs, dates, captions, and a short sequence note. Keep each source attached, and let the visual relationship do some of the explaining."
+          "For the first visits, I’m concentrating on stalls and equipment: folded tables, stacked crates and the gaps left for delivery vans. I’ll speak to traders about portraits once I know the routine."
         ),
         memeCredit(540),
-        pageLink("Notes on documenting a series", "field-book")
+        pageLink("See the field notebook", "field-book")
       ),
       page(
         "field-book",
-        "Describe carefully. Claim no more.",
-        "A field-book format for the facts and decisions that belong beside a photographic practice.",
+        "Field notebook",
+        "Notes from the first two visits to the market.",
         card(
-          "The encounter",
-          "Record what you know directly, the date, and the relevant circumstances. Respect the people and places represented."
+          "First visit / Too late",
+          "By the time I arrived, most of the stalls were ready. I stayed to watch the deliveries and wrote down when the last vans left."
         ),
         card(
-          "The caption",
-          "Use plain language. Distinguish observation from inference, and check names and source details."
+          "Second visit / Earlier start",
+          "I came back an hour earlier and stayed near the same row of stalls. This time I could follow the setup from empty pavement to a row of tables."
         ),
         card(
-          "The sequence",
-          "Explain why these images appear together, and preserve a record when the arrangement changes."
+          "The first edit",
+          "I’m choosing a short sequence that follows the setup in order. Several frames repeat the same view; I’ll keep one from each stage for the next edit."
         ),
-        pageLink("Return to the series", "series")
+        pageLink("Back to the market project", "series")
       ),
     ],
   }),

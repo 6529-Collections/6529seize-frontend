@@ -11,6 +11,7 @@
  * Do not edit the class manually.
  */
 
+import { ApiArtworkAssetTechnicalMetadata } from '../models/ApiArtworkAssetTechnicalMetadata';
 import { HttpFile } from '../http/http';
 
 export class ApiArtworkDocumentationAsset {
@@ -31,6 +32,9 @@ export class ApiArtworkDocumentationAsset {
     'failure_code'?: string | null;
     'access_class'?: ApiArtworkDocumentationAssetAccessClassEnum;
     'has_preview'?: boolean;
+    'technical_metadata'?: ApiArtworkAssetTechnicalMetadata | null;
+    'has_validation_report'?: boolean;
+    'has_media_preview'?: boolean;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -136,6 +140,24 @@ export class ApiArtworkDocumentationAsset {
         {
             "name": "has_preview",
             "baseName": "has_preview",
+            "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "technical_metadata",
+            "baseName": "technical_metadata",
+            "type": "ApiArtworkAssetTechnicalMetadata",
+            "format": ""
+        },
+        {
+            "name": "has_validation_report",
+            "baseName": "has_validation_report",
+            "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "has_media_preview",
+            "baseName": "has_media_preview",
             "type": "boolean",
             "format": ""
         }    ];

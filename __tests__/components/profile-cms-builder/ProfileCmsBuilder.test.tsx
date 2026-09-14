@@ -52,6 +52,7 @@ jest.mock("next/link", () => ({
 }));
 jest.mock("next/navigation", () => ({
   useRouter: () => ({ push: jest.fn() }),
+  useSearchParams: () => new URLSearchParams(),
 }));
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: () => ({
@@ -201,16 +202,17 @@ it.each([false, undefined])(
 it("allows guests to choose a template and edit it with the real renderer", () => {
   owner(false);
   showBuilder();
-  fireEvent.click(screen.getByRole("button", { name: "Preview Signature" }));
-  click("Use this template");
+  fireEvent.click(screen.getByRole("button", { name: "Preview Personal" }));
+  click("Use this template: Personal");
+  click("Pages");
   change("Page title", "My website");
   click("Apply");
-  click("Preview");
+  click("View site");
   expect(
-    screen.getByRole("heading", { name: "Mira, at the intersection." })
+    screen.getByRole("heading", { name: "Mara Silva." })
   ).toBeInTheDocument();
   expect(screen.getByRole("button", { name: "Save draft" })).toBeDisabled();
-  click("Edit");
+  click("Edit content");
   expect(currentPackage().payload.pages[0]!.metadata.title).toBe("My website");
 });
 it("blocks Save, outer tabs and preview without discarding pending page fields", () => {
@@ -220,7 +222,7 @@ it("blocks Save, outer tabs and preview without discarding pending page fields",
   change("Page title", "Pending title");
   expect(screen.getByRole("button", { name: "Save draft" })).toBeDisabled();
   click("Versions");
-  click("Preview");
+  click("View site");
   expect(screen.getByLabelText("Page title")).toHaveValue("Pending title");
   expect(screen.getByLabelText("Page title")).toHaveFocus();
   click("Save draft");
@@ -322,6 +324,69 @@ it("blocks undo and palette mutation while design text is pending", () => {
   click("Apply");
   click("↶ Undo");
   expect(screen.getByLabelText("Site name")).toHaveValue("punk6529");
+});
+it("changes a complete native palette in one undo step and keeps keyboard focus", () => {
+  showBuilder();
+  const original = importPackage(
+    instantiateCmsStudioTemplate("personal-v2", "punk6529")
+  );
+  click("Design");
+  const palette = screen.getByRole("radio", { name: "6529" });
+  palette.focus();
+  fireEvent.click(palette);
+  expect(screen.getByRole("radio", { name: "6529" })).toBeChecked();
+  expect(screen.getByRole("radio", { name: "6529" })).toHaveFocus();
+  const accent = (screen.getByLabelText("Accent color") as HTMLInputElement)
+    .value;
+  expect(accent).not.toBe(original.site.theme.accent);
+  const updated = currentPackage();
+  expect(updated.site.theme.tokens?.["studio_colorway"]).toBe("seize");
+  expect(updated.site.theme.accent).toBe(accent);
+  expect(updated.payload).toEqual(original.payload);
+  click("Editor");
+  click("↶ Undo");
+  expect(screen.getByRole("radio", { name: "Original" })).toBeChecked();
+  expect(screen.getByLabelText("Accent color")).toHaveValue(
+    original.site.theme.accent
+  );
+  click("↷ Redo");
+  expect(screen.getByRole("radio", { name: "6529" })).toBeChecked();
+  expect(screen.getByLabelText("Accent color")).toHaveValue(accent);
+  change("Site name", "My portfolio");
+  click("Apply");
+  expect(screen.getByLabelText("Accent color")).toHaveValue(accent);
+});
+it("preserves pending native design fields when a palette is chosen", () => {
+  showBuilder();
+  importPackage(instantiateCmsStudioTemplate("artist-v2", "punk6529"));
+  click("Design");
+  change("Site name", "Keep this name");
+  change("Accent color", "invalid");
+  fireEvent.click(screen.getByRole("radio", { name: "Acid" }));
+  expect(screen.getByRole("radio", { name: "Original" })).toBeChecked();
+  expect(screen.getByLabelText("Site name")).toHaveValue("Keep this name");
+  expect(screen.getByLabelText("Site name")).toHaveFocus();
+  expect(screen.getByLabelText("Accent color")).toHaveValue("invalid");
+  click("Apply");
+  expect(screen.getByLabelText("Accent color")).toHaveAttribute(
+    "aria-invalid",
+    "true"
+  );
+  click("Discard form changes");
+  fireEvent.click(screen.getByRole("radio", { name: "Acid" }));
+  expect(screen.getByRole("radio", { name: "Acid" })).toBeChecked();
+});
+it("keeps a custom accent through other design edits and resets it with a new palette", () => {
+  showBuilder();
+  importPackage(instantiateCmsStudioTemplate("collector-v2", "punk6529"));
+  click("Design");
+  change("Accent color", "#e46bc3");
+  click("Apply");
+  change("Typography", "mono");
+  expect(screen.getByLabelText("Accent color")).toHaveValue("#e46bc3");
+  fireEvent.click(screen.getByRole("radio", { name: "Gallery White" }));
+  expect(screen.getByLabelText("Typography")).toHaveValue("mono");
+  expect(screen.getByLabelText("Accent color")).not.toHaveValue("#e46bc3");
 });
 it("keeps section fields through blocked navigation and preserves other pages and sources", () => {
   showBuilder();

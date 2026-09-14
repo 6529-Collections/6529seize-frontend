@@ -1,4 +1,5 @@
 import type { ApiMarketTransaction } from "@/generated/models/ApiMarketTransaction";
+import type { ApiMarketBatchTransaction } from "@/generated/models/ApiMarketBatchTransaction";
 import { getAddress, isHex, sha256, stringToHex, type Hex } from "viem";
 
 /** Public transaction fingerprint only: never persist signatures or order calldata. */
@@ -35,7 +36,7 @@ export function marketTransactionDigest(transaction: {
 }
 
 export function createMarketSendAttempt(
-  transaction: ApiMarketTransaction,
+  transaction: ApiMarketTransaction | ApiMarketBatchTransaction,
   snapshotBlock: number | undefined,
   expectedRevision = ""
 ): MarketSendAttempt {

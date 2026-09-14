@@ -1,6 +1,7 @@
 "use client";
 
-import { XMarkIcon } from "@heroicons/react/24/outline";
+import { WalletIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import clsx from "clsx";
 import Image from "next/image";
 import type { ReactNode } from "react";
 import { useEffect, useId, useRef } from "react";
@@ -27,6 +28,9 @@ interface OnchainTransactionModalProps {
   readonly transactionHash?: string | undefined;
   readonly transactionLink?: string | undefined;
   readonly chain?: Pick<Chain, "id"> | undefined;
+  readonly successContent?: ReactNode | undefined;
+  readonly pendingContent?: ReactNode | undefined;
+  readonly closeLabel?: string | undefined;
   readonly onClose: () => void;
 }
 
@@ -194,6 +198,57 @@ function ModalStatusContent({
   );
 }
 
+function getCustomStatusContent(
+  status: OnchainTransactionModalStatus,
+  successContent: ReactNode,
+  pendingContent: ReactNode
+): ReactNode {
+  if (status === "error") {
+    return null;
+  }
+  const content = status === "success" ? successContent : pendingContent;
+  return content === undefined ||
+    content === null ||
+    typeof content === "boolean"
+    ? null
+    : content;
+}
+
+function CustomStatusIcon({
+  status,
+}: Readonly<{ status: OnchainTransactionModalStatus }>) {
+  if (status === "confirm_wallet") {
+    return (
+      <WalletIcon
+        className="tw-size-6 tw-flex-none tw-text-iron-200"
+        aria-hidden="true"
+      />
+    );
+  }
+  if (status === "submitted") {
+    return (
+      <span
+        aria-hidden="true"
+        className="tw-size-6 tw-flex-none tw-rounded-full tw-border-2 tw-border-solid tw-border-iron-600 tw-border-t-primary-400 motion-safe:tw-animate-spin"
+      />
+    );
+  }
+  return <StatusEmoji status={status} />;
+}
+
+function getTitleClasses(
+  hasCustomContent: boolean,
+  status: OnchainTransactionModalStatus
+) {
+  if (!hasCustomContent) {
+    return "tw-text-xl tw-text-white";
+  }
+  return clsx(
+    "tw-flex tw-items-center tw-gap-3 tw-text-2xl",
+    status === "success" ? "tw-text-green" : "tw-text-white"
+  );
+}
+
 export default function OnchainTransactionModal({
   status,
   title,
@@ -202,6 +257,9 @@ export default function OnchainTransactionModal({
   transactionHash,
   transactionLink,
   chain,
+  successContent,
+  pendingContent,
+  closeLabel,
   onClose,
 }: OnchainTransactionModalProps) {
   const titleId = useId();
@@ -209,6 +267,12 @@ export default function OnchainTransactionModal({
   const dialogRef = useRef<HTMLDialogElement>(null);
   const closable = status === "success" || status === "error";
   const hasSubtitle = subtitle !== undefined && subtitle !== null;
+  const customContent = getCustomStatusContent(
+    status,
+    successContent,
+    pendingContent
+  );
+  const hasCustomContent = customContent !== null;
 
   useEffect(() => {
     if (typeof document === "undefined") {
@@ -233,6 +297,13 @@ export default function OnchainTransactionModal({
   useEffect(() => {
     dialogRef.current?.focus();
   }, []);
+
+  useEffect(() => {
+    // A stage change can remove the focused help control or transaction link.
+    if (document.activeElement === document.body) {
+      dialogRef.current?.focus();
+    }
+  }, [status]);
 
   useEffect(() => {
     if (typeof document === "undefined") {
@@ -282,11 +353,11 @@ export default function OnchainTransactionModal({
       : null);
 
   return createPortal(
-    <div className="tailwind-scope tw-fixed tw-inset-0 tw-z-[9999] tw-flex tw-items-center tw-justify-center tw-bg-gray-600 tw-bg-opacity-50 tw-px-4 tw-backdrop-blur-[1px]">
+    <div className="tailwind-scope tw-fixed tw-inset-0 tw-z-[9999] tw-flex tw-items-center tw-justify-center tw-bg-gray-600 tw-bg-opacity-50 tw-p-4 tw-backdrop-blur-[1px]">
       {closable ? (
         <button
           type="button"
-          aria-label="Close modal backdrop"
+          aria-label={closeLabel ?? "Close modal backdrop"}
           tabIndex={-1}
           onClick={onClose}
           className="tw-absolute tw-inset-0 tw-border-0 tw-bg-transparent tw-p-0"
@@ -307,14 +378,23 @@ export default function OnchainTransactionModal({
             onClose();
           }
         }}
-        className="tw-relative tw-z-[1] tw-w-full tw-max-w-md tw-rounded-xl tw-border-0 tw-bg-iron-950 tw-p-6 tw-shadow-2xl focus:tw-outline-none"
+        className="tw-relative tw-z-[1] tw-max-h-[calc(100dvh-2rem)] tw-w-full tw-max-w-md tw-overflow-y-auto tw-rounded-xl tw-border-0 tw-bg-iron-950 tw-p-6 tw-shadow-2xl focus:tw-outline-none"
       >
-        <div className="tw-flex tw-items-start tw-justify-between tw-gap-4 tw-border-b tw-border-iron-800 tw-pb-3">
+        <div
+          className={clsx(
+            "tw-flex tw-items-start tw-justify-between tw-gap-4",
+            !hasCustomContent && "tw-border-b tw-border-iron-800 tw-pb-3"
+          )}
+        >
           <div className="tw-min-w-0">
             <h2
               id={titleId}
-              className="tw-m-0 tw-whitespace-pre-line tw-text-xl tw-font-semibold tw-text-white"
+              className={clsx(
+                "tw-m-0 tw-whitespace-pre-line tw-break-words tw-font-semibold",
+                getTitleClasses(hasCustomContent, status)
+              )}
             >
+              {hasCustomContent && <CustomStatusIcon status={status} />}
               {title}
             </h2>
             {hasSubtitle ? (
@@ -329,15 +409,16 @@ export default function OnchainTransactionModal({
           {closable ? (
             <button
               type="button"
-              aria-label="Close modal"
+              aria-label={closeLabel ?? "Close modal"}
               onClick={onClose}
-              className="tw--mt-0.5 tw-inline-flex tw-size-9 tw-flex-none tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-text-iron-400"
+              className="tw--mr-2 tw--mt-2 tw-inline-flex tw-size-11 tw-flex-none tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-text-iron-300 tw-transition-colors focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-text-white"
             >
               <XMarkIcon className="tw-size-5" aria-hidden="true" />
             </button>
           ) : null}
         </div>
 
+        {hasCustomContent && <div className="tw-mt-6">{customContent}</div>}
         {status === "error" ? (
           <div
             className="tw-mt-4 tw-flex tw-min-h-[120px] tw-items-center tw-justify-center tw-rounded-xl tw-bg-iron-800 tw-p-3"
@@ -352,14 +433,24 @@ export default function OnchainTransactionModal({
           </div>
         ) : (
           <output
-            className="tw-mt-4 tw-flex tw-min-h-[120px] tw-items-center tw-justify-center tw-rounded-xl tw-bg-iron-800 tw-p-3"
+            className={clsx(
+              hasCustomContent
+                ? "tw-sr-only"
+                : "tw-mt-4 tw-flex tw-min-h-[120px] tw-items-center tw-justify-center tw-rounded-xl tw-bg-iron-800 tw-p-3"
+            )}
             aria-live="polite"
           >
-            <ModalStatusContent
-              status={status}
-              message={message}
-              transactionUrl={transactionUrl}
-            />
+            {hasCustomContent ? (
+              <>
+                {title} {subtitle}
+              </>
+            ) : (
+              <ModalStatusContent
+                status={status}
+                message={message}
+                transactionUrl={transactionUrl}
+              />
+            )}
           </output>
         )}
       </dialog>

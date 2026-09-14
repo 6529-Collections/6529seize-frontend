@@ -1,3 +1,5 @@
+import artworkShareMessages from "@/i18n/messages/artworkShare.de-DE.json";
+import profileCmsAgentMessages from "@/i18n/messages/profileCmsAgent.de-DE.json";
 import studioTemplateDescriptions from "@/i18n/messages/studioTemplateDescriptions.de-DE.json";
 import profileCmsStudioUploadMessages from "@/i18n/messages/profileCmsStudioUpload.de-DE.json";
 import studioWalletImportMessages from "@/i18n/messages/studioWalletImport.de-DE.json";
@@ -8,6 +10,8 @@ import { DE_DE_CAPACITOR_CONNECT_MESSAGES } from "@/i18n/messages/capacitor-conn
 import { DE_DE_PAGINATION_MESSAGES } from "@/i18n/messages/pagination";
 import { DE_DE_THE_MEMES_COLLECTORS_MESSAGES } from "@/i18n/messages/the-memes-collectors";
 import { DE_DE_TRANSFER_MESSAGES } from "@/i18n/messages/transfer";
+import { DE_DE_THE_MEMES_MINT_SUCCESS_MESSAGES } from "@/i18n/messages/the-memes-mint-success";
+import { DE_DE_THE_MEMES_MINT_PROGRESS_MESSAGES } from "@/i18n/messages/the-memes-mint-progress";
 import stormComposerDeMessages from "@/i18n/messages/stormComposer.de-DE.json";
 import type { MessageKey } from "@/i18n/messages/en-US";
 import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.de-DE.json";
@@ -15,7 +19,9 @@ import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.de-DE.jso
 const RETRY_LABEL = "Erneut versuchen";
 
 export const DE_DE_MESSAGES = {
+  ...artworkShareMessages,
   ...profileCmsStudioMessages,
+  ...profileCmsAgentMessages,
   ...studioTemplateDescriptions,
   ...profileCmsStudioUploadMessages,
   ...studioWalletImportMessages,
@@ -1223,4 +1229,6 @@ export const DE_DE_MESSAGES = {
   "notifications.filter.option.invites": "Einladungen",
   "notifications.filter.option.subscriptions": "Abonnements",
   ...DE_DE_TRANSFER_MESSAGES,
+  ...DE_DE_THE_MEMES_MINT_SUCCESS_MESSAGES,
+  ...DE_DE_THE_MEMES_MINT_PROGRESS_MESSAGES,
 } satisfies Partial<Record<MessageKey, string>>;
