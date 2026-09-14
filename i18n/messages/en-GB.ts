@@ -14,6 +14,15 @@ import type { MessageKey } from "@/i18n/messages/en-US";
 import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.en-GB.json";
 
 export const EN_GB_MESSAGES = {
+  "singleDrop.share": "Share",
+  "singleDrop.shareLabel": "Share drop",
+  "singleDrop.shared": "Link shared",
+  "singleDrop.close": "Close",
+  "singleDrop.closeLabel": "Close panel",
+  "singleDrop.showChat": "Show chat",
+  "singleDrop.hideChat": "Hide chat",
+  "singleDrop.chatLabel": "Drop chat",
+  "singleDrop.closeChat": "Close chat",
   ...artworkShareMessages,
   ...profileCmsStudioMessages,
   ...profileCmsAgentMessages,
