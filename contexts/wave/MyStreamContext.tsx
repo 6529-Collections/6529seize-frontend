@@ -120,6 +120,11 @@ interface MyStreamContextType {
     type: ProcessIncomingDropType
   ) => Promise<void>;
   readonly processDropRemoved: (waveId: string, dropId: string) => void;
+  readonly processDropsRemoved: (
+    waveId: string,
+    dropIds: readonly string[]
+  ) => void;
+  readonly refreshWaveMessages: (waveId: string) => void;
   readonly applyOptimisticDropUpdate: ({
     waveId,
     dropId,
@@ -277,7 +282,19 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     syncNewestMessages,
     fetchNextPage,
     fetchAroundSerialNo,
+    cancelWaveDataFetch,
+    cancelPaginationFetch,
   } = waveDataManager;
+  const { clearWave } = waveMessagesStore;
+  const refreshWaveMessages = useCallback(
+    (waveId: string) => {
+      if (!clearWave(waveId)) return;
+      cancelWaveDataFetch(waveId);
+      cancelPaginationFetch(waveId);
+      registerWave(waveId);
+    },
+    [cancelWaveDataFetch, cancelPaginationFetch, clearWave, registerWave]
+  );
   const refetchAllMainWaves = wavesHookData.refetchAllWaves;
   const refetchAllDmWaves = dmWavesHookData.refetchAllWaves;
   const resetAllMainWavesNewDropsCount =
@@ -354,6 +371,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     registerWave,
     syncNewestMessages,
     removeDrop: waveMessagesStore.removeDrop,
+    removeDrops: waveMessagesStore.removeDrops,
     removeWaveDeliveredNotifications,
     isWaveMuted,
   });
@@ -562,6 +580,8 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
       fetchAroundSerialNo,
       processIncomingDrop,
       processDropRemoved,
+      processDropsRemoved: waveMessagesStore.removeDrops,
+      refreshWaveMessages,
       applyOptimisticDropUpdate: waveMessagesStore.optimisticUpdateDrop,
     };
   }, [
@@ -608,6 +628,8 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     fetchAroundSerialNo,
     processIncomingDrop,
     processDropRemoved,
+    waveMessagesStore.removeDrops,
+    refreshWaveMessages,
     waveMessagesStore.optimisticUpdateDrop,
   ]);
 
