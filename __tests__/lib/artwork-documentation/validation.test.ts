@@ -9,8 +9,13 @@ import type { ApiArtworkDocumentationOperation } from "@/generated/models/ApiArt
 it("requires an explanation when the canonical file changes after confirmation", () => {
   const context = documentationFixture();
   context.latest_revision_id = "confirmed";
-  const module = context.profile.modules.find((item) => item.id === "artwork")!;
-  module.fields.push({ ...module.fields[0]!, id: "canonical_asset_id" });
+  const artworkModule = context.profile.modules.find(
+    (item) => item.id === "artwork"
+  )!;
+  artworkModule.fields.push({
+    ...artworkModule.fields[0]!,
+    id: "canonical_asset_id",
+  });
   context.modules["artwork"]!.answers["canonical_asset_id"] = {
     status: "provided",
     intended_visibility: "restricted",
@@ -202,4 +207,57 @@ describe("documentation rights details", () => {
       ).toBe(true);
     }
   );
+});
+
+describe("documentation text normalization", () => {
+  const declarationSchema: ApiArtworkDocumentationValueSchema = {
+    type: "string",
+    min_length: 1,
+    max_length: 6000,
+  };
+
+  it.each([
+    ["CRLF at the limit", "x".repeat(5999) + "\r\n", true],
+    ["CRLF above the limit", "x".repeat(6000) + "\r\n", false],
+    ["NFC at the limit", "e\u0301".repeat(6000), true],
+    ["NFC above the limit", "e\u0301".repeat(6001), false],
+  ])("validates %s after server normalization", (_name, value, expected) => {
+    expect(
+      rightsOperationIsValid("rights_declaration", value, declarationSchema)
+    ).toBe(expected);
+  });
+
+  it("checks minimum lengths and enums after normalization", () => {
+    expect(
+      matchesDocumentationSchema("\r\n", { type: "string", min_length: 2 })
+    ).toBe(false);
+    expect(
+      matchesDocumentationSchema("\r", { type: "string", _enum: ["\n"] })
+    ).toBe(true);
+    expect(
+      matchesDocumentationSchema("e\u0301", {
+        type: "string",
+        _enum: ["\u00e9"],
+      })
+    ).toBe(true);
+  });
+
+  it("validates nested license strings without rewriting the answer", () => {
+    const value = Object.freeze({
+      uri: "https://example.org/" + "e\u0301".repeat(4),
+      label: "e\u0301".repeat(160),
+    });
+    const original = { ...value };
+    expect(
+      rightsOperationIsValid("intended_license", value, {
+        type: "object",
+        required: ["uri", "label"],
+        properties: {
+          uri: { type: "string", format: "uri", max_length: 24 },
+          label: { type: "string", min_length: 1, max_length: 160 },
+        },
+      })
+    ).toBe(true);
+    expect(value).toEqual(original);
+  });
 });

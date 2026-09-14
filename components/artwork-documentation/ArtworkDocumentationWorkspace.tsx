@@ -176,8 +176,15 @@ export function ArtworkDocumentationRecordView({
   const navigateField = (moduleId: string, fieldId: string) => {
     const fieldModule = MODULE_IDS.find((id) => id === moduleId);
     if (!fieldModule) return;
+    // The museum editor groups these artwork fields with the received files.
+    const isMuseumArtworkFile =
+      museum &&
+      fieldModule === "artwork" &&
+      ["canonical_asset_id", "declared_dimensions"].includes(fieldId);
     navigateSection(
-      documentationFieldSection(context.profile, fieldModule, fieldId)
+      isMuseumArtworkFile
+        ? "materials"
+        : documentationFieldSection(context.profile, fieldModule, fieldId)
     );
     requestAnimationFrame(() => {
       const heading = document.getElementById(

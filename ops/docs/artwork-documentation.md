@@ -190,6 +190,11 @@ try saving again. Other pending answers may be waiting behind that correction;
 their presence in the list does not mean they are wrong. Keep the window open
 until the save status confirms that your changes are saved.
 
+When a rights category requires supporting details, those inputs appear
+immediately. In earlier forms with an editable artwork license, include both
+the license name and its complete URL. Correcting an answer keeps the other
+pending changes ready to save.
+
 In **Materials & versions**, **Artwork & supporting files** brings **Add a file**
 together with the final artwork and material selections. Earlier forms keep
 this area in The work. Upload the exact file you intend to include with the work.

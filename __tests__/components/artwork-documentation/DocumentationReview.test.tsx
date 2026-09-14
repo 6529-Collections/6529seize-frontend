@@ -210,12 +210,15 @@ it("guides missing interview permission to its chapters and blocks confirmation 
 
 function LiveReview({
   initial,
+  reviewKey = "review",
 }: {
   readonly initial: ApiArtworkDocumentationContext;
+  readonly reviewKey?: string;
 }) {
   const draft = useDocumentationDraft(initial);
   return (
     <DocumentationReview
+      key={reviewKey}
       context={draft.context}
       controller={draft.controller}
       saveState={draft.state}
@@ -319,6 +322,7 @@ describe("artist confirmation recovery", () => {
     jest
       .mocked(getDocumentationContext)
       .mockResolvedValueOnce(context)
+      .mockResolvedValueOnce(context)
       .mockResolvedValueOnce(recordedContext(context));
     const view = renderLiveReview(context);
     clickConfirm();
@@ -359,7 +363,7 @@ describe("artist confirmation recovery", () => {
     jest
       .mocked(getDocumentationContext)
       .mockRejectedValueOnce(new Error("connection lost"))
-      .mockResolvedValueOnce(recordedContext(context));
+      .mockResolvedValue(recordedContext(context));
     const view = renderLiveReview(context);
     clickConfirm();
     expect(await screen.findByRole("alert")).toHaveTextContent(
@@ -374,7 +378,7 @@ describe("artist confirmation recovery", () => {
       )
     ).toBeInTheDocument();
     expect(confirmDocumentation).toHaveBeenCalledTimes(1);
-    expect(getDocumentationContext).toHaveBeenCalledTimes(2);
+    expect(getDocumentationContext).toHaveBeenCalledTimes(3);
     view.unmount();
     view.client.clear();
   });
@@ -577,7 +581,7 @@ describe("artist confirmation recovery", () => {
     const context = documentationFixture();
     const controller = new DocumentationDraftController(
       context,
-      { read: jest.fn(), save: jest.fn() },
+      { read: jest.fn().mockResolvedValue(context), save: jest.fn() },
       jest.fn()
     );
     await controller.mutate(async () => {
@@ -656,7 +660,7 @@ describe("artist confirmation recovery", () => {
     const context = documentationFixture();
     const controller = new DocumentationDraftController(
       context,
-      { read: jest.fn(), save: jest.fn() },
+      { read: getDocumentationContext, save: jest.fn() },
       jest.fn()
     );
     await controller.mutate(async () => {
@@ -727,4 +731,64 @@ describe("artist confirmation recovery", () => {
     view.unmount();
     view.client.clear();
   });
+
+  it.each(["post", "readback"] as const)(
+    "recovers a delayed %s failure through generic retry after the Review remounts",
+    async (phase) => {
+      const context = documentationFixture();
+      let fail!: (error: Error) => void;
+      const pending = new Promise<never>((_, reject) => {
+        fail = reject;
+      });
+      if (phase === "post")
+        jest.mocked(confirmDocumentation).mockReturnValueOnce(pending);
+      else {
+        jest.mocked(confirmDocumentation).mockResolvedValueOnce({} as never);
+        jest.mocked(getDocumentationContext).mockReturnValueOnce(pending);
+      }
+      jest
+        .mocked(getDocumentationContext)
+        .mockResolvedValue(recordedContext(context));
+      const client = new QueryClient({
+        defaultOptions: { queries: { retry: false } },
+      });
+      const view = (reviewKey: string) => (
+        <QueryClientProvider client={client}>
+          <LiveReview initial={context} reviewKey={reviewKey} />
+        </QueryClientProvider>
+      );
+      const rendered = render(view("before-navigation"));
+      try {
+        clickConfirm();
+        await waitFor(() =>
+          expect(confirmDocumentation).toHaveBeenCalledTimes(1)
+        );
+        if (phase === "readback")
+          await waitFor(() =>
+            expect(getDocumentationContext).toHaveBeenCalledTimes(1)
+          );
+        rendered.rerender(view("after-navigation"));
+        await act(async () => {
+          fail(new Error("response lost"));
+        });
+        expect(
+          await screen.findByText(/The last action could not be verified/)
+        ).toBeInTheDocument();
+        fireEvent.click(screen.getByRole("button", { name: "Try again" }));
+        expect(
+          await screen.findByText(
+            /Your confirmation is recorded for this saved version/
+          )
+        ).toBeInTheDocument();
+        expect(confirmDocumentation).toHaveBeenCalledTimes(1);
+        expect(getDocumentationContext).toHaveBeenCalledTimes(
+          phase === "post" ? 1 : 2
+        );
+        expect(screen.queryByRole("checkbox")).not.toBeInTheDocument();
+      } finally {
+        rendered.unmount();
+        client.clear();
+      }
+    }
+  );
 });
