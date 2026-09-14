@@ -76,13 +76,13 @@ Create an aggregate report by day, page type, device, country, and query
 class. The normalized columns are in
 `search-console-performance.template.csv`.
 
-| Dimension     | Required values / rule                                                                                                                                                                                                               |
-| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `page_type`   | `homepage`, `collection`, `artwork`, `museum`, `education`, `profile`, `wave`, or `other`; classify by stable page family before aggregation.                                                                                        |
-| `device`      | Search Console device value: `DESKTOP`, `MOBILE`, or `TABLET`. Keep unknown/missing rows out of device comparisons and record their total separately.                                                                                |
-| `country`     | Three-letter Search Console country code; report a global total plus the largest relevant countries, not a selectively chosen winner.                                                                                                |
-| `query_class` | `brand`, `non_brand`, or `unknown`. Use a reviewed, versioned case-insensitive matcher for 6529 names/products (for example `6529`, `the memes`, `tdh`, and `xtdh`); retain uncertain queries as `unknown`. Never commit query text. |
-| Metrics       | `clicks` and `impressions` are non-negative integers; `ctr = clicks / impressions`; `position` is an impressions-weighted average and must never be averaged from already averaged rows.                                             |
+| Dimension     | Required values / rule                                                                                                                                                                                                                                                                    |
+| ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `page_type`   | `homepage`, `collection`, `artwork`, `museum`, `education`, `profile`, `wave`, or `other`; classify by stable page family before aggregation.                                                                                                                                             |
+| `device`      | Search Console device value: `DESKTOP`, `MOBILE`, or `TABLET`. Keep unknown/missing rows out of device comparisons and record their total separately.                                                                                                                                     |
+| `country`     | Three-letter Search Console country code; report a global total plus the largest relevant countries, not a selectively chosen winner.                                                                                                                                                     |
+| `query_class` | `brand`, `non_brand`, or `unknown`. Use a reviewed, versioned case-insensitive matcher for 6529 names/products (for example `6529`, `the memes`, `tdh`, and `xtdh`); retain uncertain queries as `unknown`. Never commit query text.                                                      |
+| Metrics       | `clicks` and `impressions` are non-negative integers; `ctr = clicks / impressions`; `position` is at least 1 when impressions exist and is 0 only for an explicit zero-impression row. Position is an impressions-weighted average and must never be averaged from already averaged rows. |
 
 The Search Console API/export can truncate high-cardinality combinations.
 When a joint query/page/country/device pull is incomplete, build separate

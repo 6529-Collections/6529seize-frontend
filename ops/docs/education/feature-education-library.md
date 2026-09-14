@@ -65,7 +65,17 @@ the current 6529 Network Museum, and the education collaboration contact.
   on-site edition of every Tweetstorm or podcast.
 - Historical material remains historical; links to current Museum work provide
   present context without rewriting the original thesis.
-- The migrated Education pages currently publish English source copy.
+
+### Localization fallback debt
+
+| Field                     | Current exception                                                                                                                                                                                                               |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Route or component        | `/education` via `app/education/content.tsx`                                                                                                                                                                                    |
+| Untranslated surface      | Migrated WordPress headings, paragraphs, and link labels, including the archive context and related first-party links changed here                                                                                              |
+| Current fallback behavior | The route publishes its source copy in `en-US` only; it has no locale selector or partial-locale dictionary path                                                                                                                |
+| User impact               | Visitors using another locale still receive a functional page and descriptive links, but the Education copy remains English                                                                                                     |
+| Owner or follow-up        | Frontend localization maintainers; track the Education migrated-content conversion in the progressive i18n workstream before enabling a localized route                                                                         |
+| Expected remediation      | Move Education blocks and link labels into the source message dictionary, preserve trusted-link rendering, add locale fallback tests, and then add localized routing only after metadata, canonical, and browser QA are defined |
 
 ## Related Pages
 

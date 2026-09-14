@@ -36,6 +36,7 @@ const PAGE_TYPES = new Set([
 ]);
 const DEVICES = new Set(["DESKTOP", "MOBILE", "TABLET"]);
 const QUERY_CLASSES = new Set(["brand", "non_brand", "unknown"]);
+const ARGUMENT_KEYS = new Set(["kind", "input", "output"]);
 
 function usage() {
   return [
@@ -46,11 +47,21 @@ function usage() {
 
 function parseArgs(argv) {
   const result = {};
-  for (let index = 0; index < argv.length; index += 2) {
-    const key = argv[index];
+  for (let index = 0; index < argv.length; ) {
+    const flag = argv[index];
     const value = argv[index + 1];
-    if (!key?.startsWith("--") || !value) throw new Error(usage());
-    result[key.slice(2)] = value;
+    if (!flag?.startsWith("--")) throw new Error(usage());
+    const key = flag.slice(2);
+    if (
+      !ARGUMENT_KEYS.has(key) ||
+      !value ||
+      value.startsWith("--") ||
+      result[key] !== undefined
+    ) {
+      throw new Error(usage());
+    }
+    result[key] = value;
+    index += 2;
   }
   if (
     !result.kind ||
@@ -120,13 +131,17 @@ function validatePerformance(record, rowNumber, errors) {
     errors.push(`row ${rowNumber}: country must be a three-letter code`);
   if (!QUERY_CLASSES.has(record.query_class))
     errors.push(`row ${rowNumber}: unsupported query_class`);
-  const clicks = Number(record.clicks);
-  const impressions = Number(record.impressions);
-  const ctr = Number(record.ctr);
-  const position = Number(record.position);
-  if (!Number.isInteger(clicks) || clicks < 0)
+  validatePerformanceMetrics(record, rowNumber, errors);
+}
+
+function validatePerformanceMetrics(record, rowNumber, errors) {
+  const clicks = strictUnsignedInteger(record.clicks);
+  const impressions = strictUnsignedInteger(record.impressions);
+  const ctr = strictUnsignedDecimal(record.ctr);
+  const position = strictUnsignedDecimal(record.position);
+  if (!Number.isInteger(clicks))
     errors.push(`row ${rowNumber}: clicks must be a non-negative integer`);
-  if (!Number.isInteger(impressions) || impressions < 0)
+  if (!Number.isInteger(impressions))
     errors.push(`row ${rowNumber}: impressions must be a non-negative integer`);
   if (!Number.isFinite(ctr) || ctr < 0 || ctr > 1)
     errors.push(`row ${rowNumber}: ctr must be a decimal from 0 through 1`);
@@ -145,6 +160,34 @@ function validatePerformance(record, rowNumber, errors) {
   }
   if (impressions === 0 && ctr !== 0)
     errors.push(`row ${rowNumber}: ctr must be 0 when impressions are 0`);
+  if (impressions > 0 && position < 1)
+    errors.push(`row ${rowNumber}: position must be at least 1`);
+  if (impressions === 0 && position !== 0)
+    errors.push(`row ${rowNumber}: position must be 0 when impressions are 0`);
+}
+
+function strictUnsignedInteger(value) {
+  if (value.length === 0 || value.trim() !== value) return Number.NaN;
+  return [...value].every((character) => character >= "0" && character <= "9")
+    ? Number(value)
+    : Number.NaN;
+}
+
+function strictUnsignedDecimal(value) {
+  if (
+    value.length === 0 ||
+    value.trim() !== value ||
+    value.startsWith(".") ||
+    value.endsWith(".")
+  ) {
+    return Number.NaN;
+  }
+  let decimalPoints = 0;
+  for (const character of value) {
+    if (character === ".") decimalPoints += 1;
+    else if (character < "0" || character > "9") return Number.NaN;
+  }
+  return decimalPoints <= 1 ? Number(value) : Number.NaN;
 }
 
 function validateOptionalDateField(record, field, rowNumber, errors) {
@@ -172,7 +215,8 @@ function validateHttpsField(
 }
 
 function validateInspection(record, rowNumber, errors) {
-  validateOptionalDateField(record, "checked_on", rowNumber, errors);
+  if (!isIsoDate(record.checked_on))
+    errors.push(`row ${rowNumber}: checked_on must be YYYY-MM-DD`);
   validateOptionalDateField(record, "last_crawl", rowNumber, errors);
   if (!PAGE_TYPES.has(record.page_type))
     errors.push(`row ${rowNumber}: unsupported page_type`);
