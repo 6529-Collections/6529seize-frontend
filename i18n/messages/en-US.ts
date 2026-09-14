@@ -2798,6 +2798,7 @@ const TOKEN_NUMBER_MESSAGE = "Token #{tokenId}";
 export const EN_US_MESSAGES = {
   "singleDrop.share": "Share",
   "singleDrop.shareLabel": "Share drop",
+  "singleDrop.shared": "Link shared",
   "singleDrop.close": "Close",
   "singleDrop.closeLabel": "Close panel",
   "singleDrop.showChat": "Show chat",

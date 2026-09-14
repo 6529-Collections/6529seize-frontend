@@ -19,6 +19,7 @@ import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.es-ES.jso
 export const ES_ES_MESSAGES = {
   "singleDrop.share": "Compartir",
   "singleDrop.shareLabel": "Compartir drop",
+  "singleDrop.shared": "Enlace compartido",
   "singleDrop.close": "Cerrar",
   "singleDrop.closeLabel": "Cerrar panel",
   "singleDrop.showChat": "Mostrar chat",

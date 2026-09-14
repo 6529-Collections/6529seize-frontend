@@ -48,22 +48,22 @@ export default function SingleWaveDropShare({
     try {
       if (Capacitor.isNativePlatform()) {
         if (!(await Share.canShare()).value) {
-          copyLink();
+          await copyLink();
           return;
         }
         await Share.share(shareData);
       } else if (canUseSystemShare(shareData)) {
         await navigator.share(shareData);
       } else {
-        copyLink();
+        await copyLink();
         return;
       }
       showAppToast({
         type: "success",
-        title: t(locale, "headerWaveLinkAction.feedback.shared"),
+        title: t(locale, "singleDrop.shared"),
       });
     } catch (error: unknown) {
-      if (!isShareCancelError(error)) copyLink();
+      if (!isShareCancelError(error)) await copyLink();
     } finally {
       setIsSharing(false);
     }
@@ -75,14 +75,11 @@ export default function SingleWaveDropShare({
         type="button"
         aria-label={t(locale, "singleDrop.shareLabel")}
         disabled={isSharing || !isLoaded}
-        aria-busy={isSharing || !isLoaded}
+        aria-busy={isSharing}
         onClick={() => void shareDrop()}
-        className="tw-flex tw-min-h-11 tw-min-w-11 tw-items-center tw-justify-center tw-gap-2 tw-rounded-full tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-sm tw-font-medium tw-text-iron-300 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-wait disabled:tw-opacity-70 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-200 motion-reduce:tw-transition-none sm:tw-rounded-lg"
+        className="tw-flex tw-min-h-11 tw-min-w-11 tw-items-center tw-justify-center tw-gap-2 tw-rounded-full tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-sm tw-font-medium tw-text-iron-300 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-wait disabled:tw-opacity-70 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-200 motion-reduce:tw-transition-none sm:tw-min-h-0 sm:tw-rounded-lg"
       >
-        <ShareArrowIcon
-          className="tw-size-5 tw-shrink-0 sm:tw-size-4"
-          aria-hidden="true"
-        />
+        <ShareArrowIcon className="tw-size-5 tw-shrink-0 sm:tw-size-4" />
         <span>{statusMessage || t(locale, "singleDrop.share")}</span>
       </button>
       <span role="status" aria-live="polite" className="tw-sr-only">

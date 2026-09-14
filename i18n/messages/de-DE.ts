@@ -21,6 +21,7 @@ const RETRY_LABEL = "Erneut versuchen";
 export const DE_DE_MESSAGES = {
   "singleDrop.share": "Teilen",
   "singleDrop.shareLabel": "Drop teilen",
+  "singleDrop.shared": "Link geteilt",
   "singleDrop.close": "Schließen",
   "singleDrop.closeLabel": "Panel schließen",
   "singleDrop.showChat": "Chat anzeigen",

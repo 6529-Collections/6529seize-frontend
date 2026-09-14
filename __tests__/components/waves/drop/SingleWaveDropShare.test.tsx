@@ -242,7 +242,7 @@ it.each(["missing", "denied"])(
   }
 );
 
-it("waits for confirmed clipboard success", async () => {
+it("stays busy until clipboard copying finishes and keeps its accessible name", async () => {
   let finishCopy!: () => void;
   writeText.mockImplementation(
     () =>
@@ -253,8 +253,16 @@ it("waits for confirmed clipboard success", async () => {
   render(<SingleWaveDropShare drop={drop} wave={wave} />);
   clickShare();
   expect(screen.getByRole("status")).toBeEmptyDOMElement();
+  const button = screen.getByRole("button", { name: "Share drop" });
+  expect(button).toBeDisabled();
+  expect(button).toHaveAttribute("aria-busy", "true");
+  clickShare();
+  expect(writeText).toHaveBeenCalledTimes(1);
   await act(async () => finishCopy());
   expect(screen.getByRole("status")).toHaveTextContent("Copied!");
+  expect(button).toHaveAccessibleName("Share drop");
+  expect(button).toBeEnabled();
+  expect(button).toHaveAttribute("aria-busy", "false");
 });
 
 it.each(["temp-123", "", "   "])("omits an unshareable drop %s", (id) => {
@@ -262,9 +270,15 @@ it.each(["temp-123", "", "   "])("omits an unshareable drop %s", (id) => {
   expect(screen.queryByRole("button")).not.toBeInTheDocument();
 });
 
-it.each<SupportedLocale>(["en-US", "en-GB", "fr-FR", "es-ES", "de-DE"])(
+it.each<[SupportedLocale, string]>([
+  ["en-US", "Link shared"],
+  ["en-GB", "Link shared"],
+  ["fr-FR", "Lien partagé"],
+  ["es-ES", "Enlace compartido"],
+  ["de-DE", "Link geteilt"],
+])(
   "localizes the action and feedback in %s",
-  async (locale) => {
+  async (locale, sharedMessage) => {
     Object.defineProperty(navigator, "languages", {
       configurable: true,
       value: [locale],
@@ -280,6 +294,14 @@ it.each<SupportedLocale>(["en-US", "en-GB", "fr-FR", "es-ES", "de-DE"])(
         t(locale, "waves.drop.actions.copied")
       )
     );
+    jest.mocked(canUseSystemShare).mockReturnValue(true);
+    fireEvent.click(button);
+    await waitFor(() =>
+      expect(showAppToast).toHaveBeenCalledWith({
+        type: "success",
+        title: sharedMessage,
+      })
+    );
   }
 );
 
@@ -287,6 +309,10 @@ it("waits for wave settings before enabling canonical sharing", () => {
   mockSettingsLoaded = false;
   const { rerender } = render(<SingleWaveDropShare drop={drop} wave={wave} />);
   expect(screen.getByRole("button", { name: "Share drop" })).toBeDisabled();
+  expect(screen.getByRole("button", { name: "Share drop" })).toHaveAttribute(
+    "aria-busy",
+    "false"
+  );
   clickShare();
   expect(writeText).not.toHaveBeenCalled();
   mockSettingsLoaded = true;
