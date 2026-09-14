@@ -67,6 +67,80 @@ function submit(value = "150") {
   fireEvent.change(screen.getByLabelText("Target TDH"), { target: { value } });
   fireEvent.click(screen.getByRole("button", { name: "Find a purchase plan" }));
 }
+
+it("preserves target, horizon, budget and destination while rechecking a built plan after a receipt", async () => {
+  const { props, rerender } = mount({ revision: 0 });
+  fireEvent.change(screen.getByLabelText("Timeframe"), {
+    target: { value: "90" },
+  });
+  fireEvent.change(screen.getByLabelText("Delivery wallet"), {
+    target: { value: TARGET_CUSTODY },
+  });
+  fireEvent.change(screen.getByLabelText("Maximum purchase budget (ETH)"), {
+    target: { value: "0.5" },
+  });
+  submit("150");
+  await screen.findByRole("button", { name: "Review purchase" });
+  const request = api.mock.calls[0]![0];
+  let finish!: (value: ApiCollectTdhTargetPlan) => void;
+  api.mockImplementationOnce(
+    () =>
+      new Promise((resolve) => {
+        finish = resolve;
+      })
+  );
+  rerender(<CollectTdhTargetController {...props} revision={1} />);
+  expect(screen.getByLabelText("Target TDH")).toHaveValue("150");
+  expect(screen.getByLabelText("Timeframe")).toHaveValue("90");
+  expect(screen.getByLabelText("Delivery wallet")).toHaveValue(TARGET_CUSTODY);
+  expect(screen.getByLabelText("Maximum purchase budget (ETH)")).toHaveValue(
+    "0.5"
+  );
+  expect(
+    screen.queryByRole("button", { name: "Review purchase" })
+  ).not.toBeInTheDocument();
+  expect(api.mock.calls[1]![0]).toEqual(request);
+  await act(async () => finish(targetPlan(request)));
+  expect(screen.getByRole("button", { name: "Review purchase" })).toBeEnabled();
+  expect(props.onReviewPurchase).not.toHaveBeenCalled();
+});
+
+it("rejects a superseded in-flight target result on receipt refresh", async () => {
+  let finish!: (value: ApiCollectTdhTargetPlan) => void;
+  api.mockImplementationOnce(
+    () =>
+      new Promise((resolve) => {
+        finish = resolve;
+      })
+  );
+  const { props, rerender } = mount({ revision: 0 });
+  submit();
+  const [request, signal] = api.mock.calls[0]!;
+  rerender(<CollectTdhTargetController {...props} revision={1} />);
+  expect(signal.aborted).toBe(true);
+  await screen.findByRole("button", { name: "Review purchase" });
+  const old = targetPlan(request);
+  old.plan_id = "old-response";
+  await act(async () => finish(old));
+  fireEvent.click(
+    screen.getByRole("button", { name: "Plan offers for these artworks" })
+  );
+  expect(props.onPlanOffers).toHaveBeenCalledWith(
+    expect.not.objectContaining({ plan_id: "old-response" })
+  );
+  expect(api).toHaveBeenCalledTimes(2);
+  expect(screen.getByLabelText("Target TDH")).toHaveValue("150");
+});
+
+it("does not calculate an unsubmitted target draft on receipt updates", () => {
+  const { props, rerender } = mount({ revision: 0 });
+  fireEvent.change(screen.getByLabelText("Target TDH"), {
+    target: { value: "250" },
+  });
+  rerender(<CollectTdhTargetController {...props} revision={1} />);
+  expect(screen.getByLabelText("Target TDH")).toHaveValue("250");
+  expect(api).not.toHaveBeenCalled();
+});
 it("defaults total target/Memes/30 days without requiring a budget, then forwards exact selection only on review", async () => {
   const { props } = mount();
   submit();

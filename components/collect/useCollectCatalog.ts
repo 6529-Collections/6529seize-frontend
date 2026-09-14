@@ -1,6 +1,7 @@
 "use client";
 
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { useAuth } from "@/components/auth/Auth";
 import { ApiCollectPlanningFamily } from "@/generated/models/ApiCollectPlanningFamily";
 import type { ApiCollectAsset } from "@/generated/models/ApiCollectAsset";
 import type { ApiMarketTradeOrder } from "@/generated/models/ApiMarketTradeOrder";
@@ -12,6 +13,8 @@ import { fetchCollectTdhListings } from "@/services/api/collect-api";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import type { CollectCollection, CollectIntent } from "./collect.types";
 import { COLLECT_PLANNER_FAMILIES } from "./collect-families";
+import { useConfirmedMarketPurchases } from "./market-activity-store";
+import { reconcileCollectOrder } from "./collect-purchase-reconciliation";
 
 export interface CollectCatalogEntry {
   readonly asset: ApiCollectAsset;
@@ -25,6 +28,8 @@ export function useCollectCatalog(
   collection: CollectCollection,
   intent: CollectIntent
 ) {
+  const { connectedProfile } = useAuth();
+  const purchases = useConfirmedMarketPurchases(connectedProfile?.id);
   const listingMode = intent === "lowest" || intent === "tdh";
   const queryClient = useQueryClient();
   const family = COLLECT_PLANNER_FAMILIES.find(
@@ -58,11 +63,18 @@ export function useCollectCatalog(
   });
   const entries: CollectCatalogEntry[] = enabled
     ? (listings.data?.pages.flatMap((page) =>
-        page.entries.map((entry) => ({
-          asset: entry.asset,
-          order: entry.order,
-          ...("rate_hundredths" in entry ? { tdh: entry } : {}),
-        }))
+        page.entries.flatMap((entry) => {
+          const order = reconcileCollectOrder(entry.order, purchases);
+          return order
+            ? [
+                {
+                  asset: entry.asset,
+                  order,
+                  ...("rate_hundredths" in entry ? { tdh: entry } : {}),
+                },
+              ]
+            : [];
+        })
       ) ?? [])
     : [];
   const firstPage = enabled ? listings.data?.pages[0] : undefined;

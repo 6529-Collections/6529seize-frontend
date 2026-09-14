@@ -15,6 +15,7 @@ import { useId } from "react";
 
 export interface CollectArtworkSelection {
   readonly selected: boolean;
+  readonly pending?: boolean;
   readonly disabledReason?: string | undefined;
   readonly onToggle: () => void;
 }
@@ -31,6 +32,9 @@ export default function CollectArtworkCard({
   readonly selection?: CollectArtworkSelection | undefined;
 }) {
   const selectionReasonId = useId();
+  let selectionLabel: Parameters<typeof t>[1] = "collect.selection.add";
+  if (selection?.selected) selectionLabel = "collect.selection.selected";
+  if (selection?.pending) selectionLabel = "collect.selection.processing";
   return (
     <article className="tw-flex tw-min-w-0 tw-flex-col tw-@container/artwork">
       <Link
@@ -119,9 +123,7 @@ export default function CollectArtworkCard({
                     : "collect.selection.addArtwork",
                   { title: artwork.title }
                 )}
-                disabled={
-                  Boolean(selection.disabledReason) && !selection.selected
-                }
+                disabled={Boolean(selection.disabledReason)}
                 aria-describedby={
                   selection.disabledReason ? selectionReasonId : undefined
                 }
@@ -134,14 +136,7 @@ export default function CollectArtworkCard({
                 ) : (
                   <PlusIcon aria-hidden="true" className="tw-size-4" />
                 )}
-                <span>
-                  {t(
-                    locale,
-                    selection.selected
-                      ? "collect.selection.selected"
-                      : "collect.selection.add"
-                  )}
-                </span>
+                <span>{t(locale, selectionLabel)}</span>
               </Button>
             )}
             {selection?.disabledReason && (

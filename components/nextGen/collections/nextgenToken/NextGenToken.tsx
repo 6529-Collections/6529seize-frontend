@@ -97,6 +97,7 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
         locale={locale}
         persistentContent={
           <MarketDepthPanel
+            focusedOrderHash={searchParams.get("order")}
             contract={NEXTGEN_CONTRACT}
             tokenId={props.token.id}
             locale={locale}

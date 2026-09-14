@@ -773,6 +773,7 @@ export default function MemePage({
               locale={locale}
               persistentContent={
                 <MarketDepthPanel
+                  focusedOrderHash={searchParams.get("order")}
                   contract={MEMES_CONTRACT}
                   tokenId={nft.id}
                   locale={locale}

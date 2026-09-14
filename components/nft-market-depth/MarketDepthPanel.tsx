@@ -14,8 +14,11 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { QueryKey } from "@/components/react-query-wrapper/query-keys";
 import marketplaceStyles from "@/components/collect/marketplace-font.module.css";
 import { useAutomaticMarketRefresh } from "@/components/collect/useAutomaticMarketRefresh";
+import { useAuth } from "@/components/auth/Auth";
+import { useConfirmedMarketPurchases } from "@/components/collect/market-activity-store";
 import { commonApiFetch } from "@/services/api/common-api";
 import { ArrowPathIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
+import Link from "next/link";
 import type { ReactNode } from "react";
 import {
   useCallback,
@@ -36,6 +39,7 @@ import {
 } from "./market-depth-orders";
 import { formatDate, formatDecimal } from "./market-depth-format";
 import { subscribeMarketDepthDisclosure } from "./market-depth-disclosure";
+import { reconcileMarketDepthPurchases } from "./market-depth-purchases";
 
 const MARKET_DEPTH_QUERY_KEY = QueryKey.NFT_MARKET_DEPTH;
 
@@ -56,9 +60,11 @@ interface MarketDepthPanelProps {
   readonly embedded?: boolean;
   readonly active?: boolean;
   readonly onReveal?: () => void;
+  readonly focusedOrderHash?: string | null;
 }
 
 interface MarketDepthState {
+  readonly assetKey: string | null;
   readonly status: MarketDepthStatus;
   readonly data: ApiMarketDepth | null;
   readonly requestKey: string | null;
@@ -66,6 +72,7 @@ interface MarketDepthState {
 }
 
 const INITIAL_STATE: MarketDepthState = {
+  assetKey: null,
   status: "loading",
   data: null,
   requestKey: null,
@@ -286,13 +293,26 @@ export default function MarketDepthPanel({
   embedded = false,
   active = true,
   onReveal,
+  focusedOrderHash,
 }: MarketDepthPanelProps) {
   const browserLocale = useBrowserLocale();
+  const { connectedProfile } = useAuth();
+  const purchases = useConfirmedMarketPurchases(connectedProfile?.id);
   const resolvedLocale = locale ?? browserLocale;
   const id = useId();
   const heading = useRef<HTMLButtonElement>(null);
   const panel = useRef<HTMLElement>(null);
   const assetKey = `${contract.toLowerCase()}:${String(tokenId)}`;
+  const requestedOrderHash = /^0x[\da-f]{64}$/i.test(focusedOrderHash ?? "")
+    ? (focusedOrderHash?.toLowerCase() ?? null)
+    : null;
+  const orderFocusKey = `${assetKey}:${requestedOrderHash ?? ""}`;
+  const [completedOrderFocus, setCompletedOrderFocus] = useState<string | null>(
+    null
+  );
+  const finishOrderFocus = useCallback(() => {
+    setCompletedOrderFocus(orderFocusKey);
+  }, [orderFocusKey]);
   const [disclosure, setDisclosure] = useState({
     assetKey,
     open: false,
@@ -301,6 +321,10 @@ export default function MarketDepthPanel({
   const focusedDisclosure = useRef<typeof disclosure | null>(null);
   const open =
     embedded || (disclosure.assetKey === assetKey && disclosure.open);
+  const pendingOrderFocus =
+    active && open && completedOrderFocus !== orderFocusKey
+      ? requestedOrderHash
+      : null;
   useEffect(
     () =>
       subscribeMarketDepthDisclosure(contract, tokenId, () => {
@@ -381,12 +405,19 @@ export default function MarketDepthPanel({
     [contract, tokenId]
   );
 
-  const data = state.requestKey === requestKey ? state.data : null;
+  const rawData = state.assetKey === assetKey ? state.data : null;
+  const data = useMemo(
+    () => (rawData ? reconcileMarketDepthPurchases(rawData, purchases) : null),
+    [rawData, purchases]
+  );
   const backgroundFailed =
     state.requestKey === requestKey && state.backgroundFailed === true;
-  const effectiveStatus: MarketDepthStatus =
+  let effectiveStatus: MarketDepthStatus =
     state.requestKey === requestKey ? state.status : "loading";
-  const isLoadingMore = loadingMoreKey === requestKey;
+  if (data) effectiveStatus = "ready";
+  const isLoadingMore =
+    loadingMoreKey === requestKey ||
+    Boolean(rawData && state.requestKey !== requestKey);
   const currentLoadMoreError =
     loadMoreErrorKey === requestKey
       ? t(resolvedLocale, "marketDepth.moreError")
@@ -394,23 +425,46 @@ export default function MarketDepthPanel({
 
   useEffect(() => {
     const abortController = new AbortController();
+    const isCurrent = () => !abortController.signal.aborted;
     void (async () => {
       try {
         const loadedData = await loadDepth(undefined, abortController.signal);
-        if (!abortController.signal.aborted) {
-          setState({
-            status: "ready",
-            data: loadedData,
-            requestKey,
-          });
+        if (!isCurrent()) return;
+        setState({
+          assetKey,
+          status: "ready",
+          data: loadedData,
+          requestKey,
+        });
+        if (requestedOrderHash && loadedData.next) {
+          setLoadingMoreKey(requestKey);
+          try {
+            const complete = await loadCompleteMarketDepth(
+              loadedData,
+              loadDepth,
+              abortController.signal
+            );
+            if (isCurrent()) {
+              setState({
+                assetKey,
+                status: "ready",
+                data: complete,
+                requestKey,
+              });
+            }
+          } catch {
+            if (isCurrent()) setLoadMoreErrorKey(requestKey);
+          } finally {
+            if (isCurrent()) setLoadingMoreKey(null);
+          }
         }
       } catch {
         if (!abortController.signal.aborted) {
-          setState({
-            status: "error",
-            data: null,
-            requestKey,
-          });
+          setState((current) =>
+            current.assetKey === assetKey && current.data
+              ? { ...current, requestKey, backgroundFailed: true }
+              : { assetKey, status: "error", data: null, requestKey }
+          );
         }
       }
     })();
@@ -419,14 +473,15 @@ export default function MarketDepthPanel({
       abortController.abort();
       loadMoreAbortControllerRef.current?.abort();
     };
-  }, [loadDepth, requestKey]);
+  }, [assetKey, loadDepth, requestKey, requestedOrderHash]);
 
   const loadOrders = useCallback(async () => {
     // Opening details takes precedence over a read started before that click.
     interaction.current.generation++;
     if (
-      !data ||
-      (!data.next && loadMoreErrorKey !== requestKey) ||
+      !rawData ||
+      state.requestKey !== requestKey ||
+      (!rawData.next && loadMoreErrorKey !== requestKey) ||
       (loadMoreAbortControllerRef.current &&
         !loadMoreAbortControllerRef.current.signal.aborted)
     ) {
@@ -443,6 +498,7 @@ export default function MarketDepthPanel({
       setState((current) =>
         current.requestKey === capturedRequestKey
           ? {
+              assetKey,
               status: "ready",
               requestKey: capturedRequestKey,
               data: loadedData,
@@ -454,7 +510,7 @@ export default function MarketDepthPanel({
       let completed: ApiMarketDepth;
       try {
         completed = await loadCompleteMarketDepth(
-          data,
+          rawData,
           loadDepth,
           abortController.signal
         );
@@ -483,7 +539,14 @@ export default function MarketDepthPanel({
         setLoadingMoreKey(null);
       }
     }
-  }, [data, loadDepth, loadMoreErrorKey, requestKey]);
+  }, [
+    assetKey,
+    rawData,
+    loadDepth,
+    loadMoreErrorKey,
+    requestKey,
+    state.requestKey,
+  ]);
   const updateBrowsingDepth = useCallback(
     async (signal: AbortSignal) => {
       const generation = interaction.current.generation;
@@ -684,6 +747,30 @@ export default function MarketDepthPanel({
                   hidden={!open}
                   className="[overflow-anchor:none]"
                 >
+                  {requestedOrderHash &&
+                    !data.next &&
+                    !isLoadingMore &&
+                    !currentLoadMoreError &&
+                    !data.orders.some(
+                      (order) =>
+                        order.order_id.toLowerCase() === requestedOrderHash
+                    ) && (
+                      <p
+                        role="status"
+                        className="tw-mb-0 tw-mt-5 tw-text-meta tw-leading-5 tw-text-iron-400"
+                      >
+                        {t(
+                          resolvedLocale,
+                          "marketDepth.orders.requestedNotShown"
+                        )}{" "}
+                        <Link
+                          href="/collect/orders"
+                          className="hover:tw-text-primary-200 tw-text-primary-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+                        >
+                          {t(resolvedLocale, "collect.receipt.viewOrders")}
+                        </Link>
+                      </p>
+                    )}
                   {!hasQuotedLevels && (
                     <p className="tw-mb-0 tw-mt-6 tw-border-0 tw-border-b tw-border-solid tw-border-white/10 tw-pb-6 tw-text-sm tw-text-iron-400">
                       {t(resolvedLocale, "marketDepth.empty")}
@@ -741,6 +828,8 @@ export default function MarketDepthPanel({
                             onLoadOrders={loadOrders}
                             onRefresh={refresh}
                             locale={resolvedLocale}
+                            focusedOrderHash={pendingOrderFocus}
+                            onOrderFocused={finishOrderFocus}
                           />
                         </div>
                       ))}
@@ -758,6 +847,8 @@ export default function MarketDepthPanel({
                     onRefresh={refresh}
                     isLoading={isLoadingMore || data.next !== null}
                     error={currentLoadMoreError}
+                    focusedOrderHash={pendingOrderFocus}
+                    onOrderFocused={finishOrderFocus}
                   />
                   <AboutPrices data={data} locale={resolvedLocale} />
                 </div>
