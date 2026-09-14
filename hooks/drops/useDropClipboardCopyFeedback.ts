@@ -14,7 +14,7 @@ interface UseDropClipboardCopyFeedbackResult {
   readonly copyToClipboard: (
     getText: () => string,
     onCopied?: (() => void) | undefined
-  ) => void;
+  ) => Promise<void> | undefined;
 }
 
 /**
@@ -69,7 +69,7 @@ export function useDropClipboardCopyFeedback(): UseDropClipboardCopyFeedbackResu
       return;
     }
 
-    void clipboard
+    return clipboard
       .writeText(getText())
       .then(() => {
         if (!isMountedRef.current) {

@@ -31,6 +31,12 @@ post**, the wallet chooser, and the **Sign message** step. The sign-in explanati
 confirms address ownership, with no transaction or gas fees. Profile setup and
 Wave permissions still determine participation after authentication.
 
+The drop open/copy record includes the visible **Share** action in an opened
+drop's header, including the artist-badge preview entry path. It describes
+system sharing, confirmed clipboard fallback, silent cancellation, temporary
+drop availability, and the existing Main Stage, Quorum, and direct-message URL
+rules. Sharing a direct-message URL does not grant conversation access.
+
 The Memes submission profile and wallet signing record covers the EIP-712
 **Submit a Meme Card to The Memes** action, readable artwork and destination,
 terms agreement, and submission-only scope with no gas fee. Its five-minute

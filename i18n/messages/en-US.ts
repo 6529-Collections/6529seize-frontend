@@ -2798,6 +2798,15 @@ const MEME_DATA_TABLE_MESSAGES = objectMessages("memeData", {
 const TOKEN_NUMBER_MESSAGE = "Token #{tokenId}";
 
 export const EN_US_MESSAGES = {
+  "singleDrop.share": "Share",
+  "singleDrop.shareLabel": "Share drop",
+  "singleDrop.shared": "Link shared",
+  "singleDrop.close": "Close",
+  "singleDrop.closeLabel": "Close panel",
+  "singleDrop.showChat": "Show chat",
+  "singleDrop.hideChat": "Hide chat",
+  "singleDrop.chatLabel": "Drop chat",
+  "singleDrop.closeChat": "Close chat",
   ...artworkShareMessages,
   ...COLLECT_MESSAGES,
   ...COLLECT_TDH_TARGET_MESSAGES,
