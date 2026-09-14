@@ -288,9 +288,10 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   const { clearWave } = waveMessagesStore;
   const refreshWaveMessages = useCallback(
     (waveId: string) => {
+      if (!clearWave(waveId)) return;
       cancelWaveDataFetch(waveId);
       cancelPaginationFetch(waveId);
-      if (clearWave(waveId)) registerWave(waveId);
+      registerWave(waveId);
     },
     [cancelWaveDataFetch, cancelPaginationFetch, clearWave, registerWave]
   );
