@@ -1,11 +1,14 @@
 import { act, render } from "@testing-library/react";
 import { MyStreamProvider, useMyStream } from "@/contexts/wave/MyStreamContext";
+import { PROFILE_SWITCHED_EVENT } from "@/services/auth/auth.utils";
 
 const mockSetActiveWave = jest.fn();
 const mockRegisterWave = jest.fn();
 const mockSyncNewestMessages = jest.fn();
 const mockFetchNextPage = jest.fn();
 const mockFetchAroundSerialNo = jest.fn();
+const mockCancelWaveDataFetch = jest.fn();
+const mockCancelPaginationFetch = jest.fn();
 
 jest.mock("@/components/notifications/NotificationsContext", () => ({
   useNotificationsContext: jest.fn(() => ({
@@ -69,6 +72,8 @@ jest.mock("@/contexts/wave/hooks/useWaveDataManager", () => ({
     syncNewestMessages: mockSyncNewestMessages,
     fetchNextPage: mockFetchNextPage,
     fetchAroundSerialNo: mockFetchAroundSerialNo,
+    cancelWaveDataFetch: mockCancelWaveDataFetch,
+    cancelPaginationFetch: mockCancelPaginationFetch,
   })),
 }));
 
@@ -136,6 +141,10 @@ const markMobileLaunchStepMock =
 const useWebsocketStatusMock =
   require("@/services/websocket/useWebSocketMessage")
     .useWebsocketStatus as jest.Mock;
+const useWaveMessagesStoreMock =
+  require("@/contexts/wave/hooks/useWaveMessagesStore").default as jest.Mock;
+const defaultWaveMessagesStoreImplementation =
+  useWaveMessagesStoreMock.getMockImplementation();
 
 const setDocumentVisibilityState = (state: DocumentVisibilityState) => {
   Object.defineProperty(document, "visibilityState", {
@@ -182,6 +191,9 @@ describe("MyStreamProvider resume sync", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    useWaveMessagesStoreMock.mockImplementation(
+      defaultWaveMessagesStoreImplementation!
+    );
     setDocumentVisibilityState("visible");
     useCapacitorMock.mockReturnValue({ isCapacitor: false, isActive: true });
     useWebsocketStatusMock.mockReturnValue("disconnected");
@@ -197,6 +209,39 @@ describe("MyStreamProvider resume sync", () => {
     });
     useWavesListMock.mockReturnValue(createListData(mainRefetch));
     useDmWavesListMock.mockReturnValue(createListData(dmRefetch));
+  });
+
+  it("does not let an old profile refresh cancel or restart the current profile's fetches", () => {
+    useWaveMessagesStoreMock.mockImplementation(
+      jest.requireActual("@/contexts/wave/hooks/useWaveMessagesStore").default
+    );
+    let context: ReturnType<typeof useMyStream> | null = null;
+    render(
+      <MyStreamProvider>
+        <CaptureMyStream
+          onContext={(nextContext) => {
+            context = nextContext;
+          }}
+        />
+      </MyStreamProvider>
+    );
+    const staleRefresh = context!.refreshWaveMessages;
+    act(() =>
+      globalThis.dispatchEvent(new CustomEvent(PROFILE_SWITCHED_EVENT))
+    );
+    mockRegisterWave.mockClear();
+    mockCancelWaveDataFetch.mockClear();
+    mockCancelPaginationFetch.mockClear();
+
+    act(() => staleRefresh("wave-1"));
+    expect(mockCancelWaveDataFetch).not.toHaveBeenCalled();
+    expect(mockCancelPaginationFetch).not.toHaveBeenCalled();
+    expect(mockRegisterWave).not.toHaveBeenCalled();
+
+    act(() => context!.refreshWaveMessages("wave-1"));
+    expect(mockCancelWaveDataFetch).toHaveBeenCalledWith("wave-1");
+    expect(mockCancelPaginationFetch).toHaveBeenCalledWith("wave-1");
+    expect(mockRegisterWave).toHaveBeenCalledWith("wave-1");
   });
 
   it("registers selected waves before delegating active wave navigation", () => {
