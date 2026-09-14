@@ -57,6 +57,8 @@ type MobileWrapperDialogProps = {
   readonly backLabel?: string | undefined;
   readonly closeLabel?: string | undefined;
   readonly dismissible?: boolean | undefined;
+  /** Keep focus available when Escape opens a confirmation instead of closing. */
+  readonly preserveFocusOnEscape?: boolean | undefined;
   readonly hideOnDesktopHover?: boolean | undefined;
   /** Preserve an in-progress review while the dialog is closed. */
   readonly keepMounted?: boolean | undefined;
@@ -414,6 +416,7 @@ export default function MobileWrapperDialog({
   backLabel,
   closeLabel,
   dismissible = true,
+  preserveFocusOnEscape = false,
   hideOnDesktopHover = false,
   keepMounted = false,
 }: MobileWrapperDialogProps) {
@@ -517,6 +520,21 @@ export default function MobileWrapperDialog({
         unmount={!keepMounted}
         className={clsx("tailwind-scope tw-absolute", zIndexClassName)}
         onClose={handleClose}
+        onKeyDown={(event) => {
+          // Headless UI blurs focus before calling onClose for Escape. Keep
+          // focus here, but let nested dialogs and portalled controls handle it.
+          if (
+            preserveFocusOnEscape &&
+            !event.defaultPrevented &&
+            event.key === "Escape" &&
+            event.target instanceof Element &&
+            event.target.closest('[role="dialog"], [role="alertdialog"]') ===
+              event.currentTarget
+          ) {
+            event.preventDefault();
+            handleClose();
+          }
+        }}
         aria-label={ariaLabel}
         {...(focusTitleOnOpen ? { initialFocus: titleRef } : {})}
       >
