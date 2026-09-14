@@ -9428,6 +9428,60 @@ paths:
           description: Trade state or idempotency conflict
         "503":
           description: Trading unavailable
+  /market/operations/{id}/preflight:
+    post:
+      tags:
+        - Marketplace
+      summary: Simulate an exact reviewed batch without reserving or sending it
+      description: >-
+        Authenticated BUY_BATCH reviews only. Calls and raw gas estimates use
+        the stored transaction at one fresh Ethereum block. No transaction data
+        or RPC options are accepted. This does not renew the review, change gas
+        caps, or create a send attempt. Per-actor and per-operation throttles
+        fail closed.
+      operationId: preflightMarketBatch
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: market
+        handler:
+          import: "@/api/marketplace/marketplace-batch-preflight.handler"
+          name: handlePreflightMarketBatch
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiMarketBatchPreflightRequest"
+      responses:
+        "200":
+          description: Exact reviewed transaction simulated at the returned block
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMarketBatchPreflight"
+        "400":
+          description: Invalid request
+        "403":
+          description: Original paying wallet and current profile required
+        "404":
+          description: Operation not found
+        "409":
+          description: Review changed, expired, or cannot be simulated
+        "429":
+          description: Another check is running or checks were requested too quickly
+        "503":
+          description: Preflight or its rate limiter is unavailable
   /market/operations/{id}/send-attempts:
     post:
       tags:
@@ -28928,6 +28982,63 @@ components:
         - execution_policy
         - items
         - approval_transactions
+    ApiMarketBatchPreflight:
+      type: object
+      additionalProperties: false
+      description: >-
+        Read-only simulation of the exact stored BUY_BATCH transaction. Both
+        call and raw gas estimate are pinned to this block; its hash is checked
+        again before responding. This result does not authorize sending or
+        extend the original review expiry. Existing send-arming checks remain
+        mandatory.
+      properties:
+        operation_id:
+          type: string
+          format: uuid
+        revision:
+          type: string
+          pattern: ^[0-9a-f]{64}$
+        transaction_digest:
+          type: string
+          pattern: ^[0-9a-f]{64}$
+        estimated_gas:
+          type: string
+          pattern: ^[1-9][0-9]{0,77}$
+          maxLength: 78
+          description: Raw eth_estimateGas result, without a safety multiplier
+        block_number:
+          type: integer
+          format: int64
+          minimum: 1
+        block_hash:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{64}$
+        block_timestamp:
+          type: integer
+          format: int64
+          minimum: 1
+          description: Ethereum block timestamp in Unix seconds
+      required:
+        - operation_id
+        - revision
+        - transaction_digest
+        - estimated_gas
+        - block_number
+        - block_hash
+        - block_timestamp
+    ApiMarketBatchPreflightRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        expected_revision:
+          type: string
+          pattern: ^[0-9a-f]{64}$
+        transaction_digest:
+          type: string
+          pattern: ^[0-9a-f]{64}$
+      required:
+        - expected_revision
+        - transaction_digest
     ApiMarketBatchPrepareRequest:
       type: object
       additionalProperties: false
