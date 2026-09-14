@@ -9,6 +9,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useCallback, useMemo, useReducer } from "react";
 import type { MemesSubmissionInitialDraft } from "../utils/submissionDraft";
 import { SubmissionStep } from "../types/Steps";
+import type { ProposalCardLayout } from "@/lib/proposal-card/document";
 import {
   createInitialState,
   formReducer,
@@ -89,6 +90,9 @@ export function useArtworkSubmissionForm(
     shouldApplyProfileDefaults: !isDraftInitialized,
   });
   const mediaControls = useArtworkSubmissionMediaControls({ state, dispatch });
+  const setProposalFrame = useCallback((layout: ProposalCardLayout | null) => {
+    dispatch({ type: "SET_PROPOSAL_FRAME", payload: layout });
+  }, []);
   const traits = useMemo(
     () =>
       profileHandle
@@ -102,6 +106,8 @@ export function useArtworkSubmissionForm(
   );
 
   return {
+    proposalFrame: state.proposalFrame,
+    setProposalFrame,
     currentStep: agreements ? state.currentStep : SubmissionStep.AGREEMENT,
     agreements,
     agreementReviewRequired: state.acceptedAgreement !== null && !agreements,

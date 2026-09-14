@@ -103,11 +103,15 @@ export function MemesArtSubmissionStepContent({
     case SubmissionStep.ARTWORK:
       return (
         <ArtworkStep
+          proposalFrame={form.proposalFrame}
+          onProposalFrameChange={form.setProposalFrame}
           traits={form.traits}
           artworkUploaded={form.artworkUploaded}
           artworkUrl={form.artworkUrl}
           uploadError={form.uploadError}
-          artworkMimeType={form.existingMedia?.mimeType ?? null}
+          artworkMimeType={
+            form.selectedFile?.type ?? form.existingMedia?.mimeType ?? null
+          }
           setArtworkUploaded={form.setArtworkUploaded}
           handleFileSelect={form.handleFileSelect}
           mediaSource={form.mediaSource}
@@ -142,6 +146,21 @@ export function MemesArtSubmissionStepContent({
       if (isPreviewMode && previewDrop) {
         return (
           <MemesSubmissionPreviewScreen
+            proposalCard={
+              form.proposalFrame
+                ? {
+                    layout: form.proposalFrame,
+                    title: form.traits.title,
+                    mediaUrl: form.artworkUrl,
+                    mimeType:
+                      form.mediaSource === "url"
+                        ? form.externalMediaMimeType
+                        : (form.selectedFile?.type ??
+                          form.existingMedia?.mimeType ??
+                          "image/png"),
+                  }
+                : undefined
+            }
             previewDrop={previewDrop}
             onBackToEdit={onBackToEdit}
             onSubmit={onSubmitClick}

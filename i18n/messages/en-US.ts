@@ -2804,6 +2804,22 @@ const MEME_DATA_TABLE_MESSAGES = objectMessages("memeData", {
 const TOKEN_NUMBER_MESSAGE = "Token #{tokenId}";
 
 export const EN_US_MESSAGES = {
+  "memes.proposalFrame.enable": "Add a proposal card frame (optional)",
+  "memes.proposalFrame.description":
+    "This card has plans. Add an animated border that says this is a proposal and the artwork may change. Your media will be embedded in an HTML artwork.",
+  "memes.proposalFrame.orientation": "Frame orientation",
+  "memes.proposalFrame.portrait": "Vertical",
+  "memes.proposalFrame.landscape": "Horizontal",
+  "memes.proposalFrame.preview": "Proposal frame preview",
+  "memes.proposalFrame.artwork": "Proposal artwork",
+  "memes.proposalFrame.missingTitle":
+    "Add an artwork title before creating the proposal frame.",
+  "memes.proposalFrame.publishError":
+    "Unable to prepare the proposal card. Please try again.",
+  "memes.proposalFrame.missingPreview":
+    "Add a preview image for this proposal card.",
+  "memes.proposalFrame.previewError":
+    "Unable to prepare the proposal frame preview. Please try again.",
   "singleDrop.share": "Share",
   "singleDrop.shareLabel": "Share drop",
   "singleDrop.shared": "Link shared",

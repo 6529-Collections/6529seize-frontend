@@ -13,6 +13,11 @@ import type {
 } from "../types/OperationalData";
 import { AIRDROP_TOTAL } from "../types/OperationalData";
 import type { TraitsData } from "../types/TraitsData";
+import {
+  parseProposalFrameMetadata,
+  PROPOSAL_FRAME_METADATA_KEY,
+} from "@/lib/proposal-card/metadata";
+import type { ProposalCardLayout } from "@/lib/proposal-card/document";
 
 export interface ExistingSubmissionMedia {
   readonly url: string;
@@ -20,6 +25,7 @@ export interface ExistingSubmissionMedia {
 }
 
 export interface MemesSubmissionInitialDraft {
+  readonly proposalFrame?: ProposalCardLayout | null;
   readonly traits: TraitsData;
   readonly operationalData: OperationalData;
   readonly existingMedia: ExistingSubmissionMedia | null;
@@ -222,9 +228,20 @@ const buildExistingMediaDraft = (
 
 export const buildMemesSubmissionDraftFromDrop = (
   drop: ApiDrop
-): MemesSubmissionInitialDraft => ({
-  traits: buildTraitsDraft(drop),
-  operationalData: buildOperationalDataDraft(drop),
-  existingMedia: buildExistingMediaDraft(drop),
-  isAdditionalActionPromised: drop.is_additional_action_promised === true,
-});
+): MemesSubmissionInitialDraft => {
+  const frame = parseProposalFrameMetadata(
+    buildMetadataMap(drop).get(PROPOSAL_FRAME_METADATA_KEY)
+  );
+  const operationalData = buildOperationalDataDraft(drop);
+  if (frame)
+    operationalData.additional_media.preview_image = frame.preview_image;
+  return {
+    traits: buildTraitsDraft(drop),
+    operationalData,
+    existingMedia: frame
+      ? { url: frame.media_url, mimeType: frame.mime_type }
+      : buildExistingMediaDraft(drop),
+    ...(frame ? { proposalFrame: frame.layout } : {}),
+    isAdditionalActionPromised: drop.is_additional_action_promised === true,
+  };
+};
