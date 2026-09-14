@@ -44,13 +44,7 @@ export async function generateMetadata({
     publicationState.publication,
     workId
   );
-  const metadata = await getMuseumObjectMetadata(canonicalId ?? workId);
-  return {
-    ...metadata,
-    ...(canonicalId === null
-      ? {}
-      : { alternates: { canonical: museumWorkHref(canonicalId) } }),
-  };
+  return getMuseumObjectMetadata(canonicalId ?? workId, publicationState);
 }
 
 export default async function MuseumWorkRoute({

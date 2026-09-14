@@ -33,6 +33,7 @@ import { hasMuseumMagnumInstitutionalDisplayRights } from "@/lib/museum/publicat
 import { selectMuseumPublicWorkDocuments } from "@/lib/museum/publication/typedDocuments";
 import type {
   MuseumPublication,
+  MuseumPublicationLoadState,
   MuseumPublicWork,
 } from "@/lib/museum/publication/types";
 import { selectMuseumStillMedia } from "@/lib/museum/publication/mediaSelection";
@@ -55,25 +56,68 @@ import { buildMuseumSignedWaveStormDropUrl } from "@/lib/museum/publication";
 import { museumWorkHrefIndex } from "@/lib/museum/publication/routes";
 
 export async function getMuseumObjectMetadata(
-  objectId: string
+  objectId: string,
+  suppliedPublicationState?: MuseumPublicationLoadState
 ): Promise<Metadata> {
-  const artwork = getCaseyArtwork(objectId);
-  if (artwork !== null) {
-    return getAppMetadata({
-      title: artwork.title,
-      description: artwork.visualDescription,
-    });
+  const publicationState =
+    suppliedPublicationState ?? (await getMuseumPublicationState());
+  if (publicationState.publication === null) {
+    return getAppMetadata(
+      {
+        title: t(DEFAULT_LOCALE, "museum.network.objects.title"),
+        description: t(DEFAULT_LOCALE, "museum.network.objects.description"),
+      },
+      { robots: { index: false, follow: true } }
+    );
   }
 
-  const publicationState = await getMuseumPublicationState();
-  const publicWork = publicationState.publication?.works?.find(
-    (work) => work.id === objectId
+  const publication = publicationState.publication;
+  const canonicalEntity = publication.entityGraph?.entities.find(
+    (entity) =>
+      (entity.id === objectId || entity.sourceRecordIds.includes(objectId)) &&
+      entity.entityStatus === "published" &&
+      entity.pageExposure === "canonical_page" &&
+      entity.canonicalRoute !== null
   );
+  const metadataOptions = {
+    canonicalPath: canonicalEntity?.canonicalRoute ?? undefined,
+    robots: { index: canonicalEntity !== undefined, follow: true },
+  };
+  const artwork =
+    [objectId, ...(canonicalEntity?.sourceRecordIds ?? [])]
+      .map((candidateId) => getCaseyArtwork(candidateId))
+      .find((candidate) => candidate !== null) ?? null;
+  if (artwork !== null) {
+    const artistName = getMuseumWorkArtistName(
+      publication,
+      canonicalEntity?.id
+    );
+    const creatorLabel = artistName ? ` by ${artistName}` : "";
+    return getAppMetadata(
+      {
+        title: `${artwork.title}${creatorLabel} — 6529 Network Museum`,
+        description: artwork.visualDescription,
+      },
+      metadataOptions
+    );
+  }
+
+  const publicWork = publication.works?.find((work) => work.id === objectId);
   if (publicWork !== undefined) {
-    return getAppMetadata({
-      title: publicWork.title,
-      description: publicWork.title,
-    });
+    const artistName = getMuseumWorkArtistName(
+      publication,
+      canonicalEntity?.id
+    );
+    const title = artistName
+      ? `${publicWork.title} by ${artistName} — 6529 Network Museum`
+      : `${publicWork.title} — 6529 Network Museum`;
+    return getAppMetadata(
+      {
+        title,
+        description: publicWork.title,
+      },
+      metadataOptions
+    );
   }
 
   const view = await getMuseumView();
@@ -84,10 +128,32 @@ export async function getMuseumObjectMetadata(
     outcome === undefined || outcome.scope.trim().length === 0
       ? t(DEFAULT_LOCALE, "museum.network.objects.description")
       : outcome.scope;
-  return getAppMetadata({
-    title: outcome?.title ?? t(DEFAULT_LOCALE, "museum.network.objects.title"),
-    description,
-  });
+  return getAppMetadata(
+    {
+      title:
+        outcome?.title ?? t(DEFAULT_LOCALE, "museum.network.objects.title"),
+      description,
+    },
+    { robots: { index: false, follow: true } }
+  );
+}
+
+function getMuseumWorkArtistName(
+  publication: MuseumPublication,
+  workEntityId: string | undefined
+): string | undefined {
+  if (!workEntityId || !publication.entityGraph) return undefined;
+  const relation = publication.entityGraph.relations.find(
+    (candidate) =>
+      candidate.relationType === "ARTIST_CREATES_WORK" &&
+      candidate.targetEntityId === workEntityId
+  );
+  if (!relation) return undefined;
+  return publication.entityGraph.entities.find(
+    (entity) =>
+      entity.id === relation.sourceEntityId &&
+      entity.entityStatus === "published"
+  )?.label;
 }
 
 function MuseumCanonicalWorkMedia({

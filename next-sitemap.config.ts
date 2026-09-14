@@ -1,9 +1,44 @@
 import type { IConfig, ISitemapField } from "next-sitemap";
+import {
+  getNftSitemapFocuses,
+  type NftCollectionRoute,
+} from "@/helpers/seo/nft-route-policy";
+import { getMuseumPublicationBundle } from "@/lib/museum/publication/runtimeBundle";
+import type {
+  MuseumPublicationLoadState,
+  MuseumPublicEntityRecord,
+} from "@/lib/museum/publication/types";
 
 const SITE_URL = "https://6529.io";
 const API_BASE_URL = "https://api.6529.io/api";
 const API_SITEMAP_BASE_URL = "https://api.6529.io/sitemap";
 const SITEMAP_PAGE_GUARD = 1_000;
+const SITEMAP_REQUEST_TIMEOUT_MS = 15_000;
+
+export const STATIC_INDEXABLE_PATHS = [
+  "/",
+  "/discover",
+  "/the-memes",
+  "/meme-lab",
+  "/6529-gradient",
+  "/nextgen",
+  "/waves",
+  "/education",
+  "/education/tweetstorms",
+  "/education/podcasts",
+  "/education/education-collaboration-form",
+  "/join-6529",
+  "/network",
+  "/network/tdh",
+  "/network/xtdh",
+  "/about",
+  "/about/6529-apps",
+  "/museum",
+  "/blog/from-fibonacci-to-fidenza",
+  "/blog/disney-deekay-their-secret-to-animation",
+  "/blog/a-tale-of-two-artists",
+  "/news/introducing-om",
+] as const;
 
 const ABOUT_SECTIONS = [
   "the-memes",
@@ -29,17 +64,8 @@ const ABOUT_SECTIONS = [
   "copyright",
 ] as const;
 
-const INDEXABLE_NFT_FOCUS_VARIATIONS = [
-  "live",
-  "the-art",
-  "collectors",
-  "activity",
-  "timeline",
-] as const;
-
 const NEXTGEN_COLLECTION_SUBPAGES = [
   "art",
-  "mint",
   "distribution-plan",
   "trait-sets",
 ] as const;
@@ -48,13 +74,16 @@ const EXACT_EXCLUDED_PATHS = new Set([
   "/accept-connection-sharing",
   "/access",
   "/artwork-documentation",
+  "/buidl",
   "/cdn-cgi/l/email-protection",
+  "/content-preferences",
   "/error",
   "/messages",
   "/messages/create",
   "/nextgen/manager",
   "/notifications",
   "/open-mobile",
+  "/preferences",
   "/restricted",
   "/stream",
   "/sentry-example-page",
@@ -63,7 +92,16 @@ const EXACT_EXCLUDED_PATHS = new Set([
   "/waves/create",
 ]);
 
-const PREFIX_EXCLUDED_PATHS = ["/reviews/", "/artwork-documentation/"] as const;
+const PREFIX_EXCLUDED_PATHS = [
+  "/reviews/",
+  "/artwork-documentation/",
+  "/messages/",
+  "/notifications/",
+  "/auth/",
+  "/setup/",
+  "/builders/",
+  "/managers/",
+] as const;
 const LEGACY_MUSEUM_PREFIXES = [
   "/museum/network/accessions",
   "/museum/network/collection/",
@@ -118,6 +156,12 @@ export const MUSEUM_STATIC_CANONICAL_PATHS = [
   "/museum/network/about/governance",
 ] as const;
 
+const STATIC_PATH_SET = new Set<string>([
+  ...STATIC_INDEXABLE_PATHS,
+  ...ABOUT_SECTIONS.map((section) => `/about/${section}`),
+  ...MUSEUM_STATIC_CANONICAL_PATHS,
+]);
+
 type SitemapPathOptions = {
   readonly changefreq: NonNullable<ISitemapField["changefreq"]>;
   readonly priority: number;
@@ -141,6 +185,25 @@ const ROUTE_OVERRIDES = new Map<string, RouteOverride>([
 ]);
 
 type FetchJson = (url: string) => Promise<unknown>;
+type MuseumBundleLoader = typeof getMuseumPublicationBundle;
+type SitemapBuildOptions = {
+  readonly minimumItems?: Partial<Record<SitemapFeedName, number>>;
+};
+type SitemapFeedName =
+  | "memes"
+  | "meme-lab"
+  | "gradient"
+  | "nextgen-tokens"
+  | "nextgen-collections"
+  | "public-waves";
+const MINIMUM_SOURCE_ITEMS: Readonly<Record<SitemapFeedName, number>> = {
+  memes: 500,
+  "meme-lab": 60,
+  gradient: 100,
+  "nextgen-tokens": 900,
+  "nextgen-collections": 1,
+  "public-waves": 800,
+};
 
 interface CursorPaginatedResponse<T> {
   readonly data: readonly T[];
@@ -156,12 +219,14 @@ interface PublicWave {
   readonly id: string;
   readonly created_at?: number | null;
   readonly last_drop_time?: number | null;
-  readonly is_dm_wave?: boolean | null;
-  readonly is_private?: boolean | null;
+  readonly is_dm_wave: boolean;
+  readonly is_private: boolean;
 }
 
 const defaultFetchJson: FetchJson = async (url) => {
-  const response = await fetch(url);
+  const response = await fetch(url, {
+    signal: AbortSignal.timeout(SITEMAP_REQUEST_TIMEOUT_MS),
+  });
   if (!response.ok) {
     throw new Error(`Sitemap request failed: ${response.status} ${url}`);
   }
@@ -170,6 +235,9 @@ const defaultFetchJson: FetchJson = async (url) => {
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value);
+
+const isBoundedString = (value: unknown, max = 200): value is string =>
+  typeof value === "string" && value.trim().length > 0 && value.length <= max;
 
 const toLastmod = (timestamp: number | null | undefined): string | undefined =>
   typeof timestamp === "number" && Number.isFinite(timestamp)
@@ -181,6 +249,38 @@ const formatNameForUrl = (name: string): string =>
 
 const apiSitemapUrl = (apiPath: string): string =>
   `${API_SITEMAP_BASE_URL}/${apiPath}`;
+
+function withTimeout<T>(promise: Promise<T>, url: string): Promise<T> {
+  let timeout: ReturnType<typeof setTimeout> | undefined;
+  const expiration = new Promise<never>((_, reject) => {
+    timeout = setTimeout(
+      () => reject(new Error(`Sitemap request timed out: ${url}`)),
+      SITEMAP_REQUEST_TIMEOUT_MS
+    );
+  });
+  return Promise.race([promise, expiration]).finally(() => {
+    if (timeout) clearTimeout(timeout);
+  });
+}
+
+function assertCursorContinuation(
+  next: string,
+  expectedPathname: string
+): void {
+  let parsed: URL;
+  try {
+    parsed = new URL(next);
+  } catch {
+    throw new Error(`Invalid sitemap continuation URL: ${next}`);
+  }
+  if (
+    parsed.protocol !== "https:" ||
+    parsed.origin !== "https://api.6529.io" ||
+    parsed.pathname !== expectedPathname
+  ) {
+    throw new Error(`Unexpected sitemap continuation URL: ${next}`);
+  }
+}
 
 function assertCursorPaginatedResponse<T>(
   value: unknown,
@@ -216,6 +316,8 @@ export async function fetchCursorPaginatedData<T>(
   const results: T[] = [];
   let nextPage: string | null = url;
   let pages = 0;
+  const visited = new Set<string>();
+  const expectedPathname = new URL(url).pathname;
 
   while (nextPage) {
     pages += 1;
@@ -225,9 +327,17 @@ export async function fetchCursorPaginatedData<T>(
       );
     }
 
-    const response = await fetchJson(nextPage);
+    if (visited.has(nextPage)) {
+      throw new Error(`Sitemap pagination cycle detected: ${nextPage}`);
+    }
+    visited.add(nextPage);
+
+    const response: unknown = await withTimeout(fetchJson(nextPage), nextPage);
     assertCursorPaginatedResponse<T>(response, nextPage);
     results.push(...response.data);
+    if (response.next !== null) {
+      assertCursorContinuation(response.next, expectedPathname);
+    }
     nextPage = response.next;
   }
 
@@ -249,7 +359,7 @@ export async function fetchNumberedPaginatedData<T>(
     }
 
     const url = buildUrl(page);
-    const response = await fetchJson(url);
+    const response = await withTimeout(fetchJson(url), url);
     assertNumberedPaginatedResponse<T>(response, url);
     results.push(...response.data);
 
@@ -273,10 +383,13 @@ function createSitemapPath(
   };
 }
 
-export function getNftSitemapPaths(basePath: string): ISitemapField[] {
+export function getNftSitemapPaths(
+  basePath: string,
+  collection: NftCollectionRoute = "the-memes"
+): ISitemapField[] {
   return [
     createSitemapPath(basePath, { changefreq: "daily", priority: 0.8 }),
-    ...INDEXABLE_NFT_FOCUS_VARIATIONS.map((focus) =>
+    ...getNftSitemapFocuses(collection).map((focus) =>
       createSitemapPath(`${basePath}?focus=${focus}`, {
         changefreq: "daily",
         priority: 0.55,
@@ -286,16 +399,21 @@ export function getNftSitemapPaths(basePath: string): ISitemapField[] {
 }
 
 async function getNftCollectionPaths(
-  sitePath: string,
+  sitePath: NftCollectionRoute,
   apiPath: string,
   fetchJson: FetchJson
 ): Promise<ISitemapField[]> {
-  const ids = await fetchCursorPaginatedData<string>(
+  const ids = await fetchCursorPaginatedData<unknown>(
     apiSitemapUrl(apiPath),
     fetchJson
   );
 
-  return ids.flatMap((id) => getNftSitemapPaths(`${sitePath}/${id}`));
+  return ids.flatMap((id) => {
+    if (typeof id !== "number" || !Number.isSafeInteger(id) || id < 1) {
+      throw new Error(`Invalid ${apiPath} sitemap item`);
+    }
+    return getNftSitemapPaths(`${sitePath}/${id}`, sitePath);
+  });
 }
 
 async function getPlainApiSitemapPaths(
@@ -304,12 +422,15 @@ async function getPlainApiSitemapPaths(
   fetchJson: FetchJson,
   priority = 0.7
 ): Promise<ISitemapField[]> {
-  const ids = await fetchCursorPaginatedData<string | number>(
+  const ids = await fetchCursorPaginatedData<unknown>(
     apiSitemapUrl(apiPath),
     fetchJson
   );
 
   return ids.map((id) => {
+    if (typeof id !== "number" || !Number.isSafeInteger(id) || id < 0) {
+      throw new Error(`Invalid ${apiPath} sitemap item`);
+    }
     const encodedId = encodeURIComponent(String(id));
     return createSitemapPath(`/${sitePath}/${encodedId}`, {
       changefreq: "daily",
@@ -321,12 +442,15 @@ async function getPlainApiSitemapPaths(
 export async function getNextgenCollectionPaths(
   fetchJson: FetchJson = defaultFetchJson
 ): Promise<ISitemapField[]> {
-  const collectionNames = await fetchCursorPaginatedData<string>(
+  const collectionNames = await fetchCursorPaginatedData<unknown>(
     apiSitemapUrl("nextgen/collections"),
     fetchJson
   );
 
   return collectionNames.flatMap((collectionName) => {
+    if (!isBoundedString(collectionName, 160)) {
+      throw new Error("Invalid nextgen collection sitemap item");
+    }
     const basePath = `/nextgen/collection/${formatNameForUrl(collectionName)}`;
     return [
       createSitemapPath(basePath, { changefreq: "weekly", priority: 0.75 }),
@@ -353,15 +477,28 @@ export async function getPublicWavePaths(
     return `${API_BASE_URL}/v2/waves?${params.toString()}`;
   }, fetchJson);
 
-  return waves
-    .filter((wave) => wave.id && !wave.is_private && !wave.is_dm_wave)
-    .map((wave) =>
-      createSitemapPath(`/waves/${encodeURIComponent(wave.id)}`, {
-        changefreq: "hourly",
-        priority: 0.75,
-        lastmod: toLastmod(wave.last_drop_time ?? wave.created_at),
-      })
-    );
+  return waves.flatMap((wave) => {
+    if (
+      !isRecord(wave) ||
+      !isBoundedString(wave.id) ||
+      typeof wave.is_private !== "boolean" ||
+      typeof wave.is_dm_wave !== "boolean"
+    ) {
+      throw new Error("Invalid public wave sitemap item");
+    }
+    const publicWave = wave as PublicWave;
+    return publicWave.is_private || publicWave.is_dm_wave
+      ? []
+      : [
+          createSitemapPath(`/waves/${encodeURIComponent(publicWave.id)}`, {
+            changefreq: "hourly",
+            priority: 0.75,
+            lastmod: toLastmod(
+              publicWave.last_drop_time ?? publicWave.created_at
+            ),
+          }),
+        ];
+  });
 }
 
 function getAboutPaths(): ISitemapField[] {
@@ -379,91 +516,119 @@ function getMuseumCanonicalPaths(): ISitemapField[] {
   );
 }
 
-function dedupeSitemapFields(paths: readonly ISitemapField[]): ISitemapField[] {
+function getStrategicStaticPaths(): ISitemapField[] {
+  return STATIC_INDEXABLE_PATHS.map((loc) =>
+    createSitemapPath(loc, getRouteOverride(loc))
+  );
+}
+
+function assertSourceFloor(
+  name: SitemapFeedName,
+  emittedCount: number,
+  multiplier: number,
+  options: SitemapBuildOptions
+): void {
+  const minimum = options.minimumItems?.[name] ?? MINIMUM_SOURCE_ITEMS[name];
+  if (emittedCount / multiplier < minimum) {
+    throw new Error(`Sitemap ${name} inventory fell below its required floor`);
+  }
+}
+
+export function validateSitemapFields(
+  paths: readonly ISitemapField[]
+): ISitemapField[] {
   const pathsByLocation = new Map<string, ISitemapField>();
   for (const path of paths) {
-    if (!pathsByLocation.has(path.loc)) {
-      pathsByLocation.set(path.loc, path);
+    const url = new URL(path.loc, SITE_URL);
+    if (
+      url.origin !== SITE_URL ||
+      url.hash ||
+      shouldExcludeSitemapPath(`${url.pathname}${url.search}`)
+    ) {
+      throw new Error(`Invalid sitemap location: ${path.loc}`);
+    }
+    for (const key of url.searchParams.keys()) {
+      if (
+        key !== "focus" ||
+        !["activity", "collectors", "timeline", "references"].includes(
+          url.searchParams.get(key) ?? ""
+        )
+      ) {
+        throw new Error(`Unreviewed sitemap query parameter: ${path.loc}`);
+      }
+    }
+    const normalized = `${url.pathname}${url.search}`;
+    if (!pathsByLocation.has(normalized)) {
+      pathsByLocation.set(normalized, { ...path, loc: normalized });
       continue;
     }
 
-    const existingPath = pathsByLocation.get(path.loc);
+    const existingPath = pathsByLocation.get(normalized);
     if (
       existingPath &&
       (existingPath.changefreq !== path.changefreq ||
         existingPath.priority !== path.priority ||
         existingPath.lastmod !== path.lastmod)
     ) {
-      console.warn(
-        `dedupeSitemapFields discarded duplicate sitemap path with different metadata: ${path.loc}`
+      throw new Error(
+        `Duplicate sitemap location with conflicting metadata: ${normalized}`
       );
     }
   }
   return Array.from(pathsByLocation.values());
 }
 
-function getSettledSitemapPaths(
-  result: PromiseSettledResult<ISitemapField[]>,
-  label: string
+function getMuseumEntityPaths(
+  state: MuseumPublicationLoadState
 ): ISitemapField[] {
-  if (result.status === "fulfilled") {
-    return result.value;
+  if (state.status === "unavailable") {
+    throw new Error(
+      `Museum sitemap publication unavailable: ${state.errorCode}`
+    );
   }
+  const graph = state.publication.entityGraph;
+  if (graph === undefined) {
+    throw new Error(
+      "Museum sitemap requires an accepted publication entity graph"
+    );
+  }
+  return graph.entities.flatMap((entity: MuseumPublicEntityRecord) => {
+    if (
+      entity.entityStatus !== "published" ||
+      entity.pageExposure !== "canonical_page" ||
+      !entity.canonicalRoute
+    ) {
+      return [];
+    }
 
-  console.error(`Sitemap generation failed for ${label}:`, result.reason);
-  return [];
+    let canonicalRoute: string | null = null;
+    if (
+      entity.entityType === "WORK" &&
+      /^6529NM-W-[0-9]{4}$/u.test(entity.id)
+    ) {
+      canonicalRoute = `/museum/network/works/${entity.id}`;
+    } else if (entity.entityType === "ARTIST" && entity.slug) {
+      canonicalRoute = `/museum/network/artists/${entity.slug}`;
+    }
+
+    if (canonicalRoute === null || entity.canonicalRoute !== canonicalRoute) {
+      return [];
+    }
+
+    return [
+      createSitemapPath(canonicalRoute, {
+        changefreq: "monthly",
+        priority: 0.6,
+      }),
+    ];
+  });
 }
 
 export async function buildAdditionalSitemapPaths(
-  fetchJson: FetchJson = defaultFetchJson
+  fetchJson: FetchJson = defaultFetchJson,
+  getMuseumBundle: MuseumBundleLoader = getMuseumPublicationBundle,
+  options: SitemapBuildOptions = {}
 ): Promise<ISitemapField[]> {
-  const sitemapFeeds = [
-    {
-      label: "memes",
-      promise: getNftCollectionPaths("/the-memes", "memes", fetchJson),
-    },
-    {
-      label: "gradient",
-      promise: getPlainApiSitemapPaths(
-        "6529-gradient",
-        "gradient",
-        fetchJson,
-        0.7
-      ),
-    },
-    {
-      label: "meme-lab",
-      promise: getNftCollectionPaths("/meme-lab", "meme-lab", fetchJson),
-    },
-    {
-      label: "nextgen-tokens",
-      promise: getPlainApiSitemapPaths(
-        "nextgen/token",
-        "nextgen/tokens",
-        fetchJson,
-        0.7
-      ),
-    },
-    {
-      label: "nextgen-collections",
-      promise: getNextgenCollectionPaths(fetchJson),
-    },
-    {
-      label: "public-waves",
-      promise: getPublicWavePaths(fetchJson),
-    },
-  ] as const;
-
-  const settledFeeds = await Promise.allSettled(
-    sitemapFeeds.map((feed) => feed.promise)
-  );
-  const pathGroups = settledFeeds.map((result, index) =>
-    getSettledSitemapPaths(
-      result,
-      sitemapFeeds[index]?.label ?? `feed-${index}`
-    )
-  );
-
   const [
     memesPaths,
     gradientPaths,
@@ -471,17 +636,49 @@ export async function buildAdditionalSitemapPaths(
     nextgenTokensPaths,
     nextgenCollectionPaths,
     publicWavePaths,
-  ] = pathGroups;
+    museumBundle,
+  ] = await Promise.all([
+    getNftCollectionPaths("the-memes", "memes", fetchJson),
+    getPlainApiSitemapPaths("6529-gradient", "gradient", fetchJson, 0.7),
+    getNftCollectionPaths("meme-lab", "meme-lab", fetchJson),
+    getPlainApiSitemapPaths("nextgen/token", "nextgen/tokens", fetchJson, 0.7),
+    getNextgenCollectionPaths(fetchJson),
+    getPublicWavePaths(fetchJson),
+    getMuseumBundle(),
+  ]);
+  assertSourceFloor(
+    "memes",
+    memesPaths.length,
+    1 + getNftSitemapFocuses("the-memes").length,
+    options
+  );
+  assertSourceFloor(
+    "meme-lab",
+    memeLabPaths.length,
+    1 + getNftSitemapFocuses("meme-lab").length,
+    options
+  );
+  assertSourceFloor("gradient", gradientPaths.length, 1, options);
+  assertSourceFloor("nextgen-tokens", nextgenTokensPaths.length, 1, options);
+  assertSourceFloor(
+    "nextgen-collections",
+    nextgenCollectionPaths.length,
+    1 + NEXTGEN_COLLECTION_SUBPAGES.length,
+    options
+  );
+  assertSourceFloor("public-waves", publicWavePaths.length, 1, options);
 
-  return dedupeSitemapFields([
+  return validateSitemapFields([
+    ...getStrategicStaticPaths(),
     ...getAboutPaths(),
     ...getMuseumCanonicalPaths(),
-    ...(memesPaths ?? []),
-    ...(gradientPaths ?? []),
-    ...(memeLabPaths ?? []),
-    ...(nextgenTokensPaths ?? []),
-    ...(nextgenCollectionPaths ?? []),
-    ...(publicWavePaths ?? []),
+    ...getMuseumEntityPaths(museumBundle.publicationState),
+    ...memesPaths,
+    ...gradientPaths,
+    ...memeLabPaths,
+    ...nextgenTokensPaths,
+    ...nextgenCollectionPaths,
+    ...publicWavePaths,
   ]);
 }
 
@@ -490,7 +687,10 @@ export function shouldExcludeSitemapPath(path: string): boolean {
   return (
     EXACT_EXCLUDED_PATHS.has(pathname) ||
     PREFIX_EXCLUDED_PATHS.some((prefix) => pathname.startsWith(prefix)) ||
-    LEGACY_MUSEUM_PREFIXES.some((prefix) => pathname.startsWith(prefix))
+    LEGACY_MUSEUM_PREFIXES.some((prefix) => pathname.startsWith(prefix)) ||
+    /^\/(?!about\/)[^/]+\/(subscriptions|brain|cms(?:\/|$)|builder(?:\/|$))/u.test(
+      pathname
+    )
   );
 }
 
@@ -551,13 +751,14 @@ const config: IConfig = {
   ],
   additionalPaths: async () => buildAdditionalSitemapPaths(),
   transform: async (_config, path): Promise<ISitemapField | undefined> => {
-    if (shouldExcludeSitemapPath(path)) {
+    const pathname = path.split(/[?#]/)[0] ?? path;
+    if (shouldExcludeSitemapPath(path) || !STATIC_PATH_SET.has(pathname)) {
       return undefined;
     }
 
     const override = getRouteOverride(path);
     return {
-      loc: path,
+      loc: pathname,
       changefreq: override.changefreq,
       priority: override.priority,
     };

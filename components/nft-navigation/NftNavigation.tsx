@@ -46,40 +46,60 @@ export default function NftNavigation(
   function printNavigation() {
     return (
       <span className="tw-flex tw-items-center tw-justify-center tw-gap-2">
-        <Link
-          href={`${props.path}/${props.nftId - 1}${query}`}
-          aria-label="Previous NFT"
-          aria-disabled={isFirst}
-          title="Previous Card"
-          className={`tw-group tw-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/[0.2] tw-bg-iron-800 tw-text-iron-200 tw-shadow-[0_4px_12px_rgba(0,0,0,0.5)] tw-transition-colors tw-duration-150 hover:tw-border-white/30 hover:tw-bg-iron-700 hover:tw-text-white motion-reduce:tw-transition-none ${
-            isFirst
-              ? "tw-pointer-events-none tw-cursor-default tw-border-iron-800 tw-bg-iron-950/70 tw-text-iron-500 tw-opacity-100 tw-shadow-none"
-              : ""
-          }`}
-        >
-          <ChevronLeftIcon
-            data-testid="icon"
-            strokeWidth={2}
-            className="tw-h-[18px] tw-w-[18px] tw-transition-transform tw-duration-150 group-hover:-tw-translate-x-0.5 motion-reduce:tw-transition-none"
-          />
-        </Link>
-        <Link
-          href={`${props.path}/${props.nftId + 1}${query}`}
-          aria-label="Next NFT"
-          aria-disabled={isLast}
-          title="Next Card"
-          className={`tw-group tw-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/[0.2] tw-bg-iron-800 tw-text-iron-200 tw-shadow-[0_4px_12px_rgba(0,0,0,0.5)] tw-transition-colors tw-duration-150 hover:tw-border-white/30 hover:tw-bg-iron-700 hover:tw-text-white motion-reduce:tw-transition-none ${
-            isLast
-              ? "tw-pointer-events-none tw-cursor-default tw-border-iron-800 tw-bg-iron-950/70 tw-text-iron-500 tw-opacity-100 tw-shadow-none"
-              : ""
-          }`}
-        >
-          <ChevronRightIcon
-            data-testid="icon"
-            strokeWidth={2}
-            className="tw-h-[18px] tw-w-[18px] tw-transition-transform tw-duration-150 group-hover:tw-translate-x-0.5 motion-reduce:tw-transition-none"
-          />
-        </Link>
+        {isFirst ? (
+          <span
+            aria-label="Previous NFT"
+            aria-disabled="true"
+            title="Previous Card"
+            className="tw-flex tw-h-9 tw-w-9 tw-cursor-default tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950/70 tw-text-iron-500 tw-opacity-100 tw-shadow-none"
+          >
+            <ChevronLeftIcon
+              data-testid="icon"
+              strokeWidth={2}
+              className="tw-h-[18px] tw-w-[18px]"
+            />
+          </span>
+        ) : (
+          <Link
+            href={`${props.path}/${props.nftId - 1}${query}`}
+            aria-label="Previous NFT"
+            title="Previous Card"
+            className="tw-group tw-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/[0.2] tw-bg-iron-800 tw-text-iron-200 tw-shadow-[0_4px_12px_rgba(0,0,0,0.5)] tw-transition-colors tw-duration-150 hover:tw-border-white/30 hover:tw-bg-iron-700 hover:tw-text-white motion-reduce:tw-transition-none"
+          >
+            <ChevronLeftIcon
+              data-testid="icon"
+              strokeWidth={2}
+              className="tw-h-[18px] tw-w-[18px] tw-transition-transform tw-duration-150 group-hover:-tw-translate-x-0.5 motion-reduce:tw-transition-none"
+            />
+          </Link>
+        )}
+        {isLast ? (
+          <span
+            aria-label="Next NFT"
+            aria-disabled="true"
+            title="Next Card"
+            className="tw-flex tw-h-9 tw-w-9 tw-cursor-default tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950/70 tw-text-iron-500 tw-opacity-100 tw-shadow-none"
+          >
+            <ChevronRightIcon
+              data-testid="icon"
+              strokeWidth={2}
+              className="tw-h-[18px] tw-w-[18px]"
+            />
+          </span>
+        ) : (
+          <Link
+            href={`${props.path}/${props.nftId + 1}${query}`}
+            aria-label="Next NFT"
+            title="Next Card"
+            className="tw-group tw-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/[0.2] tw-bg-iron-800 tw-text-iron-200 tw-shadow-[0_4px_12px_rgba(0,0,0,0.5)] tw-transition-colors tw-duration-150 hover:tw-border-white/30 hover:tw-bg-iron-700 hover:tw-text-white motion-reduce:tw-transition-none"
+          >
+            <ChevronRightIcon
+              data-testid="icon"
+              strokeWidth={2}
+              className="tw-h-[18px] tw-w-[18px] tw-transition-transform tw-duration-150 group-hover:tw-translate-x-0.5 motion-reduce:tw-transition-none"
+            />
+          </Link>
+        )}
       </span>
     );
   }

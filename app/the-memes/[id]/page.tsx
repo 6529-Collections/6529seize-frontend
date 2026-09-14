@@ -1,19 +1,19 @@
 import MemePageComponent from "@/components/the-memes/MemePage";
-import {
-  getSharedAppServerSideProps,
-  isMemeFocus,
-  MEME_FOCUS,
-} from "@/components/the-memes/MemeShared";
+import { getSharedAppServerSideProps } from "@/components/the-memes/MemeShared";
+import { getCanonicalNextMintNumber } from "@/components/meme-calendar/meme-calendar.helpers";
+import { getAppMetadata } from "@/components/providers/metadata";
 import { publicEnv } from "@/config/env";
 import { MEMES_CONTRACT } from "@/constants/constants";
 import type { DBResponse } from "@/entities/IDBResponse";
 import type { NFT } from "@/entities/INFT";
 import type { ApiMemesExtendedData } from "@/generated/models/ApiMemesExtendedData";
 import { normalizeLocale } from "@/i18n/locales";
+import { getNftCanonicalPath } from "@/helpers/seo/nft-route-policy";
 import JsonLdScript from "@/lib/structured-data/json-ld";
 import { buildNftPageJsonLd } from "@/lib/structured-data/nft";
 import { fetchUrl } from "@/services/6529api";
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { cache } from "react";
 
 type SearchParamValue = string | string[] | undefined;
@@ -56,49 +56,51 @@ const fetchMemeMetadata = cache(
   }
 );
 
-function getInitialMemePageData(
-  nftResult: MemePageFetchResult<NFT | undefined>,
-  metadataResult: MemePageFetchResult<ApiMemesExtendedData[]>
-) {
-  if (!nftResult.ok || !metadataResult.ok) {
-    return undefined;
-  }
+type MemeRouteResolution =
+  | {
+      readonly kind: "published";
+      readonly nft: NFT;
+      readonly nftMeta: ApiMemesExtendedData;
+    }
+  | { readonly kind: "published-upcoming" }
+  | { readonly kind: "missing" }
+  | { readonly kind: "unavailable" };
 
-  if (metadataResult.value.length === 0) {
-    return { nftNotFound: true } as const;
-  }
-
-  const nftMeta = metadataResult.value[0];
-  if (metadataResult.value.length !== 1 || !nftMeta || !nftResult.value) {
-    return undefined;
-  }
-
-  return {
-    nft: nftResult.value,
-    nftMeta,
-    nftNotFound: false,
-  } as const;
+function parseMemeId(id: string): number | null {
+  return /^\d+$/u.test(id) && Number.isSafeInteger(Number(id)) && Number(id) > 0
+    ? Number(id)
+    : null;
 }
+
+const resolveMemeRoute = cache(
+  async (id: string): Promise<MemeRouteResolution> => {
+    const numericId = parseMemeId(id);
+    if (numericId === null) return { kind: "missing" };
+    const [nftResult, metadataResult] = await Promise.all([
+      fetchMemeNft(id),
+      fetchMemeMetadata(id),
+    ]);
+    if (!nftResult.ok || !metadataResult.ok) return { kind: "unavailable" };
+    const nft = nftResult.value;
+    const nftMeta = metadataResult.value[0];
+    if (nft && nftMeta && metadataResult.value.length === 1) {
+      return { kind: "published", nft, nftMeta };
+    }
+    if (
+      !nft &&
+      metadataResult.value.length === 0 &&
+      numericId === getCanonicalNextMintNumber()
+    ) {
+      return { kind: "published-upcoming" };
+    }
+    return !nft && metadataResult.value.length === 0
+      ? { kind: "missing" }
+      : { kind: "unavailable" };
+  }
+);
 
 function getSearchParamValue(value: SearchParamValue): string | undefined {
   return Array.isArray(value) ? value[0] : value;
-}
-
-function getMemePageCanonicalUrl(
-  id: string,
-  focus: string | undefined
-): string {
-  const canonicalUrl = new URL(
-    `/the-memes/${encodeURIComponent(id)}`,
-    publicEnv.BASE_ENDPOINT
-  );
-
-  // Locale is fallback-only today, but non-default focus tabs render distinct primary content.
-  if (focus && focus !== MEME_FOCUS.LIVE && isMemeFocus(focus)) {
-    canonicalUrl.searchParams.set("focus", focus);
-  }
-
-  return canonicalUrl.toString();
 }
 
 export default async function MemePage({
@@ -107,24 +109,33 @@ export default async function MemePage({
   readonly params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [nftResult, metadataResult] = await Promise.all([
-    fetchMemeNft(id),
-    fetchMemeMetadata(id),
-  ]);
-  const nft = nftResult.ok ? (nftResult.value ?? null) : null;
-  const initialData = getInitialMemePageData(nftResult, metadataResult);
+  const resolution = await resolveMemeRoute(id);
+  if (resolution.kind === "missing") notFound();
+  const nft = resolution.kind === "published" ? resolution.nft : null;
+  let initialData;
+  if (resolution.kind === "published") {
+    initialData = {
+      nft: resolution.nft,
+      nftMeta: resolution.nftMeta,
+      nftNotFound: false as const,
+    };
+  } else if (resolution.kind === "published-upcoming") {
+    initialData = { nftNotFound: true as const };
+  }
 
   return (
     <>
-      <JsonLdScript
-        data={buildNftPageJsonLd({
-          nft,
-          path: `/the-memes/${id}`,
-          fallbackName: `The Memes #${id}`,
-          collectionName: "The Memes by 6529",
-          collectionPath: "/the-memes",
-        })}
-      />
+      {nft !== null ? (
+        <JsonLdScript
+          data={buildNftPageJsonLd({
+            nft,
+            path: `/the-memes/${id}`,
+            fallbackName: `The Memes #${id}`,
+            collectionName: "The Memes by 6529",
+            collectionPath: "/the-memes",
+          })}
+        />
+      ) : null}
       <MemePageComponent key={id} nftId={id} initialData={initialData} />
     </>
   );
@@ -144,23 +155,31 @@ export async function generateMetadata({
   const { focus: rawFocus, locale: rawLocale } = await searchParams;
   const focus = getSearchParamValue(rawFocus);
   const locale = getSearchParamValue(rawLocale);
-  const nftResult = await fetchMemeNft(id);
+  const resolution = await resolveMemeRoute(id);
+  if (resolution.kind === "missing") notFound();
+  if (resolution.kind === "unavailable") {
+    return getAppMetadata(
+      {
+        title: `The Memes #${id}`,
+        description: "Artwork data is temporarily unavailable.",
+      },
+      {
+        canonicalPath: getNftCanonicalPath({
+          collection: "the-memes",
+          id,
+          requestedFocus: focus ?? null,
+        }),
+        robots: { index: false, follow: true },
+      }
+    );
+  }
   const metadata = await getSharedAppServerSideProps(
     MEMES_CONTRACT,
     id,
     focus ?? "",
     false,
     normalizeLocale(locale),
-    nftResult.ok ? (nftResult.value ?? null) : undefined
+    resolution.kind === "published" ? resolution.nft : null
   );
-  const canonical = getMemePageCanonicalUrl(id, focus);
-
-  return {
-    ...metadata,
-    alternates: {
-      ...(metadata.alternates ?? {}),
-      canonical,
-    },
-    openGraph: { ...metadata.openGraph, url: canonical },
-  };
+  return metadata;
 }

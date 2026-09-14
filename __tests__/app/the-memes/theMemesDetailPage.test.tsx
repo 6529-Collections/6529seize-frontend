@@ -25,6 +25,10 @@ jest.mock("@/services/6529api", () => ({
   fetchUrl: jest.fn(),
 }));
 
+jest.mock("@/components/meme-calendar/meme-calendar.helpers", () => ({
+  getCanonicalNextMintNumber: () => 123,
+}));
+
 jest.mock("@/config/env", () => ({
   publicEnv: {
     API_ENDPOINT: "https://api.test.6529.io",
@@ -121,11 +125,13 @@ describe("The Memes detail generateMetadata", () => {
       title: "Meme",
       openGraph: {
         title: "Meme",
+        url: "https://6529.io/the-memes/123?focus=activity",
         images: [
           { url: "https://6529.io/meme-preview.png", width: 1200, height: 630 },
         ],
       },
       alternates: {
+        canonical: "https://6529.io/the-memes/123?focus=activity",
         languages: {
           "en-US": "https://6529.io/the-memes/123",
         },
@@ -149,7 +155,7 @@ describe("The Memes detail generateMetadata", () => {
       prefetchedNft
     );
     expect(metadata.alternates).toMatchObject({
-      canonical: "https://6529.io/the-memes/123?focus=history",
+      canonical: "https://6529.io/the-memes/123?focus=activity",
       languages: {
         "en-US": "https://6529.io/the-memes/123",
       },
@@ -159,13 +165,15 @@ describe("The Memes detail generateMetadata", () => {
       images: [
         { url: "https://6529.io/meme-preview.png", width: 1200, height: 630 },
       ],
-      url: "https://6529.io/the-memes/123?focus=history",
+      url: "https://6529.io/the-memes/123?focus=activity",
     });
   });
 
   it("drops locale and invalid focus variants from the canonical URL", async () => {
     mockShared.mockResolvedValue({
       title: "Meme",
+      alternates: { canonical: "https://6529.io/the-memes/123" },
+      openGraph: { url: "https://6529.io/the-memes/123" },
     });
 
     const metadata = await generateMetadata({
@@ -185,6 +193,8 @@ describe("The Memes detail generateMetadata", () => {
   it("uses the base card URL for the default live focus", async () => {
     mockShared.mockResolvedValue({
       title: "Meme",
+      alternates: { canonical: "https://6529.io/the-memes/123" },
+      openGraph: { url: "https://6529.io/the-memes/123" },
     });
 
     const metadata = await generateMetadata({
@@ -199,5 +209,28 @@ describe("The Memes detail generateMetadata", () => {
       canonical: "https://6529.io/the-memes/123",
     });
     expect(metadata.openGraph?.url).toBe("https://6529.io/the-memes/123");
+  });
+
+  it("noindexes temporary source failures instead of treating them as missing", async () => {
+    mockFetchUrl.mockRejectedValue(new Error("upstream unavailable"));
+
+    const metadata = await generateMetadata({
+      params: Promise.resolve({ id: "901" }),
+      searchParams: Promise.resolve({}),
+    });
+
+    expect(metadata.robots).toEqual({ index: false, follow: true });
+    expect(mockShared).not.toHaveBeenCalled();
+  });
+
+  it("rejects arbitrary absent card IDs", async () => {
+    mockFetchUrl.mockResolvedValue({ data: [] });
+
+    await expect(
+      generateMetadata({
+        params: Promise.resolve({ id: "99999999" }),
+        searchParams: Promise.resolve({}),
+      })
+    ).rejects.toThrow();
   });
 });

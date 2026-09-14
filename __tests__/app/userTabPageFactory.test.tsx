@@ -17,7 +17,7 @@ jest.mock("@/helpers/server.helpers", () => ({
 }));
 
 jest.mock("@/components/providers/metadata", () => ({
-  getAppMetadata: jest.fn((v: any) => v),
+  getAppMetadata: jest.fn((v: any, options?: any) => ({ ...v, ...options })),
   getLargeSocialCardMetadata: jest.fn((v: any) => v),
 }));
 
@@ -33,6 +33,9 @@ jest.mock("@/components/user/layout/UserPageLayout", () => ({
 const redirectMock = jest.fn();
 jest.mock("next/navigation", () => ({
   redirect: (url: string) => redirectMock(url),
+  notFound: () => {
+    throw new Error("NEXT_HTTP_ERROR_FALLBACK;404");
+  },
 }));
 
 import { createUserTabPage } from "@/app/[user]/_lib/userTabPageFactory";
@@ -54,7 +57,17 @@ const buildFactory = () =>
 
 describe("user tab page via createUserTabPage", () => {
   beforeEach(() => {
+    jest.clearAllMocks();
     redirectMock.mockClear();
+    (getUserProfile as jest.Mock).mockImplementation(
+      async ({ user }: { user: string }) => ({
+        handle: user,
+        walletAddress: "0xabc",
+        tdh: 0,
+        rep: 0,
+        level: 0,
+      })
+    );
     (userPageNeedsRedirect as jest.Mock).mockReturnValue(null);
   });
 
@@ -155,7 +168,34 @@ describe("user tab page via createUserTabPage", () => {
     );
     expect(getAppMetadata).toHaveBeenCalled();
     expect(meta).toEqual(
-      expect.objectContaining({ title: expect.stringContaining("dave") })
+      expect.objectContaining({
+        title: expect.stringContaining("dave"),
+        canonicalPath: "/dave/collected",
+        robots: { index: true, follow: true },
+      })
     );
+  });
+
+  it("noindexes profile utility tabs and temporary profile failures", async () => {
+    const subscriptions = createUserTabPage({
+      subroute: "subscriptions",
+      Tab: DummyCollectedTab,
+    });
+    const utilityMetadata = await subscriptions.generateMetadata({
+      params: Promise.resolve({ user: "Dave" }),
+    });
+    expect(utilityMetadata.robots).toEqual({ index: false, follow: true });
+
+    (getUserProfile as jest.Mock).mockRejectedValueOnce(
+      Object.assign(new Error("upstream failed"), { status: 503 })
+    );
+    const unavailableMetadata = await buildFactory().generateMetadata({
+      params: Promise.resolve({ user: "Dave" }),
+    });
+    expect(unavailableMetadata.robots).toEqual({
+      index: false,
+      follow: true,
+    });
+    expect(unavailableMetadata.canonicalPath).toBeUndefined();
   });
 });
