@@ -688,6 +688,8 @@ export const FR_FR_MESSAGES = {
   "waves.create.review.outcome": "Résultat {number}",
   "waves.create.dialog.subwaveTitle": "Créer une sous-wave",
   "waves.create.dialog.waveTitle": "Créer une wave",
+  "waves.create.dialog.closeHint":
+    "Utilisez Fermer pour quitter. Votre travail risque d’être perdu.",
   "waves.create.actions.cancel": "Annuler",
   "waves.create.actions.backToCriteria": "Retour aux critères",
   "waves.create.actions.complete": "Terminer",

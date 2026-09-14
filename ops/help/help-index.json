@@ -2803,6 +2803,8 @@
         "To create a wave on web, click the + button in the Waves panel or open /waves?create=wave.",
         "If the connected identity has no profile handle, Create Wave opens a Create your profile first dialog with Go to Identity and Not now instead of opening the multi-step form.",
         "With a profile handle, Create Wave opens in a centered modal on desktop and the standard bottom sheet below 768px; both use the same multi-step form.",
+        "Clicking or tapping outside Create Wave or Create subwave, or pressing Escape, keeps the form open and preserves the current settings, picture, description, and step. Use the header Close button to leave immediately; the header warns that closing can discard work.",
+        "After leaving Setup, named wave settings may be recovered from Saved Drafts on the same browser and device if browser storage is available. Drafts do not restore pictures, descriptions, or the current step, and subwave creation has no draft-resume control.",
         "The app full-page create route remains /waves/create where app mode uses it.",
         "Wave creation requires a connected profile and the necessary permissions for the selected groups/settings."
       ],

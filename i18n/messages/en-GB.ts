@@ -682,6 +682,8 @@ export const EN_GB_MESSAGES = {
   "waves.create.review.outcome": "Outcome {number}",
   "waves.create.dialog.subwaveTitle": "Create subwave",
   "waves.create.dialog.waveTitle": "Create Wave",
+  "waves.create.dialog.closeHint":
+    "Use Close to leave. Closing can discard your work.",
   "waves.create.actions.cancel": "Cancel",
   "waves.create.actions.backToCriteria": "Back to criteria",
   "waves.create.actions.complete": "Complete",

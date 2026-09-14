@@ -57,6 +57,8 @@ type MobileWrapperDialogProps = {
   readonly backLabel?: string | undefined;
   readonly closeLabel?: string | undefined;
   readonly dismissible?: boolean | undefined;
+  /** Keep explicit close controls available while ignoring backdrop and Escape. */
+  readonly dismissOnBackdropOrEscape?: boolean | undefined;
   readonly hideOnDesktopHover?: boolean | undefined;
   /** Preserve an in-progress review while the dialog is closed. */
   readonly keepMounted?: boolean | undefined;
@@ -414,6 +416,7 @@ export default function MobileWrapperDialog({
   backLabel,
   closeLabel,
   dismissible = true,
+  dismissOnBackdropOrEscape = true,
   hideOnDesktopHover = false,
   keepMounted = false,
 }: MobileWrapperDialogProps) {
@@ -441,6 +444,12 @@ export default function MobileWrapperDialog({
     onClose,
     onAfterLeave,
   });
+
+  const handleBackdropOrEscape = () => {
+    if (dismissOnBackdropOrEscape) {
+      handleClose();
+    }
+  };
 
   const bottomPadding = getBottomPadding(noPadding);
   const dialogHeight = getDialogHeight({
@@ -516,7 +525,20 @@ export default function MobileWrapperDialog({
         open={dialogOpen}
         unmount={!keepMounted}
         className={clsx("tailwind-scope tw-absolute", zIndexClassName)}
-        onClose={handleClose}
+        onClose={handleBackdropOrEscape}
+        onKeyDown={(event) => {
+          // Headless UI blurs focus before calling onClose for Escape. Keep
+          // focus here, but let nested dialogs and portalled controls handle it.
+          if (
+            !dismissOnBackdropOrEscape &&
+            event.key === "Escape" &&
+            event.target instanceof Element &&
+            event.target.closest('[role="dialog"], [role="alertdialog"]') ===
+              event.currentTarget
+          ) {
+            event.preventDefault();
+          }
+        }}
         aria-label={ariaLabel}
         {...(focusTitleOnOpen ? { initialFocus: titleRef } : {})}
       >
@@ -529,7 +551,7 @@ export default function MobileWrapperDialog({
           className="tw-fixed tw-inset-0"
           onClick={(e) => {
             e.stopPropagation();
-            handleClose();
+            handleBackdropOrEscape();
           }}
         >
           <div

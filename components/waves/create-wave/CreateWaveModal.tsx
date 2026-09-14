@@ -1,6 +1,7 @@
 "use client";
 
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
+import { Description } from "@headlessui/react";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { getCreateSubwaveTitle } from "@/helpers/waves/create-subwave-title.helpers";
@@ -48,6 +49,7 @@ export default function CreateWaveModal({
       title={title}
       isOpen={isOpen}
       onClose={onClose}
+      dismissOnBackdropOrEscape={false}
       closeLabel={t(locale, "common.close")}
       noPadding
       tall
@@ -56,6 +58,11 @@ export default function CreateWaveModal({
       maxWidthClass="md:tw-max-w-5xl"
       zIndexClassName="tw-z-[9999]"
       showHeaderCloseButton
+      headerActions={
+        <Description className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400">
+          {t(locale, "waves.create.dialog.closeHint")}
+        </Description>
+      }
       headerClassName="tw-flex-shrink-0 tw-border-b tw-border-solid tw-border-x-0 tw-border-t-0 tw-border-white/[0.06] tw-py-2 md:!tw-px-8 lg:tw-py-4"
       titleClassName="tw-m-0 tw-min-w-0 tw-break-words !tw-text-base !tw-font-semibold tw-leading-6 tw-tracking-wide tw-text-white"
       surfaceClassName="tw-border tw-border-solid tw-border-white/10 tw-bg-[#09090B] tw-shadow-[0_0_80px_rgba(0,0,0,0.8)] md:tw-max-h-[56rem] md:!tw-rounded-3xl"
