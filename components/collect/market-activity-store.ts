@@ -101,7 +101,7 @@ function read(profileId: string): readonly MarketActivity[] {
         typeof a["updatedAt"] === "number" &&
         Number.isFinite(a["updatedAt"]) &&
         Array.isArray(a["purchases"]) &&
-        a["purchases"].length <= 50 &&
+        a["purchases"].length <= 128 &&
         a["purchases"].every((p) =>
           isPurchase(p, profileId, a["id"] as string)
         ) &&

@@ -27,7 +27,9 @@ export default function CollectReceiptDetails({
   const receipt = operation.receipt;
   const payment = receipt?.payment;
   const currency =
-    operation.currency.toLowerCase() === MARKET_ZERO ? "ETH" : "WETH";
+    (payment?.currency ?? operation.currency).toLowerCase() === MARKET_ZERO
+      ? "ETH"
+      : "WETH";
   const listing = operation.state.toString() === "LIVE";
   const paymentUnavailable =
     operation.kind === ApiMarketKind.List &&

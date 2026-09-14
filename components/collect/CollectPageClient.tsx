@@ -77,14 +77,7 @@ import {
   collectMissingOfferSelection,
   collectSelectedOfferSelection,
 } from "./collect-offer-selection.helpers";
-import {
-  useConfirmedMarketPurchases,
-  usePendingMarketPurchases,
-} from "./market-activity-store";
-import {
-  collectPurchaseMatchesOrder,
-  reconcileCollectSelection,
-} from "./collect-purchase-reconciliation";
+import { useCollectPurchaseSelection } from "./useCollectPurchaseSelection";
 
 export default function CollectPageClient() {
   const searchParams = useSearchParams();
@@ -107,14 +100,19 @@ function CollectCatalogController({
   readonly queryString: string;
 }) {
   const locale = useBrowserLocale();
-  const [listingTime, setListingTime] = useState(() => Date.now() / 1000);
-  useEffect(() => {
-    const timer = globalThis.setInterval(
-      () => setListingTime(Date.now() / 1000),
-      15_000
-    );
-    return () => globalThis.clearInterval(timer);
-  }, []);
+  const { connectedProfile, requestAuth } = useAuth();
+  const {
+    selection,
+    availableSelection,
+    setSelection,
+    purchases,
+    listingTime,
+    settlementRevision,
+    setSettlementRevision,
+    orderIsPending,
+    orderIsPendingNow,
+    clearSelection,
+  } = useCollectPurchaseSelection(connectedProfile?.id);
   const router = useRouter();
   // Compose rapid control changes before App Router commits their URLs. An
   // intermediate local commit must not replace a newer requested destination.
@@ -217,7 +215,6 @@ function CollectCatalogController({
   }, [planFingerprint]);
   const setCostPlan = (plan: ApiCollectPlan | null) =>
     setStoredCostPlan(plan ? { revision: goalState.revision, plan } : null);
-  const [settlementRevision, setSettlementRevision] = useState(0);
   const invalidateSettledPlans = () => {
     setCostPlan(null);
     setSettlementRevision((revision) => revision + 1);
@@ -243,7 +240,6 @@ function CollectCatalogController({
     },
     []
   );
-  const [selection, setSelection] = useState<CollectSelectedListing[]>([]);
   const [offerWorkspace, setOfferWorkspace] = useState<{
     items: readonly CollectOfferSelection[];
     hasAlternatives: boolean;
@@ -317,34 +313,6 @@ function CollectCatalogController({
     quantity?: string;
     recipient?: string;
   } | null>(null);
-  const { connectedProfile, requestAuth } = useAuth();
-  const purchases = useConfirmedMarketPurchases(connectedProfile?.id);
-  const pendingPurchases = usePendingMarketPurchases(connectedProfile?.id);
-  const orderIsPending = (order: ApiMarketTradeOrder) =>
-    pendingPurchases.some((purchase) =>
-      collectPurchaseMatchesOrder(order, purchase)
-    );
-  const availableSelection = selection.filter(
-    (item) => !orderIsPending(item.order)
-  );
-  const appliedPurchases = useRef(new Set<string>());
-  useEffect(() => {
-    const unapplied = purchases.filter((purchase) => {
-      const key = [
-        purchase.operationId,
-        purchase.assetKey.toLowerCase(),
-        purchase.protocolAddress.toLowerCase(),
-        purchase.orderHash.toLowerCase(),
-      ].join(":");
-      if (appliedPurchases.current.has(key)) return false;
-      appliedPurchases.current.add(key);
-      return true;
-    });
-    if (unapplied.length > 0) {
-      setSelection((current) => reconcileCollectSelection(current, unapplied));
-      setSettlementRevision((revision) => revision + 1);
-    }
-  }, [purchases]);
   const { seizeConnect, address: payingWallet } = useSeizeConnectContext();
   const profile = connectedProfile?.id
     ? {
@@ -407,7 +375,7 @@ function CollectCatalogController({
       pending,
       disabledReason,
       onToggle: () => {
-        if (pending) return;
+        if (orderIsPendingNow(order)) return;
         if (selected) {
           setSelection((items) =>
             items.filter((item) => collectListingKey(item.order) !== key)
@@ -713,11 +681,7 @@ function CollectCatalogController({
             <CollectSelectionBar
               active={!offerWorkspaceActive}
               items={availableSelection}
-              onClear={() =>
-                setSelection((current) =>
-                  current.filter((item) => orderIsPending(item.order))
-                )
-              }
+              onClear={clearSelection}
               onReview={() => setBatch({ items: availableSelection })}
               planOffersRef={setSelectionOfferTrigger}
               onPlanOffers={() =>

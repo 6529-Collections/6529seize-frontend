@@ -20,6 +20,7 @@ const mockNoPurchases: readonly never[] = [];
 jest.mock("@/components/collect/market-activity-store", () => ({
   useConfirmedMarketPurchases: () => mockNoPurchases,
   usePendingMarketPurchases: () => mockNoPurchases,
+  readPendingMarketPurchases: () => mockNoPurchases,
 }));
 
 let mockSearchParams = new URLSearchParams();

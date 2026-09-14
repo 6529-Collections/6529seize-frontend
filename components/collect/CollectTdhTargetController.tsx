@@ -227,9 +227,7 @@ function TargetController({
           clear();
           setDraft(value);
         }}
-        onSubmit={() => {
-          void submit();
-        }}
+        onSubmit={submit}
         onConnect={onConnect}
       />
       {currentResult?.plan && (

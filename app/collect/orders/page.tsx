@@ -14,14 +14,14 @@ export default async function CollectOrdersPage({
 }) {
   const query = await searchParams;
   const operationId =
-    typeof query.operation === "string" &&
-    /^[\da-f-]{36}$/i.test(query.operation)
-      ? query.operation
+    typeof query["operation"] === "string" &&
+    /^[\da-f-]{36}$/i.test(query["operation"])
+      ? query["operation"]
       : undefined;
   return (
     <CollectOrdersClient
       initialOperationId={operationId}
-      initialBatch={query.kind === "BUY_BATCH"}
+      initialBatch={query["kind"] === "BUY_BATCH"}
     />
   );
 }

@@ -158,7 +158,7 @@ function ReceiptHeader({
   operation,
   state,
   knownTransactionHash,
-}: ReceiptSectionProps) {
+}: Pick<ReceiptSectionProps, "operation" | "state" | "knownTransactionHash">) {
   const locale = useBrowserLocale();
   const heading = useRef<HTMLHeadingElement>(null);
   const confirmationMark = useRef<HTMLSpanElement>(null);
@@ -201,10 +201,7 @@ function ReceiptHeader({
   ]);
   return (
     <header className="tw-space-y-3">
-      <div
-        className="tw-flex tw-items-center tw-gap-2 tw-text-xs tw-font-medium tw-text-iron-300"
-        role="status"
-      >
+      <output className="tw-flex tw-items-center tw-gap-2 tw-text-xs tw-font-medium tw-text-iron-300">
         <span ref={confirmationMark} className="tw-inline-flex">
           {state.pending ? (
             <ClockIcon aria-hidden="true" className="tw-size-4 tw-shrink-0" />
@@ -216,7 +213,7 @@ function ReceiptHeader({
           )}
         </span>
         {t(locale, receiptStatusLabel(state))}
-      </div>
+      </output>
       <h2
         ref={heading}
         tabIndex={-1}
@@ -250,7 +247,10 @@ function ReceiptArtworks({
   walletNames,
   spacious,
   state,
-}: ReceiptSectionProps) {
+}: Pick<
+  ReceiptSectionProps,
+  "artworks" | "walletNames" | "spacious" | "state"
+>) {
   const locale = useBrowserLocale();
   return (
     <div className="tw-min-w-0 tw-space-y-5">
@@ -403,14 +403,17 @@ function ReceiptAmounts({
   operation,
   state,
   knownTransactionHash,
-}: ReceiptSectionProps) {
+}: Pick<ReceiptSectionProps, "operation" | "state" | "knownTransactionHash">) {
   const locale = useBrowserLocale();
   const payment = operation.receipt?.payment;
   const paymentValue = state.sale ? payment?.net_wei : payment?.total_wei;
   const priceValue =
     state.live || state.pending ? operation.total_wei : paymentValue;
-  const currency =
-    operation.currency.toLowerCase() === MARKET_ZERO ? "ETH" : "WETH";
+  const priceCurrency =
+    state.live || state.pending
+      ? operation.currency
+      : (payment?.currency ?? operation.currency);
+  const currency = priceCurrency.toLowerCase() === MARKET_ZERO ? "ETH" : "WETH";
   const recordedFee = networkCost(operation);
   const unavailable = paymentUnavailable(
     operation,
@@ -484,7 +487,10 @@ function ReceiptWallets({
   artworks,
   walletNames,
   spacious,
-}: ReceiptSectionProps) {
+}: Pick<
+  ReceiptSectionProps,
+  "operation" | "state" | "artworks" | "walletNames" | "spacious"
+>) {
   const locale = useBrowserLocale();
   const address = state.sale
     ? (operation.receipt?.payment?.payout_wallet ?? operation.wallet)
@@ -512,7 +518,10 @@ function ReceiptWallets({
     </div>
   );
 }
-function ListingTerms({ operation, state }: ReceiptSectionProps) {
+function ListingTerms({
+  operation,
+  state,
+}: Pick<ReceiptSectionProps, "operation" | "state">) {
   const locale = useBrowserLocale();
   if (!state.live) return null;
   const listing =
@@ -571,7 +580,15 @@ function ReceiptActions({
   spacious,
   knownTransactionHash,
   onClose,
-}: ReceiptSectionProps) {
+}: Pick<
+  ReceiptSectionProps,
+  | "operation"
+  | "state"
+  | "artworks"
+  | "spacious"
+  | "knownTransactionHash"
+  | "onClose"
+>) {
   const locale = useBrowserLocale();
   const transactionHref = collectReceiptTransactionHref(
     receiptTransactionHash(operation, knownTransactionHash)

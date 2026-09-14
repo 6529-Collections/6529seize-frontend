@@ -65,7 +65,7 @@ export default function CollectGoalsController({
     profile?.id,
     collectProfileWallets(profile)
       .map((wallet) => wallet.wallet.toLowerCase())
-      .sort(),
+      .sort((left, right) => left.localeCompare(right)),
     recipient,
   ]);
   const [storedPlan, setStoredPlan] = useState<{

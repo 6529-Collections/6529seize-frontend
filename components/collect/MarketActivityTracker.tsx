@@ -81,7 +81,7 @@ function ProfileActivityTracker({
     return () => globalThis.clearTimeout(timer);
   }, [completed, interacting]);
   const monitored = [
-    ...activities.filter((a) => PENDING.has(a.state)),
+    ...activities.filter((a) => PENDING.has(a.state)).slice(0, 20),
     ...activities
       .filter(
         (a) =>

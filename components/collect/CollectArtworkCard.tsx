@@ -35,6 +35,11 @@ export default function CollectArtworkCard({
   let selectionLabel: Parameters<typeof t>[1] = "collect.selection.add";
   if (selection?.selected) selectionLabel = "collect.selection.selected";
   if (selection?.pending) selectionLabel = "collect.selection.processing";
+  let selectionAccessibleLabel: Parameters<typeof t>[1] = selection?.selected
+    ? "collect.selection.removeArtwork"
+    : "collect.selection.addArtwork";
+  if (selection?.pending)
+    selectionAccessibleLabel = "collect.selection.processingArtwork";
   return (
     <article className="tw-flex tw-min-w-0 tw-flex-col tw-@container/artwork">
       <Link
@@ -116,13 +121,9 @@ export default function CollectArtworkCard({
                 variant={selection.selected ? "secondary" : "action"}
                 size="sm"
                 aria-pressed={selection.selected}
-                aria-label={t(
-                  locale,
-                  selection.selected
-                    ? "collect.selection.removeArtwork"
-                    : "collect.selection.addArtwork",
-                  { title: artwork.title }
-                )}
+                aria-label={t(locale, selectionAccessibleLabel, {
+                  title: artwork.title,
+                })}
                 disabled={Boolean(selection.disabledReason)}
                 aria-describedby={
                   selection.disabledReason ? selectionReasonId : undefined

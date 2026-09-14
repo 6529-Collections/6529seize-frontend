@@ -67,18 +67,22 @@ function ProfileOrders({ initialOperationId, initialBatch }: ReceiptLinkProps) {
           initialOperationId,
         ]
       : [QueryKey.MARKET_OPERATION, connectedProfile?.id, initialOperationId],
-    queryFn: ({ signal }) =>
-      initialBatch
+    queryFn: ({ signal }) => {
+      const profileId = connectedProfile?.id;
+      if (!profileId || !initialOperationId)
+        throw new Error("MARKET_PROFILE_CHANGED");
+      return initialBatch
         ? fetchRecoverableMarketBatch(
-            initialOperationId!,
-            connectedProfile!.id,
+            initialOperationId,
+            profileId,
             signal
           )
         : fetchRecoverableMarketOperation(
-            initialOperationId!,
-            connectedProfile!.id,
+            initialOperationId,
+            profileId,
             signal
-          ),
+          );
+    },
     enabled: Boolean(initialOperationId && canReadOrders),
   });
   const linkedReceipt =
@@ -124,8 +128,11 @@ function ProfileOrders({ initialOperationId, initialBatch }: ReceiptLinkProps) {
       "live-receipts",
       liveIds,
     ],
-    queryFn: ({ signal }) =>
-      reconcileMarketHistory(savedOperations, connectedProfile!.id, signal),
+    queryFn: ({ signal }) => {
+      const profileId = connectedProfile?.id;
+      if (!profileId) throw new Error("MARKET_PROFILE_CHANGED");
+      return reconcileMarketHistory(savedOperations, profileId, signal);
+    },
     enabled: canReadOrders && liveIds.length > 0,
     refetchInterval: 30_000,
   });

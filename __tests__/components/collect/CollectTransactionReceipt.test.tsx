@@ -447,6 +447,73 @@ it("presents WETH proceeds separately from recorded ETH fees and never charges b
   expect(screen.getAllByText("0.01").length).toBeGreaterThan(0);
 });
 
+it.each([
+  [
+    "ETH",
+    "0x0000000000000000000000000000000000000000",
+    "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+  ],
+  [
+    "WETH",
+    "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+    "0x0000000000000000000000000000000000000000",
+  ],
+])(
+  "uses recorded %s payment currency for compact and exact proceeds even when review currency differs",
+  (symbol, paymentCurrency, reviewCurrency) => {
+    const value = operation({
+      kind: ApiMarketKind.Accept,
+      currency: reviewCurrency,
+    });
+    value.receipt = {
+      payment: {
+        currency: paymentCurrency,
+        total_wei: "2500000000000000000",
+        net_wei: "2400000000000000000",
+        fees: [{ recipient: FREN, amount_wei: "100000000000000000" }],
+        payout_wallet: PAYER,
+      },
+      transactions: [
+        {
+          purpose: ApiMarketReceiptTransactionPurposeEnum.Transaction,
+          transaction_hash: HASH,
+          payer_wallet: PAYER,
+          block_number: 10,
+          block_hash: HASH,
+          block_timestamp: 1_800_000_000,
+          status: ApiMarketReceiptTransactionStatusEnum.Success,
+          confirmation: ApiMarketReceiptTransactionConfirmationEnum.Confirmed,
+          network_fee_wei: "1000000000000000",
+        },
+      ],
+    };
+    show(value);
+    expect(screen.getByText("You received").parentElement).toHaveTextContent(
+      `2.4 ${symbol}`
+    );
+    expect(
+      screen.getByText("Recorded network cost").parentElement
+    ).toHaveTextContent("0.001 ETH");
+    const summary = screen.getByText("Payment details");
+    fireEvent.click(summary);
+    const details = within(summary.closest("details")!);
+    fireEvent.click(details.getByText("Exact amounts"));
+    for (const [label, amount] of [
+      ["Purchase price", "2.5"],
+      ["Seller receives", "2.4"],
+      ["Order fee", "0.1"],
+    ] as const) {
+      const rows = details.getAllByText(label);
+      expect(rows).toHaveLength(2);
+      for (const row of rows)
+        expect(row.parentElement).toHaveTextContent(`${amount} ${symbol}`);
+    }
+    expect(
+      details.queryAllByText(symbol === "ETH" ? "WETH" : "ETH", { exact: true })
+    ).toHaveLength(0);
+  }
+);
+
 it("uses conditional proceeds for live listings and does not invent a fill transaction link", () => {
   const value = operation({
     kind: ApiMarketKind.List,

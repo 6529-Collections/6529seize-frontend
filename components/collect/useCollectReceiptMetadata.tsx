@@ -22,7 +22,10 @@ export function useCollectReceiptMetadata(
         )
         .map((artwork) => artwork.assetKey)
     ),
-  ].sort();
+  ].sort((left, right) => {
+    if (left < right) return -1;
+    return left > right ? 1 : 0;
+  });
   const query = useQuery({
     queryKey: [QueryKey.COLLECT_ASSETS, "receipt", missing],
     enabled: missing.length > 0,

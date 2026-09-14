@@ -28,6 +28,7 @@ let mockEntries: readonly CollectCatalogEntry[] = [];
 jest.mock("@/components/collect/market-activity-store", () => ({
   useConfirmedMarketPurchases: () => mockPurchases,
   usePendingMarketPurchases: () => mockPendingPurchases,
+  readPendingMarketPurchases: () => mockPendingPurchases,
 }));
 
 jest.mock("next/navigation", () => ({
@@ -201,7 +202,7 @@ function discoveredSelection() {
   mockEntries = [{ asset: item.asset, order }];
   const purchase: ConfirmedMarketPurchase = {
     operationId: "single-artwork-purchase",
-    profileId: OFFER_PROFILE.id,
+    profileId: OFFER_PROFILE.id!,
     assetKey: item.asset.asset_key,
     protocolAddress: order.identity.protocol_address,
     orderHash: order.identity.order_hash,
@@ -265,6 +266,15 @@ it("reserves a pending exact order without clearing it or offering a second chec
   mockPendingPurchases = [];
   mockPurchases = [{ ...purchase, confirmedAt: Date.now() }];
   rerender(<CollectPageClient />);
+  expect(view().selectionFor?.(id)?.selected).toBe(false);
+});
+
+it("checks current pending evidence when a selection callback runs before the next render", () => {
+  const { id, purchase } = discoveredSelection();
+  render(<CollectPageClient />);
+  const toggle = view().selectionFor?.(id)?.onToggle;
+  mockPendingPurchases = [purchase];
+  act(() => toggle?.());
   expect(view().selectionFor?.(id)?.selected).toBe(false);
 });
 

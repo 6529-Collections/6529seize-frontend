@@ -1,5 +1,8 @@
 import MarketActivityTracker from "@/components/collect/MarketActivityTracker";
-import { recordMarketActivity } from "@/components/collect/market-activity-store";
+import {
+  readPendingMarketPurchases,
+  recordMarketActivity,
+} from "@/components/collect/market-activity-store";
 import { fetchRecoverableMarketOperation } from "@/components/collect/market-recovery";
 import { fetchRecoverableMarketBatch } from "@/components/collect/market-batch-recovery";
 import { ApiMarketKind } from "@/generated/models/ApiMarketKind";
@@ -101,6 +104,49 @@ it("reassures only known submission and recovers the exact existing operation", 
     )
   );
   expect(fetchRecoverableMarketBatch).not.toHaveBeenCalled();
+});
+
+it("caps background reads at 20 pending operations while retaining all activity and Orders access", async () => {
+  const values = Array.from({ length: 25 }, (_, index) => ({
+    ...operation(),
+    id: `11111111-1111-4111-8111-${String(index).padStart(12, "0")}`,
+    updated_at: 1000 + index,
+  }));
+  const byId = new Map(values.map((value) => [value.id, value]));
+  for (const value of values) recordMarketActivity(value);
+  jest
+    .mocked(fetchRecoverableMarketOperation)
+    .mockImplementation(async (id) => {
+      const value = byId.get(id);
+      if (!value) throw new Error("Unexpected operation lookup");
+      return value;
+    });
+  const client = new QueryClient({
+    defaultOptions: { queries: { retry: false, gcTime: Infinity } },
+  });
+  render(
+    <QueryClientProvider client={client}>
+      <MarketActivityTracker />
+    </QueryClientProvider>
+  );
+  await waitFor(() =>
+    expect(fetchRecoverableMarketOperation).toHaveBeenCalledTimes(20)
+  );
+  expect(fetchRecoverableMarketBatch).not.toHaveBeenCalled();
+  expect(client.getQueryCache().getAll()).toHaveLength(20);
+  expect(
+    new Set(
+      jest.mocked(fetchRecoverableMarketOperation).mock.calls.map(([id]) => id)
+    ).size
+  ).toBe(20);
+  expect(readPendingMarketPurchases(mockAuth.connectedProfile.id)).toHaveLength(
+    25
+  );
+  expect(screen.getByRole("link", { name: "View in Orders" })).toBeVisible();
+  expect(screen.getByRole("link", { name: "View in Orders" })).toHaveAttribute(
+    "href",
+    `/collect/orders?operation=${values.at(-1)!.id}&kind=BUY`
+  );
 });
 
 it.each([State.Unknown, State.Publishing, State.CancelPending])(

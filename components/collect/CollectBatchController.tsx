@@ -446,8 +446,9 @@ function ScopedBatchController({
       : undefined;
   const content = (
     <div className="tw-space-y-5">
-      {(error ?? execution.message) ===
-        t(locale, "collect.trade.purchasePending") && (
+      {[error, execution.message].includes(
+        t(locale, "collect.trade.purchasePending")
+      ) && (
         <Link
           href="/collect/orders"
           className="tw-rounded-sm tw-text-sm tw-text-primary-300 tw-underline tw-underline-offset-4 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"

@@ -2,22 +2,20 @@ import { marketReceiptRefreshInterval } from "@/components/collect/market-receip
 import type { ApiMarketOperation } from "@/generated/models/ApiMarketOperation";
 import type { ApiMarketBatchOperation } from "@/generated/models/ApiMarketBatchOperation";
 import type { ApiMarketBatchSettlementItem } from "@/generated/models/ApiMarketBatchSettlementItem";
+import { ApiMarketBatchOperationStateEnum } from "@/generated/models/ApiMarketBatchOperation";
+import { batchFixture } from "./market-batch.fixture";
 
 function batch(): ApiMarketBatchOperation {
   return {
-    state: "CONFIRMED",
-    kind: "BUY_BATCH",
+    ...batchFixture().operation,
+    state: ApiMarketBatchOperationStateEnum.Confirmed,
     transaction_hash: `0x${"1".repeat(64)}`,
     updated_at: 1000,
-    items: [1, 2].map((index) => ({
-      asset_key: `1:0x${"1".repeat(40)}:${index}`,
-      order: {
-        order_hash: `0x${String(index).repeat(64)}`,
-        protocol_address: `0x${"2".repeat(40)}`,
-      },
-    })),
-    receipt: { transactions: [], payment: { currency: "ETH" } },
-  } as ApiMarketBatchOperation;
+    receipt: {
+      transactions: [],
+      payment: { currency: "ETH", total_wei: "140", net_wei: "126", fees: [] },
+    },
+  };
 }
 function settled(
   value: ApiMarketBatchOperation

@@ -17,6 +17,8 @@ import type { CollectSelectedListing } from "@/components/collect/collect-select
 import type { ApiMarketReceiptTransaction } from "@/generated/models/ApiMarketReceiptTransaction";
 import { MARKET_SEAPORT } from "@/components/collect/market-validation";
 import { targetPlan } from "./collect-tdh-target.fixture";
+import { batchFixture } from "./market-batch.fixture";
+import { ApiMarketBatchOperationStateEnum } from "@/generated/models/ApiMarketBatchOperation";
 
 let profileSequence = 0;
 function operation(): ApiMarketOperation {
@@ -312,6 +314,40 @@ it("recovers public progress from storage without retaining signing data or shar
   );
   expect(other.result.current).toHaveLength(0);
 });
+
+it.each([128, 129])(
+  "hydrates up to the complete128-order batch cap, supplied %i",
+  (count) => {
+    const value = operation();
+    const batch = batchFixture().operation;
+    recordMarketActivity({
+      ...batch,
+      id: value.id,
+      profile_id: value.profile_id,
+      state: ApiMarketBatchOperationStateEnum.Submitted,
+      items: Array.from({ length: count }, (_, index) => ({
+        ...batch.items[0]!,
+        asset_key: `1:0x${"1".repeat(40)}:${index}`,
+        order: {
+          ...batch.items[0]!.order,
+          order_hash: `0x${index.toString(16).padStart(64, "0")}`,
+        },
+      })),
+    });
+    const persisted = localStorage.getItem(
+      `6529-market-activity:v1:${value.profile_id}`
+    )!;
+    const restoredProfile = `${value.profile_id}-batch-reload`;
+    localStorage.setItem(
+      `6529-market-activity:v1:${restoredProfile}`,
+      persisted.replaceAll(value.profile_id, restoredProfile)
+    );
+    const restored = readPendingMarketPurchases(restoredProfile);
+    expect(restored).toHaveLength(count <= 128 ? count : 0);
+    if (count === 128)
+      expect(restored.at(-1)?.assetKey).toBe(`1:0x${"1".repeat(40)}:127`);
+  }
+);
 
 it("deduplicates the receipt celebration per profile and operation", () => {
   const value = operation();

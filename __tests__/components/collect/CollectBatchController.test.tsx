@@ -33,6 +33,7 @@ let mockNative = false;
 let mockAddress = PAYER;
 let mockProfile: ApiIdentity;
 let mockExecutionBusy = false;
+let mockExecutionMessage: string | undefined;
 let mockKnownTransaction: { operationId: string; hash: string } | undefined;
 const mockPrepare = jest.fn(),
   mockConfirm = jest.fn();
@@ -111,6 +112,7 @@ jest.mock("@/components/collect/useMarketBatchExecution", () => ({
     ready: true,
     busy: mockExecutionBusy,
     knownTransaction: mockKnownTransaction,
+    message: mockExecutionMessage,
     confirm: mockConfirm,
     clearMessage: jest.fn(),
     recoverTransaction: jest.fn(),
@@ -139,6 +141,7 @@ beforeEach(() => {
   mockNative = false;
   mockAddress = PAYER;
   mockExecutionBusy = false;
+  mockExecutionMessage = undefined;
   mockKnownTransaction = undefined;
   jest.spyOn(Date, "now").mockReturnValue(NOW);
   mockFixture = batchFixture();
@@ -257,6 +260,26 @@ it("explains a failed connection and retries the exact batch without signing", a
   expect(mockPrepare).toHaveBeenCalledTimes(2);
   expect(mockPrepare.mock.calls[1]).toEqual(mockPrepare.mock.calls[0]);
   expect(mockConfirm).not.toHaveBeenCalled();
+});
+
+it("keeps Orders available for a pending execution after an earlier check error", async () => {
+  mockPrepare.mockRejectedValueOnce(new TypeError("Failed to fetch"));
+  const { rerenderScope } = mount();
+  const prepare = screen.getByRole("button", {
+    name: "Check selected purchases",
+  });
+  await waitFor(() => expect(prepare).toBeEnabled());
+  fireEvent.click(prepare);
+  expect(await screen.findByRole("alert")).toHaveTextContent(
+    "The trading service could not be reached"
+  );
+  mockExecutionMessage =
+    "A purchase from this listing is pending. Check its progress in Orders.";
+  rerenderScope();
+  expect(screen.getByRole("link", { name: "View in Orders" })).toHaveAttribute(
+    "href",
+    "/collect/orders"
+  );
 });
 
 it.each([1, 2])(

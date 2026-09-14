@@ -1,6 +1,7 @@
 "use client";
 
 import { ApiMarketKind } from "@/generated/models/ApiMarketKind";
+import type { ApiMarketOperation } from "@/generated/models/ApiMarketOperation";
 
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import Button from "@/components/utils/button/Button";
@@ -98,6 +99,67 @@ function Facts({ facts }: { readonly facts: readonly CollectReviewFact[] }) {
         </div>
       ))}
     </dl>
+  );
+}
+function TradeReceipt({
+  operation,
+  review,
+  knownTransactionHash,
+  onClose,
+}: {
+  readonly operation: ApiMarketOperation;
+  readonly review: CollectTradeReview;
+  readonly knownTransactionHash: string | undefined;
+  readonly onClose: () => void;
+}) {
+  const nftRecipient =
+    operation.kind === ApiMarketKind.Buy
+      ? (operation.nft_recipient ?? operation.recipient)
+      : operation.nft_recipient;
+  const names: Record<string, string> = {};
+  if (review.purchase?.payerName)
+    names[operation.wallet.toLowerCase()] = review.purchase.payerName;
+  if (review.purchase?.recipientName)
+    names[review.purchase.recipientAddress.toLowerCase()] =
+      review.purchase.recipientName;
+  if (review.orderReview?.walletName)
+    names[operation.wallet.toLowerCase()] = review.orderReview.walletName;
+  return (
+    <CollectTransactionReceipt
+      operation={operation}
+      knownTransactionHash={knownTransactionHash}
+      onClose={onClose}
+      walletNames={names}
+      artworks={[
+        {
+          assetKey: operation.asset_key,
+          title: review.title,
+          media: review.media,
+          quantity: operation.quantity,
+          orderHash: operation.order_hash ?? operation.order?.order_hash,
+          recipients:
+            nftRecipient &&
+            (operation.kind === ApiMarketKind.Buy ||
+              operation.kind === ApiMarketKind.Accept ||
+              (operation.kind === ApiMarketKind.Offer &&
+                operation.state.toString() === "CONFIRMED"))
+              ? [{ address: nftRecipient, quantity: operation.quantity }]
+              : [],
+        },
+      ]}
+    />
+  );
+}
+function pendingReceipt(
+  operation: ApiMarketOperation,
+  knownTransactionHash: string | undefined
+) {
+  return (
+    ["SUBMITTED", "MINED"].includes(operation.state) ||
+    Boolean(
+      knownTransactionHash &&
+      !["CONFIRMED", "LIVE", "CANCELLED"].includes(operation.state)
+    )
   );
 }
 /** Execution refreshes and compares terms before any wallet request. */
@@ -250,47 +312,12 @@ export default function CollectTradeSheet(props: CollectTradeSheetProps) {
         props.knownTransactionPurpose
       )
     ) {
-      const operation = review.operation;
-      const nftRecipient =
-        operation.kind === ApiMarketKind.Buy
-          ? (operation.nft_recipient ?? operation.recipient)
-          : operation.nft_recipient;
-      const names: Record<string, string> = {};
-      if (review.purchase?.payerName)
-        names[operation.wallet.toLowerCase()] = review.purchase.payerName;
-      if (review.purchase?.recipientName)
-        names[review.purchase.recipientAddress.toLowerCase()] =
-          review.purchase.recipientName;
-      if (review.orderReview?.walletName)
-        names[operation.wallet.toLowerCase()] = review.orderReview.walletName;
       return (
-        <CollectTransactionReceipt
-          operation={operation}
+        <TradeReceipt
+          operation={review.operation}
+          review={review}
           knownTransactionHash={props.knownTransactionHash}
           onClose={props.onClose}
-          walletNames={names}
-          artworks={[
-            {
-              assetKey: operation.asset_key,
-              title: review.title,
-              media: review.media,
-              quantity: operation.quantity,
-              orderHash: operation.order_hash ?? operation.order?.order_hash,
-              recipients:
-                nftRecipient &&
-                (operation.kind === ApiMarketKind.Buy ||
-                  operation.kind === ApiMarketKind.Accept ||
-                  (operation.kind === ApiMarketKind.Offer &&
-                    operation.state.toString() === "CONFIRMED"))
-                  ? [
-                      {
-                        address: nftRecipient,
-                        quantity: operation.quantity,
-                      },
-                    ]
-                  : [],
-            },
-          ]}
         />
       );
     }
@@ -415,15 +442,9 @@ export default function CollectTradeSheet(props: CollectTradeSheetProps) {
       props.knownTransactionPurpose
     )
   ) {
-    const pendingReceipt =
-      ["SUBMITTED", "MINED"].includes(review.operation.state) ||
-      Boolean(
-        props.knownTransactionHash &&
-        !["CONFIRMED", "LIVE", "CANCELLED"].includes(review.operation.state)
-      );
     dialogTitle = t(
       locale,
-      pendingReceipt
+      pendingReceipt(review.operation, props.knownTransactionHash)
         ? "collect.receipt.dialogProgress"
         : "collect.receipt.dialogReceipt"
     );

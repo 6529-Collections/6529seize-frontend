@@ -41,32 +41,35 @@ it("shows explicit Add and Selected labels without changing artwork navigation o
   expect(selected).toHaveAttribute("aria-pressed", "true");
 });
 
-it("makes a pending selected purchase read-only while retaining artwork navigation", () => {
-  const onToggle = jest.fn();
-  render(
-    <CollectArtworkCard
-      artwork={{ ...artwork, priceLabel: "0.01 ETH" }}
-      locale="en-US"
-      onTrade={jest.fn()}
-      selection={{
-        selected: true,
-        pending: true,
-        disabledReason: "Purchase is processing",
-        onToggle,
-      }}
-    />
-  );
-  const pending = screen.getByRole("button", {
-    name: "Remove Test artwork from selection",
-  });
-  expect(pending).toBeDisabled();
-  expect(pending).toHaveTextContent("Processing");
-  fireEvent.click(pending);
-  expect(onToggle).not.toHaveBeenCalled();
-  expect(
-    screen.getByRole("link", { name: "View Test artwork" })
-  ).toHaveAttribute("href", "/the-memes/7");
-});
+it.each([true, false])(
+  "makes a pending purchase read-only with an accurate accessible name when selected=%s",
+  (selected) => {
+    const onToggle = jest.fn();
+    render(
+      <CollectArtworkCard
+        artwork={{ ...artwork, priceLabel: "0.01 ETH" }}
+        locale="en-US"
+        onTrade={jest.fn()}
+        selection={{
+          selected,
+          pending: true,
+          disabledReason: "Purchase is processing",
+          onToggle,
+        }}
+      />
+    );
+    const pending = screen.getByRole("button", {
+      name: "Processing purchase of Test artwork",
+    });
+    expect(pending).toBeDisabled();
+    expect(pending).toHaveTextContent("Processing");
+    fireEvent.click(pending);
+    expect(onToggle).not.toHaveBeenCalled();
+    expect(
+      screen.getByRole("link", { name: "View Test artwork" })
+    ).toHaveAttribute("href", "/the-memes/7");
+  }
+);
 
 it("shows daily TDH value with a compact price and a separate exact-price disclosure", async () => {
   const user = userEvent.setup();
