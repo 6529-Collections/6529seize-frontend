@@ -8,8 +8,7 @@ export function SidebarIconTile({
   readonly children: ReactNode;
 }) {
   const variantClasses = {
-    accent:
-      "tw-border-primary-400/35 tw-bg-primary-500/10 tw-text-primary-400",
+    accent: "tw-border-primary-400/35 tw-bg-primary-500/10 tw-text-primary-400",
     selected: "tw-border-white/15 tw-bg-iron-800 tw-text-iron-100",
     neutral:
       "tw-border-iron-700/80 tw-bg-iron-900 tw-text-iron-400 desktop-hover:group-hover:tw-border-iron-600/70 desktop-hover:group-hover:tw-text-iron-300",
@@ -24,12 +23,16 @@ export function SidebarIconTile({
   );
 }
 
-export function AnnouncementWaveIcon() {
+export function AnnouncementWaveIcon({
+  className = "tw-size-[18px]",
+}: {
+  readonly className?: string | undefined;
+}) {
   return (
     <SidebarIconTile variant="accent">
       <svg
         aria-hidden="true"
-        className="tw-size-[18px]"
+        className={className}
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"
