@@ -497,6 +497,9 @@ function ScopedBatchController({
             }
             stage={execution.stage}
             message={error ?? execution.message}
+            reviewChangeNotice={
+              error ? undefined : execution.reviewChangeNotice
+            }
             walletNames={walletNames}
             {...(recipientUpdate.canEdit || recipientUpdate.pending
               ? {

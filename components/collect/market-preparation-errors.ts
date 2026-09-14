@@ -41,12 +41,20 @@ const API_CODES = new Map<string, MessageKey>([
   ["UNSUPPORTED_CONDUIT", UNSUPPORTED_MESSAGE],
 ]);
 
-function httpErrorMessage(error: unknown, status: number): MessageKey {
-  if (status === 0) return "collect.error.prepareNetwork";
+/** Specific API guidance is reusable after sending; generic preparation fallbacks are not. */
+export function marketSpecificApiErrorKey(
+  error: unknown
+): MessageKey | undefined {
+  const status = getStructuredApiErrorStatus(error);
   if (status === 401 || status === 403) return "collect.error.prepareAuth";
   if (status === 429) return "collect.error.prepareRateLimited";
   const code = getStructuredApiErrorCode(error);
-  const knownCode = code === undefined ? undefined : API_CODES.get(code);
+  return code === undefined ? undefined : API_CODES.get(code);
+}
+
+function httpErrorMessage(error: unknown, status: number): MessageKey {
+  if (status === 0) return "collect.error.prepareNetwork";
+  const knownCode = marketSpecificApiErrorKey(error);
   if (knownCode !== undefined) return knownCode;
   if (status >= 500 && status <= 599) return SERVICE_MESSAGE;
   if (status === 400 || status === 422) return DETAILS_MESSAGE;

@@ -63,7 +63,9 @@ it("rounds the maximum up to five decimals and keeps exact fees and gas in neste
   expect(fact("Maximum total")).toHaveTextContent("0.65293 ETH");
   expect(screen.getByText("Exact maximum total")).not.toBeVisible();
   expect(screen.getByText("OpenSea fee")).not.toBeVisible();
+  expect(screen.getByText(/A failed transaction/)).not.toBeVisible();
   fireEvent.click(screen.getByText("Price breakdown"));
+  expect(screen.getByText(/A failed transaction/)).toBeVisible();
   expect(fact("Seller receives")).toHaveTextContent("0.646371 ETH");
   expect(fact("OpenSea fee")).toHaveTextContent("0.006529 ETH");
   expect(screen.getByText("Fees included")).toBeVisible();
