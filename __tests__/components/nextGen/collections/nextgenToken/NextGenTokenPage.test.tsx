@@ -1,6 +1,7 @@
 const mockIsNullAddress = jest.fn(() => false);
 const mockConnectedAddress = { value: undefined as string | undefined };
 const mockPush = jest.fn();
+let mockNavigationQuery = "returnTo=owner";
 
 jest.mock("@/helpers/Helpers", () => {
   const actual = jest.requireActual("@/helpers/Helpers");
@@ -26,7 +27,7 @@ jest.mock("next/navigation", () => {
       refresh: jest.fn(),
     }),
     useParams: () => ({ view: undefined }),
-    useSearchParams: () => new URLSearchParams("returnTo=owner"),
+    useSearchParams: () => new URLSearchParams(mockNavigationQuery),
     usePathname: () => "/nextgen/collection/COL/token/1",
   };
 });
@@ -179,6 +180,7 @@ function renderComponent(props?: Partial<typeof baseProps>) {
 
 describe("NextGenTokenPage", () => {
   beforeEach(() => {
+    mockNavigationQuery = "returnTo=owner";
     mockConnectedAddress.value = undefined;
     mockIsNullAddress.mockReturnValue(false);
   });
@@ -403,6 +405,15 @@ describe("NextGenTokenPage", () => {
   });
 
   describe("navigation", () => {
+    it("clears exact order focus when moving to another token", () => {
+      mockNavigationQuery = "returnTo=owner&order=old-order";
+      renderComponent({ view: NextgenCollectionView.LISTINGS_AND_OFFERS });
+      fireEvent.click(screen.getByRole("button", { name: "Next token" }));
+      expect(mockPush).toHaveBeenCalledWith(
+        "/nextgen/token/2/listings-and-offers?returnTo=owner",
+        { scroll: false }
+      );
+    });
     it("preserves the market view and query when moving to another token", () => {
       renderComponent({ view: NextgenCollectionView.LISTINGS_AND_OFFERS });
       fireEvent.click(screen.getByRole("button", { name: "Next token" }));

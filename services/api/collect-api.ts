@@ -72,10 +72,14 @@ export const fetchCollectAssets = (options: {
       page_size: "24",
     },
   });
-export const createCollectPlan = (body: ApiCollectPlanRequest) =>
+export const createCollectPlan = (
+  body: ApiCollectPlanRequest,
+  signal?: AbortSignal
+) =>
   commonApiPost<ApiCollectPlanRequest, ApiCollectPlan>({
     endpoint: "collect/plans",
     body,
+    signal,
     errorMode: "structured",
   });
 export const advanceCollectPlan = (id: string, signal?: AbortSignal) =>

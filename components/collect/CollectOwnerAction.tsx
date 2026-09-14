@@ -5,10 +5,13 @@ import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import { createFetchDeadline } from "@/lib/fetch/fetchDeadline";
 import { fetchCollectAssetOwnership } from "@/services/api/collect-api";
 import { useQuery } from "@tanstack/react-query";
 import { useId, useState } from "react";
 import { collectProfileWallets } from "./collect-recipient.helpers";
+import { useConfirmedMarketPurchases } from "./market-activity-store";
+import { collectOwnerRefreshInterval } from "./collect-owner-refresh";
 
 const ACTION_CLASS =
   "tw-inline-flex tw-min-h-11 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-transparent tw-px-3 tw-text-sm tw-font-medium tw-text-iron-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-border-white/20 desktop-hover:hover:tw-bg-white/5 desktop-hover:hover:tw-text-white";
@@ -26,6 +29,7 @@ export default function CollectOwnerAction({
   const [chooseOwner, setChooseOwner] = useState(false);
   const ownershipStatusId = useId();
   const profileId = connectedProfile?.id;
+  const purchases = useConfirmedMarketPurchases(profileId);
   const wallets = collectProfileWallets(connectedProfile);
   const membership = wallets
     .map((wallet) => wallet.wallet.toLowerCase())
@@ -39,12 +43,30 @@ export default function CollectOwnerAction({
       membership,
       assetKey,
     ],
-    queryFn: ({ signal }) => {
+    queryFn: async ({ signal }) => {
       if (!profileId) throw new Error("COLLECT_PROFILE_REQUIRED");
-      return fetchCollectAssetOwnership(profileId, assetKey, signal);
+      const deadline = createFetchDeadline(
+        signal,
+        30_000,
+        () => new Error("COLLECT_OWNERSHIP_TIMEOUT")
+      );
+      try {
+        return await deadline.run(() =>
+          fetchCollectAssetOwnership(profileId, assetKey, deadline.signal)
+        );
+      } finally {
+        deadline.dispose();
+      }
     },
     enabled: Boolean(profileId && wallets.length > 0),
     staleTime: 15_000,
+    refetchInterval: (query) =>
+      collectOwnerRefreshInterval({
+        assetKey,
+        profileId,
+        purchases,
+        analysis: query.state.data,
+      }),
   });
   if (!connectedProfile?.id)
     return (

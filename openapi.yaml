@@ -29024,6 +29024,8 @@ components:
             $ref: "#/components/schemas/ApiMarketTransaction"
         settlement:
           $ref: "#/components/schemas/ApiMarketBatchSettlement"
+        receipt:
+          $ref: "#/components/schemas/ApiMarketReceipt"
       required:
         - id
         - revision
@@ -29208,6 +29210,13 @@ components:
       type: object
       additionalProperties: false
       properties:
+        order_remaining_quantity:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+          description: >-
+            Whole source order remaining quantity verified at a canonical safe
+            block; absent when unavailable.
         asset_key:
           type: string
         order:
@@ -29695,6 +29704,8 @@ components:
           pattern: ^0x[0-9a-fA-F]{64}$
         settlement:
           $ref: "#/components/schemas/ApiMarketSettlement"
+        receipt:
+          $ref: "#/components/schemas/ApiMarketReceipt"
         nft_recipient:
           type: string
           pattern: ^0x[0-9a-fA-F]{40}$
@@ -29938,6 +29949,115 @@ components:
         - currency
         - amount_wei
         - acknowledge_external_recipient
+    ApiMarketReceipt:
+      type: object
+      additionalProperties: false
+      description: >-
+        Recorded chain evidence only. Historical approval transactions may be
+        unavailable; missing cost fields are not zero or a fee cap.
+      properties:
+        transactions:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiMarketReceiptTransaction"
+        payment:
+          $ref: "#/components/schemas/ApiMarketReceiptPayment"
+      required:
+        - transactions
+    ApiMarketReceiptPayment:
+      type: object
+      additionalProperties: false
+      description: >-
+        Exact payment proven by successful fulfillment events in a canonical
+        safe block. Batch net is the sum of seller proceeds, not buyer income.
+        Excludes network costs.
+      properties:
+        currency:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{40}$
+        total_wei:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+        net_wei:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+        fees:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiMarketFee"
+        payout_wallet:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{40}$
+      required:
+        - currency
+        - total_wei
+        - net_wei
+        - fees
+    ApiMarketReceiptTransaction:
+      type: object
+      additionalProperties: false
+      properties:
+        purpose:
+          type: string
+          enum:
+            - APPROVAL
+            - TRANSACTION
+        payer_wallet:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{40}$
+          description: Transaction sender who paid its ETH network cost.
+        transaction_hash:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{64}$
+        block_number:
+          type: integer
+          format: int64
+        block_hash:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{64}$
+        block_timestamp:
+          type: integer
+          format: int64
+          description: Canonical inclusion block timestamp in Unix seconds.
+        status:
+          type: string
+          enum:
+            - SUCCESS
+            - REVERTED
+        confirmation:
+          type: string
+          enum:
+            - INCLUDED
+            - CONFIRMED
+        safe_block_number:
+          type: integer
+          format: int64
+        gas_used:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+        effective_gas_price_wei:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+        network_fee_wei:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+          description: >-
+            Actual ETH network cost from receipt gasUsed multiplied by effective
+            gasPrice; never an estimate or review cap.
+      required:
+        - purpose
+        - payer_wallet
+        - transaction_hash
+        - block_number
+        - block_hash
+        - block_timestamp
+        - status
+        - confirmation
     ApiMarketSendAttempt:
       type: object
       additionalProperties: false
@@ -30033,6 +30153,13 @@ components:
       type: object
       additionalProperties: false
       properties:
+        order_remaining_quantity:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+          description: >-
+            Whole source order remaining quantity verified at a canonical safe
+            block, distinct from operation remaining_quantity.
         filled_quantity:
           type: string
           pattern: ^(0|[1-9][0-9]{0,77})$

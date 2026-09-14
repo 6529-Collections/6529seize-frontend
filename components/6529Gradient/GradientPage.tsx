@@ -665,6 +665,7 @@ export default function GradientPageComponent({
                 </div>
               </div>
               <MarketDepthPanel
+                focusedOrderHash={searchParams.get("order")}
                 contract={GRADIENT_CONTRACT}
                 tokenId={nft.id}
                 refreshKey={marketRefreshVersion}

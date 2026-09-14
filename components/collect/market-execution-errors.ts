@@ -41,6 +41,8 @@ export function marketExecutionError(
     return key === undefined ? phaseFailure(locale, stage) : t(locale, key);
   }
   if (error instanceof Error) {
+    if (error.message === "MARKET_PURCHASE_PENDING")
+      return t(locale, "collect.trade.purchasePending");
     if (error.message === "MARKET_WALLET_NOT_READY")
       return t(locale, "collect.trade.walletNotReady");
     if (
