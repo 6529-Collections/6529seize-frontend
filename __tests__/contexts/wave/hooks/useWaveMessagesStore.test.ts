@@ -585,4 +585,23 @@ describe("useWaveMessagesStore", () => {
     expect(listener).not.toHaveBeenCalled();
     expect(result.current.getData("wave1")).toBeUndefined();
   });
+  it("rejects captured destructive cache callbacks after a profile switch", async () => {
+    const { result } = renderHook(() => useWaveMessagesStore());
+    const staleRemoveDrops = result.current.removeDrops;
+    const staleClearWave = result.current.clearWave;
+    act(() =>
+      globalThis.dispatchEvent(new CustomEvent(PROFILE_SWITCHED_EVENT))
+    );
+    act(() => result.current.updateData({ key: "wave1", drops: [baseDrop] }));
+    await waitFor(() =>
+      expect(result.current.getData("wave1")?.drops).toHaveLength(1)
+    );
+    act(() => {
+      staleRemoveDrops("wave1", ["d1"]);
+      expect(staleClearWave("wave1")).toBe(false);
+    });
+    expect(result.current.getData("wave1")?.drops).toHaveLength(1);
+    act(() => result.current.removeDrops("wave1", ["d1"]));
+    expect(result.current.getData("wave1")?.drops).toHaveLength(0);
+  });
 });

@@ -290,8 +290,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     (waveId: string) => {
       cancelWaveDataFetch(waveId);
       cancelPaginationFetch(waveId);
-      clearWave(waveId);
-      registerWave(waveId);
+      if (clearWave(waveId)) registerWave(waveId);
     },
     [cancelWaveDataFetch, cancelPaginationFetch, clearWave, registerWave]
   );

@@ -89,7 +89,9 @@ function DeleteChatHistory({
               )}
             {paused &&
               text(
-                "waves.sidebar.rightPanel.configuration.deleteChatHistory.paused",
+                state.error === null
+                  ? "waves.sidebar.rightPanel.configuration.deleteChatHistory.paused"
+                  : "waves.sidebar.rightPanel.configuration.deleteChatHistory.confirmedProgress",
                 { count: formatInteger(DEFAULT_LOCALE, state.deletedCount) }
               )}
           </div>

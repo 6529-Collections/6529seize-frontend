@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useReducer, useRef } from "react";
+import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 import {
   formatWaveMessages,
   maxOrNull,
@@ -111,6 +111,7 @@ function useWaveMessagesStore() {
   );
   const authoritativePaginationWaveIdsRef = useRef<Set<string>>(new Set());
   const storeGenerationRef = useRef(0);
+  const [storeGeneration, setStoreGeneration] = useState(0);
 
   const releaseServerFeedSeedIfReady = useCallback((waveId: string): void => {
     if (
@@ -133,6 +134,7 @@ function useWaveMessagesStore() {
     const resetProfileScopedState = () => {
       const clearedWaveIds = Object.keys(waveMessagesRef.current);
       storeGenerationRef.current += 1;
+      setStoreGeneration(storeGenerationRef.current);
       pendingServerFeedSeedsRef.current.clear();
       activeServerFeedSeedsRef.current.clear();
       activeServerFeedSeedGatePromisesRef.current.clear();
@@ -555,8 +557,11 @@ function useWaveMessagesStore() {
     [updateData]
   );
 
+  // Bind destructive cache callbacks to the rendered profile generation so a
+  // caller holding an old callback cannot mutate a newly populated profile.
   const removeDrops = useCallback(
     (waveId: string, dropIds: readonly string[]) => {
+      if (storeGeneration !== storeGenerationRef.current) return;
       const currentWave = waveMessagesRef.current[waveId];
       if (!currentWave || dropIds.length === 0) return;
       const removed = new Set(dropIds);
@@ -572,7 +577,7 @@ function useWaveMessagesStore() {
         listener(updatedWave)
       );
     },
-    []
+    [storeGeneration]
   );
 
   const removeDrop = useCallback(
@@ -582,24 +587,29 @@ function useWaveMessagesStore() {
     [removeDrops]
   );
 
-  const clearWave = useCallback((waveId: string) => {
-    pendingServerFeedSeedsRef.current.delete(waveId);
-    activeServerFeedSeedsRef.current.delete(waveId);
-    activeServerFeedSeedGatePromisesRef.current.delete(waveId);
-    appliedServerFeedSeedWaveIdsRef.current.delete(waveId);
-    completedInitialRegistrationsRef.current.delete(waveId);
-    committedServerFeedSeedsRef.current.delete(waveId);
-    serverFeedSeedReadyCallbacksRef.current.delete(waveId);
-    authoritativePaginationWaveIdsRef.current.delete(waveId);
-    updateQueueRef.current = updateQueueRef.current.filter(
-      ({ update }) => update.key !== waveId
-    );
-    const next = { ...waveMessagesRef.current };
-    delete next[waveId];
-    waveMessagesRef.current = next;
-    forceRender();
-    listenersRef.current[waveId]?.forEach((listener) => listener(undefined));
-  }, []);
+  const clearWave = useCallback(
+    (waveId: string) => {
+      if (storeGeneration !== storeGenerationRef.current) return false;
+      pendingServerFeedSeedsRef.current.delete(waveId);
+      activeServerFeedSeedsRef.current.delete(waveId);
+      activeServerFeedSeedGatePromisesRef.current.delete(waveId);
+      appliedServerFeedSeedWaveIdsRef.current.delete(waveId);
+      completedInitialRegistrationsRef.current.delete(waveId);
+      committedServerFeedSeedsRef.current.delete(waveId);
+      serverFeedSeedReadyCallbacksRef.current.delete(waveId);
+      authoritativePaginationWaveIdsRef.current.delete(waveId);
+      updateQueueRef.current = updateQueueRef.current.filter(
+        ({ update }) => update.key !== waveId
+      );
+      const next = { ...waveMessagesRef.current };
+      delete next[waveId];
+      waveMessagesRef.current = next;
+      forceRender();
+      listenersRef.current[waveId]?.forEach((listener) => listener(undefined));
+      return true;
+    },
+    [storeGeneration]
+  );
 
   return {
     getData,

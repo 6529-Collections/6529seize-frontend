@@ -5,7 +5,7 @@ import {
   commonApiPost,
 } from "@/services/api/common-api";
 
-export type ChatHistoryPurgeState = {
+type ChatHistoryPurgeState = {
   readonly phase: "idle" | "running" | "paused" | "complete";
   readonly token: string | null;
   readonly deletedCount: number;
@@ -99,7 +99,13 @@ function validateBatch(
 }
 
 function getPreparedToken(plan: unknown): string {
-  if (typeof plan !== "object" || plan === null || !("purge_token" in plan) || typeof plan.purge_token !== "string" || plan.purge_token.length === 0) {
+  if (
+    typeof plan !== "object" ||
+    plan === null ||
+    !("purge_token" in plan) ||
+    typeof plan.purge_token !== "string" ||
+    plan.purge_token.length === 0
+  ) {
     throw new Error("Invalid chat history preparation response");
   }
   return plan.purge_token;
