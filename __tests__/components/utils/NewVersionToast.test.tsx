@@ -5,11 +5,11 @@ import {
 } from "@/helpers/navigation.helpers";
 import { preserveWaveScrollPositionForReload } from "@/helpers/waves/wave-visible-serial.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
-import { useIsVersionStale } from "@/hooks/useIsVersionStale";
+import { useVersionStatus } from "@/contexts/VersionStatusContext";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 
-jest.mock("@/hooks/useIsVersionStale", () => ({
-  useIsVersionStale: jest.fn(),
+jest.mock("@/contexts/VersionStatusContext", () => ({
+  useVersionStatus: jest.fn(),
 }));
 jest.mock("@/hooks/useDeviceInfo", () => ({
   __esModule: true,
@@ -23,7 +23,7 @@ jest.mock("@/helpers/waves/wave-visible-serial.helpers", () => ({
 }));
 const mockedPreserveWaveScrollPosition =
   preserveWaveScrollPositionForReload as jest.Mock;
-const mockedUseIsVersionStale = useIsVersionStale as jest.Mock;
+const mockedUseVersionStatus = useVersionStatus as jest.Mock;
 const mockedUseDeviceInfo = useDeviceInfo as jest.Mock;
 const NEW_VERSION_TOAST_MOBILE_BOTTOM_PROPERTY =
   "--new-version-toast-mobile-bottom";
@@ -225,14 +225,14 @@ describe("NewVersionToast", () => {
   });
 
   it("returns null when not stale", () => {
-    mockedUseIsVersionStale.mockReturnValue(false);
+    mockedUseVersionStatus.mockReturnValue(false);
     const { container } = render(<NewVersionToast />);
     expect(container.firstChild).toBeNull();
   });
 
-  it("renders toast", () => {
-    mockedUseIsVersionStale.mockReturnValue(true);
-    setMobileDockViewport(true);
+  it("keeps the existing desktop toast", () => {
+    mockedUseVersionStatus.mockReturnValue(true);
+    setMobileDockViewport(false);
 
     const { container } = render(<NewVersionToast />);
     expect(screen.getByText(/new version/i)).toBeInTheDocument();
@@ -264,9 +264,33 @@ describe("NewVersionToast", () => {
     expect(screen.getByRole("button")).toBeInTheDocument();
   });
 
+  it.each([
+    ["en-US", "Update", "Update to the new version"],
+    ["en-GB", "Update", "Update to the new version"],
+    ["fr-FR", "Mettre à jour", "Mettre à jour vers la nouvelle version"],
+    ["es-ES", "Actualizar", "Actualizar a la nueva versión"],
+    ["de-DE", "Aktualisieren", "Auf die neue Version aktualisieren"],
+  ])("renders the compact mobile pill in %s", (locale, label, action) => {
+    setBrowserLanguages([locale]);
+    mockedUseVersionStatus.mockReturnValue(true);
+    setMobileDockViewport(true);
+    const { container } = render(<NewVersionToast />);
+    expect(screen.getByRole("button", { name: action })).toHaveTextContent(
+      label
+    );
+    expect(screen.queryByText("Yes, again!")).not.toBeInTheDocument();
+    expect(
+      container.querySelector('img[src="/rocket-refresh-small.png"]')
+    ).toHaveAttribute("alt", "");
+    expect(
+      container.querySelector('img[src="/rocket-refresh.png"]')
+    ).not.toBeInTheDocument();
+    expect(container.firstChild).toHaveClass("tw-left-1/2", "tw-w-max");
+  });
+
   it("uses browser locale translations for visible and accessible copy", async () => {
     setBrowserLanguages(["fr-FR"]);
-    mockedUseIsVersionStale.mockReturnValue(true);
+    mockedUseVersionStatus.mockReturnValue(true);
 
     render(<NewVersionToast />);
 
@@ -280,7 +304,7 @@ describe("NewVersionToast", () => {
   });
 
   it("removes the forced toast query param from the current path on refresh", () => {
-    mockedUseIsVersionStale.mockReturnValue(true);
+    mockedUseVersionStatus.mockReturnValue(true);
 
     render(<NewVersionToast />);
     fireEvent.click(screen.getByRole("button"));
@@ -290,7 +314,7 @@ describe("NewVersionToast", () => {
   });
 
   it("pins the wave reading position after the toast param strip, before reload", () => {
-    mockedUseIsVersionStale.mockReturnValue(true);
+    mockedUseVersionStatus.mockReturnValue(true);
     mockPreserveCallSearches.length = 0;
 
     render(<NewVersionToast />);
@@ -304,7 +328,7 @@ describe("NewVersionToast", () => {
   });
 
   it("tracks the measured mobile dock top while the dock compacts", async () => {
-    mockedUseIsVersionStale.mockReturnValue(true);
+    mockedUseVersionStatus.mockReturnValue(true);
     setMobileDockViewport(true);
     const dockRoot = createDockRoot();
     const dock = createMeasuredDock({
@@ -345,7 +369,7 @@ describe("NewVersionToast", () => {
   });
 
   it("tracks the mobile dock when its root mounts after the toast", async () => {
-    mockedUseIsVersionStale.mockReturnValue(true);
+    mockedUseVersionStatus.mockReturnValue(true);
     mockedUseDeviceInfo.mockReturnValue({
       hasTouchScreen: true,
       isApp: true,
@@ -387,8 +411,8 @@ describe("NewVersionToast", () => {
     ).toBe("1");
   });
 
-  it("centers the wide native-app toast above the measured dock", async () => {
-    mockedUseIsVersionStale.mockReturnValue(true);
+  it("centers the compact native-app update pill above the measured dock", async () => {
+    mockedUseVersionStatus.mockReturnValue(true);
     mockedUseDeviceInfo.mockReturnValue({
       hasTouchScreen: true,
       isApp: true,
@@ -410,7 +434,7 @@ describe("NewVersionToast", () => {
       "tw-left-1/2",
       "tw-right-auto",
       "-tw-translate-x-1/2",
-      "tw-w-[min(calc(100vw-2rem),23.25rem)]"
+      "tw-w-max"
     );
     expect(toastLayer).not.toHaveClass("sm:tw-bottom-7", "sm:tw-right-7");
     expect(toastLayer).toHaveClass("sm:tw-scale-100");
@@ -424,7 +448,7 @@ describe("NewVersionToast", () => {
   });
 
   it("does not watch body mutations when mobile web has no dock root", async () => {
-    mockedUseIsVersionStale.mockReturnValue(true);
+    mockedUseVersionStatus.mockReturnValue(true);
     setMobileDockViewport(true);
 
     render(<NewVersionToast />);
@@ -448,7 +472,7 @@ describe("NewVersionToast", () => {
   });
 
   it("keeps desktop positioning independent from mobile dock measurements", async () => {
-    mockedUseIsVersionStale.mockReturnValue(true);
+    mockedUseVersionStatus.mockReturnValue(true);
     setMobileDockViewport(false);
     const dockRoot = createDockRoot();
     const dock = createMeasuredDock({
@@ -476,7 +500,7 @@ describe("NewVersionToast", () => {
   });
 
   it("uses the previous native-app fallback when no mobile dock is measurable", async () => {
-    mockedUseIsVersionStale.mockReturnValue(true);
+    mockedUseVersionStatus.mockReturnValue(true);
     mockedUseDeviceInfo.mockReturnValue({
       hasTouchScreen: true,
       isApp: true,

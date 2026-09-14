@@ -86,8 +86,10 @@ Profile access stays in the app drawer/account surfaces.
   available when no other hide condition is active.
 - While the mobile keyboard is open, the bar stays mounted but slides out of
   view and is non-interactive.
-- The new-version refresh prompt is centered directly above the dock in the
-  native app and follows the dock as it expands or compacts.
+- When an update is available, a compact green `Update` pill with a rocket
+  appears above the mobile dock. It follows the dock position and scales with
+  scrolling on phones. Tapping it reloads the current route; Home keeps its
+  normal navigation action. Desktop web retains the full update prompt.
 - While a single drop is open (`?drop=...`) or an inline drop edit is active,
   the bar is not rendered.
 - `Home`, `Discovery`, `Network`, `Collections`, and `Notifications` provide a
