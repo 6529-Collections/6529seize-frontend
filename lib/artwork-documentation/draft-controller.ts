@@ -304,11 +304,42 @@ export class DocumentationDraftController {
     } else this.state = "offline";
     this.emit();
   }
-  retry() {
-    if (this.state === "conflict") return Promise.resolve(false);
+  retry(): Promise<boolean> {
+    if (this.abort.signal.aborted || this.state === "conflict")
+      return Promise.resolve(false);
+    if (this.running) return this.running;
+    if (this.mutationRunning) return Promise.resolve(false);
+    const needsReadback =
+      !this.hasQueuedEdits() &&
+      ["invalid", "offline", "auth_expired"].includes(this.state);
     this.state = "retrying";
     this.emit();
-    return this.flush();
+    if (!needsReadback) return this.flush();
+    this.clearTimers();
+    const generation = this.generation;
+    this.running = this.readAfterFailedMutation(
+      generation,
+      this.abort.signal
+    ).finally(() => {
+      if (generation === this.generation) this.running = null;
+    });
+    return this.running;
+  }
+  private async readAfterFailedMutation(
+    generation: number,
+    signal: AbortSignal
+  ): Promise<boolean> {
+    try {
+      // A lost mutation response can mean success. Never replay it or mark an
+      // empty queue saved until the canonical context has been read back.
+      const result = await this.transport.read(this.context.id, signal);
+      if (!this.isCurrentSave(generation, signal)) return false;
+      this.context = result;
+      this.errorCode = undefined;
+      return this.runSaves(generation, signal);
+    } catch (error) {
+      return this.failSave(error, generation);
+    }
   }
   async resolveConflict(keepChanges: boolean) {
     const generation = this.generation;
