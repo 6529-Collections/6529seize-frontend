@@ -176,7 +176,8 @@ If a cap is unavailable, the summary says **Not available yet** and does not sho
 a complete maximum. WETH prices and ETH network fees stay separate.
 
 Open **Price breakdown** for seller proceeds and the fees already included in
-the purchase price. Its nested **Exact amounts** shows the unrounded network fee
+the purchase price, plus how network fees are charged. Unused gas is not charged;
+a transaction that fails on-chain can still use gas. Its nested **Exact amounts** shows the unrounded network fee
 cap, approval fee caps and maximum where available. **Contract details** keeps
 the NFT contract, exchange, fee recipients, approval scope and order identifiers
 available separately. Known Ethereum addresses have names such as **The Memes**,
@@ -193,8 +194,13 @@ you to review and continue again. The same checks apply to listings, offers,
 accepting an offer, cancellation and supported multiple-item purchases. Checking
 terms never signs or sends a transaction by itself. Quote freshness is separate
 from the signed order's expiry; refreshing does not extend that order.
-A lower network fee quote can proceed within the limits you reviewed. An increased
-network fee limit pauses for review of the updated maximum.
+The network fee limits you reviewed stay in place while the current transaction
+can execute within them. A changing fee estimate does not by itself require
+another review or raise those limits. If the transaction needs a higher limit,
+the review pauses and shows the updated maximum before any wallet request.
+**View exact changes** expands the previous and updated fee limits. A fee-only
+change identifies that the purchase price is unchanged; changes to the purchase
+itself require a separate review of those terms.
 
 ### Complete a profile set
 
@@ -527,6 +533,11 @@ them. The site does not substitute a different NFT into an exact-item purchase.
 **Continue in wallet** waits until the connected wallet is ready on Ethereum.
 If the wallet is still connecting, the review explains that state. A declined
 request keeps your choices for another attempt.
+
+If an initial check cannot finish, the review says **Checks could not finish**.
+Retry those checks with your choices retained. The message does not establish
+the outcome of an earlier wallet request. If a signed
+order could not be published, check order activity before retrying publication.
 
 Preparation errors distinguish an unreachable service, expired authentication,
 changed profile or delivery wallets, unsupported terms and invalid trade details.

@@ -52,6 +52,16 @@ On `success`, the modal auto-closes after a short delay.
 
 ### Review the Submission Signature
 
+Before success, eligible submitters see `Wallet signature · No gas fee` and
+`What to expect` above the actions in `Additional Information` and `Preview`.
+Click or tap `What to expect` to open `What will my wallet show?`;
+press `Escape` to dismiss it.
+
+The note explains that MetaMask shows labeled fields, while Rabby may show raw
+data with `Unknown Signature Type`. Review the message details: look for
+`Submit a Meme Card to The Memes`, check your artwork title and submission terms,
+and cancel if the details do not match your submission.
+
 The Memes Main Stage uses an EIP-712 typed-data signature. It authorizes the
 artwork submission and confirms agreement to the submission terms reviewed in
 `Agreement`. This submission signature does not mint an NFT, approve token
