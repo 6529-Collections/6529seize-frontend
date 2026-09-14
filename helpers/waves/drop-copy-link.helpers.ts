@@ -21,6 +21,20 @@ const isQuorumParticipationCopyLinkDrop = ({
 }): boolean =>
   isQuorumWave(drop.wave.id) && drop.drop_type === ApiDropType.Participatory;
 
+export const getOpenedDropLink = ({
+  drop,
+  isDirectMessage,
+}: {
+  drop: ApiDrop;
+  isDirectMessage: boolean;
+}): string =>
+  `${publicEnv.BASE_ENDPOINT}${getWaveRoute({
+    waveId: drop.wave.id,
+    extraParams: { drop: drop.id },
+    isDirectMessage,
+    isApp: false,
+  })}`;
+
 export const getCopiedDropLink = ({
   drop,
   isDirectMessage,
@@ -36,12 +50,7 @@ export const getCopiedDropLink = ({
     isMemesSubmissionCopyLinkDrop({ drop, isMemesWave }) ||
     isQuorumParticipationCopyLinkDrop({ drop, isQuorumWave })
   ) {
-    return `${publicEnv.BASE_ENDPOINT}${getWaveRoute({
-      waveId: drop.wave.id,
-      extraParams: { drop: drop.id },
-      isDirectMessage: false,
-      isApp: false,
-    })}`;
+    return getOpenedDropLink({ drop, isDirectMessage: false });
   }
 
   return `${publicEnv.BASE_ENDPOINT}${getWaveRoute({
