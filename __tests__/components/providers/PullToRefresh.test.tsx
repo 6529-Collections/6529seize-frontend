@@ -1,6 +1,13 @@
 import { useVersionStatus } from "@/contexts/VersionStatusContext";
 import { refreshAppVersion } from "@/helpers/version-refresh.helpers";
 
+const mockInvalidateAll = jest.fn();
+jest.mock("@/components/react-query-wrapper/ReactQueryWrapper", () => ({
+  ReactQueryWrapperContext: require("react").createContext({
+    invalidateAll: () => mockInvalidateAll(),
+  }),
+}));
+
 jest.mock("@/contexts/VersionStatusContext", () => ({
   useVersionStatus: jest.fn(() => false),
 }));
@@ -168,12 +175,14 @@ describe("PullToRefresh", () => {
         dispatchTouchEvent({ target: pull.triggerZone, type: "touchend" })
       );
       expect(refreshAppVersion).toHaveBeenCalledTimes(stale ? 1 : 0);
+      expect(mockInvalidateAll).toHaveBeenCalledTimes(stale ? 0 : 1);
       // A second completed gesture is ignored while this refresh is underway.
       startPull(pull.triggerZone, 200);
       act(() =>
         dispatchTouchEvent({ target: pull.triggerZone, type: "touchend" })
       );
       expect(refreshAppVersion).toHaveBeenCalledTimes(stale ? 1 : 0);
+      expect(mockInvalidateAll).toHaveBeenCalledTimes(stale ? 0 : 1);
       act(() => jest.runOnlyPendingTimers());
       pull.unmount();
     }
