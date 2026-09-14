@@ -10,6 +10,7 @@ import {
   $getRoot,
   $getSelection,
   $isRangeSelection,
+  COMMAND_PRIORITY_NORMAL,
   DELETE_CHARACTER_COMMAND,
   type EditorState,
   type LexicalEditor,
@@ -139,6 +140,41 @@ async function typeText(editor: LexicalEditor, text: string) {
   }
 }
 
+async function normalBackspace(editor: LexicalEditor) {
+  const unregisterNormalDelete = editor.registerCommand(
+    DELETE_CHARACTER_COMMAND,
+    (backward) => {
+      const selection = $getSelection();
+      if (
+        !backward ||
+        !$isRangeSelection(selection) ||
+        !selection.isCollapsed() ||
+        selection.anchor.type !== "text" ||
+        selection.anchor.offset === 0
+      ) {
+        return false;
+      }
+      const offset = selection.anchor.offset;
+      selection.anchor
+        .getNode()
+        .select(offset - 1, offset)
+        .removeText();
+      return true;
+    },
+    COMMAND_PRIORITY_NORMAL
+  );
+  try {
+    await act(async () => {
+      editor.update(
+        () => editor.dispatchCommand(DELETE_CHARACTER_COMMAND, true),
+        { discrete: true }
+      );
+    });
+  } finally {
+    unregisterNormalDelete();
+  }
+}
+
 it.each(["~test~", "~~test~~", "**test**", "*test*", "`test`", "==test=="])(
   "reverses %s with real composer plugins and parent rerenders",
   async (markdown) => {
@@ -197,4 +233,28 @@ it("bounds format normalization and allows plain typing after deleting a word", 
   } finally {
     unregister();
   }
+});
+
+it("restores Markdown after deleting text typed beyond a converted shortcut", async () => {
+  const editor = await mountComposer();
+  const input = screen.getByRole("textbox");
+  await typeText(editor, "~test~ ");
+  expect(input.textContent).toBe("test ");
+  await normalBackspace(editor);
+  expect(input.textContent).toBe("test");
+  await act(async () => {
+    fireEvent.keyDown(input, { key: "Backspace", keyCode: 8 });
+  });
+  expect(input.textContent).toBe("~test");
+  expect(input.querySelector(".editor-text-strikethrough")).toBeNull();
+});
+
+it("types plain text after a completed strikethrough shortcut", async () => {
+  const editor = await mountComposer();
+  await typeText(editor, "~test~ plain");
+  const input = screen.getByRole("textbox");
+  expect(input.textContent).toBe("test plain");
+  expect(input.querySelector(".editor-text-strikethrough")?.textContent).toBe(
+    "test"
+  );
 });

@@ -13,6 +13,7 @@ import {
   createEditor,
   DELETE_CHARACTER_COMMAND,
   COMMAND_PRIORITY_LOW,
+  COMMAND_PRIORITY_NORMAL,
   FORMAT_TEXT_COMMAND,
   UNDO_COMMAND,
   REDO_COMMAND,
@@ -103,6 +104,36 @@ describe("editor inline formatting", () => {
       editor.dispatchCommand(DELETE_CHARACTER_COMMAND, true);
     });
 
+  const normalBackspace = async () => {
+    const unregisterNormalDelete = editor.registerCommand(
+      DELETE_CHARACTER_COMMAND,
+      (backward) => {
+        const selection = $getSelection();
+        if (
+          !backward ||
+          !$isRangeSelection(selection) ||
+          !selection.isCollapsed() ||
+          selection.anchor.type !== "text" ||
+          selection.anchor.offset === 0
+        ) {
+          return false;
+        }
+        const offset = selection.anchor.offset;
+        selection.anchor
+          .getNode()
+          .select(offset - 1, offset)
+          .removeText();
+        return true;
+      },
+      COMMAND_PRIORITY_NORMAL
+    );
+    try {
+      await backspace();
+    } finally {
+      unregisterNormalDelete();
+    }
+  };
+
   const selectStrike = async (start = 0, end?: number) =>
     update(() => {
       const node = $getRoot()
@@ -124,6 +155,45 @@ describe("editor inline formatting", () => {
       expect(
         root.querySelector(".editor-text-strikethrough")
       ).toHaveTextContent("test");
+    }
+  );
+
+  it.each([
+    "~test~",
+    "~~test~~",
+    "*test*",
+    "**test**",
+    "***test***",
+    "`test`",
+    "==test==",
+  ])(
+    "reverses %s after typing and deleting a temporary suffix",
+    async (markdown) => {
+      await typeText(markdown);
+      await typeText(" ");
+      await normalBackspace();
+      expect(root.textContent).toBe("test");
+      await backspace();
+      expect(root.textContent).toBe(markdown.slice(0, -1));
+      expect(root.querySelector(".editor-text-strikethrough")).toBeNull();
+    }
+  );
+
+  it.each(["~test~", "~~test~~"])(
+    "types plain text beyond the completed shortcut %s",
+    async (markdown) => {
+      await typeText(markdown);
+      await typeText(" plain");
+      expect(root.textContent).toBe("test plain");
+      expect(
+        editor.getEditorState().read(() => {
+          const nodes = $getRoot().getAllTextNodes();
+          const suffix = nodes.find((node) =>
+            node.getTextContent().includes("plain")
+          );
+          return suffix?.getFormat();
+        })
+      ).toBe(0);
     }
   );
 
@@ -212,6 +282,9 @@ describe("editor inline formatting", () => {
 
   it("reverses a nested shortcut without removing its existing bold text", async () => {
     await typeText("~**test**~");
+    expect(root.querySelector(".editor-text-strikethrough")).toHaveTextContent(
+      "test"
+    );
     await backspace();
     expect(root.textContent).toBe("~test");
     expect(root.querySelector(".editor-text-bold")).toHaveTextContent("test");

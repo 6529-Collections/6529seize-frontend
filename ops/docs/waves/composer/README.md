@@ -48,7 +48,12 @@ formatted text to restore the text minus the closing character you just typed.
 For example, `~test~` becomes literal `~test`, and `~~test~~` becomes literal
 `~~test~`. This also applies to the supported bold, italic, highlight, and inline
 code shortcuts. After typing more text or moving the cursor, Backspace deletes
-normally.
+normally. If you type temporary text after the shortcut and then delete back to
+the original shortcut boundary, the next Backspace still restores the Markdown
+markers.
+
+Text typed after a completed strikethrough shortcut starts unformatted,
+including spaces.
 
 Deleting a whole formatted word lets you resume typing without carrying its
 formatting into new text, even when other text remains in the message. Deleting

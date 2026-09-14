@@ -4,6 +4,7 @@ import {
   $addUpdateTag,
   $getRoot,
   $getSelection,
+  $isElementNode,
   $isRangeSelection,
   $isTextNode,
   BLUR_COMMAND,
@@ -13,6 +14,7 @@ import {
   FORMAT_TEXT_COMMAND,
   KEY_DOWN_COMMAND,
   type EditorState,
+  type LexicalNode,
   type LexicalEditor,
   type TextFormatType,
 } from "lexical";
@@ -27,6 +29,7 @@ const INLINE_FORMATS: TextFormatType[] = [
   "subscript",
   "superscript",
 ];
+const PLAIN_SUFFIX_TAG = "inline-format-plain-suffix";
 
 function readCursor(state: EditorState) {
   return state.read(() => {
@@ -35,17 +38,49 @@ function readCursor(state: EditorState) {
       return null;
     }
     const node = selection.anchor.getNode();
+    const previous =
+      selection.anchor.type === "element" && $isElementNode(node)
+        ? node.getChildAtIndex(selection.anchor.offset - 1)
+        : node.getPreviousSibling();
+    const formatNodes = [node, previous].filter($isTextNode);
+    let point = 0;
+    let foundPoint = false;
+    const visit = (current: LexicalNode) => {
+      if (foundPoint) return;
+      if (current === node) {
+        if ($isTextNode(current)) {
+          point += selection.anchor.offset;
+        } else if ($isElementNode(current)) {
+          point += current
+            .getChildren()
+            .slice(0, selection.anchor.offset)
+            .reduce((size, child) => size + child.getTextContentSize(), 0);
+        }
+        foundPoint = true;
+        return;
+      }
+      if ($isTextNode(current)) {
+        point += current.getTextContentSize();
+      } else if ($isElementNode(current)) {
+        for (const child of current.getChildren()) visit(child);
+      }
+    };
+    visit($getRoot());
     return {
       selection,
+      point,
+      rootText: $getRoot().getTextContent(),
       text: $isTextNode(node) ? node.getTextContent() : null,
-      previousKey: node.getPreviousSibling()?.getKey(),
+      previousKey: previous?.getKey(),
       formats:
         $isTextNode(node) && node.getTextContentSize() > 0
           ? node.getFormat()
           : 0,
-      nodeFormats: $isTextNode(node)
-        ? new Set(INLINE_FORMATS.filter((format) => node.hasFormat(format)))
-        : new Set<TextFormatType>(),
+      nodeFormats: new Set(
+        INLINE_FORMATS.filter((format) =>
+          formatNodes.some((formatNode) => formatNode.hasFormat(format))
+        )
+      ),
       size: $getRoot().getTextContentSize(),
       touchedFormats: selection
         .getNodes()
@@ -59,6 +94,103 @@ function readCursor(state: EditorState) {
 }
 
 type Cursor = NonNullable<ReturnType<typeof readCursor>>;
+
+type Shortcut = {
+  before: EditorState;
+  converted: EditorState;
+  signature: string;
+  detour: boolean;
+  exitFormats: readonly TextFormatType[];
+};
+
+type PendingShortcut = {
+  before: EditorState;
+  typed: EditorState;
+  matches: TextFormatTransformer[];
+};
+
+type InlineFormatEditingState = {
+  pending: PendingShortcut | null;
+  shortcut: Shortcut | null;
+};
+
+type CursorUpdate = {
+  previous: Cursor;
+  current: Cursor;
+  prevEditorState: EditorState;
+  editorState: EditorState;
+};
+
+type EditorUpdate = {
+  editorState: EditorState;
+  prevEditorState: EditorState;
+  tags: Set<string>;
+};
+
+function contentSignature(state: EditorState): string {
+  return JSON.stringify(state.toJSON().root);
+}
+
+function isShortcutBoundary(
+  shortcut: Shortcut,
+  current: Cursor,
+  editorState: EditorState
+): boolean {
+  if (
+    !current.selection.isCollapsed() ||
+    contentSignature(editorState) !== shortcut.signature
+  ) {
+    return false;
+  }
+  const converted = readCursor(shortcut.converted);
+  return (
+    converted !== null &&
+    converted.selection.isCollapsed() &&
+    current.point === converted.point
+  );
+}
+
+function normalizeInsertedSuffix(
+  editor: LexicalEditor,
+  length: number,
+  formats: readonly TextFormatType[]
+) {
+  editor.update(
+    () => {
+      const selection = $getSelection();
+      if (
+        !$isRangeSelection(selection) ||
+        !selection.isCollapsed() ||
+        selection.anchor.type !== "text"
+      ) {
+        return;
+      }
+      const node = selection.anchor.getNode();
+      if (!$isTextNode(node)) return;
+      const end = selection.anchor.offset;
+      const start = end - length;
+      if (start < 0) return;
+      let suffix = start === 0 ? node : node.splitText(start)[1];
+      if (!suffix) return;
+      if (suffix.getTextContentSize() > length) {
+        const splitSuffix = suffix.splitText(length)[0];
+        if (!splitSuffix) return;
+        suffix = splitSuffix;
+      }
+      for (const format of formats) {
+        if (suffix.hasFormat(format)) suffix.toggleFormat(format);
+      }
+      const nextSelection = suffix.selectEnd();
+      for (const format of formats) {
+        const original = nextSelection.format;
+        nextSelection.toggleFormat(format);
+        const formatFlag = original ^ nextSelection.format;
+        nextSelection.format = original & ~formatFlag;
+      }
+    },
+    { tag: PLAIN_SUFFIX_TAG }
+  );
+}
 
 function isMarkerInsertion(
   previous: Cursor,
@@ -137,6 +269,198 @@ function $hasSameNodes(previous: EditorState): boolean {
   );
 }
 
+function clearEditingState(state: InlineFormatEditingState): false {
+  state.pending = null;
+  state.shortcut = null;
+  return false;
+}
+
+function retainEditingState(
+  state: InlineFormatEditingState,
+  previous: Cursor,
+  current: Cursor,
+  prevEditorState: EditorState,
+  editorState: EditorState
+): boolean {
+  if (
+    state.pending &&
+    previous.selection.isCollapsed() &&
+    current.selection.isCollapsed() &&
+    previous.rootText === current.rootText
+  ) {
+    state.pending.typed = editorState;
+    return true;
+  }
+  if (
+    !(state.pending || state.shortcut) ||
+    !hasSameCursor(previous, current) ||
+    !editorState.read(() => $hasSameNodes(prevEditorState))
+  ) {
+    return false;
+  }
+  if (state.pending?.typed === prevEditorState) {
+    state.pending.typed = editorState;
+  }
+  if (state.shortcut?.converted === prevEditorState && !state.shortcut.detour) {
+    state.shortcut.converted = editorState;
+  }
+  return true;
+}
+
+function findConvertedTransformer(
+  candidate: PendingShortcut | null,
+  previous: Cursor,
+  current: Cursor,
+  prevEditorState: EditorState
+): TextFormatTransformer | undefined {
+  const removed = previous.size - current.size;
+  return candidate?.matches.find(
+    (transformer) =>
+      candidate.typed === prevEditorState &&
+      current.selection.isCollapsed() &&
+      removed === transformer.tag.length * 2 &&
+      transformer.format.every((format) => current.nodeFormats.has(format))
+  );
+}
+
+function updateTrackedShortcut(
+  editor: LexicalEditor,
+  textFormats: TextFormatTransformer[],
+  state: InlineFormatEditingState,
+  update: CursorUpdate
+) {
+  const { previous, current, prevEditorState, editorState } = update;
+  const shortcut = state.shortcut;
+  if (shortcut && isShortcutBoundary(shortcut, current, editorState)) {
+    shortcut.converted = editorState;
+    shortcut.detour = false;
+    return;
+  }
+
+  const beforeCursor =
+    current.text?.slice(0, current.selection.anchor.offset) ?? "";
+  const marker = beforeCursor.slice(-1);
+  const matches = textFormats.filter(
+    ({ tag }) => beforeCursor.endsWith(tag) && tag.endsWith(marker)
+  );
+  if (matches.length > 0 && isMarkerInsertion(previous, current, marker)) {
+    state.shortcut = null;
+    state.pending = { before: prevEditorState, typed: editorState, matches };
+    return;
+  }
+
+  const changedSize = current.size - previous.size;
+  const startedAtBoundary =
+    shortcut && isShortcutBoundary(shortcut, previous, prevEditorState);
+  if (
+    shortcut &&
+    shortcut.exitFormats.length > 0 &&
+    changedSize > 0 &&
+    current.point === previous.point + changedSize &&
+    startedAtBoundary
+  ) {
+    shortcut.detour = true;
+    normalizeInsertedSuffix(editor, changedSize, shortcut.exitFormats);
+    return;
+  }
+  if (
+    shortcut &&
+    current.selection.isCollapsed() &&
+    changedSize !== 0 &&
+    (shortcut.detour || startedAtBoundary)
+  ) {
+    shortcut.detour = true;
+    return;
+  }
+  state.shortcut = null;
+}
+
+function handleEditorUpdate(
+  editor: LexicalEditor,
+  textFormats: TextFormatTransformer[],
+  state: InlineFormatEditingState,
+  update: EditorUpdate
+) {
+  const { editorState, prevEditorState, tags } = update;
+  if (tags.has(PLAIN_SUFFIX_TAG)) return;
+  if (
+    tags.has("historic") ||
+    tags.has("collaboration") ||
+    editor.isComposing()
+  ) {
+    clearEditingState(state);
+    return;
+  }
+  const previous = readCursor(prevEditorState);
+  const current = readCursor(editorState);
+  if (!previous || !current) {
+    clearEditingState(state);
+    return;
+  }
+  if (
+    retainEditingState(state, previous, current, prevEditorState, editorState)
+  ) {
+    return;
+  }
+
+  const candidate = state.pending;
+  state.pending = null;
+  const convertedBy = findConvertedTransformer(
+    candidate,
+    previous,
+    current,
+    prevEditorState
+  );
+  if (candidate && convertedBy) {
+    state.shortcut = {
+      before: candidate.before,
+      converted: editorState,
+      signature: contentSignature(editorState),
+      detour: false,
+      exitFormats: convertedBy.format.includes("strikethrough")
+        ? convertedBy.format
+        : [],
+    };
+  } else {
+    updateTrackedShortcut(
+      editor,
+      textFormats,
+      state,
+      { previous, current, prevEditorState, editorState }
+    );
+  }
+  resetDeletedFormats(editor, previous, current);
+}
+
+function handleDeleteCharacter(
+  editor: LexicalEditor,
+  state: InlineFormatEditingState,
+  backward: boolean
+): boolean {
+  const saved = state.shortcut;
+  const selection = $getSelection();
+  const editorState = editor.getEditorState();
+  const current = readCursor(editorState);
+  if (
+    !backward ||
+    !saved ||
+    editor.isComposing() ||
+    !$isRangeSelection(selection) ||
+    !selection.isCollapsed() ||
+    !current ||
+    !isShortcutBoundary(saved, current, editorState) ||
+    !selection.anchor.is(current.selection.anchor) ||
+    !$hasSameNodes(editorState)
+  ) {
+    if (!backward || !saved || editor.isComposing()) clearEditingState(state);
+    return false;
+  }
+  clearEditingState(state);
+  $restoreEditorState(editor, saved.before);
+  $addUpdateTag("history-push");
+  return true;
+}
+
 export function registerInlineFormatEditing(
   editor: LexicalEditor,
   transformers: Transformer[]
@@ -145,116 +469,20 @@ export function registerInlineFormatEditing(
     (transformer): transformer is TextFormatTransformer =>
       transformer.type === "text-format"
   );
-  let pending: {
-    before: EditorState;
-    typed: EditorState;
-    matches: TextFormatTransformer[];
-  } | null = null;
-  let shortcut: { before: EditorState; converted: EditorState } | null = null;
-  const clearShortcut = () => {
-    pending = null;
-    shortcut = null;
-    return false;
-  };
-
-  const retainShortcut = (
-    previous: Cursor,
-    current: Cursor,
-    prevEditorState: EditorState,
-    editorState: EditorState
-  ): boolean => {
-    // Selection reconciliation and no-op plugin updates may create a new
-    // EditorState without changing any document node or moving the cursor.
-    // Retain the shortcut only across those updates, never across content edits.
-    if (
-      !(pending || shortcut) ||
-      !hasSameCursor(previous, current) ||
-      !editorState.read(() => $hasSameNodes(prevEditorState))
-    )
-      return false;
-    if (pending?.typed === prevEditorState) pending.typed = editorState;
-    if (shortcut?.converted === prevEditorState)
-      shortcut.converted = editorState;
-    return true;
-  };
+  const state: InlineFormatEditingState = { pending: null, shortcut: null };
+  const clear = () => clearEditingState(state);
 
   return mergeRegister(
-    editor.registerUpdateListener(({ editorState, prevEditorState, tags }) => {
-      if (
-        tags.has("historic") ||
-        tags.has("collaboration") ||
-        editor.isComposing()
-      ) {
-        clearShortcut();
-        return;
-      }
-      const previous = readCursor(prevEditorState);
-      const current = readCursor(editorState);
-      if (!previous || !current) {
-        clearShortcut();
-        return;
-      }
-      if (retainShortcut(previous, current, prevEditorState, editorState)) {
-        return;
-      }
-      const candidate = pending;
-      clearShortcut();
-      const removed = previous.size - current.size;
-      if (
-        candidate?.typed === prevEditorState &&
-        current.selection.isCollapsed() &&
-        candidate.matches.some(
-          (transformer) =>
-            removed === transformer.tag.length * 2 &&
-            transformer.format.every((format) =>
-              current.nodeFormats.has(format)
-            )
-        )
-      ) {
-        shortcut = { before: candidate.before, converted: editorState };
-      } else {
-        const beforeCursor =
-          current.text?.slice(0, current.selection.anchor.offset) ?? "";
-        const marker = beforeCursor.slice(-1);
-        const matches = textFormats.filter(
-          ({ tag }) => beforeCursor.endsWith(tag) && tag.endsWith(marker)
-        );
-        if (
-          matches.length > 0 &&
-          isMarkerInsertion(previous, current, marker)
-        ) {
-          pending = { before: prevEditorState, typed: editorState, matches };
-        }
-      }
-
-      resetDeletedFormats(editor, previous, current);
-    }),
+    editor.registerUpdateListener(({ editorState, prevEditorState, tags }) =>
+      handleEditorUpdate(editor, textFormats, state, {
+        editorState,
+        prevEditorState,
+        tags,
+      })
+    ),
     editor.registerCommand(
       DELETE_CHARACTER_COMMAND,
-      (backward) => {
-        const saved = shortcut;
-        clearShortcut();
-        const selection = $getSelection();
-        const convertedSelection = saved?.converted.read($getSelection);
-        if (
-          !backward ||
-          !saved ||
-          editor.isComposing() ||
-          !$isRangeSelection(selection) ||
-          !selection.isCollapsed() ||
-          !$isRangeSelection(convertedSelection) ||
-          !selection.anchor.is(convertedSelection.anchor) ||
-          editor.getEditorState() !== saved.converted ||
-          !$hasSameNodes(saved.converted)
-        ) {
-          return false;
-        }
-        // Restore the exact pre-keystroke state, including nested formats and
-        // the original Markdown spelling, as one undoable action.
-        $restoreEditorState(editor, saved.before);
-        $addUpdateTag("history-push");
-        return true;
-      },
+      (backward) => handleDeleteCharacter(editor, state, backward),
       COMMAND_PRIORITY_HIGH
     ),
     editor.registerCommand(
@@ -267,18 +495,14 @@ export function registerInlineFormatEditing(
           event.metaKey ||
           event.shiftKey
         ) {
-          clearShortcut();
+          clear();
         }
         return false;
       },
       COMMAND_PRIORITY_HIGH
     ),
-    editor.registerCommand(
-      FORMAT_TEXT_COMMAND,
-      clearShortcut,
-      COMMAND_PRIORITY_HIGH
-    ),
-    editor.registerCommand(CLICK_COMMAND, clearShortcut, COMMAND_PRIORITY_HIGH),
-    editor.registerCommand(BLUR_COMMAND, clearShortcut, COMMAND_PRIORITY_HIGH)
+    editor.registerCommand(FORMAT_TEXT_COMMAND, clear, COMMAND_PRIORITY_HIGH),
+    editor.registerCommand(CLICK_COMMAND, clear, COMMAND_PRIORITY_HIGH),
+    editor.registerCommand(BLUR_COMMAND, clear, COMMAND_PRIORITY_HIGH)
   );
 }
