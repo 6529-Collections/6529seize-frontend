@@ -180,6 +180,37 @@ export const ARTWORK_DOCUMENTATION_MESSAGES = {
   "artworkDocumentation.copied": "Copied",
   "artworkDocumentation.confirm": "Confirm this version",
   "artworkDocumentation.confirmed": "Documentation confirmed",
+  "artworkDocumentation.confirmation.recorded":
+    "Your confirmation is recorded for this saved version. You can return to this record at any time.",
+  "artworkDocumentation.confirmation.viewRecorded": "View confirmed version",
+  "artworkDocumentation.confirmation.sending": "Recording your confirmation…",
+  "artworkDocumentation.confirmation.checking":
+    "Checking your saved confirmation…",
+  "artworkDocumentation.confirmation.unverified":
+    "We could not verify your confirmation. It may have been recorded. Check its status before confirming again.",
+  "artworkDocumentation.confirmation.check": "Check confirmation status",
+  "artworkDocumentation.confirmation.notRecorded":
+    "This saved version has no recorded confirmation. Review the statement and check the box before confirming.",
+  "artworkDocumentation.confirmation.reviewChanged":
+    "This record has changed. Review the latest saved version before checking the confirmation again.",
+  "artworkDocumentation.save.pendingFields":
+    "These changes are still waiting to save. Review them before leaving this page.",
+  "artworkDocumentation.save.licenseGuidance":
+    "Check the license name and use a complete license URL, including https://.",
+  "artworkDocumentation.save.rightsGuidance":
+    "Check the selected rights category and include the supporting details it requires.",
+  "artworkDocumentation.save.answerGuidance":
+    "Check this answer’s required details, format and length before saving again.",
+  "artworkDocumentation.validation.INVALID_VALUE":
+    "An answer has a format the record cannot accept. Review the pending answers and their field guidance, then save again.",
+  "artworkDocumentation.validation.DETAIL_REQUIRED":
+    "A selected category needs supporting details. Review the pending answers, then save again.",
+  "artworkDocumentation.validation.REQUIRED_ANSWERS_MISSING":
+    "Some required answers are not saved yet. Follow the required-question links and finish saving before confirming.",
+  "artworkDocumentation.validation.CONFIRMATION_COPY_REQUIRED":
+    "The confirmation statement could not be accepted. Check the saved confirmation status, then review the statement before trying again.",
+  "artworkDocumentation.save.actionUnverified":
+    "The last action could not be verified. Your saved answers remain available.",
   "artworkDocumentation.confirmCopy":
     "I have reviewed this version. It reflects my account of the work to the best of my knowledge, including any uncertainty I have recorded. I have checked the credits, selected files and information marked for a future public record.",
   "artworkDocumentation.confirmHelp":

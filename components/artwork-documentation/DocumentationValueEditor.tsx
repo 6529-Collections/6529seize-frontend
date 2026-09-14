@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { requiredRightsDetailField } from "@/lib/artwork-documentation/validation";
 import DocumentationLongText from "./DocumentationLongText";
 import DateEditor from "./DocumentationDateEditor";
 import ListEditor from "./DocumentationListEditor";
@@ -672,9 +673,12 @@ function ObjectEditor(
     ([key, editor]) =>
       editor.kind !== "identity" && visibleObjectField(key, current)
   );
+  const [moduleId = "", fieldId = ""] = (props.examplePath ?? "").split(".");
+  const requiredDetail = requiredRightsDetailField(moduleId, fieldId, current);
   const primary = ([key]: (typeof fields)[number]) =>
     !props.editor.required ||
     props.editor.required.includes(key) ||
+    key === requiredDetail ||
     initiallyPresent.has(key);
   const render = ([key, editor]: (typeof fields)[number]) => (
     <div key={key} className="tw-min-w-0">
