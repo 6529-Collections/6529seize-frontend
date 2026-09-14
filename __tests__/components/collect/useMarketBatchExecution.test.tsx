@@ -2,6 +2,7 @@ import { act, renderHook, waitFor } from "@testing-library/react";
 import { useMarketBatchExecution } from "@/components/collect/useMarketBatchExecution";
 import { confirmMarketBatch } from "@/components/collect/market-batch-execution";
 import { batchFixture, PAYER } from "./market-batch.fixture";
+import { t } from "@/i18n/messages";
 
 const mockAuth = {
   isAuthenticated: true,
@@ -140,3 +141,56 @@ it("reports wallet and known-hash submission phases without releasing the busy g
   });
   expect(result.current.busy).toBe(false);
 });
+
+it.each([
+  ["preparing", "collect.trade.preflightFailed"],
+  ["reconciling", "collect.trade.recoveryFailed"],
+] as const)(
+  "reports a failure during %s without blaming the wallet",
+  async (stage, key) => {
+    const { operation, request } = batchFixture();
+    jest.mocked(confirmMarketBatch).mockImplementation(async (options) => {
+      options.onStage?.(stage);
+      throw new Error("private RPC failure");
+    });
+    const { result } = renderHook(() => useMarketBatchExecution(jest.fn()));
+    await act(() => result.current.confirm(operation, request));
+    expect(result.current.message).toBe(t("en-US", key));
+    expect(result.current.busy).toBe(false);
+  }
+);
+
+it.each(["dismiss", "next action", "unrelated error"])(
+  "clears the previous review notice on %s",
+  async (action) => {
+    const { operation, request } = batchFixture();
+    const fresh = {
+      ...operation,
+      transaction: { ...operation.transaction!, gas_limit: "700000" },
+    };
+    jest.mocked(confirmMarketBatch).mockImplementationOnce(async (options) => {
+      options.onReviewChange?.("gas", operation, fresh);
+      return "UPDATED_REVIEW";
+    });
+    const { result } = renderHook(() => useMarketBatchExecution(jest.fn()));
+    await act(() => result.current.confirm(operation, request));
+    expect(result.current.reviewChangeNotice?.details).toHaveLength(1);
+    expect(result.current.message).toBe(
+      t("en-US", "collect.trade.networkFeeUpdated")
+    );
+    if (action === "dismiss") act(() => result.current.clearMessage());
+    else {
+      if (action === "unrelated error")
+        jest
+          .mocked(confirmMarketBatch)
+          .mockRejectedValueOnce(new Error("RPC unavailable"));
+      await act(() => result.current.confirm(operation, request));
+    }
+    expect(result.current.reviewChangeNotice).toBeUndefined();
+    expect(result.current.message).toBe(
+      action === "unrelated error"
+        ? t("en-US", "collect.trade.preflightFailed")
+        : undefined
+    );
+  }
+);

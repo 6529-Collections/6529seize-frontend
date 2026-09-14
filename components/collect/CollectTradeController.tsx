@@ -607,6 +607,7 @@ function CollectTradeControllerContent({
           </>
         }
         message={execution.message ?? (displayedOperation ? error : undefined)}
+        reviewChangeNotice={execution.reviewChangeNotice}
         onClose={onClose}
         onRefresh={async () => {
           if (displayedOperation) {
