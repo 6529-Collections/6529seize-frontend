@@ -18,7 +18,10 @@ import { validateMarketBatchRequest } from "./market-batch-validation";
 import { withMarketOperationLock } from "./market-operation-lock";
 import { useMarketWalletScope } from "./useMarketWalletScope";
 import type { CollectTradeStage } from "./collect.types";
-import { marketReviewChangeDescription } from "./market-review-change-description";
+import {
+  marketReviewChangeNotice,
+  type MarketReviewChangeNotice,
+} from "./market-review-change-description";
 
 export function useMarketBatchExecution(
   onOperation: (operation: ApiMarketBatchOperation) => void
@@ -31,6 +34,15 @@ export function useMarketBatchExecution(
   const [busy, setBusy] = useState(false),
     [message, setMessage] = useState<string>();
   const [stage, setStage] = useState<CollectTradeStage | null>(null);
+  const [reviewChangeNotice, setReviewChangeNotice] =
+    useState<MarketReviewChangeNotice>();
+  const executionStage = useRef<CollectTradeStage>("preparing");
+  const pending = useRef(false),
+    mounted = useRef(false);
+  const updateStage = (next: CollectTradeStage) => {
+    executionStage.current = next;
+    if (mounted.current) setStage(next);
+  };
   const [knownTransaction, setKnownTransaction] = useState<{
     operationId: string;
     hash: string;
@@ -41,8 +53,6 @@ export function useMarketBatchExecution(
     wallet,
     client,
   });
-  const pending = useRef(false),
-    mounted = useRef(false);
   useEffect(() => {
     mounted.current = true;
     return () => {
@@ -51,6 +61,7 @@ export function useMarketBatchExecution(
   }, []);
   const run = async (work: () => Promise<void>) => {
     if (pending.current) return;
+    setReviewChangeNotice(undefined);
     if (!client) {
       setMessage(t(locale, "collect.trade.walletNotReady"));
       return;
@@ -58,11 +69,14 @@ export function useMarketBatchExecution(
     pending.current = true;
     setBusy(true);
     setMessage(undefined);
-    setStage("preparing");
+    updateStage("preparing");
     try {
       await work();
     } catch (error) {
-      if (mounted.current) setMessage(marketExecutionError(error, locale));
+      if (mounted.current) {
+        setReviewChangeNotice(undefined);
+        setMessage(marketExecutionError(error, locale, executionStage.current));
+      }
     } finally {
       pending.current = false;
       if (mounted.current) {
@@ -98,18 +112,22 @@ export function useMarketBatchExecution(
           (item) => item.wallet
         ),
         assertConnection,
-        onStage: (next) => {
-          if (mounted.current) setStage(next);
-        },
+        onStage: updateStage,
         onKnownHash: (hash) => {
           if (mounted.current)
             setKnownTransaction({ operationId: operation.id, hash });
         },
         onReviewChange: (change, shown, fresh) => {
-          if (mounted.current)
-            setMessage(
-              marketReviewChangeDescription(shown, fresh, locale, change)
+          if (mounted.current) {
+            const notice = marketReviewChangeNotice(
+              shown,
+              fresh,
+              locale,
+              change
             );
+            setReviewChangeNotice(notice);
+            setMessage(notice.summary);
+          }
         },
         onOperation: (value) => {
           if (mounted.current) onOperation(value);
@@ -123,7 +141,7 @@ export function useMarketBatchExecution(
     run(async () => {
       if (!client) return;
       const assertConnection = walletScope.capture(operation, true);
-      setStage("reconciling");
+      updateStage("reconciling");
       await withMarketOperationLock(operation.id, () =>
         recoverMarketBatch({
           client,
@@ -145,6 +163,10 @@ export function useMarketBatchExecution(
     ready: walletScope.ready,
     readinessReason: walletScope.readinessReason,
     message,
-    clearMessage: () => setMessage(undefined),
+    reviewChangeNotice,
+    clearMessage: () => {
+      setMessage(undefined);
+      setReviewChangeNotice(undefined);
+    },
   };
 }
