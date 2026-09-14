@@ -7507,7 +7507,7 @@
     {
       "id": "tools.app-wallets",
       "kind": "route",
-      "title": "App wallets management",
+      "title": "6529 Mobile App Wallets management",
       "aliases": [
         "app wallets",
         "import wallet",
@@ -7516,10 +7516,10 @@
       ],
       "keywords": ["tools", "app", "wallets", "import", "detail", "management"],
       "facts": [
-        "App wallets management lives at /tools/app-wallets.",
-        "In Capacitor, Connect -> App Wallets lists app-local wallets, opens the existing create flow, and connects through the existing unlock flow.",
+        "6529 Mobile App Wallets management lives at /tools/app-wallets.",
+        "In 6529 Mobile, Connect > App Wallets lists app-local wallets, opens the existing create flow, and connects through the existing unlock flow.",
         "Wallet import lives at /tools/app-wallets/import-wallet and detail pages use /tools/app-wallets/{app-wallet-address}.",
-        "Input rules, result states, detail actions, and recovery are documented in the API tool docs."
+        "Input rules, result states, detail actions, and recovery are documented in the App Wallets guide."
       ],
       "canonical_path": "/tools/app-wallets",
       "related_paths": [
@@ -8316,7 +8316,7 @@
     {
       "id": "desktop.getting-started",
       "kind": "workflow",
-      "title": "Get started with 6529 Desktop (Core)",
+      "title": "Get started with 6529 Desktop",
       "aliases": [
         "get started with 6529 desktop",
         "get started in core",
@@ -8341,13 +8341,13 @@
         "capabilities"
       ],
       "facts": [
-        "6529 Desktop, also called Core, is the Windows, macOS, and Linux app with local Core wallets, Ethereum indexing workers, independent TDH calculation, and a bundled IPFS node. These Core tools are separate from the mobile app and desktop-browser website.",
+        "6529 Desktop is the Windows, macOS, and Linux app with local wallets, Ethereum indexing workers, independent TDH calculation, and a bundled IPFS node. These 6529 Desktop tools are separate from 6529 Mobile and desktop-browser website.",
         "Get the official installer from 6529 Apps, choose your operating system, install, and open the app.",
         "Open the dedicated 6529 Desktop sidebar menu (monitor icon). Its entries are Wallets, ETH Transactions, TDH Calculation, My IPFS when available, and About.",
         "First open 6529 Desktop > ETH Transactions > RPC Providers > Providers List. Choose Set Active on a provider, or Add RPC Provider, enter an Ethereum mainnet RPC URL, Test it, give it a Provider Name, Add, then Set Active. Saving a provider alone does not enable it.",
         "With an active RPC provider and the app running, Transactions and NFTDelegation sync automatically, and NFTs discovers and refreshes local NFT data. Initial history sync may take time; inspect worker progress and Logs instead of repeatedly resetting.",
         "Then open 6529 Desktop > TDH Calculation. TDH runs daily at 00:15 UTC; after prerequisite workers catch up you can use the TDH worker Advanced Options > Recalculate TDH Now. Compare Your Node and 6529.io at the same Last Block.",
-        "Wallets lets you create or import a Core wallet for signing, but importing a wallet or seed phrase is not required to run indexing and TDH. My IPFS opens the bundled node WebUI; About shows version, ports, updates, and App Logs.",
+        "Wallets lets you create or import a 6529 Desktop wallet for signing, but importing a wallet or seed phrase is not required to run indexing and TDH. My IPFS opens the bundled node WebUI; About shows version, ports, updates, and App Logs.",
         "The bot can explain these controls but cannot inspect or operate your local node. Never send it wallet passwords, recovery phrases, private keys, or RPC URLs containing credentials."
       ],
       "canonical_path": "/about/6529-apps",
@@ -8467,7 +8467,7 @@
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/scheduled-tasks/scheduled-worker.ts",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/eth-scanner/Workers.tsx"
       ],
-      "brief_answer": "With an active RPC provider and the app open, Core workers sync automatically. Check their progress and Logs under **6529 Desktop > ETH Transactions**. Transactions and NFTDelegation must catch up before TDH calculation can finish. Which worker is stalled, and what status or redacted error does it show?"
+      "brief_answer": "With an active RPC provider and the app open, 6529 Desktop workers sync automatically. Check their progress and Logs under **6529 Desktop > ETH Transactions**. Transactions and NFTDelegation must catch up before TDH calculation can finish. Which worker is stalled, and what status or redacted error does it show?"
     },
     {
       "id": "desktop.tdh-calculation",
@@ -8520,7 +8520,7 @@
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/scheduled-tasks/workers/tdh-worker/tdh-worker.helpers.ts",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/tdh-calculation/TDHValidation.tsx"
       ],
-      "brief_answer": "Core calculates TDH automatically at **00:15 UTC** while the app is open and its prerequisites are synced. View it under **6529 Desktop > TDH Calculation**. For a manual run, use the TDH worker’s **Advanced Options > Recalculate TDH Now**; it replaces the local TDH result and does not repair transaction history."
+      "brief_answer": "6529 Desktop calculates TDH automatically at **00:15 UTC** while the app is open and its prerequisites are synced. View it under **6529 Desktop > TDH Calculation**. For a manual run, use the TDH worker’s **Advanced Options > Recalculate TDH Now**; it replaces the local TDH result and does not repair transaction history."
     },
     {
       "id": "desktop.tdh-out-of-sync",
@@ -8670,7 +8670,7 @@
         "Reset to Block rolls back to the chosen block: transactions after it are deleted, ownership is rebuilt at that point, and later syncing reimports forward from there. The dialog offers Min Block for the earliest supported worker block, 13360860. Choose a block based on the observed problem rather than guessing.",
         "To fully resync Transactions from the beginning, use Reset to Block > Min Block and confirm. Transactions does not expose a standalone Reset button. Rolling back to the earliest supported block removes later local history for reimport; this is a more disruptive fallback than reconciliation and requires time and RPC access.",
         "Once repair/resync and prerequisite workers complete, use TDH Calculation > TDH worker > Advanced Options > Recalculate TDH Now. A stale-result warning is expected after history changes until a successful recalculation.",
-        "Worker recovery changes local indexed data, not on-chain NFTs or balances. Do not delete the whole app database or a Core wallet as a transaction-repair step."
+        "Worker recovery changes local indexed data, not on-chain NFTs or balances. Do not delete the whole app database or a 6529 Desktop wallet as a transaction-repair step."
       ],
       "canonical_path": "/about/6529-apps",
       "link_label": "6529 Apps",
@@ -8721,7 +8721,7 @@
         "For a missing local NFT history requiring rediscovery, NFTs > Advanced Options > Reset opens Reset All NFTs. Confirming deletes all local NFT rows and starts discovery from the beginning. This is more disruptive than Full Refresh and is not named Full Recovery in the UI.",
         "An NFT can wait for its mint transaction to be indexed. A Waiting for transaction sync message calls for checking Transactions progress/provider/history first; resetting NFTs repeatedly cannot repair missing transfers.",
         "Finish active NFT work and respect TDH worker conflicts before a refresh/reset. Check Logs for RPC or metadata retrieval errors; a failing upstream source needs attention rather than repeated resets.",
-        "After NFT recovery and transaction/delegation sync complete, recalculate TDH if the node result needs rebuilding. NFT refresh/reset does not change your on-chain holdings, delete your Core wallet, or replace a transaction-history reconciliation."
+        "After NFT recovery and transaction/delegation sync complete, recalculate TDH if the node result needs rebuilding. NFT refresh/reset does not change your on-chain holdings, delete your 6529 Desktop wallet, or replace a transaction-history reconciliation."
       ],
       "canonical_path": "/about/6529-apps",
       "link_label": "6529 Apps",
@@ -8739,7 +8739,7 @@
     {
       "id": "desktop.wallets",
       "kind": "workflow",
-      "title": "6529 Desktop Core wallets creation import and connection",
+      "title": "6529 Desktop wallets creation import and connection",
       "aliases": [
         "core wallets",
         "core wallet",
@@ -8762,13 +8762,13 @@
         "delete"
       ],
       "facts": [
-        "Open 6529 Desktop > Wallets for Core wallets stored on this computer. These are separate from mobile App Wallets and from connecting an external wallet or sharing a website login session.",
-        "Create Wallet opens Create New Wallet: choose a name and password and select Create. Core generates a wallet and stores its private key and recovery phrase encrypted with that password in the local database.",
+        "Open 6529 Desktop > Wallets for 6529 Desktop wallets stored on this computer. These are separate from mobile App Wallets and from connecting an external wallet or sharing a website login session.",
+        "Create Wallet opens Create New Wallet: choose a name and password and select Create. 6529 Desktop generates a wallet and stores its private key and recovery phrase encrypted with that password in the local database.",
         "Import Wallet offers Mnemonic (the current form accepts 12 words) or Private Key. Enter it only in the trusted local app, Validate, check the resulting address, then Import Wallet with a name and password. Never send a phrase, key, or password to the help bot.",
-        "Use the Core wallet connector in the wallet connection flow to select a saved wallet and unlock it when prompted. Review signature/transaction requests before approving; an unlocked wallet and an authenticated 6529 session are distinct states.",
+        "Use the 6529 Desktop wallet connector in the wallet connection flow to select a saved wallet and unlock it when prompted. Review signature/transaction requests before approving; an unlocked wallet and an authenticated 6529 session are distinct states.",
         "Wallet details show the address and password-protected reveal/copy controls plus Download Recovery File. That download contains the decrypted private key and available mnemonic in a plaintext text file; keep it private and securely backed up, never send it to the bot. Private-key-only imports have no mnemonic.",
         "Delete removes the saved local wallet record after confirmation; disconnect first if it is the currently connected wallet. It does not erase the Ethereum address or move on-chain funds. There is no documented bot/password-recovery service; the bot cannot decrypt or recover a forgotten wallet password.",
-        "A Core wallet is optional for node indexing and TDH calculation. You can run workers with an active RPC provider without importing any funded wallet, and connecting a wallet does not enable RPC workers."
+        "A 6529 Desktop wallet is optional for node indexing and TDH calculation. You can run workers with an active RPC provider without importing any funded wallet, and connecting a wallet does not enable RPC workers."
       ],
       "canonical_path": "/about/6529-apps",
       "link_label": "6529 Apps",
@@ -8782,12 +8782,12 @@
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/core-wallet/SeedWallet.tsx",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/db/db.ts"
       ],
-      "brief_answer": "Open **6529 Desktop > Wallets** to create or import a Core wallet for signing. You do not need a wallet to run indexing or TDH calculation. What would you like to do: create, import, or connect one? Never share your recovery phrase or private key here."
+      "brief_answer": "Open **6529 Desktop > Wallets** to create or import a 6529 Desktop wallet for signing. You do not need a wallet to run indexing or TDH calculation. What would you like to do: create, import, or connect one? Never share your recovery phrase or private key here."
     },
     {
       "id": "desktop.wallet-backup",
       "kind": "workflow",
-      "title": "6529 Desktop Core wallet backup and password problems",
+      "title": "6529 Desktop wallet backup and password problems",
       "aliases": [
         "core wallet backup",
         "forgot core wallet password",
@@ -8815,7 +8815,7 @@
         "export"
       ],
       "facts": [
-        "Core wallets live in 6529 Desktop > Wallets on this device. The stored private key and, when present, mnemonic are encrypted with the wallet password; a connected website profile is not a backup.",
+        "6529 Desktop wallets live in 6529 Desktop > Wallets on this device. The stored private key and, when present, mnemonic are encrypted with the wallet password; a connected website profile is not a backup.",
         "Open the saved wallet details and use Download Recovery File after unlocking, or use the password-protected reveal/copy controls. The recovery download is a plaintext text file containing the private key and available mnemonic, not an encrypted wallet backup. Keep it private and securely backed up; never upload it or paste any wallet password, key, or phrase into the bot. Private-key-only imports have no mnemonic.",
         "If you cannot unlock a wallet, verify that you selected the right saved wallet and are entering its wallet password. The bot cannot inspect the wallet, bypass encryption, reset its password, or recover missing secrets.",
         "If you have an independent recovery phrase or private-key backup, the local Import Wallet flow can restore the corresponding address; validate the address before using it. Do not delete the only local copy while investigating a password problem.",
@@ -8832,7 +8832,7 @@
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/core-wallet/SeedWalletModal.tsx",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/db/db.ts"
       ],
-      "brief_answer": "A Core **Download Recovery File** export contains a plaintext mnemonic/private key. Keep it offline and private; never send it here. The bot cannot recover a forgotten password or missing secrets. Do you still have your recovery phrase or an existing backup? Do not delete the wallet or local data while checking."
+      "brief_answer": "A 6529 Desktop **Download Recovery File** export contains a plaintext mnemonic/private key. Keep it offline and private; never send it here. The bot cannot recover a forgotten password or missing secrets. Do you still have your recovery phrase or an existing backup? Do not delete the wallet or local data while checking."
     },
     {
       "id": "desktop.ipfs",
@@ -8917,7 +8917,7 @@
         "Use ETH Transactions > the affected worker > Logs for a worker-specific failure. Expand Advanced Options for recovery controls. Logs > Locate opens the log file location; selecting log text enables Copy Selection.",
         "For a TDH issue include both Last Block values, the mismatched field, last calculation time, and the failing worker message. For a missing transfer include a public transaction hash and the expected block; distinguish a local-node mismatch from personal website TDH.",
         "Share only relevant redacted diagnostic lines. Remove RPC API keys/credential URLs, passwords, private keys, and recovery phrases. The bot cannot inspect your filesystem, operate workers, or confirm the node is repaired without observations from you.",
-        "The native titlebar identifies a Live/Test backend where applicable. That backend target is distinct from TDH TestNet Mode Phase 1. Core-only menu controls and routes are unavailable on mobile and ordinary web browsers."
+        "The native titlebar identifies a Live/Test backend where applicable. That backend target is distinct from TDH TestNet Mode Phase 1. Desktop-only menu controls and routes are unavailable on mobile and ordinary web browsers."
       ],
       "canonical_path": "/about/6529-apps",
       "link_label": "6529 Apps",
@@ -8979,19 +8979,15 @@
     {
       "id": "desktop.overview",
       "kind": "workflow",
-      "title": "What is 6529 Desktop (Core)?",
+      "title": "What is 6529 Desktop?",
       "aliases": [
-        "what is core",
-        "what is 6529 core",
         "what is 6529 desktop",
-        "explain core",
-        "about core",
         "6529 desktop overview",
         "how does 6529 desktop work"
       ],
-      "keywords": ["core"],
+      "keywords": ["desktop", "application", "node"],
       "facts": [
-        "6529 Desktop, also called Core, is the Windows, macOS, and Linux app with local Core wallets, Ethereum indexing workers, independent TDH calculation, and a bundled IPFS node. These Core tools are separate from the mobile app and desktop-browser website."
+        "6529 Desktop is the official Windows, macOS, and Linux application that runs your own 6529 node with local wallets, Ethereum indexing workers, independent TDH calculation, and a bundled IPFS node. These Desktop tools are separate from 6529 Mobile and the ordinary website."
       ],
       "canonical_path": "/about/6529-apps",
       "link_label": "6529 Apps",
@@ -9005,7 +9001,7 @@
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/eth-scanner/Workers.tsx",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/eth-scanner/RpcProviders.tsx"
       ],
-      "brief_answer": "**6529 Desktop (Core)** is the Windows, macOS, and Linux app that runs your own 6529 node: it indexes Ethereum data and calculates TDH locally. It also includes Core wallets and an IPFS node. Would you like help getting started?",
+      "brief_answer": "**6529 Desktop** is the Windows, macOS, and Linux application that runs your own 6529 node: it indexes Ethereum data and calculates TDH locally. It also includes Desktop wallets and an IPFS node. Would you like help getting started?",
       "answer_links": [
         { "label": "6529 Apps", "url": "https://6529.io/about/6529-apps" }
       ]
@@ -9016,7 +9012,9 @@
       "title": "Clarify the app for RPC or transaction support",
       "aliases": ["desktop support context clarification"],
       "keywords": ["core"],
-      "facts": ["Do you mean **6529 Desktop (Core)**, or another app?"],
+      "facts": [
+        "Do you mean **6529 Desktop**, **6529 Mobile**, or another app?"
+      ],
       "canonical_path": "/about/6529-apps",
       "link_label": "6529 Apps",
       "suppress_source_links": true,
@@ -9031,7 +9029,7 @@
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/scheduled-tasks/scheduled-worker.ts",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/index.ts"
       ],
-      "brief_answer": "Do you mean **6529 Desktop (Core)**, or another app?"
+      "brief_answer": "Do you mean **6529 Desktop**, **6529 Mobile**, or another app?"
     },
     {
       "id": "desktop.tdh-after-recalculation",
@@ -9211,6 +9209,255 @@
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/index.ts"
       ],
       "brief_answer": "The Last Block values match and both workers are caught up. In **6529 Desktop > TDH Calculation**, use the TDH worker’s **Advanced Options > Recalculate TDH Now** and confirm. This replaces the local TDH result; it does not repair transaction history. Once it finishes, does **TDH**, **Merkle Root**, or both still differ?"
+    },
+    {
+      "id": "wallets.core-mobile-clarification",
+      "kind": "business_rule",
+      "title": "Former Core wallets and 6529 Mobile App Wallets",
+      "aliases": [
+        "how do i use core wallets on mobile",
+        "core wallets on mobile",
+        "mobile core wallets",
+        "core wallet mobile",
+        "core wallets on android",
+        "core wallets on ios",
+        "core wallets in browser",
+        "core wallets on website",
+        "core wallets on web"
+      ],
+      "keywords": [
+        "core",
+        "wallet",
+        "wallets",
+        "mobile",
+        "android",
+        "ios",
+        "browser",
+        "website",
+        "app"
+      ],
+      "facts": [
+        "6529 Desktop wallets are stored in the installed 6529 Desktop application and its 6529 Desktop wallet controls are not available in the 6529 Mobile or an ordinary browser.",
+        "6529 Mobile has separate App Wallets stored in the native app environment. Use Connect > App Wallets or open App Wallets under About > Delegation & Wallets when app-wallet support is enabled.",
+        "A 6529 Desktop wallet does not automatically appear on mobile. Do not send a recovery phrase, private key, or password to the help bot."
+      ],
+      "canonical_path": "/tools/app-wallets",
+      "related_paths": ["/about/6529-apps"],
+      "tags": ["wallets", "mobile", "desktop", "clarification"],
+      "source_refs": [
+        "ops/docs/api-tool/feature-app-wallets.md",
+        "ops/docs/desktop/feature-wallets-ipfs-and-about.md"
+      ]
+    },
+    {
+      "id": "wallets.mobile-overview",
+      "kind": "workflow",
+      "title": "6529 6529 Mobile App Wallets overview",
+      "aliases": [
+        "mobile wallets",
+        "mobile app wallets",
+        "app wallets on mobile",
+        "what are app wallets",
+        "what is an app wallet",
+        "how do mobile wallets work",
+        "how do app wallets work",
+        "manage wallets in mobile app"
+      ],
+      "keywords": [
+        "mobile",
+        "app",
+        "wallet",
+        "wallets",
+        "native",
+        "manage",
+        "overview"
+      ],
+      "facts": [
+        "App Wallets are wallets stored in the 6529 Mobile environment using native secure storage. They are separate from 6529 Desktop wallets in 6529 Desktop and from external wallets offered through the External Wallets connection flow.",
+        "Open About > Delegation & Wallets > App Wallets, or open Connect > App Wallets to choose an existing app-local wallet or start Create App Wallet. The App Wallets menu appears only when native app-wallet support is available.",
+        "The App Wallets page lists locally stored wallets and provides Create Wallet, Import Wallet, and wallet-detail actions. Never send a wallet password, mnemonic, or private key to the help bot."
+      ],
+      "canonical_path": "/tools/app-wallets",
+      "related_paths": ["/tools/app-wallets/import-wallet", "/about/6529-apps"],
+      "tags": ["wallets", "mobile", "app-wallets", "overview"],
+      "source_refs": ["ops/docs/api-tool/feature-app-wallets.md"]
+    },
+    {
+      "id": "wallets.mobile-create-import",
+      "kind": "workflow",
+      "title": "Create or import a wallet in the 6529 6529 Mobile",
+      "aliases": [
+        "create mobile wallet",
+        "create app wallet",
+        "new mobile wallet",
+        "import mobile wallet",
+        "import app wallet",
+        "import mnemonic on mobile",
+        "import private key on mobile",
+        "add wallet to mobile app"
+      ],
+      "keywords": [
+        "mobile",
+        "app",
+        "wallet",
+        "create",
+        "import",
+        "mnemonic",
+        "private",
+        "key",
+        "password"
+      ],
+      "facts": [
+        "Open App Wallets in the 6529 Mobile. Choose Create Wallet to enter a wallet name and password, then select Create. Wallet names accept letters, numbers, and spaces; passwords require at least six characters and cannot contain whitespace.",
+        "For an existing wallet, open Import Wallet, select Mnemonic or Private Key, enter the recovery material only inside the trusted native app, and Validate. The mnemonic form uses exactly 12 lowercase alphabetic words. After validation, confirm the address and finish with a name and password.",
+        "Importing the same address again replaces the stored App Wallet entry for that address. Never paste a mnemonic, private key, or password into chat or send it to the help bot."
+      ],
+      "canonical_path": "/tools/app-wallets",
+      "related_paths": ["/tools/app-wallets/import-wallet"],
+      "tags": ["wallets", "mobile", "app-wallets", "create", "import"],
+      "source_refs": ["ops/docs/api-tool/feature-app-wallets.md"]
+    },
+    {
+      "id": "wallets.mobile-connect",
+      "kind": "workflow",
+      "title": "Connect a saved App Wallet in the 6529 6529 Mobile",
+      "aliases": [
+        "connect mobile wallet",
+        "connect app wallet",
+        "use saved app wallet",
+        "unlock mobile wallet",
+        "app wallet not in external wallets",
+        "where is my app wallet in connect"
+      ],
+      "keywords": [
+        "mobile",
+        "app",
+        "wallet",
+        "connect",
+        "unlock",
+        "saved",
+        "external"
+      ],
+      "facts": [
+        "In the 6529 Mobile, open Connect > App Wallets, select a saved app-local wallet, and use the existing unlock flow. You can also choose Create App Wallet from that list.",
+        "App Wallets are intentionally omitted from the External Wallets destination because that destination is for external connectors. A connected profile session and an unlocked App Wallet are separate states.",
+        "If unlock fails, reopen the unlock prompt and verify the selected wallet and password. The help bot cannot inspect the wallet or recover its password."
+      ],
+      "canonical_path": "/tools/app-wallets",
+      "related_paths": ["/about/6529-apps"],
+      "tags": ["wallets", "mobile", "app-wallets", "connect", "unlock"],
+      "source_refs": ["ops/docs/api-tool/feature-app-wallets.md"]
+    },
+    {
+      "id": "wallets.mobile-backup-recovery",
+      "kind": "workflow",
+      "title": "Back up and recover a 6529 6529 Mobile App Wallet",
+      "aliases": [
+        "backup mobile wallet",
+        "back up mobile wallet",
+        "back up my mobile wallet",
+        "how do i back up my mobile wallet",
+        "backup app wallet",
+        "back up app wallet",
+        "mobile wallet recovery",
+        "app wallet recovery",
+        "download mobile recovery file",
+        "reveal mobile mnemonic",
+        "reveal app wallet private key",
+        "forgot mobile wallet password"
+      ],
+      "keywords": [
+        "mobile",
+        "app",
+        "wallet",
+        "backup",
+        "recovery",
+        "mnemonic",
+        "private",
+        "key",
+        "password",
+        "download"
+      ],
+      "facts": [
+        "Open the App Wallet detail page in the 6529 Mobile. After unlocking, its recovery actions can reveal, hide, and copy the available mnemonic or private key, or Download Recovery File. Keep exported recovery material private and securely backed up.",
+        "A private-key-only import has no mnemonic. If recovery-file writing or sharing fails with Unable to write file, retry from wallet detail and unlock again.",
+        "The help bot cannot reveal wallet secrets, bypass encryption, reset a forgotten password, or recover missing recovery material. Never upload or paste a password, mnemonic, private key, or recovery file into chat."
+      ],
+      "canonical_path": "/tools/app-wallets",
+      "related_paths": ["/tools/app-wallets/{app-wallet-address}"],
+      "tags": ["wallets", "mobile", "app-wallets", "backup", "recovery"],
+      "source_refs": ["ops/docs/api-tool/feature-app-wallets.md"]
+    },
+    {
+      "id": "wallets.mobile-delete-troubleshooting",
+      "kind": "workflow",
+      "title": "Delete or troubleshoot a 6529 6529 Mobile App Wallet",
+      "aliases": [
+        "delete mobile wallet",
+        "delete app wallet",
+        "delete an app wallet",
+        "how do i delete an app wallet",
+        "cannot delete mobile wallet",
+        "mobile wallet not found",
+        "app wallet not found",
+        "app wallets not supported",
+        "app wallets missing",
+        "cannot use app wallets"
+      ],
+      "keywords": [
+        "mobile",
+        "app",
+        "wallet",
+        "delete",
+        "missing",
+        "unsupported",
+        "update",
+        "connected"
+      ],
+      "facts": [
+        "Open the saved wallet's App Wallet detail page and choose Delete, then confirm. Deleting the currently connected wallet is blocked; disconnect it first. Deletion removes the app-local stored entry and does not move on-chain funds.",
+        "A missing address shows Wallet with address ... not found. Create, import, and delete failures show an error and keep the current page available for retry.",
+        "App Wallets require the native mobile runtime and secure-storage support. A browser reports App Wallets are not supported on this platform; an older native app may ask you to update to the latest version."
+      ],
+      "canonical_path": "/tools/app-wallets",
+      "related_paths": [
+        "/tools/app-wallets/{app-wallet-address}",
+        "/about/6529-apps"
+      ],
+      "tags": ["wallets", "mobile", "app-wallets", "delete", "troubleshooting"],
+      "source_refs": ["ops/docs/api-tool/feature-app-wallets.md"]
+    },
+    {
+      "id": "desktop.legacy-core-name",
+      "kind": "workflow",
+      "title": "6529 Core was renamed 6529 Desktop",
+      "aliases": [
+        "what is core",
+        "what is 6529 core",
+        "explain core",
+        "about core",
+        "6529 core"
+      ],
+      "keywords": ["core", "desktop", "former", "name"],
+      "facts": [
+        "6529 Core was the former name of 6529 Desktop. The official current name is 6529 Desktop.",
+        "6529 Desktop is the Windows, macOS, and Linux application for running a local 6529 node, indexing Ethereum data, calculating TDH, managing local wallets, and using the bundled IPFS node.",
+        "The official name of the mobile application is 6529 Mobile."
+      ],
+      "canonical_path": "/about/6529-apps",
+      "link_label": "6529 Apps",
+      "suppress_source_links": true,
+      "related_paths": ["/about/6529-apps"],
+      "tags": ["desktop-core"],
+      "source_refs": [
+        "ops/docs/desktop/README.md",
+        "ops/docs/desktop/flow-getting-started.md",
+        "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/README.md"
+      ],
+      "brief_answer": "**6529 Core** was the former name of **6529 Desktop**. The official current name is 6529 Desktop; the mobile application is called 6529 Mobile. Would you like help with 6529 Desktop or 6529 Mobile?",
+      "answer_links": [
+        { "label": "6529 Apps", "url": "https://6529.io/about/6529-apps" }
+      ]
     }
   ]
 }

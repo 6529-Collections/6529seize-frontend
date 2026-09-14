@@ -1,5 +1,9 @@
-# 6529 Desktop (Core)
+# 6529 Desktop
 
+
+## Naming
+
+The official current names are **6529 Desktop** and **6529 Mobile**. **6529 Core** is the former name of 6529 Desktop and remains a help-search alias for users familiar with the old name. User-facing guidance should otherwise use the current names.
 Parent: [Documentation](../README.md)
 
 ## Overview

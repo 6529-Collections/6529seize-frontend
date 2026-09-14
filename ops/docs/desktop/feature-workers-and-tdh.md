@@ -21,13 +21,13 @@ An interrupted transaction reconciliation resumes from its saved range on restar
 ## Location in the Site
 
 These controls live inside the installed desktop application under the
-**6529 Desktop** sidebar menu. Core-only routes are not public website links.
+**6529 Desktop** sidebar menu. Desktop-only routes are not public website links.
 
 ## Entry Points
 
 Open the monitor icon in the app sidebar. If a control described here is absent,
 check your installed version under **6529 Desktop > About**; a mobile or browser
-session does not expose Core workers.
+session does not expose 6529 Desktop workers.
 
 ## User Journey
 
