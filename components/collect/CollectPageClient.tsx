@@ -77,6 +77,7 @@ import {
   collectMissingOfferSelection,
   collectSelectedOfferSelection,
 } from "./collect-offer-selection.helpers";
+import { useCollectPurchaseSelection } from "./useCollectPurchaseSelection";
 
 export default function CollectPageClient() {
   const searchParams = useSearchParams();
@@ -99,14 +100,19 @@ function CollectCatalogController({
   readonly queryString: string;
 }) {
   const locale = useBrowserLocale();
-  const [listingTime, setListingTime] = useState(() => Date.now() / 1000);
-  useEffect(() => {
-    const timer = globalThis.setInterval(
-      () => setListingTime(Date.now() / 1000),
-      15_000
-    );
-    return () => globalThis.clearInterval(timer);
-  }, []);
+  const { connectedProfile, requestAuth } = useAuth();
+  const {
+    selection,
+    availableSelection,
+    setSelection,
+    purchases,
+    listingTime,
+    settlementRevision,
+    setSettlementRevision,
+    orderIsPending,
+    orderIsPendingNow,
+    clearSelection,
+  } = useCollectPurchaseSelection(connectedProfile?.id);
   const router = useRouter();
   // Compose rapid control changes before App Router commits their URLs. An
   // intermediate local commit must not replace a newer requested destination.
@@ -209,16 +215,18 @@ function CollectCatalogController({
   }, [planFingerprint]);
   const setCostPlan = (plan: ApiCollectPlan | null) =>
     setStoredCostPlan(plan ? { revision: goalState.revision, plan } : null);
-  const [settlementRevision, setSettlementRevision] = useState(0);
   const invalidateSettledPlans = () => {
     setCostPlan(null);
     setSettlementRevision((revision) => revision + 1);
   };
-  const [basketOpen, setBasketOpen] = useState(false);
+  // The checkout owns its reviewed source. Refreshing a goal or its holdings
+  // must not unmount a transaction that is processing or its finished receipt.
+  const [basketPlan, setBasketPlan] = useState<ApiCollectPlan | null>(null);
   const [blendedPurchase, setBlendedPurchase] = useState<{
     fingerprint: string;
     plan: ApiCollectPlan;
     legs: readonly ApiCollectPlanLeg[];
+    settled?: boolean;
   } | null>(null);
   const currentBlendedPurchase = useRef(blendedPurchase);
   useLayoutEffect(() => {
@@ -232,7 +240,6 @@ function CollectCatalogController({
     },
     []
   );
-  const [selection, setSelection] = useState<CollectSelectedListing[]>([]);
   const [offerWorkspace, setOfferWorkspace] = useState<{
     items: readonly CollectOfferSelection[];
     hasAlternatives: boolean;
@@ -306,7 +313,6 @@ function CollectCatalogController({
     quantity?: string;
     recipient?: string;
   } | null>(null);
-  const { connectedProfile, requestAuth } = useAuth();
   const { seizeConnect, address: payingWallet } = useSeizeConnectContext();
   const profile = connectedProfile?.id
     ? {
@@ -354,7 +360,9 @@ function CollectCatalogController({
       !isCollectEdition(entry.asset.family) &&
       selection.some((item) => item.asset.asset_key === entry.asset.asset_key);
     let disabledReason: string | undefined;
-    if (!selected) {
+    const pending = orderIsPending(order);
+    if (pending) disabledReason = t(locale, "collect.trade.submissionPending");
+    else if (!selected) {
       if (duplicate721)
         disabledReason = t(locale, "collect.selection.alreadySelected");
       else if (selection.length >= 128)
@@ -364,8 +372,10 @@ function CollectCatalogController({
     }
     return {
       selected,
+      pending,
       disabledReason,
       onToggle: () => {
+        if (orderIsPendingNow(order)) return;
         if (selected) {
           setSelection((items) =>
             items.filter((item) => collectListingKey(item.order) !== key)
@@ -382,7 +392,12 @@ function CollectCatalogController({
           nowSeconds: Math.floor(Date.now() / 1000),
         });
         if (candidate)
-          setSelection((items) => toggleCollectSelection(items, candidate));
+          setSelection((items) =>
+            toggleCollectSelection(items, {
+              ...candidate,
+              selectedAt: Date.now(),
+            })
+          );
       },
     };
   };
@@ -451,6 +466,7 @@ function CollectCatalogController({
     goalContent = (
       <CollectGoalsController
         draft={goalDraft}
+        purchases={purchases}
         revision={goalState.revision}
         catalog={catalog.data}
         catalogFailed={catalog.isError && !catalog.isFetching}
@@ -470,7 +486,7 @@ function CollectCatalogController({
   else if (intent === "tdh")
     goalContent = (
       <CollectTdhWorkspace
-        key={settlementRevision}
+        revision={settlementRevision}
         collection={collection}
         profile={connectedProfile}
         payingWallet={payingWallet}
@@ -661,16 +677,16 @@ function CollectCatalogController({
         }
         selectionFor={selectionFor}
         selectionSummary={
-          selection.length > 0 ? (
+          availableSelection.length > 0 ? (
             <CollectSelectionBar
               active={!offerWorkspaceActive}
-              items={selection}
-              onClear={() => setSelection([])}
-              onReview={() => setBatch({ items: selection })}
+              items={availableSelection}
+              onClear={clearSelection}
+              onReview={() => setBatch({ items: availableSelection })}
               planOffersRef={setSelectionOfferTrigger}
               onPlanOffers={() =>
                 openOffers(
-                  collectSelectedOfferSelection(selection),
+                  collectSelectedOfferSelection(availableSelection),
                   false,
                   true
                 )
@@ -702,12 +718,11 @@ function CollectCatalogController({
             costPlan?.id === id &&
             costPlan.revision === revision
           )
-            setBasketOpen(true);
+            setBasketPlan(costPlan);
         }}
         onPlanScenarioChange={(scenario) => {
           if (sourceCostPlan) {
             setScenarioState({ planId: sourceCostPlan.id, scenario });
-            setBasketOpen(false);
           }
         }}
         onPlanStrategyChange={
@@ -720,10 +735,10 @@ function CollectCatalogController({
             : undefined
         }
       />
-      {basketOpen && costPlan && (
+      {basketPlan && (
         <CollectPlanBasket
-          plan={costPlan}
-          onClose={() => setBasketOpen(false)}
+          plan={basketPlan}
+          onClose={() => setBasketPlan(null)}
           onSettled={invalidateSettledPlans}
         />
       )}
@@ -732,11 +747,19 @@ function CollectCatalogController({
           plan={blendedPurchase.plan}
           reviewLegs={blendedPurchase.legs}
           open={blendedPurchaseOpen}
-          onClose={() => setBlendedPurchaseOpen(false)}
+          onClose={() => {
+            if (blendedPurchase.settled) releasePurchase();
+            else setBlendedPurchaseOpen(false);
+          }}
           onDiscard={releasePurchase}
           onSettled={() => {
             if (currentBlendedPurchase.current !== blendedPurchase) return;
-            releasePurchase();
+            if (blendedPurchaseOpen) {
+              const completedPurchase = { ...blendedPurchase, settled: true };
+              currentBlendedPurchase.current = completedPurchase;
+              setBlendedPurchase(completedPurchase);
+              setBlendedBuyLocks([]);
+            } else releasePurchase();
             invalidateSettledPlans();
           }}
         />
@@ -767,20 +790,7 @@ function CollectCatalogController({
           }
           {...(batch.recipient ? { initialRecipient: batch.recipient } : {})}
           onClose={() => setBatch(null)}
-          onSettled={(completed) => {
-            setSelection((items) =>
-              items.filter(
-                (item) =>
-                  !completed.items.some(
-                    (purchased) =>
-                      purchased.asset_key === item.asset.asset_key &&
-                      purchased.order.order_hash.toLowerCase() ===
-                        item.order.identity.order_hash.toLowerCase()
-                  )
-              )
-            );
-            invalidateSettledPlans();
-          }}
+          onSettled={invalidateSettledPlans}
         />
       )}
     </CollectPlanMetadataProvider>

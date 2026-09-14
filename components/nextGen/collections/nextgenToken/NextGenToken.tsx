@@ -35,6 +35,7 @@ import NextGenTokenRenderCenter from "./NextGenTokenRenderCenter";
 import { getNextgenTokenViewSegment } from "./nextgen-token-view.helpers";
 import { t } from "@/i18n/messages";
 import NftDetailTabSection from "@/components/nft-navigation/NftDetailTabSection";
+import { nftNavigationQuery } from "@/components/nft-navigation/nft-navigation-query";
 
 interface Props {
   collection: NextGenCollection;
@@ -97,6 +98,7 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
         locale={locale}
         persistentContent={
           <MarketDepthPanel
+            focusedOrderHash={searchParams.get("order")}
             contract={NEXTGEN_CONTRACT}
             tokenId={props.token.id}
             locale={locale}
@@ -286,7 +288,7 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
   function navigateToToken(tokenId: number) {
     const viewSegment = getNextgenTokenViewSegment(props.view);
     const viewPath = viewSegment ? `/${viewSegment}` : "";
-    const query = searchParams.toString();
+    const query = nftNavigationQuery(searchParams);
     const pathname = `/nextgen/token/${tokenId}${viewPath}`;
     router.push(query ? `${pathname}?${query}` : pathname, {
       scroll: false,

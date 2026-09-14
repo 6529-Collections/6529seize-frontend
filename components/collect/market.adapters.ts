@@ -39,9 +39,10 @@ export function marketOperationStage(
     case "PUBLISHING":
       return "publishing";
     case "SUBMITTED":
-    case "MINED":
     case "CANCEL_PENDING":
       return "submitted";
+    case "MINED":
+      return "included";
     case "LIVE":
       return operation.settlement &&
         BigInt(operation.settlement.filled_quantity) > 0n
@@ -66,6 +67,7 @@ export function marketOperationReview(
 ): CollectTradeReview {
   const action = operation.kind.toLowerCase() as CollectTradeReview["action"];
   return {
+    operation,
     id: operation.id,
     revision: operation.revision,
     action,
@@ -203,6 +205,26 @@ export function marketOperationReview(
     disabledReason,
   };
 }
+function confirmedMarketStatus(
+  operation: ApiMarketOperation,
+  locale: SupportedLocale
+): string {
+  const kind = operation.kind.toString();
+  if (kind === "CANCEL") return t(locale, "collect.trade.cancelled");
+  if (kind === "LIST" || kind === "ACCEPT")
+    return t(locale, "collect.receipt.title.accept");
+  return t(locale, "collect.receipt.title.buy");
+}
+
+function confirmedMarketAmount(operation: ApiMarketOperation): string | null {
+  const payment = operation.receipt?.payment;
+  if (!payment || operation.state.toString() !== "CONFIRMED") return null;
+  const kind = operation.kind.toString();
+  const amount =
+    kind === "ACCEPT" || kind === "LIST" ? payment.net_wei : payment.total_wei;
+  return marketAmount(amount, payment.currency);
+}
+
 export function marketOperationView(
   operation: ApiMarketOperation,
   locale: SupportedLocale
@@ -219,6 +241,9 @@ export function marketOperationView(
         : t(locale, "collect.trade.orderLive");
   if (operation.state.toString() === "CANCELLED")
     statusLabel = t(locale, "collect.trade.cancelled");
+  if (operation.state.toString() === "CONFIRMED")
+    statusLabel = confirmedMarketStatus(operation, locale);
+  const actualAmount = confirmedMarketAmount(operation);
   return {
     id: operation.id,
     title: review.title,
@@ -226,7 +251,11 @@ export function marketOperationView(
     action: review.action,
     statusLabel,
     detail: operation.recipient,
-    amountLabel: review.totalLabel,
+    amountLabel:
+      actualAmount ??
+      (operation.state.toString() === "CONFIRMED"
+        ? t(locale, "collect.receipt.notRecorded")
+        : review.totalLabel),
     makerLabel: operation.wallet,
     updatedLabel: formatDate(locale, operation.updated_at, {
       dateStyle: "medium",

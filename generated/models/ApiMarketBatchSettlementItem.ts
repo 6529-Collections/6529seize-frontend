@@ -16,6 +16,10 @@ import { ApiMarketIdentity } from '../models/ApiMarketIdentity';
 import { HttpFile } from '../http/http';
 
 export class ApiMarketBatchSettlementItem {
+    /**
+    * Whole source order remaining quantity verified at a canonical safe block; absent when unavailable.
+    */
+    'order_remaining_quantity'?: string;
     'asset_key': string;
     'order': ApiMarketIdentity;
     'filled_quantity': string;
@@ -26,6 +30,12 @@ export class ApiMarketBatchSettlementItem {
     static readonly mapping: {[index: string]: string} | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
+        {
+            "name": "order_remaining_quantity",
+            "baseName": "order_remaining_quantity",
+            "type": "string",
+            "format": ""
+        },
         {
             "name": "asset_key",
             "baseName": "asset_key",

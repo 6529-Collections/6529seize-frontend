@@ -8,6 +8,12 @@ import type { ComponentProps } from "react";
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { scenarioPlan } from "./collect-plan-scenarios.fixture";
 import { OFFER_PAYER, OFFER_PROFILE } from "./offer-plan.fixture";
+import type {
+  ConfirmedMarketPurchase,
+  PendingMarketPurchase,
+} from "@/components/collect/market-activity-store";
+import type { CollectCatalogEntry } from "@/components/collect/useCollectCatalog";
+import { targetPlan } from "./collect-tdh-target.fixture";
 
 let mockProfile: ApiIdentity | null = OFFER_PROFILE;
 let mockQuery = new URLSearchParams("intent=full_set&collection=memes");
@@ -16,6 +22,14 @@ let mockView: ComponentProps<typeof CollectPageView> | undefined;
 let mockWorkspace: ComponentProps<typeof CollectOfferWorkspace> | undefined;
 let mockBasket: ComponentProps<typeof CollectPlanBasket> | undefined;
 let mockActualWorkspace = false;
+let mockPurchases: readonly ConfirmedMarketPurchase[] = [];
+let mockPendingPurchases: readonly PendingMarketPurchase[] = [];
+let mockEntries: readonly CollectCatalogEntry[] = [];
+jest.mock("@/components/collect/market-activity-store", () => ({
+  useConfirmedMarketPurchases: () => mockPurchases,
+  usePendingMarketPurchases: () => mockPendingPurchases,
+  readPendingMarketPurchases: () => mockPendingPurchases,
+}));
 
 jest.mock("next/navigation", () => ({
   useSearchParams: () => mockQuery,
@@ -53,7 +67,7 @@ jest.mock("@/services/api/collect-api", () => ({
 }));
 jest.mock("@/components/collect/useCollectCatalog", () => ({
   useCollectCatalog: () => ({
-    entries: [],
+    entries: mockEntries,
     pending: false,
     failed: false,
     hasMore: false,
@@ -61,7 +75,8 @@ jest.mock("@/components/collect/useCollectCatalog", () => ({
     retry: jest.fn(),
     loadMore: jest.fn(),
   }),
-  collectCatalogEntryId: jest.fn(),
+  collectCatalogEntryId: (entry: CollectCatalogEntry) =>
+    entry.order?.identity.order_hash ?? entry.asset.asset_key,
 }));
 jest.mock("@/components/collect/CollectPageView", () => ({
   __esModule: true,
@@ -167,6 +182,100 @@ beforeEach(() => {
   mockWorkspace = undefined;
   mockBasket = undefined;
   mockActualWorkspace = false;
+  mockPurchases = [];
+  mockPendingPurchases = [];
+  mockEntries = [];
+});
+
+function discoveredSelection() {
+  const item = targetPlan().items[0]!;
+  const order = {
+    ...item.order,
+    maker: `0x${"9".repeat(40)}`,
+    quantity: "1",
+    purchase_quantity: "1",
+    quantity_step: "1",
+    available_quantity: "3",
+    start_time: "1",
+    end_time: "9999999999",
+  };
+  mockEntries = [{ asset: item.asset, order }];
+  const purchase: ConfirmedMarketPurchase = {
+    operationId: "single-artwork-purchase",
+    profileId: OFFER_PROFILE.id!,
+    assetKey: item.asset.asset_key,
+    protocolAddress: order.identity.protocol_address,
+    orderHash: order.identity.order_hash,
+    quantity: "1",
+    remainingQuantity: "2",
+    confirmedAt: Date.now(),
+  };
+  return { id: order.identity.order_hash, purchase };
+}
+
+it("clears an exact selection purchased on another artwork page only once", () => {
+  const { id, purchase } = discoveredSelection();
+  const { rerender } = render(<CollectPageClient />);
+  act(() => view().selectionFor?.(id)?.onToggle());
+  expect(view().selectionFor?.(id)?.selected).toBe(true);
+  mockPurchases = [{ ...purchase, confirmedAt: Date.now() }];
+  rerender(<CollectPageClient />);
+  expect(view().selectionFor?.(id)?.selected).toBe(false);
+  // A remaining copy selected afterwards is a new intention. Re-rendering the
+  // same confirmed receipt must not consume that selection a second time.
+  act(() => view().selectionFor?.(id)?.onToggle());
+  mockPurchases = [{ ...purchase }];
+  rerender(<CollectPageClient />);
+  expect(view().selectionFor?.(id)?.selected).toBe(true);
+});
+
+it.each(["historical", "unrelated"])(
+  "keeps a built goal visible when a %s receipt arrives",
+  (kind) => {
+    const { purchase } = discoveredSelection();
+    const { rerender } = render(<CollectPageClient />);
+    act(() => goals().onPlan(scenarioPlan()));
+    const goalId = view().plan?.id;
+    expect(goalId).toBeDefined();
+    mockPurchases = [
+      {
+        ...purchase,
+        confirmedAt: kind === "historical" ? 0 : Date.now(),
+        assetKey:
+          kind === "unrelated"
+            ? "1:0x9999999999999999999999999999999999999999:999"
+            : purchase.assetKey,
+      },
+    ];
+    rerender(<CollectPageClient />);
+    expect(view().plan?.id).toBe(goalId);
+  }
+);
+
+it("reserves a pending exact order without clearing it or offering a second checkout", () => {
+  const { id, purchase } = discoveredSelection();
+  const { rerender } = render(<CollectPageClient />);
+  act(() => view().selectionFor?.(id)?.onToggle());
+  mockPendingPurchases = [purchase];
+  rerender(<CollectPageClient />);
+  expect(view().selectionFor?.(id)?.selected).toBe(true);
+  expect(view().selectionFor?.(id)?.pending).toBe(true);
+  expect(view().selectionSummary).toBeNull();
+  act(() => view().selectionFor?.(id)?.onToggle());
+  expect(view().selectionFor?.(id)?.selected).toBe(true);
+  mockPendingPurchases = [];
+  mockPurchases = [{ ...purchase, confirmedAt: Date.now() }];
+  rerender(<CollectPageClient />);
+  expect(view().selectionFor?.(id)?.selected).toBe(false);
+});
+
+it("checks current pending evidence when a selection callback runs before the next render", () => {
+  const { id, purchase } = discoveredSelection();
+  render(<CollectPageClient />);
+  const toggle = view().selectionFor?.(id)?.onToggle;
+  mockPendingPurchases = [purchase];
+  act(() => toggle?.());
+  expect(view().selectionFor?.(id)?.selected).toBe(false);
 });
 
 it("keeps focus on the current listing strategy when no offer workspace is open", async () => {
@@ -329,6 +438,37 @@ it("retains the frozen purchase source after its current collecting plan is inva
   expect(basket().plan).toBe(plan);
   expect(basket().reviewLegs).toEqual(plan.result.legs);
   expect(workspace().onReviewBuys).toBeUndefined();
+});
+
+it("retains the ordinary checkout source and receipt after settlement clears the plan", () => {
+  render(<CollectPageClient />);
+  const plan = scenarioPlan();
+  act(() => goals().onPlan(plan));
+  act(() => view().onReviewPlan?.(plan.id, plan.revision));
+  const dialog = screen.getByRole("dialog");
+  act(() => basket().onSettled?.());
+  expect(screen.getByRole("dialog")).toBe(dialog);
+  expect(basket().plan).toBe(plan);
+  act(() => goals().onPlan({ ...plan, id: "updated-plan" }));
+  expect(screen.getByRole("dialog")).toBe(dialog);
+  expect(basket().plan).toBe(plan);
+  act(() => basket().onClose());
+  expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+});
+
+it("keeps the completed blended receipt open until the collector leaves", () => {
+  const { plan } = start();
+  act(() => workspace().onReviewBuys?.(plan.result.legs));
+  const dialog = screen.getByRole("dialog");
+  act(() => basket().onSettled?.());
+  expect(screen.getByRole("dialog")).toBe(dialog);
+  expect(basket().plan).toBe(plan);
+  expect(workspace().buyLockedAssetKeys).toEqual([]);
+  act(() => basket().onClose());
+  expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  expect(
+    screen.queryByRole("button", { name: /Resume purchase review/ })
+  ).not.toBeInTheDocument();
 });
 
 it.each(["goal", "recipient", "plan", "scenario"] as const)(
