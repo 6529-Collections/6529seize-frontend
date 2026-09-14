@@ -73,7 +73,7 @@
   "waves.sidebar.rightPanel.configuration.deleteChatHistory.success": "Your chat history was deleted from this wave.",
   "waves.sidebar.rightPanel.configuration.deleteChatHistory.empty": "No chat messages were deleted.",
   "waves.sidebar.rightPanel.configuration.deleteChatHistory.errorTitle": "Couldn't delete your chat history.",
-  "waves.sidebar.rightPanel.configuration.deleteChatHistory.errorDescription": "Deletion was interrupted. Messages already deleted stay deleted. Retry to continue with the same history cutoff.",
+  "waves.sidebar.rightPanel.configuration.deleteChatHistory.errorDescription": "Deletion was interrupted. Messages already deleted stay deleted. Retry to continue.",
   "waves.sidebar.rightPanel.configuration.deleteChatHistory.progress": "Deleting your chat history… Confirmed deletions: at least {count}.",
   "waves.sidebar.rightPanel.configuration.deleteChatHistory.paused": "Deletion paused. Confirmed deletions: at least {count}. Retry continues the original deletion and keeps newer messages.",
   "waves.sidebar.rightPanel.configuration.deleteChatHistory.retry": "Retry deletion",
