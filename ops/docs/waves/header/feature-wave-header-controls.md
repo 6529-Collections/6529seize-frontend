@@ -24,6 +24,10 @@ Users can:
   - `/messages/{waveId}`
 - Mobile `About` view for an active wave.
 
+The official Announcements wave uses the same blue outlined megaphone tile in
+the wave list, active thread header, right-sidebar `About`, and mobile `About`.
+These surfaces show the tile even when Announcements has a saved wave picture.
+
 ## Entry Points
 
 1. Open an active wave and switch to `About`.
