@@ -366,144 +366,149 @@ function BatchQuoteReview({
           {hasExternalRecipient ? t(locale, "collect.review.giftOutcome") : ""}
         </output>
       </div>
-      <aside
-        className="tw-min-w-0 tw-space-y-5 tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.02] tw-p-5 sm:tw-p-6 lg:tw-sticky lg:tw-top-24"
-        aria-label={t(locale, "collect.checkout.summary")}
-      >
-        <h3 className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-100">
-          {t(locale, "collect.checkout.summary")}
-        </h3>
-        {commonRecipient && onAllRecipientsChange && profile && (
-          <CollectReviewRecipient
-            label={t(
-              locale,
-              uniformDelivery
-                ? "collect.checkout.deliverAll"
-                : "collect.checkout.changeAll"
-            )}
-            address={commonRecipient.recipient}
-            name={walletNames?.[commonRecipient.recipient.toLowerCase()]}
-            profile={profile}
-            payingWallet={operation.wallet}
-            recipientInProfile={commonRecipient.recipient_in_profile === true}
-            disabled={
-              recipientDisabled ||
-              (activeRecipient !== null && activeRecipient !== "all")
-            }
-            onEditingChange={(editing) => changeEditing("all", editing)}
-            onApply={(recipient, acknowledged) =>
-              recipientDisabled || editingRecipient.current !== "all"
-                ? Promise.resolve(false)
-                : onAllRecipientsChange(recipient, acknowledged)
-            }
-          />
-        )}
-        {commonRecipient &&
-          uniformDelivery &&
-          (!onAllRecipientsChange || !profile) && (
-            <CollectReviewWallet
-              label={t(locale, "collect.checkout.deliverAll")}
+      <div className="tw-min-w-0 lg:tw-self-stretch">
+        <aside
+          className="tw-min-w-0 tw-space-y-5 tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.02] tw-p-5 sm:tw-p-6 lg:tw-sticky lg:tw-top-24"
+          aria-label={t(locale, "collect.checkout.summary")}
+        >
+          <h3 className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-100">
+            {t(locale, "collect.checkout.summary")}
+          </h3>
+          {commonRecipient && onAllRecipientsChange && profile && (
+            <CollectReviewRecipient
+              label={t(
+                locale,
+                uniformDelivery
+                  ? "collect.checkout.deliverAll"
+                  : "collect.checkout.changeAll"
+              )}
               address={commonRecipient.recipient}
               name={walletNames?.[commonRecipient.recipient.toLowerCase()]}
+              profile={profile}
+              payingWallet={operation.wallet}
+              recipientInProfile={commonRecipient.recipient_in_profile === true}
+              disabled={
+                recipientDisabled ||
+                (activeRecipient !== null && activeRecipient !== "all")
+              }
+              onEditingChange={(editing) => changeEditing("all", editing)}
+              onApply={(recipient, acknowledged) =>
+                recipientDisabled || editingRecipient.current !== "all"
+                  ? Promise.resolve(false)
+                  : onAllRecipientsChange(recipient, acknowledged)
+              }
             />
           )}
-        {!uniformDelivery && (
-          <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400">
-            {t(locale, "collect.checkout.deliveryExceptions")}
-          </p>
-        )}
-        <dl className="tw-m-0 tw-space-y-3">
-          <AmountRow label={t(locale, "collect.batchReview.purchaseTotal")}>
-            <Money wei={operation.total_wei} currency="ETH" compact />
-          </AmountRow>
-          <AmountRow label={t(locale, "collect.review.networkCap")}>
-            {gas === undefined ? (
-              t(locale, "collect.batchReview.gasUnavailable")
-            ) : (
-              <Money wei={gas} currency="ETH" cap />
+          {commonRecipient &&
+            uniformDelivery &&
+            (!onAllRecipientsChange || !profile) && (
+              <CollectReviewWallet
+                label={t(locale, "collect.checkout.deliverAll")}
+                address={commonRecipient.recipient}
+                name={walletNames?.[commonRecipient.recipient.toLowerCase()]}
+              />
             )}
-          </AmountRow>
-        </dl>
-        <CollectReviewWallet
-          label={t(locale, "collect.review.payWith")}
-          address={operation.wallet}
-          name={walletNames?.[operation.wallet.toLowerCase()]}
-        />
-        <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400">
-          {t(locale, "collect.review.maximumNote")}
-        </p>
-        {message && (
-          <p
-            role="status"
-            className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-300"
-          >
-            {message}
-          </p>
-        )}
-        {message && reviewChangeNotice && (
-          <CollectReviewChangeDetails notice={reviewChangeNotice} />
-        )}
-        {disabledReason && (
-          <p
-            role="status"
-            className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-300"
-          >
-            {disabledReason}
-          </p>
-        )}
-        <div className="tw-fixed tw-inset-x-0 tw-bottom-0 tw-z-10 tw-space-y-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-p-4 tw-pb-[max(1rem,env(safe-area-inset-bottom))] lg:tw-static lg:tw-bg-transparent lg:tw-px-0 lg:tw-pb-0">
-          {maximum !== null && (
-            <dl className="tw-m-0">
-              <AmountRow prominent label={t(locale, "collect.review.maximum")}>
-                <Money wei={maximum} currency="ETH" cap capDecimals={5} />
-              </AmountRow>
-            </dl>
+          {!uniformDelivery && (
+            <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400">
+              {t(locale, "collect.checkout.deliveryExceptions")}
+            </p>
           )}
-          <div className="tw-grid tw-grid-cols-[minmax(0,1fr)_auto] tw-items-center tw-gap-2 lg:tw-flex lg:tw-flex-wrap">
-            {operation.state === ApiMarketBatchOperationStateEnum.Review && (
-              <Button
-                variant="action"
-                size="lg"
-                fullWidth
-                loading={busy}
-                disabled={recipientDisabled || activeRecipient !== null}
-                onClick={() => {
-                  if (recipientDisabled || editingRecipient.current !== null)
-                    return;
-                  void onConfirm();
-                }}
-              >
-                {t(locale, "collect.trade.continue")}
-              </Button>
+          <dl className="tw-m-0 tw-space-y-3">
+            <AmountRow label={t(locale, "collect.batchReview.purchaseTotal")}>
+              <Money wei={operation.total_wei} currency="ETH" compact />
+            </AmountRow>
+            <AmountRow label={t(locale, "collect.review.networkCap")}>
+              {gas === undefined ? (
+                t(locale, "collect.batchReview.gasUnavailable")
+              ) : (
+                <Money wei={gas} currency="ETH" cap />
+              )}
+            </AmountRow>
+          </dl>
+          <CollectReviewWallet
+            label={t(locale, "collect.review.payWith")}
+            address={operation.wallet}
+            name={walletNames?.[operation.wallet.toLowerCase()]}
+          />
+          <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400">
+            {t(locale, "collect.review.maximumNote")}
+          </p>
+          {message && (
+            <p
+              role="status"
+              className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-300"
+            >
+              {message}
+            </p>
+          )}
+          {message && reviewChangeNotice && (
+            <CollectReviewChangeDetails notice={reviewChangeNotice} />
+          )}
+          {disabledReason && (
+            <p
+              role="status"
+              className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-300"
+            >
+              {disabledReason}
+            </p>
+          )}
+          <div className="tw-fixed tw-inset-x-0 tw-bottom-0 tw-z-10 tw-space-y-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-p-4 tw-pb-[max(1rem,env(safe-area-inset-bottom))] lg:tw-static lg:tw-bg-transparent lg:tw-px-0 lg:tw-pb-0">
+            {maximum !== null && (
+              <dl className="tw-m-0">
+                <AmountRow
+                  prominent
+                  label={t(locale, "collect.review.maximum")}
+                >
+                  <Money wei={maximum} currency="ETH" cap capDecimals={5} />
+                </AmountRow>
+              </dl>
             )}
-            {canEdit && !onRemove && (
+            <div className="tw-grid tw-grid-cols-[minmax(0,1fr)_auto] tw-items-center tw-gap-2 lg:tw-flex lg:tw-flex-wrap">
+              {operation.state === ApiMarketBatchOperationStateEnum.Review && (
+                <Button
+                  variant="action"
+                  size="lg"
+                  fullWidth
+                  loading={busy}
+                  disabled={recipientDisabled || activeRecipient !== null}
+                  onClick={() => {
+                    if (recipientDisabled || editingRecipient.current !== null)
+                      return;
+                    void onConfirm();
+                  }}
+                >
+                  {t(locale, "collect.trade.continue")}
+                </Button>
+              )}
+              {canEdit && !onRemove && (
+                <Button
+                  variant="secondary"
+                  size="lg"
+                  disabled={
+                    busy ||
+                    activeRecipient !== null ||
+                    operation.state !== ApiMarketBatchOperationStateEnum.Review
+                  }
+                  onClick={() => {
+                    if (busy || editingRecipient.current !== null) return;
+                    onEdit();
+                  }}
+                >
+                  {t(locale, "collect.buy.editPurchase")}
+                </Button>
+              )}
               <Button
                 variant="secondary"
                 size="lg"
-                disabled={
-                  busy ||
-                  activeRecipient !== null ||
-                  operation.state !== ApiMarketBatchOperationStateEnum.Review
-                }
-                onClick={() => {
-                  if (busy || editingRecipient.current !== null) return;
-                  onEdit();
-                }}
+                disabled={busy}
+                onClick={onClose}
               >
-                {t(locale, "collect.buy.editPurchase")}
+                {t(locale, "collect.batchReview.close")}
               </Button>
-            )}
-            <Button
-              variant="secondary"
-              size="lg"
-              disabled={busy}
-              onClick={onClose}
-            >
-              {t(locale, "collect.batchReview.close")}
-            </Button>
+            </div>
           </div>
-        </div>
-      </aside>
+        </aside>
+      </div>
       <div className="tw-min-w-0 lg:tw-col-span-2">
         <CollectReviewDisclosure
           label={t(locale, "collect.review.priceDetails")}

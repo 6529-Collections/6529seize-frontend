@@ -5,6 +5,59 @@ import {
 import { marketBatchReviewChange } from "@/components/collect/market-batch-validation";
 import { MARKET_WETH } from "@/components/collect/market-validation";
 import { batchFixture } from "./market-batch.fixture";
+import { ApiMarketKind } from "@/generated/models/ApiMarketKind";
+import {
+  ApiMarketOperationStateEnum,
+  type ApiMarketOperation,
+} from "@/generated/models/ApiMarketOperation";
+import { ApiMarketTransactionPurposeEnum } from "@/generated/models/ApiMarketTransaction";
+
+it("exposes an approval-only ceiling change when the total reserve is unchanged and fulfillment is not ready", () => {
+  const { operation } = batchFixture();
+  const before: ApiMarketOperation = {
+    ...operation,
+    kind: ApiMarketKind.List,
+    state: ApiMarketOperationStateEnum.ApprovalRequired,
+    recipient: operation.wallet,
+    recipient_in_profile: true,
+    asset_key: operation.items[0]!.asset_key,
+    quantity: "1",
+    net_wei: operation.total_wei,
+    fees: [],
+    potential_liability_wei: "0",
+    approval_transactions: [
+      {
+        ...operation.transaction!,
+        purpose: ApiMarketTransactionPurposeEnum.ApproveNft,
+        value: "0",
+        gas_limit: "100000",
+        max_fee_per_gas: "10",
+        gas_reserve_wei: "1000000",
+      },
+    ],
+  };
+  delete before.transaction;
+  const after = {
+    ...before,
+    approval_transactions: [
+      {
+        ...before.approval_transactions[0]!,
+        gas_limit: "50000",
+        max_fee_per_gas: "20",
+      },
+    ],
+  };
+  const notice = marketReviewChangeNotice(before, after, "en-US", "gas");
+  expect(notice.details).toEqual([
+    { label: "Approval 1 · Gas limit", before: "100,000", after: "50,000" },
+    {
+      label: "Approval 1 · Gas price limit",
+      before: "0.00000001 Gwei",
+      after: "0.00000002 Gwei",
+    },
+  ]);
+  expect(notice.summary).not.toContain("purchase price");
+});
 
 it("keeps exact one-wei cap changes in disclosure data and purchase reassurance in the summary", () => {
   const { operation: before } = batchFixture();

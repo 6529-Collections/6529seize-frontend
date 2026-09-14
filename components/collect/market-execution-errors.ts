@@ -1,7 +1,10 @@
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { isMarketSendRejected } from "./market-send-attempt";
-import { marketPreparationError } from "./market-preparation-errors";
+import {
+  marketPreparationError,
+  marketSpecificApiErrorKey,
+} from "./market-preparation-errors";
 import type { CollectTradeStage } from "./collect.types";
 import {
   getStructuredApiErrorStatus,
@@ -32,8 +35,11 @@ export function marketExecutionError(
     return phaseFailure(locale, stage);
   if (code === "OPERATION_CHANGED")
     return t(locale, "collect.trade.refreshRequired");
-  if (getStructuredApiErrorStatus(error) !== undefined)
-    return marketPreparationError(error, locale);
+  if (getStructuredApiErrorStatus(error) !== undefined) {
+    if (stage === "preparing") return marketPreparationError(error, locale);
+    const key = marketSpecificApiErrorKey(error);
+    return key === undefined ? phaseFailure(locale, stage) : t(locale, key);
+  }
   if (error instanceof Error) {
     if (error.message === "MARKET_WALLET_NOT_READY")
       return t(locale, "collect.trade.walletNotReady");

@@ -1,6 +1,5 @@
 export const COLLECT_MESSAGES = {
-  "collect.trade.preflightFailed":
-    "Checks could not finish. Try again.",
+  "collect.trade.preflightFailed": "Checks could not finish. Try again.",
   "collect.trade.recoveryFailed":
     "The transaction status could not be checked. Keep the transaction hash and retry the status check.",
   "collect.trade.publishFailed":
@@ -14,6 +13,7 @@ export const COLLECT_MESSAGES = {
   "collect.review.updatedValue": "Updated: {value}",
   "collect.review.gasLimit": "Gas limit",
   "collect.review.gasPriceLimit": "Gas price limit",
+  "collect.review.approvalLimit": "Approval {number} · {limit}",
   "collect.trade.changedPrice":
     "Trade total changed from {before} to {after} {currency}.",
   "collect.trade.changedFees":

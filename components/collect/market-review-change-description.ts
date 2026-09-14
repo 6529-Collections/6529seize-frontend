@@ -245,11 +245,18 @@ export function marketReviewChangeNotice(
     label: MessageKey,
     before: bigint | null,
     after: bigint | null,
-    format: (value: bigint) => string
+    format: (value: bigint) => string,
+    approval?: number
   ) => {
     if (before === null || after === null || before === after) return;
     details.push({
-      label: t(locale, label),
+      label:
+        approval === undefined
+          ? t(locale, label)
+          : t(locale, "collect.review.approvalLimit", {
+              number: formatDecimalString(locale, approval.toString()),
+              limit: t(locale, label),
+            }),
       before: format(before),
       after: format(after),
     });
@@ -270,6 +277,33 @@ export function marketReviewChangeNotice(
     amount(fresh.transaction?.max_fee_per_gas),
     (value) => `${formatDecimalString(locale, formatUnits(value, 9))} Gwei`
   );
+  // A gas-only change has the same approval authorities in the same order.
+  // Show each component even when offsetting changes leave the total unchanged.
+  fresh.approval_transactions.forEach((transaction, index) => {
+    const previous = shown.approval_transactions[index];
+    if (!previous) return;
+    add(
+      "collect.review.exactGas",
+      amount(previous.gas_reserve_wei),
+      amount(transaction.gas_reserve_wei),
+      eth,
+      index + 1
+    );
+    add(
+      "collect.review.gasLimit",
+      amount(previous.gas_limit),
+      amount(transaction.gas_limit),
+      (value) => formatDecimalString(locale, value.toString()),
+      index + 1
+    );
+    add(
+      "collect.review.gasPriceLimit",
+      amount(previous.max_fee_per_gas),
+      amount(transaction.max_fee_per_gas),
+      (value) => `${formatDecimalString(locale, formatUnits(value, 9))} Gwei`,
+      index + 1
+    );
+  });
   const unchangedPurchase =
     ["BUY", "BUY_BATCH"].includes(shown.kind) &&
     shown.kind === fresh.kind &&

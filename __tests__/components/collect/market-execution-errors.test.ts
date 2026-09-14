@@ -1,6 +1,13 @@
 import { marketExecutionError } from "@/components/collect/market-execution-errors";
 import { t } from "@/i18n/messages";
 
+function apiError(status: number, code = "UNKNOWN_API_CODE") {
+  return Object.assign(new Error("private provider URL"), {
+    status,
+    response: { status, body: { code, message: "private response" } },
+  });
+}
+
 it.each([
   ["MARKET_WALLET_NOT_READY", "collect.trade.walletNotReady"],
   ["MARKET_CONNECTION_CHANGED", "collect.error.prepareConnectionChanged"],
@@ -78,5 +85,43 @@ it("does not describe a rejected published signature as an unsent wallet request
   });
   expect(marketExecutionError(error, "en-US", "publishing")).toBe(
     t("en-US", "collect.trade.publishFailed")
+  );
+});
+
+describe.each([
+  ["publishing", "collect.trade.publishFailed"],
+  ["submitted", "collect.trade.recoveryFailed"],
+  ["reconciling", "collect.trade.recoveryFailed"],
+] as const)("structured API failures during %s", (stage, key) => {
+  it.each([0, 400, 404, 409, 422, 500, 503])(
+    "uses the current phase for unmapped status %s",
+    (status) => {
+      const message = marketExecutionError(apiError(status), "en-US", stage);
+      expect(message).toBe(t("en-US", key));
+      expect(message).not.toContain("private");
+    }
+  );
+  it.each([
+    [401, "UNKNOWN", "collect.error.prepareAuth"],
+    [403, "ORDER_MISMATCH", "collect.error.prepareAuth"],
+    [429, "UNKNOWN", "collect.error.prepareRateLimited"],
+    [409, "OPERATION_CHANGED", "collect.trade.refreshRequired"],
+    [409, "UNSUPPORTED_ZONE", "collect.error.prepareUnsupported"],
+    [409, "RECIPIENT_SCOPE_CHANGED", "collect.error.prepareRecipientChanged"],
+    [409, "AMOUNT_MISMATCH", "collect.error.prepareTerms"],
+    [503, "PROVIDER_UNAVAILABLE", "collect.error.prepareService"],
+  ] as const)(
+    "preserves specific %s/%s guidance",
+    (status, code, messageKey) => {
+      expect(marketExecutionError(apiError(status, code), "en-US", stage)).toBe(
+        t("en-US", messageKey)
+      );
+    }
+  );
+});
+
+it("keeps the existing preparation fallback before any wallet request", () => {
+  expect(marketExecutionError(apiError(503), "en-US", "preparing")).toBe(
+    t("en-US", "collect.error.prepareService")
   );
 });
