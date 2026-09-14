@@ -2808,6 +2808,9 @@ export const EN_US_MESSAGES = {
   "memes.proposalFrame.portrait": "Vertical",
   "memes.proposalFrame.landscape": "Horizontal",
   "memes.proposalFrame.preview": "Proposal frame preview",
+  "memes.proposalFrame.artwork": "Proposal artwork",
+  "memes.proposalFrame.missingTitle":
+    "Add an artwork title before creating the proposal frame.",
   "memes.proposalFrame.publishError":
     "Unable to prepare the proposal card. Please try again.",
   "memes.proposalFrame.missingPreview":

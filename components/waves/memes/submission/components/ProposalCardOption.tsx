@@ -63,7 +63,7 @@ export function ProposalCardOption({
                   checked={layout === value}
                   disabled={disabled}
                   onChange={() => onChange(value)}
-                  className="tw-accent-primary-400"
+                  className="tw-accent-primary-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
                 />
                 {t(
                   locale,

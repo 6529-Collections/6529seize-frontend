@@ -481,7 +481,7 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
                   <ProposalCardPreview
                     mediaUrl={externalPreviewUrl}
                     mimeType={externalMimeType}
-                    title={artworkTitle ?? "Artwork"}
+                    title={artworkTitle ?? ""}
                     layout={proposalFrame}
                   />
                 )}

@@ -13,6 +13,7 @@ import { t } from "@/i18n/messages";
 export function ProposalCardPreview(props: ProposalCardDocumentInput) {
   const { mediaUrl, mimeType, title, layout } = props;
   const locale = useBrowserLocale();
+  const artworkTitle = title.trim() || t(locale, "memes.proposalFrame.artwork");
   const document = useMemo(() => {
     const isHtml =
       mimeType === "text/html" || mimeType === "application/xhtml+xml";
@@ -22,17 +23,17 @@ export function ProposalCardPreview(props: ProposalCardDocumentInput) {
     if (!source) return null;
     try {
       return buildProposalCardDocument(
-        { mediaUrl: source, mimeType, title, layout },
+        { mediaUrl: source, mimeType, title: artworkTitle, layout },
         { localPreview: true }
       );
     } catch {
       return null;
     }
-  }, [mediaUrl, mimeType, title, layout]);
+  }, [mediaUrl, mimeType, artworkTitle, layout]);
 
   if (!document)
     return (
-      <p role="status" className="tw-p-4 tw-text-sm tw-text-iron-300">
+      <p role="alert" className="tw-p-4 tw-text-sm tw-text-iron-300">
         {t(locale, "memes.proposalFrame.previewError")}
       </p>
     );

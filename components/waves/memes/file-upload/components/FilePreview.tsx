@@ -116,7 +116,7 @@ const FilePreview: React.FC<FilePreviewProps> = ({
         <ProposalCardPreview
           mediaUrl={url}
           mimeType={effectiveMimeType || "image/png"}
-          title={artworkTitle ?? "Artwork"}
+          title={artworkTitle ?? ""}
           layout={proposalFrame}
         />
       );

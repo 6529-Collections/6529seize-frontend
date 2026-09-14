@@ -145,6 +145,10 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
 
   const resetPreviewState = useCallback(() => {
     previewGeneration.current += 1;
+    if (previewThumbnailUrl.current) {
+      URL.revokeObjectURL(previewThumbnailUrl.current);
+      previewThumbnailUrl.current = null;
+    }
     setIsPreparingPreview(false);
     setIsPreviewMode(false);
     setPreviewDrop(null);
@@ -245,8 +249,8 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
   }, [connectedProfile, form, wave, setToast, locale]);
 
   const handleBackToEdit = useCallback(() => {
-    setIsPreviewMode(false);
-  }, []);
+    resetPreviewState();
+  }, [resetPreviewState]);
 
   const handleBackFromAdditionalInfo = useCallback(() => {
     resetPreviewState();

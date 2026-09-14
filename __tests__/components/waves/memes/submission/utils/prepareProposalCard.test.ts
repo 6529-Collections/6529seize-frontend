@@ -64,6 +64,16 @@ it("does not publish until the thumbnail upload succeeds", async () => {
   expect(commonApiPost).not.toHaveBeenCalled();
 });
 
+it("rejects a blank title before creating or uploading a thumbnail", async () => {
+  const input = { ...setup(), title: " \n " };
+  await expect(prepareProposalCard(input)).rejects.toThrow(
+    "Add an artwork title"
+  );
+  expect(createProposalCardThumbnail).not.toHaveBeenCalled();
+  expect(input.uploadThumbnail).not.toHaveBeenCalled();
+  expect(commonApiPost).not.toHaveBeenCalled();
+});
+
 it("does not upload or publish after identity changes while rendering the thumbnail", async () => {
   const input = setup();
   input.assertIdentity

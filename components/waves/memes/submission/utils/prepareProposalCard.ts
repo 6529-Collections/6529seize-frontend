@@ -10,11 +10,14 @@ import type { ProposalFrameMetadata } from "@/lib/proposal-card/metadata";
 import { createProposalCardThumbnail } from "@/lib/proposal-card/thumbnail";
 import { commonApiPost } from "@/services/api/common-api";
 import type { OperationalData } from "../types/OperationalData";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 
 export async function prepareProposalCard({
   media,
   layout,
   title,
+  locale = DEFAULT_LOCALE,
   operationalData,
   uploadThumbnail,
   assertIdentity,
@@ -22,10 +25,14 @@ export async function prepareProposalCard({
   readonly media: ApiDropMedia;
   readonly layout: ProposalCardLayout;
   readonly title: string;
+  readonly locale?: SupportedLocale;
   readonly operationalData: OperationalData | undefined;
   readonly uploadThumbnail: (file: File) => Promise<ApiDropMedia>;
   readonly assertIdentity: () => void;
 }) {
+  const artworkTitle = title.trim();
+  if (!artworkTitle)
+    throw new Error(t(locale, "memes.proposalFrame.missingTitle"));
   const mimeType = getProposalCardMimeType(media.mime_type);
   if (mimeType === undefined)
     throw new Error("Proposal frames support images, video, and HTML.");
@@ -49,7 +56,7 @@ export async function prepareProposalCard({
     body: {
       media_url: media.url,
       mime_type: mimeType,
-      title: title.trim(),
+      title: artworkTitle,
       layout:
         layout === "portrait"
           ? ApiProposalFrameRequestLayoutEnum.Portrait

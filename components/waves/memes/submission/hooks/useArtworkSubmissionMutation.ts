@@ -348,6 +348,7 @@ export function useArtworkSubmissionMutation() {
           media,
           layout: data.proposalFrame,
           title: data.traits.title,
+          locale,
           operationalData,
           uploadThumbnail: async (file) => {
             const uploaded = await uploadMutation.mutateAsync({
