@@ -71,7 +71,20 @@ jobs:
               && typeof value.slug === 'string' && /^[a-z0-9-]+$/.test(value.slug))
               .map(value => ({ id: value.id, slug: value.slug }))
             : [];
+          const requiredReads = {
+            authentication: identity.status,
+            project: project.status,
+            projectInventory: projects.status,
+            alertRules: rules.status,
+            customIntegrations: integrations.status,
+          };
+          const unavailableRequiredReads = Object.entries(requiredReads)
+            .filter(([, status]) => status !== 200)
+            .map(([name]) => name);
+          const readAccessVerified = unavailableRequiredReads.length === 0;
           const summary = {
+            readAccessVerified,
+            unavailableRequiredReads,
             authenticationStatus: identity.status,
             scopeMetadataAvailable: Array.isArray(identity.data?.auth?.scopes),
             projectStatus: project.status,
@@ -94,8 +107,8 @@ jobs:
           console.log(output);
           const summaryPath = process.env.GITHUB_STEP_SUMMARY;
           if (!summaryPath) throw new Error('SUMMARY_PATH_UNAVAILABLE');
-          appendFileSync(summaryPath, `## Sentry monitoring access\n\nRead-only audit; no provider settings changed. Scope flags report token metadata, not verified mutation permissions.\n\n\`\`\`json\n${output}\n\`\`\`\n`);
-          if (identity.status !== 200) process.exitCode = 1;
+          appendFileSync(summaryPath, `## Sentry monitoring access\n\nSuccess requires authentication and project, project-inventory, alert-rule and custom-integration reads. Uptime and cron access are reported separately. This does not verify event forwarding or mutation permissions. No provider settings changed.\n\n\`\`\`json\n${output}\n\`\`\`\n`);
+          if (!readAccessVerified) process.exitCode = 1;
           }
           main().catch(() => {
             console.error('Sentry monitoring audit failed; sensitive diagnostic details suppressed.');
