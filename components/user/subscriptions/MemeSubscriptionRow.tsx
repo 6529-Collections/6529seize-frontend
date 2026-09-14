@@ -421,12 +421,9 @@ export default function MemeSubscriptionRow(
             )}
           </div>
           {hasNoAllocation && (
-            <span
-              role="status"
-              className="tw-text-xs tw-leading-5 tw-text-iron-400"
-            >
+            <output className="tw-text-xs tw-leading-5 tw-text-iron-400">
               {t(locale, "profile.subscriptions.noAllocation")}
-            </span>
+            </output>
           )}
           {finalWithMetadata && (
             <span className="tw-break-words tw-text-xs tw-leading-5 tw-text-iron-600">

@@ -72,7 +72,7 @@ it.each([401, 403, 500])(
       { wrapper }
     );
     await waitFor(() =>
-      expect(client.getQueryCache().getAll()[0].state.status).toBe("error")
+      expect(client.getQueryCache().getAll()[0]?.state.status).toBe("error")
     );
     expect(result.current.hasNoAllocation).toBe(false);
     expect(fetchMock).toHaveBeenCalledTimes(1);
@@ -87,7 +87,7 @@ it("does not report absence if publication lookup fails", async () => {
     { wrapper }
   );
   await waitFor(() =>
-    expect(client.getQueryCache().getAll()[1].state.status).toBe("error")
+    expect(client.getQueryCache().getAll()[1]?.state.status).toBe("error")
   );
   expect(result.current.hasNoAllocation).toBe(false);
 });
@@ -104,15 +104,16 @@ it.each([0, 12])(
     expect(fetchMock).toHaveBeenCalledTimes(1);
   }
 );
-it("does not query publication for an unsubscribed user", async () => {
-  fetchMock.mockResolvedValue({ phase: null });
+it.each([
+  { subscribed: false, first: true },
+  { subscribed: true, first: false },
+])("does not query allocation status for an inactive row (%j)", (props) => {
   const { result } = renderHook(
-    () => useSubscriptionAllocationStatus({ ...baseProps, subscribed: false }),
+    () => useSubscriptionAllocationStatus({ ...baseProps, ...props }),
     { wrapper }
   );
-  await waitFor(() => expect(result.current.final).toEqual({ phase: null }));
   expect(result.current.hasNoAllocation).toBe(false);
-  expect(fetchMock).toHaveBeenCalledTimes(1);
+  expect(fetchMock).not.toHaveBeenCalled();
 });
 it("does not reuse a previous profile's absence while the new profile loads", async () => {
   fetchMock
@@ -129,4 +130,21 @@ it("does not reuse a previous profile's absence while the new profile loads", as
     profileKey: "0x3333333333333333333333333333333333333333",
   });
   expect(result.current.hasNoAllocation).toBe(false);
+});
+it("does not confuse wallet allowlist spots with a subscription allocation", async () => {
+  fetchMock
+    .mockResolvedValueOnce({
+      phase: null,
+      phase_position: -1,
+      subscribed_count: 1,
+    })
+    .mockResolvedValueOnce({
+      has_distribution: true,
+      allocations: [{ phase: "Phase 1", spots_allowlist: 2, spots_airdrop: 0 }],
+    });
+  const { result } = renderHook(
+    () => useSubscriptionAllocationStatus(baseProps),
+    { wrapper }
+  );
+  await waitFor(() => expect(result.current.hasNoAllocation).toBe(true));
 });

@@ -193,11 +193,13 @@ or an unavailable page. US iOS, web, and Android retain their existing behavior.
 - Route or component: `/{user}/subscriptions`,
   `components/user/subscriptions/*`, and the shared
   `components/common/OnchainTransactionModal.tsx` status surface.
-- Untranslated surface: subscription controls plus the shared transaction
-  status, transaction-link, close-control, and backdrop accessible names.
-- Current fallback behavior: all supported locales use hardcoded canonical
-  `en-US`; the profile tab and shared modal do not yet expose a message family
-  for this content.
+- Untranslated surface: subscription controls, the Phase / Subscription Position /
+  Airdrop Address / Subscription Count metadata in both row layouts, plus the
+  shared transaction status, transaction-link, close-control, and backdrop
+  accessible names.
+- Current fallback behavior: these surfaces use hardcoded canonical `en-US`
+  in all supported locales. The `No subscription allocation` status uses
+  `profile.subscriptions.noAllocation` and is translated in all five locales.
 - User impact: the English UI remains fully functional, but these controls and
   states are not translated yet.
 - Owner or follow-up issue: frontend i18n backlog.

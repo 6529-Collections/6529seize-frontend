@@ -42,7 +42,7 @@ export function useSubscriptionAllocationStatus({
         throw error;
       }
     },
-    enabled: first,
+    enabled: first && subscribed,
     retry: false,
     refetchInterval: ALLOCATION_REFRESH_INTERVAL,
   });
