@@ -18,6 +18,15 @@ import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.es-ES.jso
 
 export const ES_ES_MESSAGES = {
   "profile.subscriptions.noAllocation": "Sin asignación de suscripción",
+  "singleDrop.share": "Compartir",
+  "singleDrop.shareLabel": "Compartir drop",
+  "singleDrop.shared": "Enlace compartido",
+  "singleDrop.close": "Cerrar",
+  "singleDrop.closeLabel": "Cerrar panel",
+  "singleDrop.showChat": "Mostrar chat",
+  "singleDrop.hideChat": "Ocultar chat",
+  "singleDrop.chatLabel": "Chat del drop",
+  "singleDrop.closeChat": "Cerrar chat",
   ...artworkShareMessages,
   ...profileCmsStudioMessages,
   ...profileCmsAgentMessages,

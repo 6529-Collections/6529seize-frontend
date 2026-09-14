@@ -20,6 +20,15 @@ const RETRY_LABEL = "Erneut versuchen";
 
 export const DE_DE_MESSAGES = {
   "profile.subscriptions.noAllocation": "Keine Abonnement-Zuteilung",
+  "singleDrop.share": "Teilen",
+  "singleDrop.shareLabel": "Drop teilen",
+  "singleDrop.shared": "Link geteilt",
+  "singleDrop.close": "Schließen",
+  "singleDrop.closeLabel": "Panel schließen",
+  "singleDrop.showChat": "Chat anzeigen",
+  "singleDrop.hideChat": "Chat ausblenden",
+  "singleDrop.chatLabel": "Drop-Chat",
+  "singleDrop.closeChat": "Chat schließen",
   ...artworkShareMessages,
   ...profileCmsStudioMessages,
   ...profileCmsAgentMessages,
