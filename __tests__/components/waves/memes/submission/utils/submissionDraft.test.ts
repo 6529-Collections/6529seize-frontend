@@ -1,6 +1,46 @@
 import { buildMemesSubmissionDraftFromDrop } from "@/components/waves/memes/submission/utils/submissionDraft";
+import type { ApiDrop } from "@/generated/models/ApiDrop";
 
 describe("buildMemesSubmissionDraftFromDrop", () => {
+  it("restores the unframed media and original preview instead of nesting frames", () => {
+    const source = {
+      version: 1,
+      layout: "landscape",
+      media_url: "https://example.com/original.mp4",
+      mime_type: "video/mp4",
+      preview_image: "https://example.com/original-preview.png",
+    };
+    const drop = {
+      title: "Proposal",
+      parts: [
+        {
+          content: "",
+          media: [
+            { url: "ipfs://bafyframe/index.html", mime_type: "text/html" },
+          ],
+        },
+      ],
+      metadata: [
+        { data_key: "proposal_frame", data_value: JSON.stringify(source) },
+        {
+          data_key: "additional_media",
+          data_value: JSON.stringify({
+            preview_image: "https://example.com/framed-preview.png",
+          }),
+        },
+      ],
+    } as ApiDrop;
+    const draft = buildMemesSubmissionDraftFromDrop(drop);
+    expect(draft.existingMedia).toEqual({
+      url: source.media_url,
+      mimeType: source.mime_type,
+    });
+    expect(draft.proposalFrame).toBe("landscape");
+    expect(draft.operationalData.additional_media.preview_image).toBe(
+      source.preview_image
+    );
+  });
+
   it("clones metadata, operational data, and existing media from a drop", () => {
     const drop = {
       title: "Fallback Title",

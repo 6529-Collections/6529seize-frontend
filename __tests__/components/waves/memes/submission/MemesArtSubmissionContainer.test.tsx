@@ -12,6 +12,11 @@ import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { useAuth } from "@/components/auth/Auth";
 import { commonApiDelete } from "@/services/api/common-api";
 import type { InteractiveMediaMimeType } from "@/components/waves/memes/submission/constants/media";
+import { createProposalCardThumbnail } from "@/lib/proposal-card/thumbnail";
+
+jest.mock("@/lib/proposal-card/thumbnail", () => ({
+  createProposalCardThumbnail: jest.fn(),
+}));
 
 jest.mock(
   "@/components/waves/memes/submission/MemesSubmissionDocumentation",
@@ -56,7 +61,15 @@ jest.mock("@/components/waves/memes/submission/utils/buildPreviewDrop", () => ({
 jest.mock(
   "@/components/waves/memes/submission/preview/MemesSubmissionPreviewScreen",
   () => ({
-    MemesSubmissionPreviewScreen: () => <div data-testid="preview" />,
+    MemesSubmissionPreviewScreen: ({
+      onBackToEdit,
+    }: {
+      onBackToEdit: () => void;
+    }) => (
+      <div data-testid="preview">
+        <button onClick={onBackToEdit}>Back to edit</button>
+      </div>
+    ),
   })
 );
 let artworkProps: any;
@@ -299,6 +312,39 @@ describe("MemesArtSubmissionContainer", () => {
     jest.useRealTimers();
   });
 
+  it("releases the framed preview image when returning to edit", async () => {
+    formState.currentStep = SubmissionStep.ADDITIONAL_INFO;
+    formState.proposalFrame = "portrait";
+    formState.artworkUrl = "https://example.com/art.png";
+    formState.existingMedia = {
+      url: formState.artworkUrl,
+      mimeType: "image/png",
+    };
+    jest
+      .mocked(createProposalCardThumbnail)
+      .mockResolvedValue(
+        new File(["png"], "preview.png", { type: "image/png" })
+      );
+    const revoke = jest.spyOn(URL, "revokeObjectURL");
+    const create = jest
+      .spyOn(URL, "createObjectURL")
+      .mockReturnValue("blob:frame");
+    try {
+      render(<MemesArtSubmissionContainer onClose={onClose} wave={wave} />);
+      await act(async () => additionalInfoProps.onPreview());
+      expect(screen.getByTestId("preview")).toBeInTheDocument();
+      expect(revoke).not.toHaveBeenCalledWith("blob:frame");
+      await userEvent.click(
+        screen.getByRole("button", { name: "Back to edit" })
+      );
+      expect(revoke).toHaveBeenCalledWith("blob:frame");
+      expect(screen.queryByTestId("preview")).not.toBeInTheDocument();
+    } finally {
+      revoke.mockRestore();
+      create.mockRestore();
+    }
+  });
+
   it("returns to current terms on rerender, retains artwork, clears the old preview, and submits only after reacceptance", async () => {
     const actualForm = jest.requireActual<
       typeof import("@/components/waves/memes/submission/hooks/useArtworkSubmissionForm")
@@ -327,7 +373,7 @@ describe("MemesArtSubmissionContainer", () => {
     act(() =>
       additionalInfoProps.onArtworkCommentaryChange("Retained commentary")
     );
-    act(() => additionalInfoProps.onPreview());
+    await act(async () => additionalInfoProps.onPreview());
     expect(screen.getByTestId("preview")).toBeInTheDocument();
 
     const updatedWave = {
