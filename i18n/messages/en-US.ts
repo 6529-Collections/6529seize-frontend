@@ -514,6 +514,17 @@ const MEMES_SUBMISSION_MESSAGES = objectMessages("memes.submission", {
     "The submission destination or terms changed. Review and agree again to continue. Your artwork draft has been kept.",
   "agreement.reviewRequired":
     "Review and agree to the current submission terms before submitting. Your artwork draft has been kept.",
+  "signing.notice": "Wallet signature · No gas fee",
+  "signing.explain": "What to expect",
+  "signing.title": "What will my wallet show?",
+  "signing.review":
+    "Look for “Submit a Meme Card to The Memes” and check your artwork title and submission terms.",
+  "signing.metamask": "MetaMask",
+  "signing.metamaskDescription": "Shows the message as labeled fields.",
+  "signing.rabby": "Rabby",
+  "signing.rabbyDescription":
+    "May show the message as raw data with “Unknown Signature Type”. Review the message details before signing.",
+  "signing.mismatch": "Cancel if the details do not match your submission.",
   "media.missingUpload": "Select artwork or choose Interactive HTML.",
   "media.missingInteractive": "Enter a valid hash or choose Upload File.",
   "identity.connectPrompt":
