@@ -5,6 +5,8 @@ import type { ApiWave } from "@/generated/models/ApiWave";
 import { getTimeAgo } from "@/helpers/Helpers";
 import WaveHeaderFollow, { WaveFollowBtnSize } from "./WaveHeaderFollow";
 import { AuthContext } from "@/components/auth/Auth";
+import { AnnouncementWaveIcon } from "@/components/brain/left-sidebar/waves/SidebarIconTile";
+import { useSeizeSettingsOptional } from "@/contexts/SeizeSettingsContext";
 import WaveHeaderOptions from "./options/WaveHeaderOptions";
 import WaveHeaderName from "./name/WaveHeaderName";
 import WaveHeaderFollowers from "./WaveHeaderFollowers";
@@ -44,6 +46,8 @@ export default function WaveHeader({
   useRounded = true,
 }: WaveHeaderProps) {
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
+  const seizeSettings = useSeizeSettingsOptional();
+  const isAnnouncement = seizeSettings?.isAnnouncementsWave(wave.id) ?? false;
   const created = getTimeAgo(wave.created_at);
   const firstXContributors = wave.contributors_overview.slice(0, 10);
   const isDropWave = wave.wave.type !== ApiWaveType.Chat;
@@ -121,19 +125,23 @@ export default function WaveHeader({
         <div className="tw-flex tw-items-start tw-justify-between tw-gap-x-4">
           <div className="tw-group tw-relative tw-h-16 tw-w-16 tw-shrink-0">
             <div
-              className={`tw-absolute tw-inset-0 tw-overflow-hidden tw-rounded-full tw-bg-iron-900 tw-shadow-[0_18px_36px_rgba(0,0,0,0.35)] ${
-                isDropWave ? "tw-ring-2 tw-ring-white/15" : ""
-              }`}
+              className={`tw-absolute tw-inset-0 tw-overflow-hidden tw-bg-iron-900 tw-shadow-[0_18px_36px_rgba(0,0,0,0.35)] ${
+                isAnnouncement ? "tw-rounded-lg" : "tw-rounded-full"
+              } ${isDropWave ? "tw-ring-2 tw-ring-white/15" : ""}`}
             >
-              <WavePicture
-                name={wave.name}
-                picture={wave.picture}
-                contributors={wave.contributors_overview.map((c) => ({
-                  pfp: c.contributor_pfp,
-                  identity: c.contributor_identity,
-                }))}
-                roundedClassName="tw-rounded-full"
-              />
+              {isAnnouncement ? (
+                <AnnouncementWaveIcon className="tw-size-9" />
+              ) : (
+                <WavePicture
+                  name={wave.name}
+                  picture={wave.picture}
+                  contributors={wave.contributors_overview.map((c) => ({
+                    pfp: c.contributor_pfp,
+                    identity: c.contributor_identity,
+                  }))}
+                  roundedClassName="tw-rounded-full"
+                />
+              )}
             </div>
             {canEdit && (
               <div className="tw-absolute tw-inset-0">
