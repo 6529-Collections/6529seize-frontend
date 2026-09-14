@@ -42,7 +42,7 @@ Write the first wave drop here, then click `Next` to review the full wave.
 3. Click `Next` to open the final Overview, then `Confirm and create`.
 4. Pass auth checks if prompted:
    - no wallet: toast `Please connect your wallet`
-   - invalid or expired auth: `Sign Authentication Request` modal
+   - invalid or expired auth: `Sign in to 6529` modal
 5. If no admin group is set, create-wave tries to create and publish a personal
    admin group (`Only {handle}` / `Only Me`) before submit.
 6. On success, create-wave opens the new route: `/waves/{waveId}`.

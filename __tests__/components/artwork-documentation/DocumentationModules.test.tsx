@@ -1,13 +1,345 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import DocumentationValueEditor from "@/components/artwork-documentation/DocumentationValueEditor";
+import { editorForSchema } from "@/lib/artwork-documentation/catalogue";
 import DocumentationModules from "@/components/artwork-documentation/DocumentationModules";
 import { documentationFixture } from "@/__tests__/fixtures/artwork-documentation";
+import type { ApiArtworkDocumentationOperation } from "@/generated/models/ApiArtworkDocumentationOperation";
+import type { PendingEdit } from "@/lib/artwork-documentation/draft-controller";
+import { validDocumentationOperation } from "@/lib/artwork-documentation/validation";
+import museumProfile from "@/__tests__/fixtures/artwork-documentation-profile-v3.json";
 
 jest.mock("@/hooks/useBrowserLocale", () => ({
   useBrowserLocale: () => "en-US",
 }));
 
 describe("artwork documentation modules", () => {
+  it("names a document's nested group using its singular item label", () => {
+    const context = documentationFixture();
+    context.profile = museumProfile as never;
+    context.modules["context"]!.answers["documents"] = {
+      status: "provided",
+      intended_visibility: "public_record",
+      value: [
+        {
+          id: "document",
+          kind: "production_account",
+          title: "A document about the work",
+          language: "en",
+          text: "The complete production account.",
+        },
+      ],
+    } as never;
+    render(
+      <DocumentationModules
+        context={context}
+        edits={[]}
+        section="story"
+        onChange={jest.fn()}
+      />
+    );
+    fireEvent.click(screen.getByText("A document about the work"));
+    const document = screen.getByRole("group", { name: "Document" });
+    expect(document.querySelector("legend")).toHaveTextContent("Document");
+    expect(within(document).getByRole("textbox", { name: "Text" })).toHaveValue(
+      "The complete production account."
+    );
+    const collection = screen.getByRole("group", {
+      name: "Full accounts & documents",
+    });
+    expect(collection).toContainElement(document);
+    expect(collection.querySelector("legend")).toHaveClass("tw-sr-only");
+    expect(document.querySelector("legend")).not.toHaveClass("tw-sr-only");
+  });
+  it("names the nested video duration group while retaining the Type control's label", () => {
+    const context = documentationFixture();
+    context.profile = museumProfile as never;
+    context.modules["artwork"]!.answers["media_profiles"] = {
+      status: "provided",
+      intended_visibility: "public_record",
+      value: ["video"],
+    } as never;
+    render(
+      <DocumentationModules
+        context={context}
+        edits={[]}
+        section="story"
+        onChange={jest.fn()}
+      />
+    );
+    const duration = screen.getByRole("group", {
+      name: "Duration",
+    });
+    expect(
+      within(duration).getByRole("combobox", { name: "Type" })
+    ).toBeInTheDocument();
+    expect(duration.querySelector("legend")).not.toHaveClass("tw-sr-only");
+    const examples = within(duration).getAllByText(
+      "See an example for this answer",
+      { exact: true }
+    );
+    for (const example of examples)
+      expect(
+        duration.querySelector("legend")!.compareDocumentPosition(example) &
+          Node.DOCUMENT_POSITION_FOLLOWING
+      ).toBeTruthy();
+  });
+  it("guides a generic Stream caption without assigning a program to the work", () => {
+    const context = documentationFixture();
+    context.profile = museumProfile as never;
+    context.program_id = null;
+    render(
+      <DocumentationModules
+        context={context}
+        edits={[]}
+        section="story"
+        onChange={jest.fn()}
+      />
+    );
+    expect(
+      within(screen.getByRole("region", { name: "Caption" })).getByText(
+        "Give a reader a way into the work. Aim for 75–150 words in your chosen language."
+      )
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/For Keys and Gates, aim/)).toBeNull();
+  });
+  it("lets artists choose the work's media before media-specific facts and preserves combined choices", () => {
+    const context = documentationFixture();
+    context.profile = museumProfile as never;
+    context.modules["artwork"]!.answers["media_profiles"] = {
+      status: "provided",
+      intended_visibility: "public_record",
+      value: ["photography"],
+    } as never;
+    context.modules["artwork"]!.answers["capture_date"] = {
+      status: "provided",
+      intended_visibility: "public_record",
+      value: { precision: "year", start: "2026", approximate: false },
+    } as never;
+    const onChange = jest.fn();
+    render(
+      <DocumentationModules
+        context={context}
+        edits={[]}
+        section="artwork"
+        onChange={onChange}
+      />
+    );
+    const media = screen.getByRole("region", { name: "The form of the work" });
+    const capture = screen.getByRole("region", { name: "Capture date" });
+    expect(
+      media.compareDocumentPosition(capture) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+    fireEvent.click(
+      within(media).getByRole("checkbox", { name: /Audio, sound & music/ })
+    );
+    expect(onChange).toHaveBeenLastCalledWith(
+      "artwork",
+      expect.objectContaining({
+        field: "media_profiles",
+        answer: expect.objectContaining({ value: ["photography", "audio"] }),
+      })
+    );
+  });
+  it("associates a nested Label with its input rather than the surrounding field heading", () => {
+    const context = documentationFixture();
+    const artwork = context.profile.modules.find(
+      (module) => module.id === "artwork"
+    )!;
+    const rights = context.profile.modules.find(
+      (module) => module.id === "rights"
+    )!;
+    rights.fields = [
+      {
+        ...artwork.fields[0]!,
+        id: "intended_license",
+        value_schema: {
+          type: "object",
+          properties: { uri: { type: "string" }, label: { type: "string" } },
+        } as never,
+      },
+    ];
+    context.modules["rights"]!.answers["intended_license"] = {
+      status: "provided",
+      intended_visibility: "public_record",
+      value: {
+        uri: "https://creativecommons.org/publicdomain/zero/1.0/",
+        label: "CC0 1.0",
+      },
+    } as never;
+    const { rerender } = render(
+      <DocumentationModules
+        context={context}
+        edits={[]}
+        section="rights"
+        onChange={jest.fn()}
+      />
+    );
+    const field = screen.getByRole("region", {
+      name: "Intended artwork license",
+    });
+    const input = within(field).getByRole<HTMLInputElement>("textbox", {
+      name: "Label",
+    });
+    expect(input.labels).toHaveLength(1);
+    expect(input.labels?.[0]?.control).toBe(input);
+    expect(document.getElementById(input.id)).toBe(input);
+    expect(
+      document.getElementById(field.getAttribute("aria-labelledby")!)
+    ).toBe(
+      within(field).getByRole("heading", { name: "Intended artwork license" })
+    );
+
+    rerender(
+      <DocumentationModules
+        context={context}
+        edits={[]}
+        section="rights"
+        readOnly
+        onChange={jest.fn()}
+      />
+    );
+    const readOnlyField = screen.getByRole("region", {
+      name: "Intended artwork license",
+    });
+    expect(
+      document.getElementById(readOnlyField.getAttribute("aria-labelledby")!)
+    ).toBe(
+      within(readOnlyField).getByRole("heading", {
+        name: "Intended artwork license",
+      })
+    );
+    expect(within(readOnlyField).queryByRole("textbox")).toBeNull();
+  });
+  it("asks for a replacement reason only while a different confirmed final file is selected", () => {
+    const context = documentationFixture();
+    context.latest_revision_id = "confirmed-revision";
+    const artwork = context.profile.modules.find(
+      (module) => module.id === "artwork"
+    )!;
+    artwork.fields.push({ ...artwork.fields[0]!, id: "canonical_asset_id" });
+    context.modules["artwork"]!.answers["canonical_asset_id"] = {
+      status: "provided",
+      value: "original-file",
+      intended_visibility: "public_record",
+    } as never;
+    const assets = [
+      { id: "original-file", label: "Confirmed photograph" },
+      { id: "replacement-file", label: "Revised photograph" },
+    ];
+    context.asset_links = assets.map((asset) => ({
+      asset_id: asset.id,
+      role: "artwork_final",
+      intended_visibility: "public_record",
+    })) as typeof context.asset_links;
+    const onChange = jest.fn<
+      void,
+      [string, ApiArtworkDocumentationOperation]
+    >();
+    const form = (edits: PendingEdit[]) => (
+      <DocumentationModules
+        context={context}
+        edits={edits}
+        section="artwork"
+        assets={assets}
+        onChange={onChange}
+      />
+    );
+    const { rerender } = render(form([]));
+    const applyPendingChange = () => {
+      const [moduleId, operation] = onChange.mock.calls.at(-1)!;
+      rerender(form([{ moduleId, operation, sequence: 1 }]));
+      return validDocumentationOperation(context, moduleId, operation);
+    };
+    const reasonName = "Why are you replacing the confirmed final file?";
+    const file = screen.getByRole("combobox", { name: "Final artwork file" });
+    expect(screen.queryByRole("textbox", { name: reasonName })).toBeNull();
+
+    fireEvent.change(file, { target: { value: "replacement-file" } });
+    expect(applyPendingChange()).toBe(false);
+    const reason = screen.getByRole("textbox", { name: reasonName });
+    expect(reason).toBeVisible();
+    expect(reason).toHaveAccessibleDescription(
+      "Explain the change in 20–1,000 characters. This explanation becomes part of the record’s history."
+    );
+    fireEvent.change(reason, { target: { value: "1234567890123456789" } });
+    expect(applyPendingChange()).toBe(false);
+    expect(screen.getByRole("status")).toBeVisible();
+    fireEvent.change(reason, { target: { value: "12345678901234567890" } });
+    expect(applyPendingChange()).toBe(true);
+    expect(screen.queryByRole("status")).toBeNull();
+
+    fireEvent.change(file, { target: { value: "original-file" } });
+    expect(applyPendingChange()).toBe(true);
+    expect(screen.queryByRole("textbox", { name: reasonName })).toBeNull();
+
+    fireEvent.change(file, { target: { value: "replacement-file" } });
+    expect(applyPendingChange()).toBe(false);
+    expect(screen.getByRole("textbox", { name: reasonName })).toHaveValue("");
+  });
+  it("keeps clearing an answer inside its options without hiding the recorded value", () => {
+    const context = documentationFixture();
+    const onChange = jest.fn();
+    render(
+      <DocumentationModules
+        context={context}
+        edits={[]}
+        section="artwork"
+        onChange={onChange}
+      />
+    );
+    const title = screen.getByRole("region", { name: "Title" });
+    expect(
+      within(title).getByDisplayValue("মুক্তিযুদ্ধ — A long title")
+    ).toBeVisible();
+    expect(
+      within(title).getByRole("button", { name: "Leave unanswered" })
+    ).not.toBeVisible();
+    fireEvent.click(within(title).getByText("Answer options"));
+    fireEvent.click(
+      within(title).getByRole("button", { name: "Leave unanswered" })
+    );
+    expect(onChange).toHaveBeenCalledWith("artwork", {
+      op: "unset",
+      field: "title",
+    });
+  });
+  it("reads a viewer/editor's restricted answer as prose while ordinary fields remain editable", () => {
+    const context = documentationFixture();
+    Object.assign(context.mutation_capabilities, {
+      confirm_as_artist: false,
+      read_restricted_fields: false,
+      read_archival_files: false,
+    });
+    context.mutation_restricted_paths = ["artwork.location"];
+    context.modules["artwork"]!.answers["location"] = {
+      status: "provided",
+      value: "Published location with restricted history",
+      intended_visibility: "public_record",
+    } as never;
+    const onChange = jest.fn();
+    render(
+      <DocumentationModules
+        context={context}
+        edits={[]}
+        section="artwork"
+        onChange={onChange}
+      />
+    );
+    const location = screen.getByRole("region", { name: "Location" });
+    expect(
+      within(location).getByText("Published location with restricted history")
+    ).toBeVisible();
+    expect(within(location).queryByRole("textbox")).not.toBeInTheDocument();
+    expect(within(location).queryByRole("button")).not.toBeInTheDocument();
+    expect(onChange).not.toHaveBeenCalled();
+    const title = screen.getByDisplayValue("মুক্তিযুদ্ধ — A long title");
+    expect(title).toBeEnabled();
+    fireEvent.change(title, { target: { value: "Ordinary title change" } });
+    expect(onChange).toHaveBeenCalledWith(
+      "artwork",
+      expect.objectContaining({ field: "title" })
+    );
+  });
   it("uses publication intent without exposing per-field privacy choices in the new intake", () => {
     const context = documentationFixture();
     context.profile.version = 2;
@@ -31,6 +363,7 @@ describe("artwork documentation modules", () => {
     expect(
       screen.queryByRole("option", { name: "Withheld" })
     ).not.toBeInTheDocument();
+    fireEvent.click(screen.getByText(/More about the work/));
     fireEvent.change(screen.getByRole("textbox", { name: "Location" }), {
       target: { value: "A studio" },
     });
@@ -74,6 +407,11 @@ describe("artwork documentation modules", () => {
         onChange={onChange}
       />
     );
+    fireEvent.click(
+      within(screen.getByRole("region", { name: "Location" })).getByText(
+        "Answer options"
+      )
+    );
     fireEvent.change(screen.getByLabelText("How would you like to answer?"), {
       target: { value: "withheld" },
     });
@@ -81,6 +419,72 @@ describe("artwork documentation modules", () => {
       status: "withheld",
       intended_visibility: "public_record",
     });
+  });
+  it("keeps an optional field mounted in its open disclosure after an autosave while essential fields remain visible", () => {
+    const context = documentationFixture();
+    const onChange = jest.fn();
+    const { rerender } = render(
+      <DocumentationModules
+        context={context}
+        edits={[]}
+        section="artwork"
+        onChange={onChange}
+      />
+    );
+    expect(screen.getByRole("textbox", { name: "Title" })).toBeVisible();
+    expect(screen.getByRole("textbox", { name: "Location" })).not.toBeVisible();
+    fireEvent.click(screen.getByText(/More about the work/));
+    const location = screen.getByRole("textbox", { name: "Location" });
+    const disclosure = location.closest("details");
+    fireEvent.change(location, { target: { value: "A studio" } });
+    context.modules["artwork"]!.answers["location"] = {
+      status: "provided",
+      value: "A studio",
+      intended_visibility: "public_record",
+    } as never;
+    rerender(
+      <DocumentationModules
+        context={context}
+        edits={[]}
+        section="artwork"
+        onChange={onChange}
+      />
+    );
+    expect(screen.getByRole("textbox", { name: "Location" })).toBe(location);
+    expect(location.closest("details")).toBe(disclosure);
+    expect(location).toBeVisible();
+  });
+
+  it("shows existing non-answer statuses and their explanation while keeping a direct answer's alternatives secondary", () => {
+    const context = documentationFixture();
+    context.modules["artwork"]!.answers["location"] = {
+      status: "unknown",
+      intended_visibility: "public_record",
+      explanation: "The original location was not recorded.",
+    } as never;
+    render(
+      <DocumentationModules
+        context={context}
+        edits={[]}
+        section="artwork"
+        onChange={jest.fn()}
+      />
+    );
+    const location = screen.getByRole("region", { name: "Location" });
+    expect(
+      within(location).getByText("The original location was not recorded.", {
+        selector: "p",
+      })
+    ).toBeVisible();
+    expect(
+      within(location).getByRole("textbox", { name: "Explanation" })
+    ).not.toBeVisible();
+    fireEvent.click(within(location).getByText("Answer options"));
+    expect(
+      within(location).getByRole("combobox", {
+        name: "How would you like to answer?",
+      })
+    ).toBeVisible();
   });
   it("renders no input or private value for server-redacted fields", () => {
     const context = documentationFixture();
@@ -161,4 +565,31 @@ describe("artwork documentation modules", () => {
     );
     expect(onChange).toHaveBeenLastCalledWith({ height: 800 });
   });
+  it.each([undefined, []])(
+    "shows a fresh object's inputs when required is %s",
+    (required) => {
+      const editor = editorForSchema(
+        {
+          type: "object",
+          properties: {
+            title: { type: "string", title: "Title" },
+            note: { type: "string", title: "Note" },
+          },
+          ...(required ? { required } : {}),
+        },
+        "fresh"
+      );
+      render(
+        <DocumentationValueEditor
+          id="fresh"
+          label="Fresh object"
+          editor={editor}
+          value={{}}
+          onChange={jest.fn()}
+        />
+      );
+      expect(screen.getByRole("textbox", { name: "Title" })).toBeVisible();
+      expect(screen.getByRole("textbox", { name: "Note" })).toBeVisible();
+    }
+  );
 });

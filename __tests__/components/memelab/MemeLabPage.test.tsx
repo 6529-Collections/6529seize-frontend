@@ -2,7 +2,14 @@ import { SeizeConnectProvider } from "@/components/auth/SeizeConnectContext";
 import MemeLabPageComponent from "@/components/memelab/MemeLabPage";
 import { MEME_FOCUS } from "@/components/the-memes/MemeShared";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { act, render, screen, within, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  within,
+  waitFor,
+} from "@testing-library/react";
 import React from "react";
 import { createConfig, http, WagmiProvider } from "wagmi";
 import { mainnet } from "wagmi/chains";
@@ -24,6 +31,27 @@ jest.mock("@/components/nothingHereYet/NothingHereYetSummer", () => ({
 jest.mock("@/components/nft-marketplace-links/NFTMarketplaceLinks", () => ({
   __esModule: true,
   default: () => <div data-testid="marketplace-links" />,
+}));
+jest.mock("@/components/collect/CollectDetailActions", () => ({
+  __esModule: true,
+  default: ({
+    collection,
+    tokenId,
+    onMarketChange,
+  }: {
+    collection: string;
+    tokenId: string;
+    onMarketChange?: () => void;
+  }) => (
+    <button
+      data-testid="collect-detail-actions"
+      data-collection={collection}
+      data-token-id={tokenId}
+      onClick={onMarketChange}
+    >
+      Complete marketplace action
+    </button>
+  ),
 }));
 
 jest.mock("@/components/download/Download", () => ({
@@ -162,7 +190,19 @@ jest.mock("@/components/nft-market-activity/NftMarketActivity", () => ({
 }));
 jest.mock("@/components/nft-market-depth/MarketDepthPanel", () => ({
   __esModule: true,
-  default: () => <div data-testid="market-depth" />,
+  default: ({
+    active,
+    refreshKey,
+  }: {
+    readonly active: boolean;
+    readonly refreshKey?: number;
+  }) => (
+    <div
+      data-testid="market-depth"
+      data-refresh-key={refreshKey}
+      hidden={!active}
+    />
+  ),
 }));
 
 jest.mock("@/components/pagination/Pagination", () => ({
@@ -417,6 +457,19 @@ describe("MemeLabPageComponent", () => {
       renderWithQueryClient(<MemeLabPageComponent nftId="1" />);
     });
 
+    const actions = screen.getByTestId("collect-detail-actions");
+    expect(actions).toHaveAttribute("data-collection", "memelab");
+    expect(actions).toHaveAttribute("data-token-id", "1");
+    expect(screen.getByTestId("market-depth")).toHaveAttribute(
+      "data-refresh-key",
+      "0"
+    );
+    fireEvent.click(actions);
+    expect(screen.getByTestId("market-depth")).toHaveAttribute(
+      "data-refresh-key",
+      "1"
+    );
+
     expect(
       screen.getByRole("heading", { name: "Meme Lab Card 1 - Test NFT" })
     ).toBeInTheDocument();
@@ -618,49 +671,51 @@ describe("MemeLabPageComponent", () => {
       expect(
         screen.getByRole("region", { name: "Meme Lab activity" })
       ).toBeInTheDocument();
+      expect(screen.getAllByTestId("market-depth")).toHaveLength(1);
     });
   });
 
-  it("syncs additional details default with legacy The Art focus changes", async () => {
+  it("keeps artwork details in Overview and opens the market in its own tab", async () => {
     setupMockApiCalls();
-
     const queryClient = createTestQueryClient();
-    const page = (nftId = "1") => (
+    const page = () => (
       <QueryClientProvider client={queryClient}>
-        <MemeLabPageComponent nftId={nftId} />
+        <MemeLabPageComponent nftId="1" />
       </QueryClientProvider>
     );
     const { rerender } = render(page());
-
-    await waitFor(() => {
-      expect(
-        screen.getByRole("button", { name: "Additional details" })
-      ).toHaveAttribute("aria-expanded", "false");
+    const details = await screen.findByRole("button", {
+      name: "Listings & offers",
     });
-
+    expect(details).not.toHaveAttribute("aria-current");
+    expect(screen.getByRole("heading", { name: "Properties" })).toBeVisible();
+    fireEvent.click(details);
+    expect(mockUseRouter().replace).toHaveBeenLastCalledWith(
+      "/meme-lab/1?focus=listings-and-offers",
+      { scroll: false }
+    );
+    mockSearchParamsWithFocus(MEME_FOCUS.MARKET);
+    rerender(page());
+    expect(screen.getByTestId("market-depth")).toBeVisible();
+    expect(
+      screen.queryByRole("heading", { name: "Properties" })
+    ).not.toBeInTheDocument();
     mockSearchParamsWithFocus(MEME_FOCUS.THE_ART);
-
-    await act(async () => {
-      rerender(page());
-    });
-
-    await waitFor(() => {
-      expect(
-        screen.getByRole("button", { name: "Additional details" })
-      ).toHaveAttribute("aria-expanded", "true");
-    });
-
+    rerender(page());
+    expect(
+      await screen.findByRole("heading", { name: "Properties" })
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Overview" })).toHaveAttribute(
+      "aria-current",
+      "page"
+    );
+    expect(screen.getAllByTestId("market-depth")).toHaveLength(1);
     mockSearchParamsWithFocus(MEME_FOCUS.LIVE);
-
-    await act(async () => {
-      rerender(page());
-    });
-
-    await waitFor(() => {
-      expect(
-        screen.getByRole("button", { name: "Additional details" })
-      ).toHaveAttribute("aria-expanded", "false");
-    });
+    rerender(page());
+    expect(screen.getByRole("heading", { name: "Properties" })).toBeVisible();
+    expect(
+      screen.queryByRole("button", { name: "About this artwork" })
+    ).not.toBeInTheDocument();
   });
 
   it("renders activity tab content", async () => {
@@ -935,9 +990,10 @@ describe("MemeLabPageComponent", () => {
 
     await waitFor(() => {
       expect(screen.getAllByTestId("nft-image")).toHaveLength(2);
-      expect(
-        screen.getByRole("button", { name: "Additional details" })
-      ).toHaveAttribute("aria-expanded", "true");
+      expect(screen.getByRole("button", { name: "Overview" })).toHaveAttribute(
+        "aria-current",
+        "page"
+      );
       expect(
         screen.getByRole("link", {
           name: "https://metadata.example/animation.html",

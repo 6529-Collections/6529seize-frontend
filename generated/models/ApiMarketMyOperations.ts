@@ -11,11 +11,11 @@
  * Do not edit the class manually.
  */
 
-import { ApiMarketOperation } from '../models/ApiMarketOperation';
+import { ApiMarketOperationResult } from '../models/ApiMarketOperationResult';
 import { HttpFile } from '../http/http';
 
 export class ApiMarketMyOperations {
-    'operations': Array<ApiMarketOperation>;
+    'operations': Array<ApiMarketOperationResult>;
     'next': string | null;
 
     static readonly discriminator: string | undefined = undefined;
@@ -26,7 +26,7 @@ export class ApiMarketMyOperations {
         {
             "name": "operations",
             "baseName": "operations",
-            "type": "Array<ApiMarketOperation>",
+            "type": "Array<ApiMarketOperationResult>",
             "format": ""
         },
         {

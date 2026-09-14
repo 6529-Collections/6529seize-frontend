@@ -105,4 +105,12 @@ describe("Collect exact input validation", () => {
     );
     expect(validateCollectGoal({ ...goal, budgetEth: "0" })).toBe("budget");
   });
+
+  it("allows only omission when an analysis cap is optional", () => {
+    expect(validateCollectGoal({ ...goal, budgetEth: "" }, false)).toBeNull();
+    expect(validateCollectGoal({ ...goal, budgetEth: "" })).toBe("budget");
+    expect(validateCollectGoal(goal, false)).toBeNull();
+    for (const budgetEth of [" ", "0", "-1", "1e3", "1.0000000000000000001"])
+      expect(validateCollectGoal({ ...goal, budgetEth }, false)).toBe("budget");
+  });
 });

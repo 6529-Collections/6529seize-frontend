@@ -63,6 +63,7 @@ interface Props {
   abi: Abi;
   mint_date: Time;
   mintMetadata: ManifoldMintMetadata;
+  animationSrc?: string | null | undefined;
   standalone?: boolean;
 }
 
@@ -127,8 +128,8 @@ function StandaloneMintPageTopBar() {
         className="tw-flex tw-justify-center md:tw-justify-end"
         style={
           {
-            "--apkt-tokens-core-backgroundAccentPrimary": "#406AFE",
-            "--apkt-tokens-core-backgroundAccentPrimary-base": "#406AFE",
+            "--apkt-tokens-core-backgroundAccentPrimary": "#3F69FC",
+            "--apkt-tokens-core-backgroundAccentPrimary-base": "#3F69FC",
             "--apkt-tokens-theme-textInvert": "#FFFFFF",
             "--apkt-tokens-theme-iconInverse": "#FFFFFF",
             "--apkt-borderRadius-2": "10px",
@@ -295,18 +296,22 @@ export default function ManifoldMinting(props: Readonly<Props>) {
     if (!instance) {
       return undefined;
     }
+    const animationSrc = props.animationSrc?.trim();
     return {
       id: instance.id,
       contract: props.contract,
       name: instance.asset.name ?? props.title,
       image: instance.asset.image_url ?? instance.asset.image ?? "",
-      animation: instance.asset.animation_url ?? instance.asset.animation ?? "",
+      animation:
+        animationSrc !== undefined && animationSrc.length > 0
+          ? animationSrc
+          : (instance.asset.animation_url ?? instance.asset.animation ?? ""),
       icon: "",
       thumbnail: "",
       scaled: "",
       metadata: instance.asset,
     };
-  }, [instance, props.contract, props.title]);
+  }, [instance, props.animationSrc, props.contract, props.title]);
 
   const artist = useMemo(() => {
     const name =
@@ -380,6 +385,10 @@ export default function ManifoldMinting(props: Readonly<Props>) {
         claim={manifoldClaim}
         local_timezone={isLocalTimezone}
         hideConnect={props.standalone ?? false}
+        artwork={{
+          name: nftImage?.name ?? props.title,
+          imageUrl: nftImage?.image,
+        }}
         setFee={setFee}
         setMintForAddress={setMintForAddress}
       />
@@ -535,7 +544,7 @@ export default function ManifoldMinting(props: Readonly<Props>) {
     }
 
     return (
-      <div className="tw-order-1 tw-flex tw-items-center tw-justify-center tw-pt-4 md:tw-order-2 md:tw-col-span-7 md:tw-h-screen md:tw-pt-0">
+      <div className="tw-order-1 tw-flex tw-items-center tw-justify-center tw-pt-4 md:tw-order-2 md:tw-col-span-7 md:tw-self-start md:tw-pt-8">
         <NFTImage
           nft={nftImage}
           animation={true}

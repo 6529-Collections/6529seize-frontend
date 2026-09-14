@@ -4,6 +4,8 @@ import Address from "@/components/address/Address";
 import { useAuth } from "@/components/auth/Auth";
 import CollectionSortControls from "@/components/collection-page/CollectionSortControls";
 import CollectionsDropdown from "@/components/collections-dropdown/CollectionsDropdown";
+import CollectEntryLink from "@/components/collect/CollectEntryLink";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import DotLoader from "@/components/dotLoader/DotLoader";
 import { LFGButton } from "@/components/lfg-slideshow/LFGSlideshow";
 import NFTImage from "@/components/nft-image/NFTImage";
@@ -37,6 +39,7 @@ interface GradientNFT extends NFT {
 }
 
 export default function GradientsComponent() {
+  const locale = useBrowserLocale();
   useSetTitle("6529 Gradient | Collections");
 
   const router = useRouter();
@@ -198,6 +201,13 @@ export default function GradientsComponent() {
                 6529 Gradient
               </h1>
               <LFGButton contract={GRADIENT_CONTRACT} />
+              <CollectEntryLink
+                collection="gradients"
+                intent="full_set"
+                definitionId="gradients"
+                locale={locale}
+                complete
+              />
             </div>
           </div>
         </header>

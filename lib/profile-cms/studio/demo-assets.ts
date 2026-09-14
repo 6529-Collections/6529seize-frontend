@@ -1,4 +1,8 @@
 import type { CmsAssetV1 } from "@/lib/profile-cms/protocol/v1";
+import {
+  getCmsApprovedAssetTitle,
+  getCmsApprovedDisplayAssetPath,
+} from "./approved-assets";
 
 /** Original demonstration works, never represented as the profile's NFTs. */
 export const DEMO_ART_ASSETS: readonly CmsAssetV1[] = [
@@ -55,10 +59,14 @@ export function getCmsStudioDemoAssetPath(asset: CmsAssetV1): string | null {
       candidate.uri === asset.uri &&
       candidate.content_hash === asset.content_hash
   );
-  return demo ? new URL(demo.uri).pathname : null;
+  return demo
+    ? new URL(demo.uri).pathname
+    : getCmsApprovedDisplayAssetPath(asset);
 }
 
 export function getCmsStudioDemoAssetTitle(asset: CmsAssetV1): string | null {
+  const approvedTitle = getCmsApprovedAssetTitle(asset);
+  if (approvedTitle) return approvedTitle;
   if (!getCmsStudioDemoAssetPath(asset)) return null;
   const titles: Readonly<Record<string, string>> = {
     "demo-quiet-signal": "Quiet Signal",

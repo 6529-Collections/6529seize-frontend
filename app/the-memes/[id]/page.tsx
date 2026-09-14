@@ -153,12 +153,14 @@ export async function generateMetadata({
     normalizeLocale(locale),
     nftResult.ok ? (nftResult.value ?? null) : undefined
   );
+  const canonical = getMemePageCanonicalUrl(id, focus);
 
   return {
     ...metadata,
     alternates: {
       ...(metadata.alternates ?? {}),
-      canonical: getMemePageCanonicalUrl(id, focus),
+      canonical,
     },
+    openGraph: { ...metadata.openGraph, url: canonical },
   };
 }

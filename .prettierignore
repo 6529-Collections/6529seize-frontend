@@ -27,3 +27,6 @@ yarn.lock
 .husky
 *.min.js
 *.min.css
+
+# Route inventory uses deterministic JSON.stringify output.
+tests/routes.manifest.json

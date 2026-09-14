@@ -516,6 +516,14 @@ jobs:
         if: matrix.lane == 'quality'
         run: ./bin/6529 run deadcode:knip
 
+      # App lint ignores tests/**. Use exact base source as a per-call debt
+      # allowance, including new code in legacy specs and shared helpers.
+      - name: Lint e2e selector usage
+        if: matrix.lane == 'quality'
+        run: |
+          ./bin/6529 run test:e2e-selectors
+          ./bin/6529 run lint:e2e-selectors --base-ref "$BASE_SHA"
+
       - name: Lint package.json versions
         if: matrix.lane == 'quality' && needs.plan.outputs.dependency_governance_required == 'true'
         run: ./bin/6529 run lint:package-json

@@ -83,7 +83,9 @@ describe("getSharedAppServerSideProps", () => {
     expect(url.searchParams.get("badge")).toBe("The Memes");
     expect(url.searchParams.get("collection")).toBe("The Memes");
     expect(url.searchParams.get("image")).toBe("https://cdn.test/seize.png");
-    expect(url.searchParams.get("subtitle")).toBe("The Memes #1 | Collections");
+    expect(metadata.description).toBe(
+      "Seize the Memes · 6529er · The Memes #1 | test.6529.io"
+    );
     expect(url.searchParams.get("title")).toBe("Seize the Memes | Collectors");
   });
 
@@ -146,11 +148,10 @@ describe("getSharedAppServerSideProps", () => {
       const url = new URL(image.url);
 
       expect(metadata.title).toBe("The Memes #491 | Activity");
-      expect(metadata.description).toBe("Collections | test.6529.io");
+      expect(metadata.description).toBe("The Memes #491 | test.6529.io");
       expect(image.alt).toBe("The Memes #491 | Activity social card");
       expect(url.pathname).toBe(`/api/og-metadata/nfts/${MEMES_CONTRACT}/491`);
       expect(url.searchParams.get("image")).toBeNull();
-      expect(url.searchParams.get("subtitle")).toBe("Collections");
       expect(url.searchParams.get("title")).toBe("The Memes #491 | Activity");
       expect(warnSpy).toHaveBeenCalledWith(
         "Failed to fetch NFT metadata for social card",

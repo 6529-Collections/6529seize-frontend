@@ -30,8 +30,35 @@ describe("UserPageIdentityAddStatementsForm", () => {
 
   beforeEach(() => {
     mutate.mockClear();
+    auth.setToast.mockClear();
     auth.requestAuth.mockClear().mockResolvedValue({ success: true });
     (useMutation as jest.Mock).mockReturnValue({ mutate, isPending: false });
+  });
+
+  it("explains when a statement approval has already been consumed", () => {
+    render(
+      <UserPageIdentityAddStatementsForm
+        profile={profile}
+        activeType={STATEMENT_TYPE.DISCORD}
+        group={STATEMENT_GROUP.CONTACT}
+        onClose={jest.fn()}
+      />,
+      { wrapper }
+    );
+    const options = (useMutation as jest.Mock).mock.calls.at(-1)?.[0] as {
+      onError: (error: Error) => void;
+    };
+    options.onError(
+      Object.assign(new Error("approval used"), {
+        response: { body: { code: "MODERATION_PERMIT_CONSUMED" } },
+      })
+    );
+    expect(auth.setToast).toHaveBeenCalledWith(
+      expect.objectContaining({
+        description:
+          "This approval has already been used. Only a retry of the original submission can return the saved result.",
+      })
+    );
   });
 
   it("resets value when active type changes and submits", async () => {

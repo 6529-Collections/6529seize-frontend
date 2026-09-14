@@ -93,8 +93,11 @@ is blocked.
   then retry the action. Post keeps the draft when authentication fails; save
   it before logging out or reloading. Reactions are not automatically retried
   after signing in.
-- Footer shows `Connect your wallet to participate in this wave`:
-  both chat and submission are blocked because the current viewer is signed out.
+- Footer offers `Sign in to 6529 to post`:
+  select it to open the wallet chooser, then use `Sign message` in the
+  `Sign in to 6529` dialog. Signing confirms the wallet address; it creates no
+  transaction and costs no gas. Cancel returns to browsing. If the wallet
+  rejects signing, retry from the same footer button.
 - Footer shows `Create a profile to participate in this wave`:
   both chat and submission are blocked because the current viewer has an
   authenticated wallet but no profile handle yet. Public wave content can stay
@@ -105,11 +108,11 @@ is blocked.
 - Footer shows `Wave is closed`:
   chat is disabled for the current chat-type wave context.
 - Footer shows a chat restriction:
-  `Please log in to participate in chat`, `Proxy users cannot participate in chat`,
+  `Proxy users cannot participate in chat`,
   `You don't have permission to chat in this wave`, or
   `Chat is currently disabled for this wave`.
 - Footer shows a submission restriction:
-  `Please log in to make submissions`, `Proxy users cannot make submissions`,
+  `Proxy users cannot make submissions`,
   `You don't have permission to submit in this wave`,
   `Submissions haven't started yet`, `Submission period has ended`, or
   `You have reached the maximum number of drops allowed`.

@@ -1,4 +1,3 @@
-import type { ApiMarketMyOperations } from "@/generated/models/ApiMarketMyOperations";
 import type { ApiMarketOperation } from "@/generated/models/ApiMarketOperation";
 import type { ApiMarketOrders } from "@/generated/models/ApiMarketOrders";
 import type { ApiMarketPrepareRequest } from "@/generated/models/ApiMarketPrepareRequest";
@@ -7,19 +6,20 @@ import type { ApiMarketSubmission } from "@/generated/models/ApiMarketSubmission
 import type { ApiMarketSendAttemptRequest } from "@/generated/models/ApiMarketSendAttemptRequest";
 import type { ApiMarketSendAttemptRejection } from "@/generated/models/ApiMarketSendAttemptRejection";
 import type { ApiMarketListings } from "@/generated/models/ApiMarketListings";
-import type { ApiCollectFamily } from "@/generated/models/ApiCollectFamily";
+import type { ApiCollectPlanningFamily } from "@/generated/models/ApiCollectPlanningFamily";
+import type { ApiMarketTradeOrder } from "@/generated/models/ApiMarketTradeOrder";
 import { commonApiFetch, commonApiPost } from "./common-api";
 
 const operationPath = (id: string) =>
   `market/operations/${encodeURIComponent(id)}`;
 export const fetchMarketListings = (
-  family: ApiCollectFamily,
+  family: ApiCollectPlanningFamily,
   cursor: string | null,
   signal?: AbortSignal
 ) =>
   commonApiFetch<ApiMarketListings>({
     endpoint: "market/listings",
-    params: { family, limit: "24", ...(cursor ? { cursor } : {}) },
+    params: { family, limit: "48", ...(cursor ? { cursor } : {}) },
     signal,
     cache: "no-store",
     errorMode: "structured",
@@ -32,6 +32,24 @@ export const fetchMarketOrders = (
   commonApiFetch<ApiMarketOrders>({
     endpoint: "market/orders",
     params: { asset_key: assetKey, side },
+    signal,
+    cache: "no-store",
+    errorMode: "structured",
+  });
+export const fetchExactMarketOrder = (
+  orderHash: string,
+  protocolAddress: string,
+  assetKey: string,
+  side: "LISTING" | "OFFER",
+  signal?: AbortSignal
+) =>
+  commonApiFetch<ApiMarketTradeOrder>({
+    endpoint: `market/orders/${encodeURIComponent(orderHash)}`,
+    params: {
+      protocol_address: protocolAddress,
+      asset_key: assetKey,
+      side,
+    },
     signal,
     cache: "no-store",
     errorMode: "structured",
@@ -49,17 +67,6 @@ export const prepareMarketOperation = (
 export const fetchMarketOperation = (id: string, signal?: AbortSignal) =>
   commonApiFetch<ApiMarketOperation>({
     endpoint: operationPath(id),
-    signal,
-    cache: "no-store",
-    errorMode: "structured",
-  });
-export const fetchMyMarketOperations = (
-  signal?: AbortSignal,
-  cursor?: string | null
-) =>
-  commonApiFetch<ApiMarketMyOperations>({
-    endpoint: "market/me/operations",
-    params: { limit: "24", ...(cursor ? { cursor } : {}) },
     signal,
     cache: "no-store",
     errorMode: "structured",

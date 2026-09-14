@@ -33,6 +33,14 @@ export class ApiArtworkDocumentationContext {
     'artist_record_revision_id': string | null;
     'modules': { [key: string]: ApiArtworkDocumentationModule; };
     'capabilities': ApiArtworkDocumentationCapabilities;
+    /**
+    * Original artist and collaborator permissions for writes, excluding program viewer read access.
+    */
+    'mutation_capabilities': ApiArtworkDocumentationCapabilities;
+    /**
+    * Persistent restricted field and asset paths already visible to the caller, used with mutation_capabilities when checking writes.
+    */
+    'mutation_restricted_paths': Array<string>;
     'confirmation_status': ApiArtworkDocumentationContextConfirmationStatusEnum;
     'latest_revision_id': string | null;
     'lifecycle': ApiArtworkDocumentationContextLifecycleEnum;
@@ -107,6 +115,18 @@ export class ApiArtworkDocumentationContext {
             "name": "capabilities",
             "baseName": "capabilities",
             "type": "ApiArtworkDocumentationCapabilities",
+            "format": ""
+        },
+        {
+            "name": "mutation_capabilities",
+            "baseName": "mutation_capabilities",
+            "type": "ApiArtworkDocumentationCapabilities",
+            "format": ""
+        },
+        {
+            "name": "mutation_restricted_paths",
+            "baseName": "mutation_restricted_paths",
+            "type": "Array<string>",
             "format": ""
         },
         {

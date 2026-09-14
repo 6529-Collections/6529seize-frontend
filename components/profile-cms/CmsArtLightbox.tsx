@@ -280,7 +280,10 @@ function ArtworkButton({
         src={item.src}
         width={item.width}
       />
-      <span className="tw-absolute tw-bottom-3 tw-right-3 tw-border tw-border-solid tw-border-white/25 tw-bg-black/75 tw-px-3 tw-py-1.5 tw-text-xs tw-font-semibold tw-uppercase tw-text-white tw-opacity-0 tw-transition group-hover:tw-opacity-100 group-focus-visible:tw-opacity-100">
+      <span
+        data-cms-art-badge
+        className="tw-absolute tw-bottom-3 tw-right-3 tw-border tw-border-solid tw-border-white/25 tw-bg-black/75 tw-px-3 tw-py-1.5 tw-text-xs tw-font-semibold tw-uppercase tw-text-white tw-opacity-0 tw-transition group-hover:tw-opacity-100 group-focus-visible:tw-opacity-100"
+      >
         {labels.inspect}
       </span>
     </button>
@@ -398,6 +401,7 @@ function ArtworkDialog({
 
   return (
     <dialog
+      data-cms-art-dialog
       aria-labelledby={titleId}
       aria-modal="true"
       className="tw-fixed tw-inset-0 tw-z-[1100] tw-m-0 tw-flex tw-h-auto tw-max-h-none tw-w-auto tw-max-w-none tw-border-0 tw-bg-black/95 tw-p-0 tw-text-iron-100"
@@ -407,9 +411,15 @@ function ArtworkDialog({
       tabIndex={-1}
     >
       <div className="tw-flex tw-min-h-0 tw-w-full tw-flex-col">
-        <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-bg-black tw-p-3">
+        <div
+          data-cms-art-toolbar
+          className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-bg-black tw-p-3"
+        >
           <div className="tw-min-w-0">
-            <p className="tw-text-xs tw-font-semibold tw-uppercase tw-text-primary-300">
+            <p
+              data-cms-art-count
+              className="tw-text-xs tw-font-semibold tw-uppercase tw-text-primary-300"
+            >
               {activeIndex + 1} / {items.length}
             </p>
             <h2
@@ -480,6 +490,7 @@ function ArtworkDialog({
               type="button"
             />
             <div
+              data-cms-art-canvas
               className="tw-pointer-events-none tw-relative tw-flex tw-min-h-full tw-items-center tw-justify-center"
               style={getArtworkFrameStyle(activeItem)}
             >
@@ -498,7 +509,10 @@ function ArtworkDialog({
           </div>
 
           {showMetadata ? (
-            <aside className="tw-max-h-[45dvh] tw-overflow-auto tw-border-x-0 tw-border-b-0 tw-border-l-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-4 lg:tw-max-h-none lg:tw-border-l lg:tw-border-t-0">
+            <aside
+              data-cms-art-metadata
+              className="tw-max-h-[45dvh] tw-overflow-auto tw-border-x-0 tw-border-b-0 tw-border-l-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-4 lg:tw-max-h-none lg:tw-border-l lg:tw-border-t-0"
+            >
               <h3 className="tw-text-base tw-font-semibold tw-text-white">
                 {labels.metadataTitle}
               </h3>
@@ -546,6 +560,7 @@ const LightboxButton = ({
   readonly onClick: () => void;
 }) => (
   <button
+    data-cms-art-control
     className="tw-min-h-10 tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-100 hover:tw-border-primary-400 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300"
     onClick={onClick}
     ref={buttonRef}

@@ -19,12 +19,9 @@ import {
 } from "@/helpers/nft.helpers";
 import {
   ChartBarIcon,
-  ChevronDownIcon,
-  InformationCircleIcon,
   LinkIcon,
   SwatchIcon,
 } from "@heroicons/react/24/outline";
-import { type ReactNode, useState } from "react";
 
 type MemeLabMediaMetadata = Parameters<typeof getImageFileTypeFromMetadata>[0];
 type MemeLabMetadataLinks = {
@@ -166,63 +163,6 @@ function getMemeLabDetailRows(nft: LabNFT) {
   ];
 }
 
-function MemeLabAdditionalDetailsAccordion({
-  defaultOpen,
-  children,
-}: {
-  readonly defaultOpen: boolean;
-  readonly children: ReactNode;
-}) {
-  const [isOpen, setIsOpen] = useState(defaultOpen);
-
-  return (
-    <section className="tw-mt-4 tw-border-x-0 tw-border-y tw-border-solid tw-border-iron-800">
-      <button
-        type="button"
-        aria-expanded={isOpen}
-        onClick={() => setIsOpen((current) => !current)}
-        className="tw-group tw-flex tw-w-full tw-cursor-pointer tw-items-center tw-justify-between tw-gap-4 tw-border-0 tw-bg-transparent tw-px-0 tw-py-4 tw-text-left tw-text-iron-100 tw-transition-colors tw-duration-300 tw-ease-out hover:tw-text-white"
-      >
-        <span className="tw-flex tw-items-center tw-gap-3">
-          <span
-            className={`tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-p-1.5 tw-transition-colors tw-duration-300 tw-ease-out ${
-              isOpen
-                ? "tw-bg-primary-500 tw-text-iron-100"
-                : "tw-bg-iron-900 tw-text-iron-500 group-hover:tw-text-iron-100"
-            }`}
-          >
-            <InformationCircleIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0" />
-          </span>
-          <span className="tw-mb-0 tw-text-base tw-font-semibold tw-text-iron-200 sm:tw-text-lg">
-            Additional details
-          </span>
-        </span>
-        <ChevronDownIcon
-          className={`tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-iron-500 tw-transition tw-duration-200 group-hover:tw-text-iron-100 ${
-            isOpen ? "tw-rotate-180 tw-text-iron-100" : ""
-          }`}
-        />
-      </button>
-      <div
-        className={`tw-grid tw-transition-[grid-template-rows,opacity] tw-duration-300 tw-ease-out ${
-          isOpen
-            ? "tw-grid-rows-[1fr] tw-opacity-100"
-            : "tw-grid-rows-[0fr] tw-opacity-0"
-        }`}
-      >
-        <div
-          aria-hidden={!isOpen}
-          inert={!isOpen}
-          tabIndex={isOpen ? undefined : -1}
-          className={isOpen ? "tw-overflow-visible" : "tw-overflow-hidden"}
-        >
-          {children}
-        </div>
-      </div>
-    </section>
-  );
-}
-
 function MemeLabCardDescription({ nft }: { readonly nft: LabNFT }) {
   return (
     <section className="tw-max-w-4xl tw-text-pretty tw-pb-4">
@@ -236,7 +176,11 @@ function MemeLabCardDescription({ nft }: { readonly nft: LabNFT }) {
   );
 }
 
-function MemeLabAdditionalDetailsContent({ nft }: { readonly nft: LabNFT }) {
+export function MemeLabAdditionalDetailsContent({
+  nft,
+}: {
+  readonly nft: LabNFT;
+}) {
   const arweaveRows = getMemeLabArweaveRows(nft);
   const detailRows = getMemeLabDetailRows(nft);
   const attributes = getMemeLabMetadataAttributes(nft.metadata);
@@ -280,22 +224,6 @@ function MemeLabAdditionalDetailsContent({ nft }: { readonly nft: LabNFT }) {
   );
 }
 
-export function MemeLabOverviewDetails({
-  nft,
-  defaultAdditionalDetailsOpen,
-}: {
-  readonly nft: LabNFT;
-  readonly defaultAdditionalDetailsOpen: boolean;
-}) {
-  return (
-    <>
-      <MemeLabCardDescription nft={nft} />
-      <MemeLabAdditionalDetailsAccordion
-        key={defaultAdditionalDetailsOpen ? "details-open" : "details-closed"}
-        defaultOpen={defaultAdditionalDetailsOpen}
-      >
-        <MemeLabAdditionalDetailsContent nft={nft} />
-      </MemeLabAdditionalDetailsAccordion>
-    </>
-  );
+export function MemeLabOverviewDetails({ nft }: { readonly nft: LabNFT }) {
+  return <MemeLabCardDescription nft={nft} />;
 }

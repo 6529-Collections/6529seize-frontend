@@ -29,7 +29,7 @@ export const transformToApiRequest = (data: {
     wave_id: waveId,
     drop_type: ApiDropType.Participatory,
     is_additional_action_promised: isAdditionalActionPromised,
-    title: traits.title,
+    title: traits.title.trim(),
     parts: [
       {
         content: traits.description,

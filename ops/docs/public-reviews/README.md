@@ -40,7 +40,7 @@ Publication also requires the environment and lifecycle gates to agree.
 
 - `/reviews/6529-stream`: active review overview
 - `/reviews/6529-stream/for-artists`: short guide to artwork plans, consent, payments, and permanence
-- `/reviews/6529-stream/for-collectors`: short guide to buying, refunds, changeable rules, and access
+- `/reviews/6529-stream/for-collectors`: short guide to collecting, refunds, changeable rules, and access
 - `/reviews/6529-stream/review-the-code`: pinned candidate, connected paths, and review priorities
 - `/reviews/6529-stream/{page}`: a detailed topic or community review instructions
 - `/reviews/6529-stream/versions/{version}`: versioned overview
@@ -94,7 +94,7 @@ version pages retain their original text and tables.
 
 **Explore an example artwork** opens a fictional, five-step release flow. It labels the
 whole-plan approval screen as an intended experience whose enforcement is still
-unfinished. Nothing in the example buys, signs, uploads, or saves.
+unfinished. The example does not collect, sign, upload, or save anything.
 
 **Full artist details** opens the active snapshot's artist explanation below the
 short guide. It covers accepted artist rights, proposed architecture, actual

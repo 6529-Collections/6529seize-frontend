@@ -15,7 +15,13 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Tooltip } from "react-tooltip";
 import type { NextGenCollection, NextGenToken } from "@/entities/INextgen";
+import { Spinner } from "@/components/dotLoader/DotLoader";
+import ArtworkShareButton from "@/components/artwork-share/ArtworkShareButton";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
+import useDownloader from "@/hooks/useDownloader";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
+import { isShareCancelError } from "@/utils/error";
 import Lightbulb from "./Lightbulb";
 import {
   NextGenTokenDownloadDropdownItem,
@@ -79,6 +85,8 @@ function NextGenTokenArtImage(
 
 export default function NextGenTokenArt(props: Readonly<Props>) {
   const isMobileDevice = useIsMobileDevice();
+  const locale = useBrowserLocale();
+  const downloader = useDownloader();
   const [mode, setMode] = useState<Mode>(Mode.IMAGE);
   const [isFullScreen, setIsFullScreen] = useState<boolean>(false);
   const [showBlackbox, setShowBlackbox] = useState<boolean>(false);
@@ -315,13 +323,19 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
               aria-haspopup="true"
               aria-expanded={isDownloadMenuOpen}
               aria-label="Download token image"
+              aria-busy={downloader.isInProgress}
+              disabled={downloader.isInProgress}
               onClick={() => setIsDownloadMenuOpen((isOpen) => !isOpen)}
             >
-              <FontAwesomeIcon
-                className="tw-h-5 tw-w-5"
-                icon={faDownload}
-                data-tooltip-id={`download-tooltip-${props.token.id}`}
-              />
+              {downloader.isInProgress ? (
+                <Spinner dimension={20} />
+              ) : (
+                <FontAwesomeIcon
+                  className="tw-h-5 tw-w-5"
+                  icon={faDownload}
+                  data-tooltip-id={`download-tooltip-${props.token.id}`}
+                />
+              )}
             </button>
             <Tooltip
               id={`download-tooltip-${props.token.id}`}
@@ -345,6 +359,7 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
                       resolution={resolution}
                       token={props.token}
                       key={resolution}
+                      download={downloader.download}
                       onSelect={() => setIsDownloadMenuOpen(false)}
                     />
                   ))}
@@ -394,6 +409,18 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
           >
             Fullscreen
           </Tooltip>
+          <ArtworkShareButton
+            locale={locale}
+            artwork={{
+              kind: "nextgen",
+              tokenId: props.token.id,
+              displayId: props.token.normalised_id,
+              title: props.token.name,
+              artist: props.collection.artist,
+              collection: props.collection.name,
+              imageUrl: props.token.image_url || props.token.thumbnail_url,
+            }}
+          />
         </div>
       </div>
     );
@@ -501,6 +528,12 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
   return (
     <div className="tw-w-full">
       {isBoxOpen ? createPortal(artworkPanel, document.body) : artworkPanel}
+      {downloader.error &&
+        !isShareCancelError(downloader.error.errorMessage) && (
+          <p role="alert" className="tw-mb-0 tw-mt-3 tw-text-sm tw-text-error">
+            {t(locale, "artworkShare.downloadError")}
+          </p>
+        )}
 
       {mode === Mode.LIVE && (
         <p className="tw-mb-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-400">

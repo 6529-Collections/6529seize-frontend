@@ -22,6 +22,7 @@ import { SortDirection } from "@/entities/ISort";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { commonApiFetch } from "@/services/api/common-api";
 import DotLoader from "@/components/dotLoader/DotLoader";
+import CollectEntryLink from "@/components/collect/CollectEntryLink";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatInteger } from "@/i18n/format";
 import {
@@ -315,6 +316,14 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
               : "tw-w-full tw-flex-wrap tw-justify-start md:tw-w-auto md:tw-justify-end"
           }`}
         >
+          {props.collection.id === 1 && (
+            <CollectEntryLink
+              collection="pebbles"
+              intent="pebbles_set"
+              locale={locale}
+              complete
+            />
+          )}
           {props.show_view_all ? (
             <Link
               href={`/nextgen/collection/${formatNameForUrl(

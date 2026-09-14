@@ -13,22 +13,11 @@ import { formatInteger, formatPercent } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 
-export function MemeLabOverview({
-  nft,
-  defaultAdditionalDetailsOpen,
-}: {
-  readonly nft: LabNFT | undefined;
-  readonly defaultAdditionalDetailsOpen: boolean;
-}) {
+export function MemeLabOverview({ nft }: { readonly nft: LabNFT | undefined }) {
   if (!nft) {
     return null;
   }
-  return (
-    <MemeLabOverviewDetails
-      nft={nft}
-      defaultAdditionalDetailsOpen={defaultAdditionalDetailsOpen}
-    />
-  );
+  return <MemeLabOverviewDetails nft={nft} />;
 }
 
 export function MemeLabReferences({
@@ -66,6 +55,7 @@ export function MemeLabStaticHeader({
   locale,
   hasOwnershipContext,
   nftBalance,
+  onMarketChange,
 }: {
   readonly nft: LabNFT;
   readonly nftMeta: LabExtendedData;
@@ -73,12 +63,14 @@ export function MemeLabStaticHeader({
   readonly locale: SupportedLocale;
   readonly hasOwnershipContext: boolean;
   readonly nftBalance: number;
+  readonly onMarketChange?: (() => void) | undefined;
 }) {
   return (
     <MemeLabStaticCardHeader
       nft={nft}
       nftMeta={nftMeta}
       showMarketplaceLinks={showMarketplaceLinks}
+      onMarketChange={onMarketChange}
       locale={locale}
       artworkFooter={
         hasOwnershipContext ? (

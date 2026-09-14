@@ -66,6 +66,9 @@ jobs:
       - name: Check E2E pack manifest consumers
         run: ./bin/6529 run e2e-manifest:check
 
+      - name: Check routes manifest classification
+        run: ./bin/6529 run routes-manifest:check
+
   debt-ratchet:
     name: Debt ratchet
     if: always()

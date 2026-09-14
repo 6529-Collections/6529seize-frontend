@@ -24,11 +24,11 @@ Sentry.init({
   // Only enable Sentry if a DSN is actually set
   enabled: Boolean(dsn),
 
-  // Define how likely traces are sampled.
-  tracesSampleRate: 0.1,
-
-  // Enable logs to be sent to Sentry
-  enableLogs: true,
+  // Error capture only: no performance integrations, OTel setup, or ESM hooks.
+  // Omitting trace sampling also avoids enabling auto-performance integrations.
+  skipOpenTelemetrySetup: true,
+  registerEsmLoaderHooks: false,
+  enableLogs: false,
 
   // Default to NOT sending PII unless explicitly reviewed and required.
   // https://docs.sentry.io/platforms/javascript/guides/nextjs/configuration/options/#sendDefaultPii

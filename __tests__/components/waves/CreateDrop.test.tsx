@@ -9,6 +9,7 @@ import {
 import userEvent from "@testing-library/user-event";
 import type { DropMutationBody } from "@/components/waves/create-drop-content/drop-submission.types";
 import CreateDrop from "@/components/waves/CreateDrop";
+import { DropMode } from "@/components/waves/dropComposer.types";
 import { AuthContext } from "@/components/auth/Auth";
 import {
   QueryKey,
@@ -21,6 +22,12 @@ import {
   DropSize,
 } from "@/helpers/waves/drop.helpers";
 import { fetchWaveMetadata } from "@/services/api/waves-v2-api";
+
+const mockReportDropSubmissionFailure = jest.fn();
+jest.mock("@/utils/monitoring/dropSubmissionMonitoring", () => ({
+  reportDropSubmissionFailure: (error: unknown) =>
+    mockReportDropSubmissionFailure(error),
+}));
 
 const mockSetQueryData = jest.fn();
 const mockInvalidateQueries = jest.fn(() => Promise.resolve());
@@ -281,6 +288,37 @@ describe("CreateDrop", () => {
     await waitFor(() => expect(onDropAdded).toHaveBeenCalled());
     await waitFor(() => expect(waitAndInvalidateDrops).toHaveBeenCalled());
     await waitFor(() => expect(commonApiPostMock).toHaveBeenCalled());
+  });
+
+  it("reports a caught submission failure and retains the error toast", async () => {
+    const error = new TypeError("Failed to fetch");
+    commonApiPostMock.mockRejectedValue(error);
+    const setToast = jest.fn();
+    jest.spyOn(console, "error").mockImplementation(() => undefined);
+    render(
+      <AuthContext.Provider
+        value={{ setToast } as React.ContextType<typeof AuthContext>}
+      >
+        <CreateDrop
+          activeDrop={null}
+          onCancelReplyQuote={() => {}}
+          onDropAddedToQueue={jest.fn()}
+          wave={wave}
+          dropId={null}
+          fixedDropMode={DropMode.CHAT}
+          privileges={{ chatRestriction: null, submissionRestriction: null }}
+        />
+      </AuthContext.Provider>
+    );
+    await userEvent.click(screen.getByText("submit current mode"));
+    await waitFor(() =>
+      expect(mockReportDropSubmissionFailure).toHaveBeenCalledTimes(1)
+    );
+    expect(mockReportDropSubmissionFailure).toHaveBeenCalledWith(error);
+    expect(setToast).toHaveBeenCalledWith(
+      expect.objectContaining({ type: "error" })
+    );
+    expect(commonApiPostMock).toHaveBeenCalledTimes(1);
   });
 
   it("keeps a moderation-rejected optimistic drop until the wave is left", async () => {
