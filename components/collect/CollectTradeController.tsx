@@ -51,6 +51,7 @@ import CollectTradeSheet, {
 import CollectTransactionRecovery from "./CollectTransactionRecovery";
 import { useMarketExecution } from "./useMarketExecution";
 import { useMarketSettlement } from "./useMarketSettlement";
+import { marketReceiptRefreshInterval } from "./market-receipt-refresh";
 import { useCollectOfferIntent } from "./useCollectOfferIntent";
 import { marketExecutionError } from "./market-execution-errors";
 import { marketPreparationError } from "./market-preparation-errors";
@@ -62,6 +63,8 @@ import { useCollectTradeOrders } from "./useCollectTradeOrders";
 import { collectProfileWallets } from "./collect-recipient.helpers";
 import { useFixedCollectOrder } from "./useFixedCollectOrder";
 import { useCollectRecipientUpdate } from "./useCollectRecipientUpdate";
+import { usePendingCollectPurchase } from "./usePendingCollectPurchase";
+import Link from "next/link";
 import {
   collectBuyAmount,
   collectBuyListings,
@@ -280,7 +283,10 @@ function CollectTradeControllerContent({
     ),
     refetchInterval: (query) => {
       const latest = query.state.data ?? operation;
-      return latest && marketOperationNeedsPolling(latest) ? 5000 : false;
+      if (!latest) return false;
+      return marketOperationNeedsPolling(latest)
+        ? 5000
+        : marketReceiptRefreshInterval(latest);
     },
   });
   const displayedOperation =
@@ -340,9 +346,29 @@ function CollectTradeControllerContent({
     cancelTarget,
   });
   const offerMaximum = action === "offer" ? maximumOfferAmountWei : undefined;
-  const disabledReason = reasonKey
+  const pendingPurchase = usePendingCollectPurchase({
+    profileId: connectedProfile?.id ?? undefined,
+    assetKey,
+    identity: expected?.order ?? selectedOrder?.identity,
+    operationId: displayedOperation?.id,
+    enabled: action === "buy",
+  });
+  const connectionDisabledReason = reasonKey
     ? t(locale, reasonKey)
     : collectOfferLimitReason(expected, offerMaximum, locale, offerQuantity);
+  const disabledReason =
+    connectionDisabledReason ??
+    (pendingPurchase.blocked
+      ? t(locale, "collect.trade.purchasePending")
+      : undefined);
+  const pendingAction = pendingPurchase.blocked ? (
+    <Link
+      href="/collect/orders"
+      className="tw-rounded-sm tw-text-sm tw-text-primary-300 tw-underline tw-underline-offset-4 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+    >
+      {t(locale, "collect.activity.viewOrders")}
+    </Link>
+  ) : null;
   const fixedIntent = useFixedCollectOrder({
     fixed: fixedOrder,
     action,
@@ -369,6 +395,7 @@ function CollectTradeControllerContent({
     setPreparing(true);
     setError(undefined);
     try {
+      pendingPurchase.assertAvailable();
       let orderForRequest = selectedOrder;
       if (fixedOrder) {
         orderForRequest = await fixedIntent.refresh();
@@ -398,6 +425,7 @@ function CollectTradeControllerContent({
         }
         orderForRequest = current;
       }
+      pendingPurchase.assertAvailable(orderForRequest?.identity);
       const request = buildMarketRequest({
         draft: value,
         action,
@@ -433,6 +461,7 @@ function CollectTradeControllerContent({
             };
       pendingPrepare.current = intent;
       const prepared = await prepareMarketOperation(intent.request, intent.key);
+      pendingPurchase.assertAvailable(intent.request.order);
       offerIntent.guard(intent.request);
       fixedIntent.guard();
       validateMarketOperation(prepared, intent.request);
@@ -553,6 +582,18 @@ function CollectTradeControllerContent({
         presentation={presentation}
         compact={inlineBuy}
         review={review}
+        knownTransactionHash={
+          displayedOperation &&
+          execution.knownTransaction?.operationId === displayedOperation.id
+            ? execution.knownTransaction.hash
+            : undefined
+        }
+        knownTransactionPurpose={
+          displayedOperation &&
+          execution.knownTransaction?.operationId === displayedOperation.id
+            ? execution.knownTransaction.purpose
+            : undefined
+        }
         title={asset?.name}
         stage={recipientUpdate.pending ? "preparing" : stage}
         recipientEditor={
@@ -575,6 +616,7 @@ function CollectTradeControllerContent({
         form={form}
         recoveryAction={
           <>
+            {pendingAction}
             {displayedOperation &&
               !execution.busy &&
               !execution.stage &&
@@ -650,6 +692,7 @@ function CollectTradeControllerContent({
               else await execution.confirm(displayedOperation, expected, guard);
             } else if (action === "buy") {
               await execution.confirm(displayedOperation, expected, () => {
+                pendingPurchase.assertAvailable(expected.order);
                 recipientUpdate.assertIdle();
                 if (fixedOrder) fixedIntent.guard();
               });

@@ -14,6 +14,7 @@
 import { ApiMarketFee } from '../models/ApiMarketFee';
 import { ApiMarketKind } from '../models/ApiMarketKind';
 import { ApiMarketOrderToSign } from '../models/ApiMarketOrderToSign';
+import { ApiMarketReceipt } from '../models/ApiMarketReceipt';
 import { ApiMarketSendAttempt } from '../models/ApiMarketSendAttempt';
 import { ApiMarketSettlement } from '../models/ApiMarketSettlement';
 import { ApiMarketTransaction } from '../models/ApiMarketTransaction';
@@ -48,6 +49,7 @@ export class ApiMarketOperation {
     'block_number'?: number;
     'block_hash'?: string;
     'settlement'?: ApiMarketSettlement;
+    'receipt'?: ApiMarketReceipt;
     'nft_recipient'?: string;
     'potential_liability_wei': string;
     'send_attempt'?: ApiMarketSendAttempt;
@@ -205,6 +207,12 @@ export class ApiMarketOperation {
             "name": "settlement",
             "baseName": "settlement",
             "type": "ApiMarketSettlement",
+            "format": ""
+        },
+        {
+            "name": "receipt",
+            "baseName": "receipt",
+            "type": "ApiMarketReceipt",
             "format": ""
         },
         {

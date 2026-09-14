@@ -481,6 +481,9 @@ export * from '../models/ApiMarketOrder';
 export * from '../models/ApiMarketOrderToSign';
 export * from '../models/ApiMarketOrders';
 export * from '../models/ApiMarketPrepareRequest';
+export * from '../models/ApiMarketReceipt';
+export * from '../models/ApiMarketReceiptPayment';
+export * from '../models/ApiMarketReceiptTransaction';
 export * from '../models/ApiMarketSendAttempt';
 export * from '../models/ApiMarketSendAttemptRejection';
 export * from '../models/ApiMarketSendAttemptRequest';
@@ -1317,7 +1320,7 @@ import { ApiMarketBatchCapabilities , ApiMarketBatchCapabilitiesExecutionPolicyE
 import { ApiMarketBatchItem } from '../models/ApiMarketBatchItem';
 import { ApiMarketBatchItemRequest } from '../models/ApiMarketBatchItemRequest';
 import { ApiMarketBatchMirrorTerms } from '../models/ApiMarketBatchMirrorTerms';
-import { ApiMarketBatchOperation  , ApiMarketBatchOperationStateEnum               , ApiMarketBatchOperationKindEnum  , ApiMarketBatchOperationExecutionPolicyEnum        } from '../models/ApiMarketBatchOperation';
+import { ApiMarketBatchOperation  , ApiMarketBatchOperationStateEnum               , ApiMarketBatchOperationKindEnum  , ApiMarketBatchOperationExecutionPolicyEnum         } from '../models/ApiMarketBatchOperation';
 import { ApiMarketBatchPreflight } from '../models/ApiMarketBatchPreflight';
 import { ApiMarketBatchPreflightRequest } from '../models/ApiMarketBatchPreflightRequest';
 import { ApiMarketBatchPrepareRequest, ApiMarketBatchPrepareRequestKindEnum    , ApiMarketBatchPrepareRequestCurrencyEnum  , ApiMarketBatchPrepareRequestExecutionPolicyEnum     } from '../models/ApiMarketBatchPrepareRequest';
@@ -1338,13 +1341,16 @@ import { ApiMarketListingEntry } from '../models/ApiMarketListingEntry';
 import { ApiMarketListings } from '../models/ApiMarketListings';
 import { ApiMarketMyOperations } from '../models/ApiMarketMyOperations';
 import { ApiMarketOfferItem } from '../models/ApiMarketOfferItem';
-import { ApiMarketOperation  , ApiMarketOperationStateEnum                            } from '../models/ApiMarketOperation';
+import { ApiMarketOperation  , ApiMarketOperationStateEnum                             } from '../models/ApiMarketOperation';
 import { ApiMarketOperationPrepareRequestClass } from '../models/ApiMarketOperationPrepareRequest';
 import { ApiMarketOperationResultClass } from '../models/ApiMarketOperationResult';
 import { ApiMarketOrder     , ApiMarketOrderSideEnum  , ApiMarketOrderScopeEnum            , ApiMarketOrderApplicabilityEnum     } from '../models/ApiMarketOrder';
 import { ApiMarketOrderToSign } from '../models/ApiMarketOrderToSign';
 import { ApiMarketOrders } from '../models/ApiMarketOrders';
 import { ApiMarketPrepareRequest            } from '../models/ApiMarketPrepareRequest';
+import { ApiMarketReceipt } from '../models/ApiMarketReceipt';
+import { ApiMarketReceiptPayment } from '../models/ApiMarketReceiptPayment';
+import { ApiMarketReceiptTransaction, ApiMarketReceiptTransactionPurposeEnum       , ApiMarketReceiptTransactionStatusEnum  , ApiMarketReceiptTransactionConfirmationEnum       } from '../models/ApiMarketReceiptTransaction';
 import { ApiMarketSendAttempt , ApiMarketSendAttemptPurposeEnum    , ApiMarketSendAttemptStatusEnum     } from '../models/ApiMarketSendAttempt';
 import { ApiMarketSendAttemptRejection  , ApiMarketSendAttemptRejectionReasonEnum   } from '../models/ApiMarketSendAttemptRejection';
 import { ApiMarketSendAttemptRequest  , ApiMarketSendAttemptRequestPurposeEnum    } from '../models/ApiMarketSendAttemptRequest';
@@ -1891,6 +1897,9 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiMarketOrderSideEnum",
     "ApiMarketOrderScopeEnum",
     "ApiMarketOrderApplicabilityEnum",
+    "ApiMarketReceiptTransactionPurposeEnum",
+    "ApiMarketReceiptTransactionStatusEnum",
+    "ApiMarketReceiptTransactionConfirmationEnum",
     "ApiMarketSendAttemptPurposeEnum",
     "ApiMarketSendAttemptStatusEnum",
     "ApiMarketSendAttemptRejectionReasonEnum",
@@ -2446,6 +2455,9 @@ let typeMap: {[index: string]: any} = {
     "ApiMarketOrderToSign": ApiMarketOrderToSign,
     "ApiMarketOrders": ApiMarketOrders,
     "ApiMarketPrepareRequest": ApiMarketPrepareRequest,
+    "ApiMarketReceipt": ApiMarketReceipt,
+    "ApiMarketReceiptPayment": ApiMarketReceiptPayment,
+    "ApiMarketReceiptTransaction": ApiMarketReceiptTransaction,
     "ApiMarketSendAttempt": ApiMarketSendAttempt,
     "ApiMarketSendAttemptRejection": ApiMarketSendAttemptRejection,
     "ApiMarketSendAttemptRequest": ApiMarketSendAttemptRequest,

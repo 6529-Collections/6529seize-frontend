@@ -240,18 +240,12 @@ it("preserves a same-operation draft across quote revisions and callback refresh
   expect(continueButton()).toBeEnabled();
 });
 
-it.each(["busy", "blocked", "submitted", "read-only"])(
+it.each(["busy", "blocked", "read-only"])(
   "keeps destination controls unavailable when %s",
   (state) => {
     const overrides: Record<string, Partial<Props>> = {
       busy: { busy: true },
       blocked: { disabledReason: "Check purchase status" },
-      submitted: {
-        operation: {
-          ...batchFixture().operation,
-          state: ApiMarketBatchOperationStateEnum.Submitted,
-        },
-      },
       "read-only": { profile: null },
     };
     setup(overrides[state]);
@@ -261,6 +255,47 @@ it.each(["busy", "blocked", "submitted", "read-only"])(
     expect(screen.getAllByRole("listitem")[0]).toHaveTextContent("Deliver 1");
   }
 );
+
+it("keeps submitted delivery immutable while exposing every full recipient and copy control", async () => {
+  const user = userEvent.setup();
+  const { props } = setup({
+    operation: {
+      ...batchFixture().operation,
+      state: ApiMarketBatchOperationStateEnum.Submitted,
+    },
+  });
+  const original = JSON.stringify(props.operation.items);
+  expect(
+    screen.queryByRole("button", { name: /^Deliver 1 / })
+  ).not.toBeInTheDocument();
+  expect(
+    screen.queryByRole("button", { name: "Continue in wallet" })
+  ).not.toBeInTheDocument();
+  expect(
+    screen.queryByRole("button", { name: "Edit purchase" })
+  ).not.toBeInTheDocument();
+  expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
+  await user.click(screen.getByText("Delivery details"));
+  const delivery = screen.getByText("Delivery details").closest("details")!;
+  const recipientSummaries = within(delivery).getAllByText("Deliver 1 to");
+  expect(recipientSummaries).toHaveLength(3);
+  for (const summary of recipientSummaries) {
+    await user.click(summary);
+  }
+  expect(within(delivery).getAllByText(FREN)).toHaveLength(2);
+  expect(within(delivery).getByText(PAYER)).toBeVisible();
+  const copyButtons = within(delivery).getAllByRole("button", {
+    name: "Copy wallet address",
+  });
+  expect(copyButtons).toHaveLength(3);
+  await user.click(copyButtons[0]!);
+  await waitFor(() =>
+    expect(navigator.clipboard.readText()).resolves.toBe(FREN)
+  );
+  expect(props.onRecipientChange).not.toHaveBeenCalled();
+  expect(props.onConfirm).not.toHaveBeenCalled();
+  expect(JSON.stringify(props.operation.items)).toBe(original);
+});
 
 it("clears an abandoned editor when update capability disappears and returns for the same operation", async () => {
   const user = userEvent.setup();
