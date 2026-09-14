@@ -10,6 +10,15 @@ import { MARKET_WETH } from "./market-validation";
 
 type Review = ApiMarketOperation | ApiMarketBatchOperation;
 
+export type MarketReviewChangeNotice = {
+  readonly summary: string;
+  readonly details: readonly {
+    readonly label: string;
+    readonly before: string;
+    readonly after: string;
+  }[];
+};
+
 function amount(value: string | undefined): bigint | null {
   return value !== undefined && /^(0|[1-9]\d{0,77})$/.test(value)
     ? BigInt(value)
@@ -216,4 +225,98 @@ export function marketReviewChangeDescription(
         : "collect.trade.refreshReview"
     );
   return `${changes.join(" ")} ${t(locale, "collect.trade.reviewUpdatedTerms")}`;
+}
+
+/** Keep exact cap changes available without turning the main review into a diagnostic log. */
+export function marketReviewChangeNotice(
+  shown: Review,
+  fresh: Review,
+  locale: SupportedLocale,
+  change: "terms" | "gas"
+): MarketReviewChangeNotice {
+  if (change === "terms") {
+    return {
+      summary: marketReviewChangeDescription(shown, fresh, locale, change),
+      details: [],
+    };
+  }
+  const details: { label: string; before: string; after: string }[] = [];
+  const add = (
+    label: MessageKey,
+    before: bigint | null,
+    after: bigint | null,
+    format: (value: bigint) => string,
+    approval?: number
+  ) => {
+    if (before === null || after === null || before === after) return;
+    details.push({
+      label:
+        approval === undefined
+          ? t(locale, label)
+          : t(locale, "collect.review.approvalLimit", {
+              number: formatDecimalString(locale, approval.toString()),
+              limit: t(locale, label),
+            }),
+      before: format(before),
+      after: format(after),
+    });
+  };
+  const eth = (value: bigint) =>
+    `${formatCollectReviewWei(locale, value.toString())} ETH`;
+  add("collect.review.exactGas", gas(shown), gas(fresh), eth);
+  add("collect.review.exactMaximum", maximum(shown), maximum(fresh), eth);
+  add(
+    "collect.review.gasLimit",
+    amount(shown.transaction?.gas_limit),
+    amount(fresh.transaction?.gas_limit),
+    (value) => formatDecimalString(locale, value.toString())
+  );
+  add(
+    "collect.review.gasPriceLimit",
+    amount(shown.transaction?.max_fee_per_gas),
+    amount(fresh.transaction?.max_fee_per_gas),
+    (value) => `${formatDecimalString(locale, formatUnits(value, 9))} Gwei`
+  );
+  // A gas-only change has the same approval authorities in the same order.
+  // Show each component even when offsetting changes leave the total unchanged.
+  fresh.approval_transactions.forEach((transaction, index) => {
+    const previous = shown.approval_transactions[index];
+    if (!previous) return;
+    add(
+      "collect.review.exactGas",
+      amount(previous.gas_reserve_wei),
+      amount(transaction.gas_reserve_wei),
+      eth,
+      index + 1
+    );
+    add(
+      "collect.review.gasLimit",
+      amount(previous.gas_limit),
+      amount(transaction.gas_limit),
+      (value) => formatDecimalString(locale, value.toString()),
+      index + 1
+    );
+    add(
+      "collect.review.gasPriceLimit",
+      amount(previous.max_fee_per_gas),
+      amount(transaction.max_fee_per_gas),
+      (value) => `${formatDecimalString(locale, formatUnits(value, 9))} Gwei`,
+      index + 1
+    );
+  });
+  const unchangedPurchase =
+    ["BUY", "BUY_BATCH"].includes(shown.kind) &&
+    shown.kind === fresh.kind &&
+    amount(shown.total_wei) !== null &&
+    shown.total_wei === fresh.total_wei &&
+    shown.currency.toLowerCase() === fresh.currency.toLowerCase();
+  return {
+    summary: t(
+      locale,
+      unchangedPurchase
+        ? "collect.trade.networkFeeUpdated"
+        : "collect.trade.networkLimitsUpdated"
+    ),
+    details,
+  };
 }

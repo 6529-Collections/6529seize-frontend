@@ -1,23 +1,45 @@
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { isMarketSendRejected } from "./market-send-attempt";
-import { marketPreparationError } from "./market-preparation-errors";
+import {
+  marketPreparationError,
+  marketSpecificApiErrorKey,
+} from "./market-preparation-errors";
+import type { CollectTradeStage } from "./collect.types";
 import {
   getStructuredApiErrorStatus,
   getStructuredApiErrorCode,
 } from "@/services/api/common-api";
 
+function phaseFailure(
+  locale: SupportedLocale,
+  stage: CollectTradeStage
+): string {
+  if (stage === "publishing") return t(locale, "collect.trade.publishFailed");
+  if (stage === "submitted" || stage === "reconciling")
+    return t(locale, "collect.trade.recoveryFailed");
+  if (["wallet", "signature", "approval"].includes(stage))
+    return t(locale, "collect.trade.walletFailed");
+  return t(locale, "collect.trade.preflightFailed");
+}
+
 export function marketExecutionError(
   error: unknown,
-  locale: SupportedLocale
+  locale: SupportedLocale,
+  stage: CollectTradeStage = "preparing"
 ): string {
   if (isMarketSendRejected(error))
     return t(locale, "collect.trade.walletRejected");
   const code = getStructuredApiErrorCode(error);
+  if (code === "INVALID_SIGNATURE" && stage === "publishing")
+    return phaseFailure(locale, stage);
   if (code === "OPERATION_CHANGED")
     return t(locale, "collect.trade.refreshRequired");
-  if (getStructuredApiErrorStatus(error) !== undefined)
-    return marketPreparationError(error, locale);
+  if (getStructuredApiErrorStatus(error) !== undefined) {
+    if (stage === "preparing") return marketPreparationError(error, locale);
+    const key = marketSpecificApiErrorKey(error);
+    return key === undefined ? phaseFailure(locale, stage) : t(locale, key);
+  }
   if (error instanceof Error) {
     if (error.message === "MARKET_WALLET_NOT_READY")
       return t(locale, "collect.trade.walletNotReady");
@@ -42,7 +64,9 @@ export function marketExecutionError(
     if (error.message === "MARKET_SUBMISSION_PENDING")
       return t(locale, "collect.trade.submissionPending");
     if (error.message === "MARKET_REVIEW_MISMATCH")
-      return t(locale, "collect.trade.checkFailed");
+      return stage === "preparing"
+        ? t(locale, "collect.trade.checkFailed")
+        : phaseFailure(locale, stage);
     if (error.message === "MARKET_APPROVAL_REVERTED")
       return t(locale, "collect.trade.approvalReverted");
     if (error.message === "MARKET_REVIEW_REFRESH_REQUIRED")
@@ -60,5 +84,5 @@ export function marketExecutionError(
     if (error.message === "MARKET_EXECUTION_ALREADY_ACTIVE")
       return t(locale, "collect.trade.lockActive");
   }
-  return t(locale, "collect.trade.walletFailed");
+  return phaseFailure(locale, stage);
 }
