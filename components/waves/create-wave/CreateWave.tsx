@@ -193,7 +193,14 @@ export default function CreateWave({
     const hasChanges =
       !isEqual(config, initialForm.current.config) ||
       !isEqual(endDateConfig, initialForm.current.endDateConfig) ||
-      (description?.parts.length ?? 0) > 0 ||
+      !!description?.parts.some(
+        (part) =>
+          !!part.content?.trim() ||
+          part.media.length > 0 ||
+          (part.attachments?.length ?? 0) > 0 ||
+          (part.uploaded_attachments?.length ?? 0) > 0 ||
+          !!part.quoted_drop
+      ) ||
       !!description?.title ||
       (description?.metadata.length ?? 0) > 0;
 

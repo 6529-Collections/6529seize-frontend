@@ -124,11 +124,12 @@ jest.mock(
       ref: Ref<CreateWaveDescriptionHandles>;
     }) {
       const [text, setText] = useState("");
+      const [files, setFiles] = useState<File[]>([]);
       useImperativeHandle(ref, () => ({
         requestDrop: () => null,
         getDropSnapshot: () => ({
           title: null,
-          parts: text ? [{ content: text, media: [], quoted_drop: null }] : [],
+          parts: [{ content: text || "\n", media: files, quoted_drop: null }],
           metadata: [],
           mentioned_users: [],
           mentioned_waves: [],
@@ -138,13 +139,22 @@ jest.mock(
         }),
       }));
       return (
-        <label>
-          Description
-          <input
-            value={text}
-            onChange={(event) => setText(event.target.value)}
-          />
-        </label>
+        <>
+          <label>
+            Description
+            <input
+              value={text}
+              onChange={(event) => setText(event.target.value)}
+            />
+          </label>
+          <label>
+            Description attachment
+            <input
+              type="file"
+              onChange={(event) => setFiles(Array.from(event.target.files ?? []))}
+            />
+          </label>
+        </>
       );
     },
   })
@@ -300,6 +310,47 @@ describe.each([undefined, "parent-wave"])(
       );
       expect(description).toHaveValue("My description");
       await waitFor(() => expect(description).toHaveFocus());
+    });
+
+    it.each(["untouched", "cleared"])(
+      "closes without confirmation when the description is %s",
+      async (state) => {
+        const { user } = await openForm();
+        await user.click(
+          screen.getByRole("button", { name: "Edit description" })
+        );
+        if (state === "cleared") {
+          const description = screen.getByRole("textbox", {
+            name: "Description",
+          });
+          await user.type(description, "Removed again");
+          await user.clear(description);
+        }
+        await leave(user, "Close");
+        await waitFor(() =>
+          expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+        );
+      }
+    );
+
+    it("protects description attachments without text", async () => {
+      const { user } = await openForm();
+      await user.click(
+        screen.getByRole("button", { name: "Edit description" })
+      );
+      const attachment = screen.getByLabelText("Description attachment");
+      const file = new File(["attachment"], "attachment.png", {
+        type: "image/png",
+      });
+      await user.upload(attachment, file);
+      await leave(user, "Close");
+      await user.click(
+        within(confirmation()).getByRole("button", { name: "Keep editing" })
+      );
+      expect(attachment).toHaveProperty(
+        "files",
+        expect.objectContaining({ 0: file })
+      );
     });
 
     it("closes after successful creation without a discard prompt", async () => {
