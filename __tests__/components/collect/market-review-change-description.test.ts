@@ -15,9 +15,16 @@ import { ApiMarketTransactionPurposeEnum } from "@/generated/models/ApiMarketTra
 it("exposes an approval-only ceiling change when the total reserve is unchanged and fulfillment is not ready", () => {
   const { operation } = batchFixture();
   const before: ApiMarketOperation = {
-    ...operation,
+    id: operation.id,
+    revision: operation.revision,
+    profile_id: operation.profile_id,
+    wallet: operation.wallet,
+    currency: operation.currency,
+    total_wei: operation.total_wei,
+    expires_at: operation.expires_at,
+    updated_at: operation.updated_at,
     kind: ApiMarketKind.List,
-    state: ApiMarketOperationStateEnum.ApprovalRequired,
+    state: ApiMarketOperationStateEnum.Approval,
     recipient: operation.wallet,
     recipient_in_profile: true,
     asset_key: operation.items[0]!.asset_key,
@@ -27,7 +34,10 @@ it("exposes an approval-only ceiling change when the total reserve is unchanged 
     potential_liability_wei: "0",
     approval_transactions: [
       {
-        ...operation.transaction!,
+        chain_id: operation.transaction!.chain_id,
+        sender: operation.transaction!.sender,
+        to: operation.transaction!.to,
+        data: operation.transaction!.data,
         purpose: ApiMarketTransactionPurposeEnum.ApproveNft,
         value: "0",
         gas_limit: "100000",
@@ -36,7 +46,6 @@ it("exposes an approval-only ceiling change when the total reserve is unchanged 
       },
     ],
   };
-  delete before.transaction;
   const after = {
     ...before,
     approval_transactions: [
