@@ -20,6 +20,7 @@ import useIsMobileScreen from "@/hooks/isMobileScreen";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import MobileWrapperDialog from "../mobile-wrapper-dialog/MobileWrapperDialog";
+import { useWaveDropLayers } from "./drops/WaveDropLayerContext";
 
 const GIPHY_GRID_FALLBACK_WIDTH = 360;
 const GIPHY_GRID_GUTTER = 8;
@@ -262,6 +263,7 @@ function GifPickerDialog({
 }) {
   const isMobile = useIsMobileScreen();
   const locale = useBrowserLocale();
+  const { mobileDialogZIndexClassName } = useWaveDropLayers();
   const normalizedGiphyApiKey = giphyApiKey?.trim();
   const dialogTitle = t(locale, "waves.gifPicker.dialogTitle");
   const poweredByLabel = t(locale, "waves.gifPicker.poweredBy", {
@@ -294,6 +296,7 @@ function GifPickerDialog({
         showHeaderCloseButton={false}
         enableDragToClose={isMobile}
         headerClassName={isMobile ? undefined : "tw-sr-only"}
+        zIndexClassName={mobileDialogZIndexClassName}
       >
         <GifPickerUnavailable
           title={t(locale, "waves.gifPicker.unavailable.title")}
@@ -315,6 +318,7 @@ function GifPickerDialog({
       showHeaderCloseButton={false}
       enableDragToClose={isMobile}
       headerClassName={isMobile ? undefined : "tw-sr-only"}
+      zIndexClassName={mobileDialogZIndexClassName}
       titleActions={
         isMobile ? (
           <GiphyAttributionMark
