@@ -46,6 +46,7 @@ jest.mock("@/services/api/common-api", () => ({
 
 jest.mock("@/services/auth/auth.utils", () => ({
   getAuthJwt: jest.fn(() => "test-jwt"),
+  PROFILE_SWITCHED_EVENT: "6529-profile-switched",
 }));
 
 jest.mock("jwt-decode", () => ({
@@ -158,6 +159,7 @@ describe("useWaveRealtimeUpdater", () => {
       .fn()
       .mockResolvedValue({ drops: null, highestSerialNo: null }),
     removeDrop: jest.fn(),
+    removeDrops: jest.fn(),
     removeWaveDeliveredNotifications: jest.fn().mockResolvedValue(undefined),
     isWaveMuted: jest.fn().mockReturnValue(false),
   });
@@ -1529,5 +1531,32 @@ describe("useWaveRealtimeUpdater", () => {
     expect(props.syncNewestMessages).not.toHaveBeenCalled();
     expect(props.removeWaveDeliveredNotifications).not.toHaveBeenCalled();
     expect(commonApiPostWithoutBodyAndResponse).not.toHaveBeenCalled();
+  });
+  it("coalesces deletion notifications per wave and discards queued work on profile switch", () => {
+    jest.useFakeTimers();
+    const props = baseProps({});
+    renderHook(() => useWaveRealtimeUpdater(props));
+    for (let index = 0; index < 100; index++) {
+      emitWebSocketMessage(WsMessageType.DROP_DELETE, {
+        wave_id: "wave1",
+        drop_id: `d${index}`,
+      });
+    }
+    expect(props.removeDrops).not.toHaveBeenCalled();
+    act(() => jest.advanceTimersByTime(100));
+    expect(props.removeDrops).toHaveBeenCalledTimes(1);
+    expect(props.removeDrops).toHaveBeenCalledWith(
+      "wave1",
+      Array.from({ length: 100 }, (_, index) => `d${index}`)
+    );
+    emitWebSocketMessage(WsMessageType.DROP_DELETE, {
+      wave_id: "wave1",
+      drop_id: "late",
+    });
+    act(() =>
+      globalThis.dispatchEvent(new CustomEvent("6529-profile-switched"))
+    );
+    act(() => jest.advanceTimersByTime(100));
+    expect(props.removeDrops).toHaveBeenCalledTimes(1);
   });
 });

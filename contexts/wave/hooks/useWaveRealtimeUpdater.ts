@@ -40,6 +40,7 @@ import {
   type ProcessIncomingDropOptions,
   type UseWaveRealtimeUpdaterProps,
 } from "./useWaveRealtimeUpdater.helpers";
+import { PROFILE_SWITCHED_EVENT } from "@/services/auth/auth.utils";
 import { useDropUpdateRefMessages } from "./useDropUpdateRefMessages";
 
 export { ProcessIncomingDropType } from "./useWaveRealtimeUpdater.helpers";
@@ -582,12 +583,37 @@ const useDropUpdateMessages = (
 };
 
 const useDropDeleteMessages = (
-  processDropRemoved: (waveId: string, dropId: string) => void
+  removeDrops: UseWaveRealtimeUpdaterProps["removeDrops"]
 ): void => {
+  const pending = useRef(new Map<string, Set<string>>());
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    const clear = () => {
+      if (timer.current !== null) clearTimeout(timer.current);
+      timer.current = null;
+      pending.current.clear();
+    };
+    globalThis.addEventListener(PROFILE_SWITCHED_EVENT, clear);
+    return () => {
+      clear();
+      globalThis.removeEventListener(PROFILE_SWITCHED_EVENT, clear);
+    };
+  }, []);
   useWebSocketMessage<WsDropDeleteMessage["data"]>(
     WsMessageType.DROP_DELETE,
     (messageData) => {
-      processDropRemoved(messageData.wave_id, messageData.drop_id);
+      const ids = pending.current.get(messageData.wave_id) ?? new Set<string>();
+      ids.add(messageData.drop_id);
+      pending.current.set(messageData.wave_id, ids);
+      if (timer.current !== null) return;
+      timer.current = setTimeout(() => {
+        timer.current = null;
+        const batches = pending.current;
+        pending.current = new Map();
+        for (const [waveId, removedIds] of batches) {
+          removeDrops(waveId, [...removedIds]);
+        }
+      }, 100);
     }
   );
 };
@@ -600,6 +626,7 @@ export function useWaveRealtimeUpdater({
   registerWave,
   syncNewestMessages,
   removeDrop,
+  removeDrops,
   removeWaveDeliveredNotifications,
   isWaveMuted,
 }: UseWaveRealtimeUpdaterProps): {
@@ -634,7 +661,7 @@ export function useWaveRealtimeUpdater({
   });
 
   useDropUpdateMessages(processIncomingDrop, processDropUpdateRef);
-  useDropDeleteMessages(processDropRemoved);
+  useDropDeleteMessages(removeDrops);
 
   useWebSocketMessage<WsAttachmentStatusUpdateMessage["data"]>(
     WsMessageType.ATTACHMENT_STATUS_UPDATE,

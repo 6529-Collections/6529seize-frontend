@@ -3017,7 +3017,11 @@
         "Submission and winner drops are never deleted by this action.",
         "If the current profile authored the wave's pinned drop, that pinned drop is preserved.",
         "The control remains available if chat was later disabled, so existing history can still be removed.",
-        "A confirmation dialog explains the scope and warns that the deletion is irreversible before the API is called."
+        "A confirmation dialog explains the scope and warns that the deletion is irreversible before deletion starts.",
+        "Large histories are deleted in batches automatically while the view stays open. The dialog shows a minimum confirmed deletion count.",
+        "Messages sent after the operation starts are kept, including when an interrupted deletion is retried.",
+        "If deletion is interrupted, already deleted messages stay deleted. Retry deletion continues the same operation and refreshes the thread.",
+        "Reopen About -> Configuration in the same browser tab and profile to resume a paused deletion. Switching profiles or leaving the view stops further requests; an in-flight request may still finish."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/waves", "/messages"],
