@@ -1,5 +1,13 @@
 import { act, render } from "@testing-library/react";
 
+const useSearchParamsMock = jest.fn(
+  () => new URLSearchParams(globalThis.location.search)
+);
+
+jest.mock("next/navigation", () => ({
+  useSearchParams: () => useSearchParamsMock(),
+}));
+
 describe("useIsVersionStale", () => {
   const CLIENT_VERSION_HEADER = "x-6529-client-version";
 
@@ -117,5 +125,19 @@ describe("useIsVersionStale", () => {
     const { findByText } = render(<TestComponent interval={1000} />);
     expect(await findByText("stale")).toBeInTheDocument();
     expect(globalThis.fetch).not.toHaveBeenCalled();
+  });
+
+  it("shows stale when a mobile deep link adds the force query after mount", async () => {
+    (globalThis.fetch as jest.Mock).mockResolvedValue({
+      json: async () => ({ stale: false }),
+    });
+    const view = render(<TestComponent interval={1000} />);
+
+    expect(await view.findByText("fresh")).toBeInTheDocument();
+
+    globalThis.history.pushState(null, "", "/?showNewVersionToast=true&_t=123");
+    view.rerender(<TestComponent interval={1000} />);
+
+    expect(await view.findByText("stale")).toBeInTheDocument();
   });
 });

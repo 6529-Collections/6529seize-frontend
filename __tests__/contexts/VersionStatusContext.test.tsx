@@ -4,6 +4,10 @@ import {
 } from "@/contexts/VersionStatusContext";
 import { act, render, screen } from "@testing-library/react";
 
+jest.mock("next/navigation", () => ({
+  useSearchParams: () => new URLSearchParams(globalThis.location.search),
+}));
+
 function Consumer({ name }: { readonly name: string }) {
   const stale = useVersionStatus();
   return <span data-testid={name}>{stale ? "update" : "current"}</span>;
