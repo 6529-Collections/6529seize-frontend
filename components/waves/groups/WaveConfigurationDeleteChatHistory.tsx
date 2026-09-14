@@ -1,77 +1,49 @@
 "use client";
 
 import { useAuth } from "@/components/auth/Auth";
-import MobileWrapperConfirmationDialog from "@/components/mobile-wrapper-dialog/MobileWrapperConfirmationDialog";
+import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import Button from "@/components/utils/button/Button";
-import { useMyStream } from "@/contexts/wave/MyStreamContext";
-import type { ApiDeleteMyWaveChatHistoryResponse } from "@/generated/models/ApiDeleteMyWaveChatHistoryResponse";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { waveRightPanelText } from "@/helpers/waves/wave-right-panel.helpers";
-import { commonApiDeleteWithResponse } from "@/services/api/common-api";
-import { useMutation } from "@tanstack/react-query";
+import { formatInteger } from "@/i18n/format";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { useContext, useState } from "react";
+import { useWaveChatHistoryPurge } from "./useWaveChatHistoryPurge";
 
-export default function WaveConfigurationDeleteChatHistory({
-  wave,
+const text = (key: Parameters<typeof waveRightPanelText>[0], params = {}) =>
+  waveRightPanelText(key, params);
+
+function DeleteChatHistory({
+  waveId,
+  profileId,
 }: {
-  readonly wave: ApiWave;
+  readonly waveId: string;
+  readonly profileId: string;
 }) {
-  const { activeProfileProxy, connectedProfile, requestAuth, setToast } =
-    useAuth();
+  const { setToast } = useAuth();
   const { invalidateDrops } = useContext(ReactQueryWrapperContext);
-  const { processDropRemoved } = useMyStream();
-  const [isConfirmationOpen, setIsConfirmationOpen] = useState(false);
-
-  const deleteHistoryMutation = useMutation({
-    mutationFn: () =>
-      commonApiDeleteWithResponse<ApiDeleteMyWaveChatHistoryResponse>({
-        endpoint: `waves/${wave.id}/my-chat-history`,
-      }),
-    onSuccess: (response) => {
-      const { deleted_drop_ids: deletedDropIds = [] } =
-        response as Partial<ApiDeleteMyWaveChatHistoryResponse>;
-      for (const dropId of deletedDropIds) {
-        processDropRemoved(wave.id, dropId);
-      }
+  const [isOpen, setIsOpen] = useState(false);
+  const { state, start } = useWaveChatHistoryPurge({
+    waveId,
+    profileId,
+    onSettled: (completed) => {
       invalidateDrops();
-      setToast({
-        message: waveRightPanelText(
-          deletedDropIds.length
-            ? "waves.sidebar.rightPanel.configuration.deleteChatHistory.success"
-            : "waves.sidebar.rightPanel.configuration.deleteChatHistory.empty"
-        ),
-        type: "warning",
-      });
-      setIsConfirmationOpen(false);
-    },
-    onError: (error) => {
-      setToast({
-        type: "error",
-        title: waveRightPanelText(
-          "waves.sidebar.rightPanel.configuration.deleteChatHistory.errorTitle"
-        ),
-        description: waveRightPanelText(
-          "waves.sidebar.rightPanel.configuration.deleteChatHistory.errorDescription"
-        ),
-        details: getToastErrorDetails(error),
-      });
+      if (completed) {
+        setToast({
+          message: text(
+            "waves.sidebar.rightPanel.configuration.deleteChatHistory.success"
+          ),
+          type: "warning",
+        });
+        setIsOpen(false);
+      }
     },
   });
-
-  if (!connectedProfile || activeProfileProxy) {
-    return null;
-  }
-
-  const deleteHistory = async () => {
-    if (deleteHistoryMutation.isPending) {
-      return;
-    }
-    const { success } = await requestAuth();
-    if (success) {
-      deleteHistoryMutation.mutate();
-    }
+  const busy = state.phase === "running";
+  const paused = state.phase === "paused";
+  const close = () => {
+    if (!busy) setIsOpen(false);
   };
 
   return (
@@ -81,33 +53,107 @@ export default function WaveConfigurationDeleteChatHistory({
         size="lg"
         fullWidth
         aria-haspopup="dialog"
-        onClick={() => setIsConfirmationOpen(true)}
+        onClick={() => setIsOpen(true)}
         className="!tw-whitespace-normal !tw-border-red !tw-bg-black !tw-text-red active:!tw-bg-red/15 desktop-hover:hover:!tw-border-red desktop-hover:hover:!tw-bg-red/10 desktop-hover:hover:!tw-text-red"
       >
-        {waveRightPanelText(
+        {text(
           "waves.sidebar.rightPanel.configuration.deleteChatHistory.button"
         )}
       </Button>
-
-      <MobileWrapperConfirmationDialog
-        isOpen={isConfirmationOpen}
-        onClose={() => setIsConfirmationOpen(false)}
-        onConfirm={deleteHistory}
-        title={waveRightPanelText(
+      <MobileWrapperDialog
+        isOpen={isOpen}
+        onClose={close}
+        tabletModal
+        dismissible={!busy}
+        title={text(
           "waves.sidebar.rightPanel.configuration.deleteChatHistory.modalTitle"
         )}
-        message={waveRightPanelText(
-          "waves.sidebar.rightPanel.configuration.deleteChatHistory.modalMessage"
-        )}
-        confirmText={waveRightPanelText(
-          "waves.sidebar.rightPanel.configuration.deleteChatHistory.confirm"
-        )}
-        cancelText={waveRightPanelText(
-          "waves.sidebar.rightPanel.configuration.deleteChatHistory.cancel"
-        )}
-        isConfirming={deleteHistoryMutation.isPending}
-        confirmVariant="destructive"
-      />
+        maxWidthClass="md:tw-max-w-lg"
+      >
+        <div className="tw-px-4 sm:tw-px-6">
+          <p className="tw-mb-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-300">
+            {text(
+              "waves.sidebar.rightPanel.configuration.deleteChatHistory.modalMessage"
+            )}
+          </p>
+          <div
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+            className="tw-mt-4 tw-text-sm tw-leading-6 tw-text-iron-300"
+          >
+            {busy &&
+              text(
+                "waves.sidebar.rightPanel.configuration.deleteChatHistory.progress",
+                { count: formatInteger(DEFAULT_LOCALE, state.deletedCount) }
+              )}
+            {paused &&
+              text(
+                state.error === null
+                  ? "waves.sidebar.rightPanel.configuration.deleteChatHistory.paused"
+                  : "waves.sidebar.rightPanel.configuration.deleteChatHistory.confirmedProgress",
+                { count: formatInteger(DEFAULT_LOCALE, state.deletedCount) }
+              )}
+          </div>
+          {state.error !== null && (
+            <p
+              role="alert"
+              className="tw-mt-3 tw-text-sm tw-leading-6 tw-text-error"
+            >
+              {text(
+                "waves.sidebar.rightPanel.configuration.deleteChatHistory.errorDescription"
+              )}
+            </p>
+          )}
+          <div className="tw-mt-6 tw-flex tw-flex-col tw-gap-2 sm:tw-flex-row sm:tw-justify-end sm:tw-gap-3">
+            <Button
+              variant="secondary"
+              size="md"
+              disabled={busy}
+              onClick={close}
+              fullWidth
+              className="sm:tw-w-auto"
+            >
+              {text(
+                paused
+                  ? "waves.sidebar.rightPanel.configuration.deleteChatHistory.close"
+                  : "waves.sidebar.rightPanel.configuration.deleteChatHistory.cancel"
+              )}
+            </Button>
+            <Button
+              variant="destructive"
+              size="md"
+              disabled={busy}
+              loading={busy}
+              onClick={start}
+              fullWidth
+              className="!tw-whitespace-normal sm:tw-w-auto"
+            >
+              {text(
+                paused
+                  ? "waves.sidebar.rightPanel.configuration.deleteChatHistory.retry"
+                  : "waves.sidebar.rightPanel.configuration.deleteChatHistory.confirm"
+              )}
+            </Button>
+          </div>
+        </div>
+      </MobileWrapperDialog>
     </section>
+  );
+}
+
+export default function WaveConfigurationDeleteChatHistory({
+  wave,
+}: {
+  readonly wave: ApiWave;
+}) {
+  const { activeProfileProxy, connectedProfile } = useAuth();
+  if (!connectedProfile?.id || activeProfileProxy) return null;
+  return (
+    <DeleteChatHistory
+      key={`${connectedProfile.id}:${wave.id}`}
+      waveId={wave.id}
+      profileId={connectedProfile.id}
+    />
   );
 }

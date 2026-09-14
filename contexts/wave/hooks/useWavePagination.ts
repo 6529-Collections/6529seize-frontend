@@ -70,8 +70,7 @@ export function useWavePagination({
   const hasHydratedDropForSerialNo = useCallback(
     (waveId: string, serialNo: number): boolean =>
       getData(waveId)?.drops.some(
-        (drop) =>
-          drop.serial_no === serialNo && drop.type !== DropSize.LIGHT
+        (drop) => drop.serial_no === serialNo && drop.type !== DropSize.LIGHT
       ) ?? false,
     [getData]
   );
@@ -339,6 +338,8 @@ export function useWavePagination({
     (waveId: string) => {
       // Cancel the abort controller
       cancelAbort(waveId, "pagination_cancelled");
+      cancelAbort(`${waveId}-around`, "pagination_cancelled");
+      delete aroundSerialNoStates.current[waveId];
 
       // Clear pagination state
       if (paginationStates.current[waveId]) {
@@ -396,6 +397,7 @@ export function useWavePagination({
           controller.signal
         );
 
+        if (controller.signal.aborted) return;
         if (result) {
           updateData({
             key: waveId,
