@@ -736,7 +736,7 @@ it("distinguishes a rejected response from a network failure without opening the
   await waitFor(() => expect(buy).toBeEnabled());
   fireEvent.click(buy);
   expect(await screen.findByRole("alert")).toHaveTextContent(
-    "This payload did not match your reviewed trade"
+    "The transaction details did not match your reviewed trade."
   );
   expect(mockSave).not.toHaveBeenCalled();
   expect(mockConfirm).not.toHaveBeenCalled();
