@@ -8,7 +8,7 @@
   `/nextgen/collection/{collection}/{overview|about|provenance|top-trait-sets}`,
   `/nextgen/collection/{collection}/{art|trait-sets|mint|distribution-plan}`.
 - Token routes: `/nextgen/token/{token}` and
-  `/nextgen/token/{token}/{provenance|display-center|rarity}`.
+  `/nextgen/token/{token}/{listings-and-offers|provenance|display-center|rarity}`.
 - Admin route: `/nextgen/manager` (wallet and role-gated actions).
 - Each linked page below owns one user-facing behavior slice.
 

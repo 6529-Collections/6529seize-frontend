@@ -1,10 +1,12 @@
 import {
   act,
   fireEvent,
-  render,
+  render as renderComponent,
   screen,
   waitFor,
 } from "@testing-library/react";
+import type { ReactElement } from "react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import DocumentationUpload from "@/components/artwork-documentation/DocumentationUpload";
 import DocumentationAssetDetails from "@/components/artwork-documentation/DocumentationAssetDetails";
 import { documentationFixture } from "@/__tests__/fixtures/artwork-documentation";
@@ -23,9 +25,16 @@ import {
   startDocumentationUpload,
 } from "@/services/api/artwork-documentation-assets-api";
 import { transferDocumentationFile } from "@/lib/artwork-documentation/upload";
+import { pollDocumentationProcessing } from "@/lib/artwork-documentation/poll-processing";
 
 jest.mock("@/hooks/useBrowserLocale", () => ({
   useBrowserLocale: () => "en-US",
+}));
+jest.mock("@/components/artwork-documentation/DocumentationAuthGate", () => ({
+  useDocumentationActor: () => ({
+    actorKey: "artist-a",
+    connectedProfile: { id: "artist-a" },
+  }),
 }));
 jest.mock("@/services/api/artwork-documentation-assets-api");
 jest.mock("@/lib/artwork-documentation/upload", () => ({
@@ -37,10 +46,21 @@ jest.mock("@/lib/artwork-documentation/poll-processing", () => ({
 }));
 
 const controllers: DocumentationDraftController[] = [];
+const clients: QueryClient[] = [];
+function render(element: ReactElement) {
+  const client = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  clients.push(client);
+  return renderComponent(
+    <QueryClientProvider client={client}>{element}</QueryClientProvider>
+  );
+}
 function uploadSession(
   overrides: Partial<ApiArtworkDocumentationAsset> = {}
 ): ApiArtworkDocumentationUploadSession {
   return {
+    can_mutate: true,
     asset: {
       id: "asset-1",
       filename: "final.png",
@@ -105,6 +125,7 @@ function setup(publicationOnly = true) {
   return { context, controller };
 }
 afterEach(() => {
+  clients.splice(0).forEach((client) => client.clear());
   controllers.splice(0).forEach((controller) => controller.dispose());
   jest.clearAllMocks();
 });
@@ -116,11 +137,194 @@ beforeEach(() => {
 });
 
 describe("publication-only artwork uploads", () => {
+  it.each(["consent_instrument", "rights_instrument"])(
+    "uploads v3 %s as public material while legacy rules remain separate",
+    async (role) => {
+      const props = setup();
+      props.context.profile.version = 3;
+      props.context.profile.media_profiles = [{ id: "photography" }] as never;
+      props.context.modules["artwork"]!.answers["media_profiles"] = {
+        status: ApiArtworkDocumentationAnswerStatusEnum.Provided,
+        value: ["photography"],
+      } as never;
+      jest
+        .mocked(startDocumentationUpload)
+        .mockResolvedValue(uploadSession({ role }));
+      jest
+        .mocked(transferDocumentationFile)
+        .mockResolvedValue({ asset: uploadSession().asset });
+      render(<DocumentationUpload {...props} />);
+      fireEvent.change(
+        screen.getByRole("combobox", { name: "What is this file for?" }),
+        { target: { value: role } }
+      );
+      selectFile();
+      fireEvent.click(screen.getByRole("button", { name: "Upload file" }));
+      await waitFor(() =>
+        expect(startDocumentationUpload).toHaveBeenCalledWith(
+          props.context.id,
+          expect.objectContaining({
+            role,
+            intended_visibility: "public_record",
+          }),
+          expect.any(String),
+          expect.any(AbortSignal)
+        )
+      );
+    }
+  );
+  it("stops an oversized queued file before creating its upload while retaining the first transfer", async () => {
+    const props = setup();
+    props.context.profile.limits["asset_bytes"] = 5;
+    jest.mocked(startDocumentationUpload).mockResolvedValue(uploadSession());
+    jest
+      .mocked(getDocumentationUpload)
+      .mockResolvedValue(uploadSession({ state: "ready" }));
+    jest
+      .mocked(transferDocumentationFile)
+      .mockResolvedValue({ asset: uploadSession().asset });
+    render(<DocumentationUpload {...props} />);
+    fireEvent.change(screen.getByLabelText("Select file"), {
+      target: {
+        files: [
+          new File(["one"], "small.png", { type: "image/png" }),
+          new File(["too-large"], "oversized.png", { type: "image/png" }),
+        ],
+      },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Upload file" }));
+    await waitFor(() => expect(pollDocumentationProcessing).toHaveBeenCalled());
+    const poll = jest.mocked(pollDocumentationProcessing).mock.calls.at(-1)![0];
+    await act(async () => {
+      await poll.poll(new AbortController().signal);
+    });
+    await waitFor(() => expect(screen.getByRole("alert")).toBeVisible());
+    expect(startDocumentationUpload).toHaveBeenCalledTimes(1);
+    expect(transferDocumentationFile).toHaveBeenCalledTimes(1);
+    expect(linkDocumentationAsset).toHaveBeenCalledTimes(1);
+  });
+  it.each([
+    [1, "1 B"],
+    [1510, "1.5 KB"],
+    [1024 * 1024, "1 MB"],
+  ] as const)("shows a nonzero received size for %s bytes", (size, label) => {
+    const props = setup();
+    const asset = uploadSession({ state: "ready", size_bytes: size }).asset;
+    props.context.assets = [asset];
+    props.context.asset_links = [assetLink(asset)];
+    render(<DocumentationUpload {...props} />);
+    expect(
+      screen.getByText(`Final artwork · ${label} · Ready`)
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/0 MiB/)).toBeNull();
+  });
+  it("transfers and attaches a selected batch once in order, retaining distinct originals", async () => {
+    const props = setup();
+    jest
+      .mocked(startDocumentationUpload)
+      .mockImplementation(async (_id, body) => ({
+        ...uploadSession({ id: body.filename, filename: body.filename }),
+        upload_id: body.filename,
+      }));
+    jest.mocked(getDocumentationUpload).mockImplementation(async (_id, id) => ({
+      ...uploadSession({ id, filename: id, state: "ready" }),
+      upload_id: id,
+    }));
+    jest
+      .mocked(transferDocumentationFile)
+      .mockResolvedValue({ asset: uploadSession().asset });
+    render(<DocumentationUpload {...props} />);
+    fireEvent.change(screen.getByLabelText("Select file"), {
+      target: {
+        files: [
+          new File(["one"], "one.png", { type: "image/png" }),
+          new File(["two"], "two.png", { type: "image/png" }),
+        ],
+      },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Upload file" }));
+    await waitFor(() => expect(pollDocumentationProcessing).toHaveBeenCalled());
+    const firstPoll = jest
+      .mocked(pollDocumentationProcessing)
+      .mock.calls.at(-1)![0];
+    await act(async () => {
+      await firstPoll.poll(new AbortController().signal);
+    });
+    await waitFor(() =>
+      expect(startDocumentationUpload).toHaveBeenCalledTimes(2)
+    );
+    await waitFor(() =>
+      expect(pollDocumentationProcessing).toHaveBeenCalledTimes(2)
+    );
+    const secondPoll = jest
+      .mocked(pollDocumentationProcessing)
+      .mock.calls.at(-1)![0];
+    await act(async () => {
+      await secondPoll.poll(new AbortController().signal);
+    });
+    expect(
+      jest
+        .mocked(startDocumentationUpload)
+        .mock.calls.map((call) => call[1].filename)
+    ).toEqual(["one.png", "two.png"]);
+    expect(
+      jest
+        .mocked(transferDocumentationFile)
+        .mock.calls.map((call) => call[0].file.name)
+    ).toEqual(["one.png", "two.png"]);
+    expect(
+      jest
+        .mocked(linkDocumentationAsset)
+        .mock.calls.map((call) => call[1].asset_id)
+    ).toEqual(["one.png", "two.png"]);
+    expect(jest.mocked(startDocumentationUpload).mock.calls[0]![2]).not.toEqual(
+      jest.mocked(startDocumentationUpload).mock.calls[1]![2]
+    );
+  });
+  it.each([true, false, undefined])(
+    "uses explicit original upload authorization can_mutate=%s for recovery after reload",
+    async (canMutate) => {
+      const { context, controller } = setup(false);
+      Object.assign(context.mutation_capabilities, {
+        confirm_as_artist: false,
+        read_archival_files: false,
+        read_rights_evidence: false,
+      });
+      const session = uploadSession({
+        role: "preservation_master",
+        intended_visibility: "restricted",
+      });
+      if (canMutate === undefined)
+        Reflect.deleteProperty(session, "can_mutate");
+      else session.can_mutate = canMutate;
+      context.assets = [session.asset];
+      jest.mocked(getDocumentationUpload).mockResolvedValue(session);
+      render(<DocumentationUpload context={context} controller={controller} />);
+      await waitFor(() => expect(getDocumentationUpload).toHaveBeenCalled());
+      expect(screen.getByText("final.png")).toBeVisible();
+      if (canMutate)
+        expect(
+          await screen.findByRole("button", { name: "Try again" })
+        ).toBeDisabled();
+      else
+        expect(
+          screen.queryByRole("button", { name: "Try again" })
+        ).not.toBeInTheDocument();
+      const role = screen.getByRole("combobox", {
+        name: "What is this file for?",
+      });
+      expect(
+        role.querySelector('option[value="rights_instrument"]')
+      ).toBeDisabled();
+      expect(transferDocumentationFile).not.toHaveBeenCalled();
+      expect(linkDocumentationAsset).not.toHaveBeenCalled();
+    }
+  );
   it("shows the final artwork first and omits private upload roles and visibility controls", () => {
     render(<DocumentationUpload {...setup()} />);
     expect(
       screen.getByRole("heading", {
-        name: "Add the final artwork or public supporting material",
+        name: "Add a file",
       })
     ).toBeInTheDocument();
     const roles = screen.getByRole("combobox", {
@@ -161,6 +365,7 @@ describe("publication-only artwork uploads", () => {
       state: "uploading",
     };
     jest.mocked(startDocumentationUpload).mockResolvedValue({
+      can_mutate: true,
       asset,
       upload_id: asset.id,
       expires_at: Date.now() + 60_000,
@@ -238,7 +443,7 @@ describe("publication-only artwork uploads", () => {
         assetId="asset-1"
       />
     );
-    fireEvent.click(screen.getByText("File details and integrity"));
+    fireEvent.click(screen.getByText("Edit file details"));
     fireEvent.click(screen.getByRole("button", { name: "Add entry" }));
     await waitFor(() =>
       expect(linkDocumentationAsset).toHaveBeenCalledWith(
@@ -270,7 +475,7 @@ describe("publication-only artwork uploads", () => {
     );
     selectFile();
     expect(screen.getByRole("button", { name: "Upload file" })).toBeDisabled();
-    fireEvent.click(screen.getByRole("button", { name: "Try again" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Try again" }));
     await waitFor(() =>
       expect(transferDocumentationFile).toHaveBeenCalledWith(
         expect.objectContaining({ session, contextId: context.id })
@@ -300,7 +505,7 @@ describe("publication-only artwork uploads", () => {
         target: { value: "interview_recording" },
       }
     );
-    fireEvent.click(screen.getByRole("button", { name: "Try again" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Try again" }));
     await waitFor(() =>
       expect(transferDocumentationFile).toHaveBeenCalledTimes(2)
     );
@@ -370,10 +575,12 @@ describe("publication-only artwork uploads", () => {
         screen.getByRole("button", { name: "Cancel upload" })
       ).toBeEnabled()
     );
-    expect(screen.getByRole("button", { name: "Try again" })).toBeDisabled();
-    expect(
-      screen.getByText(/This upload is still pending/)
-    ).toHaveTextContent("Cancel upload to release it");
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "Try again" })).toBeDisabled()
+    );
+    expect(screen.getByText(/This upload is still pending/)).toHaveTextContent(
+      "Cancel upload to release it"
+    );
     fireEvent.click(screen.getByRole("button", { name: "Cancel upload" }));
     await waitFor(() =>
       expect(cancelDocumentationUpload).toHaveBeenCalledTimes(2)
@@ -403,15 +610,18 @@ describe("publication-only artwork uploads", () => {
       status: ApiArtworkDocumentationAnswerStatusEnum.Provided,
       value: "intended_public_record",
     };
-    jest.mocked(getDocumentationUpload).mockImplementation(async () => {
-      delete props.context.modules["interview"]!.answers[
-        "recording_permission"
-      ];
-      return session;
-    });
+    jest
+      .mocked(getDocumentationUpload)
+      .mockResolvedValueOnce(session)
+      .mockImplementation(async () => {
+        delete props.context.modules["interview"]!.answers[
+          "recording_permission"
+        ];
+        return session;
+      });
     render(<DocumentationUpload {...props} />);
     selectFile();
-    fireEvent.click(screen.getByRole("button", { name: "Try again" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Try again" }));
     await waitFor(() =>
       expect(
         screen.getByRole("button", { name: "Cancel upload" })
@@ -476,7 +686,7 @@ describe("publication-only artwork uploads", () => {
     const asset = uploadSession({ state: "ready" }).asset;
     props.context.assets = [asset];
     render(<DocumentationAssetDetails {...props} assetId={asset.id} />);
-    fireEvent.click(screen.getByText("File details and integrity"));
+    fireEvent.click(screen.getByText("Edit file details"));
     asset.intended_visibility = "restricted";
     await act(async () => {
       fireEvent.click(screen.getByRole("button", { name: "Add entry" }));
@@ -495,7 +705,7 @@ describe("publication-only artwork uploads", () => {
     jest.mocked(patchDocumentationAssetLink).mockResolvedValue(props.context);
     render(<DocumentationAssetDetails {...props} assetId={asset.id} />);
     fireEvent.click(
-      screen.getByText("File details and integrity", { selector: "summary" })
+      screen.getByText("Edit file details", { selector: "summary" })
     );
     fireEvent.change(screen.getByDisplayValue("Original label"), {
       target: { value: "Updated label" },

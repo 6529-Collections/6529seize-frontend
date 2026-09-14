@@ -95,7 +95,7 @@ Core is designed to remain unchanged after deployment. Closing a collection stop
 ## Choose your path
 
 - [**For artists:** choices, consent, collaborators, and payment.](/reviews/6529-stream/for-artists)
-- [**For collectors:** buying, supply, changeable rules, and access.](/reviews/6529-stream/for-collectors)
+- [**For collectors:** collecting, supply, changeable rules, and access.](/reviews/6529-stream/for-collectors)
 - [**Review the code:** implementations, connections, and evidence.](/reviews/6529-stream/review-the-code)
 
 [Help shape Stream.](/reviews/6529-stream/community-review)`,
@@ -156,7 +156,7 @@ All Stream NFTs share one main contract, called **Core**. Some marketplaces may 
 
 Core supports three supply rules: a fixed maximum, a maximum that authorized governance can change, or no numeric maximum. Any collection can be closed to stop new tokens forever, even if none have been created. Burning destroys a token but does not erase its identity or its place in the number ever created.
 
-Stopping new tokens, preventing burns, locking Core's collection rules, and making the wider artwork permanent are different steps. Before buying, you should be able to see which are complete and who can still make changes.
+Stopping new tokens, preventing burns, locking Core's collection rules, and making the wider artwork permanent are different steps. Before collecting, you should be able to see which are complete and who can still make changes.
 
 [Explore collection and minting rules.](/reviews/6529-stream/tokens-collections-and-minting)
 

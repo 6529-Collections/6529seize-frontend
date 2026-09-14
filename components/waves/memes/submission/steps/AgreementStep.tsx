@@ -1,11 +1,14 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import PrimaryButton from "@/components/utils/button/PrimaryButton";
 import type { ApiWave } from "@/generated/models/ApiWave";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import AgreementStepAgreement from "./AgreementStepAgreement";
 
 interface AgreementStepProps {
   readonly wave: ApiWave;
   readonly agreements: boolean;
+  readonly reviewRequired?: boolean;
   readonly setAgreements: (agreed: boolean) => void;
   readonly onContinue: () => void;
 }
@@ -13,13 +16,33 @@ interface AgreementStepProps {
 const AgreementStep: React.FC<AgreementStepProps> = ({
   wave,
   agreements,
+  reviewRequired = false,
   setAgreements,
   onContinue,
 }) => {
+  const locale = useBrowserLocale();
+  const reviewNoticeRef = useRef<HTMLParagraphElement>(null);
+
+  useEffect(() => {
+    if (reviewRequired) {
+      reviewNoticeRef.current?.focus();
+    }
+  }, [reviewRequired]);
+
   return (
     <div className="tw-relative tw-flex tw-h-full tw-flex-col">
       <div className="tw-flex-1 tw-overflow-y-auto tw-overflow-x-hidden tw-px-4 tw-pb-6 tw-pt-2 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300 md:tw-px-8">
         <div className="tw-mx-auto tw-max-w-5xl">
+          {reviewRequired && (
+            <p
+              ref={reviewNoticeRef}
+              role="status"
+              tabIndex={-1}
+              className="tw-mb-0 tw-mt-6 tw-rounded-xl tw-bg-iron-900 tw-p-4 tw-text-sm tw-leading-6 tw-text-iron-100 tw-ring-1 tw-ring-iron-700"
+            >
+              {t(locale, "memes.submission.agreement.changed")}
+            </p>
+          )}
           <div className="tw-mt-6 tw-max-w-4xl tw-space-y-2 tw-text-base tw-text-iron-300">
             <p className="tw-mb-0">
               Before you submit your work to The Memes, we would like to make
@@ -42,6 +65,7 @@ const AgreementStep: React.FC<AgreementStepProps> = ({
           <div className="tw-mx-auto tw-flex tw-max-w-5xl tw-flex-col tw-items-center tw-justify-between tw-gap-4 md:tw-flex-row">
             <button
               onClick={() => setAgreements(!agreements)}
+              aria-pressed={agreements}
               className="tw-flex tw-flex-1 tw-items-start tw-gap-3 tw-rounded-lg tw-border-none tw-bg-iron-900/50 tw-px-4 tw-py-3 tw-text-left tw-ring-1 tw-ring-iron-800 tw-transition-all desktop-hover:hover:tw-ring-iron-700"
               aria-label={
                 agreements ? "Uncheck terms agreement" : "Check terms agreement"

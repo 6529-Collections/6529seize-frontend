@@ -21,7 +21,8 @@ import NextGenCollectionSlideshow from "./NextGenCollectionSlideshow";
 export function printViewButton(
   currentView: NextgenCollectionView,
   v: NextgenCollectionView,
-  setView: (v: NextgenCollectionView) => void
+  setView: (v: NextgenCollectionView) => void,
+  label: string = v
 ) {
   const isCurrent = v === currentView;
 
@@ -36,7 +37,7 @@ export function printViewButton(
           : "tw-border-transparent tw-text-iron-400 hover:tw-text-white"
       }`}
     >
-      {v}
+      {label}
     </button>
   );
 }

@@ -1,15 +1,21 @@
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
+import { CompactMenu } from "@/components/compact-menu";
 import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { useRef, useState } from "react";
 
 jest.mock("@/hooks/useIsMobileLayoutViewport");
 jest.mock("@/hooks/useIsTouchDevice");
 
-const mockedUseIsMobileLayoutViewport = jest.mocked(
-  useIsMobileLayoutViewport
-);
+const mockedUseIsMobileLayoutViewport = jest.mocked(useIsMobileLayoutViewport);
 const mockedUseIsTouchDevice = jest.mocked(useIsTouchDevice);
 
 describe("MobileWrapperDialog", () => {
@@ -465,6 +471,120 @@ describe("MobileWrapperDialog", () => {
   });
 
   describe("accessibility", () => {
+    it.each(["button", "menu"])(
+      "isolates a dialog opened from a %s and restores the background on close",
+      async (source) => {
+        function Page() {
+          const [open, setOpen] = useState(false);
+          const menuTrigger = useRef<HTMLButtonElement>(null);
+          return (
+            <>
+              <CompactMenu
+                triggerAsChild
+                trigger={
+                  <button ref={menuTrigger} type="button">
+                    More actions
+                  </button>
+                }
+                items={[
+                  {
+                    id: "review",
+                    label: "Review artwork",
+                    onSelect: () => {
+                      // Match CollectTradeActions: the removable menu item is
+                      // not the focus-restoration target for a trade review.
+                      menuTrigger.current?.focus();
+                      setOpen(true);
+                    },
+                  },
+                ]}
+              />
+              <button type="button" onClick={() => setOpen(true)}>
+                Open review
+              </button>
+              {open && (
+                <MobileWrapperDialog
+                  title="Review"
+                  isOpen
+                  tabletModal
+                  focusTitleOnOpen
+                  onClose={() => setOpen(false)}
+                >
+                  <button type="button">Confirm review</button>
+                </MobileWrapperDialog>
+              )}
+            </>
+          );
+        }
+
+        const user = userEvent.setup();
+        const { container } = render(<Page />);
+        const trigger = screen.getByRole("button", {
+          name: source === "menu" ? "More actions" : "Open review",
+        });
+        await user.click(trigger);
+        if (source === "menu") {
+          await user.click(
+            screen.getByRole("menuitem", { name: "Review artwork" })
+          );
+        }
+
+        await waitFor(() => {
+          expect(screen.getByRole("dialog")).toHaveAttribute(
+            "aria-modal",
+            "true"
+          );
+          expect(container.inert).toBe(true);
+          expect(container).toHaveAttribute("aria-hidden", "true");
+        });
+
+        await user.keyboard("{Escape}");
+        await waitFor(() => {
+          expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+          expect(Boolean(container.inert)).toBe(false);
+          expect(container).not.toHaveAttribute("aria-hidden");
+          expect(trigger).toHaveFocus();
+        });
+      }
+    );
+
+    it("isolates a previously hidden dialog when the viewport allows it", async () => {
+      const props = {
+        ...defaultProps,
+        isOpen: true,
+        hideOnDesktopHover: true,
+        title: "Review",
+      };
+      const { container, rerender } = render(
+        <MobileWrapperDialog {...props} />
+      );
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+      expect(Boolean(container.inert)).toBe(false);
+
+      mockedUseIsMobileLayoutViewport.mockReturnValue(true);
+      rerender(<MobileWrapperDialog {...props} />);
+      await waitFor(() => {
+        expect(screen.getByRole("dialog")).toBeVisible();
+        expect(container.inert).toBe(true);
+      });
+
+      mockedUseIsMobileLayoutViewport.mockReturnValue(false);
+      rerender(<MobileWrapperDialog {...props} />);
+      await waitFor(() => {
+        expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+        expect(Boolean(container.inert)).toBe(false);
+        expect(container).not.toHaveAttribute("aria-hidden");
+      });
+
+      mockedUseIsMobileLayoutViewport.mockReturnValue(true);
+      rerender(<MobileWrapperDialog {...props} />);
+      await waitFor(() => {
+        expect(screen.getByRole("dialog")).toBeVisible();
+        expect(container.inert).toBe(true);
+        expect(container).toHaveAttribute("aria-hidden", "true");
+      });
+    });
+
     it("close button can receive focus", () => {
       render(<MobileWrapperDialog {...defaultProps} isOpen={true} />);
 
@@ -476,6 +596,165 @@ describe("MobileWrapperDialog", () => {
   });
 
   describe("transition callbacks", () => {
+    class PendingTransition {
+      playState = "running";
+      readonly finished: Promise<void>;
+      private resolveFinished!: () => void;
+
+      constructor() {
+        this.finished = new Promise<void>((resolve) => {
+          this.resolveFinished = resolve;
+        });
+      }
+
+      finish() {
+        this.playState = "finished";
+        this.resolveFinished();
+      }
+    }
+
+    function controlLeaveAnimations() {
+      const originalTransition = Object.getOwnPropertyDescriptor(
+        globalThis,
+        "CSSTransition"
+      );
+      Object.defineProperty(globalThis, "CSSTransition", {
+        configurable: true,
+        value: PendingTransition,
+      });
+      const pending: PendingTransition[] = [];
+      const byElement = new WeakMap<Element, PendingTransition>();
+      // Keep real Headless UI transitions; JSDOM has no CSS animation engine.
+      // Supply only the browser animation boundary that Headless UI awaits.
+      const animations = jest
+        .spyOn(Element.prototype, "getAnimations")
+        .mockImplementation(function (this: Element) {
+          if (!this.hasAttribute("data-leave")) {
+            return [];
+          }
+          let transition = byElement.get(this);
+          if (!transition) {
+            transition = new PendingTransition();
+            byElement.set(this, transition);
+            pending.push(transition);
+          }
+          return [transition] as unknown as Animation[];
+        });
+
+      return {
+        pending,
+        restore() {
+          animations.mockRestore();
+          if (originalTransition) {
+            Object.defineProperty(
+              globalThis,
+              "CSSTransition",
+              originalTransition
+            );
+          } else {
+            Reflect.deleteProperty(globalThis, "CSSTransition");
+          }
+        },
+      };
+    }
+
+    async function finishEntering() {
+      await waitFor(() => {
+        expect(screen.getByRole("dialog")).toBeInTheDocument();
+        expect(document.querySelector("[data-transition]")).toBeNull();
+      });
+    }
+
+    it("waits for leave animation before cleaning up once with a persistent caller", async () => {
+      const onBeforeLeave = jest.fn();
+      const onAfterLeave = jest.fn();
+      const props = { ...defaultProps, onBeforeLeave, onAfterLeave };
+      const animations = controlLeaveAnimations();
+
+      try {
+        const { rerender } = render(<MobileWrapperDialog {...props} isOpen />);
+        await finishEntering();
+        expect(onAfterLeave).not.toHaveBeenCalled();
+
+        rerender(<MobileWrapperDialog {...props} isOpen={false} />);
+        await waitFor(() => expect(animations.pending).toHaveLength(2));
+        expect(onBeforeLeave).toHaveBeenCalledTimes(1);
+        expect(onAfterLeave).not.toHaveBeenCalled();
+        expect(screen.getByTestId("child-content")).toBeInTheDocument();
+
+        await act(async () => {
+          animations.pending.forEach((animation) => animation.finish());
+        });
+        await waitFor(() => {
+          expect(onAfterLeave).toHaveBeenCalledTimes(1);
+          expect(screen.queryByTestId("child-content")).not.toBeInTheDocument();
+        });
+        rerender(<MobileWrapperDialog {...props} isOpen={false} />);
+        expect(onAfterLeave).toHaveBeenCalledTimes(1);
+      } finally {
+        animations.restore();
+      }
+    });
+
+    it("does not clean up a reopened dialog when its cancelled leave animation settles", async () => {
+      const onAfterLeave = jest.fn();
+      const props = { ...defaultProps, onAfterLeave };
+      const animations = controlLeaveAnimations();
+
+      try {
+        const { rerender } = render(<MobileWrapperDialog {...props} isOpen />);
+        await finishEntering();
+        rerender(<MobileWrapperDialog {...props} isOpen={false} />);
+        await waitFor(() => expect(animations.pending).toHaveLength(2));
+        expect(onAfterLeave).not.toHaveBeenCalled();
+
+        rerender(<MobileWrapperDialog {...props} isOpen />);
+        await act(async () => {
+          animations.pending.forEach((animation) => animation.finish());
+        });
+        await finishEntering();
+        expect(onAfterLeave).not.toHaveBeenCalled();
+        expect(screen.getByTestId("child-content")).toBeInTheDocument();
+
+        rerender(<MobileWrapperDialog {...props} isOpen={false} />);
+        await waitFor(() => {
+          expect(onAfterLeave).toHaveBeenCalledTimes(1);
+          expect(screen.queryByTestId("child-content")).not.toBeInTheDocument();
+        });
+      } finally {
+        animations.restore();
+      }
+    });
+
+    it("cleans up once per completed close when reduced motion leaves no animations", async () => {
+      const onAfterLeave = jest.fn();
+      const props = { ...defaultProps, onAfterLeave };
+      const animations = jest
+        .spyOn(Element.prototype, "getAnimations")
+        .mockReturnValue([]);
+
+      try {
+        const { rerender } = render(
+          <MobileWrapperDialog {...props} isOpen={false} />
+        );
+        expect(onAfterLeave).not.toHaveBeenCalled();
+        for (const completedCloses of [1, 2]) {
+          rerender(<MobileWrapperDialog {...props} isOpen />);
+          await finishEntering();
+          expect(onAfterLeave).toHaveBeenCalledTimes(completedCloses - 1);
+          rerender(<MobileWrapperDialog {...props} isOpen={false} />);
+          await waitFor(() => {
+            expect(onAfterLeave).toHaveBeenCalledTimes(completedCloses);
+            expect(
+              screen.queryByTestId("child-content")
+            ).not.toBeInTheDocument();
+          });
+        }
+      } finally {
+        animations.mockRestore();
+      }
+    });
+
     it("accepts onBeforeLeave callback", async () => {
       const onBeforeLeave = jest.fn();
       const { rerender } = render(

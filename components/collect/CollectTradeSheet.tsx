@@ -4,14 +4,19 @@ import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrappe
 import Button from "@/components/utils/button/Button";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
-import { formatDate } from "@/i18n/format";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import CollectPurchaseSummary from "./CollectPurchaseSummary";
+import CollectOrderSummary from "./CollectOrderSummary";
+import CollectReviewRecipient from "./CollectReviewRecipient";
+import styles from "./marketplace-font.module.css";
 import type {
   CollectReviewFact,
   CollectTradeReview,
   CollectTradeStage,
 } from "./collect.types";
 
+export type CollectTradePresentation = "dialog" | "contents";
 interface CollectTradeSheetProps {
   readonly open: boolean;
   readonly review: CollectTradeReview | null;
@@ -21,20 +26,47 @@ interface CollectTradeSheetProps {
   readonly recoveryAction?: ReactNode;
   readonly message?: string | undefined;
   readonly onClose: () => void;
-  readonly onRefresh: () => void;
+  readonly onRefresh: () => void | Promise<void>;
   readonly onConfirm: (reviewId: string, revision: string) => Promise<void>;
+  readonly presentation?: CollectTradePresentation;
+  readonly compact?: boolean;
+  readonly recipientEditor?:
+    | {
+        readonly profile: ApiIdentity | null;
+        readonly payingWallet: string;
+        readonly disabled: boolean;
+        readonly onApply: (
+          address: string,
+          acknowledgeExternal: boolean
+        ) => Promise<boolean>;
+      }
+    | undefined;
 }
-
-const PENDING_STAGES: readonly CollectTradeStage[] = [
-  "preparing",
-  "approval",
-  "signature",
-  "publishing",
-  "submitted",
-  "awaiting_signatures",
-  "reconciling",
-];
-
+export function CollectTradeDialog({
+  open,
+  title,
+  onClose,
+  children,
+}: Pick<CollectTradeSheetProps, "open" | "title" | "onClose"> & {
+  readonly children: ReactNode;
+}) {
+  const locale = useBrowserLocale();
+  return (
+    <MobileWrapperDialog
+      title={title ?? t(locale, "collect.trade.title")}
+      isOpen={open}
+      onClose={onClose}
+      tabletModal
+      hideOnDesktopHover={false}
+      enableDragToClose={false}
+      maxWidthClass="md:tw-max-w-xl"
+      focusTitleOnOpen
+      showScrollbar
+    >
+      <div className={styles["surface"]}>{children}</div>
+    </MobileWrapperDialog>
+  );
+}
 function Facts({ facts }: { readonly facts: readonly CollectReviewFact[] }) {
   return (
     <dl className="tw-m-0 tw-space-y-3">
@@ -43,10 +75,10 @@ function Facts({ facts }: { readonly facts: readonly CollectReviewFact[] }) {
           key={fact.label}
           className="tw-flex tw-flex-wrap tw-items-baseline tw-justify-between tw-gap-x-5 tw-gap-y-1"
         >
-          <dt className="tw-text-sm tw-font-normal tw-text-iron-400">
+          <dt className="tw-text-[13px] tw-font-normal tw-leading-5 tw-text-iron-400">
             {fact.label}
           </dt>
-          <dd className="tw-m-0 tw-max-w-full tw-break-words tw-text-right tw-text-sm tw-font-medium tw-tabular-nums tw-text-iron-100 [overflow-wrap:anywhere]">
+          <dd className="tw-m-0 tw-max-w-full tw-text-right tw-text-sm tw-font-normal tw-tabular-nums tw-leading-5 tw-text-iron-100 [overflow-wrap:anywhere]">
             {fact.value}
           </dd>
         </div>
@@ -54,42 +86,43 @@ function Facts({ facts }: { readonly facts: readonly CollectReviewFact[] }) {
     </dl>
   );
 }
-
-function useReviewExpiry(expiresAt: number | null | undefined, open: boolean) {
-  const [now, setNow] = useState(() => Date.now());
-  useEffect(() => {
-    if (!open || expiresAt === null || expiresAt === undefined) return;
-    const initialTimer = globalThis.setTimeout(() => setNow(Date.now()), 0);
-    const timer = globalThis.setInterval(() => setNow(Date.now()), 1000);
-    return () => {
-      globalThis.clearTimeout(initialTimer);
-      globalThis.clearInterval(timer);
-    };
-  }, [expiresAt, open]);
-  return expiresAt !== null && expiresAt !== undefined && now >= expiresAt;
-}
-
+/** Execution refreshes and compares terms before any wallet request. */
 export default function CollectTradeSheet(props: CollectTradeSheetProps) {
   const locale = useBrowserLocale();
-  const expired = useReviewExpiry(props.review?.expiresAt, props.open);
   const [confirming, setConfirming] = useState(false);
   const [localError, setLocalError] = useState(false);
   const inFlight = useRef(false);
+  const editingRecipient = useRef<string | null>(null);
+  const recipientHost = useRef<HTMLDivElement>(null);
   const { review } = props;
-  const pending = PENDING_STAGES.includes(props.stage);
+  const recipientScope = JSON.stringify([
+    review?.id,
+    props.recipientEditor?.profile?.id,
+    props.recipientEditor?.payingWallet.toLowerCase(),
+  ]);
+  const [recipientEditing, setRecipientEditing] = useState({
+    scope: recipientScope,
+    open: false,
+  });
+  if (recipientEditing.scope !== recipientScope) {
+    setRecipientEditing({ scope: recipientScope, open: false });
+  }
+  useLayoutEffect(() => {
+    editingRecipient.current = null;
+  }, [recipientScope]);
   const canConfirm =
     review !== null &&
     props.stage === "review" &&
     !review.disabledReason &&
-    !expired &&
-    !confirming;
-
+    !confirming &&
+    !(recipientEditing.scope === recipientScope && recipientEditing.open);
   const confirm = async () => {
-    if (!canConfirm || inFlight.current) return;
-    if (review.expiresAt !== null && Date.now() >= review.expiresAt) {
-      props.onRefresh();
+    if (
+      !canConfirm ||
+      inFlight.current ||
+      editingRecipient.current === recipientScope
+    )
       return;
-    }
     inFlight.current = true;
     setConfirming(true);
     setLocalError(false);
@@ -102,148 +135,209 @@ export default function CollectTradeSheet(props: CollectTradeSheetProps) {
       setConfirming(false);
     }
   };
-
-  return (
-    <MobileWrapperDialog
-      title={props.title ?? t(locale, "collect.trade.title")}
-      isOpen={props.open}
-      onClose={props.onClose}
-      tabletModal
-      hideOnDesktopHover={false}
-      enableDragToClose={false}
-      maxWidthClass="md:tw-max-w-xl"
-      focusTitleOnOpen
-    >
-      <div className="tw-space-y-5 tw-px-4 tw-text-iron-100 md:tw-px-6">
-        {review ? (
-          <>
-            <div className="tw-flex tw-items-center tw-gap-4">
-              {review.media !== undefined && review.media !== null && (
-                <div className="tw-relative tw-flex tw-size-20 tw-shrink-0 tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-lg tw-bg-iron-900 [&_img]:tw-max-h-full [&_img]:tw-object-contain">
-                  {review.media}
-                </div>
-              )}
-              <div className="tw-min-w-0">
-                <p className="tw-mb-1 tw-mt-0 tw-text-xs tw-font-semibold tw-text-primary-300">
-                  {t(locale, `collect.action.${review.action}`)}
-                </p>
-                <h2 className="tw-m-0 tw-break-words tw-text-lg tw-font-semibold tw-leading-6">
-                  {review.title}
-                </h2>
-              </div>
-            </div>
-            <Facts facts={review.facts} />
-            <div className="tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-p-4">
-              <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400">
-                {review.totalDescription}
-              </p>
-              <p className="tw-mb-0 tw-mt-1 tw-text-2xl tw-font-semibold tw-tabular-nums">
-                {review.totalLabel}
-              </p>
-            </div>
-            {(review.action === "list" || review.action === "offer") && (
-              <p className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-300">
-                {t(locale, "collect.trade.orderWarning")}
-              </p>
+  const message =
+    props.message ??
+    (localError ? t(locale, "collect.trade.stage.failed") : undefined);
+  const showMessage =
+    Boolean(message) &&
+    !["confirmed", "live"].includes(props.stage) &&
+    !(
+      props.stage === "reconciling" &&
+      message === t(locale, "collect.trade.broadcastUnknown")
+    );
+  const actionSlot = (
+    <div className="tw-space-y-3">
+      {review && review.warnings.length > 0 && (
+        <ul className="tw-m-0 tw-space-y-2 tw-pl-4 tw-text-[13px] tw-leading-5 tw-text-iron-300">
+          {review.warnings.map((warning) => (
+            <li key={warning}>{warning}</li>
+          ))}
+        </ul>
+      )}
+      {review?.disabledReason && (
+        <p className="tw-m-0 tw-text-[13px] tw-leading-5 tw-text-iron-300">
+          {review.disabledReason}
+        </p>
+      )}
+      {props.stage !== "review" && (
+        <div
+          role="status"
+          className="tw-rounded-lg tw-bg-iron-900 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-leading-5"
+        >
+          {t(locale, `collect.trade.stage.${props.stage}`)}
+        </div>
+      )}
+      {showMessage && (
+        <p
+          role="alert"
+          className="tw-m-0 tw-text-[13px] tw-leading-5 tw-text-iron-300"
+        >
+          {message}
+        </p>
+      )}
+      {review && props.stage === "review" && (
+        <Button
+          variant="action"
+          size="lg"
+          fullWidth
+          disabled={!canConfirm}
+          loading={confirming}
+          className="tw-min-h-12 tw-text-sm tw-font-medium"
+          onClick={() => {
+            void confirm();
+          }}
+        >
+          {t(locale, "collect.trade.continue")}
+        </Button>
+      )}
+      {props.compact &&
+        review &&
+        (props.stage === "review" || props.stage === "confirmed") && (
+          <Button
+            variant="secondary"
+            size="sm"
+            className="tw-min-h-11 tw-text-[13px] tw-font-normal"
+            disabled={confirming}
+            onClick={props.onClose}
+          >
+            {t(
+              locale,
+              props.stage === "confirmed"
+                ? "collect.buy.doneDelivery"
+                : `collect.review.edit.${review.action}`
             )}
-            {review.action === "cancel" && (
-              <p className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-300">
-                {t(locale, "collect.trade.cancelWarning")}
-              </p>
-            )}
-            {review.warnings.length > 0 && (
-              <ul className="tw-m-0 tw-space-y-2 tw-pl-4 tw-text-sm tw-leading-6 tw-text-iron-300">
-                {review.warnings.map((warning) => (
-                  <li key={warning}>{warning}</li>
-                ))}
-              </ul>
-            )}
-            {review.technicalFacts.length > 0 && (
-              <details>
-                <summary className="tw-cursor-pointer tw-rounded tw-py-2 tw-text-sm tw-font-medium tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400">
-                  {t(locale, "collect.trade.details")}
-                </summary>
-                <div className="tw-pt-3">
-                  <Facts facts={review.technicalFacts} />
-                </div>
-              </details>
-            )}
-            {review.expiresAt !== null && (
-              <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400">
-                {t(locale, "collect.trade.expiry", {
-                  time: formatDate(locale, review.expiresAt, {
-                    dateStyle: "medium",
-                    timeStyle: "medium",
-                  }),
-                })}
-              </p>
-            )}
-            {expired && props.stage === "review" && (
-              <p
-                role="status"
-                className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-300"
-              >
-                {t(locale, "collect.trade.expired")}
-              </p>
-            )}
-            {review.disabledReason && (
-              <p className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-300">
-                {review.disabledReason}
-              </p>
-            )}
-          </>
-        ) : (
-          props.form
+          </Button>
         )}
-        {props.stage !== "review" && (
-          <div role="status" className="tw-rounded-lg tw-bg-iron-800/70 tw-p-4">
-            <p className="tw-m-0 tw-text-sm tw-font-semibold">
-              {t(locale, `collect.trade.stage.${props.stage}`)}
-            </p>
-            {pending && (
-              <p className="tw-mb-0 tw-mt-2 tw-text-xs tw-leading-5 tw-text-iron-300">
-                {t(locale, "collect.trade.pendingNote")}
-              </p>
+      {props.recoveryAction}
+    </div>
+  );
+  const renderReview = () => {
+    if (!review)
+      return (
+        <>
+          {props.form}
+          {actionSlot}
+        </>
+      );
+    if (review.purchase)
+      return (
+        <CollectPurchaseSummary
+          purchase={review.purchase}
+          title={review.title}
+          media={review.media}
+          actionSlot={actionSlot}
+          deliverySlot={
+            props.recipientEditor && (
+              <div ref={recipientHost}>
+                <CollectReviewRecipient
+                  key={recipientScope}
+                  address={review.purchase.recipientAddress}
+                  name={review.purchase.recipientName}
+                  recipientInProfile={review.purchase.recipientInProfile}
+                  profile={props.recipientEditor.profile}
+                  payingWallet={props.recipientEditor.payingWallet}
+                  disabled={
+                    props.recipientEditor.disabled ||
+                    props.stage !== "review" ||
+                    confirming
+                  }
+                  onEditingChange={(open) => {
+                    editingRecipient.current = open ? recipientScope : null;
+                    setRecipientEditing({ scope: recipientScope, open });
+                  }}
+                  onApply={async (address, acknowledgeExternal) => {
+                    if (inFlight.current || !props.recipientEditor)
+                      return false;
+                    const updated = await props.recipientEditor.onApply(
+                      address,
+                      acknowledgeExternal
+                    );
+                    if (updated) {
+                      requestAnimationFrame(() => {
+                        recipientHost.current
+                          ?.querySelector<HTMLButtonElement>(
+                            "button[aria-expanded]"
+                          )
+                          ?.focus({ preventScroll: true });
+                      });
+                    }
+                    return updated;
+                  }}
+                />
+              </div>
+            )
+          }
+        />
+      );
+    if (review.orderReview)
+      return <CollectOrderSummary review={review} actionSlot={actionSlot} />;
+    return (
+      <>
+        {!props.compact && (
+          <div className="tw-flex tw-items-center tw-gap-3">
+            {review.media !== null && review.media !== undefined && (
+              <div className="tw-relative tw-flex tw-size-16 tw-shrink-0 tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-lg tw-bg-iron-900 [&_img]:tw-max-h-full [&_img]:tw-object-contain">
+                {review.media}
+              </div>
             )}
+            <div className="tw-min-w-0">
+              <h2 className="tw-m-0 tw-break-words tw-text-lg tw-font-semibold tw-leading-6 tw-tracking-tight">
+                {review.title}
+              </h2>
+              <p className="tw-mb-0 tw-mt-1 tw-text-xs tw-text-iron-400">
+                {t(locale, `collect.action.${review.action}`)}
+              </p>
+            </div>
           </div>
         )}
-        {(Boolean(props.message) || localError) && (
-          <p
-            role="alert"
-            className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-300"
-          >
-            {props.message ?? t(locale, "collect.trade.stage.failed")}
+        <Facts facts={review.facts} />
+        <div className="tw-flex tw-flex-wrap tw-items-baseline tw-justify-between tw-gap-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-5">
+          <p className="tw-m-0 tw-text-sm tw-text-iron-300">
+            {t(locale, `collect.review.total.${review.action}`)}
+          </p>
+          <p className="tw-m-0 tw-text-2xl tw-font-medium tw-tabular-nums tw-tracking-tight">
+            {review.totalLabel}
+          </p>
+        </div>
+        {(review.action === "list" || review.action === "offer") && (
+          <p className="tw-m-0 tw-text-[13px] tw-leading-5 tw-text-iron-400">
+            {t(locale, "collect.trade.orderWarning")}
           </p>
         )}
-        {review && props.stage === "review" && (
-          <div className="tw-sticky tw-bottom-0 tw-bg-iron-950 tw-py-3">
-            {expired ? (
-              <Button
-                variant="secondary"
-                size="lg"
-                fullWidth
-                onClick={props.onRefresh}
-              >
-                {t(locale, "collect.trade.refresh")}
-              </Button>
-            ) : (
-              <Button
-                variant="action"
-                size="lg"
-                fullWidth
-                disabled={!canConfirm}
-                loading={confirming}
-                onClick={() => {
-                  void confirm();
-                }}
-              >
-                {t(locale, "collect.trade.continue")}
-              </Button>
-            )}
-          </div>
+        {review.action === "cancel" && (
+          <p className="tw-m-0 tw-text-[13px] tw-leading-5 tw-text-iron-400">
+            {t(locale, "collect.trade.cancelWarning")}
+          </p>
         )}
-        {props.recoveryAction}
-      </div>
-    </MobileWrapperDialog>
+        {actionSlot}
+        {review.technicalFacts.length > 0 && (
+          <details className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-2">
+            <summary className="tw-cursor-pointer tw-rounded tw-py-3 tw-text-sm tw-font-medium tw-text-iron-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400">
+              {t(locale, "collect.trade.details")}
+            </summary>
+            <div className="tw-py-3">
+              <Facts facts={review.technicalFacts} />
+            </div>
+          </details>
+        )}
+      </>
+    );
+  };
+  const content = (
+    <div
+      className={`${styles["surface"] ?? ""} tw-w-full tw-space-y-6 tw-text-iron-100 ${props.compact ? "" : "tw-px-5 md:tw-px-7"}`}
+    >
+      {renderReview()}
+    </div>
+  );
+  if (props.presentation === "contents") return content;
+  return (
+    <CollectTradeDialog
+      open={props.open}
+      title={props.title}
+      onClose={props.onClose}
+    >
+      {content}
+    </CollectTradeDialog>
   );
 }

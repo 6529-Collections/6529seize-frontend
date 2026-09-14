@@ -38,5 +38,12 @@ describe("token utils", () => {
   it("maps content view", () => {
     expect(getContentView("provenance")).toBe(NextgenCollectionView.PROVENANCE);
     expect(getContentView("unknown")).toBe(NextgenCollectionView.ABOUT);
+    expect(getContentView("listings-and-offers")).toBe(
+      NextgenCollectionView.LISTINGS_AND_OFFERS
+    );
+    expect(getContentView("display-center")).toBe(
+      NextgenCollectionView.DISPLAY_CENTER
+    );
+    expect(getContentView("rarity")).toBe(NextgenCollectionView.RARITY);
   });
 });

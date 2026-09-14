@@ -4,6 +4,7 @@ import type {
   CollectTradeDraft,
 } from "./collect.types";
 import { isAddress, zeroAddress } from "viem";
+import { resolveCollectOrderExpiry } from "./collect-order-expiry";
 
 export function isPositiveEthAmount(value: string): boolean {
   const parts = value.split(".");
@@ -24,7 +25,11 @@ export function validateCollectGoal(
 ): "definition" | "quantity" | "budget" | null {
   if (!draft.definitionId && draft.intent !== "tdh") return "definition";
   if (!isPositiveWholeQuantity(draft.targetCount)) return "quantity";
-  if (requireBudget && !isPositiveEthAmount(draft.budgetEth)) return "budget";
+  if (
+    (requireBudget || draft.budgetEth !== "") &&
+    !isPositiveEthAmount(draft.budgetEth)
+  )
+    return "budget";
   return null;
 }
 
@@ -47,7 +52,7 @@ export function validateCollectTrade(
     return "price";
   if (
     (action === "list" || action === "offer") &&
-    !["24", "168", "720"].includes(draft.expiryHours)
+    resolveCollectOrderExpiry(draft) === null
   )
     return "expiry";
   if (

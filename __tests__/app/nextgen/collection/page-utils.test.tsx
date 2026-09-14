@@ -36,6 +36,9 @@ describe("collection utils", () => {
 
   it("maps views correctly", () => {
     expect(getCollectionView("rarity")).toBe(NextgenCollectionView.RARITY);
+    expect(getCollectionView("listings_and_offers")).toBe(
+      NextgenCollectionView.OVERVIEW
+    );
     expect(getContentViewKeyByValue(NextgenCollectionView.PROVENANCE)).toBe(
       "PROVENANCE"
     );

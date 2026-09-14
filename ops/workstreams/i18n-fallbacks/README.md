@@ -14,6 +14,7 @@ fallback dictionaries.
 | [Content moderation](content-moderation.md)                         | Moderation actions, tombstones, preferences, queue, and composer feedback currently fall back to the reviewed `en-US` messages |
 | [Public contract review](public-contract-review.md)                 | The shell, feedback composer, ledger, and immutable editorial snapshots currently use the source-locale fallback              |
 | [Network reference pages](network-reference-pages.md)               | Prenodes and xTDH remain English in source; Definitions and Historic Boosts messages fall back to `en-US` outside the source  |
+| [Listings and Offers](listings-and-offers.md)                       | Card price messages fall back to `en-US`; API explanatory notes currently have no localized identifiers                      |
 | [Museum Open Museum and source contribution](museum-open-source.md) | Museum source/contribution and transition interface messages currently resolve through the reviewed `en-US` fallback          |
 | [Museum data architecture](museum-data-architecture.md)             | The data-architecture reading room and profile interface currently resolve through the reviewed `en-US` fallback              |
 | [Share and connect controls](share-connect-controls.md)             | Page-sharing, social-action, device-connection, and account-menu messages currently fall back to `en-US` outside the source locale |
@@ -21,6 +22,7 @@ fallback dictionaries.
 | [Wallet and profile setup controls](wallet-profile-setup-controls.md) | App-wallet dialogs, profile-setup gates, and app-sidebar feedback remain source-locale English                               |
 | [Wave competition badges](wave-competition-badges.md)               | The source locale contains `waves.competitionBadges.*`; supported locale dictionaries still rely on fallback for this surface |
 | [Wave rules](wave-rules.md)                                         | Wave rule creation/rendering still includes direct English strings and non-localized formatting                               |
+| [Public wave sign-in](public-wave-sign-in.md) | New sign-in copy falls back to `en-US`; existing composer restriction messages remain English |
 
 Remove a debt record only in the same change that completes its remediation and
 verifies the supported locale and accessible-name behavior described by the

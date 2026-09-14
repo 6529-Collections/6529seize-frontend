@@ -1,17 +1,12 @@
-import Image from "next/image";
 import { useMemo, useState } from "react";
 
 import CmsSiteRenderer from "@/components/profile-cms/CmsSiteRenderer";
-import { getString } from "@/components/profile-cms/site-renderer/data";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
-import type { CmsPackageV1 } from "@/lib/profile-cms/protocol/v1";
 import {
-  DEMO_ART_ASSETS,
-  getCmsStudioDemoAssetPath,
-} from "@/lib/profile-cms/studio/demo-assets";
-import { MEME_ART_ASSETS } from "@/lib/profile-cms/studio/meme-assets";
-import { getCmsStudioMemeDisplayAsset } from "@/lib/profile-cms/studio/meme-display-assets";
+  cmsPackageSchema,
+  type CmsPackageV1,
+} from "@/lib/profile-cms/protocol/v1";
 import {
   CMS_STUDIO_TEMPLATES,
   instantiateCmsStudioTemplate,
@@ -32,15 +27,39 @@ const FAMILIES: readonly (CmsStudioTemplateFamily | "all" | "memes")[] = [
   "memes",
 ];
 
-export default function StudioTemplateLibrary({
-  handle,
-  locale,
-  onUse,
-}: {
+interface StudioTemplateLibraryProps {
   readonly handle: string;
   readonly locale: SupportedLocale;
   readonly onUse: (document: CmsPackageV1) => void;
-}) {
+}
+
+export default function StudioTemplateLibrary(
+  props: StudioTemplateLibraryProps
+) {
+  if (
+    !cmsPackageSchema.shape.profile.shape.handle.safeParse(props.handle).success
+  )
+    return (
+      <section className="tw-space-y-3 tw-p-4 sm:tw-p-8">
+        <h2 className="tw-m-0 tw-text-2xl tw-font-semibold tw-text-white">
+          {t(props.locale, "profileCms.studio.choose")}
+        </h2>
+        <p
+          role="alert"
+          className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-300"
+        >
+          {t(props.locale, "profileCms.studio.invalidProfileHandle")}
+        </p>
+      </section>
+    );
+  return <AvailableTemplateLibrary {...props} />;
+}
+
+function AvailableTemplateLibrary({
+  handle,
+  locale,
+  onUse,
+}: StudioTemplateLibraryProps) {
   const [family, setFamily] = useState<(typeof FAMILIES)[number]>("all");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const selected = CMS_STUDIO_TEMPLATES.find(
@@ -64,8 +83,9 @@ export default function StudioTemplateLibrary({
   const templates = CMS_STUDIO_TEMPLATES.filter(
     (template) =>
       family === "all" ||
-      template.family === family ||
-      (family === "memes" && template.inspiration?.kind === "meme")
+      (template.family === family && template.id !== "meme-v2") ||
+      (family === "memes" &&
+        (template.id === "meme-v2" || template.inspiration?.kind === "meme"))
   );
 
   return (
@@ -111,16 +131,15 @@ export default function StudioTemplateLibrary({
       </div>
       <div className="tw-grid tw-grid-cols-1 tw-gap-x-6 tw-gap-y-9 md:tw-grid-cols-2 xl:tw-grid-cols-3">
         {templates.map((template) => (
-          <button
-            type="button"
+          <article
             key={template.id}
-            onClick={() => setSelectedId(template.id)}
-            aria-label={t(locale, "profileCms.studio.previewTemplate", {
-              name: template.name,
-            })}
-            className="tw-group tw-min-w-0 tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-transparent tw-p-0 tw-text-left tw-transition-colors hover:tw-border-iron-500 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-4 focus-visible:tw-outline-primary-400"
+            className="tw-min-w-0 tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950"
           >
-            <TemplateThumbnail template={template} />
+            <TemplateThumbnail
+              template={template}
+              handle={handle}
+              locale={locale}
+            />
             <div className="tw-space-y-2 tw-p-5">
               <div className="tw-flex tw-items-center tw-justify-between tw-gap-3">
                 <h3 className="tw-m-0 tw-text-lg tw-font-semibold tw-text-white">
@@ -137,13 +156,44 @@ export default function StudioTemplateLibrary({
                 )}
               </p>
               <p className="tw-m-0 tw-pt-1 tw-text-xs tw-text-iron-400">
-                {t(locale, `profileCms.studio.${template.family}`)} ·{" "}
-                {t(locale, "profileCms.studio.pageCount", {
-                  count: template.pages.length,
-                })}
+                {t(
+                  locale,
+                  `profileCms.studio.${template.id === "meme-v2" ? "memes" : template.family}`
+                )}{" "}
+                ·{" "}
+                {t(
+                  locale,
+                  template.pages.length === 1
+                    ? "profileCms.studio.singlePage"
+                    : "profileCms.studio.pageCount",
+                  {
+                    count: template.pages.length,
+                  }
+                )}
               </p>
+              <div className="tw-flex tw-flex-wrap tw-gap-2 tw-pt-3">
+                <StudioButton
+                  onClick={() => setSelectedId(template.id)}
+                  label={t(locale, "profileCms.studio.previewTemplate", {
+                    name: template.name,
+                  })}
+                >
+                  {t(locale, "profileCms.studio.preview")}
+                </StudioButton>
+                <StudioButton
+                  primary
+                  label={t(locale, "profileCms.studio.useTemplateNamed", {
+                    name: template.name,
+                  })}
+                  onClick={() =>
+                    onUse(instantiateCmsStudioTemplate(template.id, handle))
+                  }
+                >
+                  {t(locale, "profileCms.studio.useTemplate")}
+                </StudioButton>
+              </div>
             </div>
-          </button>
+          </article>
         ))}
       </div>
     </section>
@@ -152,82 +202,32 @@ export default function StudioTemplateLibrary({
 
 function TemplateThumbnail({
   template,
+  handle,
+  locale,
 }: {
   readonly template: CmsStudioTemplate;
+  readonly handle: string;
+  readonly locale: SupportedLocale;
 }) {
-  const page = template.pages[0];
-  const imageBlock = page?.blocks.find((block) => block.block_type === "image");
-  const asset = [...DEMO_ART_ASSETS, ...MEME_ART_ASSETS].find(
-    (candidate) =>
-      candidate.id === (imageBlock ? getString(imageBlock, "asset_id") : null)
+  const document = useMemo(
+    () => instantiateCmsStudioTemplate(template.id, handle),
+    [handle, template.id]
   );
-  const source = asset
-    ? (getCmsStudioDemoAssetPath(asset) ??
-      getCmsStudioMemeDisplayAsset(asset)?.localPath)
-    : null;
-  const light = ["paper", "stone"].includes(
-    template.presentation.studio_palette
-  );
-  const serif = template.presentation.studio_type === "serif";
-  const fund = template.presentation.studio_layout === "fund";
+  const page = document.payload.pages[0];
   return (
     <div
       aria-hidden="true"
-      className={`tw-relative tw-h-64 tw-overflow-hidden tw-p-6 ${light ? "tw-bg-[#f5f3ed] tw-text-[#242420]" : "tw-bg-[#101820] tw-text-[#eeeee8]"}`}
+      inert
+      className="tw-relative tw-aspect-[4/3] tw-overflow-hidden tw-bg-iron-900"
     >
-      <div className="tw-border-current/20 tw-mb-7 tw-flex tw-items-center tw-justify-between tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-pb-3">
-        <span className="tw-text-[10px] tw-font-semibold tw-uppercase tw-tracking-widest">
-          {template.name}
-        </span>
-        <div className="tw-flex tw-gap-2">
-          <span className="tw-h-px tw-w-5 tw-bg-current" />
-          <span className="tw-h-px tw-w-5 tw-bg-current" />
-        </div>
-      </div>
-      <div
-        className={
-          source && !fund
-            ? "tw-grid tw-grid-cols-2 tw-items-start tw-gap-4"
-            : "tw-max-w-[85%]"
-        }
-      >
-        <div>
-          <p
-            className={`tw-m-0 tw-text-2xl tw-leading-[1.12] tw-tracking-tight ${serif ? "tw-font-serif" : "tw-font-semibold"}`}
-          >
-            {page?.title}
-          </p>
-          <div className="tw-mt-5 tw-space-y-2">
-            <div className="tw-h-px tw-w-full tw-bg-current tw-opacity-30" />
-            <div className="tw-h-px tw-w-3/4 tw-bg-current tw-opacity-30" />
-            <div className="tw-h-px tw-w-1/2 tw-bg-current tw-opacity-30" />
-          </div>
-        </div>
-        {source && asset && !fund ? (
-          <Image
-            src={source}
-            width={asset.width ?? 768}
-            height={asset.height ?? 768}
-            alt=""
-            sizes="180px"
-            className="tw-h-36 tw-w-full tw-object-contain tw-transition-transform motion-safe:group-hover:tw-scale-[1.025]"
-          />
+      <div className="tw-pointer-events-none tw-w-[333.333%] tw-origin-top-left tw-scale-[0.3]">
+        {page ? (
+          <CmsSiteRenderer cmsPackage={document} page={page} locale={locale} />
         ) : null}
       </div>
-      {fund ? (
-        <div className="tw-mt-8 tw-grid tw-grid-cols-3 tw-gap-4">
-          {[0, 1, 2].map((index) => (
-            <div
-              key={index}
-              className="tw-border-current/30 tw-h-12 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid"
-            />
-          ))}
-        </div>
-      ) : null}
     </div>
   );
 }
-
 function TemplatePreview({
   template,
   document,
@@ -255,7 +255,13 @@ function TemplatePreview({
         <span className="-tw-order-1 tw-basis-full tw-text-base tw-font-semibold tw-text-white sm:tw-order-none sm:tw-basis-auto sm:tw-text-lg">
           {template.name}
         </span>
-        <StudioButton primary onClick={onUse}>
+        <StudioButton
+          primary
+          onClick={onUse}
+          label={t(locale, "profileCms.studio.useTemplateNamed", {
+            name: template.name,
+          })}
+        >
           {t(locale, "profileCms.studio.useTemplate")}
         </StudioButton>
       </div>

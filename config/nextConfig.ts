@@ -1,4 +1,5 @@
 import { createSecurityHeaders } from "./securityHeaders";
+import { meebits445Headers } from "./meebits445Headers";
 import { PublicEnv } from "./env.schema";
 import { NextConfig } from "next";
 import { ARWEAVE_GATEWAY_REMOTE_PATTERN_HOSTNAMES } from "../lib/media/arweave-gateways";
@@ -91,6 +92,7 @@ export function sharedConfig(
             }
           ),
         },
+        meebits445Headers,
       ];
     },
     turbopack: {

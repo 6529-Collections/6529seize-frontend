@@ -2,7 +2,53 @@ import type { ApiArtworkDocumentationContext } from "@/generated/models/ApiArtwo
 import { ApiArtworkDocumentationAnswerStatusEnum } from "@/generated/models/ApiArtworkDocumentationAnswer";
 import { isPublicationOnly } from "./intake";
 
-export const DOCUMENTATION_ASSET_ROLES = [
+const MUSEUM_DOCUMENTATION_ASSET_ROLES = [
+  "artwork_final",
+  "preservation_master",
+  "camera_original",
+  "working_file",
+  "process_evidence",
+  "display_derivative",
+  "interview_recording",
+  "interview_transcript",
+  "other_supporting",
+  "print_output",
+  "color_profile",
+  "preset",
+  "source_code",
+  "dependency",
+  "environment_package",
+  "reference_capture",
+  "captions",
+  "notebook",
+  "publication",
+  "consent_instrument",
+  "rights_instrument",
+] as const;
+
+function hasMuseumMedia(context: ApiArtworkDocumentationContext): boolean {
+  const answer = context.modules["artwork"]?.answers["media_profiles"];
+  return (
+    context.profile.version === 3 &&
+    answer?.status === ApiArtworkDocumentationAnswerStatusEnum.Provided &&
+    Array.isArray(answer.value) &&
+    answer.value.some(
+      (media: unknown) =>
+        typeof media === "string" &&
+        context.profile.media_profiles?.some((profile) => profile.id === media)
+    )
+  );
+}
+export function documentationAssetRoles(
+  context: ApiArtworkDocumentationContext
+): readonly string[] {
+  if (hasMuseumMedia(context)) return MUSEUM_DOCUMENTATION_ASSET_ROLES;
+  return isPublicationOnly(context.profile)
+    ? PUBLICATION_DOCUMENTATION_ASSET_ROLES
+    : DOCUMENTATION_ASSET_ROLES;
+}
+
+const DOCUMENTATION_ASSET_ROLES = [
   "artwork_final",
   "preservation_master",
   "camera_original",
@@ -16,7 +62,7 @@ export const DOCUMENTATION_ASSET_ROLES = [
   "other_supporting",
 ] as const;
 
-export const PUBLICATION_DOCUMENTATION_ASSET_ROLES = [
+const PUBLICATION_DOCUMENTATION_ASSET_ROLES = [
   "artwork_final",
   "preservation_master",
   "process_evidence",
@@ -35,6 +81,8 @@ export function canPublishDocumentationAsset(
   role: string
 ): boolean {
   if (!isPublicationOnly(context.profile)) return true;
+  if (hasMuseumMedia(context))
+    return MUSEUM_DOCUMENTATION_ASSET_ROLES.some((allowed) => allowed === role);
   if (!PUBLICATION_DOCUMENTATION_ASSET_ROLES.some((item) => item === role))
     return false;
   const permissionField = INTERVIEW_PERMISSION_FIELDS[role];

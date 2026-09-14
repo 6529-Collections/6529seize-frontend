@@ -183,6 +183,8 @@ it.each(["USER_REJECTED", "WALLET_NOT_REQUESTED"] as const)(
     });
     const rejected = {
       ...operation,
+      state: "REVIEW",
+      expires_at: 0,
       send_attempt: { ...operation.send_attempt, status: "REJECTED" },
     };
     mockReject.mockResolvedValue(rejected);

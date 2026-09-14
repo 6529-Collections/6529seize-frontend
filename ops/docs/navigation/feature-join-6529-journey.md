@@ -40,7 +40,7 @@ The journey shows five visible steps:
 4. Participate.
 5. Collect.
 
-The Collect step includes minting active drops, buying on secondary markets, and
+The Collect step includes minting active drops, collecting on secondary markets, and
 setting up subscription minting for future Meme Cards. Logged-out visitors see
 the marketing timeline without progress chrome and the first step highlighted as
 the next action. Connected or logged-in users see progress state for the same

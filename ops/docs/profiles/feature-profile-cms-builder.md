@@ -6,12 +6,13 @@ Build a website for your 6529 profile with a visual editor. Choose a complete
 example, edit every page, add your own images or a wallet gallery, and publish
 when the site is ready. Templates and ordinary editing work without an AI agent.
 
-The library contains 39 templates: 23 original compositions and 16 inspired by
-credited CC0 cards from The Memes. Browse **People & ideas**, **Collections**,
-**Artists**, **Organizations**, **Funds & collecting groups**, or **The Memes**.
-Examples include personal and career sites, collector cabinets, artist studios,
-exhibitions, portfolios, process journals, editions, retrospectives, companies,
-foundations, crypto projects, funds, and collecting DAOs.
+The library offers six complete examples: **Personal**, **Artist**, **Collector**,
+**Meme**, **Organization**, and **Fund / DAO**. Each has its own visual design and
+populated content. The artist example includes three bodies of work and nine
+individual artwork pages; the collector includes nineteen works, four curated
+sets, and collecting notes; the fund / DAO includes seventeen works, an exhibition,
+a mandate, members, and decision records. Personal projects, a digital art club,
+and an artist-run organization's programme provide the other starting points.
 
 ## Location in the Site
 
@@ -41,7 +42,7 @@ Your normal profile remains at `/{user}`.
 4. Click a section in the page or select it in **Content**. Edit its text, image,
    caption, credit, link, width, or treatment. Add, duplicate, remove, or move
    sections with the available controls.
-5. Use **Design** for the site name, description, layout, palette, typography,
+5. Use **Design** for the site name, description, layout, color scheme, typography,
    spacing, and accent color. Use **Add your art** for image uploads and wallet
    gallery imports.
 6. Check every page in **Preview**, including the phone view and internal links.
@@ -53,6 +54,31 @@ Your normal profile remains at `/{user}`.
    content. Keep the signed publication manifest and recovery receipt.
 
 ## Common Scenarios
+
+### Color schemes and custom accents
+
+In **Design**, all 18 color schemes are available on each of the six complete
+templates, including **Original** and **6529**. **Original** uses the template's
+original color family with contrast adjustments. A scheme changes backgrounds,
+text, borders, controls, and the default accent across every page. Artwork colors,
+content, layout, typography, and spacing stay as you set them.
+
+The built-in schemes target WCAG AAA text contrast: at least 7:1 for normal text
+and 4.5:1 for large text. Controls and focus indicators target at least 3:1
+against adjacent colors. Your artwork and custom colors need their own review;
+choosing a palette does not certify the complete website's accessibility.
+
+Selecting a scheme applies its colors and default accent together. One **Undo**
+restores the previous scheme and accent; **Redo** reapplies both. To use your own
+accent afterward, edit **Accent color** and choose **Apply changes**. That custom
+accent stays until you edit it again or select another color scheme, which
+replaces it with that scheme's default accent.
+
+Choose **Apply changes** or **Discard form changes** before selecting a scheme
+if you have unfinished design fields. Existing saved drafts and published sites
+keep their appearance until you explicitly choose a scheme. Save and publish a
+revision to update the public website. Older template designs retain the
+**Ink**, **Paper**, **Stone**, and **Night** palette controls.
 
 ### Pages and navigation
 
@@ -92,10 +118,33 @@ Saving a draft does not make those files private. Upload only material you inten
 to make public and have permission to use. Removing a placement, replacing a
 draft, or unpublishing the website does not delete the uploaded file.
 
-The Memes templates display credited CC0 artwork with compact static previews,
-including still previews for animated cards. Their source artwork remains
-available through the artwork reference. Using a template does not claim token
-ownership, authorship, or endorsement by the artist.
+Examples include original generated artwork and individually credited CC0 works
+from The Memes and Blitmap. Animated originals use still previews with links to
+the original media. Using a template does not claim token ownership, authorship,
+or endorsement by the artist. Sample people, organizations, records, and edition
+offers are fictional; replace their claims and contact details before publishing.
+
+### Artwork archives and collection records
+
+The Artist, Collector, and Fund / DAO examples include individual artwork pages
+linked from visual selections. Browse the preview's artwork, curated groups, and
+menu before choosing a template. Archive sections can include search, categories,
+and grid or list views where the example provides them.
+
+In **Content**, choose a gallery to edit its works, titles, credits, categories,
+and detail-page links. Select a record section to edit its rows and links. Use
+**Pages** to edit each artwork's full description and supporting sections; changes
+to one detail page do not replace the other works. Existing image, section, page,
+design, and JSON controls remain available.
+
+### Project mockups
+
+The Personal example includes a project planner and a book catalogue as portfolio
+illustrations. Select either section in **Content** to edit its title, small
+label, heading, date or period, description, and footer note. **Mockup style**
+switches between **Project planner** and **Book catalogue**. Edit the section's
+rows to change tasks and statuses or books, authors, and loan notes, then choose
+**Apply changes** to update the preview.
 
 ### Wallet galleries
 
@@ -134,7 +183,7 @@ A holdings import does not identify the works an artist created.
 
 ## Edge Cases
 
-- A page still referenced by a link or the homepage cannot be removed. Choose
+- A page still referenced by a link, gallery work, collection record, or the homepage cannot be removed. Choose
   another home page and remove the remaining links before trying again.
 - Importing a complete package preserves its pages, navigation, assets, and
   advanced sections. Visual controls edit supported fields without discarding
@@ -180,8 +229,9 @@ For independent verification and an archival HTML copy, use
 ## Limitations / Notes
 
 - The **More tools** menu provides optional **JSON** and **Agent** workspaces.
-  The file-based agent workflow is described separately; a connected MCP agent
-  service is not available.
+  Bring your own agent through complete website file exchange or temporary
+  access to one saved draft with the downloadable local MCP adapter. Review
+  proposals before accepting them; saving and publication remain owner actions.
 - Wallet signing for publication is separate from an on-chain transaction.
 - Unpublishing does not delete immutable storage, other people's copies, or
   external media. A publication receipt alone is not an offline media backup.

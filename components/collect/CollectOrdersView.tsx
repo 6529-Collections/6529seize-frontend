@@ -3,7 +3,9 @@
 import Button from "@/components/utils/button/Button";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import type { CollectOrderView } from "./collect.types";
+import marketplaceFont from "./marketplace-font.module.css";
 
 interface CollectOrdersViewProps {
   readonly orders: readonly CollectOrderView[];
@@ -22,9 +24,11 @@ interface CollectOrdersViewProps {
 export default function CollectOrdersView(props: CollectOrdersViewProps) {
   const locale = useBrowserLocale();
   return (
-    <div className="tailwind-scope tw-mx-auto tw-w-full tw-max-w-[1100px] tw-px-4 tw-py-6 tw-text-iron-100 md:tw-px-6 lg:tw-px-8">
+    <div
+      className={`${marketplaceFont["surface"] ?? ""} tailwind-scope tw-mx-auto tw-w-full tw-max-w-[1100px] tw-px-4 tw-py-6 tw-text-iron-100 md:tw-px-6 lg:tw-px-8`}
+    >
       <header className="tw-mb-6">
-        <h1 className="tw-m-0 tw-text-3xl tw-font-semibold tw-tracking-tight">
+        <h1 className="tw-m-0 tw-text-2xl tw-font-medium tw-tracking-tight">
           {t(locale, "collect.orders")}
         </h1>
         <p className="tw-mb-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-400">
@@ -68,11 +72,11 @@ export default function CollectOrdersView(props: CollectOrdersViewProps) {
               </p>
             </div>
           )}
-          <ul className="tw-m-0 tw-list-none tw-space-y-3 tw-p-0">
+          <ul className="tw-m-0 tw-list-none tw-p-0">
             {props.orders.map((order) => (
               <li
                 key={order.id}
-                className="tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-p-4 sm:tw-p-5"
+                className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/10 tw-py-5 first:tw-pt-2"
               >
                 <div className="tw-flex tw-items-start tw-gap-4">
                   {order.media !== undefined && order.media !== null && (
@@ -86,32 +90,29 @@ export default function CollectOrdersView(props: CollectOrdersViewProps) {
                         {t(locale, `collect.action.${order.action}`)} ·{" "}
                         {order.tokenLabel}
                       </p>
-                      <span className="tw-rounded-md tw-bg-iron-800 tw-px-2 tw-py-1 tw-text-xs tw-font-medium tw-text-iron-200">
+                      <span className="tw-rounded-md tw-bg-white/5 tw-px-2 tw-py-1 tw-text-xs tw-text-iron-300">
                         {order.statusLabel}
                       </span>
                     </div>
-                    <h2 className="tw-mb-0 tw-mt-2 tw-break-words tw-text-base tw-font-semibold tw-leading-6">
+                    <h2 className="tw-mb-0 tw-mt-2 tw-break-words tw-text-sm tw-font-medium tw-leading-5">
                       {order.title}
                     </h2>
-                    <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-tabular-nums">
+                    <p className="tw-mb-0 tw-mt-2 tw-break-words tw-text-base tw-font-medium tw-tabular-nums">
                       {order.amountLabel}
                     </p>
                     <p className="tw-mb-0 tw-mt-2 tw-text-xs tw-leading-5 tw-text-iron-400">
                       {order.detail}
                     </p>
-                    <p className="tw-mb-0 tw-mt-1 tw-break-all tw-text-xs tw-leading-5 tw-text-iron-400">
-                      {t(locale, "collect.orders.maker", {
-                        wallet: order.makerLabel,
-                      })}
-                    </p>
-                    <p className="tw-mb-0 tw-mt-1 tw-text-xs tw-text-iron-400">
-                      {t(locale, "collect.orders.updated", {
-                        time: order.updatedLabel,
-                      })}
-                    </p>
                   </div>
                 </div>
-                <div className="tw-mt-4 tw-flex tw-flex-wrap tw-items-center tw-gap-2">
+                <div
+                  className={`tw-mt-3 tw-flex tw-flex-wrap tw-items-center tw-gap-2 ${order.media !== undefined && order.media !== null ? "sm:tw-pl-20" : ""}`}
+                >
+                  <p className="tw-m-0 tw-min-w-0 tw-basis-full tw-break-words tw-text-xs tw-leading-5 tw-text-iron-400 sm:tw-basis-auto sm:tw-pr-2">
+                    {t(locale, "collect.orders.updated", {
+                      time: order.updatedLabel,
+                    })}
+                  </p>
                   <Button
                     variant="secondary"
                     size="sm"
@@ -137,6 +138,22 @@ export default function CollectOrdersView(props: CollectOrdersViewProps) {
                     </p>
                   )}
                 </div>
+                <details
+                  className={`tw-group tw-mt-1 tw-text-xs tw-leading-5 tw-text-iron-400 ${order.media !== undefined && order.media !== null ? "sm:tw-pl-20" : ""}`}
+                >
+                  <summary className="tw-inline-flex tw-min-h-11 tw-cursor-pointer tw-list-none tw-items-center tw-gap-2 tw-rounded-md focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 [&::-webkit-details-marker]:tw-hidden">
+                    {t(locale, "collect.orders.details")}
+                    <ChevronDownIcon
+                      aria-hidden="true"
+                      className="tw-size-3 tw-shrink-0 group-open:tw-rotate-180"
+                    />
+                  </summary>
+                  <p className="tw-m-0 tw-break-all tw-pb-2">
+                    {t(locale, "collect.orders.maker", {
+                      wallet: order.makerLabel,
+                    })}
+                  </p>
+                </details>
               </li>
             ))}
           </ul>

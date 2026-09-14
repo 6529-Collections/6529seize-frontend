@@ -2,6 +2,60 @@
 
 This directory contains browser tests for 6529.io.
 
+## Route classification inventory
+
+`tests/routes.manifest.json` records the intended testing treatment of every
+App Router page pattern. The required Debt Ratchet check consumes it and fails
+on missing or stale routes, unclassified entries, and malformed decisions.
+This is a static inventory, **not measured E2E coverage**: it does not navigate
+to pages, prove fixture availability, or add routes to the browser packs below.
+Do not report its classified-route count as tested routes.
+
+When adding, moving, or removing a page, run `6529 run routes-manifest:update`,
+review the diff, classify each `UNCLASSIFIED` entry, then run
+`6529 run routes-manifest:check`. The update preserves existing decisions and
+removes entries whose pages were deleted. `6529 exec node
+scripts/routes-manifest.cjs --json` prints the discovered patterns.
+
+- `crawlable`: a public static URL suitable for unauthenticated read-only
+  testing. This includes public redirects. It does not mean a crawler exists.
+- `fixture`: a parameterized public route, with a concrete root-relative path
+  in `fixture.staging` and `fixture.production`. For each unavailable or
+  unqualified environment, supply a non-empty `fixtureOmissions` reason instead
+  of a URL. A missing URL is never silently treated as coverage. Values are
+  paths without query strings, fragments, credentials, or unresolved brackets.
+- `auth`: a session or privileged role is needed for the meaningful surface;
+  unauthenticated guard tests may still cover it.
+- `exempt`: intentionally excluded from route sampling, with `exemptReason`.
+
+Classify each page from its own access requirements. For example,
+`/artwork-documentation/example/an-alteration` renders checked-in public sample
+content and is `crawlable`, while the neighboring record editors use the
+documentation authentication gate. A `noindex` metadata setting is not an
+authentication requirement.
+
+Optional `family` and `projects` fields group intended sampling decisions;
+they do not schedule tests. Omitted projects impose no project restriction.
+The initial fixtures reuse existing browser examples, checked-in report slugs,
+Museum route contracts, and the September Stream publication. Some dynamic
+catalog/legacy-alias and reference-declaration routes still need qualified
+fixtures; their per-environment omissions make this remaining work explicit.
+Recheck fixture availability when a browser consumer is introduced or changed.
+
+The scanner covers `page.ts`, `page.tsx`, `page.js`, and `page.jsx` under `app/`,
+removes `(group)` segments, and excludes `_private` subtrees. `%5F` escapes
+produce public underscore segments. Route handlers, metadata, query-string
+variants, standalone apps, and generated dynamic instances are outside this
+page-pattern inventory. The repository uses the standard page extensions;
+update the scanner alongside any custom `pageExtensions` configuration.
+Parallel slots, intercepting routes, symlinks, and duplicate page patterns fail
+closed until the inventory can represent them explicitly.
+
+Keep exhaustive inventory checks at this static layer. Add representative
+browser tests for distinct rendering or navigation risks according to
+[AGENTS.md](../AGENTS.md#test-layer-selection), and register real browser packs
+in `tests/packs.manifest.cjs`.
+
 ## Pack registry
 
 `tests/packs.manifest.cjs` is the source of truth for Playwright package

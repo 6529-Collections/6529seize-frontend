@@ -23,14 +23,12 @@ jest.mock("@/components/mobile-wrapper-dialog/MobileWrapperDialog", () => ({
       </div>
     ) : null,
 }));
-
 const review: CollectTradeReview = {
   id: "quote-1",
   revision: "revision-3",
   action: "buy",
   title: "Meme card",
   facts: [
-    { label: "Quantity", value: "2" },
     {
       label: "Receiving wallet",
       value: "0x2222222222222222222222222222222222222222",
@@ -40,12 +38,43 @@ const review: CollectTradeReview = {
   totalLabel: "0.125 ETH",
   totalDescription: "Maximum purchase amount",
   warnings: [],
-  expiresAt: null,
+  expiresAt: Date.now() + 60_000,
 };
-
-describe("Collect immutable review", () => {
-  it("submits the reviewed ID and revision exactly once while confirmation is pending", async () => {
-    let finish: (() => void) | undefined;
+it.each([null, 0, Number.NaN, Number.POSITIVE_INFINITY, Date.now() - 1000])(
+  "keeps review readable with deadline %s and delegates automatic revalidation to execution",
+  async (expiresAt) => {
+    const onConfirm = jest.fn(async () => undefined);
+    const onRefresh = jest.fn();
+    render(
+      <CollectTradeSheet
+        open
+        presentation="contents"
+        review={{ ...review, expiresAt }}
+        stage="review"
+        onClose={jest.fn()}
+        onRefresh={onRefresh}
+        onConfirm={onConfirm}
+      />
+    );
+    expect(
+      screen.queryByText(/1970|valid until|expired/i)
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /refresh/i })
+    ).not.toBeInTheDocument();
+    await act(async () => {
+      fireEvent.click(
+        screen.getByRole("button", { name: "Continue in wallet" })
+      );
+    });
+    expect(onConfirm).toHaveBeenCalledWith(review.id, review.revision);
+    expect(onRefresh).not.toHaveBeenCalled();
+  }
+);
+it.each(["dialog", "contents"] as const)(
+  "keeps one confirmation in flight in %s",
+  async (presentation) => {
+    let finish!: () => void;
     const onConfirm = jest.fn(
       () =>
         new Promise<void>((resolve) => {
@@ -55,97 +84,94 @@ describe("Collect immutable review", () => {
     render(
       <CollectTradeSheet
         open
-        review={review}
+        presentation={presentation}
+        review={{ ...review, action: "offer", expiresAt: 0 }}
         stage="review"
         onClose={jest.fn()}
         onRefresh={jest.fn()}
         onConfirm={onConfirm}
       />
     );
-    const button = screen.getByRole("button", { name: "Continue to wallet" });
+    const button = screen.getByRole("button", { name: "Continue in wallet" });
     fireEvent.click(button);
     fireEvent.click(button);
-    expect(onConfirm).toHaveBeenCalledTimes(1);
-    expect(onConfirm).toHaveBeenCalledWith("quote-1", "revision-3");
     expect(button).toBeDisabled();
+    expect(onConfirm).toHaveBeenCalledTimes(1);
+    expect(onConfirm).toHaveBeenCalledWith(review.id, review.revision);
     await act(async () => {
-      finish?.();
+      finish();
     });
-  });
-
-  it("blocks stale terms and requests a new review", () => {
-    const onConfirm = jest.fn(async () => undefined);
-    const onRefresh = jest.fn();
-    render(
-      <CollectTradeSheet
-        open
-        review={{ ...review, expiresAt: Date.now() - 1000 }}
-        stage="review"
-        onClose={jest.fn()}
-        onRefresh={onRefresh}
-        onConfirm={onConfirm}
-      />
-    );
-    expect(
-      screen.queryByRole("button", { name: "Continue to wallet" })
-    ).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Refresh review" }));
-    expect(onRefresh).toHaveBeenCalledTimes(1);
-    expect(onConfirm).not.toHaveBeenCalled();
-  });
-
-  it("keeps the immutable recipient visible when a signing wallet becomes unavailable", () => {
-    render(
-      <CollectTradeSheet
-        open
-        review={{ ...review, disabledReason: "Reconnect the signing wallet" }}
-        stage="review"
-        onClose={jest.fn()}
-        onRefresh={jest.fn()}
-        onConfirm={jest.fn(async () => undefined)}
-      />
-    );
-    expect(
-      screen.getByText("0x2222222222222222222222222222222222222222")
-    ).toBeVisible();
-    expect(
-      screen.getByRole("button", { name: "Continue to wallet" })
-    ).toBeDisabled();
-  });
-
-  it("does not offer duplicate submission while an outcome is unknown", () => {
+  }
+);
+it("keeps recipient inspectable when the signing wallet becomes unavailable", () => {
+  render(
+    <CollectTradeSheet
+      open
+      review={{ ...review, disabledReason: "Reconnect the signing wallet" }}
+      stage="review"
+      onClose={jest.fn()}
+      onRefresh={jest.fn()}
+      onConfirm={jest.fn()}
+    />
+  );
+  expect(screen.getByText(review.facts[0]!.value)).toBeVisible();
+  expect(
+    screen.getByRole("button", { name: "Continue in wallet" })
+  ).toBeDisabled();
+});
+it.each(["wallet", "reconciling", "awaiting_signatures"] as const)(
+  "does not expose a second send in %s",
+  (stage) => {
     render(
       <CollectTradeSheet
         open
         review={review}
-        stage="reconciling"
+        stage={stage}
         onClose={jest.fn()}
         onRefresh={jest.fn()}
-        onConfirm={jest.fn(async () => undefined)}
+        onConfirm={jest.fn()}
       />
     );
-    expect(screen.getByRole("status")).toHaveTextContent(
-      "Checking the outcome"
-    );
+    expect(screen.getByRole("status")).toBeVisible();
     expect(
-      screen.queryByRole("button", { name: "Continue to wallet" })
+      screen.queryByRole("button", { name: "Continue in wallet" })
     ).not.toBeInTheDocument();
-  });
-
-  it("does not present a Safe proposal as a completed purchase", () => {
-    render(
-      <CollectTradeSheet
-        open
-        review={review}
-        stage="awaiting_signatures"
-        onClose={jest.fn()}
-        onRefresh={jest.fn()}
-        onConfirm={jest.fn(async () => undefined)}
-      />
-    );
-    expect(screen.getByRole("status")).toHaveTextContent(
-      "Awaiting wallet signatures and execution"
-    );
     expect(screen.queryByText("Action confirmed")).not.toBeInTheDocument();
-  });
+  }
+);
+it("places the wallet action before expanded technical terms", () => {
+  render(
+    <CollectTradeSheet
+      open
+      review={review}
+      stage="review"
+      onClose={jest.fn()}
+      onRefresh={jest.fn()}
+      onConfirm={jest.fn()}
+    />
+  );
+  const action = screen.getByRole("button", { name: "Continue in wallet" });
+  const details = screen.getByText("Transaction details");
+  fireEvent.click(details);
+  expect(
+    action.compareDocumentPosition(details) & Node.DOCUMENT_POSITION_FOLLOWING
+  ).toBeTruthy();
+});
+
+it("shows a recovery failure while the unresolved transaction still blocks another send", () => {
+  render(
+    <CollectTradeSheet
+      open
+      review={review}
+      stage="reconciling"
+      message="This transaction could not be verified. Check the hash and try again."
+      onClose={jest.fn()}
+      onRefresh={jest.fn()}
+      onConfirm={jest.fn()}
+    />
+  );
+  expect(screen.getByRole("alert")).toHaveTextContent("Check the hash");
+  expect(
+    screen.queryByRole("button", { name: "Continue in wallet" })
+  ).not.toBeInTheDocument();
 });

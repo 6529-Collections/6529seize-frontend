@@ -7,12 +7,17 @@ import {
   getQueryImageUrl,
   getQueryText,
   OG_CACHE_CONTROL,
-  OG_IMAGE_SIZE,
 } from "@/app/api/og-metadata/_lib/routeUtils";
 import { getUsableText } from "@/app/api/og-metadata/_lib/imageUtils";
 import { loadMontserratFonts } from "@/app/api/og-metadata/profiles/[identity]/font";
+import {
+  NFT_SOCIAL_CARD_SIZES,
+  type NftSocialCardFormat,
+} from "@/components/providers/metadata";
 import { ImageResponse } from "next/og";
 import { NextResponse } from "next/server";
+import { prepareNftArtworkImage } from "./artwork";
+import { fetchNftCardMetadata, type NftCardMetadata } from "./metadata";
 
 export const runtime = "edge";
 export const revalidate = 3600;
@@ -28,25 +33,33 @@ const getDefaultTitle = ({
 const getNftCardModel = ({
   contract,
   id,
+  format,
   request,
+  metadata,
 }: {
   readonly contract: string;
   readonly id: string;
+  readonly format: NftSocialCardFormat;
   readonly request: Request;
+  readonly metadata: NftCardMetadata | null;
 }): BrandedNftOgImageModel => {
   const searchParams = new URL(request.url).searchParams;
-  const collection = getQueryText(searchParams, "collection");
+  const collection =
+    getQueryText(searchParams, "collection") ?? metadata?.collection ?? null;
   const title =
-    getQueryText(searchParams, "title") ?? getDefaultTitle({ collection, id });
+    getQueryText(searchParams, "title") ??
+    metadata?.title ??
+    getDefaultTitle({ collection, id });
 
   return {
-    artist: getQueryText(searchParams, "artist"),
-    badge: getQueryText(searchParams, "badge") ?? collection,
+    artist: getQueryText(searchParams, "artist") ?? metadata?.artist,
+    badge: getQueryText(searchParams, "badge") ?? metadata?.badge ?? collection,
     collection,
     contract,
-    displayId: getQueryText(searchParams, "displayId"),
+    displayId: getQueryText(searchParams, "displayId") ?? metadata?.displayId,
+    format,
     id,
-    imageUrl: getQueryImageUrl(searchParams, "image"),
+    imageUrl: getQueryImageUrl(searchParams, "image") ?? metadata?.imageUrl,
     origin: getOgImageRequestOrigin(request),
     subtitle: getQueryText(searchParams, "subtitle"),
     title,
@@ -75,18 +88,47 @@ export async function GET(
     );
   }
 
+  const requestedFormat = new URL(request.url).searchParams.get("format");
+  const format = requestedFormat ?? "landscape";
+  if (!Object.hasOwn(NFT_SOCIAL_CARD_SIZES, format)) {
+    return NextResponse.json(
+      {
+        error:
+          "Invalid artwork format. Use landscape, square, portrait, or story.",
+      },
+      { status: 400 }
+    );
+  }
+  const cardFormat = format as NftSocialCardFormat;
+
   try {
+    const searchParams = new URL(request.url).searchParams;
+    const metadata =
+      getQueryImageUrl(searchParams, "image") === null
+        ? await fetchNftCardMetadata(
+            normalizedContract,
+            normalizedId,
+            request.signal
+          )
+        : null;
+    const model = getNftCardModel({
+      contract: normalizedContract,
+      id: normalizedId,
+      format: cardFormat,
+      request,
+      metadata,
+    });
+    // Satori swallows remote image failures. Explicit downloads must have art
+    // ready before rendering; ordinary crawler previews retain their fallback.
+    const imageDataUrl =
+      requestedFormat === null
+        ? undefined
+        : await prepareNftArtworkImage(model, request.signal);
     const montserratFonts = await loadMontserratFonts();
     return new ImageResponse(
-      renderBrandedNftOgImage(
-        getNftCardModel({
-          contract: normalizedContract,
-          id: normalizedId,
-          request,
-        })
-      ),
+      renderBrandedNftOgImage({ ...model, imageDataUrl }),
       {
-        ...OG_IMAGE_SIZE,
+        ...NFT_SOCIAL_CARD_SIZES[cardFormat],
         fonts: montserratFonts,
         headers: {
           "Cache-Control": OG_CACHE_CONTROL,

@@ -67,6 +67,7 @@ function RecipientSelectedDisplay({
   selectedWallet,
   onWalletSelect,
   disableSingleWalletSelection,
+  showWalletTdh,
   locale,
 }: {
   readonly selectedProfile: CommunityMemberMinimal;
@@ -81,6 +82,7 @@ function RecipientSelectedDisplay({
   readonly selectedWallet: string | null;
   readonly onWalletSelect: (wallet: string) => void;
   readonly disableSingleWalletSelection: boolean;
+  readonly showWalletTdh: boolean;
   readonly locale: SupportedLocale;
 }) {
   const selectedProfileLabel =
@@ -132,6 +134,18 @@ function RecipientSelectedDisplay({
         const isSel = selectedWallet?.toLowerCase() === w.wallet.toLowerCase();
         const hasDisplay =
           w.display && w.display.toLowerCase() !== w.wallet.toLowerCase();
+        const walletTdh = profile?.wallets?.find((wallet) =>
+          areEqualAddresses(wallet.wallet, w.wallet)
+        )?.tdh;
+        const walletContext =
+          showWalletTdh &&
+          typeof walletTdh === "number" &&
+          Number.isFinite(walletTdh) &&
+          walletTdh >= 0
+            ? translate(locale, "collect.recipient.walletTdh", {
+                tdh: formatInteger(locale, walletTdh),
+              })
+            : null;
         const classes = [
           "tw-flex tw-min-h-[58px] tw-w-full tw-flex-col tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900/50 tw-p-3 tw-transition-all",
           hasDisplay
@@ -153,6 +167,11 @@ function RecipientSelectedDisplay({
                   {w.wallet}
                 </div>
               )}
+              {walletContext && (
+                <div className="tw-text-xs tw-font-normal tw-tabular-nums tw-leading-5 tw-text-iron-400">
+                  {walletContext}
+                </div>
+              )}
             </div>
           );
         }
@@ -161,6 +180,7 @@ function RecipientSelectedDisplay({
           <button
             key={w.wallet}
             type="button"
+            aria-pressed={isSel}
             onClick={() => onWalletSelect(w.wallet)}
             className={[classes, "hover:tw-bg-iron-800"].join(" ")}
           >
@@ -170,6 +190,11 @@ function RecipientSelectedDisplay({
             {hasDisplay && (
               <div className="tw-text-[11px] tw-font-medium tw-text-iron-500">
                 {w.wallet}
+              </div>
+            )}
+            {walletContext && (
+              <div className="tw-text-xs tw-font-normal tw-tabular-nums tw-leading-5 tw-text-iron-400">
+                {walletContext}
               </div>
             )}
           </button>
@@ -254,6 +279,8 @@ function RecipientSearchDisplay({
   resultsAtEnd,
   searchInputRef,
   placeholder,
+  autoFocus,
+  label,
   locale,
 }: {
   readonly query: string;
@@ -266,14 +293,17 @@ function RecipientSearchDisplay({
   readonly resultsAtEnd: boolean;
   readonly searchInputRef: React.RefObject<HTMLInputElement | null>;
   readonly placeholder?: string;
+  readonly autoFocus: boolean;
+  readonly label: string;
   readonly locale: SupportedLocale;
 }) {
   return (
     <>
       <div className="tw-relative">
         <input
-          autoFocus
+          autoFocus={autoFocus}
           type="text"
+          aria-label={label}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder={
@@ -328,8 +358,12 @@ function RecipientSearchDisplay({
 }
 
 interface RecipientSelectorProps {
+  readonly onSearchChange?: (query: string) => void;
   readonly open: boolean;
   readonly selectedProfile: CommunityMemberMinimal | null;
+  /** Confirmed identity for the selected profile, supplied by its owning flow. */
+  readonly resolvedIdentity?: ApiIdentity;
+  readonly autoFocusSearch?: boolean;
   readonly selectedWallet: string | null;
   readonly onProfileSelect: (profile: CommunityMemberMinimal | null) => void;
   readonly onWalletSelect: (wallet: string | null) => void;
@@ -339,21 +373,26 @@ interface RecipientSelectorProps {
   readonly allowProfileChange?: boolean;
   readonly disableSingleWalletSelection?: boolean;
   readonly showSelectedProfileCard?: boolean;
+  readonly showWalletTdh?: boolean;
   readonly locale?: SupportedLocale | undefined;
 }
 
 export default function RecipientSelector({
   open,
   selectedProfile,
+  resolvedIdentity,
+  autoFocusSearch = true,
   selectedWallet,
   onProfileSelect,
   onWalletSelect,
+  onSearchChange,
   placeholder,
   showLabel = true,
   label,
   allowProfileChange = true,
   disableSingleWalletSelection = false,
   showSelectedProfileCard = true,
+  showWalletTdh = false,
   locale = DEFAULT_LOCALE,
 }: RecipientSelectorProps) {
   const [query, setQuery] = useState("");
@@ -366,10 +405,12 @@ export default function RecipientSelector({
 
   const handleOrWallet =
     selectedProfile?.handle ?? selectedProfile?.wallet ?? null;
-  const { profile, isLoading: isIdentityLoading } = useIdentity({
-    handleOrWallet: handleOrWallet ?? "",
+  const { profile: fetchedProfile, isLoading } = useIdentity({
+    handleOrWallet: resolvedIdentity ? "" : (handleOrWallet ?? ""),
     initialProfile: null,
   });
+  const profile = resolvedIdentity ?? fetchedProfile;
+  const isIdentityLoading = !resolvedIdentity && isLoading;
 
   const resultsListRef = useRef<HTMLDivElement | null>(null);
   const walletsListRef = useRef<HTMLDivElement | null>(null);
@@ -507,6 +548,7 @@ export default function RecipientSelector({
       !data ||
       data.length === 0 ||
       !debouncedQuery ||
+      debouncedQuery !== trimmedQuery ||
       !trimmedQuery
     ) {
       return;
@@ -627,12 +669,18 @@ export default function RecipientSelector({
           selectedWallet={selectedWallet}
           onWalletSelect={onWalletSelect}
           disableSingleWalletSelection={disableSingleWalletSelection}
+          showWalletTdh={showWalletTdh}
           locale={locale}
         />
       ) : (
         <RecipientSearchDisplay
+          autoFocus={autoFocusSearch}
+          label={label ?? translate(locale, "recipientSelector.label")}
           query={query}
-          setQuery={setQuery}
+          setQuery={(nextQuery) => {
+            setQuery(nextQuery);
+            onSearchChange?.(nextQuery);
+          }}
           searchStatusText={searchStatusText}
           results={results}
           onPick={(r) => {

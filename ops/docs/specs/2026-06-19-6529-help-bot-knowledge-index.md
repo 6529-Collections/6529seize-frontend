@@ -26,12 +26,112 @@ backend-owned frontend product records. The source lives at
 `ops/help/help-index.json`, the sync step writes `public/help-index.json`, and
 the backend consumes the deployed `/help-index.json` with a short cache.
 
+The wallet connection and Wave composer records explain **Sign in to 6529 to
+post**, the wallet chooser, and the **Sign message** step. The sign-in explanation
+confirms address ownership, with no transaction or gas fees. Profile setup and
+Wave permissions still determine participation after authentication.
+
+The Memes submission profile and wallet signing record covers the EIP-712
+**Submit a Meme Card to The Memes** action, readable artwork and destination,
+terms agreement, and submission-only scope with no gas fee. Its five-minute
+authorization expiry does not expire a completed submission or the agreement.
+The record distinguishes canceling a wallet request, which retains the open
+draft, from closing the submission modal, which discards it. Wallet layout and
+classification vary; failed typed signing does not trigger a text-signature
+fallback.
+
 The Stream review record includes its four current entry guides and the
 **All topics** navigation. Its collector and code-review guide links refer to
 current pages; those guides are not invented as historical snapshot routes.
 
+The Meebits #445 record explains the compatibility viewer's Coinbase ETH/USD
+feed, automatic retries, and animated background. It directs users to the
+card's **Details** tab for the original Arweave artwork and metadata.
+
+The collecting record describes results below the goal controls, priced
+quantities, costs and explicit budget-versus-available scenarios. **Collect now**
+opens purchase selection and **Make offers** opens per-NFT offer pricing.
+Listing-card facts distinguish compact ETH prices from expandable Exact amounts;
+shortened prices do not change listing terms or purchase quantities.
+The card records preserve `focus=the-art` deep links to the Memes and Meme Lab
+**Overview**, where artwork details follow the description. The **Listings & offers**
+tab opens the market directly without another accordion. Primary and History tab changes keep the tab row visible and
+show the selected section from its top while deferred content loads.
+The Listings and Offers record distinguishes direct **Collect** and **Sell**
+actions for one order from the explicit choice among multiple orders at a price.
+Market browsing facts describe quiet periodic updates while visible and idle,
+paused for expanded order details, a chosen listing or open review as applicable.
+Healthy and empty states have no routine Refresh action; retrieval failures retain
+Try again or Retry details, as shown.
+Captured quotes are not guaranteed executable orders, and browsing updates do
+not replace the exact checks at preparation and Continue in wallet.
+The Collect navigation label opens the set planner. Individual purchase facts
+describe separate Pay with and Deliver to rows, expandable full wallet addresses,
+and editing delivery from expanded delivery rows on every supported purchase,
+including selected listings, Collect purchases and saved purchases in Orders.
+For multiple items or split deliveries, an edit retains all other NFTs and
+allocations. Choosing an existing destination for the same NFT combines its copies.
+Send to me offers confirmed profile wallets; Send to a fren supports a profile,
+ENS name or wallet address. The chooser shows available profile picture, name,
+profile level and profile TDH, plus each wallet's TDH when known. Level describes
+the profile, not an individual wallet. These cues do not replace checking the
+full resolved destination address. Use this address applies the selected
+destination to a fresh review, Cancel retains the current one, and an external
+address requires confirmation. Continue in wallet stays disabled until the edit
+is applied or cancelled; confirmation is unavailable while the new review prepares.
+Delivery editing is unavailable during a wallet transaction or
+outcome recovery. Purchase facts also describe included order fees, network fee
+caps and conditional maximum totals. Price breakdown, nested Exact amounts and
+Contract details preserve precise amounts,
+permissions and named Ethereum contract identities. Continue in wallet checks
+current terms and refreshes quotes when needed for purchases, listings, offers,
+sales and cancellations, including supported multiple-item purchases. Changed
+terms require another review; unresolved sends are checked instead of resent.
+View listings & offers selects the market tab from other token detail views;
+switching tabs retains the market selection and active review.
+
+Meme Lab card records include the shared Collect, Make an offer, List and Sell
+controls, exact-card eligibility checks, edition quantities and purchase delivery
+choices. Meme Lab trading is distinct from the Memes, Gradients and Pebbles
+universe used by the set planner, Lowest listings and TDH tools.
+
+Collecting strategy records cover Collect now, At WETH offer, WETH + %, Ask − %,
+and Blended. They distinguish per-NFT calculations, separate ETH purchase and
+WETH offer budgets, exact listing quantities, and reservations that do not imply
+a submitted or confirmed purchase.
+
 The EMMA record covers the five fixed collection shortcuts, Memes season
 selection, Intern JPG token IDs, and the manual contract path in Create Snapshots.
+
+The Memes mint-route record covers **Confirm in your wallet**, the expandable
+**Wallet not showing?** instructions, **Mint submitted**, and the
+receipt-confirmed **SEIZED!** state. Artwork details, **Quantity**, and the full
+destination stay visible throughout; the destination label changes from
+**Recipient** to **Minted to** after confirmation. Pending states cannot be
+dismissed; a wallet request can be rejected in the wallet before submission.
+The record distinguishes **Done**, available after confirmation, from the
+optional **View transaction** link, which opens a new tab. An unavailable
+artwork preview does not imply a failed mint.
+
+The artwork documentation record owns the six-chapter writing flow, named next
+chapter controls, **Answer options**, deliberate examples, file preparation,
+**Read the draft** and saved publication previews. It distinguishes program
+viewers from editors, describes read-only answers and source comparisons, and
+keeps questions, draft content and dated confirmed versions separate. Its
+control names must match the artist workspace and personal record list.
+
+The artwork-sharing record covers the `Share artwork` icon in the existing
+media controls: over the artwork on individual Meme and Gradient pages, and
+in the strip below the artwork on NextGen pages. It covers canonical artwork
+links, copied captions, and feed, square, Story, and landscape PNG exports.
+The dialog shows the preview first, with an `Image format` menu and a primary
+image action. `Caption and link` starts collapsed with an adjacent `Copy`
+control, while `Share a link` groups destination actions and the copyable URL.
+Copy failures reveal and select the exact text for manual recovery.
+It distinguishes link composers from file sharing, includes Instagram's
+save/share-and-paste flow, and explains preparation failures and device-dependent
+share destinations.
+It does not claim automatic posting or successful publication after a handoff.
 
 The profile website studio records cover 39 editable templates (23 original
 compositions and 16 credited Memes inspirations), page and menu editing, image
@@ -39,9 +139,11 @@ uploads, indexed wallet galleries, and the profile header's published Website
 link. They describe readable custom page addresses while preserving archive
 paths, owner-only save and publish, browser recovery, wallet signing, version
 restoration, and unpublishing. Upload records explicitly state that image files
-become public before the website is published. The optional agent-file record
-covers exports and reviewed local patches, including their first-page limits;
-it does not claim a connected MCP service. These records link to the studio's
+become public before the website is published. The optional agent record covers
+complete multipage file exchange and temporary access to one saved draft through
+the local MCP adapter, using the owner's external inference account. It covers
+review, revocation, expiry, unchanged artwork catalogs, interrupted-save recovery,
+and the separate first-page legacy patch controls. These records link to the studio's
 user guide and distinguish removing the active website pointer from deleting
 immutable storage. Per-page sharing-image choices and automatic reset, search
 visibility (`noindex` pages remain public), and Apply/Discard form recovery behavior are
@@ -319,8 +421,11 @@ The same corpus also feeds two public artifacts for external AI agents, so
 term definitions never fork from the help bot's source of truth:
 
 - `public/llms.txt`: the agent entry point, rendered from
-  `ops/help/llms.txt.template` with record and term counts injected at sync
-  time. The template must keep referencing `/llms.txt`, `/glossary.json`,
+  `ops/help/llms.txt.template` with the published corpus's base URL. It explains
+  6529's mission and links the main site areas, detailed help index, API guides,
+  and website-agent integration. It does not advertise the corpus's manually
+  maintained timestamp as a current revision. The template must keep
+  referencing `/llms.txt`, `/glossary.json`,
   `/help-index.json`, and `/sitemap.xml`; the sync step fails otherwise.
 - `public/glossary.json`: a projection of glossary records. A record is
   included when its `kind` is `glossary` or its `tags` include `glossary`.

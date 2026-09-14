@@ -14,14 +14,25 @@ import {
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { act, renderHook, waitFor } from "@testing-library/react";
 import type { ReactNode } from "react";
+import { isDirectProfileAuthSession as mockIsDirectProfileAuthSession } from "@/components/auth/auth-session-scope";
 
 let mockProfileId: string | null = "moderator-1";
 let mockProxy: { id: string } | null = null;
+let mockDirectSession = true;
+let mockUseRoleScope = false;
+let mockRole: string | null | undefined;
 
 jest.mock("@/components/auth/Auth", () => ({
   useAuth: () => ({
     connectedProfile: mockProfileId === null ? null : { id: mockProfileId },
     activeProfileProxy: mockProxy,
+    isDirectProfileSession: mockUseRoleScope
+      ? mockIsDirectProfileAuthSession({
+          authRole: mockRole,
+          profileId: mockProfileId,
+          hasActiveProxy: mockProxy !== null,
+        })
+      : mockDirectSession,
   }),
 }));
 
@@ -57,7 +68,45 @@ describe("useContentModeratorAccess identity privacy", () => {
     jest.clearAllMocks();
     mockProfileId = "moderator-1";
     mockProxy = null;
+    mockDirectSession = true;
+    mockUseRoleScope = false;
+    mockRole = undefined;
     jest.mocked(fetchContentModeratorAccess).mockResolvedValue(access);
+  });
+
+  it("checks own-role access on the server and discards late access across a profile/token switch", async () => {
+    mockUseRoleScope = true;
+    mockRole = "moderator-1";
+    let resolveFirstAccess!: (value: ApiContentModeratorAccess) => void;
+    jest.mocked(fetchContentModeratorAccess).mockReturnValueOnce(
+      new Promise((resolve) => {
+        resolveFirstAccess = resolve;
+      })
+    );
+    const client = new QueryClient();
+    const { result, rerender } = mountAccess(client);
+    await waitFor(() =>
+      expect(fetchContentModeratorAccess).toHaveBeenCalledTimes(1)
+    );
+    expect(result.current.data).toBeUndefined();
+
+    mockProfileId = "moderator-2";
+    rerender();
+    expect(result.current.data).toBeUndefined();
+    expect(client.getQueryData(accessKey)).toBeUndefined();
+    await act(async () => resolveFirstAccess(access));
+    expect(result.current.data).toBeUndefined();
+    expect(client.getQueryData(accessKey)).toBeUndefined();
+    expect(fetchContentModeratorAccess).toHaveBeenCalledTimes(1);
+
+    jest.mocked(fetchContentModeratorAccess).mockResolvedValue({
+      ...access,
+      moderator: false,
+    });
+    mockRole = "moderator-2";
+    rerender();
+    await waitFor(() => expect(result.current.data?.moderator).toBe(false));
+    expect(fetchContentModeratorAccess).toHaveBeenCalledTimes(2);
   });
 
   it.each(["proxy", "signed out"])(
@@ -101,7 +150,7 @@ describe("useContentModeratorAccess identity privacy", () => {
       await act(async () => {
         await client.invalidateQueries();
       });
-      expect(fetchContentModeratorAccess).not.toHaveBeenCalled();
+      expect(fetchContentModeratorAccess).toHaveBeenCalledTimes(1);
 
       jest
         .mocked(fetchContentModeratorAccess)
@@ -111,7 +160,7 @@ describe("useContentModeratorAccess identity privacy", () => {
       rerender();
       expect(result.current.data).toBeUndefined();
       await waitFor(() => expect(result.current.data?.moderator).toBe(false));
-      expect(fetchContentModeratorAccess).toHaveBeenCalledTimes(1);
+      expect(fetchContentModeratorAccess).toHaveBeenCalledTimes(2);
     }
   );
 
@@ -151,4 +200,123 @@ describe("useContentModeratorAccess identity privacy", () => {
     }
     expect(client.isFetching()).toBe(0);
   });
+});
+
+it("ignores cached access and Checks on reload before the proxy session is resolved", () => {
+  mockProfileId = "moderator-1";
+  mockProxy = null;
+  mockDirectSession = false;
+  const client = new QueryClient();
+  client.setQueryData(accessKey, access);
+  const checkKey = [
+    ...MODERATION_QUEUE_QUERY_KEY,
+    "checks",
+    "moderator-1",
+    "detail",
+    "one",
+  ];
+  client.setQueryData(checkKey, { evidence: "private cached evidence" });
+  const observed: unknown[] = [];
+  renderHook(
+    () => {
+      const result = useContentModeratorAccess();
+      observed.push(result.data);
+      return result;
+    },
+    {
+      wrapper: ({ children }: { readonly children: ReactNode }) => (
+        <QueryClientProvider client={client}>{children}</QueryClientProvider>
+      ),
+    }
+  );
+  expect(observed.every((value) => value === undefined)).toBe(true);
+  expect(client.getQueryData(checkKey)).toBeUndefined();
+  mockDirectSession = true;
+});
+
+it("clears the previous developer's filtered checks on a direct identity switch", async () => {
+  const client = new QueryClient();
+  mockProfileId = "moderator-1";
+  mockProxy = null;
+  jest.mocked(fetchContentModeratorAccess).mockResolvedValue(access);
+  const { result, rerender } = mountAccess(client);
+  await waitFor(() => expect(result.current.data?.moderator).toBe(true));
+  const key = [
+    ...MODERATION_QUEUE_QUERY_KEY,
+    "checks",
+    "moderator-1",
+    "list",
+    { outcome: "REJECT" },
+  ];
+  client.setQueryData(key, { evidence: "private" });
+  jest
+    .mocked(fetchContentModeratorAccess)
+    .mockReturnValue(new Promise(() => undefined));
+  mockProfileId = "moderator-2";
+  rerender();
+  expect(result.current.data).toBeUndefined();
+  expect(client.getQueryData(key)).toBeUndefined();
+  expect(client.getQueryData(accessKey)).toBeUndefined();
+});
+
+it.each(["denied", "failed"])(
+  "clears private data after an access refresh is %s",
+  async (mode) => {
+    const client = new QueryClient();
+    mockProfileId = "moderator-1";
+    mockProxy = null;
+    jest.mocked(fetchContentModeratorAccess).mockResolvedValue(access);
+    const { result } = mountAccess(client);
+    await waitFor(() => expect(result.current.data?.moderator).toBe(true));
+    const key = [
+      ...MODERATION_QUEUE_QUERY_KEY,
+      "checks",
+      "moderator-1",
+      "detail",
+      "one",
+    ];
+    client.setQueryData(key, { evidence: "private" });
+    if (mode === "denied")
+      jest
+        .mocked(fetchContentModeratorAccess)
+        .mockResolvedValue({ ...access, moderator: false });
+    else
+      jest
+        .mocked(fetchContentModeratorAccess)
+        .mockRejectedValue(new Error("offline"));
+    await act(async () => {
+      await client.invalidateQueries({ queryKey: accessKey });
+    });
+    await waitFor(() => expect(result.current.data?.moderator).not.toBe(true));
+    expect(client.getQueryData(key)).toBeUndefined();
+  }
+);
+
+it("keeps a failed initial check identifiable during a manual retry until the server responds", async () => {
+  const client = new QueryClient();
+  jest
+    .mocked(fetchContentModeratorAccess)
+    .mockRejectedValue(new Error("offline"));
+  const { result } = mountAccess(client);
+  await waitFor(() => expect(result.current.isError).toBe(true));
+  expect(result.current.isFetched).toBe(true);
+  expect(result.current.data).toBeUndefined();
+
+  let finishRetry: ((value: ApiContentModeratorAccess) => void) | undefined;
+  jest.mocked(fetchContentModeratorAccess).mockReturnValue(
+    new Promise((resolve) => {
+      finishRetry = resolve;
+    })
+  );
+  act(() => {
+    void result.current.refetch();
+  });
+  await waitFor(() => expect(result.current.isFetching).toBe(true));
+  expect(result.current.isFetched).toBe(true);
+  expect(result.current.isSuccess).toBe(false);
+  expect(result.current.data).toBeUndefined();
+
+  await act(async () => finishRetry?.(access));
+  await waitFor(() => expect(result.current.isSuccess).toBe(true));
+  expect(result.current.data?.moderator).toBe(true);
 });

@@ -46,6 +46,11 @@ endpoints fail closed to the production corpus. `agent-files:sync` regenerates
 `public/glossary.json` and `public/llms.txt` from that published,
 environment-matching corpus and `ops/help/llms.txt.template`.
 
+Keep the template's mission summary, main site links, and agent integration
+links aligned with the public site. Use the help index for detailed route
+coverage. Do not present the corpus's manually maintained `generated_at` field
+as the entry point's current revision or the freshness of live API data.
+
 Commit the regenerated `public/` artifacts with the corpus change. PR CI runs
 `__tests__/scripts/sync-agent-files.test.ts` (the "Verify agent files sync"
 step) whenever these files change and fails if the committed artifacts drift

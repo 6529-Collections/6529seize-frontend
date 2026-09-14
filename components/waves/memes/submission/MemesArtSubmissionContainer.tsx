@@ -65,7 +65,10 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
     useState(!isResubmission);
 
   // Use the form hook to manage all state
-  const form = useArtworkSubmissionForm(initialDraft);
+  const form = useArtworkSubmissionForm(
+    { waveId: wave.id, terms: wave.participation.terms },
+    initialDraft
+  );
   const { handleBackToArtwork, setAdditionalMedia } = form;
   const { connectedProfile, activeProfileProxy, setToast } = useAuth();
   const { isSafeWallet } = useSeizeConnectContext();
@@ -132,6 +135,11 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
     setIsPreviewMode(false);
     setPreviewDrop(null);
   }, []);
+
+  const handleContinueFromTerms = useCallback(() => {
+    resetPreviewState();
+    form.handleContinueFromTerms();
+  }, [form, resetPreviewState]);
 
   const handleArtworkCommentaryMediaChange = useCallback(
     (media: string[]) => {
@@ -217,8 +225,23 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
     });
 
     // Get submission data including all traits
-    const { traits, operationalData, isAdditionalActionPromised } =
-      form.getSubmissionData();
+    const {
+      traits,
+      operationalData,
+      isAdditionalActionPromised,
+      acceptedAgreement,
+    } = form.getSubmissionData();
+    if (
+      acceptedAgreement?.waveId !== wave.id ||
+      acceptedAgreement.terms !== wave.participation.terms
+    ) {
+      resetPreviewState();
+      setToast({
+        message: t(locale, "memes.submission.agreement.reviewRequired"),
+        type: "error",
+      });
+      return null;
+    }
     const media = form.getMediaSelection();
     const onSubmitted = async (drop: ApiDrop | null) => {
       if (
@@ -251,8 +274,9 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
           traits,
           operationalData,
           isAdditionalActionPromised,
-          waveId: wave.id,
-          termsOfService: wave.participation.terms,
+          waveId: acceptedAgreement.waveId,
+          waveName: wave.name,
+          termsOfService: acceptedAgreement.terms,
         },
         signerAddress,
         isSafeWallet,
@@ -281,8 +305,9 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
         traits,
         operationalData,
         isAdditionalActionPromised,
-        waveId: wave.id,
-        termsOfService: wave.participation.terms,
+        waveId: acceptedAgreement.waveId,
+        waveName: wave.name,
+        termsOfService: acceptedAgreement.terms,
       },
       signerAddress,
       isSafeWallet,
@@ -305,9 +330,11 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
     identity.canSubmit,
     isSafeWallet,
     locale,
+    resetPreviewState,
     setToast,
     submitArtwork,
     wave.id,
+    wave.name,
     wave.participation.terms,
   ]);
 
@@ -358,6 +385,7 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
         submitLabel={submitLabel}
         identity={identity}
         onClose={requestClose}
+        onContinueFromTerms={handleContinueFromTerms}
         onBackToEdit={handleBackToEdit}
         onBackFromAdditionalInfo={handleBackFromAdditionalInfo}
         onOpenPreview={handleOpenPreview}

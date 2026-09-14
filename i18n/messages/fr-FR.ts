@@ -1,3 +1,5 @@
+import artworkShareMessages from "@/i18n/messages/artworkShare.fr-FR.json";
+import profileCmsAgentMessages from "@/i18n/messages/profileCmsAgent.fr-FR.json";
 import studioTemplateDescriptions from "@/i18n/messages/studioTemplateDescriptions.fr-FR.json";
 import profileCmsStudioUploadMessages from "@/i18n/messages/profileCmsStudioUpload.fr-FR.json";
 import studioWalletImportMessages from "@/i18n/messages/studioWalletImport.fr-FR.json";
@@ -8,12 +10,16 @@ import { FR_FR_CAPACITOR_CONNECT_MESSAGES } from "@/i18n/messages/capacitor-conn
 import { FR_FR_PAGINATION_MESSAGES } from "@/i18n/messages/pagination";
 import { FR_FR_THE_MEMES_COLLECTORS_MESSAGES } from "@/i18n/messages/the-memes-collectors";
 import { FR_FR_TRANSFER_MESSAGES } from "@/i18n/messages/transfer";
+import { FR_FR_THE_MEMES_MINT_SUCCESS_MESSAGES } from "@/i18n/messages/the-memes-mint-success";
+import { FR_FR_THE_MEMES_MINT_PROGRESS_MESSAGES } from "@/i18n/messages/the-memes-mint-progress";
 import stormComposerFrMessages from "@/i18n/messages/stormComposer.fr-FR.json";
 import type { MessageKey } from "@/i18n/messages/en-US";
 import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.fr-FR.json";
 
 export const FR_FR_MESSAGES = {
+  ...artworkShareMessages,
   ...profileCmsStudioMessages,
+  ...profileCmsAgentMessages,
   ...studioTemplateDescriptions,
   ...profileCmsStudioUploadMessages,
   ...studioWalletImportMessages,
@@ -1231,4 +1237,6 @@ export const FR_FR_MESSAGES = {
   "notifications.filter.option.invites": "Invitations",
   "notifications.filter.option.subscriptions": "Abonnements",
   ...FR_FR_TRANSFER_MESSAGES,
+  ...FR_FR_THE_MEMES_MINT_SUCCESS_MESSAGES,
+  ...FR_FR_THE_MEMES_MINT_PROGRESS_MESSAGES,
 } satisfies Partial<Record<MessageKey, string>>;

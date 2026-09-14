@@ -2,6 +2,7 @@
 
 import { AuthContext } from "@/components/auth/Auth";
 import CollectionsDropdown from "@/components/collections-dropdown/CollectionsDropdown";
+import CollectEntryLink from "@/components/collect/CollectEntryLink";
 import DotLoader from "@/components/dotLoader/DotLoader";
 import { LFGButton } from "@/components/lfg-slideshow/LFGSlideshow";
 import { NftBalancesProvider } from "@/components/nft-image/NftBalancesContext";
@@ -571,6 +572,15 @@ export default function TheMemesComponent({
                     {t(locale, "theMemes.title")}
                   </h1>
                   <LFGButton contract={MEMES_CONTRACT} />
+                  <CollectEntryLink
+                    collection="memes"
+                    intent={activeSeason ? "season" : "full_set"}
+                    definitionId={
+                      activeSeason ? String(activeSeason.id) : "memes"
+                    }
+                    locale={locale}
+                    complete
+                  />
                 </div>
                 <div
                   className="tw-grid tw-w-full tw-shrink-0 tw-grid-cols-1 tw-gap-2 sm:tw-w-auto sm:tw-grid-cols-[9rem_13rem]"
