@@ -30,6 +30,7 @@ const mockClient = {
   getChainId: jest.fn(),
   getTransaction: jest.fn(),
   getCode: jest.fn(),
+  getBlock: jest.fn(),
   call: jest.fn(),
   estimateGas: jest.fn(),
   estimateFeesPerGas: jest.fn(),
@@ -207,6 +208,7 @@ beforeEach(() => {
   mockWallet.getAddresses.mockResolvedValue([walletAddress]);
   mockWallet.signTypedData.mockResolvedValue("0x1234");
   mockClient.getCode.mockResolvedValue("0x");
+  mockClient.getBlock.mockResolvedValue({ baseFeePerGas: 1n });
   mockClient.getChainId.mockResolvedValue(1);
   mockSignature.mockResolvedValue({ ...operation, state: "LIVE" });
   mockClient.call.mockResolvedValue({});
@@ -1034,10 +1036,20 @@ describe("refreshing purchase intent before execution", () => {
     await act(() => result.current.confirm(buyOperation, buyExpected));
     expect(onOperation).toHaveBeenCalledWith(changed);
     expect(result.current.message).toBe(
-      "Network fee cap changed from 0.0000000000000002 to 0.000000000000000201 ETH. " +
-        "Maximum total changed from 0.0000000000000012 to 0.000000000000001201 ETH. " +
-        "Review the updated terms before continuing."
+      "Network fee updated. Your purchase price is unchanged. Review the new maximum before continuing."
     );
+    expect(result.current.reviewChangeNotice?.details).toEqual([
+      {
+        label: "Exact network fee cap",
+        before: "0.0000000000000002 ETH",
+        after: "0.000000000000000201 ETH",
+      },
+      {
+        label: "Exact maximum total",
+        before: "0.0000000000000012 ETH",
+        after: "0.000000000000001201 ETH",
+      },
+    ]);
     expect(mockBegin).not.toHaveBeenCalled();
     expect(mockWallet.sendTransaction).not.toHaveBeenCalled();
   });
@@ -1186,6 +1198,80 @@ it("sends the reviewed gas ceilings without silently increasing them", async () 
     })
   );
   expect(onCommitment).not.toHaveBeenCalled();
+});
+it("ignores a higher padded fee recommendation when actual base plus priority still fit the review", async () => {
+  const { buyExpected, buyOperation } = buyReview();
+  mockClient.estimateFeesPerGas.mockResolvedValue({
+    maxFeePerGas: 5n,
+    maxPriorityFeePerGas: 1n,
+  });
+  const { result } = renderHook(() => useMarketExecution(jest.fn()));
+  await act(() => result.current.confirm(buyOperation, buyExpected));
+  expect(mockWallet.sendTransaction).toHaveBeenCalledTimes(1);
+  expect(mockWallet.sendTransaction).toHaveBeenCalledWith(
+    expect.objectContaining({
+      gas: 100n,
+      maxFeePerGas: 2n,
+      maxPriorityFeePerGas: 1n,
+    })
+  );
+});
+it.each(["getCode", "call", "getBlock", "estimateFeesPerGas"] as const)(
+  "reports %s failures before sending as checks that did not finish",
+  async (method) => {
+    const { buyExpected, buyOperation } = buyReview();
+    mockClient[method].mockRejectedValueOnce(new Error("private RPC failure"));
+    const { result } = renderHook(() => useMarketExecution(jest.fn()));
+    await act(() => result.current.confirm(buyOperation, buyExpected));
+    expect(result.current.message).toMatch(/checks could not finish/i);
+    expect(result.current.message).not.toMatch(/wallet action did not finish/i);
+    expect(mockBegin).not.toHaveBeenCalled();
+    expect(mockWallet.sendTransaction).not.toHaveBeenCalled();
+    expect(mockWallet.signTypedData).not.toHaveBeenCalled();
+  }
+);
+it("refuses a purchase when base plus priority exceeds the reviewed fee cap", async () => {
+  const { buyExpected, buyOperation } = buyReview();
+  mockClient.getBlock.mockResolvedValueOnce({ baseFeePerGas: 2n });
+  const { result } = renderHook(() => useMarketExecution(jest.fn()));
+  await act(() => result.current.confirm(buyOperation, buyExpected));
+  expect(result.current.message).toMatch(/network fee/i);
+  expect(mockBegin).not.toHaveBeenCalled();
+  expect(mockWallet.sendTransaction).not.toHaveBeenCalled();
+});
+it("preserves an earlier transaction journal when capabilities cannot be checked", async () => {
+  const { buyExpected, buyOperation } = buyReview();
+  const saved = { request: buyExpected, transactionHash: hash };
+  persisted = saved;
+  mockCapabilities.mockRejectedValueOnce(new Error("network unavailable"));
+  const { result } = renderHook(() => useMarketExecution(jest.fn()));
+  await act(() => result.current.confirm(buyOperation, buyExpected));
+  expect(result.current.message).toMatch(/checks could not finish/i);
+  expect(result.current.message).not.toMatch(
+    /no transaction or signature was requested/i
+  );
+  expect(persisted).toBe(saved);
+  expect(mockWallet.sendTransaction).not.toHaveBeenCalled();
+  expect(mockWallet.signTypedData).not.toHaveBeenCalled();
+});
+it("retains the known hash and recovery guidance after a submitted identity mismatch", async () => {
+  const { buyExpected, buyOperation } = buyReview();
+  mockSubmission.mockResolvedValueOnce({
+    ...buyOperation,
+    id: "another-operation",
+    state: "SUBMITTED",
+  });
+  const { result } = renderHook(() => useMarketExecution(jest.fn()));
+  await act(() => result.current.confirm(buyOperation, buyExpected));
+  expect(result.current.message).toMatch(
+    /transaction status could not be checked/i
+  );
+  expect(result.current.knownTransaction).toEqual({
+    operationId: buyOperation.id,
+    hash,
+  });
+  expect(mockWallet.sendTransaction).toHaveBeenCalledTimes(1);
+  expect(persisted).toEqual(expect.objectContaining({ transactionHash: hash }));
 });
 it("never sends when simulation exceeds the reviewed gas limit", async () => {
   const { buyExpected, buyOperation } = buyReview();

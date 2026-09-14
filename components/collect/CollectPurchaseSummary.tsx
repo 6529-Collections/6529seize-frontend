@@ -147,6 +147,9 @@ export default function CollectPurchaseSummary({
           <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400">
             {t(locale, "collect.review.feesIncluded")}
           </p>
+          <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400">
+            {t(locale, "collect.batchReview.gasNote")}
+          </p>
           <CollectReviewDisclosure
             label={t(locale, "collect.review.exactAmounts")}
             nested

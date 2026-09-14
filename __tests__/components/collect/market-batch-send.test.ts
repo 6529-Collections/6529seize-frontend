@@ -1,6 +1,7 @@
 import {
   sendReviewedMarketBatch,
   batchSendAttempt,
+  rejectUnsentBatchAttempt,
 } from "@/components/collect/market-batch-send";
 import {
   readMarketBatch,
@@ -151,6 +152,52 @@ it("rejects mismatched armed calldata before the wallet even when economics matc
     })
   );
 });
+
+it.each([false, true])(
+  "safely rejects an unarmed request after a fee-cap conflict (rejection acknowledgement lost=%s)",
+  async (lostAcknowledgement) => {
+    const f = setup();
+    const changed = Object.assign(new Error("fee cap changed"), {
+      status: 409,
+      response: { status: 409, body: { code: "OPERATION_CHANGED" } },
+    });
+    begin.mockRejectedValueOnce(changed);
+    if (lostAcknowledgement)
+      reject.mockRejectedValueOnce(new Error("lost acknowledgement"));
+    if (lostAcknowledgement) {
+      await expect(sendReviewedMarketBatch(f.options)).rejects.toThrow(
+        "MARKET_BROADCAST_UNKNOWN"
+      );
+      const attempt = readMarketBatch("profile", f.operation.id)?.sendAttempt;
+      expect(attempt).toEqual(
+        expect.objectContaining({
+          walletRequested: false,
+          rejectionReason: "WALLET_NOT_REQUESTED",
+        })
+      );
+      await rejectUnsentBatchAttempt(
+        f.operation,
+        f.request,
+        attempt!,
+        "WALLET_NOT_REQUESTED"
+      );
+    } else {
+      await expect(sendReviewedMarketBatch(f.options)).rejects.toBe(changed);
+      expect(f.latest().send_attempt?.status).toBe(Status.Rejected);
+    }
+    expect(f.send).not.toHaveBeenCalled();
+    expect(reject).toHaveBeenCalledWith(
+      f.operation.id,
+      expect.objectContaining({
+        reason: "WALLET_NOT_REQUESTED",
+        expected_revision: "1",
+      })
+    );
+    expect(
+      readMarketBatch("profile", f.operation.id)?.sendAttempt
+    ).toBeUndefined();
+  }
+);
 it("retains a wallet hash in memory when storage fails after the wallet opens", async () => {
   const f = setup();
   f.send.mockImplementation(async () => {
