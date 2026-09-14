@@ -379,6 +379,63 @@ describe("MobileWrapperDialog", () => {
       expect(onClose).toHaveBeenCalled();
     });
 
+    it("lets nested dialogs own Escape when the outer dialog preserves focus", async () => {
+      const user = userEvent.setup();
+      const onOuterClose = jest.fn();
+      function NestedDialogs() {
+        const [nestedOpen, setNestedOpen] = useState(false);
+        return (
+          <MobileWrapperDialog
+            title="Creation"
+            isOpen
+            onClose={onOuterClose}
+            preserveFocusOnEscape
+          >
+            <button type="button" onClick={() => setNestedOpen(true)}>
+              Open details
+            </button>
+            <MobileWrapperDialog
+              title="Details"
+              isOpen={nestedOpen}
+              onClose={() => setNestedOpen(false)}
+            >
+              <input aria-label="Detail" />
+            </MobileWrapperDialog>
+          </MobileWrapperDialog>
+        );
+      }
+      render(<NestedDialogs />);
+      await user.click(screen.getByRole("button", { name: "Open details" }));
+      await user.click(screen.getByRole("textbox", { name: "Detail" }));
+      await user.keyboard("{Escape}");
+      await waitFor(() =>
+        expect(
+          screen.queryByRole("dialog", { name: "Details" })
+        ).not.toBeInTheDocument()
+      );
+      expect(screen.getByRole("dialog", { name: "Creation" })).toBeVisible();
+      expect(onOuterClose).not.toHaveBeenCalled();
+    });
+
+    it("does not re-enable close controls on a non-dismissible dialog", async () => {
+      const user = userEvent.setup();
+      const onClose = jest.fn();
+      render(
+        <MobileWrapperDialog
+          {...defaultProps}
+          isOpen
+          onClose={onClose}
+          dismissible={false}
+          preserveFocusOnEscape
+        />
+      );
+      await user.keyboard("{Escape}");
+      expect(
+        screen.queryByRole("button", { name: "Close" })
+      ).not.toBeInTheDocument();
+      expect(onClose).not.toHaveBeenCalled();
+    });
+
     it("dismisses a responsive tablet modal after a mobile swipe", async () => {
       const onClose = jest.fn();
       render(
