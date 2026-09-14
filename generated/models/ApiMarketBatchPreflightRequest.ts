@@ -13,16 +13,9 @@
 
 import { HttpFile } from '../http/http';
 
-export class ApiDeleteMyWaveChatHistoryResponse {
-    /**
-    * True when another bounded request with the same token is required
-    */
-    'has_more': boolean;
-    'deleted_drop_ids': Array<string>;
-    /**
-    * ID of the caller-authored pinned CHAT drop that was preserved, or null when the pinned drop was not authored by the caller.
-    */
-    'preserved_pinned_drop_id': string | null;
+export class ApiMarketBatchPreflightRequest {
+    'expected_revision': string;
+    'transaction_digest': string;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -30,26 +23,20 @@ export class ApiDeleteMyWaveChatHistoryResponse {
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
         {
-            "name": "has_more",
-            "baseName": "has_more",
-            "type": "boolean",
+            "name": "expected_revision",
+            "baseName": "expected_revision",
+            "type": "string",
             "format": ""
         },
         {
-            "name": "deleted_drop_ids",
-            "baseName": "deleted_drop_ids",
-            "type": "Array<string>",
-            "format": ""
-        },
-        {
-            "name": "preserved_pinned_drop_id",
-            "baseName": "preserved_pinned_drop_id",
+            "name": "transaction_digest",
+            "baseName": "transaction_digest",
             "type": "string",
             "format": ""
         }    ];
 
     static getAttributeTypeMap() {
-        return ApiDeleteMyWaveChatHistoryResponse.attributeTypeMap;
+        return ApiMarketBatchPreflightRequest.attributeTypeMap;
     }
 
     public constructor() {

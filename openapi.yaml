@@ -9428,6 +9428,60 @@ paths:
           description: Trade state or idempotency conflict
         "503":
           description: Trading unavailable
+  /market/operations/{id}/preflight:
+    post:
+      tags:
+        - Marketplace
+      summary: Simulate an exact reviewed batch without reserving or sending it
+      description: >-
+        Authenticated BUY_BATCH reviews only. Calls and raw gas estimates use
+        the stored transaction at one fresh Ethereum block. No transaction data
+        or RPC options are accepted. This does not renew the review, change gas
+        caps, or create a send attempt. Per-actor and per-operation throttles
+        fail closed.
+      operationId: preflightMarketBatch
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: market
+        handler:
+          import: "@/api/marketplace/marketplace-batch-preflight.handler"
+          name: handlePreflightMarketBatch
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiMarketBatchPreflightRequest"
+      responses:
+        "200":
+          description: Exact reviewed transaction simulated at the returned block
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMarketBatchPreflight"
+        "400":
+          description: Invalid request
+        "403":
+          description: Original paying wallet and current profile required
+        "404":
+          description: Operation not found
+        "409":
+          description: Review changed, expired, or cannot be simulated
+        "429":
+          description: Another check is running or checks were requested too quickly
+        "503":
+          description: Preflight or its rate limiter is unavailable
   /market/operations/{id}/send-attempts:
     post:
       tags:
@@ -16029,6 +16083,40 @@ paths:
               schema:
                 $ref: "#/components/schemas/ApiWaveDropsFeed"
   /waves/{id}/my-chat-history:
+    post:
+      tags:
+        - Waves
+      summary: Prepare a bounded deletion of the authenticated user's chat history
+      description: >-
+        Freezes a server-side cutoff without deleting any messages. Retain the
+        returned token before issuing DELETE requests, and reuse the same token
+        for every batch and retry. Messages sent after preparation are
+        preserved. Proxies cannot prepare a purge. Wave membership is not
+        required.
+      operationId: prepareMyWaveChatHistoryPurge
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/waves/delete-my-wave-chat-history.handler"
+          name: handlePrepareMyWaveChatHistoryPurge
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Frozen purge scope; no messages have been deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiWaveChatHistoryPurgePlan"
+        "403":
+          description: A profile is required and proxies cannot delete chat history
+        "404":
+          description: Wave not found
     delete:
       tags:
         - Waves
@@ -16038,6 +16126,12 @@ paths:
         in the wave, except for the wave's pinned drop. Participatory and winner
         drops are never deleted. This self-service cleanup remains available if
         the caller is no longer eligible to view or participate in the wave.
+        With purge_token, deletes at most 100 messages per request within the
+        prepared cutoff. Repeat with the SAME token until has_more is false,
+        including after a lost response. Each response lists only this batch's
+        deletions. The latest pinned drop is protected on each request. Without
+        a token, histories larger than one batch fail with 400 before any
+        deletion; legacy clients never receive a partial success.
       operationId: deleteMyWaveChatHistory
       x-6529-router:
         enabled: true
@@ -16051,6 +16145,15 @@ paths:
           required: true
           schema:
             type: string
+        - name: purge_token
+          in: query
+          required: false
+          description: >-
+            Token from prepareMyWaveChatHistoryPurge; reuse for every batch and
+            retry
+          schema:
+            type: string
+            maxLength: 2048
       responses:
         "200":
           description: Chat history deletion result
@@ -16058,6 +16161,10 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiDeleteMyWaveChatHistoryResponse"
+        "400":
+          description: >-
+            Invalid token, or large history requiring a client that supports
+            batches
         "403":
           description: A profile is required and proxies cannot delete chat history
         "404":
@@ -26497,7 +26604,11 @@ components:
       required:
         - deleted_drop_ids
         - preserved_pinned_drop_id
+        - has_more
       properties:
+        has_more:
+          type: boolean
+          description: True when another bounded request with the same token is required
         deleted_drop_ids:
           type: array
           items:
@@ -28928,6 +29039,63 @@ components:
         - execution_policy
         - items
         - approval_transactions
+    ApiMarketBatchPreflight:
+      type: object
+      additionalProperties: false
+      description: >-
+        Read-only simulation of the exact stored BUY_BATCH transaction. Both
+        call and raw gas estimate are pinned to this block; its hash is checked
+        again before responding. This result does not authorize sending or
+        extend the original review expiry. Existing send-arming checks remain
+        mandatory.
+      properties:
+        operation_id:
+          type: string
+          format: uuid
+        revision:
+          type: string
+          pattern: ^[0-9a-f]{64}$
+        transaction_digest:
+          type: string
+          pattern: ^[0-9a-f]{64}$
+        estimated_gas:
+          type: string
+          pattern: ^[1-9][0-9]{0,77}$
+          maxLength: 78
+          description: Raw eth_estimateGas result, without a safety multiplier
+        block_number:
+          type: integer
+          format: int64
+          minimum: 1
+        block_hash:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{64}$
+        block_timestamp:
+          type: integer
+          format: int64
+          minimum: 1
+          description: Ethereum block timestamp in Unix seconds
+      required:
+        - operation_id
+        - revision
+        - transaction_digest
+        - estimated_gas
+        - block_number
+        - block_hash
+        - block_timestamp
+    ApiMarketBatchPreflightRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        expected_revision:
+          type: string
+          pattern: ^[0-9a-f]{64}$
+        transaction_digest:
+          type: string
+          pattern: ^[0-9a-f]{64}$
+      required:
+        - expected_revision
+        - transaction_digest
     ApiMarketBatchPrepareRequest:
       type: object
       additionalProperties: false
@@ -35562,6 +35730,15 @@ components:
           type: integer
           format: int64
           minimum: 1000
+    ApiWaveChatHistoryPurgePlan:
+      type: object
+      additionalProperties: false
+      required:
+        - purge_token
+      properties:
+        purge_token:
+          type: string
+          description: Opaque signed cutoff bound to the authenticated author and wave
     ApiWaveConfig:
       type: object
       required:

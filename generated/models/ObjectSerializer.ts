@@ -454,6 +454,8 @@ export * from '../models/ApiMarketBatchItem';
 export * from '../models/ApiMarketBatchItemRequest';
 export * from '../models/ApiMarketBatchMirrorTerms';
 export * from '../models/ApiMarketBatchOperation';
+export * from '../models/ApiMarketBatchPreflight';
+export * from '../models/ApiMarketBatchPreflightRequest';
 export * from '../models/ApiMarketBatchPrepareRequest';
 export * from '../models/ApiMarketBatchSendAttempt';
 export * from '../models/ApiMarketBatchSettlement';
@@ -708,6 +710,7 @@ export * from '../models/ApiWalletDistributionAllocation';
 export * from '../models/ApiWalletDistributionAllocations';
 export * from '../models/ApiWave';
 export * from '../models/ApiWaveChatConfig';
+export * from '../models/ApiWaveChatHistoryPurgePlan';
 export * from '../models/ApiWaveConfig';
 export * from '../models/ApiWaveContributorOverview';
 export * from '../models/ApiWaveCreditNft';
@@ -1315,6 +1318,8 @@ import { ApiMarketBatchItem } from '../models/ApiMarketBatchItem';
 import { ApiMarketBatchItemRequest } from '../models/ApiMarketBatchItemRequest';
 import { ApiMarketBatchMirrorTerms } from '../models/ApiMarketBatchMirrorTerms';
 import { ApiMarketBatchOperation  , ApiMarketBatchOperationStateEnum               , ApiMarketBatchOperationKindEnum  , ApiMarketBatchOperationExecutionPolicyEnum        } from '../models/ApiMarketBatchOperation';
+import { ApiMarketBatchPreflight } from '../models/ApiMarketBatchPreflight';
+import { ApiMarketBatchPreflightRequest } from '../models/ApiMarketBatchPreflightRequest';
 import { ApiMarketBatchPrepareRequest, ApiMarketBatchPrepareRequestKindEnum    , ApiMarketBatchPrepareRequestCurrencyEnum  , ApiMarketBatchPrepareRequestExecutionPolicyEnum     } from '../models/ApiMarketBatchPrepareRequest';
 import { ApiMarketBatchSendAttempt , ApiMarketBatchSendAttemptPurposeEnum    , ApiMarketBatchSendAttemptStatusEnum     } from '../models/ApiMarketBatchSendAttempt';
 import { ApiMarketBatchSettlement, ApiMarketBatchSettlementOutcomeEnum        } from '../models/ApiMarketBatchSettlement';
@@ -1569,6 +1574,7 @@ import { ApiWalletDistributionAllocation, ApiWalletDistributionAllocationPhaseEn
 import { ApiWalletDistributionAllocations } from '../models/ApiWalletDistributionAllocations';
 import { ApiWave } from '../models/ApiWave';
 import { ApiWaveChatConfig } from '../models/ApiWaveChatConfig';
+import { ApiWaveChatHistoryPurgePlan } from '../models/ApiWaveChatHistoryPurgePlan';
 import { ApiWaveConfig               } from '../models/ApiWaveConfig';
 import { ApiWaveContributorOverview } from '../models/ApiWaveContributorOverview';
 import { ApiWaveCreditNft } from '../models/ApiWaveCreditNft';
@@ -2414,6 +2420,8 @@ let typeMap: {[index: string]: any} = {
     "ApiMarketBatchItemRequest": ApiMarketBatchItemRequest,
     "ApiMarketBatchMirrorTerms": ApiMarketBatchMirrorTerms,
     "ApiMarketBatchOperation": ApiMarketBatchOperation,
+    "ApiMarketBatchPreflight": ApiMarketBatchPreflight,
+    "ApiMarketBatchPreflightRequest": ApiMarketBatchPreflightRequest,
     "ApiMarketBatchPrepareRequest": ApiMarketBatchPrepareRequest,
     "ApiMarketBatchSendAttempt": ApiMarketBatchSendAttempt,
     "ApiMarketBatchSettlement": ApiMarketBatchSettlement,
@@ -2645,6 +2653,7 @@ let typeMap: {[index: string]: any} = {
     "ApiWalletDistributionAllocations": ApiWalletDistributionAllocations,
     "ApiWave": ApiWave,
     "ApiWaveChatConfig": ApiWaveChatConfig,
+    "ApiWaveChatHistoryPurgePlan": ApiWaveChatHistoryPurgePlan,
     "ApiWaveConfig": ApiWaveConfig,
     "ApiWaveContributorOverview": ApiWaveContributorOverview,
     "ApiWaveCreditNft": ApiWaveCreditNft,

@@ -325,4 +325,27 @@ describe('useWavePagination', () => {
     expect(fetchAroundSerialNoWaveMessages).toHaveBeenCalledTimes(2);
     warnSpy.mockRestore();
   });
+  it("does not restore stale fetch-around messages after a purge refresh cancels the request", async () => {
+    const controller = new AbortController();
+    createController.mockReturnValueOnce(controller);
+    let resolve!: (drops: Array<{ id: string; serial_no: number }>) => void;
+    fetchAroundSerialNoWaveMessages.mockReturnValueOnce(
+      new Promise((done) => {
+        resolve = done;
+      })
+    );
+    cancelFetch
+      .mockImplementationOnce(() => undefined)
+      .mockImplementationOnce(() => controller.abort());
+    const { result, updateData } = setup({});
+    act(() => result.current.fetchAroundSerialNo("wave1", 10));
+    expect(fetchAroundSerialNoWaveMessages).toHaveBeenCalledTimes(1);
+    act(() => result.current.cancelPaginationFetch("wave1"));
+    await act(async () => resolve([{ id: "deleted", serial_no: 10 }]));
+    expect(updateData).not.toHaveBeenCalled();
+    expect(cancelFetch).toHaveBeenCalledWith(
+      "wave1-around",
+      "pagination_cancelled"
+    );
+  });
 });
