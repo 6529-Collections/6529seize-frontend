@@ -35,9 +35,9 @@ export default function CreateWaveInlineGroupExpandedPanel({
   let panelContent: ReactNode = children;
   if (showCancel) {
     panelContent = quiet ? (
-      <div className="tw-flex tw-flex-col tw-gap-3">
-        <div className="tw-flex tw-justify-end">{cancelControl}</div>
+      <div className="tw-flex tw-flex-col-reverse tw-gap-3">
         <div className="tw-min-w-0">{children}</div>
+        <div className="tw-flex tw-justify-end">{cancelControl}</div>
       </div>
     ) : (
       <div className="tw-flex tw-items-start tw-gap-3">
