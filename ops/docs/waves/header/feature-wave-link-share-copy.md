@@ -2,8 +2,8 @@
 
 ## Overview
 
-Wave headers expose a single action that either shares or copies the active
-wave link, depending on device capabilities.
+Wave details expose an action that either shares or copies the active wave
+link, depending on device capabilities.
 
 Users can:
 
@@ -16,9 +16,9 @@ Users can:
 - App header when an active wave is open on:
   - `/waves/{waveId}`
   - `/messages/{waveId}`
-- Web thread headers in the same routes:
-  - desktop wave tab headers
-  - mobile right action cluster
+- Web on the same routes:
+  - Right-sidebar `About`, beside Add/Edit REP when eligible
+  - `More wave actions` in compact thread headers below 768px
 
 ## Availability Rules
 
@@ -32,10 +32,12 @@ Users can:
 ## Entry Points
 
 1. Open a non-DM wave thread.
-2. Use the wave-link action button near other thread header controls. In the
-   native app header, the action appears directly when it is the only overflow
-   action; when other wave actions are available, it appears inside the
-   overflow menu with the arrow-style share icon.
+2. On desktop/tablet web, select the `Show right sidebar` icon, then `About`, and use the labeled
+   share/copy button beside the REP action. Sharing is available even when
+   signed out or acting as a proxy.
+3. On compact web, open `More wave actions` for sharing. In the native app
+   header, the action appears directly when it is the only overflow action;
+   otherwise it appears inside the overflow menu with the arrow-style share icon.
 
 ## User Journey
 

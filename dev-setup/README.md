@@ -76,6 +76,7 @@ bash dev-setup/run-staging-ec2-setup.sh
 - **SEIZE API ENDPOINT** → staging or production
 - **ALLOWLIST API ENDPOINT** → staging or production
 - **ALCHEMY_API_KEY** → required
+- **ETHEREUM_RPC_URL** → required server-only Ethereum mainnet JSON-RPC URL
 - **CW_PROJECT_ID** → required
 - **GIPHY_API_KEY** → optional (can be empty)
 - **NEXTGEN_CHAIN_ID** → `1` (mainnet) or `11155111` (sepolia)
