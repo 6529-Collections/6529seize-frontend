@@ -410,7 +410,11 @@ async function fetchAddressPreview(
 
   const [balance, code, blockNumber] = await Promise.all([
     settledValue(client.getBalance({ address })),
-    settledValue(client.getCode({ address })),
+    // Viem maps a successful empty-code response to undefined; preserve failures
+    // separately so ordinary wallets are not reported as unavailable.
+    settledValue(
+      client.getCode({ address }).then((bytecode) => bytecode ?? EMPTY_HEX)
+    ),
     settledValue(client.getBlockNumber()),
   ]);
   const delegationCandidate =

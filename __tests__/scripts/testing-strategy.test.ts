@@ -928,6 +928,8 @@ describe("testing strategy CI security checks", () => {
         "    secrets:",
         "      ALCHEMY_API_KEY:",
         "        required: false",
+        "      ETHEREUM_RPC_URL:",
+        "        required: true",
         "      SENTRY_AUTH_TOKEN:",
         "        required: true",
       ].join("\n")
