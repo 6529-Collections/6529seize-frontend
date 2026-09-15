@@ -49,6 +49,43 @@ interface WaveRepDetailsProps {
   readonly wave: ApiWave;
 }
 
+function getCategoryViewState({
+  isLoadingError,
+  isSuccess,
+  categoryCount,
+  hasSearch,
+  filteredCount,
+  hasNextPage,
+  isFetchingNextPage,
+  isFetchNextPageError,
+}: {
+  readonly isLoadingError: boolean;
+  readonly isSuccess: boolean;
+  readonly categoryCount: number;
+  readonly hasSearch: boolean;
+  readonly filteredCount: number;
+  readonly hasNextPage: boolean;
+  readonly isFetchingNextPage: boolean;
+  readonly isFetchNextPageError: boolean;
+}) {
+  const isEmpty = isSuccess && categoryCount === 0;
+
+  return {
+    isEmpty,
+    showSearch: !isLoadingError && !isEmpty,
+    showList: !isLoadingError,
+    showNoMatches:
+      !isEmpty &&
+      hasSearch &&
+      filteredCount === 0 &&
+      isSuccess &&
+      !hasNextPage &&
+      !isFetchingNextPage,
+    showPagination: hasNextPage || isFetchingNextPage || isFetchNextPageError,
+    showInitialError: isLoadingError,
+  };
+}
+
 function runQueryAction(action: () => Promise<unknown>): void {
   action().catch(() => undefined);
 }
@@ -196,8 +233,6 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
     normalizedCategorySearch.length > 0
       ? "waves.rep.details.categories.searchMore"
       : "waves.rep.details.categories.loadMore";
-  const isCategoriesEmpty =
-    categoriesQuery.status === "success" && categories.length === 0;
   const filteredCategories = useMemo(
     () =>
       normalizedCategorySearch.length === 0
@@ -207,6 +242,16 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
           ),
     [categories, normalizedCategorySearch]
   );
+  const categoryViewState = getCategoryViewState({
+    isLoadingError: categoriesQuery.isLoadingError,
+    isSuccess: categoriesQuery.status === "success",
+    categoryCount: categories.length,
+    hasSearch: normalizedCategorySearch.length > 0,
+    filteredCount: filteredCategories.length,
+    hasNextPage: categoriesQuery.hasNextPage,
+    isFetchingNextPage: categoriesQuery.isFetchingNextPage,
+    isFetchNextPageError: categoriesQuery.isFetchNextPageError,
+  });
   const contributors = useMemo(
     () => contributorsQuery.data?.pages.flatMap((page) => page.data) ?? [],
     [contributorsQuery.data?.pages]
@@ -347,14 +392,14 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
             </span>
           )}
         </div>
-        {!categoriesQuery.isLoadingError && !isCategoriesEmpty && (
+        {categoryViewState.showSearch && (
           <CategorySearch value={categorySearch} onChange={setCategorySearch} />
         )}
 
-        {!categoriesQuery.isLoadingError && (
+        {categoryViewState.showList && (
           <div
             className={`tw-divide-y tw-divide-solid tw-divide-white/5 tw-border-x-0 tw-border-y tw-border-solid tw-border-white/5 ${
-              isCategoriesEmpty ? "" : "tw-mt-2"
+              categoryViewState.isEmpty ? "" : "tw-mt-2"
             }`}
           >
             <CategoryRow
@@ -393,24 +438,17 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
                 onClick={() => selectCategory(category)}
               />
             ))}
-            {isCategoriesEmpty && (
+            {categoryViewState.isEmpty && (
               <p className="tw-mb-0 tw-px-1 tw-py-3 tw-text-xs tw-text-iron-500">
                 {detailText("waves.rep.details.categories.empty")}
               </p>
             )}
-            {!isCategoriesEmpty &&
-              normalizedCategorySearch.length > 0 &&
-              filteredCategories.length === 0 &&
-              categoriesQuery.status === "success" &&
-              !categoriesQuery.hasNextPage &&
-              !categoriesQuery.isFetchingNextPage && (
-                <p className="tw-mb-0 tw-px-1 tw-py-3 tw-text-xs tw-font-medium tw-text-iron-500">
-                  {detailText("waves.rep.details.categories.noMatches")}
-                </p>
-              )}
-            {(categoriesQuery.hasNextPage ||
-              categoriesQuery.isFetchingNextPage ||
-              categoriesQuery.isFetchNextPageError) && (
+            {categoryViewState.showNoMatches && (
+              <p className="tw-mb-0 tw-px-1 tw-py-3 tw-text-xs tw-font-medium tw-text-iron-500">
+                {detailText("waves.rep.details.categories.noMatches")}
+              </p>
+            )}
+            {categoryViewState.showPagination && (
               <div>
                 {categoriesQuery.isFetchNextPageError && (
                   <p className="tw-mb-0 tw-px-1 tw-py-2 tw-text-xs tw-text-rose-300">
@@ -433,7 +471,7 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
           </div>
         )}
 
-        {categoriesQuery.isLoadingError && (
+        {categoryViewState.showInitialError && (
           <div className="tw-flex tw-min-h-11 tw-items-center tw-justify-between tw-gap-3 tw-border-x-0 tw-border-y tw-border-solid tw-border-rose-400/15 tw-px-1 tw-py-2">
             <p className="tw-mb-0 tw-text-xs tw-text-iron-400">
               {detailText("waves.rep.details.categories.error")}

@@ -149,7 +149,7 @@ export function CategoryRow({
       aria-pressed={selected}
       title={label}
       onClick={onClick}
-      className={`tw-relative tw-grid tw-min-h-11 tw-w-full tw-cursor-pointer tw-grid-cols-[minmax(0,1fr)_auto] tw-items-center tw-gap-3 tw-border-0 tw-px-1 tw-py-2 tw-text-left tw-transition before:tw-pointer-events-none before:tw-absolute before:tw-inset-y-0 before:tw-left-0 before:tw-w-0.5 before:tw-content-[''] focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 ${
+      className={`tw-relative tw-grid tw-min-h-11 tw-w-full tw-cursor-pointer tw-grid-cols-[minmax(0,1fr)_auto] tw-items-center tw-gap-3 tw-border-0 tw-pl-3 tw-pr-1 tw-py-2 tw-text-left tw-transition before:tw-pointer-events-none before:tw-absolute before:tw-inset-y-0 before:tw-left-0 before:tw-w-0.5 before:tw-content-[''] focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 ${
         selected
           ? "tw-bg-white/[0.045] before:tw-bg-primary-400"
           : "tw-bg-transparent before:tw-bg-transparent hover:tw-bg-white/[0.025]"
