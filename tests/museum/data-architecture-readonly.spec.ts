@@ -198,10 +198,9 @@ test.describe("Museum data architecture @surface @readonly", () => {
           exact: true,
         });
         await returnLink.click();
-        await expect(page).toHaveURL(
-          (url) => url.pathname === OVERVIEW.path,
-          { timeout: ROUTE_TRANSITION_TIMEOUT_MS }
-        );
+        await expect(page).toHaveURL((url) => url.pathname === OVERVIEW.path, {
+          timeout: ROUTE_TRANSITION_TIMEOUT_MS,
+        });
         await expect(
           page.getByRole("heading", {
             level: 1,
