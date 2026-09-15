@@ -1625,7 +1625,9 @@ describe("Regression Tests: Original Functionality with Secure Implementation", 
   it("keeps AppKit-only hooks deferred without remounting children", async () => {
     const {
       useAppKit,
+      useAppKitAccount,
       useAppKitState,
+      useDisconnect,
       useWalletInfo,
     } = require("@reown/appkit/react");
     (useAppKit as jest.Mock).mockImplementation(() => {
@@ -1659,6 +1661,8 @@ describe("Regression Tests: Original Functionality with Secure Implementation", 
     const view = render(renderTree());
     const childBeforeAppKit = screen.getByTestId("stable-fast-path-child");
     expect(useAppKit).not.toHaveBeenCalled();
+    expect(useAppKitAccount).not.toHaveBeenCalled();
+    expect(useDisconnect).not.toHaveBeenCalled();
     expect(useAppKitState).not.toHaveBeenCalled();
     expect(useWalletInfo).not.toHaveBeenCalled();
 

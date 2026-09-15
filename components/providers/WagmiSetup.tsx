@@ -13,6 +13,7 @@ import {
   type AppKitBootstrapStatus,
 } from "@/components/providers/AppKitBootstrapContext";
 import { AppKitAdapterManager } from "@/components/providers/AppKitAdapterManager";
+import { createPublicWagmiConfig } from "@/components/providers/createPublicWagmiConfig";
 import type { AppToastInput } from "@/components/utils/toast/AppToast";
 import { publicEnv } from "@/config/env";
 import { useAppWalletPasswordModal } from "@/hooks/useAppWalletPasswordModal";
@@ -544,9 +545,16 @@ export default function WagmiSetup({
     return isNative;
   }, []);
 
-  const chains = useMemo<Chain[]>(
+  const chains = useMemo<[Chain, ...Chain[]]>(
     () => (enableTestnet ? [mainnet, sepolia] : [mainnet]),
     [enableTestnet]
+  );
+
+  // Server requests and the first hydration render get disconnected context.
+  // Keep this instance local: wallet state must never cross server requests.
+  const publicWagmiConfig = useMemo(
+    () => createPublicWagmiConfig(chains),
+    [chains]
   );
 
   const bootstrapConfigurationKey = `${isCapacitor ? "capacitor" : "web"}:${chains
@@ -580,6 +588,8 @@ export default function WagmiSetup({
   }, [fastPathSnapshot.status, hasFastPathConfigurationMismatch]);
 
   const createWagmiAdapter = useCallback((): WagmiAdapter => {
+    installSafeEthereumProxy();
+    markMobileLaunchStep("wagmi_init_start");
     const adapterManager = new AppKitAdapterManager(requestAppWalletPassword);
 
     const config: AppKitAdapterConfig = {
@@ -589,14 +599,21 @@ export default function WagmiSetup({
       chains,
     };
 
-    return createAppKitAdapter(config);
+    const adapter = createAppKitAdapter(config);
+    markMobileLaunchStep("wagmi_adapter_created");
+    return adapter;
   }, [chains, isCapacitor]);
 
   const startAppKitInitialization = useCallback((): Promise<void> => {
-    if (currentAdapter === null) {
-      return Promise.reject(
-        new AppKitValidationError(INTERNAL_API_FAILED_MESSAGE)
-      );
+    let adapter: WagmiAdapter;
+    try {
+      // Hydration can replay connect intent before the passive mount effect.
+      // Use the same singleton creation path so the first click is not lost.
+      adapter =
+        currentAdapter ??
+        createWagmiAdapterOnce(bootstrapConfigurationKey, createWagmiAdapter);
+    } catch (error) {
+      return Promise.reject(error);
     }
 
     return startAppKitInitializationOnce(
@@ -606,7 +623,7 @@ export default function WagmiSetup({
 
         try {
           const config: AppKitInitializationConfig = {
-            adapter: currentAdapter,
+            adapter,
             isCapacitor,
             chains,
           };
@@ -641,7 +658,13 @@ export default function WagmiSetup({
         }
       }
     );
-  }, [bootstrapConfigurationKey, chains, currentAdapter, isCapacitor]);
+  }, [
+    bootstrapConfigurationKey,
+    chains,
+    createWagmiAdapter,
+    currentAdapter,
+    isCapacitor,
+  ]);
 
   const waitForAppKitReady = useCallback(
     () => startAppKitInitialization(),
@@ -660,19 +683,15 @@ export default function WagmiSetup({
     [fastPathSnapshot, waitForAppKitReady]
   );
 
-  // Create only the Wagmi adapter on mount so hooks can render under a stable
-  // provider before AppKit performs its heavier initialization.
+  // Replace the wallet-free config after mount, preserving the provider tree,
+  // before AppKit performs its heavier initialization.
   useEffect(() => {
     if (fastPathSnapshot.adapterInitializationStarted) {
       return;
     }
 
-    installSafeEthereumProxy();
-    markMobileLaunchStep("wagmi_init_start");
-
     try {
       createWagmiAdapterOnce(bootstrapConfigurationKey, createWagmiAdapter);
-      markMobileLaunchStep("wagmi_adapter_created");
     } catch (error) {
       logErrorSecurely("[WagmiSetup] AppKit initialization failed", error);
       showAppKitToast({
@@ -715,14 +734,13 @@ export default function WagmiSetup({
     };
   }, [currentAdapter, startAppKitInitialization]);
 
-  // Show loading state until the wagmi adapter exists.
-  if (currentAdapter === null) {
-    return null;
-  }
-
   return (
     <AppKitBootstrapContext.Provider value={appKitBootstrapValue}>
-      <WagmiProvider config={currentAdapter.wagmiConfig}>
+      {/* The temporary config must not compete for Wagmi's reconnect lock. */}
+      <WagmiProvider
+        config={currentAdapter?.wagmiConfig ?? publicWagmiConfig}
+        reconnectOnMount={currentAdapter !== null}
+      >
         {children}
         {appWalletPasswordModal.modal}
       </WagmiProvider>

@@ -1,20 +1,21 @@
 import { renderHook, act } from "@testing-library/react";
 import { useSecureSign } from "@/hooks/useSecureSign";
-import { useAppKitAccount } from "@reown/appkit/react";
-import { useSignMessage } from "wagmi";
+import { useAccount, useSignMessage } from "wagmi";
 import { UserRejectedRequestError } from "viem";
 
 // Mock the hooks
-jest.mock("@reown/appkit/react", () => ({
-  useAppKitAccount: jest.fn(),
-}));
-
 jest.mock("wagmi", () => ({
+  useAccount: jest.fn(),
   useSignMessage: jest.fn(),
 }));
 
-const mockUseAppKitAccount = useAppKitAccount as jest.MockedFunction<
-  typeof useAppKitAccount
+const mockUseAccount = useAccount as jest.MockedFunction<
+  () => {
+    address?: string | undefined;
+    isConnected: boolean;
+    caipAddress: string;
+    status: string;
+  }
 >;
 const mockUseSignMessage = useSignMessage as jest.MockedFunction<
   typeof useSignMessage
@@ -29,7 +30,7 @@ describe("useSecureSign with Wagmi", () => {
     jest.clearAllMocks();
 
     // Setup default successful mocks
-    mockUseAppKitAccount.mockReturnValue({
+    mockUseAccount.mockReturnValue({
       address: validAddress,
       isConnected: true,
       caipAddress: "",
@@ -114,7 +115,7 @@ describe("useSecureSign with Wagmi", () => {
 
   describe("Connection validation", () => {
     it("fails when wallet not connected", async () => {
-      mockUseAppKitAccount.mockReturnValue({
+      mockUseAccount.mockReturnValue({
         address: undefined,
         isConnected: false,
         caipAddress: "",
@@ -135,7 +136,7 @@ describe("useSecureSign with Wagmi", () => {
     });
 
     it("fails when address is missing", async () => {
-      mockUseAppKitAccount.mockReturnValue({
+      mockUseAccount.mockReturnValue({
         address: undefined,
         isConnected: true,
         caipAddress: "",

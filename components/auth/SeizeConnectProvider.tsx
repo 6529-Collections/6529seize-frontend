@@ -1,6 +1,5 @@
 "use client";
 
-import { useAppKitAccount, useDisconnect } from "@reown/appkit/react";
 import React, {
   useCallback,
   useEffect,
@@ -36,6 +35,7 @@ import { APP_WALLET_CONNECTOR_TYPE } from "@/wagmiConfig/wagmiAppWalletConnector
 import {
   AppKitModalBridge,
   createAppKitModalBridgeStore,
+  useAppKitAccountBridgeState,
   useAppKitModalBridgeState,
 } from "./AppKitModalBridge";
 import { WalletErrorBoundary } from "./error-boundary";
@@ -67,9 +67,7 @@ import {
 export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const account = useAppKitAccount();
   const wagmiAccount = useAccount();
-  const { disconnect } = useDisconnect();
   const capacitor = useCapacitor();
   const {
     hasTerminalError: hasTerminalBootstrapError,
@@ -80,9 +78,18 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
   } = useAppKitBootstrap();
   const appKitModalBridgeStore = useMemo(createAppKitModalBridgeStore, []);
   const appKitModalState = useAppKitModalBridgeState(appKitModalBridgeStore);
+  const account = useAppKitAccountBridgeState(appKitModalBridgeStore);
+  const disconnect = useCallback(() => {
+    if (isAppKitReady) {
+      return appKitModalBridgeStore.disconnect();
+    }
+    return waitForAppKitReady()
+      .then(() => appKitModalBridgeStore.waitForOpen())
+      .then(() => appKitModalBridgeStore.disconnect());
+  }, [appKitModalBridgeStore, isAppKitReady, waitForAppKitReady]);
   const [storedConnectedAccounts, setStoredConnectedAccounts] = useState<
     ConnectedWalletAccount[]
-  >(() => getConnectedWalletAccounts());
+  >([]);
   const [isAddingConnectedAccount, setIsAddingConnectedAccount] =
     useState(false);
   const [isConnectIntentWaitingForAppKit, setIsConnectIntentWaitingForAppKit] =
