@@ -89,7 +89,8 @@ Profile access stays in the app drawer/account surfaces.
 - When an update is available, a small rocket sits in a curved attachment above
   Home. The attachment is part of the dock and follows its movement, hiding,
   and phone scroll scale. The rocket updates the app; Home keeps its normal
-  navigation action. Desktop web retains the full update prompt.
+  navigation action. Desktop web retains the full update prompt; phone browsers
+  without the native dock show a standalone rocket in the lower-right corner.
 - Tapping the rocket shows a static rocket and `Updating to the latest version`
   with three animated dots while the current route reloads. The screen resumes
   before the incoming page hydrates and clears when its app shell mounts.

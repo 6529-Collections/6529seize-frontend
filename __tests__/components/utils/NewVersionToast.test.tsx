@@ -40,7 +40,6 @@ it("retains the desktop prompt and update action", () => {
 
 it.each([
   [true, false],
-  [false, true],
   [true, true],
 ])("leaves mobile updates to the dock (app=%s, phone=%s)", (isApp, isPhone) => {
   jest
@@ -69,4 +68,16 @@ it("preserves localized desktop labels", () => {
   expect(
     screen.getByRole("button", { name: "Actualiser la page" })
   ).toBeInTheDocument();
+});
+
+it("keeps an update action on mobile web, which has no native dock", () => {
+  jest.mocked(useMediaQuery).mockReturnValue(true);
+  render(<NewVersionToast />);
+  expect(
+    screen.queryByText("A new version is available")
+  ).not.toBeInTheDocument();
+  fireEvent.click(
+    screen.getByRole("button", { name: "Update to the new version" })
+  );
+  expect(refreshAppVersion).toHaveBeenCalledTimes(1);
 });

@@ -20,9 +20,7 @@ export function finishVersionReload() {
 /** Show feedback before navigating; the next document restores it before paint. */
 export function beginVersionReload(reload: () => void) {
   if (document.documentElement.hasAttribute(VERSION_RELOAD_ATTRIBUTE)) return;
-  const locale = normalizeLocale(
-    navigator.languages?.[0] ?? navigator.language
-  );
+  const locale = normalizeLocale(navigator.languages[0] ?? navigator.language);
   try {
     sessionStorage.setItem(
       VERSION_RELOAD_KEY,

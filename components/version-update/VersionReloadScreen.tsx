@@ -7,7 +7,7 @@ export const VERSION_RELOAD_STYLES = `
 html[data-version-reload] #version-reload-screen{position:fixed;inset:0;z-index:2147483647;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#080a09;color:#f1f2f2;font-family:Arial,sans-serif;text-align:center;padding:16px;box-sizing:border-box;outline:none}
 html[data-version-reload] body>:not(#version-reload-screen){visibility:hidden}
 #version-reload-screen img{width:60px;height:60px;object-fit:contain;filter:drop-shadow(0 0 14px rgba(49,205,105,.18))}
-#version-reload-screen p{margin:24px 0 20px;font-size:clamp(12px,3.5vw,16px);font-weight:500;line-height:1.5;white-space:nowrap;max-width:100%}
+#version-reload-screen p{margin:24px 0 20px;font-size:clamp(12px,4vw,16px);font-weight:500;line-height:1.5;white-space:nowrap;max-width:100%}
 #version-reload-screen [data-reload-locale]{display:none}
 ${Object.keys(VERSION_RELOAD_MESSAGES)
   .map(
@@ -32,7 +32,6 @@ export default function VersionReloadScreen() {
       tabIndex={-1}
     >
       {/* Local decorative asset, available before React hydrates. */}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src="/rocket-refresh-small.png"
         alt=""

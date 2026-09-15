@@ -1,5 +1,6 @@
 "use client";
 
+import { VersionUpdateButton } from "@/components/version-update/DockedVersionUpdate";
 import { refreshAppVersion } from "@/helpers/version-refresh.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
@@ -30,7 +31,14 @@ const NewVersionToast = () => {
   const { isApp } = useDeviceInfo();
   const locale = useBrowserLocale();
   const isPhone = useMediaQuery("(max-width: 639px)");
-  if (!isVersionStale || isApp || isPhone) return null;
+  if (!isVersionStale || isApp) return null;
+  if (isPhone) {
+    return (
+      <div className="tailwind-scope tw-fixed tw-bottom-4 tw-right-4 tw-z-[1000]">
+        <VersionUpdateButton />
+      </div>
+    );
+  }
   const refreshActionLabel = t(locale, "newVersionToast.refreshAction");
 
   return (
