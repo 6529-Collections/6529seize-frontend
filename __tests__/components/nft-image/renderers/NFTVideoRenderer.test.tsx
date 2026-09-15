@@ -1,7 +1,8 @@
 import NFTVideoRenderer from "@/components/nft-image/renderers/NFTVideoRenderer";
+import * as videoConfig from "@/components/drops/view/item/content/media/SeizeVideoPlayer.config";
 import type { BaseRendererProps } from "@/components/nft-image/types/renderer-props";
 import type { BaseNFT } from "@/entities/INFT";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 
 // Mock NFTImageBalance to match the new showBalance API
 jest.mock("@/components/nft-image/NFTImageBalance", () => {
@@ -72,6 +73,113 @@ const createDefaultProps = (
 });
 
 describe("NFTVideoRenderer", () => {
+  describe("Video posters", () => {
+    it("retains the poster and play control when autoplay is rejected", async () => {
+      const inView = jest
+        .spyOn(videoConfig, "useElementInView")
+        .mockReturnValue(true);
+      const play = jest
+        .spyOn(HTMLMediaElement.prototype, "play")
+        .mockRejectedValue(
+          new DOMException("Autoplay blocked", "NotAllowedError")
+        );
+      try {
+        const { container } = render(
+          <NFTVideoRenderer {...createDefaultProps()} />
+        );
+        await waitFor(() => expect(play).toHaveBeenCalled());
+        expect(
+          await screen.findByRole("button", { name: "Play video" })
+        ).toBeInTheDocument();
+        expect(container.querySelector("video")).toHaveAttribute(
+          "poster",
+          "https://example.com/scaled.png"
+        );
+      } finally {
+        play.mockRestore();
+        inView.mockRestore();
+      }
+    });
+
+    it.each([
+      [{}, "https://example.com/scaled.png"],
+      [{ showThumbnail: true }, "https://example.com/thumb.png"],
+      [{ showOriginal: true }, "https://example.com/image.png"],
+    ])("selects the artwork for the display mode %o", (mode, poster) => {
+      const { container } = render(
+        <NFTVideoRenderer {...createDefaultProps(mode)} />
+      );
+      expect(container.querySelector("video")).toHaveAttribute(
+        "poster",
+        poster
+      );
+    });
+
+    it("uses metadata artwork when scaled and original images are unusable", () => {
+      const nft = createMockNFT({ scaled: " ", image: "art.mp4?download=1" });
+      const { container } = render(
+        <NFTVideoRenderer {...createDefaultProps({ nft })} />
+      );
+      expect(container.querySelector("video")).toHaveAttribute(
+        "poster",
+        "https://example.com/metadata-image.png"
+      );
+    });
+
+    it("uses a thumbnail as the last available artwork", () => {
+      const nft = createMockNFT({ scaled: "", image: "", metadata: {} });
+      const { container } = render(
+        <NFTVideoRenderer {...createDefaultProps({ nft })} />
+      );
+      expect(container.querySelector("video")).toHaveAttribute(
+        "poster",
+        "https://example.com/thumb.png"
+      );
+    });
+
+    it("uses scaled artwork when original mode has no original or metadata image", () => {
+      const nft = createMockNFT({ image: "", metadata: {}, thumbnail: "" });
+      const { container } = render(
+        <NFTVideoRenderer
+          {...createDefaultProps({ nft, showOriginal: true })}
+        />
+      );
+      expect(container.querySelector("video")).toHaveAttribute(
+        "poster",
+        "https://example.com/scaled.png"
+      );
+    });
+
+    it("omits the poster when no artwork image is available", () => {
+      const nft = createMockNFT({
+        scaled: "",
+        image: "art.mp4",
+        thumbnail: "",
+        metadata: {},
+      });
+      const { container } = render(
+        <NFTVideoRenderer {...createDefaultProps({ nft })} />
+      );
+      expect(container.querySelector("video")).not.toHaveAttribute("poster");
+    });
+
+    it("updates the poster when the displayed NFT changes", () => {
+      const { container, rerender } = render(
+        <NFTVideoRenderer {...createDefaultProps()} />
+      );
+      const nft = createMockNFT({
+        id: 2,
+        scaled: "next-poster.png",
+        animation: "next.mp4",
+      });
+      rerender(<NFTVideoRenderer {...createDefaultProps({ nft })} />);
+      expect(container.querySelector("video")).toHaveAttribute(
+        "poster",
+        "next-poster.png"
+      );
+    });
+  });
+
   describe("Basic Rendering", () => {
     it("renders video element with correct structure", () => {
       const props = createDefaultProps();
