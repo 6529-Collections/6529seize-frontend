@@ -556,8 +556,7 @@ const BottomNavigationResolvedContent: React.FC<
         className={`${getDockClassName(compact)} ${styles["dock"] ?? ""}`}
         style={getDockStyle({ compact, isTabletViewport })}
       >
-        <DockedVersionUpdate />
-        <div className="tw-pointer-events-none tw-absolute tw-inset-0 tw-overflow-hidden tw-rounded-[inherit]">
+        <DockedVersionUpdate>
           <div
             aria-hidden="true"
             data-testid="mobile-dock-active-pill"
@@ -572,7 +571,7 @@ const BottomNavigationResolvedContent: React.FC<
               isTabletViewport,
             })}
           />
-        </div>
+        </DockedVersionUpdate>
         <div className={floatingNavHitRowClassName}>
           <ul className={getFloatingNavListClassName(compact)}>
             {navItems.map((item) => (

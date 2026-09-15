@@ -32,3 +32,15 @@
   backdrop-filter: blur(40px);
   -webkit-backdrop-filter: blur(40px);
 }
+
+/* The selected item's glow follows the same outline as the glass. Its content
+   retains the original dock body as its positioning/animation coordinate box. */
+.selectionClip {
+  position: absolute;
+  inset: 0;
+}
+
+.selectionBody {
+  position: absolute;
+  inset: calc(36px * var(--dock-update-scale)) 0 0;
+}

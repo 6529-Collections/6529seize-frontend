@@ -1,12 +1,16 @@
 "use client";
 
-import { useId } from "react";
+import { useId, type ReactNode } from "react";
 import styles from "./DockUpdateSurface.module.css";
 
 const BUMP_PATH = "M0 36 C24 36 24 0 52 0 C80 0 80 36 104 36 V37 H0 Z";
 
 /** The browser lays out this silhouette with the dock; no measured frame is cached. */
-export default function DockUpdateSurface() {
+export default function DockUpdateSurface({
+  children,
+}: {
+  readonly children?: ReactNode;
+}) {
   const id = useId().replaceAll(":", "");
   const shapeId = `${id}-shape`;
   const clipId = `${id}-clip`;
@@ -98,6 +102,13 @@ export default function DockUpdateSurface() {
         className={styles["glass"]}
         style={{ clipPath: `url(#${clipId})` }}
       />
+      <div
+        data-dock-selection-clip="true"
+        className={styles["selectionClip"]}
+        style={{ clipPath: `url(#${clipId})` }}
+      >
+        <div className={styles["selectionBody"]}>{children}</div>
+      </div>
     </div>
   );
 }

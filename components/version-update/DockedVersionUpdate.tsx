@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { useVersionStatus } from "@/contexts/VersionStatusContext";
 import { refreshAppVersion } from "@/helpers/version-refresh.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -7,13 +8,23 @@ import { t } from "@/i18n/messages";
 
 import DockUpdateSurface from "./DockUpdateSurface";
 
-export default function DockedVersionUpdate() {
+export default function DockedVersionUpdate({
+  children,
+}: {
+  readonly children?: ReactNode;
+}) {
   const isVersionStale = useVersionStatus();
-  if (!isVersionStale) return null;
+  if (!isVersionStale) {
+    return children !== undefined && children !== null ? (
+      <div className="tw-pointer-events-none tw-absolute tw-inset-0 tw-overflow-hidden tw-rounded-[inherit]">
+        {children}
+      </div>
+    ) : null;
+  }
 
   return (
     <>
-      <DockUpdateSurface />
+      <DockUpdateSurface>{children}</DockUpdateSurface>
       <div
         data-version-update-dock="true"
         className="tw-pointer-events-none tw-absolute tw-bottom-full tw-left-1/2 tw-z-10 -tw-translate-x-1/2"
