@@ -22,7 +22,7 @@ it("mounts each config after commit without remounting public content", () => {
     transports: { 1: http() },
     ssr: false,
   });
-  const onMount = jest.fn();
+  const onMount = jest.fn().mockResolvedValue(undefined);
   const onContentMount = jest.fn();
   const renderedConfigs: Config[] = [];
   jest.mocked(hydrate).mockReturnValue({ onMount });
