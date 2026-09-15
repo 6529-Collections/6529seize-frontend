@@ -12,10 +12,13 @@ import {
 } from "@/helpers/navigation.helpers";
 import MessagesPageClient from "./page.client";
 
-export const metadata = getAppMetadata({
-  title: "Messages",
-  description: "Direct Messages",
-});
+export const metadata = getAppMetadata(
+  {
+    title: "Messages",
+    description: "Direct Messages",
+  },
+  { robots: { index: false, follow: true } }
+);
 
 type MessageSearchParams = RouteSearchParams;
 
