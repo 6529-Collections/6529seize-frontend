@@ -7,6 +7,8 @@ import { MuseumBreadcrumbs } from "@/components/museum/MuseumBreadcrumbs";
 import { MuseumMarkdown } from "@/components/museum/MuseumMarkdown";
 import { MuseumRelatedEntities } from "@/components/museum/MuseumRelatedEntities";
 import { MuseumPublicationUnavailable } from "@/components/museum/MuseumPublicationUnavailable";
+import JsonLdScript from "@/lib/structured-data/json-ld";
+import { buildMuseumArtistPageJsonLd } from "@/lib/structured-data/museum";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -149,8 +151,10 @@ function TypedArtistPage({
     context.sourcePath === null || context.sourceCommit === null
       ? null
       : buildImmutableMuseumBlobUrl(context.sourceCommit, context.sourcePath);
+  const path = museumArtistHref(artist.slug);
   return (
     <article className="tw-min-w-0">
+      <JsonLdScript data={buildMuseumArtistPageJsonLd({ artist, path })} />
       <MuseumBreadcrumbs
         ariaLabel={t(
           DEFAULT_LOCALE,

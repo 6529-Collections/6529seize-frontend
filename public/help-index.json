@@ -505,6 +505,46 @@
       ]
     },
     {
+      "id": "education.library",
+      "kind": "route",
+      "title": "Education library and collaboration",
+      "aliases": [
+        "education",
+        "Tweetstorms",
+        "podcasts",
+        "Open Metaverse education",
+        "education collaboration"
+      ],
+      "keywords": [
+        "education",
+        "Tweetstorms",
+        "podcasts",
+        "research",
+        "advocacy",
+        "policy",
+        "metaverse"
+      ],
+      "facts": [
+        "The Education landing page at /education introduces a historical archive of 6529 Tweetstorms and podcast appearances.",
+        "Tweetstorm entries link to their original sources. Podcast entries link to their original sources and retain their recorded publication dates.",
+        "The landing page identifies /about/open-metaverse as the original thesis and links current context through the 6529 Network Museum's institutional overview, permanent Collection, and research hub.",
+        "The collaboration page at /education/education-collaboration-form provides support@6529.io for relevant education, research, advocacy, and policy inquiries. Selecting the address prepares an email in a configured mail application; it does not send automatically."
+      ],
+      "canonical_path": "/education",
+      "link_label": "Open the Education library",
+      "related_paths": [
+        "/education/tweetstorms",
+        "/education/podcasts",
+        "/education/education-collaboration-form",
+        "/about/open-metaverse",
+        "/museum/network/about",
+        "/museum/network/collection",
+        "/museum/network/research"
+      ],
+      "tags": ["education", "research", "archive"],
+      "source_refs": ["ops/docs/education/feature-education-library.md"]
+    },
+    {
       "id": "museum.network",
       "kind": "route",
       "title": "6529 Network Museum",
@@ -5896,6 +5936,10 @@
       "keywords": ["waves", "composer", "markdown", "code", "blank", "format"],
       "facts": [
         "Wave composer docs cover markdown code blocks and blank-line preservation.",
+        "Type ~hi~ or ~~hi~~ for strikethrough. Both forms show struck-through text in the composer and when editing, matching the posted message.",
+        "Backspace immediately after an inline Markdown shortcut restores the text minus the last typed closing character. This covers strikethrough, bold, italic, highlight, and inline code. Temporary trailing text can be typed and deleted normally; after deleting back to the shortcut boundary, Backspace still restores the Markdown markers. Moving the cursor invalidates that restoration point.",
+        "Text typed after a completed strikethrough shortcut starts unformatted, including spaces.",
+        "Deleting a whole formatted word clears its typing format even when other message text remains. Partial deletion retains formatting, and formats still present at the cursor are preserved.",
         "Use markdown records when users ask how to format a drop.",
         "Markdown behavior belongs to composer content, not the wave creation form."
       ],
@@ -5903,6 +5947,7 @@
       "related_paths": ["/waves"],
       "tags": ["waves", "composer", "markdown"],
       "source_refs": [
+        "ops/docs/waves/composer/README.md",
         "ops/docs/waves/composer/feature-markdown-code-blocks.md",
         "ops/docs/waves/composer/feature-markdown-blank-line-preservation.md"
       ]

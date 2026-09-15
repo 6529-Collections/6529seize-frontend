@@ -60,6 +60,14 @@
   height: 200px;
 }
 
+.editor-text-strikethrough {
+  text-decoration: line-through;
+}
+
+.editor-text-underlineStrikethrough {
+  text-decoration: underline line-through;
+}
+
 .editor-code,
 .editor-text-code {
   color: #e5e7eb;
