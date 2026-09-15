@@ -4,10 +4,10 @@ const path = require("node:path");
 const NO_FOLLOW = fs.constants.O_NOFOLLOW ?? 0;
 
 const RELEASE_PACKAGE = "@6529-collections/release-request";
-const RELEASE_VERSION = "0.0.4";
+const RELEASE_VERSION = "0.0.5";
 const RELEASE_REFERENCE = `${RELEASE_PACKAGE}@${RELEASE_VERSION}`;
 const RELEASE_INTEGRITY =
-  "sha512-rbGE0a3zlYUQlkg43/1TWAysNLksw0eaewywxDi6IoiucWgsZyEOrmbctBRWeDxLNAU3VypzrjyIGkjZ8ediiQ==";
+  "sha512-oTnQnQdarXPu6cMj71NHCQxKwfpxem94axmBRsFW+ze3WUx5oKRlWw8jNtLcNkm13n4EOPQrt+gFr1zdbXPf9w==";
 const RELEASE_DEPENDENCIES = new Map([
   ["ajv", "8.20.0"],
   ["ajv-formats", "3.0.1(ajv@8.20.0)"],
