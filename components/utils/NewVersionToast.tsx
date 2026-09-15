@@ -13,6 +13,8 @@ import { type CSSProperties, type JSX } from "react";
 const NEW_VERSION_TOAST_MOBILE_DOCK_QUERY = "(max-width: 639px)";
 const NEW_VERSION_TOAST_MOBILE_BOTTOM_PROPERTY =
   "--new-version-toast-mobile-bottom";
+const NEW_VERSION_TOAST_MOBILE_RIGHT_PROPERTY =
+  "--new-version-toast-mobile-right";
 const NEW_VERSION_TOAST_MOBILE_SCALE_PROPERTY =
   "--new-version-toast-mobile-scale";
 const NEW_VERSION_TOAST_WEB_FALLBACK_BOTTOM = "1rem";
@@ -70,6 +72,9 @@ const NewVersionToast = (): JSX.Element | null => {
     resetOnDisabled: false,
     targetProperty: NEW_VERSION_TOAST_MOBILE_BOTTOM_PROPERTY,
     targetScaleProperty: NEW_VERSION_TOAST_MOBILE_SCALE_PROPERTY,
+    targetRightProperty: usesCompactPill
+      ? NEW_VERSION_TOAST_MOBILE_RIGHT_PROPERTY
+      : undefined,
     watchForDockRoot: isApp,
   });
 
@@ -79,14 +84,14 @@ const NewVersionToast = (): JSX.Element | null => {
 
   const refreshActionLabel = t(locale, "newVersionToast.refreshAction");
   const positionClassName = usesCompactPill
-    ? "tw-bottom-[var(--new-version-toast-mobile-bottom,1rem)] tw-left-1/2 tw-right-auto tw-w-max tw-max-w-[calc(100vw-2rem)] -tw-translate-x-1/2 sm:tw-scale-100"
-    : "tw-bottom-[var(--new-version-toast-mobile-bottom,1rem)] tw-left-4 tw-right-4 tw-w-auto sm:tw-bottom-7 sm:tw-left-auto sm:tw-right-7 sm:tw-scale-100";
+    ? "tw-bottom-[var(--new-version-toast-mobile-bottom,1rem)] tw-left-auto tw-right-[var(--new-version-toast-mobile-right,1.125rem)] tw-origin-bottom-right tw-w-max tw-max-w-[calc(100vw-2rem)] sm:tw-scale-100"
+    : "tw-bottom-[var(--new-version-toast-mobile-bottom,1rem)] tw-left-4 tw-right-4 tw-origin-bottom tw-w-auto sm:tw-bottom-7 sm:tw-left-auto sm:tw-right-7 sm:tw-scale-100";
 
   return (
     <div
       ref={toastLayerRef}
       style={getNewVersionToastStyle(fallbackBottom)}
-      className={`tailwind-scope tw-pointer-events-none tw-fixed tw-z-[1000] tw-origin-bottom tw-scale-[var(--new-version-toast-mobile-scale,1)] tw-transform-gpu tw-will-change-[bottom,transform] ${positionClassName}`}
+      className={`tailwind-scope tw-pointer-events-none tw-fixed tw-z-[1000] tw-scale-[var(--new-version-toast-mobile-scale,1)] tw-transform-gpu tw-will-change-[bottom,transform] ${positionClassName}`}
     >
       {usesCompactPill ? (
         <button

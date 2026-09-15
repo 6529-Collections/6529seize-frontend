@@ -87,7 +87,7 @@ Profile access stays in the app drawer/account surfaces.
 - While the mobile keyboard is open, the bar stays mounted but slides out of
   view and is non-interactive.
 - When an update is available, a compact green `Update` pill with a rocket
-  appears above the mobile dock. It follows the dock position and scales with
+  appears above the right edge of the mobile dock. It follows the dock position and scales with
   scrolling on phones. Tapping it reloads the current route; Home keeps its
   normal navigation action. Desktop web retains the full update prompt.
 - While a single drop is open (`?drop=...`) or an inline drop edit is active,
