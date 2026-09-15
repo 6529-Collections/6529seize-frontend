@@ -70,9 +70,9 @@ jobs:
           corepack prepare "$(node -p 'require("./package.json").packageManager')" --activate
           pnpm --version
 
-      # This contract reads the audit YAML, so Jest's import graph cannot select it.
+      # These contracts read workflow YAML, so Jest's import graph cannot select them.
       # It uses Node built-ins and synthetic responses; no provider token is needed.
-      - name: Verify Sentry audit offline contract
+      - name: Verify Sentry workflow offline contracts
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: |
@@ -80,9 +80,11 @@ jobs:
           changed_audit_inputs="$(git diff --name-only --no-renames "${BASE_SHA}...HEAD" -- \
             .github/workflows/monitoring-provider-audit.yml \
             ops/scripts/monitoring-provider-audit.test.cjs \
+            .github/workflows/monitoring-sentry-routing.yml \
+            ops/scripts/monitoring-sentry-routing.test.cjs \
             .github/workflows/app-pr-ci.yml)"
           if [[ -n "$changed_audit_inputs" ]]; then
-            ./bin/6529 exec node --test ops/scripts/monitoring-provider-audit.test.cjs
+            ./bin/6529 exec node --test ops/scripts/monitoring-provider-audit.test.cjs ops/scripts/monitoring-sentry-routing.test.cjs
           fi
 
       - name: Create CI plan and security reports
