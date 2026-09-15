@@ -30,6 +30,7 @@ interface UseWaveShareCopyActionParams {
 
 interface UseWaveShareCopyActionResult {
   readonly mode: WaveLinkActionMode;
+  readonly actionLabel: string;
   readonly label: string;
   readonly feedbackState: WaveLinkActionFeedback;
   readonly isSharing: boolean;
@@ -191,19 +192,24 @@ export function useWaveShareCopyAction({
     setTemporaryFeedback,
   ]);
 
+  const actionLabel = t(
+    locale,
+    mode === "share"
+      ? "headerWaveLinkAction.share"
+      : "headerWaveLinkAction.copy"
+  );
   let label: string;
   if (feedbackState === "shared") {
     label = t(locale, "headerWaveLinkAction.feedback.shared");
   } else if (feedbackState === "copied") {
     label = t(locale, "headerWaveLinkAction.feedback.copied");
-  } else if (mode === "share") {
-    label = t(locale, "headerWaveLinkAction.share");
   } else {
-    label = t(locale, "headerWaveLinkAction.copy");
+    label = actionLabel;
   }
 
   return {
     mode,
+    actionLabel,
     label,
     feedbackState,
     isSharing,

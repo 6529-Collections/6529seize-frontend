@@ -125,13 +125,10 @@ const VISIBILITY_TONE_CLASSES: Record<
     default: INLINE_STAT_TONE_CLASSES,
   },
   "inline-header": {
-    excellent:
-      "tw-border-emerald-500/20 tw-bg-emerald-500/[0.05] tw-text-emerald-400 desktop-hover:hover:tw-border-emerald-500/30 desktop-hover:hover:tw-bg-emerald-500/[0.08] desktop-hover:hover:tw-text-emerald-300",
-    healthy:
-      "tw-border-amber-500/20 tw-bg-amber-500/[0.05] tw-text-amber-400 desktop-hover:hover:tw-border-amber-500/30 desktop-hover:hover:tw-bg-amber-500/[0.08] desktop-hover:hover:tw-text-amber-300",
-    low: "tw-border-rose-500/20 tw-bg-rose-500/[0.05] tw-text-rose-400 desktop-hover:hover:tw-border-rose-500/30 desktop-hover:hover:tw-bg-rose-500/[0.08] desktop-hover:hover:tw-text-rose-300",
-    default:
-      "tw-border-primary-400/20 tw-bg-primary-500/[0.05] tw-text-primary-300 desktop-hover:hover:tw-border-primary-400/30 desktop-hover:hover:tw-bg-primary-500/[0.08] desktop-hover:hover:tw-text-[#A8C4FF]",
+    excellent: "tw-text-emerald-400 desktop-hover:hover:tw-text-emerald-300",
+    healthy: "tw-text-amber-400 desktop-hover:hover:tw-text-amber-300",
+    low: "tw-text-rose-400 desktop-hover:hover:tw-text-rose-300",
+    default: "tw-text-primary-300 desktop-hover:hover:tw-text-primary-200",
   },
   default: {
     excellent:
@@ -262,7 +259,7 @@ const getChipClasses = (
     sizeClasses = "";
   } else if (isInlineHeaderVariant(variant)) {
     variantClasses =
-      "tw-h-7 tw-cursor-help tw-gap-1.5 tw-whitespace-nowrap tw-rounded-md tw-border tw-border-solid tw-px-2 tw-text-[11px] tw-font-semibold tw-leading-4 tw-shadow-sm tw-shadow-black/20";
+      "tw-min-h-6 tw-min-w-6 tw-cursor-help tw-gap-1 tw-whitespace-nowrap tw-rounded-md tw-bg-transparent tw-px-1 tw-py-0 tw-text-[11px] tw-font-semibold tw-leading-4";
     sizeClasses = "";
   } else if (variant === "sidebar") {
     sizeClasses = "tw-h-5 tw-px-1.5 tw-text-[10px]";
@@ -321,7 +318,7 @@ const getValueClasses = (variant: WaveTrustSignalsVariant): string => {
   }
 
   if (isInlineHeaderVariant(variant)) {
-    return "tw-text-[11px] tw-font-semibold tw-leading-4";
+    return "tw-text-[11px] tw-font-semibold tw-leading-4 tw-tabular-nums";
   }
 
   return "tw-tabular-nums";
@@ -594,7 +591,7 @@ function WaveScoreSummaryPopoverContent({
       {learnMoreHref !== undefined && (
         <Link
           href={learnMoreHref}
-          className="desktop-hover:hover:tw-text-primary-200 tw-mt-2 tw-inline-flex tw-items-center tw-rounded-md tw-text-[11px] tw-font-semibold tw-text-primary-300 tw-no-underline tw-transition focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+          className="desktop-hover:hover:tw-text-primary-200 tw-mt-2 tw-inline-flex tw-min-h-6 tw-items-center tw-rounded-md tw-text-[11px] tw-font-semibold tw-text-primary-300 tw-no-underline tw-transition focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
         >
           {t(WAVE_TRUST_LOCALE, "waves.score.summary.learnMore")}
         </Link>
