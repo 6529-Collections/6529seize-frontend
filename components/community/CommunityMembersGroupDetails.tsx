@@ -5,7 +5,6 @@ import type { GroupCardRateMatter } from "@/components/groups/page/list/card/Gro
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import GroupCardConfigs from "@/components/groups/page/list/card/GroupCardConfigs";
 import GroupCardVoteAll from "@/components/groups/page/list/card/vote-all/GroupCardVoteAll";
-import marketplaceStyles from "@/components/collect/marketplace-font.module.css";
 import Button from "@/components/utils/button/Button";
 import type { ApiGroup } from "@/generated/models/ApiGroup";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
@@ -20,7 +19,8 @@ import { useRef, useState } from "react";
 
 type InspectableGroup = ApiGroupFull & Pick<Partial<ApiGroup>, "is_hidden">;
 
-const INSPECTION_SURFACE_CLASSES = `${marketplaceStyles["surface"] ?? ""} tw-mt-4 tw-border-x-0 tw-border-y tw-border-solid tw-border-white/10 tw-py-4`;
+const INSPECTION_SURFACE_CLASSES =
+  "tw-mt-3 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950/30 tw-p-4";
 
 export default function CommunityMembersGroupDetails({
   groupId,
@@ -156,35 +156,35 @@ export default function CommunityMembersGroupDetails({
           >
             {groupName}
           </h2>
-          {showBulkRateActions && activeRateMatter === null ? (
-            <div
-              role="group"
-              aria-label={t(locale, "network.groupInspection.bulkActionsLabel")}
-              className="tw-mt-3 tw-flex tw-flex-col tw-gap-2 sm:tw-flex-row sm:tw-flex-wrap"
-            >
-              <Button
-                ref={repButtonRef}
-                variant="tertiary"
-                size="sm"
-                className="!tw-h-auto tw-min-h-11 tw-w-full !tw-whitespace-normal !tw-font-medium !tw-shadow-none tw-py-2 tw-text-center sm:tw-min-h-9 sm:tw-w-auto"
-                onClick={() => openBulkRateForm(ApiRateMatter.Rep)}
-              >
-                {t(locale, "network.groupInspection.bulkRep")}
-              </Button>
-              <Button
-                ref={nicButtonRef}
-                variant="tertiary"
-                size="sm"
-                className="!tw-h-auto tw-min-h-11 tw-w-full !tw-whitespace-normal !tw-font-medium !tw-shadow-none tw-py-2 tw-text-center sm:tw-min-h-9 sm:tw-w-auto"
-                onClick={() => openBulkRateForm(ApiRateMatter.Cic)}
-              >
-                {t(locale, "network.groupInspection.bulkNic")}
-              </Button>
-            </div>
-          ) : null}
         </div>
         {closeButton}
       </div>
+      {showBulkRateActions && activeRateMatter === null ? (
+        <div
+          role="group"
+          aria-label={t(locale, "network.groupInspection.bulkActionsLabel")}
+          className="tw-mt-3 tw-flex tw-flex-col tw-gap-2 sm:tw-flex-row sm:tw-flex-wrap"
+        >
+          <Button
+            ref={repButtonRef}
+            variant="tertiary"
+            size="sm"
+            className="!tw-h-auto tw-min-h-11 tw-w-full !tw-whitespace-normal !tw-font-medium !tw-shadow-none tw-py-2 tw-text-center sm:tw-min-h-9 sm:tw-w-auto"
+            onClick={() => openBulkRateForm(ApiRateMatter.Rep)}
+          >
+            {t(locale, "network.groupInspection.bulkRep")}
+          </Button>
+          <Button
+            ref={nicButtonRef}
+            variant="tertiary"
+            size="sm"
+            className="!tw-h-auto tw-min-h-11 tw-w-full !tw-whitespace-normal !tw-font-medium !tw-shadow-none tw-py-2 tw-text-center sm:tw-min-h-9 sm:tw-w-auto"
+            onClick={() => openBulkRateForm(ApiRateMatter.Cic)}
+          >
+            {t(locale, "network.groupInspection.bulkNic")}
+          </Button>
+        </div>
+      ) : null}
       {showBulkRateActions && activeRateMatter !== null ? (
         <div
           ref={bulkFormRef}
