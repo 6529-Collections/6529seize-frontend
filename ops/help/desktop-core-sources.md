@@ -83,3 +83,8 @@ The final `Range: …` sentence is visible conversation context and must remain 
 calculated replies. It preserves the selected interval and percentage across
 short replies without private device access. Calculated templates are excluded
 from ordinary retrieval; update the backend before publishing these records.
+
+The 100% reconciliation failure advances to transaction-reset guidance. Preserve
+the distinction between reconciliation, Reset to Block, NFT reset, and wallet
+recovery. Reset instructions must explain local history deletion/reimport, RPC
+and time cost, and waiting for resync before recalculating TDH.

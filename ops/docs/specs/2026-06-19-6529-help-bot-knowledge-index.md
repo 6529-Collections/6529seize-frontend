@@ -586,3 +586,8 @@ publisher. Backend arithmetic fills these values from the user-supplied local
 checkpoint. Publish after the companion runtime update: ordinary retrieval must
 exclude unrendered calculated templates. Start with 25% of the indexed block
 range and widen to 50%, 75%, then 100% after completed repair/recalculation failures.
+
+After the 100% reconciliation and recalculation still fail, the calculated
+transaction-reset stages offer Reset to Block and its Min Block full-resync
+fallback. They preserve context through resync, recalculation, and final
+diagnostics. Partial, failed, or unfinished resync must not be treated as complete.

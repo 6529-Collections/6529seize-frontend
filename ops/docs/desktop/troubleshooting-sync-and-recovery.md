@@ -150,3 +150,12 @@ recovery step. The bot retains the percentage and block range in its answer so
 subsequent replies do not restart the earlier block/worker questions. Uncertain
 completion, errors, and incomplete runs must not automatically widen the range.
 The bot never runs a recovery action on the user's device.
+
+After full-history reconciliation and TDH recalculation still fail, the bot offers
+Transactions > Advanced Options > Reset to Block. Use a known-good block before
+the suspected gap when available; Min Block is the full-resync fallback. Reset deletes local transactions
+after the selected block, rebuilds ownership, then reimports history; it requires
+time and RPC access and does not change on-chain holdings. Let Transactions and
+NFTDelegation finish syncing before recalculating TDH. A continuing mismatch after
+reset/resync/recalculation moves to diagnostics, not repeated resets. NFT recovery
+and wallet recovery remain separate procedures.
