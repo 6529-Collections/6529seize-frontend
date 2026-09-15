@@ -166,7 +166,7 @@ describe("DragDropPastePlugin", () => {
     const preventDefault = jest.fn();
     const onAttachmentFiles = jest.fn();
     const file = new File(["a"], "a.pdf", { type: "application/pdf" });
-    render(<DragDropPastePlugin onAttachmentFiles={onAttachmentFiles} />);
+    renderPlugin({ onAttachmentFiles });
     const handled = pasteHandler({
       preventDefault,
       clipboardData: {
@@ -236,6 +236,8 @@ describe("DragDropPastePlugin", () => {
     );
     expect(uploadArg.file.name).toBe("pasted-image-0.png");
     expect(uploadArg.file.type).toBe("image/png");
+    expect(multiPartUpload).toHaveBeenCalledTimes(1);
+    expect($insertNodes).toHaveBeenCalled();
   });
 
   it("shows error when file unsupported", async () => {
@@ -287,6 +289,8 @@ describe("DragDropPastePlugin", () => {
   });
 
   it("removes the pending image if disabled before validation finishes", async () => {
+    const remove = jest.fn();
+    ($getNodeByKey as jest.Mock).mockReturnValue({ remove });
     let resolveFileReader: (() => void) | undefined;
     const imageFile = new File(["a"], "a.png", { type: "image/png" });
     const attachmentFile = new File(["b"], "b.pdf", {
@@ -331,6 +335,42 @@ describe("DragDropPastePlugin", () => {
     expect($insertNodes).toHaveBeenCalledTimes(1);
     expect(multiPartUpload).not.toHaveBeenCalled();
     expect(toastMock).not.toHaveBeenCalled();
+    expect(onUploadEditorStateChange).toHaveBeenCalledWith(editorState);
+    expect($getNodeByKey).toHaveBeenCalledWith("1");
+    expect(remove).toHaveBeenCalled();
+  });
+
+  it("removes a rejected image and synchronizes the disabled editor", async () => {
+    const remove = jest.fn();
+    ($getNodeByKey as jest.Mock).mockReturnValue({ remove });
+    let rejectValidation!: (error: Error) => void;
+    jest.mocked(validateDropImageSignature).mockReturnValue(
+      new Promise((_, reject) => {
+        rejectValidation = reject;
+      })
+    );
+    const onUploadEditorStateChange = jest.fn();
+    const { rerender } = renderPlugin({ onUploadEditorStateChange });
+    act(() =>
+      dragDropPasteHandler([
+        new File(["image"], "animated.avif", { type: "image/avif" }),
+      ])
+    );
+    rerender(
+      <DragDropPastePlugin
+        disabled
+        onUploadEditorStateChange={onUploadEditorStateChange}
+      />
+    );
+    await act(async () =>
+      rejectValidation(new Error("Animated AVIF is not supported"))
+    );
+    expect($getNodeByKey).toHaveBeenCalledWith("1");
+    expect(remove).toHaveBeenCalledTimes(1);
+    expect(multiPartUpload).not.toHaveBeenCalled();
+    expect(toastMock).toHaveBeenCalledWith(
+      expect.objectContaining({ title: "Could not add animated.avif" })
+    );
     expect(onUploadEditorStateChange).toHaveBeenCalledWith(editorState);
   });
 

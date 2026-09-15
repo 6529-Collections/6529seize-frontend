@@ -1,6 +1,7 @@
 import { filterValidDropUploadFiles } from "@/services/uploads/dropUploadValidation";
 import {
   DROP_UPLOAD_ACCEPT,
+  getAcceptedUploadFormats,
   getContentType,
   isSupportedUploadFile,
 } from "@/services/uploads/mediaUploadMimeType";
@@ -46,7 +47,7 @@ describe("drop upload validation", () => {
     expect(setToast).toHaveBeenCalledWith(
       expect.objectContaining({
         title: `Unsupported file: upload.${extension}`,
-        description: expect.stringContaining("PNG"),
+        description: getAcceptedUploadFormats(),
         autoClose: false,
       })
     );
@@ -72,6 +73,16 @@ describe("drop upload validation", () => {
     expect(isSupportedUploadFile(file("photo.jpg", "image/avif"))).toBe(false);
     expect(isSupportedUploadFile(file("photo.avif", "image/png"))).toBe(false);
     expect(isSupportedUploadFile(file("photo.jpg", "image/heic"))).toBe(false);
+  });
+
+  it("reports an extensionless image immediately, matching API filename requirements", () => {
+    const setToast = jest.fn();
+    expect(
+      filterValidDropUploadFiles([file("photo", "image/png")], setToast)
+    ).toEqual([]);
+    expect(setToast).toHaveBeenCalledWith(
+      expect.objectContaining({ title: "Unsupported file: photo" })
+    );
   });
 
   it("advertises exact picker formats including AVIF and GLB", () => {

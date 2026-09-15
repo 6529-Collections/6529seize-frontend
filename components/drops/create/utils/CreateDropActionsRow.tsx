@@ -4,9 +4,6 @@ import { useRef } from "react";
 import { t } from "@/i18n/messages";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { DROP_UPLOAD_ACCEPT } from "@/services/uploads/mediaUploadMimeType";
-import { filterValidDropUploadFiles } from "@/services/uploads/dropUploadValidation";
-import { useAuth } from "@/components/auth/Auth";
-import { MAX_DROP_UPLOAD_FILES } from "@/helpers/Helpers";
 
 export default function CreateDropActionsRow({
   canAddPart,
@@ -21,7 +18,6 @@ export default function CreateDropActionsRow({
   readonly breakIntoStorm: () => void;
   readonly disabled?: boolean | undefined;
 }) {
-  const { setToast } = useAuth();
   const locale = useBrowserLocale();
   const inputRef = useRef<HTMLInputElement>(null);
   return (
@@ -71,20 +67,7 @@ export default function CreateDropActionsRow({
                 return;
               }
               if (e.target.files) {
-                const files = filterValidDropUploadFiles(
-                  Array.from(e.target.files),
-                  setToast,
-                  locale
-                );
-                if (files.length > MAX_DROP_UPLOAD_FILES) {
-                  setToast({
-                    message: `Upload ${MAX_DROP_UPLOAD_FILES} or fewer files at a time.`,
-                    type: "error",
-                  });
-                  e.target.value = "";
-                  return;
-                }
-                if (files.length) setFiles(files);
+                setFiles(Array.from(e.target.files));
               }
               e.target.value = "";
             }}
@@ -133,7 +116,12 @@ export default function CreateDropActionsRow({
             />
           </svg>
           <span className="tw-ml-2 tw-whitespace-nowrap tw-text-sm tw-font-medium">
-            {isStormMode ? "Continue storm" : "Break into storm"}
+            {t(
+              locale,
+              isStormMode
+                ? "waves.stormComposer.continueStorm"
+                : "waves.stormComposer.breakIntoStorm"
+            )}
           </span>
         </button>
       )}

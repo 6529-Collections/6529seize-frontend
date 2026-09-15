@@ -63,6 +63,11 @@ it("keeps Send pending through validation, upload and processing, then retains t
   await act(async () => pending.resolve(ready));
   expect(result.current.isPreparingFiles).toBe(false);
   expect(result.current.files).toEqual([file]);
+  expect(rememberPreparedDropImage).toHaveBeenCalledWith(
+    file,
+    ready,
+    "test-account"
+  );
 });
 it("preserves valid selections when another file fails", async () => {
   jest.mocked(multiPartUpload).mockRejectedValue(new Error("Invalid AVIF"));

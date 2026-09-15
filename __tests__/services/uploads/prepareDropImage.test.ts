@@ -45,6 +45,17 @@ describe("AVIF selection validation", () => {
       validateDropImageSignature(new File([animated], "animation.avif"))
     ).rejects.toThrow("Animated AVIF");
   });
+
+  it.each([8, 17, 4097, 0xffffffff])(
+    "rejects an invalid file-type box size of %s",
+    async (size) => {
+      const header = Buffer.from(avifHeader);
+      header.writeUInt32BE(size, 0);
+      await expect(
+        validateDropImageSignature(new File([header], "photo.avif"))
+      ).rejects.toThrow("does not match");
+    }
+  );
 });
 
 it("only reuses the prepared preview for the uploader's account and proxy", () => {

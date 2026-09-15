@@ -37,10 +37,10 @@ export async function validateDropImageSignature(
     String.fromCharCode(...header.subarray(offset, offset + 4));
   const brands: string[] = [];
   if (header.length >= 16 && brandAt(4) === "ftyp") {
-    const end = Math.min(
-      new DataView(header.buffer).getUint32(0),
-      header.length
-    );
+    const end = new DataView(header.buffer).getUint32(0);
+    if (end < 16 || end > header.length || end % 4 !== 0) {
+      throw new Error(t(locale, "drop.upload.avifMismatch"));
+    }
     for (let offset = 8; offset + 4 <= end; offset += 4) {
       if (offset !== 12) brands.push(brandAt(offset));
     }

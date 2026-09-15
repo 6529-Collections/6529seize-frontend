@@ -1,49 +1,21 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import CreateDropActionsRow from "@/components/drops/create/utils/CreateDropActionsRow";
-import { AuthContext } from "@/components/auth/Auth";
 import { MAX_DROP_UPLOAD_FILES } from "@/helpers/Helpers";
 
-function renderComponent(props: any, ctx?: any) {
-  const value = { setToast: jest.fn(), ...(ctx || {}) } as any;
-  return {
-    ...render(
-      <AuthContext.Provider value={value}>
-        <CreateDropActionsRow {...props} />
-      </AuthContext.Provider>
-    ),
-    toast: value.setToast,
-  };
+function renderComponent(
+  props: React.ComponentProps<typeof CreateDropActionsRow>
+) {
+  return render(<CreateDropActionsRow {...props} />);
 }
 
 describe("CreateDropActionsRow", () => {
-  it("shows toast when uploading too many files", () => {
+  it("forwards the complete selection for shared composer validation", () => {
     const setFiles = jest.fn();
     const files = Array.from(
       { length: MAX_DROP_UPLOAD_FILES + 1 },
       (_, i) => new File(["image"], `f${i}.png`, { type: "image/png" })
     );
-    const { toast } = renderComponent({
-      canAddPart: false,
-      isStormMode: false,
-      setFiles,
-      breakIntoStorm: jest.fn(),
-    });
-    const input = screen.getByLabelText(/upload media/i);
-    fireEvent.change(input, { target: { files } });
-    expect(toast).toHaveBeenCalledWith({
-      message: `Upload ${MAX_DROP_UPLOAD_FILES} or fewer files at a time.`,
-      type: "error",
-    });
-    expect(setFiles).not.toHaveBeenCalled();
-  });
-
-  it("passes files to callback when under limit", () => {
-    const setFiles = jest.fn();
-    const files = [
-      new File(["a"], "a.png", { type: "image/png" }),
-      new File(["b"], "b.png", { type: "image/png" }),
-    ];
-    const { toast } = renderComponent({
+    renderComponent({
       canAddPart: false,
       isStormMode: false,
       setFiles,
@@ -52,7 +24,23 @@ describe("CreateDropActionsRow", () => {
     const input = screen.getByLabelText(/upload media/i);
     fireEvent.change(input, { target: { files } });
     expect(setFiles).toHaveBeenCalledWith(files);
-    expect(toast).not.toHaveBeenCalled();
+  });
+
+  it("passes files to callback when under limit", () => {
+    const setFiles = jest.fn();
+    const files = [
+      new File(["a"], "a.png", { type: "image/png" }),
+      new File(["b"], "b.png", { type: "image/png" }),
+    ];
+    renderComponent({
+      canAddPart: false,
+      isStormMode: false,
+      setFiles,
+      breakIntoStorm: jest.fn(),
+    });
+    const input = screen.getByLabelText(/upload media/i);
+    fireEvent.change(input, { target: { files } });
+    expect(setFiles).toHaveBeenCalledWith(files);
   });
 
   it("renders break into storm button when allowed and handles click", () => {
