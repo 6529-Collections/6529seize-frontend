@@ -1,4 +1,8 @@
-import { TRANSFORMERS, type Transformer } from "@lexical/markdown";
+import {
+  STRIKETHROUGH,
+  TRANSFORMERS,
+  type Transformer,
+} from "@lexical/markdown";
 
 const UNDERSCORE_TAGS = new Set(["__", "___", "_"]);
 
@@ -39,10 +43,15 @@ const isCodeTransformer = (transformer: Transformer): boolean => {
   });
 };
 
-export const SAFE_MARKDOWN_TRANSFORMERS = BASE_SAFE_TRANSFORMERS;
+// Keep the double-tilde transformer first so exports retain canonical Markdown.
+// The single-tilde alias matches the posted drop renderer's GFM support.
+export const SAFE_MARKDOWN_TRANSFORMERS: Transformer[] = [
+  ...BASE_SAFE_TRANSFORMERS,
+  { ...STRIKETHROUGH, tag: "~" },
+];
 
 export const SAFE_MARKDOWN_TRANSFORMERS_WITHOUT_CODE =
-  BASE_SAFE_TRANSFORMERS.filter(
+  SAFE_MARKDOWN_TRANSFORMERS.filter(
     (transformer) =>
       !isObjectTransformer(transformer) || !isCodeTransformer(transformer)
   );
