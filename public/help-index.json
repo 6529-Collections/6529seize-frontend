@@ -3739,7 +3739,7 @@
       ],
       "facts": [
         "An identity must meet every configured group criterion unless explicitly included. Inclusion bypasses criteria, but exclusion takes priority over inclusion and criteria.",
-        "A group with only an inclusion list contains the listed identities. A group with only an exclusion list contains everyone except excluded identities. A group with no criteria and neither identity list has no members; this differs from choosing Everyone for a wave access row.",
+        "A group with only an inclusion list contains the listed identities. A group with only an exclusion list contains everyone except excluded identities. A restored legacy group with no criteria and neither identity list has no members; this differs from choosing Everyone for a wave access row. The editor requires at least one criterion or a nonempty identity list before saving a new group.",
         "Zero is a configured bound, not an absent criterion. A minimum Level of 0 allows every Level, including profiles with a negative combined score whose Level is still 0; other configured criteria still apply. A maximum Level of 0 allows only Level 0 profiles.",
         "Level bounds include the named Levels. Maximum Level 1 includes Level 1 and stops before Level 2. Level 100 is the highest Level.",
         "REP and NIC bounds include both endpoints, and missing rating totals count as zero. NIC is the group-editor label for CIC rating values.",
@@ -3755,7 +3755,8 @@
         "ops/docs/waves/create/feature-groups-step.md",
         "ops/docs/network/flow-network-group-scope.md",
         "components/groups/page/create/config/GroupCreateCIC.tsx",
-        "components/groups/members/GroupMembersPreviewDialog.tsx"
+        "components/groups/members/GroupMembersPreviewDialog.tsx",
+        "services/groups/groupMutations.ts"
       ]
     },
     {

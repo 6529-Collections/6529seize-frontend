@@ -109,8 +109,9 @@ user-reachable for `Chat`, `Rank`, and `Approve` waves.
   included. Inclusion bypasses criteria, but an exclusion always takes priority.
 - With only an inclusion list, the group contains the listed identities. With
   only an exclusion list, it contains everyone except the excluded identities.
-  A group with no criteria and neither list has no members. This differs from
-  choosing `Everyone` for a wave access row.
+  A restored legacy group with no criteria and neither list has no members.
+  New groups need at least one criterion or a nonempty identity list to save.
+  Choosing `Everyone` for a wave access row allows everyone instead.
 - Zero is a configured value, not an empty field. A minimum Level of `0` allows
   every Level, including profiles whose combined score is negative and whose
   Level is still `0`. Other configured criteria still apply. A maximum Level of
