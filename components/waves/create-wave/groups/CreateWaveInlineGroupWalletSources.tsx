@@ -343,6 +343,15 @@ function CsvWalletSource({
       readFile(file);
     }
   };
+  let dropzoneStateClasses =
+    "desktop-hover:hover:tw-bg-iron-850 tw-border-white/10 tw-bg-iron-900 desktop-hover:hover:tw-border-white/20";
+  if (quiet) {
+    dropzoneStateClasses =
+      "tw-border-iron-700 tw-bg-iron-900/30 desktop-hover:hover:tw-border-iron-600 desktop-hover:hover:tw-bg-iron-900/60";
+  }
+  if (isDragging) {
+    dropzoneStateClasses = "tw-border-primary-400 tw-bg-primary-500/10";
+  }
 
   return (
     <section
@@ -373,13 +382,7 @@ function CsvWalletSource({
           event.preventDefault();
           setIsDragging(false);
         }}
-        className={`tw-flex tw-cursor-pointer tw-flex-col tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-border-dashed tw-p-3 tw-text-center tw-transition focus-within:tw-ring-2 focus-within:tw-ring-primary-400 ${quiet ? "tw-min-h-20 tw-border" : "tw-min-h-24 tw-border-2"} ${
-          isDragging
-            ? "tw-border-primary-400 tw-bg-primary-500/10"
-            : quiet
-              ? "tw-border-iron-700 tw-bg-iron-900/30 desktop-hover:hover:tw-border-iron-600 desktop-hover:hover:tw-bg-iron-900/60"
-              : "desktop-hover:hover:tw-bg-iron-850 tw-border-white/10 tw-bg-iron-900 desktop-hover:hover:tw-border-white/20"
-        }`}
+        className={`tw-flex tw-cursor-pointer tw-flex-col tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-border-dashed tw-p-3 tw-text-center tw-transition focus-within:tw-ring-2 focus-within:tw-ring-primary-400 ${quiet ? "tw-min-h-20 tw-border" : "tw-min-h-24 tw-border-2"} ${dropzoneStateClasses}`}
       >
         <ArrowUpTrayIcon
           aria-hidden="true"

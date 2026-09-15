@@ -32,6 +32,20 @@ export default function CreateWaveInlineGroupExpandedPanel({
       {cancelLabel ?? t(locale, "common.close")}
     </Button>
   );
+  let panelContent: ReactNode = children;
+  if (showCancel) {
+    panelContent = quiet ? (
+      <div className="tw-flex tw-flex-col tw-gap-3">
+        <div className="tw-flex tw-justify-end">{cancelControl}</div>
+        <div className="tw-min-w-0">{children}</div>
+      </div>
+    ) : (
+      <div className="tw-flex tw-items-start tw-gap-3">
+        <div className="tw-min-w-0 tw-flex-1">{children}</div>
+        {cancelControl}
+      </div>
+    );
+  }
 
   return (
     <div
@@ -41,21 +55,7 @@ export default function CreateWaveInlineGroupExpandedPanel({
           : "tw-relative tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-pt-5"
       }
     >
-      {showCancel ? (
-        quiet ? (
-          <div className="tw-flex tw-flex-col tw-gap-3">
-            <div className="tw-flex tw-justify-end">{cancelControl}</div>
-            <div className="tw-min-w-0">{children}</div>
-          </div>
-        ) : (
-          <div className="tw-flex tw-items-start tw-gap-3">
-            <div className="tw-min-w-0 tw-flex-1">{children}</div>
-            {cancelControl}
-          </div>
-        )
-      ) : (
-        children
-      )}
+      {panelContent}
     </div>
   );
 }

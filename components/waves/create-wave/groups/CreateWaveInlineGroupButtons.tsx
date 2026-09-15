@@ -17,13 +17,17 @@ export function ActionButton({
   readonly isToggle?: boolean | undefined;
   readonly quiet?: boolean;
 }) {
-  const stateClasses = quiet
-    ? active
+  let stateClasses =
+    "tw-border-transparent tw-bg-iron-800 tw-text-iron-200 desktop-hover:hover:tw-bg-iron-700 desktop-hover:hover:tw-text-white";
+  if (active) {
+    stateClasses =
+      "tw-border-primary-500/70 tw-bg-transparent tw-text-primary-400 desktop-hover:hover:tw-border-primary-400 desktop-hover:hover:tw-bg-primary-500/5 desktop-hover:hover:tw-text-primary-300";
+  }
+  if (quiet) {
+    stateClasses = active
       ? "tw-border-primary-400/40 tw-bg-primary-500/10 tw-text-primary-200 desktop-hover:hover:tw-border-primary-400/70 desktop-hover:hover:tw-bg-primary-500/15 desktop-hover:hover:tw-text-primary-100"
-      : "tw-border-iron-700 tw-bg-iron-900/60 tw-text-iron-200 desktop-hover:hover:tw-border-iron-600 desktop-hover:hover:tw-bg-iron-800"
-    : active
-      ? "tw-border-primary-500/70 tw-bg-transparent tw-text-primary-400 desktop-hover:hover:tw-border-primary-400 desktop-hover:hover:tw-bg-primary-500/5 desktop-hover:hover:tw-text-primary-300"
-      : "tw-border-transparent tw-bg-iron-800 tw-text-iron-200 desktop-hover:hover:tw-bg-iron-700 desktop-hover:hover:tw-text-white";
+      : "tw-border-iron-700 tw-bg-iron-900/60 tw-text-iron-200 desktop-hover:hover:tw-border-iron-600 desktop-hover:hover:tw-bg-iron-800";
+  }
 
   return (
     <button
@@ -83,11 +87,15 @@ export function DraftChipButton({
   } else if (compact) {
     sizeClasses = "tw-px-2.5 tw-py-1 tw-text-xs tw-font-medium";
   }
-  const configuredIndicatorClasses = quiet
-    ? "tw-bg-primary-300"
-    : active && prominent
-      ? "tw-bg-white tw-shadow-[0_0_0_3px_rgba(255,255,255,0.18)]"
-      : "tw-bg-primary-300 tw-shadow-[0_0_0_3px_rgba(89,124,255,0.14)]";
+  let configuredIndicatorClasses =
+    "tw-bg-primary-300 tw-shadow-[0_0_0_3px_rgba(89,124,255,0.14)]";
+  if (active && prominent) {
+    configuredIndicatorClasses =
+      "tw-bg-white tw-shadow-[0_0_0_3px_rgba(255,255,255,0.18)]";
+  }
+  if (quiet) {
+    configuredIndicatorClasses = "tw-bg-primary-300";
+  }
 
   if (quiet) {
     if (quietStyle === "segment") {
@@ -97,18 +105,25 @@ export function DraftChipButton({
         : "tw-border-transparent tw-bg-transparent tw-text-iron-400 desktop-hover:hover:tw-text-iron-100";
     } else {
       sizeClasses = "tw-min-h-11 tw-px-2 tw-py-2 tw-text-[13px] tw-font-medium";
-      stateClasses = active
-        ? "tw-border-primary-400 tw-bg-transparent tw-text-primary-100 desktop-hover:hover:tw-text-white"
-        : configured
-          ? "tw-border-transparent tw-bg-transparent tw-text-iron-100 desktop-hover:hover:tw-text-white"
-          : "tw-border-transparent tw-bg-transparent tw-text-iron-400 desktop-hover:hover:tw-text-iron-100";
+      stateClasses =
+        "tw-border-transparent tw-bg-transparent tw-text-iron-400 desktop-hover:hover:tw-text-iron-100";
+      if (configured) {
+        stateClasses =
+          "tw-border-transparent tw-bg-transparent tw-text-iron-100 desktop-hover:hover:tw-text-white";
+      }
+      if (active) {
+        stateClasses =
+          "tw-border-primary-400 tw-bg-transparent tw-text-primary-100 desktop-hover:hover:tw-text-white";
+      }
     }
   }
-  const shapeClasses = quiet
-    ? quietStyle === "segment"
-      ? "tw-rounded-md tw-border"
-      : "tw-rounded-none tw-border-x-0 tw-border-t-0 tw-border-b-2"
-    : "tw-rounded-lg tw-border";
+  let shapeClasses = "tw-rounded-lg tw-border";
+  if (quiet) {
+    shapeClasses =
+      quietStyle === "segment"
+        ? "tw-rounded-md tw-border"
+        : "tw-rounded-none tw-border-x-0 tw-border-t-0 tw-border-b-2";
+  }
 
   return (
     <button

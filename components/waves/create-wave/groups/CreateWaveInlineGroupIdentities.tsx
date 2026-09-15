@@ -175,6 +175,14 @@ export default function CreateWaveInlineGroupIdentities(
     }
   };
 
+  let statusToneClasses = "tw-border-white/5 tw-bg-iron-950/60 tw-text-iron-300";
+  if (quiet) {
+    statusToneClasses = "tw-text-iron-400";
+  }
+  if (isOverIdentityLimit) {
+    statusToneClasses = "tw-border-error/30 tw-bg-error/10 tw-text-error";
+  }
+
   return (
     <div className={quiet ? "tw-space-y-4" : "tw-space-y-5"}>
       <div
@@ -288,13 +296,7 @@ export default function CreateWaveInlineGroupIdentities(
       />
       <div
         role="status"
-        className={`tw-border-solid tw-py-2 tw-text-xs tw-font-medium tw-leading-relaxed ${quiet ? "tw-border-x-0 tw-border-b-0 tw-border-t tw-border-iron-800" : "tw-rounded-lg tw-border tw-px-3"} ${
-          isOverIdentityLimit
-            ? "tw-border-error/30 tw-bg-error/10 tw-text-error"
-            : quiet
-              ? "tw-text-iron-400"
-              : "tw-border-white/5 tw-bg-iron-950/60 tw-text-iron-300"
-        }`}
+        className={`tw-border-solid tw-py-2 tw-text-xs tw-font-medium tw-leading-relaxed ${quiet ? "tw-border-x-0 tw-border-b-0 tw-border-t tw-border-iron-800" : "tw-rounded-lg tw-border tw-px-3"} ${statusToneClasses}`}
       >
         <p className="tw-m-0">
           {t(locale, totalKey, {
