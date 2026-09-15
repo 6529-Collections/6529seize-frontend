@@ -86,10 +86,20 @@ Profile access stays in the app drawer/account surfaces.
   available when no other hide condition is active.
 - While the mobile keyboard is open, the bar stays mounted but slides out of
   view and is non-interactive.
-- When an update is available, a compact green `Update` pill with a rocket
-  appears above the right edge of the mobile dock. It follows the dock position and scales with
-  scrolling on phones. Tapping it reloads the current route; Home keeps its
-  normal navigation action. Desktop web retains the full update prompt.
+- When an update is available, a small rocket sits in a curved attachment above
+  Home. The attachment is part of the dock and follows its movement, hiding,
+  and phone scroll scale. The attachment uses the dock's translucent black
+  background and backdrop blur, with one continuous outline around the dock and
+  rocket attachment. The icon uses its own refresh arrow without an
+  extra circular border. The rocket updates the app; Home keeps its normal
+  navigation action. Desktop web uses the
+  [sidebar Update row](feature-sidebar-navigation.md); mobile browsers retain
+  the full update toast.
+- Tapping the rocket shows a static rocket and `Updating to the latest version`
+  with three animated dots while the current route reloads. The screen resumes
+  before the incoming page hydrates and clears when its app shell mounts.
+  Reduced-motion preferences keep the dots still. If startup does not finish,
+  the cover clears after 30 seconds so the underlying page or error is usable.
 - While a single drop is open (`?drop=...`) or an inline drop edit is active,
   the bar is not rendered.
 - `Home`, `Discovery`, `Network`, `Collections`, and `Notifications` provide a

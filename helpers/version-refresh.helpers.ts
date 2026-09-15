@@ -1,3 +1,4 @@
+import { beginVersionReload } from "@/components/version-update/versionReload";
 import { preserveWaveScrollPositionForReload } from "@/helpers/waves/wave-visible-serial.helpers";
 
 /** Reload the app bundle without losing the current route or wave reading position. */
@@ -6,5 +7,5 @@ export const refreshAppVersion = () => {
   url.searchParams.delete("showNewVersionToast");
   globalThis.history.replaceState(globalThis.history.state, "", url);
   preserveWaveScrollPositionForReload();
-  globalThis.location.reload();
+  beginVersionReload(() => globalThis.location.reload());
 };

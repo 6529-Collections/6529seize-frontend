@@ -1,0 +1,45 @@
+@property --dock-update-scale {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 1;
+}
+
+@property --dock-update-radius {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 32px;
+}
+
+.dock {
+  --dock-update-scale: 1;
+  --dock-update-radius: 2rem;
+}
+
+.dock[data-compact="true"] {
+  --dock-update-scale: 0.88;
+  --dock-update-radius: 1.65rem;
+}
+
+@media (min-width: 640px) {
+  .dock[data-compact="true"] {
+    --dock-update-scale: 1;
+  }
+}
+
+/* One CSS transition drives the geometry inherited by the surface AND button.
+   The normal dock continues to use main's original paint and dimensions. */
+.dock:has(> [data-dock-update-surface]) {
+  background: transparent;
+  border-color: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: none;
+  transition-property:
+    width, height, border-radius, --dock-update-scale, --dock-update-radius;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dock:has(> [data-dock-update-surface]) {
+    transition: none;
+  }
+}
