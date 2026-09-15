@@ -1,4 +1,6 @@
 import { createEtherscanPlan } from "@/app/api/open-graph/etherscan/service";
+import { createPublicClient, custom } from "viem";
+import { mainnet } from "viem/chains";
 
 jest.mock("@/app/api/open-graph/etherscan/networkRegistry", () => ({
   getEtherscanEnsClient: jest.fn(),
@@ -187,7 +189,7 @@ describe("createEtherscanPlan", () => {
   it("isolates ENS resolution from the entity RPC client", async () => {
     const entityClient = {
       getBalance: jest.fn().mockResolvedValue(1_000_000_000_000_000_000n),
-      getCode: jest.fn().mockResolvedValue("0x"),
+      getCode: jest.fn().mockResolvedValue(undefined),
       getBlockNumber: jest.fn().mockResolvedValue(105n),
     };
     const ensClient = {
@@ -216,6 +218,68 @@ describe("createEtherscanPlan", () => {
       })
     );
   });
+
+  it.each([
+    ["empty code", "0x", "eoa", "complete", undefined],
+    ["contract code", "0x6000", "contract", "complete", undefined],
+    [
+      "delegation code",
+      `0xef0100${TO.slice(2)}`,
+      "delegated-eoa",
+      "complete",
+      TO,
+    ],
+    ["failed code lookup", null, "unknown", "partial", undefined],
+  ])(
+    "classifies addresses with %s through Viem",
+    async (_label, code, subtype, completeness, delegationTarget) => {
+      const request = jest.fn(
+        async ({ method }: { readonly method: string }) => {
+          switch (method) {
+            case "eth_getCode":
+              if (code === null) {
+                throw new Error("RPC offline");
+              }
+              return code;
+            case "eth_getBalance":
+              return "0xde0b6b3a7640000";
+            case "eth_blockNumber":
+              return "0x69";
+            default:
+              throw new Error(`Unexpected RPC method: ${method}`);
+          }
+        }
+      );
+      registry.getEtherscanPublicClient.mockReturnValue(
+        createPublicClient({
+          chain: mainnet,
+          transport: custom({ request }, { retryCount: 0 }),
+        })
+      );
+
+      const result = await createEtherscanPlan(
+        new URL(`https://etherscan.io/address/${FROM}`)
+      )?.execute();
+
+      expect(result?.data).toEqual(
+        expect.objectContaining({
+          type: "etherscan.address",
+          completeness,
+          address: expect.objectContaining({
+            address: FROM,
+            subtype,
+            delegationTarget,
+            balanceEth: "1",
+            blockNumber: "105",
+          }),
+        })
+      );
+      expect(request).toHaveBeenCalledWith(
+        { method: "eth_getCode", params: [FROM, "latest"] },
+        undefined
+      );
+    }
+  );
 
   it("uses canonical decimal NFT IDs for ownership reads and display", async () => {
     const client = {
