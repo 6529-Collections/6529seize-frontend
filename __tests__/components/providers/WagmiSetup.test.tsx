@@ -101,6 +101,9 @@ jest.mock("wagmi", () => ({
     <div data-testid="wagmi-provider">{children}</div>
   ),
 }));
+jest.mock("@/components/providers/createPublicWagmiConfig", () => ({
+  createPublicWagmiConfig: jest.fn(() => ({ connectors: [], storage: null })),
+}));
 jest.mock("ethers", () => ({
   ethers: {
     Wallet: {
@@ -966,9 +969,7 @@ describe("WagmiSetup Security Tests", () => {
       });
     });
 
-    it("prevents hydration mismatches by using client-side only mounting", async () => {
-      // This test verifies the security pattern of preventing SSR hydration mismatches
-      // by ensuring the component handles mounting state properly
+    it("keeps rendering children while wallet initialization starts", async () => {
 
       let container!: HTMLElement;
 

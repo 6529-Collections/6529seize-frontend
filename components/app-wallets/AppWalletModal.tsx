@@ -2,7 +2,14 @@
 
 import Button from "@/components/utils/button/Button";
 import type { KeyboardEvent, ReactNode, RefObject } from "react";
-import { useCallback, useEffect, useId, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import { createPortal } from "react-dom";
 import { EyeIcon, EyeSlashIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import {
@@ -20,6 +27,9 @@ import { DELEGATION_FIELD_CLASS_NAME } from "@/components/delegation/delegation-
 
 const LEGACY_UNLOCK_MIN_PASS_LENGTH = 6;
 const APP_WALLET_INPUT_CLASS_NAME = DELEGATION_FIELD_CLASS_NAME;
+const subscribeToHydration = () => () => undefined;
+const getHydratedSnapshot = () => true;
+const getServerHydratedSnapshot = () => false;
 
 function closeDialog(dialog: HTMLDialogElement) {
   if (typeof dialog.close === "function" && dialog.open) {
@@ -41,6 +51,11 @@ function AppWalletModalShell(
   }>
 ) {
   const titleId = useId();
+  const isHydrated = useSyncExternalStore(
+    subscribeToHydration,
+    getHydratedSnapshot,
+    getServerHydratedSnapshot
+  );
   const dialogRef = useRef<HTMLDialogElement>(null);
   const previouslyFocusedElementRef = useRef<HTMLElement | null>(null);
   const {
@@ -90,9 +105,9 @@ function AppWalletModalShell(
       previouslyFocusedElementRef.current?.focus();
       previouslyFocusedElementRef.current = null;
     };
-  }, [show]);
+  }, [isHydrated, show]);
 
-  if (typeof document === "undefined") {
+  if (!isHydrated) {
     return null;
   }
 

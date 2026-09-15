@@ -1625,7 +1625,9 @@ describe("Regression Tests: Original Functionality with Secure Implementation", 
   it("keeps AppKit-only hooks deferred without remounting children", async () => {
     const {
       useAppKit,
+      useAppKitAccount,
       useAppKitState,
+      useDisconnect,
       useWalletInfo,
     } = require("@reown/appkit/react");
     (useAppKit as jest.Mock).mockImplementation(() => {
@@ -1659,6 +1661,8 @@ describe("Regression Tests: Original Functionality with Secure Implementation", 
     const view = render(renderTree());
     const childBeforeAppKit = screen.getByTestId("stable-fast-path-child");
     expect(useAppKit).not.toHaveBeenCalled();
+    expect(useAppKitAccount).not.toHaveBeenCalled();
+    expect(useDisconnect).not.toHaveBeenCalled();
     expect(useAppKitState).not.toHaveBeenCalled();
     expect(useWalletInfo).not.toHaveBeenCalled();
 
@@ -1909,6 +1913,33 @@ describe("Regression Tests: Original Functionality with Secure Implementation", 
 
     await userEvent.click(screen.getByTestId("disconnect-btn"));
     expect(mockDisconnect).toHaveBeenCalled();
+  });
+
+  it("waits for bridge registration when a child disconnects during mount", async () => {
+    mockGetWalletAddress.mockReturnValue(null);
+    jest.mocked(authUtils.removeAuthJwt).mockResolvedValue(undefined);
+    const onSuccess = jest.fn();
+    const onFailure = jest.fn();
+    const MountDisconnect = () => {
+      const { seizeDisconnectAndLogout } = useSeizeConnectContext();
+      const started = React.useRef(false);
+      React.useLayoutEffect(() => {
+        if (started.current) return;
+        started.current = true;
+        void seizeDisconnectAndLogout().then(onSuccess, onFailure);
+      }, [seizeDisconnectAndLogout]);
+      return null;
+    };
+
+    render(
+      <SeizeConnectProvider>
+        <MountDisconnect />
+      </SeizeConnectProvider>
+    );
+
+    await waitFor(() => expect(onSuccess).toHaveBeenCalledTimes(1));
+    expect(onFailure).not.toHaveBeenCalled();
+    expect(mockDisconnect).toHaveBeenCalledTimes(1);
   });
 
   it("should handle disconnect and logout", async () => {
