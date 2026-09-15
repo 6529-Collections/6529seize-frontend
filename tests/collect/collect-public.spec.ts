@@ -567,6 +567,35 @@ test("set planning is the default and navigation opens observed listings", async
   expect(mutations).toEqual([]);
 });
 
+test("short set setups gain keyboard scroll clearance", async ({ page }) => {
+  await mockCatalog(page);
+  for (const intent of ["season", "full_set"] as const) {
+    await page.goto(`/collect?collection=memes&intent=${intent}`, {
+      waitUntil: "domcontentloaded",
+    });
+    const formName =
+      intent === "season" ? "Complete a season" : "Complete a full set";
+    await expect(
+      page.getByRole("form", { name: formName, exact: true })
+    ).toBeVisible();
+    const surface = page
+      .getByRole("form", { name: formName, exact: true })
+      .locator("xpath=ancestor::div[contains(@class, 'tailwind-scope')][1]");
+    const readPadding = () =>
+      surface.evaluate((element) =>
+        Number.parseFloat(getComputedStyle(element).paddingBottom)
+      );
+    const restingPadding = await readPadding();
+    await page.evaluate(() =>
+      document.documentElement.style.setProperty(
+        "--native-keyboard-inset-bottom",
+        "320px"
+      )
+    );
+    await expect.poll(readPadding).toBeGreaterThan(restingPadding + 300);
+  }
+});
+
 test("artist choices stay scrollable and searchable on mobile and desktop", async ({
   page,
 }, info) => {
