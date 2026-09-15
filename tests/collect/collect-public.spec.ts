@@ -84,11 +84,15 @@ function listingsFor(family: string | null) {
 }
 
 async function waitForCollectClientReady(page: Page) {
-  await expect(page.locator("[data-collect-page]")).toHaveAttribute(
-    "data-client-ready",
-    "true",
-    { timeout: ROUTE_TRANSITION_TIMEOUT_MS }
-  );
+  await expect(
+    page.getByRole("heading", {
+      level: 1,
+      name: "Build your collection",
+      exact: true,
+    })
+  ).toHaveAttribute("data-client-ready", "true", {
+    timeout: ROUTE_TRANSITION_TIMEOUT_MS,
+  });
 }
 
 async function mockCatalog(page: Page, state = { fail: false }) {

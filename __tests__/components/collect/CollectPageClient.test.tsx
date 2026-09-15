@@ -227,11 +227,13 @@ beforeEach(() => {
 });
 
 it("marks the interactive surface ready after client hydration", () => {
-  const { container } = render(<CollectPageClient />);
-  expect(container.querySelector("[data-collect-page]")).toHaveAttribute(
-    "data-client-ready",
-    "true"
-  );
+  render(<CollectPageClient />);
+  expect(
+    screen.getByRole("heading", {
+      level: 1,
+      name: "Build your collection",
+    })
+  ).toHaveAttribute("data-client-ready", "true");
 });
 
 it("wires catalog retry and replaces a failed initial read with a pending retry", () => {
