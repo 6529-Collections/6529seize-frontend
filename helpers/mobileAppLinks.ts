@@ -41,7 +41,7 @@ export function getMobilePlatform(
   return null;
 }
 
-export function getMobileAppScheme(configuredScheme?: string): string {
+function getMobileAppScheme(configuredScheme?: string): string {
   // Never let a malformed environment value become an executable URL scheme.
   return configuredScheme &&
     /^[a-z][a-z\d+.-]*$/i.test(configuredScheme) &&

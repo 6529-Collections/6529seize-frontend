@@ -2,10 +2,9 @@ import { act, fireEvent, render, screen } from "@testing-library/react";
 import { Capacitor } from "@capacitor/core";
 import MobileAppBanner from "@/components/mobile-app/MobileAppBanner";
 import { MOBILE_APP_ANDROID, MOBILE_APP_IOS } from "@/constants/constants";
-import {
-  MOBILE_APP_DISMISSAL_KEY,
-  MOBILE_APP_DISMISSAL_MS,
-} from "@/hooks/useMobileAppBannerDismissal";
+
+const MOBILE_APP_DISMISSAL_KEY = "6529-mobile-banner-dismissed-until";
+const MOBILE_APP_DISMISSAL_MS = 7 * 24 * 60 * 60 * 1000;
 
 let pathname = "/";
 jest.mock("next/navigation", () => ({ usePathname: () => pathname }));

@@ -1,6 +1,11 @@
 import { renderHook, act } from "@testing-library/react";
 import { useDeepLinkNavigation } from "@/hooks/useDeepLinkNavigation";
-import { App } from "@capacitor/app";
+import { App, type URLOpenListener } from "@capacitor/app";
+
+type AppUrlOpenSubscription = (
+  event: "appUrlOpen",
+  listener: URLOpenListener
+) => ReturnType<typeof App.addListener>;
 
 const push = jest.fn();
 const router = { push };
@@ -16,10 +21,12 @@ let callback: (data: { url: string }) => void;
 beforeEach(() => {
   jest.clearAllMocks();
   capacitorMock.mockReturnValue({ isCapacitor: true });
-  jest.mocked(App.addListener).mockImplementation((_event, cb) => {
-    callback = cb;
-    return Promise.resolve({ remove });
-  });
+  jest
+    .mocked<AppUrlOpenSubscription>(App.addListener)
+    .mockImplementation((_event, cb) => {
+      callback = cb;
+      return Promise.resolve({ remove });
+    });
   jest.mocked(App.getLaunchUrl).mockResolvedValue(undefined);
 });
 

@@ -2,8 +2,8 @@
 
 import { useSyncExternalStore } from "react";
 
-export const MOBILE_APP_DISMISSAL_KEY = "6529-mobile-banner-dismissed-until";
-export const MOBILE_APP_DISMISSAL_MS = 7 * 24 * 60 * 60 * 1000;
+const MOBILE_APP_DISMISSAL_KEY = "6529-mobile-banner-dismissed-until";
+const MOBILE_APP_DISMISSAL_MS = 7 * 24 * 60 * 60 * 1000;
 const DISMISSAL_EVENT = "6529-mobile-banner-dismissal";
 let memoryDismissedUntil = 0;
 
