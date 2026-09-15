@@ -16,6 +16,7 @@ import {
   COMMAND_PRIORITY_LOW,
   COMMAND_PRIORITY_NORMAL,
   FORMAT_TEXT_COMMAND,
+  KEY_DOWN_COMMAND,
   UNDO_COMMAND,
   REDO_COMMAND,
   type LexicalEditor,
@@ -397,6 +398,43 @@ describe("editor inline formatting", () => {
       unregister();
     }
   });
+
+  it("invalidates a shortcut when a plugin replaces a node with identical serialized content", async () => {
+    await typeText("~hi~");
+    const before = editor.getEditorState().toJSON();
+    await update(() => {
+      const node = $getRoot().getAllTextNodes()[0];
+      if (!node) throw new Error("Expected converted text");
+      const replacement = $createTextNode(node.getTextContent());
+      replacement.setFormat(node.getFormat());
+      node.replace(replacement);
+      replacement.selectEnd();
+    });
+    expect(editor.getEditorState().toJSON()).toEqual(before);
+    await normalBackspace();
+    expect(root.textContent).toBe("h");
+    expect(root.querySelector(".editor-text-strikethrough")).toHaveTextContent(
+      "h"
+    );
+  });
+
+  it.each(["Delete", "Home", "End", "PageUp", "PageDown"])(
+    "invalidates the shortcut after %s even if the cursor stays in place",
+    async (key) => {
+      await typeText("~hi~");
+      await update(() => {
+        editor.dispatchCommand(
+          KEY_DOWN_COMMAND,
+          new KeyboardEvent("keydown", { key })
+        );
+      });
+      await normalBackspace();
+      expect(root.textContent).toBe("h");
+      expect(
+        root.querySelector(".editor-text-strikethrough")
+      ).toHaveTextContent("h");
+    }
+  );
 
   it("supports undo and redo of shortcut reversal", async () => {
     await typeText("~test~");

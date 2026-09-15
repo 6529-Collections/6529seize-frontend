@@ -31,6 +31,33 @@ const INLINE_FORMATS: TextFormatType[] = [
 ];
 const PLAIN_SUFFIX_TAG = "inline-format-plain-suffix";
 
+function $getCursorPoint(node: LexicalNode, offset: number): number {
+  let point = 0;
+  let foundPoint = false;
+  const visit = (current: LexicalNode) => {
+    if (foundPoint) return;
+    if (current === node) {
+      if ($isTextNode(current)) {
+        point += offset;
+      } else if ($isElementNode(current)) {
+        point += current
+          .getChildren()
+          .slice(0, offset)
+          .reduce((size, child) => size + child.getTextContentSize(), 0);
+      }
+      foundPoint = true;
+      return;
+    }
+    if ($isTextNode(current)) {
+      point += current.getTextContentSize();
+    } else if ($isElementNode(current)) {
+      for (const child of current.getChildren()) visit(child);
+    }
+  };
+  visit($getRoot());
+  return point;
+}
+
 function readCursor(state: EditorState) {
   return state.read(() => {
     const selection = $getSelection();
@@ -43,32 +70,17 @@ function readCursor(state: EditorState) {
         ? node.getChildAtIndex(selection.anchor.offset - 1)
         : node.getPreviousSibling();
     const formatNodes = [node, previous].filter($isTextNode);
-    let point = 0;
-    let foundPoint = false;
-    const visit = (current: LexicalNode) => {
-      if (foundPoint) return;
-      if (current === node) {
-        if ($isTextNode(current)) {
-          point += selection.anchor.offset;
-        } else if ($isElementNode(current)) {
-          point += current
-            .getChildren()
-            .slice(0, selection.anchor.offset)
-            .reduce((size, child) => size + child.getTextContentSize(), 0);
-        }
-        foundPoint = true;
-        return;
-      }
-      if ($isTextNode(current)) {
-        point += current.getTextContentSize();
-      } else if ($isElementNode(current)) {
-        for (const child of current.getChildren()) visit(child);
-      }
-    };
-    visit($getRoot());
+    let point: number | undefined;
     return {
       selection,
-      point,
+      // Ordinary typing needs only the local anchor. Walk the tree once, on
+      // demand, when a tracked shortcut actually needs its document offset.
+      get point(): number {
+        point ??= state.read(() =>
+          $getCursorPoint(node, selection.anchor.offset)
+        );
+        return point;
+      },
       rootText: $getRoot().getTextContent(),
       text: $isTextNode(node) ? node.getTextContent() : null,
       previousKey: previous?.getKey(),
@@ -328,12 +340,18 @@ function updateTrackedShortcut(
   state: InlineFormatEditingState,
   update: CursorUpdate
 ) {
-  // Re-arm at the original content/caret boundary; a new closing marker starts
-  // its own pending shortcut. Otherwise retain a suffix detour only across
+  // Re-arm after suffix deletion reaches the original content/caret boundary;
+  // equal-sized plugin replacements must invalidate even if JSON is identical.
+  // A new closing marker starts its own pending shortcut. Otherwise retain a
+  // suffix detour only across
   // text edits. Navigation, format changes and unrelated updates invalidate it.
   const { previous, current, prevEditorState, editorState } = update;
   const shortcut = state.shortcut;
-  if (shortcut && isShortcutBoundary(shortcut, current, editorState)) {
+  if (
+    shortcut?.detour &&
+    current.size < previous.size &&
+    isShortcutBoundary(shortcut, current, editorState)
+  ) {
     shortcut.converted = editorState;
     shortcut.detour = false;
     return;
@@ -417,6 +435,8 @@ function handleEditorUpdate(
     state.shortcut = {
       before: candidate.before,
       converted: editorState,
+      // One full signature at conversion; later comparisons are lazy and
+      // occur only when the saved size and caret match again.
       signature: contentSignature(editorState),
       size: current.size,
       point: current.point,
