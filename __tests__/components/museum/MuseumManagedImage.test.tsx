@@ -52,4 +52,51 @@ describe("MuseumManagedImage", () => {
       `/api/museum/media?url=${encodeURIComponent(source)} 640w, /api/museum/media?url=${encodeURIComponent(source.replace("/640.webp", "/1280.webp"))} 1280w`
     );
   });
+
+  it("reports an image that completed before hydration as revealed", () => {
+    const onStatusChange = jest.fn();
+    const completeDescriptor = Object.getOwnPropertyDescriptor(
+      HTMLImageElement.prototype,
+      "complete"
+    );
+    const naturalWidthDescriptor = Object.getOwnPropertyDescriptor(
+      HTMLImageElement.prototype,
+      "naturalWidth"
+    );
+    Object.defineProperty(HTMLImageElement.prototype, "complete", {
+      configurable: true,
+      get: () => true,
+    });
+    Object.defineProperty(HTMLImageElement.prototype, "naturalWidth", {
+      configurable: true,
+      get: () => 640,
+    });
+
+    try {
+      render(
+        <MuseumManagedImage
+          {...props}
+          alt="A cached governed image"
+          onStatusChange={onStatusChange}
+        />
+      );
+
+      expect(onStatusChange).toHaveBeenCalledWith("revealed");
+    } finally {
+      if (completeDescriptor) {
+        Object.defineProperty(
+          HTMLImageElement.prototype,
+          "complete",
+          completeDescriptor
+        );
+      }
+      if (naturalWidthDescriptor) {
+        Object.defineProperty(
+          HTMLImageElement.prototype,
+          "naturalWidth",
+          naturalWidthDescriptor
+        );
+      }
+    }
+  });
 });
