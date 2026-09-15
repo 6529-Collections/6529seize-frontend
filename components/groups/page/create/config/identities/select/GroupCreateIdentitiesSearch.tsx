@@ -21,6 +21,7 @@ export default function GroupCreateIdentitiesSearch({
   iconClassName = "",
   resultsLayout = "popover",
   appearance = "default",
+  inputAppearance,
   sort,
 }: {
   readonly selectedWallets: string[];
@@ -32,9 +33,10 @@ export default function GroupCreateIdentitiesSearch({
   readonly iconClassName?: string | undefined;
   readonly resultsLayout?: GroupCreateIdentitiesSearchResultsLayout | undefined;
   readonly appearance?: GroupCreateIdentitiesSearchAppearance | undefined;
+  readonly inputAppearance?: GroupCreateIdentitiesSearchAppearance | undefined;
   readonly sort?: CommunityMemberSearchSort | undefined;
 }) {
-  const isModal = appearance === "modal";
+  const isModalInput = (inputAppearance ?? appearance) === "modal";
   const [isOpen, setIsOpen] = useState(false);
   const [searchCriteria, setSearchCriteria] = useState<string | null>(null);
 
@@ -86,7 +88,7 @@ export default function GroupCreateIdentitiesSearch({
           onFocus={() => onFocusChange(true)}
           id={randomId}
           className={`${
-            isModal
+            isModalInput
               ? "tw-h-11 tw-bg-iron-900 tw-py-0 tw-pl-10 tw-pr-4 tw-text-sm tw-font-medium tw-ring-1 tw-ring-inset tw-ring-iron-700 focus:tw-bg-iron-900 focus:tw-ring-2 focus:tw-ring-inset focus:tw-ring-primary-400 desktop-hover:hover:tw-bg-iron-800/80 desktop-hover:hover:tw-ring-iron-650"
               : "tw-bg-iron-950 tw-pb-3 tw-pl-10 tw-pr-4 tw-pt-3 tw-text-base tw-font-medium tw-ring-1 tw-ring-inset tw-ring-iron-700 focus:tw-bg-iron-950 focus:tw-ring-2 focus:tw-ring-inset focus:tw-ring-primary-400 desktop-hover:hover:tw-ring-iron-650 sm:tw-text-sm"
           } tw-peer tw-form-input tw-block tw-w-full tw-appearance-none tw-rounded-lg tw-border-0 tw-text-white tw-caret-primary-300 tw-shadow-sm tw-transition-colors tw-duration-200 placeholder:tw-text-iron-500 focus:tw-outline-none ${inputClassName}`}
