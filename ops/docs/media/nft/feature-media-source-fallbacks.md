@@ -108,6 +108,23 @@
 
 ## Loading Behavior
 
+- NFT and ReMeme videos show an available artwork image as a poster before
+  playback starts, on desktop and mobile. If autoplay is blocked, the poster
+  remains behind the play button. Reduced-motion preferences still prevent
+  automatic playback.
+- Standard NFT posters prefer the thumbnail in thumbnail mode, the scaled image
+  in default mode, and the original image in original mode. Empty values and
+  known video/model/HTML URLs are skipped; original, metadata, scaled, then thumbnail
+  images provide remaining candidates.
+- ReMeme posters use the image-source order for the current card height above,
+  skipping empty values and known non-image URLs. Detail views can use a thumbnail
+  as a last resort if the larger image candidates are missing.
+- Once playback starts, the video replaces the poster. Pausing afterward keeps
+  the current video frame. Posters do not change autoplay or playback controls.
+- Posters require an existing image URL; no new thumbnail is generated. If that
+  image cannot load, the browser may show an empty video area until a video frame
+  is available. Poster image load failures do not trigger the video-source
+  fallback chain.
 - Standard NFT image renderer uses lazy loading only for thumbnail/`300`-height
   surfaces; larger surfaces are eager with high fetch priority.
 - ReMeme image renderer is eager on both `300` and `650` surfaces.
