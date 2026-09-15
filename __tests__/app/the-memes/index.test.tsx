@@ -65,6 +65,7 @@ describe("The Memes page", () => {
       searchParams: Promise.resolve({ locale: "de-DE" }),
     });
 
-    expect(metadata.description).toContain("Sammlungen");
+    expect(metadata.title).toContain("Sammlungen");
+    expect(metadata.description).toContain("6529 NFT collection");
   });
 });
