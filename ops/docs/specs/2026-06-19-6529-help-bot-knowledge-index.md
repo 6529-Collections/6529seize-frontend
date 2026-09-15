@@ -576,3 +576,11 @@ with RPC activation, worker sync, and scheduled TDH. It does not repeat download
 instructions or require account pairing. Explicit `answer_links` lists also
 govern ordinary knowledge answers: only those links appear in the final footer,
 and an empty list suppresses links. Related paths are not additional citations.
+
+## Drop media format guidance
+
+The `waves.composer.image-uploads` record owns the accepted drop media format
+list, AVIF still-image conversion and limits, immediate rejection feedback,
+and mixed-batch draft preservation. Keep its facts aligned with the shared
+upload format definitions and the composer media guide. Other upload surfaces
+retain separate rules.

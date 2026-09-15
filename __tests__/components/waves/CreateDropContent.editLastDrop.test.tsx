@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import CreateDropContent from "@/components/waves/CreateDropContent";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
@@ -7,6 +7,12 @@ import { ApiDropType } from "@/generated/models/ApiDropType";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { WaveSubmissionExperience } from "@/helpers/waves/wave-submission-experience.helpers";
 import { ActiveDropAction } from "@/types/dropInteractionTypes";
+import { validateDropImageSignature } from "@/services/uploads/prepareDropImage";
+
+jest.mock("@/services/uploads/prepareDropImage", () => ({
+  ...jest.requireActual("@/services/uploads/prepareDropImage"),
+  validateDropImageSignature: jest.fn(),
+}));
 
 const mockSetEditingDropId = jest.fn();
 const mockRequestScrollToSerialNo = jest.fn();
@@ -276,6 +282,7 @@ const renderSubject = (
 describe("CreateDropContent edit last drop shortcut", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.mocked(validateDropImageSignature).mockResolvedValue(undefined);
     mockEditingDropId = null;
     mockComposerMarkdown = null;
     mockLatestEditableChatDropTarget = { id: "drop-latest", serialNo: 42 };
@@ -329,6 +336,33 @@ describe("CreateDropContent edit last drop shortcut", () => {
       expect(mockSetEditingDropId).not.toHaveBeenCalled();
     }
   );
+
+  it("does not open edit while a selected image is being prepared", async () => {
+    let finishValidation: () => void = () => {};
+    jest.mocked(validateDropImageSignature).mockImplementationOnce(
+      () =>
+        new Promise<void>((resolve) => {
+          finishValidation = resolve;
+        })
+    );
+    renderSubject();
+
+    await userEvent.click(screen.getByText("add file"));
+    expect(screen.getByTestId("request-edit-last-drop")).toHaveAttribute(
+      "data-can-edit-last-drop",
+      "false"
+    );
+    await userEvent.click(screen.getByTestId("request-edit-last-drop"));
+    expect(mockSetEditingDropId).not.toHaveBeenCalled();
+
+    await act(async () => {
+      finishValidation();
+    });
+    expect(screen.getByTestId("request-edit-last-drop")).toHaveAttribute(
+      "data-can-edit-last-drop",
+      "false"
+    );
+  });
 
   it("does not open edit with files or draft storm parts", async () => {
     const { unmount } = renderSubject();

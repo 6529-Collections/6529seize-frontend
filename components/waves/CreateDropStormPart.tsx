@@ -1,5 +1,7 @@
 "use client";
 
+import { getPreparedDropImage } from "@/services/uploads/prepareDropImage";
+import { getContentType } from "@/services/uploads/mediaUploadMimeType";
 import type { CreateDropPart, ReferencedNft } from "@/entities/IDrop";
 import type { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
 import type { ApiDropMentionedUser } from "@/generated/models/ApiDropMentionedUser";
@@ -60,9 +62,9 @@ const StormPartMedia: React.FC<{
             key={key}
             className="tw-flex tw-h-14 tw-min-w-0 tw-max-w-40 tw-items-center tw-overflow-hidden tw-rounded-md tw-border tw-border-solid tw-border-white/[0.05] tw-bg-black/25"
           >
-            {file.type.startsWith("image/") && mediaUrl ? (
+            {getContentType(file).startsWith("image/") && mediaUrl ? (
               <img
-                src={mediaUrl}
+                src={getPreparedDropImage(file)?.url ?? mediaUrl}
                 alt={file.name}
                 className="tw-h-full tw-w-14 tw-flex-none tw-object-cover"
               />

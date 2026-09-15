@@ -4,6 +4,10 @@ import pRetry from "p-retry";
 import { multiPartUpload } from "@/components/waves/create-wave/services/multiPartUpload";
 import { commonApiPost } from "@/services/api/common-api";
 import { ApiDropMediaStatus } from "@/generated/models/ApiDropMediaStatus";
+import {
+  getDropUploadOwner,
+  rememberPreparedDropImage,
+} from "@/services/uploads/prepareDropImage";
 
 // Mock dependencies
 jest.mock("axios");
@@ -116,6 +120,31 @@ describe("multiPartUpload", () => {
   });
 
   describe("Multi-part Upload Process", () => {
+    it("rejects cancelled prepared uploads without reporting completion", async () => {
+      const file = new File(["avif"], "prepared.avif", { type: "image/avif" });
+      rememberPreparedDropImage(
+        file,
+        {
+          url: "https://cdn.example.com/prepared.webp",
+          mime_type: "image/webp",
+        },
+        getDropUploadOwner()
+      );
+      const controller = new AbortController();
+      controller.abort();
+
+      await expect(
+        multiPartUpload({
+          file,
+          path: "drop",
+          signal: controller.signal,
+          onProgress: mockOnProgress,
+        })
+      ).rejects.toMatchObject({ name: "AbortError" });
+      expect(mockOnProgress).not.toHaveBeenCalled();
+      expect(mockCommonApiPost).not.toHaveBeenCalled();
+    });
+
     it("successfully uploads a file for drop path", async () => {
       const result = await multiPartUpload({
         file: mockFile,
@@ -166,6 +195,27 @@ describe("multiPartUpload", () => {
         url: "https://cdn.example.com/final-url",
         mime_type: "image/png",
       });
+    });
+
+    it("returns the server's WebP MIME type for an AVIF upload", async () => {
+      mockCommonApiPost.mockReset();
+      mockCommonApiPost
+        .mockResolvedValueOnce(mockStartResponse)
+        .mockResolvedValueOnce(mockPartResponse)
+        .mockResolvedValueOnce({
+          ...mockCompleteResponse,
+          mime_type: "image/webp",
+        });
+      const result = await multiPartUpload({
+        file: new File(["avif"], "still.avif", { type: "image/avif" }),
+        path: "drop",
+      });
+      expect(result.mime_type).toBe("image/webp");
+      expect(mockAxios.put).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.any(Blob),
+        expect.objectContaining({ headers: { "Content-Type": "image/avif" } })
+      );
     });
 
     it("successfully uploads a file for wave path", async () => {

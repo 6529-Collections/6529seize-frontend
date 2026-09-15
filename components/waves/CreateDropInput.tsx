@@ -516,7 +516,10 @@ const CreateDropInput = forwardRef<
                   ref={hashtagPluginRef}
                 />
                 <MaxLengthPlugin maxLength={MAX_DROP_PART_UTF16_UNITS} />
-                <DragDropPastePlugin onAttachmentFiles={onAttachmentFiles} />
+                <DragDropPastePlugin
+                  disabled={submitting}
+                  onAttachmentFiles={onAttachmentFiles}
+                />
                 <ListPlugin />
                 <PlainTextPastePlugin />
                 <MarkdownShortcutPlugin
