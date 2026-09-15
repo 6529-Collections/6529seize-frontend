@@ -147,7 +147,7 @@ export default function CommunityMembersGroupDetails({
     >
       <div className="tw-flex tw-items-start tw-justify-between tw-gap-3">
         <div className="tw-min-w-0 tw-flex-1">
-          <p className="tw-mb-1 tw-mt-0 tw-text-[0.6875rem] tw-font-medium tw-uppercase tw-leading-4 tw-tracking-[0.12em] tw-text-iron-400">
+          <p className="tw-mb-1 tw-mt-0 tw-text-xs tw-font-medium tw-leading-4 tw-text-iron-400">
             {t(locale, "network.groupInspection.selectedGroup")}
           </p>
           <h2
