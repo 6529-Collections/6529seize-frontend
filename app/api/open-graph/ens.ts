@@ -12,6 +12,7 @@ import type { EnsTarget } from "@/lib/ens/detect";
 import { stripHtmlTags } from "@/lib/text/html";
 import LruTtlCache from "@/lib/cache/lruTtl";
 import { publicEnv } from "@/config/env";
+import { getEthereumMainnetClient } from "@/lib/ethereum/mainnetClient";
 import {
   normalizeDecentralizedMediaUrl,
   parseDecentralizedMediaRef,
@@ -21,16 +22,12 @@ import { ens_normalize } from "@adraffy/ens-normalize";
 import * as contentHash from "@ensdomains/content-hash";
 import { toUnicode } from "punycode";
 import {
-  createPublicClient,
-  fallback,
   getAddress,
-  http,
   isAddress,
   zeroAddress,
   type Address,
   type Hex,
 } from "viem";
-import { mainnet } from "viem/chains";
 import { labelhash, namehash } from "viem/ens";
 
 const CHAIN_ID = 1;
@@ -92,11 +89,6 @@ const NAME_WRAPPER_ABI = [
     ],
   },
 ] as const;
-
-const publicClient = createPublicClient({
-  chain: mainnet,
-  transport: fallback([http(), http("https://rpc1.6529.io")]),
-});
 
 const NAME_CACHE_TTL_MS = 15 * 60 * 1000; // 15 minutes
 const ADDRESS_CACHE_TTL_MS = 15 * 60 * 1000; // 15 minutes
@@ -350,7 +342,7 @@ async function loadOwnership(
 
   try {
     registryOwner = ensureChecksumAddress(
-      await publicClient.readContract({
+      await getEthereumMainnetClient().readContract({
         address: ENS_REGISTRY_ADDRESS,
         abi: ENS_REGISTRY_ABI,
         functionName: "owner",
@@ -373,7 +365,7 @@ async function loadOwnership(
 
     try {
       registrant = ensureChecksumAddress(
-        await publicClient.readContract({
+        await getEthereumMainnetClient().readContract({
           address: BASE_REGISTRAR_ADDRESS,
           abi: BASE_REGISTRAR_ABI,
           functionName: "ownerOf",
@@ -385,7 +377,7 @@ async function loadOwnership(
     }
 
     try {
-      const expiryRaw = await publicClient.readContract({
+      const expiryRaw = await getEthereumMainnetClient().readContract({
         address: BASE_REGISTRAR_ADDRESS,
         abi: BASE_REGISTRAR_ABI,
         functionName: "nameExpires",
@@ -404,12 +396,14 @@ async function loadOwnership(
 
   if (isWrapped) {
     try {
-      const [, , wrapperExpiry] = await publicClient.readContract({
-        address: NAME_WRAPPER_ADDRESS,
-        abi: NAME_WRAPPER_ABI,
-        functionName: "getData",
-        args: [BigInt(node)],
-      });
+      const [, , wrapperExpiry] = await getEthereumMainnetClient().readContract(
+        {
+          address: NAME_WRAPPER_ADDRESS,
+          abi: NAME_WRAPPER_ABI,
+          functionName: "getData",
+          args: [BigInt(node)],
+        }
+      );
       const wrapperExpiryNumber = safeNumber(wrapperExpiry);
       if (wrapperExpiryNumber && (!expiry || wrapperExpiryNumber > expiry)) {
         expiry = wrapperExpiryNumber;
@@ -440,7 +434,10 @@ async function fetchTextRecords(
   await Promise.all(
     TEXT_RECORD_KEYS.map(async (key) => {
       try {
-        const value = await publicClient.getEnsText({ name: normalized, key });
+        const value = await getEthereumMainnetClient().getEnsText({
+          name: normalized,
+          key,
+        });
         result[key] = sanitizeRecordValue(value, key);
       } catch {
         result[key] = null;
@@ -461,18 +458,18 @@ async function fetchEnsName(input: string): Promise<EnsNamePreview> {
   const { normalized, display } = normalizeEnsName(input);
   const node = namehash(normalized);
 
-  const resolver = await publicClient
+  const resolver = await getEthereumMainnetClient()
     .getEnsResolver({ name: normalized })
     .then((resolverAddress) => ensureChecksumAddress(resolverAddress))
     .catch(() => null);
 
   const [address, avatarUrl, records, contenthash, ownership] =
     (await Promise.all([
-      publicClient
+      getEthereumMainnetClient()
         .getEnsAddress({ name: normalized })
         .then((resolved) => ensureChecksumAddress(resolved))
         .catch(() => null),
-      publicClient
+      getEthereumMainnetClient()
         .getEnsAvatar({ name: normalized })
         .then((avatar) => sanitizeUrl(avatar))
         .catch(() => null),
@@ -482,7 +479,7 @@ async function fetchEnsName(input: string): Promise<EnsNamePreview> {
           return null;
         }
         try {
-          const raw = await publicClient.readContract({
+          const raw = await getEthereumMainnetClient().readContract({
             address: resolver as Address,
             abi: PUBLIC_RESOLVER_ABI,
             functionName: "contenthash",
@@ -536,7 +533,7 @@ async function fetchEnsAddress(address: string): Promise<EnsAddressPreview> {
 
   const checksummed = getAddress(address);
 
-  const primaryName = await publicClient
+  const primaryName = await getEthereumMainnetClient()
     .getEnsName({ address: checksummed })
     .catch(() => null);
 
@@ -545,7 +542,7 @@ async function fetchEnsAddress(address: string): Promise<EnsAddressPreview> {
 
   if (primaryName) {
     try {
-      const resolvedAddress = await publicClient.getEnsAddress({
+      const resolvedAddress = await getEthereumMainnetClient().getEnsAddress({
         name: primaryName,
       });
       forwardMatch = Boolean(
@@ -556,7 +553,7 @@ async function fetchEnsAddress(address: string): Promise<EnsAddressPreview> {
     }
 
     if (forwardMatch) {
-      avatarUrl = await publicClient
+      avatarUrl = await getEthereumMainnetClient()
         .getEnsAvatar({ name: primaryName })
         .then((value) => sanitizeUrl(value))
         .catch(() => null);

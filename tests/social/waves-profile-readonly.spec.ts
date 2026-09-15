@@ -104,6 +104,97 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     }
   });
 
+  test("keeps wave identity compact and sharing reachable through details", async ({
+    page,
+  }) => {
+    const waveId = await getFirstWaveId(page);
+    await gotoReady(page, `/waves/${waveId}`);
+
+    const compact = (page.viewportSize()?.width ?? 1280) < 768;
+    const details = page.getByRole("button", {
+      name: compact ? "Wave details" : "Show right sidebar",
+      exact: true,
+    });
+    await expect(details).toBeVisible();
+    const header = page
+      .getByRole("button", {
+        name: compact ? "Wave details" : "Show right sidebar",
+        exact: true,
+      })
+      .locator("../..");
+    await expect(header.getByRole("heading", { level: 1 })).toBeVisible();
+    const headerRep = header.getByRole("button", {
+      name: /Add Wave REP|Edit your Wave REP/,
+    });
+    await expect(
+      header.getByRole("button", { name: /^(Share wave|Copy wave link)$/ })
+    ).toHaveCount(0);
+
+    const score = header.getByRole("button", { name: /^Wave score / });
+    if (compact) {
+      await expect(headerRep).toHaveCount(0);
+      await expect(score).toHaveCount(0);
+      await header.getByRole("button", { name: "More wave actions" }).click();
+      await expect(
+        page
+          .getByRole("dialog", { name: "More wave actions" })
+          .getByRole("button", { name: /^(Share wave|Copy wave link)$/ })
+      ).toBeVisible();
+      await page.keyboard.press("Escape");
+    } else {
+      await expect(details).toHaveText("");
+      if (await headerRep.count()) {
+        await expect(headerRep).toBeVisible();
+      }
+      const description = header.getByRole("button", {
+        name: "Show wave description",
+        exact: true,
+      });
+      if (await description.count()) {
+        await expect
+          .poll(() =>
+            description.evaluate((button) => {
+              const preview = button.querySelector("span > span");
+              const identity = button.parentElement;
+              if (!preview || !identity) {
+                return false;
+              }
+              const buttonBox = button.getBoundingClientRect();
+              const identityBox = identity.getBoundingClientRect();
+              const isTruncated = preview.scrollWidth > preview.clientWidth + 1;
+              return (
+                buttonBox.right <= identityBox.right + 1 &&
+                (!isTruncated || button.querySelector("svg") !== null)
+              );
+            })
+          )
+          .toBe(true);
+      }
+      if (await score.count()) {
+        const headingBox = await header
+          .getByRole("heading", { level: 1 })
+          .boundingBox();
+        const scoreBox = await score.boundingBox();
+        expect(headingBox).not.toBeNull();
+        expect(scoreBox).not.toBeNull();
+        expect(
+          Math.abs((headingBox?.y ?? 0) - (scoreBox?.y ?? 0))
+        ).toBeLessThanOrEqual(4);
+        expect(scoreBox?.height).toBeGreaterThanOrEqual(24);
+        expect(scoreBox?.width).toBeGreaterThanOrEqual(24);
+      }
+    }
+
+    await details.click();
+    await expect(
+      page.getByRole("tab", { name: "About", exact: true })
+    ).toBeVisible();
+    await page.getByRole("tab", { name: "About", exact: true }).click();
+    await expect(
+      page.getByRole("button", { name: /^(Share wave|Copy wave link)$/ })
+    ).toBeVisible();
+  });
+
   test("handles legacy wave query links without mutation", async ({ page }) => {
     const waveId = await getFirstWaveId(page);
 
