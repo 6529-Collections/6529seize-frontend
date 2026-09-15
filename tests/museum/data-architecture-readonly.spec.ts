@@ -178,6 +178,17 @@ test.describe("Museum data architecture @surface @readonly", () => {
     const diagnostics = attachPageDiagnostics(page);
     try {
       const exactCommit = await openArchitectureRoute(page, OVERVIEW, null);
+      // Compile the shared dynamic route before measuring client navigation;
+      // CI's cold dev server can otherwise defer this request until link time.
+      const firstDynamicRoute = STANDARD_ROUTES[0];
+      if (!firstDynamicRoute) {
+        throw new Error("Museum data-architecture standards are empty.");
+      }
+      const dynamicRouteWarmup = await page.request.get(
+        firstDynamicRoute.path,
+        { timeout: ROUTE_TRANSITION_TIMEOUT_MS }
+      );
+      expect(dynamicRouteWarmup.status()).toBe(200);
       for (const route of STANDARD_ROUTES) {
         const routeLink = page.locator(`a[href="${route.path}"]:visible`);
         await expect(routeLink).toHaveCount(1);
