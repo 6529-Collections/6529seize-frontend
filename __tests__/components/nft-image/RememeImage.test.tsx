@@ -37,6 +37,76 @@ describe("RememeImage", () => {
     const video = container.querySelector("video");
     expect(video).toBeTruthy();
     expect(video).toHaveAttribute("src", expect.stringContaining("parsed-"));
+    expect(video).toHaveAttribute("poster", "thumb.jpg");
+  });
+
+  it("uses scaled artwork as the poster in the detail view", () => {
+    const nft = { ...nftBase, animation: "file.mp4" };
+    const { container } = render(
+      <RememeImage nft={nft} animation height={650} />
+    );
+    expect(container.querySelector("video")).toHaveAttribute(
+      "poster",
+      "scaled.jpg"
+    );
+  });
+
+  it("skips video-valued image fields and resolves metadata artwork through the gateway", () => {
+    const nft = {
+      ...nftBase,
+      image: "file.mp4",
+      animation: "file.mp4",
+      s3_image_thumbnail: "",
+      s3_image_scaled: "",
+      s3_image_original: "",
+    };
+    const { container } = render(
+      <RememeImage nft={nft} animation height={300} />
+    );
+    expect(container.querySelector("video")).toHaveAttribute(
+      "poster",
+      "gateway-ipfs://meta.jpg"
+    );
+  });
+
+  it("keeps the video playable without a poster when all image fields are empty", () => {
+    const nft = {
+      ...nftBase,
+      image: "file.mp4",
+      animation: "file.mp4",
+      s3_image_thumbnail: "",
+      s3_image_scaled: "",
+      s3_image_original: "",
+      metadata: { ...nftBase.metadata, image: "" },
+      contract_opensea_data: { imageUrl: "" },
+    };
+    const { container } = render(
+      <RememeImage nft={nft} animation height={300} />
+    );
+    expect(container.querySelector("video")).not.toHaveAttribute("poster");
+    expect(container.querySelector("video")).toHaveAttribute(
+      "src",
+      "parsed-file.mp4"
+    );
+  });
+
+  it("uses the thumbnail in a detail view when no larger poster exists", () => {
+    const nft = {
+      ...nftBase,
+      image: "file.mp4",
+      animation: "file.mp4",
+      s3_image_scaled: "",
+      s3_image_original: "",
+      metadata: { ...nftBase.metadata, image: "" },
+      contract_opensea_data: { imageUrl: "" },
+    };
+    const { container } = render(
+      <RememeImage nft={nft} animation height={650} />
+    );
+    expect(container.querySelector("video")).toHaveAttribute(
+      "poster",
+      "thumb.jpg"
+    );
   });
 
   it("uses top-level animation as a video fallback when metadata animation is empty", () => {
