@@ -5,9 +5,22 @@ import { formatList } from "@/i18n/format";
 import { ApiMediaUploadMimeType } from "@/generated/models/ApiMediaUploadMimeType";
 import { ApiAttachmentUploadMimeType } from "@/generated/models/ApiAttachmentUploadMimeType";
 
+const BROWSER_MIME_TYPE_ALIASES: Readonly<Record<string, string>> = {
+  "image/pjpeg": "image/jpeg",
+  "image/x-png": "image/png",
+  "audio/x-wav": "audio/wav",
+  "audio/wave": "audio/wav",
+  "audio/x-pn-wav": "audio/wav",
+  "audio/x-mp3": "audio/mp3",
+  "audio/x-mpeg": "audio/mpeg",
+  "video/avi": "video/x-msvideo",
+  "video/msvideo": "video/x-msvideo",
+};
+
 function normalizeMimeType(mimeType: string): string {
   if (!mimeType) return "";
-  return (mimeType.split(";")[0]?.trim() ?? "").toLowerCase();
+  const normalized = (mimeType.split(";")[0]?.trim() ?? "").toLowerCase();
+  return BROWSER_MIME_TYPE_ALIASES[normalized] ?? normalized;
 }
 
 const API_MEDIA_UPLOAD_MIME_TYPES = new Set<string>(
@@ -163,7 +176,7 @@ export function isSupportedUploadFile(file: File): boolean {
     ].includes(browserType);
   if (
     !isGenericBrowserType &&
-    browserType.startsWith("image/") &&
+    /^(image|video|audio)\//.test(browserType) &&
     !API_MEDIA_UPLOAD_MIME_TYPES.has(browserType)
   )
     return false;

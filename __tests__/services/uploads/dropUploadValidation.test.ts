@@ -75,6 +75,31 @@ describe("drop upload validation", () => {
     expect(isSupportedUploadFile(file("photo.jpg", "image/heic"))).toBe(false);
   });
 
+  it.each([
+    ["movie.mp4", "video/webm"],
+    ["song.mp3", "audio/flac"],
+    ["movie.mp4", "audio/mpeg"],
+    ["song.mp3", "video/mp4"],
+  ])("rejects a misleading filename %s with MIME %s", (name, type) => {
+    expect(isSupportedUploadFile(file(name, type))).toBe(false);
+  });
+
+  it.each([
+    ["photo.jpg", "image/pjpeg", "image/jpeg"],
+    ["photo.png", "image/x-png", "image/png"],
+    ["song.wav", "audio/x-wav", "audio/wav"],
+    ["song.wav", "audio/wave", "audio/wav"],
+    ["song.wav", "audio/x-pn-wav", "audio/wav"],
+    ["song.mp3", "audio/x-mp3", "audio/mp3"],
+    ["song.mp3", "audio/x-mpeg", "audio/mpeg"],
+    ["movie.avi", "video/avi", "video/x-msvideo"],
+    ["movie.avi", "video/msvideo", "video/x-msvideo"],
+  ])("preserves the browser alias %s / %s", (name, type, expectedType) => {
+    const upload = file(name, type);
+    expect(isSupportedUploadFile(upload)).toBe(true);
+    expect(getContentType(upload)).toBe(expectedType);
+  });
+
   it("reports an extensionless image immediately, matching API filename requirements", () => {
     const setToast = jest.fn();
     expect(

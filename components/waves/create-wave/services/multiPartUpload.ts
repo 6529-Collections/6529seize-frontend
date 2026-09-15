@@ -58,6 +58,9 @@ export async function multiPartUpload({
   waitForReady = true,
   signal,
 }: MultiPartUploadParams): Promise<ApiDropMedia> {
+  if (signal?.aborted) {
+    throw new DOMException("Upload aborted", "AbortError");
+  }
   const prepared = path === "drop" ? getPreparedDropImage(file) : undefined;
   if (prepared) {
     onProgress?.(100);

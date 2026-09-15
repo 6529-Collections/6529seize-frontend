@@ -4,6 +4,7 @@ import { useAuth } from "@/components/auth/Auth";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { useDropFilePreparation } from "@/components/waves/create-drop-content/useDropFilePreparation";
+import { selectNewComposerFiles } from "@/components/waves/create-drop-content/content-helpers";
 import { getContentType } from "@/services/uploads/mediaUploadMimeType";
 
 import {
@@ -227,7 +228,14 @@ const CreateDropWrapper = forwardRef<
         ],
         disabled: loading,
         setToast,
-        onFiles: (newFiles) => setFiles((current) => [...current, ...newFiles]),
+        onFiles: (newFiles) =>
+          setFiles((current) => [
+            ...current,
+            ...selectNewComposerFiles(newFiles, [
+              ...(drop?.parts.flatMap((part) => part.media) ?? []),
+              ...current,
+            ]),
+          ]),
       });
 
     const setEditorStateWhenUnlocked = (newEditorState: EditorState | null) => {

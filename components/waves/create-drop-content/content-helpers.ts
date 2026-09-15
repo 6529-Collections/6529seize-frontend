@@ -545,7 +545,7 @@ export const getMentionedGroupsForParts = ({
 export function selectNewComposerFiles(
   newFiles: readonly File[],
   existingFiles: readonly File[],
-  setToast: (toast: AppToastInput) => void,
+  setToast?: (toast: AppToastInput) => void,
   locale: SupportedLocale = DEFAULT_LOCALE
 ): File[] {
   const identities = new Set(existingFiles.map(getFileIdentity));
@@ -557,7 +557,7 @@ export function selectNewComposerFiles(
   });
   const budget = Math.max(0, MAX_DROP_UPLOAD_FILES - existingFiles.length);
   if (uniqueFiles.length > budget) {
-    setToast({
+    setToast?.({
       type: "warning",
       message: t(locale, "drop.upload.fileLimit", {
         count: MAX_DROP_UPLOAD_FILES,
@@ -565,7 +565,7 @@ export function selectNewComposerFiles(
     });
   }
   if (uniqueFiles.length < newFiles.length) {
-    setToast({
+    setToast?.({
       type: "warning",
       message: t(locale, "drop.upload.duplicatesSkipped"),
     });
@@ -609,7 +609,13 @@ export const handleComposerFileChange = ({
     locale
   );
   if (!acceptedFiles.length) return;
-  setFiles((currentFiles) => [...currentFiles, ...acceptedFiles]);
+  setFiles((currentFiles) => [
+    ...currentFiles,
+    ...selectNewComposerFiles(acceptedFiles, [
+      ...existingPartFiles,
+      ...currentFiles,
+    ]),
+  ]);
 
   if (!keepOptionsVisible) {
     setShowOptionsState({ scopeKey: waveId, value: false });

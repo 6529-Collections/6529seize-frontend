@@ -121,6 +121,32 @@ describe("CreateDropContent utilities", () => {
   });
 
   describe("composer file changes", () => {
+    it("rechecks duplicates and remaining capacity when React applies a queued batch", () => {
+      const existing = Array.from({ length: 7 }, (_, index) =>
+        createFile(`existing-${index}.png`, index)
+      );
+      const last = createFile("last.png", 100);
+      const overflow = createFile("overflow.png", 200);
+      const setFiles = jest.fn();
+      const setToast = jest.fn();
+      handleComposerFileChange({
+        newFiles: [existing[0]!, last, overflow],
+        files: [],
+        drop: null,
+        waveId: "wave-1",
+        keepOptionsVisible: true,
+        setFiles,
+        setToast,
+        setShowOptionsState: jest.fn(),
+        closeOnNextInputRef: { current: false },
+      });
+
+      const update = setFiles.mock.calls[0][0];
+      expect(update(existing)).toEqual([...existing, last]);
+      expect(update([...existing, last])).toEqual([...existing, last]);
+      expect(setToast).not.toHaveBeenCalled();
+    });
+
     it("retains files added by another batch before React applies the update", () => {
       const first = createFile("first.png", 100);
       const second = createFile("second.png", 100);
