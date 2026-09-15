@@ -28,13 +28,22 @@ const mockedBundle = jest.mocked(getMuseumPublicationBundle);
 
 function installPublication(publication: MuseumPublication | null): void {
   mockedBundle.mockResolvedValue({
-    publicationState: {
-      status: publication === null ? "unavailable" : "current",
-      publication,
-      errorCode: null,
-      failedAt: null,
-      lastValidAcceptedAt: null,
-    },
+    publicationState:
+      publication === null
+        ? {
+            status: "unavailable",
+            publication: null,
+            errorCode: "test_publication_unavailable",
+            failedAt: "2026-08-09T00:00:00Z",
+            lastValidAcceptedAt: null,
+          }
+        : {
+            status: "current",
+            publication,
+            errorCode: null,
+            failedAt: null,
+            lastValidAcceptedAt: null,
+          },
     view: null,
   });
 }
