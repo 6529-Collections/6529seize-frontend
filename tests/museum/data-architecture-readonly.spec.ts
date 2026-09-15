@@ -21,7 +21,9 @@ const BASE_PATH = "/museum/network/research/data-architecture";
 const SOURCE_REPOSITORY = "6529-Collections/6529networkmuseum";
 const MOBILE_PROJECT = "web-mobile-chromium";
 const MOBILE_VIEWPORT = { width: 390, height: 844 } as const;
-const ROUTE_TRANSITION_TIMEOUT_MS = 45_000;
+// CI exercises real link transitions against a cold Next.js development
+// server, where the first dynamic route compilation can exceed 45 seconds.
+const ROUTE_TRANSITION_TIMEOUT_MS = 90_000;
 const EXACT_COMMIT_PATTERN = /^[a-f0-9]{40}$/u;
 const DEPLOYED_ENVIRONMENT =
   process.env["PLAYWRIGHT_ENV"] === "staging" ||
