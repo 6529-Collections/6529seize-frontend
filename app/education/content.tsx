@@ -33,7 +33,7 @@ export const educationMigratedWordPressPage: MigratedWordPressStaticPageContent 
       {
         type: "html",
         html: migratedWordPressTrustedHtml(
-          "<p>I believe that most people once they are aware about their choices, will prefer an open metaverse based on interoperable standards to a closed corporate metaverse.</p>"
+          "<p>I believe that most people, once they are aware of their choices, will prefer an open metaverse based on interoperable standards to a closed corporate metaverse.</p>"
         ),
       },
       {
@@ -49,19 +49,13 @@ export const educationMigratedWordPressPage: MigratedWordPressStaticPageContent 
       {
         type: "html",
         html: migratedWordPressTrustedHtml(
-          '<p>The 6529 <a href="/education/tweetstorms">Tweetstorms</a> and <a href="/education/podcasts">Podcasts</a> are the start and will continue.</p>'
+          '<p>The 6529 <a href="/education/tweetstorms">Tweetstorms</a> and <a href="/education/podcasts">Podcasts</a> form a historical archive. Each entry keeps a link to its original source, and the podcast entries also retain their publication dates.</p>'
         ),
       },
       {
         type: "html",
         html: migratedWordPressTrustedHtml(
-          "<p>In the next couple of months, we will do Something Else too.</p>"
-        ),
-      },
-      {
-        type: "html",
-        html: migratedWordPressTrustedHtml(
-          "<p>We are working on some ideas to scale education further and faster in multiple directions. Stay tuned.</p>"
+          '<p>For a concise statement of the original thesis, read the <a href="/about/open-metaverse">Open Metaverse overview</a>. For a current institution built around public access and open records, read about the <a href="/museum/network/about">6529 Network Museum</a>, browse its <a href="/museum/network/collection">permanent collection</a>, or visit the <a href="/museum/network/research">Museum research hub</a>.</p>'
         ),
       },
       {
@@ -71,13 +65,13 @@ export const educationMigratedWordPressPage: MigratedWordPressStaticPageContent 
       {
         type: "html",
         html: migratedWordPressTrustedHtml(
-          '<p>If you are involved in education, research, advocacy or policy in the cryptocurrency, digital rights, NFTs, Web3, metaverse, or related space, please get in touch <a href="/education/education-collaboration-form"><u>here</u></a>.</p>'
+          '<p>If you work in education, research, advocacy, or policy related to cryptocurrency, digital rights, NFTs, Web3, the metaverse, or a related field, <a href="/education/education-collaboration-form">send a collaboration inquiry</a>.</p>'
         ),
       },
       {
         type: "html",
         html: migratedWordPressTrustedHtml(
-          "<p>We absolutely want to help education spread across different communities, different geographies and are open to ideas on how to do so.</p>"
+          "<p>We want to help education spread across communities and geographies, and we are open to ideas about how to do so.</p>"
         ),
       },
     ],
