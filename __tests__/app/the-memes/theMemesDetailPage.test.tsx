@@ -211,6 +211,33 @@ describe("The Memes detail generateMetadata", () => {
     expect(metadata.openGraph?.url).toBe("https://6529.io/the-memes/123");
   });
 
+  it("keeps the confirmed next mint indexable at its canonical card URL", async () => {
+    mockFetchUrl.mockResolvedValue({ data: [] });
+    mockShared.mockResolvedValue({
+      title: "The Memes #123",
+      alternates: { canonical: "https://6529.io/the-memes/123" },
+      robots: { index: true, follow: true },
+    });
+
+    const metadata = await generateMetadata({
+      params: Promise.resolve({ id: "123" }),
+      searchParams: Promise.resolve({}),
+    });
+
+    expect(mockShared).toHaveBeenCalledWith(
+      MEMES_CONTRACT,
+      "123",
+      "",
+      false,
+      "en-US",
+      null
+    );
+    expect(metadata).toMatchObject({
+      alternates: { canonical: "https://6529.io/the-memes/123" },
+      robots: { index: true, follow: true },
+    });
+  });
+
   it("noindexes temporary source failures instead of treating them as missing", async () => {
     mockFetchUrl.mockRejectedValue(new Error("upstream unavailable"));
 

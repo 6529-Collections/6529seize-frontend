@@ -1,4 +1,6 @@
 import { enterArtFullScreen, fullScreenSupported } from "@/helpers/Helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { faExpandAlt } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
@@ -20,8 +22,13 @@ export default function NftNavigation(
     params?: SearchParamsSource | undefined;
   }>
 ) {
+  const locale = useBrowserLocale();
   const isFirst = props.nftId === props.startIndex;
   const isLast = props.nftId === props.endIndex;
+  const previousAriaLabel = t(locale, "nftNavigation.previous.ariaLabel");
+  const previousTitle = t(locale, "nftNavigation.previous.title");
+  const nextAriaLabel = t(locale, "nftNavigation.next.ariaLabel");
+  const nextTitle = t(locale, "nftNavigation.next.title");
 
   const query = useMemo(() => {
     const paramsStr = nftNavigationQuery(props.params);
@@ -49,13 +56,14 @@ export default function NftNavigation(
       <span className="tw-flex tw-items-center tw-justify-center tw-gap-2">
         {isFirst ? (
           <span
-            aria-label="Previous NFT"
+            aria-label={previousAriaLabel}
             aria-disabled="true"
-            title="Previous Card"
+            title={previousTitle}
             className="tw-flex tw-h-9 tw-w-9 tw-cursor-default tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950/70 tw-text-iron-500 tw-opacity-100 tw-shadow-none"
           >
             <ChevronLeftIcon
               data-testid="icon"
+              aria-hidden="true"
               strokeWidth={2}
               className="tw-h-[18px] tw-w-[18px]"
             />
@@ -63,12 +71,13 @@ export default function NftNavigation(
         ) : (
           <Link
             href={`${props.path}/${props.nftId - 1}${query}`}
-            aria-label="Previous NFT"
-            title="Previous Card"
+            aria-label={previousAriaLabel}
+            title={previousTitle}
             className="tw-group tw-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/[0.2] tw-bg-iron-800 tw-text-iron-200 tw-shadow-[0_4px_12px_rgba(0,0,0,0.5)] tw-transition-colors tw-duration-150 hover:tw-border-white/30 hover:tw-bg-iron-700 hover:tw-text-white motion-reduce:tw-transition-none"
           >
             <ChevronLeftIcon
               data-testid="icon"
+              aria-hidden="true"
               strokeWidth={2}
               className="tw-h-[18px] tw-w-[18px] tw-transition-transform tw-duration-150 group-hover:-tw-translate-x-0.5 motion-reduce:tw-transition-none"
             />
@@ -76,13 +85,14 @@ export default function NftNavigation(
         )}
         {isLast ? (
           <span
-            aria-label="Next NFT"
+            aria-label={nextAriaLabel}
             aria-disabled="true"
-            title="Next Card"
+            title={nextTitle}
             className="tw-flex tw-h-9 tw-w-9 tw-cursor-default tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950/70 tw-text-iron-500 tw-opacity-100 tw-shadow-none"
           >
             <ChevronRightIcon
               data-testid="icon"
+              aria-hidden="true"
               strokeWidth={2}
               className="tw-h-[18px] tw-w-[18px]"
             />
@@ -90,12 +100,13 @@ export default function NftNavigation(
         ) : (
           <Link
             href={`${props.path}/${props.nftId + 1}${query}`}
-            aria-label="Next NFT"
-            title="Next Card"
+            aria-label={nextAriaLabel}
+            title={nextTitle}
             className="tw-group tw-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/[0.2] tw-bg-iron-800 tw-text-iron-200 tw-shadow-[0_4px_12px_rgba(0,0,0,0.5)] tw-transition-colors tw-duration-150 hover:tw-border-white/30 hover:tw-bg-iron-700 hover:tw-text-white motion-reduce:tw-transition-none"
           >
             <ChevronRightIcon
               data-testid="icon"
+              aria-hidden="true"
               strokeWidth={2}
               className="tw-h-[18px] tw-w-[18px] tw-transition-transform tw-duration-150 group-hover:tw-translate-x-0.5 motion-reduce:tw-transition-none"
             />

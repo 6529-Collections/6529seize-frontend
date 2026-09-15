@@ -3,6 +3,8 @@ import { getAppMetadata } from "@/components/providers/metadata";
 import UserPageLayout from "@/components/user/layout/UserPageLayout";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { getMetadataForUserPage } from "@/helpers/Helpers";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
 import {
   getUserProfile,
@@ -214,8 +216,11 @@ export function createUserTabPage<
       }
       return getAppMetadata(
         {
-          title: "Profile temporarily unavailable",
-          description: "This public profile could not be loaded.",
+          title: t(DEFAULT_LOCALE, "profile.metadata.unavailable.title"),
+          description: t(
+            DEFAULT_LOCALE,
+            "profile.metadata.unavailable.description"
+          ),
         },
         { robots: { index: false, follow: true } }
       );

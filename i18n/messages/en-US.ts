@@ -2802,6 +2802,13 @@ const MEME_DATA_TABLE_MESSAGES = objectMessages("memeData", {
 const TOKEN_NUMBER_MESSAGE = "Token #{tokenId}";
 
 export const EN_US_MESSAGES = {
+  "nftNavigation.previous.ariaLabel": "Previous NFT",
+  "nftNavigation.previous.title": "Previous Card",
+  "nftNavigation.next.ariaLabel": "Next NFT",
+  "nftNavigation.next.title": "Next Card",
+  "profile.metadata.unavailable.title": "Profile temporarily unavailable",
+  "profile.metadata.unavailable.description":
+    "This public profile could not be loaded.",
   "singleDrop.share": "Share",
   "singleDrop.shareLabel": "Share drop",
   "singleDrop.shared": "Link shared",
