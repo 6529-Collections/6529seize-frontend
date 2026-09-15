@@ -167,18 +167,18 @@ export default function CommunityMembersGroupDetails({
         >
           <Button
             ref={repButtonRef}
-            variant="tertiary"
+            variant="secondary"
             size="sm"
-            className="!tw-h-auto tw-min-h-11 tw-w-full !tw-whitespace-normal !tw-font-medium !tw-shadow-none tw-py-2 tw-text-center sm:tw-min-h-9 sm:tw-w-auto"
+            className="!tw-h-auto tw-min-h-11 tw-w-full !tw-whitespace-normal tw-py-2 tw-text-center sm:tw-min-h-9 sm:tw-w-auto"
             onClick={() => openBulkRateForm(ApiRateMatter.Rep)}
           >
             {t(locale, "network.groupInspection.bulkRep")}
           </Button>
           <Button
             ref={nicButtonRef}
-            variant="tertiary"
+            variant="secondary"
             size="sm"
-            className="!tw-h-auto tw-min-h-11 tw-w-full !tw-whitespace-normal !tw-font-medium !tw-shadow-none tw-py-2 tw-text-center sm:tw-min-h-9 sm:tw-w-auto"
+            className="!tw-h-auto tw-min-h-11 tw-w-full !tw-whitespace-normal tw-py-2 tw-text-center sm:tw-min-h-9 sm:tw-w-auto"
             onClick={() => openBulkRateForm(ApiRateMatter.Cic)}
           >
             {t(locale, "network.groupInspection.bulkNic")}

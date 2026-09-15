@@ -260,12 +260,12 @@ describe("CommunityMembersGroupDetails", () => {
       screen.getByRole("button", {
         name: "REP everyone matching criteria",
       })
-    ).toBeInTheDocument();
+    ).toHaveClass("tw-bg-white/[0.07]");
     expect(
       screen.getByRole("button", {
         name: "NIC everyone matching criteria",
       })
-    ).toBeInTheDocument();
+    ).toHaveClass("tw-bg-white/[0.07]");
     fireEvent.click(
       screen.getByRole("button", { name: "Clear selected group" })
     );
