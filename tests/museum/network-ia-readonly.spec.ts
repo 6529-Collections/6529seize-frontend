@@ -103,6 +103,14 @@ async function expectNoDeadLinks(page: Page) {
   expect(deadLinks).toEqual([]);
 }
 
+function isDetachedElementError(error: unknown): error is Error {
+  return (
+    error instanceof Error &&
+    (error.message.includes("Element is not attached to the DOM") ||
+      error.message.includes("Node is detached from document"))
+  );
+}
+
 async function expectImageLoadedAfterScroll(
   scrollTarget: Locator,
   image: Locator
@@ -119,10 +127,7 @@ async function expectImageLoadedAfterScroll(
               element.naturalWidth > 0
           );
         } catch (error) {
-          if (
-            error instanceof Error &&
-            error.message.includes("Element is not attached to the DOM")
-          ) {
+          if (isDetachedElementError(error)) {
             return false;
           }
           throw error;
@@ -511,11 +516,66 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
     page,
   }) => {
     await openRoute(page, "/museum/network");
-    const links = page.locator('nav[aria-label="Museum sections"] a');
+    const links = page
+      .getByRole("navigation", { name: "Museum sections", exact: true })
+      .getByRole("link");
 
-    await links.first().focus();
-    await page.keyboard.press("Tab");
-    await expect(links.nth(1)).toBeFocused();
+    await expect
+      .poll(
+        async () => {
+          const firstLink = links.first();
+          const secondLink = links.nth(1);
+          const [firstBefore, secondBefore] = await Promise.all([
+            firstLink.elementHandle(),
+            secondLink.elementHandle(),
+          ]);
+          if (firstBefore === null || secondBefore === null) {
+            return false;
+          }
+
+          try {
+            await firstBefore.focus();
+            await page.keyboard.press("Tab");
+            if (
+              await secondBefore.evaluate(
+                (link) => link === document.activeElement
+              )
+            ) {
+              return true;
+            }
+
+            const [firstAfter, secondAfter] = await Promise.all([
+              firstLink.elementHandle(),
+              secondLink.elementHandle(),
+            ]);
+            const linksWereReplaced =
+              firstAfter === null ||
+              secondAfter === null ||
+              !(await firstBefore.evaluate(
+                (before, after) => before === after,
+                firstAfter
+              )) ||
+              !(await secondBefore.evaluate(
+                (before, after) => before === after,
+                secondAfter
+              ));
+            if (linksWereReplaced) {
+              return false;
+            }
+
+            throw new Error(
+              "Museum navigation Tab order failed without DOM replacement"
+            );
+          } catch (error) {
+            if (isDetachedElementError(error)) {
+              return false;
+            }
+            throw error;
+          }
+        },
+        { timeout: 20_000 }
+      )
+      .toBe(true);
 
     const focusAndTarget = await links.nth(1).evaluate((link) => {
       const style = getComputedStyle(link);
