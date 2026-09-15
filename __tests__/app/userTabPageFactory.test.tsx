@@ -207,6 +207,6 @@ describe("user tab page via createUserTabPage", () => {
       index: false,
       follow: true,
     });
-    expect(unavailableMetadata.canonicalPath).toBeUndefined();
+    expect("canonicalPath" in unavailableMetadata).toBe(false);
   });
 });
