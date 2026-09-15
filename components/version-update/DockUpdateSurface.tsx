@@ -15,6 +15,7 @@ export default function DockUpdateSurface({
   const shapeId = `${id}-shape`;
   const clipId = `${id}-clip`;
   const edgeId = `${id}-edge`;
+  const clipPath = `var(--dock-update-contour, url(#${clipId}))`;
 
   return (
     <div
@@ -98,14 +99,11 @@ export default function DockUpdateSurface({
         </defs>
         <use href={`#${shapeId}`} filter={`url(#${edgeId})`} />
       </svg>
-      <div
-        className={styles["glass"]}
-        style={{ clipPath: `url(#${clipId})` }}
-      />
+      <div className={styles["glass"]} style={{ clipPath }} />
       <div
         data-dock-selection-clip="true"
         className={styles["selectionClip"]}
-        style={{ clipPath: `url(#${clipId})` }}
+        style={{ clipPath }}
       >
         <div className={styles["selectionBody"]}>{children}</div>
       </div>

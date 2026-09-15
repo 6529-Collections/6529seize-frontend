@@ -39,7 +39,7 @@ export default function DockedVersionUpdate({
   );
 }
 
-export function VersionUpdateButton({
+function VersionUpdateButton({
   className = "",
 }: {
   readonly className?: string;

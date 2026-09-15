@@ -49,7 +49,9 @@ it("keeps the selection glow inside the update contour and preserves it without 
     .getByTestId("selection")
     .closest<HTMLDivElement>("[data-dock-selection-clip]");
   expect(contour).not.toBeNull();
-  expect(clip?.style.clipPath).toBe(`url(#${contour?.id})`);
+  expect(clip?.style.clipPath).toBe(
+    `var(--dock-update-contour, url(#${contour?.id}))`
+  );
   expect(screen.getAllByTestId("selection")).toHaveLength(1);
 
   jest.mocked(useVersionStatus).mockReturnValue(false);
