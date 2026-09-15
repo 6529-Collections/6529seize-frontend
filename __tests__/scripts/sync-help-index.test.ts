@@ -95,6 +95,14 @@ describe("Desktop conversational answer metadata", () => {
       ],
     },
     { answer_links: [null] },
+    { canonical_path: "/open-mobile" },
+    { related_paths: ["/open-mobile?path=/waves"] },
+    { facts: ["Open https://staging.6529.io/open-mobile"] },
+    { brief_answer: "Use /open-mobile" },
+    { source_refs: ["app/open-mobile/page.tsx"] },
+    {
+      answer_links: [{ label: "Open app", url: "https://6529.io/open-mobile" }],
+    },
   ])("rejects invalid short answer or public link metadata: %j", (fields) => {
     const index = JSON.parse(JSON.stringify(helpIndex));
     Object.assign(
@@ -113,5 +121,15 @@ describe("Desktop conversational answer metadata", () => {
       error.mockRestore();
       exit.mockRestore();
     }
+  });
+
+  it("excludes mobile handoff references from source and published knowledge", () => {
+    const published = require("../../public/help-index.json");
+    expect(JSON.stringify(helpIndex).toLowerCase()).not.toContain(
+      "open-mobile"
+    );
+    expect(JSON.stringify(published).toLowerCase()).not.toContain(
+      "open-mobile"
+    );
   });
 });

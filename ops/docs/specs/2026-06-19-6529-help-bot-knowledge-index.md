@@ -248,6 +248,11 @@ canonical answer links. The sync step rejects records whose canonical or related
 paths resolve to WordPress-migrated route files, and rejects `source_refs` that
 point at those files.
 
+The mobile handoff route `/open-mobile` is excluded from help knowledge entirely,
+including facts, links, related paths, and source references. The publishing
+validator rejects records that reintroduce it. App downloads use the official
+6529 Apps page; the handoff route is not a help destination.
+
 ## Proposed Help Sources
 
 ### 1. Curated Glossary Records
@@ -565,3 +570,9 @@ the end, never inline; source provenance remains separate. The corpus separates
 recalculation or history reconciliation. Full facts remain available for explicit
 requests for detail. A plain RPC-provider question without local-app context asks
 which application the user means.
+
+`desktop.after-installation` answers requests for next steps after installation
+with RPC activation, worker sync, and scheduled TDH. It does not repeat download
+instructions or require account pairing. Explicit `answer_links` lists also
+govern ordinary knowledge answers: only those links appear in the final footer,
+and an empty list suppresses links. Related paths are not additional citations.

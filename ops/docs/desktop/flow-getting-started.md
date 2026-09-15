@@ -42,6 +42,13 @@ session does not expose 6529 Desktop workers.
 
 ## Common Scenarios
 
+### Already installed
+
+Start with **6529 Desktop > ETH Transactions > RPC Providers > Providers List**
+and **Set Active** on a provider, then leave the app running while workers sync.
+Account pairing and wallet import are optional; neither is required for indexing
+or TDH calculation.
+
 ### Configure or change RPC
 
 In 6529 Desktop open 6529 Desktop > ETH Transactions > RPC Providers and expand Providers List. Workers require an active RPC provider, not merely a saved one.
