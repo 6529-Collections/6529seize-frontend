@@ -3030,7 +3030,8 @@
         "sidebar"
       ],
       "facts": [
-        "Desktop wave information sections live in the right sidebar in this order: About, REP, and Configuration.",
+        "Desktop wave information sections live in the right sidebar in this order: About, REP, and Configuration. Open them with the Show right sidebar icon in the conversation header.",
+        "On desktop and tablet web, Add REP or Edit REP appears to the left of the conversation header icon buttons. It is also available in the right sidebar's About section, which is the REP entry point on compact web. The action appears for connected non-author, non-proxy profiles and is absent for DMs. A small shield and number beside the desktop wave name opens Wave Score details and Learn more.",
         "Configuration is the consolidated rules and settings surface. It includes wave type, access, chat, display, schedules and other generated rules, guidelines, acceptance-required rules, admin-only shared controls, and personal display controls. Approve waves place Approve after, Hold time, Max approved drops, and Approval window directly after Schedule. Shared edits use gears, while read-only creation-time values have no edit control.",
         "For Rank and Approve waves, the desktop right sidebar adds Voters and Activity after the three base sections; Activity moves into More at the fixed panel width.",
         "In the native app, the main About view opens compact Overview, REP, and Configuration pills; Rank and Approve waves expose Voters and Activity from More.",
@@ -3604,7 +3605,7 @@
         "Quick Vote descriptions collapse to two lines in the mobile layout and four on desktop; See more appears only when text is hidden. Swipe chevrons appear only on touch screens in the mobile layout, where swiping right votes and swiping left skips. Use Vote and Skip in a narrow browser without touch input.",
         "The Memes - Main Stage is a Memes wave context, not the /the-memes collection browse or mint route.",
         "Submission availability depends on login, proxy mode, participation eligibility, the submission window, and per-user submission limits.",
-        "If the submit control is hidden or shows a restriction icon or label, select or focus the restriction control to read why submission is unavailable, then recover by logging in, disabling proxy mode, waiting for the submission window, or freeing submission capacity.",
+        "Unavailable conversation-header submission actions show a lock icon on desktop, tablet, and phone. Hover, focus, or select the lock to read the full restriction reason, including opening or closing dates and submission limits. Recover by logging in, disabling proxy mode, waiting for the submission window, or freeing submission capacity. The desktop How to Submit helper keeps its label.",
         "In the Artwork step, Continue remains available before required fields are complete, except while an interactive artwork hash is being verified; selecting Continue turns every missing or invalid field and the missing media control red, shows inline recovery messages, and focuses the first missing item in form order.",
         "On larger viewports the artwork remains visible while the metadata form scrolls independently. On smaller viewports the complete form scrolls as one page, focused text fields move into view when the software keyboard opens, and the native modal shrinks to keep its action bar above the keyboard.",
         "On The Memes Main Stage, the desktop How to Submit control and native app lock both open Unlock submissions with the current 50,000 MemesNominee REP requirement, live progress, and a Get nominated action.",
@@ -6175,6 +6176,7 @@
       "facts": [
         "Wave header controls are documented in the Wave Header area.",
         "Available controls depend on permissions and the current wave state.",
+        "Unavailable submission actions use a lock icon at every width. Hover, focus, or select the lock for the full restriction reason; the Memes How to Submit helper keeps its desktop label and opens nomination guidance.",
         "Wave picture edit and link sharing are separate header features."
       ],
       "canonical_path": "/waves",
@@ -6238,8 +6240,8 @@
       "aliases": ["copy wave link", "share wave", "wave link", "copy link"],
       "keywords": ["waves", "share", "copy", "link", "header"],
       "facts": [
-        "Wave link share and copy behavior is documented as a wave header feature.",
-        "Use the wave header share/copy affordance when users ask how to send someone a wave link.",
+        "On desktop and tablet web (768px and above), use the Show right sidebar icon, then About, to share or copy a non-DM wave link.",
+        "The labeled Share wave or Copy wave link button is beside Add/Edit REP in About and is available to signed-out viewers and proxy sessions too. Compact web keeps sharing in More wave actions.",
         "In the native app, an active wave keeps sharing in the More menu with an arrow-style share icon instead of showing a second page-share button.",
         "General route sharing is covered by the shared share modal record."
       ],

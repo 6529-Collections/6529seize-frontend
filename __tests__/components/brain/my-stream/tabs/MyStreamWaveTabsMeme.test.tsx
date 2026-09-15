@@ -167,7 +167,7 @@ describe("MyStreamWaveTabsMeme", () => {
     expect(screen.getByTestId("modal")).toHaveTextContent("open");
   });
 
-  it("renders share-mode action for non-DM meme waves", () => {
+  it("keeps sharing out of the desktop Main Stage header", () => {
     useContentTab.mockReturnValue({
       activeContentTab: "CHAT",
       setActiveContentTab: jest.fn(),
@@ -179,10 +179,10 @@ describe("MyStreamWaveTabsMeme", () => {
       </SidebarProvider>
     );
 
-    expect(screen.getByRole("button", { name: "Share wave" })).toHaveAttribute(
-      "data-wave-link-action-mode",
-      "share"
-    );
+    expect(screen.queryByRole("button", { name: "Share wave" })).toBeNull();
+    expect(
+      screen.getByRole("button", { name: "Show right sidebar" }).textContent
+    ).toBe("");
   });
 
   it("renders description subtitle and trigger for non-DM meme waves", () => {
@@ -224,7 +224,8 @@ describe("MyStreamWaveTabsMeme", () => {
     expect(screen.getByRole("button", { name: "submit" })).toBeInTheDocument();
   });
 
-  it("renders copy-mode action when native share is unavailable", () => {
+  it("keeps copy available from the compact overflow menu", () => {
+    mockUseBreakpoint.mockReturnValue("S");
     setNavigatorShare(undefined);
     useContentTab.mockReturnValue({
       activeContentTab: "CHAT",
@@ -237,9 +238,7 @@ describe("MyStreamWaveTabsMeme", () => {
       </SidebarProvider>
     );
 
-    expect(
-      screen.getByRole("button", { name: "Copy wave link" })
-    ).toHaveAttribute("data-wave-link-action-mode", "copy");
+    fireEvent.click(screen.getByRole("button", { name: "More wave actions" }));
 
     fireEvent.click(screen.getByRole("button", { name: "Copy wave link" }));
 
@@ -285,7 +284,7 @@ describe("MyStreamWaveTabsMeme", () => {
     );
 
     expect(
-      screen.getByRole("button", { name: "Share wave" })
+      screen.getByRole("button", { name: "Show right sidebar" })
     ).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Search messages in this wave" })
