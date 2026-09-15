@@ -70,6 +70,28 @@ describe("buildWavesMetadata", () => {
       card: "summary_large_image",
       site: "@6529Collections",
     });
+    expect(metadata.alternates?.canonical?.toString()).toBe(
+      "https://6529.io/waves/wave-1"
+    );
+    expect(metadata.robots).toEqual({ index: true, follow: true });
+  });
+
+  it("canonicalizes the index and noindexes non-public waves", async () => {
+    const indexMetadata = await buildWavesMetadata(null);
+    expect(indexMetadata.alternates?.canonical?.toString()).toBe(
+      "https://6529.io/waves"
+    );
+
+    (commonApiFetch as jest.Mock).mockResolvedValue({
+      id: "private-wave",
+      name: "Private Wave",
+      author: { handle: "owner", primary_address: "0x1234" },
+      visibility: { scope: { group: { id: "private-group" } } },
+      chat: { scope: { group: null } },
+    });
+
+    const privateMetadata = await buildWavesMetadata("private-wave");
+    expect(privateMetadata.robots).toEqual({ index: false, follow: true });
   });
 
   it("uses chat drop metadata when a serial number is shared", async () => {

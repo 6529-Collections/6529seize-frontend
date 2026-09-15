@@ -70,6 +70,21 @@ jobs:
           corepack prepare "$(node -p 'require("./package.json").packageManager')" --activate
           pnpm --version
 
+      # This contract reads the audit YAML, so Jest's import graph cannot select it.
+      # It uses Node built-ins and synthetic responses; no provider token is needed.
+      - name: Verify Sentry audit offline contract
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -euo pipefail
+          changed_audit_inputs="$(git diff --name-only --no-renames "${BASE_SHA}...HEAD" -- \
+            .github/workflows/monitoring-provider-audit.yml \
+            ops/scripts/monitoring-provider-audit.test.cjs \
+            .github/workflows/app-pr-ci.yml)"
+          if [[ -n "$changed_audit_inputs" ]]; then
+            ./bin/6529 exec node --test ops/scripts/monitoring-provider-audit.test.cjs
+          fi
+
       - name: Create CI plan and security reports
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
@@ -1322,10 +1337,12 @@ jobs:
           }
           const full = collect(`${outputDir}/museum-tests-full.json`);
           const gate = collect(`${outputDir}/museum-tests-gate.json`);
-          const remaining = collect(`${outputDir}/museum-tests-remaining.json`);
+          const selected = collect(`${outputDir}/museum-tests-remaining.json`);
+          const rights = selected.filter((entry) => entry.file === "museum/rights-readonly.spec.ts");
+          const remaining = selected.filter((entry) => entry.file !== "museum/rights-readonly.spec.ts");
           const fullKeys = new Set(full.map((entry) => entry.key));
           const assigned = new Set();
-          for (const entries of [gate, remaining]) {
+          for (const entries of [gate, rights, remaining]) {
             for (const entry of entries) {
               if (!fullKeys.has(entry.key) || assigned.has(entry.key)) {
                 throw new Error(`Museum execution overlap or unexpected test: ${entry.key}`);
@@ -1359,7 +1376,7 @@ jobs:
             `${JSON.stringify(
               {
                 catalog_commit: catalogCommit,
-                contract: "museum-playwright-isolated-project-v3",
+                contract: "museum-playwright-isolated-project-v4",
                 full_test_count: full.length,
                 gate: {
                   id: "network-ia",
@@ -1368,6 +1385,13 @@ jobs:
                 },
                 project,
                 selection_digest: selection.selection_digest,
+                rights: {
+                  test_count: rights.length,
+                  test_keys: rights.map((entry) => entry.key).sort(),
+                  workers: 1,
+                  isolated_server: true,
+                  trace: "retain-on-failure",
+                },
                 remaining: {
                   test_count: remaining.length,
                   test_keys: remaining.map((entry) => entry.key).sort(),
@@ -1387,27 +1411,41 @@ jobs:
           NEXT_DEV_DIST_DIR=".next-playwright-${MUSEUM_PROJECT}" \
             BASE_ENDPOINT="$museum_base_url" \
             PORT="$museum_port" \
-            ./bin/6529 run dev > "$museum_server_log" 2>&1 &
+            setsid bash scripts/museum-ci-dev.sh > "$museum_server_log" 2>&1 &
           museum_server_pid="$!"
           cleanup_museum_server() {
-            if kill -0 "$museum_server_pid" 2>/dev/null; then
-              kill "$museum_server_pid" 2>/dev/null || true
+            if [ -n "$museum_server_pid" ]; then
+              local cleanup_exit=0
+              trap 'cleanup_exit=143' TERM
+              trap 'cleanup_exit=130' INT
+              kill -TERM -- "-$museum_server_pid" 2>/dev/null || true
+              for attempt in {1..5}; do
+                if ! kill -0 -- "-$museum_server_pid" 2>/dev/null; then break; fi
+                sleep 1 || true
+              done
+              kill -KILL -- "-$museum_server_pid" 2>/dev/null || true
               wait "$museum_server_pid" 2>/dev/null || true
+              museum_server_pid=""
+              trap 'exit 143' TERM
+              trap 'exit 130' INT
+              if [ "$cleanup_exit" -ne 0 ]; then exit "$cleanup_exit"; fi
             fi
           }
           trap cleanup_museum_server EXIT
+          trap 'exit 143' TERM
+          trap 'exit 130' INT
           museum_server_ready=false
           for attempt in $(seq 1 120); do
-            if curl --fail --silent --show-error \
-              "$museum_base_url/museum/network/about" >/dev/null
-            then
-              museum_server_ready=true
-              break
-            fi
             if ! kill -0 "$museum_server_pid" 2>/dev/null; then
               cat "$museum_server_log"
               echo "Museum server exited before readiness for $MUSEUM_PROJECT." >&2
               exit 1
+            fi
+            if curl --fail --silent --show-error --connect-timeout 2 --max-time 5 \
+              "$museum_base_url/museum/network/about" >/dev/null
+            then
+              museum_server_ready=true
+              break
             fi
             sleep 1
           done
@@ -1447,22 +1485,13 @@ jobs:
             exit "$museum_gate_exit"
           fi
 
-          museum_remaining_log="test-results/app-pr-ci/museum-remaining.log"
+          # Release the complete gate server tree before starting a fresh rights
+          # server. Rights and the other packs share the original 20-minute cap.
+          cleanup_museum_server
+          museum_remaining_log="test-results/app-pr-ci/museum-coverage.log"
           set +e
-          PLAYWRIGHT_SKIP_WEB_SERVER=1 \
-            BASE_ENDPOINT="$museum_base_url" \
-            PLAYWRIGHT_BASE_URL="$museum_base_url" \
-            PLAYWRIGHT_OUTPUT_DIR="test-results/playwright/museum-remaining" \
-            PLAYWRIGHT_HTML_REPORT_DIR="playwright-report/museum-remaining" \
-            timeout --signal=TERM --kill-after=30s 20m \
-            ./bin/6529 exec playwright test \
-              "${selected_specs[@]}" \
-              --project="$MUSEUM_PROJECT" \
-              --workers=1 \
-              --retries=0 \
-              --max-failures=1 \
-              2>&1 \
-            | sed -u "s/^/[museum $MUSEUM_PROJECT remaining] /" \
+          timeout --signal=TERM --kill-after=30s 20m \
+            bash scripts/museum-ci-remaining.sh "${selected_specs[@]}" 2>&1 \
             | tee "$museum_remaining_log"
           museum_remaining_exit="${PIPESTATUS[0]}"
           set -e
