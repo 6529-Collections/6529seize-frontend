@@ -59,18 +59,10 @@ export async function dismissNextDevTools(page: Page) {
 }
 
 export async function hideNextDevTools(page: Page) {
-  const openButton = page.getByRole("button", {
-    name: "Open Next.js Dev Tools",
-    exact: true,
+  // The Dev Tools Hide action sends a POST blocked by read-only test runs.
+  await page.addStyleTag({
+    content: "nextjs-portal { display: none !important; }",
   });
-  if (!(await openButton.isVisible())) return;
-
-  await openButton.click();
-  await page
-    .getByRole("menu", { name: "Next.js Dev Tools Items" })
-    .getByText("Preferences", { exact: true })
-    .click();
-  await page.getByRole("button", { name: "Hide", exact: true }).click();
 }
 
 export function useLocalSandboxMutationGuard(
