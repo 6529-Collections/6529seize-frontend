@@ -313,6 +313,11 @@ function validateAnswerMetadata(record, routePatterns) {
 
 function validateRecord(record, ids, routePatterns) {
   requireString(record.id, "id", "record");
+  if (JSON.stringify(record).toLowerCase().includes("open-mobile")) {
+    fail(
+      `${record.id}: mobile handoff routes must not appear in help knowledge`
+    );
+  }
   if (ids.has(record.id)) {
     fail(`${record.id}: duplicate record id`);
   }

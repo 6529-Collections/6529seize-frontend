@@ -1080,7 +1080,7 @@
         "Use this page to find official app downloads; the footer does not link directly to a platform download."
       ],
       "canonical_path": "/about/6529-apps",
-      "related_paths": ["/about", "/open-mobile"],
+      "related_paths": ["/about"],
       "tags": ["about", "apps", "navigation", "mobile", "desktop"],
       "source_refs": [
         "app/about/6529-apps/page.tsx",
@@ -4919,26 +4919,6 @@
       "source_refs": ["ops/docs/navigation/feature-mobile-pull-to-refresh.md"]
     },
     {
-      "id": "navigation.mobile-app-landing",
-      "kind": "route",
-      "title": "Open mobile app landing",
-      "aliases": ["open mobile", "mobile app", "open app", "app landing"],
-      "keywords": ["mobile", "app", "open", "landing", "install"],
-      "facts": [
-        "The open-mobile route handles mobile app handoff and landing behavior.",
-        "Use /open-mobile when users ask how to open the 6529 app from the web.",
-        "A valid internal path is used for the app handoff and Back to 6529.io, including query and fragment. A missing or invalid path skips app handoff and Back to 6529.io returns home.",
-        "Mobile navigation and push notification behavior are documented separately."
-      ],
-      "canonical_path": "/open-mobile",
-      "related_paths": ["/notifications"],
-      "tags": ["navigation", "mobile"],
-      "source_refs": [
-        "app/open-mobile/page.tsx",
-        "ops/docs/navigation/feature-mobile-app-landing.md"
-      ]
-    },
-    {
       "id": "navigation.share-modal",
       "kind": "ui_affordance",
       "title": "Share modal",
@@ -5242,7 +5222,7 @@
         "Use the notifications feed when a user wants to inspect in-app notification history."
       ],
       "canonical_path": "/notifications",
-      "related_paths": ["/open-mobile"],
+      "related_paths": ["/notifications"],
       "tags": ["notifications", "mobile"],
       "source_refs": [
         "ops/docs/notifications/feature-mobile-push-notifications.md",
@@ -8457,6 +8437,55 @@
           "url": "https://6529.io/about/6529-apps"
         }
       ]
+    },
+    {
+      "id": "desktop.after-installation",
+      "kind": "workflow",
+      "title": "Start your node after installing 6529 Desktop",
+      "aliases": [
+        "installed the desktop app now what",
+        "installed 6529 desktop",
+        "installed Core what next",
+        "desktop app first steps"
+      ],
+      "keywords": [
+        "desktop",
+        "core",
+        "installed",
+        "opened",
+        "first",
+        "steps",
+        "next",
+        "setup"
+      ],
+      "facts": [
+        "Open the dedicated 6529 Desktop sidebar menu (monitor icon). Its entries are Wallets, ETH Transactions, TDH Calculation, My IPFS when available, and About.",
+        "First open 6529 Desktop > ETH Transactions > RPC Providers > Providers List. Choose Set Active on a provider, or Add RPC Provider, enter an Ethereum mainnet RPC URL, Test it, give it a Provider Name, Add, then Set Active. Saving a provider alone does not enable it.",
+        "With an active RPC provider and the app running, Transactions and NFTDelegation sync automatically, and NFTs discovers and refreshes local NFT data. Initial history sync may take time; inspect worker progress and Logs instead of repeatedly resetting.",
+        "Then open 6529 Desktop > TDH Calculation. TDH runs daily at 00:15 UTC; after prerequisite workers catch up you can use the TDH worker Advanced Options > Recalculate TDH Now. Compare Your Node and 6529.io at the same Last Block.",
+        "Wallets lets you create or import a 6529 Desktop wallet for signing, but importing a wallet or seed phrase is not required to run indexing and TDH. My IPFS opens the bundled node WebUI; About shows version, ports, updates, and App Logs.",
+        "The bot can explain these controls but cannot inspect or operate your local node. Never send it wallet passwords, recovery phrases, private keys, or RPC URLs containing credentials.",
+        "After installation, start with the RPC provider. Account pairing and wallet import are optional and are not prerequisites for indexing or TDH."
+      ],
+      "canonical_path": "/about/6529-apps",
+      "link_label": "6529 Apps",
+      "suppress_source_links": true,
+      "related_paths": [
+        "/about/6529-apps"
+      ],
+      "tags": [
+        "desktop-core",
+        "desktop-dialogue"
+      ],
+      "source_refs": [
+        "ops/docs/desktop/flow-getting-started.md",
+        "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/hooks/useSidebarSections.ts",
+        "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/scheduled-tasks/scheduler.ts",
+        "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/eth-scanner/Workers.tsx",
+        "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/eth-scanner/RpcProviders.tsx"
+      ],
+      "brief_answer": "Open **6529 Desktop > ETH Transactions > RPC Providers > Providers List** and choose **Set Active** on a provider. If you need to add one, use **Add RPC Provider**, enter an Ethereum mainnet RPC URL, **Test**, name it, **Add**, then **Set Active**. Keep the app running while its workers sync; TDH runs automatically on its daily schedule once prerequisites are ready. You do not need to connect an account or import a wallet to run your node.",
+      "answer_links": []
     },
     {
       "id": "desktop.rpc-providers",
