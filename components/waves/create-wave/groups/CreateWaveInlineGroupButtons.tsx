@@ -120,10 +120,10 @@ export function DraftChipButton({
 
   if (quiet) {
     if (quietStyle === "segment") {
-      sizeClasses = "tw-min-h-11 tw-px-3 tw-py-2 tw-text-xs tw-font-medium";
+      sizeClasses = "tw-min-h-11 tw-px-3 tw-py-0 tw-text-xs tw-font-medium";
       stateClasses = active
-        ? "tw-border-transparent tw-bg-iron-700 tw-text-iron-50"
-        : "tw-border-transparent tw-bg-transparent tw-text-iron-400 desktop-hover:hover:tw-text-iron-100";
+        ? "tw-bg-transparent tw-text-iron-50 before:tw-bg-iron-700"
+        : "tw-bg-transparent tw-text-iron-400 desktop-hover:hover:before:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-100";
     } else {
       sizeClasses = "tw-min-h-11 tw-px-2 tw-py-2 tw-text-[13px] tw-font-medium";
       const tabHoverClasses =
@@ -142,7 +142,7 @@ export function DraftChipButton({
   if (quiet) {
     shapeClasses =
       quietStyle === "segment"
-        ? "tw-rounded-md tw-border"
+        ? "tw-relative tw-isolate tw-rounded-md tw-border-0 before:tw-pointer-events-none before:tw-absolute before:-tw-z-10 before:tw-inset-x-0 before:tw-inset-y-1.5 before:tw-rounded-md before:tw-content-['']"
         : "tw-rounded-none tw-border-x-0 tw-border-t-0 tw-border-b-2";
   }
 

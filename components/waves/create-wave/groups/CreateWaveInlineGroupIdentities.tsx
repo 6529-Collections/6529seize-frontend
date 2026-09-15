@@ -190,7 +190,7 @@ export default function CreateWaveInlineGroupIdentities(
         aria-label={t(locale, "waves.create.groups.inlineIdentities.modeLabel")}
         className={
           quiet
-            ? "tw-inline-flex tw-w-fit tw-items-center tw-rounded-lg tw-bg-iron-900 tw-p-1 tw-ring-1 tw-ring-inset tw-ring-iron-800"
+            ? "tw-relative tw-isolate tw-inline-flex tw-min-h-11 tw-w-fit tw-items-center tw-rounded-lg tw-bg-transparent tw-p-0 before:tw-pointer-events-none before:tw-absolute before:-tw-z-10 before:tw-inset-x-0 before:tw-inset-y-1 before:tw-rounded-lg before:tw-bg-iron-900 before:tw-ring-1 before:tw-ring-inset before:tw-ring-iron-800 before:tw-content-['']"
             : "tw-flex tw-flex-wrap tw-gap-1.5"
         }
       >
