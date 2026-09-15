@@ -136,6 +136,7 @@ export type CollectTradeStage =
   | "signature"
   | "publishing"
   | "submitted"
+  | "included"
   | "awaiting_signatures"
   | "reconciling"
   | "confirmed"
@@ -175,6 +176,7 @@ export interface CollectPurchaseReviewView {
 }
 
 export interface CollectTradeReview {
+  readonly operation?: ApiMarketOperation;
   readonly id: string;
   readonly revision: string;
   readonly action: CollectTradeAction;

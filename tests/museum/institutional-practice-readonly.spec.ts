@@ -13,6 +13,7 @@ import {
   attachPageDiagnostics,
 } from "../support/pageAssertions";
 import { gotoDocumentWithTransientRetry } from "../support/routeReadiness";
+import { installLocalMuseumAppKitConfig } from "../support/localMuseumAppKitConfig";
 
 const STUDY_PATH = "/museum/network/research/institutional-practice";
 const SOURCE_REPOSITORY = "6529-Collections/6529networkmuseum";
@@ -304,7 +305,8 @@ async function expectStudyRoute(
 test.describe("Museum institutional-practice publication @surface @large @readonly", () => {
   test.setTimeout(120_000);
 
-  test.beforeEach(async ({ page }, testInfo) => {
+  test.beforeEach(async ({ page, baseURL }, testInfo) => {
+    await installLocalMuseumAppKitConfig(page, baseURL);
     if (testInfo.project.name === MOBILE_PROJECT) {
       await page.setViewportSize(MOBILE_VIEWPORT);
       expect(page.viewportSize()).toEqual(MOBILE_VIEWPORT);

@@ -27,6 +27,7 @@ import { useResubmissionDelete } from "./hooks/useResubmissionDelete";
 import type { SubmissionPhase } from "./ui/SubmissionProgress";
 import { buildPreviewDrop } from "./utils/buildPreviewDrop";
 import { buildMemesSubmissionDraftFromDrop } from "./utils/submissionDraft";
+import { createProposalCardThumbnail } from "@/lib/proposal-card/thumbnail";
 
 interface MemesArtSubmissionContainerProps {
   readonly onClose: () => void;
@@ -78,6 +79,17 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
     ? t(locale, "memes.submission.action.submitNewVersion")
     : t(locale, "memes.submission.action.submitArtwork");
   const [isPreviewMode, setIsPreviewMode] = useState(false);
+  const [isPreparingPreview, setIsPreparingPreview] = useState(false);
+  const previewThumbnailUrl = useRef<string | null>(null);
+  const previewGeneration = useRef(0);
+  useEffect(
+    () => () => {
+      previewGeneration.current += 1;
+      if (previewThumbnailUrl.current)
+        URL.revokeObjectURL(previewThumbnailUrl.current);
+    },
+    [wave.id, wave.participation.terms]
+  );
   const [previewDrop, setPreviewDrop] = useState<ExtendedDrop | null>(null);
   const documentationRef = useRef<MemesSubmissionDocumentationHandle>(null);
   const documentationWallet = (
@@ -132,6 +144,12 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
   }, [isResubmission, hasDocumentation, submissionPhase, onClose]);
 
   const resetPreviewState = useCallback(() => {
+    previewGeneration.current += 1;
+    if (previewThumbnailUrl.current) {
+      URL.revokeObjectURL(previewThumbnailUrl.current);
+      previewThumbnailUrl.current = null;
+    }
+    setIsPreparingPreview(false);
     setIsPreviewMode(false);
     setPreviewDrop(null);
   }, []);
@@ -168,28 +186,71 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
     console.warn(`Submission phase changed to: ${phase}`);
   }, []);
 
-  const handleOpenPreview = useCallback(() => {
+  const handleOpenPreview = useCallback(async () => {
+    const generation = ++previewGeneration.current;
     const { imageUrl, traits, operationalData, isAdditionalActionPromised } =
       form.getSubmissionData();
     const media = form.getMediaSelection();
 
-    setPreviewDrop(
-      buildPreviewDrop({
-        wave,
-        traits,
-        operationalData,
-        isAdditionalActionPromised,
-        mediaSelection: media,
-        uploadArtworkUrl: imageUrl,
-        connectedProfile,
-      })
-    );
-    setIsPreviewMode(true);
-  }, [connectedProfile, form, wave]);
+    setIsPreparingPreview(true);
+    try {
+      let previewMedia = media;
+      if (form.proposalFrame) {
+        const mimeType =
+          media.selectedFile?.type ??
+          media.existingMedia?.mimeType ??
+          media.externalMimeType;
+        const source =
+          operationalData.additional_media.preview_image ||
+          (mimeType.startsWith("image/") ? imageUrl : "");
+        if (!source)
+          throw new Error(t(locale, "memes.proposalFrame.missingPreview"));
+        const thumbnail = await createProposalCardThumbnail(
+          source,
+          form.proposalFrame
+        );
+        if (generation !== previewGeneration.current) return;
+        if (previewThumbnailUrl.current)
+          URL.revokeObjectURL(previewThumbnailUrl.current);
+        const url = URL.createObjectURL(thumbnail);
+        previewThumbnailUrl.current = url;
+        previewMedia = {
+          ...media,
+          mediaSource: "upload",
+          selectedFile: null,
+          existingMedia: { url, mimeType: "image/png" },
+        };
+      }
+      setPreviewDrop(
+        buildPreviewDrop({
+          wave,
+          traits,
+          operationalData,
+          isAdditionalActionPromised,
+          mediaSelection: previewMedia,
+          uploadArtworkUrl: imageUrl,
+          connectedProfile,
+        })
+      );
+      setIsPreviewMode(true);
+    } catch (error) {
+      if (generation !== previewGeneration.current) return;
+      setToast({
+        type: "error",
+        message:
+          error instanceof Error
+            ? error.message
+            : t(locale, "memes.proposalFrame.previewError"),
+      });
+    } finally {
+      if (generation === previewGeneration.current)
+        setIsPreparingPreview(false);
+    }
+  }, [connectedProfile, form, wave, setToast, locale]);
 
   const handleBackToEdit = useCallback(() => {
-    setIsPreviewMode(false);
-  }, []);
+    resetPreviewState();
+  }, [resetPreviewState]);
 
   const handleBackFromAdditionalInfo = useCallback(() => {
     resetPreviewState();
@@ -230,6 +291,7 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
       operationalData,
       isAdditionalActionPromised,
       acceptedAgreement,
+      proposalFrame,
     } = form.getSubmissionData();
     if (
       acceptedAgreement?.waveId !== wave.id ||
@@ -268,6 +330,7 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
       const result = await submitArtwork(
         {
           ...(media.selectedFile ? { imageFile: media.selectedFile } : {}),
+          proposalFrame,
           ...(media.existingMedia
             ? { existingMedia: media.existingMedia }
             : {}),
@@ -302,6 +365,7 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
           url: media.externalUrl,
           mimeType: media.externalMimeType,
         },
+        proposalFrame,
         traits,
         operationalData,
         isAdditionalActionPromised,
@@ -378,7 +442,7 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
         wave={wave}
         isPreviewMode={isPreviewMode}
         previewDrop={previewDrop}
-        isSubmitting={isSubmitting}
+        isSubmitting={isSubmitting || isPreparingPreview}
         submissionPhase={submissionPhase}
         uploadProgress={uploadProgress}
         submissionError={submissionError}

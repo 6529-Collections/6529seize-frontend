@@ -3,6 +3,7 @@
 import type { ButtonVariant } from "@/components/utils/button/buttonStyles";
 import Button from "@/components/utils/button/Button";
 import MobileWrapperDialog from "./MobileWrapperDialog";
+import { Description } from "@headlessui/react";
 
 interface MobileWrapperConfirmationDialogProps {
   readonly isOpen: boolean;
@@ -41,9 +42,9 @@ export default function MobileWrapperConfirmationDialog({
       zIndexClassName={zIndexClassName}
     >
       <div className="tw-px-4 sm:tw-px-6">
-        <p className="tw-mb-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-400">
+        <Description className="tw-mb-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-400">
           {message}
-        </p>
+        </Description>
 
         <div className="tw-mt-6 tw-flex tw-flex-col tw-gap-2 sm:tw-flex-row sm:tw-justify-end sm:tw-gap-3">
           <Button

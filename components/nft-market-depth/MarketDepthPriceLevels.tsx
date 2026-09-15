@@ -29,6 +29,8 @@ export default function MarketDepthPriceLevels({
   error,
   onLoadOrders,
   onRefresh,
+  focusedOrderHash,
+  onOrderFocused,
 }: {
   readonly side: "ask" | "bid";
   readonly levels: readonly ApiMarketDepthLevel[];
@@ -40,9 +42,12 @@ export default function MarketDepthPriceLevels({
   readonly error: string | null;
   readonly onLoadOrders: () => void;
   readonly onRefresh: () => void;
+  readonly focusedOrderHash?: string | null;
+  readonly onOrderFocused?: () => void;
 }) {
   const [showAll, setShowAll] = useState(false);
   const [openPrice, setOpenPrice] = useState<string | null>(null);
+  const [openedOrderHash, setOpenedOrderHash] = useState<string | null>(null);
   const tradeActionsAvailable = useMarketDepthTradeActionsAvailable();
   const priceWidth = tradeActionsAvailable
     ? "tw-w-[64%] sm:tw-w-[40%]"
@@ -55,6 +60,24 @@ export default function MarketDepthPriceLevels({
     locale,
     side === "ask" ? "marketDepth.asks" : "marketDepth.bids"
   );
+  if (
+    focusedOrderHash &&
+    openedOrderHash !== focusedOrderHash &&
+    !isLoading &&
+    !error
+  ) {
+    const index = levels.findIndex((level) =>
+      getLevelOrders(orders, currency, side, level.unit_price).some(
+        (order) => order.order_id.toLowerCase() === focusedOrderHash
+      )
+    );
+    const level = levels[index];
+    if (level) {
+      setOpenedOrderHash(focusedOrderHash);
+      if (index >= MAX_LEVELS) setShowAll(true);
+      setOpenPrice(level.unit_price);
+    }
+  }
 
   return (
     <div className="tw-min-w-0">
@@ -112,6 +135,7 @@ export default function MarketDepthPriceLevels({
                   ? levelOrders[0]
                   : undefined;
               const toggleDetails = () => {
+                if (focusedOrderHash) onOrderFocused?.();
                 setOpenPrice(open ? null : level.unit_price);
                 if (!open) onLoadOrders();
               };
@@ -207,6 +231,8 @@ export default function MarketDepthPriceLevels({
                             enableTradeActions={
                               tradeActionsAvailable && !singleOrder
                             }
+                            focusedOrderHash={focusedOrderHash}
+                            onOrderFocused={onOrderFocused}
                           />
                         )}
                       </div>
@@ -221,7 +247,10 @@ export default function MarketDepthPriceLevels({
       {levels.length > MAX_LEVELS && (
         <button
           type="button"
-          onClick={() => setShowAll((current) => !current)}
+          onClick={() => {
+            if (focusedOrderHash) onOrderFocused?.();
+            setShowAll((current) => !current);
+          }}
           className="tw-font-inherit tw-mt-2 tw-min-h-11 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-2 tw-py-2 tw-text-meta tw-font-medium tw-text-iron-300 tw-transition hover:tw-bg-white/5 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
         >
           {showAll

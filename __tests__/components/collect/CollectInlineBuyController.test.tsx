@@ -17,6 +17,14 @@ import {
 import type CollectBatchController from "@/components/collect/CollectBatchController";
 import type CollectRecipientPicker from "@/components/collect/CollectRecipientPicker";
 import type { ComponentProps } from "react";
+import type { PendingMarketPurchase } from "@/components/collect/market-activity-store";
+
+let mockPendingPurchases: readonly PendingMarketPurchase[] = [];
+jest.mock("@/components/collect/market-activity-store", () => ({
+  ...jest.requireActual("@/components/collect/market-activity-store"),
+  usePendingMarketPurchases: () => mockPendingPurchases,
+  readPendingMarketPurchases: () => mockPendingPurchases,
+}));
 
 const payer = "0x1111111111111111111111111111111111111111";
 const seller = "0x2222222222222222222222222222222222222222";
@@ -217,6 +225,7 @@ function renderBuy(
 }
 beforeEach(() => {
   jest.clearAllMocks();
+  mockPendingPurchases = [];
   mockAuth.connectedProfile = mockProfile;
   mockAuth.isAuthenticated = true;
   mockAuth.activeProfileProxy = null;
@@ -224,6 +233,68 @@ beforeEach(() => {
   mockConnection.canSignActiveWallet = true;
   mockFetchOrders.mockResolvedValue({ orders: [order] });
   mockPrepare.mockResolvedValue(operation);
+});
+
+function pendingPurchase(): PendingMarketPurchase {
+  return {
+    profileId: mockProfile.id,
+    operationId: "pending-batch",
+    assetKey: asset.asset_key,
+    orderHash: order.identity.order_hash,
+    protocolAddress: seaport,
+    quantity: "1",
+  };
+}
+
+it("reserves a listing being bought in another checkout and points to Orders", async () => {
+  mockPendingPurchases = [pendingPurchase()];
+  renderBuy();
+  expect(
+    await screen.findByRole("button", { name: "Collect 0.1 ETH" })
+  ).toBeDisabled();
+  expect(
+    screen.getByText(
+      "A purchase from this listing is pending. Check its progress in Orders."
+    )
+  ).toBeInTheDocument();
+  expect(screen.getByRole("link", { name: "View in Orders" })).toHaveAttribute(
+    "href",
+    "/collect/orders"
+  );
+  expect(mockPrepare).not.toHaveBeenCalled();
+  expect(mockConfirm).not.toHaveBeenCalled();
+});
+
+it("still permits a different listing for the same artwork", async () => {
+  mockPendingPurchases = [
+    { ...pendingPurchase(), orderHash: `0x${"b".repeat(64)}` },
+  ];
+  renderBuy();
+  const buy = await screen.findByRole("button", { name: "Collect 0.1 ETH" });
+  await waitFor(() => expect(buy).toBeEnabled());
+  fireEvent.click(buy);
+  await waitFor(() => expect(mockPrepare).toHaveBeenCalledTimes(1));
+});
+
+it("rechecks reservations after an asynchronous listing refresh", async () => {
+  mockFetchOrders
+    .mockResolvedValueOnce({ orders: [order] })
+    .mockImplementationOnce(async () => {
+      mockPendingPurchases = [pendingPurchase()];
+      return { orders: [order] };
+    });
+  renderBuy();
+  const buy = await screen.findByRole("button", { name: "Collect 0.1 ETH" });
+  await waitFor(() => expect(buy).toBeEnabled());
+  fireEvent.click(buy);
+  await waitFor(() => expect(mockFetchOrders).toHaveBeenCalledTimes(2));
+  expect(
+    await screen.findAllByText(
+      "A purchase from this listing is pending. Check its progress in Orders."
+    )
+  ).not.toHaveLength(0);
+  expect(mockPrepare).not.toHaveBeenCalled();
+  expect(mockConfirm).not.toHaveBeenCalled();
 });
 
 it.each(["accept", "buy"] as const)(

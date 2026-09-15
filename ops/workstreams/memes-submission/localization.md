@@ -1,5 +1,21 @@
 # Memes submission localization
 
+## Proposal frame controls
+
+- Surface: `ProposalCardOption`, `ProposalCardPreview`, and the submission preview.
+- Keys: `memes.proposalFrame.*` currently use the existing `en-US` fallback in
+  `en-GB`, `fr-FR`, `es-ES`, and `de-DE`.
+- The Memes submission frontend maintainers own translations and narrow-screen
+  verification of these controls in the progressive localization workstream.
+- The published frame's English and French text is fixed artwork copy. The
+  French edge has a `lang="fr"` language annotation. Translation of the app
+  controls must preserve those artwork literals when explaining them.
+- The standalone artifact declares English and keeps its document title suffix,
+  pause labels, and explanatory accessibility text in English. These travel with
+  the fixed artwork independently of the app locale. The app preview's missing
+  artwork-title fallback is message-backed; a published frame requires the
+  submitter's nonblank artwork title.
+
 ## Wallet signing guidance
 
 - Surface: `SubmissionSigningNote`, shown in `AdditionalInfoStep` and

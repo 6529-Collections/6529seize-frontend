@@ -13,8 +13,11 @@ import { SubmissionSigningNote } from "../ui/SubmissionSigningNote";
 import type { SubmissionPhase } from "../ui/SubmissionProgress";
 import { PreviewLeaderboardGalleryCase } from "./components/PreviewLeaderboardGalleryCase";
 import { PreviewLeaderboardListCase } from "./components/PreviewLeaderboardListCase";
+import { ProposalCardPreview } from "../components/ProposalCardPreview";
+import type { ProposalCardDocumentInput } from "@/lib/proposal-card/document";
 
 interface MemesSubmissionPreviewScreenProps {
+  readonly proposalCard?: ProposalCardDocumentInput | undefined;
   readonly previewDrop: ExtendedDrop;
   readonly onBackToEdit: () => void;
   readonly onSubmit: () => void;
@@ -26,6 +29,7 @@ interface MemesSubmissionPreviewScreenProps {
 }
 
 export function MemesSubmissionPreviewScreen({
+  proposalCard,
   previewDrop,
   onBackToEdit,
   onSubmit,
@@ -57,6 +61,16 @@ export function MemesSubmissionPreviewScreen({
           </p>
         </div>
 
+        {proposalCard && (
+          <div className="tw-space-y-3">
+            <h4 className="tw-mb-0 tw-text-base tw-font-semibold tw-text-iron-100">
+              {t(locale, "memes.proposalFrame.preview")}
+            </h4>
+            <div className="tw-h-[min(65vh,600px)] tw-w-full">
+              <ProposalCardPreview {...proposalCard} />
+            </div>
+          </div>
+        )}
         <PreviewLeaderboardListCase
           drop={previewDrop}
           onDropClick={onDropClick}
