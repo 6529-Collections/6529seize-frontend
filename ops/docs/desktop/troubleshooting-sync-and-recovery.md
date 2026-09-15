@@ -42,7 +42,7 @@ For a persistent failure, share app version and OS from 6529 Desktop > About, th
 
 In 6529 Desktop go to 6529 Desktop > ETH Transactions > Transactions > Advanced Options > Reconcile. The dialog is Reconcile Transactions.
 
-Choose Reconcile from a specific block and enter the calculated starting block for the most recent 25% of indexed blocks (or the first suspect block when known). Widen to 50%, 75%, then 100% only after each completed reconciliation and recalculation still leaves a same-block mismatch. The displayed earliest block is 13360860; full history is the final range, not the default. The run ends at the local transaction checkpoint captured at start; it is not forward sync to the live chain tip.
+Choose Reconcile from a specific block and enter the calculated starting block for the most recent 25% of indexed blocks. If your TDH matched 6529.io before, a block from around that time is another starting point to try; an older log or screenshot may help you find it. You do not need to find an old block to use the calculated 25% range. Widen to 50%, 75%, then 100% only after each completed reconciliation and recalculation still leaves a same-block mismatch. The displayed earliest block is 13360860; full history is the final range, not the default. The run ends at the local transaction checkpoint captured at start; it is not forward sync to the live chain tip.
 
 Reconciliation compares Ethereum transfer logs to the local index and repairs missing, inconsistent, or orphaned records. It rebuilds ownership for affected tokens, and marks TDH for recalculation when repairs are made. It does not blindly delete all history.
 
@@ -152,8 +152,9 @@ completion, errors, and incomplete runs must not automatically widen the range.
 The bot never runs a recovery action on the user's device.
 
 After full-history reconciliation and TDH recalculation still fail, the bot offers
-Transactions > Advanced Options > Reset to Block. Use a known-good block before
-the suspected gap when available; Min Block is the full-resync fallback. Reset deletes local transactions
+Transactions > Advanced Options > Reset to Block. If your TDH matched 6529.io
+before, you can try a block from around that time—an older log or screenshot may
+help you find it. Otherwise, choose Min Block for a full resync. Reset deletes local transactions
 after the selected block, rebuilds ownership, then reimports history; it requires
 time and RPC access and does not change on-chain holdings. Let Transactions and
 NFTDelegation finish syncing before recalculating TDH. A continuing mismatch after

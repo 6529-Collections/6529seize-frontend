@@ -8776,7 +8776,7 @@
       ],
       "facts": [
         "In 6529 Desktop go to 6529 Desktop > ETH Transactions > Transactions > Advanced Options > Reconcile. The dialog is Reconcile Transactions.",
-        "Choose Reconcile from a specific block and enter the calculated starting block for the most recent 25% of indexed blocks (or the first suspect block when known). Widen to 50%, 75%, then 100% only after each completed reconciliation and recalculation still leaves a same-block mismatch. The displayed earliest block is 13360860; full history is the final range, not the default. The run ends at the local transaction checkpoint captured at start; it is not forward sync to the live chain tip.",
+        "Choose Reconcile from a specific block and enter the calculated starting block for the most recent 25% of indexed blocks. If your TDH matched 6529.io before, a block from around that time is another starting point to try; an older log or screenshot may help you find it. You do not need to find an old block to use the calculated 25% range. Widen to 50%, 75%, then 100% only after each completed reconciliation and recalculation still leaves a same-block mismatch. The displayed earliest block is 13360860; full history is the final range, not the default. The run ends at the local transaction checkpoint captured at start; it is not forward sync to the live chain tip.",
         "Reconciliation compares Ethereum transfer logs to the local index and repairs missing, inconsistent, or orphaned records. It rebuilds ownership for affected tokens, and marks TDH for recalculation when repairs are made. It does not blindly delete all history.",
         "Use an active working RPC provider and let active Transactions/TDH work finish; the action can be disabled or rejected while conflicting work runs. Full history can take significant time and RPC requests.",
         "Progress is saved. If reconciliation is interrupted, restarting the app with an active RPC provider resumes it from its saved range. Do not start a competing reset while a reconciliation is active.",
@@ -10014,7 +10014,7 @@
         "core"
       ],
       "facts": [
-        "Full-history reconciliation and TDH recalculation still leave a mismatch. The next option is a **transaction reset**: **6529 Desktop > ETH Transactions > Transactions > Advanced Options > Reset to Block**. Use a known-good block before the suspected gap if you have one; **Min Block** is the full-resync fallback. This deletes later local transaction history and rebuilds ownership before downloading it again; it needs time and RPC access. It does not change on-chain holdings. Read the confirmation, let resync finish and both Transactions and NFTDelegation catch up, then tell me they are synced."
+        "Full-history reconciliation and TDH recalculation still leave a mismatch. The next option is a **transaction reset**: **6529 Desktop > ETH Transactions > Transactions > Advanced Options > Reset to Block**. If your TDH matched 6529.io before, you can try a block from around that time—an older log or screenshot may help you find it. Otherwise, choose **Min Block** for a full resync. This deletes later local transaction history and rebuilds ownership before downloading it again; it needs time and RPC access. It does not change on-chain holdings. Read the confirmation, let resync finish and both Transactions and NFTDelegation catch up, then tell me they are synced."
       ],
       "canonical_path": "/about/6529-apps",
       "link_label": "6529 Apps",
@@ -10036,7 +10036,7 @@
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/scheduled-tasks/scheduled-worker.ts",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/index.ts"
       ],
-      "brief_answer": "Full-history reconciliation and TDH recalculation still leave a mismatch. The next option is a **transaction reset**: **6529 Desktop > ETH Transactions > Transactions > Advanced Options > Reset to Block**. Use a known-good block before the suspected gap if you have one; **Min Block** is the full-resync fallback. This deletes later local transaction history and rebuilds ownership before downloading it again; it needs time and RPC access. It does not change on-chain holdings. Read the confirmation, let resync finish and both Transactions and NFTDelegation catch up, then tell me they are synced.\n\nRange: {{percentage}}% of blocks {{minimum_block}}–{{checkpoint}}.",
+      "brief_answer": "Full-history reconciliation and TDH recalculation still leave a mismatch. The next option is a **transaction reset**: **6529 Desktop > ETH Transactions > Transactions > Advanced Options > Reset to Block**. If your TDH matched 6529.io before, you can try a block from around that time—an older log or screenshot may help you find it. Otherwise, choose **Min Block** for a full resync. This deletes later local transaction history and rebuilds ownership before downloading it again; it needs time and RPC access. It does not change on-chain holdings. Read the confirmation, let resync finish and both Transactions and NFTDelegation catch up, then tell me they are synced.\n\nRange: {{percentage}}% of blocks {{minimum_block}}–{{checkpoint}}.",
       "reconciliation_min_block": 13360860,
       "answer_links": []
     },
