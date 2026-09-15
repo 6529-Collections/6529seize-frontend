@@ -558,12 +558,27 @@ test("set planning is the default and navigation opens observed listings", async
     page.getByRole("form", { name: "Complete a season", exact: true })
   ).toBeVisible();
   await expect(season).toBeFocused();
-  const target = page.getByRole("combobox", { name: "Season", exact: true });
-  await target.fill("Season 1");
-  await target.press("ArrowDown");
-  await target.press("Enter");
-  await expect(target).toHaveValue("Season 1");
-  await expect(target).toBeFocused();
+  if (page.viewportSize()!.width < 1024) {
+    const target = page.getByRole("button", { name: /^Season / });
+    await target.click();
+    const sheet = page.getByRole("dialog", { name: "Season" });
+    await expect(sheet.getByRole("heading", { name: "Season" })).toBeVisible();
+    await expect(sheet.getByRole("searchbox")).toHaveCount(0);
+    await sheet
+      .getByRole("radio", { name: "Season 1" })
+      .locator("xpath=..")
+      .click();
+    await expect(sheet).toHaveCount(0);
+    await expect(target).toContainText("Season 1");
+    await expect(target).toBeFocused();
+  } else {
+    const target = page.getByRole("combobox", { name: "Season", exact: true });
+    await target.fill("Season 1");
+    await target.press("ArrowDown");
+    await target.press("Enter");
+    await expect(target).toHaveValue("Season 1");
+    await expect(target).toBeFocused();
+  }
   await expect(
     page.getByRole("button", { name: "Connect wallet", exact: true }).last()
   ).toBeVisible();
@@ -573,6 +588,106 @@ test("set planning is the default and navigation opens observed listings", async
     fullPage: true,
   });
   expect(mutations).toEqual([]);
+});
+
+test("short set setups gain keyboard scroll clearance", async ({ page }) => {
+  await mockCatalog(page);
+  for (const intent of ["season", "full_set"] as const) {
+    await page.goto(`/collect?collection=memes&intent=${intent}`, {
+      waitUntil: "domcontentloaded",
+    });
+    const formName =
+      intent === "season" ? "Complete a season" : "Complete a full set";
+    await expect(
+      page.getByRole("form", { name: formName, exact: true })
+    ).toBeVisible();
+    const surface = page
+      .getByRole("form", { name: formName, exact: true })
+      .locator("xpath=ancestor::div[contains(@class, 'tailwind-scope')][1]");
+    const readPadding = () =>
+      surface.evaluate((element) =>
+        Number.parseFloat(getComputedStyle(element).paddingBottom)
+      );
+    const restingPadding = await readPadding();
+    await page.evaluate(() =>
+      document.documentElement.style.setProperty(
+        "--native-keyboard-inset-bottom",
+        "320px"
+      )
+    );
+    await expect.poll(readPadding).toBeGreaterThan(restingPadding + 300);
+  }
+});
+
+test("artist choices stay scrollable and searchable on mobile and desktop", async ({
+  page,
+}, info) => {
+  await mockCatalog(page);
+  await page.route("**/api/collect/catalog", async (route) => {
+    await route.fulfill({
+      json: {
+        ...catalog,
+        artists: Array.from({ length: 30 }, (_, index) => ({
+          id: `artist-${index + 1}`,
+          name: `Catalog artist ${index + 1}`,
+          asset_keys: assets.map((asset) => asset.asset_key),
+          collaboration_asset_keys: [],
+        })),
+      },
+    });
+  });
+  await page.goto("/collect?collection=memes&intent=artist", {
+    waitUntil: "domcontentloaded",
+  });
+  if (page.viewportSize()!.width < 1024) {
+    const artist = page.getByRole("button", { name: /^Artist / });
+    await artist.click();
+    const sheet = page.getByRole("dialog", { name: "Artist" });
+    await expect(sheet.getByRole("heading", { name: "Artist" })).toBeVisible();
+    const search = sheet.getByRole("searchbox", { name: "Search artists" });
+    await expect(search).toBeVisible();
+    await expect(
+      sheet.getByRole("radio", { name: "Catalog artist 30" })
+    ).toBeVisible();
+    await page.screenshot({
+      path: info.outputPath("collect-artist-sheet.png"),
+    });
+    await search.fill("not in this catalog");
+    await expect(
+      sheet.getByText("No matches. Try another name.")
+    ).toBeVisible();
+    await search.fill("Catalog artist 20");
+    await expect(
+      sheet.getByRole("radio", { name: "Catalog artist 30" })
+    ).toHaveCount(0);
+    await sheet
+      .getByRole("radio", { name: "Catalog artist 20" })
+      .locator("xpath=..")
+      .click();
+    await expect(sheet).toHaveCount(0);
+    await expect(artist).toContainText("Catalog artist 20");
+    await expect(artist).toBeFocused();
+  } else {
+    const artist = page.getByRole("combobox", { name: "Artist", exact: true });
+    await artist.click();
+    const choices = page.getByRole("listbox");
+    await expect(choices).toBeVisible();
+    expect(
+      await choices.evaluate(
+        (element) => element.getBoundingClientRect().height
+      )
+    ).toBeLessThanOrEqual(257);
+    await choices
+      .getByRole("option", { name: "Catalog artist 30", exact: true })
+      .click();
+    await expect(artist).toHaveValue("Catalog artist 30");
+    await artist.click();
+    await artist.fill("Catalog artist 20");
+    await expect(
+      choices.getByRole("option", { name: "Catalog artist 20", exact: true })
+    ).toBeVisible();
+  }
+  await noHorizontalOverflow(page);
 });
 
 test("one collection selector stays available across set, listings and future TDH", async ({
