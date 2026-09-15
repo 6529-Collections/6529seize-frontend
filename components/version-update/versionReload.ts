@@ -62,14 +62,17 @@ function finishVersionReload() {
 
 /** Dismiss the incoming cover as a whole after its image and app shell are ready. */
 export async function finishVersionReloadWhenReady() {
-  if (
-    reloadPending ||
-    !document.documentElement.hasAttribute(VERSION_RELOAD_ATTRIBUTE)
-  )
-    return;
+  if (!canFinishVersionReload()) return;
   await prepareVersionReloadImage();
   await afterCoverPaint();
-  if (!reloadPending) finishVersionReload();
+  if (canFinishVersionReload()) finishVersionReload();
+}
+
+function canFinishVersionReload() {
+  return (
+    !reloadPending &&
+    document.documentElement.hasAttribute(VERSION_RELOAD_ATTRIBUTE)
+  );
 }
 
 /** Show feedback before navigating; the next document restores it before paint. */
