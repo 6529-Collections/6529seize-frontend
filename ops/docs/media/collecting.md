@@ -157,8 +157,7 @@ is in progress. For purchases with several NFTs or split deliveries, each
 delivery row changes only those copies. Other NFTs and destinations are retained.
 Choosing another existing destination for the same NFT combines its copies.
 The review explains that copies sent outside your profile do not count toward
-its collecting goals or TDH. After a confirmed purchase, calculate a new TDH
-projection using the updated holdings.
+its collecting goals or TDH.
 
 In a selection review, **Deliver all to** applies one destination to every item.
 Use **Change delivery for this artwork** for an exception or to inspect existing
@@ -282,6 +281,10 @@ wallet** rechecks every selected order together. A quote that aged while you rea
 is refreshed automatically. When available, the review identifies the old and new
 price, quantity, fees or maximum cost that require another decision. Changing the
 selection, quantity, payer or delivery addresses also requires another review.
+Before opening your wallet, the site simulates the complete reviewed transaction
+and checks its gas requirements against your fee caps. These checks do not sign
+or send a transaction. If they cannot finish, your selection stays available to
+retry; a successful check alone does not mean a purchase was submitted.
 Orders retains the purchase until its receipt confirms all selected deliveries.
 
 ### Make or accept an offer
@@ -503,6 +506,52 @@ Confirmed acquisitions count permanently toward the rule. Selling or moving
 those NFTs later does not cause the rule to collect replacements. The limits apply
 to this preparation workflow, not arbitrary external wallet transactions or an
 on-chain autonomous mandate.
+
+## Transaction progress and receipts
+
+After the wallet returns a transaction hash, the review becomes a read-only
+progress view. You can leave the page, close the browser or return to collecting;
+doing so does not stop a submitted Ethereum transaction. **View in Orders** opens
+that exact activity and restores its latest known progress. Waiting for wallet
+approval and an uncertain broadcast remain separate states.
+An approval transaction can also continue after you leave, but it does not
+complete the purchase or publish the listing. Return to **Orders** to finish
+the remaining wallet steps.
+
+The site distinguishes submission, inclusion in a block and verified confirmation.
+Confirmation turns the review into an artwork receipt and keeps it open until you
+leave. Purchases identify the artworks, quantities and delivery wallets. Sales show
+the proceeds and payout wallet. A published listing shows its price, quantity,
+expiry and conditional proceeds; publication does not mean it has sold.
+
+Confirmed receipts show actual payment and recorded network costs when verified
+chain evidence is available. WETH proceeds and ETH network costs stay separate.
+Missing costs are unavailable, never zero and never replaced by the earlier fee
+cap. Exact addresses, fees, contracts, order references and known transactions
+remain inspectable. A later listing fill may be confirmed without an available
+transaction link or complete historical network costs.
+
+Returning to **Lowest listings** clears confirmed purchased quantities from the
+selection and removes fulfilled exact orders. A remaining quantity or another
+valid listing for the same artwork can still be offered. Pending purchases stay
+reserved across checkout entry points; **View in Orders** opens progress instead
+of starting another purchase from the same pending listing. There is no persistent
+Collected badge on the browsing grid. Collection,
+mode and loaded browsing results remain in place.
+
+After confirmation, Collect retains your goal and TDH inputs. An already-built
+goal waits for indexed holdings to include the purchase before rebuilding with
+the same goal, budget and destination. If indexing is still catching up after the
+automatic checks, collection progress remains pending; you can leave and build
+again later. TDH rechecks the active daily target or budget, or the last submitted
+future-target request, keeping its timeframe and destination. TDH results use the
+returned indexed data, which can still lag confirmation. Purchased copies are
+not added a second time on top of holdings, and gifts outside your profile add
+no holdings or TDH to it.
+
+Orders checks live listings for later partial fills, sales, cancellation and
+expiry. A brief in-app status links to ongoing activity, while receipts remain
+available in Orders after navigation or reload.
 
 ## Edge Cases
 

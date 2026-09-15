@@ -5,6 +5,12 @@ import type {
   DraftSnapshot,
   DocumentationDraftController,
 } from "@/lib/artwork-documentation/draft-controller";
+import {
+  MODULE_IDS,
+  type DocumentationSection,
+} from "@/lib/artwork-documentation/registry";
+import { documentationFieldSection } from "@/lib/artwork-documentation/catalogue";
+import { validDocumentationOperation } from "@/lib/artwork-documentation/validation";
 import { readAnswer } from "@/lib/artwork-documentation/answers";
 import { documentationErrorMessageKey } from "@/lib/artwork-documentation/errors";
 import { documentationFieldLabel } from "@/i18n/messages/artwork-documentation-fields";
@@ -19,15 +25,26 @@ import {
 export default function DocumentationSaveStatus({
   snapshot,
   controller,
+  onNavigateSection,
+  onNavigateField,
 }: {
   readonly snapshot: DraftSnapshot;
+  readonly onNavigateField?:
+    | ((moduleId: string, fieldId: string) => void)
+    | undefined;
   readonly controller: DocumentationDraftController;
+  readonly onNavigateSection?:
+    | ((section: DocumentationSection) => void)
+    | undefined;
 }) {
   const { msg } = useDocumentationMessages();
   const { requestAuth } = useAuth();
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState(false);
   const explanation = documentationErrorMessageKey(snapshot.errorCode);
+  const blocked = ["offline", "invalid", "auth_expired", "conflict"].includes(
+    snapshot.state
+  );
   const recover = async (mine: boolean) => {
     setError(false);
     try {
@@ -64,7 +81,11 @@ export default function DocumentationSaveStatus({
         aria-live="polite"
         className="tw-m-0 tw-text-xs tw-leading-6 tw-text-iron-400"
       >
-        {msg(`save.${snapshot.state}`)}
+        {msg(
+          ["invalid", "offline"].includes(snapshot.state) && !snapshot.dirty
+            ? "save.actionUnverified"
+            : `save.${snapshot.state}`
+        )}
       </p>
       {explanation && snapshot.state === "invalid" && (
         <p
@@ -73,6 +94,66 @@ export default function DocumentationSaveStatus({
         >
           {msg(explanation)}
         </p>
+      )}
+      {blocked && snapshot.dirty && (
+        <div className="tw-space-y-2">
+          <p className="tw-m-0 tw-text-sm tw-leading-7 tw-text-iron-300">
+            {msg("save.pendingFields")}
+          </p>
+          <ul className="tw-m-0 tw-list-none tw-p-0 tw-text-sm tw-text-iron-300">
+            {snapshot.edits.map((edit) => {
+              const fieldModule = MODULE_IDS.find((id) => id === edit.moduleId);
+              const label = documentationFieldLabel(edit.operation.field);
+              const invalid = !validDocumentationOperation(
+                snapshot.context,
+                edit.moduleId,
+                edit.operation
+              );
+              let guidance = "save.answerGuidance";
+              if (edit.moduleId === "rights") {
+                if (edit.operation.field === "intended_license")
+                  guidance = "save.licenseGuidance";
+                else if (
+                  ["rights_basis", "third_party_material"].includes(
+                    edit.operation.field
+                  )
+                )
+                  guidance = "save.rightsGuidance";
+              }
+              return (
+                <li key={`${edit.moduleId}.${edit.operation.field}`}>
+                  {onNavigateSection && fieldModule ? (
+                    <button
+                      type="button"
+                      className="tw-min-h-11 tw-border-0 tw-bg-transparent tw-py-2 tw-text-left tw-text-primary-300 tw-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+                      onClick={() =>
+                        onNavigateField
+                          ? onNavigateField(edit.moduleId, edit.operation.field)
+                          : onNavigateSection(
+                              documentationFieldSection(
+                                snapshot.context.profile,
+                                fieldModule,
+                                edit.operation.field
+                              )
+                            )
+                      }
+                    >
+                      {label}
+                    </button>
+                  ) : (
+                    label
+                  )}
+                  {invalid && (
+                    <p className="tw-mb-3 tw-mt-0 tw-max-w-prose tw-text-sm tw-leading-6 tw-text-amber-200">
+                      {msg(guidance)}
+                    </p>
+                  )}
+                </li>
+              );
+            })}
+            {snapshot.contentEdits.length > 0 && <li>{msg("fileDetails")}</li>}
+          </ul>
+        </div>
       )}
       {snapshot.state === "conflict" && (
         <DocumentationNotice>

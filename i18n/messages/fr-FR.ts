@@ -697,6 +697,11 @@ export const FR_FR_MESSAGES = {
   "waves.create.review.outcome": "Résultat {number}",
   "waves.create.dialog.subwaveTitle": "Créer une sous-wave",
   "waves.create.dialog.waveTitle": "Créer une wave",
+  "waves.create.dialog.discardTitle": "Abandonner vos modifications ?",
+  "waves.create.dialog.discardMessage":
+    "Les modifications non enregistrées seront perdues. Les brouillons déjà enregistrés seront conservés.",
+  "waves.create.dialog.discardConfirm": "Abandonner les modifications",
+  "waves.create.dialog.keepEditing": "Continuer à modifier",
   "waves.create.actions.cancel": "Annuler",
   "waves.create.actions.backToCriteria": "Retour aux critères",
   "waves.create.actions.complete": "Terminer",

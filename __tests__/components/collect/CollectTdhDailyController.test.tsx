@@ -24,6 +24,82 @@ const tick = async () => {
 beforeEach(() => jest.useFakeTimers());
 afterEach(() => jest.useRealTimers());
 
+it("rechecks the same daily budget on receipt revision without reviving a captured action", async () => {
+  const callbacks: Array<() => void> = [];
+  const action = jest.fn();
+  const calculate = jest.fn(async () => result("current"));
+  const props = {
+    contextKey: "one",
+    calculate,
+    onConnect: jest.fn(),
+    renderResult: (
+      _payload: string,
+      guard: (action: () => void) => () => void
+    ) => {
+      callbacks.push(guard(action));
+      return <span>Estimate</span>;
+    },
+  };
+  const { rerender } = render(
+    <CollectTdhDailyController {...props} revision={0} />
+  );
+  fireEvent.change(budget(), { target: { value: "0.0100" } });
+  await tick();
+  const previous = callbacks.at(-1)!;
+  rerender(<CollectTdhDailyController {...props} revision={1} />);
+  expect(budget()).toHaveValue("0.0100");
+  expect(screen.queryByText("Estimate")).not.toBeInTheDocument();
+  previous();
+  expect(action).not.toHaveBeenCalled();
+  await tick();
+  expect(calculate).toHaveBeenCalledTimes(2);
+  expect(calculate).toHaveBeenLastCalledWith(
+    { mode: "budget", value: "0.0100" },
+    expect.any(AbortSignal)
+  );
+  previous();
+  expect(action).not.toHaveBeenCalled();
+  callbacks.at(-1)!();
+  expect(action).toHaveBeenCalledTimes(1);
+});
+
+it("aborts an old receipt estimate and ignores its late response without clearing input", async () => {
+  let finish!: (value: CollectTdhDailyEstimate<string>) => void;
+  const calculate = jest
+    .fn<
+      Promise<CollectTdhDailyEstimate<string>>,
+      [CollectTdhDailyInput, AbortSignal]
+    >()
+    .mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          finish = resolve;
+        })
+    )
+    .mockResolvedValue(result("fresh"));
+  const props = {
+    contextKey: "one",
+    calculate,
+    onConnect: jest.fn(),
+    renderResult,
+  };
+  const { rerender } = render(
+    <CollectTdhDailyController {...props} revision={0} />
+  );
+  fireEvent.change(target(), { target: { value: "150" } });
+  await tick();
+  const signal = calculate.mock.calls[0]![1];
+  rerender(<CollectTdhDailyController {...props} revision={1} />);
+  expect(signal.aborted).toBe(true);
+  await tick();
+  await act(async () => finish(result("old")));
+  expect(target()).toHaveValue("150");
+  expect(screen.getByRole("button", { name: "Review fresh" })).toBeVisible();
+  expect(
+    screen.queryByRole("button", { name: "Review old" })
+  ).not.toBeInTheDocument();
+});
+
 it("invalidates a captured result action immediately on edit and unmount", async () => {
   const guards: Array<() => void> = [];
   const action = jest.fn();

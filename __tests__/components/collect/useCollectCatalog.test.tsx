@@ -3,10 +3,19 @@ import type { CollectIntent } from "@/components/collect/collect.types";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { act, renderHook, waitFor } from "@testing-library/react";
 import type { ReactNode } from "react";
+import type { ConfirmedMarketPurchase } from "@/components/collect/market-activity-store";
+import { targetPlan } from "./collect-tdh-target.fixture";
 
 const mockFetchListings = jest.fn();
 const mockFetchAssets = jest.fn();
 const mockFetchTdhListings = jest.fn();
+let mockPurchases: readonly ConfirmedMarketPurchase[] = [];
+jest.mock("@/components/auth/Auth", () => ({
+  useAuth: () => ({ connectedProfile: null }),
+}));
+jest.mock("@/components/collect/market-activity-store", () => ({
+  useConfirmedMarketPurchases: () => mockPurchases,
+}));
 
 jest.mock("@/components/react-query-wrapper/ReactQueryWrapper", () => ({
   QueryKey: { MARKET_LISTINGS: "market-listings" },
@@ -20,7 +29,10 @@ jest.mock("@/services/api/collect-api", () => ({
     mockFetchTdhListings(...args),
 }));
 
-const entry = { asset: { asset_key: "asset-one" } };
+const entry = {
+  asset: { asset_key: "asset-one" },
+  order: targetPlan().items[0]!.order,
+};
 function setupClient() {
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false, gcTime: 0 } },
@@ -33,12 +45,65 @@ function setupClient() {
 
 beforeEach(() => {
   jest.clearAllMocks();
+  mockPurchases = [];
   mockFetchListings.mockResolvedValue({ entries: [], next: null });
   mockFetchTdhListings.mockResolvedValue({
     entries: [],
     next: null,
     snapshot_id: "snapshot",
   });
+});
+
+it("removes a consumed exact order while preserving the remaining seller, loaded pages and cursor", async () => {
+  const item = targetPlan().items[0]!;
+  const purchased = { asset: item.asset, order: item.order };
+  const replacement = {
+    asset: item.asset,
+    order: {
+      ...item.order,
+      identity: { ...item.order.identity, order_hash: `0x${"b".repeat(64)}` },
+    },
+  };
+  const later = {
+    asset: item.asset,
+    order: {
+      ...item.order,
+      identity: { ...item.order.identity, order_hash: `0x${"c".repeat(64)}` },
+    },
+  };
+  mockFetchListings
+    .mockResolvedValueOnce({
+      entries: [purchased, replacement],
+      next: "second-page",
+    })
+    .mockResolvedValueOnce({ entries: [later], next: "third-page" });
+  const { client, wrapper } = setupClient();
+  const { result, rerender } = renderHook(
+    () => useCollectCatalog("memes", "lowest"),
+    { wrapper }
+  );
+  await waitFor(() => expect(result.current.entries).toHaveLength(2));
+  act(() => result.current.loadMore());
+  await waitFor(() => expect(result.current.entries).toHaveLength(3));
+  mockPurchases = [
+    {
+      operationId: "confirmed-purchase",
+      profileId: "collector",
+      assetKey: item.asset.asset_key,
+      orderHash: item.order.identity.order_hash,
+      protocolAddress: item.order.identity.protocol_address,
+      quantity: "3",
+      remainingQuantity: "0",
+      confirmedAt: Date.now(),
+    },
+  ];
+  rerender();
+  expect(result.current.entries).toEqual([replacement, later]);
+  expect(result.current.hasMore).toBe(true);
+  expect(client.getQueryData(["market-listings", "memes"])).toMatchObject({
+    pageParams: [null, "second-page"],
+  });
+  expect(mockFetchListings).toHaveBeenCalledTimes(2);
 });
 
 it.each<CollectIntent>([

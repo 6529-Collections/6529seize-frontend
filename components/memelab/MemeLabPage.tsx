@@ -646,6 +646,7 @@ export default function MemeLabPageComponent({
               locale={locale}
               persistentContent={
                 <MarketDepthPanel
+                  focusedOrderHash={searchParams.get("order")}
                   contract={MEMELAB_CONTRACT}
                   tokenId={nft.id}
                   locale={locale}

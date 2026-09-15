@@ -25,7 +25,9 @@ export default function CollectTdhWorkspace({
   onPlanOffers,
   onDailyPlanOffers,
   collection,
+  revision = 0,
 }: {
+  readonly revision?: number;
   readonly profile: ApiIdentity | null;
   readonly payingWallet?: string | undefined;
   readonly snapshot: ApiCollectTdhListings | undefined;
@@ -80,6 +82,7 @@ export default function CollectTdhWorkspace({
       {projection ? (
         <div className="tw-col-span-2">
           <CollectTdhTargetController
+            revision={revision}
             collection={collection}
             profile={profile}
             payingWallet={payingWallet}
@@ -91,6 +94,7 @@ export default function CollectTdhWorkspace({
       ) : (
         <div className="tw-col-span-2 tw-min-w-0 tw-space-y-5">
           <CollectTdhDailyWorkspace
+            revision={revision}
             profile={profile}
             payingWallet={payingWallet}
             collection={collection}
