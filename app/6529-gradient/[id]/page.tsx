@@ -8,7 +8,6 @@ import {
 import { GRADIENT_CONTRACT } from "@/constants/constants";
 import { PROFILE_COLLECTED_RETURN_PARAM } from "@/helpers/profile-collected-navigation";
 import JsonLdScript from "@/lib/structured-data/json-ld";
-import { canonicalUrl } from "@/lib/structured-data/utils";
 import {
   buildNftPageJsonLd,
   fetchNftForStructuredData,
@@ -53,16 +52,18 @@ export default async function GradientPage({
 
   return (
     <main className={styles["main"]}>
-      <JsonLdScript
-        data={buildNftPageJsonLd({
-          nft,
-          path: `/6529-gradient/${id}`,
-          fallbackName: `6529 Gradient #${id}`,
-          collectionName: "6529 Gradient",
-          collectionPath: "/6529-gradient",
-          license: null,
-        })}
-      />
+      {nft ? (
+        <JsonLdScript
+          data={buildNftPageJsonLd({
+            nft,
+            path: `/6529-gradient/${id}`,
+            fallbackName: `6529 Gradient #${id}`,
+            collectionName: "6529 Gradient",
+            collectionPath: "/6529-gradient",
+            license: null,
+          })}
+        />
+      ) : null}
       <GradientPageComponent
         id={id}
         searchParamsString={serializeSearchParams(resolvedSearchParams)}
@@ -86,9 +87,7 @@ export async function generateMetadata({
     getUsableText(nft?.image) ??
     getUsableText(nft?.thumbnail);
   const description = [title, artist].filter(Boolean).join(" · ");
-  const canonical = canonicalUrl(`/6529-gradient/${encodeURIComponent(id)}`);
-
-  const metadata = getAppMetadata(
+  return getAppMetadata(
     getLargeSocialCardMetadata({
       title,
       description,
@@ -102,11 +101,10 @@ export async function generateMetadata({
         title,
       }),
       ogImageAlt: `${title} social card`,
-    })
+    }),
+    {
+      canonicalPath: `/6529-gradient/${encodeURIComponent(id)}`,
+      robots: { index: nft !== null, follow: true },
+    }
   );
-  return {
-    ...metadata,
-    alternates: { canonical },
-    openGraph: { ...metadata.openGraph, url: canonical },
-  };
 }
