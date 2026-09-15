@@ -11,6 +11,11 @@ const mockMemeLabPageComponent = jest.fn(
 );
 
 const mockGetSharedAppServerSideProps = jest.fn();
+const mockFetchUrl = jest.fn();
+
+jest.mock("@/services/6529api", () => ({
+  fetchUrl: (...args: unknown[]) => mockFetchUrl(...args),
+}));
 
 jest.mock("@/components/memelab/MemeLabPage", () => ({
   __esModule: true,
@@ -30,6 +35,9 @@ jest.mock("@/components/the-memes/MemeShared", () => ({
 describe("Meme Lab detail page", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockFetchUrl.mockResolvedValue({
+      data: [{ id: 123, contract: MEMELAB_CONTRACT }],
+    });
   });
 
   it("renders the client detail page with the default locale", async () => {
@@ -82,7 +90,34 @@ describe("Meme Lab detail page", () => {
       "123",
       "collectors",
       false,
-      "de-DE"
+      "de-DE",
+      expect.objectContaining({ id: 123, contract: MEMELAB_CONTRACT })
     );
+  });
+
+  it("returns noindex metadata when the NFT source is unavailable", async () => {
+    mockFetchUrl.mockRejectedValueOnce(new Error("upstream unavailable"));
+
+    const result = await generateMetadata({
+      params: Promise.resolve({ id: "901" }),
+      searchParams: Promise.resolve({ focus: "references" }),
+    });
+
+    expect(result.robots).toEqual({ index: false, follow: true });
+    expect(result.alternates?.canonical?.toString()).toContain(
+      "/meme-lab/901?focus=references"
+    );
+    expect(mockGetSharedAppServerSideProps).not.toHaveBeenCalled();
+  });
+
+  it("treats malformed card identifiers as missing", async () => {
+    await expect(
+      generateMetadata({
+        params: Promise.resolve({ id: "0" }),
+        searchParams: Promise.resolve({}),
+      })
+    ).rejects.toThrow();
+
+    expect(mockFetchUrl).not.toHaveBeenCalled();
   });
 });

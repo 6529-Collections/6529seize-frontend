@@ -35,8 +35,11 @@ export default function DiscoverPage() {
 }
 
 export function generateMetadata(): Metadata {
-  return getAppMetadata({
-    title: "Discovery",
-    description: "Active discussions you are not yet following",
-  });
+  return getAppMetadata(
+    {
+      title: "Discovery",
+      description: "Active discussions you are not yet following",
+    },
+    { canonicalPath: "/discover" }
+  );
 }

@@ -1,8 +1,10 @@
 import sitemapConfig, {
   buildAdditionalSitemapPaths,
+  fetchCursorPaginatedData,
   getNftSitemapPaths,
   getPublicWavePaths,
   MUSEUM_STATIC_CANONICAL_PATHS,
+  STATIC_INDEXABLE_PATHS,
   shouldExcludeSitemapPath,
 } from "@/next-sitemap.config";
 
@@ -16,6 +18,59 @@ const makeFetchJson =
     return response;
   };
 
+const museumBundle = async () =>
+  ({
+    publicationState: {
+      status: "current",
+      errorCode: null,
+      failedAt: null,
+      lastValidAcceptedAt: null,
+      publication: {
+        entityGraph: {
+          entities: [
+            {
+              id: "6529NM-W-0001",
+              entityType: "WORK",
+              entityStatus: "published",
+              pageExposure: "canonical_page",
+              canonicalRoute: "/museum/network/works/6529NM-W-0001",
+              slug: null,
+            },
+            {
+              id: "6529NM-ART-0001",
+              entityType: "ARTIST",
+              entityStatus: "published",
+              pageExposure: "canonical_page",
+              canonicalRoute: "/museum/network/artists/artist-slug",
+              slug: "artist-slug",
+            },
+            {
+              id: "6529NM-PROJ-0001",
+              entityType: "PROJECT_OR_SERIES",
+              entityStatus: "published",
+              pageExposure: "canonical_page",
+              canonicalRoute: "/museum/network/projects/project-slug",
+              slug: "project-slug",
+            },
+          ],
+        },
+      },
+    },
+    view: null,
+  }) as never;
+
+const buildFixturePaths = (responses: Record<string, unknown>) =>
+  buildAdditionalSitemapPaths(makeFetchJson(responses), museumBundle, {
+    minimumItems: {
+      memes: 0,
+      "meme-lab": 0,
+      gradient: 0,
+      "nextgen-tokens": 0,
+      "nextgen-collections": 0,
+      "public-waves": 0,
+    },
+  });
+
 describe("next-sitemap config", () => {
   it.each([
     "/artwork-documentation",
@@ -26,13 +81,16 @@ describe("next-sitemap config", () => {
     expect(shouldExcludeSitemapPath(path)).toBe(true);
   });
 
-  it("builds canonical NFT detail paths without wallet-specific focus URLs", () => {
+  it("uses the shared collection-specific NFT focus policy", () => {
     const paths = getNftSitemapPaths("/the-memes/1").map((path) => path.loc);
 
     expect(paths).toContain("/the-memes/1");
-    expect(paths).toContain("/the-memes/1?focus=the-art");
+    expect(paths).not.toContain("/the-memes/1?focus=the-art");
     expect(paths).toContain("/the-memes/1?focus=collectors");
     expect(paths).not.toContain("/the-memes/1?focus=your-cards");
+    expect(
+      getNftSitemapPaths("/meme-lab/1", "meme-lab").map((path) => path.loc)
+    ).toContain("/meme-lab/1?focus=references");
   });
 
   it("filters public wave sitemap entries to non-private non-DM waves", async () => {
@@ -113,7 +171,16 @@ describe("next-sitemap config", () => {
         },
     });
 
-    const paths = await buildAdditionalSitemapPaths(fetchJson);
+    const paths = await buildAdditionalSitemapPaths(fetchJson, museumBundle, {
+      minimumItems: {
+        memes: 0,
+        "meme-lab": 0,
+        gradient: 0,
+        "nextgen-tokens": 0,
+        "nextgen-collections": 0,
+        "public-waves": 0,
+      },
+    });
     const locations = paths.map((path) => path.loc);
 
     expect(locations).toContain("/the-memes/1");
@@ -133,11 +200,14 @@ describe("next-sitemap config", () => {
     expect(locations).toContain("/museum/network/research/rights");
     expect(locations).toContain("/museum/network/about/governance");
     expect(locations).toContain("/museum/network/works");
+    expect(locations).toContain("/museum/network/artists");
     expect(locations).toContain("/museum/network/organizations");
+    expect(locations).toContain("/education/education-collaboration-form");
     expect(locations).not.toContain("/about/release-notes");
+    expect(locations).toEqual(expect.arrayContaining(STATIC_INDEXABLE_PATHS));
   });
 
-  it("publishes fixed Research/About pages without inventing catalog entity instances", async () => {
+  it("publishes fixed Museum pages and only governed work and artist entities", async () => {
     const expectedStaticPaths = [
       "/museum/network",
       "/museum/network/collection",
@@ -175,26 +245,24 @@ describe("next-sitemap config", () => {
 
     expect(MUSEUM_STATIC_CANONICAL_PATHS).toEqual(expectedStaticPaths);
 
-    const paths = await buildAdditionalSitemapPaths(
-      makeFetchJson({
-        "https://api.6529.io/sitemap/memes": { data: [], next: null },
-        "https://api.6529.io/sitemap/gradient": { data: [], next: null },
-        "https://api.6529.io/sitemap/meme-lab": { data: [], next: null },
-        "https://api.6529.io/sitemap/nextgen/tokens": {
+    const paths = await buildFixturePaths({
+      "https://api.6529.io/sitemap/memes": { data: [], next: null },
+      "https://api.6529.io/sitemap/gradient": { data: [], next: null },
+      "https://api.6529.io/sitemap/meme-lab": { data: [], next: null },
+      "https://api.6529.io/sitemap/nextgen/tokens": {
+        data: [],
+        next: null,
+      },
+      "https://api.6529.io/sitemap/nextgen/collections": {
+        data: [],
+        next: null,
+      },
+      "https://api.6529.io/api/v2/waves?view=SEARCH&page=1&page_size=50&direct_message=false":
+        {
           data: [],
-          next: null,
+          next: false,
         },
-        "https://api.6529.io/sitemap/nextgen/collections": {
-          data: [],
-          next: null,
-        },
-        "https://api.6529.io/api/v2/waves?view=SEARCH&page=1&page_size=50&direct_message=false":
-          {
-            data: [],
-            next: false,
-          },
-      })
-    );
+    });
     const museumLocations = paths
       .map((path) => path.loc)
       .filter((path) => path.startsWith("/museum/network"));
@@ -208,25 +276,19 @@ describe("next-sitemap config", () => {
         "/museum/network/research/data-architecture/unknown-standard",
         "/museum/network/about/governance/6529NM-GOV-1052148",
         "/museum/network/artists/artist-slug",
-        "/museum/network/works/6529NM-W-0001",
         "/museum/network/projects/project-slug",
         "/museum/network/organizations/organization-slug",
         "/museum/network/acquisitions/acquisition-slug",
       ])
     );
-    expect(
-      museumLocations.some((path) =>
-        /^\/museum\/network\/(artists|works|projects|organizations|acquisitions|acquisition-programs)\/[^/]+$/u.test(
-          path
-        )
-      )
-    ).toBe(false);
+    expect(museumLocations).toContain("/museum/network/works/6529NM-W-0001");
+    expect(museumLocations).toContain("/museum/network/artists/artist-slug");
+    expect(museumLocations).not.toContain(
+      "/museum/network/projects/project-slug"
+    );
   });
 
-  it("continues building sitemap paths when one API feed fails", async () => {
-    const consoleError = jest
-      .spyOn(console, "error")
-      .mockImplementation(() => undefined);
+  it("fails atomically when a required API feed fails", async () => {
     const fetchJson = makeFetchJson({
       "https://api.6529.io/sitemap/memes": {
         data: [1],
@@ -260,23 +322,140 @@ describe("next-sitemap config", () => {
       return response;
     };
 
-    try {
-      const paths = await buildAdditionalSitemapPaths(throwingFetchJson);
-      const locations = paths.map((path) => path.loc);
+    await expect(
+      buildAdditionalSitemapPaths(throwingFetchJson, museumBundle, {
+        minimumItems: {
+          memes: 0,
+          "meme-lab": 0,
+          gradient: 0,
+          "nextgen-tokens": 0,
+          "nextgen-collections": 0,
+          "public-waves": 0,
+        },
+      })
+    ).rejects.toThrow("gradient failed");
+  });
 
-      expect(locations).toContain("/the-memes/1");
-      expect(locations).not.toContain("/6529-gradient/0");
-      expect(consoleError).toHaveBeenCalledWith(
-        "Sitemap generation failed for gradient:",
-        expect.any(Error)
-      );
-    } finally {
-      consoleError.mockRestore();
-    }
+  it("rejects malformed feed items and cyclic cursor continuations", async () => {
+    await expect(
+      buildFixturePaths({
+        "https://api.6529.io/sitemap/memes": {
+          data: ["not-an-integer"],
+          next: null,
+        },
+        "https://api.6529.io/sitemap/gradient": { data: [], next: null },
+        "https://api.6529.io/sitemap/meme-lab": { data: [], next: null },
+        "https://api.6529.io/sitemap/nextgen/tokens": { data: [], next: null },
+        "https://api.6529.io/sitemap/nextgen/collections": {
+          data: [],
+          next: null,
+        },
+        "https://api.6529.io/api/v2/waves?view=SEARCH&page=1&page_size=50&direct_message=false":
+          { data: [], next: false },
+      })
+    ).rejects.toThrow("Invalid memes sitemap item");
+
+    await expect(
+      fetchCursorPaginatedData(
+        "https://api.6529.io/sitemap/memes",
+        makeFetchJson({
+          "https://api.6529.io/sitemap/memes": {
+            data: [1],
+            next: "https://api.6529.io/sitemap/memes",
+          },
+        })
+      )
+    ).rejects.toThrow("cycle detected");
+  });
+
+  it("enforces NFT source floors using unique feed identifiers", async () => {
+    await expect(
+      buildAdditionalSitemapPaths(
+        makeFetchJson({
+          "https://api.6529.io/sitemap/memes": {
+            data: [1, 1],
+            next: null,
+          },
+          "https://api.6529.io/sitemap/gradient": { data: [], next: null },
+          "https://api.6529.io/sitemap/meme-lab": { data: [], next: null },
+          "https://api.6529.io/sitemap/nextgen/tokens": {
+            data: [],
+            next: null,
+          },
+          "https://api.6529.io/sitemap/nextgen/collections": {
+            data: [],
+            next: null,
+          },
+          "https://api.6529.io/api/v2/waves?view=SEARCH&page=1&page_size=50&direct_message=false":
+            { data: [], next: false },
+        }),
+        museumBundle,
+        {
+          minimumItems: {
+            memes: 2,
+            "meme-lab": 0,
+            gradient: 0,
+            "nextgen-tokens": 0,
+            "nextgen-collections": 0,
+            "public-waves": 0,
+          },
+        }
+      )
+    ).rejects.toThrow("Sitemap memes inventory fell below its required floor");
+  });
+
+  it("requires an accepted Museum publication graph", async () => {
+    await expect(
+      buildAdditionalSitemapPaths(
+        makeFetchJson({
+          "https://api.6529.io/sitemap/memes": { data: [], next: null },
+          "https://api.6529.io/sitemap/gradient": { data: [], next: null },
+          "https://api.6529.io/sitemap/meme-lab": { data: [], next: null },
+          "https://api.6529.io/sitemap/nextgen/tokens": {
+            data: [],
+            next: null,
+          },
+          "https://api.6529.io/sitemap/nextgen/collections": {
+            data: [],
+            next: null,
+          },
+          "https://api.6529.io/api/v2/waves?view=SEARCH&page=1&page_size=50&direct_message=false":
+            {
+              data: [],
+              next: false,
+            },
+        }),
+        async () =>
+          ({
+            publicationState: {
+              status: "unavailable",
+              publication: null,
+              errorCode: "source_unavailable",
+              failedAt: "2026-09-14T00:00:00.000Z",
+              lastValidAcceptedAt: null,
+            },
+            view: null,
+          }) as never,
+        {
+          minimumItems: {
+            memes: 0,
+            "meme-lab": 0,
+            gradient: 0,
+            "nextgen-tokens": 0,
+            "nextgen-collections": 0,
+            "public-waves": 0,
+          },
+        }
+      )
+    ).rejects.toThrow("Museum sitemap publication unavailable");
   });
 
   it("excludes app-only and restricted routes from generated sitemap output", () => {
     expect(shouldExcludeSitemapPath("/access")).toBe(true);
+    expect(shouldExcludeSitemapPath("/preferences")).toBe(true);
+    expect(shouldExcludeSitemapPath("/content-preferences")).toBe(true);
+    expect(shouldExcludeSitemapPath("/buidl")).toBe(true);
+    expect(shouldExcludeSitemapPath("/punk6529/subscriptions")).toBe(true);
     expect(shouldExcludeSitemapPath("/messages/create?wave=abc")).toBe(true);
     expect(shouldExcludeSitemapPath("/tools/app-wallets")).toBe(true);
     expect(shouldExcludeSitemapPath("/stream")).toBe(true);
