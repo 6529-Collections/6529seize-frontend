@@ -233,7 +233,7 @@ describe("public Coordinator package policy", () => {
     const manifestWithAlias = {
       ...manifest,
       dependencies: {
-        "coordinator-next": `npm:${policy.RELEASE_PACKAGE}@0.0.5`,
+        "coordinator-next": `npm:${policy.RELEASE_PACKAGE}@0.0.6`,
       },
     };
     expect(() =>
@@ -269,7 +269,7 @@ describe("public Coordinator package policy", () => {
       policy.validateWorkspace(
         workspace.replace(
           `"${policy.RELEASE_PACKAGE}@${policy.RELEASE_VERSION}"`,
-          `"${policy.RELEASE_PACKAGE}@0.0.5"`
+          `"${policy.RELEASE_PACKAGE}@0.0.6"`
         )
       )
     ).toThrow("must contain only");
@@ -312,7 +312,7 @@ describe("public Coordinator package policy", () => {
       policy.validateWorkspace(
         workspace.replace(
           "overrides:\n",
-          `overrides:\n  "${policy.RELEASE_PACKAGE}": "0.0.5"\n`
+          `overrides:\n  "${policy.RELEASE_PACKAGE}": "0.0.6"\n`
         )
       )
     ).toThrow("cannot be changed by overrides");
@@ -355,7 +355,7 @@ describe("public Coordinator package policy", () => {
     ).toThrow("cannot resolve packages from GitHub Packages");
     expect(() =>
       policy.validateLockfile(
-        `${lockfile}\n# npm:${policy.RELEASE_PACKAGE}@0.0.5\n`
+        `${lockfile}\n# npm:${policy.RELEASE_PACKAGE}@0.0.6\n`
       )
     ).toThrow("references an unreviewed package version");
     expect(() =>
@@ -380,7 +380,7 @@ describe("public Coordinator package policy", () => {
     ).toThrow("escape sequences are not supported");
     expect(() =>
       policy.validateLockfile(
-        `${lockfile}\n  "@6529-collections/release-reque\\u0073t@0.0.5":\n    resolution: {integrity: sha512-unreviewed}\n`
+        `${lockfile}\n  "@6529-collections/release-reque\\u0073t@0.0.6":\n    resolution: {integrity: sha512-unreviewed}\n`
       )
     ).toThrow("escape sequences are not supported");
     expect(() =>
@@ -409,7 +409,7 @@ describe("public Coordinator package policy", () => {
     const tampered = lockfile
       .replace(
         `'${policy.RELEASE_PACKAGE}':\n        specifier: ${policy.RELEASE_VERSION}\n        version: ${policy.RELEASE_VERSION}`,
-        `'${policy.RELEASE_PACKAGE}':\n        specifier: 0.0.5\n        version: 0.0.5`
+        `'${policy.RELEASE_PACKAGE}':\n        specifier: 0.0.6\n        version: 0.0.6`
       )
       .replace(
         `${packageKey}:\n    resolution: {integrity: ${policy.RELEASE_INTEGRITY}}`,
