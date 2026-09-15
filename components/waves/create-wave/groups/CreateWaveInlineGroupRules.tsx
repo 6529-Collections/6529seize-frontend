@@ -23,6 +23,7 @@ function CreateWaveInlineGroupCriteriaTabs({
   identityActive,
   onIdentityToggle,
   onRuleToggle,
+  quiet = false,
 }: {
   readonly activeRule: CreateWaveInlineGroupRuleType | null;
   readonly draft: ApiCreateGroup;
@@ -30,6 +31,7 @@ function CreateWaveInlineGroupCriteriaTabs({
   readonly identityActive: boolean;
   readonly onIdentityToggle?: (() => void) | undefined;
   readonly onRuleToggle: (rule: CreateWaveInlineGroupRuleType) => void;
+  readonly quiet?: boolean;
 }) {
   const locale = useBrowserLocale();
   const configuredRules = new Set(getInlineGroupConfiguredRules(draft));
@@ -48,6 +50,7 @@ function CreateWaveInlineGroupCriteriaTabs({
           configuredLabel={configuredLabel}
           compact={true}
           prominent={true}
+          quiet={quiet}
           isToggle={true}
           onClick={onIdentityToggle}
         />
@@ -62,6 +65,7 @@ function CreateWaveInlineGroupCriteriaTabs({
           configuredLabel={configuredLabel}
           compact={true}
           prominent={true}
+          quiet={quiet}
           isToggle={activeRule !== null || identityActive}
           onClick={() => onRuleToggle(rule)}
         />
@@ -75,11 +79,13 @@ export function CreateWaveInlineGroupRuleList({
   disabled,
   onIdentityOpen,
   onRuleOpen,
+  quiet = false,
 }: {
   readonly draft: ApiCreateGroup;
   readonly disabled: boolean;
   readonly onIdentityOpen?: (() => void) | undefined;
   readonly onRuleOpen: (rule: CreateWaveInlineGroupRuleType) => void;
+  readonly quiet?: boolean;
 }) {
   return (
     <div className="tw-space-y-3">
@@ -88,6 +94,7 @@ export function CreateWaveInlineGroupRuleList({
         draft={draft}
         disabled={disabled}
         identityActive={false}
+        quiet={quiet}
         onIdentityToggle={onIdentityOpen}
         onRuleToggle={onRuleOpen}
       />
@@ -102,6 +109,7 @@ export function CreateWaveInlineGroupRuleEditorPanel({
   onIdentityToggle,
   onRuleToggle,
   children,
+  quiet = false,
 }: {
   readonly activeRule: CreateWaveInlineGroupRuleType;
   readonly draft: ApiCreateGroup;
@@ -109,6 +117,7 @@ export function CreateWaveInlineGroupRuleEditorPanel({
   readonly onIdentityToggle?: (() => void) | undefined;
   readonly onRuleToggle: (rule: CreateWaveInlineGroupRuleType) => void;
   readonly children: ReactNode;
+  readonly quiet?: boolean;
 }) {
   return (
     <div className="tw-space-y-3">
@@ -117,6 +126,7 @@ export function CreateWaveInlineGroupRuleEditorPanel({
         draft={draft}
         disabled={disabled}
         identityActive={false}
+        quiet={quiet}
         onIdentityToggle={onIdentityToggle}
         onRuleToggle={onRuleToggle}
       />
@@ -131,12 +141,14 @@ export function CreateWaveInlineGroupIdentityEditorPanel({
   disabled,
   onIdentityToggle,
   onRuleToggle,
+  quiet = false,
 }: {
   readonly children: ReactNode;
   readonly draft: ApiCreateGroup;
   readonly disabled: boolean;
   readonly onIdentityToggle: () => void;
   readonly onRuleToggle: (rule: CreateWaveInlineGroupRuleType) => void;
+  readonly quiet?: boolean;
 }) {
   return (
     <div className="tw-space-y-3">
@@ -145,6 +157,7 @@ export function CreateWaveInlineGroupIdentityEditorPanel({
         draft={draft}
         disabled={disabled}
         identityActive={true}
+        quiet={quiet}
         onIdentityToggle={onIdentityToggle}
         onRuleToggle={onRuleToggle}
       />
