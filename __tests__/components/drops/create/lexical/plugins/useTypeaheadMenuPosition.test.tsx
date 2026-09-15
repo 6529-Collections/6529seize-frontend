@@ -1,5 +1,8 @@
 import { act, renderHook } from "@testing-library/react";
-import { useTypeaheadMenuPlacement } from "@/components/drops/create/lexical/plugins/useTypeaheadMenuPosition";
+import {
+  useTypeaheadMenuPlacement,
+  useTypeaheadMenuPosition,
+} from "@/components/drops/create/lexical/plugins/useTypeaheadMenuPosition";
 
 describe("useTypeaheadMenuPlacement", () => {
   const realViewport = window.visualViewport;
@@ -47,5 +50,21 @@ describe("useTypeaheadMenuPlacement", () => {
       position: "top",
       availableHeight: 250,
     });
+  });
+
+  it("keeps position-only menus from re-rendering on height-only changes", () => {
+    let renders = 0;
+    const { result } = renderHook(() => {
+      renders += 1;
+      return useTypeaheadMenuPosition(anchor);
+    });
+    act(() => window.dispatchEvent(new Event("resize")));
+    const beforeKeyboard = renders;
+
+    viewport.height = 300;
+    rect = { top: 128, bottom: 172 };
+    act(() => viewport.dispatchEvent(new Event("resize")));
+    expect(result.current).toBe("bottom");
+    expect(renders).toBe(beforeKeyboard);
   });
 });

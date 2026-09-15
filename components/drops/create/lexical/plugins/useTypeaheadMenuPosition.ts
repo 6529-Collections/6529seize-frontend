@@ -9,8 +9,9 @@ interface TypeaheadMenuPlacement {
   readonly availableHeight: number;
 }
 
-export function useTypeaheadMenuPlacement(
-  anchorElement: HTMLElement | null
+function useTypeaheadMenuGeometry(
+  anchorElement: HTMLElement | null,
+  trackAvailableHeight: boolean
 ): TypeaheadMenuPlacement {
   const [placement, setPlacement] = useState<TypeaheadMenuPlacement>({
     position: "bottom",
@@ -38,11 +39,11 @@ export function useTypeaheadMenuPlacement(
 
     setPlacement((current) =>
       current.position === nextPosition &&
-      current.availableHeight === availableHeight
+      (!trackAvailableHeight || current.availableHeight === availableHeight)
         ? current
         : { position: nextPosition, availableHeight }
     );
-  }, [anchorElement]);
+  }, [anchorElement, trackAvailableHeight]);
 
   useEffect(() => {
     if (globalThis.window === undefined || anchorElement === null) {
@@ -96,8 +97,14 @@ export function useTypeaheadMenuPlacement(
   return placement;
 }
 
+export function useTypeaheadMenuPlacement(
+  anchorElement: HTMLElement | null
+): TypeaheadMenuPlacement {
+  return useTypeaheadMenuGeometry(anchorElement, true);
+}
+
 export function useTypeaheadMenuPosition(
   anchorElement: HTMLElement | null
 ): TypeaheadMenuPosition {
-  return useTypeaheadMenuPlacement(anchorElement).position;
+  return useTypeaheadMenuGeometry(anchorElement, false).position;
 }
