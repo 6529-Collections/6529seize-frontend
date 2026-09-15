@@ -15,18 +15,21 @@ export default function DockedVersionUpdate({
 
   return (
     <div
-      data-version-update-dock="true"
-      className={`tw-pointer-events-none tw-absolute tw-bottom-[calc(100%-8px)] tw-left-1/2 tw-z-10 tw-h-11 tw-w-[104px] tw-origin-bottom -tw-translate-x-1/2 tw-transition-transform tw-duration-300 tw-ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:tw-transition-none ${compact ? "tw-scale-[0.88] sm:tw-scale-100" : "tw-scale-100"}`}
+      className={`tw-pointer-events-none tw-absolute tw-bottom-full tw-left-1/2 tw-z-10 tw-h-9 tw-w-[104px] tw-origin-bottom -tw-translate-x-1/2 tw-transition-transform tw-duration-300 tw-ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:tw-transition-none ${compact ? "tw-scale-[0.88] sm:tw-scale-100" : "tw-scale-100"}`}
     >
+      {/* A sibling backdrop layer samples the same page as the dock glass. */}
+      <div
+        aria-hidden="true"
+        className="tw-absolute tw-inset-0 tw-bg-black/[0.76] tw-backdrop-blur-2xl"
+        style={{
+          clipPath: "path('M0 36 C24 36 24 0 52 0 C80 0 80 36 104 36 Z')",
+        }}
+      />
       <svg
         aria-hidden="true"
-        viewBox="0 0 104 44"
+        viewBox="0 0 104 36"
         className="tw-absolute tw-inset-0 tw-h-full tw-w-full tw-overflow-visible"
       >
-        <path
-          d="M0 36 C24 36 24 0 52 0 C80 0 80 36 104 36 L104 44 H0 Z"
-          fill="black"
-        />
         <path
           d="M0 36 C24 36 24 0 52 0 C80 0 80 36 104 36"
           fill="none"
