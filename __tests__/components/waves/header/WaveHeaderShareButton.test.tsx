@@ -18,7 +18,12 @@ jest.mock("react-use", () => ({
 }));
 
 const createWave = (overrides: Partial<ApiWave> = {}) =>
-  ({ id: "w1", name: "Wave", ...overrides }) as ApiWave;
+  ({
+    id: "w1",
+    name: "Wave",
+    chat: { scope: { group: null } },
+    ...overrides,
+  }) as ApiWave;
 const setNavigatorShare = (share?: typeof navigator.share) => {
   Object.defineProperty(navigator, "share", {
     configurable: true,
@@ -140,22 +145,38 @@ describe("WaveHeaderShareButton", () => {
     jest.useFakeTimers();
     render(<WaveHeaderShareButton wave={createWave()} />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Share wave" }));
+    const shareActionButton = screen.getByRole("button", {
+      name: "Share wave",
+    });
+    fireEvent.click(shareActionButton);
 
     await act(async () => {
       await Promise.resolve();
     });
 
-    expect(
-      screen.getByRole("button", { name: "Link shared" })
-    ).toBeInTheDocument();
+    expect(shareActionButton).toHaveTextContent("Link shared");
+    expect(screen.getByRole("status")).toHaveTextContent("Link shared");
+    expect(shareActionButton).toHaveAccessibleName("Share wave");
 
     act(() => {
       jest.advanceTimersByTime(1500);
     });
 
-    expect(
-      screen.getByRole("button", { name: "Share wave" })
-    ).toBeInTheDocument();
+    expect(shareActionButton).toHaveTextContent("Share wave");
+    expect(screen.getByRole("status")).toBeEmptyDOMElement();
+  });
+
+  it("does not expose sharing when mounted with a direct message", () => {
+    const { container } = render(
+      <WaveHeaderShareButton
+        wave={createWave({
+          chat: {
+            scope: { group: { is_direct_message: true } },
+          } as ApiWave["chat"],
+        })}
+      />
+    );
+
+    expect(container).toBeEmptyDOMElement();
   });
 });
