@@ -33,6 +33,9 @@ jest.mock("@/components/waves/header/WaveHeaderFollowers", () => () => <div />);
 jest.mock("@/components/waves/header/WaveHeaderPinButton", () => () => (
   <div data-testid="wave-header-pin" />
 ));
+jest.mock("@/components/waves/header/WaveHeaderShareButton", () => () => (
+  <button type="button">Copy wave link</button>
+));
 jest.mock("@/components/waves/WavePicture", () => () => <div />);
 jest.mock(
   "@/components/waves/specs/WaveNotificationSettings",
@@ -80,6 +83,26 @@ describe("WaveHeader", () => {
         <WaveHeader wave={wave} onFollowersClick={jest.fn()} {...props} />
       </AuthContext.Provider>
     );
+
+  it.each([
+    ["logged out", null],
+    ["non-author", { connectedProfile: { handle: "bob" } }],
+    ["author", { connectedProfile: { handle: "a" } }],
+    ["proxy", { connectedProfile: { handle: "bob" }, activeProfileProxy: {} }],
+  ])("keeps sharing available to a %s viewer", (_state, auth) => {
+    wrapper(baseWave, undefined, auth);
+    expect(
+      screen.getByRole("button", { name: "Copy wave link" })
+    ).toBeInTheDocument();
+  });
+
+  it("does not offer sharing for a DM", () => {
+    wrapper({
+      ...baseWave,
+      chat: { scope: { group: { is_direct_message: true } } },
+    });
+    expect(screen.queryByRole("button", { name: "Copy wave link" })).toBeNull();
+  });
 
   it("shows drop icon when wave not chat", () => {
     wrapper({ ...baseWave, wave: { type: ApiWaveType.Approve } });
