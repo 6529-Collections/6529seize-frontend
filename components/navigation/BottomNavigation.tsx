@@ -337,7 +337,7 @@ const getNavClassName = ({
 };
 
 const getDockClassName = (compact: boolean) =>
-  `tw-pointer-events-auto tw-relative tw-border tw-border-white/[0.13] tw-bg-black/[0.76] tw-shadow-[0_18px_45px_rgba(0,0,0,0.48),0_0_0_1px_rgba(255,255,255,0.045),0_0_34px_rgba(255,255,255,0.075),inset_0_1px_0_rgba(255,255,255,0.105),inset_0_-1px_0_rgba(255,255,255,0.06)] tw-backdrop-blur-2xl tw-transition-[width,height,border-radius,background-color,box-shadow] tw-duration-300 tw-ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:tw-transition-none ${
+  `tw-pointer-events-auto tw-relative tw-border tw-border-white/[0.13] tw-bg-black/[0.76] has-[[data-version-update-dock]]:tw-bg-black tw-shadow-[0_18px_45px_rgba(0,0,0,0.48),0_0_0_1px_rgba(255,255,255,0.045),0_0_34px_rgba(255,255,255,0.075),inset_0_1px_0_rgba(255,255,255,0.105),inset_0_-1px_0_rgba(255,255,255,0.06)] tw-backdrop-blur-2xl tw-transition-[width,height,border-radius,background-color,box-shadow] tw-duration-300 tw-ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:tw-transition-none ${
     compact
       ? "tw-h-[54px] tw-w-[min(calc(100vw-5.5rem),25rem)] tw-rounded-[1.65rem] sm:tw-h-[58px] sm:tw-w-[min(calc(100vw-6.75rem),31rem)] md:tw-w-[min(calc(100vw-10rem),35rem)]"
       : "tw-h-[64px] tw-w-[min(calc(100vw-2.25rem),38rem)] tw-rounded-[2rem] sm:tw-h-[66px] sm:tw-w-[min(calc(100vw-4rem),40rem)]"
