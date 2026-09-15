@@ -647,6 +647,10 @@
       "surface_ids": ["museum.object", "museum.collection"]
     },
     {
+      "file": "components/museum/MuseumObjectMetadata.ts",
+      "surface_ids": ["museum.object", "museum.collection"]
+    },
+    {
       "file": "components/museum/MuseumPossibilitySpace.tsx",
       "surface_ids": ["museum.system"]
     },

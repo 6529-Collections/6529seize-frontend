@@ -102,10 +102,13 @@ export async function generateMetadata({
   }
 
   if (!context?.site) {
-    return getAppMetadata({
-      title: t(DEFAULT_LOCALE, "profileCms.state.empty.title"),
-      description: t(DEFAULT_LOCALE, "profileCms.state.empty.description"),
-    });
+    return getAppMetadata(
+      {
+        title: t(DEFAULT_LOCALE, "profileCms.state.empty.title"),
+        description: t(DEFAULT_LOCALE, "profileCms.state.empty.description"),
+      },
+      { robots: { index: false, follow: true } }
+    );
   }
 
   const routeResolution = resolveCmsRoute(
@@ -114,10 +117,13 @@ export async function generateMetadata({
   );
 
   if (routeResolution.kind !== "page") {
-    return getAppMetadata({
-      title: context.site.cmsPackage.site.title,
-      description: context.site.cmsPackage.site.description,
-    });
+    return getAppMetadata(
+      {
+        title: context.site.cmsPackage.site.title,
+        description: context.site.cmsPackage.site.description,
+      },
+      { robots: { index: false, follow: true } }
+    );
   }
 
   const page = routeResolution.page;
@@ -129,25 +135,25 @@ export async function generateMetadata({
   const socialImage = social?.asset;
   const socialImageUrl = social?.url;
 
-  const metadata = getAppMetadata({
-    title: page.metadata.title,
-    description: page.metadata.description,
-    ...(socialImageUrl ? { ogImage: socialImageUrl } : {}),
-    ...(socialImage?.width ? { ogImageWidth: socialImage.width } : {}),
-    ...(socialImage?.height ? { ogImageHeight: socialImage.height } : {}),
-    ...(socialImage?.alt_text ? { ogImageAlt: socialImage.alt_text } : {}),
-  });
   const publicPath = getCmsPublicPagePath(context.site.cmsPackage, page.id);
-  if (!publicPath) return metadata;
-  const canonical = new URL(publicPath, publicEnv.BASE_ENDPOINT).href;
-  return {
-    ...metadata,
-    ...(page.metadata.robots === "noindex"
-      ? { robots: { index: false, follow: true } }
-      : {}),
-    alternates: { canonical },
-    openGraph: { ...metadata.openGraph, url: canonical },
-  };
+  return getAppMetadata(
+    {
+      title: page.metadata.title,
+      description: page.metadata.description,
+      ...(socialImageUrl ? { ogImage: socialImageUrl } : {}),
+      ...(typeof socialImage?.width === "number"
+        ? { ogImageWidth: socialImage.width }
+        : {}),
+      ...(typeof socialImage?.height === "number"
+        ? { ogImageHeight: socialImage.height }
+        : {}),
+      ...(socialImage?.alt_text ? { ogImageAlt: socialImage.alt_text } : {}),
+    },
+    {
+      canonicalPath: publicPath ?? undefined,
+      robots: { index: page.metadata.robots !== "noindex", follow: true },
+    }
+  );
 }
 
 async function getProfileCmsRouteContext(
@@ -237,8 +243,7 @@ function isNotFoundError(error: unknown): boolean {
     return true;
   }
 
-  const message = getErrorMessage(error);
-  return /not found|404/i.test(message);
+  return false;
 }
 
 function getErrorStatus(error: unknown): number | undefined {
@@ -251,18 +256,6 @@ function getErrorStatus(error: unknown): number | undefined {
     readonly status?: number | undefined;
   };
   return apiError.status ?? apiError.response?.status;
-}
-
-function getErrorMessage(error: unknown): string {
-  if (typeof error === "string") {
-    return error;
-  }
-
-  if (error instanceof Error) {
-    return error.message;
-  }
-
-  return "";
 }
 
 function encodeCmsPathSegment(segment: string): string {
