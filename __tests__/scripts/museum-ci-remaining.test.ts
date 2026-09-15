@@ -82,7 +82,7 @@ describe("Museum isolated remaining runner", () => {
   ) {
     const eventsPath = path.join(directory, "events.txt");
     const subprocessEnv = { ...process.env };
-    delete subprocessEnv.PORT_SEARCH_LIMIT;
+    delete subprocessEnv["PORT_SEARCH_LIMIT"];
     const result = spawnSync("bash", ["--", scriptFile, ...specs], {
       cwd: directory,
       encoding: "utf8",
