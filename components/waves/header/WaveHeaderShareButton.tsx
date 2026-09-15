@@ -10,30 +10,39 @@ export default function WaveHeaderShareButton({
 }: {
   readonly wave: ApiWave;
 }) {
-  const { mode, label, feedbackState, isSharing, onClick } =
+  const isDirectMessage = wave.chat.scope.group?.is_direct_message ?? false;
+  const { mode, actionLabel, label, feedbackState, isSharing, onClick } =
     useWaveShareCopyAction({
       waveId: wave.id,
       waveName: wave.name,
-      isDirectMessage: false,
+      isDirectMessage,
     });
   let Icon = mode === "share" ? ShareIcon : LinkIcon;
   if (feedbackState !== "idle") {
     Icon = CheckIcon;
   }
+  if (isDirectMessage) {
+    return null;
+  }
 
   return (
-    <Button
-      type="button"
-      variant="tertiary"
-      size="sm"
-      onClick={onClick}
-      disabled={isSharing}
-      aria-label={label}
-      data-wave-link-action-mode={mode}
-      className="!tw-border-iron-700"
-    >
-      <Icon aria-hidden="true" className="tw-size-4 tw-shrink-0" />
-      <span aria-live="polite">{label}</span>
-    </Button>
+    <>
+      <Button
+        type="button"
+        variant="tertiary"
+        size="sm"
+        onClick={onClick}
+        disabled={isSharing}
+        aria-label={actionLabel}
+        data-wave-link-action-mode={mode}
+        className="!tw-border-iron-700"
+      >
+        <Icon aria-hidden="true" className="tw-size-4 tw-shrink-0" />
+        <span aria-hidden="true">{label}</span>
+      </Button>
+      <span role="status" className="tw-sr-only">
+        {feedbackState === "idle" ? "" : label}
+      </span>
+    </>
   );
 }
