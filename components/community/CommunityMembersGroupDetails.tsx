@@ -22,6 +22,9 @@ type InspectableGroup = ApiGroupFull & Pick<Partial<ApiGroup>, "is_hidden">;
 const INSPECTION_SURFACE_CLASSES =
   "tw-mt-3 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950/30 tw-p-4";
 
+const BULK_RATE_ACTION_CLASSES =
+  "tw-relative tw-isolate !tw-h-auto tw-min-h-11 tw-w-full !tw-whitespace-normal !tw-border-transparent !tw-bg-transparent tw-py-0 tw-text-center before:tw-pointer-events-none before:tw-absolute before:-tw-z-10 before:tw-inset-x-0 before:tw-inset-y-1.5 before:tw-rounded-lg before:tw-border before:tw-border-solid before:tw-border-white/10 before:tw-bg-white/[0.07] before:tw-content-[''] desktop-hover:hover:!tw-border-transparent desktop-hover:hover:!tw-bg-transparent desktop-hover:hover:before:tw-border-white/20 desktop-hover:hover:before:tw-bg-white/10 active:!tw-bg-transparent active:before:tw-bg-white/5 sm:!tw-border-white/10 sm:!tw-bg-white/[0.07] sm:tw-min-h-9 sm:tw-w-auto sm:tw-py-2 sm:before:tw-hidden";
+
 export default function CommunityMembersGroupDetails({
   groupId,
   onClose,
@@ -169,7 +172,7 @@ export default function CommunityMembersGroupDetails({
             ref={repButtonRef}
             variant="secondary"
             size="sm"
-            className="!tw-h-auto tw-min-h-11 tw-w-full !tw-whitespace-normal tw-py-2 tw-text-center sm:tw-min-h-9 sm:tw-w-auto"
+            className={BULK_RATE_ACTION_CLASSES}
             onClick={() => openBulkRateForm(ApiRateMatter.Rep)}
           >
             {t(locale, "network.groupInspection.bulkRep")}
@@ -178,7 +181,7 @@ export default function CommunityMembersGroupDetails({
             ref={nicButtonRef}
             variant="secondary"
             size="sm"
-            className="!tw-h-auto tw-min-h-11 tw-w-full !tw-whitespace-normal tw-py-2 tw-text-center sm:tw-min-h-9 sm:tw-w-auto"
+            className={BULK_RATE_ACTION_CLASSES}
             onClick={() => openBulkRateForm(ApiRateMatter.Cic)}
           >
             {t(locale, "network.groupInspection.bulkNic")}
