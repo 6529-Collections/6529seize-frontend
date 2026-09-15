@@ -1,4 +1,4 @@
-import { getMobileDestination } from "@/app/open-mobile/mobileDestination";
+import { getMobileDestination } from "@/helpers/mobileAppDestination";
 
 const ORIGIN = "https://6529.io";
 
