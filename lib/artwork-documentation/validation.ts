@@ -13,6 +13,11 @@ export function matchesDocumentationSchema(
   value: unknown,
   schema: ApiArtworkDocumentationValueSchema
 ): boolean {
+  // Match server normalization for validation without changing the artist's answer.
+  const normalizedValue =
+    typeof value === "string"
+      ? value.replace(/\r\n?/g, "\n").normalize("NFC")
+      : value;
   const oneOf = wireProperty(schema, "one_of", "oneOf");
   const options = wireProperty(schema, "_enum", "enum");
   if (oneOf)
@@ -20,16 +25,17 @@ export function matchesDocumentationSchema(
       oneOf.filter((candidate) => matchesDocumentationSchema(value, candidate))
         .length === 1
     );
-  if (options && !options.some((option: unknown) => option === value))
+  if (options && !options.some((option: unknown) => option === normalizedValue))
     return false;
   switch (schema.type) {
     case "string":
       return (
-        typeof value === "string" &&
-        Array.from(value).length >=
+        typeof normalizedValue === "string" &&
+        Array.from(normalizedValue).length >=
           (wireProperty(schema, "min_length", "minLength") ?? 0) &&
-        Array.from(value).length <=
-          (wireProperty(schema, "max_length", "maxLength") ?? Infinity)
+        Array.from(normalizedValue).length <=
+          (wireProperty(schema, "max_length", "maxLength") ?? Infinity) &&
+        matchesDocumentationUriFormat(normalizedValue, schema.format)
       );
     case "integer":
       return (
@@ -82,6 +88,50 @@ export function matchesDocumentationSchema(
     default:
       return true;
   }
+}
+
+function matchesDocumentationUriFormat(
+  value: string,
+  format?: string
+): boolean {
+  if (format !== "uri" && format !== "authority-uri") return true;
+  try {
+    const url = new URL(value);
+    const protocols =
+      format === "uri" ? ["https:", "ipfs:", "ar:"] : ["http:", "https:"];
+    return protocols.includes(url.protocol) && !url.username && !url.password;
+  } catch {
+    return false;
+  }
+}
+
+export function requiredRightsDetailField(
+  moduleId: string,
+  fieldId: string,
+  value: unknown
+): "detail" | "details" | null {
+  if (moduleId !== "rights" || value === null || typeof value !== "object")
+    return null;
+  const item = value as Record<string, unknown>;
+  if (
+    fieldId === "rights_basis" &&
+    typeof item["kind"] === "string" &&
+    item["kind"].length > 0 &&
+    item["kind"] !== "artist_owned"
+  )
+    return "detail";
+  if (fieldId === "third_party_material" && item["kind"] === "present")
+    return "details";
+  return null;
+}
+
+function hasRequiredRightsDetails(
+  moduleId: string,
+  fieldId: string,
+  value: unknown
+): boolean {
+  const required = requiredRightsDetailField(moduleId, fieldId, value);
+  return !required || Boolean((value as Record<string, unknown>)[required]);
 }
 
 // common-api returns wire JSON; the generator renames a few JSON Schema keywords.
@@ -144,5 +194,8 @@ export function validDocumentationAnswer(
     return false;
   if (answer.status !== ApiArtworkDocumentationAnswerStatusEnum.Provided)
     return !answer.explanation || Array.from(answer.explanation).length <= 1000;
-  return matchesDocumentationSchema(answer.value, definition.value_schema);
+  return (
+    matchesDocumentationSchema(answer.value, definition.value_schema) &&
+    hasRequiredRightsDetails(moduleId, fieldId, answer.value)
+  );
 }

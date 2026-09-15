@@ -12,6 +12,7 @@ import { motion } from "framer-motion";
 import { AuthContext } from "@/components/auth/Auth";
 import { TabToggle } from "@/components/common/TabToggle";
 import SandboxedExternalIframe from "@/components/common/SandboxedExternalIframe";
+import { ProposalCardPreview } from "./submission/components/ProposalCardPreview";
 import Button from "@/components/utils/button/Button";
 import type { CommonSelectItem } from "@/components/utils/select/CommonSelect";
 import CommonTabs from "@/components/utils/select/tabs/CommonTabs";
@@ -55,6 +56,8 @@ const renderPreviewMessage = (primary: string, secondary: string) => (
  * which satisfies a CSP requiring 'blob:' rather than 'data:' for media.
  */
 const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
+  proposalFrame,
+  artworkTitle,
   artworkUploaded,
   artworkUrl,
   uploadError,
@@ -368,6 +371,8 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
               />
             ) : (
               <FilePreview
+                proposalFrame={proposalFrame}
+                artworkTitle={artworkTitle}
                 url={previewUrl}
                 file={currentFile}
                 mimeType={artworkMimeType}
@@ -472,7 +477,15 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
               </div>
 
               <div className="tw-flex tw-min-h-[260px] tw-flex-1 tw-flex-col tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 sm:tw-min-h-[320px] lg:tw-min-h-[360px]">
-                {isExternalMediaValid ? (
+                {isExternalMediaValid && proposalFrame && (
+                  <ProposalCardPreview
+                    mediaUrl={externalPreviewUrl}
+                    mimeType={externalMimeType}
+                    title={artworkTitle ?? ""}
+                    layout={proposalFrame}
+                  />
+                )}
+                {isExternalMediaValid && !proposalFrame && (
                   <SandboxedExternalIframe
                     key={externalPreviewUrl}
                     src={externalPreviewUrl}
@@ -484,7 +497,8 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
                       "Only approved IPFS or Arweave gateway HTML documents can be embedded."
                     )}
                   />
-                ) : (
+                )}
+                {!isExternalMediaValid && (
                   <div className="tw-flex tw-h-full tw-flex-1 tw-items-center tw-justify-center">
                     {previewFallback}
                   </div>

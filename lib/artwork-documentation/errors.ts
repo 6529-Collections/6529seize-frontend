@@ -11,10 +11,17 @@ const MUSEUM_ERROR_CODES = new Set([
   "PROFILE_UPGRADE_REQUIRES_REVIEW",
   "PROFILE_DOWNGRADE_NOT_ALLOWED",
 ]);
+const VALIDATION_ERROR_CODES = new Set([
+  "INVALID_VALUE",
+  "DETAIL_REQUIRED",
+  "REQUIRED_ANSWERS_MISSING",
+  "CONFIRMATION_COPY_REQUIRED",
+]);
 /** Only known codes become copy keys; server payloads and user values are never used as UI messages. */
 export function documentationErrorMessageKey(
   code: string | undefined
 ): string | undefined {
+  if (code && VALIDATION_ERROR_CODES.has(code)) return `validation.${code}`;
   return code && MUSEUM_ERROR_CODES.has(code)
     ? `museum.error.${code}`
     : undefined;
