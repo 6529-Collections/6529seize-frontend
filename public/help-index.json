@@ -3702,6 +3702,55 @@
       ]
     },
     {
+      "id": "groups.eligibility",
+      "kind": "business_rule",
+      "title": "Group membership rules",
+      "aliases": [
+        "group eligibility",
+        "who qualifies for a group",
+        "Level zero group",
+        "empty group",
+        "included and excluded identities",
+        "member preview"
+      ],
+      "keywords": [
+        "groups",
+        "membership",
+        "eligibility",
+        "level",
+        "zero",
+        "negative",
+        "include",
+        "exclude",
+        "REP",
+        "NIC",
+        "CIC",
+        "xTDH",
+        "preview"
+      ],
+      "facts": [
+        "An identity must meet every configured group criterion unless explicitly included. Inclusion bypasses criteria, but exclusion takes priority over inclusion and criteria.",
+        "A group with only an inclusion list contains the listed identities. A group with only an exclusion list contains everyone except excluded identities. A restored legacy group with no criteria and neither identity list has no members; this differs from choosing Everyone for a wave access row. The editor requires at least one criterion or a nonempty identity list before saving a new group.",
+        "Zero is a configured bound, not an absent criterion. A minimum Level of 0 allows every Level, including profiles with a negative combined score whose Level is still 0; other configured criteria still apply. A maximum Level of 0 allows only Level 0 profiles.",
+        "Level bounds include the named Levels. Maximum Level 1 includes Level 1 and stops before Level 2. Level 100 is the highest Level.",
+        "REP and NIC bounds include both endpoints, and missing rating totals count as zero. NIC is the group-editor label for CIC rating values.",
+        "A rating rule filtered by identity or REP category, or using ratings sent, requires a nonzero matching total when neither bound is set. Ratings that cancel each other to zero do not satisfy that unbounded filtered rule.",
+        "Fractional xTDH rounds down before a group comparison, including its contribution to combined TDH and xTDH criteria. For example, 12.9 xTDH contributes 12 to the eligibility calculation.",
+        "View members on an unsaved draft applies the same membership rules as saved member lists. Profile, rating, and ownership changes can change membership over time.",
+        "A saved group marked invisible has no eligible members, including explicitly included identities. This differs from Hide criteria and members, which controls who can inspect group details."
+      ],
+      "canonical_path": "/network",
+      "related_paths": ["/waves/create", "/network/levels"],
+      "tags": ["groups", "eligibility", "business-rule"],
+      "source_refs": [
+        "ops/docs/waves/create/feature-groups-step.md",
+        "ops/docs/network/flow-network-group-scope.md",
+        "components/groups/page/create/config/GroupCreateCIC.tsx",
+        "components/groups/members/GroupMembersPreviewDialog.tsx",
+        "services/groups/groupMutations.ts"
+      ]
+    },
+    {
       "id": "delegation.overview",
       "kind": "route",
       "title": "Delegation center",
