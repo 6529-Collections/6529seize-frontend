@@ -195,7 +195,7 @@ export function CategorySearch({
         placeholder={detailText(
           "waves.rep.details.categories.searchPlaceholder"
         )}
-        className="tw-min-h-11 tw-w-full tw-rounded-md tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.015] tw-py-2 tw-pl-9 tw-pr-3 tw-text-sm tw-font-medium tw-text-iron-100 tw-outline-none tw-transition placeholder:tw-text-iron-500 focus:tw-border-primary-400 focus:tw-ring-1 focus:tw-ring-primary-400/30"
+        className="tw-h-10 tw-w-full tw-rounded-md tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.015] tw-py-2 tw-pl-9 tw-pr-3 tw-text-sm tw-font-medium tw-text-iron-100 tw-outline-none tw-transition placeholder:tw-text-iron-500 focus:tw-border-primary-400 focus:tw-ring-1 focus:tw-ring-primary-400/30"
       />
     </div>
   );
