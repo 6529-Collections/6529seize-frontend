@@ -66,7 +66,16 @@ describe("WaveTrustSignals", () => {
       />
     );
 
-    const summaryBadge = screen.getByText("Score").closest("[aria-label]");
+    const summaryBadge = screen.getByRole("button", {
+      name: /^Wave score 83\./,
+    });
+    expect(screen.queryByText("Score")).not.toBeInTheDocument();
+    expect(summaryBadge).toHaveClass(
+      "tw-border-0",
+      "tw-min-h-6",
+      "tw-min-w-6",
+      "tw-bg-transparent"
+    );
 
     expect(summaryBadge).not.toBeNull();
     expect(summaryBadge).not.toHaveAttribute("title");
