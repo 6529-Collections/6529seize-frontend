@@ -18,6 +18,8 @@ interface UseMeasuredMobileBottomNavDockBottomOptions {
   readonly fallbackBottom: string;
   readonly measurementWindowMs: number;
   readonly fallbackScale?: string | undefined;
+  readonly fallbackRight?: string | undefined;
+  readonly targetRightProperty?: `--${string}` | undefined;
   readonly targetProperty?: "bottom" | `--${string}`;
   readonly targetScaleProperty?: `--${string}` | undefined;
   readonly dockGapPx?: number | undefined;
@@ -28,6 +30,7 @@ interface UseMeasuredMobileBottomNavDockBottomOptions {
 interface MeasuredDockStyle {
   readonly bottom: string | null;
   readonly scale: string | null;
+  readonly right: string | null;
 }
 
 const getViewportHeight = (): number => {
@@ -90,15 +93,23 @@ const getMeasuredDockStyle = ({
     viewportHeight <= 0 ||
     rect.top >= viewportHeight
   ) {
-    return { bottom: null, scale: null };
+    return { bottom: null, scale: null, right: null };
   }
 
   const bottom = viewportHeight - rect.top + dockGapPx;
   if (bottom <= 0) {
-    return { bottom: null, scale: null };
+    return { bottom: null, scale: null, right: null };
   }
 
+  const viewportWidth =
+    globalThis.document.documentElement.clientWidth || globalThis.innerWidth;
+  const right = viewportWidth - rect.right;
+
   return {
+    right:
+      viewportWidth > 0 && Number.isFinite(right)
+        ? `${Math.max(0, Math.round(right))}px`
+        : null,
     bottom: `${Math.round(bottom)}px`,
     scale: getMeasuredDockScale(rect.height),
   };
@@ -109,6 +120,8 @@ export const useMeasuredMobileBottomNavDockBottom = ({
   enabled,
   fallbackBottom,
   fallbackScale = "1",
+  fallbackRight = "1.125rem",
+  targetRightProperty,
   measurementWindowMs,
   resetOnDisabled = true,
   targetProperty = "bottom",
@@ -159,10 +172,24 @@ export const useMeasuredMobileBottomNavDockBottom = ({
       targetElement.style.setProperty(targetScaleProperty, scale);
     };
 
-    const resetBottom = () => {
+    const applyRight = (nextRight: string | null) => {
+      const targetElement = targetElementRef.current;
+      if (!targetElement || !targetRightProperty) return;
+
+      const right = nextRight ?? fallbackRight;
+      if (targetElement.style.getPropertyValue(targetRightProperty) !== right) {
+        targetElement.style.setProperty(targetRightProperty, right);
+      }
+    };
+
+    const resetPosition = () => {
       const targetElement = targetElementRef.current;
       if (!targetElement) {
         return;
+      }
+
+      if (targetRightProperty) {
+        targetElement.style.removeProperty(targetRightProperty);
       }
 
       if (targetProperty === "bottom") {
@@ -187,7 +214,7 @@ export const useMeasuredMobileBottomNavDockBottom = ({
         return;
       }
 
-      resetBottom();
+      resetPosition();
       resetScale();
       return;
     }
@@ -250,12 +277,14 @@ export const useMeasuredMobileBottomNavDockBottom = ({
       bindDockElement(liveDockElement);
 
       if (!dockElement) {
+        applyRight(null);
         applyBottom(null);
         applyScale(null);
         return;
       }
 
       const measuredStyle = getMeasuredDockStyle({ dockElement, dockGapPx });
+      applyRight(measuredStyle.right);
       applyBottom(measuredStyle.bottom);
       applyScale(measuredStyle.scale);
     };
@@ -377,7 +406,7 @@ export const useMeasuredMobileBottomNavDockBottom = ({
       dockRootParentObserver?.disconnect();
       resizeObserver?.disconnect();
       removeDockListeners();
-      resetBottom();
+      resetPosition();
       resetScale();
       globalThis.removeEventListener("resize", trackDockTransition);
       globalThis.visualViewport?.removeEventListener(
@@ -390,6 +419,8 @@ export const useMeasuredMobileBottomNavDockBottom = ({
     enabled,
     fallbackBottom,
     fallbackScale,
+    fallbackRight,
+    targetRightProperty,
     measurementWindowMs,
     resetOnDisabled,
     targetProperty,

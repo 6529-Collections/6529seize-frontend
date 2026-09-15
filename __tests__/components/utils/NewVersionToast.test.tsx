@@ -53,15 +53,17 @@ describe("NewVersionToast", () => {
   const createDockRect = ({
     height,
     top,
+    right = globalThis.innerWidth - 18,
   }: {
     readonly height: number;
     readonly top: number;
+    readonly right?: number;
   }): DOMRect =>
     ({
       bottom: top + height,
       height,
       left: 0,
-      right: 390,
+      right,
       top,
       width: 390,
       x: 0,
@@ -285,7 +287,7 @@ describe("NewVersionToast", () => {
     expect(
       container.querySelector('img[src="/rocket-refresh.png"]')
     ).not.toBeInTheDocument();
-    expect(container.firstChild).toHaveClass("tw-left-1/2", "tw-w-max");
+    expect(container.firstChild).toHaveClass("tw-left-auto", "tw-w-max");
   });
 
   it("uses browser locale translations for visible and accessible copy", async () => {
@@ -351,8 +353,16 @@ describe("NewVersionToast", () => {
       toastLayer.style.getPropertyValue(NEW_VERSION_TOAST_MOBILE_SCALE_PROPERTY)
     ).toBe("1");
 
+    expect(
+      toastLayer.style.getPropertyValue("--new-version-toast-mobile-right")
+    ).toBe("18px");
+
     (dock.getBoundingClientRect as jest.Mock).mockReturnValue(
-      createDockRect({ height: 54, top: 826 })
+      createDockRect({
+        height: 54,
+        top: 826,
+        right: globalThis.innerWidth - 44,
+      })
     );
     dock.dispatchEvent(new Event("transitionrun"));
 
@@ -366,6 +376,9 @@ describe("NewVersionToast", () => {
     expect(
       toastLayer.style.getPropertyValue(NEW_VERSION_TOAST_MOBILE_SCALE_PROPERTY)
     ).toBe("0.88");
+    expect(
+      toastLayer.style.getPropertyValue("--new-version-toast-mobile-right")
+    ).toBe("44px");
   });
 
   it("tracks the mobile dock when its root mounts after the toast", async () => {
@@ -382,9 +395,9 @@ describe("NewVersionToast", () => {
     const toastLayer = container.firstChild as HTMLElement;
 
     expect(toastLayer).toHaveClass(
-      "tw-left-1/2",
-      "tw-right-auto",
-      "-tw-translate-x-1/2"
+      "tw-left-auto",
+      "tw-right-[var(--new-version-toast-mobile-right,1.125rem)]",
+      "tw-origin-bottom-right"
     );
     expect(
       toastLayer.style.getPropertyValue(
@@ -411,7 +424,7 @@ describe("NewVersionToast", () => {
     ).toBe("1");
   });
 
-  it("centers the compact native-app update pill above the measured dock", async () => {
+  it("right-aligns the compact native-app update pill above the measured dock", async () => {
     mockedUseVersionStatus.mockReturnValue(true);
     mockedUseDeviceInfo.mockReturnValue({
       hasTouchScreen: true,
@@ -431,9 +444,9 @@ describe("NewVersionToast", () => {
     const toastLayer = container.firstChild as HTMLElement;
 
     expect(toastLayer).toHaveClass(
-      "tw-left-1/2",
-      "tw-right-auto",
-      "-tw-translate-x-1/2",
+      "tw-left-auto",
+      "tw-right-[var(--new-version-toast-mobile-right,1.125rem)]",
+      "tw-origin-bottom-right",
       "tw-w-max"
     );
     expect(toastLayer).not.toHaveClass("sm:tw-bottom-7", "sm:tw-right-7");
