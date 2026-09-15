@@ -31,7 +31,7 @@ export default function VersionReloadScreen() {
       aria-live="polite"
       tabIndex={-1}
     >
-      {/* Local decorative asset, available before React hydrates. */}
+      {/* eslint-disable-next-line @next/next/no-img-element -- The reload cover must render its cached local asset without client image code. */}
       <img
         src="/rocket-refresh-small.png"
         alt=""

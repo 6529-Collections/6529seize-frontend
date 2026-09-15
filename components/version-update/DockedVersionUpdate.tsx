@@ -51,7 +51,7 @@ export function VersionUpdateButton({
       onClick={refreshAppVersion}
       className={`tw-pointer-events-auto tw-flex tw-size-9 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-[#398351] tw-bg-[#062417] tw-p-1 tw-shadow-[0_0_12px_rgba(49,205,105,0.12)] focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-[#95ffad] active:tw-bg-[#103e26] desktop-hover:hover:tw-bg-[#103e26] ${className}`}
     >
-      {/* The local decorative rocket is shared with the reload screen. */}
+      {/* eslint-disable-next-line @next/next/no-img-element -- Cache the same local asset used by the pre-hydration reload screen. */}
       <img
         src="/rocket-refresh-small.png"
         alt=""
