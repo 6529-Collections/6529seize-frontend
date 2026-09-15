@@ -18,7 +18,7 @@ beforeEach(() => {
 it("offers a separately labelled update action without replacing Home", () => {
   render(
     <nav>
-      <DockedVersionUpdate dockClassName="native-dock" compact={false} />
+      <DockedVersionUpdate />
       <a href="/">Home</a>
     </nav>
   );
@@ -35,10 +35,8 @@ it("offers a separately labelled update action without replacing Home", () => {
 });
 
 it("removes the entire attachment when there is no update", () => {
-  const view = render(
-    <DockedVersionUpdate dockClassName="native-dock" compact={false} />
-  );
+  const view = render(<DockedVersionUpdate />);
   jest.mocked(useVersionStatus).mockReturnValue(false);
-  view.rerender(<DockedVersionUpdate dockClassName="native-dock" compact />);
+  view.rerender(<DockedVersionUpdate />);
   expect(view.container).toBeEmptyDOMElement();
 });

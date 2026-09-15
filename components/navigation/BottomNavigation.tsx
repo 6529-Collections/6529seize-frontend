@@ -552,13 +552,11 @@ const BottomNavigationResolvedContent: React.FC<
     >
       <div
         {...{ [MOBILE_BOTTOM_NAV_DOCK_ATTRIBUTE]: "true" }}
-        className={`${getDockClassName(compact)} ${styles.dock}`}
+        data-compact={compact}
+        className={`${getDockClassName(compact)} ${styles["dock"] ?? ""}`}
         style={getDockStyle({ compact, isTabletViewport })}
       >
-        <DockedVersionUpdate
-          compact={compact}
-          dockClassName={getDockClassName(compact)}
-        />
+        <DockedVersionUpdate />
         <div className="tw-pointer-events-none tw-absolute tw-inset-0 tw-overflow-hidden tw-rounded-[inherit]">
           <div
             aria-hidden="true"

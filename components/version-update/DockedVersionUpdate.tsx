@@ -7,26 +7,22 @@ import { t } from "@/i18n/messages";
 
 import DockUpdateSurface from "./DockUpdateSurface";
 
-export default function DockedVersionUpdate({
-  compact,
-  dockClassName,
-}: {
-  readonly compact: boolean;
-  readonly dockClassName: string;
-}) {
+export default function DockedVersionUpdate() {
   const isVersionStale = useVersionStatus();
   if (!isVersionStale) return null;
 
   return (
     <>
-      <DockUpdateSurface dockClassName={dockClassName} />
+      <DockUpdateSurface />
       <div
-        data-version-update-dock={compact ? "compact" : "expanded"}
-        className={`tw-pointer-events-none tw-absolute tw-bottom-full tw-left-1/2 tw-z-10 -tw-translate-x-1/2 tw-transition-[width,height] tw-duration-300 tw-ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:tw-transition-none ${compact ? "tw-h-[31.68px] tw-w-[91.52px] sm:tw-h-9 sm:tw-w-[104px]" : "tw-h-9 tw-w-[104px]"}`}
+        data-version-update-dock="true"
+        className="tw-pointer-events-none tw-absolute tw-bottom-full tw-left-1/2 tw-z-10 -tw-translate-x-1/2"
+        style={{
+          width: "calc(104px * var(--dock-update-scale))",
+          height: "calc(36px * var(--dock-update-scale))",
+        }}
       >
-        <VersionUpdateButton
-          className={`tw-absolute tw-left-1/2 tw-top-0.5 tw-origin-top -tw-translate-x-1/2 tw-transition-transform tw-duration-300 tw-ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:tw-transition-none ${compact ? "tw-scale-[0.88] sm:tw-scale-100" : "tw-scale-100"}`}
-        />
+        <VersionUpdateButton className="tw-absolute tw-left-1/2 tw-top-[calc(2px*var(--dock-update-scale))] tw-origin-top -tw-translate-x-1/2 tw-scale-[var(--dock-update-scale)]" />
       </div>
     </>
   );

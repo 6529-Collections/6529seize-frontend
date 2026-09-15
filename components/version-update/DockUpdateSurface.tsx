@@ -1,117 +1,103 @@
 "use client";
 
-import { useLayoutEffect, useRef, useState } from "react";
-import {
-  getDockUpdatePath,
-  getDockBubblePath,
-  type DockUpdateGeometry,
-} from "./dockUpdateGeometry";
+import { useId } from "react";
+import styles from "./DockUpdateSurface.module.css";
 
-export default function DockUpdateSurface({
-  dockClassName,
-}: {
-  readonly dockClassName: string;
-}) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [geometry, setGeometry] = useState<(DockUpdateGeometry & { readonly borderWidth: number }) | null>(null);
+const BUMP_PATH = "M0 36 C24 36 24 0 52 0 C80 0 80 36 104 36 V37 H0 Z";
 
-  useLayoutEffect(() => {
-    const dock = ref.current?.parentElement;
-    const bubble = dock?.querySelector("[data-version-update-dock]");
-    if (!dock || !bubble) return;
-    const measure = () => {
-      const { width, height } = dock.getBoundingClientRect();
-      const bubbleRect = bubble.getBoundingClientRect();
-      const computed = getComputedStyle(dock);
-      const radius = Number.parseFloat(computed.borderTopLeftRadius);
-      const borderWidth = Number.parseFloat(computed.borderLeftWidth) || 0;
-      if (width <= 0 || height <= 0) return;
-      setGeometry((current) => {
-        const next = {
-          width,
-          height,
-          radius,
-          borderWidth,
-          bubbleWidth: bubbleRect.width,
-          bubbleHeight: bubbleRect.height,
-        };
-        return current?.width === width &&
-          current.height === height &&
-          current.radius === radius &&
-          current.borderWidth === borderWidth &&
-          current.bubbleWidth === next.bubbleWidth &&
-          current.bubbleHeight === next.bubbleHeight
-          ? current
-          : next;
-      });
-    };
-    measure();
-    const observer = new ResizeObserver(measure);
-    observer.observe(dock);
-    observer.observe(bubble);
-    return () => observer.disconnect();
-  }, []);
-
-  if (!geometry) return <div ref={ref} aria-hidden="true" />;
-  const path = getDockUpdatePath(geometry);
-  const height = geometry.height + geometry.bubbleHeight;
-  const shadowPadding = 96;
-  // Keep the native CSS paint outside the join; padding preserves its entire glow.
-  const paintMask = `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="${geometry.width + shadowPadding * 2}" height="${height + shadowPadding * 2}"><path fill-rule="evenodd" d="M0 0 H${geometry.width + shadowPadding * 2} V${height + shadowPadding * 2} H0 Z M${shadowPadding + (geometry.width - geometry.bubbleWidth) / 2} ${shadowPadding + geometry.bubbleHeight - 1} h${geometry.bubbleWidth} v4 h-${geometry.bubbleWidth} Z"/></svg>`)}")`;
-  const bubblePath = getDockBubblePath(geometry);
-  const mask = `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${geometry.width} ${height}"><path d="${path}"/></svg>`)}")`;
+/** The browser lays out this silhouette with the dock; no measured frame is cached. */
+export default function DockUpdateSurface() {
+  const id = useId().replaceAll(":", "");
+  const shapeId = `${id}-shape`;
+  const clipId = `${id}-clip`;
+  const edgeId = `${id}-edge`;
 
   return (
     <div
-      ref={ref}
       aria-hidden="true"
       data-dock-update-surface="true"
-      className="tw-pointer-events-none tw-absolute"
-      style={{
-        left: -geometry.borderWidth,
-        top: -geometry.bubbleHeight - geometry.borderWidth,
-        width: geometry.width,
-        height,
-      }}
+      className={styles["surface"]}
     >
-      <div
-        className="tw-absolute tw-inset-0 tw-bg-black/[0.76] tw-backdrop-blur-2xl [mask-repeat:no-repeat] [mask-size:100%_100%]"
-        style={{ maskImage: mask, WebkitMaskImage: mask }}
-      />
-      <div
-        className="tw-pointer-events-none tw-absolute [mask-repeat:no-repeat] [mask-size:100%_100%]"
-        style={{
-          inset: -shadowPadding,
-          maskImage: paintMask,
-          WebkitMaskImage: paintMask,
-        }}
-      >
-        <div
-          data-native-dock-paint="true"
-          className={dockClassName}
-          style={{
-            position: "absolute",
-            left: shadowPadding,
-            top: shadowPadding + geometry.bubbleHeight,
-            width: geometry.width,
-            height: geometry.height,
-            borderRadius: geometry.radius,
-            background: "transparent",
-            backdropFilter: "none",
-            WebkitBackdropFilter: "none",
-            transition: "none",
-            pointerEvents: "none",
-          }}
-        />
-      </div>
-      <svg
-        width="100%"
-        height="100%"
-        className="tw-absolute tw-inset-0 tw-overflow-visible"
-        fill="none"
-      >
-        <path d={bubblePath} stroke="rgba(255,255,255,0.13)" />
+      <svg className={styles["outline"]} width="100%" height="100%">
+        <defs>
+          <g id={shapeId} fill="white">
+            <rect className={styles["body"]} />
+            <path className={styles["bump"]} d={BUMP_PATH} />
+          </g>
+          <clipPath id={clipId}>
+            <rect className={styles["body"]} />
+            <path className={styles["bump"]} d={BUMP_PATH} />
+          </clipPath>
+          {/* Match main's box-shadow order, radii and opacity. Outer shadows must
+              exclude the ENTIRE silhouette, or they brighten the glass/join. */}
+          <filter
+            id={edgeId}
+            x="-50%"
+            y="-150%"
+            width="200%"
+            height="400%"
+            colorInterpolationFilters="sRGB"
+          >
+            <feGaussianBlur
+              in="SourceAlpha"
+              stdDeviation="17"
+              result="glowBlur"
+            />
+            <feFlood floodColor="white" floodOpacity="0.075" />
+            <feComposite in2="glowBlur" operator="in" result="glow" />
+            <feMorphology
+              in="SourceAlpha"
+              operator="dilate"
+              radius="1"
+              result="spread"
+            />
+            <feFlood floodColor="white" floodOpacity="0.045" />
+            <feComposite in2="spread" operator="in" result="ring" />
+            <feGaussianBlur in="SourceAlpha" stdDeviation="22.5" />
+            <feOffset dy="18" result="dropBlur" />
+            <feFlood floodColor="black" floodOpacity="0.48" />
+            <feComposite in2="dropBlur" operator="in" result="drop" />
+            <feMerge>
+              <feMergeNode in="glow" />
+              <feMergeNode in="ring" />
+              <feMergeNode in="drop" />
+            </feMerge>
+            <feComposite in2="SourceAlpha" operator="out" result="outside" />
+            <feOffset in="SourceAlpha" dy="1" result="down" />
+            <feComposite
+              in="SourceAlpha"
+              in2="down"
+              operator="out"
+              result="topEdge"
+            />
+            <feFlood floodColor="white" floodOpacity="0.105" />
+            <feComposite in2="topEdge" operator="in" result="topHighlight" />
+            <feOffset in="SourceAlpha" dy="-1" result="up" />
+            <feComposite
+              in="SourceAlpha"
+              in2="up"
+              operator="out"
+              result="bottomEdge"
+            />
+            <feFlood floodColor="white" floodOpacity="0.06" />
+            <feComposite
+              in2="bottomEdge"
+              operator="in"
+              result="bottomHighlight"
+            />
+            <feMerge>
+              <feMergeNode in="outside" />
+              <feMergeNode in="bottomHighlight" />
+              <feMergeNode in="topHighlight" />
+            </feMerge>
+          </filter>
+        </defs>
+        <use href={`#${shapeId}`} filter={`url(#${edgeId})`} />
       </svg>
+      <div
+        className={styles["glass"]}
+        style={{ clipPath: `url(#${clipId})` }}
+      />
     </div>
   );
 }

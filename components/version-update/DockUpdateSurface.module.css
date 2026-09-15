@@ -1,0 +1,34 @@
+.surface {
+  position: absolute;
+  pointer-events: none;
+  inset: calc(-36px * var(--dock-update-scale)) 0 0;
+}
+
+.outline {
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+  z-index: 1;
+}
+
+.body {
+  x: 0;
+  y: calc(36px * var(--dock-update-scale));
+  width: 100%;
+  height: calc(100% - 36px * var(--dock-update-scale));
+  rx: var(--dock-update-radius);
+  ry: var(--dock-update-radius);
+}
+
+.bump {
+  transform: translateX(calc(50% - 52px * var(--dock-update-scale)))
+    scale(var(--dock-update-scale));
+}
+
+.glass {
+  position: absolute;
+  inset: 0;
+  background: rgb(0 0 0 / 76%);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+}
