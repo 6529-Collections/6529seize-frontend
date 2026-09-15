@@ -155,8 +155,10 @@ On web layouts, route switching is sidebar-first.
   `Search` instead of a separate toast. Selecting it keeps the current route
   and shows a static rocket, `Updating to the latest version`, and three
   animated dots while the page reloads. Reduced-motion preferences keep the
-  dots still. The screen clears when the app shell loads, or after 30 seconds
-  if startup does not finish.
+  dots still. The rocket is prepared when an update becomes available and
+  loaded eagerly during the reload. The screen clears together after the
+  rocket and app shell are ready, or after 30 seconds if startup does not
+  finish. An image-loading failure does not block the update.
 - Mobile browsers retain the full update toast and use the same updating screen
   when it is tapped. This includes tablets using desktop browsing or a paired
   pointer. The native app keeps its

@@ -66,3 +66,25 @@ Deploy the companion backend `helpBotReplyLoop` routing/renderer change first,
 then publish this frontend corpus. The new backend fails closed for unavailable
 Core procedures. An older backend can misroute these new records into generic
 wallet answers or truncate recovery explanations; avoid frontend-first rollout.
+
+
+### Calculated reconciliation ranges
+
+`desktop-calculated` records carry a validated `reconciliation_min_block` and
+numeric placeholders in `brief_answer`: `percentage`, `minimum_block`,
+`checkpoint`, and `from_block`. The runtime computes block ranges, never the LLM.
+Keep the minimum aligned with `TRANSACTIONS_START_BLOCK` and the native Reconcile
+dialog when reviewing Desktop source changes. The user supplies the local
+Transactions checkpoint from the latest `Latest block in DB` log; never substitute
+a current Ethereum head or a TDH snapshot. The supported progression is 25%, 50%,
+75%, then 100%, with reconciliation and TDH recalculation between steps.
+
+The final `Range: …` sentence is visible conversation context and must remain in
+calculated replies. It preserves the selected interval and percentage across
+short replies without private device access. Calculated templates are excluded
+from ordinary retrieval; update the backend before publishing these records.
+
+The 100% reconciliation failure advances to transaction-reset guidance. Preserve
+the distinction between reconciliation, Reset to Block, NFT reset, and wallet
+recovery. Reset instructions must explain local history deletion/reimport, RPC
+and time cost, and waiting for resync before recalculating TDH.

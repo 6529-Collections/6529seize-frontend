@@ -4,10 +4,53 @@ export const VERSION_RELOAD_KEY = "6529:version-reload";
 export const VERSION_RELOAD_ATTRIBUTE = "data-version-reload";
 export const VERSION_RELOAD_LOCALE_ATTRIBUTE = "data-version-reload-locale";
 export const VERSION_RELOAD_SCREEN_ID = "version-reload-screen";
+export const VERSION_RELOAD_IMAGE_SRC = "/rocket-refresh-small.png";
 const MARKER_MAX_AGE_MS = 60_000;
 const SCREEN_TIMEOUT_MS = 30_000;
+const IMAGE_TIMEOUT_MS = 1_000;
+let reloadPending = false;
 
-export function finishVersionReload() {
+/** Prepare the actual cover image, not just a separate browser-cache entry. */
+export function prepareVersionReloadImage(): Promise<void> {
+  const image = document
+    .getElementById(VERSION_RELOAD_SCREEN_ID)
+    ?.querySelector("img");
+  if (!image) return Promise.resolve();
+
+  return new Promise((resolve) => {
+    const finish = () => {
+      globalThis.clearTimeout(timeout);
+      image.removeEventListener("load", finish);
+      image.removeEventListener("error", finish);
+      resolve();
+    };
+    const timeout = globalThis.setTimeout(finish, IMAGE_TIMEOUT_MS);
+    if (typeof image.decode === "function") {
+      void image.decode().then(finish).catch(finish);
+    } else if (image.complete) {
+      finish();
+    } else {
+      image.addEventListener("load", finish);
+      image.addEventListener("error", finish);
+    }
+  });
+}
+
+function afterCoverPaint(): Promise<void> {
+  return new Promise((resolve) => {
+    const finish = () => {
+      globalThis.clearTimeout(timeout);
+      resolve();
+    };
+    const timeout = globalThis.setTimeout(finish, 150);
+    globalThis.requestAnimationFrame(() =>
+      globalThis.requestAnimationFrame(finish)
+    );
+  });
+}
+
+function finishVersionReload() {
+  reloadPending = false;
   document.documentElement.removeAttribute(VERSION_RELOAD_ATTRIBUTE);
   document.documentElement.removeAttribute(VERSION_RELOAD_LOCALE_ATTRIBUTE);
   try {
@@ -17,9 +60,36 @@ export function finishVersionReload() {
   }
 }
 
+/** Dismiss the incoming cover as a whole after its image and app shell are ready. */
+export async function finishVersionReloadWhenReady() {
+  if (!canFinishVersionReload()) return;
+  await prepareVersionReloadImage();
+  await afterCoverPaint();
+  if (canFinishVersionReload()) finishVersionReload();
+}
+
+function canFinishVersionReload() {
+  return (
+    !reloadPending &&
+    document.documentElement.hasAttribute(VERSION_RELOAD_ATTRIBUTE)
+  );
+}
+
 /** Show feedback before navigating; the next document restores it before paint. */
 export function beginVersionReload(reload: () => void) {
-  if (document.documentElement.hasAttribute(VERSION_RELOAD_ATTRIBUTE)) return;
+  if (
+    reloadPending ||
+    document.documentElement.hasAttribute(VERSION_RELOAD_ATTRIBUTE)
+  )
+    return;
+  reloadPending = true;
+  void prepareVersionReloadImage().then(() => {
+    if (!reloadPending) return;
+    void showVersionReload(reload);
+  });
+}
+
+async function showVersionReload(reload: () => void) {
   const locale = normalizeLocale(navigator.languages[0] ?? navigator.language);
   try {
     sessionStorage.setItem(
@@ -37,17 +107,9 @@ export function beginVersionReload(reload: () => void) {
   document.getElementById(VERSION_RELOAD_SCREEN_ID)?.focus();
   globalThis.setTimeout(finishVersionReload, SCREEN_TIMEOUT_MS);
 
-  let started = false;
-  const navigate = () => {
-    if (started) return;
-    started = true;
-    reload();
-  };
   // Give the screen one paint; the timeout handles throttled/background frames.
-  globalThis.requestAnimationFrame(() =>
-    globalThis.requestAnimationFrame(navigate)
-  );
-  globalThis.setTimeout(navigate, 150);
+  await afterCoverPaint();
+  reload();
 }
 
 // Static inline bootstrap: no remote content or user strings are inserted into HTML.
@@ -60,5 +122,8 @@ if(!Number.isFinite(age)||age<0||age>${MARKER_MAX_AGE_MS})return;
 const locale=['en-US','en-GB','fr-FR','es-ES','de-DE'].includes(marker.locale)?marker.locale:'en-US';
 document.documentElement.setAttribute('${VERSION_RELOAD_LOCALE_ATTRIBUTE}',locale);
 document.documentElement.setAttribute('${VERSION_RELOAD_ATTRIBUTE}','true');
+const image=document.createElement('link');
+image.rel='preload';image.setAttribute('as','image');image.href=${JSON.stringify(VERSION_RELOAD_IMAGE_SRC)};
+document.head.appendChild(image);
 setTimeout(()=>{document.documentElement.removeAttribute('${VERSION_RELOAD_ATTRIBUTE}');document.documentElement.removeAttribute('${VERSION_RELOAD_LOCALE_ATTRIBUTE}');},${SCREEN_TIMEOUT_MS});
 }catch{}})();`;

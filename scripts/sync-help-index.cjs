@@ -279,12 +279,43 @@ function validateSourceRefs(record) {
   }
 }
 
+function validateCalculatedAnswer(record) {
+  if (record.tags?.includes("desktop-calculated")) {
+    if (
+      !Number.isSafeInteger(record.reconciliation_min_block) ||
+      record.reconciliation_min_block < 0
+    )
+      fail(
+        `${record.id}: reconciliation_min_block must be a non-negative safe integer`
+      );
+    const allowed = new Set([
+      "percentage",
+      "minimum_block",
+      "checkpoint",
+      "from_block",
+    ]);
+    for (const match of (record.brief_answer ?? "").matchAll(
+      /\{\{(.*?)\}\}/g
+    )) {
+      if (!allowed.has(match[1]))
+        fail(`${record.id}: unknown calculated-answer placeholder`);
+    }
+    if (
+      !(record.brief_answer ?? "").endsWith(
+        "Range: {{percentage}}% of blocks {{minimum_block}}–{{checkpoint}}."
+      )
+    )
+      fail(`${record.id}: calculated answer must preserve its block range`);
+  }
+}
+
 function validateAnswerMetadata(record, routePatterns) {
   if (record.brief_answer !== undefined) {
     requireString(record.brief_answer, "brief_answer", record.id);
     if (record.brief_answer.length > 900)
       fail(`${record.id}: brief_answer exceeds 900 characters`);
   }
+  validateCalculatedAnswer(record);
   if (record.answer_links !== undefined) {
     if (!Array.isArray(record.answer_links) || record.answer_links.length > 3) {
       fail(
