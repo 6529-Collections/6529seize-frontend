@@ -7716,6 +7716,48 @@ paths:
           description: Only the author can toggle hide link preview
         "404":
           description: Drop not found
+  /drop-media/proposal-frame:
+    post:
+      tags:
+        - Drops
+      summary: Publish an optional proposal frame around uploaded artwork
+      description: >-
+        Requires an authenticated profile. Builds a fixed HTML template around
+        an owned, ready media upload or recognized decentralized artwork and
+        pins it to IPFS. The source is referenced, never fetched by this API.
+        The returned HTML URL can be submitted as drop media with an existing
+        additional_media.preview_image for mint and static previews.
+      operationId: createProposalFrame
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        handler:
+          import: "@/api/drops/proposal-frame.handlers"
+          name: handleCreateProposalFrame
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiProposalFrameRequest"
+      responses:
+        "200":
+          description: Published proposal frame
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiProposalFrameResponse"
+        "400":
+          description: Invalid input or artwork still processing
+        "401":
+          description: Authentication required
+        "403":
+          description: A profile and ownership of uploaded media are required
+        "429":
+          description: API rate limit exceeded
   /drop-media/prep:
     post:
       tags:
@@ -9428,6 +9470,60 @@ paths:
           description: Trade state or idempotency conflict
         "503":
           description: Trading unavailable
+  /market/operations/{id}/preflight:
+    post:
+      tags:
+        - Marketplace
+      summary: Simulate an exact reviewed batch without reserving or sending it
+      description: >-
+        Authenticated BUY_BATCH reviews only. Calls and raw gas estimates use
+        the stored transaction at one fresh Ethereum block. No transaction data
+        or RPC options are accepted. This does not renew the review, change gas
+        caps, or create a send attempt. Per-actor and per-operation throttles
+        fail closed.
+      operationId: preflightMarketBatch
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: market
+        handler:
+          import: "@/api/marketplace/marketplace-batch-preflight.handler"
+          name: handlePreflightMarketBatch
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiMarketBatchPreflightRequest"
+      responses:
+        "200":
+          description: Exact reviewed transaction simulated at the returned block
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMarketBatchPreflight"
+        "400":
+          description: Invalid request
+        "403":
+          description: Original paying wallet and current profile required
+        "404":
+          description: Operation not found
+        "409":
+          description: Review changed, expired, or cannot be simulated
+        "429":
+          description: Another check is running or checks were requested too quickly
+        "503":
+          description: Preflight or its rate limiter is unavailable
   /market/operations/{id}/send-attempts:
     post:
       tags:
@@ -29010,6 +29106,8 @@ components:
             $ref: "#/components/schemas/ApiMarketTransaction"
         settlement:
           $ref: "#/components/schemas/ApiMarketBatchSettlement"
+        receipt:
+          $ref: "#/components/schemas/ApiMarketReceipt"
       required:
         - id
         - revision
@@ -29025,6 +29123,63 @@ components:
         - execution_policy
         - items
         - approval_transactions
+    ApiMarketBatchPreflight:
+      type: object
+      additionalProperties: false
+      description: >-
+        Read-only simulation of the exact stored BUY_BATCH transaction. Both
+        call and raw gas estimate are pinned to this block; its hash is checked
+        again before responding. This result does not authorize sending or
+        extend the original review expiry. Existing send-arming checks remain
+        mandatory.
+      properties:
+        operation_id:
+          type: string
+          format: uuid
+        revision:
+          type: string
+          pattern: ^[0-9a-f]{64}$
+        transaction_digest:
+          type: string
+          pattern: ^[0-9a-f]{64}$
+        estimated_gas:
+          type: string
+          pattern: ^[1-9][0-9]{0,77}$
+          maxLength: 78
+          description: Raw eth_estimateGas result, without a safety multiplier
+        block_number:
+          type: integer
+          format: int64
+          minimum: 1
+        block_hash:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{64}$
+        block_timestamp:
+          type: integer
+          format: int64
+          minimum: 1
+          description: Ethereum block timestamp in Unix seconds
+      required:
+        - operation_id
+        - revision
+        - transaction_digest
+        - estimated_gas
+        - block_number
+        - block_hash
+        - block_timestamp
+    ApiMarketBatchPreflightRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        expected_revision:
+          type: string
+          pattern: ^[0-9a-f]{64}$
+        transaction_digest:
+          type: string
+          pattern: ^[0-9a-f]{64}$
+      required:
+        - expected_revision
+        - transaction_digest
     ApiMarketBatchPrepareRequest:
       type: object
       additionalProperties: false
@@ -29137,6 +29292,13 @@ components:
       type: object
       additionalProperties: false
       properties:
+        order_remaining_quantity:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+          description: >-
+            Whole source order remaining quantity verified at a canonical safe
+            block; absent when unavailable.
         asset_key:
           type: string
         order:
@@ -29624,6 +29786,8 @@ components:
           pattern: ^0x[0-9a-fA-F]{64}$
         settlement:
           $ref: "#/components/schemas/ApiMarketSettlement"
+        receipt:
+          $ref: "#/components/schemas/ApiMarketReceipt"
         nft_recipient:
           type: string
           pattern: ^0x[0-9a-fA-F]{40}$
@@ -29867,6 +30031,115 @@ components:
         - currency
         - amount_wei
         - acknowledge_external_recipient
+    ApiMarketReceipt:
+      type: object
+      additionalProperties: false
+      description: >-
+        Recorded chain evidence only. Historical approval transactions may be
+        unavailable; missing cost fields are not zero or a fee cap.
+      properties:
+        transactions:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiMarketReceiptTransaction"
+        payment:
+          $ref: "#/components/schemas/ApiMarketReceiptPayment"
+      required:
+        - transactions
+    ApiMarketReceiptPayment:
+      type: object
+      additionalProperties: false
+      description: >-
+        Exact payment proven by successful fulfillment events in a canonical
+        safe block. Batch net is the sum of seller proceeds, not buyer income.
+        Excludes network costs.
+      properties:
+        currency:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{40}$
+        total_wei:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+        net_wei:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+        fees:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiMarketFee"
+        payout_wallet:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{40}$
+      required:
+        - currency
+        - total_wei
+        - net_wei
+        - fees
+    ApiMarketReceiptTransaction:
+      type: object
+      additionalProperties: false
+      properties:
+        purpose:
+          type: string
+          enum:
+            - APPROVAL
+            - TRANSACTION
+        payer_wallet:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{40}$
+          description: Transaction sender who paid its ETH network cost.
+        transaction_hash:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{64}$
+        block_number:
+          type: integer
+          format: int64
+        block_hash:
+          type: string
+          pattern: ^0x[0-9a-fA-F]{64}$
+        block_timestamp:
+          type: integer
+          format: int64
+          description: Canonical inclusion block timestamp in Unix seconds.
+        status:
+          type: string
+          enum:
+            - SUCCESS
+            - REVERTED
+        confirmation:
+          type: string
+          enum:
+            - INCLUDED
+            - CONFIRMED
+        safe_block_number:
+          type: integer
+          format: int64
+        gas_used:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+        effective_gas_price_wei:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+        network_fee_wei:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+          description: >-
+            Actual ETH network cost from receipt gasUsed multiplied by effective
+            gasPrice; never an estimate or review cap.
+      required:
+        - purpose
+        - payer_wallet
+        - transaction_hash
+        - block_number
+        - block_hash
+        - block_timestamp
+        - status
+        - confirmation
     ApiMarketSendAttempt:
       type: object
       additionalProperties: false
@@ -29962,6 +30235,13 @@ components:
       type: object
       additionalProperties: false
       properties:
+        order_remaining_quantity:
+          type: string
+          pattern: ^(0|[1-9][0-9]{0,77})$
+          maxLength: 78
+          description: >-
+            Whole source order remaining quantity verified at a canonical safe
+            block, distinct from operation remaining_quantity.
         filled_quantity:
           type: string
           pattern: ^(0|[1-9][0-9]{0,77})$
@@ -33613,6 +33893,56 @@ components:
       enum:
         - CREATED
         - RECENT
+    ApiProposalFrameRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - media_url
+        - mime_type
+        - title
+        - layout
+      properties:
+        media_url:
+          type: string
+          minLength: 1
+          maxLength: 2048
+          description: >-
+            Owned drop upload URL or recognized IPFS, IPNS, or Arweave artwork
+            URL
+        mime_type:
+          type: string
+          enum:
+            - image/png
+            - image/jpeg
+            - image/jpg
+            - image/gif
+            - image/webp
+            - video/mp4
+            - video/x-msvideo
+            - video/quicktime
+            - text/html
+        title:
+          type: string
+          minLength: 1
+          maxLength: 250
+        layout:
+          type: string
+          enum:
+            - portrait
+            - landscape
+    ApiProposalFrameResponse:
+      type: object
+      required:
+        - url
+        - mime_type
+      properties:
+        url:
+          type: string
+          description: Published IPFS index.html URL
+        mime_type:
+          type: string
+          enum:
+            - text/html
     ApiPublishProfileCmsPackageRequest:
       type: object
       required:

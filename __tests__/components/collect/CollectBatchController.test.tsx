@@ -22,11 +22,19 @@ import {
 
 import * as recipientHooks from "@/components/collect/useCollectBatchRecipientUpdate";
 import { validateMarketBatchOperation } from "@/components/collect/market-batch-validation";
+import { assertCollectBatchAvailable } from "@/components/collect/assertCollectBatchAvailable";
+
+jest.mock("@/components/collect/assertCollectBatchAvailable", () => ({
+  assertCollectBatchAvailable: jest.fn(),
+}));
 
 let mockFixture = batchFixture();
 let mockNative = false;
 let mockAddress = PAYER;
 let mockProfile: ApiIdentity;
+let mockExecutionBusy = false;
+let mockExecutionMessage: string | undefined;
+let mockKnownTransaction: { operationId: string; hash: string } | undefined;
 const mockPrepare = jest.fn(),
   mockConfirm = jest.fn();
 const mockReviewForm = jest.fn();
@@ -61,8 +69,10 @@ jest.mock("@/hooks/useCapacitor", () => ({
 }));
 jest.mock("@/components/collect/CollectCheckoutScreen", () => ({
   __esModule: true,
-  default: ({ children }: { children: ReactNode }) => (
-    <div role="dialog">{children}</div>
+  default: ({ children, busy }: { children: ReactNode; busy?: boolean }) => (
+    <div role="dialog" data-checkout-busy={String(Boolean(busy))}>
+      {children}
+    </div>
   ),
 }));
 jest.mock("@/components/collect/CollectBatchReviewForm", () => ({
@@ -100,7 +110,9 @@ jest.mock("@/components/collect/useMarketSettlement", () => ({
 jest.mock("@/components/collect/useMarketBatchExecution", () => ({
   useMarketBatchExecution: () => ({
     ready: true,
-    busy: false,
+    busy: mockExecutionBusy,
+    knownTransaction: mockKnownTransaction,
+    message: mockExecutionMessage,
     confirm: mockConfirm,
     clearMessage: jest.fn(),
     recoverTransaction: jest.fn(),
@@ -124,9 +136,13 @@ jest.mock("@/services/api/market-batch-api", () => ({
 let serial = 0;
 beforeEach(() => {
   jest.clearAllMocks();
+  jest.mocked(assertCollectBatchAvailable).mockReset();
   localStorage.clear();
   mockNative = false;
   mockAddress = PAYER;
+  mockExecutionBusy = false;
+  mockExecutionMessage = undefined;
+  mockKnownTransaction = undefined;
   jest.spyOn(Date, "now").mockReturnValue(NOW);
   mockFixture = batchFixture();
   mockFixture.request.profile_id = `profile-${++serial}`;
@@ -139,6 +155,34 @@ beforeEach(() => {
   mockPrepare.mockResolvedValue(mockFixture.operation);
 });
 afterEach(() => jest.restoreAllMocks());
+
+it("allows leaving as soon as this purchase has a transaction hash, even while the service report is pending", () => {
+  mockExecutionBusy = true;
+  const view = mount(true);
+  expect(screen.getByRole("dialog")).toHaveAttribute(
+    "data-checkout-busy",
+    "true"
+  );
+  mockKnownTransaction = {
+    operationId: "another-operation",
+    hash: `0x${"a".repeat(64)}`,
+  };
+  view.rerenderScope();
+  expect(screen.getByRole("dialog")).toHaveAttribute(
+    "data-checkout-busy",
+    "true"
+  );
+  mockKnownTransaction = {
+    operationId: mockFixture.operation.id,
+    hash: `0x${"a".repeat(64)}`,
+  };
+  view.rerenderScope();
+  expect(screen.getByRole("dialog")).toHaveAttribute(
+    "data-checkout-busy",
+    "false"
+  );
+  expect(mockConfirm).not.toHaveBeenCalled();
+});
 
 it.each([true, false])(
   "only requests a manual hash when the active batch lacks one (known=%s)",
@@ -216,6 +260,75 @@ it("explains a failed connection and retries the exact batch without signing", a
   expect(mockPrepare).toHaveBeenCalledTimes(2);
   expect(mockPrepare.mock.calls[1]).toEqual(mockPrepare.mock.calls[0]);
   expect(mockConfirm).not.toHaveBeenCalled();
+});
+
+it("keeps Orders available for a pending execution after an earlier check error", async () => {
+  mockPrepare.mockRejectedValueOnce(new TypeError("Failed to fetch"));
+  const { rerenderScope } = mount();
+  const prepare = screen.getByRole("button", {
+    name: "Check selected purchases",
+  });
+  await waitFor(() => expect(prepare).toBeEnabled());
+  fireEvent.click(prepare);
+  expect(await screen.findByRole("alert")).toHaveTextContent(
+    "The trading service could not be reached"
+  );
+  mockExecutionMessage =
+    "A purchase from this listing is pending. Check its progress in Orders.";
+  rerenderScope();
+  expect(screen.getByRole("link", { name: "View in Orders" })).toHaveAttribute(
+    "href",
+    "/collect/orders"
+  );
+});
+
+it.each([1, 2])(
+  "rejects a pending single purchase at prepare boundary %s",
+  async (boundary) => {
+    const guard = jest.mocked(assertCollectBatchAvailable);
+    if (boundary === 2) guard.mockImplementationOnce(() => undefined);
+    guard.mockImplementationOnce(() => {
+      throw new Error("MARKET_PURCHASE_PENDING");
+    });
+    mount();
+    const prepare = screen.getByRole("button", {
+      name: "Check selected purchases",
+    });
+    await waitFor(() => expect(prepare).toBeEnabled());
+    fireEvent.click(prepare);
+    await screen.findByText(
+      "A purchase from this listing is pending. Check its progress in Orders."
+    );
+    expect(
+      screen.getByRole("link", { name: "View in Orders" })
+    ).toHaveAttribute("href", "/collect/orders");
+    expect(mockPrepare).toHaveBeenCalledTimes(boundary - 1);
+    expect(mockConfirm).not.toHaveBeenCalled();
+  }
+);
+
+it("rechecks pending source orders in the execution guard for the current operation", async () => {
+  mount();
+  const prepare = screen.getByRole("button", {
+    name: "Check selected purchases",
+  });
+  await waitFor(() => expect(prepare).toBeEnabled());
+  fireEvent.click(prepare);
+  const confirm = await screen.findByRole("button", {
+    name: "Continue in wallet",
+  });
+  await waitFor(() => expect(confirm).toBeEnabled());
+  fireEvent.click(confirm);
+  await waitFor(() => expect(mockConfirm).toHaveBeenCalled());
+  const guard = mockConfirm.mock.calls[0]![2] as () => void;
+  jest.mocked(assertCollectBatchAvailable).mockImplementation(() => {
+    throw new Error("MARKET_PURCHASE_PENDING");
+  });
+  expect(guard).toThrow("MARKET_PURCHASE_PENDING");
+  expect(assertCollectBatchAvailable).toHaveBeenLastCalledWith(
+    mockFixture.request,
+    mockFixture.operation.id
+  );
 });
 
 it("prepares once and supports direct review editing without restarting the purchase", async () => {

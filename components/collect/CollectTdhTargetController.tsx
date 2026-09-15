@@ -9,7 +9,7 @@ import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { createCollectTdhTargetPlan } from "@/services/api/collect-tdh-target-api";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import CollectTdhTargetDelivery from "./CollectTdhTargetDelivery";
 import CollectTdhTargetForm from "./CollectTdhTargetForm";
 import CollectTdhTargetResults from "./CollectTdhTargetResults";
@@ -31,6 +31,7 @@ import type {
 import { validateCollectTdhTargetDraft } from "./collect-tdh-target.validation";
 
 interface Props {
+  readonly revision?: number;
   readonly collection?: CollectCollection;
   readonly profile: ApiIdentity | null;
   readonly payingWallet?: string | undefined;
@@ -63,6 +64,7 @@ function TargetController({
   onConnect,
   onReviewPurchase,
   onPlanOffers,
+  revision: refreshRevision = 0,
 }: Props) {
   const locale = useBrowserLocale();
   const [draft, setDraft] = useState<CollectTdhTargetDraft>({
@@ -78,16 +80,26 @@ function TargetController({
   const [recipient, setRecipient] = useState(() =>
     defaultCollectRecipient(profile, payingWallet)
   );
-  const [loading, setLoading] = useState(false);
+  const [requested, setRequested] = useState<ApiCollectTdhTargetRequest | null>(
+    null
+  );
   const [invalid, setInvalid] = useState<CollectTdhTargetField>();
   const [error, setError] = useState<string>();
   const [result, setResult] = useState<{
-    plan: ApiCollectTdhTargetPlan;
+    plan: ApiCollectTdhTargetPlan | null;
     request: ApiCollectTdhTargetRequest;
+    revision: number;
+    generation: number;
   } | null>(null);
   const pending = useRef<AbortController | null>(null);
   const revision = useRef(0);
-  useEffect(
+  useLayoutEffect(() => {
+    // Invalidate captured actions before a receipt-triggered recalculation.
+    revision.current++;
+    pending.current?.abort();
+    pending.current = null;
+  }, [refreshRevision, requested, profile]);
+  useLayoutEffect(
     () => () => {
       revision.current++;
       pending.current?.abort();
@@ -99,12 +111,12 @@ function TargetController({
     revision.current++;
     pending.current?.abort();
     pending.current = null;
-    setLoading(false);
+    setRequested(null);
     setResult(null);
     setError(undefined);
     setInvalid(undefined);
   };
-  const submit = async () => {
+  const submit = () => {
     if (!profile?.id || pending.current) return;
     const field = validateCollectTdhTargetDraft(draft);
     if (field) {
@@ -125,40 +137,68 @@ function TargetController({
       return;
     }
     clear();
+    setRequested(collectTdhTargetRequest(draft, profile, recipient));
+  };
+  useEffect(() => {
+    if (!requested || !profile) return;
     const requestRevision = revision.current;
     const abort = new AbortController();
     pending.current = abort;
-    setLoading(true);
-    try {
-      const request = collectTdhTargetRequest(draft, profile, recipient);
-      const plan = await createCollectTdhTargetPlan(request, abort.signal);
+    const record = (plan: ApiCollectTdhTargetPlan | null) => {
       if (abort.signal.aborted || revision.current !== requestRevision) return;
-      validateCollectTdhTargetPlan(plan, request, profile);
-      setResult({ plan, request });
-    } catch {
-      if (!abort.signal.aborted && revision.current === requestRevision)
-        setError(t(locale, "collect.tdhTarget.failed"));
-    } finally {
-      if (revision.current === requestRevision) {
-        pending.current = null;
-        setLoading(false);
-      }
-    }
-  };
+      setError(undefined);
+      setResult({
+        plan,
+        request: requested,
+        revision: refreshRevision,
+        generation: requestRevision,
+      });
+    };
+    void createCollectTdhTargetPlan(requested, abort.signal)
+      .then((plan) => {
+        validateCollectTdhTargetPlan(plan, requested, profile);
+        record(plan);
+      })
+      .catch(() => record(null))
+      .finally(() => {
+        if (pending.current === abort) pending.current = null;
+      });
+    return () => abort.abort();
+  }, [requested, refreshRevision, profile]);
+  const currentResult =
+    result?.request === requested && result.revision === refreshRevision
+      ? result
+      : null;
+  const loading = requested !== null && currentResult === null;
+  const currentError =
+    error ??
+    (currentResult?.plan === null
+      ? t(locale, "collect.tdhTarget.failed")
+      : undefined);
   const continuePlan = (offers: boolean) => {
-    if (!result || !profile) return;
+    if (
+      !currentResult?.plan ||
+      !profile ||
+      currentResult.generation !== revision.current
+    )
+      return;
     if (
       offers &&
-      result.request.recipient.toLowerCase() !== payingWallet?.toLowerCase()
+      currentResult.request.recipient.toLowerCase() !==
+        payingWallet?.toLowerCase()
     ) {
       setError(t(locale, "collect.tdhTarget.offerWallet"));
       return;
     }
     try {
-      validateCollectTdhTargetPlan(result.plan, result.request, profile);
-      const items = collectTdhTargetSelection(result.plan, profile);
-      if (offers) onPlanOffers?.(result.plan);
-      else onReviewPurchase(items, result.request.recipient);
+      validateCollectTdhTargetPlan(
+        currentResult.plan,
+        currentResult.request,
+        profile
+      );
+      const items = collectTdhTargetSelection(currentResult.plan, profile);
+      if (offers) onPlanOffers?.(currentResult.plan);
+      else onReviewPurchase(items, currentResult.request.recipient);
     } catch {
       setError(t(locale, "collect.tdhTarget.stale"));
     }
@@ -170,7 +210,7 @@ function TargetController({
         loading={loading}
         connected={Boolean(profile?.id)}
         invalid={invalid}
-        error={error}
+        error={currentError}
         delivery={
           profile ? (
             <CollectTdhTargetDelivery
@@ -187,19 +227,17 @@ function TargetController({
           clear();
           setDraft(value);
         }}
-        onSubmit={() => {
-          void submit();
-        }}
+        onSubmit={submit}
         onConnect={onConnect}
       />
-      {result && (
+      {currentResult?.plan && (
         <CollectTdhTargetResults
-          plan={result.plan}
+          plan={currentResult.plan}
           onReview={() => continuePlan(false)}
           onPlanOffers={onPlanOffers ? () => continuePlan(true) : undefined}
           offersDisabledReason={
             onPlanOffers &&
-            result.request.recipient.toLowerCase() !==
+            currentResult.request.recipient.toLowerCase() !==
               payingWallet?.toLowerCase()
               ? t(locale, "collect.tdhTarget.offerWallet")
               : undefined

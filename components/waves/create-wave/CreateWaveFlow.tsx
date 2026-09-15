@@ -57,7 +57,12 @@ export default function CreateWaveFlow({
 
   useEffect(() => {
     const browserWindow = globalThis.window;
-    if (!browserWindow || !isActive) {
+    // A containing dialog owns dismissal, including nested controls and any
+    // protection against accidentally closing an unfinished form.
+    if (
+      !isActive ||
+      scrollRegionRef.current?.closest('[role="dialog"], [role="alertdialog"]')
+    ) {
       return;
     }
 

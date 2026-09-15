@@ -6,7 +6,7 @@ import { ApiMarketOrderSideEnum } from "@/generated/models/ApiMarketOrder";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { ArrowPathIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
-import { useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import {
   formatDate,
   formatDecimal,
@@ -31,6 +31,8 @@ interface OrderDetailsProps {
   readonly onRefresh: () => void;
   readonly showPrice?: boolean;
   readonly enableTradeActions?: boolean;
+  readonly focusedOrderHash?: string | null | undefined;
+  readonly onOrderFocused?: (() => void) | undefined;
 }
 
 function OrderInformation({
@@ -74,14 +76,30 @@ function IndividualOrder({
   locale,
   showPrice,
   enableTradeActions,
+  focused,
+  onFocused,
 }: {
   readonly order: ApiMarketOrder;
   readonly locale: SupportedLocale;
   readonly showPrice: boolean;
   readonly enableTradeActions: boolean;
+  readonly focused: boolean;
+  readonly onFocused?: (() => void) | undefined;
 }) {
+  const element = useRef<HTMLLIElement>(null);
+  useLayoutEffect(() => {
+    if (!focused || !element.current) return;
+    element.current.focus({ preventScroll: true });
+    element.current.scrollIntoView({ block: "nearest", behavior: "instant" });
+    onFocused?.();
+  }, [focused, onFocused]);
   return (
-    <li className="tw-min-w-0 tw-border-0 tw-border-b tw-border-solid tw-border-white/10 tw-py-4 last:tw-border-b-0">
+    <li
+      ref={element}
+      tabIndex={-1}
+      data-market-order={order.order_id}
+      className="tw-min-w-0 tw-scroll-mt-24 tw-rounded-lg tw-border-0 tw-border-b tw-border-solid tw-border-white/10 tw-py-4 last:tw-border-b-0 focus:tw-outline focus:tw-outline-2 focus:tw-outline-offset-4 focus:tw-outline-primary-400"
+    >
       {showPrice && (
         <p className="tw-mb-3 tw-mt-0 tw-text-meta tw-font-medium tw-tabular-nums tw-text-iron-200 [overflow-wrap:anywhere]">
           {t(
@@ -136,8 +154,15 @@ export default function MarketDepthOrderDetails({
   onRefresh,
   showPrice = false,
   enableTradeActions = false,
+  focusedOrderHash,
+  onOrderFocused,
 }: OrderDetailsProps) {
-  const [showAll, setShowAll] = useState(false);
+  const [showAll, setShowAll] = useState(Boolean(focusedOrderHash));
+  const [shownOrderHash, setShownOrderHash] = useState(focusedOrderHash);
+  if (focusedOrderHash && shownOrderHash !== focusedOrderHash) {
+    setShownOrderHash(focusedOrderHash);
+    setShowAll(true);
+  }
   if (error) {
     return (
       <div className="tw-py-4">
@@ -195,6 +220,8 @@ export default function MarketDepthOrderDetails({
             locale={locale}
             showPrice={showPrice}
             enableTradeActions={enableTradeActions}
+            focused={order.order_id.toLowerCase() === focusedOrderHash}
+            onFocused={onOrderFocused}
           />
         ))}
       </ul>
@@ -222,14 +249,31 @@ export function MarketDepthOtherOrders({
   error,
   onRetry,
   onRefresh,
+  focusedOrderHash,
+  onOrderFocused,
 }: Omit<OrderDetailsProps, "orders" | "expectedCount" | "showPrice"> & {
   readonly data: ApiMarketDepth;
 }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [openedOrderHash, setOpenedOrderHash] = useState<string | null>(null);
+  const otherOrders = getOtherOrders(data);
+  if (
+    focusedOrderHash &&
+    openedOrderHash !== focusedOrderHash &&
+    !isLoading &&
+    !error &&
+    otherOrders.some(
+      (order) => order.order_id.toLowerCase() === focusedOrderHash
+    )
+  ) {
+    setOpenedOrderHash(focusedOrderHash);
+    setIsOpen(true);
+  }
   const count = getOtherOrderCount(data);
   if (count === 0) return null;
   return (
     <details
+      open={isOpen}
       className="tw-group/other tw-mt-5 tw-border-0 tw-border-t tw-border-solid tw-border-white/10 tw-py-2"
       onToggle={(event) => {
         const open = event.currentTarget.open;
@@ -252,7 +296,7 @@ export function MarketDepthOtherOrders({
             {t(locale, "marketDepth.orders.otherDescription")}
           </p>
           <MarketDepthOrderDetails
-            orders={getOtherOrders(data)}
+            orders={otherOrders}
             expectedCount={count}
             locale={locale}
             isLoading={isLoading}
@@ -260,6 +304,8 @@ export function MarketDepthOtherOrders({
             onRetry={onRetry}
             onRefresh={onRefresh}
             showPrice
+            focusedOrderHash={focusedOrderHash}
+            onOrderFocused={onOrderFocused}
           />
         </div>
       )}

@@ -7,6 +7,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowsRotate, faCube } from "@fortawesome/free-solid-svg-icons";
 import SeizeVideoPlayer from "@/components/drops/view/item/content/media/SeizeVideoPlayer";
 import Button from "@/components/utils/button/Button";
+import { ProposalCardPreview } from "../../submission/components/ProposalCardPreview";
 
 // Dynamically import GLB viewer to avoid SSR issues
 const MediaDisplayGLB = dynamic(
@@ -37,6 +38,8 @@ const MediaDisplayGLB = dynamic(
  * @returns JSX Element
  */
 const FilePreview: React.FC<FilePreviewProps> = ({
+  proposalFrame,
+  artworkTitle,
   url,
   file,
   mimeType,
@@ -108,6 +111,16 @@ const FilePreview: React.FC<FilePreviewProps> = ({
   };
 
   const renderMediaContent = () => {
+    if (proposalFrame) {
+      return (
+        <ProposalCardPreview
+          mediaUrl={url}
+          mimeType={effectiveMimeType || "image/png"}
+          title={artworkTitle ?? ""}
+          layout={proposalFrame}
+        />
+      );
+    }
     if (isGLB) {
       return (
         <div className="tw-h-full tw-min-h-[300px] tw-w-full">
@@ -168,7 +181,9 @@ const FilePreview: React.FC<FilePreviewProps> = ({
       )}
 
       {/* Media container with proper padding and centering */}
-      <div className="tw-relative tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-overflow-hidden tw-p-4">
+      <div
+        className={`tw-relative tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-overflow-hidden tw-p-4 ${proposalFrame ? "tw-pt-14" : ""}`}
+      >
         {renderMediaContent()}
       </div>
 
