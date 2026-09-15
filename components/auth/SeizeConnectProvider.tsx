@@ -430,6 +430,8 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
             ? error
             : new Error("Failed to revoke session during logout");
         logError("seizeDisconnectAndLogout.logoutSessionV2", revokeError);
+        // Native logout may proceed offline only after its cleanup is durably queued.
+        if (capacitor.isCapacitor) throw revokeError;
       }
       await removeAuthJwt();
       refreshStoredConnectedAccounts();
@@ -449,6 +451,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
       throw authError;
     }
   }, [
+    capacitor.isCapacitor,
     disconnect,
     isSigningOutAllRef,
     refreshStoredConnectedAccounts,

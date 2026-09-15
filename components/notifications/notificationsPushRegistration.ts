@@ -7,6 +7,7 @@ import {
 } from "@capacitor/push-notifications";
 import * as Sentry from "@sentry/nextjs";
 
+import { preparePushInstallationRegistration } from "@/services/notifications/push-installation";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { commonApiPost } from "@/services/api/common-api";
 import { getAuthJwt, isAuthJwtUsable } from "@/services/auth/auth.utils";
@@ -540,44 +541,116 @@ const registerWithRetry = async (
   }
 };
 
+const getUsablePushAuthJwt = (): string | null => {
+  const jwt = getAuthJwt();
+  return isAuthJwtUsable(jwt) ? jwt : null;
+};
+
 export const registerPushNotificationWithRetry = async (
   deviceId: string,
   deviceInfo: DeviceInfo,
   token: string,
   profileId: string
 ): Promise<boolean> => {
+  const registrationJwt = getUsablePushAuthJwt();
+  if (!registrationJwt) {
+    Sentry.addBreadcrumb({
+      category: "notifications",
+      level: "warning",
+      message: "Push registration skipped (auth token unavailable).",
+      data: {
+        component: "NotificationsProvider",
+        operation: "registerPushNotification",
+        profile_id: profileId,
+        platform: deviceInfo.platform,
+      },
+    });
+    return false;
+  }
+  let installation: Awaited<
+    ReturnType<typeof preparePushInstallationRegistration>
+  >;
+  try {
+    installation = await preparePushInstallationRegistration(
+      deviceId,
+      token,
+      registrationJwt
+    );
+  } catch {
+    // Storage/proof failures must settle the shared registration promise without
+    // logging potentially sensitive storage contents.
+    Sentry.captureException(new Error("Push installation preparation failed"), {
+      tags: {
+        component: "NotificationsProvider",
+        operation: "preparePushInstallationRegistration",
+      },
+      extra: { profile_id: profileId, platform: deviceInfo.platform },
+    });
+    return false;
+  }
+  return registerPreparedPushNotificationWithRetry({
+    deviceId,
+    deviceInfo,
+    token,
+    profileId,
+    registrationJwt,
+    installation,
+  });
+};
+
+function reportUnavailablePushAuth(
+  attempt: number,
+  profileId: string,
+  platform: DeviceInfo["platform"]
+): void {
+  console.warn("Skipping push registration: auth token is missing or expired", {
+    attempt: attempt + 1,
+    maxAttempts: PUSH_REGISTRATION_TOTAL_ATTEMPTS,
+    profileId,
+    platform,
+  });
+  Sentry.addBreadcrumb({
+    category: "notifications",
+    level: "warning",
+    message: "Push registration skipped (auth token unavailable).",
+    data: {
+      component: "NotificationsProvider",
+      operation: "registerPushNotification",
+      attempt: attempt + 1,
+      max_attempts: PUSH_REGISTRATION_TOTAL_ATTEMPTS,
+      profile_id: profileId,
+      platform,
+    },
+  });
+}
+
+const registerPreparedPushNotificationWithRetry = async ({
+  deviceId,
+  deviceInfo,
+  token,
+  profileId,
+  registrationJwt,
+  installation,
+}: {
+  deviceId: string;
+  deviceInfo: DeviceInfo;
+  token: string;
+  profileId: string;
+  registrationJwt: string;
+  installation: Awaited<ReturnType<typeof preparePushInstallationRegistration>>;
+}): Promise<boolean> => {
   for (let attempt = 0; attempt < PUSH_REGISTRATION_TOTAL_ATTEMPTS; attempt++) {
-    const currentAuthJwt = getAuthJwt();
-    if (!isAuthJwtUsable(currentAuthJwt)) {
-      console.warn(
-        "Skipping push registration: auth token is missing or expired",
-        {
-          attempt: attempt + 1,
-          maxAttempts: PUSH_REGISTRATION_TOTAL_ATTEMPTS,
-          profileId,
-          platform: deviceInfo.platform,
-        }
-      );
-      Sentry.addBreadcrumb({
-        category: "notifications",
-        level: "warning",
-        message: "Push registration skipped (auth token unavailable).",
-        data: {
-          component: "NotificationsProvider",
-          operation: "registerPushNotification",
-          attempt: attempt + 1,
-          max_attempts: PUSH_REGISTRATION_TOTAL_ATTEMPTS,
-          profile_id: profileId,
-          platform: deviceInfo.platform,
-        },
-      });
+    if (getUsablePushAuthJwt() !== registrationJwt) {
+      reportUnavailablePushAuth(attempt, profileId, deviceInfo.platform);
       return false;
     }
 
     try {
       await commonApiPost({
         endpoint: `push-notifications/register`,
+        headers: { Authorization: `Bearer ${registrationJwt}` },
         body: {
+          ...installation,
           device_id: deviceId,
           token,
           platform: deviceInfo.platform,
@@ -723,5 +796,4 @@ export {
   registerWithRetry,
   requestPushNotificationPermissions,
   toCaptureExceptionInput,
-  toRecord,
 };

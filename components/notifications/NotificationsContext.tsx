@@ -1,5 +1,6 @@
 "use client";
 
+import { flushPendingPushLogouts } from "@/services/notifications/push-installation";
 import { Device, type DeviceInfo } from "@capacitor/device";
 import {
   PushNotifications,
@@ -28,6 +29,7 @@ import {
 } from "@/services/auth/auth.utils";
 import { useAuth } from "../auth/Auth";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
+import { createDeliveredNotificationsReconciler } from "./delivered-notifications";
 import { getStableDeviceId } from "./stable-device-id";
 import type { DevicePushData } from "./device-push.types";
 import {
@@ -45,13 +47,12 @@ import {
   registerWithRetry,
   requestPushNotificationPermissions,
   toCaptureExceptionInput,
-  toRecord,
   type PushRegistrationFingerprint,
 } from "./notificationsPushRegistration";
 
 type NotificationsContextType = {
   removeWaveDeliveredNotifications: (waveId: string) => Promise<void>;
-  removeAllDeliveredNotifications: () => Promise<void>;
+  reconcileProfileDeliveredNotifications: () => Promise<void>;
 };
 
 const NotificationsContext = createContext<
@@ -79,11 +80,27 @@ const redirectConfig = {
   },
 };
 
+const captureReconciliationFailure = (failure: unknown) => {
+  Sentry.captureException(
+    toCaptureExceptionInput(
+      failure,
+      "Failed to reconcile delivered notifications"
+    ),
+    {
+      tags: {
+        component: "NotificationsProvider",
+        operation: "reconcileDeliveredNotifications",
+      },
+      extra: createErrorTelemetryExtra(failure),
+    }
+  );
+};
+
 export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const { isCapacitor, isIos, isActive } = useCapacitor();
-  const { connectedProfile } = useAuth();
+  const { connectedProfile, activeProfileProxy } = useAuth();
   const forceAuthTokenRefresh = useReducer(
     (revision: number) => revision + 1,
     0
@@ -99,7 +116,12 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
   const isRegisteredRef = useRef(false);
   const lastSuccessfulRegistrationRef =
     useRef<PushRegistrationFingerprint | null>(null);
+  const lastSuccessfulRegistrationAuthRef = useRef<string | null>(null);
   const inFlightRegistrationRef = useRef<Promise<void> | null>(null);
+  const activeProfileProxyRef = useRef(activeProfileProxy);
+  useEffect(() => {
+    activeProfileProxyRef.current = activeProfileProxy;
+  }, [activeProfileProxy]);
   const connectedProfileRef = useRef<ApiIdentity | null>(connectedProfile);
   const connectedAccountsRef = useRef(connectedAccounts);
   const activeAddressRef = useRef(address);
@@ -137,9 +159,12 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
     };
   }, [forceAuthTokenRefresh]);
 
-  const removeDeliveredNotifications = useCallback(
+  // Android dismisses tapped entries itself: its tap ID is an FCM message ID,
+  // not the tray ID/tag required by native removal. Reconciliation uses the
+  // native delivered snapshot on both platforms instead.
+  const removeTappedIosNotification = useCallback(
     async (notifications: PushNotificationSchema[]) => {
-      if (isIos && isRegisteredRef.current) {
+      if (isIos && isRegisteredRef.current && notifications.length > 0) {
         try {
           await PushNotifications.removeDeliveredNotifications({
             notifications,
@@ -267,7 +292,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
       const raw: unknown = notification.data ?? {};
       const notificationData = parseDevicePushData(raw);
       if (!notificationData) {
-        await removeDeliveredNotifications([notification]);
+        await removeTappedIosNotification([notification]);
         console.warn("Ignoring notification: invalid payload shape", { raw });
         return;
       }
@@ -275,7 +300,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
       const targetProfileHandle = notificationData.target_profile_handle.trim();
 
       if (targetProfileId.length === 0 || targetProfileHandle.length === 0) {
-        await removeDeliveredNotifications([notification]);
+        await removeTappedIosNotification([notification]);
         console.warn("Ignoring notification: missing target profile metadata", {
           targetProfileId,
           targetProfileHandle,
@@ -289,7 +314,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
       });
 
       if (!matchedAddress) {
-        await removeDeliveredNotifications([notification]);
+        await removeTappedIosNotification([notification]);
         console.warn(
           "Ignoring notification: target profile is not one of connected accounts",
           { targetProfileId, targetProfileHandle }
@@ -305,7 +330,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
         return;
       }
 
-      await removeDeliveredNotifications([notification]);
+      await removeTappedIosNotification([notification]);
 
       const { handle: rawHandle, ...notificationDataWithoutHandle } =
         notificationData;
@@ -324,7 +349,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
       }
     },
     [
-      removeDeliveredNotifications,
+      removeTappedIosNotification,
       resolveAddressForNotificationProfile,
       switchToMatchedAddress,
     ]
@@ -368,10 +393,12 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
         return;
       }
 
+      const registrationAuth = getAuthTokenFingerprint(getAuthJwt());
       const previousSuccess = lastSuccessfulRegistrationRef.current;
 
       if (
         previousSuccess &&
+        lastSuccessfulRegistrationAuthRef.current === registrationAuth &&
         isSamePushRegistrationFingerprint(previousSuccess, fingerprint)
       ) {
         Sentry.addBreadcrumb({
@@ -393,6 +420,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
         const latestSuccess = lastSuccessfulRegistrationRef.current;
         if (
           latestSuccess &&
+          lastSuccessfulRegistrationAuthRef.current === registrationAuth &&
           isSamePushRegistrationFingerprint(latestSuccess, fingerprint)
         ) {
           Sentry.addBreadcrumb({
@@ -411,6 +439,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
         }
       }
 
+      if (getAuthTokenFingerprint(getAuthJwt()) !== registrationAuth) return;
       const registrationTask = (async () => {
         const didRegister = await registerPushNotificationWithRetry(
           deviceId,
@@ -418,8 +447,12 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
           token,
           profileId
         );
-        if (didRegister) {
+        if (
+          didRegister &&
+          getAuthTokenFingerprint(getAuthJwt()) === registrationAuth
+        ) {
           lastSuccessfulRegistrationRef.current = fingerprint;
+          lastSuccessfulRegistrationAuthRef.current = registrationAuth;
         }
       })();
 
@@ -642,67 +675,88 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
     pushRegistrationAuthKey,
   ]);
 
-  const removeWaveDeliveredNotifications = useCallback(
-    async (waveId: string) => {
-      if (isIos && isRegisteredRef.current) {
-        try {
-          const deliveredNotifications =
-            await PushNotifications.getDeliveredNotifications();
-          const waveNotifications = deliveredNotifications.notifications.filter(
-            (notification) =>
-              toRecord(notification.data)?.["wave_id"] === waveId
-          );
-          await removeDeliveredNotifications(waveNotifications);
-        } catch (error) {
-          console.error("Error removing wave delivered notifications", error);
-          Sentry.captureException(
-            toCaptureExceptionInput(
-              error,
-              "Failed to remove wave delivered notifications"
-            ),
-            {
-              tags: {
-                component: "NotificationsProvider",
-                operation: "removeWaveDeliveredNotifications",
-              },
-              extra: createErrorTelemetryExtra(error),
-            }
-          );
-        }
-      }
-    },
-    [isIos, removeDeliveredNotifications]
+  const reconcileQueue = useMemo(
+    () => createDeliveredNotificationsReconciler(captureReconciliationFailure),
+    []
   );
 
-  const removeAllDeliveredNotifications = useCallback(async () => {
-    if (isIos && isRegisteredRef.current) {
-      try {
-        await PushNotifications.removeAllDeliveredNotifications();
-      } catch (error) {
-        console.error("Error removing all delivered notifications", error);
-        Sentry.captureException(
-          toCaptureExceptionInput(
-            error,
-            "Failed to remove all delivered notifications"
-          ),
-          {
-            tags: {
-              component: "NotificationsProvider",
-              operation: "removeAllDeliveredNotifications",
-            },
-            extra: createErrorTelemetryExtra(error),
-          }
-        );
-      }
-    }
-  }, [isIos]);
+  useEffect(
+    () => () => reconcileQueue.cancel(),
+    [reconcileQueue, connectedProfile?.id, authJwt, activeProfileProxy]
+  );
+
+  const reconcileProfile = useCallback(
+    async (waveId?: string) => {
+      const profileId = connectedProfile?.id;
+      if (
+        !isCapacitor ||
+        !isRegisteredRef.current ||
+        activeProfileProxy ||
+        !profileId ||
+        !authJwt ||
+        !isAuthJwtUsable(authJwt)
+      )
+        return;
+      await reconcileQueue({
+        profileId,
+        authJwt,
+        ...(waveId === undefined ? {} : { waveId }),
+        isCurrent: () =>
+          !activeProfileProxyRef.current &&
+          connectedProfileRef.current?.id === profileId &&
+          getAuthJwt() === authJwt &&
+          isAuthJwtUsable(authJwt),
+      });
+    },
+    [
+      isCapacitor,
+      connectedProfile?.id,
+      activeProfileProxy,
+      authJwt,
+      reconcileQueue,
+    ]
+  );
+
+  const removeWaveDeliveredNotifications = useCallback(
+    (waveId: string) => reconcileProfile(waveId),
+    [reconcileProfile]
+  );
+  const reconcileProfileDeliveredNotifications = useCallback(
+    () => reconcileProfile(),
+    [reconcileProfile]
+  );
+
+  useEffect(() => {
+    if (isActive) void reconcileProfileDeliveredNotifications();
+  }, [isActive, reconcileProfileDeliveredNotifications]);
+
+  useEffect(() => {
+    let current = true;
+    const flush = () => {
+      void (async () => {
+        const reconciled = await flushPendingPushLogouts();
+        if (reconciled && current && isCapacitor && isActive) {
+          // A fresh login may have deferred registration while logout was offline.
+          await initializeNotifications(
+            connectedProfileRef.current ?? undefined
+          );
+        }
+      })().catch(captureReconciliationFailure);
+    };
+    if (isActive) flush();
+    globalThis.addEventListener("online", flush);
+    return () => {
+      current = false;
+      globalThis.removeEventListener("online", flush);
+    };
+  }, [isActive, isCapacitor, initializeNotifications]);
 
   const value = useMemo(
     () => ({
       removeWaveDeliveredNotifications,
-      removeAllDeliveredNotifications,
+      reconcileProfileDeliveredNotifications,
     }),
-    [removeWaveDeliveredNotifications, removeAllDeliveredNotifications]
+    [removeWaveDeliveredNotifications, reconcileProfileDeliveredNotifications]
   );
 
   return (
