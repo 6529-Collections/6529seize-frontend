@@ -123,6 +123,37 @@ describe("Desktop conversational answer metadata", () => {
     }
   });
 
+  it.each([
+    { reconciliation_min_block: -1 },
+    { reconciliation_min_block: 1.5 },
+    { reconciliation_min_block: Number.MAX_SAFE_INTEGER + 1 },
+    { reconciliation_min_block: "13360860" },
+    { reconciliation_min_block: undefined },
+    {
+      brief_answer:
+        "{{unknown}} Range: {{percentage}}% of blocks {{minimum_block}}–{{checkpoint}}.",
+    },
+    { brief_answer: "No retained range" },
+  ])("rejects invalid calculated reconciliation metadata: %j", (fields) => {
+    const index = JSON.parse(JSON.stringify(helpIndex));
+    Object.assign(
+      index.records.find(
+        (record: { id: string }) => record.id === "desktop.tdh-reconcile-range"
+      ),
+      fields
+    );
+    const error = jest.spyOn(console, "error").mockImplementation(() => {});
+    const exit = jest.spyOn(process, "exit").mockImplementation(() => {
+      throw new Error("validation rejected");
+    });
+    try {
+      expect(() => validateIndex(index)).toThrow("validation rejected");
+    } finally {
+      error.mockRestore();
+      exit.mockRestore();
+    }
+  });
+
   it("excludes mobile handoff references from source and published knowledge", () => {
     const published = require("../../public/help-index.json");
     expect(JSON.stringify(helpIndex).toLowerCase()).not.toContain(

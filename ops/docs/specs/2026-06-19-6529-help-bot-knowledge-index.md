@@ -587,6 +587,24 @@ instructions or require account pairing. Explicit `answer_links` lists also
 govern ordinary knowledge answers: only those links appear in the final footer,
 and an empty list suppresses links. Related paths are not additional citations.
 
+Desktop progressive reconciliation uses `desktop-calculated` records with a
+non-negative safe-integer `reconciliation_min_block`. Their short answers contain
+only the supported numeric placeholders (`percentage`, `minimum_block`,
+`checkpoint`, `from_block`) and end with the range sentence validated by the
+publisher. Backend arithmetic fills these values from the user-supplied local
+checkpoint. Publish after the companion runtime update: ordinary retrieval must
+exclude unrendered calculated templates. Start with 25% of the indexed block
+range and widen to 50%, 75%, then 100% only when a same-block mismatch persists
+after each completed reconciliation and TDH recalculation. Failed or incomplete
+work stays at the current stage for completion or error diagnosis; it does not
+authorize a wider range or reset.
+
+When a same-block mismatch persists after completed 100% reconciliation and
+TDH recalculation, the calculated
+transaction-reset stages offer Reset to Block and its Min Block full-resync
+fallback. They preserve context through resync, recalculation, and final
+diagnostics. Partial, failed, or unfinished resync must not be treated as complete.
+
 ## Drop media format guidance
 
 The `waves.composer.image-uploads` record owns the accepted drop media format
