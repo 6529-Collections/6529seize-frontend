@@ -106,6 +106,25 @@ describe("production exact-artifact deployment contract", () => {
     expect(result.status).toBe(0);
   });
 
+  it("keeps the Ethereum RPC URL server-only through build and runtime", () => {
+    expect(build.on.workflow_call.secrets.ETHEREUM_RPC_URL).toEqual({
+      required: true,
+    });
+    expect(
+      deploy.jobs["build-production-artifact"].secrets.ETHEREUM_RPC_URL
+    ).toBe("${{ secrets.ETHEREUM_RPC_URL }}");
+    expect(buildSource).toContain(
+      "ETHEREUM_RPC_URL: ${{ secrets.ETHEREUM_RPC_URL }}"
+    );
+    expect(deploySource).toContain(
+      'OptionName:"ETHEREUM_RPC_URL",Value:$ethereum_rpc_url'
+    );
+    expect(deploySource).toContain(
+      "node ops/scripts/validate-ethereum-rpc-url.cjs"
+    );
+    expect(deploySource).not.toContain("NEXT_PUBLIC_ETHEREUM_RPC_URL");
+  });
+
   it("keeps production manual and deploys only the independently verified artifact", () => {
     expect(deploy.name).toBe("Web Deploy - PROD");
     expect(deploy.on.push).toBeUndefined();

@@ -1421,7 +1421,7 @@ const WAVE_HEADER_MESSAGES = objectMessages("waves.header", {
 } as const);
 
 const WAVE_DROP_ELIGIBILITY_MESSAGES = objectMessages("waves.dropEligibility", {
-  loginRequired: "Please log in",
+  loginRequired: "Please log in to make submissions",
 } as const);
 
 const WAVE_NOTIFICATION_SETTINGS_MESSAGES = namespaceMessages(
@@ -2802,6 +2802,13 @@ const MEME_DATA_TABLE_MESSAGES = objectMessages("memeData", {
 const TOKEN_NUMBER_MESSAGE = "Token #{tokenId}";
 
 export const EN_US_MESSAGES = {
+  "nftNavigation.previous.ariaLabel": "Previous NFT",
+  "nftNavigation.previous.title": "Previous Card",
+  "nftNavigation.next.ariaLabel": "Next NFT",
+  "nftNavigation.next.title": "Next Card",
+  "profile.metadata.unavailable.title": "Profile temporarily unavailable",
+  "profile.metadata.unavailable.description":
+    "This public profile could not be loaded.",
   "memes.proposalFrame.enable": "Add a proposal card frame (optional)",
   "memes.proposalFrame.description":
     "This card has plans. Add an animated border that says this is a proposal and the artwork may change. Your media will be embedded in an HTML artwork.",

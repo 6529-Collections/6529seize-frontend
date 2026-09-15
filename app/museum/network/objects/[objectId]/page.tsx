@@ -12,18 +12,8 @@ export async function generateMetadata({
   params,
 }: MuseumObjectLegacyRouteProps): Promise<Metadata> {
   const { objectId } = await params;
-  const [metadata, { publicationState, view }] = await Promise.all([
-    getMuseumObjectMetadata(objectId),
-    getMuseumPublicationBundle(),
-  ]);
-  const href =
-    publicationState.publication === null
-      ? null
-      : museumWorkHrefForSourceId(publicationState.publication, objectId, view);
-  return {
-    ...metadata,
-    ...(href === null ? {} : { alternates: { canonical: href } }),
-  };
+  const { publicationState } = await getMuseumPublicationBundle();
+  return getMuseumObjectMetadata(objectId, publicationState);
 }
 
 export default async function MuseumObjectLegacyRoute({
