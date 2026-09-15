@@ -3,6 +3,7 @@ import type { Rememe } from "@/entities/INFT";
 import Image from "next/image";
 import { parseIpfsUrl, parseIpfsUrlToGateway } from "@/helpers/Helpers";
 import SeizeVideoPlayer from "@/components/drops/view/item/content/media/SeizeVideoPlayer";
+import { getVideoPosterSrc } from "@/components/nft-image/utils/video-poster";
 
 interface Props {
   nft: Rememe;
@@ -109,6 +110,10 @@ export default function RememeImage(props: Readonly<Props>) {
           template="ambient-media"
           src={videoFallbackUrls[0]}
           fallbackSources={videoFallbackUrls.slice(1)}
+          poster={getVideoPosterSrc([
+            ...imageFallbackUrls,
+            props.nft.s3_image_thumbnail,
+          ])}
           autoPlay={props.animation}
           muted
           loop
