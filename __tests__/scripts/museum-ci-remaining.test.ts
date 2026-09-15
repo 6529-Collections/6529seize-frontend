@@ -78,12 +78,12 @@ describe("Museum isolated remaining runner", () => {
   function run(
     specs: string[],
     env: Record<string, string> = {},
-    command = [runner, ...specs]
+    scriptFile = runner
   ) {
     const eventsPath = path.join(directory, "events.txt");
     const subprocessEnv = { ...process.env };
     delete subprocessEnv.PORT_SEARCH_LIMIT;
-    const result = spawnSync("bash", command, {
+    const result = spawnSync("bash", ["--", scriptFile, ...specs], {
       cwd: directory,
       encoding: "utf8",
       timeout: 10_000,
@@ -185,7 +185,7 @@ describe("Museum isolated remaining runner", () => {
   it.each(["3101", "3102", "3103"])(
     "launches Next on the exact requested port %s",
     (port) => {
-      const result = run([], { PORT: port }, [devRunner]);
+      const result = run([], { PORT: port }, devRunner);
       expect(result.status).toBe(0);
       expect(result.events).toEqual([
         "schema-build",
@@ -197,21 +197,19 @@ describe("Museum isolated remaining runner", () => {
   );
 
   it("preserves the explicit Webpack option", () => {
-    const result = run([], { PORT: "3101", USE_TURBO: "false" }, [devRunner]);
+    const result = run([], { PORT: "3101", USE_TURBO: "false" }, devRunner);
     expect(result.status).toBe(0);
     expect(result.events[1]).toContain("next dev --port 3101 --webpack");
   });
 
   it("stops before Next when schema compilation fails", () => {
-    const result = run([], { PORT: "3101", TEST_SCHEMA_EXIT: "8" }, [
-      devRunner,
-    ]);
+    const result = run([], { PORT: "3101", TEST_SCHEMA_EXIT: "8" }, devRunner);
     expect(result.status).toBe(8);
     expect(result.events).toEqual(["schema-build"]);
   });
 
   it("propagates a failed Next startup without trying another port", () => {
-    const result = run([], { PORT: "3101", TEST_NEXT_EXIT: "1" }, [devRunner]);
+    const result = run([], { PORT: "3101", TEST_NEXT_EXIT: "1" }, devRunner);
     expect(result.status).toBe(1);
     expect(result.events).toEqual([
       "schema-build",
@@ -222,7 +220,7 @@ describe("Museum isolated remaining runner", () => {
   it.each(["", "0", "3104", "3101x"])(
     "rejects unexpected CI port %j",
     (port) => {
-      const result = run([], { PORT: port }, [devRunner]);
+      const result = run([], { PORT: port }, devRunner);
       expect(result.status).toBe(1);
       expect(result.events).toEqual([]);
     }
@@ -309,11 +307,13 @@ describe("Museum isolated remaining runner", () => {
       .split("cleanup_museum_server() {")[1]
       ?.split("museum_server_ready=false")[0];
     expect(cleanup).toBeDefined();
-      const command = `set -euo pipefail\nmuseum_server_pid=4321\ncleanup_museum_server() {${cleanup}\ncleanup_museum_server\necho unexpected-continuation`;
-    const result = run([], { TEST_CLEANUP_SIGNAL: String(signal) }, [
-      "-c",
-      command,
-    ]);
+    // Spaces and shell metacharacters in the filename remain literal argv data.
+    const gateScript = path.join(directory, "gate cleanup '$;.sh");
+    fs.writeFileSync(
+      gateScript,
+      `set -euo pipefail\nmuseum_server_pid=4321\ncleanup_museum_server() {${cleanup}\ncleanup_museum_server\necho unexpected-continuation`
+    );
+    const result = run([], { TEST_CLEANUP_SIGNAL: String(signal) }, gateScript);
     expect(result.status).toBe(status);
     expect(result.events).toEqual([
       "cleanup:-TERM -- -4321",
