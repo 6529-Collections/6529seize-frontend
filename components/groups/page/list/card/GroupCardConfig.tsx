@@ -17,6 +17,10 @@ export default function GroupCardConfig({
     [GroupDescriptionType.WALLETS]: "Manual list",
     [GroupDescriptionType.XTDH_GRANT]: "Grant",
   };
+  const activeValueClasses = quiet
+    ? "tw-font-medium tw-text-iron-200"
+    : "tw-font-semibold tw-text-iron-50";
+  const valueClasses = config.muted ? "tw-text-iron-500" : activeValueClasses;
 
   return (
     <div
@@ -27,7 +31,7 @@ export default function GroupCardConfig({
         {config.label ?? configLabel[config.key]}:
       </span>
       <span
-        className={`tw-whitespace-nowrap ${config.muted ? "tw-text-iron-500" : quiet ? "tw-font-medium tw-text-iron-200" : "tw-font-semibold tw-text-iron-50"}`}
+        className={`tw-whitespace-nowrap ${valueClasses}`}
       >
         {config.value}
       </span>
