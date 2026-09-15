@@ -4,7 +4,7 @@ Parent: [Documentation](../README.md)
 
 ## Naming
 
-The official current names are **6529 Desktop** and **6529 Mobile**. **6529 Core** is the former name of 6529 Desktop and remains a help-search alias for users familiar with the old name. User-facing guidance should otherwise use the current names.
+The official current names are **6529 Desktop** and **6529 Mobile**. **6529 Core** is the former name of 6529 Desktop and remains a help-search alias for users familiar with the old name. User-facing guidance should otherwise use the current names. In help questions, “mobile Core wallets” means 6529 Mobile App Wallets and “desktop Core wallets” means 6529 Desktop wallets; the platform and requested action take precedence over the old name.
 
 ## Overview
 

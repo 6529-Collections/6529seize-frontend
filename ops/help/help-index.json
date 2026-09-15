@@ -8896,7 +8896,15 @@
         "core recovery phrase",
         "core private key",
         "download recovery file",
-        "core recovery file"
+        "core recovery file",
+        "back up my desktop wallet",
+        "back up my desktop core wallet",
+        "back up my core wallet",
+        "back up desktop wallets",
+        "back up core wallets",
+        "back up my desktop wallets",
+        "back up my desktop core wallets",
+        "back up my core wallets"
       ],
       "keywords": [
         "desktop",
@@ -9409,12 +9417,11 @@
       "kind": "business_rule",
       "title": "Former Core wallets and 6529 Mobile App Wallets",
       "aliases": [
-        "how do i use core wallets on mobile",
-        "core wallets on mobile",
-        "mobile core wallets",
-        "core wallet mobile",
-        "core wallets on android",
-        "core wallets on ios",
+        "desktop wallets on mobile",
+        "desktop core wallets on mobile",
+        "transfer desktop wallet to mobile",
+        "same wallet on desktop and mobile",
+        "does my desktop wallet appear on mobile",
         "core wallets in browser",
         "core wallets on website",
         "core wallets on web"
@@ -9423,12 +9430,14 @@
         "core",
         "wallet",
         "wallets",
+        "desktop",
         "mobile",
         "android",
         "ios",
         "browser",
         "website",
-        "app"
+        "app",
+        "transfer"
       ],
       "facts": [
         "6529 Desktop wallets are stored in the installed 6529 Desktop application and its 6529 Desktop wallet controls are not available in 6529 Mobile or an ordinary browser.",
@@ -9462,7 +9471,14 @@
         "what is an app wallet",
         "how do mobile wallets work",
         "how do app wallets work",
-        "manage wallets in mobile app"
+        "manage wallets in mobile app",
+        "mobile core wallets",
+        "core wallets on mobile",
+        "core wallets on android",
+        "core wallets on ios",
+        "how do i use core wallets on mobile",
+        "wallets on mobile",
+        "use mobile wallets"
       ],
       "keywords": [
         "mobile",
