@@ -7,10 +7,13 @@ import { t } from "@/i18n/messages";
 
 const APPS_LOCALE = DEFAULT_LOCALE;
 
-export const metadata: Metadata = getAppMetadata({
-  title: t(APPS_LOCALE, "apps.metadata.title"),
-  description: t(APPS_LOCALE, "apps.metadata.description"),
-});
+export const metadata: Metadata = getAppMetadata(
+  {
+    title: t(APPS_LOCALE, "apps.metadata.title"),
+    description: t(APPS_LOCALE, "apps.metadata.description"),
+  },
+  { canonicalPath: "/about/6529-apps" }
+);
 
 export default function AppsRoute() {
   return <AppsPage />;

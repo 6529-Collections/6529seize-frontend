@@ -49,7 +49,13 @@ describe("user collected generateMetadata", () => {
       headers: { h: "1" },
     });
     expect(getMetadataForUserPage).toHaveBeenCalledWith(profile, "collected");
-    expect(getAppMetadata).toHaveBeenCalledWith({ title: "t" });
+    expect(getAppMetadata).toHaveBeenCalledWith(
+      { title: "t" },
+      {
+        canonicalPath: "/alice/collected",
+        robots: { index: true, follow: true },
+      }
+    );
     expect(meta).toEqual({ title: "t" });
   });
 

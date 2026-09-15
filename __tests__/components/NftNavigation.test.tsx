@@ -30,7 +30,7 @@ const fullScreenSupportedMock = fullScreenSupported as jest.Mock;
 describe("NftNavigation", () => {
   beforeEach(() => jest.clearAllMocks());
 
-  it("disables previous link when at first item", () => {
+  it("does not emit a previous link when at first item", () => {
     fullScreenSupportedMock.mockReturnValue(false);
     render(
       <NftNavigation
@@ -41,9 +41,15 @@ describe("NftNavigation", () => {
         params={makeParams()}
       />
     );
-    const links = screen.getAllByRole("link");
-    expect(links[0]?.className).toMatch(/tw-pointer-events-none/);
-    expect(links[1]?.className).not.toMatch(/tw-pointer-events-none/);
+    expect(screen.getAllByRole("link")).toHaveLength(2);
+    expect(screen.getByRole("link", { name: "Next NFT" })).toHaveAttribute(
+      "href",
+      "/art/2"
+    );
+    expect(screen.getByRole("link", { name: "Previous NFT" })).toHaveAttribute(
+      "aria-disabled",
+      "true"
+    );
   });
 
   it("shows fullscreen icon and triggers fullscreen", async () => {

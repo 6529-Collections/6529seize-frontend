@@ -3,6 +3,8 @@ import { getAppMetadata } from "@/components/providers/metadata";
 import UserPageLayout from "@/components/user/layout/UserPageLayout";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { getMetadataForUserPage } from "@/helpers/Helpers";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
 import {
   getUserProfile,
@@ -16,6 +18,9 @@ import { notFound, redirect } from "next/navigation";
 type TabProps = { readonly profile: ApiIdentity };
 type UserRouteParams = { user: string };
 type UserSearchParams = Record<string, string | string[] | undefined>;
+type ProfileLoadResult =
+  | { readonly ok: true; readonly profile: ApiIdentity }
+  | { readonly ok: false; readonly error: unknown };
 
 const PROBE_USER_SUFFIXES = [
   ".html",
@@ -25,6 +30,12 @@ const PROBE_USER_SUFFIXES = [
   ".aspx",
   ".jsp",
 ] as const;
+
+const PROFILE_NOINDEX_SUBROUTES = new Set([
+  "brain",
+  "cms/builder",
+  "subscriptions",
+]);
 
 const normalizeSearchParams = (
   params?: UserSearchParams | URLSearchParams
@@ -76,20 +87,23 @@ const isNotFoundError = (error: unknown): boolean => {
     return true;
   }
 
-  let message: string | undefined;
-
-  if (typeof error === "string") {
-    message = error;
-  } else if (error instanceof Error) {
-    message = error.message;
-  }
-
-  return message?.toLowerCase().includes("not found") ?? false;
+  return false;
 };
 
 const isProbeLikeUserSlug = (user: string): boolean => {
   const normalized = user.trim().toLowerCase();
   return PROBE_USER_SUFFIXES.some((suffix) => normalized.endsWith(suffix));
+};
+
+const loadProfile = async (
+  user: string,
+  headers: Record<string, string>
+): Promise<ProfileLoadResult> => {
+  try {
+    return { ok: true, profile: await getUserProfile({ user, headers }) };
+  } catch (error) {
+    return { ok: false, error };
+  }
 };
 
 export function createUserTabPage<
@@ -129,15 +143,14 @@ export function createUserTabPage<
     const resolvedSearchParams = searchParams ? await searchParams : undefined;
     const query: UserSearchParams = normalizeSearchParams(resolvedSearchParams);
     const headers = await getAppCommonHeaders();
-    const profile: ApiIdentity = await getUserProfile({
-      user: normalizedUser,
-      headers,
-    }).catch((error: unknown) => {
-      if (isNotFoundError(error)) {
+    const profileResult = await loadProfile(normalizedUser, headers);
+    if (!profileResult.ok) {
+      if (isNotFoundError(profileResult.error)) {
         notFound();
       }
-      throw error;
-    });
+      throw profileResult.error;
+    }
+    const profile = profileResult.profile;
 
     const needsRedirect = userPageNeedsRedirect({
       profile,
@@ -196,16 +209,38 @@ export function createUserTabPage<
 
     const normalizedUser = resolvedParams.user.toLowerCase();
     const headers = await getAppCommonHeaders();
-    const profile: ApiIdentity = await getUserProfile({
-      user: normalizedUser,
-      headers,
-    }).catch((error: unknown) => {
-      if (isNotFoundError(error)) {
+    const profileResult = await loadProfile(normalizedUser, headers);
+    if (!profileResult.ok) {
+      if (isNotFoundError(profileResult.error)) {
         notFound();
       }
-      throw error;
+      return getAppMetadata(
+        {
+          title: t(DEFAULT_LOCALE, "profile.metadata.unavailable.title"),
+          description: t(
+            DEFAULT_LOCALE,
+            "profile.metadata.unavailable.description"
+          ),
+        },
+        { robots: { index: false, follow: true } }
+      );
+    }
+    const profile = profileResult.profile;
+    const canonicalUser = profile.handle ?? profile.primary_wallet;
+    const canonicalUserPath = canonicalUser
+      ? `/${encodeURIComponent(canonicalUser)}`
+      : undefined;
+    const canonicalPath =
+      canonicalUserPath && subroute
+        ? `${canonicalUserPath}/${subroute}`
+        : canonicalUserPath;
+    return getAppMetadata(getMetadataForUserPage(profile, subroute), {
+      canonicalPath,
+      robots: {
+        index: !PROFILE_NOINDEX_SUBROUTES.has(subroute),
+        follow: true,
+      },
     });
-    return getAppMetadata(getMetadataForUserPage(profile, subroute));
   }
 
   return { Page, generateMetadata };
