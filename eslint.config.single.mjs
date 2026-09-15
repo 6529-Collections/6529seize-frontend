@@ -106,6 +106,7 @@ export default defineConfig([
       "scripts/**",
       "**/next.config.*",
       "config/env.ts",
+      "config/ethereumRpcEnv.ts",
       "config/serverEnv.ts",
       "config/alchemyEnv.ts",
       "__tests__/config/env.base-endpoint.test.ts",

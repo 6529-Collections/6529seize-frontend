@@ -2,10 +2,8 @@
 
 import React, { useMemo } from "react";
 import {
-  CalendarDaysIcon,
   ClockIcon,
   LockClosedIcon,
-  NoSymbolIcon,
   PlusIcon,
 } from "@heroicons/react/24/outline";
 import Button from "@/components/utils/button/Button";
@@ -24,7 +22,8 @@ const HEADER_ACTION_BUTTON_CLASS =
   "tw-h-8 tw-min-w-8 tw-max-w-[2rem] tw-whitespace-nowrap tw-text-xs sm:tw-min-w-0 sm:tw-max-w-[11.5rem] lg:tw-max-w-[13.5rem] xl:tw-max-w-none";
 const HEADER_ACTION_BUTTON_TEXT_CLASS =
   "tw-sr-only tw-min-w-0 tw-truncate sm:tw-not-sr-only sm:tw-inline";
-const RESTRICTED_HEADER_BUTTON_CLASS = `tw-w-auto tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-p-0 tw-text-iron-400 desktop-hover:hover:tw-border-iron-500 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-200 sm:tw-px-2.5 ${HEADER_ACTION_BUTTON_CLASS}`;
+const RESTRICTED_HEADER_BUTTON_CLASS =
+  "tw-h-8 tw-w-8 tw-min-w-8 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-p-0 tw-text-iron-400 desktop-hover:hover:tw-border-iron-500 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-200";
 const NOT_ELIGIBLE_BUTTON_CLASS = `tw-group tw-flex tw-w-auto tw-cursor-help tw-items-center tw-justify-center tw-gap-x-1.5 tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-0 tw-text-xs tw-font-medium tw-text-iron-400 tw-transition-colors tw-duration-[180ms] tw-ease-out desktop-hover:hover:tw-text-iron-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 sm:tw-px-2.5 ${HEADER_ACTION_BUTTON_CLASS}`;
 const ACTIVE_LABEL_SUBMIT_MEME = "Submit Meme";
 
@@ -75,7 +74,7 @@ const getActiveLabels = ({
 
 /**
  * Button component for The Memes submissions with multiple states:
- * - Coming soon (restriction details with countdown)
+ * - Coming soon (restriction details with opening time)
  * - Active (green primary button)
  *   - With submission count indicator when limited submissions remaining
  *   - With urgency indicator when submission period is ending soon
@@ -92,14 +91,6 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
 }) => {
   // Get wave information including participation status
   const waveInfo = useWave(wave);
-
-  // Call hooks before any conditional returns
-  // This ensures hooks are called consistently in the same order
-  const targetTime =
-    waveInfo?.participation.status === SubmissionStatus.NOT_STARTED
-      ? waveInfo?.participation.startTime
-      : null;
-  const countdown = useCountdown(targetTime);
 
   // Get end time for ending soon countdown - must be called before any returns
   const endTimeForCountdown = waveInfo?.participation.endTime ?? null;
@@ -138,11 +129,7 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
         data-testid="closed"
         data-full-width="false"
       >
-        <CalendarDaysIcon className="tw-size-4 tw-flex-shrink-0" />
-        <span className={HEADER_ACTION_BUTTON_TEXT_CLASS}>
-          <span className="xl:tw-hidden">Closed</span>
-          <span className="tw-hidden xl:tw-inline">Submissions Closed</span>
-        </span>
+        <LockClosedIcon className="tw-size-4 tw-flex-shrink-0" />
       </WaveHeaderRestrictionButton>
     );
   }
@@ -161,13 +148,7 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
         data-testid="info"
         data-full-width="false"
       >
-        <ClockIcon className="tw-size-4 tw-flex-shrink-0" />
-        <span className={HEADER_ACTION_BUTTON_TEXT_CLASS}>
-          <span className="xl:tw-hidden">Opens {countdown}</span>
-          <span className="tw-hidden xl:tw-inline">
-            Submissions Open {countdown}
-          </span>
-        </span>
+        <LockClosedIcon className="tw-size-4 tw-flex-shrink-0" />
       </WaveHeaderRestrictionButton>
     );
   }
@@ -183,7 +164,7 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
         >
           <LockClosedIcon className="tw-size-4 tw-flex-shrink-0 tw-opacity-70 tw-transition-opacity tw-duration-[180ms] tw-ease-out group-hover:tw-opacity-100" />
           <span
-            className={`${HEADER_ACTION_BUTTON_TEXT_CLASS} tw-border-x-0 tw-border-t-0 tw-border-b tw-border-dashed tw-border-iron-600/70 tw-pb-px tw-transition-colors group-hover:tw-border-iron-400/80`}
+            className={`${HEADER_ACTION_BUTTON_TEXT_CLASS} tw-border-x-0 tw-border-b tw-border-t-0 tw-border-dashed tw-border-iron-600/70 tw-pb-px tw-transition-colors group-hover:tw-border-iron-400/80`}
           >
             How to Submit
           </span>
@@ -208,15 +189,7 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
         data-testid="info"
         data-full-width="false"
       >
-        <NoSymbolIcon className="tw-size-4 tw-flex-shrink-0" />
-        <span className={HEADER_ACTION_BUTTON_TEXT_CLASS}>
-          <span className="xl:tw-hidden">Limit Reached</span>
-          <span className="tw-hidden xl:tw-inline">
-            {maxSubmissions === 1
-              ? "Submission Limit Reached (1)"
-              : `Submission Limit Reached (${maxSubmissions})`}
-          </span>
-        </span>
+        <LockClosedIcon className="tw-size-4 tw-flex-shrink-0" />
       </WaveHeaderRestrictionButton>
     );
   }
@@ -286,9 +259,6 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
         className={RESTRICTED_HEADER_BUTTON_CLASS}
       >
         <LockClosedIcon className="tw-size-4 tw-flex-shrink-0" />
-        <span className={HEADER_ACTION_BUTTON_TEXT_CLASS}>
-          {activeLabelCompact}
-        </span>
       </WaveHeaderRestrictionButton>
     );
   }

@@ -1421,7 +1421,7 @@ const WAVE_HEADER_MESSAGES = objectMessages("waves.header", {
 } as const);
 
 const WAVE_DROP_ELIGIBILITY_MESSAGES = objectMessages("waves.dropEligibility", {
-  loginRequired: "Please log in",
+  loginRequired: "Please log in to make submissions",
 } as const);
 
 const WAVE_NOTIFICATION_SETTINGS_MESSAGES = namespaceMessages(

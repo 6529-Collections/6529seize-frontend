@@ -6,6 +6,7 @@ This page explains who can start a leaderboard submission and where the start
 control appears.
 
 Entry behavior differs by wave type:
+
 - standard rank waves
 - curation waves
 - memes waves
@@ -73,11 +74,13 @@ Entry behavior differs by wave type:
   available from keyboard focus and pointer hover. On The Memes Main Stage,
   `How to Submit` opens `Unlock submissions` with MemesNominee REP progress and
   a nomination action on desktop and in the native app header.
-- Memes desktop submit labels are responsive:
-  - compact desktop widths can show short labels (for example `Submit Work`,
-    `Closed`, `Opens {countdown}`, `Not Eligible`, `Limit Reached`)
-  - extra-wide desktop can show full labels (`Submit Work to The Memes`,
-    `Submissions Closed`, `Submissions Open {countdown}`, and full limit text)
+- Unavailable conversation-header submission actions show only a lock icon on
+  desktop, tablet, and phone. Their details card retains the full reason,
+  including opening or closing dates and submission limits. The Memes
+  `How to Submit` helper keeps its desktop label.
+- Available Memes desktop submit labels are responsive: compact desktop widths
+  can show `Submit Work`, while extra-wide desktop shows
+  `Submit Work to The Memes`.
 - If voting has ended, `Leaderboard` is removed from available tabs, so
   leaderboard entry controls are no longer available.
 
