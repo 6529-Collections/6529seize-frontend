@@ -3,8 +3,10 @@ import type { GroupCardConfigProps } from "./GroupCardConfigs";
 
 export default function GroupCardConfig({
   config,
+  quiet = false,
 }: {
   readonly config: GroupCardConfigProps;
+  readonly quiet?: boolean | undefined;
 }) {
   const configLabel: Record<GroupDescriptionType, string> = {
     [GroupDescriptionType.TDH]: "Tdh",
@@ -18,14 +20,14 @@ export default function GroupCardConfig({
 
   return (
     <div
-      className="tw-inline-flex tw-flex-shrink-0 tw-cursor-default tw-items-center tw-gap-x-1 tw-whitespace-nowrap tw-text-xs tw-font-medium tw-text-iron-200 sm:tw-text-sm"
+      className={`tw-inline-flex tw-flex-shrink-0 tw-cursor-default tw-items-center tw-gap-x-1 tw-whitespace-nowrap tw-text-xs sm:tw-text-sm ${quiet ? "tw-font-normal tw-text-iron-300" : "tw-font-medium tw-text-iron-200"}`}
       title={config.tooltip}
     >
       <span className="tw-text-iron-400">
         {config.label ?? configLabel[config.key]}:
       </span>
       <span
-        className={`tw-whitespace-nowrap ${config.muted ? "tw-text-iron-500" : "tw-font-semibold tw-text-iron-50"}`}
+        className={`tw-whitespace-nowrap ${config.muted ? "tw-text-iron-500" : quiet ? "tw-font-medium tw-text-iron-200" : "tw-font-semibold tw-text-iron-50"}`}
       >
         {config.value}
       </span>

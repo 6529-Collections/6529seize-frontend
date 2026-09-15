@@ -5,6 +5,7 @@ import type { GroupCardRateMatter } from "@/components/groups/page/list/card/Gro
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import GroupCardConfigs from "@/components/groups/page/list/card/GroupCardConfigs";
 import GroupCardVoteAll from "@/components/groups/page/list/card/vote-all/GroupCardVoteAll";
+import marketplaceStyles from "@/components/collect/marketplace-font.module.css";
 import Button from "@/components/utils/button/Button";
 import type { ApiGroup } from "@/generated/models/ApiGroup";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
@@ -18,6 +19,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useRef, useState } from "react";
 
 type InspectableGroup = ApiGroupFull & Pick<Partial<ApiGroup>, "is_hidden">;
+
+const INSPECTION_SURFACE_CLASSES = `${marketplaceStyles["surface"] ?? ""} tw-mt-4 tw-border-x-0 tw-border-y tw-border-solid tw-border-white/10 tw-py-4`;
 
 export default function CommunityMembersGroupDetails({
   groupId,
@@ -79,7 +82,7 @@ export default function CommunityMembersGroupDetails({
     return (
       <section
         aria-live="polite"
-        className="tw-mt-3 tw-min-h-20 tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950 tw-p-3"
+        className={`${INSPECTION_SURFACE_CLASSES} tw-min-h-20`}
       >
         <div className="tw-flex tw-items-start tw-justify-between tw-gap-3">
           <p className="tw-m-0 tw-min-w-0 tw-text-sm tw-font-medium tw-text-iron-400">
@@ -107,7 +110,7 @@ export default function CommunityMembersGroupDetails({
     return (
       <section
         aria-labelledby="group-criteria-unavailable-title"
-        className="tw-mt-3 tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950 tw-p-3"
+        className={INSPECTION_SURFACE_CLASSES}
       >
         <div className="tw-flex tw-items-start tw-justify-between tw-gap-3">
           <h2
@@ -140,16 +143,16 @@ export default function CommunityMembersGroupDetails({
   return (
     <section
       aria-labelledby="selected-group-name"
-      className="tw-mt-3 tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950 tw-p-3"
+      className={INSPECTION_SURFACE_CLASSES}
     >
       <div className="tw-flex tw-items-start tw-justify-between tw-gap-3">
         <div className="tw-min-w-0 tw-flex-1">
-          <p className="tw-mb-1 tw-mt-0 tw-text-[0.625rem] tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-[0.08em] tw-text-iron-400">
+          <p className="tw-mb-1 tw-mt-0 tw-text-[0.6875rem] tw-font-medium tw-uppercase tw-leading-4 tw-tracking-[0.12em] tw-text-iron-400">
             {t(locale, "network.groupInspection.selectedGroup")}
           </p>
           <h2
             id="selected-group-name"
-            className="tw-m-0 tw-break-words !tw-text-base !tw-font-semibold !tw-leading-5 !tw-text-iron-50"
+            className="tw-m-0 tw-break-words !tw-text-lg !tw-font-semibold !tw-leading-6 !tw-text-iron-100"
           >
             {groupName}
           </h2>
@@ -161,18 +164,18 @@ export default function CommunityMembersGroupDetails({
             >
               <Button
                 ref={repButtonRef}
-                variant="secondary"
+                variant="tertiary"
                 size="sm"
-                className="!tw-h-auto tw-min-h-9 tw-w-full !tw-whitespace-normal tw-py-2 tw-text-center sm:tw-w-auto"
+                className="!tw-h-auto tw-min-h-11 tw-w-full !tw-whitespace-normal !tw-font-medium !tw-shadow-none tw-py-2 tw-text-center sm:tw-min-h-9 sm:tw-w-auto"
                 onClick={() => openBulkRateForm(ApiRateMatter.Rep)}
               >
                 {t(locale, "network.groupInspection.bulkRep")}
               </Button>
               <Button
                 ref={nicButtonRef}
-                variant="secondary"
+                variant="tertiary"
                 size="sm"
-                className="!tw-h-auto tw-min-h-9 tw-w-full !tw-whitespace-normal tw-py-2 tw-text-center sm:tw-w-auto"
+                className="!tw-h-auto tw-min-h-11 tw-w-full !tw-whitespace-normal !tw-font-medium !tw-shadow-none tw-py-2 tw-text-center sm:tw-min-h-9 sm:tw-w-auto"
                 onClick={() => openBulkRateForm(ApiRateMatter.Cic)}
               >
                 {t(locale, "network.groupInspection.bulkNic")}
@@ -203,8 +206,8 @@ export default function CommunityMembersGroupDetails({
           />
         </div>
       ) : null}
-      <div className="tw-mt-2.5 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-pt-2.5">
-        <GroupCardConfigs group={group} />
+      <div className="tw-mt-4 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10 tw-pt-3">
+        <GroupCardConfigs group={group} quiet />
       </div>
     </section>
   );

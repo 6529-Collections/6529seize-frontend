@@ -21,8 +21,16 @@ jest.mock("@/services/api/common-api", () => ({
 jest.mock(
   "@/components/groups/page/list/card/GroupCardConfigs",
   () =>
-    ({ group }: { readonly group: Pick<ApiGroupFull, "id"> }) => (
-      <div data-testid="group-criteria">{group.id}</div>
+    ({
+      group,
+      quiet,
+    }: {
+      readonly group: Pick<ApiGroupFull, "id">;
+      readonly quiet?: boolean;
+    }) => (
+      <div data-testid="group-criteria" data-quiet={quiet}>
+        {group.id}
+      </div>
     )
 );
 
@@ -244,6 +252,10 @@ describe("CommunityMembersGroupDetails", () => {
       screen.getByRole("heading", { name: "Artists and curators" })
     ).toBeInTheDocument();
     expect(screen.getByTestId("group-criteria")).toHaveTextContent("group-1");
+    expect(screen.getByTestId("group-criteria")).toHaveAttribute(
+      "data-quiet",
+      "true"
+    );
     expect(
       screen.getByRole("button", {
         name: "REP everyone matching criteria",
