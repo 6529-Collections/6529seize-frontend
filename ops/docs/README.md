@@ -90,6 +90,8 @@ March 19, 2026.
   `/open-data/rememes`, `/open-data/royalties`, `/open-data/team`
 - [Network Museum](museum/README.md): `/museum/network` and
   `/museum/network/{param*}`
+- [Education](education/README.md): `/education`, its Tweetstorms and Podcasts
+  archives, and the collaboration contact
 - [Navigation](navigation/README.md): app shell controls, `/open-mobile`, and
   `/about/6529-apps`
 - [Shared](shared/README.md): behavior reused by multiple areas
@@ -158,6 +160,9 @@ Route patterns use normalized placeholders: `{param}` for one segment,
   `/museum/network`, including collection, artist, project, gift, program,
   about, and Stories & Research routes. The institutional-practice study is at
   `/museum/network/stories/a-field-of-practice/{param*}`.
+- Education:
+  `/education`, `/education/tweetstorms`, `/education/podcasts`, and
+  `/education/education-collaboration-form`
 
 ### Out of Scope
 
@@ -165,8 +170,8 @@ Route patterns use normalized placeholders: `{param}` for one segment,
   `/about/*` (except `/about/primary-address` and `/about/6529-apps`),
   legacy gallery routes under `/museum` and `/museum/*` outside
   `/museum/network`,
-  `/blog/*`, `/news/*`, `/city/*`, `/om`, `/om/*`, `/education`,
-  `/education/*`, `/capital`, `/capital/*`, `/author/*`, `/category/*`,
+  `/blog/*`, `/news/*`, `/city/*`, `/om`, `/om/*`, `/capital`, `/capital/*`,
+  `/author/*`, `/category/*`,
   `/buidl`, `/casabatllo`
 - Standalone utility routes:
   `/access`, `/restricted`, `/dispute-resolution`,

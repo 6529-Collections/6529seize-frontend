@@ -145,6 +145,7 @@ export function useArtworkSubmissionFormActions({
       },
       operationalData,
       isAdditionalActionPromised,
+      proposalFrame: state.proposalFrame,
     };
   }, [state]);
 

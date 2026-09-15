@@ -630,11 +630,30 @@ function SupportedMarketDepthTradeProvider({
                 setReviewItems(null);
                 restoreFocus(reviewOpener.current);
               }}
-              onMarketChange={() => {
-                setReviewItems(null);
-                setSelected([]);
-                onMarketChange();
+              onSettled={() => {
+                setSelected(
+                  selectedRef.current.flatMap((item) => {
+                    const purchased = reviewItems.find(
+                      (reviewed) =>
+                        same(
+                          reviewed.order.identity.order_hash,
+                          item.order.identity.order_hash
+                        ) &&
+                        same(
+                          reviewed.order.identity.protocol_address,
+                          item.order.identity.protocol_address
+                        )
+                    );
+                    if (!purchased) return [item];
+                    const remaining =
+                      BigInt(item.quantity) - BigInt(purchased.quantity);
+                    return remaining > 0n
+                      ? [{ ...item, quantity: remaining.toString() }]
+                      : [];
+                  })
+                );
               }}
+              onMarketChange={onMarketChange}
             />
           </Suspense>
         )}
@@ -656,7 +675,6 @@ function SupportedMarketDepthTradeProvider({
               }}
               onMarketChange={() => {
                 invalidateAcceptAttempt();
-                setAcceptedOffer(null);
                 onMarketChange();
               }}
             />

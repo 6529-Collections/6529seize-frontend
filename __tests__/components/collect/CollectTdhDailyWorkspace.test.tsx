@@ -40,6 +40,35 @@ beforeEach(() => {
 });
 afterEach(() => jest.useRealTimers());
 
+it("keeps the chosen daily destination and driving budget across a receipt refresh", async () => {
+  const props = {
+    profile: targetProfile,
+    payingWallet: TARGET_PRIMARY,
+    collection: "memes" as const,
+    onConnect: jest.fn(),
+    onReviewPurchase: jest.fn(),
+  };
+  const { rerender } = render(
+    <CollectTdhDailyWorkspace {...props} revision={0} />
+  );
+  fireEvent.click(screen.getByRole("button", { name: "Use custody wallet" }));
+  fireEvent.change(screen.getByLabelText("Purchase budget (ETH)"), {
+    target: { value: "0.0100" },
+  });
+  await advance();
+  const request = api.mock.calls[0]![0];
+  rerender(<CollectTdhDailyWorkspace {...props} revision={1} />);
+  expect(screen.getByLabelText("Purchase budget (ETH)")).toHaveValue("0.0100");
+  expect(
+    screen.queryByRole("button", { name: "Review purchase" })
+  ).not.toBeInTheDocument();
+  await advance();
+  expect(api).toHaveBeenCalledTimes(2);
+  expect(api.mock.calls[1]![0]).toEqual(request);
+  expect(api.mock.calls[1]![0].recipient).toBe(TARGET_CUSTODY);
+  expect(props.onReviewPurchase).not.toHaveBeenCalled();
+});
+
 it("keeps exact quantities and case-insensitive delivery bound when handing off purchase and offers", async () => {
   const buy = jest.fn(),
     offer = jest.fn();

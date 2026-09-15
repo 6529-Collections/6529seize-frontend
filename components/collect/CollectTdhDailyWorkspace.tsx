@@ -24,6 +24,7 @@ import type { CollectSelectedListing } from "./collect-selection.helpers";
 import type { CollectCollection } from "./collect.types";
 
 interface Props {
+  readonly revision?: number;
   readonly profile: ApiIdentity | null;
   readonly payingWallet?: string | undefined;
   readonly collection: CollectCollection;
@@ -54,6 +55,7 @@ function DailyWorkspace({
   onConnect,
   onReviewPurchase,
   onPlanOffers,
+  revision = 0,
 }: Props) {
   const locale = useBrowserLocale();
   const [recipient, setRecipient] = useState(() =>
@@ -94,6 +96,7 @@ function DailyWorkspace({
   return (
     <div className="tw-min-w-0 tw-space-y-4">
       <CollectTdhDailyController
+        revision={revision}
         contextKey={recipient}
         onConnect={onConnect}
         calculate={

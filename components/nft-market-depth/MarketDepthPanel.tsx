@@ -5,17 +5,17 @@ import type { ApiMarketDepth } from "@/generated/models/ApiMarketDepth";
 import { ApiMarketDepthStatusEnum } from "@/generated/models/ApiMarketDepth";
 import type { ApiMarketDepthLevel } from "@/generated/models/ApiMarketDepthLevel";
 import type { SupportedLocale } from "@/i18n/locales";
-import {
-  formatInteger as formatLocalizedInteger,
-  formatRelativeTime,
-} from "@/i18n/format";
+import { formatInteger as formatLocalizedInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { QueryKey } from "@/components/react-query-wrapper/query-keys";
 import marketplaceStyles from "@/components/collect/marketplace-font.module.css";
 import { useAutomaticMarketRefresh } from "@/components/collect/useAutomaticMarketRefresh";
+import { useAuth } from "@/components/auth/Auth";
+import { useConfirmedMarketPurchases } from "@/components/collect/market-activity-store";
 import { commonApiFetch } from "@/services/api/common-api";
 import { ArrowPathIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
+import Link from "next/link";
 import type { ReactNode } from "react";
 import {
   useCallback,
@@ -25,23 +25,23 @@ import {
   useLayoutEffect,
   useRef,
   useState,
-  useSyncExternalStore,
 } from "react";
 import { MarketDepthOtherOrders } from "./MarketDepthOrderDetails";
+import MarketDepthSnapshot from "./MarketDepthSnapshot";
 import MarketDepthPriceLevels from "./MarketDepthPriceLevels";
 import { MarketDepthTradeProvider } from "./MarketDepthTradeActions";
 import {
   loadCompleteMarketDepth,
   MarketDepthSnapshotChangedError,
 } from "./market-depth-orders";
-import { formatDate, formatDecimal } from "./market-depth-format";
+import { formatDecimal } from "./market-depth-format";
 import { subscribeMarketDepthDisclosure } from "./market-depth-disclosure";
+import { reconcileMarketDepthPurchases } from "./market-depth-purchases";
 
 const MARKET_DEPTH_QUERY_KEY = QueryKey.NFT_MARKET_DEPTH;
 
 const PAGE_SIZE = 40;
 
-const MINUTE_IN_MILLISECONDS = 60_000;
 const NATIVE_ETH_ADDRESS = "0x0000000000000000000000000000000000000000";
 const WETH_ADDRESS = "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2";
 
@@ -56,9 +56,11 @@ interface MarketDepthPanelProps {
   readonly embedded?: boolean;
   readonly active?: boolean;
   readonly onReveal?: () => void;
+  readonly focusedOrderHash?: string | null;
 }
 
 interface MarketDepthState {
+  readonly assetKey: string | null;
   readonly status: MarketDepthStatus;
   readonly data: ApiMarketDepth | null;
   readonly requestKey: string | null;
@@ -66,6 +68,7 @@ interface MarketDepthState {
 }
 
 const INITIAL_STATE: MarketDepthState = {
+  assetKey: null,
   status: "loading",
   data: null,
   requestKey: null,
@@ -89,63 +92,6 @@ function getBookByAddress(
 function isCanonicalCurrency(book: ApiMarketCurrencyBook): boolean {
   const address = book.currency.address.toLowerCase();
   return address === NATIVE_ETH_ADDRESS || address === WETH_ADDRESS;
-}
-
-const getMinuteClockSnapshot = () =>
-  Math.floor(Date.now() / MINUTE_IN_MILLISECONDS);
-const getServerMinuteClockSnapshot = () => null;
-const subscribeToMinuteClock = (onStoreChange: () => void) => {
-  const intervalId = globalThis.setInterval(
-    onStoreChange,
-    MINUTE_IN_MILLISECONDS
-  );
-  return () => globalThis.clearInterval(intervalId);
-};
-
-function formatAge(
-  locale: SupportedLocale,
-  value: Date | string | null,
-  minuteClock: number | null
-): string | null {
-  if (value === null || minuteClock === null) return null;
-  const timestamp = new Date(value).getTime();
-  if (!Number.isFinite(timestamp)) return null;
-
-  const difference = timestamp - minuteClock * MINUTE_IN_MILLISECONDS;
-  if (difference > 0) return null;
-  const absoluteDifference = Math.abs(difference);
-  const units = [
-    { unit: "year", milliseconds: 365 * 24 * 60 * MINUTE_IN_MILLISECONDS },
-    { unit: "month", milliseconds: 30 * 24 * 60 * MINUTE_IN_MILLISECONDS },
-    { unit: "day", milliseconds: 24 * 60 * MINUTE_IN_MILLISECONDS },
-    { unit: "hour", milliseconds: 60 * MINUTE_IN_MILLISECONDS },
-    { unit: "minute", milliseconds: MINUTE_IN_MILLISECONDS },
-  ] as const;
-  const matchingUnit = units.find(
-    ({ milliseconds }) => absoluteDifference >= milliseconds
-  );
-
-  if (!matchingUnit) {
-    return formatRelativeTime(locale, 0, "second", { numeric: "auto" });
-  }
-  return formatRelativeTime(
-    locale,
-    Math.round(difference / matchingUnit.milliseconds),
-    matchingUnit.unit,
-    { numeric: "auto" }
-  );
-}
-
-function getUpdatedLabel(
-  locale: SupportedLocale,
-  age: string | null,
-  absoluteTime: string | null
-): string {
-  if (age) return t(locale, "marketDepth.updated", { time: age });
-  if (absoluteTime) {
-    return t(locale, "marketDepth.updatedAt", { time: absoluteTime });
-  }
-  return t(locale, "marketDepth.updatedUnknown");
 }
 
 function DecimalValue({
@@ -187,41 +133,6 @@ function MarketDepthSkeleton() {
         />
       ))}
     </div>
-  );
-}
-
-function SnapshotMeta({
-  data,
-  locale,
-  minuteClock,
-}: {
-  readonly data: ApiMarketDepth;
-  readonly locale: SupportedLocale;
-  readonly minuteClock: number | null;
-}) {
-  const absoluteTime = formatDate(data.as_of, locale);
-  const age = formatAge(locale, data.as_of, minuteClock);
-  const updatedLabel = getUpdatedLabel(locale, age, absoluteTime);
-
-  return (
-    <p
-      title={absoluteTime ?? undefined}
-      className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-500"
-    >
-      <span>{updatedLabel}</span>
-      {data.status === ApiMarketDepthStatusEnum.Stale && (
-        <>
-          <span aria-hidden="true"> · </span>
-          <span>{t(locale, "marketDepth.status.stale")}</span>
-        </>
-      )}
-      {data.status === ApiMarketDepthStatusEnum.Unavailable && (
-        <>
-          <span aria-hidden="true"> · </span>
-          <span>{t(locale, "marketDepth.status.unavailable")}</span>
-        </>
-      )}
-    </p>
   );
 }
 
@@ -286,13 +197,26 @@ export default function MarketDepthPanel({
   embedded = false,
   active = true,
   onReveal,
+  focusedOrderHash,
 }: MarketDepthPanelProps) {
   const browserLocale = useBrowserLocale();
+  const { connectedProfile } = useAuth();
+  const purchases = useConfirmedMarketPurchases(connectedProfile?.id);
   const resolvedLocale = locale ?? browserLocale;
   const id = useId();
   const heading = useRef<HTMLButtonElement>(null);
   const panel = useRef<HTMLElement>(null);
   const assetKey = `${contract.toLowerCase()}:${String(tokenId)}`;
+  const requestedOrderHash = /^0x[\da-f]{64}$/i.test(focusedOrderHash ?? "")
+    ? (focusedOrderHash?.toLowerCase() ?? null)
+    : null;
+  const orderFocusKey = `${assetKey}:${requestedOrderHash ?? ""}`;
+  const [completedOrderFocus, setCompletedOrderFocus] = useState<string | null>(
+    null
+  );
+  const finishOrderFocus = useCallback(() => {
+    setCompletedOrderFocus(orderFocusKey);
+  }, [orderFocusKey]);
   const [disclosure, setDisclosure] = useState({
     assetKey,
     open: false,
@@ -301,6 +225,10 @@ export default function MarketDepthPanel({
   const focusedDisclosure = useRef<typeof disclosure | null>(null);
   const open =
     embedded || (disclosure.assetKey === assetKey && disclosure.open);
+  const pendingOrderFocus =
+    active && open && completedOrderFocus !== orderFocusKey
+      ? requestedOrderHash
+      : null;
   useEffect(
     () =>
       subscribeMarketDepthDisclosure(contract, tokenId, () => {
@@ -332,11 +260,6 @@ export default function MarketDepthPanel({
         : "smooth",
     });
   }, [active, embedded, open, disclosure]);
-  const minuteClock = useSyncExternalStore(
-    subscribeToMinuteClock,
-    getMinuteClockSnapshot,
-    getServerMinuteClockSnapshot
-  );
   const [state, setState] = useState<MarketDepthState>(INITIAL_STATE);
   const [retryVersion, setRetryVersion] = useState(0);
   const interaction = useRef({ busy: false, generation: 0 });
@@ -381,12 +304,19 @@ export default function MarketDepthPanel({
     [contract, tokenId]
   );
 
-  const data = state.requestKey === requestKey ? state.data : null;
+  const rawData = state.assetKey === assetKey ? state.data : null;
+  const data = useMemo(
+    () => (rawData ? reconcileMarketDepthPurchases(rawData, purchases) : null),
+    [rawData, purchases]
+  );
   const backgroundFailed =
     state.requestKey === requestKey && state.backgroundFailed === true;
-  const effectiveStatus: MarketDepthStatus =
+  let effectiveStatus: MarketDepthStatus =
     state.requestKey === requestKey ? state.status : "loading";
-  const isLoadingMore = loadingMoreKey === requestKey;
+  if (data) effectiveStatus = "ready";
+  const isLoadingMore =
+    loadingMoreKey === requestKey ||
+    Boolean(rawData && state.requestKey !== requestKey);
   const currentLoadMoreError =
     loadMoreErrorKey === requestKey
       ? t(resolvedLocale, "marketDepth.moreError")
@@ -394,23 +324,46 @@ export default function MarketDepthPanel({
 
   useEffect(() => {
     const abortController = new AbortController();
+    const isCurrent = () => !abortController.signal.aborted;
     void (async () => {
       try {
         const loadedData = await loadDepth(undefined, abortController.signal);
-        if (!abortController.signal.aborted) {
-          setState({
-            status: "ready",
-            data: loadedData,
-            requestKey,
-          });
+        if (!isCurrent()) return;
+        setState({
+          assetKey,
+          status: "ready",
+          data: loadedData,
+          requestKey,
+        });
+        if (requestedOrderHash && loadedData.next) {
+          setLoadingMoreKey(requestKey);
+          try {
+            const complete = await loadCompleteMarketDepth(
+              loadedData,
+              loadDepth,
+              abortController.signal
+            );
+            if (isCurrent()) {
+              setState({
+                assetKey,
+                status: "ready",
+                data: complete,
+                requestKey,
+              });
+            }
+          } catch {
+            if (isCurrent()) setLoadMoreErrorKey(requestKey);
+          } finally {
+            if (isCurrent()) setLoadingMoreKey(null);
+          }
         }
       } catch {
         if (!abortController.signal.aborted) {
-          setState({
-            status: "error",
-            data: null,
-            requestKey,
-          });
+          setState((current) =>
+            current.assetKey === assetKey && current.data
+              ? { ...current, requestKey, backgroundFailed: true }
+              : { assetKey, status: "error", data: null, requestKey }
+          );
         }
       }
     })();
@@ -419,14 +372,15 @@ export default function MarketDepthPanel({
       abortController.abort();
       loadMoreAbortControllerRef.current?.abort();
     };
-  }, [loadDepth, requestKey]);
+  }, [assetKey, loadDepth, requestKey, requestedOrderHash]);
 
   const loadOrders = useCallback(async () => {
     // Opening details takes precedence over a read started before that click.
     interaction.current.generation++;
     if (
-      !data ||
-      (!data.next && loadMoreErrorKey !== requestKey) ||
+      !rawData ||
+      state.requestKey !== requestKey ||
+      (!rawData.next && loadMoreErrorKey !== requestKey) ||
       (loadMoreAbortControllerRef.current &&
         !loadMoreAbortControllerRef.current.signal.aborted)
     ) {
@@ -443,6 +397,7 @@ export default function MarketDepthPanel({
       setState((current) =>
         current.requestKey === capturedRequestKey
           ? {
+              assetKey,
               status: "ready",
               requestKey: capturedRequestKey,
               data: loadedData,
@@ -454,7 +409,7 @@ export default function MarketDepthPanel({
       let completed: ApiMarketDepth;
       try {
         completed = await loadCompleteMarketDepth(
-          data,
+          rawData,
           loadDepth,
           abortController.signal
         );
@@ -483,7 +438,14 @@ export default function MarketDepthPanel({
         setLoadingMoreKey(null);
       }
     }
-  }, [data, loadDepth, loadMoreErrorKey, requestKey]);
+  }, [
+    assetKey,
+    rawData,
+    loadDepth,
+    loadMoreErrorKey,
+    requestKey,
+    state.requestKey,
+  ]);
   const updateBrowsingDepth = useCallback(
     async (signal: AbortSignal) => {
       const generation = interaction.current.generation;
@@ -590,11 +552,7 @@ export default function MarketDepthPanel({
           </p>
           {data && (
             <div className="tw-mt-1">
-              <SnapshotMeta
-                data={data}
-                locale={resolvedLocale}
-                minuteClock={minuteClock}
-              />
+              <MarketDepthSnapshot data={data} locale={resolvedLocale} />
             </div>
           )}
         </div>
@@ -684,6 +642,30 @@ export default function MarketDepthPanel({
                   hidden={!open}
                   className="[overflow-anchor:none]"
                 >
+                  {requestedOrderHash &&
+                    !data.next &&
+                    !isLoadingMore &&
+                    !currentLoadMoreError &&
+                    !data.orders.some(
+                      (order) =>
+                        order.order_id.toLowerCase() === requestedOrderHash
+                    ) && (
+                      <p
+                        role="status"
+                        className="tw-mb-0 tw-mt-5 tw-text-meta tw-leading-5 tw-text-iron-400"
+                      >
+                        {t(
+                          resolvedLocale,
+                          "marketDepth.orders.requestedNotShown"
+                        )}{" "}
+                        <Link
+                          href="/collect/orders"
+                          className="hover:tw-text-primary-200 tw-text-primary-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+                        >
+                          {t(resolvedLocale, "collect.receipt.viewOrders")}
+                        </Link>
+                      </p>
+                    )}
                   {!hasQuotedLevels && (
                     <p className="tw-mb-0 tw-mt-6 tw-border-0 tw-border-b tw-border-solid tw-border-white/10 tw-pb-6 tw-text-sm tw-text-iron-400">
                       {t(resolvedLocale, "marketDepth.empty")}
@@ -741,6 +723,8 @@ export default function MarketDepthPanel({
                             onLoadOrders={loadOrders}
                             onRefresh={refresh}
                             locale={resolvedLocale}
+                            focusedOrderHash={pendingOrderFocus}
+                            onOrderFocused={finishOrderFocus}
                           />
                         </div>
                       ))}
@@ -758,6 +742,8 @@ export default function MarketDepthPanel({
                     onRefresh={refresh}
                     isLoading={isLoadingMore || data.next !== null}
                     error={currentLoadMoreError}
+                    focusedOrderHash={pendingOrderFocus}
+                    onOrderFocused={finishOrderFocus}
                   />
                   <AboutPrices data={data} locale={resolvedLocale} />
                 </div>

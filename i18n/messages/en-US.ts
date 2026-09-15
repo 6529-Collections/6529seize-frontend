@@ -43,6 +43,7 @@ import { TRANSFER_MESSAGES } from "@/i18n/messages/transfer";
 import { THE_MEMES_MINT_SUCCESS_MESSAGES } from "@/i18n/messages/the-memes-mint-success";
 import { THE_MEMES_MINT_PROGRESS_MESSAGES } from "@/i18n/messages/the-memes-mint-progress";
 import { PUBLIC_REVIEW_MESSAGES } from "@/i18n/messages/public-review";
+import { EN_US_RECEIPT_MESSAGES } from "@/i18n/messages/collect-receipts";
 import { CONTENT_MODERATION_MESSAGES } from "@/i18n/messages/content-moderation";
 import { MODERATION_CHECK_MESSAGES } from "@/i18n/messages/moderation-checks";
 import { EULA_MESSAGES } from "@/i18n/messages/eula";
@@ -2801,6 +2802,22 @@ const MEME_DATA_TABLE_MESSAGES = objectMessages("memeData", {
 const TOKEN_NUMBER_MESSAGE = "Token #{tokenId}";
 
 export const EN_US_MESSAGES = {
+  "memes.proposalFrame.enable": "Add a proposal card frame (optional)",
+  "memes.proposalFrame.description":
+    "This card has plans. Add an animated border that says this is a proposal and the artwork may change. Your media will be embedded in an HTML artwork.",
+  "memes.proposalFrame.orientation": "Frame orientation",
+  "memes.proposalFrame.portrait": "Vertical",
+  "memes.proposalFrame.landscape": "Horizontal",
+  "memes.proposalFrame.preview": "Proposal frame preview",
+  "memes.proposalFrame.artwork": "Proposal artwork",
+  "memes.proposalFrame.missingTitle":
+    "Add an artwork title before creating the proposal frame.",
+  "memes.proposalFrame.publishError":
+    "Unable to prepare the proposal card. Please try again.",
+  "memes.proposalFrame.missingPreview":
+    "Add a preview image for this proposal card.",
+  "memes.proposalFrame.previewError":
+    "Unable to prepare the proposal frame preview. Please try again.",
   "singleDrop.share": "Share",
   "singleDrop.shareLabel": "Share drop",
   "singleDrop.shared": "Link shared",
@@ -4149,6 +4166,29 @@ export const EN_US_MESSAGES = {
   ...THE_MEMES_MINT_PROGRESS_MESSAGES,
   ...CONTENT_MODERATION_MESSAGES,
   ...MODERATION_CHECK_MESSAGES,
+  ...EN_US_RECEIPT_MESSAGES,
+  "collect.selection.processing": "Processing",
+  "collect.goal.updatingAfterPurchase": "Updating your collection progress…",
+  "collect.goal.updatePending":
+    "Your purchase is confirmed. Collection progress is still updating; you can leave this page.",
+  "collect.trade.purchasePending":
+    "A purchase from this listing is pending. Check its progress in Orders.",
+  "collect.selection.processingArtwork": "Processing purchase of {title}",
+  "collect.receipt.loadError":
+    "This receipt could not be loaded. Your transaction is unaffected. You can find your activity in Orders.",
+  "collect.activity.title": "Transaction progress",
+  "marketDepth.orders.requestedNotShown":
+    "This listing is not in the current order book. Its receipt remains in Orders.",
+  "collect.activity.completed": "Your activity is confirmed",
+  "collect.activity.receiptReady": "Your receipt is ready in Orders.",
+  "collect.activity.processing": "Your transaction is processing",
+  "collect.activity.checking": "Checking transaction progress",
+  "collect.activity.leave":
+    "You can leave this page. Your transaction will continue, and you can check its progress in Orders.",
+  "collect.activity.recover":
+    "You can check the latest status in Orders. No new transaction will be sent automatically.",
+  "collect.activity.viewOrders": "View in Orders",
+  "collect.activity.dismiss": "Dismiss transaction progress",
 } as const;
 
 export type MessageKey = keyof typeof EN_US_MESSAGES;

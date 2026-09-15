@@ -82,4 +82,33 @@ describe("NftNavigation", () => {
       expect(a.getAttribute("href") || "").toContain("foo=bar");
     }
   });
+  it.each(["/the-memes", "/meme-lab", "/6529-gradient"])(
+    "clears exact order focus while preserving collection navigation context for %s",
+    (path) => {
+      fullScreenSupportedMock.mockReturnValue(false);
+      const params = makeParams(
+        "focus=listings-and-offers&order=old-order&returnTo=owner"
+      );
+      render(
+        <NftNavigation
+          nftId={2}
+          path={path}
+          startIndex={1}
+          endIndex={3}
+          params={params}
+        />
+      );
+      expect(
+        screen.getByRole("link", { name: "Previous NFT" })
+      ).toHaveAttribute(
+        "href",
+        `${path}/1?focus=listings-and-offers&returnTo=owner`
+      );
+      expect(screen.getByRole("link", { name: "Next NFT" })).toHaveAttribute(
+        "href",
+        `${path}/3?focus=listings-and-offers&returnTo=owner`
+      );
+      expect(params.get("order")).toBe("old-order");
+    }
+  );
 });
