@@ -29,14 +29,8 @@
       ],
       "canonical_path": "/the-memes/445",
       "link_label": "Open Red Light, Green Light",
-      "related_paths": [
-        "/the-memes/445?focus=the-art"
-      ],
-      "tags": [
-        "nft",
-        "memes",
-        "media"
-      ],
+      "related_paths": ["/the-memes/445?focus=the-art"],
+      "tags": ["nft", "memes", "media"],
       "source_refs": [
         "components/nft-image/renderers/NFTHTMLRenderer.tsx",
         "public/artwork/the-memes/445.html",
@@ -150,13 +144,7 @@
         "/nextgen/token/{token}",
         "/nft-activity"
       ],
-      "tags": [
-        "nft",
-        "market",
-        "memes",
-        "gradients",
-        "nextgen"
-      ],
+      "tags": ["nft", "market", "memes", "gradients", "nextgen"],
       "source_refs": [
         "components/nft-market-depth/MarketDepthPanel.tsx",
         "components/nft-market-activity/NftMarketActivity.tsx",
@@ -234,13 +222,7 @@
         "/waves",
         "/artwork-documentation/example/an-alteration"
       ],
-      "tags": [
-        "artwork",
-        "artists",
-        "documentation",
-        "privacy",
-        "museum"
-      ],
+      "tags": ["artwork", "artists", "documentation", "privacy", "museum"],
       "source_refs": [
         "ops/docs/artwork-documentation.md",
         "app/artwork-documentation/page.tsx",
@@ -521,6 +503,46 @@
         "ops/docs/home/feature-home-header-and-mission.md",
         "ops/docs/home/flow-home-landing-and-section-navigation.md"
       ]
+    },
+    {
+      "id": "education.library",
+      "kind": "route",
+      "title": "Education library and collaboration",
+      "aliases": [
+        "education",
+        "Tweetstorms",
+        "podcasts",
+        "Open Metaverse education",
+        "education collaboration"
+      ],
+      "keywords": [
+        "education",
+        "Tweetstorms",
+        "podcasts",
+        "research",
+        "advocacy",
+        "policy",
+        "metaverse"
+      ],
+      "facts": [
+        "The Education landing page at /education introduces a historical archive of 6529 Tweetstorms and podcast appearances.",
+        "Tweetstorm entries link to their original sources. Podcast entries link to their original sources and retain their recorded publication dates.",
+        "The landing page identifies /about/open-metaverse as the original thesis and links current context through the 6529 Network Museum's institutional overview, permanent Collection, and research hub.",
+        "The collaboration page at /education/education-collaboration-form provides support@6529.io for relevant education, research, advocacy, and policy inquiries. Selecting the address prepares an email in a configured mail application; it does not send automatically."
+      ],
+      "canonical_path": "/education",
+      "link_label": "Open the Education library",
+      "related_paths": [
+        "/education/tweetstorms",
+        "/education/podcasts",
+        "/education/education-collaboration-form",
+        "/about/open-metaverse",
+        "/museum/network/about",
+        "/museum/network/collection",
+        "/museum/network/research"
+      ],
+      "tags": ["education", "research", "archive"],
+      "source_refs": ["ops/docs/education/feature-education-library.md"]
     },
     {
       "id": "museum.network",
@@ -7062,13 +7084,7 @@
         "meme lab card tabs",
         "meme lab distribution"
       ],
-      "keywords": [
-        "meme",
-        "lab",
-        "card",
-        "tabs",
-        "distribution"
-      ],
+      "keywords": ["meme", "lab", "card", "tabs", "distribution"],
       "facts": [
         "Meme Lab card pages live at /meme-lab/{id}.",
         "Meme Lab distribution pages live at /meme-lab/{id}/distribution.",
@@ -7077,14 +7093,8 @@
         "Purchase review separates Pay with and Deliver to. Choose a confirmed profile wallet or Send to a fren, check the resolved destination and review fees before authorizing. Expand a delivery row in any supported purchase review to change those copies' destination without starting over, including selected listings and split deliveries. Current terms are checked again automatically before wallet authorization; changed terms require another review. Meme Lab trading is available on card pages; set planning, Lowest listings and TDH tools continue to cover Memes, Gradients and Pebbles."
       ],
       "canonical_path": "/meme-lab/{id}",
-      "related_paths": [
-        "/meme-lab/{id}/distribution",
-        "/meme-lab"
-      ],
-      "tags": [
-        "meme-lab",
-        "card"
-      ],
+      "related_paths": ["/meme-lab/{id}/distribution", "/meme-lab"],
+      "tags": ["meme-lab", "card"],
       "source_refs": [
         "app/meme-lab/[id]/page.tsx",
         "ops/docs/media/collections/feature-meme-lab-card-route-tabs-and-navigation.md",
@@ -8175,7 +8185,7 @@
         "TDH"
       ],
       "facts": [
-        "Collect in the NFT navigation opens /collect, the set planner for The Memes, 6529 Gradient and NextGen Pebbles. Choose Complete a set, Lowest listings or TDH. One shared Collection selector keeps the chosen collection across these tools, daily TDH and Reach target TDH. Incompatible goals switch to that collection’s full-set or Pebbles-set options. The Memes offers Full set, Season and Artist under Build toward. Season, artist and Pebbles set selectors support typing to find an option by name, with clear empty and no-match states. The planner has no duplicate artwork catalogue. Collecting options show a loading state while the catalog arrives; Try again retries an initial failure without treating the set as empty.",
+        "Collect in the NFT navigation opens /collect, the set planner for The Memes, 6529 Gradient and NextGen Pebbles. Choose Complete a set, Lowest listings or TDH. One shared Collection selector keeps the chosen collection across these tools, daily TDH and Reach target TDH. Incompatible goals switch to that collection’s full-set or Pebbles-set options. The Memes offers Full set, Season and Artist under Build toward. On narrow screens, Season opens a scrollable choice sheet: tap a season directly. On larger screens, type in the Season selector to filter by name. Artist and Pebbles set selectors retain searchable dropdowns. Empty and no-match states are distinct where applicable. The planner has no duplicate artwork catalogue. Collecting options show a loading state while the catalog arrives; Try again retries an initial failure without treating the set as empty.",
         "Browse artworks on /the-memes, /6529-gradient and /nextgen/collection/pebbles. Complete my set on The Memes carries the selected season, or its full set when no season is selected; the Gradients link opens its full set and the Pebbles link opens its trait-set planner. The View collection link returns from Collecting tools to the selected collection page; on narrow screens it appears as an accessible arrow.",
         "Supported artwork cards place a priced Collect action near the artwork summary, before artwork details and Listings & offers. Gradients and Pebbles put the title and artwork first, followed by the actions and lower tabs. The lowest supported listing is selected automatically; Other listings exposes alternatives. Listing prices load before wallet connection with distinct loading, failed and empty states. If no listing is returned, This artwork is not currently listed replaces empty Collect, quantity and delivery controls; Make an offer and applicable owner actions remain available. Unsupported or own-wallet listings have a separate no-matching-listing message. Connection is required before purchase review. Deliver to appears below an available Collect action; Change opens the mint-style destination picker. Collect rechecks the exact selected order and changed terms require another review. View listings & offers selects the market tab and focuses it. Switching tabs retains market selection and review.",
         "Artwork actions appear in the order Collect, Make an offer, then List. List appears when a confirmed wallet in the profile holds the NFT; connect that holding wallet to list it. Before connecting, List opens the wallet connection flow so ownership can be checked. While ownership is loading it stays visible but unavailable; a failed check offers Try again. The more-actions menu contains Review offers. Offer and listing dialogs show loading or retry states; Close or Escape returns to the opener. Closing during loading cancels that attempt and does not open a delayed review.",
@@ -8213,13 +8223,7 @@
         "/6529-gradient",
         "/nextgen/collection/pebbles"
       ],
-      "tags": [
-        "collections",
-        "marketplace",
-        "profiles",
-        "TDH",
-        "wallets"
-      ],
+      "tags": ["collections", "marketplace", "profiles", "TDH", "wallets"],
       "source_refs": [
         "ops/docs/media/collecting.md",
         "app/collect/page.tsx",

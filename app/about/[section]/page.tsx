@@ -61,17 +61,24 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     section &&
     Object.values(AboutSection).includes(section as AboutSection)
   ) {
+    const aboutSection = section as AboutSection;
     const sectionTitle = getAboutSectionDocumentTitle(
-      section as AboutSection,
+      aboutSection,
       DEFAULT_LOCALE
     );
 
-    return getAppMetadata({
-      title: t(DEFAULT_LOCALE, "about.contents.documentTitle", {
-        section: sectionTitle,
-      }),
-      description: "About",
-    });
+    return getAppMetadata(
+      {
+        title: t(DEFAULT_LOCALE, "about.contents.documentTitle", {
+          section: sectionTitle,
+        }),
+        description:
+          aboutSection === AboutSection.MEMES
+            ? "The Memes is a collection of art NFTs whose goal is to spread the message of decentralization, in a way that tweetstorms, policy papers and podcasts can’t."
+            : "About 6529",
+      },
+      { canonicalPath: `/about/${aboutSection}` }
+    );
   }
 
   return getAppMetadata({

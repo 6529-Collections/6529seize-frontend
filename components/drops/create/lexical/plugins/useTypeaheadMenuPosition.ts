@@ -4,10 +4,19 @@ import { useCallback, useEffect, useState } from "react";
 
 type TypeaheadMenuPosition = "top" | "bottom";
 
-export function useTypeaheadMenuPosition(
-  anchorElement: HTMLElement | null
-): TypeaheadMenuPosition {
-  const [position, setPosition] = useState<TypeaheadMenuPosition>("bottom");
+interface TypeaheadMenuPlacement {
+  readonly position: TypeaheadMenuPosition;
+  readonly availableHeight: number;
+}
+
+function useTypeaheadMenuGeometry(
+  anchorElement: HTMLElement | null,
+  trackAvailableHeight: boolean
+): TypeaheadMenuPlacement {
+  const [placement, setPlacement] = useState<TypeaheadMenuPlacement>({
+    position: "bottom",
+    availableHeight: 256,
+  });
 
   const updatePosition = useCallback(() => {
     if (globalThis.window === undefined || anchorElement === null) {
@@ -23,11 +32,18 @@ export function useTypeaheadMenuPosition(
     const spaceBelow = viewportTop + viewportHeight - anchorRect.bottom;
     const nextPosition: TypeaheadMenuPosition =
       spaceBelow >= spaceAbove ? "bottom" : "top";
-
-    setPosition((current) =>
-      current === nextPosition ? current : nextPosition
+    const availableHeight = Math.max(
+      0,
+      Math.floor(nextPosition === "top" ? spaceAbove : spaceBelow)
     );
-  }, [anchorElement]);
+
+    setPlacement((current) =>
+      current.position === nextPosition &&
+      (!trackAvailableHeight || current.availableHeight === availableHeight)
+        ? current
+        : { position: nextPosition, availableHeight }
+    );
+  }, [anchorElement, trackAvailableHeight]);
 
   useEffect(() => {
     if (globalThis.window === undefined || anchorElement === null) {
@@ -78,5 +94,17 @@ export function useTypeaheadMenuPosition(
     };
   }, [anchorElement, updatePosition]);
 
-  return position;
+  return placement;
+}
+
+export function useTypeaheadMenuPlacement(
+  anchorElement: HTMLElement | null
+): TypeaheadMenuPlacement {
+  return useTypeaheadMenuGeometry(anchorElement, true);
+}
+
+export function useTypeaheadMenuPosition(
+  anchorElement: HTMLElement | null
+): TypeaheadMenuPosition {
+  return useTypeaheadMenuGeometry(anchorElement, false).position;
 }

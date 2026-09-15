@@ -30,9 +30,10 @@ export async function generateMetadata(): Promise<Metadata> {
   return getAppMetadata(
     getLargeSocialCardMetadata({
       title: "6529 Gradient | Collections",
-      description: "Collections",
+      description: "6529 Gradient is a 101-piece grayscale NFT collection.",
       ogImage: getCollectionSocialCardImagePath("6529-gradient"),
       ogImageAlt: "6529 Gradient collection social card",
-    })
+    }),
+    { canonicalPath: "/6529-gradient" }
   );
 }
