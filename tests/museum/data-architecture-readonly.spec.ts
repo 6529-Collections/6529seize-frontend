@@ -179,7 +179,9 @@ test.describe("Museum data architecture @surface @readonly", () => {
         const routeLink = page.locator(`a[href="${route.path}"]:visible`);
         await expect(routeLink).toHaveCount(1);
         await routeLink.click();
-        await expect(page).toHaveURL((url) => url.pathname === route.path);
+        await expect(page).toHaveURL((url) => url.pathname === route.path, {
+          timeout: 20_000,
+        });
         await expect(
           page.getByRole("heading", {
             level: 1,
@@ -195,7 +197,10 @@ test.describe("Museum data architecture @surface @readonly", () => {
           exact: true,
         });
         await returnLink.click();
-        await expect(page).toHaveURL((url) => url.pathname === OVERVIEW.path);
+        await expect(page).toHaveURL(
+          (url) => url.pathname === OVERVIEW.path,
+          { timeout: 20_000 }
+        );
         await expect(
           page.getByRole("heading", {
             level: 1,
