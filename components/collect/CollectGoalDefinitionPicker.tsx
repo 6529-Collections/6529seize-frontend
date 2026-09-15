@@ -11,7 +11,9 @@ import {
 import { CheckIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
 import { useState } from "react";
+import CollectGoalDefinitionMobilePicker from "./CollectGoalDefinitionMobilePicker";
 import type { CollectGoalOption } from "./collect.types";
 
 export default function CollectGoalDefinitionPicker({
@@ -23,6 +25,8 @@ export default function CollectGoalDefinitionPicker({
   disabled,
   invalid,
   errorId,
+  mobileSheet = false,
+  searchableSheet = false,
   onChange,
 }: {
   readonly label: string;
@@ -33,9 +37,28 @@ export default function CollectGoalDefinitionPicker({
   readonly disabled: boolean;
   readonly invalid: boolean;
   readonly errorId?: string;
+  readonly mobileSheet?: boolean;
+  readonly searchableSheet?: boolean;
   readonly onChange: (id: string) => void;
 }) {
   const [query, setQuery] = useState("");
+  const isMobileLayoutViewport = useIsMobileLayoutViewport();
+  if (mobileSheet && isMobileLayoutViewport) {
+    return (
+      <CollectGoalDefinitionMobilePicker
+        label={label}
+        placeholder={placeholder}
+        locale={locale}
+        value={value}
+        definitions={definitions}
+        disabled={disabled}
+        invalid={invalid}
+        errorId={errorId}
+        searchable={searchableSheet}
+        onChange={onChange}
+      />
+    );
+  }
   const selected =
     definitions.find((definition) => definition.id === value) ?? null;
   const searchText = (text: string) =>
@@ -90,7 +113,7 @@ export default function CollectGoalDefinitionPicker({
             <ComboboxOptions
               anchor="bottom start"
               modal={false}
-              className="tailwind-scope tw-z-50 tw-max-h-64 tw-w-[var(--input-width)] tw-overflow-auto tw-rounded-lg tw-bg-iron-900 tw-p-1 tw-text-sm tw-text-iron-100 tw-shadow-lg tw-ring-1 tw-ring-white/10 [--anchor-gap:0.5rem] focus:tw-outline-none"
+              className="tailwind-scope tw-z-50 tw-max-h-64 tw-w-[var(--input-width)] tw-overflow-auto tw-rounded-lg tw-bg-iron-900 tw-p-1 tw-text-sm tw-text-iron-100 tw-shadow-lg tw-ring-1 tw-ring-white/10 [--anchor-gap:0.5rem] [--anchor-max-height:16rem] focus:tw-outline-none"
             >
               {filtered.length === 0 ? (
                 <ComboboxOption
