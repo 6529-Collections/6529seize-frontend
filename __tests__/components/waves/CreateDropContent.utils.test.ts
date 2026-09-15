@@ -24,7 +24,7 @@ describe("CreateDropContent utilities", () => {
   const createFile = (name: string, lastModified: number): File =>
     new File(["file"], name, {
       lastModified,
-      type: "text/plain",
+      type: "image/png",
     });
 
   const viewerIdentity: SelectableIdentityOption = {
@@ -121,12 +121,30 @@ describe("CreateDropContent utilities", () => {
   });
 
   describe("composer file changes", () => {
+    it("retains files added by another batch before React applies the update", () => {
+      const first = createFile("first.png", 100);
+      const second = createFile("second.png", 100);
+      const setFiles = jest.fn();
+      handleComposerFileChange({
+        newFiles: [second],
+        files: [],
+        drop: null,
+        waveId: "wave-1",
+        keepOptionsVisible: true,
+        setFiles,
+        setToast: jest.fn(),
+        setShowOptionsState: jest.fn(),
+        closeOnNextInputRef: { current: false },
+      });
+      expect(setFiles.mock.calls[0][0]([first])).toEqual([first, second]);
+    });
+
     it("enforces the upload budget after existing drop part attachments", () => {
       const setFiles = jest.fn();
       const setToast = jest.fn();
       const setShowOptionsState = jest.fn();
-      const currentFile = createFile("current.txt", 100);
-      const newFile = createFile("new.txt", 200);
+      const currentFile = createFile("current.png", 100);
+      const newFile = createFile("new.png", 200);
 
       handleComposerFileChange({
         newFiles: [newFile],
@@ -136,7 +154,7 @@ describe("CreateDropContent utilities", () => {
               content: "existing",
               quoted_drop: null,
               media: Array.from({ length: 7 }, (_, index) =>
-                createFile(`existing-${index}.txt`, index)
+                createFile(`existing-${index}.png`, index)
               ),
             },
           ],
@@ -150,11 +168,11 @@ describe("CreateDropContent utilities", () => {
         closeOnNextInputRef: { current: false },
       });
 
-      expect(setFiles).toHaveBeenCalledWith([newFile]);
+      expect(setFiles).not.toHaveBeenCalled();
       expect(setToast).toHaveBeenCalledWith(
         expect.objectContaining({
           type: "warning",
-          message: expect.stringContaining("1 oldest file was removed"),
+          message: expect.stringContaining("Extra files were not added"),
         })
       );
       expect(setShowOptionsState).not.toHaveBeenCalled();

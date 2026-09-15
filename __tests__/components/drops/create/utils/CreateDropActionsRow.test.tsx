@@ -20,7 +20,7 @@ describe("CreateDropActionsRow", () => {
     const setFiles = jest.fn();
     const files = Array.from(
       { length: MAX_DROP_UPLOAD_FILES + 1 },
-      (_, i) => new File([""], `f${i}.png`, { type: "image/png" })
+      (_, i) => new File(["image"], `f${i}.png`, { type: "image/png" })
     );
     const { toast } = renderComponent({
       canAddPart: false,
@@ -28,8 +28,7 @@ describe("CreateDropActionsRow", () => {
       setFiles,
       breakIntoStorm: jest.fn(),
     });
-    const button = screen.getByRole("button", { name: /select audio file/i });
-    const input = button.querySelector("input") as HTMLInputElement;
+    const input = screen.getByLabelText(/upload media/i);
     fireEvent.change(input, { target: { files } });
     expect(toast).toHaveBeenCalledWith({
       message: `Upload ${MAX_DROP_UPLOAD_FILES} or fewer files at a time.`,
@@ -50,8 +49,7 @@ describe("CreateDropActionsRow", () => {
       setFiles,
       breakIntoStorm: jest.fn(),
     });
-    const button = screen.getByRole("button", { name: /select audio file/i });
-    const input = button.querySelector("input") as HTMLInputElement;
+    const input = screen.getByLabelText(/upload media/i);
     fireEvent.change(input, { target: { files } });
     expect(setFiles).toHaveBeenCalledWith(files);
     expect(toast).not.toHaveBeenCalled();
@@ -83,10 +81,7 @@ describe("CreateDropActionsRow", () => {
       disabled: true,
     });
 
-    const uploadButton = screen.getByRole("button", {
-      name: /select audio file/i,
-    });
-    const input = uploadButton.querySelector("input") as HTMLInputElement;
+    const input = screen.getByLabelText(/upload media/i);
     fireEvent.change(input, { target: { files } });
     fireEvent.click(screen.getByRole("button", { name: /break into storm/i }));
 

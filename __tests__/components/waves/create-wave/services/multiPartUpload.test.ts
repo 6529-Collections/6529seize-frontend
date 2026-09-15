@@ -168,6 +168,27 @@ describe("multiPartUpload", () => {
       });
     });
 
+    it("returns the server's WebP MIME type for an AVIF upload", async () => {
+      mockCommonApiPost.mockReset();
+      mockCommonApiPost
+        .mockResolvedValueOnce(mockStartResponse)
+        .mockResolvedValueOnce(mockPartResponse)
+        .mockResolvedValueOnce({
+          ...mockCompleteResponse,
+          mime_type: "image/webp",
+        });
+      const result = await multiPartUpload({
+        file: new File(["avif"], "still.avif", { type: "image/avif" }),
+        path: "drop",
+      });
+      expect(result.mime_type).toBe("image/webp");
+      expect(mockAxios.put).toHaveBeenCalledWith(
+        expect.any(String),
+        expect.any(Blob),
+        expect.objectContaining({ headers: { "Content-Type": "image/avif" } })
+      );
+    });
+
     it("successfully uploads a file for wave path", async () => {
       await multiPartUpload({
         file: mockFile,

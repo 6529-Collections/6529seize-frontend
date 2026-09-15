@@ -1,3 +1,4 @@
+import { DROP_UPLOAD_ACCEPT } from "@/services/uploads/mediaUploadMimeType";
 import CreateDropActions from "@/components/waves/CreateDropActions";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -552,7 +553,7 @@ describe("CreateDropActions", () => {
     const fileInput = getFileInput();
     expect(fileInput).toHaveAttribute(
       "accept",
-      "image/*,video/*,audio/*,application/pdf,text/csv,.pdf,.csv"
+      DROP_UPLOAD_ACCEPT
     );
     expect(fileInput).toHaveAttribute("multiple");
   });

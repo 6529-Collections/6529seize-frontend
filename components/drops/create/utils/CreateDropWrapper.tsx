@@ -1,5 +1,11 @@
 "use client";
 
+import { useAuth } from "@/components/auth/Auth";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
+import { useDropFilePreparation } from "@/components/waves/create-drop-content/useDropFilePreparation";
+import { getContentType } from "@/services/uploads/mediaUploadMimeType";
+
 import {
   forwardRef,
   useEffect,
@@ -210,12 +216,19 @@ const CreateDropWrapper = forwardRef<
     const [editorState, setEditorState] = useState<EditorState | null>(null);
     const [files, setFiles] = useState<File[]>([]);
 
-    const setFilesWhenUnlocked = (newFiles: File[]) => {
-      if (loading) {
-        return;
-      }
-      setFiles(newFiles);
-    };
+    const { setToast } = useAuth();
+    const locale = useBrowserLocale();
+    const { handleFileChange: setFilesWhenUnlocked, isPreparingFiles } =
+      useDropFilePreparation({
+        scopeKey: waveId ?? "new-wave",
+        existingFiles: [
+          ...(drop?.parts.flatMap((part) => part.media) ?? []),
+          ...files,
+        ],
+        disabled: loading,
+        setToast,
+        onFiles: (newFiles) => setFiles((current) => [...current, ...newFiles]),
+      });
 
     const setEditorStateWhenUnlocked = (newEditorState: EditorState | null) => {
       if (loading) {
@@ -308,7 +321,7 @@ const CreateDropWrapper = forwardRef<
         : null;
 
     const getHasPendingInlineImageUpload = () =>
-      hasPendingInlineImageUploadMarkdown(getMarkdown());
+      isPreparingFiles || hasPendingInlineImageUploadMarkdown(getMarkdown());
 
     const getMissingRequiredMetadata = (): ApiWaveRequiredMetadata[] => {
       if (!waveProps?.id) {
@@ -343,11 +356,11 @@ const CreateDropWrapper = forwardRef<
     const getRequirementFromFileType = (
       file: File
     ): ApiWaveParticipationRequirement | null => {
-      if (file.type.startsWith("image/"))
+      if (getContentType(file).startsWith("image/"))
         return ApiWaveParticipationRequirement.Image;
-      if (file.type.startsWith("audio/"))
+      if (getContentType(file).startsWith("audio/"))
         return ApiWaveParticipationRequirement.Audio;
-      if (file.type.startsWith("video/"))
+      if (getContentType(file).startsWith("video/"))
         return ApiWaveParticipationRequirement.Video;
       return null; // Unknown or unsupported file type
     };
@@ -422,7 +435,7 @@ const CreateDropWrapper = forwardRef<
       !missingMetadata.length &&
       !!(drop?.parts.length ? getCanSubmitStorm() : true);
 
-    const [canSubmit, setCanSubmit] = useState(getCanSubmit());
+    const canSubmit = getCanSubmit();
 
     const getHaveMarkdownOrFile = () => !!getMarkdown() || !!files.length;
     const getCanAddPart = () =>
@@ -430,11 +443,7 @@ const CreateDropWrapper = forwardRef<
       !getHasPendingInlineImageUpload() &&
       !getIsDropLimit() &&
       !getIsPartLimit();
-    const [canAddPart, setCanAddPart] = useState(getCanAddPart());
-    useEffect(() => {
-      setCanSubmit(getCanSubmit());
-      setCanAddPart(getCanAddPart());
-    }, [editorState, files, drop, missingMedia, missingMetadata]);
+    const canAddPart = getCanAddPart();
 
     useEffect(() => {
       if (!onCanSubmitChange) {
@@ -689,6 +698,11 @@ const CreateDropWrapper = forwardRef<
       <div>
         <CommonAnimationHeight disableAnimation={disableHeightAnimation}>
           {components[viewType]}
+          {isPreparingFiles && (
+            <p role="status" className="tw-mt-2 tw-text-sm tw-text-iron-300">
+              {t(locale, "drop.upload.preparing")}
+            </p>
+          )}
         </CommonAnimationHeight>
       </div>
     );

@@ -2802,6 +2802,25 @@ const MEME_DATA_TABLE_MESSAGES = objectMessages("memeData", {
 const TOKEN_NUMBER_MESSAGE = "Token #{tokenId}";
 
 export const EN_US_MESSAGES = {
+  "drop.upload.avifMismatch":
+    "The image content does not match its file type. Export it again with the correct extension.",
+  "drop.upload.animatedAvif":
+    "Animated AVIF is not supported. Export a still AVIF image or use GIF.",
+  "drop.upload.chooseFiles": "Upload media",
+  "drop.upload.preparingFile": "Preparing {file}",
+  "drop.upload.preparing": "Preparing image…",
+  "drop.upload.fileLimit":
+    "A drop can contain up to {count} files. Extra files were not added.",
+  "drop.upload.duplicatesSkipped": "Duplicate files were skipped.",
+  "drop.upload.unsupported": "Unsupported file: {files}",
+  "drop.upload.acceptedFormats":
+    "Supported formats: {formats}. AVIF still images only.",
+  "drop.upload.dropHere": "Drop files here",
+  "drop.upload.invalidFile": "Could not add {file}",
+  "drop.upload.empty": "Choose a file that is not empty.",
+  "drop.upload.tooLarge": "Media files must be 500 MB or smaller.",
+  "drop.upload.imagePreview": "Preview of {file}",
+
   "nftNavigation.previous.ariaLabel": "Previous NFT",
   "nftNavigation.previous.title": "Previous Card",
   "nftNavigation.next.ariaLabel": "Next NFT",
