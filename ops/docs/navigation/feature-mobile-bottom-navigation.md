@@ -97,7 +97,10 @@ Profile access stays in the app drawer/account surfaces.
   the full update toast.
 - Tapping the rocket shows a static rocket and `Updating to the latest version`
   with three animated dots while the current route reloads. The screen resumes
-  before the incoming page hydrates and clears when its app shell mounts.
+  before the incoming page hydrates. The rocket is prepared when an update is
+  available and loaded eagerly during the reload; the screen clears together
+  after the rocket and app shell are ready. An image-loading failure does not
+  block the update.
   Reduced-motion preferences keep the dots still. If startup does not finish,
   the cover clears after 30 seconds so the underlying page or error is usable.
 - While a single drop is open (`?drop=...`) or an inline drop edit is active,

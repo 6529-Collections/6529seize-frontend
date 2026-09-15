@@ -3,6 +3,11 @@ import {
   useVersionStatus,
 } from "@/contexts/VersionStatusContext";
 import { act, render, screen } from "@testing-library/react";
+import { prepareVersionReloadImage } from "@/components/version-update/versionReload";
+
+jest.mock("@/components/version-update/versionReload", () => ({
+  prepareVersionReloadImage: jest.fn().mockResolvedValue(undefined),
+}));
 
 jest.mock("next/navigation", () => ({
   useSearchParams: () => new URLSearchParams(globalThis.location.search),
@@ -15,6 +20,7 @@ function Consumer({ name }: { readonly name: string }) {
 
 describe("shared version status", () => {
   beforeEach(() => {
+    jest.clearAllMocks();
     jest.useFakeTimers();
     globalThis.history.replaceState(null, "", "/");
     globalThis.fetch = jest
@@ -35,6 +41,7 @@ describe("shared version status", () => {
     expect(globalThis.fetch).toHaveBeenCalledTimes(1);
     expect(screen.getByTestId("toast")).toHaveTextContent("update");
     expect(screen.getByTestId("pull")).toHaveTextContent("update");
+    expect(prepareVersionReloadImage).toHaveBeenCalledTimes(1);
     (globalThis.fetch as jest.Mock).mockResolvedValue({
       json: async () => ({ stale: false }),
     });
@@ -44,6 +51,7 @@ describe("shared version status", () => {
     expect(globalThis.fetch).toHaveBeenCalledTimes(2);
     expect(screen.getByTestId("toast")).toHaveTextContent("current");
     expect(screen.getByTestId("pull")).toHaveTextContent("current");
+    expect(prepareVersionReloadImage).toHaveBeenCalledTimes(1);
     unmount();
     act(() => {
       jest.advanceTimersByTime(120_000);
@@ -62,6 +70,7 @@ describe("shared version status", () => {
       jest.advanceTimersByTime(120_000);
     });
     expect(globalThis.fetch).not.toHaveBeenCalled();
+    expect(prepareVersionReloadImage).not.toHaveBeenCalled();
     expect(screen.getByTestId("pull")).toHaveTextContent("current");
   });
 });
