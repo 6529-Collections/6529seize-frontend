@@ -573,14 +573,14 @@ test("short set setups gain keyboard scroll clearance", async ({ page }) => {
     await page.goto(`/collect?collection=memes&intent=${intent}`, {
       waitUntil: "domcontentloaded",
     });
-    const form = page.getByRole("form", {
-      name: intent === "season" ? "Complete a season" : "Complete a full set",
-      exact: true,
-    });
-    await expect(form).toBeVisible();
-    const surface = form.locator(
-      "xpath=ancestor::div[contains(@class, 'tailwind-scope')][1]"
-    );
+    const formName =
+      intent === "season" ? "Complete a season" : "Complete a full set";
+    await expect(
+      page.getByRole("form", { name: formName, exact: true })
+    ).toBeVisible();
+    const surface = page
+      .getByRole("form", { name: formName, exact: true })
+      .locator("xpath=ancestor::div[contains(@class, 'tailwind-scope')][1]");
     const readPadding = () =>
       surface.evaluate((element) =>
         Number.parseFloat(getComputedStyle(element).paddingBottom)
