@@ -535,12 +535,27 @@ test("set planning is the default and navigation opens observed listings", async
     page.getByRole("form", { name: "Complete a season", exact: true })
   ).toBeVisible();
   await expect(season).toBeFocused();
-  const target = page.getByRole("combobox", { name: "Season", exact: true });
-  await target.fill("Season 1");
-  await target.press("ArrowDown");
-  await target.press("Enter");
-  await expect(target).toHaveValue("Season 1");
-  await expect(target).toBeFocused();
+  if (page.viewportSize()!.width < 1024) {
+    const target = page.getByRole("button", { name: /^Season / });
+    await target.click();
+    const sheet = page.getByRole("dialog", { name: "Season" });
+    await expect(sheet.getByRole("heading", { name: "Season" })).toBeVisible();
+    await expect(sheet.getByRole("searchbox")).toHaveCount(0);
+    await sheet
+      .getByRole("radio", { name: "Season 1" })
+      .locator("xpath=..")
+      .click();
+    await expect(sheet).toHaveCount(0);
+    await expect(target).toContainText("Season 1");
+    await expect(target).toBeFocused();
+  } else {
+    const target = page.getByRole("combobox", { name: "Season", exact: true });
+    await target.fill("Season 1");
+    await target.press("ArrowDown");
+    await target.press("Enter");
+    await expect(target).toHaveValue("Season 1");
+    await expect(target).toBeFocused();
+  }
   await expect(
     page.getByRole("button", { name: "Connect wallet", exact: true }).last()
   ).toBeVisible();

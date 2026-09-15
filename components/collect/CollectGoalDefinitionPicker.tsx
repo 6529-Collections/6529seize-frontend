@@ -11,7 +11,9 @@ import {
 import { CheckIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
 import { useState } from "react";
+import CollectGoalDefinitionMobilePicker from "./CollectGoalDefinitionMobilePicker";
 import type { CollectGoalOption } from "./collect.types";
 
 export default function CollectGoalDefinitionPicker({
@@ -23,6 +25,7 @@ export default function CollectGoalDefinitionPicker({
   disabled,
   invalid,
   errorId,
+  mobileSheet = false,
   onChange,
 }: {
   readonly label: string;
@@ -33,9 +36,26 @@ export default function CollectGoalDefinitionPicker({
   readonly disabled: boolean;
   readonly invalid: boolean;
   readonly errorId?: string;
+  readonly mobileSheet?: boolean;
   readonly onChange: (id: string) => void;
 }) {
   const [query, setQuery] = useState("");
+  const isMobileLayoutViewport = useIsMobileLayoutViewport();
+  if (mobileSheet && isMobileLayoutViewport) {
+    return (
+      <CollectGoalDefinitionMobilePicker
+        label={label}
+        placeholder={placeholder}
+        locale={locale}
+        value={value}
+        definitions={definitions}
+        disabled={disabled}
+        invalid={invalid}
+        errorId={errorId}
+        onChange={onChange}
+      />
+    );
+  }
   const selected =
     definitions.find((definition) => definition.id === value) ?? null;
   const searchText = (text: string) =>

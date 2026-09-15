@@ -82,8 +82,10 @@ card page.
    full set directly; Pebbles offers its named sets.
 2. Connect your profile to inspect its holdings. Wallet controls describe where
    NFTs are held, which wallet pays or signs, and where a purchase is delivered.
-3. Choose the season, artist or Pebbles set when applicable. Type a name in
-   the selector to filter its options; artist names can be searched directly.
+3. Choose the season, artist or Pebbles set when applicable. On a narrow screen,
+   Season opens a scrollable choice sheet; tap a season to select it. On larger
+   screens, type in the Season selector to filter its options. Artist and
+   Pebbles set selectors still support typing to find an option by name.
    Set an optional **Budget cap (ETH, optional)**. For The Memes, also set
    **Copies per NFT**.
    Unique Gradients and Pebbles use one copy and have no copies input.
