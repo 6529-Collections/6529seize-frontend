@@ -1371,7 +1371,7 @@ jobs:
                 remaining: {
                   test_count: remaining.length,
                   test_keys: remaining.map((entry) => entry.key).sort(),
-                  workers: 1,
+                  workers: 2,
                 },
                 source_commit: sourceCommit,
                 specs: [...expectedSpecs].sort(),
@@ -1449,6 +1449,8 @@ jobs:
 
           museum_remaining_log="test-results/app-pr-ci/museum-remaining.log"
           set +e
+          # Suites with ordering requirements declare serial mode; two workers
+          # let independent tests finish within the hosted-runner budget.
           PLAYWRIGHT_SKIP_WEB_SERVER=1 \
             BASE_ENDPOINT="$museum_base_url" \
             PLAYWRIGHT_BASE_URL="$museum_base_url" \
@@ -1458,7 +1460,7 @@ jobs:
             ./bin/6529 exec playwright test \
               "${selected_specs[@]}" \
               --project="$MUSEUM_PROJECT" \
-              --workers=1 \
+              --workers=2 \
               --retries=0 \
               --max-failures=1 \
               2>&1 \
