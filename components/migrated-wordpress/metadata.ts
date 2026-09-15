@@ -9,6 +9,7 @@ import type { PageSSRMetadata } from "@/helpers/Types";
 import type { MigratedWordPressArticleMedia } from "./types";
 
 type MigratedWordPressPageMetadataContent = {
+  readonly path: string;
   readonly title: string;
   readonly description: string;
   readonly heroImage?: MigratedWordPressArticleMedia;
@@ -34,10 +35,13 @@ const getHeroImageMetadata = (
 export function getMigratedWordPressPageMetadata(
   content: MigratedWordPressPageMetadataContent
 ): Metadata {
-  return getAppMetadata({
-    title: `${content.title} - 6529.io`,
-    description: content.description,
-    twitterCard: LARGE_IMAGE_TWITTER_CARD,
-    ...getHeroImageMetadata(content.heroImage),
-  });
+  return getAppMetadata(
+    {
+      title: `${content.title} - 6529.io`,
+      description: content.description,
+      twitterCard: LARGE_IMAGE_TWITTER_CARD,
+      ...getHeroImageMetadata(content.heroImage),
+    },
+    { canonicalPath: content.path }
+  );
 }

@@ -115,6 +115,6 @@ describe("generateMetadata", () => {
     } as any);
 
     expect(meta.title).toContain("Memes");
-    expect(meta.description).toBe(`About | ${domain}`);
+    expect(meta.description).toContain("The Memes is a collection of art NFTs");
   });
 });
