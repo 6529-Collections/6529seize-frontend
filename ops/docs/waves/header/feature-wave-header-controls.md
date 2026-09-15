@@ -7,6 +7,8 @@ leaving the thread.
 
 Users can:
 
+- Add or edit Wave REP when eligible
+- Share or copy a non-DM wave link
 - Follow or unfollow (`Join` / `Joined`)
 - Use the bell notification menu after following
 - Mute or unmute waves from the speaker-muted control
@@ -30,14 +32,35 @@ These surfaces show the tile even when Announcements has a saved wave picture.
 
 ## Entry Points
 
-1. Open an active wave and switch to `About`.
+1. Open an active wave, select the `Show right sidebar` icon in the desktop/tablet header (or the
+   `Wave details` icon on compact web), then select `About`.
 2. Use the top-right control row (`Join` / `Joined`, notification controls).
 3. Use header controls near the wave title, avatar, and metadata.
 4. Open the owner options menu (`⋮`) when available.
 
+## Conversation Header
+
+At desktop and tablet widths (768px and above), the conversation header groups
+its avatar, parent-wave link, name, and a short one-line description preview into a compact
+identity block. The small shield and number beside the name show Wave Score
+when available. Hover, click, or use the keyboard to open its details card and
+`Learn more` link. No score space is left for waves without a score or for DMs.
+
+The top-right controls start with Add REP for eligible viewers, followed by the
+create/submit action when available, chat/gallery toggle when supported, search,
+and the right-sidebar toggle. Add REP is also available in the right sidebar's
+`About` section, alongside the full trust information and sharing. Existing
+contributors see `Edit REP`.
+On compact web, REP stays in `About` and sharing remains in `More wave actions`.
+
+Unavailable submission actions show a lock icon at every width. Hover, focus,
+or select the lock to read the full restriction reason. The Memes `How to Submit`
+helper keeps its desktop label and opens nomination guidance.
+
 ## Permission Rules
 
-- Anyone viewing the header can open description and followers.
+- Anyone viewing the header can open description and followers, and share a non-DM wave.
+- Add/Edit REP requires a connected non-author, non-proxy profile. DMs do not offer REP.
 - `Join`, notification settings, and pin require a connected non-proxy profile.
 - Rename and picture edit require a non-DM wave plus `canEditWave` eligibility:
   author or admin-eligible, connected, and non-proxy.
