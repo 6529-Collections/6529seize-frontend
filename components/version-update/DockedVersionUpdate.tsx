@@ -15,6 +15,7 @@ export default function DockedVersionUpdate({
 
   return (
     <div
+      data-version-update-dock={compact ? "compact" : "expanded"}
       className={`tw-pointer-events-none tw-absolute tw-bottom-full tw-left-1/2 tw-z-10 tw-h-9 tw-w-[104px] tw-origin-bottom -tw-translate-x-1/2 tw-transition-transform tw-duration-300 tw-ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:tw-transition-none ${compact ? "tw-scale-[0.88] sm:tw-scale-100" : "tw-scale-100"}`}
     >
       {/* A sibling backdrop layer samples the same page as the dock glass. */}
@@ -25,17 +26,6 @@ export default function DockedVersionUpdate({
           clipPath: "path('M0 36 C24 36 24 0 52 0 C80 0 80 36 104 36 Z')",
         }}
       />
-      <svg
-        aria-hidden="true"
-        viewBox="0 0 104 36"
-        className="tw-absolute tw-inset-0 tw-h-full tw-w-full tw-overflow-visible"
-      >
-        <path
-          d="M0 36 C24 36 24 0 52 0 C80 0 80 36 104 36"
-          fill="none"
-          stroke="rgba(255,255,255,0.13)"
-        />
-      </svg>
       <VersionUpdateButton className="tw-absolute tw-left-1/2 tw-top-0.5 -tw-translate-x-1/2" />
     </div>
   );

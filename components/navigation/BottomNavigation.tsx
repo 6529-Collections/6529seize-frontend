@@ -34,6 +34,7 @@ import CollectionsMenuIcon from "../common/icons/CollectionsMenuIcon";
 import UsersIcon from "../common/icons/UsersIcon";
 import WavesIcon from "../common/icons/WavesIcon";
 import NavItem from "./NavItem";
+import styles from "./BottomNavigation.module.css";
 import DockedVersionUpdate from "@/components/version-update/DockedVersionUpdate";
 import { getProfileHref, getResolvedNavItemState } from "./navItemState";
 import type { NavItem as NavItemData } from "./navTypes";
@@ -337,7 +338,7 @@ const getNavClassName = ({
 };
 
 const getDockClassName = (compact: boolean) =>
-  `tw-pointer-events-auto tw-relative tw-border tw-border-white/[0.13] before:tw-pointer-events-none before:tw-absolute before:tw-inset-0 before:tw-rounded-[inherit] before:tw-bg-black/[0.76] before:tw-backdrop-blur-2xl before:tw-content-[''] tw-shadow-[0_18px_45px_rgba(0,0,0,0.48),0_0_0_1px_rgba(255,255,255,0.045),0_0_34px_rgba(255,255,255,0.075),inset_0_1px_0_rgba(255,255,255,0.105),inset_0_-1px_0_rgba(255,255,255,0.06)] tw-transition-[width,height,border-radius,background-color,box-shadow] tw-duration-300 tw-ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:tw-transition-none ${
+  `${styles.dock} tw-pointer-events-auto tw-relative tw-border tw-border-transparent before:tw-pointer-events-none before:tw-absolute before:tw-inset-0 before:tw-rounded-[inherit] before:tw-bg-black/[0.76] before:tw-backdrop-blur-2xl before:tw-content-[''] tw-shadow-[0_18px_45px_rgba(0,0,0,0.48),0_0_34px_rgba(255,255,255,0.075)] tw-transition-[width,height,border-radius,background-color,box-shadow] tw-duration-300 tw-ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:tw-transition-none ${
     compact
       ? "tw-h-[54px] tw-w-[min(calc(100vw-5.5rem),25rem)] tw-rounded-[1.65rem] sm:tw-h-[58px] sm:tw-w-[min(calc(100vw-6.75rem),31rem)] md:tw-w-[min(calc(100vw-10rem),35rem)]"
       : "tw-h-[64px] tw-w-[min(calc(100vw-2.25rem),38rem)] tw-rounded-[2rem] sm:tw-h-[66px] sm:tw-w-[min(calc(100vw-4rem),40rem)]"
