@@ -102,6 +102,20 @@ describe("Museum isolated remaining runner", () => {
     return { ...result, events };
   }
 
+  function runGateCleanup(tail: string, env: Record<string, string> = {}) {
+    const cleanup = workflowRun
+      .split("cleanup_museum_server() {")[1]
+      ?.split("museum_server_ready=false")[0];
+    expect(cleanup).toBeDefined();
+    // Spaces and shell metacharacters in the filename remain literal argv data.
+    const gateScript = path.join(directory, "gate cleanup '$;.sh");
+    fs.writeFileSync(
+      gateScript,
+      `set -euo pipefail\nmuseum_server_pid=4321\ncleanup_museum_server() {${cleanup}\n${tail}`
+    );
+    return run([], env, gateScript);
+  }
+
   it.each(projects)(
     "isolates rights and retains every selected test on %s",
     (project) => {
@@ -303,17 +317,10 @@ describe("Museum isolated remaining runner", () => {
     ["TERM", 143],
     ["INT", 130],
   ])("finishes gate cleanup before honoring %s", (signal, status) => {
-    const cleanup = workflowRun
-      .split("cleanup_museum_server() {")[1]
-      ?.split("museum_server_ready=false")[0];
-    expect(cleanup).toBeDefined();
-    // Spaces and shell metacharacters in the filename remain literal argv data.
-    const gateScript = path.join(directory, "gate cleanup '$;.sh");
-    fs.writeFileSync(
-      gateScript,
-      `set -euo pipefail\nmuseum_server_pid=4321\ncleanup_museum_server() {${cleanup}\ncleanup_museum_server\necho unexpected-continuation`
+    const result = runGateCleanup(
+      "cleanup_museum_server\necho unexpected-continuation",
+      { TEST_CLEANUP_SIGNAL: String(signal) }
     );
-    const result = run([], { TEST_CLEANUP_SIGNAL: String(signal) }, gateScript);
     expect(result.status).toBe(status);
     expect(result.events).toEqual([
       "cleanup:-TERM -- -4321",
@@ -321,6 +328,47 @@ describe("Museum isolated remaining runner", () => {
     ]);
     expect(result.stdout).not.toContain("unexpected-continuation");
   });
+
+  it("continues after normal gate cleanup without repeating cleanup on EXIT", () => {
+    const result = runGateCleanup(
+      "cleanup_museum_server\necho gate-cleanup-complete"
+    );
+    expect(result.status).toBe(0);
+    expect(result.stdout).toContain("gate-cleanup-complete");
+    expect(result.events).toEqual([
+      "cleanup:-TERM -- -4321",
+      "cleanup:-KILL -- -4321",
+    ]);
+  });
+
+  it.each([0, 7])(
+    "preserves gate exit status %i without cancellation",
+    (status) => {
+      const result = runGateCleanup(`exit ${status}`);
+      expect(result.status).toBe(status);
+      expect(result.events).toEqual([
+        "cleanup:-TERM -- -4321",
+        "cleanup:-KILL -- -4321",
+      ]);
+    }
+  );
+
+  it.each([
+    ["TERM", 143],
+    ["INT", 130],
+  ])(
+    "honors %s during gate EXIT cleanup without recursive cleanup",
+    (signal, status) => {
+      const result = runGateCleanup("exit 7", {
+        TEST_CLEANUP_SIGNAL: String(signal),
+      });
+      expect(result.status).toBe(status);
+      expect(result.events).toEqual([
+        "cleanup:-TERM -- -4321",
+        "cleanup:-KILL -- -4321",
+      ]);
+    }
+  );
 
   it.each([[], ["unexpected.spec.ts"], [rightsSpec, rightsSpec]])(
     "rejects invalid selection %j before starting a server",
