@@ -123,7 +123,7 @@ describe("WagmiSetup server rendering", () => {
     });
     jest
       .mocked(createAppKitAdapter)
-      .mockReturnValue({ wagmiConfig: liveConfig } as ReturnType<
+      .mockReturnValue({ wagmiConfig: liveConfig } as unknown as ReturnType<
         typeof createAppKitAdapter
       >);
     const onMount = jest.fn();
@@ -192,7 +192,7 @@ describe("WagmiSetup server rendering", () => {
     });
     jest
       .mocked(createAppKitAdapter)
-      .mockReturnValue({ wagmiConfig: liveConfig } as ReturnType<
+      .mockReturnValue({ wagmiConfig: liveConfig } as unknown as ReturnType<
         typeof createAppKitAdapter
       >);
     const onReady = jest.fn();
