@@ -1,11 +1,8 @@
 "use client";
 
-import { VersionUpdateButton } from "@/components/version-update/DockedVersionUpdate";
+import { useWebVersionUpdate } from "@/components/version-update/useWebVersionUpdate";
 import { refreshAppVersion } from "@/helpers/version-refresh.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import useDeviceInfo from "@/hooks/useDeviceInfo";
-import { useVersionStatus } from "@/contexts/VersionStatusContext";
-import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { t } from "@/i18n/messages";
 
 const SGT_WINK_IMAGE = (
@@ -27,22 +24,13 @@ const ROCKET_REFRESH_IMAGE = (
 );
 
 const NewVersionToast = () => {
-  const isVersionStale = useVersionStatus();
-  const { isApp } = useDeviceInfo();
+  const surface = useWebVersionUpdate();
   const locale = useBrowserLocale();
-  const isPhone = useMediaQuery("(max-width: 639px)");
-  if (!isVersionStale || isApp) return null;
-  if (isPhone) {
-    return (
-      <div className="tailwind-scope tw-fixed tw-bottom-4 tw-right-4 tw-z-[1000]">
-        <VersionUpdateButton />
-      </div>
-    );
-  }
+  if (surface !== "toast") return null;
   const refreshActionLabel = t(locale, "newVersionToast.refreshAction");
 
   return (
-    <div className="tailwind-scope tw-pointer-events-none tw-fixed tw-bottom-7 tw-right-7 tw-z-[1000]">
+    <div className="tailwind-scope tw-pointer-events-none tw-fixed tw-bottom-4 tw-left-4 tw-right-4 tw-z-[1000] sm:tw-bottom-7 sm:tw-left-auto sm:tw-right-7">
       <button
         type="button"
         aria-label={refreshActionLabel}

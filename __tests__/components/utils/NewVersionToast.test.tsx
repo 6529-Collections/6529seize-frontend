@@ -2,7 +2,6 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import NewVersionToast from "@/components/utils/NewVersionToast";
 import { useVersionStatus } from "@/contexts/VersionStatusContext";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
-import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { refreshAppVersion } from "@/helpers/version-refresh.helpers";
 
 jest.mock("@/contexts/VersionStatusContext", () => ({
@@ -12,7 +11,6 @@ jest.mock("@/hooks/useDeviceInfo", () => ({
   __esModule: true,
   default: jest.fn(),
 }));
-jest.mock("@/hooks/useMediaQuery", () => ({ useMediaQuery: jest.fn() }));
 jest.mock("@/helpers/version-refresh.helpers", () => ({
   refreshAppVersion: jest.fn(),
 }));
@@ -20,17 +18,19 @@ jest.mock("@/helpers/version-refresh.helpers", () => ({
 beforeEach(() => {
   jest.clearAllMocks();
   jest.mocked(useVersionStatus).mockReturnValue(true);
-  jest
-    .mocked(useDeviceInfo)
-    .mockReturnValue({ isApp: false } as ReturnType<typeof useDeviceInfo>);
-  jest.mocked(useMediaQuery).mockReturnValue(false);
+  jest.mocked(useDeviceInfo).mockReturnValue({
+    isApp: false,
+    isMobileDevice: true,
+    isAppleMobile: false,
+    hasTouchScreen: true,
+  });
   Object.defineProperty(navigator, "languages", {
     configurable: true,
     value: ["en-US"],
   });
 });
 
-it("retains the desktop prompt and update action", () => {
+it("retains the full mobile-browser toast and uses the shared updating flow", () => {
   render(<NewVersionToast />);
   expect(screen.getByText("A new version is available")).toBeInTheDocument();
   expect(screen.getByText("Yes, again!")).toBeInTheDocument();
@@ -38,25 +38,24 @@ it("retains the desktop prompt and update action", () => {
   expect(refreshAppVersion).toHaveBeenCalledTimes(1);
 });
 
-it.each([
-  [true, false],
-  [true, true],
-])("leaves mobile updates to the dock (app=%s, phone=%s)", (isApp, isPhone) => {
-  jest
-    .mocked(useDeviceInfo)
-    .mockReturnValue({ isApp } as ReturnType<typeof useDeviceInfo>);
-  jest.mocked(useMediaQuery).mockReturnValue(isPhone);
+it("leaves native app updates to the dock", () => {
+  jest.mocked(useDeviceInfo).mockReturnValue({
+    isApp: true,
+    isMobileDevice: true,
+    isAppleMobile: true,
+    hasTouchScreen: true,
+  });
   const { container } = render(<NewVersionToast />);
   expect(container).toBeEmptyDOMElement();
 });
 
-it("hides the desktop prompt when no update is available", () => {
+it("hides the toast when no update is available", () => {
   jest.mocked(useVersionStatus).mockReturnValue(false);
   const { container } = render(<NewVersionToast />);
   expect(container).toBeEmptyDOMElement();
 });
 
-it("preserves localized desktop labels", () => {
+it("preserves localized toast labels", () => {
   Object.defineProperty(navigator, "languages", {
     configurable: true,
     value: ["fr-FR"],
@@ -70,14 +69,26 @@ it("preserves localized desktop labels", () => {
   ).toBeInTheDocument();
 });
 
-it("keeps an update action on mobile web, which has no native dock", () => {
-  jest.mocked(useMediaQuery).mockReturnValue(true);
+it("leaves desktop updates to the sidebar", () => {
+  jest.mocked(useDeviceInfo).mockReturnValue({
+    isApp: false,
+    isMobileDevice: false,
+    isAppleMobile: false,
+    hasTouchScreen: false,
+  });
+  const { container } = render(<NewVersionToast />);
+  expect(container).toBeEmptyDOMElement();
+});
+
+it("retains the toast on an iPad using desktop browsing with a pointer", () => {
+  jest.mocked(useDeviceInfo).mockReturnValue({
+    isApp: false,
+    isMobileDevice: false,
+    isAppleMobile: true,
+    hasTouchScreen: false,
+  });
   render(<NewVersionToast />);
   expect(
-    screen.queryByText("A new version is available")
-  ).not.toBeInTheDocument();
-  fireEvent.click(
-    screen.getByRole("button", { name: "Update to the new version" })
-  );
-  expect(refreshAppVersion).toHaveBeenCalledTimes(1);
+    screen.getByRole("button", { name: "Refresh page" })
+  ).toBeInTheDocument();
 });
