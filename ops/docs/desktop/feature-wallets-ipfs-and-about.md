@@ -4,38 +4,38 @@ Parent: [Desktop index](README.md)
 
 ## Overview
 
-Core wallets handle local signing, My IPFS opens the bundled content node, and
+6529 Desktop wallets handle local signing, My IPFS opens the bundled content node, and
 About exposes updates and diagnostics. They are independent tools; no wallet
 secret is required to index transactions or calculate TDH.
 
 ## Location in the Site
 
 These controls live inside the installed desktop application under the
-**6529 Desktop** sidebar menu. Core-only routes are not public website links.
+**6529 Desktop** sidebar menu. Desktop-only routes are not public website links.
 
 ## Entry Points
 
 Open the monitor icon in the app sidebar. If a control described here is absent,
 check your installed version under **6529 Desktop > About**; a mobile or browser
-session does not expose Core workers.
+session does not expose 6529 Desktop workers.
 
 ## User Journey
 
-### Create, import, and connect a Core wallet
+### Create, import, and connect a 6529 Desktop wallet
 
-Open 6529 Desktop > Wallets for Core wallets stored on this computer. These are separate from mobile App Wallets and from connecting an external wallet or sharing a website login session.
+Open 6529 Desktop > Wallets for 6529 Desktop wallets stored on this computer. These are separate from mobile App Wallets and from connecting an external wallet or sharing a website login session.
 
-Create Wallet opens Create New Wallet: choose a name and password and select Create. Core generates a wallet and stores its private key and recovery phrase encrypted with that password in the local database.
+Create Wallet opens Create New Wallet: choose a name and password and select Create. 6529 Desktop generates a wallet and stores its private key and recovery phrase encrypted with that password in the local database.
 
 Import Wallet offers Mnemonic (the current form accepts 12 words) or Private Key. Enter it only in the trusted local app, Validate, check the resulting address, then Import Wallet with a name and password. Never send a phrase, key, or password to the help bot.
 
-Use the Core wallet connector in the wallet connection flow to select a saved wallet and unlock it when prompted. Review signature/transaction requests before approving; an unlocked wallet and an authenticated 6529 session are distinct states.
+Use the 6529 Desktop wallet connector in the wallet connection flow to select a saved wallet and unlock it when prompted. Review signature/transaction requests before approving; an unlocked wallet and an authenticated 6529 session are distinct states.
 
 Wallet details show the address and password-protected reveal/copy controls plus Download Recovery File. That download contains the decrypted private key and available mnemonic in a plaintext text file; keep it private and securely backed up, never send it to the bot. Private-key-only imports have no mnemonic.
 
 Delete removes the saved local wallet record after confirmation; disconnect first if it is the currently connected wallet. It does not erase the Ethereum address or move on-chain funds. There is no documented bot/password-recovery service; the bot cannot decrypt or recover a forgotten wallet password.
 
-A Core wallet is optional for node indexing and TDH calculation. You can run workers with an active RPC provider without importing any funded wallet, and connecting a wallet does not enable RPC workers.
+A 6529 Desktop wallet is optional for node indexing and TDH calculation. You can run workers with an active RPC provider without importing any funded wallet, and connecting a wallet does not enable RPC workers.
 
 ### Explore My IPFS
 
@@ -55,7 +55,7 @@ The IPFS API and gateway are bound to loopback. Do not expose the local administ
 
 ### Wallet backup and unlocking
 
-Core wallets live in 6529 Desktop > Wallets on this device. The stored private key and, when present, mnemonic are encrypted with the wallet password; a connected website profile is not a backup.
+6529 Desktop wallets live in 6529 Desktop > Wallets on this device. The stored private key and, when present, mnemonic are encrypted with the wallet password; a connected website profile is not a backup.
 
 Open the saved wallet details and use Download Recovery File after unlocking, or use the password-protected reveal/copy controls. The recovery download is a plaintext text file containing the private key and available mnemonic, not an encrypted wallet backup. Keep it private and securely backed up; never upload it or paste any wallet password, key, or phrase into the bot. Private-key-only imports have no mnemonic.
 
@@ -77,13 +77,13 @@ For a TDH issue include both Last Block values, the mismatched field, last calcu
 
 Share only relevant redacted diagnostic lines. Remove RPC API keys/credential URLs, passwords, private keys, and recovery phrases. The bot cannot inspect your filesystem, operate workers, or confirm the node is repaired without observations from you.
 
-The native titlebar identifies a Live/Test backend where applicable. That backend target is distinct from TDH TestNet Mode Phase 1. Core-only menu controls and routes are unavailable on mobile and ordinary web browsers.
+The native titlebar identifies a Live/Test backend where applicable. That backend target is distinct from TDH TestNet Mode Phase 1. Desktop-only menu controls and routes are unavailable on mobile and ordinary web browsers.
 
 ## Edge Cases
 
 A private-key-only wallet cannot display a mnemonic it never had. A website
 connection or Mobile connection transfer is not a backup of the locally saved
-Core wallet. My IPFS can be absent when the local configuration is unavailable.
+6529 Desktop wallet. My IPFS can be absent when the local configuration is unavailable.
 The IPFS RPC port is unrelated to the Ethereum RPC provider URL.
 
 ## Failure and Recovery

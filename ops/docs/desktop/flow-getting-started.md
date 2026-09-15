@@ -4,7 +4,7 @@ Parent: [Desktop index](README.md)
 
 ## Overview
 
-6529 Desktop, also called Core, is the Windows, macOS, and Linux app with local Core wallets, Ethereum indexing workers, independent TDH calculation, and a bundled IPFS node. These Core tools are separate from the mobile app and desktop-browser website.
+6529 Desktop is the Windows, macOS, and Linux app with local wallets, Ethereum indexing workers, independent TDH calculation, and a bundled IPFS node. These Desktop tools are separate from 6529 Mobile and the website in a desktop browser.
 
 Get the official installer from [6529 Apps](https://6529.io/about/6529-apps), choose your operating system, install, and open the app.
 
@@ -16,24 +16,24 @@ With an active RPC provider and the app running, Transactions and NFTDelegation 
 
 Then open 6529 Desktop > TDH Calculation. TDH runs daily at 00:15 UTC; after prerequisite workers catch up you can use the TDH worker Advanced Options > Recalculate TDH Now. Compare Your Node and 6529.io at the same Last Block.
 
-Wallets lets you create or import a Core wallet for signing, but importing a wallet or seed phrase is not required to run indexing and TDH. My IPFS opens the bundled node WebUI; About shows version, ports, updates, and App Logs.
+Wallets lets you create or import a 6529 Desktop wallet for signing, but importing a wallet or seed phrase is not required to run indexing and TDH. My IPFS opens the bundled node WebUI; About shows version, ports, updates, and App Logs.
 
 The bot can explain these controls but cannot inspect or operate your local node. Never send it wallet passwords, recovery phrases, private keys, or RPC URLs containing credentials.
 
 ## Location in the Site
 
 These controls live inside the installed desktop application under the
-**6529 Desktop** sidebar menu. Core-only routes are not public website links.
+**6529 Desktop** sidebar menu. Desktop-only routes are not public website links.
 
 ## Entry Points
 
 Open the monitor icon in the app sidebar. If a control described here is absent,
 check your installed version under **6529 Desktop > About**; a mobile or browser
-session does not expose Core workers.
+session does not expose 6529 Desktop workers.
 
 ## User Journey
 
-1. Download and install Core from the official Apps page.
+1. Download and install 6529 Desktop from the official Apps page.
 2. Open **6529 Desktop > ETH Transactions**.
 3. Expand **Providers List** and choose **Set Active**, or add/test/name a provider and then activate it.
 4. Leave the app running while Transactions, NFTDelegation, and NFTs catch up.
