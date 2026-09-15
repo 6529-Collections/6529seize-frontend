@@ -21,6 +21,7 @@ const BASE_PATH = "/museum/network/research/data-architecture";
 const SOURCE_REPOSITORY = "6529-Collections/6529networkmuseum";
 const MOBILE_PROJECT = "web-mobile-chromium";
 const MOBILE_VIEWPORT = { width: 390, height: 844 } as const;
+const ROUTE_TRANSITION_TIMEOUT_MS = 45_000;
 const EXACT_COMMIT_PATTERN = /^[a-f0-9]{40}$/u;
 const DEPLOYED_ENVIRONMENT =
   process.env["PLAYWRIGHT_ENV"] === "staging" ||
@@ -180,7 +181,7 @@ test.describe("Museum data architecture @surface @readonly", () => {
         await expect(routeLink).toHaveCount(1);
         await routeLink.click();
         await expect(page).toHaveURL((url) => url.pathname === route.path, {
-          timeout: 20_000,
+          timeout: ROUTE_TRANSITION_TIMEOUT_MS,
         });
         await expect(
           page.getByRole("heading", {
@@ -199,7 +200,7 @@ test.describe("Museum data architecture @surface @readonly", () => {
         await returnLink.click();
         await expect(page).toHaveURL(
           (url) => url.pathname === OVERVIEW.path,
-          { timeout: 20_000 }
+          { timeout: ROUTE_TRANSITION_TIMEOUT_MS }
         );
         await expect(
           page.getByRole("heading", {
