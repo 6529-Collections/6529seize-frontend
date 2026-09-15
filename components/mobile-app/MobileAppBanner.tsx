@@ -77,12 +77,9 @@ export default function MobileAppBanner() {
         </button>
       </div>
       {attempted && (
-        <p
-          role="status"
-          className="tw-m-0 tw-px-4 tw-pb-3 tw-text-xs tw-text-iron-300"
-        >
+        <output className="tw-m-0 tw-block tw-px-4 tw-pb-3 tw-text-xs tw-text-iron-300">
           {t(DEFAULT_LOCALE, "apps.openMobile.help")}
-        </p>
+        </output>
       )}
     </aside>
   );

@@ -60,9 +60,9 @@ function OpenMobileContent({
         {t(DEFAULT_LOCALE, "apps.openMobile.open")}
       </button>
       {attempted && (
-        <p role="status" className="tw-m-0 tw-text-sm tw-text-iron-300">
+        <output className="tw-m-0 tw-block tw-text-sm tw-text-iron-300">
           {t(DEFAULT_LOCALE, "apps.openMobile.help")}
-        </p>
+        </output>
       )}
       <section
         aria-label={t(DEFAULT_LOCALE, "apps.openMobile.download")}
