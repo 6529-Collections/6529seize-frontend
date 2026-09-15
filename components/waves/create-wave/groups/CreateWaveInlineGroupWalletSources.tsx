@@ -461,7 +461,7 @@ export default function CreateWaveInlineGroupWalletSources(
       <EmmaWalletSource
         sources={props.sources}
         onChange={props.onChange}
-        quiet={props.quiet}
+        quiet={props.quiet ?? false}
       />
       <CsvWalletSource {...props} />
     </div>
