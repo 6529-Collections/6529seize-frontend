@@ -95,6 +95,7 @@ export default function CreateWaveInlineGroupActions({
         label={criteriaLabel}
         disabled={disabled || criteriaDisabled}
         quiet={quiet}
+        compactVisual={quiet && !isWaveAccessEditor}
         active={criteriaActive}
         isToggle={true}
         onClick={onReplaceCriteria}
