@@ -1,5 +1,13 @@
 import type { MessageKey } from "@/i18n/messages/en-US";
 
+export const VERSION_RELOAD_MESSAGES = {
+  "en-US": "Updating to the latest version",
+  "en-GB": "Updating to the latest version",
+  "fr-FR": "Mise à jour vers la dernière version",
+  "es-ES": "Actualizando a la última versión",
+  "de-DE": "Aktualisierung auf die neueste Version",
+} as const;
+
 const NEW_VERSION_TOAST_MESSAGE_KEYS = [
   "newVersionToast.refreshAction",
   "newVersionToast.title",

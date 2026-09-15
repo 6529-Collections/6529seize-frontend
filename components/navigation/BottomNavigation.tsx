@@ -34,6 +34,7 @@ import CollectionsMenuIcon from "../common/icons/CollectionsMenuIcon";
 import UsersIcon from "../common/icons/UsersIcon";
 import WavesIcon from "../common/icons/WavesIcon";
 import NavItem from "./NavItem";
+import DockedVersionUpdate from "@/components/version-update/DockedVersionUpdate";
 import { getProfileHref, getResolvedNavItemState } from "./navItemState";
 import type { NavItem as NavItemData } from "./navTypes";
 import { getActiveViewFromUrl } from "./ViewContext";
@@ -553,6 +554,7 @@ const BottomNavigationResolvedContent: React.FC<
         className={getDockClassName(compact)}
         style={getDockStyle({ compact, isTabletViewport })}
       >
+        <DockedVersionUpdate compact={compact} />
         <div className="tw-pointer-events-none tw-absolute tw-inset-0 tw-overflow-hidden tw-rounded-[inherit]">
           <div
             aria-hidden="true"
