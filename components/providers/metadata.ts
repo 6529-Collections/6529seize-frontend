@@ -191,9 +191,14 @@ const getOpenGraphImages = ({
 };
 
 export function getAppMetadata(
-  customMetadata?: Partial<PageSSRMetadata>
+  customMetadata?: Partial<PageSSRMetadata>,
+  options: {
+    readonly canonicalPath?: string | undefined;
+    readonly robots?: Metadata["robots"] | undefined;
+  } = {}
 ): Metadata {
   const baseEndpoint = publicEnv.BASE_ENDPOINT;
+  const metadataBase = getBaseEndpointUrl(baseEndpoint);
   const environment = getAppEnvironment(baseEndpoint);
 
   const title = customMetadata?.title ?? environment.title;
@@ -213,8 +218,27 @@ export function getAppMetadata(
   });
 
   const domain = environment.hostname;
+  const canonicalPath = options.canonicalPath;
+  if (
+    canonicalPath !== undefined &&
+    (!canonicalPath.startsWith("/") ||
+      canonicalPath.startsWith("//") ||
+      canonicalPath.includes("#") ||
+      canonicalPath.includes("\\"))
+  ) {
+    throw new Error("metadata_canonical_path_must_be_absolute_path");
+  }
+  const canonicalUrl =
+    canonicalPath === undefined
+      ? undefined
+      : new URL(canonicalPath, metadataBase);
+  if (canonicalUrl && canonicalUrl.origin !== metadataBase.origin) {
+    throw new Error("metadata_canonical_path_must_be_absolute_path");
+  }
+  const canonical = canonicalUrl?.toString();
 
   return {
+    metadataBase,
     title,
     description: description ? `${description} | ${domain}` : domain,
     openGraph: {
@@ -223,6 +247,7 @@ export function getAppMetadata(
       images: openGraphImages,
       title,
       description: description ? `${description} | ${domain}` : domain,
+      ...(canonical === undefined ? {} : { url: canonical }),
     },
     twitter: {
       card: twitterCard,
@@ -231,5 +256,7 @@ export function getAppMetadata(
     other: {
       version: publicEnv.VERSION ?? "",
     },
+    ...(canonical === undefined ? {} : { alternates: { canonical } }),
+    ...(options.robots === undefined ? {} : { robots: options.robots }),
   };
 }

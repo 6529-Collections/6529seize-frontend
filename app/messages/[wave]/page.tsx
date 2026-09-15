@@ -20,10 +20,13 @@ import WaveServerFeedSeed, {
 } from "@/components/waves/WaveServerFeedSeed";
 import { fetchServerWaveFeedSeed } from "@/app/waves/wave-feed-seed.server";
 
-export const metadata = getAppMetadata({
-  title: "Messages | Brain",
-  description: "Direct Messages",
-});
+export const metadata = getAppMetadata(
+  {
+    title: "Messages | Brain",
+    description: "Direct Messages",
+  },
+  { robots: { index: false, follow: true } }
+);
 
 export default async function MessageWavePage({
   params,

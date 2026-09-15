@@ -1,6 +1,7 @@
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import { getAuthJwt, getStagingAuth } from "@/services/auth/auth.utils";
 import { publicEnv } from "@/config/env";
+import { getUserProfile } from "@/helpers/server.helpers";
 
 jest.mock("@/services/auth/auth.utils", () => ({
   getStagingAuth: jest.fn(),
@@ -63,6 +64,28 @@ describe("commonApiFetch", () => {
       })
     );
   });
+
+  it.each([404, 503])(
+    "preserves identity HTTP %s status for route classification",
+    async (status) => {
+      (getStagingAuth as jest.Mock).mockReturnValue(null);
+      (getAuthJwt as jest.Mock).mockReturnValue(null);
+      fetchMock.mockResolvedValue({
+        ok: false,
+        status,
+        statusText: status === 404 ? "Not Found" : "Unavailable",
+        headers: new Headers(),
+        text: async () => JSON.stringify({ error: "identity lookup failed" }),
+      });
+
+      await expect(
+        getUserProfile({ user: "missing", headers: {} })
+      ).rejects.toMatchObject({
+        status,
+        response: { status },
+      });
+    }
+  );
 
   it("can target a same-origin Next route without changing default callers", async () => {
     (getStagingAuth as jest.Mock).mockReturnValue("s");
