@@ -58,6 +58,21 @@ export async function dismissNextDevTools(page: Page) {
   }
 }
 
+export async function hideNextDevTools(page: Page) {
+  const openButton = page.getByRole("button", {
+    name: "Open Next.js Dev Tools",
+    exact: true,
+  });
+  if (!(await openButton.isVisible())) return;
+
+  await openButton.click();
+  await page
+    .getByRole("menu", { name: "Next.js Dev Tools Items" })
+    .getByText("Preferences", { exact: true })
+    .click();
+  await page.getByRole("button", { name: "Hide", exact: true }).click();
+}
+
 export function useLocalSandboxMutationGuard(
   localTest: LocalSandboxTestApi,
   sandboxFlag: "PLAYWRIGHT_AUTH_SANDBOX" | "PLAYWRIGHT_COMPOSER_SANDBOX",

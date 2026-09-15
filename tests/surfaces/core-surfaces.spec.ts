@@ -1,10 +1,12 @@
 import {
   expect,
+  captureSafeScreenshot,
   expectNoHorizontalOverflow,
   test,
   waitForRouteReady,
 } from "../testHelpers";
 import type { Locator, Page } from "@playwright/test";
+import { hideNextDevTools } from "../support/localSandbox";
 import {
   isCapacitorSimulationProject,
   isDesktopWebProject,
@@ -72,6 +74,144 @@ async function expectLinkHref(page: Page, name: string, href: string) {
 }
 
 test.describe("Core app surface coverage @surface @medium @large", () => {
+  test("main sidebar bottom control keeps the desktop click target in place", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      !isDesktopWebProject(testInfo.project.name),
+      "Desktop rail geometry"
+    );
+    await page.setViewportSize({ width: 1342, height: 600 });
+    await gotoReady(page, "/messages");
+    await hideNextDevTools(page);
+
+    const expand = page.getByRole("button", {
+      name: "Expand main sidebar",
+      exact: true,
+    });
+    await expect(expand).toHaveAttribute("aria-expanded", "false");
+    const before = await expand.boundingBox();
+    expect(before).not.toBeNull();
+    if (!before) throw new Error("Sidebar toggle has no visible box");
+    expect(before.height).toBe(46);
+    expect(before.y + before.height).toBe(592);
+    const icon = await page
+      .getByRole("button", { name: "Expand main sidebar", exact: true })
+      .locator("svg")
+      .boundingBox();
+    expect(icon?.width).toBe(20);
+    expect(icon?.height).toBe(20);
+    expect(icon && icon.y + icon.height / 2).toBe(before.y + before.height / 2);
+    await expand.hover();
+    await expect(page.getByRole("tooltip")).toHaveText("Expand");
+
+    const clickPoint = {
+      x: before.x + before.width / 2,
+      y: before.y + before.height / 2,
+    };
+    await page.mouse.click(clickPoint.x, clickPoint.y);
+    const collapse = page.getByRole("button", {
+      name: "Collapse main sidebar",
+      exact: true,
+    });
+    await expect(collapse).toHaveAttribute("aria-expanded", "true");
+    await expect
+      .poll(async () => (await collapse.boundingBox())?.width)
+      .toBeGreaterThan(before.width);
+    const after = await collapse.boundingBox();
+    expect(after?.x).toBe(before.x);
+    expect(after?.y).toBe(before.y);
+    expect(after?.height).toBe(before.height);
+    const expandedIcon = await page
+      .getByRole("button", { name: "Collapse main sidebar", exact: true })
+      .locator("svg")
+      .boundingBox();
+    const label = await collapse
+      .getByText("Collapse", { exact: true })
+      .boundingBox();
+    await expect(collapse.getByText("Collapse", { exact: true })).toHaveCSS(
+      "font-size",
+      "14px"
+    );
+    expect(expandedIcon && expandedIcon.y + expandedIcon.height / 2).toBe(
+      label && label.y + label.height / 2
+    );
+    await page.mouse.click(clickPoint.x, clickPoint.y);
+    await expect(expand).toBeVisible();
+
+    await expand.focus();
+    await page.keyboard.press("Enter");
+    await expect(collapse).toBeFocused();
+    await expect(collapse).toHaveCSS("--tw-ring-offset-width", "2px");
+    await page.reload({ waitUntil: "domcontentloaded" });
+    await expect(collapse).toBeVisible();
+
+    await page.setViewportSize({ width: 1342, height: 320 });
+    await expect(collapse).toBeInViewport({ ratio: 1 });
+    const nav = page.getByRole("navigation", { name: "Desktop navigation" });
+    await nav.getByRole("button", { name: "NFTs", exact: true }).click();
+    await expect(collapse).toBeInViewport({ ratio: 1 });
+    const sidebar = page.getByLabel("Primary sidebar", { exact: true });
+    await expect(
+      sidebar.getByRole("button", { name: "Connect", exact: true })
+    ).toBeInViewport({ ratio: 1 });
+    await expectNoHorizontalOverflow(page);
+
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await expect(sidebar).toHaveCSS("transition-property", "none");
+  });
+
+  test("main sidebar bottom control closes web overlays", async ({
+    page,
+  }, testInfo) => {
+    const isMobile = isMobileWebProject(testInfo.project.name);
+    test.skip(
+      !isMobile && !isDesktopWebProject(testInfo.project.name),
+      "Web overlay controls"
+    );
+    if (!isMobile) await page.setViewportSize({ width: 1100, height: 600 });
+    await gotoReady(page, "/messages");
+    await hideNextDevTools(page);
+    const open = page.getByRole("button", {
+      name: isMobile ? "Open menu" : "Expand main sidebar",
+      exact: true,
+    });
+    const close = page.getByRole("button", {
+      name: "Close main sidebar",
+      exact: true,
+    });
+    await open.click();
+    await expect(close).toHaveAttribute("aria-expanded", "true");
+    await expect(close).toBeInViewport({ ratio: 1 });
+    await captureSafeScreenshot(page, testInfo, "sidebar-overlay");
+    await close.click();
+    await expect(close).not.toBeVisible();
+    await open.click();
+    await page.keyboard.press("Escape");
+    await expect(close).not.toBeVisible();
+    await open.click();
+    await page
+      .getByRole("button", { name: "Close menu overlay", exact: true })
+      .click({ position: { x: 350, y: 100 } });
+    await expect(close).not.toBeVisible();
+    await open.click();
+    await page
+      .getByRole("navigation", { name: "Desktop navigation" })
+      .getByRole("link", { name: "Waves", exact: true })
+      .click();
+    await expect(page).toHaveURL(/\/waves$/, {
+      timeout: NAVIGATION_TIMEOUT_MS,
+    });
+    await expect(close).not.toBeVisible();
+    if (!isMobile) {
+      await expect(page.getByRole("main").first()).toHaveCSS(
+        "transform",
+        "none"
+      );
+    }
+    await expectNoHorizontalOverflow(page);
+  });
+
   test("desktop header search opens the Wave Score page", async ({
     page,
   }, testInfo) => {

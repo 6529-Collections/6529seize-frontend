@@ -3191,6 +3191,12 @@ export const EN_US_MESSAGES = {
   "headerUserMenu.switchToProfile": "Switch to {profile} ({wallet})",
   "headerUserMenu.signOutAll": "Sign out all",
   "headerUserMenu.logout": "Logout",
+  "webSidebar.toggle.expand": "Expand",
+  "webSidebar.toggle.expandAriaLabel": "Expand main sidebar",
+  "webSidebar.toggle.collapse": "Collapse",
+  "webSidebar.toggle.collapseAriaLabel": "Collapse main sidebar",
+  "webSidebar.toggle.close": "Close",
+  "webSidebar.toggle.closeAriaLabel": "Close main sidebar",
   "webSidebar.accountMenu.openAriaLabel": "Open account and profiles menu",
   "webSidebar.accountMenu.openWithSwitchAriaLabel":
     "Open account and profiles menu (double-click to switch profiles)",
