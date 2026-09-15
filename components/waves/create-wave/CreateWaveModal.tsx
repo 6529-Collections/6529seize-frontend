@@ -1,11 +1,13 @@
 "use client";
 
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
+import { useRef } from "react";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { getCreateSubwaveTitle } from "@/helpers/waves/create-subwave-title.helpers";
 import type { ApiIdentity } from "../../../generated/models/ApiIdentity";
 import CreateWave from "./CreateWave";
+import type { CreateWaveHandles } from "./CreateWave";
 import CreateWaveProfileRequiredModal from "./CreateWaveProfileRequiredModal";
 
 interface CreateWaveModalProps {
@@ -28,6 +30,14 @@ export default function CreateWaveModal({
   parentViewGroupId,
 }: CreateWaveModalProps) {
   const locale = useBrowserLocale();
+  const createWaveRef = useRef<CreateWaveHandles>(null);
+  const requestClose = () => {
+    if (createWaveRef.current) {
+      createWaveRef.current.requestClose();
+    } else {
+      onClose();
+    }
+  };
 
   if (!profile.handle?.trim()) {
     return (
@@ -47,7 +57,8 @@ export default function CreateWaveModal({
     <MobileWrapperDialog
       title={title}
       isOpen={isOpen}
-      onClose={onClose}
+      onClose={requestClose}
+      preserveFocusOnEscape
       closeLabel={t(locale, "common.close")}
       noPadding
       tall
@@ -62,6 +73,7 @@ export default function CreateWaveModal({
     >
       <div className="tw-flex tw-min-h-0 tw-flex-1 tw-flex-col">
         <CreateWave
+          ref={createWaveRef}
           profile={profile}
           onBack={onClose}
           onSuccess={onClose}

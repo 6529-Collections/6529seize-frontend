@@ -62,7 +62,32 @@ reached), select the header restriction control to see the reason, then use
      `Arweave` from the `Hosting Network` tabs, enter the root
      CID/transaction ID in `Content Hash or Path` (or paste an approved
      gateway URL), review the resulting URL, and wait for validation.
-6. Click `Continue` to open `Additional Information`.
+6. Optionally select `Add a proposal card frame (optional)` and choose
+   `Vertical` or `Horizontal`. The preview shows the animated border around
+   your image, video, or interactive HTML. Leave it unchecked to submit the
+   original media.
+7. Click `Continue` to open `Additional Information`.
+
+## Proposal Card Frame
+
+- The frame is off by default. It is available for image, video, and interactive
+  HTML submissions; selecting a GLB model removes the frame option.
+- The thin black-and-white border uses the 6529 logo in all four corners.
+  Its messages include `THIS IS A PROPOSAL TO DO SOMETHING.`,
+  `CECI N’EST PAS UNE CARTE MÈME.`, `PLEASE JUDGE THE PLAN.`, and
+  `ARTWORK MAY CHANGE.` The original artwork stays visible without cropping.
+- Select the top-right logo to pause or resume the border animation. Reduced
+  motion preferences stop the animation automatically. Video controls and
+  interactive artwork remain usable inside the frame.
+- Submission creates an HTML artwork that embeds the original media and a
+  framed still image for gallery previews. Videos and interactive HTML still
+  need the separate preview image requested in `Additional Information`.
+- `Preview` shows the animated artwork plus the framed gallery and list preview.
+  If preparing or publishing the frame fails, the submission stops and shows an
+  error. Retry after resolving the media or preview-image issue.
+- Resubmitting a framed submission restores its original media and frame
+  orientation. Change the orientation or uncheck the option to remove the
+  frame; resubmission does not nest one frame inside another.
 
 ## Common Scenarios
 

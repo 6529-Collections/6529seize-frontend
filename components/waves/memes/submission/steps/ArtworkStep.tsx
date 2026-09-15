@@ -16,8 +16,13 @@ import type { TraitsData } from "../types/TraitsData";
 import type { SubmissionPhase } from "../ui/SubmissionProgress";
 import SubmissionProgress from "../ui/SubmissionProgress";
 import { useTraitsValidation } from "../validation";
+import type { ProposalCardLayout } from "@/lib/proposal-card/document";
+import { ProposalCardOption } from "../components/ProposalCardOption";
+import { getProposalCardMimeType } from "@/lib/proposal-card/media";
 
 interface ArtworkStepProps {
+  readonly proposalFrame?: ProposalCardLayout | null;
+  readonly onProposalFrameChange?: (layout: ProposalCardLayout | null) => void;
   readonly traits: TraitsData;
   readonly artworkUploaded: boolean;
   readonly artworkUrl: string;
@@ -66,6 +71,8 @@ interface ArtworkStepProps {
  * appearance based on the current submission phase.
  */
 const ArtworkStep: React.FC<ArtworkStepProps> = ({
+  proposalFrame,
+  onProposalFrameChange,
   traits,
   artworkUploaded,
   artworkUrl,
@@ -221,6 +228,8 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
 
   const renderMediaSubmissionPanel = () => (
     <MemesArtSubmissionFile
+      proposalFrame={proposalFrame}
+      artworkTitle={traits.title}
       artworkUploaded={artworkUploaded}
       artworkUrl={artworkUrl}
       uploadError={uploadError}
@@ -288,6 +297,16 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
           <div className="tw-w-full tw-px-4 tw-pt-6 md:tw-pl-6 md:tw-pr-8 lg:tw-h-full lg:tw-min-h-0 lg:tw-w-1/2 lg:tw-overflow-y-auto lg:tw-scrollbar-thin lg:tw-scrollbar-track-iron-800 lg:tw-scrollbar-thumb-iron-500 lg:desktop-hover:hover:tw-scrollbar-thumb-iron-300">
             <div className="tw-flex tw-flex-col tw-gap-y-6 tw-pb-6">
               {renderArtworkDetailsPanel()}
+              {onProposalFrameChange &&
+                (mediaSource === "url" ||
+                  !artworkMimeType ||
+                  getProposalCardMimeType(artworkMimeType) !== undefined) && (
+                  <ProposalCardOption
+                    layout={proposalFrame ?? null}
+                    onChange={onProposalFrameChange}
+                    disabled={isSubmitting}
+                  />
+                )}
               {renderArtworkTraitsPanel()}
             </div>
           </div>

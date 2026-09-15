@@ -2,10 +2,8 @@
 
 import { AuthContext } from "@/components/auth/Auth";
 import MarketDepthPanel from "@/components/nft-market-depth/MarketDepthPanel";
-import { getDistributionDetailHref } from "@/components/distribution/distributionRouteParams";
 import CommonTabs from "@/components/utils/select/tabs/CommonTabs";
 import { ArrowLeftIcon } from "@heroicons/react/20/solid";
-import { ArrowUpRightIcon } from "@heroicons/react/24/outline";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
@@ -17,7 +15,6 @@ import NowMintingCountdown from "@/components/home/now-minting/NowMintingCountdo
 import { getMemeYearFromMintNumber } from "@/components/the-memes/theMemesFilters";
 import { getTheMemesRouteHrefWithLocale } from "@/components/the-memes/theMemesRouteParams";
 import Button from "@/components/utils/button/Button";
-import ButtonLink from "@/components/utils/button/ButtonLink";
 import ProfileCollectedReturnLink from "@/components/user/collected/ProfileCollectedReturnLink";
 import { publicEnv } from "@/config/env";
 import { MEMES_CONTRACT } from "@/constants/constants";
@@ -63,6 +60,7 @@ import {
 } from "./MemeShared";
 import styles from "./TheMemes.module.css";
 import UpcomingMemePage from "./UpcomingMemePage";
+import UpcomingMemeDistributionHeaderLink from "./UpcomingMemeDistributionHeaderLink";
 import {
   isAbortError,
   type MemePageInitialData,
@@ -129,35 +127,6 @@ function getMemeHistoryTabLabel(
       throw new Error(`Unhandled MEME_HISTORY_TAB: ${String(unhandled)}`);
     }
   }
-}
-
-function UpcomingMemeDistributionHeaderLink({
-  id,
-  locale,
-}: {
-  readonly id: number;
-  readonly locale: SupportedLocale;
-}) {
-  return (
-    <ButtonLink
-      href={getDistributionDetailHref({
-        basePath: "/the-memes",
-        id,
-        locale,
-      })}
-      variant="tertiary"
-      size="xs"
-      className="tw-ml-auto"
-    >
-      <span className="tw-whitespace-nowrap">
-        {t(locale, "distribution.planLink")}
-      </span>
-      <ArrowUpRightIcon
-        aria-hidden="true"
-        className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-400"
-      />
-    </ButtonLink>
-  );
 }
 
 function parseMemeFocus(focus: string | null): MEME_FOCUS | undefined {
@@ -773,6 +742,7 @@ export default function MemePage({
               locale={locale}
               persistentContent={
                 <MarketDepthPanel
+                  focusedOrderHash={searchParams.get("order")}
                   contract={MEMES_CONTRACT}
                   tokenId={nft.id}
                   locale={locale}

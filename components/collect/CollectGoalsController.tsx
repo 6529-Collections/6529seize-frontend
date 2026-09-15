@@ -3,6 +3,7 @@
 import Button from "@/components/utils/button/Button";
 import type { ApiCollectCatalog } from "@/generated/models/ApiCollectCatalog";
 import type { ApiCollectPlan } from "@/generated/models/ApiCollectPlan";
+import type { ApiCollectPlanRequest } from "@/generated/models/ApiCollectPlanRequest";
 import { ApiCollectPlanStateEnum } from "@/generated/models/ApiCollectPlan";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -20,6 +21,10 @@ import CollectGoalForm from "./CollectGoalForm";
 import type { CollectCompletionSelection } from "./CollectCompletionControls";
 import CollectDeliveryControl from "./CollectDeliveryControl";
 import { isPositiveEthAmount } from "./collect-form.validation";
+import { collectProfileWallets } from "./collect-recipient.helpers";
+import type { ConfirmedMarketPurchase } from "./market-activity-store";
+import type { CollectGoalBuild } from "./collect-goal-refresh";
+import { useCollectGoalRefresh } from "./useCollectGoalRefresh";
 
 const MAX_STALLED_SCAN_ATTEMPTS = 8;
 const MAX_SCAN_ATTEMPTS = 2000 + MAX_STALLED_SCAN_ATTEMPTS;
@@ -37,6 +42,7 @@ export default function CollectGoalsController({
   onConnect,
   completion,
   revision = 0,
+  purchases = [],
 }: {
   readonly draft: CollectGoalDraft;
   readonly catalog: ApiCollectCatalog | undefined;
@@ -48,6 +54,7 @@ export default function CollectGoalsController({
   readonly onConnect: () => void;
   readonly completion?: CollectCompletionSelection;
   readonly revision?: number;
+  readonly purchases?: readonly ConfirmedMarketPurchase[];
 }) {
   const locale = useBrowserLocale();
   const [recipient, setRecipient] = useState(profile?.primary_wallet ?? "");
@@ -56,6 +63,9 @@ export default function CollectGoalsController({
     draft,
     catalog?.version,
     profile?.id,
+    collectProfileWallets(profile)
+      .map((wallet) => wallet.wallet.toLowerCase())
+      .sort((left, right) => left.localeCompare(right)),
     recipient,
   ]);
   const [storedPlan, setStoredPlan] = useState<{
@@ -64,6 +74,7 @@ export default function CollectGoalsController({
   } | null>(null);
   const plan = storedPlan?.scope === scope ? storedPlan.plan : null;
   const [submittedScope, setSubmittedScope] = useState<string | null>(null);
+  const [build, setBuild] = useState<CollectGoalBuild | null>(null);
   const requestEpoch = useRef(0);
   useEffect(
     () => () => {
@@ -75,9 +86,25 @@ export default function CollectGoalsController({
   const [recipientError, setRecipientError] = useState(false);
   const [budgetError, setBudgetError] = useState(false);
   const scanProgress = useRef({ attempts: 0, stalled: 0 });
-  const create = useMutation({ mutationFn: createCollectPlan });
+  const create = useMutation({
+    mutationFn: (request: ApiCollectPlanRequest) => createCollectPlan(request),
+  });
   const creating = create.isPending && submittedScope === scope;
   const scanning = plan?.state === ApiCollectPlanStateEnum.Scanning;
+  const refreshPhase = useCollectGoalRefresh({
+    build: build?.scope === scope ? build : null,
+    plan,
+    purchases,
+    onStart: () => onPlan(null),
+    onPlan: (next) => {
+      scanProgress.current = { attempts: 0, stalled: 0 };
+      setScanError(false);
+      setStoredPlan({ scope, plan: next });
+      onPlan(next);
+    },
+  });
+  const refreshing =
+    refreshPhase === "waiting" || refreshPhase === "rebuilding";
   useEffect(() => {
     if (plan?.state !== ApiCollectPlanStateEnum.Scanning || scanError) return;
     const abort = new AbortController();
@@ -132,27 +159,26 @@ export default function CollectGoalsController({
     setSubmittedScope(scope);
     requestEpoch.current += 1;
     const epoch = requestEpoch.current;
-    create.mutate(
-      {
-        goal: collectAnalysisRequest(profile.id, catalog, value),
-        options: {
-          ...(value.budgetEth === ""
-            ? {}
-            : { budget_wei: parseEther(value.budgetEth).toString() }),
-          recipient,
-        },
+    const request = {
+      goal: collectAnalysisRequest(profile.id, catalog, value),
+      options: {
+        ...(value.budgetEth === ""
+          ? {}
+          : { budget_wei: parseEther(value.budgetEth).toString() }),
+        recipient,
       },
-      {
-        onSuccess: (next) => {
-          if (epoch !== requestEpoch.current) return;
-          setStoredPlan({ scope, plan: next });
-          onPlan(next);
-        },
-      }
-    );
+    };
+    setBuild({ scope, generation: epoch, startedAt: Date.now(), request });
+    create.mutate(request, {
+      onSuccess: (next) => {
+        if (epoch !== requestEpoch.current) return;
+        setStoredPlan({ scope, plan: next });
+        onPlan(next);
+      },
+    });
   };
   const requestError =
-    create.isError && submittedScope === scope
+    (create.isError && submittedScope === scope) || refreshPhase === "error"
       ? t(locale, "collect.error.analysis")
       : undefined;
   let definitionsStatus: "ready" | "error" | "loading" = "loading";
@@ -172,7 +198,7 @@ export default function CollectGoalsController({
             ? { id: profile.id, displayName: profile.handle ?? profile.display }
             : null
         }
-        loading={creating || scanning}
+        loading={creating || scanning || refreshing}
         error={
           budgetError ? t(locale, "collect.goal.invalidBudget") : requestError
         }
@@ -219,6 +245,16 @@ export default function CollectGoalsController({
             checked: plan.checked_asset_count,
             total: plan.total_asset_count,
           })}
+        </p>
+      )}
+      {refreshPhase && refreshPhase !== "error" && (
+        <p role="status" className="tw-text-sm tw-text-iron-300">
+          {t(
+            locale,
+            refreshPhase === "pending"
+              ? "collect.goal.updatePending"
+              : "collect.goal.updatingAfterPurchase"
+          )}
         </p>
       )}
       {plan && scanError && (

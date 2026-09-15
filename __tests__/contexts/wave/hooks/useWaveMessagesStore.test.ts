@@ -139,7 +139,10 @@ describe("useWaveMessagesStore", () => {
 
   it("tracks only the matching pending server seed promise", () => {
     const { result } = renderHook(() => useWaveMessagesStore());
-    const firstPromise = Promise.resolve({ ok: false, waveId: "wave1" } as const);
+    const firstPromise = Promise.resolve({
+      ok: false,
+      waveId: "wave1",
+    } as const);
     const replacementPromise = Promise.resolve({
       ok: false,
       waveId: "wave1",
@@ -210,7 +213,10 @@ describe("useWaveMessagesStore", () => {
       serial_no: 2,
       created_at: "2022",
     };
-    const seedPromise = Promise.resolve({ ok: false, waveId: "wave1" } as const);
+    const seedPromise = Promise.resolve({
+      ok: false,
+      waveId: "wave1",
+    } as const);
 
     act(() => result.current.subscribe("wave1", listener));
     act(() => {
@@ -262,9 +268,7 @@ describe("useWaveMessagesStore", () => {
     expect(listener).toHaveBeenCalledTimes(1);
     expect(result.current.hasServerFeedSeed("wave1")).toBe(true);
 
-    act(() =>
-      result.current.completeInitialServerFeedRegistration("wave1")
-    );
+    act(() => result.current.completeInitialServerFeedRegistration("wave1"));
     await act(async () => {
       await Promise.resolve();
     });
@@ -418,10 +422,7 @@ describe("useWaveMessagesStore", () => {
 
     act(() => {
       result.current.subscribe("wave1", listener);
-      result.current.registerPendingServerFeedSeed(
-        "wave1",
-        oldProfilePromise
-      );
+      result.current.registerPendingServerFeedSeed("wave1", oldProfilePromise);
     });
     listener.mockClear();
 
@@ -520,5 +521,87 @@ describe("useWaveMessagesStore", () => {
     expect(result.current.hasServerFeedSeed("wave1")).toBe(false);
     expect(listener).toHaveBeenCalledTimes(1);
     expect(listener).toHaveBeenCalledWith(undefined);
+  });
+  it("removes 40,000 synthetic messages with one subscriber update and preserves the other wave", async () => {
+    const { result } = renderHook(() => useWaveMessagesStore());
+    const listener = jest.fn();
+    const drops = Array.from({ length: 60_000 }, (_, index) => ({
+      ...baseDrop,
+      id: `large-${index}`,
+      serial_no: index,
+      stableKey: `large-${index}`,
+      created_at: index,
+    }));
+    act(() => {
+      result.current.updateData({ key: "large", drops });
+      result.current.updateData({ key: "other", drops: [baseDrop] });
+      result.current.subscribe("large", listener);
+    });
+    await waitFor(() =>
+      expect(result.current.getData("other")?.drops).toHaveLength(1)
+    );
+    listener.mockClear();
+    act(() =>
+      result.current.removeDrops(
+        "large",
+        drops.slice(0, 40_000).map((drop) => drop.id)
+      )
+    );
+    expect(result.current.getData("large")?.drops).toHaveLength(20_000);
+    expect(result.current.getData("other")?.drops).toHaveLength(1);
+    expect(listener).toHaveBeenCalledTimes(1);
+    act(() => result.current.removeDrops("large", ["large-0"]));
+    expect(listener).toHaveBeenCalledTimes(1);
+  });
+
+  it("clears only the requested wave and rejects its queued and late seed data", async () => {
+    const { result } = renderHook(() => useWaveMessagesStore());
+    const listener = jest.fn();
+    const seed = Promise.resolve({ ok: false as const, waveId: "wave1" });
+    act(() => {
+      result.current.subscribe("wave1", listener);
+      result.current.updateData({ key: "wave1", drops: [baseDrop] });
+      result.current.updateData({
+        key: "wave1",
+        drops: [{ ...baseDrop, id: "queued" }],
+      });
+      result.current.registerPendingServerFeedSeed("wave1", seed);
+      result.current.clearWave("wave1");
+    });
+    expect(result.current.getData("wave1")).toBeUndefined();
+    expect(result.current.hasServerFeedSeed("wave1")).toBe(false);
+    expect(
+      result.current.applyServerFeedSeed({
+        waveId: "wave1",
+        promise: seed,
+        drops: [],
+        hasNextPage: false,
+      })
+    ).toBe(false);
+    listener.mockClear();
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+    expect(listener).not.toHaveBeenCalled();
+    expect(result.current.getData("wave1")).toBeUndefined();
+  });
+  it("rejects captured destructive cache callbacks after a profile switch", async () => {
+    const { result } = renderHook(() => useWaveMessagesStore());
+    const staleRemoveDrops = result.current.removeDrops;
+    const staleClearWave = result.current.clearWave;
+    act(() =>
+      globalThis.dispatchEvent(new CustomEvent(PROFILE_SWITCHED_EVENT))
+    );
+    act(() => result.current.updateData({ key: "wave1", drops: [baseDrop] }));
+    await waitFor(() =>
+      expect(result.current.getData("wave1")?.drops).toHaveLength(1)
+    );
+    act(() => {
+      staleRemoveDrops("wave1", ["d1"]);
+      expect(staleClearWave("wave1")).toBe(false);
+    });
+    expect(result.current.getData("wave1")?.drops).toHaveLength(1);
+    act(() => result.current.removeDrops("wave1", ["d1"]));
+    expect(result.current.getData("wave1")?.drops).toHaveLength(0);
   });
 });

@@ -183,6 +183,18 @@ or sign in again. Unsaved text is not kept after the window is closed.
 If another editor changes the record, resolve the version conflict before
 continuing; the app does not silently overwrite their work.
 
+If an answer needs correction, save guidance appears beside the chapter
+actions as well as at the top. The pending-answer links take you to the
+relevant questions. Correct any highlighted format or missing details, then
+try saving again. Other pending answers may be waiting behind that correction;
+their presence in the list does not mean they are wrong. Keep the window open
+until the save status confirms that your changes are saved.
+
+When a rights category requires supporting details, those inputs appear
+immediately. In earlier forms with an editable artwork license, include both
+the license name and its complete URL. Correcting an answer keeps the other
+pending changes ready to save.
+
 In **Materials & versions**, **Artwork & supporting files** brings **Add a file**
 together with the final artwork and material selections. Earlier forms keep
 this area in The work. Upload the exact file you intend to include with the work.
@@ -286,6 +298,18 @@ When the required information is ready, review the version and confirm it as
 the artist. Save all changes first. Confirmation preserves that specific
 dated version so everyone can review the same account. It does not publish
 the work or make a proposed license effective.
+
+Check the acknowledgment, then choose **Confirm this version**. A recorded
+confirmation appears beside that action with **View confirmed version**. The
+recorded status remains visible when you reopen the record. If the draft
+changes, review the new saved version and acknowledge it again.
+
+If the result cannot be verified, choose **Check confirmation status** before
+trying again. This checks the saved record; it does not submit another artist
+confirmation. Finish any pending saves or sign-in recovery first. If no
+confirmation is recorded, review and acknowledge the saved version before
+choosing **Confirm this version** again. Links beside missing required answers
+take you to the questions that still need attention.
 
 Before confirmation or dossier export, each received interview recording or
 transcript needs publication permission. In **The conversation**, link the file

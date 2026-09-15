@@ -35,6 +35,7 @@ import type { CollectTradeStage } from "./collect.types";
 import { acknowledgeMarketSubmission } from "./market-known-submission";
 import { knownMarketTransactionHash } from "./market-known-transaction";
 import { reviewedMarketGasLimits } from "./market-review-caps";
+import { preflightReviewedMarketBatch } from "./market-batch-preflight";
 
 interface Execution {
   readonly client: PublicClient;
@@ -135,8 +136,7 @@ async function send(options: Execution) {
     data: transaction.data as Hex,
     chain: mainnet,
   };
-  await client.call(request);
-  const estimated = await client.estimateGas(request);
+  const estimated = await preflightReviewedMarketBatch(client, operation);
   const fees = await reviewedMarketGasLimits(client, transaction, estimated);
   assertConnection();
   validateMarketBatchOperation(operation, expected, profileWallets);
