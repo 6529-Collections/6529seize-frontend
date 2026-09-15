@@ -8,10 +8,7 @@ export interface MissingRequirements {
 }
 
 const isRequiredMetadataMissing = (item: CreateDropMetadataType): boolean => {
-  return (
-    item.required &&
-    (item.value === null || item.value === undefined || item.value === "")
-  );
+  return item.required && (item.value === null || item.value === "");
 };
 
 const isMediaTypeMatching = (
