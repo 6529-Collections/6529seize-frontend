@@ -8,6 +8,7 @@ import YAML from "yaml";
 import { publicEnvSchema } from "../../config/env.schema";
 
 const runner = path.join(process.cwd(), "scripts/museum-ci-remaining.sh");
+const devRunner = path.join(process.cwd(), "scripts/museum-ci-dev.sh");
 const rightsSpec = "tests/museum/rights-readonly.spec.ts";
 const aboutSpec = "tests/museum/about-readonly.spec.ts";
 const projects = ["web-desktop-chromium", "web-mobile-chromium"];
@@ -23,18 +24,34 @@ const workflowRun: string = workflow.jobs["app-checks"].steps.find(
 const shellStubs = `
 setsid() {
   printf 'server:%s:%s:%s\n' "$PORT" "$NEXT_DEV_DIST_DIR" "\${PORT_SEARCH_LIMIT:-unset}" >> "$TEST_EVENTS"
+  printf 'launch:%s\n' "$*" >> "$TEST_EVENTS"
 }
 kill() {
   if [ "$1" = -0 ]; then
+    if [ "\${TEST_CLEANUP_SIGNAL:-}" != "" ] && [ "$2" = -- ]; then return 0; fi
     if [ "$2" = -- ]; then return 1; fi
-    return 0
+    [ "\${TEST_SERVER_EXIT:-0}" != 1 ]; return
   fi
   printf 'cleanup:%s\n' "$*" >> "$TEST_EVENTS"
 }
 curl() { [ "\${TEST_SERVER_FAIL:-0}" != 1 ]; }
-sleep() { :; }
+sleep() {
+  if [ "\${TEST_CLEANUP_SIGNAL:-}" != "" ]; then
+    builtin kill -"$TEST_CLEANUP_SIGNAL" "$$"
+    TEST_CLEANUP_SIGNAL=""
+    return 143
+  fi
+}
 `;
 const playwrightStub = `#!/usr/bin/env bash
+if [ "$*" = "run build:env-schema" ]; then
+  printf 'schema-build\n' >> "$TEST_EVENTS"
+  exit "\${TEST_SCHEMA_EXIT:-0}"
+fi
+if [ "$1 $2" = "exec next" ]; then
+  printf 'next:%s:port=%s:mcp=%s\n' "$*" "$PORT" "$__NEXT_EXPERIMENTAL_MCP_SERVER" >> "$TEST_EVENTS"
+  exit "\${TEST_NEXT_EXIT:-0}"
+fi
 printf 'test:%s:%s:%s:%s\n' "$PLAYWRIGHT_BASE_URL" "$PLAYWRIGHT_OUTPUT_DIR" "$PLAYWRIGHT_HTML_REPORT_DIR" "$*" >> "$TEST_EVENTS"
 if [ "\${TEST_CANCEL:-0}" = 1 ]; then
   builtin kill -TERM "$PPID"
@@ -58,11 +75,15 @@ describe("Museum isolated remaining runner", () => {
   });
   afterEach(() => fs.rmSync(directory, { recursive: true, force: true }));
 
-  function run(specs: string[], env: Record<string, string> = {}) {
+  function run(
+    specs: string[],
+    env: Record<string, string> = {},
+    command = [runner, ...specs]
+  ) {
     const eventsPath = path.join(directory, "events.txt");
     const subprocessEnv = { ...process.env };
     delete subprocessEnv.PORT_SEARCH_LIMIT;
-    const result = spawnSync("bash", [runner, ...specs], {
+    const result = spawnSync("bash", command, {
       cwd: directory,
       encoding: "utf8",
       timeout: 10_000,
@@ -94,6 +115,12 @@ describe("Museum isolated remaining runner", () => {
       ]);
       const tests = result.events.filter((line) => line.startsWith("test:"));
       expect(tests).toHaveLength(2);
+      expect(
+        result.events.filter((line) => line.startsWith("launch:"))
+      ).toEqual([
+        "launch:bash scripts/museum-ci-dev.sh",
+        "launch:bash scripts/museum-ci-dev.sh",
+      ]);
       expect(tests[0]).toContain(`playwright test ${rightsSpec}`);
       expect(tests[0]).not.toContain(aboutSpec);
       expect(tests[0]).toContain("--trace=retain-on-failure");
@@ -144,11 +171,60 @@ describe("Museum isolated remaining runner", () => {
           }).success
         ).toBe(true);
       }
-      // The gate and isolated phases must retain the existing startup default.
+      // Fixed ports must not rely on a schema-invalid search-limit override.
       expect(workflowRun).not.toContain("PORT_SEARCH_LIMIT=");
+      expect(fs.readFileSync(devRunner, "utf8")).not.toContain(
+        "PORT_SEARCH_LIMIT="
+      );
       expect(fs.readFileSync(runner, "utf8")).not.toContain(
         "PORT_SEARCH_LIMIT="
       );
+    }
+  );
+
+  it.each(["3101", "3102", "3103"])(
+    "launches Next on the exact requested port %s",
+    (port) => {
+      const result = run([], { PORT: port }, [devRunner]);
+      expect(result.status).toBe(0);
+      expect(result.events).toEqual([
+        "schema-build",
+        `next:exec next dev --port ${port}:port=${port}:mcp=true`,
+      ]);
+      expect(publicEnvSchema.shape.PORT.safeParse(port).success).toBe(true);
+      expect(workflowRun).toContain("setsid bash scripts/museum-ci-dev.sh");
+    }
+  );
+
+  it("preserves the explicit Webpack option", () => {
+    const result = run([], { PORT: "3101", USE_TURBO: "false" }, [devRunner]);
+    expect(result.status).toBe(0);
+    expect(result.events[1]).toContain("next dev --port 3101 --webpack");
+  });
+
+  it("stops before Next when schema compilation fails", () => {
+    const result = run([], { PORT: "3101", TEST_SCHEMA_EXIT: "8" }, [
+      devRunner,
+    ]);
+    expect(result.status).toBe(8);
+    expect(result.events).toEqual(["schema-build"]);
+  });
+
+  it("propagates a failed Next startup without trying another port", () => {
+    const result = run([], { PORT: "3101", TEST_NEXT_EXIT: "1" }, [devRunner]);
+    expect(result.status).toBe(1);
+    expect(result.events).toEqual([
+      "schema-build",
+      "next:exec next dev --port 3101:port=3101:mcp=true",
+    ]);
+  });
+
+  it.each(["", "0", "3104", "3101x"])(
+    "rejects unexpected CI port %j",
+    (port) => {
+      const result = run([], { PORT: port }, [devRunner]);
+      expect(result.status).toBe(1);
+      expect(result.events).toEqual([]);
     }
   );
 
@@ -187,10 +263,63 @@ describe("Museum isolated remaining runner", () => {
   it("cleans up when server readiness fails without running tests", () => {
     const result = run([rightsSpec], { TEST_SERVER_FAIL: "1" });
     expect(result.status).toBe(1);
+    expect(result.stderr).toContain("did not become ready");
     expect(result.events.join("\n")).toContain("cleanup:-TERM -- -");
     expect(result.events.filter((line) => line.startsWith("test:"))).toEqual(
       []
     );
+  });
+
+  it("distinguishes early server exit from readiness timeout", () => {
+    const result = run([rightsSpec], { TEST_SERVER_EXIT: "1" });
+    expect(result.status).toBe(1);
+    expect(result.stderr).toContain("server exited before readiness");
+    expect(result.events.filter((line) => line.startsWith("test:"))).toEqual(
+      []
+    );
+  });
+
+  it.each([
+    ["TERM", 143],
+    ["INT", 130],
+  ])("finishes group cleanup before honoring %s", (signal, status) => {
+    const result = run([rightsSpec, aboutSpec], {
+      TEST_CLEANUP_SIGNAL: String(signal),
+    });
+    expect(result.status).toBe(status);
+    expect(result.events.join("\n")).toContain("cleanup:-KILL -- -");
+    expect(result.events.join("\n")).not.toContain("server:3103");
+  });
+
+  it("finishes EXIT-trap cleanup when another TERM arrives", () => {
+    const result = run([rightsSpec, aboutSpec], {
+      TEST_CANCEL: "1",
+      TEST_CLEANUP_SIGNAL: "TERM",
+    });
+    expect(result.status).toBe(143);
+    expect(result.events.join("\n")).toContain("cleanup:-KILL -- -");
+    expect(result.events.join("\n")).not.toContain("server:3103");
+  });
+
+  it.each([
+    ["TERM", 143],
+    ["INT", 130],
+  ])("finishes gate cleanup before honoring %s", (signal, status) => {
+    const cleanup = workflowRun
+      .split("cleanup_museum_server() {")[1]
+      ?.split("museum_server_ready=false")[0];
+    expect(cleanup).toBeDefined();
+      const command = `set -euo pipefail\nmuseum_server_pid=4321\ncleanup_museum_server() {${cleanup}\ncleanup_museum_server\necho unexpected-continuation`;
+    const result = run([], { TEST_CLEANUP_SIGNAL: String(signal) }, [
+      "-c",
+      command,
+    ]);
+    expect(result.status).toBe(status);
+    expect(result.events).toEqual([
+      "cleanup:-TERM -- -4321",
+      "cleanup:-KILL -- -4321",
+    ]);
+    expect(result.stdout).not.toContain("unexpected-continuation");
   });
 
   it.each([[], ["unexpected.spec.ts"], [rightsSpec, rightsSpec]])(

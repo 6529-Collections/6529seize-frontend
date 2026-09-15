@@ -1411,18 +1411,24 @@ jobs:
           NEXT_DEV_DIST_DIR=".next-playwright-${MUSEUM_PROJECT}" \
             BASE_ENDPOINT="$museum_base_url" \
             PORT="$museum_port" \
-            setsid ./bin/6529 run dev > "$museum_server_log" 2>&1 &
+            setsid bash scripts/museum-ci-dev.sh > "$museum_server_log" 2>&1 &
           museum_server_pid="$!"
           cleanup_museum_server() {
             if [ -n "$museum_server_pid" ]; then
+              local cleanup_exit=0
+              trap 'cleanup_exit=143' TERM
+              trap 'cleanup_exit=130' INT
               kill -TERM -- "-$museum_server_pid" 2>/dev/null || true
               for attempt in {1..5}; do
                 if ! kill -0 -- "-$museum_server_pid" 2>/dev/null; then break; fi
-                sleep 1
+                sleep 1 || true
               done
               kill -KILL -- "-$museum_server_pid" 2>/dev/null || true
               wait "$museum_server_pid" 2>/dev/null || true
               museum_server_pid=""
+              trap 'exit 143' TERM
+              trap 'exit 130' INT
+              if [ "$cleanup_exit" -ne 0 ]; then exit "$cleanup_exit"; fi
             fi
           }
           trap cleanup_museum_server EXIT
@@ -1430,16 +1436,16 @@ jobs:
           trap 'exit 130' INT
           museum_server_ready=false
           for attempt in $(seq 1 120); do
+            if ! kill -0 "$museum_server_pid" 2>/dev/null; then
+              cat "$museum_server_log"
+              echo "Museum server exited before readiness for $MUSEUM_PROJECT." >&2
+              exit 1
+            fi
             if curl --fail --silent --show-error --connect-timeout 2 --max-time 5 \
               "$museum_base_url/museum/network/about" >/dev/null
             then
               museum_server_ready=true
               break
-            fi
-            if ! kill -0 "$museum_server_pid" 2>/dev/null; then
-              cat "$museum_server_log"
-              echo "Museum server exited before readiness for $MUSEUM_PROJECT." >&2
-              exit 1
             fi
             sleep 1
           done

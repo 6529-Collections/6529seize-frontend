@@ -31,16 +31,23 @@ fi
 museum_server_pid=""
 cleanup_museum_server() {
   if [ -n "$museum_server_pid" ]; then
+    local cleanup_exit=0
+    # Defer cancellation until the entire owned group has been reaped.
+    trap 'cleanup_exit=143' TERM
+    trap 'cleanup_exit=130' INT
     # The wrapper spawns pnpm and Next children. Stop the entire owned session,
     # not only the wrapper, before allocating another compilation process.
     kill -TERM -- "-$museum_server_pid" 2>/dev/null || true
     for attempt in {1..5}; do
       if ! kill -0 -- "-$museum_server_pid" 2>/dev/null; then break; fi
-      sleep 1
+      sleep 1 || true
     done
     kill -KILL -- "-$museum_server_pid" 2>/dev/null || true
     wait "$museum_server_pid" 2>/dev/null || true
     museum_server_pid=""
+    trap 'exit 143' TERM
+    trap 'exit 130' INT
+    if [ "$cleanup_exit" -ne 0 ]; then exit "$cleanup_exit"; fi
   fi
 }
 trap cleanup_museum_server EXIT
@@ -65,10 +72,14 @@ run_phase() {
   echo "Starting isolated Museum $phase phase on $MUSEUM_PROJECT"
   NEXT_DEV_DIST_DIR=".next-playwright-${MUSEUM_PROJECT}-${phase}" \
     BASE_ENDPOINT="$base_url" PORT="$port" \
-    setsid ./bin/6529 run dev > "$server_log" 2>&1 &
+    setsid bash scripts/museum-ci-dev.sh > "$server_log" 2>&1 &
   museum_server_pid="$!"
   for attempt in {1..120}; do
-    if ! kill -0 "$museum_server_pid" 2>/dev/null; then break; fi
+    if ! kill -0 "$museum_server_pid" 2>/dev/null; then
+      cat "$server_log"
+      echo "Museum $phase server exited before readiness for $MUSEUM_PROJECT." >&2
+      return 1
+    fi
     if curl --fail --silent --show-error --connect-timeout 2 --max-time 5 \
       "$base_url/museum/network/about" >/dev/null; then
       ready=true

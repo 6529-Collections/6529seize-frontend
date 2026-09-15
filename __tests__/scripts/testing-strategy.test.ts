@@ -734,7 +734,7 @@ describe("testing strategy CI plan", () => {
     expect(museumBrowserRun).toContain(
       'NEXT_DEV_DIST_DIR=".next-playwright-${MUSEUM_PROJECT}"'
     );
-    expect(museumBrowserRun).toContain("./bin/6529 run dev");
+    expect(museumBrowserRun).toContain("bash scripts/museum-ci-dev.sh");
     expect(museumBrowserRun).not.toContain("PORT_SEARCH_LIMIT=0");
     expect(museumBrowserRun).toContain("PLAYWRIGHT_SKIP_WEB_SERVER=1");
     expect(museumBrowserRun).toContain("trap cleanup_museum_server EXIT");
@@ -755,7 +755,7 @@ describe("testing strategy CI plan", () => {
     expect(museumBrowserRun).toContain("--workers=1");
     expect(museumBrowserRun).not.toContain("--workers=2");
     expect(museumBrowserRun).not.toContain("wait -n");
-    expect(museumBrowserRun).toContain("setsid ./bin/6529 run dev");
+    expect(museumBrowserRun).toContain("setsid bash scripts/museum-ci-dev.sh");
     expect(museumBrowserRun).toContain('kill -TERM -- "-$museum_server_pid"');
     expect(museumBrowserRun).toContain('kill -KILL -- "-$museum_server_pid"');
     expect(museumBrowserRun).not.toContain("./bin/6529 run base-build");
