@@ -12,10 +12,13 @@ type ProfileCmsBuilderParams = {
   readonly user: string;
 };
 
-export const metadata: Metadata = getAppMetadata({
-  title: t(DEFAULT_LOCALE, "profileCms.builder.pageTitle"),
-  description: t(DEFAULT_LOCALE, "profileCms.builder.pageDescription"),
-});
+export const metadata: Metadata = getAppMetadata(
+  {
+    title: t(DEFAULT_LOCALE, "profileCms.builder.pageTitle"),
+    description: t(DEFAULT_LOCALE, "profileCms.builder.pageDescription"),
+  },
+  { robots: { index: false, follow: true } }
+);
 
 export default async function ProfileCmsBuilderPage({
   params,

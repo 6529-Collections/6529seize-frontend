@@ -18,10 +18,13 @@ const resolveRequestLocale = async (): Promise<SupportedLocale> => {
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await resolveRequestLocale();
-  return getAppMetadata({
-    title: t(locale, "join6529.metadata.title"),
-    description: t(locale, "join6529.metadata.description"),
-  });
+  return getAppMetadata(
+    {
+      title: t(locale, "join6529.metadata.title"),
+      description: t(locale, "join6529.metadata.description"),
+    },
+    { canonicalPath: "/join-6529" }
+  );
 }
 
 export default function Join6529Page() {

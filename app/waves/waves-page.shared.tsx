@@ -24,6 +24,7 @@ import type { ApiOgMetadata } from "@/generated/models/ApiOgMetadata";
 import type { ApiOgMetadataProfile } from "@/generated/models/ApiOgMetadataProfile";
 import { ApiDropMainType } from "@/generated/models/ApiDropMainType";
 import { formatAddress } from "@/helpers/Helpers";
+import { isPublicNonDirectMessageWave } from "@/helpers/waves/wave.helpers";
 import {
   getWaveRouteWithSearchParams,
   type RouteSearchParams,
@@ -331,10 +332,13 @@ export async function buildWavesMetadata(
   searchParams: WavesSearchParams = {}
 ): Promise<Metadata> {
   if (waveId === null) {
-    return getAppMetadata({
-      title: "Waves | Brain",
-      description: "Browse and explore waves",
-    });
+    return getAppMetadata(
+      {
+        title: "Waves | Brain",
+        description: "Browse and explore waves",
+      },
+      { canonicalPath: "/waves" }
+    );
   }
 
   const shortUuid =
@@ -345,11 +349,21 @@ export async function buildWavesMetadata(
   const wave = waveResult.ok ? waveResult.wave : null;
 
   if (wave === null) {
-    return getAppMetadata({
-      title: `Wave ${shortUuid} | Waves`,
-      description: "Browse and explore waves",
-    });
+    return getAppMetadata(
+      {
+        title: `Wave ${shortUuid} | Waves`,
+        description: "Browse and explore waves",
+      },
+      { robots: { index: false, follow: true } }
+    );
   }
+
+  const isIndexableWave = isPublicNonDirectMessageWave(wave);
+  const canonicalPath = buildWaveStructuredDataPath({ waveId, searchParams });
+  const metadataOptions = {
+    canonicalPath,
+    robots: { index: isIndexableWave, follow: true },
+  };
 
   const waveName =
     typeof wave.name === "string" && wave.name.trim().length > 0
@@ -374,7 +388,7 @@ export async function buildWavesMetadata(
     });
 
     if (dropPageMetadata) {
-      return getAppMetadata(dropPageMetadata);
+      return getAppMetadata(dropPageMetadata, metadataOptions);
     }
   }
 
@@ -384,7 +398,8 @@ export async function buildWavesMetadata(
       description: "Waves",
       ogImage: `/api/og-metadata/waves/${encodeURIComponent(waveId)}`,
       ogImageAlt: `${waveName} wave social card`,
-    })
+    }),
+    metadataOptions
   );
 }
 

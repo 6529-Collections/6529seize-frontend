@@ -60,7 +60,8 @@ export async function generateMetadata({
       title: t(locale, "theMemes.documentTitle"),
       ogImage: getCollectionSocialCardImagePath("the-memes"),
       ogImageAlt: "The Memes collection social card",
-      description: t(locale, "theMemes.description.collections"),
-    })
+      description: "The Memes is the 6529 NFT collection of digital art cards.",
+    }),
+    { canonicalPath: "/the-memes" }
   );
 }
