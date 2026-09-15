@@ -54,7 +54,7 @@ function fixtures() {
   const appConfig = value => ({ isDisabled: value.isDisabled, isAlertable: value.isAlertable,
     webhookUrl: value.webhookUrl, webhookEvents: value.webhookEvents, schema: value.schema });
   const pins = { audit: actualPins.audit, app: hash(app.uuid), appConfig: fingerprint(appConfig(app)), callback: hash(app.webhookUrl),
-    appSlug: hash(app.slug), detectorConfig: fingerprint({ config: {}, conditionGroup: null, dataSources: [], enabled: true }),
+    appSlug: fingerprint(app.slug), detectorConfig: fingerprint({ config: {}, conditionGroup: null, dataSources: [], enabled: true }),
     workflows: Object.fromEntries(KEY_ORDER.map(key => [key, [hash(workflows[key].id), configHash(workflows[key]), key.startsWith('back') ? BACK_PROJECT : FRONT_PROJECT]])),
     detectors: { [BACK_PROJECT]: hash('100'), [FRONT_PROJECT]: hash('200') } };
   return { workflows, detectors, app, installed, pins };
@@ -195,6 +195,7 @@ function mockFetch(mock) {
 async function execute(options = {}) {
   const state = fixtures(); const baseline = clone(state.workflows);
   const pins = clone(state.pins);
+  if (options.appSlugPin !== undefined) pins.appSlug = options.appSlugPin;
   options.prepare?.(state);
   const source = original.replace(pinsPattern, 'const PINS = ' + JSON.stringify(pins) + ';')
     .replace(/^import \{ appendFileSync \} from 'node:fs';\r?\n/m, '')
@@ -404,4 +405,29 @@ test('failed initial verification permits one reconciliation GET but no subseque
   assert.equal(value.result.results[0].httpStatus, 200);
   assert.equal(value.result.results[0].status, 'observed_desired_after_uncertainty');
   assert.equal(value.requests.filter(call => call.method === 'GET' && call.path === FRONT_PATH).length, 3);
+});
+
+test('routing plan consumes the actual audit action target string fingerprint', async () => {
+  const auditYaml = readFileSync('.github/workflows/monitoring-provider-audit.yml', 'utf8');
+  const auditBlock = /node --input-type=module <<'NODE'\r?\n([\s\S]*?)^\s{10}NODE\s*$/m.exec(auditYaml);
+  assert.ok(auditBlock, 'extract the actual audit producer');
+  const auditSource = auditBlock[1].replace(/^ {10}/gm, '')
+    .replace(/^import \{ appendFileSync \} from 'node:fs';\r?\n/m, '')
+    .replace(/^import \{ createHash \} from 'node:crypto';\r?\n/m, '');
+  const mainCall = auditSource.lastIndexOf('main().catch(');
+  assert.ok(mainCall > 0, 'exclude audit execution while retaining its actual projections');
+  const state = fixtures();
+  const action = state.workflows.frontApp.actionFilters[0].actions[0];
+  const auditedPin = vm.runInNewContext(auditSource.slice(0, mainCall) +
+    '\nworkflowAction(syntheticAction, { complete: false }, { complete: false }).targetIdentifierHash',
+  { createHash, syntheticAction: action }, { timeout: 2000 });
+  assert.equal(auditedPin, hash(JSON.stringify(state.app.slug)));
+  assert.notEqual(auditedPin, hash(state.app.slug), 'audit hashes canonical JSON strings, not raw identifiers');
+  const value = await execute({ mode: 'plan', appSlugPin: auditedPin });
+  assert.equal(value.code, 0); assert.equal(value.result.outcome, 'plan_verified'); assert.equal(value.writes.length, 0);
+});
+
+test('routing rejects a raw identifier hash in place of the audited string fingerprint', async () => {
+  const value = await execute({ mode: 'plan', appSlugPin: hash(fixtures().app.slug) });
+  assert.equal(value.code, 1); assert.equal(value.result.failure, 'APP_DRIFT'); assert.equal(value.writes.length, 0);
 });

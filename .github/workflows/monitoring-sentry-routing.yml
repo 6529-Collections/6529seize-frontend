@@ -230,7 +230,7 @@ jobs:
             const installs = await list(ORG + 'sentry-app-installations/');
             const matched = apps.filter(app => record(app) && typeof app.uuid === 'string' && hash(app.uuid) === PINS.app);
             requireValue(matched.length === 1, 'APP_BINDING'); const app = matched[0];
-            requireValue(typeof app.slug === 'string' && hash(app.slug) === PINS.appSlug && app.isDisabled === false && app.isAlertable === true &&
+            requireValue(typeof app.slug === 'string' && fingerprint(app.slug) === PINS.appSlug && app.isDisabled === false && app.isAlertable === true &&
               fingerprint(appConfiguration(app)) === PINS.appConfig && typeof app.webhookUrl === 'string' && hash(app.webhookUrl) === PINS.callback, 'APP_DRIFT');
             requireValue(app.status === 'internal' && app.verifyInstall === false && Array.isArray(app.events) &&
               fingerprint([...app.events].sort(lexical)) === fingerprint(['error', 'issue']), 'APP_SUBSCRIPTIONS');
@@ -238,7 +238,7 @@ jobs:
             requireValue(installed.length === 1 && installed[0].status === 'installed', 'INSTALLATION_BINDING');
             const donor = singleAction(workflows.frontApp);
             requireValue(donor.type === 'webhook' && donor.integrationId === null && typeof donor.config.targetIdentifier === 'string' &&
-              hash(donor.config.targetIdentifier) === PINS.appSlug, 'WEBHOOK_DONOR');
+              fingerprint(donor.config.targetIdentifier) === PINS.appSlug, 'WEBHOOK_DONOR');
             const backOriginal = { ...clone(workflows.backDiscord), enabled: true };
             requireValue(singleAction(backOriginal).type === 'discord' && configHash(backOriginal) === PINS.workflows.backDiscord[1], 'BACKEND_BASELINE');
             // The retained backend action reconstructs the exact audited frontend original.
