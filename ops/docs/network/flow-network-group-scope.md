@@ -62,6 +62,9 @@ no standalone Network Groups page.
 - Build a one-off Network audience from the same criteria controls available
   during Wave group assignment, then save and apply it without leaving the
   leaderboard.
+- Use the [membership rules guide](../waves/create/feature-groups-step.md#how-membership-rules-combine)
+  to understand Level zero, explicit inclusions and exclusions, empty groups,
+  and why a draft's member preview matches its configured criteria.
 
 ## Loading and Consistency
 
