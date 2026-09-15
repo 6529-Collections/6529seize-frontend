@@ -4,7 +4,16 @@ import { load } from "cheerio";
 import { expect, test, waitForRouteReady } from "../testHelpers";
 import { isDesktopWebProject } from "../support/surfaceSimulation";
 
-const WALLET_PROVIDER_HOST = /(?:walletconnect|reown)\.com$/i;
+const WALLET_PROVIDER_HOST =
+  /(?:^|\.)(?:walletconnect\.(?:com|org)|reown\.com)$/i;
+
+function isWalletProviderHost(url: string): boolean {
+  try {
+    return WALLET_PROVIDER_HOST.test(new URL(url).hostname);
+  } catch {
+    return false;
+  }
+}
 
 function isWalletProviderRequest(route: Route): boolean {
   const request = route.request();
@@ -12,11 +21,7 @@ function isWalletProviderRequest(route: Route): boolean {
     return false;
   }
 
-  try {
-    return WALLET_PROVIDER_HOST.test(new URL(request.url()).hostname);
-  } catch {
-    return false;
-  }
+  return isWalletProviderHost(request.url());
 }
 
 async function openAnonymousAboutPage(page: Page) {
@@ -54,9 +59,9 @@ test.describe("Public rendering remains usable while wallet startup is delayed @
       "Building a decentralized network state"
     );
     expect(initialDocument('a[href="/network/health"]')).toHaveLength(1);
-    expect(
-      initialDocument('script[type="application/ld+json"]')
-    ).toHaveLength(1);
+    expect(initialDocument('script[type="application/ld+json"]')).toHaveLength(
+      1
+    );
 
     await waitForRouteReady(page);
     await expect(
@@ -75,6 +80,14 @@ test.describe("Public rendering remains usable while wallet startup is delayed @
       "Representative public rendering coverage runs on the desktop web shell"
     );
 
+    await page.routeWebSocket(/.*/, async (webSocket) => {
+      if (isWalletProviderHost(webSocket.url())) {
+        await webSocket.close();
+        return;
+      }
+      webSocket.connectToServer();
+    });
+
     await page.route("**/*", async (route) => {
       if (isWalletProviderRequest(route)) {
         await route.abort("connectionfailed");
@@ -86,7 +99,9 @@ test.describe("Public rendering remains usable while wallet startup is delayed @
     await openAnonymousAboutPage(page);
 
     // Public navigation must work independently of third-party wallet hosts.
-    await page.getByRole("link", { name: "Open page: FAQ", exact: true }).click();
+    await page
+      .getByRole("link", { name: "Open page: FAQ", exact: true })
+      .click();
     await expect(page).toHaveURL(/\/about\/faq$/);
     await waitForRouteReady(page);
     const publicMain = page.getByRole("main").first();

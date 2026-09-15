@@ -81,7 +81,9 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
   const account = useAppKitAccountBridgeState(appKitModalBridgeStore);
   const disconnect = useCallback(() => {
     if (isAppKitReady) {
-      return appKitModalBridgeStore.disconnect();
+      return appKitModalBridgeStore
+        .waitForOpen()
+        .then(() => appKitModalBridgeStore.disconnect());
     }
     return waitForAppKitReady()
       .then(() => appKitModalBridgeStore.waitForOpen())

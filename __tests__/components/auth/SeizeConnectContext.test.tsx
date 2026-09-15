@@ -1915,6 +1915,33 @@ describe("Regression Tests: Original Functionality with Secure Implementation", 
     expect(mockDisconnect).toHaveBeenCalled();
   });
 
+  it("waits for bridge registration when a child disconnects during mount", async () => {
+    mockGetWalletAddress.mockReturnValue(null);
+    jest.mocked(authUtils.removeAuthJwt).mockImplementation(() => {});
+    const onSuccess = jest.fn();
+    const onFailure = jest.fn();
+    const MountDisconnect = () => {
+      const { seizeDisconnectAndLogout } = useSeizeConnectContext();
+      const started = React.useRef(false);
+      React.useLayoutEffect(() => {
+        if (started.current) return;
+        started.current = true;
+        void seizeDisconnectAndLogout().then(onSuccess, onFailure);
+      }, [seizeDisconnectAndLogout]);
+      return null;
+    };
+
+    render(
+      <SeizeConnectProvider>
+        <MountDisconnect />
+      </SeizeConnectProvider>
+    );
+
+    await waitFor(() => expect(onSuccess).toHaveBeenCalledTimes(1));
+    expect(onFailure).not.toHaveBeenCalled();
+    expect(mockDisconnect).toHaveBeenCalledTimes(1);
+  });
+
   it("should handle disconnect and logout", async () => {
     const validAddress = "0x1234567890abcdef1234567890abcdef12345678";
     mockGetWalletAddress

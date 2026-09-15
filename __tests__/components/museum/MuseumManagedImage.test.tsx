@@ -53,50 +53,64 @@ describe("MuseumManagedImage", () => {
     );
   });
 
-  it("reports an image that completed before hydration as revealed", () => {
-    const onStatusChange = jest.fn();
-    const completeDescriptor = Object.getOwnPropertyDescriptor(
-      HTMLImageElement.prototype,
-      "complete"
-    );
-    const naturalWidthDescriptor = Object.getOwnPropertyDescriptor(
-      HTMLImageElement.prototype,
-      "naturalWidth"
-    );
-    Object.defineProperty(HTMLImageElement.prototype, "complete", {
-      configurable: true,
-      get: () => true,
-    });
-    Object.defineProperty(HTMLImageElement.prototype, "naturalWidth", {
-      configurable: true,
-      get: () => 640,
-    });
-
-    try {
-      render(
-        <MuseumManagedImage
-          {...props}
-          alt="A cached governed image"
-          onStatusChange={onStatusChange}
-        />
+  it.each([
+    { naturalWidth: 640, status: "revealed" },
+    { naturalWidth: 0, status: "error" },
+  ])(
+    "reports a completed image as $status before hydration",
+    ({ naturalWidth, status }) => {
+      const onStatusChange = jest.fn();
+      const completeDescriptor = Object.getOwnPropertyDescriptor(
+        HTMLImageElement.prototype,
+        "complete"
       );
+      const naturalWidthDescriptor = Object.getOwnPropertyDescriptor(
+        HTMLImageElement.prototype,
+        "naturalWidth"
+      );
+      Object.defineProperty(HTMLImageElement.prototype, "complete", {
+        configurable: true,
+        get: () => true,
+      });
+      Object.defineProperty(HTMLImageElement.prototype, "naturalWidth", {
+        configurable: true,
+        get: () => naturalWidth,
+      });
 
-      expect(onStatusChange).toHaveBeenCalledWith("revealed");
-    } finally {
-      if (completeDescriptor) {
-        Object.defineProperty(
-          HTMLImageElement.prototype,
-          "complete",
-          completeDescriptor
+      try {
+        render(
+          <MuseumManagedImage
+            {...props}
+            alt="A cached governed image"
+            onStatusChange={onStatusChange}
+          />
         );
-      }
-      if (naturalWidthDescriptor) {
-        Object.defineProperty(
-          HTMLImageElement.prototype,
-          "naturalWidth",
-          naturalWidthDescriptor
-        );
+
+        expect(onStatusChange).toHaveBeenCalledWith(status);
+        if (status === "error") {
+          expect(screen.getByRole("alert")).toHaveTextContent(
+            props.failureMessage
+          );
+          expect(screen.getByRole("button", { name: "Retry" })).toBeVisible();
+        } else {
+          expect(screen.getByRole("img")).toBeVisible();
+        }
+      } finally {
+        if (completeDescriptor) {
+          Object.defineProperty(
+            HTMLImageElement.prototype,
+            "complete",
+            completeDescriptor
+          );
+        }
+        if (naturalWidthDescriptor) {
+          Object.defineProperty(
+            HTMLImageElement.prototype,
+            "naturalWidth",
+            naturalWidthDescriptor
+          );
+        }
       }
     }
-  });
+  );
 });

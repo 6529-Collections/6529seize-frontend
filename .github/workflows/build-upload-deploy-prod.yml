@@ -189,8 +189,8 @@ jobs:
         # has a new URL when its bytes change. Keep the mutable version pointer
         # below explicitly no-store.
         run: |
-          aws s3 sync production-artifact/target "s3://${AWS_BUCKET}/web_build/${COMMIT_SHA}/" \
-            --cache-control "public, max-age=31536000, immutable"
+          aws s3 cp production-artifact/target "s3://${AWS_BUCKET}/web_build/${COMMIT_SHA}/" \
+            --recursive --cache-control "public, max-age=31536000, immutable"
 
       - name: Get commit message
         run: printf 'COMMIT_MESSAGE=%s\n' "$(git show -s --format=%s "$COMMIT_SHA")" >> "$GITHUB_ENV"

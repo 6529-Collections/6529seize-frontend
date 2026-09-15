@@ -149,9 +149,9 @@ describe("production exact-artifact deployment contract", () => {
       '.artifact_contract == "production-deployment-v1"'
     );
     expect(deploySource).toContain(".schema_version == 1");
-    expect(deploySource).toContain("aws s3 sync production-artifact/target");
+    expect(deploySource).toContain("aws s3 cp production-artifact/target");
     expect(deploySource).toContain(
-      '--cache-control "public, max-age=31536000, immutable"'
+      '--recursive --cache-control "public, max-age=31536000, immutable"'
     );
     expect(deploySource).toContain(
       '--cache-control "no-store, max-age=0, must-revalidate"'
