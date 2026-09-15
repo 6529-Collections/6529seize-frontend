@@ -5,6 +5,7 @@ import CircleLoader, {
 } from "@/components/distribution-plan-tool/common/CircleLoader";
 import CurationEmptyState from "@/components/brain/my-stream/curations/CurationEmptyState";
 import CommonIntersectionElement from "@/components/utils/CommonIntersectionElement";
+import Button from "@/components/utils/button/Button";
 import Drop, { DropLocation } from "@/components/waves/drops/Drop";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useWaveCurationDrops } from "@/hooks/useWaveCurationDrops";
@@ -12,8 +13,11 @@ import { useCurationManagementPermission } from "@/hooks/useCurationManagementPe
 import type { QuickCurationAction } from "@/hooks/drops/useCanShowDropCurationsAction";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { useApprovalWaveStatus } from "@/hooks/waves/useApprovalWaveStatus";
-import { useCallback, useMemo, type ReactNode } from "react";
+import { useCallback, useMemo, useState, type ReactNode } from "react";
 import { useLayout } from "../layout/LayoutContext";
+import dynamic from "next/dynamic";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 
 interface MyStreamWaveCurationContentProps {
   readonly wave: ApiWave;
@@ -22,6 +26,11 @@ interface MyStreamWaveCurationContentProps {
   readonly onDropClick?: ((drop: ExtendedDrop) => void) | undefined;
   readonly constrainToViewport?: boolean | undefined;
 }
+
+const CurationDropOrderDialog = dynamic(
+  () => import("./CurationDropOrderDialog"),
+  { loading: () => null }
+);
 
 function MyStreamWaveCurationDropItem({
   drop,
@@ -77,6 +86,8 @@ export default function MyStreamWaveCurationContent({
   constrainToViewport = true,
 }: MyStreamWaveCurationContentProps) {
   const { leaderboardViewStyle } = useLayout();
+  const locale = useBrowserLocale();
+  const [isArrangeOpen, setIsArrangeOpen] = useState(false);
   const {
     drops,
     fetchNextPage,
@@ -197,6 +208,26 @@ export default function MyStreamWaveCurationContent({
       }
       style={constrainToViewport ? leaderboardViewStyle : undefined}
     >
+      {canManageActiveCuration && !isPlaceholderData && drops.length > 1 && (
+        <div className="tailwind-scope tw-flex tw-justify-end tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-px-4 tw-py-2">
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => setIsArrangeOpen(true)}
+          >
+            {t(locale, "profileCuration.order.action")}
+          </Button>
+        </div>
+      )}
+      {isArrangeOpen && (
+        <CurationDropOrderDialog
+          wave={wave}
+          curationId={curationId}
+          curationName={curationTitle}
+          isOpen={isArrangeOpen}
+          onClose={() => setIsArrangeOpen(false)}
+        />
+      )}
       {content}
     </div>
   );

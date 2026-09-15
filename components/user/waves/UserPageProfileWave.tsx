@@ -16,6 +16,8 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useProfileWave } from "@/hooks/useProfileWave";
 import { useProfileWaveMutation } from "@/hooks/useProfileWaveMutation";
 import { useWaveById } from "@/hooks/useWaveById";
+import { useWaveCurationDrops } from "@/hooks/useWaveCurationDrops";
+import { useCurationManagementPermission } from "@/hooks/useCurationManagementPermission";
 import { useWaveCurations } from "@/hooks/waves/useWaveCurations";
 import { t } from "@/i18n/messages";
 import UserPageProfileWaveContent from "./UserPageProfileWaveContent";
@@ -47,6 +49,12 @@ type CurationPickerVariant = "dropdown" | "mobile-sheet";
 const MyStreamWaveCurationCreateDialog = dynamic(
   () =>
     import("@/components/brain/my-stream/tabs/MyStreamWaveCurationCreateDialog"),
+  { loading: () => null }
+);
+
+const CurationDropOrderDialog = dynamic(
+  () =>
+    import("@/components/brain/my-stream/curations/CurationDropOrderDialog"),
   { loading: () => null }
 );
 
@@ -254,6 +262,7 @@ export default function UserPageProfileWave({
   const [isQuickPostOpen, setIsQuickPostOpen] = useState(false);
   const [isSetupOpen, setIsSetupOpen] = useState(false);
   const [isDisconnectOpen, setIsDisconnectOpen] = useState(false);
+  const [isArrangeOpen, setIsArrangeOpen] = useState(false);
   const [submittingWaveId, setSubmittingWaveId] = useState<string | null>(null);
   const [submittingCurationId, setSubmittingCurationId] = useState<
     string | null
@@ -311,6 +320,20 @@ export default function UserPageProfileWave({
     curations ?? [],
     profileCurationId
   );
+  const {
+    drops: arrangementProbeDrops,
+    isPlaceholderData: isArrangementProbePlaceholder,
+  } = useWaveCurationDrops({
+    wave: wave ?? null,
+    curationId: profileCuration?.id,
+    enabled: canManageOwnOfficialWave && profileCuration !== null,
+  });
+  const canArrangeProfileCuration = useCurationManagementPermission({
+    curationId: profileCuration?.id ?? "",
+    probeDropId: isArrangementProbePlaceholder
+      ? ""
+      : (arrangementProbeDrops[0]?.id ?? ""),
+  });
   const waveHref = wave ? getWaveHref(wave, profileCuration?.id ?? null) : null;
   const hasLoadedCurations = curations !== undefined;
   const canSwitchOfficialCuration =
@@ -481,11 +504,14 @@ export default function UserPageProfileWave({
                 triggerLabel={t(locale, "profileCuration.header.manage")}
                 permissionMode="profile"
                 canChooseAnotherCuration={canSwitchOfficialCuration}
-                onChooseAnotherCuration={() =>
-                  setIsChangeCurationOpen(true)
-                }
+                onChooseAnotherCuration={() => setIsChangeCurationOpen(true)}
                 onChooseAnotherSourceWave={() => setIsChangeWaveOpen(true)}
                 onHideFromProfile={handleRemoveOfficialWave}
+                onReorderPosts={
+                  canArrangeProfileCuration && arrangementProbeDrops.length > 1
+                    ? () => setIsArrangeOpen(true)
+                    : undefined
+                }
                 isProfileActionPending={
                   isPending || submittingCurationId !== null
                 }
@@ -501,6 +527,15 @@ export default function UserPageProfileWave({
           onAddPost={addPostHandler}
         />
       </div>
+      {isArrangeOpen && profileCuration && (
+        <CurationDropOrderDialog
+          wave={wave}
+          curationId={profileCuration.id}
+          curationName={getProfileCurationTitle(profileCuration)}
+          isOpen={isArrangeOpen}
+          onClose={() => setIsArrangeOpen(false)}
+        />
+      )}
 
       {canManageOwnOfficialWave && (
         <MobileWrapperDialog
