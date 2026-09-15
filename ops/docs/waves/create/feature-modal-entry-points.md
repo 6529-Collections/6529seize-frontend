@@ -37,7 +37,11 @@ mobile viewports.
    context while the underlying list/content view remains visible. At widths
    below `768px`, it uses the mobile bottom sheet; wider viewports retain the
    centered modal.
-6. Close from the close button, backdrop click, or `Escape`.
+6. Use the header `Close` button, click or tap outside the form, or press `Escape`
+   to leave. An untouched form closes immediately. If you have entered work,
+   `Discard your changes?` asks you to choose `Keep editing` or `Discard changes`.
+   Keeping the form open preserves its settings, picture, description, and step.
+   This also applies when creating a subwave.
 7. Closing removes the `create` query value while keeping the rest of the URL
    context.
 8. Successful submit navigates to the new wave route.
@@ -69,11 +73,17 @@ mobile viewports.
 
 - If a stale `create=wave` URL opens the modal unexpectedly, closing the modal
   clears the create state and returns to the underlying page context.
-- If the modal is dismissed before submission, users can reopen create-wave
-  from either entry point and continue from the start of the flow.
+- Confirming `Discard changes` closes the form and loses unsaved work. Existing
+  saved drafts remain; reopening starts at Setup.
+- After leaving Setup, named wave settings can appear under `Saved Drafts` on
+  the same browser and device. Saving depends on browser storage and is delayed
+  briefly after edits. Pictures, descriptions, and the current step are not
+  restored. Subwave creation has no draft-resume control.
 - On mobile, the sheet keeps its header and close control visible while the
   multi-step form scrolls within the available viewport.
-- The close control, backdrop, and `Escape` dismiss the responsive dialog.
+- Keyboard users can Tab to `Close` and activate it with Enter or Space, or press
+  Escape. Dismissing the discard confirmation keeps the form open and returns
+  focus to it. Nested controls keep their own Escape behavior.
 
 ## Scope Notes
 

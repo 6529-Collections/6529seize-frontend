@@ -259,6 +259,127 @@ describe("staging runtime directory", () => {
   });
 });
 
+describe("staging SSM shell wrapper", () => {
+  let repo: string;
+  let commandLog: string;
+
+  beforeEach(() => {
+    repo = fs.realpathSync(
+      fs.mkdtempSync(path.join(os.tmpdir(), "staging-ssm-"))
+    );
+    fs.mkdirSync(path.join(repo, ".git"));
+    commandLog = path.join(repo, "commands");
+    fs.writeFileSync(commandLog, "");
+  });
+
+  afterEach(() => {
+    fs.rmSync(repo, { recursive: true, force: true });
+  });
+
+  function runWrapper(fetchedSha: string, finalSha = expectedSha) {
+    const sendStep = workflow.jobs["deploy-staging"].steps.find(
+      (step: { name?: string }) => step.name === "Send staging deploy command"
+    );
+    const body = sendStep.run.match(
+      /cat <<'REMOTE_SCRIPT_BODY'\n([\s\S]*?)\nREMOTE_SCRIPT_BODY/u
+    )?.[1];
+    expect(body).toBeDefined();
+
+    // AWS-RunShellScript uses /bin/sh. Stub host operations, keeping the actual
+    // workflow's conditionals and final HEAD check in that interpreter.
+    const hostCommands = `
+set -eu
+id() { return 0; }
+base64() { :; }
+jq() { :; }
+sudo() {
+  [ "$1" = -H ] && [ "$2" = -u ] && [ "$3" = "$RUN_AS" ] &&
+    [ "$4" = git ] && [ "$5" = -C ] && [ "$6" = "$REPO_DIR" ] || return 1
+  shift 6
+  printf 'git %s\\n' "$*" >> "$TEST_COMMAND_LOG"
+  case "$1 $2" in
+    'rev-parse FETCH_HEAD') printf '%s\\n' "$TEST_FETCHED_SHA" ;;
+    'rev-parse HEAD') printf '%s\\n' "$TEST_FINAL_SHA" ;;
+    'fetch --no-tags'|'reset --hard'|'clean -fd'|'checkout -B'|'config '*) : ;;
+    *) return 1 ;;
+  esac
+}
+bash() { printf 'bash %s\\n' "$*" >> "$TEST_COMMAND_LOG"; }
+`;
+    return childProcess.spawnSync("/bin/sh", ["-c", `${hostCommands}\n${body}`], {
+      encoding: "utf8",
+      timeout: 10_000,
+      env: {
+        ...process.env,
+        REPO_DIR: repo,
+        RUN_AS: "staging-test",
+        BRANCH: "1a-staging",
+        EXPECTED_SHA: expectedSha,
+        EXPECTED_DIGEST: expectedDigest,
+        ARTIFACT_URL: "https://example.invalid/artifact.zip",
+        PUBLIC_REVIEW_DISCUSSION_DESTINATIONS_B64: "e30=",
+        SSR_CLIENT_ID_B64: "Y2xpZW50",
+        SSR_CLIENT_SECRET_B64: "c2VjcmV0",
+        TEST_COMMAND_LOG: commandLog,
+        ETHEREUM_RPC_URL_B64: Buffer.from("https://example.invalid").toString(
+          "base64"
+        ),
+        ALCHEMY_API_KEY_B64: Buffer.from("staging-test-key").toString("base64"),
+        TEST_FETCHED_SHA: fetchedSha,
+        TEST_FINAL_SHA: finalSha,
+      },
+    });
+  }
+
+  function commands() {
+    return fs.readFileSync(commandLog, "utf8").trim().split("\n");
+  }
+
+  it("rejects superseded source before changing the checkout", () => {
+    const result = runWrapper(previousSha, previousSha);
+
+    expect(result.error).toBeUndefined();
+    expect(result.status).toBe(1);
+    expect(result.stderr).toContain("refusing to deploy stale bytes");
+    expect(result.stderr).not.toContain("[[: not found");
+    expect(commands()).toEqual([
+      "git fetch --no-tags origin 1a-staging",
+      "git rev-parse FETCH_HEAD",
+    ]);
+  });
+
+  it("activates matching source after both SHA checks", () => {
+    const result = runWrapper(expectedSha);
+
+    expect(result.error).toBeUndefined();
+    expect(result.status).toBe(0);
+    expect(result.stderr).toBe("");
+    expect(commands()).toEqual([
+      "git fetch --no-tags origin 1a-staging",
+      "git rev-parse FETCH_HEAD",
+      "git reset --hard HEAD",
+      "git clean -fd generated",
+      "git checkout -B 1a-staging FETCH_HEAD",
+      "git config branch.1a-staging.remote origin",
+      "git config branch.1a-staging.merge refs/heads/1a-staging",
+      "git reset --hard FETCH_HEAD",
+      "git rev-parse HEAD",
+      "bash -n ops/scripts/deploy-staging-artifact.sh",
+      "bash ops/scripts/deploy-staging-artifact.sh",
+    ]);
+  });
+
+  it("still refuses activation when final HEAD differs", () => {
+    const result = runWrapper(expectedSha, previousSha);
+
+    expect(result.error).toBeUndefined();
+    expect(result.status).toBe(1);
+    expect(result.stderr).toBe("");
+    expect(commands().at(-1)).toBe("git rev-parse HEAD");
+    expect(commands().some((command) => command.startsWith("bash "))).toBe(false);
+  });
+});
+
 describe("staging immutable artifact deployment", () => {
   it("keeps the remote activation script syntactically valid and fail-closed", () => {
     expect(childProcess.spawnSync("bash", ["-n", scriptPath]).status).toBe(0);

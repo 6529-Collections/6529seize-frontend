@@ -7,6 +7,21 @@ export const metadata = getAppMetadata({
   title: t(DEFAULT_LOCALE, "collect.orders"),
   description: t(DEFAULT_LOCALE, "collect.orders.description"),
 });
-export default function CollectOrdersPage() {
-  return <CollectOrdersClient />;
+export default async function CollectOrdersPage({
+  searchParams,
+}: {
+  readonly searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const query = await searchParams;
+  const operationId =
+    typeof query["operation"] === "string" &&
+    /^[\da-f-]{36}$/i.test(query["operation"])
+      ? query["operation"]
+      : undefined;
+  return (
+    <CollectOrdersClient
+      initialOperationId={operationId}
+      initialBatch={query["kind"] === "BUY_BATCH"}
+    />
+  );
 }

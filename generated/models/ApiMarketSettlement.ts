@@ -14,6 +14,10 @@
 import { HttpFile } from '../http/http';
 
 export class ApiMarketSettlement {
+    /**
+    * Whole source order remaining quantity verified at a canonical safe block, distinct from operation remaining_quantity.
+    */
+    'order_remaining_quantity'?: string;
     'filled_quantity': string;
     'remaining_quantity': string;
     'transaction_hash'?: string;
@@ -26,6 +30,12 @@ export class ApiMarketSettlement {
     static readonly mapping: {[index: string]: string} | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
+        {
+            "name": "order_remaining_quantity",
+            "baseName": "order_remaining_quantity",
+            "type": "string",
+            "format": ""
+        },
         {
             "name": "filled_quantity",
             "baseName": "filled_quantity",

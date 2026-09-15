@@ -4,12 +4,17 @@
 import {
   useCallback,
   useEffect,
+  useImperativeHandle,
   useRef,
   useState,
   type CSSProperties,
+  type Ref,
 } from "react";
+import isEqual from "lodash/isEqual";
 import { usePathname } from "next/navigation";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
+import MobileWrapperConfirmationDialog from "@/components/mobile-wrapper-dialog/MobileWrapperConfirmationDialog";
 import { getCreateSubwaveTitle } from "@/helpers/waves/create-subwave-title.helpers";
 import type { CreateDropConfig } from "@/entities/IDrop";
 import { useObjectUrl } from "@/hooks/useObjectUrl";
@@ -32,7 +37,12 @@ import { useSubwaveWaveConfig } from "./hooks/useSubwaveWaveConfig";
 import CreateWaveDraftsSection from "./overview/CreateWaveDraftsSection";
 import SubwaveAccessWarningDialog from "@/components/waves/groups/SubwaveAccessWarningDialog";
 
+export interface CreateWaveHandles {
+  readonly requestClose: () => void;
+}
+
 export default function CreateWave({
+  ref,
   profile,
   onBack,
   onSuccess,
@@ -41,6 +51,7 @@ export default function CreateWave({
   parentAdminGroupId,
   parentViewGroupId,
 }: {
+  readonly ref?: Ref<CreateWaveHandles> | undefined;
   readonly profile: ApiIdentity;
   readonly onBack: () => void;
   readonly onSuccess?: (() => void) | undefined;
@@ -65,6 +76,10 @@ export default function CreateWave({
     endDateConfig,
     setEndDateConfig,
   } = waveConfig;
+  // Config updates are immutable. Keep the starting values, including inherited
+  // subwave settings, and compare only when the user asks to leave.
+  const initialForm = useRef({ config, endDateConfig });
+  const [showDiscardConfirmation, setShowDiscardConfirmation] = useState(false);
   const waveNameSuffix = config.overview.name
     ? ` "${config.overview.name}"`
     : "";
@@ -173,6 +188,30 @@ export default function CreateWave({
     parentAdminGroupId,
   });
 
+  const requestClose = () => {
+    const description = descriptionRef.current?.getDropSnapshot();
+    const hasChanges =
+      !isEqual(config, initialForm.current.config) ||
+      !isEqual(endDateConfig, initialForm.current.endDateConfig) ||
+      !!description?.parts.some(
+        (part) =>
+          !!part.content?.trim() ||
+          part.media.length > 0 ||
+          (part.attachments?.length ?? 0) > 0 ||
+          (part.uploaded_attachments?.length ?? 0) > 0 ||
+          !!part.quoted_drop
+      ) ||
+      !!description?.title ||
+      (description?.metadata.length ?? 0) > 0;
+
+    if (hasChanges) {
+      setShowDiscardConfirmation(true);
+    } else {
+      onBack();
+    }
+  };
+  useImperativeHandle(ref, () => ({ requestClose }));
+
   const setStep = async (
     targetStep: CreateWaveStep,
     direction: "forward" | "backward"
@@ -243,7 +282,7 @@ export default function CreateWave({
             ? getCreateSubwaveTitle(locale, parentWaveName)
             : `Create Wave${waveNameSuffix}`
         }
-        onBack={onBack}
+        onBack={requestClose}
         nativeBoundedStyle={nativeBoundedStyle}
         scrollResetKey={step}
       >
@@ -299,6 +338,18 @@ export default function CreateWave({
         isOpen={subwaveAccessConfirmation.isOpen}
         onDecision={subwaveAccessConfirmation.onDecision}
       />
+      {showDiscardConfirmation && (
+        <MobileWrapperConfirmationDialog
+          isOpen
+          title={t(locale, "waves.create.dialog.discardTitle")}
+          message={t(locale, "waves.create.dialog.discardMessage")}
+          confirmText={t(locale, "waves.create.dialog.discardConfirm")}
+          cancelText={t(locale, "waves.create.dialog.keepEditing")}
+          onClose={() => setShowDiscardConfirmation(false)}
+          onConfirm={onBack}
+          zIndexClassName="tw-z-[10000]"
+        />
+      )}
     </div>
   );
 }
