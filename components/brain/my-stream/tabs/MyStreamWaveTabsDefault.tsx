@@ -69,26 +69,13 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
 
     return (
       <>
-        {showChatSubmitDropAction && !action.canOpen && headerIsCompact && (
+        {showChatSubmitDropAction && !action.canOpen && (
           <WaveHeaderRestrictionButton
             label={action.label}
             reason={chatSubmitDropTooltip ?? action.label}
             className="tw-h-8 tw-w-8 tw-min-w-8 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-p-0 tw-text-iron-300 desktop-hover:hover:tw-border-iron-500 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-100"
           >
             <LockClosedIcon className="tw-size-4 tw-flex-shrink-0" />
-            <span className="tw-sr-only">{action.compactLabel}</span>
-          </WaveHeaderRestrictionButton>
-        )}
-        {showChatSubmitDropAction && !action.canOpen && !headerIsCompact && (
-          <WaveHeaderRestrictionButton
-            label={action.label}
-            reason={chatSubmitDropTooltip ?? action.label}
-            className="tw-h-8 tw-min-w-0 tw-max-w-[10rem] tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-2.5 tw-text-xs tw-font-semibold tw-text-iron-400 lg:tw-max-w-[14rem]"
-          >
-            <LockClosedIcon className="tw-size-4 tw-flex-shrink-0" />
-            <span className="tw-min-w-0 tw-truncate">
-              {chatSubmitDropTooltip}
-            </span>
           </WaveHeaderRestrictionButton>
         )}
         {showChatSubmitDropAction && action.canOpen && (
@@ -175,8 +162,8 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
         isCompact={isCompact}
         showBackButton={showBackButton}
         headerActionsTooltipId={headerActionsTooltipId}
-        headerClassName="tw-flex tw-items-center tw-justify-between tw-gap-x-2 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-px-2 tw-py-3 sm:tw-gap-x-4 sm:tw-px-4"
-        actionsClassName="tw-flex tw-flex-shrink-0 tw-self-start tw-items-center tw-gap-x-2 tw-pl-3 tw-pt-0.5 sm:tw-pl-4"
+        headerClassName="tw-flex tw-items-center tw-justify-between tw-gap-x-2 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-px-2 tw-py-3 md:tw-py-2.5 sm:tw-gap-x-4 sm:tw-px-4"
+        actionsClassName="tw-flex tw-flex-shrink-0 tw-self-start tw-items-center tw-gap-x-2 tw-pt-0.5"
         renderLeadingActions={renderHeaderLeadingActions}
         renderOverflowMenuItems={renderHeaderOverflowMenuItems}
       />
