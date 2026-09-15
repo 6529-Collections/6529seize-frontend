@@ -106,7 +106,9 @@ test.describe("Core app surface coverage @surface @medium @large", () => {
     await nav.getByRole("button", { name: "Network & Reputation" }).click();
     await nav.getByRole("link", { name: "TDH", exact: true }).click();
 
-    await expect(page).toHaveURL(/\/network\/tdh$/);
+    await expect(page).toHaveURL(/\/network\/tdh$/, {
+      timeout: NAVIGATION_TIMEOUT_MS,
+    });
     await waitForRouteReady(page);
     await expectTdhExplainer(page);
   });

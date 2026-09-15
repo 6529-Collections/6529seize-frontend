@@ -1,6 +1,6 @@
 "use client";
 
-import { fullScreenSupported } from "@/helpers/Helpers";
+import { useFullScreenSupported } from "@/hooks/useFullScreenSupported";
 import {
   ArrowDownTrayIcon,
   ArrowTopRightOnSquareIcon,
@@ -102,11 +102,12 @@ export function InlineMediaActions({
   readonly children?: React.ReactNode;
 }) {
   const actionLabels = getMediaActionLabels(labels);
+  const supportsFullScreen = useFullScreenSupported();
   const canFullscreen =
     (variant === "image" || variant === "html") &&
     Boolean(onFullscreen) &&
     Boolean(fullscreenTargetAvailable) &&
-    fullScreenSupported();
+    supportsFullScreen;
   const positionClassName =
     position === "bottom-right"
       ? "tw-bottom-[5px] tw-right-[5px]"
@@ -173,10 +174,11 @@ export function ExpandedMediaToolbar({
   readonly labels?: MediaActionLabels | undefined;
 }) {
   const actionLabels = getMediaActionLabels(labels);
+  const supportsFullScreen = useFullScreenSupported();
   const canFullscreen =
     Boolean(onFullscreen) &&
     Boolean(fullscreenTargetAvailable) &&
-    fullScreenSupported();
+    supportsFullScreen;
 
   return (
     <div className="tw-fixed tw-right-4 tw-top-3 tw-z-[1102] tw-flex tw-items-center tw-gap-x-3 tw-pt-[env(safe-area-inset-top,0px)]">

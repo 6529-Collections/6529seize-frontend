@@ -3,7 +3,7 @@
 import { Capacitor } from "@capacitor/core";
 import { useCallback, useEffect, useMemo, useSyncExternalStore } from "react";
 import { mainnet, sepolia } from "viem/chains";
-import { WagmiProvider } from "wagmi";
+import DeferredWagmiProvider from "./DeferredWagmiProvider";
 import type { AppWallet } from "@/components/app-wallets/AppWalletsContext";
 import { useAppWallets } from "@/components/app-wallets/AppWalletsContext";
 import { useAuth } from "@/components/auth/Auth";
@@ -737,13 +737,13 @@ export default function WagmiSetup({
   return (
     <AppKitBootstrapContext.Provider value={appKitBootstrapValue}>
       {/* The temporary config must not compete for Wagmi's reconnect lock. */}
-      <WagmiProvider
+      <DeferredWagmiProvider
         config={currentAdapter?.wagmiConfig ?? publicWagmiConfig}
         reconnectOnMount={currentAdapter !== null}
       >
         {children}
         {appWalletPasswordModal.modal}
-      </WagmiProvider>
+      </DeferredWagmiProvider>
     </AppKitBootstrapContext.Provider>
   );
 }

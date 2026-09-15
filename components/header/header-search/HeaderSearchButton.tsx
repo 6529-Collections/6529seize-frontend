@@ -11,6 +11,7 @@ import { useWaveChatScrollOptional } from "@/contexts/wave/WaveChatScrollContext
 import type { ApiWave } from "@/generated/models/ApiWave";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useHasHydrated } from "@/hooks/useHasHydrated";
 import { t } from "@/i18n/messages";
 
 import HeaderSearchModal from "./HeaderSearchModal";
@@ -29,6 +30,7 @@ export default function HeaderSearchButton({ wave }: HeaderSearchButtonProps) {
   const pathname = usePathname();
   const waveChatScroll = useWaveChatScrollOptional();
   const locale = useBrowserLocale();
+  const hasHydrated = useHasHydrated();
   const { isApp } = useDeviceInfo();
 
   useEffect(() => {
@@ -78,6 +80,7 @@ export default function HeaderSearchButton({ wave }: HeaderSearchButtonProps) {
       <button
         ref={buttonRef}
         type="button"
+        disabled={!hasHydrated}
         aria-label={buttonLabel}
         title={buttonLabel}
         onClick={openContextSearch}

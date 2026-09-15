@@ -1,7 +1,9 @@
 import UserPageIdentityStatements from "@/components/user/identity/statements/UserPageIdentityStatements";
 import { STATEMENT_GROUP, STATEMENT_TYPE } from "@/helpers/Types";
 import { useQuery } from "@tanstack/react-query";
-import { render } from "@testing-library/react";
+import { act, render } from "@testing-library/react";
+import { renderToString } from "react-dom/server";
+import { hydrateRoot } from "react-dom/client";
 import { useParams } from "next/navigation";
 
 jest.mock("next/navigation", () => ({ useParams: jest.fn() }));
@@ -51,6 +53,35 @@ jest.mock("@tanstack/react-query");
 const useQueryMock = useQuery as jest.Mock;
 
 describe("UserPageIdentityStatements", () => {
+  it("hydrates the server loading snapshot even if another section already populated the cache", async () => {
+    useQueryMock.mockReturnValue({
+      isLoading: true,
+      isFetching: true,
+      isError: false,
+      data: undefined,
+      refetch: jest.fn(),
+    });
+    const element = <UserPageIdentityStatements profile={profile} />;
+    const container = document.createElement("div");
+    document.body.appendChild(container);
+    container.innerHTML = renderToString(element);
+    useQueryMock.mockReturnValue({
+      isLoading: false,
+      isFetching: false,
+      isError: false,
+      data: [],
+      refetch: jest.fn(),
+    });
+    const onRecoverableError = jest.fn();
+    let root: ReturnType<typeof hydrateRoot>;
+    await act(async () => {
+      root = hydrateRoot(container, element, { onRecoverableError });
+    });
+    expect(onRecoverableError).not.toHaveBeenCalled();
+    expect(container.querySelector('[data-testid="social"]')).toBeNull();
+    act(() => root!.unmount());
+    container.remove();
+  });
   const profile = { id: "p1" } as any;
   const statements = [
     {
