@@ -7,18 +7,22 @@ import {
 } from "@lexical/markdown";
 import {
   $createParagraphNode,
+  $createTextNode,
   $getRoot,
   $getSelection,
   $isRangeSelection,
   createEditor,
   DELETE_CHARACTER_COMMAND,
   COMMAND_PRIORITY_LOW,
+  COMMAND_PRIORITY_NORMAL,
   FORMAT_TEXT_COMMAND,
+  KEY_DOWN_COMMAND,
   UNDO_COMMAND,
   REDO_COMMAND,
   type LexicalEditor,
 } from "lexical";
 import { registerInlineFormatEditing } from "@/components/drops/create/lexical/utils/inlineFormatEditing";
+import { MAX_DROP_PART_UTF16_UNITS } from "@/helpers/waves/drop-content-limits";
 import { mergeRegister } from "@lexical/utils";
 import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
 import { render } from "@testing-library/react";
@@ -103,6 +107,36 @@ describe("editor inline formatting", () => {
       editor.dispatchCommand(DELETE_CHARACTER_COMMAND, true);
     });
 
+  const normalBackspace = async () => {
+    const unregisterNormalDelete = editor.registerCommand(
+      DELETE_CHARACTER_COMMAND,
+      (backward) => {
+        const selection = $getSelection();
+        if (
+          !backward ||
+          !$isRangeSelection(selection) ||
+          !selection.isCollapsed() ||
+          selection.anchor.type !== "text" ||
+          selection.anchor.offset === 0
+        ) {
+          return false;
+        }
+        const offset = selection.anchor.offset;
+        selection.anchor
+          .getNode()
+          .select(offset - 1, offset)
+          .removeText();
+        return true;
+      },
+      COMMAND_PRIORITY_NORMAL
+    );
+    try {
+      await backspace();
+    } finally {
+      unregisterNormalDelete();
+    }
+  };
+
   const selectStrike = async (start = 0, end?: number) =>
     update(() => {
       const node = $getRoot()
@@ -126,6 +160,79 @@ describe("editor inline formatting", () => {
       ).toHaveTextContent("test");
     }
   );
+
+  it.each([
+    "~test~",
+    "~~test~~",
+    "*test*",
+    "**test**",
+    "***test***",
+    "`test`",
+    "==test==",
+  ])(
+    "reverses %s after typing and deleting a temporary suffix",
+    async (markdown) => {
+      await typeText(markdown);
+      await typeText(" ");
+      await normalBackspace();
+      expect(root.textContent).toBe("test");
+      await backspace();
+      expect(root.textContent).toBe(markdown.slice(0, -1));
+      expect(root.querySelector(".editor-text-strikethrough")).toBeNull();
+    }
+  );
+
+  it.each(["~test~", "~~test~~"])(
+    "types plain text beyond the completed shortcut %s",
+    async (markdown) => {
+      await typeText(markdown);
+      await typeText(" plain");
+      expect(root.textContent).toBe("test plain");
+      expect(
+        editor.getEditorState().read(() => {
+          const nodes = $getRoot().getAllTextNodes();
+          const suffix = nodes.find((node) =>
+            node.getTextContent().includes("plain")
+          );
+          return suffix?.getFormat();
+        })
+      ).toBe(0);
+    }
+  );
+
+  it("does not serialize a near-limit drop while typing or deleting a suffix", async () => {
+    const prefix = "a".repeat(MAX_DROP_PART_UTF16_UNITS - 100) + " ";
+    await update(() => {
+      $getRoot()
+        .clear()
+        .append($createParagraphNode().append($createTextNode(prefix)))
+        .selectEnd();
+    });
+    await typeText("~test~");
+    const serialize = jest.spyOn(
+      Object.getPrototypeOf(editor.getEditorState()),
+      "toJSON"
+    );
+    try {
+      await typeText(" suffix");
+      for (let index = 0; index < 6; index++) await normalBackspace();
+      expect(root.textContent).toBe(prefix + "test ");
+      expect(serialize).not.toHaveBeenCalled();
+      await normalBackspace();
+      expect(serialize).toHaveBeenCalledTimes(1);
+      for (let index = 0; index < 3; index++) {
+        await typeText(" ");
+        expect(serialize).toHaveBeenCalledTimes(index + 1);
+        await normalBackspace();
+        expect(serialize).toHaveBeenCalledTimes(index + 2);
+      }
+      await backspace();
+      expect(root.textContent).toBe(prefix + "~test");
+      expect(serialize).toHaveBeenCalledTimes(4);
+    } finally {
+      serialize.mockRestore();
+    }
+  });
 
   it.each(["", "no strikethrough, "])(
     "clears strike after deleting the entire word following %j",
@@ -212,6 +319,9 @@ describe("editor inline formatting", () => {
 
   it("reverses a nested shortcut without removing its existing bold text", async () => {
     await typeText("~**test**~");
+    expect(root.querySelector(".editor-text-strikethrough")).toHaveTextContent(
+      "test"
+    );
     await backspace();
     expect(root.textContent).toBe("~test");
     expect(root.querySelector(".editor-text-bold")).toHaveTextContent("test");
@@ -294,6 +404,77 @@ describe("editor inline formatting", () => {
       unregister();
     }
   });
+
+  it.each(["", " "])(
+    "invalidates a shortcut when a plugin replaces a node with identical serialized content and suffix %j",
+    async (suffix) => {
+      await typeText("~hi~" + suffix);
+      const before = editor.getEditorState().toJSON();
+      await update(() => {
+        const node = $getRoot().getAllTextNodes()[0];
+        if (!node) throw new Error("Expected converted text");
+        const replacement = $createTextNode(node.getTextContent());
+        replacement.setFormat(node.getFormat());
+        node.replace(replacement);
+        if (!suffix) replacement.selectEnd();
+      });
+      expect(editor.getEditorState().toJSON()).toEqual(before);
+      if (suffix) await normalBackspace();
+      expect(root.textContent).toBe("hi");
+      await normalBackspace();
+      expect(root.textContent).toBe("h");
+      expect(
+        root.querySelector(".editor-text-strikethrough")
+      ).toHaveTextContent("h");
+    }
+  );
+
+  it.each(["Delete", "Home", "End", "PageUp", "PageDown"])(
+    "invalidates the shortcut after %s even if the cursor stays in place",
+    async (key) => {
+      await typeText("~hi~");
+      await update(() => {
+        editor.dispatchCommand(
+          KEY_DOWN_COMMAND,
+          new KeyboardEvent("keydown", { key })
+        );
+      });
+      await normalBackspace();
+      expect(root.textContent).toBe("h");
+      expect(
+        root.querySelector(".editor-text-strikethrough")
+      ).toHaveTextContent("h");
+    }
+  );
+
+  it.each([true, false])(
+    "distinguishes AltGraph typing (%s) from Ctrl+Alt command chords",
+    async (modifierAltGraph) => {
+      await typeText("~test~");
+      for (const key of [
+        "Control",
+        modifierAltGraph ? "AltGraph" : "Alt",
+        "@",
+      ]) {
+        await update(() => {
+          editor.dispatchCommand(
+            KEY_DOWN_COMMAND,
+            new KeyboardEvent("keydown", {
+              key,
+              ctrlKey: true,
+              altKey: key !== "Control",
+              modifierAltGraph: key !== "Control" && modifierAltGraph,
+            })
+          );
+        });
+      }
+      await typeText("@");
+      await normalBackspace();
+      expect(root.textContent).toBe("test");
+      await normalBackspace();
+      expect(root.textContent).toBe(modifierAltGraph ? "~test" : "tes");
+    }
+  );
 
   it("supports undo and redo of shortcut reversal", async () => {
     await typeText("~test~");
