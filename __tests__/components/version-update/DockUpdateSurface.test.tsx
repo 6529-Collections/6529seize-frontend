@@ -34,7 +34,7 @@ it("keeps the combined surface aligned as the dock and rocket change size", () =
   try {
     const view = render(
       <div data-testid="dock" style={{ borderTopLeftRadius: "32px" }}>
-        <DockUpdateSurface />
+        <DockUpdateSurface dockClassName="native-dock" />
         <div data-version-update-dock="expanded" />
       </div>
     );

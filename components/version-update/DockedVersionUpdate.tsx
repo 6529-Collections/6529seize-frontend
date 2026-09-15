@@ -9,15 +9,17 @@ import DockUpdateSurface from "./DockUpdateSurface";
 
 export default function DockedVersionUpdate({
   compact,
+  dockClassName,
 }: {
   readonly compact: boolean;
+  readonly dockClassName: string;
 }) {
   const isVersionStale = useVersionStatus();
   if (!isVersionStale) return null;
 
   return (
     <>
-      <DockUpdateSurface />
+      <DockUpdateSurface dockClassName={dockClassName} />
       <div
         data-version-update-dock={compact ? "compact" : "expanded"}
         className={`tw-pointer-events-none tw-absolute tw-bottom-full tw-left-1/2 tw-z-10 -tw-translate-x-1/2 tw-transition-[width,height] tw-duration-300 tw-ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:tw-transition-none ${compact ? "tw-h-[31.68px] tw-w-[91.52px] sm:tw-h-9 sm:tw-w-[104px]" : "tw-h-9 tw-w-[104px]"}`}
