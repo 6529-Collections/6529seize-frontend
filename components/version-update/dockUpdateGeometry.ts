@@ -22,14 +22,14 @@ export function getDockUpdatePath(
   return [
     `M ${r + inset} ${top}`,
     `H ${leftShoulder}`,
-    `C ${leftShoulder + controlOffset} ${top} ${leftShoulder + controlOffset} inset ${center} inset`,
-    `C ${rightShoulder - controlOffset} inset ${rightShoulder - controlOffset} ${top} ${rightShoulder} ${top}`,
+    `C ${leftShoulder + controlOffset} ${top} ${leftShoulder + controlOffset} ${inset} ${center} ${inset}`,
+    `C ${rightShoulder - controlOffset} ${inset} ${rightShoulder - controlOffset} ${top} ${rightShoulder} ${top}`,
     `H ${right - r}`,
     `A ${r} ${r} 0 0 1 ${right} ${top + r}`,
     `V ${bottom - r}`,
     `A ${r} ${r} 0 0 1 ${right - r} ${bottom}`,
     `H ${r + inset}`,
-    `A ${r} ${r} 0 0 1 inset ${bottom - r}`,
+    `A ${r} ${r} 0 0 1 ${inset} ${bottom - r}`,
     `V ${top + r}`,
     `A ${r} ${r} 0 0 1 ${r + inset} ${top} Z`,
   ].join(" ");

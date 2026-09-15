@@ -13,7 +13,7 @@ export default function DockUpdateSurface({
   readonly dockClassName: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
-  const [geometry, setGeometry] = useState<DockUpdateGeometry | null>(null);
+  const [geometry, setGeometry] = useState<(DockUpdateGeometry & { readonly borderWidth: number }) | null>(null);
 
   useLayoutEffect(() => {
     const dock = ref.current?.parentElement;
@@ -22,21 +22,23 @@ export default function DockUpdateSurface({
     const measure = () => {
       const { width, height } = dock.getBoundingClientRect();
       const bubbleRect = bubble.getBoundingClientRect();
-      const radius = Number.parseFloat(
-        getComputedStyle(dock).borderTopLeftRadius
-      );
+      const computed = getComputedStyle(dock);
+      const radius = Number.parseFloat(computed.borderTopLeftRadius);
+      const borderWidth = Number.parseFloat(computed.borderLeftWidth) || 0;
       if (width <= 0 || height <= 0) return;
       setGeometry((current) => {
         const next = {
           width,
           height,
           radius,
+          borderWidth,
           bubbleWidth: bubbleRect.width,
           bubbleHeight: bubbleRect.height,
         };
         return current?.width === width &&
           current.height === height &&
           current.radius === radius &&
+          current.borderWidth === borderWidth &&
           current.bubbleWidth === next.bubbleWidth &&
           current.bubbleHeight === next.bubbleHeight
           ? current
@@ -66,8 +68,8 @@ export default function DockUpdateSurface({
       data-dock-update-surface="true"
       className="tw-pointer-events-none tw-absolute"
       style={{
-        left: -1,
-        top: -geometry.bubbleHeight - 1,
+        left: -geometry.borderWidth,
+        top: -geometry.bubbleHeight - geometry.borderWidth,
         width: geometry.width,
         height,
       }}
