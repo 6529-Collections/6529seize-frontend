@@ -94,16 +94,16 @@ const NewVersionToast = (): JSX.Element | null => {
           aria-label={t(locale, "newVersionToast.updateAction")}
           title={t(locale, "newVersionToast.updateAction")}
           onClick={refreshAppVersion}
-          className="tw-pointer-events-auto tw-flex tw-min-h-11 tw-items-center tw-justify-center tw-gap-2 tw-rounded-full tw-border tw-border-[#398351] tw-bg-[#062417]/95 tw-px-4 tw-py-1.5 tw-text-sm tw-font-semibold tw-text-iron-50 tw-shadow-[inset_0_0_12px_rgba(49,205,105,0.12),_0_0_12px_rgba(49,205,105,0.12)] tw-backdrop-blur-xl tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-[#95ffad] focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black active:tw-bg-[#103e26] desktop-hover:hover:tw-bg-[#103e26]"
+          className="tw-pointer-events-auto tw-flex tw-min-h-9 tw-items-center tw-justify-center tw-gap-1.5 tw-rounded-full tw-border tw-border-[#398351] tw-bg-[#062417]/95 tw-px-3 tw-py-1 tw-text-xs tw-font-semibold tw-text-iron-50 tw-shadow-[inset_0_0_12px_rgba(49,205,105,0.12),_0_0_12px_rgba(49,205,105,0.12)] tw-backdrop-blur-xl tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-[#95ffad] focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black active:tw-bg-[#103e26] desktop-hover:hover:tw-bg-[#103e26]"
         >
           {/* Plain img preserves the existing local decorative asset behavior. */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/rocket-refresh-small.png"
             alt=""
-            width={30}
-            height={30}
-            className="tw-size-[30px] tw-shrink-0 tw-object-contain"
+            width={24}
+            height={24}
+            className="tw-size-6 tw-shrink-0 tw-object-contain"
           />
           <span>{t(locale, "newVersionToast.update")}</span>
         </button>
