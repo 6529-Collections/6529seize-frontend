@@ -1,9 +1,9 @@
 import { getMobileDestination } from "@/helpers/mobileAppDestination";
 
-export enum DeepLinkScope {
-  NAVIGATE = "navigate",
-  SHARE_CONNECTION = "share-connection",
-}
+export const DeepLinkScope = {
+  NAVIGATE: "navigate",
+  SHARE_CONNECTION: "share-connection",
+} as const;
 
 const EXCLUDED_ROUTES = [
   "/open-mobile",
