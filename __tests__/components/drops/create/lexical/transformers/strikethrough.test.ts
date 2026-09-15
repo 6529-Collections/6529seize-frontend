@@ -220,9 +220,15 @@ describe("editor inline formatting", () => {
       expect(serialize).not.toHaveBeenCalled();
       await normalBackspace();
       expect(serialize).toHaveBeenCalledTimes(1);
+      for (let index = 0; index < 3; index++) {
+        await typeText(" ");
+        expect(serialize).toHaveBeenCalledTimes(index + 1);
+        await normalBackspace();
+        expect(serialize).toHaveBeenCalledTimes(index + 2);
+      }
       await backspace();
       expect(root.textContent).toBe(prefix + "~test");
-      expect(serialize).toHaveBeenCalledTimes(1);
+      expect(serialize).toHaveBeenCalledTimes(4);
     } finally {
       serialize.mockRestore();
     }
@@ -433,6 +439,35 @@ describe("editor inline formatting", () => {
       expect(
         root.querySelector(".editor-text-strikethrough")
       ).toHaveTextContent("h");
+    }
+  );
+
+  it.each([true, false])(
+    "distinguishes AltGraph typing (%s) from Ctrl+Alt command chords",
+    async (modifierAltGraph) => {
+      await typeText("~test~");
+      for (const key of [
+        "Control",
+        modifierAltGraph ? "AltGraph" : "Alt",
+        "@",
+      ]) {
+        await update(() => {
+          editor.dispatchCommand(
+            KEY_DOWN_COMMAND,
+            new KeyboardEvent("keydown", {
+              key,
+              ctrlKey: true,
+              altKey: key !== "Control",
+              modifierAltGraph: key !== "Control" && modifierAltGraph,
+            })
+          );
+        });
+      }
+      await typeText("@");
+      await normalBackspace();
+      expect(root.textContent).toBe("test");
+      await normalBackspace();
+      expect(root.textContent).toBe(modifierAltGraph ? "~test" : "tes");
     }
   );
 

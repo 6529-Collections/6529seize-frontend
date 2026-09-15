@@ -75,6 +75,9 @@ function readCursor(state: EditorState) {
       selection,
       // Ordinary typing needs only the local anchor. Walk the tree once, on
       // demand, when a tracked shortcut actually needs its document offset.
+      // Committed EditorStates are immutable. Re-entering this exact snapshot
+      // resolves its original node/selection even inside a newer editor update;
+      // Lexical restores the caller's active state when read() returns.
       get point(): number {
         point ??= state.read(() =>
           $getCursorPoint(node, selection.anchor.offset)
@@ -159,6 +162,9 @@ function isShortcutBoundary(
   }
   // Ordinary suffix typing/deletion fails the cheap guards above. Serialize
   // only when a changed document actually returns to the saved boundary.
+  // Re-arming stores that state in converted, so repeated reads are free.
+  // A later suffix round-trip creates a different state and must be checked
+  // again: matching size/caret alone cannot prove its content is unchanged.
   return (
     editorState === shortcut.converted ||
     contentSignature(editorState) === shortcut.signature
@@ -170,6 +176,27 @@ function normalizeInsertedSuffix(
   length: number,
   formats: readonly TextFormatType[]
 ) {
+  // Do not enqueue a tagged no-op when a later suffix already starts plain.
+  // Lexical can carry that unused tag into the next real deletion update.
+  const needsNormalization = editor.getEditorState().read(() => {
+    const selection = $getSelection();
+    if (
+      !$isRangeSelection(selection) ||
+      !selection.isCollapsed() ||
+      selection.anchor.type !== "text"
+    ) {
+      return false;
+    }
+    const node = selection.anchor.getNode();
+    return (
+      $isTextNode(node) &&
+      formats.some(
+        (format) => node.hasFormat(format) || selection.hasFormat(format)
+      )
+    );
+  });
+  if (!needsNormalization) return;
+
   editor.update(
     () => {
       const selection = $getSelection();
@@ -272,6 +299,9 @@ function hasSameCursor(previous: Cursor, current: Cursor): boolean {
 }
 
 function $hasSameNodes(previous: EditorState): boolean {
+  // Identity checks walk both snapshots only while tracking a shortcut (or
+  // attempting reversal). Cursor offsets are lazy; full JSON comparisons run
+  // only at matching boundaries. Keep ordinary untracked typing off these paths.
   const currentNodes = $dfs().map(({ node }) => node);
   const previousNodes = previous.read(() => $dfs().map(({ node }) => node));
   return (
@@ -343,8 +373,8 @@ function updateTrackedShortcut(
   // Re-arm after suffix deletion reaches the original content/caret boundary;
   // equal-sized plugin replacements must invalidate even if JSON is identical.
   // A new closing marker starts its own pending shortcut. Otherwise retain a
-  // suffix detour only across
-  // text edits. Navigation, format changes and unrelated updates invalidate it.
+  // suffix detour only across text edits. Navigation, format changes and
+  // unrelated updates invalidate it.
   const { previous, current, prevEditorState, editorState } = update;
   const shortcut = state.shortcut;
   if (
@@ -516,6 +546,16 @@ export function registerInlineFormatEditing(
       (event) => {
         // Printable keys (including Shift-produced markers) must reach the
         // update listener without losing the saved conversion boundary.
+        // Browsers may report AltGraph typing as Ctrl+Alt. Preserve only
+        // explicitly identified AltGraph characters; command chords still clear.
+        const altGraphTyping =
+          (event.key.length === 1 || event.key === "AltGraph") &&
+          event.getModifierState("AltGraph");
+        // Some layouts send Control before AltGraph. A modifier alone does
+        // not edit; defer invalidation until the following command key.
+        const controlModifier =
+          event.key === "Control" && !event.altKey && !event.metaKey;
+        if ((altGraphTyping && !event.metaKey) || controlModifier) return false;
         if (
           (event.key.length !== 1 &&
             event.key !== "Backspace" &&
