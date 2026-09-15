@@ -23,7 +23,6 @@ export function useTypeaheadMenuPosition(
     const spaceBelow = viewportTop + viewportHeight - anchorRect.bottom;
     const nextPosition: TypeaheadMenuPosition =
       spaceBelow >= spaceAbove ? "bottom" : "top";
-
     setPosition((current) =>
       current === nextPosition ? current : nextPosition
     );

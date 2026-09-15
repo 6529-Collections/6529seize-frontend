@@ -777,6 +777,7 @@ export const COLLECT_MESSAGES = {
   "collect.goal.selectDefinition": "Select a target",
   "collect.goal.selectSeason": "Select a season",
   "collect.goal.selectArtist": "Select an artist",
+  "collect.goal.searchArtist": "Search artists",
   "collect.goal.selectSet": "Select a set",
   "collect.goal.targetCount": "Copies per NFT",
   "collect.goal.budget": "Maximum budget (ETH)",
