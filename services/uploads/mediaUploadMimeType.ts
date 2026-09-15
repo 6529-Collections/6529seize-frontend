@@ -41,7 +41,7 @@ const FILE_TYPE_LABELS: Record<
   "text/csv": "CSV",
 };
 
-export const ACCEPTED_FILE_TYPE_LABELS = Array.from(
+const ACCEPTED_FILE_TYPE_LABELS = Array.from(
   new Set(
     [
       ...API_MEDIA_UPLOAD_MIME_TYPE_VALUES,
