@@ -21,8 +21,6 @@ interface SidebarPrimaryItemProps {
   readonly icon?: IconComp | undefined;
   readonly iconSizeClass?: string | undefined;
   readonly label: string;
-  readonly labelClassName?: string | undefined;
-  readonly ariaLabel?: string | undefined;
   readonly active?: boolean | undefined;
   readonly ariaCurrent?: React.AriaAttributes["aria-current"] | undefined;
   readonly collapsed?: boolean | undefined;
@@ -44,8 +42,6 @@ function WebSidebarNavItem({
   icon: Icon,
   iconSizeClass,
   label,
-  labelClassName,
-  ariaLabel,
   active,
   ariaCurrent,
   collapsed,
@@ -70,7 +66,7 @@ function WebSidebarNavItem({
           <div className="tw-relative">
             <Icon
               aria-hidden="true"
-              className={`tw-block tw-h-6 tw-w-6 tw-flex-shrink-0 ${
+              className={`tw-h-6 tw-w-6 tw-flex-shrink-0 ${
                 iconSizeClass ?? ""
               }`}
             />
@@ -84,7 +80,7 @@ function WebSidebarNavItem({
         )}
       </div>
       <span
-        className={`tw-block tw-overflow-hidden tw-whitespace-nowrap tw-transition-all tw-duration-300 motion-reduce:tw-transition-none ${labelClassName ?? ""} ${
+        className={`tw-block tw-overflow-hidden tw-whitespace-nowrap tw-transition-all tw-duration-300 motion-reduce:tw-transition-none ${
           collapsed ? "tw-w-0 tw-opacity-0" : "tw-flex-1 tw-opacity-100"
         }`}
       >
@@ -102,7 +98,7 @@ function WebSidebarNavItem({
   }
 
   const commonProps = {
-    "aria-label": ariaLabel ?? accessibleLabel,
+    "aria-label": accessibleLabel,
     ...(!hasTouchScreen && {
       "data-tooltip-id": "sidebar-tooltip",
       "data-tooltip-content": label,

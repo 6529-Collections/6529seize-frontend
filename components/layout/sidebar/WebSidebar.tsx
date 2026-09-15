@@ -1,10 +1,6 @@
 "use client";
 
-import {
-  ChevronDoubleLeftIcon,
-  ChevronDoubleRightIcon,
-  MagnifyingGlassIcon,
-} from "@heroicons/react/24/outline";
+import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState, type MouseEvent } from "react";
 import { Tooltip as ReactTooltip } from "react-tooltip";
@@ -13,8 +9,6 @@ import BellIcon from "@/components/common/icons/BellIcon";
 import HeaderSearchModal from "@/components/header/header-search/HeaderSearchModal";
 import { useUnreadNotifications } from "@/hooks/useUnreadNotifications";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
-import { DEFAULT_LOCALE } from "@/i18n/locales";
-import { t } from "@/i18n/messages";
 import { useIdentity } from "../../../hooks/useIdentity";
 import { useAuth } from "../../auth/Auth";
 import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
@@ -116,18 +110,6 @@ function WebSidebar({
 
   // Sidebar is expanded when offcanvas is open (mobile or narrow desktop)
   const shouldShowCollapsed = isMobile && isOffcanvasOpen ? false : isCollapsed;
-  let toggleLabel = t(DEFAULT_LOCALE, "webSidebar.toggle.collapse");
-  let toggleAriaLabel = t(
-    DEFAULT_LOCALE,
-    "webSidebar.toggle.collapseAriaLabel"
-  );
-  if (shouldShowCollapsed) {
-    toggleLabel = t(DEFAULT_LOCALE, "webSidebar.toggle.expand");
-    toggleAriaLabel = t(DEFAULT_LOCALE, "webSidebar.toggle.expandAriaLabel");
-  } else if (isMobile || isNarrow) {
-    toggleLabel = t(DEFAULT_LOCALE, "webSidebar.toggle.close");
-    toggleAriaLabel = t(DEFAULT_LOCALE, "webSidebar.toggle.closeAriaLabel");
-  }
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const handleToggle = () => {
@@ -164,19 +146,22 @@ function WebSidebar({
         style={isMobile ? undefined : { left: "var(--layout-margin, 0px)" }}
       >
         <div
-          className="tw-group tw-relative tw-z-50 tw-h-full tw-border-0 tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-800 tw-bg-black tw-transition-[width] tw-duration-300 tw-ease-in-out [--sidebar-toggle-height:calc(2.875rem+max(0.5rem,env(safe-area-inset-bottom,0px)))] focus:tw-outline-none motion-reduce:tw-transition-none"
+          className="tw-group tw-relative tw-z-50 tw-h-full tw-border-0 tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-800 tw-bg-black tw-transition-[width] tw-duration-300 tw-ease-in-out focus:tw-outline-none"
           style={{ width: sidebarWidth }}
           aria-label="Primary sidebar"
           ref={scrollContainerRef}
         >
           <div className="tw-flex tw-h-full tw-flex-col tw-pt-2">
-            <WebSidebarHeader collapsed={shouldShowCollapsed} />
+            <WebSidebarHeader
+              collapsed={shouldShowCollapsed}
+              onToggle={handleToggle}
+            />
 
             <div
-              className="tw-no-scrollbar tw-flex tw-min-h-0 tw-flex-1 tw-flex-col tw-overflow-y-auto tw-overflow-x-hidden tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300"
+              className="tw-no-scrollbar tw-flex tw-h-full tw-flex-col tw-overflow-y-auto tw-overflow-x-hidden tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300"
               data-sidebar-scroll="true"
             >
-              <div className="tw-flex-1 tw-shrink-0">
+              <div className="tw-flex-1">
                 <WebSidebarNav ref={navRef} isCollapsed={shouldShowCollapsed} />
               </div>
 
@@ -212,28 +197,11 @@ function WebSidebar({
                   />
                 </div>
               )}
-            </div>
-            <div className="tw-shrink-0">
+
               <WebSidebarUser
                 isCollapsed={shouldShowCollapsed}
                 profile={profile}
               />
-              <div className="tw-h-[var(--sidebar-toggle-height)] tw-px-3 tw-pb-[max(0.5rem,env(safe-area-inset-bottom,0px))]">
-                <WebSidebarNavItem
-                  onClick={handleToggle}
-                  icon={
-                    shouldShowCollapsed
-                      ? ChevronDoubleRightIcon
-                      : ChevronDoubleLeftIcon
-                  }
-                  collapsed={shouldShowCollapsed}
-                  label={toggleLabel}
-                  iconSizeClass="!tw-h-5 !tw-w-5"
-                  labelClassName="tw-text-sm"
-                  ariaLabel={toggleAriaLabel}
-                  ariaExpanded={!shouldShowCollapsed}
-                />
-              </div>
             </div>
           </div>
         </div>

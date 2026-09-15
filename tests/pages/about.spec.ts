@@ -4,7 +4,6 @@ import {
   test,
   waitForRouteReady,
 } from "../testHelpers";
-import { hideNextDevTools } from "../support/localSandbox";
 
 test.describe("About Pages @smoke @medium @large", () => {
   test("should load the about index page", async ({ page }) => {
@@ -97,8 +96,7 @@ test.describe("About Pages @smoke @medium @large", () => {
     await expect(layoutRoot).toHaveAttribute("data-narrow", "true");
     await expect(layoutRoot).toHaveAttribute("data-right-open", "false");
 
-    await hideNextDevTools(page);
-    await page.getByRole("button", { name: "Expand main sidebar" }).click();
+    await page.getByRole("button", { name: "Toggle right sidebar" }).click();
     await expect(layoutRoot).toHaveAttribute("data-offcanvas", "true");
 
     const gdrcArticle = layoutRoot.getByRole("article");
