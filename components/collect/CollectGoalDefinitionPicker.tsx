@@ -12,8 +12,7 @@ import { CheckIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
-import { useTypeaheadMenuPlacement } from "@/components/drops/create/lexical/plugins/useTypeaheadMenuPosition";
-import { useState, type CSSProperties } from "react";
+import { useState } from "react";
 import CollectGoalDefinitionMobilePicker from "./CollectGoalDefinitionMobilePicker";
 import type { CollectGoalOption } from "./collect.types";
 
@@ -27,7 +26,7 @@ export default function CollectGoalDefinitionPicker({
   invalid,
   errorId,
   mobileSheet = false,
-  keyboardAware = false,
+  searchableSheet = false,
   onChange,
 }: {
   readonly label: string;
@@ -39,22 +38,11 @@ export default function CollectGoalDefinitionPicker({
   readonly invalid: boolean;
   readonly errorId?: string;
   readonly mobileSheet?: boolean;
-  readonly keyboardAware?: boolean;
+  readonly searchableSheet?: boolean;
   readonly onChange: (id: string) => void;
 }) {
   const [query, setQuery] = useState("");
-  const [inputElement, setInputElement] = useState<HTMLInputElement | null>(
-    null
-  );
   const isMobileLayoutViewport = useIsMobileLayoutViewport();
-  const menuPlacement = useTypeaheadMenuPlacement(
-    keyboardAware && isMobileLayoutViewport ? inputElement : null
-  );
-  // Headless UI can size against the layout viewport behind the iOS keyboard.
-  const menuMaxHeight =
-    keyboardAware && isMobileLayoutViewport
-      ? `min(16rem, max(0px, calc(${menuPlacement.availableHeight}px - 0.5rem)))`
-      : "16rem";
   if (mobileSheet && isMobileLayoutViewport) {
     return (
       <CollectGoalDefinitionMobilePicker
@@ -66,6 +54,7 @@ export default function CollectGoalDefinitionPicker({
         disabled={disabled}
         invalid={invalid}
         errorId={errorId}
+        searchable={searchableSheet}
         onChange={onChange}
       />
     );
@@ -107,7 +96,6 @@ export default function CollectGoalDefinitionPicker({
             )}
             <div className="tw-relative">
               <ComboboxInput
-                ref={setInputElement}
                 displayValue={(option: CollectGoalOption | null) =>
                   option?.label ?? ""
                 }
@@ -123,19 +111,9 @@ export default function CollectGoalDefinitionPicker({
               </ComboboxButton>
             </div>
             <ComboboxOptions
-              anchor={
-                keyboardAware && isMobileLayoutViewport
-                  ? `${menuPlacement.position} start`
-                  : "bottom start"
-              }
+              anchor="bottom start"
               modal={false}
-              style={
-                {
-                  "--anchor-gap": "0.5rem",
-                  "--anchor-max-height": menuMaxHeight,
-                } as CSSProperties
-              }
-              className="tailwind-scope tw-z-50 tw-max-h-64 tw-w-[var(--input-width)] tw-overflow-auto tw-rounded-lg tw-bg-iron-900 tw-p-1 tw-text-sm tw-text-iron-100 tw-shadow-lg tw-ring-1 tw-ring-white/10 focus:tw-outline-none"
+              className="tailwind-scope tw-z-50 tw-max-h-64 tw-w-[var(--input-width)] tw-overflow-auto tw-rounded-lg tw-bg-iron-900 tw-p-1 tw-text-sm tw-text-iron-100 tw-shadow-lg tw-ring-1 tw-ring-white/10 [--anchor-gap:0.5rem] [--anchor-max-height:16rem] focus:tw-outline-none"
             >
               {filtered.length === 0 ? (
                 <ComboboxOption

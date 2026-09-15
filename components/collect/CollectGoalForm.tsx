@@ -143,8 +143,10 @@ export default function CollectGoalForm(props: CollectGoalFormProps) {
               locale={locale}
               value={draft.definitionId}
               definitions={props.definitions}
-              mobileSheet={draft.intent === "season"}
-              keyboardAware={draft.intent === "artist"}
+              mobileSheet={
+                draft.intent === "season" || draft.intent === "artist"
+              }
+              searchableSheet={draft.intent === "artist"}
               disabled={props.loading || definitionsStatus !== "ready"}
               invalid={invalidField === "definition"}
               {...(invalidField === "definition"
