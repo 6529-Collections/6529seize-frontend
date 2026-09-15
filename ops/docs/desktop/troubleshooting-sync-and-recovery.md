@@ -26,7 +26,7 @@ Check 6529 Desktop > ETH Transactions > Providers List for an Active Ethereum RP
 
 When the inputs are caught up, use TDH Calculation > TDH worker > Advanced Options > Recalculate TDH Now and confirm. Compare again after completion at the same Last Block.
 
-If a same-block mismatch persists and transaction history is suspect, use ETH Transactions > Transactions > Advanced Options > Reconcile. Choose a specific starting block if known, or Reconcile full history. It compares Ethereum transfer logs through the captured local checkpoint, repairs only missing/inconsistent/orphaned records, and rebuilds affected ownership. Full-history reconciliation can take significant time.
+If a same-block mismatch persists and transaction history is suspect, use ETH Transactions > Transactions > Advanced Options > Reconcile. Start with the most recent 25% of the indexed block range. After reconciliation completes, recalculate TDH and compare at the same block. Widen to 50%, then 75%, then 100% only if the mismatch persists after each completed repair and calculation. It compares Ethereum transfer logs through the captured local checkpoint, repairs only missing/inconsistent/orphaned records, and rebuilds affected ownership. Full-history reconciliation can take significant time.
 
 Use Transactions > Advanced Options > Rebuild Ownership only when the stored transaction history is believed correct but local ownership balances are inconsistent. It cannot recover missing transfers. After history/ownership repairs complete, recalculate TDH.
 
@@ -42,7 +42,7 @@ For a persistent failure, share app version and OS from 6529 Desktop > About, th
 
 In 6529 Desktop go to 6529 Desktop > ETH Transactions > Transactions > Advanced Options > Reconcile. The dialog is Reconcile Transactions.
 
-Choose Reconcile from a specific block and enter the first suspect block, or Reconcile full history from the displayed earliest block (13360860). The run ends at the local transaction checkpoint captured at start; it is not forward sync to the live chain tip.
+Choose Reconcile from a specific block and enter the calculated starting block for the most recent 25% of indexed blocks (or the first suspect block when known). Widen to 50%, 75%, then 100% only after each completed reconciliation and recalculation still leaves a same-block mismatch. The displayed earliest block is 13360860; full history is the final range, not the default. The run ends at the local transaction checkpoint captured at start; it is not forward sync to the live chain tip.
 
 Reconciliation compares Ethereum transfer logs to the local index and repairs missing, inconsistent, or orphaned records. It rebuilds ownership for affected tokens, and marks TDH for recalculation when repairs are made. It does not blindly delete all history.
 
@@ -125,3 +125,28 @@ RPC URLs. Use the installed app's confirmation text before a recovery action.
 - [Get started](flow-getting-started.md)
 - [Workers and TDH](feature-workers-and-tdh.md)
 - [Wallets, IPFS, and About](feature-wallets-ipfs-and-about.md)
+
+## Progressive block-range reconciliation
+
+Percentages refer to scanned blocks, never transaction counts. In Transactions >
+Logs, find the latest **Latest block in DB** entry for the local transaction
+checkpoint. The Reconcile dialog displays the supported minimum in **Reconcile
+full history from block …**. Use that indexed interval, not Ethereum block zero,
+the chain head, or the TDH snapshot block.
+
+The help bot asks for the checkpoint and calculates the starting block from the
+corpus-owned supported minimum: `minimum + floor((checkpoint - minimum) *
+(100 - percentage) / 100)`. Enter the result in **Reconcile from a specific block**.
+Begin with 25%; let reconciliation finish, wait for prerequisite workers, then
+recalculate TDH and compare at the same Last Block. Stop when the result matches.
+Otherwise widen to 50%, 75%, and finally 100%, checking after each completed run.
+The larger ranges overlap earlier runs. Their percentages describe the chosen
+block interval, not completion time. The worker captures its actual ending
+checkpoint when the run starts; newer blocks may make the actual interval
+slightly larger than the one used for the suggested starting block.
+
+Short replies such as “done”, “still different”, and “no” answer the current
+recovery step. The bot retains the percentage and block range in its answer so
+subsequent replies do not restart the earlier block/worker questions. Uncertain
+completion, errors, and incomplete runs must not automatically widen the range.
+The bot never runs a recovery action on the user's device.
