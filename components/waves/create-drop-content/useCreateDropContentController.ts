@@ -409,6 +409,7 @@ export function useCreateDropContentController({
     !isDropMode &&
     !isStormMode &&
     !submitting &&
+    !hasPendingInlineImageUpload &&
     editingDropId === null &&
     activeDrop === null &&
     (getMarkdown?.trim().length ?? 0) === 0 &&
