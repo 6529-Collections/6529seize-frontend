@@ -595,6 +595,11 @@ test("mobile artist choices stay scrollable without hiding the search field", as
   expect(
     await choices.evaluate((element) => element.getBoundingClientRect().height)
   ).toBeLessThanOrEqual(257);
+  await choices
+    .getByRole("option", { name: "Catalog artist 30", exact: true })
+    .click();
+  await expect(artist).toHaveValue("Catalog artist 30");
+  await artist.click();
   await artist.fill("Catalog artist 20");
   await expect(
     choices.getByRole("option", { name: "Catalog artist 20", exact: true })

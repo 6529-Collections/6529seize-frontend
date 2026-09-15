@@ -4,10 +4,18 @@ import { useCallback, useEffect, useState } from "react";
 
 type TypeaheadMenuPosition = "top" | "bottom";
 
-export function useTypeaheadMenuPosition(
+interface TypeaheadMenuPlacement {
+  readonly position: TypeaheadMenuPosition;
+  readonly availableHeight: number;
+}
+
+export function useTypeaheadMenuPlacement(
   anchorElement: HTMLElement | null
-): TypeaheadMenuPosition {
-  const [position, setPosition] = useState<TypeaheadMenuPosition>("bottom");
+): TypeaheadMenuPlacement {
+  const [placement, setPlacement] = useState<TypeaheadMenuPlacement>({
+    position: "bottom",
+    availableHeight: 256,
+  });
 
   const updatePosition = useCallback(() => {
     if (globalThis.window === undefined || anchorElement === null) {
@@ -23,9 +31,16 @@ export function useTypeaheadMenuPosition(
     const spaceBelow = viewportTop + viewportHeight - anchorRect.bottom;
     const nextPosition: TypeaheadMenuPosition =
       spaceBelow >= spaceAbove ? "bottom" : "top";
+    const availableHeight = Math.max(
+      0,
+      Math.floor(nextPosition === "top" ? spaceAbove : spaceBelow)
+    );
 
-    setPosition((current) =>
-      current === nextPosition ? current : nextPosition
+    setPlacement((current) =>
+      current.position === nextPosition &&
+      current.availableHeight === availableHeight
+        ? current
+        : { position: nextPosition, availableHeight }
     );
   }, [anchorElement]);
 
@@ -78,5 +93,11 @@ export function useTypeaheadMenuPosition(
     };
   }, [anchorElement, updatePosition]);
 
-  return position;
+  return placement;
+}
+
+export function useTypeaheadMenuPosition(
+  anchorElement: HTMLElement | null
+): TypeaheadMenuPosition {
+  return useTypeaheadMenuPlacement(anchorElement).position;
 }
