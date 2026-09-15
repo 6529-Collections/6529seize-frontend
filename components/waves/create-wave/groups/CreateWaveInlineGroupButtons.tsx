@@ -105,15 +105,15 @@ export function DraftChipButton({
         : "tw-border-transparent tw-bg-transparent tw-text-iron-400 desktop-hover:hover:tw-text-iron-100";
     } else {
       sizeClasses = "tw-min-h-11 tw-px-2 tw-py-2 tw-text-[13px] tw-font-medium";
-      stateClasses =
-        "tw-border-transparent tw-bg-transparent tw-text-iron-400 desktop-hover:hover:tw-text-iron-100";
+      const tabHoverClasses =
+        "desktop-hover:hover:tw-border-primary-400/60 desktop-hover:hover:tw-bg-primary-500/5 desktop-hover:hover:tw-text-primary-100";
+      stateClasses = `tw-border-transparent tw-bg-transparent tw-text-iron-400 ${tabHoverClasses}`;
       if (configured) {
-        stateClasses =
-          "tw-border-transparent tw-bg-transparent tw-text-iron-100 desktop-hover:hover:tw-text-white";
+        stateClasses = `tw-border-transparent tw-bg-transparent tw-text-iron-300 ${tabHoverClasses}`;
       }
       if (active) {
         stateClasses =
-          "tw-border-primary-400 tw-bg-transparent tw-text-primary-100 desktop-hover:hover:tw-text-white";
+          "tw-border-primary-400 tw-bg-transparent tw-text-primary-100 desktop-hover:hover:tw-bg-primary-500/5 desktop-hover:hover:tw-text-white";
       }
     }
   }
