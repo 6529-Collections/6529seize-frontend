@@ -37,6 +37,9 @@ export function useDropFilePreparation({
     count: number;
     files: UploadingFile[];
   }>({ scope: scopeKey, count: 0, files: [] });
+  if (preparation.scope !== scopeKey) {
+    setPreparation({ scope: scopeKey, count: 0, files: [] });
+  }
   const scopeRef = useRef(scopeKey);
   useLayoutEffect(() => {
     scopeRef.current = scopeKey;

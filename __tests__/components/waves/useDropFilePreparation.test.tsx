@@ -111,6 +111,9 @@ it("aborts and discards an upload when its composer scope changes", async () => 
   expect(result.current.files).toEqual([]);
   expect(result.current.isPreparingFiles).toBe(false);
   expect(rememberPreparedDropImage).not.toHaveBeenCalled();
+  rerender({ scope: "wave-one" });
+  expect(result.current.isPreparingFiles).toBe(false);
+  expect(result.current.preparingFiles).toEqual([]);
 });
 
 it("keeps a new scope's reservation when an aborted upload finishes", async () => {
