@@ -5,6 +5,34 @@
   "base_url": "https://6529.io",
   "records": [
     {
+      "id": "nft.video-posters",
+      "kind": "workflow",
+      "title": "NFT and ReMeme video preview images",
+      "aliases": ["video poster", "blank NFT video", "artwork before playback"],
+      "keywords": [
+        "video",
+        "poster",
+        "thumbnail",
+        "autoplay",
+        "preview",
+        "ReMeme"
+      ],
+      "facts": [
+        "NFT and ReMeme video players show an available artwork image before playback starts on desktop and mobile, including the homepage Latest Drop artwork.",
+        "When autoplay is blocked, the artwork poster stays behind the play button. Reduced-motion preferences still prevent automatic playback. Press Play to start the video. Pausing after playback has started keeps the current video frame.",
+        "Posters use existing artwork images. If no usable image is available or the image fails to load, the video area may remain blank until a video frame loads. This does not generate preview images for uploaded Wave or drop videos."
+      ],
+      "canonical_path": "/the-memes",
+      "link_label": "Browse The Memes",
+      "related_paths": ["/", "/rememes", "/meme-lab"],
+      "tags": ["nft", "memes", "media"],
+      "source_refs": [
+        "components/nft-image/renderers/NFTVideoRenderer.tsx",
+        "components/nft-image/RememeImage.tsx",
+        "ops/docs/media/nft/feature-media-source-fallbacks.md"
+      ]
+    },
+    {
       "id": "nft.meebits-445",
       "kind": "workflow",
       "title": "Meebits card 445 ETH price and animated background",
