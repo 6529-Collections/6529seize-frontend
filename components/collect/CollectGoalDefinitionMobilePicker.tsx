@@ -90,12 +90,9 @@ export default function CollectGoalDefinitionMobilePicker({
       >
         <div className="tw-px-4 sm:tw-px-6">
           {definitions.length === 0 ? (
-            <p
-              role="status"
-              className="tw-m-0 tw-py-4 tw-text-sm tw-text-iron-400"
-            >
+            <output className="tw-block tw-py-4 tw-text-sm tw-text-iron-400">
               {t(locale, "collect.goal.noDefinitions")}
-            </p>
+            </output>
           ) : (
             <fieldset className="tw-m-0 tw-min-w-0 tw-border-0 tw-p-0">
               <legend className="tw-sr-only">{label}</legend>

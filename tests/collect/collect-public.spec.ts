@@ -567,10 +567,9 @@ test("set planning is the default and navigation opens observed listings", async
   expect(mutations).toEqual([]);
 });
 
-test("mobile artist choices stay scrollable without hiding the search field", async ({
+test("artist choices stay scrollable without hiding the search field", async ({
   page,
 }) => {
-  test.skip(page.viewportSize()!.width >= 1024, "Mobile picker layout only");
   await mockCatalog(page);
   await page.route("**/api/collect/catalog", async (route) => {
     await route.fulfill({
