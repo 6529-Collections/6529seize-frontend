@@ -89,7 +89,8 @@ Profile access stays in the app drawer/account surfaces.
 - When an update is available, a small rocket sits in a curved attachment above
   Home. The attachment is part of the dock and follows its movement, hiding,
   and phone scroll scale. The attachment uses the dock's translucent black
-  background and backdrop blur. The icon uses its own refresh arrow without an
+  background and backdrop blur, with one continuous outline around the dock and
+  rocket attachment. The icon uses its own refresh arrow without an
   extra circular border. The rocket updates the app; Home keeps its normal
   navigation action. Desktop web retains the full update prompt; phone browsers
   without the native dock show a standalone rocket in the lower-right corner.

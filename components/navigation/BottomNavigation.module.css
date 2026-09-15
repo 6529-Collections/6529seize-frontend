@@ -1,41 +1,9 @@
-/* Keep the outline separate from the glass and controls so only its join can be masked. */
-.dock::after {
-  content: "";
-  position: absolute;
-  inset: -1px;
-  border: 1px solid rgb(255 255 255 / 13%);
-  border-radius: inherit;
-  box-shadow:
-    0 0 0 1px rgb(255 255 255 / 4.5%),
-    inset 0 1px 0 rgb(255 255 255 / 10.5%),
-    inset 0 -1px 0 rgb(255 255 255 / 6%);
-  pointer-events: none;
-  transition: mask-size 300ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .dock::after {
-    transition: none;
-  }
-}
-
-.dock:has([data-version-update-dock])::after {
-  /* Exclude only the small top-center join; preserve the rest of the dock edge. */
-  -webkit-mask-image: linear-gradient(#000, #000), linear-gradient(#000, #000);
-  mask-image: linear-gradient(#000, #000), linear-gradient(#000, #000);
-  -webkit-mask-size: 100% 100%, 104px 4px;
-  mask-size: 100% 100%, 104px 4px;
-  -webkit-mask-position: center, top center;
-  mask-position: center, top center;
-  -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat;
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-}
-
-@media (max-width: 639px) {
-  .dock:has([data-version-update-dock="compact"])::after {
-    -webkit-mask-size: 100% 100%, 91.52px 4px;
-    mask-size: 100% 100%, 91.52px 4px;
-  }
+/* Only replace the rectangular paint once the combined update surface is ready.
+   All sizing, spacing, icon behavior, and the normal dock stay defined by main. */
+.dock:has(> [data-dock-update-surface]) {
+  background: transparent;
+  border-color: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: none;
 }
