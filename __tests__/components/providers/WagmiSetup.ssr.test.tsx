@@ -228,9 +228,11 @@ describe("WagmiSetup server rendering", () => {
     expect(first._internal.mipd).toBeUndefined();
     expect(first._internal.ssr).toBe(true);
     for (const chain of [mainnet, sepolia]) {
-      const transportUrl = new URL(
-        first.getClient({ chainId: chain.id }).transport.url
-      );
+      const rpcUrl = first.getClient({ chainId: chain.id }).transport.url;
+      if (typeof rpcUrl !== "string") {
+        throw new Error("Expected an explicit HTTP transport URL");
+      }
+      const transportUrl = new URL(rpcUrl);
       expect(transportUrl.origin).toBe("https://rpc.walletconnect.org");
       expect(transportUrl.searchParams.get("chainId")).toBe(
         `eip155:${chain.id}`
