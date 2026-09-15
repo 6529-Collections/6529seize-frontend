@@ -27,6 +27,23 @@ Each record includes immutable GitHub `source_refs` for the relevant controls an
 worker behavior, plus a user-facing guide in `ops/docs/desktop/`.
 These references are provenance; the bot consumes facts, not source files.
 
+## Verified runtime values
+
+Rechecked on 2026-09-15 against Desktop main at
+`09fac1226109ad3eebdc61619076fdc2c83a9515`. The following definitions are
+unchanged from the pinned evidence baseline:
+
+| Corpus fact | Desktop source definition |
+| --- | --- |
+| TDH runs daily at 00:15 UTC | [`scheduler.ts`](https://github.com/6529-Collections/6529-core/blob/09fac1226109ad3eebdc61619076fdc2c83a9515/electron-src/scheduled-tasks/scheduler.ts) uses `15 0 * * *` for TDH; [`scheduled-worker.ts`](https://github.com/6529-Collections/6529-core/blob/09fac1226109ad3eebdc61619076fdc2c83a9515/electron-src/scheduled-tasks/scheduled-worker.ts) sets `Etc/UTC`. |
+| Earliest transaction block is 13360860 | [`shared/types.ts`](https://github.com/6529-Collections/6529-core/blob/09fac1226109ad3eebdc61619076fdc2c83a9515/shared/types.ts) defines `TRANSACTIONS_START_BLOCK = 13360860`. |
+
+The frontend validator checks corpus structure, routes, and publication parity;
+it does not fetch another repository or detect future Desktop behavior changes.
+Pinned references preserve the evidence used to author an answer, rather than
+proving it remains current for every future Desktop release. The maintenance
+contract below remains required whenever those native definitions change.
+
 ## Maintenance contract
 
 When Core changes RPC setup, worker schedules/actions, TDH recovery, wallet
