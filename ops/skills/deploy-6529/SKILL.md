@@ -153,10 +153,14 @@ template with actual release metadata:
   `depends_on[]` part IDs for real prerequisites.
 - Each PR's `number`, source `branch`, and `commit`: its verified exact
   40-character lowercase head SHA, not a short SHA or destination branch name.
-- Each backend part's `deploy_units[]` and `deploy_dependencies[]`: the selected
-  backend units and applicable release-specific ordering edges of the form
+- Each ordinary backend service part's `deploy_units[]` and
+  `deploy_dependencies[]`: the selected backend units and applicable
+  release-specific ordering edges of the form
   `{ "before": "unit", "after": "unit" }`, consistent with the service catalog.
-  Frontend parts have no backend deployment fields.
+  Keep `operational_deployments` empty for this service-deployment path.
+  Version `0.0.5` can record the backend monitoring package separately, but
+  this skill does not provide a monitoring deployment workflow. Frontend parts
+  have no backend deployment fields.
 
 Remove absent template parts and references to them; for a frontend-only release,
 remove the backend part and set frontend `depends_on` to `[]`. Replace all sample
@@ -182,7 +186,7 @@ waiting, and result handling. It saves run records under
 Do not duplicate submission, choose or dispatch its workflow, or poll it
 separately through direct `gh` commands.
 
-Version `0.0.4` runs synchronously in the foreground and waits for the central
+Version `0.0.5` runs synchronously in the foreground and waits for the central
 GitHub workflow. Queueing and execution can add waiting time before deployment.
 Re-verify these semantics against the installed CLI when changing its version.
 Do not retry, background, detach, or wrap it in an invented shell timeout. If the
