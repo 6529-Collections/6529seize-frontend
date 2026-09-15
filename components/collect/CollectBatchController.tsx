@@ -18,6 +18,8 @@ import {
 } from "@/services/api/market-batch-api";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
+import { assertCollectBatchAvailable } from "./assertCollectBatchAvailable";
 import CollectBatchReviewForm from "./CollectBatchReviewForm";
 import CollectBatchQuoteReview from "./CollectBatchQuoteReview";
 import CollectTransactionRecovery from "./CollectTransactionRecovery";
@@ -49,6 +51,7 @@ import {
 } from "./market-batch-resume";
 import { withMarketOperationLock } from "./market-operation-lock";
 import { marketPreparationError } from "./market-preparation-errors";
+import { marketReceiptRefreshInterval } from "./market-receipt-refresh";
 
 interface Props {
   readonly items: readonly CollectSelectedListing[];
@@ -260,7 +263,10 @@ function ScopedBatchController({
     ),
     refetchInterval: (query) => {
       const value = query.state.data ?? activeOperation;
-      return value && batchNeedsPolling(value) ? 5000 : false;
+      if (!value) return false;
+      return batchNeedsPolling(value)
+        ? 5000
+        : marketReceiptRefreshInterval(value);
     },
   });
   const displayed = discarded ? null : (polling.data ?? activeOperation);
@@ -345,6 +351,7 @@ function ScopedBatchController({
             receive(unresolved.operation);
             return;
           }
+          assertCollectBatchAvailable(request);
           const fingerprint = JSON.stringify(request);
           if (priorPrepare.current?.fingerprint !== fingerprint)
             priorPrepare.current = {
@@ -354,6 +361,7 @@ function ScopedBatchController({
             };
           const attempt = priorPrepare.current;
           const result = await prepareMarketBatch(attempt.request, attempt.key);
+          assertCollectBatchAvailable(request, result.id);
           validateMarketBatchOperation(
             result,
             request,
@@ -382,11 +390,13 @@ function ScopedBatchController({
     : false;
   const knownHash =
     displayed &&
-    knownMarketTransactionHash(
-      displayed,
-      batchSendAttempt(displayed),
-      readMarketBatch(displayed.profile_id, displayed.id)
-    );
+    (execution.knownTransaction?.operationId === displayed.id
+      ? execution.knownTransaction.hash
+      : knownMarketTransactionHash(
+          displayed,
+          batchSendAttempt(displayed),
+          readMarketBatch(displayed.profile_id, displayed.id)
+        ));
   const recoveryNeeded =
     unresolved && !execution.busy && !execution.stage && !knownHash;
   let unresolvedReason: Parameters<typeof t>[1] =
@@ -436,6 +446,16 @@ function ScopedBatchController({
       : undefined;
   const content = (
     <div className="tw-space-y-5">
+      {[error, execution.message].includes(
+        t(locale, "collect.trade.purchasePending")
+      ) && (
+        <Link
+          href="/collect/orders"
+          className="tw-rounded-sm tw-text-sm tw-text-primary-300 tw-underline tw-underline-offset-4 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+        >
+          {t(locale, "collect.activity.viewOrders")}
+        </Link>
+      )}
       {(reason === "collect.trade.connectSigner" ||
         reason === "collect.trade.reconnect") && (
         <Button variant="secondary" onClick={() => connection.seizeConnect()}>
@@ -482,6 +502,7 @@ function ScopedBatchController({
           <CollectBatchQuoteReview
             canEdit={!initialOperation}
             operation={displayed}
+            {...(knownHash ? { knownTransactionHash: knownHash } : {})}
             items={items}
             profile={
               displayed.profile_id === auth.connectedProfile?.id
@@ -527,6 +548,7 @@ function ScopedBatchController({
                 )
               )
                 await execution.confirm(displayed, expected, () => {
+                  assertCollectBatchAvailable(expected, displayed.id);
                   recipientUpdate.assertIdle();
                   if (
                     recipientEditing.current?.operationId === displayed.id &&
@@ -574,7 +596,9 @@ function ScopedBatchController({
   ) : (
     <CollectCheckoutScreen
       open={open}
-      busy={preparing || execution.busy || recipientUpdate.pending}
+      busy={
+        preparing || recipientUpdate.pending || (execution.busy && !knownHash)
+      }
       onClose={onClose}
     >
       {content}

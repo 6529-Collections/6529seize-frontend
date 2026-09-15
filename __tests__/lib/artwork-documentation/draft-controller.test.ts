@@ -243,4 +243,106 @@ describe("documentation draft controller", () => {
       controller.dispose();
     }
   );
+
+  it.each([422, 403, 503])(
+    "reads saved state before recovering a no-edit failed mutation (%s)",
+    async (status) => {
+      const context = documentationFixture();
+      const recorded = {
+        ...context,
+        latest_revision_id: "recorded",
+        confirmation_status: "current",
+      } as ApiArtworkDocumentationContext;
+      const read = jest.fn().mockResolvedValue(recorded);
+      const action = jest.fn().mockRejectedValue({ status });
+      const controller = new DocumentationDraftController(
+        context,
+        { read, save: jest.fn() },
+        jest.fn()
+      );
+      expect(await controller.mutate(action)).toBe(false);
+      expect(await controller.retry()).toBe(true);
+      expect(read).toHaveBeenCalledWith(context.id, expect.any(AbortSignal));
+      expect(controller.snapshot().context).toBe(recorded);
+      expect(controller.snapshot().state).toBe("clean");
+      expect(action).toHaveBeenCalledTimes(1);
+      controller.dispose();
+    }
+  );
+
+  it("keeps a failed no-edit recovery blocked when its readback also fails", async () => {
+    const context = documentationFixture();
+    const read = jest.fn().mockRejectedValue({ status: 503 });
+    const action = jest.fn().mockRejectedValue({ status: 422 });
+    const controller = new DocumentationDraftController(
+      context,
+      { read, save: jest.fn() },
+      jest.fn()
+    );
+    await controller.mutate(action);
+    expect(await controller.retry()).toBe(false);
+    expect(controller.snapshot().state).toBe("offline");
+    expect(controller.snapshot().context).toBe(context);
+    expect(action).toHaveBeenCalledTimes(1);
+    controller.dispose();
+  });
+
+  it("serializes recovery readback and saves typing received during it against the fresh version", async () => {
+    const context = documentationFixture();
+    const pending = deferred<ApiArtworkDocumentationContext>();
+    const read = jest.fn().mockReturnValue(pending.promise);
+    const save = jest.fn().mockResolvedValue({ ...context, draft_version: 3 });
+    const changed = jest.fn();
+    const controller = new DocumentationDraftController(
+      context,
+      { read, save },
+      changed
+    );
+    await controller.mutate(async () => {
+      throw { status: 503 };
+    });
+    changed.mockClear();
+    const recovery = controller.retry();
+    expect(controller.retry()).toBe(recovery);
+    expect(read).toHaveBeenCalledTimes(1);
+    expect(
+      changed.mock.calls.some(([snapshot]) => snapshot.state === "clean")
+    ).toBe(false);
+    controller.edit("artwork", titleOperation("Written while checking"));
+    expect(save).not.toHaveBeenCalled();
+    pending.resolve({ ...context, draft_version: 2 });
+    expect(await recovery).toBe(true);
+    expect(save).toHaveBeenCalledWith(
+      expect.objectContaining({ draft_version: 2 }),
+      "artwork",
+      [titleOperation("Written while checking")],
+      expect.any(String),
+      expect.any(AbortSignal)
+    );
+    expect(controller.snapshot().dirty).toBe(false);
+    expect(controller.snapshot().context.draft_version).toBe(3);
+    controller.dispose();
+  });
+
+  it("ignores a recovery readback after its actor's controller is disposed", async () => {
+    const context = documentationFixture();
+    const pending = deferred<ApiArtworkDocumentationContext>();
+    const read = jest.fn().mockReturnValue(pending.promise);
+    const changed = jest.fn();
+    const controller = new DocumentationDraftController(
+      context,
+      { read, save: jest.fn() },
+      changed
+    );
+    await controller.mutate(async () => {
+      throw { status: 422 };
+    });
+    const recovery = controller.retry();
+    controller.dispose();
+    const calls = changed.mock.calls.length;
+    pending.resolve({ ...context, draft_version: 99 });
+    expect(await recovery).toBe(false);
+    expect(changed).toHaveBeenCalledTimes(calls);
+    expect(controller.snapshot().context).toBe(context);
+  });
 });

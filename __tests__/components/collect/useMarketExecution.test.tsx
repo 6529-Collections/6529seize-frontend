@@ -867,6 +867,7 @@ it("keeps the wallet phase while its promise is pending and retries only known-h
   expect(result.current.knownTransaction).toEqual({
     operationId: buyOperation.id,
     hash,
+    purpose: "TRANSACTION",
   });
 });
 
@@ -880,6 +881,7 @@ it("keeps a known hash after acknowledgement remains unavailable", async () => {
   expect(result.current.knownTransaction).toEqual({
     operationId: buyOperation.id,
     hash,
+    purpose: "TRANSACTION",
   });
   expect(persisted).toHaveProperty("transactionHash", hash);
   expect(result.current.message).toMatch(/hash.*saved/i);
@@ -1269,6 +1271,7 @@ it("retains the known hash and recovery guidance after a submitted identity mism
   expect(result.current.knownTransaction).toEqual({
     operationId: buyOperation.id,
     hash,
+    purpose: "TRANSACTION",
   });
   expect(mockWallet.sendTransaction).toHaveBeenCalledTimes(1);
   expect(persisted).toEqual(expect.objectContaining({ transactionHash: hash }));
@@ -1412,6 +1415,7 @@ it("does not use a completed approval hash to hide a later unknown fulfillment",
   expect(result.current.knownTransaction).toEqual({
     operationId: buyOperation.id,
     hash,
+    purpose: "APPROVAL",
   });
 
   // The settled approval has been retired and the fresh review can fulfill.
@@ -1630,6 +1634,7 @@ it("reconciles a saved exact hash before the active-send fence and never reopens
   expect(result.current.knownTransaction).toEqual({
     operationId: active.id,
     hash,
+    purpose: "TRANSACTION",
   });
 });
 

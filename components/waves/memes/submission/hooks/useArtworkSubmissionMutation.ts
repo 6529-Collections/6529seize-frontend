@@ -6,6 +6,8 @@ import type { ApiCreateDropRequest } from "@/generated/models/ApiCreateDropReque
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropMedia } from "@/generated/models/ApiDropMedia";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { useDropSignature } from "@/hooks/drops/useDropSignature";
 import { commonApiPost } from "@/services/api/common-api";
 import { getAuthStateFingerprint } from "@/services/auth/auth-token-fingerprint";
@@ -17,11 +19,18 @@ import type { TraitsData } from "../types/TraitsData";
 import type { SubmissionPhase } from "../ui/SubmissionProgress";
 import { getSubmissionMetadataLengthValidation } from "../utils/submissionMetadata";
 import { transformToApiRequest } from "../utils/artworkSubmissionRequest";
+import type { ProposalCardLayout } from "@/lib/proposal-card/document";
+import { prepareProposalCard } from "../utils/prepareProposalCard";
+import {
+  PROPOSAL_FRAME_METADATA_KEY,
+  type ProposalFrameMetadata,
+} from "@/lib/proposal-card/metadata";
 
 /**
  * Interface for the artwork submission data
  */
 interface ArtworkSubmissionData {
+  proposalFrame?: ProposalCardLayout | null | undefined;
   imageFile?: File | undefined;
   existingMedia?:
     | {
@@ -87,6 +96,7 @@ const isSubmissionWalletCurrent = ({
  * Hook for submitting artwork with enhanced UX
  */
 export function useArtworkSubmissionMutation() {
+  const locale = useBrowserLocale();
   const { setToast, requestAuth } = useAuth();
   const { signDrop, isLoading: isSigningDrop } = useDropSignature();
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -330,6 +340,49 @@ export function useArtworkSubmissionMutation() {
         return null;
       }
 
+      let operationalData = data.operationalData;
+      let proposalFrameMetadata: ProposalFrameMetadata | null = null;
+      if (data.proposalFrame) {
+        updatePhase("processing", callbacks);
+        const framed = await prepareProposalCard({
+          media,
+          layout: data.proposalFrame,
+          title: data.traits.title,
+          locale,
+          operationalData,
+          uploadThumbnail: async (file) => {
+            const uploaded = await uploadMutation.mutateAsync({
+              file,
+              callbacks,
+            });
+            updatePhase("processing", callbacks);
+            return uploaded;
+          },
+          assertIdentity: () => {
+            if (
+              !isSubmissionWalletCurrent({
+                signerAddress,
+                expectedAuthStateFingerprint:
+                  options.expectedAuthStateFingerprint,
+              })
+            ) {
+              throw new Error(ACTIVE_WALLET_CHANGED_ERROR);
+            }
+          },
+        }).catch((error: unknown) => {
+          setToast({
+            type: "error",
+            message:
+              getToastErrorDetails(error) ??
+              t(locale, "memes.proposalFrame.publishError"),
+          });
+          throw error;
+        });
+        media = framed.media;
+        operationalData = framed.operationalData;
+        proposalFrameMetadata = framed.metadata;
+      }
+
       if (!isSubmissionSignerCurrent(signerAddress)) {
         setToast({ message: options.identityChangedMessage, type: "error" });
         throw new Error(ACTIVE_WALLET_CHANGED_ERROR);
@@ -343,12 +396,19 @@ export function useArtworkSubmissionMutation() {
       const transformedRequest = transformToApiRequest({
         waveId: data.waveId,
         traits: data.traits,
-        operationalData: data.operationalData,
+        operationalData,
         isAdditionalActionPromised: data.isAdditionalActionPromised,
         media,
         signerAddress,
         isSafeSignature,
       });
+
+      if (proposalFrameMetadata) {
+        transformedRequest.metadata.push({
+          data_key: PROPOSAL_FRAME_METADATA_KEY,
+          data_value: JSON.stringify(proposalFrameMetadata),
+        });
+      }
 
       // Step 3: Sign the drop
       updatePhase("signing", callbacks);

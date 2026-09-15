@@ -20,10 +20,12 @@ import {
 } from "@/lib/artwork-documentation/capabilities";
 import {
   parseSection,
+  MODULE_IDS,
   type DocumentationSection,
 } from "@/lib/artwork-documentation/registry";
 import {
   documentationChapterKey,
+  documentationFieldSection,
   documentationSections,
   isMuseumRecord,
 } from "@/lib/artwork-documentation/catalogue";
@@ -152,9 +154,9 @@ export function ArtworkDocumentationRecordView({
   );
   const [reading, setReading] = useState(false);
   const counts = Object.values(context.modules).reduce(
-    (total, module) => ({
-      required: total.required + module.completeness.required,
-      addressed: total.addressed + module.completeness.addressed,
+    (total, fieldModule) => ({
+      required: total.required + fieldModule.completeness.required,
+      addressed: total.addressed + fieldModule.completeness.addressed,
     }),
     { required: 0, addressed: 0 }
   );
@@ -170,6 +172,35 @@ export function ArtworkDocumentationRecordView({
       globalThis.history.replaceState(null, "", url);
     }
     focusHeading("documentation-chapter-title");
+  };
+  const navigateField = (moduleId: string, fieldId: string) => {
+    const fieldModule = MODULE_IDS.find((id) => id === moduleId);
+    if (!fieldModule) return;
+    // The museum editor groups these artwork fields with the received files.
+    const isMuseumArtworkFile =
+      museum &&
+      fieldModule === "artwork" &&
+      ["canonical_asset_id", "declared_dimensions"].includes(fieldId);
+    navigateSection(
+      isMuseumArtworkFile
+        ? "materials"
+        : documentationFieldSection(context.profile, fieldModule, fieldId)
+    );
+    requestAnimationFrame(() => {
+      const heading = document.getElementById(
+        `documentation-field-heading-${fieldModule}-${fieldId}`
+      );
+      if (!heading) return;
+      for (
+        let ancestor = heading.parentElement;
+        ancestor;
+        ancestor = ancestor.parentElement
+      ) {
+        if (ancestor instanceof HTMLDetailsElement) ancestor.open = true;
+      }
+      heading.focus();
+      heading.scrollIntoView({ block: "center" });
+    });
   };
   useEffect(() => {
     const handler = (event: MouseEvent) => {
@@ -342,12 +373,22 @@ export function ArtworkDocumentationRecordView({
                 draft={draft}
                 section={section}
                 onNavigateSection={navigateSection}
+                onNavigateField={navigateField}
               />
             ) : (
               <DocumentationReadingChapter
                 draft={draft}
                 section={section}
                 onNavigateSection={navigateSection}
+                onNavigateField={navigateField}
+              />
+            )}
+            {canWrite && section !== "review" && draft.state !== "clean" && (
+              <DocumentationSaveStatus
+                snapshot={draft}
+                controller={controller}
+                onNavigateSection={navigateSection}
+                onNavigateField={navigateField}
               />
             )}
             <div className="tw-flex tw-flex-wrap tw-justify-between tw-gap-3 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-6">

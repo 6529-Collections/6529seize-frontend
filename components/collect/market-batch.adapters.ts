@@ -14,8 +14,9 @@ export function marketBatchStage(
     case "REVIEW":
       return "review";
     case "SUBMITTED":
-    case "MINED":
       return "submitted";
+    case "MINED":
+      return "included";
     case "CONFIRMED":
       return "confirmed";
     case "FAILED":
@@ -30,6 +31,13 @@ export function marketBatchOperationView(
   operation: ApiMarketBatchOperation,
   locale: SupportedLocale
 ): CollectOrderView {
+  let amountLabel = marketAmount(operation.total_wei, operation.currency);
+  if (operation.state.toString() === "CONFIRMED") {
+    const payment = operation.receipt?.payment;
+    amountLabel = payment
+      ? marketAmount(payment.total_wei, payment.currency)
+      : t(locale, "collect.receipt.notRecorded");
+  }
   return {
     id: operation.id,
     title: t(locale, "collect.selection.title"),
@@ -37,12 +45,12 @@ export function marketBatchOperationView(
       count: new Set(operation.items.map((item) => item.asset_key)).size,
     }),
     action: "buy",
-    statusLabel: t(
-      locale,
-      `collect.trade.stage.${marketBatchStage(operation)}`
-    ),
+    statusLabel:
+      operation.state.toString() === "CONFIRMED"
+        ? t(locale, "collect.receipt.title.buy")
+        : t(locale, `collect.trade.stage.${marketBatchStage(operation)}`),
     detail: t(locale, "collect.batchReview.atomic"),
-    amountLabel: marketAmount(operation.total_wei, operation.currency),
+    amountLabel,
     makerLabel: operation.wallet,
     updatedLabel: formatDate(locale, operation.updated_at, {
       dateStyle: "medium",

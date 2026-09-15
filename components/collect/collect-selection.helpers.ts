@@ -12,6 +12,8 @@ export interface CollectSelectedListing {
   readonly asset: ApiCollectAsset;
   readonly order: ApiMarketTradeOrder;
   readonly quantity: string;
+  /** Local selection time, never included in signed or prepared order terms. */
+  readonly selectedAt?: number;
 }
 
 /** A selection is an exact listing snapshot, never an instruction to substitute. */
