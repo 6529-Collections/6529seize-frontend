@@ -123,11 +123,18 @@ async function mountComposer() {
   return editor;
 }
 
-async function typeText(editor: LexicalEditor, text: string) {
+async function typeText(
+  editor: LexicalEditor,
+  text: string,
+  modifiers: KeyboardEventInit = {}
+) {
   for (const character of text) {
     // Flush parent rerenders and plugin effects between actual text updates.
     await act(async () => {
-      fireEvent.keyDown(screen.getByRole("textbox"), { key: character });
+      fireEvent.keyDown(screen.getByRole("textbox"), {
+        ...modifiers,
+        key: character,
+      });
       editor.update(
         () => {
           const selection = $getSelection();
@@ -191,6 +198,71 @@ it.each(["~test~", "~~test~~", "**test**", "*test*", "`test`", "==test=="])(
     expect(input.textContent).toBe(":unknown: " + markdown.slice(0, -1));
   }
 );
+
+it("keeps Markdown reversal after tapping and releasing Control without editing", async () => {
+  const editor = await mountComposer();
+  await typeText(editor, "~test~");
+  const input = screen.getByRole("textbox");
+  await act(async () => {
+    fireEvent.keyDown(input, { key: "Control", keyCode: 17, ctrlKey: true });
+    fireEvent.keyUp(input, { key: "Control", keyCode: 17 });
+    fireEvent.keyDown(input, { key: "Backspace", keyCode: 8 });
+  });
+  expect(input.textContent).toBe("~test");
+  expect(input.querySelector(".editor-text-strikethrough")).toBeNull();
+});
+
+it("invalidates Markdown reversal through keyboard undo and redo", async () => {
+  const editor = await mountComposer();
+  await typeText(editor, "~test~");
+  const input = screen.getByRole("textbox");
+  await act(async () => {
+    fireEvent.keyDown(input, { key: "Control", keyCode: 17, ctrlKey: true });
+    fireEvent.keyDown(input, { key: "z", keyCode: 90, ctrlKey: true });
+    fireEvent.keyUp(input, { key: "Control", keyCode: 17 });
+  });
+  expect(input.querySelector(".editor-text-strikethrough")).toBeNull();
+  await act(async () => {
+    fireEvent.keyDown(input, { key: "Control", keyCode: 17, ctrlKey: true });
+    fireEvent.keyDown(input, { key: "y", keyCode: 89, ctrlKey: true });
+    fireEvent.keyUp(input, { key: "Control", keyCode: 17 });
+  });
+  expect(input.textContent).toBe("test");
+  expect(input.querySelector(".editor-text-strikethrough")).toHaveTextContent(
+    "test"
+  );
+  await normalBackspace(editor);
+  expect(input.textContent).toBe("tes");
+  expect(input.querySelector(".editor-text-strikethrough")).toHaveTextContent(
+    "tes"
+  );
+});
+
+it("preserves reversal across AltGraph suffix typing with the full composer", async () => {
+  const editor = await mountComposer();
+  await typeText(editor, "~test~");
+  const input = screen.getByRole("textbox");
+  const modifiers = { ctrlKey: true, altKey: true, modifierAltGraph: true };
+  await act(async () => {
+    fireEvent.keyDown(input, { key: "Control", keyCode: 17, ctrlKey: true });
+    fireEvent.keyDown(input, { key: "AltGraph", ...modifiers });
+  });
+  await typeText(editor, "@", modifiers);
+  await act(async () => {
+    fireEvent.keyUp(input, { key: "AltGraph" });
+    fireEvent.keyUp(input, { key: "Control", keyCode: 17 });
+  });
+  expect(input.textContent).toBe("test@");
+  expect(input.querySelector(".editor-text-strikethrough")).toHaveTextContent(
+    "test"
+  );
+  await normalBackspace(editor);
+  await act(async () => {
+    fireEvent.keyDown(input, { key: "Backspace", keyCode: 8 });
+  });
+  expect(input.textContent).toBe("~test");
+  expect(input.querySelector(".editor-text-strikethrough")).toBeNull();
+});
 
 it("bounds format normalization and allows plain typing after deleting a word", async () => {
   const editor = await mountComposer();
