@@ -18,12 +18,14 @@ export default function GroupMembersPreviewTrigger({
   target,
   disabled = false,
   appearance = "details",
+  quiet = false,
   criteriaStatus,
   onOpen,
 }: {
   readonly target: GroupMembersPreviewTarget;
   readonly disabled?: boolean | undefined;
   readonly appearance?: "details" | "summary" | undefined;
+  readonly quiet?: boolean;
   readonly criteriaStatus?: "loading" | "unavailable" | undefined;
   readonly onOpen: () => void;
 }) {
@@ -127,7 +129,7 @@ export default function GroupMembersPreviewTrigger({
           type="button"
           disabled={disabled}
           onClick={onOpen}
-          className="desktop-hover:hover:tw-text-primary-200 tw-rounded-md tw-border-0 tw-bg-transparent tw-p-0 tw-text-xs tw-font-semibold tw-text-primary-300 tw-underline-offset-2 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:hover:tw-underline"
+          className={`desktop-hover:hover:tw-text-primary-200 tw-rounded-md tw-border-0 tw-bg-transparent tw-p-0 tw-text-xs tw-font-semibold tw-text-primary-300 tw-underline-offset-2 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:hover:tw-underline ${quiet ? "tw-inline-flex tw-min-h-11 tw-items-center" : ""}`}
         >
           {t(locale, "waves.create.groups.members.view")}
         </button>

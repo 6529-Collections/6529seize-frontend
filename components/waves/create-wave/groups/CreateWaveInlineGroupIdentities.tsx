@@ -26,6 +26,7 @@ import CreateWaveInlineGroupWalletSources from "./CreateWaveInlineGroupWalletSou
 type InlineIdentityMode = "included" | "excluded";
 
 interface CreateWaveInlineGroupIdentitiesProps {
+  readonly quiet?: boolean;
   readonly includedIdentities: readonly CommunityMemberMinimal[];
   readonly excludedIdentities: readonly CommunityMemberMinimal[];
   readonly includedWalletSources: InlineGroupWalletSources;
@@ -107,6 +108,7 @@ export default function CreateWaveInlineGroupIdentities(
     onIncludedIdentitySelect,
     onIncludedIdentityRemove,
     resultsLayout = "popover",
+    quiet = false,
   } = props;
   const { connectedProfile } = useAuth();
   const locale = useBrowserLocale();
@@ -174,11 +176,15 @@ export default function CreateWaveInlineGroupIdentities(
   };
 
   return (
-    <div className="tw-space-y-5">
+    <div className={quiet ? "tw-space-y-4" : "tw-space-y-5"}>
       <div
         role="group"
         aria-label={t(locale, "waves.create.groups.inlineIdentities.modeLabel")}
-        className="tw-flex tw-flex-wrap tw-gap-1.5"
+        className={
+          quiet
+            ? "tw-inline-flex tw-w-fit tw-items-center tw-rounded-lg tw-bg-iron-900 tw-p-1 tw-ring-1 tw-ring-inset tw-ring-iron-800"
+            : "tw-flex tw-flex-wrap tw-gap-1.5"
+        }
       >
         <DraftChipButton
           label={t(
@@ -186,6 +192,8 @@ export default function CreateWaveInlineGroupIdentities(
             "waves.create.groups.inlineIdentities.included.label"
           )}
           active={isIncludedMode}
+          quiet={quiet}
+          quietStyle="segment"
           isToggle={true}
           onClick={() => setMode("included")}
         />
@@ -195,12 +203,14 @@ export default function CreateWaveInlineGroupIdentities(
             "waves.create.groups.inlineIdentities.excluded.label"
           )}
           active={!isIncludedMode}
+          quiet={quiet}
+          quietStyle="segment"
           isToggle={true}
           onClick={() => setMode("excluded")}
         />
       </div>
 
-      <div className="tw-space-y-4">
+      <div className={quiet ? "tw-space-y-3" : "tw-space-y-4"}>
         <GroupCreateIdentitiesSearch
           key={mode}
           selectedWallets={selectedWallets}
@@ -210,6 +220,7 @@ export default function CreateWaveInlineGroupIdentities(
           hideLabel={true}
           inputClassName="tw-border-white/10 tw-bg-iron-950 tw-ring-white/10 desktop-hover:hover:tw-ring-white/15 desktop-hover:hover:focus:tw-ring-primary-400 focus:tw-border-primary-400 focus:tw-bg-iron-950 focus:tw-ring-primary-400"
           iconClassName="tw-text-iron-500"
+          appearance={quiet ? "modal" : "default"}
           resultsLayout={resultsLayout}
           sort="level"
         />
@@ -219,7 +230,7 @@ export default function CreateWaveInlineGroupIdentities(
               <GroupCreateIdentitySelectedItems
                 selectedIdentities={[...activeIdentities]}
                 onRemove={onRemove}
-                variant="inline"
+                variant={quiet ? "inlineQuiet" : "inline"}
               />
             )}
             {selectedWallets.length === 0 && (
@@ -274,13 +285,16 @@ export default function CreateWaveInlineGroupIdentities(
         direction={mode}
         sources={activeWalletSources}
         onChange={onWalletSourcesChange}
+        quiet={quiet}
       />
       <div
         role="status"
-        className={`tw-rounded-lg tw-border tw-border-solid tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-leading-relaxed ${
+        className={`tw-border-solid tw-py-2 tw-text-xs tw-font-medium tw-leading-relaxed ${quiet ? "tw-border-x-0 tw-border-b-0 tw-border-t tw-border-iron-800" : "tw-rounded-lg tw-border tw-px-3"} ${
           isOverIdentityLimit
             ? "tw-border-error/30 tw-bg-error/10 tw-text-error"
-            : "tw-border-white/5 tw-bg-iron-950/60 tw-text-iron-300"
+            : quiet
+              ? "tw-text-iron-400"
+              : "tw-border-white/5 tw-bg-iron-950/60 tw-text-iron-300"
         }`}
       >
         <p className="tw-m-0">

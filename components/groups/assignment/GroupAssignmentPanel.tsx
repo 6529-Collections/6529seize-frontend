@@ -30,6 +30,7 @@ import type { GroupMembersPreviewTarget } from "@/services/api/group-members-api
 type GroupAssignmentPanelStartMode = "actions" | "existing" | "criteria";
 
 type GroupAssignmentPanelProps = CreateWaveGroupInlinePanelProps & {
+  readonly presentation?: "default" | "quiet";
   readonly startMode?: GroupAssignmentPanelStartMode;
   readonly showChooseGroup?: boolean;
   readonly showPrivacyControl?: boolean;
@@ -119,7 +120,9 @@ function SharedGroupAssignmentPanel({
     onMakeWavePublic,
     showMatchWaveAccess = false,
     onMatchWaveAccess,
+    presentation = "default",
   } = panelProps;
+  const quiet = presentation === "quiet";
   const {
     addExcludedIdentity,
     addIdentity,
@@ -157,13 +160,18 @@ function SharedGroupAssignmentPanel({
     <>
       <div
         ref={panelRef}
-        className="tw-relative tw-flex tw-flex-col tw-gap-4 tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900/60 tw-p-4 tw-shadow-none tw-transition-all tw-duration-300"
+        className={
+          quiet
+            ? "tw-relative tw-flex tw-min-w-0 tw-flex-col tw-gap-4"
+            : "tw-relative tw-flex tw-flex-col tw-gap-4 tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900/60 tw-p-4 tw-shadow-none tw-transition-all tw-duration-300"
+        }
       >
         <div className="tw-relative tw-flex tw-flex-col tw-gap-4">
           <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-4 lg:tw-flex-row lg:tw-items-start lg:tw-justify-between">
             <CreateWaveInlineGroupHeader
               currentGroupLabel={currentGroupLabel}
               showCurrentGroupTitle={isCriteriaReplacementActive}
+              quiet={quiet}
               unsavedGroupDescription={
                 showChooseGroup ? unsavedGroupDescription : null
               }
@@ -172,6 +180,7 @@ function SharedGroupAssignmentPanel({
             />
             <CreateWaveInlineGroupActions
               disabled={disabled}
+              quiet={quiet}
               criteriaDisabled={!canReplaceCriteria}
               criteriaActive={isCriteriaReplacementActive}
               searchActive={isSearchPanel}
@@ -194,15 +203,18 @@ function SharedGroupAssignmentPanel({
             <CreateWaveInlineGroupExpandedPanel
               onCancel={returnToCriteria}
               showCancel={!isWaveAccessEditor}
+              quiet={quiet}
             >
               <CreateWaveInlineGroupIdentityEditorPanel
                 draft={displayedBuilder.draft}
                 disabled={disabled}
+                quiet={quiet}
                 onIdentityToggle={returnToCriteria}
                 onRuleToggle={toggleRule}
               >
                 <CreateWaveInlineGroupIdentities
                   includedIdentities={displayedBuilder.identities}
+                  quiet={quiet}
                   excludedIdentities={displayedBuilder.excludedIdentities}
                   includedWalletSources={displayedBuilder.includedWalletSources}
                   excludedWalletSources={displayedBuilder.excludedWalletSources}
@@ -221,10 +233,12 @@ function SharedGroupAssignmentPanel({
             <CreateWaveInlineGroupExpandedPanel
               onCancel={onClearAll}
               showCancel={false}
+              quiet={quiet}
             >
               <CreateWaveInlineGroupRuleList
                 draft={displayedBuilder.draft}
                 disabled={disabled}
+                quiet={quiet}
                 onIdentityOpen={() => togglePanel("identity", false)}
                 onRuleOpen={openRule}
               />
@@ -236,11 +250,13 @@ function SharedGroupAssignmentPanel({
             <CreateWaveInlineGroupExpandedPanel
               onCancel={returnToCriteria}
               showCancel={!isWaveAccessEditor}
+              quiet={quiet}
             >
               <CreateWaveInlineGroupRuleEditorPanel
                 activeRule={displayedBuilder.activeRule}
                 draft={displayedBuilder.draft}
                 disabled={disabled}
+                quiet={quiet}
                 onIdentityToggle={() => togglePanel("identity", false)}
                 onRuleToggle={toggleRule}
               >
@@ -257,6 +273,7 @@ function SharedGroupAssignmentPanel({
             <CreateWaveInlineGroupExpandedPanel
               onCancel={onCancelPanel}
               cancelSize="md"
+              quiet={quiet}
             >
               <SearchPanel
                 allowGroupClear={allowGroupClear}
@@ -272,6 +289,7 @@ function SharedGroupAssignmentPanel({
           {showDraftFooter ? (
             <CreateWaveInlineGroupDraftSummary
               draftSummary={draftSummary}
+              quiet={quiet}
               isValid={isDraftValid}
               canCreateDraft={canCreateDraft}
               isCreating={isCreating}
@@ -326,6 +344,7 @@ export default function GroupAssignmentPanel(props: GroupAssignmentPanelProps) {
       <GroupMembersPreviewTrigger
         target={currentMembersTarget}
         disabled={disabled}
+        quiet={props.presentation === "quiet"}
         criteriaStatus={selectedGroupCriteriaStatus}
         onOpen={() => setPreviewTarget(currentMembersTarget)}
       />
@@ -346,6 +365,7 @@ export default function GroupAssignmentPanel(props: GroupAssignmentPanelProps) {
       <GroupMembersPreviewTrigger
         target={draftMembersTarget}
         disabled={disabled || panelState.isCreating}
+        quiet={props.presentation === "quiet"}
         onOpen={() => setPreviewTarget(draftMembersTarget)}
       />
     ) : null;
