@@ -555,15 +555,17 @@ export function registerInlineFormatEditing(
         // not edit; defer invalidation until the following command key.
         const controlModifier =
           event.key === "Control" && !event.altKey && !event.metaKey;
-        if ((altGraphTyping && !event.metaKey) || controlModifier) return false;
+        const preservesModifier =
+          (altGraphTyping && !event.metaKey) || controlModifier;
         if (
-          (event.key.length !== 1 &&
+          !preservesModifier &&
+          ((event.key.length !== 1 &&
             event.key !== "Backspace" &&
             event.key !== "Shift") ||
-          event.altKey ||
-          event.ctrlKey ||
-          event.metaKey ||
-          (event.key === "Backspace" && event.shiftKey)
+            event.altKey ||
+            event.ctrlKey ||
+            event.metaKey ||
+            (event.key === "Backspace" && event.shiftKey))
         ) {
           clear();
         }

@@ -405,24 +405,29 @@ describe("editor inline formatting", () => {
     }
   });
 
-  it("invalidates a shortcut when a plugin replaces a node with identical serialized content", async () => {
-    await typeText("~hi~");
-    const before = editor.getEditorState().toJSON();
-    await update(() => {
-      const node = $getRoot().getAllTextNodes()[0];
-      if (!node) throw new Error("Expected converted text");
-      const replacement = $createTextNode(node.getTextContent());
-      replacement.setFormat(node.getFormat());
-      node.replace(replacement);
-      replacement.selectEnd();
-    });
-    expect(editor.getEditorState().toJSON()).toEqual(before);
-    await normalBackspace();
-    expect(root.textContent).toBe("h");
-    expect(root.querySelector(".editor-text-strikethrough")).toHaveTextContent(
-      "h"
-    );
-  });
+  it.each(["", " "])(
+    "invalidates a shortcut when a plugin replaces a node with identical serialized content and suffix %j",
+    async (suffix) => {
+      await typeText("~hi~" + suffix);
+      const before = editor.getEditorState().toJSON();
+      await update(() => {
+        const node = $getRoot().getAllTextNodes()[0];
+        if (!node) throw new Error("Expected converted text");
+        const replacement = $createTextNode(node.getTextContent());
+        replacement.setFormat(node.getFormat());
+        node.replace(replacement);
+        if (!suffix) replacement.selectEnd();
+      });
+      expect(editor.getEditorState().toJSON()).toEqual(before);
+      if (suffix) await normalBackspace();
+      expect(root.textContent).toBe("hi");
+      await normalBackspace();
+      expect(root.textContent).toBe("h");
+      expect(
+        root.querySelector(".editor-text-strikethrough")
+      ).toHaveTextContent("h");
+    }
+  );
 
   it.each(["Delete", "Home", "End", "PageUp", "PageDown"])(
     "invalidates the shortcut after %s even if the cursor stays in place",
