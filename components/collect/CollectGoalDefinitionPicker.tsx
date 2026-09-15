@@ -12,7 +12,8 @@ import { CheckIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
-import { useState } from "react";
+import { useTypeaheadMenuPosition } from "@/components/drops/create/lexical/plugins/useTypeaheadMenuPosition";
+import { useState, type CSSProperties } from "react";
 import CollectGoalDefinitionMobilePicker from "./CollectGoalDefinitionMobilePicker";
 import type { CollectGoalOption } from "./collect.types";
 
@@ -26,6 +27,7 @@ export default function CollectGoalDefinitionPicker({
   invalid,
   errorId,
   mobileSheet = false,
+  keyboardAware = false,
   onChange,
 }: {
   readonly label: string;
@@ -37,10 +39,15 @@ export default function CollectGoalDefinitionPicker({
   readonly invalid: boolean;
   readonly errorId?: string;
   readonly mobileSheet?: boolean;
+  readonly keyboardAware?: boolean;
   readonly onChange: (id: string) => void;
 }) {
   const [query, setQuery] = useState("");
+  const [inputElement, setInputElement] = useState<HTMLInputElement | null>(null);
   const isMobileLayoutViewport = useIsMobileLayoutViewport();
+  const menuPosition = useTypeaheadMenuPosition(
+    keyboardAware && isMobileLayoutViewport ? inputElement : null
+  );
   if (mobileSheet && isMobileLayoutViewport) {
     return (
       <CollectGoalDefinitionMobilePicker
@@ -93,6 +100,7 @@ export default function CollectGoalDefinitionPicker({
             )}
             <div className="tw-relative">
               <ComboboxInput
+                ref={setInputElement}
                 displayValue={(option: CollectGoalOption | null) =>
                   option?.label ?? ""
                 }
@@ -108,9 +116,19 @@ export default function CollectGoalDefinitionPicker({
               </ComboboxButton>
             </div>
             <ComboboxOptions
-              anchor="bottom start"
+              anchor={
+                keyboardAware && isMobileLayoutViewport
+                  ? `${menuPosition} start`
+                  : "bottom start"
+              }
               modal={false}
-              className="tailwind-scope tw-z-50 tw-max-h-64 tw-w-[var(--input-width)] tw-overflow-auto tw-rounded-lg tw-bg-iron-900 tw-p-1 tw-text-sm tw-text-iron-100 tw-shadow-lg tw-ring-1 tw-ring-white/10 [--anchor-gap:0.5rem] focus:tw-outline-none"
+              style={
+                {
+                  "--anchor-gap": "0.5rem",
+                  "--anchor-max-height": "16rem",
+                } as CSSProperties
+              }
+              className="tailwind-scope tw-z-50 tw-max-h-64 tw-w-[var(--input-width)] tw-overflow-auto tw-rounded-lg tw-bg-iron-900 tw-p-1 tw-text-sm tw-text-iron-100 tw-shadow-lg tw-ring-1 tw-ring-white/10 focus:tw-outline-none"
             >
               {filtered.length === 0 ? (
                 <ComboboxOption
