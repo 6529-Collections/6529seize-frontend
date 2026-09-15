@@ -56,12 +56,21 @@ async function openStudy(page: Page, slug: string, title: string) {
     });
 
     if (await studyHeading.isVisible()) {
+      const comparisonRegion = page.getByRole("region", {
+        name: "Hold the Museum work. Choose what sits beside it.",
+        exact: true,
+      });
       await expect(
-        page.getByRole("heading", {
+        comparisonRegion.getByRole("heading", {
           name: "Hold the Museum work. Choose what sits beside it.",
           exact: true,
         })
       ).toBeVisible({ timeout: STUDY_READY_TIMEOUT_MS });
+      await expect(comparisonRegion).toHaveAttribute(
+        "data-client-ready",
+        "true",
+        { timeout: STUDY_READY_TIMEOUT_MS }
+      );
       await expectNoHorizontalOverflow(page);
       return;
     }

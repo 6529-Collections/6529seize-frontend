@@ -3,6 +3,7 @@ import path from "node:path";
 
 const MEMES = "0x33fd426905f149f8376e227d0c9d3340aad17af1";
 const ZERO = "0x0000000000000000000000000000000000000000";
+const ROUTE_TRANSITION_TIMEOUT_MS = 20_000;
 const assets = [1, 2, 3].map((id) => ({
   asset_key: `1:${MEMES}:${id}`,
   chain_id: 1,
@@ -80,6 +81,14 @@ function listingsFor(family: string | null) {
       order: { ...item.order, asset_key },
     };
   });
+}
+
+async function waitForCollectClientReady(page: Page) {
+  await expect(page.locator("[data-collect-page]")).toHaveAttribute(
+    "data-client-ready",
+    "true",
+    { timeout: ROUTE_TRANSITION_TIMEOUT_MS }
+  );
 }
 
 async function mockCatalog(page: Page, state = { fail: false }) {
@@ -278,6 +287,7 @@ test("listing selection carries across browsing and opens one wallet-gated purch
   await page.goto("/collect?collection=memes&intent=lowest", {
     waitUntil: "domcontentloaded",
   });
+  await waitForCollectClientReady(page);
   await expect(
     page.getByRole("heading", { name: "Build your collection", exact: true })
   ).toBeVisible();
@@ -426,6 +436,7 @@ test("group offer prices remain per NFT and survive a return to browsing", async
   await page.goto("/collect?collection=memes&intent=lowest", {
     waitUntil: "domcontentloaded",
   });
+  await waitForCollectClientReady(page);
   for (const id of [1, 2]) {
     await page
       .getByRole("button", {
@@ -484,6 +495,7 @@ test("set planning is the default and navigation opens observed listings", async
   await page.goto("/collect", {
     waitUntil: "domcontentloaded",
   });
+  await waitForCollectClientReady(page);
   await expect(
     page.getByRole("form", { name: "Complete a full set", exact: true })
   ).toBeVisible();
@@ -492,10 +504,17 @@ test("set planning is the default and navigation opens observed listings", async
     path: info.outputPath("collect-default-planner.png"),
     fullPage: true,
   });
-  await page
-    .getByRole("button", { name: "Lowest listings", exact: true })
-    .click();
-  await expect(page.getByText("0.01 ETH", { exact: true })).toBeVisible();
+  const lowestListings = page.getByRole("button", {
+    name: "Lowest listings",
+    exact: true,
+  });
+  await lowestListings.click();
+  await expect(lowestListings).toHaveAttribute("aria-pressed", "true", {
+    timeout: ROUTE_TRANSITION_TIMEOUT_MS,
+  });
+  await expect(page.getByText("0.01 ETH", { exact: true })).toBeVisible({
+    timeout: ROUTE_TRANSITION_TIMEOUT_MS,
+  });
   const priceDisclosure = page
     .getByText("0.0243 ETH", { exact: true })
     .locator("xpath=ancestor::summary");
@@ -559,6 +578,7 @@ test("one collection selector stays available across set, listings and future TD
   await page.goto("/collect?collection=gradients&intent=full_set", {
     waitUntil: "domcontentloaded",
   });
+  await waitForCollectClientReady(page);
   const collection = page.getByRole("button", { name: /^Collection\b/ });
   await expect(collection).toContainText("Gradients");
   await expect(
@@ -633,6 +653,7 @@ test("listing errors remain distinct from empty results and support retry", asyn
   await page.goto("/collect?collection=memes&intent=lowest", {
     waitUntil: "domcontentloaded",
   });
+  await waitForCollectClientReady(page);
   const alert = page
     .getByRole("alert")
     .filter({ hasText: "The catalog could not be loaded" });
@@ -658,16 +679,20 @@ test("TDH preserves the selected collection and keeps projection as a separate k
   await page.goto("/collect?intent=lowest&collection=pebbles", {
     waitUntil: "domcontentloaded",
   });
+  await waitForCollectClientReady(page);
   const tab = page.getByRole("button", { name: "TDH", exact: true });
   await tab.focus();
   await tab.press("Enter");
+  await expect(tab).toHaveAttribute("aria-pressed", "true", {
+    timeout: ROUTE_TRANSITION_TIMEOUT_MS,
+  });
   await expect(tab).toBeFocused();
   const collection = page.getByRole("button", { name: /^Collection\b/ });
   await expect(collection).toContainText("Pebbles · NextGen");
   await expect(page).toHaveURL(/collection=pebbles/);
   await expect(
     page.getByRole("region", { name: "Lowest cost TDH", exact: true })
-  ).toBeVisible();
+  ).toBeVisible({ timeout: ROUTE_TRANSITION_TIMEOUT_MS });
   await expect(page.getByRole("article").first()).toContainText(
     "Catalog artwork 2"
   );
