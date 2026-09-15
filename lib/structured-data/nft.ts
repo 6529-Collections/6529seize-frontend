@@ -62,7 +62,7 @@ export function buildNftPageJsonLd({
   collectionPath,
   license = CC0_LICENSE_URL,
 }: {
-  readonly nft: BaseNFT | null;
+  readonly nft: BaseNFT;
   readonly path: string;
   readonly fallbackName: string;
   readonly collectionName: string;

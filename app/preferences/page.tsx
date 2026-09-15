@@ -8,10 +8,13 @@ import {
 import type { Metadata } from "next";
 import PreferencesPageClient, { type PreferencesTab } from "./page.client";
 
-export const metadata: Metadata = getAppMetadata({
-  title: t(DEFAULT_LOCALE, "preferences.title"),
-  description: t(DEFAULT_LOCALE, "preferences.metaDescription"),
-});
+export const metadata: Metadata = getAppMetadata(
+  {
+    title: t(DEFAULT_LOCALE, "preferences.title"),
+    description: t(DEFAULT_LOCALE, "preferences.metaDescription"),
+  },
+  { robots: { index: false, follow: true } }
+);
 
 export default async function PreferencesPage({
   searchParams,

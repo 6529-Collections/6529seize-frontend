@@ -13,10 +13,13 @@ import { t } from "@/i18n/messages";
 
 const ABOUT_INDEX_LOCALE = DEFAULT_LOCALE;
 
-export const metadata: Metadata = getAppMetadata({
-  title: t(ABOUT_INDEX_LOCALE, "about.index.metadata.title"),
-  description: t(ABOUT_INDEX_LOCALE, "about.index.metadata.description"),
-});
+export const metadata: Metadata = getAppMetadata(
+  {
+    title: t(ABOUT_INDEX_LOCALE, "about.index.metadata.title"),
+    description: "About 6529 and its decentralized network society.",
+  },
+  { canonicalPath: "/about" }
+);
 
 export default function AboutIndexPage() {
   return (

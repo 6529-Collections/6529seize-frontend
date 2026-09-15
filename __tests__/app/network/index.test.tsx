@@ -144,11 +144,11 @@ describe("CommunityPage (App Router)", () => {
 
     expect(metadata).toMatchObject({
       title: "Network",
-      description: expect.stringContaining("Network"),
+      description: expect.stringContaining("network members"),
       twitter: { card: "summary_large_image" },
       openGraph: {
         title: "Network",
-        description: expect.stringContaining("Network"),
+        description: expect.stringContaining("network members"),
       },
     });
   });

@@ -172,10 +172,17 @@ describe("Network Museum canonical metadata", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     installPublication();
-    mockedObjectMetadata.mockResolvedValue({
-      title: "Legacy object",
-      description: "Legacy object metadata",
-    });
+    mockedObjectMetadata.mockImplementation(async (objectId) => ({
+      title: "Museum work",
+      description: "Museum work metadata",
+      ...(objectId === "6529NM-W-0001" || objectId === "6529NM.2026.001.01"
+        ? {
+            alternates: {
+              canonical: "/museum/network/works/6529NM-W-0001",
+            },
+          }
+        : {}),
+    }));
   });
 
   it.each([
@@ -295,14 +302,18 @@ describe("Network Museum canonical metadata", () => {
     ).rejects.toMatchObject({ digest: "NEXT_HTTP_ERROR_FALLBACK;404" });
   });
 
-  it("keeps legacy Collection object metadata redirect-owned", async () => {
+  it("canonicalizes legacy Collection object metadata through the accepted bundle", async () => {
     expect(
       canonical(
         await collectionObjectMetadata({
           params: Promise.resolve({ objectId: "6529NM.2026.001.01" }),
         })
       )
-    ).toBeUndefined();
+    ).toBe("/museum/network/works/6529NM-W-0001");
+    expect(mockedObjectMetadata).toHaveBeenLastCalledWith(
+      "6529NM.2026.001.01",
+      expect.objectContaining({ status: "current", publication })
+    );
   });
 
   it("canonicalizes a resolved governance slug", async () => {
