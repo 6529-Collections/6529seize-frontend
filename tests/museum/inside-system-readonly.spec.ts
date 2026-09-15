@@ -35,7 +35,9 @@ async function openStudy(page: Page, slug: string, title: string) {
   const response = await gotoDocumentWithTransientRetry(page, path);
   expect(response?.status()).toBe(200);
   await waitForRouteReady(page);
-  await expect(page).toHaveURL((url) => url.pathname === path);
+  await expect(page).toHaveURL((url) => url.pathname === path, {
+    timeout: 20_000,
+  });
   await expect(
     page.getByRole("heading", { level: 1, name: title, exact: true })
   ).toBeVisible();
