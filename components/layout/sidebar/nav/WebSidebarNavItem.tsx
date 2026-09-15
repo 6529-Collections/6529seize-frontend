@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import useDeviceInfo from "../../../../hooks/useDeviceInfo";
+import { useHasHydrated } from "@/hooks/useHasHydrated";
 
 type IconComp = React.ComponentType<{ className?: string | undefined }>;
 
@@ -54,6 +55,7 @@ function WebSidebarNavItem({
   "data-section": dataSection,
 }: SidebarPrimaryItemProps) {
   const { hasTouchScreen } = useDeviceInfo();
+  const hasHydrated = useHasHydrated();
 
   const content = (
     <div
@@ -127,6 +129,7 @@ function WebSidebarNavItem({
   return (
     <button
       type="button"
+      disabled={!hasHydrated}
       onClick={(e) => onClick?.(e)}
       onPointerEnter={onPointerEnter}
       onPointerLeave={onPointerLeave}
