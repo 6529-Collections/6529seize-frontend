@@ -16,6 +16,7 @@ import { ApiMarketBatchMirrorTerms } from '../models/ApiMarketBatchMirrorTerms';
 import { ApiMarketBatchSendAttempt } from '../models/ApiMarketBatchSendAttempt';
 import { ApiMarketBatchSettlement } from '../models/ApiMarketBatchSettlement';
 import { ApiMarketBatchTransaction } from '../models/ApiMarketBatchTransaction';
+import { ApiMarketReceipt } from '../models/ApiMarketReceipt';
 import { ApiMarketTransaction } from '../models/ApiMarketTransaction';
 import { HttpFile } from '../http/http';
 
@@ -46,6 +47,7 @@ export class ApiMarketBatchOperation {
     'items': Array<ApiMarketBatchItem>;
     'approval_transactions': Array<ApiMarketTransaction>;
     'settlement'?: ApiMarketBatchSettlement;
+    'receipt'?: ApiMarketReceipt;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -188,6 +190,12 @@ export class ApiMarketBatchOperation {
             "name": "settlement",
             "baseName": "settlement",
             "type": "ApiMarketBatchSettlement",
+            "format": ""
+        },
+        {
+            "name": "receipt",
+            "baseName": "receipt",
+            "type": "ApiMarketReceipt",
             "format": ""
         }    ];
 

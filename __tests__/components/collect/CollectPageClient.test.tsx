@@ -16,6 +16,12 @@ const mockPurchaseItems = mockTarget.items.map((item) => ({
   order: item.order,
   quantity: item.quantity,
 }));
+const mockNoPurchases: readonly never[] = [];
+jest.mock("@/components/collect/market-activity-store", () => ({
+  useConfirmedMarketPurchases: () => mockNoPurchases,
+  usePendingMarketPurchases: () => mockNoPurchases,
+  readPendingMarketPurchases: () => mockNoPurchases,
+}));
 
 let mockSearchParams = new URLSearchParams();
 const mockReplace = jest.fn();
@@ -103,14 +109,17 @@ jest.mock("@/components/collect/CollectTdhTargetController", () => ({
   default: function MockTarget({
     onReviewPurchase,
     collection,
+    revision = 0,
   }: ComponentProps<typeof CollectTdhTargetController>) {
-    const [calculated, setCalculated] = useState(false);
+    const [calculatedRevision, setCalculatedRevision] = useState<number | null>(
+      null
+    );
     return (
       <div data-testid="profile-tdh-projection" data-collection={collection}>
-        <button onClick={() => setCalculated(true)}>
+        <button onClick={() => setCalculatedRevision(revision)}>
           Calculate projection
         </button>
-        {calculated && (
+        {calculatedRevision === revision && (
           <>
             <output>Calculated TDH benefit</output>
             <button
@@ -133,14 +142,17 @@ jest.mock("@/components/collect/CollectTdhDailyWorkspace", () => ({
   __esModule: true,
   default: function MockDaily({
     onReviewPurchase,
+    revision = 0,
   }: ComponentProps<typeof CollectTdhDailyWorkspace>) {
-    const [calculated, setCalculated] = useState(false);
+    const [calculatedRevision, setCalculatedRevision] = useState<number | null>(
+      null
+    );
     return (
       <div>
-        <button onClick={() => setCalculated(true)}>
+        <button onClick={() => setCalculatedRevision(revision)}>
           Calculate projection
         </button>
-        {calculated && (
+        {calculatedRevision === revision && (
           <>
             <output>Calculated TDH benefit</output>
             <button

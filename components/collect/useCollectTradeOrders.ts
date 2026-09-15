@@ -6,7 +6,9 @@ import type { ApiMarketOperation } from "@/generated/models/ApiMarketOperation";
 import type { ApiMarketTradeOrder } from "@/generated/models/ApiMarketTradeOrder";
 import { fetchMarketOrders } from "@/services/api/market-api";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
+import { useConfirmedMarketPurchases } from "./market-activity-store";
+import { reconcileCollectOrder } from "./collect-purchase-reconciliation";
 import { useAutomaticMarketRefresh } from "./useAutomaticMarketRefresh";
 import {
   collectBuyListings,
@@ -70,7 +72,8 @@ export function useCollectTradeOrders({
   );
   const needsOrder = action === "buy" || action === "accept";
   const inlineBuy = layout === "inline-buy" && action === "buy";
-  const orders = useQuery({
+  const purchases = useConfirmedMarketPurchases(profile?.id);
+  const orderQuery = useQuery({
     queryKey: [QueryKey.MARKET_ORDERS, assetKey, action],
     queryFn: ({ signal }) =>
       fetchMarketOrders(
@@ -81,6 +84,18 @@ export function useCollectTradeOrders({
     enabled: needsOrder && !fixedOrder && !operation && Boolean(assetKey),
     staleTime: 0,
   });
+  const data = useMemo(() => {
+    if (action !== "buy" || !orderQuery.data || purchases.length === 0)
+      return orderQuery.data;
+    return {
+      ...orderQuery.data,
+      orders: orderQuery.data.orders.flatMap((order) => {
+        const remaining = reconcileCollectOrder(order, purchases);
+        return remaining ? [remaining] : [];
+      }),
+    };
+  }, [action, orderQuery.data, purchases]);
+  const orders = { ...orderQuery, data };
   const updateBrowsingOrders = useCallback(
     async (signal: AbortSignal) => {
       const data = await fetchMarketOrders(
