@@ -21,6 +21,7 @@ import {
   seedFromHash,
   seededUnit,
   smallControlClass,
+  stableSvgNumber,
   useModelNumberState,
   useUrlStringState,
   type ProjectComparisonProps,
@@ -37,8 +38,8 @@ function cosmosPoint(
   const angle = index * 2.399963 + count * 0.07;
   const distance = Math.min(radius, 7 + ring * 4.15);
   return {
-    x: cx + Math.cos(angle) * distance,
-    y: cy + Math.sin(angle) * distance,
+    x: stableSvgNumber(cx + Math.cos(angle) * distance),
+    y: stableSvgNumber(cy + Math.sin(angle) * distance),
   };
 }
 
@@ -91,10 +92,15 @@ function CosmosSpecimen({
           32 +
           Math.floor(index / 26) *
             (330 / Math.max(1, Math.ceil(segmentCount / 26)));
-        const wave =
+        const wave = stableSvgNumber(
           Math.sin(index * 0.71 + seed * 0.00001) * 18 +
-          Math.cos(index * 0.17) * 10;
-        return { x: x + wave * 0.25, y: y - wave * 0.18, wave };
+            Math.cos(index * 0.17) * 10
+        );
+        return {
+          x: stableSvgNumber(x + wave * 0.25),
+          y: stableSvgNumber(y - wave * 0.18),
+          wave,
+        };
       }),
     [seed, segmentCount]
   );
@@ -120,11 +126,13 @@ function CosmosSpecimen({
           <g
             key={ghost}
             transform={`translate(${ghost * 1.8} ${ghost * 1.15}) rotate(${ghost * 1.9} 200 165)`}
-            opacity={0.04 + (ghost / ghosts) * 0.16}
+            opacity={stableSvgNumber(0.04 + (ghost / ghosts) * 0.16)}
           >
             {Array.from({ length: cosmosCount }, (_, cosmosIndex) => {
               const cx = 200 + (cosmosIndex - (cosmosCount - 1) / 2) * 68;
-              const cy = 156 + Math.sin(cosmosIndex * 1.7 + seed) * 24;
+              const cy = stableSvgNumber(
+                156 + Math.sin(cosmosIndex * 1.7 + seed) * 24
+              );
               const color = colors[cosmosIndex % colors.length];
               return (
                 <g
@@ -146,7 +154,9 @@ function CosmosSpecimen({
               key={`${segment.x}-${segment.y}-${segment.wave}`}
               d={`M${segment.x.toFixed(1)} ${segment.y.toFixed(1)}l${(4 + Math.abs(segment.wave) * 0.18).toFixed(1)} ${(segment.wave * 0.22).toFixed(1)}`}
               stroke={colors[index % colors.length]}
-              opacity={0.12 + Math.min(0.58, Math.abs(segment.wave) / 45)}
+              opacity={stableSvgNumber(
+                0.12 + Math.min(0.58, Math.abs(segment.wave) / 45)
+              )}
             />
           ))}
         </g>
