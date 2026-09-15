@@ -585,9 +585,13 @@ only the supported numeric placeholders (`percentage`, `minimum_block`,
 publisher. Backend arithmetic fills these values from the user-supplied local
 checkpoint. Publish after the companion runtime update: ordinary retrieval must
 exclude unrendered calculated templates. Start with 25% of the indexed block
-range and widen to 50%, 75%, then 100% after completed repair/recalculation failures.
+range and widen to 50%, 75%, then 100% only when a same-block mismatch persists
+after each completed reconciliation and TDH recalculation. Failed or incomplete
+work stays at the current stage for completion or error diagnosis; it does not
+authorize a wider range or reset.
 
-After the 100% reconciliation and recalculation still fail, the calculated
+When a same-block mismatch persists after completed 100% reconciliation and
+TDH recalculation, the calculated
 transaction-reset stages offer Reset to Block and its Min Block full-resync
 fallback. They preserve context through resync, recalculation, and final
 diagnostics. Partial, failed, or unfinished resync must not be treated as complete.

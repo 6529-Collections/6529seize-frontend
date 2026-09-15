@@ -9890,6 +9890,33 @@
       "brief_answer": "After the **transaction reset** in **6529 Desktop**, resync was reported complete. Let any active TDH calculation finish. If calculation or a worker failed or stalled, check its **Logs** and share the redacted error before trying again. Once calculation finishes, do TDH and Merkle Root now match 6529.io at the same Last Block?\n\nRange: {{percentage}}% of blocks {{minimum_block}}–{{checkpoint}}.",
       "reconciliation_min_block": 13360860,
       "answer_links": []
+    },
+    {
+      "id": "desktop.tdh-reconcile-calculation-pending",
+      "kind": "workflow",
+      "title": "Handle a failed TDH recalculation during reconciliation",
+      "aliases": ["Handle a failed TDH recalculation during reconciliation"],
+      "keywords": ["core"],
+      "facts": [
+        "For the **{{percentage}}%** recovery range in **6529 Desktop**, check the TDH worker **Logs** and share the redacted error. Let any active work finish; do not widen reconciliation or start a reset because calculation failed. Once calculation completes successfully, do TDH and Merkle Root now match 6529.io at the same Last Block?"
+      ],
+      "canonical_path": "/about/6529-apps",
+      "link_label": "6529 Apps",
+      "suppress_source_links": true,
+      "related_paths": ["/about/6529-apps"],
+      "tags": ["desktop-core", "desktop-dialogue", "desktop-calculated"],
+      "source_refs": [
+        "ops/docs/desktop/troubleshooting-sync-and-recovery.md",
+        "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/eth-scanner/Workers.tsx",
+        "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/i18n/messages/en-US.ts",
+        "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/tdh-calculation/TDHValidation.tsx",
+        "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/scheduled-tasks/workers/transactions-worker/transaction-reconciliation.ts",
+        "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/scheduled-tasks/scheduled-worker.ts",
+        "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/index.ts"
+      ],
+      "brief_answer": "For the **{{percentage}}%** recovery range in **6529 Desktop**, check the TDH worker **Logs** and share the redacted error. Let any active work finish; do not widen reconciliation or start a reset because calculation failed. Once calculation completes successfully, do TDH and Merkle Root now match 6529.io at the same Last Block?\n\nRange: {{percentage}}% of blocks {{minimum_block}}–{{checkpoint}}.",
+      "reconciliation_min_block": 13360860,
+      "answer_links": []
     }
   ]
 }
