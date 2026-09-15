@@ -8400,7 +8400,7 @@
         "capabilities"
       ],
       "facts": [
-        "6529 Desktop is the Windows, macOS, and Linux app with local wallets, Ethereum indexing workers, independent TDH calculation, and a bundled IPFS node. These 6529 Desktop tools are separate from 6529 Mobile and desktop-browser website.",
+        "6529 Desktop is the Windows, macOS, and Linux app with local wallets, Ethereum indexing workers, independent TDH calculation, and a bundled IPFS node. These 6529 Desktop tools are separate from 6529 Mobile and the desktop-browser website.",
         "Get the official installer from 6529 Apps, choose your operating system, install, and open the app.",
         "Open the dedicated 6529 Desktop sidebar menu (monitor icon). Its entries are Wallets, ETH Transactions, TDH Calculation, My IPFS when available, and About.",
         "First open 6529 Desktop > ETH Transactions > RPC Providers > Providers List. Choose Set Active on a provider, or Add RPC Provider, enter an Ethereum mainnet RPC URL, Test it, give it a Provider Name, Add, then Set Active. Saving a provider alone does not enable it.",
@@ -9431,7 +9431,7 @@
         "app"
       ],
       "facts": [
-        "6529 Desktop wallets are stored in the installed 6529 Desktop application and its 6529 Desktop wallet controls are not available in the 6529 Mobile or an ordinary browser.",
+        "6529 Desktop wallets are stored in the installed 6529 Desktop application and its 6529 Desktop wallet controls are not available in 6529 Mobile or an ordinary browser.",
         "6529 Mobile has separate App Wallets stored in the native app environment. Use Connect > App Wallets or open App Wallets under About > Delegation & Wallets when app-wallet support is enabled.",
         "A 6529 Desktop wallet does not automatically appear on mobile. Do not send a recovery phrase, private key, or password to the help bot."
       ],
@@ -9519,7 +9519,7 @@
         "password"
       ],
       "facts": [
-        "Open App Wallets in the 6529 Mobile. Choose Create Wallet to enter a wallet name and password, then select Create. Wallet names accept letters, numbers, and spaces; passwords require at least six characters and cannot contain whitespace.",
+        "Open App Wallets in 6529 Mobile. Choose Create Wallet to enter a wallet name and password, then select Create. Wallet names accept letters, numbers, and spaces; passwords require at least six characters and cannot contain whitespace.",
         "For an existing wallet, open Import Wallet, select Mnemonic or Private Key, enter the recovery material only inside the trusted native app, and Validate. The mnemonic form uses exactly 12 lowercase alphabetic words. After validation, confirm the address and finish with a name and password.",
         "Importing the same address again replaces the stored App Wallet entry for that address. Never paste a mnemonic, private key, or password into chat or send it to the help bot."
       ],
@@ -9560,7 +9560,7 @@
         "external"
       ],
       "facts": [
-        "In the 6529 Mobile, open Connect > App Wallets, select a saved app-local wallet, and use the existing unlock flow. You can also choose Create App Wallet from that list.",
+        "In 6529 Mobile, open Connect > App Wallets, select a saved app-local wallet, and use the existing unlock flow. You can also choose Create App Wallet from that list.",
         "App Wallets are intentionally omitted from the External Wallets destination because that destination is for external connectors. A connected profile session and an unlocked App Wallet are separate states.",
         "If unlock fails, reopen the unlock prompt and verify the selected wallet and password. The help bot cannot inspect the wallet or recover its password."
       ],
@@ -9610,7 +9610,7 @@
         "download"
       ],
       "facts": [
-        "Open the App Wallet detail page in the 6529 Mobile. After unlocking, its recovery actions can reveal, hide, and copy the available mnemonic or private key, or Download Recovery File. Keep exported recovery material private and securely backed up.",
+        "Open the App Wallet detail page in 6529 Mobile. After unlocking, its recovery actions can reveal, hide, and copy the available mnemonic or private key, or Download Recovery File. Keep exported recovery material private and securely backed up.",
         "A private-key-only import has no mnemonic. If recovery-file writing or sharing fails with Unable to write file, retry from wallet detail and unlock again.",
         "The help bot cannot reveal wallet secrets, bypass encryption, reset a forgotten password, or recover missing recovery material. Never upload or paste a password, mnemonic, private key, or recovery file into chat."
       ],

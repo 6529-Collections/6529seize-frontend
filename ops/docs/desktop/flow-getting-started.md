@@ -4,7 +4,7 @@ Parent: [Desktop index](README.md)
 
 ## Overview
 
-6529 Desktop, formerly called 6529 Core, is the Windows, macOS, and Linux app with local wallets, Ethereum indexing workers, independent TDH calculation, and a bundled IPFS node. These Desktop tools are separate from 6529 Mobile and the website in a desktop browser.
+6529 Desktop is the Windows, macOS, and Linux app with local wallets, Ethereum indexing workers, independent TDH calculation, and a bundled IPFS node. These Desktop tools are separate from 6529 Mobile and the website in a desktop browser.
 
 Get the official installer from [6529 Apps](https://6529.io/about/6529-apps), choose your operating system, install, and open the app.
 
@@ -33,7 +33,7 @@ session does not expose 6529 Desktop workers.
 
 ## User Journey
 
-1. Download and install Core from the official Apps page.
+1. Download and install 6529 Desktop from the official Apps page.
 2. Open **6529 Desktop > ETH Transactions**.
 3. Expand **Providers List** and choose **Set Active**, or add/test/name a provider and then activate it.
 4. Leave the app running while Transactions, NFTDelegation, and NFTs catch up.

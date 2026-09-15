@@ -61,8 +61,8 @@ If the app closes during TDH work, an active provider allows a fresh rerun on re
 
 ## Edge Cases
 
-The schedule runs while Core is open; a sleeping/offline computer cannot be
-assumed to perform its daily calculation. Reopening Core resumes pending
+The schedule runs while 6529 Desktop is open; a sleeping/offline computer cannot be
+assumed to perform its daily calculation. Reopening 6529 Desktop resumes pending
 reconciliation and reruns interrupted TDH when enabled, but a normal launch
 does not itself promise a new TDH run. **Stop** is not permanent disablement.
 
