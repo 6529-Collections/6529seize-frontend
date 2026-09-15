@@ -56,6 +56,7 @@ export default function NftNavigation(
       <span className="tw-flex tw-items-center tw-justify-center tw-gap-2">
         {isFirst ? (
           <span
+            role="link"
             aria-label={previousAriaLabel}
             aria-disabled="true"
             title={previousTitle}
@@ -85,6 +86,7 @@ export default function NftNavigation(
         )}
         {isLast ? (
           <span
+            role="link"
             aria-label={nextAriaLabel}
             aria-disabled="true"
             title={nextTitle}

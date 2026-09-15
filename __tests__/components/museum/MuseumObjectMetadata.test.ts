@@ -1,4 +1,11 @@
 import { getMuseumObjectMetadata } from "@/components/museum/MuseumObjectPage";
+import { getMuseumView } from "@/lib/museum/normalize";
+
+jest.mock("@/lib/museum/normalize", () => ({
+  getMuseumView: jest.fn(),
+}));
+
+const getMuseumViewMock = jest.mocked(getMuseumView);
 
 const publication = {
   works: [
@@ -39,6 +46,10 @@ const publication = {
 };
 
 describe("Museum object metadata", () => {
+  beforeEach(() => {
+    getMuseumViewMock.mockReset();
+  });
+
   it.each(["current", "stale"] as const)(
     "uses the accepted %s publication for canonical metadata",
     async (status) => {
@@ -71,6 +82,46 @@ describe("Museum object metadata", () => {
       lastValidAcceptedAt: null,
     });
 
+    expect(metadata.alternates?.canonical).toBeUndefined();
+    expect(metadata.robots).toEqual({ index: false, follow: true });
+  });
+
+  it("resolves a source record through its canonical Work ID", async () => {
+    const sourceRecordId = "external-source-record";
+    const metadata = await getMuseumObjectMetadata(sourceRecordId, {
+      status: "current",
+      publication: {
+        ...publication,
+        entityGraph: {
+          ...publication.entityGraph,
+          entities: publication.entityGraph.entities.map((entity) =>
+            entity.id === "6529NM-W-0001"
+              ? { ...entity, sourceRecordIds: [sourceRecordId] }
+              : entity
+          ),
+        },
+      },
+      errorCode: null,
+      failedAt: null,
+      lastValidAcceptedAt: null,
+    } as never);
+
+    expect(metadata.alternates?.canonical?.toString()).toContain(
+      "/museum/network/works/6529NM-W-0001"
+    );
+    expect(metadata.robots).toEqual({ index: true, follow: true });
+  });
+
+  it("does not reopen the legacy view for an unmatched typed-graph record", async () => {
+    const metadata = await getMuseumObjectMetadata("missing-record", {
+      status: "current",
+      publication,
+      errorCode: null,
+      failedAt: null,
+      lastValidAcceptedAt: null,
+    } as never);
+
+    expect(getMuseumViewMock).not.toHaveBeenCalled();
     expect(metadata.alternates?.canonical).toBeUndefined();
     expect(metadata.robots).toEqual({ index: false, follow: true });
   });

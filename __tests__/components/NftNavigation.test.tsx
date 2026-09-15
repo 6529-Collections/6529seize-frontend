@@ -41,10 +41,12 @@ describe("NftNavigation", () => {
         params={makeParams()}
       />
     );
-    const links = screen.getAllByRole("link");
-    expect(links).toHaveLength(1);
-    expect(links[0]).toHaveAttribute("href", "/art/2");
-    expect(screen.getByLabelText("Previous NFT")).toHaveAttribute(
+    expect(screen.getAllByRole("link")).toHaveLength(2);
+    expect(screen.getByRole("link", { name: "Next NFT" })).toHaveAttribute(
+      "href",
+      "/art/2"
+    );
+    expect(screen.getByRole("link", { name: "Previous NFT" })).toHaveAttribute(
       "aria-disabled",
       "true"
     );

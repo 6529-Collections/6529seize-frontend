@@ -408,12 +408,17 @@ async function getNftCollectionPaths(
     fetchJson
   );
 
-  return ids.flatMap((id) => {
+  const uniqueIds = new Set<number>();
+  for (const id of ids) {
     if (typeof id !== "number" || !Number.isSafeInteger(id) || id < 1) {
       throw new Error(`Invalid ${apiPath} sitemap item`);
     }
-    return getNftSitemapPaths(`${sitePath}/${id}`, sitePath);
-  });
+    uniqueIds.add(id);
+  }
+
+  return Array.from(uniqueIds).flatMap((id) =>
+    getNftSitemapPaths(`${sitePath}/${id}`, sitePath)
+  );
 }
 
 async function getPlainApiSitemapPaths(
@@ -602,10 +607,7 @@ function getMuseumEntityPaths(
     }
 
     let canonicalRoute: string | null = null;
-    if (
-      entity.entityType === "WORK" &&
-      /^6529NM-W-\d{4}$/u.test(entity.id)
-    ) {
+    if (entity.entityType === "WORK" && /^6529NM-W-\d{4}$/u.test(entity.id)) {
       canonicalRoute = `/museum/network/works/${entity.id}`;
     } else if (entity.entityType === "ARTIST" && entity.slug) {
       canonicalRoute = `/museum/network/artists/${entity.slug}`;

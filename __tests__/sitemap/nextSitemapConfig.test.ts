@@ -368,6 +368,42 @@ describe("next-sitemap config", () => {
     ).rejects.toThrow("cycle detected");
   });
 
+  it("enforces NFT source floors using unique feed identifiers", async () => {
+    await expect(
+      buildAdditionalSitemapPaths(
+        makeFetchJson({
+          "https://api.6529.io/sitemap/memes": {
+            data: [1, 1],
+            next: null,
+          },
+          "https://api.6529.io/sitemap/gradient": { data: [], next: null },
+          "https://api.6529.io/sitemap/meme-lab": { data: [], next: null },
+          "https://api.6529.io/sitemap/nextgen/tokens": {
+            data: [],
+            next: null,
+          },
+          "https://api.6529.io/sitemap/nextgen/collections": {
+            data: [],
+            next: null,
+          },
+          "https://api.6529.io/api/v2/waves?view=SEARCH&page=1&page_size=50&direct_message=false":
+            { data: [], next: false },
+        }),
+        museumBundle,
+        {
+          minimumItems: {
+            memes: 2,
+            "meme-lab": 0,
+            gradient: 0,
+            "nextgen-tokens": 0,
+            "nextgen-collections": 0,
+            "public-waves": 0,
+          },
+        }
+      )
+    ).rejects.toThrow("Sitemap memes inventory fell below its required floor");
+  });
+
   it("requires an accepted Museum publication graph", async () => {
     await expect(
       buildAdditionalSitemapPaths(

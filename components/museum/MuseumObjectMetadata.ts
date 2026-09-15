@@ -58,7 +58,9 @@ export async function getMuseumObjectMetadata(
     );
   }
 
-  const publicWork = publication.works?.find((work) => work.id === objectId);
+  const publicWork = publication.works?.find(
+    (work) => work.id === (canonicalEntity?.id ?? objectId)
+  );
   if (publicWork !== undefined) {
     const artistName = getMuseumWorkArtistName(
       publication,
@@ -76,6 +78,10 @@ export async function getMuseumObjectMetadata(
     );
   }
 
+  if (publication.entityGraph !== undefined) {
+    return getGenericMuseumObjectMetadata();
+  }
+
   const view = await getMuseumView();
   const outcome = view.objects.find((item) =>
     museumSlugMatches(item.objectId, objectId)
@@ -89,6 +95,16 @@ export async function getMuseumObjectMetadata(
       title:
         outcome?.title ?? t(DEFAULT_LOCALE, "museum.network.objects.title"),
       description,
+    },
+    { robots: { index: false, follow: true } }
+  );
+}
+
+function getGenericMuseumObjectMetadata(): Metadata {
+  return getAppMetadata(
+    {
+      title: t(DEFAULT_LOCALE, "museum.network.objects.title"),
+      description: t(DEFAULT_LOCALE, "museum.network.objects.description"),
     },
     { robots: { index: false, follow: true } }
   );

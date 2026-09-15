@@ -17,7 +17,13 @@ jest.mock("@/helpers/server.helpers", () => ({
 }));
 
 jest.mock("@/components/providers/metadata", () => ({
-  getAppMetadata: jest.fn((v: any, options?: any) => ({ ...v, ...options })),
+  getAppMetadata: jest.fn((v: any, options?: any) => ({
+    ...v,
+    ...(options?.robots ? { robots: options.robots } : {}),
+    ...(options?.canonicalPath
+      ? { alternates: { canonical: options.canonicalPath } }
+      : {}),
+  })),
   getLargeSocialCardMetadata: jest.fn((v: any) => v),
 }));
 
@@ -181,7 +187,7 @@ describe("user tab page via createUserTabPage", () => {
     expect(meta).toEqual(
       expect.objectContaining({
         title: expect.stringContaining("dave"),
-        canonicalPath: "/dave/collected",
+        alternates: { canonical: "/dave/collected" },
         robots: { index: true, follow: true },
       })
     );
@@ -207,6 +213,6 @@ describe("user tab page via createUserTabPage", () => {
       index: false,
       follow: true,
     });
-    expect("canonicalPath" in unavailableMetadata).toBe(false);
+    expect(unavailableMetadata.alternates?.canonical).toBeUndefined();
   });
 });
