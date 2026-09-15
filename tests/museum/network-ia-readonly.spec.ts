@@ -138,6 +138,35 @@ async function expectImageLoadedAfterScroll(
     .toBe(true);
 }
 
+async function expectUniformMediaStageRatio(
+  stages: Locator,
+  expectedRatios: readonly number[],
+  tolerance: number
+) {
+  await expect
+    .poll(
+      async () => {
+        const ratios = await stages.evaluateAll((elements) =>
+          elements.map((element) => {
+            const { width, height } = element.getBoundingClientRect();
+            return width / height;
+          })
+        );
+        return (
+          ratios.length > 0 &&
+          new Set(ratios.map((ratio) => ratio.toFixed(3))).size === 1 &&
+          ratios.every((ratio) =>
+            expectedRatios.some(
+              (expected) => Math.abs(ratio - expected) < tolerance
+            )
+          )
+        );
+      },
+      { timeout: 20_000 }
+    )
+    .toBe(true);
+}
+
 test.describe("Museum public IA rendered contract @surface @readonly", () => {
   test.skip(
     ({ browserName }) => browserName !== "chromium",
@@ -285,15 +314,7 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
     expect(artistHrefs).toHaveLength(23);
     const artistMediaStages = page.getByTestId("museum-directory-media-stage");
     await expect(artistMediaStages).toHaveCount(23);
-    const artistStageRatios = await artistMediaStages.evaluateAll((stages) =>
-      stages.map((stage) => {
-        const { width, height } = stage.getBoundingClientRect();
-        return width / height;
-      })
-    );
-    for (const ratio of artistStageRatios) {
-      expect(ratio).toBeCloseTo(4 / 3, 2);
-    }
+    await expectUniformMediaStageRatio(artistMediaStages, [4 / 3], 0.005);
 
     await openRoute(page, "/museum/network/acquisitions");
     await expect(page.locator("article")).toHaveCount(4);
@@ -301,21 +322,11 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
       "museum-acquisition-media-stage"
     );
     await expect(acquisitionMediaStages).toHaveCount(4);
-    const acquisitionStageRatios = await acquisitionMediaStages.evaluateAll(
-      (stages) =>
-        stages.map((stage) => {
-          const { width, height } = stage.getBoundingClientRect();
-          return width / height;
-        })
+    await expectUniformMediaStageRatio(
+      acquisitionMediaStages,
+      [4 / 5, 4 / 3],
+      0.01
     );
-    expect(
-      new Set(acquisitionStageRatios.map((ratio) => ratio.toFixed(3))).size
-    ).toBe(1);
-    for (const ratio of acquisitionStageRatios) {
-      expect(
-        [4 / 5, 4 / 3].some((expected) => Math.abs(ratio - expected) < 0.01)
-      ).toBe(true);
-    }
     await retainScreenshot(page, testInfo, "museum-network-acquisitions");
 
     for (const [path, status] of [
