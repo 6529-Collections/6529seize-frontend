@@ -64,7 +64,7 @@ run_phase() {
   fi
   echo "Starting isolated Museum $phase phase on $MUSEUM_PROJECT"
   NEXT_DEV_DIST_DIR=".next-playwright-${MUSEUM_PROJECT}-${phase}" \
-    BASE_ENDPOINT="$base_url" PORT="$port" PORT_SEARCH_LIMIT=0 \
+    BASE_ENDPOINT="$base_url" PORT="$port" \
     setsid ./bin/6529 run dev > "$server_log" 2>&1 &
   museum_server_pid="$!"
   for attempt in {1..120}; do

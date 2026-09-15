@@ -1410,7 +1410,7 @@ jobs:
           museum_server_log="test-results/app-pr-ci/museum-server.log"
           NEXT_DEV_DIST_DIR=".next-playwright-${MUSEUM_PROJECT}" \
             BASE_ENDPOINT="$museum_base_url" \
-            PORT="$museum_port" PORT_SEARCH_LIMIT=0 \
+            PORT="$museum_port" \
             setsid ./bin/6529 run dev > "$museum_server_log" 2>&1 &
           museum_server_pid="$!"
           cleanup_museum_server() {

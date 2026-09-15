@@ -5,6 +5,7 @@ import os from "node:os";
 import path from "node:path";
 import vm from "node:vm";
 import YAML from "yaml";
+import { publicEnvSchema } from "../../config/env.schema";
 
 const runner = path.join(process.cwd(), "scripts/museum-ci-remaining.sh");
 const rightsSpec = "tests/museum/rights-readonly.spec.ts";
@@ -21,7 +22,7 @@ const workflowRun: string = workflow.jobs["app-checks"].steps.find(
 // All external commands are stubs: no dev server, browser or network is started.
 const shellStubs = `
 setsid() {
-  printf 'server:%s:%s:%s\n' "$PORT" "$NEXT_DEV_DIST_DIR" "$PORT_SEARCH_LIMIT" >> "$TEST_EVENTS"
+  printf 'server:%s:%s:%s\n' "$PORT" "$NEXT_DEV_DIST_DIR" "\${PORT_SEARCH_LIMIT:-unset}" >> "$TEST_EVENTS"
 }
 kill() {
   if [ "$1" = -0 ]; then
@@ -59,12 +60,14 @@ describe("Museum isolated remaining runner", () => {
 
   function run(specs: string[], env: Record<string, string> = {}) {
     const eventsPath = path.join(directory, "events.txt");
+    const subprocessEnv = { ...process.env };
+    delete subprocessEnv.PORT_SEARCH_LIMIT;
     const result = spawnSync("bash", [runner, ...specs], {
       cwd: directory,
       encoding: "utf8",
       timeout: 10_000,
       env: {
-        ...process.env,
+        ...subprocessEnv,
         MUSEUM_PROJECT: projects[0],
         BASH_ENV: path.join(directory, "stubs.sh"),
         TEST_EVENTS: eventsPath,
@@ -86,8 +89,8 @@ describe("Museum isolated remaining runner", () => {
       expect(
         result.events.filter((line) => line.startsWith("server:"))
       ).toEqual([
-        `server:3102:.next-playwright-${project}-rights:0`,
-        `server:3103:.next-playwright-${project}-remaining:0`,
+        `server:3102:.next-playwright-${project}-rights:unset`,
+        `server:3103:.next-playwright-${project}-remaining:unset`,
       ]);
       const tests = result.events.filter((line) => line.startsWith("test:"));
       expect(tests).toHaveLength(2);
@@ -114,6 +117,37 @@ describe("Museum isolated remaining runner", () => {
         result.events.findIndex((line) => line.startsWith("cleanup:"))
       ).toBeLessThan(
         result.events.findIndex((line) => line.startsWith("server:3103:"))
+      );
+    }
+  );
+
+  it.each(projects)(
+    "uses schema-valid server port settings on %s",
+    (project) => {
+      const result = run([rightsSpec, aboutSpec], { MUSEUM_PROJECT: project });
+      expect(result.status).toBe(0);
+      const servers = result.events.filter((line) =>
+        line.startsWith("server:")
+      );
+      expect(servers).toHaveLength(2);
+      const portSchema = publicEnvSchema.pick({
+        PORT: true,
+        PORT_SEARCH_LIMIT: true,
+      });
+      for (const server of servers) {
+        const [, port, , searchLimit] = server.split(":");
+        expect(
+          portSchema.safeParse({
+            PORT: port,
+            PORT_SEARCH_LIMIT:
+              searchLimit === "unset" ? undefined : searchLimit,
+          }).success
+        ).toBe(true);
+      }
+      // The gate and isolated phases must retain the existing startup default.
+      expect(workflowRun).not.toContain("PORT_SEARCH_LIMIT=");
+      expect(fs.readFileSync(runner, "utf8")).not.toContain(
+        "PORT_SEARCH_LIMIT="
       );
     }
   );
