@@ -1917,7 +1917,7 @@ describe("Regression Tests: Original Functionality with Secure Implementation", 
 
   it("waits for bridge registration when a child disconnects during mount", async () => {
     mockGetWalletAddress.mockReturnValue(null);
-    jest.mocked(authUtils.removeAuthJwt).mockImplementation(() => {});
+    jest.mocked(authUtils.removeAuthJwt).mockResolvedValue(undefined);
     const onSuccess = jest.fn();
     const onFailure = jest.fn();
     const MountDisconnect = () => {
