@@ -89,7 +89,7 @@ test.describe("Public rendering remains usable while wallet startup is delayed @
     await page.getByRole("link", { name: "Open page: FAQ", exact: true }).click();
     await expect(page).toHaveURL(/\/about\/faq$/);
     await waitForRouteReady(page);
-    const publicMain = page.locator("main").first();
+    const publicMain = page.getByRole("main").first();
     await expect(publicMain).toBeVisible();
 
     // Wallet intent may initialize locally without making an external request.
