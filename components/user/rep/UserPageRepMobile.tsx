@@ -1,6 +1,7 @@
 "use client";
 
 import { AuthContext } from "@/components/auth/Auth";
+import { useHasHydrated } from "@/hooks/useHasHydrated";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import type { ActivityLogParams } from "@/components/profile-activity/ProfileActivityLogs";
@@ -107,7 +108,8 @@ export default function UserPageRepMobile({
       (w) => w.wallet.toLowerCase() === address?.toLowerCase()
     );
 
-  const { data: statements } = useQuery<CicStatement[]>({
+  const hasHydrated = useHasHydrated();
+  const { data: cachedStatements } = useQuery<CicStatement[]>({
     queryKey: [QueryKey.PROFILE_CIC_STATEMENTS, user],
     queryFn: async () => {
       if (!user) {
@@ -120,6 +122,9 @@ export default function UserPageRepMobile({
     enabled: !!user,
   });
 
+  // Another profile section may warm this cache before our streamed HTML
+  // hydrates. Keep the server's empty snapshot until this component commits.
+  const statements = hasHydrated ? cachedStatements : undefined;
   const identityStatementCount = useMemo(() => {
     if (!statements) {
       return null;

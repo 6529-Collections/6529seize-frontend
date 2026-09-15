@@ -20,14 +20,10 @@ async function gotoReady(
 
 async function openGroupFilters(page: Page) {
   const openButton = page.getByRole("button", { name: "Open group filters" });
-  if (
-    await openButton
-      .first()
-      .isVisible({ timeout: 5000 })
-      .catch(() => false)
-  ) {
-    await openButton.first().click();
-  }
+  // The route shell can be visible before the data-backed controls render.
+  // This control is required on both viewports, so do not silently skip it.
+  await expect(openButton.first()).toBeVisible();
+  await openButton.first().click();
 }
 
 async function expectAnyVisible(

@@ -7071,6 +7071,7 @@
       "facts": [
         "The meme calendar route lives at /meme-calendar.",
         "It is the canonical place for minting-calendar context.",
+        "The page heading appears first; clock panels and the calendar grid appear once browser JavaScript is ready, using the browser clock and local timezone. Viewing the schedule does not require connecting a wallet.",
         "The home page can also surface current or upcoming mint information.",
         "The calendar models past, current, and future Meme Card mint timing from Monday/Wednesday/Friday cadence plus explicit skip, extra, and reschedule overrides.",
         "The public calendar API exposes /api/meme-calendar/next, /api/meme-calendar/current, and /api/meme-calendar/{id}.",

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ChevronRightIcon } from "@heroicons/react/24/outline";
 import type { SidebarNavItem } from "@/components/navigation/navTypes";
 import { isSidebarNavItemActive } from "./sidebarActive";
+import { useHasHydrated } from "@/hooks/useHasHydrated";
 
 interface WebSidebarExpandableGroupProps {
   readonly name: string;
@@ -21,6 +22,7 @@ function WebSidebarExpandableGroup({
   expanded,
   onToggle,
 }: WebSidebarExpandableGroupProps) {
+  const hasHydrated = useHasHydrated();
   const hasActiveItem = useMemo(
     () => items.some((item) => isSidebarNavItemActive(item, pathname)),
     [items, pathname]
@@ -46,6 +48,7 @@ function WebSidebarExpandableGroup({
       {/* Group header with expand button */}
       <button
         type="button"
+        disabled={!hasHydrated}
         onClick={handleToggle}
         className={`tw-touch-action-manipulation tw-ml-[2.75rem] tw-flex tw-min-h-11 tw-w-[calc(100%-2.75rem)] tw-cursor-pointer tw-items-center tw-justify-between tw-rounded-xl tw-border-none tw-py-1 tw-pl-3 tw-pr-3 tw-text-left tw-text-sm tw-font-medium tw-no-underline tw-transition-colors tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 desktop-hover:tw-min-h-10 ${stateClassName}`}
         aria-expanded={expanded}

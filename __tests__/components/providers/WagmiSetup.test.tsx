@@ -96,8 +96,9 @@ jest.mock("@/wagmiConfig/wagmiAppWalletConnector", () => ({
   APP_WALLET_CONNECTOR_TYPE: "app-wallet",
   createAppWalletConnector: jest.fn(),
 }));
-jest.mock("wagmi", () => ({
-  WagmiProvider: ({ children }: any) => (
+jest.mock("@/components/providers/DeferredWagmiProvider", () => ({
+  __esModule: true,
+  default: ({ children }: { readonly children: React.ReactNode }) => (
     <div data-testid="wagmi-provider">{children}</div>
   ),
 }));
@@ -970,7 +971,6 @@ describe("WagmiSetup Security Tests", () => {
     });
 
     it("keeps rendering children while wallet initialization starts", async () => {
-
       let container!: HTMLElement;
 
       await act(async () => {
