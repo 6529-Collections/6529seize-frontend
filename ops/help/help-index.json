@@ -1034,7 +1034,8 @@
         "6529 desktop download",
         "download 6529 app",
         "mobile app",
-        "desktop app"
+        "desktop app",
+        "6529 app"
       ],
       "keywords": [
         "apps",
@@ -1063,6 +1064,13 @@
         "components/apps/AppsPage.tsx",
         "components/footer/Footer.tsx",
         "ops/docs/navigation/feature-6529-apps-page.md"
+      ],
+      "brief_answer": "Yes—**6529 Mobile** is available for iOS and Android, and **6529 Desktop** for Windows, macOS, and Linux. Find both downloads on the official Apps page.",
+      "answer_links": [
+        {
+          "label": "6529 Apps",
+          "url": "https://6529.io/about/6529-apps"
+        }
       ]
     },
     {

@@ -7,6 +7,11 @@ created: 2026-06-19
 
 # 6529 Help Bot Knowledge Index
 
+The `about.6529-apps` record includes a concise `brief_answer` naming both
+6529 Mobile and 6529 Desktop and an `answer_links` footer to the official Apps
+page. The companion backend uses it for short availability/download requests
+such as "is there an app", "6529 app", and contextual "link?" replies.
+
 ## Problem Statement
 
 Users often ask practical product questions in Waves instead of finding the
