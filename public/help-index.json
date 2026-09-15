@@ -778,8 +778,7 @@
         "Home remains available through the 6529 logo link to /.",
         "The web sidebar Waves row opens /waves directly; Discover Waves remains secondary inside the Waves experience and searchable, while Network, Delegation, Tools, Open Data, and reference material live under About.",
         "Drop Forge appears as a standalone sidebar row after About only when the connected wallet can access /drop-forge.",
-        "The web sidebar's final row sits below the account area: Expand in the collapsed rail, Collapse on expanded desktop, and Close in the narrow-desktop overlay or small-screen menu. The account area and toggle stay visible while rows above them scroll in short windows.",
-        "At 1280px and wider, the web sidebar defaults to collapsed and remembers its state for the browser session. Below 1280px, the rail opens as an overlay; small-screen touch layouts use the header menu button. Close the overlay with its bottom Close row, backdrop, Escape, or a route change.",
+        "The sidebar can be collapsed or expanded depending on viewport and layout state.",
         "In the collapsed web rail, NFTs and About open on intentional mouse hover while tap, click, and keyboard activation remain available; the flyout stays open while crossing into it and closes after leaving both surfaces or pressing Escape.",
         "Search, Share, Connect Wallet, and Notifications are utility controls; Profile and Connect Device live in the connected account menu.",
         "When a new version is available, desktop web shows a rocket above Search as the first lower sidebar item instead of a toast. It has an Update tooltip when collapsed and an Update label when expanded. Selecting it reloads the current route with an Updating to the latest version screen, a static rocket, and three animated dots. Mobile browsers, including tablets in desktop browsing mode, retain the full update toast and show the same updating screen when tapped."

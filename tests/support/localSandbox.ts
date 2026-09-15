@@ -58,13 +58,6 @@ export async function dismissNextDevTools(page: Page) {
   }
 }
 
-export async function hideNextDevTools(page: Page) {
-  // The Dev Tools Hide action sends a POST blocked by read-only test runs.
-  await page.addStyleTag({
-    content: "nextjs-portal { display: none !important; }",
-  });
-}
-
 export function useLocalSandboxMutationGuard(
   localTest: LocalSandboxTestApi,
   sandboxFlag: "PLAYWRIGHT_AUTH_SANDBOX" | "PLAYWRIGHT_COMPOSER_SANDBOX",
