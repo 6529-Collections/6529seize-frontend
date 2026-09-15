@@ -1,6 +1,11 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import React from "react";
 import CreateDropStormViewPart from "@/components/drops/create/utils/storm/CreateDropStormViewPart";
+import { getPreparedDropImage } from "@/services/uploads/prepareDropImage";
+
+jest.mock("@/services/uploads/prepareDropImage", () => ({
+  getPreparedDropImage: jest.fn(),
+}));
 
 jest.mock("@/components/drops/view/part/DropPart", () =>
   jest.fn(() => <div data-testid="drop-part" />)
@@ -18,6 +23,7 @@ describe("CreateDropStormViewPart", () => {
   let revokeObjectURLMock: jest.Mock;
 
   beforeEach(() => {
+    jest.mocked(getPreparedDropImage).mockReset();
     createObjectURLMock = jest.fn(() => "blob:url");
     revokeObjectURLMock = jest.fn();
     (global as any).URL.createObjectURL = createObjectURLMock;
@@ -62,6 +68,22 @@ describe("CreateDropStormViewPart", () => {
         { mimeType: "image/png", mediaSrc: "blob:url" },
       ]);
     });
+  });
+
+  it("uses the converted URL and MIME for a prepared AVIF Storm image", () => {
+    jest.mocked(getPreparedDropImage).mockReturnValue({
+      url: "https://media.example/photo.webp",
+      mime_type: "image/webp",
+    });
+    render(
+      <CreateDropStormViewPart
+        {...baseProps}
+        part={{ ...baseProps.part, media: [new File(["avif"], "photo.AVIF")] }}
+      />
+    );
+    expect(getLastDropPartCall().partMedias).toEqual([
+      { mimeType: "image/webp", mediaSrc: "https://media.example/photo.webp" },
+    ]);
   });
 
   it("reuses transformed media URLs on rerender", async () => {

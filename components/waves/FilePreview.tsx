@@ -121,15 +121,18 @@ const FilePreview: React.FC<FilePreviewProps> = ({
         );
         const isUploading = !!uploadingFile;
         const progress = uploadingFile?.progress ?? 0;
+        const contentType = getContentType(file.file);
+        const isPreparingAvif = contentType === "image/avif" && isUploading;
         const isProcessingImage =
           uploadingFile?.phase === "processing" &&
-          getContentType(file.file).startsWith("image/");
+          contentType.startsWith("image/");
         const fileKey = `${file.file.name}-${file.file.size}-${file.file.lastModified}-${index}`;
         return (
           <div key={fileKey} className="tw-group tw-relative">
             <div className="tw-size-24 tw-overflow-hidden tw-rounded-lg tw-bg-iron-800">
-              {getContentType(file.file).startsWith("image/") ? (
-                <ImageFilePreview file={file.file} />
+              {contentType.startsWith("image/") ? (
+                // Mount after preparation so the memoized preview reads the completed URL.
+                !isPreparingAvif && <ImageFilePreview file={file.file} />
               ) : (
                 <FileTypePreview file={file.file} />
               )}
