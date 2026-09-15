@@ -8,8 +8,14 @@ export default function TDH() {
 }
 
 export const generateMetadata = () => {
-  return getAppMetadata({
-    title: t(DEFAULT_LOCALE, "network.tdh.explainer.pageTitle"),
-    description: t(DEFAULT_LOCALE, "network.tdh.explainer.metadataDescription"),
-  });
+  return getAppMetadata(
+    {
+      title: t(DEFAULT_LOCALE, "network.tdh.explainer.pageTitle"),
+      description: t(
+        DEFAULT_LOCALE,
+        "network.tdh.explainer.metadataDescription"
+      ),
+    },
+    { canonicalPath: "/network/tdh" }
+  );
 };

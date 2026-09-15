@@ -5,7 +5,8 @@ import JsonLdScript from "@/lib/structured-data/json-ld";
 import { buildHomePageJsonLd } from "@/lib/structured-data/site";
 import type { Metadata } from "next";
 
-const ROOT_PAGE_DESCRIPTION = "Building a decentralized network state";
+const ROOT_PAGE_DESCRIPTION =
+  "Building a decentralized network state: a decentralized, permissionless global network that funds, builds, and coordinates public-goods work across art, science, culture, and technology.";
 
 export default function Page() {
   return (
@@ -17,10 +18,13 @@ export default function Page() {
 }
 
 export function generateMetadata(): Metadata {
-  const metadata = getAppMetadata({
-    ogImage: `${publicEnv.BASE_ENDPOINT}/6529io-banner.png`,
-    twitterCard: "summary_large_image",
-  });
+  const metadata = getAppMetadata(
+    {
+      ogImage: `${publicEnv.BASE_ENDPOINT}/6529io-banner.png`,
+      twitterCard: "summary_large_image",
+    },
+    { canonicalPath: "/" }
+  );
 
   return {
     ...metadata,

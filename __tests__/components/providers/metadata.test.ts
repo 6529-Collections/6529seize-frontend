@@ -92,6 +92,37 @@ describe("Metadata functionality (migrated from _document.tsx)", () => {
       });
     });
 
+    it("uses the configured origin for metadata base and declared canonicals", () => {
+      publicEnv.BASE_ENDPOINT = "https://staging.6529.io";
+
+      const metadata = getAppMetadata(
+        { title: "Card" },
+        { canonicalPath: "/the-memes/1?focus=activity" }
+      );
+
+      expect(metadata.metadataBase?.toString()).toBe(
+        "https://staging.6529.io/"
+      );
+      expect(metadata.alternates?.canonical?.toString()).toBe(
+        "https://staging.6529.io/the-memes/1?focus=activity"
+      );
+      expect(metadata.openGraph?.url?.toString()).toBe(
+        "https://staging.6529.io/the-memes/1?focus=activity"
+      );
+    });
+
+    it("rejects non-route canonical values", () => {
+      expect(() =>
+        getAppMetadata({}, { canonicalPath: "https://unexpected.test/path" })
+      ).toThrow("metadata_canonical_path_must_be_absolute_path");
+      expect(() =>
+        getAppMetadata({}, { canonicalPath: "//unexpected.test/path" })
+      ).toThrow("metadata_canonical_path_must_be_absolute_path");
+      expect(() =>
+        getAppMetadata({}, { canonicalPath: "/\\unexpected.test/path" })
+      ).toThrow("metadata_canonical_path_must_be_absolute_path");
+    });
+
     it("uses 6529.io as the default production title", () => {
       const metadata = getAppMetadata();
 

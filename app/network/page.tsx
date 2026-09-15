@@ -17,9 +17,12 @@ export default function CommunityPage() {
 }
 
 export const generateMetadata = async () => {
-  return getAppMetadata({
-    title: "Network",
-    description: "Network",
-    twitterCard: "summary_large_image",
-  });
+  return getAppMetadata(
+    {
+      title: "Network",
+      description: "Explore 6529 network members and their activity.",
+      twitterCard: "summary_large_image",
+    },
+    { canonicalPath: "/network" }
+  );
 };

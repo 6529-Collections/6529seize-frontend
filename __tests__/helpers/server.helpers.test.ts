@@ -19,6 +19,7 @@ describe("server.helpers", () => {
     expect(mockedFetch).toHaveBeenCalledWith({
       endpoint: "identities/bob",
       headers: { h: "1" },
+      errorMode: "structured",
     });
   });
 
