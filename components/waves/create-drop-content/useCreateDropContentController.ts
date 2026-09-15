@@ -318,11 +318,28 @@ export function useCreateDropContentController({
 
   useCreateDropTyping({ markdown: getMarkdown, waveId: wave.id });
 
+  const { handleFileChange, removeFile, isPreparingFiles, preparingFiles } =
+    useCreateDropFileHandlers({
+      disabled: submitting,
+      drop,
+      files,
+      keepOptionsVisible: keepDesktopOptionsVisible,
+      waveId: wave.id,
+      externalAttachmentDrop,
+      onExternalAttachmentDropConsumed,
+      setToast,
+      setFiles,
+      setDrop,
+      setShowOptionsState,
+      closeOnNextInputRef,
+    });
+
   const hasPendingInlineImageUpload = useMemo(
     () =>
+      isPreparingFiles ||
       hasPendingInlineImageUploadMarkdown(getMarkdown) ||
       (drop ? hasPendingInlineImageUploadDrop(drop) : false),
-    [drop, getMarkdown]
+    [drop, getMarkdown, isPreparingFiles]
   );
 
   const isSlowModeSubmitBlocked = isChatBlockedBySlowMode && !isDropMode;
@@ -392,6 +409,7 @@ export function useCreateDropContentController({
     !isDropMode &&
     !isStormMode &&
     !submitting &&
+    !hasPendingInlineImageUpload &&
     editingDropId === null &&
     activeDrop === null &&
     (getMarkdown?.trim().length ?? 0) === 0 &&
@@ -611,20 +629,6 @@ export function useCreateDropContentController({
     onSwitchToDropModeWithUrl(normalizedCurationDropUrl);
   }, [normalizedCurationDropUrl, onSwitchToDropModeWithUrl]);
 
-  const { handleFileChange, removeFile } = useCreateDropFileHandlers({
-    drop,
-    files,
-    keepOptionsVisible: keepDesktopOptionsVisible,
-    waveId: wave.id,
-    externalAttachmentDrop,
-    onExternalAttachmentDropConsumed,
-    setToast,
-    setFiles,
-    setDrop,
-    setShowOptionsState,
-    closeOnNextInputRef,
-  });
-
   const handleSetShowOptions = useCallback(
     (next: boolean) => {
       setShowOptionsState({ scopeKey: wave.id, value: next });
@@ -787,7 +791,7 @@ export function useCreateDropContentController({
     closeMetadata,
     drop,
     files,
-    uploadingFiles,
+    uploadingFiles: [...uploadingFiles, ...preparingFiles],
     removeFile,
     termsSignatureFlowEnabled,
     suppressInitialHeightAnimation: focusOnInitialActiveDrop,

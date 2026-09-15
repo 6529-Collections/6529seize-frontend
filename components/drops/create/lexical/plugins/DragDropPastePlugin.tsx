@@ -2,7 +2,6 @@
 
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import { DRAG_DROP_PASTE } from "@lexical/rich-text";
-import { isMimeType, mediaFileReader } from "@lexical/utils";
 import type { EditorState, RangeSelection } from "lexical";
 import {
   $getSelection,
@@ -16,30 +15,22 @@ import { useEffect, useLayoutEffect, useRef } from "react";
 import { $createImageNode } from "../nodes/ImageNode";
 import { multiPartUpload } from "@/components/waves/create-wave/services/multiPartUpload";
 import { useAuth } from "@/components/auth/Auth";
-import {
-  ACCEPTED_FILE_TYPE_LABELS,
-  isSupportedUploadFile,
-} from "@/services/uploads/mediaUploadMimeType";
+import { getContentType } from "@/services/uploads/mediaUploadMimeType";
 
-const ACCEPTABLE_IMAGE_TYPES = [
-  "image/",
-  "image/heic",
-  "image/heif",
-  "image/gif",
-  "image/webp",
-];
+import { filterValidDropUploadFiles } from "@/services/uploads/dropUploadValidation";
+import { validateDropImageSignature } from "@/services/uploads/prepareDropImage";
+import { t } from "@/i18n/messages";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 
-const INLINE_IMAGE_UPLOAD_TIMEOUT_MS = 30_000;
+const isImageFile = (file: File): boolean =>
+  getContentType(file).startsWith("image/");
+
+const INLINE_IMAGE_UPLOAD_TIMEOUT_MS = 180_000;
 const TEXT_HTML_MIME_TYPE = "text/html";
 const TEXT_PLAIN_MIME_TYPE = "text/plain";
 const DATA_IMAGE_URL_PATTERN =
   /^data:(image\/[a-z0-9.+-]+);base64,([a-z0-9+/=\s]+)$/i;
 const NEWLINE_OR_TAB_REGEX = /(\r?\n|\t)/;
-
-interface ClipboardFiles {
-  readonly files: File[];
-  readonly hasHtmlDataImage: boolean;
-}
 
 function getFileExtension(mimeType: string): string {
   switch (mimeType.toLowerCase()) {
@@ -97,7 +88,7 @@ function getHtmlDataImageFiles(html: string): File[] {
     .filter((file): file is File => file !== null);
 }
 
-function getDataTransferFiles(dataTransfer: DataTransfer): ClipboardFiles {
+function getDataTransferFiles(dataTransfer: DataTransfer): File[] {
   const files = Array.from(dataTransfer.files ?? []);
   const seenFiles = new Set(files);
 
@@ -113,9 +104,7 @@ function getDataTransferFiles(dataTransfer: DataTransfer): ClipboardFiles {
     }
   }
 
-  const hasImageFile = files.some((file) =>
-    isMimeType(file, ACCEPTABLE_IMAGE_TYPES)
-  );
+  const hasImageFile = files.some((file) => isImageFile(file));
   const htmlDataImageFiles = getHtmlDataImageFiles(
     dataTransfer.getData(TEXT_HTML_MIME_TYPE)
   );
@@ -124,16 +113,7 @@ function getDataTransferFiles(dataTransfer: DataTransfer): ClipboardFiles {
     files.push(...htmlDataImageFiles);
   }
 
-  return {
-    files,
-    hasHtmlDataImage: htmlDataImageFiles.length > 0,
-  };
-}
-
-function isAcceptableAttachment(file: File): boolean {
-  return (
-    isSupportedUploadFile(file) && !isMimeType(file, ACCEPTABLE_IMAGE_TYPES)
-  );
+  return files;
 }
 
 function withTimeout<T>(
@@ -225,6 +205,7 @@ export default function DragDropPaste({
     | undefined;
 }): null {
   const { setToast } = useAuth();
+  const locale = useBrowserLocale();
   const onAttachmentFilesRef = useRef(onAttachmentFiles);
   const onUploadEditorStateChangeRef = useRef(onUploadEditorStateChange);
   const disabledRef = useRef(disabled);
@@ -244,6 +225,7 @@ export default function DragDropPaste({
   const [editor] = useLexicalComposerContext();
   useEffect(() => {
     let isMounted = true;
+    const isActive = () => isMounted && !disabledRef.current;
     const syncUploadEditorStateWhenDisabled = () => {
       if (!disabledRef.current) {
         return;
@@ -252,98 +234,56 @@ export default function DragDropPaste({
       onUploadEditorStateChangeRef.current?.(editor.getEditorState());
     };
 
-    const processFiles = (files: File[], plainText = "") => {
-      void (async () => {
-        const filesResult = await mediaFileReader(
-          files,
-          [ACCEPTABLE_IMAGE_TYPES].flatMap((x) => x)
+    const updateImageNode = (key: string, url?: string) => {
+      editor.update(
+        () => {
+          const node = $getNodeByKey(key);
+          if (url) node?.replace($createImageNode({ src: url }));
+          else node?.remove();
+        },
+        { onUpdate: syncUploadEditorStateWhenDisabled }
+      );
+    };
+
+    const insertImage = async (file: File) => {
+      let key: string | undefined;
+      try {
+        if (!isActive()) return;
+        editor.update(
+          () => {
+            const imageNode = $createImageNode({ src: "loading" });
+            $insertNodes([imageNode]);
+            key = imageNode.getKey();
+          },
+          { discrete: true }
         );
-
-        if (disabledRef.current || !isMounted) {
+        await validateDropImageSignature(file, locale);
+        if (!isActive()) {
+          if (isMounted && key) updateImageNode(key);
           return;
         }
+        const url = await uploadImage(file);
+        if (isMounted && key) updateImageNode(key, url);
+      } catch (error) {
+        if (!isMounted) return;
+        if (key) updateImageNode(key);
+        setToast({
+          type: "error",
+          title: t(locale, "drop.upload.invalidFile", { file: file.name }),
+          description: error instanceof Error ? error.message : String(error),
+          autoClose: false,
+        });
+      }
+    };
 
-        const currentOnAttachmentFiles = onAttachmentFilesRef.current;
-        const attachmentFiles = currentOnAttachmentFiles
-          ? files.filter(isAcceptableAttachment)
-          : [];
-
-        if (attachmentFiles.length > 0) {
-          currentOnAttachmentFiles?.(attachmentFiles);
-        }
-
-        if (filesResult.length === 0 && attachmentFiles.length === 0) {
-          setToast({
-            message: `Unsupported file type. Accepted Types: ${ACCEPTED_FILE_TYPE_LABELS}`,
-            type: "error",
-          });
-          return;
-        }
-
-        for (const { file } of filesResult) {
-          if (isMimeType(file, ACCEPTABLE_IMAGE_TYPES)) {
-            editor.update(() => {
-              const imageNode = $createImageNode({ src: "loading" });
-              $insertNodes([imageNode]);
-              const key = imageNode.getKey();
-              uploadImage(file)
-                .then((url: string) => {
-                  if (!isMounted) return;
-                  let replacedLoadingImage = false;
-                  editor.update(
-                    () => {
-                      const node = $getNodeByKey(key);
-                      if (node) {
-                        node.replace($createImageNode({ src: url }));
-                        replacedLoadingImage = true;
-                      }
-                    },
-                    {
-                      onUpdate: () => {
-                        if (replacedLoadingImage) {
-                          syncUploadEditorStateWhenDisabled();
-                        }
-                      },
-                    }
-                  );
-                })
-                .catch((err: unknown) => {
-                  if (!isMounted) return;
-                  let removedLoadingImage = false;
-                  editor.update(
-                    () => {
-                      const node = $getNodeByKey(key);
-                      if (node) {
-                        node.remove();
-                        removedLoadingImage = true;
-                      }
-                    },
-                    {
-                      onUpdate: () => {
-                        if (removedLoadingImage) {
-                          syncUploadEditorStateWhenDisabled();
-                        }
-                      },
-                    }
-                  );
-                  setToast({
-                    message:
-                      err instanceof Error
-                        ? err.message
-                        : "Error uploading image. Please try again.",
-                    type: "error",
-                  });
-                });
-            });
-          }
-        }
-
-        if (plainText) {
-          editor.update(() => {
-            insertPlainText(plainText);
-          });
-        }
-      })();
+    const processFiles = (files: File[], plainText = "") => {
+      if (!isActive()) return;
+      const validFiles = filterValidDropUploadFiles(files, setToast, locale);
+      const attachmentFiles = validFiles.filter((file) => !isImageFile(file));
+      if (attachmentFiles.length)
+        onAttachmentFilesRef.current?.(attachmentFiles);
+      for (const file of validFiles.filter(isImageFile)) void insertImage(file);
+      if (plainText) editor.update(() => insertPlainText(plainText));
     };
 
     const unregisterPaste = editor.registerCommand<ClipboardEvent>(
@@ -355,11 +295,7 @@ export default function DragDropPaste({
         }
 
         const clipboardFiles = getDataTransferFiles(clipboardData);
-        if (!clipboardFiles.hasHtmlDataImage) {
-          return false;
-        }
-
-        if (clipboardFiles.files.length === 0) {
+        if (clipboardFiles.length === 0) {
           return false;
         }
 
@@ -370,7 +306,7 @@ export default function DragDropPaste({
         }
 
         processFiles(
-          clipboardFiles.files,
+          clipboardFiles,
           clipboardData.getData(TEXT_PLAIN_MIME_TYPE)
         );
         return true;
@@ -396,6 +332,6 @@ export default function DragDropPaste({
       unregisterDragDropPaste();
       isMounted = false;
     };
-  }, [editor, setToast]);
+  }, [editor, setToast, locale]);
   return null;
 }
