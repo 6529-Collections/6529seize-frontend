@@ -22,7 +22,9 @@ linked section pages.
 
 ## Entry Points
 
-- Desktop: open a wave thread, open the right sidebar, and select a tab.
+- Desktop/tablet: open a wave thread, select the `Show right sidebar` icon, and select a tab.
+  `About` contains Add/Edit REP for eligible viewers and the labeled wave
+  share/copy action for every non-DM viewer.
 - Compact web layouts: select the `Wave details` button beside the wave-search
   action. It opens the same information sidebar as the desktop control without
   requiring the `More wave actions` menu.
@@ -96,7 +98,7 @@ linked section pages.
 ## User Journey
 
 1. Open a wave thread on `/waves/{waveId}` or `/messages/{waveId}`.
-2. Open the right sidebar from the desktop sidebar control or the compact
+2. Open the right sidebar from the desktop/tablet `Show right sidebar` icon or the compact
    `Wave details` header button.
 3. Select a desktop tab or native information pill. Use `More` for the
    remaining sections.

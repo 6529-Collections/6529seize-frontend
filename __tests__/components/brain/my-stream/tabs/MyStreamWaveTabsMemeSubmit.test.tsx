@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import React from "react";
 import MyStreamWaveTabsMemeSubmit from "@/components/brain/my-stream/tabs/MyStreamWaveTabsMemeSubmit";
 import { SubmissionStatus } from "@/hooks/useWave";
@@ -41,7 +41,7 @@ describe("MyStreamWaveTabsMemeSubmit", () => {
     useCountdown.mockReturnValue("soon");
   });
 
-  it("renders closed state", () => {
+  it("opens the closing time from the restricted submission control", async () => {
     const now = Date.now();
     renderComponent({
       ...baseInfo,
@@ -62,14 +62,17 @@ describe("MyStreamWaveTabsMemeSubmit", () => {
       "data-full-width",
       "false"
     );
-    expect(screen.getByTestId("closed")).toHaveClass("tw-whitespace-nowrap");
-    expect(screen.getByText("Submissions Closed")).toBeInTheDocument();
-    expect(screen.getByText("Closed")).toBeInTheDocument();
+    const reason = `Submissions closed on ${new Date(now - 500).toLocaleString()}`;
+    expect(screen.getByTestId("closed")).toHaveAccessibleDescription(reason);
+    fireEvent.click(screen.getByTestId("closed"));
+    const dialog = await screen.findByRole("dialog", {
+      name: "Submissions Closed",
+    });
+    expect(within(dialog).getByText(reason)).toBeVisible();
   });
 
   it("renders coming soon state", () => {
     const now = Date.now();
-    useCountdown.mockReturnValue("in 1h");
     renderComponent({
       ...baseInfo,
       participation: {
@@ -89,9 +92,9 @@ describe("MyStreamWaveTabsMemeSubmit", () => {
       "data-full-width",
       "false"
     );
-    expect(screen.getByTestId("info")).toHaveClass("tw-whitespace-nowrap");
-    expect(screen.getByText("Submissions Open in 1h")).toBeInTheDocument();
-    expect(screen.getByText("Opens in 1h")).toBeInTheDocument();
+    expect(screen.getByTestId("info")).toHaveAccessibleDescription(
+      `Submissions open on ${new Date(now + 3600).toLocaleString()}`
+    );
   });
 
   it("renders not eligible state", () => {
@@ -109,7 +112,9 @@ describe("MyStreamWaveTabsMemeSubmit", () => {
     expect(button).not.toBeDisabled();
     expect(screen.queryByTestId("info")).not.toBeInTheDocument();
     expect(screen.queryByText("Not Eligible")).not.toBeInTheDocument();
-    expect(screen.queryByText("Not Eligible to Submit")).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("Not Eligible to Submit")
+    ).not.toBeInTheDocument();
     expect(screen.getByText("How to Submit")).toBeInTheDocument();
   });
 
@@ -128,10 +133,9 @@ describe("MyStreamWaveTabsMemeSubmit", () => {
     expect(screen.getByTestId("info")).toHaveAccessibleName(
       "Submission Limit Reached"
     );
-    expect(screen.getByText("Limit Reached")).toBeInTheDocument();
-    expect(
-      screen.getByText("Submission Limit Reached (2)")
-    ).toBeInTheDocument();
+    expect(screen.getByTestId("info")).toHaveAccessibleDescription(
+      "You have already submitted the maximum allowed (2 submissions)"
+    );
   });
 
   it("labels an unavailable active submission as restricted", () => {
@@ -156,7 +160,7 @@ describe("MyStreamWaveTabsMemeSubmit", () => {
 
   it("renders active state with urgency and remaining badge", () => {
     const now = Date.now();
-    useCountdown.mockReturnValueOnce("3h").mockReturnValueOnce("3h");
+    useCountdown.mockReturnValue("3h");
     renderComponent({
       ...baseInfo,
       participation: {
