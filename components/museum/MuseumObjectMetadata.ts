@@ -28,13 +28,18 @@ export async function getMuseumObjectMetadata(
   }
 
   const publication = publicationState.publication;
-  const canonicalEntity = publication.entityGraph?.entities.find(
-    (entity) =>
-      (entity.id === objectId || entity.sourceRecordIds.includes(objectId)) &&
-      entity.entityStatus === "published" &&
-      entity.pageExposure === "canonical_page" &&
-      entity.canonicalRoute !== null
+  const workEntities = publication.entityGraph?.entities.filter(
+    (entity) => entity.entityType === "WORK"
   );
+  const workEntity =
+    workEntities?.find((entity) => entity.id === objectId) ??
+    workEntities?.find((entity) => entity.sourceRecordIds.includes(objectId));
+  const canonicalEntity =
+    workEntity?.entityStatus === "published" &&
+    workEntity.pageExposure === "canonical_page" &&
+    workEntity.canonicalRoute !== null
+      ? workEntity
+      : undefined;
   const metadataOptions = {
     canonicalPath: canonicalEntity?.canonicalRoute ?? undefined,
     robots: { index: canonicalEntity !== undefined, follow: true },
