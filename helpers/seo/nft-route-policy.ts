@@ -1,6 +1,6 @@
 export type NftCollectionRoute = "the-memes" | "meme-lab";
 
-export type NftFocusPolicy = {
+type NftFocusPolicy = {
   readonly canonicalFocus: string | null;
   readonly indexable: boolean;
   readonly includeInSitemap: boolean;
