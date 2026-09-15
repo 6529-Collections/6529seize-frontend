@@ -218,9 +218,8 @@ export default function CreateWaveInlineGroupIdentities(
           label={searchLabel}
           placeholder={searchPlaceholder}
           hideLabel={true}
-          inputClassName="tw-border-white/10 tw-bg-iron-950 tw-ring-white/10 desktop-hover:hover:tw-ring-white/15 desktop-hover:hover:focus:tw-ring-primary-400 focus:tw-border-primary-400 focus:tw-bg-iron-950 focus:tw-ring-primary-400"
+          inputClassName={`tw-border-white/10 tw-bg-iron-950 tw-ring-white/10 desktop-hover:hover:tw-ring-white/15 desktop-hover:hover:focus:tw-ring-primary-400 focus:tw-border-primary-400 focus:tw-bg-iron-950 focus:tw-ring-primary-400 ${quiet ? "tw-h-11 tw-pb-0 tw-pt-0 tw-text-sm" : ""}`}
           iconClassName="tw-text-iron-500"
-          appearance={quiet ? "modal" : "default"}
           resultsLayout={resultsLayout}
           sort="level"
         />
