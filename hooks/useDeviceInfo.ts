@@ -1,12 +1,22 @@
 "use client";
 
-import { useState, useCallback, useEffect, useRef } from "react";
+import {
+  useState,
+  useCallback,
+  useEffect,
+  useRef,
+  useSyncExternalStore,
+} from "react";
 import {
   hasTouchCapability,
   isTouchFirstEnvironment,
   subscribeToTouchFirstChanges,
 } from "@/helpers/touch-first.helpers";
 import useCapacitor from "./useCapacitor";
+
+const subscribeToHydration = () => () => undefined;
+const getHydratedSnapshot = () => true;
+const getServerHydratedSnapshot = () => false;
 
 interface DeviceInfo {
   readonly isMobileDevice: boolean;
@@ -24,6 +34,11 @@ interface DeviceInfo {
 
 export default function useDeviceInfo(): DeviceInfo {
   const { isCapacitor } = useCapacitor();
+  const isHydrated = useSyncExternalStore(
+    subscribeToHydration,
+    getHydratedSnapshot,
+    getServerHydratedSnapshot
+  );
   const touchDetectedRef = useRef(false);
 
   const getInfo = useCallback(
@@ -76,7 +91,18 @@ export default function useDeviceInfo(): DeviceInfo {
     [isCapacitor]
   );
 
-  const [info, setInfo] = useState<DeviceInfo>(() => getInfo(false));
+  // Match SSR only during actual hydration; later client-only mounts must not
+  // briefly choose a desktop layout before restoring their device capabilities.
+  const [info, setInfo] = useState<DeviceInfo>(() =>
+    isHydrated
+      ? getInfo(false)
+      : {
+          isMobileDevice: false,
+          hasTouchScreen: false,
+          isApp: false,
+          isAppleMobile: false,
+        }
+  );
 
   useEffect(() => {
     const hasEventListenerApi =
@@ -125,5 +151,7 @@ export default function useDeviceInfo(): DeviceInfo {
     };
   }, [getInfo]);
 
-  return info;
+  // Native identity is already hydration-safe and must not lag behind its
+  // source while the capability effect catches up.
+  return info.isApp === isCapacitor ? info : { ...info, isApp: isCapacitor };
 }
