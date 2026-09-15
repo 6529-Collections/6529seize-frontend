@@ -39,7 +39,7 @@ jest.mock("@lexical/react/LexicalHistoryPlugin", () => ({
 jest.mock("@lexical/react/LexicalOnChangePlugin", () => ({
   OnChangePlugin: () => <div />,
 }));
-jest.mock("@lexical/react/LexicalMarkdownShortcutPlugin", () => ({
+jest.mock("@/components/drops/create/lexical/plugins/MarkdownShortcutPlugin", () => ({
   MarkdownShortcutPlugin: () => <div />,
 }));
 jest.mock("@lexical/react/LexicalTabIndentationPlugin", () => ({
