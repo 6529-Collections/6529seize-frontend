@@ -567,13 +567,7 @@ test("set planning is the default and navigation opens observed listings", async
   expect(mutations).toEqual([]);
 });
 
-test("short set setups gain keyboard scroll clearance on mobile", async ({
-  page,
-}, info) => {
-  test.skip(
-    info.project.name !== "web-mobile-chromium",
-    "Keyboard clearance is a mobile layout concern"
-  );
+test("short set setups gain keyboard scroll clearance", async ({ page }) => {
   await mockCatalog(page);
   for (const intent of ["season", "full_set"] as const) {
     await page.goto(`/collect?collection=memes&intent=${intent}`, {
