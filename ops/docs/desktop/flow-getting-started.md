@@ -4,7 +4,7 @@ Parent: [Desktop index](README.md)
 
 ## Overview
 
-6529 Desktop, also called Core, is the Windows, macOS, and Linux app with local 6529 Desktop wallets, Ethereum indexing workers, independent TDH calculation, and a bundled IPFS node. These 6529 Desktop tools are separate from 6529 Mobile and desktop-browser website.
+6529 Desktop, formerly called 6529 Core, is the Windows, macOS, and Linux app with local wallets, Ethereum indexing workers, independent TDH calculation, and a bundled IPFS node. These Desktop tools are separate from 6529 Mobile and the website in a desktop browser.
 
 Get the official installer from [6529 Apps](https://6529.io/about/6529-apps), choose your operating system, install, and open the app.
 

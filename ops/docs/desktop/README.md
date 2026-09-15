@@ -1,15 +1,15 @@
 # 6529 Desktop
 
+Parent: [Documentation](../README.md)
 
 ## Naming
 
 The official current names are **6529 Desktop** and **6529 Mobile**. **6529 Core** is the former name of 6529 Desktop and remains a help-search alias for users familiar with the old name. User-facing guidance should otherwise use the current names.
-Parent: [Documentation](../README.md)
 
 ## Overview
 
-Core adds local Ethereum indexing, independent TDH calculation, encrypted Core
-wallets, and a bundled IPFS node to the 6529 desktop application. These guides
+6529 Desktop provides local Ethereum indexing, independent TDH calculation,
+encrypted wallets, and a bundled IPFS node. These guides
 refer to the dedicated **6529 Desktop** menu, not a browser on a desktop computer
 or the 6529 Mobile app.
 

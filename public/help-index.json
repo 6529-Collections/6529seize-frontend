@@ -9261,7 +9261,7 @@
     {
       "id": "wallets.mobile-overview",
       "kind": "workflow",
-      "title": "6529 6529 Mobile App Wallets overview",
+      "title": "6529 Mobile App Wallets overview",
       "aliases": [
         "mobile wallets",
         "mobile app wallets",
@@ -9294,7 +9294,7 @@
     {
       "id": "wallets.mobile-create-import",
       "kind": "workflow",
-      "title": "Create or import a wallet in the 6529 6529 Mobile",
+      "title": "Create or import a wallet in 6529 Mobile",
       "aliases": [
         "create mobile wallet",
         "create app wallet",
@@ -9329,7 +9329,7 @@
     {
       "id": "wallets.mobile-connect",
       "kind": "workflow",
-      "title": "Connect a saved App Wallet in the 6529 6529 Mobile",
+      "title": "Connect a saved App Wallet in 6529 Mobile",
       "aliases": [
         "connect mobile wallet",
         "connect app wallet",
@@ -9360,7 +9360,7 @@
     {
       "id": "wallets.mobile-backup-recovery",
       "kind": "workflow",
-      "title": "Back up and recover a 6529 6529 Mobile App Wallet",
+      "title": "Back up and recover a 6529 Mobile App Wallet",
       "aliases": [
         "backup mobile wallet",
         "back up mobile wallet",
@@ -9400,7 +9400,7 @@
     {
       "id": "wallets.mobile-delete-troubleshooting",
       "kind": "workflow",
-      "title": "Delete or troubleshoot a 6529 6529 Mobile App Wallet",
+      "title": "Delete or troubleshoot a 6529 Mobile App Wallet",
       "aliases": [
         "delete mobile wallet",
         "delete app wallet",
