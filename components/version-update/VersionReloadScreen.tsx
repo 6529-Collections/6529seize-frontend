@@ -1,5 +1,8 @@
 import { VERSION_RELOAD_MESSAGES } from "@/i18n/messages/new-version-toast";
-import { VERSION_RELOAD_SCREEN_ID } from "./versionReload";
+import {
+  VERSION_RELOAD_IMAGE_SRC,
+  VERSION_RELOAD_SCREEN_ID,
+} from "./versionReload";
 
 // Inline styles keep reload feedback independent of the incoming CSS/JS bundles.
 export const VERSION_RELOAD_STYLES = `
@@ -33,11 +36,12 @@ export default function VersionReloadScreen() {
     >
       {/* eslint-disable-next-line @next/next/no-img-element -- The reload cover must render its cached local asset without client image code. */}
       <img
-        src="/rocket-refresh-small.png"
+        src={VERSION_RELOAD_IMAGE_SRC}
         alt=""
         width={60}
         height={60}
-        loading="lazy"
+        loading="eager"
+        decoding="sync"
       />
       {Object.entries(VERSION_RELOAD_MESSAGES).map(([locale, label]) => (
         <p key={locale} data-reload-locale={locale} lang={locale}>

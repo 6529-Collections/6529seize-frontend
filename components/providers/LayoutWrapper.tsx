@@ -3,7 +3,7 @@
 import { usePathname } from "next/navigation";
 import { useEffect, useSyncExternalStore } from "react";
 import { ErrorBoundary } from "react-error-boundary";
-import { finishVersionReload } from "@/components/version-update/versionReload";
+import { finishVersionReloadWhenReady } from "@/components/version-update/versionReload";
 import FooterWrapper from "@/components/footer/FooterWrapper";
 import MobileLayout from "@/components/layout/MobileLayout";
 import SmallScreenLayout from "@/components/layout/SmallScreenLayout";
@@ -66,7 +66,7 @@ export default function LayoutWrapper({
 
   useEffect(() => {
     const flushAfterPaint = () => {
-      finishVersionReload();
+      void finishVersionReloadWhenReady();
       markMobileLaunchStep("first_useful_app_shell");
       scheduleMobileLaunchFlush("shell_paint", 5000);
     };
