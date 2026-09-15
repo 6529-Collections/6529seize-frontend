@@ -3,13 +3,16 @@
 ## Overview
 
 When an active non-DM wave has a description drop, wave headers show a compact
-subtitle preview under the wave title. Selecting the title/preview opens a
-popover with the full description drop content.
+subtitle preview under the wave title. Selecting the description preview opens
+a popover with the full description drop content. Compact web keeps this
+popover on the wave-name button.
 
 Users can:
 
-- See a one-line preview derived from the wave description drop.
-- Open full description content directly from header title area.
+- See a short one-line preview derived from the wave description drop. Desktop
+  and tablet previews have a limited width, with an ellipsis and chevron when
+  the text is longer than the available space.
+- Open full description content directly from the header identity block.
 - Close the popover with outside click/tap, `Escape`, or the same trigger.
 
 ## Location in the Site
@@ -42,7 +45,8 @@ Users can:
 1. Open a non-DM wave thread route.
 2. Select the wave title/preview trigger (`Show wave description`) in:
    - app header center title area, or
-   - wave tabs header title/subtitle area.
+   - desktop/tablet wave tabs header description preview, or
+   - compact web wave-name button.
 
 ## User Journey
 

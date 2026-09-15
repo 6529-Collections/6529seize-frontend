@@ -161,6 +161,9 @@ if (!process.env.PUBLIC_RUNTIME) {
 if (!process.env.ALCHEMY_API_KEY) {
   process.env.ALCHEMY_API_KEY = "x";
 }
+if (!process.env["ETHEREUM_RPC_URL"]) {
+  process.env["ETHEREUM_RPC_URL"] = "https://ethereum-rpc.example.test";
+}
 
 // Mock ResizeObserver for react-tooltip
 globalThis.ResizeObserver = class ResizeObserver {
