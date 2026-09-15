@@ -8,6 +8,10 @@ The `6529 Apps` page presents official mobile and desktop downloads in one
 place. Mobile and desktop options remain visible together rather than being
 hidden behind tabs.
 
+Ask `@help6529` "is there an app?" or "is there a 6529 app?" to find both
+6529 Mobile and 6529 Desktop and the official download page. You do not need to
+choose a platform before asking.
+
 ## Location in the Site
 
 - Route: `/about/6529-apps`
@@ -73,3 +77,4 @@ hidden behind tabs.
 - [Header Search Modal](feature-header-search-modal.md)
 - [Page Sharing and Device Connection](feature-share-modal.md)
 - [Mobile App Landing Page](feature-mobile-app-landing.md)
+- [Get started with 6529 Desktop](../desktop/flow-getting-started.md)
