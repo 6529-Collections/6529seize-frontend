@@ -697,7 +697,7 @@ describe("testing strategy CI plan", () => {
     expect(museumBrowserRun).not.toContain("--project=web-desktop-firefox");
     expect(museumBrowserRun).not.toContain("--project=web-desktop-webkit");
     expect(museumBrowserRun).toContain(
-      'contract: "museum-playwright-isolated-project-v3"'
+      'contract: "museum-playwright-isolated-project-v4"'
     );
     expect(museumBrowserRun).toContain(
       "Museum execution overlap or unexpected test"
@@ -726,15 +726,15 @@ describe("testing strategy CI plan", () => {
       "Museum $MUSEUM_PROJECT Network IA gate exceeded its 10-minute timeout."
     );
     expect(museumBrowserRun).toContain(
-      'PLAYWRIGHT_OUTPUT_DIR="test-results/playwright/museum-remaining"'
+      'bash scripts/museum-ci-remaining.sh "${selected_specs[@]}"'
     );
     expect(museumBrowserRun).toContain(
-      'PLAYWRIGHT_HTML_REPORT_DIR="playwright-report/museum-remaining"'
+      "for (const entries of [gate, rights, remaining])"
     );
     expect(museumBrowserRun).toContain(
       'NEXT_DEV_DIST_DIR=".next-playwright-${MUSEUM_PROJECT}"'
     );
-    expect(museumBrowserRun).toContain("./bin/6529 run dev");
+    expect(museumBrowserRun).toContain("bash scripts/museum-ci-dev.sh");
     expect(museumBrowserRun).not.toContain("PORT_SEARCH_LIMIT=0");
     expect(museumBrowserRun).toContain("PLAYWRIGHT_SKIP_WEB_SERVER=1");
     expect(museumBrowserRun).toContain("trap cleanup_museum_server EXIT");
@@ -743,9 +743,6 @@ describe("testing strategy CI plan", () => {
     );
     expect(museumBrowserRun).toContain(
       "timeout --signal=TERM --kill-after=30s 20m"
-    );
-    expect(museumBrowserRun).toContain(
-      '| sed -u "s/^/[museum $MUSEUM_PROJECT remaining] /"'
     );
     expect(museumBrowserRun).toContain('| tee "$museum_remaining_log"');
     expect(museumBrowserRun).toContain(
@@ -758,7 +755,9 @@ describe("testing strategy CI plan", () => {
     expect(museumBrowserRun).toContain("--workers=1");
     expect(museumBrowserRun).not.toContain("--workers=2");
     expect(museumBrowserRun).not.toContain("wait -n");
-    expect(museumBrowserRun).not.toContain("setsid");
+    expect(museumBrowserRun).toContain("setsid bash scripts/museum-ci-dev.sh");
+    expect(museumBrowserRun).toContain('kill -TERM -- "-$museum_server_pid"');
+    expect(museumBrowserRun).toContain('kill -KILL -- "-$museum_server_pid"');
     expect(museumBrowserRun).not.toContain("./bin/6529 run base-build");
     expect(museumBrowserRun).not.toContain("start:standalone");
     expect(parsed.jobs["installed-checks"]).toMatchObject({

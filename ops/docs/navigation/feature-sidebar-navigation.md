@@ -6,7 +6,8 @@ Parent: [Navigation Index](README.md)
 
 On web layouts, route switching is sidebar-first.
 
-- Desktop: fixed left rail with collapse/expand toggle.
+- Desktop: fixed left rail with a collapse/expand row at the bottom, below the
+  account area.
 - Narrow desktop web: collapsed icon rail that can open as an overlay panel.
 - Touch small-screen web: header menu button opens the same sidebar as overlay.
 - In collapsed rail mode, flyout submenus keep the same subsection labels and
@@ -45,10 +46,13 @@ On web layouts, route switching is sidebar-first.
   routes), connected-only `Notifications`, then the profile control.
 - Bottom account area: connect action, loading placeholders, and the connected
   user menu.
+- Last row: `Expand` in the collapsed rail, `Collapse` on expanded desktop,
+  or `Close` in the narrow-desktop overlay and small-screen menu.
 
 ## Entry Points
 
-- Desktop and narrow desktop web: use sidebar chevron toggle.
+- Desktop and narrow desktop web: use the bottom chevron row, below the account
+  area. The collapsed row shows an `Expand` tooltip on hover.
 - Touch small-screen web: use header menu button.
 - Select direct rows or expand groups for nested routes.
 - Open `Museum` directly from the primary sidebar row.
@@ -76,6 +80,7 @@ On web layouts, route switching is sidebar-first.
    `Data & Developer Tools`.
 6. Select a destination and watch active state update.
 7. In overlay mode, sidebar closes after route change.
+8. Use the last row to collapse the desktop sidebar or close the overlay menu.
 
 ## Common Scenarios
 
@@ -127,6 +132,18 @@ On web layouts, route switching is sidebar-first.
 
 ## Edge Cases
 
+- At 1280px and wider, the sidebar starts collapsed and remembers its state for
+  the browser session. The bottom toggle icon stays in place when switching
+  between collapsed and expanded states, so a second click works in the same spot.
+- Below 1280px, expanding the rail opens an overlay. Small-screen touch layouts
+  open it from the header menu button; both overlays have a bottom `Close` row.
+- The account area and final toggle remain visible in short windows while the
+  navigation and utility rows above them scroll. The last row leaves room for
+  mobile safe areas, and the account menu opens above it with its own scrolling
+  when needed.
+- The toggle announces `Expand main sidebar`, `Collapse main sidebar`, or
+  `Close main sidebar` and exposes whether the sidebar is expanded. Keyboard
+  focus follows the account area and has a visible ring.
 - `DMs` unread dots stay in the main nav; `Notifications` unread dots stay
   on the lower connected-only row.
 - `Discover Waves` is a secondary Waves panel/search link and routes to
@@ -166,7 +183,8 @@ On web layouts, route switching is sidebar-first.
 
 - While identity data loads, account area shows placeholders.
 - If profile handle is missing, `Profile` falls back to the wallet address.
-- If overlay looks stuck, close with backdrop, `Escape`, or route change.
+- If overlay looks stuck, use the bottom `Close` row, backdrop, `Escape`, or
+  route change.
 - If submenu state looks stale, toggle the group or rail again.
 - If `Drop Forge` is missing, verify the connected wallet can access the landing
   route and wait for permission checks to finish.
