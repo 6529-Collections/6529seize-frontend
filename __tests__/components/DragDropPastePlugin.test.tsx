@@ -4,6 +4,14 @@ import { act, render } from "@testing-library/react";
 import DragDropPastePlugin from "@/components/drops/create/lexical/plugins/DragDropPastePlugin";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 
+jest.mock(
+  "@/components/drops/create/lexical/plugins/InlineImageViewportPlugin",
+  () => ({
+    __esModule: true,
+    default: () => null,
+  })
+);
+
 jest.mock("@/services/uploads/prepareDropImage", () => ({
   validateDropImageSignature: jest.fn(() => Promise.resolve()),
 }));
@@ -24,6 +32,7 @@ const update = (fn: any, options?: { onUpdate?: () => void }) => {
 };
 let dragDropPasteHandler: any;
 let pasteHandler: any;
+let updateListener: (event: { tags: Set<string> }) => void;
 const editor = {
   registerCommand: jest.fn((cmd: any, fn: any) => {
     if (cmd === "PASTE_COMMAND") {
@@ -34,6 +43,10 @@ const editor = {
     return () => {};
   }),
   getEditorState: jest.fn(() => editorState),
+  registerUpdateListener: jest.fn((listener) => {
+    updateListener = listener;
+    return () => {};
+  }),
   update,
 } as any;
 
@@ -42,12 +55,14 @@ jest.mock("@lexical/react/LexicalComposerContext", () => ({
 }));
 jest.mock("@/components/drops/create/lexical/nodes/ImageNode", () => ({
   $createImageNode: jest.fn(() => ({ getKey: () => "1" })),
+  $isImageNode: jest.fn((node) => node !== null),
 }));
 jest.mock("@/components/waves/create-wave/services/multiPartUpload", () => ({
   multiPartUpload: jest.fn(() => Promise.resolve({ url: "uploaded" })),
 }));
 
 jest.mock("lexical", () => ({
+  $addUpdateTag: jest.fn(),
   $getSelection: jest.fn(() => selectionMock),
   $getNodeByKey: jest.fn(() => ({ replace: jest.fn(), remove: jest.fn() })),
   $insertNodes: jest.fn(),
@@ -71,12 +86,16 @@ const { useAuth } = require("@/components/auth/Auth");
 describe("DragDropPastePlugin", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    editor.update = update;
     jest.mocked(validateDropImageSignature).mockResolvedValue(undefined);
     selectionMock.insertParagraph.mockClear();
     selectionMock.insertRawText.mockClear();
     selectionMock.insertText.mockClear();
     (useLexicalComposerContext as jest.Mock).mockReturnValue([editor]);
     (multiPartUpload as jest.Mock).mockResolvedValue({ url: "uploaded" });
+    ($getNodeByKey as jest.Mock).mockReturnValue(createMockImageNode());
+    URL.createObjectURL = jest.fn(() => "blob:preview");
+    URL.revokeObjectURL = jest.fn();
   });
 
   afterEach(() => {
@@ -94,6 +113,55 @@ describe("DragDropPastePlugin", () => {
     expect(multiPartUpload).toHaveBeenCalled();
     expect($insertNodes).toHaveBeenCalled();
     expect($getNodeByKey).toHaveBeenCalledWith("1");
+    expect(URL.revokeObjectURL).toHaveBeenCalledWith("blob:preview");
+  });
+
+  it("waits for a nested paste transaction to commit before starting its uploads", async () => {
+    let commit = () => {};
+    editor.update = (run: () => void, options?: { onUpdate?: () => void }) => {
+      commit = () => {
+        editor.update = update;
+        run();
+        options?.onUpdate?.();
+      };
+    };
+    renderPlugin();
+    act(() => {
+      dragDropPasteHandler([new File(["a"], "a.png", { type: "image/png" })]);
+    });
+    expect(multiPartUpload).not.toHaveBeenCalled();
+    await act(async () => commit());
+    expect($insertNodes).toHaveBeenCalledTimes(1);
+    expect(multiPartUpload).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not recreate an image deleted while its upload is in flight", async () => {
+    let finish: (value: { url: string }) => void = () => {};
+    (multiPartUpload as jest.Mock).mockReturnValue(
+      new Promise((resolve) => {
+        finish = resolve;
+      })
+    );
+    renderPlugin();
+    await act(async () => {
+      dragDropPasteHandler([new File(["a"], "a.png", { type: "image/png" })]);
+    });
+    ($getNodeByKey as jest.Mock).mockReturnValue(null);
+    await act(async () => finish({ url: "uploaded" }));
+    expect($insertNodes).toHaveBeenCalledTimes(1);
+    expect(toastMock).not.toHaveBeenCalled();
+  });
+
+  it("resolves a pending placeholder restored by redo without another upload", async () => {
+    renderPlugin();
+    await act(async () => {
+      dragDropPasteHandler([new File(["a"], "a.png", { type: "image/png" })]);
+    });
+    const restoredNode = createMockImageNode();
+    ($getNodeByKey as jest.Mock).mockReturnValue(restoredNode);
+    act(() => updateListener({ tags: new Set(["historic"]) }));
+    expect(restoredNode.setSrc).toHaveBeenCalledWith("uploaded");
+    expect(multiPartUpload).toHaveBeenCalledTimes(1);
   });
 
   it("uploads pasted HTML data images before Lexical imports the base64 src", async () => {
@@ -290,7 +358,9 @@ describe("DragDropPastePlugin", () => {
 
   it("removes the pending image if disabled before validation finishes", async () => {
     const remove = jest.fn();
-    ($getNodeByKey as jest.Mock).mockReturnValue({ remove });
+    ($getNodeByKey as jest.Mock).mockReturnValue(
+      createMockImageNode({ remove })
+    );
     let resolveFileReader: (() => void) | undefined;
     const imageFile = new File(["a"], "a.png", { type: "image/png" });
     const attachmentFile = new File(["b"], "b.pdf", {
@@ -342,7 +412,9 @@ describe("DragDropPastePlugin", () => {
 
   it("removes a rejected image and synchronizes the disabled editor", async () => {
     const remove = jest.fn();
-    ($getNodeByKey as jest.Mock).mockReturnValue({ remove });
+    ($getNodeByKey as jest.Mock).mockReturnValue(
+      createMockImageNode({ remove })
+    );
     let rejectValidation!: (error: Error) => void;
     jest.mocked(validateDropImageSignature).mockReturnValue(
       new Promise((_, reject) => {
@@ -374,10 +446,12 @@ describe("DragDropPastePlugin", () => {
     expect(onUploadEditorStateChange).toHaveBeenCalledWith(editorState);
   });
 
-  it("replaces loading image after parent rerenders with a new attachment handler", async () => {
+  it("completes the same image after parent rerenders with a new attachment handler", async () => {
     let resolveUpload: ((value: { url: string }) => void) | undefined;
-    const replace = jest.fn();
-    ($getNodeByKey as jest.Mock).mockReturnValue({ replace });
+    const setSrc = jest.fn();
+    ($getNodeByKey as jest.Mock).mockReturnValue(
+      createMockImageNode({ setSrc })
+    );
     (multiPartUpload as jest.Mock).mockReturnValue(
       new Promise((resolve) => {
         resolveUpload = resolve;
@@ -399,14 +473,16 @@ describe("DragDropPastePlugin", () => {
       await Promise.resolve();
     });
 
-    expect(replace).toHaveBeenCalled();
+    expect(setSrc).toHaveBeenCalledWith("uploaded");
   });
 
   it("finishes an in-flight inline upload after becoming disabled and syncs editor state", async () => {
     let resolveUpload: ((value: { url: string }) => void) | undefined;
-    const replace = jest.fn();
+    const setSrc = jest.fn();
     const onUploadEditorStateChange = jest.fn();
-    ($getNodeByKey as jest.Mock).mockReturnValue({ replace });
+    ($getNodeByKey as jest.Mock).mockReturnValue(
+      createMockImageNode({ setSrc })
+    );
     (multiPartUpload as jest.Mock).mockReturnValue(
       new Promise((resolve) => {
         resolveUpload = resolve;
@@ -435,7 +511,7 @@ describe("DragDropPastePlugin", () => {
       await Promise.resolve();
     });
 
-    expect(replace).toHaveBeenCalled();
+    expect(setSrc).toHaveBeenCalledWith("uploaded");
     expect(onUploadEditorStateChange).toHaveBeenCalledWith(editorState);
   });
 
@@ -443,7 +519,9 @@ describe("DragDropPastePlugin", () => {
     let rejectUpload: ((reason: Error) => void) | undefined;
     const remove = jest.fn();
     const onUploadEditorStateChange = jest.fn();
-    ($getNodeByKey as jest.Mock).mockReturnValue({ remove });
+    ($getNodeByKey as jest.Mock).mockReturnValue(
+      createMockImageNode({ remove })
+    );
     (multiPartUpload as jest.Mock).mockReturnValue(
       new Promise((_resolve, reject) => {
         rejectUpload = reject;
@@ -485,7 +563,9 @@ describe("DragDropPastePlugin", () => {
   it("removes loading image and shows an error when inline upload hangs", async () => {
     jest.useFakeTimers();
     const remove = jest.fn();
-    ($getNodeByKey as jest.Mock).mockReturnValue({ remove });
+    ($getNodeByKey as jest.Mock).mockReturnValue(
+      createMockImageNode({ remove })
+    );
     (multiPartUpload as jest.Mock).mockReturnValue(new Promise(() => {}));
 
     renderPlugin();
@@ -513,7 +593,9 @@ describe("DragDropPastePlugin", () => {
     jest.useFakeTimers();
     const remove = jest.fn();
     const onUploadEditorStateChange = jest.fn();
-    ($getNodeByKey as jest.Mock).mockReturnValue({ remove });
+    ($getNodeByKey as jest.Mock).mockReturnValue(
+      createMockImageNode({ remove })
+    );
     (multiPartUpload as jest.Mock).mockReturnValue(new Promise(() => {}));
 
     const { rerender } = render(
@@ -546,4 +628,15 @@ describe("DragDropPastePlugin", () => {
 
 function renderPlugin(props = {}) {
   return render(<DragDropPastePlugin {...props} />);
+}
+
+function createMockImageNode(overrides = {}) {
+  return {
+    isAttached: () => true,
+    getSrc: () => "loading",
+    setSrc: jest.fn(),
+    setPreviewSrc: jest.fn(),
+    remove: jest.fn(),
+    ...overrides,
+  };
 }

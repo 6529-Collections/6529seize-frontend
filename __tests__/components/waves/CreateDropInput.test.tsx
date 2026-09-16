@@ -6,6 +6,7 @@ import EditLastDropArrowUpPlugin from "@/components/waves/EditLastDropArrowUpPlu
 import { ActiveDropAction } from "@/types/dropInteractionTypes";
 
 const mockRegisterCommand = jest.fn(() => jest.fn());
+const mockSetEditable = jest.fn();
 
 // Mock all lexical plugins and context
 jest.mock("@lexical/react/LexicalComposer", () => ({
@@ -15,6 +16,7 @@ jest.mock("@lexical/react/LexicalComposerContext", () => ({
   useLexicalComposerContext: () => [
     {
       registerCommand: mockRegisterCommand,
+      setEditable: mockSetEditable,
       update: jest.fn(),
     },
   ],
