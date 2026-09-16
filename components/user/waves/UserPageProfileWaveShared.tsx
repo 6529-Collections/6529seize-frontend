@@ -167,7 +167,7 @@ export function OfficialWaveSummary({
           <span className="tw-flex-shrink-0 tw-text-iron-400">
             {t(locale, "profileCuration.header.source")}
           </span>
-          <span className="tw-min-w-0 tw-truncate tw-font-medium tw-leading-6 tw-underline tw-decoration-primary-300/70 tw-underline-offset-4 tw-transition-colors tw-duration-150 group-hover:tw-decoration-primary-100">
+          <span className="tw-min-w-0 tw-truncate tw-font-medium tw-leading-6 tw-no-underline">
             {waveName}
           </span>
           <ArrowTopRightOnSquareIcon
