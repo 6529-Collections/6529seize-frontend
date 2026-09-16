@@ -104,11 +104,11 @@ export default function LeaderboardFilterScroll({
         <>
           <div
             aria-hidden="true"
-            className={`${styles["networkFiltersFade"]} ${styles["networkFiltersFadeLeft"]}`}
+            className={`${styles["networkFiltersFade"]!} ${styles["networkFiltersFadeLeft"]!}`}
           />
           <button
             aria-label={t(locale, "user.collected.filters.scrollLeft")}
-            className={`${styles["networkFiltersScrollButton"]} ${styles["networkFiltersScrollButtonLeft"]}`}
+            className={`${styles["networkFiltersScrollButton"]!} ${styles["networkFiltersScrollButtonLeft"]!}`}
             onClick={() => scrollFilters(-1)}
             type="button"
           >
@@ -121,11 +121,11 @@ export default function LeaderboardFilterScroll({
         <>
           <div
             aria-hidden="true"
-            className={`${styles["networkFiltersFade"]} ${styles["networkFiltersFadeRight"]}`}
+            className={`${styles["networkFiltersFade"]!} ${styles["networkFiltersFadeRight"]!}`}
           />
           <button
             aria-label={t(locale, "user.collected.filters.scrollRight")}
-            className={`${styles["networkFiltersScrollButton"]} ${styles["networkFiltersScrollButtonRight"]}`}
+            className={`${styles["networkFiltersScrollButton"]!} ${styles["networkFiltersScrollButtonRight"]!}`}
             onClick={() => scrollFilters(1)}
             type="button"
           >
