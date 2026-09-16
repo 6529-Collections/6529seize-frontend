@@ -6,6 +6,7 @@ import type { ApiWaveDropsFeedV2 } from "@/generated/models/ApiWaveDropsFeedV2";
 import { getWavePathRoute } from "@/helpers/navigation.helpers";
 import { markdownToPlainText } from "@/helpers/waves/waveDescriptionPreview";
 import { anonymousSsrFetch } from "@/lib/fetch/ssrFetch";
+import { stripHtmlTags } from "@/lib/text/html";
 import { publicEnv } from "@/config/env";
 
 export const PUBLIC_WAVE_FEED_LIMIT = 10;
@@ -41,11 +42,13 @@ const toBoundedPlainText = (
   value: string | null | undefined,
   maxLength: number
 ): string | null => {
-  const plainText = markdownToPlainText(value ?? "", {
-    includeImageUrls: false,
-    includeLinkDestinations: false,
-  })
-    .replaceAll(/<[^>]*>/g, " ")
+  const plainText = stripHtmlTags(
+    markdownToPlainText(value ?? "", {
+      includeImageUrls: false,
+      includeLinkDestinations: false,
+    }),
+    { preserveTagSpacing: true }
+  )
     .replaceAll(/\s+/g, " ")
     .trim();
 
