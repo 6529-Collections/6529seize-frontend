@@ -37,11 +37,10 @@ jest.mock("@/hooks/useBrowserLocale", () => ({
 beforeEach(() => jest.clearAllMocks());
 
 describe("ImageComponent", () => {
-  it("shows the local preview and announces uploading until the remote image is ready", () => {
+  it("shows the local preview until the remote image is ready", () => {
     const { rerender } = render(
       <ImageComponent nodeKey="image" src="loading" previewSrc="blob:local" />
     );
-    expect(screen.getByRole("status")).toHaveTextContent("Uploading image");
     expect(screen.getByRole("img")).toHaveAttribute("src", "blob:local");
     expect(
       screen.queryByRole("button", { name: "View full image" })

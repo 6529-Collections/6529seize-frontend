@@ -1,6 +1,6 @@
 import { validateDropImageSignature } from "@/services/uploads/prepareDropImage";
 import React from "react";
-import { act, render } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import DragDropPastePlugin from "@/components/drops/create/lexical/plugins/DragDropPastePlugin";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 
@@ -121,6 +121,25 @@ describe("DragDropPastePlugin", () => {
     expect($insertNodes).toHaveBeenCalled();
     expect($getNodeByKey).toHaveBeenCalledWith("1");
     expect(URL.revokeObjectURL).toHaveBeenCalledWith("blob:preview");
+  });
+
+  it("updates an existing live region while an image is uploading", async () => {
+    let finish: (value: { url: string }) => void = () => {};
+    (multiPartUpload as jest.Mock).mockReturnValue(
+      new Promise((resolve) => {
+        finish = resolve;
+      })
+    );
+    renderPlugin();
+    const status = screen.getByRole("status");
+    expect(status).toBeEmptyDOMElement();
+    await act(async () => {
+      dragDropPasteHandler([new File(["a"], "a.png", { type: "image/png" })]);
+    });
+    expect(screen.getByRole("status")).toBe(status);
+    expect(status).toHaveTextContent("Uploading image");
+    await act(async () => finish({ url: "uploaded" }));
+    expect(status).toBeEmptyDOMElement();
   });
 
   it("waits for a nested paste transaction to commit before starting its uploads", async () => {

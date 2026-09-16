@@ -13,7 +13,7 @@ import {
   COMMAND_PRIORITY_LOW,
   PASTE_COMMAND,
 } from "lexical";
-import { useEffect, useLayoutEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { $createImageNode, $isImageNode, ImageNode } from "../nodes/ImageNode";
 import InlineImageViewportPlugin from "./InlineImageViewportPlugin";
 import { multiPartUpload } from "@/components/waves/create-wave/services/multiPartUpload";
@@ -209,6 +209,7 @@ export default function DragDropPaste({
 }) {
   const { setToast } = useAuth();
   const locale = useBrowserLocale();
+  const [pendingUploads, setPendingUploads] = useState(0);
   const onAttachmentFilesRef = useRef(onAttachmentFiles);
   const onUploadEditorStateChangeRef = useRef(onUploadEditorStateChange);
   const disabledRef = useRef(disabled);
@@ -326,6 +327,7 @@ export default function DragDropPaste({
         const previewUrl = previewUrls.get(key);
         if (previewUrl) URL.revokeObjectURL(previewUrl);
         previewUrls.delete(key);
+        if (isMounted) setPendingUploads((count) => count - 1);
       }
     };
 
@@ -362,8 +364,10 @@ export default function DragDropPaste({
           // Paste/drop commands already run inside a Lexical update. Start
           // uploads after that transaction has actually inserted the nodes.
           onUpdate: () => {
+            if (!isMounted) return;
+            setPendingUploads((count) => count + uploads.length);
             for (const { file, key, token } of uploads) {
-              if (isMounted) void uploadInsertedImage(file, key, token);
+              void uploadInsertedImage(file, key, token);
             }
           },
         }
@@ -420,5 +424,12 @@ export default function DragDropPaste({
       previewUrls.clear();
     };
   }, [editor, setToast]);
-  return <InlineImageViewportPlugin />;
+  return (
+    <>
+      <InlineImageViewportPlugin />
+      <span role="status" className="tw-sr-only">
+        {pendingUploads > 0 ? t(locale, "drop.composer.uploadingImage") : ""}
+      </span>
+    </>
+  );
 }

@@ -59,6 +59,7 @@ export default function ImageComponent({
 
   useEffect(() => {
     const onDelete = (event: KeyboardEvent) => {
+      if (!editor.isEditable()) return false;
       const selection = $getSelection();
       if (!$isNodeSelection(selection) || !selection.has(nodeKey)) return false;
       event.preventDefault();
@@ -128,15 +129,10 @@ export default function ImageComponent({
       </button>
       {isUploading && (
         <span
-          role="status"
+          aria-hidden="true"
           className="tw-pointer-events-none tw-absolute tw-inset-0 tw-flex tw-items-center tw-justify-center tw-rounded-md tw-bg-iron-950/30 tw-text-iron-100"
         >
-          <span aria-hidden="true">
-            <CircleLoader size={CircleLoaderSize.MEDIUM} />
-          </span>
-          <span className="tw-sr-only">
-            {t(locale, "drop.composer.uploadingImage")}
-          </span>
+          <CircleLoader size={CircleLoaderSize.MEDIUM} />
         </span>
       )}
       <button
