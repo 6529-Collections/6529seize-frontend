@@ -9,7 +9,7 @@ const bindingSchema = z.object({
   deviceId: z.string().min(1).max(100),
   previousDeviceId: z.string().min(1).max(100).optional(),
 });
-export type PushDeviceIdentity = z.infer<typeof bindingSchema>;
+type PushDeviceIdentity = z.infer<typeof bindingSchema>;
 let inFlightIdentity: Promise<PushDeviceIdentity> | undefined;
 
 async function readOptional(key: string): Promise<string | undefined> {
