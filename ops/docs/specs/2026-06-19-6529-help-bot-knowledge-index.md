@@ -7,6 +7,11 @@ created: 2026-06-19
 
 # 6529 Help Bot Knowledge Index
 
+The `about.6529-apps` record includes a concise `brief_answer` naming both
+6529 Mobile and 6529 Desktop and an `answer_links` footer to the official Apps
+page. The companion backend uses it for short availability/download requests
+such as "is there an app", "6529 app", and contextual "link?" replies.
+
 ## Problem Statement
 
 Users often ask practical product questions in Waves instead of finding the
@@ -252,6 +257,11 @@ dated content snapshots and should not be used as bot knowledge or returned as
 canonical answer links. The sync step rejects records whose canonical or related
 paths resolve to WordPress-migrated route files, and rejects `source_refs` that
 point at those files.
+
+The mobile handoff route `/open-mobile` is excluded from help knowledge entirely,
+including facts, links, related paths, and source references. The publishing
+validator rejects records that reintroduce it. App downloads use the official
+6529 Apps page; the handoff route is not a help destination.
 
 ## Proposed Help Sources
 
@@ -548,3 +558,58 @@ list, AVIF still-image conversion and limits, immediate rejection feedback,
 and mixed-batch draft preservation. Keep its facts aligned with the shared
 upload format definitions and the composer media guide. Other upload surfaces
 retain separate rules.
+
+## Desktop Core knowledge
+
+The `desktop.*` records, tagged `desktop-core`, cover the native 6529 Desktop
+menu, setup and RPC activation, worker schedules, TDH comparisons and recovery,
+Core wallets, IPFS, and diagnostics. They remain available in the public corpus
+so users can ask how to get started before installing the application.
+
+Core-only navigation is expressed as native menu labels. Canonical paths remain
+valid public Apps destinations with source-link suppression; never publish a
+website `/core` URL. Procedure facts retain full details, including
+local-data effects and warnings, with pinned Core GitHub source references.
+The [maintenance contract](../../help/desktop-core-sources.md) tracks the source
+baseline and the [Desktop guides](../desktop/README.md) explain the workflows.
+
+The companion backend scopes retrieval to local Desktop support, keeps replies
+short by default, and permits longer procedures on explicit request. It does not add
+remote control of workers or access to local wallets, logs, or database contents.
+
+Deploy the companion backend routing/renderer change before publishing these
+records. Its older-corpus fallback is safe; the older backend does not isolate
+Core records from generic questions and has insufficient procedural reply space.
+
+Desktop conversational replies use optional `brief_answer` and `answer_links`
+metadata. Short answers preserve action-specific warnings. Links appear once at
+the end, never inline; source provenance remains separate. The corpus separates
+“What is Core?” from setup, initial node mismatch triage, and follow-ups after
+recalculation or history reconciliation. Full facts remain available for explicit
+requests for detail. A plain RPC-provider question without local-app context asks
+which application the user means.
+
+`desktop.after-installation` answers requests for next steps after installation
+with RPC activation, worker sync, and scheduled TDH. It does not repeat download
+instructions or require account pairing. Explicit `answer_links` lists also
+govern ordinary knowledge answers: only those links appear in the final footer,
+and an empty list suppresses links. Related paths are not additional citations.
+
+
+Desktop progressive reconciliation uses `desktop-calculated` records with a
+non-negative safe-integer `reconciliation_min_block`. Their short answers contain
+only the supported numeric placeholders (`percentage`, `minimum_block`,
+`checkpoint`, `from_block`) and end with the range sentence validated by the
+publisher. Backend arithmetic fills these values from the user-supplied local
+checkpoint. Publish after the companion runtime update: ordinary retrieval must
+exclude unrendered calculated templates. Start with 25% of the indexed block
+range and widen to 50%, 75%, then 100% only when a same-block mismatch persists
+after each completed reconciliation and TDH recalculation. Failed or incomplete
+work stays at the current stage for completion or error diagnosis; it does not
+authorize a wider range or reset.
+
+When a same-block mismatch persists after completed 100% reconciliation and
+TDH recalculation, the calculated
+transaction-reset stages offer Reset to Block and its Min Block full-resync
+fallback. They preserve context through resync, recalculation, and final
+diagnostics. Partial, failed, or unfinished resync must not be treated as complete.

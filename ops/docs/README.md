@@ -60,6 +60,8 @@ March 19, 2026.
 
 ## Area Index
 
+- [6529 Desktop (Core)](desktop/README.md): local workers, RPC, TDH recovery, wallets, and IPFS
+
 - [Home](home/README.md): `/`
 - [Waves](waves/README.md): `/discover`, `/waves`, `/waves/{waveId}`,
   `/waves/create`, `/messages`, `/messages/create`
