@@ -114,6 +114,7 @@ push to open the matching app route.
 - `Sign out all` requests removal of every profile's push registration for this
   installation, including profiles missing from the phone's saved account list,
   and clears its delivered notifications. It does not sign out other devices.
+  Notification preferences are retained for reconnecting profiles.
 - iOS receives an asynchronous badge correction for the profiles still registered
   to this phone, including zero after the last profile leaves. Android keeps the
   remaining profiles' tray entries; launcher dot/count behavior varies.
@@ -127,17 +128,21 @@ push to open the matching app route.
 - If push permission is not granted, registration is skipped.
 - If logout cannot save cleanup securely, local account credentials are retained
   so the action can be retried. A pending network cleanup has no separate status UI.
-- Older installations with conflicting saved push tokens cannot prove ownership
-  of every registration automatically. Cleanup stays pending; support must verify
-  the installation and reconcile those registrations. A device ID alone is not
-  enough to authorize deleting other profiles.
+- A phone upgrade or restored backup uses a fresh push registration identity bound
+  to the native device. The app carries profile notification preferences forward.
+  The same profile can stay connected to multiple phones.
+- Older cleanup requests keep their original credentials and revision numbers.
+  A failure belonging to an old phone no longer blocks registration on the current
+  phone. Failed logout for the current installation still blocks its registration.
+- Migration removes old registrations only when they match this phone's current
+  native push token. Other tokens and phones remain registered. Conflicting old
+  records may still need support review, but cannot indefinitely prevent new-phone
+  registration. A device ID alone never authorizes deleting all old profiles.
 - Signing out before the phone first registers for push requires a valid saved
   native session. If that proof is missing or expires before the phone reconnects,
-  cleanup stays pending and support must verify ownership before recovery.
-- An unreadable installation credential or a changed device ID stops push
-  registration rather than replacing the credential and losing pending cleanup.
-- If secure-storage read fails with a known recoverable pattern (missing key or
-  known decrypt/keystore errors), setup regenerates `device_id` and continues.
+  cleanup remains pending for that installation.
+- An unreadable installation credential or unavailable native device identity
+  stops setup without replacing credentials or discarding pending cleanup.
 - If secure-storage read/write fails with an unrecoverable error, that setup
   pass stops before registration; the error is captured to Sentry and a later
   setup pass can retry.
@@ -178,3 +183,7 @@ push to open the matching app route.
 - [Navigation Sidebar](../navigation/feature-sidebar-navigation.md)
 - [Wallet and Account Controls](../navigation/feature-wallet-account-controls.md)
 - [Docs Home](../README.md)
+
+Connected profiles are registered with their own saved authentication without switching the visible account. Old token-scoped cleanup starts only after all currently connected profiles register successfully. If a saved session has expired, reconnect that profile; its old delivery target is preserved in the meantime. During migration, old and new targets can briefly coexist.
+
+After old-target cleanup succeeds, the app requests a fresh badge correction for the replacement installation. Push delivery and badge presentation still depend on the operating system.

@@ -21,6 +21,10 @@ export class ApiRegisterPushNotificationTokenRequest {
     */
     'installation_secret'?: string;
     /**
+    * Copy this authenticated profile\'s existing preferences to a replacement installation, without moving registrations or overwriting destination preferences.
+    */
+    'previous_device_id'?: string;
+    /**
     * Current installation revision; stale registration requests are rejected.
     */
     'installation_revision'?: number;
@@ -53,6 +57,12 @@ export class ApiRegisterPushNotificationTokenRequest {
         {
             "name": "installation_secret",
             "baseName": "installation_secret",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "previous_device_id",
+            "baseName": "previous_device_id",
             "type": "string",
             "format": ""
         },

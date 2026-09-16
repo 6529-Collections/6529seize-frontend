@@ -16,6 +16,10 @@ import { HttpFile } from '../http/http';
 
 export class ApiRevokePushInstallationRequest {
     /**
+    * Remove only registrations matching the supplied token and device ID. Uses an independent cleanup credential and revision; never claims or advances the installation. Does not revoke native sessions.
+    */
+    'token_scoped'?: boolean;
+    /**
     * True removes every profile on this installation. False removes only profile_id, or only sessions if no profile is provided.
     */
     'all_profiles': boolean;
@@ -37,6 +41,12 @@ export class ApiRevokePushInstallationRequest {
     static readonly mapping: {[index: string]: string} | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
+        {
+            "name": "token_scoped",
+            "baseName": "token_scoped",
+            "type": "boolean",
+            "format": ""
+        },
         {
             "name": "all_profiles",
             "baseName": "all_profiles",

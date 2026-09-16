@@ -4,10 +4,12 @@ import { PushNotifications } from "@capacitor/push-notifications";
 import { commonApiPost } from "@/services/api/common-api";
 import {
   preparePushInstallationRegistration,
+  completePushInstallationMigration,
   queueNativePushLogout,
   flushPendingPushLogouts,
 } from "@/services/notifications/push-installation";
 
+let mockDeviceId = "phone";
 const mockStore = new Map<string, string>();
 let mockJwt: string | null = "jwt-A";
 let mockAccounts = [
@@ -32,10 +34,14 @@ jest.mock("capacitor-secure-storage-plugin", () => ({
 }));
 jest.mock("@/services/api/common-api", () => ({ commonApiPost: jest.fn() }));
 jest.mock("@/components/notifications/stable-device-id", () => ({
-  getStableDeviceId: jest.fn(async () => "phone"),
+  getPushDeviceIdentity: jest.fn(async () => ({
+    deviceId: mockDeviceId,
+    nativeId: mockDeviceId,
+  })),
 }));
 jest.mock("@/services/auth/auth.utils", () => ({
   getAuthJwt: () => mockJwt,
+  isAuthJwtUsable: (jwt: string) => !!jwt,
   getConnectedWalletAccounts: () => mockAccounts,
   getWalletAddress: () => mockAccounts[0]?.address ?? null,
 }));
@@ -63,6 +69,7 @@ beforeEach(async () => {
   await flushPendingPushLogouts();
   jest.clearAllMocks();
   mockStore.clear();
+  mockDeviceId = "phone";
   mockJwt = "jwt-A";
   mockAccounts = [
     { address: "0x" + "1".repeat(40), profileId: "A", jwt: "jwt-A" },
@@ -273,4 +280,88 @@ it("aborts a stalled logout and retains it for retry without leaving timers", as
   } finally {
     jest.useRealTimers();
   }
+});
+
+it("registers A/B on a replacement phone despite repeated legacy 403s, preserving the original outbox", async () => {
+  post.mockRejectedValue(
+    new Error("Legacy installation token ownership is ambiguous")
+  );
+  await queueNativePushLogout(null, true);
+  await flushPendingPushLogouts();
+  const original = storage();
+  const oldJob = original.pending[0];
+  mockDeviceId = "replacement-phone";
+  mockJwt = "new-jwt-A";
+  for (let attempt = 0; attempt < 4; attempt++) {
+    mockJwt = attempt % 2 ? "new-jwt-B" : "new-jwt-A";
+    const credential = await preparePushInstallationRegistration(
+      mockDeviceId,
+      "current-native-token",
+      mockJwt
+    );
+    expect(credential.installation_revision).toBe(0);
+    expect(credential.installation_secret).not.toBe(original.secret);
+    expect(credential.previous_device_id).toBe("phone");
+  }
+  await completePushInstallationMigration(mockDeviceId, "current-native-token");
+  const state = storage();
+  expect(state.pending).toHaveLength(2);
+  expect(state.pending[0]).toEqual(oldJob);
+  expect(state.pending[1]).toMatchObject({
+    device_id: "phone",
+    token: "current-native-token",
+    token_scoped: true,
+    all_profiles: true,
+  });
+  expect(state.pending[1].installation_secret).not.toBe(original.secret);
+});
+
+it("drains independent token cleanup and current-phone logout even when old cleanup fails", async () => {
+  post.mockRejectedValue(new Error("legacy 403"));
+  await queueNativePushLogout(null, true);
+  await flushPendingPushLogouts();
+  const oldJob = storage().pending[0];
+  mockDeviceId = "replacement-phone";
+  mockJwt = "new-jwt-A";
+  post.mockImplementation(async ({ body }) => {
+    const request = body as { device_id: string; token_scoped?: boolean };
+    if (request.device_id === "phone" && !request.token_scoped)
+      throw new Error("legacy 403");
+    return { revision: 1 };
+  });
+  await preparePushInstallationRegistration(
+    mockDeviceId,
+    "current-token",
+    mockJwt
+  );
+  await completePushInstallationMigration(mockDeviceId, "current-token");
+  expect(storage().pending).toEqual([oldJob]);
+  await queueNativePushLogout(null, true);
+  await flushPendingPushLogouts();
+  // Both installations used revision 1: acknowledging the new one must not
+  // discard the old one's failed deletion proof.
+  expect(storage().pending).toEqual([oldJob]);
+  expect(storage().revision).toBe(1);
+});
+
+it("still blocks registration behind failed logout belonging to the current phone after migration", async () => {
+  mockDeviceId = "replacement-phone";
+  mockJwt = "new-jwt-A";
+  await preparePushInstallationRegistration(
+    mockDeviceId,
+    "current-token",
+    mockJwt
+  );
+  post.mockRejectedValue(new Error("offline"));
+  await queueNativePushLogout(null, true);
+  await flushPendingPushLogouts();
+  mockJwt = "another-new-login";
+  await expect(
+    preparePushInstallationRegistration(mockDeviceId, "current-token", mockJwt)
+  ).rejects.toThrow("deferred");
+  expect(
+    storage().pending.some(
+      (job: { device_id: string }) => job.device_id === mockDeviceId
+    )
+  ).toBe(true);
 });
