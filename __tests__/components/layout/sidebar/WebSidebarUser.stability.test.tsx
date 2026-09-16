@@ -9,7 +9,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import WebSidebarUser from "@/components/layout/sidebar/WebSidebarUser";
 import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
-import { useIdentity } from "@/hooks/useIdentity";
+import { useSidebarIdentity } from "@/components/layout/sidebar/useSidebarIdentity";
 import { getDocumentationProfiles } from "@/services/api/artwork-documentation-api";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 
@@ -17,7 +17,9 @@ jest.mock("@/components/auth/Auth", () => ({ useAuth: jest.fn() }));
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: jest.fn(),
 }));
-jest.mock("@/hooks/useIdentity", () => ({ useIdentity: jest.fn() }));
+jest.mock("@/components/layout/sidebar/useSidebarIdentity", () => ({
+  useSidebarIdentity: jest.fn(),
+}));
 jest.mock("@/services/api/artwork-documentation-api", () => ({
   getDocumentationProfiles: jest.fn(),
 }));
@@ -103,11 +105,11 @@ beforeEach(() => {
     isAuthenticated: true,
     setToast: jest.fn(),
   } as unknown as ReturnType<typeof useAuth>);
-  jest.mocked(useIdentity).mockReturnValue({
+  jest.mocked(useSidebarIdentity).mockReturnValue({
     profile: alice,
     isLoading: false,
     refetch,
-  } as unknown as ReturnType<typeof useIdentity>);
+  } as unknown as ReturnType<typeof useSidebarIdentity>);
   jest.mocked(getDocumentationProfiles).mockResolvedValue({
     enabled: true,
     self_service_enabled: false,
@@ -144,13 +146,13 @@ it("preserves fresh-wallet selection on the expanded connect control", () => {
 });
 
 it("offers retry instead of an endless skeleton when profile loading fails", () => {
-  jest.mocked(useIdentity).mockReturnValue({
+  jest.mocked(useSidebarIdentity).mockReturnValue({
     profile: null,
     isLoading: false,
     isError: true,
     isFetching: false,
     refetch,
-  } as unknown as ReturnType<typeof useIdentity>);
+  } as unknown as ReturnType<typeof useSidebarIdentity>);
   const { rerender } = render(accountUi());
   fireEvent.click(
     screen.getByRole("button", { name: "Profile unavailable. Retry" })
@@ -159,13 +161,13 @@ it("offers retry instead of an endless skeleton when profile loading fails", () 
   expect(screen.getByRole("status")).toHaveTextContent(
     "Profile unavailable. Retry"
   );
-  jest.mocked(useIdentity).mockReturnValue({
+  jest.mocked(useSidebarIdentity).mockReturnValue({
     profile: null,
     isLoading: false,
     isError: false,
     isFetching: true,
     refetch,
-  } as unknown as ReturnType<typeof useIdentity>);
+  } as unknown as ReturnType<typeof useSidebarIdentity>);
   rerender(accountUi(false));
   expect(
     screen.getByRole("status", { name: "Loading account" })
@@ -173,13 +175,13 @@ it("offers retry instead of an endless skeleton when profile loading fails", () 
 });
 
 it("offers profile setup for an empty successful identity result", () => {
-  jest.mocked(useIdentity).mockReturnValue({
+  jest.mocked(useSidebarIdentity).mockReturnValue({
     profile: null,
     isLoading: false,
     isError: false,
     isFetching: false,
     refetch,
-  } as unknown as ReturnType<typeof useIdentity>);
+  } as unknown as ReturnType<typeof useSidebarIdentity>);
   render(accountUi());
   expect(screen.getByRole("link", { name: "Create profile" })).toHaveAttribute(
     "href",
@@ -228,11 +230,11 @@ it("does not carry documentation visibility across account changes", async () =>
   );
   const bob = { ...alice, id: "bob", handle: "bob" };
   setAccount("0xbob");
-  jest.mocked(useIdentity).mockReturnValue({
+  jest.mocked(useSidebarIdentity).mockReturnValue({
     profile: bob,
     isLoading: false,
     refetch,
-  } as unknown as ReturnType<typeof useIdentity>);
+  } as unknown as ReturnType<typeof useSidebarIdentity>);
   // Auth's profile may still be catching up to the selected wallet.
   rerender(accountUi(false));
   expect(screen.queryByText("Documentation")).not.toBeInTheDocument();

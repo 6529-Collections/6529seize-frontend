@@ -93,8 +93,8 @@ jest.mock("@/hooks/isMobileDevice", () => ({
     isDeviceDetectionResolved: true,
   }),
 }));
-jest.mock("@/hooks/useIdentity", () => ({
-  useIdentity: () => ({ profile: null, isLoading: false }),
+jest.mock("@/components/layout/sidebar/useSidebarIdentity", () => ({
+  useSidebarIdentity: () => ({ profile: null, isLoading: false }),
 }));
 jest.mock("react-use", () => ({ useClickAway: jest.fn() }));
 
@@ -347,7 +347,9 @@ function renderDropdown(options: RenderOptions) {
       <HeaderUserMenuDropdown
         key="first"
         isOpen
-        artworkDocumentationEnabled={options.artworkDocumentationEnabled}
+        artworkDocumentationEnabled={
+          options.artworkDocumentationEnabled ?? false
+        }
         profile={options.profile ?? profileBase}
         onClose={onClose}
         onOpenConnect={options.onOpenConnect}

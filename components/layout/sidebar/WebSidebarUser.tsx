@@ -22,7 +22,7 @@ import useCapacitor from "@/hooks/useCapacitor";
 import { useAuth } from "@/components/auth/Auth";
 import { useArtworkDocumentationAccess } from "@/hooks/artwork-documentation/useArtworkDocumentationAccess";
 import WebSidebarAccountAvatar from "./WebSidebarAccountAvatar";
-import { useIdentity } from "@/hooks/useIdentity";
+import { useSidebarIdentity } from "./useSidebarIdentity";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -78,10 +78,7 @@ function WebSidebarUser({
     isError,
     isFetching,
     refetch,
-  } = useIdentity({
-    handleOrWallet: address || "",
-    initialProfile: null,
-  });
+  } = useSidebarIdentity(address);
 
   const profile = parentProfile || localProfile;
   const { connectedProfile, activeProfileProxy, setToast } = useAuth();
