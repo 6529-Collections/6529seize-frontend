@@ -32,7 +32,8 @@ import type { WsDropDeleteMessage } from "@/helpers/Types";
 import { WsMessageType } from "@/helpers/Types";
 import { REPLY_TARGET_UNAVAILABLE_TOAST_ID } from "@/components/waves/create-drop-content/reply-target-unavailable";
 import {
-  ACCEPTED_FILE_TYPE_LABELS,
+  getAcceptedUploadFormats,
+  getUnsupportedUploadToast,
   isSupportedUploadFile,
 } from "@/services/uploads/mediaUploadMimeType";
 import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
@@ -128,7 +129,6 @@ interface WaveLeaderboardCurationDropModalProps {
   readonly initialUrl?: string | null | undefined;
 }
 
-const MAX_UNSUPPORTED_FILE_NAMES_IN_TOAST = 3;
 const NATIVE_KEYBOARD_COMPOSER_BOTTOM_PADDING =
   "var(--native-keyboard-composer-bottom-padding, max(env(safe-area-inset-bottom,0px), 0.5rem))";
 const noop = () => {};
@@ -530,19 +530,6 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
     handleExternalAttachmentFiles(droppedFiles);
   };
 
-  const formatUnsupportedFileNames = (unsupported: File[]): string => {
-    const displayedNames = unsupported
-      .slice(0, MAX_UNSUPPORTED_FILE_NAMES_IN_TOAST)
-      .map((file) => file.name);
-    const remainingCount = Math.max(
-      0,
-      unsupported.length - displayedNames.length
-    );
-    return remainingCount > 0
-      ? `${displayedNames.join(", ")} and ${remainingCount} more`
-      : displayedNames.join(", ");
-  };
-
   const handleExternalAttachmentFiles = (files: File[]) => {
     if (files.length === 0) {
       return;
@@ -559,11 +546,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
     }
 
     if (unsupported.length > 0) {
-      const unsupportedNames = formatUnsupportedFileNames(unsupported);
-      setToast({
-        message: `Unsupported file type: ${unsupportedNames}. Accepted Types: ${ACCEPTED_FILE_TYPE_LABELS}`,
-        type: "error",
-      });
+      setToast(getUnsupportedUploadToast(unsupported, locale));
     }
   };
 
@@ -607,10 +590,10 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
           <div className="tw-pointer-events-none tw-absolute tw-inset-0 tw-z-40 tw-flex tw-items-center tw-justify-center tw-rounded-lg tw-border-2 tw-border-dotted tw-border-primary-400 tw-bg-iron-900/75 tw-p-6">
             <div className="tw-max-w-3xl tw-p-4 tw-text-center">
               <p className="tw-text-base tw-font-semibold tw-text-primary-300">
-                Drop files here
+                {t(locale, "drop.upload.dropHere")}
               </p>
               <p className="tw-mt-2 tw-text-xs tw-text-iron-300">
-                Accepted types: {ACCEPTED_FILE_TYPE_LABELS}
+                {getAcceptedUploadFormats(locale)}
               </p>
             </div>
           </div>

@@ -1,7 +1,9 @@
 "use client";
 
-import { useAuth } from "@/components/auth/Auth";
-import { MAX_DROP_UPLOAD_FILES } from "@/helpers/Helpers";
+import { useRef } from "react";
+import { t } from "@/i18n/messages";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { DROP_UPLOAD_ACCEPT } from "@/services/uploads/mediaUploadMimeType";
 
 export default function CreateDropActionsRow({
   canAddPart,
@@ -16,16 +18,17 @@ export default function CreateDropActionsRow({
   readonly breakIntoStorm: () => void;
   readonly disabled?: boolean | undefined;
 }) {
-  const { setToast } = useAuth();
+  const locale = useBrowserLocale();
+  const inputRef = useRef<HTMLInputElement>(null);
   return (
     <div className="tw-mt-3 tw-flex tw-items-center tw-gap-x-6">
       <div className="tw-flex tw-w-full tw-items-center tw-justify-between">
-        <label>
-          <div
-            role="button"
-            aria-label="Select audio file"
-            aria-disabled={disabled}
-            className={`tw-flex tw-items-center tw-gap-x-2 tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-50 ${
+        <div>
+          <button
+            type="button"
+            disabled={disabled}
+            onClick={() => inputRef.current?.click()}
+            className={`tw-flex tw-min-h-11 tw-items-center tw-gap-x-2 tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 ${
               disabled
                 ? "tw-cursor-not-allowed tw-opacity-50"
                 : "tw-cursor-pointer"
@@ -46,35 +49,30 @@ export default function CreateDropActionsRow({
                 d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"
               />
             </svg>
-            <input
-              type="file"
-              className="tw-hidden"
-              accept="image/*,video/*,audio/*,application/pdf,text/csv,.pdf,.csv"
-              multiple
-              disabled={disabled}
-              onChange={(e) => {
-                if (disabled) {
-                  e.target.value = "";
-                  return;
-                }
-                if (e.target.files) {
-                  const files: File[] = Array.from(e.target.files);
-                  if (files.length > MAX_DROP_UPLOAD_FILES) {
-                    setToast({
-                      message: `Upload ${MAX_DROP_UPLOAD_FILES} or fewer files at a time.`,
-                      type: "error",
-                    });
-                    e.target.value = "";
-                    return;
-                  }
-                  setFiles(files);
-                }
+            <span className="tw-text-sm tw-font-medium">
+              {t(locale, "drop.upload.chooseFiles")}
+            </span>
+          </button>
+          <input
+            ref={inputRef}
+            aria-label={t(locale, "drop.upload.chooseFiles")}
+            type="file"
+            className="tw-hidden"
+            accept={DROP_UPLOAD_ACCEPT}
+            multiple
+            disabled={disabled}
+            onChange={(e) => {
+              if (disabled) {
                 e.target.value = "";
-              }}
-            />
-            <span className="tw-text-sm tw-font-medium">Upload Media</span>
-          </div>
-        </label>
+                return;
+              }
+              if (e.target.files) {
+                setFiles(Array.from(e.target.files));
+              }
+              e.target.value = "";
+            }}
+          />
+        </div>
       </div>
       {canAddPart && (
         <button
@@ -118,7 +116,12 @@ export default function CreateDropActionsRow({
             />
           </svg>
           <span className="tw-ml-2 tw-whitespace-nowrap tw-text-sm tw-font-medium">
-            {isStormMode ? "Continue storm" : "Break into storm"}
+            {t(
+              locale,
+              isStormMode
+                ? "waves.stormComposer.continueStorm"
+                : "waves.stormComposer.breakIntoStorm"
+            )}
           </span>
         </button>
       )}

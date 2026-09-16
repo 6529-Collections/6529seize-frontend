@@ -12,6 +12,11 @@ const mockFonts = [
   },
 ];
 const mockLoadMontserratFonts = jest.fn();
+const mockGetCookie = jest.fn();
+
+jest.mock("next/headers", () => ({
+  cookies: async () => ({ get: mockGetCookie }),
+}));
 
 jest.mock("next/og", () => ({
   ImageResponse: mockImageResponse,
@@ -33,9 +38,12 @@ jest.mock("@/app/api/og-metadata/profiles/[identity]/font", () => ({
 }));
 
 import { GET } from "@/app/api/og-metadata/drops/[id]/route";
+import { publicEnv } from "@/config/env";
 
 describe("/api/og-metadata/drops/[id]", () => {
   beforeEach(() => {
+    delete publicEnv.STAGING_API_KEY;
+    mockGetCookie.mockReset();
     mockImageResponse.mockClear();
     mockLoadMontserratFonts.mockReset();
     mockLoadMontserratFonts.mockResolvedValue(mockFonts);
@@ -75,7 +83,7 @@ describe("/api/og-metadata/drops/[id]", () => {
 
     expect(globalThis.fetch).toHaveBeenCalledWith(
       "https://api.test/api/og-metadata/drops/6411",
-      { next: { revalidate: 300 } }
+      { redirect: "error", headers: {}, next: { revalidate: 300 } }
     );
     expect(mockLoadMontserratFonts).toHaveBeenCalledTimes(1);
     expect(mockImageResponse).toHaveBeenCalledTimes(1);
@@ -91,6 +99,41 @@ describe("/api/og-metadata/drops/[id]", () => {
     expect(imageResponseInit?.fonts).toBe(mockFonts);
     expect(response).toBe(mockImageResponse.mock.results[0]?.value);
   });
+
+  it.each([
+    [undefined, "staging-key", { "x-6529-auth": "staging-key" }],
+    [undefined, "   ", {}],
+    ["access-cookie", undefined, { "x-6529-auth": "access-cookie" }],
+    ["access-cookie", "staging-key", { "x-6529-auth": "access-cookie" }],
+  ])(
+    "uses staging access from the cookie or configuration (%s, %s)",
+    async (cookie, key, headers) => {
+      publicEnv.STAGING_API_KEY = key;
+      mockGetCookie.mockReturnValue(cookie ? { value: cookie } : undefined);
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
+        ok: true,
+        json: async () => ({}),
+      });
+
+      await GET(
+        { url: "https://6529.test/api/og-metadata/drops/drop-1" } as Request,
+        { params: Promise.resolve({ id: "drop-1" }) }
+      );
+
+      expect(globalThis.fetch).toHaveBeenCalledWith(
+        "https://api.test/api/og-metadata/drops/drop-1",
+        { redirect: "error", headers, next: { revalidate: 300 } }
+      );
+      expect(mockImageResponse).toHaveBeenCalledTimes(1);
+      expect(mockGetCookie).toHaveBeenCalledWith("x-6529-auth");
+      expect(mockImageResponse.mock.calls[0]?.[1]?.headers).toEqual({
+        "Cache-Control":
+          "x-6529-auth" in headers
+            ? "private, no-store"
+            : "public, max-age=300, s-maxage=300, stale-while-revalidate=600",
+      });
+    }
+  );
 
   it("returns 400 when the drop id param is missing", async () => {
     const response = await GET(
