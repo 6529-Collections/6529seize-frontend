@@ -40,8 +40,8 @@ describe("decodeHtmlEntities", () => {
   });
 
   it("strips invalid numeric entities without throwing", () => {
-    const input = "safe &#1114112; &#x110000; &#55296; text";
-    expect(decodeHtmlEntities(input)).toBe("safe    text");
+    const input = "safe &#1114112; &#x110000; &#55296; &#12f; text";
+    expect(decodeHtmlEntities(input)).toBe("safe     text");
   });
 });
 

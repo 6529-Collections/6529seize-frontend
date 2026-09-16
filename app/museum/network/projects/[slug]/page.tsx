@@ -540,12 +540,18 @@ export async function generateMetadata({
   const project = publication?.projects.find(
     (item) => item.slug === slug
   );
+  const workArtistIds = new Set(
+    project && publication
+      ? museumProjectWorks(publication, project).map((work) => work.artistId)
+      : []
+  );
   const artists =
     project && publication
       ? publication.artists.filter(
           (artist) =>
             project.artistIds?.includes(artist.id) === true ||
-            artist.id === project.artistId
+            artist.id === project.artistId ||
+            workArtistIds.has(artist.id)
         )
       : [];
   const artistNames = artists.map((artist) => artist.preferredName).join(", ");

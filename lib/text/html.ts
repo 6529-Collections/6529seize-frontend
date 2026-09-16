@@ -116,6 +116,11 @@ export function decodeHtmlEntities(value: string): string {
 }
 
 function decodeNumericEntity(value: string, radix: 10 | 16): string {
+  const validDigits = radix === 10 ? /^\d+$/ : /^[\da-f]+$/i;
+  if (!validDigits.test(value)) {
+    return "";
+  }
+
   const codePoint = Number.parseInt(value, radix);
   const isSurrogate = codePoint >= 0xd800 && codePoint <= 0xdfff;
   if (

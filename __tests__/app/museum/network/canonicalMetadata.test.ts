@@ -72,9 +72,10 @@ const publication = {
       id: "PRJ-0001",
       slug: "the-system-in-seven-states",
       title: "The System in Seven States",
-      artistIds: ["ART-0001"],
+      artistIds: [],
       organizationIds: [],
-      workIds: [],
+      artworkIds: [],
+      workIds: ["6529NM-W-0001"],
       sourcePaths: [],
     },
   ],
@@ -120,6 +121,7 @@ const publication = {
     {
       id: "6529NM-W-0001",
       title: "A Casey Reas work",
+      artistId: "ART-0001",
       status: "accessioned_into_permanent_collection",
       statusAsOf: "2026-08-09",
       media: [],
@@ -269,7 +271,7 @@ describe("Network Museum canonical metadata", () => {
     ).toBeUndefined();
   });
 
-  it("uses specific governed artist and project metadata without changing canonicals", async () => {
+  it("uses governed metadata, including project artists linked only through works", async () => {
     const artistMetadata = await artistDetailMetadata({
       params: Promise.resolve({ slug: "casey-reas" }),
     });
