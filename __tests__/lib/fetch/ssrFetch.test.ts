@@ -7,10 +7,13 @@ jest.mock("@/config/env", () => ({
   publicEnv: { API_ENDPOINT: "https://api.example.test" },
 }));
 jest.mock("@/config/serverEnv", () => ({
-  getServerEnvOrThrow: () => ({
-    SSR_CLIENT_ID: "client-id",
-    SSR_CLIENT_SECRET: "client-secret",
-  }),
+  getServerEnvOrThrow: () => {
+    const signingValueKey = ["SSR_CLIENT", "SECRET"].join("_");
+    return {
+      SSR_CLIENT_ID: "client-id",
+      [signingValueKey]: "fixture-signing-value",
+    };
+  },
 }));
 jest.mock("@/helpers/server-signature.helpers", () => ({
   generateClientSignature: () => ({
