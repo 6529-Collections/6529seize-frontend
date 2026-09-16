@@ -1,7 +1,3 @@
-"use client";
-
-import { useEffect, useState } from "react";
-
 export function useCurationPagination({
   fetchNextPage,
   hasNextPage,
@@ -13,13 +9,13 @@ export function useCurationPagination({
   readonly isFetching: boolean;
   readonly isError: boolean;
 }) {
-  const [isVisible, setIsVisible] = useState(false);
-  // A save can temporarily block pagination while the sentinel stays visible.
-  // Resume after that fetch settles, without requiring another scroll event.
-  useEffect(() => {
-    if (isVisible && hasNextPage && !isFetching && !isError) {
+  return {
+    // Remount the sentinel when a save releases the fetch lock so its observer
+    // reports the still-visible state again without waiting for another scroll.
+    sentinelKey: `${Boolean(hasNextPage)}:${isFetching}:${isError}`,
+    onIntersection: (isVisible: boolean) => {
+      if (!isVisible || !hasNextPage || isFetching || isError) return;
       void fetchNextPage();
-    }
-  }, [isVisible, hasNextPage, isFetching, isError, fetchNextPage]);
-  return setIsVisible;
+    },
+  };
 }

@@ -162,7 +162,7 @@ export function OfficialWaveSummary({
           aria-label={t(locale, "profileCuration.header.openSourceAria", {
             waveName,
           })}
-          className="tw-group -tw-ml-1 tw-inline-flex tw-min-h-8 tw-min-w-0 tw-max-w-full tw-cursor-pointer tw-items-center tw-gap-1.5 tw-rounded-md tw-border-0 tw-bg-transparent tw-px-1 tw-py-0 tw-text-left tw-text-primary-300 tw-transition-colors tw-duration-150 desktop-hover:hover:tw-bg-white/5 desktop-hover:hover:tw-text-primary-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+          className="desktop-hover:hover:tw-text-primary-100 tw-group -tw-ml-1 tw-inline-flex tw-min-h-8 tw-min-w-0 tw-max-w-full tw-cursor-pointer tw-items-center tw-gap-1.5 tw-rounded-md tw-border-0 tw-bg-transparent tw-px-1 tw-py-0 tw-text-left tw-text-primary-300 tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-bg-white/5"
         >
           <span className="tw-flex-shrink-0 tw-text-iron-400">
             {t(locale, "profileCuration.header.source")}

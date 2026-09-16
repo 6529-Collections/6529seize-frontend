@@ -30,6 +30,7 @@ import { formatInteger } from "@/i18n/format";
 import type { CurationDropPlacement } from "@/services/api/curation-drop-order-api";
 
 type Target = { id: string; placement: CurationDropPlacement };
+type OrderDrop = CurationOrder["drops"][number];
 const DRAG_OVERLAY_MARGIN = 8;
 const restrictDragOverlayToViewport: Modifier = ({
   overlayNodeRect,
@@ -55,6 +56,40 @@ const restrictDragOverlayToViewport: Modifier = ({
 };
 const dragOverlayModifiers = [restrictDragOverlayToViewport];
 
+function getKeyboardTarget({
+  drops,
+  selectedId,
+  target,
+  direction,
+}: {
+  readonly drops: readonly OrderDrop[];
+  readonly selectedId: string;
+  readonly target: Target | null;
+  readonly direction: -1 | 1;
+}): Target | null {
+  const selectedIndex = drops.findIndex((drop) => drop.id === selectedId);
+  if (selectedIndex < 0) return null;
+  const remaining = drops.filter((drop) => drop.id !== selectedId);
+  let currentIndex = selectedIndex;
+  if (target) {
+    const anchorIndex = remaining.findIndex((drop) => drop.id === target.id);
+    if (anchorIndex >= 0) {
+      currentIndex = anchorIndex + (target.placement === "after" ? 1 : 0);
+    }
+  }
+  const nextIndex = Math.max(
+    0,
+    Math.min(remaining.length, currentIndex + direction)
+  );
+  if (nextIndex === currentIndex) return target;
+  if (nextIndex === 0) {
+    const first = remaining[0];
+    return first ? { id: first.id, placement: "before" } : null;
+  }
+  const previous = remaining[nextIndex - 1];
+  return previous ? { id: previous.id, placement: "after" } : null;
+}
+
 type OrganizeContextValue = {
   enabled: boolean;
   busy: boolean;
@@ -63,7 +98,7 @@ type OrganizeContextValue = {
   instructionsId: string;
   axis: "horizontal" | "vertical";
   select: (id: string) => void;
-  keyDown: (id: string, event: KeyboardEvent<HTMLButtonElement>) => void;
+  keyDown: (event: KeyboardEvent<HTMLButtonElement>) => void;
 };
 const OrganizeContext = createContext<OrganizeContextValue | null>(null);
 
@@ -91,6 +126,7 @@ export default function CurationOrganize({
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const [target, setTarget] = useState<Target | null>(null);
+  const targetRef = useRef<Target | null>(null);
   const [announcement, setAnnouncement] = useState("");
   const active = enabled && order.canAuthenticate;
   const [feedbackSession, setFeedbackSession] = useState({
@@ -102,8 +138,7 @@ export default function CurationOrganize({
     feedbackBaseline = order.revealRequest;
     setFeedbackSession({ active, revealRequest: order.revealRequest });
   }
-  const hasSessionFeedback =
-    active && order.revealRequest !== feedbackBaseline;
+  const hasSessionFeedback = active && order.revealRequest !== feedbackBaseline;
   const doneButton = useRef<HTMLButtonElement | null>(null);
   useEffect(() => {
     if (active) doneButton.current?.focus();
@@ -134,6 +169,7 @@ export default function CurationOrganize({
     setSelectedId(null);
     setDraggingId(null);
     setTarget(null);
+    targetRef.current = null;
     order.release();
   };
   if (!active && (selectedId || target || draggingId)) {
@@ -143,7 +179,10 @@ export default function CurationOrganize({
   }
   const release = order.release;
   useEffect(() => {
-    if (!active) release();
+    if (!active) {
+      targetRef.current = null;
+      release();
+    }
   }, [active, release]);
   let status =
     hasSessionFeedback && order.saved
@@ -184,11 +223,17 @@ export default function CurationOrganize({
             : "after",
       });
   };
-  const keyDown = (id: string, event: KeyboardEvent<HTMLButtonElement>) => {
+  const keyDown = (event: KeyboardEvent<HTMLButtonElement>) => {
     if (event.key === "Escape") {
       event.preventDefault();
       cancel();
       setAnnouncement(t(locale, "profileCuration.order.cancelled"));
+      return;
+    }
+    if (selectedId && (event.key === " " || event.key === "Enter")) {
+      event.preventDefault();
+      if (target) place(selectedId, target);
+      else cancel();
       return;
     }
     if (
@@ -199,17 +244,19 @@ export default function CurationOrganize({
     event.preventDefault();
     const direction =
       event.key === "ArrowUp" || event.key === "ArrowLeft" ? -1 : 1;
-    const index = Math.max(
-      0,
-      Math.min(order.drops.length - 1, (indices.get(id) ?? 0) + direction)
-    );
-    const destination = order.drops[index];
-    if (!destination) return;
-    setTarget({
-      id: destination.id,
-      placement: index < (indices.get(selectedId) ?? 0) ? "before" : "after",
+    const destination = getKeyboardTarget({
+      drops: order.drops,
+      selectedId,
+      target,
+      direction,
     });
+    if (!destination || destination === target) return;
+    targetRef.current = destination;
+    setTarget(destination);
     order.revealDrop(destination.id);
+    const preview = order.drops.filter((drop) => drop.id !== selectedId);
+    const anchorIndex = preview.findIndex((drop) => drop.id === destination.id);
+    const index = anchorIndex + (destination.placement === "after" ? 1 : 0);
     setAnnouncement(
       t(locale, "profileCuration.order.previewPosition", {
         postName: postName(selectedId),
@@ -224,6 +271,7 @@ export default function CurationOrganize({
     activatorEvent,
   }: DragMoveEvent) => {
     if (!over || over.id === dragged.id) {
+      targetRef.current = null;
       setTarget(null);
       return;
     }
@@ -234,11 +282,14 @@ export default function CurationOrganize({
         ? start.x + delta.x < over.rect.left + over.rect.width / 2
         : start.y + delta.y < over.rect.top + over.rect.height / 2;
     const placement = before ? "before" : "after";
-    setTarget((current) =>
-      current?.id === over.id && current.placement === placement
-        ? current
-        : { id: String(over.id), placement }
-    );
+    const nextTarget = { id: String(over.id), placement } as const;
+    if (
+      targetRef.current?.id === nextTarget.id &&
+      targetRef.current.placement === nextTarget.placement
+    )
+      return;
+    targetRef.current = nextTarget;
+    setTarget(nextTarget);
   };
 
   return (
@@ -282,8 +333,9 @@ export default function CurationOrganize({
         onDragMove={updateTarget}
         onDragOver={updateTarget}
         onDragCancel={cancel}
-        onDragEnd={() => {
-          if (draggingId && target) place(draggingId, target);
+        onDragEnd={({ active: item }) => {
+          const destination = targetRef.current;
+          if (destination) place(String(item.id), destination);
           else cancel();
         }}
       >
@@ -310,7 +362,7 @@ export default function CurationOrganize({
                   cancel();
                   onDone();
                 }}
-                className="tw-h-11 tw-border-0 tw-bg-transparent tw-px-2 tw-text-sm tw-font-semibold tw-text-iron-100 tw-outline-none desktop-hover:hover:tw-text-white focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 disabled:tw-cursor-wait disabled:tw-opacity-50"
+                className="tw-h-11 tw-border-0 tw-bg-transparent tw-px-2 tw-text-sm tw-font-semibold tw-text-iron-100 tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 disabled:tw-cursor-wait disabled:tw-opacity-50 desktop-hover:hover:tw-text-white"
               >
                 {t(locale, "profileCuration.order.done")}
               </button>
@@ -321,11 +373,7 @@ export default function CurationOrganize({
             <span id={`${instructionsId}-keyboard`} className="tw-sr-only">
               {t(locale, "profileCuration.order.keyboardHelp")}
             </span>
-            <div
-              role="status"
-              aria-live="polite"
-              className="tw-sr-only"
-            >
+            <div role="status" aria-live="polite" className="tw-sr-only">
               {status}
               <span className="tw-sr-only">{announcement}</span>
             </div>

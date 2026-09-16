@@ -116,7 +116,7 @@ export default function MyStreamWaveCurationContent({
     isVotingControlsLocked,
   } = useApprovalWaveStatus({ wave });
 
-  const handleBottomIntersection = useCurationPagination({
+  const pagination = useCurationPagination({
     fetchNextPage,
     hasNextPage,
     isFetching,
@@ -198,7 +198,8 @@ export default function MyStreamWaveCurationContent({
               </div>
             )}
             <CommonIntersectionElement
-              onIntersection={handleBottomIntersection}
+              key={pagination.sentinelKey}
+              onIntersection={pagination.onIntersection}
             />
           </div>
         )}

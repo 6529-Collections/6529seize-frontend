@@ -512,7 +512,7 @@ export default function UserPageProfileWaveMasonry({
     ]
   );
 
-  const handleBottomIntersection = useCurationPagination({
+  const pagination = useCurationPagination({
     fetchNextPage,
     hasNextPage,
     isFetching: order.isFetching,
@@ -540,7 +540,8 @@ export default function UserPageProfileWaveMasonry({
             <CircleLoader size={CircleLoaderSize.MEDIUM} />
           )}
           <CommonIntersectionElement
-            onIntersection={handleBottomIntersection}
+            key={pagination.sentinelKey}
+            onIntersection={pagination.onIntersection}
           />
         </div>
       )}
