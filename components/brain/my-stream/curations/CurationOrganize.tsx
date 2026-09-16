@@ -74,15 +74,13 @@ export default function CurationOrganize({
   useEffect(() => {
     if (active) doneButton.current?.focus();
   }, [active]);
+  const movedPostMissing =
+    !!order.revealRequest &&
+    !order.busy &&
+    !order.drops.some((drop) => drop.id === order.revealRequest?.id);
   useEffect(() => {
-    if (
-      active &&
-      !order.busy &&
-      order.revealRequest &&
-      !order.drops.some((drop) => drop.id === order.revealRequest?.id)
-    )
-      doneButton.current?.focus();
-  }, [active, order.busy, order.drops, order.revealRequest]);
+    if (active && movedPostMissing) doneButton.current?.focus();
+  }, [active, movedPostMissing]);
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } })
   );
