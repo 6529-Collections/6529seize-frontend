@@ -1,9 +1,10 @@
 "use client";
 
 import Button from "@/components/utils/button/Button";
+import useKeyboardFocusScroll from "@/components/waves/create-wave/hooks/useKeyboardFocusScroll";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t, type MessageKey } from "@/i18n/messages";
-import { useId, useState } from "react";
+import { useId, useRef, useState } from "react";
 import { validateCollectGoal } from "./collect-form.validation";
 import CollectGoalDefinitionPicker from "./CollectGoalDefinitionPicker";
 import CollectCompletionControls, {
@@ -38,6 +39,8 @@ interface CollectGoalFormProps {
 export default function CollectGoalForm(props: CollectGoalFormProps) {
   const locale = useBrowserLocale();
   const id = useId();
+  const formRef = useRef<HTMLFormElement>(null);
+  useKeyboardFocusScroll(formRef);
   const [invalidField, setInvalidField] =
     useState<ReturnType<typeof validateCollectGoal>>(null);
   const uniqueGoal =
@@ -91,6 +94,7 @@ export default function CollectGoalForm(props: CollectGoalFormProps) {
   };
   return (
     <form
+      ref={formRef}
       aria-label={title}
       onSubmit={(event) => {
         event.preventDefault();
@@ -139,6 +143,10 @@ export default function CollectGoalForm(props: CollectGoalFormProps) {
               locale={locale}
               value={draft.definitionId}
               definitions={props.definitions}
+              mobileSheet={
+                draft.intent === "season" || draft.intent === "artist"
+              }
+              searchableSheet={draft.intent === "artist"}
               disabled={props.loading || definitionsStatus !== "ready"}
               invalid={invalidField === "definition"}
               {...(invalidField === "definition"

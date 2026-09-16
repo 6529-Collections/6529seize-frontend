@@ -50,7 +50,9 @@ export default async function RootLayout({
   const initialEulaConsentVersion = cookieStore.get(CONSENT_EULA_COOKIE)?.value;
 
   return (
-    <html lang="en" data-scroll-behavior="smooth">
+    // Headless UI may add its focus-visible marker before React hydrates when
+    // keyboard input arrives during startup. Keep that root-only mutation.
+    <html lang="en" data-scroll-behavior="smooth" suppressHydrationWarning>
       <head>
         <Script
           id="native-ios-platform-bootstrap"

@@ -3702,6 +3702,55 @@
       ]
     },
     {
+      "id": "groups.eligibility",
+      "kind": "business_rule",
+      "title": "Group membership rules",
+      "aliases": [
+        "group eligibility",
+        "who qualifies for a group",
+        "Level zero group",
+        "empty group",
+        "included and excluded identities",
+        "member preview"
+      ],
+      "keywords": [
+        "groups",
+        "membership",
+        "eligibility",
+        "level",
+        "zero",
+        "negative",
+        "include",
+        "exclude",
+        "REP",
+        "NIC",
+        "CIC",
+        "xTDH",
+        "preview"
+      ],
+      "facts": [
+        "An identity must meet every configured group criterion unless explicitly included. Inclusion bypasses criteria, but exclusion takes priority over inclusion and criteria.",
+        "A group with only an inclusion list contains the listed identities. A group with only an exclusion list contains everyone except excluded identities. A restored legacy group with no criteria and neither identity list has no members; this differs from choosing Everyone for a wave access row. The editor requires at least one criterion or a nonempty identity list before saving a new group.",
+        "Zero is a configured bound, not an absent criterion. A minimum Level of 0 allows every Level, including profiles with a negative combined score whose Level is still 0; other configured criteria still apply. A maximum Level of 0 allows only Level 0 profiles.",
+        "Level bounds include the named Levels. Maximum Level 1 includes Level 1 and stops before Level 2. Level 100 is the highest Level.",
+        "REP and NIC bounds include both endpoints, and missing rating totals count as zero. NIC is the group-editor label for CIC rating values.",
+        "A rating rule filtered by identity or REP category, or using ratings sent, requires a nonzero matching total when neither bound is set. Ratings that cancel each other to zero do not satisfy that unbounded filtered rule.",
+        "Fractional xTDH rounds down before a group comparison, including its contribution to combined TDH and xTDH criteria. For example, 12.9 xTDH contributes 12 to the eligibility calculation.",
+        "View members on an unsaved draft applies the same membership rules as saved member lists. Profile, rating, and ownership changes can change membership over time.",
+        "A saved group marked invisible has no eligible members, including explicitly included identities. This differs from Hide criteria and members, which controls who can inspect group details."
+      ],
+      "canonical_path": "/network",
+      "related_paths": ["/waves/create", "/network/levels"],
+      "tags": ["groups", "eligibility", "business-rule"],
+      "source_refs": [
+        "ops/docs/waves/create/feature-groups-step.md",
+        "ops/docs/network/flow-network-group-scope.md",
+        "components/groups/page/create/config/GroupCreateCIC.tsx",
+        "components/groups/members/GroupMembersPreviewDialog.tsx",
+        "services/groups/groupMutations.ts"
+      ]
+    },
+    {
       "id": "delegation.overview",
       "kind": "route",
       "title": "Delegation center",
@@ -7031,6 +7080,7 @@
       "facts": [
         "The meme calendar route lives at /meme-calendar.",
         "It is the canonical place for minting-calendar context.",
+        "The page heading appears first; clock panels and the calendar grid appear once browser JavaScript is ready, using the browser clock and local timezone. Viewing the schedule does not require connecting a wallet.",
         "The home page can also surface current or upcoming mint information.",
         "The calendar models past, current, and future Meme Card mint timing from Monday/Wednesday/Friday cadence plus explicit skip, extra, and reschedule overrides.",
         "The public calendar API exposes /api/meme-calendar/next, /api/meme-calendar/current, and /api/meme-calendar/{id}.",
@@ -8200,7 +8250,7 @@
         "TDH"
       ],
       "facts": [
-        "Collect in the NFT navigation opens /collect, the set planner for The Memes, 6529 Gradient and NextGen Pebbles. Choose Complete a set, Lowest listings or TDH. One shared Collection selector keeps the chosen collection across these tools, daily TDH and Reach target TDH. Incompatible goals switch to that collection’s full-set or Pebbles-set options. The Memes offers Full set, Season and Artist under Build toward. Season, artist and Pebbles set selectors support typing to find an option by name, with clear empty and no-match states. The planner has no duplicate artwork catalogue. Collecting options show a loading state while the catalog arrives; Try again retries an initial failure without treating the set as empty.",
+        "Collect in the NFT navigation opens /collect, the set planner for The Memes, 6529 Gradient and NextGen Pebbles. Choose Complete a set, Lowest listings or TDH. One shared Collection selector keeps the chosen collection across these tools, daily TDH and Reach target TDH. Incompatible goals switch to that collection’s full-set or Pebbles-set options. The Memes offers Full set, Season and Artist under Build toward. On narrow screens, Season opens a scrollable choice sheet without search: tap a season directly. Artist opens a scrollable choice sheet with its existing name search. On larger screens, type in the Season or Artist selector to filter by name. Pebbles set retains its searchable dropdown. Empty and no-match states are distinct where applicable. The planner has no duplicate artwork catalogue. Collecting options show a loading state while the catalog arrives; Try again retries an initial failure without treating the set as empty.",
         "Browse artworks on /the-memes, /6529-gradient and /nextgen/collection/pebbles. Complete my set on The Memes carries the selected season, or its full set when no season is selected; the Gradients link opens its full set and the Pebbles link opens its trait-set planner. The View collection link returns from Collecting tools to the selected collection page; on narrow screens it appears as an accessible arrow.",
         "Supported artwork cards place a priced Collect action near the artwork summary, before artwork details and Listings & offers. Gradients and Pebbles put the title and artwork first, followed by the actions and lower tabs. The lowest supported listing is selected automatically; Other listings exposes alternatives. Listing prices load before wallet connection with distinct loading, failed and empty states. If no listing is returned, This artwork is not currently listed replaces empty Collect, quantity and delivery controls; Make an offer and applicable owner actions remain available. Unsupported or own-wallet listings have a separate no-matching-listing message. Connection is required before purchase review. Deliver to appears below an available Collect action; Change opens the mint-style destination picker. Collect rechecks the exact selected order and changed terms require another review. View listings & offers selects the market tab and focuses it. Switching tabs retains market selection and review.",
         "Artwork actions appear in the order Collect, Make an offer, then List. List appears when a confirmed wallet in the profile holds the NFT; connect that holding wallet to list it. Before connecting, List opens the wallet connection flow so ownership can be checked. While ownership is loading it stays visible but unavailable; a failed check offers Try again. The more-actions menu contains Review offers. Offer and listing dialogs show loading or retry states; Close or Escape returns to the opener. Closing during loading cancels that attempt and does not open a delayed review.",

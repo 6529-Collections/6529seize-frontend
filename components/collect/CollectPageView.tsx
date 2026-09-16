@@ -7,6 +7,7 @@ import type { SupportedLocale } from "@/i18n/locales";
 import { ArrowUpRightIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import {
+  useEffect,
   useId,
   useLayoutEffect,
   useRef,
@@ -157,6 +158,7 @@ function Listings({
 
 export default function CollectPageView(props: CollectPageViewProps) {
   const locale = useBrowserLocale();
+  const title = useRef<HTMLHeadingElement>(null);
   const setupId = useId();
   const [expandedPlan, setExpandedPlan] = useState<string | null>(null);
   const setup = useRef<HTMLDivElement>(null);
@@ -165,6 +167,11 @@ export default function CollectPageView(props: CollectPageViewProps) {
     props.plan && !props.plan.reviewDisabledReason ? props.plan.id : null;
   const setupOpen =
     collapsiblePlan === null || expandedPlan === collapsiblePlan;
+  useEffect(() => {
+    const heading = title.current;
+    heading?.setAttribute("data-client-ready", "true");
+    return () => heading?.removeAttribute("data-client-ready");
+  }, []);
   useLayoutEffect(() => {
     if (!setupOpen && setup.current?.contains(document.activeElement))
       editSetup.current?.focus({ preventScroll: true });
@@ -176,11 +183,15 @@ export default function CollectPageView(props: CollectPageViewProps) {
     showListings || props.plan ? "tw-max-w-[1080px]" : "tw-max-w-3xl";
   return (
     <div
-      className={`${styles["surface"] ?? ""} tailwind-scope tw-mx-auto tw-w-full tw-max-w-[1440px] tw-px-4 tw-pb-28 tw-pt-5 tw-text-iron-100 md:tw-px-6 lg:tw-px-8`}
+      data-collect-page
+      className={`${styles["surface"] ?? ""} tailwind-scope tw-mx-auto tw-w-full tw-max-w-[1440px] tw-px-4 tw-pb-[calc(7rem+var(--native-keyboard-inset-bottom,0px))] tw-pt-5 tw-text-iron-100 md:tw-px-6 lg:tw-px-8`}
     >
       <header className="tw-mb-5 tw-space-y-2">
         <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-6 tw-gap-y-2">
-          <h1 className="tw-m-0 tw-min-w-0 tw-flex-1 tw-text-2xl tw-font-medium tw-tracking-tight">
+          <h1
+            ref={title}
+            className="tw-m-0 tw-min-w-0 tw-flex-1 tw-text-2xl tw-font-medium tw-tracking-tight"
+          >
             {t(locale, "collect.title")}
           </h1>
           {collectionLink && (
