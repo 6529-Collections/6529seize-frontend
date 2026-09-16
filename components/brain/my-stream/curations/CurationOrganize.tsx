@@ -342,8 +342,24 @@ export default function CurationOrganize({
         {children}
         <DragOverlay modifiers={dragOverlayModifiers} dropAnimation={null}>
           {draggingId && (
-            <div className="tailwind-scope tw-w-48 tw-rounded-xl tw-border tw-border-solid tw-border-primary-400 tw-bg-iron-900 tw-p-4 tw-text-sm tw-font-semibold tw-text-iron-50 tw-shadow-xl">
-              {postName(draggingId)}
+            <div
+              aria-hidden="true"
+              className="tailwind-scope tw-flex tw-h-7 tw-w-8 tw-items-center tw-justify-center tw-rounded-[7px] tw-bg-black/70 tw-text-iron-100 tw-shadow-[0_4px_14px_rgba(0,0,0,0.36)] tw-backdrop-blur-sm"
+            >
+              <svg
+                aria-hidden="true"
+                width="22"
+                height="16"
+                viewBox="0 0 22 16"
+                fill="none"
+              >
+                <path
+                  d="M3 5h16M3 11h16"
+                  stroke="currentColor"
+                  strokeWidth="1.75"
+                  strokeLinecap="round"
+                />
+              </svg>
             </div>
           )}
         </DragOverlay>
