@@ -147,14 +147,54 @@ it("offers retry instead of an endless skeleton when profile loading fails", () 
   jest.mocked(useIdentity).mockReturnValue({
     profile: null,
     isLoading: false,
+    isError: true,
+    isFetching: false,
     refetch,
   } as unknown as ReturnType<typeof useIdentity>);
-  render(accountUi());
+  const { rerender } = render(accountUi());
   fireEvent.click(
     screen.getByRole("button", { name: "Profile unavailable. Retry" })
   );
   expect(refetch).toHaveBeenCalledTimes(1);
-  expect(screen.queryByRole("status")).not.toBeInTheDocument();
+  expect(screen.getByRole("status")).toHaveTextContent(
+    "Profile unavailable. Retry"
+  );
+  jest.mocked(useIdentity).mockReturnValue({
+    profile: null,
+    isLoading: false,
+    isError: false,
+    isFetching: true,
+    refetch,
+  } as unknown as ReturnType<typeof useIdentity>);
+  rerender(accountUi(false));
+  expect(
+    screen.getByRole("status", { name: "Loading account" })
+  ).toBeInTheDocument();
+});
+
+it("offers profile setup for an empty successful identity result", () => {
+  jest.mocked(useIdentity).mockReturnValue({
+    profile: null,
+    isLoading: false,
+    isError: false,
+    isFetching: false,
+    refetch,
+  } as unknown as ReturnType<typeof useIdentity>);
+  render(accountUi());
+  expect(screen.getByRole("link", { name: "Create profile" })).toHaveAttribute(
+    "href",
+    "/0xalice"
+  );
+  expect(
+    screen.queryByRole("button", { name: "Profile unavailable. Retry" })
+  ).not.toBeInTheDocument();
+});
+
+it("exposes the selected account to assistive technology while collapsed", () => {
+  render(accountUi());
+  expect(
+    screen.getByRole("button", { name: "Open account and profiles menu" })
+  ).toHaveAccessibleDescription("alice");
 });
 
 it("starts availability before opening and does not repeat its request across menu openings", async () => {

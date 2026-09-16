@@ -1,7 +1,5 @@
 import { act, fireEvent, render, waitFor } from "@testing-library/react";
-import WebSidebarAccountAvatar, {
-  SIDEBAR_AVATAR_TIMEOUT_MS,
-} from "@/components/layout/sidebar/WebSidebarAccountAvatar";
+import WebSidebarAccountAvatar from "@/components/layout/sidebar/WebSidebarAccountAvatar";
 
 afterEach(() => jest.useRealTimers());
 
@@ -30,7 +28,11 @@ it("uses the default icon for a missing or broken PFP", () => {
 it("stops shimmering when an image never completes", () => {
   jest.useFakeTimers();
   const { container } = render(<WebSidebarAccountAvatar src="/stalled.png" />);
-  act(() => jest.advanceTimersByTime(SIDEBAR_AVATAR_TIMEOUT_MS));
+  const image = container.querySelector("img")!;
+  act(() => jest.advanceTimersByTime(10_000));
+  expect(container.querySelector("svg")).toBeInTheDocument();
+  expect(container.querySelector("img")).not.toBeInTheDocument();
+  fireEvent.load(image);
   expect(container.querySelector("svg")).toBeInTheDocument();
   expect(container.querySelector("img")).not.toBeInTheDocument();
 });

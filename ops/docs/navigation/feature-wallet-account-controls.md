@@ -36,6 +36,9 @@ action.
   profile's avatar. Avatar loading does not move surrounding controls.
 - A missing, failed, or stalled avatar uses the default user icon. If the
   profile request fails, select `Profile unavailable. Retry` to try again.
+  An empty successful profile result offers `Create profile` instead. Retry
+  progress and failures are announced to screen readers, and the collapsed
+  account control describes the active account.
 
 - Disconnected:
   - expanded sidebar button: `Connect Wallet`

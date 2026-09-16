@@ -56,6 +56,7 @@ test.describe("Home Page @smoke @medium @large", () => {
 test("desktop account updates do not move utilities, including in short expanded sidebars @smoke @medium @large", async ({
   page,
 }, testInfo) => {
+  // Mobile uses its own drawer; this checks persistent desktop sidebar geometry.
   test.skip(
     !isDesktopWebProject(testInfo.project.name),
     "Desktop sidebar geometry contract"

@@ -21,6 +21,8 @@ export function useIdentity({
   const {
     data: profile,
     isLoading,
+    isError,
+    isFetching,
     refetch,
   } = useQuery<ApiIdentity | undefined>({
     ...getIdentityQueryOptions({ handleOrWallet }),
@@ -29,5 +31,5 @@ export function useIdentity({
     retry: 3,
   });
 
-  return { profile: profile ?? null, isLoading, refetch };
+  return { profile: profile ?? null, isLoading, isError, isFetching, refetch };
 }

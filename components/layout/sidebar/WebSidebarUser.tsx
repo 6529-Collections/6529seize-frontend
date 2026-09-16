@@ -4,7 +4,8 @@ import {
   EllipsisVerticalIcon,
   UserCircleIcon,
 } from "@heroicons/react/24/outline";
-import { memo, useEffect, useRef, useState } from "react";
+import { memo, useEffect, useId, useRef, useState } from "react";
+import Link from "next/link";
 import { useClickAway } from "react-use";
 import { getConnectionProfileIndicator } from "@/components/auth/connection-state-indicator";
 import { HeaderConnectModal } from "@/components/header/share/HeaderShare";
@@ -38,6 +39,7 @@ function WebSidebarUser({
 }: WebSidebarUserProps) {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showConnectModal, setShowConnectModal] = useState(false);
+  const accountDescriptionId = useId();
   const capacitor = useCapacitor();
   const { isMobileDevice, isDeviceDetectionResolved } =
     useIsMobileDeviceStatus();
@@ -73,6 +75,8 @@ function WebSidebarUser({
   const {
     profile: localProfile,
     isLoading,
+    isError,
+    isFetching,
     refetch,
   } = useIdentity({
     handleOrWallet: address || "",
@@ -91,7 +95,7 @@ function WebSidebarUser({
     isAuthenticated,
   ]);
   const containerClasses =
-    "tw-relative tw-h-16 tw-w-full tw-shrink-0 tw-px-3 tw-pb-2";
+    "tw-relative tw-block tw-h-16 tw-w-full tw-shrink-0 tw-px-3 tw-pb-2";
   const rowClasses =
     "tw-flex tw-h-14 tw-w-full tw-items-center tw-gap-x-2 tw-rounded-xl tw-border-none tw-bg-transparent tw-px-2 tw-py-2";
   const avatarClasses =
@@ -109,29 +113,53 @@ function WebSidebarUser({
 
   if (
     connectionState === "initializing" ||
-    (address && isLoading && !profile)
+    (address && (isLoading || isFetching) && !profile)
   ) {
     return (
-      <div
+      <output
         className={containerClasses}
         data-sidebar-account="loading"
-        role="status"
         aria-label={t(DEFAULT_LOCALE, "webSidebar.account.loading")}
       >
-        <div className={rowClasses}>
-          <div
+        <span className={rowClasses}>
+          <span
             className={`${avatarClasses} tw-bg-iron-800 motion-safe:tw-animate-pulse`}
           />
           {!isCollapsed && (
-            <div
+            <span
               className="tw-flex tw-flex-1 tw-flex-col tw-gap-y-2"
               aria-hidden="true"
             >
-              <div className="tw-h-4 tw-w-24 tw-rounded tw-bg-iron-800 motion-safe:tw-animate-pulse" />
-              <div className="tw-h-3 tw-w-16 tw-rounded tw-bg-iron-800 motion-safe:tw-animate-pulse" />
-            </div>
+              <span className="tw-h-4 tw-w-24 tw-rounded tw-bg-iron-800 motion-safe:tw-animate-pulse" />
+              <span className="tw-h-3 tw-w-16 tw-rounded tw-bg-iron-800 motion-safe:tw-animate-pulse" />
+            </span>
           )}
-        </div>
+        </span>
+      </output>
+    );
+  }
+
+  if (address && !profile && !isError) {
+    const label = t(DEFAULT_LOCALE, "profileSetup.createAction");
+    return (
+      <div className={containerClasses} data-sidebar-account="empty">
+        <Link
+          href={`/${address.toLowerCase()}`}
+          className={`${rowClasses} tw-text-iron-400 tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-white`}
+          aria-label={label}
+          data-tooltip-id="sidebar-tooltip"
+          data-tooltip-content={label}
+          data-tooltip-hidden={!isCollapsed}
+        >
+          <span className={avatarClasses}>
+            <UserCircleIcon className="tw-size-10" aria-hidden="true" />
+          </span>
+          {!isCollapsed && (
+            <span className="tw-truncate tw-text-sm tw-font-medium">
+              {label}
+            </span>
+          )}
+        </Link>
       </div>
     );
   }
@@ -146,6 +174,11 @@ function WebSidebarUser({
         className={containerClasses}
         data-sidebar-account={address ? "error" : "signed-out"}
       >
+        {address && (
+          <output className="tw-sr-only" aria-live="polite">
+            {label}
+          </output>
+        )}
         <button
           type="button"
           className={`${rowClasses} tw-cursor-pointer tw-text-iron-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-white`}
@@ -279,8 +312,12 @@ function WebSidebarUser({
             : "webSidebar.accountMenu.openAriaLabel"
         )}
         aria-expanded={showUserMenu}
+        aria-describedby={accountDescriptionId}
         aria-controls="user-menu"
       >
+        <span id={accountDescriptionId} className="tw-sr-only">
+          {displayHandle}
+        </span>
         <div
           className={`tw-flex tw-w-full tw-items-center ${
             isCollapsed ? "" : "tw-gap-x-2"

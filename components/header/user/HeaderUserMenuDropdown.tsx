@@ -110,8 +110,8 @@ export default function HeaderUserMenuDropdown({
     }
     return null;
   })();
-  // Each opening gets one layout. Late access results apply on the next opening;
-  // a revoked capability is still removed immediately.
+  // WebSidebarUser unmounts this dropdown on close, so each opening gets one
+  // layout. Late results apply next opening; revoked access is removed immediately.
   const [initialArtworkDocumentationEnabled] = useState(
     artworkDocumentationEnabled
   );

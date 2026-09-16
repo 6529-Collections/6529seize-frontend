@@ -4,7 +4,7 @@ import { UserCircleIcon } from "@heroicons/react/24/outline";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 
-export const SIDEBAR_AVATAR_TIMEOUT_MS = 10_000;
+const SIDEBAR_AVATAR_TIMEOUT_MS = 10_000;
 
 /** The parent keys this by account and URL so an old PFP never flashes. */
 export default function WebSidebarAccountAvatar({
@@ -25,6 +25,8 @@ export default function WebSidebarAccountAvatar({
     return () => clearTimeout(timeout);
   }, [src, status]);
 
+  // Fallback is terminal for this account/URL: a late response must not cause
+  // another default-icon-to-PFP swap after the loading state has settled.
   if (!src || status === "failed") {
     return (
       <UserCircleIcon
