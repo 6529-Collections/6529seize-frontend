@@ -25,6 +25,7 @@ export function MemesDropArtworkHero({
                 imageScale={ImageScale.AUTOx1080}
                 loadStrategy={loadStrategy}
                 fillVideoContainer={true}
+                videoAlign="center"
               />
             </div>
           </div>

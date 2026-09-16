@@ -5,6 +5,49 @@
   "base_url": "https://6529.io",
   "records": [
     {
+      "id": "media.video-player",
+      "kind": "ui_affordance",
+      "title": "Video playback controls and timeline",
+      "aliases": [
+        "video duration",
+        "video timeline",
+        "scrub video",
+        "video sizing"
+      ],
+      "keywords": [
+        "video",
+        "play",
+        "pause",
+        "time",
+        "duration",
+        "seek",
+        "fullscreen"
+      ],
+      "facts": [
+        "The custom video player shows a timeline above its controls, with a small draggable handle and a larger interaction area. Drag the handle, select a position on the track, or focus the slider and use the keyboard to seek.",
+        "The bottom-left capsule shows play or pause alongside elapsed time and total duration. Pausing keeps the capsule and time in place and also shows a central play button; either play button resumes playback. The time updates while seeking.",
+        "Controls remain visible while paused, focused, or scrubbing and fade after inactivity during playback. Pointer interaction, keyboard focus, or a tap reveals them. Before duration is available, it shows a dash and seeking is disabled.",
+        "Videos are shown without cropping or stretching. Homepage Next Drop and Latest Drop share a centered artwork area; submission detail can use a larger area. Mute and fullscreen keep circular buttons. Browser-native players retain their own controls."
+      ],
+      "canonical_path": "/",
+      "link_label": "Open homepage",
+      "related_paths": [
+        "/waves",
+        "/the-memes"
+      ],
+      "tags": [
+        "media",
+        "video",
+        "waves",
+        "memes"
+      ],
+      "source_refs": [
+        "components/drops/view/item/content/media/SeizeVideoPlayer.tsx",
+        "components/drops/view/item/content/media/SeizeVideoPlayer.view.tsx",
+        "ops/docs/media/rendering/feature-video-player.md"
+      ]
+    },
+    {
       "id": "nft.video-posters",
       "kind": "workflow",
       "title": "NFT and ReMeme video preview images",

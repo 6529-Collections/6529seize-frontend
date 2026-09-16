@@ -612,3 +612,10 @@ list, AVIF still-image conversion and limits, immediate rejection feedback,
 and mixed-batch draft preservation. Keep its facts aligned with the shared
 upload format definitions and the composer media guide. Other upload surfaces
 retain separate rules.
+
+### Video playback controls
+
+The `media.video-player` record owns custom-player seeking, elapsed/total time,
+paused play controls, visibility, and homepage/submission contain sizing. Keep
+its facts aligned with the shared player and Media Rendering video guide.
+Browser-native controls remain a separate behavior.

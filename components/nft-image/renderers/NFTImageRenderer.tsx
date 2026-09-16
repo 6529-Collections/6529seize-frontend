@@ -46,7 +46,7 @@ export default function NFTImageRenderer(props: Readonly<BaseRendererProps>) {
   return (
     <NFTMediaContainer
       textCenter
-      className={`${imageWrapperClassName} ${props.heightStyle} ${props.bgStyle}`}
+      className={`${imageWrapperClassName} ${props.fillContainer ? "tw-h-full" : props.heightStyle} ${props.bgStyle}`}
     >
       <Image
         {...getNFTMediaRendererAttributes("image")}
@@ -56,10 +56,10 @@ export default function NFTImageRenderer(props: Readonly<BaseRendererProps>) {
         height="0"
         fetchPriority={shouldLazyLoad ? "auto" : "high"}
         unoptimized
-        className={props.imageStyle}
+        className={props.fillContainer ? "tw-object-contain" : props.imageStyle}
         style={{
-          height: "auto",
-          width: "auto",
+          height: props.fillContainer ? "100%" : "auto",
+          width: props.fillContainer ? "100%" : "auto",
           maxWidth: "100%",
           maxHeight: "100%",
         }}
