@@ -1,4 +1,4 @@
-jest.mock("server-only", () => ({}), { virtual: true });
+jest.mock("next/dist/compiled/server-only", () => ({}), { virtual: true });
 
 import { getTheMemesInitialData } from "@/app/the-memes/theMemesInitialData";
 

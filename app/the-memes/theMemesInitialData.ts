@@ -1,4 +1,4 @@
-import "server-only";
+import "next/dist/compiled/server-only";
 
 import type { TheMemesSearchParams } from "@/components/the-memes/theMemesRouteParams";
 import { publicEnv } from "@/config/env";
