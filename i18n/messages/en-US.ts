@@ -3201,6 +3201,9 @@ export const EN_US_MESSAGES = {
   "headerWaveLinkAction.feedback.shared": "Link shared",
   "headerWaveLinkAction.feedback.copied": "Link copied",
   "acceptConnection.incoming.profileStats": "TDH: {tdh} · Level: {level}",
+  "openData.metadata.description": "Download public 6529 datasets.",
+  "tools.api.metadata.description":
+    "Read the open REST API documentation, including authentication and drop media examples.",
   "tools.api.authCallout.title": "v2 API authentication",
   "tools.api.authCallout.description":
     "New external clients should use session-v2 wallet authentication: request a signable message, sign it exactly, exchange the signature for an access token, then send that token as bearer auth.",
@@ -3417,6 +3420,8 @@ export const EN_US_MESSAGES = {
     "About your display preference",
   "theMemes.documentTitle": "The Memes | Collections",
   "theMemes.description.collections": "Collections",
+  "theMemes.mint.metadata.description":
+    "View the latest mint from The Memes collection.",
   "theMemes.title": "The Memes",
   "theMemes.sorting.regionLabel": "Meme sorting",
   "theMemes.sorting.sortBy": "Sort by",
@@ -3508,6 +3513,8 @@ export const EN_US_MESSAGES = {
   "memeLab.collections.documentTitle":
     "{collectionName} | Meme Lab Collections",
   "memeLab.description.collections": "Collections",
+  "memeLab.metadata.description":
+    "Meme Lab is a 6529 NFT collection connected to The Memes.",
   "memeLab.sorting.regionLabel": "Meme Lab sorting",
   "memeLab.sorting.collectionRegionLabel": "Meme Lab collection sorting",
   "memeLab.sorting.sortBy": "Sort by",

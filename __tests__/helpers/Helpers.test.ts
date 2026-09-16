@@ -99,14 +99,31 @@ describe("Helpers utility functions", () => {
     } as any);
 
     expect(metadata).toMatchObject({
-      title: "phoebeum",
-      description: "Identity",
+      title: "phoebeum | 6529.io",
+      description: "Explore phoebeum's public identity and activity.",
       ogImageAlt: "phoebeum profile social card",
       ogImageHeight: 630,
       ogImageWidth: 1200,
       twitterCard: "summary_large_image",
     });
     expect(metadata.ogImage).toContain("/api/og-metadata/profiles/phoebeum");
+  });
+
+  test("getMetadataForUserPage uses a safe public bio excerpt", () => {
+    const profile = {
+      handle: "phoebeum",
+      normalised_handle: "phoebeum",
+      display: "phoebeum",
+      primary_wallet: "0x1234567890abcdef1234567890abcdef12345678",
+    } as any;
+
+    expect(
+      getMetadataForUserPage(
+        profile,
+        undefined,
+        "**Artist** building [open culture](https://example.com). <b>gm</b>"
+      ).description
+    ).toBe("Artist building open culture. gm");
   });
 
   test("getMetadataForUserPage appends formatted path to title", () => {
@@ -117,15 +134,15 @@ describe("Helpers utility functions", () => {
       primary_wallet: "0x1234567890abcdef1234567890abcdef12345678",
     } as any;
 
-    expect(getMetadataForUserPage(profile).title).toBe("phoebeum");
+    expect(getMetadataForUserPage(profile).title).toBe("phoebeum | 6529.io");
     expect(getMetadataForUserPage(profile, "brain").title).toBe(
-      "phoebeum - Brain"
+      "phoebeum - Brain | 6529.io"
     );
     expect(getMetadataForUserPage(profile, "curations").title).toBe(
-      "phoebeum - Curations"
+      "phoebeum - Curations | 6529.io"
     );
     expect(getMetadataForUserPage(profile, "foo-bar_baz").title).toBe(
-      "phoebeum - Foo Bar Baz"
+      "phoebeum - Foo Bar Baz | 6529.io"
     );
   });
 

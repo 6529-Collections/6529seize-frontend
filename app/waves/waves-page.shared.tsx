@@ -11,6 +11,7 @@ import {
   getAppMetadata,
   getLargeSocialCardMetadata,
 } from "@/components/providers/metadata";
+import { toMetadataExcerpt } from "@/helpers/metadataText";
 import WavesPageClient from "./page.client";
 import { fetchServerWaveFeedSeed } from "./wave-feed-seed.server";
 import WaveServerFeedSeed, {
@@ -369,11 +370,10 @@ export async function buildWavesMetadata(
     typeof wave.name === "string" && wave.name.trim().length > 0
       ? wave.name.trim()
       : `Wave ${shortUuid}`;
-
-  const authorHandle =
-    wave.author.handle && wave.author.handle.trim().length > 0
-      ? `@${wave.author.handle.replace(/^@/, "")}`
-      : formatAddress(wave.author.primary_address);
+  const description = isIndexableWave
+    ? (toMetadataExcerpt(wave.description_drop.parts[0]?.content) ??
+      `Explore ${waveName}, a public Wave.`)
+    : "Explore this Wave.";
 
   const dropMetadataId = getDropMetadataId(searchParams)?.trim();
   if (dropMetadataId) {
@@ -394,8 +394,8 @@ export async function buildWavesMetadata(
 
   return getAppMetadata(
     getLargeSocialCardMetadata({
-      title: `${waveName} by ${authorHandle}`,
-      description: "Waves",
+      title: `${waveName} | Brain`,
+      description,
       ogImage: `/api/og-metadata/waves/${encodeURIComponent(waveId)}`,
       ogImageAlt: `${waveName} wave social card`,
     }),

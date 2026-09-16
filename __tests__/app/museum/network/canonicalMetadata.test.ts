@@ -72,7 +72,7 @@ const publication = {
       id: "PRJ-0001",
       slug: "the-system-in-seven-states",
       title: "The System in Seven States",
-      artistIds: [],
+      artistIds: ["ART-0001"],
       organizationIds: [],
       workIds: [],
       sourcePaths: [],
@@ -267,6 +267,35 @@ describe("Network Museum canonical metadata", () => {
         })
       )
     ).toBeUndefined();
+  });
+
+  it("uses specific governed artist and project metadata without changing canonicals", async () => {
+    const artistMetadata = await artistDetailMetadata({
+      params: Promise.resolve({ slug: "casey-reas" }),
+    });
+    expect(artistMetadata).toMatchObject({
+      title: "Casey Reas | 6529 Network Museum",
+      description: expect.stringContaining(
+        "Artist and educator Casey Reas works across software"
+      ),
+    });
+    expect(canonical(artistMetadata)).toBe(
+      "/museum/network/artists/casey-reas"
+    );
+
+    const projectMetadata = await projectDetailMetadata({
+      params: Promise.resolve({ slug: "the-system-in-seven-states" }),
+    });
+    expect(projectMetadata).toMatchObject({
+      title:
+        "The System in Seven States by Casey Reas | 6529 Network Museum",
+      description: expect.stringContaining(
+        "The System in Seven States is a project by Casey Reas"
+      ),
+    });
+    expect(canonical(projectMetadata)).toBe(
+      "/museum/network/projects/the-system-in-seven-states"
+    );
   });
 
   it("does not project Keys and Gates metadata onto an unknown program route", async () => {

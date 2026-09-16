@@ -125,9 +125,11 @@ async function getMetadataProps(
       nft = Array.isArray(response.data) ? response.data[0] : undefined;
     }
     if (nft && typeof nft.name === "string" && nft.name.trim().length > 0) {
-      name = nft.name;
+      name = `${nft.name.trim()} | ${collectionLabel}`;
       artist = getUsableText(nft.artist);
-      description = [name, artist, collectionLabel].filter(Boolean).join(" · ");
+      description = [nft.name.trim(), artist, collectionLabel]
+        .filter(Boolean)
+        .join(" · ");
       image =
         getUsableText(nft.scaled) ??
         getUsableText(nft.image) ??

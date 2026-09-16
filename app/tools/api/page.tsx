@@ -463,5 +463,8 @@ export default function AboutApi() {
 }
 
 export function generateMetadata(): Metadata {
-  return getAppMetadata({ title: "API | Tools", description: "API" });
+  return getAppMetadata({
+    title: "API | Tools",
+    description: t(API_PAGE_LOCALE, "tools.api.metadata.description"),
+  });
 }

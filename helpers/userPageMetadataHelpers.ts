@@ -2,6 +2,7 @@ import { getLargeSocialCardMetadata } from "@/components/providers/metadata";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { PageSSRMetadata } from "./Types";
 import { formatAddress } from "./addressFormatting";
+import { toMetadataExcerpt } from "./metadataText";
 
 const formatUserPageMetadataPath = (path: string): string | null => {
   const words = path
@@ -17,21 +18,34 @@ const formatUserPageMetadataPath = (path: string): string | null => {
     .join(" ");
 };
 
-export const getMetadataForUserPage = (
+export const getUserPageTitle = (
   profile: ApiIdentity,
   path?: string
-): PageSSRMetadata => {
+): string => {
   const display = profile.handle ?? formatAddress(profile.display);
   const pathTitle = path ? formatUserPageMetadataPath(path) : null;
+  const pageTitle = pathTitle ? `${display} - ${pathTitle}` : display;
+  return `${pageTitle} | 6529.io`;
+};
+
+export const getMetadataForUserPage = (
+  profile: ApiIdentity,
+  path?: string,
+  publicBio?: string | null
+): PageSSRMetadata => {
+  const display = profile.handle ?? formatAddress(profile.display);
   const imageIdentity =
     profile.normalised_handle ??
     profile.handle ??
     profile.primary_wallet ??
     profile.display;
+  const description =
+    toMetadataExcerpt(publicBio) ??
+    `Explore ${display}'s public identity and activity.`;
   return getLargeSocialCardMetadata({
-    title: pathTitle ? `${display} - ${pathTitle}` : display,
+    title: getUserPageTitle(profile, path),
     ogImage: `/api/og-metadata/profiles/${encodeURIComponent(imageIdentity)}`,
     ogImageAlt: `${display} profile social card`,
-    description: "Identity",
+    description,
   });
 };
