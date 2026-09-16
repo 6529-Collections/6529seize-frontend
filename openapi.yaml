@@ -33996,6 +33996,16 @@ components:
             Optional EIP-712 domain verifyingContract. Omit or pass null when
             the client signed without one.
           nullable: true
+    ApiPushLogoutSession:
+      type: object
+      required:
+        - address
+        - native_refresh_token
+      properties:
+        address:
+          type: string
+        native_refresh_token:
+          type: string
     ApiPushNotificationDevice:
       type: object
       required:
@@ -34228,63 +34238,6 @@ components:
           type: string
         token:
           type: string
-    ApiPushLogoutSession:
-      type: object
-      required:
-        - address
-        - native_refresh_token
-      properties:
-        address:
-          type: string
-        native_refresh_token:
-          type: string
-    ApiRevokePushInstallationRequest:
-      type: object
-      required:
-        - device_id
-        - installation_secret
-        - revision
-        - sessions
-        - all_profiles
-      properties:
-        all_profiles:
-          type: boolean
-          description: >-
-            True removes every profile on this installation. False removes only
-            profile_id, or only sessions if no profile is provided.
-        device_id:
-          type: string
-        installation_secret:
-          type: string
-        revision:
-          type: integer
-          format: int64
-          minimum: 1
-          maximum: 4294967295
-        token:
-          type: string
-          description: >-
-            Legacy installation ownership proof; never exposed by device-list
-            APIs.
-        profile_id:
-          type: string
-          description: >-
-            When all_profiles is false, removes only this profile. Omit to revoke
-            only supplied sessions without deleting profile registrations. Ignored
-            when all_profiles is true, which removes every profile.
-        sessions:
-          type: array
-          maxItems: 50
-          items:
-            $ref: "#/components/schemas/ApiPushLogoutSession"
-    ApiRevokePushInstallationResponse:
-      type: object
-      required:
-        - revision
-      properties:
-        revision:
-          type: integer
-          format: int64
     ApiRegisterPushNotificationTokenRequest:
       type: object
       required:
@@ -34302,6 +34255,7 @@ components:
           type: integer
           format: int64
           minimum: 0
+          maximum: 4294967295
           description: >-
             Current installation revision; stale registration requests are
             rejected.
@@ -34490,6 +34444,54 @@ components:
           description: >-
             Required for applied; must equal the candidate and saved result
             hashes.
+    ApiRevokePushInstallationRequest:
+      type: object
+      required:
+        - device_id
+        - installation_secret
+        - revision
+        - sessions
+        - all_profiles
+      properties:
+        all_profiles:
+          type: boolean
+          description: >-
+            True removes every profile on this installation. False removes only
+            profile_id, or only sessions if no profile is provided.
+        device_id:
+          type: string
+        installation_secret:
+          type: string
+        revision:
+          type: integer
+          format: int64
+          minimum: 1
+          maximum: 4294967295
+        token:
+          type: string
+          description: >-
+            Legacy installation ownership proof; never exposed by device-list
+            APIs.
+        profile_id:
+          type: string
+          description: >-
+            When all_profiles is false, removes only this profile. Omit to
+            revoke only supplied sessions without deleting profile
+            registrations. Ignored when all_profiles is true, which removes
+            every profile.
+        sessions:
+          type: array
+          maxItems: 50
+          items:
+            $ref: "#/components/schemas/ApiPushLogoutSession"
+    ApiRevokePushInstallationResponse:
+      type: object
+      required:
+        - revision
+      properties:
+        revision:
+          type: integer
+          format: int64
     ApiRollbackProfileCmsPackageRequest:
       type: object
       required:
