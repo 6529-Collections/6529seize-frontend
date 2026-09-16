@@ -61,6 +61,7 @@ jest.mock("@/components/layout/SmallScreenLayout", () => ({
 }));
 
 beforeEach(() => {
+  document.documentElement.removeAttribute("data-native-runtime");
   Object.defineProperty(navigator, "userAgent", {
     configurable: true,
     value: "iPhone",
@@ -96,13 +97,24 @@ it.each([
   async (platform, country, layout, restricted) => {
     mockPlatform = platform;
     mockCountry = country;
+    if (platform !== "web") {
+      document.documentElement.setAttribute("data-native-runtime", platform);
+    }
     const commits: { isIos: boolean; hidden: boolean; orientation: number }[] =
       [];
     const contentMountLayouts: (string | null | undefined)[] = [];
     const navigationRenders: boolean[] = [];
+    const hiddenContentCommits: boolean[] = [];
     function Content() {
       const ref = useRef<HTMLHeadingElement>(null);
       useLayoutEffect(() => {
+        // The desktop hydration commit may exist, but native users must never
+        // see it. The browser suite verifies this selector actually hides it.
+        hiddenContentCommits.push(
+          ref.current?.closest(
+            ':root[data-native-runtime] [data-native-startup="pending"] > [data-native-startup-content]'
+          ) !== null
+        );
         contentMountLayouts.push(
           ref.current?.closest("[data-layout]")?.getAttribute("data-layout")
         );
@@ -166,6 +178,7 @@ it.each([
       // The server layout transitions once. Real MobileLayout must select
       // AppLayout immediately, without mounting a second fallback layout.
       expect(contentMountLayouts).toEqual(["web", layout]);
+      expect(hiddenContentCommits).toEqual([platform !== "web", false]);
       await act(async () => root?.render(<Reader showNavigation />));
       expect(navigationRenders[0]).toBe(platform !== "web");
       expect(
@@ -175,6 +188,7 @@ it.each([
     } finally {
       await act(async () => root?.unmount());
       container.remove();
+      document.documentElement.removeAttribute("data-native-runtime");
     }
   }
 );

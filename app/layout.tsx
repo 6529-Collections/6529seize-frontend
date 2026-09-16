@@ -17,6 +17,10 @@ import { NATIVE_IOS_BOOTSTRAP_SCRIPT } from "@/components/eula/nativeIosBootstra
 import AwsRumProvider from "@/components/monitoring/AwsRumProvider";
 import MobileLaunchTimingReporter from "@/components/monitoring/MobileLaunchTimingReporter";
 import LayoutWrapper from "@/components/providers/LayoutWrapper";
+import {
+  NATIVE_STARTUP_SCRIPT,
+  NATIVE_STARTUP_STYLES,
+} from "@/components/layout/nativeStartup";
 import Providers from "@/components/providers/Providers";
 import RuntimeFavicon from "@/components/providers/RuntimeFavicon";
 import { getAppMetadata } from "@/components/providers/metadata";
@@ -54,6 +58,11 @@ export default async function RootLayout({
     // keyboard input arrives during startup. Keep that root-only mutation.
     <html lang="en" data-scroll-behavior="smooth" suppressHydrationWarning>
       <head>
+        <style dangerouslySetInnerHTML={{ __html: NATIVE_STARTUP_STYLES }} />
+        <script
+          id="native-startup-bootstrap"
+          dangerouslySetInnerHTML={{ __html: NATIVE_STARTUP_SCRIPT }}
+        />
         <Script
           id="native-ios-platform-bootstrap"
           strategy="beforeInteractive"
