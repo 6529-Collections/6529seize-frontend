@@ -22,7 +22,6 @@ import {
   type ReactNode,
   type KeyboardEvent,
 } from "react";
-import Button from "@/components/utils/button/Button";
 import type { CurationOrder } from "@/hooks/useCurationOrder";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
@@ -51,14 +50,12 @@ export function useCurationOrganize() {
 export default function CurationOrganize({
   order,
   enabled,
-  waveId,
   onDone,
   children,
   axis = "vertical",
 }: {
   readonly order: CurationOrder;
   readonly enabled: boolean;
-  readonly waveId: string;
   readonly onDone: () => void;
   readonly children: ReactNode;
   readonly axis?: "horizontal" | "vertical";
@@ -295,30 +292,6 @@ export default function CurationOrganize({
             <span id={`${instructionsId}-keyboard`} className="tw-sr-only">
               {t(locale, "profileCuration.order.keyboardHelp")}
             </span>
-            {selectedId && !draggingId && (
-              <div className="tw-flex tw-min-h-10 tw-flex-wrap tw-items-center tw-gap-1 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5">
-                {(["first", "last"] as const).map((placement) => (
-                  <button
-                    key={placement}
-                    type="button"
-                    disabled={order.busy}
-                    onClick={() => {
-                      const id = selectedId;
-                      cancel();
-                      void order.move(id, { placement, waveId });
-                    }}
-                    className="tw-h-10 tw-border-0 tw-bg-transparent tw-px-2 tw-text-xs tw-font-medium tw-text-iron-400 tw-outline-none desktop-hover:hover:tw-text-iron-100 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 disabled:tw-cursor-wait disabled:tw-opacity-50"
-                  >
-                    {t(
-                      locale,
-                      placement === "first"
-                        ? "profileCuration.order.first"
-                        : "profileCuration.order.last"
-                    )}
-                  </button>
-                ))}
-              </div>
-            )}
             <div
               role="status"
               aria-live="polite"
@@ -335,20 +308,6 @@ export default function CurationOrganize({
                 {order.error}
               </p>
             )}
-          </div>
-        )}
-        {order.hasPreviousPage && (
-          <div className="tailwind-scope tw-mb-4 tw-flex tw-justify-center">
-            <Button
-              variant="secondary"
-              size="sm"
-              disabled={order.isFetching || order.busy || !!selectedId}
-              onClick={() => {
-                void order.fetchPreviousPage();
-              }}
-            >
-              {t(locale, "profileCuration.order.loadEarlier")}
-            </Button>
           </div>
         )}
         {children}

@@ -43,10 +43,8 @@ destination handle. Keyboard users can select a handle with Space, move with
 the arrow keys, and press Space to place it. Each move saves automatically for
 all readers. Undo reverses the latest move; Done exits organizing mode.
 
-Posts load in pages as you scroll. Select a handle to reveal Move to first and
-Move to last; these also work beyond the loaded posts. After a distant move,
-the destination page opens with the moved post in view. Load earlier posts
-lets you browse back from that page.
+Posts load in pages as you scroll. Continue scrolling to load more posts before
+moving a post to a destination farther down the Curation.
 
 The setup dialog exposes source Wave and Group details under `Advanced setup
 details`. Existing public Waves remain available as an advanced alternative.

@@ -3205,7 +3205,7 @@
       "keywords": ["waves", "curation", "posts", "arrange", "order", "profile"],
       "facts": [
         "Curators can select Organize above a source Wave's Curation tab, or Manage > This Curation > Organize posts on their profile Curation page, when the Curation contains at least two posts. Posts gain small drag handles on a subtle background over each post.",
-        "Drag a handle, or tap one and then a destination handle. Keyboard users can press Space on a handle, move with the arrow keys, and press Space to place it. Each move saves automatically. Undo reverses the latest move and Done exits. More posts load as you scroll. Select a handle for Move to first or Move to last, which work across the whole Curation. A distant move opens its destination page; Load earlier posts lets you browse back.",
+        "Drag a handle, or tap one and then a destination handle. Keyboard users can press Space on a handle, move with the arrow keys, and press Space to place it. Each move saves automatically. Undo reverses the latest move and Done exits. More posts load as you scroll; scroll farther before moving a post to a destination that has not loaded yet.",
         "A Curation has one saved order shared by all readers in the Wave and on profiles. New posts still appear at the top until moved.",
         "Only accounts allowed to manage the Curation see Organize. If a move fails, the posts return to the saved order and an error is shown."
       ],

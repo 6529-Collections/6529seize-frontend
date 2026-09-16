@@ -152,7 +152,6 @@ export default function UserPageProfileWaveContent({
           axis={containerWidth >= 624 ? "horizontal" : "vertical"}
           order={order}
           enabled={isOrganizing}
-          waveId={wave.id}
           onDone={onDoneOrganizing}
         >
           <UserPageProfileWaveMasonry

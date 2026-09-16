@@ -50,9 +50,6 @@ export const PROFILE_CURATION_MESSAGES = {
   "profileCuration.order.organizing": "Organizing",
   "profileCuration.order.done": "Done",
   "profileCuration.order.undo": "Undo",
-  "profileCuration.order.first": "Move to first",
-  "profileCuration.order.last": "Move to last",
-  "profileCuration.order.loadEarlier": "Load earlier posts",
   "profileCuration.order.title": "Reorder {curationName}",
   "profileCuration.order.help":
     "Drag a post by its handle. Each move saves automatically.",

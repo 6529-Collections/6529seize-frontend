@@ -235,7 +235,6 @@ export default function MyStreamWaveCurationContent({
       <CurationOrganize
         order={order}
         enabled={isOrganizing && canManageActiveCuration}
-        waveId={wave.id}
         onDone={() => {
           setIsOrganizing(false);
           requestAnimationFrame(() => organizeButton.current?.focus());

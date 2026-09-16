@@ -99,10 +99,8 @@ Not shown on:
 - `Organize` is available only to accounts allowed to curate with the
   selected Group. Readers without that permission see the saved order without
   arrangement controls.
-- Posts load in pages of 20 as you scroll. Select a handle to reveal
-  `Move to first` and `Move to last`; these work across the whole Curation
-  without loading every post. After a distant move, its destination page opens.
-  Use `Load earlier posts` to browse back from there.
+- Posts load in pages of 20 as you scroll. Continue scrolling to load more
+  posts before moving a post to a destination farther down the Curation.
 
 ## Failure and Recovery
 
