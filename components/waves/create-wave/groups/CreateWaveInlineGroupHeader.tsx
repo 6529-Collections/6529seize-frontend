@@ -8,19 +8,33 @@ export default function CreateWaveInlineGroupHeader({
   unsavedGroupDescription,
   unsavedGroupSummary,
   membersPreview,
+  quiet = false,
 }: {
   readonly currentGroupLabel: string;
   readonly showCurrentGroupTitle: boolean;
   readonly unsavedGroupDescription: string | null;
   readonly unsavedGroupSummary: string | null;
   readonly membersPreview?: ReactNode | undefined;
+  readonly quiet?: boolean;
 }) {
   const locale = useBrowserLocale();
   return (
     <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-3">
-      <div className="tw-flex tw-w-fit tw-max-w-full tw-flex-col tw-items-start tw-gap-0.5 tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-white/[0.04] tw-px-3 tw-py-2 md:tw-max-w-sm">
+      <div
+        className={
+          quiet
+            ? "tw-flex tw-w-full tw-min-w-0 tw-flex-col tw-items-start tw-gap-0.5 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900/40 tw-p-3"
+            : "tw-flex tw-w-fit tw-max-w-full tw-flex-col tw-items-start tw-gap-0.5 tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-white/[0.04] tw-px-3 tw-py-2 md:tw-max-w-sm"
+        }
+      >
         {showCurrentGroupTitle ? (
-          <p className="tw-m-0 tw-flex-shrink-0 tw-text-[0.6875rem] tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500">
+          <p
+            className={
+              quiet
+                ? "tw-m-0 tw-text-xs tw-font-medium tw-leading-4 tw-text-iron-400"
+                : "tw-m-0 tw-flex-shrink-0 tw-text-[0.6875rem] tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500"
+            }
+          >
             {t(locale, "waves.create.groups.currentGroup")}
           </p>
         ) : null}
@@ -29,7 +43,9 @@ export default function CreateWaveInlineGroupHeader({
             {currentGroupLabel}
           </p>
         ) : (
-          <div className="tw-mt-1.5">{membersPreview}</div>
+          <div className={quiet ? "tw-w-full" : "tw-mt-1.5"}>
+            {membersPreview}
+          </div>
         )}
       </div>
 

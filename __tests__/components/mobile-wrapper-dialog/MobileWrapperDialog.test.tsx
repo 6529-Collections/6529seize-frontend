@@ -273,34 +273,47 @@ describe("MobileWrapperDialog", () => {
       {
         name: "enables dragging with the standard handle",
         props: { enableDragToClose: true },
+        isTouchDevice: true,
         canDrag: true,
         showsHandle: true,
       },
       {
         name: "lets an explicit false override the handle fallback",
         props: { enableDragToClose: false, showDragHandle: true },
+        isTouchDevice: true,
         canDrag: false,
         showsHandle: true,
       },
       {
         name: "falls back to the legacy handle behavior",
         props: { showDragHandle: true },
+        isTouchDevice: true,
         canDrag: true,
         showsHandle: true,
       },
       {
         name: "disables dragging when the dialog is not dismissible",
         props: { dismissible: false, enableDragToClose: true },
+        isTouchDevice: true,
         canDrag: false,
         showsHandle: false,
       },
       {
         name: "enables mobile dragging for responsive tablet modals",
         props: { enableDragToClose: true, tabletModal: true },
+        isTouchDevice: true,
         canDrag: true,
         showsHandle: true,
       },
-    ])("$name", ({ props, canDrag, showsHandle }) => {
+      {
+        name: "hides the drag handle on pointer-first screens",
+        props: { enableDragToClose: true },
+        isTouchDevice: false,
+        canDrag: true,
+        showsHandle: false,
+      },
+    ])("$name", ({ props, isTouchDevice, canDrag, showsHandle }) => {
+      mockedUseIsTouchDevice.mockReturnValue(isTouchDevice);
       render(
         <MobileWrapperDialog {...defaultProps} {...props} isOpen={true} />
       );
@@ -319,6 +332,11 @@ describe("MobileWrapperDialog", () => {
         expect(dragHandle).toBeInTheDocument();
       } else {
         expect(dragHandle).not.toBeInTheDocument();
+      }
+      if (!isTouchDevice && canDrag) {
+        expect(
+          screen.getByRole("button", { name: "Close" })
+        ).toBeInTheDocument();
       }
     });
   });

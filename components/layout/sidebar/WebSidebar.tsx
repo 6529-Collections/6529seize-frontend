@@ -17,6 +17,7 @@ import WebSidebarNavItem from "./nav/WebSidebarNavItem";
 import WebSidebarHeader from "./WebSidebarHeader";
 import WebSidebarNav from "./WebSidebarNav";
 import WebSidebarUser from "./WebSidebarUser";
+import WebSidebarVersionUpdate from "./WebSidebarVersionUpdate";
 
 interface WebSidebarProps {
   readonly isCollapsed: boolean;
@@ -166,6 +167,7 @@ function WebSidebar({
 
               {showDesktopSearch && (
                 <div className="tw-px-3 tw-pt-2">
+                  <WebSidebarVersionUpdate collapsed={shouldShowCollapsed} />
                   <WebSidebarNavItem
                     onClick={(event?: MouseEvent) => {
                       event?.stopPropagation();

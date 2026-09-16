@@ -29,6 +29,7 @@ describe("GET version route", () => {
     __resetAnnouncedVersionCacheForTests();
     globalThis.fetch = jest.fn();
     const { publicEnv } = require("@/config/env");
+    publicEnv.BASE_ENDPOINT = "https://staging.6529.io";
     publicEnv.VERSION = "current-version";
     publicEnv.VERSION_BUILD_TIMESTAMP = "2026-07-09T10:00:00.000Z";
     publicEnv.ANNOUNCED_VERSION_ENDPOINT = undefined;
@@ -69,6 +70,48 @@ describe("GET version route", () => {
       { headers: NO_STORE_HEADERS }
     );
   });
+
+  it.each([undefined, "", "https://example.com/version.json"])(
+    "requires a valid announcement on production even with endpoint %s",
+    async (endpoint) => {
+      const { publicEnv } = require("@/config/env");
+      publicEnv.BASE_ENDPOINT = "https://6529.io";
+      publicEnv.ANNOUNCED_VERSION_ENDPOINT = endpoint;
+      await GET(requestWithClientVersion("previous-version"));
+      expect(jsonMock).toHaveBeenCalledWith(
+        { announced_version: null, stale: false, version: "current-version" },
+        { headers: NO_STORE_HEADERS }
+      );
+      expect(globalThis.fetch).not.toHaveBeenCalled();
+    }
+  );
+
+  it.each(["timeout", "http", "malformed", "not-ready"])(
+    "does not advertise an update after an announcement %s result",
+    async (failure) => {
+      const { publicEnv } = require("@/config/env");
+      publicEnv.BASE_ENDPOINT = "https://6529.io";
+      publicEnv.ANNOUNCED_VERSION_ENDPOINT = ANNOUNCED_VERSION_ENDPOINT;
+      if (failure === "timeout") {
+        (globalThis.fetch as jest.Mock).mockRejectedValue(
+          new DOMException("Timed out", "AbortError")
+        );
+      } else {
+        (globalThis.fetch as jest.Mock).mockResolvedValue({
+          ok: failure !== "http",
+          json: async () => {
+            if (failure === "malformed") throw new SyntaxError("Invalid JSON");
+            return { ready: false, version: "next-version" };
+          },
+        });
+      }
+      await GET(requestWithClientVersion("previous-version"));
+      expect(jsonMock).toHaveBeenCalledWith(
+        { announced_version: null, stale: false, version: "current-version" },
+        { headers: NO_STORE_HEADERS }
+      );
+    }
+  );
 
   it("returns default version when env variable is undefined", async () => {
     const { publicEnv } = require("@/config/env");
@@ -323,7 +366,7 @@ describe("GET version route", () => {
     );
   });
 
-  it("falls back to live instance comparison when the announcement endpoint is invalid", async () => {
+  it("suppresses updates when the configured announcement endpoint is invalid", async () => {
     const { publicEnv } = require("@/config/env");
     publicEnv.ANNOUNCED_VERSION_ENDPOINT =
       "https://example.com/current-production-version.json";
@@ -336,12 +379,12 @@ describe("GET version route", () => {
 
     expect(globalThis.fetch).not.toHaveBeenCalled();
     expect(warnMock).toHaveBeenCalledWith(
-      "Ignoring invalid ANNOUNCED_VERSION_ENDPOINT; falling back to live version checks."
+      "Ignoring invalid ANNOUNCED_VERSION_ENDPOINT; update availability is unconfirmed."
     );
     expect(jsonMock).toHaveBeenCalledWith(
       {
         announced_version: null,
-        stale: true,
+        stale: false,
         version: "current-version",
       },
       { headers: NO_STORE_HEADERS }
@@ -366,7 +409,7 @@ describe("GET version route", () => {
     );
   });
 
-  it("falls back to live instance comparison when the announcement request fails", async () => {
+  it("suppresses updates when the announcement request fails", async () => {
     const { publicEnv } = require("@/config/env");
     const error = new Error("network");
     publicEnv.ANNOUNCED_VERSION_ENDPOINT = ANNOUNCED_VERSION_ENDPOINT;
@@ -379,13 +422,13 @@ describe("GET version route", () => {
     await GET(requestWithClientVersion("previous-version"));
 
     expect(warnMock).toHaveBeenCalledWith(
-      "Failed to fetch announced version; falling back to live version checks.",
+      "Failed to fetch announced version; update availability is unconfirmed.",
       error
     );
     expect(jsonMock).toHaveBeenCalledWith(
       {
         announced_version: null,
-        stale: true,
+        stale: false,
         version: "current-version",
       },
       { headers: NO_STORE_HEADERS }

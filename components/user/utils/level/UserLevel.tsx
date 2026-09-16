@@ -29,7 +29,7 @@ export default function UserLevel({
       return "tw-text-[0.6875rem] tw-ring-1 tw-font-semibold tw-py-[0.1875rem]";
     }
     if (size === "xxs") {
-      return "tw-text-[0.6875rem] tw-ring-1 tw-font-semibold tw-py-0";
+      return "tw-text-[0.6875rem] tw-ring-1 tw-font-semibold tw-py-0.5";
     }
     return "tw-text-base tw-font-semibold tw-ring-1 tw-py-1";
   };
