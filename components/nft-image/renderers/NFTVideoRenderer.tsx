@@ -32,9 +32,12 @@ export default function NFTVideoRenderer(props: Readonly<BaseRendererProps>) {
     props.nft.thumbnail,
   ]);
 
+  const frameClass = props.artworkLayout ? "lg:tw-h-full" : props.heightStyle;
+  const videoLayout = props.artworkLayout ? "artwork" : "prominent";
+  const useFrame = props.fillContainer === true || props.artworkLayout === true;
   return (
     <NFTMediaContainer
-      className={`${animationClassName} ${props.fillContainer ? "tw-h-full" : props.heightStyle} ${props.bgStyle}`}
+      className={`${animationClassName} ${props.fillContainer ? "tw-h-full" : frameClass} ${props.bgStyle}`}
     >
       {props.showBalance && (
         <NFTImageBalance
@@ -54,10 +57,10 @@ export default function NFTVideoRenderer(props: Readonly<BaseRendererProps>) {
         muted
         loop
         preload="auto"
-        layout={props.fillContainer ? "fill" : "prominent"}
+        layout={props.fillContainer ? "fill" : videoLayout}
         align="center"
-        className={`${animationClassName} ${props.fillContainer ? "" : props.heightStyle} ${props.bgStyle} tw-flex tw-items-center tw-justify-center`}
-        videoClassName={props.fillContainer ? undefined : props.imageStyle}
+        className={`${animationClassName} ${useFrame ? "" : props.heightStyle} ${props.bgStyle} tw-flex tw-items-center tw-justify-center`}
+        videoClassName={useFrame ? undefined : props.imageStyle}
       />
     </NFTMediaContainer>
   );

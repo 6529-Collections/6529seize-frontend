@@ -3,7 +3,7 @@
 import { useCallback, useRef, useSyncExternalStore } from "react";
 import type { Ref } from "react";
 
-export type VideoLayout = "natural" | "fill" | "prominent";
+export type VideoLayout = "natural" | "fill" | "prominent" | "artwork";
 export type VideoAlign = "left" | "center";
 export type SeizeVideoMode = "inert-preview" | "ambient" | "interactive";
 export type SeizeVideoControls = "none" | "minimal" | "native";
@@ -199,6 +199,8 @@ export function getNaturalWidthClassName(
   if (layout === "fill") {
     return "tw-h-full tw-w-full";
   }
+
+  if (layout === "artwork") return "tw-w-full";
 
   if (layout === "prominent") {
     if (orientation === "portrait") {

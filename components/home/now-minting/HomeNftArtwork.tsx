@@ -23,7 +23,7 @@ export default function HomeNftArtwork({
         height={650}
         transparentBG
         showBalance={false}
-        fillContainer
+        artworkLayout
       />
     </HomeArtworkFrame>
   );

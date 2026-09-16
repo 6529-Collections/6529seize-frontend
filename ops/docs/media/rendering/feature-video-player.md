@@ -2,7 +2,11 @@
 
 The custom video player is shared by NFT artwork, homepage drop videos, and
 Wave submissions. Videos preserve their proportions and show the complete frame.
-On the homepage, Next Drop and Latest Drop use the same centered artwork area.
+On the homepage, Next Drop and Latest Drop videos fill the available width on
+mobile. On desktop, they are centered in the full artwork column and expand
+until either the width or height is filled. The Memes detail video follows the
+same sizing rule. The timeline and controls stay inside the video frame, not
+in the surrounding empty space.
 The submission detail view has a larger viewing area; the video fits within it
 without cropping. Compact feed previews retain their smaller viewing areas.
 

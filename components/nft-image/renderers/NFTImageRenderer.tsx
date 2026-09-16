@@ -43,10 +43,21 @@ export default function NFTImageRenderer(props: Readonly<BaseRendererProps>) {
   const shouldLazyLoad = !!props.showThumbnail || props.height === 300;
   const imageWrapperClassName = styles["imageWrapper"] ?? "";
 
+  const frameClass = props.artworkLayout ? "lg:tw-h-full" : props.heightStyle;
+  let imageClass = props.fillContainer ? "tw-object-contain" : props.imageStyle;
+  if (props.artworkLayout) {
+    imageClass = "tw-h-auto tw-w-full tw-object-contain lg:tw-h-full";
+  }
+  const imageSize = props.artworkLayout
+    ? {}
+    : {
+        height: props.fillContainer ? "100%" : "auto",
+        width: props.fillContainer ? "100%" : "auto",
+      };
   return (
     <NFTMediaContainer
       textCenter
-      className={`${imageWrapperClassName} ${props.fillContainer ? "tw-h-full" : props.heightStyle} ${props.bgStyle}`}
+      className={`${imageWrapperClassName} ${props.fillContainer ? "tw-h-full" : frameClass} ${props.bgStyle}`}
     >
       <Image
         {...getNFTMediaRendererAttributes("image")}
@@ -56,10 +67,9 @@ export default function NFTImageRenderer(props: Readonly<BaseRendererProps>) {
         height="0"
         fetchPriority={shouldLazyLoad ? "auto" : "high"}
         unoptimized
-        className={props.fillContainer ? "tw-object-contain" : props.imageStyle}
+        className={imageClass}
         style={{
-          height: props.fillContainer ? "100%" : "auto",
-          width: props.fillContainer ? "100%" : "auto",
+          ...imageSize,
           maxWidth: "100%",
           maxHeight: "100%",
         }}

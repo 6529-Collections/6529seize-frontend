@@ -781,9 +781,42 @@ describe("SeizeVideoPlayer", () => {
     });
     fireEvent.loadedMetadata(video);
     expect(container.firstElementChild).toHaveClass("tw-h-full", "tw-w-full");
-    expect(container.firstElementChild).not.toHaveAttribute("style");
+    const player = container.firstElementChild as HTMLElement;
+    expect(player.style.maxWidth).toBe("");
+    expect(player.style.maxHeight).toBe("");
+    expect(player.style.getPropertyValue("--video-ratio")).toBe(
+      String(600 / 900)
+    );
+    const surface = video.parentElement!;
+    expect(surface).toHaveAttribute("data-video-surface");
+    expect(surface).toContainElement(screen.getByRole("slider"));
     expect(video).toHaveClass("tw-object-contain");
   });
+
+  it.each([
+    [600, 900],
+    [1600, 900],
+  ])(
+    "shares an uncropped artwork surface with its controls for %s x %s video",
+    (width, height) => {
+      const { container } = render(<SeizeVideoPlayer layout="artwork" />);
+      const video = container.querySelector("video")!;
+      Object.defineProperties(video, {
+        videoWidth: { value: width },
+        videoHeight: { value: height },
+      });
+      fireEvent.loadedMetadata(video);
+      const player = container.firstElementChild as HTMLElement;
+      expect(player).toHaveClass("artwork", "tw-w-full");
+      expect(player.style.getPropertyValue("--video-ratio")).toBe(
+        String(width / height)
+      );
+      expect(player.style.maxHeight).toBe("");
+      expect(player.style.maxWidth).toBe("");
+      expect(video.parentElement).toContainElement(screen.getByRole("slider"));
+      expect(video).toHaveClass("tw-object-contain");
+    }
+  );
 
   it("clears duration when an externally managed video source is emptied", () => {
     const { container } = render(<SeizeVideoPlayer />);

@@ -79,9 +79,28 @@ describe("NFTVideoRenderer", () => {
     );
     const video = container.querySelector("video");
     expect(video).not.toHaveClass("image-style");
-    expect(video?.parentElement).toHaveClass("tw-h-full", "tw-w-full");
+    expect(video?.parentElement).toHaveAttribute("data-video-surface");
+    expect(video?.parentElement?.parentElement).toHaveClass(
+      "tw-h-full",
+      "tw-w-full",
+      "bounded"
+    );
     expect(video?.parentElement).not.toHaveClass("height-300");
     expect(video?.parentElement?.parentElement).toHaveClass("tw-h-full");
+  });
+
+  it("uses uncapped responsive artwork sizing when requested", () => {
+    const { container } = render(
+      <NFTVideoRenderer {...createDefaultProps({ artworkLayout: true })} />
+    );
+    const video = container.querySelector("video")!;
+    const player = video.parentElement!.parentElement!;
+    expect(player).toHaveClass("artwork", "tw-w-full");
+    expect(player.style.maxHeight).toBe("");
+    expect(player.style.maxWidth).toBe("");
+    expect(video).not.toHaveClass("image-style");
+    expect(container.firstElementChild).toHaveClass("lg:tw-h-full");
+    expect(container.firstElementChild).not.toHaveClass("height-300");
   });
 
   describe("Video posters", () => {
@@ -211,7 +230,7 @@ describe("NFTVideoRenderer", () => {
       const { container } = render(<NFTVideoRenderer {...props} />);
 
       const video = container.querySelector("video");
-      const wrapper = video?.parentElement;
+      const wrapper = video?.parentElement?.parentElement;
       expect(wrapper).toHaveClass("custom-height");
       expect(wrapper).toHaveClass("custom-bg");
       expect(wrapper).toHaveClass("nftAnimation");
@@ -527,7 +546,7 @@ describe("NFTVideoRenderer", () => {
       const { container } = render(<NFTVideoRenderer {...props} />);
 
       const video = container.querySelector("video");
-      const wrapper = video?.parentElement;
+      const wrapper = video?.parentElement?.parentElement;
       expect(wrapper).toHaveClass("test-height");
       expect(wrapper).toHaveClass("test-bg");
       expect(video).toHaveClass("test-image");

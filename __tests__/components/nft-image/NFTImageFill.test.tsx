@@ -15,6 +15,7 @@ jest.mock(
         <div
           data-testid="image"
           data-fill={props.fillContainer}
+          data-artwork={props.artworkLayout}
           className={props.bgStyle}
         />
       );
@@ -28,6 +29,7 @@ jest.mock(
         <div
           data-testid="video"
           data-fill={props.fillContainer}
+          data-artwork={props.artworkLayout}
           className={props.bgStyle}
         />
       );
@@ -55,12 +57,17 @@ it.each(["image", "video"] as const)(
         nft={nft}
         animation
         fillContainer
+        artworkLayout
         transparentBG
         height={650}
         showBalance={false}
       />
     );
     expect(screen.getByTestId(mediaType)).toHaveAttribute("data-fill", "true");
+    expect(screen.getByTestId(mediaType)).toHaveAttribute(
+      "data-artwork",
+      "true"
+    );
     expect(screen.getByTestId(mediaType)).toHaveClass("transparentBG");
   }
 );

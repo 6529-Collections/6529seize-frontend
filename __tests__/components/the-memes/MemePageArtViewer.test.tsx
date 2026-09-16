@@ -8,6 +8,7 @@ import { t } from "@/i18n/messages";
 const mockDownloadMediaUrl = jest.fn().mockResolvedValue(undefined);
 type MockNFTImageProps = {
   readonly animation: boolean;
+  readonly artworkLayout?: boolean;
   readonly id?: string | undefined;
   readonly showOriginal?: boolean | undefined;
 };
@@ -146,6 +147,18 @@ beforeEach(() => {
 
 afterEach(() => {
   jest.restoreAllMocks();
+});
+
+it("uses the complete responsive video frame instead of the legacy carousel height cap", () => {
+  const { container } = renderWithConnectedProfile(
+    <MemePageArtViewer nft={baseNft} />
+  );
+  const animationProps = mockNFTImage.mock.calls
+    .map(([props]) => props)
+    .find((props) => props.animation);
+  expect(animationProps?.artworkLayout).toBe(true);
+  expect(container.querySelector("section")).toHaveClass("videoCarousel");
+  expect(container.querySelector("section")).not.toHaveClass("memesCarousel");
 });
 
 describe("MemePageArtViewer", () => {

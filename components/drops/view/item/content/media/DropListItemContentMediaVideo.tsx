@@ -14,6 +14,7 @@ interface Props {
   readonly src: string;
   readonly mimeType?: string | undefined;
   readonly disableAutoPlay?: boolean | undefined;
+  readonly artworkLayout?: boolean | undefined;
   readonly fillContainer?: boolean | undefined;
   readonly align?: "left" | "center" | undefined;
   readonly showFullscreen?: boolean | undefined;
@@ -25,6 +26,7 @@ function DropListItemContentMediaVideo({
   mimeType,
   disableAutoPlay = false,
   fillContainer = false,
+  artworkLayout = false,
   align = "left",
   showFullscreen = true,
   loadStrategy = "in-view",
@@ -117,6 +119,7 @@ function DropListItemContentMediaVideo({
     };
 
     document.addEventListener("fullscreenchange", pauseWhenFullscreenCloses);
+
     return () => {
       document.removeEventListener(
         "fullscreenchange",
@@ -125,18 +128,21 @@ function DropListItemContentMediaVideo({
     };
   }, [isApp, videoRef]);
 
+  const videoLayout = artworkLayout ? "artwork" : "natural";
+
   return (
     <div
       ref={wrapperRef}
       className={clsx(
         "tw-flex tw-w-full tw-items-start tw-justify-start",
+        artworkLayout && "lg:tw-h-full",
         fillContainer && "tw-h-full tw-max-h-full"
       )}
     >
       <SeizeVideoPlayer
         videoRef={videoRef}
         template="ambient-media"
-        layout={fillContainer ? "fill" : "natural"}
+        layout={fillContainer ? "fill" : videoLayout}
         align={align}
         showFullscreen={showFullscreen}
         onDownload={downloadMedia}
