@@ -1,4 +1,5 @@
 import type { FormEvent } from "react";
+import { useHasHydrated } from "@/hooks/useHasHydrated";
 
 import Button from "@/components/utils/button/Button";
 import type { SidebarWave } from "@/types/waves.types";
@@ -211,6 +212,7 @@ export function CalculatorPanel({
   readonly onSelectMatch: (waveId: string) => void;
 }) {
   const isLoading = status === "loading";
+  const hasHydrated = useHasHydrated();
   const errorId = "wave-score-calculator-error";
 
   return (
@@ -244,6 +246,7 @@ export function CalculatorPanel({
             />
             <input
               id="wave-score-calculator-input"
+              disabled={!hasHydrated}
               value={input}
               onChange={(event) => onInputChange(event.target.value)}
               placeholder="Memes-Chat or https://6529.io/waves/..."
@@ -255,7 +258,7 @@ export function CalculatorPanel({
           </div>
           <Button
             type="submit"
-            disabled={isLoading}
+            disabled={isLoading || !hasHydrated}
             variant="action"
             size="lg"
           >

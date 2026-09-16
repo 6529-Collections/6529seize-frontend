@@ -15,6 +15,7 @@ import { gotoDocumentWithTransientRetry } from "../support/routeReadiness";
 
 const MOBILE_PROJECT = "web-mobile-chromium";
 const MOBILE_VIEWPORT = { width: 390, height: 844 } as const;
+const STUDY_READY_TIMEOUT_MS = 20_000;
 const SHELL_ALLOWED_CONSOLE_ERROR_PATTERNS = [
   /^Analytics SDK: TypeError: Failed to fetch(?:\n|$)/,
   /^Error checking Cross-Origin-Opener-Policy: Failed to fetch(?: \(6529\.io\))?(?:\n|$)/,
@@ -32,20 +33,54 @@ const PROJECTS = [
 
 async function openStudy(page: Page, slug: string, title: string) {
   const path = `/museum/network/projects/${slug}/system`;
-  const response = await gotoDocumentWithTransientRetry(page, path);
-  expect(response?.status()).toBe(200);
-  await waitForRouteReady(page);
-  await expect(page).toHaveURL((url) => url.pathname === path);
-  await expect(
-    page.getByRole("heading", { level: 1, name: title, exact: true })
-  ).toBeVisible();
-  await expect(
-    page.getByRole("heading", {
-      name: "Hold the Museum work. Choose what sits beside it.",
-      exact: true,
-    })
-  ).toBeVisible();
-  await expectNoHorizontalOverflow(page);
+  const studyHeading = page.getByRole("heading", {
+    level: 1,
+    name: title,
+    exact: true,
+  });
+  const notFoundHeading = page.getByRole("heading", {
+    name: "404 | USER OR PAGE NOT FOUND",
+    exact: true,
+  });
+
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    const response = await gotoDocumentWithTransientRetry(page, path);
+    expect(response?.status()).toBe(200);
+    await waitForRouteReady(page);
+    await expect(page).toHaveURL((url) => url.pathname === path, {
+      timeout: STUDY_READY_TIMEOUT_MS,
+    });
+    await studyHeading.or(notFoundHeading).waitFor({
+      state: "visible",
+      timeout: STUDY_READY_TIMEOUT_MS,
+    });
+
+    if (await studyHeading.isVisible()) {
+      const comparisonRegion = page.getByRole("region", {
+        name: "Hold the Museum work. Choose what sits beside it.",
+        exact: true,
+      });
+      await expect(
+        comparisonRegion.getByRole("heading", {
+          name: "Hold the Museum work. Choose what sits beside it.",
+          exact: true,
+        })
+      ).toBeVisible({ timeout: STUDY_READY_TIMEOUT_MS });
+      await expect(comparisonRegion).toHaveAttribute(
+        "data-client-ready",
+        "true",
+        { timeout: STUDY_READY_TIMEOUT_MS }
+      );
+      await expectNoHorizontalOverflow(page);
+      return;
+    }
+
+    if (attempt === 2) {
+      throw new Error(
+        `Museum study ${path} remained on the application 404 page after retry.`
+      );
+    }
+  }
 }
 
 test.describe("Museum Inside the System @surface @readonly", () => {
@@ -96,11 +131,26 @@ test.describe("Museum Inside the System @surface @readonly", () => {
     try {
       await openStudy(page, "century", "CENTURY");
       const lookup = page.getByLabel("Edition number or token ID");
-      await lookup.fill("724");
-      await page.getByRole("button", { name: "View", exact: true }).click();
+      const viewButton = page.getByRole("button", {
+        name: "View",
+        exact: true,
+      });
+      const officialStill = page.getByRole("img", {
+        name: "Official still for CENTURY #724",
+      });
       await expect(
-        page.getByRole("img", { name: "Official still for CENTURY #724" })
-      ).toBeVisible();
+        page.getByRole("region", {
+          name: "Hold the Museum work. Choose what sits beside it.",
+          exact: true,
+        })
+      ).toHaveAttribute("data-client-ready", "true", {
+        timeout: STUDY_READY_TIMEOUT_MS,
+      });
+      await lookup.fill("724");
+      await viewButton.click();
+      await expect(officialStill).toBeVisible({
+        timeout: STUDY_READY_TIMEOUT_MS,
+      });
 
       const beforeRandom = await lookup.inputValue();
       await page

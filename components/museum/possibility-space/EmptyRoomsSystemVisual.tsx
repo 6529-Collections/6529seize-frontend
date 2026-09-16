@@ -15,6 +15,7 @@ import {
   seedFromHash,
   seededUnit,
   smallControlClass,
+  stableSvgNumber,
   useModelNumberState,
   useUrlStringState,
   type ProjectComparisonProps,
@@ -68,8 +69,8 @@ export function EmptyRoomsAmphitheater({
     Math.PI / 2;
   const selectedRadius = radii[visualization.selectedGroupIndex] ?? 151;
   const selectedPoint = {
-    x: 190 + Math.cos(selectedAngle) * selectedRadius,
-    y: 190 + Math.sin(selectedAngle) * selectedRadius,
+    x: stableSvgNumber(190 + Math.cos(selectedAngle) * selectedRadius),
+    y: stableSvgNumber(190 + Math.sin(selectedAngle) * selectedRadius),
   };
   const candidateGroupIndex = Math.max(
     0,
@@ -88,8 +89,8 @@ export function EmptyRoomsAmphitheater({
     (candidateOffset / candidateGroupCount) * Math.PI * 2 - Math.PI / 2;
   const candidateRadius = radii[candidateGroupIndex] ?? 30;
   const candidatePoint = {
-    x: 190 + Math.cos(candidateAngle) * candidateRadius,
-    y: 190 + Math.sin(candidateAngle) * candidateRadius,
+    x: stableSvgNumber(190 + Math.cos(candidateAngle) * candidateRadius),
+    y: stableSvgNumber(190 + Math.sin(candidateAngle) * candidateRadius),
   };
   const traitCounts = useMemo(
     () =>
@@ -168,9 +169,9 @@ export function EmptyRoomsAmphitheater({
                 ),
             0
           ) / Math.max(1, decodedForms.length);
-        const z = wave * (comparisonDepth / 255) * 34;
-        const x = 260 + nx * 390 + z * 0.65;
-        const y = 142 + ny * 205 - z * 0.42;
+        const z = stableSvgNumber(wave * (comparisonDepth / 255) * 34);
+        const x = stableSvgNumber(260 + nx * 390 + z * 0.65);
+        const y = stableSvgNumber(142 + ny * 205 - z * 0.42);
         return { x, y, z };
       }),
     [comparisonCounts, comparisonDepth, comparisonSeed, decodedForms.length]
@@ -240,8 +241,8 @@ export function EmptyRoomsAmphitheater({
                   return (
                     <circle
                       key={`${group.label}-${angle}`}
-                      cx={190 + Math.cos(angle) * radius}
-                      cy={190 + Math.sin(angle) * radius}
+                      cx={stableSvgNumber(190 + Math.cos(angle) * radius)}
+                      cy={stableSvgNumber(190 + Math.sin(angle) * radius)}
                       r={groupIndex === 5 ? 0.72 : 1.15}
                       fill={active ? "#83bf6e" : "#848490"}
                     />
@@ -358,10 +359,10 @@ export function EmptyRoomsAmphitheater({
                     key={`${segment.x}-${segment.y}-${segment.z}`}
                     d={`M${segment.x.toFixed(1)} ${segment.y.toFixed(1)}l${(4 + Math.abs(segment.z) * 0.2).toFixed(1)} ${(-2 - segment.z * 0.12).toFixed(1)}`}
                     strokeWidth="0.7"
-                    opacity={
+                    opacity={stableSvgNumber(
                       (0.18 + Math.min(0.72, Math.abs(segment.z) / 45)) /
-                      Math.max(1, comparisonChannels.length * 0.72)
-                    }
+                        Math.max(1, comparisonChannels.length * 0.72)
+                    )}
                   />
                 ))}
                 <path

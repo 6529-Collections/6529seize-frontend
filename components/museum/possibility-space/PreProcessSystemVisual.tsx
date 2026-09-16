@@ -13,6 +13,7 @@ import {
   focusClass,
   nextSeed,
   smallControlClass,
+  stableSvgNumber,
   useModelNumberState,
   type ProjectComparisonProps,
 } from "./shared";
@@ -107,11 +108,13 @@ function CollisionChamber({
         : origin === 2
           ? 76
           : 28 + ((index * 29) % 56);
-    const x = origin === 2 ? 48 + index * 7.1 : 140 + Math.cos(angle) * spread;
+    const x = stableSvgNumber(
+      origin === 2 ? 48 + index * 7.1 : 140 + Math.cos(angle) * spread
+    );
     const y =
       origin === 2
-        ? 140 + Math.sin(index * 1.7) * 4
-        : 140 + Math.sin(angle) * spread;
+        ? stableSvgNumber(140 + Math.sin(index * 1.7) * 4)
+        : stableSvgNumber(140 + Math.sin(angle) * spread);
     const progress = index / 27;
     const radius =
       growth === 1

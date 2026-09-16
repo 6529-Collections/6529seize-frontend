@@ -2,16 +2,18 @@
 
 import { App } from "@capacitor/app";
 import { Capacitor } from "@capacitor/core";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
+
+const subscribeToHydration = () => () => undefined;
+const getHydratedSnapshot = () => true;
+const getServerHydratedSnapshot = () => false;
 
 enum CapacitorOrientationType {
   PORTRAIT,
   LANDSCAPE,
 }
 
-function getCurrentOrientation(
-  isCapacitor: boolean
-): CapacitorOrientationType {
+function getCurrentOrientation(isCapacitor: boolean): CapacitorOrientationType {
   if (
     !isCapacitor ||
     typeof window === "undefined" ||
@@ -26,8 +28,13 @@ function getCurrentOrientation(
 }
 
 const useCapacitor = () => {
-  const isCapacitor = Capacitor.isNativePlatform();
-  const platform = Capacitor.getPlatform();
+  const isHydrated = useSyncExternalStore(
+    subscribeToHydration,
+    getHydratedSnapshot,
+    getServerHydratedSnapshot
+  );
+  const isCapacitor = isHydrated && Capacitor.isNativePlatform();
+  const platform = isHydrated ? Capacitor.getPlatform() : "web";
 
   const isIos = platform === "ios";
   const isAndroid = platform === "android";
@@ -85,6 +92,7 @@ const useCapacitor = () => {
     };
 
     window.addEventListener("orientationchange", handleOrientationChange);
+    handleOrientationChange();
 
     return () => {
       window.removeEventListener("orientationchange", handleOrientationChange);

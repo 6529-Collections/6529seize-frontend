@@ -12,6 +12,7 @@ import { SortDirection } from "@/entities/ISort";
 import type { ApiCommunityMemberOverview } from "@/generated/models/ApiCommunityMemberOverview";
 import type { Page } from "@/helpers/Types";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useHasHydrated } from "@/hooks/useHasHydrated";
 import { t } from "@/i18n/messages";
 import { commonApiFetch } from "@/services/api/common-api";
 import { useQuery } from "@tanstack/react-query";
@@ -64,6 +65,7 @@ function NetworkHeaderActionButton({
   readonly label: string;
   readonly onClick: () => void;
 }) {
+  const hasHydrated = useHasHydrated();
   const buttonClassName = [
     "tw-group tw-relative tw-inline-flex tw-items-center tw-justify-center tw-gap-1.5 tw-rounded-lg tw-border-0 tw-text-xs tw-font-semibold tw-transition tw-duration-200 tw-ease-out focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400/40",
     compact
@@ -77,6 +79,7 @@ function NetworkHeaderActionButton({
   return (
     <button
       type="button"
+      disabled={!hasHydrated}
       className={buttonClassName}
       onClick={onClick}
       aria-label={active ? `${label} (active)` : label}
