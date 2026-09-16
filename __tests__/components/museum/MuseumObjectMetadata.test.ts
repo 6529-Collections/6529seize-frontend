@@ -125,4 +125,104 @@ describe("Museum object metadata", () => {
     expect(metadata.alternates?.canonical).toBeUndefined();
     expect(metadata.robots).toEqual({ index: false, follow: true });
   });
+
+  it.each([
+    ["6529NM-W-0002", "6529NM.2026.001.02", "CENTURY #724"],
+    ["6529NM-W-0003", "6529NM.2026.001.03", "CENTURY #401"],
+    ["6529NM-W-0007", "6529NM.2026.001.07", "Ex Nihilo (Cosmos) #248"],
+    ["6529NM-W-0008", "selected-work-eight", "Take the Key!"],
+    ["6529NM-W-0014", "selected-work-fourteen", "the cost of open"],
+  ])(
+    "keeps %s metadata on its Work when an acquisition is listed first",
+    async (workId, sourceRecordId, title) => {
+      const canonicalRoute = `/museum/network/works/${workId}`;
+      const workEntity = {
+        ...publication.entityGraph.entities[0],
+        id: workId,
+        label: title,
+        canonicalRoute,
+        sourceRecordIds: [sourceRecordId],
+      };
+      const acquisition = {
+        ...workEntity,
+        id: "related-acquisition",
+        entityType: "CURATED_ACQUISITION",
+        canonicalRoute:
+          "/museum/network/acquisitions/the-system-in-seven-states",
+        sourceRecordIds: [workId, sourceRecordId, "6529NM.2026.001.01"],
+      };
+      for (const requestedId of [workId, sourceRecordId]) {
+        const metadata = await getMuseumObjectMetadata(requestedId, {
+          status: "current",
+          publication: {
+            ...publication,
+            works: [...publication.works, { id: workId, title }],
+            entityGraph: {
+              ...publication.entityGraph,
+              entities: [
+                acquisition,
+                workEntity,
+                ...publication.entityGraph.entities,
+              ],
+              relations: [
+                {
+                  ...publication.entityGraph.relations[0],
+                  targetEntityId: workId,
+                },
+              ],
+            },
+          },
+          errorCode: null,
+          failedAt: null,
+          lastValidAcceptedAt: null,
+        } as never);
+
+        expect(metadata.alternates?.canonical?.toString()).toContain(
+          canonicalRoute
+        );
+        expect(metadata.openGraph?.url?.toString()).toContain(canonicalRoute);
+        expect(metadata.title).toBe(
+          `${title} by Casey Reas — 6529 Network Museum`
+        );
+        expect(metadata.robots).toEqual({ index: true, follow: true });
+      }
+    }
+  );
+
+  it.each(["published", "archived"])(
+    "prefers an exact %s Work over another Work's source-record reference",
+    async (entityStatus) => {
+      const metadata = await getMuseumObjectMetadata("6529NM-W-0001", {
+        status: "current",
+        publication: {
+          ...publication,
+          entityGraph: {
+            ...publication.entityGraph,
+            entities: [
+              {
+                ...publication.entityGraph.entities[0],
+                id: "another-work",
+                canonicalRoute: "/museum/network/works/another-work",
+                sourceRecordIds: ["6529NM-W-0001"],
+              },
+              { ...publication.entityGraph.entities[0], entityStatus },
+            ],
+          },
+        },
+        errorCode: null,
+        failedAt: null,
+        lastValidAcceptedAt: null,
+      } as never);
+
+      if (entityStatus === "published") {
+        expect(metadata.alternates?.canonical?.toString()).toContain(
+          "/museum/network/works/6529NM-W-0001"
+        );
+        expect(metadata.robots).toEqual({ index: true, follow: true });
+      } else {
+        expect(metadata.alternates?.canonical).toBeUndefined();
+        expect(metadata.robots).toEqual({ index: false, follow: true });
+      }
+    }
+  );
 });

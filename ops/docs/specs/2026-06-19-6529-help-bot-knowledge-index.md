@@ -155,6 +155,16 @@ immutable storage. Per-page sharing-image choices and automatic reset, search
 visibility (`noindex` pages remain public), and Apply/Discard form recovery behavior are
 also included.
 
+The `groups.eligibility` business-rule record mirrors the backend eligibility
+specification in the frontend-owned corpus. It covers configured zero bounds,
+Level zero and negative scores, empty and identity-list-only groups,
+inclusion/exclusion precedence, inclusive rating bounds, zero totals, rounded-down
+xTDH, and member-preview parity. It distinguishes invisible saved groups from
+the `Hide criteria and members` privacy control. The Wave access guide owns the
+user-facing explanation, and Network's group-scope guide links to it. Publish
+these facts after the corresponding backend SQL behavior is deployed in each
+environment; the help runtime continues to consume `/help-index.json`.
+
 ## Goals
 
 - Define frontend-owned source material for 6529 Help Bot answers.
@@ -530,3 +540,11 @@ compose a short answer.
 - Which controls should receive `data-help-*` metadata in the next pass?
 - How should unanswered production questions feed back into corpus updates and
   eval coverage?
+
+### Drop media format guidance
+
+The `waves.composer.image-uploads` record owns the accepted drop media format
+list, AVIF still-image conversion and limits, immediate rejection feedback,
+and mixed-batch draft preservation. Keep its facts aligned with the shared
+upload format definitions and the composer media guide. Other upload surfaces
+retain separate rules.

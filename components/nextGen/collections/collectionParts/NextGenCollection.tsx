@@ -8,6 +8,7 @@ import {
 import { useShallowRedirect } from "@/app/nextgen/collection/[collection]/useShallowRedirect";
 import { formatNameForUrl } from "@/components/nextGen/nextgen_helpers";
 import { useTitle } from "@/contexts/TitleContext";
+import { useHasHydrated } from "@/hooks/useHasHydrated";
 import type { NextGenCollection } from "@/entities/INextgen";
 import { NextgenCollectionView } from "@/types/enums";
 import { useEffect, useState } from "react";
@@ -24,11 +25,34 @@ export function printViewButton(
   setView: (v: NextgenCollectionView) => void,
   label: string = v
 ) {
+  return (
+    <NextGenViewButton
+      currentView={currentView}
+      view={v}
+      setView={setView}
+      label={label}
+    />
+  );
+}
+
+function NextGenViewButton({
+  currentView,
+  view: v,
+  setView,
+  label,
+}: {
+  readonly currentView: NextgenCollectionView;
+  readonly view: NextgenCollectionView;
+  readonly setView: (view: NextgenCollectionView) => void;
+  readonly label: string;
+}) {
+  const hasHydrated = useHasHydrated();
   const isCurrent = v === currentView;
 
   return (
     <button
       type="button"
+      disabled={!hasHydrated}
       onClick={() => setView(v)}
       aria-current={isCurrent ? "page" : undefined}
       className={`tw-inline-flex tw-min-h-12 tw-items-center tw-justify-center tw-whitespace-nowrap tw-border-0 tw-border-b-2 tw-border-solid tw-bg-transparent tw-px-1 tw-py-3 tw-text-sm tw-font-semibold tw-transition tw-duration-200 focus:tw-outline-none focus-visible:tw-rounded-sm focus-visible:tw-bg-white/10 sm:tw-text-base ${

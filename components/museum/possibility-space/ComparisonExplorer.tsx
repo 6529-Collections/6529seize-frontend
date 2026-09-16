@@ -3,7 +3,7 @@
 /* Public token identifiers and traits are intentionally compared directly. */
 /* eslint-disable security/detect-possible-timing-attacks */
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { compareLocalized } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -254,6 +254,13 @@ export function ComparisonSelector({
   readonly setMode: (mode: ComparisonMode) => void;
   readonly selectToken: (token: MuseumMintedToken) => void;
 }) {
+  const comparisonSectionRef = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const section = comparisonSectionRef.current;
+    section?.setAttribute("data-client-ready", "true");
+    return () => section?.removeAttribute("data-client-ready");
+  }, []);
+
   const traitNames = useMemo(
     () =>
       Array.from(
@@ -368,6 +375,7 @@ export function ComparisonSelector({
 
   return (
     <section
+      ref={comparisonSectionRef}
       aria-labelledby="comparison-lab-title"
       className="tw-mt-8 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-7"
     >

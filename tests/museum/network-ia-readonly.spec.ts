@@ -1,6 +1,6 @@
 import { writeFile } from "node:fs/promises";
 
-import type { Page, TestInfo } from "@playwright/test";
+import type { Locator, Page, TestInfo } from "@playwright/test";
 
 import {
   expect,
@@ -101,6 +101,70 @@ async function expectNoDeadLinks(page: Page) {
         )
     );
   expect(deadLinks).toEqual([]);
+}
+
+function isDetachedElementError(error: unknown): error is Error {
+  return (
+    error instanceof Error &&
+    (error.message.includes("Element is not attached to the DOM") ||
+      error.message.includes("Node is detached from document"))
+  );
+}
+
+async function expectImageLoadedAfterScroll(
+  scrollTarget: Locator,
+  image: Locator
+) {
+  await expect
+    .poll(
+      async () => {
+        try {
+          await scrollTarget.scrollIntoViewIfNeeded();
+          return await image.evaluate(
+            (element) =>
+              element instanceof HTMLImageElement &&
+              element.complete &&
+              element.naturalWidth > 0
+          );
+        } catch (error) {
+          if (isDetachedElementError(error)) {
+            return false;
+          }
+          throw error;
+        }
+      },
+      { timeout: 20_000 }
+    )
+    .toBe(true);
+}
+
+async function expectUniformMediaStageRatio(
+  stages: Locator,
+  expectedRatios: readonly number[],
+  tolerance: number
+) {
+  await expect
+    .poll(
+      async () => {
+        const ratios = await stages.evaluateAll((elements) =>
+          elements.map((element) => {
+            const { width, height } = element.getBoundingClientRect();
+            return width / height;
+          })
+        );
+        return (
+          ratios.length > 0 &&
+          new Set(ratios.map((ratio) => ratio.toFixed(3))).size === 1 &&
+          ratios.every((ratio) =>
+            expectedRatios.some(
+              (expected) => Math.abs(ratio - expected) < tolerance
+            )
+          )
+        );
+      },
+      { timeout: 20_000 }
+    )
+    .toBe(true);
 }
 
 test.describe("Museum public IA rendered contract @surface @readonly", () => {
@@ -219,21 +283,10 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
           exact: true,
         }),
       });
-    await firstMagnumCollectionCard.scrollIntoViewIfNeeded();
-    await expect
-      .poll(
-        () =>
-          firstMagnumCollectionCard
-            .locator("img")
-            .evaluate(
-              (image) =>
-                image instanceof HTMLImageElement &&
-                image.complete &&
-                image.naturalWidth > 0
-            ),
-        { timeout: 20_000 }
-      )
-      .toBe(true);
+    await expectImageLoadedAfterScroll(
+      firstMagnumCollectionCard,
+      firstMagnumCollectionCard.getByRole("img")
+    );
     await retainScreenshot(page, testInfo, "museum-network-collection");
     await expectNoHorizontalOverflow(page);
 
@@ -245,19 +298,10 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
     await expect(magnumProjectCard.getByText("0", { exact: true })).toHaveCount(
       0
     );
-    await magnumProjectCard.scrollIntoViewIfNeeded();
-    await expect
-      .poll(() =>
-        magnumProjectCard
-          .locator("img")
-          .evaluate(
-            (image) =>
-              image instanceof HTMLImageElement &&
-              image.complete &&
-              image.naturalWidth > 0
-          )
-      )
-      .toBe(true);
+    await expectImageLoadedAfterScroll(
+      magnumProjectCard,
+      magnumProjectCard.getByRole("img")
+    );
     await retainScreenshot(page, testInfo, "museum-network-projects");
     await expectNoHorizontalOverflow(page);
 
@@ -270,15 +314,7 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
     expect(artistHrefs).toHaveLength(23);
     const artistMediaStages = page.getByTestId("museum-directory-media-stage");
     await expect(artistMediaStages).toHaveCount(23);
-    const artistStageRatios = await artistMediaStages.evaluateAll((stages) =>
-      stages.map((stage) => {
-        const { width, height } = stage.getBoundingClientRect();
-        return width / height;
-      })
-    );
-    for (const ratio of artistStageRatios) {
-      expect(ratio).toBeCloseTo(4 / 3, 2);
-    }
+    await expectUniformMediaStageRatio(artistMediaStages, [4 / 3], 0.005);
 
     await openRoute(page, "/museum/network/acquisitions");
     await expect(page.locator("article")).toHaveCount(4);
@@ -286,21 +322,11 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
       "museum-acquisition-media-stage"
     );
     await expect(acquisitionMediaStages).toHaveCount(4);
-    const acquisitionStageRatios = await acquisitionMediaStages.evaluateAll(
-      (stages) =>
-        stages.map((stage) => {
-          const { width, height } = stage.getBoundingClientRect();
-          return width / height;
-        })
+    await expectUniformMediaStageRatio(
+      acquisitionMediaStages,
+      [4 / 5, 4 / 3],
+      0.01
     );
-    expect(
-      new Set(acquisitionStageRatios.map((ratio) => ratio.toFixed(3))).size
-    ).toBe(1);
-    for (const ratio of acquisitionStageRatios) {
-      expect(
-        [4 / 5, 4 / 3].some((expected) => Math.abs(ratio - expected) < 0.01)
-      ).toBe(true);
-    }
     await retainScreenshot(page, testInfo, "museum-network-acquisitions");
 
     for (const [path, status] of [
@@ -333,19 +359,7 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
       '[aria-labelledby="canonical-work-media-title"] img'
     );
     await expect(veraWorkImage).toHaveCount(1);
-    await veraWorkImage.scrollIntoViewIfNeeded();
-    await expect
-      .poll(
-        () =>
-          veraWorkImage.evaluate(
-            (image) =>
-              image instanceof HTMLImageElement &&
-              image.complete &&
-              image.naturalWidth > 0
-          ),
-        { timeout: 20_000 }
-      )
-      .toBe(true);
+    await expectImageLoadedAfterScroll(veraWorkImage, veraWorkImage);
     await expect(
       page.getByText("This image is temporarily unavailable.", { exact: true })
     ).toHaveCount(0);
@@ -421,7 +435,11 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
     await expect(
       page.getByRole("heading", { name: "Keys and Gates", exact: true })
     ).toBeVisible();
-    await expect(page.locator("#acquisition-works figure img")).toHaveCount(16);
+    const keysWorksRegion = page.getByRole("region", {
+      name: "Works in this acquisition",
+      exact: true,
+    });
+    await expect(keysWorksRegion.getByRole("img")).toHaveCount(16);
     await expect(
       page.getByRole("heading", { name: "Curatorial reading", exact: true })
     ).toBeVisible();
@@ -430,20 +448,10 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
     ).not.toHaveAttribute("open");
     await page.evaluate(() => window.scrollTo(0, 0));
     await retainScreenshot(page, testInfo, "museum-acquisition-keys-and-gates");
-    await page.locator("#acquisition-works-title").scrollIntoViewIfNeeded();
-    await expect
-      .poll(() =>
-        page
-          .locator("#acquisition-works figure img")
-          .first()
-          .evaluate(
-            (image) =>
-              image instanceof HTMLImageElement &&
-              image.complete &&
-              image.naturalWidth > 0
-          )
-      )
-      .toBe(true);
+    await expectImageLoadedAfterScroll(
+      keysWorksRegion.getByRole("heading"),
+      keysWorksRegion.getByRole("img").first()
+    );
     await retainScreenshot(
       page,
       testInfo,
@@ -459,8 +467,12 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
         level: 1,
       })
     ).toBeVisible();
-    await expect(page.locator("#acquisition-works figure")).toHaveCount(5);
-    await expect(page.locator("#acquisition-works figure img")).toHaveCount(5);
+    const conflictWorksRegion = page.getByRole("region", {
+      name: "Works in this acquisition",
+      exact: true,
+    });
+    await expect(conflictWorksRegion.getByRole("figure")).toHaveCount(5);
+    await expect(conflictWorksRegion.getByRole("img")).toHaveCount(5);
     await expect(
       page.getByRole("heading", { name: "Curatorial reading", exact: true })
     ).toBeVisible();
@@ -473,25 +485,15 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
       testInfo,
       "museum-acquisition-conflict-at-its-edges"
     );
-    await page.locator("#acquisition-works-title").scrollIntoViewIfNeeded();
     await expect(
-      page.locator("#acquisition-works figure").first()
+      conflictWorksRegion.getByRole("figure").first()
     ).toContainText(
       "Patrolling the border between the Negev Desert and Jordan"
     );
-    await expect
-      .poll(() =>
-        page
-          .locator("#acquisition-works figure img")
-          .first()
-          .evaluate(
-            (image) =>
-              image instanceof HTMLImageElement &&
-              image.complete &&
-              image.naturalWidth > 0
-          )
-      )
-      .toBe(true);
+    await expectImageLoadedAfterScroll(
+      conflictWorksRegion.getByRole("heading"),
+      conflictWorksRegion.getByRole("img").first()
+    );
     await retainScreenshot(
       page,
       testInfo,
@@ -525,11 +527,66 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
     page,
   }) => {
     await openRoute(page, "/museum/network");
-    const links = page.locator('nav[aria-label="Museum sections"] a');
+    const links = page
+      .getByRole("navigation", { name: "Museum sections", exact: true })
+      .getByRole("link");
 
-    await links.first().focus();
-    await page.keyboard.press("Tab");
-    await expect(links.nth(1)).toBeFocused();
+    await expect
+      .poll(
+        async () => {
+          const firstLink = links.first();
+          const secondLink = links.nth(1);
+          const [firstBefore, secondBefore] = await Promise.all([
+            firstLink.elementHandle(),
+            secondLink.elementHandle(),
+          ]);
+          if (firstBefore === null || secondBefore === null) {
+            return false;
+          }
+
+          try {
+            await firstBefore.focus();
+            await page.keyboard.press("Tab");
+            if (
+              await secondBefore.evaluate(
+                (link) => link === document.activeElement
+              )
+            ) {
+              return true;
+            }
+
+            const [firstAfter, secondAfter] = await Promise.all([
+              firstLink.elementHandle(),
+              secondLink.elementHandle(),
+            ]);
+            const linksWereReplaced =
+              firstAfter === null ||
+              secondAfter === null ||
+              !(await firstBefore.evaluate(
+                (before, after) => before === after,
+                firstAfter
+              )) ||
+              !(await secondBefore.evaluate(
+                (before, after) => before === after,
+                secondAfter
+              ));
+            if (linksWereReplaced) {
+              return false;
+            }
+
+            throw new Error(
+              "Museum navigation Tab order failed without DOM replacement"
+            );
+          } catch (error) {
+            if (isDetachedElementError(error)) {
+              return false;
+            }
+            throw error;
+          }
+        },
+        { timeout: 20_000 }
+      )
+      .toBe(true);
 
     const focusAndTarget = await links.nth(1).evaluate((link) => {
       const style = getComputedStyle(link);

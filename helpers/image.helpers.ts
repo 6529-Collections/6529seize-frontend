@@ -42,7 +42,7 @@ export function getScaledResolvedImageUri(
   if (extension.includes("?")) {
     extension = extension.slice(0, extension.indexOf("?"));
   }
-  if (["gif", "webp", "jpg", "jpeg", "png"].includes(extension.toLowerCase())) {
+  if (["gif", "webp", "jpg", "jpeg", "png", "avif"].includes(extension.toLowerCase())) {
     return `${scalableUrl}${
       folder.length ? folder + "/" : ""
     }${scale}/${fileName}`;

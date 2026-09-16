@@ -5,6 +5,8 @@ import type { ReactNode } from "react";
 
 let mockIsRightSidebarOpen = false;
 const mockToggleRightSidebar = jest.fn();
+let mockConnectedProfile: { handle: string } | null = { handle: "alice" };
+let mockActiveProfileProxy: { created_by: { handle: string } } | null = null;
 
 jest.mock("next/navigation", () => ({
   usePathname: () => "/waves/wave-1",
@@ -16,8 +18,8 @@ jest.mock("next/navigation", () => ({
 
 jest.mock("@/components/auth/Auth", () => ({
   useAuth: () => ({
-    connectedProfile: { handle: "alice" },
-    activeProfileProxy: null,
+    connectedProfile: mockConnectedProfile,
+    activeProfileProxy: mockActiveProfileProxy,
   }),
 }));
 
@@ -100,6 +102,8 @@ describe("MyStreamWaveTabsHeader", () => {
   beforeEach(() => {
     mockIsRightSidebarOpen = false;
     mockToggleRightSidebar.mockClear();
+    mockConnectedProfile = { handle: "alice" };
+    mockActiveProfileProxy = null;
   });
 
   it("can expand Wave search into the site-wide search", () => {
@@ -127,7 +131,7 @@ describe("MyStreamWaveTabsHeader", () => {
     expect(screen.getByTestId("header-search-modal")).toBeInTheDocument();
   });
 
-  it("keeps the score actions in a compact row below the description", () => {
+  it("keeps the score in the identity and REP beside the header icon buttons", () => {
     render(
       <MyStreamWaveTabsHeader
         wave={wave}
@@ -142,11 +146,46 @@ describe("MyStreamWaveTabsHeader", () => {
       />
     );
 
-    const scoreActions = screen.getByText("Add REP").parentElement;
-
-    expect(scoreActions).toHaveClass("tw-mt-1.5");
-    expect(scoreActions).toHaveClass("tw-gap-1.5");
+    expect(screen.getByTestId("wave-score")).toBeInTheDocument();
+    const repButton = screen.getByRole("button", { name: "Add REP" });
+    const searchButton = screen.getByRole("button", {
+      name: "Search messages in this wave",
+    });
+    expect(repButton.parentElement).toBe(searchButton.parentElement);
+    expect(repButton.nextElementSibling).toBe(searchButton);
+    expect(screen.queryByRole("button", { name: "Copy wave link" })).toBeNull();
+    expect(
+      screen.getByRole("button", { name: "Show right sidebar" }).textContent
+    ).toBe("");
   });
+
+  it.each(["logged out", "author", "proxy", "DM"])(
+    "hides header REP for a %s session or wave",
+    (state) => {
+      if (state === "logged out") mockConnectedProfile = null;
+      if (state === "author") mockConnectedProfile = { handle: "REPO-AUTHOR" };
+      if (state === "proxy") {
+        mockActiveProfileProxy = { created_by: { handle: "alice" } };
+      }
+      render(
+        <MyStreamWaveTabsHeader
+          wave={{
+            ...wave,
+            chat: { scope: { group: { is_direct_message: state === "DM" } } },
+          }}
+          activeContentTab={MyStreamWaveTab.CHAT}
+          setActiveContentTab={jest.fn()}
+          onSelectCuration={jest.fn()}
+          isCompact={false}
+          showBackButton={false}
+          headerActionsTooltipId="header-actions"
+          headerClassName="tw-flex"
+          actionsClassName="tw-flex"
+        />
+      );
+      expect(screen.queryByRole("button", { name: "Add REP" })).toBeNull();
+    }
+  );
 
   it("shows a linked parent wave above a subwave title", () => {
     render(
@@ -225,6 +264,8 @@ describe("MyStreamWaveTabsHeader", () => {
     expect(closedToggle).toHaveAttribute("aria-expanded", "false");
     expect(closedToggle).toHaveAttribute("aria-pressed", "false");
     expect(closedToggle).not.toHaveAttribute("aria-controls");
+    fireEvent.click(closedToggle);
+    expect(mockToggleRightSidebar).toHaveBeenCalledTimes(1);
 
     mockIsRightSidebarOpen = true;
     rerender(header());
