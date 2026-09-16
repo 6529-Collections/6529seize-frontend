@@ -121,6 +121,11 @@ or an unavailable page. US iOS, web, and Android retain their existing behavior.
   - shows first 3 rows by default; `Show More` expands the list
   - first row can show phase metadata (phase, position, airdrop address,
     subscribed count)
+  - a subscribed first row shows `No subscription allocation` once distribution
+    is published and the finalized subscription list has no record for that
+    profile; a phase-less finalized record remains pending, and no message
+    appears for unsubscribed rows, unpublished distribution, or failed lookups
+  - phase and publication details refresh once per minute while the tab is visible
   - subscribed rows show a quantity selector capped by eligibility count
 - `Subscription History`:
   - `Redeemed Subscriptions`
@@ -165,6 +170,11 @@ or an unavailable page. US iOS, web, and Android retain their existing behavior.
 
 ## Edge Cases
 
+- Subscription changes and top-ups must be received by 00:00 UTC on the day
+  before a Meme Card mint. Once a card is closed, enabling Automatic mode or
+  making a first top-up applies to later cards; the closed card's saved
+  subscription choice is retained. Switching Automatic mode off also leaves
+  the closed card unchanged.
 - On minting day, first-row upcoming controls are locked and show
   `Minting Today`.
 - `Choose a top-up amount` stays disabled until a valid option is selected.
@@ -185,11 +195,13 @@ or an unavailable page. US iOS, web, and Android retain their existing behavior.
 - Route or component: `/{user}/subscriptions`,
   `components/user/subscriptions/*`, and the shared
   `components/common/OnchainTransactionModal.tsx` status surface.
-- Untranslated surface: subscription controls plus the shared transaction
-  status, transaction-link, close-control, and backdrop accessible names.
-- Current fallback behavior: all supported locales use hardcoded canonical
-  `en-US`; the profile tab and shared modal do not yet expose a message family
-  for this content.
+- Untranslated surface: subscription controls, the Phase / Subscription Position /
+  Airdrop Address / Subscription Count metadata in both row layouts, plus the
+  shared transaction status, transaction-link, close-control, and backdrop
+  accessible names.
+- Current fallback behavior: these surfaces use hardcoded canonical `en-US`
+  in all supported locales. The `No subscription allocation` status uses
+  `profile.subscriptions.noAllocation` and is translated in all five locales.
 - User impact: the English UI remains fully functional, but these controls and
   states are not translated yet.
 - Owner or follow-up issue: frontend i18n backlog.

@@ -7,7 +7,6 @@ import {
   displayedSeasonNumberFromIndex,
   formatFullDate,
 } from "@/components/meme-calendar/meme-calendar.helpers";
-import type { NFTFinalSubscription } from "@/generated/models/NFTFinalSubscription";
 import type { NFTSubscription } from "@/generated/models/NFTSubscription";
 import { formatAddress } from "@/helpers/Helpers";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
@@ -15,17 +14,18 @@ import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
-import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
+import { commonApiPost } from "@/services/api/common-api";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { Tooltip } from "react-tooltip";
 import SubscriptionHeaderLinks, {
   SubscriptionBalanceLabel,
 } from "./SubscriptionHeaderLinks";
 import UserPageSubscriptionsToggle from "./UserPageSubscriptionsToggle";
+import { useSubscriptionAllocationStatus } from "./useSubscriptionAllocationStatus";
 
 const SUBSCRIPTION_COUNT_SELECT_CLASS =
   "tw-h-10 tw-w-12 tw-appearance-none tw-border-0 tw-bg-transparent tw-py-0 tw-pl-3 tw-pr-5 tw-text-sm tw-leading-none tw-text-iron-200 focus:tw-outline-none disabled:tw-cursor-not-allowed disabled:tw-text-iron-500";
@@ -121,19 +121,13 @@ export default function MemeSubscriptionRow(
     }
   }, [props.eligibilityCount, selectedCount]);
 
-  const { data: fetchedFinal } = useQuery<NFTFinalSubscription>({
-    queryKey: [
-      "consolidation-final-subscription",
-      `${props.profileKey}-${props.subscription.contract}-${props.subscription.token_id}`,
-    ],
-    queryFn: async () =>
-      await commonApiFetch<NFTFinalSubscription>({
-        endpoint: `subscriptions/consolidation/final/${props.profileKey}/${props.subscription.contract}/${props.subscription.token_id}`,
-      }),
-    enabled: props.first,
-    retry: false,
+  const { final, hasNoAllocation } = useSubscriptionAllocationStatus({
+    profileKey: props.profileKey,
+    contract: props.subscription.contract,
+    tokenId: props.subscription.token_id,
+    first: props.first,
+    subscribed,
   });
-  const final = fetchedFinal;
 
   useEffect(() => {
     setSubscribed(!!props.subscription.subscribed);
@@ -148,6 +142,7 @@ export default function MemeSubscriptionRow(
   const finalWithMetadata = useMemo(() => {
     if (
       !props.first ||
+      !subscribed ||
       !final?.phase ||
       final.phase_position === undefined ||
       final.phase_position <= 0
@@ -162,7 +157,7 @@ export default function MemeSubscriptionRow(
       airdropAddress: final.airdrop_address,
       subscribedCount: final.subscribed_count,
     };
-  }, [final, props.first]);
+  }, [final, props.first, subscribed]);
 
   const submit = async (): Promise<void> => {
     if (isSubmitting || props.minting_today) {
@@ -425,6 +420,11 @@ export default function MemeSubscriptionRow(
               </span>
             )}
           </div>
+          {hasNoAllocation && (
+            <output className="tw-text-xs tw-leading-5 tw-text-iron-400">
+              {t(locale, "profile.subscriptions.noAllocation")}
+            </output>
+          )}
           {finalWithMetadata && (
             <span className="tw-break-words tw-text-xs tw-leading-5 tw-text-iron-600">
               Phase: {finalWithMetadata.phase} - Subscription Position:{" "}

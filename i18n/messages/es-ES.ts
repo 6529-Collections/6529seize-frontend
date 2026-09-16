@@ -17,6 +17,7 @@ import type { MessageKey } from "@/i18n/messages/en-US";
 import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.es-ES.json";
 
 export const ES_ES_MESSAGES = {
+  "profile.subscriptions.noAllocation": "Sin asignación de suscripción",
   "singleDrop.share": "Compartir",
   "singleDrop.shareLabel": "Compartir drop",
   "singleDrop.shared": "Enlace compartido",
