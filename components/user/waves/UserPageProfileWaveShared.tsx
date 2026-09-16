@@ -158,20 +158,21 @@ export function OfficialWaveSummary({
         <button
           type="button"
           onClick={onOpenWave}
+          title={waveName}
           aria-label={t(locale, "profileCuration.header.openSourceAria", {
             waveName,
           })}
-          className="desktop-hover:hover:tw-text-primary-200 tw-inline-flex tw-min-h-8 tw-min-w-0 tw-max-w-full tw-cursor-pointer tw-items-center tw-gap-1.5 tw-rounded-md tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-text-primary-300 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+          className="tw-group -tw-ml-1 tw-inline-flex tw-min-h-8 tw-min-w-0 tw-max-w-full tw-cursor-pointer tw-items-center tw-gap-1.5 tw-rounded-md tw-border-0 tw-bg-transparent tw-px-1 tw-py-0 tw-text-left tw-text-primary-300 tw-transition-colors tw-duration-150 desktop-hover:hover:tw-bg-white/5 desktop-hover:hover:tw-text-primary-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
         >
           <span className="tw-flex-shrink-0 tw-text-iron-400">
             {t(locale, "profileCuration.header.source")}
           </span>
-          <span className="tw-min-w-0 tw-truncate tw-font-medium tw-leading-6 tw-underline tw-underline-offset-4">
+          <span className="tw-min-w-0 tw-truncate tw-font-medium tw-leading-6 tw-underline tw-decoration-primary-300/70 tw-underline-offset-4 tw-transition-colors tw-duration-150 group-hover:tw-decoration-primary-100">
             {waveName}
           </span>
           <ArrowTopRightOnSquareIcon
             aria-hidden="true"
-            className="tw-size-4 tw-flex-shrink-0"
+            className="tw-size-4 tw-flex-shrink-0 tw-transition-transform tw-duration-150 group-hover:-tw-translate-y-0.5 group-hover:tw-translate-x-0.5 motion-reduce:tw-transform-none"
           />
         </button>
         <span className="tw-text-iron-600">•</span>
