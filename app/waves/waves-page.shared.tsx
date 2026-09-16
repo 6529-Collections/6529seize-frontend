@@ -371,7 +371,10 @@ export async function buildWavesMetadata(
       ? wave.name.trim()
       : `Wave ${shortUuid}`;
   const description = isIndexableWave
-    ? (toMetadataExcerpt(wave.description_drop.parts[0]?.content) ??
+    ? (toMetadataExcerpt(
+        (wave.description_drop as typeof wave.description_drop | undefined)
+          ?.parts[0]?.content
+      ) ??
       `Explore ${waveName}, a public Wave.`)
     : "Explore this Wave.";
 
