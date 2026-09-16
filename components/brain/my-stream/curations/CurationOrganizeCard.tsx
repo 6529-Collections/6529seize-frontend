@@ -1,7 +1,6 @@
 "use client";
 
 import { useDraggable, useDroppable } from "@dnd-kit/core";
-import { Bars3Icon } from "@heroicons/react/24/outline";
 import { useCallback, useId, type ReactNode } from "react";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
@@ -78,13 +77,23 @@ export default function CurationOrganizeCard({
           disabled={busy}
           onClick={() => select(id)}
           onKeyDown={(event) => keyDown(id, event)}
-          className={`tw-absolute tw-right-0.5 tw-top-0.5 tw-z-[1001] tw-flex tw-size-11 tw-touch-none tw-select-none tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-transparent tw-p-0 tw-outline-none tw-transition-colors tw-duration-150 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 disabled:tw-cursor-wait ${selected ? "tw-text-white" : "tw-text-iron-300 desktop-hover:hover:tw-text-white"} ${isDragging ? "tw-cursor-grabbing" : "tw-cursor-grab"}`}
+          className={`tw-group tw-absolute tw-right-0.5 tw-top-0.5 tw-z-[1001] tw-flex tw-size-11 tw-touch-none tw-select-none tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-transparent tw-p-0 tw-outline-none tw-transition-colors tw-duration-150 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 disabled:tw-cursor-wait ${selected ? "tw-text-white" : "tw-text-iron-400 desktop-hover:hover:tw-text-iron-100"} ${isDragging ? "tw-cursor-grabbing" : "tw-cursor-grab"}`}
         >
-          <span className="tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-md tw-bg-black/20 tw-drop-shadow-md tw-backdrop-blur-[2px]">
-            <Bars3Icon
+          <span className="tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-md tw-bg-black/35 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-white/10 tw-backdrop-blur-[2px] tw-transition-colors tw-duration-150 desktop-hover:group-hover:tw-bg-black/55 desktop-hover:group-hover:tw-ring-white/20">
+            <svg
               aria-hidden="true"
-              className="tw-size-6 tw-stroke-[2.25]"
-            />
+              width="22"
+              height="16"
+              viewBox="0 0 22 16"
+              fill="none"
+            >
+              <path
+                d="M3 5h16M3 11h16"
+                stroke="currentColor"
+                strokeWidth="1.75"
+                strokeLinecap="round"
+              />
+            </svg>
           </span>
         </button>
       )}
