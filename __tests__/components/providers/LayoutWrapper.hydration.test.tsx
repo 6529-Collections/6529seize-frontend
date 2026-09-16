@@ -7,6 +7,7 @@ import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 
 let mockPlatform = "ios";
+let mockPathname = "/about";
 let mockCountry: string | undefined;
 jest.mock("@capacitor/core", () => ({
   Capacitor: {
@@ -20,7 +21,7 @@ jest.mock("@capacitor/app", () => ({
     addListener: async () => ({ remove: jest.fn() }),
   },
 }));
-jest.mock("next/navigation", () => ({ usePathname: () => "/about" }));
+jest.mock("next/navigation", () => ({ usePathname: () => mockPathname }));
 jest.mock("@/components/cookies/CookieConsentContext", () => ({
   useCookieConsent: () => ({ country: mockCountry }),
 }));
@@ -61,6 +62,8 @@ jest.mock("@/components/layout/SmallScreenLayout", () => ({
 }));
 
 beforeEach(() => {
+  mockPathname = "/about";
+  document.documentElement.removeAttribute("data-native-runtime");
   Object.defineProperty(navigator, "userAgent", {
     configurable: true,
     value: "iPhone",
@@ -86,6 +89,87 @@ beforeEach(() => {
 });
 
 it.each([
+  ["ios", "/access"],
+  ["ios", "/restricted"],
+  ["android", "/access"],
+  ["android", "/restricted"],
+] as const)(
+  "keeps %s %s content available without desktop chrome through hydration",
+  async (platform, pathname) => {
+    mockPlatform = platform;
+    mockPathname = pathname;
+    document.documentElement.setAttribute("data-native-runtime", platform);
+    const commits: { isApp: boolean; layout: string | null }[] = [];
+    function StandaloneContent() {
+      const { isApp } = useDeviceInfo();
+      const ref = useRef<HTMLElement>(null);
+      useLayoutEffect(() => {
+        commits.push({
+          isApp,
+          layout:
+            ref.current
+              ?.closest("[data-layout]")
+              ?.getAttribute("data-layout") ?? null,
+        });
+      });
+      return <main ref={ref}>Standalone access content</main>;
+    }
+    const reader = (
+      <LayoutWrapper>
+        <StandaloneContent />
+      </LayoutWrapper>
+    );
+    const container = document.createElement("div");
+    container.innerHTML = renderToString(reader);
+    document.body.appendChild(container);
+    const serverContent = container.querySelector("main");
+    expect(serverContent?.parentElement).toBe(container);
+    expect(container.querySelector("[data-layout]")).toBeNull();
+    expect(container.querySelector("[data-native-startup]")).toBeNull();
+
+    const onRecoverableError = jest.fn();
+    let root: ReturnType<typeof hydrateRoot> | undefined;
+    try {
+      await act(async () => {
+        root = hydrateRoot(container, reader, { onRecoverableError });
+      });
+      expect(onRecoverableError).not.toHaveBeenCalled();
+      expect(commits[0]).toEqual({ isApp: false, layout: null });
+      expect(commits.at(-1)).toEqual({ isApp: true, layout: null });
+      expect(commits.every(({ layout }) => layout === null)).toBe(true);
+      expect(container.querySelector("main")).toBe(serverContent);
+      expect(serverContent?.parentElement).toBe(container);
+      expect(container.querySelector("[data-native-startup]")).toBeNull();
+
+      // Leaving a standalone page enters the native shell directly; no web
+      // layout is mounted during this already-hydrated client navigation.
+      const previousCommitCount = commits.length;
+      mockPathname = "/about";
+      await act(async () => {
+        root?.render(
+          <LayoutWrapper>
+            <StandaloneContent />
+          </LayoutWrapper>
+        );
+      });
+      const navigationCommits = commits.slice(previousCommitCount);
+      expect(navigationCommits.length).toBeGreaterThan(0);
+      expect(navigationCommits.every(({ layout }) => layout === "native")).toBe(
+        true
+      );
+      expect(container.querySelector('[data-layout="web"]')).toBeNull();
+      expect(
+        container.querySelector('[data-native-startup="ready"]')
+      ).not.toBeNull();
+    } finally {
+      await act(async () => root?.unmount());
+      container.remove();
+      document.documentElement.removeAttribute("data-native-runtime");
+    }
+  }
+);
+
+it.each([
   ["ios", undefined, "native", true],
   ["ios", "CA", "native", true],
   ["ios", "US", "native", false],
@@ -96,13 +180,24 @@ it.each([
   async (platform, country, layout, restricted) => {
     mockPlatform = platform;
     mockCountry = country;
+    if (platform !== "web") {
+      document.documentElement.setAttribute("data-native-runtime", platform);
+    }
     const commits: { isIos: boolean; hidden: boolean; orientation: number }[] =
       [];
     const contentMountLayouts: (string | null | undefined)[] = [];
     const navigationRenders: boolean[] = [];
+    const hiddenContentCommits: boolean[] = [];
     function Content() {
       const ref = useRef<HTMLHeadingElement>(null);
       useLayoutEffect(() => {
+        // The desktop hydration commit may exist, but native users must never
+        // see it. The browser suite verifies this selector actually hides it.
+        hiddenContentCommits.push(
+          ref.current?.closest(
+            ':root[data-native-runtime] [data-native-startup="pending"] > [data-native-startup-content]'
+          ) !== null
+        );
         contentMountLayouts.push(
           ref.current?.closest("[data-layout]")?.getAttribute("data-layout")
         );
@@ -166,6 +261,7 @@ it.each([
       // The server layout transitions once. Real MobileLayout must select
       // AppLayout immediately, without mounting a second fallback layout.
       expect(contentMountLayouts).toEqual(["web", layout]);
+      expect(hiddenContentCommits).toEqual([platform !== "web", false]);
       await act(async () => root?.render(<Reader showNavigation />));
       expect(navigationRenders[0]).toBe(platform !== "web");
       expect(
@@ -175,6 +271,7 @@ it.each([
     } finally {
       await act(async () => root?.unmount());
       container.remove();
+      document.documentElement.removeAttribute("data-native-runtime");
     }
   }
 );

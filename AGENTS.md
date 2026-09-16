@@ -327,6 +327,54 @@ is available, use it; otherwise read the relevant files in
 - Before adding or expanding an E2E pack, identify the browser-specific failure
   it catches and check that a lower test layer does not already cover it.
 
+## E2E Maintenance During Implementation
+
+For every frontend behavior change, inspect affected browser coverage before
+considering test maintenance complete. Passing or updated Jest tests alone do
+not establish that the E2E contracts still match the intended behavior.
+
+- Read [tests/README.md](tests/README.md) for pack ownership, then search the
+  relevant Playwright specs, shared selectors, fixtures, and helpers for the
+  changed routes, controls, accessible names, and user flows. Include shared
+  navigation and shell consumers when the change affects them.
+- Treat the user's requested behavior and existing unaffected guarantees as
+  the test contract. Change an existing behavioral expectation only when the
+  requested behavior requires it, not merely because the implementation
+  changed or a test fails. In the PR's Validation section, explain which
+  requirement justifies each changed behavioral expectation and why the old
+  expectation conflicts with it. An agent's implementation choice is not
+  evidence that the user requested a behavior change.
+- Update affected E2E coverage in the same PR when the requested change alters
+  labels, roles, navigation, controls, responsive layout, or interaction
+  sequences. Selector, fixture, and helper maintenance must continue to prove
+  the same behavior unless the request justifies changing that behavior.
+  Preserve all unaffected guarantees. If the implementation breaks behavior
+  the user did not ask to change, fix the product code; if the intended
+  behavior is unclear, flag that ambiguity rather than assume permission to
+  relax the test. Do not skip, delete, weaken, add retries, or narrow pack/CI
+  selection merely to make failing coverage pass.
+- Add representative browser coverage when the change introduces a distinct
+  browser-specific risk, following Test Layer Selection above. If existing
+  coverage remains valid or a lower layer fully covers the change, explain
+  that briefly in the PR's Validation section instead of adding redundant E2E.
+- Check that affected specs are selected by the intended packs and CI lanes,
+  using `tests/packs.manifest.cjs`. For PR selection, start with
+  [.github/workflows/app-pr-ci.yml](.github/workflows/app-pr-ci.yml) and its
+  [CI planner](ops/scripts/testing-strategy.cjs), following the workflow's
+  effective-plan and protected-lane adjustments. For deployed packs, inspect
+  the target environment's workflow and manifest selection. Update registration
+  or selection when needed; a spec that is never selected does not provide
+  execution coverage.
+- Inspection and test maintenance are required even when E2E execution is
+  unavailable or prohibited. Run relevant browser checks only within the
+  task's execution permissions; do not start a local server or poll CI without
+  authorization. In the PR's Validation section, name the affected specs/packs
+  and distinguish coverage updated or reviewed from checks actually executed.
+  State what was not run and why, including any material residual risk.
+
+This requirement applies before PR handoff; separate post-deploy E2E does not
+replace it or change the existing deployment gates.
+
 ## Validation Matrix
 
 Prefer focused checks first. Escalate based on blast radius.
@@ -342,8 +390,12 @@ Prefer focused checks first. Escalate based on blast radius.
   like `--testPathPatterns=<regex>` or `--cacheDirectory=<dir>` directly; do
   not insert a `--` separator — jest reads everything after `--` as a
   test-path pattern, so flags placed there are misread).
-- Playwright/user flows: `6529 run test:e2e` or a targeted Playwright run. The
-  Playwright config starts `./bin/6529 run dev` on port `3001`.
+- Playwright/user flows: `6529 run test:e2e` or a targeted Playwright run only
+  within the task's execution permissions. The default Playwright config starts
+  a local development server on port `3001`; where local servers require
+  explicit authorization, a request to maintain tests alone does not permit
+  these commands. Otherwise inspect and maintain coverage without execution,
+  and disclose the gap as described in E2E Maintenance During Implementation.
 - Build-time, generated models, Next config, env/runtime config, proxy, routing,
   deploy packaging, or dependency changes: `6529 run build`.
 - Docs maintenance: use validators under `ops/skills/commit-docs-updater/scripts/`
