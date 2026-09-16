@@ -79,7 +79,7 @@ export default function CurationOrganizeCard({
           onKeyDown={(event) => keyDown(id, event)}
           className={`tw-group tw-absolute tw-right-0.5 tw-top-0.5 tw-z-[1001] tw-flex tw-size-11 tw-touch-none tw-select-none tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-transparent tw-p-0 tw-outline-none tw-transition-colors tw-duration-150 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 disabled:tw-cursor-wait ${selected ? "tw-text-white" : "tw-text-iron-400 desktop-hover:hover:tw-text-iron-100"} ${isDragging ? "tw-cursor-grabbing" : "tw-cursor-grab"}`}
         >
-          <span className="tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-md tw-bg-black/35 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-white/10 tw-backdrop-blur-[2px] tw-transition-colors tw-duration-150 desktop-hover:group-hover:tw-bg-black/55 desktop-hover:group-hover:tw-ring-white/20">
+          <span className="tw-flex tw-h-7 tw-w-8 tw-items-center tw-justify-center tw-rounded-[7px] tw-bg-black/20 tw-bg-gradient-to-b tw-from-white/[0.11] tw-to-white/[0.035] tw-shadow-[inset_0_1px_0_rgba(255,255,255,0.10),0_2px_10px_rgba(0,0,0,0.24)] tw-ring-1 tw-ring-inset tw-ring-white/[0.12] tw-backdrop-blur-md tw-transition tw-duration-150 group-active:tw-scale-95 desktop-hover:group-hover:tw-from-white/[0.15] desktop-hover:group-hover:tw-to-white/[0.06] desktop-hover:group-hover:tw-ring-white/20 motion-reduce:tw-transform-none motion-reduce:tw-transition-none">
             <svg
               aria-hidden="true"
               width="22"
