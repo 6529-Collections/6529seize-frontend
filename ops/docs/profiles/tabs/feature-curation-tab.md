@@ -17,6 +17,7 @@ controls.
 
 - Open your own profile and select `Curation`.
 - Open another profile's `Curation` tab to view its public collection.
+- Select the underlined source Wave name below the Curation title to open it.
 - Use `Manage curations` from a post's Wave action menu to add or remove that
   post from a named Curation you can manage.
 
@@ -30,8 +31,20 @@ controls.
 5. After setup succeeds, the `Add post` dialog opens automatically.
 6. Publish a post. The post is created in the source Wave and added to the
    selected Curation.
-7. Use `Manage` to rename or delete the selected Curation. Use `Switch
-   curation` to select or create another Curation from the same source.
+7. Use `Manage` to edit, reorder, or delete the selected Curation. Use
+   `Choose another Curation` to select or create another Curation from the
+   same source.
+
+If your account can curate the selected Curation, `Organize posts` appears in
+`Manage` under `This Curation` when it contains at least two posts. The same
+inline organizing mode is available from the source Wave's Curation tab. Posts
+stay in the grid and gain small drag handles over each post. Drag a handle, or tap one and then a
+destination handle. Keyboard users can select a handle with Space, move with
+the arrow keys, and press Space to place it. Each move saves automatically for
+all readers. Done exits organizing mode.
+
+Posts load in pages as you scroll. Continue scrolling to load more posts before
+moving a post to a destination farther down the Curation.
 
 The setup dialog exposes source Wave and Group details under `Advanced setup
 details`. Existing public Waves remain available as an advanced alternative.
@@ -49,8 +62,9 @@ details`. Existing public Waves remain available as an advanced alternative.
   remove the post from an eligible named Curation.
 - **Profile post actions:** open the card menu to open the original Wave, edit
   the post when you are its author, or remove it from the Curation.
-- **Owner controls:** `Add post` is the primary action. `Manage` groups profile
-  display actions separately from actions that change the Curation itself.
+- **Owner controls:** `Add post` is the primary action. `Manage` includes
+  `Organize posts` under `This Curation` when available and groups profile display
+  actions separately from actions that change the Curation itself.
 - **Profile display:** `Choose another Curation`, `Use another source Wave`,
   and `Hide from profile` only change what this profile displays. Hiding keeps
   the Curation, source Wave, Groups, and posts available.
@@ -76,8 +90,8 @@ details`. Existing public Waves remain available as an advanced alternative.
 
 ## Failure and Recovery
 
-- Setup progress lists each dependency. If a later step fails, `Continue
-  setup` resumes from that step and reuses resources already created during the
+- Setup progress lists each dependency. If a later step fails, `Continue setup`
+  resumes from that step and reuses resources already created during the
   open setup session.
 - Duplicate Curation names and permission failures remain in the dialog with
   actionable error feedback.
