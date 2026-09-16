@@ -18,4 +18,31 @@ describe("GroupCardConfig", () => {
       "tw-whitespace-nowrap"
     );
   });
+
+  it("uses quieter type only when requested", () => {
+    const config = {
+      key: GroupDescriptionType.REP,
+      value: ">= 50, category: shared experience",
+    };
+    const { rerender } = render(<GroupCardConfig config={config} quiet />);
+
+    expect(screen.getByText("Rep:").parentElement).toHaveClass(
+      "tw-font-normal",
+      "tw-text-iron-300"
+    );
+    expect(screen.getByText(config.value)).toHaveClass(
+      "tw-font-medium",
+      "tw-text-iron-200"
+    );
+
+    rerender(<GroupCardConfig config={config} />);
+    expect(screen.getByText("Rep:").parentElement).toHaveClass(
+      "tw-font-medium",
+      "tw-text-iron-200"
+    );
+    expect(screen.getByText(config.value)).toHaveClass(
+      "tw-font-semibold",
+      "tw-text-iron-50"
+    );
+  });
 });
