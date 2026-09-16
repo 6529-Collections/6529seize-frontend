@@ -3,7 +3,13 @@ import type { MemeSeason } from "@/entities/ISeason";
 import type { ApiMemesExtendedData } from "@/generated/models/ApiMemesExtendedData";
 import { fetchUrl } from "@/services/6529api";
 import { commonApiFetch } from "@/services/api/common-api";
-import { render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import type { ReactNode } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 
@@ -27,11 +33,13 @@ jest.mock("@/services/6529api", () => ({
 jest.mock("@/components/nft-image/NftBalancesContext", () => ({
   NftBalancesProvider: ({ children }: { children: ReactNode }) => children,
 }));
-jest.mock("@/components/the-memes/TheMemesCard", () => ({
-  nft,
-}: {
-  readonly nft: ApiMemesExtendedData;
-}) => <a href={`/the-memes/${nft.id}`}>{nft.name}</a>);
+jest.mock(
+  "@/components/the-memes/TheMemesCard",
+  () =>
+    ({ nft }: { readonly nft: ApiMemesExtendedData }) => (
+      <a href={`/the-memes/${nft.id}`}>{nft.name}</a>
+    )
+);
 jest.mock(
   "@/components/collections-dropdown/CollectionsDropdown",
   () => () => null
@@ -107,6 +115,33 @@ it("renders the server-provided public cards once without refetching the first p
   );
   expect(screen.getAllByRole("link", { name: "Meme #1" })).toHaveLength(1);
   expect(fetchUrl).not.toHaveBeenCalled();
+});
+
+it("does not reuse the default seed after sorting changes before filters load", async () => {
+  let resolveSeasons: (value: MemeSeason[]) => void = () => {};
+  jest.mocked(commonApiFetch).mockReturnValue(
+    new Promise<MemeSeason[]>((resolve) => {
+      resolveSeasons = resolve;
+    })
+  );
+  const initialData = {
+    nfts: [
+      { id: 1, meme: 1, meme_name: "Meme", name: "Seeded Meme" },
+    ] as ApiMemesExtendedData[],
+    nextPage: undefined,
+  };
+
+  render(<TheMemesComponent initialData={initialData} />);
+  fireEvent.click(screen.getByRole("button", { name: "Sort by TDH" }));
+
+  await act(async () => resolveSeasons(seasons));
+
+  await waitFor(() =>
+    expect(fetchUrl).toHaveBeenCalledWith(expect.stringContaining("sort=tdh"))
+  );
+  expect(fetchUrl).not.toHaveBeenCalledWith(
+    expect.stringContaining("sort=mint_date")
+  );
 });
 
 it("includes seeded artwork links in the initial HTML", () => {

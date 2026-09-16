@@ -188,6 +188,7 @@ export default function TheMemesComponent({
   const searchParams = useSearchParams();
 
   const { connectedProfile } = useContext(AuthContext);
+  const initialDataRef = useRef(initialData);
 
   const [seasonId, setSeasonId] = useState<number | null>(null);
   const [yearId, setYearId] = useState<number | null>(null);
@@ -195,10 +196,12 @@ export default function TheMemesComponent({
   const [seasonsLoaded, setSeasonsLoaded] = useState(false);
 
   const handleSeasonChange = (season: MemeSeason | null) => {
+    initialDataRef.current = undefined;
     setSeasonId(season?.id ?? null);
   };
 
   const handleYearChange = (nextYearId: number | null) => {
+    initialDataRef.current = undefined;
     setYearId(nextYearId);
     setSeasonId(null);
   };
@@ -324,7 +327,6 @@ export default function TheMemesComponent({
     return `${publicEnv.API_ENDPOINT}/api/memes_extended_data?${query.toString()}`;
   }, [activeSeasonId, activeYearId, seasons, sort, sortDir, volumeType]);
 
-  const initialDataRef = useRef(initialData);
   const [fetching, setFetching] = useState(initialData === undefined);
 
   const [nfts, setNfts] = useState<ApiMemesExtendedData[]>(
@@ -498,7 +500,10 @@ export default function TheMemesComponent({
         type="button"
         aria-label={label}
         aria-pressed={isActive}
-        onClick={() => setSortDir(direction)}
+        onClick={() => {
+          initialDataRef.current = undefined;
+          setSortDir(direction);
+        }}
         className={`tw-m-0 tw-inline-flex tw-h-7 tw-w-6 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-p-0 tw-transition tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 ${
           isActive
             ? "tw-bg-white/[0.06] tw-text-white"
@@ -670,15 +675,24 @@ export default function TheMemesComponent({
                       currentSort={sort}
                       sort={v}
                       locale={locale}
-                      select={() => setSort(v)}
+                      select={() => {
+                        initialDataRef.current = undefined;
+                        setSort(v);
+                      }}
                     />
                   ))}
                 <div className="tw-shrink-0">
                   <VolumeTypeDropdown
                     isVolumeSort={sort === MemesSort.VOLUME}
                     selectedVolumeSort={volumeType}
-                    setVolumeType={setVolumeType}
-                    setVolumeSort={() => setSort(MemesSort.VOLUME)}
+                    setVolumeType={(nextVolumeType) => {
+                      initialDataRef.current = undefined;
+                      setVolumeType(nextVolumeType);
+                    }}
+                    setVolumeSort={() => {
+                      initialDataRef.current = undefined;
+                      setSort(MemesSort.VOLUME);
+                    }}
                     locale={locale}
                   />
                 </div>

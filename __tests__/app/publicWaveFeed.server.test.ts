@@ -1,9 +1,9 @@
 jest.mock("next/dist/compiled/server-only", () => ({}), { virtual: true });
 
-const mockCommonApiFetch = jest.fn();
+const mockAnonymousSsrFetch = jest.fn();
 
-jest.mock("@/services/api/common-api", () => ({
-  commonApiFetch: (...args: unknown[]) => mockCommonApiFetch(...args),
+jest.mock("@/lib/fetch/ssrFetch", () => ({
+  anonymousSsrFetch: (...args: unknown[]) => mockAnonymousSsrFetch(...args),
 }));
 
 import {
@@ -53,8 +53,14 @@ describe("fetchPublicWaveFeed", () => {
     jest.clearAllMocks();
   });
 
+  const resolveFeed = (feed: unknown) =>
+    mockAnonymousSsrFetch.mockResolvedValue({
+      json: async () => feed,
+      ok: true,
+    } as Response);
+
   it("fetches a bounded anonymous page and returns only the strict public DTO", async () => {
-    mockCommonApiFetch.mockResolvedValue(
+    resolveFeed(
       makeFeed({
         drops: Array.from(
           { length: PUBLIC_WAVE_FEED_REQUEST_LIMIT },
@@ -66,12 +72,12 @@ describe("fetchPublicWaveFeed", () => {
     const result = await fetchPublicWaveFeed("wave-1");
 
     expect(PUBLIC_WAVE_FEED_REQUEST_LIMIT).toBe(PUBLIC_WAVE_FEED_LIMIT + 1);
-    expect(mockCommonApiFetch).toHaveBeenCalledWith({
-      endpoint: "v2/waves/wave-1/drops",
-      params: { limit: `${PUBLIC_WAVE_FEED_LIMIT + 1}` },
-      includeWalletAuth: false,
-      cache: "no-store",
-    });
+    expect(mockAnonymousSsrFetch).toHaveBeenCalledWith(
+      expect.stringContaining(
+        `/api/v2/waves/wave-1/drops?limit=${PUBLIC_WAVE_FEED_LIMIT + 1}`
+      ),
+      { cache: "no-store" }
+    );
     expect(result).toEqual(
       expect.objectContaining({
         ok: true,
@@ -103,12 +109,30 @@ describe("fetchPublicWaveFeed", () => {
 
   it("fails closed when the response wave identity or privacy is ambiguous", async () => {
     for (const wave of [
-      { id: "other-wave", name: "Public Wave", is_private: false, is_dm_wave: false },
-      { id: "wave-1", name: "Public Wave", is_private: true, is_dm_wave: false },
-      { id: "wave-1", name: "Public Wave", is_private: false, is_dm_wave: true },
+      {
+        id: "other-wave",
+        name: "Public Wave",
+        is_private: false,
+        is_dm_wave: false,
+      },
+      {
+        id: "wave-1",
+        name: "Public Wave",
+        is_private: true,
+        is_dm_wave: false,
+      },
+      {
+        id: "wave-1",
+        name: "Public Wave",
+        is_private: false,
+        is_dm_wave: true,
+      },
       { id: "wave-1", name: "Public Wave", is_dm_wave: false },
     ]) {
-      mockCommonApiFetch.mockResolvedValueOnce(makeFeed({ wave }));
+      mockAnonymousSsrFetch.mockResolvedValueOnce({
+        json: async () => makeFeed({ wave }),
+        ok: true,
+      } as Response);
       await expect(fetchPublicWaveFeed("wave-1")).resolves.toEqual({
         ok: false,
         waveId: "wave-1",
@@ -117,7 +141,7 @@ describe("fetchPublicWaveFeed", () => {
   });
 
   it("includes only drops whose moderation is explicitly visible and viewable", async () => {
-    mockCommonApiFetch.mockResolvedValue(
+    resolveFeed(
       makeFeed({
         drops: [
           makeDrop(1),
@@ -149,7 +173,7 @@ describe("fetchPublicWaveFeed", () => {
   });
 
   it("normalizes and bounds user-authored text", async () => {
-    mockCommonApiFetch.mockResolvedValue(
+    resolveFeed(
       makeFeed({
         drops: [
           makeDrop(1, {
@@ -172,7 +196,9 @@ describe("fetchPublicWaveFeed", () => {
   });
 
   it("returns an opaque unavailable result when the anonymous upstream fails", async () => {
-    mockCommonApiFetch.mockRejectedValue(new Error("private upstream detail"));
+    mockAnonymousSsrFetch.mockRejectedValue(
+      new Error("private upstream detail")
+    );
 
     const result = await fetchPublicWaveFeed("wave-1");
 

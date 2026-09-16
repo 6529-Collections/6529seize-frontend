@@ -4,6 +4,7 @@ import type { TheMemesSearchParams } from "@/components/the-memes/theMemesRouteP
 import { publicEnv } from "@/config/env";
 import type { DBResponse } from "@/entities/IDBResponse";
 import type { ApiMemesExtendedData } from "@/generated/models/ApiMemesExtendedData";
+import { anonymousSsrFetch } from "@/lib/fetch/ssrFetch";
 
 const INITIAL_PAGE_SIZE = 48;
 
@@ -65,7 +66,9 @@ export async function getTheMemesInitialData(
   }
 
   try {
-    const response = await fetch(getInitialDataUrl(), { cache: "no-store" });
+    const response = await anonymousSsrFetch(getInitialDataUrl(), {
+      cache: "no-store",
+    });
     if (!response.ok) {
       return undefined;
     }

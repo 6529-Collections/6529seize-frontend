@@ -2,20 +2,20 @@ jest.mock("server-only", () => ({}), { virtual: true });
 
 import { getTheMemesInitialData } from "@/app/the-memes/theMemesInitialData";
 
-const originalFetch = globalThis.fetch;
+const mockAnonymousSsrFetch = jest.fn();
+
+jest.mock("@/lib/fetch/ssrFetch", () => ({
+  anonymousSsrFetch: (...args: unknown[]) => mockAnonymousSsrFetch(...args),
+}));
 
 describe("getTheMemesInitialData", () => {
   beforeEach(() => {
-    globalThis.fetch = jest.fn();
-  });
-
-  afterEach(() => {
-    globalThis.fetch = originalFetch;
+    jest.clearAllMocks();
   });
 
   it("fetches the bounded anonymous default page without caching it", async () => {
     const data = [{ id: 1, name: "Meme #1" }];
-    jest.mocked(globalThis.fetch).mockResolvedValue({
+    mockAnonymousSsrFetch.mockResolvedValue({
       json: async () => ({ data, next: "https://api.test/next" }),
       ok: true,
     } as Response);
@@ -24,7 +24,7 @@ describe("getTheMemesInitialData", () => {
       nfts: data,
       nextPage: "https://api.test/next",
     });
-    expect(globalThis.fetch).toHaveBeenCalledWith(
+    expect(mockAnonymousSsrFetch).toHaveBeenCalledWith(
       expect.stringContaining(
         "/api/memes_extended_data?page_size=48&sort=mint_date&sort_direction=ASC"
       ),
@@ -33,15 +33,13 @@ describe("getTheMemesInitialData", () => {
   });
 
   it("leaves filtered views on their existing client data path", async () => {
-    await expect(
-      getTheMemesInitialData({ szn: "1" })
-    ).resolves.toBeUndefined();
+    await expect(getTheMemesInitialData({ szn: "1" })).resolves.toBeUndefined();
 
-    expect(globalThis.fetch).not.toHaveBeenCalled();
+    expect(mockAnonymousSsrFetch).not.toHaveBeenCalled();
   });
 
   it("fails closed to the existing client loader when the upstream is unavailable", async () => {
-    jest.mocked(globalThis.fetch).mockRejectedValue(new Error("unavailable"));
+    mockAnonymousSsrFetch.mockRejectedValue(new Error("unavailable"));
 
     await expect(getTheMemesInitialData({})).resolves.toBeUndefined();
   });

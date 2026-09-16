@@ -5,7 +5,8 @@ import type { ApiDropV2 } from "@/generated/models/ApiDropV2";
 import type { ApiWaveDropsFeedV2 } from "@/generated/models/ApiWaveDropsFeedV2";
 import { getWavePathRoute } from "@/helpers/navigation.helpers";
 import { markdownToPlainText } from "@/helpers/waves/waveDescriptionPreview";
-import { commonApiFetch } from "@/services/api/common-api";
+import { anonymousSsrFetch } from "@/lib/fetch/ssrFetch";
+import { publicEnv } from "@/config/env";
 
 export const PUBLIC_WAVE_FEED_LIMIT = 10;
 export const PUBLIC_WAVE_FEED_REQUEST_LIMIT = PUBLIC_WAVE_FEED_LIMIT + 1;
@@ -71,9 +72,7 @@ const toPublicWaveFeedItem = (
   const id = drop.id.trim();
   const authorHandle = drop.author.handle?.trim() ?? "";
   const authorLabel =
-    authorHandle.length > 0
-      ? authorHandle
-      : drop.author.primary_address.trim();
+    authorHandle.length > 0 ? authorHandle : drop.author.primary_address.trim();
   if (
     !id ||
     !authorLabel ||
@@ -88,10 +87,7 @@ const toPublicWaveFeedItem = (
     serialNo: drop.serial_no,
     createdAt: drop.created_at,
     authorLabel,
-    title: toBoundedPlainText(
-      drop.title,
-      PUBLIC_WAVE_FEED_TITLE_MAX_LENGTH
-    ),
+    title: toBoundedPlainText(drop.title, PUBLIC_WAVE_FEED_TITLE_MAX_LENGTH),
     excerpt: toBoundedPlainText(
       drop.content,
       PUBLIC_WAVE_FEED_EXCERPT_MAX_LENGTH
@@ -109,12 +105,19 @@ export async function fetchPublicWaveFeed(
   }
 
   try {
-    const feed = await commonApiFetch<ApiWaveDropsFeedV2>({
-      endpoint: `v2/waves/${encodeURIComponent(normalizedWaveId)}/drops`,
-      params: { limit: `${PUBLIC_WAVE_FEED_REQUEST_LIMIT}` },
-      includeWalletAuth: false,
-      cache: "no-store",
+    const query = new URLSearchParams({
+      limit: `${PUBLIC_WAVE_FEED_REQUEST_LIMIT}`,
     });
+    const response = await anonymousSsrFetch(
+      `${publicEnv.API_ENDPOINT}/api/v2/waves/${encodeURIComponent(normalizedWaveId)}/drops?${query.toString()}`,
+      {
+        cache: "no-store",
+      }
+    );
+    if (!response.ok) {
+      return { ok: false, waveId: normalizedWaveId };
+    }
+    const feed = (await response.json()) as ApiWaveDropsFeedV2;
 
     const responseWaveId = feed.wave.id.trim();
     const waveName = feed.wave.name.trim();
