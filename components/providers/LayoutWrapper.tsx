@@ -102,6 +102,8 @@ export default function LayoutWrapper({
   }
 
   if (isAccessOrRestricted) {
+    // These standalone pages never mount web/native chrome. Keep their content
+    // immediately available instead of hiding it behind native layout startup.
     return <>{children}</>;
   }
 
