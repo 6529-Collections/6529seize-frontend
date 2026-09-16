@@ -2,7 +2,9 @@ jest.mock("next/dist/compiled/server-only", () => ({}), { virtual: true });
 
 import { render, screen } from "@testing-library/react";
 import MuseumAboutPage from "@/app/museum/network/about/page";
-import MuseumNetworkPage from "@/app/museum/network/page";
+import MuseumNetworkPage, {
+  metadata as museumNetworkMetadata,
+} from "@/app/museum/network/page";
 import MuseumProjectPage from "@/app/museum/network/projects/[slug]/page";
 import MuseumGenerativeSystemPage from "@/app/museum/network/projects/[slug]/system/page";
 import { renderMuseumRightsPage } from "@/app/museum/network/rights/page";
@@ -97,6 +99,15 @@ describe("Museum finished publication routes", () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+  });
+
+  it("publishes canonical metadata for the Network Museum homepage", () => {
+    expect(museumNetworkMetadata.alternates?.canonical?.toString()).toBe(
+      "https://test.6529.io/museum/network"
+    );
+    expect(museumNetworkMetadata.openGraph).toMatchObject({
+      url: "https://test.6529.io/museum/network",
+    });
   });
 
   it("renders the governed project essay after its artworks", async () => {

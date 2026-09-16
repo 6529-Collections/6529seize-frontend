@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { MuseumArtworkFigure } from "@/components/museum/MuseumArtworkFigure";
 import { MuseumNetworkHomeSecondarySections } from "@/components/museum/MuseumNetworkHomeSecondarySections";
 import { MuseumProgramImage } from "@/components/museum/MuseumProgramImage";
@@ -7,6 +8,7 @@ import { MuseumPublicMediaFigure } from "@/components/museum/MuseumPublicMediaFi
 import { MuseumPublicWorkTextFigure } from "@/components/museum/MuseumPublicWorkTextFigure";
 import { MuseumMediaMetadataPlaceholder } from "@/components/museum/MuseumMediaMetadataPlaceholder";
 import { MuseumPublicationUnavailable } from "@/components/museum/MuseumPublicationUnavailable";
+import { getAppMetadata } from "@/components/providers/metadata";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import {
@@ -47,6 +49,14 @@ const TEXT_LINK_CLASS =
 const MUSEUM_OPEN_PRESENTATION_MESSAGE =
   "museum.network.acquisitions.openPresentation";
 const EMPTY_EXCLUDED_WORK_IDS: readonly string[] = [];
+
+export const metadata: Metadata = getAppMetadata(
+  {
+    title: t(DEFAULT_LOCALE, "museum.network.title"),
+    description: t(DEFAULT_LOCALE, "museum.network.description"),
+  },
+  { canonicalPath: "/museum/network" }
+);
 
 function MuseumHomeHero({
   artwork,
