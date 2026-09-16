@@ -1,5 +1,4 @@
 import type { CommunityMemberMinimal } from "@/entities/IProfile";
-import { UserIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 
 type SelectedIdentity = Pick<
@@ -74,9 +73,7 @@ export default function GroupCreateIdentitySelectedItems({
     removeClass =
       "tw-group tw-flex tw-size-11 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-400 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-error";
   }
-  const fallbackAvatar = isInlineQuiet ? (
-    <UserIcon aria-hidden="true" className="tw-size-4 tw-text-iron-500" />
-  ) : (
+  const fallbackAvatar = (
     <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-bg-iron-800 tw-text-iron-400" />
   );
 
@@ -86,10 +83,10 @@ export default function GroupCreateIdentitySelectedItems({
         <div key={identity.wallet} className={selectedItemClass}>
           <div className={contentClass}>
             <div
-              className={`tw-relative tw-flex-shrink-0 ${isInlineQuiet ? "tw-size-6" : "tw-size-7 tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900"} ${roundedClass}`}
+              className={`tw-relative tw-size-7 tw-flex-shrink-0 tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900 ${roundedClass}`}
             >
               <div
-                className={`tw-h-full tw-w-full tw-max-w-full tw-overflow-hidden ${isInlineQuiet ? "tw-bg-transparent" : "tw-bg-iron-900"} ${roundedClass}`}
+                className={`tw-h-full tw-w-full tw-max-w-full tw-overflow-hidden tw-bg-iron-900 ${roundedClass}`}
               >
                 <div
                   className={`tw-flex tw-h-full tw-items-center tw-justify-center tw-overflow-hidden tw-text-center ${roundedClass}`}
@@ -101,8 +98,8 @@ export default function GroupCreateIdentitySelectedItems({
                       alt={`Profile picture for ${identity.handle ?? "selected profile"}`}
                       fill
                       unoptimized
-                      sizes={isInlineQuiet ? "24px" : "28px"}
-                      className="tw-bg-iron-900 tw-bg-transparent tw-object-contain"
+                      sizes="28px"
+                      className="tw-object-contain"
                     />
                   ) : (
                     fallbackAvatar

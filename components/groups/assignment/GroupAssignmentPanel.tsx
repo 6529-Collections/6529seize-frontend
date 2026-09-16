@@ -202,7 +202,7 @@ function SharedGroupAssignmentPanel({
           {displayedBuilder.panel === "identity" ? (
             <CreateWaveInlineGroupExpandedPanel
               onCancel={returnToCriteria}
-              showCancel={!isWaveAccessEditor}
+              showCancel={!isWaveAccessEditor && !quiet}
               quiet={quiet}
             >
               <CreateWaveInlineGroupIdentityEditorPanel
@@ -211,6 +211,7 @@ function SharedGroupAssignmentPanel({
                 quiet={quiet}
                 onIdentityToggle={returnToCriteria}
                 onRuleToggle={toggleRule}
+                onClose={quiet && !isWaveAccessEditor ? returnToCriteria : undefined}
               >
                 <CreateWaveInlineGroupIdentities
                   includedIdentities={displayedBuilder.identities}
@@ -249,7 +250,7 @@ function SharedGroupAssignmentPanel({
           displayedBuilder.activeRule !== null ? (
             <CreateWaveInlineGroupExpandedPanel
               onCancel={returnToCriteria}
-              showCancel={!isWaveAccessEditor}
+              showCancel={!isWaveAccessEditor && !quiet}
               quiet={quiet}
             >
               <CreateWaveInlineGroupRuleEditorPanel
@@ -259,6 +260,7 @@ function SharedGroupAssignmentPanel({
                 quiet={quiet}
                 onIdentityToggle={() => togglePanel("identity", false)}
                 onRuleToggle={toggleRule}
+                onClose={quiet && !isWaveAccessEditor ? returnToCriteria : undefined}
               >
                 <CreateWaveInlineGroupRuleEditor
                   draft={displayedBuilder.draft}

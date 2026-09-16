@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import Button from "@/components/utils/button/Button";
 import type { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
@@ -23,6 +24,7 @@ function CreateWaveInlineGroupCriteriaTabs({
   identityActive,
   onIdentityToggle,
   onRuleToggle,
+  onClose,
   quiet = false,
 }: {
   readonly activeRule: CreateWaveInlineGroupRuleType | null;
@@ -31,6 +33,7 @@ function CreateWaveInlineGroupCriteriaTabs({
   readonly identityActive: boolean;
   readonly onIdentityToggle?: (() => void) | undefined;
   readonly onRuleToggle: (rule: CreateWaveInlineGroupRuleType) => void;
+  readonly onClose?: (() => void) | undefined;
   readonly quiet?: boolean;
 }) {
   const locale = useBrowserLocale();
@@ -39,8 +42,10 @@ function CreateWaveInlineGroupCriteriaTabs({
     (draft.group.identity_addresses?.length ?? 0) > 0 ||
     (draft.group.excluded_identity_addresses?.length ?? 0) > 0;
   const configuredLabel = t(locale, "waves.create.groups.rules.configured");
-  return (
-    <div className="tw-flex tw-flex-wrap tw-gap-1.5">
+  const criteriaTabs = (
+    <div
+      className={`tw-flex tw-flex-wrap tw-gap-1.5 ${onClose ? "tw-min-w-0 tw-flex-1" : ""}`}
+    >
       {onIdentityToggle ? (
         <DraftChipButton
           label={t(locale, "waves.create.groups.identities")}
@@ -70,6 +75,20 @@ function CreateWaveInlineGroupCriteriaTabs({
           onClick={() => onRuleToggle(rule)}
         />
       ))}
+    </div>
+  );
+  if (!onClose) {
+    return criteriaTabs;
+  }
+
+  return (
+    <div className="tw-flex tw-items-start tw-gap-2">
+      {criteriaTabs}
+      <div className="tw-flex tw-h-11 tw-items-center">
+        <Button variant="secondary" size="xs" onClick={onClose}>
+          {t(locale, "common.close")}
+        </Button>
+      </div>
     </div>
   );
 }
@@ -108,6 +127,7 @@ export function CreateWaveInlineGroupRuleEditorPanel({
   disabled,
   onIdentityToggle,
   onRuleToggle,
+  onClose,
   children,
   quiet = false,
 }: {
@@ -116,6 +136,7 @@ export function CreateWaveInlineGroupRuleEditorPanel({
   readonly disabled: boolean;
   readonly onIdentityToggle?: (() => void) | undefined;
   readonly onRuleToggle: (rule: CreateWaveInlineGroupRuleType) => void;
+  readonly onClose?: (() => void) | undefined;
   readonly children: ReactNode;
   readonly quiet?: boolean;
 }) {
@@ -129,6 +150,7 @@ export function CreateWaveInlineGroupRuleEditorPanel({
         quiet={quiet}
         onIdentityToggle={onIdentityToggle}
         onRuleToggle={onRuleToggle}
+        onClose={onClose}
       />
       {children}
     </div>
@@ -141,6 +163,7 @@ export function CreateWaveInlineGroupIdentityEditorPanel({
   disabled,
   onIdentityToggle,
   onRuleToggle,
+  onClose,
   quiet = false,
 }: {
   readonly children: ReactNode;
@@ -148,6 +171,7 @@ export function CreateWaveInlineGroupIdentityEditorPanel({
   readonly disabled: boolean;
   readonly onIdentityToggle: () => void;
   readonly onRuleToggle: (rule: CreateWaveInlineGroupRuleType) => void;
+  readonly onClose?: (() => void) | undefined;
   readonly quiet?: boolean;
 }) {
   return (
@@ -160,6 +184,7 @@ export function CreateWaveInlineGroupIdentityEditorPanel({
         quiet={quiet}
         onIdentityToggle={onIdentityToggle}
         onRuleToggle={onRuleToggle}
+        onClose={onClose}
       />
       {children}
     </div>

@@ -163,28 +163,177 @@
   width: 32px;
 }
 
+.networkFiltersFrame {
+  flex: 1 1 auto;
+  min-width: 0;
+  position: relative;
+}
+
 .networkFilters {
+  -webkit-overflow-scrolling: touch;
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  width: 100%;
+}
+
+.networkFiltersContent {
   align-items: center;
   display: flex;
   flex-wrap: nowrap;
   gap: 1.5rem;
-  min-width: 0;
-  overflow-x: auto;
-  overflow-y: hidden;
+  min-width: max-content;
   padding: 0.25rem 0;
-  scrollbar-width: none;
 }
 
 .networkFilters::-webkit-scrollbar {
   display: none;
 }
 
+.networkFiltersFade {
+  bottom: 0;
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  width: 3rem;
+  z-index: 1;
+}
+
+.networkFiltersFadeLeft {
+  background: linear-gradient(to right, rgb(13, 13, 15), transparent);
+  left: 0;
+}
+
+.networkFiltersFadeRight {
+  background: linear-gradient(to left, rgb(13, 13, 15), transparent);
+  right: 0;
+}
+
+.networkFiltersScrollButton {
+  align-items: center;
+  background-color: rgb(30, 30, 30);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 9999px;
+  color: rgb(206, 207, 212);
+  cursor: pointer;
+  display: inline-flex;
+  height: 2rem;
+  justify-content: center;
+  padding: 0;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease,
+    color 150ms ease;
+  width: 2rem;
+  z-index: 2;
+}
+
+.networkFiltersScrollButton:hover {
+  background-color: rgb(42, 42, 46);
+  border-color: rgba(255, 255, 255, 0.25);
+  color: white;
+}
+
+.networkFiltersScrollButton:focus-visible {
+  outline: 2px solid rgb(96, 165, 250);
+  outline-offset: 2px;
+}
+
+.networkFiltersScrollButton svg {
+  height: 1rem;
+  width: 1rem;
+}
+
+.networkFiltersScrollButtonLeft {
+  left: 0;
+}
+
+.networkFiltersScrollButtonRight {
+  right: 0;
+}
+
 .leaderboardSurface {
   padding-top: 0.5rem;
 }
 
+.leaderboardTableShell {
+  -webkit-overflow-scrolling: touch;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  padding-bottom: 0.5rem;
+}
+
+.leaderboardTableFrameWithCue {
+  padding-top: 2rem;
+}
+
 .scrollCue {
-  display: none;
+  align-items: center;
+  background-color: rgb(30, 30, 30);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 9999px;
+  color: white;
+  display: inline-flex;
+  height: 1.55rem;
+  justify-content: center;
+  padding: 0;
+  position: absolute;
+  top: 0.1rem;
+  width: 2rem;
+  z-index: 1;
+}
+
+.scrollCue svg {
+  height: 1rem;
+  width: 1rem;
+}
+
+.scrollCueLeft {
+  left: 0;
+}
+
+.scrollCueRight {
+  right: 0;
+}
+
+.cardsCollectedTable {
+  min-width: 64rem;
+  table-layout: auto;
+  width: max-content;
+}
+
+.interactionsTable {
+  min-width: 78rem;
+  table-layout: auto;
+  width: max-content;
+}
+
+.cardsCollectedTable th:first-child,
+.cardsCollectedTable td:first-child,
+.interactionsTable th:first-child,
+.interactionsTable td:first-child {
+  min-width: 4rem;
+  width: auto;
+}
+
+.cardsCollectedTable th:nth-child(2),
+.cardsCollectedTable td:nth-child(2),
+.interactionsTable th:nth-child(2),
+.interactionsTable td:nth-child(2) {
+  max-width: none;
+  min-width: 16rem;
+  width: auto;
+}
+
+.cardsCollectedTable th:not(:first-child):not(:nth-child(2)),
+.cardsCollectedTable td:not(:first-child):not(:nth-child(2)),
+.interactionsTable th:not(:first-child):not(:nth-child(2)),
+.interactionsTable td:not(:first-child):not(:nth-child(2)) {
+  min-width: 7rem;
 }
 
 /* hover: none keeps hybrid touch laptops on the desktop toolbar */
@@ -217,73 +366,8 @@
   .networkViewTabs {
     min-width: 0;
   }
-  .networkFilters {
+  .networkFiltersFrame {
     width: 100%;
-  }
-  .leaderboardTableShell {
-    -webkit-overflow-scrolling: touch;
-    overflow-x: auto;
-    overscroll-behavior-x: contain;
-    padding-bottom: 0.5rem;
-  }
-  .leaderboardTableFrameWithCue {
-    padding-top: 2rem;
-  }
-  .scrollCue {
-    align-items: center;
-    background-color: rgb(30, 30, 30);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 9999px;
-    color: white;
-    display: inline-flex;
-    height: 1.55rem;
-    justify-content: center;
-    padding: 0;
-    position: absolute;
-    top: 0.1rem;
-    width: 2rem;
-    z-index: 1;
-  }
-  .scrollCue svg {
-    height: 1rem;
-    width: 1rem;
-  }
-  .scrollCueLeft {
-    left: 0;
-  }
-  .scrollCueRight {
-    right: 0;
-  }
-  .cardsCollectedTable {
-    min-width: 64rem;
-    table-layout: auto;
-    width: max-content;
-  }
-  .interactionsTable {
-    min-width: 78rem;
-    table-layout: auto;
-    width: max-content;
-  }
-  .cardsCollectedTable th:first-child,
-  .cardsCollectedTable td:first-child,
-  .interactionsTable th:first-child,
-  .interactionsTable td:first-child {
-    min-width: 4rem;
-    width: auto;
-  }
-  .cardsCollectedTable th:nth-child(2),
-  .cardsCollectedTable td:nth-child(2),
-  .interactionsTable th:nth-child(2),
-  .interactionsTable td:nth-child(2) {
-    max-width: none;
-    min-width: 16rem;
-    width: auto;
-  }
-  .cardsCollectedTable th:not(:first-child):not(:nth-child(2)),
-  .cardsCollectedTable td:not(:first-child):not(:nth-child(2)),
-  .interactionsTable th:not(:first-child):not(:nth-child(2)),
-  .interactionsTable td:not(:first-child):not(:nth-child(2)) {
-    min-width: 7rem;
   }
 }
 
