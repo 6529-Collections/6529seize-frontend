@@ -41,6 +41,7 @@ import { useCurationOrganize } from "@/components/brain/my-stream/curations/Cura
 import type { CurationOrder } from "@/hooks/useCurationOrder";
 import { useCurationMasonryPositioner } from "@/hooks/useCurationMasonryPositioner";
 import { useCurationOrderReveal } from "@/hooks/useCurationOrderReveal";
+import { useCurationPagination } from "@/hooks/useCurationPagination";
 import ContentModerationDropGate from "@/components/content-moderation/ContentModerationDropGate";
 
 interface UserPageProfileWaveMasonryProps {
@@ -508,16 +509,12 @@ export default function UserPageProfileWaveMasonry({
     ]
   );
 
-  const handleBottomIntersection = useCallback(
-    (isIntersecting: boolean) => {
-      if (!isIntersecting || !hasNextPage || isFetchingNextPage) {
-        return;
-      }
-
-      fetchNextPage().catch(() => undefined);
-    },
-    [fetchNextPage, hasNextPage, isFetchingNextPage]
-  );
+  const handleBottomIntersection = useCurationPagination({
+    fetchNextPage,
+    hasNextPage,
+    isFetching: order.isFetching,
+    isError: order.isError,
+  });
 
   return (
     <div className="tw-px-1 tw-pb-2">
@@ -536,13 +533,12 @@ export default function UserPageProfileWaveMasonry({
 
       {((hasNextPage ?? false) || isFetchingNextPage) && (
         <div className="tw-flex tw-justify-center tw-py-6">
-          {isFetchingNextPage ? (
+          {isFetchingNextPage && (
             <CircleLoader size={CircleLoaderSize.MEDIUM} />
-          ) : (
-            <CommonIntersectionElement
-              onIntersection={handleBottomIntersection}
-            />
           )}
+          <CommonIntersectionElement
+            onIntersection={handleBottomIntersection}
+          />
         </div>
       )}
     </div>

@@ -147,6 +147,32 @@ it("keeps the successful save and Undo when refreshing the posts fails", async (
   );
 });
 
+it("undoes a move originating at the last position by placing it after its previous neighbor", async () => {
+  mockRefetch.mockImplementationOnce(async () => {
+    mockDrops = [{ id: "c" }, { id: "a" }, { id: "b" }] as ExtendedDrop[];
+    return {};
+  });
+  const { result } = renderOrder();
+  await act(async () => {
+    await result.current.move("c", { placement: "before", anchorDropId: "a" });
+  });
+  mockRefetch.mockImplementationOnce(async () => {
+    mockDrops = [{ id: "a" }, { id: "b" }, { id: "c" }] as ExtendedDrop[];
+    return {};
+  });
+  await act(async () => {
+    await result.current.undo?.();
+  });
+  expect(moveMock).toHaveBeenLastCalledWith({
+    curationId: "curation",
+    dropId: "c",
+    anchorDropId: "b",
+    placement: "after",
+  });
+  expect(result.current.drops.map(({ id }) => id)).toEqual(["a", "b", "c"]);
+  expect(result.current.undo).toBeNull();
+});
+
 it.each(["disconnected", "proxy"])(
   "does not save for a %s session",
   async (kind) => {

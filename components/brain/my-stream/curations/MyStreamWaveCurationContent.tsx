@@ -10,6 +10,7 @@ import Drop, { DropLocation } from "@/components/waves/drops/Drop";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useCurationOrder } from "@/hooks/useCurationOrder";
 import { useCurationOrderReveal } from "@/hooks/useCurationOrderReveal";
+import { useCurationPagination } from "@/hooks/useCurationPagination";
 import CurationOrganize from "./CurationOrganize";
 import CurationOrganizeCard from "./CurationOrganizeCard";
 import { useCurationManagementPermission } from "@/hooks/useCurationManagementPermission";
@@ -17,14 +18,7 @@ import { useCurationPermissionProbe } from "@/hooks/useCurationPermissionProbe";
 import type { QuickCurationAction } from "@/hooks/drops/useCanShowDropCurationsAction";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { useApprovalWaveStatus } from "@/hooks/waves/useApprovalWaveStatus";
-import {
-  memo,
-  useCallback,
-  useMemo,
-  useRef,
-  useState,
-  type ReactNode,
-} from "react";
+import { memo, useMemo, useRef, useState, type ReactNode } from "react";
 import { useLayout } from "../layout/LayoutContext";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
@@ -122,16 +116,12 @@ export default function MyStreamWaveCurationContent({
     isVotingControlsLocked,
   } = useApprovalWaveStatus({ wave });
 
-  const handleBottomIntersection = useCallback(
-    (isIntersecting: boolean) => {
-      if (!isIntersecting || !hasNextPage || isFetchingNextPage) {
-        return;
-      }
-
-      void fetchNextPage();
-    },
-    [fetchNextPage, hasNextPage, isFetchingNextPage]
-  );
+  const handleBottomIntersection = useCurationPagination({
+    fetchNextPage,
+    hasNextPage,
+    isFetching,
+    isError: order.isError,
+  });
 
   const curationTitle = curationName?.trim() ?? "Curation";
   const standaloneQuickRemoveCuration = useMemo<QuickCurationAction | null>(
@@ -202,15 +192,14 @@ export default function MyStreamWaveCurationContent({
         {renderedDrops}
         {(hasNextPage || isFetchingNextPage) && (
           <div className="tw-py-4">
-            {isFetchingNextPage ? (
+            {isFetchingNextPage && (
               <div className="tw-flex tw-justify-center">
                 <CircleLoader size={CircleLoaderSize.MEDIUM} />
               </div>
-            ) : (
-              <CommonIntersectionElement
-                onIntersection={handleBottomIntersection}
-              />
             )}
+            <CommonIntersectionElement
+              onIntersection={handleBottomIntersection}
+            />
           </div>
         )}
       </div>
