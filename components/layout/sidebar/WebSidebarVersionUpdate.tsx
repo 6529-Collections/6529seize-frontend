@@ -12,7 +12,7 @@ function UpdateRocketIcon({
   readonly className?: string | undefined;
 }) {
   return (
-    // eslint-disable-next-line @next/next/no-img-element -- Share the cached asset with the pre-hydration updating screen.
+    // eslint-disable-next-line @next/next/no-img-element -- Use the existing local update artwork at sidebar icon size.
     <img
       src="/rocket-refresh-small.png"
       alt=""
