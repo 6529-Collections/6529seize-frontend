@@ -41,11 +41,16 @@ On web layouts, route switching is sidebar-first.
   `About`.
 - Gated primary row: `Drop Forge`, after `About`, only when the connected
   wallet can access it.
-- Utility rows: desktop `Update` (when a new version is available), `Search`,
-  `Share` (only on supported desktop-web
-  routes), connected-only `Notifications`, then the profile control.
-- Bottom account area: connect action, loading placeholders, and the connected
-  user menu.
+- Three separate sections keep controls stable: scrollable primary navigation,
+  desktop `Search` and `Share` (on supported routes), and the bottom account area.
+- The bottom section grows upward: optional `Update`, connected-only
+  `Notifications`, then the account control. Search and Share stay in place.
+- The account control has the same footprint while loading, signed out, or
+  showing a profile. Only the account placeholder shimmers; Search and Share
+  do not wait for wallet initialization.
+- Primary navigation scrolls independently when expanded groups or gated Drop
+  Forge and Watchtower items exceed the available height. Very short windows
+  also allow the sections to scroll so every control remains reachable.
 
 ## Entry Points
 
@@ -59,9 +64,10 @@ On web layouts, route switching is sidebar-first.
 - Open `Drop Forge` from the standalone row after `About` when the current
   wallet can access `/drop-forge`.
 - Open `Search` from the desktop sidebar row.
-- Select the rocket above `Search` to update. The expanded sidebar labels it
-  `Update`; the collapsed sidebar shows the rocket with an `Update` tooltip.
-- Open connected `Notifications` from the lower utility rows.
+- Select the rocket at the top of the bottom account section to update. The
+  expanded sidebar labels it `Update`; the collapsed sidebar shows the rocket
+  with an `Update` tooltip.
+- Open connected `Notifications` immediately above the account control.
 - Open `Share` from the desktop sidebar on a supported route.
 - Open `Profile` or `Connect Device` from the connected user menu.
 - Press `⌘K` or `Ctrl+K` when desktop sidebar navigation is mounted.
@@ -70,8 +76,9 @@ On web layouts, route switching is sidebar-first.
 
 1. Open a web route.
 2. Switch primary sections with direct rows.
-3. Use lower utility rows in `Update` (when available), `Search`, `Share`,
-   `Notifications`, profile order.
+3. Use `Search` and `Share` in the utility section. The separate bottom section
+   contains `Update` (when available), `Notifications` (when connected), and
+   the account control, in that order.
 4. Open `NFTs` or `About` for nested routes; use the `Museum`, `Waves`, and
    `Join 6529` rows for direct navigation.
 5. In collapsed mode, hover a group row with a mouse or activate it by tap,
@@ -150,9 +157,11 @@ On web layouts, route switching is sidebar-first.
   moves focus into the links, and `Escape` restores focus to the group trigger.
 - The collapsed-row tooltip stays hidden while its flyout is open.
 - Flyouts reposition on sidebar scroll and window resize.
-- `Notifications` row appears only when wallet connection is active.
+- `Notifications` appears when an account address is restored; a live wallet
+  connection is not required.
 - When a new version is available, desktop browsers show `Update` above
-  `Search` instead of a separate toast. Selecting it keeps the current route
+  `Notifications`, or directly above the account icon when signed out, instead
+  of a separate toast. Selecting it keeps the current route
   and shows a static rocket, `Updating to the latest version`, and three
   animated dots while the page reloads. Reduced-motion preferences keep the
   dots still. The rocket is prepared when an update becomes available and

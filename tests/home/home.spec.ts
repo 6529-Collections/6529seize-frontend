@@ -4,6 +4,7 @@ import {
   test,
   waitForRouteReady,
 } from "../testHelpers";
+import { isDesktopWebProject } from "../support/surfaceSimulation";
 
 test.describe("Home Page @smoke @medium @large", () => {
   test.beforeEach(async ({ page }) => {
@@ -49,5 +50,78 @@ test.describe("Home Page @smoke @medium @large", () => {
     }) => {
       await expect(page.locator('[aria-label^="Environment:"]')).toHaveCount(0);
     });
+  }
+});
+
+test("desktop account updates do not move utilities, including in short expanded sidebars @smoke @medium @large", async ({
+  page,
+}, testInfo) => {
+  test.skip(
+    !isDesktopWebProject(testInfo.project.name),
+    "Desktop sidebar geometry contract"
+  );
+  let releaseVersion!: () => void;
+  const versionReady = new Promise<void>((resolve) => {
+    releaseVersion = resolve;
+  });
+  await page.route("**/api/version", async (route) => {
+    await versionReady;
+    await route.fulfill({ json: { stale: true } });
+  });
+  try {
+    await page.goto("/about", { waitUntil: "domcontentloaded" });
+    const sidebar = page.locator('[aria-label="Primary sidebar"]');
+    const search = sidebar.getByRole("button", {
+      name: "Search",
+      exact: true,
+    });
+    const account = sidebar.locator("[data-sidebar-account]");
+    await expect(account).toHaveAttribute("data-sidebar-account", "signed-out");
+    await expect(search).toBeVisible();
+    const beforeSearch = await search.boundingBox();
+    const beforeAccount = await account.boundingBox();
+    expect(beforeSearch).not.toBeNull();
+    expect(beforeAccount).not.toBeNull();
+    // Search is usable even though the optional account action is unresolved.
+    await search.click();
+    await expect(page.locator("#header-search-input")).toBeVisible();
+    await page.keyboard.press("Escape");
+    releaseVersion();
+    const update = sidebar.getByRole("button", {
+      name: "Update",
+      exact: true,
+    });
+    await expect(update).toBeVisible();
+    expect(await search.boundingBox()).toEqual(beforeSearch);
+    expect(await account.boundingBox()).toEqual(beforeAccount);
+    await expect(
+      sidebar
+        .locator('[data-sidebar-section="account"]')
+        .getByRole("button", { name: "Update", exact: true })
+    ).toBeVisible();
+
+    await page.setViewportSize({ width: 1440, height: 460 });
+    await sidebar.getByRole("button", { name: "Toggle right sidebar" }).click();
+    const nav = sidebar.getByRole("navigation", {
+      name: "Desktop navigation",
+    });
+    await nav.getByRole("button", { name: "About", exact: true }).click();
+    await expect(search).toBeInViewport();
+    await expect(update).toBeInViewport();
+    await expect(account).toBeInViewport();
+    const navigationBox = await sidebar
+      .locator('[data-sidebar-scroll="true"]')
+      .boundingBox();
+    const utilitiesBox = await sidebar
+      .locator('[data-sidebar-section="utilities"]')
+      .boundingBox();
+    expect(navigationBox).not.toBeNull();
+    expect(utilitiesBox).not.toBeNull();
+    expect(navigationBox!.y + navigationBox!.height).toBeLessThanOrEqual(
+      utilitiesBox!.y + 1
+    );
+    await expectNoHorizontalOverflow(page);
+  } finally {
+    releaseVersion();
   }
 });

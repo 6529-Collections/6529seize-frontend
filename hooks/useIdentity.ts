@@ -18,12 +18,16 @@ export function useIdentity({
   handleOrWallet,
   initialProfile,
 }: Readonly<UseIdentityProps>) {
-  const { data: profile, isLoading } = useQuery<ApiIdentity | undefined>({
+  const {
+    data: profile,
+    isLoading,
+    refetch,
+  } = useQuery<ApiIdentity | undefined>({
     ...getIdentityQueryOptions({ handleOrWallet }),
     enabled: !!handleOrWallet,
     initialData: initialProfile ?? undefined,
     retry: 3,
   });
 
-  return { profile: profile ?? null, isLoading };
+  return { profile: profile ?? null, isLoading, refetch };
 }

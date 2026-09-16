@@ -1,4 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/react";
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import WebSidebar from "@/components/layout/sidebar/WebSidebar";
 import NewVersionToast from "@/components/utils/NewVersionToast";
 import { useVersionStatus } from "@/contexts/VersionStatusContext";
@@ -20,7 +21,10 @@ jest.mock("@/components/auth/Auth", () => ({
   useAuth: () => ({ connectedProfile: null }),
 }));
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
-  useSeizeConnectContext: () => ({ address: null, hasValidWalletAuth: false }),
+  useSeizeConnectContext: jest.fn(() => ({
+    address: undefined,
+    hasValidWalletAuth: false,
+  })),
 }));
 jest.mock("@/hooks/useIdentity", () => ({
   useIdentity: () => ({ profile: null }),
@@ -65,6 +69,10 @@ const sidebarProps = {
 
 beforeEach(() => {
   jest.clearAllMocks();
+  jest.mocked(useSeizeConnectContext).mockReturnValue({
+    address: undefined,
+    hasValidWalletAuth: false,
+  } as unknown as ReturnType<typeof useSeizeConnectContext>);
   jest.mocked(useVersionStatus).mockReturnValue(true);
   jest.mocked(useDeviceInfo).mockReturnValue({
     isApp: false,
@@ -78,7 +86,7 @@ beforeEach(() => {
   });
 });
 
-it("puts the collapsed update rocket directly above Search with no desktop toast", () => {
+it("puts the collapsed update rocket in the account section with no desktop toast", () => {
   render(
     <>
       <WebSidebar {...sidebarProps} />
@@ -86,9 +94,12 @@ it("puts the collapsed update rocket directly above Search with no desktop toast
     </>
   );
   const update = screen.getByRole("button", { name: "Update" });
-  expect(update.nextElementSibling).toBe(
-    screen.getByRole("button", { name: "Search" })
-  );
+  expect(update.closest('[data-sidebar-section="account"]')).not.toBeNull();
+  expect(
+    screen
+      .getByRole("button", { name: "Search" })
+      .closest('[data-sidebar-section="utilities"]')
+  ).not.toBeNull();
   expect(update).toHaveAttribute("data-tooltip-content", "Update");
   expect(update).toHaveAttribute("data-tooltip-hidden", "false");
   expect(update.querySelector("img")).toHaveAttribute(
@@ -161,4 +172,25 @@ it("uses the localized Update label", () => {
   expect(
     screen.getByRole("button", { name: "Mettre à jour" })
   ).toBeInTheDocument();
+});
+
+it("orders Update above Notifications in the account section without adding either to utilities", () => {
+  jest.mocked(useSeizeConnectContext).mockReturnValue({
+    address: "0xalice",
+    hasValidWalletAuth: true,
+  } as unknown as ReturnType<typeof useSeizeConnectContext>);
+  render(<WebSidebar {...sidebarProps} />);
+  const update = screen.getByRole("button", { name: "Update" });
+  const notifications = screen.getByRole("link", { name: "Notifications" });
+  expect(update.parentElement?.nextElementSibling).toContainElement(
+    notifications
+  );
+  expect(
+    notifications.closest('[data-sidebar-section="account"]')
+  ).not.toBeNull();
+  expect(
+    screen
+      .getByRole("button", { name: "Search" })
+      .closest('[data-sidebar-section="utilities"]')
+  ).not.toContainElement(notifications);
 });

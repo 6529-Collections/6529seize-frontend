@@ -9,7 +9,6 @@ import BellIcon from "@/components/common/icons/BellIcon";
 import HeaderSearchModal from "@/components/header/header-search/HeaderSearchModal";
 import { useUnreadNotifications } from "@/hooks/useUnreadNotifications";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
-import { useIdentity } from "../../../hooks/useIdentity";
 import { useAuth } from "../../auth/Auth";
 import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
 import HeaderShare from "../../header/share/HeaderShare";
@@ -42,10 +41,6 @@ function WebSidebar({
   const pathname = usePathname();
   const { address, hasValidWalletAuth } = useSeizeConnectContext();
   const { connectedProfile } = useAuth();
-  const { profile } = useIdentity({
-    handleOrWallet: address || "",
-    initialProfile: null,
-  });
   const { haveUnreadNotifications } = useUnreadNotifications(
     hasValidWalletAuth ? (connectedProfile?.handle ?? null) : null,
     {
@@ -151,57 +146,76 @@ function WebSidebar({
           aria-label="Primary sidebar"
           ref={scrollContainerRef}
         >
-          <div className="tw-flex tw-h-full tw-flex-col tw-pt-2">
+          <div className="tw-flex tw-h-full tw-min-h-0 tw-flex-col tw-pt-2">
             <WebSidebarHeader
               collapsed={shouldShowCollapsed}
               onToggle={handleToggle}
             />
 
-            <div
-              className="tw-no-scrollbar tw-flex tw-h-full tw-flex-col tw-overflow-y-auto tw-overflow-x-hidden tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300"
-              data-sidebar-scroll="true"
-            >
-              <div className="tw-flex-1">
-                <WebSidebarNav ref={navRef} isCollapsed={shouldShowCollapsed} />
-              </div>
-
-              {showDesktopSearch && (
-                <div className="tw-px-3 tw-pt-2">
-                  <WebSidebarVersionUpdate collapsed={shouldShowCollapsed} />
-                  <WebSidebarNavItem
-                    onClick={(event?: MouseEvent) => {
-                      event?.stopPropagation();
-                      setIsSearchOpen(true);
-                    }}
-                    icon={MagnifyingGlassIcon}
-                    active={false}
-                    collapsed={shouldShowCollapsed}
-                    label="Search"
-                  />
-                </div>
-              )}
-
-              <HeaderShare isCollapsed={shouldShowCollapsed} />
-
-              {address && (
+            <div className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto">
+              <div
+                className={`tw-grid tw-h-full ${isMobile ? "tw-grid-rows-[minmax(2.875rem,1fr)_auto_7.625rem]" : "tw-grid-rows-[minmax(2.875rem,1fr)_5.75rem_10.5rem]"}`}
+                data-sidebar-sections="true"
+              >
                 <div
-                  className={showDesktopSearch ? "tw-px-3" : "tw-px-3 tw-pt-2"}
+                  className="tw-no-scrollbar tw-min-h-0 tw-overflow-y-auto tw-overflow-x-hidden tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300"
+                  data-sidebar-scroll="true"
                 >
-                  <WebSidebarNavItem
-                    href="/notifications"
-                    icon={BellIcon}
-                    active={pathname?.startsWith("/notifications") || false}
-                    collapsed={shouldShowCollapsed}
-                    label="Notifications"
-                    hasIndicator={haveUnreadNotifications}
+                  <WebSidebarNav
+                    ref={navRef}
+                    isCollapsed={shouldShowCollapsed}
                   />
                 </div>
-              )}
 
-              <WebSidebarUser
-                isCollapsed={shouldShowCollapsed}
-                profile={profile}
-              />
+                <div data-sidebar-section="utilities">
+                  {showDesktopSearch && (
+                    <div className="tw-px-3">
+                      <WebSidebarNavItem
+                        onClick={(event?: MouseEvent) => {
+                          event?.stopPropagation();
+                          setIsSearchOpen(true);
+                        }}
+                        icon={MagnifyingGlassIcon}
+                        active={false}
+                        collapsed={shouldShowCollapsed}
+                        label="Search"
+                      />
+                    </div>
+                  )}
+                  <HeaderShare isCollapsed={shouldShowCollapsed} />
+                </div>
+
+                {/* This independent section lets account actions grow upward.
+                    Utilities never move when auth or update availability resolves. */}
+                <div
+                  className="tw-flex tw-flex-col tw-justify-end"
+                  data-sidebar-section="account"
+                >
+                  {showDesktopSearch && (
+                    <div className="tw-px-3">
+                      <WebSidebarVersionUpdate
+                        collapsed={shouldShowCollapsed}
+                      />
+                    </div>
+                  )}
+                  {address && (
+                    <div className="tw-px-3">
+                      <WebSidebarNavItem
+                        href="/notifications"
+                        icon={BellIcon}
+                        active={pathname.startsWith("/notifications")}
+                        collapsed={shouldShowCollapsed}
+                        label="Notifications"
+                        hasIndicator={haveUnreadNotifications}
+                      />
+                    </div>
+                  )}
+                  <WebSidebarUser
+                    isCollapsed={shouldShowCollapsed}
+                    profile={null}
+                  />
+                </div>
+              </div>
             </div>
           </div>
         </div>
