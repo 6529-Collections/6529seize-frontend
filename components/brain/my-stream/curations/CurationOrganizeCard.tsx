@@ -1,6 +1,8 @@
 "use client";
 
 import { useDraggable, useDroppable } from "@dnd-kit/core";
+import { faGripVertical } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useCallback, useId, type ReactNode } from "react";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
@@ -77,22 +79,15 @@ export default function CurationOrganizeCard({
           disabled={busy}
           onClick={() => select(id)}
           onKeyDown={(event) => keyDown(id, event)}
-          className={`tw-absolute tw-right-0.5 tw-top-0.5 tw-z-[1001] tw-flex tw-size-11 tw-touch-none tw-select-none tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-transparent tw-p-0 tw-outline-none tw-transition-colors tw-duration-150 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 disabled:tw-cursor-wait ${selected ? "tw-text-white" : "tw-text-iron-400 desktop-hover:hover:tw-text-iron-100"} ${isDragging ? "tw-cursor-grabbing" : "tw-cursor-grab"}`}
+          className={`tw-absolute tw-right-0.5 tw-top-0.5 tw-z-[1001] tw-flex tw-size-11 tw-touch-none tw-select-none tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-transparent tw-p-0 tw-outline-none tw-transition-colors tw-duration-150 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 disabled:tw-cursor-wait ${selected ? "tw-text-white" : "tw-text-iron-300 desktop-hover:hover:tw-text-white"} ${isDragging ? "tw-cursor-grabbing" : "tw-cursor-grab"}`}
         >
-          <svg
-            aria-hidden="true"
-            width="16"
-            height="22"
-            viewBox="0 0 16 24"
-            fill="currentColor"
-          >
-            <circle cx="5" cy="5" r="1.5" />
-            <circle cx="11" cy="5" r="1.5" />
-            <circle cx="5" cy="12" r="1.5" />
-            <circle cx="11" cy="12" r="1.5" />
-            <circle cx="5" cy="19" r="1.5" />
-            <circle cx="11" cy="19" r="1.5" />
-          </svg>
+          <span className="tw-flex tw-h-8 tw-w-7 tw-items-center tw-justify-center tw-rounded-md tw-bg-iron-950/85 tw-shadow-sm tw-backdrop-blur-sm">
+            <FontAwesomeIcon
+              icon={faGripVertical}
+              aria-hidden="true"
+              className="tw-h-[18px] tw-w-3"
+            />
+          </span>
         </button>
       )}
       <div id={contentId} inert={enabled}>
