@@ -4951,6 +4951,7 @@
       "keywords": ["header", "context", "top", "bar", "controls", "navigation"],
       "facts": [
         "The app header provides route context and shared controls for the current surface.",
+        "On iOS and Android app launch, a dark native loading shell appears until the app layout is ready, without flashing the desktop sidebar. Public content can appear before wallet startup finishes.",
         "Header behavior changes with route, viewport, and whether the user is inside an app-like layout.",
         "Mobile-web and native-app page sharing appears next to Search on supported routes and opens the platform system share sheet directly.",
         "Use wave header records for wave-specific controls such as wave sharing or wave picture editing."
