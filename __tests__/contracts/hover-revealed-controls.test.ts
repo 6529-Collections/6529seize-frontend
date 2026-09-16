@@ -140,14 +140,6 @@ const AUDITED_REVEAL_EXEMPTIONS: readonly AuditedRevealExemption[] = [
       "This is a pointer-events-none timestamp, not a control, and WaveDrop's forceVisible pointer path also drives its opacity.",
   },
   {
-    file: "components/waves/FilePreview.tsx",
-    marker: "tw-bg-iron-950 tw-opacity-0",
-    literalHash:
-      "bdd312eefbb552edbd175dea4ef9ec973f12695c3397cfa3af018a5c83b0e0b6",
-    reason:
-      "This empty overlay is a decorative shade on a file preview; the preview content and interaction remain visible.",
-  },
-  {
     file: "components/waves/gallery/WaveGalleryItem.tsx",
     marker: "tw-bg-gradient-to-t tw-from-black/80",
     literalHash:

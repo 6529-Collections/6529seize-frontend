@@ -195,7 +195,6 @@
     "__tests__/components/drops/create/full/mobile/CreateDropFullMobileWrapper.test.tsx": 1,
     "__tests__/components/drops/create/lexical/nodes/EmojiNode.test.tsx": 1,
     "__tests__/components/drops/create/lexical/nodes/HashtagNode.test.ts": 7,
-    "__tests__/components/drops/create/lexical/nodes/ImageNode.test.tsx": 1,
     "__tests__/components/drops/create/lexical/plugins/ClearEditorPlugin.test.tsx": 1,
     "__tests__/components/drops/create/lexical/plugins/emoji/EmojiPlugin.test.tsx": 4,
     "__tests__/components/drops/create/lexical/plugins/hashtags/HashtagsPlugin.test.tsx": 1,

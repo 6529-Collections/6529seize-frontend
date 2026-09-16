@@ -53,11 +53,13 @@
 .editor-input-one-liner {
   overflow-x: auto;
   min-height: 45px;
+  max-height: var(--composer-viewport-height, 40vh);
 }
 
 .editor-input-multi-liner {
   overflow-y: auto;
   height: 200px;
+  max-height: min(200px, var(--composer-viewport-height, 40vh));
 }
 
 .editor-text-strikethrough {
