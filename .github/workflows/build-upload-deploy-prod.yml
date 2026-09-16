@@ -185,7 +185,12 @@ jobs:
           echo "Production $current_version can advance safely to $COMMIT_SHA."
 
       - name: Upload verified assets to S3
-        run: aws s3 sync production-artifact/target "s3://${AWS_BUCKET}/web_build/${COMMIT_SHA}/"
+        # The target is published under an exact commit SHA, so every object
+        # has a new URL when its bytes change. Keep the mutable version pointer
+        # below explicitly no-store.
+        run: |
+          aws s3 cp production-artifact/target "s3://${AWS_BUCKET}/web_build/${COMMIT_SHA}/" \
+            --recursive --cache-control "public, max-age=31536000, immutable"
 
       - name: Get commit message
         run: printf 'COMMIT_MESSAGE=%s\n' "$(git show -s --format=%s "$COMMIT_SHA")" >> "$GITHUB_ENV"
