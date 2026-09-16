@@ -1,6 +1,11 @@
 import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import FilePreview from "@/components/waves/FilePreview";
+import { getPreparedDropImage } from "@/services/uploads/prepareDropImage";
+
+jest.mock("@/services/uploads/prepareDropImage", () => ({
+  getPreparedDropImage: jest.fn(),
+}));
 
 jest.mock("@/components/distribution-plan-tool/common/CircleLoader", () => ({
   __esModule: true,
@@ -12,6 +17,7 @@ let createObjectURLMock: jest.Mock;
 let revokeObjectURLMock: jest.Mock;
 
 beforeEach(() => {
+  jest.mocked(getPreparedDropImage).mockReset();
   createObjectURLMock = jest.fn(() => "blob:url");
   revokeObjectURLMock = jest.fn();
 
@@ -29,6 +35,38 @@ beforeEach(() => {
 
 describe("FilePreview", () => {
   const file = new File(["a"], "a.png", { type: "image/png" });
+
+  it("mounts the AVIF preview only after its converted image is ready", () => {
+    const avif = new File(["avif"], "photo.AVIF");
+    const props = {
+      files: [{ file: avif, label: null }],
+      removeFile: jest.fn(),
+      disabled: false,
+    };
+    const { rerender } = render(
+      <FilePreview
+        {...props}
+        uploadingFiles={[
+          { file: avif, isUploading: true, progress: 100, phase: "processing" },
+        ]}
+      />
+    );
+    expect(screen.getByRole("status")).toBeInTheDocument();
+    expect(getPreparedDropImage).not.toHaveBeenCalled();
+    expect(screen.queryByRole("img")).not.toBeInTheDocument();
+
+    jest.mocked(getPreparedDropImage).mockReturnValue({
+      url: "https://media.example/photo.webp",
+      mime_type: "image/webp",
+    });
+    rerender(<FilePreview {...props} uploadingFiles={[]} />);
+
+    expect(
+      screen.getByRole("img", { name: "Preview of photo.AVIF" })
+    ).toHaveAttribute("src", "https://media.example/photo.webp");
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    expect(createObjectURLMock).not.toHaveBeenCalled();
+  });
 
   it("shows image and remove button", async () => {
     const removeFile = jest.fn();

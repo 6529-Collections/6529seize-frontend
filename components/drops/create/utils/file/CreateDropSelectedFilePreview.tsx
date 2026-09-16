@@ -1,3 +1,5 @@
+import { getPreparedDropImage } from "@/services/uploads/prepareDropImage";
+import { getContentType } from "@/services/uploads/mediaUploadMimeType";
 import type { JSX } from "react";
 import { useObjectUrl } from "@/hooks/useObjectUrl";
 import SeizeVideoPlayer from "@/components/drops/view/item/content/media/SeizeVideoPlayer";
@@ -10,13 +12,13 @@ enum FILE_TYPES {
 }
 
 const getFileType = (file: File): FILE_TYPES => {
-  if (file.type.includes("image")) {
+  if (getContentType(file).includes("image")) {
     return FILE_TYPES.IMAGE;
   }
-  if (file.type.includes("video")) {
+  if (getContentType(file).includes("video")) {
     return FILE_TYPES.VIDEO;
   }
-  if (file.type.includes("audio")) {
+  if (getContentType(file).includes("audio")) {
     return FILE_TYPES.AUDIO;
   }
   return FILE_TYPES.UNKNOWN;
@@ -29,7 +31,8 @@ export default function CreateDropSelectedFilePreview({
 }) {
   const fileType = getFileType(file);
   const previewFile = fileType === FILE_TYPES.UNKNOWN ? null : file;
-  const previewUrl = useObjectUrl(previewFile);
+  const objectUrl = useObjectUrl(previewFile);
+  const previewUrl = getPreparedDropImage(file)?.url ?? objectUrl;
 
   const components: Record<FILE_TYPES, JSX.Element> = {
     [FILE_TYPES.IMAGE]: previewUrl ? (

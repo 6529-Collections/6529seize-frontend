@@ -1,3 +1,6 @@
+import { filterValidDropUploadFiles } from "@/services/uploads/dropUploadValidation";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import type {
   CreateDropConfig,
   CreateDropPart,
@@ -17,12 +20,7 @@ import {
   MAX_DROP_STORM_UTF16_UNITS,
   isDropPartWithinLimits,
 } from "@/helpers/waves/drop-content-limits";
-import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { getMentionedGroupsFromParts } from "@/helpers/waves/drop-group-mentions";
-import {
-  isAttachmentUploadFile,
-  validateAttachmentUploadFile,
-} from "@/services/uploads/attachmentUploadMimeType";
 import {
   ActiveDropAction,
   type ActiveDropState,
@@ -544,8 +542,40 @@ export const getMentionedGroupsForParts = ({
   readonly canMentionAll: boolean;
 }): ApiDropGroupMention[] => getMentionedGroupsFromParts(parts, canMentionAll);
 
+export function selectNewComposerFiles(
+  newFiles: readonly File[],
+  existingFiles: readonly File[],
+  setToast?: (toast: AppToastInput) => void,
+  locale: SupportedLocale = DEFAULT_LOCALE
+): File[] {
+  const identities = new Set(existingFiles.map(getFileIdentity));
+  const uniqueFiles = newFiles.filter((file) => {
+    const identity = getFileIdentity(file);
+    if (identities.has(identity)) return false;
+    identities.add(identity);
+    return true;
+  });
+  const budget = Math.max(0, MAX_DROP_UPLOAD_FILES - existingFiles.length);
+  if (uniqueFiles.length > budget) {
+    setToast?.({
+      type: "warning",
+      message: t(locale, "drop.upload.fileLimit", {
+        count: MAX_DROP_UPLOAD_FILES,
+      }),
+    });
+  }
+  if (uniqueFiles.length < newFiles.length) {
+    setToast?.({
+      type: "warning",
+      message: t(locale, "drop.upload.duplicatesSkipped"),
+    });
+  }
+  return uniqueFiles.slice(0, budget);
+}
+
 export const handleComposerFileChange = ({
   newFiles,
+  locale = DEFAULT_LOCALE,
   drop,
   files,
   keepOptionsVisible,
@@ -556,6 +586,7 @@ export const handleComposerFileChange = ({
   closeOnNextInputRef,
 }: {
   readonly newFiles: File[];
+  readonly locale?: SupportedLocale;
   readonly drop: CreateDropConfig | null;
   readonly files: File[];
   readonly keepOptionsVisible: boolean;
@@ -567,66 +598,24 @@ export const handleComposerFileChange = ({
   >;
   readonly closeOnNextInputRef: MutableCurrentRef<boolean>;
 }) => {
-  try {
-    newFiles.forEach((file) => {
-      if (isAttachmentUploadFile(file)) {
-        validateAttachmentUploadFile(file);
-      }
-    });
-  } catch (error) {
-    setToast({
-      type: "error",
-      title: "Couldn't add this file.",
-      description: "Check the file and try again.",
-      details: getToastErrorDetails(error),
-    });
-    return;
-  }
+  const validNewFiles = filterValidDropUploadFiles(newFiles, setToast, locale);
+  if (validNewFiles.length === 0) return;
 
   const existingPartFiles = drop?.parts.flatMap((part) => part.media) ?? [];
-  const existingFileIds = new Set(
-    [...existingPartFiles, ...files].map(getFileIdentity)
+  const acceptedFiles = selectNewComposerFiles(
+    validNewFiles,
+    [...existingPartFiles, ...files],
+    setToast,
+    locale
   );
-  const uniqueNewFiles = newFiles.filter((file) => {
-    const fileId = getFileIdentity(file);
-    if (existingFileIds.has(fileId)) {
-      return false;
-    }
-    existingFileIds.add(fileId);
-    return true;
-  });
-  const duplicateCount = newFiles.length - uniqueNewFiles.length;
-  const existingCount = existingPartFiles.length;
-  const total = existingCount + files.length + uniqueNewFiles.length;
-  const overflow = Math.max(0, total - MAX_DROP_UPLOAD_FILES);
-  const mergedFiles = [...files, ...uniqueNewFiles];
-  const allowedNewFileBudget = Math.max(
-    0,
-    MAX_DROP_UPLOAD_FILES - existingCount
-  );
-  const updatedFiles = overflow
-    ? mergedFiles.slice(mergedFiles.length - allowedNewFileBudget)
-    : mergedFiles;
-
-  setFiles(updatedFiles);
-
-  if (overflow > 0) {
-    setToast({
-      message: `File limit exceeded. The ${overflow} oldest file${
-        overflow > 1 ? "s were" : " was"
-      } removed to maintain the ${MAX_DROP_UPLOAD_FILES}-file limit. New files have been added.`,
-      type: "warning",
-    });
-  }
-
-  if (duplicateCount > 0) {
-    setToast({
-      message: `${duplicateCount} duplicate file${
-        duplicateCount > 1 ? "s were" : " was"
-      } skipped.`,
-      type: "warning",
-    });
-  }
+  if (!acceptedFiles.length) return;
+  setFiles((currentFiles) => [
+    ...currentFiles,
+    ...selectNewComposerFiles(acceptedFiles, [
+      ...existingPartFiles,
+      ...currentFiles,
+    ]),
+  ]);
 
   if (!keepOptionsVisible) {
     setShowOptionsState({ scopeKey: waveId, value: false });

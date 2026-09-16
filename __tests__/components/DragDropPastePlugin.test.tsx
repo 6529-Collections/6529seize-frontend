@@ -1,8 +1,12 @@
+import { validateDropImageSignature } from "@/services/uploads/prepareDropImage";
 import React from "react";
 import { act, render } from "@testing-library/react";
 import DragDropPastePlugin from "@/components/drops/create/lexical/plugins/DragDropPastePlugin";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 
+jest.mock("@/services/uploads/prepareDropImage", () => ({
+  validateDropImageSignature: jest.fn(() => Promise.resolve()),
+}));
 const toastMock = jest.fn();
 jest.mock("@/components/auth/Auth", () => ({
   useAuth: () => ({ setToast: toastMock }),
@@ -54,16 +58,6 @@ jest.mock("lexical", () => ({
 jest.mock("@lexical/rich-text", () => ({
   DRAG_DROP_PASTE: "DRAG_DROP_PASTE",
 }));
-jest.mock("@lexical/utils", () => ({
-  isMimeType: jest.fn((file: File, acceptableTypes: string[]) =>
-    acceptableTypes.some(
-      (type) => file.type.startsWith(type) || file.type === type
-    )
-  ),
-  mediaFileReader: jest.fn(() =>
-    Promise.resolve([{ file: new File(["a"], "a.png", { type: "image/png" }) }])
-  ),
-}));
 
 const { $insertNodes, $getNodeByKey } = require("lexical");
 const {
@@ -77,14 +71,11 @@ const { useAuth } = require("@/components/auth/Auth");
 describe("DragDropPastePlugin", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.mocked(validateDropImageSignature).mockResolvedValue(undefined);
     selectionMock.insertParagraph.mockClear();
     selectionMock.insertRawText.mockClear();
     selectionMock.insertText.mockClear();
     (useLexicalComposerContext as jest.Mock).mockReturnValue([editor]);
-    const { mediaFileReader } = require("@lexical/utils");
-    (mediaFileReader as jest.Mock).mockResolvedValue([
-      { file: new File(["a"], "a.png", { type: "image/png" }) },
-    ]);
     (multiPartUpload as jest.Mock).mockResolvedValue({ url: "uploaded" });
   });
 
@@ -106,10 +97,6 @@ describe("DragDropPastePlugin", () => {
   });
 
   it("uploads pasted HTML data images before Lexical imports the base64 src", async () => {
-    const { mediaFileReader } = require("@lexical/utils");
-    (mediaFileReader as jest.Mock).mockImplementation((files: File[]) =>
-      Promise.resolve(files.map((file) => ({ file })))
-    );
     const preventDefault = jest.fn();
     const getData = jest.fn((type: string) =>
       type === "text/html"
@@ -141,10 +128,6 @@ describe("DragDropPastePlugin", () => {
   });
 
   it("preserves pasted plain text when image paste includes text", async () => {
-    const { mediaFileReader } = require("@lexical/utils");
-    (mediaFileReader as jest.Mock).mockImplementation((files: File[]) =>
-      Promise.resolve(files.map((file) => ({ file })))
-    );
     const preventDefault = jest.fn();
     const imageFile = new File(["a"], "a.png", { type: "image/png" });
 
@@ -179,35 +162,50 @@ describe("DragDropPastePlugin", () => {
     );
   });
 
-  it("lets attachment-only paste fall through to Lexical", async () => {
-    const { mediaFileReader } = require("@lexical/utils");
+  it("adds pasted attachments and preserves text without HTML clipboard data", async () => {
     const preventDefault = jest.fn();
-
-    renderPlugin();
+    const onAttachmentFiles = jest.fn();
+    const file = new File(["a"], "a.pdf", { type: "application/pdf" });
+    renderPlugin({ onAttachmentFiles });
     const handled = pasteHandler({
       preventDefault,
       clipboardData: {
-        files: [new File(["a"], "a.pdf", { type: "application/pdf" })],
+        files: [file],
         items: [],
-        getData: jest.fn(() => ""),
+        getData: jest.fn((type: string) =>
+          type === "text/plain" ? "caption" : ""
+        ),
       },
     });
 
-    expect(handled).toBe(false);
-    expect(preventDefault).not.toHaveBeenCalled();
-    expect(mediaFileReader).not.toHaveBeenCalled();
+    expect(handled).toBe(true);
+    expect(preventDefault).toHaveBeenCalled();
+    expect(onAttachmentFiles).toHaveBeenCalledWith([file]);
+    expect(selectionMock.insertText).toHaveBeenCalledWith("caption");
+    expect(multiPartUpload).not.toHaveBeenCalled();
+  });
+
+  it("reports rejected pasted files while preserving clipboard text", () => {
+    renderPlugin();
+    const handled = pasteHandler({
+      preventDefault: jest.fn(),
+      clipboardData: {
+        files: [new File(["a"], "photo.heic", { type: "image/heic" })],
+        items: [],
+        getData: (type: string) => (type === "text/plain" ? "keep this" : ""),
+      },
+    });
+    expect(handled).toBe(true);
+    expect(toastMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: "Unsupported file: photo.heic",
+      })
+    );
+    expect(selectionMock.insertText).toHaveBeenCalledWith("keep this");
     expect(multiPartUpload).not.toHaveBeenCalled();
   });
 
   it("uploads HTML data images when clipboard files are not images", async () => {
-    const { mediaFileReader } = require("@lexical/utils");
-    (mediaFileReader as jest.Mock).mockImplementation((files: File[]) =>
-      Promise.resolve(
-        files
-          .filter((file) => file.type.startsWith("image/"))
-          .map((file) => ({ file }))
-      )
-    );
     const preventDefault = jest.fn();
     const textFile = new File(["a"], "note.txt", { type: "text/plain" });
 
@@ -230,19 +228,19 @@ describe("DragDropPastePlugin", () => {
       expect(handled).toBe(true);
     });
 
-    const fileReaderFiles = (mediaFileReader as jest.Mock).mock.calls[0][0];
     const uploadArg = (multiPartUpload as jest.Mock).mock.calls[0][0];
     expect(preventDefault).toHaveBeenCalled();
-    expect(fileReaderFiles).toHaveLength(2);
-    expect(fileReaderFiles[0]).toBe(textFile);
-    expect(fileReaderFiles[1].name).toBe("pasted-image-0.png");
+    expect(validateDropImageSignature).toHaveBeenCalledTimes(1);
+    expect(toastMock).toHaveBeenCalledWith(
+      expect.objectContaining({ title: expect.stringContaining("note.txt") })
+    );
     expect(uploadArg.file.name).toBe("pasted-image-0.png");
     expect(uploadArg.file.type).toBe("image/png");
+    expect(multiPartUpload).toHaveBeenCalledTimes(1);
+    expect($insertNodes).toHaveBeenCalled();
   });
 
   it("shows error when file unsupported", async () => {
-    const { mediaFileReader } = require("@lexical/utils");
-    (mediaFileReader as jest.Mock).mockResolvedValue([]);
     renderPlugin();
     await act(async () => {
       await dragDropPasteHandler([
@@ -254,8 +252,6 @@ describe("DragDropPastePlugin", () => {
   });
 
   it("passes dropped video and document files to attachment handler", async () => {
-    const { mediaFileReader } = require("@lexical/utils");
-    (mediaFileReader as jest.Mock).mockResolvedValue([]);
     const onAttachmentFiles = jest.fn();
     const files = [
       new File(["a"], "a.mp4", { type: "video/mp4" }),
@@ -292,9 +288,10 @@ describe("DragDropPastePlugin", () => {
     expect(toastMock).not.toHaveBeenCalled();
   });
 
-  it("does not add files or upload images when disabled before file reading finishes", async () => {
-    const { mediaFileReader } = require("@lexical/utils");
-    let resolveFileReader: ((value: Array<{ file: File }>) => void) | undefined;
+  it("removes the pending image if disabled before validation finishes", async () => {
+    const remove = jest.fn();
+    ($getNodeByKey as jest.Mock).mockReturnValue({ remove });
+    let resolveFileReader: (() => void) | undefined;
     const imageFile = new File(["a"], "a.png", { type: "image/png" });
     const attachmentFile = new File(["b"], "b.pdf", {
       type: "application/pdf",
@@ -302,8 +299,8 @@ describe("DragDropPastePlugin", () => {
     const onAttachmentFiles = jest.fn();
     const onUploadEditorStateChange = jest.fn();
 
-    (mediaFileReader as jest.Mock).mockReturnValue(
-      new Promise<Array<{ file: File }>>((resolve) => {
+    jest.mocked(validateDropImageSignature).mockReturnValue(
+      new Promise<void>((resolve) => {
         resolveFileReader = resolve;
       })
     );
@@ -329,16 +326,52 @@ describe("DragDropPastePlugin", () => {
     );
 
     await act(async () => {
-      resolveFileReader?.([{ file: imageFile }]);
+      resolveFileReader?.();
       await Promise.resolve();
       await Promise.resolve();
     });
 
-    expect(onAttachmentFiles).not.toHaveBeenCalled();
-    expect($insertNodes).not.toHaveBeenCalled();
+    expect(onAttachmentFiles).toHaveBeenCalledWith([attachmentFile]);
+    expect($insertNodes).toHaveBeenCalledTimes(1);
     expect(multiPartUpload).not.toHaveBeenCalled();
     expect(toastMock).not.toHaveBeenCalled();
-    expect(onUploadEditorStateChange).not.toHaveBeenCalled();
+    expect(onUploadEditorStateChange).toHaveBeenCalledWith(editorState);
+    expect($getNodeByKey).toHaveBeenCalledWith("1");
+    expect(remove).toHaveBeenCalled();
+  });
+
+  it("removes a rejected image and synchronizes the disabled editor", async () => {
+    const remove = jest.fn();
+    ($getNodeByKey as jest.Mock).mockReturnValue({ remove });
+    let rejectValidation!: (error: Error) => void;
+    jest.mocked(validateDropImageSignature).mockReturnValue(
+      new Promise((_, reject) => {
+        rejectValidation = reject;
+      })
+    );
+    const onUploadEditorStateChange = jest.fn();
+    const { rerender } = renderPlugin({ onUploadEditorStateChange });
+    act(() =>
+      dragDropPasteHandler([
+        new File(["image"], "animated.avif", { type: "image/avif" }),
+      ])
+    );
+    rerender(
+      <DragDropPastePlugin
+        disabled
+        onUploadEditorStateChange={onUploadEditorStateChange}
+      />
+    );
+    await act(async () =>
+      rejectValidation(new Error("Animated AVIF is not supported"))
+    );
+    expect($getNodeByKey).toHaveBeenCalledWith("1");
+    expect(remove).toHaveBeenCalledTimes(1);
+    expect(multiPartUpload).not.toHaveBeenCalled();
+    expect(toastMock).toHaveBeenCalledWith(
+      expect.objectContaining({ title: "Could not add animated.avif" })
+    );
+    expect(onUploadEditorStateChange).toHaveBeenCalledWith(editorState);
   });
 
   it("replaces loading image after parent rerenders with a new attachment handler", async () => {
@@ -441,7 +474,9 @@ describe("DragDropPastePlugin", () => {
 
     expect(remove).toHaveBeenCalled();
     expect(toastMock).toHaveBeenCalledWith({
-      message: "Upload failed",
+      title: "Could not add a.png",
+      description: "Upload failed",
+      autoClose: false,
       type: "error",
     });
     expect(onUploadEditorStateChange).toHaveBeenCalledWith(editorState);
@@ -460,14 +495,16 @@ describe("DragDropPastePlugin", () => {
     });
 
     await act(async () => {
-      jest.advanceTimersByTime(30_000);
+      jest.advanceTimersByTime(180_000);
       await Promise.resolve();
       await Promise.resolve();
     });
 
     expect(remove).toHaveBeenCalled();
     expect(toastMock).toHaveBeenCalledWith({
-      message: "Image upload timed out. Please try again.",
+      title: "Could not add a.png",
+      description: "Image upload timed out. Please try again.",
+      autoClose: false,
       type: "error",
     });
   });
@@ -497,7 +534,7 @@ describe("DragDropPastePlugin", () => {
     );
 
     await act(async () => {
-      jest.advanceTimersByTime(30_000);
+      jest.advanceTimersByTime(180_000);
       await Promise.resolve();
       await Promise.resolve();
     });

@@ -1121,7 +1121,7 @@ import { ApiCompetitionWinnerConfig } from '../models/ApiCompetitionWinnerConfig
 import { ApiCompleteAttachmentMultipartUploadRequest } from '../models/ApiCompleteAttachmentMultipartUploadRequest';
 import { ApiCompleteMultipartUploadRequest } from '../models/ApiCompleteMultipartUploadRequest';
 import { ApiCompleteMultipartUploadRequestPart } from '../models/ApiCompleteMultipartUploadRequestPart';
-import { ApiCompleteMultipartUploadResponse     } from '../models/ApiCompleteMultipartUploadResponse';
+import { ApiCompleteMultipartUploadResponse      } from '../models/ApiCompleteMultipartUploadResponse';
 import { ApiConsolidatedTdh } from '../models/ApiConsolidatedTdh';
 import { ApiConsolidatedTdhMetrics                   } from '../models/ApiConsolidatedTdhMetrics';
 import { ApiConsolidatedTdhMetricsCollector } from '../models/ApiConsolidatedTdhMetricsCollector';

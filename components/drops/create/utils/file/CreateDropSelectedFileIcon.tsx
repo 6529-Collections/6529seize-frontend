@@ -1,3 +1,4 @@
+import { getContentType } from "@/services/uploads/mediaUploadMimeType";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 
 enum FILE_TYPES {
@@ -15,13 +16,13 @@ export default function CreateDropSelectedFileIcon({
     if (!file) {
       return null;
     }
-    if (file.type.includes("image")) {
+    if (getContentType(file).includes("image")) {
       return FILE_TYPES.IMAGE;
     }
-    if (file.type.includes("video")) {
+    if (getContentType(file).includes("video")) {
       return FILE_TYPES.VIDEO;
     }
-    if (file.type.includes("audio")) {
+    if (getContentType(file).includes("audio")) {
       return FILE_TYPES.AUDIO;
     }
     return null;
