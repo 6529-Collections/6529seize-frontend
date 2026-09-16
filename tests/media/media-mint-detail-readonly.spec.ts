@@ -238,3 +238,73 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
     });
   });
 });
+
+// Card 549 is a confirmed portrait-video fixture on staging. Other environments
+// have independent collections, so their existing detail fixtures stay intact.
+test.describe("Staging video artwork sizing @surface @medium @large @readonly", () => {
+  test.skip(
+    ({ baseURL }) =>
+      !baseURL || new URL(baseURL).hostname !== "staging.6529.io",
+    "portrait-video fixture 549 is qualified on staging only"
+  );
+
+  for (const viewport of [
+    { width: 390, height: 844 },
+    { width: 1440, height: 1000 },
+  ]) {
+    test(`contains portrait video and controls at ${viewport.width}px`, async ({
+      page,
+    }) => {
+      await page.setViewportSize(viewport);
+      await gotoReady(page, "/the-memes/549");
+      const video = page.locator("video#the-art-fullscreen-animation");
+      await expect(video).toBeVisible();
+      await expect
+        .poll(() =>
+          video.evaluate((element: HTMLVideoElement) => element.videoWidth)
+        )
+        .toBeGreaterThan(0);
+      await video.evaluate((element: HTMLVideoElement) => element.pause());
+      await expect(
+        page.getByRole("slider", { name: "Seek video" })
+      ).toBeVisible();
+
+      const geometry = await video.evaluate((element: HTMLVideoElement) => {
+        const bounds = element.getBoundingClientRect();
+        const frame = element.closest("section")!.getBoundingClientRect();
+        const scale = Math.min(
+          bounds.width / element.videoWidth,
+          bounds.height / element.videoHeight
+        );
+        const width = element.videoWidth * scale;
+        const height = element.videoHeight * scale;
+        const left = bounds.left + (bounds.width - width) / 2;
+        const top = bounds.top + (bounds.height - height) / 2;
+        const slider = element
+          .parentElement!.querySelector("input[type=range]")!
+          .getBoundingClientRect();
+        return {
+          widthGap: frame.width - width,
+          heightGap: frame.height - height,
+          centerX: left + width / 2 - (frame.left + frame.width / 2),
+          centerY: top + height / 2 - (frame.top + frame.height / 2),
+          sliderInsets: [
+            slider.left - left,
+            left + width - slider.right,
+            slider.top - top,
+            top + height - slider.bottom,
+          ],
+        };
+      });
+      expect(Math.abs(geometry.centerX)).toBeLessThanOrEqual(2);
+      expect(Math.abs(geometry.centerY)).toBeLessThanOrEqual(2);
+      expect(
+        Math.min(Math.abs(geometry.widthGap), Math.abs(geometry.heightGap))
+      ).toBeLessThanOrEqual(2);
+      if (viewport.width < 1024)
+        expect(Math.abs(geometry.widthGap)).toBeLessThanOrEqual(2);
+      for (const inset of geometry.sliderInsets)
+        expect(inset).toBeGreaterThanOrEqual(-2);
+    });
+  }
+});
