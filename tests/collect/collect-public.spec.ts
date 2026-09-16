@@ -646,6 +646,16 @@ test("artist choices stay scrollable and searchable on mobile and desktop", asyn
     await expect(sheet.getByRole("heading", { name: "Artist" })).toBeVisible();
     const search = sheet.getByRole("searchbox", { name: "Search artists" });
     await expect(search).toBeVisible();
+    expect(await sheet.getByRole("radio").count()).toBeLessThan(30);
+    const choices = sheet
+      .getByRole("group", { name: "Artist" })
+      .locator("..");
+    expect(
+      await choices.evaluate(
+        (element) => element.scrollHeight > element.clientHeight
+      )
+    ).toBe(true);
+    await search.fill("Catalog artist 30");
     await expect(
       sheet.getByRole("radio", { name: "Catalog artist 30" })
     ).toBeVisible();
