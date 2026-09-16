@@ -274,7 +274,7 @@ export default function CurationOrganize({
         }}
       >
         {active && (
-          <div className="tailwind-scope tw-sticky tw-top-0 tw-z-[1001] tw-mb-3 tw-border-x-0 tw-border-y tw-border-solid tw-border-white/10 tw-bg-black/85 tw-py-1.5 tw-backdrop-blur-md">
+          <div className="tailwind-scope tw-sticky tw-top-0 tw-z-[1001] tw-mb-3 tw-border-x-0 tw-border-y tw-border-solid tw-border-white/10 tw-bg-black/85 tw-px-4 tw-py-1.5 tw-backdrop-blur-md">
             <div className="tw-flex tw-min-h-11 tw-items-center tw-gap-2">
               <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-baseline">
                 <span className="tw-flex-shrink-0 tw-text-sm tw-font-semibold tw-text-iron-100">
