@@ -77,21 +77,21 @@ export default function CurationOrganizeCard({
           disabled={busy}
           onClick={() => select(id)}
           onKeyDown={(event) => keyDown(id, event)}
-          className={`tw-absolute tw-right-1.5 tw-top-1.5 tw-z-[1001] tw-flex tw-size-11 tw-touch-none tw-select-none tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-p-0 tw-outline-none tw-transition-colors tw-duration-150 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 disabled:tw-cursor-wait ${selected ? "tw-bg-white/10 tw-text-white" : "tw-bg-black/20 tw-text-iron-300 desktop-hover:hover:tw-bg-black/40 desktop-hover:hover:tw-text-white"} ${isDragging ? "tw-cursor-grabbing" : "tw-cursor-grab"}`}
+          className={`tw-absolute tw-right-0.5 tw-top-0.5 tw-z-[1001] tw-flex tw-size-11 tw-touch-none tw-select-none tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-transparent tw-p-0 tw-outline-none tw-transition-colors tw-duration-150 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 disabled:tw-cursor-wait ${selected ? "tw-text-white" : "tw-text-iron-400 desktop-hover:hover:tw-text-iron-100"} ${isDragging ? "tw-cursor-grabbing" : "tw-cursor-grab"}`}
         >
           <svg
             aria-hidden="true"
-            width="20"
-            height="14"
-            viewBox="0 0 24 16"
+            width="16"
+            height="22"
+            viewBox="0 0 16 24"
             fill="currentColor"
           >
-            <circle cx="6" cy="5" r="1.5" />
-            <circle cx="12" cy="5" r="1.5" />
-            <circle cx="18" cy="5" r="1.5" />
-            <circle cx="6" cy="11" r="1.5" />
-            <circle cx="12" cy="11" r="1.5" />
-            <circle cx="18" cy="11" r="1.5" />
+            <circle cx="5" cy="5" r="1.5" />
+            <circle cx="11" cy="5" r="1.5" />
+            <circle cx="5" cy="12" r="1.5" />
+            <circle cx="11" cy="12" r="1.5" />
+            <circle cx="5" cy="19" r="1.5" />
+            <circle cx="11" cy="19" r="1.5" />
           </svg>
         </button>
       )}
