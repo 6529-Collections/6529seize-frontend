@@ -17,6 +17,9 @@ const program = original.replace(prodPin, fixturePin)
   .replace(/^import \{ createHash \} from 'node:crypto';\r?\n/m, '');
 const API = 'https://sentry.io/api/0/';
 const P = {
+  backProject: 'projects/seize-ff/seize-backend/',
+  workflows: 'organizations/seize-ff/workflows/?project=6529-frontend&project=seize-backend&per_page=100',
+  workflow: 'organizations/seize-ff/workflows/100/', detector: 'organizations/seize-ff/detectors/200/',
   identity: '', project: 'projects/seize-ff/6529-frontend/', projects: 'organizations/seize-ff/projects/',
   uptime: 'organizations/seize-ff/uptime/', crons: 'organizations/seize-ff/monitors/',
   rules: 'projects/seize-ff/6529-frontend/rules/', apps: 'organizations/seize-ff/sentry-apps/',
@@ -35,11 +38,30 @@ const rule = () => ({
   actions: [{ id: 'sentry.rules.actions.notify_event_service.NotifyEventServiceAction', service: 'synthetic-app' }],
   name: PRIVATE,
 });
-const terminal = route => '<' + API + route + '?cursor=0:0:0>; rel="next"; results="false"; cursor="0:0:0"';
+const terminal = route => '<' + API + route + (route.includes('?') ? '&' : '?') + 'cursor=0:0:0>; rel="next"; results="false"; cursor="0:0:0"';
+const currentWorkflow = () => ({
+  id: '100', name: PRIVATE, enabled: true, environment: null, config: { frequency: 30 },
+  dateUpdated: '2026-09-15T00:00:00Z', detectorIds: ['200'],
+  triggers: { logicType: 'any-short', conditions: [
+    { id: '11', type: 'new_high_priority_issue', comparison: true, conditionResult: true },
+    { id: '12', type: 'existing_high_priority_issue', comparison: true, conditionResult: true },
+  ], actions: [] },
+  actionFilters: [{ logicType: 'all', conditions: [], actions: [{ id: '13', type: 'email', integrationId: null,
+    config: { targetType: 'issue_owners', targetIdentifier: null, targetDisplay: PRIVATE },
+    data: { fallthroughType: 'ActiveMembers' }, status: 'active' }] }],
+});
+function setWorkflow(rows, change) {
+  const item = currentWorkflow(); change(item);
+  rows.set(P.workflows, { data: [item] }); rows.set(P.workflow, { data: item });
+}
 function fixtures() {
   return new Map([
+    [P.workflows, { data: [currentWorkflow()] }], [P.workflow, { data: currentWorkflow() }],
+    [P.detector, { data: { id: '200', projectId: '1', workflowIds: ['100'], enabled: true, type: 'error',
+      conditionGroup: null, config: {}, dataSources: [], latestGroup: { title: PRIVATE } } }],
     [P.identity, { data: { auth: { scopes: ['org:read', 'project:read'] } } }],
-    [P.project, { data: { name: PRIVATE } }],
+    [P.project, { data: { id: '1', name: PRIVATE, access: ['project:read'] } }],
+    [P.backProject, { data: { id: '2', name: PRIVATE, access: ['project:read'] } }],
     [P.projects, { data: [{ id: '1', slug: '6529-frontend' }, { id: '2', slug: 'seize-backend' }, { slug: PRIVATE }] }],
     [P.uptime, { data: [] }], [P.crons, { data: [] }],
     [P.rules, { data: [rule()] }], [P.back, { data: [rule()] }],
@@ -58,6 +80,7 @@ async function execute(options = {}) {
   const observations = [];
   const check = (condition, label) => { if (!condition) violations.push(label); };
   const env = { SENTRY_AUTH_TOKEN: PRIVATE, GITHUB_STEP_SUMMARY: 'synthetic-summary' };
+  if (options.buildToken) env.SENTRY_BUILD_AUTH_TOKEN = options.buildToken;
   if (options.noToken) delete env.SENTRY_AUTH_TOKEN;
   const process = { env, exitCode: 0 };
   const context = {
@@ -79,7 +102,8 @@ async function execute(options = {}) {
       const observed = Object.freeze({
         atFixedApi, methodIsGet: init?.method === 'GET', redirectsRejected: init?.redirect === 'error',
         headerShapeValid: headerNames.length === 1 && headerNames[0] === 'Authorization',
-        tokenMatches: init?.headers?.Authorization === 'Bearer ' + PRIVATE,
+        tokenMatches: init?.headers?.Authorization === 'Bearer ' + PRIVATE ||
+          (options.buildToken && init?.headers?.Authorization === 'Bearer ' + options.buildToken),
       });
       observations.push(observed);
       check(observed.atFixedApi, 'external_destination');
@@ -87,7 +111,7 @@ async function execute(options = {}) {
       check(observed.redirectsRejected, 'redirect_allowed');
       check(observed.headerShapeValid, 'unexpected_headers');
       check(observed.tokenMatches, 'authorization_mismatch');
-      const value = options.resolve?.(route, entries, calls) ?? entries.get(route);
+      const value = options.resolve?.(route, entries, calls, init) ?? entries.get(route);
       if (!value) {
         check(false, 'unexpected_request');
         throw new Error('UNEXPECTED_FIXTURE_REQUEST');
@@ -95,7 +119,7 @@ async function execute(options = {}) {
       if (value.throw) throw new Error(PRIVATE);
       if (value.response) return value.response;
       const headers = { 'content-type': 'application/json' };
-      if (value.link !== null) headers.link = value.link ?? terminal(route.split('?')[0]);
+      if (value.link !== null) headers.link = value.link ?? terminal(route);
       return new Response(value.raw ?? JSON.stringify(value.data), { status: value.status ?? 200, headers });
     },
   };
@@ -376,4 +400,295 @@ test('workflow remains manually triggered, main-only, zero repository permission
   assert.doesNotMatch(workflow, /actions\/checkout|contents:\s*read|npm|pnpm|NODE_OPTIONS/);
   assert.equal((original.match(/fetch\(/g) ?? []).length, 1);
   assert.match(original, /method: 'GET'/);
+});
+
+const current = result => result.configuration.currentWorkflows;
+test('canonical high-priority workflow retains enabled state and preferred-channel recipient policy', async () => {
+  const value = await execute();
+  const item = current(value.result).workflows[0];
+  assert.equal(current(value.result).readComplete, true);
+  assert.equal(item.enabled, true);
+  assert.equal(item.listDetailConfigurationMatch, true);
+  assert.equal(item.legacyRuleJoin, 'unknown');
+  assert.equal(item.frequencyMinutes, 30);
+  assert.equal(item.triggers.conditions[0].type, 'new_high_priority_issue');
+  assert.equal(item.triggers.conditions[0].parametersVerified, true);
+  assert.equal(item.actionFilters[0].actions[0].targetType, 'issue_owners');
+  assert.equal(item.actionFilters[0].actions[0].fallthrough, 'ActiveMembers');
+  assert.equal(item.actionFilters[0].actions[0].semanticsVerified, true);
+  assert.equal(item.actionFilters[0].actions[0].destinationVerified, false);
+  assert.equal(current(value.result).detectors[0].project, '6529-frontend');
+  assert.equal(current(value.result).detectors[0].fullDetectorSemanticsVerified, false);
+});
+test('enabled-only fingerprints isolate the intended reversible configuration delta', async () => {
+  const originalValue = current((await execute()).result).workflows[0];
+  const changed = current((await execute({ configure: rows => setWorkflow(rows, item => { item.enabled = false; }) })).result).workflows[0];
+  assert.notEqual(changed.configurationFingerprint, originalValue.configurationFingerprint);
+  assert.equal(changed.configurationWithoutEnabledFingerprint, originalValue.configurationWithoutEnabledFingerprint);
+  const changedRecipient = current((await execute({ configure: rows => setWorkflow(rows, item => {
+    item.actionFilters[0].actions[0].data.fallthroughType = 'NoOne';
+  }) })).result).workflows[0];
+  assert.notEqual(changedRecipient.configurationWithoutEnabledFingerprint, originalValue.configurationWithoutEnabledFingerprint);
+});
+test('configuration fingerprints ignore only volatile timestamps and canonicalize object order', async () => {
+  const initial = current((await execute()).result).workflows[0].configurationFingerprint;
+  const value = await execute({ configure: rows => setWorkflow(rows, item => {
+    item.dateUpdated = '2026-09-15T01:00:00Z';
+    item.config = Object.fromEntries(Object.entries(item.config).reverse());
+  }) });
+  assert.equal(current(value.result).workflows[0].configurationFingerprint, initial);
+});
+test('hashing distinguishes object structure from array-of-pairs structure', async () => {
+  const values = [];
+  for (const extra of [{ a: 1 }, [['a', 1]]]) {
+    values.push(current((await execute({ configure: rows => setWorkflow(rows, item => { item.extra = extra; }) })).result)
+      .workflows[0].configurationFingerprint);
+  }
+  assert.notEqual(values[0], values[1]);
+});
+test('frequency and level conditions retain bounded parameters; unknown extras prevent verification', async () => {
+  const value = await execute({ configure: rows => setWorkflow(rows, item => {
+    item.triggers.conditions = [
+      { type: 'event_frequency_count', comparison: { value: 100, interval: '1h' }, conditionResult: true },
+      { type: 'level', comparison: { level: 40, match: 'gte' }, conditionResult: true },
+      { type: 'issue_priority_greater_or_equal', comparison: 75, conditionResult: true, secret: PRIVATE },
+      { type: PRIVATE, comparison: PRIVATE, conditionResult: true },
+    ];
+  }) });
+  const conditions = current(value.result).workflows[0].triggers.conditions;
+  assert.deepEqual(conditions[0].comparison, { value: 100, interval: '1h' });
+  assert.equal(conditions[0].parametersVerified, true);
+  assert.equal(conditions[1].parametersVerified, true);
+  assert.equal(conditions[2].parametersVerified, false);
+  assert.equal(conditions[3].type, 'unknown');
+});
+test('unknown action strings and missing state remain unknown, never enabled or known recipients', async () => {
+  const value = await execute({ configure: rows => setWorkflow(rows, item => {
+    delete item.enabled;
+    item.actionFilters[0].actions = [{ type: PRIVATE, config: { targetType: PRIVATE, targetIdentifier: PRIVATE }, data: {} }];
+  }) });
+  const item = current(value.result).workflows[0];
+  assert.equal(item.enabled, 'unknown');
+  assert.equal(item.actionFilters[0].actions[0].type, 'unknown');
+  assert.equal(item.actionFilters[0].actions[0].status, 'unknown');
+  assert.equal(item.actionFilters[0].actions[0].semanticsVerified, false);
+});
+for (const route of [P.workflows, P.workflow, P.detector]) {
+  test('canonical denied read is an incomplete audit, not a provider outage: ' + route, async () => {
+    const value = await execute({ configure: rows => rows.set(route, { status: 403, data: PRIVATE }) });
+    assert.equal(value.code, 1);
+    assert.equal(value.result.readAccessVerified, true);
+    assert.equal(current(value.result).readComplete, false);
+    assert.equal(value.result.configuration.providerSettingsChanged, false);
+  });
+}
+test('provider ID mismatch or duplicate list IDs stop before unrelated detail requests', async () => {
+  for (const setup of [
+    rows => { rows.get(P.workflow).data.id = '999'; },
+    rows => { rows.get(P.workflows).data.push(currentWorkflow()); },
+    rows => { rows.get(P.workflows).data[0].id = '../other'; },
+    rows => { rows.get(P.detector).data.id = '999'; },
+  ]) {
+    const value = await execute({ configure: setup });
+    assert.equal(value.code, 1);
+    assert.equal(current(value.result).readComplete, false);
+    assert.ok(!value.calls.some(route => route.includes('999') || route.includes('../')));
+  }
+});
+test('list/detail configuration drift is visible and blocks complete read evidence', async () => {
+  const value = await execute({ configure: rows => { rows.get(P.workflow).data.enabled = false; } });
+  assert.equal(value.code, 1);
+  assert.equal(current(value.result).limitation, 'workflow_projection_or_drift');
+  assert.equal(current(value.result).workflows[0].listDetailConfigurationMatch, false);
+});
+test('workflow count and nested detector limits stop rather than silently truncate', async () => {
+  const value = await execute({ configure: rows => {
+    rows.get(P.workflows).data = Array.from({ length: 13 }, (_, i) => ({ ...currentWorkflow(), id: String(100 + i) }));
+  } });
+  assert.equal(value.code, 1);
+  assert.equal(current(value.result).limitation, 'workflow_id_or_detail_limit');
+  assert.ok(!value.calls.includes(P.workflow));
+  const nested = await execute({ configure: rows => setWorkflow(rows, item => { item.detectorIds = Array(51).fill('200'); }) });
+  assert.equal(nested.code, 1);
+});
+test('fixed project filters survive cursor pagination and cannot be broadened', async () => {
+  const value = await execute({ configure: rows => {
+    rows.get(P.workflows).data = [];
+    rows.get(P.workflows).link = '<' + API + P.workflows + '&cursor=next>; rel="next"; results="true"';
+    rows.set(P.workflows + '&cursor=next', { data: [currentWorkflow()] });
+  } });
+  assert.equal(value.code, 0);
+  assert.equal(current(value.result).inventory.pages, 2);
+  for (const changed of [P.workflows.replace('seize-backend', 'other'), P.workflows + '&project=other',
+    P.workflows.replace('per_page=100', 'per_page=1000')]) {
+    const rejected = await execute({ configure: rows => {
+      rows.get(P.workflows).link = '<' + API + changed + '&cursor=next>; rel="next"; results="true"';
+    } });
+    assert.equal(rejected.code, 1);
+    assert.ok(!rejected.calls.includes(changed + '&cursor=next'));
+  }
+});
+test('relevant scope flags remain unknown without auth scope metadata', async () => {
+  const value = await execute({ configure: rows => { rows.get(P.identity).data = { auth: {} }; } });
+  assert.ok(Object.values(value.result.scopeFlags).every(flag => flag === 'unknown'));
+  assert.equal(value.result.providerWriteCapabilityVerified, false);
+});
+for (const [url, kind] of [
+  [fixtureUrl, 'production_collector'],
+  ['https://discord.com/api/webhooks/123456/SECRET_token?wait=true', 'discord_webhook'],
+  ['https://discord.com.evil.example/api/webhooks/123456/SECRET_token', 'other'],
+  ['https://discord.com/other/123456/SECRET_token', 'other'],
+  ['https://abcdef.execute-api.eu-west-1.amazonaws.com/sentry', 'other_aws_gateway'],
+  ['https://api.6529.io/sentry', '6529_api'],
+  ['https://user:pass@discord.com/api/webhooks/123456/SECRET_token', 'unknown'],
+]) {
+  test('destination category is bounded and never discloses URL: ' + kind + ':' + url, async () => {
+    const value = await execute({ configure: rows => { rows.get(P.apps).data[0].webhookUrl = url; } });
+    assert.equal(value.result.configuration.customIntegrations.items[0].destination.kind, kind);
+    assert.ok(!value.text.includes(url));
+    assert.ok(!value.text.includes('SECRET_token'));
+  });
+}
+test('app schema and documented event subscriptions are projected without arbitrary contents', async () => {
+  const value = await execute({ configure: rows => {
+    const item = rows.get(P.apps).data[0];
+    item.schema = { elements: [{ type: 'alert-rule-action', url: PRIVATE }] };
+    item.webhookEvents = ['error.created', 'issue.created', PRIVATE]; item.events = ['error', 'issue'];
+  } });
+  const item = value.result.configuration.customIntegrations.items[0];
+  assert.equal(item.schemaPresent, true);
+  assert.match(item.schemaFingerprint, /^[a-f0-9]{64}$/);
+  assert.deepEqual(item.eventSubscriptions.knownValues, ['error', 'issue']);
+  assert.equal(item.webhookEvents.unknownCount, 1);
+});
+
+test('connected project access is explicit metadata and not an effective write claim', async () => {
+  const value = await execute();
+  assert.equal(current(value.result).connectedProjectCoverageComplete, true);
+  assert.equal(current(value.result).reverseConnectionsVerified, true);
+  assert.equal(current(value.result).projectAccess[0].accessFlags['project:read'], true);
+  assert.equal(current(value.result).projectAccess[0].accessFlags['project:write'], false);
+  assert.equal(current(value.result).projectAccess[0].effectiveWorkflowWriteVerified, false);
+});
+test('missing access, outside project and reverse-link mismatch remain unverified', async () => {
+  const value = await execute({ configure: rows => {
+    delete rows.get(P.project).data.access;
+    rows.get(P.detector).data.projectId = '999';
+    rows.get(P.detector).data.workflowIds = ['999'];
+  } });
+  assert.equal(current(value.result).connectedProjectCoverageComplete, false);
+  assert.equal(current(value.result).reverseConnectionsVerified, false);
+  assert.equal(current(value.result).projectAccess[0].accessFlags['project:write'], 'unknown');
+  assert.ok(!value.calls.some(route => route.includes('999')));
+});
+
+test('official direct user/team email shape permits empty data without issue-owner fallthrough', async () => {
+  for (const targetType of ['user', 'team']) {
+    const value = await execute({ configure: rows => setWorkflow(rows, item => {
+      const action = item.actionFilters[0].actions[0];
+      action.config.targetType = targetType; action.config.targetIdentifier = '123'; action.data = {};
+    }) });
+    const action = current(value.result).workflows[0].actionFilters[0].actions[0];
+    assert.equal(action.semanticsVerified, true);
+    assert.equal(action.fallthrough, 'unknown');
+  }
+});
+test('separate build credential performs only the three capability GETs with no token crossover', async () => {
+  const buildToken = PRIVATE + '_build';
+  const buildCalls = [];
+  const value = await execute({ buildToken, resolve: (route, rows, calls, init) => {
+    if (init.headers.Authorization !== 'Bearer ' + buildToken) return undefined;
+    buildCalls.push(route);
+    assert.ok([P.identity, P.project, P.backProject].includes(route));
+    if (route === P.identity) return { data: { auth: { scopes: ['org:admin'] } } };
+    return { data: { id: route === P.project ? '1' : '2', access: ['project:write', 'project:admin'] } };
+  } });
+  assert.deepEqual(buildCalls.sort(), [P.identity, P.project, P.backProject].sort());
+  assert.equal(value.result.buildCredentialCapabilities.scopeFlags['org:admin'], true);
+  assert.equal(value.result.scopeFlags['org:admin'], false);
+  assert.equal(value.result.buildCredentialCapabilities.projectAccess[0].accessFlags['project:write'], true);
+  assert.equal(current(value.result).projectAccess[0].accessFlags['project:write'], false);
+  assert.equal(value.result.buildCredentialCapabilities.providerWriteCapabilityVerified, false);
+});
+test('identical credential is not read twice and optional build denial does not rewrite primary access', async () => {
+  const baseline = await execute();
+  const same = await execute({ buildToken: PRIVATE });
+  assert.equal(same.calls.length, baseline.calls.length);
+  assert.equal(same.result.buildCredentialCapabilities.source, 'same_as_selected');
+  const denied = await execute({ buildToken: PRIVATE + '_build', resolve: (route, rows, calls, init) =>
+    init.headers.Authorization.endsWith('_build') ? { status: 403, data: PRIVATE } : undefined });
+  assert.equal(denied.code, 0);
+  assert.equal(denied.result.buildCredentialCapabilities.readComplete, false);
+  assert.equal(denied.result.readAccessVerified, true);
+});
+
+test('webhook targets join by app slug and sentry_app by numeric app ID, never integrationId', async () => {
+  for (const [type, targetIdentifier] of [['webhook', 'synthetic-app'], ['sentry_app', '77']]) {
+    const value = await execute({ configure: rows => {
+      rows.get(P.installs).data[0].app.sentryAppId = 77;
+      setWorkflow(rows, item => { item.actionFilters[0].actions = [{ type, integrationId: null,
+        config: { targetType: 'specific', targetIdentifier }, data: {}, status: 'active' }]; });
+    } });
+    const target = current(value.result).workflows[0].actionFilters[0].actions[0].target;
+    assert.equal(target.join, 'unique_created_app');
+    assert.equal(target.destinationKind, 'production_collector');
+    assert.equal(target.appDisabled, false);
+  }
+  const invalid = await execute({ configure: rows => setWorkflow(rows, item => {
+    item.actionFilters[0].actions = [{ type: 'webhook', integrationId: 'app-uuid',
+      config: { targetIdentifier: 'synthetic-app' }, data: {}, status: 'active' }];
+  }) });
+  assert.equal(current(invalid.result).workflows[0].actionFilters[0].actions[0].target.join, 'unknown');
+});
+
+test('explicit null triggers mean unconditional, while missing triggers remain incomplete', async () => {
+  const value = await execute({ configure: rows => setWorkflow(rows, item => { item.triggers = null; }) });
+  assert.equal(value.code, 0);
+  assert.equal(current(value.result).workflows[0].triggers.logic, 'unconditional');
+  const missing = await execute({ configure: rows => setWorkflow(rows, item => { delete item.triggers; }) });
+  assert.equal(missing.code, 1);
+});
+test('recipient IDs and ambiguous app installation namespaces cannot become verified', async () => {
+  for (const targetIdentifier of ['', PRIVATE, '../123']) {
+    const value = await execute({ configure: rows => setWorkflow(rows, item => {
+      const action = item.actionFilters[0].actions[0]; action.config = { targetType: 'user', targetIdentifier }; action.data = {};
+    }) });
+    assert.equal(current(value.result).workflows[0].actionFilters[0].actions[0].semanticsVerified, false);
+  }
+  const value = await execute({ configure: rows => {
+    rows.get(P.installs).data[0].app.sentryAppId = 77;
+    rows.get(P.installs).data.push({ ...rows.get(P.installs).data[0], uuid: 'second-install' });
+    setWorkflow(rows, item => { item.actionFilters[0].actions = [{ type: 'sentry_app', integrationId: null,
+      config: { targetType: 'specific', targetIdentifier: '77' }, data: {}, status: 'active' }]; });
+  } });
+  assert.equal(current(value.result).workflows[0].actionFilters[0].actions[0].target.join, 'unknown');
+});
+
+test('terminal pagination cannot claim scoped completeness after changing fixed project filters', async () => {
+  const value = await execute({ configure: rows => {
+    rows.get(P.workflows).link = '<' + API + P.workflows.replace('seize-backend', 'other') + '&cursor=end>; rel="next"; results="false"';
+  } });
+  assert.equal(value.code, 1);
+  assert.equal(current(value.result).inventory.complete, false);
+  assert.equal(current(value.result).inventory.limitation, 'pagination_invalid');
+});
+
+test('fractional issue occurrence counts are not verified as integer provider conditions', async () => {
+  const value = await execute({ configure: rows => setWorkflow(rows, item => {
+    item.triggers.conditions = [{ type: 'issue_occurrences', comparison: { value: 1.5 }, conditionResult: true }];
+  }) });
+  assert.equal(current(value.result).workflows[0].triggers.conditions[0].parametersVerified, false);
+});
+
+test('real minute frequency intervals and integer counts are verified; percent and undocumented intervals stay unknown', async () => {
+  for (const [type, interval, count, verified] of [
+    ['event_frequency_count', '1m', 10, true], ['event_unique_user_frequency_count', '5m', 10, true],
+    ['event_frequency_count', '1hr', 10, false], ['event_frequency_count', '1h', 1.5, false],
+    ['event_frequency_percent', '1h', 10, false],
+  ]) {
+    const value = await execute({ configure: rows => setWorkflow(rows, item => {
+      item.triggers.conditions = [{ type, comparison: { value: count, interval }, conditionResult: true }];
+    }) });
+    assert.equal(current(value.result).workflows[0].triggers.conditions[0].parametersVerified, verified);
+  }
 });

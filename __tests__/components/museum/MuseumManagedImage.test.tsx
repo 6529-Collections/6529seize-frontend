@@ -52,4 +52,65 @@ describe("MuseumManagedImage", () => {
       `/api/museum/media?url=${encodeURIComponent(source)} 640w, /api/museum/media?url=${encodeURIComponent(source.replace("/640.webp", "/1280.webp"))} 1280w`
     );
   });
+
+  it.each([
+    { naturalWidth: 640, status: "revealed" },
+    { naturalWidth: 0, status: "error" },
+  ])(
+    "reports a completed image as $status before hydration",
+    ({ naturalWidth, status }) => {
+      const onStatusChange = jest.fn();
+      const completeDescriptor = Object.getOwnPropertyDescriptor(
+        HTMLImageElement.prototype,
+        "complete"
+      );
+      const naturalWidthDescriptor = Object.getOwnPropertyDescriptor(
+        HTMLImageElement.prototype,
+        "naturalWidth"
+      );
+      Object.defineProperty(HTMLImageElement.prototype, "complete", {
+        configurable: true,
+        get: () => true,
+      });
+      Object.defineProperty(HTMLImageElement.prototype, "naturalWidth", {
+        configurable: true,
+        get: () => naturalWidth,
+      });
+
+      try {
+        render(
+          <MuseumManagedImage
+            {...props}
+            alt="A cached governed image"
+            onStatusChange={onStatusChange}
+          />
+        );
+
+        expect(onStatusChange).toHaveBeenCalledWith(status);
+        if (status === "error") {
+          expect(screen.getByRole("alert")).toHaveTextContent(
+            props.failureMessage
+          );
+          expect(screen.getByRole("button", { name: "Retry" })).toBeVisible();
+        } else {
+          expect(screen.getByRole("img")).toBeVisible();
+        }
+      } finally {
+        if (completeDescriptor) {
+          Object.defineProperty(
+            HTMLImageElement.prototype,
+            "complete",
+            completeDescriptor
+          );
+        }
+        if (naturalWidthDescriptor) {
+          Object.defineProperty(
+            HTMLImageElement.prototype,
+            "naturalWidth",
+            naturalWidthDescriptor
+          );
+        }
+      }
+    }
+  );
 });

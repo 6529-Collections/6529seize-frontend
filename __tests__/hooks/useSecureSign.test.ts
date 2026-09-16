@@ -1,17 +1,13 @@
 import React from 'react';
 import { renderHook, act } from '@testing-library/react';
 import { useSecureSign, MobileSigningError, ConnectionMismatchError, SigningProviderError } from '@/hooks/useSecureSign';
-import { useAppKitAccount } from '@reown/appkit/react';
-import { useSignMessage } from 'wagmi';
+import { useAccount, useSignMessage } from "wagmi";
 import { UserRejectedRequestError } from 'viem';
 import { WagmiProvider } from 'wagmi';
 
 // Mock the hooks
-jest.mock('@reown/appkit/react', () => ({
-  useAppKitAccount: jest.fn(),
-}));
-
 jest.mock('wagmi', () => ({
+  useAccount: jest.fn(),
   useSignMessage: jest.fn(),
   WagmiProvider: ({ children }: any) => React.createElement('div', { 'data-testid': 'wagmi-provider' }, children),
 }));
@@ -32,7 +28,12 @@ jest.mock('viem', () => {
   };
 });
 
-const mockUseAppKitAccount = useAppKitAccount as jest.MockedFunction<typeof useAppKitAccount>;
+const mockUseAccount = useAccount as jest.MockedFunction<() => {
+  address?: string | undefined;
+  isConnected: boolean;
+  caipAddress: string;
+  status: string;
+}>;
 const mockUseSignMessage = useSignMessage as jest.MockedFunction<typeof useSignMessage>;
 
 // Test wrapper with WagmiProvider
@@ -49,7 +50,7 @@ describe('useSecureSign', () => {
     jest.clearAllMocks();
 
     // Setup default mocks
-    mockUseAppKitAccount.mockReturnValue({
+    mockUseAccount.mockReturnValue({
       address: '0x1234567890123456789012345678901234567890',
       isConnected: true,
       caipAddress: '',
@@ -73,7 +74,7 @@ describe('useSecureSign', () => {
 
   describe('Fail-fast behavior', () => {
     it('throws MobileSigningError when wallet not connected', async () => {
-      mockUseAppKitAccount.mockReturnValue({
+      mockUseAccount.mockReturnValue({
         address: undefined,
         isConnected: false,
         caipAddress: '',
@@ -92,7 +93,7 @@ describe('useSecureSign', () => {
     });
 
     it('throws MobileSigningError when address is missing', async () => {
-      mockUseAppKitAccount.mockReturnValue({
+      mockUseAccount.mockReturnValue({
         address: undefined,
         isConnected: true,
         caipAddress: '',
@@ -111,7 +112,7 @@ describe('useSecureSign', () => {
     });
 
     it('throws ProviderValidationError for invalid address format', async () => {
-      mockUseAppKitAccount.mockReturnValue({
+      mockUseAccount.mockReturnValue({
         address: 'invalid-address-format',
         isConnected: true,
         caipAddress: '',
@@ -136,7 +137,7 @@ describe('useSecureSign', () => {
       const testMessage = 'test message';
       const testSignature = '0x1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890';
 
-      mockUseAppKitAccount.mockReturnValue({
+      mockUseAccount.mockReturnValue({
         address: testAddress,
         isConnected: true,
         caipAddress: '',
@@ -172,7 +173,7 @@ describe('useSecureSign', () => {
       const testMessage = 'test message';
       const testSignature = '0x1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890';
 
-      mockUseAppKitAccount.mockReturnValue({
+      mockUseAccount.mockReturnValue({
         address: testAddress,
         isConnected: true,
         caipAddress: '',
@@ -208,7 +209,7 @@ describe('useSecureSign', () => {
     it('handles UserRejectedRequestError correctly', async () => {
       const testAddress = '0x1234567890123456789012345678901234567890';
 
-      mockUseAppKitAccount.mockReturnValue({
+      mockUseAccount.mockReturnValue({
         address: testAddress,
         isConnected: true,
         caipAddress: '',
@@ -239,7 +240,7 @@ describe('useSecureSign', () => {
     it('handles legacy code 4001 rejection correctly', async () => {
       const testAddress = '0x1234567890123456789012345678901234567890';
 
-      mockUseAppKitAccount.mockReturnValue({
+      mockUseAccount.mockReturnValue({
         address: testAddress,
         isConnected: true,
         caipAddress: '',
@@ -273,7 +274,7 @@ describe('useSecureSign', () => {
       const testAddress = '0x1234567890123456789012345678901234567890';
       const validSignature = '0x1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890';
 
-      mockUseAppKitAccount.mockReturnValue({
+      mockUseAccount.mockReturnValue({
         address: testAddress,
         isConnected: true,
         caipAddress: '',
@@ -315,7 +316,7 @@ describe('useSecureSign', () => {
 
   describe('Error classification', () => {
     it('properly classifies MobileSigningError for disconnected wallet', async () => {
-      mockUseAppKitAccount.mockReturnValue({
+      mockUseAccount.mockReturnValue({
         address: undefined,
         isConnected: false,
         caipAddress: '',
@@ -332,7 +333,7 @@ describe('useSecureSign', () => {
     });
 
     it('properly classifies ProviderValidationError for invalid address', async () => {
-      mockUseAppKitAccount.mockReturnValue({
+      mockUseAccount.mockReturnValue({
         address: 'invalid',
         isConnected: true,
         caipAddress: '',
@@ -350,7 +351,7 @@ describe('useSecureSign', () => {
 
     it('properly classifies MobileSigningError for Wagmi errors', async () => {
       const testAddress = '0x1234567890123456789012345678901234567890';
-      mockUseAppKitAccount.mockReturnValue({
+      mockUseAccount.mockReturnValue({
         address: testAddress,
         isConnected: true,
         caipAddress: '',
@@ -383,7 +384,7 @@ describe('useSecureSign', () => {
     it('correctly uses Wagmi and AppKit hooks', () => {
       renderHookWithWrapper(() => useSecureSign());
 
-      expect(mockUseAppKitAccount).toHaveBeenCalled();
+      expect(mockUseAccount).toHaveBeenCalled();
       expect(mockUseSignMessage).toHaveBeenCalled();
     });
 
@@ -392,7 +393,7 @@ describe('useSecureSign', () => {
       const testMessage = 'test message';
       const testSignature = '0x1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890';
 
-      mockUseAppKitAccount.mockReturnValue({
+      mockUseAccount.mockReturnValue({
         address: testAddress,
         isConnected: true,
         caipAddress: '',
@@ -423,7 +424,7 @@ describe('useSecureSign', () => {
 
   describe('Security Tests - Input Validation', () => {
     beforeEach(() => {
-      mockUseAppKitAccount.mockReturnValue({
+      mockUseAccount.mockReturnValue({
         address: '0x1234567890123456789012345678901234567890',
         isConnected: true,
         caipAddress: '',
@@ -503,7 +504,7 @@ describe('useSecureSign', () => {
     });
 
     it('throws ProviderValidationError for invalid connected address', async () => {
-      mockUseAppKitAccount.mockReturnValue({
+      mockUseAccount.mockReturnValue({
         address: 'invalid-address',
         isConnected: true,
         caipAddress: '',
@@ -526,7 +527,7 @@ describe('useSecureSign', () => {
     it('throws ProviderValidationError for invalid signature format from Wagmi', async () => {
       const testAddress = '0x1234567890123456789012345678901234567890';
 
-      mockUseAppKitAccount.mockReturnValue({
+      mockUseAccount.mockReturnValue({
         address: testAddress,
         isConnected: true,
         caipAddress: '',
@@ -558,7 +559,7 @@ describe('useSecureSign', () => {
       const testAddress = '0x1234567890123456789012345678901234567890';
       const validSignature = '0x1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890';
 
-      mockUseAppKitAccount.mockReturnValue({
+      mockUseAccount.mockReturnValue({
         address: testAddress,
         isConnected: true,
         caipAddress: '',
@@ -588,7 +589,7 @@ describe('useSecureSign', () => {
     it('throws ProviderValidationError for non-string signature from Wagmi', async () => {
       const testAddress = '0x1234567890123456789012345678901234567890';
 
-      mockUseAppKitAccount.mockReturnValue({
+      mockUseAccount.mockReturnValue({
         address: testAddress,
         isConnected: true,
         caipAddress: '',
@@ -622,7 +623,7 @@ describe('useSecureSign', () => {
       const testAddress = '0x1234567890123456789012345678901234567890';
       const validSignature = '0x1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890';
 
-      mockUseAppKitAccount.mockReturnValue({
+      mockUseAccount.mockReturnValue({
         address: testAddress,
         isConnected: true,
         caipAddress: '',
@@ -654,7 +655,7 @@ describe('useSecureSign', () => {
     it('handles Wagmi signMessage errors gracefully', async () => {
       const testAddress = '0x1234567890123456789012345678901234567890';
 
-      mockUseAppKitAccount.mockReturnValue({
+      mockUseAccount.mockReturnValue({
         address: testAddress,
         isConnected: true,
         caipAddress: '',
@@ -685,7 +686,7 @@ describe('useSecureSign', () => {
 
   describe('Security Tests - Error Handling', () => {
     it('properly handles input validation failures', async () => {
-      mockUseAppKitAccount.mockReturnValue({
+      mockUseAccount.mockReturnValue({
         address: '0x1234567890123456789012345678901234567890',
         isConnected: true,
         caipAddress: '',
@@ -704,7 +705,7 @@ describe('useSecureSign', () => {
     it('handles unknown error types from Wagmi safely', async () => {
       const testAddress = '0x1234567890123456789012345678901234567890';
 
-      mockUseAppKitAccount.mockReturnValue({
+      mockUseAccount.mockReturnValue({
         address: testAddress,
         isConnected: true,
         caipAddress: '',
@@ -734,7 +735,7 @@ describe('useSecureSign', () => {
     it('handles errors with numeric codes safely', async () => {
       const testAddress = '0x1234567890123456789012345678901234567890';
 
-      mockUseAppKitAccount.mockReturnValue({
+      mockUseAccount.mockReturnValue({
         address: testAddress,
         isConnected: true,
         caipAddress: '',
@@ -765,7 +766,7 @@ describe('useSecureSign', () => {
     it('handles plain object errors correctly', async () => {
       const testAddress = '0x1234567890123456789012345678901234567890';
 
-      mockUseAppKitAccount.mockReturnValue({
+      mockUseAccount.mockReturnValue({
         address: testAddress,
         isConnected: true,
         caipAddress: '',
@@ -800,7 +801,7 @@ describe('useSecureSign', () => {
       const testAddress = '0x1234567890123456789012345678901234567890';
       const testSignature = '0x1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890';
 
-      mockUseAppKitAccount.mockReturnValue({
+      mockUseAccount.mockReturnValue({
         address: testAddress,
         isConnected: true,
         caipAddress: '',

@@ -226,6 +226,16 @@ beforeEach(() => {
   });
 });
 
+it("marks the interactive surface ready after client hydration", () => {
+  render(<CollectPageClient />);
+  expect(
+    screen.getByRole("heading", {
+      level: 1,
+      name: "Build your collection",
+    })
+  ).toHaveAttribute("data-client-ready", "true");
+});
+
 it("wires catalog retry and replaces a failed initial read with a pending retry", () => {
   mockSearchParams = new URLSearchParams("intent=full_set");
   mockCatalogQuery = { ...mockCatalogQuery, isError: true, isFetching: false };

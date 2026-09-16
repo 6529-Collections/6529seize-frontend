@@ -1,6 +1,7 @@
 "use client";
 
 import { getRouteHrefWithLocale } from "@/components/rememes/rememesRouteParams";
+import ClientOnly from "@/components/client-only/ClientOnly";
 import Button from "@/components/utils/button/Button";
 import { buildTooltipId, TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import useCapacitor from "@/hooks/useCapacitor";
@@ -90,10 +91,12 @@ export default function MemeCalendarOverview({
           <MemeCalendarOverviewNextMint displayTz={displayTz} locale={locale} />
         </div>
         <div className="tw-h-full">
-          <MemeCalendarOverviewUpcomingMints
-            displayTz={displayTz}
-            locale={locale}
-          />
+          <ClientOnly fallback={<CalendarClockPlaceholder />}>
+            <MemeCalendarOverviewUpcomingMints
+              displayTz={displayTz}
+              locale={locale}
+            />
+          </ClientOnly>
         </div>
       </div>
     </div>
@@ -195,7 +198,29 @@ const TopControls = memo((props: TopControlsProps) => {
 });
 TopControls.displayName = "TopControls";
 
-export function MemeCalendarOverviewNextMint({
+function CalendarClockPlaceholder() {
+  return (
+    <div
+      aria-hidden="true"
+      className={`${OVERVIEW_CARD_CLASS} tw-min-h-80 tw-w-full`}
+    />
+  );
+}
+
+export function MemeCalendarOverviewNextMint(
+  props: MemeCalendarOverviewNextMintProps
+) {
+  // The clock, current mint, and local timezone belong to the browser. Never
+  // compare two independently sampled clocks during hydration (or hide the
+  // mismatch with suppressHydrationWarning). This does not wait for a wallet.
+  return (
+    <ClientOnly fallback={<CalendarClockPlaceholder />}>
+      <MemeCalendarOverviewNextMintContent {...props} />
+    </ClientOnly>
+  );
+}
+
+function MemeCalendarOverviewNextMintContent({
   displayTz,
   id,
   locale = DEFAULT_LOCALE,

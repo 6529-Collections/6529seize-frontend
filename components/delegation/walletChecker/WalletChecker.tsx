@@ -1,6 +1,7 @@
 "use client";
 
 import EnsAddressInput from "@/components/utils/input/ens-address/EnsAddressInput";
+import { useHasHydrated } from "@/hooks/useHasHydrated";
 import Button from "@/components/utils/button/Button";
 import SecondaryButton from "@/components/utils/button/SecondaryButton";
 import { publicEnv } from "@/config/env";
@@ -110,6 +111,7 @@ interface WalletCheckerViewProps {
 }
 
 function WalletCheckerView(props: Readonly<WalletCheckerViewProps>) {
+  const hasHydrated = useHasHydrated();
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!props.formDisabled) {
@@ -139,6 +141,7 @@ function WalletCheckerView(props: Readonly<WalletCheckerViewProps>) {
             <div className="tw-flex tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-items-center">
               <EnsAddressInput
                 id="wallet-checker-address"
+                disabled={!hasHydrated}
                 autoFocus
                 placeholder="0x... or ENS"
                 variant="dark"
@@ -165,7 +168,7 @@ function WalletCheckerView(props: Readonly<WalletCheckerViewProps>) {
                   variant="action"
                   size="lg"
                   loading={props.checking}
-                  disabled={props.formDisabled}
+                  disabled={props.formDisabled || !hasHydrated}
                   className="tw-w-full sm:tw-w-auto sm:tw-min-w-32"
                 >
                   {props.checking ? "Checking..." : "Check Wallet"}

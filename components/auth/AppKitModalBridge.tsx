@@ -1,6 +1,12 @@
 "use client";
 
-import { useAppKit, useAppKitState, useWalletInfo } from "@reown/appkit/react";
+import {
+  useAppKit,
+  useAppKitAccount,
+  useAppKitState,
+  useDisconnect,
+  useWalletInfo,
+} from "@reown/appkit/react";
 import React, {
   createContext,
   useContext,
@@ -12,6 +18,11 @@ import { isSafeWalletInfo } from "@/utils/wallet-detection";
 
 type OpenAppKitModal = ReturnType<typeof useAppKit>["open"];
 type CloseAppKitModal = ReturnType<typeof useAppKit>["close"];
+type DisconnectAppKit = ReturnType<typeof useDisconnect>["disconnect"];
+type AppKitAccountState = Pick<
+  ReturnType<typeof useAppKitAccount>,
+  "address" | "isConnected" | "status"
+>;
 type AppKitWalletInfo = ReturnType<typeof useWalletInfo>["walletInfo"];
 type AppKitWalletName = NonNullable<AppKitWalletInfo>["name"];
 type AppKitWalletIcon = NonNullable<AppKitWalletInfo>["icon"];
@@ -32,8 +43,12 @@ type AppKitOpenWaiter = {
 type AppKitModalBridgeStore = {
   readonly dispose: () => void;
   readonly close: () => Promise<void>;
+  readonly disconnect: () => Promise<void>;
   readonly failBootstrap: () => void;
   readonly getSnapshot: () => AppKitModalState;
+  readonly getAccountSnapshot: () => AppKitAccountState;
+  readonly setAccount: (account: AppKitAccountState) => void;
+  readonly setDisconnect: (disconnect: DisconnectAppKit | null) => void;
   readonly setOpen: (open: OpenAppKitModal | null) => void;
   readonly setClose: (close: CloseAppKitModal | null) => void;
   readonly setState: (state: AppKitModalState) => void;
@@ -50,6 +65,11 @@ const EMPTY_APPKIT_MODAL_STATE: AppKitModalState = Object.freeze({
   walletIcon: undefined,
   isSafeWallet: false,
 });
+const EMPTY_APPKIT_ACCOUNT_STATE: AppKitAccountState = Object.freeze({
+  address: undefined,
+  isConnected: false,
+  status: "disconnected",
+});
 const AppKitModalBridgeStoreContext =
   createContext<AppKitModalBridgeStore | null>(null);
 
@@ -57,8 +77,14 @@ function getEmptyAppKitModalState(): AppKitModalState {
   return EMPTY_APPKIT_MODAL_STATE;
 }
 
+function getEmptyAppKitAccountState(): AppKitAccountState {
+  return EMPTY_APPKIT_ACCOUNT_STATE;
+}
+
 export function createAppKitModalBridgeStore(): AppKitModalBridgeStore {
   let snapshot = EMPTY_APPKIT_MODAL_STATE;
+  let accountSnapshot = EMPTY_APPKIT_ACCOUNT_STATE;
+  let disconnectAppKit: DisconnectAppKit | null = null;
   let openAppKit: OpenAppKitModal | null = null;
   let closeAppKit: CloseAppKitModal | null = null;
   let failure: Error | null = null;
@@ -82,8 +108,12 @@ export function createAppKitModalBridgeStore(): AppKitModalBridgeStore {
     failure = error;
     openAppKit = null;
     closeAppKit = null;
-    const stateChanged = snapshot !== EMPTY_APPKIT_MODAL_STATE;
+    disconnectAppKit = null;
+    const stateChanged =
+      snapshot !== EMPTY_APPKIT_MODAL_STATE ||
+      accountSnapshot !== EMPTY_APPKIT_ACCOUNT_STATE;
     snapshot = EMPTY_APPKIT_MODAL_STATE;
+    accountSnapshot = EMPTY_APPKIT_ACCOUNT_STATE;
     rejectWaiters(error);
     if (stateChanged) {
       for (const listener of listeners) {
@@ -96,6 +126,12 @@ export function createAppKitModalBridgeStore(): AppKitModalBridgeStore {
     close: async () => {
       await closeAppKit?.();
     },
+    disconnect: () => {
+      if (!disconnectAppKit) {
+        return Promise.reject(failure ?? new Error(APPKIT_UNAVAILABLE_MESSAGE));
+      }
+      return disconnectAppKit();
+    },
     dispose: () => {
       fail(new Error("Wallet connection services became unavailable"));
       listeners.clear();
@@ -104,6 +140,26 @@ export function createAppKitModalBridgeStore(): AppKitModalBridgeStore {
       fail(new Error(APPKIT_UNAVAILABLE_MESSAGE));
     },
     getSnapshot: () => snapshot,
+    getAccountSnapshot: () => accountSnapshot,
+    setAccount: (account) => {
+      if (
+        failure ||
+        (accountSnapshot.address === account.address &&
+          accountSnapshot.isConnected === account.isConnected &&
+          accountSnapshot.status === account.status)
+      ) {
+        return;
+      }
+      accountSnapshot = account;
+      for (const listener of listeners) {
+        listener();
+      }
+    },
+    setDisconnect: (disconnect) => {
+      if (!failure) {
+        disconnectAppKit = disconnect;
+      }
+    },
     setOpen: (nextOpenAppKit) => {
       if (failure) {
         return;
@@ -186,6 +242,16 @@ export function useAppKitModalBridgeState(
   );
 }
 
+export function useAppKitAccountBridgeState(
+  store: AppKitModalBridgeStore
+): AppKitAccountState {
+  return useSyncExternalStore(
+    store.subscribe,
+    store.getAccountSnapshot,
+    getEmptyAppKitAccountState
+  );
+}
+
 function useAppKitModalBridgeStore(): AppKitModalBridgeStore {
   const store = useContext(AppKitModalBridgeStoreContext);
   if (!store) {
@@ -197,6 +263,8 @@ function useAppKitModalBridgeStore(): AppKitModalBridgeStore {
 const AppKitModalHooks: React.FC = () => {
   const store = useAppKitModalBridgeStore();
   const { close, open } = useAppKit();
+  const { address, isConnected, status } = useAppKitAccount();
+  const { disconnect } = useDisconnect();
   const { walletInfo } = useWalletInfo();
   const { open: isOpen } = useAppKitState();
   const walletName = walletInfo?.name;
@@ -206,11 +274,17 @@ const AppKitModalHooks: React.FC = () => {
   useEffect(() => {
     store.setOpen(open);
     store.setClose(close);
+    store.setDisconnect(disconnect);
     return () => {
       store.setOpen(null);
       store.setClose(null);
+      store.setDisconnect(null);
     };
-  }, [close, open, store]);
+  }, [close, disconnect, open, store]);
+
+  useEffect(() => {
+    store.setAccount({ address, isConnected, status });
+  }, [address, isConnected, status, store]);
 
   useEffect(() => {
     store.setState({ isOpen, walletName, walletIcon, isSafeWallet });

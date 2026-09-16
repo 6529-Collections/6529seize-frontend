@@ -24,6 +24,7 @@ jobs:
       - name: Read Sentry monitoring capabilities and configuration
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_MONITORING_AUTH_TOKEN || secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_BUILD_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
         shell: bash
         run: |
           set -euo pipefail
@@ -41,7 +42,8 @@ jobs:
           const COLLECTORS = {
             prod: '6d1f55bab91567b4efe26df867b8e9d72172b02e29b9534175bb5cae8c40b5a8',
           };
-          const LIMITS = { pages: 8, items: 400, nested: 50, bytes: 1048576, reads: 48 };
+          const LIMITS = { pages: 8, items: 400, nested: 50, bytes: 1048576, reads: 48, details: 12 };
+          let totalReads = 0;
           const READ_DEADLINE = Date.now() + 150000;
           const ACTIONS = new Map([
             ['sentry.rules.actions.notify_event_service.NotifyEventServiceAction', 'named_integration'],
@@ -64,7 +66,8 @@ jobs:
           ]);
           const SIMPLE_CONDITIONS = new Set(['first_seen', 'regression', 'reappeared', 'every_event']);
           const WEBHOOK_EVENTS = new Set([
-            'error', 'issue', 'event.alert', 'metric_alert',
+            'error', 'error.created', 'issue', 'event.alert', 'metric_alert',
+            'installation', 'installation.created', 'installation.deleted', 'comment.created',
             'issue.created', 'issue.resolved', 'issue.unresolved', 'issue.assigned', 'issue.ignored',
           ]);
           function record(value) {
@@ -113,9 +116,8 @@ jobs:
             }
           }
           function reader(token) {
-            let reads = 0;
             return async function read(path) {
-              if (++reads > LIMITS.reads || Date.now() > READ_DEADLINE) {
+              if (++totalReads > LIMITS.reads || Date.now() > READ_DEADLINE) {
                 return { status: 'unavailable', reason: 'read_budget' };
               }
               try {
@@ -149,12 +151,15 @@ jobs:
             const expected = new URL(API + path);
             if (url.origin !== expected.origin || url.pathname !== expected.pathname ||
                 url.username || url.password || url.hash) return { limitation: 'pagination_target_rejected' };
-            if (result[1] === 'false') return { complete: true };
             const keys = [...url.searchParams.keys()];
             const cursor = url.searchParams.get('cursor');
-            if (keys.length !== 1 || keys[0] !== 'cursor' || !cursor || cursor.length > 1024 ||
+            const fixed = [...expected.searchParams.entries()];
+            const actualFixed = [...url.searchParams.entries()].filter(([key]) => key !== 'cursor');
+            if (JSON.stringify(actualFixed) !== JSON.stringify(fixed)) return { limitation: 'pagination_invalid' };
+            if (result[1] === 'false') return { complete: true };
+            if (keys.filter(key => key === 'cursor').length !== 1 || !cursor || cursor.length > 1024 ||
                 /[\u0000-\u001f\u007f]/.test(cursor)) return { limitation: 'pagination_invalid' };
-            return { cursor, path: path + '?cursor=' + encodeURIComponent(cursor) };
+            return { cursor, path: path + (fixed.length ? '&' : '?') + 'cursor=' + encodeURIComponent(cursor) };
           }
           async function paginate(read, path, first) {
             const items = [];
@@ -193,6 +198,55 @@ jobs:
               return Object.entries(COLLECTORS).find(([, pin]) => pin === fingerprint)?.[0] ?? 'different';
             } catch { return 'unknown'; }
           }
+          // Hash only bounded JSON; never retain provider text, recipients or endpoint paths.
+          function fingerprint(value) {
+            let nodes = 0;
+            function canonical(item, depth) {
+              if (++nodes > 5000 || depth > 12) throw new Error('HASH_LIMIT');
+              if (item === null || typeof item === 'boolean') return item;
+              if (typeof item === 'number' && Number.isFinite(item)) return item;
+              if (typeof item === 'string' && item.length <= 8192) return item;
+              if (Array.isArray(item) && item.length <= LIMITS.nested) return item.map(v => canonical(v, depth + 1));
+              if (!record(item) || Object.keys(item).length > LIMITS.nested) throw new Error('HASH_SHAPE');
+              return Object.fromEntries(Object.keys(item).sort(lexical).map(key => [key, canonical(item[key], depth + 1)]));
+            }
+            try { return hash(JSON.stringify(canonical(value, 0))); } catch { return null; }
+          }
+          function eventProjection(values) {
+            if (!Array.isArray(values)) return null;
+            return { knownValues: [...new Set(values.filter(value => WEBHOOK_EVENTS.has(value)))].sort(lexical),
+              unknownCount: values.filter(value => !WEBHOOK_EVENTS.has(value)).length };
+          }
+          function schemaEvidence(value) {
+            let schema = value;
+            if (typeof schema === 'string' && schema.length <= 8192) {
+              try { schema = JSON.parse(schema); } catch { return null; }
+            }
+            if (!record(schema) || !Array.isArray(schema.elements)) return null;
+            return { count: schema.elements.length, complete: schema.elements.length <= LIMITS.nested,
+              items: schema.elements.slice(0, LIMITS.nested).map(element => ({
+                type: choice(element?.type, ['alert-rule-action', 'issue-link', 'stacktrace-link']),
+                actionUriPresent: typeof element?.uri === 'string' && element.uri.length > 0,
+                settingsUriPresent: typeof element?.settings?.uri === 'string' && element.settings.uri.length > 0,
+              })) };
+          }
+          function destinationEvidence(value) {
+            const result = { kind: 'unknown', fingerprint: null, queryPresent: false, fragmentPresent: false };
+            if (typeof value !== 'string' || value.length > 2048) return result;
+            try {
+              const url = new URL(value);
+              result.queryPresent = Boolean(url.search); result.fragmentPresent = Boolean(url.hash);
+              if (url.protocol !== 'https:' || url.username || url.password || url.port) return result;
+              result.fingerprint = hash(url.origin + url.pathname + url.search + url.hash);
+              if (destination(value) === 'prod') result.kind = 'production_collector';
+              else if (['discord.com', 'discordapp.com'].includes(url.hostname) &&
+                /^\/api\/(?:v[0-9]{1,2}\/)?webhooks\/[0-9]+\/[A-Za-z0-9_-]+$/.test(url.pathname)) result.kind = 'discord_webhook';
+              else if (['api.6529.io', 'staging.6529.io'].includes(url.hostname)) result.kind = '6529_api';
+              else if (/^[a-z0-9]+\.execute-api\.[a-z]{2}(?:-gov)?-[a-z]+-[0-9]\.amazonaws\.com$/.test(url.hostname)) result.kind = 'other_aws_gateway';
+              else result.kind = 'other';
+            } catch { /* Invalid URLs remain unknown. */ }
+            return result;
+          }
           function listProjection(values, project) {
             if (!Array.isArray(values)) return { items: null, complete: false };
             return { items: values.slice(0, LIMITS.nested).map(project), complete: values.length <= LIMITS.nested };
@@ -210,6 +264,13 @@ jobs:
               installationInventoryComplete: installations.complete,
               installationStates: states,
               destinationMatch: destination(app.webhookUrl),
+              destination: destinationEvidence(app.webhookUrl),
+              schemaPresent: record(app.schema) || (typeof app.schema === 'string' && app.schema.length > 0),
+              schemaElements: schemaEvidence(app.schema),
+              schemaFingerprint: fingerprint(app.schema),
+              eventSubscriptions: eventProjection(app.events),
+              configurationFingerprint: fingerprint({ isDisabled: app.isDisabled ?? null, isAlertable: app.isAlertable ?? null,
+                webhookUrl: app.webhookUrl ?? null, webhookEvents: app.webhookEvents ?? null, schema: app.schema ?? null }),
               webhookEvents: events === null ? null : {
                 knownValues: [...new Set(events.filter(value => WEBHOOK_EVENTS.has(value)))].sort(lexical),
                 unknownCount: events.filter(value => !WEBHOOK_EVENTS.has(value)).length,
@@ -254,7 +315,8 @@ jobs:
             const filters = listProjection(value.filters, condition);
             const actions = listProjection(value.actions, item => action(item, apps, installations));
             return {
-              idHash: idHash(value.id), status: choice(value.status, ['active', 'disabled']),
+              idHash: idHash(value.id), nameHash: fingerprint(value.name), configurationFingerprint: fingerprint(value),
+              status: choice(value.status, ['active', 'disabled']),
               snoozedForAuditIdentity: boolean(value.snooze),
               snoozedForEveryone: boolean(value.snoozeForEveryone),
               notificationFrequencyMinutes: frequencyMinutes(value.frequency),
@@ -267,7 +329,168 @@ jobs:
               fullWorkflowCoverageVerified: false,
             };
           }
-          async function configuration(read, rules, integrations) {
+          function numberIn(value, maximum = 1000000000) {
+            return Number.isFinite(value) && value >= 0 && value <= maximum ? value : 'unknown';
+          }
+          function keysOnly(value, keys) {
+            return record(value) && Object.keys(value).every(key => keys.includes(key));
+          }
+          function workflowCondition(value) {
+            if (!record(value)) return { type: 'unknown', parametersVerified: false };
+            const simple = ['first_seen_event', 'regression_event', 'reappeared_event', 'every_event',
+              'issue_resolved_trigger', 'new_high_priority_issue', 'existing_high_priority_issue'];
+            const priorities = ['issue_priority_deescalating', 'issue_priority_greater_or_equal'];
+            const frequencies = ['event_frequency_count', 'event_frequency_percent', 'event_unique_user_frequency_count'];
+            const type = choice(value.type, [...simple, ...priorities, ...frequencies, 'level', 'issue_occurrences']);
+            const result = { type, conditionResult: boolean(value.conditionResult), comparison: null,
+              parametersVerified: false, configurationFingerprint: fingerprint(value) };
+            let known = false;
+            if (simple.includes(type)) { result.comparison = boolean(value.comparison); known = result.comparison !== 'unknown'; }
+            if (priorities.includes(type)) { result.comparison = choice(value.comparison, [25, 50, 75]); known = result.comparison !== 'unknown'; }
+            if (type === 'level' && record(value.comparison)) {
+              result.comparison = { level: choice(value.comparison.level, [0, 10, 20, 30, 40, 50]),
+                match: choice(value.comparison.match, ['eq', 'gte', 'lte']) };
+              known = keysOnly(value.comparison, ['level', 'match']) && !Object.values(result.comparison).includes('unknown');
+            }
+            if (type === 'issue_occurrences' && record(value.comparison)) {
+              result.comparison = { value: numberIn(value.comparison.value) };
+              known = keysOnly(value.comparison, ['value']) && Number.isSafeInteger(result.comparison.value);
+            }
+            if (frequencies.includes(type) && record(value.comparison)) {
+              result.comparison = { value: numberIn(value.comparison.value),
+                interval: choice(value.comparison.interval, ['1m', '5m', '15m', '1h', '1d', '1w', '30d']) };
+              known = type !== 'event_frequency_percent' && Number.isSafeInteger(result.comparison.value) &&
+                keysOnly(value.comparison, ['value', 'interval']) && result.comparison.interval !== 'unknown';
+            }
+            result.parametersVerified = known && result.conditionResult !== 'unknown' &&
+              keysOnly(value, ['id', 'type', 'comparison', 'conditionResult']);
+            return result;
+          }
+          function workflowAction(value, apps, installations) {
+            if (!record(value)) return { type: 'unknown', semanticsVerified: false };
+            const type = choice(value.type, ['email', 'slack', 'discord', 'pagerduty', 'msteams', 'sentry_app', 'webhook']);
+            const config = record(value.config) ? value.config : {};
+            const data = record(value.data) ? value.data : {};
+            const targetType = choice(config.targetType, ['user', 'team', 'issue_owners', 'specific']);
+            const fallthrough = choice(data.fallthroughType, ['ActiveMembers', 'AllMembers', 'NoOne']);
+            return { type, idHash: idHash(value.id), target: workflowTarget(value, apps, installations),
+              status: choice(value.status, ['active', 'disabled']),
+              integrationIdHash: idHash(value.integrationId), targetType,
+              targetIdentifierHash: typeof config.targetIdentifier === 'string' ? fingerprint(config.targetIdentifier) : null,
+              fallthrough, configurationFingerprint: fingerprint(value),
+              // An email action is a preferred-channel recipient policy, not proof of delivery by email.
+              semanticsVerified: type === 'email' && ['user', 'team', 'issue_owners'].includes(targetType) &&
+                (targetType === 'issue_owners' || numericId(config.targetIdentifier)) &&
+                (targetType !== 'issue_owners' || fallthrough !== 'unknown') && ['active', 'disabled'].includes(value.status) &&
+                keysOnly(value, ['id', 'type', 'integrationId', 'data', 'config', 'status']) &&
+                keysOnly(config, ['targetType', 'targetIdentifier', 'targetDisplay']) && keysOnly(data, ['fallthroughType']),
+              destinationVerified: false };
+          }
+          function workflowTarget(value, apps, installations) {
+            const result = { join: 'unknown', appIdHash: null, destinationKind: 'unknown', destinationMatch: 'unknown',
+              appDisabled: 'unknown', appAlertable: 'unknown', installationCount: null };
+            // Upstream action_validation.py: webhook targetIdentifier is the app SLUG;
+            // sentry_app targetIdentifier is numeric app ID. Neither uses integrationId.
+            if (!['webhook', 'sentry_app'].includes(value.type) || value.integrationId != null ||
+                !apps?.complete || !installations?.complete) return result;
+            const identifier = value.config?.targetIdentifier;
+            if (identity(identifier) === null) return result;
+            const installed = installations.items.filter(item => item.status === 'installed' && numericId(identifier) &&
+              (typeof item.app?.sentryAppId === 'string' || Number.isSafeInteger(item.app?.sentryAppId)) &&
+              String(item.app.sentryAppId) === identifier);
+            const matches = apps.items.filter(app => value.type === 'webhook' ? app.slug === identifier :
+              installed.length === 1 && identity(installed[0].app?.uuid) !== null && app.uuid === installed[0].app.uuid);
+            if (matches.length !== 1 || identity(matches[0].uuid) === null) return result;
+            const app = integration(matches[0], installations);
+            return { join: 'unique_created_app', appIdHash: app.idHash, destinationKind: app.destination.kind,
+              destinationMatch: app.destinationMatch, appDisabled: app.disabled, appAlertable: app.alertable,
+              installationCount: app.installationCount };
+          }
+          function workflowGroup(value, apps, installations) {
+            if (!record(value)) return { logic: 'unknown', conditions: null, actions: null, complete: false };
+            const conditions = listProjection(value.conditions, workflowCondition);
+            const actions = listProjection(value.actions, item => workflowAction(item, apps, installations));
+            return { logic: choice(value.logicType, ['all', 'any', 'any-short']), conditions: conditions.items,
+              actions: actions.items, complete: conditions.complete && actions.complete &&
+                keysOnly(value, ['id', 'organizationId', 'logicType', 'conditions', 'actions']) };
+          }
+          function workflowConfig(value, includeEnabled) {
+            // Retain every nonvolatile configuration field in the fingerprint, including unknown future fields.
+            const volatile = ['id', 'organizationId', 'createdBy', 'dateCreated', 'dateUpdated', 'lastTriggered'];
+            return Object.fromEntries(Object.entries(value).filter(([key]) => !volatile.includes(key) && (includeEnabled || key !== 'enabled')));
+          }
+          function workflowProjection(value, apps, installations) {
+            const filters = listProjection(value.actionFilters, item => workflowGroup(item, apps, installations));
+            const triggers = value.triggers === null ? { logic: 'unconditional', conditions: [], actions: [], complete: true } :
+              workflowGroup(value.triggers, apps, installations);
+            const detectorIds = Array.isArray(value.detectorIds) ? value.detectorIds : [];
+            return { idHash: idHash(value.id), enabled: boolean(value.enabled), nameHash: fingerprint(value.name),
+              configurationFingerprint: fingerprint(workflowConfig(value, true)),
+              configurationWithoutEnabledFingerprint: fingerprint(workflowConfig(value, false)),
+              environment: value.environment === null ? 'all' : choice(value.environment, ['prod', 'production', 'staging']),
+              frequencyMinutes: frequencyMinutes(value.config?.frequency), triggers, actionFilters: filters.items,
+              detectorIdHashes: detectorIds.slice(0, LIMITS.nested).map(idHash),
+              nestedProjectionComplete: triggers.complete && filters.complete && filters.items.every(item => item.complete) &&
+                Array.isArray(value.detectorIds) && detectorIds.length <= LIMITS.nested && detectorIds.every(numericId),
+              legacyRuleJoin: 'unknown',
+              // Sentry's documented workflow response does not expose its migrated legacy rule ID.
+              eventForwardingVerified: false };
+          }
+          function numericId(value) {
+            return typeof value === 'string' && /^[1-9][0-9]{0,19}$/.test(value);
+          }
+          async function workflowEvidence(read, projectInventory, projectDetails, apps, installations) {
+            const path = ORG_PATH + 'workflows/?project=6529-frontend&project=seize-backend&per_page=100';
+            const listed = await paginate(read, path);
+            const result = { inventory: inventory(listed), readComplete: false, workflows: [], detectors: [],
+              limitation: 'workflow_inventory_incomplete', legacyRuleJoin: 'unknown', providerSettingsChanged: false,
+              projectAccess: projectDetails.map(projectAccess), connectedProjectCoverageComplete: false, reverseConnectionsVerified: false };
+            if (!listed.complete) return result;
+            const ids = listed.items.map(item => item.id);
+            if (ids.length > LIMITS.details || ids.some(id => !numericId(id)) || new Set(ids).size !== ids.length) {
+              result.limitation = 'workflow_id_or_detail_limit'; return result;
+            }
+            const detectorIds = new Set();
+            for (const item of listed.items) {
+              const response = await read(ORG_PATH + 'workflows/' + item.id + '/');
+              const valid = response.status === 200 && record(response.data) && response.data.id === item.id;
+              if (!valid) { result.limitation = 'workflow_detail_unavailable_or_mismatched'; return result; }
+              const projected = workflowProjection(response.data, apps, installations);
+              projected.listDetailConfigurationMatch = fingerprint(workflowConfig(item, true)) !== null &&
+                fingerprint(workflowConfig(item, true)) === projected.configurationFingerprint;
+              result.workflows.push(projected);
+              if (!projected.nestedProjectionComplete || !projected.listDetailConfigurationMatch) {
+                result.limitation = 'workflow_projection_or_drift'; return result;
+              }
+              for (const id of response.data.detectorIds) detectorIds.add(id);
+            }
+            if (detectorIds.size > LIMITS.details) { result.limitation = 'detector_detail_limit'; return result; }
+            for (const id of detectorIds) {
+              const response = await read(ORG_PATH + 'detectors/' + id + '/');
+              const item = response.data;
+              if (response.status !== 200 || !record(item) || item.id !== id ||
+                  !Array.isArray(item.workflowIds) || item.workflowIds.length > LIMITS.nested || !item.workflowIds.every(numericId)) {
+                result.limitation = 'detector_detail_unavailable_or_mismatched'; return result;
+              }
+              const matches = Array.isArray(projectInventory) ? projectInventory.filter(project =>
+                PROJECTS.includes(project.slug) && project.id === item.projectId) : [];
+              result.detectors.push({ idHash: idHash(id), project: matches.length === 1 ? matches[0].slug : 'unknown',
+                enabled: boolean(item.enabled), type: choice(item.type, ['error', 'error_issue', 'metric_issue', 'uptime', 'uptime_domain_failure', 'cron']),
+                workflowIdHashes: item.workflowIds.map(idHash),
+                conditionGroup: workflowGroup(item.conditionGroup),
+                configurationFingerprint: fingerprint({ config: item.config ?? null, conditionGroup: item.conditionGroup ?? null,
+                  dataSources: item.dataSources ?? null, enabled: item.enabled ?? null }),
+                // No latestGroup, query text, event content or arbitrary detector config is emitted.
+                fullDetectorSemanticsVerified: false });
+            }
+            result.connectedProjectCoverageComplete = result.detectors.every(item => item.project !== 'unknown') &&
+              projectDetails.every(response => response.status === 200);
+            result.reverseConnectionsVerified = result.workflows.every(workflow => workflow.detectorIdHashes.every(detectorHash =>
+              result.detectors.some(detector => detector.idHash === detectorHash && detector.workflowIdHashes.includes(workflow.idHash))));
+            result.readComplete = true; result.limitation = null;
+            return result;
+          }
+          async function configuration(read, rules, integrations, projectInventory, frontProject) {
             const [apps, installations, front, back] = await Promise.all([
               paginate(read, ORG_PATH + 'sentry-apps/', integrations),
               paginate(read, ORG_PATH + 'sentry-app-installations/'),
@@ -278,15 +501,21 @@ jobs:
               project: PROJECTS[index], inventory: inventory(value),
               rules: value.items.map(item => rule(item, apps, installations)),
             }));
+            const legacyComplete = [apps, installations, front, back].every(value => value.complete);
+            const current = legacyComplete ? await workflowEvidence(read, projectInventory, [frontProject,
+              await read(PROJECT_PATH + 'seize-backend/')], apps, installations) : null;
             return {
-              readComplete: [apps, installations, front, back].every(value => value.complete) &&
+              currentWorkflows: current,
+              readComplete: legacyComplete && current?.readComplete === true &&
                 projects.every(value => value.rules.every(item => item.nestedProjectionComplete)),
               collectorPinsConfigured: Object.keys(COLLECTORS),
               customIntegrations: { inventory: inventory(apps), items: apps.items.map(app => integration(app, installations)) },
               installations: inventory(installations), projects,
               eventForwardingVerified: false, providerSettingsChanged: false,
               limitations: [
-                'Legacy issue-rule representation only; newer workflow conditions or actions may be omitted.',
+                'Legacy-to-workflow IDs are not documented in workflow responses; correspondence remains unknown.',
+                'Email actions select preferred-channel recipients; exact member notification preferences and delivery are unverified.',
+                'Unknown condition/action parameters remain unverified even when bounded reads are complete.',
                 'Only organization-created custom apps are projected; unsupported or installed third-party targets remain unknown.',
                 'Rule snooze reflects the audit identity and does not prove global notification state.',
                 'Destination equality does not verify signing headers, component settings, transport or event delivery.',
@@ -294,6 +523,28 @@ jobs:
                 'Missing fields and unsupported parameters remain unknown; no arbitrary provider text is emitted.',
               ],
             };
+          }
+          function scopeEvidence(response) {
+            return Object.fromEntries(['alerts:read', 'alerts:write', 'org:read', 'org:write', 'org:admin',
+              'project:read', 'project:write', 'project:admin', 'event:read', 'event:write', 'event:admin'].map(scope =>
+              [scope, response.status === 200 && Array.isArray(response.data?.auth?.scopes) ? response.data.auth.scopes.includes(scope) : 'unknown']));
+          }
+          function projectAccess(response, index) {
+            return { project: PROJECTS[index], status: response.status, idHash: idHash(response.data?.id),
+              accessFlags: Object.fromEntries(['project:read', 'project:write', 'project:admin', 'alerts:read', 'alerts:write'].map(scope =>
+                [scope, response.status === 200 && Array.isArray(response.data?.access) ? response.data.access.includes(scope) : 'unknown'])),
+              effectiveWorkflowWriteVerified: false };
+          }
+          async function buildCredentialCapabilities(selectedToken) {
+            const token = process.env.SENTRY_BUILD_AUTH_TOKEN;
+            if (!token) return { source: 'not_configured', readComplete: false };
+            if (token === selectedToken) return { source: 'same_as_selected', readComplete: false };
+            const readBuild = reader(token);
+            // Capability only: never scan rules/configuration using this credential.
+            const results = await Promise.all([readBuild(''), ...PROJECTS.map(slug => readBuild(PROJECT_PATH + slug + '/'))]);
+            return { source: 'build_secret', readComplete: results.every(item => item.status === 200),
+              authenticationStatus: results[0].status, scopeFlags: scopeEvidence(results[0]),
+              projectAccess: results.slice(1).map(projectAccess), providerWriteCapabilityVerified: false };
           }
           async function main() {
             const token = process.env.SENTRY_AUTH_TOKEN;
@@ -315,8 +566,10 @@ jobs:
               projectInventory: projects.status, alertRules: rules.status, customIntegrations: integrations.status };
             const unavailableRequiredReads = Object.entries(requiredReads).filter(([, status]) => status !== 200).map(([name]) => name);
             const readAccessVerified = unavailableRequiredReads.length === 0;
-            const config = readAccessVerified ? await configuration(read, rules, integrations) : null;
+            const config = readAccessVerified ? await configuration(read, rules, integrations, projects.data, project) : null;
+            const buildCapabilities = await buildCredentialCapabilities(token);
             const summary = {
+              buildCredentialCapabilities: buildCapabilities,
               readAccessVerified, unavailableRequiredReads,
               authenticationStatus: identityResult.status,
               scopeMetadataAvailable: Array.isArray(identityResult.data?.auth?.scopes),
@@ -324,6 +577,8 @@ jobs:
               projects: Array.isArray(projects.data) ? PROJECTS.map(slug => ({
                 slug, presentOnFirstPage: projects.data.some(item => item?.slug === slug),
               })) : [],
+              scopeFlags: scopeEvidence(identityResult),
+              providerWriteCapabilityVerified: false,
               hasAlertWriteScope: permitted.has('alerts:write'), hasLegacyOrgWriteScope: permitted.has('org:write'),
               hasProjectReadScope: permitted.has('project:read'), hasOrgReadScope: permitted.has('org:read'),
               uptimeStatus: uptime.status, uptimeMonitorsOnFirstPage: Array.isArray(uptime.data) ? uptime.data.length : null,

@@ -12,6 +12,7 @@ import { useMemo, type ReactNode } from "react";
 import { Tooltip } from "react-tooltip";
 import Button from "@/components/utils/button/Button";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useHasHydrated } from "@/hooks/useHasHydrated";
 import { t } from "@/i18n/messages";
 import UserPageIdentityStatementsConsolidatedAddresses from "./consolidated-addresses/UserPageIdentityStatementsConsolidatedAddresses";
 import UserPageIdentityStatementsContacts from "./contacts/UserPageIdentityStatementsContacts";
@@ -27,14 +28,15 @@ export default function UserPageIdentityStatements({
   readonly headerAction?: ReactNode;
 }) {
   const locale = useBrowserLocale();
+  const hasHydrated = useHasHydrated();
   const params = useParams();
   const user = (params?.["user"] as string)?.toLowerCase();
 
   const {
-    isLoading,
+    isLoading: queryIsLoading,
     isFetching,
-    isError,
-    data: statements,
+    isError: queryIsError,
+    data: cachedStatements,
     refetch,
   } = useQuery<CicStatement[]>({
     queryKey: [QueryKey.PROFILE_CIC_STATEMENTS, user],
@@ -52,6 +54,9 @@ export default function UserPageIdentityStatements({
     enabled: !!user,
   });
 
+  const statements = hasHydrated ? cachedStatements : undefined;
+  const isLoading = hasHydrated ? queryIsLoading : Boolean(user);
+  const isError = hasHydrated && queryIsError;
   const groupedStatements = useMemo(() => {
     const sortedStatements = [...(statements ?? [])].sort((a, d) => {
       return new Date(d.crated_at).getTime() - new Date(a.crated_at).getTime();
