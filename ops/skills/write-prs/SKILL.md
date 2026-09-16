@@ -24,6 +24,12 @@ description: Write, open, iterate, and prepare pull requests for merge or deploy
    - Review `git status`, the diff, changed files, and relevant tests.
    - Separate user changes from agent changes; do not revert unrelated work.
    - Verify whether docs, generated files, migrations, routes, dependencies, auth, payments, analytics, or deployment-sensitive code are touched.
+   - For frontend behavior changes, complete
+     [E2E Maintenance During Implementation](../../../AGENTS.md#e2e-maintenance-during-implementation)
+     before handoff. Include affected browser specs/packs and the maintenance
+     decision in Validation, distinguishing reviewed or updated coverage from
+     actual execution and explaining any relevant execution gap. A no-wait
+     handoff still requires this inspection and maintenance.
 
 3. Write a concise PR title and body with this format:
 

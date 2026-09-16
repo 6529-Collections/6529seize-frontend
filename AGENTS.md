@@ -327,6 +327,40 @@ is available, use it; otherwise read the relevant files in
 - Before adding or expanding an E2E pack, identify the browser-specific failure
   it catches and check that a lower test layer does not already cover it.
 
+## E2E Maintenance During Implementation
+
+For every frontend behavior change, inspect affected browser coverage before
+considering test maintenance complete. Passing or updated Jest tests alone do
+not establish that the E2E contracts still match the intended behavior.
+
+- Read [tests/README.md](tests/README.md) for pack ownership, then search the
+  relevant Playwright specs, shared selectors, fixtures, and helpers for the
+  changed routes, controls, accessible names, and user flows. Include shared
+  navigation and shell consumers when the change affects them.
+- Update affected E2E coverage in the same PR when an intentional change alters
+  labels, roles, navigation, controls, responsive layout, or interaction
+  sequences. Distinguish an obsolete test expectation from a product
+  regression; fix regressions in product code and preserve meaningful
+  assertions. Do not skip, delete, weaken, or add retries to tests merely to
+  make the change pass.
+- Add representative browser coverage when the change introduces a distinct
+  browser-specific risk, following Test Layer Selection above. If existing
+  coverage remains valid or a lower layer fully covers the change, explain
+  that briefly in the PR's Validation section instead of adding redundant E2E.
+- Check that affected specs are selected by the intended packs and CI lanes,
+  using `tests/packs.manifest.cjs` and the current workflow/classifier. Update
+  registration or selection when needed; a spec that is never selected does
+  not provide execution coverage.
+- Inspection and test maintenance are required even when E2E execution is
+  unavailable or prohibited. Run relevant browser checks only within the
+  task's execution permissions; do not start a local server or poll CI without
+  authorization. In the PR's Validation section, name the affected specs/packs
+  and distinguish coverage updated or reviewed from checks actually executed.
+  State what was not run and why, including any material residual risk.
+
+This requirement applies before PR handoff; separate post-deploy E2E does not
+replace it or change the existing deployment gates.
+
 ## Validation Matrix
 
 Prefer focused checks first. Escalate based on blast radius.
