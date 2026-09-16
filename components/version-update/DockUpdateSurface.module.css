@@ -1,0 +1,79 @@
+.surface {
+  position: absolute;
+  pointer-events: none;
+  inset: calc(-36px * var(--dock-update-scale)) 0 0;
+}
+
+/* Clip the glass and selection with one continuous edge, rather than asking
+   the compositor to join a rectangle and an overlapping SVG bump. Keep the
+   existing SVG clip as the fallback for WebViews without CSS shape() support. */
+@supports (clip-path: shape(from 0 0, line to 1px 1px, close)) {
+  .surface {
+    --dock-bump-height: calc(36px * var(--dock-update-scale));
+    --dock-bump-half-width: calc(52px * var(--dock-update-scale));
+    --dock-bump-control: calc(28px * var(--dock-update-scale));
+    --dock-update-contour: shape(
+      from var(--dock-update-radius) var(--dock-bump-height),
+      line to calc(50% - var(--dock-bump-half-width)) var(--dock-bump-height),
+      curve to 50% 0 with calc(50% - var(--dock-bump-control))
+        var(--dock-bump-height) / calc(50% - var(--dock-bump-control)) 0,
+      curve to calc(50% + var(--dock-bump-half-width)) var(--dock-bump-height)
+        with calc(50% + var(--dock-bump-control)) 0 /
+        calc(50% + var(--dock-bump-control)) var(--dock-bump-height),
+      line to calc(100% - var(--dock-update-radius)) var(--dock-bump-height),
+      arc to 100% calc(var(--dock-bump-height) + var(--dock-update-radius)) of
+        var(--dock-update-radius) cw,
+      line to 100% calc(100% - var(--dock-update-radius)),
+      arc to calc(100% - var(--dock-update-radius)) 100% of
+        var(--dock-update-radius) cw,
+      line to var(--dock-update-radius) 100%,
+      arc to 0 calc(100% - var(--dock-update-radius)) of
+        var(--dock-update-radius) cw,
+      line to 0 calc(var(--dock-bump-height) + var(--dock-update-radius)),
+      arc to var(--dock-update-radius) var(--dock-bump-height) of
+        var(--dock-update-radius) cw,
+      close
+    );
+  }
+}
+
+.outline {
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+  z-index: 1;
+}
+
+.body {
+  x: 0;
+  y: calc(36px * var(--dock-update-scale));
+  width: 100%;
+  height: calc(100% - 36px * var(--dock-update-scale));
+  rx: var(--dock-update-radius);
+  ry: var(--dock-update-radius);
+}
+
+.bump {
+  transform: translateX(calc(50% - 52px * var(--dock-update-scale)))
+    scale(var(--dock-update-scale));
+}
+
+.glass {
+  position: absolute;
+  inset: 0;
+  background: rgb(0 0 0 / 76%);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+}
+
+/* The selected item's glow follows the same outline as the glass. Its content
+   retains the original dock body as its positioning/animation coordinate box. */
+.selectionClip {
+  position: absolute;
+  inset: 0;
+}
+
+.selectionBody {
+  position: absolute;
+  inset: calc(36px * var(--dock-update-scale)) 0 0;
+}
