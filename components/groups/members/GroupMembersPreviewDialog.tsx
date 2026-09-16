@@ -104,7 +104,7 @@ function MemberRow({
               aria-label={t(locale, "waves.create.groups.members.openProfile", {
                 identity: member.display,
               })}
-              className="tw-min-w-0 tw-truncate tw-text-sm tw-font-semibold tw-text-iron-50 tw-no-underline tw-transition-colors focus-visible:tw-rounded-sm focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-primary-300"
+              className="tw-min-w-0 tw-truncate tw-text-sm tw-font-semibold tw-leading-4 tw-text-iron-50 tw-no-underline tw-transition-colors focus-visible:tw-rounded-sm focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-primary-300"
             >
               {member.display}
             </Link>
