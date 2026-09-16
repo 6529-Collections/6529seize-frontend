@@ -187,7 +187,7 @@ export default function MyStreamWaveCurationContent({
   } else {
     content = (
       <div
-        className={`tw-flex tw-min-h-0 tw-flex-1 tw-flex-col ${isOrganizing ? "tw-gap-4 tw-px-4 tw-pb-4" : ""}`}
+        className={`tw-flex tw-min-h-0 tw-flex-1 tw-flex-col ${isOrganizing ? "tw-gap-4 tw-pb-4" : ""}`}
       >
         {renderedDrops}
         {(hasNextPage || isFetchingNextPage) && (
