@@ -70,7 +70,7 @@ export default function CommunityMembersTableRow({
       >
         <UserCICAndLevel
           level={member.level}
-          size={UserCICAndLevelSize.LARGE}
+          size={UserCICAndLevelSize.MEDIUM}
         />
       </td>
       <td

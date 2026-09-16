@@ -68,7 +68,7 @@ function WebSidebarNavItem({
           <div className="tw-relative">
             <Icon
               aria-hidden="true"
-              className={`tw-h-6 tw-w-6 tw-flex-shrink-0 ${
+              className={`tw-block tw-h-6 tw-w-6 tw-flex-shrink-0 ${
                 iconSizeClass ?? ""
               }`}
             />

@@ -6,8 +6,10 @@ import type { GroupCardConfigProps } from "./GroupCardConfigs";
 
 export default function GroupCardConfigsScroller({
   configs,
+  quiet = false,
 }: {
   readonly configs: readonly GroupCardConfigProps[];
+  readonly quiet?: boolean | undefined;
 }) {
   const [isLeftHidden, setIsLeftHidden] = useState(false);
   const [isRightHidden, setIsRightHidden] = useState(true);
@@ -89,7 +91,7 @@ export default function GroupCardConfigsScroller({
           onScroll={checkForHiddenContent}
         >
           {configs.map((config) => (
-            <GroupCardConfig config={config} key={config.key} />
+            <GroupCardConfig config={config} key={config.key} quiet={quiet} />
           ))}
         </div>
         {isRightHidden ? (
