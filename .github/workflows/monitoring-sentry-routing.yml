@@ -1,0 +1,339 @@
+name: Consolidate Sentry routine alert routes
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: Inspect, apply, or explicitly restore the two reviewed routes
+        type: choice
+        options: [plan, apply, restore]
+        default: plan
+        required: true
+
+permissions: {}
+
+concurrency:
+  group: sentry-alert-routing-consolidation
+  cancel-in-progress: false
+
+jobs:
+  consolidate:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Apply the fixed Sentry routing plan
+        env:
+          SENTRY_MONITORING_AUTH_TOKEN: ${{ secrets.SENTRY_MONITORING_AUTH_TOKEN }}
+          ROUTING_MODE: ${{ inputs.mode }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import { appendFileSync } from 'node:fs';
+          import { createHash } from 'node:crypto';
+
+          // Reviewed fixed targets from the 2026-09-15 configuration audit.
+          // No URLs, IDs, action data, recipients or credentials are emitted.
+          const PINS = {
+            audit: '90167c120bea94414551ceb246a11d4655d0429919054a40efc0bfe300aa65ae',
+            app: '56bafa87cf8603b3115a5ee131856db70acde69d4b43ca87f419550cd285e9d6',
+            appConfig: '827bf5bab7c2c91aad83cbd21c278853cb827592861f41156ec39bca7875849f',
+            callback: '4e515cad732ee30392ce37716ea2be0bad7e42d9100b279d145fab65597868aa',
+            appSlug: '4db6984366203567eff130e02e17d03e40e0264823b24fb95640cf7a71fd0faf',
+            detectorConfig: 'e9a60edfe9c97a1a15655d3e70a81ad69092ce365ac9694ed39e35480c425548',
+            workflows: {
+              backEmail: ['ef3f2fa03f367a65debfd89f3fbb47793b91b64d6ff38b67eda13abe15e2cb9b', '83d3fc448624c0de9b575e66c82c6400a9873f3726b80fd138fb5840e3cb22a4', 'seize-backend'],
+              backDiscord: ['de2175fbbe70d944fd74eeb74861678b4613f2102cf5facc3a82a3532c2d26c9', 'cb7ee31927fe6968d12e3993be865765ac741b468f80c4bf71d69e2d7971c0ea', 'seize-backend'],
+              frontEmail: ['90847ef64ea7799ebb8af12c55b8f92a1173338659b741df08378634b1584cfa', '909ee4bba97f99b5cb6f630c75bc4f559431670ee18aa0ddf1551a78712b7013', '6529-frontend'],
+              frontDiscord: ['9dbcdb7d4a4241af4c6ac21d24753a25a40c633fe800bfaacccd46a97a49a1d3', '2f591c584bdf3e2f21fcc3f3e1d70fe4a8dcc39cd035560c8a3ee949b35da95a', '6529-frontend'],
+              backApp: ['baeaa6c8aec74c10c80109101d4fc5f9db1723ce849b4801e15eb0fdb2db7ad2', 'cfe9ac6c69ab75a7021c9075509a2f60cca135c7ecdbae12f1cba5bc6e8b2faa', 'seize-backend'],
+              frontApp: ['2d6a2f32826de9b251dffecd810f191d8f070abada7b5a7c43f030fbb5b410a4', '9285cc09ce23fdbe656ad0bf38a5b0671ea5d0dc3b2fb0fb56c9de429de44e93', '6529-frontend'],
+            },
+            detectors: {
+              'seize-backend': 'a041c40e7f03289f6ffb95755c81b226c690c5187c3fc1f366f5e9757a523516',
+              '6529-frontend': '56d2407c10510efaa7c90713d6142babf26b4cc952e4b0ef593f91957fcbfc82',
+            },
+          };
+          const API = 'https://sentry.io/api/0/';
+          const ORG = 'organizations/seize-ff/';
+          const LIST = ORG + 'workflows/?project=6529-frontend&project=seize-backend&per_page=100';
+          const LIMITS = { calls: 48, pages: 4, items: 40, bytes: 1048576 };
+          const deadline = Date.now() + 200000;
+          const token = process.env.SENTRY_MONITORING_AUTH_TOKEN;
+          let calls = 0;
+          let puts = 0;
+          const results = [];
+          class Stop extends Error { constructor(code, httpStatus = null) { super(code); this.code = code; this.httpStatus = httpStatus; } }
+          const requireValue = (ok, code) => { if (!ok) throw new Stop(code); };
+          const record = value => value !== null && typeof value === 'object' && !Array.isArray(value);
+          const numericId = value => typeof value === 'string' && /^[1-9][0-9]{0,19}$/.test(value);
+          const hash = value => createHash('sha256').update(value).digest('hex');
+          const lexical = (a, b) => a < b ? -1 : a > b ? 1 : 0;
+          const clone = value => JSON.parse(JSON.stringify(value));
+          function fingerprint(value) {
+            let nodes = 0;
+            function canonical(item, depth) {
+              requireValue(++nodes <= 5000 && depth <= 12, 'JSON_LIMIT');
+              if (item === null || typeof item === 'boolean') return item;
+              if (typeof item === 'number' && Number.isFinite(item)) return item;
+              if (typeof item === 'string' && item.length <= 8192) return item;
+              if (Array.isArray(item) && item.length <= 50) return item.map(v => canonical(v, depth + 1));
+              requireValue(record(item) && Object.keys(item).length <= 50, 'JSON_SHAPE');
+              return Object.fromEntries(Object.keys(item).sort(lexical).map(key => [key, canonical(item[key], depth + 1)]));
+            }
+            return hash(JSON.stringify(canonical(value, 0)));
+          }
+          function keys(value, allowed, required = allowed) {
+            requireValue(record(value) && Object.keys(value).every(key => allowed.includes(key)) &&
+              required.every(key => Object.hasOwn(value, key)), 'UNSUPPORTED_SHAPE');
+          }
+          function configuration(value) {
+            const volatile = ['id', 'organizationId', 'createdBy', 'dateCreated', 'dateUpdated', 'lastTriggered'];
+            return Object.fromEntries(Object.entries(value).filter(([key]) => !volatile.includes(key)));
+          }
+          function identity(value) {
+            return fingerprint(Object.fromEntries(['id', 'organizationId', 'createdBy', 'dateCreated'].map(key => [key, value[key] ?? null])));
+          }
+          const configHash = value => fingerprint(configuration(value));
+          function action(value) {
+            keys(value, ['id', 'type', 'integrationId', 'data', 'config', 'status']);
+            requireValue(numericId(value.id) && record(value.data) && record(value.config) && value.status === 'active', 'ACTION_SHAPE');
+            fingerprint(value);
+            return value;
+          }
+          function singleAction(workflow) {
+            requireValue(Array.isArray(workflow.actionFilters) && workflow.actionFilters.length === 1, 'FILTER_COUNT');
+            const filter = workflow.actionFilters[0];
+            keys(filter, ['id', 'organizationId', 'logicType', 'conditions', 'actions'], ['id', 'logicType', 'conditions', 'actions']);
+            requireValue(numericId(filter.id) && filter.logicType === 'all' && Array.isArray(filter.conditions) &&
+              filter.conditions.length === 0 && Array.isArray(filter.actions) && filter.actions.length === 1, 'FILTER_SHAPE');
+            return action(filter.actions[0]);
+          }
+          function replaceAction(workflow, donor) {
+            const result = clone(workflow);
+            const original = singleAction(result);
+            result.actionFilters[0].actions[0] = { ...clone(action(donor)), id: original.id };
+            return result;
+          }
+          // Updating an owned Action by its original ID preserves its association.
+          // Omitted top-level fields remain unchanged; verify the full GET afterwards.
+          function frontendBody(workflow) {
+            const filter = workflow.actionFilters[0];
+            return { name: workflow.name, enabled: workflow.enabled, actionFilters: [{
+              id: filter.id, logicType: filter.logicType, conditions: clone(filter.conditions),
+              actions: [clone(singleAction(workflow))],
+            }] };
+          }
+          function safePath(path) {
+            const url = new URL(path, API);
+            requireValue(url.href === API + path && url.origin === 'https://sentry.io' && !url.hash && !url.username && !url.password, 'UNSAFE_PATH');
+            return url.href;
+          }
+          async function request(path, body) {
+            requireValue(calls < LIMITS.calls && Date.now() < deadline, 'REQUEST_BUDGET');
+            calls++;
+            const init = { method: body === undefined ? 'GET' : 'PUT', redirect: 'error',
+              headers: { Authorization: 'Bearer ' + token }, signal: AbortSignal.timeout(Math.min(10000, deadline - Date.now())) };
+            if (body !== undefined) { init.headers['Content-Type'] = 'application/json'; init.body = JSON.stringify(body); }
+            let response;
+            try { response = await fetch(safePath(path), init); } catch { throw new Stop('TRANSPORT_UNCERTAIN'); }
+            requireValue(Number.isInteger(response.status) && response.status >= 100 && response.status <= 599, 'HTTP_SHAPE');
+            const requireResponse = (ok, code) => { if (!ok) throw new Stop(code, response.status); };
+            const declared = response.headers.get('content-length');
+            requireResponse(declared === null || (/^[0-9]+$/.test(declared) && Number(declared) <= LIMITS.bytes), 'BODY_LIMIT');
+            const reader = response.body?.getReader();
+            requireResponse(reader, 'BODY_UNAVAILABLE');
+            const chunks = []; let size = 0;
+            try {
+              while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                size += value.byteLength;
+                requireResponse(size <= LIMITS.bytes && Date.now() < deadline, 'BODY_LIMIT');
+                chunks.push(Buffer.from(value));
+              }
+            } catch (error) { try { await reader.cancel(); } catch {} throw error instanceof Stop ? error : new Stop('TRANSPORT_UNCERTAIN', response.status); }
+            let data;
+            try { data = JSON.parse(Buffer.concat(chunks).toString('utf8')); } catch { throw new Stop('BODY_JSON', response.status); }
+            return { status: response.status, data, link: response.headers.get('link') };
+          }
+          async function get(path) {
+            const response = await request(path);
+            requireValue(response.status === 200, 'READ_HTTP_' + response.status);
+            return response;
+          }
+          function nextPage(link, first) {
+            if (!link) return null;
+            const parts = link.split(/,(?=\s*<)/).filter(part => /rel="next"/.test(part));
+            requireValue(parts.length === 1, 'PAGINATION_SHAPE');
+            const match = /^\s*<([^>]+)>;\s*rel="next";\s*results="(true|false)";\s*cursor="([^"]*)"\s*$/.exec(parts[0]);
+            requireValue(match, 'PAGINATION_SHAPE');
+            const target = new URL(match[1]); const base = new URL(API + first);
+            requireValue(target.origin === base.origin && target.pathname === base.pathname && !target.username && !target.password && !target.hash, 'PAGINATION_SCOPE');
+            const originalParams = [...base.searchParams.entries()];
+            const fixed = [...target.searchParams.entries()].filter(([key]) => key !== 'cursor');
+            requireValue(fingerprint(fixed) === fingerprint(originalParams), 'PAGINATION_SCOPE');
+            requireValue(target.searchParams.getAll('cursor').length === 1 && target.searchParams.get('cursor') === match[3], 'PAGINATION_CURSOR');
+            if (match[2] === 'false') return null;
+            requireValue(match[3].length > 0 && match[3].length <= 200, 'PAGINATION_CURSOR');
+            return target.href.slice(API.length);
+          }
+          async function list(path) {
+            let current = path; const seen = new Set(); const rows = [];
+            for (let page = 0; current && page < LIMITS.pages; page++) {
+              requireValue(!seen.has(current), 'PAGINATION_CYCLE'); seen.add(current);
+              const response = await get(current);
+              requireValue(Array.isArray(response.data), 'LIST_SHAPE');
+              rows.push(...response.data); requireValue(rows.length <= LIMITS.items, 'LIST_LIMIT');
+              current = nextPage(response.link, path);
+            }
+            requireValue(current === null, 'PAGINATION_LIMIT');
+            return rows;
+          }
+          function appConfiguration(app) {
+            return { isDisabled: app.isDisabled ?? null, isAlertable: app.isAlertable ?? null,
+              webhookUrl: app.webhookUrl ?? null, webhookEvents: app.webhookEvents ?? null, schema: app.schema ?? null };
+          }
+          async function snapshot() {
+            const listed = await list(LIST);
+            requireValue(listed.length === 6 && listed.every(w => record(w) && numericId(w.id)) && new Set(listed.map(w => w.id)).size === 6, 'WORKFLOW_INVENTORY');
+            const workflows = {};
+            for (const item of listed) {
+              const key = Object.keys(PINS.workflows).find(key => PINS.workflows[key][0] === hash(item.id));
+              requireValue(key, 'UNEXPECTED_WORKFLOW');
+              const { data: detail } = await get(ORG + 'workflows/' + item.id + '/');
+              keys(detail, ['id', 'organizationId', 'createdBy', 'dateCreated', 'dateUpdated', 'lastTriggered',
+                'name', 'enabled', 'config', 'environment', 'owner', 'triggers', 'actionFilters', 'detectorIds'],
+                ['id', 'name', 'enabled', 'config', 'environment', 'triggers', 'actionFilters', 'detectorIds']);
+              requireValue(detail.id === item.id && typeof detail.name === 'string' && detail.name.length > 0 && detail.name.length <= 256 &&
+                typeof detail.enabled === 'boolean' && configHash(detail) === configHash(item) && identity(detail) === identity(item), 'WORKFLOW_DRIFT');
+              requireValue(Array.isArray(detail.detectorIds) && detail.detectorIds.length === 1 && numericId(detail.detectorIds[0]), 'DETECTOR_CONNECTION');
+              singleAction(detail); workflows[key] = detail;
+            }
+            const detectorBindings = [];
+            for (const project of Object.keys(PINS.detectors)) {
+              const { data: details } = await get('projects/seize-ff/' + project + '/');
+              requireValue(record(details) && numericId(details.id) && details.slug === project, 'PROJECT_BINDING');
+              const selected = Object.keys(workflows).filter(key => PINS.workflows[key][2] === project);
+              const id = workflows[selected[0]].detectorIds[0];
+              requireValue(hash(id) === PINS.detectors[project] && selected.every(key => workflows[key].detectorIds[0] === id), 'DETECTOR_BINDING');
+              const { data: detector } = await get(ORG + 'detectors/' + id + '/');
+              requireValue(record(detector) && detector.id === id && detector.projectId === details.id && detector.enabled === true &&
+                Array.isArray(detector.workflowIds) && detector.workflowIds.every(numericId) && detector.workflowIds.length === 3 &&
+                fingerprint([...detector.workflowIds].sort(lexical)) === fingerprint(selected.map(key => workflows[key].id).sort(lexical)), 'REVERSE_BINDING');
+              requireValue(fingerprint({ config: detector.config ?? null, conditionGroup: detector.conditionGroup ?? null,
+                dataSources: detector.dataSources ?? null, enabled: detector.enabled ?? null }) === PINS.detectorConfig, 'DETECTOR_DRIFT');
+              detectorBindings.push(fingerprint({ id, project: details.id, type: detector.type ?? null, workflows: [...detector.workflowIds].sort(lexical) }));
+            }
+            const apps = await list(ORG + 'sentry-apps/');
+            const installs = await list(ORG + 'sentry-app-installations/');
+            const matched = apps.filter(app => record(app) && typeof app.uuid === 'string' && hash(app.uuid) === PINS.app);
+            requireValue(matched.length === 1, 'APP_BINDING'); const app = matched[0];
+            requireValue(typeof app.slug === 'string' && fingerprint(app.slug) === PINS.appSlug && app.isDisabled === false && app.isAlertable === true &&
+              fingerprint(appConfiguration(app)) === PINS.appConfig && typeof app.webhookUrl === 'string' && hash(app.webhookUrl) === PINS.callback, 'APP_DRIFT');
+            requireValue(app.status === 'internal' && app.verifyInstall === false && Array.isArray(app.events) &&
+              fingerprint([...app.events].sort(lexical)) === fingerprint(['error', 'issue']), 'APP_SUBSCRIPTIONS');
+            const installed = installs.filter(value => record(value) && value.app?.uuid === app.uuid);
+            requireValue(installed.length === 1 && installed[0].status === 'installed', 'INSTALLATION_BINDING');
+            const donor = singleAction(workflows.frontApp);
+            requireValue(donor.type === 'webhook' && donor.integrationId === null && typeof donor.config.targetIdentifier === 'string' &&
+              fingerprint(donor.config.targetIdentifier) === PINS.appSlug, 'WEBHOOK_DONOR');
+            const backOriginal = { ...clone(workflows.backDiscord), enabled: true };
+            requireValue(singleAction(backOriginal).type === 'discord' && configHash(backOriginal) === PINS.workflows.backDiscord[1], 'BACKEND_BASELINE');
+            // The retained backend action reconstructs the exact audited frontend original.
+            // This establishes an in-provider rollback donor without exporting action data.
+            const frontOriginal = replaceAction(workflows.frontDiscord, singleAction(backOriginal));
+            requireValue(configHash(frontOriginal) === PINS.workflows.frontDiscord[1], 'ROLLBACK_DONOR_MISMATCH');
+            const frontDesired = replaceAction(frontOriginal, donor);
+            for (const key of Object.keys(workflows)) {
+              if (key === 'backDiscord') continue;
+              const expected = key === 'frontDiscord' ? [configHash(frontOriginal), configHash(frontDesired)] : [PINS.workflows[key][1]];
+              requireValue(expected.includes(configHash(workflows[key])), 'BASELINE_MISMATCH');
+            }
+            const frontDone = configHash(workflows.frontDiscord) === configHash(frontDesired);
+            requireValue(workflows.backDiscord.enabled || frontDone, 'INCONSISTENT_PARTIAL_STATE');
+            return { workflows, frontOriginal, frontDesired, backOriginal, frontDone,
+              fixedBindings: fingerprint({ detectorBindings, app: { ...appConfiguration(app), uuid: app.uuid, slug: app.slug,
+                status: app.status, verifyInstall: app.verifyInstall, events: app.events }, installation: installed[0] }),
+              identities: fingerprint(Object.fromEntries(Object.entries(workflows).map(([key, value]) => [key, identity(value)]))) };
+          }
+          async function putOnce(key, before, desired, body, bulk) {
+            requireValue(Date.now() + 45000 < deadline && calls + 16 <= LIMITS.calls && puts < 2, 'WRITE_BUDGET');
+            const path = bulk ? ORG + 'workflows/?id=' + before.id : ORG + 'workflows/' + before.id + '/';
+            const restoring = process.env.ROUTING_MODE === 'restore';
+            requireValue((key === 'frontDiscord' && !bulk && singleAction(desired).type === (restoring ? 'discord' : 'webhook') &&
+              fingerprint(body) === fingerprint(frontendBody(desired))) ||
+              (key === 'backDiscord' && bulk && desired.enabled === restoring && fingerprint(body) === fingerprint({ enabled: restoring })), 'WRITE_SCOPE');
+            puts++;
+            const result = { target: PINS.workflows[key][0], project: PINS.workflows[key][2], before: configHash(before), desired: configHash(desired),
+              status: 'uncertain', httpStatus: null, observed: null };
+            results.push(result);
+            try {
+              const response = await request(path, body); result.httpStatus = response.status;
+              requireValue(response.status === 200, 'WRITE_HTTP');
+              const returned = bulk && Array.isArray(response.data) && response.data.length === 1 ? response.data[0] : !bulk ? response.data : null;
+              requireValue(record(returned) && returned.id === before.id && identity(returned) === identity(before) && configHash(returned) === configHash(desired), 'WRITE_RESPONSE');
+              const { data: observed } = await get(ORG + 'workflows/' + before.id + '/');
+              requireValue(record(observed) && observed.id === before.id && identity(observed) === identity(before) && configHash(observed) === configHash(desired), 'WRITE_READBACK');
+              result.status = 'verified'; result.observed = configHash(observed);
+            } catch (error) {
+              if (result.httpStatus === null && error instanceof Stop) result.httpStatus = error.httpStatus;
+              // Read only after any uncertain/denied result. Never retry or continue to the next PUT.
+              try {
+                const { data: observed } = await get(ORG + 'workflows/' + before.id + '/');
+                if (record(observed) && observed.id === before.id && identity(observed) === identity(before)) {
+                  result.observed = configHash(observed);
+                  result.status = result.observed === configHash(desired) ? 'observed_desired_after_uncertainty' :
+                    result.observed === configHash(before) ? 'not_observed_applied' : 'conflict';
+                }
+              } catch {}
+              throw new Stop('MUTATION_STOPPED');
+            }
+          }
+          let outcome = 'stopped'; let failure = null; let plan = null;
+          try {
+            requireValue(process.env.GITHUB_REPOSITORY === '6529-Collections/6529seize-frontend' && process.env.GITHUB_REF === 'refs/heads/main' &&
+              process.env.GITHUB_EVENT_NAME === 'workflow_dispatch' && process.env.GITHUB_RUN_ATTEMPT === '1' &&
+              /^[a-f0-9]{40}$/.test(process.env.GITHUB_SHA ?? ''), 'TRUSTED_SOURCE');
+            requireValue(['plan', 'apply', 'restore'].includes(process.env.ROUTING_MODE), 'MODE');
+            requireValue(typeof token === 'string' && token.length > 0, 'MISSING_MONITORING_TOKEN');
+            const initial = await snapshot();
+            plan = { frontendOriginal: configHash(initial.frontOriginal), frontendConsolidated: configHash(initial.frontDesired),
+              backendOriginal: configHash(initial.backOriginal), backendConsolidated: configHash({ ...initial.backOriginal, enabled: false }),
+              rollbackDonorVerified: true, fixedBindings: initial.fixedBindings, frontendAlreadyDesired: initial.frontDone,
+              backendAlreadyDisabled: !initial.workflows.backDiscord.enabled };
+            if (process.env.ROUTING_MODE === 'plan') outcome = 'plan_verified';
+            else if (process.env.ROUTING_MODE === 'apply') {
+              if (!initial.frontDone) await putOnce('frontDiscord', initial.workflows.frontDiscord, initial.frontDesired, frontendBody(initial.frontDesired), false);
+              const middle = await snapshot();
+              requireValue(middle.frontDone && middle.fixedBindings === initial.fixedBindings && middle.identities === initial.identities, 'MIDPOINT_DRIFT');
+              if (middle.workflows.backDiscord.enabled) await putOnce('backDiscord', middle.workflows.backDiscord,
+                { ...middle.workflows.backDiscord, enabled: false }, { enabled: false }, true);
+              const final = await snapshot();
+              requireValue(final.frontDone && !final.workflows.backDiscord.enabled && final.fixedBindings === initial.fixedBindings && final.identities === initial.identities, 'FINAL_DRIFT');
+              outcome = puts === 0 ? 'already_matched' : 'applied_and_verified';
+            } else {
+              // Restoration is manual only. Restore the independent backend route first.
+              if (!initial.workflows.backDiscord.enabled) await putOnce('backDiscord', initial.workflows.backDiscord,
+                initial.backOriginal, { enabled: true }, true);
+              const middle = await snapshot();
+              requireValue(middle.workflows.backDiscord.enabled && middle.fixedBindings === initial.fixedBindings &&
+                middle.identities === initial.identities, 'RESTORE_MIDPOINT_DRIFT');
+              if (middle.frontDone) await putOnce('frontDiscord', middle.workflows.frontDiscord,
+                middle.frontOriginal, frontendBody(middle.frontOriginal), false);
+              const final = await snapshot();
+              requireValue(!final.frontDone && final.workflows.backDiscord.enabled && final.fixedBindings === initial.fixedBindings &&
+                final.identities === initial.identities, 'RESTORE_FINAL_DRIFT');
+              outcome = puts === 0 ? 'already_original' : 'restored_and_verified';
+            }
+          } catch (error) { failure = error instanceof Stop ? error.code : 'UNEXPECTED_FAILURE'; process.exitCode = 1; }
+          const summary = { schemaVersion: 1, outcome, failure, mode: ['plan', 'apply', 'restore'].includes(process.env.ROUTING_MODE) ? process.env.ROUTING_MODE : 'invalid',
+            source: /^[a-f0-9]{40}$/.test(process.env.GITHUB_SHA ?? '') ? process.env.GITHUB_SHA : null,
+            credentialSource: 'monitoring_secret', auditReceipt: PINS.audit, calls, puts, plan, results,
+            rawProviderDataPersisted: false, credentialsExported: false, emailPolicyWritesRequested: false,
+            sharedAppWritesRequested: false, eventCaptureWritesRequested: false, deliveryVerified: false, providerPermissionProbed: false,
+            allUntargetedConfigurationVerified: ['plan_verified', 'already_matched', 'applied_and_verified', 'already_original', 'restored_and_verified'].includes(outcome) };
+          console.log(JSON.stringify(summary, null, 2));
+          if (process.env.GITHUB_STEP_SUMMARY) appendFileSync(process.env.GITHUB_STEP_SUMMARY, '## Sentry routing consolidation\n\n```json\n' + JSON.stringify(summary, null, 2) + '\n```\n');
+          NODE

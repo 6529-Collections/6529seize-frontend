@@ -34,7 +34,7 @@ export async function validateDropImageSignature(
   if (!contentType.startsWith("image/")) return;
   const header = new Uint8Array(await file.slice(0, 4096).arrayBuffer());
   const brandAt = (offset: number) =>
-    String.fromCharCode(...header.subarray(offset, offset + 4));
+    String.fromCodePoint(...header.subarray(offset, offset + 4));
   const brands: string[] = [];
   if (header.length >= 16 && brandAt(4) === "ftyp") {
     const end = new DataView(header.buffer).getUint32(0);

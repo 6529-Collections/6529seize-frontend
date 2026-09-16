@@ -141,8 +141,8 @@ const FilePreview: React.FC<FilePreviewProps> = ({
                   <ProgressOverlay progress={progress} />
                   <div className="tw-absolute tw-inset-0 tw-flex tw-flex-col tw-items-center tw-justify-center">
                     <CircleLoader size={CircleLoaderSize.XXLARGE} />
-                    <span
-                      role={isProcessingImage ? "status" : "progressbar"}
+                    <output
+                      role={isProcessingImage ? undefined : "progressbar"}
                       aria-label={t(locale, "drop.upload.preparingFile", {
                         file: file.file.name,
                       })}
@@ -156,7 +156,7 @@ const FilePreview: React.FC<FilePreviewProps> = ({
                       {isProcessingImage
                         ? t(locale, "drop.media.processing")
                         : `${Math.round(progress)}%`}
-                    </span>
+                    </output>
                   </div>
                 </>
               )}

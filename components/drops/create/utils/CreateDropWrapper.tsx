@@ -707,9 +707,9 @@ const CreateDropWrapper = forwardRef<
         <CommonAnimationHeight disableAnimation={disableHeightAnimation}>
           {components[viewType]}
           {isPreparingFiles && (
-            <p role="status" className="tw-mt-2 tw-text-sm tw-text-iron-300">
+            <output className="tw-mt-2 tw-block tw-text-sm tw-text-iron-300">
               {t(locale, "drop.upload.preparing")}
-            </p>
+            </output>
           )}
         </CommonAnimationHeight>
       </div>
