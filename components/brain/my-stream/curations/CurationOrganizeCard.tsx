@@ -79,7 +79,9 @@ export default function CurationOrganizeCard({
           onKeyDown={(event) => keyDown(id, event)}
           className={`tw-group tw-absolute tw-right-0.5 tw-top-0.5 tw-z-[1001] tw-flex tw-size-11 tw-touch-none tw-select-none tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-transparent tw-p-0 tw-outline-none tw-transition-colors tw-duration-150 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 disabled:tw-cursor-wait ${selected ? "tw-text-white" : "tw-text-iron-300 desktop-hover:hover:tw-text-white"} ${isDragging ? "tw-cursor-grabbing" : "tw-cursor-grab"}`}
         >
-          <span className={`tw-flex tw-h-7 tw-w-8 tw-items-center tw-justify-center tw-rounded-[7px] tw-transition tw-duration-150 group-active:tw-scale-95 group-focus-visible:tw-bg-white/[0.08] desktop-hover:group-hover:tw-bg-white/[0.07] motion-reduce:tw-transform-none motion-reduce:tw-transition-none ${selected ? "tw-bg-white/[0.08]" : "tw-bg-transparent"}`}>
+          <span
+            className={`tw-flex tw-h-7 tw-w-8 tw-items-center tw-justify-center tw-rounded-[7px] tw-bg-black/55 tw-shadow-[0_1px_4px_rgba(0,0,0,0.28)] tw-backdrop-blur-sm tw-transition tw-duration-150 group-active:tw-scale-95 group-focus-visible:tw-bg-iron-700/90 desktop-hover:group-hover:tw-bg-iron-800/90 motion-reduce:tw-transform-none motion-reduce:tw-transition-none ${selected ? "tw-bg-iron-700/90" : ""}`}
+          >
             <svg
               aria-hidden="true"
               className="tw-drop-shadow-[0_1px_2px_rgba(0,0,0,0.85)]"
