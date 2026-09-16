@@ -260,19 +260,6 @@ export default function CurationOrganize({
                   {toolbarMessage}
                 </span>
               </div>
-              {order.undo && (
-                <button
-                  type="button"
-                  disabled={order.busy}
-                  onClick={() => {
-                    cancel();
-                    void order.undo?.();
-                  }}
-                  className="tw-h-11 tw-border-0 tw-bg-transparent tw-px-2 tw-text-sm tw-font-medium tw-text-iron-400 tw-outline-none desktop-hover:hover:tw-text-iron-100 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 disabled:tw-cursor-wait disabled:tw-opacity-50"
-                >
-                  {t(locale, "profileCuration.order.undo")}
-                </button>
-              )}
               <button
                 ref={doneButton}
                 type="button"

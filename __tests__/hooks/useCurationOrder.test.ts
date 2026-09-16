@@ -107,7 +107,7 @@ it("shows the move immediately, rejects overlapping saves, and rolls back failur
   expect(result.current.busy).toBe(false);
 });
 
-it("opens the final page after a distant move and keeps an Undo destination", async () => {
+it("opens the final page after a distant move", async () => {
   moveMock.mockResolvedValueOnce({ position: 500 });
   const { result } = renderOrder();
   await act(async () => {
@@ -116,24 +116,11 @@ it("opens the final page after a distant move and keeps an Undo destination", as
   expect(mockQuery).toHaveBeenLastCalledWith(
     expect.objectContaining({ initialPage: 25, pageSize: 20 })
   );
-  expect(result.current.undo).not.toBeNull();
   expect(result.current.saved).toBe(true);
   expect(result.current.revealRequest).toEqual({ id: "a" });
-  await act(async () => {
-    await result.current.undo?.();
-  });
-  expect(moveMock).toHaveBeenLastCalledWith({
-    dropId: "a",
-    curationId: "curation",
-    anchorDropId: "b",
-    placement: "before",
-  });
-  expect(mockQuery).toHaveBeenLastCalledWith(
-    expect.objectContaining({ initialPage: 1 })
-  );
 });
 
-it("keeps the successful save and Undo when refreshing the posts fails", async () => {
+it("keeps the successful save when refreshing the posts fails", async () => {
   mockRefetch.mockResolvedValueOnce({ isError: true });
   const { result } = renderOrder();
   await act(async () => {
@@ -141,36 +128,9 @@ it("keeps the successful save and Undo when refreshing the posts fails", async (
   });
   expect(moveMock).toHaveBeenCalledTimes(1);
   expect(result.current.saved).toBe(true);
-  expect(result.current.undo).not.toBeNull();
   expect(result.current.error).toBe(
     "Order saved, but posts couldn't refresh. Reload to see the latest order."
   );
-});
-
-it("undoes a move originating at the last position by placing it after its previous neighbor", async () => {
-  mockRefetch.mockImplementationOnce(async () => {
-    mockDrops = [{ id: "c" }, { id: "a" }, { id: "b" }] as ExtendedDrop[];
-    return {};
-  });
-  const { result } = renderOrder();
-  await act(async () => {
-    await result.current.move("c", { placement: "before", anchorDropId: "a" });
-  });
-  mockRefetch.mockImplementationOnce(async () => {
-    mockDrops = [{ id: "a" }, { id: "b" }, { id: "c" }] as ExtendedDrop[];
-    return {};
-  });
-  await act(async () => {
-    await result.current.undo?.();
-  });
-  expect(moveMock).toHaveBeenLastCalledWith({
-    curationId: "curation",
-    dropId: "c",
-    anchorDropId: "b",
-    placement: "after",
-  });
-  expect(result.current.drops.map(({ id }) => id)).toEqual(["a", "b", "c"]);
-  expect(result.current.undo).toBeNull();
 });
 
 it.each(["disconnected", "proxy"])(
@@ -211,5 +171,4 @@ it("does not submit an old session's pending authorization after account switchi
   });
   expect(moveMock).not.toHaveBeenCalled();
   expect(result.current.busy).toBe(false);
-  expect(result.current.undo).toBeNull();
 });

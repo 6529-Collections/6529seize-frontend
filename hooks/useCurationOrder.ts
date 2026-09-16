@@ -17,7 +17,6 @@ import { useBrowserLocale } from "./useBrowserLocale";
 import { useWaveCurationDrops } from "./useWaveCurationDrops";
 
 const PAGE_SIZE = 20;
-type UndoMove = { dropId: string; move: CurationDropMove; page: number };
 type OrderSnapshot = readonly ExtendedDrop[] | null;
 type RevealRequest = { id: string } | null;
 
@@ -42,9 +41,7 @@ function reordered(
 function prepareMove(
   drops: readonly ExtendedDrop[],
   dropId: string,
-  destination: CurationDropMove,
-  startIndex: number,
-  undoing: boolean
+  destination: CurationDropMove
 ) {
   const sourceIndex = drops.findIndex((drop) => drop.id === dropId);
   if (
@@ -52,33 +49,16 @@ function prepareMove(
     ("anchorDropId" in destination && destination.anchorDropId === dropId)
   )
     return null;
-  const anchor = drops[sourceIndex + 1] ?? drops[sourceIndex - 1];
-  const previous: UndoMove | null = anchor
-    ? {
-        dropId,
-        move: {
-          anchorDropId: anchor.id,
-          placement: sourceIndex + 1 < drops.length ? "before" : "after",
-        },
-        page: Math.floor((startIndex + sourceIndex) / PAGE_SIZE) + 1,
-      }
-    : null;
   const next = reordered(drops, dropId, destination);
   if (
-    !undoing &&
     next.every((drop, index) => drops[index]?.id === drop.id) &&
     "anchorDropId" in destination
   )
     return null;
-  return { previous, next };
+  return next;
 }
 
-function getDestinationPage(
-  position: number | undefined,
-  page: number,
-  undo: UndoMove | null
-) {
-  if (undo) return undo.page;
+function getDestinationPage(position: number | undefined, page: number) {
   return position === undefined ? page : Math.ceil(position / PAGE_SIZE);
 }
 
@@ -137,7 +117,6 @@ export function useCurationOrder({
   const generation = useRef(0);
   const [error, setError] = useState("");
   const [saved, setSaved] = useState(false);
-  const [undo, setUndo] = useState<UndoMove | null>(null);
   const [revealRequest, setRevealRequest] = useState<RevealRequest>(null);
   const reveal = useRef<((id: string) => void) | null>(null);
   const canAuthenticate = !!connectedProfile && !activeProfileProxy;
@@ -157,7 +136,6 @@ export function useCurationOrder({
     setIsSaving(false);
     setOptimistic(null);
     setHeld(null);
-    setUndo(null);
     setError("");
     setSaved(false);
     setRevealRequest(null);
@@ -170,16 +148,10 @@ export function useCurationOrder({
     };
   }, [identity]);
 
-  const move = async (
-    dropId: string,
-    destination: CurationDropMove,
-    undoing = false
-  ) => {
+  const move = async (dropId: string, destination: CurationDropMove) => {
     if (saving.current || busy || !canAuthenticate) return;
-    const startIndex = query.startIndex;
-    const plan = prepareMove(drops, dropId, destination, startIndex, undoing);
-    if (!plan) return;
-    const { previous, next } = plan;
+    const next = prepareMove(drops, dropId, destination);
+    if (!next) return;
     saving.current = true;
     const startedIn = generation.current;
     const isCurrent = () => generation.current === startedIn;
@@ -201,11 +173,7 @@ export function useCurationOrder({
         curationId,
         ...destination,
       });
-      const nextPage = getDestinationPage(
-        result?.position,
-        page,
-        undoing ? undo : null
-      );
+      const nextPage = getDestinationPage(result?.position, page);
       await invalidateCurationDrops(queryClient, curationId);
       ensureCurrent();
       if (nextPage !== page) setWindowPage({ curationId, page: nextPage });
@@ -213,7 +181,6 @@ export function useCurationOrder({
         nextPage === page ? await refreshOrder(query.refetch, locale) : "";
       ensureCurrent();
       setError(refreshError);
-      setUndo(undoing ? null : previous);
       setSaved(true);
       setRevealRequest({ id: dropId });
     } catch (cause) {
@@ -256,7 +223,6 @@ export function useCurationOrder({
     move,
     hold,
     release,
-    undo: undo ? () => move(undo.dropId, undo.move, true) : null,
     registerReveal,
     revealDrop,
     revealRequest,

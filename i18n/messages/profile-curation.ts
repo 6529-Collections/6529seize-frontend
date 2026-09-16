@@ -49,7 +49,6 @@ export const PROFILE_CURATION_MESSAGES = {
   "profileCuration.order.action": "Organize",
   "profileCuration.order.organizing": "Organizing",
   "profileCuration.order.done": "Done",
-  "profileCuration.order.undo": "Undo",
   "profileCuration.order.title": "Reorder {curationName}",
   "profileCuration.order.help":
     "Drag a post by its handle. Each move saves automatically.",

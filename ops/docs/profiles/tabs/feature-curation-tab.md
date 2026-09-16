@@ -41,7 +41,7 @@ inline organizing mode is available from the source Wave's Curation tab. Posts
 stay in the grid and gain small drag handles over each post. Drag a handle, or tap one and then a
 destination handle. Keyboard users can select a handle with Space, move with
 the arrow keys, and press Space to place it. Each move saves automatically for
-all readers. Undo reverses the latest move; Done exits organizing mode.
+all readers. Done exits organizing mode.
 
 Posts load in pages as you scroll. Continue scrolling to load more posts before
 moving a post to a destination farther down the Curation.
