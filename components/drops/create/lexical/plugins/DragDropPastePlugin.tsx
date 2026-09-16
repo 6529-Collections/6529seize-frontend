@@ -93,17 +93,18 @@ function getHtmlDataImageFiles(html: string): File[] {
 
 function getDataTransferFiles(dataTransfer: DataTransfer): File[] {
   const files = Array.from(dataTransfer.files ?? []);
-  const seenFiles = new Set(files);
+  // Chrome can expose one clipboard image through both collections as
+  // different File objects. Use items only when files has no entries.
+  if (files.length === 0) {
+    for (const item of Array.from(dataTransfer.items)) {
+      if (item.kind !== "file") {
+        continue;
+      }
 
-  for (const item of Array.from(dataTransfer.items ?? [])) {
-    if (item.kind !== "file") {
-      continue;
-    }
-
-    const file = item.getAsFile();
-    if (file && !seenFiles.has(file)) {
-      seenFiles.add(file);
-      files.push(file);
+      const file = item.getAsFile();
+      if (file) {
+        files.push(file);
+      }
     }
   }
 
