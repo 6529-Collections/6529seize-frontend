@@ -11,6 +11,7 @@ const EXCLUDED_ROUTES = [
   "/restricted",
   "/accept-connection-sharing",
   "/app-wallets",
+  "/tools/app-wallets",
   "/auth",
   "/api",
 ];

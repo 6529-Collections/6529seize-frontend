@@ -125,6 +125,9 @@ test.each([
   "/auth/callback",
   "/accept-connection-sharing",
   "/app-wallets",
+  "/tools/app-wallets",
+  "/tools/app-wallets/import-wallet",
+  "/tools/app-wallets/0x123",
   "/access",
 ])("does not show on handoff route %s", (path) => {
   pathname = path;

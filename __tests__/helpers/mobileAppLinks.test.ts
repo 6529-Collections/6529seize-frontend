@@ -37,6 +37,7 @@ describe("mobile app links", () => {
     "/prxt0/collected?view=grid",
     "/the-memes/548",
     "/messages?wave=123&drop=456",
+    "/tools/block-finder",
   ])("preserves supported destination %s", (path) => {
     expect(getMobileAppLink({ ...args, destination: path })).toBe(
       `mobile6529://navigate${path}`
@@ -81,6 +82,10 @@ describe("mobile app links", () => {
     "/auth/callback",
     "/access",
     "/app-wallets",
+    "/tools/app-wallets",
+    "/tools/app-wallets/import-wallet",
+    "/tools/app-wallets/0x123?tab=details#wallet",
+    "/tools/%61pp-wallets",
     "/accept-connection-sharing?token=secret",
     "/%6fpen-mobile",
   ])(
