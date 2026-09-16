@@ -1,6 +1,13 @@
 "use client";
 
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
+import {
+  Combobox,
+  ComboboxInput,
+  ComboboxOption,
+  ComboboxOptions,
+  Label,
+} from "@headlessui/react";
 import { CheckIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -41,17 +48,19 @@ export default function CollectGoalDefinitionMobilePicker({
   const searchText = (text: string) =>
     text.normalize("NFKD").replace(/\p{M}/gu, "").toLocaleLowerCase(locale);
   const normalizedQuery = searchText(query.trim());
-  const filtered = searchable
+  const artistOptions = searchable
     ? definitions.filter((definition) =>
         searchText(definition.label).includes(normalizedQuery)
       )
-    : definitions;
+    : [];
+  const filtered = searchable ? artistOptions : definitions;
   const emptyMessage = t(
     locale,
     definitions.length === 0
       ? "collect.goal.noDefinitions"
       : "collect.goal.noMatches"
   );
+  const useArtistCombobox = searchable && definitions.length > 0;
 
   const choose = (definition: CollectGoalOption) => {
     onChange(definition.id);
@@ -108,31 +117,81 @@ export default function CollectGoalDefinitionMobilePicker({
           triggerRef.current?.focus({ preventScroll: true });
         }}
         tall
-        showScrollbar
+        fixedHeight={searchable}
+        showScrollbar={!searchable}
         focusTitleOnOpen
         surfaceClassName="tw-bg-iron-950"
       >
-        <div className="tw-px-4 sm:tw-px-6">
-          {searchable && definitions.length > 0 && (
-            <label className="tw-mb-3 tw-block tw-space-y-2">
-              <span className="tw-sr-only">
-                {t(locale, "collect.goal.searchArtist")}
-              </span>
-              <input
-                type="search"
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                placeholder={t(locale, "collect.goal.searchArtist")}
-                autoComplete="off"
-                className="tw-block tw-min-h-11 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-sm tw-text-iron-100 placeholder:tw-text-iron-500 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
-              />
-            </label>
+        <div className="tw-flex tw-min-h-0 tw-flex-1 tw-flex-col tw-px-4 sm:tw-px-6">
+          {useArtistCombobox && (
+            <Combobox
+              value={selected ?? null}
+              by="id"
+              onChange={(definition) => {
+                if (definition) choose(definition);
+              }}
+              virtual={{ options: artistOptions }}
+              immediate
+            >
+              <div className="tw-flex tw-min-h-0 tw-flex-1 tw-flex-col">
+                <Label className="tw-sr-only">
+                  {t(locale, "collect.goal.searchArtist")}
+                </Label>
+                <ComboboxInput
+                  type="search"
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                  placeholder={t(locale, "collect.goal.searchArtist")}
+                  autoComplete="off"
+                  className="tw-mb-3 tw-block tw-min-h-11 tw-w-full tw-shrink-0 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-sm tw-text-iron-100 placeholder:tw-text-iron-500 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+                />
+                {filtered.length === 0 && (
+                  <output className="tw-block tw-py-4 tw-text-sm tw-text-iron-400">
+                    {emptyMessage}
+                  </output>
+                )}
+                {filtered.length > 0 && (
+                  <ComboboxOptions
+                    static
+                    modal={false}
+                    aria-label={label}
+                    className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto focus:tw-outline-none"
+                  >
+                    {({
+                      option: definition,
+                    }: {
+                      readonly option: CollectGoalOption;
+                    }) => (
+                      <ComboboxOption
+                        value={definition}
+                        className="tw-flex tw-min-h-12 tw-w-full tw-cursor-pointer tw-items-center tw-justify-between tw-gap-3 tw-rounded-lg tw-px-3 tw-py-2 tw-text-sm tw-text-iron-100 data-[focus]:tw-bg-iron-800"
+                      >
+                        {({ selected: isSelected }) => (
+                          <>
+                            <span className="tw-min-w-0 tw-break-words">
+                              {definition.label}
+                            </span>
+                            {isSelected && (
+                              <CheckIcon
+                                aria-hidden="true"
+                                className="tw-size-4 tw-shrink-0 tw-text-iron-300"
+                              />
+                            )}
+                          </>
+                        )}
+                      </ComboboxOption>
+                    )}
+                  </ComboboxOptions>
+                )}
+              </div>
+            </Combobox>
           )}
-          {filtered.length === 0 ? (
+          {!useArtistCombobox && filtered.length === 0 && (
             <output className="tw-block tw-py-4 tw-text-sm tw-text-iron-400">
               {emptyMessage}
             </output>
-          ) : (
+          )}
+          {!useArtistCombobox && filtered.length > 0 && (
             <fieldset className="tw-m-0 tw-min-w-0 tw-border-0 tw-p-0">
               <legend className="tw-sr-only">{label}</legend>
               <ul className="tw-m-0 tw-list-none tw-p-0">
