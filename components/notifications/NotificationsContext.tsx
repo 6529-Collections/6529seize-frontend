@@ -114,6 +114,10 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
   const router = useRouter();
   const initializationRef = useRef<string | null>(null);
   const isRegisteredRef = useRef(false);
+  const [registrationRevision, notifyRegistrationReady] = useReducer(
+    (revision: number) => revision + 1,
+    0
+  );
   const lastSuccessfulRegistrationRef =
     useRef<PushRegistrationFingerprint | null>(null);
   const lastSuccessfulRegistrationAuthRef = useRef<string | null>(null);
@@ -480,6 +484,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
 
         await PushNotifications.addListener("registration", (token) => {
           isRegisteredRef.current = true;
+          notifyRegistrationReady();
           void (async () => {
             try {
               await handlePushRegistration(
@@ -728,7 +733,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
 
   useEffect(() => {
     if (isActive) void reconcileProfileDeliveredNotifications();
-  }, [isActive, reconcileProfileDeliveredNotifications]);
+  }, [isActive, registrationRevision, reconcileProfileDeliveredNotifications]);
 
   useEffect(() => {
     let current = true;
