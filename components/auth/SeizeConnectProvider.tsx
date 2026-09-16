@@ -19,7 +19,10 @@ import {
   removeAuthJwt,
   setActiveWalletAccount,
 } from "@/services/auth/auth.utils";
-import { logoutSessionV2 } from "@/services/auth/session-v2.utils";
+import {
+  getSessionClientType,
+  logoutSessionV2,
+} from "@/services/auth/session-v2.utils";
 import { useConnectedAccountsUnreadNotifications } from "@/hooks/useConnectedAccountsUnreadNotifications";
 import { useUnreadNotifications } from "@/hooks/useUnreadNotifications";
 import useCapacitor from "@/hooks/useCapacitor";
@@ -440,7 +443,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
             : new Error("Failed to revoke session during logout");
         logError("seizeDisconnectAndLogout.logoutSessionV2", revokeError);
         // Native logout may proceed offline only after its cleanup is durably queued.
-        if (capacitor.isCapacitor) throw revokeError;
+        if (getSessionClientType() !== "web") throw revokeError;
       }
       await removeAuthJwt();
       refreshStoredConnectedAccounts();
@@ -460,7 +463,6 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
       throw authError;
     }
   }, [
-    capacitor.isCapacitor,
     disconnect,
     isSigningOutAllRef,
     refreshStoredConnectedAccounts,
