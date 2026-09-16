@@ -151,7 +151,7 @@ function MyStreamWaveHeaderIdentity({
       <Link
         href={directMessageProfileHref}
         aria-label={`View ${wave.name}'s profile`}
-        className="tw-flex tw-min-w-0 tw-items-center tw-gap-x-3 tw-text-white/95 tw-no-underline tw-transition-colors desktop-hover:hover:tw-text-white"
+        className="tw-flex tw-min-w-0 tw-items-center tw-gap-x-[13px] tw-text-white/95 tw-no-underline tw-transition-colors desktop-hover:hover:tw-text-white"
       >
         <div className="tw-size-9 tw-flex-shrink-0 tw-rounded-full tw-ring-1 tw-ring-white/30 tw-ring-offset-1 tw-ring-offset-iron-950">
           <WavePicture
@@ -168,7 +168,7 @@ function MyStreamWaveHeaderIdentity({
   }
 
   return (
-    <>
+    <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-x-[13px]">
       <div
         className={`tw-size-9 tw-flex-shrink-0 tw-self-start ${
           isAnnouncement
@@ -244,7 +244,7 @@ function MyStreamWaveHeaderIdentity({
           )
         )}
       </div>
-    </>
+    </div>
   );
 }
 
@@ -432,7 +432,7 @@ export default function MyStreamWaveTabsHeader({
   return (
     <>
       <div className={headerClassName}>
-        <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-x-2">
+        <div className="tw-flex tw-min-w-0 tw-flex-1 tw-self-start tw-items-center tw-gap-x-2 tw-pt-0.5">
           {showBackButton && (
             <button
               type="button"

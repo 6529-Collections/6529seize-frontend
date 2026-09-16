@@ -25,7 +25,7 @@ const VARIANT_CLASSES: Record<ButtonVariant, string> = {
   destructive:
     "tw-border-red tw-bg-red tw-text-white desktop-hover:hover:tw-border-red/90 desktop-hover:hover:tw-bg-red/90 active:tw-border-red/80 active:tw-bg-red/80",
   destructiveOutline:
-    "tw-border-red/20 tw-bg-red/5 tw-text-red/70 desktop-hover:hover:tw-border-red/30 desktop-hover:hover:tw-bg-red/10 desktop-hover:hover:tw-text-red active:tw-border-red/30 active:tw-bg-red/10 active:tw-text-red",
+    "tw-border-red/20 tw-bg-red/5 tw-text-red desktop-hover:hover:tw-border-red/30 desktop-hover:hover:tw-bg-red/10 desktop-hover:hover:tw-text-red active:tw-border-red/30 active:tw-bg-red/10 active:tw-text-red",
 };
 
 const SIZE_CLASSES: Record<ButtonSize, string> = {

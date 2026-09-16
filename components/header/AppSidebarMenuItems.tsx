@@ -170,7 +170,10 @@ function SidebarItemIconWithIndicator({
   readonly className: string;
 }) {
   return (
-    <span className="tw-relative tw-flex-shrink-0">
+    <span
+      className="tw-relative tw-flex tw-size-6 tw-flex-shrink-0 tw-items-center tw-justify-center"
+      aria-hidden="true"
+    >
       <SidebarItemIcon icon={item.icon} className={className} />
       {item.hasIndicator === true && (
         <span
@@ -212,9 +215,9 @@ function TopLevelMenuItem({
           <>
             <DisclosureButton className="tw-flex tw-w-full tw-items-center tw-justify-between tw-rounded-lg tw-border-none tw-bg-transparent tw-px-4 tw-py-3.5 tw-text-base tw-font-semibold tw-text-iron-50 tw-transition-colors tw-duration-200 active:tw-bg-iron-800">
               <div className="tw-flex tw-items-center tw-space-x-4 tw-text-base">
-                <SidebarItemIcon
-                  icon={item.icon}
-                  className="tw-size-6 tw-flex-shrink-0"
+                <SidebarItemIconWithIndicator
+                  item={item}
+                  className="tw-block tw-size-6"
                 />
                 <span>{item.label}</span>
               </div>
@@ -263,7 +266,7 @@ function TopLevelMenuItem({
       >
         <SidebarItemIconWithIndicator
           item={item}
-          className="tw-h-5 tw-w-5 tw-flex-shrink-0"
+          className="tw-block tw-size-6"
         />
         <span>{item.label}</span>
       </Link>
@@ -273,11 +276,11 @@ function TopLevelMenuItem({
   return (
     <button
       onClick={onNavigate}
-      className="tw-flex tw-w-full tw-items-center tw-space-x-3 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-4 tw-py-3 tw-text-base tw-font-semibold tw-text-iron-50 tw-transition-colors tw-duration-200 active:tw-bg-iron-800"
+      className="tw-flex tw-w-full tw-items-center tw-space-x-4 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-4 tw-py-3.5 tw-text-base tw-font-semibold tw-text-iron-50 tw-transition-colors tw-duration-200 active:tw-bg-iron-800"
     >
-      <SidebarItemIcon
-        icon={item.icon}
-        className="tw-h-5 tw-w-5 tw-flex-shrink-0"
+      <SidebarItemIconWithIndicator
+        item={item}
+        className="tw-block tw-size-6"
       />
       <span>{item.label}</span>
     </button>

@@ -32,6 +32,32 @@ describe("SmallScreenLayout", () => {
     registerRef.mockClear();
   });
 
+  it("places the app banner above navigation inside the measured header", () => {
+    pathname = "/";
+    localStorage.clear();
+    const userAgent = jest
+      .spyOn(navigator, "userAgent", "get")
+      .mockReturnValue("iPhone Safari");
+    try {
+      render(
+        <HeaderProvider>
+          <SmallScreenLayout>child</SmallScreenLayout>
+        </HeaderProvider>
+      );
+      const banner = screen.getByRole("complementary", {
+        name: "Open in 6529 Mobile",
+      });
+      const header = registerRef.mock.calls.find(
+        ([name, element]) => name === "header" && element
+      )?.[1];
+      expect(header).toContainElement(banner);
+      expect(header.firstElementChild).toBe(banner);
+      expect(banner.nextElementSibling?.tagName).toBe("HEADER");
+    } finally {
+      userAgent.mockRestore();
+    }
+  });
+
   it("renders header and menu toggle on home page", async () => {
     pathname = "/";
     render(

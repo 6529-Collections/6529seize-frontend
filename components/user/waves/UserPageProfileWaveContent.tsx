@@ -5,7 +5,8 @@ import UserPageProfileWaveMasonry, {
 } from "@/components/user/waves/UserPageProfileWaveMasonry";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiWaveCuration } from "@/generated/models/ApiWaveCuration";
-import { useWaveCurationDrops } from "@/hooks/useWaveCurationDrops";
+import { useCurationOrder } from "@/hooks/useCurationOrder";
+import CurationOrganize from "@/components/brain/my-stream/curations/CurationOrganize";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { PlusIcon } from "@heroicons/react/24/outline";
@@ -31,7 +32,11 @@ export default function UserPageProfileWaveContent({
   onRetryCurations,
   profileCuration,
   wave,
+  isOrganizing,
+  onDoneOrganizing,
 }: {
+  readonly isOrganizing: boolean;
+  readonly onDoneOrganizing: () => void;
   readonly canManageOwnOfficialWave: boolean;
   readonly containerWidth: number;
   readonly onCreateCuration: () => void;
@@ -46,6 +51,11 @@ export default function UserPageProfileWaveContent({
   readonly wave: ApiWave;
 }) {
   const locale = useBrowserLocale();
+  const order = useCurationOrder({
+    wave,
+    curationId: profileCuration?.id ?? "",
+    enabled: profileCuration !== null,
+  });
   const {
     dataUpdatedAt,
     drops,
@@ -56,11 +66,7 @@ export default function UserPageProfileWaveContent({
     isFetchingNextPage,
     isPlaceholderData,
     refetch: refetchDrops,
-  } = useWaveCurationDrops({
-    wave,
-    curationId: profileCuration?.id,
-    enabled: profileCuration !== null,
-  });
+  } = order;
   const state = resolveProfileCurationViewState({
     areCurationsError,
     areCurationsLoading,
@@ -71,7 +77,7 @@ export default function UserPageProfileWaveContent({
     drops,
     dropsDataUpdatedAt: dataUpdatedAt,
     areDropsError,
-    isDropsPlaceholderData: isPlaceholderData,
+    isDropsPlaceholderData: isPlaceholderData && !isOrganizing,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
@@ -142,8 +148,14 @@ export default function UserPageProfileWaveContent({
       return <LoadingPanel label="Loading curation..." />;
     case "ready":
       return (
-        <div className="tw-overflow-hidden tw-rounded-2xl">
+        <CurationOrganize
+          axis={containerWidth >= 624 ? "horizontal" : "vertical"}
+          order={order}
+          enabled={isOrganizing}
+          onDone={onDoneOrganizing}
+        >
           <UserPageProfileWaveMasonry
+            order={order}
             curationId={state.curation.id}
             containerWidth={containerWidth}
             drops={state.drops}
@@ -153,7 +165,7 @@ export default function UserPageProfileWaveContent({
             showIdentity={false}
             profileIdentity={profileIdentity}
           />
-        </div>
+        </CurationOrganize>
       );
   }
 }

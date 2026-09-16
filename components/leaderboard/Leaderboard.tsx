@@ -25,6 +25,7 @@ import {
 } from "../searchModal/SearchModal";
 import styles from "./Leaderboard.module.css";
 import LeaderboardCardsCollectedComponent from "./LeaderboardCardsCollected";
+import LeaderboardFilterScroll from "./LeaderboardFilterScroll";
 import LeaderboardInteractionsComponent from "./LeaderboardInteractions";
 
 export enum Content {
@@ -394,11 +395,11 @@ export default function Leaderboard(
       {isNetworkPage && (
         <section className={styles["networkToolbar"]} id="leaderboard-page">
           <div className={styles["networkToolbarTop"]}>
-            <div className={styles["networkFilters"]}>
+            <LeaderboardFilterScroll>
               {printCollectorsDropdown()}
               {printCollectionsDropdown()}
               {printSeasonsDropdown()}
-            </div>
+            </LeaderboardFilterScroll>
             <div className={styles["networkToolbarActions"]}>
               <div className={styles["networkViewTabs"]}>
                 {printCardsInteractionsToggle()}

@@ -34,6 +34,8 @@ import CollectionsMenuIcon from "../common/icons/CollectionsMenuIcon";
 import UsersIcon from "../common/icons/UsersIcon";
 import WavesIcon from "../common/icons/WavesIcon";
 import NavItem from "./NavItem";
+import styles from "./BottomNavigation.module.css";
+import DockedVersionUpdate from "@/components/version-update/DockedVersionUpdate";
 import { getProfileHref, getResolvedNavItemState } from "./navItemState";
 import type { NavItem as NavItemData } from "./navTypes";
 import { getActiveViewFromUrl } from "./ViewContext";
@@ -550,10 +552,11 @@ const BottomNavigationResolvedContent: React.FC<
     >
       <div
         {...{ [MOBILE_BOTTOM_NAV_DOCK_ATTRIBUTE]: "true" }}
-        className={getDockClassName(compact)}
+        data-compact={compact}
+        className={`${getDockClassName(compact)} ${styles["dock"] ?? ""}`}
         style={getDockStyle({ compact, isTabletViewport })}
       >
-        <div className="tw-pointer-events-none tw-absolute tw-inset-0 tw-overflow-hidden tw-rounded-[inherit]">
+        <DockedVersionUpdate>
           <div
             aria-hidden="true"
             data-testid="mobile-dock-active-pill"
@@ -568,7 +571,7 @@ const BottomNavigationResolvedContent: React.FC<
               isTabletViewport,
             })}
           />
-        </div>
+        </DockedVersionUpdate>
         <div className={floatingNavHitRowClassName}>
           <ul className={getFloatingNavListClassName(compact)}>
             {navItems.map((item) => (
