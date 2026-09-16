@@ -16,6 +16,10 @@ import { HttpFile } from '../http/http';
 
 export class ApiCompleteMultipartUploadResponse {
     'media_url': string;
+    /**
+    * MIME type of the published image. AVIF still images are converted to WebP; use this value when attaching media to a drop.
+    */
+    'mime_type'?: string;
     'media_upload_id'?: string | null;
     'media_status'?: ApiDropMediaStatus;
     'media_error'?: string | null;
@@ -28,6 +32,12 @@ export class ApiCompleteMultipartUploadResponse {
         {
             "name": "media_url",
             "baseName": "media_url",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "mime_type",
+            "baseName": "mime_type",
             "type": "string",
             "format": ""
         },
