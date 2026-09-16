@@ -332,6 +332,7 @@ export function SeizeVideoElement({
   onClick,
   onDurationChange,
   onEnded,
+  onEmptied,
   onError,
   onFocus,
   onLoadedMetadata,
@@ -371,6 +372,7 @@ export function SeizeVideoElement({
   readonly onClick: React.MouseEventHandler<HTMLVideoElement>;
   readonly onDurationChange: () => void;
   readonly onEnded: () => void;
+  readonly onEmptied: () => void;
   readonly onError: React.ReactEventHandler<HTMLVideoElement>;
   readonly onFocus?: React.FocusEventHandler<HTMLVideoElement> | undefined;
   readonly onLoadedMetadata: React.ReactEventHandler<HTMLVideoElement>;
@@ -417,6 +419,7 @@ export function SeizeVideoElement({
       onPlay={onPlay}
       onPause={onPause}
       onEnded={onEnded}
+      onEmptied={onEmptied}
       onError={onError}
       onFocus={onFocus}
       onSeeked={onSeeked}

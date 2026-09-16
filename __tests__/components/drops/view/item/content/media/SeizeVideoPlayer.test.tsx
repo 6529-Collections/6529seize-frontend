@@ -729,6 +729,29 @@ describe("SeizeVideoPlayer", () => {
     expect(video).toHaveClass("tw-object-contain");
   });
 
+  it("clears duration when an externally managed video source is emptied", () => {
+    const { container } = render(<SeizeVideoPlayer />);
+    const video = container.querySelector("video")!;
+    Object.defineProperty(video, "duration", { configurable: true, value: 10 });
+    video.currentTime = 6;
+    fireEvent.durationChange(video);
+    fireEvent.emptied(video);
+    expect(screen.getByText("0:00 / —")).toBeInTheDocument();
+    expect(screen.getByRole("slider")).toBeDisabled();
+  });
+
+  it("refreshes elapsed time even when duration changes at the same percentage", () => {
+    const { container } = render(<SeizeVideoPlayer src="video.mp4" />);
+    const video = container.querySelector("video")!;
+    Object.defineProperty(video, "duration", { configurable: true, value: 10 });
+    video.currentTime = 5;
+    fireEvent.durationChange(video);
+    Object.defineProperty(video, "duration", { configurable: true, value: 20 });
+    video.currentTime = 10;
+    fireEvent.durationChange(video);
+    expect(screen.getByText("0:10 / 0:20")).toBeInTheDocument();
+  });
+
   it("uses native controls for watch media and suppresses custom controls", () => {
     const { container } = render(
       <SeizeVideoPlayer

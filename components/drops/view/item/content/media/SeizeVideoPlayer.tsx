@@ -267,6 +267,12 @@ export default function SeizeVideoPlayer({
     revealControls();
   }
 
+  function resetProgress() {
+    isScrubbingRef.current = false;
+    setDurationState({ src: directSrc, value: 0 });
+    setProgressState({ src: directSrc, value: 0, currentTime: 0 });
+  }
+
   function updateProgress() {
     const video = internalVideoRef.current;
     if (!video || !Number.isFinite(video.duration) || video.duration <= 0) {
@@ -292,7 +298,9 @@ export default function SeizeVideoPlayer({
       (video.currentTime / video.duration) * 100
     );
     setProgressState((current) =>
-      current.src === directSrc && current.value === nextProgress
+      current.src === directSrc &&
+      current.value === nextProgress &&
+      current.currentTime === video.currentTime
         ? current
         : {
             src: directSrc,
@@ -721,6 +729,7 @@ export default function SeizeVideoPlayer({
         onClick={handleVideoClick}
         onDurationChange={updateProgress}
         onEnded={handlePause}
+        onEmptied={resetProgress}
         onError={handleError}
         onFocus={showMinimalControls ? revealControls : undefined}
         onLoadedMetadata={handleMetadata}
