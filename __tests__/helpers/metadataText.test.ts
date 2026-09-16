@@ -14,4 +14,10 @@ describe("toMetadataExcerpt", () => {
       "one two three four…"
     );
   });
+
+  it("ignores invalid numeric entities without breaking the excerpt", () => {
+    expect(toMetadataExcerpt("Safe &#1114112; &#x110000; text")).toBe(
+      "Safe text"
+    );
+  });
 });

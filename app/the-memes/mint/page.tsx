@@ -21,8 +21,8 @@ const getLatestMeme = cache(async (): Promise<ApiMemesExtendedData> => {
   });
 });
 
-const getMintTitle = (nft: ApiMemesExtendedData | null): string => {
-  const name = nft?.name.trim();
+export const getMintTitle = (nft: ApiMemesExtendedData | null): string => {
+  const name = (nft as { readonly name?: string } | null)?.name?.trim();
   return nft && name
     ? `Mint #${nft.id} | ${name} | The Memes`
     : "Mint | The Memes";

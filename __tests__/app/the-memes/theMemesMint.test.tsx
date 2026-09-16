@@ -1,4 +1,7 @@
-import TheMemesMintPage, { generateMetadata } from "@/app/the-memes/mint/page";
+import TheMemesMintPage, {
+  generateMetadata,
+  getMintTitle,
+} from "@/app/the-memes/mint/page";
 import { AuthContext } from "@/components/auth/Auth";
 import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
 import { commonApiFetch } from "@/services/api/common-api";
@@ -107,6 +110,12 @@ describe("TheMemesMintPage", () => {
     );
     expect(url.searchParams.get("title")).toBe(
       "Mint #1 | Meme | The Memes"
+    );
+  });
+
+  it("falls back safely when a partial response omits the name", () => {
+    expect(getMintTitle({ id: 2, name: undefined } as any)).toBe(
+      "Mint | The Memes"
     );
   });
 });

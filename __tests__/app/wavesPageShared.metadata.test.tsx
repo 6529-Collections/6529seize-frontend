@@ -109,6 +109,10 @@ describe("buildWavesMetadata", () => {
       "Explore this Wave. | 6529.io"
     );
     expect(privateMetadata.description).not.toContain("private description");
+    expect(privateMetadata.openGraph?.description).not.toContain(
+      "private description"
+    );
+    expect(privateMetadata.twitter).not.toHaveProperty("description");
   });
 
   it("uses chat drop metadata when a serial number is shared", async () => {

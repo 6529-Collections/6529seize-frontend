@@ -206,6 +206,19 @@ describe("user tab page via createUserTabPage", () => {
     );
   });
 
+  it("encodes the profile identity in the public BIO endpoint", async () => {
+    const { generateMetadata } = buildFactory();
+
+    await generateMetadata({
+      params: Promise.resolve({ user: "Alice%2FAdmin" }),
+    });
+
+    expect(commonApiFetch).toHaveBeenCalledWith({
+      endpoint: "profiles/alice%252fadmin/cic/statements",
+      headers: { "x-test": "1" },
+    });
+  });
+
   it("noindexes profile utility tabs and temporary profile failures", async () => {
     const subscriptions = createUserTabPage({
       subroute: "subscriptions",

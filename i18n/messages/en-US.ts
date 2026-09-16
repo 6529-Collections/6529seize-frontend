@@ -2829,6 +2829,18 @@ export const EN_US_MESSAGES = {
   "profile.metadata.unavailable.title": "Profile temporarily unavailable",
   "profile.metadata.unavailable.description":
     "This public profile could not be loaded.",
+  "profile.metadata.pathTitle": "{display} - {pathTitle}",
+  "profile.metadata.title": "{pageTitle} | 6529.io",
+  "profile.metadata.description":
+    "Explore {display}'s public identity and activity.",
+  "profile.metadata.ogImageAlt": "{display} profile social card",
+  "waves.metadata.title": "{waveName} | Brain",
+  "waves.metadata.publicDescription": "Explore {waveName}, a public Wave.",
+  "waves.metadata.privateDescription": "Explore this Wave.",
+  "waves.metadata.ogImageAlt": "{waveName} wave social card",
+  "nft.metadata.itemTitle": "{name} | {collection}",
+  "nft.metadata.description": "{name} · {collection}",
+  "nft.metadata.descriptionWithArtist": "{name} · {artist} · {collection}",
   "memes.proposalFrame.enable": "Add a proposal card frame (optional)",
   "memes.proposalFrame.description":
     "This card has plans. Add an animated border that says this is a proposal and the artwork may change. Your media will be embedded in an HTML artwork.",

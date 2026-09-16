@@ -117,7 +117,7 @@ const loadPublicProfileBio = async (
 ): Promise<string | null> => {
   try {
     const statements = await commonApiFetch<CicStatement[]>({
-      endpoint: `profiles/${user}/cic/statements`,
+      endpoint: `profiles/${encodeURIComponent(user)}/cic/statements`,
       headers,
     });
     return (
