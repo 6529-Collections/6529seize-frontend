@@ -59,8 +59,10 @@ Opening this page inside 6529 Mobile and choosing `Open app` navigates internall
   does not launch. The fallback retains your destination.
 - On iOS and other browsers, a custom app link may show a browser error or
   leave you on the website if the app is absent or the launch is blocked.
-- After an attempt, the page offers neutral help: `App didn’t open? Get the app
-  or continue browsing.` This is not an installation or success check.
+- The banner does not add a status message after an attempt. `Get the app`
+  and dismiss remain available if you stay in the browser.
+- After an attempt on the handoff page, neutral help reads: `App didn’t open?
+Get the app or continue browsing.` This is not an installation or success check.
 - Use the store action, retry `Open app` on the handoff page, or continue browsing.
 - Retrying from the handoff page uses a direct app link to avoid a fallback loop.
 - There is no timed automatic store redirect.

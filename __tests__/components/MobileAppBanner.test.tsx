@@ -37,17 +37,14 @@ test("shows the approved logo, store link, Open and dismiss controls", () => {
     "href",
     MOBILE_APP_IOS
   );
-  expect(container.querySelector("img")).toHaveAttribute(
-    "src",
-    "/6529bgwhite.svg"
-  );
+  expect(container.querySelector("img")).toHaveAttribute("src", "/6529.svg");
   expect(
     screen.getByRole("button", { name: "Open in 6529 Mobile" })
   ).toHaveTextContent("Open");
   expect(screen.queryByRole("status")).not.toBeInTheDocument();
 });
 
-test("uses the actual destination at tap time and offers neutral recovery", () => {
+test("opens the live destination without adding a status message", () => {
   const open = jest.spyOn(window, "open").mockReturnValue(null);
   render(<MobileAppBanner />);
   window.history.replaceState({}, "", "/waves/123?drop=456&tag=a&tag=b#part-2");
@@ -56,9 +53,7 @@ test("uses the actual destination at tap time and offers neutral recovery", () =
     "testmobile6529://navigate/waves/123?drop=456&tag=a&tag=b#part-2",
     "_self"
   );
-  expect(screen.getByRole("status")).toHaveTextContent(
-    "App didn’t open? Get the app or continue browsing."
-  );
+  expect(screen.queryByRole("status")).not.toBeInTheDocument();
   expect(screen.getByRole("link", { name: "Get the app" })).toBeInTheDocument();
 });
 
@@ -68,8 +63,16 @@ test("a thrown browser launch error leaves the page and recovery actions usable"
   });
   render(<MobileAppBanner />);
   fireEvent.click(screen.getByRole("button", { name: "Open in 6529 Mobile" }));
-  expect(screen.getByRole("status")).toBeInTheDocument();
+  expect(screen.queryByRole("status")).not.toBeInTheDocument();
+  expect(screen.getByRole("link", { name: "Get the app" })).toHaveAttribute(
+    "href",
+    MOBILE_APP_IOS
+  );
   expect(window.location.pathname).toBe("/");
+  fireEvent.click(
+    screen.getByRole("button", { name: "Dismiss app banner for seven days" })
+  );
+  expect(screen.queryByRole("complementary")).not.toBeInTheDocument();
 });
 
 test("dismissal persists across remounts and expires after exactly seven days", () => {

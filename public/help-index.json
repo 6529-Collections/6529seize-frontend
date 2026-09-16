@@ -5033,7 +5033,7 @@
         "Open attempts to launch the current wave, drop, profile or supported page directly in the app, preserving query parameters and fragments. Browser authentication is not transferred; app access and regional restrictions still apply.",
         "Dismissing the banner hides it for seven days in the same browser, including reloads and visits. Clearing website data resets it; blocked storage permits only in-memory dismissal.",
         "Get the app opens the App Store on iOS or Google Play on Android. After installation, return to the browser page and tap Open to reach the destination; installation alone does not preserve it through the store.",
-        "App opening may be blocked, cancelled, or unavailable. The website cannot reliably detect installation and does not automatically redirect to a store after a timer. Users can continue browsing."
+        "App opening may be blocked, cancelled, or unavailable. The banner adds no status message after Open; Get the app and dismiss remain available if users stay in the browser. The website cannot reliably detect installation and does not automatically redirect to a store after a timer. Users can continue browsing."
       ],
       "canonical_path": "/about/6529-apps",
       "related_paths": ["/waves"],
