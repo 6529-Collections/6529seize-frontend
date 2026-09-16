@@ -38,7 +38,7 @@ controls.
 If your account can curate the selected Curation, `Organize posts` appears in
 `Manage` under `This Curation` when it contains at least two posts. The same
 inline organizing mode is available from the source Wave's Curation tab. Posts
-stay in the grid and gain blue handles. Drag a handle, or tap one and then a
+stay in the grid and gain small drag handles over each post. Drag a handle, or tap one and then a
 destination handle. Keyboard users can select a handle with Space, move with
 the arrow keys, and press Space to place it. Each move saves automatically for
 all readers. Undo reverses the latest move; Done exits organizing mode.

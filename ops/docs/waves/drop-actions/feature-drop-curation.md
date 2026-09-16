@@ -33,7 +33,7 @@ Not shown on:
 - While viewing a Curation tab, use `Remove from {Curation name}` in the same
   post action menu to remove the post from the active Curation.
 - If you can manage a Curation with at least two posts, select `Organize`
-  above the Curation tab's posts. Posts gain blue drag handles in place. Drag
+  above the Curation tab's posts. Posts gain small drag handles over each post. Drag
   a handle, or tap one and then a destination handle. With a keyboard, select
   a handle with Space, move with the arrow keys, and press Space to place it.
   Each move saves automatically. Undo reverses the latest move; Done exits.

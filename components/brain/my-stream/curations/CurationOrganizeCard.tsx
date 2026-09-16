@@ -60,7 +60,7 @@ export default function CurationOrganizeCard({
   return (
     <div
       ref={setNodeRef}
-      className={`tailwind-scope tw-relative tw-min-w-0 tw-rounded-xl ${enabled ? "tw-ring-1 tw-ring-primary-400/40" : ""} ${isDragging ? "tw-opacity-40" : ""}`}
+      className={`tailwind-scope tw-relative tw-min-w-0 tw-rounded-xl ${selected ? "tw-ring-1 tw-ring-iron-500" : ""} ${isDragging ? "tw-opacity-40" : ""}`}
     >
       {enabled && (
         <button
@@ -77,9 +77,8 @@ export default function CurationOrganizeCard({
           disabled={busy}
           onClick={() => select(id)}
           onKeyDown={(event) => keyDown(id, event)}
-          className={`tw-flex tw-h-11 tw-w-full tw-touch-none tw-select-none tw-items-center tw-justify-between tw-gap-2 tw-rounded-t-xl tw-border-0 tw-px-3 tw-text-sm tw-font-semibold tw-text-white tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 disabled:tw-cursor-wait ${selected ? "tw-bg-primary-500" : "tw-bg-primary-600"} ${isDragging ? "tw-cursor-grabbing" : "tw-cursor-grab"}`}
+          className={`tw-absolute tw-right-2 tw-top-2 tw-z-[1001] tw-flex tw-size-11 tw-touch-none tw-select-none tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-p-0 tw-text-iron-100 tw-shadow-sm tw-outline-none tw-ring-1 tw-ring-inset tw-ring-white/10 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 disabled:tw-cursor-wait ${selected ? "tw-bg-iron-700" : "tw-bg-iron-800/90 desktop-hover:hover:tw-bg-iron-700"} ${isDragging ? "tw-cursor-grabbing" : "tw-cursor-grab"}`}
         >
-          <span>{number}</span>
           <svg
             aria-hidden="true"
             width="24"

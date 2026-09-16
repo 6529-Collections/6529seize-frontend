@@ -55,7 +55,7 @@ export const PROFILE_CURATION_MESSAGES = {
   "profileCuration.order.loadEarlier": "Load earlier posts",
   "profileCuration.order.title": "Reorder {curationName}",
   "profileCuration.order.help":
-    "Drag the blue handle to move a post. Each move saves automatically.",
+    "Drag a post by its handle. Each move saves automatically.",
   "profileCuration.order.postNumber": "Post #{number}",
   "profileCuration.order.handle": "Select {postName} to move",
   "profileCuration.order.chooseDestination":
