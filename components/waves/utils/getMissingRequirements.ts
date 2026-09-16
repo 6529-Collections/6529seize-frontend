@@ -1,4 +1,5 @@
 import { ApiWaveParticipationRequirement } from "@/generated/models/ApiWaveParticipationRequirement";
+import { getContentType } from "@/services/uploads/mediaUploadMimeType";
 import type { CreateDropMetadataType } from "../CreateDropContent";
 
 export interface MissingRequirements {
@@ -7,17 +8,20 @@ export interface MissingRequirements {
 }
 
 const isRequiredMetadataMissing = (item: CreateDropMetadataType): boolean => {
-  return item.required && (item.value === null || item.value === undefined || item.value === "");
+  return item.required && (item.value === null || item.value === "");
 };
 
-const isMediaTypeMatching = (file: File, mediaType: ApiWaveParticipationRequirement): boolean => {
+const isMediaTypeMatching = (
+  file: File,
+  mediaType: ApiWaveParticipationRequirement
+): boolean => {
   switch (mediaType) {
     case ApiWaveParticipationRequirement.Image:
-      return file.type.startsWith("image/");
+      return getContentType(file).startsWith("image/");
     case ApiWaveParticipationRequirement.Audio:
-      return file.type.startsWith("audio/");
+      return getContentType(file).startsWith("audio/");
     case ApiWaveParticipationRequirement.Video:
-      return file.type.startsWith("video/");
+      return getContentType(file).startsWith("video/");
     default:
       return false;
   }
@@ -39,10 +43,12 @@ export const getMissingRequirements = (
     metadata.filter(isRequiredMetadataMissing).map((item) => item.key);
 
   const getMissingMedia = () =>
-    requiredMedia.filter((media) => !files.some((file) => isMediaTypeMatching(file, media)));
+    requiredMedia.filter(
+      (media) => !files.some((file) => isMediaTypeMatching(file, media))
+    );
 
   return {
     metadata: getMissingMetadata(),
     media: getMissingMedia(),
   };
-}; 
+};

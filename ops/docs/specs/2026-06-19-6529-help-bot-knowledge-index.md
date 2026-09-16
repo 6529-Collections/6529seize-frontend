@@ -551,6 +551,14 @@ compose a short answer.
 - How should unanswered production questions feed back into corpus updates and
   eval coverage?
 
+### Drop media format guidance
+
+The `waves.composer.image-uploads` record owns the accepted drop media format
+list, AVIF still-image conversion and limits, immediate rejection feedback,
+and mixed-batch draft preservation. Keep its facts aligned with the shared
+upload format definitions and the composer media guide. Other upload surfaces
+retain separate rules.
+
 ## Desktop Core knowledge
 
 The `desktop.*` records, tagged `desktop-core`, cover the native 6529 Desktop
