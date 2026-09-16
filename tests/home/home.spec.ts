@@ -71,12 +71,14 @@ test("desktop account updates do not move utilities, including in short expanded
   });
   try {
     await page.goto("/about", { waitUntil: "domcontentloaded" });
-    const sidebar = page.locator('[aria-label="Primary sidebar"]');
+    const sidebar = page.getByLabel("Primary sidebar", { exact: true });
     const search = sidebar.getByRole("button", {
       name: "Search",
       exact: true,
     });
-    const account = sidebar.locator("[data-sidebar-account]");
+    const account = page
+      .getByLabel("Primary sidebar", { exact: true })
+      .locator("[data-sidebar-account]");
     await expect(account).toHaveAttribute("data-sidebar-account", "signed-out");
     await expect(search).toBeVisible();
     const beforeSearch = await search.boundingBox();
@@ -85,7 +87,9 @@ test("desktop account updates do not move utilities, including in short expanded
     expect(beforeAccount).not.toBeNull();
     // Search is usable even though the optional account action is unresolved.
     await search.click();
-    await expect(page.locator("#header-search-input")).toBeVisible();
+    await expect(
+      page.getByRole("combobox", { name: "Search 6529", exact: true })
+    ).toBeVisible();
     await page.keyboard.press("Escape");
     releaseVersion();
     const update = sidebar.getByRole("button", {
@@ -96,7 +100,8 @@ test("desktop account updates do not move utilities, including in short expanded
     expect(await search.boundingBox()).toEqual(beforeSearch);
     expect(await account.boundingBox()).toEqual(beforeAccount);
     await expect(
-      sidebar
+      page
+        .getByLabel("Primary sidebar", { exact: true })
         .locator('[data-sidebar-section="account"]')
         .getByRole("button", { name: "Update", exact: true })
     ).toBeVisible();
@@ -110,10 +115,12 @@ test("desktop account updates do not move utilities, including in short expanded
     await expect(search).toBeInViewport();
     await expect(update).toBeInViewport();
     await expect(account).toBeInViewport();
-    const navigationBox = await sidebar
+    const navigationBox = await page
+      .getByLabel("Primary sidebar", { exact: true })
       .locator('[data-sidebar-scroll="true"]')
       .boundingBox();
-    const utilitiesBox = await sidebar
+    const utilitiesBox = await page
+      .getByLabel("Primary sidebar", { exact: true })
       .locator('[data-sidebar-section="utilities"]')
       .boundingBox();
     expect(navigationBox).not.toBeNull();
