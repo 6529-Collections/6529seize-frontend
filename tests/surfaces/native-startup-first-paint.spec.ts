@@ -2,6 +2,7 @@ import { expect, test } from "@playwright/test";
 import { createElement } from "react";
 import { renderToString } from "react-dom/server";
 import NativeStartupBoundary from "../../components/layout/NativeStartupBoundary";
+import { VERSION_RELOAD_STYLES } from "../../components/version-update/VersionReloadScreen";
 import {
   NATIVE_STARTUP_SCRIPT,
   NATIVE_STARTUP_STYLES,
@@ -62,3 +63,32 @@ for (const platform of ["ios", "android", "web"] as const) {
     });
   }
 }
+
+test("version reload cover hands off to the native loading shell @readonly", async ({
+  page,
+}) => {
+  const content = renderToString(
+    createElement(NativeStartupBoundary, {
+      isNativeLayout: false,
+      children: createElement("main", null, "Public content"),
+    })
+  );
+  await page.setContent(`<!doctype html><html data-version-reload="true"><head>
+    <style>${NATIVE_STARTUP_STYLES}${VERSION_RELOAD_STYLES}</style>
+    <script>globalThis.androidBridge = {};</script>
+    <script>${NATIVE_STARTUP_SCRIPT}</script>
+    </head><body>
+    <div id="version-reload-screen" role="status">Updating</div>
+    ${content}</body></html>`);
+  const placeholder = page.getByTestId("native-startup-placeholder");
+  const main = page.getByRole("main", { includeHidden: true });
+  await expect(page.getByRole("status")).toBeVisible();
+  await expect(placeholder).toBeHidden();
+  await expect(main).toBeHidden();
+  await page.evaluate(() =>
+    document.documentElement.removeAttribute("data-version-reload")
+  );
+  await expect(page.getByRole("status", { includeHidden: true })).toBeHidden();
+  await expect(placeholder).toBeVisible();
+  await expect(main).toBeHidden();
+});
