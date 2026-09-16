@@ -236,8 +236,9 @@ describe("DragDropPastePlugin", () => {
   });
 
   it("inserts one image when Chrome exposes it in both clipboard collections", async () => {
-    const listedImage = new File(["a"], "image.png", { type: "image/png" });
-    const itemImage = new File(["a"], "image.png", { type: "image/png" });
+    const imageOptions = { type: "image/png", lastModified: 1700000000000 };
+    const listedImage = new File(["a"], "image.png", imageOptions);
+    const itemImage = new File(["a"], "image.png", imageOptions);
     const preventDefault = jest.fn();
 
     renderPlugin();
@@ -265,6 +266,62 @@ describe("DragDropPastePlugin", () => {
     expect(multiPartUpload).toHaveBeenCalledTimes(1);
     expect(multiPartUpload).toHaveBeenCalledWith(
       expect.objectContaining({ file: listedImage, path: "drop" })
+    );
+  });
+
+  it("keeps a distinct clipboard item when the file list is populated", async () => {
+    const listedImage = new File(["a"], "first.png", { type: "image/png" });
+    const additionalImage = new File(["b"], "second.png", {
+      type: "image/png",
+    });
+
+    renderPlugin();
+    await act(async () => {
+      const handled = pasteHandler({
+        preventDefault: jest.fn(),
+        clipboardData: {
+          files: [listedImage],
+          items: [
+            { kind: "file", type: "image/png", getAsFile: () => listedImage },
+            {
+              kind: "file",
+              type: "image/png",
+              getAsFile: () => additionalImage,
+            },
+          ],
+          getData: () => "",
+        },
+      });
+      expect(handled).toBe(true);
+      await Promise.resolve();
+    });
+
+    expect($insertNodes).toHaveBeenCalledTimes(2);
+    expect(multiPartUpload).toHaveBeenCalledTimes(2);
+    expect(multiPartUpload).toHaveBeenCalledWith(
+      expect.objectContaining({ file: additionalImage, path: "drop" })
+    );
+  });
+
+  it("handles a clipboard file list without items", async () => {
+    const imageFile = new File(["a"], "image.png", { type: "image/png" });
+
+    renderPlugin();
+    await act(async () => {
+      const handled = pasteHandler({
+        preventDefault: jest.fn(),
+        clipboardData: {
+          files: [imageFile],
+          getData: () => "",
+        },
+      });
+      expect(handled).toBe(true);
+      await Promise.resolve();
+    });
+
+    expect($insertNodes).toHaveBeenCalledTimes(1);
+    expect(multiPartUpload).toHaveBeenCalledWith(
+      expect.objectContaining({ file: imageFile, path: "drop" })
     );
   });
 
