@@ -6038,12 +6038,24 @@
     {
       "id": "waves.composer.image-uploads",
       "kind": "ui_affordance",
-      "title": "Wave image uploads",
-      "aliases": ["upload image", "paste image", "drag image", "drop image"],
+      "title": "Drop media uploads",
+      "aliases": [
+        "upload image",
+        "paste image",
+        "drag image",
+        "drop image",
+        "AVIF",
+        "unsupported file"
+      ],
       "keywords": ["waves", "composer", "image", "upload", "drag", "paste"],
       "facts": [
-        "Wave composer supports documented drag-and-paste image upload behavior.",
-        "Image uploads have rules, limits, feedback states, and failure recovery.",
+        "Drop composers in waves, DMs and replies accept PNG, JPG/JPEG, GIF, WebP, AVIF still images, MP4, MOV/QT, AVI, MP3/MPEG audio, WAV, AAC, OGG, GLB, PDF and CSV.",
+        "Use the upload button or drag onto the chat for the file tray. Dragging or pasting images into the text editor uploads them inline; other supported files go to the tray.",
+        "Unsupported files are reported immediately by name with the supported formats. Existing text and valid files remain in the draft, including valid files from mixed batches.",
+        "AVIF still images are converted to WebP with orientation applied and metadata removed for compatibility with older supported apps. Wait for preparation before sending or continuing a Storm. Animated AVIF is unsupported; use a still image or GIF.",
+        "Media must be non-empty and at most 500 MB. PDF limits are 25 MB and 100 pages; CSV is limited to 50 MB. The file tray supports eight files across all Storm parts and skips excess files without removing existing selections.",
+        "AVIF limits are 64 million pixels and 16,383 pixels per side. Corrupt files and AVIF content with a mismatched filename are rejected. Uppercase .AVIF and empty or generic browser MIME types work.",
+        "HEIC/HEIF, SVG, BMP, TIFF and JPEG XL images are unsupported. Renaming a file does not convert its format. Other upload surfaces have their own format rules.",
         "Open media viewer behavior after posting is covered by drop image-viewer docs."
       ],
       "canonical_path": "/waves",
