@@ -1,67 +1,58 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { App } from "@capacitor/app";
-import { useCallback, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { publicEnv } from "@/config/env";
+import { getNativeLinkDestination } from "@/helpers/mobileAppLinks";
 import useCapacitor from "./useCapacitor";
 
-export enum DeepLinkScope {
-  NAVIGATE = "navigate",
-  SHARE_CONNECTION = "share-connection",
-}
+export { DeepLinkScope } from "@/helpers/mobileAppLinks";
 
 export const useDeepLinkNavigation = () => {
   const { isCapacitor } = useCapacitor();
   const router = useRouter();
 
-  const doNavigation = useCallback(
-    (pathname: string, query: Record<string, string | number>) => {
-      const searchParams = new URLSearchParams(
-        Object.entries(query).map(([key, value]) => [key, String(value)])
-      );
-      const url = `${pathname}?${searchParams.toString()}`;
-
-      router.push(url);
-    },
-    [router]
-  );
-
   useEffect(() => {
     if (!isCapacitor) return;
+    let disposed = false;
+    let receivedEvent = false;
+    let initialUrl: string | undefined;
+    let initialUrlReceivedAt = 0;
 
-    const listener = App.addListener("appUrlOpen", (data) => {
-      const urlString = data.url;
-
-      const schemeEndIndex = urlString.indexOf("://") + 3;
-      const urlWithoutScheme = urlString.slice(schemeEndIndex);
-
-      const [scope, ...pathParts] = urlWithoutScheme.split("?")[0]?.split("/")!;
-
-      const queryString = urlWithoutScheme.includes("?")
-        ? urlWithoutScheme.split("?")[1]
-        : "";
-
-      const searchParams = new URLSearchParams(queryString);
-      const queryParams: Record<string, string | number> = Object.fromEntries(
-        searchParams.entries()
+    const navigate = (url: string) => {
+      if (disposed) return;
+      const destination = getNativeLinkDestination(
+        url,
+        publicEnv.MOBILE_APP_SCHEME ?? "mobile6529",
+        window.location.origin,
+        Math.floor(Date.now() / 1000)
       );
-      queryParams["_t"] = Math.floor(Date.now() / 1000);
+      if (destination) router.push(destination);
+    };
 
-      switch (scope) {
-        case DeepLinkScope.NAVIGATE:
-          doNavigation(`/${pathParts.join("/")}`, queryParams);
-          break;
-        case DeepLinkScope.SHARE_CONNECTION:
-          doNavigation("/accept-connection-sharing", queryParams);
-          break;
-        default:
-          console.warn("Unknown Deep Link Scope", scope);
-          break;
-      }
+    const listener = App.addListener("appUrlOpen", ({ url }) => {
+      receivedEvent = true;
+      // Some native shells deliver the launch URL through both APIs.
+      if (url === initialUrl && Date.now() - initialUrlReceivedAt < 1000)
+        return;
+      navigate(url);
     });
 
+    void App.getLaunchUrl()
+      .then((launch) => {
+        if (disposed || receivedEvent || !launch?.url) return;
+        initialUrl = launch.url;
+        initialUrlReceivedAt = Date.now();
+        navigate(launch.url);
+      })
+      .catch(() => {
+        // The foreground listener remains usable if launch URL retrieval is unavailable.
+      });
+
     return () => {
-      listener.then((handle) => handle.remove());
+      disposed = true;
+      void listener.then((handle) => handle.remove());
     };
-  }, [doNavigation]);
+  }, [isCapacitor, router]);
 };
