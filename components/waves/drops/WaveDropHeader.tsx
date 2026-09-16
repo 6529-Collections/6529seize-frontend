@@ -117,6 +117,7 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
           {showActionsButton && onOpenActions !== undefined && (
             <button
               type="button"
+              data-curation-card-actions
               aria-label="Open drop actions"
               onClick={onOpenActions}
               className={`${
