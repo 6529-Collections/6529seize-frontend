@@ -46,14 +46,20 @@ export const PROFILE_CURATION_MESSAGES = {
   "profileCuration.header.disconnect": "Hide",
   "profileCuration.header.disconnectAria": "Hide Curation from profile",
   "profileCuration.header.manage": "Manage",
-  "profileCuration.order.action": "Reorder",
+  "profileCuration.order.action": "Organize",
+  "profileCuration.order.organizing": "Organizing",
+  "profileCuration.order.done": "Done",
+  "profileCuration.order.undo": "Undo",
+  "profileCuration.order.first": "Move to first",
+  "profileCuration.order.last": "Move to last",
+  "profileCuration.order.loadEarlier": "Load earlier posts",
   "profileCuration.order.title": "Reorder {curationName}",
   "profileCuration.order.help":
-    "Drag to reorder, or tap a handle then another post.",
+    "Drag the blue handle to move a post. Each move saves automatically.",
   "profileCuration.order.postNumber": "Post #{number}",
-  "profileCuration.order.handle": "Reorder {postName}",
+  "profileCuration.order.handle": "Select {postName} to move",
   "profileCuration.order.chooseDestination":
-    "Tap a post to move it there. Tap the selected handle to cancel.",
+    "Tap another handle to move it there. Tap the selected handle to cancel.",
   "profileCuration.order.placeBefore": "Move {postName} before {targetName}",
   "profileCuration.order.placeAfter": "Move {postName} after {targetName}",
   "profileCuration.order.keyboardHelp":
@@ -65,6 +71,9 @@ export const PROFILE_CURATION_MESSAGES = {
   "profileCuration.order.saved": "Curation order saved.",
   "profileCuration.order.moved": "{postName} is now at position {position}.",
   "profileCuration.order.saveFailed": "Couldn't save the order. Try again.",
+  "profileCuration.order.authCancelled": "Authentication was cancelled.",
+  "profileCuration.order.refreshFailed":
+    "Order saved, but posts couldn't refresh. Reload to see the latest order.",
   "profileCuration.order.changed":
     "This Curation changed. We've refreshed the posts. Try your move again.",
   "profileCuration.order.loadFailed": "Couldn't load posts. Retry",
@@ -80,7 +89,7 @@ export const PROFILE_CURATION_MESSAGES = {
   "profileCuration.manage.hideFromProfile": "Hide from profile",
   "profileCuration.manage.curationSection": "This Curation",
   "profileCuration.manage.edit": "Edit Curation",
-  "profileCuration.manage.reorderPosts": "Reorder posts",
+  "profileCuration.manage.reorderPosts": "Organize posts",
   "profileCuration.manage.showOnProfile": "Show on profile",
   "profileCuration.manage.delete": "Delete Curation",
   "profileCuration.manage.deleteTitle": "Delete Curation?",

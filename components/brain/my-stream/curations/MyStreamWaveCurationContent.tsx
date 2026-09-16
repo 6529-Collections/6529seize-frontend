@@ -8,14 +8,24 @@ import CommonIntersectionElement from "@/components/utils/CommonIntersectionElem
 import Button from "@/components/utils/button/Button";
 import Drop, { DropLocation } from "@/components/waves/drops/Drop";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
-import { useWaveCurationDrops } from "@/hooks/useWaveCurationDrops";
+import { useCurationOrder } from "@/hooks/useCurationOrder";
+import { useCurationOrderReveal } from "@/hooks/useCurationOrderReveal";
+import CurationOrganize from "./CurationOrganize";
+import CurationOrganizeCard from "./CurationOrganizeCard";
 import { useCurationManagementPermission } from "@/hooks/useCurationManagementPermission";
+import { useCurationPermissionProbe } from "@/hooks/useCurationPermissionProbe";
 import type { QuickCurationAction } from "@/hooks/drops/useCanShowDropCurationsAction";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { useApprovalWaveStatus } from "@/hooks/waves/useApprovalWaveStatus";
-import { useCallback, useMemo, useState, type ReactNode } from "react";
+import {
+  memo,
+  useCallback,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { useLayout } from "../layout/LayoutContext";
-import dynamic from "next/dynamic";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 
@@ -26,11 +36,6 @@ interface MyStreamWaveCurationContentProps {
   readonly onDropClick?: ((drop: ExtendedDrop) => void) | undefined;
   readonly constrainToViewport?: boolean | undefined;
 }
-
-const CurationDropOrderDialog = dynamic(
-  () => import("./CurationDropOrderDialog"),
-  { loading: () => null }
-);
 
 function MyStreamWaveCurationDropItem({
   drop,
@@ -78,6 +83,8 @@ function MyStreamWaveCurationDropItem({
   );
 }
 
+const MemoizedMyStreamWaveCurationDropItem = memo(MyStreamWaveCurationDropItem);
+
 export default function MyStreamWaveCurationContent({
   wave,
   curationId,
@@ -87,7 +94,11 @@ export default function MyStreamWaveCurationContent({
 }: MyStreamWaveCurationContentProps) {
   const { leaderboardViewStyle } = useLayout();
   const locale = useBrowserLocale();
-  const [isArrangeOpen, setIsArrangeOpen] = useState(false);
+  const [isOrganizing, setIsOrganizing] = useState(false);
+  const order = useCurationOrder({ wave, curationId });
+  const organizeButton = useRef<HTMLButtonElement | null>(null);
+  const container = useRef<HTMLDivElement | null>(null);
+  useCurationOrderReveal(order, container);
   const {
     drops,
     fetchNextPage,
@@ -95,15 +106,14 @@ export default function MyStreamWaveCurationContent({
     isFetching,
     isFetchingNextPage,
     isPlaceholderData,
-  } = useWaveCurationDrops({
-    wave,
-    curationId,
-  });
+  } = order;
 
+  const permissionProbeDropId = useCurationPermissionProbe(curationId, drops);
   const isInitialLoading = isFetching && drops.length === 0;
   const canManageActiveCuration = useCurationManagementPermission({
     curationId,
-    probeDropId: isPlaceholderData ? "" : (drops[0]?.id ?? ""),
+    probeDropId:
+      isPlaceholderData && !isOrganizing ? "" : permissionProbeDropId,
   });
   const {
     winningThreshold,
@@ -135,21 +145,27 @@ export default function MyStreamWaveCurationContent({
   const renderedDrops = useMemo(
     () =>
       drops.map((drop, index) => (
-        <MyStreamWaveCurationDropItem
-          key={drop.stableKey}
-          drop={drop}
-          previousDrop={index > 0 ? (drops[index - 1] ?? null) : null}
-          nextDrop={drops[index + 1] ?? null}
-          onDropClick={onDropClick}
-          winningThreshold={winningThreshold}
-          winningThresholdMinDurationMs={winningThresholdMinDurationMs}
-          isVotingClosed={isVotingClosed}
-          isVotingControlsLocked={isVotingControlsLocked}
-          standaloneQuickRemoveCuration={standaloneQuickRemoveCuration}
-        />
+        <CurationOrganizeCard
+          key={drop.id}
+          id={drop.id}
+          position={order.startIndex + index + 1}
+        >
+          <MemoizedMyStreamWaveCurationDropItem
+            drop={drop}
+            previousDrop={index > 0 ? (drops[index - 1] ?? null) : null}
+            nextDrop={drops[index + 1] ?? null}
+            onDropClick={onDropClick}
+            winningThreshold={winningThreshold}
+            winningThresholdMinDurationMs={winningThresholdMinDurationMs}
+            isVotingClosed={isVotingClosed}
+            isVotingControlsLocked={isVotingControlsLocked}
+            standaloneQuickRemoveCuration={standaloneQuickRemoveCuration}
+          />
+        </CurationOrganizeCard>
       )),
     [
       drops,
+      order.startIndex,
       isVotingClosed,
       isVotingControlsLocked,
       onDropClick,
@@ -180,7 +196,9 @@ export default function MyStreamWaveCurationContent({
     );
   } else {
     content = (
-      <div className="tw-flex tw-min-h-0 tw-flex-1 tw-flex-col">
+      <div
+        className={`tw-flex tw-min-h-0 tw-flex-1 tw-flex-col ${isOrganizing ? "tw-gap-4 tw-px-4 tw-pb-4" : ""}`}
+      >
         {renderedDrops}
         {(hasNextPage || isFetchingNextPage) && (
           <div className="tw-py-4">
@@ -201,6 +219,7 @@ export default function MyStreamWaveCurationContent({
 
   return (
     <div
+      ref={container}
       className={
         constrainToViewport
           ? "tw-flex tw-h-full tw-min-h-0 tw-w-full tw-min-w-0 tw-flex-grow tw-flex-col tw-overflow-y-auto tw-overflow-x-hidden tw-overscroll-y-contain tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300"
@@ -208,27 +227,33 @@ export default function MyStreamWaveCurationContent({
       }
       style={constrainToViewport ? leaderboardViewStyle : undefined}
     >
-      {canManageActiveCuration && !isPlaceholderData && drops.length > 1 && (
-        <div className="tailwind-scope tw-flex tw-justify-end tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-px-4 tw-py-2">
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => setIsArrangeOpen(true)}
-          >
-            {t(locale, "profileCuration.order.action")}
-          </Button>
-        </div>
-      )}
-      {isArrangeOpen && (
-        <CurationDropOrderDialog
-          wave={wave}
-          curationId={curationId}
-          curationName={curationTitle}
-          isOpen={isArrangeOpen}
-          onClose={() => setIsArrangeOpen(false)}
-        />
-      )}
-      {content}
+      {!isOrganizing &&
+        order.canAuthenticate &&
+        canManageActiveCuration &&
+        !isPlaceholderData &&
+        drops.length > 1 && (
+          <div className="tailwind-scope tw-flex tw-justify-end tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-px-4 tw-py-2">
+            <Button
+              ref={organizeButton}
+              variant="secondary"
+              size="sm"
+              onClick={() => setIsOrganizing(true)}
+            >
+              {t(locale, "profileCuration.order.action")}
+            </Button>
+          </div>
+        )}
+      <CurationOrganize
+        order={order}
+        enabled={isOrganizing && canManageActiveCuration}
+        waveId={wave.id}
+        onDone={() => {
+          setIsOrganizing(false);
+          requestAnimationFrame(() => organizeButton.current?.focus());
+        }}
+      >
+        {content}
+      </CurationOrganize>
     </div>
   );
 }

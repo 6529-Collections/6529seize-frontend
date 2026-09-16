@@ -32,10 +32,11 @@ Not shown on:
   `Manage Curations` to choose, remove, or create.
 - While viewing a Curation tab, use `Remove from {Curation name}` in the same
   post action menu to remove the post from the active Curation.
-- If you can manage a Curation with at least two posts, select `Reorder`
-  above the Curation tab's posts. Drag a handle, or tap a handle and then a
-  destination post. With a keyboard, lift a handle with Space, move with the
-  arrow keys, and press Space to place it. Each move saves automatically.
+- If you can manage a Curation with at least two posts, select `Organize`
+  above the Curation tab's posts. Posts gain blue drag handles in place. Drag
+  a handle, or tap one and then a destination handle. With a keyboard, select
+  a handle with Space, move with the arrow keys, and press Space to place it.
+  Each move saves automatically. Undo reverses the latest move; Done exits.
 - On specialized eligible leaderboard cards, use the separate `Curate` /
   `Curated` toggle.
 
@@ -95,12 +96,13 @@ Not shown on:
   action control.
 - Profile-card removal requires confirmation and does not delete the original
   post from its Wave.
-- `Reorder` is available only to accounts allowed to curate with the
+- `Organize` is available only to accounts allowed to curate with the
   selected Group. Readers without that permission see the saved order without
   arrangement controls.
-- The reorder editor initially requests up to 100 posts. In a longer Curation,
-  use `Load more posts` to reveal more destinations. Moves are currently
-  limited to loaded posts.
+- Posts load in pages of 20 as you scroll. Select a handle to reveal
+  `Move to first` and `Move to last`; these work across the whole Curation
+  without loading every post. After a distant move, its destination page opens.
+  Use `Load earlier posts` to browse back from there.
 
 ## Failure and Recovery
 

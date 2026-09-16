@@ -35,12 +35,18 @@ controls.
    `Choose another Curation` to select or create another Curation from the
    same source.
 
-If your account can curate the selected Curation, `Reorder posts` appears in
+If your account can curate the selected Curation, `Organize posts` appears in
 `Manage` under `This Curation` when it contains at least two posts. The same
-editor is available from the source Wave's Curation tab. Drag a handle, or tap
-a handle and then a destination post. Keyboard users can lift a handle with
-Space, move with the arrow keys, and press Space to place it. Each move saves automatically for all
-readers and appears in the profile's Curation grid.
+inline organizing mode is available from the source Wave's Curation tab. Posts
+stay in the grid and gain blue handles. Drag a handle, or tap one and then a
+destination handle. Keyboard users can select a handle with Space, move with
+the arrow keys, and press Space to place it. Each move saves automatically for
+all readers. Undo reverses the latest move; Done exits organizing mode.
+
+Posts load in pages as you scroll. Select a handle to reveal Move to first and
+Move to last; these also work beyond the loaded posts. After a distant move,
+the destination page opens with the moved post in view. Load earlier posts
+lets you browse back from that page.
 
 The setup dialog exposes source Wave and Group details under `Advanced setup
 details`. Existing public Waves remain available as an advanced alternative.
@@ -59,7 +65,7 @@ details`. Existing public Waves remain available as an advanced alternative.
 - **Profile post actions:** open the card menu to open the original Wave, edit
   the post when you are its author, or remove it from the Curation.
 - **Owner controls:** `Add post` is the primary action. `Manage` includes
-  `Reorder posts` under `This Curation` when available and groups profile display
+  `Organize posts` under `This Curation` when available and groups profile display
   actions separately from actions that change the Curation itself.
 - **Profile display:** `Choose another Curation`, `Use another source Wave`,
   and `Hide from profile` only change what this profile displays. Hiding keeps

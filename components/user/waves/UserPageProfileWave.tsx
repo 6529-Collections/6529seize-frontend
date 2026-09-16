@@ -2,7 +2,7 @@
 
 import { useParams, useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
-import { type ReactNode, useMemo, useState } from "react";
+import { type ReactNode, useMemo, useRef, useState } from "react";
 import { useAuth } from "@/components/auth/Auth";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import MobileWrapperConfirmationDialog from "@/components/mobile-wrapper-dialog/MobileWrapperConfirmationDialog";
@@ -18,6 +18,7 @@ import { useProfileWaveMutation } from "@/hooks/useProfileWaveMutation";
 import { useWaveById } from "@/hooks/useWaveById";
 import { useWaveCurationDrops } from "@/hooks/useWaveCurationDrops";
 import { useCurationManagementPermission } from "@/hooks/useCurationManagementPermission";
+import { useCurationPermissionProbe } from "@/hooks/useCurationPermissionProbe";
 import { useWaveCurations } from "@/hooks/waves/useWaveCurations";
 import { t } from "@/i18n/messages";
 import UserPageProfileWaveContent from "./UserPageProfileWaveContent";
@@ -49,12 +50,6 @@ type CurationPickerVariant = "dropdown" | "mobile-sheet";
 const MyStreamWaveCurationCreateDialog = dynamic(
   () =>
     import("@/components/brain/my-stream/tabs/MyStreamWaveCurationCreateDialog"),
-  { loading: () => null }
-);
-
-const CurationDropOrderDialog = dynamic(
-  () =>
-    import("@/components/brain/my-stream/curations/CurationDropOrderDialog"),
   { loading: () => null }
 );
 
@@ -262,7 +257,10 @@ export default function UserPageProfileWave({
   const [isQuickPostOpen, setIsQuickPostOpen] = useState(false);
   const [isSetupOpen, setIsSetupOpen] = useState(false);
   const [isDisconnectOpen, setIsDisconnectOpen] = useState(false);
-  const [isArrangeOpen, setIsArrangeOpen] = useState(false);
+  const curationHeaderRef = useRef<HTMLDivElement | null>(null);
+  const [organizingCurationId, setOrganizingCurationId] = useState<
+    string | null
+  >(null);
   const [submittingWaveId, setSubmittingWaveId] = useState<string | null>(null);
   const [submittingCurationId, setSubmittingCurationId] = useState<
     string | null
@@ -328,11 +326,13 @@ export default function UserPageProfileWave({
     curationId: profileCuration?.id,
     enabled: canManageOwnOfficialWave && profileCuration !== null,
   });
+  const permissionProbeDropId = useCurationPermissionProbe(
+    profileCuration?.id,
+    arrangementProbeDrops
+  );
   const canArrangeProfileCuration = useCurationManagementPermission({
     curationId: profileCuration?.id ?? "",
-    probeDropId: isArrangementProbePlaceholder
-      ? ""
-      : (arrangementProbeDrops[0]?.id ?? ""),
+    probeDropId: isArrangementProbePlaceholder ? "" : permissionProbeDropId,
   });
   const waveHref = wave ? getWaveHref(wave, profileCuration?.id ?? null) : null;
   const hasLoadedCurations = curations !== undefined;
@@ -488,7 +488,7 @@ export default function UserPageProfileWave({
 
   return (
     <div className="tw-space-y-5">
-      <div className="tw-relative">
+      <div ref={curationHeaderRef} className="tw-relative">
         <OfficialWaveSummary
           waveName={wave.name}
           metadataLabel={getOfficialWaveMetadataLabel(wave)}
@@ -509,7 +509,7 @@ export default function UserPageProfileWave({
                 onHideFromProfile={handleRemoveOfficialWave}
                 onReorderPosts={
                   canArrangeProfileCuration && arrangementProbeDrops.length > 1
-                    ? () => setIsArrangeOpen(true)
+                    ? () => setOrganizingCurationId(profileCuration.id)
                     : undefined
                 }
                 isProfileActionPending={
@@ -527,16 +527,6 @@ export default function UserPageProfileWave({
           onAddPost={addPostHandler}
         />
       </div>
-      {isArrangeOpen && profileCuration && (
-        <CurationDropOrderDialog
-          wave={wave}
-          curationId={profileCuration.id}
-          curationName={getProfileCurationTitle(profileCuration)}
-          isOpen={isArrangeOpen}
-          onClose={() => setIsArrangeOpen(false)}
-        />
-      )}
-
       {canManageOwnOfficialWave && (
         <MobileWrapperDialog
           title="Use another source Wave"
@@ -626,6 +616,22 @@ export default function UserPageProfileWave({
 
       <div ref={containerRef} className="tw-min-w-0 tw-flex-1">
         <UserPageProfileWaveContent
+          key={profileCuration?.id ?? "no-curation"}
+          isOrganizing={
+            canManageOwnOfficialWave &&
+            canArrangeProfileCuration &&
+            organizingCurationId === profileCuration?.id
+          }
+          onDoneOrganizing={() => {
+            setOrganizingCurationId(null);
+            requestAnimationFrame(() =>
+              curationHeaderRef.current
+                ?.querySelector<HTMLButtonElement>(
+                  `button[aria-label="${t(locale, "profileCuration.manage.menuAria")}"]`
+                )
+                ?.focus()
+            );
+          }}
           canManageOwnOfficialWave={canManageOwnOfficialWave}
           containerWidth={containerWidth}
           onCreateCuration={() => setIsCreateCurationOpen(true)}

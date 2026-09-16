@@ -21,17 +21,30 @@ import { ImageScale } from "@/helpers/image.helpers";
 import { areSameProfileIdentity } from "@/helpers/ProfileHelpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useCurationManagementPermission } from "@/hooks/useCurationManagementPermission";
+import { useCurationPermissionProbe } from "@/hooks/useCurationPermissionProbe";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useDropCurationMembershipMutation } from "@/hooks/drops/useDropCurationMembershipMutation";
 import { useNavigateToDropWave } from "@/hooks/useNavigateToDropWave";
 import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
 import { t } from "@/i18n/messages";
 import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
-import { Masonry } from "masonic";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  MasonryScroller,
+  useContainerPosition,
+  useResizeObserver,
+  useScrollToIndex,
+} from "masonic";
+import { useWindowSize } from "react-use";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import CurationOrganizeCard from "@/components/brain/my-stream/curations/CurationOrganizeCard";
+import { useCurationOrganize } from "@/components/brain/my-stream/curations/CurationOrganize";
+import type { CurationOrder } from "@/hooks/useCurationOrder";
+import { useCurationMasonryPositioner } from "@/hooks/useCurationMasonryPositioner";
+import { useCurationOrderReveal } from "@/hooks/useCurationOrderReveal";
 import ContentModerationDropGate from "@/components/content-moderation/ContentModerationDropGate";
 
 interface UserPageProfileWaveMasonryProps {
+  readonly order: CurationOrder;
   readonly curationId: string;
   readonly containerWidth: number;
   readonly drops: readonly ExtendedDrop[];
@@ -42,8 +55,6 @@ interface UserPageProfileWaveMasonryProps {
   readonly profileIdentity?: ProfileIdentitySummary | undefined;
 }
 
-const MASONRY_COLUMN_WIDTH = 300;
-const MASONRY_GUTTER = 16;
 const noop = () => {};
 const CURATION_CARD_CLASS_NAME =
   "tw-group tw-relative tw-isolate tw-rounded-xl";
@@ -69,6 +80,7 @@ type ProfileMasonryCardLayout = {
 };
 
 type ProfileMasonryItem = {
+  readonly position: number;
   readonly drop: ExtendedDrop;
   readonly curationId: string;
   readonly canManageActiveCuration: boolean;
@@ -413,23 +425,30 @@ function UserPageProfileWaveMasonryCard({
   );
 }
 
+const MemoizedUserPageProfileWaveMasonryCard = memo(
+  UserPageProfileWaveMasonryCard
+);
+
 function UserPageProfileWaveMasonryRenderItem({
   data,
 }: {
   readonly data: ProfileMasonryItem;
 }) {
   return (
-    <UserPageProfileWaveMasonryCard
-      drop={data.drop}
-      curationId={data.curationId}
-      canManageActiveCuration={data.canManageActiveCuration}
-      showIdentity={data.showIdentity}
-      profileIdentity={data.profileIdentity}
-    />
+    <CurationOrganizeCard id={data.drop.id} position={data.position}>
+      <MemoizedUserPageProfileWaveMasonryCard
+        drop={data.drop}
+        curationId={data.curationId}
+        canManageActiveCuration={data.canManageActiveCuration}
+        showIdentity={data.showIdentity}
+        profileIdentity={data.profileIdentity}
+      />
+    </CurationOrganizeCard>
   );
 }
 
 export default function UserPageProfileWaveMasonry({
+  order,
   curationId,
   containerWidth,
   drops,
@@ -439,31 +458,55 @@ export default function UserPageProfileWaveMasonry({
   showIdentity = false,
   profileIdentity,
 }: UserPageProfileWaveMasonryProps) {
-  const permissionProbeDropId = drops[0]?.id ?? "";
+  const { enabled, selectedId } = useCurationOrganize();
+  const container = useRef<HTMLDivElement | null>(null);
+  const { height } = useWindowSize({ initialWidth: 0, initialHeight: 900 });
+  const { offset, width } = useContainerPosition(container, [
+    containerWidth,
+    height,
+    enabled,
+    selectedId,
+    order.error,
+    order.isSaving,
+    order.saved,
+    order.hasPreviousPage,
+  ]);
+  const ids = useMemo(() => drops.map((drop) => drop.id), [drops]);
+  const positioner = useCurationMasonryPositioner(
+    ids,
+    width || Math.max(1, containerWidth - 8)
+  );
+  const resizeObserver = useResizeObserver(positioner);
+  const scrollToIndex = useScrollToIndex(positioner, {
+    height,
+    offset,
+    align: "center",
+  });
+  useCurationOrderReveal(order, container, scrollToIndex);
+  const permissionProbeDropId = useCurationPermissionProbe(curationId, drops);
   const canManageActiveCuration = useCurationManagementPermission({
     curationId,
     probeDropId: permissionProbeDropId,
   });
   const masonryItems = useMemo(
     () =>
-      drops.map((drop) => ({
+      drops.map((drop, index) => ({
+        position: order.startIndex + index + 1,
         drop,
         curationId,
         canManageActiveCuration,
         showIdentity,
         profileIdentity,
       })),
-    [canManageActiveCuration, curationId, drops, profileIdentity, showIdentity]
+    [
+      canManageActiveCuration,
+      curationId,
+      drops,
+      profileIdentity,
+      showIdentity,
+      order.startIndex,
+    ]
   );
-  const masonryTopItemsKey = useMemo(
-    () =>
-      drops
-        .slice(0, 8)
-        .map((drop) => drop.stableKey)
-        .join("|"),
-    [drops]
-  );
-  const masonryKey = `${curationId}-${containerWidth}-${drops.length}-${masonryTopItemsKey}`;
 
   const handleBottomIntersection = useCallback(
     (isIntersecting: boolean) => {
@@ -478,18 +521,17 @@ export default function UserPageProfileWaveMasonry({
 
   return (
     <div className="tw-px-1 tw-pb-2">
-      <Masonry
-        key={masonryKey}
+      <MasonryScroller
+        containerRef={container}
+        positioner={positioner}
+        resizeObserver={resizeObserver}
+        offset={offset}
+        height={height}
         items={masonryItems}
         render={UserPageProfileWaveMasonryRenderItem}
-        itemKey={(item) => item.drop.stableKey}
+        itemKey={(item) => item.drop.id}
         itemHeightEstimate={420}
-        columnWidth={MASONRY_COLUMN_WIDTH}
-        columnGutter={MASONRY_GUTTER}
-        rowGutter={MASONRY_GUTTER}
         overscanBy={2}
-        ssrWidth={containerWidth}
-        ssrHeight={900}
       />
 
       {((hasNextPage ?? false) || isFetchingNextPage) && (
