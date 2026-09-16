@@ -8,10 +8,16 @@ import {
 } from "@testing-library/react";
 import {
   $getRoot,
+  $createParagraphNode,
+  $getNodeByKey,
   $getSelection,
   $isRangeSelection,
   type LexicalEditor,
 } from "lexical";
+import {
+  $createImageNode,
+  type ImageNode,
+} from "@/components/drops/create/lexical/nodes/ImageNode";
 import { getMentionedGroupsFromEditorState } from "@/components/drops/create/lexical/utils/groupMentionDetection";
 import { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
 import CreateDropInput, {
@@ -89,7 +95,10 @@ jest.mock("@/components/waves/EditLastDropArrowUpPlugin", () => {
   };
 });
 
-const renderInput = (ref: React.RefObject<CreateDropInputHandles | null>) =>
+const renderInput = (
+  ref: React.RefObject<CreateDropInputHandles | null>,
+  onEditorState = jest.fn()
+) =>
   render(
     <CreateDropInput
       ref={ref}
@@ -100,12 +109,42 @@ const renderInput = (ref: React.RefObject<CreateDropInputHandles | null>) =>
       isStormMode={false}
       isDropMode={false}
       submitting={false}
-      onEditorState={jest.fn()}
+      onEditorState={onEditorState}
       onReferencedNft={jest.fn()}
       onMentionedUser={jest.fn()}
       onMentionedWave={jest.fn()}
     />
   );
+
+it("reports upload completion even when it merges into the current undo step", async () => {
+  const onEditorState = jest.fn();
+  renderInput(createRef<CreateDropInputHandles>(), onEditorState);
+  await waitFor(() => expect(mockLexicalEditor).not.toBeNull());
+  const editor = mockLexicalEditor!;
+  let imageKey = "";
+  await act(async () => {
+    editor.update(
+      () => {
+        const image = $createImageNode({ src: "loading" });
+        imageKey = image.getKey();
+        $getRoot().append($createParagraphNode().append(image));
+      },
+      { discrete: true }
+    );
+  });
+  onEditorState.mockClear();
+  await act(async () => {
+    editor.update(
+      () => {
+        $getNodeByKey<ImageNode>(imageKey)?.setSrc(
+          "https://example.com/image.png"
+        );
+      },
+      { discrete: true, tag: "history-merge" }
+    );
+  });
+  expect(onEditorState).toHaveBeenCalledWith(editor.getEditorState());
+});
 
 it("keeps an empty-selection click inside a Lexical block", async () => {
   const ref = createRef<CreateDropInputHandles>();
@@ -220,9 +259,6 @@ it("keeps exact @all metadata detectable without live shortcut conversion", asyn
   await waitFor(() => expect(editor).toHaveTextContent("@all,"));
   expect(editor.querySelector(".editor-group-mention")).toBeNull();
   expect(
-    getMentionedGroupsFromEditorState(
-      mockLexicalEditor!.getEditorState(),
-      true
-    )
+    getMentionedGroupsFromEditorState(mockLexicalEditor!.getEditorState(), true)
   ).toEqual([ApiDropGroupMention.All]);
 });

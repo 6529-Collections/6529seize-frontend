@@ -2805,6 +2805,10 @@ const MEME_DATA_TABLE_MESSAGES = objectMessages("memeData", {
 const TOKEN_NUMBER_MESSAGE = "Token #{tokenId}";
 
 export const EN_US_MESSAGES = {
+  "drop.composer.image": "Image",
+  "drop.composer.selectImage": "Select image",
+  "drop.composer.removeImage": "Remove image",
+  "drop.composer.uploadingImage": "Uploading image…",
   "drop.upload.avifMismatch":
     "The image content does not match its file type. Export it again with the correct extension.",
   "drop.upload.animatedAvif":
@@ -2823,6 +2827,7 @@ export const EN_US_MESSAGES = {
   "drop.upload.empty": "Choose a file that is not empty.",
   "drop.upload.tooLarge": "Media files must be 500 MB or smaller.",
   "drop.upload.imagePreview": "Preview of {file}",
+  "drop.upload.removeFile": "Remove file",
 
   "nftNavigation.previous.ariaLabel": "Previous NFT",
   "nftNavigation.previous.title": "Previous Card",

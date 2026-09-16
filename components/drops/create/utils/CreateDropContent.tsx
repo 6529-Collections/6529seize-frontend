@@ -338,7 +338,10 @@ const CreateDropContent = forwardRef<
               <EditablePlugin editable={!loading} />
               <HistoryPlugin />
 
-              <OnChangePlugin onChange={onEditorStateChange} />
+              <OnChangePlugin
+                onChange={onEditorStateChange}
+                ignoreHistoryMergeTagChange={false}
+              />
               <RootBlockGuardPlugin />
               <NewMentionsPlugin
                 waveId={waveId}
