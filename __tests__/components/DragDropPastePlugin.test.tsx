@@ -235,6 +235,156 @@ describe("DragDropPastePlugin", () => {
     expect($insertNodes).toHaveBeenCalled();
   });
 
+  it("inserts one image when Chrome exposes it in both clipboard collections", async () => {
+    const imageOptions = { type: "image/png", lastModified: 1700000000000 };
+    const listedImage = new File(["a"], "image.png", imageOptions);
+    const itemImage = new File(["a"], "image.png", imageOptions);
+    const preventDefault = jest.fn();
+
+    renderPlugin();
+    await act(async () => {
+      const handled = pasteHandler({
+        preventDefault,
+        clipboardData: {
+          files: [listedImage],
+          items: [
+            { kind: "string", type: "text/html" },
+            { kind: "file", type: "image/png", getAsFile: () => itemImage },
+          ],
+          getData: (type: string) =>
+            type === "text/html"
+              ? '<img src="https://example.com/image.png">'
+              : "",
+        },
+      });
+      expect(handled).toBe(true);
+      await Promise.resolve();
+    });
+
+    expect(preventDefault).toHaveBeenCalledTimes(1);
+    expect($insertNodes).toHaveBeenCalledTimes(1);
+    expect(multiPartUpload).toHaveBeenCalledTimes(1);
+    expect(multiPartUpload).toHaveBeenCalledWith(
+      expect.objectContaining({ path: "drop" })
+    );
+    const uploadedFile = (multiPartUpload as jest.Mock).mock.calls[0][0].file;
+    expect(uploadedFile).toBe(listedImage);
+    expect(uploadedFile).not.toBe(itemImage);
+  });
+
+  it("keeps a distinct clipboard item when the file list is populated", async () => {
+    const listedImage = new File(["a"], "first.png", { type: "image/png" });
+    const additionalImage = new File(["b"], "second.png", {
+      type: "image/png",
+    });
+
+    renderPlugin();
+    await act(async () => {
+      const handled = pasteHandler({
+        preventDefault: jest.fn(),
+        clipboardData: {
+          files: [listedImage],
+          items: [
+            { kind: "file", type: "image/png", getAsFile: () => listedImage },
+            {
+              kind: "file",
+              type: "image/png",
+              getAsFile: () => additionalImage,
+            },
+          ],
+          getData: () => "",
+        },
+      });
+      expect(handled).toBe(true);
+      await Promise.resolve();
+    });
+
+    expect($insertNodes).toHaveBeenCalledTimes(2);
+    expect(multiPartUpload).toHaveBeenCalledTimes(2);
+    expect(multiPartUpload).toHaveBeenCalledWith(
+      expect.objectContaining({ file: additionalImage, path: "drop" })
+    );
+  });
+
+  it("handles a clipboard file list without items", async () => {
+    const imageFile = new File(["a"], "image.png", { type: "image/png" });
+
+    renderPlugin();
+    await act(async () => {
+      const handled = pasteHandler({
+        preventDefault: jest.fn(),
+        clipboardData: {
+          files: [imageFile],
+          getData: () => "",
+        },
+      });
+      expect(handled).toBe(true);
+      await Promise.resolve();
+    });
+
+    expect($insertNodes).toHaveBeenCalledTimes(1);
+    expect(multiPartUpload).toHaveBeenCalledWith(
+      expect.objectContaining({ file: imageFile, path: "drop" })
+    );
+  });
+
+  it("keeps an item image alongside a listed attachment", async () => {
+    const attachmentFile = new File(["a"], "file.pdf", {
+      type: "application/pdf",
+    });
+    const imageFile = new File(["b"], "image.png", { type: "image/png" });
+    const onAttachmentFiles = jest.fn();
+
+    renderPlugin({ onAttachmentFiles });
+    await act(async () => {
+      const handled = pasteHandler({
+        preventDefault: jest.fn(),
+        clipboardData: {
+          files: [attachmentFile],
+          items: [
+            { kind: "file", type: "image/png", getAsFile: () => imageFile },
+          ],
+          getData: () => "",
+        },
+      });
+      expect(handled).toBe(true);
+      await Promise.resolve();
+    });
+
+    expect(onAttachmentFiles).toHaveBeenCalledWith([attachmentFile]);
+    expect($insertNodes).toHaveBeenCalledTimes(1);
+    expect(multiPartUpload).toHaveBeenCalledTimes(1);
+    expect(multiPartUpload).toHaveBeenCalledWith(
+      expect.objectContaining({ file: imageFile, path: "drop" })
+    );
+  });
+
+  it("uses a clipboard item image when the file list is empty", async () => {
+    const imageFile = new File(["a"], "image.png", { type: "image/png" });
+
+    renderPlugin();
+    await act(async () => {
+      const handled = pasteHandler({
+        preventDefault: jest.fn(),
+        clipboardData: {
+          files: [],
+          items: [
+            { kind: "file", type: "image/png", getAsFile: () => imageFile },
+          ],
+          getData: () => "",
+        },
+      });
+      expect(handled).toBe(true);
+      await Promise.resolve();
+    });
+
+    expect($insertNodes).toHaveBeenCalledTimes(1);
+    expect(multiPartUpload).toHaveBeenCalledTimes(1);
+    expect(multiPartUpload).toHaveBeenCalledWith(
+      expect.objectContaining({ file: imageFile, path: "drop" })
+    );
+  });
+
   it("preserves pasted plain text when image paste includes text", async () => {
     const preventDefault = jest.fn();
     const imageFile = new File(["a"], "a.png", { type: "image/png" });
