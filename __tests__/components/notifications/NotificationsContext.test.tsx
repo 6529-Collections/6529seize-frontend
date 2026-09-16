@@ -1444,3 +1444,132 @@ describe("push notification action handling", () => {
     expect(PushNotifications.removeDeliveredNotifications).toHaveBeenCalled();
   });
 });
+
+describe("reconciliation after native registration", () => {
+  const ownNotification = {
+    id: "user-a-read",
+    data: { target_profile_id: "test-profile-id", notification_id: "1" },
+  };
+  const otherNotification = {
+    id: "user-b-unread",
+    data: { target_profile_id: "other-profile-id", notification_id: "2" },
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockIsActive = true;
+    mockActiveProfileProxy = null;
+    mockConnectedProfile = { id: "test-profile-id", handle: "owner" };
+    const { PushNotifications } = require("@capacitor/push-notifications");
+    const {
+      commonApiFetch,
+      commonApiPost,
+    } = require("@/services/api/common-api");
+    commonApiPost.mockReset().mockResolvedValue({});
+    commonApiFetch.mockReset().mockResolvedValue({
+      notifications: [{ id: 1, read_at: 123 }],
+      unread_count: 0,
+    });
+    PushNotifications.getDeliveredNotifications.mockReset().mockResolvedValue({
+      notifications: [ownNotification, otherNotification],
+    });
+  });
+
+  afterEach(() => {
+    mockIsActive = true;
+    mockActiveProfileProxy = null;
+  });
+
+  it.each([true, false])(
+    "automatically reconciles delayed registration and recovery on iOS=%s",
+    async (isIos) => {
+      mockIsIos = isIos;
+      const { PushNotifications } = require("@capacitor/push-notifications");
+      const listeners = new Map<string, (value: unknown) => void>();
+      PushNotifications.addListener.mockImplementation(
+        (event: string, callback: (value: unknown) => void) => {
+          listeners.set(event, callback);
+          return Promise.resolve();
+        }
+      );
+      renderHook(() => useNotificationsContext(), { wrapper });
+      await waitFor(() =>
+        expect(listeners.has("registrationError")).toBe(true)
+      );
+      expect(
+        PushNotifications.getDeliveredNotifications
+      ).not.toHaveBeenCalled();
+
+      await act(async () =>
+        listeners.get("registration")?.({ value: "token" })
+      );
+      await waitFor(() =>
+        expect(
+          PushNotifications.removeDeliveredNotifications
+        ).toHaveBeenCalledWith({
+          notifications: [ownNotification],
+        })
+      );
+      PushNotifications.removeDeliveredNotifications.mockClear();
+      await act(async () => {
+        listeners.get("registrationError")?.({
+          message: "network unavailable",
+        });
+        listeners.get("registration")?.({ value: "replacement-token" });
+      });
+      await waitFor(() =>
+        expect(
+          PushNotifications.removeDeliveredNotifications
+        ).toHaveBeenCalledWith({
+          notifications: [ownNotification],
+        })
+      );
+      expect(
+        PushNotifications.removeAllDeliveredNotifications
+      ).not.toHaveBeenCalled();
+    }
+  );
+
+  it.each(["inactive", "proxy", "refresh-failure"])(
+    "preserves notification state after registration when %s",
+    async (condition) => {
+      const { PushNotifications } = require("@capacitor/push-notifications");
+      const { commonApiFetch } = require("@/services/api/common-api");
+      const listeners = new Map<string, (value: unknown) => void>();
+      PushNotifications.addListener.mockImplementation(
+        (event: string, callback: (value: unknown) => void) => {
+          listeners.set(event, callback);
+          return Promise.resolve();
+        }
+      );
+      const { rerender } = renderHook(() => useNotificationsContext(), {
+        wrapper,
+      });
+      await waitFor(() => expect(listeners.has("registration")).toBe(true));
+      if (condition === "inactive") mockIsActive = false;
+      if (condition === "proxy") mockActiveProfileProxy = { id: "proxy" };
+      if (condition === "refresh-failure") {
+        commonApiFetch.mockRejectedValue(
+          new Error("unread refresh unavailable")
+        );
+      }
+      rerender();
+      await act(async () =>
+        listeners.get("registration")?.({ value: "token" })
+      );
+      expect(
+        PushNotifications.removeDeliveredNotifications
+      ).not.toHaveBeenCalled();
+      expect(
+        PushNotifications.removeAllDeliveredNotifications
+      ).not.toHaveBeenCalled();
+      if (condition === "refresh-failure") {
+        expect(commonApiFetch).toHaveBeenCalled();
+      } else {
+        expect(
+          PushNotifications.getDeliveredNotifications
+        ).not.toHaveBeenCalled();
+      }
+    }
+  );
+});
