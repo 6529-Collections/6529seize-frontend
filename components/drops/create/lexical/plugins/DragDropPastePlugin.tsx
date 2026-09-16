@@ -4,15 +4,18 @@ import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext
 import { DRAG_DROP_PASTE } from "@lexical/rich-text";
 import type { EditorState, RangeSelection } from "lexical";
 import {
+  $addUpdateTag,
   $getSelection,
   $getNodeByKey,
   $insertNodes,
   $isRangeSelection,
+  $nodesOfType,
   COMMAND_PRIORITY_LOW,
   PASTE_COMMAND,
 } from "lexical";
-import { useEffect, useLayoutEffect, useRef } from "react";
-import { $createImageNode } from "../nodes/ImageNode";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { $createImageNode, $isImageNode, ImageNode } from "../nodes/ImageNode";
+import InlineImageViewportPlugin from "./InlineImageViewportPlugin";
 import { multiPartUpload } from "@/components/waves/create-wave/services/multiPartUpload";
 import { useAuth } from "@/components/auth/Auth";
 import { getContentType } from "@/services/uploads/mediaUploadMimeType";
@@ -203,12 +206,14 @@ export default function DragDropPaste({
   readonly onUploadEditorStateChange?:
     | ((editorState: EditorState) => void)
     | undefined;
-}): null {
+}) {
   const { setToast } = useAuth();
   const locale = useBrowserLocale();
+  const [pendingUploads, setPendingUploads] = useState(0);
   const onAttachmentFilesRef = useRef(onAttachmentFiles);
   const onUploadEditorStateChangeRef = useRef(onUploadEditorStateChange);
   const disabledRef = useRef(disabled);
+  const localeRef = useRef(locale);
 
   useEffect(() => {
     onAttachmentFilesRef.current = onAttachmentFiles;
@@ -222,9 +227,17 @@ export default function DragDropPaste({
     disabledRef.current = disabled;
   }, [disabled]);
 
+  useLayoutEffect(() => {
+    localeRef.current = locale;
+  }, [locale]);
+
   const [editor] = useLexicalComposerContext();
   useEffect(() => {
     let isMounted = true;
+    // Keep results only while an image or its undo history retains the token.
+    // Detaching a node alone does not mean redo can no longer restore it.
+    const uploadResults = new WeakMap<object, string | null>();
+    const previewUrls = new Map<string, string>();
     const isActive = () => isMounted && !disabledRef.current;
     const syncUploadEditorStateWhenDisabled = () => {
       if (!disabledRef.current) {
@@ -234,56 +247,131 @@ export default function DragDropPaste({
       onUploadEditorStateChangeRef.current?.(editor.getEditorState());
     };
 
-    const updateImageNode = (key: string, url?: string) => {
+    const updateUpload = (update: () => void) => {
       editor.update(
         () => {
-          const node = $getNodeByKey(key);
-          if (url) node?.replace($createImageNode({ src: url }));
-          else node?.remove();
+          // These tags are supported by the installed Lexical version. A
+          // background upload must not steal focus or add an undo step.
+          $addUpdateTag("history-merge");
+          $addUpdateTag("collaboration");
+          $addUpdateTag("skip-scroll-into-view");
+          update();
         },
-        { onUpdate: syncUploadEditorStateWhenDisabled }
+        {
+          tag: "composer-image-upload",
+          onUpdate: syncUploadEditorStateWhenDisabled,
+        }
       );
     };
 
-    const insertImage = async (file: File) => {
-      let key: string | undefined;
+    const applyUploadResult = (key: string, url: string | null) => {
+      const node = $getNodeByKey(key);
+      if (
+        !$isImageNode(node) ||
+        !node.isAttached() ||
+        node.getSrc() !== "loading"
+      )
+        return;
+      if (url) node.setSrc(url);
+      else node.remove();
+    };
+
+    const finishUpload = (key: string, token: object, url: string | null) => {
+      uploadResults.set(token, url);
+      updateUpload(() => applyUploadResult(key, url));
+    };
+
+    const unregisterHistory = editor.registerUpdateListener(({ tags }) => {
+      if (!tags.has("historic")) return;
+      updateUpload(() => {
+        for (const node of $nodesOfType(ImageNode)) {
+          if (node.getSrc() !== "loading") continue;
+          const result = uploadResults.get(node.getUploadToken());
+          if (result !== undefined) applyUploadResult(node.getKey(), result);
+        }
+      });
+    });
+
+    const uploadInsertedImage = async (
+      file: File,
+      key: string,
+      token: object
+    ) => {
       try {
-        if (!isActive()) return;
-        editor.update(
-          () => {
-            const imageNode = $createImageNode({ src: "loading" });
-            $insertNodes([imageNode]);
-            key = imageNode.getKey();
-          },
-          { discrete: true }
-        );
-        await validateDropImageSignature(file, locale);
+        await validateDropImageSignature(file, localeRef.current);
         if (!isActive()) {
-          if (isMounted && key) updateImageNode(key);
+          if (isMounted) finishUpload(key, token, null);
           return;
         }
+        const previewUrl = URL.createObjectURL(file);
+        previewUrls.set(key, previewUrl);
+        updateUpload(() => {
+          const node = $getNodeByKey(key);
+          if ($isImageNode(node) && node.isAttached())
+            node.setPreviewSrc(previewUrl);
+        });
         const url = await uploadImage(file);
-        if (isMounted && key) updateImageNode(key, url);
+        if (isMounted) finishUpload(key, token, url);
       } catch (error) {
         if (!isMounted) return;
-        if (key) updateImageNode(key);
+        finishUpload(key, token, null);
         setToast({
           type: "error",
-          title: t(locale, "drop.upload.invalidFile", { file: file.name }),
+          title: t(localeRef.current, "drop.upload.invalidFile", {
+            file: file.name,
+          }),
           description: error instanceof Error ? error.message : String(error),
           autoClose: false,
         });
+      } finally {
+        const previewUrl = previewUrls.get(key);
+        if (previewUrl) URL.revokeObjectURL(previewUrl);
+        previewUrls.delete(key);
+        if (isMounted) setPendingUploads((count) => count - 1);
       }
     };
 
     const processFiles = (files: File[], plainText = "") => {
       if (!isActive()) return;
-      const validFiles = filterValidDropUploadFiles(files, setToast, locale);
+      const validFiles = filterValidDropUploadFiles(
+        files,
+        setToast,
+        localeRef.current
+      );
       const attachmentFiles = validFiles.filter((file) => !isImageFile(file));
       if (attachmentFiles.length)
         onAttachmentFilesRef.current?.(attachmentFiles);
-      for (const file of validFiles.filter(isImageFile)) void insertImage(file);
-      if (plainText) editor.update(() => insertPlainText(plainText));
+      const imageFiles = validFiles.filter(isImageFile);
+      if (!imageFiles.length && !plainText) return;
+      const uploads: { file: File; key: string; token: object }[] = [];
+      editor.update(
+        () => {
+          $addUpdateTag("history-push");
+          for (const file of imageFiles) {
+            const imageNode = $createImageNode({ src: "loading" });
+            $insertNodes([imageNode]);
+            uploads.push({
+              file,
+              key: imageNode.getKey(),
+              token: imageNode.getUploadToken(),
+            });
+          }
+          if (plainText) insertPlainText(plainText);
+        },
+        {
+          discrete: true,
+          tag: "composer-image-insert",
+          // Paste/drop commands already run inside a Lexical update. Start
+          // uploads after that transaction has actually inserted the nodes.
+          onUpdate: () => {
+            if (!isMounted) return;
+            setPendingUploads((count) => count + uploads.length);
+            for (const { file, key, token } of uploads) {
+              void uploadInsertedImage(file, key, token);
+            }
+          },
+        }
+      );
     };
 
     const unregisterPaste = editor.registerCommand<ClipboardEvent>(
@@ -330,8 +418,18 @@ export default function DragDropPaste({
     return () => {
       unregisterPaste();
       unregisterDragDropPaste();
+      unregisterHistory();
       isMounted = false;
+      for (const url of previewUrls.values()) URL.revokeObjectURL(url);
+      previewUrls.clear();
     };
-  }, [editor, setToast, locale]);
-  return null;
+  }, [editor, setToast]);
+  return (
+    <>
+      <InlineImageViewportPlugin />
+      <span role="status" className="tw-sr-only">
+        {pendingUploads > 0 ? t(locale, "drop.composer.uploadingImage") : ""}
+      </span>
+    </>
+  );
 }

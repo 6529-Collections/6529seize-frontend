@@ -13,7 +13,7 @@ import {
   useRef,
 } from "react";
 import type { EditorState, LexicalEditor } from "lexical";
-import { $getRoot, COMMAND_PRIORITY_CRITICAL, createCommand } from "lexical";
+import { $getRoot } from "lexical";
 import { clearWaveDraft } from "@/helpers/waves/wave-draft.helpers";
 
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
@@ -58,6 +58,7 @@ import type { NewWaveMentionsPluginHandles } from "../drops/create/lexical/plugi
 import NewWaveMentionsPlugin from "../drops/create/lexical/plugins/waves/WaveMentionsPlugin";
 import { MaxLengthPlugin } from "../drops/create/lexical/plugins/MaxLengthPlugin";
 import DragDropPastePlugin from "../drops/create/lexical/plugins/DragDropPastePlugin";
+import EditablePlugin from "../drops/create/lexical/plugins/EditablePlugin";
 import EnterKeyPlugin from "../drops/create/lexical/plugins/enter/EnterKeyPlugin";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import CreateDropEmojiPicker from "./CreateDropEmojiPicker";
@@ -83,29 +84,6 @@ export interface CreateDropInputHandles {
   expandMentionAliases: () => Promise<MentionAliasExpansionResult>;
   focus: () => void;
   blur: () => void;
-}
-
-// Create a custom command
-const DISABLE_EDIT_COMMAND = createCommand("DISABLE_EDIT");
-
-// Create a custom plugin to handle disabling
-function DisableEditPlugin({ disabled }: { disabled: boolean }) {
-  const [editor] = useLexicalComposerContext();
-
-  useEffect(() => {
-    if (disabled) {
-      return editor.registerCommand(
-        DISABLE_EDIT_COMMAND,
-        () => {
-          return true;
-        },
-        COMMAND_PRIORITY_CRITICAL
-      );
-    }
-    return () => {};
-  }, [editor, disabled]);
-
-  return null;
 }
 
 interface EditorCommandsPluginHandles {
@@ -467,7 +445,7 @@ const CreateDropInput = forwardRef<
                         aria-invalid={hasValidationError || undefined}
                         style={{ touchAction: "manipulation" }}
                         onBlur={onEditorBlur}
-                        className={`editor-input-one-liner tw-form-input tw-block tw-max-h-[40vh] tw-w-full tw-resize-none tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-pl-3 tw-font-normal tw-text-white tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out tw-scrollbar-thin tw-scrollbar-track-iron-900 tw-scrollbar-thumb-iron-600 placeholder:tw-text-iron-500 focus:tw-bg-iron-950 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 ${
+                        className={`editor-input-one-liner tw-form-input tw-block tw-max-h-[min(40vh,var(--composer-viewport-height,40vh))] tw-w-full tw-resize-none tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-pl-3 tw-font-normal tw-text-white tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out tw-scrollbar-thin tw-scrollbar-track-iron-900 tw-scrollbar-thumb-iron-600 placeholder:tw-text-iron-500 focus:tw-bg-iron-950 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 ${
                           isCompact
                             ? "tw-py-3 tw-text-sm tw-leading-5"
                             : "tw-pb-2 tw-pt-3 tw-text-base tw-leading-6 sm:tw-text-sm"
@@ -494,7 +472,10 @@ const CreateDropInput = forwardRef<
                   ErrorBoundary={LexicalErrorBoundary}
                 />
                 <HistoryPlugin />
-                <OnChangePlugin onChange={onEditorStateChange} />
+                <OnChangePlugin
+                  onChange={onEditorStateChange}
+                  ignoreHistoryMergeTagChange={false}
+                />
                 {typeof initialEditorStateJson === "string" && (
                   <NotifyInitialEditorStatePlugin
                     onEditorState={onEditorStateChange}
@@ -529,7 +510,7 @@ const CreateDropInput = forwardRef<
                 <LinkPlugin validateUrl={validateUrl} />
                 <ClearEditorPlugin ref={clearEditorRef} />
                 <EditorCommandsPlugin ref={editorCommandsRef} />
-                <DisableEditPlugin disabled={submitting} />
+                <EditablePlugin editable={!submitting} />
                 <InitialMarkdownPlugin
                   initialMarkdown={initialMarkdown}
                   initialMarkdownKey={initialMarkdownKey}
