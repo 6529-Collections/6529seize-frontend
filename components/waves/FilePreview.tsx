@@ -16,6 +16,7 @@ import { getFileExtension } from "./memes/file-upload/utils/formatHelpers";
 import { useObjectUrl } from "@/hooks/useObjectUrl";
 import { t } from "@/i18n/messages";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { XMarkIcon } from "@heroicons/react/24/outline";
 
 interface FileItem {
   file: File;
@@ -101,7 +102,6 @@ const ImageFilePreview: React.FC<{ file: File }> = ({ file }) => {
           className="tw-h-full tw-w-full tw-object-cover"
         />
       )}
-      <div className="tw-absolute tw-inset-0 tw-bg-iron-950 tw-opacity-0 tw-transition-opacity tw-duration-300 group-hover:tw-opacity-30"></div>
     </div>
   );
 };
@@ -128,8 +128,8 @@ const FilePreview: React.FC<FilePreviewProps> = ({
           contentType.startsWith("image/");
         const fileKey = `${file.file.name}-${file.file.size}-${file.file.lastModified}-${index}`;
         return (
-          <div key={fileKey} className="tw-group tw-relative">
-            <div className="tw-size-24 tw-overflow-hidden tw-rounded-lg tw-bg-iron-800">
+          <div key={fileKey} className="tw-relative">
+            <div className="tw-relative tw-size-24 tw-overflow-hidden tw-rounded-lg tw-bg-iron-900/40">
               {contentType.startsWith("image/") ? (
                 // Mount after preparation so the memoized preview reads the completed URL.
                 !isPreparingAvif && <ImageFilePreview file={file.file} />
@@ -168,26 +168,18 @@ const FilePreview: React.FC<FilePreviewProps> = ({
             )}
             {!isUploading && (
               <button
+                type="button"
                 onClick={() => removeFile(file.file)}
                 disabled={disabled}
-                className={`tw-absolute tw-right-1 tw-top-1 tw-z-10 tw-flex tw-size-7 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-800 tw-text-red tw-transition-all tw-duration-300 hover:tw-bg-iron-700 ${
-                  disabled ? "tw-pointer-events-none" : ""
-                }`}
-                aria-label="Remove file"
+                className="tw-absolute tw-right-1 tw-top-1 tw-z-10 tw-flex tw-size-7 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-black/80 tw-p-0 tw-text-white tw-ring-1 tw-ring-inset tw-ring-white/20 tw-transition-colors hover:tw-bg-black focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 disabled:tw-pointer-events-none disabled:tw-opacity-50"
+                aria-label={t(locale, "drop.upload.removeFile")}
+                title={t(locale, "drop.upload.removeFile")}
               >
-                <svg
-                  className="tw-size-5 tw-flex-shrink-0"
-                  viewBox="0 0 24 24"
-                  fill="none"
+                <XMarkIcon
+                  className="tw-size-4"
+                  strokeWidth={2}
                   aria-hidden="true"
-                  xmlns="http://www.w3.org/2000/svg"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M18 6L6 18M6 6l12 12" />
-                </svg>
+                />
               </button>
             )}
           </div>
