@@ -149,7 +149,13 @@ describe("production exact-artifact deployment contract", () => {
       '.artifact_contract == "production-deployment-v1"'
     );
     expect(deploySource).toContain(".schema_version == 1");
-    expect(deploySource).toContain("aws s3 sync production-artifact/target");
+    expect(deploySource).toContain("aws s3 cp production-artifact/target");
+    expect(deploySource).toContain(
+      '--recursive --cache-control "public, max-age=31536000, immutable"'
+    );
+    expect(deploySource).toContain(
+      '--cache-control "no-store, max-age=0, must-revalidate"'
+    );
     expect(deploySource).toContain("Refuse stale main or production downgrade");
     expect(deploySource).toContain(
       'if ! git merge-base --is-ancestor "$COMMIT_SHA" "$current_main_sha"; then'

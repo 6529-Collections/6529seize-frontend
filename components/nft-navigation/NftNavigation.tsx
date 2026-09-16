@@ -1,5 +1,6 @@
-import { enterArtFullScreen, fullScreenSupported } from "@/helpers/Helpers";
+import { enterArtFullScreen } from "@/helpers/Helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useFullScreenSupported } from "@/hooks/useFullScreenSupported";
 import { t } from "@/i18n/messages";
 import { faExpandAlt } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -23,6 +24,7 @@ export default function NftNavigation(
   }>
 ) {
   const locale = useBrowserLocale();
+  const supportsFullScreen = useFullScreenSupported();
   const isFirst = props.nftId === props.startIndex;
   const isLast = props.nftId === props.endIndex;
   const previousAriaLabel = t(locale, "nftNavigation.previous.ariaLabel");
@@ -121,7 +123,7 @@ export default function NftNavigation(
   return (
     <>
       {printNavigation()}
-      {fullScreenSupported() && printFullScreen()}
+      {supportsFullScreen && printFullScreen()}
     </>
   );
 }

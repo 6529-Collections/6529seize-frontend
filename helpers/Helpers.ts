@@ -191,7 +191,10 @@ export function areEqualAddresses(w1: unknown, w2: unknown): boolean {
 }
 
 export const fullScreenSupported = (): boolean => {
-  const doc = document as Document & {
+  if (typeof globalThis.document === "undefined") {
+    return false;
+  }
+  const doc = globalThis.document as Document & {
     readonly mozCancelFullScreen?: unknown;
     readonly webkitExitFullscreen?: unknown;
     readonly msExitFullscreen?: unknown;

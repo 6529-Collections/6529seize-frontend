@@ -1,6 +1,13 @@
 "use client";
 
-import { useEffect, useMemo, useState, useCallback, useRef } from "react";
+import {
+  useEffect,
+  useMemo,
+  useState,
+  useCallback,
+  useRef,
+  useSyncExternalStore,
+} from "react";
 import {
   SIDEBAR_WIDTHS,
   SIDEBAR_BREAKPOINT,
@@ -9,11 +16,24 @@ import {
 import { safeSessionStorage } from "../helpers/safeSessionStorage";
 import useIsTouchDevice from "./useIsTouchDevice";
 
-const getBrowserWindow = () => {
-  const { window: browserWindow } = globalThis as typeof globalThis & {
+const getBrowserWindow = (): Window | undefined => {
+  const { window: browserWindow } = globalThis as {
     window?: Window | undefined;
   };
   return browserWindow;
+};
+
+const subscribeToPreference = () => () => undefined;
+const getServerCollapsedSnapshot = () => true;
+const getStoredCollapsedSnapshot = (): boolean => {
+  try {
+    const stored = safeSessionStorage.getItem("sidebarCollapsed");
+    if (stored === null) return true;
+    const parsed: unknown = JSON.parse(stored);
+    return typeof parsed === "boolean" ? parsed : true;
+  } catch {
+    return true;
+  }
 };
 
 /**
@@ -33,55 +53,66 @@ const getBrowserWindow = () => {
  *   by the sidebar component, not this hook.
  */
 export function useSidebarController() {
-  const createMediaQuery = useCallback((query: string): MediaQueryList | null => {
-    const browserWindow = getBrowserWindow();
-    if (browserWindow === undefined || typeof browserWindow.matchMedia !== "function") {
-      return null;
-    }
-    return browserWindow.matchMedia(query);
-  }, []);
+  const createMediaQuery = useCallback(
+    (query: string): MediaQueryList | null => {
+      const browserWindow = getBrowserWindow();
+      if (
+        browserWindow === undefined ||
+        typeof browserWindow.matchMedia !== "function"
+      ) {
+        return null;
+      }
+      return browserWindow.matchMedia(query);
+    },
+    []
+  );
 
   const narrowMql = useMemo(
     () => createMediaQuery(`(max-width: ${SIDEBAR_BREAKPOINT - 0.02}px)`),
     [createMediaQuery]
   );
   const mobileWidthMql = useMemo(
-    () => createMediaQuery(`(max-width: ${SIDEBAR_MOBILE_BREAKPOINT - 0.02}px)`),
+    () =>
+      createMediaQuery(`(max-width: ${SIDEBAR_MOBILE_BREAKPOINT - 0.02}px)`),
     [createMediaQuery]
   );
 
-  const [isNarrow, setIsNarrow] = useState(() => narrowMql?.matches ?? false);
+  const [isNarrow, setIsNarrow] = useState(false);
   // Touch-first (no mouse/trackpad/hover), NOT merely "has a touch screen" —
   // hybrid touch laptops must keep the desktop sidebar behavior.
   const isTouchScreen = useIsTouchDevice();
-  const [isMobileWidth, setIsMobileWidth] = useState(() => mobileWidthMql?.matches ?? false);
+  const [isMobileWidth, setIsMobileWidth] = useState(false);
 
   const lastIsNarrowRef = useRef(isNarrow);
 
-  const [isDesktopCollapsed, setIsDesktopCollapsed] = useState(() => {
-    try {
-      const stored = safeSessionStorage.getItem("sidebarCollapsed");
-      if (stored === null) {
-        return true;
-      }
-      const parsed = JSON.parse(stored);
-      return typeof parsed === "boolean" ? parsed : true;
-    } catch {
-      return true;
-    }
-  });
+  const storedCollapsed = useSyncExternalStore(
+    subscribeToPreference,
+    getStoredCollapsedSnapshot,
+    getServerCollapsedSnapshot
+  );
+  const [collapsedOverride, setIsDesktopCollapsed] = useState<boolean | null>(
+    null
+  );
+  const isDesktopCollapsed = collapsedOverride ?? storedCollapsed;
 
-  const persistDesktopCollapsed = useCallback((value: boolean | ((prev: boolean) => boolean)) => {
-    setIsDesktopCollapsed((prev: boolean) => {
-      const newValue = typeof value === "function" ? value(prev) : value;
-      try {
-        safeSessionStorage.setItem("sidebarCollapsed", JSON.stringify(newValue));
-      } catch (e) {
-        console.warn("Failed to save sidebar preference:", e);
-      }
-      return newValue;
-    });
-  }, []);
+  const persistDesktopCollapsed = useCallback(
+    (value: boolean | ((prev: boolean) => boolean)) => {
+      setIsDesktopCollapsed((prev) => {
+        const newValue =
+          typeof value === "function" ? value(prev ?? storedCollapsed) : value;
+        try {
+          safeSessionStorage.setItem(
+            "sidebarCollapsed",
+            JSON.stringify(newValue)
+          );
+        } catch (e) {
+          console.warn("Failed to save sidebar preference:", e);
+        }
+        return newValue;
+      });
+    },
+    [storedCollapsed]
+  );
 
   const [isOffcanvasOpen, setIsOffcanvasOpen] = useState(false);
 
@@ -109,7 +140,8 @@ export function useSidebarController() {
     if (!narrowMql) {
       return;
     }
-    const handleChange = (event: MediaQueryListEvent) => setIsNarrow(event.matches);
+    const handleChange = (event: MediaQueryListEvent) =>
+      setIsNarrow(event.matches);
     setIsNarrow(narrowMql.matches);
     narrowMql.addEventListener("change", handleChange);
     return () => narrowMql.removeEventListener("change", handleChange);
@@ -119,7 +151,8 @@ export function useSidebarController() {
     if (!mobileWidthMql) {
       return;
     }
-    const handleChange = (event: MediaQueryListEvent) => setIsMobileWidth(event.matches);
+    const handleChange = (event: MediaQueryListEvent) =>
+      setIsMobileWidth(event.matches);
     setIsMobileWidth(mobileWidthMql.matches);
     mobileWidthMql.addEventListener("change", handleChange);
     return () => mobileWidthMql.removeEventListener("change", handleChange);
@@ -148,9 +181,9 @@ export function useSidebarController() {
 
   const toggleCollapsed = useCallback(() => {
     if (isOffcanvasMode) {
-      setIsOffcanvasOpen(prev => !prev);
+      setIsOffcanvasOpen((prev) => !prev);
     } else {
-      persistDesktopCollapsed(prev => !prev);
+      persistDesktopCollapsed((prev) => !prev);
     }
   }, [isOffcanvasMode, persistDesktopCollapsed]);
 

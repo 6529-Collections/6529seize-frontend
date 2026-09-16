@@ -25,6 +25,12 @@ export interface MuseumProjectSystemVisualProps {
   readonly selectedWorkId: string;
 }
 
+// Transcendental results can differ in their final bit across Node and browser
+// V8 versions. Quantize SVG props so server and client markup serialize alike.
+export function stableSvgNumber(value: number): number {
+  return Number(value.toFixed(6));
+}
+
 export type ComparisonMode = "minted" | "counterfactual";
 
 export interface ProjectComparisonProps {

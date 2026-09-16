@@ -13,6 +13,10 @@ windows. It combines:
 The same top panel is reused as a compact fallback on unresolved card and
 distribution routes.
 
+The page heading appears first. The clock panels and calendar grid fill their
+reserved space once browser JavaScript is ready, using the browser's clock and
+local timezone. Viewing the schedule does not require connecting a wallet.
+
 ## Location in the Site
 
 - Full route: `/meme-calendar`

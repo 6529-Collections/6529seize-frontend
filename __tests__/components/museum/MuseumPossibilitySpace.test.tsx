@@ -287,6 +287,11 @@ describe("Museum possibility-space explorer", () => {
         mintedIndex={index}
       />
     );
+    expect(
+      screen.getByRole("region", {
+        name: "Hold the Museum work. Choose what sits beside it.",
+      })
+    ).toHaveAttribute("data-client-ready", "true");
     expect(screen.getByText(/Silt · 100 machines · 2 lights/u)).toBeVisible();
     mintedView.unmount();
 
