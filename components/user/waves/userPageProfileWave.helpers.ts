@@ -46,7 +46,7 @@ type ProfileCurationViewState =
   | {
       readonly kind: "ready";
       readonly curation: ApiWaveCuration;
-      readonly drops: ExtendedDrop[];
+      readonly drops: readonly ExtendedDrop[];
       readonly fetchNextPage: () => Promise<void>;
       readonly hasNextPage: boolean | undefined;
       readonly isFetchingNextPage: boolean;
@@ -330,7 +330,7 @@ export const resolveProfileCurationViewState = ({
   readonly containerWidth: number;
   readonly hasLoadedCurations: boolean;
   readonly profileCuration: ApiWaveCuration | null;
-  readonly drops: ExtendedDrop[];
+  readonly drops: readonly ExtendedDrop[];
   readonly dropsDataUpdatedAt: number;
   readonly areDropsError: boolean;
   readonly isDropsPlaceholderData: boolean;

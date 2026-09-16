@@ -158,18 +158,22 @@ export function OfficialWaveSummary({
         <button
           type="button"
           onClick={onOpenWave}
+          title={waveName}
           aria-label={t(locale, "profileCuration.header.openSourceAria", {
             waveName,
           })}
-          className="tw-group tw-inline-flex tw-min-w-0 tw-items-center tw-gap-1.5 tw-rounded-md tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-text-iron-400 tw-transition focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-300 desktop-hover:hover:tw-text-iron-200"
+          className="desktop-hover:hover:tw-text-primary-100 tw-group -tw-ml-1 tw-inline-flex tw-min-h-8 tw-min-w-0 tw-max-w-full tw-cursor-pointer tw-items-center tw-gap-1.5 tw-rounded-md tw-border-0 tw-bg-transparent tw-px-1 tw-py-0 tw-text-left tw-text-primary-300 tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-bg-white/5"
         >
-          <span className="tw-flex-shrink-0 tw-text-iron-500">
+          <span className="tw-flex-shrink-0 tw-text-iron-400">
             {t(locale, "profileCuration.header.source")}
           </span>
-          <span className="tw-min-w-0 tw-truncate tw-text-iron-300">
+          <span className="tw-min-w-0 tw-truncate tw-font-medium tw-leading-6 tw-no-underline">
             {waveName}
           </span>
-          <ArrowTopRightOnSquareIcon className="tw-size-3.5 tw-flex-shrink-0 tw-text-iron-400 tw-transition-colors group-focus-visible:tw-text-primary-300 desktop-hover:group-hover:tw-text-primary-300" />
+          <ArrowTopRightOnSquareIcon
+            aria-hidden="true"
+            className="tw-size-4 tw-flex-shrink-0 tw-transition-transform tw-duration-150 group-hover:-tw-translate-y-0.5 group-hover:tw-translate-x-0.5 motion-reduce:tw-transform-none"
+          />
         </button>
         <span className="tw-text-iron-600">•</span>
         <span className="tw-text-iron-500">{metadataLabel}</span>
@@ -179,11 +183,7 @@ export function OfficialWaveSummary({
         <div className="tw-flex tw-items-center tw-gap-2 md:tw-col-start-2 md:tw-row-span-2 md:tw-row-start-1 md:tw-justify-end">
           {manageCurationControl}
           {onAddPost !== undefined && (
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={onAddPost}
-            >
+            <Button variant="primary" size="sm" onClick={onAddPost}>
               <PlusIcon className="-tw-ml-1 tw-h-4 tw-w-4 tw-flex-shrink-0" />
               <span>Add post</span>
             </Button>
