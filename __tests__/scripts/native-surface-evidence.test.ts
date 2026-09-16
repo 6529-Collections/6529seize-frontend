@@ -391,7 +391,10 @@ describe("native surface evidence", () => {
       cwd,
       encoding: "utf8",
       timeout: TEST_COMMAND_TIMEOUT_MS,
+      // The CLI uses built-ins and explicit fixture paths, so HOME/temp settings
+      // are unnecessary. Keep SDK variables and Node startup hooks isolated.
       env: {
+        NODE_ENV: "test",
         PATH: emptyPath,
         ...(process.env["SystemRoot"]
           ? { SystemRoot: process.env["SystemRoot"] }
