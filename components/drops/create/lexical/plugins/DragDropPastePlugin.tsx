@@ -91,18 +91,44 @@ function getHtmlDataImageFiles(html: string): File[] {
     .filter((file): file is File => file !== null);
 }
 
+/** Matches separate File wrappers for the same clipboard entry. */
+function getClipboardFileSignature(file: File): string {
+  return JSON.stringify([
+    file.name,
+    file.size,
+    file.type,
+    file.lastModified,
+  ]);
+}
+
+/** Combines clipboard file views while keeping distinct file items. */
 function getDataTransferFiles(dataTransfer: DataTransfer): File[] {
   const files = Array.from(dataTransfer.files ?? []);
-  const seenFiles = new Set(files);
+  const remainingFilesBySignature = new Map<string, number>();
+  for (const file of files) {
+    const signature = getClipboardFileSignature(file);
+    remainingFilesBySignature.set(
+      signature,
+      (remainingFilesBySignature.get(signature) ?? 0) + 1
+    );
+  }
 
-  for (const item of Array.from(dataTransfer.items ?? [])) {
+  // Chrome can expose one image in both collections as different File objects.
+  const items = "items" in dataTransfer ? dataTransfer.items : [];
+  for (const item of Array.from(items)) {
     if (item.kind !== "file") {
       continue;
     }
 
     const file = item.getAsFile();
-    if (file && !seenFiles.has(file)) {
-      seenFiles.add(file);
+    if (!file) {
+      continue;
+    }
+    const signature = getClipboardFileSignature(file);
+    const remaining = remainingFilesBySignature.get(signature) ?? 0;
+    if (remaining > 0) {
+      remainingFilesBySignature.set(signature, remaining - 1);
+    } else {
       files.push(file);
     }
   }
