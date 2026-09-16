@@ -12,6 +12,10 @@ import "@/styles/swiper.css";
 import "@/styles/animations.css";
 import "@/styles/globals.css";
 
+import VersionReloadScreen, {
+  VERSION_RELOAD_STYLES,
+} from "@/components/version-update/VersionReloadScreen";
+import { VERSION_RELOAD_BOOTSTRAP_SCRIPT } from "@/components/version-update/versionReload";
 import DynamicHeadTitle from "@/components/dynamic-head/DynamicHeadTitle";
 import { NATIVE_IOS_BOOTSTRAP_SCRIPT } from "@/components/eula/nativeIosBootstrap";
 import AwsRumProvider from "@/components/monitoring/AwsRumProvider";
@@ -54,6 +58,11 @@ export default async function RootLayout({
     // keyboard input arrives during startup. Keep that root-only mutation.
     <html lang="en" data-scroll-behavior="smooth" suppressHydrationWarning>
       <head>
+        <style dangerouslySetInnerHTML={{ __html: VERSION_RELOAD_STYLES }} />
+        {/* Restore reload feedback during HTML parsing, before hydration. */}
+        <script
+          dangerouslySetInnerHTML={{ __html: VERSION_RELOAD_BOOTSTRAP_SCRIPT }}
+        />
         <Script
           id="native-ios-platform-bootstrap"
           strategy="beforeInteractive"
@@ -83,6 +92,7 @@ export default async function RootLayout({
       </head>
       {/* The touch-first helper may restore data-fine-pointer before hydration. */}
       <body suppressHydrationWarning>
+        <VersionReloadScreen />
         <RuntimeFavicon />
         <MobileLaunchTimingReporter />
         <AwsRumProvider>

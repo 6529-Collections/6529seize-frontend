@@ -23,6 +23,7 @@ export default function CreateWaveInlineGroupActions({
   onMatchWaveAccess,
   onReplaceCriteria,
   onUseExistingGroup,
+  quiet = false,
 }: {
   readonly disabled: boolean;
   readonly criteriaDisabled?: boolean | undefined;
@@ -36,6 +37,7 @@ export default function CreateWaveInlineGroupActions({
   readonly onMatchWaveAccess?: (() => void) | undefined;
   readonly onReplaceCriteria: () => void;
   readonly onUseExistingGroup: () => void;
+  readonly quiet?: boolean;
 }) {
   const locale = useBrowserLocale();
   const isCancel = isWaveAccessEditor && criteriaActive;
@@ -70,6 +72,7 @@ export default function CreateWaveInlineGroupActions({
           }
           label={t(locale, "waves.create.groups.editAccess.makePublic")}
           disabled={disabled}
+          quiet={quiet}
           onClick={onMakeWavePublic}
         />
       ) : null}
@@ -83,6 +86,7 @@ export default function CreateWaveInlineGroupActions({
           }
           label={t(locale, "waves.create.groups.actions.matchWaveAccess")}
           disabled={disabled}
+          quiet={quiet}
           onClick={onMatchWaveAccess}
         />
       ) : null}
@@ -90,6 +94,8 @@ export default function CreateWaveInlineGroupActions({
         icon={criteriaIcon}
         label={criteriaLabel}
         disabled={disabled || criteriaDisabled}
+        quiet={quiet}
+        compactVisual={quiet && !isWaveAccessEditor}
         active={criteriaActive}
         isToggle={true}
         onClick={onReplaceCriteria}
@@ -104,6 +110,7 @@ export default function CreateWaveInlineGroupActions({
           }
           label={t(locale, "waves.create.groups.actions.chooseGroup")}
           disabled={disabled}
+          quiet={quiet}
           active={searchActive}
           isToggle={true}
           onClick={onUseExistingGroup}

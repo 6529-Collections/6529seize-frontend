@@ -261,11 +261,12 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
                         className="tw-mt-0.5"
                         showTooltip={!opensWholeCard}
                       />
-                      <div className="tw-min-w-0 tw-flex-1">
-                        <MemesLeaderboardDropHeader title={title} />
+                      <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-2">
+                        <div className="tw-max-w-full tw-flex-none">
+                          <MemesLeaderboardDropHeader title={title} />
+                        </div>
                         {drop.is_additional_action_promised === true && (
                           <AdditionalActionPromiseBadge
-                            className="tw-mt-2"
                             focusable={!opensWholeCard}
                           />
                         )}
