@@ -293,7 +293,8 @@ jobs:
           retention-days: 14
 
   core-playwright-checks:
-    name: App check / ${{ matrix.label }}
+    # Keep skipped jobs readable before GitHub expands the matrix.
+    name: App check / Browser tests
     needs: plan
     if: >-
       needs.plan.outputs.core_playwright_required == 'true' &&

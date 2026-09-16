@@ -19,6 +19,7 @@ import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.de-DE.jso
 const RETRY_LABEL = "Erneut versuchen";
 
 export const DE_DE_MESSAGES = {
+  "profile.subscriptions.noAllocation": "Keine Abonnement-Zuteilung",
   "singleDrop.share": "Teilen",
   "singleDrop.shareLabel": "Drop teilen",
   "singleDrop.shared": "Link geteilt",

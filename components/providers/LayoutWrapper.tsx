@@ -6,6 +6,7 @@ import { ErrorBoundary } from "react-error-boundary";
 import { finishVersionReloadWhenReady } from "@/components/version-update/versionReload";
 import FooterWrapper from "@/components/footer/FooterWrapper";
 import MobileLayout from "@/components/layout/MobileLayout";
+import NativeStartupBoundary from "@/components/layout/NativeStartupBoundary";
 import SmallScreenLayout from "@/components/layout/SmallScreenLayout";
 import WebLayout from "@/components/layout/WebLayout";
 import LayoutErrorFallback from "@/components/providers/LayoutErrorFallback";
@@ -101,19 +102,23 @@ export default function LayoutWrapper({
   }
 
   if (isAccessOrRestricted) {
+    // These standalone pages never mount web/native chrome. Keep their content
+    // immediately available instead of hiding it behind native layout startup.
     return <>{children}</>;
   }
 
   return (
-    <LayoutComponent>
-      <ErrorBoundary
-        key={refreshKey}
-        FallbackComponent={LayoutErrorFallback}
-        resetKeys={[pathname, refreshKey]}
-      >
-        {children}
-        <FooterWrapper />
-      </ErrorBoundary>
-    </LayoutComponent>
+    <NativeStartupBoundary isNativeLayout={isApp}>
+      <LayoutComponent>
+        <ErrorBoundary
+          key={refreshKey}
+          FallbackComponent={LayoutErrorFallback}
+          resetKeys={[pathname, refreshKey]}
+        >
+          {children}
+          <FooterWrapper />
+        </ErrorBoundary>
+      </LayoutComponent>
+    </NativeStartupBoundary>
   );
 }

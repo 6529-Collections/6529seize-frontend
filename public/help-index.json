@@ -1849,6 +1849,8 @@
         "The tab also shows exact ETH balance, raw mint capacity, airdrop address, manual or automatic mode, edition preference, upcoming drops, and history when subscriptions are available.",
         "Owners can update settings, including airdrop address and mode, and top up; read-only viewers can inspect visible subscription information.",
         "The owner profile header and connected Home subscription row show a compact coverage status with a contextual setup, manage, choose-drops, or top-up action.",
+        "Subscription changes and top-ups must be received by 00:00 UTC on the day before a Meme Card mint. Once a card is closed, enabling Automatic mode or making a first top-up does not subscribe you to that card. Its saved subscription choice is retained; Automatic mode applies to later cards.",
+        "Upcoming Drops shows No subscription allocation only for a subscribed first card whose distribution is published but whose finalized subscription list has no record for that profile. A phase-less finalized record remains pending; the message also stays silent for unsubscribed cards, unpublished distribution, or failed lookups.",
         "The tab keeps loading and empty states distinct, and its subscription controls, upcoming rows, and history panels adapt to narrow screens."
       ],
       "canonical_path": "/{user}/subscriptions",
@@ -4945,6 +4947,7 @@
       "keywords": ["header", "context", "top", "bar", "controls", "navigation"],
       "facts": [
         "The app header provides route context and shared controls for the current surface.",
+        "On iOS and Android app launch, a dark native loading shell appears until the app layout is ready, without flashing the desktop sidebar. Public content can appear before wallet startup finishes.",
         "Header behavior changes with route, viewport, and whether the user is inside an app-like layout.",
         "Mobile-web and native-app page sharing appears next to Search on supported routes and opens the platform system share sheet directly.",
         "Use wave header records for wave-specific controls such as wave sharing or wave picture editing."
@@ -5013,6 +5016,34 @@
       "related_paths": ["/waves", "/notifications"],
       "tags": ["navigation", "mobile", "refresh"],
       "source_refs": ["ops/docs/navigation/feature-mobile-pull-to-refresh.md"]
+    },
+    {
+      "id": "navigation.mobile-app-banner",
+      "kind": "ui_affordance",
+      "title": "Open in 6529 Mobile banner",
+      "aliases": [
+        "open in app",
+        "app banner",
+        "get the app",
+        "dismiss app banner"
+      ],
+      "keywords": ["mobile", "app", "banner", "open", "install", "dismiss"],
+      "facts": [
+        "A dismissible 6529 Mobile banner above the small-screen mobile website header offers Open and Get the app. It is hidden inside 6529 Mobile and 6529 Desktop and on authentication, access, app-wallet and handoff routes.",
+        "Open attempts to launch the current wave, drop, profile or supported page directly in the app, preserving query parameters and fragments. Browser authentication is not transferred; app access and regional restrictions still apply.",
+        "Dismissing the banner hides it for seven days in the same browser, including reloads and visits. Clearing website data resets it; blocked storage permits only in-memory dismissal.",
+        "Get the app opens the App Store on iOS or Google Play on Android. After installation, return to the browser page and tap Open to reach the destination; installation alone does not preserve it through the store.",
+        "App opening may be blocked, cancelled, or unavailable. The banner adds no status message after Open; Get the app and dismiss remain available if users stay in the browser. The website cannot reliably detect installation and does not automatically redirect to a store after a timer. Users can continue browsing."
+      ],
+      "canonical_path": "/about/6529-apps",
+      "related_paths": ["/waves"],
+      "tags": ["navigation", "mobile"],
+      "source_refs": [
+        "components/mobile-app/MobileAppBanner.tsx",
+        "helpers/mobileAppLinks.ts",
+        "hooks/useMobileAppBannerDismissal.ts",
+        "ops/docs/navigation/feature-mobile-app-landing.md"
+      ]
     },
     {
       "id": "navigation.share-modal",
