@@ -328,7 +328,8 @@ export default function UserPageProfileWave({
   });
   const permissionProbeDropId = useCurationPermissionProbe(
     profileCuration?.id,
-    arrangementProbeDrops
+    arrangementProbeDrops,
+    isArrangementProbePlaceholder
   );
   const canArrangeProfileCuration = useCurationManagementPermission({
     curationId: profileCuration?.id ?? "",

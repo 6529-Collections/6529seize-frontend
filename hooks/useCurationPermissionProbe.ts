@@ -7,13 +7,22 @@ import { useState } from "react";
 // the server checks current membership and permission on every save.
 export function useCurationPermissionProbe(
   curationId: string | undefined,
-  drops: readonly { id: string }[]
+  drops: readonly { id: string }[],
+  isPlaceholderData = false
 ) {
   const firstId = drops[0]?.id ?? "";
   const [probe, setProbe] = useState({ curationId, id: firstId });
-  if (probe.curationId !== curationId || (!probe.id && firstId)) {
-    setProbe({ curationId, id: firstId });
-    return firstId;
+  if (probe.curationId !== curationId) {
+    setProbe({ curationId, id: "" });
+    return "";
+  }
+  if (isPlaceholderData) return probe.id;
+  const nextId = drops.some((drop) => drop.id === probe.id)
+    ? probe.id
+    : firstId;
+  if (probe.id !== nextId) {
+    setProbe({ curationId, id: nextId });
+    return nextId;
   }
   return probe.id;
 }

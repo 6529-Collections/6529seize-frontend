@@ -487,7 +487,11 @@ export default function UserPageProfileWaveMasonry({
     align: "center",
   });
   useCurationOrderReveal(order, container, scrollToIndex);
-  const permissionProbeDropId = useCurationPermissionProbe(curationId, drops);
+  const permissionProbeDropId = useCurationPermissionProbe(
+    curationId,
+    drops,
+    order.isPlaceholderData
+  );
   const canManageActiveCuration = useCurationManagementPermission({
     curationId,
     probeDropId: permissionProbeDropId,

@@ -134,6 +134,17 @@ it.each(["disconnected", "proxy"])(
   }
 );
 
+it("shows the authentication cancellation message without saving", async () => {
+  mockRequestAuth.mockResolvedValueOnce({ success: false });
+  const { result } = renderOrder();
+  await act(async () => {
+    await result.current.move("a", { placement: "after", anchorDropId: "b" });
+  });
+  expect(moveMock).not.toHaveBeenCalled();
+  expect(result.current.error).toBe("Authentication was cancelled.");
+  expect(result.current.busy).toBe(false);
+});
+
 it("does not submit an old session's pending authorization after account switching", async () => {
   let authorize: (value: { success: boolean }) => void = () => {};
   mockRequestAuth.mockImplementationOnce(

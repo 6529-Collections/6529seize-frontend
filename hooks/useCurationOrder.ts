@@ -20,6 +20,8 @@ const PAGE_SIZE = 20;
 type OrderSnapshot = readonly ExtendedDrop[] | null;
 type RevealRequest = { id: string } | null;
 
+class CurationAuthCancelledError extends Error {}
+
 function reordered(
   drops: readonly ExtendedDrop[],
   dropId: string,
@@ -148,8 +150,7 @@ export function useCurationOrder({
     try {
       const auth = await requestAuth();
       ensureCurrent();
-      const authError = t(locale, "profileCuration.order.authCancelled");
-      if (!auth.success) throw new Error(authError);
+      if (!auth.success) throw new CurationAuthCancelledError();
       await moveCurationDrop({
         dropId,
         curationId,
@@ -164,11 +165,13 @@ export function useCurationOrder({
       setRevealRequest({ id: dropId });
     } catch (cause) {
       if (!isCurrent()) return;
-      setError(
-        cause instanceof CurationOrderChangedError
-          ? t(locale, "profileCuration.order.changed")
-          : t(locale, "profileCuration.order.saveFailed")
-      );
+      let message = t(locale, "profileCuration.order.saveFailed");
+      if (cause instanceof CurationAuthCancelledError) {
+        message = t(locale, "profileCuration.order.authCancelled");
+      } else if (cause instanceof CurationOrderChangedError) {
+        message = t(locale, "profileCuration.order.changed");
+      }
+      setError(message);
       await query.refetch();
       if (isCurrent()) setRevealRequest({ id: dropId });
     } finally {

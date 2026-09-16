@@ -102,7 +102,11 @@ export default function MyStreamWaveCurationContent({
     isPlaceholderData,
   } = order;
 
-  const permissionProbeDropId = useCurationPermissionProbe(curationId, drops);
+  const permissionProbeDropId = useCurationPermissionProbe(
+    curationId,
+    drops,
+    isPlaceholderData
+  );
   const isInitialLoading = isFetching && drops.length === 0;
   const canManageActiveCuration = useCurationManagementPermission({
     curationId,
