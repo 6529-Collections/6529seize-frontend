@@ -49,6 +49,43 @@ interface WaveRepDetailsProps {
   readonly wave: ApiWave;
 }
 
+function getCategoryViewState({
+  isLoadingError,
+  isSuccess,
+  categoryCount,
+  hasSearch,
+  filteredCount,
+  hasNextPage,
+  isFetchingNextPage,
+  isFetchNextPageError,
+}: {
+  readonly isLoadingError: boolean;
+  readonly isSuccess: boolean;
+  readonly categoryCount: number;
+  readonly hasSearch: boolean;
+  readonly filteredCount: number;
+  readonly hasNextPage: boolean;
+  readonly isFetchingNextPage: boolean;
+  readonly isFetchNextPageError: boolean;
+}) {
+  const isEmpty = isSuccess && categoryCount === 0;
+
+  return {
+    isEmpty,
+    showSearch: !isLoadingError && !isEmpty,
+    showList: !isLoadingError,
+    showNoMatches:
+      !isEmpty &&
+      hasSearch &&
+      filteredCount === 0 &&
+      isSuccess &&
+      !hasNextPage &&
+      !isFetchingNextPage,
+    showPagination: hasNextPage || isFetchingNextPage || isFetchNextPageError,
+    showInitialError: isLoadingError,
+  };
+}
+
 function runQueryAction(action: () => Promise<unknown>): void {
   action().catch(() => undefined);
 }
@@ -205,6 +242,16 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
           ),
     [categories, normalizedCategorySearch]
   );
+  const categoryViewState = getCategoryViewState({
+    isLoadingError: categoriesQuery.isLoadingError,
+    isSuccess: categoriesQuery.status === "success",
+    categoryCount: categories.length,
+    hasSearch: normalizedCategorySearch.length > 0,
+    filteredCount: filteredCategories.length,
+    hasNextPage: categoriesQuery.hasNextPage,
+    isFetchingNextPage: categoriesQuery.isFetchingNextPage,
+    isFetchNextPageError: categoriesQuery.isFetchNextPageError,
+  });
   const contributors = useMemo(
     () => contributorsQuery.data?.pages.flatMap((page) => page.data) ?? [],
     [contributorsQuery.data?.pages]
@@ -345,9 +392,16 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
             </span>
           )}
         </div>
-        <div className="tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.06] tw-bg-white/[0.025] tw-p-1.5">
+        {categoryViewState.showSearch && (
           <CategorySearch value={categorySearch} onChange={setCategorySearch} />
-          <div className="tw-mt-1.5 tw-divide-y tw-divide-solid tw-divide-white/[0.04] tw-overflow-hidden tw-rounded-md">
+        )}
+
+        {categoryViewState.showList && (
+          <div
+            className={`tw-divide-y tw-divide-solid tw-divide-white/5 tw-border-x-0 tw-border-y tw-border-solid tw-border-white/5 ${
+              categoryViewState.isEmpty ? "" : "tw-mt-2"
+            }`}
+          >
             <CategoryRow
               label={detailText("waves.rep.details.categories.all")}
               totalRep={summary.totalRep}
@@ -384,60 +438,51 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
                 onClick={() => selectCategory(category)}
               />
             ))}
-            {normalizedCategorySearch.length > 0 &&
-              filteredCategories.length === 0 &&
-              categoriesQuery.status === "success" &&
-              !categoriesQuery.hasNextPage &&
-              !categoriesQuery.isFetchingNextPage && (
-                <p className="tw-mb-0 tw-px-2.5 tw-py-3 tw-text-xs tw-font-medium tw-text-iron-500">
-                  {detailText("waves.rep.details.categories.noMatches")}
-                </p>
-              )}
+            {categoryViewState.isEmpty && (
+              <p className="tw-mb-0 tw-px-1 tw-py-3 tw-text-xs tw-text-iron-500">
+                {detailText("waves.rep.details.categories.empty")}
+              </p>
+            )}
+            {categoryViewState.showNoMatches && (
+              <p className="tw-mb-0 tw-px-1 tw-py-3 tw-text-xs tw-font-medium tw-text-iron-500">
+                {detailText("waves.rep.details.categories.noMatches")}
+              </p>
+            )}
+            {categoryViewState.showPagination && (
+              <div>
+                {categoriesQuery.isFetchNextPageError && (
+                  <p className="tw-mb-0 tw-px-1 tw-py-2 tw-text-xs tw-text-rose-300">
+                    {detailText("waves.rep.details.categories.loadMoreError")}
+                  </p>
+                )}
+                <button
+                  type="button"
+                  aria-busy={categoriesQuery.isFetchingNextPage}
+                  onClick={fetchNextCategoriesPage}
+                  disabled={categoriesQuery.isFetchingNextPage}
+                  className="tw-min-h-11 tw-w-full tw-cursor-pointer tw-border-0 tw-bg-transparent tw-px-1 tw-py-2 tw-text-center tw-text-xs tw-font-semibold tw-text-iron-300 tw-transition hover:tw-bg-white/[0.025] hover:tw-text-white focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 disabled:tw-cursor-wait disabled:tw-text-iron-500"
+                >
+                  {categoriesQuery.isFetchingNextPage
+                    ? detailText("waves.rep.details.categories.loadingMore")
+                    : detailText(categoryLoadMoreMessageKey)}
+                </button>
+              </div>
+            )}
           </div>
-        </div>
-
-        {categoriesQuery.status === "success" && categories.length === 0 && (
-          <p className="tw-mb-0 tw-mt-3 tw-text-xs tw-text-iron-500">
-            {detailText("waves.rep.details.categories.empty")}
-          </p>
         )}
 
-        {categoriesQuery.isLoadingError && (
-          <div className="tw-mt-3 tw-flex tw-items-center tw-justify-between tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-rose-400/15 tw-bg-rose-400/[0.03] tw-px-3 tw-py-3">
+        {categoryViewState.showInitialError && (
+          <div className="tw-flex tw-min-h-11 tw-items-center tw-justify-between tw-gap-3 tw-border-x-0 tw-border-y tw-border-solid tw-border-rose-400/15 tw-px-1 tw-py-2">
             <p className="tw-mb-0 tw-text-xs tw-text-iron-400">
               {detailText("waves.rep.details.categories.error")}
             </p>
             <button
               type="button"
               onClick={retryCategories}
-              className="tw-cursor-pointer tw-border-none tw-bg-transparent tw-p-0 tw-text-xs tw-font-semibold tw-text-white tw-transition hover:tw-text-iron-300"
+              className="tw-min-h-11 tw-cursor-pointer tw-rounded-md tw-border-0 tw-bg-transparent tw-px-2 tw-text-xs tw-font-semibold tw-text-white tw-transition hover:tw-text-iron-300 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400"
             >
               {detailText(RETRY_ACTION_MESSAGE_KEY)}
             </button>
-          </div>
-        )}
-
-        {(categoriesQuery.hasNextPage ||
-          categoriesQuery.isFetchingNextPage ||
-          categoriesQuery.isFetchNextPageError) && (
-          <div className="tw-mt-3">
-            {categoriesQuery.isFetchNextPageError && (
-              <p className="tw-mb-2 tw-text-xs tw-text-rose-300">
-                {detailText("waves.rep.details.categories.loadMoreError")}
-              </p>
-            )}
-            <Button
-              type="button"
-              onClick={fetchNextCategoriesPage}
-              disabled={categoriesQuery.isFetchingNextPage}
-              variant="tertiary"
-              size="xs"
-              fullWidth
-            >
-              {categoriesQuery.isFetchingNextPage
-                ? detailText("waves.rep.details.categories.loadingMore")
-                : detailText(categoryLoadMoreMessageKey)}
-            </Button>
           </div>
         )}
       </section>

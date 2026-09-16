@@ -72,13 +72,13 @@ describe("Button", () => {
     );
   });
 
-  it("supports a subtle outlined destructive action", () => {
+  it("supports an outlined destructive action with full red text", () => {
     render(<Button variant="destructiveOutline">Delete drop</Button>);
 
     expect(screen.getByRole("button", { name: "Delete drop" })).toHaveClass(
       "tw-border-red/20",
       "tw-bg-red/5",
-      "tw-text-red/70",
+      "tw-text-red",
       "focus-visible:tw-outline-red"
     );
   });

@@ -5,7 +5,7 @@ import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 import { DEFAULT_CONNECTED_PROFILE_FALLBACK_PFP } from "@/constants/constants";
 import { useIdentity } from "@/hooks/useIdentity";
-import { ArrowPathIcon } from "@heroicons/react/24/outline";
+import { ArrowPathIcon, PlusIcon } from "@heroicons/react/24/outline";
 import { useAuth } from "@/components/auth/Auth";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -157,21 +157,21 @@ export default function AppSidebarConnectedAccounts({
           type="button"
           onClick={handleAddAccount}
           disabled={seizeConnectOpen}
-          className="tw-touch-action-manipulation tw-flex tw-h-12 tw-w-12 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-800 tw-text-iron-100 tw-ring-1 tw-ring-iron-500 tw-transition-colors focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 active:tw-bg-iron-700 disabled:tw-cursor-wait disabled:tw-opacity-60"
+          className="tw-group tw-touch-action-manipulation tw-flex tw-size-11 tw-flex-shrink-0 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-wait disabled:tw-opacity-60"
           aria-busy={seizeConnectOpen}
           aria-label={seizeConnectOpen ? openingAccountLabel : addAccountLabel}
           title={seizeConnectOpen ? openingAccountLabel : addAccountLabel}
         >
-          {seizeConnectOpen ? (
-            <ArrowPathIcon
-              className="tw-size-5 tw-animate-spin motion-reduce:tw-animate-none"
-              aria-hidden="true"
-            />
-          ) : (
-            <span className="tw-text-2xl tw-leading-none" aria-hidden="true">
-              +
-            </span>
-          )}
+          <span className="tw-flex tw-size-9 tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-iron-500 tw-transition-colors tw-duration-150 desktop-hover:group-hover:tw-bg-iron-700 group-active:tw-bg-iron-700 motion-reduce:tw-transition-none">
+            {seizeConnectOpen ? (
+              <ArrowPathIcon
+                className="tw-size-5 tw-animate-spin motion-reduce:tw-animate-none"
+                aria-hidden="true"
+              />
+            ) : (
+              <PlusIcon className="tw-size-6 tw-stroke-2" aria-hidden="true" />
+            )}
+          </span>
         </button>
       ) : null}
     </div>

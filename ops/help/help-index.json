@@ -780,7 +780,8 @@
         "Drop Forge appears as a standalone sidebar row after About only when the connected wallet can access /drop-forge.",
         "The sidebar can be collapsed or expanded depending on viewport and layout state.",
         "In the collapsed web rail, NFTs and About open on intentional mouse hover while tap, click, and keyboard activation remain available; the flyout stays open while crossing into it and closes after leaving both surfaces or pressing Escape.",
-        "Search, Share, Connect Wallet, and Notifications are utility controls; Profile and Connect Device live in the connected account menu."
+        "Search, Share, Connect Wallet, and Notifications are utility controls; Profile and Connect Device live in the connected account menu.",
+        "When a new version is available, desktop web shows a rocket above Search as the first lower sidebar item instead of a toast. It has an Update tooltip when collapsed and an Update label when expanded. Selecting it reloads the current route with an Updating to the latest version screen, a static rocket, and three animated dots. Mobile browsers, including tablets in desktop browsing mode, retain the full update toast and show the same updating screen when tapped."
       ],
       "canonical_path": "/waves",
       "related_paths": [
@@ -4952,7 +4953,7 @@
         "Rapid primary-tab switching commits the most recently requested destination.",
         "In the Android app, bottom spacing respects the space the device reports for system navigation.",
         "Rotating a phone or tablet keeps bottom navigation visible unless a route, edit state, open drop, or real software keyboard hides it.",
-        "In the native app, the new-version refresh prompt stays centered directly above the dock and follows its expanded or compact position."
+        "In the native app, a small rocket appears in a curved attachment above Home when a new version is available. It moves, hides and scales with the dock. Tapping the rocket reloads the current route and shows Updating to the latest version with a static rocket and animated dots during loading; Home still navigates home. Desktop web uses an Update rocket above Search in the lower sidebar; mobile browsers retain the full update toast."
       ],
       "canonical_path": "/waves",
       "related_paths": [
@@ -4983,7 +4984,7 @@
       "keywords": ["mobile", "refresh", "pull", "swipe", "feed", "app"],
       "facts": [
         "Mobile pull-to-refresh is documented as app-shell behavior.",
-        "It is intended for supported mobile surfaces and does not replace explicit page reload controls.",
+        "In the native app, pulling down from the header normally refreshes content. If a new app version is available, it fully reloads the current route to load the update, preserving the wave reading position when available.",
         "Use it when users ask how to refresh content on mobile."
       ],
       "canonical_path": "/waves",
