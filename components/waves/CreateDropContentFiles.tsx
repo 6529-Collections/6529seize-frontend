@@ -69,6 +69,16 @@ export const CreateDropContentFiles: React.FC<CreateDropContentFilesProps> = ({
     })),
   ];
 
+  for (const uploading of uploadingFiles) {
+    if (!allFiles.some((item) => item.file === uploading.file)) {
+      allFiles.push({
+        file: uploading.file,
+        source: FileSource.Files,
+        label: currentFilesLabel,
+      });
+    }
+  }
+
   return (
     <div>
       <AnimatePresence>
