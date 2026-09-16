@@ -93,6 +93,17 @@ export default function CurationOrganize({
   const [target, setTarget] = useState<Target | null>(null);
   const [announcement, setAnnouncement] = useState("");
   const active = enabled && order.canAuthenticate;
+  const [feedbackSession, setFeedbackSession] = useState({
+    active,
+    revealRequest: order.revealRequest,
+  });
+  let feedbackBaseline = feedbackSession.revealRequest;
+  if (active !== feedbackSession.active) {
+    feedbackBaseline = order.revealRequest;
+    setFeedbackSession({ active, revealRequest: order.revealRequest });
+  }
+  const hasSessionFeedback =
+    active && order.revealRequest !== feedbackBaseline;
   const doneButton = useRef<HTMLButtonElement | null>(null);
   useEffect(() => {
     if (active) doneButton.current?.focus();
@@ -134,7 +145,10 @@ export default function CurationOrganize({
   useEffect(() => {
     if (!active) release();
   }, [active, release]);
-  let status = order.saved ? t(locale, "profileCuration.order.saved") : null;
+  let status =
+    hasSessionFeedback && order.saved
+      ? t(locale, "profileCuration.order.saved")
+      : null;
   if (order.isSaving) status = t(locale, "profileCuration.order.saving");
   const guidance = t(
     locale,
@@ -313,7 +327,7 @@ export default function CurationOrganize({
               {status}
               <span className="tw-sr-only">{announcement}</span>
             </div>
-            {order.error && (
+            {hasSessionFeedback && order.error && (
               <p
                 role="alert"
                 className="tw-mb-0 tw-mt-2 tw-text-sm tw-text-red"

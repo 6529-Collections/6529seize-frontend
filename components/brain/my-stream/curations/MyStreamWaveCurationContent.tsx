@@ -221,7 +221,7 @@ export default function MyStreamWaveCurationContent({
         canManageActiveCuration &&
         !isPlaceholderData &&
         drops.length > 1 && (
-          <div className="tailwind-scope tw-flex tw-justify-end tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-px-4 tw-py-2">
+          <div className="tailwind-scope tw-flex tw-justify-start tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-px-4 tw-py-2">
             <Button
               ref={organizeButton}
               variant="secondary"
