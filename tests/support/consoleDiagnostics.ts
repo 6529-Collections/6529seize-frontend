@@ -1,6 +1,7 @@
 export type PageDiagnostics = {
   consoleErrors: string[];
   failedResponses?: string[];
+  networkFailures?: string[];
   pageErrors: string[];
 };
 
