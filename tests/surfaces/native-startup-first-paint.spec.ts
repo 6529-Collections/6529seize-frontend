@@ -11,6 +11,8 @@ import {
 // These browser tests use the real boundary markup and critical bootstrap/CSS.
 // They need no app server or wallet runtime. LayoutWrapper.hydration.test.tsx
 // separately exercises the actual device hooks and web-to-native React commits.
+// Each fixture needs the app's mobile viewport settings; setViewportSize alone
+// leaves mobile browsers using their default 980px layout viewport.
 for (const platform of ["ios", "android", "web"] as const) {
   for (const isNativeLayout of [false, true]) {
     test(`${platform} ${isNativeLayout ? "native layout ready" : "before hydration"} @readonly`, async ({
@@ -29,6 +31,7 @@ for (const platform of ["ios", "android", "web"] as const) {
         })
       );
       await page.setContent(`<!doctype html><html><head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
         <style>${NATIVE_STARTUP_STYLES}body { margin: 0; }</style>
         <script>globalThis.CapacitorCustomPlatform = { name: "${platform}" };</script>
         <script>${NATIVE_STARTUP_SCRIPT}</script>
@@ -74,6 +77,7 @@ test("version reload cover hands off to the native loading shell @readonly", asy
     })
   );
   await page.setContent(`<!doctype html><html data-version-reload="true"><head>
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <style>${NATIVE_STARTUP_STYLES}${VERSION_RELOAD_STYLES}</style>
     <script>globalThis.androidBridge = {};</script>
     <script>${NATIVE_STARTUP_SCRIPT}</script>
