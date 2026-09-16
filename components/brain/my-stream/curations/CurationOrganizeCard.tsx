@@ -60,7 +60,7 @@ export default function CurationOrganizeCard({
   return (
     <div
       ref={setNodeRef}
-      className={`tailwind-scope tw-relative tw-min-w-0 tw-rounded-xl ${selected ? "tw-ring-1 tw-ring-iron-500" : ""} ${isDragging ? "tw-opacity-40" : ""}`}
+      className={`tailwind-scope tw-relative tw-min-w-0 tw-rounded-xl ${selected ? "tw-ring-1 tw-ring-white/20" : ""} ${isDragging ? "tw-opacity-40" : ""}`}
     >
       {enabled && (
         <button
@@ -77,12 +77,12 @@ export default function CurationOrganizeCard({
           disabled={busy}
           onClick={() => select(id)}
           onKeyDown={(event) => keyDown(id, event)}
-          className={`tw-absolute tw-right-2 tw-top-2 tw-z-[1001] tw-flex tw-size-11 tw-touch-none tw-select-none tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-p-0 tw-text-iron-100 tw-shadow-sm tw-outline-none tw-ring-1 tw-ring-inset tw-ring-white/10 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 disabled:tw-cursor-wait ${selected ? "tw-bg-iron-700" : "tw-bg-iron-800/90 desktop-hover:hover:tw-bg-iron-700"} ${isDragging ? "tw-cursor-grabbing" : "tw-cursor-grab"}`}
+          className={`tw-absolute tw-right-1.5 tw-top-1.5 tw-z-[1001] tw-flex tw-size-11 tw-touch-none tw-select-none tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-p-0 tw-outline-none tw-transition-colors tw-duration-150 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 disabled:tw-cursor-wait ${selected ? "tw-bg-white/10 tw-text-white" : "tw-bg-black/20 tw-text-iron-300 desktop-hover:hover:tw-bg-black/40 desktop-hover:hover:tw-text-white"} ${isDragging ? "tw-cursor-grabbing" : "tw-cursor-grab"}`}
         >
           <svg
             aria-hidden="true"
-            width="24"
-            height="16"
+            width="20"
+            height="14"
             viewBox="0 0 24 16"
             fill="currentColor"
           >

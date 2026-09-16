@@ -113,6 +113,14 @@ export default function CurationOrganize({
   }, [active, release]);
   let status = order.saved ? t(locale, "profileCuration.order.saved") : null;
   if (order.isSaving) status = t(locale, "profileCuration.order.saving");
+  const guidance = t(
+    locale,
+    selectedId
+      ? "profileCuration.order.chooseDestination"
+      : "profileCuration.order.help"
+  );
+  const toolbarMessage = selectedId ? guidance : (status ?? guidance);
+  const showToolbarMessageOnMobile = !!status && !selectedId;
 
   const place = (id: string, destination: Target) => {
     cancel();
@@ -243,64 +251,63 @@ export default function CurationOrganize({
         }}
       >
         {active && (
-          <div className="tailwind-scope tw-sticky tw-top-0 tw-z-[1001] tw-mb-4 tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-3">
-            <div className="tw-flex tw-items-center tw-gap-2">
-              <span className="tw-min-w-0 tw-flex-1 tw-truncate tw-text-sm tw-font-semibold tw-text-iron-100">
-                {t(locale, "profileCuration.order.organizing")}
-              </span>
+          <div className="tailwind-scope tw-sticky tw-top-0 tw-z-[1001] tw-mb-3 tw-border-x-0 tw-border-y tw-border-solid tw-border-white/10 tw-bg-black/85 tw-py-1.5 tw-backdrop-blur-md">
+            <div className="tw-flex tw-min-h-11 tw-items-center tw-gap-2">
+              <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-baseline">
+                <span className="tw-flex-shrink-0 tw-text-sm tw-font-semibold tw-text-iron-100">
+                  {t(locale, "profileCuration.order.organizing")}
+                </span>
+                <span
+                  className={`tw-ml-2 tw-min-w-0 tw-truncate tw-text-xs tw-text-iron-500 ${showToolbarMessageOnMobile ? "tw-inline" : "tw-hidden sm:tw-inline"}`}
+                >
+                  {toolbarMessage}
+                </span>
+              </div>
               {order.undo && (
-                <Button
-                  variant="secondary"
-                  size="sm"
+                <button
+                  type="button"
                   disabled={order.busy}
                   onClick={() => {
                     cancel();
                     void order.undo?.();
                   }}
+                  className="tw-h-11 tw-border-0 tw-bg-transparent tw-px-2 tw-text-sm tw-font-medium tw-text-iron-400 tw-outline-none desktop-hover:hover:tw-text-iron-100 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 disabled:tw-cursor-wait disabled:tw-opacity-50"
                 >
                   {t(locale, "profileCuration.order.undo")}
-                </Button>
+                </button>
               )}
-              <Button
+              <button
                 ref={doneButton}
-                variant="secondary"
-                size="sm"
+                type="button"
                 disabled={order.busy}
                 onClick={() => {
                   cancel();
                   onDone();
                 }}
+                className="tw-h-11 tw-border-0 tw-bg-transparent tw-px-2 tw-text-sm tw-font-semibold tw-text-iron-100 tw-outline-none desktop-hover:hover:tw-text-white focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 disabled:tw-cursor-wait disabled:tw-opacity-50"
               >
                 {t(locale, "profileCuration.order.done")}
-              </Button>
+              </button>
             </div>
-            <p
-              id={instructionsId}
-              className="tw-mb-0 tw-mt-2 tw-text-sm tw-text-iron-400"
-            >
-              {t(
-                locale,
-                selectedId
-                  ? "profileCuration.order.chooseDestination"
-                  : "profileCuration.order.help"
-              )}
+            <p id={instructionsId} className="tw-sr-only">
+              {guidance}
             </p>
             <span id={`${instructionsId}-keyboard`} className="tw-sr-only">
               {t(locale, "profileCuration.order.keyboardHelp")}
             </span>
             {selectedId && !draggingId && (
-              <div className="tw-mt-3 tw-flex tw-flex-wrap tw-gap-2">
+              <div className="tw-flex tw-min-h-10 tw-flex-wrap tw-items-center tw-gap-1 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5">
                 {(["first", "last"] as const).map((placement) => (
-                  <Button
+                  <button
                     key={placement}
-                    variant="secondary"
-                    size="sm"
+                    type="button"
                     disabled={order.busy}
                     onClick={() => {
                       const id = selectedId;
                       cancel();
                       void order.move(id, { placement, waveId });
                     }}
+                    className="tw-h-10 tw-border-0 tw-bg-transparent tw-px-2 tw-text-xs tw-font-medium tw-text-iron-400 tw-outline-none desktop-hover:hover:tw-text-iron-100 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 disabled:tw-cursor-wait disabled:tw-opacity-50"
                   >
                     {t(
                       locale,
@@ -308,14 +315,14 @@ export default function CurationOrganize({
                         ? "profileCuration.order.first"
                         : "profileCuration.order.last"
                     )}
-                  </Button>
+                  </button>
                 ))}
               </div>
             )}
             <div
               role="status"
               aria-live="polite"
-              className="tw-text-sm tw-text-iron-300"
+              className="tw-sr-only"
             >
               {status}
               <span className="tw-sr-only">{announcement}</span>
