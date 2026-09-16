@@ -7,8 +7,10 @@ Parent: [Navigation Index](README.md)
 In native app layout, you can pull down from the header to refresh data
 without leaving the current route.
 
-This refresh invalidates cached query data and triggers an in-app refresh
-cycle. It is not a full browser reload.
+Normally this refresh invalidates cached query data and triggers an in-app
+refresh cycle. When a new app version is available, it instead fully reloads
+the page to load that version, keeping the current route and preserving the
+wave reading position when available.
 
 ## Location in the Site
 
@@ -58,7 +60,7 @@ cycle. It is not a full browser reload.
 
 - Native app layout only.
 - Keeps current URL and route context.
-- Refreshes app/query state; does not force a full page reload.
+- Refreshes app/query state unless an available version update requires a full reload.
 
 ## Related Pages
 

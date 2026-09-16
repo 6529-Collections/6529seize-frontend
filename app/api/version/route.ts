@@ -1,3 +1,4 @@
+import { getAppEnvironment } from "@/config/appEnvironment";
 import { publicEnv } from "@/config/env";
 import { NextResponse } from "next/server";
 
@@ -201,9 +202,8 @@ const shouldRefreshClient = ({
 }): boolean => {
   const currentClientVersion = clientVersion ?? version;
 
-  // Production intentionally gates the toast on a valid, reachable announcement
-  // endpoint. Local/staging or broken endpoint configs keep the historical
-  // live-instance comparison so version drift remains detectable.
+  // Production and any configured announcement endpoint fail closed. Only
+  // local/staging without an announcement endpoint compare live instances.
   const targetVersion = useAnnouncementGate
     ? announcedVersion
     : (announcedVersion ?? version);
@@ -246,11 +246,13 @@ export async function GET(request?: Request) {
   const announcementEndpoint = configuredEndpoint
     ? normalizeAnnouncementEndpoint(configuredEndpoint)
     : null;
-  let useAnnouncementGate = announcementEndpoint !== null;
+  const useAnnouncementGate =
+    configuredEndpoint !== null ||
+    getAppEnvironment(publicEnv.BASE_ENDPOINT).isProduction;
 
   if (configuredEndpoint && !announcementEndpoint) {
     console.warn(
-      "Ignoring invalid ANNOUNCED_VERSION_ENDPOINT; falling back to live version checks."
+      "Ignoring invalid ANNOUNCED_VERSION_ENDPOINT; update availability is unconfirmed."
     );
   }
 
@@ -269,9 +271,8 @@ export async function GET(request?: Request) {
         });
       }
     } catch (error) {
-      useAnnouncementGate = false;
       console.warn(
-        "Failed to fetch announced version; falling back to live version checks.",
+        "Failed to fetch announced version; update availability is unconfirmed.",
         error
       );
     }
