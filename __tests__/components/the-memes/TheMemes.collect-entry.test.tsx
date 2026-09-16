@@ -1,9 +1,11 @@
 import TheMemesComponent from "@/components/the-memes/TheMemes";
 import type { MemeSeason } from "@/entities/ISeason";
+import type { ApiMemesExtendedData } from "@/generated/models/ApiMemesExtendedData";
 import { fetchUrl } from "@/services/6529api";
 import { commonApiFetch } from "@/services/api/common-api";
 import { render, screen, waitFor } from "@testing-library/react";
 import type { ReactNode } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
 
 let mockSearchParams = new URLSearchParams();
 const mockRouter = { push: jest.fn() };
@@ -25,7 +27,11 @@ jest.mock("@/services/6529api", () => ({
 jest.mock("@/components/nft-image/NftBalancesContext", () => ({
   NftBalancesProvider: ({ children }: { children: ReactNode }) => children,
 }));
-jest.mock("@/components/the-memes/TheMemesCard", () => () => null);
+jest.mock("@/components/the-memes/TheMemesCard", () => ({
+  nft,
+}: {
+  readonly nft: ApiMemesExtendedData;
+}) => <a href={`/the-memes/${nft.id}`}>{nft.name}</a>);
 jest.mock(
   "@/components/collections-dropdown/CollectionsDropdown",
   () => () => null
@@ -81,3 +87,40 @@ it.each([
     });
   }
 );
+
+it("renders the server-provided public cards once without refetching the first page", async () => {
+  const initialData = {
+    nfts: [
+      { id: 1, meme: 1, meme_name: "Meme", name: "Meme #1" },
+    ] as ApiMemesExtendedData[],
+    nextPage: undefined,
+  };
+
+  mockSearchParams = new URLSearchParams();
+  render(<TheMemesComponent initialData={initialData} />);
+
+  await waitFor(() =>
+    expect(screen.getByRole("link", { name: "Meme #1" })).toHaveAttribute(
+      "href",
+      "/the-memes/1"
+    )
+  );
+  expect(screen.getAllByRole("link", { name: "Meme #1" })).toHaveLength(1);
+  expect(fetchUrl).not.toHaveBeenCalled();
+});
+
+it("includes seeded artwork links in the initial HTML", () => {
+  const markup = renderToStaticMarkup(
+    <TheMemesComponent
+      initialData={{
+        nfts: [
+          { id: 2, meme: 1, meme_name: "Meme", name: "Meme #2" },
+        ] as ApiMemesExtendedData[],
+        nextPage: undefined,
+      }}
+    />
+  );
+
+  expect(markup).toContain('href="/the-memes/2"');
+  expect(markup).toContain("Meme #2");
+});

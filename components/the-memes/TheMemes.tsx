@@ -16,6 +16,7 @@ import {
   normalizeMemeFilterIds,
 } from "@/components/the-memes/theMemesFilters";
 import { getTheMemesBrowseHref } from "@/components/the-memes/theMemesRouteParams";
+import type { TheMemesInitialData } from "@/app/the-memes/theMemesInitialData";
 import VolumeTypeDropdown from "@/components/the-memes/VolumeTypeDropdown";
 import FilterGridDropdown from "@/components/utils/select/dropdown/FilterGridDropdown";
 import MemeSeasonGridDropdown from "@/components/utils/select/dropdown/MemeSeasonGridDropdown";
@@ -40,7 +41,14 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 interface Meme {
   meme: number;
@@ -170,8 +178,10 @@ function getSortQueryParam(sort: MemesSort, volumeType: VolumeType): string {
 }
 
 export default function TheMemesComponent({
+  initialData,
   locale = DEFAULT_LOCALE,
 }: Readonly<{
+  initialData?: TheMemesInitialData | undefined;
   locale?: SupportedLocale;
 }> = {}) {
   const router = useRouter();
@@ -314,11 +324,16 @@ export default function TheMemesComponent({
     return `${publicEnv.API_ENDPOINT}/api/memes_extended_data?${query.toString()}`;
   }, [activeSeasonId, activeYearId, seasons, sort, sortDir, volumeType]);
 
-  const [fetching, setFetching] = useState(true);
+  const initialDataRef = useRef(initialData);
+  const [fetching, setFetching] = useState(initialData === undefined);
 
-  const [nfts, setNfts] = useState<ApiMemesExtendedData[]>([]);
+  const [nfts, setNfts] = useState<ApiMemesExtendedData[]>(
+    () => initialData?.nfts ?? []
+  );
   const tokenIds = useMemo(() => nfts.map((nft) => nft.id), [nfts]);
-  const [nftsNextPage, setNftsNextPage] = useState<string>();
+  const [nftsNextPage, setNftsNextPage] = useState<string | undefined>(
+    () => initialData?.nextPage
+  );
 
   const [nftMemes, setNftMemes] = useState<Meme[]>([]);
   const [nftsByMeme, setNftsByMeme] = useState<
@@ -410,6 +425,11 @@ export default function TheMemesComponent({
 
   useEffect(() => {
     if (filtersReady) {
+      if (initialDataRef.current !== undefined) {
+        initialDataRef.current = undefined;
+        return;
+      }
+
       setNfts([]);
       setNftsNextPage(getNftsNextPage());
       setFetching(true);
