@@ -107,19 +107,6 @@ it("shows the move immediately, rejects overlapping saves, and rolls back failur
   expect(result.current.busy).toBe(false);
 });
 
-it("opens the final page after a distant move", async () => {
-  moveMock.mockResolvedValueOnce({ position: 500 });
-  const { result } = renderOrder();
-  await act(async () => {
-    await result.current.move("a", { placement: "last", waveId: "wave" });
-  });
-  expect(mockQuery).toHaveBeenLastCalledWith(
-    expect.objectContaining({ initialPage: 25, pageSize: 20 })
-  );
-  expect(result.current.saved).toBe(true);
-  expect(result.current.revealRequest).toEqual({ id: "a" });
-});
-
 it("keeps the successful save when refreshing the posts fails", async () => {
   mockRefetch.mockResolvedValueOnce({ isError: true });
   const { result } = renderOrder();

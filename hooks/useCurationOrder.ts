@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useLayoutEffect, useRef, useState } from "react";
 import { useQueryClient, type QueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/components/auth/Auth";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
@@ -28,12 +28,9 @@ function reordered(
   const source = drops.find((drop) => drop.id === dropId);
   if (!source) return drops;
   const next = drops.filter((drop) => drop.id !== dropId);
-  let index = move.placement === "first" ? 0 : next.length;
-  if ("anchorDropId" in move) {
-    const anchor = next.findIndex((drop) => drop.id === move.anchorDropId);
-    if (anchor < 0) return drops;
-    index = anchor + (move.placement === "after" ? 1 : 0);
-  }
+  const anchor = next.findIndex((drop) => drop.id === move.anchorDropId);
+  if (anchor < 0) return drops;
+  const index = anchor + (move.placement === "after" ? 1 : 0);
   next.splice(index, 0, source);
   return next;
 }
@@ -44,22 +41,10 @@ function prepareMove(
   destination: CurationDropMove
 ) {
   const sourceIndex = drops.findIndex((drop) => drop.id === dropId);
-  if (
-    sourceIndex < 0 ||
-    ("anchorDropId" in destination && destination.anchorDropId === dropId)
-  )
-    return null;
+  if (sourceIndex < 0 || destination.anchorDropId === dropId) return null;
   const next = reordered(drops, dropId, destination);
-  if (
-    next.every((drop, index) => drops[index]?.id === drop.id) &&
-    "anchorDropId" in destination
-  )
-    return null;
+  if (next.every((drop, index) => drops[index]?.id === drop.id)) return null;
   return next;
-}
-
-function getDestinationPage(position: number | undefined, page: number) {
-  return position === undefined ? page : Math.ceil(position / PAGE_SIZE);
 }
 
 async function invalidateCurationDrops(
@@ -101,13 +86,10 @@ export function useCurationOrder({
   const locale = useBrowserLocale();
   const { requestAuth, connectedProfile, activeProfileProxy } = useAuth();
   const queryClient = useQueryClient();
-  const [windowPage, setWindowPage] = useState({ curationId, page: 1 });
-  const page = windowPage.curationId === curationId ? windowPage.page : 1;
   const query = useWaveCurationDrops({
     wave,
     curationId,
     enabled,
-    initialPage: page,
     pageSize: PAGE_SIZE,
   });
   const [optimistic, setOptimistic] = useState<OrderSnapshot>(null);
@@ -140,7 +122,7 @@ export function useCurationOrder({
     setSaved(false);
     setRevealRequest(null);
   }
-  useEffect(() => {
+  useLayoutEffect(() => {
     generation.current += 1;
     saving.current = false;
     return () => {
@@ -168,17 +150,14 @@ export function useCurationOrder({
       ensureCurrent();
       const authError = t(locale, "profileCuration.order.authCancelled");
       if (!auth.success) throw new Error(authError);
-      const result = await moveCurationDrop({
+      await moveCurationDrop({
         dropId,
         curationId,
         ...destination,
       });
-      const nextPage = getDestinationPage(result?.position, page);
       await invalidateCurationDrops(queryClient, curationId);
       ensureCurrent();
-      if (nextPage !== page) setWindowPage({ curationId, page: nextPage });
-      const refreshError =
-        nextPage === page ? await refreshOrder(query.refetch, locale) : "";
+      const refreshError = await refreshOrder(query.refetch, locale);
       ensureCurrent();
       setError(refreshError);
       setSaved(true);

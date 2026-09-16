@@ -3,21 +3,10 @@ import type { ApiDropCurationRequest } from "@/generated/models/ApiDropCurationR
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 
 export type CurationDropPlacement = "before" | "after";
-export type CurationDropMove =
-  | { readonly placement: CurationDropPlacement; readonly anchorDropId: string }
-  | { readonly placement: "first" | "last"; readonly waveId: string };
-
-async function fetchCurationSize(waveId: string, curationId: string) {
-  const page = await commonApiFetch<{ data: { id: string }[] }>({
-    endpoint: `v2/waves/${waveId}/curations/${curationId}/drops`,
-    params: { page: "1", page_size: "1" },
-    errorMode: "structured",
-  });
-  const first = page.data[0];
-  if (!first) throw new CurationOrderChangedError();
-  // Ranks are contiguous and the V2 endpoint returns the highest rank first.
-  return fetchDropPriority(first.id, curationId);
-}
+export type CurationDropMove = {
+  readonly placement: CurationDropPlacement;
+  readonly anchorDropId: string;
+};
 
 export class CurationOrderChangedError extends Error {
   constructor() {
@@ -50,17 +39,8 @@ export async function moveCurationDrop(
     readonly dropId: string;
     readonly curationId: string;
   } & CurationDropMove
-): Promise<{ position?: number } | undefined> {
-  const { dropId, curationId, placement } = request;
-  if ("waveId" in request) {
-    const [, size] = await Promise.all([
-      fetchDropPriority(dropId, curationId),
-      fetchCurationSize(request.waveId, curationId),
-    ]);
-    await savePriority(dropId, curationId, placement === "first" ? size : 1);
-    return { position: placement === "first" ? 1 : size };
-  }
-  const { anchorDropId } = request;
+): Promise<void> {
+  const { dropId, curationId, placement, anchorDropId } = request;
   if (dropId === anchorDropId) return;
 
   // Read actual ranks: the visible page can be incomplete or stale after a move.
@@ -77,7 +57,6 @@ export async function moveCurationDrop(
   if (priorityOrder === sourcePriority) return;
 
   await savePriority(dropId, curationId, priorityOrder);
-  return {};
 }
 
 async function savePriority(
