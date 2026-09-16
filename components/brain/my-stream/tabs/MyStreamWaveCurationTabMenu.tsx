@@ -40,6 +40,7 @@ interface MyStreamWaveCurationTabMenuProps {
   readonly onChooseAnotherCuration?: (() => void) | undefined;
   readonly onChooseAnotherSourceWave?: (() => void) | undefined;
   readonly onHideFromProfile?: (() => void) | undefined;
+  readonly onReorderPosts?: (() => void) | undefined;
   readonly isProfileActionPending?: boolean | undefined;
 }
 
@@ -77,6 +78,7 @@ const getCurationMenuItems = ({
   onChooseAnotherCuration,
   onChooseAnotherSourceWave,
   onHideFromProfile,
+  onReorderPosts,
   onEdit,
   onSetAsProfileCuration,
   onDelete,
@@ -91,6 +93,7 @@ const getCurationMenuItems = ({
   readonly onChooseAnotherCuration?: (() => void) | undefined;
   readonly onChooseAnotherSourceWave?: (() => void) | undefined;
   readonly onHideFromProfile?: (() => void) | undefined;
+  readonly onReorderPosts?: (() => void) | undefined;
   readonly onEdit: () => void;
   readonly onSetAsProfileCuration: () => void;
   readonly onDelete: () => void;
@@ -144,6 +147,14 @@ const getCurationMenuItems = ({
     onSelect: onEdit,
   });
 
+  if (onReorderPosts) {
+    items.push({
+      id: "reorder-posts",
+      label: t(locale, "profileCuration.manage.reorderPosts"),
+      onSelect: onReorderPosts,
+    });
+  }
+
   if (canSetAsProfileCuration) {
     items.push({
       id: "set-profile-curation",
@@ -178,6 +189,7 @@ export default function MyStreamWaveCurationTabMenu({
   onChooseAnotherCuration,
   onChooseAnotherSourceWave,
   onHideFromProfile,
+  onReorderPosts,
   isProfileActionPending = false,
 }: MyStreamWaveCurationTabMenuProps) {
   const queryClient = useQueryClient();
@@ -291,6 +303,7 @@ export default function MyStreamWaveCurationTabMenu({
     onChooseAnotherCuration,
     onChooseAnotherSourceWave,
     onHideFromProfile,
+    onReorderPosts,
     onEdit: () => setIsEditOpen(true),
     onSetAsProfileCuration: () => {
       void updateProfileWave(wave.id, curation.id);

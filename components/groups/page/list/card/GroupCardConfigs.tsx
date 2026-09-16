@@ -59,8 +59,10 @@ const getGrantModeLabel = (
 
 export default function GroupCardConfigs({
   group,
+  quiet = false,
 }: {
   readonly group?: ApiGroupFull | undefined;
+  readonly quiet?: boolean | undefined;
 }) {
   const [nowMs] = useState<number>(() => Date.now());
   const identityLabels = useGroupCriteriaIdentityLabels(group?.group);
@@ -278,5 +280,5 @@ export default function GroupCardConfigs({
   };
 
   const configs = getConfigs();
-  return <GroupCardConfigsScroller configs={configs} />;
+  return <GroupCardConfigsScroller configs={configs} quiet={quiet} />;
 }

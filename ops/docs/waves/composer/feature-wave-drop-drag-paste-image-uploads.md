@@ -25,8 +25,9 @@ draft.
 1. Add files to an available composer.
 2. Check any rejection message. It names every unsupported file and lists the
    formats below. Supported files from the same batch can still be added.
-3. Wait for image preparation to finish. An inline image shows a loading
-   placeholder while uploading. An AVIF selected for the tray uploads and
+3. Wait for image preparation to finish. An inline image shows a compact
+   preview with an uploading indicator. Its frame keeps the same size when
+   uploading finishes. An AVIF selected for the tray uploads and
    processes before its preview appears; the composer shows its progress.
 4. Add or edit the message. Sending and continuing a Storm wait for pending
    image preparation to finish.
@@ -55,6 +56,12 @@ draft.
   batch. Duplicate selections and files beyond the count limit are skipped.
 - **Pasting a caption and image:** the text is preserved even if the image is
   rejected or its upload fails.
+- **Writing around screenshots:** inline images stay where you insert them,
+  between your text. Compact previews leave space for nearby text, including
+  portrait screenshots. While writing, the composer keeps the cursor in view;
+  you can still scroll to read another part of the draft.
+- **Removing an inline image:** choose its `Remove image` X, or select the image
+  and press Backspace or Delete. Undo restores the image in its original place.
 - **Posting to a wave that requires images:** a prepared AVIF counts as an image.
   The wave's other participation requirements still apply.
 
@@ -84,7 +91,9 @@ draft.
 
 The format list applies to drop media. Profile pictures, wave pictures, meme
 submissions, distribution photos, and Profile CMS have their own upload rules.
-Inline images show a loading placeholder rather than a per-image progress bar.
+Inline images show an uploading indicator rather than a per-image progress bar.
+Compact sizing applies only while composing; posted images keep their normal
+display. Drafts containing inline images are not saved when you leave the composer.
 
 ## Related Pages
 

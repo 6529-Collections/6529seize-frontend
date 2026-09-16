@@ -458,6 +458,7 @@ export default function MobileWrapperDialog({
   });
   const dragPanelClassNames = getDragPanelClassNames(canDragToClose);
   const hasDragHandle = showDragHandle ?? canDragToClose;
+  const showTouchDragHandle = hasDragHandle && isTouchDevice;
   const containerClassNames = getContainerClassNames(tabletModal);
   const slideTransition = getSlideTransition(tabletModal);
   const panelStyle = getPanelStyle({
@@ -474,7 +475,7 @@ export default function MobileWrapperDialog({
     allowOverflow,
     noPadding,
     showScrollbar,
-    hasDragHandle,
+    hasDragHandle: showTouchDragHandle,
     tabletModal,
   });
   const surfaceStyle = getSurfaceStyle({
@@ -485,7 +486,7 @@ export default function MobileWrapperDialog({
     dismissible && !!tabletModal && !showHeaderCloseButton;
   const showFloatingCloseButton = dismissible && !showHeaderCloseButton;
   const showInlineHeaderCloseButton = dismissible && !!showHeaderCloseButton;
-  const hideMobileCloseButton = canDragToClose;
+  const hideMobileCloseButton = canDragToClose && isTouchDevice;
   const shouldHideOnDesktopHover =
     hideOnDesktopHover && !isMobileLayoutViewport && !isTouchDevice;
   const dialogOpen = isOpen && dialogMount !== null;
@@ -584,7 +585,7 @@ export default function MobileWrapperDialog({
                         style={{ paddingBottom: bottomPadding }}
                       >
                         <DragHandle
-                          show={hasDragHandle}
+                          show={showTouchDragHandle}
                           tabletModal={tabletModal}
                         />
                         <MobileWrapperDialogHeader

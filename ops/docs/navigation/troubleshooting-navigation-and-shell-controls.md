@@ -93,8 +93,8 @@ handoff does not behave as expected.
   area.
 - `/open-mobile` only shows one store action:
   expected on detected iOS (App Store only) or Android (Play Store only).
-- `Back to 6529.io` on `/open-mobile` returns to `/`:
-  happens when `path` is missing or is not a valid internal route.
+- `Continue in browser` on `/open-mobile` returns to `/`:
+  happens when `path` is missing, invalid, or an unsupported handoff route.
 
 ## Edge Cases
 
@@ -103,8 +103,7 @@ handoff does not behave as expected.
 - In small-screen web overlay mode, route changes close the menu automatically.
 - Web and app account surfaces expose different action sets (for example web
   `Disconnect Wallet`).
-- `/open-mobile` deep-link attempt runs after client render, so landing UI can
-  flash briefly before handoff.
+- `/open-mobile` waits for `Open app` to be tapped; it does not launch automatically.
 
 ## Failure and Recovery
 
@@ -122,7 +121,7 @@ handoff does not behave as expected.
 - If wallet/session controls fail, use wallet recovery actions (`Try Again`,
   then `Clear Storage & Reload` if needed).
 - If overlay/search state remains inconsistent, reload the current route.
-- If `/open-mobile` handoff fails, reopen it with a valid URL-encoded `path`
+- If `/open-mobile` handoff fails, use `Open app` to retry with the preserved `path`
   and use store actions as fallback.
 
 ## Limitations / Notes
@@ -131,8 +130,7 @@ handoff does not behave as expected.
   route state, and auth/device gating.
 - Search `Pages` results are limited to cataloged navigation destinations, not
   full-text site indexing.
-- `/open-mobile` has no in-page retry flow beyond store actions and
-  `Back to 6529.io`.
+- `/open-mobile` offers `Open app` to retry, `Download`, and `Continue in browser`.
 
 ## Related Pages
 

@@ -1,7 +1,6 @@
 export const PROFILE_CURATION_MESSAGES = {
   "profileCuration.setup.title": "Create a Curation",
-  "profileCuration.setup.intro":
-    "Give your Curation a name to get started.",
+  "profileCuration.setup.intro": "Give your Curation a name to get started.",
   "profileCuration.setup.nameLabel": "Curation name",
   "profileCuration.setup.nameHelp": "You can change this later.",
   "profileCuration.setup.progressAria": "Curation setup progress",
@@ -47,6 +46,36 @@ export const PROFILE_CURATION_MESSAGES = {
   "profileCuration.header.disconnect": "Hide",
   "profileCuration.header.disconnectAria": "Hide Curation from profile",
   "profileCuration.header.manage": "Manage",
+  "profileCuration.order.action": "Organize",
+  "profileCuration.order.organizing": "Organizing",
+  "profileCuration.order.done": "Done",
+  "profileCuration.order.title": "Reorder {curationName}",
+  "profileCuration.order.help":
+    "Drag a post by its handle. Each move saves automatically.",
+  "profileCuration.order.postNumber": "Post #{number}",
+  "profileCuration.order.handle": "Select {postName} to move",
+  "profileCuration.order.chooseDestination":
+    "Tap another handle to move it there. Tap the selected handle to cancel.",
+  "profileCuration.order.placeBefore": "Move {postName} before {targetName}",
+  "profileCuration.order.placeAfter": "Move {postName} after {targetName}",
+  "profileCuration.order.keyboardHelp":
+    "Press Space to pick up a post, use the arrow keys to move it, and press Space to place it. Press Escape to cancel.",
+  "profileCuration.order.pickedUp": "Picked up {postName}.",
+  "profileCuration.order.previewPosition": "{postName}, position {position}.",
+  "profileCuration.order.cancelled": "Move cancelled.",
+  "profileCuration.order.saving": "Saving order…",
+  "profileCuration.order.saved": "Curation order saved.",
+  "profileCuration.order.moved": "{postName} is now at position {position}.",
+  "profileCuration.order.saveFailed": "Couldn't save the order. Try again.",
+  "profileCuration.order.authCancelled": "Authentication was cancelled.",
+  "profileCuration.order.refreshFailed":
+    "Order saved, but posts couldn't refresh. Reload to see the latest order.",
+  "profileCuration.order.changed":
+    "This Curation changed. We've refreshed the posts. Try your move again.",
+  "profileCuration.order.loadFailed": "Couldn't load posts. Retry",
+  "profileCuration.order.loading": "Loading posts…",
+  "profileCuration.order.empty": "Add posts to this Curation to arrange them.",
+  "profileCuration.order.loadMore": "Load more posts",
   "profileCuration.header.createAnother": "Create another Curation",
   "profileCuration.header.addFirstPost": "Add your first post",
   "profileCuration.manage.menuAria": "Curation options",
@@ -56,6 +85,7 @@ export const PROFILE_CURATION_MESSAGES = {
   "profileCuration.manage.hideFromProfile": "Hide from profile",
   "profileCuration.manage.curationSection": "This Curation",
   "profileCuration.manage.edit": "Edit Curation",
+  "profileCuration.manage.reorderPosts": "Organize posts",
   "profileCuration.manage.showOnProfile": "Show on profile",
   "profileCuration.manage.delete": "Delete Curation",
   "profileCuration.manage.deleteTitle": "Delete Curation?",
@@ -63,13 +93,10 @@ export const PROFILE_CURATION_MESSAGES = {
     "Delete “{curationName}”? The Curation will be deleted and removed from your profile. Its source Wave and posts will remain.",
   "profileCuration.manage.deleteSuccess":
     "Curation deleted. The source Wave remains.",
-  "profileCuration.manage.deleteErrorTitle":
-    "Couldn't delete this Curation.",
+  "profileCuration.manage.deleteErrorTitle": "Couldn't delete this Curation.",
   "profileCuration.manage.deleteErrorDescription": "Please try again.",
-  "profileCuration.manage.deleteErrorFallback":
-    "Failed to delete Curation.",
-  "profileCuration.manage.deleteAuthCancelled":
-    "Authentication was cancelled.",
+  "profileCuration.manage.deleteErrorFallback": "Failed to delete Curation.",
+  "profileCuration.manage.deleteAuthCancelled": "Authentication was cancelled.",
   "profileCuration.manage.profileCleanupErrorTitle":
     "Curation deleted, but the profile could not be updated.",
   "profileCuration.manage.profileCleanupErrorDescription":
@@ -122,8 +149,7 @@ export const PROFILE_CURATION_MESSAGES = {
   "profileCuration.unavailable.title": "Curation source unavailable",
   "profileCuration.unavailable.message":
     "The source Wave for this profile Curation may have been removed or is no longer accessible. Hide it from your profile to choose or create another.",
-  "profileCuration.unavailable.disconnectTitle":
-    "Hide unavailable source?",
+  "profileCuration.unavailable.disconnectTitle": "Hide unavailable source?",
   "profileCuration.unavailable.disconnectMessage":
     "Hide this unavailable Curation source from your profile? No underlying data will be deleted.",
   "profileCuration.toast.updated": "Profile Curation updated.",

@@ -293,6 +293,35 @@ describe("WaveRepDetails", () => {
     expect(await screen.findByText("helpful")).toBeInTheDocument();
   });
 
+  it("shows category pagination errors inside the list", async () => {
+    const defaultFetch = commonApiFetchMock.getMockImplementation();
+    commonApiFetchMock.mockImplementation(
+      (request: {
+        endpoint: string;
+        params?: { page?: string };
+      }) => {
+        if (
+          request.endpoint === "waves/wave-1/rep/categories" &&
+          request.params?.page === "2"
+        ) {
+          return Promise.reject(new Error("failed"));
+        }
+
+        return defaultFetch?.(request);
+      }
+    );
+
+    renderDetails();
+
+    fireEvent.click(
+      await screen.findByRole("button", { name: "Load more categories" })
+    );
+
+    expect(
+      await screen.findByText("Could not load more categories.")
+    ).toBeInTheDocument();
+  });
+
   it("searches all category pages before showing no matches", async () => {
     commonApiFetchMock.mockImplementation(
       ({
@@ -374,6 +403,17 @@ describe("WaveRepDetails", () => {
     );
     expect(await screen.findByText("helpful")).toBeInTheDocument();
     expect(screen.queryByText("No matching categories")).toBeNull();
+
+    fireEvent.change(
+      screen.getByRole("searchbox", {
+        name: "Search Wave REP categories",
+      }),
+      { target: { value: "missing" } }
+    );
+
+    expect(
+      await screen.findByText("No matching categories")
+    ).toBeInTheDocument();
   });
 
   it("loads more all-contributor pages", async () => {

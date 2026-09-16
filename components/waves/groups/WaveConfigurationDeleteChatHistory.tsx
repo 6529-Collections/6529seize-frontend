@@ -49,12 +49,12 @@ function DeleteChatHistory({
   return (
     <section className="tw-px-4 tw-py-4">
       <Button
-        variant="tertiary"
+        variant="destructiveOutline"
         size="lg"
         fullWidth
         aria-haspopup="dialog"
         onClick={() => setIsOpen(true)}
-        className="!tw-whitespace-normal !tw-border-red !tw-bg-black !tw-text-red active:!tw-bg-red/15 desktop-hover:hover:!tw-border-red desktop-hover:hover:!tw-bg-red/10 desktop-hover:hover:!tw-text-red"
+        className="!tw-whitespace-normal !tw-px-3 !tw-text-xs"
       >
         {text(
           "waves.sidebar.rightPanel.configuration.deleteChatHistory.button"
