@@ -9,6 +9,7 @@ import { getMediaType } from "@/components/nft-image/utils/media-type";
 interface Props {
   nft: BaseNFT | NFTLite;
   animation: boolean;
+  fillContainer?: boolean | undefined;
   showThumbnail?: boolean | undefined;
   showOriginal?: boolean | undefined;
   height: 300 | 650 | "full";

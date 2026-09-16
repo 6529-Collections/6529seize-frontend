@@ -73,6 +73,17 @@ const createDefaultProps = (
 });
 
 describe("NFTVideoRenderer", () => {
+  it("fills an explicit artwork frame without inherited NFT height caps", () => {
+    const { container } = render(
+      <NFTVideoRenderer {...createDefaultProps({ fillContainer: true })} />
+    );
+    const video = container.querySelector("video");
+    expect(video).not.toHaveClass("image-style");
+    expect(video?.parentElement).toHaveClass("tw-h-full", "tw-w-full");
+    expect(video?.parentElement).not.toHaveClass("height-300");
+    expect(video?.parentElement?.parentElement).toHaveClass("tw-h-full");
+  });
+
   describe("Video posters", () => {
     it("retains the poster and play control when autoplay is rejected", async () => {
       const inView = jest
@@ -89,7 +100,7 @@ describe("NFTVideoRenderer", () => {
         );
         await waitFor(() => expect(play).toHaveBeenCalled());
         expect(
-          await screen.findByRole("button", { name: "Play video" })
+          (await screen.findAllByRole("button", { name: "Play video" }))[0]!
         ).toBeInTheDocument();
         expect(container.querySelector("video")).toHaveAttribute(
           "poster",

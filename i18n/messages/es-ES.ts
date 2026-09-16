@@ -228,6 +228,7 @@ export const ES_ES_MESSAGES = {
   "media.video.play": "Reproducir video",
   "media.video.player": "Reproductor de video",
   "media.video.playPreview": "Reproducir vista previa del video",
+  "media.video.position": "{current} de {duration}",
   "media.video.seek": "Cambiar la posicion del video",
   "media.video.unmute": "Activar sonido del video",
   "media.video.unsupported": "Tu navegador no admite la etiqueta de video.",

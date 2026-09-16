@@ -4,6 +4,7 @@ import { PlayIcon } from "@heroicons/react/24/solid";
 import clsx from "clsx";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import { formatVideoTime } from "./videoTime";
 import React, {
   useCallback,
   useEffect,
@@ -128,6 +129,7 @@ export default function SeizeVideoPlayer({
 }: SeizeVideoPlayerProps) {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const internalVideoRef = useRef<HTMLVideoElement | null>(null);
+  const isScrubbingRef = useRef(false);
   const hideControlsTimerRef = useRef<number | null>(null);
   const [wrapperElement, setWrapperElement] = useState<HTMLDivElement | null>(
     null
@@ -161,7 +163,8 @@ export default function SeizeVideoPlayer({
   const [progressState, setProgressState] = useState<{
     readonly src?: string | undefined;
     readonly value: number;
-  }>({ value: 0 });
+    readonly currentTime: number;
+  }>({ value: 0, currentTime: 0 });
   const [durationState, setDurationState] = useState<{
     readonly src?: string | undefined;
     readonly value: number;
@@ -233,7 +236,13 @@ export default function SeizeVideoPlayer({
       const playerHasFocus = activeElement
         ? (wrapperRef.current?.contains(activeElement) ?? false)
         : false;
-      if (video && !video.paused && !isAnyFullscreen && !playerHasFocus) {
+      if (
+        video &&
+        !video.paused &&
+        !isAnyFullscreen &&
+        !playerHasFocus &&
+        !isScrubbingRef.current
+      ) {
         setControlsVisible(false);
       }
     }, CONTROL_HIDE_DELAY_MS);
@@ -247,6 +256,17 @@ export default function SeizeVideoPlayer({
     hideControlsSoon();
   }
 
+  function startScrubbing() {
+    isScrubbingRef.current = true;
+    clearHideControlsTimer();
+    setControlsVisible(true);
+  }
+
+  function endScrubbing() {
+    isScrubbingRef.current = false;
+    revealControls();
+  }
+
   function updateProgress() {
     const video = internalVideoRef.current;
     if (!video || !Number.isFinite(video.duration) || video.duration <= 0) {
@@ -258,7 +278,7 @@ export default function SeizeVideoPlayer({
       setProgressState((current) =>
         current.src === directSrc && current.value === 0
           ? current
-          : { src: directSrc, value: 0 }
+          : { src: directSrc, value: 0, currentTime: 0 }
       );
       return;
     }
@@ -274,7 +294,11 @@ export default function SeizeVideoPlayer({
     setProgressState((current) =>
       current.src === directSrc && current.value === nextProgress
         ? current
-        : { src: directSrc, value: nextProgress }
+        : {
+            src: directSrc,
+            value: nextProgress,
+            currentTime: video.currentTime,
+          }
     );
   }
 
@@ -412,7 +436,6 @@ export default function SeizeVideoPlayer({
 
     const clampedProgress = Math.min(100, Math.max(0, nextProgress));
     video.currentTime = (clampedProgress / 100) * video.duration;
-    setProgressState({ src: directSrc, value: clampedProgress });
     updateProgress();
     revealControls();
   }
@@ -591,6 +614,18 @@ export default function SeizeVideoPlayer({
   const duration = durationState.src === directSrc ? durationState.value : 0;
   const progress = progressState.src === directSrc ? progressState.value : 0;
   const seekDisabled = duration <= 0;
+  const currentTimeLabel = formatVideoTime(
+    progressState.src === directSrc ? progressState.currentTime : 0,
+    duration,
+    locale
+  );
+  const durationLabel = seekDisabled
+    ? "—"
+    : formatVideoTime(duration, duration, locale);
+  const seekValueText = t(locale, "media.video.position", {
+    current: currentTimeLabel,
+    duration: durationLabel,
+  });
   const hasUserPausedOwnedAutoplay = userPausedAutoplaySrc === directSrc;
   const labels = useMemo<SeizeVideoLabels>(
     () => ({
@@ -742,6 +777,11 @@ export default function SeizeVideoPlayer({
           onSeekChange={(event) => {
             seekToProgress(Number(event.currentTarget.value));
           }}
+          onScrubStart={startScrubbing}
+          onScrubEnd={endScrubbing}
+          currentTimeLabel={currentTimeLabel}
+          durationLabel={durationLabel}
+          seekValueText={seekValueText}
           openLabel={openLabel}
           progress={progress}
           seekDisabled={seekDisabled}

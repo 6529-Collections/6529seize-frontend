@@ -14,6 +14,9 @@
 
 ## Features
 
+- [Video Player](feature-video-player.md): playback, time, seeking, controls, and
+  consistent artwork sizing on homepage and submission views.
+
 - [Interactive HTML Media Rendering](feature-interactive-html-rendering.md):
   sandboxed iframe behavior, trusted-host checks, touch `Tap to load` gating,
   submission-preview validation, and non-sandboxed latest-drop exceptions.

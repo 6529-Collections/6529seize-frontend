@@ -34,7 +34,7 @@ export default function NFTVideoRenderer(props: Readonly<BaseRendererProps>) {
 
   return (
     <NFTMediaContainer
-      className={`${animationClassName} ${props.heightStyle} ${props.bgStyle}`}
+      className={`${animationClassName} ${props.fillContainer ? "tw-h-full" : props.heightStyle} ${props.bgStyle}`}
     >
       {props.showBalance && (
         <NFTImageBalance
@@ -54,10 +54,10 @@ export default function NFTVideoRenderer(props: Readonly<BaseRendererProps>) {
         muted
         loop
         preload="auto"
-        layout="prominent"
+        layout={props.fillContainer ? "fill" : "prominent"}
         align="center"
-        className={`${animationClassName} ${props.heightStyle} ${props.bgStyle} tw-flex tw-items-center tw-justify-center`}
-        videoClassName={props.imageStyle}
+        className={`${animationClassName} ${props.fillContainer ? "" : props.heightStyle} ${props.bgStyle} tw-flex tw-items-center tw-justify-center`}
+        videoClassName={props.fillContainer ? undefined : props.imageStyle}
       />
     </NFTMediaContainer>
   );

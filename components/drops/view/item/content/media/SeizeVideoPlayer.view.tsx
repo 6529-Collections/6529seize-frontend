@@ -10,6 +10,7 @@ import {
 } from "@heroicons/react/24/solid";
 import clsx from "clsx";
 import React from "react";
+import styles from "./SeizeVideoTimeline.module.css";
 
 function SeizeVideoControlButton({
   label,
@@ -35,7 +36,7 @@ function SeizeVideoControlButton({
       onClick={onClick}
       onFocus={onFocus}
       tabIndex={tabIndex}
-      className="tw-inline-flex tw-size-9 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-950/70 tw-text-white tw-shadow-lg tw-shadow-black/25 tw-backdrop-blur-md tw-transition tw-duration-200 disabled:tw-cursor-default disabled:tw-opacity-60 desktop-hover:hover:tw-bg-iron-800/90"
+      className="tw-inline-flex tw-size-9 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-950/70 tw-text-white tw-shadow-lg tw-shadow-black/25 tw-backdrop-blur-md tw-transition tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-default disabled:tw-opacity-60 desktop-hover:hover:tw-bg-iron-800/90"
     >
       {children}
     </button>
@@ -99,6 +100,11 @@ export function SeizeVideoMinimalControls({
   onOpenClick,
   onPlaybackClick,
   onSeekChange,
+  onScrubStart,
+  onScrubEnd,
+  currentTimeLabel,
+  durationLabel,
+  seekValueText,
   openLabel,
   progress,
   seekDisabled,
@@ -127,6 +133,11 @@ export function SeizeVideoMinimalControls({
   ) => void;
   readonly onSeekChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   readonly openLabel?: string | undefined;
+  readonly onScrubStart: () => void;
+  readonly onScrubEnd: () => void;
+  readonly currentTimeLabel: string;
+  readonly durationLabel: string;
+  readonly seekValueText: string;
   readonly progress: number;
   readonly seekDisabled: boolean;
   readonly showControls: boolean;
@@ -165,116 +176,137 @@ export function SeizeVideoMinimalControls({
           </div>
         )}
 
-        <div
-          className={clsx(
-            controlsHitTestClass,
-            "tw-absolute tw-bottom-4 tw-left-3"
-          )}
-        >
-          {!isPaused && (
-            <SeizeVideoControlButton
-              label={labels.pause}
-              onClick={onPlaybackClick}
-              onFocus={onControlsFocus}
-              tabIndex={controlsTabIndex}
-            >
-              <PauseIcon className="tw-size-5" aria-hidden="true" />
-            </SeizeVideoControlButton>
-          )}
-        </div>
-
-        <div
-          className={clsx(
-            controlsHitTestClass,
-            "tw-absolute tw-bottom-4 tw-right-3 tw-flex tw-items-center tw-gap-2"
-          )}
-        >
-          <SeizeVideoControlButton
-            label={isMuted ? labels.unmute : labels.mute}
-            onClick={onMuteClick}
-            onFocus={onControlsFocus}
+        <div className="tw-absolute tw-bottom-3 tw-left-3 tw-right-3">
+          <input
+            type="range"
+            min="0"
+            max="100"
+            step="0.1"
+            value={progress}
+            disabled={seekDisabled}
+            aria-label={labels.seek}
+            aria-valuetext={seekValueText}
             tabIndex={controlsTabIndex}
-          >
-            {isMuted ? (
-              <SpeakerXMarkIcon className="tw-size-5" aria-hidden="true" />
-            ) : (
-              <SpeakerWaveIcon className="tw-size-5" aria-hidden="true" />
+            onChange={onSeekChange}
+            onClick={(event) => event.stopPropagation()}
+            onFocus={onControlsFocus}
+            onPointerDown={(event) => {
+              event.stopPropagation();
+              event.currentTarget.setPointerCapture(event.pointerId);
+              onScrubStart();
+            }}
+            onPointerUp={(event) => {
+              event.stopPropagation();
+              onScrubEnd();
+            }}
+            onPointerCancel={onScrubEnd}
+            onLostPointerCapture={onScrubEnd}
+            onBlur={onScrubEnd}
+            onTouchStart={(event) => event.stopPropagation()}
+            className={clsx(
+              styles["timeline"],
+              controlsHitTestClass,
+              "tw-m-0 tw-block tw-h-11 tw-w-full tw-cursor-pointer disabled:tw-cursor-default"
             )}
-          </SeizeVideoControlButton>
-          {showActions && onOpenClick && openLabel && (
-            <SeizeVideoControlButton
-              label={openLabel}
-              onClick={onOpenClick}
-              onFocus={onControlsFocus}
-              tabIndex={controlsTabIndex}
-            >
-              <ArrowTopRightOnSquareIcon
-                className="tw-size-5"
-                aria-hidden="true"
-              />
-            </SeizeVideoControlButton>
-          )}
-          {showActions && onDownloadClick && (
-            <SeizeVideoControlButton
-              label={isDownloading ? labels.downloading : labels.download}
-              onClick={onDownloadClick}
-              onFocus={onControlsFocus}
-              disabled={isDownloading}
-              tabIndex={controlsTabIndex}
-            >
-              <ArrowDownTrayIcon className="tw-size-5" aria-hidden="true" />
-            </SeizeVideoControlButton>
-          )}
-          {showFullscreen && (
-            <SeizeVideoControlButton
-              label={
-                isAnyFullscreen ? labels.exitFullscreen : labels.fullscreen
-              }
-              onClick={onFullscreenClick}
-              onFocus={onControlsFocus}
-              tabIndex={controlsTabIndex}
-            >
-              {isAnyFullscreen ? (
-                <ArrowsPointingInIcon
-                  className="tw-size-5"
-                  aria-hidden="true"
-                />
-              ) : (
-                <ArrowsPointingOutIcon
-                  className="tw-size-5"
-                  aria-hidden="true"
-                />
-              )}
-            </SeizeVideoControlButton>
-          )}
-        </div>
-      </div>
-
-      <div className="tw-absolute tw-bottom-0 tw-left-0 tw-right-0 tw-z-30 tw-h-4 tw-overflow-hidden">
-        <input
-          type="range"
-          min="0"
-          max="100"
-          step="0.1"
-          value={progress}
-          disabled={seekDisabled}
-          aria-label={labels.seek}
-          onChange={onSeekChange}
-          onClick={(event) => event.stopPropagation()}
-          onFocus={onControlsFocus}
-          onPointerDown={(event) => event.stopPropagation()}
-          onPointerUp={(event) => event.stopPropagation()}
-          onTouchStart={(event) => event.stopPropagation()}
-          className="tw-peer tw-absolute tw-inset-0 tw-z-10 tw-h-full tw-w-full tw-cursor-pointer tw-opacity-0 disabled:tw-cursor-default"
-        />
-        <div
-          aria-hidden="true"
-          className="tw-pointer-events-none tw-absolute tw-bottom-0 tw-left-0 tw-right-0 tw-h-1 tw-bg-white/20 peer-focus-visible:tw-outline peer-focus-visible:tw-outline-2 peer-focus-visible:tw-outline-offset-2 peer-focus-visible:tw-outline-primary-400"
-        >
-          <div
-            className="tw-h-full tw-bg-primary-400"
-            style={{ width: `${progress}%` }}
+            style={
+              { "--video-progress": `${progress}%` } as React.CSSProperties
+            }
           />
+          <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-2">
+            <div
+              className={clsx(
+                controlsHitTestClass,
+                "tw-flex tw-h-9 tw-items-center tw-rounded-full tw-bg-iron-950/70 tw-pr-3 tw-text-white tw-shadow-lg tw-shadow-black/25 tw-backdrop-blur-md"
+              )}
+            >
+              <button
+                type="button"
+                aria-label={isPaused ? labels.play : labels.pause}
+                title={isPaused ? labels.play : labels.pause}
+                onClick={onPlaybackClick}
+                onFocus={onControlsFocus}
+                tabIndex={controlsTabIndex}
+                className="tw-flex tw-size-9 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-white tw-transition focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-bg-iron-800/90"
+              >
+                {isPaused ? (
+                  <PlayIcon className="tw-size-5" aria-hidden="true" />
+                ) : (
+                  <PauseIcon className="tw-size-5" aria-hidden="true" />
+                )}
+              </button>
+              <span
+                className="tw-whitespace-nowrap tw-text-xs tw-font-medium tw-tabular-nums"
+                dir="ltr"
+              >
+                {currentTimeLabel} / {durationLabel}
+              </span>
+            </div>
+            <div
+              className={clsx(
+                controlsHitTestClass,
+                "tw-ml-auto tw-flex tw-items-center tw-gap-2"
+              )}
+            >
+              <SeizeVideoControlButton
+                label={isMuted ? labels.unmute : labels.mute}
+                onClick={onMuteClick}
+                onFocus={onControlsFocus}
+                tabIndex={controlsTabIndex}
+              >
+                {isMuted ? (
+                  <SpeakerXMarkIcon className="tw-size-5" aria-hidden="true" />
+                ) : (
+                  <SpeakerWaveIcon className="tw-size-5" aria-hidden="true" />
+                )}
+              </SeizeVideoControlButton>
+              {showActions && onOpenClick && openLabel && (
+                <SeizeVideoControlButton
+                  label={openLabel}
+                  onClick={onOpenClick}
+                  onFocus={onControlsFocus}
+                  tabIndex={controlsTabIndex}
+                >
+                  <ArrowTopRightOnSquareIcon
+                    className="tw-size-5"
+                    aria-hidden="true"
+                  />
+                </SeizeVideoControlButton>
+              )}
+              {showActions && onDownloadClick && (
+                <SeizeVideoControlButton
+                  label={isDownloading ? labels.downloading : labels.download}
+                  onClick={onDownloadClick}
+                  onFocus={onControlsFocus}
+                  disabled={isDownloading}
+                  tabIndex={controlsTabIndex}
+                >
+                  <ArrowDownTrayIcon className="tw-size-5" aria-hidden="true" />
+                </SeizeVideoControlButton>
+              )}
+              {showFullscreen && (
+                <SeizeVideoControlButton
+                  label={
+                    isAnyFullscreen ? labels.exitFullscreen : labels.fullscreen
+                  }
+                  onClick={onFullscreenClick}
+                  onFocus={onControlsFocus}
+                  tabIndex={controlsTabIndex}
+                >
+                  {isAnyFullscreen ? (
+                    <ArrowsPointingInIcon
+                      className="tw-size-5"
+                      aria-hidden="true"
+                    />
+                  ) : (
+                    <ArrowsPointingOutIcon
+                      className="tw-size-5"
+                      aria-hidden="true"
+                    />
+                  )}
+                </SeizeVideoControlButton>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </>

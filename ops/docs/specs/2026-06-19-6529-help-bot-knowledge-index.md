@@ -613,3 +613,10 @@ TDH recalculation, the calculated
 transaction-reset stages offer Reset to Block and its Min Block full-resync
 fallback. They preserve context through resync, recalculation, and final
 diagnostics. Partial, failed, or unfinished resync must not be treated as complete.
+
+### Video playback controls
+
+The `media.video-player` record owns custom-player seeking, elapsed/total time,
+paused play controls, visibility, and homepage/submission contain sizing. Keep
+its facts aligned with the shared player and Media Rendering video guide.
+Browser-native controls remain a separate behavior.
