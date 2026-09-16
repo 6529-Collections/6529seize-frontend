@@ -64,6 +64,7 @@ describe("useWaveCurationDrops", () => {
             waveId: "wave-1",
             curationId: "curation-1",
             pageSize: 25,
+            initialPage: 1,
             context: "wave-curation-drops",
           },
         ],

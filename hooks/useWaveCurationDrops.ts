@@ -33,11 +33,13 @@ export function useWaveCurationDrops({
   wave,
   curationId,
   pageSize = DEFAULT_WAVE_CURATION_DROPS_PAGE_SIZE,
+  initialPage = 1,
   enabled = true,
 }: {
   readonly wave: ApiWave | null;
   readonly curationId: string | null | undefined;
   readonly pageSize?: number | undefined;
+  readonly initialPage?: number | undefined;
   readonly enabled?: boolean | undefined;
 }) {
   const normalizedCurationId = curationId?.trim() ?? "";
@@ -52,10 +54,11 @@ export function useWaveCurationDrops({
           waveId,
           curationId: normalizedCurationId || null,
           pageSize,
+          initialPage,
           context: "wave-curation-drops",
         },
       ] as const,
-    [normalizedCurationId, pageSize, waveId]
+    [normalizedCurationId, pageSize, waveId, initialPage]
   );
 
   const {
@@ -63,6 +66,8 @@ export function useWaveCurationDrops({
     dataUpdatedAt,
     error,
     fetchNextPage: onFetchNextPage,
+    fetchPreviousPage,
+    hasPreviousPage,
     hasNextPage,
     isError,
     isFetching,
@@ -86,7 +91,9 @@ export function useWaveCurationDrops({
       });
     },
     enabled: enabled && !!waveId && normalizedCurationId.length > 0,
-    initialPageParam: 1,
+    initialPageParam: initialPage,
+    getPreviousPageParam: (firstPage) =>
+      firstPage.page > 1 ? firstPage.page - 1 : undefined,
     getNextPageParam: (lastPage) =>
       lastPage.next ? lastPage.page + 1 : undefined,
     placeholderData: keepPreviousData,
@@ -97,10 +104,10 @@ export function useWaveCurationDrops({
   });
 
   const fetchNextPage = useCallback(async () => {
-    if (hasNextPage && !isFetchingNextPage) {
+    if (hasNextPage && !isFetching) {
       await onFetchNextPage();
     }
-  }, [hasNextPage, isFetchingNextPage, onFetchNextPage]);
+  }, [hasNextPage, isFetching, onFetchNextPage]);
 
   const drops = useMemo<ExtendedDrop[]>(() => {
     if (!waveMin) {
@@ -152,6 +159,9 @@ export function useWaveCurationDrops({
   );
 
   return {
+    startIndex: ((data?.pages[0]?.page ?? initialPage) - 1) * pageSize,
+    fetchPreviousPage,
+    hasPreviousPage,
     dataUpdatedAt,
     drops,
     error,

@@ -143,6 +143,7 @@ export default function WaveDropActionsMore({
       >
         <button
           ref={buttonRef}
+          data-curation-card-actions
           className="tw-flex tw-size-8 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-400 tw-transition-colors tw-duration-200 tw-ease-out desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-200"
           onClick={(event) => {
             event.stopPropagation();
