@@ -37,9 +37,15 @@ jest.mock("@/components/waves/drops/Drop", () => ({
     return <div>{props.drop.id}</div>;
   },
 }));
-jest.mock("@/hooks/useWaveCurationDrops", () => ({
-  useWaveCurationDrops: () => ({
+jest.mock("@/hooks/useCurationOrder", () => ({
+  useCurationOrder: () => ({
     drops: mockDrops,
+    startIndex: 0,
+    registerReveal: jest.fn(),
+    revealDrop: jest.fn(),
+    revealRequest: null,
+    canAuthenticate: true,
+    release: jest.fn(),
     fetchNextPage: jest.fn(),
     hasNextPage: false,
     isFetching: false,
