@@ -2,6 +2,7 @@
 
 import type { CommonSelectItem } from "@/components/utils/select/CommonSelect";
 import CommonTabs from "@/components/utils/select/tabs/CommonTabs";
+import ClientOnly from "@/components/client-only/ClientOnly";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { useState } from "react";
@@ -52,7 +53,11 @@ export default function MemesMintingCalendar({
         />
       </div>
       <div className="tw-w-full">
-        <MemeCalendar displayTz={displayTz} locale={locale} />
+        <ClientOnly
+          fallback={<div aria-hidden="true" className="tw-min-h-96" />}
+        >
+          <MemeCalendar displayTz={displayTz} locale={locale} />
+        </ClientOnly>
       </div>
     </div>
   );

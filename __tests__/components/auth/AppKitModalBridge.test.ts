@@ -1,6 +1,36 @@
 import { createAppKitModalBridgeStore } from "@/components/auth/AppKitModalBridge";
 
 describe("AppKitModalBridge store", () => {
+  it("starts disconnected and refuses to skip an unavailable wallet disconnect", async () => {
+    const store = createAppKitModalBridgeStore();
+    expect(store.getAccountSnapshot()).toEqual({
+      address: undefined,
+      isConnected: false,
+      status: "disconnected",
+    });
+    await expect(store.disconnect()).rejects.toThrow("failed to initialize");
+  });
+
+  it("publishes account changes and delegates disconnect only while available", async () => {
+    const store = createAppKitModalBridgeStore();
+    const disconnect = jest.fn().mockResolvedValue(undefined);
+    const listener = jest.fn();
+    store.subscribe(listener);
+    store.setDisconnect(disconnect);
+    store.setAccount({
+      address: "0x0000000000000000000000000000000000000529",
+      isConnected: true,
+      status: "connected",
+    });
+    expect(store.getAccountSnapshot().isConnected).toBe(true);
+    await store.disconnect();
+    expect(disconnect).toHaveBeenCalledTimes(1);
+    store.failBootstrap();
+    expect(store.getAccountSnapshot().isConnected).toBe(false);
+    await expect(store.disconnect()).rejects.toThrow("failed to initialize");
+    expect(disconnect).toHaveBeenCalledTimes(1);
+    expect(listener).toHaveBeenCalledTimes(2);
+  });
   beforeEach(() => {
     jest.useFakeTimers();
   });

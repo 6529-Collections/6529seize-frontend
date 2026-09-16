@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type CSSProperties } from "react";
+import { useCallback, useState, type CSSProperties } from "react";
 import {
   getMuseumMediaDeliverySrcSet,
   getMuseumMediaDeliveryUrl,
@@ -89,6 +89,21 @@ export function MuseumManagedImage({
   const deliveredSrcSet = getMuseumMediaDeliverySrcSet(srcSet);
   const [failed, setFailed] = useState(alt.trim().length === 0);
   const [attempt, setAttempt] = useState(0);
+  const attachImage = useCallback(
+    (image: HTMLImageElement | null) => {
+      // Server-rendered images can finish before hydration attaches onLoad.
+      if (image?.complete) {
+        if (image.naturalWidth > 0) {
+          onStatusChange?.("revealed");
+        } else {
+          setFailed(true);
+          onStatusChange?.("error");
+        }
+      }
+    },
+    [onStatusChange]
+  );
+
   if (failed) {
     return (
       <MuseumMediaFailure
@@ -113,6 +128,7 @@ export function MuseumManagedImage({
     // The publication retains the exact governed URI. Approved accession bytes
     // traverse the strict same-origin delivery route without re-derivation.
     <img
+      ref={attachImage}
       key={`${deliveredSrc}:${attempt}`}
       src={deliveredSrc}
       alt={alt}
