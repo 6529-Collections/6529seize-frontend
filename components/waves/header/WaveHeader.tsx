@@ -19,6 +19,7 @@ import { canEditWave } from "@/helpers/waves/waves.helpers";
 import WaveHeaderPictureEdit from "./picture/WaveHeaderPictureEdit";
 import WaveRepButton from "./rep/WaveRepButton";
 import WaveHeaderTrustStats from "./WaveHeaderTrustStats";
+import WaveHeaderShareButton from "./WaveHeaderShareButton";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { formatDate, formatInteger } from "@/i18n/format";
 import { t, type MessageKey } from "@/i18n/messages";
@@ -227,9 +228,10 @@ export default function WaveHeader({
             </div>
           </div>
           {showTrustStats && <WaveHeaderTrustStats wave={wave} />}
-          {showWaveRepAction && (
-            <div className="tw-flex">
-              <WaveRepButton wave={wave} />
+          {!isDirectMessage && (
+            <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
+              {showWaveRepAction && <WaveRepButton wave={wave} />}
+              <WaveHeaderShareButton wave={wave} />
             </div>
           )}
         </div>

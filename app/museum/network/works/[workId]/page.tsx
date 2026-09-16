@@ -5,6 +5,8 @@ import {
   getMuseumObjectMetadata,
 } from "@/components/museum/MuseumObjectPage";
 import { MuseumPublicationUnavailable } from "@/components/museum/MuseumPublicationUnavailable";
+import JsonLdScript from "@/lib/structured-data/json-ld";
+import { buildMuseumWorkPageJsonLd } from "@/lib/structured-data/museum";
 import { applyMuseumCollectionSemantics } from "@/lib/museum/publication/collectionSemantics";
 import {
   isMuseumCanonicalWorkId,
@@ -44,13 +46,7 @@ export async function generateMetadata({
     publicationState.publication,
     workId
   );
-  const metadata = await getMuseumObjectMetadata(canonicalId ?? workId);
-  return {
-    ...metadata,
-    ...(canonicalId === null
-      ? {}
-      : { alternates: { canonical: museumWorkHref(canonicalId) } }),
-  };
+  return getMuseumObjectMetadata(canonicalId ?? workId, publicationState);
 }
 
 export default async function MuseumWorkRoute({
@@ -69,11 +65,24 @@ export default async function MuseumWorkRoute({
   if (canonicalId !== workId) {
     permanentRedirect(museumWorkHref(canonicalId));
   }
+  const work = publication.works?.find(
+    (candidate) => candidate.id === canonicalId
+  );
   return (
-    <MuseumObjectPage
-      objectId={canonicalId}
-      publication={publication}
-      view={view}
-    />
+    <>
+      {work === undefined ? null : (
+        <JsonLdScript
+          data={buildMuseumWorkPageJsonLd({
+            work,
+            path: museumWorkHref(canonicalId),
+          })}
+        />
+      )}
+      <MuseumObjectPage
+        objectId={canonicalId}
+        publication={publication}
+        view={view}
+      />
+    </>
   );
 }

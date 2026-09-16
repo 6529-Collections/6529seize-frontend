@@ -379,7 +379,7 @@ describe("CreateDropContent identity picker flow", () => {
     await userEvent.click(screen.getByText("add upload file"));
 
     expect(mockSetToast).toHaveBeenCalledWith({
-      message: "1 duplicate file was skipped.",
+      message: "Duplicate files were skipped.",
       type: "warning",
     });
   });

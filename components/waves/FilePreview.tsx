@@ -1,3 +1,5 @@
+import { getPreparedDropImage } from "@/services/uploads/prepareDropImage";
+import { getContentType } from "@/services/uploads/mediaUploadMimeType";
 import React from "react";
 import CircleLoader, {
   CircleLoaderSize,
@@ -13,7 +15,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { getFileExtension } from "./memes/file-upload/utils/formatHelpers";
 import { useObjectUrl } from "@/hooks/useObjectUrl";
 import { t } from "@/i18n/messages";
-import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 
 interface FileItem {
   file: File;
@@ -44,11 +46,11 @@ const ProgressOverlay: React.FC<{ progress: number }> = ({ progress }) => (
 );
 
 const getFileIcon = (file: File) => {
-  if (file.type.startsWith("video/")) {
+  if (getContentType(file).startsWith("video/")) {
     return faFileVideo;
   }
 
-  if (file.type.startsWith("audio/")) {
+  if (getContentType(file).startsWith("audio/")) {
     return faFileAudio;
   }
 
@@ -82,11 +84,12 @@ const FileTypePreview: React.FC<{ file: File }> = ({ file }) => (
   </div>
 );
 
-const ImageFilePreview: React.FC<{ file: File; index: number }> = ({
-  file,
-  index,
-}) => {
-  const previewUrl = useObjectUrl(file);
+const ImageFilePreview: React.FC<{ file: File }> = ({ file }) => {
+  const locale = useBrowserLocale();
+  const objectUrl = useObjectUrl(
+    getContentType(file) === "image/avif" ? null : file
+  );
+  const previewUrl = getPreparedDropImage(file)?.url ?? objectUrl;
 
   return (
     <div className="tw-relative tw-h-full tw-w-full">
@@ -94,7 +97,7 @@ const ImageFilePreview: React.FC<{ file: File; index: number }> = ({
         // Keep a plain img here because local blob previews cannot be optimized by next/image.
         <img
           src={previewUrl}
-          alt={`Preview ${index}`}
+          alt={t(locale, "drop.upload.imagePreview", { file: file.name })}
           className="tw-h-full tw-w-full tw-object-cover"
         />
       )}
@@ -109,6 +112,7 @@ const FilePreview: React.FC<FilePreviewProps> = ({
   removeFile,
   disabled,
 }) => {
+  const locale = useBrowserLocale();
   return (
     <div className="tw-mt-2 tw-flex tw-flex-wrap tw-gap-2">
       {files.map((file, index) => {
@@ -117,15 +121,18 @@ const FilePreview: React.FC<FilePreviewProps> = ({
         );
         const isUploading = !!uploadingFile;
         const progress = uploadingFile?.progress ?? 0;
+        const contentType = getContentType(file.file);
+        const isPreparingAvif = contentType === "image/avif" && isUploading;
         const isProcessingImage =
           uploadingFile?.phase === "processing" &&
-          file.file.type.startsWith("image/");
+          contentType.startsWith("image/");
         const fileKey = `${file.file.name}-${file.file.size}-${file.file.lastModified}-${index}`;
         return (
           <div key={fileKey} className="tw-group tw-relative">
             <div className="tw-size-24 tw-overflow-hidden tw-rounded-lg tw-bg-iron-800">
-              {file.file.type.startsWith("image/") ? (
-                <ImageFilePreview file={file.file} index={index} />
+              {contentType.startsWith("image/") ? (
+                // Mount after preparation so the memoized preview reads the completed URL.
+                !isPreparingAvif && <ImageFilePreview file={file.file} />
               ) : (
                 <FileTypePreview file={file.file} />
               )}
@@ -134,11 +141,22 @@ const FilePreview: React.FC<FilePreviewProps> = ({
                   <ProgressOverlay progress={progress} />
                   <div className="tw-absolute tw-inset-0 tw-flex tw-flex-col tw-items-center tw-justify-center">
                     <CircleLoader size={CircleLoaderSize.XXLARGE} />
-                    <span className="tw-mt-1 tw-px-2 tw-text-center tw-text-sm tw-font-medium tw-leading-tight tw-text-white">
+                    <output
+                      role={isProcessingImage ? undefined : "progressbar"}
+                      aria-label={t(locale, "drop.upload.preparingFile", {
+                        file: file.file.name,
+                      })}
+                      aria-valuenow={
+                        isProcessingImage ? undefined : Math.round(progress)
+                      }
+                      aria-valuemin={isProcessingImage ? undefined : 0}
+                      aria-valuemax={isProcessingImage ? undefined : 100}
+                      className="tw-mt-1 tw-px-2 tw-text-center tw-text-sm tw-font-medium tw-leading-tight tw-text-white"
+                    >
                       {isProcessingImage
-                        ? t(DEFAULT_LOCALE, "drop.media.processing")
+                        ? t(locale, "drop.media.processing")
                         : `${Math.round(progress)}%`}
-                    </span>
+                    </output>
                   </div>
                 </>
               )}

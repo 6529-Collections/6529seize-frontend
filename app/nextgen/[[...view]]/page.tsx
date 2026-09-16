@@ -30,17 +30,22 @@ export async function generateMetadata({
   const { view } = await params;
   const nextgenView = getNextGenView(view?.[0] ?? "");
   const title = getNextgenTitle(nextgenView, "NextGen");
+  const options =
+    view === undefined || view.length === 0
+      ? { canonicalPath: "/nextgen" as const }
+      : undefined;
 
   return getAppMetadata(
     getLargeSocialCardMetadata({
       title,
-      description: "NextGen",
+      description: "Generative art collections from 6529",
       ogImage: getCollectionSocialCardImagePath("nextgen", {
         subtitle: "Generative art collections from 6529",
         title,
       }),
       ogImageAlt: `${title} social card`,
-    })
+    }),
+    options
   );
 }
 

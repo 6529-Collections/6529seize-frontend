@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MuseumArtworkViewer } from "./MuseumArtworkViewer";
@@ -14,14 +13,12 @@ import { MuseumRelatedEntities } from "./MuseumRelatedEntities";
 import { MuseumInTheSystem } from "./MuseumInsideSystem";
 import { MuseumRightsLink } from "./MuseumRightsLink";
 import { displayCreditWithoutRepeatedLicense } from "@/lib/museum/credit";
-import { getAppMetadata } from "@/components/providers/metadata";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import {
   CASEY_ARTIST_NAME,
   CASEY_ARTIST_SLUG,
   tryCaseyArtworksFromPublication,
-  getCaseyArtwork,
 } from "@/lib/museum/casey";
 import { getMuseumPublicationState } from "@/lib/museum/publication/runtime";
 import {
@@ -54,41 +51,7 @@ import {
 import { buildMuseumSignedWaveStormDropUrl } from "@/lib/museum/publication";
 import { museumWorkHrefIndex } from "@/lib/museum/publication/routes";
 
-export async function getMuseumObjectMetadata(
-  objectId: string
-): Promise<Metadata> {
-  const artwork = getCaseyArtwork(objectId);
-  if (artwork !== null) {
-    return getAppMetadata({
-      title: artwork.title,
-      description: artwork.visualDescription,
-    });
-  }
-
-  const publicationState = await getMuseumPublicationState();
-  const publicWork = publicationState.publication?.works?.find(
-    (work) => work.id === objectId
-  );
-  if (publicWork !== undefined) {
-    return getAppMetadata({
-      title: publicWork.title,
-      description: publicWork.title,
-    });
-  }
-
-  const view = await getMuseumView();
-  const outcome = view.objects.find((item) =>
-    museumSlugMatches(item.objectId, objectId)
-  );
-  const description =
-    outcome === undefined || outcome.scope.trim().length === 0
-      ? t(DEFAULT_LOCALE, "museum.network.objects.description")
-      : outcome.scope;
-  return getAppMetadata({
-    title: outcome?.title ?? t(DEFAULT_LOCALE, "museum.network.objects.title"),
-    description,
-  });
-}
+export { getMuseumObjectMetadata } from "./MuseumObjectMetadata";
 
 function MuseumCanonicalWorkMedia({
   work,

@@ -6,8 +6,11 @@ export default function XTDH() {
 }
 
 export const generateMetadata = () => {
-  return getAppMetadata({
-    title: "xTDH Overview | Network",
-    description: "Network",
-  });
+  return getAppMetadata(
+    {
+      title: "xTDH Overview | Network",
+      description: "Explore xTDH allocations and network context.",
+    },
+    { canonicalPath: "/network/xtdh" }
+  );
 };

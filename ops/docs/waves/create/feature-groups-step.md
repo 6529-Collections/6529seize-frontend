@@ -103,6 +103,34 @@ user-reachable for `Chat`, `Rank`, and `Approve` waves.
 - Excluding the creator from the main access group shows a warning because the
   creator may be unable to reopen the wave.
 
+## How Membership Rules Combine
+
+- An identity must meet every configured criterion unless it is explicitly
+  included. Inclusion bypasses criteria, but an exclusion always takes priority.
+- With only an inclusion list, the group contains the listed identities. With
+  only an exclusion list, it contains everyone except the excluded identities.
+  A restored legacy group with no criteria and neither list has no members.
+  New groups need at least one criterion or a nonempty identity list to save.
+  Choosing `Everyone` for a wave access row allows everyone instead.
+- Zero is a configured value, not an empty field. A minimum Level of `0` allows
+  every Level, including profiles whose combined score is negative and whose
+  Level is still `0`. Other configured criteria still apply. A maximum Level of
+  `0` allows only Level `0` profiles.
+- Level bounds include the named Levels. For example, maximum Level `1` includes
+  Level `1` and stops before Level `2`; Level `100` is the highest Level.
+- REP and NIC bounds include both endpoints. Missing rating totals count as
+  zero. If a rating rule selects an identity or REP category, or uses ratings
+  sent, without either bound, the matching total must be nonzero. Ratings that
+  cancel each other to zero do not satisfy that unbounded filtered rule.
+- Fractional xTDH rounds down before comparison, including when it contributes
+  to a combined TDH and xTDH criterion. For example, `12.9` xTDH contributes
+  `12` to the eligibility calculation.
+- `View members` on a draft applies the same membership rules as saved member
+  lists. Membership can change as profile, rating, and ownership data changes.
+- A saved group marked invisible has no eligible members, including explicitly
+  included identities. This differs from `Hide criteria and members`, which
+  controls who can inspect a group's details.
+
 ## Permission Shortcuts
 
 - A restricted `Who can access this wave` row offers `Make wave public`.

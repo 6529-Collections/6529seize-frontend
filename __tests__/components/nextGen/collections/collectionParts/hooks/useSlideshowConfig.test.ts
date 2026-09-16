@@ -1,7 +1,18 @@
 import { renderHook, act } from "@testing-library/react";
+import { createElement } from "react";
+import { renderToString } from "react-dom/server";
 import { useSlideshowConfig } from "@/components/nextGen/collections/collectionParts/hooks/useSlideshowConfig";
 
 describe("useSlideshowConfig", () => {
+  it("uses a deterministic server snapshot instead of reading the viewport", () => {
+    let slides: number | undefined;
+    function Capture() {
+      slides = useSlideshowConfig().slidesPerView;
+      return null;
+    }
+    renderToString(createElement(Capture));
+    expect(slides).toBe(1);
+  });
   const originalInnerWidth = window.innerWidth;
 
   beforeEach(() => {
