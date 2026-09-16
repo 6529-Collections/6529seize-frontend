@@ -156,7 +156,7 @@ it("waits for the rocket before showing the outgoing cover, including repeat tap
   expect(document.documentElement).toHaveAttribute(VERSION_RELOAD_ATTRIBUTE);
 });
 
-it("preloads the incoming rocket and keeps the whole cover until it can paint", async () => {
+it("keeps the incoming cover intact until its inline rocket can paint", async () => {
   let completeDecode = () => {};
   const image = mountRocket(
     () =>
@@ -171,7 +171,7 @@ it("preloads the incoming rocket and keeps the whole cover until it can paint", 
   globalThis.eval(VERSION_RELOAD_BOOTSTRAP_SCRIPT);
   expect(
     document.head.querySelector('link[rel="preload"][as="image"]')
-  ).toHaveAttribute("href", "/rocket-refresh-small.png");
+  ).toBeNull();
   finishVersionReloadWhenReady();
   await jest.advanceTimersByTimeAsync(200);
   expect(document.documentElement).toHaveAttribute(VERSION_RELOAD_ATTRIBUTE);

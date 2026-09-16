@@ -1,8 +1,6 @@
 import { VERSION_RELOAD_MESSAGES } from "@/i18n/messages/new-version-toast";
-import {
-  VERSION_RELOAD_IMAGE_SRC,
-  VERSION_RELOAD_SCREEN_ID,
-} from "./versionReload";
+import { VERSION_RELOAD_SCREEN_ID } from "./versionReload";
+import { VERSION_RELOAD_IMAGE_DATA } from "./versionReloadImage";
 
 // Inline styles keep reload feedback independent of the incoming CSS/JS bundles.
 export const VERSION_RELOAD_STYLES = `
@@ -34,9 +32,9 @@ export default function VersionReloadScreen() {
       aria-live="polite"
       tabIndex={-1}
     >
-      {/* eslint-disable-next-line @next/next/no-img-element -- The reload cover must render its cached local asset without client image code. */}
+      {/* eslint-disable-next-line @next/next/no-img-element -- Inline artwork must arrive with the cover HTML, without a separate request or client bundle. */}
       <img
-        src={VERSION_RELOAD_IMAGE_SRC}
+        src={VERSION_RELOAD_IMAGE_DATA}
         alt=""
         width={60}
         height={60}
