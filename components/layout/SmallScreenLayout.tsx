@@ -6,6 +6,7 @@ import { SIDEBAR_WIDTHS } from "../../constants/sidebar";
 import { SidebarProvider } from "../../hooks/useSidebarState";
 import { useLayout } from "../brain/my-stream/layout/LayoutContext";
 import WebSidebar from "./sidebar/WebSidebar";
+import MobileAppBanner from "@/components/mobile-app/MobileAppBanner";
 import SmallScreenHeader from "./SmallScreenHeader";
 import type { ReactNode } from "react";
 
@@ -46,6 +47,7 @@ export default function SmallScreenLayout({ children }: Props) {
     <SidebarProvider>
       <div ref={containerRef} className="tw-overflow-auto tw-bg-black">
         <div ref={headerWrapperRef}>
+          <MobileAppBanner />
           <SmallScreenHeader
             onMenuToggle={toggleMenu}
             isMenuOpen={isMenuOpen}

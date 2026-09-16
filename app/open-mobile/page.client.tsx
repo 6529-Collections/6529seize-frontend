@@ -2,87 +2,99 @@
 
 import ClientOnly from "@/components/client-only/ClientOnly";
 import { MobileAppDownload } from "@/components/apps/MobileAppDownloads";
-import { publicEnv } from "@/config/env";
-import { DeepLinkScope } from "@/hooks/useDeepLinkNavigation";
+import { getMobileDestination } from "@/helpers/mobileAppDestination";
+import {
+  getMobilePlatform,
+  isMobileAppDestination,
+} from "@/helpers/mobileAppLinks";
+import { useOpenMobileApp } from "@/hooks/useOpenMobileApp";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import { useSearchParams } from "next/navigation";
-import { useEffect } from "react";
-import useDeviceInfo from "@/hooks/useDeviceInfo";
-import { getMobileDestination } from "./mobileDestination";
+import { Capacitor } from "@capacitor/core";
+import Image from "next/image";
+import { useRouter, useSearchParams } from "next/navigation";
 
-const APPS_LOCALE = DEFAULT_LOCALE;
+function OpenMobileContent({
+  pathParam,
+}: {
+  readonly pathParam: string | null;
+}) {
+  const router = useRouter();
+  const parsed = getMobileDestination(pathParam, window.location.origin);
+  const destination = parsed && isMobileAppDestination(parsed) ? parsed : "/";
+  const hasDestination = parsed !== null && isMobileAppDestination(parsed);
+  const platform = getMobilePlatform(
+    navigator.userAgent,
+    navigator.maxTouchPoints
+  );
+  const { attempted, openApp } = useOpenMobileApp();
 
-export default function OpenMobilePage() {
-  const searchParams = useSearchParams();
-  const pathParam = searchParams.get("path");
-  const destination =
-    typeof window === "undefined"
-      ? null
-      : getMobileDestination(pathParam, window.location.origin);
-  const { isAppleMobile } = useDeviceInfo();
-
-  useEffect(() => {
-    if (!destination) {
+  const handleOpen = () => {
+    if (Capacitor.isNativePlatform()) {
+      router.replace(destination);
       return;
     }
-
-    const appScheme = publicEnv.MOBILE_APP_SCHEME ?? "mobile6529";
-    const deepLink = `${appScheme}://${DeepLinkScope.NAVIGATE}${destination}`;
-
-    window.open(deepLink, "_self");
-  }, [destination]);
-
-  const handleBack = () => {
-    const returnUrl = new URL(destination ?? "/", window.location.origin);
-    window.open(returnUrl.href, "_self");
-  };
-
-  const printMobileApps = () => {
-    const shareIos = <MobileAppDownload platform="iOS" target="_self" />;
-    const shareAndroid = (
-      <MobileAppDownload platform="Android" target="_self" />
-    );
-
-    const userAgent =
-      typeof navigator === "undefined" ? "" : navigator.userAgent;
-    const isAndroid = /android/i.test(userAgent);
-
-    if (isAppleMobile) {
-      return shareIos;
-    } else if (isAndroid) {
-      return shareAndroid;
-    }
-
-    return (
-      <>
-        {shareIos}
-        {shareAndroid}
-      </>
-    );
+    // This is already the browser fallback: retry directly, never loop via an intent fallback.
+    openApp(destination, false);
   };
 
   return (
-    <ClientOnly>
-      <div className="tailwind-scope tw-flex tw-h-screen tw-flex-col tw-items-center tw-justify-center tw-gap-10 tw-p-4 tw-text-center">
-        <p className="tw-animate-pulse tw-text-2xl tw-font-bold">
-          {t(APPS_LOCALE, "apps.openMobile.opening")}
-        </p>
-        <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-1">
-          <p className="tw-text-xl tw-font-bold">
-            {t(APPS_LOCALE, "apps.openMobile.get")}
-          </p>
-          <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-center tw-gap-4">
-            {printMobileApps()}
-          </div>
+    <div className="tailwind-scope tw-mx-auto tw-flex tw-min-h-[70svh] tw-max-w-lg tw-flex-col tw-items-center tw-justify-center tw-gap-6 tw-px-5 tw-py-10 tw-text-center">
+      <Image src="/6529bgwhite.svg" alt="" width={64} height={64} unoptimized />
+      <h1 className="tw-m-0 tw-text-2xl tw-font-semibold tw-text-iron-50">
+        {t(DEFAULT_LOCALE, "apps.openMobile.title")}
+      </h1>
+      <p className="tw-m-0 tw-text-sm tw-text-iron-300">
+        {t(
+          DEFAULT_LOCALE,
+          hasDestination
+            ? "apps.openMobile.description"
+            : "apps.openMobile.homeFallback"
+        )}
+      </p>
+      <button
+        type="button"
+        onClick={handleOpen}
+        className="tw-min-h-11 tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-50 tw-px-5 tw-py-3 tw-font-semibold tw-text-iron-950 hover:tw-bg-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+      >
+        {t(DEFAULT_LOCALE, "apps.openMobile.open")}
+      </button>
+      {attempted && (
+        <output className="tw-m-0 tw-block tw-text-sm tw-text-iron-300">
+          {t(DEFAULT_LOCALE, "apps.openMobile.help")}
+        </output>
+      )}
+      <section
+        aria-label={t(DEFAULT_LOCALE, "apps.openMobile.download")}
+        className="tw-w-full"
+      >
+        <h2 className="tw-mb-3 tw-text-base tw-font-semibold tw-text-iron-50">
+          {t(DEFAULT_LOCALE, "apps.openMobile.download")}
+        </h2>
+        <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-center tw-gap-4">
+          {platform !== "Android" && (
+            <MobileAppDownload platform="iOS" target="_self" />
+          )}
+          {platform !== "iOS" && (
+            <MobileAppDownload platform="Android" target="_self" />
+          )}
         </div>
-        <button
-          onClick={handleBack}
-          className="tw-mt-10 tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0 tw-text-inherit hover:tw-text-[#9a9a9a]"
-        >
-          {t(APPS_LOCALE, "apps.openMobile.back")}
-        </button>
-      </div>
+      </section>
+      <a
+        href={destination}
+        className="tw-inline-flex tw-min-h-11 tw-items-center tw-rounded-lg tw-px-3 tw-text-sm tw-text-iron-300 tw-underline tw-underline-offset-4 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+      >
+        {t(DEFAULT_LOCALE, "apps.openMobile.continue")}
+      </a>
+    </div>
+  );
+}
+
+export default function OpenMobilePage() {
+  const pathParam = useSearchParams().get("path");
+  return (
+    <ClientOnly>
+      <OpenMobileContent key={pathParam} pathParam={pathParam} />
     </ClientOnly>
   );
 }
