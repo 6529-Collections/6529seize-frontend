@@ -47,6 +47,7 @@ export default function ImageComponent({
   const imageAlt = altText?.trim() ? altText : t(locale, "drop.composer.image");
 
   const removeImage = useCallback(() => {
+    if (!editor.isEditable()) return;
     editor.update(() => {
       const node = $getNodeByKey(nodeKey);
       if (node?.getType() === "image") {

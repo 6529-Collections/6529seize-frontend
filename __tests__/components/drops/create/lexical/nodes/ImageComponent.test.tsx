@@ -11,7 +11,7 @@ const editor = {
   registerCommand: jest.fn(
     (_command: unknown, _handler: (event: MouseEvent) => boolean) => () => {}
   ),
-  isEditable: () => true,
+  isEditable: jest.fn(() => true),
   focus: jest.fn(),
   getRootElement: () => null,
 };
@@ -34,7 +34,10 @@ jest.mock("@/hooks/useBrowserLocale", () => ({
   useBrowserLocale: () => "en-US",
 }));
 
-beforeEach(() => jest.clearAllMocks());
+beforeEach(() => {
+  jest.clearAllMocks();
+  editor.isEditable.mockReturnValue(true);
+});
 
 describe("ImageComponent", () => {
   it("shows the local preview until the remote image is ready", () => {
@@ -74,5 +77,15 @@ describe("ImageComponent", () => {
     expect(selectNext).toHaveBeenCalled();
     expect(remove).toHaveBeenCalled();
     expect(editor.focus).toHaveBeenCalled();
+  });
+
+  it("does not remove an image if the editor becomes read-only before React updates", () => {
+    render(
+      <ImageComponent nodeKey="image" src="https://example.com/image.png" />
+    );
+    editor.isEditable.mockReturnValue(false);
+    fireEvent.click(screen.getByRole("button", { name: "Remove image" }));
+    expect(remove).not.toHaveBeenCalled();
+    expect(editor.focus).not.toHaveBeenCalled();
   });
 });
