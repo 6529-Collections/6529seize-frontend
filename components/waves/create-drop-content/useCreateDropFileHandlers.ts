@@ -1,9 +1,11 @@
 "use client";
 
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import type { AppToastInput } from "@/components/utils/toast/AppToast";
 import type { CreateDropConfig } from "@/entities/IDrop";
 import type { Dispatch, SetStateAction } from "react";
 import { useEffect, useRef } from "react";
+import { useDropFilePreparation } from "./useDropFilePreparation";
 import { handleComposerFileChange } from "./content-helpers";
 import type { MutableCurrentRef, ScopedValueState } from "./types";
 
@@ -19,7 +21,9 @@ export const useCreateDropFileHandlers = ({
   setDrop,
   setShowOptionsState,
   closeOnNextInputRef,
+  disabled,
 }: {
+  readonly disabled: boolean;
   readonly drop: CreateDropConfig | null;
   readonly files: File[];
   readonly keepOptionsVisible: boolean;
@@ -40,11 +44,13 @@ export const useCreateDropFileHandlers = ({
   >;
   readonly closeOnNextInputRef: MutableCurrentRef<boolean>;
 }) => {
+  const locale = useBrowserLocale();
   const lastExternalAttachmentDropTokenRef = useRef<number | null>(null);
 
-  const handleFileChange = (newFiles: File[]) => {
+  const addFiles = (newFiles: File[]) => {
     handleComposerFileChange({
       newFiles,
+      locale,
       drop,
       files,
       keepOptionsVisible,
@@ -55,6 +61,18 @@ export const useCreateDropFileHandlers = ({
       closeOnNextInputRef,
     });
   };
+
+  const { handleFileChange, isPreparingFiles, preparingFiles } =
+    useDropFilePreparation({
+      scopeKey: waveId,
+      existingFiles: [
+        ...(drop?.parts.flatMap((part) => part.media) ?? []),
+        ...files,
+      ],
+      disabled,
+      setToast,
+      onFiles: addFiles,
+    });
 
   const latestHandleFileChangeRef = useRef(handleFileChange);
   latestHandleFileChangeRef.current = handleFileChange;
@@ -100,5 +118,7 @@ export const useCreateDropFileHandlers = ({
   return {
     handleFileChange,
     removeFile,
+    isPreparingFiles,
+    preparingFiles,
   };
 };

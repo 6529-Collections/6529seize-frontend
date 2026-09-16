@@ -356,6 +356,7 @@ const CreateDropContent = forwardRef<
               <MaxLengthPlugin maxLength={MAX_DROP_PART_UTF16_UNITS} />
               <DragDropPastePlugin
                 disabled={loading}
+                onAttachmentFiles={setFiles}
                 onUploadEditorStateChange={onUploadEditorStateChange}
               />
               <ListPlugin />
