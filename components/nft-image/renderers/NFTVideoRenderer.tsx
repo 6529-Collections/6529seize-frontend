@@ -1,6 +1,7 @@
 "use client";
 
 import SeizeVideoPlayer from "@/components/drops/view/item/content/media/SeizeVideoPlayer";
+import { getVideoRatio } from "@/components/drops/view/item/content/media/SeizeVideoPlayer.config";
 import NFTImageBalance from "@/components/nft-image/NFTImageBalance";
 import NFTMediaContainer from "@/components/nft-image/NFTMediaContainer";
 import styles from "@/components/nft-image/NFTImage.module.css";
@@ -32,6 +33,10 @@ export default function NFTVideoRenderer(props: Readonly<BaseRendererProps>) {
     props.nft.thumbnail,
   ]);
 
+  const dimensions =
+    "metadata" in props.nft ? props.nft.metadata?.animation_details : undefined;
+  const aspectRatioHint = getVideoRatio(dimensions?.width, dimensions?.height);
+
   const frameClass = props.artworkLayout ? "lg:tw-h-full" : props.heightStyle;
   const videoLayout = props.artworkLayout ? "artwork" : "prominent";
   const useFrame = props.fillContainer === true || props.artworkLayout === true;
@@ -53,6 +58,7 @@ export default function NFTVideoRenderer(props: Readonly<BaseRendererProps>) {
         src={primarySrc}
         fallbackSources={fallbackSources}
         poster={poster}
+        aspectRatioHint={aspectRatioHint}
         autoPlay
         muted
         loop

@@ -242,6 +242,7 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
 // Card 549 is a confirmed portrait-video fixture on staging. Other environments
 // have independent collections, so their existing detail fixtures stay intact.
 test.describe("Staging video artwork sizing @surface @medium @large @readonly", () => {
+  // This fixture is unavailable outside staging; skip only those environments.
   test.skip(
     ({ baseURL }) =>
       !baseURL || new URL(baseURL).hostname !== "staging.6529.io",
@@ -257,7 +258,7 @@ test.describe("Staging video artwork sizing @surface @medium @large @readonly", 
     }) => {
       await page.setViewportSize(viewport);
       await gotoReady(page, "/the-memes/549");
-      const video = page.locator("video#the-art-fullscreen-animation");
+      const video = page.getByLabel("Video player", { exact: true });
       await expect(video).toBeVisible();
       await expect
         .poll(() =>

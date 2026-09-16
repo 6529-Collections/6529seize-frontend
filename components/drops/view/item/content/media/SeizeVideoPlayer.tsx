@@ -16,6 +16,7 @@ import React, {
 import {
   assignRef,
   getAspectRatio,
+  getVideoRatio,
   getNaturalWidthClassName,
   getOrientation,
   resolveSeizeVideoTemplate,
@@ -59,6 +60,7 @@ interface SeizeVideoPlayerProps {
   readonly loop?: boolean | undefined;
   readonly preload?: "auto" | "metadata" | "none" | undefined;
   readonly poster?: string | undefined;
+  readonly aspectRatioHint?: number | undefined;
   readonly captionsSrc?: string | undefined;
   readonly captionsLabel?: string | undefined;
   readonly captionsLang?: string | undefined;
@@ -103,6 +105,7 @@ export default function SeizeVideoPlayer({
   loop,
   preload,
   poster,
+  aspectRatioHint,
   captionsSrc,
   captionsLabel,
   captionsLang = DEFAULT_CAPTIONS_LANGUAGE,
@@ -173,6 +176,7 @@ export default function SeizeVideoPlayer({
     | {
         readonly width: number;
         readonly height: number;
+        readonly src: string | undefined;
       }
     | undefined
   >();
@@ -355,7 +359,11 @@ export default function SeizeVideoPlayer({
 
   function handleMetadata(event: React.SyntheticEvent<HTMLVideoElement>) {
     const video = event.currentTarget;
-    setVideoSize({ width: video.videoWidth, height: video.videoHeight });
+    setVideoSize({
+      width: video.videoWidth,
+      height: video.videoHeight,
+      src: directSrc,
+    });
     setAspectRatio(getAspectRatio(video.videoWidth, video.videoHeight));
     setOrientation(getOrientation(video.videoWidth, video.videoHeight));
     updateProgress();
@@ -521,11 +529,13 @@ export default function SeizeVideoPlayer({
 
   function getResponsiveMediaStyle(): React.CSSProperties | undefined {
     if (isFillLayout || layout === "artwork" || isFullscreen) {
+      const measuredRatio =
+        videoSize?.src === directSrc
+          ? getVideoRatio(videoSize?.width, videoSize?.height)
+          : undefined;
       return {
         "--video-ratio":
-          videoSize && videoSize.width > 0 && videoSize.height > 0
-            ? videoSize.width / videoSize.height
-            : 16 / 9,
+          measuredRatio ?? getVideoRatio(aspectRatioHint, 1) ?? 16 / 9,
       } as React.CSSProperties;
     }
 

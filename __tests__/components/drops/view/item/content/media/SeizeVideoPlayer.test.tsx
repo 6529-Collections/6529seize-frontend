@@ -818,6 +818,51 @@ describe("SeizeVideoPlayer", () => {
     }
   );
 
+  it("reserves known portrait dimensions before metadata and resets them for another source", () => {
+    const { container, rerender } = render(
+      <SeizeVideoPlayer
+        src="portrait.mp4"
+        layout="artwork"
+        aspectRatioHint={2 / 3}
+      />
+    );
+    const player = container.firstElementChild as HTMLElement;
+    const video = container.querySelector("video")!;
+    expect(player.style.getPropertyValue("--video-ratio")).toBe(String(2 / 3));
+    Object.defineProperties(video, {
+      videoWidth: { value: 600, configurable: true },
+      videoHeight: { value: 900, configurable: true },
+    });
+    fireEvent.loadedMetadata(video);
+    expect(player.style.getPropertyValue("--video-ratio")).toBe(String(2 / 3));
+    rerender(
+      <SeizeVideoPlayer
+        src="landscape.mp4"
+        layout="artwork"
+        aspectRatioHint={2}
+      />
+    );
+    expect(player.style.getPropertyValue("--video-ratio")).toBe("2");
+    Object.defineProperty(video, "videoWidth", { value: 1600 });
+    fireEvent.loadedMetadata(video);
+    expect(player.style.getPropertyValue("--video-ratio")).toBe(
+      String(1600 / 900)
+    );
+  });
+
+  it.each([0, -1, Number.NaN, Number.POSITIVE_INFINITY])(
+    "ignores invalid aspect ratio hint %s",
+    (aspectRatioHint) => {
+      const { container } = render(
+        <SeizeVideoPlayer layout="artwork" aspectRatioHint={aspectRatioHint} />
+      );
+      const player = container.firstElementChild as HTMLElement;
+      expect(player.style.getPropertyValue("--video-ratio")).toBe(
+        String(16 / 9)
+      );
+    }
+  );
+
   it("clears duration when an externally managed video source is emptied", () => {
     const { container } = render(<SeizeVideoPlayer />);
     const video = container.querySelector("video")!;

@@ -103,6 +103,22 @@ describe("NFTVideoRenderer", () => {
     expect(container.firstElementChild).not.toHaveClass("height-300");
   });
 
+  it("reserves the NFT animation dimensions before video metadata loads", () => {
+    const props = createDefaultProps({ artworkLayout: true });
+    const { container } = render(
+      <NFTVideoRenderer
+        {...props}
+        nft={{
+          ...props.nft,
+          metadata: { animation_details: { width: 600, height: 900 } },
+        }}
+      />
+    );
+    const player =
+      container.querySelector("video")!.parentElement!.parentElement!;
+    expect(player.style.getPropertyValue("--video-ratio")).toBe(String(2 / 3));
+  });
+
   describe("Video posters", () => {
     it("retains the poster and play control when autoplay is rejected", async () => {
       const inView = jest

@@ -166,6 +166,17 @@ export function useElementInView(element: Element | null): boolean {
   return useSyncExternalStore(subscribe, getSnapshot, () => false);
 }
 
+export function getVideoRatio(
+  width?: number | null,
+  height?: number | null
+): number | undefined {
+  if (typeof width !== "number" || typeof height !== "number") return undefined;
+  const ratio = width / height;
+  return getAspectRatio(width, height) && Number.isFinite(ratio) && ratio > 0
+    ? ratio
+    : undefined;
+}
+
 export function getAspectRatio(
   width: number,
   height: number
