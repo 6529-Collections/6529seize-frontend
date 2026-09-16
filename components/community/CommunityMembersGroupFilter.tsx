@@ -90,6 +90,7 @@ export default function CommunityMembersGroupFilter({
     <div className="tw-p-4 sm:tw-p-6">
       <GroupAssignmentPanel
         key={currentCriteria.criteria.group?.id ?? "all-network-members"}
+        presentation="quiet"
         suggestedName={t(locale, "network.groupFilter.suggestedName")}
         defaultLabel={t(locale, "network.groupFilter.defaultLabel")}
         selectedGroup={currentCriteria.criteria.group}
