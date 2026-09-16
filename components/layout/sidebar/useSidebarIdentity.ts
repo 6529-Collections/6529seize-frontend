@@ -8,7 +8,7 @@ export function useSidebarIdentity(address: string | undefined) {
   const { data, isLoading, isError, isFetching, refetch } = useQuery<
     ApiIdentity | undefined
   >({
-    ...getIdentityQueryOptions({ handleOrWallet: address || "" }),
+    ...getIdentityQueryOptions({ handleOrWallet: address ?? "" }),
     enabled: !!address,
     retry: 3,
   });
