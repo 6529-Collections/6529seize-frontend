@@ -1,3 +1,4 @@
+import { getPreparedDropImage } from "@/services/uploads/prepareDropImage";
 import type { ApiDropMedia } from "@/generated/models/ApiDropMedia";
 import type { ApiAttachment } from "@/generated/models/ApiAttachment";
 import {
@@ -57,6 +58,14 @@ export async function multiPartUpload({
   waitForReady = true,
   signal,
 }: MultiPartUploadParams): Promise<ApiDropMedia> {
+  if (signal?.aborted) {
+    throw new DOMException("Upload aborted", "AbortError");
+  }
+  const prepared = path === "drop" ? getPreparedDropImage(file) : undefined;
+  if (prepared) {
+    onProgress?.(100);
+    return prepared;
+  }
   if (file.size > MAX_FILE_SIZE) {
     throw new Error("File size exceeds maximum allowed size of 500 MB");
   }
@@ -80,7 +89,7 @@ export async function multiPartUpload({
 
   const media: ApiDropMedia = {
     url: completion.media_url,
-    mime_type: contentType,
+    mime_type: completion.mime_type ?? contentType,
   };
 
   if (typeof completion.media_upload_id === "string") {

@@ -1,5 +1,6 @@
 "use client";
 
+import { DROP_UPLOAD_ACCEPT } from "@/services/uploads/mediaUploadMimeType";
 import { publicEnv } from "@/config/env";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
@@ -651,7 +652,7 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
             ref={fileInputRef}
             type="file"
             className="tw-hidden"
-            accept="image/*,video/*,audio/*,application/pdf,text/csv,.pdf,.csv"
+            accept={DROP_UPLOAD_ACCEPT}
             multiple
             onChange={onFiles}
           />

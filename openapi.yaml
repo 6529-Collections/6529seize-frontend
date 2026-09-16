@@ -24906,6 +24906,11 @@ components:
       properties:
         media_url:
           type: string
+        mime_type:
+          type: string
+          description: >-
+            MIME type of the published image. AVIF still images are converted to
+            WebP; use this value when attaching media to a drop.
         media_upload_id:
           type: string
           nullable: true
@@ -30453,6 +30458,7 @@ components:
     ApiMediaUploadMimeType:
       type: string
       enum:
+        - image/avif
         - image/png
         - image/jpeg
         - image/jpg

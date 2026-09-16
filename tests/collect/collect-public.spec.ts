@@ -644,10 +644,28 @@ test("artist choices stay scrollable and searchable on mobile and desktop", asyn
     await artist.click();
     const sheet = page.getByRole("dialog", { name: "Artist" });
     await expect(sheet.getByRole("heading", { name: "Artist" })).toBeVisible();
-    const search = sheet.getByRole("searchbox", { name: "Search artists" });
+    const search = sheet.getByRole("combobox", { name: "Search artists" });
     await expect(search).toBeVisible();
+    const choices = sheet.getByRole("listbox", { name: "Artist" });
+    expect(await choices.getByRole("option").count()).toBeLessThan(30);
+    expect(
+      await choices.evaluate(
+        (element) => element.scrollHeight > element.clientHeight
+      )
+    ).toBe(true);
+    await search.focus();
+    await expect(search).toHaveAttribute("aria-expanded", "true");
+    await search.press("End");
     await expect(
-      sheet.getByRole("radio", { name: "Catalog artist 30" })
+      choices.getByRole("option", { name: "Catalog artist 30" })
+    ).toBeVisible();
+    await search.press("Enter");
+    await expect(sheet).toHaveCount(0);
+    await expect(artist).toContainText("Catalog artist 30");
+    await artist.click();
+    await search.fill("Catalog artist 30");
+    await expect(
+      choices.getByRole("option", { name: "Catalog artist 30" })
     ).toBeVisible();
     await page.screenshot({
       path: info.outputPath("collect-artist-sheet.png"),
@@ -658,11 +676,10 @@ test("artist choices stay scrollable and searchable on mobile and desktop", asyn
     ).toBeVisible();
     await search.fill("Catalog artist 20");
     await expect(
-      sheet.getByRole("radio", { name: "Catalog artist 30" })
+      choices.getByRole("option", { name: "Catalog artist 30" })
     ).toHaveCount(0);
-    await sheet
-      .getByRole("radio", { name: "Catalog artist 20" })
-      .locator("xpath=..")
+    await choices
+      .getByRole("option", { name: "Catalog artist 20" })
       .click();
     await expect(sheet).toHaveCount(0);
     await expect(artist).toContainText("Catalog artist 20");
