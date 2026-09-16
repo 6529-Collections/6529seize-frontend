@@ -337,12 +337,22 @@ not establish that the E2E contracts still match the intended behavior.
   relevant Playwright specs, shared selectors, fixtures, and helpers for the
   changed routes, controls, accessible names, and user flows. Include shared
   navigation and shell consumers when the change affects them.
-- Update affected E2E coverage in the same PR when an intentional change alters
+- Treat the user's requested behavior and existing unaffected guarantees as
+  the test contract. Change an existing behavioral expectation only when the
+  requested behavior requires it, not merely because the implementation
+  changed or a test fails. In the PR's Validation section, explain which
+  requirement justifies each changed behavioral expectation and why the old
+  expectation conflicts with it. An agent's implementation choice is not
+  evidence that the user requested a behavior change.
+- Update affected E2E coverage in the same PR when the requested change alters
   labels, roles, navigation, controls, responsive layout, or interaction
-  sequences. Distinguish an obsolete test expectation from a product
-  regression; fix regressions in product code and preserve meaningful
-  assertions. Do not skip, delete, weaken, or add retries to tests merely to
-  make the change pass.
+  sequences. Selector, fixture, and helper maintenance must continue to prove
+  the same behavior unless the request justifies changing that behavior.
+  Preserve all unaffected guarantees. If the implementation breaks behavior
+  the user did not ask to change, fix the product code; if the intended
+  behavior is unclear, flag that ambiguity rather than assume permission to
+  relax the test. Do not skip, delete, weaken, add retries, or narrow pack/CI
+  selection merely to make failing coverage pass.
 - Add representative browser coverage when the change introduces a distinct
   browser-specific risk, following Test Layer Selection above. If existing
   coverage remains valid or a lower layer fully covers the change, explain
