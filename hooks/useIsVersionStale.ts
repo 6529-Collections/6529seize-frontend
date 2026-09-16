@@ -1,6 +1,7 @@
 "use client";
 
 import { publicEnv } from "@/config/env";
+import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 const CURRENT = publicEnv.VERSION ?? "unknown"; // baked into the bundle
@@ -12,17 +13,18 @@ type VersionStatusResponse = {
   readonly stale?: unknown;
 };
 
-const shouldForceShowNewVersionToast = () =>
-  globalThis.window !== undefined &&
-  new URLSearchParams(globalThis.location.search).get(
-    SHOW_NEW_VERSION_TOAST_PARAM
-  ) === "true";
-
-export function useIsVersionStale(interval = 120_000) {
+export function useIsVersionStale(interval = 120_000, enabled = true) {
+  const searchParams = useSearchParams();
+  const shouldForceShowNewVersionToast =
+    searchParams.get(SHOW_NEW_VERSION_TOAST_PARAM) === "true";
   const [stale, setStale] = useState(shouldForceShowNewVersionToast);
 
   useEffect(() => {
-    if (shouldForceShowNewVersionToast()) {
+    if (!enabled) {
+      return;
+    }
+
+    if (shouldForceShowNewVersionToast) {
       setStale(true);
       return;
     }
@@ -58,7 +60,7 @@ export function useIsVersionStale(interval = 120_000) {
       clearInterval(id);
       globalThis.removeEventListener("focus", onFocus);
     };
-  }, [interval]);
+  }, [interval, enabled, shouldForceShowNewVersionToast]);
 
-  return stale;
+  return enabled && stale;
 }

@@ -41,7 +41,8 @@ On web layouts, route switching is sidebar-first.
   `About`.
 - Gated primary row: `Drop Forge`, after `About`, only when the connected
   wallet can access it.
-- Utility rows: desktop `Search`, `Share` (only on supported desktop-web
+- Utility rows: desktop `Update` (when a new version is available), `Search`,
+  `Share` (only on supported desktop-web
   routes), connected-only `Notifications`, then the profile control.
 - Bottom account area: connect action, loading placeholders, and the connected
   user menu.
@@ -58,6 +59,8 @@ On web layouts, route switching is sidebar-first.
 - Open `Drop Forge` from the standalone row after `About` when the current
   wallet can access `/drop-forge`.
 - Open `Search` from the desktop sidebar row.
+- Select the rocket above `Search` to update. The expanded sidebar labels it
+  `Update`; the collapsed sidebar shows the rocket with an `Update` tooltip.
 - Open connected `Notifications` from the lower utility rows.
 - Open `Share` from the desktop sidebar on a supported route.
 - Open `Profile` or `Connect Device` from the connected user menu.
@@ -67,7 +70,8 @@ On web layouts, route switching is sidebar-first.
 
 1. Open a web route.
 2. Switch primary sections with direct rows.
-3. Use lower utility rows in `Search`, `Share`, `Notifications`, profile order.
+3. Use lower utility rows in `Update` (when available), `Search`, `Share`,
+   `Notifications`, profile order.
 4. Open `NFTs` or `About` for nested routes; use the `Museum`, `Waves`, and
    `Join 6529` rows for direct navigation.
 5. In collapsed mode, hover a group row with a mouse or activate it by tap,
@@ -147,6 +151,18 @@ On web layouts, route switching is sidebar-first.
 - The collapsed-row tooltip stays hidden while its flyout is open.
 - Flyouts reposition on sidebar scroll and window resize.
 - `Notifications` row appears only when wallet connection is active.
+- When a new version is available, desktop browsers show `Update` above
+  `Search` instead of a separate toast. Selecting it keeps the current route
+  and shows a static rocket, `Updating to the latest version`, and three
+  animated dots while the page reloads. Reduced-motion preferences keep the
+  dots still. The rocket is prepared when an update becomes available and
+  loaded eagerly during the reload. The screen clears together after the
+  rocket and app shell are ready, or after 30 seconds if startup does not
+  finish. An image-loading failure does not block the update.
+- Mobile browsers retain the full update toast and use the same updating screen
+  when it is tapped. This includes tablets using desktop browsing or a paired
+  pointer. The native app keeps its
+  [docked rocket](feature-mobile-bottom-navigation.md).
 - `Drop Forge` appears as a standalone row after `About` only when the
   connected wallet can access the `/drop-forge` landing route.
 - Connected user row opens the account menu immediately on a single activate.
