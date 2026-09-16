@@ -9,6 +9,7 @@ import {
   useSensor,
   useSensors,
   type DragMoveEvent,
+  type Modifier,
 } from "@dnd-kit/core";
 import { getEventCoordinates } from "@dnd-kit/utilities";
 import {
@@ -29,6 +30,31 @@ import { formatInteger } from "@/i18n/format";
 import type { CurationDropPlacement } from "@/services/api/curation-drop-order-api";
 
 type Target = { id: string; placement: CurationDropPlacement };
+const DRAG_OVERLAY_MARGIN = 8;
+const restrictDragOverlayToViewport: Modifier = ({
+  overlayNodeRect,
+  transform,
+  windowRect,
+}) => {
+  if (!overlayNodeRect || !windowRect) return transform;
+  let x = transform.x;
+  let y = transform.y;
+  const left = overlayNodeRect.left + x;
+  const right = overlayNodeRect.right + x;
+  const top = overlayNodeRect.top + y;
+  const bottom = overlayNodeRect.bottom + y;
+  if (left < windowRect.left + DRAG_OVERLAY_MARGIN)
+    x += windowRect.left + DRAG_OVERLAY_MARGIN - left;
+  else if (right > windowRect.right - DRAG_OVERLAY_MARGIN)
+    x -= right - (windowRect.right - DRAG_OVERLAY_MARGIN);
+  if (top < windowRect.top + DRAG_OVERLAY_MARGIN)
+    y += windowRect.top + DRAG_OVERLAY_MARGIN - top;
+  else if (bottom > windowRect.bottom - DRAG_OVERLAY_MARGIN)
+    y -= bottom - (windowRect.bottom - DRAG_OVERLAY_MARGIN);
+  return { ...transform, x, y };
+};
+const dragOverlayModifiers = [restrictDragOverlayToViewport];
+
 type OrganizeContextValue = {
   enabled: boolean;
   busy: boolean;
@@ -298,7 +324,7 @@ export default function CurationOrganize({
           </div>
         )}
         {children}
-        <DragOverlay dropAnimation={null}>
+        <DragOverlay modifiers={dragOverlayModifiers} dropAnimation={null}>
           {draggingId && (
             <div className="tailwind-scope tw-w-48 tw-rounded-xl tw-border tw-border-solid tw-border-primary-400 tw-bg-iron-900 tw-p-4 tw-text-sm tw-font-semibold tw-text-iron-50 tw-shadow-xl">
               {postName(draggingId)}

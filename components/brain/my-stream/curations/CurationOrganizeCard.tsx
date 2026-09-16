@@ -50,8 +50,8 @@ export default function CurationOrganizeCard({
   const name = t(locale, "profileCuration.order.postNumber", { number });
   const selected = selectedId === id;
   const marker = target?.id === id ? target.placement : null;
-  const horizontalSide = marker === "before" ? "-tw-left-2" : "-tw-right-2";
-  const verticalSide = marker === "before" ? "-tw-top-2" : "-tw-bottom-2";
+  const horizontalSide = marker === "before" ? "tw-left-0" : "tw-right-0";
+  const verticalSide = marker === "before" ? "tw-top-0" : "tw-bottom-0";
   const markerSide =
     axis === "horizontal"
       ? `${horizontalSide} tw-inset-y-0 tw-w-1`
