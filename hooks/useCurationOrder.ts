@@ -7,6 +7,7 @@ import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { t } from "@/i18n/messages";
+import type { SupportedLocale } from "@/i18n/locales";
 import {
   CurationOrderChangedError,
   moveCurationDrop,
@@ -102,7 +103,7 @@ async function invalidateCurationDrops(
 
 async function refreshOrder(
   refetch: ReturnType<typeof useWaveCurationDrops>["refetch"],
-  locale: string
+  locale: SupportedLocale
 ) {
   const result = await refetch();
   return result.isError ? t(locale, "profileCuration.order.refreshFailed") : "";
