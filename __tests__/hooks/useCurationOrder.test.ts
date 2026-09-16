@@ -56,7 +56,7 @@ beforeEach(() => {
   mockRequestAuth.mockResolvedValue({ success: true });
   mockRefetch.mockResolvedValue({});
   mockInvalidate.mockResolvedValue(undefined);
-  moveMock.mockResolvedValue({});
+  moveMock.mockResolvedValue(undefined);
 });
 
 it("holds realtime order changes during selection but allows new pages to append", () => {
