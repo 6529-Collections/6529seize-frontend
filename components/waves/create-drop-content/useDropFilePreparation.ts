@@ -74,6 +74,18 @@ export function useDropFilePreparation({
     controllersRef.current.add(controller);
     const active = () =>
       !controller.signal.aborted && scopeRef.current === scopeKey;
+    const updateFile = (
+      file: File,
+      update: Partial<Pick<UploadingFile, "progress" | "phase">>
+    ) => {
+      if (!active()) return;
+      setPreparation((current) => ({
+        ...current,
+        files: current.files.map((item) =>
+          item.file === file ? { ...item, ...update } : item
+        ),
+      }));
+    };
     setPreparation((current) => ({
       scope: scopeKey,
       count: (current.scope === scopeKey ? current.count : 0) + 1,
@@ -94,26 +106,9 @@ export function useDropFilePreparation({
           file,
           path: "drop",
           signal: controller.signal,
-          onProgress: (progress) => {
-            if (active())
-              setPreparation((current) => ({
-                ...current,
-                files: current.files.map((item) =>
-                  item.file === file ? { ...item, progress } : item
-                ),
-              }));
-          },
-          onProcessing: () => {
-            if (active())
-              setPreparation((current) => ({
-                ...current,
-                files: current.files.map((item) =>
-                  item.file === file
-                    ? { ...item, phase: "processing", progress: 100 }
-                    : item
-                ),
-              }));
-          },
+          onProgress: (progress) => updateFile(file, { progress }),
+          onProcessing: () =>
+            updateFile(file, { phase: "processing", progress: 100 }),
         });
         if (active()) rememberPreparedDropImage(file, media, owner);
       }
