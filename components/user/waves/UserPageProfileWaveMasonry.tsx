@@ -237,7 +237,10 @@ function CurationMasonryActions({
 
   return (
     <>
-      <div className="tw-absolute tw-right-4 tw-top-3 tw-z-[1000]">
+      <div
+        data-curation-card-actions
+        className="tw-absolute tw-right-4 tw-top-3 tw-z-[1000]"
+      >
         {isMobileLayoutViewport ? (
           <CompactMenuMobileBottomSheet
             title={menuLabel}
