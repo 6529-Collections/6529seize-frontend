@@ -358,9 +358,13 @@ not establish that the E2E contracts still match the intended behavior.
   coverage remains valid or a lower layer fully covers the change, explain
   that briefly in the PR's Validation section instead of adding redundant E2E.
 - Check that affected specs are selected by the intended packs and CI lanes,
-  using `tests/packs.manifest.cjs` and the current workflow/classifier. Update
-  registration or selection when needed; a spec that is never selected does
-  not provide execution coverage.
+  using `tests/packs.manifest.cjs`. For PR selection, start with
+  [.github/workflows/app-pr-ci.yml](.github/workflows/app-pr-ci.yml) and its
+  [CI planner](ops/scripts/testing-strategy.cjs), following the workflow's
+  effective-plan and protected-lane adjustments. For deployed packs, inspect
+  the target environment's workflow and manifest selection. Update registration
+  or selection when needed; a spec that is never selected does not provide
+  execution coverage.
 - Inspection and test maintenance are required even when E2E execution is
   unavailable or prohibited. Run relevant browser checks only within the
   task's execution permissions; do not start a local server or poll CI without
@@ -386,8 +390,12 @@ Prefer focused checks first. Escalate based on blast radius.
   like `--testPathPatterns=<regex>` or `--cacheDirectory=<dir>` directly; do
   not insert a `--` separator — jest reads everything after `--` as a
   test-path pattern, so flags placed there are misread).
-- Playwright/user flows: `6529 run test:e2e` or a targeted Playwright run. The
-  Playwright config starts `./bin/6529 run dev` on port `3001`.
+- Playwright/user flows: `6529 run test:e2e` or a targeted Playwright run only
+  within the task's execution permissions. The default Playwright config starts
+  a local development server on port `3001`; where local servers require
+  explicit authorization, a request to maintain tests alone does not permit
+  these commands. Otherwise inspect and maintain coverage without execution,
+  and disclose the gap as described in E2E Maintenance During Implementation.
 - Build-time, generated models, Next config, env/runtime config, proxy, routing,
   deploy packaging, or dependency changes: `6529 run build`.
 - Docs maintenance: use validators under `ops/skills/commit-docs-updater/scripts/`
