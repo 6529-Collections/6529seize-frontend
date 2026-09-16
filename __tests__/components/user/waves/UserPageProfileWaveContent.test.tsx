@@ -1,10 +1,15 @@
 import React from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import UserPageProfileWaveContent from "@/components/user/waves/UserPageProfileWaveContent";
-import { useWaveCurationDrops } from "@/hooks/useWaveCurationDrops";
+import { useCurationOrder } from "@/hooks/useCurationOrder";
 
-jest.mock("@/hooks/useWaveCurationDrops", () => ({
-  useWaveCurationDrops: jest.fn(),
+jest.mock("@/hooks/useCurationOrder", () => ({
+  useCurationOrder: jest.fn(),
+}));
+
+jest.mock("@/components/brain/my-stream/curations/CurationOrganize", () => ({
+  __esModule: true,
+  default: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
 jest.mock("@/components/user/waves/UserPageProfileWaveMasonry", () => ({
@@ -14,7 +19,7 @@ jest.mock("@/components/user/waves/UserPageProfileWaveMasonry", () => ({
   ),
 }));
 
-const useWaveCurationDropsMock = useWaveCurationDrops as jest.Mock;
+const useCurationOrderMock = useCurationOrder as jest.Mock;
 
 const wave = { id: "wave-1" } as any;
 const curation = { id: "curation-1", name: "Art" } as any;
@@ -30,6 +35,8 @@ const renderContent = (
 ) =>
   render(
     <UserPageProfileWaveContent
+      isOrganizing={false}
+      onDoneOrganizing={jest.fn()}
       canManageOwnOfficialWave={true}
       containerWidth={600}
       onCreateCuration={jest.fn()}
@@ -48,7 +55,7 @@ const renderContent = (
 
 describe("UserPageProfileWaveContent", () => {
   beforeEach(() => {
-    useWaveCurationDropsMock.mockReturnValue({
+    useCurationOrderMock.mockReturnValue({
       dataUpdatedAt: 1,
       drops: [drop],
       fetchNextPage: jest.fn(),
@@ -81,7 +88,7 @@ describe("UserPageProfileWaveContent", () => {
   });
 
   it("does not show Add post in the empty selected curation state", () => {
-    useWaveCurationDropsMock.mockReturnValue({
+    useCurationOrderMock.mockReturnValue({
       dataUpdatedAt: 1,
       drops: [],
       fetchNextPage: jest.fn(),
