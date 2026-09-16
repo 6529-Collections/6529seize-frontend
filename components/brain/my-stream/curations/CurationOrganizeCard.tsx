@@ -1,8 +1,7 @@
 "use client";
 
 import { useDraggable, useDroppable } from "@dnd-kit/core";
-import { faGripVertical } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { Bars3Icon } from "@heroicons/react/24/outline";
 import { useCallback, useId, type ReactNode } from "react";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
@@ -81,11 +80,10 @@ export default function CurationOrganizeCard({
           onKeyDown={(event) => keyDown(id, event)}
           className={`tw-absolute tw-right-0.5 tw-top-0.5 tw-z-[1001] tw-flex tw-size-11 tw-touch-none tw-select-none tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-transparent tw-p-0 tw-outline-none tw-transition-colors tw-duration-150 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 disabled:tw-cursor-wait ${selected ? "tw-text-white" : "tw-text-iron-300 desktop-hover:hover:tw-text-white"} ${isDragging ? "tw-cursor-grabbing" : "tw-cursor-grab"}`}
         >
-          <span className="tw-flex tw-h-8 tw-w-7 tw-items-center tw-justify-center tw-rounded-md tw-bg-iron-950/85 tw-shadow-sm tw-backdrop-blur-sm">
-            <FontAwesomeIcon
-              icon={faGripVertical}
+          <span className="tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-md tw-bg-black/20 tw-drop-shadow-md tw-backdrop-blur-[2px]">
+            <Bars3Icon
               aria-hidden="true"
-              className="tw-h-[18px] tw-w-3"
+              className="tw-size-6 tw-stroke-[2.25]"
             />
           </span>
         </button>
