@@ -21,6 +21,7 @@ jest.mock("@/components/auth/Auth", () => ({
 }));
 
 const editorState = { id: "editor-state" };
+const imageUploadToken = {};
 const selectionMock = {
   insertParagraph: jest.fn(),
   insertRawText: jest.fn(),
@@ -54,8 +55,12 @@ jest.mock("@lexical/react/LexicalComposerContext", () => ({
   useLexicalComposerContext: jest.fn(),
 }));
 jest.mock("@/components/drops/create/lexical/nodes/ImageNode", () => ({
-  $createImageNode: jest.fn(() => ({ getKey: () => "1" })),
+  $createImageNode: jest.fn(() => ({
+    getKey: () => "1",
+    getUploadToken: () => imageUploadToken,
+  })),
   $isImageNode: jest.fn((node) => node !== null),
+  ImageNode: class {},
 }));
 jest.mock("@/components/waves/create-wave/services/multiPartUpload", () => ({
   multiPartUpload: jest.fn(() => Promise.resolve({ url: "uploaded" })),
@@ -67,6 +72,7 @@ jest.mock("lexical", () => ({
   $getNodeByKey: jest.fn(() => ({ replace: jest.fn(), remove: jest.fn() })),
   $insertNodes: jest.fn(),
   $isRangeSelection: jest.fn(() => true),
+  $nodesOfType: jest.fn(() => []),
   COMMAND_PRIORITY_LOW: 1,
   PASTE_COMMAND: "PASTE_COMMAND",
 }));
@@ -74,7 +80,7 @@ jest.mock("@lexical/rich-text", () => ({
   DRAG_DROP_PASTE: "DRAG_DROP_PASTE",
 }));
 
-const { $insertNodes, $getNodeByKey } = require("lexical");
+const { $insertNodes, $getNodeByKey, $nodesOfType } = require("lexical");
 const {
   multiPartUpload,
 } = require("@/components/waves/create-wave/services/multiPartUpload");
@@ -94,6 +100,7 @@ describe("DragDropPastePlugin", () => {
     (useLexicalComposerContext as jest.Mock).mockReturnValue([editor]);
     (multiPartUpload as jest.Mock).mockResolvedValue({ url: "uploaded" });
     ($getNodeByKey as jest.Mock).mockReturnValue(createMockImageNode());
+    ($nodesOfType as jest.Mock).mockReturnValue([]);
     URL.createObjectURL = jest.fn(() => "blob:preview");
     URL.revokeObjectURL = jest.fn();
   });
@@ -159,9 +166,23 @@ describe("DragDropPastePlugin", () => {
     });
     const restoredNode = createMockImageNode();
     ($getNodeByKey as jest.Mock).mockReturnValue(restoredNode);
+    ($nodesOfType as jest.Mock).mockReturnValue([restoredNode]);
     act(() => updateListener({ tags: new Set(["historic"]) }));
     expect(restoredNode.setSrc).toHaveBeenCalledWith("uploaded");
     expect(multiPartUpload).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not apply a settled result to another image's pending history", async () => {
+    renderPlugin();
+    await act(async () => {
+      dragDropPasteHandler([new File(["a"], "a.png", { type: "image/png" })]);
+    });
+    const unrelatedNode = createMockImageNode({ getUploadToken: () => ({}) });
+    ($getNodeByKey as jest.Mock).mockReturnValue(unrelatedNode);
+    ($nodesOfType as jest.Mock).mockReturnValue([unrelatedNode]);
+    act(() => updateListener({ tags: new Set(["historic"]) }));
+    expect(unrelatedNode.setSrc).not.toHaveBeenCalled();
+    expect(unrelatedNode.remove).not.toHaveBeenCalled();
   });
 
   it("uploads pasted HTML data images before Lexical imports the base64 src", async () => {
@@ -632,6 +653,8 @@ function renderPlugin(props = {}) {
 
 function createMockImageNode(overrides = {}) {
   return {
+    getKey: () => "1",
+    getUploadToken: () => imageUploadToken,
     isAttached: () => true,
     getSrc: () => "loading",
     setSrc: jest.fn(),

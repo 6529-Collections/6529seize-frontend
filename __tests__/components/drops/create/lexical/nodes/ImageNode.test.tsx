@@ -47,6 +47,8 @@ describe("ImageNode", () => {
 
   it("completes an upload without replacing its node or changing image metadata", () => {
     const editor = createImageEditor();
+    let imageKey = "";
+    let uploadToken: object | undefined;
     editor.update(
       () => {
         const node = $createImageNode({
@@ -56,11 +58,19 @@ describe("ImageNode", () => {
           height: 20,
         });
         $getRoot().append(node);
-        const key = node.getKey();
+        imageKey = node.getKey();
+        uploadToken = node.getUploadToken();
         node.setPreviewSrc("blob:temporary");
+      },
+      { discrete: true }
+    );
+    editor.update(
+      () => {
+        const node = $getRoot().getFirstChildOrThrow<ImageNode>();
         node.setSrc("https://example.com/image.png");
         const current = $getRoot().getFirstChildOrThrow<ImageNode>();
-        expect(current.getKey()).toBe(key);
+        expect(current.getKey()).toBe(imageKey);
+        expect(current.getUploadToken()).toBe(uploadToken);
         expect(current.exportJSON()).toMatchObject({
           src: "https://example.com/image.png",
           altText: "alt",

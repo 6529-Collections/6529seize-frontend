@@ -56,12 +56,14 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
   __height?: number | undefined;
   // Local upload previews are transient and must never enter saved content.
   __previewSrc?: string | undefined;
+  // History clones share this transient identity; discarded history can release it.
+  __uploadToken: object = {};
   static override getType(): string {
     return "image";
   }
 
   static override clone(node: ImageNode): ImageNode {
-    return new ImageNode(
+    const clone = new ImageNode(
       node.__src,
       node.__altText,
       node.__width,
@@ -69,6 +71,8 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
       node.__key,
       node.__previewSrc
     );
+    clone.__uploadToken = node.__uploadToken;
+    return clone;
   }
 
   static override importJSON(serializedNode: SerializedImageNode): ImageNode {
@@ -168,6 +172,10 @@ export class ImageNode extends DecoratorNode<JSX.Element> {
 
   setPreviewSrc(src: string): void {
     this.getWritable().__previewSrc = src;
+  }
+
+  getUploadToken(): object {
+    return this.__uploadToken;
   }
 
   override decorate(): JSX.Element {
