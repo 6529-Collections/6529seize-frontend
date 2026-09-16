@@ -27,6 +27,12 @@ In the app layout, the header adapts to route and thread state. It controls:
 
 ## User Journey
 
+On iOS and Android app launch, a dark loading shell reserves the native header
+and bottom-navigation space until the app layout is ready. The desktop sidebar
+does not appear during this transition. Public content can display before
+wallet startup finishes; browser pages still display their initial content
+immediately.
+
 1. Header renders for the current app route.
 2. Left control resolves:
    - `Back` appears when an active wave exists, on `/waves/create` or
