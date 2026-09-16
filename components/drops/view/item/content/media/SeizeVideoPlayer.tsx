@@ -4,7 +4,7 @@ import { PlayIcon } from "@heroicons/react/24/solid";
 import clsx from "clsx";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import { formatVideoTime } from "./videoTime";
+import { useVideoProgress } from "./useVideoProgress";
 import React, {
   useCallback,
   useEffect,
@@ -160,15 +160,6 @@ export default function SeizeVideoPlayer({
   }>({});
   const [isPaused, setIsPaused] = useState(!resolvedTemplate.autoPlay);
   const [controlsVisible, setControlsVisible] = useState(true);
-  const [progressState, setProgressState] = useState<{
-    readonly src?: string | undefined;
-    readonly value: number;
-    readonly currentTime: number;
-  }>({ value: 0, currentTime: 0 });
-  const [durationState, setDurationState] = useState<{
-    readonly src?: string | undefined;
-    readonly value: number;
-  }>({ value: 0 });
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isNativeFullscreen, setIsNativeFullscreen] = useState(false);
   const [openPosterGateKey, setOpenPosterGateKey] = useState<string | null>(
@@ -204,6 +195,16 @@ export default function SeizeVideoPlayer({
   const isInView = useElementInView(wrapperElement);
   const directSrc =
     fallbackState.originSrc === src ? (fallbackState.source ?? src) : src;
+
+  const {
+    updateProgress,
+    resetTiming,
+    seekDisabled,
+    progress,
+    currentTimeLabel,
+    durationLabel,
+    seekValueText,
+  } = useVideoProgress(internalVideoRef, directSrc, locale);
 
   const setWrapperRef = useCallback((element: HTMLDivElement | null) => {
     wrapperRef.current = element;
@@ -268,46 +269,9 @@ export default function SeizeVideoPlayer({
   }
 
   function resetProgress() {
+    clearHideControlsTimer();
     isScrubbingRef.current = false;
-    setDurationState({ src: directSrc, value: 0 });
-    setProgressState({ src: directSrc, value: 0, currentTime: 0 });
-  }
-
-  function updateProgress() {
-    const video = internalVideoRef.current;
-    if (!video || !Number.isFinite(video.duration) || video.duration <= 0) {
-      setDurationState((current) =>
-        current.src === directSrc && current.value === 0
-          ? current
-          : { src: directSrc, value: 0 }
-      );
-      setProgressState((current) =>
-        current.src === directSrc && current.value === 0
-          ? current
-          : { src: directSrc, value: 0, currentTime: 0 }
-      );
-      return;
-    }
-    setDurationState((current) =>
-      current.src === directSrc && current.value === video.duration
-        ? current
-        : { src: directSrc, value: video.duration }
-    );
-    const nextProgress = Math.min(
-      100,
-      (video.currentTime / video.duration) * 100
-    );
-    setProgressState((current) =>
-      current.src === directSrc &&
-      current.value === nextProgress &&
-      current.currentTime === video.currentTime
-        ? current
-        : {
-            src: directSrc,
-            value: nextProgress,
-            currentTime: video.currentTime,
-          }
-    );
+    resetTiming();
   }
 
   useEffect(() => {
@@ -441,11 +405,9 @@ export default function SeizeVideoPlayer({
     if (!video || !Number.isFinite(video.duration) || video.duration <= 0) {
       return;
     }
-
-    const clampedProgress = Math.min(100, Math.max(0, nextProgress));
-    video.currentTime = (clampedProgress / 100) * video.duration;
+    video.currentTime =
+      (Math.min(100, Math.max(0, nextProgress)) / 100) * video.duration;
     updateProgress();
-    revealControls();
   }
 
   function toggleMuted(event: React.MouseEvent<HTMLButtonElement>) {
@@ -619,21 +581,6 @@ export default function SeizeVideoPlayer({
   const isWrapperFullscreen = isFullscreen;
   const controlsAreVisible = controlsVisible || isPaused || isAnyFullscreen;
   const responsiveMediaStyle = getResponsiveMediaStyle();
-  const duration = durationState.src === directSrc ? durationState.value : 0;
-  const progress = progressState.src === directSrc ? progressState.value : 0;
-  const seekDisabled = duration <= 0;
-  const currentTimeLabel = formatVideoTime(
-    progressState.src === directSrc ? progressState.currentTime : 0,
-    duration,
-    locale
-  );
-  const durationLabel = seekDisabled
-    ? "—"
-    : formatVideoTime(duration, duration, locale);
-  const seekValueText = t(locale, "media.video.position", {
-    current: currentTimeLabel,
-    duration: durationLabel,
-  });
   const hasUserPausedOwnedAutoplay = userPausedAutoplaySrc === directSrc;
   const labels = useMemo<SeizeVideoLabels>(
     () => ({
@@ -785,6 +732,7 @@ export default function SeizeVideoPlayer({
           }}
           onSeekChange={(event) => {
             seekToProgress(Number(event.currentTarget.value));
+            revealControls();
           }}
           onScrubStart={startScrubbing}
           onScrubEnd={endScrubbing}

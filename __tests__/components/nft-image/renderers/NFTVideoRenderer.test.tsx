@@ -100,8 +100,8 @@ describe("NFTVideoRenderer", () => {
         );
         await waitFor(() => expect(play).toHaveBeenCalled());
         expect(
-          (await screen.findAllByRole("button", { name: "Play video" }))[0]!
-        ).toBeInTheDocument();
+          await screen.findAllByRole("button", { name: "Play video" })
+        ).toHaveLength(2);
         expect(container.querySelector("video")).toHaveAttribute(
           "poster",
           "https://example.com/scaled.png"

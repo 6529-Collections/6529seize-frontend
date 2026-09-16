@@ -157,7 +157,12 @@ describe("SeizeVideoPlayer", () => {
 
     try {
       const { container } = render(
-        <SeizeVideoPlayer src="https://example.com/video.mp4" />
+        <SeizeVideoPlayer
+          src="https://example.com/video.mp4"
+          onOpen={jest.fn()}
+          openLabel="Open video"
+          onDownload={jest.fn()}
+        />
       );
 
       const video = container.querySelector("video");
@@ -189,6 +194,14 @@ describe("SeizeVideoPlayer", () => {
       expect(muteControlZone).toHaveClass("tw-pointer-events-none");
       expect(muteControlZone).not.toHaveClass("tw-pointer-events-auto");
       expect(muteButton).toHaveAttribute("tabindex", "-1");
+      const controls = [
+        ...screen.getAllByRole("button"),
+        screen.getByRole("slider"),
+      ];
+      expect(controls).toHaveLength(6);
+      for (const control of controls) {
+        expect(control).toHaveAttribute("tabindex", "-1");
+      }
 
       act(() => {
         video.focus();
@@ -700,6 +713,49 @@ describe("SeizeVideoPlayer", () => {
       }
     }
   );
+
+  it("keeps native seeking usable when pointer capture fails", () => {
+    const capture = jest.mocked(HTMLElement.prototype.setPointerCapture);
+    capture.mockImplementationOnce(() => {
+      throw new DOMException("Pointer has ended", "NotFoundError");
+    });
+    const { container } = render(<SeizeVideoPlayer src="video.mp4" />);
+    const video = container.querySelector("video")!;
+    Object.defineProperty(video, "duration", { configurable: true, value: 10 });
+    fireEvent.durationChange(video);
+    const seek = screen.getByRole("slider");
+    fireEvent.pointerDown(seek, { pointerId: 1 });
+    fireEvent.change(seek, { target: { value: "60" } });
+    expect(video.currentTime).toBe(6);
+    expect(screen.getByText("0:06 / 0:10")).toBeInTheDocument();
+  });
+
+  it("cancels the old hide timer when a scrubbing source is emptied", () => {
+    jest.useFakeTimers();
+    try {
+      const { container } = render(<SeizeVideoPlayer />);
+      const video = container.querySelector("video")!;
+      Object.defineProperties(video, {
+        duration: { configurable: true, value: 10 },
+        paused: { configurable: true, value: false },
+      });
+      fireEvent.durationChange(video);
+      fireEvent.play(video);
+      const seek = screen.getByRole("slider");
+      fireEvent.pointerDown(seek, { pointerId: 1 });
+      fireEvent.change(seek, { target: { value: "60" } });
+      fireEvent.emptied(video);
+      act(() => {
+        jest.advanceTimersByTime(5000);
+      });
+      expect(seek).not.toHaveAttribute("tabindex", "-1");
+      expect(seek).toHaveValue("0");
+      expect(seek).toBeDisabled();
+      expect(screen.getByText("0:00 / —")).toBeInTheDocument();
+    } finally {
+      jest.useRealTimers();
+    }
+  });
 
   it("clears the timestamp and disables seeking for a replacement source until metadata arrives", () => {
     const { container, rerender } = render(
