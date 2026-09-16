@@ -3268,6 +3268,34 @@
       ]
     },
     {
+      "id": "waves.curation.arrange-posts",
+      "kind": "workflow",
+      "title": "Organize posts in a Curation",
+      "aliases": [
+        "reorder curation posts",
+        "sort drops in a curation",
+        "move a curation post to the top",
+        "arrange profile curation"
+      ],
+      "keywords": ["waves", "curation", "posts", "arrange", "order", "profile"],
+      "facts": [
+        "Curators can select Organize above a source Wave's Curation tab, or Manage > This Curation > Organize posts on their profile Curation page, when the Curation contains at least two posts. Posts gain small drag handles on a subtle background over each post.",
+        "Drag a handle, or tap one and then a destination handle. Keyboard users can press Space on a handle, move with the arrow keys, and press Space to place it. Each move saves automatically, and Done exits. More posts load as you scroll; scroll farther before moving a post to a destination that has not loaded yet.",
+        "A Curation has one saved order shared by all readers in the Wave and on profiles. New posts still appear at the top until moved.",
+        "Only accounts allowed to manage the Curation see Organize. If a move fails, the posts return to the saved order and an error is shown."
+      ],
+      "canonical_path": "/waves",
+      "related_paths": ["/{user}/curations"],
+      "tags": ["waves", "posts", "curation", "profiles"],
+      "source_refs": [
+        "components/brain/my-stream/curations/CurationOrganize.tsx",
+        "components/brain/my-stream/curations/MyStreamWaveCurationContent.tsx",
+        "components/user/waves/UserPageProfileWave.tsx",
+        "ops/docs/waves/drop-actions/feature-drop-curation.md",
+        "ops/docs/profiles/tabs/feature-curation-tab.md"
+      ]
+    },
+    {
       "id": "waves.reactions-voting",
       "kind": "workflow",
       "title": "Wave reactions and voting",

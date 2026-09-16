@@ -3275,6 +3275,34 @@
       ]
     },
     {
+      "id": "waves.curation.arrange-posts",
+      "kind": "workflow",
+      "title": "Organize posts in a Curation",
+      "aliases": [
+        "reorder curation posts",
+        "sort drops in a curation",
+        "move a curation post to the top",
+        "arrange profile curation"
+      ],
+      "keywords": ["waves", "curation", "posts", "arrange", "order", "profile"],
+      "facts": [
+        "Curators can select Organize above a source Wave's Curation tab, or Manage > This Curation > Organize posts on their profile Curation page, when the Curation contains at least two posts. Posts gain small drag handles on a subtle background over each post.",
+        "Drag a handle, or tap one and then a destination handle. Keyboard users can press Space on a handle, move with the arrow keys, and press Space to place it. Each move saves automatically, and Done exits. More posts load as you scroll; scroll farther before moving a post to a destination that has not loaded yet.",
+        "A Curation has one saved order shared by all readers in the Wave and on profiles. New posts still appear at the top until moved.",
+        "Only accounts allowed to manage the Curation see Organize. If a move fails, the posts return to the saved order and an error is shown."
+      ],
+      "canonical_path": "/waves",
+      "related_paths": ["/{user}/curations"],
+      "tags": ["waves", "posts", "curation", "profiles"],
+      "source_refs": [
+        "components/brain/my-stream/curations/CurationOrganize.tsx",
+        "components/brain/my-stream/curations/MyStreamWaveCurationContent.tsx",
+        "components/user/waves/UserPageProfileWave.tsx",
+        "ops/docs/waves/drop-actions/feature-drop-curation.md",
+        "ops/docs/profiles/tabs/feature-curation-tab.md"
+      ]
+    },
+    {
       "id": "waves.reactions-voting",
       "kind": "workflow",
       "title": "Wave reactions and voting",
@@ -7654,14 +7682,7 @@
         "managed wallets",
         "wallet detail"
       ],
-      "keywords": [
-        "tools",
-        "app",
-        "wallets",
-        "import",
-        "detail",
-        "management"
-      ],
+      "keywords": ["tools", "app", "wallets", "import", "detail", "management"],
       "facts": [
         "6529 Mobile App Wallets management lives at /tools/app-wallets.",
         "In 6529 Mobile, Connect > App Wallets lists app-local wallets, opens the existing create flow, and connects through the existing unlock flow.",
@@ -7673,10 +7694,7 @@
         "/tools/app-wallets/import-wallet",
         "/tools/app-wallets/{app-wallet-address}"
       ],
-      "tags": [
-        "tools",
-        "wallets"
-      ],
+      "tags": ["tools", "wallets"],
       "source_refs": [
         "app/tools/app-wallets/page.tsx",
         "app/tools/app-wallets/import-wallet/page.tsx",
@@ -8505,12 +8523,8 @@
       "canonical_path": "/about/6529-apps",
       "link_label": "6529 Apps",
       "suppress_source_links": true,
-      "related_paths": [
-        "/about/6529-apps"
-      ],
-      "tags": [
-        "desktop-core"
-      ],
+      "related_paths": ["/about/6529-apps"],
+      "tags": ["desktop-core"],
       "source_refs": [
         "ops/docs/desktop/flow-getting-started.md",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/hooks/useSidebarSections.ts",
@@ -8558,13 +8572,8 @@
       "canonical_path": "/about/6529-apps",
       "link_label": "6529 Apps",
       "suppress_source_links": true,
-      "related_paths": [
-        "/about/6529-apps"
-      ],
-      "tags": [
-        "desktop-core",
-        "desktop-dialogue"
-      ],
+      "related_paths": ["/about/6529-apps"],
+      "tags": ["desktop-core", "desktop-dialogue"],
       "source_refs": [
         "ops/docs/desktop/flow-getting-started.md",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/hooks/useSidebarSections.ts",
@@ -8616,12 +8625,8 @@
       "canonical_path": "/about/6529-apps",
       "link_label": "6529 Apps",
       "suppress_source_links": true,
-      "related_paths": [
-        "/about/6529-apps"
-      ],
-      "tags": [
-        "desktop-core"
-      ],
+      "related_paths": ["/about/6529-apps"],
+      "tags": ["desktop-core"],
       "source_refs": [
         "ops/docs/desktop/flow-getting-started.md",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/eth-scanner/RpcProviderModal.tsx",
@@ -8671,12 +8676,8 @@
       "canonical_path": "/about/6529-apps",
       "link_label": "6529 Apps",
       "suppress_source_links": true,
-      "related_paths": [
-        "/about/6529-apps"
-      ],
-      "tags": [
-        "desktop-core"
-      ],
+      "related_paths": ["/about/6529-apps"],
+      "tags": ["desktop-core"],
       "source_refs": [
         "ops/docs/desktop/feature-workers-and-tdh.md",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/scheduled-tasks/scheduler.ts",
@@ -8727,12 +8728,8 @@
       "canonical_path": "/about/6529-apps",
       "link_label": "6529 Apps",
       "suppress_source_links": true,
-      "related_paths": [
-        "/about/6529-apps"
-      ],
-      "tags": [
-        "desktop-core"
-      ],
+      "related_paths": ["/about/6529-apps"],
+      "tags": ["desktop-core"],
       "source_refs": [
         "ops/docs/desktop/feature-workers-and-tdh.md",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/scheduled-tasks/scheduler.ts",
@@ -8796,13 +8793,8 @@
       "canonical_path": "/about/6529-apps",
       "link_label": "6529 Apps",
       "suppress_source_links": true,
-      "related_paths": [
-        "/about/6529-apps"
-      ],
-      "tags": [
-        "desktop-core",
-        "desktop-dialogue"
-      ],
+      "related_paths": ["/about/6529-apps"],
+      "tags": ["desktop-core", "desktop-dialogue"],
       "source_refs": [
         "ops/docs/desktop/troubleshooting-sync-and-recovery.md",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/eth-scanner/Workers.tsx",
@@ -8853,12 +8845,8 @@
       "canonical_path": "/about/6529-apps",
       "link_label": "6529 Apps",
       "suppress_source_links": true,
-      "related_paths": [
-        "/about/6529-apps"
-      ],
-      "tags": [
-        "desktop-core"
-      ],
+      "related_paths": ["/about/6529-apps"],
+      "tags": ["desktop-core"],
       "source_refs": [
         "ops/docs/desktop/troubleshooting-sync-and-recovery.md",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/eth-scanner/Workers.tsx",
@@ -8905,12 +8893,8 @@
       "canonical_path": "/about/6529-apps",
       "link_label": "6529 Apps",
       "suppress_source_links": true,
-      "related_paths": [
-        "/about/6529-apps"
-      ],
-      "tags": [
-        "desktop-core"
-      ],
+      "related_paths": ["/about/6529-apps"],
+      "tags": ["desktop-core"],
       "source_refs": [
         "ops/docs/desktop/troubleshooting-sync-and-recovery.md",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/eth-scanner/Workers.tsx",
@@ -8960,12 +8944,8 @@
       "canonical_path": "/about/6529-apps",
       "link_label": "6529 Apps",
       "suppress_source_links": true,
-      "related_paths": [
-        "/about/6529-apps"
-      ],
-      "tags": [
-        "desktop-core"
-      ],
+      "related_paths": ["/about/6529-apps"],
+      "tags": ["desktop-core"],
       "source_refs": [
         "ops/docs/desktop/troubleshooting-sync-and-recovery.md",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/eth-scanner/Workers.tsx",
@@ -9011,12 +8991,8 @@
       "canonical_path": "/about/6529-apps",
       "link_label": "6529 Apps",
       "suppress_source_links": true,
-      "related_paths": [
-        "/about/6529-apps"
-      ],
-      "tags": [
-        "desktop-core"
-      ],
+      "related_paths": ["/about/6529-apps"],
+      "tags": ["desktop-core"],
       "source_refs": [
         "ops/docs/desktop/feature-wallets-ipfs-and-about.md",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/core-wallet/SeedWallets.tsx",
@@ -9074,12 +9050,8 @@
       "canonical_path": "/about/6529-apps",
       "link_label": "6529 Apps",
       "suppress_source_links": true,
-      "related_paths": [
-        "/about/6529-apps"
-      ],
-      "tags": [
-        "desktop-core"
-      ],
+      "related_paths": ["/about/6529-apps"],
+      "tags": ["desktop-core"],
       "source_refs": [
         "ops/docs/desktop/feature-wallets-ipfs-and-about.md",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/core-wallet/SeedWallet.tsx",
@@ -9127,12 +9099,8 @@
       "canonical_path": "/about/6529-apps",
       "link_label": "6529 Apps",
       "suppress_source_links": true,
-      "related_paths": [
-        "/about/6529-apps"
-      ],
-      "tags": [
-        "desktop-core"
-      ],
+      "related_paths": ["/about/6529-apps"],
+      "tags": ["desktop-core"],
       "source_refs": [
         "ops/docs/desktop/feature-wallets-ipfs-and-about.md",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/ipfs/ipfs.server.ts",
@@ -9180,12 +9148,8 @@
       "canonical_path": "/about/6529-apps",
       "link_label": "6529 Apps",
       "suppress_source_links": true,
-      "related_paths": [
-        "/about/6529-apps"
-      ],
-      "tags": [
-        "desktop-core"
-      ],
+      "related_paths": ["/about/6529-apps"],
+      "tags": ["desktop-core"],
       "source_refs": [
         "ops/docs/desktop/feature-wallets-ipfs-and-about.md",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/app-info/AppInfo.tsx",
@@ -9228,12 +9192,8 @@
       "canonical_path": "/about/6529-apps",
       "link_label": "6529 Apps",
       "suppress_source_links": true,
-      "related_paths": [
-        "/about/6529-apps"
-      ],
-      "tags": [
-        "desktop-core"
-      ],
+      "related_paths": ["/about/6529-apps"],
+      "tags": ["desktop-core"],
       "source_refs": [
         "ops/docs/desktop/troubleshooting-sync-and-recovery.md",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/eth-scanner/TransactionsLocalData.tsx",
@@ -9251,23 +9211,15 @@
         "6529 desktop overview",
         "how does 6529 desktop work"
       ],
-      "keywords": [
-        "desktop",
-        "application",
-        "node"
-      ],
+      "keywords": ["desktop", "application", "node"],
       "facts": [
         "6529 Desktop is the official Windows, macOS, and Linux application that runs your own 6529 node with local wallets, Ethereum indexing workers, independent TDH calculation, and a bundled IPFS node. These Desktop tools are separate from 6529 Mobile and the ordinary website."
       ],
       "canonical_path": "/about/6529-apps",
       "link_label": "6529 Apps",
       "suppress_source_links": true,
-      "related_paths": [
-        "/about/6529-apps"
-      ],
-      "tags": [
-        "desktop-core"
-      ],
+      "related_paths": ["/about/6529-apps"],
+      "tags": ["desktop-core"],
       "source_refs": [
         "ops/docs/desktop/flow-getting-started.md",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/hooks/useSidebarSections.ts",
@@ -9287,25 +9239,16 @@
       "id": "desktop.clarify-context",
       "kind": "workflow",
       "title": "Clarify the app for RPC or transaction support",
-      "aliases": [
-        "desktop support context clarification"
-      ],
-      "keywords": [
-        "core"
-      ],
+      "aliases": ["desktop support context clarification"],
+      "keywords": ["core"],
       "facts": [
         "Do you mean **6529 Desktop**, **6529 Mobile**, or another app?"
       ],
       "canonical_path": "/about/6529-apps",
       "link_label": "6529 Apps",
       "suppress_source_links": true,
-      "related_paths": [
-        "/about/6529-apps"
-      ],
-      "tags": [
-        "desktop-core",
-        "desktop-dialogue"
-      ],
+      "related_paths": ["/about/6529-apps"],
+      "tags": ["desktop-core", "desktop-dialogue"],
       "source_refs": [
         "ops/docs/desktop/troubleshooting-sync-and-recovery.md",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/eth-scanner/Workers.tsx",
@@ -9321,25 +9264,16 @@
       "id": "desktop.tdh-after-recalculation",
       "kind": "workflow",
       "title": "Desktop node still mismatches after recalculation",
-      "aliases": [
-        "desktop mismatch after recalculation"
-      ],
-      "keywords": [
-        "core"
-      ],
+      "aliases": ["desktop mismatch after recalculation"],
+      "keywords": ["core"],
       "facts": [
         "You have already recalculated and it still does not match. In **6529 Desktop > TDH Calculation**, are the two **Last Block** values identical, and is the mismatch in **TDH**, **Merkle Root**, or both?"
       ],
       "canonical_path": "/about/6529-apps",
       "link_label": "6529 Apps",
       "suppress_source_links": true,
-      "related_paths": [
-        "/about/6529-apps"
-      ],
-      "tags": [
-        "desktop-core",
-        "desktop-dialogue"
-      ],
+      "related_paths": ["/about/6529-apps"],
+      "tags": ["desktop-core", "desktop-dialogue"],
       "source_refs": [
         "ops/docs/desktop/troubleshooting-sync-and-recovery.md",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/eth-scanner/Workers.tsx",
@@ -9355,25 +9289,16 @@
       "id": "desktop.tdh-same-block-mismatch",
       "kind": "workflow",
       "title": "Desktop mismatch persists at the same block after recalculation",
-      "aliases": [
-        "desktop confirmed same block mismatch"
-      ],
-      "keywords": [
-        "core"
-      ],
+      "aliases": ["desktop confirmed same block mismatch"],
+      "keywords": ["core"],
       "facts": [
         "Since recalculation did not resolve the mismatch at the same block, start with the most recent 25% of indexed blocks in **6529 Desktop**. What number appears beside **Latest block in DB** in **ETH Transactions > Transactions > Logs**? Send that checkpoint as a number and I can calculate where to start **Reconcile**. We can widen the range after each completed reconciliation and TDH recalculation if needed."
       ],
       "canonical_path": "/about/6529-apps",
       "link_label": "6529 Apps",
       "suppress_source_links": true,
-      "related_paths": [
-        "/about/6529-apps"
-      ],
-      "tags": [
-        "desktop-core",
-        "desktop-dialogue"
-      ],
+      "related_paths": ["/about/6529-apps"],
+      "tags": ["desktop-core", "desktop-dialogue"],
       "source_refs": [
         "ops/docs/desktop/troubleshooting-sync-and-recovery.md",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/eth-scanner/Workers.tsx",
@@ -9389,25 +9314,16 @@
       "id": "desktop.tdh-after-reconciliation",
       "kind": "workflow",
       "title": "Desktop mismatch persists after history reconciliation",
-      "aliases": [
-        "desktop mismatch after reconciliation"
-      ],
-      "keywords": [
-        "core"
-      ],
+      "aliases": ["desktop mismatch after reconciliation"],
+      "keywords": ["core"],
       "facts": [
         "If reconciliation has finished, allow the prerequisite workers to catch up, then recalculate TDH once because the history repair can make the old result stale. If you have already done that and the same-block mismatch persists, share your **About** version/OS, both Last Block values, which row differs, and any redacted worker error. Do not reset wallets or the app database; never share wallet secrets or credential-bearing RPC URLs."
       ],
       "canonical_path": "/about/6529-apps",
       "link_label": "6529 Apps",
       "suppress_source_links": true,
-      "related_paths": [
-        "/about/6529-apps"
-      ],
-      "tags": [
-        "desktop-core",
-        "desktop-dialogue"
-      ],
+      "related_paths": ["/about/6529-apps"],
+      "tags": ["desktop-core", "desktop-dialogue"],
       "source_refs": [
         "ops/docs/desktop/troubleshooting-sync-and-recovery.md",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/eth-scanner/Workers.tsx",
@@ -9423,25 +9339,16 @@
       "id": "desktop.tdh-repair-diagnostics",
       "kind": "workflow",
       "title": "Desktop node still mismatches after reconciliation and recalculation",
-      "aliases": [
-        "desktop mismatch repair diagnostics"
-      ],
-      "keywords": [
-        "core"
-      ],
+      "aliases": ["desktop mismatch repair diagnostics"],
+      "keywords": ["core"],
       "facts": [
         "You have reconciled and recalculated, but the mismatch persists. Please share your **6529 Desktop > About** version/OS, both **Last Block** values, whether **TDH**, **Merkle Root**, or both differ, and any redacted worker error. Do not reset wallets or the app database; never share wallet secrets or credential-bearing RPC URLs."
       ],
       "canonical_path": "/about/6529-apps",
       "link_label": "6529 Apps",
       "suppress_source_links": true,
-      "related_paths": [
-        "/about/6529-apps"
-      ],
-      "tags": [
-        "desktop-core",
-        "desktop-dialogue"
-      ],
+      "related_paths": ["/about/6529-apps"],
+      "tags": ["desktop-core", "desktop-dialogue"],
       "source_refs": [
         "ops/docs/desktop/troubleshooting-sync-and-recovery.md",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/eth-scanner/Workers.tsx",
@@ -9457,25 +9364,16 @@
       "id": "desktop.tdh-block-mismatch",
       "kind": "workflow",
       "title": "Desktop Last Block values differ",
-      "aliases": [
-        "desktop last block values differ"
-      ],
-      "keywords": [
-        "core"
-      ],
+      "aliases": ["desktop last block values differ"],
+      "keywords": ["core"],
       "facts": [
         "Different **Last Block** values mean you are comparing different snapshots. In **6529 Desktop > ETH Transactions**, check Transactions and NFTDelegation progress and Logs. Let them catch up before recalculating TDH and comparing the same block. Do either of those workers show an error or appear stalled?"
       ],
       "canonical_path": "/about/6529-apps",
       "link_label": "6529 Apps",
       "suppress_source_links": true,
-      "related_paths": [
-        "/about/6529-apps"
-      ],
-      "tags": [
-        "desktop-core",
-        "desktop-dialogue"
-      ],
+      "related_paths": ["/about/6529-apps"],
+      "tags": ["desktop-core", "desktop-dialogue"],
       "source_refs": [
         "ops/docs/desktop/troubleshooting-sync-and-recovery.md",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/eth-scanner/Workers.tsx",
@@ -9494,22 +9392,15 @@
       "aliases": [
         "check workers before recalculating a same-block desktop mismatch"
       ],
-      "keywords": [
-        "core"
-      ],
+      "keywords": ["core"],
       "facts": [
         "Your node still does not match 6529.io at the same Last Block. In **6529 Desktop > ETH Transactions**, have **Transactions** and **NFTDelegation** both reached that block? If either is behind or stalled, share its status or a redacted error."
       ],
       "canonical_path": "/about/6529-apps",
       "link_label": "6529 Apps",
       "suppress_source_links": true,
-      "related_paths": [
-        "/about/6529-apps"
-      ],
-      "tags": [
-        "desktop-core",
-        "desktop-dialogue"
-      ],
+      "related_paths": ["/about/6529-apps"],
+      "tags": ["desktop-core", "desktop-dialogue"],
       "source_refs": [
         "ops/docs/desktop/troubleshooting-sync-and-recovery.md",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/eth-scanner/Workers.tsx",
@@ -9528,22 +9419,15 @@
       "aliases": [
         "recalculate after confirming matching blocks and synced workers"
       ],
-      "keywords": [
-        "core"
-      ],
+      "keywords": ["core"],
       "facts": [
         "The Last Block values match and both workers are caught up. In **6529 Desktop > TDH Calculation**, use the TDH worker’s **Advanced Options > Recalculate TDH Now** and confirm. This replaces the local TDH result; it does not repair transaction history. Once it finishes, does **TDH**, **Merkle Root**, or both still differ?"
       ],
       "canonical_path": "/about/6529-apps",
       "link_label": "6529 Apps",
       "suppress_source_links": true,
-      "related_paths": [
-        "/about/6529-apps"
-      ],
-      "tags": [
-        "desktop-core",
-        "desktop-dialogue"
-      ],
+      "related_paths": ["/about/6529-apps"],
+      "tags": ["desktop-core", "desktop-dialogue"],
       "source_refs": [
         "ops/docs/desktop/troubleshooting-sync-and-recovery.md",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/eth-scanner/Workers.tsx",
@@ -9588,15 +9472,8 @@
         "A 6529 Desktop wallet does not automatically appear on mobile. Do not send a recovery phrase, private key, or password to the help bot."
       ],
       "canonical_path": "/tools/app-wallets",
-      "related_paths": [
-        "/about/6529-apps"
-      ],
-      "tags": [
-        "wallets",
-        "mobile",
-        "desktop",
-        "clarification"
-      ],
+      "related_paths": ["/about/6529-apps"],
+      "tags": ["wallets", "mobile", "desktop", "clarification"],
       "source_refs": [
         "ops/docs/api-tool/feature-app-wallets.md",
         "ops/docs/desktop/feature-wallets-ipfs-and-about.md"
@@ -9638,19 +9515,9 @@
         "The App Wallets page lists locally stored wallets and provides Create Wallet, Import Wallet, and wallet-detail actions. Never send a wallet password, mnemonic, or private key to the help bot."
       ],
       "canonical_path": "/tools/app-wallets",
-      "related_paths": [
-        "/tools/app-wallets/import-wallet",
-        "/about/6529-apps"
-      ],
-      "tags": [
-        "wallets",
-        "mobile",
-        "app-wallets",
-        "overview"
-      ],
-      "source_refs": [
-        "ops/docs/api-tool/feature-app-wallets.md"
-      ]
+      "related_paths": ["/tools/app-wallets/import-wallet", "/about/6529-apps"],
+      "tags": ["wallets", "mobile", "app-wallets", "overview"],
+      "source_refs": ["ops/docs/api-tool/feature-app-wallets.md"]
     },
     {
       "id": "wallets.mobile-create-import",
@@ -9683,19 +9550,9 @@
         "Importing the same address again replaces the stored App Wallet entry for that address. Never paste a mnemonic, private key, or password into chat or send it to the help bot."
       ],
       "canonical_path": "/tools/app-wallets",
-      "related_paths": [
-        "/tools/app-wallets/import-wallet"
-      ],
-      "tags": [
-        "wallets",
-        "mobile",
-        "app-wallets",
-        "create",
-        "import"
-      ],
-      "source_refs": [
-        "ops/docs/api-tool/feature-app-wallets.md"
-      ]
+      "related_paths": ["/tools/app-wallets/import-wallet"],
+      "tags": ["wallets", "mobile", "app-wallets", "create", "import"],
+      "source_refs": ["ops/docs/api-tool/feature-app-wallets.md"]
     },
     {
       "id": "wallets.mobile-connect",
@@ -9724,19 +9581,9 @@
         "If unlock fails, reopen the unlock prompt and verify the selected wallet and password. The help bot cannot inspect the wallet or recover its password."
       ],
       "canonical_path": "/tools/app-wallets",
-      "related_paths": [
-        "/about/6529-apps"
-      ],
-      "tags": [
-        "wallets",
-        "mobile",
-        "app-wallets",
-        "connect",
-        "unlock"
-      ],
-      "source_refs": [
-        "ops/docs/api-tool/feature-app-wallets.md"
-      ]
+      "related_paths": ["/about/6529-apps"],
+      "tags": ["wallets", "mobile", "app-wallets", "connect", "unlock"],
+      "source_refs": ["ops/docs/api-tool/feature-app-wallets.md"]
     },
     {
       "id": "wallets.mobile-backup-recovery",
@@ -9774,19 +9621,9 @@
         "The help bot cannot reveal wallet secrets, bypass encryption, reset a forgotten password, or recover missing recovery material. Never upload or paste a password, mnemonic, private key, or recovery file into chat."
       ],
       "canonical_path": "/tools/app-wallets",
-      "related_paths": [
-        "/tools/app-wallets/{app-wallet-address}"
-      ],
-      "tags": [
-        "wallets",
-        "mobile",
-        "app-wallets",
-        "backup",
-        "recovery"
-      ],
-      "source_refs": [
-        "ops/docs/api-tool/feature-app-wallets.md"
-      ]
+      "related_paths": ["/tools/app-wallets/{app-wallet-address}"],
+      "tags": ["wallets", "mobile", "app-wallets", "backup", "recovery"],
+      "source_refs": ["ops/docs/api-tool/feature-app-wallets.md"]
     },
     {
       "id": "wallets.mobile-delete-troubleshooting",
@@ -9824,16 +9661,8 @@
         "/tools/app-wallets/{app-wallet-address}",
         "/about/6529-apps"
       ],
-      "tags": [
-        "wallets",
-        "mobile",
-        "app-wallets",
-        "delete",
-        "troubleshooting"
-      ],
-      "source_refs": [
-        "ops/docs/api-tool/feature-app-wallets.md"
-      ]
+      "tags": ["wallets", "mobile", "app-wallets", "delete", "troubleshooting"],
+      "source_refs": ["ops/docs/api-tool/feature-app-wallets.md"]
     },
     {
       "id": "desktop.legacy-core-name",
@@ -9846,12 +9675,7 @@
         "about core",
         "6529 core"
       ],
-      "keywords": [
-        "core",
-        "desktop",
-        "former",
-        "name"
-      ],
+      "keywords": ["core", "desktop", "former", "name"],
       "facts": [
         "6529 Core was the former name of 6529 Desktop. The official current name is 6529 Desktop.",
         "6529 Desktop is the Windows, macOS, and Linux application for running a local 6529 node, indexing Ethereum data, calculating TDH, managing local wallets, and using the bundled IPFS node.",
@@ -9860,12 +9684,8 @@
       "canonical_path": "/about/6529-apps",
       "link_label": "6529 Apps",
       "suppress_source_links": true,
-      "related_paths": [
-        "/about/6529-apps"
-      ],
-      "tags": [
-        "desktop-core"
-      ],
+      "related_paths": ["/about/6529-apps"],
+      "tags": ["desktop-core"],
       "source_refs": [
         "ops/docs/desktop/README.md",
         "ops/docs/desktop/flow-getting-started.md",
@@ -9883,12 +9703,8 @@
       "id": "desktop.tdh-reconcile-range",
       "kind": "workflow",
       "title": "Desktop block-range reconciliation range",
-      "aliases": [
-        "Desktop block-range reconciliation range"
-      ],
-      "keywords": [
-        "core"
-      ],
+      "aliases": ["Desktop block-range reconciliation range"],
+      "keywords": ["core"],
       "facts": [
         "Check the most recent **{{percentage}}%** of indexed blocks. In **6529 Desktop > ETH Transactions > Transactions > Advanced Options > Reconcile**, choose **Reconcile from a specific block** and enter **{{from_block}}**. Let reconciliation finish, then tell me it is done so we can recalculate TDH. This repairs local transfer records; it does not change on-chain holdings.",
         "Percentages apply to the indexed block interval from the supported minimum through the user-reported local transaction checkpoint. Compute starting block as minimum + floor((checkpoint - minimum) * (100 - percentage) / 100). Use the same reported checkpoint while widening from 25% to 50%, 75%, and 100%; rechecking overlapping blocks is expected. Never infer a local checkpoint from the current chain head or TDH snapshot."
@@ -9896,14 +9712,8 @@
       "canonical_path": "/about/6529-apps",
       "link_label": "6529 Apps",
       "suppress_source_links": true,
-      "related_paths": [
-        "/about/6529-apps"
-      ],
-      "tags": [
-        "desktop-core",
-        "desktop-dialogue",
-        "desktop-calculated"
-      ],
+      "related_paths": ["/about/6529-apps"],
+      "tags": ["desktop-core", "desktop-dialogue", "desktop-calculated"],
       "source_refs": [
         "ops/docs/desktop/troubleshooting-sync-and-recovery.md",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/eth-scanner/Workers.tsx",
@@ -9921,12 +9731,8 @@
       "id": "desktop.tdh-reconcile-progress",
       "kind": "workflow",
       "title": "Desktop block-range reconciliation progress",
-      "aliases": [
-        "Desktop block-range reconciliation progress"
-      ],
-      "keywords": [
-        "core"
-      ],
+      "aliases": ["Desktop block-range reconciliation progress"],
+      "keywords": ["core"],
       "facts": [
         "In **6529 Desktop**, has reconciliation finished for the **{{percentage}}%** range? If it is still running, let it finish; if it failed, share the redacted worker error. We will recalculate TDH after it finishes.",
         "Percentages apply to the indexed block interval from the supported minimum through the user-reported local transaction checkpoint. Compute starting block as minimum + floor((checkpoint - minimum) * (100 - percentage) / 100). Use the same reported checkpoint while widening from 25% to 50%, 75%, and 100%; rechecking overlapping blocks is expected. Never infer a local checkpoint from the current chain head or TDH snapshot."
@@ -9934,14 +9740,8 @@
       "canonical_path": "/about/6529-apps",
       "link_label": "6529 Apps",
       "suppress_source_links": true,
-      "related_paths": [
-        "/about/6529-apps"
-      ],
-      "tags": [
-        "desktop-core",
-        "desktop-dialogue",
-        "desktop-calculated"
-      ],
+      "related_paths": ["/about/6529-apps"],
+      "tags": ["desktop-core", "desktop-dialogue", "desktop-calculated"],
       "source_refs": [
         "ops/docs/desktop/troubleshooting-sync-and-recovery.md",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/eth-scanner/Workers.tsx",
@@ -9959,12 +9759,8 @@
       "id": "desktop.tdh-reconcile-recalculate",
       "kind": "workflow",
       "title": "Desktop block-range reconciliation recalculate",
-      "aliases": [
-        "Desktop block-range reconciliation recalculate"
-      ],
-      "keywords": [
-        "core"
-      ],
+      "aliases": ["Desktop block-range reconciliation recalculate"],
+      "keywords": ["core"],
       "facts": [
         "The **{{percentage}}%** reconciliation is finished. In **6529 Desktop > TDH Calculation > Advanced Options**, run **Recalculate TDH Now** after Transactions and NFTDelegation have caught up. Once it finishes, do TDH and Merkle Root match 6529.io at the same Last Block?",
         "Percentages apply to the indexed block interval from the supported minimum through the user-reported local transaction checkpoint. Compute starting block as minimum + floor((checkpoint - minimum) * (100 - percentage) / 100). Use the same reported checkpoint while widening from 25% to 50%, 75%, and 100%; rechecking overlapping blocks is expected. Never infer a local checkpoint from the current chain head or TDH snapshot."
@@ -9972,14 +9768,8 @@
       "canonical_path": "/about/6529-apps",
       "link_label": "6529 Apps",
       "suppress_source_links": true,
-      "related_paths": [
-        "/about/6529-apps"
-      ],
-      "tags": [
-        "desktop-core",
-        "desktop-dialogue",
-        "desktop-calculated"
-      ],
+      "related_paths": ["/about/6529-apps"],
+      "tags": ["desktop-core", "desktop-dialogue", "desktop-calculated"],
       "source_refs": [
         "ops/docs/desktop/troubleshooting-sync-and-recovery.md",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/eth-scanner/Workers.tsx",
@@ -9997,12 +9787,8 @@
       "id": "desktop.tdh-reconcile-result",
       "kind": "workflow",
       "title": "Desktop block-range reconciliation result",
-      "aliases": [
-        "Desktop block-range reconciliation result"
-      ],
-      "keywords": [
-        "core"
-      ],
+      "aliases": ["Desktop block-range reconciliation result"],
+      "keywords": ["core"],
       "facts": [
         "In **6529 Desktop**, do TDH and Merkle Root now match 6529.io at the same Last Block after the **{{percentage}}%** reconciliation and recalculation?",
         "Percentages apply to the indexed block interval from the supported minimum through the user-reported local transaction checkpoint. Compute starting block as minimum + floor((checkpoint - minimum) * (100 - percentage) / 100). Use the same reported checkpoint while widening from 25% to 50%, 75%, and 100%; rechecking overlapping blocks is expected. Never infer a local checkpoint from the current chain head or TDH snapshot."
@@ -10010,14 +9796,8 @@
       "canonical_path": "/about/6529-apps",
       "link_label": "6529 Apps",
       "suppress_source_links": true,
-      "related_paths": [
-        "/about/6529-apps"
-      ],
-      "tags": [
-        "desktop-core",
-        "desktop-dialogue",
-        "desktop-calculated"
-      ],
+      "related_paths": ["/about/6529-apps"],
+      "tags": ["desktop-core", "desktop-dialogue", "desktop-calculated"],
       "source_refs": [
         "ops/docs/desktop/troubleshooting-sync-and-recovery.md",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/eth-scanner/Workers.tsx",
@@ -10035,12 +9815,8 @@
       "id": "desktop.tdh-reconcile-success",
       "kind": "workflow",
       "title": "Desktop block-range reconciliation success",
-      "aliases": [
-        "Desktop block-range reconciliation success"
-      ],
-      "keywords": [
-        "core"
-      ],
+      "aliases": ["Desktop block-range reconciliation success"],
+      "keywords": ["core"],
       "facts": [
         "Your **6529 Desktop** result now matches. Stop here; there is no need to widen reconciliation or reset the worker.",
         "Percentages apply to the indexed block interval from the supported minimum through the user-reported local transaction checkpoint. Compute starting block as minimum + floor((checkpoint - minimum) * (100 - percentage) / 100). Use the same reported checkpoint while widening from 25% to 50%, 75%, and 100%; rechecking overlapping blocks is expected. Never infer a local checkpoint from the current chain head or TDH snapshot."
@@ -10048,14 +9824,8 @@
       "canonical_path": "/about/6529-apps",
       "link_label": "6529 Apps",
       "suppress_source_links": true,
-      "related_paths": [
-        "/about/6529-apps"
-      ],
-      "tags": [
-        "desktop-core",
-        "desktop-dialogue",
-        "desktop-calculated"
-      ],
+      "related_paths": ["/about/6529-apps"],
+      "tags": ["desktop-core", "desktop-dialogue", "desktop-calculated"],
       "source_refs": [
         "ops/docs/desktop/troubleshooting-sync-and-recovery.md",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/eth-scanner/Workers.tsx",
@@ -10073,26 +9843,16 @@
       "id": "desktop.tdh-reconcile-reset",
       "kind": "workflow",
       "title": "Offer transaction reset after full reconciliation",
-      "aliases": [
-        "Offer transaction reset after full reconciliation"
-      ],
-      "keywords": [
-        "core"
-      ],
+      "aliases": ["Offer transaction reset after full reconciliation"],
+      "keywords": ["core"],
       "facts": [
         "Full-history reconciliation and TDH recalculation still leave a mismatch. The next option is a **transaction reset**: **6529 Desktop > ETH Transactions > Transactions > Advanced Options > Reset to Block**. If your TDH matched 6529.io before, you can try a block from around that time—an older log or screenshot may help you find it. Otherwise, choose **Min Block** for a full resync. This deletes later local transaction history and rebuilds ownership before downloading it again; it needs time and RPC access. It does not change on-chain holdings. Read the confirmation, let resync finish and both Transactions and NFTDelegation catch up, then tell me they are synced."
       ],
       "canonical_path": "/about/6529-apps",
       "link_label": "6529 Apps",
       "suppress_source_links": true,
-      "related_paths": [
-        "/about/6529-apps"
-      ],
-      "tags": [
-        "desktop-core",
-        "desktop-dialogue",
-        "desktop-calculated"
-      ],
+      "related_paths": ["/about/6529-apps"],
+      "tags": ["desktop-core", "desktop-dialogue", "desktop-calculated"],
       "source_refs": [
         "ops/docs/desktop/troubleshooting-sync-and-recovery.md",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/eth-scanner/Workers.tsx",
@@ -10110,26 +9870,16 @@
       "id": "desktop.tdh-reconcile-reset-progress",
       "kind": "workflow",
       "title": "Check resync after transaction reset",
-      "aliases": [
-        "Check resync after transaction reset"
-      ],
-      "keywords": [
-        "core"
-      ],
+      "aliases": ["Check resync after transaction reset"],
+      "keywords": ["core"],
       "facts": [
         "After the **transaction reset** in **6529 Desktop**, have Transactions and NFTDelegation both finished syncing? Let any running work finish. If a worker failed or stalled, share its redacted error; do not start another reset while it is recovering."
       ],
       "canonical_path": "/about/6529-apps",
       "link_label": "6529 Apps",
       "suppress_source_links": true,
-      "related_paths": [
-        "/about/6529-apps"
-      ],
-      "tags": [
-        "desktop-core",
-        "desktop-dialogue",
-        "desktop-calculated"
-      ],
+      "related_paths": ["/about/6529-apps"],
+      "tags": ["desktop-core", "desktop-dialogue", "desktop-calculated"],
       "source_refs": [
         "ops/docs/desktop/troubleshooting-sync-and-recovery.md",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/eth-scanner/Workers.tsx",
@@ -10147,26 +9897,16 @@
       "id": "desktop.tdh-reconcile-reset-recalculate",
       "kind": "workflow",
       "title": "Recalculate TDH after transaction reset",
-      "aliases": [
-        "Recalculate TDH after transaction reset"
-      ],
-      "keywords": [
-        "core"
-      ],
+      "aliases": ["Recalculate TDH after transaction reset"],
+      "keywords": ["core"],
       "facts": [
         "The **transaction reset** and resync are complete. In **6529 Desktop > TDH Calculation > Advanced Options**, run **Recalculate TDH Now**. Once it finishes, do TDH and Merkle Root match 6529.io at the same Last Block?"
       ],
       "canonical_path": "/about/6529-apps",
       "link_label": "6529 Apps",
       "suppress_source_links": true,
-      "related_paths": [
-        "/about/6529-apps"
-      ],
-      "tags": [
-        "desktop-core",
-        "desktop-dialogue",
-        "desktop-calculated"
-      ],
+      "related_paths": ["/about/6529-apps"],
+      "tags": ["desktop-core", "desktop-dialogue", "desktop-calculated"],
       "source_refs": [
         "ops/docs/desktop/troubleshooting-sync-and-recovery.md",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/eth-scanner/Workers.tsx",
@@ -10184,26 +9924,16 @@
       "id": "desktop.tdh-reconcile-reset-result",
       "kind": "workflow",
       "title": "Compare TDH after transaction reset",
-      "aliases": [
-        "Compare TDH after transaction reset"
-      ],
-      "keywords": [
-        "core"
-      ],
+      "aliases": ["Compare TDH after transaction reset"],
+      "keywords": ["core"],
       "facts": [
         "After the **transaction reset**, resync, and TDH recalculation in **6529 Desktop**: do TDH and Merkle Root now match 6529.io at the same Last Block?"
       ],
       "canonical_path": "/about/6529-apps",
       "link_label": "6529 Apps",
       "suppress_source_links": true,
-      "related_paths": [
-        "/about/6529-apps"
-      ],
-      "tags": [
-        "desktop-core",
-        "desktop-dialogue",
-        "desktop-calculated"
-      ],
+      "related_paths": ["/about/6529-apps"],
+      "tags": ["desktop-core", "desktop-dialogue", "desktop-calculated"],
       "source_refs": [
         "ops/docs/desktop/troubleshooting-sync-and-recovery.md",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/eth-scanner/Workers.tsx",
@@ -10221,26 +9951,16 @@
       "id": "desktop.tdh-reconcile-reset-diagnostics",
       "kind": "workflow",
       "title": "Diagnose mismatch after transaction reset",
-      "aliases": [
-        "Diagnose mismatch after transaction reset"
-      ],
-      "keywords": [
-        "core"
-      ],
+      "aliases": ["Diagnose mismatch after transaction reset"],
+      "keywords": ["core"],
       "facts": [
         "The **transaction reset**, resync, and recalculation have not resolved the mismatch in **6529 Desktop**. Please share your **About** version/OS, the current Last Block values, which result differs, and any redacted worker error for further diagnosis. Do not repeat the reset or delete wallets or the app database. Never share wallet secrets or RPC credentials."
       ],
       "canonical_path": "/about/6529-apps",
       "link_label": "6529 Apps",
       "suppress_source_links": true,
-      "related_paths": [
-        "/about/6529-apps"
-      ],
-      "tags": [
-        "desktop-core",
-        "desktop-dialogue",
-        "desktop-calculated"
-      ],
+      "related_paths": ["/about/6529-apps"],
+      "tags": ["desktop-core", "desktop-dialogue", "desktop-calculated"],
       "source_refs": [
         "ops/docs/desktop/troubleshooting-sync-and-recovery.md",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/eth-scanner/Workers.tsx",
@@ -10258,26 +9978,16 @@
       "id": "desktop.tdh-reconcile-reset-calculation-pending",
       "kind": "workflow",
       "title": "Desktop transaction reset calculation pending",
-      "aliases": [
-        "Desktop transaction reset calculation pending"
-      ],
-      "keywords": [
-        "core"
-      ],
+      "aliases": ["Desktop transaction reset calculation pending"],
+      "keywords": ["core"],
       "facts": [
         "After the **transaction reset** in **6529 Desktop**, resync was reported complete. Let any active TDH calculation finish. If calculation or a worker failed or stalled, check its **Logs** and share the redacted error before trying again. Once calculation finishes, do TDH and Merkle Root now match 6529.io at the same Last Block?"
       ],
       "canonical_path": "/about/6529-apps",
       "link_label": "6529 Apps",
       "suppress_source_links": true,
-      "related_paths": [
-        "/about/6529-apps"
-      ],
-      "tags": [
-        "desktop-core",
-        "desktop-dialogue",
-        "desktop-calculated"
-      ],
+      "related_paths": ["/about/6529-apps"],
+      "tags": ["desktop-core", "desktop-dialogue", "desktop-calculated"],
       "source_refs": [
         "ops/docs/desktop/troubleshooting-sync-and-recovery.md",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/eth-scanner/Workers.tsx",
@@ -10295,26 +10005,16 @@
       "id": "desktop.tdh-reconcile-calculation-pending",
       "kind": "workflow",
       "title": "Handle a failed TDH recalculation during reconciliation",
-      "aliases": [
-        "Handle a failed TDH recalculation during reconciliation"
-      ],
-      "keywords": [
-        "core"
-      ],
+      "aliases": ["Handle a failed TDH recalculation during reconciliation"],
+      "keywords": ["core"],
       "facts": [
         "For the **{{percentage}}%** recovery range in **6529 Desktop**, check the TDH worker **Logs** and share the redacted error. Let any active work finish; do not widen reconciliation or start a reset because calculation failed. Once calculation completes successfully, do TDH and Merkle Root now match 6529.io at the same Last Block?"
       ],
       "canonical_path": "/about/6529-apps",
       "link_label": "6529 Apps",
       "suppress_source_links": true,
-      "related_paths": [
-        "/about/6529-apps"
-      ],
-      "tags": [
-        "desktop-core",
-        "desktop-dialogue",
-        "desktop-calculated"
-      ],
+      "related_paths": ["/about/6529-apps"],
+      "tags": ["desktop-core", "desktop-dialogue", "desktop-calculated"],
       "source_refs": [
         "ops/docs/desktop/troubleshooting-sync-and-recovery.md",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/eth-scanner/Workers.tsx",
