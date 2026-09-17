@@ -1,4 +1,5 @@
 import { fireEvent, render, screen } from "@testing-library/react";
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import WebSidebar from "@/components/layout/sidebar/WebSidebar";
 import NewVersionToast from "@/components/utils/NewVersionToast";
 import { useVersionStatus } from "@/contexts/VersionStatusContext";
@@ -20,7 +21,10 @@ jest.mock("@/components/auth/Auth", () => ({
   useAuth: () => ({ connectedProfile: null }),
 }));
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
-  useSeizeConnectContext: () => ({ address: null, hasValidWalletAuth: false }),
+  useSeizeConnectContext: jest.fn(() => ({
+    address: undefined,
+    hasValidWalletAuth: false,
+  })),
 }));
 jest.mock("@/hooks/useIdentity", () => ({
   useIdentity: () => ({ profile: null }),
@@ -65,6 +69,10 @@ const sidebarProps = {
 
 beforeEach(() => {
   jest.clearAllMocks();
+  jest.mocked(useSeizeConnectContext).mockReturnValue({
+    address: undefined,
+    hasValidWalletAuth: false,
+  } as unknown as ReturnType<typeof useSeizeConnectContext>);
   jest.mocked(useVersionStatus).mockReturnValue(true);
   jest.mocked(useDeviceInfo).mockReturnValue({
     isApp: false,
@@ -78,7 +86,7 @@ beforeEach(() => {
   });
 });
 
-it("puts the collapsed update rocket directly above Search with no desktop toast", () => {
+it("puts the collapsed update rocket last in utilities with no desktop toast", () => {
   render(
     <>
       <WebSidebar {...sidebarProps} />
@@ -86,9 +94,14 @@ it("puts the collapsed update rocket directly above Search with no desktop toast
     </>
   );
   const update = screen.getByRole("button", { name: "Update" });
-  expect(update.nextElementSibling).toBe(
-    screen.getByRole("button", { name: "Search" })
-  );
+  const utilities = update.closest('[data-sidebar-section="utilities"]');
+  expect(utilities).not.toBeNull();
+  expect(utilities?.lastElementChild).toContainElement(update);
+  expect(
+    screen
+      .getByRole("button", { name: "Search" })
+      .closest('[data-sidebar-section="utilities"]')
+  ).not.toBeNull();
   expect(update).toHaveAttribute("data-tooltip-content", "Update");
   expect(update).toHaveAttribute("data-tooltip-hidden", "false");
   expect(update.querySelector("img")).toHaveAttribute(
@@ -161,4 +174,47 @@ it("uses the localized Update label", () => {
   expect(
     screen.getByRole("button", { name: "Mettre à jour" })
   ).toBeInTheDocument();
+});
+
+it("keeps Update in the same utility row when Notifications appears or disappears", () => {
+  const { rerender } = render(<WebSidebar {...sidebarProps} />);
+  const update = screen.getByRole("button", { name: "Update" });
+  const utilityRow = update.parentElement;
+  const utilities = update.closest('[data-sidebar-section="utilities"]');
+  expect(utilities?.lastElementChild).toBe(utilityRow);
+  expect(
+    screen.queryByRole("link", { name: "Notifications" })
+  ).not.toBeInTheDocument();
+
+  jest.mocked(useSeizeConnectContext).mockReturnValue({
+    address: "0xalice",
+    hasValidWalletAuth: true,
+  } as unknown as ReturnType<typeof useSeizeConnectContext>);
+  rerender(<WebSidebar {...sidebarProps} />);
+  const notifications = screen.getByRole("link", { name: "Notifications" });
+  expect(
+    notifications.closest('[data-sidebar-section="account"]')
+  ).not.toBeNull();
+  expect(utilities).not.toContainElement(notifications);
+  expect(screen.getByRole("button", { name: "Update" })).toBe(update);
+  expect(utilities?.lastElementChild).toBe(utilityRow);
+
+  jest.mocked(useSeizeConnectContext).mockReturnValue({
+    address: undefined,
+    hasValidWalletAuth: false,
+  } as unknown as ReturnType<typeof useSeizeConnectContext>);
+  rerender(<WebSidebar {...sidebarProps} />);
+  expect(
+    screen.queryByRole("link", { name: "Notifications" })
+  ).not.toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "Update" })).toBe(update);
+  expect(utilities?.lastElementChild).toBe(utilityRow);
+});
+
+it("places Update directly after Search when Share is unavailable", () => {
+  render(<WebSidebar {...sidebarProps} />);
+  const search = screen.getByRole("button", { name: "Search" });
+  expect(search.parentElement?.nextElementSibling).toContainElement(
+    screen.getByRole("button", { name: "Update" })
+  );
 });

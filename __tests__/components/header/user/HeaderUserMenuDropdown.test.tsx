@@ -21,8 +21,10 @@ import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
 import { mainnet } from "viem/chains";
 
 jest.mock(
-  "@/components/header/user/HeaderArtworkDocumentationLink",
-  () => () => null
+  "@/hooks/artwork-documentation/useArtworkDocumentationAccess",
+  () => ({
+    useArtworkDocumentationAccess: () => ({ enabled: false }),
+  })
 );
 
 jest.mock("@/components/header/user/HeaderUserProxyDropdownItem", () => () => (
@@ -91,8 +93,8 @@ jest.mock("@/hooks/isMobileDevice", () => ({
     isDeviceDetectionResolved: true,
   }),
 }));
-jest.mock("@/hooks/useIdentity", () => ({
-  useIdentity: () => ({ profile: null, isLoading: false }),
+jest.mock("@/components/layout/sidebar/useSidebarIdentity", () => ({
+  useSidebarIdentity: () => ({ profile: null, isLoading: false }),
 }));
 jest.mock("react-use", () => ({ useClickAway: jest.fn() }));
 
@@ -176,6 +178,7 @@ function connectedAccount(
 }
 
 interface RenderOptions {
+  readonly artworkDocumentationEnabled?: boolean;
   readonly address?: string | undefined;
   readonly isAuthenticated?: boolean | undefined;
   readonly isConnected?: boolean | undefined;
@@ -339,10 +342,14 @@ function renderDropdown(options: RenderOptions) {
     switchToNextChain: options.switchToNextChain || jest.fn(() => false),
   });
   const onClose = jest.fn();
-  render(
+  const rendered = render(
     <AuthContext.Provider value={authValue}>
       <HeaderUserMenuDropdown
+        key="first"
         isOpen
+        artworkDocumentationEnabled={
+          options.artworkDocumentationEnabled ?? false
+        }
         profile={options.profile ?? profileBase}
         onClose={onClose}
         onOpenConnect={options.onOpenConnect}
@@ -350,6 +357,8 @@ function renderDropdown(options: RenderOptions) {
     </AuthContext.Provider>
   );
   return {
+    rendered,
+    authValue,
     onClose,
     ...authValue,
     ...connectContext,
@@ -785,4 +794,34 @@ describe("HeaderUserMenuDropdown", () => {
       expect(onClose).not.toHaveBeenCalled();
     });
   });
+});
+
+it("keeps an open menu stable when documentation becomes available, then includes it on reopening", () => {
+  const { rendered, authValue, onClose } = renderDropdown({
+    address: "0xabc",
+    artworkDocumentationEnabled: false,
+  });
+  const menu = (enabled: boolean, key = "first") => (
+    <AuthContext.Provider value={authValue}>
+      <HeaderUserMenuDropdown
+        key={key}
+        isOpen
+        profile={profileBase}
+        onClose={onClose}
+        artworkDocumentationEnabled={enabled}
+      />
+    </AuthContext.Provider>
+  );
+  rendered.rerender(menu(true));
+  expect(
+    screen.queryByRole("link", { name: "My artwork documentation" })
+  ).not.toBeInTheDocument();
+  rendered.rerender(menu(true, "next-opening"));
+  expect(
+    screen.getByRole("link", { name: "My artwork documentation" })
+  ).toBeInTheDocument();
+  rendered.rerender(menu(false, "next-opening"));
+  expect(
+    screen.queryByRole("link", { name: "My artwork documentation" })
+  ).not.toBeInTheDocument();
 });

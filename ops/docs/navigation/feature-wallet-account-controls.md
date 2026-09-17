@@ -16,7 +16,7 @@ action.
 
 ## Entry Points
 
-- Web disconnected: select `Connect` in the sidebar account area.
+- Web disconnected: select `Connect Wallet` in the sidebar account area.
 - Web connected: single-activate the user row to open the account dropdown;
   with multiple connected profiles, double-click within 400 ms to switch to
   the next profile.
@@ -31,8 +31,20 @@ action.
 
 ### Web Sidebar Account Area
 
+- During account restoration, a fixed-size shimmer appears in the account slot.
+  It becomes the connect icon once signed out is confirmed, or the selected
+  profile's avatar. Avatar loading does not move surrounding controls. The
+  default user symbol remains 24px inside a 40px rounded frame, matching the PFP
+  footprint. Signed-out frames use a neutral border; connected frames keep their
+  connection-state colors.
+- A missing, failed, or stalled avatar uses the default user icon. If the
+  profile request fails, select `Profile unavailable. Retry` to try again.
+  An empty successful profile result offers `Create profile` instead. Retry
+  progress and failures are announced to screen readers, and the collapsed
+  account control describes the active account.
+
 - Disconnected:
-  - expanded sidebar button: `Connect`
+  - expanded sidebar button: `Connect Wallet`
   - collapsed sidebar icon button tooltip: `Connect Wallet`
 - Connected:
   - with one connected profile, single activate opens the account dropdown
@@ -46,6 +58,12 @@ action.
     unread notifications.
 
 ### Web Account Dropdown
+
+- Artwork documentation availability is checked while the account UI is present,
+  independently of opening the dropdown. Closing and reopening does not restart
+  the check. `My artwork documentation` appears when available for the active
+  profile. If the first result arrives while the dropdown is open, close and
+  reopen to see the new item without the menu moving under the pointer.
 
 - The dropdown enters with a short opacity and vertical-position reveal;
   reduced-motion preferences show it immediately without animation.
