@@ -616,6 +616,8 @@ retain separate rules.
 ### Video playback controls
 
 The `media.video-player` record owns custom-player seeking, elapsed/total time,
-paused play controls, visibility, and homepage/submission contain sizing. Keep
-its facts aligned with the shared player and Media Rendering video guide.
+paused play controls, visibility, and homepage/submission/detail contain sizing.
+Homepage and The Memes detail videos use full mobile width and center within
+the desktop artwork column, with controls bounded by the actual video frame.
+Keep its facts aligned with the shared player and Media Rendering video guide.
 Browser-native controls remain a separate behavior.

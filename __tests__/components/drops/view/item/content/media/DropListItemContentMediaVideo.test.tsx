@@ -87,9 +87,9 @@ describe("DropListItemContentMediaVideo", () => {
 
     render(<DropListItemContentMediaVideo src="foo.mp4" align="center" />);
 
-    expect(screen.getByLabelText("Video player").parentElement).toHaveClass(
-      "tw-mx-auto"
-    );
+    expect(
+      screen.getByLabelText("Video player").parentElement?.parentElement
+    ).toHaveClass("tw-mx-auto");
   });
 
   it("keeps video optimization disabled until the wrapper is in view", () => {

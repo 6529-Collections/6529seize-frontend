@@ -11,8 +11,8 @@ jest.mock("@/hooks/useDeviceInfo", () => ({
 jest.mock("@/components/nft-image/NFTImage", () => ({
   __esModule: true,
   default: jest.fn(
-    ({ fillContainer }: { readonly fillContainer?: boolean }) => (
-      <div data-testid="artwork" data-fill={String(fillContainer)} />
+    ({ artworkLayout }: { readonly artworkLayout?: boolean }) => (
+      <div data-testid="artwork" data-fill={String(artworkLayout)} />
     )
   ),
 }));
@@ -31,7 +31,7 @@ it.each(["MP4", "MOV", "PNG"])(
     const lastProps = jest.mocked(NFTImage).mock.calls.at(-1)?.[0];
     expect(lastProps).toMatchObject({
       animation: true,
-      fillContainer: true,
+      artworkLayout: true,
       showBalance: false,
     });
   }

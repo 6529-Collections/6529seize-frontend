@@ -98,6 +98,7 @@ export function MemePageArtViewer({
   const animationFormat = getAnimationFileTypeFromMetadata(metadata);
   const imageMimeType = getImageMimeTypeFromMetadata(metadata);
   const animationMimeType = getAnimationMimeTypeFromMetadata(metadata);
+  const isVideoArtwork = animationMimeType?.startsWith("video/") ?? false;
   const imageHref = getResolvedImageSrc(nft);
   const hasImage = Boolean(imageHref);
   const isShowingAnimation = hasAnimation && (currentSlide === 0 || !imageHref);
@@ -345,7 +346,7 @@ export function MemePageArtViewer({
           <>
             <div className="tw-flex tw-min-h-0 tw-w-full tw-flex-1 tw-items-center tw-bg-iron-950 tw-p-0">
               <section
-                className={`${styles["memesCarousel"] ?? ""} tw-w-full`}
+                className={`${styles[isVideoArtwork ? "videoCarousel" : "memesCarousel"] ?? ""} tw-w-full`}
                 aria-roledescription="carousel"
                 onTouchStart={handleSlideTouchStart}
                 onTouchEnd={handleSlideTouchEnd}
@@ -359,6 +360,7 @@ export function MemePageArtViewer({
                   <NFTImage
                     nft={nft}
                     animation={true}
+                    artworkLayout={isVideoArtwork}
                     height={650}
                     transparentBG={true}
                     showBalance={false}
@@ -379,6 +381,7 @@ export function MemePageArtViewer({
                     <NFTImage
                       nft={nft}
                       animation={false}
+                      artworkLayout={isVideoArtwork}
                       height={650}
                       showBalance={false}
                       showOriginal={

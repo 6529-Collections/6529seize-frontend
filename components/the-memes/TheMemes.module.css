@@ -229,6 +229,24 @@
   max-height: 100% !important;
 }
 
+.videoCarousel {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+
+@media (min-width: 1024px) {
+  .videoCarousel {
+    align-self: stretch;
+    min-height: 650px;
+  }
+
+  .videoCarousel > [data-carousel-slide] {
+    position: absolute;
+    inset: 0;
+  }
+}
+
 .rankSubheading {
   color: white !important;
 }

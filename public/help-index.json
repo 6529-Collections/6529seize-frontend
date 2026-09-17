@@ -27,7 +27,7 @@
         "The custom video player shows a timeline above its controls, with a small draggable handle and a larger interaction area. Drag the handle, select a position on the track, or focus the slider and use the keyboard to seek.",
         "The bottom-left capsule shows play or pause alongside elapsed time and total duration. Pausing keeps the capsule and time in place and also shows a central play button; either play button resumes playback. The time updates while seeking.",
         "Controls remain visible while paused, focused, or scrubbing and fade after inactivity during playback. Pointer interaction, keyboard focus, or a tap reveals them. Before duration is available, it shows a dash and seeking is disabled.",
-        "Videos are shown without cropping or stretching. Homepage Next Drop and Latest Drop share a centered artwork area; submission detail can use a larger area. Mute and fullscreen keep circular buttons. Browser-native players retain their own controls."
+        "Videos are shown without cropping or stretching. Homepage Next Drop, Latest Drop, and The Memes detail videos fill the available width on mobile. On desktop they center and expand to fill either the available width or height. The timeline and controls stay inside the video frame. Submission detail can use a larger area. Mute and fullscreen keep circular buttons. Browser-native players retain their own controls."
       ],
       "canonical_path": "/",
       "link_label": "Open homepage",

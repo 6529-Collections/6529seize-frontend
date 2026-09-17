@@ -133,7 +133,7 @@ describe("MediaDisplayVideo", () => {
     const video = container.querySelector("video");
 
     expect(wrapper).toHaveClass("tw-h-full", "tw-max-h-full");
-    expect(video?.parentElement).toHaveClass(
+    expect(video?.parentElement?.parentElement).toHaveClass(
       "tw-flex",
       "tw-items-center",
       "tw-justify-center"

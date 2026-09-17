@@ -50,15 +50,15 @@ jest.mock(
   () => ({
     __esModule: true,
     default: ({
-      fillVideoContainer,
+      artworkVideoLayout,
       videoAlign,
     }: {
-      readonly fillVideoContainer?: boolean;
+      readonly artworkVideoLayout?: boolean;
       readonly videoAlign?: string;
     }) => (
       <div
         data-testid="drop-media"
-        data-fill={String(fillVideoContainer)}
+        data-fill={String(artworkVideoLayout)}
         data-align={videoAlign}
       />
     ),
