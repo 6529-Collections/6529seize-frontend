@@ -1,5 +1,6 @@
 "use client";
 
+import StreamRouteLoadingShell from "@/components/brain/my-stream/layout/StreamRouteLoadingShell";
 import type { ReactNode } from "react";
 import { useMemo } from "react";
 import UserSetUpProfileCta from "../../user/utils/set-up-profile/UserSetUpProfileCta";
@@ -15,7 +16,9 @@ import { t } from "@/i18n/messages";
 
 // Main layout content that uses the Layout context
 function MessagesLayoutContent({ children }: { readonly children: ReactNode }) {
-  const { contentState, connectedProfile } = useAuthenticatedContent();
+  const { contentState, connectedProfile } = useAuthenticatedContent({
+    waitForAuth: true,
+  });
   const { isApp } = useDeviceInfo();
   const locale = useBrowserLocale();
   const { isDirectMessageModalOpen, close } = useCreateModalState();
@@ -33,7 +36,7 @@ function MessagesLayoutContent({ children }: { readonly children: ReactNode }) {
         );
       case "loading":
       case "measuring":
-        // Don't show any text for loading states - let the messages content handle its own loading UI
+        // Loading states use the route skeleton below.
         return null;
       default:
         return null;
@@ -78,8 +81,12 @@ function MessagesLayoutContent({ children }: { readonly children: ReactNode }) {
       );
     }
 
-    // Loading/measuring states
-    return null;
+    return (
+      <StreamRouteLoadingShell
+        ariaLabel={t(locale, "webSidebar.account.loading")}
+        variant="messages"
+      />
+    );
   }, [
     contentState,
     connectPrompt,

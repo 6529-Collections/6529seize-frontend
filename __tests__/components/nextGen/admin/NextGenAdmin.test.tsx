@@ -79,3 +79,54 @@ describe('NextGenAdmin component', () => {
     );
   });
 });
+
+
+it.each(["initializing", "connecting"])(
+  "does not prompt for a wallet while %s",
+  (connectionState) => {
+    (useSeizeConnectContext as jest.Mock).mockReturnValue({
+      connectionState,
+      isConnected: false,
+    });
+    render(<NextGenAdmin />);
+    expect(screen.getByRole("status")).toBeInTheDocument();
+    expect(screen.queryByTestId("connect")).not.toBeInTheDocument();
+  }
+);
+it("waits for connector restoration after the stored address is known", () => {
+  (useSeizeConnectContext as jest.Mock).mockReturnValue({
+    connectionState: "connected",
+    isConnected: false,
+    isWalletConnectionPending: true,
+  });
+  const { rerender } = render(<NextGenAdmin />);
+  expect(screen.getByRole("status")).toBeInTheDocument();
+  expect(screen.queryByTestId("connect")).not.toBeInTheDocument();
+  (useSeizeConnectContext as jest.Mock).mockReturnValue({
+    connectionState: "disconnected",
+    isConnected: false,
+    isWalletConnectionPending: false,
+  });
+  rerender(<NextGenAdmin />);
+  expect(screen.getByTestId("connect")).toBeInTheDocument();
+});
+
+it("waits for initial collection permission reads before showing manager access", () => {
+  (useSeizeConnectContext as jest.Mock).mockReturnValue({
+    connectionState: "connected",
+    isConnected: true,
+    address: "0x1",
+  });
+  (helpers.useCollectionIndex as jest.Mock).mockReturnValue({
+    isFetching: true,
+    data: undefined,
+  });
+  const { rerender } = render(<NextGenAdmin />);
+  expect(screen.getByRole("status")).toBeInTheDocument();
+  (helpers.useCollectionIndex as jest.Mock).mockReturnValue({
+    isFetching: false,
+    data: 1n,
+  });
+  rerender(<NextGenAdmin />);
+  expect(screen.queryByRole("status")).not.toBeInTheDocument();
+});

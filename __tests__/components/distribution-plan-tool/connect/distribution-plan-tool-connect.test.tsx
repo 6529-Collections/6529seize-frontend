@@ -35,3 +35,21 @@ describe("DistributionPlanToolConnect", () => {
     expect(screen.getByTestId("connected")).toBeInTheDocument();
   });
 });
+
+it.each(["initializing", "connecting"])(
+  "keeps EMMA neutral during %s and resolves directly to the wallet",
+  (connectionState) => {
+    (useSeizeConnectContext as jest.Mock).mockReturnValue({ connectionState });
+    const { rerender } = render(<DistributionPlanToolConnect />);
+    expect(screen.getByRole("status")).toBeInTheDocument();
+    expect(screen.queryByTestId("not-connected")).not.toBeInTheDocument();
+    (useSeizeConnectContext as jest.Mock).mockReturnValue({
+      connectionState: "connected",
+      address: "0x1",
+    });
+    jest.spyOn(helpers, "isEthereumAddress").mockReturnValue(true);
+    rerender(<DistributionPlanToolConnect />);
+    expect(screen.getByTestId("connected")).toBeInTheDocument();
+    expect(screen.queryByTestId("not-connected")).not.toBeInTheDocument();
+  }
+);
