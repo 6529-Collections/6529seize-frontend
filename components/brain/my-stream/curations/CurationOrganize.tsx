@@ -23,6 +23,7 @@ import {
   type ReactNode,
   type KeyboardEvent,
 } from "react";
+import Button from "@/components/utils/button/Button";
 import type { CurationOrder } from "@/hooks/useCurationOrder";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
@@ -340,9 +341,7 @@ export default function CurationOrganize({
         }}
       >
         {active && (
-          <div
-            className={`tailwind-scope tw-sticky tw-top-0 tw-z-[1001] tw-min-h-[52px] tw-w-full tw-border-x-0 tw-border-y tw-border-solid tw-border-white/10 tw-bg-black/85 tw-px-4 tw-backdrop-blur-md ${axis === "horizontal" ? "tw-mb-3" : ""}`}
-          >
+          <div className="tailwind-scope tw-sticky tw-top-0 tw-z-[1001] tw-mb-3 tw-min-h-[52px] tw-w-full tw-border-x-0 tw-border-y tw-border-solid tw-border-white/10 tw-bg-black/85 tw-backdrop-blur-md">
             <div className="tw-flex tw-h-[50px] tw-items-center tw-gap-2">
               <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-baseline">
                 <span className="tw-flex-shrink-0 tw-text-sm tw-font-semibold tw-text-iron-100">
@@ -354,18 +353,19 @@ export default function CurationOrganize({
                   {toolbarMessage}
                 </span>
               </div>
-              <button
+              <Button
                 ref={doneButton}
-                type="button"
+                variant="secondary"
+                size="sm"
                 disabled={order.busy}
                 onClick={() => {
                   cancel();
                   onDone();
                 }}
-                className="tw-h-11 tw-border-0 tw-bg-transparent tw-px-2 tw-text-sm tw-font-semibold tw-text-iron-100 tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 disabled:tw-cursor-wait disabled:tw-opacity-50 desktop-hover:hover:tw-text-white"
+                className="disabled:tw-cursor-wait"
               >
                 {t(locale, "profileCuration.order.done")}
-              </button>
+              </Button>
             </div>
             <p id={instructionsId} className="tw-sr-only">
               {guidance}

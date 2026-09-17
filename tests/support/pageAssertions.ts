@@ -12,10 +12,24 @@ export {
 } from "./consoleDiagnostics";
 import type { PageDiagnostics } from "./consoleDiagnostics";
 
+function networkEvidenceUrl(value: string): string {
+  try {
+    const url = new URL(value);
+    if (url.protocol !== "https:" && url.protocol !== "http:") {
+      return "[non-HTTP URL]";
+    }
+    // Evidence needs the endpoint, never credentials, query values or fragments.
+    return `${url.origin}${url.pathname}`;
+  } catch {
+    return "[invalid URL]";
+  }
+}
+
 export function attachPageDiagnostics(page: Page): PageDiagnostics {
   const diagnostics: PageDiagnostics = {
     consoleErrors: [],
     failedResponses: [],
+    networkFailures: [],
     pageErrors: [],
   };
 
@@ -37,6 +51,17 @@ export function attachPageDiagnostics(page: Page): PageDiagnostics {
     diagnostics.failedResponses?.push(
       `${response.status()} ${response.request().method()} ${response.url()}`
     );
+    diagnostics.networkFailures?.push(
+      `${new Date().toISOString()} HTTP ${response.status()} ${response.request().method()} ${response.request().resourceType()} ${networkEvidenceUrl(response.url())}`
+    );
+  });
+
+  page.on("requestfailed", (request) => {
+    // Transport failures have no HTTP response. Keep these as evidence rather
+    // than a new assertion: navigation cancellations and guard aborts are normal.
+    diagnostics.networkFailures?.push(
+      `${new Date().toISOString()} ${request.failure()?.errorText ?? "unknown transport failure"} ${request.method()} ${request.resourceType()} ${networkEvidenceUrl(request.url())}`
+    );
   });
 
   return diagnostics;
@@ -49,6 +74,7 @@ export async function attachPageDiagnosticsArtifact(
   if (
     diagnostics.consoleErrors.length === 0 &&
     (diagnostics.failedResponses?.length ?? 0) === 0 &&
+    (diagnostics.networkFailures?.length ?? 0) === 0 &&
     diagnostics.pageErrors.length === 0
   ) {
     return;
@@ -58,6 +84,8 @@ export async function attachPageDiagnosticsArtifact(
     testInfo,
     "playwright-page-diagnostics.txt",
     [
+      `Playwright policy: failOnFlakyTests=${testInfo.config.failOnFlakyTests}; retries=${testInfo.project.retries}`,
+      "",
       "Page errors:",
       ...diagnostics.pageErrors,
       "",
@@ -66,6 +94,9 @@ export async function attachPageDiagnosticsArtifact(
       "",
       "Failed responses:",
       ...(diagnostics.failedResponses ?? []),
+      "",
+      "Network failures (UTC observation time; URLs omit query and fragment):",
+      ...(diagnostics.networkFailures ?? []),
     ].join("\n")
   );
 }

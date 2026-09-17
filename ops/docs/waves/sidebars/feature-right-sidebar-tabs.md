@@ -76,9 +76,10 @@ linked section pages.
 ## Overflow and Keyboard Behavior
 
 - Desktop Chat waves show all three base sections in the scroll-safe tab strip.
-  Rank and Approve waves keep `About`, `REP`, `Configuration`, and `Voters`
-  visible and move `Activity` into `More`, so the fixed-width panel never clips
-  a section label.
+  Rank and Approve waves also show `Voters` and `Activity` as direct tabs.
+  Scroll the tab strip horizontally if the labels do not all fit.
+- A single remaining section appears as a direct tab, without a dropdown
+  chevron or menu. `More` is used only when it contains at least two sections.
 - Native keeps three compact pills visible and moves remaining sections into
   `More`, avoiding a compressed desktop-style tab row on narrow phones.
 - The contextual row and every section share the same panel canvas, including
