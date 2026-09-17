@@ -376,40 +376,88 @@ describe("native surface evidence", () => {
     });
   });
 
-  it("fails the CLI when package prerequisites are required but absent", () => {
+  function runCli(args: string[], cwd = fixture()) {
     const script = path.join(
       process.cwd(),
       "ops/scripts/native-surface-evidence.cjs"
     );
-    const result = spawnSync(
-      process.execPath,
-      [script, "--require-package-prereqs"],
-      {
-        cwd: process.cwd(),
-        encoding: "utf8",
-        timeout: TEST_COMMAND_TIMEOUT_MS,
-      }
+    // Use an absolute Node executable and an empty tool search directory. The
+    // CLI still runs its real probe code, but never starts a host SDK or daemon.
+    const emptyPath = fs.mkdtempSync(
+      path.join(os.tmpdir(), "native-empty-path-")
     );
+    tempDirs.push(emptyPath);
+    return spawnSync(process.execPath, [script, "--cwd", cwd, ...args], {
+      cwd,
+      encoding: "utf8",
+      timeout: TEST_COMMAND_TIMEOUT_MS,
+      // The CLI uses built-ins and explicit fixture paths, so HOME/temp settings
+      // are unnecessary. Keep SDK variables and Node startup hooks isolated.
+      env: {
+        NODE_ENV: "test",
+        PATH: emptyPath,
+        ...(process.env["SystemRoot"]
+          ? { SystemRoot: process.env["SystemRoot"] }
+          : {}),
+      },
+    });
+  }
 
-    expect(result.status).toBe(1);
-    expect(`${result.stdout}${result.stderr}`).toContain(
+  function expectCliExit(result: ReturnType<typeof runCli>, status: number) {
+    // Include interruption and captured output in failures instead of reporting
+    // only `null` when Node could not start or the subprocess was terminated.
+    expect({
+      status: result.status,
+      signal: result.signal,
+      error: result.error,
+      stdout: result.stdout,
+      stderr: result.stderr,
+    }).toEqual({
+      status,
+      signal: null,
+      error: undefined,
+      stdout: expect.any(String),
+      stderr: expect.any(String),
+    });
+  }
+
+  it("fails the CLI when package prerequisites are required but absent", () => {
+    const result = runCli(["--json", "--require-package-prereqs"]);
+
+    expectCliExit(result, 1);
+    expect(result.stderr).toContain(
       "native/Electron package prerequisites are not available"
     );
+    const evidence = JSON.parse(result.stdout);
+    expect(evidence.host.commands).toEqual({
+      adb: false,
+      gradle: false,
+      java: false,
+      xcodebuild: false,
+    });
+    expect(evidence.host.android_sdk_configured).toBe(false);
+    expect(evidence.summary.package_prerequisites_ready).toBe(false);
+  });
+
+  it("passes the CLI when a fixture has Electron package prerequisites", () => {
+    const cwd = fixture(
+      { "electron/main.js": "// fixture entrypoint" },
+      { devDependencies: { electron: "1.0.0", "electron-builder": "1.0.0" } }
+    );
+    const result = runCli(["--json", "--require-package-prereqs"], cwd);
+
+    expectCliExit(result, 0);
+    expect(JSON.parse(result.stdout).summary).toMatchObject({
+      package_prerequisites_ready: true,
+      actual_package_runtime_evidence: false,
+    });
   });
 
   it("keeps the old --require-real flag as an explicit unsupported failure", () => {
-    const script = path.join(
-      process.cwd(),
-      "ops/scripts/native-surface-evidence.cjs"
-    );
-    const result = spawnSync(process.execPath, [script, "--require-real"], {
-      cwd: process.cwd(),
-      encoding: "utf8",
-      timeout: TEST_COMMAND_TIMEOUT_MS,
-    });
+    const result = runCli(["--require-real"]);
 
-    expect(result.status).toBe(1);
-    expect(`${result.stdout}${result.stderr}`).toContain(
+    expectCliExit(result, 1);
+    expect(result.stderr).toContain(
       "--require-real is intentionally unsupported"
     );
   });
@@ -419,47 +467,30 @@ describe("native surface evidence", () => {
       path.join(os.tmpdir(), "6529-native-surface-missing-input-")
     );
     tempDirs.push(cwd);
-    const script = path.join(
-      process.cwd(),
-      "ops/scripts/native-surface-evidence.cjs"
-    );
-    const result = spawnSync(process.execPath, [script, "--cwd", cwd], {
-      cwd: process.cwd(),
-      encoding: "utf8",
-      timeout: TEST_COMMAND_TIMEOUT_MS,
-    });
+    const result = runCli([], cwd);
 
-    expect(result.status).toBe(1);
-    expect(`${result.stdout}${result.stderr}`).toContain(
+    expectCliExit(result, 1);
+    expect(result.stderr).toContain(
       "native evidence input missing: package.json"
     );
-    expect(`${result.stdout}${result.stderr}`).not.toContain("Error:");
+    expect(result.stderr).not.toContain("Error:");
   });
 
   it("writes redacted JSON evidence when an output path is provided", () => {
-    const outputDir = fs.mkdtempSync(
-      path.join(os.tmpdir(), "6529-native-surface-output-")
-    );
-    tempDirs.push(outputDir);
-    const outputPath = path.join(outputDir, "native-surface-evidence.json");
-    const script = path.join(
-      process.cwd(),
-      "ops/scripts/native-surface-evidence.cjs"
+    const cwd = fixture();
+    const outputPath = path.join(cwd, "native-surface-evidence.json");
+    const result = runCli(
+      ["--json", "--output", outputPath, "--require-simulation"],
+      cwd
     );
 
-    const result = spawnSync(
-      process.execPath,
-      [script, "--json", "--output", outputPath, "--require-simulation"],
-      {
-        cwd: process.cwd(),
-        encoding: "utf8",
-        timeout: TEST_COMMAND_TIMEOUT_MS,
-      }
-    );
-    expect(result.status).toBe(0);
+    expectCliExit(result, 0);
     const evidence = JSON.parse(fs.readFileSync(outputPath, "utf8"));
 
     expect(evidence.schema_version).toBe(NATIVE_EVIDENCE_SCHEMA_VERSION);
+    expect(evidence.summary.simulation_available).toBe(true);
+    expect(JSON.parse(result.stdout)).toEqual(evidence);
+    expect(JSON.stringify(evidence)).not.toContain(cwd);
     expect(JSON.stringify(evidence)).not.toContain(process.cwd());
   });
 });
