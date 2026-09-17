@@ -28,6 +28,9 @@ it.each(["MP4", "MOV", "PNG"])(
     } as ApiMemesExtendedData;
     render(<HomeNftArtwork nft={nft} />);
     expect(screen.getByTestId("artwork")).toHaveAttribute("data-fill", "true");
+    const frame = screen.getByTestId("artwork").parentElement!;
+    expect(frame).not.toHaveClass("lg:tw-absolute", "lg:tw-h-full");
+    expect(frame.parentElement).not.toHaveClass("lg:tw-h-full");
     const lastProps = jest.mocked(NFTImage).mock.calls.at(-1)?.[0];
     expect(lastProps).toMatchObject({
       animation: true,

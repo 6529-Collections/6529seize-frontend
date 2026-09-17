@@ -159,6 +159,13 @@ it("uses the complete responsive video frame instead of the legacy carousel heig
   expect(animationProps?.artworkLayout).toBe(true);
   expect(container.querySelector("section")).toHaveClass("videoCarousel");
   expect(container.querySelector("section")).not.toHaveClass("memesCarousel");
+  // Loading panels can change the ancestor's height. The video must not grow
+  // into that space or surrender space when the ownership controls appear.
+  expect(container.firstElementChild).toHaveClass("tw-flex-none");
+  expect(container.firstElementChild).not.toHaveClass("tw-h-full");
+  expect(container.querySelector("[data-carousel-slide]")).toHaveClass(
+    "tw-h-auto"
+  );
 });
 
 describe("MemePageArtViewer", () => {

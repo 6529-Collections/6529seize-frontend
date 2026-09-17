@@ -618,7 +618,8 @@ diagnostics. Partial, failed, or unfinished resync must not be treated as comple
 
 The `media.video-player` record owns custom-player seeking, elapsed/total time,
 paused play controls, visibility, and homepage/submission/detail contain sizing.
-Homepage and The Memes detail videos use full mobile width and center within
-the desktop artwork column, with controls bounded by the actual video frame.
+Homepage and The Memes detail videos use full width and aspect-ratio height on
+mobile and desktop, independent of neighboring loading panels, with controls
+bounded by the actual video frame.
 Keep its facts aligned with the shared player and Media Rendering video guide.
 Browser-native controls remain a separate behavior.

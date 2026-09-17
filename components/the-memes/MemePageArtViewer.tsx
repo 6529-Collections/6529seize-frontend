@@ -1,6 +1,7 @@
 "use client";
 
 import NFTImage from "@/components/nft-image/NFTImage";
+import clsx from "clsx";
 import NFTImageBalance from "@/components/nft-image/NFTImageBalance";
 import { InlineMediaActions } from "@/components/drops/view/item/content/media/MediaActionToolbar";
 import { useMediaActions } from "@/components/drops/view/item/content/media/useMediaActions";
@@ -337,14 +338,27 @@ export function MemePageArtViewer({
   }
 
   return (
-    <div className="tw-flex tw-h-full tw-w-full tw-flex-col tw-p-0">
-      <div className="tw-flex tw-flex-1 tw-flex-col">
+    <div
+      data-video-artwork={isVideoArtwork || undefined}
+      className={clsx(
+        "tw-flex tw-w-full tw-flex-col tw-p-0",
+        isVideoArtwork ? "tw-flex-none" : "tw-h-full"
+      )}
+    >
+      <div
+        className={clsx("tw-flex tw-flex-col", !isVideoArtwork && "tw-flex-1")}
+      >
         {!hasAnimation && !hasImage && Boolean(actions) && (
           <div className="tw-relative tw-min-h-9">{printMediaActions()}</div>
         )}
         {hasAnimation ? (
           <>
-            <div className="tw-flex tw-min-h-0 tw-w-full tw-flex-1 tw-items-center tw-bg-iron-950 tw-p-0">
+            <div
+              className={clsx(
+                "tw-flex tw-min-h-0 tw-w-full tw-items-center tw-bg-iron-950 tw-p-0",
+                !isVideoArtwork && "tw-flex-1"
+              )}
+            >
               <section
                 className={`${styles[isVideoArtwork ? "videoCarousel" : "memesCarousel"] ?? ""} tw-w-full`}
                 aria-roledescription="carousel"
@@ -353,7 +367,7 @@ export function MemePageArtViewer({
               >
                 <div
                   data-carousel-slide
-                  className={`tw-h-full tw-items-center tw-justify-center tw-text-center ${
+                  className={`${isVideoArtwork ? "tw-h-auto" : "tw-h-full"} tw-items-center tw-justify-center tw-text-center ${
                     currentSlide === 0 ? "tw-flex" : "tw-hidden"
                   }`}
                 >
@@ -374,7 +388,7 @@ export function MemePageArtViewer({
                 {hasImage && (
                   <div
                     data-carousel-slide
-                    className={`tw-h-full tw-items-center tw-justify-center tw-text-center ${
+                    className={`${isVideoArtwork ? "tw-h-auto" : "tw-h-full"} tw-items-center tw-justify-center tw-text-center ${
                       currentSlide === 1 ? "tw-flex" : "tw-hidden"
                     }`}
                   >

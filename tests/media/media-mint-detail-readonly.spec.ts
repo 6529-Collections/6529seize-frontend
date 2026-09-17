@@ -302,10 +302,49 @@ test.describe("Staging video artwork sizing @surface @medium @large @readonly", 
       expect(
         Math.min(Math.abs(geometry.widthGap), Math.abs(geometry.heightGap))
       ).toBeLessThanOrEqual(2);
-      if (viewport.width < 1024)
-        expect(Math.abs(geometry.widthGap)).toBeLessThanOrEqual(2);
+      expect(Math.abs(geometry.widthGap)).toBeLessThanOrEqual(2);
       for (const inset of geometry.sliderInsets)
         expect(inset).toBeGreaterThanOrEqual(-2);
+
+      // Reproduce the recording's changing details/ownership space without
+      // depending on wallet-specific API timing or modifying remote data.
+      const shifts = await video.evaluate(async (element: HTMLVideoElement) => {
+        const artwork = element.closest<HTMLElement>("[data-video-artwork]")!;
+        const column = artwork.parentElement!;
+        const originalStyle = column.getAttribute("style");
+        const baseline = element.getBoundingClientRect();
+        const offsetTop = baseline.top - artwork.getBoundingClientRect().top;
+        const ownershipPanel = document.createElement("div");
+        ownershipPanel.style.cssText = "height: 180px; flex: none";
+        ownershipPanel.setAttribute("aria-hidden", "true");
+        const measurements: number[] = [];
+        artwork.append(ownershipPanel);
+        try {
+          for (const height of [1600, 2100, 1300]) {
+            column.style.height = `${height}px`;
+            column.style.flex = "none";
+            await new Promise<void>((resolve) => {
+              requestAnimationFrame(() =>
+                requestAnimationFrame(() => resolve())
+              );
+            });
+            const bounds = element.getBoundingClientRect();
+            measurements.push(
+              Math.abs(bounds.width - baseline.width),
+              Math.abs(bounds.height - baseline.height),
+              Math.abs(
+                bounds.top - artwork.getBoundingClientRect().top - offsetTop
+              )
+            );
+          }
+        } finally {
+          ownershipPanel.remove();
+          if (originalStyle === null) column.removeAttribute("style");
+          else column.setAttribute("style", originalStyle);
+        }
+        return measurements;
+      });
+      for (const shift of shifts) expect(shift).toBeLessThanOrEqual(2);
     });
   }
 });

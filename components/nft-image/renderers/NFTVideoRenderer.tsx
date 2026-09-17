@@ -37,7 +37,7 @@ export default function NFTVideoRenderer(props: Readonly<BaseRendererProps>) {
     "metadata" in props.nft ? props.nft.metadata?.animation_details : undefined;
   const aspectRatioHint = getVideoRatio(dimensions?.width, dimensions?.height);
 
-  const frameClass = props.artworkLayout ? "lg:tw-h-full" : props.heightStyle;
+  const frameClass = props.artworkLayout ? "tw-h-auto" : props.heightStyle;
   const videoLayout = props.artworkLayout ? "artwork" : "prominent";
   const useFrame = props.fillContainer === true || props.artworkLayout === true;
   return (

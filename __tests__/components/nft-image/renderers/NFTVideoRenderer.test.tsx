@@ -99,7 +99,8 @@ describe("NFTVideoRenderer", () => {
     expect(player.style.maxHeight).toBe("");
     expect(player.style.maxWidth).toBe("");
     expect(video).not.toHaveClass("image-style");
-    expect(container.firstElementChild).toHaveClass("lg:tw-h-full");
+    expect(container.firstElementChild).toHaveClass("tw-h-auto");
+    expect(container.firstElementChild).not.toHaveClass("lg:tw-h-full");
     expect(container.firstElementChild).not.toHaveClass("height-300");
   });
 

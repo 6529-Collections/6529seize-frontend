@@ -43,10 +43,10 @@ export default function NFTImageRenderer(props: Readonly<BaseRendererProps>) {
   const shouldLazyLoad = !!props.showThumbnail || props.height === 300;
   const imageWrapperClassName = styles["imageWrapper"] ?? "";
 
-  const frameClass = props.artworkLayout ? "lg:tw-h-full" : props.heightStyle;
+  const frameClass = props.artworkLayout ? "tw-h-auto" : props.heightStyle;
   let imageClass = props.fillContainer ? "tw-object-contain" : props.imageStyle;
   if (props.artworkLayout) {
-    imageClass = "tw-h-auto tw-w-full tw-object-contain lg:tw-h-full";
+    imageClass = "tw-h-auto tw-w-full tw-object-contain";
   }
   const imageSize = props.artworkLayout
     ? {}
