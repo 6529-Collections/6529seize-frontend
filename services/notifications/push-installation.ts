@@ -10,9 +10,11 @@ import {
 } from "@/services/auth/auth.utils";
 import { getAuthTokenFingerprint } from "@/services/auth/auth-token-fingerprint";
 import { getNativeRefreshToken } from "@/services/auth/native-refresh-token-storage";
-import { getStableDeviceId } from "@/components/notifications/stable-device-id";
+import { getPushDeviceIdentity } from "@/components/notifications/stable-device-id";
 import { getDeliveredNotificationProfileId } from "@/components/notifications/delivered-notification-data";
 import type { ApiRevokePushInstallationRequest } from "@/generated/models/ApiRevokePushInstallationRequest";
+
+import { isConnectedPushAuth } from "./connected-push-profiles";
 
 const STORAGE_KEY = "push-installation-lifecycle-v1";
 const secretSchema = z.string().regex(/^[a-f0-9]{64}$/i);
@@ -23,6 +25,8 @@ const installationSchema = z
     secret: secretSchema,
     revision: revisionSchema,
     token: z.string().optional(),
+    previousDeviceId: z.string().optional(),
+    migrationQueued: z.boolean().optional(),
     blockedAuth: z.array(z.string()),
     pending: z.array(
       z.object({
@@ -32,6 +36,7 @@ const installationSchema = z
         token: z.string().optional(),
         profile_id: z.string().optional(),
         all_profiles: z.boolean(),
+        token_scoped: z.boolean().optional(),
         sessions: z.array(
           z.object({ address: z.string(), native_refresh_token: z.string() })
         ),
@@ -41,9 +46,9 @@ const installationSchema = z
   .refine((state) =>
     state.pending.every(
       (job) =>
-        job.device_id === state.deviceId &&
-        job.installation_secret === state.secret &&
-        job.revision <= state.revision
+        job.device_id !== state.deviceId ||
+        (job.installation_secret === state.secret &&
+          job.revision <= state.revision)
     )
   );
 interface InstallationState {
@@ -51,6 +56,8 @@ interface InstallationState {
   secret: string;
   revision: number;
   token?: string;
+  previousDeviceId?: string;
+  migrationQueued?: boolean;
   blockedAuth: string[];
   pending: ApiRevokePushInstallationRequest[];
 }
@@ -62,27 +69,46 @@ function serialized<T>(action: () => Promise<T>): Promise<T> {
   stateWork = result.catch(() => undefined);
   return result;
 }
+const newSecret = () => (uuidv4() + uuidv4()).replaceAll("-", "");
 async function readState(): Promise<InstallationState> {
+  const identity = await getPushDeviceIdentity();
+  let state: InstallationState;
   try {
     const stored = await SecureStoragePlugin.get({ key: STORAGE_KEY });
     const parsed = installationSchema.safeParse(JSON.parse(stored.value));
     if (!parsed.success) throw new Error("Invalid push installation storage");
-    return parsed.data as InstallationState;
+    state = parsed.data as InstallationState;
   } catch (error) {
     // Do not replace a damaged/unreadable existing credential or discard its outbox.
     const message = error instanceof Error ? error.message : String(error);
     if (!/item with given key does not exist|not found/i.test(message))
       throw error;
-    const state: InstallationState = {
-      deviceId: await getStableDeviceId(),
-      secret: (uuidv4() + uuidv4()).replaceAll("-", ""),
+    state = {
+      deviceId: identity.deviceId,
+      ...(identity.previousDeviceId
+        ? { previousDeviceId: identity.previousDeviceId }
+        : {}),
+      secret: newSecret(),
       revision: 0,
       blockedAuth: [],
       pending: [],
     };
     await writeState(state);
-    return state;
   }
+  if (state.deviceId !== identity.deviceId) {
+    state = {
+      deviceId: identity.deviceId,
+      previousDeviceId: state.deviceId,
+      secret: newSecret(),
+      revision: 0,
+      blockedAuth: state.blockedAuth,
+      // Preserve original jobs and their credentials/revisions verbatim. They
+      // belong to an older namespace and cannot delete this installation.
+      pending: state.pending,
+    };
+    await writeState(state);
+  }
+  return state;
 }
 async function writeState(state: InstallationState) {
   await SecureStoragePlugin.set({
@@ -94,7 +120,8 @@ async function writeState(state: InstallationState) {
 export async function preparePushInstallationRegistration(
   deviceId: string,
   token: string,
-  authJwt: string
+  authJwt: string,
+  connectedProfileId?: string
 ) {
   const credential = await serialized(async () => {
     const state = await readState();
@@ -105,12 +132,15 @@ export async function preparePushInstallationRegistration(
     state.token = token;
     // An immediate logout may precede the first native token callback.
     state.pending = state.pending.map((job) =>
-      job.token ? job : { ...job, token }
+      job.device_id === state.deviceId && !job.token ? { ...job, token } : job
     );
     await writeState(state);
     return {
       installation_secret: state.secret,
       installation_revision: state.revision,
+      ...(state.previousDeviceId
+        ? { previous_device_id: state.previousDeviceId }
+        : {}),
     };
   });
   await flushPendingPushLogouts();
@@ -118,9 +148,13 @@ export async function preparePushInstallationRegistration(
   const ready = await serialized(async () => {
     const state = await readState();
     return (
-      !state.pending.length &&
+      !state.pending.some((job) => job.device_id === state.deviceId) &&
+      state.secret === credential.installation_secret &&
+      state.deviceId === deviceId &&
       state.revision === credential.installation_revision &&
-      getAuthJwt() === authJwt &&
+      (connectedProfileId
+        ? isConnectedPushAuth(authJwt, connectedProfileId)
+        : getAuthJwt() === authJwt) &&
       !state.blockedAuth.includes(getAuthTokenFingerprint(authJwt))
     );
   });
@@ -129,6 +163,47 @@ export async function preparePushInstallationRegistration(
       "Push registration deferred until logout reconciliation completes"
     );
   return credential;
+}
+
+/** Called only after every currently connected profile registered its current token. */
+export async function completePushInstallationMigration(
+  deviceId: string,
+  token: string
+): Promise<boolean> {
+  const job = await serialized(async () => {
+    const state = await readState();
+    if (
+      state.deviceId !== deviceId ||
+      state.token !== token ||
+      !state.previousDeviceId
+    )
+      return;
+    if (state.migrationQueued)
+      return state.pending.find(
+        (item) => item.token_scoped && item.device_id === state.previousDeviceId
+      );
+    const cleanup: ApiRevokePushInstallationRequest = {
+      device_id: state.previousDeviceId,
+      installation_secret: newSecret(),
+      revision: 1,
+      token,
+      token_scoped: true,
+      all_profiles: true,
+      sessions: [],
+    };
+    state.pending.push(cleanup);
+    state.migrationQueued = true;
+    await writeState(state);
+    return cleanup;
+  });
+  if (!job) return false;
+  await flushPendingPushLogouts();
+  return serialized(
+    async () =>
+      !(await readState()).pending.some(
+        (item) => jobNamespace(item) === jobNamespace(job)
+      )
+  );
 }
 
 /** Persist only a revocation request in secure storage before removing active credentials. */
@@ -226,21 +301,39 @@ async function sendPushLogout(
   }
 }
 
+function jobNamespace(job: ApiRevokePushInstallationRequest): string {
+  return `${job.device_id}:${job.installation_secret}`;
+}
 async function drainPushLogouts(): Promise<boolean> {
   let reconciled = false;
+  const failed = new Set<string>();
   for (;;) {
-    const job = await serialized(async () => (await readState()).pending[0]);
+    const job = await serialized(async () => {
+      const state = await readState();
+      const available = state.pending.filter(
+        (item) => !failed.has(jobNamespace(item))
+      );
+      // Current-device logout must not wait behind an unreachable old phone.
+      return (
+        available.find((item) => item.device_id === state.deviceId) ??
+        available[0]
+      );
+    });
     if (!job) return reconciled;
     try {
       await sendPushLogout(job);
     } catch {
-      // Retry on app activation/reconnect and before any new registration.
-      return reconciled;
+      // Preserve order within each installation/credential, but continue work
+      // in independent namespaces. Failure never discards deletion proof.
+      failed.add(jobNamespace(job));
+      continue;
     }
     await serialized(async () => {
       const state = await readState();
       state.pending = state.pending.filter(
-        (pending) => pending.revision !== job.revision
+        (pending) =>
+          jobNamespace(pending) !== jobNamespace(job) ||
+          pending.revision !== job.revision
       );
       await writeState(state);
     });

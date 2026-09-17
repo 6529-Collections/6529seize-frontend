@@ -1,81 +1,58 @@
-import * as Sentry from "@sentry/nextjs";
 import { SecureStoragePlugin } from "capacitor-secure-storage-plugin";
 import { v4 as uuidv4 } from "uuid";
+import { z } from "zod";
 
-const DEVICE_ID_KEY = "stable_device_id";
-const RECOVERABLE_SECURE_STORAGE_ERROR_PATTERNS = [
-  "item with given key does not exist",
-  "illegalblocksizeexception",
-  "keystoreexception",
-];
-let inFlightStableDeviceIdPromise: Promise<string> | null = null;
+const BINDING_KEY = "push-device-binding-v1";
+const bindingSchema = z.object({
+  nativeId: z.string().min(1),
+  deviceId: z.string().min(1).max(100),
+  previousDeviceId: z.string().min(1).max(100).optional(),
+});
+type PushDeviceIdentity = z.infer<typeof bindingSchema>;
+let inFlightIdentity: Promise<PushDeviceIdentity> | undefined;
 
-function getErrorMessage(error: unknown): string {
-  if (error instanceof Error) {
-    return error.message;
-  }
-  return String(error);
-}
-
-function isRecoverableSecureStorageError(error: unknown): boolean {
-  const message = getErrorMessage(error).toLowerCase();
-  return RECOVERABLE_SECURE_STORAGE_ERROR_PATTERNS.some((pattern) =>
-    message.includes(pattern)
-  );
-}
-
-async function createAndPersistDeviceId(): Promise<string> {
-  const newId = uuidv4();
-  await SecureStoragePlugin.set({
-    key: DEVICE_ID_KEY,
-    value: newId,
-  });
-  return newId;
-}
-
-async function resolveStableDeviceId(): Promise<string> {
+async function readOptional(key: string): Promise<string | undefined> {
   try {
-    const result = await SecureStoragePlugin.get({ key: DEVICE_ID_KEY });
-    if (typeof result.value === "string" && result.value.trim().length > 0) {
-      return result.value;
-    }
-
-    Sentry.addBreadcrumb({
-      category: "notifications",
-      level: "warning",
-      message: "Recovered empty stable_device_id value from secure storage",
-      data: { key: DEVICE_ID_KEY },
-    });
-
-    return await createAndPersistDeviceId();
+    return (await SecureStoragePlugin.get({ key })).value;
   } catch (error) {
-    if (!isRecoverableSecureStorageError(error)) {
-      throw error;
-    }
-
-    Sentry.addBreadcrumb({
-      category: "notifications",
-      level: "warning",
-      message: "Recovered stable_device_id secure-storage read failure",
-      data: {
-        key: DEVICE_ID_KEY,
-        error: getErrorMessage(error),
-      },
-    });
-
-    return await createAndPersistDeviceId();
+    const message = error instanceof Error ? error.message : String(error);
+    if (/item with given key does not exist|not found/i.test(message)) return;
+    // An unavailable keychain must never silently rotate the installation.
+    throw error;
   }
 }
 
-/**
- * Retrieves a stable device ID from secure storage if it exists,
- * otherwise generates a new one, stores it, and returns it.
- */
+async function resolveIdentity(): Promise<PushDeviceIdentity> {
+  const { Device } = await import("@capacitor/device");
+  const { identifier } = await Device.getId();
+  if (!identifier.trim())
+    throw new Error("Native device identity unavailable");
+  const stored = await readOptional(BINDING_KEY);
+  const binding = stored ? bindingSchema.parse(JSON.parse(stored)) : undefined;
+  if (binding?.nativeId === identifier) return binding;
+  // Native vendor/app device IDs distinguish a restored backup on another
+  // phone. Never use the copied legacy UUID as the new delivery namespace.
+  const previousDeviceId =
+    binding?.deviceId ?? (await readOptional("stable_device_id"));
+  const identity: PushDeviceIdentity = {
+    nativeId: identifier,
+    deviceId: uuidv4(),
+    ...(previousDeviceId ? { previousDeviceId } : {}),
+  };
+  await SecureStoragePlugin.set({
+    key: BINDING_KEY,
+    value: JSON.stringify(identity),
+  });
+  return identity;
+}
+
+export function getPushDeviceIdentity(): Promise<PushDeviceIdentity> {
+  inFlightIdentity ??= resolveIdentity().finally(() => {
+    inFlightIdentity = undefined;
+  });
+  return inFlightIdentity;
+}
+
 export async function getStableDeviceId(): Promise<string> {
-  if (!inFlightStableDeviceIdPromise) {
-    inFlightStableDeviceIdPromise = resolveStableDeviceId().finally(() => {
-      inFlightStableDeviceIdPromise = null;
-    });
-  }
-  return await inFlightStableDeviceIdPromise;
+  return (await getPushDeviceIdentity()).deviceId;
 }

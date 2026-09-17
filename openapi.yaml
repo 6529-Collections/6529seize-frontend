@@ -34251,6 +34251,13 @@ components:
         installation_secret:
           type: string
           description: Private installation credential stored in native secure storage.
+        previous_device_id:
+          type: string
+          maxLength: 100
+          description: >-
+            Copy this authenticated profile's existing preferences to a
+            replacement installation, without moving registrations or
+            overwriting destination preferences.
         installation_revision:
           type: integer
           format: int64
@@ -34453,6 +34460,12 @@ components:
         - sessions
         - all_profiles
       properties:
+        token_scoped:
+          type: boolean
+          description: >-
+            Remove only registrations matching the supplied token and device ID.
+            Uses an independent cleanup credential and revision; never claims or
+            advances the installation. Does not revoke native sessions.
         all_profiles:
           type: boolean
           description: >-

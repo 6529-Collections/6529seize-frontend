@@ -1,5 +1,6 @@
 jest.mock("@/services/notifications/push-installation", () => ({
   preparePushInstallationRegistration: jest.fn().mockResolvedValue({}),
+  completePushInstallationMigration: jest.fn().mockResolvedValue(undefined),
   flushPendingPushLogouts: jest.fn().mockResolvedValue(undefined),
 }));
 import {
@@ -63,6 +64,7 @@ jest.mock("@/services/api/common-api", () => ({
 jest.mock("@/services/auth/auth.utils", () => ({
   AUTH_TOKEN_CHANGED_EVENT: "6529-auth-token-changed",
   getAuthJwt: jest.fn(() => "test-jwt"),
+  getConnectedWalletAccounts: jest.fn(() => []),
   isAuthJwtUsable: jest.fn(
     (jwt: string | null | undefined) =>
       typeof jwt === "string" && jwt.length > 0
