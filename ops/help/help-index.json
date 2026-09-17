@@ -2696,6 +2696,7 @@
         "Each latest-profile-post card identifies the author, posting time, and originating Profile Wave; curated replies can also appear. On small screens, the default /waves view remains a Wave navigator.",
         "In Worth Checking Out, each avatar and its overlaid score shield form one wave navigation link; hovering or focusing the combined link shows score details.",
         "Every Worth Checking Out recommendation also appears in All at its recent-activity position; Joined normally includes only waves the user has joined.",
+        "Switching All and Joined preserves list position instead of jumping to the active wave; a shorter list can clamp the position. Selecting another wave reveals its active row again.",
         "A Wave opened from a direct link remains visible and highlighted in the left sidebar even when it is not followed, pinned, or present in the loaded overview; this temporary route context does not join or pin it.",
         "When a direct link opens a subwave, the sidebar surfaces its visible parent, loads and expands the subwave list, reveals the selected child row, and keeps that parent tree ahead of paginated activity rows so every sibling remains reachable.",
         "An active subwave header shows an up-left arrow and a linked parent wave name; selecting that name opens the parent wave.",
@@ -3066,7 +3067,7 @@
         "Desktop wave information sections live in the right sidebar in this order: About, REP, and Configuration. Open them with the Show right sidebar icon in the conversation header.",
         "On desktop and tablet web, Add REP or Edit REP appears to the left of the conversation header icon buttons. It is also available in the right sidebar's About section, which is the REP entry point on compact web. The action appears for connected non-author, non-proxy profiles and is absent for DMs. A small shield and number beside the desktop wave name opens Wave Score details and Learn more.",
         "Configuration is the consolidated rules and settings surface. It includes wave type, access, chat, display, schedules and other generated rules, guidelines, acceptance-required rules, admin-only shared controls, and personal display controls. Approve waves place Approve after, Hold time, Max approved drops, and Approval window directly after Schedule. Shared edits use gears, while read-only creation-time values have no edit control.",
-        "For Rank and Approve waves, the desktop right sidebar adds Voters and Activity after the three base sections; Activity moves into More at the fixed panel width.",
+        "For Rank and Approve waves, the desktop right sidebar adds Voters and Activity as direct tabs after the three base sections. Scroll the tab strip horizontally if needed. A single remaining section is shown directly; More is used only when it contains at least two sections.",
         "In the native app, the main About view opens compact Overview, REP, and Configuration pills; Rank and Approve waves expose Voters and Activity from More.",
         "While native About is active, its information pills replace the subwave pills in the same contextual row; selecting another main tab restores the subwave pills.",
         "Selecting a section switches information for the active wave without navigating away from the thread."
