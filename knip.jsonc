@@ -150,7 +150,6 @@
       "babel-jest",
       "eslint-plugin-jsx-a11y",
       "identity-obj-proxy",
-      "istanbul-lib-coverage",
       "jest-environment-jsdom",
       "nodemon",
       "@openapitools/openapi-generator-cli",
