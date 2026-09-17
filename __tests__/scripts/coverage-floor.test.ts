@@ -1,3 +1,5 @@
+/** @jest-environment node */
+
 import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
@@ -128,8 +130,11 @@ describe("coverage-floor workflow", () => {
 
   it("names both checks and preserves their failures", () => {
     expect(workflow.name).toBe("Full Jest suite and coverage");
-    const steps = workflow.jobs["coverage-floor"].steps;
-    for (const id of ["jest", "coverage"]) {
+    for (const [job, id] of [
+      ["jest", "jest"],
+      ["coverage-floor", "coverage"],
+    ] as const) {
+      const steps = workflow.jobs[job].steps;
       const step = steps.find(
         (candidate: { id?: string }) => candidate.id === id
       );
@@ -139,10 +144,11 @@ describe("coverage-floor workflow", () => {
   });
 
   it.each([
-    ["failure", "success", "The Jest step failed."],
+    ["failure", "success", "The Jest shards did not all pass."],
     ["success", "failure", "The coverage floor step failed."],
-    ["failure", "skipped", "no coverage summary was produced"],
-    ["skipped", "skipped", "The Jest suite did not run."],
+    ["failure", "skipped", "Coverage was not checked."],
+    ["skipped", "skipped", "The Jest shards did not all pass."],
+    ["cancelled", "success", "The Jest shards did not all pass."],
     ["success", "success", "| Coverage floor | success |"],
   ])(
     "summarizes Jest %s and coverage %s independently",
@@ -153,7 +159,7 @@ describe("coverage-floor workflow", () => {
       );
       expect(step.if).toBe("always()");
       expect(step.env).toEqual({
-        JEST_OUTCOME: "${{ steps.jest.outcome }}",
+        JEST_OUTCOME: "${{ needs.jest.result }}",
         COVERAGE_OUTCOME: "${{ steps.coverage.outcome }}",
       });
       const root = fs.mkdtempSync(
@@ -185,25 +191,196 @@ describe("coverage-floor workflow", () => {
     }
   );
 
-  it("reports the coverage result when a failing suite still writes a summary", () => {
-    const workflow = YAML.parse(
+  it("collects all four raw shards without cancelling peers after failure", () => {
+    const shards = workflow.jobs.jest;
+    const gate = workflow.jobs["coverage-floor"];
+    expect(shards.strategy).toEqual({
+      "fail-fast": false,
+      matrix: { shard: [1, 2, 3, 4] },
+    });
+    expect(shards).not.toHaveProperty("continue-on-error");
+    expect(gate.needs).toBe("jest");
+    expect(gate.if).toContain("always()");
+    for (const job of [shards, gate]) {
+      expect(job.if).toContain(
+        "github.event.pull_request.head.repo.full_name == github.repository"
+      );
+    }
+    const run = shards.steps.find(
+      (step: { id?: string }) => step.id === "jest"
+    );
+    expect(run.run).toContain('--shard="$JEST_SHARD"');
+    expect(run.env.JEST_SHARD).toBe(
+      "${{ matrix.shard }}/${{ strategy.job-total }}"
+    );
+    expect(run.run).toContain("--coverageReporters=json");
+    const upload = shards.steps.find((step: { uses?: string }) =>
+      step.uses?.startsWith("actions/upload-artifact@")
+    );
+    expect(upload.if).toBe("always()");
+    expect(upload.with).toMatchObject({
+      name: "jest-coverage-${{ matrix.shard }}",
+      path: "coverage/coverage-final.json",
+      "if-no-files-found": "error",
+    });
+    const merge = gate.steps.find(
+      (step: { id?: string }) => step.id === "coverage"
+    );
+    expect(merge.run).toContain("--merge");
+    expect(merge.run).toContain("jest-coverage-{1,2,3,4}/coverage-final.json");
+    expect(merge).not.toHaveProperty("continue-on-error");
+    expect(merge).not.toHaveProperty("if");
+  });
+
+  it.each(["success", "failure", "cancelled", "skipped"])(
+    "only passes the aggregate Jest check for success, received %s",
+    (outcome) => {
+      const step = workflow.jobs["coverage-floor"].steps.find(
+        (candidate: { name?: string }) =>
+          candidate.name === "Require all Jest shards to pass"
+      );
+      expect(step.if).toBe("always()");
+      expect(step.env.JEST_OUTCOME).toBe("${{ needs.jest.result }}");
+      const result = spawnSync(
+        "bash",
+        ["-e", "-o", "pipefail", "-c", step.run],
+        {
+          encoding: "utf8",
+          env: { ...process.env, JEST_OUTCOME: outcome },
+        }
+      );
+      expect(result.status).toBe(outcome === "success" ? 0 : 1);
+    }
+  );
+});
+
+const fileCoverage = (file: string, hits: [number, number]) => ({
+  path: file,
+  statementMap: {
+    0: { start: { line: 1, column: 0 }, end: { line: 1, column: 10 } },
+    1: { start: { line: 2, column: 0 }, end: { line: 2, column: 10 } },
+  },
+  fnMap: {
+    0: {
+      name: "example",
+      decl: { start: { line: 1, column: 0 }, end: { line: 1, column: 5 } },
+      loc: { start: { line: 1, column: 0 }, end: { line: 2, column: 10 } },
+      line: 1,
+    },
+  },
+  branchMap: {
+    0: {
+      type: "if",
+      loc: { start: { line: 1, column: 0 }, end: { line: 2, column: 10 } },
+      locations: [
+        { start: { line: 1, column: 0 }, end: { line: 1, column: 10 } },
+        { start: { line: 2, column: 0 }, end: { line: 2, column: 10 } },
+      ],
+      line: 1,
+    },
+  },
+  s: { 0: hits[0], 1: hits[1] },
+  f: { 0: hits[0] + hits[1] },
+  b: { 0: hits },
+});
+
+describe("coverage-floor shard merging", () => {
+  let root: string;
+  let shards: string[];
+
+  beforeEach(() => {
+    root = fs.mkdtempSync(path.join(os.tmpdir(), "coverage-shards-"));
+    writeSummary(root, {
+      lines: 50,
+      statements: 50,
+      functions: 50,
+      branches: 50,
+    });
+    expect(runFloor(root, ["--update"]).status).toBe(0);
+    const source = path.join(root, "source.ts");
+    const untested = path.join(root, "untested.ts");
+    const counts: [number, number][] = [
+      [1, 0],
+      [0, 1],
+      [0, 0],
+      [0, 0],
+    ];
+    shards = counts.map((hits, index) => {
+      const file = path.join(root, `shard-${index}.json`);
+      fs.writeFileSync(
+        file,
+        JSON.stringify({
+          [source]: fileCoverage(source, hits),
+          [untested]: fileCoverage(untested, [0, 0]),
+        })
+      );
+      return file;
+    });
+    fs.rmSync(path.join(root, "coverage", "coverage-summary.json"));
+  });
+
+  afterEach(() => {
+    fs.rmSync(root, { recursive: true, force: true });
+  });
+
+  it("unions complementary hits and counts untested files once", () => {
+    const result = runFloor(root, ["--merge", ...shards]);
+    expect({ status: result.status, stderr: result.stderr }).toEqual({
+      status: 0,
+      stderr: "",
+    });
+    const summary = JSON.parse(
       fs.readFileSync(
-        path.join(process.cwd(), ".github/workflows/coverage-floor.yml"),
+        path.join(root, "coverage", "coverage-summary.json"),
         "utf8"
       )
-    ) as {
-      jobs: {
-        "coverage-floor": {
-          steps: Array<{ name?: string; if?: string }>;
-        };
-      };
-    };
-    const step = workflow.jobs["coverage-floor"].steps.find(
-      ({ name }) => name === "Check coverage against baseline"
     );
+    for (const metric of ["lines", "statements", "branches"]) {
+      expect(summary.total[metric]).toMatchObject({
+        total: 4,
+        covered: 2,
+        pct: 50,
+      });
+    }
+    expect(summary.total.functions).toMatchObject({
+      total: 2,
+      covered: 1,
+      pct: 50,
+    });
+    expect(Object.keys(summary)).toHaveLength(3);
+  });
 
-    expect(step?.if).toBe(
-      "always() && hashFiles('coverage/coverage-summary.json') != ''"
+  it("still fails the unchanged baseline when merged coverage regresses", () => {
+    const data = JSON.parse(
+      fs.readFileSync(path.join(root, "shard-1.json"), "utf8")
     );
+    const source = path.join(root, "source.ts");
+    data[source] = fileCoverage(source, [0, 0]);
+    fs.writeFileSync(path.join(root, "shard-1.json"), JSON.stringify(data));
+    const result = runFloor(root, ["--merge", ...shards]);
+    expect(result.status).toBe(1);
+    expect(result.stderr).toContain("branches coverage dropped 25.00 points");
+  });
+
+  it.each(["missing", "invalid", "empty"])(
+    "fails closed on a %s shard",
+    (kind) => {
+      const broken = path.join(root, "shard-3.json");
+      if (kind === "missing") fs.rmSync(broken);
+      else fs.writeFileSync(broken, kind === "empty" ? "{}" : "not json");
+      const result = runFloor(root, ["--merge", ...shards]);
+      expect(result.status).toBe(1);
+      expect(result.stderr).toContain("Could not merge coverage:");
+      if (kind === "missing") expect(result.stderr).toContain(broken);
+      expect(
+        fs.existsSync(path.join(root, "coverage", "coverage-summary.json"))
+      ).toBe(false);
+    }
+  );
+
+  it("rejects merge mode with no shard inputs", () => {
+    const result = runFloor(root, ["--merge"]);
+    expect(result.status).toBe(1);
+    expect(result.stderr).toContain("--merge requires every shard");
   });
 });

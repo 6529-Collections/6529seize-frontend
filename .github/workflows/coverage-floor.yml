@@ -34,15 +34,18 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  coverage-floor:
-    name: Full Jest suite and coverage
+  jest:
+    name: Jest shard ${{ matrix.shard }}/4
     if: >-
       github.event_name != 'pull_request' ||
       github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     timeout-minutes: 60
-    permissions:
-      contents: read
+    strategy:
+      # Preserve every shard's result even if another shard fails.
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
 
     steps:
       - name: Checkout code
@@ -77,21 +80,107 @@ jobs:
           SFW_BIN: ${{ steps.socket_firewall.outputs.firewall-path-binary }}
         run: ./bin/6529 ci
 
-      - name: Run full Jest suite with coverage
+      - name: Restore Jest cache
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        with:
+          path: ${{ runner.temp }}/jest-cache
+          key: jest-v1-${{ runner.os }}-${{ runner.arch }}-node22-${{ hashFiles('pnpm-lock.yaml', 'jest.config.js', 'jest.setup.js', 'tsconfig*.json') }}-shard${{ matrix.shard }}-${{ github.sha }}
+          restore-keys: |
+            jest-v1-${{ runner.os }}-${{ runner.arch }}-node22-${{ hashFiles('pnpm-lock.yaml', 'jest.config.js', 'jest.setup.js', 'tsconfig*.json') }}-shard${{ matrix.shard }}-
+
+      - name: Run Jest shard with coverage
         id: jest
+        env:
+          JEST_SHARD: ${{ matrix.shard }}/${{ strategy.job-total }}
+          JEST_CACHE: ${{ runner.temp }}/jest-cache
         run: |
           NODE_ENV=test ./bin/6529 exec jest --silent --verbose=false --ci \
-            --coverage --coverageReporters=json-summary
+            --shard="$JEST_SHARD" --cacheDirectory="$JEST_CACHE" \
+            --coverage --coverageReporters=json
 
-      - name: Check coverage against baseline
+      # Missing coverage (including an empty test shard) must fail, not silently
+      # reduce the set of tests contributing to the final coverage verdict.
+      - name: Upload shard coverage
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: jest-coverage-${{ matrix.shard }}
+          path: coverage/coverage-final.json
+          if-no-files-found: error
+          overwrite: true
+          retention-days: 7
+
+  coverage-floor:
+    name: Full Jest suite and coverage
+    needs: jest
+    if: >-
+      always() &&
+      (github.event_name != 'pull_request' ||
+      github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+          filter: blob:none
+
+      - name: Install Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "22"
+
+      - name: Activate pinned pnpm
+        run: |
+          corepack enable pnpm
+          corepack prepare "$(node -p 'require("./package.json").packageManager')" --activate
+          pnpm --version
+
+      - name: Install Socket Firewall
+        id: socket_firewall
+        uses: SocketDev/action@2d3f25590c6ed6ba11a9a14c064d962a3a04698f # v1.3.1
+        with:
+          mode: firewall
+
+      - name: Assert npm lockfile is absent
+        run: ./bin/6529 run guard:no-package-lock
+
+      - name: Install dependencies
+        env:
+          SFW_BIN: ${{ steps.socket_firewall.outputs.firewall-path-binary }}
+        run: ./bin/6529 ci
+
+      - name: Download shard coverage
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+        with:
+          pattern: jest-coverage-*
+          path: coverage/shards
+
+      - name: Merge coverage and check against baseline
         id: coverage
-        if: always() && hashFiles('coverage/coverage-summary.json') != ''
-        run: node scripts/coverage-floor.cjs
+        run: |
+          ./bin/6529 exec node scripts/coverage-floor.cjs --merge \
+            coverage/shards/jest-coverage-{1,2,3,4}/coverage-final.json
+
+      # Run even after a failed merge/download so test failures remain explicit.
+      # Keep this after merging to report coverage independently of test success.
+      - name: Require all Jest shards to pass
+        if: always()
+        env:
+          JEST_OUTCOME: ${{ needs.jest.result }}
+        run: |
+          if [ "$JEST_OUTCOME" != success ]; then
+            echo "::error::Jest shards did not all pass (result: $JEST_OUTCOME)."
+            exit 1
+          fi
 
       - name: Summarize test and coverage outcomes
         if: always()
         env:
-          JEST_OUTCOME: ${{ steps.jest.outcome }}
+          JEST_OUTCOME: ${{ needs.jest.result }}
           COVERAGE_OUTCOME: ${{ steps.coverage.outcome }}
         run: |
           {
@@ -102,16 +191,13 @@ jobs:
             printf '| Full Jest suite | %s |\n' "$JEST_OUTCOME"
             printf '| Coverage floor | %s |\n' "$COVERAGE_OUTCOME"
             echo ""
-            if [ "$JEST_OUTCOME" = failure ]; then
-              echo "The Jest step failed. Inspect its failing tests or runner error; a passing coverage floor does not make the suite pass."
+            if [ "$JEST_OUTCOME" != success ]; then
+              echo "The Jest shards did not all pass. Inspect failing tests or runner/setup errors; a passing coverage floor does not make the suite pass."
             fi
             if [ "$COVERAGE_OUTCOME" = failure ]; then
-              echo "The coverage floor step failed. Inspect its report for a coverage regression or invalid coverage data."
+              echo "The coverage floor step failed. Inspect its report for a coverage regression, missing shard, or invalid coverage data."
             elif [ "$COVERAGE_OUTCOME" = skipped ]; then
-              echo "Coverage was not checked because no coverage summary was produced."
-            fi
-            if [ "$JEST_OUTCOME" = skipped ]; then
-              echo "The Jest suite did not run. Inspect earlier setup steps."
+              echo "Coverage was not checked. Inspect dependency installation and shard artifact downloads."
             fi
           } >> "$GITHUB_STEP_SUMMARY"
 
