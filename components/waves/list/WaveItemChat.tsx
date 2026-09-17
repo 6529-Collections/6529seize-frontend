@@ -14,15 +14,13 @@ export default function WaveItemChat({
   const { wave } = useWavePreviewById(waveId);
 
   return (
-    <div className="tw-flex tw-w-full tw-items-stretch tw-gap-x-1">
+    <div className="tailwind-scope tw-flex tw-w-full tw-max-w-2xl tw-items-stretch tw-gap-x-1">
       <div className="tw-min-w-0 tw-flex-1">
-        <div className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-700">
-          <WaveItemWide
-            wave={wave}
-            userPlaceholder={href}
-            titlePlaceholder={waveId}
-          />
-        </div>
+        <WaveItemWide
+          wave={wave}
+          userPlaceholder={href}
+          titlePlaceholder={waveId}
+        />
       </div>
       <ChatItemHrefButtons href={href} relativeHref={`/waves/${waveId}`} />
     </div>
