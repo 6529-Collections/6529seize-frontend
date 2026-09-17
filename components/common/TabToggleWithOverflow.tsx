@@ -85,6 +85,10 @@ export const TabToggleWithOverflow: React.FC<TabToggleWithOverflowProps> = ({
     [maxVisibleTabs]
   );
   const [visibleTabs, overflowTabs] = React.useMemo(() => {
+    if (options.length <= clampedMax + 1) {
+      return [options, []] as const;
+    }
+
     const v = options.slice(0, clampedMax);
     const o = options.length > clampedMax ? options.slice(clampedMax) : [];
     return [v, o] as const;

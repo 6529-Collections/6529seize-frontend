@@ -72,7 +72,9 @@ export default function WaveRepButton({
         />
         <span>{actionText}</span>
       </Button>
-      {showTooltip && <MyStreamActionTooltip id={tooltipId} />}
+      {showTooltip && (
+        <MyStreamActionTooltip id={tooltipId} place="bottom-end" />
+      )}
       {isModalOpen && (
         <WaveRepRatingModal wave={wave} onClose={() => setIsModalOpen(false)} />
       )}
