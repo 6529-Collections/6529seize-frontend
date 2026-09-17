@@ -1,12 +1,7 @@
 "use client";
 
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import type React from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getAddress, isAddress } from "viem";
 import { useAccount } from "wagmi";
 import { MAX_CONNECTED_PROFILES } from "@/constants/constants";
