@@ -1,7 +1,7 @@
 "use client";
 
 import type { KeyboardEvent, MouseEvent, ReactNode } from "react";
-import { useCallback } from "react";
+import { useCallback, useId } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -10,9 +10,12 @@ import {
   UserGroupIcon,
 } from "@heroicons/react/24/outline";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import { getRandomColorWithSeed, numberWithCommas } from "@/helpers/Helpers";
+import { getRandomColorWithSeed } from "@/helpers/Helpers";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { formatInteger } from "@/i18n/format";
+import { t, tRich } from "@/i18n/messages";
 import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "@/components/user/utils/UserCICAndLevel";
@@ -116,6 +119,8 @@ export default function WaveItemWide({
   readonly titlePlaceholder?: string | undefined;
 }) {
   const router = useRouter();
+  const locale = useBrowserLocale();
+  const authorLevelId = useId();
   const author = wave?.author;
   const authorHref = author?.handle ? `/${author.handle}` : undefined;
   const authorLevel = author?.level ?? 0;
@@ -156,8 +161,14 @@ export default function WaveItemWide({
 
   const authorLevelBadge = (
     <div className="tw-inline-flex tw-flex-shrink-0">
-      <span className="tw-sr-only">Level </span>
-      <UserCICAndLevel level={authorLevel} size={UserCICAndLevelSize.SMALL} />
+      <span id={authorLevelId} className="tw-sr-only">
+        {t(locale, "waves.preview.level", {
+          level: formatInteger(locale, authorLevel),
+        })}
+      </span>
+      <span aria-hidden="true" className="tw-inline-flex">
+        <UserCICAndLevel level={authorLevel} size={UserCICAndLevelSize.SMALL} />
+      </span>
     </div>
   );
 
@@ -204,6 +215,7 @@ export default function WaveItemWide({
       aria-label={
         author?.handle ? `View @${author.handle}` : "View author profile"
       }
+      aria-describedby={authorLevelId}
     >
       {authorAvatar}
       <span className="tw-truncate tw-text-sm tw-font-semibold tw-leading-5">
@@ -262,6 +274,10 @@ export default function WaveItemWide({
 
   const dropsCount = wave?.metrics.drops_count ?? 0;
   const subscribersCount = wave?.metrics.subscribers_count ?? 0;
+  const dropsMessageKey =
+    new Intl.PluralRules(locale).select(dropsCount) === "one"
+      ? "waves.preview.drops.one"
+      : "waves.preview.drops.other";
 
   return (
     <CardContainer
@@ -305,20 +321,36 @@ export default function WaveItemWide({
                     aria-hidden="true"
                     className="tw-h-3.5 tw-w-3.5 tw-flex-shrink-0 tw-text-iron-400"
                   />
-                  <span className="tw-font-medium tw-tabular-nums tw-text-iron-200">
-                    {numberWithCommas(dropsCount)}
+                  <span className="tw-inline-flex tw-gap-[5px]">
+                    {tRich(locale, dropsMessageKey, {
+                      count: (
+                        <span
+                          key="count"
+                          className="tw-font-medium tw-tabular-nums tw-text-iron-200"
+                        >
+                          {formatInteger(locale, dropsCount)}
+                        </span>
+                      ),
+                    })}
                   </span>
-                  <span>{dropsCount === 1 ? "Drop" : "Drops"}</span>
                 </span>
                 <span className="tw-inline-flex tw-items-center tw-gap-[5px]">
                   <UserGroupIcon
                     aria-hidden="true"
                     className="tw-h-3.5 tw-w-3.5 tw-flex-shrink-0 tw-text-iron-400"
                   />
-                  <span className="tw-font-medium tw-tabular-nums tw-text-iron-200">
-                    {numberWithCommas(subscribersCount)}
+                  <span className="tw-inline-flex tw-gap-[5px]">
+                    {tRich(locale, "waves.preview.joined", {
+                      count: (
+                        <span
+                          key="count"
+                          className="tw-font-medium tw-tabular-nums tw-text-iron-200"
+                        >
+                          {formatInteger(locale, subscribersCount)}
+                        </span>
+                      ),
+                    })}
                   </span>
-                  <span>Joined</span>
                 </span>
               </div>
               <div
