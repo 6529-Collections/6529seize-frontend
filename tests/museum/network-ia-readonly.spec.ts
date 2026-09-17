@@ -10,6 +10,7 @@ import {
   waitForRouteReady,
 } from "../testHelpers";
 import { gotoDocumentWithTransientRetry } from "../support/routeReadiness";
+import { expectMuseumPath } from "../support/museumNavigation";
 import {
   expectAcquisitionsAcceptance,
   expectCollectionAcceptance,
@@ -40,7 +41,7 @@ async function openRoute(page: Page, path: string) {
     200
   );
   await waitForRouteReady(page);
-  await expect(page).toHaveURL((url) => url.pathname === path);
+  await expectMuseumPath(page, path);
 }
 
 async function retainScreenshot(page: Page, testInfo: TestInfo, name: string) {
@@ -485,9 +486,7 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
       testInfo,
       "museum-acquisition-conflict-at-its-edges"
     );
-    await expect(
-      conflictWorksRegion.getByRole("figure").first()
-    ).toContainText(
+    await expect(conflictWorksRegion.getByRole("figure").first()).toContainText(
       "Patrolling the border between the Negev Desert and Jordan"
     );
     await expectImageLoadedAfterScroll(
