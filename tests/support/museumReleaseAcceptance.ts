@@ -336,9 +336,8 @@ export async function expectResearchAcceptance(page: Page) {
   await expect(practice).toContainText("The Open Museum");
   await expect(practice).toContainText("From repository to chain");
 
-  const imageArticles = await page
-    .locator("main article")
-    .evaluateAll((articles) =>
+  const imageArticles = await page.locator("main article").evaluateAll(
+    (articles) =>
       articles.flatMap((article) => {
         const image = article.querySelector("img");
         if (!(image instanceof HTMLImageElement)) return [];
@@ -351,7 +350,7 @@ export async function expectResearchAcceptance(page: Page) {
           },
         ];
       })
-    );
+  );
   const articlesBySource = new Map<string, string[]>();
   for (const { source, text } of imageArticles) {
     const articles = articlesBySource.get(source) ?? [];

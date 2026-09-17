@@ -486,7 +486,9 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
       testInfo,
       "museum-acquisition-conflict-at-its-edges"
     );
-    await expect(conflictWorksRegion.getByRole("figure").first()).toContainText(
+    await expect(
+      conflictWorksRegion.getByRole("figure").first()
+    ).toContainText(
       "Patrolling the border between the Negev Desert and Jordan"
     );
     await expectImageLoadedAfterScroll(
