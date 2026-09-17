@@ -128,14 +128,18 @@ beforeEach(() => {
 
 describe("NotificationsContext", () => {
   it("provides context functions", async () => {
+    const { PushNotifications } = require("@capacitor/push-notifications");
     const { result } = renderHook(() => useNotificationsContext(), { wrapper });
     expect(typeof result.current.reconcileProfileDeliveredNotifications).toBe(
       "function"
     );
-    const { PushNotifications } = require("@capacitor/push-notifications");
-    await waitFor(() => {
-      expect(PushNotifications.register).toHaveBeenCalled();
-    });
+
+    // Finish this provider's delayed iOS registration before later tests reset
+    // the shared mocks and assert that denied permissions never register.
+    await waitFor(
+      () => expect(PushNotifications.register).toHaveBeenCalledTimes(1),
+      { timeout: 2000 }
+    );
   });
 
   it("throws when used outside provider", () => {
