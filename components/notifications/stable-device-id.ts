@@ -1,4 +1,3 @@
-import { Device } from "@capacitor/device";
 import { SecureStoragePlugin } from "capacitor-secure-storage-plugin";
 import { v4 as uuidv4 } from "uuid";
 import { z } from "zod";
@@ -24,6 +23,7 @@ async function readOptional(key: string): Promise<string | undefined> {
 }
 
 async function resolveIdentity(): Promise<PushDeviceIdentity> {
+  const { Device } = await import("@capacitor/device");
   const { identifier } = await Device.getId();
   if (!identifier.trim())
     throw new Error("Native device identity unavailable");
