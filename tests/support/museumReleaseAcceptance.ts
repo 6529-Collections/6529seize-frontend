@@ -85,39 +85,45 @@ export async function expectNoUnresolvedMuseumMedia(
   imageSelector = "img"
 ) {
   await settleImages(page, `${root} ${imageSelector}`);
-  const problems = await page.locator(root).evaluateAll(
-    (roots, options) => {
-      const unresolvedMediaPattern = new RegExp(options.patternSource, "iu");
-      const isVisible = (element: Element) => {
-        const style = getComputedStyle(element);
-        const rect = element.getBoundingClientRect();
-        return (
-          style.display !== "none" &&
-          style.visibility !== "hidden" &&
-          rect.width > 0 &&
-          rect.height > 0
-        );
-      };
-      const failures: string[] = [];
-      for (const root of roots) {
-        for (const element of root.querySelectorAll(options.imageSelector)) {
-          if (!isVisible(element)) continue;
-          if (!(element instanceof HTMLImageElement)) continue;
-          if (!element.complete || element.naturalWidth === 0) {
-            failures.push(`unresolved image: ${element.alt || element.src}`);
+  // Image bytes may finish before hydration clears the rendered loading state.
+  // Wait for the same empty-problems contract instead of taking one snapshot.
+  const readProblems = () =>
+    page.locator(root).evaluateAll(
+      (roots, options) => {
+        const unresolvedMediaPattern = new RegExp(options.patternSource, "iu");
+        const isVisible = (element: Element) => {
+          const style = getComputedStyle(element);
+          const rect = element.getBoundingClientRect();
+          return (
+            style.display !== "none" &&
+            style.visibility !== "hidden" &&
+            rect.width > 0 &&
+            rect.height > 0
+          );
+        };
+        const failures: string[] = [];
+        for (const root of roots) {
+          for (const element of root.querySelectorAll(options.imageSelector)) {
+            if (!isVisible(element)) continue;
+            if (!(element instanceof HTMLImageElement)) continue;
+            if (!element.complete || element.naturalWidth === 0) {
+              failures.push(`unresolved image: ${element.alt || element.src}`);
+            }
+          }
+          for (const element of root.querySelectorAll(
+            "[role=alert], p, span"
+          )) {
+            if (!isVisible(element)) continue;
+            const text =
+              element.textContent?.replace(/\s+/gu, " ").trim() ?? "";
+            if (unresolvedMediaPattern.test(text)) failures.push(text);
           }
         }
-        for (const element of root.querySelectorAll("[role=alert], p, span")) {
-          if (!isVisible(element)) continue;
-          const text = element.textContent?.replace(/\s+/gu, " ").trim() ?? "";
-          if (unresolvedMediaPattern.test(text)) failures.push(text);
-        }
-      }
-      return [...new Set(failures)];
-    },
-    { imageSelector, patternSource: unresolvedMediaPatternSource }
-  );
-  expect(problems, problems.join("\n")).toEqual([]);
+        return [...new Set(failures)];
+      },
+      { imageSelector, patternSource: unresolvedMediaPatternSource }
+    );
+  await expect.poll(readProblems).toEqual([]);
 }
 
 export async function expectCollectionAcceptance(page: Page) {
