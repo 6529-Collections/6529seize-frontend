@@ -30,7 +30,7 @@ export default function WebSidebarAccountAvatar({
   if (!src || status === "failed") {
     return (
       <UserCircleIcon
-        className="tw-size-10 tw-text-iron-400 motion-safe:tw-animate-sidebar-account-fade-in"
+        className="tw-size-6 tw-text-iron-400 motion-safe:tw-animate-sidebar-account-fade-in"
         aria-hidden="true"
       />
     );

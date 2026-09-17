@@ -33,7 +33,10 @@ action.
 
 - During account restoration, a fixed-size shimmer appears in the account slot.
   It becomes the connect icon once signed out is confirmed, or the selected
-  profile's avatar. Avatar loading does not move surrounding controls.
+  profile's avatar. Avatar loading does not move surrounding controls. The
+  default user symbol remains 24px inside a 40px rounded frame, matching the PFP
+  footprint. Signed-out frames use a neutral border; connected frames keep their
+  connection-state colors.
 - A missing, failed, or stalled avatar uses the default user icon. If the
   profile request fails, select `Profile unavailable. Retry` to try again.
   An empty successful profile result offers `Create profile` instead. Retry

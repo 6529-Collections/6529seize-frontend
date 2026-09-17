@@ -1,9 +1,6 @@
 "use client";
 
-import {
-  EllipsisVerticalIcon,
-  UserCircleIcon,
-} from "@heroicons/react/24/outline";
+import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
 import { memo, useEffect, useId, useRef, useState } from "react";
 import Link from "next/link";
 import { useClickAway } from "react-use";
@@ -96,7 +93,7 @@ function WebSidebarUser({
   const rowClasses =
     "motion-safe:tw-animate-sidebar-account-fade-in tw-flex tw-h-14 tw-w-full tw-items-center tw-gap-x-2 tw-rounded-xl tw-border-none tw-bg-transparent tw-px-2 tw-py-2";
   const avatarClasses =
-    "tw-relative tw-flex tw-size-10 tw-shrink-0 tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-xl";
+    "tw-relative tw-flex tw-size-10 tw-shrink-0 tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-xl tw-bg-iron-900 tw-ring-2 tw-ring-inset tw-ring-white/10";
   const resolvedPfp = profile?.pfp ? resolveIpfsUrlSync(profile.pfp) : null;
 
   useEffect(
@@ -149,7 +146,7 @@ function WebSidebarUser({
           data-tooltip-hidden={!isCollapsed}
         >
           <span className={avatarClasses}>
-            <UserCircleIcon className="tw-size-10" aria-hidden="true" />
+            <WebSidebarAccountAvatar src={null} />
           </span>
           {!isCollapsed && (
             <span className="tw-truncate tw-text-sm tw-font-medium">
@@ -202,7 +199,7 @@ function WebSidebarUser({
           data-tooltip-hidden={!isCollapsed}
         >
           <span className={avatarClasses}>
-            <UserCircleIcon className="tw-size-10" aria-hidden="true" />
+            <WebSidebarAccountAvatar src={null} />
           </span>
           {!isCollapsed && (
             <span className="tw-truncate tw-text-sm tw-font-medium">

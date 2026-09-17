@@ -210,3 +210,11 @@ it("keeps Update in the same utility row when Notifications appears or disappear
   expect(screen.getByRole("button", { name: "Update" })).toBe(update);
   expect(utilities?.lastElementChild).toBe(utilityRow);
 });
+
+it("places Update directly after Search when Share is unavailable", () => {
+  render(<WebSidebar {...sidebarProps} />);
+  const search = screen.getByRole("button", { name: "Search" });
+  expect(search.parentElement?.nextElementSibling).toContainElement(
+    screen.getByRole("button", { name: "Update" })
+  );
+});

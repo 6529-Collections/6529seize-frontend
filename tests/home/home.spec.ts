@@ -4,6 +4,7 @@ import {
   test,
   waitForRouteReady,
 } from "../testHelpers";
+import { getAppEnvironment } from "../../config/appEnvironment";
 import { isDesktopWebProject } from "../support/surfaceSimulation";
 
 test.describe("Home Page @smoke @medium @large", () => {
@@ -70,7 +71,18 @@ test("desktop account updates do not move utilities, including in short expanded
     await route.fulfill({ json: { stale: true } });
   });
   try {
-    await page.goto("/about", { waitUntil: "domcontentloaded" });
+    const response = await page.goto("/about", {
+      waitUntil: "domcontentloaded",
+    });
+    const environment = getAppEnvironment(page.url());
+    const serverHtml = await response!.text();
+    if (environment.badge) {
+      expect(serverHtml).toContain(
+        `aria-label="Environment: ${environment.badge} (${environment.host})"`
+      );
+    } else {
+      expect(serverHtml).not.toContain('aria-label="Environment:');
+    }
     const sidebar = page.getByLabel("Primary sidebar", { exact: true });
     const search = sidebar.getByRole("button", {
       name: "Search",
@@ -137,6 +149,18 @@ test("desktop account updates do not move utilities, including in short expanded
       utilitiesBox!.y + 1
     );
     await expectNoHorizontalOverflow(page);
+
+    // Unsupported Share routes pack Update directly below Search, with no hole.
+    await page.goto("/notifications", { waitUntil: "domcontentloaded" });
+    await expect(
+      sidebar.getByRole("button", { name: "Share this page", exact: true })
+    ).toHaveCount(0);
+    await expect(update).toBeVisible();
+    const searchBox = await search.boundingBox();
+    const updateBox = await update.boundingBox();
+    expect(searchBox).not.toBeNull();
+    expect(updateBox).not.toBeNull();
+    expect(updateBox!.y).toBeCloseTo(searchBox!.y + searchBox!.height, 0);
   } finally {
     releaseVersion();
   }

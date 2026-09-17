@@ -42,14 +42,17 @@ On web layouts, route switching is sidebar-first.
 - Gated primary row: `Drop Forge`, after `About`, only when the connected
   wallet can access it.
 - Three separate sections keep controls stable: scrollable primary navigation,
-  desktop `Search`, `Share` (on supported routes), and optional `Update` in fixed
-  utility rows, and the bottom account area.
+  desktop utilities in a fixed-height middle section, and the bottom account area.
+  Utilities stack as `Search`, `Share` (on supported routes), then optional `Update`.
+  Without Share, Update sits directly below Search; unused space stays below them.
 - The bottom section contains connected-only `Notifications` above the account
   control. `Update` stays below Share in the middle section even as Notifications
-  appears or disappears. Unavailable utility rows leave their space empty.
+  appears or disappears.
 - Newly appearing sidebar controls and labels fade in with a subtle scale over
   125ms, including gated Drop Forge and Watchtower. Account pictures and fallback
   icons use a simple fade. Reduced motion shows controls immediately.
+- Local and staging environment badges are present in the initial page render;
+  production shows no environment badge.
 - The account control has the same footprint while loading, signed out, or
   showing a profile. Only the account placeholder shimmers; Search and Share
   do not wait for wallet initialization.

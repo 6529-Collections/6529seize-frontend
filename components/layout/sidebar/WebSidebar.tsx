@@ -167,14 +167,7 @@ function WebSidebar({
                   />
                 </div>
 
-                <div
-                  className={
-                    isMobile
-                      ? undefined
-                      : "tw-grid tw-grid-rows-[repeat(3,2.875rem)]"
-                  }
-                  data-sidebar-section="utilities"
-                >
+                <div data-sidebar-section="utilities">
                   {showDesktopSearch && (
                     <div className="tw-px-3">
                       <WebSidebarNavItem
@@ -189,10 +182,8 @@ function WebSidebar({
                       />
                     </div>
                   )}
-                  <div>
-                    <HeaderShare isCollapsed={shouldShowCollapsed} />
-                  </div>
-                  {/* Keep Update in its own utility row even while Share or auth resolves. */}
+                  <HeaderShare isCollapsed={shouldShowCollapsed} />
+                  {/* Share returns null on unsupported routes: keep visible rows together. */}
                   {showDesktopSearch && (
                     <div className="tw-px-3">
                       <WebSidebarVersionUpdate

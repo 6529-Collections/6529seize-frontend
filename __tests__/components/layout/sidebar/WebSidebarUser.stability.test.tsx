@@ -131,6 +131,15 @@ it("distinguishes initializing from signed out and keeps the same account footpr
   setAccount(undefined, "disconnected");
   rerender(accountUi(false));
   expect(container.firstElementChild?.className).toBe(loadingClasses);
+  const icon = screen
+    .getByRole("button", { name: "Connect Wallet" })
+    .querySelector("svg");
+  expect(icon).toHaveClass("tw-size-6");
+  expect(icon?.parentElement).toHaveClass(
+    "tw-size-10",
+    "tw-rounded-xl",
+    "tw-ring-white/10"
+  );
   fireEvent.click(screen.getByRole("button", { name: "Connect Wallet" }));
   expect(freshConnect).toHaveBeenCalledTimes(1);
   setAccount("0xalice");

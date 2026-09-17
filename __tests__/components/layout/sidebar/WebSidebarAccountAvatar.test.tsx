@@ -18,10 +18,10 @@ it("uses the default icon for a missing or broken PFP", () => {
   const { container, rerender } = render(
     <WebSidebarAccountAvatar src={null} />
   );
-  expect(container.querySelector("svg")).toBeInTheDocument();
+  expect(container.querySelector("svg")).toHaveClass("tw-size-6");
   rerender(<WebSidebarAccountAvatar key="alice" src="/alice.png" />);
   fireEvent.error(container.querySelector("img")!);
-  expect(container.querySelector("svg")).toBeInTheDocument();
+  expect(container.querySelector("svg")).toHaveClass("tw-size-6");
   expect(container.querySelector("img")).not.toBeInTheDocument();
 });
 
