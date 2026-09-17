@@ -108,13 +108,45 @@ describe("TabToggleWithOverflow", () => {
     );
   });
 
+  it.each(["underline", "compactPills"] as const)(
+    "renders a lone overflow option as a direct %s tab",
+    async (variant) => {
+      const onSelect = jest.fn();
+      const user = userEvent.setup();
+      render(
+        <TabToggleWithOverflow
+          options={options}
+          activeKey="d"
+          onSelect={onSelect}
+          maxVisibleTabs={3}
+          variant={variant}
+        />
+      );
+
+      const lastTab = screen.getByRole("tab", { name: "D" });
+      expect(lastTab).toHaveAttribute("aria-selected", "true");
+      expect(lastTab).toHaveAttribute("tabindex", "0");
+      expect(lastTab).not.toHaveAttribute("aria-haspopup");
+      expect(
+        screen.queryByRole("button", { name: "More tabs" })
+      ).not.toBeInTheDocument();
+
+      await user.click(lastTab);
+      expect(onSelect).toHaveBeenCalledWith("d");
+      await user.keyboard("{ArrowLeft}");
+      expect(screen.getByRole("tab", { name: "C" })).toHaveFocus();
+      await user.keyboard("{End}");
+      expect(lastTab).toHaveFocus();
+    }
+  );
+
   it("matches compact pill typography to the subwave bar", () => {
     render(
       <TabToggleWithOverflow
         options={options}
         activeKey="a"
         onSelect={() => {}}
-        maxVisibleTabs={3}
+        maxVisibleTabs={2}
         variant="compactPills"
       />
     );

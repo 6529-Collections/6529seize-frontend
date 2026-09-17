@@ -109,7 +109,7 @@ function DropImageContent({
 
   return intrinsicHeight ? (
     <span
-      className="tw-relative tw-block tw-min-h-40 tw-w-full tw-max-w-full tw-overflow-hidden tw-rounded-xl tw-bg-iron-900/40"
+      className="tw-relative tw-block tw-min-h-40 tw-w-full tw-max-w-full tw-overflow-hidden tw-bg-iron-900/40"
       style={{
         aspectRatio: aspectRatio ?? INTRINSIC_IMAGE_RESERVED_ASPECT_RATIO,
         maxHeight: INTRINSIC_IMAGE_MAX_HEIGHT,
