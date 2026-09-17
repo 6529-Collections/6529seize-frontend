@@ -2,12 +2,14 @@
 
 // Coverage floor: keeps global Jest coverage from silently eroding.
 //
-// Compares the totals in coverage/coverage-summary.json (produced by
-// `jest --coverage --coverageReporters=json-summary`) against the checked-in
-// baseline (scripts/coverage-floor-baseline.json).
+// Compares coverage/coverage-summary.json against the checked-in baseline
+// (scripts/coverage-floor-baseline.json). A single Jest run produces the summary
+// with --coverageReporters=json-summary. Sharded runs use --coverageReporters=json
+// and this script's --merge mode combines their raw coverage into that same format.
 //
 //   node scripts/coverage-floor.cjs            -> check against baseline (CI mode)
 //   node scripts/coverage-floor.cjs --update   -> rewrite the baseline from actuals
+//   node scripts/coverage-floor.cjs --merge <files...> -> merge shards, then check
 //
 // Rules enforced by the check:
 //   - Any tracked percentage more than the tolerance below its baseline fails.
@@ -18,7 +20,8 @@
 //   - A drop of exactly the tolerance passes: the gate is "more than
 //     `tolerance_points` points", intentionally, to absorb coverage jitter.
 //
-// Dependency-free so it can run before or without node_modules.
+// Default check/update modes are dependency-free. --merge uses the pinned
+// istanbul-lib-coverage dependency to combine raw Jest coverage before checking.
 
 const fs = require("node:fs");
 const path = require("node:path");
@@ -72,7 +75,8 @@ function readSummaryTotals() {
   if (summary === null) {
     console.error(
       `Coverage summary not found at ${SUMMARY_PATH}. ` +
-        "Run Jest with --coverage --coverageReporters=json-summary first."
+        "Run Jest with --coverage --coverageReporters=json-summary first, " +
+        "or use --merge with every shard's coverage-final.json."
     );
     process.exit(1);
   }
@@ -240,9 +244,41 @@ function runUpdate() {
   }
 }
 
+function mergeCoverageFiles(inputPaths) {
+  if (inputPaths.length === 0) {
+    throw new Error("--merge requires every shard's coverage-final.json path.");
+  }
+  const { createCoverageMap } = require("istanbul-lib-coverage");
+  const merged = createCoverageMap({});
+  for (const inputPath of inputPaths) {
+    const data = JSON.parse(fs.readFileSync(inputPath, "utf8"));
+    const shard = createCoverageMap(data);
+    if (shard.files().length === 0) {
+      throw new Error(`Coverage shard is empty: ${inputPath}`);
+    }
+    merged.merge(shard);
+  }
+  // Merge counters before calculating percentages. Averaging shard summaries
+  // would lose complementary branch hits and double-count untested files.
+  const summary = { total: merged.getCoverageSummary().toJSON() };
+  for (const file of merged.files()) {
+    summary[file] = merged.fileCoverageFor(file).toSummary().toJSON();
+  }
+  fs.mkdirSync(path.dirname(SUMMARY_PATH), { recursive: true });
+  fs.writeFileSync(SUMMARY_PATH, `${JSON.stringify(summary)}\n`);
+}
+
 function main() {
   const args = process.argv.slice(2);
-  if (args.includes("--update")) {
+  if (args[0] === "--merge") {
+    try {
+      mergeCoverageFiles(args.slice(1));
+    } catch (error) {
+      console.error(`Could not merge coverage: ${error.message}`);
+      process.exitCode = 1;
+      return;
+    }
+  } else if (args.includes("--update")) {
     runUpdate();
     return;
   }
@@ -252,5 +288,3 @@ function main() {
 if (require.main === module) {
   main();
 }
-
-module.exports = { DEFAULT_TOLERANCE_POINTS, TRACKED_METRICS };
