@@ -144,43 +144,41 @@ export function OfficialWaveSummary({
   const locale = useBrowserLocale();
 
   return (
-    <div className="tw-grid tw-grid-cols-1 tw-items-start tw-gap-3 md:tw-grid-cols-[minmax(0,1fr)_auto] md:tw-gap-x-4 md:tw-gap-y-2">
-      <div className="tw-min-w-0 tw-max-w-2xl md:tw-col-start-1 md:tw-row-start-1">
-        <div className="tw-flex tw-items-center">
-          <h2 className="tw-m-0 tw-min-w-0 tw-max-w-full tw-text-xl tw-font-semibold tw-text-iron-100">
-            {profileCurationLabel ??
-              t(locale, "profileCuration.header.fallbackTitle")}
-          </h2>
+    <div className="tw-flex tw-flex-col tw-gap-3 md:tw-flex-row md:tw-items-center md:tw-justify-between md:tw-gap-6">
+      <div className="tw-min-w-0 tw-flex-1">
+        <h2 className="tw-m-0 tw-min-w-0 tw-max-w-full tw-text-xl tw-font-semibold tw-text-iron-100">
+          {profileCurationLabel ??
+            t(locale, "profileCuration.header.fallbackTitle")}
+        </h2>
+
+        <div className="tw-mt-1 tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-text-sm tw-leading-6">
+          <button
+            type="button"
+            onClick={onOpenWave}
+            title={waveName}
+            aria-label={t(locale, "profileCuration.header.openSourceAria", {
+              waveName,
+            })}
+            className="desktop-hover:hover:tw-text-primary-100 tw-group -tw-ml-1 tw-inline-flex tw-min-h-8 tw-min-w-0 tw-max-w-full tw-cursor-pointer tw-items-center tw-gap-1.5 tw-rounded-md tw-border-0 tw-bg-transparent tw-px-1 tw-py-0 tw-text-left tw-text-primary-300 tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-bg-white/5"
+          >
+            <span className="tw-flex-shrink-0 tw-text-iron-400">
+              {t(locale, "profileCuration.header.source")}
+            </span>
+            <span className="tw-min-w-0 tw-truncate tw-font-medium tw-leading-6 tw-no-underline">
+              {waveName}
+            </span>
+            <ArrowTopRightOnSquareIcon
+              aria-hidden="true"
+              className="tw-size-4 tw-flex-shrink-0 tw-transition-transform tw-duration-150 group-hover:-tw-translate-y-0.5 group-hover:tw-translate-x-0.5 motion-reduce:tw-transform-none"
+            />
+          </button>
+          <span className="tw-text-iron-600">•</span>
+          <span className="tw-text-iron-500">{metadataLabel}</span>
         </div>
       </div>
 
-      <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-text-sm tw-leading-6 md:tw-col-start-1 md:tw-row-start-2">
-        <button
-          type="button"
-          onClick={onOpenWave}
-          title={waveName}
-          aria-label={t(locale, "profileCuration.header.openSourceAria", {
-            waveName,
-          })}
-          className="desktop-hover:hover:tw-text-primary-100 tw-group -tw-ml-1 tw-inline-flex tw-min-h-8 tw-min-w-0 tw-max-w-full tw-cursor-pointer tw-items-center tw-gap-1.5 tw-rounded-md tw-border-0 tw-bg-transparent tw-px-1 tw-py-0 tw-text-left tw-text-primary-300 tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-bg-white/5"
-        >
-          <span className="tw-flex-shrink-0 tw-text-iron-400">
-            {t(locale, "profileCuration.header.source")}
-          </span>
-          <span className="tw-min-w-0 tw-truncate tw-font-medium tw-leading-6 tw-no-underline">
-            {waveName}
-          </span>
-          <ArrowTopRightOnSquareIcon
-            aria-hidden="true"
-            className="tw-size-4 tw-flex-shrink-0 tw-transition-transform tw-duration-150 group-hover:-tw-translate-y-0.5 group-hover:tw-translate-x-0.5 motion-reduce:tw-transform-none"
-          />
-        </button>
-        <span className="tw-text-iron-600">•</span>
-        <span className="tw-text-iron-500">{metadataLabel}</span>
-      </div>
-
       {canManageOwnOfficialWave && (
-        <div className="tw-flex tw-items-center tw-gap-2 md:tw-col-start-2 md:tw-row-span-2 md:tw-row-start-1 md:tw-justify-end">
+        <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-2 md:tw-justify-end">
           {manageCurationControl}
           {onAddPost !== undefined && (
             <Button variant="primary" size="sm" onClick={onAddPost}>

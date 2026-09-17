@@ -92,19 +92,36 @@ describe("WaveLeaderboardRightSidebarActivityLog", () => {
   it("renders the activity log container", () => {
     const { container } = renderComponent();
 
-    const activityRow = container.querySelector(".tw-border-b.tw-py-3");
+    const activityRow = container.querySelector(".tw-border-b");
     expect(activityRow).toBeInTheDocument();
-    expect(activityRow).toHaveClass("tw-border-white/5", "tw-px-1", "tw-py-3");
+    expect(activityRow).toHaveClass(
+      "tw-border-white/5",
+      "tw-px-1",
+      "tw-py-[13px]"
+    );
   });
 
-  it("displays timestamp with clock icon", () => {
+  it("keeps the timestamp beside the voter without uppercase styling", () => {
     renderComponent();
 
-    expect(screen.getByText("5m")).toBeInTheDocument();
+    const timestamp = screen.getByText("5m");
+    const header = screen.getByTitle("Voter: voter_user").parentElement;
+    expect(header).toContainElement(timestamp);
+    expect(header).toHaveClass("tw-items-center", "tw-justify-between");
+    expect(timestamp).toHaveClass("tw-text-xs", "tw-text-iron-400");
+    expect(timestamp).not.toHaveClass("tw-uppercase");
+  });
 
-    const clockIcon = document.querySelector("svg");
-    expect(clockIcon).toBeInTheDocument();
-    expect(clockIcon).toHaveClass("tw-size-3.5", "tw-text-iron-400");
+  it("indents the recipient below the vote details with a decorative arrow", () => {
+    renderComponent();
+
+    const recipientRow = screen.getByTitle(
+      "Drop creator: author_user"
+    ).parentElement;
+    const arrow = recipientRow?.querySelector("svg");
+    expect(recipientRow?.parentElement).toHaveClass("tw-pl-7");
+    expect(arrow).toHaveAttribute("aria-hidden", "true");
+    expect(arrow).toHaveClass("tw-size-3.5", "tw-text-iron-500");
   });
 
   it("renders drop click button component", () => {
@@ -309,7 +326,7 @@ describe("WaveLeaderboardRightSidebarActivityLog", () => {
     const oldVoteSpan = screen.getByText("1,000 →");
     expect(oldVoteSpan).toHaveClass(
       "tw-text-sm",
-      "tw-text-iron-500",
+      "tw-text-iron-400",
       "tw-whitespace-nowrap"
     );
 
@@ -328,16 +345,16 @@ describe("WaveLeaderboardRightSidebarActivityLog", () => {
     expect(voterLink).toHaveClass(
       "tw-group",
       "desktop-hover:hover:tw-opacity-80",
-      "tw-transition-all",
-      "tw-duration-300"
+      "tw-transition-opacity",
+      "tw-duration-200"
     );
 
     const authorLink = screen.getByTitle("Drop creator: author_user");
     expect(authorLink).toHaveClass(
       "tw-group",
       "desktop-hover:hover:tw-opacity-80",
-      "tw-transition-all",
-      "tw-duration-300"
+      "tw-transition-opacity",
+      "tw-duration-200"
     );
   });
 });

@@ -217,11 +217,8 @@ describe("DropListItemContentMediaImage", () => {
 
     expect(wrapper).toHaveClass("tw-w-full", "tw-min-h-40");
     expect(wrapper).not.toHaveClass("tw-h-full");
-    expect(imageFrame).toHaveClass(
-      "tw-min-h-40",
-      "tw-rounded-xl",
-      "tw-bg-iron-900/40"
-    );
+    expect(imageFrame).toHaveClass("tw-min-h-40", "tw-bg-iron-900/40");
+    expect(imageFrame).not.toHaveClass("tw-rounded-xl");
     expect(imageFrame?.getAttribute("style")).toContain("aspect-ratio: 16 / 9");
     expect(imageFrame?.getAttribute("style")).toContain("max-height: 16rem");
     expect(img).toHaveClass(

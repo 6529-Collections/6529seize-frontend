@@ -24,7 +24,10 @@ Wave and DM rows in the left list control which thread is open.
 - When the direct link targets a subwave, its visible root parent is surfaced,
   its subwaves are loaded, the parent opens, and the active child row is
   highlighted.
-- The sidebar scrolls the active route row into the nearest visible position.
+- Navigating to a wave scrolls its active row into the nearest visible position.
+- Switching `All` / `Joined` preserves the current list position instead of
+  jumping back to the active wave. A shorter list can clamp the scroll position
+  to its available content; selecting another wave enables active-row reveal again.
 - The expanded web Waves panel header includes a secondary `Discover Waves`
   link to `/discover`.
 - Browser back/forward keeps the active row and URL in sync.

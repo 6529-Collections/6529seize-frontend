@@ -23,7 +23,7 @@ export default function TDHSection({
       aria-labelledby={`${id}-heading`}
       className="tw-grid tw-scroll-mt-24 tw-grid-cols-1 tw-items-start tw-gap-5 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-py-8 sm:tw-py-10 lg:tw-grid-cols-[minmax(0,1fr)_minmax(0,2.5fr)] lg:tw-gap-10"
     >
-      <div>
+      <div className="lg:tw-sticky lg:tw-top-28">
         <h2
           id={`${id}-heading`}
           tabIndex={-1}

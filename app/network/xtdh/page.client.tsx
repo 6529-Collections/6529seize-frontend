@@ -12,7 +12,7 @@ import type { ReactNode } from "react";
 
 const EDITORIAL_GRID_CLASSES =
   "tw-grid tw-grid-cols-1 tw-items-start tw-gap-4 lg:tw-grid-cols-[minmax(0,1fr)_minmax(0,2.5fr)] lg:tw-gap-12";
-const REFERENCE_SECTION_CLASSES = `${EDITORIAL_GRID_CLASSES} tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-py-8 sm:tw-py-12`;
+const REFERENCE_SECTION_CLASSES = `${EDITORIAL_GRID_CLASSES} tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-py-8 sm:tw-py-12`;
 const REFERENCE_CONTENT_CLASSES =
   "tw-min-w-0 tw-space-y-5 tw-text-base tw-leading-7 tw-text-iron-300";
 const INTRO_CONTENT_CLASSES =

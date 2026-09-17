@@ -20,3 +20,21 @@
 - Remediation path: add reviewed translations for these keys, localize shared
   vote summary children and adjacent profile/winner labels, then verify all five
   supported locales for wrapping, accessible names, and number formatting.
+
+## Embedded wave previews
+
+- Component: `components/waves/list/WaveItemWide.tsx`, reused by embedded wave
+  cards in drops.
+- Untranslated surface: `waves.preview.*` drop/joined counts and the author's
+  accessible level description. Existing card/profile navigation labels and
+  Follow feedback remain English.
+- Current fallback: metadata uses browser locale, `formatInteger()`, complete
+  message templates, and `Intl.PluralRules` for the supported one/other forms.
+  Missing translations in `en-GB`, `fr-FR`, `es-ES`, and `de-DE` fall back to
+  `en-US`; initial server/client rendering uses `en-US` before browser detection.
+- User impact: metadata labels remain English in non-source locales while the
+  numbers follow browser formatting. Authored wave names and handles are not
+  translated.
+- Owner/follow-up: Waves UI maintainers and the frontend i18n migration workstream.
+- Remediation path: add reviewed translations, migrate the remaining navigation
+  and Follow copy, and verify all five supported locales at narrow card widths.
