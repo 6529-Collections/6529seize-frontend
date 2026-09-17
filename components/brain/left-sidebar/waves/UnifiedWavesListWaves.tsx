@@ -297,13 +297,9 @@ const UnifiedWavesListWaves = forwardRef<
       ? t(SIDEBAR_LOCALE, "waves.sidebar.highlyRatedInfoTooltip")
       : undefined;
     const shouldShowBottomHeader = !hideHeaders;
-    let virtualizedKey = "unified-waves-all";
-    if (isJoinedFilterActive) {
-      virtualizedKey = "unified-waves-joined";
-    }
-    if (isDirectMessage) {
-      virtualizedKey = "direct-message-conversations";
-    }
+    const virtualizedKey = isDirectMessage
+      ? "direct-message-conversations"
+      : "unified-waves";
     const shouldUseHighlyRatedToggle = !hideHeaders;
     const shouldShowHighlyRatedRows =
       highlyRatedRows.length > 0 && !shouldUseHighlyRatedToggle;
@@ -405,6 +401,7 @@ const UnifiedWavesListWaves = forwardRef<
     useRevealActiveSidebarWave({
       activeParentWaveId: effectiveActiveParentWaveId,
       activeWaveId,
+      filterKey: isJoinedFilterActive ? "joined" : "all",
       scrollContainerRef,
       scrollToVirtualIndex: virtual.scrollToIndex,
       staticRows: revealStaticRows,

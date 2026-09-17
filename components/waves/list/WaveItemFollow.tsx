@@ -128,7 +128,7 @@ export default function WaveItemFollow({ wave }: { readonly wave: ApiWave }) {
         </svg>
       ) : (
         <svg
-          className="tw-h-4 tw-w-4"
+          className="-tw-ml-0.5 tw-mr-0.5 tw-h-4 tw-w-4"
           viewBox="0 0 24 24"
           fill="none"
           aria-hidden="true"

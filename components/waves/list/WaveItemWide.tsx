@@ -1,7 +1,7 @@
 "use client";
 
 import type { KeyboardEvent, MouseEvent, ReactNode } from "react";
-import { useCallback } from "react";
+import { useCallback, useId } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -10,27 +10,21 @@ import {
   UserGroupIcon,
 } from "@heroicons/react/24/outline";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import { getRandomColorWithSeed, numberWithCommas } from "@/helpers/Helpers";
+import { getRandomColorWithSeed } from "@/helpers/Helpers";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { formatInteger } from "@/i18n/format";
+import { t, tRich } from "@/i18n/messages";
+import UserCICAndLevel, {
+  UserCICAndLevelSize,
+} from "@/components/user/utils/UserCICAndLevel";
 import WaveItemFollow from "./WaveItemFollow";
 
-const LEVEL_CLASSES: ReadonlyArray<{
-  readonly minLevel: number;
-  readonly classes: string;
-}> = [
-  { minLevel: 80, classes: "tw-text-[#55B075] tw-ring-[#55B075]" },
-  { minLevel: 60, classes: "tw-text-[#AABE68] tw-ring-[#AABE68]" },
-  { minLevel: 40, classes: "tw-text-[#DAC660] tw-ring-[#DAC660]" },
-  { minLevel: 20, classes: "tw-text-[#DAAC60] tw-ring-[#DAAC60]" },
-  { minLevel: 0, classes: "tw-text-[#DA8C60] tw-ring-[#DA8C60]" },
-];
-
-const DEFAULT_LEVEL_CLASS = LEVEL_CLASSES.at(-1)?.classes ?? "";
 const CARD_BASE_CLASSES =
-  "tw-@container/wave tw-group tw-rounded-xl tw-bg-iron-950 tw-backdrop-blur-sm tw-shadow-sm tw-shadow-black/20 tw-transition-all tw-duration-300 tw-ease-out";
+  "tw-@container/wave tw-group tw-relative tw-isolate tw-rounded-xl tw-border tw-border-solid tw-border-iron-700/70 tw-bg-iron-950 tw-shadow-sm tw-shadow-black/20 tw-transition-colors tw-duration-200";
 const CARD_INTERACTIVE_CLASSES =
-  "tw-cursor-pointer desktop-hover:hover:tw-shadow-lg desktop-hover:hover:tw-shadow-black/40 desktop-hover:hover:tw-translate-y-[-1px] focus-visible:tw-ring-2 focus-visible:tw-ring-primary-500 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-900 focus-visible:tw-outline-none";
+  "desktop-hover:hover:tw-border-iron-600 desktop-hover:hover:tw-bg-iron-900/70";
 
 const INTERACTIVE_TAGS = new Set([
   "A",
@@ -89,26 +83,21 @@ function CardContainer({
 }: CardContainerProps) {
   const className = `${CARD_BASE_CLASSES} ${
     isInteractive ? CARD_INTERACTIVE_CLASSES : ""
-  } tw-no-underline`;
-
-  if (isInteractive && href) {
-    return (
-      <Link
-        href={href}
-        prefetch={false}
-        className={className}
-        aria-label={ariaLabel}
-        {...(onClick ? { onClick } : {})}
-        onKeyDown={onKeyDown}
-      >
-        {children}
-      </Link>
-    );
-  }
+  }`;
 
   return (
-    <div className={className} aria-label={ariaLabel}>
-      {children}
+    <div className={className}>
+      {isInteractive && href && (
+        <Link
+          href={href}
+          prefetch={false}
+          className="tw-absolute tw-inset-0 tw-rounded-xl focus-visible:tw-ring-2 focus-visible:tw-ring-primary-500 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950"
+          aria-label={ariaLabel}
+          {...(onClick ? { onClick } : {})}
+          onKeyDown={onKeyDown}
+        />
+      )}
+      <div className="tw-pointer-events-none tw-relative">{children}</div>
     </div>
   );
 }
@@ -118,13 +107,6 @@ function getCardLabel(href?: string, label?: string | null) {
     return undefined;
   }
   return label ? `View wave ${label}` : "View wave";
-}
-
-function resolveLevelClasses(level?: number | null) {
-  return (
-    LEVEL_CLASSES.find((levelClass) => levelClass.minLevel <= (level ?? 0))
-      ?.classes ?? DEFAULT_LEVEL_CLASS
-  );
 }
 
 export default function WaveItemWide({
@@ -137,6 +119,8 @@ export default function WaveItemWide({
   readonly titlePlaceholder?: string | undefined;
 }) {
   const router = useRouter();
+  const locale = useBrowserLocale();
+  const authorLevelId = useId();
   const author = wave?.author;
   const authorHref = author?.handle ? `/${author.handle}` : undefined;
   const authorLevel = author?.level ?? 0;
@@ -167,25 +151,29 @@ export default function WaveItemWide({
     <Image
       src={getScaledImageUri(author.pfp, ImageScale.W_200_H_200)}
       alt={`${author.handle ?? author.primary_address} avatar`}
-      width={28}
-      height={28}
-      className="tw-h-7 tw-w-7 tw-rounded-md tw-bg-iron-800 tw-object-cover tw-ring-1 tw-ring-white/10"
+      width={24}
+      height={24}
+      className="tw-h-6 tw-w-6 tw-flex-shrink-0 tw-rounded-full tw-bg-iron-800 tw-object-cover tw-ring-1 tw-ring-white/10"
     />
   ) : (
-    <div className="tw-h-7 tw-w-7 tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-white/10" />
+    <div className="tw-h-6 tw-w-6 tw-flex-shrink-0 tw-rounded-full tw-bg-iron-800 tw-ring-1 tw-ring-white/10" />
   );
 
   const authorLevelBadge = (
-    <div
-      className={`${resolveLevelClasses(
-        author?.level
-      )} tw-inline-flex tw-items-center tw-whitespace-nowrap tw-rounded-xl tw-border-none tw-bg-transparent tw-px-2 tw-py-0.5 tw-text-[0.625rem] tw-font-semibold tw-leading-3 tw-ring-2 tw-ring-inset`}
-    >
-      Level {authorLevel}
+    <div className="tw-inline-flex tw-flex-shrink-0">
+      <span id={authorLevelId} className="tw-sr-only">
+        {t(locale, "waves.preview.level", {
+          level: formatInteger(locale, authorLevel),
+        })}
+      </span>
+      <span aria-hidden="true" className="tw-inline-flex">
+        <UserCICAndLevel level={authorLevel} size={UserCICAndLevelSize.SMALL} />
+      </span>
     </div>
   );
 
-  const authorWrapperClass = "tw-flex tw-items-center tw-gap-2 tw-min-w-0";
+  const authorWrapperClass =
+    "tw-pointer-events-auto tw-relative tw-col-span-2 tw-row-start-2 tw-flex tw-min-w-0 tw-max-w-full tw-items-center tw-gap-2 tw-self-start";
 
   const handleAuthorClick = useCallback(
     (event: MouseEvent<HTMLButtonElement>) => {
@@ -223,13 +211,14 @@ export default function WaveItemWide({
       data-wave-item-interactive="true"
       onClick={handleAuthorClick}
       onAuxClick={handleAuthorAuxClick}
-      className={`${authorWrapperClass} tw-cursor-pointer tw-border-none tw-bg-transparent tw-p-0 tw-text-left`}
+      className={`${authorWrapperClass} tw-cursor-pointer tw-rounded-md tw-border-none tw-bg-transparent tw-p-0 tw-text-left tw-text-iron-200 tw-transition-colors focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-text-opacity-80`}
       aria-label={
         author?.handle ? `View @${author.handle}` : "View author profile"
       }
+      aria-describedby={authorLevelId}
     >
       {authorAvatar}
-      <span className="tw-truncate tw-text-xs tw-font-semibold tw-text-white">
+      <span className="tw-truncate tw-text-sm tw-font-semibold tw-leading-5">
         {author?.handle ?? userPlaceholder}
       </span>
       {authorLevelBadge}
@@ -237,7 +226,7 @@ export default function WaveItemWide({
   ) : (
     <div className={authorWrapperClass}>
       {authorAvatar}
-      <span className="tw-truncate tw-text-xs tw-font-semibold tw-text-white">
+      <span className="tw-truncate tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-200">
         {author?.handle ?? userPlaceholder}
       </span>
       {authorLevelBadge}
@@ -285,6 +274,10 @@ export default function WaveItemWide({
 
   const dropsCount = wave?.metrics.drops_count ?? 0;
   const subscribersCount = wave?.metrics.subscribers_count ?? 0;
+  const dropsMessageKey =
+    new Intl.PluralRules(locale).select(dropsCount) === "one"
+      ? "waves.preview.drops.one"
+      : "waves.preview.drops.other";
 
   return (
     <CardContainer
@@ -294,8 +287,8 @@ export default function WaveItemWide({
       onClick={handleCardClick}
       onKeyDown={handleCardKeyDown}
     >
-      <div className="tw-flex tw-gap-3 tw-p-3 sm:tw-p-4">
-        <div className="tw-relative tw-aspect-[4/3] tw-w-24 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-lg tw-bg-iron-900 sm:tw-w-28 md:tw-w-32">
+      <div className="tw-grid tw-grid-cols-1 tw-items-start tw-gap-[13px] tw-p-2 @md/wave:tw-grid-cols-[auto_minmax(0,1fr)]">
+        <div className="tw-relative tw-aspect-[4/3] tw-w-full tw-overflow-hidden tw-rounded-lg tw-bg-iron-900 @md/wave:tw-aspect-auto @md/wave:tw-min-h-24 @md/wave:tw-w-36 @md/wave:tw-self-stretch">
           <div
             className="tw-absolute tw-inset-0"
             style={{
@@ -308,54 +301,65 @@ export default function WaveItemWide({
               src={getScaledImageUri(wave.picture, ImageScale.AUTOx450)}
               alt={`Wave ${wave.name}`}
               fill
-              sizes="(max-width: 639px) 96px, (max-width: 1023px) 112px, 128px"
-              className="tw-object-cover tw-transition-transform tw-duration-500 tw-will-change-transform desktop-hover:group-hover:tw-scale-[1.02]"
+              sizes="(max-width: 479px) 100vw, 430px"
+              className="tw-object-cover"
             />
           )}
         </div>
 
-        <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-gap-2">
-          <div className="tw-flex tw-items-start tw-justify-between tw-gap-3">
-            <span className="tw-line-clamp-2 tw-text-sm tw-font-bold tw-leading-tight tw-text-white sm:tw-text-base">
-              {wave?.name ?? titlePlaceholder}
-            </span>
-            {wave && (
-              <div
-                data-wave-item-interactive="true"
-                className="tw-pointer-events-auto tw-relative tw-z-10"
-              >
-                <WaveItemFollow wave={wave} />
-              </div>
-            )}
-          </div>
-
+        <div className="tw-grid tw-min-w-0 tw-grid-cols-[minmax(0,1fr)_auto] tw-gap-x-[13px] tw-gap-y-2 tw-p-[5px] @md/wave:tw-pl-0">
+          <span className="tw-row-start-1 tw-line-clamp-3 tw-self-center tw-break-words tw-text-base tw-font-semibold tw-leading-6 tw-tracking-tight tw-text-iron-50 @md/wave:tw-text-lg">
+            {wave?.name ?? titlePlaceholder}
+          </span>
           {authorSection}
 
           {wave && (
-            <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-1 tw-text-[11px] tw-text-iron-400">
-              <span className="tw-inline-flex tw-items-center tw-gap-1">
-                <ChatBubbleLeftRightIcon
-                  aria-hidden="true"
-                  className="tw-h-3.5 tw-w-3.5 tw-flex-shrink-0 tw-text-iron-400"
-                />
-                <span className="tw-font-medium">
-                  {numberWithCommas(dropsCount)}
+            <>
+              <div className="tw-col-span-2 tw-row-start-3 tw-flex tw-flex-wrap tw-items-center tw-gap-x-[13px] tw-gap-y-[5px] tw-text-xs tw-leading-5 tw-text-iron-400">
+                <span className="tw-inline-flex tw-items-center tw-gap-[5px]">
+                  <ChatBubbleLeftRightIcon
+                    aria-hidden="true"
+                    className="tw-h-3.5 tw-w-3.5 tw-flex-shrink-0 tw-text-iron-400"
+                  />
+                  <span className="tw-inline-flex tw-gap-[5px]">
+                    {tRich(locale, dropsMessageKey, {
+                      count: (
+                        <span
+                          key="count"
+                          className="tw-font-medium tw-tabular-nums tw-text-iron-200"
+                        >
+                          {formatInteger(locale, dropsCount)}
+                        </span>
+                      ),
+                    })}
+                  </span>
                 </span>
-                <span className="tw-text-iron-500">
-                  {dropsCount === 1 ? "Drop" : "Drops"}
+                <span className="tw-inline-flex tw-items-center tw-gap-[5px]">
+                  <UserGroupIcon
+                    aria-hidden="true"
+                    className="tw-h-3.5 tw-w-3.5 tw-flex-shrink-0 tw-text-iron-400"
+                  />
+                  <span className="tw-inline-flex tw-gap-[5px]">
+                    {tRich(locale, "waves.preview.joined", {
+                      count: (
+                        <span
+                          key="count"
+                          className="tw-font-medium tw-tabular-nums tw-text-iron-200"
+                        >
+                          {formatInteger(locale, subscribersCount)}
+                        </span>
+                      ),
+                    })}
+                  </span>
                 </span>
-              </span>
-              <span className="tw-inline-flex tw-items-center tw-gap-1">
-                <UserGroupIcon
-                  aria-hidden="true"
-                  className="tw-h-3.5 tw-w-3.5 tw-flex-shrink-0 tw-text-iron-400"
-                />
-                <span className="tw-font-medium">
-                  {numberWithCommas(subscribersCount)}
-                </span>
-                <span className="tw-text-iron-500">Joined</span>
-              </span>
-            </div>
+              </div>
+              <div
+                data-wave-item-interactive="true"
+                className="tw-pointer-events-auto tw-relative tw-col-start-2 tw-row-start-1 tw-self-center"
+              >
+                <WaveItemFollow wave={wave} />
+              </div>
+            </>
           )}
         </div>
       </div>

@@ -111,20 +111,14 @@ function getVirtualizedAriaLabel({
 
 function getVirtualizedKey({
   isDirectMessage,
-  isJoinedFilterActive,
 }: {
   readonly isDirectMessage: boolean;
-  readonly isJoinedFilterActive: boolean;
 }) {
   if (isDirectMessage) {
     return "web-direct-message-conversations";
   }
 
-  if (isJoinedFilterActive) {
-    return "web-unified-waves-joined";
-  }
-
-  return "web-unified-waves-all";
+  return "web-unified-waves";
 }
 
 function getBottomListLabel(isJoinedFilterActive: boolean) {
@@ -388,7 +382,6 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
   const shouldShowBottomHeader = !hideHeaders && !isCollapsed;
   const virtualizedKey = getVirtualizedKey({
     isDirectMessage,
-    isJoinedFilterActive,
   });
   const sectionClassName = getSectionClassName(isCollapsed);
   const rowHeight = getBaseRowHeight(isCollapsed);
@@ -491,6 +484,7 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
   useRevealActiveSidebarWave({
     activeParentWaveId: effectiveActiveParentWaveId,
     activeWaveId,
+    filterKey: isJoinedFilterActive ? "joined" : "all",
     scrollContainerRef: scrollContainerRef ?? listContainerRef,
     scrollToVirtualIndex: virtual.scrollToIndex,
     staticRows: revealStaticRows,
