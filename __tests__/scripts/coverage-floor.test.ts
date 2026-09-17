@@ -371,6 +371,7 @@ describe("coverage-floor shard merging", () => {
       const result = runFloor(root, ["--merge", ...shards]);
       expect(result.status).toBe(1);
       expect(result.stderr).toContain("Could not merge coverage:");
+      if (kind === "missing") expect(result.stderr).toContain(broken);
       expect(
         fs.existsSync(path.join(root, "coverage", "coverage-summary.json"))
       ).toBe(false);

@@ -2,9 +2,10 @@
 
 // Coverage floor: keeps global Jest coverage from silently eroding.
 //
-// Compares the totals in coverage/coverage-summary.json (produced by
-// `jest --coverage --coverageReporters=json-summary`) against the checked-in
-// baseline (scripts/coverage-floor-baseline.json).
+// Compares coverage/coverage-summary.json against the checked-in baseline
+// (scripts/coverage-floor-baseline.json). A single Jest run produces the summary
+// with --coverageReporters=json-summary. Sharded runs use --coverageReporters=json
+// and this script's --merge mode combines their raw coverage into that same format.
 //
 //   node scripts/coverage-floor.cjs            -> check against baseline (CI mode)
 //   node scripts/coverage-floor.cjs --update   -> rewrite the baseline from actuals
@@ -74,7 +75,8 @@ function readSummaryTotals() {
   if (summary === null) {
     console.error(
       `Coverage summary not found at ${SUMMARY_PATH}. ` +
-        "Run Jest with --coverage --coverageReporters=json-summary first."
+        "Run Jest with --coverage --coverageReporters=json-summary first, " +
+        "or use --merge with every shard's coverage-final.json."
     );
     process.exit(1);
   }
@@ -286,5 +288,3 @@ function main() {
 if (require.main === module) {
   main();
 }
-
-module.exports = { DEFAULT_TOLERANCE_POINTS, TRACKED_METRICS };

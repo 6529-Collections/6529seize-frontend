@@ -98,6 +98,8 @@ jobs:
             --shard="$JEST_SHARD" --cacheDirectory="$JEST_CACHE" \
             --coverage --coverageReporters=json
 
+      # Missing coverage (including an empty test shard) must fail, not silently
+      # reduce the set of tests contributing to the final coverage verdict.
       - name: Upload shard coverage
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
@@ -163,6 +165,8 @@ jobs:
           ./bin/6529 exec node scripts/coverage-floor.cjs --merge \
             coverage/shards/jest-coverage-{1,2,3,4}/coverage-final.json
 
+      # Run even after a failed merge/download so test failures remain explicit.
+      # Keep this after merging to report coverage independently of test success.
       - name: Require all Jest shards to pass
         if: always()
         env:
