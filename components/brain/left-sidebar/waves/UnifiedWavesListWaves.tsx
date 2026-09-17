@@ -401,6 +401,7 @@ const UnifiedWavesListWaves = forwardRef<
     useRevealActiveSidebarWave({
       activeParentWaveId: effectiveActiveParentWaveId,
       activeWaveId,
+      filterKey: isJoinedFilterActive ? "joined" : "all",
       scrollContainerRef,
       scrollToVirtualIndex: virtual.scrollToIndex,
       staticRows: revealStaticRows,

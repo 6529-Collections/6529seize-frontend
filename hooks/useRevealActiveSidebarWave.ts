@@ -6,6 +6,7 @@ import { useLayoutEffect, useMemo, useRef, type RefObject } from "react";
 interface UseRevealActiveSidebarWaveOptions {
   readonly activeParentWaveId: string | null;
   readonly activeWaveId: string | null;
+  readonly filterKey?: string;
   readonly scrollContainerRef: RefObject<HTMLElement | null>;
   readonly scrollToVirtualIndex: (index: number) => boolean;
   readonly staticRows: readonly (readonly SidebarWaveTreeRow[])[];
@@ -37,12 +38,18 @@ const findWaveRowElement = (
 export function useRevealActiveSidebarWave({
   activeParentWaveId,
   activeWaveId,
+  filterKey = "all",
   scrollContainerRef,
   scrollToVirtualIndex,
   staticRows,
   virtualRows,
 }: UseRevealActiveSidebarWaveOptions) {
   const lastRevealKeyRef = useRef<string | null>(null);
+  const revealContextRef = useRef({
+    activeWaveId,
+    filterKey,
+    preserveScroll: false,
+  });
   const staticWaveIds = useMemo(
     () =>
       new Set(
@@ -82,6 +89,21 @@ export function useRevealActiveSidebarWave({
   );
 
   useLayoutEffect(() => {
+    const revealContext = revealContextRef.current;
+    if (revealContext.activeWaveId !== activeWaveId) {
+      revealContext.activeWaveId = activeWaveId;
+      revealContext.preserveScroll = false;
+    } else if (revealContext.filterKey !== filterKey) {
+      revealContext.preserveScroll = true;
+    }
+    revealContext.filterKey = filterKey;
+
+    // A filter change takes precedence over automatic reveals, including delayed
+    // list hydration. Navigating to another wave enables automatic reveals again.
+    if (revealContext.preserveScroll) {
+      return;
+    }
+
     if (activeWaveId === null || revealWaveId === null) {
       lastRevealKeyRef.current = null;
       return;
@@ -118,6 +140,7 @@ export function useRevealActiveSidebarWave({
     lastRevealKeyRef.current = revealKey;
   }, [
     activeWaveId,
+    filterKey,
     revealWaveId,
     scrollContainerRef,
     scrollToVirtualIndex,

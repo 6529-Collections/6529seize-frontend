@@ -484,6 +484,7 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
   useRevealActiveSidebarWave({
     activeParentWaveId: effectiveActiveParentWaveId,
     activeWaveId,
+    filterKey: isJoinedFilterActive ? "joined" : "all",
     scrollContainerRef: scrollContainerRef ?? listContainerRef,
     scrollToVirtualIndex: virtual.scrollToIndex,
     staticRows: revealStaticRows,
