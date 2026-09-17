@@ -16,6 +16,8 @@ const tooltipStyle = {
   fontWeight: 500,
   borderRadius: "6px",
   boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+  maxWidth: "min(20rem, calc(100vw - 2rem))",
+  whiteSpace: "normal",
   zIndex: 99999,
   pointerEvents: "none",
 } as const;

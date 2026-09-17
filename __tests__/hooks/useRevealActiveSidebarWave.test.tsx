@@ -23,6 +23,61 @@ const createWaveRow = (
 });
 
 describe("useRevealActiveSidebarWave", () => {
+  it.each([true, false])(
+    "preserves scroll across filter changes and resumes on navigation (empty Joined: %s)",
+    (emptyJoined) => {
+      const activeRow = createWaveRow("active");
+      const nextRow = createWaveRow("next");
+      const scrollToVirtualIndex = jest.fn(() => true);
+      const scrollContainerRef = { current: document.createElement("div") };
+      const { rerender } = renderHook(
+        ({ activeWaveId, filterKey, virtualRows }) =>
+          useRevealActiveSidebarWave({
+            activeParentWaveId: null,
+            activeWaveId,
+            filterKey,
+            scrollContainerRef,
+            scrollToVirtualIndex,
+            staticRows: [],
+            virtualRows,
+          }),
+        {
+          initialProps: {
+            activeWaveId: "active",
+            filterKey: "all",
+            virtualRows: [createWaveRow("newer"), activeRow],
+          },
+        }
+      );
+
+      expect(scrollToVirtualIndex).toHaveBeenLastCalledWith(1);
+      rerender({
+        activeWaveId: "active",
+        filterKey: "joined",
+        virtualRows: emptyJoined ? [] : [activeRow],
+      });
+      rerender({
+        activeWaveId: "active",
+        filterKey: "all",
+        virtualRows: [activeRow],
+      });
+      rerender({
+        activeWaveId: "active",
+        filterKey: "all",
+        virtualRows: [nextRow, activeRow],
+      });
+      expect(scrollToVirtualIndex).toHaveBeenCalledTimes(1);
+
+      rerender({
+        activeWaveId: "next",
+        filterKey: "all",
+        virtualRows: [nextRow, activeRow],
+      });
+      expect(scrollToVirtualIndex).toHaveBeenLastCalledWith(0);
+      expect(scrollToVirtualIndex).toHaveBeenCalledTimes(2);
+    }
+  );
+
   it("reveals the parent while loading and then the active subwave", () => {
     const parentRow = createWaveRow("parent");
     const childRow = createWaveRow("child", "parent");
