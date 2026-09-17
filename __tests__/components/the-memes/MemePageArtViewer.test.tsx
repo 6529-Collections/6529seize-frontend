@@ -169,6 +169,30 @@ it("uses the complete responsive video frame instead of the legacy carousel heig
 });
 
 describe("MemePageArtViewer", () => {
+  it("keeps image sizing when video metadata has no animation URL", () => {
+    const { container } = render(
+      <MemePageArtViewer
+        nft={{
+          ...baseNft,
+          animation: "",
+          compressed_animation: "",
+          metadata: { ...baseNft.metadata, animation_url: "" },
+        }}
+      />
+    );
+
+    expect(screen.getByTestId("image-art")).toBeInTheDocument();
+    expect(screen.queryByTestId("animation-art")).not.toBeInTheDocument();
+    expect(container.firstElementChild).toHaveClass("tw-h-full");
+    expect(container.firstElementChild).not.toHaveClass("tw-flex-none");
+    expect(container.firstElementChild).not.toHaveAttribute(
+      "data-video-artwork"
+    );
+    expect(container.firstElementChild?.firstElementChild).toHaveClass(
+      "tw-flex-1"
+    );
+  });
+
   it("keeps artwork sharing available when the media URLs are missing", () => {
     const nft = {
       ...baseNft,

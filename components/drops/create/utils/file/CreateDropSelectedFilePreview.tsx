@@ -51,7 +51,7 @@ export default function CreateDropSelectedFilePreview({
         template="watch-media"
         muted
         preload="metadata"
-        layout="fill"
+        layout="natural"
         showActions={false}
       />
     ) : (

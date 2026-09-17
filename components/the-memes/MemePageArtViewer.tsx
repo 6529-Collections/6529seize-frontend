@@ -72,6 +72,15 @@ function getInlineMediaVariant(
   return "image";
 }
 
+function getArtworkLayout(isVideoArtwork: boolean) {
+  return {
+    root: isVideoArtwork ? "tw-flex-none" : "tw-h-full",
+    content: isVideoArtwork ? undefined : "tw-flex-1",
+    carousel: styles[isVideoArtwork ? "videoCarousel" : "memesCarousel"],
+    slide: isVideoArtwork ? "tw-h-auto" : "tw-h-full",
+  };
+}
+
 export function MemePageArtViewer({
   nft,
   showBalance = false,
@@ -99,7 +108,9 @@ export function MemePageArtViewer({
   const animationFormat = getAnimationFileTypeFromMetadata(metadata);
   const imageMimeType = getImageMimeTypeFromMetadata(metadata);
   const animationMimeType = getAnimationMimeTypeFromMetadata(metadata);
-  const isVideoArtwork = animationMimeType?.startsWith("video/") ?? false;
+  const isVideoArtwork =
+    hasAnimation && (animationMimeType?.startsWith("video/") ?? false);
+  const artworkLayout = getArtworkLayout(isVideoArtwork);
   const imageHref = getResolvedImageSrc(nft);
   const hasImage = Boolean(imageHref);
   const isShowingAnimation = hasAnimation && (currentSlide === 0 || !imageHref);
@@ -342,12 +353,10 @@ export function MemePageArtViewer({
       data-video-artwork={isVideoArtwork || undefined}
       className={clsx(
         "tw-flex tw-w-full tw-flex-col tw-p-0",
-        isVideoArtwork ? "tw-flex-none" : "tw-h-full"
+        artworkLayout.root
       )}
     >
-      <div
-        className={clsx("tw-flex tw-flex-col", !isVideoArtwork && "tw-flex-1")}
-      >
+      <div className={clsx("tw-flex tw-flex-col", artworkLayout.content)}>
         {!hasAnimation && !hasImage && Boolean(actions) && (
           <div className="tw-relative tw-min-h-9">{printMediaActions()}</div>
         )}
@@ -356,18 +365,18 @@ export function MemePageArtViewer({
             <div
               className={clsx(
                 "tw-flex tw-min-h-0 tw-w-full tw-items-center tw-bg-iron-950 tw-p-0",
-                !isVideoArtwork && "tw-flex-1"
+                artworkLayout.content
               )}
             >
               <section
-                className={`${styles[isVideoArtwork ? "videoCarousel" : "memesCarousel"] ?? ""} tw-w-full`}
+                className={clsx(artworkLayout.carousel, "tw-w-full")}
                 aria-roledescription="carousel"
                 onTouchStart={handleSlideTouchStart}
                 onTouchEnd={handleSlideTouchEnd}
               >
                 <div
                   data-carousel-slide
-                  className={`${isVideoArtwork ? "tw-h-auto" : "tw-h-full"} tw-items-center tw-justify-center tw-text-center ${
+                  className={`${artworkLayout.slide} tw-items-center tw-justify-center tw-text-center ${
                     currentSlide === 0 ? "tw-flex" : "tw-hidden"
                   }`}
                 >
@@ -388,7 +397,7 @@ export function MemePageArtViewer({
                 {hasImage && (
                   <div
                     data-carousel-slide
-                    className={`${isVideoArtwork ? "tw-h-auto" : "tw-h-full"} tw-items-center tw-justify-center tw-text-center ${
+                    className={`${artworkLayout.slide} tw-items-center tw-justify-center tw-text-center ${
                       currentSlide === 1 ? "tw-flex" : "tw-hidden"
                     }`}
                   >

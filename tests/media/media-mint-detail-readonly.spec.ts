@@ -243,11 +243,14 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
 // have independent collections, so their existing detail fixtures stay intact.
 test.describe("Staging video artwork sizing @surface @medium @large @readonly", () => {
   // This fixture is unavailable outside staging; skip only those environments.
-  test.skip(
-    ({ baseURL }) =>
-      !baseURL || new URL(baseURL).hostname !== "staging.6529.io",
-    "portrait-video fixture 549 is qualified on staging only"
-  );
+  test.skip(({ baseURL }) => {
+    if (!baseURL) return true;
+    try {
+      return new URL(baseURL).hostname !== "staging.6529.io";
+    } catch {
+      return true;
+    }
+  }, "portrait-video fixture 549 is qualified on staging only");
 
   for (const viewport of [
     { width: 390, height: 844 },
