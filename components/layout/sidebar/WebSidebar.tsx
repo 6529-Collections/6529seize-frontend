@@ -154,7 +154,7 @@ function WebSidebar({
 
             <div className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto">
               <div
-                className={`tw-grid tw-h-full ${isMobile ? "tw-grid-rows-[minmax(2.875rem,1fr)_auto_7.625rem]" : "tw-grid-rows-[minmax(2.875rem,1fr)_5.75rem_10.5rem]"}`}
+                className={`tw-grid tw-h-full ${isMobile ? "tw-grid-rows-[minmax(2.875rem,1fr)_auto_7.625rem]" : "tw-grid-rows-[minmax(2.875rem,1fr)_8.625rem_7.625rem]"}`}
                 data-sidebar-sections="true"
               >
                 <div
@@ -167,7 +167,14 @@ function WebSidebar({
                   />
                 </div>
 
-                <div data-sidebar-section="utilities">
+                <div
+                  className={
+                    isMobile
+                      ? undefined
+                      : "tw-grid tw-grid-rows-[repeat(3,2.875rem)]"
+                  }
+                  data-sidebar-section="utilities"
+                >
                   {showDesktopSearch && (
                     <div className="tw-px-3">
                       <WebSidebarNavItem
@@ -182,15 +189,10 @@ function WebSidebar({
                       />
                     </div>
                   )}
-                  <HeaderShare isCollapsed={shouldShowCollapsed} />
-                </div>
-
-                {/* This independent section lets account actions grow upward.
-                    Utilities never move when auth or update availability resolves. */}
-                <div
-                  className="tw-flex tw-flex-col tw-justify-end"
-                  data-sidebar-section="account"
-                >
+                  <div>
+                    <HeaderShare isCollapsed={shouldShowCollapsed} />
+                  </div>
+                  {/* Keep Update in its own utility row even while Share or auth resolves. */}
                   {showDesktopSearch && (
                     <div className="tw-px-3">
                       <WebSidebarVersionUpdate
@@ -198,6 +200,13 @@ function WebSidebar({
                       />
                     </div>
                   )}
+                </div>
+
+                {/* Notifications grow upward without moving the utility rows. */}
+                <div
+                  className="tw-flex tw-flex-col tw-justify-end"
+                  data-sidebar-section="account"
+                >
                   {address && (
                     <div className="tw-px-3">
                       <WebSidebarNavItem

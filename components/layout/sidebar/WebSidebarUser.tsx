@@ -94,7 +94,7 @@ function WebSidebarUser({
   const containerClasses =
     "tw-relative tw-block tw-h-16 tw-w-full tw-shrink-0 tw-px-3 tw-pb-2";
   const rowClasses =
-    "tw-flex tw-h-14 tw-w-full tw-items-center tw-gap-x-2 tw-rounded-xl tw-border-none tw-bg-transparent tw-px-2 tw-py-2";
+    "motion-safe:tw-animate-sidebar-account-fade-in tw-flex tw-h-14 tw-w-full tw-items-center tw-gap-x-2 tw-rounded-xl tw-border-none tw-bg-transparent tw-px-2 tw-py-2";
   const avatarClasses =
     "tw-relative tw-flex tw-size-10 tw-shrink-0 tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-xl";
   const resolvedPfp = profile?.pfp ? resolveIpfsUrlSync(profile.pfp) : null;

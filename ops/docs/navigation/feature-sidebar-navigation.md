@@ -42,9 +42,14 @@ On web layouts, route switching is sidebar-first.
 - Gated primary row: `Drop Forge`, after `About`, only when the connected
   wallet can access it.
 - Three separate sections keep controls stable: scrollable primary navigation,
-  desktop `Search` and `Share` (on supported routes), and the bottom account area.
-- The bottom section grows upward: optional `Update`, connected-only
-  `Notifications`, then the account control. Search and Share stay in place.
+  desktop `Search`, `Share` (on supported routes), and optional `Update` in fixed
+  utility rows, and the bottom account area.
+- The bottom section contains connected-only `Notifications` above the account
+  control. `Update` stays below Share in the middle section even as Notifications
+  appears or disappears. Unavailable utility rows leave their space empty.
+- Newly appearing sidebar controls and labels fade in with a subtle scale over
+  125ms, including gated Drop Forge and Watchtower. Account pictures and fallback
+  icons use a simple fade. Reduced motion shows controls immediately.
 - The account control has the same footprint while loading, signed out, or
   showing a profile. Only the account placeholder shimmers; Search and Share
   do not wait for wallet initialization.
@@ -64,7 +69,7 @@ On web layouts, route switching is sidebar-first.
 - Open `Drop Forge` from the standalone row after `About` when the current
   wallet can access `/drop-forge`.
 - Open `Search` from the desktop sidebar row.
-- Select the rocket at the top of the bottom account section to update. The
+- Select the rocket below Share in the middle utility section to update. The
   expanded sidebar labels it `Update`; the collapsed sidebar shows the rocket
   with an `Update` tooltip.
 - Open connected `Notifications` immediately above the account control.
@@ -76,9 +81,9 @@ On web layouts, route switching is sidebar-first.
 
 1. Open a web route.
 2. Switch primary sections with direct rows.
-3. Use `Search` and `Share` in the utility section. The separate bottom section
-   contains `Update` (when available), `Notifications` (when connected), and
-   the account control, in that order.
+3. Use `Search`, `Share`, and optional `Update` in the utility section. The
+   separate bottom section contains `Notifications` (when connected) directly
+   above the account control.
 4. Open `NFTs` or `About` for nested routes; use the `Museum`, `Waves`, and
    `Join 6529` rows for direct navigation.
 5. In collapsed mode, hover a group row with a mouse or activate it by tap,

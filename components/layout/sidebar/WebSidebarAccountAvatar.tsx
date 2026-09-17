@@ -30,7 +30,7 @@ export default function WebSidebarAccountAvatar({
   if (!src || status === "failed") {
     return (
       <UserCircleIcon
-        className="tw-size-10 tw-text-iron-400"
+        className="tw-size-10 tw-text-iron-400 motion-safe:tw-animate-sidebar-account-fade-in"
         aria-hidden="true"
       />
     );
@@ -53,7 +53,7 @@ export default function WebSidebarAccountAvatar({
         alt=""
         onLoad={() => setStatus("loaded")}
         onError={() => setStatus("failed")}
-        className={`tw-absolute tw-inset-0 tw-block tw-size-10 tw-rounded-xl tw-object-contain ${status === "loaded" ? "tw-opacity-100" : "tw-opacity-0"}`}
+        className={`tw-absolute tw-inset-0 tw-block tw-size-10 tw-rounded-xl tw-object-contain ${status === "loaded" ? "tw-opacity-100 motion-safe:tw-animate-sidebar-account-fade-in" : "tw-opacity-0"}`}
       />
     </>
   );

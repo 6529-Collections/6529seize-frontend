@@ -85,7 +85,7 @@ test("desktop account updates do not move utilities, including in short expanded
     const beforeAccount = await account.boundingBox();
     expect(beforeSearch).not.toBeNull();
     expect(beforeAccount).not.toBeNull();
-    // Search is usable even though the optional account action is unresolved.
+    // Search is usable even though update availability is unresolved.
     await search.click();
     await expect(
       page.getByRole("combobox", { name: "Search 6529", exact: true })
@@ -97,12 +97,20 @@ test("desktop account updates do not move utilities, including in short expanded
       exact: true,
     });
     await expect(update).toBeVisible();
+    const updateContent = sidebar
+      .getByRole("button", { name: "Update", exact: true })
+      .locator(":scope > div");
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await expect(updateContent).toHaveCSS("animation-duration", "0.125s");
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await expect(updateContent).toHaveCSS("animation-name", "none");
+    await expect(updateContent).toHaveCSS("opacity", "1");
     expect(await search.boundingBox()).toEqual(beforeSearch);
     expect(await account.boundingBox()).toEqual(beforeAccount);
     await expect(
       page
         .getByLabel("Primary sidebar", { exact: true })
-        .locator('[data-sidebar-section="account"]')
+        .locator('[data-sidebar-section="utilities"]')
         .getByRole("button", { name: "Update", exact: true })
     ).toBeVisible();
 

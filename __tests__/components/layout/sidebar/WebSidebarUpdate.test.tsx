@@ -86,7 +86,7 @@ beforeEach(() => {
   });
 });
 
-it("puts the collapsed update rocket in the account section with no desktop toast", () => {
+it("puts the collapsed update rocket last in utilities with no desktop toast", () => {
   render(
     <>
       <WebSidebar {...sidebarProps} />
@@ -94,7 +94,9 @@ it("puts the collapsed update rocket in the account section with no desktop toas
     </>
   );
   const update = screen.getByRole("button", { name: "Update" });
-  expect(update.closest('[data-sidebar-section="account"]')).not.toBeNull();
+  const utilities = update.closest('[data-sidebar-section="utilities"]');
+  expect(utilities).not.toBeNull();
+  expect(utilities?.lastElementChild).toContainElement(update);
   expect(
     screen
       .getByRole("button", { name: "Search" })
@@ -174,23 +176,37 @@ it("uses the localized Update label", () => {
   ).toBeInTheDocument();
 });
 
-it("orders Update above Notifications in the account section without adding either to utilities", () => {
+it("keeps Update in the same utility row when Notifications appears or disappears", () => {
+  const { rerender } = render(<WebSidebar {...sidebarProps} />);
+  const update = screen.getByRole("button", { name: "Update" });
+  const utilityRow = update.parentElement;
+  const utilities = update.closest('[data-sidebar-section="utilities"]');
+  expect(utilities?.lastElementChild).toBe(utilityRow);
+  expect(
+    screen.queryByRole("link", { name: "Notifications" })
+  ).not.toBeInTheDocument();
+
   jest.mocked(useSeizeConnectContext).mockReturnValue({
     address: "0xalice",
     hasValidWalletAuth: true,
   } as unknown as ReturnType<typeof useSeizeConnectContext>);
-  render(<WebSidebar {...sidebarProps} />);
-  const update = screen.getByRole("button", { name: "Update" });
+  rerender(<WebSidebar {...sidebarProps} />);
   const notifications = screen.getByRole("link", { name: "Notifications" });
-  expect(update.parentElement?.nextElementSibling).toContainElement(
-    notifications
-  );
   expect(
     notifications.closest('[data-sidebar-section="account"]')
   ).not.toBeNull();
+  expect(utilities).not.toContainElement(notifications);
+  expect(screen.getByRole("button", { name: "Update" })).toBe(update);
+  expect(utilities?.lastElementChild).toBe(utilityRow);
+
+  jest.mocked(useSeizeConnectContext).mockReturnValue({
+    address: undefined,
+    hasValidWalletAuth: false,
+  } as unknown as ReturnType<typeof useSeizeConnectContext>);
+  rerender(<WebSidebar {...sidebarProps} />);
   expect(
-    screen
-      .getByRole("button", { name: "Search" })
-      .closest('[data-sidebar-section="utilities"]')
-  ).not.toContainElement(notifications);
+    screen.queryByRole("link", { name: "Notifications" })
+  ).not.toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "Update" })).toBe(update);
+  expect(utilities?.lastElementChild).toBe(utilityRow);
 });

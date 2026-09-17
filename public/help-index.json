@@ -779,11 +779,11 @@
         "The web sidebar Waves row opens /waves directly; Discover Waves remains secondary inside the Waves experience and searchable, while Network, Delegation, Tools, Open Data, and reference material live under About.",
         "Drop Forge appears as a standalone sidebar row after About only when the connected wallet can access /drop-forge.",
         "The sidebar can be collapsed or expanded depending on viewport and layout state.",
-        "The web sidebar has independently scrollable primary navigation, a stable Search and Share section, and bottom account controls. Update and Notifications appear above the fixed account slot without moving Search or Share. Extra Drop Forge and Watchtower entries remain reachable in short windows.",
+        "The web sidebar has independently scrollable primary navigation, fixed Search, Share, and optional Update rows in the middle section, and bottom account controls. Notifications appear directly above the fixed account slot without moving Update, Search, or Share. Extra Drop Forge and Watchtower entries remain reachable in short windows.",
         "The account slot shimmers during restoration, then shows a profile picture or the signed-out Connect Wallet icon. Failed pictures use a default user icon; a failed profile request offers Profile unavailable. Retry, while an empty successful result offers Create profile. Search and Share remain available during account loading.",
         "In the collapsed web rail, NFTs and About open on intentional mouse hover while tap, click, and keyboard activation remain available; the flyout stays open while crossing into it and closes after leaving both surfaces or pressing Escape.",
         "Search, Share, Connect Wallet, and Notifications are utility controls; Profile and Connect Device live in the connected account menu.",
-        "When a new version is available, desktop web shows a rocket at the top of the bottom account section instead of a toast: above Notifications when connected, or directly above the account icon when signed out. It has an Update tooltip when collapsed and an Update label when expanded. Selecting it reloads the current route with an Updating to the latest version screen, a static rocket, and three animated dots. Mobile browsers, including tablets in desktop browsing mode, retain the full update toast and show the same updating screen when tapped."
+        "When a new version is available, desktop web shows a rocket below Share in the middle utility section instead of a toast. Its position does not change when Notifications appears. It has an Update tooltip when collapsed and an Update label when expanded. Selecting it reloads the current route with an Updating to the latest version screen, a static rocket, and three animated dots. Mobile browsers, including tablets in desktop browsing mode, retain the full update toast and show the same updating screen when tapped."
       ],
       "canonical_path": "/waves",
       "related_paths": [
@@ -4980,7 +4980,7 @@
         "Rapid primary-tab switching commits the most recently requested destination.",
         "In the Android app, bottom spacing respects the space the device reports for system navigation.",
         "Rotating a phone or tablet keeps bottom navigation visible unless a route, edit state, open drop, or real software keyboard hides it.",
-        "In the native app, a small rocket appears in a curved attachment above Home when a new version is available. It moves, hides and scales with the dock. Tapping the rocket reloads the current route and shows Updating to the latest version with a static rocket and animated dots during loading; Home still navigates home. Desktop web uses an Update rocket above Search in the lower sidebar; mobile browsers retain the full update toast."
+        "In the native app, a small rocket appears in a curved attachment above Home when a new version is available. It moves, hides and scales with the dock. Tapping the rocket reloads the current route and shows Updating to the latest version with a static rocket and animated dots during loading; Home still navigates home. Desktop web uses an Update rocket below Share in the middle sidebar section; mobile browsers retain the full update toast."
       ],
       "canonical_path": "/waves",
       "related_paths": [
