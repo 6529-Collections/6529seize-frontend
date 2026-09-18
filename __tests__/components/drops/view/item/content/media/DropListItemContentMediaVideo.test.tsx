@@ -38,6 +38,10 @@ describe("DropListItemContentMediaVideo", () => {
     });
   });
 
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
   it("renders video when in view", () => {
     const ref = {
       current: document.createElement("div"),
@@ -365,7 +369,8 @@ describe("DropListItemContentMediaVideo", () => {
     expect(playSpy).toHaveBeenCalledTimes(playCallsBeforeClick);
   });
 
-  it("shows a retry action after a terminal playback error", async () => {
+  it("shows a retry action after a terminal playback error", () => {
+    jest.useFakeTimers();
     const ref = {
       current: document.createElement("div"),
     } as React.RefObject<HTMLDivElement>;
@@ -389,8 +394,46 @@ describe("DropListItemContentMediaVideo", () => {
 
     fireEvent.error(video);
 
-    expect(await screen.findByText("Couldn’t load video.")).toBeInTheDocument();
+    act(() => {
+      jest.advanceTimersByTime(3000);
+    });
+
+    expect(screen.getByText("Couldn’t load video.")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Retry" }));
+    expect(screen.queryByText("Couldn’t load video.")).not.toBeInTheDocument();
+  });
+
+  it("keeps a recoverable playback error hidden during the recovery grace period", () => {
+    jest.useFakeTimers();
+    const ref = {
+      current: document.createElement("div"),
+    } as React.RefObject<HTMLDivElement>;
+    mockUseInView.mockReturnValue([ref, true]);
+    mockUseOptimizedVideo.mockReturnValue({
+      playableUrl: "stream.m3u8",
+      isHls: true,
+    });
+
+    const { container } = render(
+      <DropListItemContentMediaVideo src="stream.mp4" />
+    );
+    const video = container.querySelector("video");
+    if (!video) {
+      throw new Error("Expected video element to render");
+    }
+    let playbackError: Pick<MediaError, "code"> | null = { code: 3 };
+    Object.defineProperty(video, "error", {
+      configurable: true,
+      get: () => playbackError,
+    });
+
+    fireEvent.error(video);
+    playbackError = null;
+    fireEvent.loadedData(video);
+    act(() => {
+      jest.advanceTimersByTime(3000);
+    });
+
     expect(screen.queryByText("Couldn’t load video.")).not.toBeInTheDocument();
   });
 });

@@ -24,6 +24,16 @@ interface UseHlsPlayerParams {
 const HLS_MANIFEST_MAX_RETRIES = 2;
 const HLS_NETWORK_MAX_RECOVERIES = 2;
 const HLS_MANIFEST_RETRY_DELAY_MS = 2000;
+const VIDEO_SOURCE_PROTOCOLS = new Set(["blob:", "http:", "https:"]);
+
+function getSafeVideoSource(source: string): string | null {
+  try {
+    const parsed = new URL(source, globalThis.window.location.origin);
+    return VIDEO_SOURCE_PROTOCOLS.has(parsed.protocol) ? parsed.href : null;
+  } catch {
+    return null;
+  }
+}
 
 /**
  * A custom hook for Hls.js setup/cleanup.
@@ -115,7 +125,15 @@ export function useHlsPlayer({
    * Fallback to a raw MP4 (or original src) if HLS is unsupported or fails.
    */
   function fallbackToSrc(videoEl: HTMLVideoElement, fallback: string) {
-    videoEl.src = fallback;
+    const safeFallback = getSafeVideoSource(fallback);
+    if (safeFallback === null) {
+      videoEl.removeAttribute("src");
+      videoEl.load();
+      setIsLoading(false);
+      return;
+    }
+
+    videoEl.src = safeFallback;
     videoEl.load();
     setIsLoading(false);
     if (autoPlay) {
@@ -210,18 +228,19 @@ export function useHlsPlayer({
         return;
       }
 
+      const safeHlsSrc = getSafeVideoSource(src);
+      if (safeHlsSrc === null) {
+        fallbackToSrc(videoEl, fallbackSrc ?? src);
+        return;
+      }
+
       // Prefer Hls.js wherever Media Source Extensions are available. Some
       // Chromium builds report "maybe" for native HLS even though playback can
       // stall without producing an error. Native HLS remains the Safari path.
       if (!HlsConstructor.isSupported()) {
         if (videoEl.canPlayType("application/vnd.apple.mpegurl")) {
           videoEl.addEventListener("error", nativeErrorHandler, { once: true });
-          videoEl.src = src;
-          videoEl.load();
-          setIsLoading(false);
-          if (autoPlay) {
-            void videoEl.play().catch(() => {});
-          }
+          fallbackToSrc(videoEl, safeHlsSrc);
           return;
         }
 
@@ -259,7 +278,7 @@ export function useHlsPlayer({
       hlsRef.current = hls;
 
       // Configure error handlers
-      setupHlsErrorHandlers(hls, HlsConstructor, videoEl, src);
+      setupHlsErrorHandlers(hls, HlsConstructor, videoEl, safeHlsSrc);
 
       // Once the manifest is parsed, we can attempt autoplay
       hls.on(HlsConstructor.Events.MANIFEST_PARSED, () => {
@@ -272,7 +291,7 @@ export function useHlsPlayer({
         }
       });
 
-      hls.loadSource(src);
+      hls.loadSource(safeHlsSrc);
       hls.attachMedia(videoEl);
     } catch (error) {
       // If dynamic import fails, fallback if possible
@@ -345,12 +364,7 @@ export function useHlsPlayer({
       );
     } else {
       // Not HLS => just assign the src
-      videoEl.src = src;
-      videoEl.load();
-      setIsLoading(false);
-      if (autoPlay) {
-        void videoEl.play().catch(() => {});
-      }
+      fallbackToSrc(videoEl, src);
     }
 
     // Cleanup on unmount

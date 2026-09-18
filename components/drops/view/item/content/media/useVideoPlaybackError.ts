@@ -3,6 +3,8 @@
 import type { ReactEventHandler, RefObject } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
+const PLAYBACK_RECOVERY_GRACE_MS = 3000;
+
 export function useVideoPlaybackError({
   onRetry,
   resetKey,
@@ -51,12 +53,12 @@ export function useVideoPlaybackError({
       }
       errorCheckTimeoutRef.current = globalThis.setTimeout(() => {
         errorCheckTimeoutRef.current = null;
-        // The HLS hook handles recoverable native-HLS errors synchronously.
-        // Surface only a media element that remains failed afterward.
+        // Hls.js media recovery is asynchronous. Give it time to emit
+        // loadeddata/playing before treating the element error as terminal.
         if (videoRef.current === videoEl && videoEl.error !== null) {
           setErrorState({ failed: true, key: resetKey });
         }
-      }, 0);
+      }, PLAYBACK_RECOVERY_GRACE_MS);
     },
     [resetKey, videoRef]
   );

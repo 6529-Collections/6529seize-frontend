@@ -1,4 +1,4 @@
-import { render, waitFor, act } from "@testing-library/react";
+import { render, waitFor, act, fireEvent } from "@testing-library/react";
 import React from "react";
 import { useHlsPlayer } from "@/hooks/useHlsPlayer";
 
@@ -63,8 +63,15 @@ Object.defineProperty(HTMLVideoElement.prototype, "canPlayType", {
 });
 
 function TestComponent(props: any) {
-  const { videoRef, isLoading } = useHlsPlayer(props);
-  return <video data-testid="vid" ref={videoRef} data-loading={isLoading} />;
+  const { videoRef, isLoading, retry } = useHlsPlayer(props);
+  return (
+    <>
+      <video data-testid="vid" ref={videoRef} data-loading={isLoading} />
+      <button type="button" onClick={retry}>
+        Retry
+      </button>
+    </>
+  );
 }
 
 describe("useHlsPlayer", () => {
@@ -98,6 +105,29 @@ describe("useHlsPlayer", () => {
     });
   });
 
+  it("reloads native HLS when retry is requested", async () => {
+    (HTMLVideoElement.prototype.canPlayType as jest.Mock).mockReturnValue(
+      "probably"
+    );
+
+    const { getByTestId, getByRole } = render(
+      <TestComponent src="video.m3u8" isHls fallbackSrc="fallback.mp4" />
+    );
+    const video = getByTestId("vid") as HTMLVideoElement;
+    await waitFor(() => {
+      expect(video.src).toContain("video.m3u8");
+    });
+    const loadSpy = HTMLVideoElement.prototype.load as jest.Mock;
+    loadSpy.mockClear();
+
+    fireEvent.click(getByRole("button", { name: "Retry" }));
+
+    await waitFor(() => {
+      expect(loadSpy).toHaveBeenCalled();
+      expect(video.src).toContain("video.m3u8");
+    });
+  });
+
   it("prefers Hls.js over a Chromium-style maybe response", async () => {
     mockHlsSupported = true;
     (HTMLVideoElement.prototype.canPlayType as jest.Mock).mockReturnValue(
@@ -110,7 +140,9 @@ describe("useHlsPlayer", () => {
     const video = getByTestId("vid") as HTMLVideoElement;
 
     await waitFor(() => {
-      expect(mockHlsLoadSource).toHaveBeenCalledWith("video.m3u8");
+      expect(mockHlsLoadSource).toHaveBeenCalledWith(
+        expect.stringContaining("video.m3u8")
+      );
     });
     expect(mockHlsAttachMedia).toHaveBeenCalledWith(video);
     expect(video.src).not.toContain("video.m3u8");
@@ -160,6 +192,26 @@ describe("useHlsPlayer", () => {
     const video = getByTestId("vid") as HTMLVideoElement;
     expect(video.src).toContain("video.mp4");
     expect(video.getAttribute("data-loading")).toBe("false");
+  });
+
+  it("reloads a non-HLS source when retry is requested", () => {
+    const { getByRole } = render(
+      <TestComponent src="video.mp4" isHls={false} />
+    );
+    const loadSpy = HTMLVideoElement.prototype.load as jest.Mock;
+    loadSpy.mockClear();
+
+    fireEvent.click(getByRole("button", { name: "Retry" }));
+
+    expect(loadSpy).toHaveBeenCalled();
+  });
+
+  it("rejects unsafe video source protocols", () => {
+    const { getByTestId } = render(
+      <TestComponent src="javascript:alert(1)" isHls={false} />
+    );
+
+    expect((getByTestId("vid") as HTMLVideoElement).src).toBe("");
   });
 
   it("does not attach a source while disabled", () => {
