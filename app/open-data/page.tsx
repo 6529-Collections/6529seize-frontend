@@ -12,8 +12,11 @@ export default function Downloads() {
 }
 
 export async function generateMetadata(): Promise<Metadata> {
-  return getAppMetadata({
-    title: "Open Data",
-    description: "Tools",
-  });
+  return getAppMetadata(
+    {
+      title: "Open Data",
+      description: "Tools",
+    },
+    { canonicalPath: "/open-data" }
+  );
 }
