@@ -97,6 +97,9 @@ jest-results.json
 # generated env schema for Node runtime
 /config/env.schema.runtime.cjs
 
+# Verified Network Museum publication packaged by the build.
+/.museum-publication/
+
 # OpenAPI generator scratch directories
 /tmp_gen_outp/
 /tmp_gen_final/
