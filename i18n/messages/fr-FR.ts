@@ -1121,6 +1121,10 @@ export const FR_FR_MESSAGES = {
     "Prochaine décision après le {date}",
   "waves.leaderboard.timeline.noDecisionScheduled": "Aucune décision planifiée",
   "waves.leaderboard.timeline.noUpcomingEvents": "Aucun événement à venir",
+  "waves.leaderboard.phase.nextWinnersIn": "Prochains gagnants annoncés dans",
+  "waves.leaderboard.phase.countdown": "{hours} h {minutes} min",
+  "waves.leaderboard.phase.countdownWithDays":
+    "{days} j {hours} h {minutes} min",
   "waves.leaderboard.timeline.nextWinner": "Prochain gagnant",
   "waves.leaderboard.timeline.nextWinnerIn":
     "Prochain gagnant dans {countdown}",
