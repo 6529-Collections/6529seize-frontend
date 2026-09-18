@@ -365,43 +365,64 @@ describe("SeizeVideoPlayer", () => {
     });
   });
 
-  it("uses the mounted player wrapper as its fullscreen target", async () => {
-    const requestFullscreen = jest.fn().mockImplementation(function (
-      this: HTMLElement | undefined
-    ) {
+  it.each(["natural", "artwork"] as const)(
+    "uses the mounted %s player wrapper as its fullscreen target",
+    async (layout) => {
+      const requestFullscreen = jest.fn().mockImplementation(function (
+        this: HTMLElement | undefined
+      ) {
+        Object.defineProperty(document, "fullscreenElement", {
+          configurable: true,
+          value: this,
+        });
+        document.dispatchEvent(new Event("fullscreenchange"));
+        return Promise.resolve();
+      });
+      Object.defineProperty(document, "fullscreenEnabled", {
+        configurable: true,
+        value: true,
+      });
+      Object.defineProperty(HTMLElement.prototype, "requestFullscreen", {
+        configurable: true,
+        value: requestFullscreen,
+      });
+
+      const { container } = render(
+        <SeizeVideoPlayer src="https://example.com/video.mp4" layout={layout} />
+      );
+
+      await userEvent.click(
+        screen.getByRole("button", { name: "Full screen" })
+      );
+
+      await waitFor(() => {
+        expect(requestFullscreen).toHaveBeenCalled();
+      });
+      const fullscreenTarget = requestFullscreen.mock
+        .contexts[0] as HTMLElement;
+      const video = container.querySelector("video");
+      expect(fullscreenTarget).not.toBe(document.documentElement);
+      expect(fullscreenTarget).toContainElement(video);
+      expect(fullscreenTarget).toHaveClass(
+        "bounded",
+        "tw-h-screen",
+        "tw-w-screen"
+      );
+      expect(
+        screen.getByRole("button", { name: "Exit full screen" })
+      ).toBeInTheDocument();
       Object.defineProperty(document, "fullscreenElement", {
         configurable: true,
-        value: this,
+        value: null,
       });
-      document.dispatchEvent(new Event("fullscreenchange"));
-      return Promise.resolve();
-    });
-    Object.defineProperty(document, "fullscreenEnabled", {
-      configurable: true,
-      value: true,
-    });
-    Object.defineProperty(HTMLElement.prototype, "requestFullscreen", {
-      configurable: true,
-      value: requestFullscreen,
-    });
-
-    const { container } = render(
-      <SeizeVideoPlayer src="https://example.com/video.mp4" />
-    );
-
-    await userEvent.click(screen.getByRole("button", { name: "Full screen" }));
-
-    await waitFor(() => {
-      expect(requestFullscreen).toHaveBeenCalled();
-    });
-    const fullscreenTarget = requestFullscreen.mock.contexts[0] as HTMLElement;
-    const video = container.querySelector("video");
-    expect(fullscreenTarget).not.toBe(document.documentElement);
-    expect(fullscreenTarget).toContainElement(video);
-    expect(
-      screen.getByRole("button", { name: "Exit full screen" })
-    ).toBeInTheDocument();
-  });
+      fireEvent(document, new Event("fullscreenchange"));
+      expect(fullscreenTarget).not.toHaveClass(
+        "bounded",
+        "tw-h-screen",
+        "tw-w-screen"
+      );
+    }
+  );
 
   it("can hide the fullscreen control", () => {
     render(

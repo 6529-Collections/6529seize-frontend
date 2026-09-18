@@ -21,10 +21,36 @@
 }
 
 .artwork:not(.bounded) {
+  --video-viewport-height: 100vh;
+  --video-max-height: calc(
+    max(
+        1px,
+        var(--video-viewport-height) -
+          max(
+            var(--stream-route-loading-header-reserve, 0px),
+            env(safe-area-inset-top, 0px)
+          ) -
+          max(
+            var(--stream-route-loading-bottom-reserve, 0px),
+            env(safe-area-inset-bottom, 0px)
+          )
+      ) *
+      0.95
+  );
   width: 100%;
+  max-width: calc(var(--video-max-height) * var(--video-ratio, 1.777778));
+  max-height: var(--video-max-height);
   height: auto;
   flex: none;
+  margin-inline: auto;
   aspect-ratio: var(--video-ratio, 1.777778);
+}
+
+/* Small viewport units keep the cap stable when mobile browser chrome changes. */
+@supports (height: 100svh) {
+  .artwork:not(.bounded) {
+    --video-viewport-height: 100svh;
+  }
 }
 
 /* Artwork owns its height; asynchronously loaded neighboring panels must not
