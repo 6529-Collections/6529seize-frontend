@@ -34,6 +34,7 @@ export default function DropListItemContentMedia({
   isCompetitionDrop = false,
   disableModal = false,
   disableAutoPlay = false,
+  allowAutoPlayInApp = false,
   fillVideoContainer = false,
   artworkVideoLayout = false,
   videoAlign,
@@ -50,6 +51,7 @@ export default function DropListItemContentMedia({
   readonly disableModal?: boolean | undefined;
   readonly disableAutoPlay?: boolean | undefined;
   readonly artworkVideoLayout?: boolean | undefined;
+  readonly allowAutoPlayInApp?: boolean | undefined;
   readonly fillVideoContainer?: boolean | undefined;
   readonly videoAlign?: "left" | "center" | undefined;
   readonly imageObjectPosition?: string | undefined;
@@ -107,6 +109,7 @@ export default function DropListItemContentMedia({
           src={media_url}
           mimeType={media_mime_type}
           disableAutoPlay={disableAutoPlay}
+          allowAutoPlayInApp={allowAutoPlayInApp}
           fillContainer={fillVideoContainer}
           artworkLayout={artworkVideoLayout}
           align={videoAlign}
