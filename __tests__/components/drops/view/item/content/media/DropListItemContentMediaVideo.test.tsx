@@ -110,9 +110,9 @@ describe("DropListItemContentMediaVideo", () => {
 
     render(<DropListItemContentMediaVideo src="foo.mp4" align="center" />);
 
-    expect(screen.getByLabelText("Video player").parentElement).toHaveClass(
-      "tw-mx-auto"
-    );
+    expect(
+      screen.getByLabelText("Video player").parentElement?.parentElement
+    ).toHaveClass("tw-mx-auto");
   });
 
   it("keeps video optimization disabled until the wrapper is in view", () => {
@@ -154,34 +154,49 @@ describe("DropListItemContentMediaVideo", () => {
     expect(playSpy).not.toHaveBeenCalled();
   });
 
-  it("autoplays an opted-in app video when reduced motion is off", () => {
-    mockIsApp = true;
-    mockPrefersReducedMotion(false);
-    const ref = {
-      current: document.createElement("div"),
-    } as React.RefObject<HTMLDivElement>;
-    mockUseInView.mockReturnValue([ref, true]);
-    mockUseOptimizedVideo.mockReturnValue({
-      playableUrl: "foo.mp4",
-      isHls: false,
-    });
+  it.each([false, true])(
+    "autoplays an opted-in app video with artworkLayout=%s",
+    (artworkLayout) => {
+      mockIsApp = true;
+      mockPrefersReducedMotion(false);
+      const ref = {
+        current: document.createElement("div"),
+      } as React.RefObject<HTMLDivElement>;
+      mockUseInView.mockReturnValue([ref, true]);
+      mockUseOptimizedVideo.mockReturnValue({
+        playableUrl: "foo.mp4",
+        isHls: false,
+      });
 
-    const playSpy = jest.fn().mockResolvedValue(undefined);
-    Object.defineProperty(HTMLVideoElement.prototype, "play", {
-      configurable: true,
-      writable: true,
-      value: playSpy,
-    });
+      const playSpy = jest.fn().mockResolvedValue(undefined);
+      Object.defineProperty(HTMLVideoElement.prototype, "play", {
+        configurable: true,
+        writable: true,
+        value: playSpy,
+      });
 
-    render(
-      <DropListItemContentMediaVideo
-        src="foo.mp4"
-        allowAutoPlayInApp
-      />
-    );
+      render(
+        <DropListItemContentMediaVideo
+          src="foo.mp4"
+          allowAutoPlayInApp
+          artworkLayout={artworkLayout}
+        />
+      );
 
-    expect(playSpy).toHaveBeenCalled();
-  });
+      expect(playSpy).toHaveBeenCalled();
+      const frame =
+        screen.getByLabelText("Video player").parentElement?.parentElement;
+      if (artworkLayout) {
+        expect(frame).toHaveClass("artwork");
+      } else {
+        expect(frame).toHaveClass("tw-w-full");
+        expect(frame).not.toHaveClass("artwork");
+      }
+      expect(
+        screen.getByRole("slider", { name: "Seek video" })
+      ).toBeInTheDocument();
+    }
+  );
 
   it("does not autoplay an opted-in app video when reduced motion is on", () => {
     mockIsApp = true;
@@ -202,12 +217,7 @@ describe("DropListItemContentMediaVideo", () => {
       value: playSpy,
     });
 
-    render(
-      <DropListItemContentMediaVideo
-        src="foo.mp4"
-        allowAutoPlayInApp
-      />
-    );
+    render(<DropListItemContentMediaVideo src="foo.mp4" allowAutoPlayInApp />);
 
     expect(playSpy).not.toHaveBeenCalled();
   });

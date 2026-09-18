@@ -134,6 +134,34 @@ const createDefaultProps = (
 
 describe("NFTImageRenderer", () => {
   describe("Basic Rendering", () => {
+    it("fills artwork width with intrinsic image height instead of the legacy cap", () => {
+      render(
+        <NFTImageRenderer
+          {...createDefaultProps({
+            artworkLayout: true,
+            height: 650,
+            heightStyle: "legacy-height-cap",
+            imageStyle: "legacy-image-cap",
+          })}
+        />
+      );
+
+      const image = screen.getByRole("img");
+      expect(image).toHaveClass("tw-w-full", "tw-h-auto", "tw-object-contain");
+      expect(image).not.toHaveClass("legacy-image-cap");
+      expect(image.style.width).toBe("");
+      expect(image.style.height).toBe("");
+      expect(image.parentElement).toHaveClass(
+        "tw-w-full",
+        "tw-h-auto",
+        "tw-justify-center"
+      );
+      expect(image.parentElement).not.toHaveClass(
+        "legacy-height-cap",
+        "tw-h-full"
+      );
+    });
+
     it("renders image with correct props", () => {
       const props = createDefaultProps({ showOriginal: true });
       render(<NFTImageRenderer {...props} />);

@@ -558,6 +558,7 @@ export const MEDIA_VIDEO_MESSAGES = namespaceMessages("media.video", [
   ["player", "Video player"],
   ["playPreview", "Play video preview"],
   ["seek", "Seek video"],
+  ["position", "{current} of {duration}"],
   ["unmute", "Unmute video"],
   ["unsupported", "Your browser does not support the video tag."],
 ] as const);

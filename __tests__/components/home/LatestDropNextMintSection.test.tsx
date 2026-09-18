@@ -45,6 +45,26 @@ jest.mock("next/link", () => {
   };
 });
 
+jest.mock(
+  "@/components/drops/view/item/content/media/DropListItemContentMedia",
+  () => ({
+    __esModule: true,
+    default: ({
+      artworkVideoLayout,
+      videoAlign,
+    }: {
+      readonly artworkVideoLayout?: boolean;
+      readonly videoAlign?: string;
+    }) => (
+      <div
+        data-testid="drop-media"
+        data-fill={String(artworkVideoLayout)}
+        data-align={videoAlign}
+      />
+    ),
+  })
+);
+
 const createDrop = (memeCardId?: number): ApiDropV2View =>
   ({
     id: "drop-1",
@@ -123,4 +143,20 @@ describe("LatestDropNextMintSection", () => {
       screen.queryByRole("link", { name: "The Memes #488" })
     ).not.toBeInTheDocument();
   });
+});
+
+it("fits Next Drop video into the same centered homepage area", () => {
+  const drop = {
+    ...createDrop(488),
+    parts: [{ media: [{ mime_type: "video/mp4", url: "video.mp4" }] }],
+  } as ApiDropV2View;
+  render(<LatestDropNextMintSection drop={drop} />);
+  expect(screen.getByTestId("drop-media")).toHaveAttribute("data-fill", "true");
+  expect(
+    screen.getByTestId("drop-media").closest("[data-home-artwork-column]")
+  ).toHaveClass("tw-flex", "tw-items-center");
+  expect(screen.getByTestId("drop-media")).toHaveAttribute(
+    "data-align",
+    "center"
+  );
 });

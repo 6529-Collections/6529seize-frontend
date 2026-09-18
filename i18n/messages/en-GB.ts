@@ -211,6 +211,7 @@ export const EN_GB_MESSAGES = {
   "media.video.play": "Play video",
   "media.video.player": "Video player",
   "media.video.playPreview": "Play video preview",
+  "media.video.position": "{current} of {duration}",
   "media.video.seek": "Seek video",
   "media.video.unmute": "Unmute video",
   "media.video.unsupported": "Your browser does not support the video tag.",

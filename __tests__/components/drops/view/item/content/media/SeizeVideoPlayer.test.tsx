@@ -67,6 +67,10 @@ function mockPrefersReducedMotion(matches: boolean) {
 describe("SeizeVideoPlayer", () => {
   beforeEach(() => {
     jest.restoreAllMocks();
+    Object.defineProperty(HTMLElement.prototype, "setPointerCapture", {
+      configurable: true,
+      value: jest.fn(),
+    });
     Object.defineProperty(globalThis, "IntersectionObserver", {
       configurable: true,
       value: undefined,
@@ -153,7 +157,12 @@ describe("SeizeVideoPlayer", () => {
 
     try {
       const { container } = render(
-        <SeizeVideoPlayer src="https://example.com/video.mp4" />
+        <SeizeVideoPlayer
+          src="https://example.com/video.mp4"
+          onOpen={jest.fn()}
+          openLabel="Open video"
+          onDownload={jest.fn()}
+        />
       );
 
       const video = container.querySelector("video");
@@ -185,6 +194,14 @@ describe("SeizeVideoPlayer", () => {
       expect(muteControlZone).toHaveClass("tw-pointer-events-none");
       expect(muteControlZone).not.toHaveClass("tw-pointer-events-auto");
       expect(muteButton).toHaveAttribute("tabindex", "-1");
+      const controls = [
+        ...screen.getAllByRole("button"),
+        screen.getByRole("slider"),
+      ];
+      expect(controls).toHaveLength(6);
+      for (const control of controls) {
+        expect(control).toHaveAttribute("tabindex", "-1");
+      }
 
       act(() => {
         video.focus();
@@ -348,43 +365,64 @@ describe("SeizeVideoPlayer", () => {
     });
   });
 
-  it("uses the mounted player wrapper as its fullscreen target", async () => {
-    const requestFullscreen = jest.fn().mockImplementation(function (
-      this: HTMLElement | undefined
-    ) {
+  it.each(["natural", "artwork"] as const)(
+    "uses the mounted %s player wrapper as its fullscreen target",
+    async (layout) => {
+      const requestFullscreen = jest.fn().mockImplementation(function (
+        this: HTMLElement | undefined
+      ) {
+        Object.defineProperty(document, "fullscreenElement", {
+          configurable: true,
+          value: this,
+        });
+        document.dispatchEvent(new Event("fullscreenchange"));
+        return Promise.resolve();
+      });
+      Object.defineProperty(document, "fullscreenEnabled", {
+        configurable: true,
+        value: true,
+      });
+      Object.defineProperty(HTMLElement.prototype, "requestFullscreen", {
+        configurable: true,
+        value: requestFullscreen,
+      });
+
+      const { container } = render(
+        <SeizeVideoPlayer src="https://example.com/video.mp4" layout={layout} />
+      );
+
+      await userEvent.click(
+        screen.getByRole("button", { name: "Full screen" })
+      );
+
+      await waitFor(() => {
+        expect(requestFullscreen).toHaveBeenCalled();
+      });
+      const fullscreenTarget = requestFullscreen.mock
+        .contexts[0] as HTMLElement;
+      const video = container.querySelector("video");
+      expect(fullscreenTarget).not.toBe(document.documentElement);
+      expect(fullscreenTarget).toContainElement(video);
+      expect(fullscreenTarget).toHaveClass(
+        "bounded",
+        "tw-h-screen",
+        "tw-w-screen"
+      );
+      expect(
+        screen.getByRole("button", { name: "Exit full screen" })
+      ).toBeInTheDocument();
       Object.defineProperty(document, "fullscreenElement", {
         configurable: true,
-        value: this,
+        value: null,
       });
-      document.dispatchEvent(new Event("fullscreenchange"));
-      return Promise.resolve();
-    });
-    Object.defineProperty(document, "fullscreenEnabled", {
-      configurable: true,
-      value: true,
-    });
-    Object.defineProperty(HTMLElement.prototype, "requestFullscreen", {
-      configurable: true,
-      value: requestFullscreen,
-    });
-
-    const { container } = render(
-      <SeizeVideoPlayer src="https://example.com/video.mp4" />
-    );
-
-    await userEvent.click(screen.getByRole("button", { name: "Full screen" }));
-
-    await waitFor(() => {
-      expect(requestFullscreen).toHaveBeenCalled();
-    });
-    const fullscreenTarget = requestFullscreen.mock.contexts[0] as HTMLElement;
-    const video = container.querySelector("video");
-    expect(fullscreenTarget).not.toBe(document.documentElement);
-    expect(fullscreenTarget).toContainElement(video);
-    expect(
-      screen.getByRole("button", { name: "Exit full screen" })
-    ).toBeInTheDocument();
-  });
+      fireEvent(document, new Event("fullscreenchange"));
+      expect(fullscreenTarget).not.toHaveClass(
+        "bounded",
+        "tw-h-screen",
+        "tw-w-screen"
+      );
+    }
+  );
 
   it("can hide the fullscreen control", () => {
     render(
@@ -414,7 +452,9 @@ describe("SeizeVideoPlayer", () => {
       <SeizeVideoPlayer src="https://example.com/video.mp4" autoPlay={false} />
     );
 
-    await userEvent.click(screen.getByRole("button", { name: "Play video" }));
+    await userEvent.click(
+      screen.getAllByRole("button", { name: "Play video" })[0]!
+    );
 
     expect(HTMLMediaElement.prototype.play).toHaveBeenCalled();
   });
@@ -425,8 +465,8 @@ describe("SeizeVideoPlayer", () => {
     const pauseButton = screen.getByRole("button", { name: "Pause video" });
     const muteButton = screen.getByRole("button", { name: "Unmute video" });
 
-    expect(pauseButton.parentElement).toHaveClass("tw-left-3");
-    expect(muteButton.parentElement).toHaveClass("tw-right-3");
+    expect(pauseButton.parentElement).toHaveTextContent("0:00 / —");
+    expect(muteButton.parentElement).toHaveClass("tw-ml-auto");
   });
 
   it("pauses minimal playback from video clicks without starting playback", () => {
@@ -452,7 +492,9 @@ describe("SeizeVideoPlayer", () => {
     expect(HTMLMediaElement.prototype.pause).toHaveBeenCalledTimes(
       pauseCallsBeforeClick + 1
     );
-    const playButton = screen.getByRole("button", { name: "Play video" });
+    const playButton = screen.getAllByRole("button", {
+      name: "Play video",
+    })[0]!;
     expect(playButton).toBeVisible();
     expect(playButton).toHaveClass("tw-border-white/40", "tw-bg-black/80");
 
@@ -619,6 +661,252 @@ describe("SeizeVideoPlayer", () => {
     fireEvent.seeked(video);
 
     expect(seek).toHaveValue("50");
+  });
+
+  it("keeps the same playback capsule and timestamp when paused", () => {
+    const { container } = render(<SeizeVideoPlayer src="video.mp4" autoPlay />);
+    const video = container.querySelector("video")!;
+    Object.defineProperty(video, "duration", { configurable: true, value: 10 });
+    video.currentTime = 6;
+    fireEvent.durationChange(video);
+    const pause = screen.getByRole("button", { name: "Pause video" });
+    const capsule = pause.parentElement;
+    const time = screen.getByText("0:06 / 0:10");
+    fireEvent.pause(video);
+    expect(screen.getAllByRole("button", { name: "Play video" })).toHaveLength(
+      2
+    );
+    expect(capsule).toContainElement(pause);
+    expect(pause).toHaveAccessibleName("Play video");
+    expect(screen.getByText("0:06 / 0:10")).toBe(time);
+    fireEvent.play(video);
+    expect(screen.getByRole("button", { name: "Pause video" })).toBe(pause);
+  });
+
+  it("updates the visible time and accessible seek position immediately", () => {
+    const { container } = render(<SeizeVideoPlayer src="video.mp4" />);
+    const video = container.querySelector("video")!;
+    Object.defineProperty(video, "duration", {
+      configurable: true,
+      value: 100,
+    });
+    fireEvent.durationChange(video);
+    const seek = screen.getByRole("slider", { name: "Seek video" });
+    fireEvent.change(seek, { target: { value: "29" } });
+    expect(video.currentTime).toBeCloseTo(29);
+    expect(screen.getByText("0:29 / 1:40")).toBeInTheDocument();
+    expect(seek).toHaveAttribute("aria-valuetext", "0:29 of 1:40");
+  });
+
+  it.each(["pointerUp", "pointerCancel", "lostPointerCapture"])(
+    "keeps controls during long scrubs and releases on %s",
+    (endEvent) => {
+      jest.useFakeTimers();
+      try {
+        const { container } = render(<SeizeVideoPlayer src="video.mp4" />);
+        const video = container.querySelector("video")!;
+        Object.defineProperty(video, "duration", {
+          configurable: true,
+          value: 10,
+        });
+        Object.defineProperty(video, "paused", {
+          configurable: true,
+          value: false,
+        });
+        fireEvent.durationChange(video);
+        fireEvent.play(video);
+        const seek = screen.getByRole("slider", { name: "Seek video" });
+        fireEvent.pointerDown(seek, { pointerId: 1 });
+        fireEvent.change(seek, { target: { value: "60" } });
+        act(() => {
+          jest.advanceTimersByTime(5000);
+        });
+        expect(seek).not.toHaveAttribute("tabindex", "-1");
+        expect(screen.getByText("0:06 / 0:10")).toBeInTheDocument();
+        if (endEvent === "pointerUp") fireEvent.pointerUp(seek);
+        else if (endEvent === "pointerCancel") fireEvent.pointerCancel(seek);
+        else fireEvent.lostPointerCapture(seek);
+        act(() => {
+          jest.advanceTimersByTime(1800);
+        });
+        expect(seek).toHaveAttribute("tabindex", "-1");
+        expect(seek).toHaveClass("tw-pointer-events-none");
+      } finally {
+        jest.useRealTimers();
+      }
+    }
+  );
+
+  it("keeps native seeking usable when pointer capture fails", () => {
+    const capture = jest.mocked(HTMLElement.prototype.setPointerCapture);
+    capture.mockImplementationOnce(() => {
+      throw new DOMException("Pointer has ended", "NotFoundError");
+    });
+    const { container } = render(<SeizeVideoPlayer src="video.mp4" />);
+    const video = container.querySelector("video")!;
+    Object.defineProperty(video, "duration", { configurable: true, value: 10 });
+    fireEvent.durationChange(video);
+    const seek = screen.getByRole("slider");
+    fireEvent.pointerDown(seek, { pointerId: 1 });
+    fireEvent.change(seek, { target: { value: "60" } });
+    expect(video.currentTime).toBe(6);
+    expect(screen.getByText("0:06 / 0:10")).toBeInTheDocument();
+  });
+
+  it("cancels the old hide timer when a scrubbing source is emptied", () => {
+    jest.useFakeTimers();
+    try {
+      const { container } = render(<SeizeVideoPlayer />);
+      const video = container.querySelector("video")!;
+      Object.defineProperties(video, {
+        duration: { configurable: true, value: 10 },
+        paused: { configurable: true, value: false },
+      });
+      fireEvent.durationChange(video);
+      fireEvent.play(video);
+      const seek = screen.getByRole("slider");
+      fireEvent.pointerDown(seek, { pointerId: 1 });
+      fireEvent.change(seek, { target: { value: "60" } });
+      fireEvent.emptied(video);
+      act(() => {
+        jest.advanceTimersByTime(5000);
+      });
+      expect(seek).not.toHaveAttribute("tabindex", "-1");
+      expect(seek).toHaveValue("0");
+      expect(seek).toBeDisabled();
+      expect(screen.getByText("0:00 / —")).toBeInTheDocument();
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it("clears the timestamp and disables seeking for a replacement source until metadata arrives", () => {
+    const { container, rerender } = render(
+      <SeizeVideoPlayer src="first.mp4" />
+    );
+    const video = container.querySelector("video")!;
+    Object.defineProperty(video, "duration", { configurable: true, value: 10 });
+    video.currentTime = 6;
+    fireEvent.durationChange(video);
+    rerender(<SeizeVideoPlayer src="second.mp4" />);
+    expect(screen.getByText("0:00 / —")).toBeInTheDocument();
+    expect(screen.getByRole("slider")).toBeDisabled();
+  });
+
+  it("uses the complete supplied viewing area without natural sizing caps", () => {
+    const { container } = render(
+      <SeizeVideoPlayer src="video.mp4" layout="fill" align="center" />
+    );
+    const video = container.querySelector("video")!;
+    Object.defineProperties(video, {
+      videoWidth: { value: 600 },
+      videoHeight: { value: 900 },
+    });
+    fireEvent.loadedMetadata(video);
+    expect(container.firstElementChild).toHaveClass("tw-h-full", "tw-w-full");
+    const player = container.firstElementChild as HTMLElement;
+    expect(player.style.maxWidth).toBe("");
+    expect(player.style.maxHeight).toBe("");
+    expect(player.style.getPropertyValue("--video-ratio")).toBe(
+      String(600 / 900)
+    );
+    const surface = video.parentElement!;
+    expect(surface).toHaveAttribute("data-video-surface");
+    expect(surface).toContainElement(screen.getByRole("slider"));
+    expect(video).toHaveClass("tw-object-contain");
+  });
+
+  it.each([
+    [600, 900],
+    [1600, 900],
+  ])(
+    "shares an uncropped artwork surface with its controls for %s x %s video",
+    (width, height) => {
+      const { container } = render(<SeizeVideoPlayer layout="artwork" />);
+      const video = container.querySelector("video")!;
+      Object.defineProperties(video, {
+        videoWidth: { value: width },
+        videoHeight: { value: height },
+      });
+      fireEvent.loadedMetadata(video);
+      const player = container.firstElementChild as HTMLElement;
+      expect(player).toHaveClass("artwork", "tw-w-full");
+      expect(player.style.getPropertyValue("--video-ratio")).toBe(
+        String(width / height)
+      );
+      expect(player.style.maxHeight).toBe("");
+      expect(player.style.maxWidth).toBe("");
+      expect(video.parentElement).toContainElement(screen.getByRole("slider"));
+      expect(video).toHaveClass("tw-object-contain");
+    }
+  );
+
+  it("reserves known portrait dimensions before metadata and resets them for another source", () => {
+    const { container, rerender } = render(
+      <SeizeVideoPlayer
+        src="portrait.mp4"
+        layout="artwork"
+        aspectRatioHint={2 / 3}
+      />
+    );
+    const player = container.firstElementChild as HTMLElement;
+    const video = container.querySelector("video")!;
+    expect(player.style.getPropertyValue("--video-ratio")).toBe(String(2 / 3));
+    Object.defineProperties(video, {
+      videoWidth: { value: 600, configurable: true },
+      videoHeight: { value: 900, configurable: true },
+    });
+    fireEvent.loadedMetadata(video);
+    expect(player.style.getPropertyValue("--video-ratio")).toBe(String(2 / 3));
+    rerender(
+      <SeizeVideoPlayer
+        src="landscape.mp4"
+        layout="artwork"
+        aspectRatioHint={2}
+      />
+    );
+    expect(player.style.getPropertyValue("--video-ratio")).toBe("2");
+    Object.defineProperty(video, "videoWidth", { value: 1600 });
+    fireEvent.loadedMetadata(video);
+    expect(player.style.getPropertyValue("--video-ratio")).toBe(
+      String(1600 / 900)
+    );
+  });
+
+  it.each([0, -1, Number.NaN, Number.POSITIVE_INFINITY])(
+    "ignores invalid aspect ratio hint %s",
+    (aspectRatioHint) => {
+      const { container } = render(
+        <SeizeVideoPlayer layout="artwork" aspectRatioHint={aspectRatioHint} />
+      );
+      const player = container.firstElementChild as HTMLElement;
+      expect(player.style.getPropertyValue("--video-ratio")).toBe(
+        String(16 / 9)
+      );
+    }
+  );
+
+  it("clears duration when an externally managed video source is emptied", () => {
+    const { container } = render(<SeizeVideoPlayer />);
+    const video = container.querySelector("video")!;
+    Object.defineProperty(video, "duration", { configurable: true, value: 10 });
+    video.currentTime = 6;
+    fireEvent.durationChange(video);
+    fireEvent.emptied(video);
+    expect(screen.getByText("0:00 / —")).toBeInTheDocument();
+    expect(screen.getByRole("slider")).toBeDisabled();
+  });
+
+  it("refreshes elapsed time even when duration changes at the same percentage", () => {
+    const { container } = render(<SeizeVideoPlayer src="video.mp4" />);
+    const video = container.querySelector("video")!;
+    Object.defineProperty(video, "duration", { configurable: true, value: 10 });
+    video.currentTime = 5;
+    fireEvent.durationChange(video);
+    Object.defineProperty(video, "duration", { configurable: true, value: 20 });
+    video.currentTime = 10;
+    fireEvent.durationChange(video);
+    expect(screen.getByText("0:10 / 0:20")).toBeInTheDocument();
   });
 
   it("uses native controls for watch media and suppresses custom controls", () => {
@@ -809,10 +1097,12 @@ describe("SeizeVideoPlayer", () => {
       <SeizeVideoPlayer src="https://example.com/video.mp4" autoPlay={false} />
     );
 
-    await userEvent.click(screen.getByRole("button", { name: "Play video" }));
+    await userEvent.click(
+      screen.getAllByRole("button", { name: "Play video" })[0]!
+    );
 
     expect(
-      await screen.findByRole("button", { name: "Play video" })
+      (await screen.findAllByRole("button", { name: "Play video" }))[0]!
     ).toBeInTheDocument();
   });
 

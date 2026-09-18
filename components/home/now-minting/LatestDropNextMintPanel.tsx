@@ -21,6 +21,7 @@ import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import Link from "next/link";
 import { useSyncExternalStore } from "react";
+import HomeArtworkFrame from "./HomeArtworkFrame";
 import ArtistPill from "./ArtistPill";
 import LatestDropAllowlistStatus from "./LatestDropAllowlistStatus";
 import LatestDropNextMintSubscribe from "./LatestDropNextMintSubscribe";
@@ -146,29 +147,34 @@ export default function LatestDropNextMintPanel({
   return (
     <div className="tw-relative tw-overflow-hidden tw-rounded-2xl tw-border tw-border-solid tw-border-white/[0.03] tw-bg-iron-950 tw-shadow-[0_24px_60px_rgba(0,0,0,0.2)]">
       <div className="tw-grid tw-grid-cols-1 tw-items-stretch lg:tw-grid-cols-12 xl:tw-grid-cols-9">
-        <div className="tw-p-0 lg:tw-col-span-6 xl:tw-col-span-5">
-          <div className="tw-relative tw-flex tw-h-[clamp(360px,65vw,640px)] tw-w-full tw-items-center tw-justify-center tw-overflow-hidden tw-bg-black/50">
-            <div className="tw-[&>div]:tw-mx-0 tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center">
-              {media ? (
-                <DropListItemContentMedia
-                  media_mime_type={media.mime_type}
-                  media_url={media.url}
-                  imageObjectPosition="center"
-                  imageScale={ImageScale.AUTOx600}
-                  disableAutoPlay={hasTouchScreen}
-                  disableModal={hasTouchScreen}
-                  htmlIframeContainerClassName="tw-w-full"
-                  htmlPreviewImageUrl={htmlPreviewImageUrl}
-                />
-              ) : (
-                <div className="tw-flex tw-size-full tw-items-center tw-justify-center tw-bg-black/40">
-                  <span className="tw-text-sm tw-text-white/40">
-                    {t(locale, "home.nextMint.noImage")}
-                  </span>
-                </div>
-              )}
-            </div>
-          </div>
+        <div
+          data-home-artwork-column
+          className="tw-flex tw-items-center tw-p-0 lg:tw-col-span-6 xl:tw-col-span-5"
+        >
+          <HomeArtworkFrame
+            reserveMobileHeight={!media?.mime_type.includes("video")}
+          >
+            {media ? (
+              <DropListItemContentMedia
+                media_mime_type={media.mime_type}
+                media_url={media.url}
+                imageObjectPosition="center"
+                artworkVideoLayout
+                videoAlign="center"
+                imageScale={ImageScale.AUTOx600}
+                disableAutoPlay={hasTouchScreen}
+                disableModal={hasTouchScreen}
+                htmlIframeContainerClassName="tw-w-full"
+                htmlPreviewImageUrl={htmlPreviewImageUrl}
+              />
+            ) : (
+              <div className="tw-flex tw-size-full tw-items-center tw-justify-center tw-bg-black/40">
+                <span className="tw-text-sm tw-text-white/40">
+                  {t(locale, "home.nextMint.noImage")}
+                </span>
+              </div>
+            )}
+          </HomeArtworkFrame>
         </div>
 
         <div className="tw-relative tw-flex tw-items-center tw-bg-iron-950 tw-p-5 md:tw-p-7 lg:tw-col-span-6 lg:tw-p-8 xl:tw-col-span-4 xl:tw-p-10 2xl:tw-p-12">

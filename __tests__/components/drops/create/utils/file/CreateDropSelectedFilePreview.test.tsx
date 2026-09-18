@@ -1,5 +1,5 @@
 import React from "react";
-import { render, waitFor } from "@testing-library/react";
+import { fireEvent, render, waitFor } from "@testing-library/react";
 import CreateDropSelectedFilePreview from "@/components/drops/create/utils/file/CreateDropSelectedFilePreview";
 
 let createObjectURLMock: jest.Mock;
@@ -51,6 +51,16 @@ describe("CreateDropSelectedFilePreview", () => {
     });
     expect(video).toBeInTheDocument();
     expect(video).toHaveAttribute("controls");
+    // The composer has content-driven height, so the preview must size itself.
+    const frame = video?.parentElement?.parentElement;
+    expect(frame).not.toHaveClass("bounded");
+    expect(frame?.style.aspectRatio).toBeTruthy();
+    Object.defineProperties(video, {
+      videoWidth: { configurable: true, value: 720 },
+      videoHeight: { configurable: true, value: 1280 },
+    });
+    fireEvent.loadedMetadata(video!);
+    expect(frame?.style.aspectRatio).toBe("720 / 1280");
     expect(createObjectURLMock).toHaveBeenCalledTimes(1);
 
     rerender(<CreateDropSelectedFilePreview file={file} />);
