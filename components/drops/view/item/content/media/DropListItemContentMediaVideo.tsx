@@ -4,9 +4,12 @@ import { useInView } from "@/hooks/useInView";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useOptimizedVideo } from "@/hooks/useOptimizedVideo";
 import { useHlsPlayer } from "@/hooks/useHlsPlayer";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import clsx from "clsx";
 import React, { useEffect, useRef } from "react";
 import SeizeVideoPlayer from "./SeizeVideoPlayer";
+import VideoPlaybackErrorOverlay from "./VideoPlaybackErrorOverlay";
+import { useVideoPlaybackError } from "./useVideoPlaybackError";
 import { useMediaActions } from "./useMediaActions";
 import type { MediaLoadStrategy } from "./mediaLoadStrategy";
 
@@ -35,6 +38,7 @@ function DropListItemContentMediaVideo({
     threshold: 0.1,
   });
   const wasFullscreenRef = useRef(false);
+  const locale = useBrowserLocale();
   const { isApp } = useDeviceInfo();
   const shouldLoadVideo = loadStrategy === "eager" || inView;
   const { downloadMedia, isDownloading, openLabel, openMedia } =
@@ -55,7 +59,7 @@ function DropListItemContentMediaVideo({
   });
 
   // 2) Setup HLS (or native) once and get back the videoRef + loading state
-  const { videoRef, isLoading } = useHlsPlayer({
+  const { videoRef, isLoading, retry } = useHlsPlayer({
     enabled: shouldLoadVideo,
     src: playableUrl,
     isHls,
@@ -65,6 +69,12 @@ function DropListItemContentMediaVideo({
 
   // 3) Play/pause & mute based on scroll visibility
   const shouldAutoPlay = inView && !isApp && !disableAutoPlay;
+  const { handlePlaybackError, hasPlaybackError, retryPlayback } =
+    useVideoPlaybackError({
+      onRetry: retry,
+      resetKey: playableUrl,
+      videoRef,
+    });
 
   useEffect(() => {
     const videoEl = videoRef.current;
@@ -129,13 +139,14 @@ function DropListItemContentMediaVideo({
     <div
       ref={wrapperRef}
       className={clsx(
-        "tw-flex tw-w-full tw-items-start tw-justify-start",
+        "tw-relative tw-flex tw-w-full tw-items-start tw-justify-start",
         fillContainer && "tw-h-full tw-max-h-full"
       )}
     >
       <SeizeVideoPlayer
         videoRef={videoRef}
         template="ambient-media"
+        autoPlay={shouldAutoPlay}
         layout={fillContainer ? "fill" : "natural"}
         align={align}
         showFullscreen={showFullscreen}
@@ -143,7 +154,12 @@ function DropListItemContentMediaVideo({
         onOpen={openMedia}
         openLabel={openLabel}
         isDownloading={isDownloading}
+        locale={locale}
+        onError={handlePlaybackError}
       />
+      {hasPlaybackError && (
+        <VideoPlaybackErrorOverlay onRetry={retryPlayback} />
+      )}
     </div>
   );
 }

@@ -19,6 +19,11 @@ jest.mock("@/components/waves/drops/time/WaveDropTime", () => ({
   default: () => <span>just now</span>,
 }));
 
+jest.mock("@/components/content-moderation/ContentModerationDropGate", () => ({
+  __esModule: true,
+  default: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+}));
+
 jest.mock(
   "@/components/drops/view/item/content/media/DropListItemContentMedia",
   () => ({
@@ -26,6 +31,18 @@ jest.mock(
     default: () => <div data-testid="drop-media" />,
   })
 );
+
+jest.mock("@/hooks/useOptimizedVideo", () => ({
+  useOptimizedVideo: jest.fn(() => ({
+    playableUrl: "",
+    isOptimized: false,
+    isChecking: false,
+    isHls: false,
+  })),
+}));
+
+const useOptimizedVideoMock = require("@/hooks/useOptimizedVideo")
+  .useOptimizedVideo as jest.Mock;
 
 const createDrop = ({
   serialNo = 42,
@@ -331,6 +348,51 @@ describe("MemesQuickVoteDialog", () => {
 
     expect(screen.queryByTestId("drop-media")).not.toBeInTheDocument();
     expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
+  });
+
+  it("preloads the next image without mounting a second media tree", () => {
+    render(
+      <MemesQuickVoteDialog
+        {...createDialogProps({
+          nextDrop: createDrop({ serialNo: 43 }),
+        })}
+      />
+    );
+
+    expect(screen.getAllByTestId("drop-media")).toHaveLength(1);
+    expect(screen.queryByTestId("quick-vote-preview-card-next")).toBeNull();
+    expect(
+      document.querySelector(
+        'link[data-testid="quick-vote-next-image-preload"]'
+      )
+    ).toHaveAttribute("href", "https://example.com/drop.png");
+  });
+
+  it("warms video renditions without creating a hidden video player", () => {
+    const nextDrop = createDrop({ serialNo: 43 });
+    nextDrop.parts[0].media[0] = {
+      mime_type: "video/mp4",
+      url: "https://example.com/drop.mp4",
+    };
+
+    render(
+      <MemesQuickVoteDialog
+        {...createDialogProps({
+          nextDrop,
+        })}
+      />
+    );
+
+    expect(screen.getAllByTestId("drop-media")).toHaveLength(1);
+    expect(useOptimizedVideoMock).toHaveBeenCalledWith(
+      "https://example.com/drop.mp4",
+      expect.objectContaining({ enabled: true, preferHls: true })
+    );
+    expect(
+      document.querySelector(
+        'link[data-testid="quick-vote-next-image-preload"]'
+      )
+    ).toBeNull();
   });
 
   it("keeps signed draft values from submitting", async () => {

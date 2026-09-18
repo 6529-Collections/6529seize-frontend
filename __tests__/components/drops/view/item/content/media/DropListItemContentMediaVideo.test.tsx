@@ -49,10 +49,11 @@ describe("DropListItemContentMediaVideo", () => {
     });
 
     // Mock HTMLVideoElement.play to return a promise
+    const playSpy = jest.fn().mockResolvedValue(undefined);
     Object.defineProperty(HTMLVideoElement.prototype, "play", {
       configurable: true,
       writable: true,
-      value: jest.fn().mockResolvedValue(undefined),
+      value: playSpy,
     });
 
     render(<DropListItemContentMediaVideo src="foo.mp4" />);
@@ -61,7 +62,8 @@ describe("DropListItemContentMediaVideo", () => {
     ).toBeInTheDocument();
     const vid = document.querySelector("video") as HTMLVideoElement;
     expect(vid).toBeTruthy();
-    expect(vid.autoplay).toBe(false); // Component uses useEffect for controlled playback
+    expect(vid.autoplay).toBe(false); // Ambient playback is managed imperatively.
+    expect(playSpy).toHaveBeenCalled();
     expect(mockUseInView).toHaveBeenCalledWith(
       expect.objectContaining({
         freezeOnceVisible: false,
@@ -361,5 +363,34 @@ describe("DropListItemContentMediaVideo", () => {
 
     expect(pauseSpy).toHaveBeenCalledTimes(pauseCallsBeforeClick + 1);
     expect(playSpy).toHaveBeenCalledTimes(playCallsBeforeClick);
+  });
+
+  it("shows a retry action after a terminal playback error", async () => {
+    const ref = {
+      current: document.createElement("div"),
+    } as React.RefObject<HTMLDivElement>;
+    mockUseInView.mockReturnValue([ref, true]);
+    mockUseOptimizedVideo.mockReturnValue({
+      playableUrl: "foo.mp4",
+      isHls: false,
+    });
+
+    const { container } = render(
+      <DropListItemContentMediaVideo src="foo.mp4" />
+    );
+    const video = container.querySelector("video");
+    if (!video) {
+      throw new Error("Expected video element to render");
+    }
+    Object.defineProperty(video, "error", {
+      configurable: true,
+      value: { code: 4 },
+    });
+
+    fireEvent.error(video);
+
+    expect(await screen.findByText("Couldn’t load video.")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Retry" }));
+    expect(screen.queryByText("Couldn’t load video.")).not.toBeInTheDocument();
   });
 });

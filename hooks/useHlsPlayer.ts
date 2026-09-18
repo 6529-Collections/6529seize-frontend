@@ -60,6 +60,12 @@ export function useHlsPlayer({
   const previousSrcRef = useRef<string>("");
 
   const [isLoading, setIsLoading] = useState(true);
+  const [retryVersion, setRetryVersion] = useState(0);
+
+  const retry = useCallback(() => {
+    setIsLoading(true);
+    setRetryVersion((current) => current + 1);
+  }, []);
 
   function isCurrentSetup(
     setupVersion: number,
@@ -194,7 +200,8 @@ export function useHlsPlayer({
   async function initHls(
     videoEl: HTMLVideoElement,
     changedSource: boolean,
-    setupVersion: number
+    setupVersion: number,
+    nativeErrorHandler: () => void
   ) {
     try {
       const mod = await import("hls.js");
@@ -203,8 +210,21 @@ export function useHlsPlayer({
         return;
       }
 
-      // If Hls is unsupported in this browser, fallback to direct src
+      // Prefer Hls.js wherever Media Source Extensions are available. Some
+      // Chromium builds report "maybe" for native HLS even though playback can
+      // stall without producing an error. Native HLS remains the Safari path.
       if (!HlsConstructor.isSupported()) {
+        if (videoEl.canPlayType("application/vnd.apple.mpegurl")) {
+          videoEl.addEventListener("error", nativeErrorHandler, { once: true });
+          videoEl.src = src;
+          videoEl.load();
+          setIsLoading(false);
+          if (autoPlay) {
+            void videoEl.play().catch(() => {});
+          }
+          return;
+        }
+
         fallbackToSrc(videoEl, fallbackSrc ?? src);
         return;
       }
@@ -272,7 +292,12 @@ export function useHlsPlayer({
     const setupVersion = setupVersionRef.current;
     const videoEl = videoRef.current;
     if (!videoEl) return;
-    let nativeErrorHandler: (() => void) | null = null;
+    const nativeErrorHandler = () => {
+      if (!isCurrentSetup(setupVersion, videoEl)) {
+        return;
+      }
+      fallbackToSrc(videoEl, fallbackSrc ?? src);
+    };
 
     if (!enabled) {
       setIsLoading(false);
@@ -312,23 +337,12 @@ export function useHlsPlayer({
 
     // Setup HLS or fallback to direct MP4
     if (isHls) {
-      if (videoEl.canPlayType("application/vnd.apple.mpegurl")) {
-        nativeErrorHandler = () => {
-          if (!isCurrentSetup(setupVersion, videoEl)) {
-            return;
-          }
-          fallbackToSrc(videoEl, fallbackSrc ?? src);
-        };
-        videoEl.addEventListener("error", nativeErrorHandler, { once: true });
-        videoEl.src = src;
-        videoEl.load();
-        setIsLoading(false);
-        if (autoPlay) {
-          void videoEl.play().catch(() => {});
-        }
-      } else {
-        void initHls(videoEl, changedSource, setupVersion);
-      }
+      void initHls(
+        videoEl,
+        changedSource || retryVersion > 0,
+        setupVersion,
+        nativeErrorHandler
+      );
     } else {
       // Not HLS => just assign the src
       videoEl.src = src;
@@ -342,9 +356,7 @@ export function useHlsPlayer({
     // Cleanup on unmount
     return () => {
       setupVersionRef.current += 1;
-      if (nativeErrorHandler !== null) {
-        videoEl.removeEventListener("error", nativeErrorHandler);
-      }
+      videoEl.removeEventListener("error", nativeErrorHandler);
       if (cleanupTimeoutRef.current !== null) {
         clearTimeout(cleanupTimeoutRef.current);
       }
@@ -363,6 +375,7 @@ export function useHlsPlayer({
     onError,
     onManifestParsed,
     cleanupHls,
+    retryVersion,
   ]);
 
   return {
@@ -370,5 +383,7 @@ export function useHlsPlayer({
     videoRef,
     /** True if still loading or parsing the manifest, etc. */
     isLoading,
+    /** Rebuild the selected playback pipeline after a terminal media error. */
+    retry,
   };
 }

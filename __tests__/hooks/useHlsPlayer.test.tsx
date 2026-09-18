@@ -2,17 +2,40 @@ import { render, waitFor, act } from "@testing-library/react";
 import React from "react";
 import { useHlsPlayer } from "@/hooks/useHlsPlayer";
 
-// Force the dynamic import of `hls.js` to return a minimal unsupported
-// implementation so the hook immediately falls back to the provided source.
+let mockHlsSupported = false;
+const mockHlsLoadSource = jest.fn();
+const mockHlsAttachMedia = jest.fn();
+
 jest.mock("hls.js", () => {
   class MockHls {
+    static Events = {
+      ERROR: "error",
+      MANIFEST_PARSED: "manifestParsed",
+    };
+    static ErrorTypes = {
+      NETWORK_ERROR: "networkError",
+      MEDIA_ERROR: "mediaError",
+      KEY_SYSTEM_ERROR: "keySystemError",
+      MUX_ERROR: "muxError",
+      OTHER_ERROR: "otherError",
+    };
+    static ErrorDetails = {
+      MANIFEST_LOAD_ERROR: "manifestLoadError",
+      MANIFEST_LOAD_TIMEOUT: "manifestLoadTimeout",
+    };
     static isSupported() {
-      return false;
+      return mockHlsSupported;
     }
     // no-op methods used by the hook
     on() {}
-    loadSource() {}
-    attachMedia() {}
+    loadSource(src: string) {
+      mockHlsLoadSource(src);
+    }
+    attachMedia(video: HTMLVideoElement) {
+      mockHlsAttachMedia(video);
+    }
+    startLoad() {}
+    recoverMediaError() {}
     stopLoad() {}
     detachMedia() {}
     destroy() {}
@@ -46,6 +69,8 @@ function TestComponent(props: any) {
 
 describe("useHlsPlayer", () => {
   beforeEach(() => {
+    mockHlsSupported = false;
+    jest.clearAllMocks();
     (HTMLVideoElement.prototype.canPlayType as jest.Mock).mockReturnValue("");
   });
 
@@ -58,7 +83,7 @@ describe("useHlsPlayer", () => {
     expect(video.getAttribute("data-loading")).toBe("false");
   });
 
-  it("uses native HLS when the browser can play m3u8 sources", () => {
+  it("uses native HLS when Hls.js is unavailable and the browser supports it", async () => {
     (HTMLVideoElement.prototype.canPlayType as jest.Mock).mockReturnValue(
       "probably"
     );
@@ -67,11 +92,31 @@ describe("useHlsPlayer", () => {
       <TestComponent src="video.m3u8" isHls fallbackSrc="fallback.mp4" />
     );
     const video = getByTestId("vid") as HTMLVideoElement;
-    expect(video.src).toContain("video.m3u8");
-    expect(video.getAttribute("data-loading")).toBe("false");
+    await waitFor(() => {
+      expect(video.src).toContain("video.m3u8");
+      expect(video.getAttribute("data-loading")).toBe("false");
+    });
   });
 
-  it("falls back when native HLS emits an error", () => {
+  it("prefers Hls.js over a Chromium-style maybe response", async () => {
+    mockHlsSupported = true;
+    (HTMLVideoElement.prototype.canPlayType as jest.Mock).mockReturnValue(
+      "maybe"
+    );
+
+    const { getByTestId } = render(
+      <TestComponent src="video.m3u8" isHls fallbackSrc="fallback.mp4" />
+    );
+    const video = getByTestId("vid") as HTMLVideoElement;
+
+    await waitFor(() => {
+      expect(mockHlsLoadSource).toHaveBeenCalledWith("video.m3u8");
+    });
+    expect(mockHlsAttachMedia).toHaveBeenCalledWith(video);
+    expect(video.src).not.toContain("video.m3u8");
+  });
+
+  it("falls back when native HLS emits an error", async () => {
     (HTMLVideoElement.prototype.canPlayType as jest.Mock).mockReturnValue(
       "probably"
     );
@@ -80,6 +125,10 @@ describe("useHlsPlayer", () => {
       <TestComponent src="video.m3u8" isHls fallbackSrc="fallback.mp4" />
     );
     const video = getByTestId("vid") as HTMLVideoElement;
+
+    await waitFor(() => {
+      expect(video.src).toContain("video.m3u8");
+    });
 
     act(() => {
       video.dispatchEvent(new Event("error"));
