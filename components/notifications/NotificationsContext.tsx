@@ -1,6 +1,6 @@
 "use client";
 
-import { flushPendingPushLogouts } from "@/services/notifications/push-installation";
+import { usePushRegistrationRecovery } from "./usePushRegistrationRecovery";
 import { Device, type DeviceInfo } from "@capacitor/device";
 import {
   PushNotifications,
@@ -122,6 +122,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
     useRef<PushRegistrationFingerprint | null>(null);
   const lastSuccessfulRegistrationAuthRef = useRef<string | null>(null);
   const inFlightRegistrationRef = useRef<Promise<void> | null>(null);
+  const registrationRetryPendingRef = useRef(false);
   const activeProfileProxyRef = useRef(activeProfileProxy);
   useEffect(() => {
     activeProfileProxyRef.current = activeProfileProxy;
@@ -451,10 +452,9 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
           token,
           profileId
         );
-        if (
-          didRegister &&
-          getAuthTokenFingerprint(getAuthJwt()) === registrationAuth
-        ) {
+        if (getAuthTokenFingerprint(getAuthJwt()) !== registrationAuth) return;
+        registrationRetryPendingRef.current = !didRegister;
+        if (didRegister) {
           lastSuccessfulRegistrationRef.current = fingerprint;
           lastSuccessfulRegistrationAuthRef.current = registrationAuth;
         }
@@ -631,7 +631,13 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
   const initializeNotifications = useCallback(
     async (profile?: ApiIdentity) => {
       if (isCapacitor) {
-        await initializePushNotifications(profile);
+        registrationRetryPendingRef.current = false;
+        try {
+          await initializePushNotifications(profile);
+        } catch (error) {
+          registrationRetryPendingRef.current = true;
+          throw error;
+        }
       }
     },
     [isCapacitor, initializePushNotifications]
@@ -735,26 +741,15 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
     if (isActive) void reconcileProfileDeliveredNotifications();
   }, [isActive, registrationRevision, reconcileProfileDeliveredNotifications]);
 
-  useEffect(() => {
-    let current = true;
-    const flush = () => {
-      void (async () => {
-        const reconciled = await flushPendingPushLogouts();
-        if (reconciled && current && isCapacitor && isActive) {
-          // A fresh login may have deferred registration while logout was offline.
-          await initializeNotifications(
-            connectedProfileRef.current ?? undefined
-          );
-        }
-      })().catch(captureReconciliationFailure);
-    };
-    if (isActive) flush();
-    globalThis.addEventListener("online", flush);
-    return () => {
-      current = false;
-      globalThis.removeEventListener("online", flush);
-    };
-  }, [isActive, isCapacitor, initializeNotifications]);
+  usePushRegistrationRecovery({
+    isActive,
+    isCapacitor,
+    initializeNotifications,
+    profileRef: connectedProfileRef,
+    retryPendingRef: registrationRetryPendingRef,
+    inFlightRef: inFlightRegistrationRef,
+    onError: captureReconciliationFailure,
+  });
 
   const value = useMemo(
     () => ({

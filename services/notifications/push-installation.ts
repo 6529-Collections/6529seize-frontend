@@ -302,6 +302,8 @@ async function sendPushLogout(
 }
 
 function jobNamespace(job: ApiRevokePushInstallationRequest): string {
+  // Legacy logout and migration cleanup can share a device ID and revision;
+  // only the credential namespace plus revision identifies an acknowledgement.
   return `${job.device_id}:${job.installation_secret}`;
 }
 async function drainPushLogouts(): Promise<boolean> {

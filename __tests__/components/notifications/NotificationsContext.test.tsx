@@ -921,6 +921,74 @@ describe("push registration behavior", () => {
     );
   });
 
+  it.each(["online", "activation"])(
+    "retries partial connected-profile registration on %s without a completed logout",
+    async (trigger) => {
+      mockIsActive = true;
+      mockIsIos = false;
+      const { PushNotifications } = require("@capacitor/push-notifications");
+      const { commonApiPost } = require("@/services/api/common-api");
+      const {
+        getConnectedWalletAccounts,
+      } = require("@/services/auth/auth.utils");
+      const {
+        flushPendingPushLogouts,
+        completePushInstallationMigration,
+      } = require("@/services/notifications/push-installation");
+      getConnectedWalletAccounts.mockReturnValue([
+        { profileId: "test-profile-id", jwt: "test-jwt" },
+        { profileId: "peer-profile", jwt: "peer-jwt" },
+      ]);
+      flushPendingPushLogouts.mockResolvedValue(false);
+      commonApiPost
+        .mockResolvedValueOnce({})
+        .mockRejectedValueOnce({ status: 403 });
+      try {
+        const { registrationCallback, getRegistrationCallback, rerender } =
+          await setupRegistrationCallback();
+        await act(async () => {
+          await registrationCallback({ value: "test-token" });
+        });
+        await waitFor(() => expect(commonApiPost).toHaveBeenCalledTimes(2));
+        expect(completePushInstallationMigration).not.toHaveBeenCalled();
+
+        if (trigger === "activation") {
+          mockIsActive = false;
+          rerender();
+          mockIsActive = true;
+          rerender();
+        } else {
+          await act(async () => {
+            globalThis.dispatchEvent(new Event("online"));
+          });
+        }
+        await waitFor(() =>
+          expect(PushNotifications.removeAllListeners).toHaveBeenCalledTimes(2)
+        );
+        await act(async () => {
+          await getRegistrationCallback()({ value: "test-token" });
+        });
+        await waitFor(() =>
+          expect(completePushInstallationMigration).toHaveBeenCalledTimes(1)
+        );
+        expect(commonApiPost).toHaveBeenNthCalledWith(
+          4,
+          expect.objectContaining({
+            headers: { Authorization: "Bearer peer-jwt" },
+            body: expect.objectContaining({ profile_id: "peer-profile" }),
+          })
+        );
+        await act(async () => {
+          globalThis.dispatchEvent(new Event("online"));
+        });
+        expect(PushNotifications.removeAllListeners).toHaveBeenCalledTimes(2);
+      } finally {
+        getConnectedWalletAccounts.mockReturnValue([]);
+        mockIsActive = true;
+      }
+    }
+  );
+
   it("registers the same profile and token again after a fresh login", async () => {
     const { commonApiPost } = require("@/services/api/common-api");
     const { getAuthJwt } = require("@/services/auth/auth.utils");

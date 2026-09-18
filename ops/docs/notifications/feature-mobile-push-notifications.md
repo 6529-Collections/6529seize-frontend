@@ -44,6 +44,10 @@ push to open the matching app route.
     `429`, `408`, `5xx`, and network-failure patterns).
   - Retry delay uses `Retry-After` headers or retry-hint text when available;
     otherwise delay uses bounded exponential backoff with jitter.
+  - If registration completes for only some connected profiles, returning to
+    the active app or reconnecting retries the registration pass. Successful
+    profiles keep their registrations; old-target cleanup waits for all profiles.
+    An expired saved session still requires reconnecting that profile.
   - Duplicate registration callbacks with the same
     (`device_id`, token, profile, login session) fingerprint are skipped when already
     completed in-session or already handled by an in-flight attempt.
