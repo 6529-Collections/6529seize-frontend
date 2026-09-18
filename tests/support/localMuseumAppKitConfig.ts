@@ -1,6 +1,6 @@
 import type { Page } from "@playwright/test";
 
-function isLocalMuseumRun(baseURL: string | undefined): boolean {
+export function isLocalMuseumRun(baseURL: string | undefined): boolean {
   const environment = process.env["PLAYWRIGHT_ENV"];
   if (!baseURL || (environment && environment !== "local")) {
     return false;
