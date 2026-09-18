@@ -15,6 +15,7 @@ import {
 } from "@/config/museumPublicationEnv.server";
 import {
   createMuseumPublicationBuildSnapshot,
+  MUSEUM_PUBLICATION_BUILD_SNAPSHOT_MAX_CLOCK_SKEW_MS,
   parseMuseumPublicationBuildSnapshot,
 } from "@/lib/museum/publication/buildSnapshot.server";
 import { createCaseyFixture } from "./fixture";
@@ -250,6 +251,29 @@ describe("Museum publication runtime", () => {
     await expect(request).resolves.toBe(current);
   });
 
+  it("does not activate a build snapshot dated beyond the clock-skew bound", async () => {
+    const now = Date.parse("2026-08-02T12:00:00.000Z");
+    const { load, source } = mockedSource();
+    const current = currentState(publication);
+    load.mockResolvedValue(current);
+    const runtime = createMuseumPublicationRuntime(
+      source,
+      () => now,
+      () => 0,
+      {
+        initialLastValid: {
+          publication,
+          acceptedAt: new Date(
+            now + MUSEUM_PUBLICATION_BUILD_SNAPSHOT_MAX_CLOCK_SKEW_MS + 1
+          ).toISOString(),
+        },
+      }
+    );
+
+    await expect(runtime.load()).resolves.toBe(current);
+    expect(load).toHaveBeenCalledWith(undefined);
+  });
+
   it("serves caller-visible stale state from the last valid publication after failure", async () => {
     let now = Date.parse("2026-08-02T12:00:00.000Z");
     const { load, source } = mockedSource();
@@ -470,6 +494,20 @@ describe("Museum publication build snapshot", () => {
     };
 
     expect(parseMuseumPublicationBuildSnapshot(tampered)).toBeUndefined();
+  });
+
+  it("rejects a snapshot dated beyond the clock-skew bound", () => {
+    const now = Date.parse("2026-08-02T12:00:00.000Z");
+    const snapshot = createMuseumPublicationBuildSnapshot(
+      publication,
+      new Date(
+        now + MUSEUM_PUBLICATION_BUILD_SNAPSHOT_MAX_CLOCK_SKEW_MS + 1
+      ).toISOString()
+    );
+
+    expect(
+      parseMuseumPublicationBuildSnapshot(snapshot, () => now)
+    ).toBeUndefined();
   });
 });
 

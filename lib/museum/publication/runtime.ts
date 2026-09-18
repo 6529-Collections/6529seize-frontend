@@ -5,7 +5,10 @@ import {
 } from "@/config/museumPublicationEnv.server";
 import { getNodeEnv } from "@/config/env";
 import { cache } from "react";
-import { readMuseumPublicationBuildSnapshot } from "./buildSnapshot.server";
+import {
+  MUSEUM_PUBLICATION_BUILD_SNAPSHOT_MAX_CLOCK_SKEW_MS,
+  readMuseumPublicationBuildSnapshot,
+} from "./buildSnapshot.server";
 import { GitHubMuseumPublicationSource } from "./github";
 import { museumPublicationCatalogResolver } from "./catalog";
 import { legacyCaseyPublicationAssembler } from "./legacyCasey";
@@ -79,7 +82,17 @@ export function createMuseumPublicationRuntime(
 ): MuseumPublicationRuntime {
   let cache: RuntimeCacheEntry | undefined;
   let lastValid = options.initialLastValid;
-  const refreshInBackground = options.initialLastValid !== undefined;
+  if (lastValid !== undefined) {
+    const acceptedAt = Date.parse(lastValid.acceptedAt);
+    if (
+      !Number.isFinite(acceptedAt) ||
+      acceptedAt >
+        now() + MUSEUM_PUBLICATION_BUILD_SNAPSHOT_MAX_CLOCK_SKEW_MS
+    ) {
+      lastValid = undefined;
+    }
+  }
+  const refreshInBackground = lastValid !== undefined;
   let inFlight: Promise<MuseumPublicationLoadState> | undefined;
   let consecutiveFailures = 0;
 

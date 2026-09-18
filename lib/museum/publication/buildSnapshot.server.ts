@@ -6,6 +6,8 @@ import type { MuseumLastValidPublication, MuseumPublication } from "./types";
 
 const MUSEUM_PUBLICATION_BUILD_SNAPSHOT_CONTRACT =
   "museum-publication-build-snapshot-v1";
+export const MUSEUM_PUBLICATION_BUILD_SNAPSHOT_MAX_CLOCK_SKEW_MS =
+  5 * 60 * 1000;
 export const MUSEUM_PUBLICATION_BUILD_SNAPSHOT_PATH =
   ".museum-publication/current.json";
 
@@ -69,16 +71,21 @@ export function createMuseumPublicationBuildSnapshot(
 }
 
 export function parseMuseumPublicationBuildSnapshot(
-  value: unknown
+  value: unknown,
+  now: () => number = Date.now
 ): MuseumLastValidPublication | undefined {
   if (!isRecord(value)) return undefined;
   const generatedAt = value["generatedAt"];
+  const generatedAtMs =
+    typeof generatedAt === "string" ? Date.parse(generatedAt) : Number.NaN;
   const publicationSha256 = value["publicationSha256"];
   const publication = value["publication"];
   if (
     value["contract"] !== MUSEUM_PUBLICATION_BUILD_SNAPSHOT_CONTRACT ||
     typeof generatedAt !== "string" ||
-    !Number.isFinite(Date.parse(generatedAt)) ||
+    !Number.isFinite(generatedAtMs) ||
+    generatedAtMs >
+      now() + MUSEUM_PUBLICATION_BUILD_SNAPSHOT_MAX_CLOCK_SKEW_MS ||
     typeof publicationSha256 !== "string" ||
     !/^sha256:[a-f0-9]{64}$/u.test(publicationSha256) ||
     !hasMinimumPublicationShape(publication) ||
