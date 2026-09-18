@@ -1115,6 +1115,11 @@ export const DE_DE_MESSAGES = {
     "Keine Entscheidung geplant",
   "waves.leaderboard.timeline.noUpcomingEvents":
     "Keine bevorstehenden Ereignisse",
+  "waves.leaderboard.phase.nextWinnersIn":
+    "Nächste Gewinner werden bekannt gegeben in",
+  "waves.leaderboard.phase.countdown": "{hours} Std. {minutes} Min.",
+  "waves.leaderboard.phase.countdownWithDays":
+    "{days} T. {hours} Std. {minutes} Min.",
   "waves.leaderboard.timeline.nextWinner": "Nächster Gewinner",
   "waves.leaderboard.timeline.nextWinnerIn": "Nächster Gewinner in {countdown}",
   "waves.leaderboard.timeline.unit.day.one": "{count} Tag",

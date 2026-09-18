@@ -1111,6 +1111,10 @@ export const ES_ES_MESSAGES = {
   "waves.leaderboard.timeline.noDecisionScheduled":
     "No hay ninguna decisión programada",
   "waves.leaderboard.timeline.noUpcomingEvents": "No hay próximos eventos",
+  "waves.leaderboard.phase.nextWinnersIn": "Próximos ganadores anunciados en",
+  "waves.leaderboard.phase.countdown": "{hours} h {minutes} min",
+  "waves.leaderboard.phase.countdownWithDays":
+    "{days} d {hours} h {minutes} min",
   "waves.leaderboard.timeline.nextWinner": "Próximo ganador",
   "waves.leaderboard.timeline.nextWinnerIn": "Próximo ganador en {countdown}",
   "waves.leaderboard.timeline.unit.day.one": "{count} día",

@@ -2022,6 +2022,9 @@ const WAVE_LEADERBOARD_PHASE_MESSAGES = objectMessages(
     votingOngoing: "Voting ongoing",
     droppingOngoing: "Dropping open",
     noEndDate: "No end date",
+    nextWinnersIn: "Next winners announced in",
+    countdown: "{hours}h {minutes}m",
+    countdownWithDays: "{days}d {hours}h {minutes}m",
   } as const
 );
 
