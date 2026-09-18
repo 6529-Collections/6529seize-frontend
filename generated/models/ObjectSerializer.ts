@@ -613,6 +613,7 @@ export * from '../models/ApiProfileWaveActivityType';
 export * from '../models/ApiProposalFrameRequest';
 export * from '../models/ApiProposalFrameResponse';
 export * from '../models/ApiPublishProfileCmsPackageRequest';
+export * from '../models/ApiPushLogoutSession';
 export * from '../models/ApiPushNotificationDevice';
 export * from '../models/ApiPushNotificationSettings';
 export * from '../models/ApiPushNotificationSettingsUpdate';
@@ -625,6 +626,8 @@ export * from '../models/ApiRedeemConnectionShareRequest';
 export * from '../models/ApiRedeemConnectionShareResponse';
 export * from '../models/ApiRedeemRefreshTokenRequest';
 export * from '../models/ApiRedeemRefreshTokenResponse';
+export * from '../models/ApiRefreshPushInstallationBadgeRequest';
+export * from '../models/ApiRefreshPushInstallationBadgeResponse';
 export * from '../models/ApiRegisterPushNotificationTokenRequest';
 export * from '../models/ApiRepCategoriesPage';
 export * from '../models/ApiRepCategory';
@@ -638,6 +641,8 @@ export * from '../models/ApiReplyToDropAuthor';
 export * from '../models/ApiReplyToDropResponse';
 export * from '../models/ApiReplyToDropV2';
 export * from '../models/ApiReviewProfileCmsAgentProposalRequest';
+export * from '../models/ApiRevokePushInstallationRequest';
+export * from '../models/ApiRevokePushInstallationResponse';
 export * from '../models/ApiRollbackProfileCmsPackageRequest';
 export * from '../models/ApiSaveEulaConsentRequest';
 export * from '../models/ApiSaveEulaConsentResponse';
@@ -1482,6 +1487,7 @@ import { ApiProfileWaveActivityType } from '../models/ApiProfileWaveActivityType
 import { ApiProposalFrameRequest , ApiProposalFrameRequestMimeTypeEnum   , ApiProposalFrameRequestLayoutEnum   } from '../models/ApiProposalFrameRequest';
 import { ApiProposalFrameResponse , ApiProposalFrameResponseMimeTypeEnum   } from '../models/ApiProposalFrameResponse';
 import { ApiPublishProfileCmsPackageRequest } from '../models/ApiPublishProfileCmsPackageRequest';
+import { ApiPushLogoutSession } from '../models/ApiPushLogoutSession';
 import { ApiPushNotificationDevice } from '../models/ApiPushNotificationDevice';
 import { ApiPushNotificationSettings } from '../models/ApiPushNotificationSettings';
 import { ApiPushNotificationSettingsUpdate } from '../models/ApiPushNotificationSettingsUpdate';
@@ -1494,6 +1500,8 @@ import { ApiRedeemConnectionShareRequest , ApiRedeemConnectionShareRequestTarget
 import { ApiRedeemConnectionShareResponse    , ApiRedeemConnectionShareResponseClientTypeEnum     } from '../models/ApiRedeemConnectionShareResponse';
 import { ApiRedeemRefreshTokenRequest } from '../models/ApiRedeemRefreshTokenRequest';
 import { ApiRedeemRefreshTokenResponse } from '../models/ApiRedeemRefreshTokenResponse';
+import { ApiRefreshPushInstallationBadgeRequest } from '../models/ApiRefreshPushInstallationBadgeRequest';
+import { ApiRefreshPushInstallationBadgeResponse } from '../models/ApiRefreshPushInstallationBadgeResponse';
 import { ApiRegisterPushNotificationTokenRequest } from '../models/ApiRegisterPushNotificationTokenRequest';
 import { ApiRepCategoriesPage } from '../models/ApiRepCategoriesPage';
 import { ApiRepCategory } from '../models/ApiRepCategory';
@@ -1507,6 +1515,8 @@ import { ApiReplyToDropAuthor } from '../models/ApiReplyToDropAuthor';
 import { ApiReplyToDropResponse } from '../models/ApiReplyToDropResponse';
 import { ApiReplyToDropV2 } from '../models/ApiReplyToDropV2';
 import { ApiReviewProfileCmsAgentProposalRequest, ApiReviewProfileCmsAgentProposalRequestStatusEnum        } from '../models/ApiReviewProfileCmsAgentProposalRequest';
+import { ApiRevokePushInstallationRequest } from '../models/ApiRevokePushInstallationRequest';
+import { ApiRevokePushInstallationResponse } from '../models/ApiRevokePushInstallationResponse';
 import { ApiRollbackProfileCmsPackageRequest } from '../models/ApiRollbackProfileCmsPackageRequest';
 import { ApiSaveEulaConsentRequest    } from '../models/ApiSaveEulaConsentRequest';
 import { ApiSaveEulaConsentResponse   } from '../models/ApiSaveEulaConsentResponse';
@@ -2584,6 +2594,7 @@ let typeMap: {[index: string]: any} = {
     "ApiProposalFrameRequest": ApiProposalFrameRequest,
     "ApiProposalFrameResponse": ApiProposalFrameResponse,
     "ApiPublishProfileCmsPackageRequest": ApiPublishProfileCmsPackageRequest,
+    "ApiPushLogoutSession": ApiPushLogoutSession,
     "ApiPushNotificationDevice": ApiPushNotificationDevice,
     "ApiPushNotificationSettings": ApiPushNotificationSettings,
     "ApiPushNotificationSettingsUpdate": ApiPushNotificationSettingsUpdate,
@@ -2595,6 +2606,8 @@ let typeMap: {[index: string]: any} = {
     "ApiRedeemConnectionShareResponse": ApiRedeemConnectionShareResponse,
     "ApiRedeemRefreshTokenRequest": ApiRedeemRefreshTokenRequest,
     "ApiRedeemRefreshTokenResponse": ApiRedeemRefreshTokenResponse,
+    "ApiRefreshPushInstallationBadgeRequest": ApiRefreshPushInstallationBadgeRequest,
+    "ApiRefreshPushInstallationBadgeResponse": ApiRefreshPushInstallationBadgeResponse,
     "ApiRegisterPushNotificationTokenRequest": ApiRegisterPushNotificationTokenRequest,
     "ApiRepCategoriesPage": ApiRepCategoriesPage,
     "ApiRepCategory": ApiRepCategory,
@@ -2607,6 +2620,8 @@ let typeMap: {[index: string]: any} = {
     "ApiReplyToDropResponse": ApiReplyToDropResponse,
     "ApiReplyToDropV2": ApiReplyToDropV2,
     "ApiReviewProfileCmsAgentProposalRequest": ApiReviewProfileCmsAgentProposalRequest,
+    "ApiRevokePushInstallationRequest": ApiRevokePushInstallationRequest,
+    "ApiRevokePushInstallationResponse": ApiRevokePushInstallationResponse,
     "ApiRollbackProfileCmsPackageRequest": ApiRollbackProfileCmsPackageRequest,
     "ApiSaveEulaConsentRequest": ApiSaveEulaConsentRequest,
     "ApiSaveEulaConsentResponse": ApiSaveEulaConsentResponse,

@@ -191,6 +191,11 @@ action.
 - Use connected-account rows in the web dropdown to switch profiles without
   leaving the menu.
 - Use `Logout` to sign out the active profile.
+- Native logout removes this phone's push registration for that profile unless
+  another connected wallet still uses the same profile. Other profiles and devices
+  stay connected. Native `Sign out all` also sweeps
+  stale profile registrations for this phone. Offline cleanup retries when the
+  app reconnects; see [Mobile Push Notifications](../notifications/feature-mobile-push-notifications.md).
 - Use web `Disconnect Wallet` when you need wallet disconnect without full
   logout.
 - Use `Switch to {nextChain}` from the web dropdown or app footer when you need
