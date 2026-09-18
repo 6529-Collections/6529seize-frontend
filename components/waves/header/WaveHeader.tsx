@@ -4,6 +4,7 @@ import { useContext, useMemo } from "react";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { getTimeAgo } from "@/helpers/Helpers";
 import WaveHeaderFollow, { WaveFollowBtnSize } from "./WaveHeaderFollow";
+import WaveHeaderSubscribeDm from "./WaveHeaderSubscribeDm";
 import { AuthContext } from "@/components/auth/Auth";
 import { AnnouncementWaveIcon } from "@/components/brain/left-sidebar/waves/SidebarIconTile";
 import { useSeizeSettingsOptional } from "@/contexts/SeizeSettingsContext";
@@ -173,6 +174,9 @@ export default function WaveHeader({
               </div>
               <div className="tw-shrink-0">
                 <WaveHeaderFollow wave={wave} size={WaveFollowBtnSize.SMALL} />
+              </div>
+              <div className="tw-shrink-0">
+                <WaveHeaderSubscribeDm wave={wave} />
               </div>
               {showPinAction && (
                 <div className="tw-shrink-0">
