@@ -452,7 +452,9 @@ describe("SeizeVideoPlayer", () => {
     expect(HTMLMediaElement.prototype.pause).toHaveBeenCalledTimes(
       pauseCallsBeforeClick + 1
     );
-    expect(screen.getByRole("button", { name: "Play video" })).toBeVisible();
+    const playButton = screen.getByRole("button", { name: "Play video" });
+    expect(playButton).toBeVisible();
+    expect(playButton).toHaveClass("tw-border-white/40", "tw-bg-black/80");
 
     paused = true;
     const playCallsBeforeClick = jest.mocked(HTMLMediaElement.prototype.play)

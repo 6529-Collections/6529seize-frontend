@@ -4,11 +4,6 @@ import { act, fireEvent, render, screen } from "@testing-library/react";
 describe("MemesQuickVoteDescription", () => {
   beforeEach(() => {
     jest.useFakeTimers();
-    jest.spyOn(globalThis, "getComputedStyle").mockReturnValue(
-      Object.assign(document.createElement("p").style, {
-        lineHeight: "22.75px",
-      })
-    );
   });
 
   afterEach(() => {
@@ -17,33 +12,30 @@ describe("MemesQuickVoteDescription", () => {
   });
 
   const renderDescription = (lineCount: number, isDesktop: boolean) => {
-    const mediaQuery = globalThis.matchMedia("(min-width: 768px)");
-    jest.spyOn(globalThis, "matchMedia").mockReturnValue({
-      ...mediaQuery,
-      matches: isDesktop,
-    });
-
     const fullHeight = lineCount * 22.75;
     jest
       .spyOn(HTMLElement.prototype, "offsetHeight", "get")
-      .mockReturnValue(Math.round(fullHeight));
-    // The swipe card scales visually without changing the text's layout height.
-    jest.spyOn(Element.prototype, "getBoundingClientRect").mockReturnValue({
-      x: 0,
-      y: 0,
-      top: 0,
-      left: 0,
-      right: 320,
-      bottom: fullHeight * 1.05,
-      width: 320,
-      height: fullHeight * 1.05,
-      toJSON: () => ({}),
-    });
+      .mockImplementation(function getOffsetHeight(this: HTMLElement) {
+        if (this.classList.contains("tw-line-clamp-none")) {
+          return Math.round(fullHeight);
+        }
 
-    render(<MemesQuickVoteDescription description="Submission description" />);
+        if (this.classList.contains("tw-line-clamp-2")) {
+          const collapsedLines = isDesktop ? 4 : 2;
+          return Math.round(Math.min(lineCount, collapsedLines) * 22.75);
+        }
+
+        return Math.round(fullHeight);
+      });
+
+    const renderResult = render(
+      <MemesQuickVoteDescription description="Submission description" />
+    );
     act(() => {
       jest.runOnlyPendingTimers();
     });
+
+    return renderResult;
   };
 
   it.each([
@@ -82,4 +74,33 @@ describe("MemesQuickVoteDescription", () => {
       );
     }
   );
+
+  it("keeps the collapse control outside the expanded mobile scroll area", () => {
+    const fullHeight = 8 * 22.75;
+    jest
+      .spyOn(HTMLElement.prototype, "offsetHeight", "get")
+      .mockImplementation(function getOffsetHeight(this: HTMLElement) {
+        return this.classList.contains("tw-line-clamp-none")
+          ? Math.round(fullHeight)
+          : Math.round(2 * 22.75);
+      });
+
+    const { container } = render(
+      <MemesQuickVoteDescription
+        constrainHeight={true}
+        description="Submission description"
+      />
+    );
+    act(() => {
+      jest.runOnlyPendingTimers();
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "See more" }));
+
+    const scrollArea = container.querySelector(".tw-overflow-y-auto");
+    const collapseButton = screen.getByRole("button", { name: "See less" });
+    expect(scrollArea).toBeInTheDocument();
+    expect(scrollArea).not.toContainElement(collapseButton);
+    expect(collapseButton).toHaveAttribute("aria-expanded", "true");
+  });
 });
