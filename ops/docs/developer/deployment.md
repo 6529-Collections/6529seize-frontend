@@ -22,9 +22,10 @@ actual deployment.
 Every frontend build resolves, verifies, and packages one complete Network
 Museum publication. A missing, partial, or invalid publication fails the build
 instead of producing an artifact that would make visitor requests wait on the
-source repository. The build output records the exact accepted publication
-commit and catalog identity; compare that evidence between staging and
-production when the Museum source changes during a release.
+source repository. The build retries bounded transient source failures before
+failing. The build output records the exact accepted publication commit and
+catalog identity; compare that evidence between staging and production when the
+Museum source changes during a release.
 
 ## Order and completion
 

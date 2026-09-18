@@ -137,7 +137,6 @@ describe("Museum publication runtime", () => {
           publication,
           acceptedAt: "2026-08-02T12:00:00.000Z",
         },
-        refreshInBackground: true,
       }
     );
 
@@ -164,7 +163,6 @@ describe("Museum publication runtime", () => {
           publication,
           acceptedAt: "2026-08-02T12:00:00.000Z",
         },
-        refreshInBackground: true,
       }
     );
 
@@ -205,7 +203,6 @@ describe("Museum publication runtime", () => {
           publication,
           acceptedAt: "2026-08-02T12:00:00.000Z",
         },
-        refreshInBackground: true,
       }
     );
 
@@ -223,6 +220,34 @@ describe("Museum publication runtime", () => {
     await Promise.resolve();
 
     await expect(runtime.load()).resolves.toEqual(currentState(publication));
+  });
+
+  it("awaits the source when no build snapshot is available", async () => {
+    const { load, source } = mockedSource();
+    const current = currentState(publication);
+    let resolveRequest:
+      | ((state: MuseumPublicationLoadState) => void)
+      | undefined;
+    load.mockReturnValue(
+      new Promise((resolve) => {
+        resolveRequest = resolve;
+      })
+    );
+    const runtime = createMuseumPublicationRuntime(source, () => 0);
+
+    const request = runtime.load();
+    let settled = false;
+    void request.finally(() => {
+      settled = true;
+    });
+    await Promise.resolve();
+    expect(settled).toBe(false);
+    if (resolveRequest === undefined) {
+      throw new Error("test_source_request_not_started");
+    }
+    resolveRequest(current);
+
+    await expect(request).resolves.toBe(current);
   });
 
   it("serves caller-visible stale state from the last valid publication after failure", async () => {

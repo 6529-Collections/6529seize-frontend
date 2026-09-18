@@ -1,5 +1,6 @@
 import { mkdir, rename, writeFile } from "node:fs/promises";
 import path from "node:path";
+import pRetry from "p-retry";
 
 import {
   createMuseumPublicationBuildSnapshot,
@@ -9,17 +10,32 @@ import { museumPublicationCatalogResolver } from "../lib/museum/publication/cata
 import { GitHubMuseumPublicationSource } from "../lib/museum/publication/github";
 import { legacyCaseyPublicationAssembler } from "../lib/museum/publication/legacyCasey";
 
+const BUILD_SNAPSHOT_RETRIES = 2;
+const BUILD_SNAPSHOT_RETRY_DELAY_MS = 1_000;
+
 async function main(): Promise<void> {
-  const state = await new GitHubMuseumPublicationSource({
+  const source = new GitHubMuseumPublicationSource({
     ref: "main",
     assembler: legacyCaseyPublicationAssembler,
     catalogResolver: museumPublicationCatalogResolver,
-  }).load();
-  if (state.status !== "current") {
-    throw new Error(
-      state.errorCode ?? "publication_build_snapshot_unavailable"
-    );
-  }
+  });
+  const state = await pRetry(
+    async () => {
+      const candidate = await source.load();
+      if (candidate.status !== "current") {
+        throw new Error(
+          candidate.errorCode ?? "publication_build_snapshot_unavailable"
+        );
+      }
+      return candidate;
+    },
+    {
+      retries: BUILD_SNAPSHOT_RETRIES,
+      minTimeout: BUILD_SNAPSHOT_RETRY_DELAY_MS,
+      factor: 2,
+      randomize: true,
+    }
+  );
 
   const snapshot = createMuseumPublicationBuildSnapshot(state.publication);
   const outputPath = path.resolve(

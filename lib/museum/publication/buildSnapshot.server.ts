@@ -58,7 +58,7 @@ export function createMuseumPublicationBuildSnapshot(
   generatedAt = new Date().toISOString()
 ): MuseumPublicationBuildSnapshot {
   if (!Number.isFinite(Date.parse(generatedAt))) {
-    throw new Error("publication_build_snapshot_timestamp_invalid");
+    throw new TypeError("publication_build_snapshot_timestamp_invalid");
   }
   return {
     contract: MUSEUM_PUBLICATION_BUILD_SNAPSHOT_CONTRACT,

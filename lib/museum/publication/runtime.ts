@@ -40,7 +40,6 @@ interface MuseumPublicationRuntime {
 
 interface MuseumPublicationRuntimeOptions {
   readonly initialLastValid?: MuseumLastValidPublication;
-  readonly refreshInBackground?: boolean;
 }
 
 export function resolveMuseumPublicationRef(
@@ -80,6 +79,7 @@ export function createMuseumPublicationRuntime(
 ): MuseumPublicationRuntime {
   let cache: RuntimeCacheEntry | undefined;
   let lastValid = options.initialLastValid;
+  const refreshInBackground = options.initialLastValid !== undefined;
   let inFlight: Promise<MuseumPublicationLoadState> | undefined;
   let consecutiveFailures = 0;
 
@@ -144,7 +144,7 @@ export function createMuseumPublicationRuntime(
         : undefined;
 
     if (inFlight !== undefined) {
-      return options.refreshInBackground
+      return refreshInBackground
         ? pendingState(usableLastValid, currentTime)
         : inFlight;
     }
@@ -183,7 +183,7 @@ export function createMuseumPublicationRuntime(
         inFlight = undefined;
       });
     inFlight = request;
-    if (options.refreshInBackground) {
+    if (refreshInBackground) {
       // The source owns its error-to-state conversion. This rejection handler
       // protects the detached refresh if an alternative source violates that
       // contract; the next request can retry after `finally` clears inFlight.
@@ -251,8 +251,6 @@ const museumPublicationRuntime = createMuseumPublicationRuntime(
   Math.random,
   {
     ...(buildSnapshot === undefined ? {} : { initialLastValid: buildSnapshot }),
-    refreshInBackground:
-      buildSnapshot !== undefined || getNodeEnv() === "production",
   }
 );
 
