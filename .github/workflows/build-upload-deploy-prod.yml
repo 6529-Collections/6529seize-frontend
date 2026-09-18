@@ -42,6 +42,9 @@ jobs:
     env:
       EXPECTED_SOURCE_SHA: ${{ inputs.expected_source_sha }}
     steps:
+      # GITHUB_SHA is the main commit pinned when this run was dispatched. Every
+      # later job builds, verifies, and checks out that same commit, so comparing
+      # it with the reviewed commit here decides the whole deployment up front.
       - name: Refuse a source commit that differs from the reviewed one
         run: |
           set -euo pipefail
