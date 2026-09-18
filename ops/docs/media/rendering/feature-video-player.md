@@ -2,9 +2,12 @@
 
 The custom video player is shared by NFT artwork, homepage drop videos, and
 Wave submissions. Videos preserve their proportions and show the complete frame.
-On the homepage, Next Drop and Latest Drop videos fill the available width on
-mobile and desktop, using their aspect ratio for height. The Memes detail video
-follows the same sizing rule. Loading listing, subscription, or ownership panels
+On the homepage and The Memes detail page, videos use the available width until
+they reach 95% of the usable screen height. This applies in desktop browsers,
+mobile browsers, and the mobile app, allowing for the app header, bottom navigation,
+and safe areas. Taller videos become narrower and stay centered without cropping.
+The height limit stays stable when mobile browser toolbars change visibility.
+Fullscreen continues to use the full viewing area. Loading listing, subscription, or ownership panels
 does not resize or recenter the video. The timeline and controls stay inside the
 video frame, not in the surrounding empty space. When NFT animation dimensions are available,
 the player reserves those proportions before video metadata loads. If dimensions

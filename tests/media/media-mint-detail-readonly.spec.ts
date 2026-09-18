@@ -255,8 +255,9 @@ test.describe("Staging video artwork sizing @surface @medium @large @readonly", 
   for (const viewport of [
     { width: 390, height: 844 },
     { width: 1440, height: 1000 },
+    { width: 1440, height: 600 },
   ]) {
-    test(`contains portrait video and controls at ${viewport.width}px`, async ({
+    test(`contains portrait video and controls at ${viewport.width}x${viewport.height}`, async ({
       page,
     }) => {
       await page.setViewportSize(viewport);
@@ -276,6 +277,18 @@ test.describe("Staging video artwork sizing @surface @medium @large @readonly", 
       const geometry = await video.evaluate((element: HTMLVideoElement) => {
         const bounds = element.getBoundingClientRect();
         const frame = element.closest("section")!.getBoundingClientRect();
+        const player = element.parentElement!.parentElement!;
+        const playerStyle = getComputedStyle(player);
+        const heightLimit = Number.parseFloat(playerStyle.maxHeight);
+        const shellReserve = [
+          "--stream-route-loading-header-reserve",
+          "--stream-route-loading-bottom-reserve",
+        ].reduce(
+          (total, property) =>
+            total +
+            (Number.parseFloat(playerStyle.getPropertyValue(property)) || 0),
+          0
+        );
         const scale = Math.min(
           bounds.width / element.videoWidth,
           bounds.height / element.videoHeight
@@ -288,6 +301,14 @@ test.describe("Staging video artwork sizing @surface @medium @large @readonly", 
           .parentElement!.querySelector("input[type=range]")!
           .getBoundingClientRect();
         return {
+          height,
+          heightLimit,
+          shellReserve,
+          expectedWidth: Math.min(
+            frame.width,
+            (heightLimit * element.videoWidth) / element.videoHeight
+          ),
+          width,
           widthGap: frame.width - width,
           heightGap: frame.height - height,
           centerX: left + width / 2 - (frame.left + frame.width / 2),
@@ -305,7 +326,16 @@ test.describe("Staging video artwork sizing @surface @medium @large @readonly", 
       expect(
         Math.min(Math.abs(geometry.widthGap), Math.abs(geometry.heightGap))
       ).toBeLessThanOrEqual(2);
-      expect(Math.abs(geometry.widthGap)).toBeLessThanOrEqual(2);
+      // The requested screen-height cap replaces unconditional full-width sizing.
+      expect(Number.isFinite(geometry.heightLimit)).toBe(true);
+      expect(geometry.heightLimit).toBeGreaterThan(0);
+      expect(geometry.heightLimit).toBeLessThanOrEqual(
+        Math.max(1, viewport.height - geometry.shellReserve) * 0.95 + 2
+      );
+      expect(geometry.height).toBeLessThanOrEqual(geometry.heightLimit + 2);
+      expect(
+        Math.abs(geometry.width - geometry.expectedWidth)
+      ).toBeLessThanOrEqual(2);
       for (const inset of geometry.sliderInsets)
         expect(inset).toBeGreaterThanOrEqual(-2);
 
