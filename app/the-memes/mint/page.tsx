@@ -48,10 +48,8 @@ export async function generateMetadata(): Promise<Metadata> {
         subtitle: "Latest The Memes mint on 6529.io",
       }),
       ogImageAlt: "The Memes mint social card",
-      description: t(
-        DEFAULT_LOCALE,
-        "theMemes.mint.metadata.description"
-      ),
-    })
+      description: t(DEFAULT_LOCALE, "theMemes.mint.metadata.description"),
+    }),
+    { canonicalPath: "/the-memes/mint" }
   );
 }

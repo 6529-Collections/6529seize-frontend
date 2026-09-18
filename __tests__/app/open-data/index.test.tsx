@@ -38,9 +38,12 @@ describe("Open Data page", () => {
 
   it("exposes metadata", async () => {
     await expect(generateMetadata()).resolves.toEqual({ title: "Open Data" });
-    expect(getAppMetadata).toHaveBeenCalledWith({
-      title: "Open Data",
-      description: "Download public 6529 datasets.",
-    });
+    expect(getAppMetadata).toHaveBeenCalledWith(
+      {
+        title: "Open Data",
+        description: "Download public 6529 datasets.",
+      },
+      { canonicalPath: "/open-data" }
+    );
   });
 });

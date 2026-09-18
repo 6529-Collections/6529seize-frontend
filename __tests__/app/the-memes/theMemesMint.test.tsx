@@ -98,7 +98,11 @@ describe("TheMemesMintPage", () => {
       title: "Mint #1 | Meme | The Memes",
       description:
         "View the latest mint from The Memes collection. | test.6529.io",
+      url: "https://test.6529.io/the-memes/mint",
     });
+    expect(metadata.alternates?.canonical?.toString()).toBe(
+      "https://test.6529.io/the-memes/mint"
+    );
     expect(image).toMatchObject({
       alt: "The Memes mint social card",
       height: 630,
@@ -108,9 +112,7 @@ describe("TheMemesMintPage", () => {
     expect(url.searchParams.get("subtitle")).toBe(
       "Latest The Memes mint on 6529.io"
     );
-    expect(url.searchParams.get("title")).toBe(
-      "Mint #1 | Meme | The Memes"
-    );
+    expect(url.searchParams.get("title")).toBe("Mint #1 | Meme | The Memes");
   });
 
   it("falls back safely when a partial response omits the name", () => {
