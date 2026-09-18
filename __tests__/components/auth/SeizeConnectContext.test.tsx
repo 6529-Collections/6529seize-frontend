@@ -1466,6 +1466,25 @@ describe("Regression Tests: Original Functionality with Secure Implementation", 
     jest.restoreAllMocks();
   });
 
+  it.each(["connecting", "reconnecting"])(
+    "exposes live wallet restoration separately from stored auth (%s)",
+    async (status) => {
+      const { useAccount } = jest.requireMock("wagmi");
+      useAccount.mockReturnValue({ status });
+      const { result, rerender } = renderHook(() => useSeizeConnectContext(), {
+        wrapper: ({ children }) => (
+          <SeizeConnectProvider>{children}</SeizeConnectProvider>
+        ),
+      });
+      expect(result.current.isWalletConnectionPending).toBe(true);
+      useAccount.mockReturnValue({ status: "disconnected" });
+      rerender();
+      await waitFor(() =>
+        expect(result.current.isWalletConnectionPending).toBe(false)
+      );
+    }
+  );
+
   it("should maintain all original context values", async () => {
     const validAddress = "0x1234567890abcdef1234567890abcdef12345678";
     const checksummedAddress = "0x1234567890AbcdEF1234567890AbcDEF12345678";

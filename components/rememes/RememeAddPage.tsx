@@ -1,5 +1,7 @@
 "use client";
 
+import { isWalletConnectionResolving } from "@/components/auth/authResolution";
+import { AuthLoadingBoundary } from "@/components/auth/AuthLoadingPlaceholder";
 import { publicEnv } from "@/config/env";
 import Button from "@/components/utils/button/Button";
 import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
@@ -77,8 +79,8 @@ async function postRememeSubmission(body: {
 export default function RememeAddPage() {
   useSetTitle("Add ReMemes | Collections");
   const { connectedProfile } = useAuth();
-  const { address, isConnected, seizeConnect, seizeConnectOpen } =
-    useSeizeConnectContext();
+  const connection = useSeizeConnectContext();
+  const { address, isConnected, seizeConnect, seizeConnectOpen } = connection;
 
   const { seizeSettings } = useSeizeSettings();
 
@@ -346,71 +348,76 @@ export default function RememeAddPage() {
                     </ul>
                   )}
                 </span>
-                {isConnected ? (
-                  <span className="tw-flex tw-flex-col tw-gap-2">
+                <AuthLoadingBoundary
+                  loading={isWalletConnectionResolving(connection)}
+                  compact
+                >
+                  {isConnected ? (
+                    <span className="tw-flex tw-flex-col tw-gap-2">
+                      <Button
+                        type="button"
+                        variant="action"
+                        size="md"
+                        disabled={
+                          !addRememe ||
+                          !addRememe.valid ||
+                          (!userTDH &&
+                            !areEqualAddresses(
+                              address,
+                              addRememe.contract.contractDeployer
+                            )) ||
+                          checkList.some((c) => !c.status) ||
+                          submissionResult?.success
+                        }
+                        onClick={() => {
+                          setSignErrors([]);
+                          setSubmissionResult(undefined);
+                          if (addRememe) {
+                            if (!address) {
+                              signerAddressRef.current = null;
+                              signedRememeRef.current = null;
+                              setSignErrors([
+                                "Error: Connect a wallet before signing",
+                              ]);
+                              return;
+                            }
+                            const signingAddress = address;
+                            const rememe = buildRememeObject();
+                            signedRememeRef.current = rememe;
+                            signerAddressRef.current = signingAddress;
+                            if (isStructuredSignaturesEnabled()) {
+                              const { message } = buildRememeSignatureMessage({
+                                address: signingAddress,
+                                rememe,
+                              });
+                              signatureMessageRef.current = message;
+                              signMessage.signMessage({ message });
+                              return;
+                            }
+                            signatureMessageRef.current = null;
+                            signMessage.signMessage({
+                              message: JSON.stringify(rememe),
+                            });
+                          }
+                        }}
+                      >
+                        Add Rememe
+                      </Button>
+                    </span>
+                  ) : (
                     <Button
                       type="button"
-                      variant="action"
+                      variant="primary"
                       size="md"
-                      disabled={
-                        !addRememe ||
-                        !addRememe.valid ||
-                        (!userTDH &&
-                          !areEqualAddresses(
-                            address,
-                            addRememe.contract.contractDeployer
-                          )) ||
-                        checkList.some((c) => !c.status) ||
-                        submissionResult?.success
-                      }
+                      disabled={seizeConnectOpen}
                       onClick={() => {
-                        setSignErrors([]);
-                        setSubmissionResult(undefined);
-                        if (addRememe) {
-                          if (!address) {
-                            signerAddressRef.current = null;
-                            signedRememeRef.current = null;
-                            setSignErrors([
-                              "Error: Connect a wallet before signing",
-                            ]);
-                            return;
-                          }
-                          const signingAddress = address;
-                          const rememe = buildRememeObject();
-                          signedRememeRef.current = rememe;
-                          signerAddressRef.current = signingAddress;
-                          if (isStructuredSignaturesEnabled()) {
-                            const { message } = buildRememeSignatureMessage({
-                              address: signingAddress,
-                              rememe,
-                            });
-                            signatureMessageRef.current = message;
-                            signMessage.signMessage({ message });
-                            return;
-                          }
-                          signatureMessageRef.current = null;
-                          signMessage.signMessage({
-                            message: JSON.stringify(rememe),
-                          });
-                        }
+                        seizeConnect();
                       }}
                     >
-                      Add Rememe
+                      {seizeConnectOpen ? `Connecting...` : `Connect Wallet`}
                     </Button>
-                  </span>
-                ) : (
-                  <Button
-                    type="button"
-                    variant="primary"
-                    size="md"
-                    disabled={seizeConnectOpen}
-                    onClick={() => {
-                      seizeConnect();
-                    }}
-                  >
-                    {seizeConnectOpen ? `Connecting...` : `Connect Wallet`}
-                  </Button>
-                )}
+                  )}
+                </AuthLoadingBoundary>
               </div>
             </div>
             {(submitting || signMessage.isPending) && (

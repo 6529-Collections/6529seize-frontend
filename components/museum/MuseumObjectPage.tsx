@@ -12,6 +12,7 @@ import { MuseumProposalImage } from "./MuseumProposalImage";
 import { MuseumRelatedEntities } from "./MuseumRelatedEntities";
 import { MuseumInTheSystem } from "./MuseumInsideSystem";
 import { MuseumRightsLink } from "./MuseumRightsLink";
+import { MuseumStudyLink } from "./MuseumStudyLink";
 import { displayCreditWithoutRepeatedLicense } from "@/lib/museum/credit";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -397,12 +398,12 @@ function MuseumCanonicalWorkRecordPage({
       />
       {insideSystemHref !== null ? (
         <div className="tw-mt-8">
-          <Link
+          <MuseumStudyLink
             href={insideSystemHref}
             className="hover:tw-text-primary-200 tw-inline-flex tw-min-h-11 tw-items-center tw-text-sm tw-font-medium tw-text-primary-300 tw-underline tw-underline-offset-4 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
           >
             {t(DEFAULT_LOCALE, "museum.network.insideSystem.locateWork")}
-          </Link>
+          </MuseumStudyLink>
         </div>
       ) : null}
       {programMediaMatch === null &&

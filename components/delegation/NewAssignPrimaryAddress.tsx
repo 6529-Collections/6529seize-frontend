@@ -1,5 +1,6 @@
 "use client";
 
+import AuthLoadingPlaceholder from "@/components/auth/AuthLoadingPlaceholder";
 import { useContext, useEffect, useState } from "react";
 
 import { DELEGATION_ABI } from "@/abis/abis";
@@ -56,7 +57,7 @@ export default function NewAssignPrimaryAddress(props: Readonly<Props>) {
     setNewPrimaryAddressQuery,
     onSetToast,
   } = props;
-  const { connectedProfile } = useContext(AuthContext);
+  const { connectedProfile, fetchingProfile } = useContext(AuthContext);
 
   const [selectedToAddress, setSelectedToAddress] = useState<string>("");
   const [addressOptions, setAddressOptions] = useState<string[]>([]);
@@ -236,10 +237,14 @@ export default function NewAssignPrimaryAddress(props: Readonly<Props>) {
       closeTitle="Primary Address"
       onHide={onHide}
     >
-      {!connectedProfile && (
-        <div className="tw-rounded-lg tw-bg-iron-950 tw-p-4 tw-text-base tw-font-semibold tw-text-white">
-          Connect Wallet to continue
-        </div>
+      {fetchingProfile ? (
+        <AuthLoadingPlaceholder />
+      ) : (
+        !connectedProfile && (
+          <div className="tw-rounded-lg tw-bg-iron-950 tw-p-4 tw-text-base tw-font-semibold tw-text-white">
+            Connect Wallet to continue
+          </div>
+        )
       )}
       {printContent()}
     </DelegationFormShell>

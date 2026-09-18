@@ -68,3 +68,23 @@ it("preserves cancellation gating and never exposes private rows to a guest", ()
   expect(p.onConnect).toHaveBeenCalledTimes(1);
   expect(p.onCancel).not.toHaveBeenCalled();
 });
+
+it("waits for auth without exposing either login prompts or private order data", () => {
+  const p = props();
+  const { rerender } = render(
+    <CollectOrdersView {...p} resolvingAuth authenticated={false} />
+  );
+  expect(screen.getByRole("status")).toBeInTheDocument();
+  expect(
+    screen.queryByRole("button", { name: "Connect wallet" })
+  ).not.toBeInTheDocument();
+  expect(screen.queryByText(order.title)).not.toBeInTheDocument();
+  rerender(
+    <CollectOrdersView {...p} resolvingAuth={false} authenticated={false} />
+  );
+  expect(
+    screen.getByRole("button", { name: "Connect wallet" })
+  ).toBeInTheDocument();
+  rerender(<CollectOrdersView {...p} resolvingAuth={false} authenticated />);
+  expect(screen.getByText(order.title)).toBeInTheDocument();
+});

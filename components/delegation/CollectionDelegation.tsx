@@ -1,5 +1,7 @@
 "use client";
 
+import { isWalletConnectionResolving } from "@/components/auth/authResolution";
+import { AuthLoadingBoundary } from "@/components/auth/AuthLoadingPlaceholder";
 import { useEffect, useEffectEvent, useRef, useState } from "react";
 import { useChainId, useEnsName } from "wagmi";
 
@@ -252,7 +254,9 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
           !showCreateNewConsolidationWithSub &&
           !showAssignPrimaryAddressWithSub &&
           !showRevokeDelegationWithSub && (
-            <>
+            <AuthLoadingBoundary
+              loading={isWalletConnectionResolving(accountResolution)}
+            >
               {!accountResolution.isConnected ? (
                 <section
                   className={COLLECTION_PANEL_CLASS}
@@ -319,7 +323,7 @@ export default function CollectionDelegationComponent(props: Readonly<Props>) {
                   />
                 </>
               )}
-            </>
+            </AuthLoadingBoundary>
           )}
         {showUpdateDelegation &&
           updateDelegationParams &&

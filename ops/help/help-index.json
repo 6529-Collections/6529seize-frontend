@@ -814,9 +814,11 @@
         "The web sidebar Waves row opens /waves directly; Discover Waves remains secondary inside the Waves experience and searchable, while Network, Delegation, Tools, Open Data, and reference material live under About.",
         "Drop Forge appears as a standalone sidebar row after About only when the connected wallet can access /drop-forge.",
         "The sidebar can be collapsed or expanded depending on viewport and layout state.",
+        "The web sidebar has independently scrollable primary navigation, a fixed-height middle section containing Search, Share when supported, and optional Update, and bottom account controls. Without Share, Update sits directly below Search with no empty row. Notifications appear directly above the fixed account slot without moving Update, Search, or Share. Local and staging badges appear in the initial page render; production omits them. Extra Drop Forge and WatchTower entries remain reachable in short windows.",
+        "The account slot shimmers during restoration, then shows a profile picture or the signed-out Connect Wallet icon. Failed pictures use a 24px default user icon inside the same 40px rounded frame as the PFP; a failed profile request offers Profile unavailable. Retry, while an empty successful result offers Create profile. Search and Share remain available during account loading.",
         "In the collapsed web rail, NFTs and About open on intentional mouse hover while tap, click, and keyboard activation remain available; the flyout stays open while crossing into it and closes after leaving both surfaces or pressing Escape.",
         "Search, Share, Connect Wallet, and Notifications are utility controls; Profile and Connect Device live in the connected account menu.",
-        "When a new version is available, desktop web shows a rocket above Search as the first lower sidebar item instead of a toast. It has an Update tooltip when collapsed and an Update label when expanded. Selecting it reloads the current route with an Updating to the latest version screen, a static rocket, and three animated dots. Mobile browsers, including tablets in desktop browsing mode, retain the full update toast and show the same updating screen when tapped."
+        "When a new version is available, desktop web shows a rocket below Share in the middle utility section instead of a toast. Its position does not change when Notifications appears. It has an Update tooltip when collapsed and an Update label when expanded. Selecting it reloads the current route with an Updating to the latest version screen, a static rocket, and three animated dots. Mobile browsers, including tablets in desktop browsing mode, retain the full update toast and show the same updating screen when tapped."
       ],
       "canonical_path": "/waves",
       "related_paths": [
@@ -1663,11 +1665,15 @@
         "In Capacitor, Connect and add-profile open a shared Connect sheet with App Wallets, External Wallets, and Scan Connection QR options.",
         "The Capacitor App Wallets view supports Back, Create App Wallet, and direct app-wallet unlock/connect; app wallets are omitted from the Reown external-wallet browser.",
         "Scan Connection QR accepts only canonical 6529 connection-share links; the separate app-sidebar scanner remains general-purpose.",
+        "My artwork documentation availability is checked independently of opening the account dropdown. When access is already known, the item is present from the start. If access resolves while the menu is open, the item appears immediately without needing to reopen the menu.",
         "On desktop web, the collapsed sidebar account avatar highlights on hover but opens its account dropdown only when activated; the dropdown stays aligned with the sidebar on centered wide-screen layouts.",
         "Sign out all clears every connected profile in one visible transition without switching through the remaining profiles.",
+        "On the native app, logout removes that profile from push delivery on this phone unless another connected wallet still uses the same profile; Sign out all removes every profile registration for this installation, including stale profiles missing locally. Other devices stay connected. Offline cleanup retries when the app reconnects, so pushes can continue until the server accepts it.",
         "If wallet connection is not working, retry from the header wallet controls and confirm the wallet modal is completed before using write actions.",
         "If Post cannot finish its session check, the draft stays in the composer. Wait for loading to finish, check the connection, complete sign-in if prompted, then retry Post. A stalled session check expires so a later attempt can check again; it does not automatically post the draft.",
         "If Post asks you to reconnect or reactions show Please reconnect your wallet, the saved profile can still be visible even though its session cannot renew. Reconnect that profile from the wallet account controls, then retry the action. Save your draft before logging out or reloading; failed authentication keeps it in the composer, and reactions are not automatically retried after sign-in.",
+        "Protected pages show a loading placeholder while wallet identity and the required profile are being restored; connect-wallet, profile-setup, and permission messages appear after those checks settle. Public browsing, Search, and Share remain available while account-dependent controls load.",
+        "Delegation, NextGen Manager, and signing or minting controls also wait for the live wallet connection to restore. A saved profile session alone does not provide a signer.",
         "Some write actions, settings, and subscriptions require a connected profile."
       ],
       "canonical_path": "/",
@@ -5021,7 +5027,7 @@
         "Rapid primary-tab switching commits the most recently requested destination.",
         "In the Android app, bottom spacing respects the space the device reports for system navigation.",
         "Rotating a phone or tablet keeps bottom navigation visible unless a route, edit state, open drop, or real software keyboard hides it.",
-        "In the native app, a small rocket appears in a curved attachment above Home when a new version is available. It moves, hides and scales with the dock. Tapping the rocket reloads the current route and shows Updating to the latest version with a static rocket and animated dots during loading; Home still navigates home. Desktop web uses an Update rocket above Search in the lower sidebar; mobile browsers retain the full update toast."
+        "In the native app, a small rocket appears in a curved attachment above Home when a new version is available. It moves, hides and scales with the dock. Tapping the rocket reloads the current route and shows Updating to the latest version with a static rocket and animated dots during loading; Home still navigates home. Desktop web uses an Update rocket below Share in the middle sidebar section; mobile browsers retain the full update toast."
       ],
       "canonical_path": "/waves",
       "related_paths": [
@@ -5383,7 +5389,12 @@
       ],
       "facts": [
         "Mobile push notifications are documented under the Notifications area.",
+        "Mobile tray cleanup preserves other connected profiles and removes only matching notifications confirmed read; uncertain or failed refreshes preserve entries.",
+        "The iOS badge is updated asynchronously from unread notifications across device-registered profiles, including reads from desktop or web. Android dots and counts depend on the launcher.",
+        "Opening or returning to the iOS app requests a backend badge correction after connected profiles finish push registration, without marking notifications read. The update still arrives asynchronously by push; failed refresh requests leave notification state unchanged.",
         "Push notification behavior depends on mobile app support and notification permissions.",
+        "After a phone transfer, push registration uses a separate native-device identity. Old cleanup retries stay saved but cannot block the replacement phone. Migration removes only old registrations matching this phone’s current push token; other phones remain connected and notification preferences carry forward.",
+        "If only some connected profiles finish push registration, returning to the active app or reconnecting retries registration while preserving successful profiles and old delivery targets. Reconnect a profile whose saved session has expired.",
         "Push settings include toggles for Identity - REP, Identity - NIC, New Follows, Mentions, Drops - Quoted, Drops - Replied, Drops - Voted, Drops - Reacted, Drops - Boosted, Wave Invites, and Subscription Coverage.",
         "Running-low and action-required subscription coverage can send mobile push; the earlier plan-a-top-up alert remains in the in-app feed without a push.",
         "Tapping a subscription coverage push opens the matching profile's Subscriptions tab.",

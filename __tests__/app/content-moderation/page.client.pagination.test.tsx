@@ -1,3 +1,7 @@
+let mockConnectionState = "connected";
+jest.mock("@/components/auth/SeizeConnectContext", () => ({
+  useSeizeConnectContext: () => ({ connectionState: mockConnectionState }),
+}));
 import BlockActivityFeed from "@/app/content-moderation/BlockActivityFeed";
 import ContentModerationPageClient from "@/app/content-moderation/page.client";
 import {
@@ -199,6 +203,7 @@ const createBlockActivityItem = (
 
 describe("ContentModerationPageClient pagination", () => {
   beforeEach(() => {
+    mockConnectionState = "connected";
     jest.clearAllMocks();
     mockFetchContentModerationQueue.mockReset();
     mockFetchContentModerationBlockActivity.mockReset();
@@ -865,3 +870,27 @@ describe("ContentModerationPageClient pagination", () => {
     });
   });
 });
+
+it.each(["initializing", "connecting"])(
+  "does not deny WatchTower access while %s",
+  (state) => {
+    mockConnectionState = state;
+    mockProfileId = null;
+    mockFetchingProfile = false;
+    const client = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+    render(
+      <QueryClientProvider client={client}>
+        <ContentModerationPageClient />
+      </QueryClientProvider>
+    );
+    expect(screen.getByText("Checking permissions…")).toBeInTheDocument();
+    expect(
+      screen.queryByText(
+        "WatchTower requires membership in the 6529 Dev Team group."
+      )
+    ).not.toBeInTheDocument();
+    client.clear();
+  }
+);

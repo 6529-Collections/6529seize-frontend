@@ -113,11 +113,6 @@
       "surface_ids": ["museum.artist"]
     },
     {
-      "file": "app/museum/network/collection/[objectId]/page.tsx",
-      "path": "/museum/network/collection/[objectId]",
-      "surface_ids": ["museum.collection", "museum.object"]
-    },
-    {
       "file": "app/museum/network/collection/page.tsx",
       "path": "/museum/network/collection",
       "surface_ids": ["museum.collection"]
@@ -344,6 +339,10 @@
     }
   ],
   "support_files": [
+    {
+      "file": "app/museum/network/collection/[objectId]/route.ts",
+      "surface_ids": ["museum.collection", "museum.object"]
+    },
     {
       "file": "app/museum/network/about/governance/presentation.ts",
       "surface_ids": ["museum.governance"]
@@ -607,6 +606,10 @@
     {
       "file": "components/museum/MuseumInsideSystem.tsx",
       "surface_ids": ["museum.system"]
+    },
+    {
+      "file": "components/museum/MuseumStudyLink.tsx",
+      "surface_ids": ["museum.system", "museum.object", "museum.collection"]
     },
     {
       "file": "components/museum/MuseumLegacyEntryPoint.tsx",
