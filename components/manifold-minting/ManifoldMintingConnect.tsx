@@ -1,5 +1,7 @@
 "use client";
 
+import { isWalletConnectionResolving } from "@/components/auth/authResolution";
+import AuthLoadingPlaceholder from "@/components/auth/AuthLoadingPlaceholder";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import { areEqualAddresses } from "@/helpers/Helpers";
@@ -197,6 +199,9 @@ export default function ManifoldMintingConnect(
       return <></>;
     }
   }
+
+  if (isWalletConnectionResolving(account))
+    return hideConnect ? null : <AuthLoadingPlaceholder compact />;
 
   if (!account.isConnected) {
     if (hideConnect || account.hasActiveWalletAddress) {

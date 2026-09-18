@@ -1,5 +1,6 @@
 "use client";
 
+import { isAuthResolving } from "@/components/auth/authResolution";
 import { useContext, useMemo } from "react";
 import { AuthContext } from "../components/auth/Auth";
 import { useLayout } from "../components/brain/my-stream/layout/LayoutContext";
@@ -13,17 +14,24 @@ type ContentState =
   | "measuring"
   | "ready";
 
-export function useAuthenticatedContent() {
+export function useAuthenticatedContent({
+  waitForAuth = false,
+}: { readonly waitForAuth?: boolean } = {}) {
   const { showWaves, connectedProfile, fetchingProfile, isAuthenticated } =
     useContext(AuthContext);
   const { spaces } = useLayout();
-  const { address, hasValidWalletAuth } = useSeizeConnectContext();
+  const { address, hasValidWalletAuth, connectionState } =
+    useSeizeConnectContext();
   const hasValidWalletAuthorization = hasValidWalletAuth !== false;
   const hasAuthenticatedProfile =
     hasValidWalletAuthorization &&
     (isAuthenticated ?? (!!connectedProfile?.handle && showWaves));
 
   const contentState = useMemo<ContentState>(() => {
+    if (waitForAuth && isAuthResolving(connectionState, fetchingProfile)) {
+      return "loading";
+    }
+
     if (!address) {
       return "not-authenticated";
     }
@@ -54,6 +62,8 @@ export function useAuthenticatedContent() {
 
     return "ready";
   }, [
+    waitForAuth,
+    connectionState,
     address,
     hasValidWalletAuthorization,
     hasAuthenticatedProfile,

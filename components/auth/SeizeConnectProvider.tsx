@@ -1,12 +1,7 @@
 "use client";
 
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import type React from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getAddress, isAddress } from "viem";
 import { useAccount } from "wagmi";
 import { MAX_CONNECTED_PROFILES } from "@/constants/constants";
@@ -239,6 +234,12 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     liveConnectedAddress &&
     normalizeAddress(activeAddress) === normalizeAddress(liveConnectedAddress)
   );
+  const isWalletConnectionPending =
+    !isSigningOutAll &&
+    !isActiveWalletConnected &&
+    (appKitBootstrapStatus === "initializing" ||
+      wagmiAccount.status === "connecting" ||
+      wagmiAccount.status === "reconnecting");
   const activeConnectorType = wagmiAccount.connector?.type;
   const isActiveAppWalletConnector =
     activeConnectorType === APP_WALLET_CONNECTOR_TYPE;
@@ -734,6 +735,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
         isCapacitorHandoffPending,
       isConnected: !isSigningOutAll && isActiveWalletConnected,
       canSignActiveWallet: !isSigningOutAll && isActiveWalletConnected,
+      isWalletConnectionPending,
       hasActiveWalletAddress,
       hasValidWalletAuth,
       isSigningOutAll,
@@ -752,6 +754,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
       hasValidWalletAuth,
       isSigningOutAll,
       isActiveWalletConnected,
+      isWalletConnectionPending,
       connectedAccounts,
       appKitModalState.walletName,
       appKitModalState.walletIcon,

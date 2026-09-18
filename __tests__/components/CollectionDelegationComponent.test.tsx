@@ -42,12 +42,14 @@ jest.mock("wagmi", () => {
 
 let mockAccountAddress: string | undefined = "0x0";
 let mockAccountIsConnected = true;
+let mockAccountPending = false;
 const mockSeizeConnect = jest.fn();
 
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: () => ({
     address: mockAccountAddress,
     isConnected: mockAccountIsConnected,
+    isWalletConnectionPending: mockAccountPending,
     seizeConnect: mockSeizeConnect,
   }),
 }));
@@ -89,6 +91,31 @@ describe("CollectionDelegationComponent", () => {
     preview: "",
   };
   const setSection = jest.fn();
+
+  it("waits for live wallet restoration before offering connection", () => {
+    mockAccountIsConnected = false;
+    mockAccountPending = true;
+    const { rerender } = render(
+      <CollectionDelegationComponent
+        collection={collection}
+        setSection={setSection}
+      />
+    );
+    expect(screen.getByRole("status")).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /connect wallet/i })
+    ).not.toBeInTheDocument();
+    mockAccountPending = false;
+    rerender(
+      <CollectionDelegationComponent
+        collection={collection}
+        setSection={setSection}
+      />
+    );
+    expect(
+      screen.getByRole("button", { name: /connect wallet/i })
+    ).toBeInTheDocument();
+  });
 
   function selectLockUseCase(useCase: number) {
     const dropdown = screen.getByRole("button", {
@@ -148,6 +175,7 @@ describe("CollectionDelegationComponent", () => {
   }
 
   beforeEach(() => {
+    mockAccountPending = false;
     jest.clearAllMocks();
     mockAccountAddress = "0x0";
     mockAccountIsConnected = true;

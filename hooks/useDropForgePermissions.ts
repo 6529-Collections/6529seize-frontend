@@ -1,5 +1,6 @@
 "use client";
 
+import { isAuthResolving } from "@/components/auth/authResolution";
 import { useMemo } from "react";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
@@ -28,7 +29,7 @@ export function useDropForgePermissions() {
 
   return useMemo(() => {
     const hasWallet = !!address;
-    const isWalletInitializing = connectionState === "initializing";
+    const isWalletInitializing = isAuthResolving(connectionState);
     const permissionsLoading =
       isWalletInitializing ||
       (hasWallet && !isLoaded) ||

@@ -224,3 +224,36 @@ describe("useAuthenticatedContent", () => {
     ).toBe("ready");
   });
 });
+
+describe("private auth restoration", () => {
+  it.each(["initializing", "connecting"])(
+    "waits during %s without changing the public Waves decision",
+    (connectionState) => {
+      mockUseLayout.mockReturnValue({ spaces: { measurementsComplete: true } });
+      mockUseSeizeConnectContext.mockReturnValue({
+        connectionState,
+        address: undefined,
+        hasValidWalletAuth: false,
+      });
+      const { result, rerender } = renderHook(
+        () => ({
+          privateState: useAuthenticatedContent({ waitForAuth: true })
+            .contentState,
+          publicState: useAuthenticatedContent().contentState,
+        }),
+        { wrapper: createWrapper() }
+      );
+      expect(result.current).toEqual({
+        privateState: "loading",
+        publicState: "not-authenticated",
+      });
+      mockUseSeizeConnectContext.mockReturnValue({
+        connectionState: "disconnected",
+        address: undefined,
+        hasValidWalletAuth: false,
+      });
+      rerender();
+      expect(result.current.privateState).toBe("not-authenticated");
+    }
+  );
+});

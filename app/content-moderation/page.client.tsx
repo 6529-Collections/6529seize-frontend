@@ -1,5 +1,7 @@
 "use client";
 
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import { isAuthResolving } from "@/components/auth/authResolution";
 import { useAuth } from "@/components/auth/Auth";
 import ContentModerationAccessError from "@/components/content-moderation/ContentModerationAccessError";
 import ContentModerationNoAccess from "@/components/content-moderation/ContentModerationNoAccess";
@@ -322,6 +324,7 @@ export default function ContentModerationPageClient() {
     fetchingProfile,
     isDirectProfileSession,
   } = useAuth();
+  const { connectionState } = useSeizeConnectContext();
   const profileId = connectedProfile?.id;
   const pathname = usePathname();
   const activeTab =
@@ -332,7 +335,11 @@ export default function ContentModerationPageClient() {
     activeProfileProxy === null &&
     isDirectProfileSession === true;
   const { canModerate, permissionsLoading, moderatorContentReady } =
-    getModeratorPermissions(accessQuery, hasModeratorIdentity, fetchingProfile);
+    getModeratorPermissions(
+      accessQuery,
+      hasModeratorIdentity,
+      isAuthResolving(connectionState, fetchingProfile)
+    );
   const reportsTabActive = isReportsTab(activeTab);
   const reportsView = activeTab === "RESOLVED" ? "RESOLVED" : "OPEN";
   const queueQuery = useInfiniteQuery({
