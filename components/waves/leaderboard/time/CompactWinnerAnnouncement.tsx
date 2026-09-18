@@ -23,7 +23,7 @@ export const CompactWinnerAnnouncement = ({
       <div className="tw-flex tw-flex-col tw-gap-y-1 sm:tw-flex-row sm:tw-flex-wrap sm:tw-items-center">
         <span className="tw-text-xs tw-text-iron-400">
           {t(locale, "waves.leaderboard.phase.nextWinnersIn")}
-        </span>{" "}
+        </span>
         <span className="tw-flex tw-flex-wrap tw-items-baseline tw-gap-y-1">
           <span className="tw-ml-1 tw-whitespace-nowrap tw-font-mono tw-text-xs tw-tracking-tight tw-text-iron-300">
             {t(

@@ -161,9 +161,17 @@ describe("single-decision winner announcement", () => {
     expect(screen.getByTestId("vote")).toBeInTheDocument();
     expect(screen.getByText("Next winners announced in")).toBeInTheDocument();
     expect(screen.getByText("2d 3h 4m")).toBeInTheDocument();
-    expect(screen.getByText("Sep 20")).toHaveAttribute(
+    const announcementDate = screen.getByText("Sep 20");
+    expect(announcementDate).toHaveAttribute(
       "dateTime",
       new Date(announcement).toISOString()
+    );
+    expect(announcementDate).toHaveAccessibleName(
+      /September 20, 2026.*\d.*(?:AM|PM)/
+    );
+    expect(announcementDate).toHaveAttribute(
+      "title",
+      announcementDate.getAttribute("aria-label")
     );
   });
 
