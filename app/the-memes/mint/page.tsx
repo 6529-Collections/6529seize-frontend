@@ -33,6 +33,7 @@ export async function generateMetadata(): Promise<Metadata> {
       }),
       ogImageAlt: "The Memes mint social card",
       description: "Collections",
-    })
+    }),
+    { canonicalPath: "/the-memes/mint" }
   );
 }
