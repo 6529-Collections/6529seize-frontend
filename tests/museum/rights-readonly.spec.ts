@@ -147,8 +147,15 @@ test.describe("Museum rights education @surface @readonly", () => {
     const diagnostics = attachPageDiagnostics(page);
     try {
       const objectPath = "/museum/network/collection/6529NM.2026.001.01";
+      const workPath = "/museum/network/works/6529NM-W-0001";
       const response = await gotoDocumentWithTransientRetry(page, objectPath);
       expect(response?.status()).toBe(200);
+      const aliasRequest = response?.request().redirectedFrom();
+      expect(aliasRequest?.url()).toBe(new URL(objectPath, page.url()).href);
+      const aliasResponse = await aliasRequest?.response();
+      expect(aliasResponse?.status()).toBe(308);
+      expect(aliasResponse?.headers()["location"]).toBe(workPath);
+      expect(response?.url()).toBe(new URL(workPath, page.url()).href);
       await waitForRouteReady(page);
       await expect(page.locator("body")).toContainText(
         "Licensed CC BY-NC 4.0.",
