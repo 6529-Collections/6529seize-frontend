@@ -110,11 +110,6 @@ export default function HeaderUserMenuDropdown({
     }
     return null;
   })();
-  // WebSidebarUser unmounts this dropdown on close, so each opening gets one
-  // layout. Late results apply next opening; revoked access is removed immediately.
-  const [initialArtworkDocumentationEnabled] = useState(
-    artworkDocumentationEnabled
-  );
   const [pendingAction, setPendingAction] = useState<string | null>(null);
   useEffect(() => setLabel(getLabel()), [profile, address]);
 
@@ -447,10 +442,7 @@ export default function HeaderUserMenuDropdown({
                     </div>
                     <HeaderArtworkDocumentationLink
                       onClose={onClose}
-                      enabled={
-                        initialArtworkDocumentationEnabled &&
-                        artworkDocumentationEnabled
-                      }
+                      enabled={artworkDocumentationEnabled}
                     />
                     <button
                       onClick={() => {

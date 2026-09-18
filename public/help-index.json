@@ -1623,7 +1623,7 @@
         "In Capacitor, Connect and add-profile open a shared Connect sheet with App Wallets, External Wallets, and Scan Connection QR options.",
         "The Capacitor App Wallets view supports Back, Create App Wallet, and direct app-wallet unlock/connect; app wallets are omitted from the Reown external-wallet browser.",
         "Scan Connection QR accepts only canonical 6529 connection-share links; the separate app-sidebar scanner remains general-purpose.",
-        "My artwork documentation availability is checked independently of opening the account dropdown. If it becomes available while the menu is open, close and reopen to see it without a layout jump.",
+        "My artwork documentation availability is checked independently of opening the account dropdown. When access is already known, the item is present from the start. If access resolves while the menu is open, the item appears immediately without needing to reopen the menu.",
         "On desktop web, the collapsed sidebar account avatar highlights on hover but opens its account dropdown only when activated; the dropdown stays aligned with the sidebar on centered wide-screen layouts.",
         "Sign out all clears every connected profile in one visible transition without switching through the remaining profiles.",
         "If wallet connection is not working, retry from the header wallet controls and confirm the wallet modal is completed before using write actions.",
