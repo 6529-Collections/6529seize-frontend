@@ -10,6 +10,9 @@ import {
 } from "@/hooks/memesQuickVote.helpers";
 import type { MemesQuickVoteDialogState } from "@/hooks/useMemesQuickVoteDialogController";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { useOptimizedVideo } from "@/hooks/useOptimizedVideo";
+import { getDropPreviewImageUrl } from "@/helpers/waves/drop.helpers";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import {
   MemesQuickVoteDialogDoneState,
   MemesQuickVoteDialogErrorState,
@@ -93,24 +96,45 @@ interface MemesQuickVoteControlsPaneProps {
   readonly onVoteAmount: (amount: number) => void;
 }
 
-function getQuickVotePreloadedNextDrop(
-  isOpen: boolean,
-  nextDrop: MemesQuickVoteDialogProps["nextDrop"]
-): MemesQuickVoteDialogProps["nextDrop"] {
-  if (!isOpen || !nextDrop) {
+function MemesQuickVoteNextMediaPreloader({
+  drop,
+}: {
+  readonly drop: MemesQuickVoteDialogProps["nextDrop"];
+}) {
+  const artworkMedia = drop?.parts.at(0)?.media.at(0);
+  const mediaMimeType = artworkMedia?.mime_type.toLowerCase() ?? "";
+  const isVideo = mediaMimeType.includes("video");
+  const videoUrl = isVideo ? (artworkMedia?.url ?? "") : "";
+
+  // Warm the shared rendition-availability cache without mounting another
+  // video element, HLS engine, observer tree, or swipe card.
+  useOptimizedVideo(videoUrl, {
+    enabled: isVideo,
+    pollInterval: 10000,
+    maxRetries: 8,
+    preferHls: true,
+    exponentialBackoff: false,
+  });
+
+  let imageUrl: string | null | undefined = null;
+  if (mediaMimeType.includes("image")) {
+    imageUrl = artworkMedia?.url;
+  } else if (mediaMimeType === "text/html" && drop) {
+    imageUrl = getDropPreviewImageUrl(drop.metadata);
+  }
+
+  if (!imageUrl) {
     return null;
   }
 
-  const artworkMedia = nextDrop.parts.at(0)?.media.at(0);
-  const mediaMimeType = artworkMedia?.mime_type.toLowerCase();
-  const mediaUrl = artworkMedia?.url.toLowerCase();
-  const isGlbMedia =
-    mediaMimeType === "model/gltf-binary" ||
-    mediaMimeType === "model/gltf+json" ||
-    (mediaUrl?.endsWith(".glb") ?? false) ||
-    (mediaUrl?.endsWith(".gltf") ?? false);
-
-  return isGlbMedia ? null : nextDrop;
+  return (
+    <link
+      data-testid="quick-vote-next-image-preload"
+      rel="preload"
+      as="image"
+      href={getScaledImageUri(imageUrl, ImageScale.AUTOx800)}
+    />
+  );
 }
 
 function MemesQuickVotePreviewStack({
@@ -142,48 +166,9 @@ function MemesQuickVotePreviewStack({
   readonly unratedCount: number;
   readonly votingLabel: string | null;
 }) {
-  const preloadedCardRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    const preloadedCard = preloadedCardRef.current;
-
-    if (!preloadedCard) {
-      return;
-    }
-
-    preloadedCard.setAttribute("inert", "");
-
-    return () => {
-      preloadedCard.removeAttribute("inert");
-    };
-  }, [nextDrop]);
-
   return (
     <div className="tw-relative tw-h-full tw-w-full">
-      {nextDrop && (
-        <div
-          ref={preloadedCardRef}
-          aria-hidden="true"
-          className="tw-pointer-events-none tw-absolute tw-inset-0 tw-overflow-hidden tw-opacity-0"
-          data-testid="quick-vote-preview-card-next"
-        >
-          <MemesQuickVotePreview
-            key={`next:${sessionId}:${nextDrop.id}`}
-            drop={nextDrop}
-            isBusy={false}
-            isMobile={isMobile}
-            leftThisRoundCount={leftThisRoundCount}
-            renderMode="preloaded"
-            swipeVoteAmount={swipeVoteAmount}
-            uncastPower={uncastPower}
-            unratedCount={unratedCount}
-            votingLabel={votingLabel}
-            onAdvanceStart={() => undefined}
-            onSkip={() => undefined}
-            onVoteWithSwipe={() => undefined}
-          />
-        </div>
-      )}
+      <MemesQuickVoteNextMediaPreloader drop={nextDrop} />
 
       <div className="tw-relative tw-z-10 tw-h-full">
         <MemesQuickVotePreview
@@ -192,7 +177,6 @@ function MemesQuickVotePreviewStack({
           isBusy={isBusy}
           isMobile={isMobile}
           leftThisRoundCount={leftThisRoundCount}
-          renderMode="active"
           swipeVoteAmount={swipeVoteAmount}
           uncastPower={uncastPower}
           unratedCount={unratedCount}
@@ -695,8 +679,6 @@ export default function MemesQuickVoteDialog({
       dialogBody = <MemesQuickVoteDialogSkeleton />;
     } else {
       const contentResetKey = `${sessionId}:${activeDrop.id}:open`;
-      const preloadedNextDrop = getQuickVotePreloadedNextDrop(isOpen, nextDrop);
-
       dialogBody = (
         <MemesQuickVoteDialogContent
           key={contentResetKey}
@@ -704,7 +686,7 @@ export default function MemesQuickVoteDialog({
           isMobile={isMobile}
           leftThisRoundCount={leftThisRoundCount}
           latestUsedAmount={latestUsedAmount}
-          nextDrop={preloadedNextDrop}
+          nextDrop={nextDrop}
           onClose={onClose}
           recentAmounts={recentAmounts}
           sessionId={sessionId}

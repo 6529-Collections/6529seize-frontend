@@ -169,6 +169,10 @@ async function expectUniformMediaStageRatio(
     .toBe(true);
 }
 
+test.beforeEach(async ({ page, baseURL }) => {
+  await installLocalMuseumCountryCheck(page, baseURL);
+});
+
 test.describe("Museum public IA rendered contract @surface @readonly", () => {
   test.skip(
     ({ browserName }) => browserName !== "chromium",
@@ -180,8 +184,7 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
   );
   test.setTimeout(180_000);
 
-  test.beforeEach(async ({ page, baseURL }, testInfo) => {
-    await installLocalMuseumCountryCheck(page, baseURL);
+  test.beforeEach(async ({ page }, testInfo) => {
     if (testInfo.project.name === MOBILE_PROJECT) {
       await page.setViewportSize(MOBILE_VIEWPORT);
       expect(page.viewportSize()).toEqual(MOBILE_VIEWPORT);

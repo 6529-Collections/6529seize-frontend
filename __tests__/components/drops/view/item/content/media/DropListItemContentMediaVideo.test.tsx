@@ -26,8 +26,25 @@ const mockUseInView = require("@/hooks/useInView").useInView as jest.Mock;
 const mockUseOptimizedVideo = require("@/hooks/useOptimizedVideo")
   .useOptimizedVideo as jest.Mock;
 
+function mockPrefersReducedMotion(matches: boolean) {
+  jest.spyOn(globalThis, "matchMedia").mockImplementation(
+    (query: string) =>
+      ({
+        addEventListener: jest.fn(),
+        addListener: jest.fn(),
+        dispatchEvent: jest.fn(),
+        matches,
+        media: query,
+        onchange: null,
+        removeEventListener: jest.fn(),
+        removeListener: jest.fn(),
+      }) as MediaQueryList
+  );
+}
+
 describe("DropListItemContentMediaVideo", () => {
   beforeEach(() => {
+    jest.restoreAllMocks();
     jest.clearAllMocks();
     jest.useRealTimers();
     mockIsApp = false;
@@ -36,6 +53,10 @@ describe("DropListItemContentMediaVideo", () => {
       configurable: true,
       value: null,
     });
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
   });
 
   it("renders video when in view", () => {
@@ -49,10 +70,11 @@ describe("DropListItemContentMediaVideo", () => {
     });
 
     // Mock HTMLVideoElement.play to return a promise
+    const playSpy = jest.fn().mockResolvedValue(undefined);
     Object.defineProperty(HTMLVideoElement.prototype, "play", {
       configurable: true,
       writable: true,
-      value: jest.fn().mockResolvedValue(undefined),
+      value: playSpy,
     });
 
     render(<DropListItemContentMediaVideo src="foo.mp4" />);
@@ -61,7 +83,8 @@ describe("DropListItemContentMediaVideo", () => {
     ).toBeInTheDocument();
     const vid = document.querySelector("video") as HTMLVideoElement;
     expect(vid).toBeTruthy();
-    expect(vid.autoplay).toBe(false); // Component uses useEffect for controlled playback
+    expect(vid.autoplay).toBe(false); // Ambient playback is managed imperatively.
+    expect(playSpy).toHaveBeenCalled();
     expect(mockUseInView).toHaveBeenCalledWith(
       expect.objectContaining({
         freezeOnceVisible: false,
@@ -129,6 +152,104 @@ describe("DropListItemContentMediaVideo", () => {
 
     render(<DropListItemContentMediaVideo src="foo.mp4" disableAutoPlay />);
     expect(playSpy).not.toHaveBeenCalled();
+  });
+
+  it("autoplays an opted-in app video when reduced motion is off", () => {
+    mockIsApp = true;
+    mockPrefersReducedMotion(false);
+    const ref = {
+      current: document.createElement("div"),
+    } as React.RefObject<HTMLDivElement>;
+    mockUseInView.mockReturnValue([ref, true]);
+    mockUseOptimizedVideo.mockReturnValue({
+      playableUrl: "foo.mp4",
+      isHls: false,
+    });
+
+    const playSpy = jest.fn().mockResolvedValue(undefined);
+    Object.defineProperty(HTMLVideoElement.prototype, "play", {
+      configurable: true,
+      writable: true,
+      value: playSpy,
+    });
+
+    render(
+      <DropListItemContentMediaVideo
+        src="foo.mp4"
+        allowAutoPlayInApp
+      />
+    );
+
+    expect(playSpy).toHaveBeenCalled();
+  });
+
+  it("does not autoplay an opted-in app video when reduced motion is on", () => {
+    mockIsApp = true;
+    mockPrefersReducedMotion(true);
+    const ref = {
+      current: document.createElement("div"),
+    } as React.RefObject<HTMLDivElement>;
+    mockUseInView.mockReturnValue([ref, true]);
+    mockUseOptimizedVideo.mockReturnValue({
+      playableUrl: "foo.mp4",
+      isHls: false,
+    });
+
+    const playSpy = jest.fn().mockResolvedValue(undefined);
+    Object.defineProperty(HTMLVideoElement.prototype, "play", {
+      configurable: true,
+      writable: true,
+      value: playSpy,
+    });
+
+    render(
+      <DropListItemContentMediaVideo
+        src="foo.mp4"
+        allowAutoPlayInApp
+      />
+    );
+
+    expect(playSpy).not.toHaveBeenCalled();
+  });
+
+  it("starts an opted-in app video when it enters view after setup", () => {
+    mockIsApp = true;
+    mockPrefersReducedMotion(false);
+    const ref = {
+      current: document.createElement("div"),
+    } as React.RefObject<HTMLDivElement>;
+    let setInView: React.Dispatch<React.SetStateAction<boolean>> | undefined;
+    mockUseInView.mockImplementation(() => {
+      const [inView, setCurrentInView] = React.useState(false);
+      setInView = setCurrentInView;
+      return [ref, inView];
+    });
+    mockUseOptimizedVideo.mockReturnValue({
+      playableUrl: "foo.mp4",
+      isHls: false,
+    });
+
+    const playSpy = jest.fn().mockResolvedValue(undefined);
+    Object.defineProperty(HTMLVideoElement.prototype, "play", {
+      configurable: true,
+      writable: true,
+      value: playSpy,
+    });
+
+    render(
+      <DropListItemContentMediaVideo
+        src="foo.mp4"
+        allowAutoPlayInApp
+        loadStrategy="eager"
+      />
+    );
+    expect(playSpy).not.toHaveBeenCalled();
+
+    act(() => {
+      setInView?.(true);
+    });
+
+    expect(playSpy).toHaveBeenCalled();
   });
 
   it("does not pause while its video is in wrapper fullscreen", () => {
@@ -361,5 +482,73 @@ describe("DropListItemContentMediaVideo", () => {
 
     expect(pauseSpy).toHaveBeenCalledTimes(pauseCallsBeforeClick + 1);
     expect(playSpy).toHaveBeenCalledTimes(playCallsBeforeClick);
+  });
+
+  it("shows a retry action after a terminal playback error", () => {
+    jest.useFakeTimers();
+    const ref = {
+      current: document.createElement("div"),
+    } as React.RefObject<HTMLDivElement>;
+    mockUseInView.mockReturnValue([ref, true]);
+    mockUseOptimizedVideo.mockReturnValue({
+      playableUrl: "foo.mp4",
+      isHls: false,
+    });
+
+    const { container } = render(
+      <DropListItemContentMediaVideo src="foo.mp4" />
+    );
+    const video = container.querySelector("video");
+    if (!video) {
+      throw new Error("Expected video element to render");
+    }
+    Object.defineProperty(video, "error", {
+      configurable: true,
+      value: { code: 4 },
+    });
+
+    fireEvent.error(video);
+
+    act(() => {
+      jest.advanceTimersByTime(3000);
+    });
+
+    expect(screen.getByText("Couldn’t load video.")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Retry" }));
+    expect(screen.queryByText("Couldn’t load video.")).not.toBeInTheDocument();
+  });
+
+  it("keeps a recoverable playback error hidden during the recovery grace period", () => {
+    jest.useFakeTimers();
+    const ref = {
+      current: document.createElement("div"),
+    } as React.RefObject<HTMLDivElement>;
+    mockUseInView.mockReturnValue([ref, true]);
+    mockUseOptimizedVideo.mockReturnValue({
+      playableUrl: "stream.m3u8",
+      isHls: true,
+    });
+
+    const { container } = render(
+      <DropListItemContentMediaVideo src="stream.mp4" />
+    );
+    const video = container.querySelector("video");
+    if (!video) {
+      throw new Error("Expected video element to render");
+    }
+    let playbackError: Pick<MediaError, "code"> | null = { code: 3 };
+    Object.defineProperty(video, "error", {
+      configurable: true,
+      get: () => playbackError,
+    });
+
+    fireEvent.error(video);
+    playbackError = null;
+    fireEvent.loadedData(video);
+    act(() => {
+      jest.advanceTimersByTime(3000);
+    });
+
+    expect(screen.queryByText("Couldn’t load video.")).not.toBeInTheDocument();
   });
 });
