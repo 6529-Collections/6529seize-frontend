@@ -3,6 +3,7 @@ import {
   GitHubMuseumPublicationSource,
   legacyCaseyPublicationAssembler,
   resolveMuseumPublicationRef,
+  shouldUseMuseumPublicationBuildSnapshot,
   type MuseumLastValidPublication,
   type MuseumPublication,
   type MuseumPublicationLoadState,
@@ -12,6 +13,10 @@ import {
   getMuseumPublicationNodeEnvironment,
   isMuseumLocalFixtureEnvironment,
 } from "@/config/museumPublicationEnv.server";
+import {
+  createMuseumPublicationBuildSnapshot,
+  parseMuseumPublicationBuildSnapshot,
+} from "@/lib/museum/publication/buildSnapshot.server";
 import { createCaseyFixture } from "./fixture";
 
 type CurrentState = Extract<
@@ -118,6 +123,106 @@ describe("Museum publication runtime", () => {
       current,
     ]);
     expect(load).toHaveBeenCalledTimes(1);
+  });
+
+  it("serves a fresh verified build snapshot without a source request", async () => {
+    const now = Date.parse("2026-08-02T12:05:00.000Z");
+    const { load, source } = mockedSource();
+    const runtime = createMuseumPublicationRuntime(
+      source,
+      () => now,
+      () => 0,
+      {
+        initialLastValid: {
+          publication,
+          acceptedAt: "2026-08-02T12:00:00.000Z",
+        },
+        refreshInBackground: true,
+      }
+    );
+
+    await expect(runtime.load()).resolves.toEqual(currentState(publication));
+    expect(load).not.toHaveBeenCalled();
+  });
+
+  it("serves a stale build snapshot immediately while refreshing in the background", async () => {
+    const now = Date.parse("2026-08-02T12:10:00.001Z");
+    const { load, source } = mockedSource();
+    let resolveRefresh:
+      | ((state: MuseumPublicationLoadState) => void)
+      | undefined;
+    const refresh = new Promise<MuseumPublicationLoadState>((resolve) => {
+      resolveRefresh = resolve;
+    });
+    load.mockReturnValue(refresh);
+    const runtime = createMuseumPublicationRuntime(
+      source,
+      () => now,
+      () => 0,
+      {
+        initialLastValid: {
+          publication,
+          acceptedAt: "2026-08-02T12:00:00.000Z",
+        },
+        refreshInBackground: true,
+      }
+    );
+
+    await expect(runtime.load()).resolves.toMatchObject({
+      status: "stale",
+      publication,
+      errorCode: "publication_refresh_pending",
+      lastValidAcceptedAt: "2026-08-02T12:00:00.000Z",
+    });
+    expect(load).toHaveBeenCalledTimes(1);
+    if (resolveRefresh === undefined) {
+      throw new Error("test_source_request_not_started");
+    }
+    resolveRefresh(currentState(publication));
+    await refresh;
+    await Promise.resolve();
+
+    await expect(runtime.load()).resolves.toEqual(currentState(publication));
+    expect(load).toHaveBeenCalledTimes(1);
+  });
+
+  it("fails closed promptly when the build snapshot is beyond the last-valid limit", async () => {
+    const now = Date.parse("2026-08-03T12:00:00.001Z");
+    const { load, source } = mockedSource();
+    let resolveRefresh:
+      | ((state: MuseumPublicationLoadState) => void)
+      | undefined;
+    const refresh = new Promise<MuseumPublicationLoadState>((resolve) => {
+      resolveRefresh = resolve;
+    });
+    load.mockReturnValue(refresh);
+    const runtime = createMuseumPublicationRuntime(
+      source,
+      () => now,
+      () => 0,
+      {
+        initialLastValid: {
+          publication,
+          acceptedAt: "2026-08-02T12:00:00.000Z",
+        },
+        refreshInBackground: true,
+      }
+    );
+
+    await expect(runtime.load()).resolves.toMatchObject({
+      status: "unavailable",
+      publication: null,
+      errorCode: "publication_refresh_pending",
+    });
+    expect(load).toHaveBeenCalledWith(undefined);
+    if (resolveRefresh === undefined) {
+      throw new Error("test_source_request_not_started");
+    }
+    resolveRefresh(currentState(publication));
+    await refresh;
+    await Promise.resolve();
+
+    await expect(runtime.load()).resolves.toEqual(currentState(publication));
   });
 
   it("serves caller-visible stale state from the last valid publication after failure", async () => {
@@ -306,7 +411,59 @@ describe("Museum publication runtime", () => {
   });
 });
 
+describe("Museum publication build snapshot", () => {
+  let publication: MuseumPublication;
+
+  beforeAll(async () => {
+    publication = await buildPublication();
+  });
+
+  it("activates a digest-verified publication with its build acceptance time", () => {
+    const generatedAt = "2026-08-02T12:00:00.000Z";
+    const snapshot = createMuseumPublicationBuildSnapshot(
+      publication,
+      generatedAt
+    );
+
+    expect(parseMuseumPublicationBuildSnapshot(snapshot)).toEqual({
+      publication,
+      acceptedAt: generatedAt,
+    });
+  });
+
+  it("rejects a publication whose packaged bytes do not match the digest", () => {
+    const snapshot = createMuseumPublicationBuildSnapshot(
+      publication,
+      "2026-08-02T12:00:00.000Z"
+    );
+    const tampered = {
+      ...snapshot,
+      publication: {
+        ...snapshot.publication,
+        artists: [],
+      },
+    };
+
+    expect(parseMuseumPublicationBuildSnapshot(tampered)).toBeUndefined();
+  });
+});
+
 describe("Museum publication runtime source ref", () => {
+  it("uses a build snapshot only for the canonical publication source", () => {
+    expect(shouldUseMuseumPublicationBuildSnapshot({})).toBe(true);
+    expect(
+      shouldUseMuseumPublicationBuildSnapshot({
+        MUSEUM_PUBLICATION_TEST_COMMIT:
+          "66c9eb9fa8c1512ca9450108151d2d7a037c4f31",
+      })
+    ).toBe(false);
+    expect(
+      shouldUseMuseumPublicationBuildSnapshot({
+        MUSEUM_PUBLICATION_LOCAL_FIXTURE_ROOT: "fixture",
+      })
+    ).toBe(false);
+  });
+
   it("uses the moving canonical ref outside the read-only browser harness", () => {
     expect(resolveMuseumPublicationRef({})).toBe("main");
   });
