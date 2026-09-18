@@ -797,15 +797,15 @@ describe("HeaderUserMenuDropdown", () => {
   });
 });
 
-it("keeps an open menu stable when documentation becomes available, then includes it on reopening", () => {
+it("reveals documentation when access resolves in an open menu and removes revoked access", () => {
   const { rendered, authValue, onClose } = renderDropdown({
     address: "0xabc",
     artworkDocumentationEnabled: false,
   });
-  const menu = (enabled: boolean, key = "first") => (
+  const menu = (enabled: boolean) => (
     <AuthContext.Provider value={authValue}>
       <HeaderUserMenuDropdown
-        key={key}
+        key="first"
         isOpen
         profile={profileBase}
         onClose={onClose}
@@ -813,15 +813,14 @@ it("keeps an open menu stable when documentation becomes available, then include
       />
     </AuthContext.Provider>
   );
-  rendered.rerender(menu(true));
   expect(
     screen.queryByRole("link", { name: "My artwork documentation" })
   ).not.toBeInTheDocument();
-  rendered.rerender(menu(true, "next-opening"));
+  rendered.rerender(menu(true));
   expect(
     screen.getByRole("link", { name: "My artwork documentation" })
   ).toBeInTheDocument();
-  rendered.rerender(menu(false, "next-opening"));
+  rendered.rerender(menu(false));
   expect(
     screen.queryByRole("link", { name: "My artwork documentation" })
   ).not.toBeInTheDocument();

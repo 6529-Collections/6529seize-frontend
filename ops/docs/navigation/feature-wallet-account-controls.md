@@ -62,8 +62,9 @@ action.
 - Artwork documentation availability is checked while the account UI is present,
   independently of opening the dropdown. Closing and reopening does not restart
   the check. `My artwork documentation` appears when available for the active
-  profile. If the first result arrives while the dropdown is open, close and
-  reopen to see the new item without the menu moving under the pointer.
+  profile. If the first result arrives while the dropdown is open, the item
+  appears immediately. When the check finishes before opening, the item is
+  present from the start. Revoked access removes the item immediately.
 
 - The dropdown enters with a short opacity and vertical-position reveal;
   reduced-motion preferences show it immediately without animation.
