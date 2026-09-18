@@ -263,6 +263,8 @@ test.describe("Staging video artwork sizing @surface @medium @large @readonly", 
       .locator("[data-home-artwork-column]");
     await expect(column).toBeVisible();
     const video = column.getByLabel("Video player", { exact: true });
+    // The live homepage rotates between image and video drops. This regression
+    // needs a video; fixed video fixtures below still run when the homepage is an image.
     test.skip(
       (await video.count()) === 0,
       "Current homepage drop is not a video"
