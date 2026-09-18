@@ -6,6 +6,7 @@ import { commonApiPost } from "@/services/api/common-api";
 import {
   getConnectedWalletAccounts,
   getAuthJwt,
+  isAuthJwtUsable,
   getWalletAddress,
 } from "@/services/auth/auth.utils";
 import { getAuthTokenFingerprint } from "@/services/auth/auth-token-fingerprint";
@@ -13,6 +14,7 @@ import { getNativeRefreshToken } from "@/services/auth/native-refresh-token-stor
 import { getPushDeviceIdentity } from "@/components/notifications/stable-device-id";
 import { getDeliveredNotificationProfileId } from "@/components/notifications/delivered-notification-data";
 import type { ApiRevokePushInstallationRequest } from "@/generated/models/ApiRevokePushInstallationRequest";
+import type { ApiRefreshPushInstallationBadgeRequest } from "@/generated/models/ApiRefreshPushInstallationBadgeRequest";
 
 import { isConnectedPushAuth } from "./connected-push-profiles";
 
@@ -163,6 +165,32 @@ export async function preparePushInstallationRegistration(
       "Push registration deferred until logout reconciliation completes"
     );
   return credential;
+}
+
+/** Read proof without changing registration, logout jobs, or notification state. */
+export function getPushInstallationBadgeRefreshRequest(
+  deviceId: string,
+  token: string,
+  authKey: string
+): Promise<ApiRefreshPushInstallationBadgeRequest | null> {
+  return serialized(async () => {
+    const state = await readState();
+    const jwt = getAuthJwt();
+    if (
+      !isAuthJwtUsable(jwt) ||
+      getAuthTokenFingerprint(jwt) !== authKey ||
+      state.deviceId !== deviceId ||
+      state.token !== token ||
+      state.blockedAuth.includes(authKey) ||
+      state.pending.some((job) => job.device_id === deviceId)
+    )
+      return null;
+    return {
+      device_id: deviceId,
+      installation_secret: state.secret,
+      revision: state.revision,
+    };
+  });
 }
 
 /** Called only after every currently connected profile registered its current token. */

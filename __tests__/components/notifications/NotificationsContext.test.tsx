@@ -1,3 +1,7 @@
+jest.mock("@/services/notifications/push-badge-refresh", () => ({
+  requestPushBadgeRefresh: jest.fn().mockResolvedValue(undefined),
+}));
+import { requestPushBadgeRefresh } from "@/services/notifications/push-badge-refresh";
 jest.mock("@/services/notifications/push-installation", () => ({
   preparePushInstallationRegistration: jest.fn().mockResolvedValue({}),
   completePushInstallationMigration: jest.fn().mockResolvedValue(undefined),
@@ -512,6 +516,47 @@ describe("push registration behavior", () => {
     sentry.addBreadcrumb.mockClear();
   });
 
+  it("requests a badge only after backend registration succeeds, then again on resume", async () => {
+    const { commonApiPost } = require("@/services/api/common-api");
+    let finish!: (value: unknown) => void;
+    commonApiPost.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          finish = resolve;
+        })
+    );
+    const { registrationCallback, rerender } =
+      await setupRegistrationCallback();
+    await act(async () => {
+      await registrationCallback({ value: "test-token" });
+    });
+    expect(requestPushBadgeRefresh).not.toHaveBeenCalled();
+    await act(async () => {
+      finish({});
+    });
+    await waitFor(() =>
+      expect(requestPushBadgeRefresh).toHaveBeenCalledTimes(1)
+    );
+    mockIsActive = false;
+    rerender();
+    mockIsActive = true;
+    rerender();
+    await waitFor(() =>
+      expect(requestPushBadgeRefresh).toHaveBeenCalledTimes(2)
+    );
+  });
+
+  it("keeps Android registration free of iOS badge refresh requests", async () => {
+    mockIsIos = false;
+    const { commonApiPost } = require("@/services/api/common-api");
+    const { registrationCallback } = await setupRegistrationCallback();
+    await act(async () => {
+      await registrationCallback({ value: "test-token" });
+    });
+    await waitFor(() => expect(commonApiPost).toHaveBeenCalledTimes(1));
+    expect(requestPushBadgeRefresh).not.toHaveBeenCalled();
+  });
+
   it("allows a waiting registration to continue after installation preparation fails", async () => {
     const {
       preparePushInstallationRegistration,
@@ -925,7 +970,7 @@ describe("push registration behavior", () => {
     "retries partial connected-profile registration on %s without a completed logout",
     async (trigger) => {
       mockIsActive = true;
-      mockIsIos = false;
+      mockIsIos = true;
       const { PushNotifications } = require("@capacitor/push-notifications");
       const { commonApiPost } = require("@/services/api/common-api");
       const {
@@ -951,6 +996,7 @@ describe("push registration behavior", () => {
         });
         await waitFor(() => expect(commonApiPost).toHaveBeenCalledTimes(2));
         expect(completePushInstallationMigration).not.toHaveBeenCalled();
+        expect(requestPushBadgeRefresh).not.toHaveBeenCalled();
 
         if (trigger === "activation") {
           mockIsActive = false;
@@ -970,6 +1016,9 @@ describe("push registration behavior", () => {
         });
         await waitFor(() =>
           expect(completePushInstallationMigration).toHaveBeenCalledTimes(1)
+        );
+        await waitFor(() =>
+          expect(requestPushBadgeRefresh).toHaveBeenCalledTimes(1)
         );
         expect(commonApiPost).toHaveBeenNthCalledWith(
           4,

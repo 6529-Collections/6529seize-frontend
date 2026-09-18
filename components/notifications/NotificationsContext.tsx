@@ -1,6 +1,7 @@
 "use client";
 
 import { usePushRegistrationRecovery } from "./usePushRegistrationRecovery";
+import { usePushBadgeRefresh } from "./usePushBadgeRefresh";
 import { Device, type DeviceInfo } from "@capacitor/device";
 import {
   PushNotifications,
@@ -109,6 +110,10 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
   const pushRegistrationAuthKey = isAuthJwtUsable(authJwt)
     ? getAuthTokenFingerprint(authJwt)
     : "no-usable-auth";
+  const notifyBadgeRegistrationReady = usePushBadgeRefresh(
+    isCapacitor && isIos && isActive,
+    pushRegistrationAuthKey
+  );
   const { address, connectedAccounts, seizeSwitchConnectedAccount } =
     useSeizeConnectContext();
   const router = useRouter();
@@ -457,6 +462,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
         if (didRegister) {
           lastSuccessfulRegistrationRef.current = fingerprint;
           lastSuccessfulRegistrationAuthRef.current = registrationAuth;
+          notifyBadgeRegistrationReady(fingerprint, registrationAuth);
         }
       })();
 
@@ -469,7 +475,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
         }
       }
     },
-    [registerPushNotificationWithRetry]
+    [notifyBadgeRegistrationReady]
   );
 
   const initializePushNotifications = useCallback(
