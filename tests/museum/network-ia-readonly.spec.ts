@@ -9,6 +9,7 @@ import {
   test,
   waitForRouteReady,
 } from "../testHelpers";
+import { installLocalMuseumCountryCheck } from "../support/localMuseumCountryCheck";
 import { gotoDocumentWithTransientRetry } from "../support/routeReadiness";
 import { expectMuseumPath } from "../support/museumNavigation";
 import {
@@ -167,6 +168,10 @@ async function expectUniformMediaStageRatio(
     )
     .toBe(true);
 }
+
+test.beforeEach(async ({ page, baseURL }) => {
+  await installLocalMuseumCountryCheck(page, baseURL);
+});
 
 test.describe("Museum public IA rendered contract @surface @readonly", () => {
   test.skip(
