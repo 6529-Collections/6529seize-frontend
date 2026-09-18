@@ -8,6 +8,7 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import clsx from "clsx";
 import React, { useEffect, useRef } from "react";
 import SeizeVideoPlayer from "./SeizeVideoPlayer";
+import { usePrefersReducedMotion } from "./SeizeVideoPlayer.config";
 import VideoPlaybackErrorOverlay from "./VideoPlaybackErrorOverlay";
 import { useVideoPlaybackError } from "./useVideoPlaybackError";
 import { useMediaActions } from "./useMediaActions";
@@ -17,6 +18,7 @@ interface Props {
   readonly src: string;
   readonly mimeType?: string | undefined;
   readonly disableAutoPlay?: boolean | undefined;
+  readonly allowAutoPlayInApp?: boolean | undefined;
   readonly fillContainer?: boolean | undefined;
   readonly align?: "left" | "center" | undefined;
   readonly showFullscreen?: boolean | undefined;
@@ -27,6 +29,7 @@ function DropListItemContentMediaVideo({
   src,
   mimeType,
   disableAutoPlay = false,
+  allowAutoPlayInApp = false,
   fillContainer = false,
   align = "left",
   showFullscreen = true,
@@ -40,7 +43,13 @@ function DropListItemContentMediaVideo({
   const wasFullscreenRef = useRef(false);
   const locale = useBrowserLocale();
   const { isApp } = useDeviceInfo();
+  const prefersReducedMotion = usePrefersReducedMotion();
   const shouldLoadVideo = loadStrategy === "eager" || inView;
+  const canAutoPlayInCurrentEnvironment = allowAutoPlayInApp
+    ? !prefersReducedMotion
+    : !isApp;
+  const shouldAutoPlay =
+    inView && !disableAutoPlay && canAutoPlayInCurrentEnvironment;
   const { downloadMedia, isDownloading, openLabel, openMedia } =
     useMediaActions({
       url: src,
@@ -64,11 +73,10 @@ function DropListItemContentMediaVideo({
     src: playableUrl,
     isHls,
     fallbackSrc: src,
-    autoPlay: inView && !isApp && !disableAutoPlay,
+    autoPlay: shouldAutoPlay,
   });
 
   // 3) Play/pause & mute based on scroll visibility
-  const shouldAutoPlay = inView && !isApp && !disableAutoPlay;
   const { handlePlaybackError, hasPlaybackError, retryPlayback } =
     useVideoPlaybackError({
       onRetry: retry,
@@ -88,12 +96,12 @@ function DropListItemContentMediaVideo({
     if (shouldAutoPlay) {
       // ensure muted autoplay works
       videoEl.muted = true;
-      if (!isApp) videoEl.play().catch(() => {});
+      videoEl.play().catch(() => {});
     } else {
       videoEl.pause();
       videoEl.muted = true;
     }
-  }, [shouldAutoPlay, isApp, isLoading, videoRef]);
+  }, [shouldAutoPlay, isLoading, videoRef]);
 
   // 4) Inline attributes for iOS / legacy WebKit
   useEffect(() => {

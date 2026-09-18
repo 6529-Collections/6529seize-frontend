@@ -61,15 +61,20 @@ function getQuickVoteArtworkMediaContent({
     return null;
   }
 
+  const isVideoArtwork = artworkMedia.mime_type
+    .toLowerCase()
+    .includes("video");
+
   return (
     <DropListItemContentMedia
       media_mime_type={artworkMedia.mime_type}
       media_url={artworkMedia.url}
       isCompetitionDrop={true}
-      disableAutoPlay={hasTouchScreen}
+      disableAutoPlay={hasTouchScreen && !isVideoArtwork}
+      allowAutoPlayInApp={isVideoArtwork}
       disableModal={hasTouchScreen}
       htmlPreviewImageUrl={htmlPreviewImageUrl}
-      loadStrategy="in-view"
+      loadStrategy={isVideoArtwork ? "eager" : "in-view"}
       videoAlign="center"
     />
   );
