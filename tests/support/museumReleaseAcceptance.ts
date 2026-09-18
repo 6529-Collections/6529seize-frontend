@@ -58,25 +58,33 @@ export async function openMuseumAcceptanceRoute(
 
 async function settleImages(page: Page, selector: string) {
   const images = page.locator(selector);
-  const imageCount = await images.count();
-  for (let index = 0; index < imageCount; index += 1) {
-    await images.nth(index).scrollIntoViewIfNeeded();
+  let settledCount = 0;
+  let imageCount = await images.count();
+  // Streaming/hydration may add lazy images while the first batch loads.
+  // Recount after settling each batch so those images are also scrolled into
+  // view and checked, rather than leaving them unloaded below the viewport.
+  while (settledCount < imageCount) {
+    for (let index = settledCount; index < imageCount; index += 1) {
+      await images.nth(index).scrollIntoViewIfNeeded();
+    }
+    await Promise.all(
+      Array.from({ length: imageCount - settledCount }, async (_, offset) => {
+        const image = images.nth(settledCount + offset);
+        await expect
+          .poll(
+            () =>
+              image.evaluate((element) => {
+                if (!(element instanceof HTMLImageElement)) return false;
+                return element.complete && element.naturalWidth > 0;
+              }),
+            { timeout: 20_000 }
+          )
+          .toBe(true);
+      })
+    );
+    settledCount = imageCount;
+    imageCount = await images.count();
   }
-  await Promise.all(
-    Array.from({ length: imageCount }, async (_, index) => {
-      const image = images.nth(index);
-      await expect
-        .poll(
-          () =>
-            image.evaluate((element) => {
-              if (!(element instanceof HTMLImageElement)) return false;
-              return element.complete && element.naturalWidth > 0;
-            }),
-          { timeout: 20_000 }
-        )
-        .toBe(true);
-    })
-  );
 }
 
 export async function expectNoUnresolvedMuseumMedia(
@@ -301,7 +309,6 @@ export async function expectAcquisitionsAcceptance(page: Page) {
 }
 
 export async function expectResearchAcceptance(page: Page) {
-  await expectNoUnresolvedMuseumMedia(page, "main", "img");
   const section = (id: string) =>
     page.locator(`section:has(> header > #museum-research-section-${id})`);
   const acquisitions = section("acquisition-scholarship");
@@ -342,8 +349,12 @@ export async function expectResearchAcceptance(page: Page) {
   await expect(practice).toContainText("The Open Museum");
   await expect(practice).toContainText("From repository to chain");
 
-  const imageArticles = await page.locator("main article").evaluateAll(
-    (articles) =>
+  // Wait for the expected sections/cards before taking the media inventory.
+  await expectNoUnresolvedMuseumMedia(page, "main", "img");
+
+  const imageArticles = await page
+    .locator("main article")
+    .evaluateAll((articles) =>
       articles.flatMap((article) => {
         const image = article.querySelector("img");
         if (!(image instanceof HTMLImageElement)) return [];
@@ -356,7 +367,7 @@ export async function expectResearchAcceptance(page: Page) {
           },
         ];
       })
-  );
+    );
   const articlesBySource = new Map<string, string[]>();
   for (const { source, text } of imageArticles) {
     const articles = articlesBySource.get(source) ?? [];
