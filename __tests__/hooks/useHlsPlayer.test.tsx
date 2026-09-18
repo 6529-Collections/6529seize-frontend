@@ -90,6 +90,24 @@ describe("useHlsPlayer", () => {
     expect(video.getAttribute("data-loading")).toBe("false");
   });
 
+  it("resolves relative video sources against the document base URI", () => {
+    const base = document.createElement("base");
+    base.href = "https://example.com/waves/quick-vote/";
+    document.head.append(base);
+
+    try {
+      const { getByTestId } = render(
+        <TestComponent src="media/video.mp4" isHls={false} />
+      );
+
+      expect((getByTestId("vid") as HTMLVideoElement).src).toBe(
+        "https://example.com/waves/quick-vote/media/video.mp4"
+      );
+    } finally {
+      base.remove();
+    }
+  });
+
   it("uses native HLS when Hls.js is unavailable and the browser supports it", async () => {
     (HTMLVideoElement.prototype.canPlayType as jest.Mock).mockReturnValue(
       "probably"

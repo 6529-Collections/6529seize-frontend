@@ -110,7 +110,7 @@ function MemesQuickVoteMobileDetails({
 }) {
   return (
     <div
-      className="tw-relative tw-flex tw-min-h-[12.5rem] tw-flex-[2_1_0%] tw-flex-col tw-overflow-hidden md:tw-hidden"
+      className="tw-relative tw-flex tw-min-h-0 tw-flex-[2_1_0%] tw-flex-col tw-overflow-hidden md:tw-hidden"
       style={{ touchAction: "pan-y" }}
       onTouchStart={touchSurfaceProps.onTouchStart}
       onTouchMove={touchSurfaceProps.onTouchMove}
@@ -166,7 +166,7 @@ function MemesQuickVoteMediaStage({
 
   if (mediaContent === null) {
     return (
-      <div className="tw-flex tw-min-h-24 tw-w-full tw-flex-[3_1_0%] tw-items-center tw-justify-center tw-border-b tw-border-solid tw-border-white/5 tw-bg-black/30 tw-text-sm tw-text-iron-500 md:tw-h-full md:tw-border-0">
+      <div className="tw-flex tw-min-h-0 tw-w-full tw-flex-[3_1_0%] tw-items-center tw-justify-center tw-border-b tw-border-solid tw-border-white/5 tw-bg-black/30 tw-text-sm tw-text-iron-500 md:tw-h-full md:tw-border-0">
         {t(locale, "memes.quickVote.previewUnavailable")}
       </div>
     );
@@ -177,7 +177,7 @@ function MemesQuickVoteMediaStage({
       className={clsx(
         "tw-relative tw-overflow-hidden tw-bg-black/40",
         isMobile
-          ? "tw-max-h-[45dvh] tw-min-h-24 tw-flex-[3_1_0%] tw-border-b tw-border-solid tw-border-white/5"
+          ? "tw-max-h-[45dvh] tw-min-h-0 tw-flex-[3_1_0%] tw-border-b tw-border-solid tw-border-white/5"
           : "md:tw-flex md:tw-h-full md:tw-w-full md:tw-items-center md:tw-justify-center md:tw-border-0"
       )}
     >

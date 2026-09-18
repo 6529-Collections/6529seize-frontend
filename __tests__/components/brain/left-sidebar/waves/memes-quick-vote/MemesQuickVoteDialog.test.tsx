@@ -9,6 +9,12 @@ import {
 } from "@testing-library/react";
 import React from "react";
 
+let mockIsMobile = false;
+
+jest.mock("@/hooks/useMediaQuery", () => ({
+  useMediaQuery: () => mockIsMobile,
+}));
+
 jest.mock("@/components/waves/drops/WaveDropAuthorPfp", () => ({
   __esModule: true,
   default: () => <div data-testid="author-pfp" />,
@@ -165,6 +171,7 @@ describe("MemesQuickVoteDialog", () => {
   });
 
   beforeEach(() => {
+    mockIsMobile = false;
     jest.clearAllMocks();
     jest.useFakeTimers();
   });
@@ -366,6 +373,22 @@ describe("MemesQuickVoteDialog", () => {
         'link[data-testid="quick-vote-next-image-preload"]'
       )
     ).toHaveAttribute("href", "https://example.com/drop.png");
+  });
+
+  it("allows both mobile preview regions to shrink on short screens", () => {
+    mockIsMobile = true;
+    render(<MemesQuickVoteDialog {...createDialogProps()} />);
+
+    const mobileContext = screen.getByTestId(
+      "quick-vote-preview-mobile-context"
+    );
+    const mediaRegion = mobileContext.firstElementChild;
+    const detailsRegion = mobileContext.lastElementChild;
+
+    expect(mediaRegion).toHaveClass("tw-min-h-0");
+    expect(mediaRegion).not.toHaveClass("tw-min-h-24");
+    expect(detailsRegion).toHaveClass("tw-min-h-0");
+    expect(detailsRegion).not.toHaveClass("tw-min-h-[12.5rem]");
   });
 
   it("warms video renditions without creating a hidden video player", () => {

@@ -28,7 +28,9 @@ const VIDEO_SOURCE_PROTOCOLS = new Set(["blob:", "http:", "https:"]);
 
 function getSafeVideoSource(source: string): string | null {
   try {
-    const parsed = new URL(source, globalThis.window.location.origin);
+    const baseUrl =
+      typeof document === "undefined" ? undefined : document.baseURI;
+    const parsed = new URL(source, baseUrl);
     return VIDEO_SOURCE_PROTOCOLS.has(parsed.protocol) ? parsed.href : null;
   } catch {
     return null;
@@ -65,6 +67,7 @@ export function useHlsPlayer({
   const manifestRetryCountRef = useRef(0);
   const networkRecoveryCountRef = useRef(0);
   const setupVersionRef = useRef(0);
+  const appliedRetryVersionRef = useRef(0);
   const isCleaningUpRef = useRef(false);
   const isFirstMountRef = useRef(true);
   const previousSrcRef = useRef<string>("");
@@ -338,10 +341,12 @@ export function useHlsPlayer({
     const isInitialMount = isFirstMountRef.current;
     const changedSource =
       previousSrcRef.current !== src && previousSrcRef.current !== "";
+    const hasPendingRetry = appliedRetryVersionRef.current !== retryVersion;
 
     // Update for next render
     isFirstMountRef.current = false;
     previousSrcRef.current = src;
+    appliedRetryVersionRef.current = retryVersion;
 
     // If the source changed after mount, do a quick reset
     if (changedSource) {
@@ -358,7 +363,7 @@ export function useHlsPlayer({
     if (isHls) {
       void initHls(
         videoEl,
-        changedSource || retryVersion > 0,
+        changedSource || hasPendingRetry,
         setupVersion,
         nativeErrorHandler
       );
