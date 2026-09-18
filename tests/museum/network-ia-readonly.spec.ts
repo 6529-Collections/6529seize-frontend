@@ -9,6 +9,7 @@ import {
   test,
   waitForRouteReady,
 } from "../testHelpers";
+import { installLocalMuseumCountryCheck } from "../support/localMuseumCountryCheck";
 import { gotoDocumentWithTransientRetry } from "../support/routeReadiness";
 import { expectMuseumPath } from "../support/museumNavigation";
 import {
@@ -179,7 +180,8 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
   );
   test.setTimeout(180_000);
 
-  test.beforeEach(async ({ page }, testInfo) => {
+  test.beforeEach(async ({ page, baseURL }, testInfo) => {
+    await installLocalMuseumCountryCheck(page, baseURL);
     if (testInfo.project.name === MOBILE_PROJECT) {
       await page.setViewportSize(MOBILE_VIEWPORT);
       expect(page.viewportSize()).toEqual(MOBILE_VIEWPORT);
