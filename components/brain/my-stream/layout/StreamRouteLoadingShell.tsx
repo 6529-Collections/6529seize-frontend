@@ -22,7 +22,7 @@ const SkeletonBlock = ({
 }) => (
   <div
     aria-hidden="true"
-    className={`tw-animate-pulse tw-rounded-md tw-bg-iron-800/80 ${className}`}
+    className={`tw-rounded-md tw-bg-iron-800/80 motion-safe:tw-animate-pulse ${className}`}
     style={style}
   />
 );
@@ -41,11 +41,13 @@ export default function StreamRouteLoadingShell({
       role="status"
       aria-live="polite"
       aria-label={ariaLabel}
-      data-testid="stream-route-loading-shell">
+      data-testid="stream-route-loading-shell"
+    >
       <span className="tw-sr-only">{ariaLabel}</span>
       <div
         className="tw-flex tw-overflow-hidden"
-        style={routeLoadingMinHeightStyle}>
+        style={routeLoadingMinHeightStyle}
+      >
         <aside className="tw-hidden tw-w-80 tw-shrink-0 tw-border-r tw-border-iron-900 tw-bg-iron-950 md:tw-flex md:tw-flex-col">
           <div className="tw-border-b tw-border-iron-900 tw-px-4 tw-py-4">
             <SkeletonBlock className="tw-h-5" style={{ width: primaryWidth }} />
@@ -58,7 +60,8 @@ export default function StreamRouteLoadingShell({
             {sidebarRows.map((width, index) => (
               <div
                 key={width}
-                className="tw-flex tw-items-center tw-gap-3 tw-rounded-md tw-bg-iron-900/55 tw-p-3">
+                className="tw-flex tw-items-center tw-gap-3 tw-rounded-md tw-bg-iron-900/55 tw-p-3"
+              >
                 <SkeletonBlock className="tw-size-10 tw-shrink-0 tw-rounded-full" />
                 <div className="tw-min-w-0 tw-flex-1">
                   <SkeletonBlock
@@ -80,7 +83,10 @@ export default function StreamRouteLoadingShell({
             <SkeletonBlock className="tw-size-9 tw-shrink-0 tw-rounded-full md:tw-hidden" />
             <div className="tw-min-w-0 tw-flex-1">
               <SkeletonBlock className="tw-h-5" style={{ width: "48%" }} />
-              <SkeletonBlock className="tw-mt-3 tw-h-3" style={{ width: "28%" }} />
+              <SkeletonBlock
+                className="tw-mt-3 tw-h-3"
+                style={{ width: "28%" }}
+              />
             </div>
           </div>
 
@@ -88,7 +94,8 @@ export default function StreamRouteLoadingShell({
             {contentRows.map((width, index) => (
               <div
                 key={width}
-                className="tw-flex tw-gap-3 tw-rounded-md tw-bg-iron-900/45 tw-p-4">
+                className="tw-flex tw-gap-3 tw-rounded-md tw-bg-iron-900/45 tw-p-4"
+              >
                 <SkeletonBlock className="tw-size-9 tw-shrink-0 tw-rounded-full" />
                 <div className="tw-min-w-0 tw-flex-1">
                   <SkeletonBlock

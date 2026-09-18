@@ -224,6 +224,7 @@ function createConnectContext(
     seizeConnectOpen: false,
     isConnected: true,
     canSignActiveWallet: true,
+    isWalletConnectionPending: false,
     hasActiveWalletAddress: Boolean(address),
     hasValidWalletAuth: true,
     isSigningOutAll: false,

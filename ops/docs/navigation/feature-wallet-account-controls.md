@@ -252,6 +252,19 @@ Cancel or Escape before signing returns to browsing. If signing is rejected,
 reconnect and try again. Once signed in, existing profile and posting permissions
 still apply; a wallet without a profile is offered profile setup.
 
+## Protected Page Loading
+
+Protected screens show a loading placeholder while wallet identity or the required
+profile is being restored. The connect-wallet, profile-setup, and permission
+messages appear only after their checks settle. This applies to Messages, Create
+Wave, artwork documentation, WatchTower, Orders, EMMA, and the profile CMS builder.
+Drop Forge also waits while a connection is in progress.
+
+Delegation, NextGen Manager, EMMA sign-in, and other signing or minting controls
+wait for the live wallet connection to restore. A saved profile session alone does
+not supply a signer. Public page content, Search, and Share remain available while
+account-dependent controls load. No additional account cache is used.
+
 ## Failure and Recovery
 
 - If wallet connect is canceled, stay on the same surface and retry `Connect`.
