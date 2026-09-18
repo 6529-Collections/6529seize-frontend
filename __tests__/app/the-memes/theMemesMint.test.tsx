@@ -91,7 +91,11 @@ describe("TheMemesMintPage", () => {
       siteName: "6529.io",
       title: "Mint | The Memes",
       description: "Collections | test.6529.io",
+      url: "https://test.6529.io/the-memes/mint",
     });
+    expect(metadata.alternates?.canonical?.toString()).toBe(
+      "https://test.6529.io/the-memes/mint"
+    );
     expect(image).toMatchObject({
       alt: "The Memes mint social card",
       height: 630,
