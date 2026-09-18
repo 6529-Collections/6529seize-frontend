@@ -32,6 +32,7 @@ function AnimationReplaceControls({
   replaceMode,
   animationActionLabel,
   canRemoveAnimation,
+  onChooseReplacement,
   onChooseUpload,
   onSwitchToLink,
   onCancel,
@@ -40,6 +41,7 @@ function AnimationReplaceControls({
   replaceMode: AnimationReplaceMode;
   animationActionLabel: string;
   canRemoveAnimation: boolean;
+  onChooseReplacement: () => void;
   onChooseUpload: () => void;
   onSwitchToLink: () => void;
   onCancel: () => void;
@@ -48,7 +50,11 @@ function AnimationReplaceControls({
   if (replaceMode === null) {
     return (
       <>
-        <button type="button" onClick={onChooseUpload} className={BTN_PRIMARY}>
+        <button
+          type="button"
+          onClick={onChooseReplacement}
+          className={BTN_PRIMARY}
+        >
           {animationActionLabel}
         </button>
         {canRemoveAnimation && (
@@ -396,7 +402,8 @@ export default function AnimationSection({
               replaceMode={replaceMode}
               animationActionLabel={animationActionLabel}
               canRemoveAnimation={pendingAnimation !== null}
-              onChooseUpload={() => setReplaceMode("choose")}
+              onChooseReplacement={() => setReplaceMode("choose")}
+              onChooseUpload={() => animationInputRef.current?.click()}
               onSwitchToLink={() => setReplaceMode("link")}
               onCancel={() => setReplaceMode(null)}
               onRemoveAnimation={handleRemoveAnimation}
