@@ -1,5 +1,7 @@
 "use client";
 
+import { isWalletConnectionResolving } from "@/components/auth/authResolution";
+import AuthLoadingPlaceholder from "@/components/auth/AuthLoadingPlaceholder";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import Button from "@/components/utils/button/Button";
 import { DELEGATION_CONTRACT } from "@/constants/constants";
@@ -119,6 +121,16 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
     useDelegationToast();
 
   function printContent() {
+    if (
+      [
+        DelegationCenterSection.REGISTER_DELEGATION,
+        DelegationCenterSection.REGISTER_SUB_DELEGATION,
+        DelegationCenterSection.REGISTER_CONSOLIDATION,
+        DelegationCenterSection.ASSIGN_PRIMARY_ADDRESS,
+      ].includes(props.section) &&
+      isWalletConnectionResolving(accountResolution)
+    )
+      return <AuthLoadingPlaceholder />;
     switch (props.section) {
       case DelegationCenterSection.CENTER:
         return (

@@ -35,3 +35,54 @@ describe("DistributionPlanToolConnect", () => {
     expect(screen.getByTestId("connected")).toBeInTheDocument();
   });
 });
+
+it.each(["initializing", "connecting"])(
+  "keeps EMMA neutral during %s and resolves directly to the wallet",
+  (connectionState) => {
+    (useSeizeConnectContext as jest.Mock).mockReturnValue({ connectionState });
+    const { rerender } = render(<DistributionPlanToolConnect />);
+    expect(screen.getByRole("status")).toBeInTheDocument();
+    expect(screen.queryByTestId("not-connected")).not.toBeInTheDocument();
+    (useSeizeConnectContext as jest.Mock).mockReturnValue({
+      connectionState: "connected",
+      address: "0x1",
+    });
+    jest.spyOn(helpers, "isEthereumAddress").mockReturnValue(true);
+    rerender(<DistributionPlanToolConnect />);
+    expect(screen.getByTestId("connected")).toBeInTheDocument();
+    expect(screen.queryByTestId("not-connected")).not.toBeInTheDocument();
+  }
+);
+
+it.each([
+  { restored: true, expectedView: "connected" },
+  { restored: false, expectedView: "not-connected" },
+])(
+  "keeps EMMA signing hidden until wallet reconnection settles ($expectedView)",
+  ({ restored, expectedView }) => {
+    const address = "0x1111111111111111111111111111111111111111";
+    jest
+      .spyOn(helpers, "isEthereumAddress")
+      .mockImplementation((value) => value === address);
+    (useSeizeConnectContext as jest.Mock).mockReturnValue({
+      address,
+      connectionState: "connected",
+      isConnected: false,
+      isWalletConnectionPending: true,
+    });
+    const { rerender } = render(<DistributionPlanToolConnect />);
+    expect(screen.getByRole("status")).toBeInTheDocument();
+    expect(screen.queryByTestId("connected")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("not-connected")).not.toBeInTheDocument();
+
+    (useSeizeConnectContext as jest.Mock).mockReturnValue({
+      address: restored ? address : undefined,
+      connectionState: restored ? "connected" : "disconnected",
+      isConnected: restored,
+      isWalletConnectionPending: false,
+    });
+    rerender(<DistributionPlanToolConnect />);
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    expect(screen.getByTestId(expectedView)).toBeInTheDocument();
+  }
+);

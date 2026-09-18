@@ -1,5 +1,7 @@
 "use client";
 
+import { isAuthResolving } from "@/components/auth/authResolution";
+import AuthLoadingPlaceholder from "@/components/auth/AuthLoadingPlaceholder";
 import React, {
   useRef,
   useEffect,
@@ -27,8 +29,8 @@ interface DirectMessagesListProps {
 const DirectMessagesList: React.FC<DirectMessagesListProps> = ({
   scrollContainerRef,
 }) => {
-  const { hasValidWalletAuth } = useSeizeConnectContext();
-  const { connectedProfile } = useContext(AuthContext);
+  const { hasValidWalletAuth, connectionState } = useSeizeConnectContext();
+  const { connectedProfile, fetchingProfile } = useContext(AuthContext);
   const { isApp } = useDeviceInfo();
 
   const listRef = useRef<UnifiedWavesListWavesHandle>(null);
@@ -85,6 +87,9 @@ const DirectMessagesList: React.FC<DirectMessagesListProps> = ({
     () => list.map((w) => ({ ...w, isPinned: false })),
     [list]
   );
+
+  if (isAuthResolving(connectionState, fetchingProfile))
+    return <AuthLoadingPlaceholder />;
 
   if (shouldShowPlaceholder) {
     if (!hasValidWalletAuth) {

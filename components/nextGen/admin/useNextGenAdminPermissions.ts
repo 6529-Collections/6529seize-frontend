@@ -95,7 +95,33 @@ export function useNextGenAdminPermissions(address: string) {
 
   const isArtist = isCollectionArtist(address, collectionArtists);
 
+  const permissionsLoading = [
+    collectionIndex,
+    globalAdmin,
+    createCollectionFunctionAdmin,
+    airdropTokensFunctionAdmin,
+    setDataFunctionAdmin,
+    setCostsFunctionAdmin,
+    setPhasesFunctionAdmin,
+    updateInfoFunctionAdmin,
+    changeMetadataViewFunctionAdmin,
+    setFinalSupplyFunctionAdmin,
+    initializeBurnFunctionAdmin,
+    updateImagesAttributesFunctionAdmin,
+    addRandomizerFunctionAdmin,
+    setSplitsFunctionAdmin,
+    proposePrimaryAddressesAndPercentagesFunctionAdmin,
+    proposeSecondaryAddressesAndPercentagesFunctionAdmin,
+    acceptAddressesAndPercentagesFunctionAdmin,
+    payArtistFunctionAdmin,
+    mintAndAuctionFunctionAdmin,
+    initializeExternalBurnSwapFunctionAdmin,
+    collectionAdmin,
+    collectionArtists,
+  ].some((query) => query.isFetching && query.data === undefined);
+
   return {
+    permissionsLoading,
     globalAdmin,
     createCollectionFunctionAdmin,
     airdropTokensFunctionAdmin,

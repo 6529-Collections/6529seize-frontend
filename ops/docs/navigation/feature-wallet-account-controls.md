@@ -16,7 +16,7 @@ action.
 
 ## Entry Points
 
-- Web disconnected: select `Connect` in the sidebar account area.
+- Web disconnected: select `Connect Wallet` in the sidebar account area.
 - Web connected: single-activate the user row to open the account dropdown;
   with multiple connected profiles, double-click within 400 ms to switch to
   the next profile.
@@ -31,8 +31,20 @@ action.
 
 ### Web Sidebar Account Area
 
+- During account restoration, a fixed-size shimmer appears in the account slot.
+  It becomes the connect icon once signed out is confirmed, or the selected
+  profile's avatar. Avatar loading does not move surrounding controls. The
+  default user symbol remains 24px inside a 40px rounded frame, matching the PFP
+  footprint. Signed-out frames use a neutral border; connected frames keep their
+  connection-state colors.
+- A missing, failed, or stalled avatar uses the default user icon. If the
+  profile request fails, select `Profile unavailable. Retry` to try again.
+  An empty successful profile result offers `Create profile` instead. Retry
+  progress and failures are announced to screen readers, and the collapsed
+  account control describes the active account.
+
 - Disconnected:
-  - expanded sidebar button: `Connect`
+  - expanded sidebar button: `Connect Wallet`
   - collapsed sidebar icon button tooltip: `Connect Wallet`
 - Connected:
   - with one connected profile, single activate opens the account dropdown
@@ -46,6 +58,13 @@ action.
     unread notifications.
 
 ### Web Account Dropdown
+
+- Artwork documentation availability is checked while the account UI is present,
+  independently of opening the dropdown. Closing and reopening does not restart
+  the check. `My artwork documentation` appears when available for the active
+  profile. If the first result arrives while the dropdown is open, the item
+  appears immediately. When the check finishes before opening, the item is
+  present from the start. Revoked access removes the item immediately.
 
 - The dropdown enters with a short opacity and vertical-position reveal;
   reduced-motion preferences show it immediately without animation.
@@ -228,6 +247,19 @@ The sign-in message does not create a transaction, cost gas, or approve tokens.
 Cancel or Escape before signing returns to browsing. If signing is rejected,
 reconnect and try again. Once signed in, existing profile and posting permissions
 still apply; a wallet without a profile is offered profile setup.
+
+## Protected Page Loading
+
+Protected screens show a loading placeholder while wallet identity or the required
+profile is being restored. The connect-wallet, profile-setup, and permission
+messages appear only after their checks settle. This applies to Messages, Create
+Wave, artwork documentation, WatchTower, Orders, EMMA, and the profile CMS builder.
+Drop Forge also waits while a connection is in progress.
+
+Delegation, NextGen Manager, EMMA sign-in, and other signing or minting controls
+wait for the live wallet connection to restore. A saved profile session alone does
+not supply a signer. Public page content, Search, and Share remain available while
+account-dependent controls load. No additional account cache is used.
 
 ## Failure and Recovery
 

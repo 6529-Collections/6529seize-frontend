@@ -59,7 +59,7 @@ function WebSidebarNavItem({
 
   const content = (
     <div
-      className={`tw-flex tw-h-full tw-w-full tw-items-center ${
+      className={`tw-flex tw-h-full tw-w-full tw-items-center motion-safe:tw-animate-sidebar-control-in ${
         collapsed ? "" : "tw-gap-x-2"
       }`}
     >
