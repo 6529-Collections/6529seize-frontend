@@ -6773,6 +6773,7 @@
       "facts": [
         "Wave decision timeline behavior is documented under leaderboard features.",
         "It explains decision header states, expand/review behavior, and scrolling/loading.",
+        "Single-decision leaderboard waves show Next winners announced in with a live countdown and local date beside dropping and voting times when a future announcement is scheduled. It excludes paused decisions and disappears when no future announcement remains; perpetual rankings without scheduled winners do not show it.",
         "Use it when users ask when or how a wave decision is shown."
       ],
       "canonical_path": "/waves",
