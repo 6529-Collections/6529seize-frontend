@@ -52,6 +52,12 @@ into a horizontal decision strip.
   (refresh, tab switch, or wave switch).
 - Single-decision waves do not render this timeline:
   - non-curation waves show compact dropping and voting phase cards
+  - when a future winner announcement is scheduled, `Next winners announced in`
+    shows a live countdown and local calendar date beside those phase cards
+  - the announcement countdown follows the decision schedule, excluding pauses,
+    and disappears when no future announcement remains; perpetual rankings with
+    no scheduled winners do not show it
+  - the timing cards wrap onto additional rows on narrow screens
   - curation waves show no timing card in this slot
 
 ## Related Pages
