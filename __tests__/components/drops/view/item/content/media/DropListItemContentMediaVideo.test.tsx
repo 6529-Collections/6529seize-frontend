@@ -212,6 +212,46 @@ describe("DropListItemContentMediaVideo", () => {
     expect(playSpy).not.toHaveBeenCalled();
   });
 
+  it("starts an opted-in app video when it enters view after setup", () => {
+    mockIsApp = true;
+    mockPrefersReducedMotion(false);
+    const ref = {
+      current: document.createElement("div"),
+    } as React.RefObject<HTMLDivElement>;
+    let setInView: React.Dispatch<React.SetStateAction<boolean>> | undefined;
+    mockUseInView.mockImplementation(() => {
+      const [inView, setCurrentInView] = React.useState(false);
+      setInView = setCurrentInView;
+      return [ref, inView];
+    });
+    mockUseOptimizedVideo.mockReturnValue({
+      playableUrl: "foo.mp4",
+      isHls: false,
+    });
+
+    const playSpy = jest.fn().mockResolvedValue(undefined);
+    Object.defineProperty(HTMLVideoElement.prototype, "play", {
+      configurable: true,
+      writable: true,
+      value: playSpy,
+    });
+
+    render(
+      <DropListItemContentMediaVideo
+        src="foo.mp4"
+        allowAutoPlayInApp
+        loadStrategy="eager"
+      />
+    );
+    expect(playSpy).not.toHaveBeenCalled();
+
+    act(() => {
+      setInView?.(true);
+    });
+
+    expect(playSpy).toHaveBeenCalled();
+  });
+
   it("does not pause while its video is in wrapper fullscreen", () => {
     const ref = {
       current: document.createElement("div"),
