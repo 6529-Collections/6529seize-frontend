@@ -13,6 +13,12 @@ Public pages are assembled from one verified edition of the
 repository. Each page identifies its source release and offers a route for
 proposing corrections or additions.
 
+On a normal visit, Museum content opens from a complete verified edition that
+is already available with the site. The site checks for a newer edition in the
+background. A stale-but-valid edition is identified as stale; an edition beyond
+the last-valid limit is not shown, and the route reports publication
+unavailability while it attempts to refresh.
+
 The institutional-practice study, _A field of practice_, examines how twenty-seven
 museums and digital-art organizations publish collections, conserve technical
 works, build research infrastructure, and acknowledge the limits of their
