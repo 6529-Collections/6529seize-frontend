@@ -17,6 +17,18 @@ export class ApiRegisterPushNotificationTokenRequest {
     'device_id': string;
     'token': string;
     /**
+    * Private installation credential stored in native secure storage.
+    */
+    'installation_secret'?: string;
+    /**
+    * Copy this authenticated profile\'s existing preferences to a replacement installation, without moving registrations or overwriting destination preferences.
+    */
+    'previous_device_id'?: string;
+    /**
+    * Current installation revision; stale registration requests are rejected.
+    */
+    'installation_revision'?: number;
+    /**
     * Optional profile_id
     */
     'profile_id'?: string;
@@ -41,6 +53,24 @@ export class ApiRegisterPushNotificationTokenRequest {
             "baseName": "token",
             "type": "string",
             "format": ""
+        },
+        {
+            "name": "installation_secret",
+            "baseName": "installation_secret",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "previous_device_id",
+            "baseName": "previous_device_id",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "installation_revision",
+            "baseName": "installation_revision",
+            "type": "number",
+            "format": "int64"
         },
         {
             "name": "profile_id",

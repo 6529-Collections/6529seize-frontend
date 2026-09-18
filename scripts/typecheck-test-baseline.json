@@ -343,7 +343,6 @@
     "__tests__/components/nft-image/utils/media-type.test.ts": 1,
     "__tests__/components/NftNavigation.test.tsx": 1,
     "__tests__/components/notifications/NotificationsContext.test.tsx": 5,
-    "__tests__/components/notifications/stable-device-id.test.ts": 3,
     "__tests__/components/NumberTrait.test.tsx": 4,
     "__tests__/components/pagination/Pagination.test.tsx": 1,
     "__tests__/components/profile-activity/filter/ProfileActivityLogsFilterList.test.tsx": 1,

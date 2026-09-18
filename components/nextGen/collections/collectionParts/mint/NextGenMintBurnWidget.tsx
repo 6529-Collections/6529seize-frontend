@@ -1,5 +1,7 @@
 "use client";
 
+import { isWalletConnectionResolving } from "@/components/auth/authResolution";
+import AuthLoadingPlaceholder from "@/components/auth/AuthLoadingPlaceholder";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import NextGenContractWriteStatus from "@/components/nextGen/NextGenContractWriteStatus";
 import Button from "@/components/utils/button/Button";
@@ -264,6 +266,9 @@ export default function NextGenMintBurnWidget(props: Readonly<Props>) {
     }
     return text;
   }
+
+  if (isWalletConnectionResolving(account))
+    return <AuthLoadingPlaceholder compact />;
 
   return (
     <div>

@@ -153,3 +153,26 @@ describe("MessagesLayout", () => {
     expect(screen.queryByTestId("messages-desktop")).not.toBeInTheDocument();
   });
 });
+
+it.each(["loading", "measuring"])(
+  "shows the messages skeleton during %s, never a login prompt",
+  (contentState) => {
+    mockUseAuthenticatedContent.mockReturnValue({
+      contentState,
+      connectedProfile: null,
+    });
+    mockUseDeviceInfo.mockReturnValue({ isApp: false });
+    mockUseCreateModalState.mockReturnValue({
+      close: jest.fn(),
+      isDirectMessageModalOpen: false,
+    });
+    render(
+      <MessagesLayout>
+        <div>Private messages</div>
+      </MessagesLayout>
+    );
+    expect(screen.getByRole("status")).toBeInTheDocument();
+    expect(screen.queryByTestId("connect-wallet")).not.toBeInTheDocument();
+    expect(screen.queryByText("Private messages")).not.toBeInTheDocument();
+  }
+);

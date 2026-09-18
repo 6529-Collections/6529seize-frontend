@@ -54,9 +54,11 @@ jest.mock("next/navigation", () => ({
   useRouter: () => ({ push: jest.fn() }),
   useSearchParams: () => new URLSearchParams(),
 }));
+let mockConnectionState = "connected";
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: () => ({
     address: "0x0000000000000000000000000000000000000001",
+    connectionState: mockConnectionState,
     isConnected: true,
     isSafeWallet: false,
   }),
@@ -669,3 +671,18 @@ it("does not accept late save responses after the owner scope changes", async ()
   );
   expect(screen.queryByText("Draft saved.")).toBeNull();
 });
+
+it.each(["initializing", "connecting"])(
+  "defers the builder owner decision during %s",
+  (state) => {
+    mockConnectionState = state;
+    owner(false);
+    const { unmount } = showBuilder();
+    expect(screen.getByRole("status")).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Save draft" })
+    ).not.toBeInTheDocument();
+    unmount();
+    mockConnectionState = "connected";
+  }
+);

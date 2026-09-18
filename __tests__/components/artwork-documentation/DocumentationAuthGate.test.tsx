@@ -4,6 +4,7 @@ import DocumentationAuthGate from "@/components/artwork-documentation/Documentat
 
 let mockProfile: { id: string } | null = { id: "artist-a" };
 let mockFetching = false;
+let mockConnectionState = "connected";
 let mockAddress: string | undefined = "0xabc";
 let mockWallet: string | null = "0xabc";
 let mockProxy: { id: string } | null = null;
@@ -22,7 +23,10 @@ jest.mock("@/components/auth/Auth", () => ({
   }),
 }));
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
-  useSeizeConnectContext: () => ({ address: mockAddress }),
+  useSeizeConnectContext: () => ({
+    address: mockAddress,
+    connectionState: mockConnectionState,
+  }),
 }));
 jest.mock("@/services/auth/auth.utils", () => ({
   getWalletAddress: () => mockWallet,
@@ -51,6 +55,7 @@ describe("documentation authenticated actor boundary", () => {
   beforeEach(() => {
     mockProfile = { id: "artist-a" };
     mockFetching = false;
+    mockConnectionState = "connected";
     mockAddress = "0xabc";
     mockWallet = "0xabc";
     mockProxy = null;
@@ -108,3 +113,24 @@ describe("documentation authenticated actor boundary", () => {
     expect(screen.getByLabelText("Private draft")).toHaveValue("");
   });
 });
+
+it.each(["initializing", "connecting"])(
+  "waits for %s before deciding documentation access",
+  (state) => {
+    mockConnectionState = state;
+    mockProfile = null;
+    mockFetching = false;
+    const { rerender } = render(gate());
+    expect(screen.getByText("Loading your documentation…")).toBeInTheDocument();
+    expect(screen.queryByRole("button")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Private draft")).not.toBeInTheDocument();
+    mockConnectionState = "connected";
+    mockFetching = true;
+    rerender(gate());
+    expect(screen.queryByRole("button")).not.toBeInTheDocument();
+    mockFetching = false;
+    mockProfile = { id: "artist-a" };
+    rerender(gate());
+    expect(screen.getByLabelText("Private draft")).toBeInTheDocument();
+  }
+);

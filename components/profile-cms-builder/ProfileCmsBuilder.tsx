@@ -1,5 +1,7 @@
 "use client";
 
+import AuthLoadingPlaceholder from "@/components/auth/AuthLoadingPlaceholder";
+import { isAuthResolving } from "@/components/auth/authResolution";
 import { useMemo, useRef, useState, type ComponentProps } from "react";
 
 import { useAuth } from "@/components/auth/Auth";
@@ -53,8 +55,17 @@ import { getProfileCmsPackageById } from "@/lib/profile-cms/builder/api";
 export default function ProfileCmsBuilder(
   props: ComponentProps<typeof ProfileCmsBuilderWorkspace>
 ) {
-  const { connectedProfile, activeProfileProxy, isAuthenticated } = useAuth();
-  const { address } = useSeizeConnectContext();
+  const {
+    connectedProfile,
+    activeProfileProxy,
+    isAuthenticated,
+    fetchingProfile,
+  } = useAuth();
+  const { address, connectionState } = useSeizeConnectContext();
+  if (
+    isAuthResolving(connectionState, fetchingProfile && !connectedProfile?.id)
+  )
+    return <AuthLoadingPlaceholder />;
   return (
     <ProfileCmsBuilderWorkspace
       key={

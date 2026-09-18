@@ -1,5 +1,6 @@
 "use client";
 
+import { isAuthResolving } from "@/components/auth/authResolution";
 import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
@@ -47,12 +48,17 @@ export default function CollectOrdersClient(props: ReceiptLinkProps) {
 }
 function ProfileOrders({ initialOperationId, initialBatch }: ReceiptLinkProps) {
   const locale = useBrowserLocale();
-  const { connectedProfile, isAuthenticated, activeProfileProxy } = useAuth();
+  const {
+    connectedProfile,
+    isAuthenticated,
+    activeProfileProxy,
+    fetchingProfile,
+  } = useAuth();
   const canReadOrders =
     isAuthenticated === true &&
     Boolean(connectedProfile?.id) &&
     !activeProfileProxy;
-  const { seizeConnect } = useSeizeConnectContext();
+  const { seizeConnect, connectionState } = useSeizeConnectContext();
   const [selection, setSelected] = useState<{
     operation: ApiMarketOperationResult;
     cancel: boolean;
@@ -72,11 +78,7 @@ function ProfileOrders({ initialOperationId, initialBatch }: ReceiptLinkProps) {
       if (!profileId || !initialOperationId)
         throw new Error("MARKET_PROFILE_CHANGED");
       return initialBatch
-        ? fetchRecoverableMarketBatch(
-            initialOperationId,
-            profileId,
-            signal
-          )
+        ? fetchRecoverableMarketBatch(initialOperationId, profileId, signal)
         : fetchRecoverableMarketOperation(
             initialOperationId,
             profileId,
@@ -182,6 +184,7 @@ function ProfileOrders({ initialOperationId, initialBatch }: ReceiptLinkProps) {
         )}
         loading={isAuthenticated === true && operations.isPending}
         authenticated={canReadOrders}
+        resolvingAuth={isAuthResolving(connectionState, fetchingProfile)}
         error={
           operations.isError ? t(locale, "collect.error.orders") : undefined
         }

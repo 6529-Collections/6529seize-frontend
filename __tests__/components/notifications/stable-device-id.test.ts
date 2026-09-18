@@ -1,130 +1,72 @@
-import * as Sentry from "@sentry/nextjs";
-import { getStableDeviceId } from "@/components/notifications/stable-device-id";
+import { Device } from "@capacitor/device";
 import { SecureStoragePlugin } from "capacitor-secure-storage-plugin";
-import { v4 as uuidv4 } from "uuid";
+import {
+  getPushDeviceIdentity,
+  getStableDeviceId,
+} from "@/components/notifications/stable-device-id";
 
-jest.mock("@sentry/nextjs", () => ({
-  addBreadcrumb: jest.fn(),
-}));
-
-jest.mock("uuid", () => ({
-  v4: jest.fn(),
-}));
-
+const mockStore = new Map<string, string>();
+jest.mock("@capacitor/device", () => ({ Device: { getId: jest.fn() } }));
 jest.mock("capacitor-secure-storage-plugin", () => ({
   SecureStoragePlugin: {
-    get: jest.fn(),
-    set: jest.fn(),
+    get: jest.fn(async ({ key }: { key: string }) => {
+      const value = mockStore.get(key);
+      if (value === undefined)
+        throw new Error("Item with given key does not exist");
+      return { value };
+    }),
+    set: jest.fn(async ({ key, value }: { key: string; value: string }) => {
+      mockStore.set(key, value);
+    }),
   },
 }));
-
-const mockedSecureStoragePlugin = SecureStoragePlugin as {
-  get: jest.Mock;
-  set: jest.Mock;
-};
-const mockedUuidv4 = uuidv4 as jest.Mock;
-const mockedSentry = Sentry as {
-  addBreadcrumb: jest.Mock;
-};
-
-describe("getStableDeviceId", () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it("returns existing device ID when secure storage has a value", async () => {
-    mockedSecureStoragePlugin.get.mockResolvedValueOnce({
-      value: "existing-id",
-    });
-
-    await expect(getStableDeviceId()).resolves.toBe("existing-id");
-
-    expect(mockedSecureStoragePlugin.get).toHaveBeenCalledWith({
-      key: "stable_device_id",
-    });
-    expect(mockedSecureStoragePlugin.set).not.toHaveBeenCalled();
-    expect(mockedSentry.addBreadcrumb).not.toHaveBeenCalled();
-  });
-
-  it("recovers when key does not exist by generating and persisting an ID", async () => {
-    mockedSecureStoragePlugin.get.mockRejectedValueOnce(
-      new Error("Item with given key does not exist")
-    );
-    mockedUuidv4.mockReturnValueOnce("generated-id");
-    mockedSecureStoragePlugin.set.mockResolvedValueOnce({ value: true });
-
-    await expect(getStableDeviceId()).resolves.toBe("generated-id");
-
-    expect(mockedSecureStoragePlugin.set).toHaveBeenCalledWith({
-      key: "stable_device_id",
-      value: "generated-id",
-    });
-    expect(mockedSentry.addBreadcrumb).toHaveBeenCalledWith(
-      expect.objectContaining({
-        category: "notifications",
-        level: "warning",
-        message: "Recovered stable_device_id secure-storage read failure",
-      })
-    );
-  });
-
-  it("recovers when decrypt-related keystore errors occur", async () => {
-    mockedSecureStoragePlugin.get.mockRejectedValueOnce(
-      new Error("javax.crypto.IllegalBlockSizeException KeyStoreException")
-    );
-    mockedUuidv4.mockReturnValueOnce("regenerated-id");
-    mockedSecureStoragePlugin.set.mockResolvedValueOnce({ value: true });
-
-    await expect(getStableDeviceId()).resolves.toBe("regenerated-id");
-
-    expect(mockedSecureStoragePlugin.set).toHaveBeenCalledWith({
-      key: "stable_device_id",
-      value: "regenerated-id",
-    });
-    expect(mockedSentry.addBreadcrumb).toHaveBeenCalledTimes(1);
-  });
-
-  it("rejects when persisting a regenerated ID fails", async () => {
-    mockedSecureStoragePlugin.get.mockRejectedValueOnce(
-      new Error("Item with given key does not exist")
-    );
-    mockedUuidv4.mockReturnValueOnce("generated-id");
-    mockedSecureStoragePlugin.set.mockRejectedValueOnce(
-      new Error("set failed")
-    );
-
-    await expect(getStableDeviceId()).rejects.toThrow("set failed");
-  });
-
-  it("uses single-flight behavior for concurrent calls", async () => {
-    let resolveGet: ((value: { value: string }) => void) | null = null;
-    mockedSecureStoragePlugin.get.mockReturnValueOnce(
-      new Promise((resolve) => {
-        resolveGet = resolve;
-      })
-    );
-
-    const callOne = getStableDeviceId();
-    const callTwo = getStableDeviceId();
-
-    expect(mockedSecureStoragePlugin.get).toHaveBeenCalledTimes(1);
-
-    resolveGet?.({ value: "shared-id" });
-
-    await expect(Promise.all([callOne, callTwo])).resolves.toEqual([
-      "shared-id",
-      "shared-id",
-    ]);
-  });
-
-  it("retries storage read after a failed attempt", async () => {
-    mockedSecureStoragePlugin.get
-      .mockRejectedValueOnce(new Error("unexpected failure"))
-      .mockResolvedValueOnce({ value: "retry-success-id" });
-
-    await expect(getStableDeviceId()).rejects.toThrow("unexpected failure");
-    await expect(getStableDeviceId()).resolves.toBe("retry-success-id");
-
-    expect(mockedSecureStoragePlugin.get).toHaveBeenCalledTimes(2);
-  });
+beforeEach(() => {
+  jest.clearAllMocks();
+  mockStore.clear();
+  jest.mocked(Device.getId).mockResolvedValue({ identifier: "native-phone-A" });
+});
+it("creates a stable identity shared by concurrent callers and later launches", async () => {
+  const [one, two] = await Promise.all([
+    getStableDeviceId(),
+    getStableDeviceId(),
+  ]);
+  expect(one).toBe(two);
+  expect(await getStableDeviceId()).toBe(one);
+  expect(SecureStoragePlugin.set).toHaveBeenCalledTimes(1);
+});
+it("migrates the unbound legacy UUID without destroying the recovery reference", async () => {
+  mockStore.set("stable_device_id", "legacy-phone");
+  const identity = await getPushDeviceIdentity();
+  expect(identity.deviceId).not.toBe("legacy-phone");
+  expect(identity.previousDeviceId).toBe("legacy-phone");
+  expect(mockStore.get("stable_device_id")).toBe("legacy-phone");
+});
+it("gives a restored backup on another phone a distinct delivery identity", async () => {
+  const original = await getPushDeviceIdentity();
+  jest.mocked(Device.getId).mockResolvedValue({ identifier: "native-phone-B" });
+  const replacement = await getPushDeviceIdentity();
+  expect(replacement.deviceId).not.toBe(original.deviceId);
+  expect(replacement.previousDeviceId).toBe(original.deviceId);
+  expect(await getStableDeviceId()).toBe(replacement.deviceId);
+});
+it("preserves storage and fails closed when native identity is unavailable", async () => {
+  jest
+    .mocked(Device.getId)
+    .mockRejectedValueOnce(new Error("native unavailable"));
+  await expect(getStableDeviceId()).rejects.toThrow("native unavailable");
+  expect(SecureStoragePlugin.set).not.toHaveBeenCalled();
+});
+it("does not replace an unreadable credential binding", async () => {
+  jest
+    .mocked(SecureStoragePlugin.get)
+    .mockRejectedValueOnce(new Error("keychain locked"));
+  await expect(getStableDeviceId()).rejects.toThrow("keychain locked");
+  expect(SecureStoragePlugin.set).not.toHaveBeenCalled();
+});
+it("does not use an identity whose persistence failed", async () => {
+  jest
+    .mocked(SecureStoragePlugin.set)
+    .mockRejectedValueOnce(new Error("write failed"));
+  await expect(getStableDeviceId()).rejects.toThrow("write failed");
+  expect(mockStore.size).toBe(0);
 });
