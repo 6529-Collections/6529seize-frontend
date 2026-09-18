@@ -96,12 +96,12 @@ function DropListItemContentMediaVideo({
     if (shouldAutoPlay) {
       // ensure muted autoplay works
       videoEl.muted = true;
-      videoEl.play().catch(() => {});
+      if (!isApp) videoEl.play().catch(() => {});
     } else {
       videoEl.pause();
       videoEl.muted = true;
     }
-  }, [shouldAutoPlay, isLoading, videoRef]);
+  }, [shouldAutoPlay, isApp, isLoading, videoRef]);
 
   // 4) Inline attributes for iOS / legacy WebKit
   useEffect(() => {
