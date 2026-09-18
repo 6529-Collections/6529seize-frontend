@@ -587,6 +587,7 @@ export const DE_DE_MESSAGES = {
   "drop.media.loading": "Bild wird geladen",
   "drop.media.unavailable": "Bild nicht verfuegbar",
   "drop.media.loadFailed": "Bild konnte nicht geladen werden.",
+  "drop.media.videoLoadFailed": "Video konnte nicht geladen werden.",
   "drop.media.retry": RETRY_LABEL,
   "drop.media.openPreview": "Bildvorschau oeffnen",
   "drop.media.openMedia": "Drop-Medium oeffnen",

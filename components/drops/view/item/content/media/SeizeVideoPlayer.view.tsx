@@ -157,7 +157,7 @@ export function SeizeVideoMinimalControls({
               tabIndex={controlsTabIndex}
               className={clsx(
                 controlsHitTestClass,
-                "tw-flex tw-size-16 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-950/65 tw-p-0 tw-text-white tw-shadow-xl tw-shadow-black/30 tw-backdrop-blur-md tw-transition focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-bg-iron-800/90"
+                "tw-flex tw-size-16 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/40 tw-bg-black/80 tw-p-0 tw-text-white tw-shadow-xl tw-shadow-black/50 tw-backdrop-blur-md tw-transition focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-bg-iron-800/90"
               )}
             >
               <PlayIcon className="tw-ml-1 tw-size-8" aria-hidden="true" />
