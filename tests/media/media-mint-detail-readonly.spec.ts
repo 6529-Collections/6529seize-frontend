@@ -243,11 +243,14 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
 // have independent collections, so their existing detail fixtures stay intact.
 test.describe("Staging video artwork sizing @surface @medium @large @readonly", () => {
   // This fixture is unavailable outside staging; skip only those environments.
-  test.skip(
-    ({ baseURL }) =>
-      !baseURL || new URL(baseURL).hostname !== "staging.6529.io",
-    "portrait-video fixture 549 is qualified on staging only"
-  );
+  test.skip(({ baseURL }) => {
+    if (!baseURL) return true;
+    try {
+      return new URL(baseURL).hostname !== "staging.6529.io";
+    } catch {
+      return true;
+    }
+  }, "portrait-video fixture 549 is qualified on staging only");
 
   for (const viewport of [
     { width: 390, height: 844 },
@@ -302,10 +305,49 @@ test.describe("Staging video artwork sizing @surface @medium @large @readonly", 
       expect(
         Math.min(Math.abs(geometry.widthGap), Math.abs(geometry.heightGap))
       ).toBeLessThanOrEqual(2);
-      if (viewport.width < 1024)
-        expect(Math.abs(geometry.widthGap)).toBeLessThanOrEqual(2);
+      expect(Math.abs(geometry.widthGap)).toBeLessThanOrEqual(2);
       for (const inset of geometry.sliderInsets)
         expect(inset).toBeGreaterThanOrEqual(-2);
+
+      // Reproduce the recording's changing details/ownership space without
+      // depending on wallet-specific API timing or modifying remote data.
+      const shifts = await video.evaluate(async (element: HTMLVideoElement) => {
+        const artwork = element.closest<HTMLElement>("[data-video-artwork]")!;
+        const column = artwork.parentElement!;
+        const originalStyle = column.getAttribute("style");
+        const baseline = element.getBoundingClientRect();
+        const offsetTop = baseline.top - artwork.getBoundingClientRect().top;
+        const ownershipPanel = document.createElement("div");
+        ownershipPanel.style.cssText = "height: 180px; flex: none";
+        ownershipPanel.setAttribute("aria-hidden", "true");
+        const measurements: number[] = [];
+        artwork.append(ownershipPanel);
+        try {
+          for (const height of [1600, 2100, 1300]) {
+            column.style.height = `${height}px`;
+            column.style.flex = "none";
+            await new Promise<void>((resolve) => {
+              requestAnimationFrame(() =>
+                requestAnimationFrame(() => resolve())
+              );
+            });
+            const bounds = element.getBoundingClientRect();
+            measurements.push(
+              Math.abs(bounds.width - baseline.width),
+              Math.abs(bounds.height - baseline.height),
+              Math.abs(
+                bounds.top - artwork.getBoundingClientRect().top - offsetTop
+              )
+            );
+          }
+        } finally {
+          ownershipPanel.remove();
+          if (originalStyle === null) column.removeAttribute("style");
+          else column.setAttribute("style", originalStyle);
+        }
+        return measurements;
+      });
+      for (const shift of shifts) expect(shift).toBeLessThanOrEqual(2);
     });
   }
 });

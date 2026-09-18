@@ -159,9 +159,68 @@ it("uses the complete responsive video frame instead of the legacy carousel heig
   expect(animationProps?.artworkLayout).toBe(true);
   expect(container.querySelector("section")).toHaveClass("videoCarousel");
   expect(container.querySelector("section")).not.toHaveClass("memesCarousel");
+  // Loading panels can change the ancestor's height. The video must not grow
+  // into that space or surrender space when the ownership controls appear.
+  expect(container.firstElementChild).toHaveClass("tw-flex-none");
+  expect(container.firstElementChild).not.toHaveClass("tw-h-full");
+  expect(container.querySelector("[data-carousel-slide]")).toHaveClass(
+    "tw-h-auto"
+  );
 });
 
 describe("MemePageArtViewer", () => {
+  it("keeps the still image self-sized when switching away from video", async () => {
+    const user = userEvent.setup();
+    const { container } = render(<MemePageArtViewer nft={baseNft} />);
+    const imageSlide = screen.getByTestId("image-art").parentElement;
+    const videoSlide = screen.getByTestId("animation-art").parentElement;
+
+    expect(imageSlide).toHaveClass("tw-hidden");
+    await user.click(
+      screen.getByRole("button", { name: "Show next artwork media" })
+    );
+
+    expect(imageSlide).toHaveClass("tw-flex", "tw-h-auto", "tw-justify-center");
+    expect(imageSlide).not.toHaveClass("tw-hidden", "tw-h-full");
+    expect(videoSlide).toHaveClass("tw-hidden");
+    expect(getLatestNFTImageProps(false).artworkLayout).toBe(true);
+    expect(container.firstElementChild).toHaveClass(
+      "tw-flex-none",
+      "tw-w-full"
+    );
+    expect(container.querySelector("section")).toHaveClass("tw-w-full");
+
+    await user.click(
+      screen.getByRole("button", { name: "Show previous artwork media" })
+    );
+    expect(videoSlide).toHaveClass("tw-flex", "tw-h-auto");
+    expect(imageSlide).toHaveClass("tw-hidden");
+  });
+
+  it("keeps image sizing when video metadata has no animation URL", () => {
+    const { container } = render(
+      <MemePageArtViewer
+        nft={{
+          ...baseNft,
+          animation: "",
+          compressed_animation: "",
+          metadata: { ...baseNft.metadata, animation_url: "" },
+        }}
+      />
+    );
+
+    expect(screen.getByTestId("image-art")).toBeInTheDocument();
+    expect(screen.queryByTestId("animation-art")).not.toBeInTheDocument();
+    expect(container.firstElementChild).toHaveClass("tw-h-full");
+    expect(container.firstElementChild).not.toHaveClass("tw-flex-none");
+    expect(container.firstElementChild).not.toHaveAttribute(
+      "data-video-artwork"
+    );
+    expect(container.firstElementChild?.firstElementChild).toHaveClass(
+      "tw-flex-1"
+    );
+  });
+
   it("keeps artwork sharing available when the media URLs are missing", () => {
     const nft = {
       ...baseNft,

@@ -20,23 +20,21 @@
   height: min(100cqh, calc(100cqw / var(--video-ratio, 1.777778)));
 }
 
-.artwork {
+.artwork:not(.bounded) {
   width: 100%;
+  height: auto;
+  flex: none;
   aspect-ratio: var(--video-ratio, 1.777778);
 }
 
-@media (min-width: 1024px) {
-  .artwork {
-    container-type: size;
-    height: 100%;
-    aspect-ratio: auto;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
+/* Artwork owns its height; asynchronously loaded neighboring panels must not
+   resize or recenter the video. Only explicit fill/fullscreen frames are bounded. */
+.artwork:not(.bounded) > .surface {
+  height: auto;
+  aspect-ratio: var(--video-ratio, 1.777778);
+}
 
-  .artwork > .surface {
-    width: min(100cqw, calc(100cqh * var(--video-ratio, 1.777778)));
-    height: min(100cqh, calc(100cqw / var(--video-ratio, 1.777778)));
-  }
+.artwork:not(.bounded) > .surface > video {
+  position: absolute;
+  inset: 0;
 }
