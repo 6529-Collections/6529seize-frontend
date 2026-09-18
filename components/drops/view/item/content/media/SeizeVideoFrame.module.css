@@ -20,20 +20,38 @@
   height: min(100cqh, calc(100cqw / var(--video-ratio, 1.777778)));
 }
 
+/* Drop overlays have an explicit height that can be smaller than the screen. */
+@supports (height: 1cqh) {
+  .viewport {
+    container-type: size;
+    --video-container-height: 100cqh;
+  }
+}
+
 .artwork:not(.bounded) {
   --video-viewport-height: 100vh;
   --video-max-height: calc(
     max(
         1px,
-        var(--video-viewport-height) -
+        min(
+            var(--video-viewport-height),
+            var(--video-container-height, var(--video-viewport-height))
+          ) -
           max(
-            var(--stream-route-loading-header-reserve, 0px),
+            var(
+              --video-header-reserve,
+              var(--stream-route-loading-header-reserve, 0px)
+            ),
             env(safe-area-inset-top, 0px)
           ) -
           max(
-            var(--stream-route-loading-bottom-reserve, 0px),
+            var(
+              --video-bottom-reserve,
+              var(--stream-route-loading-bottom-reserve, 0px)
+            ),
             env(safe-area-inset-bottom, 0px)
-          )
+          ) -
+          var(--video-frame-padding, 0px)
       ) *
       0.95
   );
