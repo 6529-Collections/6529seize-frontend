@@ -1,7 +1,13 @@
 import { render, screen } from "@testing-library/react";
+import NowMintingSection from "@/components/home/now-minting/NowMintingSection";
 import HomeNftArtwork from "@/components/home/now-minting/HomeNftArtwork";
 import NFTImage from "@/components/nft-image/NFTImage";
 import type { ApiMemesExtendedData } from "@/generated/models/ApiMemesExtendedData";
+
+jest.mock("@/components/home/now-minting/NowMintingDetails", () => ({
+  __esModule: true,
+  default: () => <div>Details</div>,
+}));
 
 jest.mock("@/hooks/useDeviceInfo", () => ({
   __esModule: true,
@@ -39,3 +45,22 @@ it.each(["MP4", "MOV", "PNG"])(
     });
   }
 );
+
+it("centers Latest Drop artwork in its column without stretching the frame", () => {
+  const nft = {
+    id: 1,
+    image: "poster.png",
+    animation: "video.mp4",
+    metadata: { animation_details: { format: "MP4" } },
+  } as ApiMemesExtendedData;
+  render(<NowMintingSection nft={nft} isFetching={false} />);
+  const artwork = screen.getByTestId("artwork");
+  expect(artwork.closest("[data-home-artwork-column]")).toHaveClass(
+    "tw-flex",
+    "tw-items-center"
+  );
+  expect(artwork.parentElement?.parentElement).not.toHaveClass(
+    "tw-h-full",
+    "lg:tw-h-full"
+  );
+});

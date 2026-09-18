@@ -252,6 +252,64 @@ test.describe("Staging video artwork sizing @surface @medium @large @readonly", 
     }
   }, "portrait-video fixture 549 is qualified on staging only");
 
+  test("centers homepage artwork without resizing when its column grows", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1440, height: 1000 });
+    await gotoReady(page, "/");
+    const column = page
+      .getByText(/^(Latest Drop|Next Drop)$/)
+      .locator("..")
+      .locator("[data-home-artwork-column]");
+    await expect(column).toBeVisible();
+    const video = column.getByLabel("Video player", { exact: true });
+    test.skip(
+      (await video.count()) === 0,
+      "Current homepage drop is not a video"
+    );
+    await expect(video).toBeVisible();
+    await expect
+      .poll(() =>
+        video.evaluate((element: HTMLVideoElement) => element.videoWidth)
+      )
+      .toBeGreaterThan(0);
+    const geometry = await column.evaluate(async (element: HTMLElement) => {
+      const frame = element.firstElementChild as HTMLElement;
+      const baseline = frame.getBoundingClientRect();
+      const originalStyle = element.getAttribute("style");
+      const initialColumn = element.getBoundingClientRect();
+      const initialOffset =
+        baseline.top +
+        baseline.height / 2 -
+        initialColumn.top -
+        initialColumn.height / 2;
+      try {
+        element.style.minHeight = `${initialColumn.height + 180}px`;
+        await new Promise<void>((resolve) =>
+          requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+        );
+        const bounds = frame.getBoundingClientRect();
+        const outer = element.getBoundingClientRect();
+        return {
+          initialOffset,
+          finalOffset:
+            bounds.top + bounds.height / 2 - outer.top - outer.height / 2,
+          widthChange: bounds.width - baseline.width,
+          heightChange: bounds.height - baseline.height,
+          height: baseline.height,
+        };
+      } finally {
+        if (originalStyle === null) element.removeAttribute("style");
+        else element.setAttribute("style", originalStyle);
+      }
+    });
+    expect(geometry.height).toBeGreaterThan(0);
+    expect(Math.abs(geometry.initialOffset)).toBeLessThanOrEqual(2);
+    expect(Math.abs(geometry.finalOffset)).toBeLessThanOrEqual(2);
+    expect(Math.abs(geometry.widthChange)).toBeLessThanOrEqual(2);
+    expect(Math.abs(geometry.heightChange)).toBeLessThanOrEqual(2);
+  });
+
   for (const viewport of [
     { width: 390, height: 844 },
     { width: 390, height: 600 },
