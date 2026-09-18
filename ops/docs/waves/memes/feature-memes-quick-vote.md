@@ -63,6 +63,9 @@ participatory submissions in the configured memes wave.
 - Descriptions start collapsed to two lines in the mobile layout and four on
   desktop. `See more` appears only when text is hidden; `See less` collapses it
   again.
+- Video artwork starts automatically, muted and inline, when it becomes visible
+  in Quick Vote on web or in the native app. Video autoplay stays off when the
+  device is configured to reduce motion; playback controls remain available.
 - Swipe chevrons appear only on touch screens in the mobile layout. In a narrow
   browser window without touch input, use the `Vote` and `Skip` buttons.
 - Custom amounts are normalized to a whole number and capped at the current
