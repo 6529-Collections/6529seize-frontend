@@ -1,4 +1,5 @@
 import type { Page, Route } from "@playwright/test";
+import { defineWaveVideoLayoutTests } from "../media/waveVideoLayoutCases";
 
 import {
   expect,
@@ -45,6 +46,8 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     "PLAYWRIGHT_COMPOSER_SANDBOX",
     "Composer sandbox requires the local mock API runner."
   );
+
+  defineWaveVideoLayoutTests();
 
   test("queues and removes an attachment without upload or submit", async ({
     baseURL,
