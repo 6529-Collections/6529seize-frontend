@@ -105,6 +105,12 @@ push to open the matching app route.
     from the unfiltered in-app feed total.
   - Reading from the website or desktop can update the phone's iOS badge when
     the correction push is delivered and badge permission is enabled.
+  - Launching or returning to the iOS app requests a fresh backend badge update
+    after all connected profiles finish push registration. It does not mark
+    anything read and needs no native app update. The count still arrives by push.
+  - Duplicate refresh requests in flight are combined. Failed requests preserve
+    notification state; a later activation can retry. Refresh waits for current
+    registration credentials and pending logout reconciliation.
   - Tray cleanup does not calculate or overwrite the iOS badge. Delivery delays,
     offline devices, or failed refreshes can leave the badge temporarily stale.
   - Android dots/counts depend on the launcher and remaining notifications;

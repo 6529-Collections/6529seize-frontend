@@ -5350,6 +5350,7 @@
         "Mobile push notifications are documented under the Notifications area.",
         "Mobile tray cleanup preserves other connected profiles and removes only matching notifications confirmed read; uncertain or failed refreshes preserve entries.",
         "The iOS badge is updated asynchronously from unread notifications across device-registered profiles, including reads from desktop or web. Android dots and counts depend on the launcher.",
+        "Opening or returning to the iOS app requests a backend badge correction after connected profiles finish push registration, without marking notifications read. The update still arrives asynchronously by push; failed refresh requests leave notification state unchanged.",
         "Push notification behavior depends on mobile app support and notification permissions.",
         "After a phone transfer, push registration uses a separate native-device identity. Old cleanup retries stay saved but cannot block the replacement phone. Migration removes only old registrations matching this phone’s current push token; other phones remain connected and notification preferences carry forward.",
         "If only some connected profiles finish push registration, returning to the active app or reconnecting retries registration while preserving successful profiles and old delivery targets. Reconnect a profile whose saved session has expired.",

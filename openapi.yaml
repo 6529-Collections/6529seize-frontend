@@ -13875,6 +13875,44 @@ paths:
           description: Unauthorized
         "403":
           description: Forbidden - profile required
+  /push-notifications/installations/badge-refresh:
+    post:
+      tags:
+        - Push Notifications
+      summary: Request the current aggregate iOS badge for this installation
+      description: >-
+        Authenticated by an already registered installation's private credential
+        and current revision, without a wallet JWT. Queues the existing worker
+        to recount all registered profiles. Does not mark notifications read,
+        change registrations, or accept a client-supplied count. Delivery is
+        asynchronous and best effort; queued is false when pushes are disabled.
+      operationId: refreshPushInstallationBadge
+      security: []
+      x-6529-router:
+        enabled: true
+        auth: none
+        handler:
+          import: "@/api/push-notifications/refresh-push-installation-badge.handler"
+          name: handleRefreshPushInstallationBadge
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiRefreshPushInstallationBadgeRequest"
+      responses:
+        "200":
+          description: Installation verified and queue handoff completed when enabled.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiRefreshPushInstallationBadgeResponse"
+        "400":
+          description: Invalid request.
+        "403":
+          description: Installation credential is invalid or not yet registered.
+        "409":
+          description: Installation revision is stale.
   /push-notifications/installations/revoke:
     post:
       tags:
@@ -34238,6 +34276,34 @@ components:
           type: string
         token:
           type: string
+    ApiRefreshPushInstallationBadgeRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - device_id
+        - installation_secret
+        - revision
+      properties:
+        device_id:
+          type: string
+          minLength: 1
+          maxLength: 100
+        installation_secret:
+          type: string
+          pattern: ^[a-fA-F0-9]{64}$
+        revision:
+          type: integer
+          format: int64
+          minimum: 0
+          maximum: 4294967295
+    ApiRefreshPushInstallationBadgeResponse:
+      type: object
+      required:
+        - queued
+      properties:
+        queued:
+          type: boolean
+          description: Queue acceptance, not confirmation of device delivery.
     ApiRegisterPushNotificationTokenRequest:
       type: object
       required:

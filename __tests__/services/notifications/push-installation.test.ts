@@ -3,6 +3,7 @@ import { SecureStoragePlugin } from "capacitor-secure-storage-plugin";
 import { PushNotifications } from "@capacitor/push-notifications";
 import { commonApiPost } from "@/services/api/common-api";
 import {
+  getPushInstallationBadgeRefreshRequest,
   preparePushInstallationRegistration,
   completePushInstallationMigration,
   queueNativePushLogout,
@@ -364,4 +365,70 @@ it("still blocks registration behind failed logout belonging to the current phon
       (job: { device_id: string }) => job.device_id === mockDeviceId
     )
   ).toBe(true);
+});
+
+describe("badge refresh proof", () => {
+  const authKey = () =>
+    require("@/services/auth/auth-token-fingerprint").getAuthTokenFingerprint(
+      "jwt-A"
+    );
+  it("returns the current proof without changing stored state or sending a request", async () => {
+    const before = storage();
+    await expect(
+      getPushInstallationBadgeRefreshRequest("phone", "fcm-token", authKey())
+    ).resolves.toEqual({
+      device_id: "phone",
+      installation_secret: before.secret,
+      revision: 0,
+    });
+    expect(storage()).toEqual(before);
+    expect(post).not.toHaveBeenCalled();
+  });
+  it("rejects a different device, rotated token, or changed auth session", async () => {
+    await expect(
+      getPushInstallationBadgeRefreshRequest(
+        "other-phone",
+        "fcm-token",
+        authKey()
+      )
+    ).resolves.toBeNull();
+    await expect(
+      getPushInstallationBadgeRefreshRequest("phone", "old-token", authKey())
+    ).resolves.toBeNull();
+    mockJwt = "jwt-B";
+    await expect(
+      getPushInstallationBadgeRefreshRequest("phone", "fcm-token", authKey())
+    ).resolves.toBeNull();
+  });
+  it("waits for another profile's pending logout, then uses the advanced revision", async () => {
+    post.mockRejectedValue(new Error("offline"));
+    await queueNativePushLogout(mockAccounts[1]!.address, false);
+    await flushPendingPushLogouts();
+    await expect(
+      getPushInstallationBadgeRefreshRequest("phone", "fcm-token", authKey())
+    ).resolves.toBeNull();
+    post.mockResolvedValue({ revision: 1 });
+    await flushPendingPushLogouts();
+    await expect(
+      getPushInstallationBadgeRefreshRequest("phone", "fcm-token", authKey())
+    ).resolves.toEqual({
+      device_id: "phone",
+      installation_secret: storage().secret,
+      revision: 1,
+    });
+  });
+
+  it("refuses refresh while logout is pending or the session has signed out", async () => {
+    post.mockRejectedValue(new Error("offline"));
+    await queueNativePushLogout(mockAccounts[0]!.address, false);
+    await flushPendingPushLogouts();
+    await expect(
+      getPushInstallationBadgeRefreshRequest("phone", "fcm-token", authKey())
+    ).resolves.toBeNull();
+    post.mockResolvedValue({ revision: 1 });
+    await flushPendingPushLogouts();
+    await expect(
+      getPushInstallationBadgeRefreshRequest("phone", "fcm-token", authKey())
+    ).resolves.toBeNull();
+  });
 });
