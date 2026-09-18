@@ -33,7 +33,11 @@ export const STATIC_INDEXABLE_PATHS = [
   "/network/xtdh",
   "/about",
   "/about/6529-apps",
+  "/about/open-metaverse",
   "/museum",
+  "/open-data",
+  "/the-memes/mint",
+  "/tools/api",
   "/blog/from-fibonacci-to-fidenza",
   "/blog/disney-deekay-their-secret-to-animation",
   "/blog/a-tale-of-two-artists",
@@ -606,12 +610,7 @@ function getMuseumEntityPaths(
       return [];
     }
 
-    let canonicalRoute: string | null = null;
-    if (entity.entityType === "WORK" && /^6529NM-W-\d{4}$/u.test(entity.id)) {
-      canonicalRoute = `/museum/network/works/${entity.id}`;
-    } else if (entity.entityType === "ARTIST" && entity.slug) {
-      canonicalRoute = `/museum/network/artists/${entity.slug}`;
-    }
+    const canonicalRoute = getMuseumEntityCanonicalRoute(entity);
 
     if (canonicalRoute === null || entity.canonicalRoute !== canonicalRoute) {
       return [];
@@ -624,6 +623,38 @@ function getMuseumEntityPaths(
       }),
     ];
   });
+}
+
+/**
+ * The accepted Museum entity graph is the source of truth for instance
+ * routes. Keep aliases out of the sitemap: their route handlers redirect to
+ * one of these canonical records. This explicit route map also prevents a
+ * newly-added entity type from becoming crawlable before it has a public page
+ * implementation and an identity policy.
+ */
+function getMuseumEntityCanonicalRoute(
+  entity: MuseumPublicEntityRecord
+): string | null {
+  if (entity.entityType === "WORK") {
+    return /^6529NM-W-\d{4}$/u.test(entity.id) && entity.slug === entity.id
+      ? `/museum/network/works/${entity.id}`
+      : null;
+  }
+
+  if (entity.slug === null) return null;
+
+  const prefixes: Partial<
+    Record<MuseumPublicEntityRecord["entityType"], string>
+  > = {
+    ARTIST: "/museum/network/artists/",
+    ORGANIZATION: "/museum/network/organizations/",
+    PROJECT_OR_SERIES: "/museum/network/projects/",
+    CURATED_ACQUISITION: "/museum/network/acquisitions/",
+    ACQUISITION_PROGRAM: "/museum/network/acquisition-programs/",
+    RESEARCH_PUBLICATION: "/museum/network/research/",
+  };
+  const prefix = prefixes[entity.entityType];
+  return prefix === undefined ? null : `${prefix}${entity.slug}`;
 }
 
 export async function buildAdditionalSitemapPaths(

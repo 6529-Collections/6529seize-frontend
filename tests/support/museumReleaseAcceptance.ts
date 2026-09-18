@@ -58,25 +58,48 @@ export async function openMuseumAcceptanceRoute(
 
 async function settleImages(page: Page, selector: string) {
   const images = page.locator(selector);
-  const imageCount = await images.count();
-  for (let index = 0; index < imageCount; index += 1) {
-    await images.nth(index).scrollIntoViewIfNeeded();
-  }
-  await Promise.all(
-    Array.from({ length: imageCount }, async (_, index) => {
-      const image = images.nth(index);
-      await expect
-        .poll(
-          () =>
-            image.evaluate((element) => {
-              if (!(element instanceof HTMLImageElement)) return false;
-              return element.complete && element.naturalWidth > 0;
-            }),
-          { timeout: 20_000 }
-        )
-        .toBe(true);
-    })
-  );
+  let settledCount = 0;
+  let stableSince: number | undefined;
+  // Streaming/hydration may add lazy images while the first batch loads.
+  // Require a quiet interval, including for an initially empty inventory,
+  // rather than accepting the first unchanged recount.
+  await expect
+    .poll(
+      async () => {
+        const imageCount = await images.count();
+        if (imageCount === settledCount) {
+          stableSince ??= Date.now();
+          return Date.now() - stableSince >= 500;
+        }
+        if (imageCount < settledCount) settledCount = 0;
+        for (let index = settledCount; index < imageCount; index += 1) {
+          await images.nth(index).scrollIntoViewIfNeeded();
+        }
+        await Promise.all(
+          Array.from(
+            { length: imageCount - settledCount },
+            async (_, offset) => {
+              const image = images.nth(settledCount + offset);
+              await expect
+                .poll(
+                  () =>
+                    image.evaluate((element) => {
+                      if (!(element instanceof HTMLImageElement)) return false;
+                      return element.complete && element.naturalWidth > 0;
+                    }),
+                  { timeout: 20_000 }
+                )
+                .toBe(true);
+            }
+          )
+        );
+        settledCount = imageCount;
+        stableSince = Date.now();
+        return false;
+      },
+      { timeout: 30_000, intervals: [100, 250] }
+    )
+    .toBe(true);
 }
 
 export async function expectNoUnresolvedMuseumMedia(
@@ -301,7 +324,6 @@ export async function expectAcquisitionsAcceptance(page: Page) {
 }
 
 export async function expectResearchAcceptance(page: Page) {
-  await expectNoUnresolvedMuseumMedia(page, "main", "img");
   const section = (id: string) =>
     page.locator(`section:has(> header > #museum-research-section-${id})`);
   const acquisitions = section("acquisition-scholarship");
@@ -342,8 +364,13 @@ export async function expectResearchAcceptance(page: Page) {
   await expect(practice).toContainText("The Open Museum");
   await expect(practice).toContainText("From repository to chain");
 
-  const imageArticles = await page.locator("main article").evaluateAll(
-    (articles) =>
+  // Wait for the expected sections/cards before taking the media inventory.
+  await expectNoUnresolvedMuseumMedia(page, "main", "img");
+
+  const imageArticles = await page
+    .getByRole("main")
+    .getByRole("article")
+    .evaluateAll((articles) =>
       articles.flatMap((article) => {
         const image = article.querySelector("img");
         if (!(image instanceof HTMLImageElement)) return [];
@@ -356,7 +383,7 @@ export async function expectResearchAcceptance(page: Page) {
           },
         ];
       })
-  );
+    );
   const articlesBySource = new Map<string, string[]>();
   for (const { source, text } of imageArticles) {
     const articles = articlesBySource.get(source) ?? [];

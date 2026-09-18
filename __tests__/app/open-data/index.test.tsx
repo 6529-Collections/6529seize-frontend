@@ -2,6 +2,7 @@ import React from "react";
 import { render, screen } from "@testing-library/react";
 import Downloads, { generateMetadata } from "@/app/open-data/page";
 import { CookieConsentProvider } from "@/components/cookies/CookieConsentContext";
+import { getAppMetadata } from "@/components/providers/metadata";
 
 // Mock TitleContext
 jest.mock("@/contexts/TitleContext", () => ({
@@ -37,5 +38,12 @@ describe("Open Data page", () => {
 
   it("exposes metadata", async () => {
     await expect(generateMetadata()).resolves.toEqual({ title: "Open Data" });
+    expect(getAppMetadata).toHaveBeenCalledWith(
+      {
+        title: "Open Data",
+        description: "Tools",
+      },
+      { canonicalPath: "/open-data" }
+    );
   });
 });
