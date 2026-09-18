@@ -2,7 +2,7 @@ import { AuthContext } from "@/components/auth/Auth";
 import MemeLabComponent from "@/components/memelab/MemeLab";
 import LabCollection from "@/components/memelab/MemeLabCollection";
 import { VolumeType } from "@/entities/INFT";
-import { fetchAllPages } from "@/services/6529api";
+import { fetchAllPages, fetchUrl } from "@/services/6529api";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   fireEvent,
@@ -18,7 +18,10 @@ jest.mock("next/navigation", () => ({
   useRouter: jest.fn(),
   useSearchParams: jest.fn(),
 }));
-jest.mock("@/services/6529api", () => ({ fetchAllPages: jest.fn() }));
+jest.mock("@/services/6529api", () => ({
+  fetchAllPages: jest.fn(),
+  fetchUrl: jest.fn(),
+}));
 
 jest.mock("@/components/nft-image/NFTImage", () => (props: any) => (
   <div data-testid={`nft-${props.nft.id}`}>{props.nft.name}</div>
@@ -105,14 +108,19 @@ function renderComponent({
   );
 }
 
-function renderMemeLab(props?: ComponentProps<typeof MemeLabComponent>) {
-  const componentProps = props ?? DEFAULT_MEME_LAB_PROPS;
-
-  const queryClient = new QueryClient({
+function createQueryClient() {
+  return new QueryClient({
     defaultOptions: {
       queries: { retry: false },
     },
   });
+}
+
+function renderMemeLab(
+  props?: ComponentProps<typeof MemeLabComponent>,
+  queryClient = createQueryClient()
+) {
+  const componentProps = props ?? DEFAULT_MEME_LAB_PROPS;
 
   return render(
     <QueryClientProvider client={queryClient}>
@@ -133,9 +141,6 @@ describe("MemeLabCollection", () => {
   it("renders grouped collection cards as a labelled list with locale-preserving collection links", async () => {
     (fetchAllPages as jest.Mock)
       .mockResolvedValueOnce([
-        { id: 1, metadata_collection: "Cool Collection" },
-      ])
-      .mockResolvedValueOnce([
         {
           id: 1,
           contract: "0x",
@@ -143,6 +148,9 @@ describe("MemeLabCollection", () => {
           artist: "artist",
           mint_date: "2024-01-01",
         },
+      ])
+      .mockResolvedValueOnce([
+        { id: 1, metadata_collection: "Cool Collection" },
       ]);
 
     renderMemeLab({
@@ -255,5 +263,121 @@ describe("MemeLabCollection", () => {
     renderComponent();
     expect(fetchAllPages).toHaveBeenCalledTimes(1);
     expect(await screen.findByTestId("nothing")).toBeInTheDocument();
+  });
+
+  it("paginates age-sorted cards in pages of 40", async () => {
+    (fetchUrl as jest.Mock)
+      .mockResolvedValueOnce({
+        count: 71,
+        page: 1,
+        next: "page-2",
+        data: Array.from({ length: 40 }, (_, index) => ({
+          id: 71 - index,
+          contract: "0x",
+          name: `NFT ${71 - index}`,
+        })),
+      })
+      .mockResolvedValueOnce({
+        count: 71,
+        page: 2,
+        next: null,
+        data: Array.from({ length: 31 }, (_, index) => ({
+          id: 31 - index,
+          contract: "0x",
+          name: `NFT ${31 - index}`,
+        })),
+      });
+
+    renderMemeLab();
+
+    expect(await screen.findByTestId("nft-71")).toBeInTheDocument();
+    expect(getRenderedNftIds()).toHaveLength(40);
+    expect(fetchUrl).toHaveBeenNthCalledWith(
+      1,
+      expect.stringContaining("page_size=40"),
+      expect.objectContaining({ signal: expect.any(AbortSignal) })
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Next page" }));
+
+    expect(await screen.findByTestId("nft-1")).toBeInTheDocument();
+    expect(getRenderedNftIds()).toHaveLength(31);
+    expect(screen.queryByTestId("nft-71")).not.toBeInTheDocument();
+    expect(fetchUrl).toHaveBeenNthCalledWith(
+      2,
+      expect.stringContaining("page=2"),
+      expect.objectContaining({ signal: expect.any(AbortSignal) })
+    );
+  });
+
+  it("retries an initial catalog error", async () => {
+    (fetchUrl as jest.Mock)
+      .mockRejectedValueOnce(new Error("offline"))
+      .mockResolvedValueOnce({
+        count: 1,
+        page: 1,
+        next: null,
+        data: [{ id: 1, contract: "0x", name: "Recovered NFT" }],
+      });
+
+    renderMemeLab();
+
+    const error = await screen.findByRole("alert");
+    expect(error).toHaveTextContent("The catalog could not be loaded");
+    fireEvent.click(within(error).getByRole("button", { name: "Try again" }));
+
+    expect(await screen.findByTestId("nft-1")).toBeInTheDocument();
+    expect(fetchUrl).toHaveBeenCalledTimes(2);
+  });
+
+  it("retries a failed page request", async () => {
+    (fetchUrl as jest.Mock)
+      .mockResolvedValueOnce({
+        count: 71,
+        page: 1,
+        next: "page-2",
+        data: [{ id: 71, contract: "0x", name: "NFT 71" }],
+      })
+      .mockRejectedValueOnce(new Error("offline"))
+      .mockResolvedValueOnce({
+        count: 71,
+        page: 2,
+        next: null,
+        data: [{ id: 31, contract: "0x", name: "NFT 31" }],
+      });
+
+    renderMemeLab();
+    expect(await screen.findByTestId("nft-71")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Next page" }));
+
+    const error = await screen.findByRole("alert");
+    expect(error).toHaveTextContent("The catalog could not be loaded");
+    fireEvent.click(within(error).getByRole("button", { name: "Try again" }));
+
+    expect(await screen.findByTestId("nft-31")).toBeInTheDocument();
+  });
+
+  it("reuses a fresh page when navigating back to it", async () => {
+    (fetchUrl as jest.Mock)
+      .mockResolvedValueOnce({
+        count: 71,
+        page: 1,
+        next: "page-2",
+        data: [{ id: 71, contract: "0x", name: "NFT 71" }],
+      })
+      .mockResolvedValueOnce({
+        count: 71,
+        page: 2,
+        next: null,
+        data: [{ id: 31, contract: "0x", name: "NFT 31" }],
+      });
+    renderMemeLab();
+
+    expect(await screen.findByTestId("nft-71")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Next page" }));
+    expect(await screen.findByTestId("nft-31")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Previous page" }));
+
+    expect(await screen.findByTestId("nft-71")).toBeInTheDocument();
+    expect(fetchUrl).toHaveBeenCalledTimes(2);
   });
 });
