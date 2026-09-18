@@ -126,8 +126,9 @@ describe("WaveLeaderboardTime", () => {
 });
 
 describe("single-decision winner announcement", () => {
-  const now = Date.UTC(2026, 8, 18, 12);
-  const announcement = now + (2 * 24 * 60 + 3 * 60 + 4) * 60_000;
+  // Keep the expected calendar date local, regardless of the test runner's TZ.
+  const announcement = new Date(2026, 8, 20, 15, 4).getTime();
+  const now = announcement - (2 * 24 * 60 + 3 * 60 + 4) * 60_000;
   const wave = {} as ApiWave;
 
   beforeEach(() => {
