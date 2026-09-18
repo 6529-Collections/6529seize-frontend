@@ -48,7 +48,11 @@ describe("user collected generateMetadata", () => {
       user: "alice",
       headers: { h: "1" },
     });
-    expect(getMetadataForUserPage).toHaveBeenCalledWith(profile, "collected");
+    expect(getMetadataForUserPage).toHaveBeenCalledWith(
+      profile,
+      "collected",
+      null
+    );
     expect(getAppMetadata).toHaveBeenCalledWith(
       { title: "t" },
       {

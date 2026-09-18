@@ -105,16 +105,34 @@ export function replaceHtmlBreaksWithNewlines(value: string): string {
 export function decodeHtmlEntities(value: string): string {
   return value.replaceAll(/&(#x?[0-9a-fA-F]+|[a-zA-Z]+);/g, (_match, entity: string) => {
     if (entity.startsWith("#x") || entity.startsWith("#X")) {
-      const codePoint = Number.parseInt(entity.slice(2), 16);
-      return Number.isNaN(codePoint) ? "" : String.fromCodePoint(codePoint);
+      return decodeNumericEntity(entity.slice(2), 16);
     }
     if (entity.startsWith("#")) {
-      const codePoint = Number.parseInt(entity.slice(1), 10);
-      return Number.isNaN(codePoint) ? "" : String.fromCodePoint(codePoint);
+      return decodeNumericEntity(entity.slice(1), 10);
     }
 
     return NAMED_ENTITIES[entity] ?? "";
   });
+}
+
+function decodeNumericEntity(value: string, radix: 10 | 16): string {
+  const validDigits = radix === 10 ? /^\d+$/ : /^[\da-f]+$/i;
+  if (!validDigits.test(value)) {
+    return "";
+  }
+
+  const codePoint = Number.parseInt(value, radix);
+  const isSurrogate = codePoint >= 0xd800 && codePoint <= 0xdfff;
+  if (
+    !Number.isInteger(codePoint) ||
+    codePoint < 0 ||
+    codePoint > 0x10ffff ||
+    isSurrogate
+  ) {
+    return "";
+  }
+
+  return String.fromCodePoint(codePoint);
 }
 
 /**

@@ -58,7 +58,7 @@ export async function generateMetadata({
       title: t(locale, "memeLab.documentTitle"),
       ogImage: getCollectionSocialCardImagePath("meme-lab"),
       ogImageAlt: "Meme Lab collection social card",
-      description: t(locale, "memeLab.description.collections"),
+      description: t(locale, "memeLab.metadata.description"),
     }),
     { canonicalPath: "/meme-lab" }
   );

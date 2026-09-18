@@ -77,10 +77,12 @@ describe("getSharedAppServerSideProps", () => {
     expect(fetchUrl).toHaveBeenCalledWith(
       `https://api.test.6529.io/api/nfts?contract=${MEMES_CONTRACT}&id=1`
     );
-    expect(metadata.title).toBe("Seize the Memes | Collectors");
+    expect(metadata.title).toBe(
+      "Seize the Memes | The Memes #1 | Collectors"
+    );
     expect(metadata.twitter?.card).toBe("summary_large_image");
     expect(image).toMatchObject({
-      alt: "Seize the Memes | Collectors social card",
+      alt: "Seize the Memes | The Memes #1 | Collectors social card",
       height: 630,
       width: 1200,
     });
@@ -92,7 +94,9 @@ describe("getSharedAppServerSideProps", () => {
     expect(metadata.description).toBe(
       "Seize the Memes · 6529er · The Memes #1 | test.6529.io"
     );
-    expect(url.searchParams.get("title")).toBe("Seize the Memes | Collectors");
+    expect(url.searchParams.get("title")).toBe(
+      "Seize the Memes | The Memes #1 | Collectors"
+    );
   });
 
   it("builds Meme Lab social cards without raw media when data is missing", async () => {

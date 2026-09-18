@@ -11,6 +11,7 @@ import {
   getAppMetadata,
   getLargeSocialCardMetadata,
 } from "@/components/providers/metadata";
+import { toMetadataExcerpt } from "@/helpers/metadataText";
 import WavesPageClient from "./page.client";
 import { fetchServerWaveFeedSeed } from "./wave-feed-seed.server";
 import WaveServerFeedSeed, {
@@ -25,6 +26,8 @@ import type { ApiOgMetadataProfile } from "@/generated/models/ApiOgMetadataProfi
 import { ApiDropMainType } from "@/generated/models/ApiDropMainType";
 import { formatAddress } from "@/helpers/Helpers";
 import { isPublicNonDirectMessageWave } from "@/helpers/waves/wave.helpers";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import {
   getWaveRouteWithSearchParams,
   type RouteSearchParams,
@@ -369,11 +372,17 @@ export async function buildWavesMetadata(
     typeof wave.name === "string" && wave.name.trim().length > 0
       ? wave.name.trim()
       : `Wave ${shortUuid}`;
-
-  const authorHandle =
-    wave.author.handle && wave.author.handle.trim().length > 0
-      ? `@${wave.author.handle.replace(/^@/, "")}`
-      : formatAddress(wave.author.primary_address);
+  const descriptionDrop = wave.description_drop as
+    | {
+        readonly parts?:
+          | ReadonlyArray<{ readonly content?: string | null }>
+          | undefined;
+      }
+    | undefined;
+  const description = isIndexableWave
+    ? (toMetadataExcerpt(descriptionDrop?.parts?.[0]?.content) ??
+      t(DEFAULT_LOCALE, "waves.metadata.publicDescription", { waveName }))
+    : t(DEFAULT_LOCALE, "waves.metadata.privateDescription");
 
   const dropMetadataId = getDropMetadataId(searchParams)?.trim();
   if (dropMetadataId) {
@@ -394,10 +403,10 @@ export async function buildWavesMetadata(
 
   return getAppMetadata(
     getLargeSocialCardMetadata({
-      title: `${waveName} by ${authorHandle}`,
-      description: "Waves",
+      title: t(DEFAULT_LOCALE, "waves.metadata.title", { waveName }),
+      description,
       ogImage: `/api/og-metadata/waves/${encodeURIComponent(waveId)}`,
-      ogImageAlt: `${waveName} wave social card`,
+      ogImageAlt: t(DEFAULT_LOCALE, "waves.metadata.ogImageAlt", { waveName }),
     }),
     metadataOptions
   );
