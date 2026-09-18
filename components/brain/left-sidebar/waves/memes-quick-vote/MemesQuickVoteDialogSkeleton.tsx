@@ -94,11 +94,11 @@ export default function MemesQuickVoteDialogSkeleton() {
               data-testid="quick-vote-preview-mobile-context"
               className="tw-flex tw-h-full tw-flex-col md:tw-flex md:tw-min-h-0 md:tw-flex-1 md:tw-p-0"
             >
-              <div className="tw-relative tw-flex tw-h-[45vh] tw-shrink-0 tw-items-center tw-justify-center tw-overflow-hidden tw-border-b tw-border-solid tw-border-white/5 tw-bg-black/40 md:tw-flex md:tw-h-full md:tw-w-full md:tw-items-center md:tw-justify-center md:tw-border-0">
+              <div className="tw-relative tw-flex tw-max-h-[45dvh] tw-min-h-0 tw-flex-[3_1_0%] tw-items-center tw-justify-center tw-overflow-hidden tw-border-b tw-border-solid tw-border-white/5 tw-bg-black/40 md:tw-flex md:tw-h-full md:tw-w-full md:tw-items-center md:tw-justify-center md:tw-border-0">
                 <SkeletonBlock className="tw-h-full tw-w-full tw-bg-iron-800/60" />
               </div>
 
-              <div className="tw-relative tw-flex tw-min-h-0 tw-flex-1 tw-flex-col tw-bg-[#0d0d0e] md:tw-hidden">
+              <div className="tw-relative tw-flex tw-min-h-0 tw-flex-[2_1_0%] tw-flex-col tw-bg-[#0d0d0e] md:tw-hidden">
                 <div className="tw-min-h-0 tw-flex-1 tw-overflow-hidden tw-px-6 tw-pb-5 tw-pt-4">
                   <div className="tw-flex tw-flex-col tw-gap-4">
                     <MemesQuickVoteDropHeaderSkeleton />

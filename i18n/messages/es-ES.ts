@@ -583,6 +583,7 @@ export const ES_ES_MESSAGES = {
   "drop.media.loading": "Cargando imagen",
   "drop.media.unavailable": "Imagen no disponible",
   "drop.media.loadFailed": "No se pudo cargar la imagen.",
+  "drop.media.videoLoadFailed": "No se pudo cargar el video.",
   "drop.media.retry": "Reintentar",
   "drop.media.openPreview": "Abrir vista previa de imagen",
   "drop.media.openMedia": "Abrir medio del drop",
