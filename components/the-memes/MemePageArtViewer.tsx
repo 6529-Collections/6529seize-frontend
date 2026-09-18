@@ -74,8 +74,7 @@ function getInlineMediaVariant(
 
 function getArtworkLayout(isVideoArtwork: boolean) {
   return {
-    root: isVideoArtwork ? "tw-flex-none" : "tw-h-full",
-    content: isVideoArtwork ? undefined : "tw-flex-1",
+    root: isVideoArtwork ? "tw-flex-1" : "tw-h-full",
     carousel: styles[isVideoArtwork ? "videoCarousel" : "memesCarousel"],
     slide: isVideoArtwork ? "tw-h-auto" : "tw-h-full",
   };
@@ -356,17 +355,15 @@ export function MemePageArtViewer({
         artworkLayout.root
       )}
     >
-      <div className={clsx("tw-flex tw-flex-col", artworkLayout.content)}>
+      <div className="tw-flex tw-flex-1 tw-flex-col">
         {!hasAnimation && !hasImage && Boolean(actions) && (
           <div className="tw-relative tw-min-h-9">{printMediaActions()}</div>
         )}
         {hasAnimation ? (
           <>
             <div
-              className={clsx(
-                "tw-flex tw-min-h-0 tw-w-full tw-items-center tw-bg-iron-950 tw-p-0",
-                artworkLayout.content
-              )}
+              data-artwork-stage
+              className="tw-flex tw-min-h-0 tw-w-full tw-flex-1 tw-items-center tw-bg-iron-950 tw-p-0"
             >
               <section
                 className={clsx(artworkLayout.carousel, "tw-w-full")}

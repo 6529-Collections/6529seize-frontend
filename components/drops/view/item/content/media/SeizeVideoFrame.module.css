@@ -28,8 +28,27 @@
   }
 }
 
+.artworkStage,
 .artwork:not(.bounded) {
   --video-viewport-height: 100vh;
+}
+
+/* The wave stage fills the space below its header. Its child video keeps its
+   own aspect ratio and height cap instead of stretching with this container. */
+.artworkStage {
+  min-height: max(
+    0px,
+    calc(
+      min(
+          var(--video-viewport-height),
+          var(--video-container-height, var(--video-viewport-height))
+        ) -
+        var(--video-header-reserve, 0px) - var(--video-bottom-reserve, 0px)
+    )
+  );
+}
+
+.artwork:not(.bounded) {
   --video-max-height: calc(
     max(
         1px,
@@ -66,13 +85,14 @@
 
 /* Small viewport units keep the cap stable when mobile browser chrome changes. */
 @supports (height: 100svh) {
+  .artworkStage,
   .artwork:not(.bounded) {
     --video-viewport-height: 100svh;
   }
 }
 
-/* Artwork owns its height; asynchronously loaded neighboring panels must not
-   resize or recenter the video. Only explicit fill/fullscreen frames are bounded. */
+/* Artwork owns its size. A surrounding stage can center it without resizing
+   it when neighboring panels load. Only fill/fullscreen frames are bounded. */
 .artwork:not(.bounded) > .surface {
   height: auto;
   aspect-ratio: var(--video-ratio, 1.777778);
