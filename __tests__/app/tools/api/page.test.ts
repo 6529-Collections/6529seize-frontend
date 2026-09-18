@@ -9,10 +9,13 @@ describe("API documentation metadata", () => {
   it("summarizes the documentation available on the page", () => {
     generateMetadata();
 
-    expect(getAppMetadata).toHaveBeenCalledWith({
-      title: "API | Tools",
-      description:
-        "Read the open REST API documentation, including authentication and drop media examples.",
-    });
+    expect(getAppMetadata).toHaveBeenCalledWith(
+      {
+        title: "API | Tools",
+        description:
+          "Read the open REST API documentation, including authentication and drop media examples.",
+      },
+      { canonicalPath: "/tools/api" }
+    );
   });
 });
