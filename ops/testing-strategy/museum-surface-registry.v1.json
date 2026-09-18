@@ -608,6 +608,10 @@
       "surface_ids": ["museum.system"]
     },
     {
+      "file": "components/museum/MuseumStudyLink.tsx",
+      "surface_ids": ["museum.system", "museum.object", "museum.collection"]
+    },
+    {
       "file": "components/museum/MuseumLegacyEntryPoint.tsx",
       "surface_ids": ["museum.shell", "museum.home"]
     },
