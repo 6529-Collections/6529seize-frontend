@@ -16,7 +16,7 @@ jest.mock(
 );
 
 it.each(["video/mp4", "video/webm"])(
-  "uses the shared screen-height limit for %s without a fixed-height ancestor",
+  "centers %s in the available stage without stretching the video",
   (mimeType) => {
     render(
       <MemesDropArtworkHero
@@ -35,12 +35,17 @@ it.each(["video/mp4", "video/webm"])(
     const hero = frame.closest("[data-video-artwork]")!;
     expect(frame.className).not.toMatch(/tw-h-\[/);
     expect(hero).not.toHaveClass("lg:tw-min-h-screen");
+    expect(hero).toHaveClass("artworkStage");
     const padding = frame.parentElement!.parentElement!;
     expect(padding).toHaveClass(
       "[--video-frame-padding:2rem]",
       "lg:[--video-frame-padding:4rem]"
     );
-    expect(padding).not.toHaveClass("lg:tw-flex-1");
+    expect(padding).toHaveClass(
+      "tw-flex-1",
+      "tw-items-center",
+      "tw-justify-center"
+    );
   }
 );
 

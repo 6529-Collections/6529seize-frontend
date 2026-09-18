@@ -8,8 +8,10 @@ mobile browsers, and the mobile app, allowing for the app header, bottom navigat
 and safe areas. Taller videos become narrower and stay centered without cropping.
 The height limit stays stable when mobile browser toolbars change visibility.
 Fullscreen continues to use the full viewing area. Loading listing, subscription, or ownership panels
-does not resize the video. Homepage artwork is vertically centered in its column;
-its position follows the column height while its dimensions remain independent.
+does not resize the video. Homepage artwork is vertically centered in its column. The Memes detail keeps its
+full-column dark background and centers the capped video inside it. Expanded wave
+submissions center video in the available area below the overlay header.
+Centering can change the video’s position when its container grows, but not its dimensions.
 The timeline and controls stay inside the
 video frame, not in the surrounding empty space. When NFT animation dimensions are available,
 the player reserves those proportions before video metadata loads. If dimensions

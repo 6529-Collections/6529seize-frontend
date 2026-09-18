@@ -1,4 +1,5 @@
 import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
+import videoFrameStyles from "@/components/drops/view/item/content/media/SeizeVideoFrame.module.css";
 import { ImageScale } from "@/helpers/image.helpers";
 import clsx from "clsx";
 import type { MemesDropMedia } from "./memesDropPanelTypes";
@@ -19,14 +20,14 @@ export function MemesDropArtworkHero({
       data-video-artwork={isVideo || undefined}
       className={clsx(
         "tw-flex tw-w-full tw-flex-col",
-        !isVideo && "lg:tw-min-h-screen"
+        isVideo ? videoFrameStyles["artworkStage"] : "lg:tw-min-h-screen"
       )}
     >
       <div
         className={clsx(
           "tw-flex tw-items-center tw-justify-center tw-px-4 tw-py-4 sm:tw-px-6 lg:tw-py-8 xl:tw-px-20",
           isVideo
-            ? "[--video-frame-padding:2rem] lg:[--video-frame-padding:4rem]"
+            ? "tw-flex-1 [--video-frame-padding:2rem] lg:[--video-frame-padding:4rem]"
             : "lg:tw-flex-1"
         )}
       >

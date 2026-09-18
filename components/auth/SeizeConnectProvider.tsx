@@ -37,6 +37,7 @@ import {
   useAppKitModalBridgeState,
 } from "./AppKitModalBridge";
 import { WalletErrorBoundary } from "./error-boundary";
+import { mergeConnectedAccountUnreadCounts } from "./connectedAccountUnreadCounts";
 import { SeizeConnectContext } from "./seizeConnectContextValue";
 import {
   AuthenticationError,
@@ -677,33 +678,19 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   );
 
-  const connectedAccountUnreadNotifications = useMemo(() => {
-    const unreadNotificationsByAddress = {
-      ...jwtConnectedAccountUnreadNotifications,
-    };
-
-    if (activeStoredAccount?.profileHandle) {
-      const activeAccountAddress = normalizeAddress(
-        activeStoredAccount.address
-      );
-      const activeUnreadCount = activeUnreadNotifications?.unread_count;
-
-      if (typeof activeUnreadCount === "number") {
-        unreadNotificationsByAddress[activeAccountAddress] = activeUnreadCount;
-      }
-    } else if (activeStoredAccount) {
-      const activeAccountAddress = normalizeAddress(
-        activeStoredAccount.address
-      );
-      unreadNotificationsByAddress[activeAccountAddress] ??= 0;
-    }
-
-    return unreadNotificationsByAddress;
-  }, [
-    activeStoredAccount,
-    activeUnreadNotifications?.unread_count,
-    jwtConnectedAccountUnreadNotifications,
-  ]);
+  const connectedAccountUnreadNotifications = useMemo(
+    () =>
+      mergeConnectedAccountUnreadCounts(
+        jwtConnectedAccountUnreadNotifications,
+        activeStoredAccount,
+        activeUnreadNotifications?.unread_count
+      ),
+    [
+      activeStoredAccount,
+      activeUnreadNotifications?.unread_count,
+      jwtConnectedAccountUnreadNotifications,
+    ]
+  );
 
   const contextValue = useMemo(
     (): SeizeConnectContextType => ({
