@@ -605,7 +605,12 @@ function isOwnedRootPath(file) {
 
 function mapChangedFilesToSurfaces(
   changedFiles,
-  { root, registry = readJson(root, REGISTRY_PATH), graph = null } = {}
+  {
+    root,
+    registry = readJson(root, REGISTRY_PATH),
+    graph = null,
+    deletedEntries = [],
+  } = {}
 ) {
   if (!Array.isArray(changedFiles)) {
     throw new Error("museum surface registry: changedFiles must be an array");
@@ -613,7 +618,10 @@ function mapChangedFilesToSurfaces(
   const validated = validateRegistry(root, registry);
   const normalizedFiles = [...new Set(changedFiles.map(normalizePath))].sort();
   const ownedEntries = allOwnedEntries(validated.ownership);
-  const ownershipIndex = new Map(ownedEntries);
+  const ownershipIndex = new Map([
+    ...deletedEntries.map((entry) => [entry.file, entry]),
+    ...ownedEntries,
+  ]);
   const entryFiles = ownedEntries.map(([file]) => file);
   const importGraph = graph ?? buildReverseImportGraph(root, { entryFiles });
   if (importGraph.unresolved.length > 0) {
@@ -624,9 +632,8 @@ function mapChangedFilesToSurfaces(
     );
   }
 
-  const directOwnedFiles = new Set(entryFiles);
   const unmapped = normalizedFiles.filter(
-    (file) => isOwnedRootPath(file) && !directOwnedFiles.has(file)
+    (file) => isOwnedRootPath(file) && !ownershipIndex.has(file)
   );
   if (unmapped.length > 0) {
     throw new Error(
@@ -695,6 +702,49 @@ function changedFilesFromGit(root, base, head) {
   return output.toString("utf8").split("\0").filter(Boolean);
 }
 
+function deletedEntriesFromGit(root, base, head) {
+  if (!SHA_PATTERN.test(base) || !SHA_PATTERN.test(head)) {
+    throw new Error(
+      "museum surface registry: Git refs must resolve to 40-hex commits"
+    );
+  }
+  const deletedFiles = new Set(
+    execFileSync(
+      "git",
+      [
+        "diff",
+        "--name-only",
+        "-z",
+        "--no-renames",
+        "--diff-filter=D",
+        base,
+        head,
+        "--",
+      ],
+      { cwd: root, encoding: "utf8", maxBuffer: 16 * 1024 * 1024 }
+    )
+      .split("\0")
+      .filter(isOwnedRootPath)
+  );
+  if (deletedFiles.size === 0) return [];
+
+  // Deleted paths cannot be in the current inventory. Retain their base
+  // ownership so removals still select surfaces instead of bypassing the gate.
+  const baseRegistry = JSON.parse(
+    execFileSync("git", ["show", `${base}:${REGISTRY_PATH}`], {
+      cwd: root,
+      encoding: "utf8",
+      maxBuffer: 16 * 1024 * 1024,
+    })
+  );
+  return [
+    ...baseRegistry.routes,
+    ...baseRegistry.support_files,
+    ...baseRegistry.components,
+    ...baseRegistry.e2e_specs,
+  ].filter((entry) => deletedFiles.has(entry.file));
+}
+
 function readOption(argv, name) {
   const index = argv.indexOf(name);
   return index === -1 ? "" : (argv[index + 1] ?? "");
@@ -732,7 +782,12 @@ function main(argv = process.argv.slice(2)) {
       );
     }
     const changedFiles = changedFilesFromGit(root, base, head);
-    report = mapChangedFilesToSurfaces(changedFiles, { root, registry });
+    const deletedEntries = deletedEntriesFromGit(root, base, head);
+    report = mapChangedFilesToSurfaces(changedFiles, {
+      root,
+      registry,
+      deletedEntries,
+    });
   }
   const output = {
     contract: CONTRACT,
@@ -774,6 +829,7 @@ module.exports = {
   OWNED_ROOTS,
   REGISTRY_PATH,
   buildReverseImportGraph,
+  deletedEntriesFromGit,
   expectedInventory,
   isOwnedRootPath,
   mapChangedFilesToSurfaces,
