@@ -353,7 +353,8 @@ export async function expectResearchAcceptance(page: Page) {
   await expectNoUnresolvedMuseumMedia(page, "main", "img");
 
   const imageArticles = await page
-    .locator("main article")
+    .getByRole("main")
+    .getByRole("article")
     .evaluateAll((articles) =>
       articles.flatMap((article) => {
         const image = article.querySelector("img");
