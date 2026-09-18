@@ -59,32 +59,47 @@ export async function openMuseumAcceptanceRoute(
 async function settleImages(page: Page, selector: string) {
   const images = page.locator(selector);
   let settledCount = 0;
-  let imageCount = await images.count();
+  let stableSince: number | undefined;
   // Streaming/hydration may add lazy images while the first batch loads.
-  // Recount after settling each batch so those images are also scrolled into
-  // view and checked, rather than leaving them unloaded below the viewport.
-  while (settledCount < imageCount) {
-    for (let index = settledCount; index < imageCount; index += 1) {
-      await images.nth(index).scrollIntoViewIfNeeded();
-    }
-    await Promise.all(
-      Array.from({ length: imageCount - settledCount }, async (_, offset) => {
-        const image = images.nth(settledCount + offset);
-        await expect
-          .poll(
-            () =>
-              image.evaluate((element) => {
-                if (!(element instanceof HTMLImageElement)) return false;
-                return element.complete && element.naturalWidth > 0;
-              }),
-            { timeout: 20_000 }
+  // Require a quiet interval, including for an initially empty inventory,
+  // rather than accepting the first unchanged recount.
+  await expect
+    .poll(
+      async () => {
+        const imageCount = await images.count();
+        if (imageCount === settledCount) {
+          stableSince ??= Date.now();
+          return Date.now() - stableSince >= 500;
+        }
+        if (imageCount < settledCount) settledCount = 0;
+        for (let index = settledCount; index < imageCount; index += 1) {
+          await images.nth(index).scrollIntoViewIfNeeded();
+        }
+        await Promise.all(
+          Array.from(
+            { length: imageCount - settledCount },
+            async (_, offset) => {
+              const image = images.nth(settledCount + offset);
+              await expect
+                .poll(
+                  () =>
+                    image.evaluate((element) => {
+                      if (!(element instanceof HTMLImageElement)) return false;
+                      return element.complete && element.naturalWidth > 0;
+                    }),
+                  { timeout: 20_000 }
+                )
+                .toBe(true);
+            }
           )
-          .toBe(true);
-      })
-    );
-    settledCount = imageCount;
-    imageCount = await images.count();
-  }
+        );
+        settledCount = imageCount;
+        stableSince = Date.now();
+        return false;
+      },
+      { timeout: 30_000, intervals: [100, 250] }
+    )
+    .toBe(true);
 }
 
 export async function expectNoUnresolvedMuseumMedia(
