@@ -2,15 +2,17 @@
 
 import { isEthereumAddress } from "@/helpers/AllowlistToolHelpers";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
-import { isAuthResolving } from "@/components/auth/authResolution";
+import { isWalletConnectionResolving } from "@/components/auth/authResolution";
 import AuthLoadingPlaceholder from "@/components/auth/AuthLoadingPlaceholder";
 import DistributionPlanToolNotConnected from "./distribution-plan-tool-not-connected";
 import DistributionPlanToolConnected from "./distribution-plan-tool-connected";
 
 export default function DistributionPlanToolConnect() {
-  const { address, connectionState } = useSeizeConnectContext();
+  const connection = useSeizeConnectContext();
+  const { address } = connection;
   let content;
-  if (isAuthResolving(connectionState)) content = <AuthLoadingPlaceholder />;
+  if (isWalletConnectionResolving(connection))
+    content = <AuthLoadingPlaceholder />;
   else if (address && isEthereumAddress(address))
     content = <DistributionPlanToolConnected />;
   else content = <DistributionPlanToolNotConnected />;

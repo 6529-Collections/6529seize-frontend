@@ -255,9 +255,9 @@ messages appear only after their checks settle. This applies to Messages, Create
 Wave, artwork documentation, WatchTower, Orders, EMMA, and the profile CMS builder.
 Drop Forge also waits while a connection is in progress.
 
-Delegation, NextGen Manager, and signing or minting controls additionally wait for
-the live wallet connection to restore. A saved profile session alone does not
-supply a signer. Public page content, Search, and Share remain available while
+Delegation, NextGen Manager, EMMA sign-in, and other signing or minting controls
+wait for the live wallet connection to restore. A saved profile session alone does
+not supply a signer. Public page content, Search, and Share remain available while
 account-dependent controls load. No additional account cache is used.
 
 ## Failure and Recovery
