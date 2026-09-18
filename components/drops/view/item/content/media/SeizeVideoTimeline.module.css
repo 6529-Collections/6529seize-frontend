@@ -5,10 +5,10 @@
   touch-action: none;
   --track-background: linear-gradient(
     to right,
-    #8098f9 0%,
-    #8098f9 var(--video-progress),
-    rgb(255 255 255 / 45%) var(--video-progress),
-    rgb(255 255 255 / 45%) 100%
+    #528bff 0%,
+    #528bff var(--video-progress),
+    rgb(255 255 255 / 20%) var(--video-progress),
+    rgb(255 255 255 / 20%) 100%
   );
 }
 
@@ -16,14 +16,12 @@
   height: 4px;
   border-radius: 999px;
   background: var(--track-background);
-  box-shadow: 0 0 1px 1px rgb(0 0 0 / 35%);
 }
 
 .timeline::-moz-range-track {
   height: 4px;
   border-radius: 999px;
   background: var(--track-background);
-  box-shadow: 0 0 1px 1px rgb(0 0 0 / 35%);
 }
 
 .timeline::-webkit-slider-thumb {
@@ -66,7 +64,7 @@
 }
 
 .timeline:focus-visible {
-  outline: 2px solid #8098f9;
+  outline: 2px solid #528bff;
   outline-offset: 2px;
   border-radius: 4px;
 }

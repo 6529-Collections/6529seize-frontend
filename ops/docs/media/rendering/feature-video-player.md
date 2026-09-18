@@ -2,18 +2,21 @@
 
 The custom video player is shared by NFT artwork, homepage drop videos, and
 Wave submissions. Videos preserve their proportions and show the complete frame.
-On the homepage and The Memes detail page, videos use the available width until
+On the homepage, The Memes detail page, and Wave submission detail, videos use the available width until
 they reach 95% of the usable screen height. This applies in desktop browsers,
 mobile browsers, and the mobile app, allowing for the app header, bottom navigation,
 and safe areas. Taller videos become narrower and stay centered without cropping.
 The height limit stays stable when mobile browser toolbars change visibility.
 Fullscreen continues to use the full viewing area. Loading listing, subscription, or ownership panels
-does not resize or recenter the video. The timeline and controls stay inside the
+does not resize the video. Homepage artwork is vertically centered in its column;
+its position follows the column height while its dimensions remain independent.
+The timeline and controls stay inside the
 video frame, not in the surrounding empty space. When NFT animation dimensions are available,
 the player reserves those proportions before video metadata loads. If dimensions
 are unavailable, the initial placeholder adjusts when the video becomes known.
-The submission detail view has a larger viewing area; the video fits within it
-without cropping. Compact feed previews retain their smaller viewing areas.
+Wave submission detail accounts for its overlay header and artwork padding in
+the same height limit, and stays within the overlay when it is shorter than the
+screen. Compact feed previews retain their smaller viewing areas.
 
 ## Playback and time
 

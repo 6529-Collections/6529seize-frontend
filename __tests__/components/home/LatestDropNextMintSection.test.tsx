@@ -152,6 +152,9 @@ it("fits Next Drop video into the same centered homepage area", () => {
   } as ApiDropV2View;
   render(<LatestDropNextMintSection drop={drop} />);
   expect(screen.getByTestId("drop-media")).toHaveAttribute("data-fill", "true");
+  expect(
+    screen.getByTestId("drop-media").closest("[data-home-artwork-column]")
+  ).toHaveClass("tw-flex", "tw-items-center");
   expect(screen.getByTestId("drop-media")).toHaveAttribute(
     "data-align",
     "center"

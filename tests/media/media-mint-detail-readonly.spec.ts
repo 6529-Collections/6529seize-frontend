@@ -252,11 +252,161 @@ test.describe("Staging video artwork sizing @surface @medium @large @readonly", 
     }
   }, "portrait-video fixture 549 is qualified on staging only");
 
+  test("centers homepage artwork without resizing when its column grows", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1440, height: 1000 });
+    await gotoReady(page, "/");
+    const column = page
+      .getByText(/^(Latest Drop|Next Drop)$/)
+      .locator("..")
+      .locator("[data-home-artwork-column]");
+    await expect(column).toBeVisible();
+    const video = column.getByLabel("Video player", { exact: true });
+    // The live homepage rotates between image and video drops. This regression
+    // needs a video; fixed video fixtures below still run when the homepage is an image.
+    test.skip(
+      (await video.count()) === 0,
+      "Current homepage drop is not a video"
+    );
+    await expect(video).toBeVisible();
+    await expect
+      .poll(() =>
+        video.evaluate((element: HTMLVideoElement) => element.videoWidth)
+      )
+      .toBeGreaterThan(0);
+    const geometry = await column.evaluate(async (element: HTMLElement) => {
+      const frame = element.firstElementChild as HTMLElement;
+      const baseline = frame.getBoundingClientRect();
+      const originalStyle = element.getAttribute("style");
+      const initialColumn = element.getBoundingClientRect();
+      const initialOffset =
+        baseline.top +
+        baseline.height / 2 -
+        initialColumn.top -
+        initialColumn.height / 2;
+      try {
+        element.style.minHeight = `${initialColumn.height + 180}px`;
+        await new Promise<void>((resolve) =>
+          requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+        );
+        const bounds = frame.getBoundingClientRect();
+        const outer = element.getBoundingClientRect();
+        return {
+          initialOffset,
+          finalOffset:
+            bounds.top + bounds.height / 2 - outer.top - outer.height / 2,
+          widthChange: bounds.width - baseline.width,
+          heightChange: bounds.height - baseline.height,
+          height: baseline.height,
+        };
+      } finally {
+        if (originalStyle === null) element.removeAttribute("style");
+        else element.setAttribute("style", originalStyle);
+      }
+    });
+    expect(geometry.height).toBeGreaterThan(0);
+    expect(Math.abs(geometry.initialOffset)).toBeLessThanOrEqual(2);
+    expect(Math.abs(geometry.finalOffset)).toBeLessThanOrEqual(2);
+    expect(Math.abs(geometry.widthChange)).toBeLessThanOrEqual(2);
+    expect(Math.abs(geometry.heightChange)).toBeLessThanOrEqual(2);
+  });
+
   for (const viewport of [
     { width: 390, height: 844 },
+    { width: 390, height: 600 },
     { width: 1440, height: 1000 },
     { width: 1440, height: 600 },
   ]) {
+    test(`fits wave submission video below its header at ${viewport.width}x${viewport.height}`, async ({
+      page,
+    }) => {
+      await page.setViewportSize(viewport);
+      await gotoReady(
+        page,
+        "/waves/b6128077-ea78-4dd9-b381-52c4eadb2077?drop=68304ba1-f084-4534-8de1-6b0e423df8bd"
+      );
+      const artwork = page
+        .getByLabel("Video player", { exact: true })
+        .locator("xpath=ancestor::*[@data-video-artwork]");
+      const video = artwork.getByLabel("Video player", { exact: true });
+      await expect(video).toBeVisible();
+      await expect
+        .poll(() =>
+          video.evaluate((element: HTMLVideoElement) => element.videoWidth)
+        )
+        .toBeGreaterThan(0);
+      await video.evaluate((element: HTMLVideoElement) => element.pause());
+      await expect(
+        artwork.getByRole("slider", { name: "Seek video" })
+      ).toBeVisible();
+
+      const geometry = await video.evaluate((element: HTMLVideoElement) => {
+        const player = element.parentElement!.parentElement!;
+        const hero = element.closest<HTMLElement>("[data-video-artwork]")!;
+        const viewportBounds = element
+          .closest<HTMLElement>("[data-video-viewport]")!
+          .getBoundingClientRect();
+        const bounds = element.getBoundingClientRect();
+        const paddingStyle = getComputedStyle(hero.firstElementChild!);
+        const padding =
+          Number.parseFloat(paddingStyle.paddingTop) +
+          Number.parseFloat(paddingStyle.paddingBottom);
+        const rootFontSize = Number.parseFloat(
+          getComputedStyle(document.documentElement).fontSize
+        );
+        const slider = element
+          .parentElement!.querySelector("input[type=range]")!
+          .getBoundingClientRect();
+        const frame =
+          player.parentElement!.parentElement!.getBoundingClientRect();
+        return {
+          height: bounds.height,
+          width: bounds.width,
+          heightLimit: Number.parseFloat(getComputedStyle(player).maxHeight),
+          padding,
+          headerReserve: rootFontSize * 4,
+          heroHeight: hero.getBoundingClientRect().height,
+          viewportHeight: Math.min(window.innerHeight, viewportBounds.height),
+          frameWidth: frame.width,
+          ratio: element.videoWidth / element.videoHeight,
+          centerOffset:
+            bounds.left + bounds.width / 2 - frame.left - frame.width / 2,
+          sliderInsets: [
+            slider.left - bounds.left,
+            bounds.right - slider.right,
+            slider.top - bounds.top,
+            bounds.bottom - slider.bottom,
+          ],
+        };
+      });
+      // The overlay owns its header; its former 95vh/minimum-height frame must
+      // not override the shared cap or push the controls below a short screen.
+      const availableHeight =
+        geometry.viewportHeight - geometry.headerReserve - geometry.padding;
+      expect(Number.isFinite(geometry.heightLimit)).toBe(true);
+      expect(geometry.heightLimit).toBeGreaterThan(0);
+      expect(geometry.heightLimit).toBeLessThanOrEqual(
+        availableHeight * 0.95 + 2
+      );
+      expect(geometry.height).toBeLessThanOrEqual(geometry.heightLimit + 2);
+      expect(geometry.heroHeight + geometry.headerReserve).toBeLessThanOrEqual(
+        geometry.viewportHeight + 2
+      );
+      expect(
+        Math.abs(geometry.width / geometry.height - geometry.ratio)
+      ).toBeLessThan(0.01);
+      expect(
+        Math.abs(
+          geometry.width -
+            Math.min(geometry.frameWidth, geometry.heightLimit * geometry.ratio)
+        )
+      ).toBeLessThanOrEqual(2);
+      expect(Math.abs(geometry.centerOffset)).toBeLessThanOrEqual(2);
+      for (const inset of geometry.sliderInsets)
+        expect(inset).toBeGreaterThanOrEqual(-2);
+    });
+
     test(`contains portrait video and controls at ${viewport.width}x${viewport.height}`, async ({
       page,
     }) => {

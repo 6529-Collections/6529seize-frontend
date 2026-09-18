@@ -1,6 +1,8 @@
 "use client";
 
 import { CompactModeProvider } from "@/contexts/CompactModeContext";
+import videoFrameStyles from "@/components/drops/view/item/content/media/SeizeVideoFrame.module.css";
+import clsx from "clsx";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
@@ -93,7 +95,13 @@ export const SingleWaveDropWrapper: React.FC<SingleWaveDropWrapperProps> = ({
   }, [drop.id, wave.id]);
 
   return (
-    <div className="tw-flex tw-h-full tw-w-full tw-flex-col tw-overflow-hidden tw-overscroll-none tw-bg-iron-950 lg:tw-flex-row">
+    <div
+      data-video-viewport
+      className={clsx(
+        videoFrameStyles["viewport"],
+        "tw-flex tw-h-full tw-w-full tw-flex-col tw-overflow-hidden tw-overscroll-none tw-bg-iron-950 [--video-bottom-reserve:env(safe-area-inset-bottom,0px)] [--video-header-reserve:calc(env(safe-area-inset-top,0px)+4rem)] lg:tw-flex-row"
+      )}
+    >
       <div className="@container tw-relative tw-h-full tw-flex-1 tw-overflow-hidden">
         <header className="tw-absolute tw-inset-x-0 tw-top-0 tw-z-30 tw-bg-iron-950/55 tw-bg-gradient-to-b tw-from-iron-950/75 tw-via-iron-950/55 tw-to-iron-950/10 tw-px-4 tw-pb-2 tw-pt-[calc(env(safe-area-inset-top,0px)+0.5rem)] tw-backdrop-blur-sm sm:tw-px-6 lg:tw-px-8">
           <div className="tw-flex tw-w-full tw-items-center tw-justify-between">
@@ -141,7 +149,7 @@ export const SingleWaveDropWrapper: React.FC<SingleWaveDropWrapperProps> = ({
 
         <div className="tw-[scrollbar-gutter:stable] tw-h-full tw-overflow-y-auto tw-overscroll-contain tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300">
           <div
-            className="tw-h-[calc(env(safe-area-inset-top,0px)+4rem)] tw-shrink-0"
+            className="tw-h-[var(--video-header-reserve)] tw-shrink-0"
             aria-hidden="true"
           />
           {children}
