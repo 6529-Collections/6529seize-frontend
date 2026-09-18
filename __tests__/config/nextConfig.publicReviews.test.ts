@@ -15,6 +15,7 @@ describe("public review standalone packaging", () => {
     );
 
     expect(config.outputFileTracingIncludes).toEqual({
+      "/*": [".museum-publication/current.json"],
       "/api/og-metadata/image": [
         "node_modules/@img/sharp-libvips-*/**/*",
         "node_modules/.pnpm/@img+sharp-libvips-*/node_modules/@img/sharp-libvips-*/**/*",
