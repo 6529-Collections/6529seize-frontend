@@ -26,8 +26,25 @@ const mockUseInView = require("@/hooks/useInView").useInView as jest.Mock;
 const mockUseOptimizedVideo = require("@/hooks/useOptimizedVideo")
   .useOptimizedVideo as jest.Mock;
 
+function mockPrefersReducedMotion(matches: boolean) {
+  jest.spyOn(globalThis, "matchMedia").mockImplementation(
+    (query: string) =>
+      ({
+        addEventListener: jest.fn(),
+        addListener: jest.fn(),
+        dispatchEvent: jest.fn(),
+        matches,
+        media: query,
+        onchange: null,
+        removeEventListener: jest.fn(),
+        removeListener: jest.fn(),
+      }) as MediaQueryList
+  );
+}
+
 describe("DropListItemContentMediaVideo", () => {
   beforeEach(() => {
+    jest.restoreAllMocks();
     jest.clearAllMocks();
     jest.useRealTimers();
     mockIsApp = false;
@@ -134,6 +151,64 @@ describe("DropListItemContentMediaVideo", () => {
     });
 
     render(<DropListItemContentMediaVideo src="foo.mp4" disableAutoPlay />);
+    expect(playSpy).not.toHaveBeenCalled();
+  });
+
+  it("autoplays an opted-in app video when reduced motion is off", () => {
+    mockIsApp = true;
+    mockPrefersReducedMotion(false);
+    const ref = {
+      current: document.createElement("div"),
+    } as React.RefObject<HTMLDivElement>;
+    mockUseInView.mockReturnValue([ref, true]);
+    mockUseOptimizedVideo.mockReturnValue({
+      playableUrl: "foo.mp4",
+      isHls: false,
+    });
+
+    const playSpy = jest.fn().mockResolvedValue(undefined);
+    Object.defineProperty(HTMLVideoElement.prototype, "play", {
+      configurable: true,
+      writable: true,
+      value: playSpy,
+    });
+
+    render(
+      <DropListItemContentMediaVideo
+        src="foo.mp4"
+        allowAutoPlayInApp
+      />
+    );
+
+    expect(playSpy).toHaveBeenCalled();
+  });
+
+  it("does not autoplay an opted-in app video when reduced motion is on", () => {
+    mockIsApp = true;
+    mockPrefersReducedMotion(true);
+    const ref = {
+      current: document.createElement("div"),
+    } as React.RefObject<HTMLDivElement>;
+    mockUseInView.mockReturnValue([ref, true]);
+    mockUseOptimizedVideo.mockReturnValue({
+      playableUrl: "foo.mp4",
+      isHls: false,
+    });
+
+    const playSpy = jest.fn().mockResolvedValue(undefined);
+    Object.defineProperty(HTMLVideoElement.prototype, "play", {
+      configurable: true,
+      writable: true,
+      value: playSpy,
+    });
+
+    render(
+      <DropListItemContentMediaVideo
+        src="foo.mp4"
+        allowAutoPlayInApp
+      />
+    );
+
     expect(playSpy).not.toHaveBeenCalled();
   });
 
