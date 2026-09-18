@@ -169,6 +169,34 @@ it("uses the complete responsive video frame instead of the legacy carousel heig
 });
 
 describe("MemePageArtViewer", () => {
+  it("keeps the still image self-sized when switching away from video", async () => {
+    const user = userEvent.setup();
+    const { container } = render(<MemePageArtViewer nft={baseNft} />);
+    const imageSlide = screen.getByTestId("image-art").parentElement;
+    const videoSlide = screen.getByTestId("animation-art").parentElement;
+
+    expect(imageSlide).toHaveClass("tw-hidden");
+    await user.click(
+      screen.getByRole("button", { name: "Show next artwork media" })
+    );
+
+    expect(imageSlide).toHaveClass("tw-flex", "tw-h-auto", "tw-justify-center");
+    expect(imageSlide).not.toHaveClass("tw-hidden", "tw-h-full");
+    expect(videoSlide).toHaveClass("tw-hidden");
+    expect(getLatestNFTImageProps(false).artworkLayout).toBe(true);
+    expect(container.firstElementChild).toHaveClass(
+      "tw-flex-none",
+      "tw-w-full"
+    );
+    expect(container.querySelector("section")).toHaveClass("tw-w-full");
+
+    await user.click(
+      screen.getByRole("button", { name: "Show previous artwork media" })
+    );
+    expect(videoSlide).toHaveClass("tw-flex", "tw-h-auto");
+    expect(imageSlide).toHaveClass("tw-hidden");
+  });
+
   it("keeps image sizing when video metadata has no animation URL", () => {
     const { container } = render(
       <MemePageArtViewer
