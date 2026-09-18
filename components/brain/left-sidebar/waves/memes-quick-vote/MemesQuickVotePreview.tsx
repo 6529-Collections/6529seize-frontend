@@ -131,7 +131,7 @@ function MemesQuickVoteMobileDetails({
         </div>
 
         <div className="tw-flex tw-min-h-0 tw-flex-1 tw-flex-col tw-gap-2.5 tw-pt-3">
-          <h2 className="tw-m-0 tw-shrink-0 tw-break-words tw-text-[1.25rem] tw-font-bold tw-leading-[1.1] tw-tracking-tight tw-text-white">
+          <h2 className="tw-m-0 tw-line-clamp-2 tw-shrink-0 tw-break-words tw-text-[1.25rem] tw-font-bold tw-leading-[1.1] tw-tracking-tight tw-text-white">
             {title}
           </h2>
 

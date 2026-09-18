@@ -6,6 +6,7 @@ import {
   render,
   screen,
   waitFor,
+  within,
 } from "@testing-library/react";
 import React from "react";
 
@@ -389,6 +390,9 @@ describe("MemesQuickVoteDialog", () => {
     expect(mediaRegion).not.toHaveClass("tw-min-h-24");
     expect(detailsRegion).toHaveClass("tw-min-h-0");
     expect(detailsRegion).not.toHaveClass("tw-min-h-[12.5rem]");
+    expect(
+      within(mobileContext).getByRole("heading", { name: "Drop 42" })
+    ).toHaveClass("tw-line-clamp-2");
   });
 
   it("warms video renditions without creating a hidden video player", () => {
