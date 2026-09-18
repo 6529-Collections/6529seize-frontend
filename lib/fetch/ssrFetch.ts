@@ -42,97 +42,108 @@ const extractPathFromUrl = (url: string | URL, baseUrl: string): string => {
   }
 };
 
-const enhancedFetch: typeof fetch = async (
-  input: RequestInfo | URL,
-  init?: RequestInit
-): Promise<Response> => {
-  if (globalThis.window !== undefined) {
-    return originalFetch(input, init);
-  }
+const createSsrFetch =
+  (includeWalletAuth: boolean): typeof fetch =>
+  async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
+    if (Reflect.has(globalThis, "window")) {
+      return originalFetch(input, init);
+    }
 
-  let url: string;
-  if (typeof input === "string") {
-    url = input;
-  } else if (input instanceof URL) {
-    url = input.toString();
-  } else {
-    url = input.url;
-  }
+    let url: string;
+    if (typeof input === "string") {
+      url = input;
+    } else if (input instanceof URL) {
+      url = input.toString();
+    } else {
+      url = input.url;
+    }
 
-  if (!isApiRequest(url)) {
-    return originalFetch(input, init);
-  }
+    if (!isApiRequest(url)) {
+      return originalFetch(input, init);
+    }
 
-  let clientId: string;
-  let clientSecret: string;
+    let clientId: string;
+    let clientSecret: string;
 
-  const method = (
-    init?.method ??
-    (input instanceof Request ? input.method : undefined) ??
-    "GET"
-  ).toUpperCase();
-  const path = extractPathFromUrl(url, publicEnv.API_ENDPOINT);
+    const method = (
+      init?.method ??
+      (input instanceof Request ? input.method : undefined) ??
+      "GET"
+    ).toUpperCase();
+    const path = extractPathFromUrl(url, publicEnv.API_ENDPOINT);
 
-  if (!path) {
-    return originalFetch(input, init);
-  }
+    if (!path) {
+      return originalFetch(input, init);
+    }
 
-  try {
-    const env = getServerEnvOrThrow();
-    clientId = env.SSR_CLIENT_ID;
-    clientSecret = env.SSR_CLIENT_SECRET;
-  } catch {
-    console.warn(
-      `[SSR Fetch] [PATH: ${path}] SSR credentials unavailable, falling back to unauthenticated fetch. Internal rate limits will not be bypassed.`
+    const baseHeaders = input instanceof Request ? input.headers : undefined;
+    const enhancedHeaders = new Headers(baseHeaders);
+    if (init?.headers) {
+      new Headers(init.headers).forEach((value, key) => {
+        enhancedHeaders.set(key, value);
+      });
+    }
+    if (!includeWalletAuth) {
+      enhancedHeaders.delete("Authorization");
+    }
+
+    try {
+      const env = getServerEnvOrThrow();
+      clientId = env.SSR_CLIENT_ID;
+      clientSecret = env.SSR_CLIENT_SECRET;
+    } catch {
+      console.warn(
+        `[SSR Fetch] [PATH: ${path}] SSR credentials unavailable, falling back to unauthenticated fetch. Internal rate limits will not be bypassed.`
+      );
+      return originalFetch(input, {
+        ...init,
+        headers: enhancedHeaders,
+      });
+    }
+
+    const signatureData = generateClientSignature(
+      clientId,
+      clientSecret,
+      method,
+      path
     );
-    return originalFetch(input, init);
-  }
 
-  const signatureData = generateClientSignature(
-    clientId,
-    clientSecret,
-    method,
-    path
-  );
+    const wafSignature = generateWafSignature(clientId, clientSecret);
 
-  const wafSignature = generateWafSignature(clientId, clientSecret);
-
-  const baseHeaders = input instanceof Request ? input.headers : undefined;
-  const enhancedHeaders = new Headers(baseHeaders);
-  if (init?.headers) {
-    new Headers(init.headers).forEach((value, key) => {
-      enhancedHeaders.set(key, value);
-    });
-  }
-
-  enhancedHeaders.set("x-6529-internal-id", signatureData.clientId);
-  enhancedHeaders.set("x-6529-internal-signature", signatureData.signature);
-  enhancedHeaders.set(
-    "x-6529-internal-timestamp",
-    signatureData.timestamp.toString()
-  );
-  enhancedHeaders.set("x-6529-internal-waf-signature", wafSignature);
-
-  try {
-    const appHeaders = await getAppCommonHeaders();
-    Object.entries(appHeaders).forEach(([key, value]) => {
-      enhancedHeaders.set(key, value);
-    });
-  } catch (error) {
-    console.warn(
-      `[SSR Fetch] [PATH: ${path}] Failed to get app common headers:`,
-      error instanceof Error ? error.message : error
+    enhancedHeaders.set("x-6529-internal-id", signatureData.clientId);
+    enhancedHeaders.set("x-6529-internal-signature", signatureData.signature);
+    enhancedHeaders.set(
+      "x-6529-internal-timestamp",
+      signatureData.timestamp.toString()
     );
-  }
+    enhancedHeaders.set("x-6529-internal-waf-signature", wafSignature);
 
-  return originalFetch(input, {
-    ...init,
-    headers: enhancedHeaders,
-  });
-};
+    try {
+      const appHeaders = await getAppCommonHeaders();
+      Object.entries(appHeaders).forEach(([key, value]) => {
+        if (!includeWalletAuth && key.toLowerCase() === "authorization") {
+          return;
+        }
+        enhancedHeaders.set(key, value);
+      });
+    } catch (error) {
+      console.warn(
+        `[SSR Fetch] [PATH: ${path}] Failed to get app common headers:`,
+        error instanceof Error ? error.message : error
+      );
+    }
+
+    return originalFetch(input, {
+      ...init,
+      headers: enhancedHeaders,
+    });
+  };
+
+const enhancedFetch = createSsrFetch(true);
+const anonymousSsrFetch = createSsrFetch(false);
 
 if (globalThis.window === undefined) {
   globalThis.fetch = enhancedFetch;
 }
 
-export { enhancedFetch as ssrFetch };
+export { anonymousSsrFetch, enhancedFetch as ssrFetch };
