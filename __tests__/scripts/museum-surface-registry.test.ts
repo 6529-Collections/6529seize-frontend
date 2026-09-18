@@ -341,11 +341,11 @@ describe("Museum surface registry", () => {
       };
       try {
         const remainingRoutes = (
-          fixture.registry.routes as { file: string }[]
+          fixture.registry["routes"] as { file: string }[]
         ).filter((entry) => entry.file !== page);
         const baseRegistry = {
           ...fixture.registry,
-          routes: registered ? fixture.registry.routes : remainingRoutes,
+          routes: registered ? fixture.registry["routes"] : remainingRoutes,
         };
         write(fixture.root, registryPath, JSON.stringify(baseRegistry));
         git("init", "-q");
@@ -356,9 +356,9 @@ describe("Museum surface registry", () => {
           handler,
           "export function GET() { return new Response(null, { status: 308 }); }\n"
         );
-        fixture.registry.routes = remainingRoutes;
-        fixture.registry.support_files = [
-          ...(fixture.registry.support_files as object[]),
+        fixture.registry["routes"] = remainingRoutes;
+        fixture.registry["support_files"] = [
+          ...(fixture.registry["support_files"] as object[]),
           ownedFile(handler, ["museum.home"]),
         ];
         write(fixture.root, registryPath, JSON.stringify(fixture.registry));

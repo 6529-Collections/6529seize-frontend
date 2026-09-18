@@ -228,7 +228,7 @@ describe("Museum legacy route contract", () => {
           status: "unavailable",
           publication: null,
           errorCode: "publication_unavailable",
-          failedAt: null,
+          failedAt: "2026-09-18T00:00:00.000Z",
           lastValidAcceptedAt: null,
         },
         view: null,
