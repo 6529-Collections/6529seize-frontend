@@ -4,8 +4,14 @@ import {
   ApiArtworkDocumentationOperationOpEnum,
   type ApiArtworkDocumentationOperation,
 } from "@/generated/models/ApiArtworkDocumentationOperation";
-import type { ApiArtworkDocumentationAnswer } from "@/generated/models/ApiArtworkDocumentationAnswer";
-import type { ApiArtworkDocumentationProfile } from "@/generated/models/ApiArtworkDocumentationProfile";
+import {
+  ApiArtworkDocumentationAnswerStatusEnum,
+  type ApiArtworkDocumentationAnswer,
+} from "@/generated/models/ApiArtworkDocumentationAnswer";
+import {
+  ApiArtworkDocumentationProfileIntakeModeEnum,
+  type ApiArtworkDocumentationProfile,
+} from "@/generated/models/ApiArtworkDocumentationProfile";
 
 export type DocumentationValidationCode =
   | "required"
@@ -35,6 +41,7 @@ export interface DocumentationValidationIssue {
   path: (string | number)[];
   kind: "incomplete" | "invalid";
 }
+type Issues = DocumentationValidationIssue[];
 type Path = DocumentationValidationIssue["path"];
 type Schema = ApiArtworkDocumentationValueSchema;
 type RecordValue = Record<string, unknown>;
@@ -67,12 +74,11 @@ function normalizeString(value: string): string {
   return value.replace(/\r\n?/g, "\n").normalize("NFC");
 }
 function normalizeObject(value: unknown, depth: number): RecordValue {
-  if (
-    !isRecord(value) ||
-    ![Object.prototype, null].includes(Object.getPrototypeOf(value))
-  )
+  if (!isRecord(value)) throw new Error("invalid_value");
+  const prototype: unknown = Object.getPrototypeOf(value);
+  if (prototype !== Object.prototype && prototype !== null)
     throw new Error("invalid_value");
-  const result: RecordValue = Object.create(null);
+  const result: RecordValue = {};
   for (const [key, item] of Object.entries(value)) {
     if (["__proto__", "prototype", "constructor"].includes(key))
       throw new Error("invalid_value");
@@ -91,7 +97,10 @@ function normalize(value: unknown, depth = 0): unknown {
 }
 
 function validDate(value: unknown): value is string {
-  if (typeof value !== "string" || !/^\d{4}(-\d{2})?(-\d{2})?$/.test(value))
+  if (
+    typeof value !== "string" ||
+    !/^(?:\d{4}|\d{4}-\d{2}|\d{4}-\d{2}-\d{2})$/.test(value)
+  )
     return false;
   const [year = 0, month = 1, day = 1] = value.split("-").map(Number);
   const leap = year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
@@ -105,53 +114,62 @@ function validDate(value: unknown): value is string {
   );
 }
 
+function validIntegerString(value: string): boolean {
+  const max =
+    "115792089237316195423570985008687907853269984665640564039457584007913129639935";
+  return (
+    /^(0|[1-9]\d{0,77})$/.test(value) &&
+    (value.length < max.length || value <= max)
+  );
+}
+function validLanguage(value: string): boolean {
+  try {
+    return Intl.getCanonicalLocales(value).length === 1;
+  } catch {
+    return false;
+  }
+}
+function validUri(value: string, authority: boolean): boolean {
+  try {
+    const url = new URL(value);
+    const protocols = authority
+      ? ["http:", "https:"]
+      : ["https:", "ipfs:", "ar:"];
+    return protocols.includes(url.protocol) && !url.username && !url.password;
+  } catch {
+    return false;
+  }
+}
 function formatIssue(
   value: string,
   format: string | undefined
 ): DocumentationValidationCode | null {
-  if (format === "uuid")
-    return /^[a-f\d]{8}(?:-[a-f\d]{4}){3}-[a-f\d]{12}$/i.test(value)
-      ? null
-      : "invalid_uuid";
-  if (format === "ethereum-address")
-    return /^0x[a-f\d]{40}$/i.test(value) ? null : "invalid_address";
-  if (format === "uint256-string") {
-    const max =
-      "115792089237316195423570985008687907853269984665640564039457584007913129639935";
-    return /^(0|[1-9]\d{0,77})$/.test(value) &&
-      (value.length < max.length || value <= max)
-      ? null
-      : "invalid_integer_string";
-  }
-  if (format === "partial-date")
-    return validDate(value) ? null : "invalid_date";
-  if (format === "bcp47") {
-    try {
-      return Intl.getCanonicalLocales(value).length === 1
+  switch (format) {
+    case "uuid":
+      return /^[a-f\d]{8}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{4}-[a-f\d]{12}$/i.test(
+        value
+      )
         ? null
-        : "invalid_language";
-    } catch {
-      return "invalid_language";
-    }
-  }
-  if (format !== "uri" && format !== "authority-uri") return null;
-  try {
-    const url = new URL(value);
-    const protocols =
-      format === "uri" ? ["https:", "ipfs:", "ar:"] : ["http:", "https:"];
-    return protocols.includes(url.protocol) && !url.username && !url.password
-      ? null
-      : "invalid_uri";
-  } catch {
-    return "invalid_uri";
+        : "invalid_uuid";
+    case "ethereum-address":
+      return /^0x[a-f\d]{40}$/i.test(value) ? null : "invalid_address";
+    case "uint256-string":
+      return validIntegerString(value) ? null : "invalid_integer_string";
+    case "partial-date":
+      return validDate(value) ? null : "invalid_date";
+    case "bcp47":
+      return validLanguage(value) ? null : "invalid_language";
+    case "uri":
+      return validUri(value, false) ? null : "invalid_uri";
+    case "authority-uri":
+      return validUri(value, true) ? null : "invalid_uri";
+    case undefined:
+    default:
+      return null;
   }
 }
 
-function stringIssues(
-  value: unknown,
-  schema: Schema,
-  path: Path
-): DocumentationValidationIssue[] {
+function stringIssues(value: unknown, schema: Schema, path: Path): Issues {
   if (typeof value !== "string") return [issue("invalid_value", path)];
   const length = Array.from(value).length;
   if (length < (wireProperty(schema, "min_length", "minLength") ?? 1))
@@ -161,13 +179,9 @@ function stringIssues(
   const code = formatIssue(value, schema.format);
   return code ? [issue(code, path)] : [];
 }
-function arrayIssues(
-  value: unknown,
-  schema: Schema,
-  path: Path
-): DocumentationValidationIssue[] {
+function arrayIssues(value: unknown, schema: Schema, path: Path): Issues {
   if (!Array.isArray(value)) return [issue("invalid_value", path)];
-  const result: DocumentationValidationIssue[] = [];
+  const result: Issues = [];
   if (value.length < (wireProperty(schema, "min_items", "minItems") ?? 0))
     result.push(issue("required", path, "incomplete"));
   if (value.length > (wireProperty(schema, "max_items", "maxItems") ?? 30))
@@ -182,11 +196,7 @@ function arrayIssues(
   });
   return result;
 }
-function objectIssues(
-  value: unknown,
-  schema: Schema,
-  path: Path
-): DocumentationValidationIssue[] {
+function objectIssues(value: unknown, schema: Schema, path: Path): Issues {
   if (!isRecord(value)) return [issue("invalid_value", path)];
   const result = (schema.required ?? [])
     .filter((key) => !Object.hasOwn(value, key))
@@ -203,22 +213,35 @@ function objectIssues(
   }
   return result;
 }
-function schemaIssues(
+function alternativeIssues(
   value: unknown,
-  schema: Schema,
+  alternatives: Schema[],
   path: Path
-): DocumentationValidationIssue[] {
+): Issues {
+  const results = alternatives.map((item) => schemaIssues(value, item, path));
+  const matches = results.filter((result) => result.length === 0).length;
+  if (matches === 1) return [];
+  if (matches > 1) return [issue("invalid_value", path)];
+  return results.reduce(
+    (best, next) => (next.length < best.length ? next : best),
+    results[0] ?? [issue("invalid_value", path)]
+  );
+}
+function numericIssues(value: unknown, schema: Schema, path: Path): Issues {
+  if (
+    typeof value !== "number" ||
+    !Number.isFinite(value) ||
+    (schema.type === "integer" && !Number.isInteger(value))
+  )
+    return [issue("invalid_value", path)];
+  return value >= (schema.minimum ?? -Number.MAX_SAFE_INTEGER) &&
+    value <= (schema.maximum ?? Number.MAX_SAFE_INTEGER)
+    ? []
+    : [issue("out_of_range", path)];
+}
+function schemaIssues(value: unknown, schema: Schema, path: Path): Issues {
   const alternatives = wireProperty(schema, "one_of", "oneOf");
-  if (alternatives) {
-    const results = alternatives.map((item) => schemaIssues(value, item, path));
-    const matches = results.filter((result) => result.length === 0).length;
-    if (matches === 1) return [];
-    if (matches > 1) return [issue("invalid_value", path)];
-    return results.reduce(
-      (best, next) => (next.length < best.length ? next : best),
-      results[0] ?? [issue("invalid_value", path)]
-    );
-  }
+  if (alternatives) return alternativeIssues(value, alternatives, path);
   const options = wireProperty(schema, "_enum", "enum");
   if (options && !options.includes(value))
     return [
@@ -234,22 +257,13 @@ function schemaIssues(
     case "boolean":
       return typeof value === "boolean" ? [] : [issue("invalid_value", path)];
     case "integer":
-    case "number": {
-      if (
-        typeof value !== "number" ||
-        !Number.isFinite(value) ||
-        (schema.type === "integer" && !Number.isInteger(value))
-      )
-        return [issue("invalid_value", path)];
-      return value >= (schema.minimum ?? -Number.MAX_SAFE_INTEGER) &&
-        value <= (schema.maximum ?? Number.MAX_SAFE_INTEGER)
-        ? []
-        : [issue("out_of_range", path)];
-    }
+    case "number":
+      return numericIssues(value, schema, path);
     case "array":
       return arrayIssues(value, schema, path);
     case "object":
       return objectIssues(value, schema, path);
+    case undefined:
     default:
       return [issue("invalid_value", path)];
   }
@@ -258,7 +272,7 @@ function schemaIssues(
 export function documentationSchemaIssues(
   value: unknown,
   schema: Schema
-): DocumentationValidationIssue[] {
+): Issues {
   try {
     return schemaIssues(normalize(value), schema, []);
   } catch {
@@ -289,10 +303,7 @@ export function requiredRightsDetailField(
     return "details";
   return null;
 }
-function dateIssues(
-  value: RecordValue,
-  path: Path
-): DocumentationValidationIssue[] {
+function dateIssues(value: RecordValue, path: Path): Issues {
   const precision =
     value["precision"] === "range"
       ? value["endpoint_precision"]
@@ -300,8 +311,8 @@ function dateIssues(
   const length = ({ day: 10, month: 7, year: 4 } as Record<string, number>)[
     String(precision)
   ];
-  const result: DocumentationValidationIssue[] = [];
-  if (value["precision"] === "range" && !value["endpoint_precision"])
+  const result: Issues = [];
+  if (value["precision"] === "range" && !Boolean(value["endpoint_precision"]))
     result.push(
       issue("required", [...path, "endpoint_precision"], "incomplete")
     );
@@ -311,7 +322,7 @@ function dateIssues(
       issue(
         "invalid_date",
         [...path, "start"],
-        start ? "invalid" : "incomplete"
+        Boolean(start) ? "invalid" : "incomplete"
       )
     );
   if (value["precision"] === "range") {
@@ -322,7 +333,11 @@ function dateIssues(
       (typeof start === "string" && end < start)
     )
       result.push(
-        issue("invalid_date", [...path, "end"], end ? "invalid" : "incomplete")
+        issue(
+          "invalid_date",
+          [...path, "end"],
+          Boolean(end) ? "invalid" : "incomplete"
+        )
       );
   } else if (
     value["end"] !== undefined ||
@@ -331,7 +346,7 @@ function dateIssues(
     result.push(issue("invalid_date", path));
   return result;
 }
-function localizedIssues(value: RecordValue): DocumentationValidationIssue[] {
+function localizedIssues(value: RecordValue): Issues {
   if (!Array.isArray(value["versions"])) return [];
   const versions = value["versions"].filter(isRecord);
   const languages = versions.map((version) => version["language"]);
@@ -358,13 +373,10 @@ function needsExplanation(path: string, value: RecordValue): boolean {
   return (
     path === "context.prior_mint_status" &&
     kind === "previously_minted" &&
-    !(value["references"] as unknown[] | undefined)?.length
+    ((value["references"] as unknown[] | undefined)?.length ?? 0) === 0
   );
 }
-function requiredDetailIssues(
-  path: string,
-  value: RecordValue
-): DocumentationValidationIssue[] {
+function requiredDetailIssues(path: string, value: RecordValue): Issues {
   const needed: string[] = [];
   if (needsKindDetail(path, value["kind"])) needed.push("detail");
   if (path === "rights.third_party_material" && value["kind"] === "present")
@@ -377,15 +389,45 @@ function requiredDetailIssues(
   )
     needed.push("other_detail");
   return needed
-    .filter((key) => !value[key])
+    .filter((key) => !Boolean(value[key]))
     .map((key) => issue("required_details", [key], "incomplete"));
 }
 
-function suppliedObjectIssues(
-  path: string,
-  value: RecordValue
-): DocumentationValidationIssue[] {
-  const result = requiredDetailIssues(path, value);
+function entriesIssues(path: string, value: RecordValue): Issues {
+  if (
+    ![
+      "process.contributors",
+      "process.ingredients",
+      "context.history",
+    ].includes(path)
+  )
+    return [];
+  const entries = Array.isArray(value["entries"]) ? value["entries"] : [];
+  const result: Issues = [];
+  if (
+    value["kind"] === "entries_supplied"
+      ? entries.length === 0
+      : entries.length > 0
+  )
+    result.push(
+      issue(
+        "required_details",
+        ["entries"],
+        entries.length > 0 ? "invalid" : "incomplete"
+      )
+    );
+  if (path === "context.history")
+    entries.forEach((entry, index) => {
+      if (isRecord(entry) && isRecord(entry["date"]))
+        result.push(...dateIssues(entry["date"], ["entries", index, "date"]));
+    });
+  return result;
+}
+function suppliedObjectIssues(path: string, value: RecordValue): Issues {
+  const result = [
+    ...requiredDetailIssues(path, value),
+    ...entriesIssues(path, value),
+  ];
   if ("precision" in value) result.push(...dateIssues(value, []));
   if ("versions" in value) result.push(...localizedIssues(value));
   if (
@@ -394,34 +436,10 @@ function suppliedObjectIssues(
     new Set(value["kinds"]).size !== value["kinds"].length
   )
     result.push(issue("duplicate_item", ["kinds"]));
-  if (
-    ["process.contributors", "process.ingredients", "context.history"].includes(
-      path
-    )
-  ) {
-    const entries = Array.isArray(value["entries"]) ? value["entries"] : [];
-    if (
-      value["kind"] === "entries_supplied" ? !entries.length : !!entries.length
-    )
-      result.push(
-        issue(
-          "required_details",
-          ["entries"],
-          entries.length ? "invalid" : "incomplete"
-        )
-      );
-    if (path === "context.history")
-      entries.forEach((entry, index) => {
-        if (isRecord(entry) && isRecord(entry["date"]))
-          result.push(...dateIssues(entry["date"], ["entries", index, "date"]));
-      });
-  }
   return result;
 }
-function timeRangeIssues(
-  value: RecordValue,
-  path: Path
-): DocumentationValidationIssue[] {
+
+function timeRangeIssues(value: RecordValue, path: Path): Issues {
   return (
     [
       ["start_seconds", "end_seconds"],
@@ -435,11 +453,8 @@ function timeRangeIssues(
       : [];
   });
 }
-function dimensionIssues(
-  value: RecordValue,
-  path: Path
-): DocumentationValidationIssue[] {
-  const result: DocumentationValidationIssue[] = [];
+function dimensionIssues(value: RecordValue, path: Path): Issues {
+  const result: Issues = [];
   const seconds = value["seconds"];
   if (
     value["kind"] === "fixed" &&
@@ -452,7 +467,7 @@ function dimensionIssues(
         seconds === undefined ? "incomplete" : "invalid"
       )
     );
-  if (value["unit"] === "other" && !value["unit_label"])
+  if (value["unit"] === "other" && !Boolean(value["unit_label"]))
     result.push(
       issue("required_details", [...path, "unit_label"], "incomplete")
     );
@@ -466,10 +481,7 @@ function dimensionIssues(
     );
   return result;
 }
-function nestedObjectIssues(
-  value: RecordValue,
-  path: Path
-): DocumentationValidationIssue[] {
+function nestedObjectIssues(value: RecordValue, path: Path): Issues {
   const result = [
     ...timeRangeIssues(value, path),
     ...dimensionIssues(value, path),
@@ -486,10 +498,7 @@ function nestedObjectIssues(
   return result;
 }
 
-function nestedIssues(
-  value: unknown,
-  path: Path = []
-): DocumentationValidationIssue[] {
+function nestedIssues(value: unknown, path: Path = []): Issues {
   if (Array.isArray(value))
     return value.flatMap((item, index) => nestedIssues(item, [...path, index]));
   if (!isRecord(value)) return [];
@@ -500,7 +509,7 @@ function nestedIssues(
     ),
   ];
 }
-function presentationIssues(value: unknown): DocumentationValidationIssue[] {
+function presentationIssues(value: unknown): Issues {
   if (!Array.isArray(value)) return [];
   return value.flatMap((scene, index) => {
     if (!isRecord(scene)) return [];
@@ -538,7 +547,7 @@ function semanticIssues(
   moduleId: string,
   fieldId: string,
   value: unknown
-): DocumentationValidationIssue[] {
+): Issues {
   const path = `${moduleId}.${fieldId}`;
   const result = isRecord(value) ? suppliedObjectIssues(path, value) : [];
   if (profile.version !== 3) return result;
@@ -566,7 +575,7 @@ export function documentationAnswerIssues(
   moduleId: string,
   fieldId: string,
   raw: ApiArtworkDocumentationAnswer
-): DocumentationValidationIssue[] {
+): Issues {
   const definition = profile.modules
     .find((module) => String(module.id) === moduleId)
     ?.fields.find((field) => field.id === fieldId);
@@ -593,7 +602,8 @@ export function documentationAnswerIssues(
     ) ||
     (definition.locked_restricted &&
       answer["intended_visibility"] !== "restricted") ||
-    (profile.intake_mode === "publication_only" &&
+    (profile.intake_mode ===
+      ApiArtworkDocumentationProfileIntakeModeEnum.PublicationOnly &&
       answer["intended_visibility"] !== "public_record")
   )
     return [issue("invalid_value")];
@@ -610,7 +620,7 @@ export function documentationAnswerIssues(
     if (
       moduleId === "process" &&
       fieldId === "capture_method" &&
-      !answer["explanation"]
+      !Boolean(answer["explanation"])
     )
       return [issue("required_details", [], "incomplete")];
     return explanationIssues;
@@ -667,7 +677,7 @@ function duplicateIds(
   context: ApiArtworkDocumentationContext,
   field: string,
   value: unknown
-): DocumentationValidationIssue[] {
+): Issues {
   if (context.profile.version !== 3 || !COLLECTION_FIELDS.has(field)) return [];
   const seen = new Set<unknown>([context.work_id]);
   const assetIds = new Set<unknown>(
@@ -679,7 +689,7 @@ function duplicateIds(
       if (
         other !== field &&
         COLLECTION_FIELDS.has(other) &&
-        answer.status === "provided"
+        answer.status === ApiArtworkDocumentationAnswerStatusEnum.Provided
       )
         collectionIds(answer.value).forEach(({ id }) => seen.add(id));
     }
@@ -693,7 +703,7 @@ export function documentationOperationIssues(
   context: ApiArtworkDocumentationContext,
   moduleId: string,
   operation: ApiArtworkDocumentationOperation
-): DocumentationValidationIssue[] {
+): Issues {
   const definition = context.profile.modules
     .find((module) => String(module.id) === moduleId)
     ?.fields.find((field) => field.id === operation.field);
@@ -701,10 +711,7 @@ export function documentationOperationIssues(
   if (definition.read_only) return [issue("fixed_terms")];
   if (operation.op === ApiArtworkDocumentationOperationOpEnum.Unset)
     return operation.answer === undefined ? [] : [issue("invalid_value")];
-  if (
-    operation.op !== ApiArtworkDocumentationOperationOpEnum.Set ||
-    !operation.answer
-  )
+  if (String(operation.op) !== "set" || !operation.answer)
     return [issue("required", [], "incomplete")];
   const result = documentationAnswerIssues(
     context.profile,
@@ -727,7 +734,9 @@ export function documentationOperationIssues(
     )
       result.push(issue("replacement_reason_required", [], "incomplete"));
   }
-  if (operation.answer.status === "provided")
+  if (
+    operation.answer.status === ApiArtworkDocumentationAnswerStatusEnum.Provided
+  )
     result.push(
       ...duplicateIds(
         context,
@@ -742,9 +751,8 @@ export function validDocumentationOperation(
   moduleId: string,
   operation: ApiArtworkDocumentationOperation
 ): boolean {
-  return (
-    documentationOperationIssues(context, moduleId, operation).length === 0
-  );
+  const issues = documentationOperationIssues(context, moduleId, operation);
+  return issues.length === 0;
 }
 export function validDocumentationAnswer(
   profile: ApiArtworkDocumentationProfile,
@@ -752,7 +760,6 @@ export function validDocumentationAnswer(
   fieldId: string,
   answer: ApiArtworkDocumentationAnswer
 ): boolean {
-  return (
-    documentationAnswerIssues(profile, moduleId, fieldId, answer).length === 0
-  );
+  const issues = documentationAnswerIssues(profile, moduleId, fieldId, answer);
+  return issues.length === 0;
 }
