@@ -55,6 +55,29 @@ import {
   documentationAssetRoles,
 } from "@/lib/artwork-documentation/asset-roles";
 import { isPublicationOnly } from "@/lib/artwork-documentation/intake";
+import {
+  reportArtworkDocumentationUploadFailure,
+  type DocumentationUploadStage,
+} from "@/utils/monitoring/artworkDocumentationUploadMonitoring";
+
+type UploadStatus =
+  | "idle"
+  | "queued"
+  | "uploading"
+  | "processing"
+  | "checking"
+  | "ready"
+  | "attach_failed"
+  | "cancelling"
+  | "failed"
+  | "changed";
+const activeUploadStates = new Set<UploadStatus>([
+  "queued",
+  "uploading",
+  "processing",
+  "checking",
+  "cancelling",
+]);
 
 const restrictedRoles = new Set([
   "consent_instrument",
@@ -65,6 +88,7 @@ const restrictedRoles = new Set([
 interface Props {
   readonly context: ApiArtworkDocumentationContext;
   readonly controller: DocumentationDraftController;
+  readonly onPendingChange?: ((pending: boolean) => void) | undefined;
 }
 
 function canContinueUpload(
@@ -87,7 +111,65 @@ function canUseUpload(
   );
 }
 
-export default function DocumentationUpload({ context, controller }: Props) {
+function uploadButtonDisabled(
+  file: File | null,
+  state: string | undefined,
+  busy: boolean,
+  permitted: boolean,
+  limit: number
+): boolean {
+  if (!file && !["ready", "processing"].includes(state ?? "")) return true;
+  return busy || !permitted || (file?.size ?? 0) > limit;
+}
+
+function uploadActionMessage(
+  status: UploadStatus,
+  hasSession: boolean
+): string {
+  if (status === "attach_failed") return "uploadRetryAttachment";
+  return hasSession ? "retry" : "uploadStart";
+}
+function uploadFailureStatus(error: unknown): UploadStatus {
+  return error instanceof DocumentationFileChangedError ? "changed" : "failed";
+}
+async function getOrStartUpload({
+  contextId,
+  resumeId,
+  file,
+  role,
+  visibility,
+  key,
+  signal,
+}: {
+  readonly contextId: string;
+  readonly resumeId: string | undefined;
+  readonly file: File | null;
+  readonly role: string;
+  readonly visibility: string;
+  readonly key: string;
+  readonly signal: AbortSignal;
+}): Promise<ApiArtworkDocumentationUploadSession> {
+  if (resumeId) return getDocumentationUpload(contextId, resumeId, signal);
+  if (!file) throw new Error("UPLOAD_FILE_REQUIRED");
+  return startDocumentationUpload(
+    contextId,
+    {
+      filename: file.name,
+      size_bytes: file.size,
+      declared_mime: file.type || "application/octet-stream",
+      role,
+      intended_visibility: visibility,
+    },
+    key,
+    signal
+  );
+}
+
+export default function DocumentationUpload({
+  context,
+  controller,
+  onPendingChange,
+}: Props) {
   const { msg, locale } = useDocumentationMessages();
   const publicationOnly = isPublicationOnly(context.profile);
   const [file, setFile] = useState<File | null>(null);
@@ -97,17 +179,24 @@ export default function DocumentationUpload({ context, controller }: Props) {
   const [session, setSession] =
     useState<ApiArtworkDocumentationUploadSession | null>(null);
   const [sent, setSent] = useState(0);
-  const [status, setStatus] = useState<
-    | "idle"
-    | "queued"
-    | "uploading"
-    | "processing"
-    | "cancelling"
-    | "failed"
-    | "changed"
-  >("idle");
+  const [attaching, setAttaching] = useState(false);
+  const [completedFilename, setCompletedFilename] = useState("");
+  const fileInput = useRef<HTMLInputElement | null>(null);
+  const [status, setStatus] = useState<UploadStatus>("idle");
+  const setUploadStatus = useCallback(
+    (next: UploadStatus) => {
+      setStatus(next);
+      onPendingChange?.(activeUploadStates.has(next));
+    },
+    [onPendingChange]
+  );
   const abort = useRef<AbortController | null>(null);
   const transferRunning = useRef(false);
+  const monitoringAttempt = useRef<object>({});
+  const queuedTransfer = useRef<ReturnType<typeof setTimeout> | undefined>(
+    undefined
+  );
+  const queuedFilesRef = useRef<readonly File[]>([]);
   const startKey = useRef(crypto.randomUUID());
   const [actionError, setActionError] = useState(false);
   const mounted = useRef(true);
@@ -116,14 +205,23 @@ export default function DocumentationUpload({ context, controller }: Props) {
     return () => {
       mounted.current = false;
       abort.current?.abort();
+      clearTimeout(queuedTransfer.current);
+      onPendingChange?.(false);
     };
-  }, []);
+  }, [onPendingChange]);
   const sizeLabel = (size: number) => formatFileSizeLabel(size, locale) ?? "—";
-  const busy =
-    status === "queued" ||
-    status === "uploading" ||
-    status === "processing" ||
-    status === "cancelling";
+  const busy = attaching || activeUploadStates.has(status);
+  useEffect(() => {
+    if (!busy) return;
+    const beforeUnload = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      // Legacy WebViews also require returnValue to protect an active transfer.
+      // eslint-disable-next-line @typescript-eslint/no-deprecated -- Retain beforeunload compatibility.
+      event.returnValue = "";
+    };
+    globalThis.addEventListener("beforeunload", beforeUnload);
+    return () => globalThis.removeEventListener("beforeunload", beforeUnload);
+  }, [busy]);
   const roles = documentationAssetRoles(context);
   const rolePermitted =
     canPublishDocumentationAsset(context, role) &&
@@ -133,6 +231,7 @@ export default function DocumentationUpload({ context, controller }: Props) {
     : rolePermitted;
   const failureMessage =
     session && !transferPermitted ? "uploadBlockedRecovery" : "uploadFailed";
+  const actionLabel = msg(uploadActionMessage(status, session !== null));
   const chosenVisibility = publicationOnly ? "public_record" : visibility;
   const uploadVisibility =
     !publicationOnly && restrictedRoles.has(role)
@@ -162,40 +261,108 @@ export default function DocumentationUpload({ context, controller }: Props) {
       assetId: string,
       assetRole: string,
       assetVisibility: string,
-      filename: string
+      filename: string,
+      uploadSignal: AbortSignal,
+      allowLink = true
     ) =>
-      controller.mutate((current, signal) => {
-        if (
-          !canUseUpload(current, {
-            role: assetRole,
-            intended_visibility: assetVisibility,
-          })
-        )
-          throw new Error("PUBLICATION_ASSET_ROLE_REQUIRED");
-        return linkDocumentationAsset(
-          current,
-          {
-            asset_id: assetId,
-            role: assetRole,
-            label: filename,
-            description: "",
-            intended_visibility: assetVisibility,
-            source_of_asset: isPublicationOnly(current.profile)
-              ? "unknown"
-              : "self",
-            source_credit: "",
-            derived_from_asset_ids: [],
-            deposit_note: "",
-            intended_terms: {
-              kind: isPublicationOnly(current.profile)
-                ? "unspecified"
-                : "private_deposit",
-            },
-          } as ApiArtworkDocumentationAssetLinkRequest,
-          signal
-        );
+      controller.mutateContent(async (current, signal) => {
+        const requestAbort = new AbortController();
+        const cancelRequest = () => requestAbort.abort();
+        signal.addEventListener("abort", cancelRequest, { once: true });
+        uploadSignal.addEventListener("abort", cancelRequest, { once: true });
+        if (signal.aborted || uploadSignal.aborted) cancelRequest();
+        try {
+          // Read back before linking: the previous response may have been lost.
+          const latest = await getDocumentationContext(
+            current.id,
+            requestAbort.signal
+          );
+          if (
+            latest.asset_links.some(
+              (link) => link.asset_id === assetId && link.role === assetRole
+            )
+          )
+            return latest;
+          if (!allowLink) throw new Error("UPLOAD_MUTATION_NOT_ALLOWED");
+          if (
+            !canUseUpload(latest, {
+              role: assetRole,
+              intended_visibility: assetVisibility,
+            })
+          )
+            throw new Error("PUBLICATION_ASSET_ROLE_REQUIRED");
+          return await linkDocumentationAsset(
+            latest,
+            {
+              asset_id: assetId,
+              role: assetRole,
+              label: filename,
+              description: "",
+              intended_visibility: assetVisibility,
+              source_of_asset: isPublicationOnly(latest.profile)
+                ? "unknown"
+                : "self",
+              source_credit: "",
+              derived_from_asset_ids: [],
+              deposit_note: "",
+              intended_terms: {
+                kind: isPublicationOnly(latest.profile)
+                  ? "unspecified"
+                  : "private_deposit",
+              },
+            } as ApiArtworkDocumentationAssetLinkRequest,
+            requestAbort.signal
+          );
+        } catch (error) {
+          reportArtworkDocumentationUploadFailure(error, {
+            stage: "attach",
+            profileVersion: current.profile.version,
+            assetState: "ready",
+            attempt: monitoringAttempt.current,
+          });
+          throw error;
+        } finally {
+          signal.removeEventListener("abort", cancelRequest);
+          uploadSignal.removeEventListener("abort", cancelRequest);
+        }
       }),
     [controller]
+  );
+  const finishAttachment = useCallback(
+    async (
+      upload: ApiArtworkDocumentationUploadSession,
+      signal: AbortSignal
+    ) => {
+      setAttaching(true);
+      const attached = await attach(
+        upload.asset.id,
+        upload.asset.role,
+        upload.asset.intended_visibility,
+        upload.asset.filename,
+        signal,
+        upload.can_mutate === true
+      );
+      if (mounted.current) setAttaching(false);
+      if (!canContinueUpload(signal, mounted)) return;
+      if (!attached) {
+        // Keep the checked original available. Retrying must not upload it again.
+        setSession(upload);
+        setUploadStatus("attach_failed");
+        return;
+      }
+      setCompletedFilename(upload.asset.filename);
+      const [next, ...remaining] = queuedFilesRef.current;
+      queuedFilesRef.current = remaining;
+      setFile(next ?? null);
+      setQueuedFiles(remaining);
+      setSession(null);
+      setSent(0);
+      startKey.current = crypto.randomUUID();
+      if (fileInput.current) fileInput.current.value = "";
+      setUploadStatus(next ? "queued" : "ready");
+      return next;
+    },
+    [attach, setUploadStatus]
   );
   const verifyUpload = useCallback(
     async (
@@ -220,55 +387,94 @@ export default function DocumentationUpload({ context, controller }: Props) {
     },
     [controller, context.id]
   );
-  const run = useCallback(
-    async (resumeId?: string, selectedFile: File | null = file) => {
+  const handleUploadState = useCallback(
+    async (
+      upload: ApiArtworkDocumentationUploadSession,
+      resumeId: string | undefined,
+      signal: AbortSignal,
+      onNext: (file: File) => void
+    ): Promise<boolean> => {
+      if (upload.asset.state === "ready") {
+        const next = await finishAttachment(upload, signal);
+        if (next)
+          queuedTransfer.current = setTimeout(() => {
+            if (mounted.current) onNext(next);
+          }, 0);
+        return true;
+      }
+      if (!(await verifyUpload(upload, resumeId, signal))) return true;
+      if (upload.asset.state === "processing") {
+        setUploadStatus("processing");
+        return true;
+      }
       if (
-        !selectedFile ||
+        ["failed", "quarantined", "expired", "cancelled"].includes(
+          upload.asset.state
+        )
+      ) {
+        setUploadStatus("failed");
+        return true;
+      }
+      return false;
+    },
+    [finishAttachment, verifyUpload, setUploadStatus]
+  );
+  const run = useCallback(
+    async function runUpload(
+      resumeId?: string,
+      selectedFile: File | null = file
+    ) {
+      if (
+        (!selectedFile && !resumeId) ||
         (!resumeId && !rolePermitted) ||
         transferRunning.current
       )
         return;
       if (
+        selectedFile &&
         selectedFile.size >
-        (controller.snapshot().context.profile.limits["asset_bytes"] ??
-          4294967296)
+          (controller.snapshot().context.profile.limits["asset_bytes"] ??
+            4294967296)
       ) {
-        setStatus("failed");
+        setUploadStatus("failed");
         return;
       }
       transferRunning.current = true;
+      monitoringAttempt.current = {};
+      let stage: DocumentationUploadStage = resumeId ? "check" : "reserve";
       const controllerAbort = new AbortController();
       abort.current = controllerAbort;
-      setStatus("uploading");
+      setUploadStatus(resumeId ? "checking" : "uploading");
+      setSent(0);
       setActionError(false);
       try {
-        if (!(await controller.flush())) {
-          setStatus("idle");
-          return;
-        }
-        const upload = resumeId
-          ? await getDocumentationUpload(
-              context.id,
-              resumeId,
-              controllerAbort.signal
-            )
-          : await startDocumentationUpload(
-              context.id,
-              {
-                filename: selectedFile.name,
-                size_bytes: selectedFile.size,
-                declared_mime: selectedFile.type || "application/octet-stream",
-                role,
-                intended_visibility: uploadVisibility,
-              },
-              startKey.current,
-              controllerAbort.signal
-            );
+        const upload = await getOrStartUpload({
+          contextId: context.id,
+          resumeId,
+          file: selectedFile,
+          role,
+          visibility: uploadVisibility,
+          key: startKey.current,
+          signal: controllerAbort.signal,
+        });
         if (!canContinueUpload(controllerAbort.signal, mounted)) return;
         setSession(upload);
-        if (!(await verifyUpload(upload, resumeId, controllerAbort.signal)))
+        if (upload.asset.state === "ready") stage = "attach";
+        if (
+          await handleUploadState(
+            upload,
+            resumeId,
+            controllerAbort.signal,
+            (next) => {
+              void runUpload(undefined, next);
+            }
+          )
+        )
           return;
-        await transferDocumentationFile({
+        if (!selectedFile) throw new Error("UPLOAD_FILE_REQUIRED");
+        setUploadStatus("uploading");
+        stage = "transfer";
+        const completed = await transferDocumentationFile({
           contextId: context.id,
           session: upload,
           file: selectedFile,
@@ -276,14 +482,16 @@ export default function DocumentationUpload({ context, controller }: Props) {
           onProgress: setSent,
         });
         if (!canContinueUpload(controllerAbort.signal, mounted)) return;
-        setStatus("processing");
+        setSession({ ...upload, asset: completed.asset });
+        setUploadStatus("processing");
       } catch (error) {
-        if (canContinueUpload(controllerAbort.signal, mounted))
-          setStatus(
-            error instanceof DocumentationFileChangedError
-              ? "changed"
-              : "failed"
-          );
+        if (!canContinueUpload(controllerAbort.signal, mounted)) return;
+        reportArtworkDocumentationUploadFailure(error, {
+          stage,
+          profileVersion: controller.snapshot().context.profile.version,
+          attempt: monitoringAttempt.current,
+        });
+        setUploadStatus(uploadFailureStatus(error));
       } finally {
         transferRunning.current = false;
       }
@@ -295,16 +503,19 @@ export default function DocumentationUpload({ context, controller }: Props) {
       context.id,
       role,
       uploadVisibility,
-      verifyUpload,
+      handleUploadState,
+      setUploadStatus,
     ]
   );
   const cancel = async () => {
     if (session && (session.can_mutate !== true || !canUpload)) return;
     abort.current?.abort();
+    clearTimeout(queuedTransfer.current);
+    queuedFilesRef.current = [];
     setQueuedFiles([]);
     const controllerAbort = new AbortController();
     abort.current = controllerAbort;
-    setStatus("cancelling");
+    setUploadStatus("cancelling");
     setActionError(false);
     try {
       if (session)
@@ -314,12 +525,14 @@ export default function DocumentationUpload({ context, controller }: Props) {
           controllerAbort.signal
         );
       if (!canContinueUpload(controllerAbort.signal, mounted)) return;
-      setStatus("idle");
+      setUploadStatus("idle");
+      setAttaching(false);
+      setSent(0);
       setSession(null);
       startKey.current = crypto.randomUUID();
     } catch {
       if (canContinueUpload(controllerAbort.signal, mounted)) {
-        setStatus("failed");
+        setUploadStatus("failed");
         setActionError(true);
       }
     }
@@ -328,47 +541,66 @@ export default function DocumentationUpload({ context, controller }: Props) {
     if (status !== "processing" || !session) return;
     return pollDocumentationProcessing({
       expiresAt: session.expires_at,
-      onError: () => setStatus("failed"),
-      poll: async (signal) => {
-        const result = await getDocumentationUpload(
-          context.id,
-          session.upload_id,
-          signal
-        );
-        if (signal.aborted) return false;
-        if (result.can_mutate !== true)
-          throw new Error("UPLOAD_MUTATION_NOT_ALLOWED");
-        if (result.asset.state === "ready") {
-          const attached = await attach(
-            result.asset.id,
-            result.asset.role,
-            result.asset.intended_visibility,
-            result.asset.filename
-          );
-          if (canContinueUpload(signal, mounted)) {
-            const next = attached ? queuedFiles[0] : undefined;
-            if (next) setStatus("queued");
-            else setStatus(attached ? "idle" : "failed");
-            setFile(next ?? null);
-            if (attached) setQueuedFiles((files) => files.slice(1));
-            setSession(null);
-            startKey.current = crypto.randomUUID();
-            if (next) void run(undefined, next);
+      onError: () => {
+        reportArtworkDocumentationUploadFailure(
+          new Error("UPLOAD_STATUS_CHECK_FAILED"),
+          {
+            stage: "check",
+            profileVersion: context.profile.version,
+            assetState: session.asset.state,
+            attempt: monitoringAttempt.current,
           }
+        );
+        setUploadStatus("failed");
+      },
+      poll: async (signal) => {
+        let result: ApiArtworkDocumentationUploadSession;
+        try {
+          result = await getDocumentationUpload(
+            context.id,
+            session.upload_id,
+            signal
+          );
+        } catch (error) {
+          reportArtworkDocumentationUploadFailure(error, {
+            stage: "check",
+            profileVersion: context.profile.version,
+            assetState: session.asset.state,
+            attempt: monitoringAttempt.current,
+          });
+          throw error;
+        }
+        if (signal.aborted) return false;
+        if (result.asset.state === "ready") {
+          const next = await finishAttachment(result, signal);
+          if (next)
+            queuedTransfer.current = setTimeout(() => {
+              if (mounted.current) void run(undefined, next);
+            }, 0);
           return false;
         }
+        if (result.can_mutate !== true)
+          throw new Error("UPLOAD_MUTATION_NOT_ALLOWED");
         if (
           ["failed", "quarantined", "expired", "cancelled"].includes(
             result.asset.state
           )
         ) {
-          setStatus("failed");
+          setUploadStatus("failed");
           return false;
         }
         return true;
       },
     });
-  }, [status, session, context.id, attach, queuedFiles, run]);
+  }, [
+    status,
+    session,
+    context.id,
+    context.profile.version,
+    finishAttachment,
+    run,
+    setUploadStatus,
+  ]);
   useEffect(() => {
     if (status === "processing") return;
     const restored = context.assets.find(
@@ -386,7 +618,7 @@ export default function DocumentationUpload({ context, controller }: Props) {
         );
         if (signal.aborted) return false;
         if (result.asset.state === "processing") return true;
-        return !(await controller.mutate((current, currentSignal) =>
+        return !(await controller.mutateContent((current, currentSignal) =>
           getDocumentationContext(current.id, currentSignal)
         ));
       },
@@ -411,7 +643,9 @@ export default function DocumentationUpload({ context, controller }: Props) {
   };
   return (
     <section
-      className="tw-min-w-0 tw-space-y-6"
+      className="tw-min-w-0 tw-space-y-6 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+      id="documentation-upload"
+      tabIndex={-1}
       aria-labelledby="documentation-upload-title"
     >
       <h3
@@ -471,13 +705,22 @@ export default function DocumentationUpload({ context, controller }: Props) {
           <label className="tw-block tw-text-sm tw-text-iron-300">
             {msg("uploadSelect")}
             <input
+              ref={fileInput}
               type="file"
               multiple={!session}
               className="tw-mt-3 tw-block tw-min-h-12 tw-w-full tw-max-w-full tw-text-sm tw-text-iron-300 file:tw-mr-4 file:tw-cursor-pointer file:tw-rounded-md file:tw-border-0 file:tw-bg-iron-800 file:tw-px-4 file:tw-py-3 file:tw-font-medium file:tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 disabled:tw-opacity-50"
-              disabled={busy}
+              disabled={
+                busy ||
+                session?.asset.state === "ready" ||
+                session?.asset.state === "processing"
+              }
               onChange={(event) => {
                 setFile(event.target.files?.[0] ?? null);
-                setQueuedFiles(Array.from(event.target.files ?? []).slice(1));
+                setSent(0);
+                if (!session) setUploadStatus("idle");
+                const queued = Array.from(event.target.files ?? []).slice(1);
+                queuedFilesRef.current = queued;
+                setQueuedFiles(queued);
                 if (!session) startKey.current = crypto.randomUUID();
               }}
             />
@@ -527,23 +770,23 @@ export default function DocumentationUpload({ context, controller }: Props) {
           </p>
           <div className="tw-flex tw-flex-wrap tw-gap-3">
             <DocumentationButton
-              disabled={
-                !file ||
-                busy ||
-                !transferPermitted ||
-                file.size >
-                  (context.profile.limits["asset_bytes"] ?? 4294967296)
-              }
+              disabled={uploadButtonDisabled(
+                file,
+                session?.asset.state,
+                busy,
+                transferPermitted,
+                context.profile.limits["asset_bytes"] ?? 4294967296
+              )}
               onClick={() => {
                 void run(session?.upload_id);
               }}
             >
-              {session ? msg("retry") : msg("uploadStart")}
+              {actionLabel}
             </DocumentationButton>
             {(busy || session !== null) && (
               <DocumentationButton
                 secondary
-                disabled={status === "cancelling"}
+                disabled={status === "cancelling" || attaching}
                 onClick={() => {
                   void cancel();
                 }}
@@ -554,36 +797,16 @@ export default function DocumentationUpload({ context, controller }: Props) {
           </div>
         </div>
       )}
-      {status === "uploading" && (
-        <div role="status">
-          <progress
-            className="tw-w-full"
-            max={Math.max(1, file?.size ?? 0)}
-            value={sent}
-            aria-label={msg("uploadProgress", {
-              sent: sizeLabel(sent),
-              total: sizeLabel(file?.size ?? 0),
-            })}
-          />
-          <p className="tw-mt-2 tw-text-xs tw-text-iron-300">
-            {msg("uploadProgress", {
-              sent: sizeLabel(sent),
-              total: sizeLabel(file?.size ?? 0),
-            })}
-          </p>
-        </div>
-      )}
-      {status === "processing" && (
-        <DocumentationNotice>{msg("uploadProcessing")}</DocumentationNotice>
-      )}
-      {(status === "failed" || status === "changed") && (
-        <DocumentationNotice error>
-          {msg(status === "changed" ? "uploadMismatch" : failureMessage)}
-        </DocumentationNotice>
-      )}
-      {actionError && (
-        <DocumentationNotice error>{msg("error")}</DocumentationNotice>
-      )}
+      <DocumentationUploadFeedback
+        status={status}
+        attaching={attaching}
+        selectedFilename={file?.name}
+        total={file?.size ?? 0}
+        sent={sent}
+        completedFilename={completedFilename}
+        failureMessage={failureMessage}
+        actionError={actionError}
+      />
       <ul className="tw-m-0 tw-list-none tw-p-0">
         {visibleAssets.map((asset) => (
           <DocumentationAssetMutationAccess
@@ -621,15 +844,10 @@ export default function DocumentationUpload({ context, controller }: Props) {
                           <DocumentationButton
                             secondary
                             onClick={() => {
-                              void attach(
-                                asset.id,
-                                asset.role,
-                                asset.intended_visibility,
-                                asset.filename
-                              );
+                              void run(asset.id);
                             }}
                           >
-                            {msg("add")}
+                            {msg("uploadRetryAttachment")}
                           </DocumentationButton>
                         )}
                     </div>
@@ -685,6 +903,84 @@ export default function DocumentationUpload({ context, controller }: Props) {
         </p>
       )}
     </section>
+  );
+}
+
+function DocumentationUploadFeedback({
+  status,
+  attaching,
+  selectedFilename,
+  total,
+  sent,
+  completedFilename,
+  failureMessage,
+  actionError,
+}: {
+  readonly status: UploadStatus;
+  readonly attaching: boolean;
+  readonly selectedFilename: string | undefined;
+  readonly total: number;
+  readonly sent: number;
+  readonly completedFilename: string;
+  readonly failureMessage: string;
+  readonly actionError: boolean;
+}) {
+  const { msg, locale } = useDocumentationMessages();
+  const sizeLabel = (size: number) => formatFileSizeLabel(size, locale) ?? "—";
+  return (
+    <>
+      {selectedFilename && status === "idle" && (
+        <DocumentationNotice>
+          {msg("uploadSelected", { filename: selectedFilename })}
+        </DocumentationNotice>
+      )}
+      {status === "checking" && (
+        <DocumentationNotice>{msg("uploadChecking")}</DocumentationNotice>
+      )}
+      {attaching && (
+        <DocumentationNotice>{msg("uploadAttaching")}</DocumentationNotice>
+      )}
+      {status === "ready" && (
+        <DocumentationNotice>
+          {msg("uploadCompleted", { filename: completedFilename })}
+        </DocumentationNotice>
+      )}
+      {status === "attach_failed" && (
+        <DocumentationNotice error>
+          {msg("uploadAttachmentFailed")}
+        </DocumentationNotice>
+      )}
+      {status === "uploading" && !attaching && (
+        <div role="status">
+          <progress
+            className="tw-w-full"
+            max={Math.max(1, total)}
+            value={sent}
+            aria-label={msg("uploadProgress", {
+              sent: sizeLabel(sent),
+              total: sizeLabel(total),
+            })}
+          />
+          <p className="tw-mt-2 tw-text-xs tw-text-iron-300">
+            {msg("uploadProgress", {
+              sent: sizeLabel(sent),
+              total: sizeLabel(total),
+            })}
+          </p>
+        </div>
+      )}
+      {status === "processing" && !attaching && (
+        <DocumentationNotice>{msg("uploadProcessing")}</DocumentationNotice>
+      )}
+      {(status === "failed" || status === "changed") && (
+        <DocumentationNotice error>
+          {msg(status === "changed" ? "uploadMismatch" : failureMessage)}
+        </DocumentationNotice>
+      )}
+      {actionError && (
+        <DocumentationNotice error>{msg("error")}</DocumentationNotice>
+      )}
+    </>
   );
 }
 
