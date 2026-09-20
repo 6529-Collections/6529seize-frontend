@@ -154,8 +154,10 @@ it.each(["profile-switched", "auth-changed"])(
     );
     first.unmount();
     mockAuth = event !== "auth-changed";
+    if (!mockAuth) mockAddress = null;
     globalThis.dispatchEvent(new Event(event));
     mockAuth = true;
+    mockAddress = mockWallet;
     const reopened = renderHook(() => useDocumentationDraft(context, actor));
     expect(reopened.result.current.edits).toEqual([]);
     expect(patchDocumentationModule).not.toHaveBeenCalled();
@@ -282,5 +284,45 @@ it("keeps pending writing across a token refresh for the same actor", async () =
   const reopened = renderHook(() => useDocumentationDraft(context, actor));
   await act(() => jest.advanceTimersByTimeAsync(6000));
   expect(reopened.result.current.edits[0]?.operation.answer?.value).toBe("");
+  reopened.unmount();
+});
+
+it("keeps pending writing through temporary same-account session invalidation and renewal", async () => {
+  const context = documentationFixture();
+  const first = renderHook(() => useDocumentationDraft(context, actor));
+  act(() =>
+    first.result.current.controller.edit("artwork", titleOperation(""))
+  );
+  first.unmount();
+  mockAuth = false;
+  globalThis.dispatchEvent(new Event("auth-changed"));
+  globalThis.dispatchEvent(new Event("wallets-changed"));
+  mockAuth = true;
+  globalThis.dispatchEvent(new Event("auth-changed"));
+  const reopened = renderHook(() => useDocumentationDraft(context, actor));
+  await act(() => jest.advanceTimersByTimeAsync(6000));
+  expect(reopened.result.current.edits[0]?.operation.answer?.value).toBe("");
+  expect(patchDocumentationModule).not.toHaveBeenCalled();
+  reopened.unmount();
+});
+
+it("clears recovery when the authenticated account disappears without a profile-switch event", () => {
+  const context = documentationFixture();
+  const first = renderHook(() => useDocumentationDraft(context, actor));
+  act(() =>
+    first.result.current.controller.edit(
+      "artwork",
+      titleOperation("Private draft")
+    )
+  );
+  first.unmount();
+  // getWalletAddress reads the authenticated account, not the physical connector.
+  mockAddress = null;
+  mockAuth = false;
+  globalThis.dispatchEvent(new Event("wallets-changed"));
+  mockAddress = mockWallet;
+  mockAuth = true;
+  const reopened = renderHook(() => useDocumentationDraft(context, actor));
+  expect(reopened.result.current.edits).toEqual([]);
   reopened.unmount();
 });

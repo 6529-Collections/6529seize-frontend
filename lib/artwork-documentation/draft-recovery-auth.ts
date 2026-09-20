@@ -1,7 +1,6 @@
 import {
   AUTH_STORAGE_KEYS,
   AUTH_TOKEN_CHANGED_EVENT,
-  getAuthJwt,
   getWalletAddress,
   getWalletRole,
   PROFILE_SWITCHED_EVENT,
@@ -19,9 +18,11 @@ function revokeRecovery() {
   role = getWalletRole();
 }
 function checkAuth() {
+  // Session renewal retains the authenticated account; logout removes or switches it.
+  const currentWallet = getWalletAddress()?.toLowerCase() ?? null;
   if (
-    !getAuthJwt() ||
-    wallet !== (getWalletAddress()?.toLowerCase() ?? null) ||
+    currentWallet === null ||
+    wallet !== currentWallet ||
     role !== getWalletRole()
   )
     revokeRecovery();
