@@ -1,4 +1,6 @@
+import cloneDeep from "lodash/cloneDeep";
 import { act, renderHook } from "@testing-library/react";
+import type { ApiArtworkDocumentationContext } from "@/generated/models/ApiArtworkDocumentationContext";
 import {
   documentationFixture,
   titleOperation,
@@ -325,4 +327,380 @@ it("clears recovery when the authenticated account disappears without a profile-
   const reopened = renderHook(() => useDocumentationDraft(context, actor));
   expect(reopened.result.current.edits).toEqual([]);
   reopened.unmount();
+});
+
+describe("incoming canonical context reconciliation", () => {
+  let deniedStorage: jest.SpyInstance;
+
+  beforeEach(() => {
+    jest.mocked(patchDocumentationModule).mockReset();
+    jest.mocked(getDocumentationContext).mockReset();
+    deniedStorage = jest
+      .spyOn(Storage.prototype, "setItem")
+      .mockImplementation(() => {
+        throw new Error("Storage denied");
+      });
+  });
+  afterEach(() => deniedStorage.mockRestore());
+
+  it.each(["incomplete", "server-rejected"])(
+    "retains a %s answer and its rejection state through equivalent parent rerenders without storage",
+    async (kind) => {
+      const context = documentationFixture();
+      jest.mocked(patchDocumentationModule).mockRejectedValue({ status: 422 });
+      const hook = renderHook(
+        ({ initial }) => useDocumentationDraft(initial, actor),
+        {
+          initialProps: { initial: context },
+        }
+      );
+      const controller = hook.result.current.controller;
+      act(() =>
+        controller.edit(
+          "artwork",
+          titleOperation(kind === "incomplete" ? "" : "Rejected writing")
+        )
+      );
+      await act(() => controller.flush());
+      const before = controller.snapshot();
+      const requests = jest.mocked(patchDocumentationModule).mock.calls.length;
+      hook.rerender({ initial: cloneDeep(context) });
+      await act(() => jest.advanceTimersByTimeAsync(6000));
+      expect(hook.result.current.controller).toBe(controller);
+      expect(hook.result.current.edits).toEqual(before.edits);
+      expect(hook.result.current.rejectedEdits).toEqual(before.rejectedEdits);
+      expect(hook.result.current.state).toBe("invalid");
+      expect(patchDocumentationModule).toHaveBeenCalledTimes(requests);
+      expect(hook.result.current.recoveryUnavailable).toBe(true);
+      hook.unmount();
+    }
+  );
+
+  it("keeps an in-flight save and subsequent typing through an equivalent rerender", async () => {
+    const context = documentationFixture();
+    let resolve!: (value: ApiArtworkDocumentationContext) => void;
+    jest
+      .mocked(patchDocumentationModule)
+      .mockImplementationOnce(
+        () =>
+          new Promise((done) => {
+            resolve = done;
+          })
+      )
+      .mockResolvedValueOnce({ ...context, draft_version: 3 });
+    const hook = renderHook(
+      ({ initial }) => useDocumentationDraft(initial, actor),
+      {
+        initialProps: { initial: context },
+      }
+    );
+    const controller = hook.result.current.controller;
+    act(() => controller.edit("artwork", titleOperation("First write")));
+    let saving!: Promise<boolean>;
+    act(() => {
+      saving = controller.flush();
+    });
+    act(() => controller.edit("artwork", titleOperation("Later typing")));
+    const signal = jest.mocked(patchDocumentationModule).mock.calls[0]![4];
+    hook.rerender({ initial: cloneDeep(context) });
+    expect(signal.aborted).toBe(false);
+    expect(hook.result.current.controller).toBe(controller);
+    expect(hook.result.current.edits[0]?.operation.answer?.value).toBe(
+      "Later typing"
+    );
+    await act(async () => {
+      resolve({ ...context, draft_version: 2 });
+      await saving;
+    });
+    expect(patchDocumentationModule).toHaveBeenCalledTimes(2);
+    expect(
+      jest.mocked(patchDocumentationModule).mock.calls[1]![0].draft_version
+    ).toBe(2);
+    expect(
+      jest.mocked(patchDocumentationModule).mock.calls[1]![2][0]?.answer?.value
+    ).toBe("Later typing");
+    expect(hook.result.current.state).toBe("clean");
+    hook.rerender({ initial: cloneDeep(context) });
+    expect(hook.result.current.context.draft_version).toBe(3);
+    hook.unmount();
+  });
+
+  it.each(["draft_version", "artist_record_version"] as const)(
+    "retains pending writing and requires review when an incoming %s advances",
+    async (version) => {
+      const context = documentationFixture();
+      const latest = { ...context, [version]: context[version] + 1 };
+      const hook = renderHook(
+        ({ initial }) => useDocumentationDraft(initial, actor),
+        {
+          initialProps: { initial: context },
+        }
+      );
+      const controller = hook.result.current.controller;
+      act(() => controller.edit("artwork", titleOperation("Pending writing")));
+      hook.rerender({ initial: latest });
+      await act(() => jest.advanceTimersByTimeAsync(6000));
+      expect(hook.result.current.controller).toBe(controller);
+      expect(hook.result.current.state).toBe("conflict");
+      expect(hook.result.current.latest).toEqual(latest);
+      expect(hook.result.current.edits[0]?.operation.answer?.value).toBe(
+        "Pending writing"
+      );
+      expect(patchDocumentationModule).not.toHaveBeenCalled();
+      hook.rerender({ initial: cloneDeep(context) });
+      expect(hook.result.current.latest).toEqual(latest);
+      jest.mocked(getDocumentationContext).mockResolvedValue(latest);
+      jest.mocked(patchDocumentationModule).mockResolvedValue({
+        ...latest,
+        draft_version: latest.draft_version + 1,
+      });
+      await act(() => controller.resolveConflict(true));
+      expect(jest.mocked(patchDocumentationModule).mock.calls[0]![0]).toEqual(
+        latest
+      );
+      expect(hook.result.current.state).toBe("clean");
+      hook.unmount();
+    }
+  );
+
+  it("adopts same-version capability changes and stops pending work without dropping it", async () => {
+    const context = documentationFixture();
+    const restricted = {
+      ...context,
+      mutation_capabilities: {
+        ...context.mutation_capabilities,
+        edit_modules: [],
+      },
+    };
+    const hook = renderHook(
+      ({ initial }) => useDocumentationDraft(initial, actor),
+      {
+        initialProps: { initial: context },
+      }
+    );
+    act(() =>
+      hook.result.current.controller.edit(
+        "artwork",
+        titleOperation("Pending writing")
+      )
+    );
+    hook.rerender({ initial: restricted });
+    await act(() => jest.advanceTimersByTimeAsync(6000));
+    expect(
+      hook.result.current.context.mutation_capabilities.edit_modules
+    ).toEqual([]);
+    expect(hook.result.current.state).toBe("conflict");
+    expect(hook.result.current.edits[0]?.operation.answer?.value).toBe(
+      "Pending writing"
+    );
+    expect(patchDocumentationModule).not.toHaveBeenCalled();
+    hook.unmount();
+  });
+
+  it("rejects a late save response after newer canonical data changes capabilities", async () => {
+    const context = documentationFixture();
+    let resolve!: (value: ApiArtworkDocumentationContext) => void;
+    jest.mocked(patchDocumentationModule).mockImplementationOnce(
+      () =>
+        new Promise((done) => {
+          resolve = done;
+        })
+    );
+    const hook = renderHook(
+      ({ initial }) => useDocumentationDraft(initial, actor),
+      {
+        initialProps: { initial: context },
+      }
+    );
+    const controller = hook.result.current.controller;
+    act(() => controller.edit("artwork", titleOperation("In-flight writing")));
+    let saving!: Promise<boolean>;
+    act(() => {
+      saving = controller.flush();
+    });
+    const signal = jest.mocked(patchDocumentationModule).mock.calls[0]![4];
+    const latest = {
+      ...context,
+      draft_version: 3,
+      mutation_capabilities: {
+        ...context.mutation_capabilities,
+        edit_modules: [],
+      },
+    };
+    hook.rerender({ initial: latest });
+    expect(signal.aborted).toBe(true);
+    await act(async () => {
+      resolve({ ...context, draft_version: 2 });
+      await saving;
+    });
+    expect(hook.result.current.context).toEqual(latest);
+    expect(hook.result.current.state).toBe("conflict");
+    expect(hook.result.current.edits[0]?.operation.answer?.value).toBe(
+      "In-flight writing"
+    );
+    expect(patchDocumentationModule).toHaveBeenCalledTimes(1);
+    hook.unmount();
+  });
+
+  it("adopts a newer clean snapshot and same-version profile changes without replacing the controller", () => {
+    const context = documentationFixture();
+    const hook = renderHook(
+      ({ initial }) => useDocumentationDraft(initial, actor),
+      {
+        initialProps: { initial: context },
+      }
+    );
+    const controller = hook.result.current.controller;
+    const latest = {
+      ...context,
+      draft_version: 2,
+      profile: { ...context.profile, guidance_version: "updated-guidance" },
+    };
+    hook.rerender({ initial: latest });
+    expect(hook.result.current.controller).toBe(controller);
+    expect(hook.result.current.context).toEqual(latest);
+    expect(hook.result.current.state).toBe("clean");
+    const revised = {
+      ...latest,
+      profile: { ...latest.profile, guidance_version: "revised-guidance" },
+    };
+    hook.rerender({ initial: revised });
+    expect(hook.result.current.context.profile.guidance_version).toBe(
+      "revised-guidance"
+    );
+    const restricted = {
+      ...revised,
+      mutation_capabilities: {
+        ...revised.mutation_capabilities,
+        edit_modules: [],
+      },
+    };
+    hook.rerender({ initial: restricted });
+    expect(
+      hook.result.current.context.mutation_capabilities.edit_modules
+    ).toEqual([]);
+    expect(hook.result.current.state).toBe("clean");
+    hook.unmount();
+  });
+
+  it.each(["actor", "context"])(
+    "isolates an incoming %s switch and cancels the old request",
+    async (scope) => {
+      const context = documentationFixture();
+      let resolve!: (value: ApiArtworkDocumentationContext) => void;
+      jest.mocked(patchDocumentationModule).mockImplementationOnce(
+        () =>
+          new Promise((done) => {
+            resolve = done;
+          })
+      );
+      const hook = renderHook(
+        ({ initial, actorKey }) => useDocumentationDraft(initial, actorKey),
+        {
+          initialProps: { initial: context, actorKey: actor },
+        }
+      );
+      const previous = hook.result.current.controller;
+      act(() =>
+        previous.edit("artwork", titleOperation("Other record writing"))
+      );
+      let saving!: Promise<boolean>;
+      act(() => {
+        saving = previous.flush();
+      });
+      const signal = jest.mocked(patchDocumentationModule).mock.calls[0]![4];
+      const next =
+        scope === "context"
+          ? { ...context, id: "33333333-3333-4333-8333-333333333333" }
+          : context;
+      hook.rerender({
+        initial: next,
+        actorKey: scope === "actor" ? "another:direct:wallet" : actor,
+      });
+      expect(hook.result.current.controller).not.toBe(previous);
+      expect(signal.aborted).toBe(true);
+      expect(hook.result.current.edits).toEqual([]);
+      await act(async () => {
+        resolve({ ...context, draft_version: 2 });
+        await saving;
+      });
+      expect(hook.result.current.context).toEqual(next);
+      expect(hook.result.current.edits).toEqual([]);
+      hook.unmount();
+    }
+  );
+
+  it("retains queued content through a new canonical version and replays only after review", async () => {
+    const context = documentationFixture();
+    const latest = { ...context, draft_version: 2 };
+    const saveContent = jest
+      .fn()
+      .mockResolvedValue({ ...latest, draft_version: 3 });
+    const hook = renderHook(
+      ({ initial }) => useDocumentationDraft(initial, actor),
+      {
+        initialProps: { initial: context },
+      }
+    );
+    act(() =>
+      hook.result.current.controller.queueContent(
+        "asset-caption",
+        "Pending caption",
+        saveContent
+      )
+    );
+    hook.rerender({ initial: latest });
+    await act(() => jest.advanceTimersByTimeAsync(6000));
+    expect(hook.result.current.state).toBe("conflict");
+    expect(hook.result.current.contentEdits).toEqual([
+      { id: "asset-caption", value: "Pending caption" },
+    ]);
+    expect(saveContent).not.toHaveBeenCalled();
+    jest.mocked(getDocumentationContext).mockResolvedValue(latest);
+    await act(() => hook.result.current.controller.resolveConflict(true));
+    expect(saveContent).toHaveBeenCalledWith(
+      latest,
+      expect.any(String),
+      expect.any(AbortSignal)
+    );
+    expect(hook.result.current.contentEdits).toEqual([]);
+    expect(hook.result.current.context.draft_version).toBe(3);
+    hook.unmount();
+  });
+
+  it("does not accept a late nonqueued mutation response after newer readback", async () => {
+    const context = documentationFixture();
+    let resolve!: (value: ApiArtworkDocumentationContext) => void;
+    let signal!: AbortSignal;
+    const mutate = jest.fn(
+      (_: ApiArtworkDocumentationContext, abort: AbortSignal) => {
+        signal = abort;
+        return new Promise<ApiArtworkDocumentationContext>((done) => {
+          resolve = done;
+        });
+      }
+    );
+    const hook = renderHook(
+      ({ initial }) => useDocumentationDraft(initial, actor),
+      {
+        initialProps: { initial: context },
+      }
+    );
+    let saving!: Promise<boolean>;
+    await act(async () => {
+      saving = hook.result.current.controller.mutateContent(mutate);
+    });
+    const latest = { ...context, draft_version: 3 };
+    hook.rerender({ initial: latest });
+    expect(signal.aborted).toBe(true);
+    expect(hook.result.current.state).toBe("conflict");
+    await act(async () => {
+      resolve({ ...context, draft_version: 2 });
+      await saving;
+    });
+    expect(hook.result.current.context).toEqual(latest);
+    expect(hook.result.current.latest).toEqual(latest);
+    expect(mutate).toHaveBeenCalledTimes(1);
+    hook.unmount();
+  });
 });

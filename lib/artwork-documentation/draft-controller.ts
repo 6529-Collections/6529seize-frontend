@@ -1,3 +1,4 @@
+import isEqual from "lodash/isEqual";
 import type { ApiArtworkDocumentationContext } from "@/generated/models/ApiArtworkDocumentationContext";
 import type { ApiArtworkDocumentationOperation } from "@/generated/models/ApiArtworkDocumentationOperation";
 import { documentationErrorStatus } from "@/services/api/artwork-documentation-api";
@@ -112,6 +113,37 @@ export class DocumentationDraftController {
       })),
     };
   }
+  /** Reconcile parent readback without replacing pending in-memory work. */
+  receiveContext(next: ApiArtworkDocumentationContext): void {
+    const current = this.latest ?? this.context;
+    if (
+      this.abort.signal.aborted ||
+      next.id !== current.id ||
+      next.work_id !== current.work_id ||
+      next.draft_version < current.draft_version ||
+      next.artist_record_version < current.artist_record_version ||
+      (next.draft_version === current.draft_version &&
+        next.artist_record_version === current.artist_record_version &&
+        next.updated_at < current.updated_at) ||
+      isEqual(next, current)
+    )
+      return;
+    const requireReview =
+      this.hasQueuedEdits() || this.running !== null || this.mutationRunning;
+    // A request may already have reached the server. Preserve its local queue,
+    // reject its late response, and require canonical readback before replay.
+    this.generation++;
+    this.clearTimers();
+    this.abort.abort();
+    this.abort = new AbortController();
+    this.running = null;
+    this.mutationRunning = false;
+    this.context = next;
+    this.latest = requireReview ? next : null;
+    this.state = requireReview ? "conflict" : "clean";
+    if (!requireReview) this.errorCode = undefined;
+    this.emit();
+  }
   /** Restore tab-local answers without treating them as acknowledged server data. */
   restore(
     edits: readonly Pick<PendingEdit, "moduleId" | "operation">[],
@@ -206,14 +238,15 @@ export class DocumentationDraftController {
         if (!(await this.saveBatch(batch, generation, signal))) return false;
       } else if (this.pendingContent || this.nextContent()) {
         if (!(await this.saveQueuedContent(generation, signal))) return false;
-      } else {
-        this.state = this.hasQueuedEdits() ? "invalid" : "clean";
-        if (this.state === "clean") this.errorCode = undefined;
-        this.emit();
-        return this.state === "clean";
-      }
+      } else return this.finishSaves();
     }
     return false;
+  }
+  private finishSaves(): boolean {
+    this.state = this.hasQueuedEdits() ? "invalid" : "clean";
+    if (this.state === "clean") this.errorCode = undefined;
+    this.emit();
+    return this.state === "clean";
   }
   private async saveBatch(
     batch: Batch,
