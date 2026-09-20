@@ -68,9 +68,9 @@ export const ARTWORK_DOCUMENTATION_MESSAGES = {
   "artworkDocumentation.uploadLeave":
     "A file is still being added. Stay on this page until it is complete, or cancel the upload before leaving.",
   "artworkDocumentation.legacyLicenseHelp":
-    "Keys and Gates uses CC0 1.0. You can use the project’s license details below; your own rights declaration remains yours to review.",
+    "The artwork license for Keys and Gates is CC0 1.0. Add its name and link below, then review your rights declaration.",
   "artworkDocumentation.legacyLicenseApply":
-    "Use the Keys and Gates CC0 license",
+    "Add the project’s CC0 license details",
   ...ARTWORK_DOCUMENTATION_GUIDANCE_MESSAGES,
   ...ARTWORK_DOCUMENTATION_EDITORIAL_MESSAGES,
   ...ARTWORK_DOCUMENTATION_CHAPTER_MESSAGES,

@@ -27,7 +27,7 @@ it("names the nested answer part and deduplicates repeated validators", () => {
   expect(screen.getByRole("status")).toHaveTextContent(/https/);
 });
 
-it("offers the project CC0 terms only by explicit choice without altering the declaration", () => {
+it("fills the fixed project CC0 details without altering the declaration", () => {
   const context = documentationFixture();
   context.program_id = "6529NM-AP-01";
   context.profile.profile_id = "keys_and_gates_v1";
@@ -49,7 +49,7 @@ it("offers the project CC0 terms only by explicit choice without altering the de
   );
   expect(edit).not.toHaveBeenCalled();
   fireEvent.click(
-    screen.getByRole("button", { name: /Use the Keys and Gates CC0 license/ })
+    screen.getByRole("button", { name: /Add the project’s CC0 license details/ })
   );
   expect(edit).toHaveBeenCalledTimes(1);
   expect(edit).toHaveBeenCalledWith(
