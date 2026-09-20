@@ -11,6 +11,16 @@ import {
   installDocumentationSandbox,
 } from "./sandbox";
 
+// Production CSP deliberately rejects the plain-HTTP fixture API. This opt-in
+// covers the production bundle's UI only; beforeEach still enforces loopback
+// origins and blocks external mutations. Live acceptance keeps CSP enabled.
+test.use({
+  bypassCSP:
+    process.env["PLAYWRIGHT_ARTWORK_DOCUMENTATION_PRODUCTION_SANDBOX"] === "1" &&
+    process.env["PLAYWRIGHT_COMPOSER_SANDBOX"] === "1" &&
+    process.env["PLAYWRIGHT_ENV"] === "local",
+});
+
 useLocalSandboxMutationGuard(
   test,
   "PLAYWRIGHT_COMPOSER_SANDBOX",

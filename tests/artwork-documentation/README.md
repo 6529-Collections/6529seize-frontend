@@ -38,7 +38,10 @@ In the build/server terminal, retain the repository's other required environment
 Against that server:
 
     $env:PLAYWRIGHT_SKIP_WEB_SERVER = "1"
+    $env:PLAYWRIGHT_ARTWORK_DOCUMENTATION_PRODUCTION_SANDBOX = "1"
     seize run test:e2e:artwork-documentation-sandbox
+
+The production build intentionally rejects the plain-HTTP fixture API under its Content Security Policy. The explicit production-sandbox flag bypasses CSP only in this pack's browser contexts, and only with the local sandbox flags; the mandatory loopback-origin and mutation guards still run before navigation. Normal development/CI runs retain CSP. This opt-in tests the production bundle's editor behavior and appearance; **it does not validate CSP**. Staging and production acceptance must keep CSP enforced and use their real HTTPS/WSS services. Do not change application headers to accommodate the mock API.
 
 The fixture route is /artwork-documentation/works/22222222-2222-4222-8222-222222222222/contexts/11111111-1111-4111-8111-111111111111?section=artwork. It exists only while installDocumentationSandbox is installed in that browser page. Other chapters use the same route with section=materials, section=rights or the corresponding chapter ID. The helper returns the mutable fictional context and route, so a separate local visual review can reuse it at 1440, 820 and 390 pixels without copying artist records. Preserve operational screenshots outside tracked files.
 

@@ -34,6 +34,7 @@ export async function installDocumentationSandbox(
   assertLocalSandboxBaseURL(baseURL);
   const origin = getSandboxApiOrigin(baseURL);
   const address = "0x0000000000000000000000000000000000000529";
+  const profileId = "00000000-0000-4000-8000-000000000531";
   const encode = (value: unknown) =>
     Buffer.from(JSON.stringify(value)).toString("base64url");
   // An unsigned local-only identity, never a credential for a deployed API.
@@ -44,12 +45,12 @@ export async function installDocumentationSandbox(
       sub: address,
       iat: 1760000000,
       exp: 2000000000,
-      role: "",
+      role: profileId,
     }),
     "",
   ].join(".");
   await page.addInitScript(
-    ({ localOrigin, address, jwt }) => {
+    ({ localOrigin, address, jwt, profileId }) => {
       if (location.origin !== localOrigin) return;
       localStorage.setItem(
         "6529-wallet-accounts",
@@ -59,18 +60,18 @@ export async function installDocumentationSandbox(
             jwt,
             role: null,
             refreshToken: null,
-            profileId: "00000000-0000-4000-8000-000000000531",
+            profileId,
             profileHandle: "playwright",
-            authSessionVersion: null,
+            authSessionVersion: "v2",
           },
         ])
       );
       localStorage.setItem("6529-wallet-active-address", address);
     },
-    { localOrigin: new URL(baseURL!).origin, address, jwt }
+    { localOrigin: new URL(baseURL!).origin, address, jwt, profileId }
   );
   const context = documentationFixture();
-  context.owner_profile_id = "00000000-0000-4000-8000-000000000531";
+  context.owner_profile_id = profileId;
   context.profile = structuredClone(
     version === 2 ? legacyProfile : museumProfile
   ) as unknown as ApiArtworkDocumentationContext["profile"];
@@ -159,6 +160,32 @@ export async function installDocumentationSandbox(
     "access-control-allow-methods": "GET,POST,PATCH,PUT,DELETE,OPTIONS",
     "access-control-expose-headers": "etag",
   };
+  // The shared shell opens a socket even on documentation routes. Keep the
+  // exact local fixture socket open without connecting to a deployed service.
+  const socketUrl = new URL(origin);
+  socketUrl.protocol = "ws:";
+  await page.routeWebSocket(socketUrl.href, (socket) => {
+    socket.onMessage(() => {});
+  });
+  await page.route(`${origin}/api/auth/session-refresh`, async (route) => {
+    const credentialsHeaders = {
+      ...headers,
+      "access-control-allow-credentials": "true",
+    };
+    if (route.request().method() === "OPTIONS") {
+      await route.fulfill({ status: 204, headers: credentialsHeaders });
+      return;
+    }
+    // The loopback server still validates the request. Keep this fixture's
+    // synthetic identity consistent if the normal auth code refreshes it.
+    const response = await route.fetch();
+    const body = await response.json();
+    await route.fulfill({
+      response,
+      headers: { ...response.headers(), ...credentialsHeaders },
+      json: response.ok() ? { ...body, access_token: jwt } : body,
+    });
+  });
   const respond = (route: Route, body: unknown, status = 200) =>
     route.fulfill({
       status,
