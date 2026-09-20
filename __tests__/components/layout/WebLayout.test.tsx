@@ -8,10 +8,10 @@ const mockSetHeaderRef = jest.fn();
 const mockMounted = jest.fn();
 const mockCleanup = jest.fn();
 let mockWidth = 900;
-const mediaChanges = new Map<
-  string,
-  Set<(event: MediaQueryListEvent) => void>
->();
+type MediaListener =
+  | EventListenerOrEventListenerObject
+  | ((event: MediaQueryListEvent) => void);
+const mediaChanges = new Map<string, Set<MediaListener>>();
 
 jest.mock("@/components/brain/my-stream/layout/LayoutContext", () => ({
   useLayout: () => ({ registerRef: mockRegisterRef }),
@@ -92,8 +92,11 @@ function resize(width: number) {
   act(() => {
     mockWidth = width;
     for (const [query, listeners] of mediaChanges) {
-      for (const listener of listeners)
-        listener({ matches: matches(query) } as MediaQueryListEvent);
+      const event = { matches: matches(query) } as MediaQueryListEvent;
+      for (const listener of listeners) {
+        if (typeof listener === "function") listener(event);
+        else listener.handleEvent(event);
+      }
     }
   });
 }
@@ -130,18 +133,12 @@ beforeEach(() => {
     addListener: jest.fn(),
     removeListener: jest.fn(),
     dispatchEvent: jest.fn(),
-    addEventListener: (
-      _event: string,
-      listener: (event: MediaQueryListEvent) => void
-    ) => {
+    addEventListener: (_event: string, listener: MediaListener) => {
       const listeners = mediaChanges.get(query) ?? new Set();
       listeners.add(listener);
       mediaChanges.set(query, listeners);
     },
-    removeEventListener: (
-      _event: string,
-      listener: (event: MediaQueryListEvent) => void
-    ) => {
+    removeEventListener: (_event: string, listener: MediaListener) => {
       mediaChanges.get(query)?.delete(listener);
     },
   }));
@@ -167,7 +164,9 @@ it("adapts chrome and clears its overlay without remounting the editor or Sideba
   expect(main).toHaveClass("tw-transition-opacity");
 
   fireEvent.click(screen.getByRole("button", { name: "Open menu" }));
-  expect(screen.getByLabelText("Primary sidebar").style.width).toBe("17.1875rem");
+  expect(screen.getByLabelText("Primary sidebar").style.width).toBe(
+    "17.1875rem"
+  );
   fireEvent.keyDown(window, { key: "Escape" });
   expect(
     screen.queryByRole("button", { name: "Close menu overlay" })
@@ -196,7 +195,7 @@ it("adapts chrome and clears its overlay without remounting the editor or Sideba
   expect(screen.getByText("Details open")).toBeInTheDocument();
 
   // The desktop search belongs to the chrome, so switching back clears it.
-  fireEvent.click(screen.getByRole("button", { name: "Search", exact: true }));
+  fireEvent.click(screen.getByRole("button", { name: "Search" }));
   expect(screen.getByRole("dialog", { name: "Search" })).toBeInTheDocument();
   resize(390);
   rerender(
