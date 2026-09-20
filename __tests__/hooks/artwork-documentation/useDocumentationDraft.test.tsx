@@ -403,7 +403,7 @@ describe("incoming canonical context reconciliation", () => {
     act(() => controller.edit("artwork", titleOperation("Later typing")));
     const signal = jest.mocked(patchDocumentationModule).mock.calls[0]![4];
     hook.rerender({ initial: cloneDeep(context) });
-    expect(signal.aborted).toBe(false);
+    expect(signal?.aborted).toBe(false);
     expect(hook.result.current.controller).toBe(controller);
     expect(hook.result.current.edits[0]?.operation.answer?.value).toBe(
       "Later typing"
@@ -528,7 +528,7 @@ describe("incoming canonical context reconciliation", () => {
       },
     };
     hook.rerender({ initial: latest });
-    expect(signal.aborted).toBe(true);
+    expect(signal?.aborted).toBe(true);
     await act(async () => {
       resolve({ ...context, draft_version: 2 });
       await saving;
@@ -618,7 +618,7 @@ describe("incoming canonical context reconciliation", () => {
         actorKey: scope === "actor" ? "another:direct:wallet" : actor,
       });
       expect(hook.result.current.controller).not.toBe(previous);
-      expect(signal.aborted).toBe(true);
+      expect(signal?.aborted).toBe(true);
       expect(hook.result.current.edits).toEqual([]);
       await act(async () => {
         resolve({ ...context, draft_version: 2 });

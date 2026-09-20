@@ -1,8 +1,11 @@
 "use client";
 
-import { useEffect, useReducer, useState } from "react";
+import { useEffect, useState } from "react";
 import type { ApiArtworkDocumentationContext } from "@/generated/models/ApiArtworkDocumentationContext";
-import { DocumentationDraftController } from "@/lib/artwork-documentation/draft-controller";
+import {
+  DocumentationDraftController,
+  type DraftSnapshot,
+} from "@/lib/artwork-documentation/draft-controller";
 import {
   activateDocumentationDraftRecovery,
   readDocumentationDraftRecovery,
@@ -20,11 +23,12 @@ export function useDocumentationDraft(
   actorKey: string | null = null
 ) {
   const [recoveryUnavailable, setRecoveryUnavailable] = useState(false);
-  const [, redraw] = useReducer((revision: number) => revision + 1, 0);
-  const createBinding = () => ({
-    actorKey,
-    seed: initial,
-    controller: new DocumentationDraftController(
+  const [published, setPublished] = useState<{
+    readonly controller: DocumentationDraftController;
+    readonly snapshot: DraftSnapshot;
+  } | null>(null);
+  const createBinding = () => {
+    const controller = new DocumentationDraftController(
       initial,
       { save: patchDocumentationModule, read: getDocumentationContext },
       (next) => {
@@ -32,10 +36,16 @@ export function useDocumentationDraft(
           setRecoveryUnavailable(
             !saveDocumentationDraftRecovery(actorKey, next)
           );
-        redraw();
+        setPublished({ controller, snapshot: next });
       }
-    ),
-  });
+    );
+    return {
+      actorKey,
+      seed: initial,
+      controller,
+      initialSnapshot: controller.snapshot(),
+    };
+  };
   const [binding, setBinding] = useState(createBinding);
   if (
     binding.actorKey !== actorKey ||
@@ -84,5 +94,9 @@ export function useDocumentationDraft(
     globalThis.addEventListener("beforeunload", beforeUnload);
     return () => globalThis.removeEventListener("beforeunload", beforeUnload);
   }, [controller, actorKey]);
-  return { ...controller.snapshot(), controller, recoveryUnavailable };
+  const snapshot =
+    published?.controller === controller
+      ? published.snapshot
+      : binding.initialSnapshot;
+  return { ...snapshot, controller, recoveryUnavailable };
 }
