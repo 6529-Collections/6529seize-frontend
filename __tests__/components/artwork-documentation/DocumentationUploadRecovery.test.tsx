@@ -193,7 +193,7 @@ describe("upload, scan and final-file selection with the real draft controller",
     "makes a checked file selectable without losing an incomplete answer in profile v%s",
     async (version) => {
       setup(version);
-      expect(screen.getByText(/No checked file is available/)).toBeVisible();
+      expect(screen.getByText(/A file becomes available here after its checks finish/)).toBeVisible();
       const link = screen.getByRole("link", { name: "Go to file upload" });
       fireEvent.click(link);
       expect(document.getElementById("documentation-upload")).toHaveFocus();

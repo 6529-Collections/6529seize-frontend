@@ -18,7 +18,7 @@ export const ARTWORK_DOCUMENTATION_MESSAGES = {
     "Your file has been received and checked, but could not yet be added to this record. Try adding it again; you do not need to upload it again.",
   "artworkDocumentation.uploadRetryAttachment": "Add checked file to record",
   "artworkDocumentation.assetChoicesEmpty":
-    "No checked file is available for this field yet. Upload a file with the matching purpose and wait for its checks to finish.",
+    "A file becomes available here after its checks finish and it is added to the record.",
   "artworkDocumentation.assetChoicesUpload": "Go to file upload",
   "artworkDocumentation.validation.entry": "Entry {number}",
   "artworkDocumentation.validation.required":
