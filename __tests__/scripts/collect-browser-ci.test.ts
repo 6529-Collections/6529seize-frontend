@@ -28,6 +28,7 @@ function select(files: string[]) {
       playwright_smoke: { required: false },
       playwright_critical_shell: { required: false },
       playwright_museum: { required: false },
+      playwright_artwork_documentation: { required: false },
     },
   };
   runInNewContext(script, {
