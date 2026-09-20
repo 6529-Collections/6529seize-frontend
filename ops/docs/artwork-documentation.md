@@ -199,7 +199,7 @@ When a rights category requires supporting details, those inputs appear
 immediately. In earlier forms with an editable artwork license, include both
 the license name and its complete URL. Correcting an answer keeps the other
 pending changes ready to save. Earlier Keys and Gates records also offer
-**Use the Keys and Gates CC0 license** to fill the project licence name and URL;
+**Add the project’s CC0 license details** to fill the project license name and URL;
 this action does not change your rights declaration.
 
 In **Materials & versions**, **Artwork & supporting files** brings **Add a file**

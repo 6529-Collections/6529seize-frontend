@@ -23,7 +23,7 @@ interface RecoveryRecord {
   readonly reviewRequired: boolean;
   readonly edits: readonly RecoveryEdit[];
 }
-export interface RecoveredDocumentationDraft {
+interface RecoveredDocumentationDraft {
   readonly edits: readonly RecoveryEdit[];
   readonly requireReview: boolean;
 }

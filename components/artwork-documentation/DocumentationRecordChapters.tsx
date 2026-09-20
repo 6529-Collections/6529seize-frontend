@@ -195,31 +195,29 @@ export function DocumentationWritingChapter({
             )}
           </>
         ) : (
-          <>
-            <DocumentationModules
-              key={`${context.id}-${section}`}
-              context={context}
-              edits={draft.edits}
-              rejectedEdits={draft.rejectedEdits}
-              section={section}
-              excludeFields={
-                section === "artwork" || section === "materials"
-                  ? FILE_FIELDS
-                  : undefined
-              }
-              onChange={(moduleId, operation) =>
-                controller.edit(moduleId, operation)
-              }
-              onBlur={() => {
-                void controller.flush();
-              }}
-              readOnly={
-                context.lifecycle ===
-                ApiArtworkDocumentationContextLifecycleEnum.Archived
-              }
-              assets={assets}
-            />
-          </>
+          <DocumentationModules
+            key={`${context.id}-${section}`}
+            context={context}
+            edits={draft.edits}
+            rejectedEdits={draft.rejectedEdits}
+            section={section}
+            excludeFields={
+              section === "artwork" || section === "materials"
+                ? FILE_FIELDS
+                : undefined
+            }
+            onChange={(moduleId, operation) =>
+              controller.edit(moduleId, operation)
+            }
+            onBlur={() => {
+              void controller.flush();
+            }}
+            readOnly={
+              context.lifecycle ===
+              ApiArtworkDocumentationContextLifecycleEnum.Archived
+            }
+            assets={assets}
+          />
         )}
       </div>
     </>
@@ -305,9 +303,7 @@ export function DocumentationReadingChapter({
         showHeading={false}
       />
       {section === "artwork" && (
-        <>
-          <DocumentationSources context={context} controller={controller} />
-        </>
+        <DocumentationSources context={context} controller={controller} />
       )}
     </>
   );

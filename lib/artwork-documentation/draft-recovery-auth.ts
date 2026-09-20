@@ -8,6 +8,8 @@ import {
 } from "@/services/auth/auth.utils";
 import { clearDocumentationDraftRecovery } from "./draft-recovery";
 
+const AUTH_KEYS = new Set<string>(Object.values(AUTH_STORAGE_KEYS));
+
 let watching = false;
 let wallet: string | null = null;
 let role: string | null = null;
@@ -28,11 +30,7 @@ function checkAuth() {
     revokeRecovery();
 }
 function storageChanged(event: StorageEvent) {
-  if (
-    event.key === null ||
-    Object.values(AUTH_STORAGE_KEYS).some((name) => name === event.key)
-  )
-    checkAuth();
+  if (event.key === null || AUTH_KEYS.has(event.key)) checkAuth();
 }
 
 /** Keep logout/switch cleanup active even while the editor route is unmounted. */

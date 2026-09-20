@@ -560,7 +560,7 @@ function semanticIssues(
     const entry = value["entry_document"];
     if (
       /^[\\/]|^[a-z]+:|[\\?#]/i.test(entry) ||
-      Array.from(entry).some((character) => character.charCodeAt(0) < 32) ||
+      Array.from(entry).some((character) => character.codePointAt(0)! < 32) ||
       entry.split("/").some((part) => !part || part === "." || part === "..")
     )
       result.push(issue("invalid_entry_document", ["entry_document"]));
@@ -570,7 +570,7 @@ function semanticIssues(
   return result;
 }
 
-export function documentationAnswerIssues(
+function documentationAnswerIssues(
   profile: ApiArtworkDocumentationProfile,
   moduleId: string,
   fieldId: string,
