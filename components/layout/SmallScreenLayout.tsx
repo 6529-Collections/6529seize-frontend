@@ -1,13 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import { useHeaderContext } from "@/contexts/HeaderContext";
+import { useCallback, useState } from "react";
 import { SIDEBAR_WIDTHS } from "../../constants/sidebar";
 import { SidebarProvider } from "../../hooks/useSidebarState";
-import { useLayout } from "../brain/my-stream/layout/LayoutContext";
 import WebSidebar from "./sidebar/WebSidebar";
-import MobileAppBanner from "@/components/mobile-app/MobileAppBanner";
-import SmallScreenHeader from "./SmallScreenHeader";
+import SmallScreenLayoutHeader from "./SmallScreenLayoutHeader";
 import type { ReactNode } from "react";
 
 interface Props {
@@ -16,25 +13,6 @@ interface Props {
 
 export default function SmallScreenLayout({ children }: Props) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { registerRef } = useLayout();
-  const { setHeaderRef } = useHeaderContext();
-  const containerRef = useRef<HTMLDivElement | null>(null);
-
-  const headerWrapperRef = useCallback(
-    (node: HTMLDivElement | null) => {
-      registerRef("header", node);
-      setHeaderRef(node);
-    },
-    [registerRef, setHeaderRef]
-  );
-
-  useEffect(() => {
-    return () => {
-      registerRef("header", null);
-      setHeaderRef(null);
-    };
-  }, [registerRef, setHeaderRef]);
-
   const toggleMenu = useCallback(() => {
     setIsMenuOpen((prev) => !prev);
   }, []);
@@ -45,14 +23,11 @@ export default function SmallScreenLayout({ children }: Props) {
 
   return (
     <SidebarProvider>
-      <div ref={containerRef} className="tw-overflow-auto tw-bg-black">
-        <div ref={headerWrapperRef}>
-          <MobileAppBanner />
-          <SmallScreenHeader
-            onMenuToggle={toggleMenu}
-            isMenuOpen={isMenuOpen}
-          />
-        </div>
+      <div className="tw-overflow-auto tw-bg-black">
+        <SmallScreenLayoutHeader
+          onMenuToggle={toggleMenu}
+          isMenuOpen={isMenuOpen}
+        />
 
         <div className="tailwind-scope">
           <WebSidebar

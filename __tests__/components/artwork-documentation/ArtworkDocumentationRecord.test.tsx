@@ -14,6 +14,7 @@ import {
 jest.mock("@/components/artwork-documentation/DocumentationAuthGate", () => ({
   __esModule: true,
   default: ({ children }: { children: ReactNode }) => children,
+  useDocumentationActor: () => ({ actorKey: null }),
 }));
 jest.mock(
   "@/components/artwork-documentation/ArtworkDocumentationWorkspace",

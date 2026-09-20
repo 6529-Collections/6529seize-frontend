@@ -113,18 +113,18 @@ export const MODULE_FIELDS: Readonly<
   identity: [
     field("display_name", text(160)),
     field("preferred_credit", text(300)),
-    field("record_language", text(35)),
+    field("record_language", { kind: "language" }),
     field("biography", localized(4000)),
     field("links", list(object({ label: text(100), url: text(2048) }), 10)),
-    field("languages", list(text(35), 10)),
+    field("languages", list({ kind: "language" }, 10)),
     field("private_contact", text(320)),
   ],
   artwork: [
     field("title", text(255)),
-    field("title_language", text(35)),
+    field("title_language", { kind: "language" }),
     field(
       "alternate_titles",
-      list(object({ language: text(35), text: text(255) }), 10)
+      list(object({ language: { kind: "language" }, text: text(255) }), 10)
     ),
     field("capture_date", date, { help: "captureHelp" }),
     field("completion_date", date),
@@ -359,7 +359,7 @@ export const MODULE_FIELDS: Readonly<
     field("mode", choice("written", "recording", "declined", "not_yet")),
     field("date", date),
     field("participants", list(object({ name: text(160), role: text(300) }))),
-    field("languages", list(text(35), 10)),
+    field("languages", list({ kind: "language" }, 10)),
     field("q1", localized(8000)),
     field("q2", localized(8000)),
     field("q3", localized(8000)),

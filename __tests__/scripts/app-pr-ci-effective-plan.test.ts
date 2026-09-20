@@ -10,6 +10,7 @@ type EffectivePlan = {
     playwright_smoke?: { required: boolean };
     playwright_critical_shell?: { required: boolean };
     playwright_museum: { required: boolean };
+    playwright_artwork_documentation: { required: boolean };
     install: { required: boolean };
   };
 };
@@ -58,6 +59,43 @@ function executePlan(changedFiles: string[]): EffectivePlan {
 }
 
 describe("effective App PR CI plan", () => {
+  it.each([
+    "app/artwork-documentation/page.tsx",
+    "components/providers/LayoutWrapper.tsx",
+    "components/layout/WebLayout.tsx",
+    "components/layout/SmallScreenLayout.tsx",
+    "components/layout/SmallScreenLayoutHeader.tsx",
+    "components/artwork-documentation/DocumentationUpload.tsx",
+    "lib/artwork-documentation/draft-controller.ts",
+    "services/api/artwork-documentation-assets-api.ts",
+    "i18n/messages/artwork-documentation-chapters.ts",
+    "tests/artwork-documentation/profile-v2.json",
+    "tests/support/composerSandboxServer.cjs",
+    "tests/packs.manifest.cjs",
+    ".github/workflows/app-pr-ci.yml",
+  ])(
+    "selects the isolated artwork documentation browser pack for %s",
+    (file) => {
+      expect(
+        executePlan([file]).checks.playwright_artwork_documentation.required
+      ).toBe(true);
+    }
+  );
+
+  it.each([
+    "README.md",
+    "components/header/AppHeader.tsx",
+    "components/layout/AppLayout.tsx",
+    "app/collect/page.tsx",
+  ])(
+    "does not select the artwork documentation browser pack for unrelated %s",
+    (file) => {
+      expect(
+        executePlan([file]).checks.playwright_artwork_documentation.required
+      ).toBe(false);
+    }
+  );
+
   it("preserves risk-selected browser checks for ordinary runtime changes", () => {
     const effective = executePlan(["components/header/AppHeader.tsx"]);
 

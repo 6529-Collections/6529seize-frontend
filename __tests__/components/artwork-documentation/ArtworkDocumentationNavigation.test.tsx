@@ -1,15 +1,19 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ArtworkDocumentationRecordView } from "@/components/artwork-documentation/ArtworkDocumentationWorkspace";
+import ArtworkDocumentationWorkspace, {
+  ArtworkDocumentationRecordView,
+} from "@/components/artwork-documentation/ArtworkDocumentationWorkspace";
 import { useDocumentationDraft } from "@/hooks/artwork-documentation/useDocumentationDraft";
 import { documentationFixture } from "@/__tests__/fixtures/artwork-documentation";
 import museumProfile from "@/__tests__/fixtures/artwork-documentation-profile-v3.json";
 import type { ApiArtworkDocumentationContext } from "@/generated/models/ApiArtworkDocumentationContext";
 import type * as documentationApi from "@/services/api/artwork-documentation-api";
+import { getDocumentationContext } from "@/services/api/artwork-documentation-api";
 import { documentationFieldLabel } from "@/i18n/messages/artwork-documentation-fields";
 
 jest.mock("next/navigation", () => ({
   useRouter: () => ({ push: jest.fn() }),
+  useSearchParams: () => new URLSearchParams(globalThis.location.search),
 }));
 jest.mock("@/hooks/useBrowserLocale", () => ({
   useBrowserLocale: () => "en-US",
@@ -19,7 +23,8 @@ jest.mock("@/components/auth/Auth", () => ({
 }));
 jest.mock("@/components/artwork-documentation/DocumentationAuthGate", () => ({
   __esModule: true,
-  default: () => null,
+  default: ({ children }: { readonly children: import("react").ReactNode }) =>
+    children,
   useDocumentationActor: () => ({
     actorKey: "artist-a",
     connectedProfile: { id: "artist-a" },
@@ -30,6 +35,7 @@ jest.mock("@/services/api/artwork-documentation-api", () => ({
     "@/services/api/artwork-documentation-api"
   ),
   getDocumentationRevisions: jest.fn().mockResolvedValue({ data: [] }),
+  getDocumentationContext: jest.fn(),
 }));
 jest.mock(
   "@/components/artwork-documentation/DocumentationRecordHeader",
@@ -189,6 +195,88 @@ it.each([
     } finally {
       view.unmount();
       client.clear();
+    }
+  }
+);
+
+function workspace(
+  context: ApiArtworkDocumentationContext,
+  section = "artwork"
+) {
+  const client = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  jest.mocked(getDocumentationContext).mockResolvedValue(context);
+  const view = render(
+    <QueryClientProvider client={client}>
+      <ArtworkDocumentationWorkspace
+        workId={context.work_id}
+        contextId={context.id}
+        section={section}
+      />
+    </QueryClientProvider>
+  );
+  return () => {
+    view.unmount();
+    client.clear();
+  };
+}
+
+it("restores the current URL chapter when the workspace remounts with an older server prop", async () => {
+  const context = navigationContext(false, "rights", "rights_basis");
+  globalThis.history.replaceState(
+    null,
+    "",
+    "/artwork-documentation?section=artwork"
+  );
+  const unmount = workspace(context);
+  await screen.findByRole("combobox", { name: "Chapters in this record" });
+  fireEvent.change(
+    screen.getByRole("combobox", { name: "Chapters in this record" }),
+    {
+      target: { value: "rights" },
+    }
+  );
+  expect(
+    screen.getByRole("combobox", { name: "Chapters in this record" })
+  ).toHaveValue("rights");
+  expect(new URL(globalThis.location.href).searchParams.get("section")).toBe(
+    "rights"
+  );
+  unmount();
+
+  const unmountRestored = workspace(context);
+  try {
+    await waitFor(() =>
+      expect(
+        screen.getByRole("combobox", { name: "Chapters in this record" })
+      ).toHaveValue("rights")
+    );
+    expect(
+      document.getElementById(`documentation-answers-${context.id}-rights`)
+    ).toBeVisible();
+  } finally {
+    unmountRestored();
+  }
+});
+
+it.each(["", "?section=unrecognized", "?section=materials"])(
+  "uses the work chapter for an absent, invalid or unavailable URL section (%s)",
+  async (query) => {
+    const context = navigationContext(false, "rights", "rights_basis");
+    globalThis.history.replaceState(null, "", `/artwork-documentation${query}`);
+    const unmount = workspace(context, "rights");
+    try {
+      await waitFor(() =>
+        expect(
+          screen.getByRole("combobox", { name: "Chapters in this record" })
+        ).toHaveValue("artwork")
+      );
+      expect(
+        document.getElementById(`documentation-answers-${context.id}-artwork`)
+      ).toBeVisible();
+    } finally {
+      unmount();
     }
   }
 );

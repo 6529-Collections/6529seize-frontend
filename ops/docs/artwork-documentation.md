@@ -179,27 +179,39 @@ Changes save with 6529 while you prepare the draft. Check the save status
 before leaving, or use **Save and exit**. After all pending changes save,
 **Save and exit** returns to **My artwork documentation**, where you can reopen
 the same record. If saving fails or your session expires, keep the window open while you retry
-or sign in again. Unsaved text is not kept after the window is closed.
+or sign in again. Where browser storage is available, the same tab keeps a
+recovery copy of unfinished form answers when you navigate away or refresh.
+This is a best-effort recovery copy, not a saved record; check the save status.
+Signing out or changing profile clears it. Closing the tab can remove it.
+Files and their transfer bytes are not stored in this recovery copy.
 If another editor changes the record, resolve the version conflict before
 continuing; the app does not silently overwrite their work.
 
 If an answer needs correction, save guidance appears beside the chapter
 actions as well as at the top. The pending-answer links take you to the
 relevant questions. Correct any highlighted format or missing details, then
-try saving again. Other pending answers may be waiting behind that correction;
-their presence in the list does not mean they are wrong. Keep the window open
-until the save status confirms that your changes are saved.
+try saving again. Valid answers continue saving while you finish another answer.
+The guidance names the part that needs attention, including entries inside a
+longer answer. Only the answers still waiting to save remain in the pending list.
+Keep the window open until the save status confirms that your changes are saved.
 
 When a rights category requires supporting details, those inputs appear
 immediately. In earlier forms with an editable artwork license, include both
 the license name and its complete URL. Correcting an answer keeps the other
-pending changes ready to save.
+pending changes ready to save. Earlier Keys and Gates records also offer
+**Add the project’s CC0 license details** to fill the project license name and URL;
+this action does not change your rights declaration.
 
 In **Materials & versions**, **Artwork & supporting files** brings **Add a file**
 together with the final artwork and material selections. Earlier forms keep
 this area in The work. Upload the exact file you intend to include with the work.
 Finishing the transfer is followed by file processing; wait for the file to
-become ready. **Edit file details** opens editable descriptions and other file
+become ready. Choosing a filename alone does not upload it: select **Upload file**
+and watch its progress. Uploads continue while you move between chapters and do
+not require unrelated answers to be complete. A success message confirms that
+the checked file is in your record and available in its relevant file selector.
+If adding a checked file to the record fails, **Add checked file to record**
+retries that step without uploading its bytes again. **Edit file details** opens editable descriptions and other file
 information when your access permits it. **File integrity** shows the recorded
 file information and checksum. Viewers can see **Files in this record** and
 download originals according to their access, without upload or editing controls.
