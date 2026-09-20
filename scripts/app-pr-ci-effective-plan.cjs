@@ -42,6 +42,8 @@ const DEPLOYMENT_CONTRACT_PATTERNS = [
   /^(?:package\.json|pnpm-lock\.yaml|pnpm-workspace\.yaml)$/u,
 ];
 const ARTWORK_DOCUMENTATION_BROWSER_PATTERNS = [
+  /^components\/providers\/LayoutWrapper\.tsx$/u,
+  /^components\/layout\/(?:WebLayout|SmallScreenLayout|SmallScreenLayoutHeader)\.tsx$/u,
   /^(?:app|components|hooks|lib)\/artwork-documentation\//u,
   /^services\/api\/artwork-documentation(?:-assets)?-api\.ts$/u,
   /^i18n\/messages\/artwork-documentation(?:-[A-Za-z0-9]+)*\.ts$/u,

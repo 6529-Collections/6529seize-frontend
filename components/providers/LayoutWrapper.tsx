@@ -7,7 +7,6 @@ import { finishVersionReloadWhenReady } from "@/components/version-update/versio
 import FooterWrapper from "@/components/footer/FooterWrapper";
 import MobileLayout from "@/components/layout/MobileLayout";
 import NativeStartupBoundary from "@/components/layout/NativeStartupBoundary";
-import SmallScreenLayout from "@/components/layout/SmallScreenLayout";
 import WebLayout from "@/components/layout/WebLayout";
 import LayoutErrorFallback from "@/components/providers/LayoutErrorFallback";
 import { SIDEBAR_MOBILE_BREAKPOINT } from "@/constants/sidebar";
@@ -85,8 +84,10 @@ export default function LayoutWrapper({
     };
   }, [pathname]);
 
-  let LayoutComponent: ComponentType<{ readonly children: ReactNode }> =
-    WebLayout;
+  const LayoutComponent: ComponentType<{
+    readonly children: ReactNode;
+    readonly isSmall?: boolean;
+  }> = isApp ? MobileLayout : WebLayout;
 
   // hasTouchScreen covers touch-first hardware; isMobileDevice (UA-based)
   // keeps phones on the small layout even when a mouse or trackpad is
@@ -94,12 +95,6 @@ export default function LayoutWrapper({
   const isSmallLayout =
     (hasTouchScreen || isMobileDevice) &&
     (isSmallScreen || isTouchTabletViewport);
-
-  if (isApp) {
-    LayoutComponent = MobileLayout;
-  } else if (isSmallLayout) {
-    LayoutComponent = SmallScreenLayout;
-  }
 
   if (isAccessOrRestricted) {
     // These standalone pages never mount web/native chrome. Keep their content
@@ -109,7 +104,7 @@ export default function LayoutWrapper({
 
   return (
     <NativeStartupBoundary isNativeLayout={isApp}>
-      <LayoutComponent>
+      <LayoutComponent isSmall={isSmallLayout}>
         <ErrorBoundary
           key={refreshKey}
           FallbackComponent={LayoutErrorFallback}

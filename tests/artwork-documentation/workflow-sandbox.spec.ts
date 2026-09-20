@@ -16,7 +16,8 @@ import {
 // origins and blocks external mutations. Live acceptance keeps CSP enabled.
 test.use({
   bypassCSP:
-    process.env["PLAYWRIGHT_ARTWORK_DOCUMENTATION_PRODUCTION_SANDBOX"] === "1" &&
+    process.env["PLAYWRIGHT_ARTWORK_DOCUMENTATION_PRODUCTION_SANDBOX"] ===
+      "1" &&
     process.env["PLAYWRIGHT_COMPOSER_SANDBOX"] === "1" &&
     process.env["PLAYWRIGHT_ENV"] === "local",
 });
@@ -93,9 +94,10 @@ for (const version of [2, 3] as const) {
     await expectNoUnsafeSandboxMutations(baseURL);
   });
 
-  test(`profile v${version}: transfer survives chapter and reading navigation, attachment retries without retransfer, final selection persists`, async ({
+  test(`profile v${version}: transfer survives responsive layout, chapter and reading navigation, attachment retries without retransfer, final selection persists`, async ({
     page,
     baseURL,
+    isMobile,
   }) => {
     const sandbox = await installDocumentationSandbox(page, baseURL, version, {
       failFirstAttachment: true,
@@ -139,6 +141,30 @@ for (const version of [2, 3] as const) {
           .getByRole("region", { name: "Draft reading view" })
           .getByRole("button", { name: "Return to writing", exact: true })
       ).toBeVisible();
+      // Touch devices cross the actual shell boundary at 1024px. Preserve
+      // reading state and the in-flight transfer in both directions.
+      const originalViewport = page.viewportSize()!;
+      for (const width of [1100, 390, originalViewport.width]) {
+        await page.setViewportSize({ width, height: originalViewport.height });
+        await expect(page.locator("[data-small]").first()).toHaveAttribute(
+          "data-small",
+          String(isMobile && width < 1024)
+        );
+        await page.evaluate(
+          () =>
+            new Promise<void>((resolve) => {
+              requestAnimationFrame(() =>
+                requestAnimationFrame(() => resolve())
+              );
+            })
+        );
+        await expect(
+          page
+            .getByRole("region", { name: "Draft reading view" })
+            .getByRole("button", { name: "Return to writing", exact: true })
+        ).toBeVisible();
+        await expect(page).toHaveURL(/section=story/u);
+      }
       sandbox.releaseTransfer();
       await expect.poll(() => sandbox.counts.completes).toBe(1);
       await expect.poll(() => sandbox.counts.polls).toBeGreaterThan(0);

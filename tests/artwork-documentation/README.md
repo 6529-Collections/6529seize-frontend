@@ -4,13 +4,13 @@ Run `seize run test:e2e:artwork-documentation-sandbox` on Windows, or the reposi
 
 The pack runs the real editor on desktop and mobile with the published legacy photography v2 catalogue and the canonical museum v3 catalogue. All records, account state and uploaded bytes are fictional. A loopback API and browser interception provide deterministic save, transfer, processing and attachment responses. The shared sandbox mutation guard refuses non-local writes.
 
-The tests exercise independent answer saving, inline validation, chapter and reading navigation during a transfer, scanning-state polling, attachment recovery without a second transfer, final-file selection and saved values after reload. The first attachment deliberately receives HTTP 503. This is browser regression coverage across mocked HTTP boundaries; it does not prove live authorization, object storage, malware scanning or deployment health. Those require separate staging end-to-end checks.
+The tests exercise independent answer saving, inline validation, chapter and reading navigation plus viewport changes across the mobile/desktop shell boundary during a transfer, scanning-state polling, attachment recovery without a second transfer, final-file selection and saved values after reload. The first attachment deliberately receives HTTP 503. This is browser regression coverage across mocked HTTP boundaries; it does not prove live authorization, object storage, malware scanning or deployment health. Those require separate staging end-to-end checks.
 
 The pack reserves local ports 3295 and 4295, uses the existing composer sandbox server and writes Next output to the ignored `.next-playwright-artwork-documentation` directory. It uses a public unsigned synthetic account through the ordinary stored-account hydration path, not development impersonation. It must never be pointed at staging or production.
 
 `profile-v2.json` is the public `photography_documentation_v1` version 2 catalogue exported from the backend catalogue, without artist answers. Museum v3 reuses `__tests__/fixtures/artwork-documentation-profile-v3.json`. Update the fixture deliberately when its contract changes.
 
-App PR CI selects this pack for artwork-documentation runtime, fixture and sandbox-policy changes through `scripts/app-pr-ci-effective-plan.cjs`.
+App PR CI selects this pack for artwork-documentation runtime, responsive shell, fixture and sandbox-policy changes through `scripts/app-pr-ci-effective-plan.cjs`.
 
 ## Production-built local acceptance
 

@@ -61,6 +61,10 @@ function executePlan(changedFiles: string[]): EffectivePlan {
 describe("effective App PR CI plan", () => {
   it.each([
     "app/artwork-documentation/page.tsx",
+    "components/providers/LayoutWrapper.tsx",
+    "components/layout/WebLayout.tsx",
+    "components/layout/SmallScreenLayout.tsx",
+    "components/layout/SmallScreenLayoutHeader.tsx",
     "components/artwork-documentation/DocumentationUpload.tsx",
     "lib/artwork-documentation/draft-controller.ts",
     "services/api/artwork-documentation-assets-api.ts",
@@ -81,6 +85,7 @@ describe("effective App PR CI plan", () => {
   it.each([
     "README.md",
     "components/header/AppHeader.tsx",
+    "components/layout/AppLayout.tsx",
     "app/collect/page.tsx",
   ])(
     "does not select the artwork documentation browser pack for unrelated %s",
