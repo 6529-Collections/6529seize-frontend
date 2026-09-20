@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { ApiArtworkDocumentationContextConfirmationStatusEnum } from "@/generated/models/ApiArtworkDocumentationContext";
 import type { ApiArtworkDocumentationContext } from "@/generated/models/ApiArtworkDocumentationContext";
 import { useDocumentationDraft } from "@/hooks/artwork-documentation/useDocumentationDraft";
@@ -66,6 +66,10 @@ export default function ArtworkDocumentationWorkspace(props: Props) {
 }
 
 function WorkspaceLoader(props: Props) {
+  const searchParams = useSearchParams();
+  const section = searchParams
+    ? (searchParams.get("section") ?? undefined)
+    : props.section;
   const { msg } = useDocumentationMessages();
   const { connectedProfile, actorKey } = useDocumentationActor();
   const query = useQuery({
@@ -109,7 +113,7 @@ function WorkspaceLoader(props: Props) {
     <WorkspaceEditor
       initial={query.data}
       actorKey={actorKey}
-      initialSection={parseSection(props.section)}
+      initialSection={parseSection(section)}
     />
   );
 }
