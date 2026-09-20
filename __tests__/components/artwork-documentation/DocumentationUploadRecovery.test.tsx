@@ -8,6 +8,7 @@ import {
   titleOperation,
 } from "@/__tests__/fixtures/artwork-documentation";
 import museumProfile from "@/__tests__/fixtures/artwork-documentation-profile-v3.json";
+import { ApiArtworkDocumentationProfileIntakeModeEnum } from "@/generated/models/ApiArtworkDocumentationProfile";
 import type { ApiArtworkDocumentationContext } from "@/generated/models/ApiArtworkDocumentationContext";
 import type { ApiArtworkDocumentationUploadSession } from "@/generated/models/ApiArtworkDocumentationUploadSession";
 import { getDocumentationContext } from "@/services/api/artwork-documentation-api";
@@ -94,7 +95,8 @@ function setup(version = 2, restored: false | "ready" | "processing" = false) {
     } as never;
   } else {
     server.profile.version = version;
-    server.profile.intake_mode = "publication_only";
+    server.profile.intake_mode =
+      ApiArtworkDocumentationProfileIntakeModeEnum.PublicationOnly;
     server.profile.modules
       .find((module) => module.id === "artwork")!
       .fields.push({
