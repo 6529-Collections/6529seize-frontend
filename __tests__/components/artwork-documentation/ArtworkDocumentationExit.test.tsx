@@ -54,6 +54,7 @@ jest.mock("@/components/artwork-documentation/DocumentationSaveStatus", () => ({
 jest.mock(
   "@/components/artwork-documentation/DocumentationRecordChapters",
   () => ({
+    DocumentationFilesSection: () => null,
     DocumentationReadingChapter: () => <p>Saved artwork</p>,
     DocumentationWritingChapter: ({
       draft,
