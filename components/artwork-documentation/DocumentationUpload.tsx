@@ -1,22 +1,11 @@
 "use client";
 
 import {
-  canEditDocumentationAsset,
   canWriteDocumentationAssetRole,
   mutationCapabilities,
 } from "@/lib/artwork-documentation/capabilities";
 
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  type ReactNode,
-} from "react";
-import { useQuery } from "@tanstack/react-query";
-import { documentationQueryKey } from "@/hooks/artwork-documentation/useArtworkDocumentationAccess";
-import { useDocumentationActor } from "./DocumentationAuthGate";
-import type { ApiArtworkDocumentationAsset } from "@/generated/models/ApiArtworkDocumentationAsset";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ApiArtworkDocumentationContextLifecycleEnum,
   type ApiArtworkDocumentationContext,
@@ -25,16 +14,12 @@ import { ApiArtworkDocumentationCapabilitiesEditModulesEnum } from "@/generated/
 import type { ApiArtworkDocumentationUploadSession } from "@/generated/models/ApiArtworkDocumentationUploadSession";
 import type { ApiArtworkDocumentationAssetLinkRequest } from "@/generated/models/ApiArtworkDocumentationAssetLinkRequest";
 import type { DocumentationDraftController } from "@/lib/artwork-documentation/draft-controller";
-import {
-  DocumentationFileChangedError,
-  transferDocumentationFile,
-} from "@/lib/artwork-documentation/upload";
+import { transferDocumentationFile } from "@/lib/artwork-documentation/upload";
 import {
   cancelDocumentationUpload,
   downloadDocumentationAsset,
   getDocumentationUpload,
   linkDocumentationAsset,
-  startDocumentationUpload,
 } from "@/services/api/artwork-documentation-assets-api";
 import { pollDocumentationProcessing } from "@/lib/artwork-documentation/poll-processing";
 import { getDocumentationContext } from "@/services/api/artwork-documentation-api";
@@ -47,9 +32,6 @@ import {
   inputClass,
   useDocumentationMessages,
 } from "./DocumentationControls";
-import DocumentationAssetDetails from "./DocumentationAssetDetails";
-import DocumentationMediaPlayer from "./DocumentationMediaPlayer";
-import DocumentationAssetTechnical from "./DocumentationAssetTechnical";
 import {
   canPublishDocumentationAsset,
   documentationAssetRoles,
@@ -60,109 +42,26 @@ import {
   type DocumentationUploadStage,
 } from "@/utils/monitoring/artworkDocumentationUploadMonitoring";
 
-type UploadStatus =
-  | "idle"
-  | "queued"
-  | "uploading"
-  | "processing"
-  | "checking"
-  | "ready"
-  | "attach_failed"
-  | "cancelling"
-  | "failed"
-  | "changed";
-const activeUploadStates = new Set<UploadStatus>([
-  "queued",
-  "uploading",
-  "processing",
-  "checking",
-  "cancelling",
-]);
+import {
+  activeUploadStates,
+  canContinueUpload,
+  canUseUpload,
+  getOrStartUpload,
+  restrictedRoles,
+  uploadActionMessage,
+  uploadButtonDisabled,
+  uploadFailureStatus,
+  type UploadStatus,
+} from "@/lib/artwork-documentation/upload-state";
+import {
+  DocumentationUploadAssets,
+  DocumentationUploadFeedback,
+} from "./DocumentationUploadPresentation";
 
-const restrictedRoles = new Set([
-  "consent_instrument",
-  "rights_instrument",
-  "camera_original",
-  "working_file",
-]);
 interface Props {
   readonly context: ApiArtworkDocumentationContext;
   readonly controller: DocumentationDraftController;
   readonly onPendingChange?: ((pending: boolean) => void) | undefined;
-}
-
-function canContinueUpload(
-  signal: AbortSignal,
-  mounted: { readonly current: boolean }
-): boolean {
-  // Both values can change while awaiting a transfer or attachment.
-  return mounted.current && !signal.aborted;
-}
-
-function canUseUpload(
-  context: ApiArtworkDocumentationContext,
-  asset: { readonly role: string; readonly intended_visibility: string }
-): boolean {
-  return (
-    canPublishDocumentationAsset(context, asset.role) &&
-    canWriteDocumentationAssetRole(context, asset.role) &&
-    (!isPublicationOnly(context.profile) ||
-      asset.intended_visibility === "public_record")
-  );
-}
-
-function uploadButtonDisabled(
-  file: File | null,
-  state: string | undefined,
-  busy: boolean,
-  permitted: boolean,
-  limit: number
-): boolean {
-  if (!file && !["ready", "processing"].includes(state ?? "")) return true;
-  return busy || !permitted || (file?.size ?? 0) > limit;
-}
-
-function uploadActionMessage(
-  status: UploadStatus,
-  hasSession: boolean
-): string {
-  if (status === "attach_failed") return "uploadRetryAttachment";
-  return hasSession ? "retry" : "uploadStart";
-}
-function uploadFailureStatus(error: unknown): UploadStatus {
-  return error instanceof DocumentationFileChangedError ? "changed" : "failed";
-}
-async function getOrStartUpload({
-  contextId,
-  resumeId,
-  file,
-  role,
-  visibility,
-  key,
-  signal,
-}: {
-  readonly contextId: string;
-  readonly resumeId: string | undefined;
-  readonly file: File | null;
-  readonly role: string;
-  readonly visibility: string;
-  readonly key: string;
-  readonly signal: AbortSignal;
-}): Promise<ApiArtworkDocumentationUploadSession> {
-  if (resumeId) return getDocumentationUpload(contextId, resumeId, signal);
-  if (!file) throw new Error("UPLOAD_FILE_REQUIRED");
-  return startDocumentationUpload(
-    contextId,
-    {
-      filename: file.name,
-      size_bytes: file.size,
-      declared_mime: file.type || "application/octet-stream",
-      role,
-      intended_visibility: visibility,
-    },
-    key,
-    signal
-  );
 }
 
 export default function DocumentationUpload({
@@ -807,224 +706,19 @@ export default function DocumentationUpload({
         failureMessage={failureMessage}
         actionError={actionError}
       />
-      <ul className="tw-m-0 tw-list-none tw-p-0">
-        {visibleAssets.map((asset) => (
-          <DocumentationAssetMutationAccess
-            key={asset.id}
-            context={context}
-            asset={asset}
-            session={session}
-          >
-            {(canMutateAsset) => (
-              <li className="tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-py-6">
-                <p className="tw-m-0 tw-break-words tw-text-base tw-font-medium tw-leading-7">
-                  {asset.filename}
-                </p>
-                <p className="tw-my-2 tw-text-xs tw-text-iron-400">
-                  {roleLabel(asset.role)} · {sizeLabel(asset.size_bytes)} ·{" "}
-                  {documentationOptionLabel(asset.state)}
-                </p>
-                {asset.state === "ready" && (
-                  <>
-                    <DocumentationMediaPlayer context={context} asset={asset} />
-                    <div className="tw-flex tw-flex-wrap tw-gap-3">
-                      <DocumentationButton
-                        secondary
-                        onClick={() => {
-                          void download(asset.id);
-                        }}
-                      >
-                        {msg("download")}
-                      </DocumentationButton>
-                      {!context.asset_links.some(
-                        (link) => link.asset_id === asset.id
-                      ) &&
-                        canMutateAsset &&
-                        canPublishDocumentationAsset(context, asset.role) && (
-                          <DocumentationButton
-                            secondary
-                            onClick={() => {
-                              void run(asset.id);
-                            }}
-                          >
-                            {msg("uploadRetryAttachment")}
-                          </DocumentationButton>
-                        )}
-                    </div>
-                    <DocumentationAssetTechnical
-                      contextId={context.id}
-                      asset={asset}
-                      canReadReport={context.capabilities.read_archival_files}
-                      onReport={() => {
-                        void download(asset.id, "c2pa_report");
-                      }}
-                    />
-                  </>
-                )}
-                {asset.state === "ready" &&
-                  canEditDocumentationAsset(context, asset.id) && (
-                    <DocumentationAssetDetails
-                      context={context}
-                      assetId={asset.id}
-                      controller={controller}
-                    />
-                  )}
-                {["created", "uploading"].includes(asset.state) &&
-                  canMutateAsset && (
-                    <>
-                      <p className="tw-text-xs tw-text-iron-400">
-                        {msg("uploadReselect")}
-                      </p>
-                      <DocumentationButton
-                        secondary
-                        disabled={
-                          !file ||
-                          busy ||
-                          (session !== null &&
-                            session.upload_id !== asset.id) ||
-                          !canPublishDocumentationAsset(context, asset.role)
-                        }
-                        onClick={() => {
-                          void run(asset.id);
-                        }}
-                      >
-                        {msg("retry")}
-                      </DocumentationButton>
-                    </>
-                  )}
-              </li>
-            )}
-          </DocumentationAssetMutationAccess>
-        ))}
-      </ul>
-      {visibleAssets.length === 0 && (
-        <p className="tw-text-sm tw-text-iron-400">
-          {msg(publicationOnly ? "publicationNoFiles" : "noFiles")}
-        </p>
-      )}
+      <DocumentationUploadAssets
+        context={context}
+        controller={controller}
+        session={session}
+        file={file}
+        busy={busy}
+        visibleAssets={visibleAssets}
+        publicationOnly={publicationOnly}
+        roleLabel={roleLabel}
+        sizeLabel={sizeLabel}
+        onDownload={download}
+        onResume={run}
+      />
     </section>
-  );
-}
-
-function DocumentationUploadFeedback({
-  status,
-  attaching,
-  selectedFilename,
-  total,
-  sent,
-  completedFilename,
-  failureMessage,
-  actionError,
-}: {
-  readonly status: UploadStatus;
-  readonly attaching: boolean;
-  readonly selectedFilename: string | undefined;
-  readonly total: number;
-  readonly sent: number;
-  readonly completedFilename: string;
-  readonly failureMessage: string;
-  readonly actionError: boolean;
-}) {
-  const { msg, locale } = useDocumentationMessages();
-  const sizeLabel = (size: number) => formatFileSizeLabel(size, locale) ?? "—";
-  return (
-    <>
-      {selectedFilename && status === "idle" && (
-        <DocumentationNotice>
-          {msg("uploadSelected", { filename: selectedFilename })}
-        </DocumentationNotice>
-      )}
-      {status === "checking" && (
-        <DocumentationNotice>{msg("uploadChecking")}</DocumentationNotice>
-      )}
-      {attaching && (
-        <DocumentationNotice>{msg("uploadAttaching")}</DocumentationNotice>
-      )}
-      {status === "ready" && (
-        <DocumentationNotice>
-          {msg("uploadCompleted", { filename: completedFilename })}
-        </DocumentationNotice>
-      )}
-      {status === "attach_failed" && (
-        <DocumentationNotice error>
-          {msg("uploadAttachmentFailed")}
-        </DocumentationNotice>
-      )}
-      {status === "uploading" && !attaching && (
-        <div role="status">
-          <progress
-            className="tw-w-full"
-            max={Math.max(1, total)}
-            value={sent}
-            aria-label={msg("uploadProgress", {
-              sent: sizeLabel(sent),
-              total: sizeLabel(total),
-            })}
-          />
-          <p className="tw-mt-2 tw-text-xs tw-text-iron-300">
-            {msg("uploadProgress", {
-              sent: sizeLabel(sent),
-              total: sizeLabel(total),
-            })}
-          </p>
-        </div>
-      )}
-      {status === "processing" && !attaching && (
-        <DocumentationNotice>{msg("uploadProcessing")}</DocumentationNotice>
-      )}
-      {(status === "failed" || status === "changed") && (
-        <DocumentationNotice error>
-          {msg(status === "changed" ? "uploadMismatch" : failureMessage)}
-        </DocumentationNotice>
-      )}
-      {actionError && (
-        <DocumentationNotice error>{msg("error")}</DocumentationNotice>
-      )}
-    </>
-  );
-}
-
-function DocumentationAssetMutationAccess({
-  context,
-  asset,
-  session,
-  children,
-}: {
-  readonly context: ApiArtworkDocumentationContext;
-  readonly asset: ApiArtworkDocumentationAsset;
-  readonly session: ApiArtworkDocumentationUploadSession | null;
-  readonly children: (allowed: boolean) => ReactNode;
-}) {
-  const { connectedProfile, actorKey } = useDocumentationActor();
-  const linked = context.asset_links.some((link) => link.asset_id === asset.id);
-  const directlyAllowed =
-    linked && canEditDocumentationAsset(context, asset.id);
-  const mayRecover =
-    canWriteDocumentationAssetRole(context, asset.role) && !linked;
-  const knownUpload =
-    session?.asset.id === asset.id && session.can_mutate === true;
-  const recovery = useQuery({
-    queryKey: documentationQueryKey(
-      connectedProfile?.id,
-      context.id,
-      "upload-mutation-access",
-      asset.id,
-      actorKey,
-      String(context.draft_version),
-      JSON.stringify(mutationCapabilities(context))
-    ),
-    queryFn: ({ signal }) =>
-      getDocumentationUpload(context.id, asset.id, signal),
-    enabled: mayRecover && !knownUpload,
-    retry: false,
-    gcTime: 0,
-    meta: { persist: false },
-  });
-  // The upload endpoint checks the stored uploader and reference state using original grants.
-  return children(
-    directlyAllowed ||
-      (mayRecover &&
-        (knownUpload ||
-          (recovery.data?.can_mutate === true && !recovery.isFetching)))
   );
 }
