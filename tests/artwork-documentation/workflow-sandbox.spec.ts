@@ -146,10 +146,15 @@ for (const version of [2, 3] as const) {
       const originalViewport = page.viewportSize()!;
       for (const width of [1100, 390, originalViewport.width]) {
         await page.setViewportSize({ width, height: originalViewport.height });
-        await expect(page.locator("[data-small]").first()).toHaveAttribute(
-          "data-small",
-          String(isMobile && width < 1024)
-        );
+        await expect
+          .poll(() =>
+            page
+              .getByRole("main")
+              .evaluate((main) =>
+                main.closest("[data-small]")?.getAttribute("data-small")
+              )
+          )
+          .toBe(String(isMobile && width < 1024));
         await page.evaluate(
           () =>
             new Promise<void>((resolve) => {
