@@ -67,9 +67,7 @@ export default function ArtworkDocumentationWorkspace(props: Props) {
 
 function WorkspaceLoader(props: Props) {
   const searchParams = useSearchParams();
-  const section = searchParams
-    ? (searchParams.get("section") ?? undefined)
-    : props.section;
+  const section = searchParams.get("section") ?? undefined;
   const { msg } = useDocumentationMessages();
   const { connectedProfile, actorKey } = useDocumentationActor();
   const query = useQuery({
