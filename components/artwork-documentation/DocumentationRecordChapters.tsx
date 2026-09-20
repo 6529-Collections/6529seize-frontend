@@ -14,6 +14,7 @@ import {
   DocumentationButton,
   useDocumentationMessages,
 } from "./DocumentationControls";
+import DocumentationProgramLicense from "./DocumentationProgramLicense";
 import DocumentationModules from "./DocumentationModules";
 import DocumentationUpload from "./DocumentationUpload";
 import DocumentationReview from "./DocumentationReview";
@@ -73,11 +74,7 @@ export function DocumentationWritingChapter({
         edits={draft.edits}
         section={section}
       />
-      <div
-        id={`documentation-answers-${context.id}-${section}`}
-        tabIndex={-1}
-        className="tw-min-w-0 tw-space-y-10 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
-      >
+      <div className="tw-min-w-0 tw-space-y-10 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400">
         {section === "artwork" && (
           <DocumentationSources context={context} controller={controller} />
         )}
@@ -105,6 +102,7 @@ export function DocumentationWritingChapter({
               </p>
             </section>
           )}
+        {section === "rights" && <DocumentationProgramLicense draft={draft} />}
         {section === "rights" && !museum && (
           <details className="tw-text-sm tw-leading-6 tw-text-iron-400">
             <summary className="tw-min-h-11 tw-cursor-pointer tw-py-2">
@@ -140,6 +138,7 @@ export function DocumentationWritingChapter({
               <DocumentationModules
                 context={context}
                 edits={draft.edits}
+                rejectedEdits={draft.rejectedEdits}
                 section="review"
                 onChange={(moduleId, operation) =>
                   controller.edit(moduleId, operation)
@@ -196,42 +195,40 @@ export function DocumentationWritingChapter({
             )}
           </>
         ) : (
-          <>
-            {museum && section === "materials" && (
-              <DocumentationFilesSection draft={draft} />
-            )}
-            <DocumentationModules
-              key={`${context.id}-${section}`}
-              context={context}
-              edits={draft.edits}
-              section={section}
-              excludeFields={
-                section === "artwork" || section === "materials"
-                  ? FILE_FIELDS
-                  : undefined
-              }
-              onChange={(moduleId, operation) =>
-                controller.edit(moduleId, operation)
-              }
-              onBlur={() => {
-                void controller.flush();
-              }}
-              readOnly={
-                context.lifecycle ===
-                ApiArtworkDocumentationContextLifecycleEnum.Archived
-              }
-              assets={assets}
-            />
-            {!museum && section === "artwork" && (
-              <DocumentationFilesSection draft={draft} />
-            )}
-          </>
+          <DocumentationModules
+            key={`${context.id}-${section}`}
+            context={context}
+            edits={draft.edits}
+            rejectedEdits={draft.rejectedEdits}
+            section={section}
+            excludeFields={
+              section === "artwork" || section === "materials"
+                ? FILE_FIELDS
+                : undefined
+            }
+            onChange={(moduleId, operation) =>
+              controller.edit(moduleId, operation)
+            }
+            onBlur={() => {
+              void controller.flush();
+            }}
+            readOnly={
+              context.lifecycle ===
+              ApiArtworkDocumentationContextLifecycleEnum.Archived
+            }
+            assets={assets}
+          />
         )}
       </div>
     </>
   );
 }
-function DocumentationFilesSection({ draft }: Pick<Props, "draft">) {
+export function DocumentationFilesSection({
+  draft,
+  onPendingChange,
+}: Pick<Props, "draft"> & {
+  readonly onPendingChange?: ((pending: boolean) => void) | undefined;
+}) {
   const { context, controller } = draft;
   const { msg } = useDocumentationMessages();
   const assets = context.assets
@@ -251,10 +248,15 @@ function DocumentationFilesSection({ draft }: Pick<Props, "draft">) {
       <p className="tw-m-0 tw-max-w-prose tw-text-sm tw-leading-6 tw-text-iron-400">
         {msg("chapters.filesHelp")}
       </p>
-      <DocumentationUpload context={context} controller={controller} />
+      <DocumentationUpload
+        context={context}
+        controller={controller}
+        onPendingChange={onPendingChange}
+      />
       <DocumentationModules
         context={context}
         edits={draft.edits}
+        rejectedEdits={draft.rejectedEdits}
         inlineFields={FILE_FIELDS}
         onChange={(moduleId, operation) => controller.edit(moduleId, operation)}
         onBlur={() => {
@@ -276,7 +278,6 @@ export function DocumentationReadingChapter({
   onNavigateField,
 }: Props) {
   const { context, controller } = draft;
-  const museum = isMuseumRecord(context.profile);
   return section === "review" ? (
     <>
       <DocumentationReview
@@ -296,21 +297,13 @@ export function DocumentationReadingChapter({
           allowSubmissionReference
         />
       )}
-      {museum && section === "materials" && (
-        <DocumentationUpload context={context} controller={controller} />
-      )}
       <DocumentationSummary
         context={context}
         section={section}
         showHeading={false}
       />
       {section === "artwork" && (
-        <>
-          <DocumentationSources context={context} controller={controller} />
-          {!museum && (
-            <DocumentationUpload context={context} controller={controller} />
-          )}
-        </>
+        <DocumentationSources context={context} controller={controller} />
       )}
     </>
   );

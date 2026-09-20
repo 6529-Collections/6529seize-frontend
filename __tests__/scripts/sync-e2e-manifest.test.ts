@@ -44,7 +44,7 @@ describe("E2E pack manifest", () => {
 
   it("defines every package pack once and satisfies the safety contract", () => {
     expect(manifestTools.validateManifest(packs, { root: ROOT })).toEqual([]);
-    expect(packs).toHaveLength(71);
+    expect(packs).toHaveLength(72);
 
     const rendered = manifestTools.renderPackageJsonScripts(packs);
     const packageScripts = JSON.parse(
@@ -56,6 +56,29 @@ describe("E2E pack manifest", () => {
       )
     );
     expect(checkedInE2eScripts).toEqual(rendered);
+  });
+
+  it("keeps artwork documentation mutations in the local desktop and mobile sandbox", () => {
+    const artwork = packs.filter(
+      (pack) => pack.scriptKey === "test:e2e:artwork-documentation-sandbox"
+    );
+    expect(artwork).toHaveLength(1);
+    expect(artwork[0]).toMatchObject({
+      safety: "sandbox",
+      environments: ["local"],
+      triggers: ["pr-ci", "manual"],
+      specs: ["tests/artwork-documentation/workflow-sandbox.spec.ts"],
+      projects: ["web-desktop-chromium", "web-mobile-chromium"],
+      env: {
+        PLAYWRIGHT_ENV: "local",
+        PLAYWRIGHT_COMPOSER_SANDBOX: "1",
+        PLAYWRIGHT_BASE_URL: "http://localhost:3295",
+        PLAYWRIGHT_WEB_SERVER_URL: "http://localhost:3295",
+        PLAYWRIGHT_COMPOSER_SANDBOX_API_PORT: "4295",
+        PLAYWRIGHT_READONLY: "0",
+        USE_DEV_AUTH: "false",
+      },
+    });
   });
 
   it("marks every dedicated Museum pack for change-set selection", () => {
