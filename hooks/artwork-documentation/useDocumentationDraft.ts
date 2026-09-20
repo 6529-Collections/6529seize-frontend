@@ -7,12 +7,22 @@ import {
   type DraftSnapshot,
 } from "@/lib/artwork-documentation/draft-controller";
 import {
+  activateDocumentationDraftRecovery,
+  readDocumentationDraftRecovery,
+  saveDocumentationDraftRecovery,
+} from "@/lib/artwork-documentation/draft-recovery";
+import { watchDocumentationRecoveryAuth } from "@/lib/artwork-documentation/draft-recovery-auth";
+import {
   getDocumentationContext,
   patchDocumentationModule,
 } from "@/services/api/artwork-documentation-api";
 
-/** Parent keys the editor by authenticated profile, proxy and wallet to discard private buffers on a switch. */
-export function useDocumentationDraft(initial: ApiArtworkDocumentationContext) {
+/** Parent keys the editor by authenticated profile, proxy and wallet. */
+export function useDocumentationDraft(
+  initial: ApiArtworkDocumentationContext,
+  actorKey: string | null = null
+) {
+  const [recoveryUnavailable, setRecoveryUnavailable] = useState(false);
   const [snapshot, setSnapshot] = useState<DraftSnapshot>({
     context: initial,
     edits: [],
@@ -26,17 +36,38 @@ export function useDocumentationDraft(initial: ApiArtworkDocumentationContext) {
       new DocumentationDraftController(
         initial,
         { save: patchDocumentationModule, read: getDocumentationContext },
-        setSnapshot
+        (next) => {
+          if (actorKey)
+            setRecoveryUnavailable(
+              !saveDocumentationDraftRecovery(actorKey, next)
+            );
+          setSnapshot(next);
+        }
       ),
-    [initial]
+    [initial, actorKey]
   );
   useEffect(() => {
     controller.activate();
-    return () => controller.dispose();
-  }, [controller]);
+    if (actorKey) {
+      watchDocumentationRecoveryAuth();
+      activateDocumentationDraftRecovery(actorKey);
+      const recovered = readDocumentationDraftRecovery(actorKey, initial);
+      if (recovered) {
+        controller.restore(recovered.edits, recovered.requireReview);
+        if (!recovered.requireReview) void controller.flush();
+      }
+    }
+    return () => {
+      if (actorKey)
+        saveDocumentationDraftRecovery(actorKey, controller.snapshot());
+      controller.dispose();
+    };
+  }, [controller, initial, actorKey]);
   useEffect(() => {
     const beforeUnload = (event: BeforeUnloadEvent) => {
-      if (controller.snapshot().dirty) {
+      const current = controller.snapshot();
+      if (actorKey) saveDocumentationDraftRecovery(actorKey, current);
+      if (current.dirty) {
         event.preventDefault();
         // Legacy WebViews need returnValue as well as preventDefault to protect unsaved edits.
         // eslint-disable-next-line @typescript-eslint/no-deprecated -- Retain the documented beforeunload compatibility mechanism.
@@ -45,6 +76,6 @@ export function useDocumentationDraft(initial: ApiArtworkDocumentationContext) {
     };
     globalThis.addEventListener("beforeunload", beforeUnload);
     return () => globalThis.removeEventListener("beforeunload", beforeUnload);
-  }, [controller]);
-  return { ...snapshot, controller };
+  }, [controller, actorKey]);
+  return { ...snapshot, controller, recoveryUnavailable };
 }
