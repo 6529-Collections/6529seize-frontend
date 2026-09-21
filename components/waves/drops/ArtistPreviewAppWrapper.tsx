@@ -8,8 +8,6 @@ import {
   TransitionChild,
 } from "@headlessui/react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
-import type { PanInfo } from "framer-motion";
-import { domMax, LazyMotion, m } from "framer-motion";
 import type { CSSProperties, ReactNode } from "react";
 import { Fragment, useRef } from "react";
 
@@ -38,15 +36,6 @@ export default function ArtistPreviewAppWrapper({
   const contentRef = useRef<HTMLDivElement>(null);
   useKeyboardFocusScroll(contentRef);
 
-  const handleDragEnd = (
-    _event: MouseEvent | TouchEvent | PointerEvent,
-    info: PanInfo
-  ) => {
-    // More lenient threshold for closing
-    if (info.offset.y > 80 || info.velocity.y > 300) {
-      onClose();
-    }
-  };
   return (
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog
@@ -74,59 +63,51 @@ export default function ArtistPreviewAppWrapper({
           onTouchStart={(e) => e.stopPropagation()}
           ref={constraintsRef}
         >
-          <LazyMotion features={domMax}>
-            <TransitionChild
-              as={Fragment}
-              enter="tw-transform tw-duration-300 tw-ease-out"
-              enterFrom="tw-translate-y-full"
-              enterTo="tw-translate-y-0"
-              leave="tw-transform tw-duration-300 tw-ease-in"
-              leaveFrom="tw-translate-y-0"
-              leaveTo="tw-translate-y-full"
-            >
-              <m.div
-                drag="y"
-                dragConstraints={constraintsRef}
-                dragElastic={0.1}
-                onDragEnd={handleDragEnd}
-                className="tw-pointer-events-auto tw-relative tw-w-full tw-transform-gpu tw-will-change-transform"
+          <TransitionChild
+            as={Fragment}
+            enter="tw-transform tw-duration-300 tw-ease-out"
+            enterFrom="tw-translate-y-full"
+            enterTo="tw-translate-y-0"
+            leave="tw-transform tw-duration-300 tw-ease-in"
+            leaveFrom="tw-translate-y-0"
+            leaveTo="tw-translate-y-full"
+          >
+            <div className="tw-pointer-events-auto tw-relative tw-w-full tw-transform-gpu tw-will-change-transform">
+              <TransitionChild
+                as={Fragment}
+                enter="tw-duration-300 tw-ease-in-out motion-reduce:tw-transition-none"
+                enterFrom="tw-opacity-0"
+                enterTo="tw-opacity-100"
+                leave="tw-duration-300 tw-ease-in-out motion-reduce:tw-transition-none"
+                leaveFrom="tw-opacity-100"
+                leaveTo="tw-opacity-0"
               >
-                <TransitionChild
-                  as={Fragment}
-                  enter="tw-duration-300 tw-ease-in-out motion-reduce:tw-transition-none"
-                  enterFrom="tw-opacity-0"
-                  enterTo="tw-opacity-100"
-                  leave="tw-duration-300 tw-ease-in-out motion-reduce:tw-transition-none"
-                  leaveFrom="tw-opacity-100"
-                  leaveTo="tw-opacity-0"
-                >
-                  <div className="tw-absolute -tw-top-16 tw-right-0 -tw-ml-8 tw-flex tw-pr-2 tw-pt-4 sm:-tw-ml-10 sm:tw-pr-4">
-                    <button
-                      type="button"
-                      aria-label="Close panel"
-                      className="tw-relative tw-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950/90 tw-p-0 tw-text-iron-300 tw-backdrop-blur-sm tw-transition focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 active:tw-scale-95 desktop-hover:hover:tw-border-white/20 desktop-hover:hover:tw-text-white motion-reduce:tw-transform-none"
-                      onClick={onClose}
-                    >
-                      <XMarkIcon className="tw-size-5 tw-flex-shrink-0" />
-                    </button>
-                  </div>
-                </TransitionChild>
-
-                <DialogPanel
-                  style={APP_DIALOG_PANEL_STYLE}
-                  className="tw-relative tw-flex tw-w-full tw-flex-col tw-overflow-hidden tw-rounded-t-2xl tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10 tw-bg-[#0B0C0E] tw-pb-[env(safe-area-inset-bottom,0px)] tw-shadow-[0_-18px_50px_rgba(0,0,0,0.45)]"
-                >
-                  <div
-                    ref={contentRef}
-                    data-testid="artist-preview-app-scroll"
-                    className="tw-min-h-0 tw-flex-1 tw-scroll-py-3 tw-overflow-y-auto tw-overscroll-contain tw-scrollbar-thin tw-scrollbar-track-iron-900 tw-scrollbar-thumb-iron-600"
+                <div className="tw-absolute -tw-top-16 tw-right-0 -tw-ml-8 tw-flex tw-pr-2 tw-pt-4 sm:-tw-ml-10 sm:tw-pr-4">
+                  <button
+                    type="button"
+                    aria-label="Close panel"
+                    className="tw-relative tw-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950/90 tw-p-0 tw-text-iron-300 tw-backdrop-blur-sm tw-transition focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 active:tw-scale-95 desktop-hover:hover:tw-border-white/20 desktop-hover:hover:tw-text-white motion-reduce:tw-transform-none"
+                    onClick={onClose}
                   >
-                    {children}
-                  </div>
-                </DialogPanel>
-              </m.div>
-            </TransitionChild>
-          </LazyMotion>
+                    <XMarkIcon className="tw-size-5 tw-flex-shrink-0" />
+                  </button>
+                </div>
+              </TransitionChild>
+
+              <DialogPanel
+                style={APP_DIALOG_PANEL_STYLE}
+                className="tw-relative tw-flex tw-w-full tw-flex-col tw-overflow-hidden tw-rounded-t-2xl tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10 tw-bg-[#0B0C0E] tw-pb-[env(safe-area-inset-bottom,0px)] tw-shadow-[0_-18px_50px_rgba(0,0,0,0.45)]"
+              >
+                <div
+                  ref={contentRef}
+                  data-testid="artist-preview-app-scroll"
+                  className="tw-min-h-0 tw-flex-1 tw-scroll-py-3 tw-overflow-y-auto tw-overscroll-contain tw-scrollbar-thin tw-scrollbar-track-iron-900 tw-scrollbar-thumb-iron-600"
+                >
+                  {children}
+                </div>
+              </DialogPanel>
+            </div>
+          </TransitionChild>
         </div>
       </Dialog>
     </Transition>

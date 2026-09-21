@@ -77,6 +77,11 @@ test.describe("Waves signed drop local sandbox @auth @medium @local-only", () =>
         await dialog
           .getByRole("button", { name: "Add field", exact: true })
           .click();
+        await expect(
+          dialog
+            .getByRole("textbox", { name: "Field name", exact: true })
+            .last()
+        ).toBeFocused();
       }
       const metadataValue = dialog
         .getByRole("textbox", { name: "Value", exact: true })
