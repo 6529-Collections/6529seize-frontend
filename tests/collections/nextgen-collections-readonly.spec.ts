@@ -260,6 +260,53 @@ test.describe("NextGen and collections read-only coverage @surface @medium @larg
     );
   });
 
+  test("Meme Lab pagination keeps keyboard focus through loading", async ({
+    page,
+  }) => {
+    let releasePage = () => {};
+    const pageGate = new Promise<void>((resolve) => {
+      releasePage = resolve;
+    });
+    await page.route(
+      (url) =>
+        url.pathname === "/api/nfts_memelab" &&
+        url.searchParams.get("page") === "2",
+      async (route) => {
+        await pageGate;
+        await route.fallback();
+      }
+    );
+
+    try {
+      await gotoReady(page, "/meme-lab");
+      const results = page.getByRole("region", { name: "Meme Lab cards" });
+      const status = page.getByRole("main").getByRole("status");
+      const next = results.getByRole("button", { name: "Next page" });
+      await expect(next).toBeEnabled({ timeout: SETTLE_TIMEOUT_MS });
+      await next.focus();
+      await next.press("Enter");
+
+      await expect(results).toBeFocused();
+      await expect(results).toHaveAttribute("aria-busy", "true");
+      await expect(status).toHaveText("Fetching");
+
+      releasePage();
+      await expect(results).toHaveAttribute("aria-busy", "false", {
+        timeout: SETTLE_TIMEOUT_MS,
+      });
+      await expect(status).toHaveText(/^Page 2 of /);
+      await expect(results).toBeFocused();
+      await page.keyboard.press("Tab");
+      await expect(
+        results
+          .getByRole("link", { name: /^View .+, Meme Lab card #\d+/ })
+          .first()
+      ).toBeFocused();
+    } finally {
+      releasePage();
+    }
+  });
+
   test("6529 Gradient browse page keeps public cards reachable", async ({
     page,
   }, testInfo) => {

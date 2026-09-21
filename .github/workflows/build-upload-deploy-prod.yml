@@ -8,6 +8,11 @@ on:
         type: boolean
         required: false
         default: false
+      expected_source_sha:
+        description: Exact reviewed source commit; fail if main resolves differently
+        type: string
+        required: false
+        default: ""
 
 run-name: Production deploy ${{ github.sha }}
 
@@ -29,8 +34,37 @@ env:
   ANNOUNCED_VERSION_ENDPOINT: "https://dnclu2fna0b2b.cloudfront.net/web_build/current-production-version.json"
 
 jobs:
+  verify-expected-source:
+    name: Verify expected source commit
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions: {}
+    env:
+      EXPECTED_SOURCE_SHA: ${{ inputs.expected_source_sha }}
+    steps:
+      # GITHUB_SHA is the main commit pinned when this run was dispatched. Every
+      # later job builds, verifies, and checks out that same commit, so comparing
+      # it with the reviewed commit here decides the whole deployment up front.
+      - name: Refuse a source commit that differs from the reviewed one
+        run: |
+          set -euo pipefail
+          if [ -z "$EXPECTED_SOURCE_SHA" ]; then
+            echo "No expected source commit was given; deploying main at $GITHUB_SHA."
+            exit 0
+          fi
+          if ! [[ "$EXPECTED_SOURCE_SHA" =~ ^[a-f0-9]{40}$ ]]; then
+            echo "::error::expected_source_sha must be a full lowercase commit SHA."
+            exit 1
+          fi
+          if [ "$GITHUB_SHA" != "$EXPECTED_SOURCE_SHA" ]; then
+            echo "::error::Source changed after review; refusing deployment. Expected $EXPECTED_SOURCE_SHA but main resolved to $GITHUB_SHA."
+            exit 1
+          fi
+          echo "Source commit $GITHUB_SHA matches the reviewed commit."
+
   build-production-artifact:
     name: Build exact production artifact
+    needs: verify-expected-source
     uses: ./.github/workflows/production-build-artifact.yml
     with:
       target_sha: ${{ github.sha }}

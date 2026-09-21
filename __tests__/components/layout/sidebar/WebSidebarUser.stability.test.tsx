@@ -4,8 +4,11 @@ import {
   render,
   screen,
   waitFor,
+  within,
 } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { hydrateRoot } from "react-dom/client";
+import { renderToString } from "react-dom/server";
 import WebSidebarUser from "@/components/layout/sidebar/WebSidebarUser";
 import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
@@ -145,6 +148,61 @@ it("distinguishes initializing from signed out and keeps the same account footpr
   setAccount("0xalice");
   rerender(accountUi());
   expect(container.firstElementChild?.className).toBe(loadingClasses);
+});
+
+it("hydrates the loading account before revealing a stored profile", async () => {
+  setAccount(undefined, "initializing");
+  jest.mocked(useAuth).mockReturnValue({
+    connectedProfile: null,
+    activeProfileProxy: null,
+    isAuthenticated: false,
+    setToast: jest.fn(),
+  } as unknown as ReturnType<typeof useAuth>);
+  jest.mocked(useSidebarIdentity).mockReturnValue({
+    profile: null,
+    isLoading: false,
+    refetch,
+  } as unknown as ReturnType<typeof useSidebarIdentity>);
+  const container = document.createElement("div");
+  container.innerHTML = renderToString(accountUi());
+  document.body.appendChild(container);
+  const initialAccount = within(container).getByRole("status", {
+    name: "Loading account",
+  });
+  const recoverableErrors: unknown[] = [];
+
+  setAccount("0xalice");
+  jest.mocked(useAuth).mockReturnValue({
+    connectedProfile: alice,
+    activeProfileProxy: null,
+    isAuthenticated: true,
+    setToast: jest.fn(),
+  } as unknown as ReturnType<typeof useAuth>);
+  jest.mocked(useSidebarIdentity).mockReturnValue({
+    profile: alice,
+    isLoading: false,
+    refetch,
+  } as unknown as ReturnType<typeof useSidebarIdentity>);
+
+  let root: ReturnType<typeof hydrateRoot> | undefined;
+  try {
+    await act(async () => {
+      root = hydrateRoot(container, accountUi(), {
+        onRecoverableError: (error) => recoverableErrors.push(error),
+      });
+    });
+
+    expect(initialAccount).not.toBeInTheDocument();
+    expect(
+      within(container).getByRole("button", {
+        name: "Open account and profiles menu",
+      })
+    ).toBeInTheDocument();
+    expect(recoverableErrors).toEqual([]);
+  } finally {
+    act(() => root?.unmount());
+    container.remove();
+  }
 });
 
 it("preserves fresh-wallet selection on the expanded connect control", () => {
