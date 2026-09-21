@@ -8,6 +8,7 @@ import { useKey } from "react-use";
 import BellIcon from "@/components/common/icons/BellIcon";
 import HeaderSearchModal from "@/components/header/header-search/HeaderSearchModal";
 import { useUnreadNotifications } from "@/hooks/useUnreadNotifications";
+import { useHasHydrated } from "@/hooks/useHasHydrated";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import { useAuth } from "../../auth/Auth";
 import { useSeizeConnectContext } from "../../auth/SeizeConnectContext";
@@ -40,6 +41,7 @@ function WebSidebar({
   const navRef = useRef<{ closeSubmenu: () => void }>(null);
   const pathname = usePathname();
   const { address, hasValidWalletAuth } = useSeizeConnectContext();
+  const hasHydrated = useHasHydrated();
   const { connectedProfile } = useAuth();
   const { haveUnreadNotifications } = useUnreadNotifications(
     hasValidWalletAuth ? (connectedProfile?.handle ?? null) : null,
@@ -198,7 +200,7 @@ function WebSidebar({
                   className="tw-flex tw-flex-col tw-justify-end"
                   data-sidebar-section="account"
                 >
-                  {address && (
+                  {hasHydrated && address && (
                     <div className="tw-px-3">
                       <WebSidebarNavItem
                         href="/notifications"
