@@ -84,3 +84,25 @@ it("lets the details determine the homepage still-image height", () => {
     artworkLayout: true,
   });
 });
+
+it.each(["GIF", "SVG"])("fits %s animation artwork as an image", (format) => {
+  render(
+    <HomeNftArtwork
+      nft={
+        {
+          id: 551,
+          image: "poster.png",
+          animation: `artwork.${format.toLowerCase()}`,
+          metadata: { animation_details: { format } },
+        } as ApiMemesExtendedData
+      }
+    />
+  );
+  expect(
+    screen.getByTestId("artwork").parentElement?.parentElement
+  ).toHaveClass("homeImageFrame");
+  expect(jest.mocked(NFTImage).mock.calls.at(-1)?.[0]).toMatchObject({
+    animation: true,
+    artworkLayout: true,
+  });
+});

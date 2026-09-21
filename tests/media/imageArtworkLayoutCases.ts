@@ -2,7 +2,7 @@ import type { Locator } from "@playwright/test";
 import { expect, test, waitForRouteReady } from "../testHelpers";
 import { installImageArtworkSandbox } from "../support/videoArtworkSandbox";
 
-async function expectContainedImage(image: Locator) {
+export async function expectContainedImage(image: Locator) {
   await expect(image).toBeVisible();
   await expect
     .poll(() =>

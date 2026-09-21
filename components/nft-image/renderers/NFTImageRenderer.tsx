@@ -40,11 +40,7 @@ function getMetadataImage(nft: BaseRendererProps["nft"]): string | undefined {
   return typeof image === "string" ? image : undefined;
 }
 
-export default function NFTImageRenderer(props: Readonly<BaseRendererProps>) {
-  const src = getSrc(props.nft, !!props.showThumbnail, !!props.showOriginal);
-  const shouldLazyLoad = !!props.showThumbnail || props.height === 300;
-  const imageWrapperClassName = styles["imageWrapper"] ?? "";
-
+function getArtworkImageDimensions(props: Readonly<BaseRendererProps>) {
   const dimensions =
     props.artworkLayout && "metadata" in props.nft
       ? props.nft.metadata?.image_details
@@ -58,9 +54,17 @@ export default function NFTImageRenderer(props: Readonly<BaseRendererProps>) {
     typeof height === "number" &&
     Number.isFinite(height) &&
     height > 0;
-  const frameStyle = hasDimensions
+  return hasDimensions ? { width, height } : undefined;
+}
+
+export default function NFTImageRenderer(props: Readonly<BaseRendererProps>) {
+  const src = getSrc(props.nft, !!props.showThumbnail, !!props.showOriginal);
+  const shouldLazyLoad = !!props.showThumbnail || props.height === 300;
+  const imageWrapperClassName = styles["imageWrapper"] ?? "";
+  const dimensions = getArtworkImageDimensions(props);
+  const frameStyle = dimensions
     ? ({
-        "--artwork-image-height": `calc(100cqw * ${height / width})`,
+        "--artwork-image-height": `calc(100cqw * ${dimensions.height / dimensions.width})`,
       } as CSSProperties)
     : undefined;
   const frameClass = props.artworkLayout
@@ -81,8 +85,8 @@ export default function NFTImageRenderer(props: Readonly<BaseRendererProps>) {
         {...getNFTMediaRendererAttributes("image")}
         loading={shouldLazyLoad ? "lazy" : "eager"}
         priority={!shouldLazyLoad}
-        width={hasDimensions ? width : 0}
-        height={hasDimensions ? height : 0}
+        width={dimensions?.width ?? 0}
+        height={dimensions?.height ?? 0}
         data-artwork-image={props.artworkLayout ? true : undefined}
         fetchPriority={shouldLazyLoad ? "auto" : "high"}
         unoptimized

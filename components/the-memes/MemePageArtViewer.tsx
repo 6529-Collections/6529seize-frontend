@@ -113,14 +113,14 @@ export function MemePageArtViewer({
   const animationFormat = getAnimationFileTypeFromMetadata(metadata);
   const imageMimeType = getImageMimeTypeFromMetadata(metadata);
   const animationMimeType = getAnimationMimeTypeFromMetadata(metadata);
-  const isVideoArtwork =
-    hasAnimation && (animationMimeType?.startsWith("video/") ?? false);
-  const isImageArtwork =
-    !hasAnimation || (animationMimeType?.startsWith("image/") ?? false);
-  const artworkLayout = getArtworkLayout(isVideoArtwork, isImageArtwork);
   const imageHref = getResolvedImageSrc(nft);
   const hasImage = Boolean(imageHref);
   const isShowingAnimation = hasAnimation && (currentSlide === 0 || !imageHref);
+  const isVideoAnimation = animationMimeType?.startsWith("video/") ?? false;
+  const isImageAnimation = animationMimeType?.startsWith("image/") ?? false;
+  const isVideoArtwork = isShowingAnimation && isVideoAnimation;
+  const isImageArtwork = !isShowingAnimation || isImageAnimation;
+  const artworkLayout = getArtworkLayout(isVideoArtwork, isImageArtwork);
   const hasMultipleSlides = hasAnimation && hasImage;
   const activeMedia = isShowingAnimation
     ? {
@@ -389,7 +389,7 @@ export function MemePageArtViewer({
                   <NFTImage
                     nft={nft}
                     animation={true}
-                    artworkLayout={isVideoArtwork || isImageArtwork}
+                    artworkLayout={isVideoAnimation || isImageAnimation}
                     height={650}
                     transparentBG={true}
                     showBalance={false}
@@ -403,14 +403,14 @@ export function MemePageArtViewer({
                 {hasImage && (
                   <div
                     data-carousel-slide
-                    className={`${artworkLayout.slide} tw-items-center tw-justify-center tw-text-center ${
+                    className={`tw-h-auto tw-items-center tw-justify-center tw-text-center ${
                       currentSlide === 1 ? "tw-flex" : "tw-hidden"
                     }`}
                   >
                     <NFTImage
                       nft={nft}
                       animation={false}
-                      artworkLayout={isVideoArtwork || isImageArtwork}
+                      artworkLayout
                       height={650}
                       showBalance={false}
                       showOriginal={
