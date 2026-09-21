@@ -5,6 +5,7 @@ import PencilIcon, {
 } from "@/components/utils/icons/PencilIcon";
 import { Cog6ToothIcon } from "@heroicons/react/24/outline";
 import { isTouchFirstEnvironment } from "@/helpers/touch-first.helpers";
+import { FocusTrap } from "focus-trap-react";
 import type { ReactNode } from "react";
 import {
   useCallback,
@@ -100,6 +101,8 @@ export default function WaveSettingRow({
     };
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
+        event.preventDefault();
+        event.stopPropagation();
         closeEditor();
       }
     };
@@ -206,10 +209,15 @@ export default function WaveSettingRow({
 
     globalThis.addEventListener("resize", updatePopoverPosition);
     globalThis.addEventListener("scroll", updatePopoverPosition, true);
+    const observer = new ResizeObserver(updatePopoverPosition);
+    if (editorRef.current) {
+      observer.observe(editorRef.current);
+    }
 
     return () => {
       globalThis.removeEventListener("resize", updatePopoverPosition);
       globalThis.removeEventListener("scroll", updatePopoverPosition, true);
+      observer.disconnect();
     };
   }, [isEditorOpen, updatePopoverPosition, useBottomSheet]);
 
@@ -225,7 +233,8 @@ export default function WaveSettingRow({
         <div
           id={editorId}
           ref={editorRef}
-          className="tw-w-full tw-rounded-t-xl tw-border tw-border-b-0 tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-p-4 tw-shadow-[0_-18px_50px_rgba(0,0,0,0.45)]"
+          tabIndex={-1}
+          className="tw-max-h-[calc(100dvh-4rem)] tw-w-full tw-overflow-y-auto tw-rounded-t-xl tw-border tw-border-b-0 tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-p-4 tw-shadow-[0_-18px_50px_rgba(0,0,0,0.45)]"
         >
           {editorForm}
         </div>
@@ -245,7 +254,10 @@ export default function WaveSettingRow({
       <div
         id={editorId}
         ref={editorRef}
-        className="tw-w-64 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-p-3 tw-shadow-xl"
+        role="dialog"
+        aria-label={editLabel}
+        tabIndex={-1}
+        className="tw-max-h-[calc(100dvh-2rem)] tw-w-64 tw-overflow-y-auto tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-p-3 tw-shadow-xl"
       >
         {editorForm}
       </div>
@@ -255,7 +267,20 @@ export default function WaveSettingRow({
     ? bottomSheetSurface
     : popoverSurface;
   const editorSurface = isEditorOpen
-    ? createPortal(selectedEditorSurface, globalThis.document.body)
+    ? createPortal(
+        <FocusTrap
+          active={useBottomSheet || popoverPosition !== null}
+          focusTrapOptions={{
+            escapeDeactivates: false,
+            clickOutsideDeactivates: true,
+            fallbackFocus: () => editorRef.current!,
+            setReturnFocus: () => editButtonRef.current ?? false,
+          }}
+        >
+          {selectedEditorSurface}
+        </FocusTrap>,
+        globalThis.document.body
+      )
     : null;
   const rowGridClasses = canEdit
     ? "tw-grid-cols-[minmax(5.5rem,0.7fr)_minmax(0,1.3fr)_2.75rem] sm:tw-grid-cols-[minmax(5.5rem,0.7fr)_minmax(0,1.3fr)_1.75rem]"

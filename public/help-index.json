@@ -2799,14 +2799,14 @@
         "create"
       ],
       "facts": [
-        "The 6529 Network Museum Wave predates proposal-card recipe metadata, so it uses a compatibility fallback: Summary card with 360 characters and the first ready still image enabled. A Wave admin can replace that fallback from Settings, and the saved choice takes precedence.",
+        "The 6529 Network Museum Wave predates proposal-card recipe metadata, so it uses a compatibility fallback: Summary card with 360 characters and the first ready still image enabled. A Wave admin can replace that fallback from Configuration, and the saved choice takes precedence.",
         "Other existing standard Waves keep their current presentation unless the Wave is explicitly configured to use custom proposal cards.",
         "A compact card uses the proposal's stored title or first authored non-empty line, an excerpt from the original authored text, real multipart/media/attachment counts, and at most one ready static image preview.",
         "Compact proposal cards do not generate summaries, categories, or proposal metadata.",
         "Selecting a proposal card opens the complete original proposal, including its full markdown, media, attachments, and multipart navigation.",
         "Memes, Curation, and Quorum Waves keep their specialized proposal presentations.",
-        "Wave creators can choose Full proposal or Summary card under Advanced settings in the Setup step for a Rank or Approve Wave. New Waves default to Summary card; existing Waves and older drafts without this setting keep Full proposal except for the Network Museum compatibility fallback.",
-        "Wave admins can change the same presentation later from the right sidebar under Settings, Display, Proposal cards. This control is available for standard Rank and Approve Waves, not Chat, Memes, Curation, or Quorum presentations.",
+        "Wave creators can choose Full proposal or Summary card under Appearance and labels when creating a Rank or Approve Wave. New Waves default to Summary card; existing Waves and older drafts without this setting keep Full proposal except for the Network Museum compatibility fallback.",
+        "Wave creators and eligible admins can change the presentation for everyone in the Wave from the right sidebar (Wave details on mobile), Configuration, Proposal cards. Use its gear to open the editor, choose the Full proposal or Summary card visual tile, then Save. The closed wireframe preview and label show the saved choice; Cancel or closing the editor discards a draft. This is separate from the personal Boosted drops preference and is available for standard Rank and Approve Waves, not Chat, Memes, Curation, or Quorum presentations.",
         "Summary card lets the admin set a proposal-text limit from 120 to 1000 characters and choose whether the first ready still image appears beside proposal summaries in chat and list views. Invalid limits cannot be saved. Full proposal media is unchanged."
       ],
       "canonical_path": "/waves/5f207393-5418-4a75-8738-e40edb44a94d",

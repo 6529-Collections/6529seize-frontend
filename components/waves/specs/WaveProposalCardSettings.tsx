@@ -1,6 +1,7 @@
 "use client";
 
 import type { ApiWave } from "@/generated/models/ApiWave";
+import ProposalCardLayoutPreview from "./wave-proposal-card-settings/ProposalCardLayoutPreview";
 import WaveProposalCardSettingsEditor from "./wave-proposal-card-settings/WaveProposalCardSettingsEditor";
 import { useWaveProposalCardSettings } from "./wave-proposal-card-settings/useWaveProposalCardSettings";
 import WaveSettingRow from "./WaveSettingRow";
@@ -28,7 +29,15 @@ export default function WaveProposalCardSettings({
       editLabel={settings.editLabel}
       label={settings.rowLabel}
       onOpen={settings.resetEditor}
-      valueLabel={settings.valueLabel}
+      valueLabel={
+        <span className="tw-inline-flex tw-max-w-full tw-items-center tw-gap-2">
+          <ProposalCardLayoutPreview
+            mode={settings.savedMode}
+            className="tw-h-5 tw-w-[1.9375rem] tw-shrink-0 tw-text-iron-400"
+          />
+          <span className="tw-min-w-0">{settings.valueLabel}</span>
+        </span>
+      }
       renderEditor={({ closeEditor }) => (
         <WaveProposalCardSettingsEditor
           closeEditor={closeEditor}
