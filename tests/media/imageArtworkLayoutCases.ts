@@ -143,7 +143,8 @@ export function defineWaveImageLayoutTests() {
           exact: true,
         });
         await expect(close).toBeVisible();
-        const image = close
+        const image = page
+          .getByRole("button", { name: "Close panel", exact: true })
           .locator("xpath=ancestor::*[@data-video-viewport]")
           .locator("[data-image-artwork]")
           .getByRole("img");
