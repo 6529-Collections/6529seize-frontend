@@ -1,9 +1,20 @@
 import TheMemesPage, { generateMetadata } from "@/app/the-memes/page";
+import { getTheMemesInitialData } from "@/app/the-memes/theMemesInitialData";
 import { render, screen } from "@testing-library/react";
 
 const mockTheMemesComponent = jest.fn(
-  ({ locale }: { readonly locale?: string }) => (
-    <div data-locale={locale} data-testid="the-memes-page" />
+  ({
+    initialData,
+    locale,
+  }: {
+    readonly initialData?: unknown;
+    readonly locale?: string;
+  }) => (
+    <div
+      data-has-initial-data={initialData !== undefined}
+      data-locale={locale}
+      data-testid="the-memes-page"
+    />
   )
 );
 
@@ -11,6 +22,10 @@ jest.mock("@/components/the-memes/TheMemes", () => ({
   __esModule: true,
   default: (props: { readonly locale?: string }) =>
     mockTheMemesComponent(props),
+}));
+
+jest.mock("@/app/the-memes/theMemesInitialData", () => ({
+  getTheMemesInitialData: jest.fn(),
 }));
 
 jest.mock("@/lib/structured-data/json-ld", () => ({
@@ -31,6 +46,7 @@ jest.mock("@/config/env", () => ({
 describe("The Memes page", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.mocked(getTheMemesInitialData).mockResolvedValue(undefined);
   });
 
   it("passes normalized locale search params to the client list page", async () => {
@@ -44,7 +60,31 @@ describe("The Memes page", () => {
       "data-locale",
       "de-DE"
     );
-    expect(mockTheMemesComponent).toHaveBeenCalledWith({ locale: "de-DE" });
+    expect(mockTheMemesComponent).toHaveBeenCalledWith({
+      initialData: undefined,
+      locale: "de-DE",
+    });
+    expect(getTheMemesInitialData).toHaveBeenCalledWith({ locale: "DE-de" });
+  });
+
+  it("passes the public first-page seed to the rendered collection", async () => {
+    const initialData = { nfts: [], nextPage: undefined };
+    jest.mocked(getTheMemesInitialData).mockResolvedValue(initialData);
+
+    const page = await TheMemesPage({
+      searchParams: Promise.resolve({ locale: "de-DE" }),
+    });
+
+    render(page);
+
+    expect(await screen.findByTestId("the-memes-page")).toHaveAttribute(
+      "data-has-initial-data",
+      "true"
+    );
+    expect(mockTheMemesComponent).toHaveBeenCalledWith({
+      initialData,
+      locale: "de-DE",
+    });
   });
 
   it("passes the default locale when no supported locale is present", async () => {

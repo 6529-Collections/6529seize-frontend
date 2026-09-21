@@ -12,7 +12,9 @@ import {
   getLargeSocialCardMetadata,
 } from "@/components/providers/metadata";
 import WavesPageClient from "./page.client";
+import { fetchPublicWaveFeed } from "./public-wave-feed.server";
 import { fetchServerWaveFeedSeed } from "./wave-feed-seed.server";
+import PublicWaveFeed from "@/components/waves/PublicWaveFeed";
 import WaveServerFeedSeed, {
   WaveServerFeedSeedGate,
 } from "@/components/waves/WaveServerFeedSeed";
@@ -277,6 +279,13 @@ export async function renderWavesPageContent({
           waveId: context.waveId,
         })
       : null;
+  const publicFeedPromise =
+    routeContext === "waves" &&
+    context.waveId &&
+    context.wave &&
+    isPublicNonDirectMessageWave(context.wave)
+      ? fetchPublicWaveFeed(context.waveId)
+      : null;
 
   const dropMetadataId = getDropMetadataId(searchParams)?.trim();
   const dropMetadata =
@@ -286,6 +295,17 @@ export async function renderWavesPageContent({
           JSON.stringify(context.headers)
         )
       : null;
+  const publicFeed = publicFeedPromise ? await publicFeedPromise : null;
+  const publicFeedFallback =
+    publicFeed?.ok && publicFeed.items.length > 0 ? (
+      <PublicWaveFeed feed={publicFeed} />
+    ) : null;
+  const wavesPageClient = (
+    <WavesPageClient
+      publicFeedFallback={publicFeedFallback}
+      publicFeedWaveId={publicFeed?.ok ? publicFeed.waveId : null}
+    />
+  );
 
   return (
     <>
@@ -314,13 +334,11 @@ export async function renderWavesPageContent({
               />
             </Suspense>
             <Suspense fallback={null}>
-              <WavesPageClient />
+              {wavesPageClient}
             </Suspense>
           </WaveServerFeedSeedGate>
         ) : (
-          <Suspense fallback={null}>
-            <WavesPageClient />
-          </Suspense>
+          <Suspense fallback={null}>{wavesPageClient}</Suspense>
         )}
       </HydrationBoundary>
     </>
