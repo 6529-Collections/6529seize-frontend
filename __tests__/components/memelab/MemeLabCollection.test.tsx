@@ -328,7 +328,52 @@ describe("MemeLabCollection", () => {
     fireEvent.click(within(error).getByRole("button", { name: "Try again" }));
 
     expect(await screen.findByTestId("nft-1")).toBeInTheDocument();
+    expect(
+      screen.getByRole("region", { name: "Meme Lab cards" })
+    ).toHaveFocus();
+    expect(screen.getByRole("status")).toHaveTextContent("Page 1 of 1");
     expect(fetchUrl).toHaveBeenCalledTimes(2);
+  });
+
+  it("keeps focus on the results region and announces a pending page", async () => {
+    let resolvePage: (value: unknown) => void = () => {};
+    const pendingPage = new Promise((resolve) => {
+      resolvePage = resolve;
+    });
+    (fetchUrl as jest.Mock)
+      .mockResolvedValueOnce({
+        count: 71,
+        page: 1,
+        next: "page-2",
+        data: [{ id: 71, contract: "0x", name: "NFT 71" }],
+      })
+      .mockReturnValueOnce(pendingPage);
+    renderMemeLab();
+
+    expect(await screen.findByTestId("nft-71")).toBeInTheDocument();
+    const results = screen.getByRole("region", { name: "Meme Lab cards" });
+    const next = screen.getByRole("button", { name: "Next page" });
+    next.focus();
+    fireEvent.click(next);
+
+    expect(results).toHaveFocus();
+    expect(results).toHaveAttribute("aria-busy", "true");
+    expect(screen.getByRole("status")).toHaveTextContent("Fetching");
+    expect(screen.queryByTestId("nft-71")).not.toBeInTheDocument();
+
+    await act(async () => {
+      resolvePage({
+        count: 71,
+        page: 2,
+        next: null,
+        data: [{ id: 31, contract: "0x", name: "NFT 31" }],
+      });
+    });
+
+    expect(await screen.findByTestId("nft-31")).toBeInTheDocument();
+    expect(results).toHaveFocus();
+    expect(results).toHaveAttribute("aria-busy", "false");
+    expect(screen.getByRole("status")).toHaveTextContent("Page 2 of 2");
   });
 
   it("retries a failed page request", async () => {
@@ -353,9 +398,15 @@ describe("MemeLabCollection", () => {
 
     const error = await screen.findByRole("alert");
     expect(error).toHaveTextContent("The catalog could not be loaded");
+    expect(
+      screen.getByRole("region", { name: "Meme Lab cards" })
+    ).toHaveFocus();
     fireEvent.click(within(error).getByRole("button", { name: "Try again" }));
 
     expect(await screen.findByTestId("nft-31")).toBeInTheDocument();
+    expect(
+      screen.getByRole("region", { name: "Meme Lab cards" })
+    ).toHaveFocus();
   });
 
   it("reuses a fresh page when navigating back to it", async () => {

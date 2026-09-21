@@ -14,13 +14,13 @@ import type { LabExtendedData, LabNFT } from "@/entities/INFT";
 import { VolumeType } from "@/entities/INFT";
 import { SortDirection } from "@/entities/ISort";
 import { getValuesForVolumeType } from "@/helpers/Helpers";
-import { compareLocalized } from "@/i18n/format";
+import { compareLocalized, formatInteger } from "@/i18n/format";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { MemeLabSort } from "@/types/enums";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { getMemeLabCollectionHref } from "./memeLabRouteParams";
 import MemeLabNftCard from "./MemeLabNftCard";
 import MemeLabSortControls from "./MemeLabSortControls";
@@ -232,6 +232,7 @@ export default function MemeLabComponent({
   const [volumeType, setVolumeType] = useState<VolumeType>(VolumeType.HOURS_24);
   const pageViewKey = `${sort}-${sortDir}-${volumeType}`;
   const [pageState, setPageState] = useState({ viewKey: "", page: 1 });
+  const resultsRef = useRef<HTMLElement>(null);
   const page = pageState.viewKey === pageViewKey ? pageState.page : 1;
   const catalog = useMemeLabCatalog(sort, sortDir, page);
 
@@ -314,10 +315,7 @@ export default function MemeLabComponent({
   }, [catalog.nftMetas, labArtists, labCollections, sort, sortedNfts]);
   const totalResults =
     sort === MemeLabSort.AGE ? catalog.totalResults : orderedNfts.length;
-  const totalPages = Math.max(
-    1,
-    Math.ceil(totalResults / MEME_LAB_PAGE_SIZE)
-  );
+  const totalPages = Math.max(1, Math.ceil(totalResults / MEME_LAB_PAGE_SIZE));
   const visiblePage =
     sort === MemeLabSort.AGE ? page : Math.min(page, totalPages);
   const firstResultIndex = (visiblePage - 1) * MEME_LAB_PAGE_SIZE;
@@ -341,11 +339,22 @@ export default function MemeLabComponent({
   );
 
   const selectPage = (nextPage: number) => {
+    resultsRef.current?.focus({ preventScroll: true });
     setPageState({ viewKey: pageViewKey, page: nextPage });
     if (typeof globalThis.scrollTo === "function") {
       globalThis.scrollTo(0, 0);
     }
   };
+
+  let resultsStatus = "";
+  if (catalog.isLoading) {
+    resultsStatus = t(locale, "memeLab.loading.fetching");
+  } else if (!catalog.isInitialError) {
+    resultsStatus = t(locale, "common.pagination.pageOf", {
+      current: formatInteger(locale, visiblePage),
+      total: formatInteger(locale, totalPages),
+    });
+  }
 
   function printNft(nft: LabNFT) {
     return (
@@ -467,7 +476,10 @@ export default function MemeLabComponent({
             {t(locale, "collect.error.catalog")}
           </p>
           <Button
-            onClick={() => void catalog.retry()}
+            onClick={() => {
+              resultsRef.current?.focus({ preventScroll: true });
+              void catalog.retry();
+            }}
             variant="secondary"
             loading={catalog.isRetrying}
           >
@@ -544,7 +556,18 @@ export default function MemeLabComponent({
             volumeType={volumeType}
             locale={locale}
           />
-          {printNftsContent()}
+          <p role="status" className="tw-sr-only">
+            {resultsStatus}
+          </p>
+          <section
+            ref={resultsRef}
+            aria-label={t(locale, "memeLab.results.gridLabel")}
+            aria-busy={catalog.isLoading}
+            tabIndex={-1}
+            className="focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+          >
+            {printNftsContent()}
+          </section>
         </div>
       </div>
     </NftBalancesProvider>

@@ -88,6 +88,9 @@
   the sorted results in 40-card pages.
 - A failed initial `/meme-lab` request shows an inline error with `Try again`.
 - A failed page request shows an inline error with `Try again`.
+- Changing pages or choosing `Try again` moves keyboard focus to the results
+  area, where it stays while cards load. Screen readers announce loading and the
+  current page when results arrive.
 - `/meme-lab/collection/{collection}` does not show a dedicated loading row.
 - Empty or unknown collections show `Nothing here yet`.
 - If collection fetch calls fail, the route can stay on header and sort controls
