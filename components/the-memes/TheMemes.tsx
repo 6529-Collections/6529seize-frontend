@@ -418,13 +418,21 @@ export default function TheMemesComponent({
     setNftsByMeme(nextNftsByMeme);
   }, [nfts, sortDir]);
 
-  const fetchNfts = useCallback(() => {
-    if (nftsNextPage === undefined) {
-      setFetching(false);
+  const activeRequest = useRef<AbortController | undefined>(undefined);
+
+  const fetchNfts = useCallback((url: string) => {
+    if (activeRequest.current !== undefined) {
       return;
     }
-    fetchUrl(nftsNextPage)
+    const controller = new AbortController();
+    activeRequest.current = controller;
+    setFetching(true);
+
+    fetchUrl(url, { signal: controller.signal })
       .then((responseNfts: Partial<DBResponse<ApiMemesExtendedData>>) => {
+        // Aborting alone is insufficient if a response has already settled.
+        if (controller.signal.aborted) return;
+
         setNfts((prev) => [...prev, ...(responseNfts.data ?? [])]);
         setNftsNextPage(
           typeof responseNfts.next === "string" ? responseNfts.next : undefined
@@ -433,35 +441,44 @@ export default function TheMemesComponent({
       .catch(() => {
         // optionally surface a toast/log here
       })
-      .finally(() => setFetching(false));
-  }, [nftsNextPage]);
+      .finally(() => {
+        if (controller.signal.aborted) return;
+
+        activeRequest.current = undefined;
+        setFetching(false);
+      });
+  }, []);
 
   useEffect(() => {
-    if (filtersReady) {
-      if (initialDataRef.current !== undefined) {
-        initialDataRef.current = undefined;
-        return;
-      }
+    if (!filtersReady) return;
 
+    if (initialDataRef.current !== undefined) {
+      initialDataRef.current = undefined;
+    } else {
+      const firstPage = getNftsNextPage();
       setNfts([]);
-      setNftsNextPage(getNftsNextPage());
-      setFetching(true);
+      // These are local state/request updates, not callbacks to a parent.
+      /* eslint-disable react-you-might-not-need-an-effect/no-pass-live-state-to-parent */
+      setNftsNextPage(firstPage);
+      fetchNfts(firstPage);
+      /* eslint-enable react-you-might-not-need-an-effect/no-pass-live-state-to-parent */
     }
+
+    // This also owns pagination requests started by scrolling in this view.
+    return () => {
+      activeRequest.current?.abort();
+      activeRequest.current = undefined;
+    };
   }, [
     activeSeasonId,
     activeYearId,
     filtersReady,
+    fetchNfts,
     getNftsNextPage,
     sort,
     sortDir,
     volumeType,
   ]);
-
-  useEffect(() => {
-    if (fetching && filtersReady && nftsNextPage !== undefined) {
-      fetchNfts();
-    }
-  }, [fetching, fetchNfts, filtersReady, nftsNextPage]);
 
   useEffect(() => {
     if (nftsNextPage === undefined) {
@@ -484,7 +501,7 @@ export default function TheMemesComponent({
           window.scrollY;
 
         if (distanceFromBottom <= 400 && filtersReady) {
-          setFetching(true);
+          fetchNfts(nftsNextPage);
         }
       }, 200);
     };
@@ -497,7 +514,7 @@ export default function TheMemesComponent({
       }
       window.removeEventListener("scroll", handleScroll);
     };
-  }, [filtersReady, nftsNextPage]);
+  }, [fetchNfts, filtersReady, nftsNextPage]);
 
   function printSortDirectionButton(
     direction: SortDirection,

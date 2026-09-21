@@ -76,7 +76,8 @@
 8. Set a season with the season dropdown (`All Seasons`, `All Year N`,
    or a specific season in the active year).
 9. Each control change updates the query, clears loaded rows, and refetches
-   from page one.
+   from page one. When controls change quickly, only results for the latest
+   selection appear; earlier requests cannot append cards or change pagination.
 10. When sorting by `Meme`, cards are grouped under meme headings. Heading order
    follows `sort_dir`; cards inside each heading are ordered by card id
    ascending.
