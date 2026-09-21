@@ -56,6 +56,9 @@ availability. Submission availability is exposed through the Chat tab
 - Chat composers do not render a chat/drop mode toggle.
 - If submission is available, users enter it from `Submit drop` in the Chat tab
   header or app composer area.
+- The standard `Submit drop` dialog follows the app keyboard as it opens and
+  closes. Long forms scroll within the remaining space, and focused composer
+  or metadata fields are brought into view on touch devices.
 
 ## Edge Cases
 

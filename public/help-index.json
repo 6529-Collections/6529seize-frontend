@@ -3424,7 +3424,8 @@
         "Competition badges do not appear in other waves unless the author also qualifies there.",
         "The wave competition badges are hidden in The Memes Main Stage, which keeps its existing artist badges.",
         "Selecting either badge loads and opens that author's full entries for the current wave; users can switch active and winning sections when both exist.",
-        "The entry viewer offers voting only for participatory entries while voting is open, and normal voting eligibility and credit rules still apply."
+        "The entry viewer offers voting only for participatory entries while voting is open, and normal voting eligibility and credit rules still apply.",
+        "In the native app, the entry sheet moves above the software keyboard and keeps the focused vote field visible."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/waves", "/messages"],
@@ -6323,9 +6324,12 @@
         "rows"
       ],
       "facts": [
-        "Wave drop composer metadata submissions are documented under composer features.",
-        "Metadata row behavior and submit rules can affect whether a drop can be submitted.",
-        "Memes-specific submission forms can also ask for additional information."
+        "In Submit drop or standard Drop mode, select the Add metadata code icon beside the input. On compact layouts, open composer actions and select Metadata. The section stays hidden until opened, including when metadata is required.",
+        "Use Add field, then fill Field name and Value, such as Medium and Digital. Closing Metadata hides the entire section and retains its fields in the current draft. Reopen it from the icon. Metadata is included when submitting the drop; there is no separate save action.",
+        "Required field names are locked and their rows cannot be removed. Optional fields have a trash button. A populated value needs a field name, and missing required values block submission.",
+        "Drop mode shows an informational requirement line before any draft text is entered, such as Required: add an image. Use the existing upload and metadata controls to complete it. Completed items are removed, the line disappears when nothing is missing, and missing items keep the final Drop action disabled.",
+        "On narrow screens field names and values stack vertically. The native app submit dialog adjusts for the keyboard and scrolls focused fields into view.",
+        "Curation URL composers do not expose metadata rows. Memes-specific submission forms can also ask for additional information."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/waves"],

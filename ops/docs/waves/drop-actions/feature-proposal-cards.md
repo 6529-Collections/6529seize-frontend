@@ -86,6 +86,8 @@ saved settings. The editor opens in a desktop popover or a mobile/touch sheet.
   block forward navigation instead of being silently accepted.
 - Very short proposals remain compact and do not receive invented descriptive
   text.
+- `Read full` follows the excerpt, or the title when there is no excerpt, in
+  the text column. A taller preview image does not push the action below it.
 - The surrounding proposal row keeps its existing author, date, status, vote,
   voter, and action controls.
 

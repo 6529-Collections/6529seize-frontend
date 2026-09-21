@@ -52,6 +52,7 @@ import {
   canSubmitComposerAction,
   canSubmitDrop,
   createMetadataHandlers,
+  getMetadataNameErrors,
   hasMetadataContent,
   isDuplicateIdentitySubmissionError,
 } from "./content-helpers";
@@ -248,13 +249,15 @@ export function useCreateDropContentController({
     requiredMetadata,
   });
   const metadataErrorById = useMemo(
-    () =>
-      getIdentitySubmissionMetadataErrors({
+    () => ({
+      ...getMetadataNameErrors(metadata, locale),
+      ...getIdentitySubmissionMetadataErrors({
         isIdentitySubmissionExperience:
           isIdentitySubmissionExperience && isDropMode,
         metadata,
       }),
-    [isDropMode, isIdentitySubmissionExperience, metadata]
+    }),
+    [isDropMode, isIdentitySubmissionExperience, metadata, locale]
   );
   const hasMetadataValidationErrors = Object.keys(metadataErrorById).length > 0;
 
@@ -689,7 +692,6 @@ export function useCreateDropContentController({
 
   const { onChangeKey, onChangeValue, onAddMetadata, onRemoveMetadata } =
     createMetadataHandlers({
-      metadata,
       setMetadata,
       generateMetadataId,
     });
@@ -760,6 +762,9 @@ export function useCreateDropContentController({
       canAddPart,
       canSubmit,
       editingPartIndex,
+      hasMissingRequirements:
+        missingRequirements.metadata.length > 0 ||
+        missingRequirements.media.length > 0,
       isStormMode,
     }),
     handleEditorStateChange,

@@ -7,6 +7,7 @@ import {
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import WaveDropPart from "@/components/waves/drops/WaveDropPart";
+import ProposalCardReadFullButton from "@/components/waves/drops/proposal/ProposalCardReadFullButton";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 
 // Mock the WaveDropPartDrop component
@@ -17,6 +18,7 @@ jest.mock("@/components/waves/drops/WaveDropPartDrop", () => {
         <div data-testid="drop-id">{props.drop.id}</div>
         <div data-testid="active-part-index">{props.activePartIndex}</div>
         <div data-testid="is-storm">{props.isStorm.toString()}</div>
+        {props.proposalCardTextFooter}
         <button
           data-testid="quote-button"
           onClick={() => props.onQuoteClick(props.drop)}
@@ -42,6 +44,7 @@ describe("WaveDropPart", () => {
         content: "Single part content",
         quoted_drop: null,
         media: [],
+        attachments: [],
       },
     ],
   } as ExtendedDrop;
@@ -111,6 +114,33 @@ describe("WaveDropPart", () => {
   });
 
   describe("Component Rendering", () => {
+    it("keeps the inline Read full action keyboard-accessible without a nested button", async () => {
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+      render(
+        <WaveDropPart
+          {...defaultProps}
+          contentPresentation="proposalCard"
+          proposalCardTextFooter={
+            <ProposalCardReadFullButton
+              drop={mockSinglePartDrop}
+              onReadFull={mockOnDropContentClick}
+            />
+          }
+        />
+      );
+
+      const readFull = screen.getByRole("button", { name: /Read full:/ });
+      expect(readFull.closest('[role="button"]')).toBeNull();
+      await user.click(readFull);
+      expect(mockOnDropContentClick).toHaveBeenCalledTimes(1);
+      await user.keyboard("{Enter}");
+      expect(mockOnDropContentClick).toHaveBeenCalledTimes(2);
+      await user.keyboard(" ");
+      expect(mockOnDropContentClick).toHaveBeenCalledTimes(3);
+      await user.click(screen.getByTestId("drop-id"));
+      expect(mockOnDropContentClick).toHaveBeenCalledTimes(4);
+    });
+
     it("renders with single part drop", () => {
       render(<WaveDropPart {...defaultProps} />);
 

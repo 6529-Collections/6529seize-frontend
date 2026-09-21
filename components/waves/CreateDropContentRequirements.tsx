@@ -1,70 +1,61 @@
 import React from "react";
-import { AnimatePresence, motion } from "framer-motion";
-import type { ApiWave } from "@/generated/models/ApiWave";
-import type { ApiWaveParticipationRequirement } from "@/generated/models/ApiWaveParticipationRequirement";
-import CreateDropContentRequirementsItem from "./CreateDropContentRequirementsItem";
-
-export enum DropRequirementType {
-  MEDIA = "MEDIA",
-  METADATA = "METADATA",
-}
+import { ExclamationCircleIcon } from "@heroicons/react/24/outline";
+import { ApiWaveParticipationRequirement } from "@/generated/models/ApiWaveParticipationRequirement";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { formatList } from "@/i18n/format";
+import { t } from "@/i18n/messages";
 
 interface CreateDropContentRequirementsProps {
-  readonly canSubmit: boolean;
-  readonly wave: ApiWave;
   readonly missingMedia: ApiWaveParticipationRequirement[];
   readonly missingMetadata: string[];
-  readonly disabled: boolean;
-  readonly onOpenMetadata: () => void;
-  readonly setFiles: (files: File[]) => void;
 }
 
 const CreateDropContentRequirements: React.FC<
   CreateDropContentRequirementsProps
-> = ({
-  canSubmit,
-  wave,
-  missingMedia,
-  missingMetadata,
-  disabled,
-  onOpenMetadata,
-  setFiles,
-}) => {
+> = ({ missingMedia, missingMetadata }) => {
+  const locale = useBrowserLocale();
+  const mediaActions: Record<ApiWaveParticipationRequirement, string> = {
+    [ApiWaveParticipationRequirement.Image]: t(
+      locale,
+      "waves.requirements.addImage"
+    ),
+    [ApiWaveParticipationRequirement.Audio]: t(
+      locale,
+      "waves.requirements.addAudio"
+    ),
+    [ApiWaveParticipationRequirement.Video]: t(
+      locale,
+      "waves.requirements.addVideo"
+    ),
+  };
+  const missingRequirementActions = missingMedia.map(
+    (mediaType) => mediaActions[mediaType]
+  );
+  if (missingMetadata.length > 0) {
+    missingRequirementActions.push(
+      t(locale, "waves.requirements.completeMetadataDetails", {
+        items: formatList(locale, missingMetadata),
+      })
+    );
+  }
+
+  if (missingRequirementActions.length === 0) return null;
+
   return (
-    <AnimatePresence>
-      {canSubmit &&
-        (!!wave.participation.required_media.length ||
-          !!wave.participation.required_metadata.length) && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.3 }}
-            className="tw-mt-2 tw-w-full tw-inline-flex tw-space-x-2"
-          >
-            {wave.participation.required_media.length > 0 && (
-              <CreateDropContentRequirementsItem
-                isValid={!missingMedia.length}
-                missingItems={missingMedia.map((m) => m.toLowerCase())}
-                requirementType={DropRequirementType.MEDIA}
-                onOpenMetadata={onOpenMetadata}
-                setFiles={setFiles}
-                disabled={disabled}
-              />
-            )}
-            {wave.participation.required_metadata.length > 0 && (
-              <CreateDropContentRequirementsItem
-                isValid={!missingMetadata.length}
-                missingItems={missingMetadata}
-                requirementType={DropRequirementType.METADATA}
-                onOpenMetadata={onOpenMetadata}
-                setFiles={setFiles}
-                disabled={disabled}
-              />
-            )}
-          </motion.div>
-        )}
-    </AnimatePresence>
+    <p
+      role="status"
+      className="tw-mb-0 tw-mt-2 tw-flex tw-w-full tw-items-start tw-gap-1.5 tw-text-xs tw-leading-5 tw-text-amber-200"
+    >
+      <ExclamationCircleIcon
+        aria-hidden="true"
+        className="tw-mt-0.5 tw-size-4 tw-shrink-0"
+      />
+      <span>
+        {t(locale, "waves.requirements.missingSummary", {
+          requirements: formatList(locale, missingRequirementActions),
+        })}
+      </span>
+    </p>
   );
 };
 

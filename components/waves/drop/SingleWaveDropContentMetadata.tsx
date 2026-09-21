@@ -109,19 +109,21 @@ const SingleWaveDropContentMetadataContent: React.FC<
               onCompactSelect={setSelectedMetadata}
             />
           ))}
+          {metadata.length > 2 && (
+            <Button
+              type="button"
+              onClick={handleToggleMetadata}
+              variant="tertiary"
+              size="xs"
+              className={`tw-min-w-[100px] tw-self-end ${
+                isCompactLayout ? "tw-col-span-2 tw-min-h-11" : ""
+              }`}
+              aria-expanded={showAllMetadata}
+            >
+              {showAllMetadata ? "Show less" : "Show all"}
+            </Button>
+          )}
         </div>
-      )}
-      {metadata.length > 2 && (
-        <Button
-          type="button"
-          onClick={handleToggleMetadata}
-          variant="tertiary"
-          size="xs"
-          className={`tw-min-w-[100px] ${isCompactLayout ? "tw-min-h-11" : ""}`}
-          aria-expanded={showAllMetadata}
-        >
-          {showAllMetadata ? "Show less" : "Show all"}
-        </Button>
       )}
       {selectedMetadata && isCompactLayout && (
         <MobileWrapperDialog

@@ -54,7 +54,6 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
 
   const renderHeaderLeadingActions = ({
     activeContentTab: headerActiveContentTab,
-    isCompact: headerIsCompact,
     tooltipId,
   }: MyStreamWaveTabsHeaderActionContext) => {
     const action = chatSubmitDropAction;
@@ -100,23 +99,33 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
             </Button>
           </span>
         )}
-        {!headerIsCompact && showGalleryToggle && !activeCurationId && (
-          <button
-            type="button"
-            onClick={onToggleViewMode}
-            aria-label={galleryToggleLabel}
-            data-tooltip-id={tooltipId}
-            data-tooltip-content={galleryToggleLabel}
-            className="tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-text-iron-200 tw-transition tw-duration-150 hover:tw-border-iron-500 hover:tw-bg-iron-800 hover:tw-text-white"
-          >
-            {viewMode === "chat" ? (
-              <Squares2X2Icon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
-            ) : (
-              <ChatBubbleLeftIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
-            )}
-          </button>
-        )}
       </>
+    );
+  };
+
+  const renderHeaderTrailingActions = ({
+    isCompact: headerIsCompact,
+    tooltipId,
+  }: MyStreamWaveTabsHeaderActionContext) => {
+    if (headerIsCompact || !showGalleryToggle || activeCurationId) {
+      return null;
+    }
+
+    return (
+      <button
+        type="button"
+        onClick={onToggleViewMode}
+        aria-label={galleryToggleLabel}
+        data-tooltip-id={tooltipId}
+        data-tooltip-content={galleryToggleLabel}
+        className="tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-text-iron-200 tw-transition tw-duration-150 hover:tw-border-iron-500 hover:tw-bg-iron-800 hover:tw-text-white"
+      >
+        {viewMode === "chat" ? (
+          <Squares2X2Icon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
+        ) : (
+          <ChatBubbleLeftIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
+        )}
+      </button>
     );
   };
 
@@ -165,6 +174,7 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
         headerClassName="tw-flex tw-items-center tw-justify-between tw-gap-x-2 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-px-2 tw-py-3 md:tw-py-2.5 sm:tw-gap-x-4 sm:tw-px-4"
         actionsClassName="tw-flex tw-flex-shrink-0 tw-self-start tw-items-center tw-gap-x-2 tw-pt-0.5"
         renderLeadingActions={renderHeaderLeadingActions}
+        renderTrailingActions={renderHeaderTrailingActions}
         renderOverflowMenuItems={renderHeaderOverflowMenuItems}
       />
       <div className="tw-border-b tw-border-l-0 tw-border-t-0 tw-border-solid tw-border-iron-800">

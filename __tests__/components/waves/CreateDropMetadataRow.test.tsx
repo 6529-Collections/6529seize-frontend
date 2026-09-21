@@ -1,14 +1,16 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import React from "react";
+import { ApiWaveMetadataType } from "@/generated/models/ApiWaveMetadataType";
+import type { CreateDropMetadataType } from "@/components/waves/CreateDropContent";
 import CreateDropMetadataRow from "@/components/waves/CreateDropMetadataRow";
 
 const baseMeta = {
   id: "meta-1",
   key: "a",
   value: "1",
-  type: "TEXT",
+  type: ApiWaveMetadataType.String,
   required: false,
-} as any;
+} satisfies CreateDropMetadataType;
 
 test("calls handlers for key and value changes", () => {
   const onKey = jest.fn();
@@ -39,7 +41,7 @@ test("handles numeric value parsing", () => {
   const onValue = jest.fn();
   render(
     <CreateDropMetadataRow
-      metadata={{ ...baseMeta, type: "NUMBER", value: 2 }}
+      metadata={{ ...baseMeta, type: ApiWaveMetadataType.Number, value: 2 }}
       index={1}
       onChangeKey={jest.fn()}
       onChangeValue={onValue}
@@ -52,6 +54,10 @@ test("handles numeric value parsing", () => {
   const input = screen.getAllByRole("textbox")[1];
   fireEvent.change(input, { target: { value: "3" } });
   expect(onValue).toHaveBeenCalledWith({ index: 1, newValue: 3 });
+  fireEvent.change(input, { target: { value: "0" } });
+  expect(onValue).toHaveBeenCalledWith({ index: 1, newValue: 0 });
+  fireEvent.change(input, { target: { value: "-2.5" } });
+  expect(onValue).toHaveBeenCalledWith({ index: 1, newValue: -2.5 });
   fireEvent.change(input, { target: { value: "-" } });
   expect(onValue).toHaveBeenCalledWith({ index: 1, newValue: null });
 });
