@@ -17,7 +17,10 @@ import {
   requiredPaths,
   visibleField,
 } from "@/lib/artwork-documentation/answers";
-import type { PendingEdit } from "@/lib/artwork-documentation/draft-controller";
+import type {
+  PendingEdit,
+  RejectedEdit,
+} from "@/lib/artwork-documentation/draft-controller";
 import {
   documentationFields,
   documentationFieldSection,
@@ -43,7 +46,10 @@ import {
 import DocumentationValueEditor, {
   type AssetChoice,
 } from "./DocumentationValueEditor";
-import { validDocumentationOperation } from "@/lib/artwork-documentation/validation";
+import {
+  documentationOperationIssues,
+  validDocumentationOperation,
+} from "@/lib/artwork-documentation/validation";
 import {
   documentationChoiceEditor,
   isPublicationOnly,
@@ -55,7 +61,10 @@ import {
   canReferenceDocumentationAssetLink,
 } from "@/lib/artwork-documentation/capabilities";
 
+import DocumentationValidationMessages from "./DocumentationValidationMessages";
+
 interface Props {
+  readonly rejectedEdits?: readonly RejectedEdit[] | undefined;
   readonly context: ApiArtworkDocumentationContext;
   readonly edits: readonly PendingEdit[];
   readonly section?: DocumentationSection | undefined;
@@ -280,9 +289,17 @@ function DocumentationAnswerField(
     pending?.operation.op === ApiArtworkDocumentationOperationOpEnum.Set &&
     pending.operation.answer?.value !==
       context.modules["artwork"]?.answers["canonical_asset_id"]?.value;
-  const invalid = pending
-    ? !validDocumentationOperation(context, moduleId, pending.operation)
-    : false;
+  const issues = pending
+    ? documentationOperationIssues(context, moduleId, pending.operation)
+    : [];
+  const rejected = props.rejectedEdits?.find(
+    (edit) =>
+      edit.moduleId === moduleId &&
+      edit.field === field.id &&
+      edit.sequence === pending?.sequence
+  );
+  const invalid = issues.length > 0 || !!rejected;
+  const validationId = `${id}-validation`;
   const assetRole = (
     {
       canonical_asset_id: "artwork_final",
@@ -479,7 +496,14 @@ function DocumentationAnswerField(
               assets={choices}
               examplePath={`${moduleId}.${field.id}`}
               references={props.references}
-              describedBy={(field.guidance ?? field.help) ? helpId : undefined}
+              describedBy={
+                [
+                  (field.guidance ?? field.help) ? helpId : "",
+                  invalid ? validationId : "",
+                ]
+                  .filter(Boolean)
+                  .join(" ") || undefined
+              }
               onChange={(value) => update({ value })}
             />
           ) : (
@@ -575,11 +599,12 @@ function DocumentationAnswerField(
               </div>
             </details>
           )}
-          {invalid && (
-            <p role="status" className="tw-mt-3 tw-text-xs tw-text-amber-200">
-              {msg("invalidField")}
-            </p>
-          )}
+          <DocumentationValidationMessages
+            id={validationId}
+            issues={issues}
+            rejected={!!rejected}
+            errorCode={rejected?.errorCode}
+          />
         </>
       )}
     </section>

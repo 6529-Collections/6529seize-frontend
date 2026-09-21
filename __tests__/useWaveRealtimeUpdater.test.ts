@@ -1364,9 +1364,7 @@ describe("useWaveRealtimeUpdater", () => {
     );
     await flushPromises();
 
-    expect(props.removeWaveDeliveredNotifications).toHaveBeenCalledWith(
-      "wave1"
-    );
+    expect(props.removeWaveDeliveredNotifications).not.toHaveBeenCalled();
     expect(commonApiPostWithoutBodyAndResponse).not.toHaveBeenCalled();
 
     props.activeWaveId = "wave2";
@@ -1402,9 +1400,7 @@ describe("useWaveRealtimeUpdater", () => {
     );
     await flushPromises();
 
-    expect(props.removeWaveDeliveredNotifications).toHaveBeenCalledWith(
-      "wave1"
-    );
+    expect(props.removeWaveDeliveredNotifications).not.toHaveBeenCalled();
     expect(commonApiPostWithoutBodyAndResponse).not.toHaveBeenCalled();
 
     setDocumentVisibilityState("hidden");

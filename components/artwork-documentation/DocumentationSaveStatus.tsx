@@ -10,7 +10,7 @@ import {
   type DocumentationSection,
 } from "@/lib/artwork-documentation/registry";
 import { documentationFieldSection } from "@/lib/artwork-documentation/catalogue";
-import { validDocumentationOperation } from "@/lib/artwork-documentation/validation";
+import { documentationOperationIssues } from "@/lib/artwork-documentation/validation";
 import { readAnswer } from "@/lib/artwork-documentation/answers";
 import { documentationErrorMessageKey } from "@/lib/artwork-documentation/errors";
 import { documentationFieldLabel } from "@/i18n/messages/artwork-documentation-fields";
@@ -21,6 +21,8 @@ import {
   DocumentationNotice,
   useDocumentationMessages,
 } from "./DocumentationControls";
+
+import DocumentationValidationMessages from "./DocumentationValidationMessages";
 
 export default function DocumentationSaveStatus({
   snapshot,
@@ -76,6 +78,9 @@ export default function DocumentationSaveStatus({
     <div
       className={`tw-min-w-0 tw-max-w-full tw-space-y-3 ${["conflict", "offline", "invalid", "auth_expired"].includes(snapshot.state) ? "tw-basis-full" : ""}`}
     >
+      {snapshot.recoveryUnavailable === true && snapshot.dirty && (
+        <DocumentationNotice>{msg("recoveryUnavailable")}</DocumentationNotice>
+      )}
       <p
         role="status"
         aria-live="polite"
@@ -104,22 +109,17 @@ export default function DocumentationSaveStatus({
             {snapshot.edits.map((edit) => {
               const fieldModule = MODULE_IDS.find((id) => id === edit.moduleId);
               const label = documentationFieldLabel(edit.operation.field);
-              const invalid = !validDocumentationOperation(
+              const issues = documentationOperationIssues(
                 snapshot.context,
                 edit.moduleId,
                 edit.operation
               );
-              let guidance = "save.answerGuidance";
-              if (edit.moduleId === "rights") {
-                if (edit.operation.field === "intended_license")
-                  guidance = "save.licenseGuidance";
-                else if (
-                  ["rights_basis", "third_party_material"].includes(
-                    edit.operation.field
-                  )
-                )
-                  guidance = "save.rightsGuidance";
-              }
+              const rejected = snapshot.rejectedEdits?.find(
+                (item) =>
+                  item.moduleId === edit.moduleId &&
+                  item.field === edit.operation.field &&
+                  item.sequence === edit.sequence
+              );
               return (
                 <li key={`${edit.moduleId}.${edit.operation.field}`}>
                   {onNavigateSection && fieldModule ? (
@@ -143,11 +143,11 @@ export default function DocumentationSaveStatus({
                   ) : (
                     label
                   )}
-                  {invalid && (
-                    <p className="tw-mb-3 tw-mt-0 tw-max-w-prose tw-text-sm tw-leading-6 tw-text-amber-200">
-                      {msg(guidance)}
-                    </p>
-                  )}
+                  <DocumentationValidationMessages
+                    issues={issues}
+                    rejected={!!rejected}
+                    errorCode={rejected?.errorCode}
+                  />
                 </li>
               );
             })}

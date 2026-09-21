@@ -79,13 +79,14 @@ export const useNotificationsController =
       setActiveProfileProxy,
     } = useContext(AuthContext);
     const { notificationsViewStyle } = useLayout();
-    const { removeAllDeliveredNotifications } = useNotificationsContext();
+    const { reconcileProfileDeliveredNotifications } =
+      useNotificationsContext();
     const { invalidateNotifications } = useContext(ReactQueryWrapperContext);
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
 
-    const hasMarkedAllAsReadRef = useRef(false);
+    const hasMarkedAllAsReadRef = useRef<string | null>(null);
     const errorToastShownRef = useRef(false);
     const reauthTriggeredRef = useRef(false);
     const timeoutToastShownRef = useRef(false);
@@ -106,16 +107,17 @@ export const useNotificationsController =
     useSetTitle("Notifications | My Stream | Brain");
 
     const { mutateAsync: markAllAsRead } = useMutation({
-      mutationFn: async () =>
+      mutationFn: async () => {
         await commonApiPostWithoutBodyAndResponse({
           endpoint: `notifications/read`,
-        }),
+        });
+        await reconcileProfileDeliveredNotifications();
+      },
       onSuccess: async () => {
         try {
           invalidateNotifications();
-          await removeAllDeliveredNotifications();
         } catch (error) {
-          console.error("Failed to clear delivered notifications:", error);
+          console.error("Failed to invalidate notifications:", error);
         }
       },
       onError: (error) => {
@@ -132,22 +134,25 @@ export const useNotificationsController =
       if (!isAuthenticated) {
         return;
       }
-      if (reload === "true" || hasMarkedAllAsReadRef.current) {
+      if (
+        reload === "true" ||
+        hasMarkedAllAsReadRef.current === connectedProfile?.id
+      ) {
         return;
       }
 
-      hasMarkedAllAsReadRef.current = true;
       const id = setTimeout(() => {
+        hasMarkedAllAsReadRef.current = connectedProfile?.id ?? null;
         markAllAsRead().catch((error) => {
           console.error("Failed to mark notifications as read:", error);
         });
       }, 0);
       return () => clearTimeout(id);
-    }, [isAuthenticated, markAllAsRead, reload]);
+    }, [isAuthenticated, connectedProfile?.id, markAllAsRead, reload]);
 
     useEffect(() => {
       if (!isAuthenticated) {
-        hasMarkedAllAsReadRef.current = false;
+        hasMarkedAllAsReadRef.current = null;
       }
     }, [isAuthenticated]);
 
@@ -200,13 +205,13 @@ export const useNotificationsController =
             })
           )
         );
+        await reconcileProfileDeliveredNotifications();
       },
       onSuccess: async () => {
         try {
           invalidateNotifications();
-          await removeAllDeliveredNotifications();
         } catch (error) {
-          console.error("Failed to clear delivered notifications:", error);
+          console.error("Failed to invalidate notifications:", error);
         }
       },
       onError: (error) => {
@@ -240,7 +245,7 @@ export const useNotificationsController =
 
       refetch()
         .then(() => {
-          hasMarkedAllAsReadRef.current = true;
+          hasMarkedAllAsReadRef.current = connectedProfile?.id ?? null;
           return markAllAsRead();
         })
         .catch((error) => {
@@ -251,6 +256,7 @@ export const useNotificationsController =
         });
     }, [
       pathname,
+      connectedProfile?.id,
       isAuthenticated,
       markAllAsRead,
       refetch,

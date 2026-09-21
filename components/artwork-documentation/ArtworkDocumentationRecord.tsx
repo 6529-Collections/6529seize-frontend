@@ -8,7 +8,9 @@ import {
 import type { ApiArtworkDocumentationContext } from "@/generated/models/ApiArtworkDocumentationContext";
 import { useDocumentationDraft } from "@/hooks/artwork-documentation/useDocumentationDraft";
 import { associateDocumentationSource } from "@/services/api/artwork-documentation-api";
-import DocumentationAuthGate from "./DocumentationAuthGate";
+import DocumentationAuthGate, {
+  useDocumentationActor,
+} from "./DocumentationAuthGate";
 import { ArtworkDocumentationRecordView } from "./ArtworkDocumentationWorkspace";
 import { canEditDocumentationField } from "@/lib/artwork-documentation/capabilities";
 import { documentationMediaProfiles } from "@/lib/artwork-documentation/catalogue";
@@ -80,7 +82,8 @@ const RecordEditor = forwardRef<
     readonly initialMediaProfiles?: readonly string[] | undefined;
   }
 >(({ initial, sourceProposal, initialMediaProfiles }, ref) => {
-  const draft = useDocumentationDraft(initial);
+  const { actorKey } = useDocumentationActor();
+  const draft = useDocumentationDraft(initial, actorKey);
   const { controller } = draft;
   const seeded = useRef(false);
   const sourceSeed = useRef(sourceProposal).current;

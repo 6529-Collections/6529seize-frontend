@@ -2,16 +2,16 @@
 
 import { DocumentTextIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
-import { useArtworkDocumentationAccess } from "@/hooks/artwork-documentation/useArtworkDocumentationAccess";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 
 export default function HeaderArtworkDocumentationLink({
   onClose,
+  enabled,
 }: {
+  readonly enabled: boolean;
   readonly onClose: () => void;
 }) {
-  const { enabled } = useArtworkDocumentationAccess();
   const locale = useBrowserLocale();
 
   if (!enabled) return null;

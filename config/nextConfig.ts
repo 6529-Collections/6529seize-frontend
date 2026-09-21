@@ -17,6 +17,7 @@ const OG_IMAGE_SHARP_TRACE_INCLUDES = [
   "node_modules/@img/sharp-libvips-*/**/*",
   "node_modules/.pnpm/@img+sharp-libvips-*/node_modules/@img/sharp-libvips-*/**/*",
 ];
+const MUSEUM_PUBLICATION_TRACE_INCLUDES = [".museum-publication/current.json"];
 
 function getAllowedDevOrigins(): string[] {
   return (
@@ -71,6 +72,7 @@ export function sharedConfig(
       "/*": PUBLIC_REVIEW_TRACE_EXCLUDES,
     },
     outputFileTracingIncludes: {
+      "/*": MUSEUM_PUBLICATION_TRACE_INCLUDES,
       "/api/og-metadata/image": OG_IMAGE_SHARP_TRACE_INCLUDES,
     },
     async headers() {

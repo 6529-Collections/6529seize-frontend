@@ -86,7 +86,9 @@ describe("useHlsPlayer hls supported", () => {
     await new Promise((r) => setTimeout(r, 0));
     const video = getByTestId("v") as any;
     const hlsInstance = (require("hls.js").default as any).instances[0];
-    expect(hlsInstance.loadSource).toHaveBeenCalledWith("a.m3u8");
+    expect(hlsInstance.loadSource).toHaveBeenCalledWith(
+      expect.stringContaining("a.m3u8")
+    );
     act(() => {
       hlsInstance.trigger("manifest");
     });

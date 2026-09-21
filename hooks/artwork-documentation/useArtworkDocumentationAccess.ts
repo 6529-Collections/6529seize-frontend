@@ -12,7 +12,7 @@ export const documentationQueryKey = (
 
 export function useArtworkDocumentationAccess() {
   const { connectedProfile, isAuthenticated, activeProfileProxy } = useAuth();
-  const identity = connectedProfile?.id;
+  const identity = isAuthenticated === false ? undefined : connectedProfile?.id;
   const query = useQuery({
     queryKey: documentationQueryKey(
       identity,

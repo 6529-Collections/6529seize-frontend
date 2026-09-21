@@ -1,5 +1,7 @@
 "use client";
 
+import { isAuthResolving } from "@/components/auth/authResolution";
+import AuthLoadingPlaceholder from "@/components/auth/AuthLoadingPlaceholder";
 import useCreateModalState from "@/hooks/useCreateModalState";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
@@ -27,8 +29,8 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
   scrollContainerRef,
   isCollapsed = false,
 }) => {
-  const { hasValidWalletAuth } = useSeizeConnectContext();
-  const { connectedProfile } = useContext(AuthContext);
+  const { hasValidWalletAuth, connectionState } = useSeizeConnectContext();
+  const { connectedProfile, fetchingProfile } = useContext(AuthContext);
   const { openDirectMessage, isApp } = useCreateModalState();
   const isTouchDevice = useIsTouchDevice();
 
@@ -83,6 +85,9 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
       />
     );
   }
+
+  if (isAuthResolving(connectionState, fetchingProfile))
+    return <AuthLoadingPlaceholder />;
 
   if (!hasValidWalletAuth) {
     return (
@@ -205,7 +210,6 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
           border="1px solid #4C4C55"
         />
       )}
-
     </div>
   );
 };

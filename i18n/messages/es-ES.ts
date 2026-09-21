@@ -229,6 +229,7 @@ export const ES_ES_MESSAGES = {
   "media.video.play": "Reproducir video",
   "media.video.player": "Reproductor de video",
   "media.video.playPreview": "Reproducir vista previa del video",
+  "media.video.position": "{current} de {duration}",
   "media.video.seek": "Cambiar la posicion del video",
   "media.video.unmute": "Activar sonido del video",
   "media.video.unsupported": "Tu navegador no admite la etiqueta de video.",
@@ -583,6 +584,7 @@ export const ES_ES_MESSAGES = {
   "drop.media.loading": "Cargando imagen",
   "drop.media.unavailable": "Imagen no disponible",
   "drop.media.loadFailed": "No se pudo cargar la imagen.",
+  "drop.media.videoLoadFailed": "No se pudo cargar el video.",
   "drop.media.retry": "Reintentar",
   "drop.media.openPreview": "Abrir vista previa de imagen",
   "drop.media.openMedia": "Abrir medio del drop",
@@ -1109,6 +1111,10 @@ export const ES_ES_MESSAGES = {
   "waves.leaderboard.timeline.noDecisionScheduled":
     "No hay ninguna decisión programada",
   "waves.leaderboard.timeline.noUpcomingEvents": "No hay próximos eventos",
+  "waves.leaderboard.phase.nextWinnersIn": "Próximos ganadores anunciados en",
+  "waves.leaderboard.phase.countdown": "{hours} h {minutes} min",
+  "waves.leaderboard.phase.countdownWithDays":
+    "{days} d {hours} h {minutes} min",
   "waves.leaderboard.timeline.nextWinner": "Próximo ganador",
   "waves.leaderboard.timeline.nextWinnerIn": "Próximo ganador en {countdown}",
   "waves.leaderboard.timeline.unit.day.one": "{count} día",

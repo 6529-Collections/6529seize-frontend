@@ -332,6 +332,24 @@ const PACKS = [
     triggers: ["pr-ci", "manual"],
   }),
 
+  {
+    ...sandboxPack(
+      "test:e2e:artwork-documentation-sandbox",
+      "Artwork documentation saving and upload recovery through the real editor with isolated HTTP fixtures.",
+      ["tests/artwork-documentation/workflow-sandbox.spec.ts"],
+      {
+        ...COMPOSER_SANDBOX_ENV,
+        USE_DEV_AUTH: "false",
+        PLAYWRIGHT_BASE_URL: "http://localhost:3295",
+        PLAYWRIGHT_WEB_SERVER_URL: "http://localhost:3295",
+        PLAYWRIGHT_COMPOSER_SANDBOX_API_PORT: "4295",
+        PLAYWRIGHT_READONLY: "0",
+        NEXT_DEV_DIST_DIR: ".next-playwright-artwork-documentation",
+      },
+      [DESKTOP, MOBILE]
+    ),
+    triggers: ["pr-ci", "manual"],
+  },
   sandboxPack(
     "test:e2e:composer-sandbox",
     "Waves composer sandbox against the local mock API.",

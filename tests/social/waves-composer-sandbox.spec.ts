@@ -1,4 +1,5 @@
 import type { Page, Route } from "@playwright/test";
+import { defineWaveVideoLayoutTests } from "../media/waveVideoLayoutCases";
 
 import {
   expect,
@@ -46,6 +47,8 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     "Composer sandbox requires the local mock API runner."
   );
 
+  defineWaveVideoLayoutTests();
+
   test("queues and removes an attachment without upload or submit", async ({
     baseURL,
     page,
@@ -77,6 +80,35 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     await page.getByRole("button", { name: "Remove file" }).last().click();
     await expect(page.getByText("composer-sandbox.pdf")).toBeHidden();
     await expectNoHorizontalOverflow(page);
+    await expectNoUnsafeSandboxMutations(baseURL);
+  });
+
+  test("reserves a visible video preview without decoded metadata", async ({
+    baseURL,
+    page,
+  }) => {
+    await gotoSandboxWave(page);
+    await showDropActionsIfCollapsed(page);
+
+    const fileInput = page.getByLabel("Upload media", { exact: true }).first();
+    // Deliberately undecodable: the frame must remain usable even before
+    // metadata is available, or when a selected video cannot be decoded.
+    await fileInput.setInputFiles({
+      name: "composer-video.mp4",
+      mimeType: "video/mp4",
+      buffer: Buffer.from("undecodable video fixture"),
+    });
+
+    const video = page.getByLabel("Video player", { exact: true }).last();
+    await expect(video).toBeVisible();
+    await expect(video).toHaveAttribute("controls", "");
+    const bounds = await video.boundingBox();
+    expect(bounds?.width).toBeGreaterThan(0);
+    expect(bounds?.height).toBeGreaterThan(0);
+    await expectNoHorizontalOverflow(page);
+
+    await page.getByRole("button", { name: "Remove file" }).last().click();
+    await expect(page.getByText("composer-video.mp4")).toBeHidden();
     await expectNoUnsafeSandboxMutations(baseURL);
   });
 

@@ -1,3 +1,12 @@
+jest.mock("@/services/notifications/push-badge-refresh", () => ({
+  requestPushBadgeRefresh: jest.fn().mockResolvedValue(undefined),
+}));
+import { requestPushBadgeRefresh } from "@/services/notifications/push-badge-refresh";
+jest.mock("@/services/notifications/push-installation", () => ({
+  preparePushInstallationRegistration: jest.fn().mockResolvedValue({}),
+  completePushInstallationMigration: jest.fn().mockResolvedValue(undefined),
+  flushPendingPushLogouts: jest.fn().mockResolvedValue(undefined),
+}));
 import {
   NotificationsProvider,
   useNotificationsContext,
@@ -23,10 +32,14 @@ const mockSeizeConnectContext = {
   seizeSwitchConnectedAccount: mockSeizeSwitchConnectedAccount,
 };
 
+let mockActiveProfileProxy: object | null = null;
 let mockIsActive = true;
+let mockIsIos = true;
 jest.mock("@/hooks/useCapacitor", () => () => ({
   isCapacitor: true,
-  isIos: true,
+  get isIos() {
+    return mockIsIos;
+  },
   get isActive() {
     return mockIsActive;
   },
@@ -36,18 +49,26 @@ jest.mock("next/navigation", () => ({
   useRouter: () => mockUseRouter(),
 }));
 jest.mock("@/components/auth/Auth", () => ({
-  useAuth: () => ({ connectedProfile: mockConnectedProfile }),
+  useAuth: () => ({
+    connectedProfile: mockConnectedProfile,
+    activeProfileProxy: mockActiveProfileProxy,
+  }),
 }));
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: () => mockSeizeConnectContext,
 }));
 jest.mock("@/services/api/common-api", () => ({
+  commonApiFetch: jest.fn().mockResolvedValue({
+    notifications: [{ id: 1, read_at: 123 }],
+    unread_count: 0,
+  }),
   commonApiPost: jest.fn().mockResolvedValue({}),
   commonApiPostWithoutBodyAndResponse: jest.fn().mockResolvedValue({}),
 }));
 jest.mock("@/services/auth/auth.utils", () => ({
   AUTH_TOKEN_CHANGED_EVENT: "6529-auth-token-changed",
   getAuthJwt: jest.fn(() => "test-jwt"),
+  getConnectedWalletAccounts: jest.fn(() => []),
   isAuthJwtUsable: jest.fn(
     (jwt: string | null | undefined) =>
       typeof jwt === "string" && jwt.length > 0
@@ -65,9 +86,18 @@ jest.mock("@capacitor/push-notifications", () => {
       addListener: jest.fn(),
       requestPermissions: jest.fn().mockResolvedValue({ receive: "granted" }),
       register: jest.fn().mockResolvedValue(undefined),
-      getDeliveredNotifications: jest
-        .fn()
-        .mockResolvedValue({ notifications: [{ data: { wave_id: "w1" } }] }),
+      getDeliveredNotifications: jest.fn().mockResolvedValue({
+        notifications: [
+          {
+            id: "native-1",
+            data: {
+              wave_id: "w1",
+              target_profile_id: "test-profile-id",
+              notification_id: "1",
+            },
+          },
+        ],
+      }),
       removeDeliveredNotifications: jest.fn().mockResolvedValue(undefined),
       removeAllDeliveredNotifications: jest.fn().mockResolvedValue(undefined),
     },
@@ -90,6 +120,7 @@ const flushMicrotasks = async () => {
 };
 
 beforeEach(() => {
+  mockIsIos = true;
   const { getAuthJwt, isAuthJwtUsable } = require("@/services/auth/auth.utils");
 
   getAuthJwt.mockReset();
@@ -105,7 +136,7 @@ describe("NotificationsContext", () => {
   it("provides context functions", async () => {
     const { PushNotifications } = require("@capacitor/push-notifications");
     const { result } = renderHook(() => useNotificationsContext(), { wrapper });
-    expect(typeof result.current.removeAllDeliveredNotifications).toBe(
+    expect(typeof result.current.reconcileProfileDeliveredNotifications).toBe(
       "function"
     );
 
@@ -244,8 +275,7 @@ describe("NotificationsContext initialization", () => {
       expect(sentry.addBreadcrumb).toHaveBeenCalledWith({
         category: "notifications",
         level: "warning",
-        message:
-          "Push permission request completed after native error retry.",
+        message: "Push permission request completed after native error retry.",
         data: {
           component: "NotificationsProvider",
           operation: "requestPermissions",
@@ -287,8 +317,7 @@ describe("NotificationsContext initialization", () => {
     expect(PushNotifications.requestPermissions).toHaveBeenCalledTimes(2);
     expect(sentry.addBreadcrumb).toHaveBeenCalledWith(
       expect.objectContaining({
-        message:
-          "Push permission request completed after native error retry.",
+        message: "Push permission request completed after native error retry.",
         data: expect.objectContaining({
           retry_succeeded: true,
           permission_status: "granted",
@@ -329,8 +358,7 @@ describe("NotificationsContext initialization", () => {
     expect(PushNotifications.requestPermissions).toHaveBeenCalledTimes(2);
     expect(sentry.addBreadcrumb).not.toHaveBeenCalledWith(
       expect.objectContaining({
-        message:
-          "Push permission request completed after native error retry.",
+        message: "Push permission request completed after native error retry.",
       })
     );
   });
@@ -364,8 +392,7 @@ describe("NotificationsContext initialization", () => {
     expect(PushNotifications.requestPermissions).not.toHaveBeenCalled();
     expect(sentry.addBreadcrumb).not.toHaveBeenCalledWith(
       expect.objectContaining({
-        message:
-          "Push permission request completed after native error retry.",
+        message: "Push permission request completed after native error retry.",
       })
     );
   });
@@ -373,39 +400,42 @@ describe("NotificationsContext initialization", () => {
   it.each([
     "Couldn't communicate with a helper application.",
     "Couldn’t communicate with a helper application. Retry later.",
-  ])("captures push permission helper-error near-miss %s", async (errorMessage) => {
-    const { PushNotifications } = require("@capacitor/push-notifications");
-    const sentry = require("@sentry/nextjs");
-    const nearMiss = new Error(errorMessage);
+  ])(
+    "captures push permission helper-error near-miss %s",
+    async (errorMessage) => {
+      const { PushNotifications } = require("@capacitor/push-notifications");
+      const sentry = require("@sentry/nextjs");
+      const nearMiss = new Error(errorMessage);
 
-    PushNotifications.requestPermissions.mockRejectedValueOnce(nearMiss);
+      PushNotifications.requestPermissions.mockRejectedValueOnce(nearMiss);
 
-    renderHook(() => useNotificationsContext(), { wrapper });
+      renderHook(() => useNotificationsContext(), { wrapper });
 
-    await waitFor(() => {
-      expect(sentry.captureException).toHaveBeenCalledWith(
-        nearMiss,
+      await waitFor(() => {
+        expect(sentry.captureException).toHaveBeenCalledWith(
+          nearMiss,
+          expect.objectContaining({
+            tags: {
+              component: "NotificationsProvider",
+              operation: "initializeNotifications",
+            },
+            extra: expect.objectContaining({
+              error_name: "Error",
+              error_message: errorMessage,
+            }),
+          })
+        );
+      });
+
+      expect(sentry.addBreadcrumb).not.toHaveBeenCalledWith(
         expect.objectContaining({
-          tags: {
-            component: "NotificationsProvider",
-            operation: "initializeNotifications",
-          },
-          extra: expect.objectContaining({
-            error_name: "Error",
-            error_message: errorMessage,
-          }),
+          message:
+            "Push permission request completed after native error retry.",
         })
       );
-    });
-
-    expect(sentry.addBreadcrumb).not.toHaveBeenCalledWith(
-      expect.objectContaining({
-        message:
-          "Push permission request completed after native error retry.",
-      })
-    );
-    expect(PushNotifications.requestPermissions).toHaveBeenCalledTimes(1);
-  });
+      expect(PushNotifications.requestPermissions).toHaveBeenCalledTimes(1);
+    }
+  );
 });
 
 describe("push registration behavior", () => {
@@ -484,6 +514,87 @@ describe("push registration behavior", () => {
     );
     sentry.captureException.mockClear();
     sentry.addBreadcrumb.mockClear();
+  });
+
+  it("requests a badge only after backend registration succeeds, then again on resume", async () => {
+    const { commonApiPost } = require("@/services/api/common-api");
+    let finish!: (value: unknown) => void;
+    commonApiPost.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          finish = resolve;
+        })
+    );
+    const { registrationCallback, rerender } =
+      await setupRegistrationCallback();
+    await act(async () => {
+      await registrationCallback({ value: "test-token" });
+    });
+    expect(requestPushBadgeRefresh).not.toHaveBeenCalled();
+    await act(async () => {
+      finish({});
+    });
+    await waitFor(() =>
+      expect(requestPushBadgeRefresh).toHaveBeenCalledTimes(1)
+    );
+    mockIsActive = false;
+    rerender();
+    mockIsActive = true;
+    rerender();
+    await waitFor(() =>
+      expect(requestPushBadgeRefresh).toHaveBeenCalledTimes(2)
+    );
+  });
+
+  it("keeps Android registration free of iOS badge refresh requests", async () => {
+    mockIsIos = false;
+    const { commonApiPost } = require("@/services/api/common-api");
+    const { registrationCallback } = await setupRegistrationCallback();
+    await act(async () => {
+      await registrationCallback({ value: "test-token" });
+    });
+    await waitFor(() => expect(commonApiPost).toHaveBeenCalledTimes(1));
+    expect(requestPushBadgeRefresh).not.toHaveBeenCalled();
+  });
+
+  it("allows a waiting registration to continue after installation preparation fails", async () => {
+    const {
+      preparePushInstallationRegistration,
+    } = require("@/services/notifications/push-installation");
+    const { commonApiPost } = require("@/services/api/common-api");
+    const sentry = require("@sentry/nextjs");
+    const { registrationCallback } = await setupRegistrationCallback();
+    let rejectPreparation!: (error: Error) => void;
+    preparePushInstallationRegistration.mockImplementationOnce(
+      () =>
+        new Promise((_, reject) => {
+          rejectPreparation = reject;
+        })
+    );
+    const first = registrationCallback({ value: "old-token" });
+    await waitFor(() =>
+      expect(preparePushInstallationRegistration).toHaveBeenCalledTimes(1)
+    );
+    const second = registrationCallback({ value: "new-token" });
+    await act(async () => {
+      rejectPreparation(new Error("sensitive storage error"));
+      await Promise.all([first, second]);
+    });
+    expect(preparePushInstallationRegistration).toHaveBeenCalledTimes(2);
+    expect(commonApiPost).toHaveBeenCalledTimes(1);
+    expect(commonApiPost).toHaveBeenCalledWith(
+      expect.objectContaining({
+        body: expect.objectContaining({ token: "new-token" }),
+      })
+    );
+    expect(sentry.captureException).toHaveBeenCalledWith(
+      new Error("Push installation preparation failed"),
+      expect.objectContaining({
+        tags: expect.objectContaining({
+          operation: "preparePushInstallationRegistration",
+        }),
+      })
+    );
   });
 
   it("skips registration when auth token is unavailable", async () => {
@@ -840,6 +951,107 @@ describe("push registration behavior", () => {
     );
   });
 
+  it("retries deferred registration after reconnect finishes pending logout", async () => {
+    const { PushNotifications } = require("@capacitor/push-notifications");
+    const {
+      flushPendingPushLogouts,
+    } = require("@/services/notifications/push-installation");
+    await setupRegistrationCallback();
+    flushPendingPushLogouts.mockResolvedValueOnce(true);
+    await act(async () => {
+      globalThis.dispatchEvent(new Event("online"));
+    });
+    await waitFor(() =>
+      expect(PushNotifications.removeAllListeners).toHaveBeenCalledTimes(2)
+    );
+  });
+
+  it.each(["online", "activation"])(
+    "retries partial connected-profile registration on %s without a completed logout",
+    async (trigger) => {
+      mockIsActive = true;
+      mockIsIos = true;
+      const { PushNotifications } = require("@capacitor/push-notifications");
+      const { commonApiPost } = require("@/services/api/common-api");
+      const {
+        getConnectedWalletAccounts,
+      } = require("@/services/auth/auth.utils");
+      const {
+        flushPendingPushLogouts,
+        completePushInstallationMigration,
+      } = require("@/services/notifications/push-installation");
+      getConnectedWalletAccounts.mockReturnValue([
+        { profileId: "test-profile-id", jwt: "test-jwt" },
+        { profileId: "peer-profile", jwt: "peer-jwt" },
+      ]);
+      flushPendingPushLogouts.mockResolvedValue(false);
+      commonApiPost
+        .mockResolvedValueOnce({})
+        .mockRejectedValueOnce({ status: 403 });
+      try {
+        const { registrationCallback, getRegistrationCallback, rerender } =
+          await setupRegistrationCallback();
+        await act(async () => {
+          await registrationCallback({ value: "test-token" });
+        });
+        await waitFor(() => expect(commonApiPost).toHaveBeenCalledTimes(2));
+        expect(completePushInstallationMigration).not.toHaveBeenCalled();
+        expect(requestPushBadgeRefresh).not.toHaveBeenCalled();
+
+        if (trigger === "activation") {
+          mockIsActive = false;
+          rerender();
+          mockIsActive = true;
+          rerender();
+        } else {
+          await act(async () => {
+            globalThis.dispatchEvent(new Event("online"));
+          });
+        }
+        await waitFor(() =>
+          expect(PushNotifications.removeAllListeners).toHaveBeenCalledTimes(2)
+        );
+        await act(async () => {
+          await getRegistrationCallback()({ value: "test-token" });
+        });
+        await waitFor(() =>
+          expect(completePushInstallationMigration).toHaveBeenCalledTimes(1)
+        );
+        await waitFor(() =>
+          expect(requestPushBadgeRefresh).toHaveBeenCalledTimes(1)
+        );
+        expect(commonApiPost).toHaveBeenNthCalledWith(
+          4,
+          expect.objectContaining({
+            headers: { Authorization: "Bearer peer-jwt" },
+            body: expect.objectContaining({ profile_id: "peer-profile" }),
+          })
+        );
+        await act(async () => {
+          globalThis.dispatchEvent(new Event("online"));
+        });
+        expect(PushNotifications.removeAllListeners).toHaveBeenCalledTimes(2);
+      } finally {
+        getConnectedWalletAccounts.mockReturnValue([]);
+        mockIsActive = true;
+      }
+    }
+  );
+
+  it("registers the same profile and token again after a fresh login", async () => {
+    const { commonApiPost } = require("@/services/api/common-api");
+    const { getAuthJwt } = require("@/services/auth/auth.utils");
+    const { registrationCallback } = await setupRegistrationCallback();
+    await act(async () => {
+      await registrationCallback({ value: "test-token" });
+    });
+    getAuthJwt.mockReturnValue("fresh-login-jwt");
+    await act(async () => {
+      await registrationCallback({ value: "test-token" });
+    });
+    expect(commonApiPost).toHaveBeenCalledTimes(2);
+  });
+
   it("skips duplicate registration for identical fingerprint", async () => {
     const { commonApiPost } = require("@/services/api/common-api");
     const sentry = require("@sentry/nextjs");
@@ -987,38 +1199,35 @@ describe("push registration behavior", () => {
     "An SSL error has occurred and a secure connection to the server cannot be made because the push configuration is invalid.",
     "A TLS error caused the secure connection to fail. More details followed.",
     "A TLS error caused the secure connection to fail because the push configuration is invalid.",
-  ])(
-    "captures native registration near-miss %s",
-    async (errorMessage) => {
-      const sentry = require("@sentry/nextjs");
-      const nativeError = new Error(errorMessage);
-      const { registrationErrorCallback } = await setupRegistrationCallback();
+  ])("captures native registration near-miss %s", async (errorMessage) => {
+    const sentry = require("@sentry/nextjs");
+    const nativeError = new Error(errorMessage);
+    const { registrationErrorCallback } = await setupRegistrationCallback();
 
-      act(() => {
-        registrationErrorCallback(nativeError);
-      });
+    act(() => {
+      registrationErrorCallback(nativeError);
+    });
 
-      expect(sentry.addBreadcrumb).not.toHaveBeenCalledWith(
-        expect.objectContaining({
-          message: "Push registration transient error.",
-        })
-      );
-      expect(sentry.captureException).toHaveBeenCalledWith(
-        nativeError,
-        expect.objectContaining({
-          tags: expect.objectContaining({
-            component: "NotificationsProvider",
-            operation: "pushRegistrationError",
-          }),
-          extra: expect.objectContaining({
-            retryable: false,
-            error_name: "Error",
-            error_message: errorMessage,
-          }),
-        })
-      );
-    }
-  );
+    expect(sentry.addBreadcrumb).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: "Push registration transient error.",
+      })
+    );
+    expect(sentry.captureException).toHaveBeenCalledWith(
+      nativeError,
+      expect.objectContaining({
+        tags: expect.objectContaining({
+          component: "NotificationsProvider",
+          operation: "pushRegistrationError",
+        }),
+        extra: expect.objectContaining({
+          retryable: false,
+          error_name: "Error",
+          error_message: errorMessage,
+        }),
+      })
+    );
+  });
 
   it.each(["-25291", "-25299"])(
     "records known low-value native registration error %s as an info breadcrumb",
@@ -1137,47 +1346,53 @@ describe("push registration behavior", () => {
   });
 });
 
-it("removes notifications when functions called", async () => {
-  const { PushNotifications } = require("@capacitor/push-notifications");
+it.each([true, false])(
+  "reconciles delivered notifications on iOS=%s",
+  async (isIos) => {
+    mockIsIos = isIos;
+    const { PushNotifications } = require("@capacitor/push-notifications");
 
-  let registrationCallback:
-    | ((token: { value: string }) => Promise<void>)
-    | null = null;
-  PushNotifications.addListener.mockImplementation(
-    (event: string, callback: (arg: unknown) => Promise<void>) => {
-      if (event === "registration") {
-        registrationCallback = callback as (token: {
-          value: string;
-        }) => Promise<void>;
+    let registrationCallback:
+      | ((token: { value: string }) => Promise<void>)
+      | null = null;
+    PushNotifications.addListener.mockImplementation(
+      (event: string, callback: (arg: unknown) => Promise<void>) => {
+        if (event === "registration") {
+          registrationCallback = callback as (token: {
+            value: string;
+          }) => Promise<void>;
+        }
+        return Promise.resolve();
       }
-      return Promise.resolve();
-    }
-  );
+    );
 
-  const { result } = renderHook(() => useNotificationsContext(), { wrapper });
+    const { result } = renderHook(() => useNotificationsContext(), { wrapper });
 
-  await waitFor(() => {
-    expect(PushNotifications.removeAllListeners).toHaveBeenCalled();
-  });
+    await waitFor(() => {
+      expect(PushNotifications.removeAllListeners).toHaveBeenCalled();
+    });
 
-  await waitFor(() => {
-    expect(registrationCallback).not.toBeNull();
-  });
+    await waitFor(() => {
+      expect(registrationCallback).not.toBeNull();
+    });
 
-  await act(async () => {
-    if (registrationCallback) {
-      await registrationCallback({ value: "test-token" });
-    }
-  });
+    await act(async () => {
+      if (registrationCallback) {
+        await registrationCallback({ value: "test-token" });
+      }
+    });
 
-  await act(async () => {
-    await result.current.removeWaveDeliveredNotifications("w1");
-    await result.current.removeAllDeliveredNotifications();
-  });
-  expect(PushNotifications.getDeliveredNotifications).toHaveBeenCalled();
-  expect(PushNotifications.removeDeliveredNotifications).toHaveBeenCalled();
-  expect(PushNotifications.removeAllDeliveredNotifications).toHaveBeenCalled();
-});
+    await act(async () => {
+      await result.current.removeWaveDeliveredNotifications("w1");
+      await result.current.reconcileProfileDeliveredNotifications();
+    });
+    expect(PushNotifications.getDeliveredNotifications).toHaveBeenCalled();
+    expect(PushNotifications.removeDeliveredNotifications).toHaveBeenCalled();
+    expect(
+      PushNotifications.removeAllDeliveredNotifications
+    ).not.toHaveBeenCalled();
+  }
+);
 
 it("skips notification removal when not registered", async () => {
   const { PushNotifications } = require("@capacitor/push-notifications");
@@ -1194,7 +1409,7 @@ it("skips notification removal when not registered", async () => {
 
   await act(async () => {
     await result.current.removeWaveDeliveredNotifications("w1");
-    await result.current.removeAllDeliveredNotifications();
+    await result.current.reconcileProfileDeliveredNotifications();
   });
 
   expect(PushNotifications.getDeliveredNotifications).not.toHaveBeenCalled();
@@ -1351,4 +1566,133 @@ describe("push notification action handling", () => {
     expect(push).not.toHaveBeenCalled();
     expect(PushNotifications.removeDeliveredNotifications).toHaveBeenCalled();
   });
+});
+
+describe("reconciliation after native registration", () => {
+  const ownNotification = {
+    id: "user-a-read",
+    data: { target_profile_id: "test-profile-id", notification_id: "1" },
+  };
+  const otherNotification = {
+    id: "user-b-unread",
+    data: { target_profile_id: "other-profile-id", notification_id: "2" },
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockIsActive = true;
+    mockActiveProfileProxy = null;
+    mockConnectedProfile = { id: "test-profile-id", handle: "owner" };
+    const { PushNotifications } = require("@capacitor/push-notifications");
+    const {
+      commonApiFetch,
+      commonApiPost,
+    } = require("@/services/api/common-api");
+    commonApiPost.mockReset().mockResolvedValue({});
+    commonApiFetch.mockReset().mockResolvedValue({
+      notifications: [{ id: 1, read_at: 123 }],
+      unread_count: 0,
+    });
+    PushNotifications.getDeliveredNotifications.mockReset().mockResolvedValue({
+      notifications: [ownNotification, otherNotification],
+    });
+  });
+
+  afterEach(() => {
+    mockIsActive = true;
+    mockActiveProfileProxy = null;
+  });
+
+  it.each([true, false])(
+    "automatically reconciles delayed registration and recovery on iOS=%s",
+    async (isIos) => {
+      mockIsIos = isIos;
+      const { PushNotifications } = require("@capacitor/push-notifications");
+      const listeners = new Map<string, (value: unknown) => void>();
+      PushNotifications.addListener.mockImplementation(
+        (event: string, callback: (value: unknown) => void) => {
+          listeners.set(event, callback);
+          return Promise.resolve();
+        }
+      );
+      renderHook(() => useNotificationsContext(), { wrapper });
+      await waitFor(() =>
+        expect(listeners.has("registrationError")).toBe(true)
+      );
+      expect(
+        PushNotifications.getDeliveredNotifications
+      ).not.toHaveBeenCalled();
+
+      await act(async () =>
+        listeners.get("registration")?.({ value: "token" })
+      );
+      await waitFor(() =>
+        expect(
+          PushNotifications.removeDeliveredNotifications
+        ).toHaveBeenCalledWith({
+          notifications: [ownNotification],
+        })
+      );
+      PushNotifications.removeDeliveredNotifications.mockClear();
+      await act(async () => {
+        listeners.get("registrationError")?.({
+          message: "network unavailable",
+        });
+        listeners.get("registration")?.({ value: "replacement-token" });
+      });
+      await waitFor(() =>
+        expect(
+          PushNotifications.removeDeliveredNotifications
+        ).toHaveBeenCalledWith({
+          notifications: [ownNotification],
+        })
+      );
+      expect(
+        PushNotifications.removeAllDeliveredNotifications
+      ).not.toHaveBeenCalled();
+    }
+  );
+
+  it.each(["inactive", "proxy", "refresh-failure"])(
+    "preserves notification state after registration when %s",
+    async (condition) => {
+      const { PushNotifications } = require("@capacitor/push-notifications");
+      const { commonApiFetch } = require("@/services/api/common-api");
+      const listeners = new Map<string, (value: unknown) => void>();
+      PushNotifications.addListener.mockImplementation(
+        (event: string, callback: (value: unknown) => void) => {
+          listeners.set(event, callback);
+          return Promise.resolve();
+        }
+      );
+      const { rerender } = renderHook(() => useNotificationsContext(), {
+        wrapper,
+      });
+      await waitFor(() => expect(listeners.has("registration")).toBe(true));
+      if (condition === "inactive") mockIsActive = false;
+      if (condition === "proxy") mockActiveProfileProxy = { id: "proxy" };
+      if (condition === "refresh-failure") {
+        commonApiFetch.mockRejectedValue(
+          new Error("unread refresh unavailable")
+        );
+      }
+      rerender();
+      await act(async () =>
+        listeners.get("registration")?.({ value: "token" })
+      );
+      expect(
+        PushNotifications.removeDeliveredNotifications
+      ).not.toHaveBeenCalled();
+      expect(
+        PushNotifications.removeAllDeliveredNotifications
+      ).not.toHaveBeenCalled();
+      if (condition === "refresh-failure") {
+        expect(commonApiFetch).toHaveBeenCalled();
+      } else {
+        expect(
+          PushNotifications.getDeliveredNotifications
+        ).not.toHaveBeenCalled();
+      }
+    }
+  );
 });

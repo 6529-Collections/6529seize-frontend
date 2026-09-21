@@ -41,6 +41,21 @@ const DEPLOYMENT_CONTRACT_PATTERNS = [
   /^__tests__\/scripts\/(?:app-pr-ci-effective-plan|deploy-staging-artifact|deployment-e2e-workflows|e2e-packs|frontend-deployment-workflows|museum-|production-|sync-e2e-manifest)/u,
   /^(?:package\.json|pnpm-lock\.yaml|pnpm-workspace\.yaml)$/u,
 ];
+const ARTWORK_DOCUMENTATION_BROWSER_PATTERNS = [
+  /^components\/providers\/LayoutWrapper\.tsx$/u,
+  /^components\/layout\/(?:WebLayout|SmallScreenLayout|SmallScreenLayoutHeader)\.tsx$/u,
+  /^(?:app|components|hooks|lib)\/artwork-documentation\//u,
+  /^services\/api\/artwork-documentation(?:-assets)?-api\.ts$/u,
+  /^i18n\/messages\/artwork-documentation(?:-[A-Za-z0-9]+)*\.ts$/u,
+  /^utils\/monitoring\/artworkDocumentationUploadMonitoring\.ts$/u,
+  /^tests\/artwork-documentation\//u,
+  /^__tests__\/fixtures\/artwork-documentation(?:-profile-v3\.json|\.ts)$/u,
+  /^tests\/support\/(?:composerSandboxServer\.cjs|localSandbox\.ts)$/u,
+  /^tests\/packs\.manifest\.cjs$/u,
+  /^scripts\/app-pr-ci-effective-plan\.cjs$/u,
+  /^\.github\/workflows\/app-pr-ci\.yml$/u,
+  /^playwright\.config\.ts$/u,
+];
 function check(required, reason) {
   return { required, reason };
 }
@@ -92,6 +107,10 @@ function applyEffectiveAppPrCiPlan(plan) {
     (file) => isMuseumPath(file) || isPolicyPath(file)
   );
 
+  const playwrightArtworkDocumentation = files.some((file) =>
+    ARTWORK_DOCUMENTATION_BROWSER_PATTERNS.some((pattern) => pattern.test(file))
+  );
+
   const checks = {
     ...plan.checks,
     install: check(
@@ -113,6 +132,12 @@ function applyEffectiveAppPrCiPlan(plan) {
       testTypecheck
         ? "Changed test code, test configuration, or dependency policy needs test-helper typechecking."
         : "No test code, test configuration, or dependency policy changed."
+    ),
+    playwright_artwork_documentation: check(
+      playwrightArtworkDocumentation,
+      playwrightArtworkDocumentation
+        ? "Artwork documentation editor, HTTP boundary fixtures or browser lane policy changed."
+        : "No artwork documentation editor or browser lane contract changed."
     ),
     playwright_museum: check(
       playwrightMuseum,

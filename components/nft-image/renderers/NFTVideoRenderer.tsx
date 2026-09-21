@@ -1,6 +1,7 @@
 "use client";
 
 import SeizeVideoPlayer from "@/components/drops/view/item/content/media/SeizeVideoPlayer";
+import { getVideoRatio } from "@/components/drops/view/item/content/media/SeizeVideoPlayer.config";
 import NFTImageBalance from "@/components/nft-image/NFTImageBalance";
 import NFTMediaContainer from "@/components/nft-image/NFTMediaContainer";
 import styles from "@/components/nft-image/NFTImage.module.css";
@@ -32,9 +33,16 @@ export default function NFTVideoRenderer(props: Readonly<BaseRendererProps>) {
     props.nft.thumbnail,
   ]);
 
+  const dimensions =
+    "metadata" in props.nft ? props.nft.metadata?.animation_details : undefined;
+  const aspectRatioHint = getVideoRatio(dimensions?.width, dimensions?.height);
+
+  const frameClass = props.artworkLayout ? "tw-h-auto" : props.heightStyle;
+  const videoLayout = props.artworkLayout ? "artwork" : "prominent";
+  const useFrame = props.fillContainer === true || props.artworkLayout === true;
   return (
     <NFTMediaContainer
-      className={`${animationClassName} ${props.heightStyle} ${props.bgStyle}`}
+      className={`${animationClassName} ${props.fillContainer ? "tw-h-full" : frameClass} ${props.bgStyle}`}
     >
       {props.showBalance && (
         <NFTImageBalance
@@ -50,14 +58,15 @@ export default function NFTVideoRenderer(props: Readonly<BaseRendererProps>) {
         src={primarySrc}
         fallbackSources={fallbackSources}
         poster={poster}
+        aspectRatioHint={aspectRatioHint}
         autoPlay
         muted
         loop
         preload="auto"
-        layout="prominent"
+        layout={props.fillContainer ? "fill" : videoLayout}
         align="center"
-        className={`${animationClassName} ${props.heightStyle} ${props.bgStyle} tw-flex tw-items-center tw-justify-center`}
-        videoClassName={props.imageStyle}
+        className={`${animationClassName} ${useFrame ? "" : props.heightStyle} ${props.bgStyle} tw-flex tw-items-center tw-justify-center`}
+        videoClassName={useFrame ? undefined : props.imageStyle}
       />
     </NFTMediaContainer>
   );

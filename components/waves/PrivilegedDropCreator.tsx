@@ -1,3 +1,4 @@
+import { isAuthResolving } from "@/components/auth/authResolution";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
@@ -99,7 +100,8 @@ export default function PrivilegedDropCreator({
 }: PrivilegedDropCreatorProps) {
   const queryClient = useQueryClient();
   const { connectedProfile, activeProfileProxy, fetchingProfile } = useAuth();
-  const { address, hasValidWalletAuth } = useSeizeConnectContext();
+  const { address, hasValidWalletAuth, connectionState } =
+    useSeizeConnectContext();
   const { updateEligibility } = useWaveEligibility();
   const moderationProfileId = connectedProfile?.id;
   const profileModerationStatus =
@@ -154,7 +156,7 @@ export default function PrivilegedDropCreator({
     });
   }, [chatRestriction, updateEligibility, wave.id]);
 
-  if (isProfileLoadingForWallet) {
+  if (isAuthResolving(connectionState) || isProfileLoadingForWallet) {
     return <DropPlaceholder type="profile-check" />;
   }
 

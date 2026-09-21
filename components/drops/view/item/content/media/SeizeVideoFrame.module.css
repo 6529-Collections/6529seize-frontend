@@ -1,0 +1,104 @@
+/* The surface, video and controls share the same uncropped rectangle. */
+.surface {
+  position: relative;
+  flex: none;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: inherit;
+}
+
+.bounded {
+  container-type: size;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bounded > .surface {
+  width: min(100cqw, calc(100cqh * var(--video-ratio, 1.777778)));
+  height: min(100cqh, calc(100cqw / var(--video-ratio, 1.777778)));
+}
+
+/* Drop overlays have an explicit height that can be smaller than the screen. */
+@supports (height: 1cqh) {
+  .viewport {
+    container-type: size;
+    --video-container-height: 100cqh;
+  }
+}
+
+.artworkStage,
+.artwork:not(.bounded) {
+  --video-viewport-height: 100vh;
+}
+
+/* The wave stage fills the space below its header. Its child video keeps its
+   own aspect ratio and height cap instead of stretching with this container. */
+.artworkStage {
+  min-height: max(
+    0px,
+    calc(
+      min(
+          var(--video-viewport-height),
+          var(--video-container-height, var(--video-viewport-height))
+        ) -
+        var(--video-header-reserve, 0px) - var(--video-bottom-reserve, 0px)
+    )
+  );
+}
+
+.artwork:not(.bounded) {
+  --video-max-height: calc(
+    max(
+        1px,
+        min(
+            var(--video-viewport-height),
+            var(--video-container-height, var(--video-viewport-height))
+          ) -
+          max(
+            var(
+              --video-header-reserve,
+              var(--stream-route-loading-header-reserve, 0px)
+            ),
+            env(safe-area-inset-top, 0px)
+          ) -
+          max(
+            var(
+              --video-bottom-reserve,
+              var(--stream-route-loading-bottom-reserve, 0px)
+            ),
+            env(safe-area-inset-bottom, 0px)
+          ) -
+          var(--video-frame-padding, 0px)
+      ) *
+      0.95
+  );
+  width: 100%;
+  max-width: calc(var(--video-max-height) * var(--video-ratio, 1.777778));
+  max-height: var(--video-max-height);
+  height: auto;
+  flex: none;
+  margin-inline: auto;
+  aspect-ratio: var(--video-ratio, 1.777778);
+}
+
+/* Small viewport units keep the cap stable when mobile browser chrome changes. */
+@supports (height: 100svh) {
+  .artworkStage,
+  .artwork:not(.bounded) {
+    --video-viewport-height: 100svh;
+  }
+}
+
+/* Artwork owns its size. A surrounding stage can center it without resizing
+   it when neighboring panels load. Only fill/fullscreen frames are bounded. */
+.artwork:not(.bounded) > .surface {
+  height: auto;
+  aspect-ratio: var(--video-ratio, 1.777778);
+}
+
+.artwork:not(.bounded) > .surface > video {
+  position: absolute;
+  inset: 0;
+}

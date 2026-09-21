@@ -92,3 +92,40 @@ test("hydrates browser-local calendar clocks with a different client time and ti
     page.getByRole("tab", { name: "UTC", exact: true })
   ).toHaveAttribute("aria-selected", "true");
 });
+
+for (const path of ["/messages", "/waves/create"]) {
+  test(`keeps ${path} neutral until wallet restoration can run @critical-shell @readonly`, async ({
+    page,
+  }) => {
+    let releaseScripts: () => void = () => undefined;
+    const scriptsReady = new Promise<void>((resolve) => {
+      releaseScripts = resolve;
+    });
+    await page.route("**/*", async (route) => {
+      if (route.request().resourceType() === "script") await scriptsReady;
+      await route.continue();
+    });
+    try {
+      await page.goto(path, { waitUntil: "commit" });
+      await expect(
+        page.getByRole("status").filter({ hasText: "Loading account" }).first()
+      ).toBeVisible();
+      await expect(
+        page.getByRole("heading", {
+          name: "This content is only available to connected wallets.",
+        })
+      ).toHaveCount(0);
+      await expect(
+        page.getByText("You need to set up a profile to continue.")
+      ).toHaveCount(0);
+      releaseScripts();
+      await expect(
+        page.getByRole("heading", {
+          name: "This content is only available to connected wallets.",
+        })
+      ).toBeVisible();
+    } finally {
+      releaseScripts();
+    }
+  });
+}

@@ -2022,6 +2022,9 @@ const WAVE_LEADERBOARD_PHASE_MESSAGES = objectMessages(
     votingOngoing: "Voting ongoing",
     droppingOngoing: "Dropping open",
     noEndDate: "No end date",
+    nextWinnersIn: "Next winners announced in",
+    countdown: "{hours}h {minutes}m",
+    countdownWithDays: "{days}d {hours}h {minutes}m",
   } as const
 );
 
@@ -3225,6 +3228,11 @@ export const EN_US_MESSAGES = {
   "headerUserMenu.switchToProfile": "Switch to {profile} ({wallet})",
   "headerUserMenu.signOutAll": "Sign out all",
   "headerUserMenu.logout": "Logout",
+  "webSidebar.account.loading": "Loading account",
+  "webSidebar.account.connect": "Connect Wallet",
+  "webSidebar.account.connectFailed":
+    "Failed to open wallet connection. Please try again.",
+  "webSidebar.account.retry": "Profile unavailable. Retry",
   "webSidebar.accountMenu.openAriaLabel": "Open account and profiles menu",
   "webSidebar.accountMenu.openWithSwitchAriaLabel":
     "Open account and profiles menu (double-click to switch profiles)",
@@ -4070,6 +4078,7 @@ export const EN_US_MESSAGES = {
   "drop.media.unavailable": "Image unavailable",
   "drop.media.unavailableGeneric": "Media unavailable",
   "drop.media.loadFailed": "Couldn’t load image.",
+  "drop.media.videoLoadFailed": "Couldn’t load video.",
   "drop.media.retry": "Retry",
   "drop.media.openPreview": "Open image preview",
   "drop.media.openMedia": "Open drop media",

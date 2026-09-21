@@ -1,5 +1,6 @@
 "use client";
 
+import { isAuthResolving } from "@/components/auth/authResolution";
 import { useEffect, type ReactNode } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/components/auth/Auth";
@@ -37,7 +38,10 @@ export default function DocumentationAuthGate({
     },
     [actorKey, queryClient]
   );
-  if (fetchingProfile && !connectedProfile?.id)
+  const { connectionState } = useSeizeConnectContext();
+  if (
+    isAuthResolving(connectionState, fetchingProfile && !connectedProfile?.id)
+  )
     return <DocumentationNotice>{msg("loading")}</DocumentationNotice>;
   if (!connectedProfile?.id)
     return (
