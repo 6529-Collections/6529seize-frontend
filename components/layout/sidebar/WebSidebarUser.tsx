@@ -18,6 +18,7 @@ import { useIsMobileDeviceStatus } from "@/hooks/isMobileDevice";
 import useCapacitor from "@/hooks/useCapacitor";
 import { useAuth } from "@/components/auth/Auth";
 import { useArtworkDocumentationAccess } from "@/hooks/artwork-documentation/useArtworkDocumentationAccess";
+import { useHasHydrated } from "@/hooks/useHasHydrated";
 import WebSidebarAccountAvatar from "./WebSidebarAccountAvatar";
 import { useSidebarIdentity } from "./useSidebarIdentity";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
@@ -36,6 +37,7 @@ function WebSidebarUser({
 }: WebSidebarUserProps) {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showConnectModal, setShowConnectModal] = useState(false);
+  const hasHydrated = useHasHydrated();
   const accountDescriptionId = useId();
   const capacitor = useCapacitor();
   const { isMobileDevice, isDeviceDetectionResolved } =
@@ -106,6 +108,7 @@ function WebSidebarUser({
   );
 
   if (
+    !hasHydrated ||
     connectionState === "initializing" ||
     (address && (isLoading || isFetching) && !profile)
   ) {
