@@ -71,6 +71,7 @@ const seasons: MemeSeason[] = [
 
 beforeEach(() => {
   jest.clearAllMocks();
+  mockSearchParams = new URLSearchParams();
   jest.mocked(commonApiFetch).mockResolvedValue(seasons);
 });
 
@@ -158,4 +159,62 @@ it("includes seeded artwork links in the initial HTML", () => {
 
   expect(markup).toContain('href="/the-memes/2"');
   expect(markup).toContain("Meme #2");
+});
+
+it.each([
+  ["sort=tdh", "sort", "tdh"],
+  ["sort_dir=desc", "sort_direction", "DESC"],
+  ["szn=1", "season", "1"],
+  ["year=0", "season", "1"],
+])(
+  "loads the selected query after early URL navigation to %s",
+  async (query, apiKey, apiValue) => {
+    let resolveSeasons!: (value: MemeSeason[]) => void;
+    jest.mocked(commonApiFetch).mockReturnValue(
+      new Promise<MemeSeason[]>((resolve) => {
+        resolveSeasons = resolve;
+      })
+    );
+    const initialData = {
+      nfts: [
+        { id: 1, meme: 1, meme_name: "Meme", name: "Seeded Meme" },
+      ] as ApiMemesExtendedData[],
+      nextPage: undefined,
+    };
+    const { rerender } = render(
+      <TheMemesComponent initialData={initialData} />
+    );
+
+    mockSearchParams = new URLSearchParams(query);
+    rerender(<TheMemesComponent initialData={initialData} />);
+    await act(async () => resolveSeasons(seasons));
+
+    await waitFor(() => expect(fetchUrl).toHaveBeenCalledTimes(1));
+    const [requestedUrl] = jest.mocked(fetchUrl).mock.calls[0]!;
+    expect(new URL(requestedUrl).searchParams.get(apiKey)).toBe(apiValue);
+    expect(screen.queryByRole("link", { name: "Seeded Meme" })).toBeNull();
+  }
+);
+
+it("keeps the seed for equivalent default query parameters while seasons load", async () => {
+  let resolveSeasons!: (value: MemeSeason[]) => void;
+  jest.mocked(commonApiFetch).mockReturnValue(
+    new Promise<MemeSeason[]>((resolve) => {
+      resolveSeasons = resolve;
+    })
+  );
+  const initialData = {
+    nfts: [
+      { id: 1, meme: 1, meme_name: "Meme", name: "Seeded Meme" },
+    ] as ApiMemesExtendedData[],
+    nextPage: undefined,
+  };
+  const { rerender } = render(<TheMemesComponent initialData={initialData} />);
+
+  mockSearchParams = new URLSearchParams("sort=AGE&sort_dir=ASC&locale=de-DE");
+  rerender(<TheMemesComponent initialData={initialData} />);
+  await act(async () => resolveSeasons(seasons));
+
+  expect(fetchUrl).not.toHaveBeenCalled();
+  expect(screen.getByRole("link", { name: "Seeded Meme" })).toBeInTheDocument();
 });

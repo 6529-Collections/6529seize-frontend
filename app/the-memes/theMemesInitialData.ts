@@ -49,7 +49,27 @@ function isMemesResponse(
   return (
     typeof value === "object" &&
     value !== null &&
-    Array.isArray((value as { readonly data?: unknown }).data)
+    "data" in value &&
+    Array.isArray(value.data) &&
+    value.data.every(isRenderableMeme)
+  );
+}
+
+function isRenderableMeme(value: unknown): boolean {
+  if (typeof value !== "object" || value === null) {
+    return false;
+  }
+
+  const nft = value as Record<string, unknown>;
+  return (
+    Number.isSafeInteger(nft["id"]) &&
+    Number(nft["id"]) > 0 &&
+    ["contract", "name", "thumbnail", "scaled", "meme_name"].every(
+      (key) => typeof nft[key] === "string"
+    ) &&
+    ["image", "animation", "compressed_animation", "mint_date"].every(
+      (key) => nft[key] === null || typeof nft[key] === "string"
+    )
   );
 }
 

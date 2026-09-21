@@ -220,6 +220,17 @@ export default function TheMemesComponent({
     const initialSznId = getInitialSeasonId(searchParams);
     const initialYearId = getInitialYearId(searchParams);
 
+    // The server seed belongs only to the unfiltered, oldest-first view.
+    // URL navigation can change that view before the season request finishes.
+    if (
+      initialSort !== MemesSort.AGE ||
+      initialSortDir !== SortDirection.ASC ||
+      initialSznId !== null ||
+      initialYearId !== null
+    ) {
+      initialDataRef.current = undefined;
+    }
+
     setSort(initialSort);
     setSortDir(initialSortDir);
     setSeasonId(initialSznId);
