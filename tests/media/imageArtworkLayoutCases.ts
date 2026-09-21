@@ -59,9 +59,7 @@ export function defineNftImageLayoutTests() {
         .locator("xpath=self::*[@data-artwork-image]");
       await expectContainedImage(image);
       const shift = await image.evaluate(async (element: HTMLImageElement) => {
-        const column = element.closest("[data-artwork-image-container]")!
-          .parentElement!.parentElement!.parentElement!.parentElement!
-          .parentElement!;
+        const column = element.closest("[data-image-artwork]")!.parentElement!;
         const before = element.getBoundingClientRect();
         const originalStyle = column.getAttribute("style");
         try {
@@ -97,7 +95,10 @@ export function defineNftImageLayoutTests() {
       .locator("..")
       .locator("[data-home-artwork-column]");
     await expect(column).toBeVisible();
-    const image = column.getByRole("img").first();
+    const image = column
+      .getByRole("img")
+      .locator("xpath=self::*[ancestor::*[@data-artwork-image-frame]]")
+      .first();
     test.skip(
       (await image.count()) === 0,
       "Current homepage drop has no still image"

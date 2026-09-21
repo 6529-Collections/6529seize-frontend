@@ -46,7 +46,9 @@ export default function NFTImageRenderer(props: Readonly<BaseRendererProps>) {
   const imageWrapperClassName = styles["imageWrapper"] ?? "";
 
   const dimensions =
-    "metadata" in props.nft ? props.nft.metadata?.image_details : undefined;
+    props.artworkLayout && "metadata" in props.nft
+      ? props.nft.metadata?.image_details
+      : undefined;
   const width = dimensions?.width;
   const height = dimensions?.height;
   const hasDimensions =
@@ -62,12 +64,13 @@ export default function NFTImageRenderer(props: Readonly<BaseRendererProps>) {
       } as CSSProperties)
     : undefined;
   const frameClass = props.artworkLayout
-    ? artworkStyles.imageFrame
+    ? (artworkStyles["imageFrame"] ?? "")
     : props.heightStyle;
   const imageClass = props.artworkLayout
     ? "tw-h-full tw-w-full tw-object-contain"
     : props.imageStyle;
-  const fillImage = props.fillContainer || props.artworkLayout;
+  const fillImage =
+    props.fillContainer === true || props.artworkLayout === true;
   const image = (
     <NFTMediaContainer
       artworkImageFrame={props.artworkLayout}
@@ -80,7 +83,7 @@ export default function NFTImageRenderer(props: Readonly<BaseRendererProps>) {
         priority={!shouldLazyLoad}
         width={hasDimensions ? width : 0}
         height={hasDimensions ? height : 0}
-        data-artwork-image={props.artworkLayout || undefined}
+        data-artwork-image={props.artworkLayout ? true : undefined}
         fetchPriority={shouldLazyLoad ? "auto" : "high"}
         unoptimized
         className={props.fillContainer ? "tw-object-contain" : imageClass}
@@ -117,11 +120,11 @@ export default function NFTImageRenderer(props: Readonly<BaseRendererProps>) {
       )}
     </NFTMediaContainer>
   );
-  if (!props.artworkLayout) return image;
+  if (!props.artworkLayout || props.fillContainer) return image;
   return (
     <div
       data-artwork-image-container
-      className={artworkStyles.imageContainer}
+      className={artworkStyles["imageContainer"]}
       style={frameStyle}
     >
       {image}

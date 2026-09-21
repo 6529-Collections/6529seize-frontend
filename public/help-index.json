@@ -37,6 +37,9 @@
       "source_refs": [
         "components/drops/view/item/content/media/SeizeVideoPlayer.tsx",
         "components/drops/view/item/content/media/SeizeVideoPlayer.view.tsx",
+        "components/nft-image/renderers/NFTImageRenderer.tsx",
+        "components/home/now-minting/HomeArtworkFrame.tsx",
+        "components/waves/drop/MemesDropArtworkHero.tsx",
         "ops/docs/media/rendering/feature-video-player.md"
       ]
     },

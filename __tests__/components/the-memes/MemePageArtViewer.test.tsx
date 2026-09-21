@@ -578,3 +578,23 @@ describe("MemePageArtViewer", () => {
     ).not.toBeInTheDocument();
   });
 });
+
+it("uses the stable image frame for animated GIF artwork", () => {
+  const { container } = render(
+    <MemePageArtViewer
+      nft={{
+        ...baseNft,
+        animation: "https://media.example/art.gif",
+        compressed_animation: "",
+        metadata: {
+          ...baseNft.metadata,
+          animation_url: "https://media.example/art.gif",
+          animation_details: { format: "GIF" },
+        },
+      }}
+    />
+  );
+  expect(getLatestNFTImageProps(true).artworkLayout).toBe(true);
+  expect(container.firstElementChild).toHaveAttribute("data-image-artwork");
+  expect(container.firstElementChild).not.toHaveClass("tw-h-full", "tw-flex-1");
+});

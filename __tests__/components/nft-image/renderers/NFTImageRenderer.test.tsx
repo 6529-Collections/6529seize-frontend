@@ -224,6 +224,20 @@ describe("NFTImageRenderer", () => {
       expect(ratio()).toBe("");
     });
 
+    it("preserves an explicitly bounded fill container", () => {
+      const { container } = render(
+        <NFTImageRenderer
+          {...createDefaultProps({ artworkLayout: true, fillContainer: true })}
+        />
+      );
+      const image = screen.getByRole("img");
+      expect(image.parentElement).toBe(container.firstElementChild);
+      expect(image.parentElement).toHaveClass("tw-h-full");
+      expect(
+        container.querySelector("[data-artwork-image-container]")
+      ).toBeNull();
+    });
+
     it("renders image with correct props", () => {
       const props = createDefaultProps({ showOriginal: true });
       render(<NFTImageRenderer {...props} />);

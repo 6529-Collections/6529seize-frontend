@@ -42,7 +42,7 @@ export function MemesDropArtworkHero({
               data-artwork-image-frame={isImage || undefined}
               className={clsx(
                 "tw-relative tw-w-full",
-                isImage && artworkStyles.submissionImage,
+                isImage && artworkStyles["submissionImage"],
                 !isArtwork &&
                   "tw-h-[clamp(24rem,calc(100dvh-10rem),42rem)] sm:tw-h-[clamp(18rem,75vw,calc(100dvh-8rem))] lg:tw-h-[95vh]"
               )}

@@ -357,6 +357,7 @@ export function MemePageArtViewer({
 
   return (
     <div
+      data-image-artwork={isImageArtwork || undefined}
       data-video-artwork={isVideoArtwork || undefined}
       className={clsx(
         "tw-flex tw-w-full tw-flex-col tw-p-0",

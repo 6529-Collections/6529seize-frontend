@@ -2,7 +2,7 @@ import artworkStyles from "@/components/drops/view/item/content/media/ArtworkFra
 import clsx from "clsx";
 import type { ReactNode } from "react";
 
-/** Artwork owns its height so neighboring loading states cannot resize it. */
+/** Videos size themselves; desktop still images can fit the details column. */
 export default function HomeArtworkFrame({
   children,
   reserveMobileHeight = false,
@@ -18,7 +18,7 @@ export default function HomeArtworkFrame({
     <div
       className={clsx(
         "tw-relative tw-w-full",
-        fitImageToDetails && artworkStyles.homeImageFrame,
+        fitImageToDetails && artworkStyles["homeImageFrame"],
         reserveMobileHeight &&
           "tw-h-[clamp(360px,65vw,640px)] lg:tw-h-full lg:tw-min-h-[640px]"
       )}
@@ -33,7 +33,7 @@ export default function HomeArtworkFrame({
           <div data-artwork-image-container className="tw-w-full">
             <div
               data-artwork-image-frame
-              className={artworkStyles.submissionImage}
+              className={artworkStyles["submissionImage"]}
             >
               {children}
             </div>
