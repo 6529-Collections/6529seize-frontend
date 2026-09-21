@@ -51,7 +51,9 @@ test("adds, retains and removes custom metadata across collapse and reopen", asy
     screen.queryByRole("button", { name: /^Metadata/ })
   ).not.toBeInTheDocument();
   await user.click(screen.getByRole("button", { name: "Add metadata" }));
-  expect(screen.getByRole("button", { name: "Metadata" })).toBeInTheDocument();
+  const closeMetadata = screen.getByRole("button", { name: "Metadata" });
+  expect(closeMetadata).toBeInTheDocument();
+  expect(closeMetadata).not.toHaveAttribute("aria-expanded");
   expect(screen.queryByText("Optional")).not.toBeInTheDocument();
   await user.click(screen.getByRole("button", { name: "Add field" }));
   expect(screen.getByRole("textbox", { name: "Field name" })).toHaveFocus();

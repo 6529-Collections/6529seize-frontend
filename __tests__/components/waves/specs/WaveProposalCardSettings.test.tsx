@@ -52,7 +52,7 @@ const setMetadata = (data: ApiWaveMetadata[] = [], state = {}) => {
 };
 const edit = () =>
   screen.getByRole("button", { name: "Edit proposal card settings" });
-const save = () => screen.getByRole("button", { name: "Save", exact: true });
+const save = () => screen.getByRole("button", { name: "Save" });
 const summary = () => screen.getByRole("radio", { name: "Summary card" });
 const full = () => screen.getByRole("radio", { name: "Full proposal" });
 const limit = () =>

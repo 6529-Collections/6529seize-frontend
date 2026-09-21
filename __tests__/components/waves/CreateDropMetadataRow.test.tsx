@@ -1,5 +1,4 @@
 import { render, screen, fireEvent } from "@testing-library/react";
-import React from "react";
 import { ApiWaveMetadataType } from "@/generated/models/ApiWaveMetadataType";
 import type { CreateDropMetadataType } from "@/components/waves/CreateDropContent";
 import CreateDropMetadataRow from "@/components/waves/CreateDropMetadataRow";
@@ -27,11 +26,11 @@ test("calls handlers for key and value changes", () => {
       disabled={false}
     />
   );
-  fireEvent.change(screen.getAllByRole("textbox")[0], {
+  fireEvent.change(screen.getByRole("textbox", { name: "Field name" }), {
     target: { value: "x" },
   });
   expect(onKey).toHaveBeenCalledWith({ index: 0, newKey: "x" });
-  fireEvent.change(screen.getAllByRole("textbox")[1], {
+  fireEvent.change(screen.getByRole("textbox", { name: "Value" }), {
     target: { value: "foo" },
   });
   expect(onValue).toHaveBeenCalledWith({ index: 0, newValue: "foo" });
@@ -51,7 +50,7 @@ test("handles numeric value parsing", () => {
       disabled={false}
     />
   );
-  const input = screen.getAllByRole("textbox")[1];
+  const input = screen.getByRole("textbox", { name: /^Value/ });
   fireEvent.change(input, { target: { value: "3" } });
   expect(onValue).toHaveBeenCalledWith({ index: 1, newValue: 3 });
   fireEvent.change(input, { target: { value: "0" } });

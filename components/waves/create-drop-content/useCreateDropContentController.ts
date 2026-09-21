@@ -39,7 +39,6 @@ import {
   hasPendingInlineImageUploadDrop,
   hasPendingInlineImageUploadMarkdown,
 } from "@/helpers/waves/inline-image-upload.helpers";
-import { getIdentitySubmissionMetadataErrors } from "../utils/identitySubmissionMetadataValidation";
 import { normalizeCurationDropInput } from "../utils/validateCurationDropUrl";
 import {
   areHandlesEqual,
@@ -52,7 +51,6 @@ import {
   canSubmitComposerAction,
   canSubmitDrop,
   createMetadataHandlers,
-  getMetadataNameErrors,
   hasMetadataContent,
   isDuplicateIdentitySubmissionError,
 } from "./content-helpers";
@@ -65,6 +63,7 @@ import { useCreateDropTyping } from "./useCreateDropTyping";
 import { exportComposerMarkdown } from "./exportComposerMarkdown";
 import { useCreateDropContainerWidth } from "./useCreateDropContainerWidth";
 import { useCreateDropPollActions } from "./useCreateDropPollActions";
+import { useCreateDropMetadataErrors } from "./useCreateDropMetadataErrors";
 import { useStormPartActions } from "./useStormPartActions";
 import type {
   CreateDropContentProps,
@@ -248,17 +247,12 @@ export function useCreateDropContentController({
     isDropMode,
     requiredMetadata,
   });
-  const metadataErrorById = useMemo(
-    () => ({
-      ...getMetadataNameErrors(metadata, locale),
-      ...getIdentitySubmissionMetadataErrors({
-        isIdentitySubmissionExperience:
-          isIdentitySubmissionExperience && isDropMode,
-        metadata,
-      }),
-    }),
-    [isDropMode, isIdentitySubmissionExperience, metadata, locale]
-  );
+  const metadataErrorById = useCreateDropMetadataErrors({
+    isIdentitySubmissionExperience,
+    isDropMode,
+    locale,
+    metadata,
+  });
   const hasMetadataValidationErrors = Object.keys(metadataErrorById).length > 0;
 
   const hasMetadata = useMemo(() => hasMetadataContent(metadata), [metadata]);
