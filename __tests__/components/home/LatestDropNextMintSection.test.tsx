@@ -51,14 +51,17 @@ jest.mock(
     __esModule: true,
     default: ({
       artworkVideoLayout,
+      loadStrategy,
       videoAlign,
     }: {
       readonly artworkVideoLayout?: boolean;
+      readonly loadStrategy?: string;
       readonly videoAlign?: string;
     }) => (
       <div
         data-testid="drop-media"
         data-fill={String(artworkVideoLayout)}
+        data-load-strategy={loadStrategy}
         data-align={videoAlign}
       />
     ),
@@ -158,5 +161,19 @@ it("fits Next Drop video into the same centered homepage area", () => {
   expect(screen.getByTestId("drop-media")).toHaveAttribute(
     "data-align",
     "center"
+  );
+});
+
+it("loads above-the-fold Next Drop media eagerly", () => {
+  const drop = {
+    ...createDrop(488),
+    parts: [{ media: [{ mime_type: "image/png", url: "image.png" }] }],
+  } as ApiDropV2View;
+
+  render(<LatestDropNextMintSection drop={drop} />);
+
+  expect(screen.getByTestId("drop-media")).toHaveAttribute(
+    "data-load-strategy",
+    "eager"
   );
 });

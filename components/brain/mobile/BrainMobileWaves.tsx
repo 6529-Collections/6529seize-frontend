@@ -61,9 +61,6 @@ const BrainMobileWaves: React.FC<BrainMobileWavesProps> = ({
             <span className="tw-block tw-text-sm tw-font-normal">
               {t(locale, "waves.mobile.profileFeed.title")}
             </span>
-            <span className="tw-mt-0.5 tw-block tw-text-xs tw-leading-5 tw-text-iron-400">
-              {t(locale, "waves.mobile.profileFeed.subtitle")}
-            </span>
           </span>
           <ChevronRightIcon
             className="tw-size-5 tw-flex-shrink-0 tw-text-iron-500 tw-transition-colors tw-duration-200 desktop-hover:group-hover:tw-text-iron-300 motion-reduce:tw-transition-none"
