@@ -133,7 +133,7 @@ test("applies style, forwards scroll ref, and passes the quick-vote opener", () 
   expect(onOpenQuickVote).toHaveBeenCalledTimes(1);
 });
 
-test("uses browser locale for the profile feed link", async () => {
+test("uses browser locale for the profile feed link title", async () => {
   setBrowserLanguages(["fr-FR"]);
 
   render(<BrainMobileWaves onOpenQuickVote={jest.fn()} />);
@@ -142,6 +142,6 @@ test("uses browser locale for the profile feed link", async () => {
     await screen.findByText(t("fr-FR", "waves.mobile.profileFeed.title"))
   ).toBeInTheDocument();
   expect(
-    screen.getByText(t("fr-FR", "waves.mobile.profileFeed.subtitle"))
-  ).toBeInTheDocument();
+    screen.queryByText(t("fr-FR", "waves.mobile.profileFeed.subtitle"))
+  ).not.toBeInTheDocument();
 });
