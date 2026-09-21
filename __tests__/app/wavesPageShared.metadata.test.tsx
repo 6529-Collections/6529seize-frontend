@@ -20,6 +20,10 @@ jest.mock("@/app/waves/wave-feed-seed.server", () => ({
   fetchServerWaveFeedSeed: jest.fn(),
 }));
 
+jest.mock("@/app/waves/public-wave-feed.server", () => ({
+  fetchPublicWaveFeed: jest.fn(),
+}));
+
 jest.mock("@/components/waves/WaveServerFeedSeed", () => ({
   __esModule: true,
   default: () => null,

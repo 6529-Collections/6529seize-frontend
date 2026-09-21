@@ -16,6 +16,7 @@ import {
   normalizeMemeFilterIds,
 } from "@/components/the-memes/theMemesFilters";
 import { getTheMemesBrowseHref } from "@/components/the-memes/theMemesRouteParams";
+import type { TheMemesInitialData } from "@/app/the-memes/theMemesInitialData";
 import VolumeTypeDropdown from "@/components/the-memes/VolumeTypeDropdown";
 import FilterGridDropdown from "@/components/utils/select/dropdown/FilterGridDropdown";
 import MemeSeasonGridDropdown from "@/components/utils/select/dropdown/MemeSeasonGridDropdown";
@@ -40,7 +41,14 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 interface Meme {
   meme: number;
@@ -170,14 +178,17 @@ function getSortQueryParam(sort: MemesSort, volumeType: VolumeType): string {
 }
 
 export default function TheMemesComponent({
+  initialData,
   locale = DEFAULT_LOCALE,
 }: Readonly<{
+  initialData?: TheMemesInitialData | undefined;
   locale?: SupportedLocale;
 }> = {}) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
   const { connectedProfile } = useContext(AuthContext);
+  const initialDataRef = useRef(initialData);
 
   const [seasonId, setSeasonId] = useState<number | null>(null);
   const [yearId, setYearId] = useState<number | null>(null);
@@ -185,10 +196,12 @@ export default function TheMemesComponent({
   const [seasonsLoaded, setSeasonsLoaded] = useState(false);
 
   const handleSeasonChange = (season: MemeSeason | null) => {
+    initialDataRef.current = undefined;
     setSeasonId(season?.id ?? null);
   };
 
   const handleYearChange = (nextYearId: number | null) => {
+    initialDataRef.current = undefined;
     setYearId(nextYearId);
     setSeasonId(null);
   };
@@ -206,6 +219,17 @@ export default function TheMemesComponent({
       getInitialSortAndVolume(searchParams);
     const initialSznId = getInitialSeasonId(searchParams);
     const initialYearId = getInitialYearId(searchParams);
+
+    // The server seed belongs only to the unfiltered, oldest-first view.
+    // URL navigation can change that view before the season request finishes.
+    if (
+      initialSort !== MemesSort.AGE ||
+      initialSortDir !== SortDirection.ASC ||
+      initialSznId !== null ||
+      initialYearId !== null
+    ) {
+      initialDataRef.current = undefined;
+    }
 
     setSort(initialSort);
     setSortDir(initialSortDir);
@@ -314,11 +338,15 @@ export default function TheMemesComponent({
     return `${publicEnv.API_ENDPOINT}/api/memes_extended_data?${query.toString()}`;
   }, [activeSeasonId, activeYearId, seasons, sort, sortDir, volumeType]);
 
-  const [fetching, setFetching] = useState(true);
+  const [fetching, setFetching] = useState(initialData === undefined);
 
-  const [nfts, setNfts] = useState<ApiMemesExtendedData[]>([]);
+  const [nfts, setNfts] = useState<ApiMemesExtendedData[]>(
+    () => initialData?.nfts ?? []
+  );
   const tokenIds = useMemo(() => nfts.map((nft) => nft.id), [nfts]);
-  const [nftsNextPage, setNftsNextPage] = useState<string>();
+  const [nftsNextPage, setNftsNextPage] = useState<string | undefined>(
+    () => initialData?.nextPage
+  );
 
   const [nftMemes, setNftMemes] = useState<Meme[]>([]);
   const [nftsByMeme, setNftsByMeme] = useState<
@@ -410,6 +438,11 @@ export default function TheMemesComponent({
 
   useEffect(() => {
     if (filtersReady) {
+      if (initialDataRef.current !== undefined) {
+        initialDataRef.current = undefined;
+        return;
+      }
+
       setNfts([]);
       setNftsNextPage(getNftsNextPage());
       setFetching(true);
@@ -478,7 +511,10 @@ export default function TheMemesComponent({
         type="button"
         aria-label={label}
         aria-pressed={isActive}
-        onClick={() => setSortDir(direction)}
+        onClick={() => {
+          initialDataRef.current = undefined;
+          setSortDir(direction);
+        }}
         className={`tw-m-0 tw-inline-flex tw-h-7 tw-w-6 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-p-0 tw-transition tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 ${
           isActive
             ? "tw-bg-white/[0.06] tw-text-white"
@@ -650,15 +686,24 @@ export default function TheMemesComponent({
                       currentSort={sort}
                       sort={v}
                       locale={locale}
-                      select={() => setSort(v)}
+                      select={() => {
+                        initialDataRef.current = undefined;
+                        setSort(v);
+                      }}
                     />
                   ))}
                 <div className="tw-shrink-0">
                   <VolumeTypeDropdown
                     isVolumeSort={sort === MemesSort.VOLUME}
                     selectedVolumeSort={volumeType}
-                    setVolumeType={setVolumeType}
-                    setVolumeSort={() => setSort(MemesSort.VOLUME)}
+                    setVolumeType={(nextVolumeType) => {
+                      initialDataRef.current = undefined;
+                      setVolumeType(nextVolumeType);
+                    }}
+                    setVolumeSort={() => {
+                      initialDataRef.current = undefined;
+                      setSort(MemesSort.VOLUME);
+                    }}
                     locale={locale}
                   />
                 </div>

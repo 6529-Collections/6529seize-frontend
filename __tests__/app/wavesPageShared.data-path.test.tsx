@@ -11,6 +11,7 @@ const mockTraceServerRouteData = jest.fn(
   async (_options: unknown, task: () => Promise<unknown> | unknown) => task()
 );
 const mockFetchServerWaveFeedSeed = jest.fn();
+const mockFetchPublicWaveFeed = jest.fn();
 
 jest.mock("next/navigation", () => ({ redirect: jest.fn() }));
 jest.mock("@/helpers/server.app.helpers", () => ({
@@ -22,6 +23,10 @@ jest.mock("@/services/api/common-api", () => ({
 jest.mock("@/app/waves/wave-feed-seed.server", () => ({
   fetchServerWaveFeedSeed: (...args: unknown[]) =>
     mockFetchServerWaveFeedSeed(...args),
+}));
+jest.mock("@/app/waves/public-wave-feed.server", () => ({
+  fetchPublicWaveFeed: (...args: unknown[]) =>
+    mockFetchPublicWaveFeed(...args),
 }));
 jest.mock("@/components/waves/WaveServerFeedSeed", () => ({
   __esModule: true,
@@ -76,6 +81,10 @@ describe("renderWavesPageContent data paths", () => {
       Authorization: "Bearer token",
     });
     mockFetchServerWaveFeedSeed.mockResolvedValue({
+      ok: false,
+      waveId: wave.id,
+    });
+    mockFetchPublicWaveFeed.mockResolvedValue({
       ok: false,
       waveId: wave.id,
     });
