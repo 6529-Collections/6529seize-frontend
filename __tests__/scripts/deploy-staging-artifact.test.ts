@@ -269,6 +269,7 @@ describe("staging runtime directory", () => {
     expect(fs.statSync(secretsPath).mode & 0o777).toBe(0o600);
     const config = require(path.join(runtimeRoot, "ecosystem.config.cjs"));
     expect(config.apps[0].env.ALCHEMY_API_KEY).toBe(key);
+    expect(config.apps[0].env.KEEP_ALIVE_TIMEOUT).toBe("65000");
     expect(config.apps[0].env).not.toHaveProperty("STAGING_ALCHEMY_API_KEY");
   });
 

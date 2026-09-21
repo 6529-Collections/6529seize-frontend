@@ -50,17 +50,15 @@ it("distinguishes an invalid answer from other pending changes and links both to
   const title = screen.getByRole("button", { name: "Title" });
   const location = screen.getByRole("button", { name: "Location" });
   expect(
-    within(title.closest("li")!).getByText(
-      /Check this answer’s required details/
-    )
+    within(title.closest("li")!).getByText(/Complete this part of the answer/)
   ).toBeInTheDocument();
   expect(
     within(location.closest("li")!).queryByText(
-      /Check this answer’s required details/
+      /Complete this part of the answer/
     )
   ).not.toBeInTheDocument();
   expect(
-    screen.getByText(/These changes are still waiting to save/)
+    screen.getByText(/These answers have not been saved yet/)
   ).toBeInTheDocument();
   fireEvent.click(title);
   expect(onNavigateField).toHaveBeenLastCalledWith("artwork", "title");

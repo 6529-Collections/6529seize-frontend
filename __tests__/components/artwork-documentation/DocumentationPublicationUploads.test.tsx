@@ -26,6 +26,7 @@ import {
 } from "@/services/api/artwork-documentation-assets-api";
 import { transferDocumentationFile } from "@/lib/artwork-documentation/upload";
 import { pollDocumentationProcessing } from "@/lib/artwork-documentation/poll-processing";
+import { getDocumentationContext } from "@/services/api/artwork-documentation-api";
 
 jest.mock("@/hooks/useBrowserLocale", () => ({
   useBrowserLocale: () => "en-US",
@@ -37,6 +38,11 @@ jest.mock("@/components/artwork-documentation/DocumentationAuthGate", () => ({
   }),
 }));
 jest.mock("@/services/api/artwork-documentation-assets-api");
+jest.mock("@/utils/monitoring/artworkDocumentationUploadMonitoring");
+jest.mock("@/services/api/artwork-documentation-api", () => ({
+  ...jest.requireActual("@/services/api/artwork-documentation-api"),
+  getDocumentationContext: jest.fn(),
+}));
 jest.mock("@/lib/artwork-documentation/upload", () => ({
   DocumentationFileChangedError: class extends Error {},
   transferDocumentationFile: jest.fn(),
@@ -121,6 +127,7 @@ function setup(publicationOnly = true) {
     jest.fn()
   );
   controllers.push(controller);
+  jest.mocked(getDocumentationContext).mockResolvedValue(context);
   jest.mocked(linkDocumentationAsset).mockResolvedValue(context);
   return { context, controller };
 }

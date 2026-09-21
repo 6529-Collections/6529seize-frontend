@@ -223,3 +223,30 @@ describe("ManifoldMintingConnect", () => {
     );
   });
 });
+
+it.each(["initializing", "connecting"])(
+  "waits for %s before showing the mint connect prompt",
+  (connectionState) => {
+    mockedConnect.mockReturnValue({ connectionState, isConnected: false });
+    const { rerender } = render(
+      <ManifoldMintingConnect onMintFor={jest.fn()} />
+    );
+    expect(screen.getByRole("status")).toBeInTheDocument();
+    expect(screen.queryByTestId("header-connect")).not.toBeInTheDocument();
+    mockedConnect.mockReturnValue({
+      connectionState: "disconnected",
+      isConnected: false,
+    });
+    rerender(<ManifoldMintingConnect onMintFor={jest.fn()} />);
+    expect(screen.getByTestId("header-connect")).toBeInTheDocument();
+  }
+);
+it("keeps hidden mint connection controls hidden during restoration", () => {
+  mockedConnect.mockReturnValue({
+    connectionState: "initializing",
+    isConnected: false,
+  });
+  render(<ManifoldMintingConnect onMintFor={jest.fn()} hideConnect />);
+  expect(screen.queryByRole("status")).not.toBeInTheDocument();
+  expect(screen.queryByTestId("header-connect")).not.toBeInTheDocument();
+});

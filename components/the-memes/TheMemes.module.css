@@ -229,6 +229,12 @@
   max-height: 100% !important;
 }
 
+.videoCarousel {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+
 .rankSubheading {
   color: white !important;
 }

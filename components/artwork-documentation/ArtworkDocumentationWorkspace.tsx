@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { ApiArtworkDocumentationContextConfirmationStatusEnum } from "@/generated/models/ApiArtworkDocumentationContext";
 import type { ApiArtworkDocumentationContext } from "@/generated/models/ApiArtworkDocumentationContext";
 import { useDocumentationDraft } from "@/hooks/artwork-documentation/useDocumentationDraft";
@@ -44,6 +44,7 @@ import DocumentationSummary from "./DocumentationSummary";
 import DocumentationArtworkPreview from "./DocumentationArtworkPreview";
 import {
   DocumentationWritingChapter,
+  DocumentationFilesSection,
   DocumentationReadingChapter,
 } from "./DocumentationRecordChapters";
 import DocumentationDossier from "./DocumentationDossier";
@@ -65,6 +66,8 @@ export default function ArtworkDocumentationWorkspace(props: Props) {
 }
 
 function WorkspaceLoader(props: Props) {
+  const searchParams = useSearchParams();
+  const section = searchParams.get("section") ?? undefined;
   const { msg } = useDocumentationMessages();
   const { connectedProfile, actorKey } = useDocumentationActor();
   const query = useQuery({
@@ -107,7 +110,8 @@ function WorkspaceLoader(props: Props) {
   return (
     <WorkspaceEditor
       initial={query.data}
-      initialSection={parseSection(props.section)}
+      actorKey={actorKey}
+      initialSection={parseSection(section)}
     />
   );
 }
@@ -115,11 +119,13 @@ function WorkspaceLoader(props: Props) {
 function WorkspaceEditor({
   initial,
   initialSection,
+  actorKey,
 }: {
   readonly initial: ApiArtworkDocumentationContext;
+  readonly actorKey: string;
   readonly initialSection: DocumentationSection;
 }) {
-  const draft = useDocumentationDraft(initial);
+  const draft = useDocumentationDraft(initial, actorKey);
   return (
     <ArtworkDocumentationRecordView
       draft={draft}
@@ -153,6 +159,8 @@ export function ArtworkDocumentationRecordView({
     sections.includes(initialSection) ? initialSection : "artwork"
   );
   const [reading, setReading] = useState(false);
+  const [uploadPending, setUploadPending] = useState(false);
+  const [uploadExitAttempt, setUploadExitAttempt] = useState(false);
   const counts = Object.values(context.modules).reduce(
     (total, fieldModule) => ({
       required: total.required + fieldModule.completeness.required,
@@ -211,6 +219,28 @@ export function ArtworkDocumentationRecordView({
       if (
         target &&
         target.getAttribute("target") !== "_blank" &&
+        uploadPending
+      ) {
+        const destination = new URL(
+          target.getAttribute("href")!,
+          globalThis.location.href
+        );
+        const current = new URL(globalThis.location.href);
+        if (
+          destination.origin === current.origin &&
+          destination.pathname === current.pathname &&
+          destination.search === current.search &&
+          destination.hash
+        )
+          return;
+        event.preventDefault();
+        event.stopPropagation();
+        setUploadExitAttempt(true);
+        return;
+      }
+      if (
+        target &&
+        target.getAttribute("target") !== "_blank" &&
         controller.snapshot().dirty &&
         // Cancel captured navigation before unsaved edits are lost.
         !globalThis.confirm(msg("leave"))
@@ -221,8 +251,12 @@ export function ArtworkDocumentationRecordView({
     };
     document.addEventListener("click", handler, true);
     return () => document.removeEventListener("click", handler, true);
-  }, [controller, msg]);
+  }, [controller, msg, uploadPending]);
   const saveExit = async () => {
+    if (uploadPending) {
+      setUploadExitAttempt(true);
+      return;
+    }
     if (await controller.flush()) {
       if (onExit) onExit();
       else if (!embedded) router.push(listPath);
@@ -244,7 +278,12 @@ export function ArtworkDocumentationRecordView({
           </Link>
         )}
         {canWrite && (
-          <DocumentationSaveStatus snapshot={draft} controller={controller} />
+          <DocumentationSaveStatus
+            snapshot={draft}
+            controller={controller}
+            onNavigateSection={navigateSection}
+            onNavigateField={navigateField}
+          />
         )}
       </div>
       <DocumentationRecordHeader
@@ -265,7 +304,10 @@ export function ArtworkDocumentationRecordView({
         ApiArtworkDocumentationContextConfirmationStatusEnum.NewerDraft && (
         <DocumentationNotice>{msg("newerDraft")}</DocumentationNotice>
       )}
-      {reading ? (
+      {uploadPending && uploadExitAttempt && (
+        <DocumentationNotice>{msg("uploadLeave")}</DocumentationNotice>
+      )}
+      {reading && (
         <section
           aria-labelledby="documentation-reading-title"
           className="tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-10"
@@ -294,80 +336,87 @@ export function ArtworkDocumentationRecordView({
             </DocumentationButton>
           </div>
         </section>
-      ) : (
-        <div className="tw-grid tw-gap-8 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-8 lg:tw-grid-cols-[200px_minmax(0,1fr)] lg:tw-gap-12 lg:tw-pt-12">
-          <aside className="lg:tw-sticky lg:tw-top-24 lg:tw-self-start">
-            <nav
-              aria-label={msg("chapters.index")}
-              className="tw-hidden lg:tw-block"
-            >
-              <ol className="tw-m-0 tw-list-none tw-space-y-1 tw-p-0">
-                {sections.map((item, index) => (
-                  <li key={item}>
-                    <button
-                      type="button"
-                      aria-current={section === item ? "step" : undefined}
-                      className={`tw-flex tw-min-h-11 tw-w-full tw-items-baseline tw-gap-3 tw-border-0 tw-bg-transparent tw-py-3 tw-text-left tw-text-sm tw-leading-6 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 ${section === item ? "tw-font-semibold tw-text-white" : "tw-text-iron-400 hover:tw-text-white"}`}
-                      onClick={() => navigateSection(item)}
+      )}
+      <div
+        className={`${reading ? "tw-hidden" : "tw-grid"} tw-gap-8 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-8 lg:tw-grid-cols-[200px_minmax(0,1fr)] lg:tw-gap-12 lg:tw-pt-12`}
+      >
+        <aside className="lg:tw-sticky lg:tw-top-24 lg:tw-self-start">
+          <nav
+            aria-label={msg("chapters.index")}
+            className="tw-hidden lg:tw-block"
+          >
+            <ol className="tw-m-0 tw-list-none tw-space-y-1 tw-p-0">
+              {sections.map((item, index) => (
+                <li key={item}>
+                  <button
+                    type="button"
+                    aria-current={section === item ? "step" : undefined}
+                    className={`tw-flex tw-min-h-11 tw-w-full tw-items-baseline tw-gap-3 tw-border-0 tw-bg-transparent tw-py-3 tw-text-left tw-text-sm tw-leading-6 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 ${section === item ? "tw-font-semibold tw-text-white" : "tw-text-iron-400 hover:tw-text-white"}`}
+                    onClick={() => navigateSection(item)}
+                  >
+                    <span
+                      aria-hidden="true"
+                      className="tw-w-5 tw-shrink-0 tw-text-xs tw-tabular-nums tw-text-iron-500"
                     >
-                      <span
-                        aria-hidden="true"
-                        className="tw-w-5 tw-shrink-0 tw-text-xs tw-tabular-nums tw-text-iron-500"
-                      >
-                        {formatNumber(locale, index + 1, {
-                          minimumIntegerDigits: 2,
-                        })}
-                      </span>
-                      {msg(documentationChapterKey(context.profile, item))}
-                    </button>
-                  </li>
-                ))}
-              </ol>
-            </nav>
-            <label className="tw-block tw-text-sm tw-text-iron-400 lg:tw-hidden">
-              {msg("chapters.index")}
-              <select
-                className={`${inputClass} tw-mt-2`}
-                value={section}
-                onChange={(event) =>
-                  navigateSection(parseSection(event.target.value))
-                }
-              >
-                {sections.map((item) => (
-                  <option key={item} value={item}>
+                      {formatNumber(locale, index + 1, {
+                        minimumIntegerDigits: 2,
+                      })}
+                    </span>
                     {msg(documentationChapterKey(context.profile, item))}
-                  </option>
-                ))}
-              </select>
-            </label>
+                  </button>
+                </li>
+              ))}
+            </ol>
+          </nav>
+          <label className="tw-block tw-text-sm tw-text-iron-400 lg:tw-hidden">
+            {msg("chapters.index")}
+            <select
+              className={`${inputClass} tw-mt-2`}
+              value={section}
+              onChange={(event) =>
+                navigateSection(parseSection(event.target.value))
+              }
+            >
+              {sections.map((item) => (
+                <option key={item} value={item}>
+                  {msg(documentationChapterKey(context.profile, item))}
+                </option>
+              ))}
+            </select>
+          </label>
+          {canWrite && (
+            <p className="tw-mb-0 tw-mt-5 tw-text-xs tw-leading-5 tw-text-iron-400">
+              {msg("progress", counts)}
+            </p>
+          )}
+        </aside>
+        <div className="tw-min-w-0 tw-space-y-10">
+          <div className="tw-max-w-prose">
+            <p className="tw-mb-3 tw-text-xs tw-uppercase tw-tracking-widest tw-text-iron-400">
+              {msg("chapters.number", {
+                number: formatNumber(locale, sections.indexOf(section) + 1),
+              })}
+            </p>
+            <h2
+              id="documentation-chapter-title"
+              tabIndex={-1}
+              className="tw-m-0 tw-font-serif tw-text-4xl tw-font-normal tw-leading-tight focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+            >
+              {msg(documentationChapterKey(context.profile, section))}
+            </h2>
             {canWrite && (
-              <p className="tw-mb-0 tw-mt-5 tw-text-xs tw-leading-5 tw-text-iron-400">
-                {msg("progress", counts)}
+              <p className="tw-mb-0 tw-mt-4 tw-text-base tw-leading-7 tw-text-iron-300">
+                {msg(
+                  `${museum ? "museum.purpose" : "chapters.purpose"}.${section}`
+                )}
               </p>
             )}
-          </aside>
-          <div className="tw-min-w-0 tw-space-y-10">
-            <div className="tw-max-w-prose">
-              <p className="tw-mb-3 tw-text-xs tw-uppercase tw-tracking-widest tw-text-iron-400">
-                {msg("chapters.number", {
-                  number: formatNumber(locale, sections.indexOf(section) + 1),
-                })}
-              </p>
-              <h2
-                id="documentation-chapter-title"
-                tabIndex={-1}
-                className="tw-m-0 tw-font-serif tw-text-4xl tw-font-normal tw-leading-tight focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
-              >
-                {msg(documentationChapterKey(context.profile, section))}
-              </h2>
-              {canWrite && (
-                <p className="tw-mb-0 tw-mt-4 tw-text-base tw-leading-7 tw-text-iron-300">
-                  {msg(
-                    `${museum ? "museum.purpose" : "chapters.purpose"}.${section}`
-                  )}
-                </p>
-              )}
-            </div>
+          </div>
+          <div
+            id={`documentation-answers-${context.id}-${section}`}
+            tabIndex={-1}
+            className="tw-space-y-10 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+          >
             {canWrite ? (
               <DocumentationWritingChapter
                 draft={draft}
@@ -383,46 +432,52 @@ export function ArtworkDocumentationRecordView({
                 onNavigateField={navigateField}
               />
             )}
-            {canWrite && section !== "review" && draft.state !== "clean" && (
-              <DocumentationSaveStatus
-                snapshot={draft}
-                controller={controller}
-                onNavigateSection={navigateSection}
-                onNavigateField={navigateField}
+            <div hidden={section !== (museum ? "materials" : "artwork")}>
+              <DocumentationFilesSection
+                draft={draft}
+                onPendingChange={setUploadPending}
               />
-            )}
-            <div className="tw-flex tw-flex-wrap tw-justify-between tw-gap-3 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-6">
-              <DocumentationButton
-                secondary
-                onClick={() => {
-                  if (canWrite) void saveExit();
-                  else router.push(listPath);
-                }}
-              >
-                {msg(canWrite ? "saveExit" : backLabel)}
-              </DocumentationButton>
-              {section !== "review" && (
-                <DocumentationButton
-                  onClick={() =>
-                    navigateSection(
-                      sections[sections.indexOf(section) + 1] ?? "review"
-                    )
-                  }
-                >
-                  {msg("chapters.nextChapter", {
-                    chapter: msg(
-                      documentationChapterKey(
-                        context.profile,
-                        sections[sections.indexOf(section) + 1] ?? "review"
-                      )
-                    ),
-                  })}
-                </DocumentationButton>
-              )}
             </div>
           </div>
+          {canWrite && section !== "review" && draft.state !== "clean" && (
+            <DocumentationSaveStatus
+              snapshot={draft}
+              controller={controller}
+              onNavigateSection={navigateSection}
+              onNavigateField={navigateField}
+            />
+          )}
+          <div className="tw-flex tw-flex-wrap tw-justify-between tw-gap-3 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-6">
+            <DocumentationButton
+              secondary
+              onClick={() => {
+                if (canWrite) void saveExit();
+                else router.push(listPath);
+              }}
+            >
+              {msg(canWrite ? "saveExit" : backLabel)}
+            </DocumentationButton>
+            {section !== "review" && (
+              <DocumentationButton
+                onClick={() =>
+                  navigateSection(
+                    sections[sections.indexOf(section) + 1] ?? "review"
+                  )
+                }
+              >
+                {msg("chapters.nextChapter", {
+                  chapter: msg(
+                    documentationChapterKey(
+                      context.profile,
+                      sections[sections.indexOf(section) + 1] ?? "review"
+                    )
+                  ),
+                })}
+              </DocumentationButton>
+            )}
+          </div>
         </div>
-      )}
+      </div>
       {museum && (
         <div hidden={section !== "review" || reading} className="tw-space-y-10">
           <DocumentationDossier

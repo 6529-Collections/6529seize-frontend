@@ -4,6 +4,73 @@ import { ARTWORK_DOCUMENTATION_CHAPTER_MESSAGES } from "./artwork-documentation-
 import { ARTWORK_DOCUMENTATION_MUSEUM_MESSAGES } from "./artwork-documentation-museum";
 
 export const ARTWORK_DOCUMENTATION_MESSAGES = {
+  "artworkDocumentation.recoveryUnavailable":
+    "This browser cannot keep a recovery copy of unfinished answers. Keep this page open until your changes have saved.",
+  "artworkDocumentation.uploadSelected":
+    "{filename} is selected on your device. Choose Upload file to transfer it.",
+  "artworkDocumentation.uploadChecking":
+    "Checking the saved upload. We will continue from the last completed step.",
+  "artworkDocumentation.uploadAttaching":
+    "The file has passed its checks. Adding it to your record…",
+  "artworkDocumentation.uploadCompleted":
+    "{filename} has been checked and added to your record. You can now select it in the relevant file field below.",
+  "artworkDocumentation.uploadAttachmentFailed":
+    "Your file has been received and checked, but could not yet be added to this record. Try adding it again; you do not need to upload it again.",
+  "artworkDocumentation.uploadRetryAttachment": "Add checked file to record",
+  "artworkDocumentation.assetChoicesEmpty":
+    "A file becomes available here after its checks finish and it is added to the record.",
+  "artworkDocumentation.assetChoicesUpload": "Go to file upload",
+  "artworkDocumentation.validation.entry": "Entry {number}",
+  "artworkDocumentation.validation.required":
+    "Complete this part of the answer, or remove the unfinished entry.",
+  "artworkDocumentation.validation.invalid_value":
+    "Check this part of the answer against its choices and guidance.",
+  "artworkDocumentation.validation.invalid_language":
+    "Choose a language from the list. For a custom language tag, use a code such as en or en-GB.",
+  "artworkDocumentation.validation.invalid_date":
+    "Enter a valid date matching the selected precision: YYYY, YYYY-MM, or YYYY-MM-DD.",
+  "artworkDocumentation.validation.invalid_uuid":
+    "Choose an available record or checked file from the list.",
+  "artworkDocumentation.validation.invalid_address":
+    "Enter a complete Ethereum address: 0x followed by 40 hexadecimal characters.",
+  "artworkDocumentation.validation.invalid_integer_string":
+    "Enter a whole number without spaces, decimal places or a sign.",
+  "artworkDocumentation.validation.invalid_uri":
+    "Enter a complete https://, ipfs:// or ar:// address without a username or password.",
+  "artworkDocumentation.validation.too_long":
+    "Shorten this answer to the stated limit.",
+  "artworkDocumentation.validation.out_of_range":
+    "Use a number or number of entries within the stated limits.",
+  "artworkDocumentation.validation.duplicate_item":
+    "Remove the repeated entry or give each entry a distinct value.",
+  "artworkDocumentation.validation.required_details":
+    "Add the supporting details required for this choice.",
+  "artworkDocumentation.validation.invalid_translations":
+    "Choose a primary language and give each translation a different language.",
+  "artworkDocumentation.validation.invalid_time_range":
+    "Check that the end comes after the start and both use the selected format.",
+  "artworkDocumentation.validation.incomplete_coordinates":
+    "Provide both latitude and longitude, or remove both.",
+  "artworkDocumentation.validation.invalid_authority":
+    "Check the catalogue reference against the selected authority.",
+  "artworkDocumentation.validation.invalid_entry_document":
+    "Use a relative HTML file path without a leading slash or parent-directory segments.",
+  "artworkDocumentation.validation.presentation_bounds":
+    "Check that the preferred display dimensions fit within the minimum and maximum sizes.",
+  "artworkDocumentation.validation.fixed_terms":
+    "This answer must match the project’s fixed artwork terms.",
+  "artworkDocumentation.validation.replacement_reason_required":
+    "Explain the file replacement in 20 to 1,000 characters before saving it.",
+  "artworkDocumentation.validation.interview_permission_required":
+    "Record the interview date, participants and permission before linking the recording or transcript.",
+  "artworkDocumentation.validation.serverRejected":
+    "The server could not accept this answer. Check its details, then try saving it again.",
+  "artworkDocumentation.uploadLeave":
+    "A file is still being added. Stay on this page until it is complete, or cancel the upload before leaving.",
+  "artworkDocumentation.legacyLicenseHelp":
+    "The artwork license for Keys and Gates is CC0 1.0. Add its name and link below, then review your rights declaration.",
+  "artworkDocumentation.legacyLicenseApply":
+    "Add the project’s CC0 license details",
   ...ARTWORK_DOCUMENTATION_GUIDANCE_MESSAGES,
   ...ARTWORK_DOCUMENTATION_EDITORIAL_MESSAGES,
   ...ARTWORK_DOCUMENTATION_CHAPTER_MESSAGES,
@@ -162,7 +229,7 @@ export const ARTWORK_DOCUMENTATION_MESSAGES = {
   "artworkDocumentation.save.saving": "Saving…",
   "artworkDocumentation.save.retrying": "Retrying save…",
   "artworkDocumentation.save.invalid":
-    "Some answers need attention before they can be saved.",
+    "Some answers still need attention. Other changes continue to save.",
   "artworkDocumentation.save.conflict":
     "This draft changed in another window. Your changes are still here.",
   "artworkDocumentation.save.auth_expired":
@@ -194,7 +261,7 @@ export const ARTWORK_DOCUMENTATION_MESSAGES = {
   "artworkDocumentation.confirmation.reviewChanged":
     "This record has changed. Review the latest saved version before checking the confirmation again.",
   "artworkDocumentation.save.pendingFields":
-    "These changes are still waiting to save. Review them before leaving this page.",
+    "These answers have not been saved yet. Review the guidance beneath each one before leaving.",
   "artworkDocumentation.save.licenseGuidance":
     "Check the license name and use a complete license URL, including https://.",
   "artworkDocumentation.save.rightsGuidance":

@@ -70,6 +70,16 @@ describe("SingleWaveDropWrapper", () => {
     );
 
     expect(screen.getByTestId("child")).toBeInTheDocument();
+    const scrollArea = screen.getByTestId("child").parentElement!;
+    expect(scrollArea.firstElementChild).toHaveClass(
+      "tw-h-[var(--video-header-reserve)]"
+    );
+    const wrapper = scrollArea.parentElement!.parentElement!;
+    expect(wrapper).toHaveClass(
+      "viewport",
+      "[--video-header-reserve:calc(env(safe-area-inset-top,0px)+4rem)]",
+      "[--video-bottom-reserve:env(safe-area-inset-bottom,0px)]"
+    );
     expect(screen.getByRole("button", { name: "Share drop" })).toBeVisible();
     expect(screen.queryByTestId("chat")).not.toBeInTheDocument();
 

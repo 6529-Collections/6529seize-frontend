@@ -1,12 +1,9 @@
 "use client";
 
 import { buildTooltipId, TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
-import {
-  getAppEnvironment,
-  getBrowserOrigin,
-  PRODUCTION_APP_ORIGIN,
-} from "@/config/appEnvironment";
+import { getAppEnvironment, getBrowserOrigin } from "@/config/appEnvironment";
 import { useId, useSyncExternalStore } from "react";
+import { useInitialEnvironmentOrigin } from "./EnvironmentOriginContext";
 import { Tooltip } from "react-tooltip";
 
 interface EnvironmentBadgeProps {
@@ -14,15 +11,15 @@ interface EnvironmentBadgeProps {
 }
 
 const subscribeToBrowserOrigin = () => () => undefined;
-const getServerOriginSnapshot = () => PRODUCTION_APP_ORIGIN;
 
 export default function EnvironmentBadge({
   compact = false,
 }: EnvironmentBadgeProps) {
+  const initialOrigin = useInitialEnvironmentOrigin();
   const browserOrigin = useSyncExternalStore(
     subscribeToBrowserOrigin,
     getBrowserOrigin,
-    getServerOriginSnapshot
+    () => initialOrigin
   );
   const { badge, host } = getAppEnvironment(browserOrigin);
   const tooltipId = buildTooltipId("environment-badge", useId());

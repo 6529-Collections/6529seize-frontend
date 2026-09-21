@@ -12,6 +12,22 @@ const readWorkflow = (name: string) => {
 };
 
 describe("frontend deployment workflow contract", () => {
+  it("keeps standalone connections alive beyond the load balancer idle timeout", () => {
+    const procfile = fs.readFileSync(path.join(ROOT, "Procfile"), "utf8");
+    const configuredTimeout = procfile.match(/\bKEEP_ALIVE_TIMEOUT=(\d+)\b/);
+    expect(configuredTimeout).not.toBeNull();
+    // The production ALB reaches Node directly and has a 60-second idle timeout.
+    expect(Number(configuredTimeout?.[1])).toBeGreaterThan(60_000);
+    expect(procfile).toMatch(/\bnode server\.js\s*$/);
+    const stagingScript = fs.readFileSync(
+      path.join(ROOT, "ops", "scripts", "deploy-staging-artifact.sh"),
+      "utf8"
+    );
+    expect(stagingScript).toContain(
+      `KEEP_ALIVE_TIMEOUT: '${configuredTimeout?.[1]}'`
+    );
+  });
+
   it("keeps canonical names and makes main merges non-deploying", () => {
     const staging = readWorkflow("deploy-staging.yml").workflow;
     const production = readWorkflow("build-upload-deploy-prod.yml").workflow;

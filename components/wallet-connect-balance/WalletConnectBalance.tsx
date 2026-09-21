@@ -1,3 +1,5 @@
+import { isWalletConnectionResolving } from "@/components/auth/authResolution";
+import AuthLoadingPlaceholder from "@/components/auth/AuthLoadingPlaceholder";
 import { formatAddress } from "@/helpers/Helpers";
 import { logErrorSecurely } from "@/utils/error-sanitizer";
 import { formatUnits } from "viem";
@@ -53,8 +55,8 @@ export default function WalletConnectBalance() {
     ? `${ens.data}`
     : formatAddress(account.address?.toString() ?? "");
 
-  const { seizeConnect, seizeConnectOpen, seizeDisconnect } =
-    useSeizeConnectContext();
+  const connection = useSeizeConnectContext();
+  const { seizeConnect, seizeConnectOpen, seizeDisconnect } = connection;
   const handleDisconnect = async () => {
     try {
       await seizeDisconnect();
@@ -62,6 +64,9 @@ export default function WalletConnectBalance() {
       logErrorSecurely("wallet_connect_balance_disconnect", error);
     }
   };
+
+  if (isWalletConnectionResolving(connection))
+    return <AuthLoadingPlaceholder compact />;
 
   if (!account.isConnected) {
     return (

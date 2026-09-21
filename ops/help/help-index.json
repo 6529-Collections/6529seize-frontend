@@ -5,6 +5,41 @@
   "base_url": "https://6529.io",
   "records": [
     {
+      "id": "media.video-player",
+      "kind": "ui_affordance",
+      "title": "Video playback controls and timeline",
+      "aliases": [
+        "video duration",
+        "video timeline",
+        "scrub video",
+        "video sizing"
+      ],
+      "keywords": [
+        "video",
+        "play",
+        "pause",
+        "time",
+        "duration",
+        "seek",
+        "fullscreen"
+      ],
+      "facts": [
+        "The custom video player shows a timeline above its controls, with a small draggable handle and a larger interaction area. Drag the handle, select a position on the track, or focus the slider and use the keyboard to seek.",
+        "The bottom-left capsule shows play or pause alongside elapsed time and total duration. Pausing keeps the capsule and time in place and also shows a central play button; either play button resumes playback. The time updates while seeking.",
+        "Controls remain visible while paused, focused, or scrubbing and fade after inactivity during playback. Pointer interaction, keyboard focus, or a tap reveals them. Before duration is available, it shows a dash and seeking is disabled.",
+        "Videos are shown without cropping or stretching. Homepage Next Drop, Latest Drop, The Memes detail, and Wave submission detail videos fit the available width up to 95% of the usable screen height in desktop browsers, mobile browsers, and the mobile app, allowing for headers, bottom navigation, and safe areas. Tall videos become narrower and stay centered. Fullscreen uses the full viewing area. Loading listing, subscription, or ownership panels does not resize the video. Homepage artwork stays vertically centered in its column. The Memes detail retains its full-column dark artwork background and centers the video inside it. Expanded wave submissions center the video in the available area below the overlay header. The timeline and controls stay inside the video frame. Submission detail reserves space for its overlay header and artwork padding. Mute and fullscreen keep circular buttons. Browser-native players retain their own controls."
+      ],
+      "canonical_path": "/",
+      "link_label": "Open homepage",
+      "related_paths": ["/waves", "/the-memes"],
+      "tags": ["media", "video", "waves", "memes"],
+      "source_refs": [
+        "components/drops/view/item/content/media/SeizeVideoPlayer.tsx",
+        "components/drops/view/item/content/media/SeizeVideoPlayer.view.tsx",
+        "ops/docs/media/rendering/feature-video-player.md"
+      ]
+    },
+    {
       "id": "nft.video-posters",
       "kind": "workflow",
       "title": "NFT and ReMeme video preview images",
@@ -223,8 +258,9 @@
         "Required, conditional and already answered questions stay visible. Other questions open under headings such as More about the work or Additional rights details, with a question count. Optional details can be left unanswered and revisited. For an unanswered question, Not known or not applicable? opens permitted answer-status choices and an explanation. Once recorded, Answer options holds these choices and Leave unanswered; recorded statuses and explanations remain readable with the options closed.",
         "Dates can record a year, year and month, exact date or range, with This date is approximate when appropriate. For an answer with multiple languages, Language and translations holds the Primary language selector, authorship, artist review and Add a translation. Selecting an existing primary version preserves every version's language, text and review information. Other versions are labelled Version with a number and language; an original account keeps that credit even when another language is shown first. Change language lets artists choose a language by name; Other language reveals Language tag for the full supported range. Apply language changes only that version's tag. Invalid or duplicate tags remain in the dialog until corrected or cancelled.",
         "Open an assigned record with Open record to continue. Existing records appear before new-record controls. The project team prepares program records for invited artists. Start documenting and Document this work for another context offer standalone records only when self-service creation is available. An existing source-linked record is opened instead of duplicated when it appears in the list. If it may be on a later page, use Load more to finish looking before starting a new record. Documentation can also begin in a supported submission form and continue afterward. It is optional during submission. A successful artwork post is not retried when its documentation source link needs recovery.",
-        "Drafts save with 6529 during preparation. Check the save status or use Save and exit before leaving. After pending changes save, Save and exit returns to My artwork documentation so the same record can be reopened. A list-loading error does not mean artwork answers failed to save; Try again reloads the list, and an unavailable program list offers a return to your own records. Keep the window open when saving fails or sign-in expires, and resolve a version conflict before continuing. Unsaved text is not kept after the window is closed. Save guidance also appears beside chapter actions. Pending-answer links take you to the relevant questions; correct highlighted formats or missing details, then retry saving. Other queued answers may be waiting behind that correction, rather than being wrong themselves. Selecting a rights category that needs supporting details reveals those inputs immediately. Earlier editable license fields require both a license name and a complete URL.",
-        "Drafts remain stored with 6529 during preparation. New publication forms have no per-field privacy choices or private evidence uploads. Earlier records preserve their original publication choices; restricted material is never silently converted.",
+        "Drafts save with 6529 during preparation. Valid answers can save while another answer needs correction. The save status identifies remaining answers and links to their questions; field guidance explains which detail needs attention. Use Save and exit after those answers save to return to My artwork documentation. A list-loading error does not mean artwork answers failed to save; Try again reloads the list. Pending written answers can be recovered in the same browser tab for the same signed-in account when browser storage is available. This temporary copy is not a saved record or a backup: keep the tab open until saving succeeds. If the saved version has changed, review the conflict before applying recovered answers. Signing out or changing accounts clears the temporary copy. Selecting a rights category that needs supporting details reveals those inputs immediately. Earlier editable license fields require both a license name and a complete URL. Eligible earlier Keys and Gates records offer Add the project’s CC0 license details to fill the fixed CC0 name and URL; it does not change the artist’s rights declaration.",
+        "Selecting a file on your device does not upload it. Choose Upload file and follow its transfer, safety-check and attachment status. Uploads can continue while a written answer needs correction and while moving between chapters or reading the draft. A checked file that could not be attached offers Add checked file to record; this retries attachment without transferring the same bytes again. Keep the tab open during transfer. The final artwork selector lists eligible checked files after they are attached; selecting a file there is a separate choice that must save.",
+      "Drafts remain stored with 6529 during preparation. New publication forms have no per-field privacy choices or private evidence uploads. Earlier records preserve their original publication choices; restricted material is never silently converted.",
         "Selecting a different final artwork file after confirmation asks why it is being replaced. Explain the change in 20–1,000 characters before it can save. Choosing another replacement clears the earlier explanation; returning to the saved file removes the prompt.",
         "Check your existing information lets authorized editors compare In the record with From the source, select permitted information and choose Use selected information. Submission references gives viewers the comparison without import controls. Source information is never copied automatically.",
         "The Keys and Gates program list shows authorized artwork records. Find a record filters confirmation and review status; each entry offers Open record and Review status details. Preferred artist credit or display name identifies the record, with an explicitly labelled Artist profile handle as a fallback. Submitted as shows an original submission title separately when no artwork title has been entered. Record for appears on the personal documentation list only when standalone creation is enabled; it does not offer program profiles that need a separate invitation.",
@@ -779,9 +815,11 @@
         "The web sidebar Waves row opens /waves directly; Discover Waves remains secondary inside the Waves experience and searchable, while Network, Delegation, Tools, Open Data, and reference material live under About.",
         "Drop Forge appears as a standalone sidebar row after About only when the connected wallet can access /drop-forge.",
         "The sidebar can be collapsed or expanded depending on viewport and layout state.",
+        "The web sidebar has independently scrollable primary navigation, a fixed-height middle section containing Search, Share when supported, and optional Update, and bottom account controls. Without Share, Update sits directly below Search with no empty row. Notifications appear directly above the fixed account slot without moving Update, Search, or Share. Local and staging badges appear in the initial page render; production omits them. Extra Drop Forge and WatchTower entries remain reachable in short windows.",
+        "The account slot shimmers during restoration, then shows a profile picture or the signed-out Connect Wallet icon. Failed pictures use a 24px default user icon inside the same 40px rounded frame as the PFP; a failed profile request offers Profile unavailable. Retry, while an empty successful result offers Create profile. Search and Share remain available during account loading.",
         "In the collapsed web rail, NFTs and About open on intentional mouse hover while tap, click, and keyboard activation remain available; the flyout stays open while crossing into it and closes after leaving both surfaces or pressing Escape.",
         "Search, Share, Connect Wallet, and Notifications are utility controls; Profile and Connect Device live in the connected account menu.",
-        "When a new version is available, desktop web shows a rocket above Search as the first lower sidebar item instead of a toast. It has an Update tooltip when collapsed and an Update label when expanded. Selecting it reloads the current route with an Updating to the latest version screen, a static rocket, and three animated dots. Mobile browsers, including tablets in desktop browsing mode, retain the full update toast and show the same updating screen when tapped."
+        "When a new version is available, desktop web shows a rocket below Share in the middle utility section instead of a toast. Its position does not change when Notifications appears. It has an Update tooltip when collapsed and an Update label when expanded. Selecting it reloads the current route with an Updating to the latest version screen, a static rocket, and three animated dots. Mobile browsers, including tablets in desktop browsing mode, retain the full update toast and show the same updating screen when tapped."
       ],
       "canonical_path": "/waves",
       "related_paths": [
@@ -1628,11 +1666,15 @@
         "In Capacitor, Connect and add-profile open a shared Connect sheet with App Wallets, External Wallets, and Scan Connection QR options.",
         "The Capacitor App Wallets view supports Back, Create App Wallet, and direct app-wallet unlock/connect; app wallets are omitted from the Reown external-wallet browser.",
         "Scan Connection QR accepts only canonical 6529 connection-share links; the separate app-sidebar scanner remains general-purpose.",
+        "My artwork documentation availability is checked independently of opening the account dropdown. When access is already known, the item is present from the start. If access resolves while the menu is open, the item appears immediately without needing to reopen the menu.",
         "On desktop web, the collapsed sidebar account avatar highlights on hover but opens its account dropdown only when activated; the dropdown stays aligned with the sidebar on centered wide-screen layouts.",
         "Sign out all clears every connected profile in one visible transition without switching through the remaining profiles.",
+        "On the native app, logout removes that profile from push delivery on this phone unless another connected wallet still uses the same profile; Sign out all removes every profile registration for this installation, including stale profiles missing locally. Other devices stay connected. Offline cleanup retries when the app reconnects, so pushes can continue until the server accepts it.",
         "If wallet connection is not working, retry from the header wallet controls and confirm the wallet modal is completed before using write actions.",
         "If Post cannot finish its session check, the draft stays in the composer. Wait for loading to finish, check the connection, complete sign-in if prompted, then retry Post. A stalled session check expires so a later attempt can check again; it does not automatically post the draft.",
         "If Post asks you to reconnect or reactions show Please reconnect your wallet, the saved profile can still be visible even though its session cannot renew. Reconnect that profile from the wallet account controls, then retry the action. Save your draft before logging out or reloading; failed authentication keeps it in the composer, and reactions are not automatically retried after sign-in.",
+        "Protected pages show a loading placeholder while wallet identity and the required profile are being restored; connect-wallet, profile-setup, and permission messages appear after those checks settle. Public browsing, Search, and Share remain available while account-dependent controls load.",
+        "Delegation, NextGen Manager, and signing or minting controls also wait for the live wallet connection to restore. A saved profile session alone does not provide a signer.",
         "Some write actions, settings, and subscriptions require a connected profile."
       ],
       "canonical_path": "/",
@@ -4986,7 +5028,7 @@
         "Rapid primary-tab switching commits the most recently requested destination.",
         "In the Android app, bottom spacing respects the space the device reports for system navigation.",
         "Rotating a phone or tablet keeps bottom navigation visible unless a route, edit state, open drop, or real software keyboard hides it.",
-        "In the native app, a small rocket appears in a curved attachment above Home when a new version is available. It moves, hides and scales with the dock. Tapping the rocket reloads the current route and shows Updating to the latest version with a static rocket and animated dots during loading; Home still navigates home. Desktop web uses an Update rocket above Search in the lower sidebar; mobile browsers retain the full update toast."
+        "In the native app, a small rocket appears in a curved attachment above Home when a new version is available. It moves, hides and scales with the dock. Tapping the rocket reloads the current route and shows Updating to the latest version with a static rocket and animated dots during loading; Home still navigates home. Desktop web uses an Update rocket below Share in the middle sidebar section; mobile browsers retain the full update toast."
       ],
       "canonical_path": "/waves",
       "related_paths": [
@@ -5348,7 +5390,12 @@
       ],
       "facts": [
         "Mobile push notifications are documented under the Notifications area.",
+        "Mobile tray cleanup preserves other connected profiles and removes only matching notifications confirmed read; uncertain or failed refreshes preserve entries.",
+        "The iOS badge is updated asynchronously from unread notifications across device-registered profiles, including reads from desktop or web. Android dots and counts depend on the launcher.",
+        "Opening or returning to the iOS app requests a backend badge correction after connected profiles finish push registration, without marking notifications read. The update still arrives asynchronously by push; failed refresh requests leave notification state unchanged.",
         "Push notification behavior depends on mobile app support and notification permissions.",
+        "After a phone transfer, push registration uses a separate native-device identity. Old cleanup retries stay saved but cannot block the replacement phone. Migration removes only old registrations matching this phone’s current push token; other phones remain connected and notification preferences carry forward.",
+        "If only some connected profiles finish push registration, returning to the active app or reconnecting retries registration while preserving successful profiles and old delivery targets. Reconnect a profile whose saved session has expired.",
         "Push settings include toggles for Identity - REP, Identity - NIC, New Follows, Mentions, Drops - Quoted, Drops - Replied, Drops - Voted, Drops - Reacted, Drops - Boosted, Wave Invites, and Subscription Coverage.",
         "Running-low and action-required subscription coverage can send mobile push; the earlier plan-a-top-up alert remains in the in-app feed without a push.",
         "Tapping a subscription coverage push opens the matching profile's Subscriptions tab.",
@@ -6773,6 +6820,7 @@
       "facts": [
         "Wave decision timeline behavior is documented under leaderboard features.",
         "It explains decision header states, expand/review behavior, and scrolling/loading.",
+        "Single-decision leaderboard waves show Next winners announced in with a live countdown and local date beside dropping and voting times when a future announcement is scheduled. It excludes paused decisions and disappears when no future announcement remains; perpetual rankings without scheduled winners do not show it.",
         "Use it when users ask when or how a wave decision is shown."
       ],
       "canonical_path": "/waves",

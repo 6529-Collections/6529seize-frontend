@@ -3,7 +3,7 @@
 import { useCallback, useRef, useSyncExternalStore } from "react";
 import type { Ref } from "react";
 
-export type VideoLayout = "natural" | "fill" | "prominent";
+export type VideoLayout = "natural" | "fill" | "prominent" | "artwork";
 export type VideoAlign = "left" | "center";
 export type SeizeVideoMode = "inert-preview" | "ambient" | "interactive";
 export type SeizeVideoControls = "none" | "minimal" | "native";
@@ -166,6 +166,17 @@ export function useElementInView(element: Element | null): boolean {
   return useSyncExternalStore(subscribe, getSnapshot, () => false);
 }
 
+export function getVideoRatio(
+  width?: number | null,
+  height?: number | null
+): number | undefined {
+  if (typeof width !== "number" || typeof height !== "number") return undefined;
+  const ratio = width / height;
+  return getAspectRatio(width, height) && Number.isFinite(ratio) && ratio > 0
+    ? ratio
+    : undefined;
+}
+
 export function getAspectRatio(
   width: number,
   height: number
@@ -199,6 +210,8 @@ export function getNaturalWidthClassName(
   if (layout === "fill") {
     return "tw-h-full tw-w-full";
   }
+
+  if (layout === "artwork") return "tw-w-full";
 
   if (layout === "prominent") {
     if (orientation === "portrait") {

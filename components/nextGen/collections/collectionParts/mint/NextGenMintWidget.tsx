@@ -1,5 +1,7 @@
 "use client";
 
+import { isWalletConnectionResolving } from "@/components/auth/authResolution";
+import AuthLoadingPlaceholder from "@/components/auth/AuthLoadingPlaceholder";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import DotLoader from "@/components/dotLoader/DotLoader";
 import NextGenContractWriteStatus from "@/components/nextGen/NextGenContractWriteStatus";
@@ -80,7 +82,8 @@ function getMintValue(mintCount: number, mintPrice: number) {
 
 export default function NextGenMintWidget(props: Readonly<Props>) {
   const chainId = useChainId();
-  const { address, isConnected, seizeConnect } = useSeizeConnectContext();
+  const connection = useSeizeConnectContext();
+  const { address, isConnected, seizeConnect } = connection;
 
   const [currentProof, setCurrentProof] = useState<
     | {
@@ -385,6 +388,9 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
     }
     return "Mint";
   }
+
+  if (isWalletConnectionResolving(connection))
+    return <AuthLoadingPlaceholder compact />;
 
   return (
     <div>

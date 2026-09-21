@@ -12,6 +12,8 @@ jest.mock("@/config/appEnvironment", () => {
   };
 });
 
+import EnvironmentOriginProvider from "@/components/common/EnvironmentOriginContext";
+
 import EnvironmentBadge from "@/components/common/EnvironmentBadge";
 
 describe("EnvironmentBadge", () => {
@@ -87,3 +89,56 @@ describe("EnvironmentBadge", () => {
     }
   });
 });
+
+it.each([
+  ["http://localhost:3001", "LCL:3001", "localhost:3001"],
+  ["https://staging.6529.io", "STG", "staging.6529.io"],
+  ["https://prxtstaging.6529.io", "PRXTSTG", "prxtstaging.6529.io"],
+])(
+  "renders %s in server HTML and preserves its node through hydration",
+  async (origin, badge, host) => {
+    mockBrowserOrigin = origin;
+    const ui = (
+      <EnvironmentOriginProvider origin={origin}>
+        <EnvironmentBadge compact />
+      </EnvironmentOriginProvider>
+    );
+    const container = document.createElement("div");
+    container.innerHTML = renderToString(ui);
+    document.body.appendChild(container);
+    const initialBadge = within(container).getByLabelText(
+      `Environment: ${badge} (${host})`
+    );
+    expect(initialBadge).toHaveTextContent(badge);
+    const errors: unknown[] = [];
+    let root: ReturnType<typeof hydrateRoot> | undefined;
+    try {
+      await act(async () => {
+        root = hydrateRoot(container, ui, {
+          onRecoverableError: (error) => errors.push(error),
+        });
+      });
+      expect(
+        within(container).getByLabelText(`Environment: ${badge} (${host})`)
+      ).toBe(initialBadge);
+      expect(errors).toEqual([]);
+    } finally {
+      act(() => root?.unmount());
+      container.remove();
+      mockBrowserOrigin = "https://6529.io";
+    }
+  }
+);
+
+it.each(["https://6529.io", "https://www.6529.io"])(
+  "omits the production badge from server HTML for %s",
+  (origin) => {
+    expect(
+      renderToString(
+        <EnvironmentOriginProvider origin={origin}>
+          <EnvironmentBadge />
+        </EnvironmentOriginProvider>
+      )
+    ).toBe("");
+  }
+);
