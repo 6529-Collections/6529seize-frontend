@@ -33,7 +33,7 @@ jest.mock("@headlessui/react", () => ({
 
 // Mock Framer Motion
 jest.mock("framer-motion", () => ({
-  domAnimation: {},
+  domMax: {},
   LazyMotion: ({ children }: any) => <>{children}</>,
   m: {
     div: React.forwardRef(function MockMotionDiv(
@@ -58,9 +58,6 @@ jest.mock("framer-motion", () => ({
       );
     }),
   },
-  useDragControls: () => ({
-    start: jest.fn(),
-  }),
 }));
 
 // Mock Heroicons

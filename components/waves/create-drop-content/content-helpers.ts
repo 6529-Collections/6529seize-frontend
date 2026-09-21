@@ -690,6 +690,7 @@ export const createMetadataHandlers = ({
         required: false,
       },
     ]);
+    return id;
   };
 
   const onRemoveMetadata = (index: number) => {

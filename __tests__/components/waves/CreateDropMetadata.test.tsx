@@ -112,3 +112,50 @@ test("keeps required field names locked and connects reserved-name errors to the
     screen.getByRole("textbox", { name: "Field name", exact: true })
   ).toHaveAttribute("aria-invalid", "true");
 });
+
+test("focuses the newly added field even when it is not the last row", async () => {
+  function PrependingDraft() {
+    const [metadata, setMetadata] = useState<CreateDropMetadataType[]>([
+      {
+        id: "existing",
+        key: "Existing",
+        type: ApiWaveMetadataType.String,
+        value: null,
+        required: false,
+      },
+    ]);
+
+    return (
+      <CreateDropMetadata
+        metadata={metadata}
+        missingRequiredMetadataKeys={[]}
+        metadataErrorById={NO_ERRORS}
+        disabled={false}
+        closeMetadata={() => undefined}
+        onChangeKey={() => undefined}
+        onChangeValue={() => undefined}
+        onAddMetadata={() => {
+          const id = "new";
+          setMetadata((current) => [
+            {
+              id,
+              key: "",
+              type: ApiWaveMetadataType.String,
+              value: null,
+              required: false,
+            },
+            ...current,
+          ]);
+          return id;
+        }}
+        onRemoveMetadata={() => undefined}
+      />
+    );
+  }
+
+  const { container } = render(<PrependingDraft />);
+  await userEvent.click(screen.getByRole("button", { name: "Add field" }));
+  expect(
+    container.querySelector('input[data-metadata-id="new"]')
+  ).toHaveFocus();
+});

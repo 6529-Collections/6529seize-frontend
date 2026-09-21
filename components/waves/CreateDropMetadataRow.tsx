@@ -95,6 +95,7 @@ const CreateDropMetadataRow: React.FC<CreateDropMetadataRowProps> = ({
           <input
             id={`${rowId}-key`}
             data-metadata-key=""
+            data-metadata-id={metadata.id}
             type="text"
             placeholder={t(locale, "waves.metadata.key")}
             value={metadata.key}

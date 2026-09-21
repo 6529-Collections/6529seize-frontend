@@ -9,7 +9,7 @@ import {
 } from "@headlessui/react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import type { PanInfo } from "framer-motion";
-import { domAnimation, LazyMotion, m, useDragControls } from "framer-motion";
+import { domMax, LazyMotion, m } from "framer-motion";
 import type { CSSProperties, ReactNode } from "react";
 import { Fragment, useRef } from "react";
 
@@ -36,7 +36,6 @@ export default function ArtistPreviewAppWrapper({
 }) {
   const constraintsRef = useRef(null);
   const contentRef = useRef<HTMLDivElement>(null);
-  const dragControls = useDragControls();
   useKeyboardFocusScroll(contentRef);
 
   const handleDragEnd = (
@@ -75,7 +74,7 @@ export default function ArtistPreviewAppWrapper({
           onTouchStart={(e) => e.stopPropagation()}
           ref={constraintsRef}
         >
-          <LazyMotion features={domAnimation}>
+          <LazyMotion features={domMax}>
             <TransitionChild
               as={Fragment}
               enter="tw-transform tw-duration-300 tw-ease-out"
@@ -90,8 +89,6 @@ export default function ArtistPreviewAppWrapper({
                 dragConstraints={constraintsRef}
                 dragElastic={0.1}
                 onDragEnd={handleDragEnd}
-                dragControls={dragControls}
-                dragListener={false}
                 className="tw-pointer-events-auto tw-relative tw-w-full tw-transform-gpu tw-will-change-transform"
               >
                 <TransitionChild

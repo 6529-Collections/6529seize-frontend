@@ -12,6 +12,8 @@ export const EN_US_DROP_METADATA_MESSAGES = {
   "waves.metadata.number": "Number",
   "waves.metadata.add": "Add field",
   "waves.metadata.remove": "Remove field {number}",
+  "waves.metadata.showAll": "Show all",
+  "waves.metadata.showLess": "Show less",
   "waves.metadata.missingValue": "Enter a value for this required field.",
 } as const;
 
@@ -29,6 +31,8 @@ export const FR_FR_DROP_METADATA_MESSAGES = {
   "waves.metadata.number": "Nombre",
   "waves.metadata.add": "Ajouter un champ",
   "waves.metadata.remove": "Supprimer le champ {number}",
+  "waves.metadata.showAll": "Tout afficher",
+  "waves.metadata.showLess": "Afficher moins",
   "waves.metadata.missingValue":
     "Saisissez une valeur pour ce champ obligatoire.",
 } satisfies Record<keyof typeof EN_US_DROP_METADATA_MESSAGES, string>;
@@ -46,6 +50,8 @@ export const ES_ES_DROP_METADATA_MESSAGES = {
   "waves.metadata.number": "Número",
   "waves.metadata.add": "Añadir campo",
   "waves.metadata.remove": "Eliminar el campo {number}",
+  "waves.metadata.showAll": "Mostrar todo",
+  "waves.metadata.showLess": "Mostrar menos",
   "waves.metadata.missingValue":
     "Introduce un valor para este campo obligatorio.",
 } satisfies Record<keyof typeof EN_US_DROP_METADATA_MESSAGES, string>;
@@ -64,5 +70,7 @@ export const DE_DE_DROP_METADATA_MESSAGES = {
   "waves.metadata.number": "Zahl",
   "waves.metadata.add": "Feld hinzufügen",
   "waves.metadata.remove": "Feld {number} entfernen",
+  "waves.metadata.showAll": "Alle anzeigen",
+  "waves.metadata.showLess": "Weniger anzeigen",
   "waves.metadata.missingValue": "Gib einen Wert für dieses Pflichtfeld ein.",
 } satisfies Record<keyof typeof EN_US_DROP_METADATA_MESSAGES, string>;

@@ -19,7 +19,7 @@ interface CreateDropMetadataProps {
     index: number;
     newValue: string | number | null;
   }) => void;
-  readonly onAddMetadata: () => void;
+  readonly onAddMetadata: () => string;
   readonly onRemoveMetadata: (index: number) => void;
 }
 
@@ -37,7 +37,7 @@ export default function CreateDropMetadata({
   const locale = useBrowserLocale();
   const rowsRef = useRef<HTMLDivElement>(null);
   const addButtonRef = useRef<HTMLButtonElement>(null);
-  const focusNewFieldRef = useRef(false);
+  const focusNewFieldIdRef = useRef<string | null>(null);
   const hasRequiredFields = metadata.some((item) => item.required);
   const hasErrors =
     missingRequiredMetadataKeys.length > 0 ||
@@ -51,15 +51,19 @@ export default function CreateDropMetadata({
     : null;
 
   useEffect(() => {
-    if (!focusNewFieldRef.current) return;
+    const newFieldId = focusNewFieldIdRef.current;
+    if (newFieldId === null) return;
     const inputs = rowsRef.current?.querySelectorAll<HTMLInputElement>(
       "input[data-metadata-key]"
     );
-    if (inputs !== undefined && inputs.length > 0) {
-      inputs.item(inputs.length - 1).focus();
-    }
-    focusNewFieldRef.current = false;
-  }, [metadata.length]);
+    const newFieldInput = inputs
+      ? Array.from(inputs).find(
+          (input) => input.dataset["metadataId"] === newFieldId
+        )
+      : undefined;
+    newFieldInput?.focus();
+    focusNewFieldIdRef.current = null;
+  }, [metadata]);
 
   return (
     <div className="tw-mt-4 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800">
@@ -114,8 +118,7 @@ export default function CreateDropMetadata({
           ref={addButtonRef}
           type="button"
           onClick={() => {
-            focusNewFieldRef.current = true;
-            onAddMetadata();
+            focusNewFieldIdRef.current = onAddMetadata();
           }}
           disabled={disabled}
           className="tw-mt-2 tw-flex tw-min-h-11 tw-items-center tw-gap-1.5 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-0 tw-py-2 tw-text-sm tw-font-medium tw-text-iron-300 hover:tw-text-iron-50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-50"

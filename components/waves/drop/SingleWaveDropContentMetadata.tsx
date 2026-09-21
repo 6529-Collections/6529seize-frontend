@@ -7,6 +7,8 @@ import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
 import { buildTooltipId } from "@/helpers/tooltip.helpers";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import Button from "@/components/utils/button/Button";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 
 interface SingleWaveDropContentMetadataProps {
   readonly metadata: readonly ApiDropMetadataResponse[];
@@ -83,6 +85,7 @@ const SingleWaveDropContentMetadataContent: React.FC<
     readonly isCompactLayout: boolean;
   }
 > = ({ metadata, isCompactLayout }) => {
+  const locale = useBrowserLocale();
   const [showAllMetadata, setShowAllMetadata] = useState(false);
   const [selectedMetadata, setSelectedMetadata] =
     useState<SelectedMetadata | null>(null);
@@ -120,7 +123,9 @@ const SingleWaveDropContentMetadataContent: React.FC<
               }`}
               aria-expanded={showAllMetadata}
             >
-              {showAllMetadata ? "Show less" : "Show all"}
+              {showAllMetadata
+                ? t(locale, "waves.metadata.showLess")
+                : t(locale, "waves.metadata.showAll")}
             </Button>
           )}
         </div>
