@@ -37,18 +37,20 @@
 
 1. Open `/meme-lab`.
 2. Wait for `Fetching ...` to finish.
-3. Optional: select `LFG: Start the Show!` to open the slideshow.
-4. Set sort direction with the up/down arrows.
-5. Pick a sort mode: `Age`, `Edition Size`, `Collectors`, `Artists`,
+3. The default `Age` view shows 40 cards per page. Use the pagination controls
+   below the grid to move between pages.
+4. Optional: select `LFG: Start the Show!` to open the slideshow.
+5. Set sort direction with the up/down arrows.
+6. Pick a sort mode: `Age`, `Edition Size`, `Collectors`, `Artists`,
    `Collections`, `Unique %`, `Unique % Exc. Museum`, `Floor Price`,
    `Market Cap`, `Highest Offer`, or `Volume`.
-6. In `Volume`, pick `24 Hours`, `7 Days`, `30 Days`, or `All Time`.
-7. If `Volume` is not active, picking a volume window also switches sort to
+7. In `Volume`, pick `24 Hours`, `7 Days`, `30 Days`, or `All Time`.
+8. If `Volume` is not active, picking a volume window also switches sort to
    `Volume`.
-8. In grouped `Collections`, select `view` to open
+9. In grouped `Collections`, select `view` to open
    `/meme-lab/collection/{collection}`. During progressive i18n migration, a
    supported non-default `locale` query is preserved on the collection link.
-9. Open any card tile to go to `/meme-lab/{id}`.
+10. Open any card tile to go to `/meme-lab/{id}`.
 
 ### Collection Route `/meme-lab/collection/{collection}`
 
@@ -81,8 +83,14 @@
 ## Loading, Empty, and Error States
 
 - `/meme-lab` shows a message-backed `Fetching ...` row during initial load.
-- If `/meme-lab` fetch calls fail, the route falls back to `Nothing here yet`
-  with no inline error banner.
+- The default `Age` view requests one 40-card page at a time. Other sort and
+  grouped views load the complete data required for correct ordering, then show
+  the sorted results in 40-card pages.
+- A failed initial `/meme-lab` request shows an inline error with `Try again`.
+- A failed page request shows an inline error with `Try again`.
+- Changing pages or choosing `Try again` moves keyboard focus to the results
+  area, where it stays while cards load. Screen readers announce loading and the
+  current page when results arrive.
 - `/meme-lab/collection/{collection}` does not show a dedicated loading row.
 - Empty or unknown collections show `Nothing here yet`.
 - If collection fetch calls fail, the route can stay on header and sort controls
@@ -103,7 +111,8 @@
 
 ## Recovery
 
-- Refresh the current route to retry data fetch.
+- Use `Try again` after an initial or page request failure on `/meme-lab`.
+- Refresh the current route if the retry action continues to fail.
 - If a collection route is empty, reopen it from `/meme-lab` grouped
   `Collections` `view` links.
 - If sort output looks stale, change sort mode or sort direction once to force
@@ -114,6 +123,8 @@
 ## Limitations / Notes
 
 - Sorting and grouping are client-side and are not saved per user profile.
+- Fresh Meme Lab list data is cached briefly, so revisiting a page can reuse it
+  without repeating the list request.
 - Volume window choice is not stored in the URL.
 - List and collection routes do not share one sort-direction query key on first
   read (`sort_dir` vs `sortDir`).

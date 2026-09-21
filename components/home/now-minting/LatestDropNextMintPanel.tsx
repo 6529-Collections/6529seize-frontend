@@ -166,6 +166,7 @@ export default function LatestDropNextMintPanel({
                 disableModal={hasTouchScreen}
                 htmlIframeContainerClassName="tw-w-full"
                 htmlPreviewImageUrl={htmlPreviewImageUrl}
+                loadStrategy="eager"
               />
             ) : (
               <div className="tw-flex tw-size-full tw-items-center tw-justify-center tw-bg-black/40">
