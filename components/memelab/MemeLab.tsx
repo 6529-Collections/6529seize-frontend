@@ -6,24 +6,25 @@ import DotLoader from "@/components/dotLoader/DotLoader";
 import { LFGButton } from "@/components/lfg-slideshow/LFGSlideshow";
 import { NftBalancesProvider } from "@/components/nft-image/NftBalancesContext";
 import NothingHereYetSummer from "@/components/nothingHereYet/NothingHereYetSummer";
-import { publicEnv } from "@/config/env";
+import Pagination from "@/components/pagination/Pagination";
+import Button from "@/components/utils/button/Button";
 import { MEMELAB_CONTRACT } from "@/constants/constants";
 import { useSetTitle } from "@/contexts/TitleContext";
 import type { LabExtendedData, LabNFT } from "@/entities/INFT";
 import { VolumeType } from "@/entities/INFT";
 import { SortDirection } from "@/entities/ISort";
 import { getValuesForVolumeType } from "@/helpers/Helpers";
-import { compareLocalized } from "@/i18n/format";
+import { compareLocalized, formatInteger } from "@/i18n/format";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import { fetchAllPages } from "@/services/6529api";
 import { MemeLabSort } from "@/types/enums";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { getMemeLabCollectionHref } from "./memeLabRouteParams";
 import MemeLabNftCard from "./MemeLabNftCard";
 import MemeLabSortControls from "./MemeLabSortControls";
+import { MEME_LAB_PAGE_SIZE, useMemeLabCatalog } from "./useMemeLabCatalog";
 
 const COLLECTION_GRID_CLASS =
   "tw-grid tw-grid-cols-2 tw-gap-3 tw-pt-2 sm:tw-grid-cols-3 sm:tw-gap-4 lg:tw-grid-cols-[repeat(auto-fill,minmax(15rem,1fr))] xl:tw-gap-5";
@@ -88,6 +89,93 @@ function getMemeLabSortOptions(isCollection?: boolean) {
   return enumValues;
 }
 
+function getMemeLabSortQuery(
+  sort: MemeLabSort,
+  sortDir: SortDirection,
+  locale: SupportedLocale
+) {
+  const sortKey =
+    Object.keys(MemeLabSort)
+      .find((k) => MemeLabSort[k as keyof typeof MemeLabSort] === sort)
+      ?.toLowerCase() ?? "";
+  const newQuery: Record<string, string> = {
+    sort: sortKey,
+    sort_dir: sortDir.toLowerCase(),
+  };
+  if (locale !== DEFAULT_LOCALE) {
+    newQuery["locale"] = locale;
+  }
+  return `?${new URLSearchParams(newQuery).toString()}`;
+}
+
+function compareMetric(first: number, second: number, sortDir: SortDirection) {
+  let comparison = 0;
+  if (first > second) comparison = 1;
+  if (first < second) comparison = -1;
+  return sortDir === SortDirection.ASC ? comparison : -comparison;
+}
+
+function getSortedMemeLabNfts(
+  sort: MemeLabSort,
+  sortDir: SortDirection,
+  volumeType: VolumeType,
+  nfts: readonly LabNFT[],
+  nftMetas: readonly LabExtendedData[]
+) {
+  if (sort === MemeLabSort.AGE) {
+    return [...nfts].sort((a, b) =>
+      sortDir === SortDirection.ASC ? b.id - a.id : a.id - b.id
+    );
+  }
+
+  const metadataById = new Map(
+    nftMetas.map((nftMeta) => [nftMeta.id, nftMeta])
+  );
+  const getMetric = (nft: LabNFT) => {
+    const nftMeta = metadataById.get(nft.id);
+    switch (sort) {
+      case MemeLabSort.EDITION_SIZE:
+        return nft.supply;
+      case MemeLabSort.HODLERS:
+        return nftMeta?.hodlers ?? 0;
+      case MemeLabSort.UNIQUE_PERCENT:
+        return nftMeta?.percent_unique ?? 0;
+      case MemeLabSort.UNIQUE_PERCENT_EX_MUSEUM:
+        return nftMeta?.percent_unique_cleaned ?? 0;
+      case MemeLabSort.FLOOR_PRICE:
+        return nft.floor_price;
+      case MemeLabSort.MARKET_CAP:
+        return nft.market_cap;
+      case MemeLabSort.HIGHEST_OFFER:
+        return nft.highest_offer;
+      case MemeLabSort.VOLUME:
+        return getValuesForVolumeType(volumeType, nft);
+      case MemeLabSort.ARTISTS:
+      case MemeLabSort.COLLECTIONS:
+        return 0;
+      default:
+        return 0;
+    }
+  };
+
+  return [...nfts].sort((a, b) => {
+    const comparison = compareMetric(getMetric(a), getMetric(b), sortDir);
+    return comparison || a.id - b.id;
+  });
+}
+
+function getSortedLabels(
+  labels: readonly string[],
+  sortDir: SortDirection,
+  locale: SupportedLocale
+) {
+  return [...labels].sort((a, b) =>
+    sortDir === SortDirection.ASC
+      ? compareLocalized(locale, a, b)
+      : compareLocalized(locale, b, a)
+  );
+}
+
 export function sortChanged(
   router: ReturnType<typeof useRouter>,
   sort: MemeLabSort,
@@ -102,258 +190,17 @@ export function sortChanged(
   setLabCollections?: (collections: string[]) => void,
   locale: SupportedLocale = DEFAULT_LOCALE
 ) {
-  const sortKey =
-    Object.keys(MemeLabSort)
-      .find((k) => MemeLabSort[k as keyof typeof MemeLabSort] === sort)
-      ?.toLowerCase() ?? "";
-  const newQuery: Record<string, string> = {
-    sort: sortKey,
-    sort_dir: sortDir.toLowerCase(),
-  };
-  if (locale !== DEFAULT_LOCALE) {
-    newQuery["locale"] = locale;
+  router.replace(getMemeLabSortQuery(sort, sortDir, locale));
+
+  if (sort !== MemeLabSort.ARTISTS && sort !== MemeLabSort.COLLECTIONS) {
+    setNfts(getSortedMemeLabNfts(sort, sortDir, volumeType, nfts, nftMetas));
   }
 
-  router.replace(`?${new URLSearchParams(newQuery).toString()}`);
-
-  if (sort === MemeLabSort.AGE) {
-    if (sortDir === SortDirection.ASC) {
-      setNfts([...nfts].sort((a, b) => b.id - a.id));
-    } else {
-      setNfts([...nfts].sort((a, b) => a.id - b.id));
-    }
-  }
-  if (sort === MemeLabSort.EDITION_SIZE) {
-    setNfts([...nfts].sort((a, b) => a.id - b.id));
-    if (sortDir === SortDirection.ASC) {
-      setNfts(
-        [...nfts].sort((a, b) => {
-          if (a.supply > b.supply) return 1;
-          if (a.supply < b.supply) return -1;
-          return a.id - b.id;
-        })
-      );
-    } else {
-      setNfts(
-        [...nfts].sort((a, b) => {
-          if (a.supply > b.supply) return -1;
-          if (a.supply < b.supply) return 1;
-          return a.id - b.id;
-        })
-      );
-    }
-  }
-  if (sort === MemeLabSort.HODLERS) {
-    if (sortDir === SortDirection.ASC) {
-      setNfts(
-        [...nfts].sort((a, b) => {
-          if (
-            nftMetas.find((t1) => a.id === t1.id)!.hodlers >
-            nftMetas.find((t2) => b.id === t2.id)!.hodlers
-          )
-            return 1;
-          if (
-            nftMetas.find((t1) => a.id === t1.id)!.hodlers <
-            nftMetas.find((t2) => b.id === t2.id)!.hodlers
-          )
-            return -1;
-          return a.id - b.id;
-        })
-      );
-    } else {
-      setNfts(
-        [...nfts].sort((a, b) => {
-          if (
-            nftMetas.find((t1) => a.id === t1.id)!.hodlers >
-            nftMetas.find((t2) => b.id === t2.id)!.hodlers
-          )
-            return -1;
-          if (
-            nftMetas.find((t1) => a.id === t1.id)!.hodlers <
-            nftMetas.find((t2) => b.id === t2.id)!.hodlers
-          )
-            return 1;
-          return a.id - b.id;
-        })
-      );
-    }
-  }
   if (sort === MemeLabSort.ARTISTS && labArtists && setLabArtists) {
-    if (sortDir === SortDirection.ASC) {
-      setLabArtists(
-        [...labArtists].sort((a, b) => compareLocalized(locale, a, b))
-      );
-    } else {
-      setLabArtists(
-        [...labArtists].sort((a, b) => compareLocalized(locale, b, a))
-      );
-    }
+    setLabArtists(getSortedLabels(labArtists, sortDir, locale));
   }
   if (sort === MemeLabSort.COLLECTIONS && labCollections && setLabCollections) {
-    if (sortDir === SortDirection.ASC) {
-      setLabCollections(
-        [...labCollections].sort((a, b) => compareLocalized(locale, a, b))
-      );
-    } else {
-      setLabCollections(
-        [...labCollections].sort((a, b) => compareLocalized(locale, b, a))
-      );
-    }
-  }
-  if (sort === MemeLabSort.UNIQUE_PERCENT) {
-    if (sortDir === SortDirection.ASC) {
-      setNfts(
-        [...nfts].sort((a, b) => {
-          if (
-            nftMetas.find((t1) => a.id === t1.id)!.percent_unique >
-            nftMetas.find((t2) => b.id === t2.id)!.percent_unique
-          )
-            return 1;
-          if (
-            nftMetas.find((t1) => a.id === t1.id)!.percent_unique <
-            nftMetas.find((t2) => b.id === t2.id)!.percent_unique
-          )
-            return -1;
-          return a.id - b.id;
-        })
-      );
-    } else {
-      setNfts(
-        [...nfts].sort((a, b) => {
-          if (
-            nftMetas.find((t1) => a.id === t1.id)!.percent_unique >
-            nftMetas.find((t2) => b.id === t2.id)!.percent_unique
-          )
-            return -1;
-          if (
-            nftMetas.find((t1) => a.id === t1.id)!.percent_unique <
-            nftMetas.find((t2) => b.id === t2.id)!.percent_unique
-          )
-            return 1;
-          return a.id - b.id;
-        })
-      );
-    }
-  }
-  if (sort === MemeLabSort.UNIQUE_PERCENT_EX_MUSEUM) {
-    if (sortDir === SortDirection.ASC) {
-      setNfts(
-        [...nfts].sort((a, b) => {
-          if (
-            nftMetas.find((t1) => a.id === t1.id)!.percent_unique_cleaned >
-            nftMetas.find((t2) => b.id === t2.id)!.percent_unique_cleaned
-          )
-            return 1;
-          if (
-            nftMetas.find((t1) => a.id === t1.id)!.percent_unique_cleaned <
-            nftMetas.find((t2) => b.id === t2.id)!.percent_unique_cleaned
-          )
-            return -1;
-          return a.id - b.id;
-        })
-      );
-    } else {
-      setNfts(
-        [...nfts].sort((a, b) => {
-          if (
-            nftMetas.find((t1) => a.id === t1.id)!.percent_unique_cleaned >
-            nftMetas.find((t2) => b.id === t2.id)!.percent_unique_cleaned
-          )
-            return -1;
-          if (
-            nftMetas.find((t1) => a.id === t1.id)!.percent_unique_cleaned <
-            nftMetas.find((t2) => b.id === t2.id)!.percent_unique_cleaned
-          )
-            return 1;
-          return a.id - b.id;
-        })
-      );
-    }
-  }
-  if (sort === MemeLabSort.FLOOR_PRICE) {
-    setNfts([...nfts].sort((a, b) => a.id - b.id));
-    if (sortDir === SortDirection.ASC) {
-      setNfts(
-        [...nfts].sort((a, b) => {
-          if (a.floor_price > b.floor_price) return 1;
-          if (a.floor_price < b.floor_price) return -1;
-          return a.id - b.id;
-        })
-      );
-    } else {
-      setNfts(
-        [...nfts].sort((a, b) => {
-          if (a.floor_price > b.floor_price) return -1;
-          if (a.floor_price < b.floor_price) return 1;
-          return a.id - b.id;
-        })
-      );
-    }
-  }
-  if (sort === MemeLabSort.MARKET_CAP) {
-    setNfts([...nfts].sort((a, b) => a.id - b.id));
-    if (sortDir === SortDirection.ASC) {
-      setNfts(
-        [...nfts].sort((a, b) => {
-          if (a.market_cap > b.market_cap) return 1;
-          if (a.market_cap < b.market_cap) return -1;
-          return a.id - b.id;
-        })
-      );
-    } else {
-      setNfts(
-        [...nfts].sort((a, b) => {
-          if (a.market_cap > b.market_cap) return -1;
-          if (a.market_cap < b.market_cap) return 1;
-          return a.id - b.id;
-        })
-      );
-    }
-  }
-  if (sort === MemeLabSort.HIGHEST_OFFER) {
-    setNfts([...nfts].sort((a, b) => a.id - b.id));
-    if (sortDir === SortDirection.ASC) {
-      setNfts(
-        [...nfts].sort((a, b) => {
-          if (a.highest_offer > b.highest_offer) return 1;
-          if (a.highest_offer < b.highest_offer) return -1;
-          return a.id - b.id;
-        })
-      );
-    } else {
-      setNfts(
-        [...nfts].sort((a, b) => {
-          if (a.highest_offer > b.highest_offer) return -1;
-          if (a.highest_offer < b.highest_offer) return 1;
-          return a.id - b.id;
-        })
-      );
-    }
-  }
-  if (sort === MemeLabSort.VOLUME) {
-    setNfts([...nfts].sort((a, b) => a.id - b.id));
-    if (sortDir === SortDirection.ASC) {
-      setNfts(
-        [...nfts].sort((a, b) => {
-          const aVolume = getValuesForVolumeType(volumeType, a);
-          const bVolume = getValuesForVolumeType(volumeType, b);
-
-          if (aVolume > bVolume) return 1;
-          if (aVolume < bVolume) return -1;
-          return a.id - b.id;
-        })
-      );
-    } else {
-      setNfts(
-        [...nfts].sort((a, b) => {
-          const aVolume = getValuesForVolumeType(volumeType, a);
-          const bVolume = getValuesForVolumeType(volumeType, b);
-          if (aVolume > bVolume) return -1;
-          if (aVolume < bVolume) return 1;
-          return a.id - b.id;
-        })
-      );
-    }
+    setLabCollections(getSortedLabels(labCollections, sortDir, locale));
   }
 }
 
@@ -369,8 +216,25 @@ export default function MemeLabComponent({
   const router = useRouter();
   const { connectedProfile } = useContext(AuthContext);
   const isConnected = !!connectedProfile;
+  const initialRouterValues = getInitialRouterValues(
+    initialSortDirection,
+    initialSort
+  );
 
   useSetTitle(t(locale, "memeLab.documentTitle"));
+
+  const [sortDir, setSortDir] = useState<SortDirection>(
+    initialRouterValues.initialSortDir
+  );
+  const [sort, setSort] = useState<MemeLabSort>(
+    initialRouterValues.initialSort
+  );
+  const [volumeType, setVolumeType] = useState<VolumeType>(VolumeType.HOURS_24);
+  const pageViewKey = `${sort}-${sortDir}-${volumeType}`;
+  const [pageState, setPageState] = useState({ viewKey: "", page: 1 });
+  const resultsRef = useRef<HTMLElement>(null);
+  const page = pageState.viewKey === pageViewKey ? pageState.page : 1;
+  const catalog = useMemeLabCatalog(sort, sortDir, page);
 
   useEffect(() => {
     const { initialSortDir, initialSort: parsedInitialSort } =
@@ -379,85 +243,118 @@ export default function MemeLabComponent({
     setSort(parsedInitialSort);
   }, [initialSort, initialSortDirection]);
 
-  const [sortDir, setSortDir] = useState<SortDirection>();
-  const [sort, setSort] = useState<MemeLabSort>(MemeLabSort.AGE);
+  const selectSort = (nextSort: MemeLabSort) => {
+    setSort(nextSort);
+    router.replace(getMemeLabSortQuery(nextSort, sortDir, locale));
+  };
 
-  const [nfts, setNfts] = useState<LabNFT[]>([]);
-  const tokenIds = useMemo(() => nfts.map((nft) => nft.id), [nfts]);
-  const [nftMetas, setNftMetas] = useState<LabExtendedData[]>([]);
+  const selectSortDirection = (nextSortDir: SortDirection) => {
+    setSortDir(nextSortDir);
+    router.replace(getMemeLabSortQuery(sort, nextSortDir, locale));
+  };
 
-  const [nftsLoaded, setNftsLoaded] = useState(false);
-  const [labArtists, setLabArtists] = useState<string[]>([]);
-  const [labCollections, setLabCollections] = useState<string[]>([]);
+  const selectVolumeType = (nextVolumeType: VolumeType) => {
+    setVolumeType(nextVolumeType);
+  };
 
-  const [volumeType, setVolumeType] = useState<VolumeType>(VolumeType.HOURS_24);
-
-  useEffect(() => {
-    const loadMemeLabData = async () => {
-      try {
-        const nftsUrl = `${publicEnv.API_ENDPOINT}/api/lab_extended_data`;
-        const responseNftMetas = await fetchAllPages<LabExtendedData>(nftsUrl);
-        setNftMetas(responseNftMetas);
-        const myCollections: string[] = [];
-        [...responseNftMetas].map((nftMeta) => {
-          if (!myCollections.includes(nftMeta.metadata_collection)) {
-            myCollections.push(nftMeta.metadata_collection);
-          }
-        });
-        setLabCollections(myCollections.sort());
-        if (responseNftMetas.length > 0) {
-          const tokenIds = responseNftMetas.map((n) => n.id);
-          const responseNfts = await fetchAllPages<LabNFT>(
-            `${publicEnv.API_ENDPOINT}/api/nfts_memelab?id=${tokenIds.join(",")}`
-          );
-          setNfts(responseNfts);
-        } else {
-          setNfts([]);
-        }
-      } catch (error) {
-        console.error("Failed to fetch Meme Lab collections", error);
-        setNftMetas([]);
-        setLabCollections([]);
-        setNfts([]);
-      } finally {
-        setNftsLoaded(true);
-      }
-    };
-
-    loadMemeLabData();
-  }, []);
-
-  useEffect(() => {
-    if (nfts && nfts.length > 0) {
-      const myArtists: string[] = [];
-      [...nfts].map((nft) => {
-        if (!myArtists.includes(nft.artist)) {
-          myArtists.push(nft.artist);
-        }
-      });
-      setLabArtists(myArtists.sort());
-      setNftsLoaded(true);
-    }
-  }, [nfts]);
-
-  useEffect(() => {
-    if (sort && sortDir && nftsLoaded) {
-      sortChanged(
-        router,
+  const sortedNfts = useMemo(
+    () =>
+      getSortedMemeLabNfts(
         sort,
         sortDir,
         volumeType,
-        nfts,
-        nftMetas,
-        setNfts,
-        labArtists,
-        labCollections,
-        setLabArtists,
-        setLabCollections,
+        catalog.nfts,
+        catalog.nftMetas
+      ),
+    [catalog.nftMetas, catalog.nfts, sort, sortDir, volumeType]
+  );
+  const labArtists = useMemo(
+    () =>
+      getSortedLabels(
+        Array.from(new Set(catalog.nfts.map((nft) => nft.artist))),
+        sortDir,
         locale
+      ),
+    [catalog.nfts, locale, sortDir]
+  );
+  const labCollections = useMemo(
+    () =>
+      getSortedLabels(
+        Array.from(
+          new Set(
+            catalog.nftMetas.map((nftMeta) => nftMeta.metadata_collection)
+          )
+        ),
+        sortDir,
+        locale
+      ),
+    [catalog.nftMetas, locale, sortDir]
+  );
+
+  const orderedNfts = useMemo(() => {
+    if (sort === MemeLabSort.ARTISTS) {
+      return labArtists.flatMap((artist) =>
+        sortedNfts
+          .filter((nft) => nft.artist === artist)
+          .sort((a, b) => a.id - b.id)
       );
     }
-  }, [sort, sortDir, nftsLoaded, volumeType, locale]);
+    if (sort === MemeLabSort.COLLECTIONS) {
+      return labCollections.flatMap((collection) => {
+        const collectionIds = new Set(
+          catalog.nftMetas
+            .filter((nftMeta) => nftMeta.metadata_collection === collection)
+            .map((nftMeta) => nftMeta.id)
+        );
+        return sortedNfts
+          .filter((nft) => collectionIds.has(nft.id))
+          .sort((a, b) => a.id - b.id);
+      });
+    }
+    return sortedNfts;
+  }, [catalog.nftMetas, labArtists, labCollections, sort, sortedNfts]);
+  const totalResults =
+    sort === MemeLabSort.AGE ? catalog.totalResults : orderedNfts.length;
+  const totalPages = Math.max(1, Math.ceil(totalResults / MEME_LAB_PAGE_SIZE));
+  const visiblePage =
+    sort === MemeLabSort.AGE ? page : Math.min(page, totalPages);
+  const firstResultIndex = (visiblePage - 1) * MEME_LAB_PAGE_SIZE;
+  const visibleNfts = useMemo(
+    () =>
+      sort === MemeLabSort.AGE
+        ? orderedNfts
+        : orderedNfts.slice(
+            firstResultIndex,
+            firstResultIndex + MEME_LAB_PAGE_SIZE
+          ),
+    [firstResultIndex, orderedNfts, sort]
+  );
+  const visibleNftIds = useMemo(
+    () => new Set(visibleNfts.map((nft) => nft.id)),
+    [visibleNfts]
+  );
+  const tokenIds = useMemo(
+    () => visibleNfts.map((nft) => nft.id),
+    [visibleNfts]
+  );
+
+  const selectPage = (nextPage: number) => {
+    resultsRef.current?.focus({ preventScroll: true });
+    setPageState({ viewKey: pageViewKey, page: nextPage });
+    if (typeof globalThis.scrollTo === "function") {
+      globalThis.scrollTo(0, 0);
+    }
+  };
+
+  let resultsStatus = "";
+  if (catalog.isLoading) {
+    resultsStatus = t(locale, "memeLab.loading.fetching");
+  } else if (!catalog.isInitialError) {
+    resultsStatus = t(locale, "common.pagination.pageOf", {
+      current: formatInteger(locale, visiblePage),
+      total: formatInteger(locale, totalPages),
+    });
+  }
 
   function printNft(nft: LabNFT) {
     return (
@@ -465,7 +362,7 @@ export default function MemeLabComponent({
         <MemeLabNftCard
           nft={nft}
           sort={sort}
-          nftMetas={nftMetas}
+          nftMetas={catalog.nftMetas}
           volumeType={volumeType}
           hasConnectedProfile={isConnected}
           locale={locale}
@@ -480,14 +377,19 @@ export default function MemeLabComponent({
         aria-label={t(locale, "memeLab.results.gridLabel")}
         className={COLLECTION_GRID_LIST_CLASS}
       >
-        {nfts.map(printNft)}
+        {visibleNfts.map(printNft)}
       </ul>
     );
   }
 
   function printArtists() {
     return labArtists.map((artist) => {
-      const artistNfts = [...nfts].filter((n) => n.artist === artist);
+      const artistNfts = sortedNfts.filter(
+        (nft) => nft.artist === artist && visibleNftIds.has(nft.id)
+      );
+      if (artistNfts.length === 0) {
+        return null;
+      }
       return (
         <section key={`${artist}-row`} className="tw-pt-6">
           <h2 className="tw-mb-4 tw-text-lg tw-font-semibold tw-leading-6 tw-text-iron-100">
@@ -510,12 +412,17 @@ export default function MemeLabComponent({
 
   function printCollections() {
     return labCollections.map((collection) => {
-      const collectionNftsMetas = [...nftMetas].filter(
+      const collectionNftsMetas = catalog.nftMetas.filter(
         (n) => n.metadata_collection === collection
       );
-      const collectionNfts = [...nfts].filter((n) =>
-        collectionNftsMetas.some((a) => a.id === n.id)
+      const collectionNfts = sortedNfts.filter(
+        (nft) =>
+          visibleNftIds.has(nft.id) &&
+          collectionNftsMetas.some((nftMeta) => nftMeta.id === nft.id)
       );
+      if (collectionNfts.length === 0) {
+        return null;
+      }
       return (
         <section key={`${collection}-row`} className="tw-pt-6">
           <div className="tw-mb-4 tw-flex tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-1">
@@ -551,33 +458,69 @@ export default function MemeLabComponent({
   }
 
   function printNftsContent() {
-    let content;
-
-    if (nftsLoaded) {
-      if (nfts.length > 0) {
-        if (sort === MemeLabSort.ARTISTS) {
-          content = printArtists();
-        } else if (sort === MemeLabSort.COLLECTIONS) {
-          content = printCollections();
-        } else {
-          content = printNfts();
-        }
-      } else {
-        content = (
-          <div>
-            <NothingHereYetSummer />
-          </div>
-        );
-      }
-    } else {
-      content = (
+    if (catalog.isLoading) {
+      return (
         <div className="tw-pb-5 tw-pt-4 tw-text-sm tw-text-iron-300">
           {t(locale, "memeLab.loading.fetching")} <DotLoader />
         </div>
       );
     }
 
-    return content;
+    if (catalog.isInitialError) {
+      return (
+        <div
+          role="alert"
+          className="tw-mt-4 tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-p-6"
+        >
+          <p className="tw-mt-0 tw-text-sm tw-text-iron-300">
+            {t(locale, "collect.error.catalog")}
+          </p>
+          <Button
+            onClick={() => {
+              resultsRef.current?.focus({ preventScroll: true });
+              void catalog.retry();
+            }}
+            variant="secondary"
+            loading={catalog.isRetrying}
+          >
+            {t(locale, "collect.retry")}
+          </Button>
+        </div>
+      );
+    }
+
+    if (sortedNfts.length === 0) {
+      return (
+        <div>
+          <NothingHereYetSummer />
+        </div>
+      );
+    }
+
+    let results;
+    if (sort === MemeLabSort.ARTISTS) {
+      results = printArtists();
+    } else if (sort === MemeLabSort.COLLECTIONS) {
+      results = printCollections();
+    } else {
+      results = printNfts();
+    }
+
+    return (
+      <>
+        {results}
+        {totalResults > MEME_LAB_PAGE_SIZE && (
+          <div className="tw-py-4 tw-text-center">
+            <Pagination
+              page={visiblePage}
+              pageSize={MEME_LAB_PAGE_SIZE}
+              totalResults={totalResults}
+              setPage={selectPage}
+            />
+          </div>
+        )}
+      </>
+    );
   }
 
   return (
@@ -605,15 +548,26 @@ export default function MemeLabComponent({
           <MemeLabSortControls
             ariaLabel={t(locale, "memeLab.sorting.regionLabel")}
             sortDirection={sortDir}
-            setSortDirection={setSortDir}
+            setSortDirection={selectSortDirection}
             currentSort={sort}
             sortOptions={getMemeLabSortOptions()}
-            setSort={setSort}
-            setVolumeType={setVolumeType}
+            setSort={selectSort}
+            setVolumeType={selectVolumeType}
             volumeType={volumeType}
             locale={locale}
           />
-          {printNftsContent()}
+          <p role="status" className="tw-sr-only">
+            {resultsStatus}
+          </p>
+          <section
+            ref={resultsRef}
+            aria-label={t(locale, "memeLab.results.gridLabel")}
+            aria-busy={catalog.isLoading}
+            tabIndex={-1}
+            className="focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+          >
+            {printNftsContent()}
+          </section>
         </div>
       </div>
     </NftBalancesProvider>

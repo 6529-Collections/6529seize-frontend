@@ -7241,6 +7241,7 @@
       "keywords": ["meme", "lab", "list", "collection", "browse", "query"],
       "facts": [
         "Meme Lab list browsing lives at /meme-lab.",
+        "Meme Lab shows 40 cards per page and uses the same pagination controls as ReMemes. Failed initial or page requests provide a Try again action. Page changes and retries move keyboard focus to the results area; screen readers announce loading and the current page.",
         "Collection-specific browsing uses /meme-lab/collection/{collection}.",
         "URL and query behavior are documented in the Meme Lab collection browsing docs."
       ],
