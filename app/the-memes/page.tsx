@@ -10,6 +10,7 @@ import {
   getTheMemesRouteLocale,
   type TheMemesSearchParams,
 } from "@/components/the-memes/theMemesRouteParams";
+import { getTheMemesInitialData } from "@/app/the-memes/theMemesInitialData";
 import { publicEnv } from "@/config/env";
 import { t } from "@/i18n/messages";
 import JsonLdScript from "@/lib/structured-data/json-ld";
@@ -29,7 +30,9 @@ async function getRouteLocale(searchParams: TheMemesPageProps["searchParams"]) {
 export default async function TheMemesPage({
   searchParams,
 }: TheMemesPageProps) {
-  const locale = await getRouteLocale(searchParams);
+  const resolvedSearchParams = (await searchParams) ?? {};
+  const locale = getTheMemesRouteLocale(resolvedSearchParams);
+  const initialData = await getTheMemesInitialData(resolvedSearchParams);
 
   return (
     <main className={styles["main"]}>
@@ -44,7 +47,7 @@ export default async function TheMemesPage({
         })}
       />
       <Suspense fallback={null}>
-        <TheMemesComponent locale={locale} />
+        <TheMemesComponent initialData={initialData} locale={locale} />
       </Suspense>
     </main>
   );

@@ -18,6 +18,10 @@ jest.mock("@/components/the-memes/TheMemes", () => ({
   default: () => <div data-testid="the-memes" />,
 }));
 
+jest.mock("@/app/the-memes/theMemesInitialData", () => ({
+  getTheMemesInitialData: jest.fn(),
+}));
+
 const getSocialImage = (metadata: Metadata) => {
   const [image] = metadata.openGraph?.images as {
     alt: string;
