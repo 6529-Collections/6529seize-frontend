@@ -626,3 +626,9 @@ Tall videos become narrower and centered without cropping; controls stay
 inside the actual frame. Sizing remains independent of neighboring loading panels.
 Keep its facts aligned with the shared player and Media Rendering video guide.
 Browser-native controls remain a separate behavior.
+
+### Still artwork sizing coverage
+
+The media playback record also describes contained still artwork on the
+homepage, Meme detail, and expanded Wave submissions: the shared usable-screen
+height cap, desktop homepage details-height limit, and stable Meme image frame.

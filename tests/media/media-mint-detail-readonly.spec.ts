@@ -1,3 +1,4 @@
+import { defineNftImageLayoutTests } from "./imageArtworkLayoutCases";
 import type { Page } from "@playwright/test";
 
 import {
@@ -241,6 +242,15 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
 
 // Cards 549 (portrait) and 550 (square) are video fixtures on staging. Other environments
 // have independent collections, so their existing detail fixtures stay intact.
+test.describe("Staging image artwork sizing @surface @medium @large @readonly", () => {
+  test.skip(
+    ({ baseURL }) =>
+      !baseURL || new URL(baseURL).hostname !== "staging.6529.io",
+    "Meme 551 image fixture runs on staging"
+  );
+  defineNftImageLayoutTests();
+});
+
 test.describe("Staging video artwork sizing @surface @medium @large @readonly", () => {
   // This fixture is unavailable outside staging; skip only those environments.
   test.skip(({ baseURL }) => {

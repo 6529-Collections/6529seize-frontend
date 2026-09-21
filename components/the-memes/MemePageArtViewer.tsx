@@ -72,11 +72,17 @@ function getInlineMediaVariant(
   return "image";
 }
 
-function getArtworkLayout(isVideoArtwork: boolean) {
+function getArtworkLayout(isVideoArtwork: boolean, isImageArtwork: boolean) {
   return {
-    root: isVideoArtwork ? "tw-flex-1" : "tw-h-full",
-    carousel: styles[isVideoArtwork ? "videoCarousel" : "memesCarousel"],
-    slide: isVideoArtwork ? "tw-h-auto" : "tw-h-full",
+    root: clsx(
+      isVideoArtwork && "tw-flex-1",
+      !isVideoArtwork && !isImageArtwork && "tw-h-full"
+    ),
+    carousel:
+      styles[
+        isVideoArtwork || isImageArtwork ? "videoCarousel" : "memesCarousel"
+      ],
+    slide: isVideoArtwork || isImageArtwork ? "tw-h-auto" : "tw-h-full",
   };
 }
 
@@ -109,7 +115,9 @@ export function MemePageArtViewer({
   const animationMimeType = getAnimationMimeTypeFromMetadata(metadata);
   const isVideoArtwork =
     hasAnimation && (animationMimeType?.startsWith("video/") ?? false);
-  const artworkLayout = getArtworkLayout(isVideoArtwork);
+  const isImageArtwork =
+    !hasAnimation || (animationMimeType?.startsWith("image/") ?? false);
+  const artworkLayout = getArtworkLayout(isVideoArtwork, isImageArtwork);
   const imageHref = getResolvedImageSrc(nft);
   const hasImage = Boolean(imageHref);
   const isShowingAnimation = hasAnimation && (currentSlide === 0 || !imageHref);
@@ -380,7 +388,7 @@ export function MemePageArtViewer({
                   <NFTImage
                     nft={nft}
                     animation={true}
-                    artworkLayout={isVideoArtwork}
+                    artworkLayout={isVideoArtwork || isImageArtwork}
                     height={650}
                     transparentBG={true}
                     showBalance={false}
@@ -401,7 +409,7 @@ export function MemePageArtViewer({
                     <NFTImage
                       nft={nft}
                       animation={false}
-                      artworkLayout={isVideoArtwork}
+                      artworkLayout={isVideoArtwork || isImageArtwork}
                       height={650}
                       showBalance={false}
                       showOriginal={
@@ -424,6 +432,7 @@ export function MemePageArtViewer({
                 <NFTImage
                   nft={nft}
                   animation={false}
+                  artworkLayout
                   height={650}
                   transparentBG={true}
                   showBalance={false}

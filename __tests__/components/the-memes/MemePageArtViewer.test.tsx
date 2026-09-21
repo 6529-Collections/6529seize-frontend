@@ -215,7 +215,8 @@ describe("MemePageArtViewer", () => {
 
     expect(screen.getByTestId("image-art")).toBeInTheDocument();
     expect(screen.queryByTestId("animation-art")).not.toBeInTheDocument();
-    expect(container.firstElementChild).toHaveClass("tw-h-full");
+    expect(container.firstElementChild).not.toHaveClass("tw-h-full");
+    expect(getLatestNFTImageProps(false).artworkLayout).toBe(true);
     expect(container.firstElementChild).not.toHaveClass("tw-flex-none");
     expect(container.firstElementChild).not.toHaveAttribute(
       "data-video-artwork"
