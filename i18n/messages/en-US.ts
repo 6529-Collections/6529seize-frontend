@@ -2846,6 +2846,18 @@ export const EN_US_MESSAGES = {
   "profile.metadata.unavailable.title": "Profile temporarily unavailable",
   "profile.metadata.unavailable.description":
     "This public profile could not be loaded.",
+  "profile.metadata.pathTitle": "{display} - {pathTitle}",
+  "profile.metadata.title": "{pageTitle} | 6529.io",
+  "profile.metadata.description":
+    "Explore {display}'s public identity and activity.",
+  "profile.metadata.ogImageAlt": "{display} profile social card",
+  "waves.metadata.title": "{waveName} | Brain",
+  "waves.metadata.publicDescription": "Explore {waveName}, a public Wave.",
+  "waves.metadata.privateDescription": "Explore this Wave.",
+  "waves.metadata.ogImageAlt": "{waveName} wave social card",
+  "nft.metadata.itemTitle": "{name} | {collection}",
+  "nft.metadata.description": "{name} · {collection}",
+  "nft.metadata.descriptionWithArtist": "{name} · {artist} · {collection}",
   "memes.proposalFrame.enable": "Add a proposal card frame (optional)",
   "memes.proposalFrame.description":
     "This card has plans. Add an animated border that says this is a proposal and the artwork may change. Your media will be embedded in an HTML artwork.",
@@ -3243,6 +3255,9 @@ export const EN_US_MESSAGES = {
   "headerWaveLinkAction.feedback.shared": "Link shared",
   "headerWaveLinkAction.feedback.copied": "Link copied",
   "acceptConnection.incoming.profileStats": "TDH: {tdh} · Level: {level}",
+  "openData.metadata.description": "Download public 6529 datasets.",
+  "tools.api.metadata.description":
+    "Read the open REST API documentation, including authentication and drop media examples.",
   "tools.api.authCallout.title": "v2 API authentication",
   "tools.api.authCallout.description":
     "New external clients should use session-v2 wallet authentication: request a signable message, sign it exactly, exchange the signature for an access token, then send that token as bearer auth.",
@@ -3459,6 +3474,8 @@ export const EN_US_MESSAGES = {
     "About your display preference",
   "theMemes.documentTitle": "The Memes | Collections",
   "theMemes.description.collections": "Collections",
+  "theMemes.mint.metadata.description":
+    "View the latest mint from The Memes collection.",
   "theMemes.title": "The Memes",
   "theMemes.sorting.regionLabel": "Meme sorting",
   "theMemes.sorting.sortBy": "Sort by",
@@ -3550,6 +3567,8 @@ export const EN_US_MESSAGES = {
   "memeLab.collections.documentTitle":
     "{collectionName} | Meme Lab Collections",
   "memeLab.description.collections": "Collections",
+  "memeLab.metadata.description":
+    "Meme Lab is a 6529 NFT collection connected to The Memes.",
   "memeLab.sorting.regionLabel": "Meme Lab sorting",
   "memeLab.sorting.collectionRegionLabel": "Meme Lab collection sorting",
   "memeLab.sorting.sortBy": "Sort by",
