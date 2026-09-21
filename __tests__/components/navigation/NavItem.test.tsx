@@ -119,7 +119,7 @@ describe("NavItem notifications", () => {
   const getNavHref = jest.fn();
   const recordNavClick = jest.fn();
   const seizeConnect = jest.fn();
-  const removeAllDeliveredNotifications = jest.fn();
+  const reconcileProfileDeliveredNotifications = jest.fn();
   const setTitle = jest.fn();
 
   beforeEach(() => {
@@ -142,13 +142,14 @@ describe("NavItem notifications", () => {
     (isNavItemActive as jest.Mock).mockReturnValue(false);
     (useUnreadIndicator as jest.Mock).mockReturnValue({ hasUnread: false });
     (useNotificationsContext as jest.Mock).mockReturnValue({
-      removeAllDeliveredNotifications,
+      reconcileProfileDeliveredNotifications,
     });
     (useAuth as jest.Mock).mockReturnValue({
       connectedProfile: { handle: "user", normalised_handle: "user" },
     });
     (useSeizeConnectContext as jest.Mock).mockReturnValue({
       address: "0xabc",
+      hasValidWalletAuth: true,
       seizeConnect,
     });
     (useUnreadNotifications as jest.Mock).mockReturnValue({
@@ -182,7 +183,7 @@ describe("NavItem notifications", () => {
 
     // Title is set via TitleContext hooks
     expect(container.querySelector(".tw-bg-red")).not.toBeNull();
-    expect(removeAllDeliveredNotifications).not.toHaveBeenCalled();
+    expect(reconcileProfileDeliveredNotifications).toHaveBeenCalled();
   });
 
   it("clears delivered notifications when none unread", () => {
@@ -200,8 +201,28 @@ describe("NavItem notifications", () => {
     const { container } = render(<NavItem item={item} />);
 
     // Title is set via TitleContext hooks
-    expect(removeAllDeliveredNotifications).toHaveBeenCalled();
+    expect(reconcileProfileDeliveredNotifications).toHaveBeenCalled();
     expect(container.querySelector(".tw-bg-red")).toBeNull();
+  });
+
+  it("does not treat unavailable unread state as zero", () => {
+    (useUnreadNotifications as jest.Mock).mockReturnValue({
+      notifications: undefined,
+      haveUnreadNotifications: false,
+    });
+    render(
+      <NavItem
+        item={
+          {
+            kind: "route",
+            name: "Notifications",
+            href: "/notifications",
+            icon: "/n",
+          } as any
+        }
+      />
+    );
+    expect(reconcileProfileDeliveredNotifications).not.toHaveBeenCalled();
   });
 
   it("prompts connect when profile item is clicked without a connected wallet", () => {

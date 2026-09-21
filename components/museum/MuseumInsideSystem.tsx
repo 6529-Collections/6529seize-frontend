@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { MuseumStudyLink } from "./MuseumStudyLink";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { getCaseyArtwork } from "@/lib/museum/casey";
@@ -37,12 +38,12 @@ export function MuseumInTheSystem({
           <p className="tw-m-0 tw-mt-4 tw-max-w-2xl tw-text-base tw-leading-7 tw-text-iron-200">
             {position.reading}
           </p>
-          <Link
+          <MuseumStudyLink
             href={`/museum/network/projects/${study.projectSlug}/system?work=${encodeURIComponent(position.objectId)}#possibility-space`}
             className={`${linkClass} tw-mt-5`}
           >
             {t(DEFAULT_LOCALE, "museum.network.insideSystem.locateWork")}
-          </Link>
+          </MuseumStudyLink>
         </div>
         <div className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-700 tw-pt-5 lg:tw-border-l lg:tw-border-t-0 lg:tw-pl-7 lg:tw-pt-0">
           <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.14em] tw-text-iron-500">

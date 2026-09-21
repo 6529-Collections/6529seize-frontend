@@ -1,0 +1,74 @@
+/* Native range pseudos keep pointer, touch and keyboard seeking in the browser. */
+.timeline {
+  appearance: none;
+  background: transparent;
+  touch-action: none;
+  --track-background: linear-gradient(
+    to right,
+    #528bff 0%,
+    #528bff var(--video-progress),
+    rgb(255 255 255 / 20%) var(--video-progress),
+    rgb(255 255 255 / 20%) 100%
+  );
+}
+
+.timeline::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--track-background);
+}
+
+.timeline::-moz-range-track {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--track-background);
+}
+
+.timeline::-webkit-slider-thumb {
+  appearance: none;
+  width: 10px;
+  height: 10px;
+  margin-top: -3px;
+  border: 0;
+  border-radius: 50%;
+  background: white;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 45%);
+}
+
+.timeline::-moz-range-thumb {
+  width: 10px;
+  height: 10px;
+  border: 0;
+  border-radius: 50%;
+  background: white;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 45%);
+}
+
+.timeline:active::-webkit-slider-thumb,
+.timeline:focus-visible::-webkit-slider-thumb {
+  transform: scale(1.3);
+}
+
+.timeline:active::-moz-range-thumb,
+.timeline:focus-visible::-moz-range-thumb {
+  transform: scale(1.3);
+}
+
+@media (hover: hover) {
+  .timeline:hover::-webkit-slider-thumb {
+    transform: scale(1.3);
+  }
+  .timeline:hover::-moz-range-thumb {
+    transform: scale(1.3);
+  }
+}
+
+.timeline:focus-visible {
+  outline: 2px solid #528bff;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.timeline:disabled {
+  opacity: 0.5;
+}

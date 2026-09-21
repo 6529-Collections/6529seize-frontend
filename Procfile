@@ -1,1 +1,1 @@
-web: PORT=3001 HOSTNAME=0.0.0.0 node server.js
+web: PORT=3001 HOSTNAME=0.0.0.0 KEEP_ALIVE_TIMEOUT=65000 node server.js

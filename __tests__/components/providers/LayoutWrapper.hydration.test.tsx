@@ -44,9 +44,13 @@ jest.mock("@/utils/monitoring/mobileLaunchTiming", () => ({
 // the layouts' unrelated service trees with distinct host elements.
 jest.mock("@/components/layout/WebLayout", () => ({
   __esModule: true,
-  default: ({ children }: { children: React.ReactNode }) => (
-    <section data-layout="web">{children}</section>
-  ),
+  default: ({
+    children,
+    isSmall,
+  }: {
+    children: React.ReactNode;
+    isSmall?: boolean;
+  }) => <section data-layout={isSmall ? "small" : "web"}>{children}</section>,
 }));
 jest.mock("@/components/layout/AppLayout", () => ({
   __esModule: true,
@@ -258,16 +262,20 @@ it.each([
       if (restricted)
         expect(commits.every((commit) => commit.hidden)).toBe(true);
       if (platform !== "web") expect(commits.at(-1)?.orientation).toBe(1);
-      // The server layout transitions once. Real MobileLayout must select
-      // AppLayout immediately, without mounting a second fallback layout.
-      expect(contentMountLayouts).toEqual(["web", layout]);
-      expect(hiddenContentCommits).toEqual([platform !== "web", false]);
+      // Native hydration still enters AppLayout once. Web chrome adapts without
+      // remounting the server-rendered page or losing its pending work.
+      const expectedMountLayouts =
+        platform === "web" ? ["web"] : ["web", layout];
+      expect(contentMountLayouts).toEqual(expectedMountLayouts);
+      expect(hiddenContentCommits).toEqual(
+        platform === "web" ? [false] : [true, false]
+      );
       await act(async () => root?.render(<Reader showNavigation />));
       expect(navigationRenders[0]).toBe(platform !== "web");
       expect(
         navigationRenders.every((isApp) => isApp === (platform !== "web"))
       ).toBe(true);
-      expect(contentMountLayouts).toEqual(["web", layout]);
+      expect(contentMountLayouts).toEqual(expectedMountLayouts);
     } finally {
       await act(async () => root?.unmount());
       container.remove();

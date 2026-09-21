@@ -1509,14 +1509,6 @@
       "classification": "crawlable",
       "family": "museum-publication"
     },
-    "/museum/network/collection/[objectId]": {
-      "classification": "fixture",
-      "fixture": {
-        "staging": "/museum/network/collection/6529NM.2026.001.01",
-        "production": "/museum/network/collection/6529NM.2026.001.01"
-      },
-      "family": "museum-publication"
-    },
     "/museum/network/collections": {
       "classification": "crawlable",
       "family": "museum-publication"

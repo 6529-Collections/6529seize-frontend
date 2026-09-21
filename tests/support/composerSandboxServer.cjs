@@ -3102,6 +3102,8 @@ server.on("error", (error) => {
 
 server.listen(mockApiPort, "127.0.0.1", () => {
   console.log(`Composer sandbox mock API listening on ${mockApiOrigin}`);
+  // Production-built browser acceptance supplies its own Next.js server.
+  if (process.env.PLAYWRIGHT_COMPOSER_SANDBOX_API_ONLY === "1") return;
   nextChild = startNextDev();
   nextChild.on("exit", (code) => {
     server.close(() => process.exit(code || 0));

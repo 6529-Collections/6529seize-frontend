@@ -63,6 +63,9 @@ export interface SeizeConnectContextType {
   /** Whether the active wallet has a live signer connection */
   canSignActiveWallet: boolean;
 
+  /** Live signing-wallet bootstrap or reconnection is still pending. */
+  isWalletConnectionPending: boolean;
+
   /** Whether there is an active wallet address, regardless of auth validity */
   hasActiveWalletAddress: boolean;
 

@@ -34,9 +34,11 @@ jest.mock("@/components/delegation/CollectionDelegation", () => () => <div />);
 jest.mock("@/components/delegation/html/DelegationHTML", () => () => <div />);
 
 let mockConnectedAddress = "0xabc";
+let mockWalletPending = false;
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: () => ({
     address: mockConnectedAddress,
+    isWalletConnectionPending: mockWalletPending,
     isConnected: true,
     seizeConnect: jest.fn(),
   }),
@@ -64,6 +66,7 @@ describe("DelegationCenterMenu links", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockConnectedAddress = "0xabc";
+    mockWalletPending = false;
   });
 
   it("renders resource links", async () => {
@@ -259,4 +262,26 @@ describe("DelegationCenterMenu links", () => {
     fireEvent.click(screen.getByText("Show second"));
     expect(screen.getByText("Second Toast")).toBeInTheDocument();
   });
+});
+
+it.each([
+  DelegationCenterSection.REGISTER_DELEGATION,
+  DelegationCenterSection.REGISTER_SUB_DELEGATION,
+  DelegationCenterSection.REGISTER_CONSOLIDATION,
+  DelegationCenterSection.ASSIGN_PRIMARY_ADDRESS,
+])("waits for the live connector on %s", async (section) => {
+  const { default: Menu } =
+    await import("@/components/delegation/DelegationCenterMenu");
+  mockWalletPending = true;
+  mockConnectedAddress = "";
+  const { rerender } = render(<Menu {...props} section={section} />);
+  expect(screen.getByRole("status")).toBeInTheDocument();
+  expect(
+    screen.queryByRole("button", { name: "Connect Wallet" })
+  ).not.toBeInTheDocument();
+  mockWalletPending = false;
+  rerender(<Menu {...props} section={section} />);
+  expect(
+    screen.getByRole("button", { name: "Connect Wallet" })
+  ).toBeInTheDocument();
 });

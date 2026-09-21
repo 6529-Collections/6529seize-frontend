@@ -13875,6 +13875,84 @@ paths:
           description: Unauthorized
         "403":
           description: Forbidden - profile required
+  /push-notifications/installations/badge-refresh:
+    post:
+      tags:
+        - Push Notifications
+      summary: Request the current aggregate iOS badge for this installation
+      description: >-
+        Authenticated by an already registered installation's private credential
+        and current revision, without a wallet JWT. Queues the existing worker
+        to recount all registered profiles. Does not mark notifications read,
+        change registrations, or accept a client-supplied count. Delivery is
+        asynchronous and best effort; queued is false when pushes are disabled.
+      operationId: refreshPushInstallationBadge
+      security: []
+      x-6529-router:
+        enabled: true
+        auth: none
+        handler:
+          import: "@/api/push-notifications/refresh-push-installation-badge.handler"
+          name: handleRefreshPushInstallationBadge
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiRefreshPushInstallationBadgeRequest"
+      responses:
+        "200":
+          description: Installation verified and queue handoff completed when enabled.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiRefreshPushInstallationBadgeResponse"
+        "400":
+          description: Invalid request.
+        "403":
+          description: Installation credential is invalid or not yet registered.
+        "409":
+          description: Installation revision is stale.
+  /push-notifications/installations/revoke:
+    post:
+      tags:
+        - Push Notifications
+      summary: Revoke this installation's profile registrations and native sessions
+      description: >-
+        Authenticated by the private installation credential, not a wallet JWT.
+        Set all_profiles to remove all profiles on this installation. Persist
+        and retry the same revision after a network failure. A legacy
+        installation can be claimed only with a token matching every existing
+        registration on that device.
+      operationId: revokePushInstallation
+      security: []
+      x-6529-router:
+        enabled: true
+        auth: none
+        handler:
+          import: "@/api/push-notifications/revoke-push-installation.handler"
+          name: handleRevokePushInstallation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiRevokePushInstallationRequest"
+      responses:
+        "200":
+          description: >-
+            Registrations and supplied native sessions revoked; badge refresh
+            queued when enabled.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiRevokePushInstallationResponse"
+        "403":
+          description: >-
+            Installation proof is invalid or legacy token ownership cannot be
+            established.
+        "409":
+          description: Installation revision is out of order.
   /push-notifications/settings/{device_id}:
     get:
       tags:
@@ -33956,6 +34034,16 @@ components:
             Optional EIP-712 domain verifyingContract. Omit or pass null when
             the client signed without one.
           nullable: true
+    ApiPushLogoutSession:
+      type: object
+      required:
+        - address
+        - native_refresh_token
+      properties:
+        address:
+          type: string
+        native_refresh_token:
+          type: string
     ApiPushNotificationDevice:
       type: object
       required:
@@ -34188,6 +34276,34 @@ components:
           type: string
         token:
           type: string
+    ApiRefreshPushInstallationBadgeRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - device_id
+        - installation_secret
+        - revision
+      properties:
+        device_id:
+          type: string
+          minLength: 1
+          maxLength: 100
+        installation_secret:
+          type: string
+          pattern: ^[a-fA-F0-9]{64}$
+        revision:
+          type: integer
+          format: int64
+          minimum: 0
+          maximum: 4294967295
+    ApiRefreshPushInstallationBadgeResponse:
+      type: object
+      required:
+        - queued
+      properties:
+        queued:
+          type: boolean
+          description: Queue acceptance, not confirmation of device delivery.
     ApiRegisterPushNotificationTokenRequest:
       type: object
       required:
@@ -34198,6 +34314,24 @@ components:
           type: string
         token:
           type: string
+        installation_secret:
+          type: string
+          description: Private installation credential stored in native secure storage.
+        previous_device_id:
+          type: string
+          maxLength: 100
+          description: >-
+            Copy this authenticated profile's existing preferences to a
+            replacement installation, without moving registrations or
+            overwriting destination preferences.
+        installation_revision:
+          type: integer
+          format: int64
+          minimum: 0
+          maximum: 4294967295
+          description: >-
+            Current installation revision; stale registration requests are
+            rejected.
         profile_id:
           type: string
           description: Optional profile_id
@@ -34383,6 +34517,60 @@ components:
           description: >-
             Required for applied; must equal the candidate and saved result
             hashes.
+    ApiRevokePushInstallationRequest:
+      type: object
+      required:
+        - device_id
+        - installation_secret
+        - revision
+        - sessions
+        - all_profiles
+      properties:
+        token_scoped:
+          type: boolean
+          description: >-
+            Remove only registrations matching the supplied token and device ID.
+            Uses an independent cleanup credential and revision; never claims or
+            advances the installation. Does not revoke native sessions.
+        all_profiles:
+          type: boolean
+          description: >-
+            True removes every profile on this installation. False removes only
+            profile_id, or only sessions if no profile is provided.
+        device_id:
+          type: string
+        installation_secret:
+          type: string
+        revision:
+          type: integer
+          format: int64
+          minimum: 1
+          maximum: 4294967295
+        token:
+          type: string
+          description: >-
+            Legacy installation ownership proof; never exposed by device-list
+            APIs.
+        profile_id:
+          type: string
+          description: >-
+            When all_profiles is false, removes only this profile. Omit to
+            revoke only supplied sessions without deleting profile
+            registrations. Ignored when all_profiles is true, which removes
+            every profile.
+        sessions:
+          type: array
+          maxItems: 50
+          items:
+            $ref: "#/components/schemas/ApiPushLogoutSession"
+    ApiRevokePushInstallationResponse:
+      type: object
+      required:
+        - revision
+      properties:
+        revision:
+          type: integer
+          format: int64
     ApiRollbackProfileCmsPackageRequest:
       type: object
       required:

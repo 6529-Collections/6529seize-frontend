@@ -1,5 +1,7 @@
 "use client";
 
+import { isWalletConnectionResolving } from "@/components/auth/authResolution";
+import AuthLoadingPlaceholder from "@/components/auth/AuthLoadingPlaceholder";
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button, Col, Container, Row } from "./NextGenAdminShared";
@@ -50,6 +52,7 @@ export default function NextGenAdmin() {
   useSetTitle("NextGen Admin");
 
   const {
+    permissionsLoading,
     globalAdmin,
     createCollectionFunctionAdmin,
     airdropTokensFunctionAdmin,
@@ -720,9 +723,12 @@ export default function NextGenAdmin() {
   }
 
   function printContent() {
+    if (isWalletConnectionResolving(account)) return <AuthLoadingPlaceholder />;
     if (!account.isConnected) {
       return <HeaderUserConnect />;
     }
+
+    if (permissionsLoading) return <AuthLoadingPlaceholder />;
 
     switch (focus) {
       case Focus.GLOBAL:

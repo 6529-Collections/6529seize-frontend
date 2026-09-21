@@ -1,0 +1,2459 @@
+{
+  "profile_id": "photography_documentation_v1",
+  "version": 2,
+  "program_id": null,
+  "wave_id": null,
+  "required_for_review": [
+    "identity.display_name",
+    "identity.preferred_credit",
+    "identity.record_language",
+    "artwork.title",
+    "artwork.title_language",
+    "artwork.capture_date",
+    "artwork.location",
+    "artwork.medium",
+    "artwork.edition_statement",
+    "artwork.canonical_asset_id",
+    "files.master_availability",
+    "context.caption",
+    "context.history",
+    "context.prior_mint_status",
+    "process.capture_method",
+    "process.techniques",
+    "process.process_description",
+    "process.material_changes",
+    "process.ai_use",
+    "process.contributors",
+    "rights.rights_basis",
+    "rights.intended_license",
+    "rights.rights_declaration",
+    "rights.declaration_effect",
+    "rights.third_party_material",
+    "preservation.significant_properties",
+    "preservation.display_orientation_crop",
+    "preservation.color_and_tone",
+    "preservation.acceptable_changes"
+  ],
+  "review_lanes": [
+    "curatorial",
+    "technical",
+    "rights"
+  ],
+  "modules": [
+    {
+      "id": "identity",
+      "version": 1,
+      "fields": [
+        {
+          "id": "display_name",
+          "value_schema": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "allowed_statuses": [
+            "provided"
+          ],
+          "default_visibility": "public_record",
+          "locked_restricted": false
+        },
+        {
+          "id": "preferred_credit",
+          "value_schema": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300
+          },
+          "allowed_statuses": [
+            "provided"
+          ],
+          "default_visibility": "public_record",
+          "locked_restricted": false
+        },
+        {
+          "id": "biography",
+          "value_schema": {
+            "type": "object",
+            "properties": {
+              "primary_language": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 64,
+                "format": "bcp47"
+              },
+              "versions": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "language": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 64,
+                      "format": "bcp47"
+                    },
+                    "text": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 4000
+                    },
+                    "authorship": {
+                      "type": "string",
+                      "enum": [
+                        "original",
+                        "artist_translation",
+                        "third_party_translation"
+                      ]
+                    },
+                    "approved_by_artist": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "language",
+                    "text",
+                    "authorship",
+                    "approved_by_artist"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 10,
+                "minItems": 1
+              }
+            },
+            "required": [
+              "primary_language",
+              "versions"
+            ],
+            "additionalProperties": false
+          },
+          "allowed_statuses": [
+            "provided"
+          ],
+          "default_visibility": "public_record",
+          "locked_restricted": false
+        },
+        {
+          "id": "links",
+          "value_schema": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "label": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                },
+                "url": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 2048,
+                  "format": "uri"
+                }
+              },
+              "required": [
+                "label",
+                "url"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 10,
+            "minItems": 0
+          },
+          "allowed_statuses": [
+            "provided"
+          ],
+          "default_visibility": "public_record",
+          "locked_restricted": false
+        },
+        {
+          "id": "languages",
+          "value_schema": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64,
+              "format": "bcp47"
+            },
+            "maxItems": 10,
+            "minItems": 1
+          },
+          "allowed_statuses": [
+            "provided"
+          ],
+          "default_visibility": "public_record",
+          "locked_restricted": false
+        },
+        {
+          "id": "record_language",
+          "value_schema": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "format": "bcp47"
+          },
+          "allowed_statuses": [
+            "provided"
+          ],
+          "default_visibility": "public_record",
+          "locked_restricted": false
+        }
+      ]
+    },
+    {
+      "id": "artwork",
+      "version": 1,
+      "fields": [
+        {
+          "id": "title",
+          "value_schema": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
+          },
+          "allowed_statuses": [
+            "provided"
+          ],
+          "default_visibility": "public_record",
+          "locked_restricted": false
+        },
+        {
+          "id": "title_language",
+          "value_schema": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "format": "bcp47"
+          },
+          "allowed_statuses": [
+            "provided"
+          ],
+          "default_visibility": "public_record",
+          "locked_restricted": false
+        },
+        {
+          "id": "alternate_titles",
+          "value_schema": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "language": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64,
+                  "format": "bcp47"
+                },
+                "text": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 255
+                }
+              },
+              "required": [
+                "language",
+                "text"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 10,
+            "minItems": 0
+          },
+          "allowed_statuses": [
+            "provided"
+          ],
+          "default_visibility": "public_record",
+          "locked_restricted": false
+        },
+        {
+          "id": "capture_date",
+          "value_schema": {
+            "type": "object",
+            "properties": {
+              "precision": {
+                "type": "string",
+                "enum": [
+                  "day",
+                  "month",
+                  "year",
+                  "range"
+                ]
+              },
+              "endpoint_precision": {
+                "type": "string",
+                "enum": [
+                  "day",
+                  "month",
+                  "year"
+                ]
+              },
+              "start": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 10,
+                "format": "partial-date"
+              },
+              "end": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 10,
+                "format": "partial-date"
+              },
+              "approximate": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "precision",
+              "start",
+              "approximate"
+            ],
+            "additionalProperties": false
+          },
+          "allowed_statuses": [
+            "provided",
+            "unknown"
+          ],
+          "default_visibility": "public_record",
+          "locked_restricted": false
+        },
+        {
+          "id": "completion_date",
+          "value_schema": {
+            "type": "object",
+            "properties": {
+              "precision": {
+                "type": "string",
+                "enum": [
+                  "day",
+                  "month",
+                  "year",
+                  "range"
+                ]
+              },
+              "endpoint_precision": {
+                "type": "string",
+                "enum": [
+                  "day",
+                  "month",
+                  "year"
+                ]
+              },
+              "start": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 10,
+                "format": "partial-date"
+              },
+              "end": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 10,
+                "format": "partial-date"
+              },
+              "approximate": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "precision",
+              "start",
+              "approximate"
+            ],
+            "additionalProperties": false
+          },
+          "allowed_statuses": [
+            "provided",
+            "unknown"
+          ],
+          "default_visibility": "public_record",
+          "locked_restricted": false
+        },
+        {
+          "id": "location",
+          "value_schema": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300
+          },
+          "allowed_statuses": [
+            "provided",
+            "unknown"
+          ],
+          "default_visibility": "public_record",
+          "locked_restricted": false
+        },
+        {
+          "id": "medium",
+          "value_schema": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "digital_photograph",
+                  "analogue_photograph",
+                  "photographic_composite",
+                  "other"
+                ]
+              },
+              "detail": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 500
+              }
+            },
+            "required": [
+              "kind"
+            ],
+            "additionalProperties": false
+          },
+          "allowed_statuses": [
+            "provided"
+          ],
+          "default_visibility": "public_record",
+          "locked_restricted": false
+        },
+        {
+          "id": "edition_statement",
+          "value_schema": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "allowed_statuses": [
+            "provided"
+          ],
+          "default_visibility": "public_record",
+          "locked_restricted": false
+        },
+        {
+          "id": "visual_description",
+          "value_schema": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1500
+          },
+          "allowed_statuses": [
+            "provided"
+          ],
+          "default_visibility": "public_record",
+          "locked_restricted": false
+        },
+        {
+          "id": "series_title",
+          "value_schema": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 255
+          },
+          "allowed_statuses": [
+            "provided"
+          ],
+          "default_visibility": "public_record",
+          "locked_restricted": false
+        },
+        {
+          "id": "canonical_asset_id",
+          "value_schema": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 36,
+            "format": "uuid"
+          },
+          "allowed_statuses": [
+            "provided"
+          ],
+          "default_visibility": "public_record",
+          "locked_restricted": false
+        },
+        {
+          "id": "declared_dimensions",
+          "value_schema": {
+            "type": "object",
+            "properties": {
+              "width": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 1000000
+              },
+              "height": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 1000000
+              }
+            },
+            "required": [
+              "width",
+              "height"
+            ],
+            "additionalProperties": false
+          },
+          "allowed_statuses": [
+            "provided"
+          ],
+          "default_visibility": "public_record",
+          "locked_restricted": false
+        },
+        {
+          "id": "work_relationships",
+          "value_schema": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "work_id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 36,
+                  "format": "uuid"
+                },
+                "source_url": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 2048,
+                  "format": "uri"
+                },
+                "relation": {
+                  "type": "string",
+                  "enum": [
+                    "version_of",
+                    "part_of_series",
+                    "related_work"
+                  ]
+                }
+              },
+              "required": [
+                "relation"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 30,
+            "minItems": 0
+          },
+          "allowed_statuses": [
+            "provided"
+          ],
+          "default_visibility": "public_record",
+          "locked_restricted": false
+        }
+      ]
+    },
+    {
+      "id": "files",
+      "version": 1,
+      "fields": [
+        {
+          "id": "master_availability",
+          "value_schema": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "supplied",
+                  "same_as_final",
+                  "unavailable"
+                ]
+              },
+              "explanation": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1000
+              }
+            },
+            "required": [
+              "kind"
+            ],
+            "additionalProperties": false
+          },
+          "allowed_statuses": [
+            "provided"
+          ],
+          "default_visibility": "public_record",
+          "locked_restricted": false
+        }
+      ]
+    },
+    {
+      "id": "context",
+      "version": 1,
+      "fields": [
+        {
+          "id": "caption",
+          "value_schema": {
+            "type": "object",
+            "properties": {
+              "primary_language": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 64,
+                "format": "bcp47"
+              },
+              "versions": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "language": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 64,
+                      "format": "bcp47"
+                    },
+                    "text": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 3000
+                    },
+                    "authorship": {
+                      "type": "string",
+                      "enum": [
+                        "original",
+                        "artist_translation",
+                        "third_party_translation"
+                      ]
+                    },
+                    "approved_by_artist": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "language",
+                    "text",
+                    "authorship",
+                    "approved_by_artist"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 10,
+                "minItems": 1
+              }
+            },
+            "required": [
+              "primary_language",
+              "versions"
+            ],
+            "additionalProperties": false
+          },
+          "allowed_statuses": [
+            "provided"
+          ],
+          "default_visibility": "public_record",
+          "locked_restricted": false
+        },
+        {
+          "id": "artist_statement",
+          "value_schema": {
+            "type": "object",
+            "properties": {
+              "primary_language": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 64,
+                "format": "bcp47"
+              },
+              "versions": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "language": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 64,
+                      "format": "bcp47"
+                    },
+                    "text": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 12000
+                    },
+                    "authorship": {
+                      "type": "string",
+                      "enum": [
+                        "original",
+                        "artist_translation",
+                        "third_party_translation"
+                      ]
+                    },
+                    "approved_by_artist": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "language",
+                    "text",
+                    "authorship",
+                    "approved_by_artist"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 10,
+                "minItems": 1
+              }
+            },
+            "required": [
+              "primary_language",
+              "versions"
+            ],
+            "additionalProperties": false
+          },
+          "allowed_statuses": [
+            "provided"
+          ],
+          "default_visibility": "public_record",
+          "locked_restricted": false
+        },
+        {
+          "id": "making_context",
+          "value_schema": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 6000
+          },
+          "allowed_statuses": [
+            "provided"
+          ],
+          "default_visibility": "public_record",
+          "locked_restricted": false
+        },
+        {
+          "id": "theme_connection",
+          "value_schema": {
+            "oneOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "text"
+                    ]
+                  },
+                  "text": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 4000
+                  }
+                },
+                "required": [
+                  "kind",
+                  "text"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "kind": {
+                    "type": "string",
+                    "enum": [
+                      "caption_reference"
+                    ]
+                  }
+                },
+                "required": [
+                  "kind"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          },
+          "allowed_statuses": [
+            "provided"
+          ],
+          "default_visibility": "public_record",
+          "locked_restricted": false
+        },
+        {
+          "id": "misunderstandings",
+          "value_schema": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000
+          },
+          "allowed_statuses": [
+            "provided"
+          ],
+          "default_visibility": "public_record",
+          "locked_restricted": false
+        },
+        {
+          "id": "references",
+          "value_schema": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "label": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 160
+                },
+                "url": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 2048,
+                  "format": "uri"
+                },
+                "note": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 1000
+                }
+              },
+              "required": [
+                "url"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 30,
+            "minItems": 0
+          },
+          "allowed_statuses": [
+            "provided"
+          ],
+          "default_visibility": "public_record",
+          "locked_restricted": false
+        },
+        {
+          "id": "history",
+          "value_schema": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "entries_supplied",
+                  "none_known",
+                  "unknown"
+                ]
+              },
+              "entries": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "kind": {
+                      "type": "string",
+                      "enum": [
+                        "publication",
+                        "exhibition",
+                        "award",
+                        "print_edition",
+                        "nft_mint",
+                        "other"
+                      ]
+                    },
+                    "scope": {
+                      "type": "string",
+                      "enum": [
+                        "this_work",
+                        "series",
+                        "artist"
+                      ]
+                    },
+                    "title": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 300
+                    },
+                    "date": {
+                      "type": "object",
+                      "properties": {
+                        "precision": {
+                          "type": "string",
+                          "enum": [
+                            "day",
+                            "month",
+                            "year",
+                            "range"
+                          ]
+                        },
+                        "endpoint_precision": {
+                          "type": "string",
+                          "enum": [
+                            "day",
+                            "month",
+                            "year"
+                          ]
+                        },
+                        "start": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 10,
+                          "format": "partial-date"
+                        },
+                        "end": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 10,
+                          "format": "partial-date"
+                        },
+                        "approximate": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "precision",
+                        "start",
+                        "approximate"
+                      ],
+                      "additionalProperties": false
+                    },
+                    "venue": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 300
+                    },
+                    "url": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 2048,
+                      "format": "uri"
+                    },
+                    "note": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 1000
+                    },
+                    "chain": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100
+                    },
+                    "contract": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100
+                    },
+                    "token": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "scope",
+                    "title"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 50,
+                "minItems": 0
+              }
+            },
+            "required": [
+              "kind"
+            ],
+            "additionalProperties": false
+          },
+          "allowed_statuses": [
+            "provided"
+          ],
+          "default_visibility": "public_record",
+          "locked_restricted": false
+        },
+        {
+          "id": "prior_mint_status",
+          "value_schema": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "never_minted",
+                  "previously_minted",
+                  "unknown"
+                ]
+              },
+              "references": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "label": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160
+                    },
+                    "url": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 2048,
+                      "format": "uri"
+                    },
+                    "note": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 1000
+                    }
+                  },
+                  "required": [
+                    "url"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 30,
+                "minItems": 0
+              },
+              "explanation": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1000
+              }
+            },
+            "required": [
+              "kind"
+            ],
+            "additionalProperties": false
+          },
+          "allowed_statuses": [
+            "provided"
+          ],
+          "default_visibility": "public_record",
+          "locked_restricted": false
+        }
+      ]
+    },
+    {
+      "id": "process",
+      "version": 1,
+      "fields": [
+        {
+          "id": "capture_method",
+          "value_schema": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "digital_camera",
+                  "phone",
+                  "drone",
+                  "film_scan",
+                  "other"
+                ]
+              },
+              "detail": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 500
+              }
+            },
+            "required": [
+              "kind"
+            ],
+            "additionalProperties": false
+          },
+          "allowed_statuses": [
+            "provided",
+            "unknown"
+          ],
+          "default_visibility": "public_record",
+          "locked_restricted": false
+        },
+        {
+          "id": "camera",
+          "value_schema": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300
+          },
+          "allowed_statuses": [
+            "provided",
+            "unknown"
+          ],
+          "default_visibility": "public_record",
+          "locked_restricted": false
+        },
+        {
+          "id": "lens",
+          "value_schema": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300
+          },
+          "allowed_statuses": [
+            "provided",
+            "unknown"
+          ],
+          "default_visibility": "public_record",
+          "locked_restricted": false
+        },
+        {
+          "id": "exposure_note",
+          "value_schema": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "allowed_statuses": [
+            "provided"
+          ],
+          "default_visibility": "public_record",
+          "locked_restricted": false
+        },
+        {
+          "id": "techniques",
+          "value_schema": {
+            "type": "object",
+            "properties": {
+              "kinds": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "single_capture",
+                    "staged",
+                    "composite",
+                    "collage",
+                    "focus_stack",
+                    "long_exposure",
+                    "miniature",
+                    "other"
+                  ]
+                },
+                "maxItems": 9,
+                "minItems": 1
+              },
+              "other_detail": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 500
+              }
+            },
+            "required": [
+              "kinds"
+            ],
+            "additionalProperties": false
+          },
+          "allowed_statuses": [
+            "provided"
+          ],
+          "default_visibility": "public_record",
+          "locked_restricted": false
+        },
+        {
+          "id": "editing_tools",
+          "value_schema": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 160
+                },
+                "version": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                }
+              },
+              "required": [
+                "name"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 20,
+            "minItems": 0
+          },
+          "allowed_statuses": [
+            "provided"
+          ],
+          "default_visibility": "public_record",
+          "locked_restricted": false
+        },
+        {
+          "id": "process_description",
+          "value_schema": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 8000
+          },
+          "allowed_statuses": [
+            "provided"
+          ],
+          "default_visibility": "public_record",
+          "locked_restricted": false
+        },
+        {
+          "id": "material_changes",
+          "value_schema": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000
+          },
+          "allowed_statuses": [
+            "provided"
+          ],
+          "default_visibility": "public_record",
+          "locked_restricted": false
+        },
+        {
+          "id": "ai_use",
+          "value_schema": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "none",
+                  "assistive",
+                  "generative",
+                  "unknown"
+                ]
+              },
+              "detail": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 4000
+              }
+            },
+            "required": [
+              "kind"
+            ],
+            "additionalProperties": false
+          },
+          "allowed_statuses": [
+            "provided"
+          ],
+          "default_visibility": "public_record",
+          "locked_restricted": false
+        },
+        {
+          "id": "ingredients",
+          "value_schema": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "entries_supplied",
+                  "unavailable"
+                ]
+              },
+              "entries": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "asset_id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 36,
+                      "format": "uuid"
+                    },
+                    "source_url": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 2048,
+                      "format": "uri"
+                    },
+                    "creator": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160
+                    },
+                    "role": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 300
+                    },
+                    "rights_note": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 1000
+                    }
+                  },
+                  "required": [
+                    "creator",
+                    "role",
+                    "rights_note"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 50,
+                "minItems": 0
+              },
+              "explanation": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1000
+              }
+            },
+            "required": [
+              "kind",
+              "entries"
+            ],
+            "additionalProperties": false
+          },
+          "allowed_statuses": [
+            "provided"
+          ],
+          "default_visibility": "public_record",
+          "locked_restricted": false
+        },
+        {
+          "id": "contributors",
+          "value_schema": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "entries_supplied",
+                  "none"
+                ]
+              },
+              "entries": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160
+                    },
+                    "profile_id": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100
+                    },
+                    "role": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 300
+                    },
+                    "authorship_claim": {
+                      "type": "boolean"
+                    },
+                    "credit": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 500
+                    }
+                  },
+                  "required": [
+                    "name",
+                    "role",
+                    "authorship_claim",
+                    "credit"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 30,
+                "minItems": 0
+              }
+            },
+            "required": [
+              "kind",
+              "entries"
+            ],
+            "additionalProperties": false
+          },
+          "allowed_statuses": [
+            "provided"
+          ],
+          "default_visibility": "public_record",
+          "locked_restricted": false
+        },
+        {
+          "id": "construction_note",
+          "value_schema": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000
+          },
+          "allowed_statuses": [
+            "provided"
+          ],
+          "default_visibility": "public_record",
+          "locked_restricted": false
+        }
+      ]
+    },
+    {
+      "id": "rights",
+      "version": 1,
+      "fields": [
+        {
+          "id": "rights_basis",
+          "value_schema": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "artist_owned",
+                  "coauthored",
+                  "licensed_components",
+                  "other",
+                  "unknown"
+                ]
+              },
+              "detail": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2000
+              }
+            },
+            "required": [
+              "kind"
+            ],
+            "additionalProperties": false
+          },
+          "allowed_statuses": [
+            "provided"
+          ],
+          "default_visibility": "public_record",
+          "locked_restricted": false
+        },
+        {
+          "id": "intended_license",
+          "value_schema": {
+            "type": "object",
+            "properties": {
+              "uri": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2048,
+                "format": "uri"
+              },
+              "label": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 160
+              }
+            },
+            "required": [
+              "uri",
+              "label"
+            ],
+            "additionalProperties": false
+          },
+          "allowed_statuses": [
+            "provided"
+          ],
+          "default_visibility": "public_record",
+          "locked_restricted": false
+        },
+        {
+          "id": "rights_declaration",
+          "value_schema": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 6000
+          },
+          "allowed_statuses": [
+            "provided"
+          ],
+          "default_visibility": "public_record",
+          "locked_restricted": false
+        },
+        {
+          "id": "declaration_effect",
+          "value_schema": {
+            "type": "string",
+            "enum": [
+              "proposed",
+              "conditional",
+              "already_effective",
+              "unknown"
+            ]
+          },
+          "allowed_statuses": [
+            "provided"
+          ],
+          "default_visibility": "public_record",
+          "locked_restricted": false
+        },
+        {
+          "id": "third_party_material",
+          "value_schema": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "none",
+                  "present",
+                  "unknown"
+                ]
+              },
+              "details": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 4000
+              },
+              "references": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "label": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 160
+                    },
+                    "url": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 2048,
+                      "format": "uri"
+                    },
+                    "note": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 1000
+                    }
+                  },
+                  "required": [
+                    "url"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 30,
+                "minItems": 0
+              }
+            },
+            "required": [
+              "kind"
+            ],
+            "additionalProperties": false
+          },
+          "allowed_statuses": [
+            "provided"
+          ],
+          "default_visibility": "public_record",
+          "locked_restricted": false
+        },
+        {
+          "id": "publication_notes",
+          "value_schema": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "allowed_statuses": [
+            "provided"
+          ],
+          "default_visibility": "public_record",
+          "locked_restricted": false
+        }
+      ]
+    },
+    {
+      "id": "preservation",
+      "version": 1,
+      "fields": [
+        {
+          "id": "significant_properties",
+          "value_schema": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 6000
+          },
+          "allowed_statuses": [
+            "provided"
+          ],
+          "default_visibility": "public_record",
+          "locked_restricted": false
+        },
+        {
+          "id": "display_orientation_crop",
+          "value_schema": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "allowed_statuses": [
+            "provided"
+          ],
+          "default_visibility": "public_record",
+          "locked_restricted": false
+        },
+        {
+          "id": "color_and_tone",
+          "value_schema": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "allowed_statuses": [
+            "provided"
+          ],
+          "default_visibility": "public_record",
+          "locked_restricted": false
+        },
+        {
+          "id": "screen_preferences",
+          "value_schema": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "allowed_statuses": [
+            "provided"
+          ],
+          "default_visibility": "public_record",
+          "locked_restricted": false
+        },
+        {
+          "id": "print_preferences",
+          "value_schema": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 3000
+          },
+          "allowed_statuses": [
+            "provided"
+          ],
+          "default_visibility": "public_record",
+          "locked_restricted": false
+        },
+        {
+          "id": "acceptable_changes",
+          "value_schema": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000
+          },
+          "allowed_statuses": [
+            "provided"
+          ],
+          "default_visibility": "public_record",
+          "locked_restricted": false
+        },
+        {
+          "id": "avoid_changes",
+          "value_schema": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000
+          },
+          "allowed_statuses": [
+            "provided"
+          ],
+          "default_visibility": "public_record",
+          "locked_restricted": false
+        },
+        {
+          "id": "physical_materials",
+          "value_schema": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "allowed_statuses": [
+            "provided"
+          ],
+          "default_visibility": "public_record",
+          "locked_restricted": false
+        }
+      ]
+    },
+    {
+      "id": "interview",
+      "version": 1,
+      "fields": [
+        {
+          "id": "mode",
+          "value_schema": {
+            "type": "string",
+            "enum": [
+              "written",
+              "recording",
+              "declined",
+              "not_yet"
+            ]
+          },
+          "allowed_statuses": [
+            "provided"
+          ],
+          "default_visibility": "public_record",
+          "locked_restricted": false
+        },
+        {
+          "id": "instrument_id",
+          "value_schema": {
+            "type": "string",
+            "enum": [
+              "artwork-documentation-artist-interview-v1"
+            ]
+          },
+          "allowed_statuses": [
+            "provided"
+          ],
+          "default_visibility": "public_record",
+          "locked_restricted": false
+        },
+        {
+          "id": "instrument_version",
+          "value_schema": {
+            "type": "integer",
+            "enum": [
+              1
+            ]
+          },
+          "allowed_statuses": [
+            "provided"
+          ],
+          "default_visibility": "public_record",
+          "locked_restricted": false
+        },
+        {
+          "id": "date",
+          "value_schema": {
+            "type": "object",
+            "properties": {
+              "precision": {
+                "type": "string",
+                "enum": [
+                  "day",
+                  "month",
+                  "year",
+                  "range"
+                ]
+              },
+              "endpoint_precision": {
+                "type": "string",
+                "enum": [
+                  "day",
+                  "month",
+                  "year"
+                ]
+              },
+              "start": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 10,
+                "format": "partial-date"
+              },
+              "end": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 10,
+                "format": "partial-date"
+              },
+              "approximate": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "precision",
+              "start",
+              "approximate"
+            ],
+            "additionalProperties": false
+          },
+          "allowed_statuses": [
+            "provided",
+            "unknown"
+          ],
+          "default_visibility": "public_record",
+          "locked_restricted": false
+        },
+        {
+          "id": "participants",
+          "value_schema": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 160
+                },
+                "role": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 300
+                }
+              },
+              "required": [
+                "name",
+                "role"
+              ],
+              "additionalProperties": false
+            },
+            "maxItems": 30,
+            "minItems": 0
+          },
+          "allowed_statuses": [
+            "provided"
+          ],
+          "default_visibility": "public_record",
+          "locked_restricted": false
+        },
+        {
+          "id": "languages",
+          "value_schema": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64,
+              "format": "bcp47"
+            },
+            "maxItems": 10,
+            "minItems": 1
+          },
+          "allowed_statuses": [
+            "provided"
+          ],
+          "default_visibility": "public_record",
+          "locked_restricted": false
+        },
+        {
+          "id": "q1",
+          "value_schema": {
+            "type": "object",
+            "properties": {
+              "primary_language": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 64,
+                "format": "bcp47"
+              },
+              "versions": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "language": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 64,
+                      "format": "bcp47"
+                    },
+                    "text": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 8000
+                    },
+                    "authorship": {
+                      "type": "string",
+                      "enum": [
+                        "original",
+                        "artist_translation",
+                        "third_party_translation"
+                      ]
+                    },
+                    "approved_by_artist": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "language",
+                    "text",
+                    "authorship",
+                    "approved_by_artist"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 10,
+                "minItems": 1
+              }
+            },
+            "required": [
+              "primary_language",
+              "versions"
+            ],
+            "additionalProperties": false
+          },
+          "allowed_statuses": [
+            "provided"
+          ],
+          "default_visibility": "public_record",
+          "locked_restricted": false
+        },
+        {
+          "id": "q2",
+          "value_schema": {
+            "type": "object",
+            "properties": {
+              "primary_language": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 64,
+                "format": "bcp47"
+              },
+              "versions": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "language": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 64,
+                      "format": "bcp47"
+                    },
+                    "text": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 8000
+                    },
+                    "authorship": {
+                      "type": "string",
+                      "enum": [
+                        "original",
+                        "artist_translation",
+                        "third_party_translation"
+                      ]
+                    },
+                    "approved_by_artist": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "language",
+                    "text",
+                    "authorship",
+                    "approved_by_artist"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 10,
+                "minItems": 1
+              }
+            },
+            "required": [
+              "primary_language",
+              "versions"
+            ],
+            "additionalProperties": false
+          },
+          "allowed_statuses": [
+            "provided"
+          ],
+          "default_visibility": "public_record",
+          "locked_restricted": false
+        },
+        {
+          "id": "q3",
+          "value_schema": {
+            "type": "object",
+            "properties": {
+              "primary_language": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 64,
+                "format": "bcp47"
+              },
+              "versions": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "language": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 64,
+                      "format": "bcp47"
+                    },
+                    "text": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 8000
+                    },
+                    "authorship": {
+                      "type": "string",
+                      "enum": [
+                        "original",
+                        "artist_translation",
+                        "third_party_translation"
+                      ]
+                    },
+                    "approved_by_artist": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "language",
+                    "text",
+                    "authorship",
+                    "approved_by_artist"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 10,
+                "minItems": 1
+              }
+            },
+            "required": [
+              "primary_language",
+              "versions"
+            ],
+            "additionalProperties": false
+          },
+          "allowed_statuses": [
+            "provided"
+          ],
+          "default_visibility": "public_record",
+          "locked_restricted": false
+        },
+        {
+          "id": "q4",
+          "value_schema": {
+            "type": "object",
+            "properties": {
+              "primary_language": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 64,
+                "format": "bcp47"
+              },
+              "versions": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "language": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 64,
+                      "format": "bcp47"
+                    },
+                    "text": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 8000
+                    },
+                    "authorship": {
+                      "type": "string",
+                      "enum": [
+                        "original",
+                        "artist_translation",
+                        "third_party_translation"
+                      ]
+                    },
+                    "approved_by_artist": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "language",
+                    "text",
+                    "authorship",
+                    "approved_by_artist"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 10,
+                "minItems": 1
+              }
+            },
+            "required": [
+              "primary_language",
+              "versions"
+            ],
+            "additionalProperties": false
+          },
+          "allowed_statuses": [
+            "provided"
+          ],
+          "default_visibility": "public_record",
+          "locked_restricted": false
+        },
+        {
+          "id": "q5",
+          "value_schema": {
+            "type": "object",
+            "properties": {
+              "primary_language": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 64,
+                "format": "bcp47"
+              },
+              "versions": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "language": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 64,
+                      "format": "bcp47"
+                    },
+                    "text": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 8000
+                    },
+                    "authorship": {
+                      "type": "string",
+                      "enum": [
+                        "original",
+                        "artist_translation",
+                        "third_party_translation"
+                      ]
+                    },
+                    "approved_by_artist": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "language",
+                    "text",
+                    "authorship",
+                    "approved_by_artist"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 10,
+                "minItems": 1
+              }
+            },
+            "required": [
+              "primary_language",
+              "versions"
+            ],
+            "additionalProperties": false
+          },
+          "allowed_statuses": [
+            "provided"
+          ],
+          "default_visibility": "public_record",
+          "locked_restricted": false
+        },
+        {
+          "id": "q6",
+          "value_schema": {
+            "type": "object",
+            "properties": {
+              "primary_language": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 64,
+                "format": "bcp47"
+              },
+              "versions": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "language": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 64,
+                      "format": "bcp47"
+                    },
+                    "text": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 8000
+                    },
+                    "authorship": {
+                      "type": "string",
+                      "enum": [
+                        "original",
+                        "artist_translation",
+                        "third_party_translation"
+                      ]
+                    },
+                    "approved_by_artist": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "language",
+                    "text",
+                    "authorship",
+                    "approved_by_artist"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 10,
+                "minItems": 1
+              }
+            },
+            "required": [
+              "primary_language",
+              "versions"
+            ],
+            "additionalProperties": false
+          },
+          "allowed_statuses": [
+            "provided"
+          ],
+          "default_visibility": "public_record",
+          "locked_restricted": false
+        },
+        {
+          "id": "q7",
+          "value_schema": {
+            "type": "object",
+            "properties": {
+              "primary_language": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 64,
+                "format": "bcp47"
+              },
+              "versions": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "language": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 64,
+                      "format": "bcp47"
+                    },
+                    "text": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 8000
+                    },
+                    "authorship": {
+                      "type": "string",
+                      "enum": [
+                        "original",
+                        "artist_translation",
+                        "third_party_translation"
+                      ]
+                    },
+                    "approved_by_artist": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "language",
+                    "text",
+                    "authorship",
+                    "approved_by_artist"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 10,
+                "minItems": 1
+              }
+            },
+            "required": [
+              "primary_language",
+              "versions"
+            ],
+            "additionalProperties": false
+          },
+          "allowed_statuses": [
+            "provided"
+          ],
+          "default_visibility": "public_record",
+          "locked_restricted": false
+        },
+        {
+          "id": "q8",
+          "value_schema": {
+            "type": "object",
+            "properties": {
+              "primary_language": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 64,
+                "format": "bcp47"
+              },
+              "versions": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "language": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 64,
+                      "format": "bcp47"
+                    },
+                    "text": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 8000
+                    },
+                    "authorship": {
+                      "type": "string",
+                      "enum": [
+                        "original",
+                        "artist_translation",
+                        "third_party_translation"
+                      ]
+                    },
+                    "approved_by_artist": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "language",
+                    "text",
+                    "authorship",
+                    "approved_by_artist"
+                  ],
+                  "additionalProperties": false
+                },
+                "maxItems": 10,
+                "minItems": 1
+              }
+            },
+            "required": [
+              "primary_language",
+              "versions"
+            ],
+            "additionalProperties": false
+          },
+          "allowed_statuses": [
+            "provided"
+          ],
+          "default_visibility": "public_record",
+          "locked_restricted": false
+        },
+        {
+          "id": "recording_asset_id",
+          "value_schema": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 36,
+            "format": "uuid"
+          },
+          "allowed_statuses": [
+            "provided"
+          ],
+          "default_visibility": "public_record",
+          "locked_restricted": false
+        },
+        {
+          "id": "transcript_asset_id",
+          "value_schema": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 36,
+            "format": "uuid"
+          },
+          "allowed_statuses": [
+            "provided"
+          ],
+          "default_visibility": "public_record",
+          "locked_restricted": false
+        },
+        {
+          "id": "recording_permission",
+          "value_schema": {
+            "type": "string",
+            "enum": [
+              "intended_public_record"
+            ]
+          },
+          "allowed_statuses": [
+            "provided"
+          ],
+          "default_visibility": "public_record",
+          "locked_restricted": false
+        },
+        {
+          "id": "transcript_permission",
+          "value_schema": {
+            "type": "string",
+            "enum": [
+              "intended_public_record"
+            ]
+          },
+          "allowed_statuses": [
+            "provided"
+          ],
+          "default_visibility": "public_record",
+          "locked_restricted": false
+        },
+        {
+          "id": "correction_note",
+          "value_schema": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4000
+          },
+          "allowed_statuses": [
+            "provided"
+          ],
+          "default_visibility": "public_record",
+          "locked_restricted": false
+        }
+      ]
+    }
+  ],
+  "guidance_version": "artwork-documentation-copy-v2",
+  "confirmation_copy_version": "artwork-documentation-confirmation-v2",
+  "confirmation_copy": "I have reviewed this version. All artwork answers and selected files in this record are intended for publication with the work, including any uncertainty I have recorded. I have checked the credits and publication permissions. Questions for the team are drafting discussion and are not part of this artwork record. Confirmation does not publish or mint the work.",
+  "interview_instrument": {
+    "id": "artwork-documentation-artist-interview-v1",
+    "version": 1,
+    "language": "en",
+    "prompts": [
+      {
+        "id": "q1",
+        "text": "What first drew you to make this work?"
+      },
+      {
+        "id": "q2",
+        "text": "What is happening in the image, and what lies outside the frame that a future viewer should know?"
+      },
+      {
+        "id": "q3",
+        "text": "Which choices in capture, construction or editing were most important to the final work?"
+      },
+      {
+        "id": "q4",
+        "text": "How does this work relate to your practice and to other works in the same series?"
+      },
+      {
+        "id": "q5",
+        "text": "What themes or ideas connect this work to the context in which it is being presented?"
+      },
+      {
+        "id": "q6",
+        "text": "What is most likely to be misunderstood about this work?"
+      },
+      {
+        "id": "q7",
+        "text": "What must remain intact when the work is displayed, reproduced or preserved?"
+      },
+      {
+        "id": "q8",
+        "text": "Is there anything you would want someone encountering the work many years from now to know?"
+      }
+    ]
+  },
+  "limits": {
+    "context_payload_bytes": 262144,
+    "write_request_bytes": 524288,
+    "asset_bytes": 4294967296,
+    "context_stored_and_reserved_bytes": 21474836480,
+    "assets_per_context": 100,
+    "upload_sessions_per_context": 5,
+    "upload_part_bytes": 16777216,
+    "client_parallel_parts": 3,
+    "upload_session_seconds": 86400,
+    "part_url_seconds": 600,
+    "download_url_seconds": 300,
+    "unattached_ready_asset_seconds": 604800
+  },
+  "storage_mode": "private_database_and_object_storage",
+  "submission_gate": "optional",
+  "group_order": [
+    "artwork",
+    "story",
+    "artist",
+    "rights",
+    "preservation",
+    "review"
+  ],
+  "intake_mode": "publication_only"
+}

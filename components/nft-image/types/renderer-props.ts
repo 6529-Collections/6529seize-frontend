@@ -2,6 +2,8 @@ import type { BaseNFT, NFTLite } from "@/entities/INFT";
 
 export interface BaseRendererProps {
   readonly nft: BaseNFT | NFTLite;
+  readonly artworkLayout?: boolean | undefined;
+  readonly fillContainer?: boolean | undefined;
   readonly height: 300 | 650 | "full";
   readonly showBalance: boolean;
   readonly transparentBG?: boolean | undefined;

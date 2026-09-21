@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import { execFileSync } from "node:child_process";
 import os from "node:os";
 import path from "node:path";
 
@@ -10,6 +11,11 @@ type ImportGraph = {
 };
 
 type RegistryScript = {
+  readonly deletedEntriesFromGit: (
+    root: string,
+    base: string,
+    head: string
+  ) => readonly { file: string; surface_ids: string[] }[];
   readonly assertArguments: (argv: readonly string[]) => void;
   readonly buildReverseImportGraph: (
     root: string,
@@ -21,6 +27,10 @@ type RegistryScript = {
       readonly root: string;
       readonly registry?: Record<string, unknown>;
       readonly graph?: ImportGraph;
+      readonly deletedEntries?: readonly {
+        file: string;
+        surface_ids: string[];
+      }[];
     }
   ) => {
     readonly affected_surfaces: readonly string[];
@@ -194,9 +204,9 @@ describe("Museum surface registry", () => {
 
   it("validates complete ownership of the checked-in Museum inventory", () => {
     const result = registryScript.validateRegistry(process.cwd());
-    expect(result.inventory.routes).toHaveLength(57);
-    expect(result.inventory.supportFiles).toHaveLength(15);
-    expect(result.inventory.components).toHaveLength(70);
+    expect(result.inventory.routes).toHaveLength(56);
+    expect(result.inventory.supportFiles).toHaveLength(16);
+    expect(result.inventory.components).toHaveLength(71);
     expect(result.inventory.e2eSpecs).toHaveLength(6);
   });
 
@@ -299,4 +309,85 @@ describe("Museum surface registry", () => {
       fs.rmSync(fixture.root, { recursive: true, force: true });
     }
   });
+
+  it.each([true, false])(
+    "retains only registered deleted-path ownership (registered=%s)",
+    (registered) => {
+      const fixture = createFixtureRoot();
+      const page = "app/museum/network/about/page.tsx";
+      const handler = "app/museum/network/about/route.ts";
+      const registryPath =
+        "ops/testing-strategy/museum-surface-registry.v1.json";
+      const git = (...args: string[]) =>
+        execFileSync("git", args, {
+          cwd: fixture.root,
+          encoding: "utf8",
+        }).trim();
+      const commit = () => {
+        git("add", ".");
+        git(
+          "-c",
+          "user.name=Registry Test",
+          "-c",
+          "user.email=registry@example.invalid",
+          "-c",
+          "commit.gpgsign=false",
+          "commit",
+          "--no-verify",
+          "-qm",
+          "Fixture"
+        );
+        return git("rev-parse", "HEAD");
+      };
+      try {
+        const remainingRoutes = (
+          fixture.registry["routes"] as { file: string }[]
+        ).filter((entry) => entry.file !== page);
+        const baseRegistry = {
+          ...fixture.registry,
+          routes: registered ? fixture.registry["routes"] : remainingRoutes,
+        };
+        write(fixture.root, registryPath, JSON.stringify(baseRegistry));
+        git("init", "-q");
+        const base = commit();
+        fs.unlinkSync(path.join(fixture.root, page));
+        write(
+          fixture.root,
+          handler,
+          "export function GET() { return new Response(null, { status: 308 }); }\n"
+        );
+        fixture.registry["routes"] = remainingRoutes;
+        fixture.registry["support_files"] = [
+          ...(fixture.registry["support_files"] as object[]),
+          ownedFile(handler, ["museum.home"]),
+        ];
+        write(fixture.root, registryPath, JSON.stringify(fixture.registry));
+        const head = commit();
+        const deletedEntries = registryScript.deletedEntriesFromGit(
+          fixture.root,
+          base,
+          head
+        );
+        expect(deletedEntries.map((entry) => entry.file)).toEqual(
+          registered ? [page] : []
+        );
+        const map = () =>
+          registryScript.mapChangedFilesToSurfaces([page, handler], {
+            root: fixture.root,
+            registry: fixture.registry,
+            deletedEntries,
+          });
+        if (registered) {
+          expect(map().affected_surfaces).toEqual([
+            "museum.about.proposition",
+            "museum.home",
+          ]);
+        } else {
+          expect(map).toThrow(/changed Museum-owned paths are unmapped/u);
+        }
+      } finally {
+        fs.rmSync(fixture.root, { recursive: true, force: true });
+      }
+    }
+  );
 });

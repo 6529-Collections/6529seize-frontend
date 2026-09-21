@@ -67,12 +67,16 @@ const mockUseAuth = jest.fn<MockAuthState, []>(() => ({}));
 jest.mock("@/components/auth/Auth", () => ({
   useAuth: () => mockUseAuth(),
 }));
+let mockConnectionState = "connected";
 const mockUseSeizeConnectContext = jest.fn(() => ({
   address: undefined,
   hasValidWalletAuth: false,
 }));
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
-  useSeizeConnectContext: () => mockUseSeizeConnectContext(),
+  useSeizeConnectContext: () => ({
+    ...mockUseSeizeConnectContext(),
+    connectionState: mockConnectionState,
+  }),
 }));
 jest.mock("@/components/user/utils/set-up-profile/UserSetUpProfileCta", () => ({
   __esModule: true,
@@ -149,6 +153,7 @@ const EligibilityProbe = ({
 
 describe("PrivilegedDropCreator", () => {
   beforeEach(() => {
+    mockConnectionState = "connected";
     mockPriv.mockReset();
     mockInvalidateQueries.mockClear();
     mockUsePublicProfileModerationStatus.mockReturnValue({
@@ -166,6 +171,24 @@ describe("PrivilegedDropCreator", () => {
       hasValidWalletAuth: false,
     });
   });
+
+  it.each(["initializing", "connecting"])(
+    "shows a profile check while %s without a sign-in prompt",
+    (state) => {
+      mockConnectionState = state;
+      mockPriv.mockReturnValue({ canChat: false, canSubmit: false });
+      renderPrivilegedDropCreator();
+      expect(screen.getByTestId("placeholder")).toHaveAttribute(
+        "data-type",
+        "profile-check"
+      );
+      expect(screen.getByTestId("placeholder")).toHaveAttribute(
+        "data-profile-setup-href",
+        ""
+      );
+      expect(screen.queryByTestId("create")).not.toBeInTheDocument();
+    }
+  );
 
   it("shows both placeholder when both restricted", () => {
     mockPriv.mockReturnValue({

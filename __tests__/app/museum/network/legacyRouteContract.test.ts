@@ -1,6 +1,8 @@
+/** @jest-environment node */
+
 import { notFound, permanentRedirect } from "next/navigation";
 import MuseumObjectLegacyRoute from "@/app/museum/network/objects/[objectId]/page";
-import MuseumCollectionObjectRoute from "@/app/museum/network/collection/[objectId]/page";
+import { GET as getCollectionAlias } from "@/app/museum/network/collection/[objectId]/route";
 import MuseumGiftRoute from "@/app/museum/network/gifts/[accessionId]/page";
 import MuseumAccessionLegacyRoute from "@/app/museum/network/accessions/[accessionId]/page";
 import MuseumAccessionsPage from "@/app/museum/network/accessions/page";
@@ -190,14 +192,21 @@ describe("Museum legacy route contract", () => {
   });
 
   describe("permanent Collection aliases", () => {
-    it("redirects the Casey accession object to its canonical Work", async () => {
-      await expectRedirect(
-        () =>
-          MuseumCollectionObjectRoute({
-            params: Promise.resolve({ objectId: "6529NM.2026.001.01" }),
-          }),
+    const request = new Request(
+      "https://6529.io/museum/network/collection/6529NM.2026.001.01"
+    );
+
+    it("returns an empty HTTP 308 before an application shell can render", async () => {
+      const response = await getCollectionAlias(request, {
+        params: Promise.resolve({ objectId: "6529NM.2026.001.01" }),
+      });
+      expect(response.status).toBe(308);
+      expect(response.headers.get("location")).toBe(
         `/museum/network/works/${CASEY_WORK_ID}`
       );
+      expect(response.headers.get("cache-control")).toBe("no-store");
+      expect(await response.text()).toBe("");
+      expect(mockedPermanentRedirect).not.toHaveBeenCalled();
     });
 
     it.each([
@@ -205,11 +214,39 @@ describe("Museum legacy route contract", () => {
       "6529NM-PG-2026-001.OBJ-001",
       "unknown-object",
     ])("404s a non-Collection or unknown alias: %s", async (objectId) => {
-      await expectNotFound(() =>
-        MuseumCollectionObjectRoute({
-          params: Promise.resolve({ objectId }),
+      const response = await getCollectionAlias(request, {
+        params: Promise.resolve({ objectId }),
+      });
+      expect(response.status).toBe(404);
+      expect(response.headers.has("location")).toBe(false);
+      expect(response.headers.get("cache-control")).toBe("no-store");
+    });
+
+    it("does not redirect when no accepted publication is available", async () => {
+      mockedBundle.mockResolvedValueOnce({
+        publicationState: {
+          status: "unavailable",
+          publication: null,
+          errorCode: "publication_unavailable",
+          failedAt: "2026-09-18T00:00:00.000Z",
+          lastValidAcceptedAt: null,
+        },
+        view: null,
+      });
+      const response = await getCollectionAlias(request, {
+        params: Promise.resolve({ objectId: "6529NM.2026.001.01" }),
+      });
+      expect(response.status).toBe(404);
+      expect(response.headers.has("location")).toBe(false);
+    });
+
+    it("retains publication load failures instead of redirecting around them", async () => {
+      mockedBundle.mockRejectedValueOnce(new Error("publication load failed"));
+      await expect(
+        getCollectionAlias(request, {
+          params: Promise.resolve({ objectId: "6529NM.2026.001.01" }),
         })
-      );
+      ).rejects.toThrow("publication load failed");
     });
   });
 

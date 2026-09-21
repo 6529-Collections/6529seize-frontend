@@ -229,23 +229,27 @@ const NavItemContent = ({
         : null,
   });
 
-  const { removeAllDeliveredNotifications } = useNotificationsContext();
+  const { reconcileProfileDeliveredNotifications } = useNotificationsContext();
 
   useEffect(() => {
     if (item.name !== "Notifications") return;
+    if (hasValidWalletAuth && notifications) {
+      void reconcileProfileDeliveredNotifications();
+    }
     if (haveUnreadNotifications) {
       const unreadNotificationsCount = notifications?.unread_count ?? 0;
       setTitle(`(${unreadNotificationsCount}) Notifications | 6529.io`);
     }
     if (!haveUnreadNotifications) {
-      void removeAllDeliveredNotifications();
       setTitle("Notifications | 6529.io");
     }
   }, [
     haveUnreadNotifications,
+    hasValidWalletAuth,
+    notifications,
     item.name,
     notifications?.unread_count,
-    removeAllDeliveredNotifications,
+    reconcileProfileDeliveredNotifications,
     setTitle,
   ]);
 
