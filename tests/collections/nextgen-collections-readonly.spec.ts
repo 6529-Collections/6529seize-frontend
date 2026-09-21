@@ -280,7 +280,7 @@ test.describe("NextGen and collections read-only coverage @surface @medium @larg
     try {
       await gotoReady(page, "/meme-lab");
       const results = page.getByRole("region", { name: "Meme Lab cards" });
-      const status = page.locator("main").getByRole("status");
+      const status = page.getByRole("main").getByRole("status");
       const next = results.getByRole("button", { name: "Next page" });
       await expect(next).toBeEnabled({ timeout: SETTLE_TIMEOUT_MS });
       await next.focus();
