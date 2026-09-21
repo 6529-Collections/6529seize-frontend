@@ -1,10 +1,12 @@
 import { AuthContext } from "@/components/auth/Auth";
 import MemeLabComponent from "@/components/memelab/MemeLab";
 import LabCollection from "@/components/memelab/MemeLabCollection";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { VolumeType } from "@/entities/INFT";
 import { fetchAllPages, fetchUrl } from "@/services/6529api";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
+  act,
   fireEvent,
   render,
   screen,
@@ -379,5 +381,39 @@ describe("MemeLabCollection", () => {
 
     expect(await screen.findByTestId("nft-71")).toBeInTheDocument();
     expect(fetchUrl).toHaveBeenCalledTimes(2);
+  });
+
+  it("shows the last valid page when a complete catalog shrinks", async () => {
+    const nfts = Array.from({ length: 81 }, (_, index) => ({
+      id: index + 1,
+      contract: "0x",
+      name: `NFT ${index + 1}`,
+      total_volume_last_24_hours: index + 1,
+    }));
+    (fetchAllPages as jest.Mock).mockResolvedValueOnce(nfts);
+    const queryClient = createQueryClient();
+
+    renderMemeLab(
+      { initialSort: "volume", initialSortDirection: "desc" },
+      queryClient
+    );
+
+    expect(await screen.findByTestId("nft-81")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Next page" }));
+    expect(await screen.findByTestId("nft-41")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Next page" }));
+    await waitFor(() => expect(getRenderedNftIds()).toHaveLength(1));
+
+    act(() => {
+      queryClient.setQueryData(
+        [QueryKey.NFTS, { scope: "meme-lab-catalog-complete" }],
+        nfts.slice(0, 20)
+      );
+    });
+
+    await waitFor(() => expect(getRenderedNftIds()).toHaveLength(20));
+    expect(
+      screen.queryByRole("button", { name: "Next page" })
+    ).not.toBeInTheDocument();
   });
 });

@@ -314,7 +314,13 @@ export default function MemeLabComponent({
   }, [catalog.nftMetas, labArtists, labCollections, sort, sortedNfts]);
   const totalResults =
     sort === MemeLabSort.AGE ? catalog.totalResults : orderedNfts.length;
-  const firstResultIndex = (page - 1) * MEME_LAB_PAGE_SIZE;
+  const totalPages = Math.max(
+    1,
+    Math.ceil(totalResults / MEME_LAB_PAGE_SIZE)
+  );
+  const visiblePage =
+    sort === MemeLabSort.AGE ? page : Math.min(page, totalPages);
+  const firstResultIndex = (visiblePage - 1) * MEME_LAB_PAGE_SIZE;
   const visibleNfts = useMemo(
     () =>
       sort === MemeLabSort.AGE
@@ -494,7 +500,7 @@ export default function MemeLabComponent({
         {totalResults > MEME_LAB_PAGE_SIZE && (
           <div className="tw-py-4 tw-text-center">
             <Pagination
-              page={page}
+              page={visiblePage}
               pageSize={MEME_LAB_PAGE_SIZE}
               totalResults={totalResults}
               setPage={selectPage}
