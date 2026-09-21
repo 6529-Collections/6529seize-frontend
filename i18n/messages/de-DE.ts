@@ -235,6 +235,7 @@ export const DE_DE_MESSAGES = {
   "media.video.play": "Video abspielen",
   "media.video.player": "Videoplayer",
   "media.video.playPreview": "Videovorschau abspielen",
+  "media.video.position": "{current} von {duration}",
   "media.video.seek": "Videoposition andern",
   "media.video.unmute": "Videoton einschalten",
   "media.video.unsupported": "Ihr Browser unterstuetzt das Video-Tag nicht.",
@@ -1114,6 +1115,11 @@ export const DE_DE_MESSAGES = {
     "Keine Entscheidung geplant",
   "waves.leaderboard.timeline.noUpcomingEvents":
     "Keine bevorstehenden Ereignisse",
+  "waves.leaderboard.phase.nextWinnersIn":
+    "Nächste Gewinner werden bekannt gegeben in",
+  "waves.leaderboard.phase.countdown": "{hours} Std. {minutes} Min.",
+  "waves.leaderboard.phase.countdownWithDays":
+    "{days} T. {hours} Std. {minutes} Min.",
   "waves.leaderboard.timeline.nextWinner": "Nächster Gewinner",
   "waves.leaderboard.timeline.nextWinnerIn": "Nächster Gewinner in {countdown}",
   "waves.leaderboard.timeline.unit.day.one": "{count} Tag",

@@ -16,6 +16,7 @@ import { TimelineToggleHeader } from "./time/TimelineToggleHeader";
 import { ExpandedTimelineContent } from "./time/ExpandedTimelineContent";
 import { CompactDroppingPhaseCard } from "./time/CompactDroppingPhaseCard";
 import { CompactVotingPhaseCard } from "./time/CompactVotingPhaseCard";
+import { CompactWinnerAnnouncement } from "./time/CompactWinnerAnnouncement";
 import { useWave } from "@/hooks/useWave";
 import { Time } from "@/helpers/time";
 
@@ -174,13 +175,11 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
 
   return (
     <div
-      className={`${className ?? ""} ${
-        isDecisionDetailsOpen ? "tw-mb-3" : ""
-      }`}
+      className={`${className ?? ""} ${isDecisionDetailsOpen ? "tw-mb-3" : ""}`}
     >
       {multiDecision ? (
         <div
-          className={`tw-box-border tw-mt-2 tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.06] tw-bg-iron-950/70 tw-@container/timeline sm:tw-mt-4 ${
+          className={`tw-mt-2 tw-box-border tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.06] tw-bg-iron-950/70 tw-@container/timeline sm:tw-mt-4 ${
             isDecisionDetailsOpen ? "" : "tw-h-[38px]"
           }`}
         >
@@ -221,9 +220,15 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
       ) : (
         !isCurationWave && (
           <div className="tw-overflow-hidden tw-rounded-lg tw-bg-iron-950 tw-px-3 tw-py-2">
-            <div className="tw-flex tw-items-center tw-gap-2">
+            <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-3">
               <CompactDroppingPhaseCard wave={wave} />
               <CompactVotingPhaseCard wave={wave} />
+              {nextDecisionTime !== null && (
+                <CompactWinnerAnnouncement
+                  timestamp={nextDecisionTime}
+                  timeLeft={displayedTimeLeft}
+                />
+              )}
             </div>
           </div>
         )

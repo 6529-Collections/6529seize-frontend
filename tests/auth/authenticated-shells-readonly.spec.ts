@@ -98,7 +98,30 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
   test("renders direct messages without falling back to the wallet gate", async ({
     page,
   }) => {
+    await page.addInitScript(() => {
+      const flashes: string[] = [];
+      Object.defineProperty(window, "__authPromptFlashes", { value: flashes });
+      const observer = new MutationObserver(() => {
+        for (const heading of document.querySelectorAll("h1")) {
+          if (
+            /only available to connected wallets|need to set up a profile/.test(
+              heading.textContent ?? ""
+            )
+          ) {
+            flashes.push(heading.textContent ?? "");
+          }
+        }
+      });
+      observer.observe(document, {
+        subtree: true,
+        childList: true,
+        characterData: true,
+      });
+    });
     await gotoReady(page, "/messages", { readySelector: "#messages-content" });
+    expect(
+      await page.evaluate(() => Reflect.get(window, "__authPromptFlashes"))
+    ).toEqual([]);
 
     await expect(page.locator("#messages-content")).toBeVisible();
     await expectWalletGateAbsent(page);

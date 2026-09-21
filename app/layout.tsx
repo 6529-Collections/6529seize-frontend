@@ -32,7 +32,9 @@ import { getProductionAppEnvironment } from "@/config/appEnvironment";
 import { publicEnv } from "@/config/env";
 import { CONSENT_EULA_COOKIE, NATIVE_IOS_COOKIE } from "@/constants/constants";
 import type { Viewport } from "next";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
+import EnvironmentOriginProvider from "@/components/common/EnvironmentOriginContext";
+import { getRequestOrigin } from "@/config/requestOrigin";
 import Script from "next/script";
 
 export const fetchCache = "force-no-store";
@@ -53,7 +55,11 @@ export default async function RootLayout({
   readonly children: React.ReactNode;
 }) {
   const isUsingStaticAssets = publicEnv.ASSETS_FROM_S3 === "true";
-  const cookieStore = await cookies();
+  const [cookieStore, requestHeaders] = await Promise.all([
+    cookies(),
+    headers(),
+  ]);
+  const initialOrigin = getRequestOrigin(requestHeaders);
   const initialIsIos = cookieStore.get(NATIVE_IOS_COOKIE)?.value === "true";
   const initialEulaConsentVersion = cookieStore.get(CONSENT_EULA_COOKIE)?.value;
 
@@ -106,13 +112,15 @@ export default async function RootLayout({
         <RuntimeFavicon />
         <MobileLaunchTimingReporter />
         <AwsRumProvider>
-          <Providers
-            initialIsIos={initialIsIos}
-            initialEulaConsentVersion={initialEulaConsentVersion}
-          >
-            <DynamicHeadTitle />
-            <LayoutWrapper>{children}</LayoutWrapper>
-          </Providers>
+          <EnvironmentOriginProvider origin={initialOrigin}>
+            <Providers
+              initialIsIos={initialIsIos}
+              initialEulaConsentVersion={initialEulaConsentVersion}
+            >
+              <DynamicHeadTitle />
+              <LayoutWrapper>{children}</LayoutWrapper>
+            </Providers>
+          </EnvironmentOriginProvider>
         </AwsRumProvider>
       </body>
     </html>

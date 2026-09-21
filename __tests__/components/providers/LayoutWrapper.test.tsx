@@ -1,4 +1,5 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
+import { useEffect } from "react";
 import LayoutWrapper from "@/components/providers/LayoutWrapper";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
@@ -9,8 +10,16 @@ jest.mock("next/navigation", () => ({
 
 jest.mock("@/components/layout/WebLayout", () => ({
   __esModule: true,
-  default: ({ children }: { children: React.ReactNode }) => (
-    <div data-testid="web-layout">{children}</div>
+  default: ({
+    children,
+    isSmall,
+  }: {
+    children: React.ReactNode;
+    isSmall?: boolean;
+  }) => (
+    <div data-testid={isSmall ? "small-screen-layout" : "web-layout"}>
+      {children}
+    </div>
   ),
 }));
 
@@ -100,14 +109,14 @@ describe("LayoutWrapper layout selection", () => {
     expect(screen.queryByTestId("small-screen-layout")).not.toBeInTheDocument();
   });
 
-  it("uses SmallScreenLayout for touch-first devices at narrow widths", () => {
+  it("uses small-screen chrome for touch-first devices at narrow widths", () => {
     setDeviceInfo({ hasTouchScreen: true });
     setViewportWidth(390);
     renderLayout();
     expect(screen.getByTestId("small-screen-layout")).toBeInTheDocument();
   });
 
-  it("uses SmallScreenLayout for touch-first tablets between the small and tablet breakpoints", () => {
+  it("uses small-screen chrome for touch-first tablets between the small and tablet breakpoints", () => {
     // 900px: wider than the small-screen cutoff (750) but inside the tablet
     // viewport (<1024) — exercises the isTouchTabletViewport OR-branch.
     setDeviceInfo({ hasTouchScreen: true });
@@ -116,7 +125,7 @@ describe("LayoutWrapper layout selection", () => {
     expect(screen.getByTestId("small-screen-layout")).toBeInTheDocument();
   });
 
-  it("keeps SmallScreenLayout for phone user agents even with a mouse attached", () => {
+  it("keeps small-screen chrome for phone user agents even with a mouse attached", () => {
     // A mouse gives the phone a fine pointer, so touch-first detection turns
     // false — the mobile UA must still pin the phone to the small layout.
     setDeviceInfo({ hasTouchScreen: false, isMobileDevice: true });
@@ -131,6 +140,52 @@ describe("LayoutWrapper layout selection", () => {
     setViewportWidth(1440);
     renderLayout();
     expect(screen.getByTestId("web-layout")).toBeInTheDocument();
+  });
+
+  it("preserves page state and active work across touch viewport and capability changes", () => {
+    const mounted = jest.fn();
+    const cleanup = jest.fn();
+    const transfer = new AbortController();
+    function Editor() {
+      useEffect(() => {
+        mounted();
+        return () => {
+          cleanup();
+          transfer.abort();
+        };
+      }, []);
+      return <input aria-label="Pending answer" defaultValue="" />;
+    }
+    setDeviceInfo({ hasTouchScreen: true });
+    setViewportWidth(900);
+    const { rerender } = render(
+      <LayoutWrapper>
+        <Editor />
+      </LayoutWrapper>
+    );
+    const input = screen.getByRole("textbox", { name: "Pending answer" });
+    fireEvent.change(input, { target: { value: "Still writing" } });
+    for (const [width, hasTouchScreen] of [
+      [1100, true],
+      [390, true],
+      [390, false],
+      [900, true],
+    ] as const) {
+      setViewportWidth(width);
+      setDeviceInfo({ hasTouchScreen });
+      rerender(
+        <LayoutWrapper>
+          <Editor />
+        </LayoutWrapper>
+      );
+      expect(screen.getByRole("textbox", { name: "Pending answer" })).toBe(
+        input
+      );
+      expect(input).toHaveValue("Still writing");
+      expect(transfer.signal.aborted).toBe(false);
+      expect(cleanup).not.toHaveBeenCalled();
+    }
+    expect(mounted).toHaveBeenCalledTimes(1);
   });
 
   it("always uses MobileLayout inside the native app", () => {

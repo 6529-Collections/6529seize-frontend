@@ -303,6 +303,14 @@ test.describe("Museum Inside the System @surface @readonly", () => {
         "/museum/network/projects/century/system?work=6529NM.2026.001.01#possibility-space",
         { timeout: 45_000 }
       );
+      // Visible server HTML is not proof that Next's navigation handler is ready.
+      // An early native navigation cancels the Work page's startup requests.
+      await expect(link).toHaveAttribute("data-client-ready", "true", {
+        timeout: STUDY_READY_TIMEOUT_MS,
+      });
+      const documentTimeOrigin = await page.evaluate(
+        () => performance.timeOrigin
+      );
       await link.click();
       await expect(page).toHaveURL((url) => {
         return (
@@ -314,6 +322,10 @@ test.describe("Museum Inside the System @surface @readonly", () => {
       await expect(
         page.getByRole("button", { name: "#31", exact: true })
       ).toHaveAttribute("aria-pressed", "true");
+      expect(
+        await page.evaluate(() => performance.timeOrigin),
+        "The hydrated study link should preserve the document and its startup requests"
+      ).toBe(documentTimeOrigin);
       await expectNoHorizontalOverflow(page);
     } finally {
       assertNoConsoleErrors(diagnostics, {

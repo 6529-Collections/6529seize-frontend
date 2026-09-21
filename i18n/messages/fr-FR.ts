@@ -233,6 +233,7 @@ export const FR_FR_MESSAGES = {
   "media.video.play": "Lire la video",
   "media.video.player": "Lecteur video",
   "media.video.playPreview": "Lire l'apercu video",
+  "media.video.position": "{current} sur {duration}",
   "media.video.seek": "Modifier la position de la video",
   "media.video.unmute": "Activer le son de la video",
   "media.video.unsupported":
@@ -1121,6 +1122,10 @@ export const FR_FR_MESSAGES = {
     "Prochaine décision après le {date}",
   "waves.leaderboard.timeline.noDecisionScheduled": "Aucune décision planifiée",
   "waves.leaderboard.timeline.noUpcomingEvents": "Aucun événement à venir",
+  "waves.leaderboard.phase.nextWinnersIn": "Prochains gagnants annoncés dans",
+  "waves.leaderboard.phase.countdown": "{hours} h {minutes} min",
+  "waves.leaderboard.phase.countdownWithDays":
+    "{days} j {hours} h {minutes} min",
   "waves.leaderboard.timeline.nextWinner": "Prochain gagnant",
   "waves.leaderboard.timeline.nextWinnerIn":
     "Prochain gagnant dans {countdown}",

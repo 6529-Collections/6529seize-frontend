@@ -1,3 +1,7 @@
+let mockConnectionState = "connected";
+jest.mock("@/components/auth/SeizeConnectContext", () => ({
+  useSeizeConnectContext: () => ({ connectionState: mockConnectionState }),
+}));
 import { render, screen } from "@testing-library/react";
 import type { ReactNode } from "react";
 
@@ -87,6 +91,7 @@ import WavesCreatePageClient from "@/app/waves/create/page.client";
 describe("WavesCreatePageClient", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockConnectionState = "connected";
     mockUseDeviceInfo.mockReturnValue({ isApp: true, isMobileDevice: true });
   });
 
@@ -129,3 +134,22 @@ describe("WavesCreatePageClient", () => {
     expect(screen.queryByTestId("connect-wallet")).not.toBeInTheDocument();
   });
 });
+
+it.each(["initializing", "connecting"])(
+  "does not show Connect Wallet while %s",
+  (state) => {
+    mockConnectionState = state;
+    mockUseAuth.mockReturnValue({
+      connectedProfile: null,
+      fetchingProfile: false,
+    });
+    mockUseAuthenticatedContent.mockReturnValue({
+      contentState: "not-authenticated",
+    });
+    mockUseDeviceInfo.mockReturnValue({ isApp: true, isMobileDevice: true });
+    render(<WavesCreatePageClient />);
+    expect(screen.getByRole("status")).toBeInTheDocument();
+    expect(screen.queryByTestId("connect-wallet")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("setup-profile")).not.toBeInTheDocument();
+  }
+);

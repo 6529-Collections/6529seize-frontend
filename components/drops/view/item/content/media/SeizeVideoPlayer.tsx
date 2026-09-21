@@ -2,8 +2,10 @@
 
 import { PlayIcon } from "@heroicons/react/24/solid";
 import clsx from "clsx";
+import frameStyles from "./SeizeVideoFrame.module.css";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import { useVideoProgress } from "./useVideoProgress";
 import React, {
   useCallback,
   useEffect,
@@ -14,6 +16,7 @@ import React, {
 import {
   assignRef,
   getAspectRatio,
+  getVideoRatio,
   getNaturalWidthClassName,
   getOrientation,
   resolveSeizeVideoTemplate,
@@ -57,6 +60,7 @@ interface SeizeVideoPlayerProps {
   readonly loop?: boolean | undefined;
   readonly preload?: "auto" | "metadata" | "none" | undefined;
   readonly poster?: string | undefined;
+  readonly aspectRatioHint?: number | undefined;
   readonly captionsSrc?: string | undefined;
   readonly captionsLabel?: string | undefined;
   readonly captionsLang?: string | undefined;
@@ -101,6 +105,7 @@ export default function SeizeVideoPlayer({
   loop,
   preload,
   poster,
+  aspectRatioHint,
   captionsSrc,
   captionsLabel,
   captionsLang = DEFAULT_CAPTIONS_LANGUAGE,
@@ -128,6 +133,7 @@ export default function SeizeVideoPlayer({
 }: SeizeVideoPlayerProps) {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const internalVideoRef = useRef<HTMLVideoElement | null>(null);
+  const isScrubbingRef = useRef(false);
   const hideControlsTimerRef = useRef<number | null>(null);
   const [wrapperElement, setWrapperElement] = useState<HTMLDivElement | null>(
     null
@@ -158,14 +164,6 @@ export default function SeizeVideoPlayer({
   }>({});
   const [isPaused, setIsPaused] = useState(!resolvedTemplate.autoPlay);
   const [controlsVisible, setControlsVisible] = useState(true);
-  const [progressState, setProgressState] = useState<{
-    readonly src?: string | undefined;
-    readonly value: number;
-  }>({ value: 0 });
-  const [durationState, setDurationState] = useState<{
-    readonly src?: string | undefined;
-    readonly value: number;
-  }>({ value: 0 });
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isNativeFullscreen, setIsNativeFullscreen] = useState(false);
   const [openPosterGateKey, setOpenPosterGateKey] = useState<string | null>(
@@ -178,6 +176,7 @@ export default function SeizeVideoPlayer({
     | {
         readonly width: number;
         readonly height: number;
+        readonly src: string | undefined;
       }
     | undefined
   >();
@@ -201,6 +200,16 @@ export default function SeizeVideoPlayer({
   const isInView = useElementInView(wrapperElement);
   const directSrc =
     fallbackState.originSrc === src ? (fallbackState.source ?? src) : src;
+
+  const {
+    updateProgress,
+    resetTiming,
+    seekDisabled,
+    progress,
+    currentTimeLabel,
+    durationLabel,
+    seekValueText,
+  } = useVideoProgress(internalVideoRef, directSrc, locale);
 
   const setWrapperRef = useCallback((element: HTMLDivElement | null) => {
     wrapperRef.current = element;
@@ -233,7 +242,13 @@ export default function SeizeVideoPlayer({
       const playerHasFocus = activeElement
         ? (wrapperRef.current?.contains(activeElement) ?? false)
         : false;
-      if (video && !video.paused && !isAnyFullscreen && !playerHasFocus) {
+      if (
+        video &&
+        !video.paused &&
+        !isAnyFullscreen &&
+        !playerHasFocus &&
+        !isScrubbingRef.current
+      ) {
         setControlsVisible(false);
       }
     }, CONTROL_HIDE_DELAY_MS);
@@ -247,35 +262,21 @@ export default function SeizeVideoPlayer({
     hideControlsSoon();
   }
 
-  function updateProgress() {
-    const video = internalVideoRef.current;
-    if (!video || !Number.isFinite(video.duration) || video.duration <= 0) {
-      setDurationState((current) =>
-        current.src === directSrc && current.value === 0
-          ? current
-          : { src: directSrc, value: 0 }
-      );
-      setProgressState((current) =>
-        current.src === directSrc && current.value === 0
-          ? current
-          : { src: directSrc, value: 0 }
-      );
-      return;
-    }
-    setDurationState((current) =>
-      current.src === directSrc && current.value === video.duration
-        ? current
-        : { src: directSrc, value: video.duration }
-    );
-    const nextProgress = Math.min(
-      100,
-      (video.currentTime / video.duration) * 100
-    );
-    setProgressState((current) =>
-      current.src === directSrc && current.value === nextProgress
-        ? current
-        : { src: directSrc, value: nextProgress }
-    );
+  function startScrubbing() {
+    isScrubbingRef.current = true;
+    clearHideControlsTimer();
+    setControlsVisible(true);
+  }
+
+  function endScrubbing() {
+    isScrubbingRef.current = false;
+    revealControls();
+  }
+
+  function resetProgress() {
+    clearHideControlsTimer();
+    isScrubbingRef.current = false;
+    resetTiming();
   }
 
   useEffect(() => {
@@ -358,7 +359,11 @@ export default function SeizeVideoPlayer({
 
   function handleMetadata(event: React.SyntheticEvent<HTMLVideoElement>) {
     const video = event.currentTarget;
-    setVideoSize({ width: video.videoWidth, height: video.videoHeight });
+    setVideoSize({
+      width: video.videoWidth,
+      height: video.videoHeight,
+      src: directSrc,
+    });
     setAspectRatio(getAspectRatio(video.videoWidth, video.videoHeight));
     setOrientation(getOrientation(video.videoWidth, video.videoHeight));
     updateProgress();
@@ -409,12 +414,9 @@ export default function SeizeVideoPlayer({
     if (!video || !Number.isFinite(video.duration) || video.duration <= 0) {
       return;
     }
-
-    const clampedProgress = Math.min(100, Math.max(0, nextProgress));
-    video.currentTime = (clampedProgress / 100) * video.duration;
-    setProgressState({ src: directSrc, value: clampedProgress });
+    video.currentTime =
+      (Math.min(100, Math.max(0, nextProgress)) / 100) * video.duration;
     updateProgress();
-    revealControls();
   }
 
   function toggleMuted(event: React.MouseEvent<HTMLButtonElement>) {
@@ -526,16 +528,19 @@ export default function SeizeVideoPlayer({
     };
 
   function getResponsiveMediaStyle(): React.CSSProperties | undefined {
-    if (isFillLayout) {
-      return undefined;
+    if (isFillLayout || layout === "artwork" || isFullscreen) {
+      const measuredRatio =
+        videoSize?.src === directSrc
+          ? getVideoRatio(videoSize?.width, videoSize?.height)
+          : undefined;
+      return {
+        "--video-ratio":
+          measuredRatio ?? getVideoRatio(aspectRatioHint, 1) ?? 16 / 9,
+      } as React.CSSProperties;
     }
 
     const style: React.CSSProperties = {};
     style.aspectRatio = aspectRatio ?? DEFAULT_UNLOADED_ASPECT_RATIO;
-
-    if (isFullscreen) {
-      return style;
-    }
 
     const fallbackViewportHeight = viewportHeight ?? 900;
     const maxViewportHeight =
@@ -588,9 +593,6 @@ export default function SeizeVideoPlayer({
   const isWrapperFullscreen = isFullscreen;
   const controlsAreVisible = controlsVisible || isPaused || isAnyFullscreen;
   const responsiveMediaStyle = getResponsiveMediaStyle();
-  const duration = durationState.src === directSrc ? durationState.value : 0;
-  const progress = progressState.src === directSrc ? progressState.value : 0;
-  const seekDisabled = duration <= 0;
   const hasUserPausedOwnedAutoplay = userPausedAutoplaySrc === directSrc;
   const labels = useMemo<SeizeVideoLabels>(
     () => ({
@@ -659,6 +661,8 @@ export default function SeizeVideoPlayer({
         "tw-relative tw-max-w-full tw-overflow-hidden tw-rounded-xl tw-bg-transparent tw-outline-none tw-transition",
         showMinimalControls ? "tw-cursor-default" : "tw-cursor-auto",
         widthClassName,
+        layout === "artwork" && frameStyles["artwork"],
+        (isFillLayout || isWrapperFullscreen) && frameStyles["bounded"],
         align === "center" && "tw-mx-auto",
         isFillLayout && "tw-flex tw-items-center tw-justify-center",
         isWrapperFullscreen &&
@@ -667,89 +671,98 @@ export default function SeizeVideoPlayer({
       )}
       style={responsiveMediaStyle}
     >
-      <SeizeVideoElement
-        ariaLabel={ariaLabel ?? labels.player}
-        captionsDefault={captionsDefault}
-        captionsLabel={resolvedCaptionsLabel}
-        captionsLang={captionsLang}
-        captionsSrc={captionsSrc}
-        dataDisable={dataDisable}
-        dataNftMediaRenderer={dataNftMediaRenderer}
-        dataMime={dataMime}
-        dataTestId={dataTestId}
-        dataUrl={dataUrl}
-        id={id}
-        isMuted={isMuted}
-        isWrapperFullscreen={isWrapperFullscreen}
-        labels={labels}
-        loop={resolvedTemplate.loop}
-        onClick={handleVideoClick}
-        onDurationChange={updateProgress}
-        onEnded={handlePause}
-        onError={handleError}
-        onFocus={showMinimalControls ? revealControls : undefined}
-        onLoadedMetadata={handleMetadata}
-        onPause={handlePause}
-        onPlay={handlePlay}
-        onPointerEnter={minimalVideoHandlers.onPointerEnter}
-        onPointerLeave={minimalVideoHandlers.onPointerLeave}
-        onPointerMove={minimalVideoHandlers.onPointerMove}
-        onSeeked={updateProgress}
-        onSeeking={updateProgress}
-        onTimeUpdate={updateProgress}
-        onTouchStart={minimalVideoHandlers.onTouchStart}
-        poster={poster}
-        preload={resolvedTemplate.preload}
-        setVideoRef={setVideoRef}
-        src={directSrc}
-        videoAutoPlay={videoAutoPlay}
-        videoClassName={videoClassName}
-        videoControls={videoControls}
-        videoTabIndex={showMinimalControls ? 0 : undefined}
-      />
-
-      {isPosterGateClosed && (
-        <div className="tw-pointer-events-none tw-absolute tw-inset-0 tw-z-20 tw-flex tw-items-center tw-justify-center">
-          <button
-            type="button"
-            aria-label={labels.playPreview}
-            onClick={openPosterGate}
-            className="tw-pointer-events-auto tw-flex tw-size-14 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-950/70 tw-p-0 tw-text-white tw-shadow-xl tw-shadow-black/30 tw-backdrop-blur-md tw-transition focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-bg-iron-800/90"
-          >
-            <PlayIcon className="tw-ml-1 tw-size-7" aria-hidden="true" />
-          </button>
-        </div>
-      )}
-
-      {showMinimalControls && (
-        <SeizeVideoMinimalControls
-          isAnyFullscreen={isAnyFullscreen}
-          isDownloading={isDownloading}
+      <div className={frameStyles["surface"]} data-video-surface>
+        <SeizeVideoElement
+          ariaLabel={ariaLabel ?? labels.player}
+          captionsDefault={captionsDefault}
+          captionsLabel={resolvedCaptionsLabel}
+          captionsLang={captionsLang}
+          captionsSrc={captionsSrc}
+          dataDisable={dataDisable}
+          dataNftMediaRenderer={dataNftMediaRenderer}
+          dataMime={dataMime}
+          dataTestId={dataTestId}
+          dataUrl={dataUrl}
+          id={id}
           isMuted={isMuted}
-          isPaused={isPaused}
+          isWrapperFullscreen={isWrapperFullscreen}
           labels={labels}
-          onControlsFocus={revealControls}
-          onDownloadClick={onDownload ? stopAndRun(onDownload) : undefined}
-          onFullscreenClick={requestFullscreen}
-          onMuteClick={toggleMuted}
-          onOpenClick={onOpen ? stopAndRun(onOpen) : undefined}
-          onPlaybackClick={(event) => {
-            event.preventDefault();
-            event.stopPropagation();
-            togglePlayback();
-            revealControls();
-          }}
-          onSeekChange={(event) => {
-            seekToProgress(Number(event.currentTarget.value));
-          }}
-          openLabel={openLabel}
-          progress={progress}
-          seekDisabled={seekDisabled}
-          showControls={controlsAreVisible}
-          showActions={showActions}
-          showFullscreen={showFullscreen}
+          loop={resolvedTemplate.loop}
+          onClick={handleVideoClick}
+          onDurationChange={updateProgress}
+          onEnded={handlePause}
+          onEmptied={resetProgress}
+          onError={handleError}
+          onFocus={showMinimalControls ? revealControls : undefined}
+          onLoadedMetadata={handleMetadata}
+          onPause={handlePause}
+          onPlay={handlePlay}
+          onPointerEnter={minimalVideoHandlers.onPointerEnter}
+          onPointerLeave={minimalVideoHandlers.onPointerLeave}
+          onPointerMove={minimalVideoHandlers.onPointerMove}
+          onSeeked={updateProgress}
+          onSeeking={updateProgress}
+          onTimeUpdate={updateProgress}
+          onTouchStart={minimalVideoHandlers.onTouchStart}
+          poster={poster}
+          preload={resolvedTemplate.preload}
+          setVideoRef={setVideoRef}
+          src={directSrc}
+          videoAutoPlay={videoAutoPlay}
+          videoClassName={videoClassName}
+          videoControls={videoControls}
+          videoTabIndex={showMinimalControls ? 0 : undefined}
         />
-      )}
+
+        {isPosterGateClosed && (
+          <div className="tw-pointer-events-none tw-absolute tw-inset-0 tw-z-20 tw-flex tw-items-center tw-justify-center">
+            <button
+              type="button"
+              aria-label={labels.playPreview}
+              onClick={openPosterGate}
+              className="tw-pointer-events-auto tw-flex tw-size-14 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-950/70 tw-p-0 tw-text-white tw-shadow-xl tw-shadow-black/30 tw-backdrop-blur-md tw-transition focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-bg-iron-800/90"
+            >
+              <PlayIcon className="tw-ml-1 tw-size-7" aria-hidden="true" />
+            </button>
+          </div>
+        )}
+
+        {showMinimalControls && (
+          <SeizeVideoMinimalControls
+            isAnyFullscreen={isAnyFullscreen}
+            isDownloading={isDownloading}
+            isMuted={isMuted}
+            isPaused={isPaused}
+            labels={labels}
+            onControlsFocus={revealControls}
+            onDownloadClick={onDownload ? stopAndRun(onDownload) : undefined}
+            onFullscreenClick={requestFullscreen}
+            onMuteClick={toggleMuted}
+            onOpenClick={onOpen ? stopAndRun(onOpen) : undefined}
+            onPlaybackClick={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              togglePlayback();
+              revealControls();
+            }}
+            onSeekChange={(event) => {
+              seekToProgress(Number(event.currentTarget.value));
+              revealControls();
+            }}
+            onScrubStart={startScrubbing}
+            onScrubEnd={endScrubbing}
+            currentTimeLabel={currentTimeLabel}
+            durationLabel={durationLabel}
+            seekValueText={seekValueText}
+            openLabel={openLabel}
+            progress={progress}
+            seekDisabled={seekDisabled}
+            showControls={controlsAreVisible}
+            showActions={showActions}
+            showFullscreen={showFullscreen}
+          />
+        )}
+      </div>
     </div>
   );
 }

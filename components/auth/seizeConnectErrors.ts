@@ -1,3 +1,5 @@
+import { Capacitor } from "@capacitor/core";
+import { queueNativePushLogout } from "@/services/notifications/push-installation";
 import {
   clearAllWalletAuth,
   getConnectedWalletAccounts,
@@ -90,6 +92,11 @@ const revokeProfileSessionForLogoutAll = async ({
 };
 
 export const clearAllAuthenticatedProfiles = async (): Promise<void> => {
+  if (Capacitor.isNativePlatform()) {
+    await queueNativePushLogout(null, true);
+    await clearAllWalletAuth();
+    return;
+  }
   const authenticatedProfiles = getAuthenticatedProfilesForLogoutAll();
   await Promise.all(
     authenticatedProfiles.map((profile) =>

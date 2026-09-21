@@ -29,6 +29,7 @@ jobs:
       jest_changed_required: ${{ steps.plan_outputs.outputs.jest_changed_required }}
       build_required: ${{ steps.plan_outputs.outputs.build_required }}
       playwright_smoke_required: ${{ steps.plan_outputs.outputs.playwright_smoke_required }}
+      playwright_artwork_documentation_required: ${{ steps.plan_outputs.outputs.playwright_artwork_documentation_required }}
       playwright_collect_required: ${{ steps.plan_outputs.outputs.playwright_collect_required }}
       playwright_critical_shell_required: ${{ steps.plan_outputs.outputs.playwright_critical_shell_required }}
       playwright_museum_required: ${{ steps.plan_outputs.outputs.playwright_museum_required }}
@@ -206,7 +207,7 @@ jobs:
           if (plan.checks.build.required) {
             appCheckLanes.push({ lane: "build", label: "Production build", runner: buildRunner });
           }
-          if (plan.checks.playwright_smoke.required || collectBrowserRequired) {
+          if (plan.checks.playwright_smoke.required || collectBrowserRequired || plan.checks.playwright_artwork_documentation.required) {
             corePlaywrightLanes.push({ lane: "playwright-smoke", label: "Playwright smoke", runner: defaultRunner });
           }
           if (plan.checks.playwright_critical_shell.required) {
@@ -392,6 +393,13 @@ jobs:
             --project=web-desktop-chromium \
             --project=web-mobile-chromium \
             --workers=1
+
+      - name: Run artwork documentation browser regression pack
+        if: matrix.lane == 'playwright-smoke' && needs.plan.outputs.playwright_artwork_documentation_required == 'true'
+        env:
+          PLAYWRIGHT_OUTPUT_DIR: "test-results/playwright/artwork-documentation"
+          PLAYWRIGHT_HTML_REPORT_DIR: "playwright-report/artwork-documentation"
+        run: ./bin/6529 run test:e2e:artwork-documentation-sandbox
 
       - name: Run critical route-shell Playwright pack
         if: matrix.lane == 'playwright-critical-shell'
