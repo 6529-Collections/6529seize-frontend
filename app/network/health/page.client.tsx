@@ -46,7 +46,7 @@ export default function MetricsPageClient() {
 
   return (
     <main
-      className={`${NETWORK_REFERENCE_BLACK_PAGE_CLASSES} tw-overflow-x-hidden [touch-action:pan-y]`}
+      className={`${NETWORK_REFERENCE_BLACK_PAGE_CLASSES} tw-overflow-x-clip [touch-action:pan-y]`}
     >
       <div className="tw-w-full">
         <AboutContentsDropdown
