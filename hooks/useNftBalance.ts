@@ -10,6 +10,10 @@ interface UseNftBalanceProps {
   enabled?: boolean;
 }
 
+// Far above either collection's holdings; fail rather than publish a truncated
+// snapshot if an invalid API response never terminates pagination.
+const MAX_BALANCE_PAGES = 100;
+
 export function useNftBalance({
   consolidationKey,
   contract,
@@ -50,34 +54,67 @@ export function useNftContractBalances({
   readonly tokenIds: readonly number[];
   readonly enabled?: boolean;
 }) {
-  const uniqueTokenIds = Array.from(new Set(tokenIds)).sort((a, b) => a - b);
-  const tokenIdsParam = uniqueTokenIds.join(",");
+  const normalizedContract = contract.toLowerCase();
 
+  // A collection's ownership snapshot is independent of the visible grid pages.
+  // Keep it cached while scrolling, sorting, or filtering the collection.
   return useQuery<NftOwner[]>({
-    queryKey: [
-      "nft-contract-balances",
-      consolidationKey,
-      contract,
-      tokenIdsParam,
-    ],
-    queryFn: async () => {
-      if (!consolidationKey || tokenIdsParam.length === 0) {
+    queryKey: ["nft-contract-balances", consolidationKey, normalizedContract],
+    queryFn: async ({ signal }) => {
+      if (!consolidationKey) {
         return [];
       }
 
-      const response = await commonApiFetch<
-        DBResponse<NftOwner>,
-        Record<string, string>
-      >({
-        endpoint: `nft-owners/consolidation/${consolidationKey}`,
-        params: {
-          contract,
-          token_id: tokenIdsParam,
-        },
-      });
+      const balances: NftOwner[] = [];
+      let page = 1;
+      let hasNextPage = true;
 
-      return response.data ?? [];
+      while (hasNextPage) {
+        signal.throwIfAborted();
+        if (page > MAX_BALANCE_PAGES) {
+          throw new Error(
+            "Collection balance pagination exceeded its page limit"
+          );
+        }
+        const response = await commonApiFetch<
+          DBResponse<NftOwner>,
+          Record<string, string>
+        >({
+          endpoint: `nft-owners/consolidation/${encodeURIComponent(consolidationKey)}`,
+          params: {
+            contract: normalizedContract,
+            page: String(page),
+            page_size: "100",
+          },
+          signal,
+          errorMode: "structured",
+        });
+
+        if (!Array.isArray(response.data)) {
+          throw new TypeError(
+            "Collection balance response is missing its data array"
+          );
+        }
+        if (
+          response.next !== null &&
+          (typeof response.next !== "string" || response.next.trim() === "")
+        ) {
+          throw new TypeError("Collection balance response has invalid pagination");
+        }
+        hasNextPage = response.next !== null;
+        if (hasNextPage && response.data.length === 0) {
+          throw new Error(
+            "Collection balance pagination returned an empty intermediate page"
+          );
+        }
+        balances.push(...response.data);
+        page += 1;
+      }
+
+      // Publish only a complete snapshot: a missing row then means zero balance,
+      // rather than an owned token omitted from the first API response page.
+      return balances;
     },
-    enabled: enabled && !!consolidationKey && tokenIdsParam.length > 0,
+    enabled: enabled && !!consolidationKey && tokenIds.length > 0,
   });
 }

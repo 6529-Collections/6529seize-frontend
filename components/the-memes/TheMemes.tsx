@@ -344,9 +344,7 @@ export default function TheMemesComponent({
     () => initialData?.nfts ?? []
   );
   const tokenIds = useMemo(() => nfts.map((nft) => nft.id), [nfts]);
-  const [nftsNextPage, setNftsNextPage] = useState<string | undefined>(
-    () => initialData?.nextPage
-  );
+  const nftsNextPage = useRef(initialData?.nextPage);
 
   const [nftMemes, setNftMemes] = useState<Meme[]>([]);
   const [nftsByMeme, setNftsByMeme] = useState<
@@ -418,39 +416,60 @@ export default function TheMemesComponent({
     setNftsByMeme(nextNftsByMeme);
   }, [nfts, sortDir]);
 
+  const activeRequest = useRef<AbortController | undefined>(undefined);
+
   const fetchNfts = useCallback(() => {
-    if (nftsNextPage === undefined) {
-      setFetching(false);
+    const url = nftsNextPage.current;
+    if (activeRequest.current !== undefined || url === undefined) {
       return;
     }
-    fetchUrl(nftsNextPage)
+    const controller = new AbortController();
+    activeRequest.current = controller;
+    setFetching(true);
+
+    fetchUrl(url, { signal: controller.signal })
       .then((responseNfts: Partial<DBResponse<ApiMemesExtendedData>>) => {
+        // Aborting alone is insufficient if a response has already settled.
+        if (controller.signal.aborted) return;
+
+        // Once finally releases the lock, a scroll may run before React
+        // commits. Read the next cursor from this ref, not the previous render.
+        nftsNextPage.current =
+          typeof responseNfts.next === "string" ? responseNfts.next : undefined;
         setNfts((prev) => [...prev, ...(responseNfts.data ?? [])]);
-        setNftsNextPage(
-          typeof responseNfts.next === "string" ? responseNfts.next : undefined
-        );
       })
       .catch(() => {
         // optionally surface a toast/log here
       })
-      .finally(() => setFetching(false));
-  }, [nftsNextPage]);
+      .finally(() => {
+        if (controller.signal.aborted) return;
+
+        activeRequest.current = undefined;
+        setFetching(false);
+      });
+  }, []);
 
   useEffect(() => {
-    if (filtersReady) {
-      if (initialDataRef.current !== undefined) {
-        initialDataRef.current = undefined;
-        return;
-      }
+    if (!filtersReady) return;
 
+    if (initialDataRef.current !== undefined) {
+      initialDataRef.current = undefined;
+    } else {
+      nftsNextPage.current = getNftsNextPage();
       setNfts([]);
-      setNftsNextPage(getNftsNextPage());
-      setFetching(true);
+      fetchNfts();
     }
+
+    // This also owns pagination requests started by scrolling in this view.
+    return () => {
+      activeRequest.current?.abort();
+      activeRequest.current = undefined;
+    };
   }, [
     activeSeasonId,
     activeYearId,
     filtersReady,
+    fetchNfts,
     getNftsNextPage,
     sort,
     sortDir,
@@ -458,20 +477,14 @@ export default function TheMemesComponent({
   ]);
 
   useEffect(() => {
-    if (fetching && filtersReady && nftsNextPage !== undefined) {
-      fetchNfts();
-    }
-  }, [fetching, fetchNfts, filtersReady, nftsNextPage]);
-
-  useEffect(() => {
-    if (nftsNextPage === undefined) {
+    if (!filtersReady) {
       return;
     }
 
     let throttleTimeout: ReturnType<typeof setTimeout> | null = null;
 
     const handleScroll = () => {
-      if (throttleTimeout !== null) {
+      if (throttleTimeout !== null || nftsNextPage.current === undefined) {
         return;
       }
 
@@ -483,8 +496,8 @@ export default function TheMemesComponent({
           window.innerHeight -
           window.scrollY;
 
-        if (distanceFromBottom <= 400 && filtersReady) {
-          setFetching(true);
+        if (distanceFromBottom <= 400) {
+          fetchNfts();
         }
       }, 200);
     };
@@ -497,7 +510,7 @@ export default function TheMemesComponent({
       }
       window.removeEventListener("scroll", handleScroll);
     };
-  }, [filtersReady, nftsNextPage]);
+  }, [fetchNfts, filtersReady]);
 
   function printSortDirectionButton(
     direction: SortDirection,
