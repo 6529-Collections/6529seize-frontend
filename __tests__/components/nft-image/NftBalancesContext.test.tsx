@@ -166,6 +166,86 @@ describe("collection balance snapshots", () => {
     expect(screen.queryByText("SEIZED x2")).not.toBeInTheDocument();
   });
 
+  it("stops a nonterminating API response without exposing partial balances", async () => {
+    jest.spyOn(console, "error").mockImplementation(() => undefined);
+    fetchBalances.mockResolvedValue(ownershipPage(MEMES, [1], "?page=2"));
+    render(<Grid />);
+    await waitFor(() => expectBalance(1, "N/A"));
+    expect(fetchBalances).toHaveBeenCalledTimes(100);
+    expect(screen.queryByText("SEIZED x2")).not.toBeInTheDocument();
+  });
+
+  it.each([undefined, null, {}])(
+    "rejects malformed page data (%p) instead of assuming zero",
+    async (data) => {
+      jest.spyOn(console, "error").mockImplementation(() => undefined);
+      fetchBalances
+        .mockResolvedValueOnce(ownershipPage(MEMES, [1], "?page=2"))
+        .mockResolvedValueOnce({ count: 2, page: 2, next: null, data });
+      render(<Grid tokenIds={[1, 2]} />);
+      await waitFor(() => expect(screen.getAllByText("N/A")).toHaveLength(2));
+      expect(screen.queryByText("UNSEIZED")).not.toBeInTheDocument();
+      expect(fetchBalances).toHaveBeenCalledTimes(2);
+    }
+  );
+
+  it("rejects an empty intermediate page without requesting more pages", async () => {
+    jest.spyOn(console, "error").mockImplementation(() => undefined);
+    fetchBalances.mockResolvedValue(ownershipPage(MEMES, [], "?page=2"));
+    render(<Grid />);
+    await waitFor(() => expectBalance(1, "N/A"));
+    expect(fetchBalances).toHaveBeenCalledTimes(1);
+  });
+
+  it("encodes the consolidation key as a single path segment", async () => {
+    connectedProfile = {
+      consolidation_key: "profile/with?reserved#characters",
+    };
+    fetchBalances.mockResolvedValueOnce(ownershipPage(MEMES, [1]));
+    render(<Grid />);
+    await waitFor(() => expectBalance(1, "SEIZED x2"));
+    expect(fetchBalances).toHaveBeenCalledWith(
+      expect.objectContaining({
+        endpoint:
+          "nft-owners/consolidation/profile%2Fwith%3Freserved%23characters",
+      })
+    );
+  });
+
+  it("cancels a later page when signing out without fetching another page", async () => {
+    const lastPage = Promise.withResolvers<DBResponse<NftOwner>>();
+    fetchBalances
+      .mockResolvedValueOnce(ownershipPage(MEMES, [1], "?page=2"))
+      .mockReturnValueOnce(lastPage.promise);
+    const { rerender } = render(<Grid />);
+    await waitFor(() => expect(fetchBalances).toHaveBeenCalledTimes(2));
+    const signal = fetchBalances.mock.calls[1]?.[0].signal;
+    connectedProfile = null;
+    rerender(<Grid />);
+    expect(signal?.aborted).toBe(true);
+    await act(async () => {
+      lastPage.resolve(ownershipPage(MEMES, [2], "?page=3"));
+    });
+    expect(fetchBalances).toHaveBeenCalledTimes(2);
+    expect(screen.queryByText("SEIZED x2")).not.toBeInTheDocument();
+  });
+
+  it("loads an initially empty grid and preserves cached ownership when filters reset", async () => {
+    queryClient.setDefaultOptions({
+      queries: { retry: false, gcTime: Infinity, staleTime: 10000 },
+    });
+    fetchBalances.mockResolvedValueOnce(ownershipPage(MEMES, [1, 2]));
+    const { rerender } = render(<Grid tokenIds={[]} />);
+    expect(fetchBalances).not.toHaveBeenCalled();
+    rerender(<Grid tokenIds={[1]} />);
+    await waitFor(() => expectBalance(1, "SEIZED x2"));
+    rerender(<Grid tokenIds={[]} />);
+    rerender(<Grid tokenIds={[2, 1]} />);
+    expectBalance(1, "SEIZED x2");
+    expectBalance(2, "SEIZED x2");
+    expect(fetchBalances).toHaveBeenCalledTimes(1);
+  });
+
   it.each(["profile", "contract"])(
     "isolates balances when the %s changes",
     async (scope) => {

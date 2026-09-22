@@ -10,6 +10,10 @@ interface UseNftBalanceProps {
   enabled?: boolean;
 }
 
+// Far above either collection's holdings; fail rather than publish a truncated
+// snapshot if an invalid API response never terminates pagination.
+const MAX_BALANCE_PAGES = 100;
+
 export function useNftBalance({
   consolidationKey,
   contract,
@@ -66,11 +70,17 @@ export function useNftContractBalances({
       let hasNextPage = true;
 
       while (hasNextPage) {
+        signal.throwIfAborted();
+        if (page > MAX_BALANCE_PAGES) {
+          throw new Error(
+            "Collection balance pagination exceeded its page limit"
+          );
+        }
         const response = await commonApiFetch<
           DBResponse<NftOwner>,
           Record<string, string>
         >({
-          endpoint: `nft-owners/consolidation/${consolidationKey}`,
+          endpoint: `nft-owners/consolidation/${encodeURIComponent(consolidationKey)}`,
           params: {
             contract: normalizedContract,
             page: String(page),
@@ -80,6 +90,16 @@ export function useNftContractBalances({
           errorMode: "structured",
         });
 
+        if (!Array.isArray(response.data)) {
+          throw new Error(
+            "Collection balance response is missing its data array"
+          );
+        }
+        if (Boolean(response.next) && response.data.length === 0) {
+          throw new Error(
+            "Collection balance pagination returned an empty intermediate page"
+          );
+        }
         balances.push(...response.data);
         hasNextPage = Boolean(response.next);
         page += 1;
