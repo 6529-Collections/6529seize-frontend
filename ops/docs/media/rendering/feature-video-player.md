@@ -60,13 +60,17 @@ it, retain the browser's own controls. Control-free previews do not gain control
 
 Still images on the homepage, individual Meme pages, and expanded Wave
 submissions preserve their proportions without cropping. They fit within the
-available width and the same 95% usable-screen-height limit as video.
+available width and the same 95% usable-screen-height limit as video, except
+for stacked homepage images on mobile.
 
 On desktop, homepage images also fit within the height of the adjacent details
-section. On mobile, the image appears above the details and uses its own frame.
+section. On mobile, homepage images fill the available width at their natural
+aspect ratio, with no reserved blank space above or below. The details follow
+directly beneath the image; tall images can extend beyond one screen.
 Meme detail images reserve their proportions when dimensions are available,
 with a stable fallback frame otherwise. Loading ownership or listing panels
 does not vertically recenter a still image against the growing details column.
 Wave submission images reserve space for the overlay header and artwork padding.
-Portrait images usually reach the height limit first; landscape images reach
-the available width first. Empty space around the artwork is intentional.
+In these capped layouts, portrait images usually reach the height limit first;
+landscape images reach the available width first. Empty space around the artwork
+is intentional there, but is not reserved for mobile homepage images.
