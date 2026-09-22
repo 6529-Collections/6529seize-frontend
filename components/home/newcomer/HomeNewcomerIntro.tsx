@@ -35,7 +35,7 @@ export default function HomeNewcomerIntro() {
   return (
     <section
       aria-labelledby="home-newcomer-title"
-      className="tw-px-4 tw-pb-10 tw-pt-4 md:tw-mx-auto md:tw-max-w-3xl md:tw-px-6 md:tw-pb-12 lg:tw-px-8"
+      className="tw-px-4 tw-pb-2 tw-pt-5 md:tw-mx-auto md:tw-max-w-3xl md:tw-px-6 md:tw-pb-4 lg:tw-px-8"
     >
       <h2 id="home-newcomer-title" className="tw-sr-only">
         {t(locale, "home.newcomer.title")}

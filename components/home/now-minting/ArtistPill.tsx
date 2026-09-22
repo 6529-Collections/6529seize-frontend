@@ -31,7 +31,7 @@ export default function ArtistPill({
   const labelClassName = clsx(
     "tw-min-w-0 tw-truncate tw-font-medium",
     isMinimal
-      ? "tw-text-sm tw-tracking-[-0.01em] tw-text-iron-400"
+      ? "tw-text-sm tw-tracking-[-0.01em] tw-text-iron-200"
       : "tw-text-sm tw-text-iron-200",
     href &&
       "tw-transition-colors tw-duration-300 desktop-hover:hover:tw-text-iron-100"

@@ -86,7 +86,7 @@ export function BoostedSection() {
       <div className="tw-relative">
         <div className="tw-mb-8">
           <div className="tw-flex tw-items-center">
-            <span className="tw-m-0 tw-text-xl tw-font-semibold tw-tracking-tight tw-text-iron-200 md:tw-text-2xl">
+            <span className="tw-m-0 tw-text-xl tw-font-medium tw-tracking-tight tw-text-iron-200 md:tw-text-2xl">
               Boosted Drops
             </span>
           </div>

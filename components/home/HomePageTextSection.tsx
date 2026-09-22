@@ -11,7 +11,7 @@ export default function HomePageTextSection() {
       <div className="tw-relative tw-z-10 tw-py-4 md:tw-py-8">
         <div className="tw-mx-auto tw-grid tw-grid-cols-1 tw-gap-y-1 md:tw-max-w-2xl md:tw-gap-y-2 lg:tw-max-w-none lg:tw-grid-cols-12 lg:tw-gap-x-8 lg:tw-gap-y-0 xl:tw-gap-x-12">
           <header className="md:tw-text-center lg:tw-col-span-7 lg:tw-row-start-1 lg:tw-text-left">
-            <h2 className="tw-mb-0 tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-200 sm:tw-text-2xl md:tw-text-3xl">
+            <h2 className="tw-mb-0 tw-text-xl tw-font-medium tw-leading-tight tw-tracking-tight tw-text-iron-200 sm:tw-text-2xl md:tw-text-3xl">
               6529 is a network society
             </h2>
           </header>
@@ -23,7 +23,7 @@ export default function HomePageTextSection() {
               and technology.
             </p>
 
-            <p className="tw-mb-0 tw-mt-6 tw-text-pretty tw-text-xs tw-uppercase tw-tracking-widest tw-text-iron-400 md:tw-mt-8 lg:tw-whitespace-nowrap">
+            <p className="tw-mb-0 tw-mt-6 tw-text-pretty tw-text-xs tw-uppercase tw-tracking-[0.14em] tw-text-iron-400 md:tw-mt-8 lg:tw-whitespace-nowrap">
               The long-term goal is nation-scale positive impact.
             </p>
           </div>

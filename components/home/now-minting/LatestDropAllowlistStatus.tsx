@@ -68,7 +68,9 @@ function formatAllocation(
 
 export default function LatestDropAllowlistStatus({
   tokenId,
-}: Readonly<{ tokenId: number }>) {
+}: Readonly<{
+  tokenId: number;
+}>) {
   const { address, connectionState } = useSeizeConnectContext();
   const locale = useBrowserLocale();
   const normalizedAddress = address ? normalizeAddress(address) : "";
@@ -122,8 +124,8 @@ export default function LatestDropAllowlistStatus({
     labels.length > 0;
 
   return (
-    <section className="tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900/70 tw-px-4 tw-py-3">
-      <h3 className="tw-m-0 tw-text-[11px] tw-font-semibold tw-uppercase tw-tracking-[0.12em] tw-text-iron-400">
+    <section className="tw-min-w-0">
+      <h3 className="tw-m-0 tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-400">
         {t(locale, "home.mintAllowlist.label")}
       </h3>
       <div

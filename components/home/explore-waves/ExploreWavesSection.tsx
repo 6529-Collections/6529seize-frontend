@@ -43,8 +43,8 @@ interface ExploreWavesSectionProps {
 
 export function ExploreWavesSection({
   headingVariant = "default",
-  title = "Tired of bot replies? Join the most interesting chats in crypto",
-  subtitle = "Most active waves",
+  title = "Tired of bot replies?",
+  subtitle = "Join the most interesting chats in crypto",
   limit = DEFAULT_WAVES_LIMIT,
   viewAllHref = "/waves",
   excludeFollowed = false,
@@ -139,11 +139,11 @@ export function ExploreWavesSection({
   const hasHeaderAdditions = Boolean(headerControls);
   const headerClassName = hasHeaderAdditions
     ? "tw-mb-8 tw-flex tw-flex-col tw-items-start tw-gap-5"
-    : "tw-mb-8 tw-flex tw-flex-col tw-items-start tw-gap-4 md:tw-items-end";
+    : "tw-mb-10 tw-flex tw-flex-col tw-items-center md:tw-mb-12";
   const titleClassName =
     headingVariant === "page"
       ? "tw-w-full tw-max-w-4xl tw-text-left"
-      : "tw-w-full tw-max-w-sm md:tw-mx-auto md:tw-max-w-xl md:tw-text-center lg:tw-max-w-full";
+      : "tw-mx-auto tw-w-full tw-max-w-5xl tw-text-center";
 
   return (
     <section className="tw-px-4 tw-py-10 md:tw-px-6 md:tw-py-16 lg:tw-px-8">
@@ -155,12 +155,18 @@ export function ExploreWavesSection({
                 {title}
               </h1>
             ) : (
-              <span className="tw-m-0 tw-text-xl tw-font-semibold tw-tracking-tight tw-text-iron-200 md:tw-text-2xl">
+              <h2 className="tw-m-0 tw-text-balance tw-text-xl tw-font-medium tw-leading-tight tw-tracking-tight tw-text-iron-50 md:tw-text-2xl">
                 {title}
-              </span>
+              </h2>
             )}
             {subtitle && (
-              <p className="tw-mb-0 tw-mt-2 tw-text-base tw-text-iron-500">
+              <p
+                className={
+                  headingVariant === "page"
+                    ? "tw-mb-0 tw-mt-2 tw-text-base tw-text-iron-500"
+                    : "tw-mb-0 tw-mt-3 tw-text-[11px] tw-font-normal tw-uppercase tw-leading-relaxed tw-tracking-[0.14em] tw-text-iron-500 sm:tw-text-xs"
+                }
+              >
                 {subtitle}
               </p>
             )}

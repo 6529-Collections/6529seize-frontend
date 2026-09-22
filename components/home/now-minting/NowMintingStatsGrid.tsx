@@ -88,11 +88,13 @@ export default function NowMintingStatsGrid({
     <div className="tw-grid tw-grid-cols-2 tw-gap-x-8 tw-gap-y-5">
       <NowMintingStatsItem
         appearance="compact"
+        compactLabelSize="large"
         label="Edition"
         value={editionValue}
       />
       <NowMintingStatsItem
         appearance="compact"
+        compactLabelSize="large"
         label="Status"
         value={statusLabel}
         status={statusTone}
@@ -100,14 +102,18 @@ export default function NowMintingStatsGrid({
       />
       <NowMintingStatsItem
         appearance="compact"
+        compactLabelSize="large"
         label="Mint price"
-        value={mintPrice}
+        value={
+          <span className="tw-font-semibold tw-text-iron-100">{mintPrice}</span>
+        }
         isLoading={isStatusLoading}
       />
       <NowMintingStatsItem
         appearance="compact"
+        compactLabelSize="large"
         label="Floor"
-        value={floorPrice}
+        value={<span className="tw-text-iron-400">{floorPrice}</span>}
       />
     </div>
   );

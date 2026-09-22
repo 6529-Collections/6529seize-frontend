@@ -1,5 +1,7 @@
 import NowMintingDetails from "@/components/home/now-minting/NowMintingDetails";
+import type { ApiMemesExtendedData } from "@/generated/models/ApiMemesExtendedData";
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 
 type LatestDropNextMintSubscribeMockProps = {
   statusSource?: "none" | "upcoming";
@@ -80,6 +82,29 @@ describe("NowMintingDetails", () => {
   beforeEach(() => {
     mockLatestDropNextMintSubscribe.mockClear();
     mockLatestDropAllowlistStatus.mockClear();
+  });
+
+  it("lets keyboard users toggle edition links without exposing collapsed content", async () => {
+    const user = userEvent.setup();
+    render(<NowMintingDetails nft={baseNft as ApiMemesExtendedData} />);
+
+    const toggle = screen.getByRole("button", { name: "Edition Details" });
+    expect(toggle).toHaveAttribute("aria-expanded", "false");
+    expect(screen.queryByRole("link", { name: "View" })).toBeNull();
+
+    await user.tab();
+    expect(toggle).toHaveFocus();
+    await user.keyboard(" ");
+    expect(toggle).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getByRole("link", { name: "View" })).toHaveAttribute(
+      "href",
+      "/the-memes/667/distribution"
+    );
+
+    await user.keyboard("{Enter}");
+    expect(toggle).toHaveAttribute("aria-expanded", "false");
+    expect(screen.queryByRole("link", { name: "View" })).toBeNull();
+    expect(toggle).toHaveFocus();
   });
 
   it("omits file metadata rows when media metadata is missing", () => {
