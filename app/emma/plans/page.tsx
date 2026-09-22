@@ -11,7 +11,7 @@ export default function DistributionPlanToolPlansPage() {
   return (
     <DistributionPlanToolWrapper>
       <div className="tw-flex tw-h-full tw-min-h-screen">
-        <div className="tw-mx-auto tw-flex-1 tw-space-y-8 tw-px-2 tw-pb-12 tw-pt-8 lg:tw-px-6 xl:tw-px-8">
+        <div className="tw-mx-auto tw-min-w-0 tw-flex-1 tw-space-y-8 tw-px-2 tw-pb-12 tw-pt-8 lg:tw-px-6 xl:tw-px-8">
           <div className="tw-w-full tw-space-y-4">
             <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-4">
               <EmmaTitle />

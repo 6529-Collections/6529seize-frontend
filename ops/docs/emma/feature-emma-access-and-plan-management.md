@@ -40,6 +40,10 @@
 - Creating a plan requires `Name` and `Description`.
 - On success, EMMA routes to `/emma/plans/{planId}`.
 - Existing plans render in a table with `Name`, `Description`, and `Date`.
+- Long names and descriptions wrap within their columns, including text without
+  spaces. The table and `Create new` control stay within the page width.
+- On narrow screens, each plan's name and description stack above a bottom row
+  containing the date and delete action.
 - Dates render as `DD/MM/YY`.
 - Loading state shows a centered spinner.
 - Empty state shows `No plan`.
