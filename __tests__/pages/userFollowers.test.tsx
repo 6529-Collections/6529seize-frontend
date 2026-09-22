@@ -6,6 +6,10 @@ jest.mock("@/helpers/server.app.helpers", () => ({
   getAppCommonHeaders: jest.fn(async () => ({ "x-test": "1" })),
 }));
 
+jest.mock("@/services/api/common-api", () => ({
+  commonApiFetch: jest.fn().mockResolvedValue([]),
+}));
+
 jest.mock("@/helpers/server.helpers", () => ({
   getUserProfile: jest.fn(async ({ user }: { user: string }) => ({
     handle: user,
@@ -116,7 +120,8 @@ describe("followers page via createUserTabPage", () => {
 
     expect(spy).toHaveBeenCalledWith(
       expect.objectContaining({ handle: "dave", walletAddress: "0xabc" }),
-      " "
+      " ",
+      null
     );
     expect(getAppMetadata).toHaveBeenCalled();
     expect(meta).toEqual(
