@@ -316,7 +316,7 @@ test.describe("Notifications local sandbox @auth @medium @local-only", () => {
       await card.hover();
       await expect(card).toHaveCSS("background-color", "rgb(19, 19, 22)");
       for (const name of [
-        "Click to react",
+        "React with Thumbs up",
         "Add reaction to drop",
         "Reply to drop",
         "Edit",
