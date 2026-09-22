@@ -552,6 +552,7 @@
         "Authenticated visitors keep the dashboard-first home experience.",
         "It highlights the current or upcoming Meme Card mint, discovery sections, and 6529 mission content.",
         "After the current Meme mint ends, the homepage keeps Latest Drop through a configurable grace period before replacing it with a mapped Next Drop.",
+        "Latest Drop groups title and artist first, then stats with Edition Details beneath them, then Your allowance above Subscription Minting, and the countdown and mint action at the bottom.",
         "A mapped Latest Drop adds Main Stage Submission -> View as the last Edition Details row, and a mapped Next Drop shows a The Memes #{id} pill linked to the Meme card.",
         "The home mint panel can surface The Memes subscription awareness with read-only status, subscription info, and Set up or Manage actions for the profile Subscriptions tab.",
         "Use it when users ask where to start or where the current mint is surfaced."

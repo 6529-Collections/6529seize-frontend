@@ -70,10 +70,10 @@ export function NextMintLeadingSection() {
   const header = (
     <div className="tw-mb-8 tw-flex tw-flex-col tw-items-start tw-gap-4 sm:tw-flex-row sm:tw-items-end sm:tw-justify-between">
       <div>
-        <span className="tw-m-0 tw-text-xl tw-font-semibold tw-tracking-tight tw-text-iron-200 md:tw-text-2xl">
+        <h2 className="tw-m-0 tw-text-xl tw-font-medium tw-leading-tight tw-tracking-tight tw-text-iron-50 md:tw-text-2xl">
           Coming up
-        </span>
-        <p className="tw-mb-0 tw-mt-2 tw-text-base tw-text-iron-500">
+        </h2>
+        <p className="tw-mb-0 tw-mt-3 tw-text-[11px] tw-font-normal tw-uppercase tw-leading-relaxed tw-tracking-[0.14em] tw-text-iron-500 sm:tw-text-xs">
           Next in queue and current vote leaders
         </p>
       </div>
@@ -96,7 +96,7 @@ export function NextMintLeadingSection() {
       <section className={sectionClassName}>
         <div>
           {header}
-          <div className="tw-grid tw-grid-cols-1 tw-gap-6 lg:tw-grid-cols-3 lg:tw-gap-8">
+          <div className="tw-grid tw-grid-cols-1 tw-gap-6 md:tw-grid-cols-2 lg:tw-grid-cols-3 lg:tw-gap-8">
             {SKELETON_KEYS.map((key) => (
               <NextMintLeadingSkeletonCard key={key} />
             ))}
@@ -114,7 +114,7 @@ export function NextMintLeadingSection() {
     <section className={sectionClassName}>
       <div>
         {header}
-        <div className="tw-grid tw-grid-cols-1 tw-gap-6 lg:tw-grid-cols-3 lg:tw-gap-8">
+        <div className="tw-grid tw-grid-cols-1 tw-gap-6 md:tw-grid-cols-2 lg:tw-grid-cols-3 lg:tw-gap-8">
           {showNextMint && <NextMintCard drop={nextMint} />}
           {leading.map((drop, index) => (
             <LeadingCard key={drop.id} drop={drop} rank={index + 1} />

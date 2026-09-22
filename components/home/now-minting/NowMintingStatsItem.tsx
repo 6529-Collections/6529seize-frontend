@@ -7,6 +7,7 @@ interface NowMintingStatsItemProps {
   readonly status?: "active" | "upcoming" | "ended" | undefined;
   readonly isLoading?: boolean;
   readonly allowWrap?: boolean;
+  readonly compactLabelSize?: "default" | "large";
 }
 
 export default function NowMintingStatsItem({
@@ -16,12 +17,15 @@ export default function NowMintingStatsItem({
   status,
   isLoading,
   allowWrap,
+  compactLabelSize = "default",
 }: NowMintingStatsItemProps) {
   const getValueColor = () => {
     if (status === "active") return "tw-text-emerald-400";
     if (status === "ended") return "tw-text-iron-400";
     return appearance === "compact" ? "tw-text-iron-200" : "tw-text-iron-100";
   };
+  const compactLabelSizeClassName =
+    compactLabelSize === "large" ? "tw-text-[11px]" : "tw-text-[10.5px]";
 
   return (
     <div
@@ -32,7 +36,7 @@ export default function NowMintingStatsItem({
       <span
         className={
           appearance === "compact"
-            ? "tw-text-[10.5px] tw-font-semibold tw-uppercase tw-tracking-[0.14em] tw-text-iron-500"
+            ? `tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-500 ${compactLabelSizeClassName}`
             : "tw-text-xs tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-400"
         }
       >
@@ -44,7 +48,7 @@ export default function NowMintingStatsItem({
         <span
           className={`${getValueColor()} ${
             appearance === "compact"
-              ? "tw-text-sm tw-font-medium tw-tracking-[-0.01em] tw-tabular-nums"
+              ? "tw-text-sm tw-font-medium tw-tabular-nums tw-tracking-[-0.01em]"
               : "tw-font-mono tw-text-sm tw-font-medium md:tw-text-base"
           } ${allowWrap ? "tw-whitespace-normal" : "tw-whitespace-nowrap"}`}
         >

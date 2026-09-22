@@ -8,6 +8,8 @@ import {
 } from "@/helpers/manifold-display-helpers";
 import { useDropForgeManifoldClaim } from "@/hooks/useDropForgeManifoldClaim";
 import { useNftBalance } from "@/hooks/useNftBalance";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { faLayerGroup } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Tooltip } from "react-tooltip";
@@ -22,6 +24,7 @@ export default function NowMintingStatsGrid({
   nftId,
   floorPrice,
 }: NowMintingStatsGridProps) {
+  const locale = useBrowserLocale();
   const { claim: manifoldClaim } = useDropForgeManifoldClaim(nftId);
   const { contract } = useDropForgeMintingConfig();
   const status = manifoldClaim?.status;
@@ -44,7 +47,10 @@ export default function NowMintingStatsGrid({
     : undefined;
   const mintPrice = manifoldClaim ? formatClaimCost(manifoldClaim) : undefined;
 
-  const balanceTooltip = balance > 0 ? `SEIZED x${balance}` : "UNSEIZED";
+  const balanceTooltip =
+    balance > 0
+      ? t(locale, "home.nowMinting.stats.balance.seized", { count: balance })
+      : t(locale, "home.nowMinting.stats.balance.unseized");
   const showBalance = connectedProfile && !isBalanceLoading;
 
   const editionValue = (
@@ -88,26 +94,32 @@ export default function NowMintingStatsGrid({
     <div className="tw-grid tw-grid-cols-2 tw-gap-x-8 tw-gap-y-5">
       <NowMintingStatsItem
         appearance="compact"
-        label="Edition"
+        compactLabelSize="large"
+        label={t(locale, "home.nowMinting.stats.edition")}
         value={editionValue}
       />
       <NowMintingStatsItem
         appearance="compact"
-        label="Status"
+        compactLabelSize="large"
+        label={t(locale, "home.nowMinting.stats.status")}
         value={statusLabel}
         status={statusTone}
         isLoading={isStatusLoading}
       />
       <NowMintingStatsItem
         appearance="compact"
-        label="Mint price"
-        value={mintPrice}
+        compactLabelSize="large"
+        label={t(locale, "home.nowMinting.stats.mintPrice")}
+        value={
+          <span className="tw-font-semibold tw-text-iron-100">{mintPrice}</span>
+        }
         isLoading={isStatusLoading}
       />
       <NowMintingStatsItem
         appearance="compact"
-        label="Floor"
-        value={floorPrice}
+        compactLabelSize="large"
+        label={t(locale, "home.nowMinting.stats.floor")}
+        value={<span className="tw-text-iron-400">{floorPrice}</span>}
       />
     </div>
   );

@@ -41,7 +41,7 @@ export function MainStageMemeCardPill({
       : "tw-border-primary-400/40 tw-bg-primary-500/10 tw-font-semibold tw-text-primary-300";
   const className =
     variant === "subtle"
-      ? "tw-inline-flex tw-flex-shrink-0 tw-items-center tw-text-[11px] tw-font-semibold tw-uppercase tw-leading-5 tw-tracking-[0.14em] tw-text-iron-500"
+      ? "tw-inline-flex tw-flex-shrink-0 tw-items-center tw-text-[11px] tw-font-medium tw-uppercase tw-leading-5 tw-tracking-wider tw-text-iron-500"
       : `tw-inline-flex tw-flex-shrink-0 tw-items-center tw-rounded-full tw-border tw-border-solid ${pillToneClassName} ${pillSizeClassName}`;
   const label = `The Memes #${memeCardId}`;
 

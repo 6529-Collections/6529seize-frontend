@@ -66,12 +66,12 @@ const subscribeToMinuteClock = (onStoreChange: () => void) => {
 
 export function LatestDropNextMintPanelSkeleton() {
   return (
-    <div className="tw-relative tw-overflow-hidden tw-rounded-2xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950 tw-shadow-[0_24px_60px_rgba(0,0,0,0.2)]">
+    <div className="tw-relative tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950 tw-shadow-[0_24px_60px_rgba(0,0,0,0.2)]">
       <div className="tw-grid tw-grid-cols-1 tw-items-stretch lg:tw-grid-cols-12 xl:tw-grid-cols-9">
-        <div className="tw-p-0 lg:tw-col-span-6 xl:tw-col-span-5">
-          <div className="tw-relative tw-h-[clamp(360px,65vw,640px)] tw-w-full tw-animate-pulse tw-bg-iron-800/50" />
+        <div className="tw-flex tw-p-0 lg:tw-col-span-6 xl:tw-col-span-5">
+          <div className="tw-relative tw-min-h-[clamp(360px,65vw,640px)] tw-w-full tw-bg-iron-800/50 motion-safe:tw-animate-pulse" />
         </div>
-        <div className="tw-flex tw-items-center tw-bg-iron-950 tw-p-5 md:tw-p-7 lg:tw-col-span-6 lg:tw-p-8 xl:tw-col-span-4 xl:tw-p-10 2xl:tw-p-12">
+        <div className="tw-flex tw-min-w-0 tw-items-center tw-bg-iron-950 tw-p-5 md:tw-p-6 lg:tw-col-span-6 lg:tw-p-8 xl:tw-col-span-4">
           <div className="tw-flex tw-w-full tw-flex-col tw-gap-8">
             <div className="tw-space-y-2">
               <div className="tw-h-4 tw-w-24 tw-animate-pulse tw-rounded tw-bg-iron-800/50" />
@@ -146,7 +146,7 @@ export default function LatestDropNextMintPanel({
       })
     : "—";
   return (
-    <div className="tw-relative tw-overflow-hidden tw-rounded-2xl tw-border tw-border-solid tw-border-white/[0.03] tw-bg-iron-950 tw-shadow-[0_24px_60px_rgba(0,0,0,0.2)]">
+    <div className="tw-relative tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.03] tw-bg-iron-950 tw-shadow-[0_24px_60px_rgba(0,0,0,0.2)]">
       <div className="tw-grid tw-grid-cols-1 tw-items-stretch lg:tw-grid-cols-12 xl:tw-grid-cols-9">
         <div
           data-home-artwork-column
@@ -183,13 +183,13 @@ export default function LatestDropNextMintPanel({
           </HomeArtworkFrame>
         </div>
 
-        <div className="tw-relative tw-flex tw-items-center tw-bg-iron-950 tw-p-5 md:tw-p-7 lg:tw-col-span-6 lg:tw-p-8 xl:tw-col-span-4 xl:tw-p-10 2xl:tw-p-12">
+        <div className="tw-relative tw-flex tw-min-w-0 tw-items-center tw-bg-iron-950 tw-p-5 md:tw-p-6 lg:tw-col-span-6 lg:tw-p-8 xl:tw-col-span-4">
           <div className="tw-flex tw-w-full tw-flex-col tw-gap-8">
             <div className="tw-flex tw-flex-col">
               <div className="tw-flex tw-min-h-5 tw-flex-wrap tw-items-center tw-gap-3">
                 <div className="tw-flex tw-items-center tw-gap-2">
                   <span className="tw-size-1.5 tw-rounded-full tw-bg-emerald-400/60" />
-                  <span className="tw-text-[11px] tw-font-semibold tw-uppercase tw-leading-5 tw-tracking-[0.14em] tw-text-emerald-400/70">
+                  <span className="tw-text-[11px] tw-font-medium tw-uppercase tw-leading-5 tw-tracking-wider tw-text-emerald-400/70">
                     {t(locale, "home.nextMint.status")}
                   </span>
                 </div>
@@ -209,7 +209,7 @@ export default function LatestDropNextMintPanel({
               </div>
               <Link
                 href={`/waves?wave=${drop.wave.id}&drop=${drop.id}`}
-                className="tw-mt-3 tw-text-xl tw-font-semibold tw-leading-[1.08] tw-tracking-[-0.02em] tw-text-iron-50 tw-no-underline tw-transition-colors tw-duration-300 desktop-hover:hover:tw-text-iron-200 sm:tw-text-2xl sm:tw-leading-[1.08] md:tw-text-3xl md:tw-leading-[1.08]"
+                className="tw-mt-3 tw-w-fit tw-max-w-full tw-text-balance tw-rounded-sm tw-text-2xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 tw-no-underline tw-transition-colors tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-4 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-iron-300 motion-reduce:tw-transition-none md:tw-text-3xl"
               >
                 {title}
               </Link>

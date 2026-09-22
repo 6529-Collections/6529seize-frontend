@@ -156,13 +156,13 @@ describe("LatestDropNextMintSubscribe", () => {
     expect(awarenessLabel).toBeInTheDocument();
     const awarenessRow = awarenessLabel.closest(".tw-group");
     expect(awarenessRow).toHaveClass(
-      "tw-rounded-2xl",
+      "tw-rounded-lg",
       "tw-border-primary-400/25",
       "tw-bg-primary-500/10",
       "tw-p-5"
     );
     expect(awarenessRow).not.toHaveClass(
-      "tw-rounded-lg",
+      "tw-rounded-2xl",
       "tw-border-white/5",
       "tw-bg-iron-900/60"
     );
