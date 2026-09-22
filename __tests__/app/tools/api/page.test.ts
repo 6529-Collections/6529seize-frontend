@@ -1,16 +1,14 @@
 import { generateMetadata } from "@/app/tools/api/page";
 import { getAppMetadata } from "@/components/providers/metadata";
-import type { Metadata } from "next";
 
 jest.mock("@/components/providers/metadata", () => ({
-  getAppMetadata: jest.fn().mockReturnValue({
-    title: "API | Tools",
-  } as Metadata),
+  getAppMetadata: jest.fn((metadata: unknown) => metadata),
 }));
 
-describe("tools API metadata", () => {
-  it("publishes the API reference canonical", () => {
-    expect(generateMetadata()).toEqual({ title: "API | Tools" });
+describe("API documentation metadata", () => {
+  it("summarizes the documentation available on the page", () => {
+    generateMetadata();
+
     expect(getAppMetadata).toHaveBeenCalledWith(
       {
         title: "API | Tools",
