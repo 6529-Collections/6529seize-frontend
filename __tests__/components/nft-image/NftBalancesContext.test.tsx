@@ -189,6 +189,21 @@ describe("collection balance snapshots", () => {
     }
   );
 
+  it.each([undefined, false, 0, {}, "", " "])(
+    "rejects malformed pagination (%p) without publishing partial balances",
+    async (next) => {
+      jest.spyOn(console, "error").mockImplementation(() => undefined);
+      fetchBalances
+        .mockResolvedValueOnce(ownershipPage(MEMES, [1], "?page=2"))
+        .mockResolvedValueOnce({ ...ownershipPage(MEMES, []), next });
+      render(<Grid tokenIds={[1, 2]} />);
+      await waitFor(() => expect(screen.getAllByText("N/A")).toHaveLength(2));
+      expect(screen.queryByText("UNSEIZED")).not.toBeInTheDocument();
+      expect(screen.queryByText("SEIZED x2")).not.toBeInTheDocument();
+      expect(fetchBalances).toHaveBeenCalledTimes(2);
+    }
+  );
+
   it("rejects an empty intermediate page without requesting more pages", async () => {
     jest.spyOn(console, "error").mockImplementation(() => undefined);
     fetchBalances.mockResolvedValue(ownershipPage(MEMES, [], "?page=2"));

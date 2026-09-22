@@ -91,17 +91,23 @@ export function useNftContractBalances({
         });
 
         if (!Array.isArray(response.data)) {
-          throw new Error(
+          throw new TypeError(
             "Collection balance response is missing its data array"
           );
         }
-        if (Boolean(response.next) && response.data.length === 0) {
+        if (
+          response.next !== null &&
+          (typeof response.next !== "string" || response.next.trim() === "")
+        ) {
+          throw new TypeError("Collection balance response has invalid pagination");
+        }
+        hasNextPage = response.next !== null;
+        if (hasNextPage && response.data.length === 0) {
           throw new Error(
             "Collection balance pagination returned an empty intermediate page"
           );
         }
         balances.push(...response.data);
-        hasNextPage = Boolean(response.next);
         page += 1;
       }
 
