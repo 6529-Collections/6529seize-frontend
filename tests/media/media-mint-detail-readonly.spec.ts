@@ -344,7 +344,14 @@ test.describe("Staging video artwork sizing @surface @medium @large @readonly", 
             video.evaluate((element: HTMLVideoElement) => element.videoWidth)
           )
           .toBeGreaterThan(0);
+        // Native metadata can load before React hydrates the artwork controls.
+        await expect(
+          page.getByRole("slider", { name: "Seek video" })
+        ).toBeEnabled({ timeout: 20000 });
         await video.evaluate((element: HTMLVideoElement) => element.pause());
+        await expect(
+          page.getByRole("button", { name: "Play video", exact: true }).first()
+        ).toBeVisible();
         await expect(
           page.getByRole("slider", { name: "Seek video" })
         ).toBeVisible();
