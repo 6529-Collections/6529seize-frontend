@@ -55,3 +55,18 @@ it, retain the browser's own controls. Control-free previews do not gain control
 
 - [Media Rendering](README.md)
 - [Media Source Fallbacks](../nft/feature-media-source-fallbacks.md)
+
+## Still artwork sizing
+
+Still images on the homepage, individual Meme pages, and expanded Wave
+submissions preserve their proportions without cropping. They fit within the
+available width and the same 95% usable-screen-height limit as video.
+
+On desktop, homepage images also fit within the height of the adjacent details
+section. On mobile, the image appears above the details and uses its own frame.
+Meme detail images reserve their proportions when dimensions are available,
+with a stable fallback frame otherwise. Loading ownership or listing panels
+does not vertically recenter a still image against the growing details column.
+Wave submission images reserve space for the overlay header and artwork padding.
+Portrait images usually reach the height limit first; landscape images reach
+the available width first. Empty space around the artwork is intentional.

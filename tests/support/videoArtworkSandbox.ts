@@ -15,6 +15,22 @@ export async function installVideoArtworkSandbox(
   page: Page,
   baseURL: string | undefined
 ): Promise<string> {
+  return installArtworkSandbox(page, baseURL);
+}
+
+export async function installImageArtworkSandbox(
+  page: Page,
+  baseURL: string | undefined,
+  dimensions: { width: number; height: number }
+): Promise<string> {
+  return installArtworkSandbox(page, baseURL, dimensions);
+}
+
+async function installArtworkSandbox(
+  page: Page,
+  baseURL: string | undefined,
+  dimensions?: { width: number; height: number }
+): Promise<string> {
   const apiOrigin = getSandboxApiOrigin(baseURL);
   const response = await page.request.get(
     `${apiOrigin}/api/v2/waves/${WAVE_ID}/drops`
@@ -34,13 +50,20 @@ export async function installVideoArtworkSandbox(
     );
   }
 
-  const videoUrl = new URL("/__video-fixture/portrait.mp4", baseURL).href;
+  const videoUrl = new URL(
+    dimensions
+      ? "/__image-fixture/artwork.svg"
+      : "/__video-fixture/portrait.mp4",
+    baseURL
+  ).href;
   const drop: ApiDropV2 = {
     ...source,
     drop_type: ApiDropMainType.Submission,
     title: "Local video artwork fixture",
     content: "",
-    media: [{ url: videoUrl, mime_type: "video/mp4" }],
+    media: [
+      { url: videoUrl, mime_type: dimensions ? "image/svg+xml" : "video/mp4" },
+    ],
   };
   const headers = { "access-control-allow-origin": "*" };
   await page.route(`${apiOrigin}/api/settings`, (route) =>
@@ -53,10 +76,15 @@ export async function installVideoArtworkSandbox(
     route.fulfill({ headers, json: { ...feed, drops: [drop] } })
   );
   await page.route(videoUrl, (route) =>
-    route.fulfill({
-      contentType: "video/mp4",
-      path: path.resolve("tests/media/fixtures/portrait.mp4"),
-    })
+    dimensions
+      ? route.fulfill({
+          contentType: "image/svg+xml",
+          body: `<svg xmlns="http://www.w3.org/2000/svg" width="${dimensions.width}" height="${dimensions.height}"><rect width="100%" height="100%" fill="#c19a49"/></svg>`,
+        })
+      : route.fulfill({
+          contentType: "video/mp4",
+          path: path.resolve("tests/media/fixtures/portrait.mp4"),
+        })
   );
   await page.route("**/6529-emoji/emoji-list.json**", (route) =>
     route.fulfill({ json: [] })

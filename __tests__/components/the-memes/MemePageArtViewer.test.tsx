@@ -191,7 +191,15 @@ describe("MemePageArtViewer", () => {
     expect(imageSlide).not.toHaveClass("tw-hidden", "tw-h-full");
     expect(videoSlide).toHaveClass("tw-hidden");
     expect(getLatestNFTImageProps(false).artworkLayout).toBe(true);
-    expect(container.firstElementChild).toHaveClass("tw-flex-1", "tw-w-full");
+    expect(container.firstElementChild).toHaveClass("tw-w-full");
+    expect(container.firstElementChild).not.toHaveClass(
+      "tw-flex-1",
+      "tw-h-full"
+    );
+    expect(container.firstElementChild).toHaveAttribute(
+      "data-image-artwork",
+      "true"
+    );
     expect(container.querySelector("section")).toHaveClass("tw-w-full");
 
     await user.click(
@@ -199,6 +207,56 @@ describe("MemePageArtViewer", () => {
     );
     expect(videoSlide).toHaveClass("tw-flex", "tw-h-auto");
     expect(imageSlide).toHaveClass("tw-hidden");
+    expect(container.firstElementChild).toHaveClass("tw-flex-1");
+  });
+
+  it("gives an HTML artwork's poster its own image layout and restores the embedded layout", async () => {
+    const user = userEvent.setup();
+    const { container } = render(
+      <MemePageArtViewer
+        nft={{
+          ...baseNft,
+          animation: "https://media.example/interactive.html",
+          compressed_animation: "",
+          metadata: {
+            ...baseNft.metadata,
+            animation_url: "https://media.example/interactive.html",
+            animation_details: { format: "HTML" },
+          },
+        }}
+      />
+    );
+    const posterSlide = screen.getByTestId("image-art").parentElement;
+    const animationSlide = screen.getByTestId("animation-art").parentElement;
+    expect(container.querySelector("section")).toHaveClass("memesCarousel");
+    expect(container.firstElementChild).toHaveClass("tw-h-full");
+    expect(animationSlide).toHaveClass("tw-h-full", "tw-flex");
+    expect(getLatestNFTImageProps(true).artworkLayout).toBe(false);
+
+    await user.click(
+      screen.getByRole("button", { name: "Show next artwork media" })
+    );
+    expect(posterSlide).toHaveClass("tw-flex", "tw-h-auto");
+    expect(posterSlide).not.toHaveClass("tw-h-full", "tw-hidden");
+    expect(getLatestNFTImageProps(false).artworkLayout).toBe(true);
+    expect(container.querySelector("section")).toHaveClass("videoCarousel");
+    expect(container.firstElementChild).not.toHaveClass(
+      "tw-h-full",
+      "tw-flex-1"
+    );
+    expect(container.firstElementChild).toHaveAttribute(
+      "data-image-artwork",
+      "true"
+    );
+
+    await user.click(
+      screen.getByRole("button", { name: "Show previous artwork media" })
+    );
+    expect(container.querySelector("section")).toHaveClass("memesCarousel");
+    expect(container.firstElementChild).toHaveClass("tw-h-full");
+    expect(animationSlide).toHaveClass("tw-h-full", "tw-flex");
+    expect(posterSlide).toHaveClass("tw-hidden");
+    expect(getLatestNFTImageProps(true).artworkLayout).toBe(false);
   });
 
   it("keeps image sizing when video metadata has no animation URL", () => {
@@ -215,7 +273,8 @@ describe("MemePageArtViewer", () => {
 
     expect(screen.getByTestId("image-art")).toBeInTheDocument();
     expect(screen.queryByTestId("animation-art")).not.toBeInTheDocument();
-    expect(container.firstElementChild).toHaveClass("tw-h-full");
+    expect(container.firstElementChild).not.toHaveClass("tw-h-full");
+    expect(getLatestNFTImageProps(false).artworkLayout).toBe(true);
     expect(container.firstElementChild).not.toHaveClass("tw-flex-none");
     expect(container.firstElementChild).not.toHaveAttribute(
       "data-video-artwork"
@@ -576,4 +635,24 @@ describe("MemePageArtViewer", () => {
       screen.queryByRole("button", { name: "Open in new tab" })
     ).not.toBeInTheDocument();
   });
+});
+
+it("uses the stable image frame for animated GIF artwork", () => {
+  const { container } = render(
+    <MemePageArtViewer
+      nft={{
+        ...baseNft,
+        animation: "https://media.example/art.gif",
+        compressed_animation: "",
+        metadata: {
+          ...baseNft.metadata,
+          animation_url: "https://media.example/art.gif",
+          animation_details: { format: "GIF" },
+        },
+      }}
+    />
+  );
+  expect(getLatestNFTImageProps(true).artworkLayout).toBe(true);
+  expect(container.firstElementChild).toHaveAttribute("data-image-artwork");
+  expect(container.firstElementChild).not.toHaveClass("tw-h-full", "tw-flex-1");
 });

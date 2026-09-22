@@ -1,0 +1,86 @@
+/* Shared usable-screen budget for still artwork and video. */
+.viewportLimit {
+  --artwork-viewport-height: 100vh;
+  --artwork-max-height: calc(
+    max(
+        1px,
+        min(
+            var(--artwork-viewport-height),
+            var(--video-container-height, var(--artwork-viewport-height))
+          ) -
+          max(
+            var(
+              --video-header-reserve,
+              var(--stream-route-loading-header-reserve, 0px)
+            ),
+            env(safe-area-inset-top, 0px)
+          ) -
+          max(
+            var(
+              --video-bottom-reserve,
+              var(--stream-route-loading-bottom-reserve, 0px)
+            ),
+            env(safe-area-inset-bottom, 0px)
+          ) -
+          var(--video-frame-padding, 0px)
+      ) *
+      0.95
+  );
+}
+
+@supports (height: 100svh) {
+  .viewportLimit {
+    --artwork-viewport-height: 100svh;
+  }
+}
+
+.imageContainer {
+  width: 100%;
+  min-width: 0;
+  container-type: inline-size;
+}
+
+/* A reserved frame prevents decoding or adjacent panels moving the artwork.
+   Known image dimensions keep landscape and portrait frames proportional. */
+.imageFrame {
+  composes: viewportLimit;
+  position: relative;
+  width: 100%;
+  height: min(
+    var(--artwork-max-height),
+    var(--artwork-image-height, var(--artwork-max-height))
+  );
+  max-height: var(--artwork-max-height);
+}
+
+/* Drop images have no dimensions in the API. Reserve a stable viewing area. */
+.submissionImage {
+  composes: viewportLimit;
+  height: var(--artwork-max-height);
+  max-height: var(--artwork-max-height);
+}
+
+.homeImageFrame {
+  align-self: stretch;
+  flex: 1;
+  min-width: 0;
+}
+
+@media (min-width: 1024px) {
+  /* Only the details column contributes height to this grid row. */
+  .homeImageFrame > div {
+    position: absolute;
+    inset: 0;
+    height: 100%;
+  }
+
+  .homeImageFrame [data-artwork-image-container] {
+    height: 100%;
+    display: flex;
+    align-items: center;
+  }
+
+  .homeImageFrame [data-artwork-image-frame] {
+    height: 100%;
+  }
+}
