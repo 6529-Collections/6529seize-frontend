@@ -18,15 +18,18 @@ jest.mock("@/hooks/waves/useWaveProposalCardRecipe", () => ({
   useWaveProposalCardRecipe: () => mockProposalCardRecipe,
 }));
 
-jest.mock("@/components/common/FallbackImage", () => ({
-  FallbackImage: ({
-    fallbackSrc,
-    alt,
-  }: {
-    readonly fallbackSrc: string;
-    readonly alt: string;
-  }) => <img src={fallbackSrc} alt={alt} />,
-}));
+jest.mock(
+  "@/components/drops/view/item/content/media/DropImagePreview",
+  () => ({
+    DropImagePreview: ({
+      originalSrc,
+      alt,
+    }: {
+      readonly originalSrc: string;
+      readonly alt: string;
+    }) => <img src={originalSrc} alt={alt} />,
+  })
+);
 
 const proposal = {
   id: "proposal-1",
