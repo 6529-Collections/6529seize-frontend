@@ -64,16 +64,26 @@ export function defineNftImageLayoutTests() {
         "Current homepage drop has no still image"
       );
       await expect(image).toBeVisible();
+      await expect(image).toHaveJSProperty("tagName", "IMG");
       await expect
         .poll(() =>
           image.evaluate((element: HTMLImageElement) => element.naturalWidth)
         )
         .toBeGreaterThan(0);
       const layout = await image.evaluate((element: HTMLImageElement) => {
-        const column = element.closest("[data-home-artwork-column]")!;
+        const column = element.closest("[data-home-artwork-column]");
+        if (!column) {
+          throw new Error("Homepage image is missing its artwork column");
+        }
+        const detailsElement = column.nextElementSibling;
+        if (!detailsElement) {
+          throw new Error(
+            "Homepage artwork column is missing its details sibling"
+          );
+        }
         const artwork = column.getBoundingClientRect();
         const bounds = element.getBoundingClientRect();
-        const details = column.nextElementSibling!.getBoundingClientRect();
+        const details = detailsElement.getBoundingClientRect();
         return {
           width: bounds.width,
           availableWidth: artwork.width,
