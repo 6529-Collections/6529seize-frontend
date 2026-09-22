@@ -16,7 +16,7 @@ export default function HomeNftArtwork({
     return <NowMintingArtwork nft={nft} />;
   }
   return (
-    <HomeArtworkFrame>
+    <HomeArtworkFrame fitImageToDetails={mediaType === "image"}>
       <NFTImage
         nft={mediaNft}
         animation
