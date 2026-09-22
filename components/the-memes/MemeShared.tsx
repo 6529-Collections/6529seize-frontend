@@ -125,9 +125,22 @@ async function getMetadataProps(
       nft = Array.isArray(response.data) ? response.data[0] : undefined;
     }
     if (nft && typeof nft.name === "string" && nft.name.trim().length > 0) {
-      name = nft.name;
+      const nftName = nft.name.trim();
+      name = t(locale, "nft.metadata.itemTitle", {
+        name: nftName,
+        collection: collectionLabel,
+      });
       artist = getUsableText(nft.artist);
-      description = [name, artist, collectionLabel].filter(Boolean).join(" · ");
+      description = artist
+        ? t(locale, "nft.metadata.descriptionWithArtist", {
+            name: nftName,
+            artist,
+            collection: collectionLabel,
+          })
+        : t(locale, "nft.metadata.description", {
+            name: nftName,
+            collection: collectionLabel,
+          });
       image =
         getUsableText(nft.scaled) ??
         getUsableText(nft.image) ??

@@ -1,4 +1,7 @@
-import TheMemesMintPage, { generateMetadata } from "@/app/the-memes/mint/page";
+import TheMemesMintPage, {
+  generateMetadata,
+  getMintTitle,
+} from "@/app/the-memes/mint/page";
 import { AuthContext } from "@/components/auth/Auth";
 import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
 import { commonApiFetch } from "@/services/api/common-api";
@@ -68,6 +71,8 @@ describe("TheMemesMintPage", () => {
   });
 
   it("exports metadata", async () => {
+    (getAppCommonHeaders as jest.Mock).mockResolvedValue({ h: "1" });
+    (commonApiFetch as jest.Mock).mockResolvedValue(nft);
     const metadata = await generateMetadata();
     const [image] = metadata.openGraph?.images as {
       alt: string;
@@ -78,8 +83,9 @@ describe("TheMemesMintPage", () => {
     const url = new URL(image.url);
 
     expect(metadata).toMatchObject({
-      title: "Mint | The Memes",
-      description: "Collections | test.6529.io",
+      title: "Mint #1 | Meme | The Memes",
+      description:
+        "View the latest mint from The Memes collection. | test.6529.io",
       other: { version: "test-version" },
       twitter: {
         card: "summary_large_image",
@@ -89,8 +95,9 @@ describe("TheMemesMintPage", () => {
     expect(metadata.openGraph).toMatchObject({
       type: "website",
       siteName: "6529.io",
-      title: "Mint | The Memes",
-      description: "Collections | test.6529.io",
+      title: "Mint #1 | Meme | The Memes",
+      description:
+        "View the latest mint from The Memes collection. | test.6529.io",
       url: "https://test.6529.io/the-memes/mint",
     });
     expect(metadata.alternates?.canonical?.toString()).toBe(
@@ -105,6 +112,12 @@ describe("TheMemesMintPage", () => {
     expect(url.searchParams.get("subtitle")).toBe(
       "Latest The Memes mint on 6529.io"
     );
-    expect(url.searchParams.get("title")).toBe("Mint | The Memes");
+    expect(url.searchParams.get("title")).toBe("Mint #1 | Meme | The Memes");
+  });
+
+  it("falls back safely when a partial response omits the name", () => {
+    expect(getMintTitle({ id: 2, name: undefined } as any)).toBe(
+      "Mint | The Memes"
+    );
   });
 });

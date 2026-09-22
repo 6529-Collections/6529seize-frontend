@@ -1,8 +1,10 @@
 import { TransferProvider } from "@/components/nft-transfer/TransferState";
 import { getAppMetadata } from "@/components/providers/metadata";
 import UserPageLayout from "@/components/user/layout/UserPageLayout";
+import type { CicStatement } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import { getMetadataForUserPage } from "@/helpers/Helpers";
+import { getMetadataForUserPage, getUserPageTitle } from "@/helpers/Helpers";
+import { STATEMENT_GROUP, STATEMENT_TYPE } from "@/helpers/Types";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
@@ -12,6 +14,7 @@ import {
 } from "@/helpers/server.helpers";
 import JsonLdScript from "@/lib/structured-data/json-ld";
 import { buildProfilePageJsonLd } from "@/lib/structured-data/profile";
+import { commonApiFetch } from "@/services/api/common-api";
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 
@@ -36,6 +39,8 @@ const PROFILE_NOINDEX_SUBROUTES = new Set([
   "cms/builder",
   "subscriptions",
 ]);
+const PROFILE_BIO_STATEMENT_TYPE: CicStatement["statement_type"] =
+  STATEMENT_TYPE.BIO;
 
 const normalizeSearchParams = (
   params?: UserSearchParams | URLSearchParams
@@ -103,6 +108,27 @@ const loadProfile = async (
     return { ok: true, profile: await getUserProfile({ user, headers }) };
   } catch (error) {
     return { ok: false, error };
+  }
+};
+
+const loadPublicProfileBio = async (
+  user: string,
+  headers: Record<string, string>
+): Promise<string | null> => {
+  try {
+    const statements = await commonApiFetch<CicStatement[]>({
+      endpoint: `profiles/${encodeURIComponent(user)}/cic/statements`,
+      headers,
+    });
+    return (
+      statements.find(
+        (statement) =>
+          statement.statement_group === STATEMENT_GROUP.GENERAL &&
+          statement.statement_type === PROFILE_BIO_STATEMENT_TYPE
+      )?.statement_value ?? null
+    );
+  } catch {
+    return null;
   }
 };
 
@@ -180,7 +206,11 @@ export function createUserTabPage<
             path: profilePath,
           })}
         />
-        <UserPageLayout profile={profile} handleOrWallet={normalizedUser}>
+        <UserPageLayout
+          profile={profile}
+          handleOrWallet={normalizedUser}
+          pageTitle={getUserPageTitle(profile, subroute)}
+        >
           <Tab profile={profile} {...extraProps} />
         </UserPageLayout>
       </>
@@ -226,6 +256,7 @@ export function createUserTabPage<
       );
     }
     const profile = profileResult.profile;
+    const publicBio = await loadPublicProfileBio(normalizedUser, headers);
     const canonicalUser = profile.handle ?? profile.primary_wallet;
     const canonicalUserPath = canonicalUser
       ? `/${encodeURIComponent(canonicalUser)}`
@@ -234,7 +265,7 @@ export function createUserTabPage<
       canonicalUserPath && subroute
         ? `${canonicalUserPath}/${subroute}`
         : canonicalUserPath;
-    return getAppMetadata(getMetadataForUserPage(profile, subroute), {
+    return getAppMetadata(getMetadataForUserPage(profile, subroute, publicBio), {
       canonicalPath,
       robots: {
         index: !PROFILE_NOINDEX_SUBROUTES.has(subroute),

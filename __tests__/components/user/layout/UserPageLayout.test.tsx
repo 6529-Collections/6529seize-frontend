@@ -18,6 +18,11 @@ jest.mock("next/navigation", () => ({
   usePathname: jest.fn(),
   useRouter: jest.fn(),
 }));
+const mockUseSetTitle = jest.fn();
+jest.mock("@/contexts/TitleContext", () => ({
+  ...jest.requireActual("@/contexts/TitleContext"),
+  useSetTitle: (title: string) => mockUseSetTitle(title),
+}));
 jest.mock(
   "@/components/user/user-page-header/UserPageHeader",
   () =>
@@ -55,6 +60,7 @@ const mockUseSearchParams = useSearchParams as jest.Mock;
 
 describe("UserPageLayout", () => {
   beforeEach(() => {
+    mockUseSetTitle.mockClear();
     mockUseParams.mockReturnValue({ user: "testuser" });
     mockUsePathname.mockReturnValue("/testuser");
     mockUseRouter.mockReturnValue({ push: jest.fn(), replace: jest.fn() });
@@ -76,6 +82,7 @@ describe("UserPageLayout", () => {
               <UserPageLayout
                 profile={profile}
                 handleOrWallet={handleOrWallet}
+                pageTitle="testuser - Collected | 6529.io"
               >
                 <div>Content</div>
               </UserPageLayout>
@@ -97,6 +104,14 @@ describe("UserPageLayout", () => {
     renderComponent();
     await waitFor(() =>
       expect(mockReactQueryContext.setProfile).toHaveBeenCalledWith(mockProfile)
+    );
+  });
+
+  it("uses the complete server title unchanged during hydration", () => {
+    renderComponent();
+
+    expect(mockUseSetTitle).toHaveBeenCalledWith(
+      "testuser - Collected | 6529.io"
     );
   });
 
