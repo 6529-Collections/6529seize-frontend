@@ -1,44 +1,41 @@
-import { render } from '@testing-library/react';
-import React from 'react';
-import CreateDropContentRequirements from '@/components/waves/CreateDropContentRequirements';
+import { render, screen } from "@testing-library/react";
+import CreateDropContentRequirements from "@/components/waves/CreateDropContentRequirements";
+import { ApiWaveParticipationRequirement } from "@/generated/models/ApiWaveParticipationRequirement";
 
-let itemProps: any[] = [];
-jest.mock('@/components/waves/CreateDropContentRequirementsItem', () => (props: any) => {
-  itemProps.push(props);
-  return <div data-testid="item" />;
-});
-
-describe('CreateDropContentRequirements', () => {
-  beforeEach(() => { itemProps = []; });
-  const wave = { participation: { required_media: ['PNG'], required_metadata: ['name'] } } as any;
-
-  it('renders requirement items when allowed', () => {
+describe("CreateDropContentRequirements", () => {
+  it("summarizes every missing requirement as plain status text", () => {
     render(
       <CreateDropContentRequirements
-        canSubmit={true}
-        wave={wave}
-        missingMedia={['PNG']}
-        missingMetadata={["name"]}
-        disabled={false}
-        onOpenMetadata={jest.fn()}
-        setFiles={jest.fn()}
+        missingMedia={[
+          ApiWaveParticipationRequirement.Image,
+          ApiWaveParticipationRequirement.Video,
+        ]}
+        missingMetadata={["Medium"]}
       />
     );
-    expect(itemProps.length).toBe(2);
+
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Required: add an image, add a video, and complete metadata (Medium)."
+    );
+    expect(screen.queryByRole("button")).not.toBeInTheDocument();
   });
 
-  it('renders nothing when cannot submit', () => {
-    const { container } = render(
+  it("disappears when every requirement is complete", () => {
+    const { rerender } = render(
       <CreateDropContentRequirements
-        canSubmit={false}
-        wave={wave}
-        missingMedia={[]}
-        missingMetadata={[]}
-        disabled={false}
-        onOpenMetadata={jest.fn()}
-        setFiles={jest.fn()}
+        missingMedia={[ApiWaveParticipationRequirement.Audio]}
+        missingMetadata={["Year"]}
       />
     );
-    expect(container.firstChild).toBeNull();
+
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Required: add audio and complete metadata (Year)."
+    );
+
+    rerender(
+      <CreateDropContentRequirements missingMedia={[]} missingMetadata={[]} />
+    );
+
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
   });
 });

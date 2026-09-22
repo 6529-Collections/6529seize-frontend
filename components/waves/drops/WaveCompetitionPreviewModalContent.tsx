@@ -32,29 +32,42 @@ const TabButton = ({
   tab,
   activeTab,
   onTabChange,
+  isApp,
   children,
 }: {
   readonly tab: WaveCompetitionPreviewTab;
   readonly activeTab: WaveCompetitionPreviewTab;
   readonly onTabChange: (tab: WaveCompetitionPreviewTab) => void;
+  readonly isApp: boolean;
   readonly children: React.ReactNode;
 }) => {
   const isActive = activeTab === tab;
-  const activeClass =
+  const accentTextClass =
+    tab === "winners" ? "tw-text-emerald-200" : "tw-text-violet-200";
+  const webActiveClass =
     tab === "winners"
       ? "tw-bg-emerald-500/15 tw-text-emerald-200 tw-shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]"
       : "tw-bg-violet-500/15 tw-text-violet-200 tw-shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]";
+  let className: string;
+  if (isApp) {
+    const stateClassName = isActive
+      ? `${accentTextClass} tw-border-current tw-font-semibold`
+      : "tw-border-transparent tw-font-medium tw-text-iron-500 desktop-hover:hover:tw-text-iron-200";
+    className = `tw-min-h-11 tw-flex-1 tw-whitespace-nowrap tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-bg-transparent tw-px-3 tw-py-2 tw-text-xs tw-transition-colors tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400/60 ${stateClassName}`;
+  } else {
+    const stateClassName = isActive
+      ? webActiveClass
+      : "tw-bg-transparent tw-text-iron-400 desktop-hover:hover:tw-text-iron-200";
+    className = `tw-flex-1 tw-whitespace-nowrap tw-rounded-md tw-border-0 tw-px-3 tw-py-1.5 tw-text-xs tw-transition-colors tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/60 ${stateClassName}`;
+  }
 
   return (
     <button
       type="button"
-      aria-pressed={isActive}
+      role="tab"
+      aria-selected={isActive}
       onClick={() => onTabChange(tab)}
-      className={`tw-flex-1 tw-whitespace-nowrap tw-rounded-md tw-border-0 tw-px-3 tw-py-1.5 tw-text-xs tw-transition-colors tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/60 ${
-        isActive
-          ? activeClass
-          : "tw-bg-transparent tw-text-iron-400 desktop-hover:hover:tw-text-iron-200"
-      }`}
+      className={className}
     >
       {children}
     </button>
@@ -94,6 +107,9 @@ export const WaveCompetitionPreviewModalContent = ({
       ? "waves.competitionBadges.tabs.active"
       : "waves.competitionBadges.tabs.winners"
   );
+  const surfaceClassName = isApp
+    ? "tailwind-scope tw-relative tw-overflow-hidden tw-bg-[#0B0C0E]"
+    : "tailwind-scope tw-relative tw-overflow-hidden tw-rounded-xl tw-border tw-border-white/5 tw-bg-[#0E1012] tw-shadow-[0_10px_40px_rgba(0,0,0,0.55)]";
 
   const handleDropClick = useCallback(
     (drop: ApiDrop) => {
@@ -111,12 +127,30 @@ export const WaveCompetitionPreviewModalContent = ({
   );
 
   return (
-    <div className="tailwind-scope tw-relative tw-overflow-hidden tw-rounded-xl tw-border tw-border-white/5 tw-bg-[#0E1012] tw-shadow-[0_10px_40px_rgba(0,0,0,0.55)]">
-      <div className="tw-pointer-events-none tw-absolute tw-inset-x-0 tw-top-0 tw-h-28 tw-bg-[radial-gradient(80%_100%_at_20%_0%,rgba(139,92,246,0.10),transparent_75%)]" />
+    <div className={surfaceClassName}>
+      {!isApp && (
+        <div className="tw-pointer-events-none tw-absolute tw-inset-x-0 tw-top-0 tw-h-28 tw-bg-[radial-gradient(80%_100%_at_20%_0%,rgba(139,92,246,0.10),transparent_75%)]" />
+      )}
 
-      <header className="tw-relative tw-z-[100] tw-flex tw-justify-between tw-gap-4 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800/60 tw-p-6">
-        <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-4">
-          <div className="tw-relative tw-size-12 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-full tw-bg-iron-900 tw-ring-1 tw-ring-violet-400/25">
+      <header
+        className={`tw-relative tw-z-[100] tw-flex tw-justify-between tw-gap-4 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid ${
+          isApp
+            ? "tw-border-white/[0.06] tw-px-4 tw-pb-4 tw-pt-5"
+            : "tw-border-iron-800/60 tw-p-6"
+        }`}
+      >
+        <div
+          className={`tw-flex tw-min-w-0 tw-items-center ${
+            isApp ? "tw-gap-3" : "tw-gap-4"
+          }`}
+        >
+          <div
+            className={`tw-relative tw-flex-shrink-0 tw-overflow-hidden tw-rounded-full tw-bg-iron-900 tw-ring-1 ${
+              isApp
+                ? "tw-size-11 tw-ring-white/10"
+                : "tw-size-12 tw-ring-violet-400/25"
+            }`}
+          >
             {user.pfp && (
               <Image
                 src={resolveIpfsUrlSync(user.pfp)}
@@ -157,12 +191,29 @@ export const WaveCompetitionPreviewModalContent = ({
       </header>
 
       {showTabs && (
-        <div className="tw-relative tw-z-[100] tw-mt-4 tw-flex tw-w-full tw-px-6 sm:tw-w-auto">
-          <div className="tw-flex tw-h-10 tw-w-full tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-1 sm:tw-w-auto">
+        <div
+          className={`tw-relative tw-z-[100] tw-w-full ${
+            isApp
+              ? "tw-flex tw-px-4 tw-pt-2"
+              : "tw-mt-4 tw-inline-flex tw-px-6 sm:tw-w-auto"
+          }`}
+        >
+          <div
+            role="tablist"
+            aria-label={t(locale, "waves.competitionBadges.title", {
+              profile: displayName,
+            })}
+            className={
+              isApp
+                ? "tw-flex tw-w-full tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.06]"
+                : "tw-flex tw-h-10 tw-w-full tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-1 sm:tw-w-auto"
+            }
+          >
             <TabButton
               tab="active"
               activeTab={activeTab}
               onTabChange={onTabChange}
+              isApp={isApp}
             >
               {t(locale, "waves.competitionBadges.tabs.active")}
             </TabButton>
@@ -170,6 +221,7 @@ export const WaveCompetitionPreviewModalContent = ({
               tab="winners"
               activeTab={activeTab}
               onTabChange={onTabChange}
+              isApp={isApp}
             >
               {t(locale, "waves.competitionBadges.tabs.winners")}
             </TabButton>

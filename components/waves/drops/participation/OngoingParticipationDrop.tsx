@@ -193,6 +193,14 @@ function OngoingParticipationDropInner({
       fullWidthMedia={fullWidthMedia}
       fullWidthLinkPreviews={fullWidthLinkPreviews}
       contentPresentation={contentPresentation}
+      proposalCardTextFooter={
+        isChatProposal ? (
+          <ProposalCardReadFullButton
+            drop={drop}
+            onReadFull={onDropContentClick}
+          />
+        ) : undefined
+      }
       embedPath={embedPath}
       quotePath={quotePath}
       embedDepth={embedDepth}
@@ -211,7 +219,6 @@ function OngoingParticipationDropInner({
     <div className="tw-relative tw-z-10 tw-flex tw-w-full tw-flex-col tw-gap-y-1 tw-border-0 tw-bg-transparent tw-px-4 tw-pt-3 tw-text-left">
       <ProposalCardContextLabel />
       {content}
-      <ProposalCardReadFullButton drop={drop} onReadFull={onDropContentClick} />
     </div>
   ) : (
     <div

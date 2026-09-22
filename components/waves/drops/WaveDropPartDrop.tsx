@@ -39,6 +39,7 @@ interface WaveDropPartDropProps {
     | ((href: string, active: boolean) => void)
     | undefined;
   readonly contentPresentation?: DropContentPresentation | undefined;
+  readonly proposalCardTextFooter?: React.ReactNode;
   readonly embedPath?: readonly string[] | undefined;
   readonly quotePath?: readonly string[] | undefined;
   readonly embedDepth?: number | undefined;
@@ -65,6 +66,7 @@ const WaveDropPartDrop: React.FC<WaveDropPartDropProps> = ({
   fullWidthLinkPreviews = false,
   onLinkCardActionsActiveChange,
   contentPresentation = "default",
+  proposalCardTextFooter,
   embedPath,
   quotePath,
   embedDepth,
@@ -78,7 +80,10 @@ const WaveDropPartDrop: React.FC<WaveDropPartDropProps> = ({
       <div className="tw-flex tw-h-full tw-w-full tw-flex-col tw-self-center sm:tw-self-start">
         <div>
           {showProposalCard ? (
-            <ProposalCardContent drop={drop} />
+            <ProposalCardContent
+              drop={drop}
+              textFooter={proposalCardTextFooter}
+            />
           ) : (
             <>
               {showStandaloneTitle && <WaveDropPartTitle title={drop.title} />}

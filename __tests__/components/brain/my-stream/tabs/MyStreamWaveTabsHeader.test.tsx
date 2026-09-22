@@ -159,6 +159,42 @@ describe("MyStreamWaveTabsHeader", () => {
     ).toBe("");
   });
 
+  it("keeps the primary action first and places supplemental actions after REP", () => {
+    render(
+      <MyStreamWaveTabsHeader
+        wave={wave}
+        activeContentTab={MyStreamWaveTab.CHAT}
+        setActiveContentTab={jest.fn()}
+        onSelectCuration={jest.fn()}
+        isCompact={false}
+        showBackButton={false}
+        headerActionsTooltipId="header-actions"
+        headerClassName="tw-flex"
+        actionsClassName="tw-flex"
+        renderLeadingActions={() => (
+          <button type="button" aria-label="Submit drop">
+            Drop
+          </button>
+        )}
+        renderTrailingActions={() => (
+          <button type="button" aria-label="Switch to gallery view">
+            Gallery
+          </button>
+        )}
+      />
+    );
+
+    const dropButton = screen.getByRole("button", { name: "Submit drop" });
+    const repButton = screen.getByRole("button", { name: "Add REP" });
+    const galleryButton = screen.getByRole("button", {
+      name: "Switch to gallery view",
+    });
+
+    expect(dropButton.parentElement?.firstElementChild).toBe(dropButton);
+    expect(dropButton.nextElementSibling).toBe(repButton);
+    expect(repButton.nextElementSibling).toBe(galleryButton);
+  });
+
   it.each(["logged out", "author", "proxy", "DM"])(
     "hides header REP for a %s session or wave",
     (state) => {

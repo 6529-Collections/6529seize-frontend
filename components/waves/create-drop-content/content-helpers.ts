@@ -72,6 +72,16 @@ export const hasMetadataContent = (
   metadata: CreateDropMetadataType[]
 ): boolean => metadata.some((item) => isMetadataValuePresent(item.value));
 
+export const getMetadataNameErrors = (
+  metadata: CreateDropMetadataType[],
+  locale: SupportedLocale
+): Record<string, string> =>
+  Object.fromEntries(
+    metadata
+      .filter((item) => !item.key.trim() && isMetadataValuePresent(item.value))
+      .map((item) => [item.id, t(locale, "waves.metadata.missingName")])
+  );
+
 const hasSubmissionContent = ({
   markdown,
   files,
@@ -170,16 +180,18 @@ export const canSubmitComposerAction = ({
   canAddPart,
   canSubmit,
   editingPartIndex,
+  hasMissingRequirements,
   isStormMode,
 }: {
   readonly canAddPart: boolean;
   readonly canSubmit: boolean;
   readonly editingPartIndex: number | null;
+  readonly hasMissingRequirements: boolean;
   readonly isStormMode: boolean;
 }): boolean =>
   isStormMode && (editingPartIndex !== null || canAddPart)
     ? canAddPart
-    : canSubmit;
+    : canSubmit && !hasMissingRequirements;
 
 const ensurePartsWithFallback = (
   parts: CreateDropPart[],
@@ -624,11 +636,9 @@ export const handleComposerFileChange = ({
 };
 
 export const createMetadataHandlers = ({
-  metadata,
   setMetadata,
   generateMetadataId,
 }: {
-  readonly metadata: CreateDropMetadataType[];
   readonly setMetadata: React.Dispatch<
     React.SetStateAction<CreateDropMetadataType[]>
   >;
@@ -660,32 +670,27 @@ export const createMetadataHandlers = ({
           };
         }
 
-        if (item.type === ApiWaveMetadataType.String) {
-          if (params.newValue === null) {
-            return { ...item, value: null };
-          }
-          if (typeof params.newValue === "string") {
-            return { ...item, value: params.newValue };
-          }
-          return { ...item, value: String(params.newValue) };
-        }
-
-        return item;
+        return {
+          ...item,
+          value: params.newValue === null ? null : String(params.newValue),
+        };
       })
     );
   };
 
   const onAddMetadata = () => {
-    setMetadata([
-      ...metadata,
+    const id = generateMetadataId();
+    setMetadata((prev) => [
+      ...prev,
       {
-        id: generateMetadataId(),
+        id,
         key: "",
-        type: null,
+        type: ApiWaveMetadataType.String,
         value: null,
         required: false,
       },
     ]);
+    return id;
   };
 
   const onRemoveMetadata = (index: number) => {

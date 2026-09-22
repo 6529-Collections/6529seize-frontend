@@ -397,78 +397,80 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
         )}
 
         {categoryViewState.showList && (
-          <div
-            className={`tw-divide-y tw-divide-solid tw-divide-white/5 tw-border-x-0 tw-border-y tw-border-solid tw-border-white/5 ${
-              categoryViewState.isEmpty ? "" : "tw-mt-2"
-            }`}
-          >
-            <CategoryRow
-              label={detailText("waves.rep.details.categories.all")}
-              totalRep={summary.totalRep}
-              contributorCount={summary.contributorCount}
-              selected={selectedCategory === null}
-              ariaLabel={detailText(
-                "waves.rep.details.categories.allAriaLabel",
-                {
-                  rep: formatSignedRep(summary.totalRep),
-                  contributors: getContributorCountLabel(
-                    summary.contributorCount
-                  ),
-                }
-              )}
-              onClick={clearSelectedCategory}
-            />
-            {filteredCategories.map((category) => (
+          <>
+            <div
+              className={`tw-divide-y tw-divide-solid tw-divide-white/5 tw-border-x-0 tw-border-y tw-border-solid tw-border-white/5 ${
+                categoryViewState.isEmpty ? "" : "tw-mt-2"
+              }`}
+            >
               <CategoryRow
-                key={category.category}
-                label={category.category}
-                totalRep={category.total_rep}
-                contributorCount={category.contributor_count}
-                selected={selectedCategory === category.category}
+                label={detailText("waves.rep.details.categories.all")}
+                totalRep={summary.totalRep}
+                contributorCount={summary.contributorCount}
+                selected={selectedCategory === null}
                 ariaLabel={detailText(
-                  "waves.rep.details.categories.categoryAriaLabel",
+                  "waves.rep.details.categories.allAriaLabel",
                   {
-                    category: category.category,
-                    rep: formatSignedRep(category.total_rep),
+                    rep: formatSignedRep(summary.totalRep),
                     contributors: getContributorCountLabel(
-                      category.contributor_count
+                      summary.contributorCount
                     ),
                   }
                 )}
-                onClick={() => selectCategory(category)}
+                onClick={clearSelectedCategory}
               />
-            ))}
+              {filteredCategories.map((category) => (
+                <CategoryRow
+                  key={category.category}
+                  label={category.category}
+                  totalRep={category.total_rep}
+                  contributorCount={category.contributor_count}
+                  selected={selectedCategory === category.category}
+                  ariaLabel={detailText(
+                    "waves.rep.details.categories.categoryAriaLabel",
+                    {
+                      category: category.category,
+                      rep: formatSignedRep(category.total_rep),
+                      contributors: getContributorCountLabel(
+                        category.contributor_count
+                      ),
+                    }
+                  )}
+                  onClick={() => selectCategory(category)}
+                />
+              ))}
+              {categoryViewState.showNoMatches && (
+                <p className="tw-mb-0 tw-px-1 tw-py-3 tw-text-xs tw-font-medium tw-text-iron-500">
+                  {detailText("waves.rep.details.categories.noMatches")}
+                </p>
+              )}
+              {categoryViewState.showPagination && (
+                <div>
+                  {categoriesQuery.isFetchNextPageError && (
+                    <p className="tw-mb-0 tw-px-1 tw-py-2 tw-text-xs tw-text-rose-300">
+                      {detailText("waves.rep.details.categories.loadMoreError")}
+                    </p>
+                  )}
+                  <button
+                    type="button"
+                    aria-busy={categoriesQuery.isFetchingNextPage}
+                    onClick={fetchNextCategoriesPage}
+                    disabled={categoriesQuery.isFetchingNextPage}
+                    className="tw-min-h-11 tw-w-full tw-cursor-pointer tw-border-0 tw-bg-transparent tw-px-1 tw-py-2 tw-text-center tw-text-xs tw-font-semibold tw-text-iron-300 tw-transition hover:tw-bg-white/[0.025] hover:tw-text-white focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 disabled:tw-cursor-wait disabled:tw-text-iron-500"
+                  >
+                    {categoriesQuery.isFetchingNextPage
+                      ? detailText("waves.rep.details.categories.loadingMore")
+                      : detailText(categoryLoadMoreMessageKey)}
+                  </button>
+                </div>
+              )}
+            </div>
             {categoryViewState.isEmpty && (
-              <p className="tw-mb-0 tw-px-1 tw-py-3 tw-text-xs tw-text-iron-500">
+              <p className="tw-mb-0 tw-mt-2 tw-border-0 tw-px-1 tw-py-1 tw-text-xs tw-italic tw-text-iron-500">
                 {detailText("waves.rep.details.categories.empty")}
               </p>
             )}
-            {categoryViewState.showNoMatches && (
-              <p className="tw-mb-0 tw-px-1 tw-py-3 tw-text-xs tw-font-medium tw-text-iron-500">
-                {detailText("waves.rep.details.categories.noMatches")}
-              </p>
-            )}
-            {categoryViewState.showPagination && (
-              <div>
-                {categoriesQuery.isFetchNextPageError && (
-                  <p className="tw-mb-0 tw-px-1 tw-py-2 tw-text-xs tw-text-rose-300">
-                    {detailText("waves.rep.details.categories.loadMoreError")}
-                  </p>
-                )}
-                <button
-                  type="button"
-                  aria-busy={categoriesQuery.isFetchingNextPage}
-                  onClick={fetchNextCategoriesPage}
-                  disabled={categoriesQuery.isFetchingNextPage}
-                  className="tw-min-h-11 tw-w-full tw-cursor-pointer tw-border-0 tw-bg-transparent tw-px-1 tw-py-2 tw-text-center tw-text-xs tw-font-semibold tw-text-iron-300 tw-transition hover:tw-bg-white/[0.025] hover:tw-text-white focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 disabled:tw-cursor-wait disabled:tw-text-iron-500"
-                >
-                  {categoriesQuery.isFetchingNextPage
-                    ? detailText("waves.rep.details.categories.loadingMore")
-                    : detailText(categoryLoadMoreMessageKey)}
-                </button>
-              </div>
-            )}
-          </div>
+          </>
         )}
 
         {categoryViewState.showInitialError && (
@@ -564,16 +566,14 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
           {contributorsQuery.status === "success" &&
             !isShowingPreviousContributors &&
             contributors.length === 0 && (
-              <div className="tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-white/[0.02] tw-p-4">
-                <p className="tw-mb-0 tw-text-sm tw-text-iron-400">
-                  {selectedCategory
-                    ? detailText(
-                        "waves.rep.details.contributors.empty.category",
-                        { category: selectedCategory }
-                      )
-                    : detailText("waves.rep.details.contributors.empty.all")}
-                </p>
-              </div>
+              <p className="tw-mb-0 tw-border-0 tw-px-1 tw-py-1 tw-text-xs tw-italic tw-text-iron-500">
+                {selectedCategory
+                  ? detailText(
+                      "waves.rep.details.contributors.empty.category",
+                      { category: selectedCategory }
+                    )
+                  : detailText("waves.rep.details.contributors.empty.all")}
+              </p>
             )}
 
           {!isShowingPreviousContributors && contributors.length > 0 && (
@@ -663,7 +663,7 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
           )}
 
           {logsQuery.status === "success" && logs.length === 0 && (
-            <p className="tw-mb-0 tw-text-sm tw-text-iron-500">
+            <p className="tw-mb-0 tw-border-0 tw-px-1 tw-py-1 tw-text-xs tw-italic tw-text-iron-500">
               {detailText("waves.rep.details.activity.empty")}
             </p>
           )}
