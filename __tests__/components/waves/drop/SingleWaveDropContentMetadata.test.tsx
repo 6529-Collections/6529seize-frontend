@@ -39,6 +39,10 @@ describe("SingleWaveDropContentMetadata", () => {
 
     expect(screen.getByText("a:")).toBeInTheDocument();
     expect(screen.queryByText("c:")).toBeNull();
+    const metadataGrid = screen.getByText("a:").closest(".tw-grid");
+    expect(metadataGrid).toContainElement(
+      screen.getByRole("button", { name: "Show all" })
+    );
 
     fireEvent.click(screen.getByText("Show all"));
     expect(screen.getByText("c:")).toBeInTheDocument();

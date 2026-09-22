@@ -1,7 +1,7 @@
 import { CHAT_LINK_RESTRICTION_MESSAGE } from "@/helpers/waves/chat-link-restriction.helpers";
 import { t } from "@/i18n/messages";
 import type { SupportedLocale } from "@/i18n/locales";
-import { AnimatePresence, LazyMotion, domAnimation, m } from "framer-motion";
+import { AnimatePresence, LazyMotion, domAnimation } from "framer-motion";
 import CreateDropActions from "../CreateDropActions";
 import { CreateDropContentFiles } from "../CreateDropContentFiles";
 import CreateDropContentRequirements from "../CreateDropContentRequirements";
@@ -267,23 +267,16 @@ export default function CreateDropComposer({
       )}
       {isDropMode && (
         <CreateDropContentRequirements
-          canSubmit={canSubmit}
-          wave={wave}
           missingMedia={missingRequirements.media}
           missingMetadata={missingRequirements.metadata}
-          onOpenMetadata={openMetadata}
-          setFiles={handleFileChange}
-          disabled={submitting}
         />
       )}
       <LazyMotion features={domAnimation}>
-        <AnimatePresence>
+        <AnimatePresence initial={false}>
           {isDropMode && isMetadataOpen && (
-            <m.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.3 }}
+            <CreateDropComposerSurface
+              key="metadata-composer-surface"
+              testId="metadata-composer-surface"
             >
               <CreateDropMetadata
                 disabled={submitting}
@@ -296,7 +289,7 @@ export default function CreateDropComposer({
                 onChangeValue={onChangeValue}
                 onAddMetadata={onAddMetadata}
               />
-            </m.div>
+            </CreateDropComposerSurface>
           )}
         </AnimatePresence>
       </LazyMotion>

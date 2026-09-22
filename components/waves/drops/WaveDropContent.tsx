@@ -39,6 +39,7 @@ interface WaveDropContentProps {
     | ((href: string, active: boolean) => void)
     | undefined;
   readonly contentPresentation?: DropContentPresentation | undefined;
+  readonly proposalCardTextFooter?: React.ReactNode;
   readonly embedPath?: readonly string[] | undefined;
   readonly quotePath?: readonly string[] | undefined;
   readonly embedDepth?: number | undefined;
@@ -65,6 +66,7 @@ const WaveDropContent: React.FC<WaveDropContentProps> = ({
   hasTouch,
   onLinkCardActionsActiveChange,
   contentPresentation = "default",
+  proposalCardTextFooter,
   embedPath,
   quotePath,
   embedDepth,
@@ -95,6 +97,7 @@ const WaveDropContent: React.FC<WaveDropContentProps> = ({
         hasTouch={effectiveHasTouch}
         onLinkCardActionsActiveChange={onLinkCardActionsActiveChange}
         contentPresentation={contentPresentation}
+        proposalCardTextFooter={proposalCardTextFooter}
         embedPath={embedPath}
         quotePath={quotePath}
         embedDepth={embedDepth}

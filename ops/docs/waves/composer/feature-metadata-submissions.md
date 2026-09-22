@@ -15,43 +15,54 @@ The standard wave composer supports metadata submissions.
 
 - Wave thread: `/waves/{waveId}`
 - Direct-message thread: `/messages/{waveId}`
-- Thread footer composer actions row (`Post` / `Drop`)
+- The `Submit drop` dialog and standard composers in `Drop` mode
 
 ## Entry Points
 
-1. If the composer shows a `Post` / `Drop` toggle, switch to `Drop`.
-2. Open composer actions and select `Add metadata`.
-3. On narrow rows, select the chevron first, then `Add metadata`.
-4. In `Drop` mode with required metadata configured, select the `Metadata`
-   requirement chip to reopen the panel.
+1. Select `Submit drop` in the wave header, or enter `Drop` mode where the
+   composer offers it.
+2. Select the `Add metadata` code icon beside the input. On compact layouts,
+   open composer actions first and select `Metadata`.
+3. The metadata section opens below the input with any required fields already
+   added. It stays hidden until opened, including when metadata is required.
 
-`Post` mode does not show `Add metadata` and does not expose the metadata
-editor.
+`Post` mode and curation URL composers do not expose the metadata editor.
 
 ## User Journey
 
-1. If available, switch the thread composer from `Post` to `Drop`.
-2. Open composer actions and select `Add metadata`.
-3. Add or review metadata rows, then fill the values you want to submit.
-4. Submit from `Drop`, or switch back to `Post` to keep writing with the same
-   populated metadata attached to the draft.
+1. Review any required fields and enter their values. Required field names are
+   locked and these rows cannot be removed.
+2. Select `Add field` to add an optional field. Focus moves to `Field name`.
+3. Enter a name and value, for example `Medium` and `Digital`.
+4. Close the section using its heading when finished. The entire section hides;
+   values stay in the current draft when reopened from the icon.
+5. Submit the drop. Metadata is included with the drop; there is no separate
+   save action.
 
 ## Common Scenarios
 
 - Add required metadata for a participatory submission before sending.
-- Reopen the metadata panel from the `Metadata` requirement chip in `Drop`
-  mode.
-- Submit a metadata-only draft when at least one metadata value is populated.
-- Fill metadata in `Drop`, then switch back to `Post` to continue a chat-style
-  draft without reopening the panel.
+- Add optional details with `Add field` and remove an optional row with its
+  trash button.
+- Submit a metadata-only draft when at least one named metadata field has a
+  populated value.
+- On narrow screens, field names and values stack vertically. In the native
+  app, the submit dialog uses the shared keyboard inset and scrolls focused
+  fields into view.
 
 ## Metadata Row Behavior
 
-- In `Drop` mode, required metadata rows are preloaded from wave settings.
+- In `Drop` mode, required metadata rows are preloaded from wave settings and
+  shown when you open metadata.
 - Required keys are locked and required rows cannot be removed.
 - A required value is treated as missing only when it is `null`, `undefined`,
   or `""`.
 - Numeric required values accept `0`, negative numbers, and decimals.
+- Optional fields accept text values. A populated value needs a field name;
+  unnamed values show an inline error and block submission.
+- Empty unnamed rows are omitted from the submission.
+- Every input has a persistent label. Required and numeric fields are identified
+  in text.
 - Switching from `Drop` to `Post` closes the metadata panel.
 - In `Post` mode, required metadata and required media checks are not enforced.
 - Switching from `Drop` to `Post` removes only required rows that still have no
@@ -64,10 +75,15 @@ editor.
   metadata value).
 - Whitespace-only metadata values do not count as populated metadata content.
 - In `Drop` mode, missing required metadata or required media blocks submit.
-- Requirement chips render only in `Drop` mode after the draft is already
-  submittable.
-- `Metadata` chip opens the metadata panel in `Drop` mode. `Media` chip opens a
-  file picker.
+- A compact informational line is visible as soon as `Drop` mode opens, even
+  before the draft has body text. It states what is still required, such as
+  `Required: add an image.` or `Required: complete metadata (Medium).`
+- The final `Drop` action stays disabled while a required item is missing.
+  Adding or editing an individual storm part remains available; requirements
+  gate the final storm submission.
+- The line is informational. Use the existing upload and metadata controls to
+  complete it. Each completed requirement is removed; the line disappears when
+  nothing is missing.
 
 ## Edge Cases
 
@@ -93,10 +109,7 @@ editor.
 
 ## Limitations / Notes
 
-- `Add new` custom rows currently do not produce submit-ready metadata values
-  and are excluded from the metadata payload.
-- `Post` mode hides the `Add metadata` action and does not expose the metadata
-  editor.
+- `Post` mode does not expose the metadata editor.
 - Curation URL composer flows use URL-only submission and do not expose metadata
   rows.
 - Composer access/eligibility constraints are documented in

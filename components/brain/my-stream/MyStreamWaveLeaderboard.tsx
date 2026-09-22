@@ -526,6 +526,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
         ) : (
           <WaveLeaderboardTime
             wave={wave}
+            fullBleed={!isMemesWave}
             className={
               isMemesWave
                 ? "tw-relative tw-z-40 tw-w-full tw-min-w-0 tw-flex-none tw-basis-full @[46rem]/leaderboard-toolbar:tw-w-auto @[46rem]/leaderboard-toolbar:tw-flex-[1_1_17rem]"
@@ -547,7 +548,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
             isSticky
             className={
               isMemesWave
-                ? "tw-w-full tw-min-w-0 tw-max-w-full !tw-flex-none !tw-basis-full !tw-pb-2 !tw-pt-2 sm:!tw-pt-4 @[46rem]/leaderboard-toolbar:!tw-w-auto @[46rem]/leaderboard-toolbar:!tw-flex-[0_0_27rem]"
+                ? "tw-w-full tw-min-w-0 tw-max-w-full !tw-flex-none !tw-basis-full !tw-pb-2 !tw-pt-2 @[46rem]/leaderboard-toolbar:!tw-w-auto @[46rem]/leaderboard-toolbar:!tw-flex-[0_0_27rem] sm:!tw-pt-4"
                 : undefined
             }
           >
@@ -558,9 +559,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
         {/* Content section */}
         <div
           className={`tw-min-w-0 tw-pb-[calc(env(safe-area-inset-bottom,0px)+1.5rem)] ${
-            isMemesWave
-              ? "tw-w-full tw-flex-none tw-basis-full tw-pt-4"
-              : ""
+            isMemesWave ? "tw-w-full tw-flex-none tw-basis-full tw-pt-4" : ""
           }`}
         >
           <AnimatePresence>

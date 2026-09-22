@@ -39,7 +39,6 @@ import {
   hasPendingInlineImageUploadDrop,
   hasPendingInlineImageUploadMarkdown,
 } from "@/helpers/waves/inline-image-upload.helpers";
-import { getIdentitySubmissionMetadataErrors } from "../utils/identitySubmissionMetadataValidation";
 import { normalizeCurationDropInput } from "../utils/validateCurationDropUrl";
 import {
   areHandlesEqual,
@@ -64,6 +63,7 @@ import { useCreateDropTyping } from "./useCreateDropTyping";
 import { exportComposerMarkdown } from "./exportComposerMarkdown";
 import { useCreateDropContainerWidth } from "./useCreateDropContainerWidth";
 import { useCreateDropPollActions } from "./useCreateDropPollActions";
+import { useCreateDropMetadataErrors } from "./useCreateDropMetadataErrors";
 import { useStormPartActions } from "./useStormPartActions";
 import type {
   CreateDropContentProps,
@@ -247,15 +247,12 @@ export function useCreateDropContentController({
     isDropMode,
     requiredMetadata,
   });
-  const metadataErrorById = useMemo(
-    () =>
-      getIdentitySubmissionMetadataErrors({
-        isIdentitySubmissionExperience:
-          isIdentitySubmissionExperience && isDropMode,
-        metadata,
-      }),
-    [isDropMode, isIdentitySubmissionExperience, metadata]
-  );
+  const metadataErrorById = useCreateDropMetadataErrors({
+    isIdentitySubmissionExperience,
+    isDropMode,
+    locale,
+    metadata,
+  });
   const hasMetadataValidationErrors = Object.keys(metadataErrorById).length > 0;
 
   const hasMetadata = useMemo(() => hasMetadataContent(metadata), [metadata]);
@@ -689,7 +686,6 @@ export function useCreateDropContentController({
 
   const { onChangeKey, onChangeValue, onAddMetadata, onRemoveMetadata } =
     createMetadataHandlers({
-      metadata,
       setMetadata,
       generateMetadataId,
     });
@@ -760,6 +756,9 @@ export function useCreateDropContentController({
       canAddPart,
       canSubmit,
       editingPartIndex,
+      hasMissingRequirements:
+        missingRequirements.metadata.length > 0 ||
+        missingRequirements.media.length > 0,
       isStormMode,
     }),
     handleEditorStateChange,
