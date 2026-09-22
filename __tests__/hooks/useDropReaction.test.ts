@@ -1,3 +1,4 @@
+import { recordReaction } from "@/helpers/reactions/reactionHistory";
 import { useDropReaction } from "@/hooks/drops/useDropReaction";
 import { COMMUNITY_CURATIONS_DROPS_QUERY_KEY } from "@/hooks/useCommunityCurationsDrops";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
@@ -210,6 +211,23 @@ const createNotificationQuery = ({
 };
 
 describe("useDropReaction", () => {
+  it.each(["picker", "quick-react"] as const)(
+    "records %s usage exactly once across the picker and reaction hook",
+    async (source) => {
+      const { result } = renderHook(() =>
+        useDropReaction(mockDrop, { source })
+      );
+      await act(async () => {
+        await result.current.react(":smile:");
+      });
+      if (source === "picker") {
+        expect(recordReaction).not.toHaveBeenCalled();
+      } else {
+        expect(recordReaction).toHaveBeenCalledTimes(1);
+        expect(recordReaction).toHaveBeenCalledWith(":smile:");
+      }
+    }
+  );
   it.each([null, ":smile:"])(
     "reconciles community-curation cards with canonical reaction %s after a timeout",
     async (canonicalReaction) => {

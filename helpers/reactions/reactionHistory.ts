@@ -3,7 +3,7 @@ const DEFAULT_REACTION = ":+1:";
 
 const listeners = new Set<() => void>();
 
-function emitChange() {
+export function notifyReactionHistoryChange() {
   for (const listener of listeners) {
     listener();
   }
@@ -13,17 +13,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === "object";
 }
 
-function readReactionStore(): Record<string, number> | null {
-  if (typeof globalThis.localStorage === "undefined") {
-    return null;
-  }
-
-  let rawStore: string | null;
-  try {
-    rawStore = globalThis.localStorage.getItem(STORAGE_KEY);
-  } catch {
-    return null;
-  }
+function readReactionStore(rawStore: string): Record<string, number> | null {
   if (!rawStore) {
     return null;
   }
@@ -48,25 +38,34 @@ function readReactionStore(): Record<string, number> | null {
 }
 
 function writeReactionStore(store: Record<string, number>): void {
-  if (typeof globalThis.localStorage === "undefined") {
-    return;
-  }
-
   try {
     globalThis.localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
   } catch {}
 }
 
-export function recordReaction(emoji: string): void {
+export async function recordReaction(emoji: string): Promise<void> {
   const id = emoji.replaceAll(":", "");
-  const store = readReactionStore() ?? {};
-  store[id] = (store[id] ?? 0) + 1;
-  writeReactionStore(store);
-  emitChange();
+  if (!id) return;
+
+  try {
+    // Keep the runtime lazy, but use the same writer as the picker. Writing
+    // localStorage directly leaves Emoji Mart's in-memory index stale.
+    const { FrequentlyUsed } = await import("emoji-mart");
+    FrequentlyUsed.add({ id });
+  } catch {
+    // A failed runtime import must not discard a quick reaction's history.
+    const store = readReactionStore(getReactionSnapshot()) ?? {};
+    store[id] = (store[id] ?? 0) + 1;
+    writeReactionStore(store);
+  }
+  notifyReactionHistoryChange();
 }
 
-export function getTopReactions(limit: number): string[] {
-  const freq = readReactionStore();
+export function getTopReactions(
+  limit: number,
+  snapshot = getReactionSnapshot()
+): string[] {
+  const freq = readReactionStore(snapshot);
   if (!freq) return [DEFAULT_REACTION];
 
   const sorted = Object.entries(freq)
@@ -83,7 +82,7 @@ export function subscribeToReactionStore(
 ): () => void {
   listeners.add(onStoreChange);
   const handler = (e: StorageEvent) => {
-    if (e.key === STORAGE_KEY) onStoreChange();
+    if (e.key === STORAGE_KEY || e.key === null) onStoreChange();
   };
   globalThis.addEventListener("storage", handler);
   return () => {
@@ -93,10 +92,6 @@ export function subscribeToReactionStore(
 }
 
 export function getReactionSnapshot(): string {
-  if (typeof globalThis.localStorage === "undefined") {
-    return "";
-  }
-
   try {
     return globalThis.localStorage.getItem(STORAGE_KEY) ?? "";
   } catch {
