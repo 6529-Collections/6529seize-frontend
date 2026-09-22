@@ -15,6 +15,7 @@ import { MuseumReviewedProgramMediaFigure } from "@/components/museum/MuseumRevi
 import { MuseumRelatedEntities } from "@/components/museum/MuseumRelatedEntities";
 import { MuseumSourceMatrixLink } from "@/components/museum/MuseumSourceMatrixLink";
 import { getAppMetadata } from "@/components/providers/metadata";
+import { toMetadataExcerpt } from "@/helpers/metadataText";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { formatDate } from "@/i18n/format";
@@ -533,12 +534,47 @@ export async function generateMetadata({
 }: MuseumProjectPageProps): Promise<Metadata> {
   const { slug } = await params;
   const { publicationState } = await getMuseumPublicationBundle();
-  const project = publicationState.publication?.projects.find(
+  const publication = publicationState.publication
+    ? applyMuseumCollectionSemantics(publicationState.publication)
+    : null;
+  const project = publication?.projects.find(
     (item) => item.slug === slug
   );
+  const workArtistIds = new Set(
+    project && publication
+      ? museumProjectWorks(publication, project).map((work) => work.artistId)
+      : []
+  );
+  const artists =
+    project && publication
+      ? publication.artists.filter(
+          (artist) =>
+            project.artistIds?.includes(artist.id) === true ||
+            artist.id === project.artistId ||
+            workArtistIds.has(artist.id)
+        )
+      : [];
+  const artistNames = artists.map((artist) => artist.preferredName).join(", ");
+  const projectTitle =
+    project?.title ?? t(DEFAULT_LOCALE, "museum.network.projects.title");
   const metadata = getAppMetadata({
-    title: project?.title ?? t(DEFAULT_LOCALE, "museum.network.projects.title"),
-    description: t(DEFAULT_LOCALE, "museum.network.projects.description"),
+    title:
+      project && artistNames
+        ? t(DEFAULT_LOCALE, "museum.network.projects.metadataTitle", {
+            project: projectTitle,
+            artists: artistNames,
+          })
+        : projectTitle,
+    description:
+      (project && publication
+        ? toMetadataExcerpt(projectDetails(publication, project).description)
+        : null) ??
+      (project && artistNames
+        ? t(DEFAULT_LOCALE, "museum.network.projects.metadataDescription", {
+            project: projectTitle,
+            artists: artistNames,
+          })
+        : t(DEFAULT_LOCALE, "museum.network.projects.description")),
   });
   return project === undefined
     ? metadata

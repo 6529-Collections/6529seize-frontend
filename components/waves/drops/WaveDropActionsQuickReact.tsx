@@ -1,6 +1,10 @@
 "use client";
 
-import { useEmoji } from "@/contexts/EmojiContext";
+import {
+  useEmoji,
+  type Emoji,
+  type NativeEmoji,
+} from "@/contexts/EmojiContext";
 import {
   getReactionSnapshot,
   getReactionSnapshotServer,
@@ -9,6 +13,8 @@ import {
 } from "@/helpers/reactions/reactionHistory";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useDropReaction } from "@/hooks/drops/useDropReaction";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import Image from "next/image";
 import React, {
   useCallback,
@@ -20,12 +26,19 @@ import DropActionTooltip from "./DropActionTooltip";
 
 const MAX_QUICK_REACTIONS = 3;
 const DEFAULT_QUICK_REACTION_ID = "+1";
+const DEFAULT_QUICK_REACTION: NativeEmoji = {
+  id: DEFAULT_QUICK_REACTION_ID,
+  name: "Thumbs up",
+  keywords: "thumbs up",
+  skins: [{ native: "👍" }],
+};
 
 const WaveDropActionsQuickReact: React.FC<{
   readonly drop: ExtendedDrop;
   readonly isMobile?: boolean;
   readonly onReactionStarted?: () => void;
 }> = ({ drop, isMobile = false, onReactionStarted }) => {
+  const locale = useBrowserLocale();
   const { react, canReact } = useDropReaction(drop, { source: "quick-react" });
 
   const handleReaction = useCallback(
@@ -41,18 +54,57 @@ const WaveDropActionsQuickReact: React.FC<{
   );
 
   // Subscribe to localStorage changes (hydration-safe)
-  useSyncExternalStore(
+  const snapshot = useSyncExternalStore(
     subscribeToReactionStore,
     getReactionSnapshot,
     getReactionSnapshotServer
   );
 
-  const topReactionCodes = getTopReactions(MAX_QUICK_REACTIONS);
+  const { findCustomEmoji, findNativeEmoji, loadEmojiData } = useEmoji();
+  const topReactionCodes = useMemo(
+    () => getTopReactions(Number.MAX_SAFE_INTEGER, snapshot),
+    [snapshot]
+  );
 
-  const buttons = topReactionCodes.map((code) => (
+  const needsEmojiData = topReactionCodes.some((code) => code !== ":+1:");
+  useEffect(() => {
+    if (needsEmojiData) {
+      void loadEmojiData();
+    }
+  }, [needsEmojiData, loadEmojiData]);
+
+  const topEmojis = useMemo(() => {
+    const emojis = new Map<string, Emoji | NativeEmoji>();
+    for (const code of topReactionCodes) {
+      const id = code.replaceAll(":", "");
+      const emoji = findCustomEmoji(id) ?? findNativeEmoji(id);
+      if (
+        emoji?.skins[0] &&
+        ("src" in emoji.skins[0] ? emoji.skins[0].src : emoji.skins[0].native)
+      ) {
+        emojis.set(emoji.id, emoji);
+      } else if (id === DEFAULT_QUICK_REACTION_ID) {
+        emojis.set(DEFAULT_QUICK_REACTION_ID, DEFAULT_QUICK_REACTION);
+      }
+      if (emojis.size === MAX_QUICK_REACTIONS) {
+        break;
+      }
+    }
+    return [...emojis.values()];
+  }, [topReactionCodes, findCustomEmoji, findNativeEmoji]);
+  // Only use a fallback when nothing can be rendered. It must send the emoji
+  // it displays, rather than disguising an unavailable saved reaction as 👍.
+  const visibleEmojis = topEmojis.length ? topEmojis : [DEFAULT_QUICK_REACTION];
+  const buttons = visibleEmojis.map((emoji) => (
     <QuickReactButton
-      key={code}
-      reactionCode={code}
+      key={emoji.id}
+      emoji={emoji}
+      label={t(locale, "drops.reactions.reactWith", {
+        emoji:
+          emoji.id === DEFAULT_QUICK_REACTION_ID
+            ? t(locale, "drops.reactions.thumbsUp")
+            : emoji.name,
+      })}
       canReact={canReact}
       onReact={handleReaction}
       isMobile={isMobile}
@@ -71,86 +123,38 @@ const WaveDropActionsQuickReact: React.FC<{
 };
 
 const QuickReactButton: React.FC<{
-  readonly reactionCode: string;
+  readonly emoji: Emoji | NativeEmoji;
+  readonly label: string;
   readonly canReact: boolean;
   readonly onReact: (code: string) => void;
   readonly isMobile?: boolean;
-}> = ({ reactionCode, canReact, onReact, isMobile = false }) => {
-  const { emojiMap, findNativeEmoji, loadEmojiData } = useEmoji();
-
-  const emojiId = useMemo(
-    () => reactionCode.replaceAll(":", ""),
-    [reactionCode]
-  );
-
-  useEffect(() => {
-    if (emojiId === DEFAULT_QUICK_REACTION_ID) {
-      return;
-    }
-
-    void loadEmojiData();
-  }, [emojiId, loadEmojiData]);
-
+}> = ({ emoji, label, canReact, onReact, isMobile = false }) => {
   const emojiSize = isMobile ? "tw-size-7" : "tw-size-5";
   const textSize = isMobile ? "tw-text-[1.625rem]" : "tw-text-[1.25rem]";
-  const emojiLabel = useMemo(() => emojiId.replaceAll("_", " "), [emojiId]);
-
-  const emojiNode = useMemo(() => {
-    const fallback = (
+  const skin = emoji.skins[0];
+  const emojiNode =
+    skin && "src" in skin ? (
+      <div className={`tw-relative ${emojiSize}`}>
+        <Image
+          src={skin.src}
+          alt={emoji.name}
+          fill
+          sizes={isMobile ? "28px" : "20px"}
+          unoptimized
+          className="tw-object-contain"
+        />
+      </div>
+    ) : (
       <span
         className={`tw-flex tw-items-center tw-justify-center ${textSize} tw-leading-none`}
       >
-        👍
+        {skin?.native ?? "👍"}
       </span>
     );
 
-    if (!emojiMap.length) return fallback;
-
-    const custom = emojiMap
-      .flatMap((cat) => cat.emojis)
-      .find((e) => e.id === emojiId);
-
-    const customSrc = custom?.skins[0]?.src;
-    if (customSrc) {
-      return (
-        <div className={`tw-relative ${emojiSize}`}>
-          <Image
-            src={customSrc}
-            alt={emojiLabel}
-            fill
-            sizes={isMobile ? "28px" : "20px"}
-            unoptimized
-            className="tw-object-contain"
-          />
-        </div>
-      );
-    }
-
-    const native = findNativeEmoji(emojiId);
-    if (native?.skins[0]?.native) {
-      return (
-        <span
-          className={`tw-flex tw-items-center tw-justify-center ${textSize} tw-leading-none`}
-        >
-          {native.skins[0].native}
-        </span>
-      );
-    }
-
-    return fallback;
-  }, [
-    emojiId,
-    emojiLabel,
-    emojiMap,
-    findNativeEmoji,
-    emojiSize,
-    isMobile,
-    textSize,
-  ]);
-
   const handleClick = useCallback(() => {
-    onReact(reactionCode);
-  }, [onReact, reactionCode]);
+    onReact(`:${emoji.id}:`);
+  }, [onReact, emoji.id]);
 
   if (isMobile) {
     return (
@@ -160,7 +164,7 @@ const QuickReactButton: React.FC<{
         }`}
         onClick={handleClick}
         disabled={!canReact}
-        aria-label="Click to react"
+        aria-label={label}
       >
         {emojiNode}
       </button>
@@ -169,7 +173,7 @@ const QuickReactButton: React.FC<{
 
   return (
     <DropActionTooltip
-      content={<span className="tw-text-xs">Click to react</span>}
+      content={<span className="tw-text-xs">{label}</span>}
       disabled={!canReact}
     >
       <button
@@ -178,7 +182,7 @@ const QuickReactButton: React.FC<{
         }`}
         onClick={handleClick}
         disabled={!canReact}
-        aria-label="Click to react"
+        aria-label={label}
       >
         <div
           className={`tw-flex tw-size-5 tw-flex-shrink-0 tw-items-center tw-justify-center tw-transition tw-duration-300 tw-ease-out ${

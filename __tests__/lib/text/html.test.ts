@@ -38,6 +38,11 @@ describe("decodeHtmlEntities", () => {
     const input = "foo &madeup; bar";
     expect(decodeHtmlEntities(input)).toBe("foo  bar");
   });
+
+  it("strips invalid numeric entities without throwing", () => {
+    const input = "safe &#1114112; &#x110000; &#55296; &#12f; text";
+    expect(decodeHtmlEntities(input)).toBe("safe     text");
+  });
 });
 
 describe("sanitizeHtmlToText", () => {

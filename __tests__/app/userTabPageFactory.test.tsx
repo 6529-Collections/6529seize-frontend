@@ -5,6 +5,10 @@ jest.mock("@/helpers/server.app.helpers", () => ({
   getAppCommonHeaders: jest.fn(async () => ({ "x-test": "1" })),
 }));
 
+jest.mock("@/services/api/common-api", () => ({
+  commonApiFetch: jest.fn().mockResolvedValue([]),
+}));
+
 jest.mock("@/helpers/server.helpers", () => ({
   getUserProfile: jest.fn(async ({ user }: { user: string }) => ({
     handle: user,
@@ -46,6 +50,7 @@ jest.mock("next/navigation", () => ({
 
 import { createUserTabPage } from "@/app/[user]/_lib/userTabPageFactory";
 import { getAppMetadata } from "@/components/providers/metadata";
+import { commonApiFetch } from "@/services/api/common-api";
 import {
   getUserProfile,
   userPageNeedsRedirect,
@@ -174,6 +179,13 @@ describe("user tab page via createUserTabPage", () => {
   it("generateMetadata uses helpers", async () => {
     const { generateMetadata } = buildFactory();
     const spy = jest.spyOn(Helpers, "getMetadataForUserPage");
+    (commonApiFetch as jest.Mock).mockResolvedValueOnce([
+      {
+        statement_group: "GENERAL",
+        statement_type: "BIO",
+        statement_value: "Public artist biography",
+      },
+    ]);
 
     const meta = await generateMetadata({
       params: Promise.resolve({ user: "Dave" }),
@@ -181,7 +193,8 @@ describe("user tab page via createUserTabPage", () => {
 
     expect(spy).toHaveBeenCalledWith(
       expect.objectContaining({ handle: "dave", walletAddress: "0xabc" }),
-      "collected"
+      "collected",
+      "Public artist biography"
     );
     expect(getAppMetadata).toHaveBeenCalled();
     expect(meta).toEqual(
@@ -191,6 +204,19 @@ describe("user tab page via createUserTabPage", () => {
         robots: { index: true, follow: true },
       })
     );
+  });
+
+  it("encodes the profile identity in the public BIO endpoint", async () => {
+    const { generateMetadata } = buildFactory();
+
+    await generateMetadata({
+      params: Promise.resolve({ user: "Alice%2FAdmin" }),
+    });
+
+    expect(commonApiFetch).toHaveBeenCalledWith({
+      endpoint: "profiles/alice%252fadmin/cic/statements",
+      headers: { "x-test": "1" },
+    });
   });
 
   it("noindexes profile utility tabs and temporary profile failures", async () => {

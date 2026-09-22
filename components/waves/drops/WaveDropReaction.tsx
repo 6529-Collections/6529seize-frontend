@@ -579,7 +579,7 @@ function WaveDropReaction({
     recordReactionOptimisticApplied(mutation);
 
     if (!selected) {
-      recordReaction(reaction.reaction);
+      void recordReaction(reaction.reaction);
     }
 
     const handleTimeout = async () => {
