@@ -89,7 +89,7 @@ test.describe("Direct message local sandbox @auth @medium @local-only", () => {
 
     const drop = page.locator('[data-serial-no="1"]').first();
     const quickReactButton = page
-      .getByRole("button", { name: "Click to react" })
+      .getByRole("button", { name: "React with Thumbs up" })
       .first();
     await openMobileDropMenu(page, drop, quickReactButton);
     const delayedReaction = await delayReactionResponse(page);
@@ -173,7 +173,7 @@ test.describe("Direct message local sandbox @auth @medium @local-only", () => {
 
     const drop = page.locator('[data-serial-no="1"]').first();
     const quickReactButton = page
-      .getByRole("button", { name: "Click to react" })
+      .getByRole("button", { name: "React with Thumbs up" })
       .first();
     await openMobileDropMenu(page, drop, quickReactButton);
     const delayedReaction = await delayReactionResponse(page, {

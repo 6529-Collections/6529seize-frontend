@@ -534,8 +534,9 @@ export function useDropReaction(
       );
       recordReactionOptimisticApplied(mutation);
 
-      if (!isRemoving) {
-        recordReaction(reactionCode);
+      // The picker records its selection before invoking this callback.
+      if (!isRemoving && source !== "picker") {
+        void recordReaction(reactionCode);
       }
 
       const handleTimeout = async () => {
