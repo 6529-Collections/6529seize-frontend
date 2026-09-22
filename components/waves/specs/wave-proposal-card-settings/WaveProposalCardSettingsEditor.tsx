@@ -5,8 +5,11 @@ import {
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import type { CreateWaveProposalCardMode } from "@/types/waves.types";
+import { CheckIcon } from "@heroicons/react/24/outline";
+import clsx from "clsx";
 import { useId } from "react";
 import WaveSettingEditorActions from "../WaveSettingEditorActions";
+import ProposalCardLayoutPreview from "./ProposalCardLayoutPreview";
 import type { ProposalCardDraft } from "./useWaveProposalCardSettings";
 
 interface ProposalCardLayoutFieldsetProps {
@@ -24,32 +27,59 @@ function ProposalCardLayoutFieldset({
   const locale = useBrowserLocale();
 
   return (
-    <fieldset className="tw-m-0 tw-border-0 tw-p-0" disabled={disabled}>
+    <fieldset
+      className="tw-m-0 tw-min-w-0 tw-border-0 tw-p-0"
+      disabled={disabled}
+    >
       <legend className="tw-mb-2 tw-text-sm tw-font-medium tw-text-iron-100">
         {t(locale, "waves.proposalCard.settings.layoutLabel")}
       </legend>
-      <div className="tw-flex tw-flex-col tw-gap-1.5">
+      <div className="tw-grid tw-grid-cols-2 tw-gap-2">
         {(["standard", "custom"] as const).map((mode) => (
           <label
             key={mode}
-            className="tw-flex tw-min-h-9 tw-cursor-pointer tw-items-center tw-gap-2 tw-rounded-lg tw-px-2 tw-py-1.5 tw-text-sm tw-font-medium tw-text-iron-200 hover:tw-bg-iron-900"
+            className={clsx(
+              "tw-group tw-relative tw-flex tw-min-w-0",
+              disabled ? "tw-cursor-not-allowed" : "tw-cursor-pointer"
+            )}
           >
             <input
-              autoFocus={selectedMode === mode}
               checked={selectedMode === mode}
-              className="tw-form-radio tw-size-4 tw-border tw-border-solid tw-border-iron-500 tw-bg-iron-950 tw-text-primary-500 focus:tw-ring-primary-400"
+              className="tw-peer tw-absolute tw-inset-0 tw-m-0 tw-h-full tw-w-full tw-cursor-pointer tw-opacity-0 disabled:tw-cursor-not-allowed"
               name={layoutName}
               type="radio"
               value={mode}
               onChange={() => onChange(mode)}
             />
-            <span>
-              {t(
-                locale,
-                mode === "standard"
-                  ? "waves.proposalCard.mode.standard.label"
-                  : "waves.proposalCard.mode.custom.label"
+            <span
+              className={clsx(
+                "tw-pointer-events-none tw-flex tw-min-h-[3.875rem] tw-w-full tw-min-w-0 tw-flex-col tw-items-center tw-justify-center tw-gap-1 tw-rounded-lg tw-border tw-border-solid tw-px-2 tw-py-2.5 tw-text-center peer-focus-visible:tw-ring-2 peer-focus-visible:tw-ring-primary-400 peer-focus-visible:tw-ring-offset-2 peer-focus-visible:tw-ring-offset-iron-950 peer-disabled:tw-opacity-50",
+                selectedMode === mode
+                  ? "tw-border-primary-400 tw-bg-primary-500/[0.08] tw-text-primary-300"
+                  : "tw-border-iron-600 tw-bg-white/[0.015] tw-text-iron-300",
+                !disabled &&
+                  selectedMode !== mode &&
+                  "desktop-hover:group-hover:tw-border-iron-400 desktop-hover:group-hover:tw-bg-white/[0.04]"
               )}
+            >
+              {selectedMode === mode && (
+                <CheckIcon
+                  aria-hidden="true"
+                  className="tw-absolute tw-right-1 tw-top-1 tw-size-3.5"
+                />
+              )}
+              <ProposalCardLayoutPreview
+                mode={mode}
+                className="tw-h-5 tw-w-[1.9375rem] tw-shrink-0"
+              />
+              <span className="tw-w-full tw-break-words tw-text-xs tw-font-medium tw-leading-4">
+                {t(
+                  locale,
+                  mode === "standard"
+                    ? "waves.proposalCard.mode.standard.label"
+                    : "waves.proposalCard.mode.custom.label"
+                )}
+              </span>
             </span>
           </label>
         ))}
@@ -87,9 +117,7 @@ function SummaryCardFields({
         <span className="tw-mt-2 tw-flex tw-items-center tw-gap-2">
           <input
             id={excerptInputId}
-            aria-describedby={
-              hasExcerptError ? excerptErrorId : undefined
-            }
+            aria-describedby={hasExcerptError ? excerptErrorId : undefined}
             aria-invalid={hasExcerptError}
             className="tw-form-input tw-h-9 tw-w-20 tw-appearance-none tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-2 tw-py-1 tw-text-sm tw-font-medium tw-text-white tw-ring-1 tw-ring-inset tw-ring-iron-650 focus:tw-bg-iron-900 focus:tw-outline-none focus:tw-ring-primary-400"
             disabled={isSaving}

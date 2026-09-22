@@ -14,6 +14,7 @@ export const convertMetadataToDropMetadata = (
       } =>
         md.key !== null &&
         md.key !== undefined &&
+        md.key.trim().length > 0 &&
         md.value !== null &&
         md.value !== undefined
     )
@@ -22,4 +23,3 @@ export const convertMetadataToDropMetadata = (
       data_value: `${md.value}`,
     }));
 };
-

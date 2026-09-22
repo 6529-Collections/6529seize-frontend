@@ -569,6 +569,7 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
       new RegExp(`/waves/${SANDBOX_CREATED_WAVE_ID}$`),
       { timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS }
     );
+    await checkProposalCardConfiguration(page);
     await expectNoUnsafeSandboxMutations(baseURL);
   });
 
@@ -1263,6 +1264,70 @@ test.describe("Create wave mobile reachability @auth @medium @local-only", () =>
     await expectNoHorizontalOverflow(page);
   });
 });
+
+async function checkProposalCardConfiguration(page: Page) {
+  const mobile = (page.viewportSize()?.width ?? 1280) < 768;
+  await page
+    .getByRole("button", {
+      name: mobile ? "Wave details" : "Show right sidebar",
+      exact: true,
+    })
+    .click();
+  await page.getByRole("tab", { name: "Configuration", exact: true }).click();
+  const edit = page.getByRole("button", {
+    name: "Edit proposal card settings",
+  });
+  await edit.focus();
+  await page.keyboard.press("Enter");
+
+  const editor = page.getByRole("dialog", {
+    name: "Edit proposal card settings",
+  });
+  const full = editor.getByRole("radio", {
+    name: "Full proposal",
+    exact: true,
+  });
+  const summary = editor.getByRole("radio", {
+    name: "Summary card",
+    exact: true,
+  });
+  const initiallySummary = await summary.isChecked();
+  await expect(initiallySummary ? summary : full).toBeFocused();
+  await expect(
+    editor.getByRole("button", { name: "Save", exact: true })
+  ).toBeDisabled();
+
+  if (mobile) {
+    await full.tap();
+    await summary.tap();
+  } else {
+    await full.check();
+    await page.keyboard.press("ArrowRight");
+  }
+  await expect(summary).toBeChecked();
+  const limit = editor.getByRole("spinbutton", { name: /Text preview limit/ });
+  await limit.fill("119");
+  await expect(limit).toHaveAttribute("aria-invalid", "true");
+  await expect(editor.getByRole("alert")).toContainText("120");
+  const save = editor.getByRole("button", { name: "Save", exact: true });
+  await expect(save).toBeDisabled();
+  await expect(save).toBeInViewport();
+  const bounds = await editor.boundingBox();
+  expect(bounds).not.toBeNull();
+  expect(bounds!.y + bounds!.height).toBeLessThanOrEqual(
+    page.viewportSize()!.height
+  );
+  await expectNoHorizontalOverflow(page);
+  await editor.getByRole("button", { name: "Cancel", exact: true }).click();
+  await expect(editor).toBeHidden();
+  await expect(edit).toBeFocused();
+
+  await edit.press("Enter");
+  await expect(initiallySummary ? summary : full).toBeChecked();
+  await page.keyboard.press("Escape");
+  await expect(editor).toBeHidden();
+  await expect(edit).toBeFocused();
+}
 
 async function gotoCreateWave(page: Page) {
   await installExternalDataFixtures(page);

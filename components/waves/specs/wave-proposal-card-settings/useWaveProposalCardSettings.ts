@@ -193,6 +193,7 @@ export function useWaveProposalCardSettings(wave: ApiWave) {
     isSupported,
     resetEditor,
     rowLabel: t(locale, "waves.proposalCard.settings.rowLabel"),
+    savedMode: proposalCards.mode,
     saveError,
     saveSettings,
     setDraft,

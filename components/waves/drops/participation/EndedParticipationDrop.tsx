@@ -249,6 +249,14 @@ function EndedParticipationDropInner({
       fullWidthLinkPreviews={fullWidthLinkPreviews}
       hasTouch={showInteractions && canUseTouchActionSheet}
       contentPresentation={contentPresentation}
+      proposalCardTextFooter={
+        isChatProposal ? (
+          <ProposalCardReadFullButton
+            drop={drop}
+            onReadFull={onDropContentClick}
+          />
+        ) : undefined
+      }
       embedPath={embedPath}
       quotePath={quotePath}
       embedDepth={embedDepth}
@@ -257,10 +265,7 @@ function EndedParticipationDropInner({
   );
   const detachedProposalHeader =
     isChatProposal && showIdentity ? (
-      <ProposalCardDetachedHeader
-        drop={drop}
-        identityHeader={identityHeader}
-      />
+      <ProposalCardDetachedHeader drop={drop} identityHeader={identityHeader} />
     ) : null;
   const effectiveIsSlideUp = isSlideUp && canUseTouchActionSheet;
 
@@ -368,12 +373,6 @@ function EndedParticipationDropInner({
 
               {isChatProposal && <ProposalCardContextLabel />}
               {content}
-              {isChatProposal && (
-                <ProposalCardReadFullButton
-                  drop={drop}
-                  onReadFull={onDropContentClick}
-                />
-              )}
             </div>
           </div>
 

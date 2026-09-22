@@ -121,7 +121,7 @@ export interface CreateDropLayoutProps {
     index: number;
     newValue: string | number | null;
   }) => void;
-  readonly onAddMetadata: () => void;
+  readonly onAddMetadata: () => string;
   readonly onRemoveMetadata: (index: number) => void;
   readonly closeMetadata: () => void;
   readonly drop: CreateDropConfig | null;

@@ -40,6 +40,7 @@ interface WaveDropPartProps {
     | ((href: string, active: boolean) => void)
     | undefined;
   readonly contentPresentation?: DropContentPresentation | undefined;
+  readonly proposalCardTextFooter?: React.ReactNode;
   readonly embedPath?: readonly string[] | undefined;
   readonly quotePath?: readonly string[] | undefined;
   readonly embedDepth?: number | undefined;
@@ -70,6 +71,7 @@ const WaveDropPart: React.FC<WaveDropPartProps> = memo(
     hasTouch = false,
     onLinkCardActionsActiveChange,
     contentPresentation = "default",
+    proposalCardTextFooter,
     embedPath,
     quotePath,
     embedDepth,
@@ -83,6 +85,19 @@ const WaveDropPart: React.FC<WaveDropPartProps> = memo(
 
     const isTemporaryDrop = drop.id.startsWith("temp-");
     const isInteractive = !isTemporaryDrop && !!onDropContentClick;
+    const hasProposalCardTextFooter =
+      contentPresentation === "proposalCard" &&
+      !isEditing &&
+      proposalCardTextFooter !== null &&
+      proposalCardTextFooter !== undefined;
+    // The inline action owns keyboard activation without a nested button.
+    const isContentButton = isInteractive && !hasProposalCardTextFooter;
+    let contentRole: "button" | "presentation" | undefined;
+    if (isContentButton) {
+      contentRole = "button";
+    } else if (hasProposalCardTextFooter) {
+      contentRole = "presentation";
+    }
 
     const longPressTimeout = useRef<NodeJS.Timeout | null>(null);
     const touchStartX = useRef(0);
@@ -198,9 +213,9 @@ const WaveDropPart: React.FC<WaveDropPartProps> = memo(
         className={`touch-select-none tw-no-underline ${
           isInteractive ? "tw-cursor-pointer" : "tw-cursor-default"
         }`}
-        role={isInteractive ? "button" : undefined}
-        tabIndex={isInteractive ? 0 : undefined}
-        onKeyDown={handleKeyDown}
+        role={contentRole}
+        tabIndex={isContentButton ? 0 : undefined}
+        onKeyDown={isContentButton ? handleKeyDown : undefined}
       >
         <div className="tw-relative tw-overflow-hidden">
           <WaveDropPartDrop
@@ -223,6 +238,7 @@ const WaveDropPart: React.FC<WaveDropPartProps> = memo(
             fullWidthLinkPreviews={fullWidthLinkPreviews}
             onLinkCardActionsActiveChange={onLinkCardActionsActiveChange}
             contentPresentation={contentPresentation}
+            proposalCardTextFooter={proposalCardTextFooter}
             embedPath={embedPath}
             quotePath={quotePath}
             embedDepth={embedDepth}

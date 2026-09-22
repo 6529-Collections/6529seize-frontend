@@ -1,8 +1,12 @@
-import React from "react";
+"use client";
 
+import { useEffect, useRef } from "react";
+import { ChevronDownIcon, PlusIcon } from "@heroicons/react/24/outline";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { formatNumber } from "@/i18n/format";
+import { t } from "@/i18n/messages";
 import CreateDropMetadataRow from "./CreateDropMetadataRow";
 import type { CreateDropMetadataType } from "./CreateDropContent";
-import { Tooltip } from "react-tooltip";
 
 interface CreateDropMetadataProps {
   readonly metadata: CreateDropMetadataType[];
@@ -15,11 +19,11 @@ interface CreateDropMetadataProps {
     index: number;
     newValue: string | number | null;
   }) => void;
-  readonly onAddMetadata: () => void;
+  readonly onAddMetadata: () => string;
   readonly onRemoveMetadata: (index: number) => void;
 }
 
-const CreateDropMetadata: React.FC<CreateDropMetadataProps> = ({
+export default function CreateDropMetadata({
   metadata,
   missingRequiredMetadataKeys,
   metadataErrorById,
@@ -29,94 +33,100 @@ const CreateDropMetadata: React.FC<CreateDropMetadataProps> = ({
   onChangeValue,
   onAddMetadata,
   onRemoveMetadata,
-}) => {
-  return (
-    <div className="tw-mt-2 tw-space-y-2">
-      <div className="tw-inline-flex tw-w-full tw-items-center tw-justify-between">
-        <span>
-          <span className="tw-text-xs tw-text-iron-300">Add Metadata</span>
-        </span>
-        <>
-          <button
-            type="button"
-            onClick={closeMetadata}
-            className="-tw-mr-2 tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out hover:tw-text-iron-50"
-            data-tooltip-id="close-metadata"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              aria-hidden="true"
-              viewBox="0 0 24 24"
-              strokeWidth="1.5"
-              stroke="currentColor"
-              className="tw-size-5 tw-flex-shrink-0"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M6 18 18 6M6 6l12 12"
-              ></path>
-            </svg>
-          </button>
-          <Tooltip
-            id="close-metadata"
-            style={{
-              backgroundColor: "#1F2937",
-              color: "white",
-              padding: "4px 8px",
-            }}
-          >
-            Close
-          </Tooltip>
-        </>
-      </div>
-      <div className="tw-space-y-2">
-        {metadata.map((item, index) => (
-          <CreateDropMetadataRow
-            key={item.id}
-            isError={
-              missingRequiredMetadataKeys.includes(item.key) ||
-              !!metadataErrorById[item.id]
-            }
-            errorMessage={metadataErrorById[item.id] ?? null}
-            onRemove={onRemoveMetadata}
-            metadata={item}
-            index={index}
-            onChangeKey={onChangeKey}
-            onChangeValue={onChangeValue}
-            disabled={disabled}
-          />
-        ))}
-      </div>
+}: CreateDropMetadataProps) {
+  const locale = useBrowserLocale();
+  const rowsRef = useRef<HTMLDivElement>(null);
+  const addButtonRef = useRef<HTMLButtonElement>(null);
+  const focusNewFieldIdRef = useRef<string | null>(null);
+  const hasRequiredFields = metadata.some((item) => item.required);
+  const hasErrors =
+    missingRequiredMetadataKeys.length > 0 ||
+    Object.keys(metadataErrorById).length > 0;
+  const fieldCountKey =
+    metadata.length === 1
+      ? "waves.metadata.fields.one"
+      : "waves.metadata.fields.other";
+  const fieldCountLabel = metadata.length
+    ? t(locale, fieldCountKey, { count: formatNumber(locale, metadata.length) })
+    : null;
 
+  useEffect(() => {
+    const newFieldId = focusNewFieldIdRef.current;
+    if (newFieldId === null) return;
+    const inputs = rowsRef.current?.querySelectorAll<HTMLInputElement>(
+      "input[data-metadata-key]"
+    );
+    const newFieldInput = inputs
+      ? Array.from(inputs).find(
+          (input) => input.dataset["metadataId"] === newFieldId
+        )
+      : undefined;
+    newFieldInput?.focus();
+    focusNewFieldIdRef.current = null;
+  }, [metadata]);
+
+  return (
+    <div className="tw-mt-4 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800">
       <button
         type="button"
-        onClick={onAddMetadata}
-        disabled={disabled}
-        className={`tw-flex tw-items-center tw-gap-x-1 tw-border-none tw-bg-transparent tw-p-0 tw-text-sm tw-font-medium tw-text-primary-400 tw-transition tw-duration-300 tw-ease-out hover:tw-text-primary-300 ${
-          disabled ? "tw-cursor-default tw-opacity-50" : ""
-        }`}
+        onClick={closeMetadata}
+        className="tw-flex tw-min-h-11 tw-w-full tw-items-center tw-gap-2 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-0 tw-py-2 tw-text-left focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth="1.5"
-          stroke="currentColor"
+        <span className="tw-text-sm tw-font-medium tw-text-iron-200">
+          {t(locale, "waves.metadata.title")}
+        </span>
+        {fieldCountLabel && (
+          <span className="tw-text-xs tw-font-normal tw-text-iron-400">
+            {fieldCountLabel}
+          </span>
+        )}
+        {hasRequiredFields && (
+          <span
+            className={`tw-text-xs ${hasErrors ? "tw-text-amber-200" : "tw-text-iron-400"}`}
+          >
+            {t(locale, "waves.metadata.required")}
+          </span>
+        )}
+        <ChevronDownIcon
           aria-hidden="true"
-          className="tw-size-5 tw-flex-shrink-0"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M12 4.5v15m7.5-7.5h-15"
-          ></path>
-        </svg>
-        <span>Add new</span>
+          className="tw-ml-auto tw-size-4 tw-shrink-0 tw-rotate-180 tw-text-iron-400"
+        />
       </button>
+      <div>
+        <p className="tw-mb-4 tw-mt-0 tw-text-xs tw-leading-5 tw-text-iron-400">
+          {t(locale, "waves.metadata.description")}
+        </p>
+        <div ref={rowsRef} className="tw-space-y-4">
+          {metadata.map((item, index) => (
+            <CreateDropMetadataRow
+              key={item.id}
+              isError={missingRequiredMetadataKeys.includes(item.key)}
+              errorMessage={metadataErrorById[item.id] ?? null}
+              onRemove={(rowIndex) => {
+                onRemoveMetadata(rowIndex);
+                addButtonRef.current?.focus();
+              }}
+              metadata={item}
+              index={index}
+              onChangeKey={onChangeKey}
+              onChangeValue={onChangeValue}
+              disabled={disabled}
+            />
+          ))}
+        </div>
+        <button
+          ref={addButtonRef}
+          type="button"
+          onClick={() => {
+            focusNewFieldIdRef.current = onAddMetadata();
+          }}
+          disabled={disabled}
+          className="tw-mt-2 tw-flex tw-min-h-11 tw-items-center tw-gap-1.5 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-0 tw-py-2 tw-text-sm tw-font-medium tw-text-iron-300 hover:tw-text-iron-50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-50"
+        >
+          <PlusIcon aria-hidden="true" className="tw-size-4 tw-shrink-0" />
+          {t(locale, "waves.metadata.add")}
+        </button>
+      </div>
     </div>
   );
-};
-
-export default CreateDropMetadata;
+}

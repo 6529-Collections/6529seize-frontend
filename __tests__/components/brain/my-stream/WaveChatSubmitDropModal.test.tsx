@@ -1,11 +1,22 @@
 import { WaveChatSubmitDropModal } from "@/components/brain/my-stream/WaveChatSubmitDropModal";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
 import { createPortal } from "react-dom";
 
 let waveDropCreateProps: any;
 let waveDropCreateExtra: React.ReactNode | null = null;
+
+jest.mock("@/hooks/useDeviceInfo", () => ({
+  __esModule: true,
+  default: () => ({ hasTouchScreen: true }),
+}));
 
 jest.mock("@/components/waves/leaderboard/create/WaveDropCreate", () => ({
   WaveDropCreate: (props: any) => {
@@ -146,6 +157,38 @@ describe("WaveChatSubmitDropModal", () => {
       "sm:tw-rounded-xl",
       "sm:tw-border-b"
     );
+  });
+
+  it("keeps focused form fields visible after opening and reopening on touch devices", () => {
+    jest.useFakeTimers();
+    const originalScrollIntoView = Element.prototype.scrollIntoView;
+    const scrollIntoView = jest.fn();
+    Element.prototype.scrollIntoView = scrollIntoView;
+    waveDropCreateExtra = <input aria-label="Metadata value" />;
+    const props = { wave, title: "Submit drop", onClose: jest.fn() };
+    const { rerender, unmount } = render(
+      <WaveChatSubmitDropModal {...props} isOpen={false} />
+    );
+
+    try {
+      for (let opening = 0; opening < 2; opening += 1) {
+        rerender(<WaveChatSubmitDropModal {...props} isOpen />);
+        const input = screen.getByRole("textbox", { name: "Metadata value" });
+        input.focus();
+        act(() => jest.advanceTimersByTime(400));
+        expect(scrollIntoView).toHaveBeenLastCalledWith({
+          behavior: "smooth",
+          block: "center",
+        });
+        expect(scrollIntoView.mock.instances.at(-1)).toBe(input);
+        rerender(<WaveChatSubmitDropModal {...props} isOpen={false} />);
+        scrollIntoView.mockClear();
+      }
+    } finally {
+      unmount();
+      Element.prototype.scrollIntoView = originalScrollIntoView;
+      jest.useRealTimers();
+    }
   });
 
   it("closes from backdrop, close button, and escape key", async () => {

@@ -57,6 +57,8 @@ existing palette and trophy badges.
   parameter.
 - In compact small-screen thread layouts, opening an entry also closes the chat
   column.
+- In the native app, the entry sheet moves above the software keyboard and
+  scrolls the focused vote field into view.
 
 ## Edge Cases
 
