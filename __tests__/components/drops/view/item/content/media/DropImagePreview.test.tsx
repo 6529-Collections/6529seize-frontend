@@ -35,6 +35,8 @@ it("tries only bounded previews and reports exhaustion once", () => {
       onError={onError}
     />
   );
+  const status = screen.getByRole("status");
+  expect(status).toBeEmptyDOMElement();
   expect(screen.getByAltText("Artwork")).toHaveAttribute(
     "src",
     preview("AUTOx1080")
@@ -47,7 +49,8 @@ it("tries only bounded previews and reports exhaustion once", () => {
   expect(onError).not.toHaveBeenCalled();
   fireEvent.error(screen.getByAltText("Artwork"));
   expect(screen.queryByRole("img")).not.toBeInTheDocument();
-  expect(screen.getByRole("status")).toHaveTextContent("Preview unavailable");
+  expect(screen.getByRole("status")).toBe(status);
+  expect(status).toHaveTextContent("Preview unavailable");
   expect(onError).toHaveBeenCalledTimes(1);
 });
 

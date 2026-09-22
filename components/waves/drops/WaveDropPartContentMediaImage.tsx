@@ -416,11 +416,11 @@ function WaveDropPartContentMediaImageContent({
         </div>
       </div>
 
-      {!imageViewState.loaded && !showError && (
-        <div className="tw-sr-only" aria-live="polite">
-          {t(DEFAULT_LOCALE, "drop.media.loading")}
-        </div>
-      )}
+      <div className="tw-sr-only" role="status">
+        {showError
+          ? t(DEFAULT_LOCALE, "drop.media.previewUnavailable")
+          : !imageViewState.loaded && t(DEFAULT_LOCALE, "drop.media.loading")}
+      </div>
 
       {imageViewState.isModalOpen && (
         <ImageMediaModal

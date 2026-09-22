@@ -43,34 +43,40 @@ const PreviewAttempt = forwardRef<HTMLImageElement, Props>(
     const sources = getDropImagePreviewSources(originalSrc, imageScale);
     const source = sources[attempt];
 
-    if (!source) {
-      if (fallback !== undefined) return fallback;
-      return (
-        <span
-          role="status"
-          className="tw-absolute tw-inset-0 tw-flex tw-items-center tw-justify-center tw-rounded-xl tw-bg-iron-900 tw-p-4 tw-text-center tw-text-sm tw-text-iron-400"
-        >
-          {t(DEFAULT_LOCALE, "drop.media.previewUnavailable")}
-        </span>
-      );
-    }
-
     return (
-      <Image
-        {...props}
-        alt={alt}
-        ref={ref}
-        src={source}
-        unoptimized
-        onError={() => {
-          // Repeated errors from one source must not skip its fallback or
-          // notify the parent twice before React commits the next render.
-          if (failedAttempt.current === attempt) return;
-          failedAttempt.current = attempt;
-          setAttempt(attempt + 1);
-          if (attempt + 1 === sources.length) onError?.();
-        }}
-      />
+      <>
+        {fallback === undefined && (
+          <span
+            role="status"
+            className={
+              source
+                ? "tw-sr-only"
+                : "tw-absolute tw-inset-0 tw-flex tw-items-center tw-justify-center tw-rounded-xl tw-bg-iron-900 tw-p-4 tw-text-center tw-text-sm tw-text-iron-400"
+            }
+          >
+            {!source && t(DEFAULT_LOCALE, "drop.media.previewUnavailable")}
+          </span>
+        )}
+        {source ? (
+          <Image
+            {...props}
+            alt={alt}
+            ref={ref}
+            src={source}
+            unoptimized
+            onError={() => {
+              // Repeated errors from one source must not skip its fallback or
+              // notify the parent twice before React commits the next render.
+              if (failedAttempt.current === attempt) return;
+              failedAttempt.current = attempt;
+              setAttempt(attempt + 1);
+              if (attempt + 1 === sources.length) onError?.();
+            }}
+          />
+        ) : (
+          fallback
+        )}
+      </>
     );
   }
 );

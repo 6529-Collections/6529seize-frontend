@@ -201,7 +201,7 @@ describe("WaveDropPartContentMediaImage", () => {
 
     failCurrentPreview();
 
-    expect(screen.getByText("Preview unavailable")).toBeInTheDocument();
+    expect(screen.getByRole("status")).toHaveTextContent("Preview unavailable");
     expect(screen.getByRole("button", { name: "Retry" })).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Retry" }));
