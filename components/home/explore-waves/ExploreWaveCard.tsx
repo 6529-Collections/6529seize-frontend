@@ -287,11 +287,11 @@ export function ExploreWaveCard({ wave }: ExploreWaveCardProps) {
     <Link
       href={waveHref}
       prefetch={false}
-      className="tw-group tw-relative tw-flex tw-h-full tw-transform-gpu tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.04] tw-bg-iron-950 tw-text-left tw-no-underline tw-shadow-[inset_0_0_0_1px_rgba(255,255,255,0.025),0_10px_28px_rgba(0,0,0,0.28)] tw-transition-[transform,border-color,background-color,box-shadow] tw-duration-500 tw-ease-out focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/60 desktop-hover:hover:-tw-translate-y-1 desktop-hover:hover:tw-border-white/15 desktop-hover:hover:tw-shadow-[inset_0_0_0_1px_rgba(255,255,255,0.04),0_14px_34px_rgba(0,0,0,0.45)] motion-reduce:tw-transform-none motion-reduce:tw-transition-none"
+      className="tw-group tw-relative tw-flex tw-h-full tw-transform-gpu tw-flex-col tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.05] tw-bg-iron-950 tw-text-left tw-no-underline tw-shadow-[0_10px_28px_rgba(0,0,0,0.2)] tw-transition-[transform,border-color,box-shadow] tw-duration-300 tw-ease-out focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/60 desktop-hover:hover:-tw-translate-y-1 desktop-hover:hover:tw-border-white/15 desktop-hover:hover:tw-shadow-[0_14px_34px_rgba(0,0,0,0.36)] motion-reduce:tw-transform-none motion-reduce:tw-transition-none"
       aria-label={cardAriaLabel}
     >
       <div
-        className="tw-relative tw-h-48 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-t-xl tw-bg-iron-900 sm:tw-h-52 lg:tw-h-48 xl:tw-h-52"
+        className="tw-relative tw-h-44 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-t-lg tw-bg-iron-900 sm:tw-h-48 lg:tw-h-44 xl:tw-h-48"
         style={imageAreaStyle}
       >
         {wave.picture && (
@@ -311,8 +311,8 @@ export function ExploreWaveCard({ wave }: ExploreWaveCardProps) {
         />
       </div>
 
-      <div className="tw-relative tw-z-10 tw-flex tw-flex-1 tw-flex-col tw-px-5 tw-pb-5 tw-pt-1">
-        <span className="tw-m-0 tw-line-clamp-1 tw-min-w-0 tw-break-words tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 tw-transition-colors tw-duration-300 group-focus-visible:tw-text-primary-300 desktop-hover:group-hover:tw-text-primary-300">
+      <div className="tw-relative tw-z-10 tw-flex tw-flex-1 tw-flex-col tw-px-4 tw-pb-4 tw-pt-2">
+        <span className="tw-m-0 tw-line-clamp-1 tw-min-w-0 tw-break-words tw-text-lg tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 tw-transition-colors tw-duration-300 group-focus-visible:tw-text-primary-300 desktop-hover:group-hover:tw-text-primary-300">
           {wave.name}
         </span>
 
@@ -321,7 +321,7 @@ export function ExploreWaveCard({ wave }: ExploreWaveCardProps) {
         <ExploreWaveCompactMetrics metrics={metrics} />
 
         {hasDrops && (
-          <div className="tw-mt-3 tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-text-xs tw-text-iron-500">
+          <div className="tw-mt-2.5 tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-text-xs tw-text-iron-500">
             <ClockIcon
               aria-hidden="true"
               className="tw-size-3 tw-flex-shrink-0"
@@ -332,7 +332,7 @@ export function ExploreWaveCard({ wave }: ExploreWaveCardProps) {
         )}
 
         {!hasDrops && (
-          <div className="tw-mt-3 tw-text-xs tw-text-iron-500">
+          <div className="tw-mt-2.5 tw-text-xs tw-text-iron-500">
             {t(EXPLORE_WAVE_CARD_LOCALE, "waves.explore.card.noDropsYet")}
           </div>
         )}
@@ -347,7 +347,7 @@ function ExploreWaveCompactMetrics({
   readonly metrics: readonly ExploreWaveMetric[];
 }) {
   return (
-    <span className="explore-wave-card-metrics tw-mt-4 tw-flex tw-min-h-6 tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-2">
+    <span className="explore-wave-card-metrics tw-mt-3 tw-flex tw-min-h-5 tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-1.5">
       {metrics.map((metric) => (
         <span
           key={`${metric.ariaLabel}-${metric.value}`}
@@ -382,8 +382,8 @@ function MessagePreviewContent({
     <ContentDisplay
       content={previewContent}
       shouldClamp={false}
-      className="tw-mt-2 tw-flex tw-min-h-10 tw-min-w-0 tw-items-start tw-gap-1 tw-overflow-hidden"
-      textClassName="tw-line-clamp-2 tw-break-words tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-400"
+      className="tw-mt-1.5 tw-flex tw-min-h-9 tw-min-w-0 tw-items-start tw-gap-1 tw-overflow-hidden"
+      textClassName="tw-line-clamp-2 tw-break-words tw-text-[13px] tw-font-normal tw-leading-[18px] tw-text-iron-500"
       linkify={false}
     />
   );
