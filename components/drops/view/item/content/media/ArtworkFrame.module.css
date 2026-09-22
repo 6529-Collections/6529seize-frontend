@@ -56,6 +56,7 @@
 /* Drop images have no dimensions in the API. Reserve a stable viewing area. */
 .submissionImage {
   composes: viewportLimit;
+  width: 100%;
   height: var(--artwork-max-height);
   max-height: var(--artwork-max-height);
 }
