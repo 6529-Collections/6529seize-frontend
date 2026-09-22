@@ -1,3 +1,7 @@
+import {
+  defineNftImageLayoutTests,
+  expectContainedImage,
+} from "./imageArtworkLayoutCases";
 import type { Page } from "@playwright/test";
 
 import {
@@ -239,8 +243,17 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
   });
 });
 
-// Cards 549 (portrait) and 550 (square) are video fixtures on staging. Other environments
-// have independent collections, so their existing detail fixtures stay intact.
+test.describe("Staging image artwork sizing @surface @medium @large @readonly", () => {
+  // Meme 551 is qualified as a still-image fixture only on staging; other
+  // environments have independent collections and keep their existing fixtures.
+  test.skip(
+    ({ baseURL }) =>
+      !baseURL || new URL(baseURL).hostname !== "staging.6529.io",
+    "Meme 551 image fixture runs on staging"
+  );
+  defineNftImageLayoutTests();
+});
+
 test.describe("Staging video artwork sizing @surface @medium @large @readonly", () => {
   // This fixture is unavailable outside staging; skip only those environments.
   test.skip(({ baseURL }) => {
@@ -331,7 +344,14 @@ test.describe("Staging video artwork sizing @surface @medium @large @readonly", 
             video.evaluate((element: HTMLVideoElement) => element.videoWidth)
           )
           .toBeGreaterThan(0);
+        // Native metadata can load before React hydrates the artwork controls.
+        await expect(
+          page.getByRole("slider", { name: "Seek video" })
+        ).toBeEnabled({ timeout: 20000 });
         await video.evaluate((element: HTMLVideoElement) => element.pause());
+        await expect(
+          page.getByRole("button", { name: "Play video", exact: true }).first()
+        ).toBeVisible();
         await expect(
           page.getByRole("slider", { name: "Seek video" })
         ).toBeVisible();
@@ -461,6 +481,24 @@ test.describe("Staging video artwork sizing @surface @medium @large @readonly", 
           }
         );
         for (const shift of shifts) expect(shift).toBeLessThanOrEqual(2);
+
+        // Poster slides use the image budget independently of the animation.
+        await page
+          .getByRole("button", { name: "Show next artwork media" })
+          .click();
+        const poster = page
+          .getByRole("img")
+          .locator("xpath=self::*[@id='the-art-fullscreen-img']");
+        await expectContainedImage(poster);
+        await expect(video).toBeHidden();
+        await page
+          .getByRole("button", { name: "Show previous artwork media" })
+          .click();
+        await expect(video).toBeVisible();
+        await expect(poster).toBeHidden();
+        await expect(
+          page.getByRole("slider", { name: "Seek video" })
+        ).toBeVisible();
       });
     }
   }

@@ -103,6 +103,7 @@ export default function LatestDropNextMintPanel({
   const browserLocale = useBrowserLocale();
   const locale = requestedLocale ?? browserLocale;
   const media = drop.parts[0]?.media[0];
+  const isImage = media?.mime_type.startsWith("image/") ?? false;
   const isHtml = media?.mime_type === "text/html";
   const htmlPreviewImageUrl =
     hasTouchScreen && isHtml
@@ -152,7 +153,11 @@ export default function LatestDropNextMintPanel({
           className="tw-flex tw-items-center tw-p-0 lg:tw-col-span-6 xl:tw-col-span-5"
         >
           <HomeArtworkFrame
-            reserveMobileHeight={!media?.mime_type.includes("video")}
+            reserveMobileHeight={
+              !isImage && !media?.mime_type.includes("video")
+            }
+            fitImageToDetails={isImage}
+            reserveImageFrame={isImage}
           >
             {media ? (
               <DropListItemContentMedia
