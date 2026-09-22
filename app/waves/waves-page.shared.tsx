@@ -399,8 +399,8 @@ export async function buildWavesMetadata(
     | undefined;
   const description = isIndexableWave
     ? (toMetadataExcerpt(descriptionDrop?.parts?.[0]?.content) ??
-      t(DEFAULT_LOCALE, "waves.metadata.publicDescription", { waveName }))
-    : t(DEFAULT_LOCALE, "waves.metadata.privateDescription");
+      t(DEFAULT_LOCALE, "waves.pageMetadata.publicDescription", { waveName }))
+    : t(DEFAULT_LOCALE, "waves.pageMetadata.privateDescription");
 
   const dropMetadataId = getDropMetadataId(searchParams)?.trim();
   if (dropMetadataId) {
@@ -421,10 +421,10 @@ export async function buildWavesMetadata(
 
   return getAppMetadata(
     getLargeSocialCardMetadata({
-      title: t(DEFAULT_LOCALE, "waves.metadata.title", { waveName }),
+      title: t(DEFAULT_LOCALE, "waves.pageMetadata.title", { waveName }),
       description,
       ogImage: `/api/og-metadata/waves/${encodeURIComponent(waveId)}`,
-      ogImageAlt: t(DEFAULT_LOCALE, "waves.metadata.ogImageAlt", { waveName }),
+      ogImageAlt: t(DEFAULT_LOCALE, "waves.pageMetadata.ogImageAlt", { waveName }),
     }),
     metadataOptions
   );
