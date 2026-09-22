@@ -1,4 +1,4 @@
-/** Only EMMA plan routes may be used as post-authentication destinations. */
+/** Backend-generated plan IDs are UUIDs; only EMMA plan routes may be destinations. */
 export function getEmmaReturnPath(
   value: string | string[] | undefined
 ): string {

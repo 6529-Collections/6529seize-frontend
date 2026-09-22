@@ -8,14 +8,20 @@ import { t, tRich } from "@/i18n/messages";
 export default function EmmaHelpPage() {
   return (
     <DistributionPlanToolWrapper>
-      <article className="tw-max-w-3xl tw-space-y-6 tw-px-4 tw-py-8 tw-text-base tw-leading-relaxed tw-text-iron-300 sm:tw-px-6 lg:tw-px-8">
+      <article
+        aria-labelledby="emma-help-title"
+        className="tw-max-w-3xl tw-space-y-6 tw-px-4 tw-py-8 tw-text-base tw-leading-relaxed tw-text-iron-300 sm:tw-px-6 lg:tw-px-8"
+      >
         <Link
           href="/emma"
           className="tw-inline-flex tw-min-h-11 tw-items-center tw-rounded-lg tw-text-iron-300 tw-underline tw-underline-offset-4 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
         >
           {t(DEFAULT_LOCALE, "emma.back")}
         </Link>
-        <h1 className="tw-m-0 tw-text-xl tw-font-semibold tw-leading-relaxed tw-text-white">
+        <h1
+          id="emma-help-title"
+          className="tw-m-0 tw-text-xl tw-font-semibold tw-leading-relaxed tw-text-white"
+        >
           {t(DEFAULT_LOCALE, "emma.introduction")}
         </h1>
         <p>
@@ -28,18 +34,15 @@ export default function EmmaHelpPage() {
                 rel="noopener noreferrer"
                 className="tw-rounded tw-font-semibold tw-text-white tw-underline tw-underline-offset-4 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
               >
-                Janus
+                {t(DEFAULT_LOCALE, "emma.janusLink")}
               </a>
             ),
           })}
         </p>
         <p>{t(DEFAULT_LOCALE, "emma.community")}</p>
         <p>{t(DEFAULT_LOCALE, "emma.resources")}</p>
-        <p>
-          {t(DEFAULT_LOCALE, "emma.limited")}
-          <br />
-          {t(DEFAULT_LOCALE, "emma.unlimited")}
-        </p>
+        <p>{t(DEFAULT_LOCALE, "emma.limited")}</p>
+        <p>{t(DEFAULT_LOCALE, "emma.unlimited")}</p>
       </article>
     </DistributionPlanToolWrapper>
   );

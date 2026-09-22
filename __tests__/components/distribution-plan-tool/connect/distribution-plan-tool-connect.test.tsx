@@ -16,25 +16,28 @@ jest.mock("next/navigation", () => ({
 const address = "0x1111111111111111111111111111111111111111";
 const mockConnect = jest.fn();
 const mockRequestAuth = jest.fn();
-const setConnection = (overrides = {}) => {
-  jest.mocked(useSeizeConnectContext).mockReturnValue({
+type WalletConnection = ReturnType<typeof useSeizeConnectContext>;
+const setConnection = (overrides: Partial<WalletConnection> = {}) => {
+  const connection: Partial<WalletConnection> = {
     connectionState: "disconnected",
     hasValidWalletAuth: false,
     address: undefined,
     seizeConnect: mockConnect,
     isWalletConnectionPending: false,
     ...overrides,
-  } as ReturnType<typeof useSeizeConnectContext>);
+  };
+  jest
+    .mocked(useSeizeConnectContext)
+    .mockReturnValue(connection as WalletConnection);
 };
 
 beforeEach(() => {
   jest.clearAllMocks();
   setConnection();
-  jest
-    .mocked(useAuth)
-    .mockReturnValue({ requestAuth: mockRequestAuth } as ReturnType<
-      typeof useAuth
-    >);
+  const auth: Pick<ReturnType<typeof useAuth>, "requestAuth"> = {
+    requestAuth: mockRequestAuth,
+  };
+  jest.mocked(useAuth).mockReturnValue(auth as ReturnType<typeof useAuth>);
   mockRequestAuth.mockResolvedValue({ success: false });
 });
 
@@ -54,7 +57,7 @@ it("shows compact guidance, a connect action and public help while signed out", 
   expect(mockReplace).not.toHaveBeenCalled();
 });
 
-it.each(["initializing", "connecting"])(
+it.each(["initializing", "connecting"] as const)(
   "waits during %s without flashing the form",
   (connectionState) => {
     setConnection({ connectionState });
@@ -112,6 +115,20 @@ it("stays on the form when sign-in is canceled and allows retry", async () => {
   await userEvent.click(screen.getByRole("button", { name: "Sign in" }));
   expect(mockReplace).not.toHaveBeenCalled();
   expect(screen.getByRole("button", { name: "Sign in" })).toBeEnabled();
+});
+
+it("prevents repeated connect requests while the wallet prompt is open and allows retry after closing", async () => {
+  setConnection({ seizeConnectOpen: true });
+  const { rerender } = render(<DistributionPlanToolConnect />);
+  const button = screen.getByRole("button", { name: "Connect wallet" });
+  expect(button).toBeDisabled();
+  await userEvent.dblClick(button);
+  expect(mockConnect).not.toHaveBeenCalled();
+  setConnection({ seizeConnectOpen: false });
+  rerender(<DistributionPlanToolConnect />);
+  expect(button).toBeEnabled();
+  await userEvent.click(button);
+  expect(mockConnect).toHaveBeenCalledTimes(1);
 });
 
 it("disables repeated sign-in requests while one is pending", async () => {

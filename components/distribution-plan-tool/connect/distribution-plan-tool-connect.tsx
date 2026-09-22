@@ -8,6 +8,7 @@ import { isWalletConnectionResolving } from "@/components/auth/authResolution";
 import AuthLoadingPlaceholder from "@/components/auth/AuthLoadingPlaceholder";
 import PrimaryButton from "@/components/utils/button/PrimaryButton";
 import { isEthereumAddress } from "@/helpers/AllowlistToolHelpers";
+import { useHasHydrated } from "@/hooks/useHasHydrated";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import EmmaTitle from "../EmmaTitle";
@@ -21,14 +22,15 @@ export default function DistributionPlanToolConnect({
   const connection = useSeizeConnectContext();
   const { requestAuth } = useAuth();
   const router = useRouter();
+  const hasHydrated = useHasHydrated();
   const [signingIn, setSigningIn] = useState(false);
   const destination = getEmmaReturnPath(returnTo);
   const { address, hasValidWalletAuth, seizeConnect } = connection;
   const hasAddress = !!address && isEthereumAddress(address);
 
   useEffect(() => {
-    if (hasValidWalletAuth) router.replace(destination);
-  }, [hasValidWalletAuth, destination, router]);
+    if (hasHydrated && hasValidWalletAuth) router.replace(destination);
+  }, [hasHydrated, hasValidWalletAuth, destination, router]);
 
   const signIn = async () => {
     setSigningIn(true);
@@ -40,7 +42,11 @@ export default function DistributionPlanToolConnect({
     }
   };
 
-  if (hasValidWalletAuth || isWalletConnectionResolving(connection)) {
+  if (
+    !hasHydrated ||
+    hasValidWalletAuth ||
+    isWalletConnectionResolving(connection)
+  ) {
     return <AuthLoadingPlaceholder />;
   }
 
@@ -61,7 +67,7 @@ export default function DistributionPlanToolConnect({
       </p>
       <PrimaryButton
         onClicked={hasAddress ? signIn : seizeConnect}
-        disabled={signingIn}
+        disabled={signingIn || connection.seizeConnectOpen}
         loading={signingIn}
       >
         {t(DEFAULT_LOCALE, hasAddress ? "emma.signIn" : "emma.connect")}

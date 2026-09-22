@@ -1,17 +1,30 @@
+"use client";
+
+import { useState } from "react";
 import { QuestionMarkCircleIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
-import CustomTooltip from "@/components/utils/tooltip/CustomTooltip";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 
 export default function EmmaTitle() {
   const about = t(DEFAULT_LOCALE, "emma.about");
+  const [showHelpLabel, setShowHelpLabel] = useState(false);
   return (
     <div className="tw-flex tw-items-center tw-gap-2">
       <h1 className="tw-m-0 tw-text-xl tw-font-semibold tw-text-white">
         {t(DEFAULT_LOCALE, "emma.title")}
       </h1>
-      <CustomTooltip content={about} placement="bottom">
+      <span
+        role="presentation"
+        className="tw-relative tw-inline-flex"
+        onMouseEnter={() => setShowHelpLabel(true)}
+        onMouseLeave={() => setShowHelpLabel(false)}
+        onFocus={() => setShowHelpLabel(true)}
+        onBlur={() => setShowHelpLabel(false)}
+        onKeyDown={(event) => {
+          if (event.key === "Escape") setShowHelpLabel(false);
+        }}
+      >
         <Link
           href="/emma/help"
           aria-label={about}
@@ -19,7 +32,17 @@ export default function EmmaTitle() {
         >
           <QuestionMarkCircleIcon className="tw-size-5" aria-hidden="true" />
         </Link>
-      </CustomTooltip>
+        {showHelpLabel && (
+          // The link already has this name. Keep its visual label out of the
+          // accessibility tree to avoid announcing the same text twice.
+          <span
+            aria-hidden="true"
+            className="tw-absolute tw-left-0 tw-top-full tw-z-10 tw-whitespace-nowrap tw-rounded-md tw-bg-iron-700 tw-px-2 tw-py-1 tw-text-xs tw-font-medium tw-text-white tw-shadow-lg"
+          >
+            {about}
+          </span>
+        )}
+      </span>
     </div>
   );
 }

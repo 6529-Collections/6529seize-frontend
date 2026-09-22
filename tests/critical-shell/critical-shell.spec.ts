@@ -69,9 +69,16 @@ test.describe("Critical read-only route shells @critical-shell @medium @large", 
     const help = page.getByRole("link", { name: "About EMMA" });
     await help.focus();
     await expect(help).toBeFocused();
-    await expect(
-      page.getByRole("tooltip", { name: "About EMMA" })
-    ).toBeVisible();
+    const helpLabel = page.getByText("About EMMA", { exact: true });
+    await expect(helpLabel).toBeVisible();
+    await expect(helpLabel).toHaveAttribute("aria-hidden", "true");
+    await help.press("Escape");
+    await expect(helpLabel).toHaveCount(0);
+    await expect(help).toBeFocused();
+    await help.hover();
+    await expect(helpLabel).toBeVisible();
+    await helpLabel.hover();
+    await expect(helpLabel).toBeVisible();
     await help.press("Enter");
     await expect(page).toHaveURL(/\/emma\/help$/);
     await expect(

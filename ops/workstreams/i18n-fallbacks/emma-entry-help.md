@@ -7,6 +7,6 @@
   locale switcher on these surfaces. Existing plan/editor controls remain English.
 - User impact: all routes remain readable in English; translations are pending.
 - Owner: frontend localization maintainers. Follow-up: add reviewed translations
-  and wire locale selection, then verify wrapping and accessible labels in all
+  and replace the `DEFAULT_LOCALE` call sites with the resolved user/request locale, then verify wrapping and accessible labels in all
   supported locales. The original help copy, including TDH threshold wording,
   is preserved pending a separate policy-copy review.

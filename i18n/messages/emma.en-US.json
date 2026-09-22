@@ -18,5 +18,6 @@
   "emma.community": "EMMA was created as the internal team tool so that The Memes team can smoothly manage multiple complex weekly NFT drops. We are making this tool available for any member of The Memes community who wants to use it for their own drops.",
   "emma.resources": "Please note: Since the tool can use significant computational resources for complex allowlists, we have some mild anti-spam measures currently in place to protect system performance. Specifically, we use our community's \"proof of humanity\" or anti-Sybil measure (TDH) as a lightweight rate-limiter on allowlist creation. We will reevaluate and increase or decrease the limits over time. As always, we reserve the right to change access to this free tool, including sunsetting it altogether.",
   "emma.limited": "Users with TDH < 25,000 (but at least 1) will be limited to 3 allowlists per day.",
-  "emma.unlimited": "Users with TDH > 25,000 can create unlimited allowlists per day."
+  "emma.unlimited": "Users with TDH > 25,000 can create unlimited allowlists per day.",
+  "emma.janusLink": "Janus"
 }
