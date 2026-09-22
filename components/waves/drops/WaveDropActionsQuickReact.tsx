@@ -74,7 +74,7 @@ const WaveDropActionsQuickReact: React.FC<{
   }, [needsEmojiData, loadEmojiData]);
 
   const topEmojis = useMemo(() => {
-    const emojis: (Emoji | NativeEmoji)[] = [];
+    const emojis = new Map<string, Emoji | NativeEmoji>();
     for (const code of topReactionCodes) {
       const id = code.replaceAll(":", "");
       const emoji = findCustomEmoji(id) ?? findNativeEmoji(id);
@@ -82,15 +82,15 @@ const WaveDropActionsQuickReact: React.FC<{
         emoji?.skins[0] &&
         ("src" in emoji.skins[0] ? emoji.skins[0].src : emoji.skins[0].native)
       ) {
-        emojis.push(emoji);
+        emojis.set(emoji.id, emoji);
       } else if (id === DEFAULT_QUICK_REACTION_ID) {
-        emojis.push(DEFAULT_QUICK_REACTION);
+        emojis.set(DEFAULT_QUICK_REACTION_ID, DEFAULT_QUICK_REACTION);
       }
-      if (emojis.length === MAX_QUICK_REACTIONS) {
+      if (emojis.size === MAX_QUICK_REACTIONS) {
         break;
       }
     }
-    return emojis;
+    return [...emojis.values()];
   }, [topReactionCodes, findCustomEmoji, findNativeEmoji]);
   // Only use a fallback when nothing can be rendered. It must send the emoji
   // it displays, rather than disguising an unavailable saved reaction as 👍.

@@ -147,13 +147,13 @@ it.each([false, true])(
     expect(screen.queryByText("👍")).not.toBeInTheDocument();
     expect(mockFindNativeEmoji).not.toHaveBeenCalledWith("fire");
     expect(
-      screen.getByRole("button", { name: "React with heart", exact: true })
+      screen.getByRole("button", { name: "React with heart" })
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "React with smile", exact: true })
+      screen.getByRole("button", { name: "React with smile" })
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "React with wave", exact: true })
+      screen.getByRole("button", { name: "React with wave" })
     ).toBeInTheDocument();
   }
 );
@@ -224,7 +224,41 @@ it.each([
 ])("localizes the fallback action in %s", (locale, label) => {
   mockLocale = locale;
   render(<WaveDropActionsQuickReact drop={drop} />);
-  expect(
-    screen.getByRole("button", { name: label, exact: true })
-  ).toHaveTextContent("👍");
+  expect(screen.getByRole("button", { name: label })).toHaveTextContent("👍");
 });
+
+it.each([
+  [false, false],
+  [false, true],
+  [true, false],
+  [true, true],
+])(
+  "shows distinct reactions when saved IDs normalize to the same emoji (mobile=%s, loaded=%s)",
+  (isMobile, thumbsUpLoaded) => {
+    const natives = [nativeEmoji("heart", "❤️"), nativeEmoji("smile", "😄")];
+    if (thumbsUpLoaded) natives.push(nativeEmoji("+1", "👍"));
+    mockFindNativeEmoji.mockImplementation((id: string) =>
+      natives.find((emoji) => emoji.id === id)
+    );
+    localStorage.setItem(
+      "emoji-mart.frequently",
+      JSON.stringify({
+        "+1": 10,
+        ":+1:": 9,
+        ":+1::": 8,
+        heart: 7,
+        smile: 6,
+      })
+    );
+    render(<WaveDropActionsQuickReact drop={drop} isMobile={isMobile} />);
+    expect(
+      screen.getAllByRole("button").map((button) => button.textContent)
+    ).toEqual(["👍", "❤️", "😄"]);
+    fireEvent.click(
+      screen.getByRole("button", { name: "React with Thumbs up" })
+    );
+    expect(
+      mockedUseDropReaction.mock.results[0]!.value.react
+    ).toHaveBeenCalledWith(":+1:");
+  }
+);
