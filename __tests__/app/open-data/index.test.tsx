@@ -41,7 +41,7 @@ describe("Open Data page", () => {
     expect(getAppMetadata).toHaveBeenCalledWith(
       {
         title: "Open Data",
-        description: "Tools",
+        description: "Download public 6529 datasets.",
       },
       { canonicalPath: "/open-data" }
     );
