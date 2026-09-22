@@ -228,6 +228,9 @@ it("appends one page per scroll request and stops at the end", async () => {
   expect(cardIds()).toEqual([1, 2]);
   await act(async () => second.resolve({ data: ascending.slice(2, 4) }));
   expect(cardIds()).toEqual([1, 2, 3, 4]);
+  const timersAtEnd = jest.getTimerCount();
+  fireEvent.scroll(window);
+  expect(jest.getTimerCount()).toBe(timersAtEnd);
   await scrollToNextPage();
   expect(fetchUrl).toHaveBeenCalledTimes(2);
 });

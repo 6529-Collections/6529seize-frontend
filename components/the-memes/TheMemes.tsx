@@ -432,8 +432,8 @@ export default function TheMemesComponent({
         // Aborting alone is insufficient if a response has already settled.
         if (controller.signal.aborted) return;
 
-        // Advance before releasing the request lock: a queued scroll can run
-        // before React commits the card update or replaces effect listeners.
+        // Once finally releases the lock, a scroll may run before React
+        // commits. Read the next cursor from this ref, not the previous render.
         nftsNextPage.current =
           typeof responseNfts.next === "string" ? responseNfts.next : undefined;
         setNfts((prev) => [...prev, ...(responseNfts.data ?? [])]);
@@ -484,7 +484,7 @@ export default function TheMemesComponent({
     let throttleTimeout: ReturnType<typeof setTimeout> | null = null;
 
     const handleScroll = () => {
-      if (throttleTimeout !== null) {
+      if (throttleTimeout !== null || nftsNextPage.current === undefined) {
         return;
       }
 
