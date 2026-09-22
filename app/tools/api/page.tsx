@@ -464,7 +464,10 @@ export default function AboutApi() {
 
 export function generateMetadata(): Metadata {
   return getAppMetadata(
-    { title: "API | Tools", description: "API" },
+    {
+      title: "API | Tools",
+      description: t(API_PAGE_LOCALE, "tools.api.metadata.description"),
+    },
     { canonicalPath: "/tools/api" }
   );
 }
