@@ -138,10 +138,13 @@ it("does not reuse the default seed after sorting changes before filters load", 
   await act(async () => resolveSeasons(seasons));
 
   await waitFor(() =>
-    expect(fetchUrl).toHaveBeenCalledWith(expect.stringContaining("sort=tdh"))
+    expect(fetchUrl).toHaveBeenCalledWith(expect.stringContaining("sort=tdh"), {
+      signal: expect.any(AbortSignal),
+    })
   );
   expect(fetchUrl).not.toHaveBeenCalledWith(
-    expect.stringContaining("sort=mint_date")
+    expect.stringContaining("sort=mint_date"),
+    { signal: expect.any(AbortSignal) }
   );
 });
 
