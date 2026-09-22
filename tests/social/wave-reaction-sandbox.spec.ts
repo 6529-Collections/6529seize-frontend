@@ -39,7 +39,7 @@ test.describe("Wave reaction local sandbox @auth @medium @local-only", () => {
 
     const drop = page.locator('[data-serial-no="1"]').first();
     const quickReactButton = drop
-      .getByRole("button", { name: "Click to react" })
+      .getByRole("button", { name: "React with Thumbs up" })
       .first();
 
     await drop.hover();
@@ -110,7 +110,10 @@ test.describe("Wave reaction local sandbox @auth @medium @local-only", () => {
     await openPicker();
     await page.keyboard.press("Escape");
     await drop.hover();
-    await drop.getByRole("button", { name: "Click to react" }).first().click();
+    await drop
+      .getByRole("button", { name: "React with Thumbs up" })
+      .first()
+      .click();
     await expect
       .poll(async () => getReactionMutationMethods(baseURL))
       .toEqual(["POST"]);
@@ -122,7 +125,7 @@ test.describe("Wave reaction local sandbox @auth @medium @local-only", () => {
     await page.getByRole("button", { name: "😄", exact: true }).click();
     await expect(
       drop
-        .getByRole("button", { name: "Click to react" })
+        .getByRole("button", { name: /^React with / })
         .filter({ hasText: "😄" })
     ).toHaveCount(1);
     await expect

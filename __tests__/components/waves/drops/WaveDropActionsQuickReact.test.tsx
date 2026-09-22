@@ -8,6 +8,11 @@ jest.mock("@/hooks/drops/useDropReaction", () => ({
   useDropReaction: jest.fn(),
 }));
 
+let mockLocale = "en-US";
+jest.mock("@/hooks/useBrowserLocale", () => ({
+  useBrowserLocale: () => mockLocale,
+}));
+
 const mockFindNativeEmoji = jest.fn();
 const mockFindCustomEmoji = jest.fn();
 const mockLoadEmojiData = jest.fn().mockResolvedValue(undefined);
@@ -30,6 +35,7 @@ const mockedUseDropReaction = jest.mocked(useDropReaction);
 const drop = { id: "drop-1" } as ExtendedDrop;
 
 beforeEach(() => {
+  mockLocale = "en-US";
   jest.clearAllMocks();
   localStorage.clear();
   mockFindNativeEmoji.mockReset();
@@ -53,7 +59,7 @@ it("reports an enabled mobile quick reaction without waiting for the request", (
     />
   );
 
-  fireEvent.click(screen.getByRole("button", { name: "Click to react" }));
+  fireEvent.click(screen.getByRole("button", { name: /^React with / }));
 
   expect(react).toHaveBeenCalledWith(":+1:");
   expect(onReactionStarted).toHaveBeenCalledTimes(1);
@@ -75,7 +81,7 @@ it("does nothing when mobile quick reactions are disabled", () => {
     />
   );
 
-  const button = screen.getByRole("button", { name: "Click to react" });
+  const button = screen.getByRole("button", { name: /^React with / });
   expect(button).toBeDisabled();
   fireEvent.click(button);
 
@@ -98,7 +104,7 @@ it.each([false, true])(
       JSON.stringify({ missing: 9, gone: 8, removed: 7 })
     );
     render(<WaveDropActionsQuickReact drop={drop} isMobile={isMobile} />);
-    const buttons = screen.getAllByRole("button", { name: "Click to react" });
+    const buttons = screen.getAllByRole("button", { name: /^React with / });
     expect(buttons).toHaveLength(1);
     expect(buttons[0]).toHaveTextContent("👍");
     fireEvent.click(buttons[0]!);
@@ -122,15 +128,33 @@ it.each([false, true])(
     );
     localStorage.setItem(
       "emoji-mart.frequently",
-      JSON.stringify({ missing: 20, heart: 9, smile: 8, wave: 7, fire: 6 })
+      JSON.stringify({
+        ...Object.fromEntries(
+          Array.from({ length: 50 }, (_, i) => [`missing${i}`, 100 + i])
+        ),
+        heart: 9,
+        smile: 8,
+        wave: 7,
+        fire: 6,
+      })
     );
     render(<WaveDropActionsQuickReact drop={drop} isMobile={isMobile} />);
     expect(
       screen
-        .getAllByRole("button", { name: "Click to react" })
+        .getAllByRole("button", { name: /^React with / })
         .map((button) => button.textContent)
     ).toEqual(["❤️", "😄", "👋"]);
     expect(screen.queryByText("👍")).not.toBeInTheDocument();
+    expect(mockFindNativeEmoji).not.toHaveBeenCalledWith("fire");
+    expect(
+      screen.getByRole("button", { name: "React with heart", exact: true })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "React with smile", exact: true })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "React with wave", exact: true })
+    ).toBeInTheDocument();
   }
 );
 
@@ -162,7 +186,7 @@ it("keeps custom and native reactions in usage order", () => {
     JSON.stringify({ "6529": 9, heart: 8 })
   );
   render(<WaveDropActionsQuickReact drop={drop} isMobile />);
-  const buttons = screen.getAllByRole("button", { name: "Click to react" });
+  const buttons = screen.getAllByRole("button", { name: /^React with / });
   expect(buttons).toHaveLength(2);
   expect(screen.getByRole("img", { name: "6529" })).toHaveAttribute(
     "src",
@@ -173,4 +197,34 @@ it("keeps custom and native reactions in usage order", () => {
   expect(
     mockedUseDropReaction.mock.results[0]!.value.react
   ).toHaveBeenCalledWith(":6529:");
+});
+
+it("reuses resolved emojis across rerenders and only requests data when needed", () => {
+  mockFindNativeEmoji.mockImplementation((id: string) => nativeEmoji(id, "❤️"));
+  localStorage.setItem("emoji-mart.frequently", JSON.stringify({ heart: 1 }));
+  const { rerender } = render(<WaveDropActionsQuickReact drop={drop} />);
+  expect(mockFindNativeEmoji).toHaveBeenCalledTimes(1);
+  expect(mockLoadEmojiData).toHaveBeenCalledTimes(1);
+  rerender(<WaveDropActionsQuickReact drop={drop} isMobile />);
+  expect(mockFindNativeEmoji).toHaveBeenCalledTimes(1);
+  act(() => {
+    localStorage.setItem("emoji-mart.frequently", JSON.stringify({ heart: 2 }));
+    notifyReactionHistoryChange();
+  });
+  expect(mockFindNativeEmoji).toHaveBeenCalledTimes(2);
+  expect(mockLoadEmojiData).toHaveBeenCalledTimes(1);
+});
+
+it.each([
+  ["en-US", "React with Thumbs up"],
+  ["en-GB", "React with Thumbs up"],
+  ["fr-FR", "Réagir avec Pouce levé"],
+  ["es-ES", "Reaccionar con Pulgar arriba"],
+  ["de-DE", "Mit Daumen hoch reagieren"],
+])("localizes the fallback action in %s", (locale, label) => {
+  mockLocale = locale;
+  render(<WaveDropActionsQuickReact drop={drop} />);
+  expect(
+    screen.getByRole("button", { name: label, exact: true })
+  ).toHaveTextContent("👍");
 });

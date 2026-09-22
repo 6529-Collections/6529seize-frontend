@@ -3381,7 +3381,7 @@
         "Drop actions include reactions, ratings, voting, boosting, curation, replies, link copy, and pinning where allowed.",
         "On desktop, hover or keyboard-focus a drop action to read its label beside the control. Moving the pointer away, scrolling, resizing, pressing Escape, clicking elsewhere, or activating the control with a pointer or keyboard dismisses action tooltips. Touch uses the drop action menu.",
         "Posted full drops can support emoji reactions and clap rating with optimistic UI and rollback on failure.",
-        "Desktop and touch quick reactions show up to three available emojis ranked by local usage. If none can be displayed, one thumbs-up fallback appears and sends a thumbs-up reaction.",
+        "Desktop and touch quick reactions show up to three available emojis ranked by local usage. Each button names its emoji in its accessible label and desktop tooltip, such as React with Thumbs up. If none can be displayed, one thumbs-up fallback appears and sends a thumbs-up reaction.",
         "Quick reactions and the emoji picker Frequently used section share local emoji history, including composer emoji selections. History stays in the current browser or app installation and does not sync between devices.",
         "Reaction controls are disabled while a proxy profile is active.",
         "Reaction controls are disabled only when chatting and reacting are disabled for the entire wave. A viewer who can see the wave may still react when the wave's chat group does not permit them to post.",

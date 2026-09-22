@@ -13,6 +13,8 @@ import {
 } from "@/helpers/reactions/reactionHistory";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useDropReaction } from "@/hooks/drops/useDropReaction";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import Image from "next/image";
 import React, {
   useCallback,
@@ -36,6 +38,7 @@ const WaveDropActionsQuickReact: React.FC<{
   readonly isMobile?: boolean;
   readonly onReactionStarted?: () => void;
 }> = ({ drop, isMobile = false, onReactionStarted }) => {
+  const locale = useBrowserLocale();
   const { react, canReact } = useDropReaction(drop, { source: "quick-react" });
 
   const handleReaction = useCallback(
@@ -63,25 +66,32 @@ const WaveDropActionsQuickReact: React.FC<{
     [snapshot]
   );
 
+  const needsEmojiData = topReactionCodes.some((code) => code !== ":+1:");
   useEffect(() => {
-    if (topReactionCodes.some((code) => code !== ":+1:")) {
+    if (needsEmojiData) {
       void loadEmojiData();
     }
-  }, [topReactionCodes, loadEmojiData]);
+  }, [needsEmojiData, loadEmojiData]);
 
-  const topEmojis = topReactionCodes
-    .flatMap((code) => {
+  const topEmojis = useMemo(() => {
+    const emojis: (Emoji | NativeEmoji)[] = [];
+    for (const code of topReactionCodes) {
       const id = code.replaceAll(":", "");
       const emoji = findCustomEmoji(id) ?? findNativeEmoji(id);
       if (
         emoji?.skins[0] &&
         ("src" in emoji.skins[0] ? emoji.skins[0].src : emoji.skins[0].native)
       ) {
-        return [emoji];
+        emojis.push(emoji);
+      } else if (id === DEFAULT_QUICK_REACTION_ID) {
+        emojis.push(DEFAULT_QUICK_REACTION);
       }
-      return id === DEFAULT_QUICK_REACTION_ID ? [DEFAULT_QUICK_REACTION] : [];
-    })
-    .slice(0, MAX_QUICK_REACTIONS);
+      if (emojis.length === MAX_QUICK_REACTIONS) {
+        break;
+      }
+    }
+    return emojis;
+  }, [topReactionCodes, findCustomEmoji, findNativeEmoji]);
   // Only use a fallback when nothing can be rendered. It must send the emoji
   // it displays, rather than disguising an unavailable saved reaction as 👍.
   const visibleEmojis = topEmojis.length ? topEmojis : [DEFAULT_QUICK_REACTION];
@@ -89,6 +99,12 @@ const WaveDropActionsQuickReact: React.FC<{
     <QuickReactButton
       key={emoji.id}
       emoji={emoji}
+      label={t(locale, "drops.reactions.reactWith", {
+        emoji:
+          emoji.id === DEFAULT_QUICK_REACTION_ID
+            ? t(locale, "drops.reactions.thumbsUp")
+            : emoji.name,
+      })}
       canReact={canReact}
       onReact={handleReaction}
       isMobile={isMobile}
@@ -108,10 +124,11 @@ const WaveDropActionsQuickReact: React.FC<{
 
 const QuickReactButton: React.FC<{
   readonly emoji: Emoji | NativeEmoji;
+  readonly label: string;
   readonly canReact: boolean;
   readonly onReact: (code: string) => void;
   readonly isMobile?: boolean;
-}> = ({ emoji, canReact, onReact, isMobile = false }) => {
+}> = ({ emoji, label, canReact, onReact, isMobile = false }) => {
   const emojiSize = isMobile ? "tw-size-7" : "tw-size-5";
   const textSize = isMobile ? "tw-text-[1.625rem]" : "tw-text-[1.25rem]";
   const skin = emoji.skins[0];
@@ -147,7 +164,7 @@ const QuickReactButton: React.FC<{
         }`}
         onClick={handleClick}
         disabled={!canReact}
-        aria-label="Click to react"
+        aria-label={label}
       >
         {emojiNode}
       </button>
@@ -156,7 +173,7 @@ const QuickReactButton: React.FC<{
 
   return (
     <DropActionTooltip
-      content={<span className="tw-text-xs">Click to react</span>}
+      content={<span className="tw-text-xs">{label}</span>}
       disabled={!canReact}
     >
       <button
@@ -165,7 +182,7 @@ const QuickReactButton: React.FC<{
         }`}
         onClick={handleClick}
         disabled={!canReact}
-        aria-label="Click to react"
+        aria-label={label}
       >
         <div
           className={`tw-flex tw-size-5 tw-flex-shrink-0 tw-items-center tw-justify-center tw-transition tw-duration-300 tw-ease-out ${

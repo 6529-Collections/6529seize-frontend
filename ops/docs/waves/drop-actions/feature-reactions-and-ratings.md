@@ -20,7 +20,8 @@ rolls back if the request fails.
 
 ## Entry Points
 
-- Use quick-react buttons in the action bar/menu.
+- Use quick-react buttons in the action bar/menu. Each button names its emoji
+  in its accessible label and desktop tooltip, such as `React with Thumbs up`.
 - On desktop, hover an action or reach it with keyboard focus to read its label
   beside the control. Labels stay within the viewport in notifications, My
   Stream, profiles, and wave threads. Moving away, scrolling, resizing, pressing
@@ -111,9 +112,9 @@ rolls back if the request fails.
 
 ### Localization fallback debt
 
-- Drop action labels use the existing English copy across supported locales.
-  The frontend i18n backlog owns moving these labels and their accessible names
-  into a shared message family; tooltip placement does not add new copy.
+- Quick-reaction action text and the thumbs-up fallback name follow the browser
+  locale. Other emoji names come from the emoji data. Other drop action labels
+  retain the existing English copy; the frontend i18n backlog owns that debt.
 
 ## Related Pages
 
