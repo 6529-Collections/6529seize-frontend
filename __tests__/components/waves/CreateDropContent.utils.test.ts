@@ -4,6 +4,7 @@ import {
   canSubmitComposerAction,
   canSubmitDrop,
   createMetadataHandlers,
+  getMetadataNameErrors,
   handleComposerFileChange,
 } from "@/components/waves/create-drop-content/content-helpers";
 import { convertMetadataToDropMetadata } from "@/components/waves/utils/convertMetadataToDropMetadata";
@@ -206,6 +207,38 @@ describe("CreateDropContent utilities", () => {
   });
 
   describe("metadata handlers", () => {
+    it("retains legacy custom values, rejects unnamed values, and omits empty rows", () => {
+      let metadata: CreateDropMetadataType[] = [
+        {
+          id: "legacy",
+          key: "Medium",
+          type: null,
+          value: null,
+          required: false,
+        },
+        { id: "blank", key: "", type: null, value: "", required: false },
+      ];
+      const setMetadata: React.Dispatch<
+        React.SetStateAction<CreateDropMetadataType[]>
+      > = (updater) => {
+        metadata = typeof updater === "function" ? updater(metadata) : updater;
+      };
+      const handlers = createMetadataHandlers({
+        setMetadata,
+        generateMetadataId: () => "new",
+      });
+      handlers.onChangeValue({ index: 0, newValue: "Digital" });
+      expect(convertMetadataToDropMetadata(metadata)).toEqual([
+        { data_key: "Medium", data_value: "Digital" },
+      ]);
+      handlers.onChangeKey({ index: 0, newKey: " " });
+      expect(getMetadataNameErrors(metadata, "en-US")).toEqual({
+        legacy: "Enter a field name.",
+      });
+      handlers.onChangeKey({ index: 0, newKey: "Medium" });
+      expect(getMetadataNameErrors(metadata, "en-US")).toEqual({});
+    });
+
     it("clears string metadata values without storing literal null", () => {
       let metadata: CreateDropMetadataType[] = [
         {
@@ -221,7 +254,6 @@ describe("CreateDropContent utilities", () => {
       });
 
       const { onChangeValue } = createMetadataHandlers({
-        metadata,
         setMetadata,
         generateMetadataId: () => "metadata-id",
       });
@@ -393,6 +425,7 @@ describe("CreateDropContent utilities", () => {
           canAddPart: false,
           canSubmit: true,
           editingPartIndex: 0,
+          hasMissingRequirements: false,
           isStormMode: true,
         })
       ).toBe(false);
@@ -402,6 +435,29 @@ describe("CreateDropContent utilities", () => {
           canAddPart: true,
           canSubmit: true,
           editingPartIndex: 0,
+          hasMissingRequirements: false,
+          isStormMode: true,
+        })
+      ).toBe(true);
+    });
+
+    it("blocks final submission until requirements are complete", () => {
+      expect(
+        canSubmitComposerAction({
+          canAddPart: false,
+          canSubmit: true,
+          editingPartIndex: null,
+          hasMissingRequirements: true,
+          isStormMode: false,
+        })
+      ).toBe(false);
+
+      expect(
+        canSubmitComposerAction({
+          canAddPart: true,
+          canSubmit: true,
+          editingPartIndex: null,
+          hasMissingRequirements: true,
           isStormMode: true,
         })
       ).toBe(true);

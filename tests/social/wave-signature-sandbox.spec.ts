@@ -31,6 +31,97 @@ test.describe("Waves signed drop local sandbox @auth @medium @local-only", () =>
     "Signed drop sandbox requires the local authenticated mock API runner."
   );
 
+  test.describe("submit dialog keyboard layout", () => {
+    test.use({ viewport: { width: 390, height: 844 }, hasTouch: true });
+
+    test("keeps the composer and metadata above the native keyboard", async ({
+      baseURL,
+      page,
+    }) => {
+      await gotoSignedSandboxWave(page);
+      await page.getByRole("button", { name: "Submit drop" }).click();
+      const dialog = page.getByRole("dialog", { name: "Submit drop" });
+      const panel = page.getByTestId("chat-submit-drop-modal-panel");
+      const composer = dialog.getByRole("textbox", { name: "Create a drop" });
+      await expect(dialog).toBeVisible();
+      await composer.fill("Local keyboard layout check.");
+
+      const keyboardInset = 320;
+      await page.evaluate((inset) => {
+        document.documentElement.style.setProperty(
+          "--native-keyboard-inset-bottom",
+          `${inset}px`
+        );
+      }, keyboardInset);
+      const keyboardTop = 844 - keyboardInset;
+      const readBottom = (locator: ReturnType<Page["locator"]>) =>
+        locator.evaluate((element) => element.getBoundingClientRect().bottom);
+      await expect
+        .poll(() => readBottom(panel))
+        .toBeLessThanOrEqual(keyboardTop);
+      await expect
+        .poll(() => readBottom(composer))
+        .toBeLessThanOrEqual(keyboardTop);
+
+      await expect(
+        dialog.getByRole("button", { name: "Add field", exact: true })
+      ).toHaveCount(0);
+      const showActions = dialog.getByRole("button", {
+        name: "Show composer actions",
+      });
+      if (await showActions.isVisible()) await showActions.click();
+      await dialog
+        .getByRole("button", { name: /^(Add metadata|Metadata)$/ })
+        .click();
+      for (let row = 0; row < 8; row += 1) {
+        await dialog
+          .getByRole("button", { name: "Add field", exact: true })
+          .click();
+        await expect(
+          dialog
+            .getByRole("textbox", { name: "Field name", exact: true })
+            .last()
+        ).toBeFocused();
+      }
+      const metadataValue = dialog
+        .getByRole("textbox", { name: "Value", exact: true })
+        .last();
+      await metadataValue.focus();
+      await expect
+        .poll(() =>
+          metadataValue.evaluate((element) => {
+            const rect = element.getBoundingClientRect();
+            const scrollport = element.closest(
+              '[data-testid="chat-submit-drop-modal-panel"]'
+            )?.lastElementChild;
+            return (
+              !!scrollport &&
+              rect.top >= scrollport.getBoundingClientRect().top &&
+              rect.bottom <= scrollport.getBoundingClientRect().bottom
+            );
+          })
+        )
+        .toBe(true);
+      await expect
+        .poll(() => readBottom(metadataValue))
+        .toBeLessThanOrEqual(keyboardTop);
+      await expectNoHorizontalOverflow(page);
+
+      await page.evaluate(() => {
+        document.documentElement.style.setProperty(
+          "--native-keyboard-inset-bottom",
+          "0px"
+        );
+      });
+      await expect.poll(() => readBottom(panel)).toBeGreaterThan(keyboardTop);
+      await dialog
+        .getByRole("button", { name: "Close modal", exact: true })
+        .click();
+      await expect(dialog).toBeHidden();
+      await expectNoUnsafeSandboxMutations(baseURL);
+    });
+  });
+
   test("requires terms and fails closed before unsigned drop submission", async ({
     baseURL,
     page,

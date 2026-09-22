@@ -61,6 +61,9 @@ interface MyStreamWaveTabsHeaderProps {
   readonly renderLeadingActions?:
     | ((context: MyStreamWaveTabsHeaderActionContext) => React.ReactNode)
     | undefined;
+  readonly renderTrailingActions?:
+    | ((context: MyStreamWaveTabsHeaderActionContext) => React.ReactNode)
+    | undefined;
   readonly renderOverflowMenuItems?:
     | ((
         context: MyStreamWaveTabsHeaderActionContext
@@ -259,6 +262,7 @@ export default function MyStreamWaveTabsHeader({
   headerClassName,
   actionsClassName,
   renderLeadingActions,
+  renderTrailingActions,
   renderOverflowMenuItems,
 }: MyStreamWaveTabsHeaderProps) {
   const { toggleRightSidebar, isRightSidebarOpen } = useSidebarState();
@@ -432,7 +436,7 @@ export default function MyStreamWaveTabsHeader({
   return (
     <>
       <div className={headerClassName}>
-        <div className="tw-flex tw-min-w-0 tw-flex-1 tw-self-start tw-items-center tw-gap-x-2 tw-pt-0.5">
+        <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-x-2 tw-self-start tw-pt-0.5">
           {showBackButton && (
             <button
               type="button"
@@ -457,8 +461,9 @@ export default function MyStreamWaveTabsHeader({
           />
         </div>
         <div className={actionsClassName}>
-          {showWaveRepAction && <WaveRepButton wave={wave} variant="compact" />}
           {renderLeadingActions?.(actionContext)}
+          {showWaveRepAction && <WaveRepButton wave={wave} variant="compact" />}
+          {renderTrailingActions?.(actionContext)}
           {isCompact && compactMenuItems.length > 0 && (
             <CompactWaveActions items={compactMenuItems} />
           )}
