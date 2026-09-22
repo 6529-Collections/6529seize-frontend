@@ -8,18 +8,20 @@ export default function DistributionPlanToolPlansPage() {
   return (
     <DistributionPlanToolWrapper>
       <div className="tw-flex tw-h-full tw-min-h-screen">
-        <div className="tw-flex-1 tw-pt-8 tw-space-y-8 tw-pb-12 tw-px-2 lg:tw-px-6 xl:tw-px-8 tw-mx-auto">
+        <div className="tw-mx-auto tw-min-w-0 tw-flex-1 tw-space-y-8 tw-px-2 tw-pb-12 tw-pt-8 lg:tw-px-6 xl:tw-px-8">
           <div className="tw-w-full">
-            <div className="tw-w-full tw-flex tw-justify-between tw-items-start">
-              <div className="tw-max-w-2xl">
+            <div className="tw-flex tw-w-full tw-flex-col tw-items-start tw-gap-4 sm:tw-flex-row sm:tw-justify-between">
+              <div className="tw-min-w-0 tw-max-w-2xl">
                 <div className="tw-flex tw-flex-col">
                   <h1 className="text-xl text-white">EMMA</h1>
-                  <p className="tw-mb-0 tw-block tw-font-light tw-text-base tw-text-iron-400">
-                    The Seize distribution plan tool allows you to build a distribution plan for your mint that includes airdrops, allowlists and public minting in one or more phases.
+                  <p className="tw-mb-0 tw-block tw-text-base tw-font-light tw-text-iron-400">
+                    The Seize distribution plan tool allows you to build a
+                    distribution plan for your mint that includes airdrops,
+                    allowlists and public minting in one or more phases.
                   </p>
                 </div>
               </div>
-              <div className="tw-ml-auto">
+              <div className="tw-shrink-0 sm:tw-ml-auto">
                 <DistributionPlanToolCreatePlan />
               </div>
             </div>
