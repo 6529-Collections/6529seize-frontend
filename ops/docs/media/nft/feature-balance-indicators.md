@@ -32,6 +32,11 @@
 - Shows `SEIZED xN` when balance is greater than `0`.
 - Shows `UNSEIZED` when balance is `0`.
 - Shows `N/A` when the balance request fails.
+- The Memes, Meme Lab, and Meme Lab collection grids load all pages of the
+  connected profile's collection balances before displaying ownership. Loading
+  more cards or changing their sort order keeps the same balance snapshot, so
+  earlier cards retain their indicators. A failed balance page shows `N/A`
+  instead of treating an incomplete result as unowned tokens.
 
 ### Home `Edition` chip (`/`)
 
