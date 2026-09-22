@@ -153,7 +153,7 @@ export function ImageMediaModal({
 
   return createPortal(
     <div
-      className="tailwind-scope tw-relative tw-z-1000 tw-cursor-default"
+      className="tailwind-scope tw-relative tw-z-[1100] tw-cursor-default"
       onTouchStart={(event) => event.stopPropagation()}
       onTouchEnd={(event) => event.stopPropagation()}
       onTouchMove={(event) => event.stopPropagation()}

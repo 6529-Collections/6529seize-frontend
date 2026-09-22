@@ -1,3 +1,4 @@
+import path from "node:path";
 import type { ApiDropV2 } from "../../generated/models/ApiDropV2";
 import { ApiDropMainType } from "../../generated/models/ApiDropMainType";
 import type { ApiWaveOverview } from "../../generated/models/ApiWaveOverview";
@@ -128,4 +129,3 @@ export function defineWaveImagePreviewTests() {
     await expect(page.getByTestId("image-gallery-counter")).toBeHidden();
   });
 }
-import path from "node:path";
