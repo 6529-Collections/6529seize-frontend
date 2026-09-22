@@ -1,0 +1,23 @@
+{
+  "emma.title": "EMMA",
+  "emma.about": "About EMMA",
+  "emma.connectHeading": "Connect Your Wallet",
+  "emma.signInHeading": "Sign in",
+  "emma.connect": "Connect wallet",
+  "emma.signIn": "Sign in",
+  "emma.back": "Back to EMMA",
+  "emma.tools": "Tools",
+  "emma.plansTitle": "EMMA | Plans",
+  "emma.entryTitle": "EMMA | Tools",
+  "emma.helpTitle": "EMMA | Help",
+  "emma.connectDescription": "Connect with an address from within your consolidated account to proceed, so that we can verify your TDH to grant you access. No special delegation is required. Please don't connect your vault.",
+  "emma.noFee": "No gas is needed to sign in, and there is no cost or fee to use the tool.",
+  "emma.plansDescription": "The Seize distribution plan tool allows you to build a distribution plan for your mint that includes airdrops, allowlists and public minting in one or more phases.",
+  "emma.introduction": "Meet EMMA - The Editor for Managing Multiphase Allowlists: The first reference implementation of Janus.",
+  "emma.history": "The Memes and the Allowlist Research Institute have built what may be the world's deepest expertise in complex allowlist management across 150+ NFT drops (and counting). These efforts lead to the creation of {janus}, a domain-specific language for deeply customized allowlist management.",
+  "emma.community": "EMMA was created as the internal team tool so that The Memes team can smoothly manage multiple complex weekly NFT drops. We are making this tool available for any member of The Memes community who wants to use it for their own drops.",
+  "emma.resources": "Please note: Since the tool can use significant computational resources for complex allowlists, we have some mild anti-spam measures currently in place to protect system performance. Specifically, we use our community's \"proof of humanity\" or anti-Sybil measure (TDH) as a lightweight rate-limiter on allowlist creation. We will reevaluate and increase or decrease the limits over time. As always, we reserve the right to change access to this free tool, including sunsetting it altogether.",
+  "emma.limited": "Users with TDH < 25,000 (but at least 1) will be limited to 3 allowlists per day.",
+  "emma.unlimited": "Users with TDH > 25,000 can create unlimited allowlists per day.",
+  "emma.janusLink": "Janus"
+}
