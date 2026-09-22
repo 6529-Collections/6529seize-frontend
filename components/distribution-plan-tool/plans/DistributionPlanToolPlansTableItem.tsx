@@ -41,19 +41,32 @@ export default function DistributionPlanToolPlansTableItem({
 
   return (
     <tr
+      role="row"
       onClick={() => goToDistributionPlan(plan.id)}
       className="tw-grid tw-cursor-pointer tw-grid-cols-[minmax(0,1fr)_auto] tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-800/60 sm:tw-table-row"
     >
-      <td className="tw-col-span-2 tw-whitespace-normal tw-break-words tw-px-2 tw-py-4 tw-text-xs tw-font-normal tw-text-iron-300 sm:tw-px-3 sm:tw-pl-6">
+      <td
+        role="cell"
+        className="tw-col-span-2 tw-whitespace-normal tw-break-words tw-px-2 tw-py-4 tw-text-xs tw-font-normal tw-text-iron-300 sm:tw-px-3 sm:tw-pl-6"
+      >
         {plan.name}
       </td>
-      <td className="tw-col-span-2 tw-whitespace-normal tw-break-words tw-px-2 tw-py-4 tw-text-xs tw-font-normal tw-text-iron-300 sm:tw-px-3">
+      <td
+        role="cell"
+        className="tw-col-span-2 tw-whitespace-normal tw-break-words tw-px-2 tw-py-4 tw-text-xs tw-font-normal tw-text-iron-300 sm:tw-px-3"
+      >
         {plan.description}
       </td>
-      <td className="tw-whitespace-nowrap tw-px-2 tw-py-4 tw-text-xs tw-font-normal tw-text-iron-300 sm:tw-px-3">
+      <td
+        role="cell"
+        className="tw-whitespace-nowrap tw-px-2 tw-py-4 tw-text-xs tw-font-normal tw-text-iron-300 sm:tw-px-3"
+      >
         {date}
       </td>
-      <td className="tw-whitespace-nowrap tw-px-2 tw-py-4 tw-text-right tw-text-xs tw-font-normal tw-text-iron-300 sm:tw-px-3 sm:tw-pr-6">
+      <td
+        role="cell"
+        className="tw-whitespace-nowrap tw-px-2 tw-py-4 tw-text-right tw-text-xs tw-font-normal tw-text-iron-300 sm:tw-px-3 sm:tw-pr-6"
+      >
         <button
           onClick={(e) => {
             e.stopPropagation();

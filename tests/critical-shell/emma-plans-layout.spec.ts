@@ -13,19 +13,25 @@ test.describe("EMMA plan layout @critical-shell @medium @large", () => {
       page,
     }, testInfo) => {
       await page.setViewportSize({ width, height: 1000 });
-      await page.route("**/allowlists", async (route) => {
-        if (route.request().method() === "GET") {
-          await route.fulfill({ json: [plan] });
-        } else {
-          await route.fallback();
+      await page.route(
+        (url) => url.pathname === "/allowlists",
+        async (route) => {
+          if (route.request().method() === "GET") {
+            await route.fulfill({ json: [plan] });
+          } else {
+            await route.abort("blockedbyclient");
+          }
         }
-      });
+      );
 
       await page.goto("/emma/plans", { waitUntil: "domcontentloaded" });
       const table = page.getByRole("table");
       await expect(
         table.getByRole("cell", { name: plan.name, exact: true })
       ).toBeVisible();
+      await expect(table.getByRole("columnheader")).toHaveCount(4);
+      await expect(table.getByRole("row")).toHaveCount(2);
+      await expect(table.getByRole("cell")).toHaveCount(4);
       await expect(
         page.getByRole("button", { name: "Create new", exact: true })
       ).toBeInViewport({ ratio: 1 });
@@ -69,6 +75,7 @@ test.describe("EMMA plan layout @critical-shell @medium @large", () => {
         geometry.cells.every((cell) => cell.contained),
         JSON.stringify(geometry)
       ).toBe(true);
+      // These cells render the fixture as inline text, with one rect per line.
       expect(geometry.cells[0]?.lineCount).toBeGreaterThan(1);
       expect(geometry.cells[1]?.lineCount).toBeGreaterThan(1);
       const deleteButton = table.getByRole("button", {
