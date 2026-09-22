@@ -13,20 +13,22 @@ jest.mock(
   "@/components/distribution-plan-tool/wrapper/DistributionPlanToolWrapper",
   () => ({
     __esModule: true,
-    default: ({ children }: any) => <div data-testid="wrapper">{children}</div>,
+    default: ({ children }: { children: React.ReactNode }) => (
+      <div data-testid="wrapper">{children}</div>
+    ),
   })
 );
 
 describe("EMMA page", () => {
-  it("renders wrapper and connect components", () => {
+  it("renders a compact entry without the introduction", async () => {
     render(
       <TitleProvider>
-        <DistributionPlanTool />
+        {await DistributionPlanTool({ searchParams: Promise.resolve({}) })}
       </TitleProvider>
     );
     expect(screen.getByTestId("wrapper")).toBeInTheDocument();
     expect(screen.getByTestId("connect")).toBeInTheDocument();
-    expect(screen.getByText(/Meet EMMA/i)).toBeInTheDocument();
+    expect(screen.queryByText(/Meet EMMA/i)).not.toBeInTheDocument();
   });
 
   it("exports metadata", async () => {

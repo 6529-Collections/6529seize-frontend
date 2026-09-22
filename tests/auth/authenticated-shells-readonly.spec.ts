@@ -95,6 +95,27 @@ async function expectProfileShell(page: Page, activeTab: string | RegExp) {
 test.describe("Authenticated read-only route shells @auth @medium @readonly", () => {
   test.skip(!hasDevAuthConfig(), DEV_AUTH_SKIP_MESSAGE);
 
+  test("opens EMMA plans directly from a restored session and keeps help public", async ({
+    page,
+  }) => {
+    await page.goto("/emma", { waitUntil: "domcontentloaded" });
+    await expect(page).toHaveURL((url) => url.pathname === "/emma/plans");
+    await expect(
+      page.getByRole("heading", { name: "EMMA", exact: true })
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Sign in", exact: true })
+    ).toHaveCount(0);
+    await page.getByRole("link", { name: "About EMMA" }).click();
+    await expect(page).toHaveURL((url) => url.pathname === "/emma/help");
+    await expect(
+      page.getByRole("heading", { name: /Meet EMMA/ })
+    ).toBeVisible();
+    await page.getByRole("link", { name: "Back to EMMA" }).click();
+    await expect(page).toHaveURL((url) => url.pathname === "/emma/plans");
+    await expectNoHorizontalOverflow(page);
+  });
+
   test("renders direct messages without falling back to the wallet gate", async ({
     page,
   }) => {

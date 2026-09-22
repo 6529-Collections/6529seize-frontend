@@ -17,13 +17,14 @@ active-run blocking, and failed-run recovery.
 
 ## Entry Points
 
-1. Open `About -> Data & Developer Tools -> EMMA`, connect a valid wallet, then use `Sign In with Web3`.
+1. Open `About -> Data & Developer Tools -> EMMA`, connect a valid wallet, then use `Sign in`.
 2. Open or create a plan in `/emma/plans`.
 3. Open `/emma/plans/{planId}` directly if you already have access.
 
 ## End-to-End Flow
 
-1. Open `/emma`, connect wallet, then use `Sign In with Web3`.
+1. Open `/emma`. If signed out, use `Connect wallet`, then `Sign in`.
+   Signed-in users go directly to their plans.
 2. EMMA routes to `/emma/plans`.
 3. Create or open a plan to enter `/emma/plans/{planId}`.
 4. The plan route starts in `Create Plan` loading state while EMMA fetches the

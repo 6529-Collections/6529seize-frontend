@@ -62,8 +62,62 @@ test.describe("Critical read-only route shells @critical-shell @medium @large", 
       page.getByRole("heading", { level: 2, name: "Connect Your Wallet" })
     ).toBeVisible();
     await expect(page.getByText("No gas is needed")).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Connect wallet", exact: true })
+    ).toBeVisible();
+    await expect(page.getByText(/Meet EMMA/)).toHaveCount(0);
+    const help = page.getByRole("link", { name: "About EMMA" });
+    await help.focus();
+    await expect(help).toBeFocused();
+    await expect(
+      page.getByRole("tooltip", { name: "About EMMA" })
+    ).toBeVisible();
+    await help.press("Enter");
+    await expect(page).toHaveURL(/\/emma\/help$/);
+    await expect(
+      page.getByRole("heading", { level: 1, name: /Meet EMMA/ })
+    ).toBeVisible();
+    await expect(page.getByRole("link", { name: "Janus" })).toHaveAttribute(
+      "href",
+      "https://github.com/6529-Collections/Janus"
+    );
+    await expect(page.getByText(/Users with TDH </)).toBeVisible();
+    await expectRouteShellHealthy(page, diagnostics);
+    await page.getByRole("link", { name: "Back to EMMA" }).click();
+    await expect(page).toHaveURL(/\/emma$/);
+    await expect(
+      page.getByRole("heading", { name: "Connect Your Wallet" })
+    ).toBeVisible();
     await expectRouteShellHealthy(page, diagnostics);
   });
+
+  for (const planPath of ["/emma/plans", "/emma/plans/emma-guard-check"]) {
+    test(`preserves the signed-out EMMA destination ${planPath}`, async ({
+      page,
+    }) => {
+      const planRequests: string[] = [];
+      page.on("request", (request) => {
+        if (new URL(request.url()).pathname.startsWith("/allowlists")) {
+          planRequests.push(request.url());
+        }
+      });
+      await page.goto(planPath, { waitUntil: "domcontentloaded" });
+      await waitForRouteReady(page, { readySelector: "#allowlist-tool h2" });
+      await expect(page).toHaveURL(
+        (url) =>
+          url.pathname === "/emma" &&
+          url.searchParams.get("returnTo") === planPath
+      );
+      await expect(
+        page.getByRole("heading", { name: "Connect Your Wallet" })
+      ).toBeVisible();
+      await expect(
+        page.getByRole("button", { name: "Create new", exact: true })
+      ).toHaveCount(0);
+      expect(planRequests).toEqual([]);
+      await expectNoHorizontalOverflow(page);
+    });
+  }
 
   test("keeps Drop Forge unauthorized users out", async ({ page }) => {
     const diagnostics = attachConsoleDiagnostics(page);

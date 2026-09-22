@@ -1,72 +1,29 @@
 import DistributionPlanToolConnect from "@/components/distribution-plan-tool/connect/distribution-plan-tool-connect";
 import DistributionPlanToolWrapper from "@/components/distribution-plan-tool/wrapper/DistributionPlanToolWrapper";
+import { getEmmaReturnPath } from "@/components/distribution-plan-tool/emma-route";
 import { getAppMetadata } from "@/components/providers/metadata";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import type { Metadata } from "next";
 
-export default function DistributionPlanTool() {
+export default async function DistributionPlanTool({
+  searchParams,
+}: {
+  readonly searchParams: Promise<{ returnTo?: string | string[] }>;
+}) {
+  const { returnTo } = await searchParams;
   return (
     <DistributionPlanToolWrapper>
-      <div className="tw-flex tw-h-full tw-min-h-screen tw-overflow-x-hidden tw-bg-iron-900">
-        <div className="tw-flex tw-h-full tw-w-full tw-flex-col tw-gap-y-8 tw-px-4 sm:tw-px-8 lg:tw-min-h-screen lg:tw-flex-row lg:tw-gap-y-0 lg:tw-px-0">
-          <div className="tw-w-full tw-min-w-0 tw-pt-8 md:tw-pt-14 lg:tw-w-1/2 lg:tw-px-8 lg:tw-pb-12 xl:tw-w-[40%] 2xl:tw-w-1/2">
-            <div className="tw-mx-auto tw-w-full tw-min-w-0 2xl:tw-max-w-xl">
-              <div className="tw-flex tw-min-w-0 tw-flex-col tw-break-words">
-                <p className="tw-text-white tw-font-semibold tw-mb-0 tw-text-base md:tw-text-lg">
-                  Meet EMMA - The Editor for Managing Multiphase Allowlists: The
-                  first reference implementation of Janus.
-                </p>
-                <p className="tw-text-justify tw-mb-0 tw-mt-2 md:tw-mt-4 tw-block tw-font-light tw-text-base tw-leading-[1.6] tw-text-iron-400">
-                  The Memes and the Allowlist Research Institute have built what
-                  may be the world's deepest expertise in complex allowlist
-                  management across 150+ NFT drops (and counting). These efforts
-                  lead to the creation of {""}
-                  <a
-                    className="tw-font-semibold hover:tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out"
-                    href="https://github.com/6529-Collections/Janus"
-                    target="_blank"
-                    rel="noopener noreferrer">
-                    Janus
-                  </a>
-                  {""}, a domain-specific language for deeply customized
-                  allowlist management.
-                </p>
-                <p className="tw-text-justify tw-mb-0 tw-mt-2 md:tw-mt-4 tw-block tw-font-light tw-text-base tw-leading-[1.6] tw-text-iron-400">
-                  EMMA was created as the internal team tool so that The Memes
-                  team can smoothly manage multiple complex weekly NFT drops. We
-                  are making this tool available for any member of The Memes
-                  community who wants to use it for their own drops.
-                </p>
-                <p className="tw-text-justify tw-mb-0 tw-mt-2 md:tw-mt-4 tw-block tw-font-light tw-text-base tw-leading-[1.6] tw-text-iron-400">
-                  Please note: Since the tool can use significant computational
-                  resources for complex allowlists, we have some mild anti-spam
-                  measures currently in place to protect system performance.
-                  Specifically, we use our community&apos;s &quot;proof of
-                  humanity&quot; or anti-Sybil measure (TDH) as a lightweight
-                  rate-limiter on allowlist creation. We will reevaluate and
-                  increase or decrease the limits over time. As always, we
-                  reserve the right to change access to this free tool,
-                  including sunsetting it altogether.
-                </p>
-                <p className="tw-text-justify tw-mb-0 tw-mt-2 md:tw-mt-4 tw-block tw-font-light tw-text-base tw-leading-[1.6] tw-text-iron-400">
-                  Users with TDH &lt; 25,000 (but at least 1) will be limited to
-                  3 allowlists per day.
-                  <br /> Users with TDH &gt; 25,000 can create unlimited
-                  allowlists per day.
-                </p>
-                <p className="tw-text-justify tw-mb-0 tw-mt-2 md:tw-mt-4 tw-block tw-font-light tw-text-base tw-leading-[1.6] tw-text-iron-400"></p>
-              </div>
-            </div>
-          </div>
-
-          <div className="tw-w-full tw-min-w-0 tw-border-b-0 tw-border-l-0 tw-border-r-0 tw-border-t-1 tw-border-solid tw-border-iron-700 tw-pb-12 tw-pt-8 lg:tw-w-1/2 lg:tw-border-l lg:tw-border-t-0 lg:tw-px-8 lg:tw-pb-0 lg:tw-pt-12 xl:tw-w-[60%] 2xl:tw-w-1/2">
-            <DistributionPlanToolConnect />
-          </div>
-        </div>
+      <div className="tw-px-4 tw-py-8 sm:tw-px-6 lg:tw-px-8">
+        <DistributionPlanToolConnect returnTo={getEmmaReturnPath(returnTo)} />
       </div>
     </DistributionPlanToolWrapper>
   );
 }
 
 export async function generateMetadata(): Promise<Metadata> {
-  return getAppMetadata({ title: "EMMA | Tools", description: "Tools" });
+  return getAppMetadata({
+    title: t(DEFAULT_LOCALE, "emma.entryTitle"),
+    description: t(DEFAULT_LOCALE, "emma.tools"),
+  });
 }
