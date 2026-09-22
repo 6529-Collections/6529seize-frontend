@@ -92,6 +92,55 @@ test.describe("Wave reaction local sandbox @auth @medium @local-only", () => {
     await expectNoUnsafeSandboxMutations(baseURL);
   });
 
+  test("retains quick-reaction history after reopening and selecting from the picker", async ({
+    baseURL,
+    page,
+  }) => {
+    await gotoSandboxWave(page);
+    const drop = page.getByRole("main").locator('[data-serial-no="1"]').first();
+    const openPicker = async () => {
+      await drop.hover();
+      await drop.getByRole("button", { name: "Add reaction to drop" }).click();
+      await expect(
+        page.getByRole("button", { name: "Frequently used", exact: true })
+      ).toBeVisible();
+    };
+
+    // Opening the picker primes its cached history before a quick reaction.
+    await openPicker();
+    await page.keyboard.press("Escape");
+    await drop.hover();
+    await drop.getByRole("button", { name: "Click to react" }).first().click();
+    await expect
+      .poll(async () => getReactionMutationMethods(baseURL))
+      .toEqual(["POST"]);
+
+    await page
+      .getByRole("button", { name: "Open emoji picker", exact: true })
+      .click();
+    await page.getByPlaceholder("Search", { exact: true }).fill("smile");
+    await page.getByRole("button", { name: "😄", exact: true }).click();
+    await expect(
+      drop
+        .getByRole("button", { name: "Click to react" })
+        .filter({ hasText: "😄" })
+    ).toHaveCount(1);
+    await expect
+      .poll(() =>
+        page.evaluate(() =>
+          JSON.parse(localStorage.getItem("emoji-mart.frequently") ?? "{}")
+        )
+      )
+      .toEqual({ "+1": 11, smile: 1 });
+
+    await openPicker();
+    await expect(
+      page.getByRole("button", { name: "😄", exact: true }).first()
+    ).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expectNoUnsafeSandboxMutations(baseURL);
+  });
+
   test("rejects unsupported reaction mutation methods", async ({ baseURL }) => {
     const response = await fetch(
       `${getSandboxApiOrigin(baseURL)}${REACTION_PATH}`,

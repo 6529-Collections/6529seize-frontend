@@ -8,6 +8,8 @@ import {
   type EmojiMartData,
 } from "@/contexts/EmojiContext";
 
+import { notifyReactionHistoryChange } from "@/helpers/reactions/reactionHistory";
+
 export interface EmojiPickerSelection {
   native?: string | undefined;
   id?: string | undefined;
@@ -117,7 +119,12 @@ export default function LazyEmojiPicker({
     <Picker
       theme="dark"
       data={emojiData}
-      onEmojiSelect={onEmojiSelect}
+      onEmojiSelect={(emoji) => {
+        // Emoji Mart has already recorded this selection. Notify same-tab
+        // quick reactions, including when the selection came from a composer.
+        notifyReactionHistoryChange();
+        onEmojiSelect(emoji);
+      }}
       custom={emojiMap}
       categories={categories}
       categoryIcons={categoryIcons}
