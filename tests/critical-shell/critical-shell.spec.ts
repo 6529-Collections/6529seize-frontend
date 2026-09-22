@@ -86,7 +86,9 @@ test.describe("Critical read-only route shells @critical-shell @medium @large", 
     await helpLabel.hover();
     await expect(helpLabel).toBeVisible();
     await help.press("Enter");
+    await waitForRouteReady(page, { readySelector: "#emma-help-title" });
     await expect(page).toHaveURL(/\/emma\/help$/);
+    await expect(page).toHaveTitle(/EMMA \| Help/);
     await expect(
       page.getByRole("heading", { level: 1, name: /Meet EMMA/ })
     ).toBeVisible();
@@ -98,6 +100,7 @@ test.describe("Critical read-only route shells @critical-shell @medium @large", 
     await expectRouteShellHealthy(page, diagnostics);
     await page.getByRole("link", { name: "Back to EMMA" }).click();
     await expect(page).toHaveURL(/\/emma$/);
+    await expect(page).toHaveTitle(/EMMA \| Tools/);
     await expect(
       page.getByRole("heading", { name: "Connect Your Wallet" })
     ).toBeVisible();

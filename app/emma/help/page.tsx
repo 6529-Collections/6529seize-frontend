@@ -7,7 +7,7 @@ import { t, tRich } from "@/i18n/messages";
 
 export default function EmmaHelpPage() {
   return (
-    <DistributionPlanToolWrapper>
+    <DistributionPlanToolWrapper title={t(DEFAULT_LOCALE, "emma.helpTitle")}>
       <article
         aria-labelledby="emma-help-title"
         className="tw-max-w-3xl tw-space-y-6 tw-px-4 tw-py-8 tw-text-base tw-leading-relaxed tw-text-iron-300 sm:tw-px-6 lg:tw-px-8"
