@@ -257,7 +257,7 @@ describe("DropListItemContentMediaImage retry", () => {
       screen.getByRole("button", { name: "Download media" })
     ).toBeInTheDocument();
     expect(screen.queryByAltText("Drop media")).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Retry", exact: true }));
+    fireEvent.click(screen.getByRole("button", { name: "Retry" }));
     expect(screen.getByAltText("Drop media")).toHaveAttribute(
       "src",
       "img?preview"
