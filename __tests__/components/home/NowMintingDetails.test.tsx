@@ -84,27 +84,27 @@ describe("NowMintingDetails", () => {
     mockLatestDropAllowlistStatus.mockClear();
   });
 
-  it("lets keyboard users toggle edition links without exposing collapsed content", async () => {
+  it("uses a native disclosure and exposes focusable edition links when opened", async () => {
     const user = userEvent.setup();
     render(<NowMintingDetails nft={baseNft as ApiMemesExtendedData} />);
 
-    const toggle = screen.getByRole("button", { name: "Edition Details" });
-    expect(toggle).toHaveAttribute("aria-expanded", "false");
-    expect(screen.queryByRole("link", { name: "View" })).toBeNull();
+    const toggle = screen.getByText("Edition Details").closest("summary");
+    const disclosure = toggle?.closest("details");
+    expect(toggle).not.toBeNull();
+    expect(disclosure).not.toHaveAttribute("open");
 
-    await user.tab();
-    expect(toggle).toHaveFocus();
-    await user.keyboard(" ");
-    expect(toggle).toHaveAttribute("aria-expanded", "true");
-    expect(screen.getByRole("link", { name: "View" })).toHaveAttribute(
+    await user.click(toggle!);
+    expect(disclosure).toHaveAttribute("open");
+    const distributionLink = screen.getByRole("link", { name: "View" });
+    expect(distributionLink).toHaveAttribute(
       "href",
       "/the-memes/667/distribution"
     );
 
-    await user.keyboard("{Enter}");
-    expect(toggle).toHaveAttribute("aria-expanded", "false");
-    expect(screen.queryByRole("link", { name: "View" })).toBeNull();
-    expect(toggle).toHaveFocus();
+    distributionLink.focus();
+    expect(distributionLink).toHaveFocus();
+    await user.click(toggle!);
+    expect(disclosure).not.toHaveAttribute("open");
   });
 
   it("omits file metadata rows when media metadata is missing", () => {

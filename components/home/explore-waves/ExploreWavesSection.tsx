@@ -4,6 +4,8 @@ import { useAuth } from "@/components/auth/Auth";
 import { WAVE_SCORE_DISCOVERY_PARAMS } from "@/components/react-query-wrapper/utils/query-utils";
 import type { ApiWaveScoreSort } from "@/generated/models/ApiWaveScoreSort";
 import type { ApiWaveVisibilityTier } from "@/generated/models/ApiWaveVisibilityTier";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import {
   ApiWavesOverviewType,
   type ApiWavesOverviewType as ApiWavesOverviewTypeValue,
@@ -43,8 +45,8 @@ interface ExploreWavesSectionProps {
 
 export function ExploreWavesSection({
   headingVariant = "default",
-  title = "Tired of bot replies?",
-  subtitle = "Join the most interesting chats in crypto",
+  title,
+  subtitle,
   limit = DEFAULT_WAVES_LIMIT,
   viewAllHref = "/waves",
   excludeFollowed = false,
@@ -57,11 +59,19 @@ export function ExploreWavesSection({
   minHotnessScore,
   minRepSortScore,
   visibilityTier,
-  statusLabel = "waves",
+  statusLabel,
   headerControls,
   showEmptyState = false,
   emptyStateLabel,
 }: ExploreWavesSectionProps) {
+  const locale = useBrowserLocale();
+  const effectiveTitle = title ?? t(locale, "home.exploreWaves.heading.title");
+  const effectiveSubtitle =
+    subtitle === undefined
+      ? t(locale, "home.exploreWaves.heading.subtitle")
+      : subtitle;
+  const effectiveStatusLabel =
+    statusLabel ?? t(locale, "home.exploreWaves.status.defaultLabel");
   const { connectedProfile } = useAuth();
   const userScope =
     connectedProfile?.id ??
@@ -132,10 +142,18 @@ export function ExploreWavesSection({
   }
 
   const resultStatus = isLoading
-    ? `Loading ${statusLabel}`
+    ? t(locale, "home.exploreWaves.status.loading", {
+        label: effectiveStatusLabel,
+      })
     : hasNoWaves
-      ? (emptyStateLabel ?? `No ${statusLabel}`)
-      : `Showing ${waves?.length ?? 0} ${statusLabel}`;
+      ? (emptyStateLabel ??
+        t(locale, "home.exploreWaves.status.empty", {
+          label: effectiveStatusLabel,
+        }))
+      : t(locale, "home.exploreWaves.status.showing", {
+          count: waves?.length ?? 0,
+          label: effectiveStatusLabel,
+        });
   const hasHeaderAdditions = Boolean(headerControls);
   const headerClassName = hasHeaderAdditions
     ? "tw-mb-8 tw-flex tw-flex-col tw-items-start tw-gap-5"
@@ -152,14 +170,14 @@ export function ExploreWavesSection({
           <div className={titleClassName}>
             {headingVariant === "page" ? (
               <h1 className="tw-m-0 tw-mb-5 tw-text-balance tw-text-3xl tw-font-semibold tw-leading-[1.05] tw-tracking-[-0.035em] tw-text-iron-50 md:tw-text-4xl">
-                {title}
+                {effectiveTitle}
               </h1>
             ) : (
               <h2 className="tw-m-0 tw-text-balance tw-text-xl tw-font-medium tw-leading-tight tw-tracking-tight tw-text-iron-50 md:tw-text-2xl">
-                {title}
+                {effectiveTitle}
               </h2>
             )}
-            {subtitle && (
+            {effectiveSubtitle && (
               <p
                 className={
                   headingVariant === "page"
@@ -167,7 +185,7 @@ export function ExploreWavesSection({
                     : "tw-mb-0 tw-mt-3 tw-text-[11px] tw-font-normal tw-uppercase tw-leading-relaxed tw-tracking-[0.14em] tw-text-iron-500 sm:tw-text-xs"
                 }
               >
-                {subtitle}
+                {effectiveSubtitle}
               </p>
             )}
           </div>
@@ -182,7 +200,10 @@ export function ExploreWavesSection({
             role="status"
             className="tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-4 tw-py-8 tw-text-center tw-text-sm tw-font-medium tw-text-iron-400"
           >
-            {emptyStateLabel ?? `No ${statusLabel}`}
+            {emptyStateLabel ??
+              t(locale, "home.exploreWaves.status.empty", {
+                label: effectiveStatusLabel,
+              })}
           </div>
         ) : (
           <div className="tw-grid tw-grid-cols-1 tw-gap-x-3 tw-gap-y-4 sm:tw-grid-cols-2 sm:tw-gap-6 lg:tw-grid-cols-3">
@@ -209,7 +230,7 @@ export function ExploreWavesSection({
               href={viewAllHref}
               className="tw-inline-flex tw-items-center tw-gap-1.5 tw-text-sm tw-font-medium tw-text-iron-400 tw-no-underline tw-transition-colors hover:tw-text-white"
             >
-              <span>View all</span>
+              <span>{t(locale, "home.exploreWaves.viewAll")}</span>
               <ArrowRightIcon
                 className="tw-size-4 tw-flex-shrink-0"
                 aria-hidden
