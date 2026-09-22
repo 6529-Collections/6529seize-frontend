@@ -350,7 +350,7 @@ describe("MyStreamWaveTabsDefault", () => {
     expect(mockToggleViewMode).toHaveBeenCalledTimes(1);
   });
 
-  it("keeps desktop action set at medium breakpoint", () => {
+  it("keeps the desktop view toggle behavior at medium breakpoint", () => {
     mockUseBreakpoint.mockReturnValue("MD");
     useContentTab.mockReturnValue({
       activeContentTab: "CHAT",
@@ -367,15 +367,19 @@ describe("MyStreamWaveTabsDefault", () => {
       </SidebarProvider>
     );
 
-    expect(
-      screen.getByRole("button", { name: "Switch to gallery view" })
-    ).toBeInTheDocument();
+    const galleryToggle = screen.getByRole("button", {
+      name: "Switch to gallery view",
+    });
+    expect(galleryToggle).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Search messages in this wave" })
     ).toBeInTheDocument();
     expect(
       screen.queryByRole("button", { name: "Go back" })
     ).toBeInTheDocument();
+
+    fireEvent.click(galleryToggle);
+    expect(mockToggleViewMode).toHaveBeenCalledTimes(1);
   });
 
   it("keeps compact subtitle trigger and search action", () => {

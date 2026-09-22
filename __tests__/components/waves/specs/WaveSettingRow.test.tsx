@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import WaveSettingRow from "@/components/waves/specs/WaveSettingRow";
 
 jest.mock("@heroicons/react/24/outline", () => ({
@@ -47,6 +47,21 @@ describe("WaveSettingRow", () => {
       screen.queryByRole("button", { name: "Edit links" })
     ).not.toBeInTheDocument();
     expect(screen.queryByTestId("gear-icon")).not.toBeInTheDocument();
+  });
+
+  it("dismisses the editor without sending Escape to its parent dialog", () => {
+    renderRow(true);
+    fireEvent.click(screen.getByRole("button", { name: "Edit links" }));
+    const parentKeyDown = jest.fn();
+    window.addEventListener("keydown", parentKeyDown);
+
+    try {
+      fireEvent.keyDown(screen.getByText("Links editor"), { key: "Escape" });
+      expect(screen.queryByText("Links editor")).not.toBeInTheDocument();
+      expect(parentKeyDown).not.toHaveBeenCalled();
+    } finally {
+      window.removeEventListener("keydown", parentKeyDown);
+    }
   });
 
   it("renders full content with an admin gear in the content variant", () => {

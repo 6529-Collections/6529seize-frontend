@@ -100,7 +100,9 @@ export const WaveOutcomeAccordion: FC<WaveOutcomeAccordionProps> = ({
             <div className="tw-text-base tw-font-semibold tw-leading-5 tw-tracking-[-0.015em] tw-text-iron-50 sm:tw-text-lg sm:tw-leading-6">
               {title}
             </div>
-            <div className={`tw-mt-[5px] ${OUTCOME_EYEBROW_CLASSES}`}>
+            <div
+              className={`tw-mt-[5px] tw-flex tw-h-[13px] tw-items-center ${OUTCOME_EYEBROW_CLASSES}`}
+            >
               {isLoading ? (
                 <span className="tw-inline-block tw-h-[13px] tw-w-[55px] tw-animate-pulse tw-rounded tw-bg-iron-800" />
               ) : (
@@ -139,9 +141,7 @@ export const WaveOutcomeAccordion: FC<WaveOutcomeAccordionProps> = ({
       </button>
       {metadata && (
         <div className="tw-mx-[13px] tw-grid tw-gap-[8px] tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-pb-[21px] tw-pt-[13px] sm:tw-mx-[21px] sm:tw-grid-cols-[minmax(0,0.35fr)_minmax(0,1fr)] sm:tw-items-baseline sm:tw-gap-[21px]">
-          <span className={OUTCOME_EYEBROW_CLASSES}>
-            {metadata.label}
-          </span>
+          <span className={OUTCOME_EYEBROW_CLASSES}>{metadata.label}</span>
           <span className="tw-text-sm tw-leading-5 tw-text-iron-200 sm:tw-text-right">
             {metadata.value}
           </span>

@@ -224,9 +224,16 @@ jest.mock(
 jest.mock("@/components/waves/CreateDropContentRequirements", () => () => (
   <div data-testid="requirements" />
 ));
-jest.mock("@/components/waves/CreateDropMetadata", () => () => (
-  <div data-testid="metadata" />
-));
+jest.mock(
+  "@/components/waves/CreateDropMetadata",
+  () => (props: { closeMetadata: () => void }) => (
+    <div data-testid="metadata">
+      <button type="button" onClick={props.closeMetadata}>
+        close metadata
+      </button>
+    </div>
+  )
+);
 jest.mock("@/components/waves/CreateDropContentFiles", () => ({
   CreateDropContentFiles: () => <div data-testid="files" />,
 }));
@@ -1118,6 +1125,21 @@ describe("CreateDropContent identity picker flow", () => {
       expect(screen.getByTestId("identity-field")).toHaveTextContent("none");
     });
     expect(screen.getByTestId("identity-picker-modal")).toBeInTheDocument();
+  });
+
+  it("opens required metadata only from the composer action and hides it when closed", async () => {
+    const wave = createWave();
+    wave.participation.required_metadata = [{ name: "Medium", type: "STRING" }];
+    renderSubject({ wave });
+    expect(screen.queryByTestId("metadata")).not.toBeInTheDocument();
+    await userEvent.click(screen.getByText("open metadata"));
+    expect(screen.getByTestId("metadata-composer-surface")).toHaveAttribute(
+      "data-state",
+      "open"
+    );
+    expect(screen.getByTestId("metadata")).toBeInTheDocument();
+    await userEvent.click(screen.getByText("close metadata"));
+    expect(screen.queryByTestId("metadata")).not.toBeInTheDocument();
   });
 
   it("closes metadata after leaving Drop mode and keeps it closed on re-entry", async () => {

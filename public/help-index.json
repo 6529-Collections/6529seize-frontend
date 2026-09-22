@@ -2803,14 +2803,14 @@
         "create"
       ],
       "facts": [
-        "The 6529 Network Museum Wave predates proposal-card recipe metadata, so it uses a compatibility fallback: Summary card with 360 characters and the first ready still image enabled. A Wave admin can replace that fallback from Settings, and the saved choice takes precedence.",
+        "The 6529 Network Museum Wave predates proposal-card recipe metadata, so it uses a compatibility fallback: Summary card with 360 characters and the first ready still image enabled. A Wave admin can replace that fallback from Configuration, and the saved choice takes precedence.",
         "Other existing standard Waves keep their current presentation unless the Wave is explicitly configured to use custom proposal cards.",
         "A compact card uses the proposal's stored title or first authored non-empty line, an excerpt from the original authored text, real multipart/media/attachment counts, and at most one ready static image preview.",
         "Compact proposal cards do not generate summaries, categories, or proposal metadata.",
         "Selecting a proposal card opens the complete original proposal, including its full markdown, media, attachments, and multipart navigation.",
         "Memes, Curation, and Quorum Waves keep their specialized proposal presentations.",
-        "Wave creators can choose Full proposal or Summary card under Advanced settings in the Setup step for a Rank or Approve Wave. New Waves default to Summary card; existing Waves and older drafts without this setting keep Full proposal except for the Network Museum compatibility fallback.",
-        "Wave admins can change the same presentation later from the right sidebar under Settings, Display, Proposal cards. This control is available for standard Rank and Approve Waves, not Chat, Memes, Curation, or Quorum presentations.",
+        "Wave creators can choose Full proposal or Summary card under Appearance and labels when creating a Rank or Approve Wave. New Waves default to Summary card; existing Waves and older drafts without this setting keep Full proposal except for the Network Museum compatibility fallback.",
+        "Wave creators and eligible admins can change the presentation for everyone in the Wave from the right sidebar (Wave details on mobile), Configuration, Proposal cards. Use its gear to open the editor, choose the Full proposal or Summary card visual tile, then Save. The closed wireframe preview and label show the saved choice; Cancel or closing the editor discards a draft. This is separate from the personal Boosted drops preference and is available for standard Rank and Approve Waves, not Chat, Memes, Curation, or Quorum presentations.",
         "Summary card lets the admin set a proposal-text limit from 120 to 1000 characters and choose whether the first ready still image appears beside proposal summaries in chat and list views. Invalid limits cannot be saved. Full proposal media is unchanged."
       ],
       "canonical_path": "/waves/5f207393-5418-4a75-8738-e40edb44a94d",
@@ -3428,7 +3428,8 @@
         "Competition badges do not appear in other waves unless the author also qualifies there.",
         "The wave competition badges are hidden in The Memes Main Stage, which keeps its existing artist badges.",
         "Selecting either badge loads and opens that author's full entries for the current wave; users can switch active and winning sections when both exist.",
-        "The entry viewer offers voting only for participatory entries while voting is open, and normal voting eligibility and credit rules still apply."
+        "The entry viewer offers voting only for participatory entries while voting is open, and normal voting eligibility and credit rules still apply.",
+        "In the native app, the entry sheet moves above the software keyboard and keeps the focused vote field visible."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/waves", "/messages"],
@@ -6327,9 +6328,12 @@
         "rows"
       ],
       "facts": [
-        "Wave drop composer metadata submissions are documented under composer features.",
-        "Metadata row behavior and submit rules can affect whether a drop can be submitted.",
-        "Memes-specific submission forms can also ask for additional information."
+        "In Submit drop or standard Drop mode, select the Add metadata code icon beside the input. On compact layouts, open composer actions and select Metadata. The section stays hidden until opened, including when metadata is required.",
+        "Use Add field, then fill Field name and Value, such as Medium and Digital. Closing Metadata hides the entire section and retains its fields in the current draft. Reopen it from the icon. Metadata is included when submitting the drop; there is no separate save action.",
+        "Required field names are locked and their rows cannot be removed. Optional fields have a trash button. A populated value needs a field name, and missing required values block submission.",
+        "Drop mode shows an informational requirement line before any draft text is entered, such as Required: add an image. Use the existing upload and metadata controls to complete it. Completed items are removed, the line disappears when nothing is missing, and missing items keep the final Drop action disabled.",
+        "On narrow screens field names and values stack vertically. The native app submit dialog adjusts for the keyboard and scrolls focused fields into view.",
+        "Curation URL composers do not expose metadata rows. Memes-specific submission forms can also ask for additional information."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/waves"],
