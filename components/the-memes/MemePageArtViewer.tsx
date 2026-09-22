@@ -72,11 +72,17 @@ function getInlineMediaVariant(
   return "image";
 }
 
-function getArtworkLayout(isVideoArtwork: boolean) {
+function getArtworkLayout(isVideoArtwork: boolean, isImageArtwork: boolean) {
   return {
-    root: isVideoArtwork ? "tw-flex-1" : "tw-h-full",
-    carousel: styles[isVideoArtwork ? "videoCarousel" : "memesCarousel"],
-    slide: isVideoArtwork ? "tw-h-auto" : "tw-h-full",
+    root: clsx(
+      isVideoArtwork && "tw-flex-1",
+      !isVideoArtwork && !isImageArtwork && "tw-h-full"
+    ),
+    carousel:
+      styles[
+        isVideoArtwork || isImageArtwork ? "videoCarousel" : "memesCarousel"
+      ],
+    slide: isVideoArtwork || isImageArtwork ? "tw-h-auto" : "tw-h-full",
   };
 }
 
@@ -107,12 +113,14 @@ export function MemePageArtViewer({
   const animationFormat = getAnimationFileTypeFromMetadata(metadata);
   const imageMimeType = getImageMimeTypeFromMetadata(metadata);
   const animationMimeType = getAnimationMimeTypeFromMetadata(metadata);
-  const isVideoArtwork =
-    hasAnimation && (animationMimeType?.startsWith("video/") ?? false);
-  const artworkLayout = getArtworkLayout(isVideoArtwork);
   const imageHref = getResolvedImageSrc(nft);
   const hasImage = Boolean(imageHref);
   const isShowingAnimation = hasAnimation && (currentSlide === 0 || !imageHref);
+  const isVideoAnimation = animationMimeType?.startsWith("video/") ?? false;
+  const isImageAnimation = animationMimeType?.startsWith("image/") ?? false;
+  const isVideoArtwork = isShowingAnimation && isVideoAnimation;
+  const isImageArtwork = !isShowingAnimation || isImageAnimation;
+  const artworkLayout = getArtworkLayout(isVideoArtwork, isImageArtwork);
   const hasMultipleSlides = hasAnimation && hasImage;
   const activeMedia = isShowingAnimation
     ? {
@@ -349,6 +357,7 @@ export function MemePageArtViewer({
 
   return (
     <div
+      data-image-artwork={isImageArtwork || undefined}
       data-video-artwork={isVideoArtwork || undefined}
       className={clsx(
         "tw-flex tw-w-full tw-flex-col tw-p-0",
@@ -380,7 +389,7 @@ export function MemePageArtViewer({
                   <NFTImage
                     nft={nft}
                     animation={true}
-                    artworkLayout={isVideoArtwork}
+                    artworkLayout={isVideoAnimation || isImageAnimation}
                     height={650}
                     transparentBG={true}
                     showBalance={false}
@@ -394,14 +403,14 @@ export function MemePageArtViewer({
                 {hasImage && (
                   <div
                     data-carousel-slide
-                    className={`${artworkLayout.slide} tw-items-center tw-justify-center tw-text-center ${
+                    className={`tw-h-auto tw-items-center tw-justify-center tw-text-center ${
                       currentSlide === 1 ? "tw-flex" : "tw-hidden"
                     }`}
                   >
                     <NFTImage
                       nft={nft}
                       animation={false}
-                      artworkLayout={isVideoArtwork}
+                      artworkLayout
                       height={650}
                       showBalance={false}
                       showOriginal={
@@ -424,6 +433,7 @@ export function MemePageArtViewer({
                 <NFTImage
                   nft={nft}
                   animation={false}
+                  artworkLayout
                   height={650}
                   transparentBG={true}
                   showBalance={false}
