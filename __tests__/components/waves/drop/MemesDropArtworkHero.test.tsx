@@ -49,29 +49,42 @@ it.each(["video/mp4", "video/webm"])(
   }
 );
 
-it.each(["image/png", "text/html"])(
-  "preserves the explicit frame for %s",
-  (mimeType) => {
-    render(
-      <MemesDropArtworkHero
-        artworkMedia={{ mime_type: mimeType, url: "artwork" }}
-      />
-    );
-    expect(
-      jest.mocked(DropListItemContentMedia).mock.calls.at(-1)?.[0]
-    ).toMatchObject({
-      artworkVideoLayout: false,
-      fillVideoContainer: true,
-      loadStrategy: mimeType === "text/html" ? "in-view" : "eager",
-    });
-    expect(screen.getByTestId("media").parentElement).toHaveClass(
-      "lg:tw-h-[95vh]"
-    );
-  }
-);
+it.each(["text/html"])("preserves the explicit frame for %s", (mimeType) => {
+  render(
+    <MemesDropArtworkHero
+      artworkMedia={{ mime_type: mimeType, url: "artwork" }}
+    />
+  );
+  expect(
+    jest.mocked(DropListItemContentMedia).mock.calls.at(-1)?.[0]
+  ).toMatchObject({
+    artworkVideoLayout: false,
+    fillVideoContainer: true,
+    loadStrategy: mimeType === "text/html" ? "in-view" : "eager",
+  });
+  expect(screen.getByTestId("media").parentElement).toHaveClass(
+    "lg:tw-h-[95vh]"
+  );
+});
 
 it("keeps an empty submission free of a video frame", () => {
   const { container } = render(<MemesDropArtworkHero />);
   expect(screen.queryByTestId("media")).not.toBeInTheDocument();
   expect(container.querySelector("[data-video-artwork]")).toBeNull();
+});
+
+it("fits a submission image below the header with the shared screen budget", () => {
+  render(
+    <MemesDropArtworkHero
+      artworkMedia={{ mime_type: "image/png", url: "portrait.png" }}
+    />
+  );
+  const frame = screen.getByTestId("media").parentElement!;
+  expect(frame).toHaveClass("submissionImage");
+  expect(frame).not.toHaveClass("lg:tw-h-[95vh]");
+  expect(frame.closest("[data-image-artwork]")).toHaveClass("artworkStage");
+  expect(frame.parentElement?.parentElement).toHaveClass(
+    "[--video-frame-padding:2rem]",
+    "lg:[--video-frame-padding:4rem]"
+  );
 });
