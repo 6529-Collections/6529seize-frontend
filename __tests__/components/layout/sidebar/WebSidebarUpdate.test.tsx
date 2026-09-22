@@ -86,7 +86,7 @@ beforeEach(() => {
   });
 });
 
-it("puts the collapsed update rocket last in utilities with no desktop toast", () => {
+it("puts the collapsed update rocket above Search with no desktop toast", () => {
   render(
     <>
       <WebSidebar {...sidebarProps} />
@@ -96,7 +96,7 @@ it("puts the collapsed update rocket last in utilities with no desktop toast", (
   const update = screen.getByRole("button", { name: "Update" });
   const utilities = update.closest('[data-sidebar-section="utilities"]');
   expect(utilities).not.toBeNull();
-  expect(utilities?.lastElementChild).toContainElement(update);
+  expect(utilities?.firstElementChild).toContainElement(update);
   expect(
     screen
       .getByRole("button", { name: "Search" })
@@ -128,15 +128,17 @@ it("reveals the Update label when the sidebar expands", () => {
   );
 });
 
-it("responds to update availability without adding a placeholder above Search", () => {
+it("reserves the update slot above Search while availability resolves", () => {
   jest.mocked(useVersionStatus).mockReturnValue(false);
-  const { rerender } = render(<WebSidebar {...sidebarProps} />);
+  const { container, rerender } = render(<WebSidebar {...sidebarProps} />);
   expect(
     screen.queryByRole("button", { name: "Update" })
   ).not.toBeInTheDocument();
-  expect(
-    screen.getByRole("button", { name: "Search" }).previousElementSibling
-  ).toBeNull();
+  const slot = container.querySelector('[data-sidebar-version-slot="true"]');
+  expect(slot).not.toBeNull();
+  expect(slot?.nextElementSibling).toContainElement(
+    screen.getByRole("button", { name: "Search" })
+  );
 
   jest.mocked(useVersionStatus).mockReturnValue(true);
   rerender(<WebSidebar {...sidebarProps} />);
@@ -181,7 +183,7 @@ it("keeps Update in the same utility row when Notifications appears or disappear
   const update = screen.getByRole("button", { name: "Update" });
   const utilityRow = update.parentElement;
   const utilities = update.closest('[data-sidebar-section="utilities"]');
-  expect(utilities?.lastElementChild).toBe(utilityRow);
+  expect(utilities?.firstElementChild).toBe(utilityRow);
   expect(
     screen.queryByRole("link", { name: "Notifications" })
   ).not.toBeInTheDocument();
@@ -197,7 +199,7 @@ it("keeps Update in the same utility row when Notifications appears or disappear
   ).not.toBeNull();
   expect(utilities).not.toContainElement(notifications);
   expect(screen.getByRole("button", { name: "Update" })).toBe(update);
-  expect(utilities?.lastElementChild).toBe(utilityRow);
+  expect(utilities?.firstElementChild).toBe(utilityRow);
 
   jest.mocked(useSeizeConnectContext).mockReturnValue({
     address: undefined,
@@ -208,13 +210,13 @@ it("keeps Update in the same utility row when Notifications appears or disappear
     screen.queryByRole("link", { name: "Notifications" })
   ).not.toBeInTheDocument();
   expect(screen.getByRole("button", { name: "Update" })).toBe(update);
-  expect(utilities?.lastElementChild).toBe(utilityRow);
+  expect(utilities?.firstElementChild).toBe(utilityRow);
 });
 
-it("places Update directly after Search when Share is unavailable", () => {
+it("places Update directly before Search when Share is unavailable", () => {
   render(<WebSidebar {...sidebarProps} />);
   const search = screen.getByRole("button", { name: "Search" });
-  expect(search.parentElement?.nextElementSibling).toContainElement(
+  expect(search.parentElement?.previousElementSibling).toContainElement(
     screen.getByRole("button", { name: "Update" })
   );
 });

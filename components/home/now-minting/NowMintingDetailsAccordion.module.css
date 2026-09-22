@@ -1,0 +1,31 @@
+@supports (interpolate-size: allow-keywords) and
+  selector(details::details-content) {
+  .disclosure {
+    interpolate-size: allow-keywords;
+  }
+
+  .disclosure::details-content {
+    content-visibility: visible !important;
+    visibility: hidden;
+    height: 0;
+    overflow: clip;
+    opacity: 0;
+    transition:
+      height 200ms ease-out,
+      opacity 200ms ease-out,
+      visibility 0s linear 200ms;
+  }
+
+  .disclosure[open]::details-content {
+    visibility: visible;
+    height: auto;
+    opacity: 1;
+    transition-delay: 0s;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .disclosure::details-content {
+      transition: none;
+    }
+  }
+}

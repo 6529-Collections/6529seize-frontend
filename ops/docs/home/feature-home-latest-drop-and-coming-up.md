@@ -52,10 +52,17 @@ Use this page for visibility rules, state switches, and route targets.
      grace period after its scheduled end, or when no next winner is available.
    - `Next Drop` when the current mint is complete, its grace period has
      elapsed, and a next winner exists.
-4. `Latest Drop` shows artwork, stats, connected-wallet allowance,
-   subscription awareness, edition details, and countdown states: `Upcoming`,
-   `Live`, `Mint Complete`, or `Error`. When the card has an explicit Main Stage
-   mapping, edition details also includes `Main Stage Submission` → `View`.
+4. `Latest Drop` groups its details beside the artwork: title and artist;
+   stats with `Edition Details` directly below; `Your allowance` followed by
+   subscription awareness; and the countdown and mint action at the bottom.
+   Countdown states are `Upcoming`, `Live`, `Mint Complete`, or `Error`. When
+   the card has an explicit Main Stage mapping, edition details also includes
+   `Main Stage Submission` → `View`.
+   `Edition Details` opens and closes with a brief transition, or immediately
+   when reduced motion is enabled. Collapsed links are excluded from keyboard
+   navigation. File type and dimensions appear inside `Edition Details` when
+   available; the artist row contains the artist identity without a media-type
+   badge.
 5. `Coming up` resolves after app settings load and `memes_wave_id` is
    available.
 6. `Coming up` then shows:

@@ -150,7 +150,7 @@ test("desktop account updates do not move utilities, including in short expanded
     );
     await expectNoHorizontalOverflow(page);
 
-    // Unsupported Share routes pack Update directly below Search, with no hole.
+    // Unsupported Share routes keep Update directly above Search, with no hole.
     await page.goto("/notifications", { waitUntil: "domcontentloaded" });
     await expect(
       sidebar.getByRole("button", { name: "Share this page", exact: true })
@@ -160,7 +160,7 @@ test("desktop account updates do not move utilities, including in short expanded
     const updateBox = await update.boundingBox();
     expect(searchBox).not.toBeNull();
     expect(updateBox).not.toBeNull();
-    expect(updateBox!.y).toBeCloseTo(searchBox!.y + searchBox!.height, 0);
+    expect(searchBox!.y).toBeCloseTo(updateBox!.y + updateBox!.height, 0);
   } finally {
     releaseVersion();
   }

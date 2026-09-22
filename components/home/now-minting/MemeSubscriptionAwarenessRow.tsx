@@ -236,7 +236,7 @@ export default function MemeSubscriptionAwarenessRow({
         : "home.mintSubscriptions.action.setUp"
     );
   return (
-    <div className="tw-group tw-relative tw-overflow-hidden tw-rounded-2xl tw-border tw-border-solid tw-border-primary-400/25 tw-bg-primary-500/10 tw-p-5 tw-shadow-[0_15px_40px_rgba(0,0,0,0.38)]">
+    <div className="tw-group tw-relative tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-primary-400/25 tw-bg-primary-500/10 tw-p-5 tw-shadow-[0_15px_40px_rgba(0,0,0,0.38)]">
       <span
         aria-hidden="true"
         className="tw-pointer-events-none tw-absolute tw-inset-0 tw-bg-primary-400/[0.045] tw-opacity-0 tw-transition-opacity tw-duration-500 tw-ease-[cubic-bezier(0.22,1,0.36,1)] group-focus-within:tw-opacity-100 desktop-hover:group-hover:tw-opacity-100 motion-reduce:tw-transition-none"

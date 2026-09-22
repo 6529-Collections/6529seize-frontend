@@ -154,7 +154,7 @@ function WebSidebar({
               onToggle={handleToggle}
             />
 
-            <div className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto">
+            <div className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-overflow-x-hidden">
               <div
                 className={`tw-grid tw-h-full ${isMobile ? "tw-grid-rows-[minmax(2.875rem,1fr)_auto_7.625rem]" : "tw-grid-rows-[minmax(2.875rem,1fr)_8.625rem_7.625rem]"}`}
                 data-sidebar-sections="true"
@@ -169,9 +169,22 @@ function WebSidebar({
                   />
                 </div>
 
-                <div data-sidebar-section="utilities">
+                <div
+                  className="tw-flex tw-flex-col tw-justify-end"
+                  data-sidebar-section="utilities"
+                >
                   {showDesktopSearch && (
-                    <div className="tw-px-3">
+                    <div
+                      className="tw-h-[2.875rem] tw-flex-none tw-px-3"
+                      data-sidebar-version-slot="true"
+                    >
+                      <WebSidebarVersionUpdate
+                        collapsed={shouldShowCollapsed}
+                      />
+                    </div>
+                  )}
+                  {showDesktopSearch && (
+                    <div className="tw-flex-none tw-px-3">
                       <WebSidebarNavItem
                         onClick={(event?: MouseEvent) => {
                           event?.stopPropagation();
@@ -185,14 +198,6 @@ function WebSidebar({
                     </div>
                   )}
                   <HeaderShare isCollapsed={shouldShowCollapsed} />
-                  {/* Share returns null on unsupported routes: keep visible rows together. */}
-                  {showDesktopSearch && (
-                    <div className="tw-px-3">
-                      <WebSidebarVersionUpdate
-                        collapsed={shouldShowCollapsed}
-                      />
-                    </div>
-                  )}
                 </div>
 
                 {/* Notifications grow upward without moving the utility rows. */}
