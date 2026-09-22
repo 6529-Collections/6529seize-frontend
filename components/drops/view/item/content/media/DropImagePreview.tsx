@@ -6,7 +6,7 @@ import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import Image, { type ImageProps } from "next/image";
-import { forwardRef, useState, type ReactNode } from "react";
+import { forwardRef, useRef, useState, type ReactNode } from "react";
 
 export function getDropImagePreviewSources(src: string, scale: ImageScale) {
   const original = resolveIpfsUrlSync(src);
@@ -39,6 +39,7 @@ type Props = Omit<ImageProps, "src" | "unoptimized" | "onError"> & {
 const PreviewAttempt = forwardRef<HTMLImageElement, Props>(
   ({ originalSrc, imageScale, onError, alt, fallback, ...props }, ref) => {
     const [attempt, setAttempt] = useState(0);
+    const failedAttempt = useRef<number | null>(null);
     const sources = getDropImagePreviewSources(originalSrc, imageScale);
     const source = sources[attempt];
 
@@ -62,6 +63,10 @@ const PreviewAttempt = forwardRef<HTMLImageElement, Props>(
         src={source}
         unoptimized
         onError={() => {
+          // Repeated errors from one source must not skip its fallback or
+          // notify the parent twice before React commits the next render.
+          if (failedAttempt.current === attempt) return;
+          failedAttempt.current = attempt;
           setAttempt(attempt + 1);
           if (attempt + 1 === sources.length) onError?.();
         }}

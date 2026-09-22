@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import { createElement, forwardRef, type ComponentProps } from "react";
 import { DropImagePreview } from "@/components/drops/view/item/content/media/DropImagePreview";
 import { ImageScale } from "@/helpers/image.helpers";
@@ -49,6 +49,35 @@ it("tries only bounded previews and reports exhaustion once", () => {
   expect(screen.queryByRole("img")).not.toBeInTheDocument();
   expect(screen.getByRole("status")).toHaveTextContent("Preview unavailable");
   expect(onError).toHaveBeenCalledTimes(1);
+});
+
+it("counts repeated errors from the same rendered preview only once", () => {
+  const onError = jest.fn();
+  render(
+    <DropImagePreview
+      originalSrc={original}
+      imageScale={ImageScale.AUTOx1080}
+      alt="Artwork"
+      fill
+      onError={onError}
+    />
+  );
+  const failTwice = () => {
+    const image = screen.getByAltText("Artwork");
+    act(() => {
+      fireEvent.error(image);
+      fireEvent.error(image);
+    });
+  };
+  failTwice();
+  expect(screen.getByAltText("Artwork")).toHaveAttribute(
+    "src",
+    preview("AUTOx450")
+  );
+  expect(onError).not.toHaveBeenCalled();
+  failTwice();
+  expect(onError).toHaveBeenCalledTimes(1);
+  expect(screen.queryByRole("img")).not.toBeInTheDocument();
 });
 
 it.each([
