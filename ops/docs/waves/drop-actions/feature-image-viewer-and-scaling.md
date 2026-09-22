@@ -7,6 +7,7 @@ Parent: [Wave Drop Actions Index](README.md)
 Drop attachments and markdown images render inline in wave and DM threads.
 Clicking or tapping an image opens a modal viewer with zoom and quick actions.
 Attachment images use larger scaling in single-drop views than in thread cards.
+The viewer also uses a scaled preview; opening it does not load the original.
 
 ## Location in the Site
 
@@ -50,16 +51,27 @@ Attachment images use larger scaling in single-drop views than in thread cards.
   APIs are unavailable.
 - `Open in Browser` and `Download` stay available even when fullscreen is
   hidden.
-- Scaled URL rewriting applies only to supported hosted raster image URLs
-  (`gif`, `webp`, `jpg`, `jpeg`, `png` under supported media prefixes).
+- Scaled URL rewriting applies to supported hosted raster image URLs
+  (`gif`, `webp`, `jpg`, `jpeg`, `png`, `avif` under supported media prefixes).
+  External HTTPS images use the site's guarded image-preview service. Ordinary
+  GIFs remain animated; over-budget animations use a still. Original-file actions
+  retain the source.
 - Fullscreen is requested on the current rendered image element, which can differ
   between attachment and markdown rendering paths.
 
 ## Failure and Recovery
 
-- If a scaled attachment URL fails, the viewer falls back to the original media URL.
-- If image loading still fails, users see `Couldn’t load image.` and can press
-  `Retry`.
+- If a larger preview fails, the viewer tries the smaller `AUTOx450` preview.
+  Feeds and the viewer never automatically load the original as a fallback.
+- If no supported preview is available, the image frame stays in place and shows
+  `Preview unavailable`. Thread images retry briefly while new uploads process,
+  then offer `Retry`; the viewer offers `Retry preview`.
+- `Open in browser` / `Open in new tab` and `Download media` deliberately access
+  the original. In the native app, downloads go directly to a temporary native
+  file and the share sheet, without loading the file into the image viewer.
+- Large GIFs may have a still preview when the full animation exceeds the
+  resizer's memory budget. The original animation remains available through the
+  original-file actions.
 - If a fullscreen request is denied or interrupted, the modal stays open and
   the other image actions continue to work.
 - If fullscreen is unavailable, users can still open the source in a new tab.

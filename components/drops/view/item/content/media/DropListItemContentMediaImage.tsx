@@ -1,8 +1,12 @@
 "use client";
 
-import { FallbackImage } from "@/components/common/FallbackImage";
+import {
+  DropImagePreview,
+  getDropImagePreviewSources,
+} from "./DropImagePreview";
+import Button from "@/components/utils/button/Button";
 import { useDropImageGallery } from "@/components/drops/view/part/DropImageGalleryProvider";
-import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
+import { ImageScale } from "@/helpers/image.helpers";
 import useCapacitor from "@/hooks/useCapacitor";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useInView } from "@/hooks/useInView";
@@ -46,25 +50,9 @@ function LoadingPlaceholder({
   );
 }
 
-function RetryImageMessage({ onRetry }: { readonly onRetry: () => void }) {
-  return (
-    <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-2">
-      <span className="tw-text-sm tw-text-iron-400">
-        {t(DEFAULT_LOCALE, "drop.media.loadFailed")}
-      </span>
-      <button
-        onClick={onRetry}
-        className="tw-rounded-md tw-bg-iron-700 tw-px-3 tw-py-1 tw-text-xs tw-text-white hover:tw-bg-iron-600"
-      >
-        {t(DEFAULT_LOCALE, "drop.media.retry")}
-      </button>
-    </div>
-  );
-}
-
 function DropImageContent({
   src,
-  primarySrc,
+  imageScale,
   retryTick,
   imgRef,
   loaded,
@@ -76,7 +64,7 @@ function DropImageContent({
   handleError,
 }: {
   readonly src: string;
-  readonly primarySrc: string;
+  readonly imageScale: ImageScale;
   readonly retryTick: number;
   readonly imgRef: React.RefObject<HTMLImageElement | null>;
   readonly loaded: boolean;
@@ -116,14 +104,13 @@ function DropImageContent({
       }}
     >
       {/* Drop media can come from hosts outside next.config.ts image remotePatterns. */}
-      <FallbackImage
+      <DropImagePreview
         key={retryTick}
         ref={imgRef}
-        primarySrc={primarySrc}
-        fallbackSrc={src}
+        originalSrc={src}
+        imageScale={imageScale}
         alt={t(DEFAULT_LOCALE, "drop.media.alt")}
         fill
-        optimize={false}
         loading={loadStrategy === "eager" ? "eager" : undefined}
         sizes="(max-width: 768px) 100vw, 768px"
         className={`tw-object-contain ${imageClassName}`}
@@ -133,13 +120,12 @@ function DropImageContent({
       />
     </span>
   ) : (
-    <FallbackImage
+    <DropImagePreview
       key={retryTick}
       ref={imgRef}
-      primarySrc={primarySrc}
-      fallbackSrc={src}
+      originalSrc={src}
+      imageScale={imageScale}
       alt={t(DEFAULT_LOCALE, "drop.media.alt")}
-      optimize={false}
       fill
       loading={loadStrategy === "eager" ? "eager" : undefined}
       sizes="(max-width: 768px) 100vw, 768px"
@@ -238,14 +224,16 @@ function DropListItemContentMediaImageContent({
       dialogTitle: t(DEFAULT_LOCALE, "drop.media.saveDialogTitle"),
       mimeType: "image",
     });
-  const primarySrc = getScaledImageUri(src, imageScale);
 
   const handleImageLoad = useCallback(() => {
     setLoaded(true);
   }, []);
 
   const handleError = useCallback(() => {
-    if (errorCount >= maxRetries) return;
+    if (errorCount >= maxRetries) {
+      setErrorCount(maxRetries + 1);
+      return;
+    }
     const delay = 500 * 2 ** errorCount; // 0.5s, 1s, 2s …
     setTimeout(() => {
       setErrorCount((count) => count + 1);
@@ -253,11 +241,11 @@ function DropListItemContentMediaImageContent({
     }, delay);
   }, [errorCount, maxRetries]);
 
-  const manualRetry = useCallback(() => {
+  const manualRetry = () => {
     setErrorCount(0);
     setLoaded(false);
     setRetryTick((tick) => tick + 1);
-  }, []);
+  };
 
   const openModal = useCallback(() => {
     if (disableModal) {
@@ -303,6 +291,9 @@ function DropListItemContentMediaImageContent({
   }, []);
 
   const shouldLoadImage = loadStrategy === "eager" || inView;
+  const unavailable =
+    getDropImagePreviewSources(src, imageScale).length === 0 ||
+    errorCount > maxRetries;
 
   const resolvedObjectPosition =
     imageObjectPosition ?? (isCompetitionDrop ? "center" : "left top");
@@ -324,7 +315,7 @@ function DropListItemContentMediaImageContent({
           intrinsicHeight ? "tw-min-h-40" : "tw-h-full"
         } ${isCompetitionDrop ? "tw-justify-center" : ""}`}
       >
-        {!loaded && errorCount <= maxRetries && (
+        {!loaded && !unavailable && (
           <LoadingPlaceholder hasTouchScreen={hasTouchScreen} />
         )}
 
@@ -334,10 +325,10 @@ function DropListItemContentMediaImageContent({
             intrinsicHeight ? "tw-w-full" : "tw-h-full tw-w-full"
           }`}
         >
-          {shouldLoadImage && errorCount <= maxRetries && (
+          {shouldLoadImage && (
             <DropImageContent
               src={src}
-              primarySrc={primarySrc}
+              imageScale={imageScale}
               retryTick={retryTick}
               imgRef={imgRef}
               loaded={loaded}
@@ -349,13 +340,25 @@ function DropListItemContentMediaImageContent({
               handleError={handleError}
             />
           )}
+          {unavailable && !disableModal && (
+            <div className="tw-absolute tw-bottom-3 tw-left-1/2 tw-z-30 -tw-translate-x-1/2">
+              <Button
+                type="button"
+                variant="tertiary"
+                size="xs"
+                onClick={manualRetry}
+              >
+                {t(DEFAULT_LOCALE, "drop.media.retry")}
+              </Button>
+            </div>
+          )}
           {!disableModal && (
             <ImageInteractionLayer
               boundsStyle={imageActionBoundsStyle}
               label={t(DEFAULT_LOCALE, "drop.media.openPreview")}
               onClick={handleImageClick}
               actions={
-                loaded ? (
+                loaded || unavailable ? (
                   <InlineMediaActions
                     variant="image"
                     onOpen={openMedia}
@@ -363,15 +366,14 @@ function DropListItemContentMediaImageContent({
                     onDownload={downloadMedia}
                     isDownloading={isDownloading}
                     onFullscreen={handleFullScreen}
-                    fullscreenTargetAvailable={!isCapacitor}
-                    visibility="desktop-hover"
+                    fullscreenTargetAvailable={!isCapacitor && loaded}
+                    visibility={unavailable ? "always" : "desktop-hover"}
                   />
                 ) : null
               }
             />
           )}
         </div>
-        {errorCount > maxRetries && <RetryImageMessage onRetry={manualRetry} />}
       </div>
       {!disableModal && isModalOpen && (
         <ImageMediaModal

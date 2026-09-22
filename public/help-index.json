@@ -6484,7 +6484,9 @@
       "aliases": ["image viewer", "open image", "zoom image", "scale image"],
       "keywords": ["waves", "drop", "image", "viewer", "scaling", "zoom"],
       "facts": [
-        "Wave drop image viewer and scaling behavior is documented under drop actions.",
+        "Drop images use scaled previews in feeds and the image viewer. A failed preview never automatically loads the full-size original.",
+        "If no preview is available, the frame shows Preview unavailable. Thread images retry while uploads process; Retry or Retry preview can try again. Open in browser or Open in new tab and Download media deliberately access the original.",
+        "Large GIFs may show a still preview when the animation exceeds the image resizer memory budget; the original animation remains available through the original-file actions.",
         "Use it when users ask how to inspect an image attached to a drop.",
         "Uploading images is handled by the composer image-upload behavior."
       ],

@@ -1,7 +1,10 @@
 "use client";
 
-import { FallbackImage } from "@/components/common/FallbackImage";
-import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
+import {
+  DropImagePreview,
+  getDropImagePreviewSources,
+} from "./DropImagePreview";
+import { ImageScale } from "@/helpers/image.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useInView } from "@/hooks/useInView";
 import React, { useCallback, useState } from "react";
@@ -43,7 +46,7 @@ function MediaDisplayImage({
       ref={ref}
       className="tw-relative tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center"
     >
-      {isLoading && (
+      {isLoading && getDropImagePreviewSources(src, imageScale).length > 0 && (
         <div
           className={`tw-rounded-xl tw-bg-iron-800 ${
             hasTouchScreen ? "" : "tw-animate-pulse"
@@ -52,11 +55,10 @@ function MediaDisplayImage({
         />
       )}
       {shouldLoadImage && (
-        <FallbackImage
-          primarySrc={getScaledImageUri(src, imageScale)}
-          fallbackSrc={src}
+        <DropImagePreview
+          originalSrc={src}
+          imageScale={imageScale}
           alt="Media content"
-          optimize={false}
           fill
           loading={loadStrategy === "eager" ? "eager" : undefined}
           sizes="(max-width: 768px) 100vw, 600px"

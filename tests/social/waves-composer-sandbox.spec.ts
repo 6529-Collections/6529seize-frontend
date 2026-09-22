@@ -1,4 +1,5 @@
 import type { Page, Route } from "@playwright/test";
+import { defineWaveImagePreviewTests } from "../media/waveImagePreviewCases";
 import { defineWaveVideoLayoutTests } from "../media/waveVideoLayoutCases";
 
 import {
@@ -48,6 +49,7 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
   );
 
   defineWaveVideoLayoutTests();
+  defineWaveImagePreviewTests();
 
   test("queues and removes an attachment without upload or submit", async ({
     baseURL,
