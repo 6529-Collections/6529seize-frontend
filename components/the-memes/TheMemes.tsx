@@ -344,9 +344,7 @@ export default function TheMemesComponent({
     () => initialData?.nfts ?? []
   );
   const tokenIds = useMemo(() => nfts.map((nft) => nft.id), [nfts]);
-  const [nftsNextPage, setNftsNextPage] = useState<string | undefined>(
-    () => initialData?.nextPage
-  );
+  const nftsNextPage = useRef(initialData?.nextPage);
 
   const [nftMemes, setNftMemes] = useState<Meme[]>([]);
   const [nftsByMeme, setNftsByMeme] = useState<
@@ -420,8 +418,9 @@ export default function TheMemesComponent({
 
   const activeRequest = useRef<AbortController | undefined>(undefined);
 
-  const fetchNfts = useCallback((url: string) => {
-    if (activeRequest.current !== undefined) {
+  const fetchNfts = useCallback(() => {
+    const url = nftsNextPage.current;
+    if (activeRequest.current !== undefined || url === undefined) {
       return;
     }
     const controller = new AbortController();
@@ -433,10 +432,11 @@ export default function TheMemesComponent({
         // Aborting alone is insufficient if a response has already settled.
         if (controller.signal.aborted) return;
 
+        // Advance before releasing the request lock: a queued scroll can run
+        // before React commits the card update or replaces effect listeners.
+        nftsNextPage.current =
+          typeof responseNfts.next === "string" ? responseNfts.next : undefined;
         setNfts((prev) => [...prev, ...(responseNfts.data ?? [])]);
-        setNftsNextPage(
-          typeof responseNfts.next === "string" ? responseNfts.next : undefined
-        );
       })
       .catch(() => {
         // optionally surface a toast/log here
@@ -455,13 +455,9 @@ export default function TheMemesComponent({
     if (initialDataRef.current !== undefined) {
       initialDataRef.current = undefined;
     } else {
-      const firstPage = getNftsNextPage();
+      nftsNextPage.current = getNftsNextPage();
       setNfts([]);
-      // These are local state/request updates, not callbacks to a parent.
-      /* eslint-disable react-you-might-not-need-an-effect/no-pass-live-state-to-parent */
-      setNftsNextPage(firstPage);
-      fetchNfts(firstPage);
-      /* eslint-enable react-you-might-not-need-an-effect/no-pass-live-state-to-parent */
+      fetchNfts();
     }
 
     // This also owns pagination requests started by scrolling in this view.
@@ -481,7 +477,7 @@ export default function TheMemesComponent({
   ]);
 
   useEffect(() => {
-    if (nftsNextPage === undefined) {
+    if (!filtersReady) {
       return;
     }
 
@@ -500,8 +496,8 @@ export default function TheMemesComponent({
           window.innerHeight -
           window.scrollY;
 
-        if (distanceFromBottom <= 400 && filtersReady) {
-          fetchNfts(nftsNextPage);
+        if (distanceFromBottom <= 400) {
+          fetchNfts();
         }
       }, 200);
     };
@@ -514,7 +510,7 @@ export default function TheMemesComponent({
       }
       window.removeEventListener("scroll", handleScroll);
     };
-  }, [fetchNfts, filtersReady, nftsNextPage]);
+  }, [fetchNfts, filtersReady]);
 
   function printSortDirectionButton(
     direction: SortDirection,
