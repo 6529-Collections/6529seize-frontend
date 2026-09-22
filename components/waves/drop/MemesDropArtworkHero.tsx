@@ -1,3 +1,4 @@
+import artworkStyles from "@/components/drops/view/item/content/media/ArtworkFrame.module.css";
 import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
 import videoFrameStyles from "@/components/drops/view/item/content/media/SeizeVideoFrame.module.css";
 import { ImageScale } from "@/helpers/image.helpers";
@@ -13,20 +14,24 @@ export function MemesDropArtworkHero({
 }: MemesDropArtworkHeroProps) {
   const loadStrategy =
     artworkMedia?.mime_type === "text/html" ? "in-view" : "eager";
+  const isImage = artworkMedia?.mime_type.startsWith("image/") ?? false;
   const isVideo = artworkMedia?.mime_type.includes("video") ?? false;
+
+  const isArtwork = isVideo || isImage;
 
   return (
     <div
+      data-image-artwork={isImage || undefined}
       data-video-artwork={isVideo || undefined}
       className={clsx(
         "tw-flex tw-w-full tw-flex-col",
-        isVideo ? videoFrameStyles["artworkStage"] : "lg:tw-min-h-screen"
+        isArtwork ? videoFrameStyles["artworkStage"] : "lg:tw-min-h-screen"
       )}
     >
       <div
         className={clsx(
           "tw-flex tw-items-center tw-justify-center tw-px-4 tw-py-4 sm:tw-px-6 lg:tw-py-8 xl:tw-px-20",
-          isVideo
+          isArtwork
             ? "tw-flex-1 [--video-frame-padding:2rem] lg:[--video-frame-padding:4rem]"
             : "lg:tw-flex-1"
         )}
@@ -34,9 +39,11 @@ export function MemesDropArtworkHero({
         {artworkMedia && (
           <div className="tw-mx-auto tw-flex tw-w-full tw-items-center tw-justify-center md:tw-max-w-4xl">
             <div
+              data-artwork-image-frame={isImage || undefined}
               className={clsx(
                 "tw-relative tw-w-full",
-                !isVideo &&
+                isImage && artworkStyles["submissionImage"],
+                !isArtwork &&
                   "tw-h-[clamp(24rem,calc(100dvh-10rem),42rem)] sm:tw-h-[clamp(18rem,75vw,calc(100dvh-8rem))] lg:tw-h-[95vh]"
               )}
             >
