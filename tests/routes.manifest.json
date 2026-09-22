@@ -404,6 +404,9 @@
       "classification": "crawlable",
       "family": "tools"
     },
+    "/emma/help": {
+      "classification": "crawlable"
+    },
     "/emma/plans": {
       "classification": "auth"
     },

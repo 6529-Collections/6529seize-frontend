@@ -132,7 +132,9 @@
       ],
       "facts": [
         "EMMA is the Editor for Managing Multiphase Allowlists and the first reference implementation of Janus.",
-        "The EMMA landing route lives at /emma and the plans route lives at /emma/plans.",
+        "Opening /emma while signed in goes directly to /emma/plans, including with a restored session and no live wallet connection. A connected wallet alone is not a signed-in session.",
+        "Signed-out users at /emma see wallet guidance and a Connect wallet or Sign in action. Opening a plan while signed out preserves that plan destination through sign-in.",
+        "About EMMA, the question-mark link beside the title on the entry and plans pages, opens /emma/help. This public help page contains the full introduction, Janus link, TDH policy, and Back to EMMA link.",
         "The distribution plan tool helps build mint plans with airdrops, allowlists, and public minting in one or more phases.",
         "EMMA uses TDH as a lightweight anti-spam/rate-limit measure for allowlist creation.",
         "In Create Snapshots at /emma/plans/{planId}, Use a 6529 collection presents five image rows: The Memes by 6529 (ERC1155), Meme Lab (ERC1155), 6529 Gradient (ERC721), 6529 RAW (ERC721), and 6529 Intern JPGs (ERC1155). Tab reaches each shortcut; Enter or Space selects it.",
@@ -142,7 +144,8 @@
       ],
       "canonical_path": "/emma",
       "related_paths": [
-        "/emma/plans"
+        "/emma/plans",
+        "/emma/help"
       ],
       "tags": [
         "tools",
