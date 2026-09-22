@@ -1,11 +1,15 @@
 "use client";
 
-import { FallbackImage } from "@/components/common/FallbackImage";
 import {
-  ChevronLeftIcon,
-  ChevronRightIcon,
-} from "@heroicons/react/24/outline";
-import React, { useCallback, useEffect, useState } from "react";
+  DropImagePreview,
+  getDropImagePreviewSources,
+} from "./DropImagePreview";
+import Button from "@/components/utils/button/Button";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
+import { ImageScale } from "@/helpers/image.helpers";
+import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
+import React, { useCallback, useState } from "react";
 import { createPortal } from "react-dom";
 import useKeyPressEvent from "react-use/lib/useKeyPressEvent";
 import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch";
@@ -66,12 +70,15 @@ export function ImageMediaModal({
       }
     | undefined;
 }) {
-  const [isZoomed, setIsZoomed] = useState(false);
+  const [zoomState, setZoomState] = useState({ src, isZoomed: false });
+  if (zoomState.src !== src) setZoomState({ src, isZoomed: false });
+  const isZoomed = zoomState.src === src && zoomState.isZoomed;
+  const [failedSource, setFailedSource] = useState<string | null>(null);
+  const [retry, setRetry] = useState(0);
+  const previewUnavailable =
+    failedSource === src ||
+    getDropImagePreviewSources(src, ImageScale.AUTOx1080).length === 0;
   const showGalleryControls = Boolean(gallery && gallery.total > 1);
-
-  useEffect(() => {
-    setIsZoomed(false);
-  }, [src]);
 
   const goToPrevious = useCallback(() => {
     if (gallery?.canGoPrevious) {
@@ -146,7 +153,7 @@ export function ImageMediaModal({
 
   return createPortal(
     <div
-      className="tailwind-scope tw-relative tw-z-1000 tw-cursor-default"
+      className="tailwind-scope tw-relative tw-z-[1100] tw-cursor-default"
       onTouchStart={(event) => event.stopPropagation()}
       onTouchEnd={(event) => event.stopPropagation()}
       onTouchMove={(event) => event.stopPropagation()}
@@ -163,7 +170,9 @@ export function ImageMediaModal({
         panning={{ disabled: true }}
         limitToBounds={!isZoomed}
         smooth
-        onZoom={(event) => setIsZoomed(event.state.scale > 1)}
+        onZoom={(event) =>
+          setZoomState({ src, isZoomed: event.state.scale > 1 })
+        }
       >
         {() => (
           <div className="tw-pointer-events-none tw-fixed tw-inset-0 tw-z-[1001] tw-flex tw-items-center tw-justify-center tw-overflow-hidden">
@@ -182,14 +191,16 @@ export function ImageMediaModal({
                     onClick={handleExpandedImageButtonClick}
                   >
                     {/* Drop media can come from arbitrary hosts outside Next image config. */}
-                    <FallbackImage
+                    <DropImagePreview
+                      key={`${src}:${retry}`}
                       ref={imageRef}
-                      primarySrc={src}
-                      fallbackSrc={src}
-                      alt="Full size drop media"
+                      onError={() => setFailedSource(src)}
+                      onLoad={() => setFailedSource(null)}
+                      originalSrc={src}
+                      imageScale={ImageScale.AUTOx1080}
+                      alt={t(DEFAULT_LOCALE, "drop.media.previewAlt")}
                       fill
                       sizes="95vw"
-                      optimize={false}
                       style={{
                         objectFit: "contain",
                         objectPosition: "center",
@@ -203,6 +214,21 @@ export function ImageMediaModal({
           </div>
         )}
       </TransformWrapper>
+      {previewUnavailable && (
+        <div className="tw-fixed tw-bottom-20 tw-left-1/2 tw-z-[1102] -tw-translate-x-1/2">
+          <Button
+            type="button"
+            variant="tertiary"
+            size="sm"
+            onClick={() => {
+              setFailedSource(null);
+              setRetry((value) => value + 1);
+            }}
+          >
+            {t(DEFAULT_LOCALE, "drop.media.retryPreview")}
+          </Button>
+        </div>
+      )}
       {showGalleryControls && gallery && (
         <>
           <button
@@ -214,7 +240,7 @@ export function ImageMediaModal({
               event.stopPropagation();
               goToPrevious();
             }}
-            className="tw-fixed tw-left-3 tw-top-1/2 tw-z-[1101] tw-inline-flex tw-size-10 -tw-translate-y-1/2 tw-items-center tw-justify-center tw-rounded-xl tw-border-0 tw-bg-iron-900/95 tw-text-iron-100 tw-shadow-lg tw-shadow-black/30 tw-ring-1 tw-ring-inset tw-ring-iron-700/70 tw-backdrop-blur tw-transition tw-duration-200 desktop-hover:hover:tw-bg-iron-700 disabled:tw-cursor-default disabled:tw-opacity-40 sm:tw-left-4 sm:tw-size-12"
+            className="tw-fixed tw-left-3 tw-top-1/2 tw-z-[1101] tw-inline-flex tw-size-10 -tw-translate-y-1/2 tw-items-center tw-justify-center tw-rounded-xl tw-border-0 tw-bg-iron-900/95 tw-text-iron-100 tw-shadow-lg tw-shadow-black/30 tw-ring-1 tw-ring-inset tw-ring-iron-700/70 tw-backdrop-blur tw-transition tw-duration-200 disabled:tw-cursor-default disabled:tw-opacity-40 desktop-hover:hover:tw-bg-iron-700 sm:tw-left-4 sm:tw-size-12"
           >
             <ChevronLeftIcon className="tw-size-6" aria-hidden="true" />
           </button>
@@ -227,7 +253,7 @@ export function ImageMediaModal({
               event.stopPropagation();
               goToNext();
             }}
-            className="tw-fixed tw-right-3 tw-top-1/2 tw-z-[1101] tw-inline-flex tw-size-10 -tw-translate-y-1/2 tw-items-center tw-justify-center tw-rounded-xl tw-border-0 tw-bg-iron-900/95 tw-text-iron-100 tw-shadow-lg tw-shadow-black/30 tw-ring-1 tw-ring-inset tw-ring-iron-700/70 tw-backdrop-blur tw-transition tw-duration-200 desktop-hover:hover:tw-bg-iron-700 disabled:tw-cursor-default disabled:tw-opacity-40 sm:tw-right-4 sm:tw-size-12"
+            className="tw-fixed tw-right-3 tw-top-1/2 tw-z-[1101] tw-inline-flex tw-size-10 -tw-translate-y-1/2 tw-items-center tw-justify-center tw-rounded-xl tw-border-0 tw-bg-iron-900/95 tw-text-iron-100 tw-shadow-lg tw-shadow-black/30 tw-ring-1 tw-ring-inset tw-ring-iron-700/70 tw-backdrop-blur tw-transition tw-duration-200 disabled:tw-cursor-default disabled:tw-opacity-40 desktop-hover:hover:tw-bg-iron-700 sm:tw-right-4 sm:tw-size-12"
           >
             <ChevronRightIcon className="tw-size-6" aria-hidden="true" />
           </button>
@@ -246,7 +272,9 @@ export function ImageMediaModal({
         onDownload={onDownload}
         isDownloading={isDownloading}
         onFullscreen={onFullscreen}
-        fullscreenTargetAvailable={fullscreenTargetAvailable}
+        fullscreenTargetAvailable={
+          fullscreenTargetAvailable && !previewUnavailable
+        }
         onClose={onClose}
       />
     </div>,

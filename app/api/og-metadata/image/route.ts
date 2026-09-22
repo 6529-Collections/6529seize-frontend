@@ -24,6 +24,7 @@ const MAX_INPUT_DIMENSION = 65_536;
 // Ordinary multi-image cards can wait briefly without allocating image buffers.
 const imageAdmission = new AdmissionQueue({ maxPending: 32, waitMs: 15_000 });
 const OVERSIZED_GIF_PREVIEW_MAX_BYTES = 8 * 1024 * 1024;
+const MAX_ANIMATED_WORK_BYTES = 512 * 1024 * 1024;
 const PNG_CONTENT_TYPE = "image/png";
 const GIF_CONTENT_TYPE = "image/gif";
 const CACHE_CONTROL =
@@ -222,7 +223,9 @@ const readImageResponseBuffer = async (
   return Buffer.concat(chunks, totalBytes);
 };
 
-const fetchImageBuffer = async (url: URL): Promise<Buffer> => {
+const fetchImageBuffer = async (
+  url: URL
+): Promise<{ buffer: Buffer; complete: boolean }> => {
   const response = await fetchPublicUrl(
     url,
     {
@@ -242,7 +245,10 @@ const fetchImageBuffer = async (url: URL): Promise<Buffer> => {
   const contentType = getResponseContentType(response);
   if (shouldUseOversizedGifPreview({ contentLength, contentType, url })) {
     await cancelResponseBody(response);
-    return fetchOversizedGifPreviewBuffer(url);
+    return {
+      buffer: await fetchOversizedGifPreviewBuffer(url),
+      complete: false,
+    };
   }
 
   if (contentLength !== null) {
@@ -254,7 +260,7 @@ const fetchImageBuffer = async (url: URL): Promise<Buffer> => {
     }
   }
 
-  return readImageResponseBuffer(response);
+  return { buffer: await readImageResponseBuffer(response), complete: true };
 };
 
 const fetchOversizedGifPreviewBuffer = async (url: URL): Promise<Buffer> => {
@@ -311,13 +317,15 @@ const detectContentType = (buffer: Buffer): string | null => {
   return null;
 };
 
-const normalizeImageToPng = async ({
+const normalizeImage = async ({
   buffer,
   width,
+  allowAnimation,
 }: {
   readonly buffer: Buffer;
   readonly width: number;
-}): Promise<Buffer> => {
+  readonly allowAnimation: boolean;
+}): Promise<{ data: Buffer; contentType: string }> => {
   const detectedContentType = detectContentType(buffer);
   if (!detectedContentType?.startsWith("image/")) {
     throw new Error("Upstream response is not an image.");
@@ -331,16 +339,39 @@ const normalizeImageToPng = async ({
   }).timeout({ seconds: 7 });
   // Read only the first frame, so animation length does not consume the pixel
   // budget. Sharp enforces its finite pixel limit while opening this metadata.
-  ensureAllowedImageDimensions(await image.metadata());
-
-  return image
+  const metadata = await image.metadata();
+  ensureAllowedImageDimensions(metadata);
+  const frames = metadata.pages ?? 1;
+  const animatedWorkBytes =
+    metadata.width * (metadata.pageHeight ?? metadata.height) * frames * 16;
+  const animated =
+    allowAnimation &&
+    detectedContentType === GIF_CONTENT_TYPE &&
+    Number.isSafeInteger(frames) &&
+    frames > 1 &&
+    Number.isSafeInteger(animatedWorkBytes) &&
+    animatedWorkBytes <= MAX_ANIMATED_WORK_BYTES;
+  // Preserve ordinary external GIFs without admitting an unbounded animation.
+  // Range-fetched or over-budget GIFs keep the existing first-frame PNG path.
+  const output = (
+    animated
+      ? sharp(buffer, {
+          animated: true,
+          limitInputPixels: MAX_ANIMATED_WORK_BYTES / 16,
+        }).timeout({ seconds: 7 })
+      : image
+  )
     .rotate()
-    .resize(width, MAX_HEIGHT, {
-      fit: "inside",
-      withoutEnlargement: true,
-    })
-    .png({ quality: 100 })
-    .toBuffer();
+    .resize(width, MAX_HEIGHT, { fit: "inside", withoutEnlargement: true });
+  if (animated)
+    return {
+      data: await output.gif().toBuffer(),
+      contentType: GIF_CONTENT_TYPE,
+    };
+  return {
+    data: await output.png({ quality: 100 }).toBuffer(),
+    contentType: PNG_CONTENT_TYPE,
+  };
 };
 
 const ensureAllowedImageDimensions = (metadata: Metadata): void => {
@@ -371,13 +402,18 @@ export async function GET(request: NextRequest) {
     const imageUrl = parseImageUrl(request.nextUrl.searchParams.get("url"));
     const width = parseWidth(request.nextUrl.searchParams.get("w"));
     releaseAdmission = await imageAdmission.acquire(request.signal);
-    const buffer = await fetchImageBuffer(imageUrl);
-    const png = await normalizeImageToPng({ buffer, width });
+    const { buffer, complete } = await fetchImageBuffer(imageUrl);
+    const { data, contentType } = await normalizeImage({
+      buffer,
+      width,
+      allowAnimation:
+        complete && request.nextUrl.searchParams.get("animated") === "1",
+    });
 
-    return new NextResponse(new Uint8Array(png), {
+    return new NextResponse(new Uint8Array(data), {
       headers: {
         "Cache-Control": CACHE_CONTROL,
-        "Content-Type": PNG_CONTENT_TYPE,
+        "Content-Type": contentType,
       },
     });
   } catch (error) {

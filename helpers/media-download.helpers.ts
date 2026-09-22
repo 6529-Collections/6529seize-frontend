@@ -1,4 +1,7 @@
-import { shareFetchedBlobInNativeApp } from "@/helpers/capacitorBlobDownload.helpers";
+import {
+  downloadAndShareInNativeApp,
+  shareFetchedBlobInNativeApp,
+} from "@/helpers/capacitorBlobDownload.helpers";
 
 const DOWNLOAD_URL_PROTOCOLS = new Set(["blob:", "http:", "https:"]);
 const MEDIA_DOWNLOAD_FETCH_TIMEOUT_MS = 120_000;
@@ -55,6 +58,12 @@ export async function downloadMediaUrl({
   readonly isCapacitor: boolean;
   readonly dialogTitle?: string | undefined;
 }) {
+  const safeUrl = getSafeDownloadUrl(url);
+  if (isCapacitor && !safeUrl.startsWith("blob:")) {
+    await downloadAndShareInNativeApp(safeUrl, fileName, dialogTitle);
+    return;
+  }
+
   const controller = new AbortController();
   const timeoutId = globalThis.window.setTimeout(() => {
     controller.abort();

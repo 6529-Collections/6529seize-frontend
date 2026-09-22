@@ -24,7 +24,7 @@ jest.mock("next/image", () => ({
 }));
 
 jest.mock("@/helpers/image.helpers", () => ({
-  getScaledImageUri: (_src: string) => _src,
+  getScaledImageUri: (src: string) => `${src}?preview`,
   ImageScale: { AUTOx450: "AUTOx450", AUTOx1080: "AUTOx1080" },
 }));
 
@@ -66,11 +66,11 @@ describe("DropListItemContentMediaImage", () => {
     const img = screen.getByAltText("Drop media");
     fireEvent.load(img);
     fireEvent.click(screen.getByRole("button", { name: "Open image preview" }));
-    const modalImage = screen.getByAltText("Full size drop media");
+    const modalImage = screen.getByAltText("Expanded image preview");
     expect(modalImage).toBeInTheDocument();
     fireEvent.click(screen.getByTestId("modal-backdrop"));
     expect(
-      screen.queryByAltText("Full size drop media")
+      screen.queryByAltText("Expanded image preview")
     ).not.toBeInTheDocument();
   });
 
@@ -83,7 +83,7 @@ describe("DropListItemContentMediaImage", () => {
     fireEvent.click(screen.getByTestId("modal-backdrop"));
 
     expect(
-      screen.queryByAltText("Full size drop media")
+      screen.queryByAltText("Expanded image preview")
     ).not.toBeInTheDocument();
   });
 
@@ -93,7 +93,7 @@ describe("DropListItemContentMediaImage", () => {
     fireEvent.load(img);
     fireEvent.click(screen.getByRole("button", { name: "Open image preview" }));
 
-    const modalImage = screen.getByAltText("Full size drop media");
+    const modalImage = screen.getByAltText("Expanded image preview");
     Object.defineProperty(modalImage, "naturalWidth", {
       configurable: true,
       value: 100,
@@ -117,7 +117,7 @@ describe("DropListItemContentMediaImage", () => {
     fireEvent.click(modalImage, { clientX: 50, clientY: 10 });
 
     expect(
-      screen.queryByAltText("Full size drop media")
+      screen.queryByAltText("Expanded image preview")
     ).not.toBeInTheDocument();
   });
 
@@ -127,7 +127,7 @@ describe("DropListItemContentMediaImage", () => {
     fireEvent.load(img);
     fireEvent.click(screen.getByRole("button", { name: "Open image preview" }));
 
-    const modalImage = screen.getByAltText("Full size drop media");
+    const modalImage = screen.getByAltText("Expanded image preview");
     Object.defineProperty(modalImage, "naturalWidth", {
       configurable: true,
       value: 100,
@@ -151,7 +151,7 @@ describe("DropListItemContentMediaImage", () => {
     fireEvent.click(modalImage, { clientX: 50, clientY: 50 });
 
     expect(
-      screen.queryByAltText("Full size drop media")
+      screen.queryByAltText("Expanded image preview")
     ).not.toBeInTheDocument();
   });
 
@@ -161,7 +161,7 @@ describe("DropListItemContentMediaImage", () => {
     fireEvent.load(img);
     fireEvent.click(img);
     expect(
-      screen.queryByAltText("Full size drop media")
+      screen.queryByAltText("Expanded image preview")
     ).not.toBeInTheDocument();
   });
 
@@ -200,7 +200,7 @@ describe("DropListItemContentMediaImage", () => {
     fireEvent.load(screen.getByAltText("Drop media"));
     fireEvent.click(screen.getByRole("button", { name: "Open image preview" }));
 
-    expect(screen.getByAltText("Full size drop media")).toBeInTheDocument();
+    expect(screen.getByAltText("Expanded image preview")).toBeInTheDocument();
     expect(
       screen.getAllByRole("button", { name: "Download media" }).length
     ).toBeGreaterThanOrEqual(1);
@@ -240,7 +240,6 @@ describe("DropListItemContentMediaImage", () => {
     );
 
     fireEvent.error(screen.getByAltText("Drop media"));
-    fireEvent.error(screen.getByAltText("Drop media"));
 
     expect(setTimeoutSpy).toHaveBeenCalledWith(expect.any(Function), 500);
 
@@ -250,8 +249,18 @@ describe("DropListItemContentMediaImage", () => {
 });
 
 describe("DropListItemContentMediaImage retry", () => {
-  it("shows error and retries manually", () => {
-    render(<DropListItemContentMediaImage src="img" maxRetries={-1} />);
-    expect(screen.getByText("Couldn’t load image.")).toBeInTheDocument();
+  it("keeps original actions available after a preview fails", () => {
+    render(<DropListItemContentMediaImage src="img" />);
+    fireEvent.error(screen.getByAltText("Drop media"));
+    expect(screen.getByText("Preview unavailable")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Download media" })
+    ).toBeInTheDocument();
+    expect(screen.queryByAltText("Drop media")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Retry" }));
+    expect(screen.getByAltText("Drop media")).toHaveAttribute(
+      "src",
+      "img?preview"
+    );
   });
 });

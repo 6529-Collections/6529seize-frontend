@@ -40,7 +40,7 @@ jest.mock("@/helpers/Helpers", () => ({
 }));
 
 jest.mock("@/helpers/image.helpers", () => ({
-  getScaledImageUri: (src: string) => src,
+  getScaledImageUri: (src: string) => `${src}?preview`,
   ImageScale: {
     AUTOx450: "AUTOx450",
     AUTOx800: "AUTOx800",
@@ -90,16 +90,16 @@ describe("DropPartContent image gallery", () => {
 
     fireEvent.click(bodyImageButton);
 
-    expect(screen.getByAltText("Full size drop media")).toHaveAttribute(
+    expect(screen.getByAltText("Expanded image preview")).toHaveAttribute(
       "src",
-      "/body.png"
+      "/body.png" + "?preview"
     );
 
     fireEvent.click(screen.getByRole("button", { name: "Next image" }));
 
-    expect(screen.getByAltText("Full size drop media")).toHaveAttribute(
+    expect(screen.getByAltText("Expanded image preview")).toHaveAttribute(
       "src",
-      "upload.png"
+      "upload.png" + "?preview"
     );
   });
 
@@ -121,9 +121,9 @@ describe("DropPartContent image gallery", () => {
 
     fireEvent.click(uploadedImageButton);
 
-    expect(screen.getByAltText("Full size drop media")).toHaveAttribute(
+    expect(screen.getByAltText("Expanded image preview")).toHaveAttribute(
       "src",
-      "upload.png"
+      "upload.png" + "?preview"
     );
     expect(screen.getByTestId("image-gallery-counter")).toHaveTextContent(
       "2 / 2"

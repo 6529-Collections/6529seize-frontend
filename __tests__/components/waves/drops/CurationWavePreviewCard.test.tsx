@@ -57,6 +57,7 @@ jest.mock("@/components/common/FallbackImage", () => ({
 
 jest.mock("@/helpers/image.helpers", () => ({
   ImageScale: {
+    AUTOx450: "AUTOx450",
     W_AUTO_H_50: "W_AUTO_H_50",
     W_200_H_200: "W_200_H_200",
   },
@@ -207,11 +208,6 @@ const mockResolvedProfileCurationDrops = (drops: readonly PreviewDrop[]) => {
     isFetched: true,
   });
 };
-
-const getFallbackImagesForSrc = (src: string): HTMLElement[] =>
-  screen
-    .queryAllByTestId("fallback-image")
-    .filter((image) => image.dataset.fallbackSrc === src);
 
 describe("CurationWavePreviewCard", () => {
   beforeEach(() => {
@@ -414,7 +410,7 @@ describe("CurationWavePreviewCard", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("renders image preview media as an image tile", () => {
+  it("renders an image preview without falling back to the original", () => {
     const imageUrl = "https://cdn.example.com/artwork.webp";
     mockResolvedProfileCurationDrops([
       createPreviewDrop({
@@ -426,8 +422,15 @@ describe("CurationWavePreviewCard", () => {
 
     render(<CurationWavePreviewCard waveId="wave-1" profileIdentity="alice" />);
 
-    expect(getFallbackImagesForSrc(imageUrl)).toHaveLength(1);
+    const tile = within(screen.getByLabelText("Curated media"));
+    const image = tile.getByAltText("");
+    expect(image).toHaveAttribute("src", `scaled:${imageUrl}`);
     expect(screen.queryByTestId("video-play-icon")).not.toBeInTheDocument();
+
+    fireEvent.error(image);
+
+    expect(tile.queryByAltText("")).not.toBeInTheDocument();
+    expect(tile.getByRole("status")).toHaveTextContent("Preview unavailable");
   });
 
   it("renders video preview thumbnails with a play indicator", () => {
@@ -443,7 +446,9 @@ describe("CurationWavePreviewCard", () => {
 
     render(<CurationWavePreviewCard waveId="wave-1" profileIdentity="alice" />);
 
-    expect(getFallbackImagesForSrc(thumbnailUrl)).toHaveLength(1);
+    expect(
+      within(screen.getByLabelText("Curated video")).getByAltText("")
+    ).toHaveAttribute("src", `scaled:${thumbnailUrl}`);
     expect(screen.getByTestId("video-play-icon")).toBeInTheDocument();
   });
 
@@ -459,8 +464,10 @@ describe("CurationWavePreviewCard", () => {
 
     render(<CurationWavePreviewCard waveId="wave-1" profileIdentity="alice" />);
 
-    expect(getFallbackImagesForSrc(videoUrl)).toHaveLength(0);
     expect(screen.getByLabelText("Curated video")).toBeInTheDocument();
+    expect(
+      within(screen.getByLabelText("Curated video")).queryByAltText("")
+    ).not.toBeInTheDocument();
     expect(screen.getByTestId("video-play-icon")).toBeInTheDocument();
   });
 });

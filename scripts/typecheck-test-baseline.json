@@ -563,7 +563,7 @@
     "__tests__/components/waves/drops/ContentSegmentComponent.test.tsx": 3,
     "__tests__/components/waves/drops/create/lexical/nodes/EmojiNode.test.tsx": 3,
     "__tests__/components/waves/drops/CurationWaveBadge.test.tsx": 1,
-    "__tests__/components/waves/drops/CurationWavePreviewCard.test.tsx": 3,
+    "__tests__/components/waves/drops/CurationWavePreviewCard.test.tsx": 2,
     "__tests__/components/waves/drops/Drop.test.tsx": 5,
     "__tests__/components/waves/drops/DropAuthorBadges.test.tsx": 15,
     "__tests__/components/waves/drops/DropContext.test.tsx": 1,

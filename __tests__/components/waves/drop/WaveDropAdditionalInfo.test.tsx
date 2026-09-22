@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { WaveDropAdditionalInfo } from "@/components/waves/drop/WaveDropAdditionalInfo";
 import { MemesSubmissionAdditionalInfoKey } from "@/components/waves/memes/submission/types/OperationalData";
-import { FallbackImage } from "@/components/common/FallbackImage";
+import { DropImagePreview } from "@/components/drops/view/item/content/media/DropImagePreview";
 
 const mockVideoPlayer = jest.fn((props: any) => (
   <video data-testid="video-player" preload={props.preload} />
@@ -12,11 +12,14 @@ jest.mock("next/image", () => ({
   default: (props: any) => <img {...props} alt={props.alt ?? ""} />,
 }));
 
-jest.mock("@/components/common/FallbackImage", () => ({
-  FallbackImage: jest.fn((props: any) => (
-    <img src={props.primarySrc} alt={props.alt ?? ""} />
-  )),
-}));
+jest.mock(
+  "@/components/drops/view/item/content/media/DropImagePreview",
+  () => ({
+    DropImagePreview: jest.fn((props: any) => (
+      <img src={props.originalSrc} alt={props.alt ?? ""} />
+    )),
+  })
+);
 
 jest.mock(
   "@/components/drops/view/item/content/media/SeizeVideoPlayer",
@@ -36,11 +39,11 @@ jest.mock("@/components/ipfs/IPFSContext", () => ({
 const buildDrop = (metadata: { data_key: string; data_value: string }[]) =>
   ({ metadata }) as any;
 
-const fallbackImageMock = FallbackImage as jest.Mock;
+const previewImageMock = DropImagePreview as jest.Mock;
 
 describe("WaveDropAdditionalInfo", () => {
   beforeEach(() => {
-    fallbackImageMock.mockClear();
+    previewImageMock.mockClear();
     mockVideoPlayer.mockClear();
   });
 
@@ -185,13 +188,13 @@ describe("WaveDropAdditionalInfo", () => {
       />
     );
 
-    const previewImageCall = fallbackImageMock.mock.calls.find(
+    const previewImageCall = previewImageMock.mock.calls.find(
       ([props]) => props.alt === "Preview image"
     );
 
     expect(previewImageCall?.[0]).toEqual(
       expect.objectContaining({
-        fallbackSrc: resolvedPreviewImage,
+        originalSrc: resolvedPreviewImage,
       })
     );
   });

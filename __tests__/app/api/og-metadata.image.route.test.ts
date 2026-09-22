@@ -297,6 +297,40 @@ describe("/api/og-metadata/image", () => {
     expect(metadata).toMatchObject({ format: "png", width: 24, height: 12 });
   });
 
+  it("preserves ordinary external GIF animation only when explicitly requested", async () => {
+    mockImageResponse(GIF_2_FRAME.byteLength, "image/gif", GIF_2_FRAME);
+    const request = createRequest("https://cdn.test/art.gif");
+    request.nextUrl.searchParams.set("animated", "1");
+    const response = await GET(request);
+    const metadata = await actualSharp(
+      Buffer.from(await response.arrayBuffer()),
+      { animated: true }
+    ).metadata();
+    expect(response.headers.get("content-type")).toBe("image/gif");
+    expect(metadata).toMatchObject({ width: 2, pageHeight: 2, pages: 2 });
+    const original = await actualSharp(GIF_2_FRAME, {
+      animated: true,
+    }).metadata();
+    expect(metadata.delay).toEqual(original.delay);
+    expect(metadata.loop).toBe(original.loop);
+  });
+
+  it("keeps a first-frame preview when external animation exceeds the decoded budget", async () => {
+    const image = actualSharp(GIF_2_FRAME);
+    const metadata = await image.metadata();
+    jest
+      .spyOn(image, "metadata")
+      .mockResolvedValue({ ...metadata, pages: 100_000_000 });
+    mockSharp.mockReturnValueOnce(image);
+    mockImageResponse(GIF_2_FRAME.byteLength, "image/gif", GIF_2_FRAME);
+    const request = createRequest("https://cdn.test/art.gif");
+    request.nextUrl.searchParams.set("animated", "1");
+    const response = await GET(request);
+    expect(response.status).toBe(200);
+    expect(response.headers.get("content-type")).toBe("image/png");
+    expect(mockSharp).toHaveBeenCalledTimes(1);
+  });
+
   it("preserves the GIF first-frame colors in a static PNG", async () => {
     mockImageResponse(GIF_2_FRAME.byteLength, "image/gif", GIF_2_FRAME);
 
@@ -544,13 +578,15 @@ describe("/api/og-metadata/image", () => {
     }
   });
 
-  it("uses a bounded range request for oversized GIF previews", async () => {
+  it("uses a static bounded range preview even when animation is requested", async () => {
     mockImageResponse(108 * 1024 * 1024, "image/gif");
     mockImageResponse(GIF_2_FRAME.byteLength, "image/gif", GIF_2_FRAME, 206);
 
-    const response = await GET(
-      createRequest("https://d3lqz0a4bldqgf.cloudfront.net/large.gif")
+    const request = createRequest(
+      "https://d3lqz0a4bldqgf.cloudfront.net/large.gif"
     );
+    request.nextUrl.searchParams.set("animated", "1");
+    const response = await GET(request);
 
     expect(response.status).toBe(200);
     expect(response.headers.get("content-type")).toBe("image/png");
