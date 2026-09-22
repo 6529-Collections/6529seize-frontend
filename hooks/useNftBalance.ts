@@ -50,34 +50,45 @@ export function useNftContractBalances({
   readonly tokenIds: readonly number[];
   readonly enabled?: boolean;
 }) {
-  const uniqueTokenIds = Array.from(new Set(tokenIds)).sort((a, b) => a - b);
-  const tokenIdsParam = uniqueTokenIds.join(",");
+  const normalizedContract = contract.toLowerCase();
 
+  // A collection's ownership snapshot is independent of the visible grid pages.
+  // Keep it cached while scrolling, sorting, or filtering the collection.
   return useQuery<NftOwner[]>({
-    queryKey: [
-      "nft-contract-balances",
-      consolidationKey,
-      contract,
-      tokenIdsParam,
-    ],
-    queryFn: async () => {
-      if (!consolidationKey || tokenIdsParam.length === 0) {
+    queryKey: ["nft-contract-balances", consolidationKey, normalizedContract],
+    queryFn: async ({ signal }) => {
+      if (!consolidationKey) {
         return [];
       }
 
-      const response = await commonApiFetch<
-        DBResponse<NftOwner>,
-        Record<string, string>
-      >({
-        endpoint: `nft-owners/consolidation/${consolidationKey}`,
-        params: {
-          contract,
-          token_id: tokenIdsParam,
-        },
-      });
+      const balances: NftOwner[] = [];
+      let page = 1;
+      let hasNextPage = true;
 
-      return response.data ?? [];
+      while (hasNextPage) {
+        const response = await commonApiFetch<
+          DBResponse<NftOwner>,
+          Record<string, string>
+        >({
+          endpoint: `nft-owners/consolidation/${consolidationKey}`,
+          params: {
+            contract: normalizedContract,
+            page: String(page),
+            page_size: "100",
+          },
+          signal,
+          errorMode: "structured",
+        });
+
+        balances.push(...response.data);
+        hasNextPage = Boolean(response.next);
+        page += 1;
+      }
+
+      // Publish only a complete snapshot: a missing row then means zero balance,
+      // rather than an owned token omitted from the first API response page.
+      return balances;
     },
-    enabled: enabled && !!consolidationKey && tokenIdsParam.length > 0,
+    enabled: enabled && !!consolidationKey && tokenIds.length > 0,
   });
 }
