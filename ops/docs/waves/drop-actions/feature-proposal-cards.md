@@ -17,8 +17,8 @@ presentations are not changed by this setting.
 The Network Museum Wave predates the Create Wave recipe control. The frontend
 therefore recognizes its existing Wave ID as a compatibility fallback and
 applies the default summary recipe (`360` characters with the first ready still
-image enabled). Wave admins can replace that fallback from the Wave's `Settings`
-sidebar, and the saved choice then takes precedence.
+image enabled). Wave admins can replace that fallback from the Wave's
+`Configuration` section, and the saved choice then takes precedence.
 
 ## Location in the Site
 
@@ -36,11 +36,11 @@ sidebar, and the saved choice then takes precedence.
   cards.
 - Select a quoted proposal or a same-origin proposal preview inside another
   drop.
-- While creating a `Rank` or `Approve` Wave, open `Appearance and labels` in
-  `Overview`. New Waves default to `Summary card`; choose `Full proposal` to
+- While creating a `Rank` or `Approve` Wave, open `Appearance and labels`. New Waves default to `Summary card`; choose `Full proposal` to
   keep the previous full-content presentation.
-- For an existing standard `Rank` or `Approve` Wave, open the right sidebar,
-  select `Settings`, and edit `Proposal cards` under `Display`.
+- For an existing standard `Rank` or `Approve` Wave, open the right sidebar
+  (or `Wave details` on mobile), select `Configuration`, and use the gear beside
+  `Proposal cards`.
 
 ## User Journey
 
@@ -51,10 +51,15 @@ sidebar, and the saved choice then takes precedence.
 4. Read the complete original proposal in the focused drop view.
 5. Close the focused view to return to the proposal list.
 
-To change an existing Wave, an admin opens `Settings` -> `Display` ->
-`Proposal cards`, chooses `Full proposal` or `Summary card`, adjusts the summary
-options when shown, and saves. The proposal views update to use the saved
-presentation.
+To change an existing Wave, a creator or eligible admin opens `Configuration` ->
+`Proposal cards` and chooses a visual `Full proposal` or `Summary card` tile.
+Each tile includes a layout preview and a readable label; the selected tile has
+an accent border and checkmark. Adjust the summary options when shown, then
+select `Save`. The proposal views update for everyone in that Wave.
+
+The closed section shows a layout icon beside the saved choice. `Cancel`,
+`Escape`, or closing the editor discards the draft; reopening starts with the
+saved settings. The editor opens in a desktop popover or a mobile/touch sheet.
 
 ## Common Scenarios
 
@@ -81,6 +86,8 @@ presentation.
   block forward navigation instead of being silently accepted.
 - Very short proposals remain compact and do not receive invented descriptive
   text.
+- `Read full` follows the excerpt, or the title when there is no excerpt, in
+  the text column. A taller preview image does not push the action below it.
 - The surrounding proposal row keeps its existing author, date, status, vote,
   voter, and action controls.
 
@@ -118,7 +125,7 @@ presentation.
   display preference.
 - Creating a Wave persists Summary card as a versioned Wave metadata recipe.
   Full proposal creates no recipe and keeps the previous presentation.
-- Saving either choice from an existing Wave's `Settings` sidebar makes that
+- Saving either choice from an existing Wave's `Configuration` section makes that
   choice explicit. This lets a compatibility Wave such as the Network Museum
   switch to `Full proposal` or use different Summary card options.
 - This card presentation is reusable across standard proposal-bearing Waves but

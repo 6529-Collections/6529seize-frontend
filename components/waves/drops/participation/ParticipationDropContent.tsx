@@ -3,6 +3,7 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 import WaveDropContent from "../WaveDropContent";
 import type { DropContentPresentation } from "../dropContentPresentation";
 import type { ImageScale } from "@/helpers/image.helpers";
+import type { ReactNode } from "react";
 
 interface ParticipationDropContentProps {
   readonly drop: ExtendedDrop;
@@ -18,6 +19,7 @@ interface ParticipationDropContentProps {
   readonly fullWidthMedia?: boolean | undefined;
   readonly fullWidthLinkPreviews?: boolean | undefined;
   readonly contentPresentation?: DropContentPresentation | undefined;
+  readonly proposalCardTextFooter?: ReactNode;
   readonly embedPath?: readonly string[] | undefined;
   readonly quotePath?: readonly string[] | undefined;
   readonly embedDepth?: number | undefined;
@@ -38,6 +40,7 @@ export default function ParticipationDropContent({
   fullWidthMedia = false,
   fullWidthLinkPreviews = false,
   contentPresentation = "default",
+  proposalCardTextFooter,
   embedPath,
   quotePath,
   embedDepth,
@@ -60,6 +63,7 @@ export default function ParticipationDropContent({
         fullWidthLinkPreviews={fullWidthLinkPreviews}
         hasTouch={hasTouch}
         contentPresentation={contentPresentation}
+        proposalCardTextFooter={proposalCardTextFooter}
         embedPath={embedPath}
         quotePath={quotePath}
         embedDepth={embedDepth}

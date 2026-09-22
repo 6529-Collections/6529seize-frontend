@@ -294,7 +294,9 @@ describe("CreateDropActions", () => {
   it("centers the desktop action row against the input", () => {
     render(<CreateDropActions {...defaultProps} />);
 
-    const actionSlot = screen.getByTestId("drop-actions-motion-shell").parentElement;
+    const actionSlot = screen.getByTestId(
+      "drop-actions-motion-shell"
+    ).parentElement;
     expect(actionSlot).toHaveClass("tw-self-center");
     expect(actionSlot).not.toHaveClass("tw-self-end", "tw-mb-1");
   });
@@ -530,6 +532,29 @@ describe("CreateDropActions", () => {
     expect(uploadLabels[0]).toHaveClass("tw-text-[#FEDF89]");
   });
 
+  it("scopes action tooltips to each mounted composer", () => {
+    render(
+      <>
+        <CreateDropActions {...defaultProps} />
+        <CreateDropActions {...defaultProps} />
+      </>
+    );
+
+    const uploadButtons = screen.getAllByLabelText("Upload a file");
+    const tooltipIds = uploadButtons.map((button) =>
+      button.getAttribute("data-tooltip-id")
+    );
+
+    expect(tooltipIds).toHaveLength(2);
+    expect(tooltipIds.every(Boolean)).toBe(true);
+    expect(new Set(tooltipIds)).toHaveProperty("size", 2);
+    expect(
+      uploadButtons.every(
+        (button) => button.getAttribute("data-tooltip-content") === "Upload"
+      )
+    ).toBe(true);
+  });
+
   it("highlights chevron button when any required content is missing", () => {
     render(
       <CreateDropActions
@@ -551,10 +576,7 @@ describe("CreateDropActions", () => {
     render(<CreateDropActions {...defaultProps} />);
 
     const fileInput = getFileInput();
-    expect(fileInput).toHaveAttribute(
-      "accept",
-      DROP_UPLOAD_ACCEPT
-    );
+    expect(fileInput).toHaveAttribute("accept", DROP_UPLOAD_ACCEPT);
     expect(fileInput).toHaveAttribute("multiple");
   });
 

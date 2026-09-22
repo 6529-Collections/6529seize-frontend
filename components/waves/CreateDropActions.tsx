@@ -2,7 +2,7 @@
 
 import { DROP_UPLOAD_ACCEPT } from "@/services/uploads/mediaUploadMimeType";
 import { publicEnv } from "@/config/env";
-import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
+import { buildTooltipId } from "@/helpers/tooltip.helpers";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -17,7 +17,7 @@ import {
   useReducedMotion,
 } from "framer-motion";
 import React, { memo, useEffect, useId, useRef, useState } from "react";
-import { Tooltip } from "react-tooltip";
+import MyStreamActionTooltip from "@/components/brain/my-stream/MyStreamActionTooltip";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
@@ -168,6 +168,7 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
     const prefersReducedMotion = useReducedMotion();
     const locale = useBrowserLocale();
     const actionTrayId = useId();
+    const tooltipScopeId = useId();
     const addGifLabel = t(locale, "waves.gifPicker.open");
     const showActionsLabel = t(locale, "waves.composer.actions.show");
     const hideActionsLabel = t(locale, "waves.composer.actions.hide");
@@ -178,6 +179,16 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
     const pollLabel = t(locale, "waves.composer.actions.poll");
     const addPollLabel = t(locale, "waves.poll.composer.add");
     const stormLabel = t(locale, "waves.composer.actions.storm");
+    const metadataTooltipId = buildTooltipId(
+      "drop-actions-metadata",
+      tooltipScopeId
+    );
+    const uploadTooltipId = buildTooltipId(
+      "drop-actions-upload",
+      tooltipScopeId
+    );
+    const gifTooltipId = buildTooltipId("drop-actions-gif", tooltipScopeId);
+    const pollTooltipId = buildTooltipId("drop-actions-poll", tooltipScopeId);
     const gifPickerKey = publicEnv.GIPHY_API_KEY;
     const [showGifPicker, setShowGifPicker] = useState(false);
     const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -304,37 +315,28 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
       isRequired: isCompactToggleRequired,
     });
 
-    const pollAction = canCreatePoll && !isPollActive ? (
-      <>
-        <button
-          type="button"
-          aria-label={addPollLabel}
-          onClick={onTogglePoll}
-          disabled={isStormMode}
-          className={`tw-flex tw-size-8 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-transition tw-duration-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 desktop-hover:hover:tw-bg-iron-700/70 lg:tw-size-7 ${getPollActionStyles(
-            { isStormMode }
-          )}`}
-          data-tooltip-id="add-poll-tooltip"
-        >
-          <ChartBarIcon
-            className="tw-size-4 tw-flex-shrink-0"
-            aria-hidden="true"
-          />
-        </button>
-        {!isMobile && (
-          <Tooltip
-            id="add-poll-tooltip"
-            place="top"
-            offset={8}
-            opacity={1}
-            positionStrategy="fixed"
-            style={TOOLTIP_STYLES}
+    const pollAction =
+      canCreatePoll && !isPollActive ? (
+        <>
+          <button
+            type="button"
+            aria-label={addPollLabel}
+            onClick={onTogglePoll}
+            disabled={isStormMode}
+            className={`tw-flex tw-size-8 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-transition tw-duration-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 desktop-hover:hover:tw-bg-iron-700/70 lg:tw-size-7 ${getPollActionStyles(
+              { isStormMode }
+            )}`}
+            data-tooltip-id={pollTooltipId}
+            data-tooltip-content={addPollLabel}
           >
-            <span className="tw-text-xs">{addPollLabel}</span>
-          </Tooltip>
-        )}
-      </>
-    ) : null;
+            <ChartBarIcon
+              className="tw-size-4 tw-flex-shrink-0"
+              aria-hidden="true"
+            />
+          </button>
+          {!isMobile && <MyStreamActionTooltip id={pollTooltipId} />}
+        </>
+      ) : null;
 
     return (
       <LayoutGroup>
@@ -350,10 +352,7 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                     aria-hidden="true"
                     className="tw-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-primary-400/20 tw-bg-primary-500/10 tw-text-primary-300 desktop-hover:tw-size-9"
                   >
-                    <ChartBarIcon
-                      className="tw-size-5"
-                      aria-hidden="true"
-                    />
+                    <ChartBarIcon className="tw-size-5" aria-hidden="true" />
                   </span>
                 ) : (
                   <motion.button
@@ -479,7 +478,8 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                                 ? "tw-text-[#FEDF89]"
                                 : "tw-text-iron-300"
                             } tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-700 tw-transition tw-duration-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 desktop-hover:hover:tw-bg-iron-700/80 lg:tw-size-7`}
-                            data-tooltip-id="add-metadata-tooltip"
+                            data-tooltip-id={metadataTooltipId}
+                            data-tooltip-content={metadataLabel}
                           >
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
@@ -498,16 +498,7 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                             </svg>
                           </button>
                           {!isMobile && (
-                            <Tooltip
-                              id="add-metadata-tooltip"
-                              place="top"
-                              offset={8}
-                              opacity={1}
-                              positionStrategy="fixed"
-                              style={TOOLTIP_STYLES}
-                            >
-                              <span className="tw-text-xs">Add metadata</span>
-                            </Tooltip>
+                            <MyStreamActionTooltip id={metadataTooltipId} />
                           )}
                         </>
                       )}
@@ -526,7 +517,8 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                                 ? "tw-text-[#FEDF89]"
                                 : "tw-text-iron-300"
                             } tw-flex tw-size-8 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-700 tw-transition tw-duration-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 desktop-hover:hover:tw-bg-iron-700/70 lg:tw-size-7`}
-                            data-tooltip-id="upload-file-tooltip"
+                            data-tooltip-id={uploadTooltipId}
+                            data-tooltip-content={uploadLabel}
                           >
                             <FontAwesomeIcon
                               icon={faPlus}
@@ -539,23 +531,18 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                             />
                           </button>
                           {!isMobile && (
-                            <Tooltip
-                              id="upload-file-tooltip"
+                            <MyStreamActionTooltip
+                              id={uploadTooltipId}
                               place="top-start"
-                              offset={8}
-                              opacity={1}
-                              positionStrategy="fixed"
-                              style={TOOLTIP_STYLES}
-                            >
-                              <span className="tw-text-xs">Upload a file</span>
-                            </Tooltip>
+                            />
                           )}
                         </>
                         <button
                           onClick={() => setShowGifPicker(true)}
                           aria-label={addGifLabel}
                           className="tw-flex tw-size-8 tw-flex-shrink-0 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-700 tw-text-iron-300 tw-transition tw-duration-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 desktop-hover:hover:tw-bg-iron-700/70 lg:tw-size-7"
-                          data-tooltip-id="add-gif-tooltip"
+                          data-tooltip-id={gifTooltipId}
+                          data-tooltip-content={addGifLabel}
                         >
                           <svg
                             className="tw-size-4 tw-flex-shrink-0"
@@ -589,16 +576,7 @@ const CreateDropActions: React.FC<CreateDropActionsProps> = memo(
                           </svg>
                         </button>
                         {!isMobile && (
-                          <Tooltip
-                            id="add-gif-tooltip"
-                            place="top"
-                            offset={8}
-                            opacity={1}
-                            positionStrategy="fixed"
-                            style={TOOLTIP_STYLES}
-                          >
-                            <span className="tw-text-xs">{addGifLabel}</span>
-                          </Tooltip>
+                          <MyStreamActionTooltip id={gifTooltipId} />
                         )}
                         {pollAction}
                         {!isStormMode && (

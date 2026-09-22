@@ -23,6 +23,7 @@ import { Time } from "@/helpers/time";
 interface WaveLeaderboardTimeProps {
   readonly wave: ApiWave;
   readonly className?: string | undefined;
+  readonly fullBleed?: boolean | undefined;
 }
 
 const AUTO_EXPAND_LIMIT = 5;
@@ -36,6 +37,7 @@ const EMPTY_TIME_LEFT: TimeLeft = {
 export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
   wave,
   className,
+  fullBleed = false,
 }) => {
   const {
     allDecisions,
@@ -166,6 +168,9 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
     setTimelineFocus(null);
   }, []);
 
+  const useFullBleedCompactTimeline =
+    fullBleed && !multiDecision && !isCurationWave;
+
   const handleDecisionDetailsOpenChange = useCallback((isOpen: boolean) => {
     setIsDecisionDetailsOpen(isOpen);
     if (!isOpen) {
@@ -175,7 +180,11 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
 
   return (
     <div
-      className={`${className ?? ""} ${isDecisionDetailsOpen ? "tw-mb-3" : ""}`}
+      className={`${className ?? ""} ${
+        useFullBleedCompactTimeline
+          ? "-tw-mx-2 tw-w-[calc(100%+1rem)] sm:-tw-mx-4 sm:tw-w-[calc(100%+2rem)]"
+          : ""
+      } ${isDecisionDetailsOpen ? "tw-mb-3" : ""}`}
     >
       {multiDecision ? (
         <div
@@ -219,7 +228,13 @@ export const WaveLeaderboardTime: React.FC<WaveLeaderboardTimeProps> = ({
         </div>
       ) : (
         !isCurationWave && (
-          <div className="tw-overflow-hidden tw-rounded-lg tw-bg-iron-950 tw-px-3 tw-py-2">
+          <div
+            className={`tw-overflow-hidden tw-bg-iron-950 tw-py-2 ${
+              useFullBleedCompactTimeline
+                ? "tw-px-5 sm:tw-px-7"
+                : "tw-rounded-lg tw-px-3"
+            }`}
+          >
             <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-3">
               <CompactDroppingPhaseCard wave={wave} />
               <CompactVotingPhaseCard wave={wave} />

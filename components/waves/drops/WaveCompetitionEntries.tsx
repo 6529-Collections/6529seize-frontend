@@ -118,11 +118,7 @@ export const WaveCompetitionEntries = ({
         <p className="tw-m-0 tw-text-sm tw-text-iron-300" role="alert">
           {t(locale, "waves.competitionBadges.error")}
         </p>
-        <Button
-          onClick={() => refetch()}
-          variant="tertiary"
-          size="sm"
-        >
+        <Button onClick={() => refetch()} variant="tertiary" size="sm">
           {t(locale, "waves.competitionBadges.retry")}
         </Button>
       </div>
@@ -146,13 +142,19 @@ export const WaveCompetitionEntries = ({
 
   return (
     <div
-      className={`tw-relative tw-z-[100] tw-p-6 ${
+      className={`tw-relative tw-z-[100] ${
         isApp
-          ? ""
-          : "tw-max-h-[calc(75vh-120px)] tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 hover:tw-scrollbar-thumb-iron-300 sm:tw-max-h-[calc(90vh-160px)]"
+          ? "tw-px-4 tw-pb-5 tw-pt-4"
+          : "tw-max-h-[calc(75vh-120px)] tw-overflow-y-auto tw-p-6 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 hover:tw-scrollbar-thumb-iron-300 sm:tw-max-h-[calc(90vh-160px)]"
       }`}
     >
-      <div className="tw-grid tw-grid-cols-1 tw-gap-6 sm:tw-grid-cols-2 lg:tw-grid-cols-3">
+      <div
+        className={`tw-grid tw-grid-cols-1 ${
+          isApp
+            ? "tw-gap-4 sm:tw-grid-cols-2 sm:tw-gap-5"
+            : "tw-gap-6 sm:tw-grid-cols-2 lg:tw-grid-cols-3"
+        }`}
+      >
         {entries.map((drop) => {
           const media = getFirstMedia(drop);
           const entryText = getEntryText(drop);
@@ -161,16 +163,27 @@ export const WaveCompetitionEntries = ({
             drop.drop_type === ApiDropType.Participatory && drop.voting_open;
 
           return (
-            <div key={drop.id} className="tw-flex tw-h-full tw-flex-col">
+            <div
+              key={drop.id}
+              className="tw-flex tw-h-full tw-min-w-0 tw-flex-col"
+            >
               <button
                 type="button"
                 aria-label={t(locale, "waves.competitionBadges.openEntry", {
                   title,
                 })}
                 onClick={() => onDropClick(drop)}
-                className="tw-group tw-relative tw-mb-3 tw-flex tw-flex-1 tw-cursor-pointer tw-flex-col tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950/50 tw-p-0 tw-text-left tw-shadow-lg tw-transition-all tw-duration-300 tw-ease-out focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/60 desktop-hover:hover:tw-border-iron-700 desktop-hover:hover:tw-shadow-xl"
+                className={`tw-group tw-relative tw-flex tw-w-full tw-flex-1 tw-cursor-pointer tw-flex-col tw-overflow-hidden tw-border tw-border-solid tw-p-0 tw-text-left focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/60 ${
+                  isApp
+                    ? "tw-mb-2.5 tw-rounded-xl tw-border-white/[0.08] tw-bg-white/[0.02] tw-transition tw-duration-200 desktop-hover:hover:tw-border-white/15 desktop-hover:hover:tw-bg-white/[0.035]"
+                    : "tw-mb-3 tw-rounded-lg tw-border-iron-800 tw-bg-iron-950/50 tw-shadow-lg tw-transition-all tw-duration-300 tw-ease-out desktop-hover:hover:tw-border-iron-700 desktop-hover:hover:tw-shadow-xl"
+                }`}
               >
-                <div className="tw-relative tw-aspect-square tw-overflow-hidden tw-bg-iron-950/50">
+                <div
+                  className={`tw-relative tw-aspect-square tw-w-full tw-overflow-hidden ${
+                    isApp ? "tw-bg-black/25" : "tw-bg-iron-950/50"
+                  }`}
+                >
                   {media ? (
                     <div className="tw-flex tw-size-full tw-items-center tw-justify-center">
                       <MediaDisplay
@@ -201,11 +214,19 @@ export const WaveCompetitionEntries = ({
                   )}
                 </div>
 
-                <div className="tw-flex tw-flex-1 tw-flex-col tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-iron-950/50 tw-p-3">
+                <div
+                  className={`tw-flex tw-w-full tw-flex-1 tw-flex-col tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-p-3 ${
+                    isApp
+                      ? "tw-border-white/[0.06] tw-bg-transparent"
+                      : "tw-border-iron-800 tw-bg-iron-950/50"
+                  }`}
+                >
                   <div className="tw-mb-3 tw-flex tw-items-start tw-justify-between tw-gap-2">
                     <p
                       dir="auto"
-                      className="tw-m-0 tw-line-clamp-2 tw-min-w-0 tw-flex-1 tw-text-sm tw-font-bold tw-leading-tight tw-text-iron-100"
+                      className={`tw-m-0 tw-line-clamp-2 tw-min-w-0 tw-flex-1 tw-text-sm tw-leading-tight tw-text-iron-100 ${
+                        isApp ? "tw-font-semibold" : "tw-font-bold"
+                      }`}
                     >
                       {title}
                     </p>
