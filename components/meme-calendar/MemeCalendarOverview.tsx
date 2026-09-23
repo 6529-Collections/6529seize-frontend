@@ -5,9 +5,10 @@ import ClientOnly from "@/components/client-only/ClientOnly";
 import Button from "@/components/utils/button/Button";
 import { buildTooltipId, TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import useCapacitor from "@/hooks/useCapacitor";
+import type { PublishedMemesStatus } from "@/hooks/usePublishedMemes";
 import { formatInteger } from "@/i18n/format";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
-import { t } from "@/i18n/messages";
+import { t, type MessageKey } from "@/i18n/messages";
 import { toPng } from "html-to-image";
 import Link from "next/link";
 import {
@@ -47,6 +48,12 @@ const CALENDAR_INVITE_ICON_SIZE = 18;
 const OVERVIEW_CARD_CLASS =
   "tw-rounded-2xl tw-bg-iron-950 tw-shadow-lg tw-ring-1 tw-ring-iron-800";
 
+function getArtworkStatusMessageKey(status: PublishedMemesStatus): MessageKey {
+  if (status === "loading") return "memeCalendar.artwork.checking";
+  if (status === "error") return "memeCalendar.artwork.checkFailed";
+  return "memeCalendar.artwork.notPublished";
+}
+
 /**
  * Layout wrapper: global Local/UTC toggle + two cards
  */
@@ -55,6 +62,8 @@ interface MemeCalendarOverviewProps {
   readonly locale?: SupportedLocale | undefined;
   readonly showViewAll?: boolean | undefined;
   readonly headerAction?: ReactNode | undefined;
+  readonly publishedMemeIds?: ReadonlySet<number> | undefined;
+  readonly publishedMemesStatus?: PublishedMemesStatus | undefined;
 }
 
 export default function MemeCalendarOverview({
@@ -62,6 +71,8 @@ export default function MemeCalendarOverview({
   locale = DEFAULT_LOCALE,
   showViewAll = false,
   headerAction,
+  publishedMemeIds = new Set<number>(),
+  publishedMemesStatus,
 }: MemeCalendarOverviewProps) {
   return (
     <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-5 sm:tw-gap-6">
@@ -88,7 +99,12 @@ export default function MemeCalendarOverview({
       </div>
       <div className="tw-grid tw-grid-cols-1 tw-gap-4 lg:tw-grid-cols-2">
         <div className="tw-h-full">
-          <MemeCalendarOverviewNextMint displayTz={displayTz} locale={locale} />
+          <MemeCalendarOverviewNextMint
+            displayTz={displayTz}
+            locale={locale}
+            publishedMemeIds={publishedMemeIds}
+            publishedMemesStatus={publishedMemesStatus}
+          />
         </div>
         <div className="tw-h-full">
           <ClientOnly fallback={<CalendarClockPlaceholder />}>
@@ -111,6 +127,8 @@ interface MemeCalendarOverviewNextMintProps {
   readonly displayTz: DisplayTz;
   readonly id?: number | undefined;
   readonly locale?: SupportedLocale | undefined;
+  readonly publishedMemeIds?: ReadonlySet<number> | undefined;
+  readonly publishedMemesStatus?: PublishedMemesStatus | undefined;
 }
 
 interface TopControlsProps {
@@ -171,7 +189,7 @@ const TopControls = memo((props: TopControlsProps) => {
         value={mintInputValue}
         error={mintInputError}
         label={t(locale, "memeCalendar.overview.controls.memeNumber")}
-        submitLabel={t(locale, "memeCalendar.numberInput.submit")}
+        submitLabel={t(locale, "memeCalendar.overview.controls.showSchedule")}
         max={MAX_MINT_NUMBER}
         className="!tw-w-[140px] !tw-flex-none sm:!tw-w-44"
         onChange={onMintInputChange}
@@ -224,6 +242,8 @@ function MemeCalendarOverviewNextMintContent({
   displayTz,
   id,
   locale = DEFAULT_LOCALE,
+  publishedMemeIds = new Set<number>(),
+  publishedMemesStatus,
 }: MemeCalendarOverviewNextMintProps) {
   const overviewInstanceId = useId();
   const calendarInviteTooltipId = buildTooltipId(
@@ -337,6 +357,7 @@ function MemeCalendarOverviewNextMintContent({
   const endMs = mintDetails.mintEndUtc.getTime();
   const isUpcoming = nowMs < startMs;
   const isPast = nowMs >= endMs;
+  const isPublished = publishedMemeIds.has(selectedMintNumber);
 
   let heading: string;
   if (isUpcoming) {
@@ -510,6 +531,30 @@ function MemeCalendarOverviewNextMintContent({
           <div className="tw-mt-5 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-2 tw-text-sm tw-leading-5 tw-text-iron-300">
             {formatToFullDivision(mintDetails.instantUtc, locale)}
           </div>
+          {publishedMemesStatus && (
+            <div
+              data-ignore-screenshot
+              className="tw-mt-3 tw-flex tw-min-h-9 tw-items-center"
+            >
+              {isPublished ? (
+                <Link
+                  href={getRouteHrefWithLocale({
+                    href: `/the-memes/${selectedMintNumber}`,
+                    locale,
+                  })}
+                  className="desktop-hover:hover:tw-text-primary-200 tw-inline-flex tw-min-h-9 tw-items-center tw-rounded-lg tw-text-sm tw-font-semibold tw-text-primary-300 tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+                >
+                  {t(locale, "memeCalendar.artwork.open", {
+                    meme: selectedMintNumber,
+                  })}
+                </Link>
+              ) : (
+                <span className="tw-text-sm tw-text-iron-500">
+                  {t(locale, getArtworkStatusMessageKey(publishedMemesStatus))}
+                </span>
+              )}
+            </div>
+          )}
           <ScreenshotFeedback
             locale={locale}
             statusId={screenshotStatusId}

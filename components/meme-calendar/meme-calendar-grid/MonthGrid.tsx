@@ -5,6 +5,8 @@ import { useEffect } from "react";
 import { formatInteger } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
+import type { PublishedMemesStatus } from "@/hooks/usePublishedMemes";
+import { getRouteHrefWithLocale } from "@/components/rememes/rememesRouteParams";
 
 import type { DisplayTz } from "../meme-calendar.helpers";
 import {
@@ -60,6 +62,12 @@ function formatHistoricalMintLabel(
   return `#${formatInteger(locale, first.id)}-#${formatInteger(locale, last.id)}`;
 }
 
+function getArtworkStatusMessageKey(status: PublishedMemesStatus): MessageKey {
+  if (status === "loading") return "memeCalendar.artwork.checking";
+  if (status === "error") return "memeCalendar.artwork.checkFailed";
+  return "memeCalendar.artwork.notPublished";
+}
+
 function getMintCellDetails(
   cellDateUtcDay: Date,
   locale: SupportedLocale
@@ -100,7 +108,9 @@ function getMintCellDetails(
 function getHistoricalTooltipHtml(
   historical: readonly HistoricalMint[],
   displayTz: DisplayTz,
-  locale: SupportedLocale
+  locale: SupportedLocale,
+  publishedMemeIds: ReadonlySet<number>,
+  publishedMemesStatus: PublishedMemesStatus
 ): string {
   const firstInstant = historical[0]?.instantUtc;
 
@@ -118,6 +128,12 @@ function getHistoricalTooltipHtml(
       : "memeCalendar.grid.tooltip.meme",
     historical.length > 1 ? { mints: items } : { mint: items }
   );
+  const artwork = getArtworkHtml(
+    historical.map((mint) => mint.id),
+    publishedMemeIds,
+    publishedMemesStatus,
+    locale
+  );
 
   return `<div class="tw-min-w-[13.75rem]">
     <div class="tw-mb-1 tw-text-lg tw-font-semibold tw-leading-6 tw-text-iron-50">
@@ -127,8 +143,33 @@ function getHistoricalTooltipHtml(
       firstInstant,
       displayTz,
       locale
-    )}</div>
+    )}</div>${artwork}
   </div>`;
+}
+
+function getArtworkHtml(
+  mintNumbers: readonly number[],
+  publishedMemeIds: ReadonlySet<number>,
+  status: PublishedMemesStatus,
+  locale: SupportedLocale
+): string {
+  const published = mintNumbers.filter((mint) => publishedMemeIds.has(mint));
+  if (published.length > 0) {
+    return `<div class="tw-flex tw-flex-col tw-items-start tw-gap-2">${published
+      .map((mint) => {
+        const href = getRouteHrefWithLocale({
+          href: `/the-memes/${mint}`,
+          locale,
+        });
+        return `<a class="tw-text-sm tw-font-semibold tw-text-primary-300 tw-no-underline hover:tw-text-primary-200 hover:tw-underline" href="${escapeHtml(href)}">${escapeHtml(
+          t(locale, "memeCalendar.artwork.open", { meme: mint })
+        )}</a>`;
+      })
+      .join("")}</div>`;
+  }
+
+  const message = t(locale, getArtworkStatusMessageKey(status));
+  return `<div class="tw-text-sm tw-leading-5 tw-text-iron-400">${escapeHtml(message)}</div>`;
 }
 
 function getScheduledMintTooltip({
@@ -138,6 +179,8 @@ function getScheduledMintTooltip({
   mintLabel,
   mintNumber,
   noteTooltipContent,
+  publishedMemeIds,
+  publishedMemesStatus,
 }: {
   readonly displayTz: DisplayTz;
   readonly locale: SupportedLocale;
@@ -145,6 +188,8 @@ function getScheduledMintTooltip({
   readonly mintLabel: string | undefined;
   readonly mintNumber: number | undefined;
   readonly noteTooltipContent: string;
+  readonly publishedMemeIds: ReadonlySet<number>;
+  readonly publishedMemesStatus: PublishedMemesStatus;
 }): MintTooltip {
   if (mintInstantUtc === undefined || mintNumber === undefined) {
     return { className: "!tw-border-iron-700", html: "" };
@@ -172,6 +217,12 @@ function getScheduledMintTooltip({
   const tooltipTitle = t(locale, "memeCalendar.grid.tooltip.meme", {
     mint: mintLabel ?? "",
   });
+  const artwork = getArtworkHtml(
+    [mintNumber],
+    publishedMemeIds,
+    publishedMemesStatus,
+    locale
+  );
 
   return {
     className: isFutureMint
@@ -181,6 +232,7 @@ function getScheduledMintTooltip({
       <div class="tw-min-w-[13.75rem]">
         <div class="tw-mb-1 tw-text-lg tw-font-semibold tw-leading-6 tw-text-iron-50">${escapeHtml(tooltipTitle)}</div>
         ${oneLineDivWithNote}
+        ${artwork}
         ${invites}
       </div>`,
   };
@@ -190,12 +242,20 @@ function getMintTooltip(
   cellDateUtcDay: Date,
   details: MintCellDetails,
   displayTz: DisplayTz,
-  locale: SupportedLocale
+  locale: SupportedLocale,
+  publishedMemeIds: ReadonlySet<number>,
+  publishedMemesStatus: PublishedMemesStatus
 ): MintTooltip {
   if (details.historical.length > 0) {
     return {
       className: "!tw-border-iron-700",
-      html: getHistoricalTooltipHtml(details.historical, displayTz, locale),
+      html: getHistoricalTooltipHtml(
+        details.historical,
+        displayTz,
+        locale,
+        publishedMemeIds,
+        publishedMemesStatus
+      ),
     };
   }
 
@@ -210,6 +270,8 @@ function getMintTooltip(
     noteTooltipContent: overrideNote
       ? escapeHtml(overrideNote).replaceAll("\n", "<br />")
       : "",
+    publishedMemeIds,
+    publishedMemesStatus,
   });
 }
 
@@ -229,6 +291,8 @@ function MonthDayCell({
   locale,
   month,
   onSelectDay,
+  publishedMemeIds,
+  publishedMemesStatus,
   year,
 }: MonthDayCellProps) {
   const cellDateUtcDay = new Date(Date.UTC(year, month, day));
@@ -283,7 +347,14 @@ function MonthDayCell({
     );
   }
 
-  const tooltip = getMintTooltip(cellDateUtcDay, details, displayTz, locale);
+  const tooltip = getMintTooltip(
+    cellDateUtcDay,
+    details,
+    displayTz,
+    locale,
+    publishedMemeIds,
+    publishedMemesStatus
+  );
 
   return (
     <button
@@ -325,6 +396,8 @@ export function Month({
   autoOpenYmd,
   displayTz,
   locale,
+  publishedMemeIds,
+  publishedMemesStatus,
 }: MonthProps) {
   const year = date.getUTCFullYear();
   const month = date.getUTCMonth();
@@ -401,6 +474,8 @@ export function Month({
               locale={locale}
               month={month}
               onSelectDay={onSelectDay}
+              publishedMemeIds={publishedMemeIds}
+              publishedMemesStatus={publishedMemesStatus}
               year={year}
             />
           )
