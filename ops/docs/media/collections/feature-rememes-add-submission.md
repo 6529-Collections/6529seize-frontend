@@ -23,7 +23,10 @@
    - comma list: `1,2,3`
    - range: `1-3`
    - mixed: `1-3,5`
-3. Add one or more `Meme References` from the `+` picker.
+3. Add one or more `Meme References` from the searchable picker. Search by
+   Meme number (with or without `#`) or artwork name. The initial list starts
+   with the newest published Meme Cards and limits the visible results for
+   practical keyboard, touch, and small-screen use.
 4. Select `Validate`.
 5. Review validation output:
    - `Contract` section (name, deployer, collection name when available)
@@ -41,6 +44,9 @@
 
 - `Validate` stays disabled until contract, token IDs, and at least one Meme
   reference are present.
+- The Meme reference picker supports keyboard navigation and returns focus to
+  its search field after a selection, so multiple references can be added
+  without reopening a hundreds-item menu.
 - `Add Rememe` stays disabled until all are true:
   - submission is `Verified`
   - wallet is connected

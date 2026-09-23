@@ -7191,6 +7191,8 @@
       "facts": [
         "The meme calendar route lives at /meme-calendar.",
         "It is the canonical place for minting-calendar context.",
+        "The top Meme number control uses Show mint schedule; the lower calendar control uses Find mint date because it moves the calendar to that mint.",
+        "A selected published Meme provides an Open Meme link to /the-memes/{id}; upcoming or unrevealed Memes do not receive speculative artwork links.",
         "The page heading appears first; clock panels and the calendar grid appear once browser JavaScript is ready, using the browser clock and local timezone. Viewing the schedule does not require connecting a wallet.",
         "The home page can also surface current or upcoming mint information.",
         "The calendar models past, current, and future Meme Card mint timing from Monday/Wednesday/Friday cadence plus explicit skip, extra, and reschedule overrides.",
@@ -7329,6 +7331,7 @@
       "keywords": ["rememes", "add", "submit", "submission", "tdh"],
       "facts": [
         "The ReMemes add route lives at /rememes/add.",
+        "The Meme References picker searches published Meme Cards by number or artwork name and shows the newest cards first.",
         "Submission status, blocking states, and recovery are documented in the ReMemes add-submission docs.",
         "Some submission paths can depend on TDH threshold checks."
       ],
