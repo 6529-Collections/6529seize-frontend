@@ -62,6 +62,14 @@ describe("RememeAddComponent", () => {
       tdh: 0,
     },
   ];
+  mockMemes.push({
+    ...mockMemes[0]!,
+    id: 11,
+    name: "The Memes #11",
+    description: "Test meme 11",
+    image: "test11.jpg",
+    contract: "0x789",
+  });
 
   const mockVerifiedRememe = jest.fn();
 
@@ -101,6 +109,29 @@ describe("RememeAddComponent", () => {
     expect(screen.getByText("#2 - The Memes #2")).toBeTruthy();
   });
 
+  it("filters Meme references by number or name", async () => {
+    const user = userEvent.setup();
+    renderComponent();
+
+    const search = screen.getByRole("combobox", {
+      name: "Meme References",
+    });
+    await user.type(search, "#2");
+
+    expect(screen.getByText("#2 - The Memes #2")).toBeTruthy();
+    expect(screen.queryByText("#1 - The Memes #1")).toBeNull();
+
+    await user.clear(search);
+    await user.type(search, "1");
+    expect(screen.getByText("#1 - The Memes #1")).toBeTruthy();
+    expect(screen.queryByText("#11 - The Memes #11")).toBeNull();
+
+    await user.clear(search);
+    await user.type(search, "memes #1");
+    expect(screen.getByText("#1 - The Memes #1")).toBeTruthy();
+    expect(screen.queryByText("#2 - The Memes #2")).toBeNull();
+  });
+
   it("adds and removes meme references", async () => {
     const user = userEvent.setup();
     renderComponent();
@@ -116,7 +147,9 @@ describe("RememeAddComponent", () => {
     expect(screen.getByText("#1 - The Memes #1")).toBeTruthy();
 
     // Remove the reference
-    const removeButton = screen.getByText("x");
+    const removeButton = screen.getByRole("button", {
+      name: "Clear reference #1",
+    });
     await user.click(removeButton);
 
     await waitFor(() => {
@@ -199,6 +232,37 @@ describe("RememeAddComponent", () => {
           references: [1],
         })
       );
+      expect(
+        screen.getByRole("button", { name: "Clear reference #1" })
+      ).toBeDisabled();
+    });
+  });
+
+  it("does not verify an incomplete valid response", async () => {
+    const user = userEvent.setup();
+    renderComponent();
+
+    mockPostData.mockResolvedValue({
+      status: 200,
+      response: { valid: true },
+    });
+
+    await user.type(
+      screen.getByPlaceholderText("0x..."),
+      "0x1234567890123456789012345678901234567890"
+    );
+    await user.type(screen.getByPlaceholderText(/1,2,3 or 1-3/), "1");
+    await user.click(
+      screen
+        .getAllByRole("button")
+        .find((button) => button.getAttribute("aria-expanded") === "false")!
+    );
+    await user.click(screen.getByText("#1 - The Memes #1"));
+    await user.click(screen.getByRole("button", { name: /validate/i }));
+
+    await waitFor(() => {
+      expect(mockVerifiedRememe).not.toHaveBeenCalled();
+      expect(screen.queryByText("Verified")).toBeNull();
     });
   });
 

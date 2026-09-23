@@ -39,6 +39,8 @@ export function SeasonView({
   autoOpenYmd,
   displayTz,
   locale,
+  publishedMemeIds,
+  publishedMemesStatus,
 }: SeasonViewProps) {
   const seasonStart = getSeasonStartDate(seasonIndex);
 
@@ -68,6 +70,8 @@ export function SeasonView({
           autoOpenYmd={autoOpenYmd}
           displayTz={displayTz}
           locale={locale}
+          publishedMemeIds={publishedMemeIds}
+          publishedMemesStatus={publishedMemesStatus}
         />
       ))}
     </div>
