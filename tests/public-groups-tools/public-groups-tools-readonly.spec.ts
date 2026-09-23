@@ -399,6 +399,14 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
       name: "Clear reference #551",
     });
     await expect(clearReference).toBeVisible();
+    const [searchBox, selectedReferenceBox] = await Promise.all([
+      referenceSearch.boundingBox(),
+      clearReference.boundingBox(),
+    ]);
+    if (!searchBox || !selectedReferenceBox) {
+      throw new Error("Expected the reference search and selection to render");
+    }
+    expect(selectedReferenceBox.y).toBeGreaterThan(searchBox.y);
     if (testInfo.project.name === "web-mobile-chromium") {
       await clearReference.tap();
     } else {

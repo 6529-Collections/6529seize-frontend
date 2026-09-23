@@ -263,32 +263,6 @@ export default function RememeAddComponent({
         >
           Meme References{references.length > 0 && ` (${references.length})`}
         </label>
-        {references.length > 0 && (
-          <ul className="tw-m-0 tw-flex tw-list-none tw-flex-wrap tw-gap-2 tw-p-0">
-            {references.map((meme) => (
-              <li key={meme.id}>
-                <span className="tw-inline-flex tw-min-h-10 tw-items-center tw-gap-2 tw-rounded-full tw-bg-iron-800 tw-py-1 tw-pl-3 tw-pr-1 tw-text-sm tw-text-iron-100">
-                  <span>
-                    #{meme.id} - {meme.name}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setReferences((current) =>
-                        current.filter((item) => item.id !== meme.id)
-                      )
-                    }
-                    className="tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-text-iron-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-bg-iron-700 desktop-hover:hover:tw-text-iron-50"
-                    aria-label={`Clear reference #${meme.id}`}
-                  >
-                    <XMarkIcon aria-hidden="true" className="tw-size-4" />
-                  </button>
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
-
         <Combobox<NFT | null>
           value={null}
           onChange={(meme) => meme && addReference(meme)}
@@ -335,6 +309,32 @@ export default function RememeAddComponent({
             </ComboboxOptions>
           </div>
         </Combobox>
+        {references.length > 0 && (
+          <ul className="tw-m-0 tw-flex tw-list-none tw-flex-wrap tw-gap-2 tw-p-0">
+            {references.map((meme) => (
+              <li key={meme.id}>
+                <span className="tw-inline-flex tw-min-h-10 tw-items-center tw-gap-2 tw-rounded-full tw-bg-iron-800 tw-py-1 tw-pl-3 tw-pr-1 tw-text-sm tw-text-iron-100">
+                  <span>
+                    #{meme.id} - {meme.name}
+                  </span>
+                  <button
+                    type="button"
+                    disabled={verifying || verified}
+                    onClick={() =>
+                      setReferences((current) =>
+                        current.filter((item) => item.id !== meme.id)
+                      )
+                    }
+                    className="tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-text-iron-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-bg-iron-700 desktop-hover:hover:tw-text-iron-50 disabled:tw-cursor-not-allowed disabled:tw-opacity-50"
+                    aria-label={`Clear reference #${meme.id}`}
+                  >
+                    <XMarkIcon aria-hidden="true" className="tw-size-4" />
+                  </button>
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
 
       <div className="tw-space-y-5">

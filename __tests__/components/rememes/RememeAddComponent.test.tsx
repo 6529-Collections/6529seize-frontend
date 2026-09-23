@@ -237,6 +237,9 @@ describe("RememeAddComponent", () => {
           references: [1],
         })
       );
+      expect(
+        screen.getByRole("button", { name: "Clear reference #1" })
+      ).toBeDisabled();
     });
   });
 
