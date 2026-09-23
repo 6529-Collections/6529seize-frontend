@@ -37,8 +37,13 @@ import {
   BRAIN_RIGHT_SIDEBAR_ENTER_TRANSITION,
   BRAIN_RIGHT_SIDEBAR_EXIT_TRANSITION,
 } from "@/components/brain/right-sidebar/BrainRightSidebarTypes";
+import { SIDEBAR_MOBILE_BREAKPOINT } from "@/constants/sidebar";
 
-const useBreakpoint = createBreakpoint({ XL: 1400, LG: 1024, S: 0 });
+const useBreakpoint = createBreakpoint({
+  XL: 1400,
+  LG: SIDEBAR_MOBILE_BREAKPOINT,
+  S: 0,
+});
 
 interface WavesMessagesWrapperProps {
   readonly children: ReactNode;
@@ -171,7 +176,7 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
                 {shouldShowLeftSidebar && (
                   <WebBrainLeftSidebar
                     isCollapsed={isInlineRightOpen}
-                    showProfileFeedShortcut
+                    showProfileFeedShortcut={defaultPath === "/waves"}
                   />
                 )}
                 {shouldShowMainContent && (

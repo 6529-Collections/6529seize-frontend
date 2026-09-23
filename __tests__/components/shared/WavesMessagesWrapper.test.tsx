@@ -152,9 +152,9 @@ function MainContentProbe() {
   return <div data-testid="main-content">Main content</div>;
 }
 
-function renderWrapper() {
+function renderWrapper({ defaultPath = "/waves" } = {}) {
   return render(
-    <WavesMessagesWrapper>
+    <WavesMessagesWrapper defaultPath={defaultPath}>
       <MainContentProbe />
     </WavesMessagesWrapper>
   );
@@ -204,6 +204,17 @@ describe("WavesMessagesWrapper", () => {
     expect(screen.getByTestId("main-content")).toBeInTheDocument();
     expect(screen.queryByTestId("left-sidebar")).not.toBeInTheDocument();
     expect(mockChildMounted).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps the profile feed shortcut scoped to the Waves section", () => {
+    mockBreakpoint = "S";
+
+    renderWrapper({ defaultPath: "/messages" });
+
+    expect(screen.getByTestId("left-sidebar")).toHaveAttribute(
+      "data-profile-feed-shortcut",
+      "false"
+    );
   });
 
   it("renders selected wave main content on small screens", () => {
