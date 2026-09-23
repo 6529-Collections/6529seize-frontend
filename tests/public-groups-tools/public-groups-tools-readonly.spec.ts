@@ -287,8 +287,32 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
     await expect(localTab).toHaveAttribute("aria-selected", "false");
 
     await expect(page.getByRole("button", { name: "Next Mint" })).toBeVisible();
-    await expect(page.locator("#meme-overview-mint-input")).toBeVisible();
-    await expect(page.locator("#meme-calendar-mint-input")).toBeVisible();
+    const overviewMemeNumberInput = page.getByLabel("Meme #").first();
+    const calendarMemeNumberInput = page.getByLabel("Meme #").last();
+    await expect(overviewMemeNumberInput).toBeVisible();
+    await expect(calendarMemeNumberInput).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Show mint schedule" })
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Find mint date" })
+    ).toBeVisible();
+
+    await overviewMemeNumberInput.fill("551");
+    await page.getByRole("button", { name: "Show mint schedule" }).click();
+    await expect(
+      page.getByRole("link", { name: "Open Meme #551" })
+    ).toHaveAttribute("href", "/the-memes/551?locale=de-DE", {
+      timeout: 30000,
+    });
+    await calendarMemeNumberInput.fill("551");
+    await page.getByRole("button", { name: "Find mint date" }).click();
+    const tooltipArtworkLink = page
+      .getByRole("tooltip")
+      .getByRole("link", { name: "Open Meme #551" });
+    await expect(tooltipArtworkLink).toBeVisible({ timeout: 30000 });
+    await tooltipArtworkLink.focus();
+    await expect(tooltipArtworkLink).toBeFocused();
     await expect(
       page.getByRole("button", { name: "Screenshot" })
     ).toBeVisible();
@@ -316,6 +340,81 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
       "href",
       /^https:\/\/calendar\.google\.com\/calendar\/render/
     );
+    await expectNoHorizontalOverflow(page);
+  });
+
+  test("keeps ReMeme fields intact and makes Meme references searchable", async ({
+    page,
+  }, testInfo) => {
+    if (testInfo.project.name === "web-desktop-chromium") {
+      await page.setViewportSize({ width: 1536, height: 1000 });
+    }
+    await page.route("**/api/memes_lite", async (route) => {
+      const headers = { ...route.request().headers() };
+      delete headers["if-modified-since"];
+      delete headers["if-none-match"];
+      await route.continue({ headers });
+    });
+    await gotoReady(page, "/rememes/add", {
+      readySelector: "#rememe-reference-search",
+    });
+
+    await expect(page.getByLabel("Contract", { exact: true })).toBeVisible();
+    await expect(page.getByLabel("Token IDs", { exact: true })).toHaveAttribute(
+      "placeholder",
+      "1,2,3 or 1-3 or 1,2-5 or 1-3,5"
+    );
+    await expect(page.getByRole("button", { name: "Validate" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Add Rememe" })).toHaveCount(
+      0
+    );
+
+    if (testInfo.project.name === "web-desktop-chromium") {
+      const [logoBox, contractBox] = await Promise.all([
+        page.getByAltText("re-memes").boundingBox(),
+        page.getByLabel("Contract", { exact: true }).boundingBox(),
+      ]);
+      if (!logoBox || !contractBox) {
+        throw new Error(
+          "Expected the ReMeme logo and contract input to render"
+        );
+      }
+      expect(Math.abs(contractBox.x - logoBox.x)).toBeLessThanOrEqual(1);
+    }
+
+    const referenceSearch = page.getByRole("combobox", {
+      name: "Meme References",
+    });
+    await expect(referenceSearch).toBeEnabled({ timeout: 30000 });
+    await referenceSearch.fill("551");
+    const memeOption = page.getByRole("option", { name: /^#551 - / });
+    await expect(memeOption).toBeVisible();
+
+    if (testInfo.project.name === "web-mobile-chromium") {
+      await memeOption.tap();
+    } else {
+      await referenceSearch.press("ArrowDown");
+      await referenceSearch.press("Enter");
+    }
+
+    const clearReference = page.getByRole("button", {
+      name: "Clear reference #551",
+    });
+    await expect(clearReference).toBeVisible();
+    const [searchBox, selectedReferenceBox] = await Promise.all([
+      referenceSearch.boundingBox(),
+      clearReference.boundingBox(),
+    ]);
+    if (!searchBox || !selectedReferenceBox) {
+      throw new Error("Expected the reference search and selection to render");
+    }
+    expect(selectedReferenceBox.y).toBeGreaterThan(searchBox.y);
+    if (testInfo.project.name === "web-mobile-chromium") {
+      await clearReference.tap();
+    } else {
+      await clearReference.click();
+    }
+    await expect(clearReference).toHaveCount(0);
     await expectNoHorizontalOverflow(page);
   });
 });

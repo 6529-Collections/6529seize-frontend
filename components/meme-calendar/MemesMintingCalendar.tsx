@@ -5,6 +5,7 @@ import CommonTabs from "@/components/utils/select/tabs/CommonTabs";
 import ClientOnly from "@/components/client-only/ClientOnly";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import usePublishedMemes from "@/hooks/usePublishedMemes";
 import { useState } from "react";
 import type { DisplayTz } from "./meme-calendar.helpers";
 import MemeCalendar from "./MemeCalendar";
@@ -16,6 +17,7 @@ export default function MemesMintingCalendar({
   readonly locale?: SupportedLocale | undefined;
 }) {
   const [displayTz, setDisplayTz] = useState<DisplayTz>("local");
+  const publishedMemes = usePublishedMemes();
   const timezoneItems: readonly CommonSelectItem<DisplayTz>[] = [
     {
       key: "local",
@@ -50,13 +52,20 @@ export default function MemesMintingCalendar({
           displayTz={displayTz}
           headerAction={timezoneToggle}
           locale={locale}
+          publishedMemeIds={publishedMemes.publishedMemeIds}
+          publishedMemesStatus={publishedMemes.status}
         />
       </div>
       <div className="tw-w-full">
         <ClientOnly
           fallback={<div aria-hidden="true" className="tw-min-h-96" />}
         >
-          <MemeCalendar displayTz={displayTz} locale={locale} />
+          <MemeCalendar
+            displayTz={displayTz}
+            locale={locale}
+            publishedMemeIds={publishedMemes.publishedMemeIds}
+            publishedMemesStatus={publishedMemes.status}
+          />
         </ClientOnly>
       </div>
     </div>

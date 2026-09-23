@@ -16,24 +16,35 @@ jest.mock("wagmi", () => ({
 }));
 
 // Mock components
-jest.mock("@/components/rememes/RememeAddComponent", () => (props: any) => (
-  <div data-testid="rememe-add-component">
-    <button
-      onClick={() =>
-        props.verifiedRememe(
-          {
-            valid: true,
-            contract: { address: "0xtest", contractDeployer: "0xdeployer" },
-            nfts: [{ tokenId: "1", name: "Test NFT" }],
-          },
-          [1, 2]
-        )
-      }
-    >
-      Verify Rememe
-    </button>
-  </div>
-));
+jest.mock("@/components/rememes/RememeAddComponent", () => {
+  const React = require("react");
+  return function MockRememeAddComponent(props: any) {
+    const [verified, setVerified] = React.useState(false);
+    return (
+      <div data-testid="rememe-add-component">
+        <button
+          onClick={() => {
+            props.verifiedRememe(
+              {
+                valid: true,
+                contract: {
+                  address: "0xtest",
+                  contractDeployer: "0xdeployer",
+                },
+                nfts: [{ tokenId: "1", name: "Test NFT" }],
+              },
+              [1, 2]
+            );
+            setVerified(true);
+          }}
+        >
+          Verify Rememe
+        </button>
+        {verified && props.verifiedAction}
+      </div>
+    );
+  };
+});
 
 jest.mock("@fortawesome/react-fontawesome", () => ({
   FontAwesomeIcon: (props: any) => (
@@ -181,6 +192,7 @@ describe("RememeAddPage", () => {
     });
 
     renderComponent();
+    fireEvent.click(screen.getByText("Verify Rememe"));
 
     expect(screen.getByText("Connect Wallet")).toBeInTheDocument();
   });
@@ -194,13 +206,16 @@ describe("RememeAddPage", () => {
     });
 
     renderComponent();
+    fireEvent.click(screen.getByText("Verify Rememe"));
 
     expect(screen.getByText("Connecting...")).toBeInTheDocument();
   });
 
-  it("shows add rememe button when connected", () => {
+  it("shows add rememe only after validation when connected", () => {
     renderComponent();
 
+    expect(screen.queryByText("Add Rememe")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByText("Verify Rememe"));
     expect(screen.getByText("Add Rememe")).toBeInTheDocument();
   });
 
@@ -295,7 +310,9 @@ describe("RememeAddPage", () => {
     expect(signedMessage).toEqual(expect.stringContaining("Wallet: 0x123"));
     expect(signedMessage).toEqual(expect.stringContaining("Payload Hash:"));
     expect(signedMessage).toEqual(
-      expect.stringContaining("Purpose: Sign this message to add a 6529 ReMeme.")
+      expect.stringContaining(
+        "Purpose: Sign this message to add a 6529 ReMeme."
+      )
     );
   });
 
@@ -457,14 +474,23 @@ describe("RememeAddPage", () => {
     expect(screen.queryByText("Adding Rememe")).not.toBeInTheDocument();
   });
 
-  it("handles sign message errors", () => {
-    mockUseSignMessage.mockReturnValue({
+  it("handles sign message errors", async () => {
+    mockEligibleProfile();
+    const signMessageMock = {
       ...defaultSignMessage,
+      signMessage: jest.fn(),
+    };
+    mockUseSignMessage.mockReturnValue(signMessageMock);
+
+    const { rerender } = renderComponent();
+    await verifyAndClickAddRememe();
+
+    mockUseSignMessage.mockReturnValue({
+      ...signMessageMock,
       isError: true,
       error: { message: "User rejected. Something else." },
     });
-
-    renderComponent();
+    rerenderComponent(rerender);
 
     expect(screen.getByText("Error: User rejected")).toBeInTheDocument();
   });

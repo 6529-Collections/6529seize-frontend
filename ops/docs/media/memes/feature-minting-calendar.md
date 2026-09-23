@@ -47,15 +47,20 @@ local timezone. Viewing the schedule does not require connecting a wallet.
      labels, and a live countdown.
 4. Use top controls to jump:
    - `Next Mint` button.
-   - `Meme #` input (submit with Enter).
+   - `Meme #` input and `Show mint schedule` action (or submit with Enter).
+   - When the selected number is a published Meme Card, use `Open Meme #…` to
+     open its artwork page. Scheduled numbers without published artwork say so
+     instead of linking to an unresolved route.
 5. Export the selected mint using ICS or Google Calendar icons.
 6. Use the lower calendar controls:
    - Change zoom (`SZN`, `Year`, `Epoch`, `Period`, `Era`, `Eon`).
    - Move backward/forward.
    - `Jump to Today`.
-   - `Meme #` jump.
+   - `Meme #` and `Find mint date` to move the calendar to that mint.
    - `Date` month jump (`Date` input is hidden on small screens).
-7. Open mint-day cells to view details, export links, and any override note.
+7. Open mint-day cells to view details, export links, any override note, and an
+   artwork link when that Meme Card is published. Upcoming or unrevealed cards
+   show their artwork as not published yet.
 8. On fallback routes, the compact panel auto-selects the URL id and stays
    local-time read-only (no timezone toggle, no `Next Mint` button, no `Meme #`
    input, no upcoming table). When an unresolved route is the canonical next
@@ -88,6 +93,9 @@ local timezone. Viewing the schedule does not require connecting a wallet.
   `No upcoming mints in this season.`.
 - Year 0 launch period is grouped as `Memes #1 - #47` in higher-level views.
 - Day tooltips auto-place (`top`, `right`, `bottom`) near viewport edges.
+- Published artwork links are derived from the published Memes list. A loading
+  or availability-check failure is described without creating a speculative
+  `/the-memes/{id}` link.
 - In Capacitor/native sessions, screenshot control is hidden on full
   `/meme-calendar` top controls.
 - In compact fallback panels, screenshot control remains visible next to the

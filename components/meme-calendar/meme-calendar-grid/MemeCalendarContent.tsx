@@ -62,6 +62,8 @@ const CONTROL_INPUT_CLASS =
 export default function MemeCalendar({
   displayTz,
   locale = DEFAULT_LOCALE,
+  publishedMemeIds = new Set<number>(),
+  publishedMemesStatus = "loading",
 }: MemeCalendarProps) {
   const guideTooltipId = buildTooltipId(useId(), "meme-calendar-guide");
   const [seasonIndex, setSeasonIndex] = useState<number>(() => {
@@ -119,6 +121,8 @@ export default function MemeCalendar({
             autoOpenYmd={autoOpenYmd ?? undefined}
             displayTz={displayTz}
             locale={locale}
+            publishedMemeIds={publishedMemeIds}
+            publishedMemesStatus={publishedMemesStatus}
           />
         );
       case "year":
@@ -463,7 +467,7 @@ export default function MemeCalendar({
               value={jumpMint}
               error={jumpMintError}
               label={t(locale, "memeCalendar.grid.memeNumber")}
-              submitLabel={t(locale, "memeCalendar.numberInput.submit")}
+              submitLabel={t(locale, "memeCalendar.grid.controls.findMintDate")}
               max={MAX_MINT_NUMBER}
               onChange={(value) => {
                 setJumpMint(value);

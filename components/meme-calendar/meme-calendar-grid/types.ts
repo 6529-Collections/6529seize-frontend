@@ -1,4 +1,5 @@
 import type { SupportedLocale } from "@/i18n/locales";
+import type { PublishedMemesStatus } from "@/hooks/usePublishedMemes";
 
 import type { DisplayTz } from "../meme-calendar.helpers";
 import { getHistoricalMintsOnUtcDay } from "../meme-calendar.szn1";
@@ -9,6 +10,8 @@ export interface MonthProps {
   readonly autoOpenYmd?: string | undefined;
   readonly displayTz: DisplayTz;
   readonly locale: SupportedLocale;
+  readonly publishedMemeIds: ReadonlySet<number>;
+  readonly publishedMemesStatus: PublishedMemesStatus;
 }
 
 export interface SeasonViewProps {
@@ -17,6 +20,8 @@ export interface SeasonViewProps {
   readonly autoOpenYmd?: string | undefined;
   readonly displayTz: DisplayTz;
   readonly locale: SupportedLocale;
+  readonly publishedMemeIds: ReadonlySet<number>;
+  readonly publishedMemesStatus: PublishedMemesStatus;
 }
 
 export interface YearViewProps {
@@ -81,11 +86,15 @@ export interface MonthDayCellProps {
   readonly month: number;
   readonly onSelectDay?: ((date: Date) => void) | undefined;
   readonly year: number;
+  readonly publishedMemeIds: ReadonlySet<number>;
+  readonly publishedMemesStatus: PublishedMemesStatus;
 }
 
 export interface MemeCalendarProps {
   readonly displayTz: DisplayTz;
   readonly locale?: SupportedLocale | undefined;
+  readonly publishedMemeIds?: ReadonlySet<number> | undefined;
+  readonly publishedMemesStatus?: PublishedMemesStatus | undefined;
 }
 
 export type { ZoomLevel } from "../meme-calendar.helpers";
