@@ -61,20 +61,15 @@ describe("RememeAddComponent", () => {
       minted_by: "",
       tdh: 0,
     },
-    {
-      id: 11,
-      name: "The Memes #11",
-      description: "Test meme 11",
-      image: "test11.jpg",
-      animation_url: "",
-      animation_url_new: "",
-      contract: "0x789",
-      token_id: 11,
-      mint_date: "",
-      minted_by: "",
-      tdh: 0,
-    },
   ];
+  mockMemes.push({
+    ...mockMemes[0]!,
+    id: 11,
+    name: "The Memes #11",
+    description: "Test meme 11",
+    image: "test11.jpg",
+    contract: "0x789",
+  });
 
   const mockVerifiedRememe = jest.fn();
 
