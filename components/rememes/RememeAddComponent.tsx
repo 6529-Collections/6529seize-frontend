@@ -325,7 +325,7 @@ export default function RememeAddComponent({
                         current.filter((item) => item.id !== meme.id)
                       )
                     }
-                    className="tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-text-iron-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-bg-iron-700 desktop-hover:hover:tw-text-iron-50 disabled:tw-cursor-not-allowed disabled:tw-opacity-50"
+                    className="tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-text-iron-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:hover:tw-bg-iron-700 desktop-hover:hover:tw-text-iron-50"
                     aria-label={`Clear reference #${meme.id}`}
                   >
                     <XMarkIcon aria-hidden="true" className="tw-size-4" />
