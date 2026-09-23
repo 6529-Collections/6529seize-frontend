@@ -41,6 +41,13 @@ export interface ProcessedRememe {
   error?: string | undefined;
 }
 
+interface RememeValidationResponse {
+  readonly valid?: boolean | undefined;
+  readonly contract?: NftContract | null | undefined;
+  readonly nfts?: Nft[] | null | undefined;
+  readonly error?: string | undefined;
+}
+
 interface Props {
   readonly memes: readonly NFT[];
   readonly verifiedRememe: (
@@ -91,6 +98,17 @@ function parseTokenIds(tokenIds: string): string[] | undefined {
   } catch {
     return undefined;
   }
+}
+
+function isCompleteValidResponse(
+  response: RememeValidationResponse
+): response is ProcessedRememe {
+  return (
+    response.valid === true &&
+    typeof response.contract === "object" &&
+    response.contract !== null &&
+    Array.isArray(response.nfts)
+  );
 }
 
 const INPUT_CLASS =
@@ -168,26 +186,22 @@ export default function RememeAddComponent({
           `${publicEnv.API_ENDPOINT}/api/rememes/validate`,
           getRememe(myTokenIds)
         );
-        const response = validation.response;
+        const response = validation.response as RememeValidationResponse;
         const contractR = response.contract;
-        const nftResponses: Nft[] = response.nfts;
+        const responseNfts = Array.isArray(response.nfts) ? response.nfts : [];
         if (contractR) {
           setContractResponse(contractR);
         }
-        if (nftResponses) {
-          setNftResponses(nftResponses);
-        }
+        setNftResponses(responseNfts);
         if (response.error) {
           setVerificationErrors([response.error]);
         }
-        if (
-          nftResponses &&
-          nftResponses.some((nft) => nft.raw.error !== undefined)
-        ) {
+        if (responseNfts.some((nft) => nft.raw.error !== undefined)) {
           setVerificationErrors(["Some Token IDs are invalid"]);
         }
-        setVerified(response.valid);
-        if (response.valid) {
+        const hasCompleteValidResponse = isCompleteValidResponse(response);
+        setVerified(hasCompleteValidResponse);
+        if (hasCompleteValidResponse) {
           verifiedRememe(
             response,
             references.map((reference) => reference.id)

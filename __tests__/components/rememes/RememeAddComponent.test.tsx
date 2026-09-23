@@ -243,6 +243,34 @@ describe("RememeAddComponent", () => {
     });
   });
 
+  it("does not verify an incomplete valid response", async () => {
+    const user = userEvent.setup();
+    renderComponent();
+
+    mockPostData.mockResolvedValue({
+      status: 200,
+      response: { valid: true },
+    });
+
+    await user.type(
+      screen.getByPlaceholderText("0x..."),
+      "0x1234567890123456789012345678901234567890"
+    );
+    await user.type(screen.getByPlaceholderText(/1,2,3 or 1-3/), "1");
+    await user.click(
+      screen
+        .getAllByRole("button")
+        .find((button) => button.getAttribute("aria-expanded") === "false")!
+    );
+    await user.click(screen.getByText("#1 - The Memes #1"));
+    await user.click(screen.getByRole("button", { name: /validate/i }));
+
+    await waitFor(() => {
+      expect(mockVerifiedRememe).not.toHaveBeenCalled();
+      expect(screen.queryByText("Verified")).toBeNull();
+    });
+  });
+
   it("parses comma-separated token IDs correctly", async () => {
     const user = userEvent.setup();
     renderComponent();
