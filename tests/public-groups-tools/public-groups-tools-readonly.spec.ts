@@ -287,8 +287,10 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
     await expect(localTab).toHaveAttribute("aria-selected", "false");
 
     await expect(page.getByRole("button", { name: "Next Mint" })).toBeVisible();
-    await expect(page.locator("#meme-overview-mint-input")).toBeVisible();
-    await expect(page.locator("#meme-calendar-mint-input")).toBeVisible();
+    const overviewMemeNumberInput = page.getByLabel("Meme #").first();
+    const calendarMemeNumberInput = page.getByLabel("Meme #").last();
+    await expect(overviewMemeNumberInput).toBeVisible();
+    await expect(calendarMemeNumberInput).toBeVisible();
     await expect(
       page.getByRole("button", { name: "Show mint schedule" })
     ).toBeVisible();
@@ -296,17 +298,17 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
       page.getByRole("button", { name: "Find mint date" })
     ).toBeVisible();
 
-    await page.locator("#meme-overview-mint-input").fill("551");
+    await overviewMemeNumberInput.fill("551");
     await page.getByRole("button", { name: "Show mint schedule" }).click();
     await expect(
       page.getByRole("link", { name: "Open Meme #551" })
     ).toHaveAttribute("href", "/the-memes/551?locale=de-DE", {
       timeout: 30000,
     });
-    await page.locator("#meme-calendar-mint-input").fill("551");
+    await calendarMemeNumberInput.fill("551");
     await page.getByRole("button", { name: "Find mint date" }).click();
     const tooltipArtworkLink = page
-      .locator("#meme-tooltip")
+      .getByRole("tooltip")
       .getByRole("link", { name: "Open Meme #551" });
     await expect(tooltipArtworkLink).toBeVisible({ timeout: 30000 });
     await tooltipArtworkLink.focus();
