@@ -40,6 +40,5 @@ export default function usePublishedMemes() {
   return {
     publishedMemeIds: query.data ?? EMPTY_PUBLISHED_MEME_IDS,
     status,
-    retry: query.refetch,
   };
 }

@@ -41,13 +41,6 @@ export interface ProcessedRememe {
   error?: string | undefined;
 }
 
-interface RememeValidationResponse {
-  readonly valid: boolean;
-  readonly contract?: NftContract | undefined;
-  readonly nfts?: Nft[] | undefined;
-  readonly error?: string | undefined;
-}
-
 interface Props {
   readonly memes: readonly NFT[];
   readonly verifiedRememe: (
@@ -175,20 +168,28 @@ export default function RememeAddComponent({
           `${publicEnv.API_ENDPOINT}/api/rememes/validate`,
           getRememe(myTokenIds)
         );
-        const response = validation.response as RememeValidationResponse;
-        const nextNftResponses = response.nfts;
-        const hasNftErrors =
-          nextNftResponses?.some((nft) => nft.raw.error !== undefined) === true;
-        if (response.contract) setContractResponse(response.contract);
-        if (nextNftResponses) setNftResponses(nextNftResponses);
-        if (response.error) setVerificationErrors([response.error]);
-        if (hasNftErrors) {
+        const response = validation.response;
+        const contractR = response.contract;
+        const nftResponses: Nft[] = response.nfts;
+        if (contractR) {
+          setContractResponse(contractR);
+        }
+        if (nftResponses) {
+          setNftResponses(nftResponses);
+        }
+        if (response.error) {
+          setVerificationErrors([response.error]);
+        }
+        if (
+          nftResponses &&
+          nftResponses.some((nft) => nft.raw.error !== undefined)
+        ) {
           setVerificationErrors(["Some Token IDs are invalid"]);
         }
         setVerified(response.valid);
         if (response.valid) {
           verifiedRememe(
-            response as ProcessedRememe,
+            response,
             references.map((reference) => reference.id)
           );
         }

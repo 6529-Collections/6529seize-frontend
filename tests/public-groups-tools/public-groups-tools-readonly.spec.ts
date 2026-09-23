@@ -303,6 +303,14 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
     ).toHaveAttribute("href", "/the-memes/551?locale=de-DE", {
       timeout: 30000,
     });
+    await page.locator("#meme-calendar-mint-input").fill("551");
+    await page.getByRole("button", { name: "Find mint date" }).click();
+    const tooltipArtworkLink = page
+      .locator("#meme-tooltip")
+      .getByRole("link", { name: "Open Meme #551" });
+    await expect(tooltipArtworkLink).toBeVisible({ timeout: 30000 });
+    await tooltipArtworkLink.focus();
+    await expect(tooltipArtworkLink).toBeFocused();
     await expect(
       page.getByRole("button", { name: "Screenshot" })
     ).toBeVisible();
