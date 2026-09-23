@@ -23,6 +23,7 @@ import {
 } from "../meme-calendar.helpers";
 import { getMintOverrideNoteForUtcDay } from "../meme-calendar.overrides";
 import { getHistoricalMintsOnUtcDay } from "../meme-calendar.szn1";
+import { getArtworkStatusMessageKey } from "../MemeCalendarArtworkAvailability";
 import { escapeHtml, getCalendarInviteLabels } from "./calendarText";
 import type {
   HistoricalMint,
@@ -60,12 +61,6 @@ function formatHistoricalMintLabel(
   }
 
   return `#${formatInteger(locale, first.id)}-#${formatInteger(locale, last.id)}`;
-}
-
-function getArtworkStatusMessageKey(status: PublishedMemesStatus): MessageKey {
-  if (status === "loading") return "memeCalendar.artwork.checking";
-  if (status === "error") return "memeCalendar.artwork.checkFailed";
-  return "memeCalendar.artwork.notPublished";
 }
 
 function getMintCellDetails(

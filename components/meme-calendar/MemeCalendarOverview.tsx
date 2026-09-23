@@ -8,7 +8,7 @@ import useCapacitor from "@/hooks/useCapacitor";
 import type { PublishedMemesStatus } from "@/hooks/usePublishedMemes";
 import { formatInteger } from "@/i18n/format";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
-import { t, type MessageKey } from "@/i18n/messages";
+import { t } from "@/i18n/messages";
 import { toPng } from "html-to-image";
 import Link from "next/link";
 import {
@@ -41,18 +41,13 @@ import {
   ScreenshotFeedback,
   type ScreenshotStatus,
 } from "./MemeCalendarScreenshotControls";
+import MemeCalendarArtworkAvailability from "./MemeCalendarArtworkAvailability";
 import MemeNumberSearch from "./MemeNumberSearch";
 
 const MAX_MINT_NUMBER = 100_000;
 const CALENDAR_INVITE_ICON_SIZE = 18;
 const OVERVIEW_CARD_CLASS =
   "tw-rounded-2xl tw-bg-iron-950 tw-shadow-lg tw-ring-1 tw-ring-iron-800";
-
-function getArtworkStatusMessageKey(status: PublishedMemesStatus): MessageKey {
-  if (status === "loading") return "memeCalendar.artwork.checking";
-  if (status === "error") return "memeCalendar.artwork.checkFailed";
-  return "memeCalendar.artwork.notPublished";
-}
 
 /**
  * Layout wrapper: global Local/UTC toggle + two cards
@@ -357,8 +352,6 @@ function MemeCalendarOverviewNextMintContent({
   const endMs = mintDetails.mintEndUtc.getTime();
   const isUpcoming = nowMs < startMs;
   const isPast = nowMs >= endMs;
-  const isPublished = publishedMemeIds.has(selectedMintNumber);
-
   let heading: string;
   if (isUpcoming) {
     heading =
@@ -532,28 +525,12 @@ function MemeCalendarOverviewNextMintContent({
             {formatToFullDivision(mintDetails.instantUtc, locale)}
           </div>
           {publishedMemesStatus && (
-            <div
-              data-ignore-screenshot
-              className="tw-mt-3 tw-flex tw-min-h-9 tw-items-center"
-            >
-              {isPublished ? (
-                <Link
-                  href={getRouteHrefWithLocale({
-                    href: `/the-memes/${selectedMintNumber}`,
-                    locale,
-                  })}
-                  className="desktop-hover:hover:tw-text-primary-200 tw-inline-flex tw-min-h-9 tw-items-center tw-rounded-lg tw-text-sm tw-font-semibold tw-text-primary-300 tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
-                >
-                  {t(locale, "memeCalendar.artwork.open", {
-                    meme: selectedMintNumber,
-                  })}
-                </Link>
-              ) : (
-                <span className="tw-text-sm tw-text-iron-500">
-                  {t(locale, getArtworkStatusMessageKey(publishedMemesStatus))}
-                </span>
-              )}
-            </div>
+            <MemeCalendarArtworkAvailability
+              locale={locale}
+              memeNumber={selectedMintNumber}
+              publishedMemeIds={publishedMemeIds}
+              status={publishedMemesStatus}
+            />
           )}
           <ScreenshotFeedback
             locale={locale}
