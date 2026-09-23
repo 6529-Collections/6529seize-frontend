@@ -6,6 +6,7 @@ let mockBreakpoint = "LG";
 let mockWaveId: string | null = null;
 let mockIsRightSidebarOpen = false;
 let mockEffectiveDropId: string | undefined;
+let mockSearchParams = new URLSearchParams();
 
 const mockChildMounted = jest.fn();
 const mockCloseRightSidebar = jest.fn();
@@ -48,7 +49,7 @@ jest.mock("framer-motion", () => {
 jest.mock("next/navigation", () => ({
   usePathname: () => "/waves",
   useRouter: () => ({ replace: mockRouterReplace }),
-  useSearchParams: () => new URLSearchParams(),
+  useSearchParams: () => mockSearchParams,
 }));
 
 jest.mock("@/helpers/navigation.helpers", () => ({
@@ -100,10 +101,17 @@ jest.mock("@/contexts/wave/WaveChatScrollContext", () => ({
 
 jest.mock("@/components/brain/left-sidebar/web/WebLeftSidebar", () => ({
   __esModule: true,
-  default: ({ isCollapsed }: { readonly isCollapsed: boolean }) => (
+  default: ({
+    isCollapsed,
+    showProfileFeedShortcut,
+  }: {
+    readonly isCollapsed: boolean;
+    readonly showProfileFeedShortcut?: boolean;
+  }) => (
     <div
       data-testid="left-sidebar"
       data-collapsed={isCollapsed ? "true" : "false"}
+      data-profile-feed-shortcut={showProfileFeedShortcut ? "true" : "false"}
     />
   ),
 }));
@@ -158,6 +166,7 @@ describe("WavesMessagesWrapper", () => {
     mockWaveId = null;
     mockIsRightSidebarOpen = false;
     mockEffectiveDropId = undefined;
+    mockSearchParams = new URLSearchParams();
     jest.clearAllMocks();
     mockUseQuery.mockReturnValue({ data: undefined, error: null });
   });
@@ -179,8 +188,22 @@ describe("WavesMessagesWrapper", () => {
     renderWrapper();
 
     expect(screen.queryByTestId("main-content")).not.toBeInTheDocument();
-    expect(screen.getByTestId("left-sidebar")).toBeInTheDocument();
+    expect(screen.getByTestId("left-sidebar")).toHaveAttribute(
+      "data-profile-feed-shortcut",
+      "true"
+    );
     expect(mockChildMounted).not.toHaveBeenCalled();
+  });
+
+  it("renders the direct profile feed query on small screens", () => {
+    mockBreakpoint = "S";
+    mockSearchParams = new URLSearchParams("view=profile-feed");
+
+    renderWrapper();
+
+    expect(screen.getByTestId("main-content")).toBeInTheDocument();
+    expect(screen.queryByTestId("left-sidebar")).not.toBeInTheDocument();
+    expect(mockChildMounted).toHaveBeenCalledTimes(1);
   });
 
   it("renders selected wave main content on small screens", () => {
