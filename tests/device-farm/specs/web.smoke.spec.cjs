@@ -41,6 +41,9 @@ describe("6529 mobile web smoke (real device)", function () {
 
   before(async function () {
     driver = await startWebSession();
+    // Exercise navigation on the device, not a curl from the test host.
+    // This also captures explicit offline state before any app assertions.
+    await openPage(driver, targetUrl(), PAGE_LOAD_TIMEOUT_MS);
   });
 
   after(async function () {

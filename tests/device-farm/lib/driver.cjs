@@ -13,6 +13,7 @@
 
 const path = require("node:path");
 const { remote } = require("webdriverio");
+const { recordNavigationRetry } = require("./result.cjs");
 
 const APPIUM_HOSTNAME = "127.0.0.1";
 const APPIUM_PORT = 4723;
@@ -71,14 +72,14 @@ function baseCapabilities() {
   return capabilities;
 }
 
-async function connect(capabilities) {
+async function connect(capabilities, connectionRetryCount = 2) {
   return remote({
     hostname: APPIUM_HOSTNAME,
     port: APPIUM_PORT,
     path: "/",
     logLevel: "warn",
     connectionRetryTimeout: 300000,
-    connectionRetryCount: 2,
+    connectionRetryCount,
     capabilities,
   });
 }
@@ -96,6 +97,15 @@ async function startWebSession() {
     // iOS 18.6.2 with "remote debugger did not return any connected web
     // applications after ~5s").
     capabilities["appium:webviewConnectTimeout"] = 30000;
+    // XCUITest attaches to a webview BEFORE setting safariInitialUrl. Launch
+    // a page through WDA instead of depending on the device's previous tab.
+    // initialDeeplinkUrl is supported on iOS 16.4+ (including both QA phones).
+    const [major, minor = 0] = env("DEVICEFARM_DEVICE_OS_VERSION", "")
+      .split(".")
+      .map(Number);
+    if (major > 16 || (major === 16 && minor >= 4)) {
+      capabilities["appium:initialDeeplinkUrl"] = targetUrl();
+    }
     const derivedDataPath = env("DEVICEFARM_APPIUM_WDA_DERIVED_DATA_PATH");
     if (derivedDataPath) {
       capabilities["appium:derivedDataPath"] = derivedDataPath;
@@ -109,7 +119,9 @@ async function startWebSession() {
       capabilities["appium:chromedriverExecutableDir"] = chromedriverDir;
     }
   }
-  return connect(capabilities);
+  // Surface the first failed session/command instead of replaying it silently.
+  // Fresh Device Farm allocations are the unit of reliability validation.
+  return connect(capabilities, 0);
 }
 
 /**
@@ -133,8 +145,13 @@ async function startNativeAndroidSession() {
 
 async function waitForDocumentReady(driver, timeout) {
   await driver.waitUntil(
-    async () => (await driver.execute(() => document.readyState)) === "complete",
-    { timeout, interval: 2000, timeoutMsg: "document never reached readyState=complete" }
+    async () =>
+      (await driver.execute(() => document.readyState)) === "complete",
+    {
+      timeout,
+      interval: 2000,
+      timeoutMsg: "document never reached readyState=complete",
+    }
   );
 }
 
@@ -146,6 +163,36 @@ async function waitForDocumentReady(driver, timeout) {
  * and a non-empty body rather than trusting the first readyState=complete.
  */
 async function openPage(driver, pageUrl, timeout) {
+  try {
+    await navigateToPage(driver, pageUrl, timeout);
+    const connectivity = await browserDiagnostics(driver);
+    if (connectivity.online === false) {
+      const error = new Error(
+        "Device browser reports offline after navigation"
+      );
+      error.code = "DEVICE_OFFLINE";
+      throw error;
+    }
+  } catch (error) {
+    // Diagnostic failures must never replace the original navigation error.
+    error.deviceFarmDiagnostics = await browserDiagnostics(driver);
+    throw error;
+  }
+}
+
+async function browserDiagnostics(driver) {
+  try {
+    return await driver.execute(() => ({
+      online: navigator.onLine,
+      readyState: document.readyState,
+      pathname: window.location.pathname,
+    }));
+  } catch {
+    return { unavailable: true };
+  }
+}
+
+async function navigateToPage(driver, pageUrl, timeout) {
   const expectedPath = new URL(pageUrl).pathname.replace(/\/$/, "") || "/";
   const onExpectedPath = async () => {
     const pathname = await driver.execute(() =>
@@ -163,6 +210,7 @@ async function openPage(driver, pageUrl, timeout) {
       interval: 2000,
     });
   } catch {
+    recordNavigationRetry();
     console.warn(`navigation to ${expectedPath} did not start; retrying url()`);
     await driver.url(pageUrl);
     await driver.waitUntil(onExpectedPath, {

@@ -10,7 +10,12 @@ const fs = require("node:fs");
 const CONTRACTS = [
   {
     test: "__tests__/scripts/device-farm-workflow.test.ts",
-    inputs: [/^\.github\/workflows\/device-farm-qa\.yml$/u],
+    inputs: [
+      /^\.github\/workflows\/device-farm-qa\.yml$/u,
+      /^scripts\/device-farm-report\.py$/u,
+      /^scripts\/__tests__\/device_farm_report_test\.py$/u,
+      /^tests\/device-farm\//u,
+    ],
   },
   {
     test: "__tests__/scripts/production-canary-workflow.test.ts",

@@ -5,7 +5,8 @@
   "description": "Appium smoke suites executed on AWS Device Farm real devices. Packaged via npm pack (bundleDependencies) and uploaded by .github/workflows/device-farm-qa.yml; not part of the pnpm workspace.",
   "scripts": {
     "test": "npm run test:web",
-    "test:web": "mocha specs/web.smoke.spec.cjs --timeout 900000 --retries 1 --reporter spec",
+    "test:unit": "node --test unit/*.test.cjs",
+    "test:web": "mocha specs/web.smoke.spec.cjs --timeout 900000 --retries 0 --reporter ./lib/reporter.cjs --fail-zero --forbid-pending",
     "test:native": "mocha specs/native-android.smoke.spec.cjs --timeout 900000 --retries 1 --reporter spec"
   },
   "dependencies": {
