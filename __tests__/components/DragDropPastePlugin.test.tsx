@@ -236,9 +236,14 @@ describe("DragDropPastePlugin", () => {
   });
 
   it("inserts one image when Chrome exposes it in both clipboard collections", async () => {
-    const imageOptions = { type: "image/png", lastModified: 1700000000000 };
-    const listedImage = new File(["a"], "image.png", imageOptions);
-    const itemImage = new File(["a"], "image.png", imageOptions);
+    const listedImage = new File(["a"], "image.png", {
+      type: "image/png",
+      lastModified: 1700000000000,
+    });
+    const itemImage = new File(["a"], "image.png", {
+      type: "image/png",
+      lastModified: 1700000000001,
+    });
     const preventDefault = jest.fn();
 
     renderPlugin();
