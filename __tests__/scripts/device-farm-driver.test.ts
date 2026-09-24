@@ -16,7 +16,7 @@ describe("Device Farm browser startup and diagnostics", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     process.env = { ...originalEnv, TARGET_URL: "https://staging.6529.io" };
-    delete process.env.DEVICEFARM_DEVICE_OS_VERSION;
+    delete process.env["DEVICEFARM_DEVICE_OS_VERSION"];
     mockRemote.mockResolvedValue({});
   });
   afterAll(() => {
@@ -26,8 +26,8 @@ describe("Device Farm browser startup and diagnostics", () => {
   it.each(["16.4", "18.6.2", "26.0"])(
     "preloads Safari before debugger attachment on iOS %s",
     async (version) => {
-      process.env.DEVICEFARM_DEVICE_PLATFORM_NAME = "iOS";
-      process.env.DEVICEFARM_DEVICE_OS_VERSION = version;
+      process.env["DEVICEFARM_DEVICE_PLATFORM_NAME"] = "iOS";
+      process.env["DEVICEFARM_DEVICE_OS_VERSION"] = version;
       await startWebSession();
       expect(mockRemote).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -45,8 +45,8 @@ describe("Device Farm browser startup and diagnostics", () => {
   it.each(["16.3", "15.8", "", "unknown"])(
     "does not send an unsupported launch capability on iOS %s",
     async (version) => {
-      process.env.DEVICEFARM_DEVICE_PLATFORM_NAME = "iOS";
-      process.env.DEVICEFARM_DEVICE_OS_VERSION = version;
+      process.env["DEVICEFARM_DEVICE_PLATFORM_NAME"] = "iOS";
+      process.env["DEVICEFARM_DEVICE_OS_VERSION"] = version;
       await startWebSession();
       expect(mockRemote.mock.calls[0][0].capabilities).not.toHaveProperty(
         "appium:initialDeeplinkUrl"
@@ -55,7 +55,7 @@ describe("Device Farm browser startup and diagnostics", () => {
   );
 
   it("keeps Android and native capabilities separate", async () => {
-    process.env.DEVICEFARM_DEVICE_PLATFORM_NAME = "Android";
+    process.env["DEVICEFARM_DEVICE_PLATFORM_NAME"] = "Android";
     await startWebSession();
     expect(mockRemote.mock.calls[0][0].capabilities.browserName).toBe("Chrome");
     expect(mockRemote.mock.calls[0][0].capabilities).not.toHaveProperty(
