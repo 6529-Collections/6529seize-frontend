@@ -54,6 +54,7 @@ import { GET } from "@/app/api/og-metadata/profiles/[identity]/route";
 
 describe("/api/og-metadata/profiles/[identity]", () => {
   beforeEach(() => {
+    jest.spyOn(console, "error").mockImplementation(() => undefined);
     mockImageResponse.mockClear();
     mockLoadMontserratFonts.mockReset();
     mockLoadMontserratFonts.mockResolvedValue(mockFonts);
@@ -64,6 +65,10 @@ describe("/api/og-metadata/profiles/[identity]", () => {
       json: async () => body,
     }));
     globalThis.fetch = jest.fn();
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   it("fetches profile metadata from the backend and returns an image response", async () => {
@@ -136,24 +141,112 @@ describe("/api/og-metadata/profiles/[identity]", () => {
     expect(response.status).toBe(400);
   });
 
-  it("returns 502 when backend metadata is unavailable", async () => {
+  it("returns a non-cacheable 404 without rendering missing metadata", async () => {
+    const readBody = jest.fn().mockResolvedValue({ error: "Private details" });
     (globalThis.fetch as jest.Mock).mockResolvedValue({
       ok: false,
       status: 404,
+      json: readBody,
     });
 
     const response = await GET(
       { url: "https://6529.test/api/og-metadata/profiles/missing" } as Request,
-      {
-        params: Promise.resolve({ identity: "missing" }),
-      }
+      { params: Promise.resolve({ identity: "missing" }) }
     );
 
-    expect(mockImageResponse).not.toHaveBeenCalled();
+    expect(response.status).toBe(404);
     expect(mockNextResponseJson).toHaveBeenCalledWith(
-      { error: "Unable to generate profile OG metadata image." },
-      { status: 502 }
+      { error: "Profile not found." },
+      { status: 404, headers: { "Cache-Control": "private, no-store" } }
     );
-    expect(response.status).toBe(502);
+    expect(globalThis.fetch).toHaveBeenCalledTimes(1);
+    expect(readBody).not.toHaveBeenCalled();
+    expect(mockLoadMontserratFonts).not.toHaveBeenCalled();
+    expect(mockImageResponse).not.toHaveBeenCalled();
+    expect(console.error).not.toHaveBeenCalled();
   });
+
+  it.each([401, 403, 429, 500, 502, 503])(
+    "keeps backend status %s as a logged 502 without exposing content",
+    async (status) => {
+      const readBody = jest
+        .fn()
+        .mockResolvedValue({ error: "Private details" });
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
+        ok: false,
+        status,
+        json: readBody,
+      });
+
+      const response = await GET(
+        {
+          url: "https://6529.test/api/og-metadata/profiles/unavailable",
+        } as Request,
+        { params: Promise.resolve({ identity: "unavailable" }) }
+      );
+
+      expect(response.status).toBe(502);
+      expect(mockNextResponseJson).toHaveBeenCalledWith(
+        { error: "Unable to generate profile OG metadata image." },
+        { status: 502 }
+      );
+      expect(globalThis.fetch).toHaveBeenCalledTimes(1);
+      expect(readBody).not.toHaveBeenCalled();
+      expect(mockLoadMontserratFonts).not.toHaveBeenCalled();
+      expect(mockImageResponse).not.toHaveBeenCalled();
+      expect(console.error).toHaveBeenCalledWith(
+        "Unable to generate profile OG metadata image.",
+        expect.any(Error)
+      );
+    }
+  );
+
+  it.each(["network", "json", "null metadata", "fonts", "rendering"])(
+    "keeps %s failures as logged server errors",
+    async (failure) => {
+      const error = new Error("Unexpected failure");
+      const readBody = jest.fn().mockResolvedValue({});
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: readBody,
+      });
+      switch (failure) {
+        case "network":
+          (globalThis.fetch as jest.Mock).mockRejectedValue(error);
+          break;
+        case "json":
+          readBody.mockRejectedValue(error);
+          break;
+        case "null metadata":
+          readBody.mockResolvedValue(null);
+          break;
+        case "fonts":
+          mockLoadMontserratFonts.mockRejectedValue(error);
+          break;
+        case "rendering":
+          mockImageResponse.mockImplementationOnce(() => {
+            throw error;
+          });
+          break;
+      }
+
+      const response = await GET(
+        {
+          url: "https://6529.test/api/og-metadata/profiles/unavailable",
+        } as Request,
+        { params: Promise.resolve({ identity: "unavailable" }) }
+      );
+
+      expect(response.status).toBe(502);
+      expect(mockNextResponseJson).toHaveBeenCalledWith(
+        { error: "Unable to generate profile OG metadata image." },
+        { status: 502 }
+      );
+      expect(console.error).toHaveBeenCalledWith(
+        "Unable to generate profile OG metadata image.",
+        expect.any(Error)
+      );
+    }
+  );
 });

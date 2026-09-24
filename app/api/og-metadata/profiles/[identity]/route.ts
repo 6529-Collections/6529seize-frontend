@@ -1,5 +1,6 @@
 import { publicEnv } from "@/config/env";
 import type { ApiOgMetadata } from "@/generated/models/ApiOgMetadata";
+import { MetadataNotFoundError } from "@/app/api/og-metadata/_lib/metadataNotFoundError";
 import { getOgImageRequestOrigin } from "@/app/api/og-metadata/_lib/requestOrigin";
 import { loadMontserratFonts } from "@/app/api/og-metadata/profiles/[identity]/font";
 import { renderProfileOgImage } from "@/app/api/og-metadata/profiles/[identity]/image";
@@ -30,6 +31,10 @@ const fetchProfileMetadata = async (
   const response = await fetch(url, {
     next: { revalidate },
   });
+
+  if (response.status === 404) {
+    throw new MetadataNotFoundError();
+  }
 
   if (!response.ok) {
     throw new Error(`Profile OG metadata request failed: ${response.status}`);
@@ -71,6 +76,13 @@ export async function GET(
       }
     );
   } catch (error) {
+    if (error instanceof MetadataNotFoundError) {
+      return NextResponse.json(
+        { error: "Profile not found." },
+        { status: 404, headers: { "Cache-Control": "private, no-store" } }
+      );
+    }
+
     console.error("Unable to generate profile OG metadata image.", error);
     return NextResponse.json(
       { error: "Unable to generate profile OG metadata image." },
