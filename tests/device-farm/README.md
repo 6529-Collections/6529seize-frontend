@@ -27,8 +27,9 @@ testspecs/*.yml                Device Farm test spec files (run on the Device
 ```
 
 Specs are mocha `.cjs` files on purpose: Playwright only collects
-`tests/**/*.spec.ts`, so these never leak into the Playwright packs, and knip
-ignores `tests/**`.
+`tests/**/*.spec.ts`, so these never leak into the Playwright packs. Knip
+analyzes this bundle as its own package using its nested dependency manifest;
+this does not add it to the pnpm workspace or the frontend application bundle.
 
 ## Read-only discipline
 

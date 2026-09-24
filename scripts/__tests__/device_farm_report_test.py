@@ -58,6 +58,17 @@ class DeviceFarmReportTests(unittest.TestCase):
         self.archive("iPhone 16", {})
         self.assertFalse(report.summarize(self.folder, "PASSED", "ios-safari", 2)[1])
 
+    def test_corrupt_archive_is_distinct_from_missing_or_invalid_result(self):
+        self.archive("iPhone 16", {})
+        summary, passed = report.summarize(self.folder, "PASSED", "ios-safari", 1)
+        self.assertFalse(passed)
+        self.assertIn("result missing or invalid", summary)
+        archive = next(self.folder.rglob("*Customer Artifacts.zip"))
+        archive.write_bytes(b"not a ZIP file")
+        summary, passed = report.summarize(self.folder, "PASSED", "ios-safari", 1)
+        self.assertFalse(passed)
+        self.assertIn("archive unreadable", summary)
+
     def test_retries_skips_and_failures_do_not_count_as_clean_runs(self):
         for change in [
             {"outcome": "passed-after-retry", "retries": 1},

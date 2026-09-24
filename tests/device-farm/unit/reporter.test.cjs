@@ -100,3 +100,16 @@ test("existing navigation recovery remains visible in the result", () => {
   assert.equal(result.outcome, "passed-after-retry");
   assert.equal(result.retries, 1);
 });
+
+test("a new reporter resets recovery counts from a previous run", () => {
+  const Mocha = require("mocha");
+  const Reporter = require("../lib/reporter.cjs");
+  const { recordNavigationRetry, getNavigationRetries } = require("../lib/result.cjs");
+  recordNavigationRetry();
+  assert.ok(getNavigationRetries() > 0);
+  const runner = new Mocha.Runner(new Mocha.Suite("next run"));
+  new Reporter(runner, {});
+  assert.equal(getNavigationRetries(), 0);
+  recordNavigationRetry();
+  assert.equal(getNavigationRetries(), 1);
+});

@@ -1,7 +1,6 @@
 /** @jest-environment node */
-jest.mock("webdriverio", () => ({ remote: jest.fn() }), { virtual: true });
-
-const { remote } = require("webdriverio");
+const mockRemote = jest.fn();
+jest.mock("webdriverio", () => ({ remote: mockRemote }), { virtual: true });
 const {
   openPage,
   startWebSession,
@@ -18,7 +17,7 @@ describe("Device Farm browser startup and diagnostics", () => {
     jest.clearAllMocks();
     process.env = { ...originalEnv, TARGET_URL: "https://staging.6529.io" };
     delete process.env.DEVICEFARM_DEVICE_OS_VERSION;
-    remote.mockResolvedValue({});
+    mockRemote.mockResolvedValue({});
   });
   afterAll(() => {
     process.env = originalEnv;
@@ -30,7 +29,7 @@ describe("Device Farm browser startup and diagnostics", () => {
       process.env.DEVICEFARM_DEVICE_PLATFORM_NAME = "iOS";
       process.env.DEVICEFARM_DEVICE_OS_VERSION = version;
       await startWebSession();
-      expect(remote).toHaveBeenCalledWith(
+      expect(mockRemote).toHaveBeenCalledWith(
         expect.objectContaining({
           connectionRetryCount: 0,
           capabilities: expect.objectContaining({
@@ -49,7 +48,7 @@ describe("Device Farm browser startup and diagnostics", () => {
       process.env.DEVICEFARM_DEVICE_PLATFORM_NAME = "iOS";
       process.env.DEVICEFARM_DEVICE_OS_VERSION = version;
       await startWebSession();
-      expect(remote.mock.calls[0][0].capabilities).not.toHaveProperty(
+      expect(mockRemote.mock.calls[0][0].capabilities).not.toHaveProperty(
         "appium:initialDeeplinkUrl"
       );
     }
@@ -58,13 +57,13 @@ describe("Device Farm browser startup and diagnostics", () => {
   it("keeps Android and native capabilities separate", async () => {
     process.env.DEVICEFARM_DEVICE_PLATFORM_NAME = "Android";
     await startWebSession();
-    expect(remote.mock.calls[0][0].capabilities.browserName).toBe("Chrome");
-    expect(remote.mock.calls[0][0].capabilities).not.toHaveProperty(
+    expect(mockRemote.mock.calls[0][0].capabilities.browserName).toBe("Chrome");
+    expect(mockRemote.mock.calls[0][0].capabilities).not.toHaveProperty(
       "appium:initialDeeplinkUrl"
     );
     await startNativeAndroidSession();
-    expect(remote.mock.calls[1][0].connectionRetryCount).toBe(2);
-    expect(remote.mock.calls[1][0].capabilities).not.toHaveProperty(
+    expect(mockRemote.mock.calls[1][0].connectionRetryCount).toBe(2);
+    expect(mockRemote.mock.calls[1][0].capabilities).not.toHaveProperty(
       "browserName"
     );
   });
@@ -73,9 +72,9 @@ describe("Device Farm browser startup and diagnostics", () => {
     const error = new Error(
       "The remote debugger did not return any connected web applications after 30154ms"
     );
-    remote.mockRejectedValue(error);
+    mockRemote.mockRejectedValue(error);
     await expect(startWebSession()).rejects.toBe(error);
-    expect(remote).toHaveBeenCalledTimes(1);
+    expect(mockRemote).toHaveBeenCalledTimes(1);
     expect(classifyFailure(error)).toBe("safari-session-startup");
   });
 

@@ -10,6 +10,10 @@ function getNavigationRetries() {
   return navigationRetries;
 }
 
+function resetNavigationRetries() {
+  navigationRetries = 0;
+}
+
 function classifyFailure(error) {
   const message = error.message || "";
   if (
@@ -65,4 +69,5 @@ module.exports = {
   summarizeResult,
   recordNavigationRetry,
   getNavigationRetries,
+  resetNavigationRetries,
 };

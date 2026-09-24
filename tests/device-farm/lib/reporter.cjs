@@ -7,6 +7,7 @@ const {
   classifyFailure,
   summarizeResult,
   getNavigationRetries,
+  resetNavigationRetries,
 } = require("./result.cjs");
 
 // Retain the readable Mocha output and add a small machine-readable artifact.
@@ -14,6 +15,7 @@ const {
 module.exports = class DeviceFarmReporter extends reporters.Spec {
   constructor(runner, options) {
     super(runner, options);
+    resetNavigationRetries();
     const failures = [];
     let retries = 0;
     runner.on("retry", () => {

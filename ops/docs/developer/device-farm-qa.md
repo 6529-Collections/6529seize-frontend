@@ -183,6 +183,15 @@ templating, not syntax. Device Farm rejects the braces with
   execution evidence. Generic timeouts remain test failures requiring triage;
   they are not automatically attributed to AWS. Missing or malformed evidence
   cannot override the Device Farm verdict or produce a clean pass.
+- Completeness uses the completed run's `run.totalJobs`. AWS defines a
+  [Job](https://docs.aws.amazon.com/devicefarm/latest/APIReference/API_Job.html)
+  as a device, and the [Run API](https://docs.aws.amazon.com/devicefarm/latest/APIReference/API_Run.html)
+  counts those jobs. Setup, test, and teardown suites belong to that device job;
+  they are not extra devices. Require one valid customer-artifact result per
+  device job. The diagnostics step deliberately fails the web job for missing,
+  malformed, or recovered evidence even if Device Farm returns `PASSED`.
+  The aggregate report then propagates that failure and the scheduled alerts;
+  this is an incomplete-verification verdict, not an assertion of an app bug.
 - Web session/command retries and Mocha test retries are disabled. The existing
   single retry for a swallowed Safari navigation is recorded; a recovered run
   is shown as `passed-after-retry` and does not count as a clean workflow pass.

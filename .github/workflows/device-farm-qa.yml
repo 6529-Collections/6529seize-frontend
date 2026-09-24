@@ -280,6 +280,8 @@ jobs:
         run: |
           # One completed-run metadata read verifies that no device artifact
           # silently disappeared. An unavailable count is incomplete evidence.
+          # AWS Job represents one device; setup/test/teardown are child suites,
+          # not additional jobs: https://docs.aws.amazon.com/devicefarm/latest/APIReference/API_Job.html
           EXPECTED_DEVICES=""
           if [ -n "$RUN_ARN" ]; then
             EXPECTED_DEVICES=$(aws devicefarm get-run --arn "$RUN_ARN" \
