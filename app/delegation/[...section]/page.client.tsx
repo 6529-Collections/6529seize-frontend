@@ -86,7 +86,14 @@ export default function DelegationPageClient(props: {
   };
 
   const updateQueryParams = (s: DelegationCenterSection) => {
-    if (s === DelegationCenterSection.HTML) {
+    if (
+      s === DelegationCenterSection.HTML ||
+      (s === DelegationCenterSection.CHECKER &&
+        addressQuery === props.addressQuery)
+    ) {
+      // The server already rendered this wallet's metadata. Replacing the
+      // route during hydration replays it and can leave duplicate head tags.
+      // Only a submitted or cleared wallet needs a new server navigation.
       return;
     }
     const queryParams = getQueryParams(s);

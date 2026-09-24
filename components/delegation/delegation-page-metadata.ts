@@ -1,3 +1,4 @@
+import { isValidEthAddress } from "@/helpers/addressFormatting";
 import { DelegationCenterSection } from "@/types/enums";
 import {
   getDelegationArticle,
@@ -190,4 +191,22 @@ export function getDelegationArticleNavigation(
     previous: toLink(previousSlug),
     next: toLink(nextSlug),
   };
+}
+
+export function getWalletCheckerCanonicalPath(
+  address: string | string[] | undefined
+): string {
+  const path = "/delegation/wallet-checker";
+  if (typeof address !== "string" || !address) {
+    return path;
+  }
+  if (isValidEthAddress(address)) {
+    return `${path}?${new URLSearchParams({ address: address.toLowerCase() })}`;
+  }
+  // ENS resolution happens in the browser. Preserve its input identity rather
+  // than claiming it is equivalent to the empty checker or guessing a wallet.
+  if (address.toLowerCase().endsWith(".eth")) {
+    return `${path}?${new URLSearchParams({ address })}`;
+  }
+  return path;
 }

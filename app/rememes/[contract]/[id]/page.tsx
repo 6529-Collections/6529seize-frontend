@@ -6,6 +6,7 @@ import {
 import RememePage from "@/components/rememes/RememePage";
 import {
   getRememesRouteLocale,
+  getRememeDetailCanonicalPath,
   type RememesSearchParams,
 } from "@/components/rememes/rememesRouteParams";
 import { formatAddress } from "@/helpers/Helpers";
@@ -159,6 +160,7 @@ export async function generateMetadata({
         title: name,
       }),
       ogImageAlt: `${name} ReMeme social card`,
-    })
+    }),
+    { canonicalPath: getRememeDetailCanonicalPath({ contract, id, locale }) }
   );
 }
