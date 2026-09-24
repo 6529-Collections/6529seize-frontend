@@ -1,3 +1,7 @@
+import {
+  getArtCanonicalQuery,
+  type ArtSearchParams,
+} from "@/components/nextGen/collections/collectionParts/art/artCanonical";
 import NextGenCollectionComponent from "@/components/nextGen/collections/collectionParts/NextGenCollection";
 import { NEXTGEN_PAGE_FRAME_CLASSNAME } from "@/components/nextGen/collections/NextGenPageFrame";
 import { getAppMetadata } from "@/components/providers/metadata";
@@ -9,6 +13,7 @@ import { notFound } from "next/navigation";
 import {
   fetchCollection,
   getCollectionView,
+  getNextgenCollectionCanonicalPath,
   getNextgenCollectionDocumentTitle,
   getNextgenCollectionSocialCardTitle,
   getNextgenCollectionMetadata,
@@ -16,8 +21,10 @@ import {
 
 export async function generateMetadata({
   params,
+  searchParams,
 }: {
   readonly params: Promise<{ collection: string; view?: string[] | undefined }>;
+  readonly searchParams?: Promise<ArtSearchParams>;
 }): Promise<Metadata> {
   const { collection, view } = await params;
   const headers = await getAppCommonHeaders();
@@ -30,8 +37,16 @@ export async function generateMetadata({
     resolvedCollection.name,
     resolvedView
   );
+  const canonicalQuery = getArtCanonicalQuery((await searchParams) ?? {});
   return getNextgenCollectionMetadata({
     collection: resolvedCollection,
+    // Keep this route's view identity (including the top-trait-sets shell),
+    // rather than folding distinct collection tabs into the overview.
+    canonicalPath: getNextgenCollectionCanonicalPath(
+      resolvedCollection.name,
+      view?.[0],
+      canonicalQuery
+    ),
     documentTitle: getNextgenCollectionDocumentTitle(
       resolvedCollection.name,
       resolvedView

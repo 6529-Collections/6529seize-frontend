@@ -79,20 +79,28 @@ export function sharedConfig(
       return [
         {
           source: "/:path*",
-          headers: createSecurityHeaders(
-            publicEnv["API_ENDPOINT"],
-            publicEnv["IPFS_GATEWAY_ENDPOINT"],
-            publicEnv["MEDIA_RESOLVER_ENDPOINT"],
-            {
-              allowInsecureLocalhostConnectSrc:
-                publicEnv.NODE_ENV === "development" ||
-                publicEnv.NODE_ENV === "local",
-              allowUnsafeEval:
-                publicEnv.NODE_ENV === "development" ||
-                publicEnv.NODE_ENV === "local",
-              webSocketEndpoint: publicEnv["WS_ENDPOINT"],
-            }
-          ),
+          headers: [
+            ...createSecurityHeaders(
+              publicEnv["API_ENDPOINT"],
+              publicEnv["IPFS_GATEWAY_ENDPOINT"],
+              publicEnv["MEDIA_RESOLVER_ENDPOINT"],
+              {
+                allowInsecureLocalhostConnectSrc:
+                  publicEnv.NODE_ENV === "development" ||
+                  publicEnv.NODE_ENV === "local",
+                allowUnsafeEval:
+                  publicEnv.NODE_ENV === "development" ||
+                  publicEnv.NODE_ENV === "local",
+                webSocketEndpoint: publicEnv["WS_ENDPOINT"],
+              }
+            ),
+            // Environment-wide, including /access, redirects and public files.
+            // Use the baked deployment origin, never NODE_ENV or request headers:
+            // staging runs production builds and proxies may rewrite the Host.
+            ...(new URL(publicEnv.BASE_ENDPOINT).hostname === "staging.6529.io"
+              ? [{ key: "X-Robots-Tag", value: "noindex" }]
+              : []),
+          ],
         },
         meebits445Headers,
       ];
