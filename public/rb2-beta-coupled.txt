@@ -1,0 +1,2 @@
+Simple Release Bus v2 coupled acceptance marker.
+This inert public asset is the frontend half of the coupled backend-DAG case.
