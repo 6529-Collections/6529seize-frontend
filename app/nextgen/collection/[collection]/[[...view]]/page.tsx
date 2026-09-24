@@ -8,6 +8,7 @@ import { getAppMetadata } from "@/components/providers/metadata";
 import { getAppCommonHeaders } from "@/helpers/server.app.helpers";
 import JsonLdScript from "@/lib/structured-data/json-ld";
 import { buildNextgenCollectionPageJsonLd } from "@/lib/structured-data/nextgen";
+import { NextgenCollectionView } from "@/types/enums";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import {
@@ -38,13 +39,19 @@ export async function generateMetadata({
     resolvedView
   );
   const canonicalQuery = getArtCanonicalQuery((await searchParams) ?? {});
+  let canonicalView = view?.[0]?.toLowerCase();
+  if (resolvedView === NextgenCollectionView.OVERVIEW) {
+    canonicalView = undefined;
+  } else if (resolvedView === NextgenCollectionView.TOP_TRAIT_SETS) {
+    canonicalView = "top-trait-sets";
+  }
   return getNextgenCollectionMetadata({
     collection: resolvedCollection,
     // Keep this route's view identity (including the top-trait-sets shell),
     // rather than folding distinct collection tabs into the overview.
     canonicalPath: getNextgenCollectionCanonicalPath(
       resolvedCollection.name,
-      view?.[0],
+      canonicalView,
       canonicalQuery
     ),
     documentTitle: getNextgenCollectionDocumentTitle(

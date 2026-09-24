@@ -40,6 +40,7 @@ describe("staging-only indexing policy", () => {
     "/sitemap.xml",
     "/api/example",
     "/favicon.svg",
+    "/artwork/the-memes/445.html",
   ])(
     "adds noindex to staging responses at %s even with a production build",
     async (path) => {

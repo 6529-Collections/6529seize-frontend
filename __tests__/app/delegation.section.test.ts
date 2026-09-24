@@ -71,11 +71,14 @@ describe("Wallet Checker canonicals", () => {
     }
   );
 
-  it("does not assign the checker canonical to delegation articles", async () => {
-    const metadata = await generateMetadata({
-      params: Promise.resolve({ section: ["delegation-faq"] }),
-      searchParams: Promise.resolve({ address: wallet }),
-    });
-    expect(metadata.alternates).toBeUndefined();
-  });
+  it.each([["delegation-faq"], ["wallet-checker", "extra"]])(
+    "does not assign the checker canonical to the article path %s",
+    async (...section) => {
+      const metadata = await generateMetadata({
+        params: Promise.resolve({ section }),
+        searchParams: Promise.resolve({ address: wallet }),
+      });
+      expect(metadata.alternates).toBeUndefined();
+    }
+  );
 });

@@ -435,6 +435,10 @@ describe("NextGen art filter canonicals", () => {
     ],
     [{ traits: "Missing,Empty:", listed: "" }, ""],
     [{ listed: "other" }, "?listed=false"],
+    [
+      { traits: "Shape:é,Shape:round,Shape:Round,Shape:Round" },
+      "?traits=Shape%3ARound%2CShape%3Around%2CShape%3A%C3%A9",
+    ],
   ])(
     "preserves result-set filters but consolidates sort/tracking variants: %j",
     async (searchParams, query) => {
@@ -449,16 +453,36 @@ describe("NextGen art filter canonicals", () => {
     }
   );
 
-  it("also preserves filters in the collection overview's artwork preview", async () => {
-    mockNextgenFetches();
-    const metadata = await generateNextGenCollectionMetadata({
-      params: Promise.resolve({ collection: "pebbles", view: ["about"] }),
-      searchParams: Promise.resolve({ traits: "Palette:Sgt. Pepe" }),
-    });
-    expect(metadata.alternates?.canonical).toBe(
-      "https://test.6529.io/nextgen/collection/pebbles/about?traits=Palette%3ASgt.+Pepe"
-    );
-  });
+  it.each([
+    [undefined, ""],
+    ["overview", ""],
+    ["OVERVIEW", ""],
+    ["unsupported", ""],
+    ["about", "/about"],
+    ["ABOUT", "/about"],
+    ["Provenance", "/provenance"],
+    ["RARITY", "/rarity"],
+    ["DISPLAY_CENTER", "/display_center"],
+    ["display-center", ""],
+    ["top-trait-sets", "/top-trait-sets"],
+    ["TOP_TRAIT_SETS", "/top-trait-sets"],
+    ["TOP-TRAIT-SETS", ""],
+  ])(
+    "canonicalizes the resolved %s collection view and preserves preview filters",
+    async (view, suffix) => {
+      mockNextgenFetches();
+      const metadata = await generateNextGenCollectionMetadata({
+        params: Promise.resolve({
+          collection: "pebbles",
+          view: view ? [view] : undefined,
+        }),
+        searchParams: Promise.resolve({ traits: "Palette:Sgt. Pepe" }),
+      });
+      const canonical = `https://test.6529.io/nextgen/collection/pebbles${suffix}?traits=Palette%3ASgt.+Pepe`;
+      expect(metadata.alternates?.canonical).toBe(canonical);
+      expect(metadata.openGraph?.url).toBe(canonical);
+    }
+  );
 
   it("does not assign a resolved collection canonical when lookup fails", async () => {
     jest.mocked(commonApiFetch).mockResolvedValue(null);

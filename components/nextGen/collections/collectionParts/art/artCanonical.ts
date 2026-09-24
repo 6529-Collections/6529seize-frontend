@@ -6,6 +6,15 @@ function firstValue(value: string | string[] | undefined): string | undefined {
   return Array.isArray(value) ? value[0] : value;
 }
 
+// Canonical ordering must not depend on the server's locale or merge distinct
+// API-facing spellings. Preserve UTF-16 code-unit order explicitly.
+function compareCanonicalTraits(left: string, right: string): number {
+  if (left === right) {
+    return 0;
+  }
+  return left < right ? -1 : 1;
+}
+
 /** Preserve result-set filters; sorting and display toggles share those results. */
 export function getArtCanonicalQuery(searchParams: ArtSearchParams): string {
   const query = new URLSearchParams();
@@ -19,7 +28,9 @@ export function getArtCanonicalQuery(searchParams: ArtSearchParams): string {
       .map((pair) => pair.split(":").slice(0, 2))
       .filter(([trait, value]) => trait && value)
       .map((pair) => pair.join(":"));
-    const normalized = [...new Set(pairs)].sort().join(",");
+    const normalized = [...new Set(pairs)]
+      .sort(compareCanonicalTraits)
+      .join(",");
     if (normalized) {
       query.set("traits", normalized);
     }
