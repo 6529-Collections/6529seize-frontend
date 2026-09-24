@@ -1,6 +1,7 @@
 import { publicEnv } from "@/config/env";
 import { API_AUTH_COOKIE } from "@/constants/constants";
 import type { ApiOgMetadata } from "@/generated/models/ApiOgMetadata";
+import { MetadataNotFoundError } from "@/app/api/og-metadata/_lib/metadataNotFoundError";
 import { getUsableText } from "@/app/api/og-metadata/_lib/imageUtils";
 import { getOgImageRequestOrigin } from "@/app/api/og-metadata/_lib/requestOrigin";
 import { renderDropOgImage } from "@/app/api/og-metadata/drops/[id]/image";
@@ -31,6 +32,10 @@ const fetchDropMetadata = async (
     headers: apiAuth === null ? {} : { "x-6529-auth": apiAuth },
     next: { revalidate },
   });
+
+  if (response.status === 404) {
+    throw new MetadataNotFoundError();
+  }
 
   if (!response.ok) {
     throw new Error(`Drop OG metadata request failed: ${response.status}`);
@@ -78,6 +83,13 @@ export async function GET(
       }
     );
   } catch (error) {
+    if (error instanceof MetadataNotFoundError) {
+      return NextResponse.json(
+        { error: "Drop not found." },
+        { status: 404, headers: { "Cache-Control": "private, no-store" } }
+      );
+    }
+
     console.error("Unable to generate drop OG metadata image.", error);
     return NextResponse.json(
       { error: "Unable to generate drop OG metadata image." },

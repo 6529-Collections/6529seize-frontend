@@ -40,6 +40,25 @@ The main metadata integration points are:
   values, but many currently use raw thumbnails or fixed images rather than a
   branded 1200x630 card contract.
 
+## Missing Profile and Drop Previews
+
+Profile and drop image endpoints preserve backend `404 Not Found` responses.
+They return a generic JSON error with `Cache-Control: private, no-store`, without
+rendering a fallback card or exposing the upstream error body. Inaccessible
+drops that the backend hides behind a 404 receive the same response as missing
+drops; preview requests do not bypass the backend's access checks.
+
+When staging access is present, profile and drop preview requests forward the
+`x-6529-auth` cookie to the configured API, falling back to `STAGING_API_KEY`
+when the cookie is missing or blank. Credential-bearing requests reject redirects
+and their successful images use `private, no-store`. Requests without credentials
+retain the public image cache policy. No staging password is embedded in the route.
+
+Other upstream errors (including explicit 401/403 responses), network failures,
+and caught metadata or rendering failures retain the existing logged `502`
+response. Valid previews continue to return images with the existing cache
+policy.
+
 ## Coverage Matrix
 
 | Area                                                    | Current behavior                                                                                                           | Expansion and standardization target                                                                                                |
