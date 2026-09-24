@@ -96,6 +96,25 @@ function pageMain(page: Page) {
   return page.locator("main").first();
 }
 
+async function expectWalletCanonical(page: Page, address = "") {
+  const canonical = new URL("/delegation/wallet-checker", page.url());
+  if (address) {
+    canonical.searchParams.set("address", address.toLowerCase());
+  }
+  const socialUrls = page.locator('meta[property="og:url"]');
+  await expect
+    .poll(() =>
+      page.evaluate(() =>
+        Array.from(document.querySelectorAll('link[rel="canonical"]'), (link) =>
+          link.getAttribute("href")
+        )
+      )
+    )
+    .toEqual([canonical.toString()]);
+  await expect(socialUrls).toHaveCount(1);
+  await expect(socialUrls).toHaveAttribute("content", canonical.toString());
+}
+
 test.describe("Delegation read-only coverage @surface @medium @large @readonly", () => {
   test("Delegation Center exposes disconnected-safe choices and references", async ({
     page,
@@ -186,7 +205,7 @@ test.describe("Delegation read-only coverage @surface @medium @large @readonly",
   test("Wallet Checker returns a public empty state", async ({ page }) => {
     await gotoReady(
       page,
-      `/delegation/wallet-checker?address=${SYNTHETIC_EMPTY_WALLET}`
+      `/delegation/wallet-checker?address=${SYNTHETIC_EMPTY_WALLET}&utm_source=metadata-regression`
     );
     await expect(page.getByText("Checking delegation records...")).toBeHidden({
       timeout: 20000,
@@ -210,6 +229,27 @@ test.describe("Delegation read-only coverage @surface @medium @large @readonly",
     await expect(page.getByText("No delegations found")).toBeVisible();
     await expect(page.getByText("No delegation managers found")).toBeVisible();
     await expect(page.getByText("No consolidations found")).toBeVisible();
+    await expectWalletCanonical(page, SYNTHETIC_EMPTY_WALLET);
+    await expect(page).toHaveURL(
+      (url) => url.searchParams.get("utm_source") === "metadata-regression"
+    );
+
+    await page.getByRole("button", { name: "Clear", exact: true }).click();
+    const input = page.getByLabel("Wallet address or ENS name");
+    await expect(input).toBeVisible();
+    await expect(page).toHaveURL((url) => !url.searchParams.has("address"));
+    await expectWalletCanonical(page);
+
+    await input.fill(SYNTHETIC_EMPTY_WALLET);
+    await page
+      .getByRole("button", { name: "Check Wallet", exact: true })
+      .click();
+    await expect(
+      page.getByText(
+        "No delegation, delegation manager, or consolidation records found for this wallet."
+      )
+    ).toBeVisible({ timeout: 20000 });
+    await expectWalletCanonical(page, SYNTHETIC_EMPTY_WALLET);
   });
 
   for (const route of WRITE_GUARD_ROUTES) {

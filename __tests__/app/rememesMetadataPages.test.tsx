@@ -193,3 +193,47 @@ describe("ReMemes metadata", () => {
     expect(url.searchParams.get("title")).toBe("0xabc #8");
   });
 });
+
+describe("ReMeme detail canonicals", () => {
+  const contract = "0xe63f4e6ce4110a2fad3de9ed38e7ea5858eb953b";
+  beforeEach(() => {
+    jest.mocked(commonApiFetch).mockResolvedValue({ data: [] });
+  });
+
+  it.each([
+    ["2281", undefined, "2281", ""],
+    ["002286", "en-US", "2286", ""],
+    ["2251", "de-DE", "2251", "?locale=de-DE"],
+    ["2268", "unknown", "2268", ""],
+    ["9007199254740993", "es-ES", "9007199254740993", "?locale=es-ES"],
+    ["0", ["de-DE", "en-US"], "0", "?locale=de-DE"],
+  ])(
+    "normalizes artwork %s while preserving its supported locale",
+    async (id, locale, canonicalId, query) => {
+      const metadata = await generateRememeDetailMetadata({
+        params: Promise.resolve({
+          contract: `0x${contract.slice(2).toUpperCase()}`,
+          id,
+        }),
+        searchParams: Promise.resolve({
+          locale,
+          utm_source: "share",
+          returnTo: "/rememes",
+        }),
+      });
+      const canonical = `https://test.6529.io/rememes/${contract}/${canonicalId}${query}`;
+      expect(metadata.alternates?.canonical).toBe(canonical);
+      expect(metadata.openGraph?.url).toBe(canonical);
+    }
+  );
+
+  it.each(["-1", "1.5", "12oops", ""])(
+    "does not invent artwork identity for invalid token %s",
+    async (id) => {
+      const metadata = await generateRememeDetailMetadata({
+        params: Promise.resolve({ contract, id }),
+      });
+      expect(metadata.alternates).toBeUndefined();
+    }
+  );
+});
