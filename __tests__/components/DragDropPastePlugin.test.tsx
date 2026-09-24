@@ -277,6 +277,39 @@ describe("DragDropPastePlugin", () => {
     expect(uploadedFile).not.toBe(itemImage);
   });
 
+  it("accepts a metadata collision across clipboard views", async () => {
+    const listedImage = new File(["a"], "image.png", {
+      type: "image/png",
+      lastModified: 1700000000000,
+    });
+    const itemImage = new File(["b"], "image.png", {
+      type: "image/png",
+      lastModified: 1700000000001,
+    });
+
+    renderPlugin();
+    await act(async () => {
+      const handled = pasteHandler({
+        preventDefault: jest.fn(),
+        clipboardData: {
+          files: [listedImage],
+          items: [
+            { kind: "file", type: "image/png", getAsFile: () => itemImage },
+          ],
+          getData: () => "",
+        },
+      });
+      expect(handled).toBe(true);
+      await Promise.resolve();
+    });
+
+    expect($insertNodes).toHaveBeenCalledTimes(1);
+    expect(multiPartUpload).toHaveBeenCalledTimes(1);
+    expect(multiPartUpload).toHaveBeenCalledWith(
+      expect.objectContaining({ file: listedImage, path: "drop" })
+    );
+  });
+
   it("keeps a distinct clipboard item when the file list is populated", async () => {
     const listedImage = new File(["a"], "first.png", { type: "image/png" });
     const additionalImage = new File(["b"], "second.png", {

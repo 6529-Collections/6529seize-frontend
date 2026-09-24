@@ -112,7 +112,7 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
         type: "image/png",
         lastModified: 1700000000001,
       });
-      const pasteEvent = new Event("paste", {
+      const pasteEvent = new ClipboardEvent("paste", {
         bubbles: true,
         cancelable: true,
       });
@@ -137,6 +137,10 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
       page.getByRole("button", { name: "Select image" })
     ).toHaveCount(1);
     await expect.poll(() => uploadStartCount).toBe(1);
+    // Both wrappers are processed in the same paste. Let asynchronous upload
+    // starts settle before asserting that no second upload was queued.
+    await page.waitForTimeout(250);
+    expect(uploadStartCount).toBe(1);
 
     await page.getByRole("button", { name: "Remove image" }).click();
     await expect(
