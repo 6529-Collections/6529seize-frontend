@@ -4,6 +4,7 @@ import {
   getLargeSocialCardMetadata,
 } from "@/components/providers/metadata";
 import type { NextGenCollection } from "@/entities/INextgen";
+import { formatNameForUrl } from "@/helpers/nextgen-utils";
 import { isEmptyObject } from "@/helpers/Helpers";
 import { commonApiFetch } from "@/services/api/common-api";
 import { NextgenCollectionView } from "@/types/enums";
@@ -84,10 +85,12 @@ export function getNextgenCollectionSocialCardTitle(
 export function getNextgenCollectionMetadata({
   collection,
   documentTitle,
+  canonicalPath,
   subtitle,
   title,
 }: {
   readonly collection: NextGenCollection;
+  readonly canonicalPath: string;
   readonly documentTitle?: string | undefined;
   readonly subtitle?: string | undefined;
   readonly title: string;
@@ -102,7 +105,8 @@ export function getNextgenCollectionMetadata({
         title,
       }),
       ogImageAlt: `${title} social card`,
-    })
+    }),
+    { canonicalPath }
   );
 }
 
@@ -110,10 +114,14 @@ export async function generateNextgenCollectionMetadata({
   collection,
   headers,
   page,
+  routeSegment,
+  canonicalQuery,
 }: {
   readonly collection: string;
   readonly headers: Record<string, string>;
   readonly page: string;
+  readonly routeSegment: "art" | "mint" | "trait-sets" | "distribution-plan";
+  readonly canonicalQuery?: string;
 }): Promise<Metadata> {
   const resolvedCollection = await fetchCollection(collection, headers);
   if (!resolvedCollection) {
@@ -122,8 +130,23 @@ export async function generateNextgenCollectionMetadata({
   const title = getNextgenTitle(page, resolvedCollection.name);
   return getNextgenCollectionMetadata({
     collection: resolvedCollection,
+    canonicalPath: getNextgenCollectionCanonicalPath(
+      resolvedCollection.name,
+      routeSegment,
+      canonicalQuery
+    ),
     documentTitle: title,
     subtitle: `${resolvedCollection.name} | NextGen`,
     title,
   });
+}
+
+export function getNextgenCollectionCanonicalPath(
+  collectionName: string,
+  view = "",
+  query = ""
+): string {
+  const path = `/nextgen/collection/${encodeURIComponent(formatNameForUrl(collectionName))}`;
+  const viewPath = view ? `${path}/${encodeURIComponent(view)}` : path;
+  return query ? `${viewPath}?${query}` : viewPath;
 }
