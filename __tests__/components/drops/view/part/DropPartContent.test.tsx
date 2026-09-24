@@ -114,11 +114,16 @@ it("opens duplicate uploaded image URLs at the clicked item", () => {
   const mediaButtons = screen.getAllByTestId("media");
   fireEvent.click(mediaButtons[1]!);
 
-  expect(screen.getByAltText("Full size drop media")).toHaveAttribute(
+  expect(screen.getByAltText("Expanded image preview")).toHaveAttribute(
     "src",
-    "duplicate.png"
+    "duplicate.png" + "?preview"
   );
   expect(screen.getByTestId("image-gallery-counter")).toHaveTextContent(
     "2 / 2"
   );
 });
+
+jest.mock("@/helpers/image.helpers", () => ({
+  ...jest.requireActual("@/helpers/image.helpers"),
+  getScaledImageUri: (src: string) => `${src}?preview`,
+}));

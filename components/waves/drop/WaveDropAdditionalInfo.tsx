@@ -4,11 +4,11 @@ import {
   AdditionalMedia,
   MemesSubmissionAdditionalInfoKey,
 } from "@/components/waves/memes/submission/types/OperationalData";
-import { FallbackImage } from "@/components/common/FallbackImage";
+import { DropImagePreview } from "@/components/drops/view/item/content/media/DropImagePreview";
 import SeizeVideoPlayer from "@/components/drops/view/item/content/media/SeizeVideoPlayer";
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 import { getFileInfoFromUrl } from "@/helpers/file.helpers";
-import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
+import { ImageScale } from "@/helpers/image.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useMemo } from "react";
 
@@ -105,10 +105,7 @@ export const WaveDropAdditionalInfo = ({
       const mediaItemsValue = Array.from(new Set(resolvedMediaUrls)).map(
         (url) => {
           const isVideo = isVideoUrl(url);
-          const displayUrl = isVideo
-            ? url
-            : getScaledImageUri(url, ImageScale.AUTOx600);
-          return { url, displayUrl, isVideo };
+          return { url, isVideo };
         }
       );
 
@@ -142,12 +139,9 @@ export const WaveDropAdditionalInfo = ({
           </h3>
           <div className="tw-flex tw-justify-center">
             <div className="tw-relative tw-aspect-[4/3] tw-w-full tw-max-w-2xl tw-overflow-hidden tw-bg-white/[0.02]">
-              <FallbackImage
-                primarySrc={getScaledImageUri(
-                  previewImage,
-                  ImageScale.AUTOx600
-                )}
-                fallbackSrc={previewImage}
+              <DropImagePreview
+                originalSrc={previewImage}
+                imageScale={ImageScale.AUTOx600}
                 alt="Preview image"
                 fill
                 sizes="(min-width: 768px) 400px, 100vw"
@@ -200,9 +194,9 @@ export const WaveDropAdditionalInfo = ({
                     layout="fill"
                   />
                 ) : (
-                  <FallbackImage
-                    primarySrc={item.displayUrl}
-                    fallbackSrc={item.url}
+                  <DropImagePreview
+                    originalSrc={item.url}
+                    imageScale={ImageScale.AUTOx600}
                     alt={`Additional media ${index + 1}`}
                     fill
                     sizes="(min-width: 816px) 376px, calc(50vw - 1.5rem)"

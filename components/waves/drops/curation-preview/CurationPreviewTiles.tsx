@@ -1,7 +1,7 @@
 import type React from "react";
 import { LinkIcon, PlayIcon } from "@heroicons/react/24/outline";
-import { FallbackImage } from "@/components/common/FallbackImage";
-import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
+import { DropImagePreview } from "@/components/drops/view/item/content/media/DropImagePreview";
+import { ImageScale } from "@/helpers/image.helpers";
 import type { PreviewItem } from "./types";
 import { getMediaAspectRatio, getPreviewImageUrl } from "./utils";
 
@@ -34,9 +34,9 @@ const PreviewMediaTile: React.FC<{
             </span>
           </div>
         ) : (
-          <FallbackImage
-            primarySrc={getScaledImageUri(imageUrl, ImageScale.W_200_H_200)}
-            fallbackSrc={imageUrl}
+          <DropImagePreview
+            originalSrc={imageUrl}
+            imageScale={ImageScale.W_200_H_200}
             alt=""
             fill
             sizes="156px"

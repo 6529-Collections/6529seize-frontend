@@ -1,3 +1,6 @@
+import EmmaTitle from "@/components/distribution-plan-tool/EmmaTitle";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import DistributionPlanToolCreatePlan from "@/components/distribution-plan-tool/create-plan/DistributionPlanToolCreatePlan";
 import DistributionPlanToolPlans from "@/components/distribution-plan-tool/plans/DistributionPlanToolPlans";
 import DistributionPlanToolWrapper from "@/components/distribution-plan-tool/wrapper/DistributionPlanToolWrapper";
@@ -9,24 +12,18 @@ export default function DistributionPlanToolPlansPage() {
     <DistributionPlanToolWrapper>
       <div className="tw-flex tw-h-full tw-min-h-screen">
         <div className="tw-mx-auto tw-min-w-0 tw-flex-1 tw-space-y-8 tw-px-2 tw-pb-12 tw-pt-8 lg:tw-px-6 xl:tw-px-8">
-          <div className="tw-w-full">
-            <div className="tw-flex tw-w-full tw-flex-col tw-items-start tw-gap-4 sm:tw-flex-row sm:tw-justify-between">
-              <div className="tw-min-w-0 tw-max-w-2xl">
-                <div className="tw-flex tw-flex-col">
-                  <h1 className="text-xl text-white">EMMA</h1>
-                  <p className="tw-mb-0 tw-block tw-text-base tw-font-light tw-text-iron-400">
-                    The Seize distribution plan tool allows you to build a
-                    distribution plan for your mint that includes airdrops,
-                    allowlists and public minting in one or more phases.
-                  </p>
-                </div>
-              </div>
-              <div className="tw-shrink-0 sm:tw-ml-auto">
+          <div className="tw-w-full tw-space-y-4">
+            <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-4">
+              <EmmaTitle />
+              <div className="tw-shrink-0 tw-whitespace-nowrap">
                 <DistributionPlanToolCreatePlan />
               </div>
             </div>
-            <DistributionPlanToolPlans />
+            <p className="tw-m-0 tw-max-w-2xl tw-text-base tw-font-light tw-text-iron-400">
+              {t(DEFAULT_LOCALE, "emma.plansDescription")}
+            </p>
           </div>
+          <DistributionPlanToolPlans />
         </div>
       </div>
     </DistributionPlanToolWrapper>
@@ -34,5 +31,8 @@ export default function DistributionPlanToolPlansPage() {
 }
 
 export async function generateMetadata(): Promise<Metadata> {
-  return getAppMetadata({ title: "EMMA | Plans", description: "Tools" });
+  return getAppMetadata({
+    title: t(DEFAULT_LOCALE, "emma.plansTitle"),
+    description: t(DEFAULT_LOCALE, "emma.tools"),
+  });
 }

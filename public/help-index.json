@@ -6491,7 +6491,9 @@
       "aliases": ["image viewer", "open image", "zoom image", "scale image"],
       "keywords": ["waves", "drop", "image", "viewer", "scaling", "zoom"],
       "facts": [
-        "Wave drop image viewer and scaling behavior is documented under drop actions.",
+        "Drop images use scaled previews in feeds and the image viewer. A failed preview never automatically loads the full-size original.",
+        "If no preview is available, the frame shows Preview unavailable. Thread images retry while uploads process; Retry or Retry preview can try again. Open in browser or Open in new tab and Download media deliberately access the original.",
+        "Large GIFs may show a still preview when the animation exceeds the image resizer memory budget; the original animation remains available through the original-file actions.",
         "Use it when users ask how to inspect an image attached to a drop.",
         "Uploading images is handled by the composer image-upload behavior."
       ],
@@ -7188,6 +7190,8 @@
       "facts": [
         "The meme calendar route lives at /meme-calendar.",
         "It is the canonical place for minting-calendar context.",
+        "The top Meme number control uses Show mint schedule; the lower calendar control uses Find mint date because it moves the calendar to that mint.",
+        "A selected published Meme provides an Open Meme link to /the-memes/{id}; upcoming or unrevealed Memes do not receive speculative artwork links.",
         "The page heading appears first; clock panels and the calendar grid appear once browser JavaScript is ready, using the browser clock and local timezone. Viewing the schedule does not require connecting a wallet.",
         "The home page can also surface current or upcoming mint information.",
         "The calendar models past, current, and future Meme Card mint timing from Monday/Wednesday/Friday cadence plus explicit skip, extra, and reschedule overrides.",
@@ -7326,6 +7330,7 @@
       "keywords": ["rememes", "add", "submit", "submission", "tdh"],
       "facts": [
         "The ReMemes add route lives at /rememes/add.",
+        "The Meme References picker searches published Meme Cards by number or artwork name and shows the newest cards first.",
         "Submission status, blocking states, and recovery are documented in the ReMemes add-submission docs.",
         "Some submission paths can depend on TDH threshold checks."
       ],
@@ -7667,7 +7672,9 @@
       ],
       "facts": [
         "EMMA is the Editor for Managing Multiphase Allowlists and the first reference implementation of Janus.",
-        "The EMMA landing route lives at /emma and the plans route lives at /emma/plans.",
+        "Opening /emma while signed in goes directly to /emma/plans, including with a restored session and no live wallet connection. A connected wallet alone is not a signed-in session.",
+        "Signed-out users at /emma see wallet guidance and a Connect wallet or Sign in action. Opening a plan while signed out preserves that plan destination through sign-in.",
+        "About EMMA, the question-mark link beside the title on the entry and plans pages, opens /emma/help. This public help page contains the full introduction, Janus link, TDH policy, and Back to EMMA link.",
         "The distribution plan tool helps build mint plans with airdrops, allowlists, and public minting in one or more phases.",
         "EMMA uses TDH as a lightweight anti-spam/rate-limit measure for allowlist creation.",
         "In Create Snapshots at /emma/plans/{planId}, Use a 6529 collection presents five image rows: The Memes by 6529 (ERC1155), Meme Lab (ERC1155), 6529 Gradient (ERC721), 6529 RAW (ERC721), and 6529 Intern JPGs (ERC1155). Tab reaches each shortcut; Enter or Space selects it.",
@@ -7676,11 +7683,13 @@
         "The five shortcuts remain available without metadata lookup. If Intern JPG token IDs fail to load or are empty, the form stays unchanged and shows an error. Select the shortcut to retry, or enter its name, contract address, and token IDs manually; leaving token IDs empty selects all tokens in the shared contract."
       ],
       "canonical_path": "/emma",
-      "related_paths": ["/emma/plans"],
+      "related_paths": ["/emma/plans", "/emma/help"],
       "tags": ["tools", "emma", "allowlist", "glossary"],
       "source_refs": [
         "app/emma/page.tsx",
+        "app/emma/help/page.tsx",
         "app/emma/plans/page.tsx",
+        "components/distribution-plan-tool/EmmaAuthGate.tsx",
         "components/distribution-plan-tool/create-snapshots/form/CreateSnapshotForm.tsx",
         "components/distribution-plan-tool/create-snapshots/form/CreateSnapshotFormCollections.tsx",
         "ops/docs/emma/feature-create-snapshots-status-and-retry.md"
