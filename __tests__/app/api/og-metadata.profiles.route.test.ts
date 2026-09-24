@@ -30,6 +30,11 @@ const mockFonts = [
   },
 ];
 const mockLoadMontserratFonts = jest.fn();
+const mockGetCookie = jest.fn();
+
+jest.mock("next/headers", () => ({
+  cookies: async () => ({ get: mockGetCookie }),
+}));
 
 jest.mock("next/og", () => ({
   ImageResponse: mockImageResponse,
@@ -51,9 +56,12 @@ jest.mock("@/app/api/og-metadata/profiles/[identity]/font", () => ({
 }));
 
 import { GET } from "@/app/api/og-metadata/profiles/[identity]/route";
+import { publicEnv } from "@/config/env";
 
 describe("/api/og-metadata/profiles/[identity]", () => {
   beforeEach(() => {
+    delete publicEnv.STAGING_API_KEY;
+    mockGetCookie.mockReset();
     jest.spyOn(console, "error").mockImplementation(() => undefined);
     mockImageResponse.mockClear();
     mockLoadMontserratFonts.mockReset();
@@ -109,7 +117,7 @@ describe("/api/og-metadata/profiles/[identity]", () => {
 
     expect(globalThis.fetch).toHaveBeenCalledWith(
       "https://api.test/api/og-metadata/profiles/alice%206529",
-      { next: { revalidate: 300 } }
+      { redirect: "error", headers: {}, next: { revalidate: 300 } }
     );
     expect(mockLoadMontserratFonts).toHaveBeenCalledTimes(1);
     expect(mockImageResponse).toHaveBeenCalledTimes(1);
@@ -123,6 +131,44 @@ describe("/api/og-metadata/profiles/[identity]", () => {
     expect(imageOptions?.fonts).toBe(mockFonts);
     expect(response).toBe(mockImageResponse.mock.results[0]?.value);
   });
+
+  it.each([
+    [undefined, undefined, {}],
+    [undefined, "staging-key", { "x-6529-auth": "staging-key" }],
+    [undefined, "   ", {}],
+    ["access-cookie", undefined, { "x-6529-auth": "access-cookie" }],
+    ["access-cookie", "staging-key", { "x-6529-auth": "access-cookie" }],
+    ["   ", "staging-key", { "x-6529-auth": "staging-key" }],
+    ["   ", "   ", {}],
+  ])(
+    "forwards available staging access and isolates authenticated images (%s, %s)",
+    async (cookie, key, headers) => {
+      publicEnv.STAGING_API_KEY = key;
+      mockGetCookie.mockReturnValue(cookie ? { value: cookie } : undefined);
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
+        ok: true,
+        json: async () => ({ profile: { handle: "alice" } }),
+      });
+
+      await GET(
+        { url: "https://6529.test/api/og-metadata/profiles/alice" } as Request,
+        { params: Promise.resolve({ identity: "alice" }) }
+      );
+
+      expect(globalThis.fetch).toHaveBeenCalledWith(
+        "https://api.test/api/og-metadata/profiles/alice",
+        { redirect: "error", headers, next: { revalidate: 300 } }
+      );
+      expect(mockGetCookie).toHaveBeenCalledWith("x-6529-auth");
+      expect(mockImageResponse).toHaveBeenCalledTimes(1);
+      expect(mockImageResponse.mock.calls[0]?.[1]?.headers).toEqual({
+        "Cache-Control":
+          "x-6529-auth" in headers
+            ? "private, no-store"
+            : "public, max-age=300, s-maxage=300, stale-while-revalidate=600",
+      });
+    }
+  );
 
   it("returns 400 when the identity param is missing", async () => {
     const response = await GET(
@@ -141,30 +187,46 @@ describe("/api/og-metadata/profiles/[identity]", () => {
     expect(response.status).toBe(400);
   });
 
-  it("returns a non-cacheable 404 without rendering missing metadata", async () => {
-    const readBody = jest.fn().mockResolvedValue({ error: "Private details" });
-    (globalThis.fetch as jest.Mock).mockResolvedValue({
-      ok: false,
-      status: 404,
-      json: readBody,
-    });
+  it.each([undefined, "access-cookie"])(
+    "returns a non-cacheable 404 without rendering missing metadata (%s)",
+    async (cookie) => {
+      mockGetCookie.mockReturnValue(cookie ? { value: cookie } : undefined);
+      const readBody = jest
+        .fn()
+        .mockResolvedValue({ error: "Private details" });
+      (globalThis.fetch as jest.Mock).mockResolvedValue({
+        ok: false,
+        status: 404,
+        json: readBody,
+      });
 
-    const response = await GET(
-      { url: "https://6529.test/api/og-metadata/profiles/missing" } as Request,
-      { params: Promise.resolve({ identity: "missing" }) }
-    );
+      const response = await GET(
+        {
+          url: "https://6529.test/api/og-metadata/profiles/missing",
+        } as Request,
+        { params: Promise.resolve({ identity: "missing" }) }
+      );
 
-    expect(response.status).toBe(404);
-    expect(mockNextResponseJson).toHaveBeenCalledWith(
-      { error: "Profile not found." },
-      { status: 404, headers: { "Cache-Control": "private, no-store" } }
-    );
-    expect(globalThis.fetch).toHaveBeenCalledTimes(1);
-    expect(readBody).not.toHaveBeenCalled();
-    expect(mockLoadMontserratFonts).not.toHaveBeenCalled();
-    expect(mockImageResponse).not.toHaveBeenCalled();
-    expect(console.error).not.toHaveBeenCalled();
-  });
+      expect(response.status).toBe(404);
+      expect(mockNextResponseJson).toHaveBeenCalledWith(
+        { error: "Profile not found." },
+        { status: 404, headers: { "Cache-Control": "private, no-store" } }
+      );
+      expect(globalThis.fetch).toHaveBeenCalledTimes(1);
+      expect(globalThis.fetch).toHaveBeenCalledWith(
+        "https://api.test/api/og-metadata/profiles/missing",
+        {
+          redirect: "error",
+          headers: cookie ? { "x-6529-auth": cookie } : {},
+          next: { revalidate: 300 },
+        }
+      );
+      expect(readBody).not.toHaveBeenCalled();
+      expect(mockLoadMontserratFonts).not.toHaveBeenCalled();
+      expect(mockImageResponse).not.toHaveBeenCalled();
+      expect(console.error).not.toHaveBeenCalled();
+    }
+  );
 
   it.each([401, 403, 429, 500, 502, 503])(
     "keeps backend status %s as a logged 502 without exposing content",
