@@ -17,6 +17,7 @@ export async function generateMetadata({
   const headers = await getAppCommonHeaders();
   return generateNextgenCollectionMetadata({
     collection,
+    routeSegment: "mint",
     page: "Mint",
     headers,
   });

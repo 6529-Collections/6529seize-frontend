@@ -36,3 +36,49 @@ describe("delegation page server", () => {
     });
   });
 });
+
+describe("Wallet Checker canonicals", () => {
+  const wallet = "0xd73e55a3f739fbd783f7a2a307831afc31c6510b";
+  it.each([
+    [{}, ""],
+    [{ address: wallet }, `?address=${wallet}`],
+    [
+      {
+        address: `0x${wallet.slice(2).toUpperCase()}`,
+        utm_source: "share",
+        collection: "ignored",
+        use_case: "2",
+      },
+      `?address=${wallet}`,
+    ],
+    [
+      { address: "0x0000000000000000000000000000000000000529" },
+      "?address=0x0000000000000000000000000000000000000529",
+    ],
+    [{ address: "not-a-wallet" }, ""],
+    [{ address: "name.eth" }, "?address=name.eth"],
+    [{ address: [wallet, "0x0000000000000000000000000000000000000529"] }, ""],
+  ])(
+    "preserves wallet identity and ignores non-result parameters: %j",
+    async (searchParams, query) => {
+      const metadata = await generateMetadata({
+        params: Promise.resolve({ section: ["wallet-checker"] }),
+        searchParams: Promise.resolve(searchParams),
+      });
+      const canonical = `https://test.6529.io/delegation/wallet-checker${query}`;
+      expect(metadata.alternates?.canonical).toBe(canonical);
+      expect(metadata.openGraph?.url).toBe(canonical);
+    }
+  );
+
+  it.each([["delegation-faq"], ["wallet-checker", "extra"]])(
+    "does not assign the checker canonical to the article path %s",
+    async (...section) => {
+      const metadata = await generateMetadata({
+        params: Promise.resolve({ section }),
+        searchParams: Promise.resolve({ address: wallet }),
+      });
+      expect(metadata.alternates).toBeUndefined();
+    }
+  );
+});
