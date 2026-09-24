@@ -2,6 +2,7 @@ import { getAppMetadata } from "@/components/providers/metadata";
 import {
   getDelegationAppTitle,
   getDelegationRouteMetadata,
+  getWalletCheckerCanonicalPath,
 } from "@/components/delegation/delegation-page-metadata";
 import { DelegationCenterSection } from "@/types/enums";
 import type { Metadata } from "next";
@@ -55,14 +56,26 @@ export default async function DelegationPage({
 
 export async function generateMetadata({
   params,
+  searchParams,
 }: {
   readonly params: Promise<{ section: string[] }>;
+  readonly searchParams?: Promise<{
+    readonly [key: string]: string | string[] | undefined;
+  }>;
 }): Promise<Metadata> {
   const { section } = await params;
   const metadata = getDelegationRouteMetadata(section);
 
-  return getAppMetadata({
-    title: getDelegationAppTitle(metadata),
-    description: metadata.description,
-  });
+  const canonicalPath =
+    section.length === 1 && section[0] === DelegationCenterSection.CHECKER
+      ? getWalletCheckerCanonicalPath((await searchParams)?.["address"])
+      : undefined;
+
+  return getAppMetadata(
+    {
+      title: getDelegationAppTitle(metadata),
+      description: metadata.description,
+    },
+    { canonicalPath }
+  );
 }
