@@ -3,7 +3,6 @@ import { MEMES_CONTRACT } from "@/constants/constants";
 import type { ApiMemesExtendedData } from "@/generated/models/ApiMemesExtendedData";
 import {
   getDimensionsFromMetadata,
-  getFileMimeTypeFromMetadata,
   getFileTypeFromMetadata,
 } from "@/helpers/nft.helpers";
 import LatestDropAllowlistStatus from "./LatestDropAllowlistStatus";
@@ -23,21 +22,17 @@ export default function NowMintingDetails({ nft }: NowMintingDetailsProps) {
     return `${Number.parseFloat(value.toFixed(5))} ETH`;
   };
   const floorPrice = formatEth(nft.floor_price);
-  const fileMimeType = getFileMimeTypeFromMetadata(nft.metadata);
 
   return (
-    <div className="tw-w-full">
-      <div className="tw-flex tw-flex-col tw-gap-5">
-        <NowMintingHeader
-          cardNumber={nft.id}
-          title={nft.name}
-          artistHandle={nft.artist_seize_handle ?? ""}
-          artistName={nft.artist}
-          mediaMimeType={fileMimeType}
-        />
+    <div className="tw-flex tw-w-full tw-flex-col tw-gap-8 lg:tw-gap-10">
+      <NowMintingHeader
+        cardNumber={nft.id}
+        title={nft.name}
+        artistHandle={nft.artist_seize_handle ?? ""}
+        artistName={nft.artist}
+      />
+      <div className="tw-flex tw-flex-col tw-gap-4">
         <NowMintingStatsGrid nftId={nft.id} floorPrice={floorPrice} />
-        <LatestDropAllowlistStatus tokenId={nft.id} />
-        <LatestDropNextMintSubscribe tokenId={nft.id} statusSource="none" />
         <NowMintingDetailsAccordion
           nftId={nft.id}
           mintDate={nft.mint_date ?? undefined}
@@ -46,12 +41,16 @@ export default function NowMintingDetails({ nft }: NowMintingDetailsProps) {
           collection={nft.collection}
           season={nft.season}
         />
-        <NowMintingCountdown
-          nftId={nft.id}
-          contract={MEMES_CONTRACT}
-          chainId={mainnet.id}
-        />
       </div>
+      <div className="tw-flex tw-flex-col tw-gap-4 empty:tw-hidden">
+        <LatestDropAllowlistStatus tokenId={nft.id} />
+        <LatestDropNextMintSubscribe tokenId={nft.id} statusSource="none" />
+      </div>
+      <NowMintingCountdown
+        nftId={nft.id}
+        contract={MEMES_CONTRACT}
+        chainId={mainnet.id}
+      />
     </div>
   );
 }

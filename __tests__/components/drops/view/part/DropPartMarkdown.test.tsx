@@ -559,9 +559,9 @@ describe("DropPartMarkdown", () => {
 
     fireEvent.click(openButtons[1]!);
 
-    expect(screen.getByAltText("Full size drop media")).toHaveAttribute(
+    expect(screen.getByAltText("Expanded image preview")).toHaveAttribute(
       "src",
-      duplicateSrc
+      duplicateSrc + "?preview"
     );
     expect(screen.getByTestId("image-gallery-counter")).toHaveTextContent(
       "2 / 2"
@@ -595,9 +595,9 @@ describe("DropPartMarkdown", () => {
       })
     );
 
-    expect(screen.getByAltText("Full size drop media")).toHaveAttribute(
+    expect(screen.getByAltText("Expanded image preview")).toHaveAttribute(
       "src",
-      angleBracketSrc
+      angleBracketSrc + "?preview"
     );
     expect(screen.getByTestId("image-gallery-counter")).toHaveTextContent(
       "1 / 2"
@@ -639,9 +639,9 @@ describe("DropPartMarkdown", () => {
       })
     );
 
-    expect(screen.getByAltText("Full size drop media")).toHaveAttribute(
+    expect(screen.getByAltText("Expanded image preview")).toHaveAttribute(
       "src",
-      markdownSrc
+      markdownSrc + "?preview"
     );
     expect(screen.queryByTestId("image-gallery-counter")).toBeNull();
   });
@@ -678,9 +678,9 @@ describe("DropPartMarkdown", () => {
       })
     );
 
-    expect(screen.getByAltText("Full size drop media")).toHaveAttribute(
+    expect(screen.getByAltText("Expanded image preview")).toHaveAttribute(
       "src",
-      referenceSrc
+      referenceSrc + "?preview"
     );
     expect(screen.getByTestId("image-gallery-counter")).toHaveTextContent(
       "1 / 2"
@@ -1456,3 +1456,8 @@ describe("DropPartMarkdown", () => {
     ).toBeNull();
   });
 });
+
+jest.mock("@/helpers/image.helpers", () => ({
+  ...jest.requireActual("@/helpers/image.helpers"),
+  getScaledImageUri: (src: string) => `${src}?preview`,
+}));

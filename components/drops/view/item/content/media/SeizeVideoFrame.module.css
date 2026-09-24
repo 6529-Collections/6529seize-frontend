@@ -1,3 +1,7 @@
+.artwork {
+  composes: viewportLimit from "./ArtworkFrame.module.css";
+}
+
 /* The surface, video and controls share the same uncropped rectangle. */
 .surface {
   position: relative;
@@ -49,31 +53,7 @@
 }
 
 .artwork:not(.bounded) {
-  --video-max-height: calc(
-    max(
-        1px,
-        min(
-            var(--video-viewport-height),
-            var(--video-container-height, var(--video-viewport-height))
-          ) -
-          max(
-            var(
-              --video-header-reserve,
-              var(--stream-route-loading-header-reserve, 0px)
-            ),
-            env(safe-area-inset-top, 0px)
-          ) -
-          max(
-            var(
-              --video-bottom-reserve,
-              var(--stream-route-loading-bottom-reserve, 0px)
-            ),
-            env(safe-area-inset-bottom, 0px)
-          ) -
-          var(--video-frame-padding, 0px)
-      ) *
-      0.95
-  );
+  --video-max-height: var(--artwork-max-height);
   width: 100%;
   max-width: calc(var(--video-max-height) * var(--video-ratio, 1.777778));
   max-height: var(--video-max-height);

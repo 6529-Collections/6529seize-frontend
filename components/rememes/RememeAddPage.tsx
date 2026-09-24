@@ -257,169 +257,159 @@ export default function RememeAddPage() {
     };
   }
 
+  const verifiedAction = (
+    <AuthLoadingBoundary
+      loading={isWalletConnectionResolving(connection)}
+      compact
+    >
+      {isConnected ? (
+        <Button
+          type="button"
+          variant="action"
+          size="lg"
+          disabled={
+            !addRememe ||
+            !addRememe.valid ||
+            (!userTDH &&
+              !areEqualAddresses(
+                address,
+                addRememe.contract.contractDeployer
+              )) ||
+            checkList.some((item) => !item.status) ||
+            submissionResult?.success
+          }
+          onClick={() => {
+            setSignErrors([]);
+            setSubmissionResult(undefined);
+            if (addRememe) {
+              if (!address) {
+                signerAddressRef.current = null;
+                signedRememeRef.current = null;
+                setSignErrors(["Error: Connect a wallet before signing"]);
+                return;
+              }
+              const signingAddress = address;
+              const rememe = buildRememeObject();
+              signedRememeRef.current = rememe;
+              signerAddressRef.current = signingAddress;
+              if (isStructuredSignaturesEnabled()) {
+                const { message } = buildRememeSignatureMessage({
+                  address: signingAddress,
+                  rememe,
+                });
+                signatureMessageRef.current = message;
+                signMessage.signMessage({ message });
+                return;
+              }
+              signatureMessageRef.current = null;
+              signMessage.signMessage({
+                message: JSON.stringify(rememe),
+              });
+            }
+          }}
+        >
+          Add Rememe
+        </Button>
+      ) : (
+        <Button
+          type="button"
+          variant="primary"
+          size="lg"
+          disabled={seizeConnectOpen}
+          onClick={() => {
+            seizeConnect();
+          }}
+        >
+          {seizeConnectOpen ? `Connecting...` : `Connect Wallet`}
+        </Button>
+      )}
+    </AuthLoadingBoundary>
+  );
+
   return (
     <div className={`${styles["mainContainer"]} tw-w-full`}>
-      <div className="tw-pb-5">
+      <div className="tw-pb-16">
         <div>
-          <div className="tw-container tw-mx-auto tw-px-3 tw-pt-4">
-            <div className="tw-grid tw-grid-cols-1 tw-pb-2 tw-pt-2 md:tw-grid-cols-12">
-              <div className="tw-flex tw-items-center tw-gap-2 md:tw-col-span-4">
+          <div className="tw-mx-auto tw-w-full tw-max-w-5xl tw-px-4 tw-pt-8 sm:tw-px-6">
+            <div className="tw-pb-2">
+              <div className="tw-flex tw-items-center tw-gap-2">
                 <Image
                   unoptimized
                   loading={"eager"}
                   width="0"
                   height="0"
-                  style={{ width: "250px", height: "auto" }}
+                  style={{ width: "220px", height: "auto" }}
                   src="/re-memes.png"
                   alt="re-memes"
                 />
               </div>
             </div>
-            <div className="tw-pt-2">
-              <div>
+            <div className="tw-pt-1 tw-text-sm tw-text-iron-300">
+              <div className="tw-flex tw-flex-wrap tw-gap-x-1">
                 Please use this page to only add ReMemes{" "}
                 <Link href="#requirements">view requirements</Link>
               </div>
             </div>
-            <div className="tw-pt-4">
-              <div>
-                <div className="tw-container tw-mx-auto">
-                  <div className="tw-pb-4 tw-pt-2">
-                    <div>
-                      <RememeAddComponent
-                        memes={memes}
-                        verifiedRememe={(r, references) => {
-                          setAddRememe(r);
-                          setReferences(references);
-                          setCheckList([]);
-                          setSignErrors([]);
-                          signatureMessageRef.current = null;
-                          signedRememeRef.current = null;
-                          signerAddressRef.current = null;
-                          signMessage.reset();
-                        }}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
+            <div className="tw-pb-4 tw-pt-8">
+              <RememeAddComponent
+                memes={memes}
+                verifiedAction={verifiedAction}
+                verifiedRememe={(r, referenceIds) => {
+                  setAddRememe(r);
+                  setReferences(referenceIds);
+                  setCheckList([]);
+                  setSignErrors([]);
+                  signatureMessageRef.current = null;
+                  signedRememeRef.current = null;
+                  signerAddressRef.current = null;
+                  signMessage.reset();
+                }}
+              />
             </div>
-            <div className="tw-pt-2">
-              <div className="tw-flex tw-items-center tw-justify-between">
-                <span className="tw-flex tw-flex-col tw-gap-2">
-                  {checkList.length > 0 && (
-                    <ul className={styles["addRememeChecklist"]}>
-                      {checkList.map((note, index) => (
-                        <li
-                          key={`ve-${index}`}
-                          className="tw-flex tw-items-center tw-gap-2"
-                        >
-                          {note.status ? (
-                            <FontAwesomeIcon
-                              icon={faCheckCircle}
-                              className={styles["verifiedIcon"]}
-                              data-testid="check-circle"
-                            />
-                          ) : (
-                            <FontAwesomeIcon
-                              icon={faTimesCircle}
-                              className={styles["unverifiedIcon"]}
-                            />
-                          )}
-                          {note.note}
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                  {signErrors.length > 0 && (
-                    <ul className={styles["addRememeChecklist"]}>
-                      {signErrors.map((se, index) => (
-                        <li
-                          key={`se-${index}`}
-                          className="tw-flex tw-items-center tw-gap-2"
-                        >
+            {addRememe && (checkList.length > 0 || signErrors.length > 0) && (
+              <div className="tw-mt-4 tw-flex tw-flex-col tw-gap-2">
+                {checkList.length > 0 && (
+                  <ul className={styles["addRememeChecklist"]}>
+                    {checkList.map((note, index) => (
+                      <li
+                        key={`ve-${index}`}
+                        className="tw-flex tw-items-center tw-gap-2"
+                      >
+                        {note.status ? (
+                          <FontAwesomeIcon
+                            icon={faCheckCircle}
+                            className={styles["verifiedIcon"]}
+                            data-testid="check-circle"
+                          />
+                        ) : (
                           <FontAwesomeIcon
                             icon={faTimesCircle}
                             className={styles["unverifiedIcon"]}
                           />
-                          {se}
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </span>
-                <AuthLoadingBoundary
-                  loading={isWalletConnectionResolving(connection)}
-                  compact
-                >
-                  {isConnected ? (
-                    <span className="tw-flex tw-flex-col tw-gap-2">
-                      <Button
-                        type="button"
-                        variant="action"
-                        size="md"
-                        disabled={
-                          !addRememe ||
-                          !addRememe.valid ||
-                          (!userTDH &&
-                            !areEqualAddresses(
-                              address,
-                              addRememe.contract.contractDeployer
-                            )) ||
-                          checkList.some((c) => !c.status) ||
-                          submissionResult?.success
-                        }
-                        onClick={() => {
-                          setSignErrors([]);
-                          setSubmissionResult(undefined);
-                          if (addRememe) {
-                            if (!address) {
-                              signerAddressRef.current = null;
-                              signedRememeRef.current = null;
-                              setSignErrors([
-                                "Error: Connect a wallet before signing",
-                              ]);
-                              return;
-                            }
-                            const signingAddress = address;
-                            const rememe = buildRememeObject();
-                            signedRememeRef.current = rememe;
-                            signerAddressRef.current = signingAddress;
-                            if (isStructuredSignaturesEnabled()) {
-                              const { message } = buildRememeSignatureMessage({
-                                address: signingAddress,
-                                rememe,
-                              });
-                              signatureMessageRef.current = message;
-                              signMessage.signMessage({ message });
-                              return;
-                            }
-                            signatureMessageRef.current = null;
-                            signMessage.signMessage({
-                              message: JSON.stringify(rememe),
-                            });
-                          }
-                        }}
+                        )}
+                        {note.note}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                {signErrors.length > 0 && (
+                  <ul className={styles["addRememeChecklist"]}>
+                    {signErrors.map((error, index) => (
+                      <li
+                        key={`se-${index}`}
+                        className="tw-flex tw-items-center tw-gap-2"
                       >
-                        Add Rememe
-                      </Button>
-                    </span>
-                  ) : (
-                    <Button
-                      type="button"
-                      variant="primary"
-                      size="md"
-                      disabled={seizeConnectOpen}
-                      onClick={() => {
-                        seizeConnect();
-                      }}
-                    >
-                      {seizeConnectOpen ? `Connecting...` : `Connect Wallet`}
-                    </Button>
-                  )}
-                </AuthLoadingBoundary>
+                        <FontAwesomeIcon
+                          icon={faTimesCircle}
+                          className={styles["unverifiedIcon"]}
+                        />
+                        {error}
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
-            </div>
+            )}
             {(submitting || signMessage.isPending) && (
               <div className="tw-pt-3">
                 <div className="tw-w-full">
@@ -508,20 +498,25 @@ export default function RememeAddPage() {
                 )}
               </div>
             )}
-            <div className="tw-pt-5" id="requirements">
-              <div className="tw-pt-5">
-                Submission Requirements:
-                <ol className="tw-pt-2">
-                  <li className="tw-pt-2">
+            <div
+              className="tw-mt-12 tw-border-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-8"
+              id="requirements"
+            >
+              <div>
+                <h2 className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-100">
+                  Submission Requirements:
+                </h2>
+                <ol className="tw-mb-0 tw-mt-4 tw-space-y-3 tw-pl-5 tw-text-sm tw-leading-6 tw-text-iron-300">
+                  <li>
                     This form will allow you to submit ReMemes if you are the
                     contract deployer or if you are not the contract deployer,
                     but have a TDH &gt; 6,942
                   </li>
-                  <li className="tw-pt-2">
+                  <li>
                     You must connect with your Ethereum wallet (from any of your
                     consolidated addresses)
                   </li>
-                  <li className="tw-pt-2">
+                  <li>
                     The contracts and tokens added must be a ReMeme of one or
                     more Meme Cards. Please do not submit other contracts or
                     there may be implications (for you!)

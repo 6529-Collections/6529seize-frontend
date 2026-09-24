@@ -47,14 +47,28 @@ export async function generateMetadata({
 }: MuseumArtistPageProps): Promise<Metadata> {
   const { slug } = await params;
   const { publicationState } = await getMuseumPublicationBundle();
-  const artist = publicationState.publication?.artists.find(
+  const publication = publicationState.publication
+    ? applyMuseumCollectionSemantics(publicationState.publication)
+    : null;
+  const artist = publication?.artists.find(
     (item) => item.slug === slug
   );
+  const artistName =
+    artist?.preferredName ?? t(DEFAULT_LOCALE, "museum.network.artists.title");
   const metadata = getAppMetadata({
     title:
-      artist?.preferredName ??
-      t(DEFAULT_LOCALE, "museum.network.artists.title"),
-    description: t(DEFAULT_LOCALE, "museum.network.artists.description"),
+      artist === undefined
+        ? artistName
+        : t(DEFAULT_LOCALE, "museum.network.artists.metadataTitle", {
+            artist: artistName,
+          }),
+    description:
+      (artist?.slug === CASEY_ARTIST_SLUG
+        ? t(DEFAULT_LOCALE, "museum.network.artists.caseySummary")
+        : null) ??
+      t(DEFAULT_LOCALE, "museum.network.artists.metadataDescription", {
+        artist: artistName,
+      }),
   });
   return artist === undefined
     ? metadata

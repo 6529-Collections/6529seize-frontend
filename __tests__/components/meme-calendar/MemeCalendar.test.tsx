@@ -16,7 +16,14 @@ describe("MemeCalendar controls", () => {
   });
 
   it("exposes named zoom, guide, navigation, and jump controls", () => {
-    render(<MemeCalendar displayTz="utc" locale="de-DE" />);
+    render(
+      <MemeCalendar
+        displayTz="utc"
+        locale="de-DE"
+        publishedMemeIds={new Set([439])}
+        publishedMemesStatus="ready"
+      />
+    );
 
     const rangeGroup = screen.getByRole("tablist", {
       name: "Calendar range",
@@ -48,11 +55,21 @@ describe("MemeCalendar controls", () => {
 
     expect(screen.getByRole("button", { name: "Jump to Today" })).toBeEnabled();
     expect(screen.getByLabelText("Meme #")).toHaveAttribute("type", "number");
+    expect(
+      screen.getByRole("button", { name: "Find mint date" })
+    ).toBeInTheDocument();
     expect(screen.getByLabelText("Date")).toHaveAttribute("type", "month");
   });
 
   it("formats default SZN grid dates and mint day labels with the active locale", () => {
-    render(<MemeCalendar displayTz="utc" locale="de-DE" />);
+    render(
+      <MemeCalendar
+        displayTz="utc"
+        locale="de-DE"
+        publishedMemeIds={new Set([439])}
+        publishedMemesStatus="ready"
+      />
+    );
 
     expect(screen.getByText("Januar 2026")).toBeInTheDocument();
     const mintButton = screen.getByRole("button", {
@@ -65,6 +82,14 @@ describe("MemeCalendar controls", () => {
     expect(mintButton).toHaveAttribute(
       "data-tooltip-html",
       expect.stringContaining("Fr., 2. Jan. 2026")
+    );
+    expect(mintButton).toHaveAttribute(
+      "data-tooltip-html",
+      expect.stringContaining("/the-memes/439?locale=de-DE")
+    );
+    expect(mintButton).toHaveAttribute(
+      "data-tooltip-html",
+      expect.stringContaining("Open Meme #439")
     );
   });
 

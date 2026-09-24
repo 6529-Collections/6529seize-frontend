@@ -1,5 +1,7 @@
 import NowMintingDetails from "@/components/home/now-minting/NowMintingDetails";
+import type { ApiMemesExtendedData } from "@/generated/models/ApiMemesExtendedData";
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 
 type LatestDropNextMintSubscribeMockProps = {
   statusSource?: "none" | "upcoming";
@@ -80,6 +82,29 @@ describe("NowMintingDetails", () => {
   beforeEach(() => {
     mockLatestDropNextMintSubscribe.mockClear();
     mockLatestDropAllowlistStatus.mockClear();
+  });
+
+  it("uses a native disclosure and exposes focusable edition links when opened", async () => {
+    const user = userEvent.setup();
+    render(<NowMintingDetails nft={baseNft as ApiMemesExtendedData} />);
+
+    const toggle = screen.getByText("Edition Details").closest("summary");
+    const disclosure = toggle?.closest("details");
+    expect(toggle).not.toBeNull();
+    expect(disclosure).not.toHaveAttribute("open");
+
+    await user.click(toggle!);
+    expect(disclosure).toHaveAttribute("open");
+    const distributionLink = screen.getByRole("link", { name: "View" });
+    expect(distributionLink).toHaveAttribute(
+      "href",
+      "/the-memes/667/distribution"
+    );
+
+    distributionLink.focus();
+    expect(distributionLink).toHaveFocus();
+    await user.click(toggle!);
+    expect(disclosure).not.toHaveAttribute("open");
   });
 
   it("omits file metadata rows when media metadata is missing", () => {

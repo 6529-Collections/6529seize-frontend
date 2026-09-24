@@ -4,7 +4,7 @@ import {
   getSeasonIndexForDate,
   nextMintDateOnOrAfter,
 } from "@/components/meme-calendar/meme-calendar.helpers";
-import { act, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import { renderToString } from "react-dom/server";
 import { hydrateRoot } from "react-dom/client";
 
@@ -97,6 +97,9 @@ describe("MemeCalendarOverview upcoming mints card", () => {
     ).toBeInTheDocument();
     expect(screen.getByLabelText("Meme #")).toBeInTheDocument();
     expect(
+      screen.getByRole("button", { name: "Show mint schedule" })
+    ).toBeInTheDocument();
+    expect(
       screen.getAllByRole("link", { name: "Add to Calendar" }).length
     ).toBeGreaterThan(0);
     expect(
@@ -117,5 +120,34 @@ describe("MemeCalendarOverview upcoming mints card", () => {
     expect(screen.getByRole("button", { name: "Screenshot" })).toHaveClass(
       "focus-visible:tw-outline"
     );
+  });
+
+  it("links a selected published Meme and describes an unpublished selection", () => {
+    jest.useFakeTimers().setSystemTime(new Date("2026-09-23T12:00:00Z"));
+    const { rerender } = render(
+      <MemeCalendarOverview
+        displayTz="utc"
+        publishedMemeIds={new Set([551])}
+        publishedMemesStatus="ready"
+      />
+    );
+
+    fireEvent.change(screen.getByLabelText("Meme #"), {
+      target: { value: "551" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Show mint schedule" }));
+
+    expect(
+      screen.getByRole("link", { name: "Open Meme #551" })
+    ).toHaveAttribute("href", "/the-memes/551");
+
+    rerender(
+      <MemeCalendarOverview
+        displayTz="utc"
+        publishedMemeIds={new Set()}
+        publishedMemesStatus="ready"
+      />
+    );
+    expect(screen.getByText("Artwork not published yet.")).toBeInTheDocument();
   });
 });

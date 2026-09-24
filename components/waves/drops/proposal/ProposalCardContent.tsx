@@ -1,8 +1,8 @@
 "use client";
 
-import { FallbackImage } from "@/components/common/FallbackImage";
+import { DropImagePreview } from "@/components/drops/view/item/content/media/DropImagePreview";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
-import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
+import { ImageScale } from "@/helpers/image.helpers";
 import {
   DEFAULT_PROPOSAL_CARD_RECIPE,
   getProposalCardViewModel,
@@ -186,12 +186,9 @@ export default function ProposalCardContent({
                 isCompact ? "tw-size-20" : "tw-size-24"
               }`}
             >
-              <FallbackImage
-                primarySrc={getScaledImageUri(
-                  viewModel.previewImage.url,
-                  ImageScale.AUTOx450
-                )}
-                fallbackSrc={viewModel.previewImage.url}
+              <DropImagePreview
+                originalSrc={viewModel.previewImage.url}
+                imageScale={ImageScale.AUTOx450}
                 alt={t(locale, "waves.proposalCard.previewAlt", { title })}
                 fill
                 sizes={isCompact ? "80px" : "96px"}

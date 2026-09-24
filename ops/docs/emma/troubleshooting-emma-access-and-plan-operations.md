@@ -11,8 +11,8 @@ actions are blocked.
 
 ## Quick Reset
 
-1. Reopen `/emma` and verify the connected wallet address is valid.
-2. Retry `Sign In with Web3`.
+1. Reopen `/emma`. Signed-in users go directly to plans; signed-out users see wallet guidance.
+2. If prompted, use `Connect wallet`, then retry `Sign in`.
 3. Reopen `/emma/plans` and check for error toasts (`Unauthorized`, `Something went wrong, try again`).
 4. Open the target plan from the table row in `/emma/plans`.
 5. If the warning bar shows `Distribution plan building failed`, click `Run Analysis` and wait for the blocking loader to clear.
@@ -21,7 +21,7 @@ actions are blocked.
 
 - `/emma` stays on `Connect Your Wallet`:
   connect a valid wallet address, then retry sign-in.
-- `Sign In with Web3` does not move to plans:
+- `Sign in` does not move to plans:
   the auth request failed or was canceled; retry sign-in.
 - `/emma/plans` shows `No plan` right after `Unauthorized` toast:
   the auth session was cleared; return to `/emma`, sign in again, then reopen plans.
@@ -30,7 +30,8 @@ actions are blocked.
 - Create-plan modal does not submit:
   `Name` and `Description` are both required before `Create`.
 - `/emma/plans/{planId}` redirects back to `/emma`:
-  the plan ID is invalid/inaccessible or plan load failed; reopen from the plans list.
+  if signed out, sign in to return to the requested plan. If already signed in,
+  an invalid/inaccessible plan or failed load returns you through `/emma` to the plans list.
 - Top warning says `Distribution plan building failed`:
   read the backend reason shown in the warning and retry with `Run Analysis`.
 

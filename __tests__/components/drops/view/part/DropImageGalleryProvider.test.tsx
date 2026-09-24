@@ -108,9 +108,9 @@ describe("DropImageGalleryProvider", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Open body" }));
 
-    expect(screen.getByAltText("Full size drop media")).toHaveAttribute(
+    expect(screen.getByAltText("Expanded image preview")).toHaveAttribute(
       "src",
-      "body.png"
+      "body.png" + "?preview"
     );
     expect(screen.getByTestId("image-gallery-counter")).toHaveTextContent(
       "1 / 2"
@@ -122,9 +122,9 @@ describe("DropImageGalleryProvider", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Next image" }));
 
-    expect(screen.getByAltText("Full size drop media")).toHaveAttribute(
+    expect(screen.getByAltText("Expanded image preview")).toHaveAttribute(
       "src",
-      "upload.png"
+      "upload.png" + "?preview"
     );
     expect(screen.getByTestId("image-gallery-counter")).toHaveTextContent(
       "2 / 2"
@@ -136,9 +136,9 @@ describe("DropImageGalleryProvider", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Previous image" }));
 
-    expect(screen.getByAltText("Full size drop media")).toHaveAttribute(
+    expect(screen.getByAltText("Expanded image preview")).toHaveAttribute(
       "src",
-      "body.png"
+      "body.png" + "?preview"
     );
   });
 
@@ -149,16 +149,16 @@ describe("DropImageGalleryProvider", () => {
     fireEvent.click(screen.getByRole("button", { name: "Open body" }));
     await user.keyboard("{ArrowRight}");
 
-    expect(screen.getByAltText("Full size drop media")).toHaveAttribute(
+    expect(screen.getByAltText("Expanded image preview")).toHaveAttribute(
       "src",
-      "upload.png"
+      "upload.png" + "?preview"
     );
 
     await user.keyboard("{ArrowLeft}");
 
-    expect(screen.getByAltText("Full size drop media")).toHaveAttribute(
+    expect(screen.getByAltText("Expanded image preview")).toHaveAttribute(
       "src",
-      "body.png"
+      "body.png" + "?preview"
     );
   });
 
@@ -186,14 +186,14 @@ describe("DropImageGalleryProvider", () => {
     await user.keyboard("{Escape}");
 
     expect(
-      screen.queryByAltText("Full size drop media")
+      screen.queryByAltText("Expanded image preview")
     ).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Open body" }));
     fireEvent.click(screen.getByTestId("modal-backdrop"));
 
     expect(
-      screen.queryByAltText("Full size drop media")
+      screen.queryByAltText("Expanded image preview")
     ).not.toBeInTheDocument();
   });
 
@@ -229,12 +229,17 @@ describe("DropImageGalleryProvider", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Open body" }));
 
-    expect(screen.getByAltText("Full size drop media")).toHaveAttribute(
+    expect(screen.getByAltText("Expanded image preview")).toHaveAttribute(
       "src",
-      "duplicate.png"
+      "duplicate.png" + "?preview"
     );
     expect(screen.getByTestId("image-gallery-counter")).toHaveTextContent(
       "2 / 2"
     );
   });
 });
+
+jest.mock("@/helpers/image.helpers", () => ({
+  ...jest.requireActual("@/helpers/image.helpers"),
+  getScaledImageUri: (src: string) => `${src}?preview`,
+}));

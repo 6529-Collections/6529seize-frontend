@@ -1,6 +1,5 @@
 "use client";
 
-import MediaTypeBadge from "@/components/drops/media/MediaTypeBadge";
 import { MainStageMemeCardPill } from "@/components/memes/drops/MainStageMemeCardLink";
 import Link from "next/link";
 import ArtistPill from "./ArtistPill";
@@ -10,7 +9,6 @@ interface NowMintingHeaderProps {
   readonly title: string;
   readonly artistHandle: string;
   readonly artistName: string;
-  readonly mediaMimeType?: string | null | undefined;
 }
 
 export default function NowMintingHeader({
@@ -18,7 +16,6 @@ export default function NowMintingHeader({
   title,
   artistHandle,
   artistName,
-  mediaMimeType,
 }: NowMintingHeaderProps) {
   const artistHandles = artistHandle
     .split(",")
@@ -32,19 +29,12 @@ export default function NowMintingHeader({
       </div>
       <Link
         href={`/the-memes/${cardNumber}`}
-        className="tw-mt-3 tw-text-xl tw-font-semibold tw-leading-[1.08] tw-tracking-[-0.02em] tw-text-iron-50 tw-no-underline tw-transition-colors tw-duration-300 desktop-hover:hover:tw-text-iron-200 sm:tw-text-2xl sm:tw-leading-[1.08] md:tw-text-3xl md:tw-leading-[1.08]"
+        className="tw-mt-2 tw-w-fit tw-max-w-full tw-text-balance tw-rounded-sm tw-text-2xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 tw-no-underline tw-transition-colors tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-4 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-iron-300 motion-reduce:tw-transition-none md:tw-text-3xl"
       >
         {title}
       </Link>
 
       <div className="tw-mt-3 tw-flex tw-flex-wrap tw-items-center tw-gap-3">
-        {mediaMimeType && (
-          <MediaTypeBadge
-            mimeType={mediaMimeType}
-            dropId={`home-now-minting-${cardNumber}`}
-            size="sm"
-          />
-        )}
         {artistHandles.length > 0 ? (
           artistHandles.map((handle) => (
             <ArtistPill

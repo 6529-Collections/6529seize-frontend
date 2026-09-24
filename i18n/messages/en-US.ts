@@ -1,3 +1,4 @@
+import emmaMessages from "@/i18n/messages/emma.en-US.json";
 import { EN_US_DROP_METADATA_MESSAGES } from "@/i18n/messages/drop-metadata";
 import { EN_DROP_REQUIREMENT_MESSAGES } from "@/i18n/messages/drop-requirements";
 import artworkShareMessages from "@/i18n/messages/artworkShare.en-US.json";
@@ -601,6 +602,8 @@ const MEMES_WAVE_FOOTER_MESSAGES = objectMessages("memes.waveFooter", {
 } as const);
 
 const DROP_REACTION_MESSAGES = objectMessages("drops.reactions", {
+  reactWith: "React with {emoji}",
+  thumbsUp: "Thumbs up",
   unconfirmed:
     "Could not confirm your reaction. Refresh to check before trying again.",
   capabilityDisabled: "Reactions are disabled for this wave.",
@@ -2850,6 +2853,18 @@ export const EN_US_MESSAGES = {
   "profile.metadata.unavailable.title": "Profile temporarily unavailable",
   "profile.metadata.unavailable.description":
     "This public profile could not be loaded.",
+  "profile.metadata.pathTitle": "{display} - {pathTitle}",
+  "profile.metadata.title": "{pageTitle} | 6529.io",
+  "profile.metadata.description":
+    "Explore {display}'s public identity and activity.",
+  "profile.metadata.ogImageAlt": "{display} profile social card",
+  "waves.pageMetadata.title": "{waveName} | Brain",
+  "waves.pageMetadata.publicDescription": "Explore {waveName}, a public Wave.",
+  "waves.pageMetadata.privateDescription": "Explore this Wave.",
+  "waves.pageMetadata.ogImageAlt": "{waveName} wave social card",
+  "nft.metadata.itemTitle": "{name} | {collection}",
+  "nft.metadata.description": "{name} · {collection}",
+  "nft.metadata.descriptionWithArtist": "{name} · {artist} · {collection}",
   "memes.proposalFrame.enable": "Add a proposal card frame (optional)",
   "memes.proposalFrame.description":
     "This card has plans. Add an animated border that says this is a proposal and the artwork may change. Your media will be embedded in an HTML artwork.",
@@ -3247,6 +3262,9 @@ export const EN_US_MESSAGES = {
   "headerWaveLinkAction.feedback.shared": "Link shared",
   "headerWaveLinkAction.feedback.copied": "Link copied",
   "acceptConnection.incoming.profileStats": "TDH: {tdh} · Level: {level}",
+  "openData.metadata.description": "Download public 6529 datasets.",
+  "tools.api.metadata.description":
+    "Read the open REST API documentation, including authentication and drop media examples.",
   "tools.api.authCallout.title": "v2 API authentication",
   "tools.api.authCallout.description":
     "New external clients should use session-v2 wallet authentication: request a signable message, sign it exactly, exchange the signature for an access token, then send that token as bearer auth.",
@@ -3449,6 +3467,28 @@ export const EN_US_MESSAGES = {
   "home.nextMint.stats.wave": "Wave",
   "home.nextMint.stats.submitted": "Submitted",
   "home.nextMint.stats.rating": "Rating",
+  "home.nowMinting.editionDetails.toggle": "Edition Details",
+  "home.nowMinting.editionDetails.mintDate": "Mint date",
+  "home.nowMinting.editionDetails.fileType": "File type",
+  "home.nowMinting.editionDetails.dimensions": "Dimensions",
+  "home.nowMinting.editionDetails.collection": "Collection",
+  "home.nowMinting.editionDetails.season": "Season",
+  "home.nowMinting.editionDetails.distributionPlan": "Distribution Plan",
+  "home.nowMinting.editionDetails.view": "View",
+  "home.nowMinting.stats.edition": "Edition",
+  "home.nowMinting.stats.status": "Status",
+  "home.nowMinting.stats.mintPrice": "Mint price",
+  "home.nowMinting.stats.floor": "Floor",
+  "home.nowMinting.stats.balance.seized": "SEIZED x{count}",
+  "home.nowMinting.stats.balance.unseized": "UNSEIZED",
+  "home.exploreWaves.heading.title": "Tired of bot replies?",
+  "home.exploreWaves.heading.subtitle":
+    "Join the most interesting chats in crypto",
+  "home.exploreWaves.status.defaultLabel": "waves",
+  "home.exploreWaves.status.loading": "Loading {label}",
+  "home.exploreWaves.status.empty": "No {label}",
+  "home.exploreWaves.status.showing": "Showing {count} {label}",
+  "home.exploreWaves.viewAll": "View all",
   "waveChat.boostedDrops.display.description":
     "How boosted-drop cards show in chat.",
   "waveChat.boostedDrops.display.expanded": "Expanded",
@@ -3463,6 +3503,8 @@ export const EN_US_MESSAGES = {
     "About your display preference",
   "theMemes.documentTitle": "The Memes | Collections",
   "theMemes.description.collections": "Collections",
+  "theMemes.mint.metadata.description":
+    "View the latest mint from The Memes collection.",
   "theMemes.title": "The Memes",
   "theMemes.sorting.regionLabel": "Meme sorting",
   "theMemes.sorting.sortBy": "Sort by",
@@ -3554,6 +3596,8 @@ export const EN_US_MESSAGES = {
   "memeLab.collections.documentTitle":
     "{collectionName} | Meme Lab Collections",
   "memeLab.description.collections": "Collections",
+  "memeLab.metadata.description":
+    "Meme Lab is a 6529 NFT collection connected to The Memes.",
   "memeLab.sorting.regionLabel": "Meme Lab sorting",
   "memeLab.sorting.collectionRegionLabel": "Meme Lab collection sorting",
   "memeLab.sorting.sortBy": "Sort by",
@@ -4080,6 +4124,9 @@ export const EN_US_MESSAGES = {
   "drop.media.processingGeneric": "Processing media",
   "drop.media.loading": "Loading image",
   "drop.media.unavailable": "Image unavailable",
+  "drop.media.previewAlt": "Expanded image preview",
+  "drop.media.previewUnavailable": "Preview unavailable",
+  "drop.media.retryPreview": "Retry preview",
   "drop.media.unavailableGeneric": "Media unavailable",
   "drop.media.loadFailed": "Couldn’t load image.",
   "drop.media.videoLoadFailed": "Couldn’t load video.",
@@ -4165,6 +4212,7 @@ export const EN_US_MESSAGES = {
   ...USER_RATE_MESSAGES,
   ...aboutMessages,
   ...emmaSnapshotsMessages,
+  ...emmaMessages,
   ...museumMessages,
   ...networkMetricsMessages,
   ...networkTdhMessages,

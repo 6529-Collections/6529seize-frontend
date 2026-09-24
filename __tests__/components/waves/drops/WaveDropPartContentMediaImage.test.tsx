@@ -24,7 +24,10 @@ jest.mock("next/image", () => ({
 }));
 
 jest.mock("@/helpers/image.helpers", () => ({
-  getScaledImageUri: (_src: string) => `${_src}?scale=auto`,
+  getScaledImageUri: (src: string) => {
+    const [path, query] = src.split("?");
+    return `${path}?scale=auto${query ? `&${query}` : ""}`;
+  },
   ImageScale: { AUTOx450: "AUTOx450", AUTOx1080: "AUTOx1080" },
 }));
 
@@ -54,15 +57,7 @@ afterEach(() => {
   jest.useRealTimers();
 });
 
-const failCurrentImageThroughFallback = async () => {
-  fireEvent.error(screen.getByAltText("Drop media"));
-
-  await waitFor(() => {
-    expect(screen.getByAltText("Drop media").getAttribute("src")).not.toContain(
-      "scale=auto"
-    );
-  });
-
+const failCurrentPreview = () => {
   fireEvent.error(screen.getByAltText("Drop media"));
 };
 
@@ -112,10 +107,10 @@ describe("WaveDropPartContentMediaImage", () => {
     );
 
     fireEvent.click(screen.getByRole("button", { name: /open drop media/i }));
-    expect(screen.getByAltText("Full size drop media")).toBeInTheDocument();
+    expect(screen.getByAltText("Expanded image preview")).toBeInTheDocument();
     fireEvent.click(screen.getByTestId("modal-backdrop"));
     expect(
-      screen.queryByAltText("Full size drop media")
+      screen.queryByAltText("Expanded image preview")
     ).not.toBeInTheDocument();
   });
 
@@ -163,10 +158,10 @@ describe("WaveDropPartContentMediaImage", () => {
       "https://example.com/path/image.png?scale=auto"
     );
 
-    await failCurrentImageThroughFallback();
+    failCurrentPreview();
 
     expect(screen.getByText("Processing image")).toBeInTheDocument();
-    expect(screen.queryByText("Couldn’t load image.")).not.toBeInTheDocument();
+    expect(screen.queryByText("Preview unavailable")).not.toBeInTheDocument();
 
     act(() => {
       jest.advanceTimersByTime(1500);
@@ -188,7 +183,7 @@ describe("WaveDropPartContentMediaImage", () => {
     );
 
     for (let retryAttempt = 1; retryAttempt <= 40; retryAttempt++) {
-      await failCurrentImageThroughFallback();
+      failCurrentPreview();
 
       expect(screen.getByText("Processing image")).toBeInTheDocument();
 
@@ -204,9 +199,9 @@ describe("WaveDropPartContentMediaImage", () => {
       });
     }
 
-    await failCurrentImageThroughFallback();
+    failCurrentPreview();
 
-    expect(screen.getByText("Couldn’t load image.")).toBeInTheDocument();
+    expect(screen.getByRole("status")).toHaveTextContent("Preview unavailable");
     expect(screen.getByRole("button", { name: "Retry" })).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Retry" }));

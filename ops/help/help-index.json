@@ -27,7 +27,8 @@
         "The custom video player shows a timeline above its controls, with a small draggable handle and a larger interaction area. Drag the handle, select a position on the track, or focus the slider and use the keyboard to seek.",
         "The bottom-left capsule shows play or pause alongside elapsed time and total duration. Pausing keeps the capsule and time in place and also shows a central play button; either play button resumes playback. The time updates while seeking.",
         "Controls remain visible while paused, focused, or scrubbing and fade after inactivity during playback. Pointer interaction, keyboard focus, or a tap reveals them. Before duration is available, it shows a dash and seeking is disabled.",
-        "Videos are shown without cropping or stretching. Homepage Next Drop, Latest Drop, The Memes detail, and Wave submission detail videos fit the available width up to 95% of the usable screen height in desktop browsers, mobile browsers, and the mobile app, allowing for headers, bottom navigation, and safe areas. Tall videos become narrower and stay centered. Fullscreen uses the full viewing area. Loading listing, subscription, or ownership panels does not resize the video. Homepage artwork stays vertically centered in its column. The Memes detail retains its full-column dark artwork background and centers the video inside it. Expanded wave submissions center the video in the available area below the overlay header. The timeline and controls stay inside the video frame. Submission detail reserves space for its overlay header and artwork padding. Mute and fullscreen keep circular buttons. Browser-native players retain their own controls."
+        "Videos are shown without cropping or stretching. Homepage Next Drop, Latest Drop, The Memes detail, and Wave submission detail videos fit the available width up to 95% of the usable screen height in desktop browsers, mobile browsers, and the mobile app, allowing for headers, bottom navigation, and safe areas. Tall videos become narrower and stay centered. Fullscreen uses the full viewing area. Loading listing, subscription, or ownership panels does not resize the video. Homepage artwork stays vertically centered in its column. The Memes detail retains its full-column dark artwork background and centers the video inside it. Expanded wave submissions center the video in the available area below the overlay header. The timeline and controls stay inside the video frame. Submission detail reserves space for its overlay header and artwork padding. Mute and fullscreen keep circular buttons. Browser-native players retain their own controls.",
+        "Still artwork on the homepage, individual Meme pages, and expanded Wave submissions fits the available width and at most 95% of usable screen height without cropping or stretching. Desktop homepage images also fit within the adjacent details section height. Meme detail images use a stable reserved frame so loading details or ownership panels does not move them. Submission images allow for the overlay header and padding. Portrait images are normally limited by height, landscape images by width."
       ],
       "canonical_path": "/",
       "link_label": "Open homepage",
@@ -36,6 +37,9 @@
       "source_refs": [
         "components/drops/view/item/content/media/SeizeVideoPlayer.tsx",
         "components/drops/view/item/content/media/SeizeVideoPlayer.view.tsx",
+        "components/nft-image/renderers/NFTImageRenderer.tsx",
+        "components/home/now-minting/HomeArtworkFrame.tsx",
+        "components/waves/drop/MemesDropArtworkHero.tsx",
         "ops/docs/media/rendering/feature-video-player.md"
       ]
     },
@@ -548,6 +552,7 @@
         "Authenticated visitors keep the dashboard-first home experience.",
         "It highlights the current or upcoming Meme Card mint, discovery sections, and 6529 mission content.",
         "After the current Meme mint ends, the homepage keeps Latest Drop through a configurable grace period before replacing it with a mapped Next Drop.",
+        "Latest Drop groups title and artist first, then stats with Edition Details beneath them, then Your allowance above Subscription Minting, and the countdown and mint action at the bottom.",
         "A mapped Latest Drop adds Main Stage Submission -> View as the last Edition Details row, and a mapped Next Drop shows a The Memes #{id} pill linked to the Meme card.",
         "The home mint panel can surface The Memes subscription awareness with read-only status, subscription info, and Set up or Manage actions for the profile Subscriptions tab.",
         "Use it when users ask where to start or where the current mint is surfaced."
@@ -3381,6 +3386,8 @@
         "Drop actions include reactions, ratings, voting, boosting, curation, replies, link copy, and pinning where allowed.",
         "On desktop, hover or keyboard-focus a drop action to read its label beside the control. Moving the pointer away, scrolling, resizing, pressing Escape, clicking elsewhere, or activating the control with a pointer or keyboard dismisses action tooltips. Touch uses the drop action menu.",
         "Posted full drops can support emoji reactions and clap rating with optimistic UI and rollback on failure.",
+        "Desktop and touch quick reactions show up to three available emojis ranked by local usage. Each button names its emoji in its accessible label and desktop tooltip, such as React with Thumbs up. If none can be displayed, one thumbs-up fallback appears and sends a thumbs-up reaction.",
+        "Quick reactions and the emoji picker Frequently used section share local emoji history, including composer emoji selections. History stays in the current browser or app installation and does not sync between devices.",
         "Reaction controls are disabled while a proxy profile is active.",
         "Reaction controls are disabled only when chatting and reacting are disabled for the entire wave. A viewer who can see the wave may still react when the wave's chat group does not permit them to post.",
         "If the API rejects the current session, the app starts one authentication recovery attempt for that session and temporarily disables reaction actions. The failed reaction is not automatically replayed.",
@@ -6491,7 +6498,9 @@
       "aliases": ["image viewer", "open image", "zoom image", "scale image"],
       "keywords": ["waves", "drop", "image", "viewer", "scaling", "zoom"],
       "facts": [
-        "Wave drop image viewer and scaling behavior is documented under drop actions.",
+        "Drop images use scaled previews in feeds and the image viewer. A failed preview never automatically loads the full-size original.",
+        "If no preview is available, the frame shows Preview unavailable. Thread images retry while uploads process; Retry or Retry preview can try again. Open in browser or Open in new tab and Download media deliberately access the original.",
+        "Large GIFs may show a still preview when the animation exceeds the image resizer memory budget; the original animation remains available through the original-file actions.",
         "Use it when users ask how to inspect an image attached to a drop.",
         "Uploading images is handled by the composer image-upload behavior."
       ],
@@ -7188,6 +7197,8 @@
       "facts": [
         "The meme calendar route lives at /meme-calendar.",
         "It is the canonical place for minting-calendar context.",
+        "The top Meme number control uses Show mint schedule; the lower calendar control uses Find mint date because it moves the calendar to that mint.",
+        "A selected published Meme provides an Open Meme link to /the-memes/{id}; upcoming or unrevealed Memes do not receive speculative artwork links.",
         "The page heading appears first; clock panels and the calendar grid appear once browser JavaScript is ready, using the browser clock and local timezone. Viewing the schedule does not require connecting a wallet.",
         "The home page can also surface current or upcoming mint information.",
         "The calendar models past, current, and future Meme Card mint timing from Monday/Wednesday/Friday cadence plus explicit skip, extra, and reschedule overrides.",
@@ -7326,6 +7337,7 @@
       "keywords": ["rememes", "add", "submit", "submission", "tdh"],
       "facts": [
         "The ReMemes add route lives at /rememes/add.",
+        "The Meme References picker searches published Meme Cards by number or artwork name and shows the newest cards first.",
         "Submission status, blocking states, and recovery are documented in the ReMemes add-submission docs.",
         "Some submission paths can depend on TDH threshold checks."
       ],
@@ -7667,7 +7679,9 @@
       ],
       "facts": [
         "EMMA is the Editor for Managing Multiphase Allowlists and the first reference implementation of Janus.",
-        "The EMMA landing route lives at /emma and the plans route lives at /emma/plans.",
+        "Opening /emma while signed in goes directly to /emma/plans, including with a restored session and no live wallet connection. A connected wallet alone is not a signed-in session.",
+        "Signed-out users at /emma see wallet guidance and a Connect wallet or Sign in action. Opening a plan while signed out preserves that plan destination through sign-in.",
+        "About EMMA, the question-mark link beside the title on the entry and plans pages, opens /emma/help. This public help page contains the full introduction, Janus link, TDH policy, and Back to EMMA link.",
         "The distribution plan tool helps build mint plans with airdrops, allowlists, and public minting in one or more phases.",
         "EMMA uses TDH as a lightweight anti-spam/rate-limit measure for allowlist creation.",
         "In Create Snapshots at /emma/plans/{planId}, Use a 6529 collection presents five image rows: The Memes by 6529 (ERC1155), Meme Lab (ERC1155), 6529 Gradient (ERC721), 6529 RAW (ERC721), and 6529 Intern JPGs (ERC1155). Tab reaches each shortcut; Enter or Space selects it.",
@@ -7676,11 +7690,13 @@
         "The five shortcuts remain available without metadata lookup. If Intern JPG token IDs fail to load or are empty, the form stays unchanged and shows an error. Select the shortcut to retry, or enter its name, contract address, and token IDs manually; leaving token IDs empty selects all tokens in the shared contract."
       ],
       "canonical_path": "/emma",
-      "related_paths": ["/emma/plans"],
+      "related_paths": ["/emma/plans", "/emma/help"],
       "tags": ["tools", "emma", "allowlist", "glossary"],
       "source_refs": [
         "app/emma/page.tsx",
+        "app/emma/help/page.tsx",
         "app/emma/plans/page.tsx",
+        "components/distribution-plan-tool/EmmaAuthGate.tsx",
         "components/distribution-plan-tool/create-snapshots/form/CreateSnapshotForm.tsx",
         "components/distribution-plan-tool/create-snapshots/form/CreateSnapshotFormCollections.tsx",
         "ops/docs/emma/feature-create-snapshots-status-and-retry.md"

@@ -12,7 +12,11 @@ describe("tools API metadata", () => {
   it("publishes the API reference canonical", () => {
     expect(generateMetadata()).toEqual({ title: "API | Tools" });
     expect(getAppMetadata).toHaveBeenCalledWith(
-      { title: "API | Tools", description: "API" },
+      {
+        title: "API | Tools",
+        description:
+          "Read the open REST API documentation, including authentication and drop media examples.",
+      },
       { canonicalPath: "/tools/api" }
     );
   });
