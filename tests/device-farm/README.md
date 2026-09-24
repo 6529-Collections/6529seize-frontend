@@ -54,6 +54,9 @@ the same tgz layout.)
 The workflow uploads the zip as the Device Farm test package; the test spec
 then runs `npm install *.tgz && cd node_modules/6529-device-farm-tests` and
 invokes `npm run test:web` or `npm run test:native` on the test host.
+Both commands invoke the bundled Mocha entry point through Node explicitly.
+Root PR quality checks can analyze this package without installing its separate
+dependencies or inferring executable names from an absent nested installation.
 
 The web command disables Mocha retries and rejects pending/empty suites. Its
 reporter writes `devicefarm-result.json` to `$DEVICEFARM_LOG_DIR`, including

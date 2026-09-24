@@ -6,6 +6,7 @@ const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
 const { test } = require("node:test");
+const { scripts } = require("../package.json");
 
 function runFixture(source) {
   const directory = fs.mkdtempSync(
@@ -14,19 +15,17 @@ function runFixture(source) {
   try {
     const fixture = path.join(directory, "fixture.cjs");
     fs.writeFileSync(fixture, source);
+    // Exercise the shipped web command, substituting only the offline spec.
+    const [command, ...args] = scripts["test:web"].split(" ");
+    assert.equal(command, "node");
+    const specIndex = args.indexOf("specs/web.smoke.spec.cjs");
+    assert.ok(specIndex > 0);
+    args[specIndex] = fixture;
     const run = spawnSync(
       process.execPath,
-      [
-        require.resolve("mocha/bin/mocha.js"),
-        fixture,
-        "--reporter",
-        path.resolve(__dirname, "../lib/reporter.cjs"),
-        "--retries",
-        "0",
-        "--fail-zero",
-        "--forbid-pending",
-      ],
+      args,
       {
+        cwd: path.resolve(__dirname, ".."),
         encoding: "utf8",
         timeout: 10000,
         env: { ...process.env, DEVICEFARM_LOG_DIR: directory },
