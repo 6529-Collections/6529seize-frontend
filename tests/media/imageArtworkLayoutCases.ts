@@ -55,14 +55,18 @@ export function defineNftImageLayoutTests() {
         .locator("..")
         .locator("[data-home-artwork-column]");
       await expect(column).toBeVisible();
+      await expect(column).toHaveAttribute(
+        "data-home-artwork-is-image",
+        /^(true|false)$/
+      );
+      test.skip(
+        (await column.getAttribute("data-home-artwork-is-image")) === "false",
+        "Current homepage media data identifies a non-image drop"
+      );
       const image = column
         .getByRole("img")
         .locator("xpath=self::*[ancestor::*[@data-artwork-image-frame]]")
         .first();
-      test.skip(
-        (await image.count()) === 0,
-        "Current homepage drop has no still image"
-      );
       await expect(image).toBeVisible();
       await expect(image).toHaveJSProperty("tagName", "IMG");
       await expect
@@ -158,14 +162,18 @@ export function defineNftImageLayoutTests() {
       .locator("..")
       .locator("[data-home-artwork-column]");
     await expect(column).toBeVisible();
+    await expect(column).toHaveAttribute(
+      "data-home-artwork-is-image",
+      /^(true|false)$/
+    );
+    test.skip(
+      (await column.getAttribute("data-home-artwork-is-image")) === "false",
+      "Current homepage media data identifies a non-image drop"
+    );
     const image = column
       .getByRole("img")
       .locator("xpath=self::*[ancestor::*[@data-artwork-image-frame]]")
       .first();
-    test.skip(
-      (await image.count()) === 0,
-      "Current homepage drop has no still image"
-    );
     await expectContainedImage(image);
     const layout = await image.evaluate((element: HTMLImageElement) => {
       const column = element.closest("[data-home-artwork-column]")!;

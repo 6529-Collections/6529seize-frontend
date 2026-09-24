@@ -150,6 +150,7 @@ export default function LatestDropNextMintPanel({
       <div className="tw-grid tw-grid-cols-1 tw-items-stretch lg:tw-grid-cols-12 xl:tw-grid-cols-9">
         <div
           data-home-artwork-column
+          data-home-artwork-is-image={isImage}
           className="tw-flex tw-items-center tw-p-0 lg:tw-col-span-6 xl:tw-col-span-5"
         >
           <HomeArtworkFrame
