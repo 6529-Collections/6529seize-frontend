@@ -219,12 +219,25 @@ templating, not syntax. Device Farm rejects the braces with
 
 ### Safari startup and reliability validation
 
-For iOS 16.4 and newer, Safari receives `appium:initialDeeplinkUrl` so WDA
-launches the target page before XCUITest attaches its debugger. Both pinned
-iPhones support it. Older or unknown iOS versions retain the default startup
-path. Increasing `safariInitialUrl` readiness waits alone does not address
-attachment: XCUITest attempts attachment before applying that URL. See
-[XCUITest capabilities](https://appium.github.io/appium-xcuitest-driver/9.10/reference/capabilities/).
+For iOS 16.4 and newer, start a native XCUITest session for Safari's bundle ID,
+using the ordinary XCTest app launch. After launch completes, issue one
+`mobile: deepLink` to the target and wait up to 30 seconds for a Safari web
+context matching the target origin/path before switching to it. This avoids
+both automatic attachment to a missing/old tab and WDA's cold deep-link launch
+race. A failed attachment closes the session and preserves the original error;
+it never recreates the session or reopens the URL. Xcode output is retained in
+the Appium log for startup failures. Older or unknown iOS versions retain the
+default Safari startup path. Both pinned iPhones support
+[mobile: deepLink](https://appium.github.io/appium-xcuitest-driver/9.10/reference/execute-methods/#mobile-deeplink).
+
+[Run 36123141853](https://github.com/6529-Collections/6529seize-frontend/actions/runs/36123141853)
+failed on the SE before any test: WDA 9.15.3 returned `Cannot launch
+com.apple.mobilesafari` immediately after its initial deep-link request, while
+the device syslog recorded a successful Safari launch and foreground scene.
+The [matching WDA source](https://github.com/appium/WebDriverAgent/blob/v9.15.3/WebDriverAgentLib/Commands/FBSessionCommands.m)
+checks `app.running` immediately after that request. The separated launch and
+attachment sequence avoids this timing dependency. It still requires real-device
+validation; local sequencing tests cannot establish device reliability.
 
 The web suite navigates from the device before app assertions and records
 browser connectivity, origin, pathname, and document readiness when navigation

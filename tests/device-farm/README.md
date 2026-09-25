@@ -66,6 +66,14 @@ customer artifacts for the Actions summary without extracting arbitrary ZIP
 contents. Missing evidence, known infrastructure failures, and recovered runs
 do not become clean passes. The native command is unchanged.
 
+On iOS 16.4+, Safari starts through an ordinary native XCTest app launch.
+The harness then opens the target once with `mobile: deepLink`, waits for a
+Safari context matching its origin/path, and switches to web automation.
+It does not use WDA's `initialDeeplinkUrl` cold-launch path or automatically
+attach to an old tab. Failed attachment closes the session without retrying;
+Xcode output is included in the Appium log. Older/unknown iOS versions retain
+the default Safari session path.
+
 Each web page check verifies a fully loaded `about:blank` document before
 requesting its target once. This isolates direct-load checks from the previous
 page's delayed router effects. Target readiness checks origin, pathname,

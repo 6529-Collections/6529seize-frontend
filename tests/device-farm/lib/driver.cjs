@@ -16,6 +16,7 @@ const { remote } = require("webdriverio");
 
 const APPIUM_HOSTNAME = "127.0.0.1";
 const APPIUM_PORT = 4723;
+const SAFARI_BUNDLE_ID = "com.apple.mobilesafari";
 
 const APP_PACKAGE = "com.core6529.app";
 const APP_ACTIVITY = ".MainActivity";
@@ -96,15 +97,21 @@ async function startWebSession() {
     // iOS 18.6.2 with "remote debugger did not return any connected web
     // applications after ~5s").
     capabilities["appium:webviewConnectTimeout"] = 30000;
-    // XCUITest attaches to a webview BEFORE setting safariInitialUrl. Launch
-    // a page through WDA instead of depending on the device's previous tab.
-    // initialDeeplinkUrl is supported on iOS 16.4+ (including both QA phones).
+    // Create a native Safari session first: WDA's initialDeeplinkUrl path
+    // checks app.running immediately after opening the URL and raced Safari
+    // startup on the SE in run 36123141853. The ordinary app launch waits for
+    // XCTest startup; then we open the page and attach explicitly below.
     const [major, minor = 0] = env("DEVICEFARM_DEVICE_OS_VERSION", "")
       .split(".")
       .map(Number);
     if (major > 16 || (major === 16 && minor >= 4)) {
-      capabilities["appium:initialDeeplinkUrl"] = targetUrl();
+      delete capabilities.browserName;
+      capabilities["appium:bundleId"] = SAFARI_BUNDLE_ID;
+      capabilities["appium:autoWebview"] = false;
+      capabilities["appium:includeSafariInWebviews"] = true;
+      capabilities["appium:fullContextList"] = true;
     }
+    capabilities["appium:showXcodeLog"] = true;
     const derivedDataPath = env("DEVICEFARM_APPIUM_WDA_DERIVED_DATA_PATH");
     if (derivedDataPath) {
       capabilities["appium:derivedDataPath"] = derivedDataPath;
@@ -120,7 +127,59 @@ async function startWebSession() {
   }
   // Surface the first failed session/command instead of replaying it silently.
   // Fresh Device Farm allocations are the unit of reliability validation.
-  return connect(capabilities, 0);
+  const driver = await connect(capabilities, 0);
+  if (capabilities["appium:bundleId"] === SAFARI_BUNDLE_ID) {
+    try {
+      await attachSafariPage(driver);
+    } catch (error) {
+      // The caller never receives this session if attachment fails.
+      await driver.deleteSession().catch(() => {});
+      throw error;
+    }
+  }
+  return driver;
+}
+
+async function attachSafariPage(driver) {
+  const pageUrl = new URL(targetUrl());
+  // mobile: deepLink requires iOS 16.4+. Safari is already running, so this
+  // opens the page without coupling cold launch to WDA session creation.
+  await driver.execute("mobile: deepLink", {
+    url: pageUrl.toString(),
+    bundleId: SAFARI_BUNDLE_ID,
+  });
+  let pageContext;
+  await driver.waitUntil(
+    async () => {
+      const contexts = await driver.getContexts();
+      pageContext = contexts.find((context) =>
+        isSafariPageContext(context, pageUrl)
+      );
+      return Boolean(pageContext);
+    },
+    {
+      timeout: 30000,
+      interval: 1000,
+      timeoutMsg: "Safari did not expose the target page context",
+    }
+  );
+  await driver.switchContext(pageContext.id);
+}
+
+function isSafariPageContext(context, pageUrl) {
+  if (
+    context.bundleId !== SAFARI_BUNDLE_ID ||
+    !context.id?.startsWith("WEBVIEW_") ||
+    !URL.canParse(context.url)
+  ) {
+    return false;
+  }
+  const contextUrl = new URL(context.url);
+  return (
+    contextUrl.origin === pageUrl.origin &&
+    contextUrl.pathname.replace(/\/$/, "") ===
+      pageUrl.pathname.replace(/\/$/, "")
+  );
 }
 
 /**

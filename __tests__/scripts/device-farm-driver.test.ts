@@ -15,31 +15,76 @@ const {
 
 describe("Device Farm browser startup and diagnostics", () => {
   const originalEnv = { ...process.env };
+  const safariPage = {
+    id: "WEBVIEW_726.1",
+    bundleId: "com.apple.mobilesafari",
+    url: "https://staging.6529.io/",
+  };
+  function safariDriver() {
+    return {
+      execute: jest.fn().mockResolvedValue(undefined),
+      getContexts: jest.fn().mockResolvedValue([safariPage]),
+      switchContext: jest.fn().mockResolvedValue(undefined),
+      deleteSession: jest.fn().mockResolvedValue(undefined),
+      waitUntil: jest.fn(
+        async (
+          predicate: () => Promise<boolean>,
+          options: { timeoutMsg: string }
+        ) => {
+          for (let observation = 0; observation < 3; observation += 1) {
+            if (await predicate()) return;
+          }
+          throw new Error(options.timeoutMsg);
+        }
+      ),
+    };
+  }
   beforeEach(() => {
     jest.clearAllMocks();
     process.env = { ...originalEnv, TARGET_URL: "https://staging.6529.io" };
     delete process.env["DEVICEFARM_DEVICE_OS_VERSION"];
-    mockRemote.mockResolvedValue({});
+    mockRemote.mockResolvedValue(safariDriver());
   });
   afterAll(() => {
     process.env = originalEnv;
   });
 
   it.each(["16.4", "18.6.2", "26.0"])(
-    "preloads Safari before debugger attachment on iOS %s",
+    "launches Safari natively before opening and attaching its page on iOS %s",
     async (version) => {
       process.env["DEVICEFARM_DEVICE_PLATFORM_NAME"] = "iOS";
       process.env["DEVICEFARM_DEVICE_OS_VERSION"] = version;
-      await startWebSession();
+      const driver = await startWebSession();
       expect(mockRemote).toHaveBeenCalledWith(
         expect.objectContaining({
           connectionRetryCount: 0,
           capabilities: expect.objectContaining({
-            browserName: "Safari",
-            "appium:initialDeeplinkUrl": "https://staging.6529.io",
+            "appium:bundleId": "com.apple.mobilesafari",
+            "appium:autoWebview": false,
+            "appium:includeSafariInWebviews": true,
+            "appium:fullContextList": true,
             "appium:webviewConnectTimeout": 30000,
           }),
         })
+      );
+      const { capabilities } = mockRemote.mock.calls[0][0];
+      expect(capabilities).not.toHaveProperty("browserName");
+      expect(capabilities).not.toHaveProperty("appium:initialDeeplinkUrl");
+      expect(driver.execute.mock.calls).toEqual([
+        [
+          "mobile: deepLink",
+          {
+            url: "https://staging.6529.io/",
+            bundleId: "com.apple.mobilesafari",
+          },
+        ],
+      ]);
+      expect(driver.switchContext.mock.calls).toEqual([[safariPage.id]]);
+      expect(driver.getContexts.mock.invocationCallOrder[0]).toBeGreaterThan(
+        driver.execute.mock.invocationCallOrder[0]
+      );
+      expect(driver.switchContext.mock.invocationCallOrder[0]).toBeGreaterThan(
+        driver.getContexts.mock.invocationCallOrder[0]
       );
     }
   );
@@ -53,8 +98,86 @@ describe("Device Farm browser startup and diagnostics", () => {
       expect(mockRemote.mock.calls[0][0].capabilities).not.toHaveProperty(
         "appium:initialDeeplinkUrl"
       );
+      expect(mockRemote.mock.calls[0][0].capabilities.browserName).toBe(
+        "Safari"
+      );
     }
   );
+
+  it("waits for native launch completion before opening the page", async () => {
+    process.env["DEVICEFARM_DEVICE_PLATFORM_NAME"] = "iOS";
+    process.env["DEVICEFARM_DEVICE_OS_VERSION"] = "16.4";
+    const driver = safariDriver();
+    let finishLaunch!: (value: typeof driver) => void;
+    mockRemote.mockReturnValue(
+      new Promise((resolve) => {
+        finishLaunch = resolve;
+      })
+    );
+    const session = startWebSession();
+    await Promise.resolve();
+    expect(driver.execute).not.toHaveBeenCalled();
+    finishLaunch(driver);
+    await expect(session).resolves.toBe(driver);
+    expect(mockRemote).toHaveBeenCalledTimes(1);
+  });
+
+  it("waits for the target Safari context rather than attaching another tab or app", async () => {
+    process.env["DEVICEFARM_DEVICE_PLATFORM_NAME"] = "iOS";
+    process.env["DEVICEFARM_DEVICE_OS_VERSION"] = "16.4";
+    const driver = safariDriver();
+    driver.getContexts
+      .mockResolvedValueOnce([
+        "NATIVE_APP",
+        { ...safariPage, url: "about:blank" },
+      ])
+      .mockResolvedValueOnce([
+        { ...safariPage, bundleId: "another.app" },
+        { ...safariPage, url: "https://other.example/" },
+        { ...safariPage, url: "https://staging.6529.io/network" },
+        { ...safariPage, url: "invalid" },
+      ])
+      .mockResolvedValueOnce([
+        { ...safariPage, url: `${safariPage.url}?view=latest` },
+      ]);
+    mockRemote.mockResolvedValue(driver);
+    await expect(startWebSession()).resolves.toBe(driver);
+    expect(driver.getContexts).toHaveBeenCalledTimes(3);
+    expect(driver.execute).toHaveBeenCalledTimes(1);
+    expect(driver.switchContext.mock.calls).toEqual([[safariPage.id]]);
+  });
+
+  it.each(["execute", "getContexts", "switchContext"] as const)(
+    "preserves %s failure and cleans up without recreating the session",
+    async (method) => {
+      process.env["DEVICEFARM_DEVICE_PLATFORM_NAME"] = "iOS";
+      process.env["DEVICEFARM_DEVICE_OS_VERSION"] = "16.4";
+      const driver = safariDriver();
+      const error = new Error(`${method} failed`);
+      driver[method].mockRejectedValue(error);
+      driver.deleteSession.mockRejectedValue(new Error("cleanup failed"));
+      mockRemote.mockResolvedValue(driver);
+      await expect(startWebSession()).rejects.toBe(error);
+      expect(driver.deleteSession).toHaveBeenCalledTimes(1);
+      expect(mockRemote).toHaveBeenCalledTimes(1);
+      expect(driver.execute).toHaveBeenCalledTimes(1);
+    }
+  );
+
+  it("fails and closes the session when the target page never appears", async () => {
+    process.env["DEVICEFARM_DEVICE_PLATFORM_NAME"] = "iOS";
+    process.env["DEVICEFARM_DEVICE_OS_VERSION"] = "16.4";
+    const driver = safariDriver();
+    driver.getContexts.mockResolvedValue([{ id: "NATIVE_APP" }]);
+    mockRemote.mockResolvedValue(driver);
+    await expect(startWebSession()).rejects.toThrow(
+      "Safari did not expose the target page context"
+    );
+    expect(driver.switchContext).not.toHaveBeenCalled();
+    expect(driver.deleteSession).toHaveBeenCalledTimes(1);
+    expect(driver.execute).toHaveBeenCalledTimes(1);
+    expect(mockRemote).toHaveBeenCalledTimes(1);
+  });
 
   it("keeps Android and native capabilities separate", async () => {
     process.env["DEVICEFARM_DEVICE_PLATFORM_NAME"] = "Android";
