@@ -101,8 +101,8 @@ export function defineWaveImagePreviewTests() {
     await page.route(originals[1]!, (route) =>
       route.fulfill({
         status: 200,
-        contentType: "image/png",
-        path: path.resolve("public/test-wave-icon.png"),
+        contentType: "image/gif",
+        path: path.resolve("tests/media/fixtures/animation.gif"),
       })
     );
     await page.getByRole("button", { name: "Play original GIF" }).click();
@@ -118,6 +118,8 @@ export function defineWaveImagePreviewTests() {
     expect(requests.filter((url) => originals.includes(url))).toEqual([
       originals[1],
     ]);
+    const firstFrame = await originalImage.screenshot();
+    await expect.poll(() => originalImage.screenshot()).not.toEqual(firstFrame);
     await page.getByRole("button", { name: "Return to preview" }).click();
     await expect(originalImage).toBeHidden();
     // A recovered preview must replace the error state without closing the
