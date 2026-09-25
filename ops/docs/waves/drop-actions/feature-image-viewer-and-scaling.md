@@ -7,7 +7,10 @@ Parent: [Wave Drop Actions Index](README.md)
 Drop attachments and markdown images render inline in wave and DM threads.
 Clicking or tapping an image opens a modal viewer with zoom and quick actions.
 Attachment images use larger scaling in single-drop views than in thread cards.
-The viewer also uses a scaled preview; opening it does not load the original.
+The viewer opens an optimized preview. For GIFs, the **HD** icon in the popup's
+top-right toolbar offers **View original**. Selecting it loads the original in
+the same viewer and highlights HD; **View optimized** switches back. Moving to
+another image resets this choice. Inline images have no HD control or GIF badge.
 
 ## Location in the Site
 
@@ -30,6 +33,7 @@ The viewer also uses a scaled preview; opening it does not load the original.
 4. Zoom the image and use modal controls:
    - `Open in Browser` opens the source URL in a new tab.
    - `Download` saves the source image.
+   - `HD` switches GIFs between original and optimized versions inside the popup.
    - `Full screen` enters browser fullscreen when supported and not in native app.
    - `Reset zoom` appears after zooming in.
    - `Close` exits the modal.
@@ -54,8 +58,8 @@ The viewer also uses a scaled preview; opening it does not load the original.
 - Scaled URL rewriting applies to supported hosted raster image URLs
   (`gif`, `webp`, `jpg`, `jpeg`, `png`, `avif` under supported media prefixes).
   External HTTPS images use the site's guarded image-preview service. Ordinary
-  GIFs remain animated; over-budget animations use a still. Original-file actions
-  retain the source.
+  GIFs remain animated when processing limits allow; legacy and external
+  over-budget previews may be stills. Original-file actions retain the source.
 - Fullscreen is requested on the current rendered image element, which can differ
   between attachment and markdown rendering paths.
 
@@ -69,9 +73,15 @@ The viewer also uses a scaled preview; opening it does not load the original.
 - `Open in browser` / `Open in new tab` and `Download media` deliberately access
   the original. In the native app, downloads go directly to a temporary native
   file and the share sheet, without loading the file into the image viewer.
-- Large GIFs may have a still preview when the full animation exceeds the
-  resizer's memory budget. The original animation remains available through the
-  original-file actions.
+- GIF previews use a versioned animation-preserving resize path. The worker can
+  reduce preview resolution to retain every frame within its output budget.
+  GIFs that exceed processing limits fall back to a legacy preview, which may
+  be static. Choose **View original** with the popup toolbar's HD icon if the
+  preview does not animate. The original loads only after that action and may
+  use more bandwidth and device memory.
+- If loading the original fails, the viewer restores its preview, announces the
+  failure, and lets you try again. HD shows an error color and its tooltip
+  explains the failure; no playback controls or messages cover the artwork.
 - If a fullscreen request is denied or interrupted, the modal stays open and
   the other image actions continue to work.
 - If fullscreen is unavailable, users can still open the source in a new tab.

@@ -7,13 +7,17 @@ import {
 import Button from "@/components/utils/button/Button";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import Image from "next/image";
+import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 import { ImageScale } from "@/helpers/image.helpers";
+import { isGifImageUrl } from "@/helpers/gif-preview.helpers";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 import React, { useCallback, useState } from "react";
 import { createPortal } from "react-dom";
 import useKeyPressEvent from "react-use/lib/useKeyPressEvent";
 import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch";
 import { ExpandedMediaToolbar } from "./MediaActionToolbar";
+import { GifQualityToggle } from "./GifQualityToggle";
 
 export function requestCenteredImageFullscreen(
   fullscreenTarget: HTMLImageElement
@@ -70,6 +74,15 @@ export function ImageMediaModal({
       }
     | undefined;
 }) {
+  const [originalState, setOriginalState] = useState({
+    src,
+    playing: false,
+    failed: false,
+  });
+  if (originalState.src !== src)
+    setOriginalState({ src, playing: false, failed: false });
+  const playingOriginal = originalState.src === src && originalState.playing;
+  const canPlayOriginal = isGifImageUrl(src) && /^(https?:|ipfs:)/i.test(src);
   const [zoomState, setZoomState] = useState({ src, isZoomed: false });
   if (zoomState.src !== src) setZoomState({ src, isZoomed: false });
   const isZoomed = zoomState.src === src && zoomState.isZoomed;
@@ -191,22 +204,46 @@ export function ImageMediaModal({
                     onClick={handleExpandedImageButtonClick}
                   >
                     {/* Drop media can come from arbitrary hosts outside Next image config. */}
-                    <DropImagePreview
-                      key={`${src}:${retry}`}
-                      ref={imageRef}
-                      onError={() => setFailedSource(src)}
-                      onLoad={() => setFailedSource(null)}
-                      originalSrc={src}
-                      imageScale={ImageScale.AUTOx1080}
-                      alt={t(DEFAULT_LOCALE, "drop.media.previewAlt")}
-                      fill
-                      sizes="95vw"
-                      style={{
-                        objectFit: "contain",
-                        objectPosition: "center",
-                        pointerEvents: "auto",
-                      }}
-                    />
+                    {playingOriginal ? (
+                      <Image
+                        key={`original-${src}`}
+                        ref={imageRef}
+                        src={resolveIpfsUrlSync(src)}
+                        alt={t(DEFAULT_LOCALE, "drop.media.originalGifAlt")}
+                        fill
+                        sizes="95vw"
+                        unoptimized
+                        onError={() =>
+                          setOriginalState({
+                            src,
+                            playing: false,
+                            failed: true,
+                          })
+                        }
+                        style={{
+                          objectFit: "contain",
+                          objectPosition: "center",
+                          pointerEvents: "auto",
+                        }}
+                      />
+                    ) : (
+                      <DropImagePreview
+                        key={`${src}:${retry}`}
+                        ref={imageRef}
+                        onError={() => setFailedSource(src)}
+                        onLoad={() => setFailedSource(null)}
+                        originalSrc={src}
+                        imageScale={ImageScale.AUTOx1080}
+                        alt={t(DEFAULT_LOCALE, "drop.media.previewAlt")}
+                        fill
+                        sizes="95vw"
+                        style={{
+                          objectFit: "contain",
+                          objectPosition: "center",
+                          pointerEvents: "auto",
+                        }}
+                      />
+                    )}
                   </button>
                 </TransformComponent>
               </div>
@@ -214,7 +251,7 @@ export function ImageMediaModal({
           </div>
         )}
       </TransformWrapper>
-      {previewUnavailable && (
+      {!playingOriginal && previewUnavailable && (
         <div className="tw-fixed tw-bottom-20 tw-left-1/2 tw-z-[1102] -tw-translate-x-1/2">
           <Button
             type="button"
@@ -273,10 +310,24 @@ export function ImageMediaModal({
         isDownloading={isDownloading}
         onFullscreen={onFullscreen}
         fullscreenTargetAvailable={
-          fullscreenTargetAvailable && !previewUnavailable
+          fullscreenTargetAvailable && (playingOriginal || !previewUnavailable)
         }
         onClose={onClose}
-      />
+      >
+        {canPlayOriginal && (
+          <GifQualityToggle
+            showingOriginal={playingOriginal}
+            failed={originalState.src === src && originalState.failed}
+            onToggle={() =>
+              setOriginalState({
+                src,
+                playing: !playingOriginal,
+                failed: false,
+              })
+            }
+          />
+        )}
+      </ExpandedMediaToolbar>
     </div>,
     document.body
   );

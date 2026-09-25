@@ -61,6 +61,19 @@ beforeEach(() => {
 });
 
 describe("DropListItemContentMediaImage", () => {
+  it("keeps GIF quality controls in the popup and omits the inline preview badge", () => {
+    render(<DropListItemContentMediaImage src="https://example.com/art.gif" />);
+    fireEvent.load(screen.getByAltText("Drop media"));
+    expect(screen.queryByText("GIF preview")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "View original" })
+    ).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Open image preview" }));
+    expect(
+      screen.getByRole("button", { name: "View original" })
+    ).toBeInTheDocument();
+  });
+
   it("opens and closes the modal", () => {
     render(<DropListItemContentMediaImage src="img" maxRetries={1} />);
     const img = screen.getByAltText("Drop media");
