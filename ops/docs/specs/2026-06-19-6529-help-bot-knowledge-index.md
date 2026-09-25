@@ -631,4 +631,5 @@ Browser-native controls remain a separate behavior.
 
 The media playback record also describes contained still artwork on the
 homepage, Meme detail, and expanded Wave submissions: the shared usable-screen
-height cap, desktop homepage details-height limit, and stable Meme image frame.
+height cap, desktop homepage details-height limit, natural-height full-width
+mobile homepage images without reserved gaps, and stable Meme image frame.
