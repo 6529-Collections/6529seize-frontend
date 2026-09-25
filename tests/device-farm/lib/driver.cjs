@@ -13,7 +13,6 @@
 
 const path = require("node:path");
 const { remote } = require("webdriverio");
-const { recordNavigationRetry } = require("./result.cjs");
 
 const APPIUM_HOSTNAME = "127.0.0.1";
 const APPIUM_PORT = 4723;
@@ -158,9 +157,8 @@ async function waitForDocumentReady(driver, timeout) {
 /**
  * Navigate and wait until the browser is really on the requested page with
  * rendered content. Safari's WebDriver `url()` can return before navigation
- * starts (observed on Device Farm iPhones: the previous page's readyState
- * satisfies a naive readiness check), so this waits for the expected pathname
- * and a non-empty body rather than trusting the first readyState=complete.
+ * starts. Retire the previous document before loading each independent smoke
+ * target so its hydration/router effects cannot race the next navigation.
  */
 async function openPage(driver, pageUrl, timeout) {
   try {
@@ -185,6 +183,7 @@ async function browserDiagnostics(driver) {
     return await driver.execute(() => ({
       online: navigator.onLine,
       readyState: document.readyState,
+      origin: window.location.origin,
       pathname: window.location.pathname,
     }));
   } catch {
@@ -193,41 +192,46 @@ async function browserDiagnostics(driver) {
 }
 
 async function navigateToPage(driver, pageUrl, timeout) {
-  const expectedPath = new URL(pageUrl).pathname.replace(/\/$/, "") || "/";
-  const onExpectedPath = async () => {
-    const pathname = await driver.execute(() =>
-      window.location.pathname.replace(/\/$/, "")
-    );
-    return (pathname || "/") === expectedPath;
-  };
-  // Safari on real devices occasionally swallows a navigation command
-  // outright (observed on Device Farm iPhones), so re-issue url() once if the
-  // pathname has not changed within half the budget.
-  await driver.url(pageUrl);
-  try {
-    await driver.waitUntil(onExpectedPath, {
-      timeout: Math.floor(timeout / 2),
-      interval: 2000,
-    });
-  } catch {
-    recordNavigationRetry();
-    console.warn(`navigation to ${expectedPath} did not start; retrying url()`);
-    await driver.url(pageUrl);
-    await driver.waitUntil(onExpectedPath, {
-      timeout: Math.floor(timeout / 2),
-      interval: 2000,
-      timeoutMsg: `browser never navigated to ${expectedPath} (after retry)`,
-    });
-  }
-  await waitForDocumentReady(driver, timeout);
+  const expectedUrl = new URL(pageUrl);
+  const expectedPath = expectedUrl.pathname.replace(/\/$/, "") || "/";
+  // In run 36099676558, /the-memes initialized its query parameters after
+  // Appium accepted /network, leaving Safari on the old document. These are
+  // independent direct-load checks, not tests of in-app route transitions.
+  // Verify the neutral document has committed before issuing the target once.
+  await driver.url("about:blank");
   await driver.waitUntil(
     async () =>
-      (await driver.execute(() => (document.body.innerText || "").trim()))
-        .length > 0,
+      await driver.execute(
+        () =>
+          window.location.href === "about:blank" &&
+          document.readyState === "complete"
+      ),
+    {
+      timeout,
+      interval: 500,
+      timeoutMsg: "previous document did not unload to about:blank",
+    }
+  );
+  await driver.url(pageUrl);
+  await driver.waitUntil(
+    async () => {
+      const state = await driver.execute(() => ({
+        origin: window.location.origin,
+        pathname: window.location.pathname.replace(/\/$/, "") || "/",
+        ready: document.readyState === "complete",
+        hasContent: Boolean(document.body?.innerText?.trim()),
+      }));
+      return (
+        state.origin === expectedUrl.origin &&
+        state.pathname === expectedPath &&
+        state.ready &&
+        state.hasContent
+      );
+    },
     {
       timeout,
       interval: 2000,
-      timeoutMsg: `${expectedPath} never rendered visible body content`,
+      timeoutMsg: `${expectedUrl.origin}${expectedPath} never loaded with visible body content`,
     }
   );
 }

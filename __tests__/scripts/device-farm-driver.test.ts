@@ -1,4 +1,6 @@
 /** @jest-environment node */
+import { runInNewContext } from "node:vm";
+
 const mockRemote = jest.fn();
 jest.mock("webdriverio", () => ({ remote: mockRemote }), { virtual: true });
 const {
@@ -110,6 +112,98 @@ describe("Device Farm browser startup and diagnostics", () => {
     await expect(
       openPage(driver, "https://6529.io", 100)
     ).rejects.toMatchObject({ code: "DEVICE_OFFLINE" });
+  });
+});
+
+describe("Device Farm direct-page isolation", () => {
+  type Page = { href: string; readyState: string; body: string | null };
+  const page = (
+    href: string,
+    body: string | null = "Rendered page",
+    readyState = "complete"
+  ): Page => ({ href, body, readyState });
+  const blank = page("about:blank", "");
+  const target = "https://6529.io/network";
+
+  function browser(observations: Page[]) {
+    const pending = [...observations];
+    let current = page("https://6529.io/the-memes");
+    const driver = {
+      url: jest.fn().mockResolvedValue(undefined),
+      execute: jest.fn(async (callback: () => unknown) =>
+        runInNewContext(`(${callback.toString()})()`, {
+          window: { location: new URL(current.href) },
+          document: {
+            readyState: current.readyState,
+            body: current.body === null ? null : { innerText: current.body },
+          },
+          navigator: { onLine: true },
+        })
+      ),
+      waitUntil: jest.fn(
+        async (
+          predicate: () => Promise<boolean>,
+          options: { timeoutMsg: string }
+        ) => {
+          while (pending.length) {
+            current = pending.shift()!;
+            if (await predicate()) return;
+          }
+          throw new Error(options.timeoutMsg);
+        }
+      ),
+    };
+    return driver;
+  }
+
+  it("waits for the old document to unload before issuing the destination once", async () => {
+    const driver = browser([
+      page("https://6529.io/the-memes?sort=age&sort_dir=asc"),
+      page("about:blank", "", "loading"),
+      blank,
+      page(target),
+    ]);
+    await openPage(driver, target, 100);
+    expect(driver.url.mock.calls).toEqual([["about:blank"], [target]]);
+    expect(driver.url.mock.invocationCallOrder[1]).toBeGreaterThan(
+      driver.execute.mock.invocationCallOrder[2]!
+    );
+    expect(driver.execute).toHaveBeenCalledTimes(5);
+  });
+
+  it("does not navigate onward if the old page survives the blank navigation", async () => {
+    const driver = browser([page("https://6529.io/the-memes?sort=age")]);
+    await expect(openPage(driver, target, 100)).rejects.toThrow(
+      "previous document did not unload"
+    );
+    expect(driver.url.mock.calls).toEqual([["about:blank"]]);
+  });
+
+  it.each([
+    ["old route", page("https://6529.io/the-memes")],
+    ["wrong origin", page("https://example.org/network")],
+    ["loading document", page(target, "Rendered page", "loading")],
+    ["empty body", page(target, "   ")],
+    ["missing body", page(target, null)],
+  ])("rejects %s without retrying the target", async (_name, observed) => {
+    const driver = browser([blank, observed as Page]);
+    await expect(openPage(driver, target, 100)).rejects.toMatchObject({
+      message: expect.stringContaining(
+        "never loaded with visible body content"
+      ),
+      deviceFarmDiagnostics: expect.objectContaining({ online: true }),
+    });
+    expect(driver.url.mock.calls).toEqual([["about:blank"], [target]]);
+  });
+
+  it("waits for a rendered destination and allows its query initialization", async () => {
+    const driver = browser([
+      blank,
+      page(target, null, "loading"),
+      page(`${target}/?view=all`),
+    ]);
+    await expect(openPage(driver, target, 100)).resolves.toBeUndefined();
+    expect(driver.url.mock.calls).toEqual([["about:blank"], [target]]);
   });
 });
 

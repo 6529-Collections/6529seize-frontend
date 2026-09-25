@@ -192,9 +192,12 @@ templating, not syntax. Device Farm rejects the braces with
   malformed, or recovered evidence even if Device Farm returns `PASSED`.
   The aggregate report then propagates that failure and the scheduled alerts;
   this is an incomplete-verification verdict, not an assertion of an app bug.
-- Web session/command retries and Mocha test retries are disabled. The existing
-  single retry for a swallowed Safari navigation is recorded; a recovered run
-  is shown as `passed-after-retry` and does not count as a clean workflow pass.
+- Web session/command, navigation, and Mocha test retries are disabled. Each
+  independent page check first loads and verifies `about:blank`, retiring the
+  previous page's scripts before requesting its destination once. Readiness
+  requires the expected origin/path, a complete document, and visible content
+  in the same observation. Recovered evidence is shown as `passed-after-retry`
+  and does not count as a clean workflow pass.
   Empty suites and skipped tests also fail. Native smoke and fuzz retain their
   existing behavior.
 - Deep inspection (per-device video, logcat, Appium server log) lives in the
@@ -224,9 +227,14 @@ attachment: XCUITest attempts attachment before applying that URL. See
 [XCUITest capabilities](https://appium.github.io/appium-xcuitest-driver/9.10/reference/capabilities/).
 
 The web suite navigates from the device before app assertions and records
-browser connectivity, pathname, and document readiness when navigation fails.
+browser connectivity, origin, pathname, and document readiness when navigation
+fails.
 `navigator.onLine: true` alone is not proof that production is reachable.
 Original navigation errors are preserved if diagnostic collection fails.
+The blank-document barrier isolates direct-load smoke checks from pending
+hydration or router effects on the previous page. These checks cover each
+destination and its interactions; they do not establish in-app link-transition
+reliability. A failed barrier or destination is reported without replaying it.
 
 After a startup change, validate it with ten fresh, sequential manual runs of
 the same branch head using `packs=web` and the same target. Each run must cover

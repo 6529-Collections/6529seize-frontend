@@ -66,6 +66,13 @@ customer artifacts for the Actions summary without extracting arbitrary ZIP
 contents. Missing evidence, known infrastructure failures, and recovered runs
 do not become clean passes. The native command is unchanged.
 
+Each web page check verifies a fully loaded `about:blank` document before
+requesting its target once. This isolates direct-load checks from the previous
+page's delayed router effects. Target readiness checks origin, pathname,
+document state, and visible content together. Navigation is not retried;
+timeouts preserve browser diagnostics. The same seven app assertions and
+long-press interaction remain required.
+
 ## Local development
 
 There is nothing device-specific to run locally — sessions require the Appium
