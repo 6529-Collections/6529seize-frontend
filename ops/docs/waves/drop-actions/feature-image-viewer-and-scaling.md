@@ -75,7 +75,7 @@ image resets this choice.
   reduce preview resolution to retain every frame within its output budget.
   GIFs that exceed processing limits fall back to a legacy preview, which may
   be static. The `GIF preview` label identifies GIF content; use `Play original
-GIF` in the viewer if the preview does not animate. The original loads only
+  GIF` in the viewer if the preview does not animate. The original loads only
   after that action and may use more bandwidth and device memory.
 - If loading the original fails, the viewer restores its preview, announces the
   failure, and lets you try again.

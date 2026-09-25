@@ -25,6 +25,7 @@ jest.mock("next/image", () => ({
 
 jest.mock("@/helpers/image.helpers", () => ({
   ...jest.requireActual("@/helpers/image.helpers"),
+  getScaledImageUri: (src: string) => `${src}?preview`,
   getAnimatedImagePreviewUri: (src: string) => `${src}?preview`,
   ImageScale: { AUTOx450: "AUTOx450", AUTOx1080: "AUTOx1080" },
 }));
