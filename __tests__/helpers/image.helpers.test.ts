@@ -78,3 +78,8 @@ describe("animation preserving previews", () => {
     );
   });
 });
+
+it("recognizes GIF paths in IPFS URLs without mistaking the CID for a filename", () => {
+  expect(isGifImageUrl("ipfs://bafyexample/art.GIF")).toBe(true);
+  expect(isGifImageUrl("ipfs://bafyexample?name=art.gif")).toBe(false);
+});

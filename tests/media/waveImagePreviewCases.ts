@@ -120,7 +120,9 @@ export function defineWaveImagePreviewTests() {
     ]);
     const firstFrame = await originalImage.screenshot();
     await expect.poll(() => originalImage.screenshot()).not.toEqual(firstFrame);
-    await page.getByRole("button", { name: "Return to preview" }).click();
+    await page
+      .getByRole("button", { name: "Stop original GIF and return to preview" })
+      .click();
     await expect(originalImage).toBeHidden();
     // A recovered preview must replace the error state without closing the
     // viewer, and navigation must reset the previous item's failed state.

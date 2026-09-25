@@ -1,5 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import {
+  StrictMode,
   createElement,
   createRef,
   forwardRef,
@@ -53,7 +54,11 @@ it("only loads the original after an explicit play action and can return to its 
     "src",
     source
   );
-  fireEvent.click(screen.getByRole("button", { name: "Return to preview" }));
+  fireEvent.click(
+    screen.getByRole("button", {
+      name: "Stop original GIF and return to preview",
+    })
+  );
   expect(screen.getByRole("img")).not.toHaveAttribute("src", source);
 });
 
@@ -93,4 +98,35 @@ it("does not offer GIF playback for ordinary images or unsafe schemes", () => {
   expect(
     screen.queryByRole("button", { name: "Play original GIF" })
   ).not.toBeInTheDocument();
+});
+
+it("retains keyboard focus and announces each failure in the persistent alert", () => {
+  render(
+    <StrictMode>
+      <ImageMediaModal {...props} />
+    </StrictMode>
+  );
+  const button = screen.getByRole("button", { name: "Play original GIF" });
+  const alert = screen.getByRole("alert");
+  button.focus();
+  for (let attempt = 0; attempt < 2; attempt++) {
+    fireEvent.click(button);
+    expect(button).toHaveAccessibleName(
+      "Stop original GIF and return to preview"
+    );
+    expect(alert).toBeEmptyDOMElement();
+    fireEvent.error(screen.getByAltText("Original GIF animation"));
+    expect(screen.getByRole("alert")).toBe(alert);
+    expect(alert).toHaveTextContent("Couldn't load the original GIF");
+    expect(button).toHaveFocus();
+  }
+});
+
+it("offers original playback for an IPFS GIF pathname", () => {
+  render(<ImageMediaModal {...props} src="ipfs://bafyexample/art.gif" />);
+  fireEvent.click(screen.getByRole("button", { name: "Play original GIF" }));
+  expect(screen.getByAltText("Original GIF animation")).toHaveAttribute(
+    "src",
+    "ipfs://bafyexample/art.gif"
+  );
 });

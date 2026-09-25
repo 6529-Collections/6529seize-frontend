@@ -8,7 +8,7 @@ Drop attachments and markdown images render inline in wave and DM threads.
 Clicking or tapping an image opens a modal viewer with zoom and quick actions.
 Attachment images use larger scaling in single-drop views than in thread cards.
 The viewer opens a scaled preview. For GIFs, choose **Play original GIF** to load
-the original animation, or **Return to preview** to unload it. Moving to another
+the original animation, or **Stop original GIF and return to preview** to unload it. Moving to another
 image resets this choice.
 
 ## Location in the Site
@@ -75,7 +75,7 @@ image resets this choice.
   reduce preview resolution to retain every frame within its output budget.
   GIFs that exceed processing limits fall back to a legacy preview, which may
   be static. The `GIF preview` label identifies GIF content; use `Play original
-  GIF` in the viewer if the preview does not animate. The original loads only
+GIF` in the viewer if the preview does not animate. The original loads only
   after that action and may use more bandwidth and device memory.
 - If loading the original fails, the viewer restores its preview, announces the
   failure, and lets you try again.
