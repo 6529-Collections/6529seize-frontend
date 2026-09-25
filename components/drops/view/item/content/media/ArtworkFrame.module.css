@@ -67,6 +67,24 @@
   min-width: 0;
 }
 
+@media (max-width: 1023.98px) {
+  /* Stacked homepage artwork owns its height; do not reserve a screen of space. */
+  .homeImageFrame [data-artwork-image-frame] {
+    width: 100%;
+    height: auto;
+    max-height: none;
+  }
+
+  .homeImageFrame [data-artwork-image-frame] img {
+    /* Override the shared image renderer's inline fill styles on mobile only. */
+    position: relative !important;
+    display: block;
+    width: 100% !important;
+    height: auto !important;
+    max-height: none !important;
+  }
+}
+
 @media (min-width: 1024px) {
   /* Only the details column contributes height to this grid row. */
   .homeImageFrame > div {
