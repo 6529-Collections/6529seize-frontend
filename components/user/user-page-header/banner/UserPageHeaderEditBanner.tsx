@@ -11,10 +11,8 @@ import CommonTabs from "@/components/utils/select/tabs/CommonTabs";
 import Button from "@/components/utils/button/Button";
 import type { ApiCreateOrUpdateProfileRequest } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import {
-  getAnimatedImagePreviewUri,
-  ImageScale,
-} from "@/helpers/image.helpers";
+import { ImageScale } from "@/helpers/image.helpers";
+import { getAnimatedImagePreviewUri } from "@/helpers/gif-preview.helpers";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import {
   getBannerColorValue,

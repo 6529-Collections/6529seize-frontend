@@ -2,13 +2,12 @@
 
 import { isAllowedOgImageSourceUrl } from "@/app/api/og-metadata/_lib/imageProxyPolicy";
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import {
   getAnimatedImagePreviewUri,
-  getScaledImageUri,
   isGifImageUrl,
   getLegacyGifPreviewUri,
-  ImageScale,
-} from "@/helpers/image.helpers";
+} from "@/helpers/gif-preview.helpers";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import Image, { type ImageProps } from "next/image";

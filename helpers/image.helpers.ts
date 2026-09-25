@@ -42,11 +42,7 @@ export function getScaledResolvedImageUri(
   if (extension.includes("?")) {
     extension = extension.slice(0, extension.indexOf("?"));
   }
-  if (
-    ["gif", "webp", "jpg", "jpeg", "png", "avif"].includes(
-      extension.toLowerCase()
-    )
-  ) {
+  if (["gif", "webp", "jpg", "jpeg", "png", "avif"].includes(extension.toLowerCase())) {
     return `${scalableUrl}${
       folder.length ? folder + "/" : ""
     }${scale}/${fileName}`;
@@ -56,33 +52,4 @@ export function getScaledResolvedImageUri(
 
 export function getScaledImageUri(url: string, scale: ImageScale): string {
   return getScaledResolvedImageUri(resolveIpfsUrlSync(url), scale);
-}
-
-/** Match the pathname, never a query parameter that happens to end in .gif. */
-export function isGifImageUrl(url: string): boolean {
-  try {
-    return new URL(url).pathname.toLowerCase().endsWith(".gif");
-  } catch {
-    return false;
-  }
-}
-
-/** Compatibility preview while the GIF worker rolls out or rejects an input. */
-export function getLegacyGifPreviewUri(url: string): string {
-  if (!SCALABLE_PREFIXES.some((prefix) => url.startsWith(prefix))) return url;
-  return url.replace(/(\/(?:AUTO|\d+)x(?:AUTO|\d+))_gifv2\//, "$1/");
-}
-
-/** Opt in for drop previews and banners; leave other image consumers unchanged. */
-export function getAnimatedImagePreviewUri(
-  url: string,
-  scale: ImageScale
-): string {
-  const scaled = getScaledImageUri(url, scale);
-  if (
-    !isGifImageUrl(url) ||
-    !SCALABLE_PREFIXES.some((prefix) => scaled.startsWith(prefix))
-  )
-    return scaled;
-  return scaled.replace(`/${scale}/`, `/${scale}_gifv2/`);
 }

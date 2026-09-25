@@ -1,7 +1,7 @@
 "use client";
 
 import { FallbackImage } from "@/components/common/FallbackImage";
-import { getLegacyGifPreviewUri } from "@/helpers/image.helpers";
+import { getLegacyGifPreviewUri } from "@/helpers/gif-preview.helpers";
 import { ACCEPTED_FORMATS_DISPLAY } from "./imageValidation";
 import { useImageUpload } from "./useImageUpload";
 

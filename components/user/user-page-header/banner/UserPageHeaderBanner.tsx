@@ -4,11 +4,11 @@ import { FallbackImage } from "@/components/common/FallbackImage";
 import { useState } from "react";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import PencilIcon from "@/components/utils/icons/PencilIcon";
+import { ImageScale } from "@/helpers/image.helpers";
 import {
   getAnimatedImagePreviewUri,
   getLegacyGifPreviewUri,
-  ImageScale,
-} from "@/helpers/image.helpers";
+} from "@/helpers/gif-preview.helpers";
 import {
   getBannerColorValue,
   getBannerImageUrl,
