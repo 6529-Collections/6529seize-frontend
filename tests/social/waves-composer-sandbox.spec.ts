@@ -141,7 +141,7 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
       page.getByRole("button", { name: "Select image" }).locator("img")
     ).toHaveAttribute("src", /\/__composer-sandbox\/pasted-image\.png$/);
     await expect(
-      page.locator('span[role="status"]').filter({ hasText: /Uploading image/i })
+      page.getByRole("status").filter({ hasText: /Uploading image/i })
     ).toHaveCount(0);
     expect(uploadStartCount).toBe(1);
 
