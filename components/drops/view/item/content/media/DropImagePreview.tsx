@@ -3,6 +3,11 @@
 import { isAllowedOgImageSourceUrl } from "@/app/api/og-metadata/_lib/imageProxyPolicy";
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
+import {
+  getAnimatedImagePreviewUri,
+  isGifImageUrl,
+  getLegacyGifPreviewUri,
+} from "@/helpers/gif-preview.helpers";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import Image, { type ImageProps } from "next/image";
@@ -13,7 +18,12 @@ export function getDropImagePreviewSources(src: string, scale: ImageScale) {
   // An IPFS gateway URL is still an original, even when resolving it changes
   // the URL string. Try bounded CDN copies before the guarded external proxy.
   const sources = [scale, ImageScale.AUTOx450]
-    .map((size) => getScaledImageUri(original, size))
+    .map((size) =>
+      isGifImageUrl(original)
+        ? getAnimatedImagePreviewUri(original, size)
+        : getScaledImageUri(original, size)
+    )
+    .flatMap((url) => [url, getLegacyGifPreviewUri(url)])
     .filter(
       (url, index, all) => url !== original && all.indexOf(url) === index
     );
