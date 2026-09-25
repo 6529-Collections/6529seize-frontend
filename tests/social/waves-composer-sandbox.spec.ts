@@ -137,9 +137,12 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
       page.getByRole("button", { name: "Select image" })
     ).toHaveCount(1);
     await expect.poll(() => uploadStartCount).toBe(1);
-    // Both wrappers are processed in the same paste. Let asynchronous upload
-    // starts settle before asserting that no second upload was queued.
-    await page.waitForTimeout(250);
+    await expect(
+      page.getByRole("button", { name: "Select image" }).locator("img")
+    ).toHaveAttribute("src", /\/__composer-sandbox\/pasted-image\.png$/);
+    await expect(
+      page.locator('span[role="status"]').filter({ hasText: /Uploading image/i })
+    ).toHaveCount(0);
     expect(uploadStartCount).toBe(1);
 
     await page.getByRole("button", { name: "Remove image" }).click();
@@ -847,7 +850,8 @@ async function installDropImageUploadFixture(
   onUploadStart: () => void
 ) {
   const sandboxApiOrigin = getSandboxApiOrigin(baseURL);
-  const uploadUrl = `${sandboxApiOrigin}/__composer-sandbox/image-upload`;
+  // Keep the mocked PUT same-origin so the browser can read its ETag.
+  const uploadUrl = new URL("/__composer-sandbox/image-upload", baseURL).href;
   const mediaUrl = `${sandboxApiOrigin}/__composer-sandbox/pasted-image.png`;
 
   await page.route("**/drop-media/multipart-upload**", async (route) => {
