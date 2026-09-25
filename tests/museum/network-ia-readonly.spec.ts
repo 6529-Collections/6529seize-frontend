@@ -193,9 +193,7 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
     }
   });
 
-  test("keeps hubs, active navigation, canonical work context, and media intent bounded", async ({
-    page,
-  }, testInfo) => {
+  test("keeps hub navigation, links, and geometry intact", async ({ page }) => {
     const hubRoutes = [
       ["/museum/network", null],
       ["/museum/network/collection", "Collection"],
@@ -213,7 +211,11 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
       await expectNoHorizontalOverflow(page);
       await expectNoDeadLinks(page);
     }
+  });
 
+  test("keeps home, Collection, and project media intact", async ({
+    page,
+  }, testInfo) => {
     await openRoute(page, "/museum/network");
     await expect(
       page
@@ -312,7 +314,11 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
     );
     await retainScreenshot(page, testInfo, "museum-network-projects");
     await expectNoHorizontalOverflow(page);
+  });
 
+  test("keeps artist and acquisition media stages consistent", async ({
+    page,
+  }, testInfo) => {
     await openRoute(page, "/museum/network/artists");
     const artistHrefs = await page
       .locator('a[href^="/museum/network/artists/"]')
@@ -336,7 +342,11 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
       0.01
     );
     await retainScreenshot(page, testInfo, "museum-network-acquisitions");
+  });
 
+  test("keeps canonical work status, context, and media intact", async ({
+    page,
+  }, testInfo) => {
     for (const [path, status] of [
       [
         "/museum/network/works/6529NM-W-0001",
@@ -438,7 +448,11 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
     ).toHaveCount(1);
     await retainScreenshot(page, testInfo, "museum-work-conflict-at-its-edges");
     await expectNoHorizontalOverflow(page);
+  });
 
+  test("keeps Keys and Gates acquisition media and records intact", async ({
+    page,
+  }, testInfo) => {
     await openRoute(page, "/museum/network/acquisitions/keys-and-gates");
     await expect(
       page.getByRole("heading", { name: "Keys and Gates", exact: true })
@@ -466,7 +480,11 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
       "museum-acquisition-keys-and-gates-gallery"
     );
     await expectNoHorizontalOverflow(page);
+  });
 
+  test("keeps Conflict at Its Edges acquisition media and records intact", async ({
+    page,
+  }, testInfo) => {
     await openRoute(page, "/museum/network/acquisitions/conflict-at-its-edges");
     await expect(
       page.getByRole("heading", {
@@ -493,9 +511,7 @@ test.describe("Museum public IA rendered contract @surface @readonly", () => {
       testInfo,
       "museum-acquisition-conflict-at-its-edges"
     );
-    await expect(
-      conflictWorksRegion.getByRole("figure").first()
-    ).toContainText(
+    await expect(conflictWorksRegion.getByRole("figure").first()).toContainText(
       "Patrolling the border between the Negev Desert and Jordan"
     );
     await expectImageLoadedAfterScroll(
