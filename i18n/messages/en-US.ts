@@ -4124,9 +4124,8 @@ export const EN_US_MESSAGES = {
   "drop.media.processingGeneric": "Processing media",
   "drop.media.loading": "Loading image",
   "drop.media.unavailable": "Image unavailable",
-  "drop.media.gifPreview": "GIF preview",
-  "drop.media.playOriginalGif": "Play original GIF",
-  "drop.media.showGifPreview": "Stop original GIF and return to preview",
+  "drop.media.viewOriginal": "View original",
+  "drop.media.viewOptimized": "View optimized",
   "drop.media.originalGifAlt": "Original GIF animation",
   "drop.media.originalGifFailed":
     "Couldn't load the original GIF. You can try again.",

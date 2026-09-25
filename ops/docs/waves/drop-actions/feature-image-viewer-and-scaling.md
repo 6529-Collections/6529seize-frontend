@@ -7,9 +7,10 @@ Parent: [Wave Drop Actions Index](README.md)
 Drop attachments and markdown images render inline in wave and DM threads.
 Clicking or tapping an image opens a modal viewer with zoom and quick actions.
 Attachment images use larger scaling in single-drop views than in thread cards.
-The viewer opens a scaled preview. For GIFs, choose **Play original GIF** to load
-the original animation, or **Stop original GIF and return to preview** to unload it. Moving to another
-image resets this choice.
+The viewer opens an optimized preview. For GIFs, the **HD** icon in the popup's
+top-right toolbar offers **View original**. Selecting it loads the original in
+the same viewer and highlights HD; **View optimized** switches back. Moving to
+another image resets this choice. Inline images have no HD control or GIF badge.
 
 ## Location in the Site
 
@@ -32,6 +33,7 @@ image resets this choice.
 4. Zoom the image and use modal controls:
    - `Open in Browser` opens the source URL in a new tab.
    - `Download` saves the source image.
+   - `HD` switches GIFs between original and optimized versions inside the popup.
    - `Full screen` enters browser fullscreen when supported and not in native app.
    - `Reset zoom` appears after zooming in.
    - `Close` exits the modal.
@@ -74,11 +76,12 @@ image resets this choice.
 - GIF previews use a versioned animation-preserving resize path. The worker can
   reduce preview resolution to retain every frame within its output budget.
   GIFs that exceed processing limits fall back to a legacy preview, which may
-  be static. The `GIF preview` label identifies GIF content; use `Play original
-  GIF` in the viewer if the preview does not animate. The original loads only
-  after that action and may use more bandwidth and device memory.
+  be static. Choose **View original** with the popup toolbar's HD icon if the
+  preview does not animate. The original loads only after that action and may
+  use more bandwidth and device memory.
 - If loading the original fails, the viewer restores its preview, announces the
-  failure, and lets you try again.
+  failure, and lets you try again. HD shows an error color and its tooltip
+  explains the failure; no playback controls or messages cover the artwork.
 - If a fullscreen request is denied or interrupted, the modal stays open and
   the other image actions continue to work.
 - If fullscreen is unavailable, users can still open the source in a new tab.

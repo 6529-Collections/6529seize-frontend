@@ -105,7 +105,17 @@ export function defineWaveImagePreviewTests() {
         path: path.resolve("tests/media/fixtures/animation.gif"),
       })
     );
-    await page.getByRole("button", { name: "Play original GIF" }).click();
+    const qualityToggle = page.getByRole("button", { name: "View original" });
+    await expect(qualityToggle).toHaveAttribute("title", "View original");
+    await expect(qualityToggle).toHaveAttribute("aria-pressed", "false");
+    const toggleBounds = await qualityToggle.boundingBox();
+    expect(toggleBounds).not.toBeNull();
+    expect(toggleBounds!.y).toBeLessThan(80);
+    expect(toggleBounds!.x).toBeGreaterThan(page.viewportSize()!.width - 240);
+    await qualityToggle.click();
+    await expect(
+      page.getByRole("button", { name: "View optimized" })
+    ).toHaveAttribute("aria-pressed", "true");
     const originalImage = page.getByRole("img", {
       name: "Original GIF animation",
     });
@@ -120,9 +130,7 @@ export function defineWaveImagePreviewTests() {
     ]);
     const firstFrame = await originalImage.screenshot();
     await expect.poll(() => originalImage.screenshot()).not.toEqual(firstFrame);
-    await page
-      .getByRole("button", { name: "Stop original GIF and return to preview" })
-      .click();
+    await page.getByRole("button", { name: "View optimized" }).click();
     await expect(originalImage).toBeHidden();
     // A recovered preview must replace the error state without closing the
     // viewer, and navigation must reset the previous item's failed state.
