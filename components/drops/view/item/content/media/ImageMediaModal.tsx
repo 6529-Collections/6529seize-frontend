@@ -7,7 +7,9 @@ import {
 import Button from "@/components/utils/button/Button";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import { ImageScale } from "@/helpers/image.helpers";
+import Image from "next/image";
+import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
+import { isGifImageUrl, ImageScale } from "@/helpers/image.helpers";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 import React, { useCallback, useState } from "react";
 import { createPortal } from "react-dom";
@@ -70,6 +72,15 @@ export function ImageMediaModal({
       }
     | undefined;
 }) {
+  const [originalState, setOriginalState] = useState({
+    src,
+    playing: false,
+    failed: false,
+  });
+  if (originalState.src !== src)
+    setOriginalState({ src, playing: false, failed: false });
+  const playingOriginal = originalState.src === src && originalState.playing;
+  const canPlayOriginal = isGifImageUrl(src) && /^(https?:|ipfs:)/i.test(src);
   const [zoomState, setZoomState] = useState({ src, isZoomed: false });
   if (zoomState.src !== src) setZoomState({ src, isZoomed: false });
   const isZoomed = zoomState.src === src && zoomState.isZoomed;
@@ -191,22 +202,46 @@ export function ImageMediaModal({
                     onClick={handleExpandedImageButtonClick}
                   >
                     {/* Drop media can come from arbitrary hosts outside Next image config. */}
-                    <DropImagePreview
-                      key={`${src}:${retry}`}
-                      ref={imageRef}
-                      onError={() => setFailedSource(src)}
-                      onLoad={() => setFailedSource(null)}
-                      originalSrc={src}
-                      imageScale={ImageScale.AUTOx1080}
-                      alt={t(DEFAULT_LOCALE, "drop.media.previewAlt")}
-                      fill
-                      sizes="95vw"
-                      style={{
-                        objectFit: "contain",
-                        objectPosition: "center",
-                        pointerEvents: "auto",
-                      }}
-                    />
+                    {playingOriginal ? (
+                      <Image
+                        key={`original-${src}`}
+                        ref={imageRef}
+                        src={resolveIpfsUrlSync(src)}
+                        alt={t(DEFAULT_LOCALE, "drop.media.originalGifAlt")}
+                        fill
+                        sizes="95vw"
+                        unoptimized
+                        onError={() =>
+                          setOriginalState({
+                            src,
+                            playing: false,
+                            failed: true,
+                          })
+                        }
+                        style={{
+                          objectFit: "contain",
+                          objectPosition: "center",
+                          pointerEvents: "auto",
+                        }}
+                      />
+                    ) : (
+                      <DropImagePreview
+                        key={`${src}:${retry}`}
+                        ref={imageRef}
+                        onError={() => setFailedSource(src)}
+                        onLoad={() => setFailedSource(null)}
+                        originalSrc={src}
+                        imageScale={ImageScale.AUTOx1080}
+                        alt={t(DEFAULT_LOCALE, "drop.media.previewAlt")}
+                        fill
+                        sizes="95vw"
+                        style={{
+                          objectFit: "contain",
+                          objectPosition: "center",
+                          pointerEvents: "auto",
+                        }}
+                      />
+                    )}
                   </button>
                 </TransformComponent>
               </div>
@@ -214,7 +249,38 @@ export function ImageMediaModal({
           </div>
         )}
       </TransformWrapper>
-      {previewUnavailable && (
+      {canPlayOriginal && (
+        <div className="tw-fixed tw-bottom-32 tw-left-1/2 tw-z-[1102] tw-flex tw-max-w-[80vw] -tw-translate-x-1/2 tw-flex-col tw-items-center tw-gap-2">
+          {originalState.src === src && originalState.failed && (
+            <p
+              role="alert"
+              className="tw-m-0 tw-rounded-lg tw-bg-iron-950 tw-p-2 tw-text-sm tw-text-iron-100"
+            >
+              {t(DEFAULT_LOCALE, "drop.media.originalGifFailed")}
+            </p>
+          )}
+          <Button
+            type="button"
+            variant="tertiary"
+            size="sm"
+            onClick={() =>
+              setOriginalState({
+                src,
+                playing: !playingOriginal,
+                failed: false,
+              })
+            }
+          >
+            {t(
+              DEFAULT_LOCALE,
+              playingOriginal
+                ? "drop.media.showGifPreview"
+                : "drop.media.playOriginalGif"
+            )}
+          </Button>
+        </div>
+      )}
+      {!playingOriginal && previewUnavailable && (
         <div className="tw-fixed tw-bottom-20 tw-left-1/2 tw-z-[1102] -tw-translate-x-1/2">
           <Button
             type="button"
@@ -273,7 +339,7 @@ export function ImageMediaModal({
         isDownloading={isDownloading}
         onFullscreen={onFullscreen}
         fullscreenTargetAvailable={
-          fullscreenTargetAvailable && !previewUnavailable
+          fullscreenTargetAvailable && (playingOriginal || !previewUnavailable)
         }
         onClose={onClose}
       />

@@ -97,6 +97,29 @@ export function defineWaveImagePreviewTests() {
     expect(requests.some((url) => url.includes("AUTOx1080"))).toBe(true);
     expect(requests.some((url) => url.includes("AUTOx450"))).toBe(true);
     expect(requests.filter((url) => originals.includes(url))).toEqual([]);
+    // Originals remain opt-in even when every generated preview fails.
+    await page.route(originals[1]!, (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: "image/png",
+        path: path.resolve("public/test-wave-icon.png"),
+      })
+    );
+    await page.getByRole("button", { name: "Play original GIF" }).click();
+    const originalImage = page.getByRole("img", {
+      name: "Original GIF animation",
+    });
+    await expect(originalImage).toHaveAttribute("src", originals[1]!);
+    await expect
+      .poll(() =>
+        originalImage.evaluate((img: HTMLImageElement) => img.naturalWidth)
+      )
+      .toBeGreaterThan(0);
+    expect(requests.filter((url) => originals.includes(url))).toEqual([
+      originals[1],
+    ]);
+    await page.getByRole("button", { name: "Return to preview" }).click();
+    await expect(originalImage).toBeHidden();
     // A recovered preview must replace the error state without closing the
     // viewer, and navigation must reset the previous item's failed state.
     await page.route(`${MEDIA_ROOT}**`, (route) =>
@@ -123,7 +146,9 @@ export function defineWaveImagePreviewTests() {
     await expect
       .poll(() => preview.evaluate((img: HTMLImageElement) => img.naturalWidth))
       .toBeGreaterThan(0);
-    expect(requests.filter((url) => originals.includes(url))).toEqual([]);
+    expect(requests.filter((url) => originals.includes(url))).toEqual([
+      originals[1],
+    ]);
     await expectNoHorizontalOverflow(page);
     await page.keyboard.press("Escape");
     await expect(page.getByTestId("image-gallery-counter")).toBeHidden();

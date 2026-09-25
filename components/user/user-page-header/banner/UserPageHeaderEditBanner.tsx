@@ -11,7 +11,10 @@ import CommonTabs from "@/components/utils/select/tabs/CommonTabs";
 import Button from "@/components/utils/button/Button";
 import type { ApiCreateOrUpdateProfileRequest } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
+import {
+  getAnimatedImagePreviewUri,
+  ImageScale,
+} from "@/helpers/image.helpers";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import {
   getBannerColorValue,
@@ -75,7 +78,7 @@ export default function UserPageHeaderEditBanner({
   const [bannerFile, setBannerFile] = useState<File | null>(null);
   const [bannerPreviewUrl, setBannerPreviewUrl] = useState<string | null>(
     initialBannerImageUrl
-      ? getScaledImageUri(initialBannerImageUrl, ImageScale.AUTOx800)
+      ? getAnimatedImagePreviewUri(initialBannerImageUrl, ImageScale.AUTOx800)
       : null
   );
   const [isSaving, setIsSaving] = useState(false);
@@ -89,7 +92,7 @@ export default function UserPageHeaderEditBanner({
 
     setBannerPreviewUrl(
       initialBannerImageUrl
-        ? getScaledImageUri(initialBannerImageUrl, ImageScale.AUTOx800)
+        ? getAnimatedImagePreviewUri(initialBannerImageUrl, ImageScale.AUTOx800)
         : null
     );
     return undefined;

@@ -6,7 +6,7 @@ import {
 } from "./DropImagePreview";
 import Button from "@/components/utils/button/Button";
 import { useDropImageGallery } from "@/components/drops/view/part/DropImageGalleryProvider";
-import { ImageScale } from "@/helpers/image.helpers";
+import { isGifImageUrl, ImageScale } from "@/helpers/image.helpers";
 import useCapacitor from "@/hooks/useCapacitor";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useInView } from "@/hooks/useInView";
@@ -339,6 +339,11 @@ function DropListItemContentMediaImageContent({
               handleIntrinsicImageError={handleIntrinsicImageError}
               handleError={handleError}
             />
+          )}
+          {isGifImageUrl(src) && (
+            <span className="tw-pointer-events-none tw-absolute tw-left-2 tw-top-2 tw-rounded tw-bg-iron-950/90 tw-px-2 tw-py-1 tw-text-xs tw-text-white">
+              {t(DEFAULT_LOCALE, "drop.media.gifPreview")}
+            </span>
           )}
           {unavailable && !disableModal && (
             <div className="tw-absolute tw-bottom-3 tw-left-1/2 tw-z-30 -tw-translate-x-1/2">

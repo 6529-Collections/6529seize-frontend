@@ -6492,6 +6492,7 @@
       "keywords": ["waves", "drop", "image", "viewer", "scaling", "zoom"],
       "facts": [
         "Drop images use scaled previews in feeds and the image viewer. A failed preview never automatically loads the full-size original.",
+        "GIF previews preserve animation when processing limits allow; a fallback preview may be static. Choose Play original GIF in the expanded viewer to load the original animation, and Return to preview to unload it. Moving to another image resets playback. If the original fails, the preview returns and you can try again.",
         "If no preview is available, the frame shows Preview unavailable. Thread images retry while uploads process; Retry or Retry preview can try again. Open in browser or Open in new tab and Download media deliberately access the original.",
         "Large GIFs may show a still preview when the animation exceeds the image resizer memory budget; the original animation remains available through the original-file actions.",
         "Use it when users ask how to inspect an image attached to a drop.",

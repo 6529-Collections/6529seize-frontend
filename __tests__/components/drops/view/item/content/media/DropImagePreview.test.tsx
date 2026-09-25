@@ -121,7 +121,7 @@ it("resets failed previews when the gallery source changes", () => {
   );
   expect(screen.getByAltText("Artwork")).toHaveAttribute(
     "src",
-    preview("AUTOx450").replace("file.jpg", "next.gif")
+    preview("AUTOx450_gifv2").replace("file.jpg", "next.gif")
   );
 });
 
@@ -151,3 +151,26 @@ it.each([
     expect(screen.queryByRole("img")).not.toBeInTheDocument();
   }
 );
+
+it("falls back from a rejected GIF animation to a legacy preview, never the original", () => {
+  const gif = original.replace("file.jpg", "artwork.gif");
+  render(
+    <DropImagePreview
+      originalSrc={gif}
+      imageScale={ImageScale.AUTOx450}
+      alt="GIF"
+      fill
+    />
+  );
+  expect(screen.getByAltText("GIF")).toHaveAttribute(
+    "src",
+    gif.replace("artwork.gif", "AUTOx450_gifv2/artwork.gif")
+  );
+  fireEvent.error(screen.getByAltText("GIF"));
+  expect(screen.getByAltText("GIF")).toHaveAttribute(
+    "src",
+    gif.replace("artwork.gif", "AUTOx450/artwork.gif")
+  );
+  fireEvent.error(screen.getByAltText("GIF"));
+  expect(screen.queryByRole("img")).not.toBeInTheDocument();
+});

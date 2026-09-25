@@ -1,6 +1,7 @@
 "use client";
 
-import Image from "next/image";
+import { FallbackImage } from "@/components/common/FallbackImage";
+import { getLegacyGifPreviewUri } from "@/helpers/image.helpers";
 import { ACCEPTED_FORMATS_DISPLAY } from "./imageValidation";
 import { useImageUpload } from "./useImageUpload";
 
@@ -36,8 +37,9 @@ export default function UserSettingsBannerImageInput({
         <div className="tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-3 tw-px-4">
           {imageToShow ? (
             <div className="tw-relative tw-h-40 tw-w-40">
-              <Image
-                src={imageToShow}
+              <FallbackImage
+                primarySrc={imageToShow}
+                fallbackSrc={getLegacyGifPreviewUri(imageToShow)}
                 alt="Banner preview"
                 fill
                 sizes="10rem"

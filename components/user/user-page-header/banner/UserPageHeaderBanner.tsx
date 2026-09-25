@@ -1,9 +1,14 @@
 "use client";
 
+import { FallbackImage } from "@/components/common/FallbackImage";
 import { useState } from "react";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import PencilIcon from "@/components/utils/icons/PencilIcon";
-import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
+import {
+  getAnimatedImagePreviewUri,
+  getLegacyGifPreviewUri,
+  ImageScale,
+} from "@/helpers/image.helpers";
 import {
   getBannerColorValue,
   getBannerImageUrl,
@@ -27,7 +32,7 @@ export default function UserPageHeaderBanner({
   const [isEditOpen, setIsEditOpen] = useState<boolean>(false);
   const bannerImageUrl = getBannerImageUrl(profile.banner1);
   const scaledBannerUrl = bannerImageUrl
-    ? getScaledImageUri(bannerImageUrl, ImageScale.AUTOx800)
+    ? getAnimatedImagePreviewUri(bannerImageUrl, ImageScale.AUTOx800)
     : null;
   const banner1Color = getBannerColorValue(profile.banner1) ?? defaultBanner1;
   const banner2Color = getBannerColorValue(profile.banner2) ?? defaultBanner2;
@@ -35,13 +40,14 @@ export default function UserPageHeaderBanner({
   return (
     <div className="tw-group tw-relative tw-z-10 tw-h-28 tw-w-full tw-overflow-hidden sm:tw-h-40 md:tw-h-52">
       {scaledBannerUrl ? (
-        <div
-          className="tw-absolute tw-inset-0 md:tw-opacity-80"
-          style={{
-            backgroundImage: `url(${scaledBannerUrl})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          }}
+        <FallbackImage
+          primarySrc={scaledBannerUrl}
+          fallbackSrc={getLegacyGifPreviewUri(scaledBannerUrl)}
+          alt=""
+          fill
+          sizes="100vw"
+          optimize={false}
+          className="tw-object-cover tw-object-center md:tw-opacity-80"
         />
       ) : (
         <div
