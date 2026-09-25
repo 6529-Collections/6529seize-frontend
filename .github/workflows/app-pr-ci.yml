@@ -1479,6 +1479,7 @@ jobs:
               --project="$MUSEUM_PROJECT" \
               --workers=1 \
               --retries=0 \
+              --trace=retain-on-failure \
               --max-failures=1 \
               2>&1 \
             | sed -u "s/^/[museum $MUSEUM_PROJECT gate] /" \

@@ -17,6 +17,16 @@ const COVERAGE = "__tests__/scripts/coverage-floor.test.ts";
 
 describe("filesystem contract selection", () => {
   it.each([
+    "tests/fixtures/museum-media/manifest.json",
+    "tests/fixtures/museum-media/6529NM-W-0029-2400.webp",
+    "public/museum/research/editorial/magnum/6529NM-W-0025-640.webp",
+  ])("checks retained Museum bytes when %s changes", (file) => {
+    expect(selectFileContractTests([file])).toContain(
+      "__tests__/playwright/localMuseumMedia.test.ts"
+    );
+  });
+
+  it.each([
     "components/waves/drops/WaveDropActions.tsx",
     "app/example/page.tsx",
     "components\\example\\Control.tsx",
