@@ -22,7 +22,10 @@ jest.mock("next/image", () => ({
   ),
 }));
 jest.mock("@/components/ipfs/IPFSContext", () => ({
-  resolveIpfsUrlSync: (src: string) => src,
+  resolveIpfsUrlSync: (src: string) =>
+    src.startsWith("ipfs://")
+      ? `https://ipfs-gateway.test/ipfs/${src.slice(7)}`
+      : src,
 }));
 jest.mock("react-zoom-pan-pinch", () => ({
   TransformWrapper: ({ children }: { children: () => ReactNode }) => children(),
@@ -127,6 +130,6 @@ it("offers original playback for an IPFS GIF pathname", () => {
   fireEvent.click(screen.getByRole("button", { name: "Play original GIF" }));
   expect(screen.getByAltText("Original GIF animation")).toHaveAttribute(
     "src",
-    "ipfs://bafyexample/art.gif"
+    "https://ipfs-gateway.test/ipfs/bafyexample/art.gif"
   );
 });

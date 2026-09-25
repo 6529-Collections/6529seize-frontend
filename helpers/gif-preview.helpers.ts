@@ -18,10 +18,21 @@ export function isGifImageUrl(url: string): boolean {
   }
 }
 
+function splitUrlSuffix(url: string) {
+  const index = url.search(/[?#]/);
+  return index < 0
+    ? { path: url, suffix: "" }
+    : { path: url.slice(0, index), suffix: url.slice(index) };
+}
+
 /** Compatibility preview while the GIF worker rolls out or rejects an input. */
 export function getLegacyGifPreviewUri(url: string): string {
   if (!SCALABLE_PREFIXES.some((prefix) => url.startsWith(prefix))) return url;
-  return url.replace(/(\/(?:AUTO|\d+)x(?:AUTO|\d+))_gifv2\//, "$1/");
+  const { path, suffix } = splitUrlSuffix(url);
+  return (
+    path.replace(/(\/(?:AUTO|\d+)x(?:AUTO|\d+))_gifv2(\/[^/]+)$/, "$1$2") +
+    suffix
+  );
 }
 
 /** Opt in for drop previews and banners; leave other image consumers unchanged. */
@@ -29,11 +40,17 @@ export function getAnimatedImagePreviewUri(
   url: string,
   scale: ImageScale
 ): string {
-  const scaled = getScaledImageUri(url, scale);
-  if (
-    !isGifImageUrl(url) ||
-    !SCALABLE_PREFIXES.some((prefix) => scaled.startsWith(prefix))
-  )
-    return scaled;
-  return scaled.replace(`/${scale}/`, `/${scale}_gifv2/`);
+  if (!isGifImageUrl(url)) return getScaledImageUri(url, scale);
+  const { path, suffix } = splitUrlSuffix(url);
+  const scaled = getScaledImageUri(path, scale);
+  if (!SCALABLE_PREFIXES.some((prefix) => scaled.startsWith(prefix)))
+    return getScaledImageUri(url, scale);
+  // Only version the resize segment immediately before the filename.
+  const filenameIndex = scaled.lastIndexOf("/");
+  return (
+    scaled.slice(0, filenameIndex) +
+    "_gifv2" +
+    scaled.slice(filenameIndex) +
+    suffix
+  );
 }

@@ -42,6 +42,40 @@ describe("animation preserving previews", () => {
       false
     );
   });
+
+  it.each(["AUTOx800", "AUTOx800_gifv2"])(
+    "preserves the parent folder %s while changing only the derivative segment",
+    (folder) => {
+      const base = `https://d3lqz0a4bldqgf.cloudfront.net/drops/author/${folder}/`;
+      const suffix = "?redirect=/AUTOx800_gifv2/art.gif&token=a%2Fb#preview/path";
+      const preview = getAnimatedImagePreviewUri(
+        `${base}art.gif${suffix}`,
+        ImageScale.AUTOx800
+      );
+      expect(preview).toBe(`${base}AUTOx800_gifv2/art.gif${suffix}`);
+      expect(getLegacyGifPreviewUri(preview)).toBe(
+        `${base}AUTOx800/art.gif${suffix}`
+      );
+    }
+  );
+
+  it("does not remove a version marker from an ordinary parent folder or query", () => {
+    const url =
+      "https://d3lqz0a4bldqgf.cloudfront.net/drops/AUTOx800_gifv2/author/art.gif?path=/AUTOx800_gifv2/art.gif";
+    expect(getLegacyGifPreviewUri(url)).toBe(url);
+  });
+
+  it("preserves fragment-only GIF URLs and external GIF query strings", () => {
+    const base = "https://d3lqz0a4bldqgf.cloudfront.net/drops/author/";
+    expect(
+      getAnimatedImagePreviewUri(`${base}art.gif#frame/1`, ImageScale.AUTOx800)
+    ).toBe(`${base}AUTOx800_gifv2/art.gif#frame/1`);
+    const external = "ipfs://bafyexample/art.gif?path=/AUTOx800/a.gif#preview";
+    expect(getAnimatedImagePreviewUri(external, ImageScale.AUTOx800)).toBe(
+      "https://ipfs-gateway.test/ipfs/bafyexample/art.gif?path=/AUTOx800/a.gif#preview"
+    );
+    expect(getLegacyGifPreviewUri(external)).toBe(external);
+  });
 });
 
 it("recognizes GIF paths in IPFS URLs without mistaking the CID for a filename", () => {
