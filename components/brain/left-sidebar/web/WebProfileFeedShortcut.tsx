@@ -2,12 +2,13 @@
 
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { SidebarIconTile } from "../waves/SidebarIconTile";
+import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import Link from "next/link";
 import React from "react";
 
 export const PROFILE_FEED_TOOLTIP_ID = "profile-feed-shortcut-tooltip";
-
-const PROFILE_FEED_LABEL = "Profile Waves Feed";
 
 function MasonryGridIcon() {
   return (
@@ -59,10 +60,20 @@ export function WebProfileFeedShortcut({
   readonly isCollapsed: boolean;
 }) {
   const { activeWave } = useMyStream();
-  const isActive = activeWave.id === null;
+  const locale = useBrowserLocale();
+  const isMobileLayoutViewport = useIsMobileLayoutViewport();
+  const href = isMobileLayoutViewport
+    ? `${basePath}?view=profile-feed`
+    : basePath;
+  const isActive = activeWave.id === null && !isMobileLayoutViewport;
+  const profileFeedLabel = t(locale, "waves.mobile.profileFeed.title");
 
   const handleClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
-    if (event.defaultPrevented || isModifiedClick(event)) {
+    if (
+      isMobileLayoutViewport ||
+      event.defaultPrevented ||
+      isModifiedClick(event)
+    ) {
       return;
     }
 
@@ -80,14 +91,14 @@ export function WebProfileFeedShortcut({
         }`}
       >
         <Link
-          href={basePath}
+          href={href}
           prefetch={false}
           onClick={handleClick}
-          aria-label={PROFILE_FEED_LABEL}
+          aria-label={profileFeedLabel}
           aria-current={isActive ? "page" : undefined}
           className="tw-flex tw-items-center tw-justify-center tw-no-underline"
           data-tooltip-id={PROFILE_FEED_TOOLTIP_ID}
-          data-tooltip-content={PROFILE_FEED_LABEL}
+          data-tooltip-content={profileFeedLabel}
         >
           <ProfileFeedAvatar isActive={isActive} />
         </Link>
@@ -104,7 +115,7 @@ export function WebProfileFeedShortcut({
       }`}
     >
       <Link
-        href={basePath}
+        href={href}
         prefetch={false}
         onClick={handleClick}
         aria-current={isActive ? "page" : undefined}
@@ -116,7 +127,7 @@ export function WebProfileFeedShortcut({
       >
         <ProfileFeedAvatar isActive={isActive} />
         <div className="tw-min-w-0 tw-flex-1">
-          <div className="tw-truncate tw-text-sm">{PROFILE_FEED_LABEL}</div>
+          <div className="tw-truncate tw-text-sm">{profileFeedLabel}</div>
         </div>
       </Link>
     </div>
