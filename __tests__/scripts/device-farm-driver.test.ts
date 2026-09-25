@@ -1,0 +1,373 @@
+/** @jest-environment node */
+import { runInNewContext } from "node:vm";
+
+const mockRemote = jest.fn();
+jest.mock("webdriverio", () => ({ remote: mockRemote }), { virtual: true });
+const {
+  openPage,
+  startWebSession,
+  startNativeAndroidSession,
+} = require("../../tests/device-farm/lib/driver.cjs");
+const {
+  classifyFailure,
+  summarizeResult,
+} = require("../../tests/device-farm/lib/result.cjs");
+
+describe("Device Farm browser startup and diagnostics", () => {
+  const originalEnv = { ...process.env };
+  const safariPage = {
+    id: "WEBVIEW_726.1",
+    bundleId: "com.apple.mobilesafari",
+    url: "https://staging.6529.io/",
+  };
+  function safariDriver() {
+    return {
+      execute: jest.fn().mockResolvedValue(undefined),
+      getContexts: jest.fn().mockResolvedValue([safariPage]),
+      switchContext: jest.fn().mockResolvedValue(undefined),
+      deleteSession: jest.fn().mockResolvedValue(undefined),
+      waitUntil: jest.fn(
+        async (
+          predicate: () => Promise<boolean>,
+          options: { timeoutMsg: string }
+        ) => {
+          for (let observation = 0; observation < 3; observation += 1) {
+            if (await predicate()) return;
+          }
+          throw new Error(options.timeoutMsg);
+        }
+      ),
+    };
+  }
+  beforeEach(() => {
+    jest.clearAllMocks();
+    process.env = { ...originalEnv, TARGET_URL: "https://staging.6529.io" };
+    delete process.env["DEVICEFARM_DEVICE_OS_VERSION"];
+    mockRemote.mockResolvedValue(safariDriver());
+  });
+  afterAll(() => {
+    process.env = originalEnv;
+  });
+
+  it.each(["16.4", "18.6.2", "26.0"])(
+    "launches Safari natively before opening and attaching its page on iOS %s",
+    async (version) => {
+      process.env["DEVICEFARM_DEVICE_PLATFORM_NAME"] = "iOS";
+      process.env["DEVICEFARM_DEVICE_OS_VERSION"] = version;
+      const driver = await startWebSession();
+      expect(mockRemote).toHaveBeenCalledWith(
+        expect.objectContaining({
+          connectionRetryCount: 0,
+          capabilities: expect.objectContaining({
+            "appium:bundleId": "com.apple.mobilesafari",
+            "appium:autoWebview": false,
+            "appium:includeSafariInWebviews": true,
+            "appium:fullContextList": true,
+            "appium:webviewConnectTimeout": 30000,
+          }),
+        })
+      );
+      const { capabilities } = mockRemote.mock.calls[0][0];
+      expect(capabilities).not.toHaveProperty("browserName");
+      expect(capabilities).not.toHaveProperty("appium:initialDeeplinkUrl");
+      expect(driver.execute.mock.calls).toEqual([
+        [
+          "mobile: deepLink",
+          {
+            url: "https://staging.6529.io/",
+            bundleId: "com.apple.mobilesafari",
+          },
+        ],
+      ]);
+      expect(driver.switchContext.mock.calls).toEqual([[safariPage.id]]);
+      expect(driver.getContexts.mock.invocationCallOrder[0]).toBeGreaterThan(
+        driver.execute.mock.invocationCallOrder[0]
+      );
+      expect(driver.switchContext.mock.invocationCallOrder[0]).toBeGreaterThan(
+        driver.getContexts.mock.invocationCallOrder[0]
+      );
+    }
+  );
+
+  it.each(["16.3", "15.8", "", "unknown"])(
+    "does not send an unsupported launch capability on iOS %s",
+    async (version) => {
+      process.env["DEVICEFARM_DEVICE_PLATFORM_NAME"] = "iOS";
+      process.env["DEVICEFARM_DEVICE_OS_VERSION"] = version;
+      await startWebSession();
+      expect(mockRemote.mock.calls[0][0].capabilities).not.toHaveProperty(
+        "appium:initialDeeplinkUrl"
+      );
+      expect(mockRemote.mock.calls[0][0].capabilities.browserName).toBe(
+        "Safari"
+      );
+    }
+  );
+
+  it("waits for native launch completion before opening the page", async () => {
+    process.env["DEVICEFARM_DEVICE_PLATFORM_NAME"] = "iOS";
+    process.env["DEVICEFARM_DEVICE_OS_VERSION"] = "16.4";
+    const driver = safariDriver();
+    let finishLaunch!: (value: typeof driver) => void;
+    mockRemote.mockReturnValue(
+      new Promise((resolve) => {
+        finishLaunch = resolve;
+      })
+    );
+    const session = startWebSession();
+    await Promise.resolve();
+    expect(driver.execute).not.toHaveBeenCalled();
+    finishLaunch(driver);
+    await expect(session).resolves.toBe(driver);
+    expect(mockRemote).toHaveBeenCalledTimes(1);
+  });
+
+  it("waits for the target Safari context rather than attaching another tab or app", async () => {
+    process.env["DEVICEFARM_DEVICE_PLATFORM_NAME"] = "iOS";
+    process.env["DEVICEFARM_DEVICE_OS_VERSION"] = "16.4";
+    const driver = safariDriver();
+    driver.getContexts
+      .mockResolvedValueOnce([
+        "NATIVE_APP",
+        { ...safariPage, url: "about:blank" },
+      ])
+      .mockResolvedValueOnce([
+        { ...safariPage, bundleId: "another.app" },
+        { ...safariPage, url: "https://other.example/" },
+        { ...safariPage, url: "https://staging.6529.io/network" },
+        { ...safariPage, url: "invalid" },
+      ])
+      .mockResolvedValueOnce([
+        { ...safariPage, url: `${safariPage.url}?view=latest` },
+      ]);
+    mockRemote.mockResolvedValue(driver);
+    await expect(startWebSession()).resolves.toBe(driver);
+    expect(driver.getContexts).toHaveBeenCalledTimes(3);
+    expect(driver.execute).toHaveBeenCalledTimes(1);
+    expect(driver.switchContext.mock.calls).toEqual([[safariPage.id]]);
+  });
+
+  it.each(["execute", "getContexts", "switchContext"] as const)(
+    "preserves %s failure and cleans up without recreating the session",
+    async (method) => {
+      process.env["DEVICEFARM_DEVICE_PLATFORM_NAME"] = "iOS";
+      process.env["DEVICEFARM_DEVICE_OS_VERSION"] = "16.4";
+      const driver = safariDriver();
+      const error = new Error(`${method} failed`);
+      driver[method].mockRejectedValue(error);
+      driver.deleteSession.mockRejectedValue(new Error("cleanup failed"));
+      mockRemote.mockResolvedValue(driver);
+      await expect(startWebSession()).rejects.toBe(error);
+      expect(driver.deleteSession).toHaveBeenCalledTimes(1);
+      expect(mockRemote).toHaveBeenCalledTimes(1);
+      expect(driver.execute).toHaveBeenCalledTimes(1);
+    }
+  );
+
+  it("fails and closes the session when the target page never appears", async () => {
+    process.env["DEVICEFARM_DEVICE_PLATFORM_NAME"] = "iOS";
+    process.env["DEVICEFARM_DEVICE_OS_VERSION"] = "16.4";
+    const driver = safariDriver();
+    driver.getContexts.mockResolvedValue([{ id: "NATIVE_APP" }]);
+    mockRemote.mockResolvedValue(driver);
+    await expect(startWebSession()).rejects.toThrow(
+      "Safari did not expose the target page context"
+    );
+    expect(driver.switchContext).not.toHaveBeenCalled();
+    expect(driver.deleteSession).toHaveBeenCalledTimes(1);
+    expect(driver.execute).toHaveBeenCalledTimes(1);
+    expect(mockRemote).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps Android and native capabilities separate", async () => {
+    process.env["DEVICEFARM_DEVICE_PLATFORM_NAME"] = "Android";
+    await startWebSession();
+    expect(mockRemote.mock.calls[0][0].capabilities.browserName).toBe("Chrome");
+    expect(mockRemote.mock.calls[0][0].capabilities).not.toHaveProperty(
+      "appium:initialDeeplinkUrl"
+    );
+    await startNativeAndroidSession();
+    expect(mockRemote.mock.calls[1][0].connectionRetryCount).toBe(2);
+    expect(mockRemote.mock.calls[1][0].capabilities).not.toHaveProperty(
+      "browserName"
+    );
+  });
+
+  it("preserves session startup failures instead of retrying outside the driver", async () => {
+    const error = new Error(
+      "The remote debugger did not return any connected web applications after 30154ms"
+    );
+    mockRemote.mockRejectedValue(error);
+    await expect(startWebSession()).rejects.toBe(error);
+    expect(mockRemote).toHaveBeenCalledTimes(1);
+    expect(classifyFailure(error)).toBe("safari-session-startup");
+  });
+
+  it("preserves disconnected navigation and captures device state", async () => {
+    const error = new Error("unknown error: net::ERR_INTERNET_DISCONNECTED");
+    const driver = {
+      url: jest.fn().mockRejectedValue(error),
+      execute: jest.fn().mockResolvedValue({ online: false }),
+    };
+    await expect(openPage(driver, "https://6529.io", 100)).rejects.toBe(error);
+    expect(classifyFailure(error)).toBe("device-connectivity");
+    expect(error).toHaveProperty("deviceFarmDiagnostics.online", false);
+    expect(driver.url).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not mask navigation errors when diagnostics also fail", async () => {
+    const error = new Error("navigation failed");
+    const driver = {
+      url: jest.fn().mockRejectedValue(error),
+      execute: jest.fn().mockRejectedValue(new Error("session lost")),
+    };
+    await expect(openPage(driver, "https://6529.io", 100)).rejects.toBe(error);
+    expect(error).toHaveProperty("deviceFarmDiagnostics.unavailable", true);
+    expect(classifyFailure(error)).toBe("test-failure");
+  });
+
+  it("detects explicit offline state even when navigation returns normally", async () => {
+    const driver = {
+      url: jest.fn().mockResolvedValue(undefined),
+      waitUntil: jest.fn().mockResolvedValue(undefined),
+      execute: jest.fn().mockResolvedValue({ online: false }),
+    };
+    await expect(
+      openPage(driver, "https://6529.io", 100)
+    ).rejects.toMatchObject({ code: "DEVICE_OFFLINE" });
+  });
+});
+
+describe("Device Farm direct-page isolation", () => {
+  type Page = { href: string; readyState: string; body: string | null };
+  const page = (
+    href: string,
+    body: string | null = "Rendered page",
+    readyState = "complete"
+  ): Page => ({ href, body, readyState });
+  const blank = page("about:blank", "");
+  const target = "https://6529.io/network";
+
+  function browser(observations: Page[]) {
+    const pending = [...observations];
+    let current = page("https://6529.io/the-memes");
+    const driver = {
+      url: jest.fn().mockResolvedValue(undefined),
+      execute: jest.fn(async (callback: () => unknown) =>
+        runInNewContext(`(${callback.toString()})()`, {
+          window: { location: new URL(current.href) },
+          document: {
+            readyState: current.readyState,
+            body: current.body === null ? null : { innerText: current.body },
+          },
+          navigator: { onLine: true },
+        })
+      ),
+      waitUntil: jest.fn(
+        async (
+          predicate: () => Promise<boolean>,
+          options: { timeoutMsg: string }
+        ) => {
+          while (pending.length) {
+            current = pending.shift()!;
+            if (await predicate()) return;
+          }
+          throw new Error(options.timeoutMsg);
+        }
+      ),
+    };
+    return driver;
+  }
+
+  it("waits for the old document to unload before issuing the destination once", async () => {
+    const driver = browser([
+      page("https://6529.io/the-memes?sort=age&sort_dir=asc"),
+      page("about:blank", "", "loading"),
+      blank,
+      page(target),
+    ]);
+    await openPage(driver, target, 100);
+    expect(driver.url.mock.calls).toEqual([["about:blank"], [target]]);
+    expect(driver.url.mock.invocationCallOrder[1]).toBeGreaterThan(
+      driver.execute.mock.invocationCallOrder[2]!
+    );
+    expect(driver.execute).toHaveBeenCalledTimes(5);
+  });
+
+  it("does not navigate onward if the old page survives the blank navigation", async () => {
+    const driver = browser([page("https://6529.io/the-memes?sort=age")]);
+    await expect(openPage(driver, target, 100)).rejects.toThrow(
+      "previous document did not unload"
+    );
+    expect(driver.url.mock.calls).toEqual([["about:blank"]]);
+  });
+
+  it.each([
+    ["old route", page("https://6529.io/the-memes")],
+    ["wrong origin", page("https://example.org/network")],
+    ["loading document", page(target, "Rendered page", "loading")],
+    ["empty body", page(target, "   ")],
+    ["missing body", page(target, null)],
+  ])("rejects %s without retrying the target", async (_name, observed) => {
+    const driver = browser([blank, observed as Page]);
+    await expect(openPage(driver, target, 100)).rejects.toMatchObject({
+      message: expect.stringContaining(
+        "never loaded with visible body content"
+      ),
+      deviceFarmDiagnostics: expect.objectContaining({ online: true }),
+    });
+    expect(driver.url.mock.calls).toEqual([["about:blank"], [target]]);
+  });
+
+  it("waits for a rendered destination and allows its query initialization", async () => {
+    const driver = browser([
+      blank,
+      page(target, null, "loading"),
+      page(`${target}/?view=all`),
+    ]);
+    await expect(openPage(driver, target, 100)).resolves.toBeUndefined();
+    expect(driver.url.mock.calls).toEqual([["about:blank"], [target]]);
+  });
+});
+
+describe("Device Farm evidence classifications", () => {
+  const passed = { total: 7, passes: 7, pending: 0, failures: [], retries: 0 };
+  it("requires every selected test to execute without recovery", () => {
+    expect(summarizeResult(passed).outcome).toBe("passed");
+    expect(summarizeResult({ ...passed, passes: 6, pending: 1 }).outcome).toBe(
+      "tests-not-run"
+    );
+    expect(summarizeResult({ ...passed, passes: 6 }).notRun).toBe(1);
+    expect(summarizeResult({ ...passed, retries: 1 }).outcome).toBe(
+      "passed-after-retry"
+    );
+    expect(summarizeResult({ ...passed, total: 0, passes: 0 }).outcome).toBe(
+      "tests-not-run"
+    );
+  });
+  it("distinguishes a failed setup hook from an app assertion failure", () => {
+    const setup = summarizeResult({
+      ...passed,
+      passes: 0,
+      failures: [{ hook: true, kind: "safari-session-startup" }],
+    });
+    expect(setup).toMatchObject({
+      outcome: "infrastructure-failure",
+      notRun: 7,
+    });
+    const app = summarizeResult({
+      ...passed,
+      passes: 6,
+      failures: [{ hook: false, kind: "test-failure" }],
+    });
+    expect(app).toMatchObject({ outcome: "test-failure", notRun: 0 });
+    expect(
+      classifyFailure(
+        new Error("long-press did not open the wave action sheet")
+      )
+    ).toBe("test-failure");
+    expect(classifyFailure(new Error("net::ERR_NAME_NOT_RESOLVED"))).toBe(
+      "test-failure"
+    );
+  });
+});

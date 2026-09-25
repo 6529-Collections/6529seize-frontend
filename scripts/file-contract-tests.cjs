@@ -9,8 +9,21 @@ const fs = require("node:fs");
 // deployment/agent-file contract lanes continue to own their selected suites.
 const CONTRACTS = [
   {
+    test: "__tests__/playwright/localMuseumMedia.test.ts",
+    inputs: [
+      /^tests\/fixtures\/museum-media\//u,
+      /^public\/museum\/research\/editorial\/magnum\//u,
+      /^tests\/support\/localMuseumMedia\.ts$/u,
+    ],
+  },
+  {
     test: "__tests__/scripts/device-farm-workflow.test.ts",
-    inputs: [/^\.github\/workflows\/device-farm-qa\.yml$/u],
+    inputs: [
+      /^\.github\/workflows\/device-farm-qa\.yml$/u,
+      /^scripts\/device-farm-report\.py$/u,
+      /^scripts\/__tests__\/device_farm_report_test\.py$/u,
+      /^tests\/device-farm\//u,
+    ],
   },
   {
     test: "__tests__/scripts/production-canary-workflow.test.ts",
