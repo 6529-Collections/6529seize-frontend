@@ -74,9 +74,15 @@ attach to an old tab. Failed attachment closes the session without retrying;
 Xcode output is included in the Appium log. Older/unknown iOS versions retain
 the default Safari session path.
 
-Each web page check verifies a fully loaded `about:blank` document before
-requesting its target once. This isolates direct-load checks from the previous
-page's delayed router effects. Target readiness checks origin, pathname,
+Each Android web page check creates a fresh blank tab through W3C `createWindow`,
+closes the previous tab, verifies it is gone, and switches to the new handle.
+Safari continues navigating the current tab to `about:blank`. Both paths verify
+the blank document before requesting the target once. Android no longer depends
+on the old document accepting navigation away: the A15 acknowledged that command
+but stayed on Memes for 90 seconds in run `36431891530`. A tab-command failure is
+terminal; no fallback, retry, or replacement session is attempted. Cookies and
+local storage remain shared; session storage starts fresh with each tab.
+Target readiness checks origin, pathname,
 document state, and visible content together. Navigation is not retried;
 timeouts preserve browser diagnostics. The same seven app assertions and
 long-press interaction remain required.

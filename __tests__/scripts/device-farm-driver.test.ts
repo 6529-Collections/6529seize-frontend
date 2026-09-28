@@ -43,7 +43,11 @@ describe("Device Farm browser startup and diagnostics", () => {
   }
   beforeEach(() => {
     jest.clearAllMocks();
-    process.env = { ...originalEnv, TARGET_URL: "https://staging.6529.io" };
+    process.env = {
+      ...originalEnv,
+      TARGET_URL: "https://staging.6529.io",
+      DEVICEFARM_DEVICE_PLATFORM_NAME: "iOS",
+    };
     delete process.env["DEVICEFARM_DEVICE_OS_VERSION"];
     mockRemote.mockResolvedValue(safariDriver());
   });
@@ -259,6 +263,17 @@ describe("Device Farm browser startup and diagnostics", () => {
 });
 
 describe("Device Farm direct-page isolation", () => {
+  const originalPlatform = process.env["DEVICEFARM_DEVICE_PLATFORM_NAME"];
+  beforeEach(() => {
+    process.env["DEVICEFARM_DEVICE_PLATFORM_NAME"] = "iOS";
+  });
+  afterEach(() => {
+    if (originalPlatform === undefined) {
+      delete process.env["DEVICEFARM_DEVICE_PLATFORM_NAME"];
+    } else {
+      process.env["DEVICEFARM_DEVICE_PLATFORM_NAME"] = originalPlatform;
+    }
+  });
   type Page = { href: string; readyState: string; body: string | null };
   const page = (
     href: string,
@@ -298,6 +313,123 @@ describe("Device Farm direct-page isolation", () => {
     };
     return driver;
   }
+
+  function androidBrowser(observations: Page[] = [blank, page(target)]) {
+    process.env["DEVICEFARM_DEVICE_PLATFORM_NAME"] = "Android";
+    return {
+      ...browser(observations),
+      getWindowHandle: jest.fn().mockResolvedValue("old-memes"),
+      createWindow: jest
+        .fn()
+        .mockResolvedValue({ handle: "fresh", type: "tab" }),
+      switchToWindow: jest.fn().mockResolvedValue(undefined),
+      closeWindow: jest.fn().mockResolvedValue(["fresh"]),
+    };
+  }
+
+  it("retires Android's old tab before navigating the fresh blank tab once", async () => {
+    const driver = androidBrowser();
+    await openPage(driver, target, 100);
+    expect(driver.createWindow.mock.calls).toEqual([["tab"]]);
+    expect(driver.switchToWindow.mock.calls).toEqual([
+      ["old-memes"],
+      ["fresh"],
+    ]);
+    expect(driver.closeWindow).toHaveBeenCalledTimes(1);
+    expect(driver.closeWindow.mock.invocationCallOrder[0]).toBeGreaterThan(
+      driver.switchToWindow.mock.invocationCallOrder[0]!
+    );
+    expect(driver.switchToWindow.mock.invocationCallOrder[1]).toBeGreaterThan(
+      driver.closeWindow.mock.invocationCallOrder[0]!
+    );
+    expect(driver.execute.mock.invocationCallOrder[0]).toBeGreaterThan(
+      driver.switchToWindow.mock.invocationCallOrder[1]!
+    );
+    expect(driver.url.mock.calls).toEqual([[target]]);
+    expect(driver.url.mock.invocationCallOrder[0]).toBeGreaterThan(
+      driver.execute.mock.invocationCallOrder[0]!
+    );
+  });
+
+  it.each([
+    "getWindowHandle",
+    "createWindow",
+    "switchToWindow",
+    "closeWindow",
+  ] as const)(
+    "preserves Android %s errors without retry or destination navigation",
+    async (method) => {
+      const driver = androidBrowser();
+      const error = new Error(`${method} failed`);
+      driver[method].mockRejectedValueOnce(error);
+      await expect(openPage(driver, target, 100)).rejects.toBe(error);
+      expect(error).toHaveProperty(
+        "deviceFarmDiagnostics.navigationStage",
+        "tab-isolation"
+      );
+      expect(driver[method]).toHaveBeenCalledTimes(1);
+      expect(driver.url).not.toHaveBeenCalled();
+    }
+  );
+
+  it("does not navigate when switching to the fresh Android tab fails", async () => {
+    const driver = androidBrowser();
+    const error = new Error("fresh tab unavailable");
+    driver.switchToWindow
+      .mockResolvedValueOnce(undefined)
+      .mockRejectedValueOnce(error);
+    await expect(openPage(driver, target, 100)).rejects.toBe(error);
+    expect(driver.createWindow).toHaveBeenCalledTimes(1);
+    expect(driver.closeWindow).toHaveBeenCalledTimes(1);
+    expect(driver.url).not.toHaveBeenCalled();
+  });
+
+  it.each(["", "old-memes"])(
+    "rejects an invalid new Android handle %s",
+    async (handle) => {
+      const driver = androidBrowser();
+      driver.createWindow.mockResolvedValue({ handle, type: "tab" });
+      await expect(openPage(driver, target, 100)).rejects.toThrow(
+        "distinct tab"
+      );
+      expect(driver.closeWindow).not.toHaveBeenCalled();
+      expect(driver.url).not.toHaveBeenCalled();
+    }
+  );
+
+  it.each([{ handles: ["old-memes", "fresh"] }, { handles: [] }])(
+    "rejects incomplete Android tab retirement $handles",
+    async ({ handles }) => {
+      const driver = androidBrowser();
+      driver.closeWindow.mockResolvedValue(handles);
+      await expect(openPage(driver, target, 100)).rejects.toThrow(
+        "retire the previous tab"
+      );
+      expect(driver.switchToWindow.mock.calls).toEqual([["old-memes"]]);
+      expect(driver.url).not.toHaveBeenCalled();
+    }
+  );
+
+  it("rejects a nonblank fresh Android tab without issuing the destination", async () => {
+    const driver = androidBrowser([page("https://6529.io/the-memes")]);
+    await expect(openPage(driver, target, 100)).rejects.toThrow(
+      "previous document did not unload"
+    );
+    expect(driver.url).not.toHaveBeenCalled();
+  });
+
+  it("preserves the first Android destination failure without creating another tab", async () => {
+    const driver = androidBrowser();
+    const error = new Error("destination navigation failed");
+    driver.url.mockRejectedValueOnce(error);
+    await expect(openPage(driver, target, 100)).rejects.toBe(error);
+    expect(error).toHaveProperty(
+      "deviceFarmDiagnostics.navigationStage",
+      "destination"
+    );
+    expect(driver.createWindow).toHaveBeenCalledTimes(1);
+    expect(driver.url.mock.calls).toEqual([[target]]);
+  });
 
   it("waits for the old document to unload before issuing the destination once", async () => {
     const driver = browser([

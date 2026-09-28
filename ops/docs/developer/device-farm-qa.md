@@ -204,8 +204,9 @@ templating, not syntax. Device Farm rejects the braces with
   The aggregate report then propagates that failure and the scheduled alerts;
   this is an incomplete-verification verdict, not an assertion of an app bug.
 - Web session/command, navigation, and Mocha test retries are disabled. Each
-  independent page check first loads and verifies `about:blank`, retiring the
-  previous page's scripts before requesting its destination once. Readiness
+  Android page check creates a blank tab and closes the preceding tab; Safari
+  navigates the current tab to `about:blank`. Both verify the blank document
+  before requesting the destination once. Readiness
   requires the expected origin/path, a complete document, and visible content
   in the same observation. Recovered evidence is shown as `passed-after-retry`
   and does not count as a clean workflow pass.
@@ -231,10 +232,24 @@ templating, not syntax. Device Farm rejects the braces with
 ### Android navigation readiness
 
 Android web sessions use the supported `pageLoadStrategy: none` capability.
-The harness then owns the readiness wait: commit the blank-document barrier,
+The harness then owns the readiness wait: create a fresh blank tab, close the
+preceding tab, verify its handle is gone, switch to the new tab, verify blankness,
 request the target once, and require its origin/path, complete document state,
 and visible body before assertions. This does not accept an interactive-only,
 empty, or wrong document and does not replay a failed navigation.
+
+[Run 36431891530](https://github.com/6529-Collections/6529seize-frontend/actions/runs/36431891530)
+broke a two-run streak at `47127c3255`: Samsung A15 passed six of seven tests.
+Chrome acknowledged `about:blank` in 103 ms but remained on Memes throughout
+the 90-second barrier wait; `/network` was never requested. Pixel, S24, and
+the iOS lane passed, and collection retained the evidence without errors.
+The new-tab path removes the preceding document instead of navigating it away.
+It uses W3C `createWindow("tab")`, not WebdriverIO's desktop-only `newWindow`
+helper. Tab creation, closure, and switching errors remain terminal. The fresh
+tab has no opener; cookies and local storage remain shared, while session storage
+starts fresh. This is document
+isolation for direct-load checks, not a claim about in-app transitions. Safari
+and native Android are unchanged, and fresh device validation is still required.
 
 [Run 36401855670](https://github.com/6529-Collections/6529seize-frontend/actions/runs/36401855670)
 failed only the Pixel 8 Memes check (six of seven assertions passed). The URL
@@ -279,12 +294,12 @@ browser connectivity, origin, pathname, and document readiness when navigation
 fails.
 `navigator.onLine: true` alone is not proof that production is reachable.
 Original navigation errors are preserved if diagnostic collection fails.
-The blank-document barrier isolates direct-load smoke checks from pending
-hydration or router effects on the previous page. These checks cover each
+The blank-document barrier (with tab replacement on Android) isolates direct-load
+smoke checks from pending hydration or router effects on the previous page. These checks cover each
 destination and its interactions; they do not establish in-app link-transition
 reliability. A failed barrier or destination is reported without replaying it.
 Navigation diagnostics record `navigationStage` (`target-validation`,
-`blank-document`, `destination`, or `connectivity`) and `requestedUrl` separately
+`tab-isolation`, `blank-document`, `destination`, or `connectivity`) and `requestedUrl` separately
 from the observed browser origin/path. A blank-document timeout therefore shows
 that the destination was never requested, even when the previous route remains
 visible or the diagnostic browser read fails. Focused driver tests inject this

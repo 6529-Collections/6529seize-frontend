@@ -263,6 +263,22 @@ async function browserDiagnostics(driver) {
   }
 }
 
+async function retirePreviousAndroidTab(driver) {
+  const previous = await driver.getWindowHandle();
+  // Use the W3C command: WebdriverIO's newWindow helper rejects mobile.
+  // Creating a tab does not navigate the old document or give it an opener.
+  const { handle } = await driver.createWindow("tab");
+  if (!handle || handle === previous) {
+    throw new Error("Chrome did not create a distinct tab");
+  }
+  await driver.switchToWindow(previous);
+  const remaining = await driver.closeWindow();
+  if (remaining.includes(previous) || !remaining.includes(handle)) {
+    throw new Error("Chrome did not retire the previous tab");
+  }
+  await driver.switchToWindow(handle);
+}
+
 async function navigateToPage(driver, pageUrl, timeout, navigation) {
   const expectedUrl = new URL(pageUrl);
   const expectedPath = expectedUrl.pathname.replace(/\/$/, "") || "/";
@@ -270,8 +286,16 @@ async function navigateToPage(driver, pageUrl, timeout, navigation) {
   // Appium accepted /network, leaving Safari on the old document. These are
   // independent direct-load checks, not tests of in-app route transitions.
   // Verify the neutral document has committed before issuing the target once.
+  if (isIos()) {
+    navigation.navigationStage = "blank-document";
+    await driver.url("about:blank");
+  } else {
+    // A15 acknowledged about:blank but stayed on Memes for 90s in run
+    // 36431891530. Remove the old browsing context before navigating once.
+    navigation.navigationStage = "tab-isolation";
+    await retirePreviousAndroidTab(driver);
+  }
   navigation.navigationStage = "blank-document";
-  await driver.url("about:blank");
   await driver.waitUntil(
     async () =>
       await driver.execute(
