@@ -429,7 +429,10 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await expect(
       composer.getByText("Nominating yourself: playwright", { exact: true })
     ).toBeVisible();
-    const editor = composer.locator('[contenteditable="true"]').first();
+    const editor = composer.getByRole("textbox", {
+      name: "Describe your wave",
+      exact: true,
+    });
     await editor.fill("Entry body in shared chat");
     const terms = composer.getByRole("checkbox", {
       name: "I agree to this competition’s terms.",
@@ -479,8 +482,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     ).toBeVisible();
     await page.getByRole("button", { name: "Next", exact: true }).click();
     await page
-      .locator('[contenteditable="true"]')
-      .last()
+      .getByRole("textbox", { name: "Describe your wave", exact: true })
       .fill("A shared chat with independently configured competitions.");
     await page.getByRole("button", { name: "Next", exact: true }).click();
     await page
