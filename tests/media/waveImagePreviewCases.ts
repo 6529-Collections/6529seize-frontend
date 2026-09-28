@@ -80,10 +80,12 @@ export function defineWaveImagePreviewTests() {
       });
       await waitForRouteReady(page);
       await dismissNextDevTools(page);
-      const inlineLoader = page.getByRole("status", {
-        name: "Loading image",
-        exact: true,
-      });
+      const inlineLoader = page
+        .getByRole("status", {
+          name: "Loading image",
+          exact: true,
+        })
+        .last();
       await expect(inlineLoader).toBeVisible();
       const alignment = await inlineLoader.evaluate((element) => {
         const frame = element.getBoundingClientRect();
