@@ -248,6 +248,12 @@ The blank-document barrier isolates direct-load smoke checks from pending
 hydration or router effects on the previous page. These checks cover each
 destination and its interactions; they do not establish in-app link-transition
 reliability. A failed barrier or destination is reported without replaying it.
+Navigation diagnostics record `navigationStage` (`target-validation`,
+`blank-document`, `destination`, or `connectivity`) and `requestedUrl` separately
+from the observed browser origin/path. A blank-document timeout therefore shows
+that the destination was never requested, even when the previous route remains
+visible or the diagnostic browser read fails. Focused driver tests inject this
+timeout; it is a failing scenario, not a pass required in the acceptance streak.
 
 Document readiness and nonempty body text do not guarantee that asynchronous
 content has rendered. In [run 36135706885](https://github.com/6529-Collections/6529seize-frontend/actions/runs/36135706885),

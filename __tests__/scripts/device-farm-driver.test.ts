@@ -225,6 +225,14 @@ describe("Device Farm browser startup and diagnostics", () => {
     };
     await expect(openPage(driver, "https://6529.io", 100)).rejects.toBe(error);
     expect(error).toHaveProperty("deviceFarmDiagnostics.unavailable", true);
+    expect(error).toHaveProperty(
+      "deviceFarmDiagnostics.navigationStage",
+      "blank-document"
+    );
+    expect(error).toHaveProperty(
+      "deviceFarmDiagnostics.requestedUrl",
+      "https://6529.io"
+    );
     expect(classifyFailure(error)).toBe("test-failure");
   });
 
@@ -236,7 +244,10 @@ describe("Device Farm browser startup and diagnostics", () => {
     };
     await expect(
       openPage(driver, "https://6529.io", 100)
-    ).rejects.toMatchObject({ code: "DEVICE_OFFLINE" });
+    ).rejects.toMatchObject({
+      code: "DEVICE_OFFLINE",
+      deviceFarmDiagnostics: { navigationStage: "connectivity" },
+    });
   });
 });
 
@@ -298,9 +309,15 @@ describe("Device Farm direct-page isolation", () => {
 
   it("does not navigate onward if the old page survives the blank navigation", async () => {
     const driver = browser([page("https://6529.io/the-memes?sort=age")]);
-    await expect(openPage(driver, target, 100)).rejects.toThrow(
-      "previous document did not unload"
-    );
+    await expect(openPage(driver, target, 100)).rejects.toMatchObject({
+      message: expect.stringContaining("previous document did not unload"),
+      deviceFarmDiagnostics: {
+        navigationStage: "blank-document",
+        requestedUrl: target,
+        origin: "https://6529.io",
+        pathname: "/the-memes",
+      },
+    });
     expect(driver.url.mock.calls).toEqual([["about:blank"]]);
   });
 
@@ -316,7 +333,11 @@ describe("Device Farm direct-page isolation", () => {
       message: expect.stringContaining(
         "never loaded with visible body content"
       ),
-      deviceFarmDiagnostics: expect.objectContaining({ online: true }),
+      deviceFarmDiagnostics: expect.objectContaining({
+        online: true,
+        navigationStage: "destination",
+        requestedUrl: target,
+      }),
     });
     expect(driver.url.mock.calls).toEqual([["about:blank"], [target]]);
   });

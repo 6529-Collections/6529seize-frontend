@@ -104,6 +104,7 @@ async function startWebSession() {
     const [major, minor = 0] = env("DEVICEFARM_DEVICE_OS_VERSION", "")
       .split(".")
       .map(Number);
+    // Older/unknown iOS retains browserName; 16.4+ uses bundleId + deepLink.
     if (major > 16 || (major === 16 && minor >= 4)) {
       delete capabilities.browserName;
       capabilities["appium:bundleId"] = SAFARI_BUNDLE_ID;
@@ -220,8 +221,13 @@ async function waitForDocumentReady(driver, timeout) {
  * target so its hydration/router effects cannot race the next navigation.
  */
 async function openPage(driver, pageUrl, timeout) {
+  const navigation = {
+    navigationStage: "target-validation",
+    requestedUrl: pageUrl,
+  };
   try {
-    await navigateToPage(driver, pageUrl, timeout);
+    await navigateToPage(driver, pageUrl, timeout, navigation);
+    navigation.navigationStage = "connectivity";
     const connectivity = await browserDiagnostics(driver);
     if (connectivity.online === false) {
       const error = new Error(
@@ -232,7 +238,10 @@ async function openPage(driver, pageUrl, timeout) {
     }
   } catch (error) {
     // Diagnostic failures must never replace the original navigation error.
-    error.deviceFarmDiagnostics = await browserDiagnostics(driver);
+    error.deviceFarmDiagnostics = {
+      ...(await browserDiagnostics(driver)),
+      ...navigation,
+    };
     throw error;
   }
 }
@@ -250,13 +259,14 @@ async function browserDiagnostics(driver) {
   }
 }
 
-async function navigateToPage(driver, pageUrl, timeout) {
+async function navigateToPage(driver, pageUrl, timeout, navigation) {
   const expectedUrl = new URL(pageUrl);
   const expectedPath = expectedUrl.pathname.replace(/\/$/, "") || "/";
   // In run 36099676558, /the-memes initialized its query parameters after
   // Appium accepted /network, leaving Safari on the old document. These are
   // independent direct-load checks, not tests of in-app route transitions.
   // Verify the neutral document has committed before issuing the target once.
+  navigation.navigationStage = "blank-document";
   await driver.url("about:blank");
   await driver.waitUntil(
     async () =>
@@ -271,6 +281,7 @@ async function navigateToPage(driver, pageUrl, timeout) {
       timeoutMsg: "previous document did not unload to about:blank",
     }
   );
+  navigation.navigationStage = "destination";
   await driver.url(pageUrl);
   await driver.waitUntil(
     async () => {
