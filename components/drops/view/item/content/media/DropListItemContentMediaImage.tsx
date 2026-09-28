@@ -4,6 +4,8 @@ import {
   DropImagePreview,
   getDropImagePreviewSources,
 } from "./DropImagePreview";
+import { GifPreviewLoadingIndicator } from "./GifPreviewLoadingIndicator";
+import { isGifImageUrl } from "@/helpers/gif-preview.helpers";
 import Button from "@/components/utils/button/Button";
 import { useDropImageGallery } from "@/components/drops/view/part/DropImageGalleryProvider";
 import { ImageScale } from "@/helpers/image.helpers";
@@ -339,6 +341,9 @@ function DropListItemContentMediaImageContent({
               handleIntrinsicImageError={handleIntrinsicImageError}
               handleError={handleError}
             />
+          )}
+          {shouldLoadImage && !loaded && !unavailable && isGifImageUrl(src) && (
+            <GifPreviewLoadingIndicator />
           )}
           {unavailable && !disableModal && (
             <div className="tw-absolute tw-bottom-3 tw-left-1/2 tw-z-30 -tw-translate-x-1/2">

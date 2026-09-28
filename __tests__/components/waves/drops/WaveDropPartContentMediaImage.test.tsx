@@ -62,6 +62,61 @@ const failCurrentPreview = () => {
 };
 
 describe("WaveDropPartContentMediaImage", () => {
+  it("shows a GIF loading spinner until ready and resets it for another source", () => {
+    const { rerender } = render(
+      <WaveDropPartContentMediaImage src="https://example.com/first.gif" />
+    );
+    const loader = screen.getByRole("status", { name: "Loading image" });
+    expect(loader).toBeInTheDocument();
+    expect(loader).toHaveClass("tw-pointer-events-none", "tw-inset-0");
+    expect(loader.querySelector('[aria-hidden="true"]')).toHaveClass(
+      "motion-safe:tw-animate-spin"
+    );
+    fireEvent.load(screen.getByAltText("Drop media"));
+    expect(
+      screen.queryByRole("status", { name: "Loading image" })
+    ).not.toBeInTheDocument();
+    rerender(
+      <WaveDropPartContentMediaImage src="https://example.com/second.GIF?version=2" />
+    );
+    expect(
+      screen.getByRole("status", { name: "Loading image" })
+    ).toBeInTheDocument();
+  });
+
+  it("does not add a GIF spinner to static images", () => {
+    render(
+      <WaveDropPartContentMediaImage src="https://example.com/still.png" />
+    );
+    expect(
+      screen.queryByRole("status", { name: "Loading image" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("uses the existing processing state between GIF retry attempts", () => {
+    jest.useFakeTimers();
+    render(
+      <WaveDropPartContentMediaImage
+        src="https://example.com/failure.gif"
+        fillContainer
+      />
+    );
+    fireEvent.error(screen.getByAltText("Drop media"));
+    expect(
+      screen.queryByRole("status", { name: "Loading image" })
+    ).not.toBeInTheDocument();
+    act(() => {
+      jest.advanceTimersByTime(1500);
+    });
+    expect(
+      screen.getByRole("status", { name: "Loading image" })
+    ).toBeInTheDocument();
+    fireEvent.load(screen.getByAltText("Drop media"));
+    expect(
+      screen.queryByRole("status", { name: "Loading image" })
+    ).not.toBeInTheDocument();
+  });
+
   it("fills a reserved-height media container without natural aspect sizing", () => {
     const { container } = render(
       <WaveDropPartContentMediaImage
