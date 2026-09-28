@@ -15,7 +15,7 @@ import { HttpFile } from '../http/http';
 
 export class ApiCompetitionSignature {
     /**
-    * Canonical JSON 6529-competition-v1 envelope binding action, actor_profile_id, actor_wallet, wave_id, competition_id, competition_entry_id, drop_id, config_version, payload_hash, nonce, issued_at and expires_at. Sign the exact UTF-8 message with personal_sign. Lifetime at most five minutes; nonce UUID is atomically single-use.
+    * Canonical JSON 6529-competition-v1 envelope binding audience (the configured API host including non-default port), chain_id (1, Ethereum mainnet), action, actor_profile_id, actor_wallet, wave_id, competition_id, competition_entry_id, drop_id, config_version, payload_hash, nonce, issued_at and expires_at. Sign the exact UTF-8 message with personal_sign. Lifetime at most five minutes; nonce UUID is atomically single-use.
     */
     'message': string;
     'signature': string;

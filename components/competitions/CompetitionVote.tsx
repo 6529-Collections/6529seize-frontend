@@ -15,6 +15,7 @@ import { useCompetitionViewer } from "@/hooks/competitions/useCompetitionQueries
 import { useCompetitionSignature } from "@/hooks/competitions/useCompetitionSignature";
 import {
   newCompetitionRequestKey,
+  isMultiCompetitionEnabled,
   isRejectedCompetitionCommand,
 } from "@/helpers/competition.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -27,7 +28,7 @@ import {
 } from "./CompetitionState";
 import CompetitionCredits from "./CompetitionCredits";
 
-export default function CompetitionVote({
+function CompetitionVoteForm({
   entryId,
   dropId,
   disabled,
@@ -165,7 +166,11 @@ export default function CompetitionVote({
             className={`${COMPETITION_INPUT} !tw-w-40`}
             value={value}
             disabled={busy || disabled || !competition.permissions.vote}
-            aria-describedby={`competition-vote-range-${entryId}`}
+            aria-invalid={!valid}
+            aria-describedby={[
+              `competition-vote-range-${entryId}`,
+              ...(failed ? [`competition-vote-error-${entryId}`] : []),
+            ].join(" ")}
             onChange={(event) => {
               setDraft({ source, value: event.target.value });
               setSaved(false);
@@ -201,7 +206,11 @@ export default function CompetitionVote({
           </p>
         )}
         {failed && (
-          <p role="alert" className="tw-text-sm tw-text-red">
+          <p
+            id={`competition-vote-error-${entryId}`}
+            role="alert"
+            className="tw-text-sm tw-text-red"
+          >
             {t(locale, "competitions.failure")}
           </p>
         )}
@@ -213,4 +222,12 @@ export default function CompetitionVote({
       </form>
     </div>
   );
+}
+
+export default function CompetitionVote(
+  props: Parameters<typeof CompetitionVoteForm>[0]
+) {
+  return isMultiCompetitionEnabled() ? (
+    <CompetitionVoteForm {...props} />
+  ) : null;
 }

@@ -1,4 +1,5 @@
 "use client";
+import { getCompetitionConfigLabel } from "@/helpers/competition-labels.helpers";
 import IdentitySearch, {
   IdentitySearchSize,
 } from "@/components/utils/input/identity/IdentitySearch";
@@ -13,7 +14,7 @@ import {
 } from "@/helpers/waves/identity-submission-metadata";
 import { ApiCompetitionLifecycle } from "@/generated/models/ApiCompetitionLifecycle";
 import { getMentionedGroupsFromText } from "@/helpers/waves/drop-group-mentions";
-import { useRef, useState } from "react";
+import { useId, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/components/auth/Auth";
@@ -45,6 +46,33 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { COMPETITION_BUTTON, COMPETITION_INPUT } from "./CompetitionState";
 
+function getEntryReferences(
+  snapshot: NonNullable<ReturnType<DropEditorHandles["getDropSnapshot"]>>,
+  isWaveAdmin: boolean
+) {
+  return {
+    mentioned_waves: snapshot.mentioned_waves ?? [],
+    mentioned_groups: getMentionedGroupsFromText(
+      snapshot.parts.map((part) => part.content ?? "").join("\n"),
+      isWaveAdmin
+    ),
+    ...(snapshot.hide_link_preview !== undefined
+      ? { hide_link_preview: snapshot.hide_link_preview }
+      : {}),
+  };
+}
+
+function isSameIdentity(
+  selected: SelectableIdentityOption | null,
+  own: SelectableIdentityOption | null
+) {
+  if (!selected || !own) return false;
+  return (
+    (selected.profileId !== null && selected.profileId === own.profileId) ||
+    selected.value.toLowerCase() === own.value.toLowerCase()
+  );
+}
+
 export default function CompetitionEntryForm({
   onClose,
 }: {
@@ -57,6 +85,9 @@ export default function CompetitionEntryForm({
   const router = useRouter();
   const client = useQueryClient();
   const sign = useCompetitionSignature();
+  const formId = useId();
+  const errorId = `${formId}-error`;
+  const termsId = `${formId}-terms`;
   const editor = useRef<DropEditorHandles | null>(null);
   const [title, setTitle] = useState("");
   const [nominee, setNominee] = useState<SelectableIdentityOption | null>(null);
@@ -66,6 +97,7 @@ export default function CompetitionEntryForm({
   const [canSubmit, setCanSubmit] = useState(false);
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState(false);
+  const failureDescription = failed ? errorId : undefined;
   const pending = useRef<{
     fingerprint: string;
     request: ApiCreateCompetitionEntryRequest;
@@ -83,13 +115,7 @@ export default function CompetitionEntryForm({
   );
   const selectedIdentity =
     identityMode === IdentityMode.OnlyMyself ? selfIdentity : nominee;
-  const nominatesSelf =
-    selectedIdentity &&
-    selfIdentity &&
-    ((selectedIdentity.profileId !== null &&
-      selectedIdentity.profileId === selfIdentity.profileId) ||
-      selectedIdentity.value.toLowerCase() ===
-        selfIdentity.value.toLowerCase());
+  const nominatesSelf = isSameIdentity(selectedIdentity, selfIdentity);
   const identityValid =
     !identitySubmission ||
     Boolean(
@@ -153,14 +179,10 @@ export default function CompetitionEntryForm({
         const content = await getCreateWaveDropRequest(snapshot);
         const drop = {
           ...content,
-          mentioned_waves: snapshot.mentioned_waves ?? [],
-          mentioned_groups: getMentionedGroupsFromText(
-            snapshot.parts.map((part) => part.content ?? "").join("\n"),
+          ...getEntryReferences(
+            snapshot,
             wave.wave.authenticated_user_eligible_for_admin
           ),
-          ...(snapshot.hide_link_preview !== undefined
-            ? { hide_link_preview: snapshot.hide_link_preview }
-            : {}),
           title: title.trim() || (content.title ?? null),
           metadata: [
             ...content.metadata.filter(
@@ -230,6 +252,7 @@ export default function CompetitionEntryForm({
     <section
       className="tw-space-y-4 tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-p-4"
       aria-labelledby="native-entry-heading"
+      aria-describedby={failureDescription}
     >
       <h2 id="native-entry-heading" className="tw-text-lg tw-text-iron-100">
         {t(locale, "competitions.submit")}
@@ -299,17 +322,24 @@ export default function CompetitionEntryForm({
           )}
         </div>
       )}
-      {requirements.map((item) => (
+      {requirements.map((item, index) => (
         <label
           key={item.name}
           className="tw-block tw-space-y-2 tw-text-sm tw-text-iron-300"
         >
-          <span>{item.name}</span>
+          <span>
+            {item.name.trim() ||
+              t(locale, "competitions.metadataFallback", { number: index + 1 })}
+          </span>
           <input
             type={item.type === "NUMBER" ? "number" : "text"}
             required
             className={COMPETITION_INPUT}
             value={metadata[item.name] ?? ""}
+            aria-invalid={
+              metadata[item.name] !== undefined && !metadata[item.name]?.trim()
+            }
+            aria-describedby={failureDescription}
             onChange={(event) =>
               setMetadata((current) => ({
                 ...current,
@@ -323,17 +353,23 @@ export default function CompetitionEntryForm({
       {competition.participation.required_media.length > 0 && (
         <p className="tw-text-sm tw-text-iron-400">
           {t(locale, "competitions.requirements")}:{" "}
-          {competition.participation.required_media.join(", ")}
+          {competition.participation.required_media
+            .map((media) => getCompetitionConfigLabel(locale, media))
+            .join(", ")}
         </p>
       )}
       {competition.participation.terms && (
         <div className="tw-space-y-3">
-          <p className="tw-max-h-48 tw-overflow-y-auto tw-whitespace-pre-wrap tw-text-sm tw-text-iron-400">
+          <p
+            id={termsId}
+            className="tw-max-h-48 tw-overflow-y-auto tw-whitespace-pre-wrap tw-text-sm tw-text-iron-400"
+          >
             {competition.participation.terms}
           </p>
           <label className="tw-flex tw-min-h-11 tw-items-center tw-gap-3 tw-text-sm tw-text-iron-200">
             <input
               type="checkbox"
+              aria-describedby={termsId}
               checked={terms}
               onChange={(event) =>
                 setTermsVersion(
@@ -347,7 +383,7 @@ export default function CompetitionEntryForm({
         </div>
       )}
       {failed && (
-        <p role="alert" className="tw-text-sm tw-text-red">
+        <p id={errorId} role="alert" className="tw-text-sm tw-text-red">
           {t(locale, "competitions.failure")}
         </p>
       )}

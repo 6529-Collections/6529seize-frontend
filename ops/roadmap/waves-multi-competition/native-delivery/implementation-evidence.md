@@ -34,7 +34,8 @@ foundation delivery's environment rollout remains independent.
 - Shared drop edit/delete and chat-history purge integration; historical
   content snapshots respect current removal/moderation access.
 - Exact backend-branch OpenAPI synchronization, product docs and published help
-  corpus. Frontend discovery/creation defaults off.
+  corpus. Frontend discovery and native mutation controls default off;
+  canonical authorized read links remain available.
 - Native notification causes and counts require explicit V2 query and device
   registration opt-ins, preserving existing notification clients and badges.
 
@@ -97,10 +98,18 @@ shared pause permission/command gate passed 21. Focused counts overlap the
 broad run.
 
 The [backend PR](https://github.com/6529-Collections/6529seize-backend/pull/2125)
-and paired frontend PR record final build/check and review evidence. This
+and [frontend PR](https://github.com/6529-Collections/6529seize-frontend/pull/4116)
+record final build/check and review evidence. This
 document does not claim staging, production, real queue redrive or cohort parity
 from local synthetic fixtures. Do not mark the roadmap complete from a green
 local suite or from historical adapter self-comparison observations.
+
+Review follow-up adds private/parent/suppressed anonymous-content tests,
+exact boundary vote metrics and durable queue retries with stable notification
+IDs. Native wallet messages bind the configured deployment-specific API
+host (`audience`) and Ethereum chain 1. Before enabling signed participation,
+backend `API_BASE_URL` and frontend `API_ENDPOINT` must name the same API host;
+backend verification fails closed if that configuration is missing.
 
 ## Future deployment gate
 

@@ -89,6 +89,7 @@ async function installCompetitionApi(page: Page, selfNomination = false) {
     Object.assign(competitions[0]!.participation, {
       submission_type: "IDENTITY",
       identity_submission_strategy: "ONLY_MYSELF",
+      terms: "Keep submissions original and follow this competition’s rules.",
     });
   }
   const configurations = new Map<string, Record<string, unknown>>();
@@ -267,7 +268,14 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       page.getByText("Immutable alpha entry content", { exact: true })
     ).toBeVisible({ timeout: 30000 });
     await page.getByRole("button", { name: "Your vote", exact: true }).click();
-    await page.getByRole("spinbutton", { name: "Your vote" }).fill("25");
+    const voteInput = page.getByRole("spinbutton", { name: "Your vote" });
+    await voteInput.fill("");
+    await expect(voteInput).toHaveAttribute("aria-invalid", "true");
+    await expect(voteInput).toHaveAccessibleDescription(
+      /Enter a whole number between/
+    );
+    await voteInput.fill("25");
+    await expect(voteInput).toHaveAttribute("aria-invalid", "false");
     await page.getByRole("button", { name: "Save vote", exact: true }).click();
     await expect(page.getByText("Saved", { exact: true })).toBeVisible();
     expect(sandbox.requests).toHaveLength(1);
@@ -371,6 +379,16 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await page
       .getByLabel("Competition name", { exact: true })
       .fill("Native draft");
+    const beforeUnload = page.waitForEvent("dialog");
+    await page.evaluate(() => {
+      setTimeout(() => globalThis.location.reload(), 0);
+    });
+    const dialog = await beforeUnload;
+    expect(dialog.type()).toBe("beforeunload");
+    await dialog.dismiss();
+    await expect(
+      page.getByLabel("Competition name", { exact: true })
+    ).toHaveValue("Native draft");
     await page
       .getByRole("button", { name: "Save changes", exact: true })
       .click();
@@ -413,6 +431,14 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     ).toBeVisible();
     const editor = composer.locator('[contenteditable="true"]').first();
     await editor.fill("Entry body in shared chat");
+    const terms = composer.getByRole("checkbox", {
+      name: "I agree to this competition’s terms.",
+      exact: true,
+    });
+    await expect(terms).toHaveAccessibleDescription(
+      "Keep submissions original and follow this competition’s rules."
+    );
+    await terms.check();
     await composer
       .getByRole("button", { name: "Submit an entry", exact: true })
       .click();

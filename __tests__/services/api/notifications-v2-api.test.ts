@@ -533,5 +533,6 @@ describe("fetchNotificationsV2", () => {
     });
     const response = await fetchNotificationsV2({ limit: "30" });
     expect(response.notifications).toEqual([]);
+    expect(response.nextPageParam).toBe(100);
   });
 });

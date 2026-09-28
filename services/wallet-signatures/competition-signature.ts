@@ -1,4 +1,5 @@
 import { sha256 } from "js-sha256";
+import { getWalletSignatureAudience } from "./structured-wallet-signatures";
 
 /** Matches the native server signing domain. Undefined object fields are omitted. */
 export function canonicalCompetitionJson(value: unknown): string {
@@ -28,6 +29,7 @@ export function canonicalCompetitionJson(value: unknown): string {
 
 export function buildCompetitionSignatureMessage({
   action,
+  audience = getWalletSignatureAudience(),
   actorProfileId,
   actorWallet,
   waveId,
@@ -40,6 +42,7 @@ export function buildCompetitionSignatureMessage({
   issuedAt,
 }: {
   readonly action: "ENTRY_CREATE" | "VOTE_SET";
+  readonly audience?: string;
   readonly actorProfileId: string;
   readonly actorWallet: string;
   readonly waveId: string;
@@ -53,6 +56,8 @@ export function buildCompetitionSignatureMessage({
 }) {
   return canonicalCompetitionJson({
     domain: "6529-competition-v1",
+    audience,
+    chain_id: 1,
     action,
     actor_profile_id: actorProfileId,
     actor_wallet: actorWallet.toLowerCase(),

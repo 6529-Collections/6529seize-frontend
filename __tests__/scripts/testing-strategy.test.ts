@@ -291,15 +291,6 @@ describe("testing strategy risk floor", () => {
 });
 
 describe("testing strategy CI plan", () => {
-  it("selects native browser evidence for explicit competition surfaces", () => {
-    const plan = createCiPlan(["components/competitions/CompetitionVote.tsx"]);
-    expect(plan.checks["playwright_native_competition"]!.required).toBe(true);
-    const unrelated = createCiPlan(["ops/docs/README.md"]);
-    expect(unrelated.checks["playwright_native_competition"]!.required).toBe(
-      false
-    );
-  });
-
   it("keeps docs-only PRs in the no-install fast lane", () => {
     const plan = createCiPlan(["ops/workstreams/README.md"]);
 

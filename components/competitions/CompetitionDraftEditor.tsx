@@ -224,7 +224,12 @@ function DraftForm({
 
   useEffect(() => {
     if (fingerprint === savedFingerprint) return;
-    const preventExit = (event: BeforeUnloadEvent) => event.preventDefault();
+    const preventExit = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      // Older embedded WebViews require this property to protect unsaved edits.
+      // eslint-disable-next-line @typescript-eslint/no-deprecated -- Retain beforeunload compatibility.
+      event.returnValue = "";
+    };
     globalThis.addEventListener("beforeunload", preventExit);
     return () => globalThis.removeEventListener("beforeunload", preventExit);
   }, [fingerprint, savedFingerprint]);
@@ -530,6 +535,7 @@ export default function CompetitionDraftEditor({
       <CompetitionState
         error
         retry={() => {
+          void entries.refetch();
           void query.refetch();
         }}
       />

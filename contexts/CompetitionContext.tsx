@@ -5,7 +5,7 @@ import type { ApiCompetition } from "@/generated/models/ApiCompetition";
 import type { ApiWaveV3 } from "@/generated/models/ApiWaveV3";
 import type { ApiWave } from "@/generated/models/ApiWave";
 
-export interface CompetitionContextValue {
+interface CompetitionContextValue {
   readonly wave: ApiWave;
   readonly hub: ApiWaveV3;
   readonly competition: ApiCompetition;

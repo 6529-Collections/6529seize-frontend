@@ -1,7 +1,10 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import CompetitionExistingEntry from "@/components/competitions/CompetitionExistingEntry";
 import CompetitionEntryForm from "@/components/competitions/CompetitionEntryForm";
 import { createCompetitionEntry } from "@/services/api/competitions-api";
 
+let mockRequiredMetadata: Array<{ name: string; type: string }> = [];
+let mockTerms: string | null = null;
 const mockSnapshot = {
   title: null,
   parts: [
@@ -26,6 +29,7 @@ jest.mock("next/navigation", () => ({
   useRouter: () => ({ push: jest.fn() }),
 }));
 jest.mock("@tanstack/react-query", () => ({
+  useQuery: () => ({ isError: false }),
   useQueryClient: () => ({
     invalidateQueries: jest.fn().mockResolvedValue(undefined),
   }),
@@ -52,10 +56,10 @@ jest.mock("@/contexts/CompetitionContext", () => ({
       title: "Competition",
       lifecycle: "PUBLISHED",
       participation: {
-        required_metadata: [],
+        required_metadata: mockRequiredMetadata,
         required_media: [],
         signature_required: false,
-        terms: null,
+        terms: mockTerms,
       },
       permissions: { submit: true },
     },
@@ -126,7 +130,12 @@ jest.mock(
     }),
   })
 );
+jest.mock(
+  "@/components/competitions/CompetitionEntryContent",
+  () => () => null
+);
 jest.mock("@/services/api/competitions-api", () => ({
+  competitionScope: () => ({}),
   createCompetitionEntry: jest.fn().mockResolvedValue({ id: "entry" }),
   invalidateCompetition: jest.fn().mockResolvedValue(undefined),
 }));
@@ -146,4 +155,33 @@ it("preserves wave and group mentions in the native CHAT command and strips lega
   });
   expect(body.drop).not.toHaveProperty("signer_address");
   expect(body.drop).not.toHaveProperty("is_safe_signature");
+});
+
+afterEach(() => {
+  mockRequiredMetadata = [];
+  mockTerms = null;
+});
+
+it("gives blank metadata requirements an accessible fallback name", () => {
+  mockRequiredMetadata = [{ name: " ", type: "NUMBER" }];
+  render(<CompetitionEntryForm onClose={jest.fn()} />);
+  const field = screen.getByRole("spinbutton", {
+    name: "Required information 1",
+  });
+  expect(field).toBeRequired();
+  fireEvent.change(field, { target: { value: "1" } });
+  fireEvent.change(field, { target: { value: "" } });
+  expect(field).toHaveAttribute("aria-invalid", "true");
+});
+
+it("keeps existing-entry terms separate from the checkbox accessible name", () => {
+  mockTerms = "The complete competition participation terms.";
+  render(<CompetitionExistingEntry onClose={jest.fn()} />);
+  const checkbox = screen.getByRole("checkbox", {
+    name: "I agree to this competition’s terms.",
+  });
+  expect(checkbox).toHaveAccessibleDescription(mockTerms);
+  expect(screen.getByText(mockTerms).closest("label")).toBeNull();
+  fireEvent.click(checkbox);
+  expect(checkbox).toBeChecked();
 });

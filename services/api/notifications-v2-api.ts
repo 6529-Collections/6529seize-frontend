@@ -509,6 +509,7 @@ const mapNotificationsV2Response = (
 ): TypedNotificationsResponse => ({
   unread_count: response.unread_count,
   notifications: response.notifications.flatMap(mapNotificationV2),
+  nextPageParam: response.notifications.at(-1)?.id ?? null,
 });
 
 const buildNotificationsV2Params = ({

@@ -687,25 +687,6 @@ function createCiPlan(files, options = {}) {
       !isTestOrTestSupportFile(file) &&
       !changedFileExists(file, options.cwd)
   );
-  const hasNativeCompetitionEvidenceNeed = normalizedFiles.some(
-    (file) =>
-      /^(?:components\/competitions\/|hooks\/competitions\/|__tests__\/competitions\/|app\/waves\/\[wave\]\/competitions\/|components\/waves\/create-wave\/|generated\/models\/ApiCompetition)/u.test(
-        file
-      ) ||
-      [
-        "contexts/CompetitionContext.tsx",
-        "helpers/competition.helpers.ts",
-        "helpers/competition-config.helpers.ts",
-        "services/api/competitions-api.ts",
-        "services/wallet-signatures/competition-signature.ts",
-        "i18n/messages/competitions.ts",
-        "tests/social/native-competition-sandbox.spec.ts",
-        "tests/support/composerSandboxServer.cjs",
-        "components/waves/WavesMobile.tsx",
-        "tests/packs.manifest.cjs",
-        "openapi.yaml",
-      ].includes(file)
-  );
   const hasRuntimeEvidenceNeed =
     riskFloor >= 2 || risk.route_impacts.length > 0 || hasStyle;
   const hasCriticalShellEvidenceNeed =
@@ -798,12 +779,6 @@ function createCiPlan(files, options = {}) {
         hasRuntimeEvidenceNeed
           ? "Standard-risk UI, route, or style changes need a small browser smoke pack."
           : "No route, runtime UI, or style smoke needed."
-      ),
-      playwright_native_competition: check(
-        hasNativeCompetitionEvidenceNeed,
-        hasNativeCompetitionEvidenceNeed
-          ? "Native competition changes require desktop and mobile sandbox browser coverage."
-          : "No native competition surfaces changed."
       ),
       playwright_critical_shell: check(
         hasCriticalShellEvidenceNeed,

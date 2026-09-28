@@ -171,8 +171,8 @@ export function useCreateWaveSubmission({
     onError: (error) => {
       setToast({
         type: "error",
-        title: "Couldn't create this wave.",
-        description: "Please try again.",
+        title: t(locale, "competitions.waveCreationFailure"),
+        description: t(locale, "competitions.tryAgain"),
         details: getToastErrorDetails(error),
       });
     },
@@ -399,6 +399,10 @@ export function useCreateWaveSubmission({
             });
           }
         }
+        nativeHubRequest.current = null;
+        nativeCompetitionConfig.current = null;
+        nativeDisplayMetadata.current = [];
+        nativeCompetitionKey.current = null;
         onWaveCreated();
         onSuccess?.();
         finishSubmitting();
@@ -419,10 +423,10 @@ export function useCreateWaveSubmission({
       if (!mutationStarted) {
         setToast({
           type: "error",
-          title: "Couldn't create this wave.",
+          title: t(locale, "competitions.waveCreationFailure"),
           description: nativeHubRequest.current
             ? t(locale, "competitions.hubRetry")
-            : "Please try again.",
+            : t(locale, "competitions.tryAgain"),
           details: getToastErrorDetails(error, "Could not create wave."),
         });
         finishSubmitting();

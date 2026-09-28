@@ -1,4 +1,5 @@
 "use client";
+import { getCompetitionConfigLabel } from "@/helpers/competition-labels.helpers";
 import { useCompetition } from "@/contexts/CompetitionContext";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
@@ -68,11 +69,16 @@ export default function CompetitionRules() {
             })}
           </p>
         )}
-        <p>{competition.participation.required_media.join(", ")}</p>
+        <p>
+          {competition.participation.required_media
+            .map((media) => getCompetitionConfigLabel(locale, media))
+            .join(", ")}
+        </p>
         <ul>
           {competition.participation.required_metadata.map((item) => (
             <li key={String(item["name"] ?? "")}>
-              {String(item["name"] ?? "")} ({String(item["type"] ?? "")})
+              {String(item["name"] ?? "")} (
+              {getCompetitionConfigLabel(locale, String(item["type"] ?? ""))})
             </li>
           ))}
         </ul>
@@ -108,7 +114,8 @@ export default function CompetitionRules() {
           })}
         </p>
         <p>
-          {competition.voting.credit_type} · {competition.voting.credit_scope} ·{" "}
+          {getCompetitionConfigLabel(locale, competition.voting.credit_type)} ·{" "}
+          {getCompetitionConfigLabel(locale, competition.voting.credit_scope)} ·{" "}
           {competition.voting.credit_category}
         </p>
         <p>
@@ -142,14 +149,18 @@ export default function CompetitionRules() {
         </p>
         <p>
           {t(locale, "competitions.hold", {
-            value: number(
+            value: formatInteger(
+              locale,
               competition.decisions.winning_threshold_min_duration_ms
             ),
           })}
         </p>
         <p>
           {t(locale, "competitions.lock", {
-            value: number(competition.decisions.time_lock_ms),
+            value: formatInteger(
+              locale,
+              competition.decisions.time_lock_ms ?? 0
+            ),
           })}
         </p>
       </section>

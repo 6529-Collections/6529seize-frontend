@@ -1,5 +1,5 @@
 "use client";
-import { useRef, useState } from "react";
+import { useId, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { sha256 } from "js-sha256";
@@ -48,6 +48,7 @@ export default function CompetitionExistingEntry({
   const router = useRouter();
   const client = useQueryClient();
   const sign = useCompetitionSignature();
+  const termsId = useId();
   const [dropId, setDropId] = useState("");
   const [selected, setSelected] = useState("");
   const [acceptedTermsVersion, setTermsVersion] = useState<number | null>(null);
@@ -177,22 +178,25 @@ export default function CompetitionExistingEntry({
       </form>
       {selected && preview}
       {competition.participation.terms && (
-        <label className="tw-block tw-space-y-3 tw-text-sm tw-text-iron-300">
-          <p className="tw-whitespace-pre-wrap">
+        <div className="tw-space-y-3 tw-text-sm tw-text-iron-300">
+          <p id={termsId} className="tw-whitespace-pre-wrap">
             {competition.participation.terms}
           </p>
-          <input
-            type="checkbox"
-            checked={terms}
-            onChange={(event) =>
-              setTermsVersion(
-                event.target.checked ? competition.config_version : null
-              )
-            }
-            disabled={busy}
-          />{" "}
-          {t(locale, "competitions.terms")}
-        </label>
+          <label className="tw-flex tw-min-h-11 tw-items-center tw-gap-3">
+            <input
+              type="checkbox"
+              aria-describedby={termsId}
+              checked={terms}
+              onChange={(event) =>
+                setTermsVersion(
+                  event.target.checked ? competition.config_version : null
+                )
+              }
+              disabled={busy}
+            />{" "}
+            {t(locale, "competitions.terms")}
+          </label>
+        </div>
       )}
       {failed && (
         <p role="alert" className="tw-text-red">

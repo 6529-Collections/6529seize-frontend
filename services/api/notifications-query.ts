@@ -91,7 +91,9 @@ export const getIdentityNotificationsInfiniteQueryOptions = ({
       }),
     initialPageParam: null as number | null,
     getNextPageParam: (lastPage: TypedNotificationsResponse) =>
-      lastPage.notifications.at(-1)?.id ?? null,
+      lastPage.nextPageParam === undefined
+        ? (lastPage.notifications.at(-1)?.id ?? null)
+        : lastPage.nextPageParam,
     staleTime: NOTIFICATIONS_STALE_TIME_MS,
   };
 };

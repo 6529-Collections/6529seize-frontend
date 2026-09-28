@@ -12,6 +12,7 @@ import {
 } from "@/services/api/competitions-api";
 import {
   getCompetitionRoute,
+  isMultiCompetitionEnabled,
   newCompetitionRequestKey,
 } from "@/helpers/competition.helpers";
 import MobileWrapperConfirmationDialog from "@/components/mobile-wrapper-dialog/MobileWrapperConfirmationDialog";
@@ -41,7 +42,8 @@ export default function CompetitionAdmin({
     version: number;
     key: string;
   } | null>(null);
-  if (!competition.permissions.administer) return null;
+  if (!isMultiCompetitionEnabled() || !competition.permissions.administer)
+    return null;
   let actions: CompetitionAction[] = ["archive", "clone"];
   if (competition.lifecycle === ApiCompetitionLifecycle.Draft)
     actions = ["publish", "cancel", "archive"];

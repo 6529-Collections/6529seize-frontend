@@ -85,7 +85,10 @@ test("hydrates browser-local calendar clocks with a different client time and ti
     waitUntil: "domcontentloaded",
   });
   await expect(
-    page.getByRole("table", { name: /Upcoming Mints for SZN/ })
+    // Season boundaries can leave one or both upcoming-season tables.
+    page
+      .getByRole("table", { name: /^Upcoming (?:Mints for )?SZN \d+$/ })
+      .first()
   ).toBeVisible();
   await page.getByRole("tab", { name: "UTC", exact: true }).click();
   await expect(

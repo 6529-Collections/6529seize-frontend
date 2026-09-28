@@ -34,12 +34,21 @@ export default function NotificationCompetitionLifecycle({
   );
 }
 
+const EVENT_LABELS = {
+  COMPETITION_PUBLISHED: "published",
+  COMPETITION_CANCELLED: "cancelled",
+  COMPETITION_ENDED: "ended",
+  COMPETITION_SCHEDULE_CHANGED: "updated",
+  COMPETITION_PAUSED: "paused",
+  COMPETITION_RESUMED: "resumed",
+  COMPETITION_STARTED: "updated",
+  COMPETITION_DECISION_COMPLETED: "winners",
+  COMPETITION_UPDATED: "updated",
+  ENTRY_DISQUALIFIED: "updated",
+} as const;
+
 function getEventLabel(event: string) {
-  if (event.includes("PUBLISH")) return "published";
-  if (event.includes("CANCEL")) return "cancelled";
-  if (event.includes("ENDED")) return "ended";
-  if (event.includes("PAUS")) return "paused";
-  if (event.includes("RESUM")) return "resumed";
-  if (event.includes("WINNER") || event.includes("DECISION")) return "winners";
-  return "updated";
+  return Object.hasOwn(EVENT_LABELS, event)
+    ? EVENT_LABELS[event as keyof typeof EVENT_LABELS]
+    : "updated";
 }

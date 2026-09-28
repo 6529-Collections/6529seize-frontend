@@ -1,4 +1,5 @@
 "use client";
+import { getCompetitionConfigLabel } from "@/helpers/competition-labels.helpers";
 import { ApiCompetitionEntryStatus } from "@/generated/models/ApiCompetitionEntryStatus";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
@@ -361,7 +362,9 @@ function Outcome({ outcome }: { readonly outcome: ApiCompetitionOutcome }) {
     <section className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-p-4">
       <h3 className="tw-text-base tw-text-iron-100">{outcome.description}</h3>
       <p className="tw-text-sm tw-text-iron-300">
-        {outcome.type} {outcome.credit} {outcome.rep_category}{" "}
+        {getCompetitionConfigLabel(locale, outcome.type)}{" "}
+        {getCompetitionConfigLabel(locale, outcome.credit)}{" "}
+        {outcome.rep_category}{" "}
         {outcome.amount === null ? null : formatInteger(locale, outcome.amount)}
       </p>
       {distribution}

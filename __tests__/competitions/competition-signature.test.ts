@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { publicEnv } from "@/config/env";
 import {
   buildCompetitionSignatureMessage,
   canonicalCompetitionJson,
@@ -6,6 +7,7 @@ import {
 
 const signing = {
   action: "VOTE_SET" as const,
+  audience: "api.example.test:8443",
   actorProfileId: "profile",
   actorWallet: "0xABC",
   waveId: "wave",
@@ -19,6 +21,16 @@ const signing = {
 };
 
 describe("native competition signatures", () => {
+  it("defaults to the trusted configured API audience and mainnet chain", () => {
+    const { audience: _fixtureAudience, ...runtimeSigning } = signing;
+    expect(
+      JSON.parse(buildCompetitionSignatureMessage(runtimeSigning))
+    ).toMatchObject({
+      audience: new URL(publicEnv.API_ENDPOINT).host.toLowerCase(),
+      chain_id: 1,
+    });
+  });
+
   it("canonicalizes nested keys while preserving arrays and omitting absent fields", () => {
     expect(
       canonicalCompetitionJson({
@@ -32,6 +44,8 @@ describe("native competition signatures", () => {
     const message = buildCompetitionSignatureMessage(signing);
     expect(JSON.parse(message)).toEqual({
       action: "VOTE_SET",
+      audience: "api.example.test:8443",
+      chain_id: 1,
       actor_profile_id: "profile",
       actor_wallet: "0xabc",
       competition_entry_id: "entry",
@@ -47,6 +61,7 @@ describe("native competition signatures", () => {
     });
     expect(message).toBe(canonicalCompetitionJson(JSON.parse(message)));
     for (const change of [
+      { audience: "api.staging.example.test:8443" },
       { competitionId: "other" },
       { entryId: "other" },
       { configVersion: 8 },

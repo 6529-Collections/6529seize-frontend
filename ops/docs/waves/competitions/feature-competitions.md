@@ -75,8 +75,10 @@ administrators can also see drafts.
 
 ## Limitations / Notes
 
-Competition discovery and creation depend on feature availability. A direct
-link can show an unavailable state if the server has not enabled its support.
+Competition discovery, creation, participation and management depend on feature
+availability. Existing direct links can still show authorized competition
+history when these controls are unavailable. A link can show an unavailable
+state if the server has not enabled its support.
 There is no single current competition for a wave. Older wave links continue
 to open their established experience. Main Stage privileges apply only to an
 explicitly designated competition, never automatically to all competitions in

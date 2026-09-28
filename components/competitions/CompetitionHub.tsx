@@ -31,7 +31,7 @@ function CompetitionCard({
         className="tw-block tw-space-y-3 tw-rounded-xl tw-p-5 tw-text-iron-100 hover:tw-bg-iron-900 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
       >
         <span className="tw-text-xs tw-text-iron-400">
-          {competition.type} ·{" "}
+          {t(locale, `competitions.type.${competition.type}`)} ·{" "}
           {t(locale, `competitions.phase.${competition.computed_phase}`)}
         </span>
         <h2 className="tw-m-0 tw-break-words tw-text-lg tw-font-semibold">

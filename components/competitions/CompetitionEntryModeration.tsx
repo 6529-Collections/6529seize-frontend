@@ -5,12 +5,17 @@ import { useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/components/auth/Auth";
 import { useCompetition } from "@/contexts/CompetitionContext";
+import type { ApiCompetitionActionRequest } from "@/generated/models/ApiCompetitionActionRequest";
 import type { ApiCompetitionEntry } from "@/generated/models/ApiCompetitionEntry";
 import {
   invalidateCompetition,
   performCompetitionEntryAction,
 } from "@/services/api/competitions-api";
-import { newCompetitionRequestKey } from "@/helpers/competition.helpers";
+import {
+  newCompetitionRequestKey,
+  isRejectedCompetitionCommand,
+  isMultiCompetitionEnabled,
+} from "@/helpers/competition.helpers";
 import MobileWrapperConfirmationDialog from "@/components/mobile-wrapper-dialog/MobileWrapperConfirmationDialog";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
@@ -29,8 +34,15 @@ export default function CompetitionEntryModeration({
   const [reason, setReason] = useState("");
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState(false);
-  const requestKey = useRef(newCompetitionRequestKey());
+  const pending = useRef<{
+    action: "withdraw" | "disqualify";
+    actor: string | null;
+    body: ApiCompetitionActionRequest;
+  } | null>(null);
+  const actor =
+    activeProfileProxy?.created_by.id ?? connectedProfile?.id ?? null;
   if (
+    !isMultiCompetitionEnabled() ||
     entry.status !== ApiCompetitionEntryStatus.Active ||
     competition.lifecycle !== ApiCompetitionLifecycle.Published
   )
@@ -49,16 +61,34 @@ export default function CompetitionEntryModeration({
     };
     try {
       if (!(await requestAuth()).success) return;
-      await performCompetitionEntryAction(identity, entry.id, action, {
-        idempotency_key: requestKey.current,
-        config_version: competition.config_version,
-        reason,
-      });
-      requestKey.current = newCompetitionRequestKey();
+      if (
+        pending.current?.action !== action ||
+        pending.current.actor !== actor ||
+        pending.current.body.reason !== reason
+      ) {
+        pending.current = {
+          action,
+          actor,
+          body: {
+            idempotency_key: newCompetitionRequestKey(),
+            config_version: competition.config_version,
+            reason,
+          },
+        };
+      }
+      await performCompetitionEntryAction(
+        identity,
+        entry.id,
+        action,
+        pending.current.body
+      );
+      pending.current = null;
       setAction(null);
       await invalidateCompetition(client, identity);
-    } catch {
+    } catch (error) {
+      if (isRejectedCompetitionCommand(error)) pending.current = null;
       setFailed(true);
+      await invalidateCompetition(client, identity);
     } finally {
       setBusy(false);
     }
@@ -77,7 +107,7 @@ export default function CompetitionEntryModeration({
         value={reason}
         onChange={(event) => {
           setReason(event.target.value);
-          requestKey.current = newCompetitionRequestKey();
+          pending.current = null;
         }}
       />
       <div className="tw-flex tw-flex-wrap tw-gap-2">

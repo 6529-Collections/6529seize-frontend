@@ -230,4 +230,5 @@ export interface TypedNotificationsResponse extends Omit<
   "notifications"
 > {
   readonly notifications: TypedNotification[];
+  readonly nextPageParam?: number | null;
 }

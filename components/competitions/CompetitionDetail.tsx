@@ -22,6 +22,7 @@ import {
 import {
   COMPETITION_TABS,
   getCompetitionTab,
+  isMultiCompetitionEnabled,
   getCompetitionsRoute,
 } from "@/helpers/competition.helpers";
 import { getWavePathRoute } from "@/helpers/navigation.helpers";
@@ -65,7 +66,8 @@ function NativeCompetitionContent() {
   };
   const [entering, setEntering] = useState(false);
   const [associating, setAssociating] = useState(false);
-  const editing = search.get("edit") === "1";
+  const mutationsEnabled = isMultiCompetitionEnabled();
+  const editing = mutationsEnabled && search.get("edit") === "1";
   const pauses = useCompetitionPauseState({
     waveId: wave.id,
     competitionId: competition.id,
@@ -88,7 +90,7 @@ function NativeCompetitionContent() {
     <div className="tw-space-y-5">
       <header className="tw-space-y-2">
         <p className="tw-m-0 tw-text-xs tw-text-iron-400">
-          {competition.type} ·{" "}
+          {t(locale, `competitions.type.${competition.type}`)} ·{" "}
           {t(locale, `competitions.phase.${competition.computed_phase}`)}
         </p>
         <h1 className="tw-m-0 tw-break-words tw-text-2xl tw-font-semibold tw-text-iron-100">
@@ -136,12 +138,15 @@ function NativeCompetitionContent() {
           {t(locale, "competitions.submitClosed")}
         </p>
       )}
-      <CompetitionAdmin
-        paused={paused}
-        onEdit={() => router.push(`${pathname}?edit=1`)}
-      />
+      {mutationsEnabled && (
+        <CompetitionAdmin
+          paused={paused}
+          onEdit={() => router.push(`${pathname}?edit=1`)}
+        />
+      )}
       <div className="tw-flex tw-flex-wrap tw-gap-2">
-        {competition.permissions.submit &&
+        {mutationsEnabled &&
+          competition.permissions.submit &&
           competition.lifecycle === ApiCompetitionLifecycle.Published && (
             <button
               type="button"
@@ -152,7 +157,8 @@ function NativeCompetitionContent() {
               {submitLabel}
             </button>
           )}
-        {competition.permissions.submit &&
+        {mutationsEnabled &&
+          competition.permissions.submit &&
           competition.lifecycle === ApiCompetitionLifecycle.Published && (
             <button
               type="button"
@@ -164,10 +170,10 @@ function NativeCompetitionContent() {
             </button>
           )}
       </div>
-      {associating && (
+      {mutationsEnabled && associating && (
         <CompetitionExistingEntry onClose={() => setAssociating(false)} />
       )}
-      {entering && (
+      {mutationsEnabled && entering && (
         <CompetitionEntryForm
           key={competition.id}
           onClose={() => setEntering(false)}

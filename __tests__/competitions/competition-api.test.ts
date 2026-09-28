@@ -88,6 +88,19 @@ describe("explicit competition transport", () => {
       "Invalid pause history cursor"
     );
   });
+  it("bounds pause history with changing cursors to one hundred pages", async () => {
+    for (let page = 0; page < 100; page++) {
+      jest.mocked(commonApiFetch).mockResolvedValueOnce({
+        data: [],
+        has_more: true,
+        next_cursor: `page-${page}`,
+      });
+    }
+    await expect(fetchCompetitionPauseState(identity)).rejects.toThrow(
+      "Pause history could not be resolved"
+    );
+    expect(commonApiFetch).toHaveBeenCalledTimes(100);
+  });
   it("requests historical phases on the server before cursor pagination", async () => {
     jest
       .mocked(commonApiFetch)

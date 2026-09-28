@@ -1,4 +1,8 @@
 "use client";
+import {
+  getCompetitionRoute,
+  isMultiCompetitionEnabled,
+} from "@/helpers/competition.helpers";
 import { ApiCompetitionEntryStatus } from "@/generated/models/ApiCompetitionEntryStatus";
 import { useState } from "react";
 import Link from "next/link";
@@ -17,7 +21,6 @@ import { useCompetition } from "@/contexts/CompetitionContext";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { formatInteger } from "@/i18n/format";
-import { getCompetitionRoute } from "@/helpers/competition.helpers";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import CompetitionVote from "./CompetitionVote";
 import { COMPETITION_BUTTON } from "./CompetitionState";
@@ -138,14 +141,16 @@ export default function CompetitionEntryCard({
         >
           {t(locale, "competitions.viewDrop")}
         </Link>
-        <button
-          type="button"
-          className={COMPETITION_BUTTON}
-          aria-expanded={(selected ?? false) || showVote}
-          onClick={() => setShowVote((value) => !value)}
-        >
-          {t(locale, "competitions.voteValue")}
-        </button>
+        {isMultiCompetitionEnabled() && (
+          <button
+            type="button"
+            className={COMPETITION_BUTTON}
+            aria-expanded={(selected ?? false) || showVote}
+            onClick={() => setShowVote((value) => !value)}
+          >
+            {t(locale, "competitions.voteValue")}
+          </button>
+        )}
       </div>
       {((selected ?? false) || showVote) && (
         <CompetitionVote

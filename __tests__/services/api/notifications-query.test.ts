@@ -46,6 +46,26 @@ describe("notifications query options", () => {
     ]);
   });
 
+  it("continues from the raw page cursor even when all records are excluded", () => {
+    const options = getIdentityNotificationsInfiniteQueryOptions({
+      identity: "alice",
+    });
+    expect(
+      options.getNextPageParam({
+        notifications: [],
+        unread_count: 1,
+        nextPageParam: 100,
+      })
+    ).toBe(100);
+    expect(
+      options.getNextPageParam({
+        notifications: [],
+        unread_count: 0,
+        nextPageParam: null,
+      })
+    ).toBeNull();
+  });
+
   it("uses the same parameters and server headers in its query function", async () => {
     const headers = { Authorization: "Bearer token" };
     const options = getIdentityNotificationsInfiniteQueryOptions({

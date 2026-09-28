@@ -5,7 +5,7 @@ import { useWebSocket } from "@/services/websocket/useWebSocket";
 import { WsMessageType } from "@/helpers/Types";
 import { invalidateCompetition } from "@/services/api/competitions-api";
 
-export function parseCompetitionEvent(
+function parseCompetitionEvent(
   value: unknown
 ): { event_id: string; wave_id: string; competition_id: string } | null {
   if (value === null || typeof value !== "object") return null;

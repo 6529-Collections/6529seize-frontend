@@ -35,7 +35,7 @@
         "Voting credit is independent per competition. A budget can be shared across that competition or apply per entry. Zero removes a vote; negative values depend on the rules. Winner, withdrawal and disqualification release active spend while retaining history.",
         "Pause decisions stops winner selection while otherwise eligible entries and votes remain available. Approve may finalize accepted votes after voting closes when a hold or pause finishes. End and Cancel stop new work and preserve history; Archive keeps it in history. Terminal competitions can be cloned into new drafts but cannot reopen.",
         "Main Stage privileges belong only to an explicitly designated competition. Other competitions in the same wave do not inherit them. A wave containing native competition history cannot be deleted, and ordinary chat-history deletion preserves competition content.",
-        "If a competition cannot load, retry or return to Shared chat. Reload after changed rules, credit, or membership. Preview an existing drop again if its content changed before signing. Discovery and creation controls depend on availability; direct links may show unavailable support."
+        "If a competition cannot load, retry or return to Shared chat. Reload after changed rules, credit, or membership. Preview an existing drop again if its content changed before signing. Discovery, creation, participation and management controls depend on availability. Authorized direct links can still show history while these controls are unavailable; a link may show unavailable support if the server is not ready."
       ],
       "canonical_path": "/waves",
       "link_label": "Open Waves",
