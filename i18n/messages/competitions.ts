@@ -166,6 +166,7 @@ export const COMPETITION_MESSAGES = {
   "competitions.disqualified": "Disqualified",
   "competitions.winner": "Winner",
   "competitions.notification.updated": "Competition updated",
+  "competitions.notification.disqualified": "Competition entry disqualified",
   "competitions.notification.published": "Competition published",
   "competitions.notification.ended": "Competition ended",
   "competitions.notification.cancelled": "Competition cancelled",

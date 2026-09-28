@@ -44,7 +44,7 @@ const EVENT_LABELS = {
   COMPETITION_STARTED: "updated",
   COMPETITION_DECISION_COMPLETED: "winners",
   COMPETITION_UPDATED: "updated",
-  ENTRY_DISQUALIFIED: "updated",
+  ENTRY_DISQUALIFIED: "disqualified",
 } as const;
 
 function getEventLabel(event: string) {

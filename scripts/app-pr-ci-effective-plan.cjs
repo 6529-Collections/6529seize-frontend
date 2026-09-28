@@ -127,6 +127,8 @@ function applyEffectiveAppPrCiPlan(plan) {
         "tests/social/native-competition-sandbox.spec.ts",
         "tests/support/composerSandboxServer.cjs",
         "components/waves/WavesMobile.tsx",
+        "components/brain/BrainMobile.tsx",
+        "components/brain/my-stream/MyStreamWaveContent.tsx",
         "tests/packs.manifest.cjs",
         "openapi.yaml",
         ".github/workflows/app-pr-ci.yml",
