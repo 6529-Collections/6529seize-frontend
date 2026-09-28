@@ -2,6 +2,9 @@
 
 ## Overview
 
+For independently managed competitions in a shared wave, see
+[Competitions](../competitions/README.md).
+
 Use this area to create:
 
 - new waves (`Chat`, `Rank`, and `Approve`)

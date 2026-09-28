@@ -20,6 +20,7 @@ import React, {
 } from "react";
 import { getUserPageTabByRoute } from "@/components/user/layout/userTabs.config";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { getCompetitionRoute } from "@/helpers/competition.helpers";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import useCapacitor from "@/hooks/useCapacitor";
 import { getAuthTokenFingerprint } from "@/services/auth/auth-token-fingerprint";
@@ -71,7 +72,23 @@ const redirectConfig = {
   "the-memes": ({ id }: { id: string }) => `/the-memes/${id}`,
   "6529-gradient": ({ id }: { id: string }) => `/6529-gradient/${id}`,
   "meme-lab": ({ id }: { id: string }) => `/meme-lab/${id}`,
-  waves: ({ wave_id, drop_id }: { wave_id: string; drop_id: string }) => {
+  waves: ({
+    wave_id,
+    drop_id,
+    competition_id,
+    competition_entry_id,
+  }: {
+    wave_id: string;
+    drop_id: string;
+    competition_id?: string;
+    competition_entry_id?: string;
+  }) => {
+    if (competition_id) {
+      const entryQuery = competition_entry_id
+        ? `?entry=${encodeURIComponent(competition_entry_id)}`
+        : "";
+      return getCompetitionRoute(wave_id, competition_id) + entryQuery;
+    }
     return getWaveRoute({
       waveId: wave_id,
       serialNo: drop_id || undefined,

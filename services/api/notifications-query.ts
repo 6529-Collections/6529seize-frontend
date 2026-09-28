@@ -1,3 +1,4 @@
+import { isMultiCompetitionEnabled } from "@/helpers/competition.helpers";
 import type { QueryFunctionContext } from "@tanstack/react-query";
 
 import { QueryKey } from "@/components/react-query-wrapper/query-keys";
@@ -55,6 +56,7 @@ export const getIdentityNotificationsQueryKey = ({
         ? {}
         : { causeExclude: normalizedExclude }),
       version: NOTIFICATIONS_QUERY_VERSION,
+      ...(isMultiCompetitionEnabled() ? { includeCompetitions: true } : {}),
     },
   ] as const;
 };

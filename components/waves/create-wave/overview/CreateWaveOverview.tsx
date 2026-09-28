@@ -1,4 +1,5 @@
 import type { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
+import { isMultiCompetitionEnabled } from "@/helpers/competition.helpers";
 import type {
   CreateWaveDisplayConfig,
   WaveOverviewConfig,
@@ -101,16 +102,28 @@ export default function CreateWaveOverview({
           }
         />
       </div>
-      <CreateWaveType
-        isSubwave={isSubwave}
-        selected={overview.typeSelected ? overview.type : null}
-        errors={errors}
-        onChange={(type) =>
-          // Record the explicit pick so the selector highlights it and the
-          // Overview "type required" gate clears.
-          setOverview({ ...overview, type, typeSelected: true })
+      <details
+        open={isMultiCompetitionEnabled() ? undefined : true}
+        className={
+          isMultiCompetitionEnabled()
+            ? "tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-p-4"
+            : "[&>summary]:tw-hidden"
         }
-      />
+      >
+        <summary className="tw-cursor-pointer tw-text-sm tw-text-iron-300">
+          {t(locale, "competitions.first")}
+        </summary>
+        <CreateWaveType
+          isSubwave={isSubwave}
+          selected={overview.typeSelected ? overview.type : null}
+          errors={errors}
+          onChange={(type) =>
+            // Record the explicit pick so the selector highlights it and the
+            // Overview "type required" gate clears.
+            setOverview({ ...overview, type, typeSelected: true })
+          }
+        />
+      </details>
       {overview.type === ApiWaveType.Rank && (
         <RankScheduleModeSelector
           ongoingRanking={ongoingRanking}

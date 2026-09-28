@@ -5,6 +5,52 @@
   "base_url": "https://6529.io",
   "records": [
     {
+      "id": "waves.native-competitions",
+      "kind": "workflow",
+      "title": "Several competitions in one wave",
+      "aliases": [
+        "parallel competitions",
+        "competition credits",
+        "create competition",
+        "pause decisions"
+      ],
+      "keywords": [
+        "wave",
+        "competitions",
+        "Rank",
+        "Approve",
+        "entries",
+        "votes",
+        "credits",
+        "results",
+        "shared chat",
+        "cancel",
+        "archive"
+      ],
+      "facts": [
+        "Where the competition experience is available, use Competitions in a wave to browse its active competitions and history. Each competition has its own entries, votes, rules, budget and results while Shared chat returns to the wave conversation.",
+        "Competition links use /waves/{waveId}/competitions/{competitionId}; an entry link adds ?entry={entryId}. An original competition in an older wave keeps its established experience when another competition is added.",
+        "Wave administrators can create Rank or Approve drafts and publish them. Drafts are visible only to wave administrators. Published types cannot change; after the first entry, participation, voting, signing, timing, decision and outcome rules are fixed. Title, description and presentation can still be updated.",
+        "Entries can create a new drop or attach an eligible existing drop authored in the same wave after preview. A drop can have only one active entry in an unfinished competition at a time. Signed entries and winners cannot be edited; unsigned active edits must continue satisfying competition rules.",
+        "Voting credit is independent per competition. A budget can be shared across that competition or apply per entry. Zero removes a vote; negative values depend on the rules. Winner, withdrawal and disqualification release active spend while retaining history.",
+        "Pause decisions stops winner selection while otherwise eligible entries and votes remain available. Approve may finalize accepted votes after voting closes when a hold or pause finishes. End and Cancel stop new work and preserve history; Archive keeps it in history. Terminal competitions can be cloned into new drafts but cannot reopen.",
+        "Main Stage privileges belong only to an explicitly designated competition. Other competitions in the same wave do not inherit them. A wave containing native competition history cannot be deleted, and ordinary chat-history deletion preserves competition content.",
+        "If a competition cannot load, retry or return to Shared chat. Reload after changed rules, credit, or membership. Preview an existing drop again if its content changed before signing. Discovery and creation controls depend on availability; direct links may show unavailable support."
+      ],
+      "canonical_path": "/waves",
+      "link_label": "Open Waves",
+      "related_paths": ["/waves/create"],
+      "tags": ["waves", "competitions", "voting", "creation"],
+      "source_refs": [
+        "components/competitions/CompetitionHub.tsx",
+        "components/competitions/CompetitionDetail.tsx",
+        "components/competitions/CompetitionExistingEntry.tsx",
+        "components/competitions/CompetitionAdmin.tsx",
+        "ops/docs/waves/competitions/feature-competitions.md",
+        "ops/docs/waves/competitions/feature-manage-competitions.md"
+      ]
+    },
+    {
       "id": "media.video-player",
       "kind": "ui_affordance",
       "title": "Video playback controls and timeline",

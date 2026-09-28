@@ -1,4 +1,5 @@
 "use client";
+import CompetitionDiscoveryLink from "@/components/competitions/CompetitionDiscoveryLink";
 
 import type { ReactNode } from "react";
 import React, {
@@ -329,6 +330,7 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
           isApp={isApp}
         />
       )}
+      {isApp && waveId && <CompetitionDiscoveryLink waveId={waveId} />}
       {isApp &&
         wave &&
         (activeView === BrainView.ABOUT ? (

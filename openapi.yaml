@@ -4525,50 +4525,806 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiMintMetricsPage"
-  /v3/waves/{wave_id}:
+  /v3/waves/{wave_id}/competitions/{competition_id}/entry-content-candidate/{drop_id}:
     get:
       tags:
-        - CompetitionsV3
-      summary: Read a wave as a competition hub without selecting a competition
-      operationId: getWaveHubV3
-      security:
-        - bearerAuth: []
-        - {}
-      x-6529-router:
-        enabled: true
-        auth: optional
-        typeImportGroup: competitions-v3
-        handler:
-          import: "@/api/competitions/competitions-v3.handlers"
-          name: handleGetWaveHubV3
+        - Competitions
+      summary: getCompetitionEntryContentCandidateV3
+      operationId: getCompetitionEntryContentCandidateV3
       parameters:
         - name: wave_id
           in: path
           required: true
           schema:
             type: string
-            minLength: 1
-            maxLength: 100
+        - name: competition_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: drop_id
+          in: path
+          required: true
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/competitions/competition-commands.handlers"
+          name: handleGetCompetitionEntryContentCandidateV3
       responses:
         "200":
-          description: Visible competition hub
+          description: Authorized competition resource
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCreateDropRequest"
+        "400":
+          description: Invalid request.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+        "401":
+          description: Authentication required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+        "403":
+          description: Action not permitted.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+        "404":
+          description: Resource missing or inaccessible
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+  /v3/waves/{wave_id}/competitions/{competition_id}/entries/{entry_id}/content:
+    get:
+      tags:
+        - Competitions
+      summary: getCompetitionEntryContentV3
+      operationId: getCompetitionEntryContentV3
+      parameters:
+        - name: wave_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: competition_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: entry_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      security: []
+      x-6529-router:
+        enabled: true
+        auth: optional
+        handler:
+          import: "@/api/competitions/competition-commands.handlers"
+          name: handleGetCompetitionEntryContentV3
+      responses:
+        "200":
+          description: Authorized competition resource
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCreateDropRequest"
+        "400":
+          description: Invalid request.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+        "404":
+          description: Resource missing or inaccessible
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+  /v3/waves/{wave_id}/competitions/{competition_id}/configuration:
+    get:
+      tags:
+        - Competitions
+      summary: getCompetitionConfigurationV3
+      operationId: getCompetitionConfigurationV3
+      parameters:
+        - name: wave_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: competition_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/competitions/competition-commands.handlers"
+          name: handleGetCompetitionConfigurationV3
+      responses:
+        "200":
+          description: Authorized competition resource
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCompetitionDraftInput"
+        "400":
+          description: Invalid request.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+        "401":
+          description: Authentication required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+        "403":
+          description: Action not permitted.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+        "404":
+          description: Resource missing or inaccessible
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+  /v3/waves/{wave_id}/competitions/{competition_id}/awards:
+    get:
+      tags:
+        - Competitions
+      summary: list Competition Awards V3
+      operationId: listCompetitionAwardsV3
+      parameters:
+        - name: wave_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: competition_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: cursor
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            maximum: 100
+            default: 50
+      security: []
+      x-6529-router:
+        enabled: true
+        auth: optional
+        handler:
+          import: "@/api/competitions/competition-commands.handlers"
+          name: handleListCompetitionAwardsV3
+      responses:
+        "200":
+          description: Command result or identical idempotent replay.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCompetitionAwardPage"
+        "400":
+          description: Invalid request.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+        "401":
+          description: Authentication required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+        "403":
+          description: Action not permitted.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+        "404":
+          description: Resource missing or parent not visible.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+        "409":
+          description: Config, lifecycle, signature nonce or idempotency conflict.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+        "422":
+          description: Competition eligibility or credit requirement not met.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+  /v3/waves/{wave_id}/competitions/{competition_id}/votes/me:
+    get:
+      tags:
+        - Competitions
+      summary: list Competition My Votes V3
+      operationId: listCompetitionMyVotesV3
+      parameters:
+        - name: wave_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: competition_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: cursor
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            maximum: 100
+            default: 50
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/competitions/competition-commands.handlers"
+          name: handleListCompetitionMyVotesV3
+      responses:
+        "200":
+          description: Command result or identical idempotent replay.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCompetitionMyVotePage"
+        "400":
+          description: Invalid request.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+        "401":
+          description: Authentication required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+        "403":
+          description: Action not permitted.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+        "404":
+          description: Resource missing or parent not visible.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+        "409":
+          description: Config, lifecycle, signature nonce or idempotency conflict.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+        "422":
+          description: Competition eligibility or credit requirement not met.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+  /v3/waves/{wave_id}/competitions/{competition_id}/credits/me:
+    get:
+      tags:
+        - Competitions
+      summary: get Competition Credit Budget V3
+      operationId: getCompetitionCreditBudgetV3
+      parameters:
+        - name: wave_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: competition_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: entry_id
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/competitions/competition-commands.handlers"
+          name: handleGetCompetitionCreditBudgetV3
+      responses:
+        "200":
+          description: Command result or identical idempotent replay.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCompetitionCreditBudget"
+        "400":
+          description: Invalid request.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+        "401":
+          description: Authentication required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+        "403":
+          description: Action not permitted.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+        "404":
+          description: Resource missing or parent not visible.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+        "409":
+          description: Config, lifecycle, signature nonce or idempotency conflict.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+        "422":
+          description: Competition eligibility or credit requirement not met.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+  /v3/waves/{wave_id}/competitions/{competition_id}/entries/{entry_id}/votes/me:
+    put:
+      tags:
+        - Competitions
+      summary: set Competition Vote V3
+      operationId: setCompetitionVoteV3
+      parameters:
+        - name: wave_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: competition_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: entry_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/competitions/competition-commands.handlers"
+          name: handleSetCompetitionVoteV3
+      responses:
+        "200":
+          description: Command result or identical idempotent replay.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCompetitionCreditBudget"
+        "400":
+          description: Invalid request.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+        "401":
+          description: Authentication required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+        "403":
+          description: Action not permitted.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+        "404":
+          description: Resource missing or parent not visible.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+        "409":
+          description: Config, lifecycle, signature nonce or idempotency conflict.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+        "422":
+          description: Competition eligibility or credit requirement not met.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiSetCompetitionVoteRequest"
+  /v3/waves/{wave_id}/competitions/{competition_id}/entries/{entry_id}/actions/{action}:
+    post:
+      tags:
+        - Competitions
+      summary: execute Competition Entry Action V3
+      operationId: executeCompetitionEntryActionV3
+      parameters:
+        - name: wave_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: competition_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: entry_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: action
+          in: path
+          required: true
+          schema:
+            type: string
+            enum:
+              - withdraw
+              - disqualify
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/competitions/competition-commands.handlers"
+          name: handleExecuteCompetitionEntryActionV3
+      responses:
+        "200":
+          description: Command result or identical idempotent replay.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCompetitionEntry"
+        "400":
+          description: Invalid request.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+        "401":
+          description: Authentication required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+        "403":
+          description: Action not permitted.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+        "404":
+          description: Resource missing or parent not visible.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+        "409":
+          description: Config, lifecycle, signature nonce or idempotency conflict.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+        "422":
+          description: Competition eligibility or credit requirement not met.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiCompetitionActionRequest"
+  /v3/waves/{wave_id}/competitions/{competition_id}/actions/{action}:
+    post:
+      tags:
+        - Competitions
+      summary: execute Competition Action V3
+      operationId: executeCompetitionActionV3
+      parameters:
+        - name: wave_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: competition_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: action
+          in: path
+          required: true
+          schema:
+            type: string
+            enum:
+              - publish
+              - end
+              - cancel
+              - archive
+              - clone
+              - pause
+              - resume
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/competitions/competition-commands.handlers"
+          name: handleExecuteCompetitionActionV3
+      responses:
+        "200":
+          description: Command result or identical idempotent replay.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCompetition"
+        "400":
+          description: Invalid request.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+        "401":
+          description: Authentication required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+        "403":
+          description: Action not permitted.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+        "404":
+          description: Resource missing or parent not visible.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+        "409":
+          description: Config, lifecycle, signature nonce or idempotency conflict.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+        "422":
+          description: Competition eligibility or credit requirement not met.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiCompetitionActionRequest"
+  /v3/waves:
+    post:
+      tags:
+        - Competitions
+      summary: create Wave Hub V3
+      operationId: createWaveHubV3
+      parameters: []
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/competitions/competition-commands.handlers"
+          name: handleCreateWaveHubV3
+      responses:
+        "200":
+          description: Command result or identical idempotent replay.
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiWaveV3"
         "400":
-          description: Invalid wave identifier
+          description: Invalid request.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiCompetitionError"
+                $ref: "#/components/schemas/ApiErrorResponse"
+        "401":
+          description: Authentication required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+        "403":
+          description: Action not permitted.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
         "404":
-          description: Wave is absent, private, or unified reads are disabled
+          description: Resource missing or parent not visible.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiCompetitionError"
+                $ref: "#/components/schemas/ApiErrorResponse"
+        "409":
+          description: Config, lifecycle, signature nonce or idempotency conflict.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+        "422":
+          description: Competition eligibility or credit requirement not met.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiCreateWaveHubRequest"
   /v3/waves/{wave_id}/competitions:
+    post:
+      tags:
+        - Competitions
+      summary: create Competition V3
+      operationId: createCompetitionV3
+      parameters:
+        - name: wave_id
+          in: path
+          required: true
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/competitions/competition-commands.handlers"
+          name: handleCreateCompetitionV3
+      responses:
+        "200":
+          description: Command result or identical idempotent replay.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCompetition"
+        "400":
+          description: Invalid request.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+        "401":
+          description: Authentication required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+        "403":
+          description: Action not permitted.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+        "404":
+          description: Resource missing or parent not visible.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+        "409":
+          description: Config, lifecycle, signature nonce or idempotency conflict.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+        "422":
+          description: Competition eligibility or credit requirement not met.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiCreateCompetitionRequest"
     get:
       tags:
         - CompetitionsV3
@@ -4665,6 +5421,80 @@ paths:
               schema:
                 $ref: "#/components/schemas/ApiCompetitionError"
   /v3/waves/{wave_id}/competitions/{competition_id}:
+    patch:
+      tags:
+        - Competitions
+      summary: update Competition V3
+      operationId: updateCompetitionV3
+      parameters:
+        - name: wave_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: competition_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/competitions/competition-commands.handlers"
+          name: handleUpdateCompetitionV3
+      responses:
+        "200":
+          description: Command result or identical idempotent replay.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCompetition"
+        "400":
+          description: Invalid request.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+        "401":
+          description: Authentication required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+        "403":
+          description: Action not permitted.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+        "404":
+          description: Resource missing or parent not visible.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+        "409":
+          description: Config, lifecycle, signature nonce or idempotency conflict.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+        "422":
+          description: Competition eligibility or credit requirement not met.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiUpdateCompetitionRequest"
     get:
       tags:
         - CompetitionsV3
@@ -4715,72 +5545,81 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiCompetitionError"
-  /v3/waves/{wave_id}/competitions/{competition_id}/versions:
-    get:
+  /v3/waves/{wave_id}/competitions/{competition_id}/entries:
+    post:
       tags:
-        - CompetitionsV3
-      summary: List immutable competition configuration versions newest first
-      operationId: listCompetitionVersionsV3
-      security:
-        - bearerAuth: []
-        - {}
-      x-6529-router:
-        enabled: true
-        auth: optional
-        typeImportGroup: competitions-v3
-        handler:
-          import: "@/api/competitions/competitions-v3.handlers"
-          name: handleListCompetitionVersionsV3
+        - Competitions
+      summary: create Competition Entry V3
+      operationId: createCompetitionEntryV3
       parameters:
         - name: wave_id
           in: path
           required: true
           schema:
             type: string
-            minLength: 1
-            maxLength: 100
         - name: competition_id
           in: path
           required: true
           schema:
             type: string
             format: uuid
-        - name: cursor
-          in: query
-          required: false
-          schema:
-            type: string
-            minLength: 1
-            maxLength: 1000
-        - name: limit
-          in: query
-          required: false
-          schema:
-            type: integer
-            format: int32
-            minimum: 1
-            maximum: 100
-            default: 50
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/competitions/competition-commands.handlers"
+          name: handleCreateCompetitionEntryV3
       responses:
         "200":
-          description: Newest-first version page; non-public actor fields are omitted
+          description: Command result or identical idempotent replay.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiCompetitionConfigVersionPage"
+                $ref: "#/components/schemas/ApiCompetitionEntry"
         "400":
-          description: Invalid limit or cursor
+          description: Invalid request.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiCompetitionError"
+                $ref: "#/components/schemas/ApiErrorResponse"
+        "401":
+          description: Authentication required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+        "403":
+          description: Action not permitted.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
         "404":
-          description: Masked parent or child mismatch
+          description: Resource missing or parent not visible.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiCompetitionError"
-  /v3/waves/{wave_id}/competitions/{competition_id}/entries:
+                $ref: "#/components/schemas/ApiErrorResponse"
+        "409":
+          description: Config, lifecycle, signature nonce or idempotency conflict.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+        "422":
+          description: Competition eligibility or credit requirement not met.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiCreateCompetitionEntryRequest"
     get:
       tags:
         - CompetitionsV3
@@ -4869,6 +5708,114 @@ paths:
                 $ref: "#/components/schemas/ApiCompetitionEntryPage"
         "400":
           description: Invalid filter, sort, limit, or cursor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCompetitionError"
+        "404":
+          description: Masked parent or child mismatch
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCompetitionError"
+  /v3/waves/{wave_id}:
+    get:
+      tags:
+        - CompetitionsV3
+      summary: Read a wave as a competition hub without selecting a competition
+      operationId: getWaveHubV3
+      security:
+        - bearerAuth: []
+        - {}
+      x-6529-router:
+        enabled: true
+        auth: optional
+        typeImportGroup: competitions-v3
+        handler:
+          import: "@/api/competitions/competitions-v3.handlers"
+          name: handleGetWaveHubV3
+      parameters:
+        - name: wave_id
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 100
+      responses:
+        "200":
+          description: Visible competition hub
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiWaveV3"
+        "400":
+          description: Invalid wave identifier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCompetitionError"
+        "404":
+          description: Wave is absent, private, or unified reads are disabled
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCompetitionError"
+  /v3/waves/{wave_id}/competitions/{competition_id}/versions:
+    get:
+      tags:
+        - CompetitionsV3
+      summary: List immutable competition configuration versions newest first
+      operationId: listCompetitionVersionsV3
+      security:
+        - bearerAuth: []
+        - {}
+      x-6529-router:
+        enabled: true
+        auth: optional
+        typeImportGroup: competitions-v3
+        handler:
+          import: "@/api/competitions/competitions-v3.handlers"
+          name: handleListCompetitionVersionsV3
+      parameters:
+        - name: wave_id
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 100
+        - name: competition_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: cursor
+          in: query
+          required: false
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 1000
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+            maximum: 100
+            default: 50
+      responses:
+        "200":
+          description: Newest-first version page; non-public actor fields are omitted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCompetitionConfigVersionPage"
+        "400":
+          description: Invalid limit or cursor
           content:
             application/json:
               schema:
@@ -10931,6 +11878,15 @@ paths:
           import: "@/api/notifications/notifications-v2.handlers"
           name: handleGetNotificationsV2
       parameters:
+        - name: include_competitions
+          in: query
+          description: >-
+            Opt in to native competition lifecycle notifications and their
+            unread count. Defaults to false to preserve existing clients.
+          required: false
+          schema:
+            type: boolean
+            default: false
         - name: limit
           in: query
           description: Default is 10
@@ -24161,6 +25117,10 @@ components:
         - cancelled_at
         - archived_at
       properties:
+        presentation:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiCreateWaveMetadataRequest"
         id:
           type: string
           format: uuid
@@ -24222,6 +25182,92 @@ components:
           type: integer
           format: int64
           nullable: true
+    ApiCompetitionActionRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - idempotency_key
+        - config_version
+      properties:
+        idempotency_key: &ref_12
+          type: string
+          format: uuid
+          description: >-
+            Stable client-generated command identity. Reuse for identical
+            retries only.
+        config_version: &ref_13
+          type: integer
+          format: int64
+          minimum: 1
+        reason:
+          type: string
+          nullable: true
+          maxLength: 2000
+        starts_at:
+          type: integer
+          format: int64
+          nullable: true
+        ends_at:
+          type: integer
+          format: int64
+          nullable: true
+    ApiCompetitionAward:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - decision_id
+        - entry_id
+        - outcome_position
+        - description
+        - type
+        - credit
+        - rep_category
+        - amount
+      properties:
+        id:
+          type: string
+          format: uuid
+        decision_id:
+          type: string
+          format: uuid
+        entry_id:
+          type: string
+          format: uuid
+        outcome_position:
+          type: integer
+          format: int64
+        description:
+          type: string
+        type:
+          type: string
+        credit:
+          type: string
+          nullable: true
+        rep_category:
+          type: string
+          nullable: true
+        amount:
+          type: integer
+          format: int64
+          nullable: true
+    ApiCompetitionAwardPage:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - next_cursor
+        - has_more
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiCompetitionAward"
+        next_cursor:
+          type: string
+          nullable: true
+        has_more:
+          type: boolean
     ApiCompetitionCapability:
       type: string
       enum:
@@ -24279,6 +25325,58 @@ components:
           nullable: true
         has_more:
           type: boolean
+    ApiCompetitionCreditBudget:
+      type: object
+      additionalProperties: false
+      required:
+        - competition_id
+        - profile_id
+        - entry_id
+        - credit_type
+        - credit_scope
+        - available
+        - spent
+        - remaining
+        - current_vote
+        - min_vote
+        - max_vote
+      properties:
+        competition_id:
+          type: string
+          format: uuid
+        profile_id:
+          type: string
+        entry_id:
+          type: string
+          nullable: true
+        credit_type:
+          $ref: "#/components/schemas/ApiWaveCreditType"
+        credit_scope:
+          $ref: "#/components/schemas/ApiWaveCreditScope"
+        available:
+          type: integer
+          format: int64
+          minimum: 0
+        spent:
+          type: integer
+          format: int64
+          nullable: true
+        remaining:
+          type: integer
+          format: int64
+          nullable: true
+        current_vote:
+          type: integer
+          format: int64
+          nullable: true
+        min_vote:
+          type: integer
+          format: int64
+          nullable: true
+        max_vote:
+          type: integer
+          format: int64
+          nullable: true
     ApiCompetitionDecision:
       type: object
       additionalProperties: false
@@ -24433,6 +25531,40 @@ components:
           nullable: true
         has_more:
           type: boolean
+    ApiCompetitionDraftInput:
+      type: object
+      additionalProperties: false
+      required:
+        - title
+        - description
+        - participation
+        - voting
+        - rules
+        - outcomes
+        - presentation
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 250
+        description:
+          type: string
+          nullable: true
+          maxLength: 50000
+        participation:
+          $ref: "#/components/schemas/ApiCreateNewWaveParticipationConfig"
+        voting:
+          $ref: "#/components/schemas/ApiCreateNewWaveVotingConfig"
+        rules:
+          $ref: "#/components/schemas/ApiCompetitionRulesInput"
+        outcomes:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiCreateWaveOutcome"
+        presentation:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiCreateWaveMetadataRequest"
     ApiCompetitionEntry:
       type: object
       additionalProperties: false
@@ -24449,6 +25581,13 @@ components:
         - won_at
         - decision_id
       properties:
+        meme_card_id:
+          type: integer
+          format: int64
+          nullable: true
+          description: >-
+            Minted card associated with this designated competition entry,
+            independently of shared drop type.
         id:
           type: string
           format: uuid
@@ -24621,6 +25760,46 @@ components:
         - ENDED
         - CANCELLED
         - ARCHIVED
+    ApiCompetitionMyVote:
+      type: object
+      additionalProperties: false
+      required:
+        - entry_id
+        - drop_id
+        - value
+        - credit_spent
+        - entry_status
+      properties:
+        entry_id:
+          type: string
+          format: uuid
+        drop_id:
+          type: string
+        value:
+          type: integer
+          format: int64
+        credit_spent:
+          type: integer
+          format: int64
+        entry_status:
+          $ref: "#/components/schemas/ApiCompetitionEntryStatus"
+    ApiCompetitionMyVotePage:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - next_cursor
+        - has_more
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiCompetitionMyVote"
+        next_cursor:
+          type: string
+          nullable: true
+        has_more:
+          type: boolean
     ApiCompetitionOutcome:
       type: object
       additionalProperties: false
@@ -24825,6 +26004,67 @@ components:
           type: boolean
         administer:
           type: boolean
+    ApiCompetitionRulesInput:
+      type: object
+      additionalProperties: false
+      required:
+        - type
+        - winning_threshold
+        - winning_threshold_min_duration_ms
+        - max_winners
+        - max_votes_per_identity_to_drop
+        - time_lock_ms
+        - decisions_strategy
+      properties:
+        type:
+          type: string
+          enum:
+            - RANK
+            - APPROVE
+        winning_threshold:
+          type: integer
+          format: int64
+          nullable: true
+        winning_threshold_min_duration_ms:
+          type: integer
+          format: int64
+          nullable: true
+        max_winners:
+          type: integer
+          format: int64
+          nullable: true
+        max_votes_per_identity_to_drop:
+          type: integer
+          format: int64
+          nullable: true
+        time_lock_ms:
+          type: integer
+          format: int64
+          nullable: true
+        decisions_strategy:
+          anyOf:
+            - type: "null"
+            - $ref: "#/components/schemas/ApiWaveDecisionsStrategy"
+    ApiCompetitionSignature:
+      type: object
+      additionalProperties: false
+      required:
+        - message
+        - signature
+      properties:
+        message:
+          type: string
+          maxLength: 10000
+          description: >-
+            Canonical JSON 6529-competition-v1 envelope binding action,
+            actor_profile_id, actor_wallet, wave_id, competition_id,
+            competition_entry_id, drop_id, config_version, payload_hash, nonce,
+            issued_at and expires_at. Sign the exact UTF-8 message with
+            personal_sign. Lifetime at most five minutes; nonce UUID is
+            atomically single-use.
+        signature:
+          type: string
+          maxLength: 20000
     ApiCompetitionSortDirection:
       type: string
       enum:
@@ -25752,6 +26992,38 @@ components:
           type: string
         status:
           $ref: "#/components/schemas/ApiAttachmentStatus"
+    ApiCreateCompetitionEntryRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - idempotency_key
+        - config_version
+      properties:
+        idempotency_key: *ref_12
+        config_version: *ref_13
+        drop:
+          $ref: "#/components/schemas/ApiCreateDropRequest"
+        drop_id:
+          type: string
+          maxLength: 100
+        drop_content_hash:
+          type: string
+          pattern: ^[0-9a-f]{64}$
+          description: >-
+            Required when a signed existing drop is attached. SHA-256 of the
+            canonical sanitized content snapshot; checked under the drop lock.
+        signature:
+          $ref: "#/components/schemas/ApiCompetitionSignature"
+    ApiCreateCompetitionRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - idempotency_key
+        - config
+      properties:
+        idempotency_key: *ref_12
+        config:
+          $ref: "#/components/schemas/ApiCompetitionDraftInput"
     ApiCreateConnectionShareRequest:
       type: object
       required:
@@ -26587,6 +27859,40 @@ components:
           type: boolean
         signer_address:
           type: string
+    ApiCreateWaveHubRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - idempotency_key
+        - name
+        - picture
+        - description_drop
+        - visibility
+        - chat
+        - admin_group
+      properties:
+        idempotency_key: *ref_12
+        name:
+          type: string
+          minLength: 1
+          maxLength: 250
+        picture:
+          type: string
+          format: uri
+          pattern: ^https://
+          description: HTTPS URL for the wave picture, or null.
+          nullable: true
+        description_drop:
+          $ref: "#/components/schemas/ApiCreateWaveDropRequest"
+        visibility:
+          $ref: "#/components/schemas/ApiCreateNewWaveVisibilityConfig"
+        chat:
+          $ref: "#/components/schemas/ApiCreateNewWaveChatConfig"
+        admin_group:
+          $ref: "#/components/schemas/ApiCreateNewWaveScope"
+        parent_wave_id:
+          type: string
+          nullable: true
     ApiCreateWaveMetadataRequest:
       type: object
       required:
@@ -28990,11 +30296,11 @@ components:
           maxLength: 150
         order:
           $ref: "#/components/schemas/ApiMarketIdentity"
-        quantity: &ref_12
+        quantity: &ref_14
           type: string
           pattern: ^[1-9][0-9]{0,77}$
           maxLength: 78
-        amount_wei: *ref_12
+        amount_wei: *ref_14
         allocations:
           type: array
           minItems: 1
@@ -29027,11 +30333,11 @@ components:
           maxLength: 150
         order:
           $ref: "#/components/schemas/ApiMarketIdentity"
-        quantity: &ref_13
+        quantity: &ref_15
           type: string
           pattern: ^[1-9][0-9]{0,77}$
           maxLength: 78
-        amount_wei: *ref_13
+        amount_wei: *ref_15
         allocations:
           type: array
           minItems: 1
@@ -29048,12 +30354,12 @@ components:
       type: object
       additionalProperties: false
       properties:
-        start_time: &ref_14
+        start_time: &ref_16
           type: string
           pattern: ^(0|[1-9][0-9]{0,77})$
           maxLength: 78
-        end_time: *ref_14
-        salt: *ref_14
+        end_time: *ref_16
+        salt: *ref_16
       required:
         - start_time
         - end_time
@@ -29318,13 +30624,13 @@ components:
         transaction_hash:
           type: string
           pattern: ^0x[0-9a-fA-F]{64}$
-        block_number: &ref_15
+        block_number: &ref_17
           type: integer
           format: int64
         block_hash:
           type: string
           pattern: ^0x[0-9a-fA-F]{64}$
-        safe_block_number: *ref_15
+        safe_block_number: *ref_17
       required:
         - outcome
         - items
@@ -31908,6 +33214,21 @@ components:
     ApiNotificationAdditionalContextV2:
       type: object
       properties:
+        event_id:
+          type: string
+          description: Stable idempotency identifier for COMPETITION_LIFECYCLE.
+        event_type:
+          type: string
+        competition_id:
+          type: string
+          format: uuid
+        competition_title:
+          type: string
+        entry_id:
+          type: string
+          format: uuid
+        drop_id:
+          type: string
         amount:
           type: number
           format: double
@@ -32001,7 +33322,10 @@ components:
       description: >-
         Notification-specific additional context. For DROP_REACTED notifications
         this includes reaction and reactors, where each reactor only has handle,
-        pfp, and subscribed.
+        pfp, and subscribed. COMPETITION_LIFECYCLE always includes event_id,
+        event_type, wave_id, competition_id and competition_title; winner events
+        also include entry_id and drop_id. These identify the native competition
+        destination independently of the shared drop's legacy projection.
     ApiNotificationCause:
       type: string
       enum:
@@ -32019,6 +33343,7 @@ components:
         - ALL_DROPS
         - PRIORITY_ALERT
         - SUBSCRIPTION_COVERAGE
+        - COMPETITION_LIFECYCLE
     ApiNotificationDropReactedReactor:
       type: object
       required:
@@ -34310,6 +35635,12 @@ components:
         - device_id
         - token
       properties:
+        include_competitions:
+          type: boolean
+          default: false
+          description: >-
+            This installation supports native competition notifications and
+            badge counts. Omission clears that support for older clients.
         device_id:
           type: string
         token:
@@ -34866,6 +36197,26 @@ components:
           type: string
           enum:
             - web
+    ApiSetCompetitionVoteRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - idempotency_key
+        - config_version
+        - value
+      properties:
+        idempotency_key: *ref_12
+        config_version: *ref_13
+        value:
+          type: integer
+          format: int64
+          minimum: -9007199254740991
+          maximum: 9007199254740991
+          description: >-
+            Whole credit units within the JavaScript safe-integer range; the
+            competition credit budget applies an additional limit.
+        signature:
+          $ref: "#/components/schemas/ApiCompetitionSignature"
     ApiSetPinnedDropRequest:
       type: object
       required:
@@ -35724,6 +37075,18 @@ components:
           enum:
             - automatic
             - manual
+    ApiUpdateCompetitionRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - idempotency_key
+        - config_version
+        - config
+      properties:
+        idempotency_key: *ref_12
+        config_version: *ref_13
+        config:
+          $ref: "#/components/schemas/ApiCompetitionDraftInput"
     ApiUpdateDropRequest:
       type: object
       allOf:
@@ -37591,6 +38954,12 @@ components:
         - capabilities
         - permissions
       properties:
+        legacy_primary_competition_id:
+          type: string
+          nullable: true
+          description: >-
+            Immutable original competition selected by all legacy routes; null
+            for chat hubs.
         id:
           type: string
         name:
@@ -37624,6 +38993,8 @@ components:
         - chat
         - administer
       properties:
+        create_competition:
+          type: boolean
         view:
           type: boolean
         chat:

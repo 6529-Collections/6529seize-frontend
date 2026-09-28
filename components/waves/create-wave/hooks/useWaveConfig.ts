@@ -110,10 +110,16 @@ const getPrivilegeGroupDefaults = ({
 // eslint-disable-next-line max-lines-per-function -- Existing controller; initialize inherited access here so validation and submission share the same state.
 export function useWaveConfig({
   initialViewGroupId = null,
+  initialWaveType = ApiWaveType.Chat,
+  initialConfigTransform,
 }: {
   readonly initialViewGroupId?: string | null | undefined;
+  readonly initialWaveType?: ApiWaveType;
+  readonly initialConfigTransform?: (
+    config: CreateWaveConfig
+  ) => CreateWaveConfig;
 } = {}) {
-  const initialType = ApiWaveType.Chat;
+  const initialType = initialWaveType;
   const initialStep = CreateWaveStep.OVERVIEW;
 
   // Get initial config for a wave type
@@ -199,11 +205,10 @@ export function useWaveConfig({
   };
 
   // State management
-  const [config, setConfig] = useState<CreateWaveConfig>(
-    getInitialConfig({
-      type: initialType,
-    })
-  );
+  const [config, setConfig] = useState<CreateWaveConfig>(() => {
+    const initial = getInitialConfig({ type: initialType });
+    return initialConfigTransform ? initialConfigTransform(initial) : initial;
+  });
 
   const [endDateConfig, setEndDateConfig] = useState<EndDateConfig>({
     time: null,

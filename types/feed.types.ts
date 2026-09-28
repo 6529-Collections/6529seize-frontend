@@ -158,7 +158,23 @@ export type INotificationSubscriptionCoverage = {
   };
 };
 
+export type INotificationCompetitionLifecycle = Omit<
+  NotificationBase,
+  "related_identity"
+> & {
+  readonly cause: ApiNotificationCause.CompetitionLifecycle;
+  readonly additional_context: {
+    readonly wave_id: string;
+    readonly competition_id: string;
+    readonly competition_title: string;
+    readonly event_id: string;
+    readonly event_type: string;
+    readonly entry_id?: string;
+  };
+};
+
 export type TypedNotification =
+  | INotificationCompetitionLifecycle
   | INotificationIdentitySubscribed
   | INotificationIdentityMentioned
   | INotificationIdentityRep

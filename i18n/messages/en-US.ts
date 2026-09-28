@@ -1,4 +1,5 @@
 import emmaMessages from "@/i18n/messages/emma.en-US.json";
+import { COMPETITION_MESSAGES } from "@/i18n/messages/competitions";
 import { EN_US_DROP_METADATA_MESSAGES } from "@/i18n/messages/drop-metadata";
 import { EN_DROP_REQUIREMENT_MESSAGES } from "@/i18n/messages/drop-requirements";
 import artworkShareMessages from "@/i18n/messages/artworkShare.en-US.json";
@@ -2820,6 +2821,7 @@ const MEME_DATA_TABLE_MESSAGES = objectMessages("memeData", {
 const TOKEN_NUMBER_MESSAGE = "Token #{tokenId}";
 
 export const EN_US_MESSAGES = {
+  ...COMPETITION_MESSAGES,
   ...EN_DROP_REQUIREMENT_MESSAGES,
   ...EN_US_DROP_METADATA_MESSAGES,
   "drop.composer.image": "Image",

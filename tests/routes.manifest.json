@@ -2313,6 +2313,16 @@
     "/xtdh": {
       "classification": "crawlable",
       "family": "info"
+    },
+    "/waves/[wave]/competitions": {
+      "classification": "exempt",
+      "family": "social",
+      "exemptReason": "Native competition rollout requires an isolated mock API and explicit feature flag."
+    },
+    "/waves/[wave]/competitions/[competition]": {
+      "classification": "exempt",
+      "family": "social",
+      "exemptReason": "Native competition rollout requires scoped competition fixtures."
     }
   }
 }

@@ -1,4 +1,5 @@
 "use client";
+import CompetitionDiscoveryLink from "@/components/competitions/CompetitionDiscoveryLink";
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -686,6 +687,7 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({ waveId }) => {
       key={stableWaveKey}
     >
       {/* Always render tab container (hidden on app inside MyStreamWaveTabs) */}
+      <CompetitionDiscoveryLink waveId={wave.id} />
       <MyStreamWaveTabs
         wave={wave}
         viewMode={viewMode}

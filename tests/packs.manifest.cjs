@@ -376,6 +376,23 @@ const PACKS = [
     ["tests/social/wave-edit-drop-sandbox.spec.ts"],
     COMPOSER_SANDBOX_ENV
   ),
+  {
+    ...sandboxPack(
+      "test:e2e:native-competition-sandbox",
+      "Native competition context, parallel budgets and navigation against the local mock API.",
+      ["tests/social/native-competition-sandbox.spec.ts"],
+      {
+        ...AUTH_SANDBOX_ENV,
+        NEXT_PUBLIC_FEATURE_MULTI_COMPETITION: "true",
+        PLAYWRIGHT_BASE_URL: "http://localhost:3297",
+        PLAYWRIGHT_WEB_SERVER_URL: "http://localhost:3297",
+        PLAYWRIGHT_COMPOSER_SANDBOX_API_PORT: "4297",
+        NEXT_DEV_DIST_DIR: ".next-playwright-native-competition",
+      },
+      [DESKTOP, MOBILE]
+    ),
+    triggers: ["pr-ci", "manual"],
+  },
   sandboxPack(
     "test:e2e:signature-sandbox",
     "Signed participation sandbox that fails closed unsigned.",

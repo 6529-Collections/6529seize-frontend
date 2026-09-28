@@ -180,23 +180,18 @@ describe("waves multi-competition Phase 1 frontend contract", () => {
     });
   });
 
-  it("does not consume v3 competition resources in production frontend code", () => {
+  it("keeps native competition transport out of legacy drop and vote consumers", () => {
+    // Native competition rollout intentionally adds v3 consumers. Existing drop
+    // transports must still retain their legacy wave/drop contract.
     const roots = [
-      "app",
-      "components",
-      "contexts",
-      "helpers",
-      "hooks",
-      "lib",
-      "services",
-      "utils",
+      "components/waves/drops",
+      "components/waves/drop",
+      "components/waves/voting",
     ];
     const violations = roots
       .flatMap((root) => sourceFiles(path.join(projectRoot, root)))
       .filter((file) =>
-        /ApiCompetition|ApiWaveV3|\/v3\/waves\//.test(
-          fs.readFileSync(file, "utf8")
-        )
+        /ApiCompetition|ApiWaveV3|v3\/waves/.test(fs.readFileSync(file, "utf8"))
       )
       .map((file) => path.relative(projectRoot, file));
     expect(violations).toEqual([]);
