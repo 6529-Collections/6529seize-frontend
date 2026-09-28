@@ -41,6 +41,9 @@ This page owns compact-list behavior only. Drop-open action ownership stays in
 - Rank labels use ordinal place formatting across rows (`1st`, `2nd`, `3rd`,
   `4th`, and so on).
 - Rows can show preview image/media/text content.
+- GIF preview images use animated previews when available. If an animated
+  preview fails, the row tries a compatibility preview, which can be static.
+  The row does not download the full original GIF automatically.
 - Rows can show `Storm`, `Metadata`, and media indicators with tooltips.
 - Rows with configured rewards can show an `Outcome` badge with tooltip
   details.

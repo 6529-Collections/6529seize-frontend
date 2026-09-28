@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { WaveSmallLeaderboardItemContent } from "@/components/waves/small-leaderboard/WaveSmallLeaderboardItemContent";
 import { MemesSubmissionAdditionalInfoKey } from "@/components/waves/memes/submission/types/OperationalData";
@@ -87,6 +87,44 @@ describe("WaveSmallLeaderboardItemContent", () => {
     expect(
       screen.queryByRole("img", { name: "Preview image" })
     ).not.toBeInTheDocument();
+  });
+
+  it("uses an animated GIF preview and falls back without downloading the original", () => {
+    const original =
+      "https://d3lqz0a4bldqgf.cloudfront.net/drops/author/preview.gif";
+    render(
+      <WaveSmallLeaderboardItemContent
+        drop={{
+          ...baseDrop,
+          parts: [
+            { media: [{ url: "artwork.mp4", mime_type: "video/mp4" }], id: 1 },
+          ],
+          metadata: [
+            {
+              data_key: MemesSubmissionAdditionalInfoKey.ADDITIONAL_MEDIA,
+              data_value: JSON.stringify({ preview_image: original }),
+            },
+          ],
+        }}
+        onDropClick={jest.fn()}
+      />
+    );
+    const image = screen.getByRole("img", { name: "Preview image" });
+    expect(image).toHaveAttribute(
+      "src",
+      original.replace("preview.gif", "AUTOx450_gifv2/preview.gif")
+    );
+    expect(image).not.toHaveAttribute("srcset");
+    fireEvent.error(image);
+    expect(image).toHaveAttribute(
+      "src",
+      original.replace("preview.gif", "AUTOx450/preview.gif")
+    );
+    fireEvent.error(image);
+    expect(
+      screen.queryByRole("img", { name: "Preview image" })
+    ).not.toBeInTheDocument();
+    expect(screen.getByRole("status")).toHaveTextContent("Preview unavailable");
   });
 
   it("forwards custom content presentation to markdown rendering", () => {

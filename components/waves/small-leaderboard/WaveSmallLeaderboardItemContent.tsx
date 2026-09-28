@@ -6,15 +6,11 @@ import {
   getDropPreviewImageUrl,
 } from "@/helpers/waves/drop.helpers";
 import type { DropContentPresentation } from "@/components/waves/drops/dropContentPresentation";
-import {
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type MouseEvent,
-} from "react";
+import { useEffect, useMemo, useRef, useState, type MouseEvent } from "react";
 import { Tooltip } from "react-tooltip";
 import Image from "next/image";
+import { DropImagePreview } from "@/components/drops/view/item/content/media/DropImagePreview";
+import { isGifImageUrl } from "@/helpers/gif-preview.helpers";
 import WaveDropPartContentMedias from "../drops/WaveDropPartContentMedias";
 import WaveDropPartContentMarkdown from "../drops/WaveDropPartContentMarkdown";
 import { ImageScale, getScaledImageUri } from "@/helpers/image.helpers";
@@ -74,13 +70,24 @@ export const WaveSmallLeaderboardItemContent: React.FC<
         {previewImageUrl ? (
           <div className="tw-flex tw-w-full tw-justify-center">
             <div className="tw-relative tw-aspect-[4/3] tw-max-h-48 tw-w-full tw-max-w-[264px] tw-overflow-hidden tw-rounded-lg">
-              <Image
-                src={getScaledImageUri(previewImageUrl, ImageScale.AUTOx450)}
-                alt="Preview image"
-                fill
-                sizes="264px"
-                className="tw-object-contain"
-              />
+              {isGifImageUrl(previewImageUrl) ? (
+                <DropImagePreview
+                  originalSrc={previewImageUrl}
+                  imageScale={ImageScale.AUTOx450}
+                  alt="Preview image"
+                  fill
+                  sizes="264px"
+                  className="tw-object-contain"
+                />
+              ) : (
+                <Image
+                  src={getScaledImageUri(previewImageUrl, ImageScale.AUTOx450)}
+                  alt="Preview image"
+                  fill
+                  sizes="264px"
+                  className="tw-object-contain"
+                />
+              )}
             </div>
           </div>
         ) : (

@@ -24,6 +24,23 @@ const original = "https://d3lqz0a4bldqgf.cloudfront.net/drops/author/file.jpg";
 const preview = (size: string) =>
   original.replace("file.jpg", `${size}/file.jpg`);
 
+it("uses the animated 600px path for a submission's additional-media GIF", () => {
+  const submissionPreview =
+    "https://d3lqz0a4bldqgf.cloudfront.net/drops/author/preview/Survive-at-Dominio-PubliCC0.gif";
+  render(
+    <DropImagePreview
+      originalSrc={submissionPreview}
+      imageScale={ImageScale.AUTOx600}
+      alt="Submission preview"
+      fill
+    />
+  );
+  expect(screen.getByAltText("Submission preview")).toHaveAttribute(
+    "src",
+    submissionPreview.replace("/Survive-", "/AUTOx600_gifv2/Survive-")
+  );
+});
+
 it("tries only bounded previews and reports exhaustion once", () => {
   const onError = jest.fn();
   render(
