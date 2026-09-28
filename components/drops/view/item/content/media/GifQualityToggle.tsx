@@ -57,7 +57,10 @@ export function GifQualityToggle({
           <path d="M6 8v8m0-4h4m0-4v8m4-8v8h1a4 4 0 0 0 0-8h-1Z" />
         </svg>
       </button>
-      <span id={errorId} role="alert" aria-atomic="true" className="tw-sr-only">
+      <span id={errorId} hidden>
+        {error}
+      </span>
+      <span role="alert" aria-atomic="true" className="tw-sr-only">
         {failed ? error : ""}
       </span>
     </>

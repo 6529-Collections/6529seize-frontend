@@ -126,6 +126,7 @@ it("retains keyboard focus and announces each failure in the persistent alert", 
   for (let attempt = 0; attempt < 2; attempt++) {
     fireEvent.click(button);
     expect(button).toHaveAccessibleName("View optimized");
+    expect(button).not.toHaveAttribute("aria-describedby");
     expect(alert).toBeEmptyDOMElement();
     fireEvent.error(screen.getByAltText("Original GIF animation"));
     expect(screen.getByRole("alert")).toBe(alert);
@@ -133,6 +134,14 @@ it("retains keyboard focus and announces each failure in the persistent alert", 
     expect(button).toHaveFocus();
     expect(button).toHaveAttribute("aria-pressed", "false");
     expect(button).toHaveAccessibleDescription(
+      "Couldn't load the original GIF. You can try again."
+    );
+    const description = document.getElementById(
+      button.getAttribute("aria-describedby")!
+    );
+    expect(description).not.toBe(alert);
+    expect(description).not.toHaveAttribute("role", "alert");
+    expect(description).toHaveTextContent(
       "Couldn't load the original GIF. You can try again."
     );
   }
