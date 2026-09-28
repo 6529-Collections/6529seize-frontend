@@ -642,6 +642,9 @@ test.describe("Museum deterministic release acceptance @surface @readonly", () =
         page,
         MUSEUM_RELEASE_ACCEPTANCE_ROUTES.collection
       );
+      // Retained images can finish before async hydration scripts. Complete
+      // document loading before checking the client-rendered media status.
+      await page.waitForLoadState("load");
       await expectCollectionAcceptance(page);
       await expectMuseumGeometryAcceptance(page);
     }
@@ -660,6 +663,7 @@ test.describe("Museum deterministic release acceptance @surface @readonly", () =
         page,
         MUSEUM_RELEASE_ACCEPTANCE_ROUTES.acquisitions
       );
+      await page.waitForLoadState("load");
       await expectAcquisitionsAcceptance(page);
       await expectMuseumGeometryAcceptance(page);
     }
@@ -678,6 +682,7 @@ test.describe("Museum deterministic release acceptance @surface @readonly", () =
         page,
         MUSEUM_RELEASE_ACCEPTANCE_ROUTES.research
       );
+      await page.waitForLoadState("load");
       await expectResearchAcceptance(page);
       await expectMuseumGeometryAcceptance(page);
     }
