@@ -20,16 +20,15 @@ export function defineWaveVideoLayoutTests() {
     await waitForRouteReady(page);
     await dismissNextDevTools(page);
 
-    const heading = page.getByRole("heading", {
-      name: "Local linked video fixture",
-      exact: true,
-    });
-    await expect(heading).toBeVisible({
+    const card = page
+      .getByRole("heading", {
+        name: "Local linked video fixture",
+        exact: true,
+      })
+      .locator("xpath=ancestor::div[contains(@class, 'tw-border')][1]");
+    await expect(card).toBeVisible({
       timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
     });
-    const card = heading.locator(
-      "xpath=ancestor::div[contains(@class, 'tw-border')][1]"
-    );
     const video = card.getByLabel("Video player", { exact: true });
     await expect(video).toBeVisible();
     await expect
