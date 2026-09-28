@@ -17,6 +17,7 @@ import { createPortal } from "react-dom";
 import useKeyPressEvent from "react-use/lib/useKeyPressEvent";
 import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch";
 import { ExpandedMediaToolbar } from "./MediaActionToolbar";
+import { GifQualityToggle } from "./GifQualityToggle";
 
 export function requestCenteredImageFullscreen(
   fullscreenTarget: HTMLImageElement
@@ -250,42 +251,6 @@ export function ImageMediaModal({
           </div>
         )}
       </TransformWrapper>
-      {canPlayOriginal && (
-        <div className="tw-fixed tw-bottom-32 tw-left-1/2 tw-z-[1102] tw-flex tw-max-w-[80vw] -tw-translate-x-1/2 tw-flex-col tw-items-center tw-gap-2">
-          <p
-            role="alert"
-            aria-atomic="true"
-            className={
-              originalState.src === src && originalState.failed
-                ? "tw-m-0 tw-rounded-lg tw-bg-iron-950 tw-p-2 tw-text-sm tw-text-iron-100"
-                : "tw-sr-only"
-            }
-          >
-            {originalState.src === src && originalState.failed
-              ? t(DEFAULT_LOCALE, "drop.media.originalGifFailed")
-              : ""}
-          </p>
-          <Button
-            type="button"
-            variant="tertiary"
-            size="sm"
-            onClick={() =>
-              setOriginalState({
-                src,
-                playing: !playingOriginal,
-                failed: false,
-              })
-            }
-          >
-            {t(
-              DEFAULT_LOCALE,
-              playingOriginal
-                ? "drop.media.showGifPreview"
-                : "drop.media.playOriginalGif"
-            )}
-          </Button>
-        </div>
-      )}
       {!playingOriginal && previewUnavailable && (
         <div className="tw-fixed tw-bottom-20 tw-left-1/2 tw-z-[1102] -tw-translate-x-1/2">
           <Button
@@ -348,7 +313,21 @@ export function ImageMediaModal({
           fullscreenTargetAvailable && (playingOriginal || !previewUnavailable)
         }
         onClose={onClose}
-      />
+      >
+        {canPlayOriginal && (
+          <GifQualityToggle
+            showingOriginal={playingOriginal}
+            failed={originalState.src === src && originalState.failed}
+            onToggle={() =>
+              setOriginalState({
+                src,
+                playing: !playingOriginal,
+                failed: false,
+              })
+            }
+          />
+        )}
+      </ExpandedMediaToolbar>
     </div>,
     document.body
   );
