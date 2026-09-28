@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import UserPageHeaderBanner from "@/components/user/user-page-header/banner/UserPageHeaderBanner";
@@ -109,9 +109,7 @@ describe("UserPageHeaderBanner", () => {
       />
     );
 
-    const imageLayer = container.querySelector<HTMLElement>(
-      'div[style*="background-image"]'
-    );
+    const imageLayer = container.querySelector<HTMLElement>("img");
     expect(imageLayer).toHaveClass("md:tw-opacity-80");
     expect(imageLayer).not.toHaveClass("tw-mix-blend-lighten");
     expect(imageLayer).not.toHaveClass("tw-opacity-80");
@@ -156,5 +154,28 @@ describe("UserPageHeaderBanner", () => {
     expect(
       container.querySelector<HTMLElement>('div[class~="tw-bg-gradient-to-b"]')
     ).toHaveClass("tw-hidden", "md:tw-block");
+  });
+  it("uses a fresh GIF derivative and falls back to the legacy preview on failure", () => {
+    const banner =
+      "https://d3lqz0a4bldqgf.cloudfront.net/drops/author/banner.gif";
+    const { container } = render(
+      <UserPageHeaderBanner
+        profile={{ ...baseProfile, banner1: banner }}
+        defaultBanner1="#000"
+        defaultBanner2="#fff"
+        canEdit={false}
+        profileLabel="alice"
+      />
+    );
+    const image = container.querySelector("img")!;
+    expect(image).toHaveAttribute(
+      "src",
+      banner.replace("banner.gif", "AUTOx800_gifv2/banner.gif")
+    );
+    fireEvent.error(image);
+    expect(image).toHaveAttribute(
+      "src",
+      banner.replace("banner.gif", "AUTOx800/banner.gif")
+    );
   });
 });
