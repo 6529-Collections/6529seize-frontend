@@ -42,6 +42,10 @@ README). Device Farm test spec files live in `tests/device-farm/testspecs/`.
 - `workflow_dispatch` with `target` (`production` default, or `staging`) and
   `packs` (`all` default, `web`, `native`). The native pack always exercises
   production content because the shell hardcodes `https://6529.io`.
+- For missing artifacts from an already completed run, set `evidence_run_arn`
+  to its AWS Device Farm run ARN. This selects a read-only collection job and
+  skips planning, packaging, and all new tests. The recovered summary preserves
+  the original verdict; retrieving a failed run's logs does not make it pass.
 - Daily schedule (04:00 UTC): mobile web smoke against production. Monday's
   full pack includes web smoke plus native Android smoke and fuzz; Tuesday
   through Sunday run web only. The two schedules do not overlap.
@@ -173,6 +177,13 @@ templating, not syntax. Device Farm rejects the braces with
   step summary, and uploads the full Device Farm artifact set (videos, device
   logs, Appium logs, screenshots from `$DEVICEFARM_LOG_DIR`) as workflow
   artifacts (14-day retention).
+- Web artifact collection runs separately from the AWS action, after its run
+  identity and verdict are available. Each download streams to a temporary file
+  and allows at most three transport attempts; failed downloads do not discard
+  other devices' evidence. An exhausted download still fails the collection
+  step. These are artifact-transfer attempts, never test or navigation retries.
+  `run.json`, `jobs.json`, and `collection-errors.json` retain the known result
+  and identify missing evidence. The native pack's collection is unchanged.
 - The `QA report` job checks planning, packaging, and every requested pack.
   Failures, cancellations, and unexpected skips remain failures; scheduled
   failures ping Discord and the shared CI wave receiver. A planning failure

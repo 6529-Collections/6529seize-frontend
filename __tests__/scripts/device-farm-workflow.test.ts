@@ -119,20 +119,48 @@ describe("Device Farm cadence and pack selection", () => {
 });
 
 describe("Device Farm aggregate outcome", () => {
-  it("validates nested device evidence without accessing AWS", () => {
-    const result = spawnSync(
-      "python3",
-      ["scripts/__tests__/device_farm_report_test.py"],
-      {
-        encoding: "utf8",
-        timeout: 10_000,
-        env: { ...process.env, PYTHONDONTWRITEBYTECODE: "1" },
-      }
+  it("recovery cannot package or schedule tests and retains the original verdict", () => {
+    expect(workflow.jobs.plan.if).toBe("inputs.evidence_run_arn == ''");
+    expect(workflow.jobs["package-tests"].needs).toBe("plan");
+    expect(workflow.jobs["web-smoke"].needs).toContain("plan");
+    expect(workflow.jobs["native-android"].needs).toContain("plan");
+    const recovery = workflow.jobs["recover-evidence"];
+    expect(recovery.if).toBe(
+      "github.event_name == 'workflow_dispatch' && inputs.evidence_run_arn != ''"
     );
-    expect(result.error).toBeUndefined();
-    expect(result.stderr).toContain("OK");
-    expect(result.status).toBe(0);
+    expect(
+      recovery.steps
+        .filter((step: { run?: string }) => step.run)
+        .map((step: { run: string }) => step.run)
+    ).toEqual([
+      "python3 scripts/device-farm-artifacts.py",
+      "python3 scripts/device-farm-report.py",
+    ]);
+    expect(JSON.stringify(recovery)).not.toContain(
+      "aws-devicefarm-mobile-device-testing"
+    );
+    expect(recovery.steps.at(-1).env.RUN_RESULT).toBe(
+      "${{ steps.evidence.outputs.result }}"
+    );
   });
+
+  it.each(["report", "artifacts"])(
+    "validates device %s without accessing AWS",
+    (area) => {
+      const result = spawnSync(
+        "python3",
+        [`scripts/__tests__/device_farm_${area}_test.py`],
+        {
+          encoding: "utf8",
+          timeout: 10_000,
+          env: { ...process.env, PYTHONDONTWRITEBYTECODE: "1" },
+        }
+      );
+      expect(result.error).toBeUndefined();
+      expect(result.stderr).toContain("OK");
+      expect(result.status).toBe(0);
+    }
+  );
 
   function report(overrides: Record<string, string> = {}) {
     const root = fs.mkdtempSync(path.join(os.tmpdir(), "device-farm-report-"));
@@ -198,7 +226,9 @@ describe("Device Farm aggregate outcome", () => {
       "infrastructure/setup failed or tests did not run"
     );
     expect(workflow.jobs.report.needs).toContain("package-tests");
-    expect(workflow.jobs.report.if).toBe("always()");
+    expect(workflow.jobs.report.if).toBe(
+      "always() && inputs.evidence_run_arn == ''"
+    );
   });
 
   it("does not pass missing credentials or missing requested native access", () => {
@@ -218,13 +248,27 @@ describe("Device Farm aggregate outcome", () => {
     );
     expect(diagnosis.if).toBe("always()");
     expect(diagnosis.run).toContain("python3 scripts/device-farm-report.py");
-    expect(diagnosis.run).toContain("--query 'run.totalJobs'");
-    expect(diagnosis.env.ARTIFACT_FOLDER).toContain(
-      "steps.devicefarm.outputs.artifact-folder"
+    expect(diagnosis.env.EXPECTED_DEVICES).toContain(
+      "steps.evidence.outputs.expected-devices"
     );
+    expect(diagnosis.env.ARTIFACT_FOLDER).toContain("devicefarm-artifacts/");
     const action = steps.find(
       (step: { id: string }) => step.id === "devicefarm"
     );
     expect(action["continue-on-error"]).toBeUndefined();
+    expect(action.with["artifact-types"]).toBe("");
+    const collection = steps.find(
+      (step: { id: string }) => step.id === "evidence"
+    );
+    expect(collection.if).toBe(
+      "always() && steps.devicefarm.outputs.arn != ''"
+    );
+    expect(collection.run).toBe("python3 scripts/device-farm-artifacts.py");
+    expect(collection["continue-on-error"]).toBeUndefined();
+    const upload = steps.find(
+      (step: { name: string }) => step.name === "Upload Device Farm artifacts"
+    );
+    expect(upload.if).toBe("always() && steps.devicefarm.outputs.arn != ''");
+    expect(upload.with.path).toBe(collection.env.ARTIFACT_FOLDER);
   });
 });

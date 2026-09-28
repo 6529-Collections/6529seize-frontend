@@ -21,6 +21,8 @@ const CONTRACTS = [
     inputs: [
       /^\.github\/workflows\/device-farm-qa\.yml$/u,
       /^scripts\/device-farm-report\.py$/u,
+      /^scripts\/device-farm-artifacts\.py$/u,
+      /^scripts\/__tests__\/device_farm_artifacts_test\.py$/u,
       /^scripts\/__tests__\/device_farm_report_test\.py$/u,
       /^tests\/device-farm\//u,
     ],
