@@ -9,8 +9,10 @@ Clicking or tapping an image opens a modal viewer with zoom and quick actions.
 Attachment images use larger scaling in single-drop views than in thread cards.
 The viewer opens an optimized preview. For GIFs, the **HD** icon in the popup's
 top-right toolbar offers **View original**. Selecting it loads the original in
-the same viewer and highlights HD; **View optimized** switches back. Moving to
-another image resets this choice. Inline images have no HD control or GIF badge.
+the same viewer and highlights HD. The optimized image stays visible with a
+small loader until the original is ready; **View optimized** switches back or
+cancels a pending switch. Moving to another image resets this choice. Inline
+images have no HD control or GIF badge.
 
 ## Location in the Site
 
@@ -80,8 +82,9 @@ another image resets this choice. Inline images have no HD control or GIF badge.
   preview does not animate. The original loads only after that action and may
   use more bandwidth and device memory.
 - If loading the original fails, the viewer restores its preview, announces the
-  failure, and lets you try again. HD shows an error color and its tooltip
-  explains the failure; no playback controls or messages cover the artwork.
+  failure, and lets you try again. The HD button shows a warning icon and its
+  tooltip explains the failure. Selecting it retries and restores the HD icon;
+  no playback controls or messages cover the artwork.
 - If a fullscreen request is denied or interrupted, the modal stays open and
   the other image actions continue to work.
 - If fullscreen is unavailable, users can still open the source in a new tab.

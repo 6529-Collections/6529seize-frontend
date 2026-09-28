@@ -2,6 +2,7 @@
 
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
 import { useId } from "react";
 
@@ -38,24 +39,32 @@ export function GifQualityToggle({
           {
             "tw-bg-primary-500/20 tw-text-primary-300": showingOriginal,
             "tw-bg-transparent": !showingOriginal,
-            "tw-text-iron-400": !showingOriginal && !failed,
+            "tw-text-iron-100": !showingOriginal && !failed,
             "tw-text-error": !showingOriginal && failed,
           }
         )}
       >
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.6"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className="tw-size-5"
-          aria-hidden="true"
-        >
-          <rect x="2" y="4" width="20" height="16" rx="3" />
-          <path d="M6 8v8m0-4h4m0-4v8m4-8v8h1a4 4 0 0 0 0-8h-1Z" />
-        </svg>
+        {failed ? (
+          <ExclamationTriangleIcon
+            className="tw-size-5"
+            aria-hidden="true"
+            data-testid="gif-quality-error"
+          />
+        ) : (
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="tw-size-5"
+            aria-hidden="true"
+          >
+            <rect x="2" y="4" width="20" height="16" rx="3" />
+            <path d="M6 8v8m0-4h4m0-4v8m4-8v8h1a4 4 0 0 0 0-8h-1Z" />
+          </svg>
+        )}
       </button>
       <span id={errorId} hidden>
         {error}

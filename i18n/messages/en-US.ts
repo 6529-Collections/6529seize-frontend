@@ -4127,6 +4127,7 @@ export const EN_US_MESSAGES = {
   "drop.media.viewOriginal": "View original",
   "drop.media.viewOptimized": "View optimized",
   "drop.media.originalGifAlt": "Original GIF animation",
+  "drop.media.loadingOriginalGif": "Loading original GIF",
   "drop.media.originalGifFailed":
     "Couldn't load the original GIF. You can try again.",
   "drop.media.previewAlt": "Expanded image preview",
