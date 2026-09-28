@@ -70,6 +70,7 @@ describe("Device Farm browser startup and diagnostics", () => {
         })
       );
       const { capabilities } = mockRemote.mock.calls[0][0];
+      expect(capabilities).not.toHaveProperty("pageLoadStrategy");
       expect(capabilities).not.toHaveProperty("browserName");
       expect(capabilities).not.toHaveProperty("appium:initialDeeplinkUrl");
       expect(driver.execute.mock.calls).toEqual([
@@ -184,11 +185,17 @@ describe("Device Farm browser startup and diagnostics", () => {
   it("keeps Android and native capabilities separate", async () => {
     process.env["DEVICEFARM_DEVICE_PLATFORM_NAME"] = "Android";
     await startWebSession();
-    expect(mockRemote.mock.calls[0][0].capabilities.browserName).toBe("Chrome");
+    expect(mockRemote.mock.calls[0][0].capabilities).toMatchObject({
+      browserName: "Chrome",
+      pageLoadStrategy: "none",
+    });
     expect(mockRemote.mock.calls[0][0].capabilities).not.toHaveProperty(
       "appium:initialDeeplinkUrl"
     );
     await startNativeAndroidSession();
+    expect(mockRemote.mock.calls[1][0].capabilities).not.toHaveProperty(
+      "pageLoadStrategy"
+    );
     expect(mockRemote.mock.calls[1][0].connectionRetryCount).toBe(2);
     expect(mockRemote.mock.calls[1][0].capabilities).not.toHaveProperty(
       "browserName"
@@ -325,6 +332,7 @@ describe("Device Farm direct-page isolation", () => {
     ["old route", page("https://6529.io/the-memes")],
     ["wrong origin", page("https://example.org/network")],
     ["loading document", page(target, "Rendered page", "loading")],
+    ["interactive document", page(target, "Rendered page", "interactive")],
     ["empty body", page(target, "   ")],
     ["missing body", page(target, null)],
   ])("rejects %s without retrying the target", async (_name, observed) => {
@@ -340,6 +348,27 @@ describe("Device Farm direct-page isolation", () => {
       }),
     });
     expect(driver.url.mock.calls).toEqual([["about:blank"], [target]]);
+  });
+
+  it("preserves a failed navigation even when the later diagnostic read sees a complete page", async () => {
+    const driver = browser([blank]);
+    const error = new Error(
+      "Could not proxy command: timeout of 240000ms exceeded"
+    );
+    driver.url.mockResolvedValueOnce(undefined).mockRejectedValueOnce(error);
+    driver.execute.mockResolvedValueOnce(true).mockResolvedValueOnce({
+      online: true,
+      origin: "https://6529.io",
+      pathname: "/network",
+      readyState: "complete",
+    });
+    await expect(openPage(driver, target, 90000)).rejects.toBe(error);
+    expect(error).toHaveProperty(
+      "deviceFarmDiagnostics.readyState",
+      "complete"
+    );
+    expect(driver.url.mock.calls).toEqual([["about:blank"], [target]]);
+    expect(driver.waitUntil).toHaveBeenCalledTimes(1);
   });
 
   it("waits for a rendered destination and allows its query initialization", async () => {

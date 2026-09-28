@@ -120,6 +120,10 @@ async function startWebSession() {
     }
   } else {
     capabilities.browserName = "Chrome";
+    // Chrome's implicit load wait exceeded Appium's 240s proxy timeout in
+    // run 36401855670 before openPage could observe the rendered document.
+    // Let openPage own readiness: URL + complete document + visible content.
+    capabilities.pageLoadStrategy = "none";
     capabilities["appium:automationName"] = "UiAutomator2";
     const chromedriverDir = env("DEVICEFARM_CHROMEDRIVER_EXECUTABLE_DIR");
     if (chromedriverDir) {

@@ -228,6 +228,30 @@ templating, not syntax. Device Farm rejects the braces with
 | Deep-link test fails                       | `useDeepLinkNavigation` regression in this repo or intent-filter change in the shell | Compare against `__tests__/app/openMobile.test.tsx` expectations.                                                              |
 | Fuzz fails                                 | Shell crash/ANR under monkey input                                                   | Pull the crash video + logcat from artifacts; file against `6529-core-mobile` if native.                                       |
 
+### Android navigation readiness
+
+Android web sessions use the supported `pageLoadStrategy: none` capability.
+The harness then owns the readiness wait: commit the blank-document barrier,
+request the target once, and require its origin/path, complete document state,
+and visible body before assertions. This does not accept an interactive-only,
+empty, or wrong document and does not replay a failed navigation.
+
+[Run 36401855670](https://github.com/6529-Collections/6529seize-frontend/actions/runs/36401855670)
+failed only the Pixel 8 Memes check (six of seven assertions passed). The URL
+command began at 09:13:54 UTC; video showed the Memes page and artwork at
+09:14:21, but Appium timed out the command at 09:17:54. Chrome had negotiated
+`pageLoadStrategy: normal` and a 300-second page-load timeout behind Appium's
+240-second proxy timeout. The later diagnostic read returned the correct URL,
+`readyState: complete`, and online status at 09:18:54. Removing Chrome's implicit
+wait lets the existing explicit readiness checks run without that competing
+load wait. The precise browser-internal reason the implicit wait hung is not
+established; this change still needs fresh real-device validation.
+
+[Recovery run 36405625529](https://github.com/6529-Collections/6529seize-frontend/actions/runs/36405625529)
+collected all three Android device archives without transfer errors. Its red
+summary preserves the original Pixel failure; no new tests ran. `run.totalJobs`
+was three, matching the three distinct recovered device reports.
+
 ### Safari startup and reliability validation
 
 For iOS 16.4 and newer, start a native XCUITest session for Safari's bundle ID,

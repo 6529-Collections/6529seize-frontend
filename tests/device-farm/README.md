@@ -81,6 +81,16 @@ document state, and visible content together. Navigation is not retried;
 timeouts preserve browser diagnostics. The same seven app assertions and
 long-press interaction remain required.
 
+Android web sessions use `pageLoadStrategy: none`, so Chrome returns navigation
+control to the harness instead of blocking behind its implicit load wait.
+The explicit blank-document barrier and target origin/path, `readyState=complete`,
+and visible-content checks remain required. This addresses the Pixel 8 command
+stall in run `36401855670`: the video showed Memes content by 27 seconds, while
+the URL command failed at Appium's 240-second proxy deadline. The subsequent
+diagnostic read returned about five minutes after navigation began. A command that
+actually fails is still terminal; a later healthy diagnostic cannot turn it into
+a pass. Safari and native Android retain their existing page-load settings.
+
 Document readiness does not establish asynchronous page-content readiness.
 The Memes assertion separately waits up to 90 seconds for its existing `meme`
 body-text requirement; a header or `Loading collections` skeleton is insufficient.
