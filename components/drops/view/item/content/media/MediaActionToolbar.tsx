@@ -163,6 +163,7 @@ export function ExpandedMediaToolbar({
   isDownloading,
   fullscreenTargetAvailable,
   labels,
+  children,
 }: {
   readonly onOpen?: (() => void) | undefined;
   readonly onDownload: () => void;
@@ -172,6 +173,7 @@ export function ExpandedMediaToolbar({
   readonly isDownloading: boolean;
   readonly fullscreenTargetAvailable?: boolean | undefined;
   readonly labels?: MediaActionLabels | undefined;
+  readonly children?: React.ReactNode;
 }) {
   const actionLabels = getMediaActionLabels(labels);
   const supportsFullScreen = useFullScreenSupported();
@@ -183,6 +185,7 @@ export function ExpandedMediaToolbar({
   return (
     <div className="tw-fixed tw-right-4 tw-top-3 tw-z-[1102] tw-flex tw-items-center tw-gap-x-3 tw-pt-[env(safe-area-inset-top,0px)]">
       <div className="tw-flex tw-overflow-hidden tw-rounded-xl tw-bg-iron-900/95 tw-shadow-lg tw-shadow-black/30 tw-ring-1 tw-ring-inset tw-ring-iron-700/70 tw-backdrop-blur">
+        {children}
         {canFullscreen && (
           <ToolbarButton
             label={actionLabels.fullscreen}
