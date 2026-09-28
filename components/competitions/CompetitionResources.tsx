@@ -413,7 +413,7 @@ function Outcomes() {
             </p>
           ))
       )}
-      <LoadMore query={awards} />
+      {!awards.isError && <LoadMore query={awards} />}
     </div>
   );
 }
