@@ -5,8 +5,9 @@
 ## Tracking
 
 - Status: In progress
-- Delivery target: Repository delivery Phase 3 (staging)
-- Owner: Waves multi-competition Phase 1 delivery
+- Delivery target: Repository delivery Phase 3 (review and staging of the foundation follow-up)
+- Shared-environment acceptance: Pending staging deployment and related E2E; production is outside this delivery
+- Owner: Waves multi-competition Phase 1 foundation follow-up
 - Evidence: [Phase 1 implementation and validation record](./phase-1/implementation-evidence.md),
   [accepted Phase 0 package](./phase-0/README.md), and the backend competition
   read-boundary runbook at `docs/competition-read-boundary-runbook.md`.
