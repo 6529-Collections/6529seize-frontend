@@ -76,6 +76,7 @@ export default function DropItemChat({
                   drop.drop_type === ApiDropType.Participatory ||
                   drop.drop_type === ApiDropType.Winner
                 }
+                fillVideoContainer
               />
             </div>
           )}
