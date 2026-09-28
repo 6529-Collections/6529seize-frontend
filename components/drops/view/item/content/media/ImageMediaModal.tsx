@@ -273,8 +273,7 @@ export function ImageMediaModal({
         )}
       </TransformWrapper>
       {loadingOriginal && (
-        <div
-          role="status"
+        <output
           aria-label={t(DEFAULT_LOCALE, "drop.media.loadingOriginalGif")}
           className="tw-pointer-events-none tw-fixed tw-left-1/2 tw-top-1/2 tw-z-[1101] -tw-translate-x-1/2 -tw-translate-y-1/2 tw-rounded-full tw-bg-black/60 tw-p-3"
         >
@@ -285,7 +284,7 @@ export function ImageMediaModal({
             aria-hidden="true"
             className="tw-block tw-size-6 tw-rounded-full tw-border-2 tw-border-solid tw-border-iron-100/30 tw-border-t-iron-100 motion-safe:tw-animate-spin"
           />
-        </div>
+        </output>
       )}
       {!playingOriginal && previewUnavailable && (
         <div className="tw-fixed tw-bottom-20 tw-left-1/2 tw-z-[1102] -tw-translate-x-1/2">

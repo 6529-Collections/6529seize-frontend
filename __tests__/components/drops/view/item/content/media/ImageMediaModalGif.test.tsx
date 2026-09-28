@@ -131,6 +131,7 @@ it("ignores late original events after cancelling or navigating, including a new
   const { rerender } = render(<ImageMediaModal {...props} />);
   for (const cancel of ["toggle", "gallery"]) {
     fireEvent.click(screen.getByRole("button", { name: "View original" }));
+    const staleImage = screen.getByAltText("Original GIF animation");
     const stale = mockImageRender.mock.calls
       .filter(([image]) => image.alt === "Original GIF animation")
       .at(-1)![0];
@@ -148,7 +149,14 @@ it("ignores late original events after cancelling or navigating, including a new
     expect(
       screen.queryByRole("status", { name: "Loading original GIF" })
     ).toBeNull();
+    expect(staleImage).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "View original" }));
+    const currentImage = screen.getByAltText("Original GIF animation");
+    expect(currentImage).not.toBe(staleImage);
+    // Native events belong to the detached old node, not the newly mounted
+    // image for the same URL. Also exercise callbacks already queued by Next.
+    fireEvent.load(staleImage);
+    fireEvent.error(staleImage);
     act(() => {
       stale.onLoad?.({} as SyntheticEvent<HTMLImageElement>);
       stale.onError?.({} as SyntheticEvent<HTMLImageElement>);
