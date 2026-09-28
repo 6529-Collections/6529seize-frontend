@@ -4,11 +4,15 @@ import http.client
 import importlib.util
 import io
 import json
+import os
 from pathlib import Path
+import subprocess
+import sys
 import tempfile
 import unittest
 from unittest.mock import patch
 import urllib.error
+import zipfile
 
 spec = importlib.util.spec_from_file_location(
     "device_farm_artifacts", Path(__file__).parents[1] / "device-farm-artifacts.py"
@@ -116,6 +120,77 @@ class ArtifactTests(unittest.TestCase):
         with patch.object(collector, "aws", side_effect=api), patch.object(collector, "download") as download:
             self.assertFalse(collector.collect("run", self.folder, self.output))
         self.assertEqual(download.call_count, 2)
+
+    def collect_and_report(self, folder_name, payloads, farm_result, total_jobs):
+        folder = self.root / folder_name
+        output = self.root / "pipeline-output"
+        summary = self.root / "pipeline-summary"
+        output.write_text("")
+        summary.write_text("")
+
+        def api(operation, **parameters):
+            data = self.fake_aws(operation, **parameters)
+            if operation == "get-run":
+                # Suite/test counters are deliberately NOT the device count.
+                data["run"].update(result=farm_result, totalJobs=total_jobs, counters={"total": 6})
+            if operation == "list-artifacts" and parameters["type"] == "FILE":
+                device = int(parameters["arn"].split("/")[-1])
+                data["artifacts"] = [] if payloads[device] is None else [{
+                    "name": "Customer Artifacts", "extension": "zip",
+                    "url": f"https://example.test/{device}",
+                }]
+            return data
+
+        def response(url, **_kwargs):
+            payload = payloads[int(url.rsplit("/", 1)[-1])]
+            return Response(payload)
+
+        with patch.object(collector, "aws", side_effect=api), patch.object(collector.urllib.request, "urlopen", side_effect=response):
+            collector.collect("run", folder, output)
+        outputs = dict(line.split("=", 1) for line in output.read_text().splitlines())
+        self.assertEqual(outputs["expected-devices"], str(total_jobs))
+        result = subprocess.run(
+            [sys.executable, str(Path(__file__).parents[1] / "device-farm-report.py")],
+            env={**os.environ, "ARTIFACT_FOLDER": str(folder), "RUN_RESULT": outputs["result"],
+                 "EXPECTED_DEVICES": outputs["expected-devices"], "PLATFORM": folder_name,
+                 "GITHUB_STEP_SUMMARY": str(summary)},
+            capture_output=True, text=True, timeout=5, check=False,
+        )
+        self.assertEqual(result.stderr, "")
+        return result.returncode, summary.read_text()
+
+    def test_real_collector_layout_and_outputs_feed_the_report_cli(self):
+        def archive(**overrides):
+            result = dict(schemaVersion=1, outcome="passed", total=7, passes=7,
+                          pending=0, notRun=0, retries=0, failures=[])
+            result.update(overrides)
+            data = io.BytesIO()
+            with zipfile.ZipFile(data, "w") as bundle:
+                bundle.writestr("devicefarm/logs/devicefarm-result.json", json.dumps(result))
+            return data.getvalue()
+
+        passed = archive()
+        failed = archive(outcome="test-failure", passes=6, failures=[{"kind": "test-failure"}])
+        cases = [
+            ("complete", [passed, passed], "PASSED", 2, 0, "2 / 2 expected"),
+            ("test-failed", [passed, failed], "FAILED", 2, 1, "6 / 7"),
+            ("farm-failed", [passed, passed], "FAILED", 2, 1, "Device Farm result: `FAILED`"),
+            ("device-missing", [passed, None], "PASSED", 2, 1, "1 / 2 expected"),
+            ("job-missing", [passed, passed], "PASSED", 3, 1, "2 / 3 expected"),
+            ("archive-corrupt", [passed, b"not a zip"], "PASSED", 2, 1, "archive unreadable"),
+        ]
+        for lane in ("android-chrome", "recovered"):
+            for name, payloads, verdict, total_jobs, expected_exit, expected_summary in cases:
+                with self.subTest(lane=lane, case=name):
+                    code, summary = self.collect_and_report(
+                        f"{lane}-{name}", payloads, verdict, total_jobs
+                    )
+                    self.assertEqual(code, expected_exit)
+                    self.assertIn(expected_summary, summary)
+                    if name == "complete":
+                        self.assertIn("Same phone-0 | passed | 7 / 7", summary)
+                        self.assertIn("Same phone-1 | passed | 7 / 7", summary)
+                        self.assertNotIn("Evidence unavailable", summary)
 
     def test_artifact_names_cannot_escape_the_output_directory(self):
         self.assertEqual(collector.safe_name("../../secret\n"), "_.._secret_")

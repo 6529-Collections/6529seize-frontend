@@ -139,6 +139,15 @@ describe("Device Farm aggregate outcome", () => {
     expect(JSON.stringify(recovery)).not.toContain(
       "aws-devicefarm-mobile-device-testing"
     );
+    const collector = recovery.steps.find(
+      (step: { id: string }) => step.id === "evidence"
+    );
+    expect(recovery.steps.at(-1).env.ARTIFACT_FOLDER).toBe(
+      collector.env.ARTIFACT_FOLDER
+    );
+    expect(recovery.steps.at(-1).env.EXPECTED_DEVICES).toBe(
+      "${{ steps.evidence.outputs.expected-devices }}"
+    );
     expect(recovery.steps.at(-1).env.RUN_RESULT).toBe(
       "${{ steps.evidence.outputs.result }}"
     );
@@ -270,5 +279,6 @@ describe("Device Farm aggregate outcome", () => {
     );
     expect(upload.if).toBe("always() && steps.devicefarm.outputs.arn != ''");
     expect(upload.with.path).toBe(collection.env.ARTIFACT_FOLDER);
+    expect(diagnosis.env.ARTIFACT_FOLDER).toBe(collection.env.ARTIFACT_FOLDER);
   });
 });
