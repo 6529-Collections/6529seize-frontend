@@ -38,7 +38,7 @@ export function GifQualityToggle({
           {
             "tw-bg-primary-500/20 tw-text-primary-300": showingOriginal,
             "tw-bg-transparent": !showingOriginal,
-            "tw-text-iron-400": !showingOriginal && !failed,
+            "tw-text-iron-100": !showingOriginal && !failed,
             "tw-text-error": !showingOriginal && failed,
           }
         )}
