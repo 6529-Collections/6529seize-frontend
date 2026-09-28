@@ -132,6 +132,15 @@ export function defineWaveImagePreviewTests() {
     await expect.poll(() => originalImage.screenshot()).not.toEqual(firstFrame);
     await page.getByRole("button", { name: "View optimized" }).click();
     await expect(originalImage).toBeHidden();
+    // Keyboard users must be able to identify a failed original without color.
+    await page.route(originals[1]!, (route) => route.abort("failed"));
+    await qualityToggle.focus();
+    await page.keyboard.press("Enter");
+    await expect(qualityToggle.getByTestId("gif-quality-error")).toBeVisible();
+    await expect(qualityToggle).toBeFocused();
+    await expect(qualityToggle).toHaveAccessibleDescription(
+      "Couldn't load the original GIF. You can try again."
+    );
     // A recovered preview must replace the error state without closing the
     // viewer, and navigation must reset the previous item's failed state.
     await page.route(`${MEDIA_ROOT}**`, (route) =>
@@ -150,6 +159,32 @@ export function defineWaveImagePreviewTests() {
     await expect(
       page.getByRole("button", { name: "Retry preview" })
     ).toBeHidden();
+    let releaseOriginal = () => {};
+    const originalResponseGate = new Promise<void>((resolve) => {
+      releaseOriginal = resolve;
+    });
+    await page.route(originals[1]!, async (route) => {
+      await originalResponseGate;
+      await route.fulfill({
+        status: 200,
+        contentType: "image/gif",
+        path: path.resolve("tests/media/fixtures/animation.gif"),
+      });
+    });
+    const loader = page.getByRole("status", { name: "Loading original GIF" });
+    try {
+      await qualityToggle.click();
+      await expect(loader).toBeVisible();
+      await expect(preview).toBeVisible();
+      await expect(page.getByAltText("Original GIF animation")).toBeHidden();
+    } finally {
+      releaseOriginal();
+    }
+    await expect(
+      page.getByRole("img", { name: "Original GIF animation" })
+    ).toBeVisible();
+    await expect(loader).toBeHidden();
+    await expect(preview).toBeHidden();
     await page
       .getByRole("button", { name: "Previous image", exact: true })
       .click();
@@ -159,6 +194,8 @@ export function defineWaveImagePreviewTests() {
       .poll(() => preview.evaluate((img: HTMLImageElement) => img.naturalWidth))
       .toBeGreaterThan(0);
     expect(requests.filter((url) => originals.includes(url))).toEqual([
+      originals[1],
+      originals[1],
       originals[1],
     ]);
     await expectNoHorizontalOverflow(page);
