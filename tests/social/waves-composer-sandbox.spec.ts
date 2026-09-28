@@ -87,6 +87,71 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     await expectNoUnsafeSandboxMutations(baseURL);
   });
 
+  test("pastes one image when Chrome exposes different timestamp wrappers", async ({
+    baseURL,
+    page,
+  }) => {
+    let uploadStartCount = 0;
+    await installDropImageUploadFixture(page, baseURL, () => {
+      uploadStartCount += 1;
+    });
+    await gotoSandboxWave(page);
+
+    const composer = page
+      .getByRole("textbox", { name: "Write a chat message" })
+      .last();
+    await composer.evaluate((element) => {
+      const bytes = new Uint8Array([
+        0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
+      ]);
+      const listedImage = new File([bytes], "image.png", {
+        type: "image/png",
+        lastModified: 1700000000000,
+      });
+      const itemImage = new File([bytes], "image.png", {
+        type: "image/png",
+        lastModified: 1700000000001,
+      });
+      const pasteEvent = new ClipboardEvent("paste", {
+        bubbles: true,
+        cancelable: true,
+      });
+
+      Object.defineProperty(pasteEvent, "clipboardData", {
+        value: {
+          files: [listedImage],
+          items: [
+            {
+              kind: "file",
+              type: "image/png",
+              getAsFile: () => itemImage,
+            },
+          ],
+          getData: () => "",
+        },
+      });
+      element.dispatchEvent(pasteEvent);
+    });
+
+    await expect(
+      page.getByRole("button", { name: "Select image" })
+    ).toHaveCount(1);
+    await expect.poll(() => uploadStartCount).toBe(1);
+    await expect(
+      page.getByRole("button", { name: "Select image" }).locator("img")
+    ).toHaveAttribute("src", /\/__composer-sandbox\/pasted-image\.png$/);
+    await expect(
+      page.getByRole("status").filter({ hasText: /Uploading image/i })
+    ).toHaveCount(0);
+    expect(uploadStartCount).toBe(1);
+
+    await page.getByRole("button", { name: "Remove image" }).click();
+    await expect(
+      page.getByRole("button", { name: "Select image" })
+    ).toHaveCount(0);
+    await expectNoUnsafeSandboxMutations(baseURL);
+  });
+
   test("reserves a visible video preview without decoded metadata", async ({
     baseURL,
     page,
@@ -774,6 +839,65 @@ async function installExternalDataFixtures(page: Page) {
     await route.fulfill({
       contentType: "application/json",
       json: [],
+      status: 200,
+    });
+  });
+}
+
+async function installDropImageUploadFixture(
+  page: Page,
+  baseURL: string | undefined,
+  onUploadStart: () => void
+) {
+  const sandboxApiOrigin = getSandboxApiOrigin(baseURL);
+  // Keep the mocked PUT same-origin so the browser can read its ETag.
+  const uploadUrl = new URL("/__composer-sandbox/image-upload", baseURL).href;
+  const mediaUrl = `${sandboxApiOrigin}/__composer-sandbox/pasted-image.png`;
+
+  await page.route("**/drop-media/multipart-upload**", async (route) => {
+    const pathname = new URL(route.request().url()).pathname;
+
+    if (pathname.endsWith("/part")) {
+      await route.fulfill({
+        contentType: "application/json",
+        json: { upload_url: uploadUrl },
+        status: 200,
+      });
+      return;
+    }
+
+    if (pathname.endsWith("/completion")) {
+      await route.fulfill({
+        contentType: "application/json",
+        json: { media_url: mediaUrl, mime_type: "image/png" },
+        status: 200,
+      });
+      return;
+    }
+
+    onUploadStart();
+    await route.fulfill({
+      contentType: "application/json",
+      json: { upload_id: "clipboard-image", key: "clipboard-image.png" },
+      status: 200,
+    });
+  });
+
+  await page.route(uploadUrl, async (route) => {
+    await route.fulfill({
+      body: "",
+      headers: { etag: '"clipboard-image-etag"' },
+      status: 200,
+    });
+  });
+
+  await page.route(mediaUrl, async (route) => {
+    await route.fulfill({
+      body: Buffer.from(
+        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=",
+        "base64"
+      ),
+      contentType: "image/png",
       status: 200,
     });
   });
