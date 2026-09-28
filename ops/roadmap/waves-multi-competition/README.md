@@ -308,6 +308,11 @@ Update this table and the phase's tracking section together.
 | [6](./phase-6-progressive-rollout.md) | Progressive rollout | Not started | Multi-competition hubs become broadly available |
 | [7](./phase-7-retire-wave-coupling.md) | Retire internal legacy coupling | Not started | Legacy execution/storage are removed while current GET contracts remain supported |
 
+Phase 1's [current evidence](./phase-1/implementation-evidence.md) records the
+2026-09-28 local follow-up: independent legacy read comparisons replace the
+original self-comparison. Remaining-credit validation and shared-environment
+acceptance remain open. Phase 2 has not started.
+
 ## Global Success Criteria
 
 The roadmap is complete when:
