@@ -344,6 +344,37 @@ function assertNoCrashMarkers(assert, bodyText, where) {
   }
 }
 
+/** Wait for asynchronous page content without replaying navigation or errors. */
+async function assertPageBody(assert, driver, where, expectedText, timeout) {
+  let bodyText;
+  let readError;
+  await driver.waitUntil(
+    async () => {
+      try {
+        bodyText = await driver.execute(() => document.body?.innerText || "");
+      } catch (error) {
+        // waitUntil normally retries rejected predicates. Stop observing on
+        // the first command error and rethrow it outside that retry boundary.
+        readError = error;
+        return true;
+      }
+      // A crash is terminal even if content could appear in a later read.
+      return (
+        CRASH_MARKERS.some((marker) => bodyText.includes(marker)) ||
+        !expectedText ||
+        bodyText.toLowerCase().includes(expectedText.toLowerCase())
+      );
+    },
+    {
+      timeout,
+      interval: 1000,
+      timeoutMsg: `${where} body never mentioned "${expectedText}"`,
+    }
+  );
+  if (readError) throw readError;
+  assertNoCrashMarkers(assert, bodyText, where);
+}
+
 /**
  * Screenshots land in $DEVICEFARM_LOG_DIR so Device Farm collects them as
  * customer artifacts. Failures to capture never fail the test itself.
@@ -361,6 +392,7 @@ module.exports = {
   APP_PACKAGE,
   DEEP_LINK_SCHEME,
   assertNoCrashMarkers,
+  assertPageBody,
   isIos,
   longPress,
   openPage,

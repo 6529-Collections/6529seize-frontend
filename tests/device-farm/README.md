@@ -81,6 +81,13 @@ document state, and visible content together. Navigation is not retried;
 timeouts preserve browser diagnostics. The same seven app assertions and
 long-press interaction remain required.
 
+Document readiness does not establish asynchronous page-content readiness.
+The Memes assertion separately waits up to 90 seconds for its existing `meme`
+body-text requirement; a header or `Loading collections` skeleton is insufficient.
+Each observation still checks crash markers, and the first crash or failed
+browser read terminates the assertion. This only waits for content on the
+current page: it never reopens the URL or retries a failed test.
+
 ## Local development
 
 There is nothing device-specific to run locally — sessions require the Appium

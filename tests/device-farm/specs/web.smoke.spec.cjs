@@ -11,6 +11,7 @@
 const assert = require("node:assert");
 const {
   assertNoCrashMarkers,
+  assertPageBody,
   longPress,
   openPage,
   saveScreenshot,
@@ -66,14 +67,13 @@ describe("6529 mobile web smoke (real device)", function () {
         PAGE_LOAD_TIMEOUT_MS
       );
 
-      const bodyText = await driver.execute(() => document.body.innerText || "");
-      assertNoCrashMarkers(assert, bodyText, page.path);
-      if (page.expectBodyText) {
-        assert.ok(
-          bodyText.toLowerCase().includes(page.expectBodyText),
-          `${page.path} body does not mention "${page.expectBodyText}"`
-        );
-      }
+      await assertPageBody(
+        assert,
+        driver,
+        page.path,
+        page.expectBodyText,
+        PAGE_LOAD_TIMEOUT_MS
+      );
       await saveScreenshot(driver, `web-${page.name}`);
     });
   }

@@ -249,6 +249,14 @@ hydration or router effects on the previous page. These checks cover each
 destination and its interactions; they do not establish in-app link-transition
 reliability. A failed barrier or destination is reported without replaying it.
 
+Document readiness and nonempty body text do not guarantee that asynchronous
+content has rendered. In [run 36135706885](https://github.com/6529-Collections/6529seize-frontend/actions/runs/36135706885),
+the iPhone 16 reached `/the-memes` but still showed `Loading collections` when
+the body-text assertion ran about 670 ms after navigation. The Memes assertion
+now waits up to 90 seconds for the same expected text, stopping immediately on
+a crash marker or browser-read error. A permanently loading page still fails;
+this wait does not repeat navigation, session creation, or a failed test.
+
 After a startup change, validate it with ten fresh, sequential manual runs of
 the same branch head using `packs=web` and the same target. Each run must cover
 both iPhones and all three Android devices, with every selected test executed,

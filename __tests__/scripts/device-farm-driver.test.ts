@@ -1,10 +1,12 @@
 /** @jest-environment node */
 import { runInNewContext } from "node:vm";
+import assert from "node:assert";
 
 const mockRemote = jest.fn();
 jest.mock("webdriverio", () => ({ remote: mockRemote }), { virtual: true });
 const {
   openPage,
+  assertPageBody,
   startWebSession,
   startNativeAndroidSession,
 } = require("../../tests/device-farm/lib/driver.cjs");
@@ -327,6 +329,105 @@ describe("Device Farm direct-page isolation", () => {
     ]);
     await expect(openPage(driver, target, 100)).resolves.toBeUndefined();
     expect(driver.url.mock.calls).toEqual([["about:blank"], [target]]);
+  });
+});
+
+describe("Device Farm asynchronous page content", () => {
+  function browser(observations: (string | null | Error)[]) {
+    const pending = [...observations];
+    let current: string | null | Error = null;
+    return {
+      url: jest.fn(),
+      execute: jest.fn(async (callback: () => unknown) => {
+        if (current instanceof Error) throw current;
+        return runInNewContext(`(${callback.toString()})()`, {
+          document: { body: current === null ? null : { innerText: current } },
+        });
+      }),
+      waitUntil: jest.fn(
+        async (
+          predicate: () => Promise<boolean>,
+          options: { timeoutMsg: string }
+        ) => {
+          while (pending.length) {
+            current = pending.shift()!;
+            // Match waitUntil's rejected-predicate behavior: a command failure
+            // must still escape, even when a later observation would pass.
+            const ready = await predicate().catch(() => false);
+            if (ready) return;
+          }
+          throw new Error(options.timeoutMsg);
+        }
+      ),
+    };
+  }
+
+  it("waits through the observed collection skeleton until Memes content appears", async () => {
+    const driver = browser([
+      null,
+      "6529 Mobile\nLoading collections",
+      "The MEMES",
+    ]);
+    await expect(
+      assertPageBody(assert, driver, "/the-memes", "meme", 90000)
+    ).resolves.toBeUndefined();
+    expect(driver.execute).toHaveBeenCalledTimes(3);
+    expect(driver.url).not.toHaveBeenCalled();
+    expect(driver.waitUntil).toHaveBeenCalledWith(
+      expect.any(Function),
+      expect.objectContaining({ timeout: 90000 })
+    );
+  });
+
+  it.each(["6529 Mobile\nLoading collections", "Unrelated content", null])(
+    "fails within the content deadline when the expected text never appears: %s",
+    async (body) => {
+      const driver = browser([body, body]);
+      await expect(
+        assertPageBody(assert, driver, "/the-memes", "meme", 100)
+      ).rejects.toThrow('/the-memes body never mentioned "meme"');
+      expect(driver.url).not.toHaveBeenCalled();
+    }
+  );
+
+  it.each([
+    "Welcome to the 6529 Page of Doom",
+    "Application error: a client-side exception has occurred",
+    "Internal Server Error",
+    "The Memes\nWelcome to the 6529 Page of Doom",
+  ])(
+    "fails immediately on %s, even if the next observation would pass",
+    async (body) => {
+      const driver = browser([body, "The Memes"]);
+      await expect(
+        assertPageBody(assert, driver, "/the-memes", "meme", 100)
+      ).rejects.toThrow("shows the crash marker");
+      expect(driver.execute).toHaveBeenCalledTimes(1);
+    }
+  );
+
+  it("preserves a failed body read instead of accepting a later successful read", async () => {
+    const error = new Error("device disconnected");
+    const driver = browser([error, "The Memes"]);
+    await expect(
+      assertPageBody(assert, driver, "/the-memes", "meme", 100)
+    ).rejects.toBe(error);
+    expect(driver.execute).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps crash checks for pages without an expected text requirement", async () => {
+    await expect(
+      assertPageBody(assert, browser(["Network"]), "/network", null, 100)
+    ).resolves.toBeUndefined();
+    await expect(
+      assertPageBody(
+        assert,
+        browser(["Internal Server Error"]),
+        "/network",
+        null,
+        100
+      )
+    ).rejects.toThrow("shows the crash marker");
   });
 });
 
