@@ -148,7 +148,7 @@ const classifyDrop = (inputDrop: PreviewDrop): PreviewItem | null => {
   const rawText = getDropDisplayText(drop);
   const rawContents = drop.parts.map((part) => part.content ?? "");
   const urls = extractUrls(
-    rawText,
+    drop.title,
     ...rawContents,
     ...(drop.nft_links?.map((link) => link.url_in_text) ?? [])
   );
