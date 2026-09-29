@@ -119,6 +119,23 @@ describe("patchFromMediaLinkUpdate", () => {
     ...overrides,
   });
 
+  it("does not roll a newer NFT preview back to an older queued snapshot", () => {
+    const current = createCurrentData({
+      title: "Newer",
+      price: "2",
+      lastSuccessfullyUpdatedMs: 1771516352000,
+    });
+    const patched = patchFromMediaLinkUpdate({
+      current,
+      update: createMediaLinkUpdatedPayload({
+        name: "Older",
+        price: "1",
+        last_successfully_updated: "1771516351000",
+      }),
+    });
+    expect(patched).toBe(current);
+  });
+
   it("prefers preview urls from websocket payload over media_uri", () => {
     const patched = patchFromMediaLinkUpdate({
       current: createCurrentData(),

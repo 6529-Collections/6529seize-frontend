@@ -1,5 +1,7 @@
 "use client";
 
+import { isOlderDropVersion } from "@/helpers/waves/drop-version";
+
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiAttachment } from "@/generated/models/ApiAttachment";
 import type {
@@ -261,7 +263,11 @@ interface ApplyCanonicalDropUpdateForExistingDropParams {
 const useCanonicalDropUpdateForExistingDrop = ({
   queryClient,
   updateData,
-}: Pick<UseProcessIncomingDropParams, "queryClient" | "updateData">): ((
+  canApplyDrop,
+}: Pick<
+  UseProcessIncomingDropParams,
+  "queryClient" | "updateData" | "canApplyDrop"
+>): ((
   params: ApplyCanonicalDropUpdateForExistingDropParams
 ) => Promise<void>) =>
   useCallback(
@@ -281,6 +287,7 @@ const useCanonicalDropUpdateForExistingDrop = ({
           options,
           queryClient,
           updateData,
+          canApplyDrop,
         });
       } catch (error) {
         reportBackgroundTaskError(
@@ -289,7 +296,7 @@ const useCanonicalDropUpdateForExistingDrop = ({
         );
       }
     },
-    [queryClient, updateData]
+    [queryClient, updateData, canApplyDrop]
   );
 
 const useNewestMessagesAfterDropUpdate = (
@@ -333,6 +340,7 @@ interface UseProcessIncomingDropParams extends Pick<
   | "isWaveMuted"
 > {
   readonly queryClient: QueryClient;
+  readonly canApplyDrop: (drop: ApiDrop) => boolean;
 }
 
 const useProcessIncomingDrop = ({
@@ -345,6 +353,7 @@ const useProcessIncomingDrop = ({
   removeWaveDeliveredNotifications,
   isWaveMuted,
   queryClient,
+  canApplyDrop,
 }: UseProcessIncomingDropParams): {
   readonly processIncomingDrop: ProcessIncomingDropFn;
   readonly processDropUpdateRef: (messageData: unknown) => void;
@@ -362,7 +371,11 @@ const useProcessIncomingDrop = ({
   const refreshEligibilityAfterVisibilityChange =
     useVisibilityEligibilityRefresh();
   const applyCanonicalDropUpdateForExistingDrop =
-    useCanonicalDropUpdateForExistingDrop({ queryClient, updateData });
+    useCanonicalDropUpdateForExistingDrop({
+      queryClient,
+      updateData,
+      canApplyDrop,
+    });
   const syncNewestMessagesAfterDropUpdate = useNewestMessagesAfterDropUpdate(
     initiateFetchNewestCycle
   );
@@ -376,7 +389,7 @@ const useProcessIncomingDrop = ({
       const drop = normalizeRealtimeDrop(dropData);
       const waveId = getIncomingWaveId(drop);
 
-      if (waveId === null) {
+      if (waveId === null || !canApplyDrop(drop)) {
         return;
       }
 
@@ -392,7 +405,7 @@ const useProcessIncomingDrop = ({
 
       await refreshEligibilityAfterVisibilityChange(waveId);
 
-      if (shouldSkipMutedWave()) {
+      if (shouldSkipMutedWave() || !canApplyDrop(drop)) {
         return;
       }
 
@@ -485,6 +498,7 @@ const useProcessIncomingDrop = ({
       applyCanonicalDropUpdateForExistingDrop,
       markActiveWaveAsRead,
       refreshEligibilityAfterVisibilityChange,
+      canApplyDrop,
       isWaveMuted,
       queryClient,
       syncNewestMessagesAfterDropUpdate,
@@ -585,7 +599,8 @@ const useDropUpdateMessages = (
 };
 
 const useDropDeleteMessages = (
-  removeDrops: UseWaveRealtimeUpdaterProps["removeDrops"]
+  removeDrops: UseWaveRealtimeUpdaterProps["removeDrops"],
+  rememberDeletion: (dropId: string) => void
 ): void => {
   const pending = useRef(new Map<string, Set<string>>());
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -604,6 +619,7 @@ const useDropDeleteMessages = (
   useWebSocketMessage<WsDropDeleteMessage["data"]>(
     WsMessageType.DROP_DELETE,
     (messageData) => {
+      rememberDeletion(messageData.drop_id);
       const ids = pending.current.get(messageData.wave_id) ?? new Set<string>();
       ids.add(messageData.drop_id);
       pending.current.set(messageData.wave_id, ids);
@@ -636,23 +652,54 @@ export function useWaveRealtimeUpdater({
   processDropRemoved: (waveId: string, dropId: string) => void;
 } {
   const queryClient = useQueryClient();
+  // IDs are globally unique. Retain observed deletions for this provider's lifetime
+  // so queued snapshots and already-running fetches cannot resurrect them.
+  const deletedDropIds = useRef(new Set<string>());
+  const rememberDeletion = useCallback((dropId: string) => {
+    deletedDropIds.current.add(dropId);
+  }, []);
+  const canApplyDrop = useCallback(
+    (drop: ApiDrop): boolean => {
+      if (deletedDropIds.current.has(drop.id)) return false;
+      const existing = getData(drop.wave.id)?.drops.find(
+        (value) => value.id === drop.id
+      );
+      return (
+        existing?.type !== DropSize.FULL || !isOlderDropVersion(drop, existing)
+      );
+    },
+    [getData]
+  );
+  const updateLiveData = useCallback<UseWaveRealtimeUpdaterProps["updateData"]>(
+    (value) => {
+      const drops = value.drops?.filter(
+        (drop) =>
+          !deletedDropIds.current.has(drop.id) &&
+          (drop.type !== DropSize.FULL || canApplyDrop(drop))
+      );
+      updateData({ ...value, ...(drops ? { drops } : {}) });
+    },
+    [canApplyDrop, updateData]
+  );
   const { processIncomingDrop, processDropUpdateRef } = useProcessIncomingDrop({
     activeWaveId,
     getData,
     hasServerFeedSeed,
-    updateData,
+    updateData: updateLiveData,
     registerWave,
     syncNewestMessages,
     removeWaveDeliveredNotifications,
     isWaveMuted,
     queryClient,
+    canApplyDrop,
   });
 
   const processDropRemoved = useCallback(
     (waveId: string, dropId: string) => {
+      rememberDeletion(dropId);
       removeDrop(waveId, dropId);
     },
-    [removeDrop]
+    [removeDrop, rememberDeletion]
   );
 
   const processAttachmentStatusUpdate = useAttachmentStatusUpdate({
@@ -663,7 +710,7 @@ export function useWaveRealtimeUpdater({
   });
 
   useDropUpdateMessages(processIncomingDrop, processDropUpdateRef);
-  useDropDeleteMessages(removeDrops);
+  useDropDeleteMessages(removeDrops, rememberDeletion);
 
   useWebSocketMessage<WsAttachmentStatusUpdateMessage["data"]>(
     WsMessageType.ATTACHMENT_STATUS_UPDATE,

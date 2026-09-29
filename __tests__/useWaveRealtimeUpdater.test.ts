@@ -164,6 +164,93 @@ describe("useWaveRealtimeUpdater", () => {
     isWaveMuted: jest.fn().mockReturnValue(false),
   });
 
+  it("does not replace a newer edit with a delayed full drop snapshot", async () => {
+    const newer = {
+      id: "audit-drop",
+      serial_no: 11,
+      updated_at: 2000,
+      parts: [],
+      wave: { id: "wave1" },
+      author: {},
+      type: DropSize.FULL,
+    };
+    const store = { wave1: { drops: [newer], latestFetchedSerialNo: 11 } };
+    const props = baseProps(store);
+    const { result } = renderHook(() => useWaveRealtimeUpdater(props));
+    await act(async () => {
+      await result.current.processIncomingDrop(
+        { ...newer, updated_at: 1000 } as any,
+        ProcessIncomingDropType.DROP_INSERT
+      );
+    });
+    expect(store.wave1.drops[0].updated_at).toBe(2000);
+  });
+
+  it("does not resurrect a deleted drop when an older full frame arrives", async () => {
+    const original = {
+      id: "audit-drop",
+      serial_no: 11,
+      updated_at: 1000,
+      parts: [],
+      wave: { id: "wave1" },
+      author: {},
+      type: DropSize.FULL,
+    };
+    const store = { wave1: { drops: [original], latestFetchedSerialNo: 11 } };
+    const props = baseProps(store);
+    props.removeDrop.mockImplementation(() => {
+      store.wave1.drops = [];
+    });
+    const { result } = renderHook(() => useWaveRealtimeUpdater(props));
+    act(() => result.current.processDropRemoved("wave1", "audit-drop"));
+    await act(async () => {
+      await result.current.processIncomingDrop(
+        original as any,
+        ProcessIncomingDropType.DROP_INSERT
+      );
+    });
+    expect(store.wave1.drops).toEqual([]);
+  });
+
+  it("ignores a canonical reaction fetch that completes after deletion", async () => {
+    const original = {
+      id: "race-drop",
+      serial_no: 11,
+      parts: [],
+      wave: { id: "wave1" },
+      author: {},
+      type: DropSize.FULL,
+    };
+    const store = { wave1: { drops: [original], latestFetchedSerialNo: 11 } };
+    const props = baseProps(store);
+    props.removeDrop.mockImplementation(() => {
+      store.wave1.drops = [];
+    });
+    let resolveFetch!: (value: unknown) => void;
+    fetchDropByIdBatched.mockReturnValueOnce(
+      new Promise((resolve) => {
+        resolveFetch = resolve;
+      })
+    );
+    const { result } = renderHook(() => useWaveRealtimeUpdater(props));
+    let pending!: Promise<void>;
+    await act(async () => {
+      pending = result.current.processIncomingDrop(
+        original as any,
+        ProcessIncomingDropType.DROP_REACTION_UPDATE
+      );
+      await Promise.resolve();
+    });
+    act(() => result.current.processDropRemoved("wave1", "race-drop"));
+    props.updateData.mockClear();
+    await act(async () => {
+      resolveFetch(original);
+      await pending;
+    });
+    expect(props.updateData).not.toHaveBeenCalled();
+    expect(store.wave1.drops).toEqual([]);
+  });
+
   it("keeps full DROP_UPDATE messages on the existing optimistic path", async () => {
     const store = { wave1: { drops: [], latestFetchedSerialNo: 10 } };
     const props = baseProps(store);

@@ -1,3 +1,4 @@
+import { isOlderDropVersion } from "@/helpers/waves/drop-version";
 import type { QueryClient } from "@tanstack/react-query";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiWaveDropsFeed } from "@/generated/models/ApiWaveDropsFeed";
@@ -163,6 +164,8 @@ function upsertDropInQueryData(
       existingDropIndex !== undefined &&
       existingDropIndex !== -1
     ) {
+      if (isOlderDropVersion(drop, pageDrops[existingDropIndex]))
+        return oldData;
       pageDrops[existingDropIndex] = reconcileFinalizedDropAttachments(
         drop,
         pageDrops[existingDropIndex]

@@ -179,3 +179,18 @@ test("skips media-only caches when a websocket drop omits parts", () => {
     "partial-websocket-drop"
   );
 });
+
+test("keeps a newer REST snapshot when an older websocket edit arrives", () => {
+  const queryClient = new QueryClient();
+  const key = [QueryKey.DROPS, { waveId: "w", context: "wave-drops" }];
+  const current = { id: "d", wave: { id: "w" }, updated_at: 200, parts: [] };
+  const original = { pages: [{ drops: [current] }] };
+  queryClient.setQueryData(key, original);
+  upsertDropIntoMatchingDropsQueries(queryClient, {
+    drop: {
+      ...current,
+      updated_at: 100,
+    } as import("@/generated/models/ApiDrop").ApiDrop,
+  });
+  expect(queryClient.getQueryData(key)).toEqual(original);
+});
