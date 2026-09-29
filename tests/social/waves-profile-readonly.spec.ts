@@ -141,6 +141,74 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       feedNavigation.getByRole("link", { name: "Waves" })
     ).toHaveAttribute("href", "/waves");
 
+    const profileFeed = page
+      .locator("section")
+      .filter({
+        has: page.getByRole("heading", {
+          level: 1,
+          name: "Latest From Profile Waves",
+        }),
+      })
+      .first();
+    const feedPostButtons = profileFeed.locator(
+      'article [role="button"][tabindex="0"]'
+    );
+    await expect(feedPostButtons.first()).toBeVisible({ timeout: 15000 });
+    const feedScrollOffset = await profileFeed.evaluate((element) => {
+      const maxScrollOffset = element.scrollHeight - element.clientHeight;
+      element.scrollTop = Math.min(320, maxScrollOffset);
+      element.dispatchEvent(new Event("scroll"));
+      return element.scrollTop;
+    });
+    expect(feedScrollOffset).toBeGreaterThan(0);
+
+    const visibleFeedPostIndex = await feedPostButtons.evaluateAll(
+      (buttons) => {
+        const feed = buttons[0]?.closest("section");
+        if (!feed) {
+          return -1;
+        }
+
+        const feedRect = feed.getBoundingClientRect();
+        return buttons.findIndex((button) => {
+          const rect = button.getBoundingClientRect();
+          return rect.bottom > feedRect.top && rect.top < feedRect.bottom;
+        });
+      }
+    );
+    expect(visibleFeedPostIndex).toBeGreaterThanOrEqual(0);
+    await feedPostButtons.nth(visibleFeedPostIndex).click();
+    await expect(page).toHaveURL(
+      (url) =>
+        /^\/waves\/[0-9a-f-]{36}$/i.test(url.pathname) &&
+        Boolean(url.searchParams.get("serialNo"))
+    );
+
+    await page.goBack();
+    await expect(page).toHaveURL(
+      (url) =>
+        url.pathname === "/waves" &&
+        url.searchParams.get("view") === "profile-feed"
+    );
+    await expect(
+      page.getByRole("heading", {
+        level: 1,
+        name: "Latest From Profile Waves",
+      })
+    ).toBeVisible();
+    const restoredProfileFeed = page
+      .locator("section")
+      .filter({
+        has: page.getByRole("heading", {
+          level: 1,
+          name: "Latest From Profile Waves",
+        }),
+      })
+      .first();
+    await expect
+      .poll(() => restoredProfileFeed.evaluate((element) => element.scrollTop))
+      .toBeGreaterThan(0);
+
     await page.goBack();
     await expect(page).toHaveURL(
       (url) => url.pathname === "/waves" && !url.search
