@@ -232,6 +232,7 @@ export * from '../models/ApiCompetitionDecisionWinner';
 export * from '../models/ApiCompetitionDistributionItem';
 export * from '../models/ApiCompetitionDistributionItemPage';
 export * from '../models/ApiCompetitionDraftInput';
+export * from '../models/ApiCompetitionDropVoteSummary';
 export * from '../models/ApiCompetitionEntry';
 export * from '../models/ApiCompetitionEntryPage';
 export * from '../models/ApiCompetitionEntryStatus';
@@ -354,6 +355,7 @@ export * from '../models/ApiDropAttachmentReference';
 export * from '../models/ApiDropBoost';
 export * from '../models/ApiDropBoostV2';
 export * from '../models/ApiDropBoostsPage';
+export * from '../models/ApiDropCompetitionContext';
 export * from '../models/ApiDropContextProfileContext';
 export * from '../models/ApiDropCuration';
 export * from '../models/ApiDropCurationRequest';
@@ -1120,6 +1122,7 @@ import { ApiCompetitionDecisionWinner } from '../models/ApiCompetitionDecisionWi
 import { ApiCompetitionDistributionItem } from '../models/ApiCompetitionDistributionItem';
 import { ApiCompetitionDistributionItemPage } from '../models/ApiCompetitionDistributionItemPage';
 import { ApiCompetitionDraftInput } from '../models/ApiCompetitionDraftInput';
+import { ApiCompetitionDropVoteSummary } from '../models/ApiCompetitionDropVoteSummary';
 import { ApiCompetitionEntry             } from '../models/ApiCompetitionEntry';
 import { ApiCompetitionEntryPage } from '../models/ApiCompetitionEntryPage';
 import { ApiCompetitionEntryStatus } from '../models/ApiCompetitionEntryStatus';
@@ -1242,6 +1245,7 @@ import { ApiDropAttachmentReference } from '../models/ApiDropAttachmentReference
 import { ApiDropBoost } from '../models/ApiDropBoost';
 import { ApiDropBoostV2 } from '../models/ApiDropBoostV2';
 import { ApiDropBoostsPage } from '../models/ApiDropBoostsPage';
+import { ApiDropCompetitionContext } from '../models/ApiDropCompetitionContext';
 import { ApiDropContextProfileContext } from '../models/ApiDropContextProfileContext';
 import { ApiDropCuration } from '../models/ApiDropCuration';
 import { ApiDropCurationRequest } from '../models/ApiDropCurationRequest';
@@ -2280,6 +2284,7 @@ let typeMap: {[index: string]: any} = {
     "ApiCompetitionDistributionItem": ApiCompetitionDistributionItem,
     "ApiCompetitionDistributionItemPage": ApiCompetitionDistributionItemPage,
     "ApiCompetitionDraftInput": ApiCompetitionDraftInput,
+    "ApiCompetitionDropVoteSummary": ApiCompetitionDropVoteSummary,
     "ApiCompetitionEntry": ApiCompetitionEntry,
     "ApiCompetitionEntryPage": ApiCompetitionEntryPage,
     "ApiCompetitionEntryVote": ApiCompetitionEntryVote,
@@ -2390,6 +2395,7 @@ let typeMap: {[index: string]: any} = {
     "ApiDropBoost": ApiDropBoost,
     "ApiDropBoostV2": ApiDropBoostV2,
     "ApiDropBoostsPage": ApiDropBoostsPage,
+    "ApiDropCompetitionContext": ApiDropCompetitionContext,
     "ApiDropContextProfileContext": ApiDropContextProfileContext,
     "ApiDropCuration": ApiDropCuration,
     "ApiDropCurationRequest": ApiDropCurationRequest,

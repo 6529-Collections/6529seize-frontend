@@ -20,17 +20,16 @@ export const isCompetitionPathname = (pathname: string | null) => {
 };
 
 export const COMPETITION_TABS = [
-  "entries",
   "leaderboard",
-  "votes",
   "decisions",
   "outcomes",
+  "votes",
   "voters",
   "rules",
 ] as const;
 export type CompetitionTab = (typeof COMPETITION_TABS)[number];
 export const getCompetitionTab = (tab: string | null): CompetitionTab =>
-  COMPETITION_TABS.find((candidate) => candidate === tab) ?? "entries";
+  COMPETITION_TABS.find((candidate) => candidate === tab) ?? "leaderboard";
 
 export const newCompetitionRequestKey = () => globalThis.crypto.randomUUID();
 

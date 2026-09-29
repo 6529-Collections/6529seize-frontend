@@ -31,18 +31,12 @@ import { useSubwaveAccessConfirmation } from "@/components/waves/hooks/useSubwav
 import {
   isMultiCompetitionEnabled,
   isRejectedCompetitionCommand,
-  getCompetitionsRoute,
-  getCompetitionRoute,
   newCompetitionRequestKey,
 } from "@/helpers/competition.helpers";
-import { competitionFormToDraft } from "@/helpers/competition-config.helpers";
-import { createCompetition } from "@/services/api/competitions-api";
 import { commonApiPost } from "@/services/api/common-api";
-import type { ApiCompetitionDraftInput } from "@/generated/models/ApiCompetitionDraftInput";
 import type { ApiCreateWaveMetadataRequest } from "@/generated/models/ApiCreateWaveMetadataRequest";
 import type { ApiCreateWaveHubRequest } from "@/generated/models/ApiCreateWaveHubRequest";
 import type { ApiWaveV3 } from "@/generated/models/ApiWaveV3";
-import { ApiWaveType } from "@/generated/models/ApiWaveType";
 
 interface UseCreateWaveSubmissionParams {
   readonly config: CreateWaveConfig;
@@ -120,9 +114,7 @@ export function useCreateWaveSubmission({
   const [submitting, setSubmitting] = useState(false);
   const submissionInProgressRef = useRef(false);
   const nativeHubRequest = useRef<ApiCreateWaveHubRequest | null>(null);
-  const nativeCompetitionConfig = useRef<ApiCompetitionDraftInput | null>(null);
   const nativeDisplayMetadata = useRef<ApiCreateWaveMetadataRequest[]>([]);
-  const nativeCompetitionKey = useRef<string | null>(null);
   const [showDropError, setShowDropError] = useState(false);
   const { submit: submitInlineGroup } = useGroupMutations({
     requestAuth,
@@ -345,14 +337,7 @@ export function useCreateWaveSubmission({
 
       if (isMultiCompetitionEnabled()) {
         if (!nativeHubRequest.current) {
-          nativeCompetitionConfig.current =
-            submissionConfig.overview.type === ApiWaveType.Chat
-              ? null
-              : competitionFormToDraft(submissionConfig, "");
-          nativeDisplayMetadata.current =
-            submissionConfig.overview.type === ApiWaveType.Chat
-              ? displayMetadataRequests
-              : [];
+          nativeDisplayMetadata.current = displayMetadataRequests;
           nativeHubRequest.current = {
             idempotency_key: newCompetitionRequestKey(),
             name: waveBody.name,
@@ -369,22 +354,6 @@ export function useCreateWaveSubmission({
           body: nativeHubRequest.current,
           errorMode: "structured",
         });
-        let destination = getCompetitionsRoute(hub.id);
-        if (nativeCompetitionConfig.current) {
-          try {
-            nativeCompetitionKey.current ??= newCompetitionRequestKey();
-            const competition = await createCompetition(hub.id, {
-              idempotency_key: nativeCompetitionKey.current,
-              config: nativeCompetitionConfig.current,
-            });
-            destination = getCompetitionRoute(hub.id, competition.id);
-          } catch {
-            setToast({
-              type: "warning",
-              message: t(locale, "competitions.partialCreation"),
-            });
-          }
-        }
         if (nativeDisplayMetadata.current.length > 0) {
           try {
             await Promise.all(
@@ -399,10 +368,13 @@ export function useCreateWaveSubmission({
             });
           }
         }
+        const destination = getWaveRoute({
+          waveId: hub.id,
+          isDirectMessage: false,
+          isApp,
+        });
         nativeHubRequest.current = null;
-        nativeCompetitionConfig.current = null;
         nativeDisplayMetadata.current = [];
-        nativeCompetitionKey.current = null;
         onWaveCreated();
         onSuccess?.();
         finishSubmitting();

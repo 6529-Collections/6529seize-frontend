@@ -21,12 +21,7 @@ export class ApiCreateCompetitionEntryRequest {
     */
     'idempotency_key': string;
     'config_version': number;
-    'drop'?: ApiCreateDropRequest;
-    'drop_id'?: string;
-    /**
-    * Required when a signed existing drop is attached. SHA-256 of the canonical sanitized content snapshot; checked under the drop lock.
-    */
-    'drop_content_hash'?: string;
+    'drop': ApiCreateDropRequest;
     'signature'?: ApiCompetitionSignature;
 
     static readonly discriminator: string | undefined = undefined;
@@ -50,18 +45,6 @@ export class ApiCreateCompetitionEntryRequest {
             "name": "drop",
             "baseName": "drop",
             "type": "ApiCreateDropRequest",
-            "format": ""
-        },
-        {
-            "name": "drop_id",
-            "baseName": "drop_id",
-            "type": "string",
-            "format": ""
-        },
-        {
-            "name": "drop_content_hash",
-            "baseName": "drop_content_hash",
-            "type": "string",
             "format": ""
         },
         {

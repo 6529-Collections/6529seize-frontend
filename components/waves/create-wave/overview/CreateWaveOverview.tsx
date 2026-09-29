@@ -68,6 +68,19 @@ export default function CreateWaveOverview({
       [key]: value,
     });
 
+  const competitionTypeSelector = (
+    <CreateWaveType
+      isSubwave={isSubwave}
+      selected={overview.typeSelected ? overview.type : null}
+      errors={errors}
+      onChange={(type) =>
+        // Record the explicit pick so the selector highlights it and the
+        // Overview "type required" gate clears.
+        setOverview({ ...overview, type, typeSelected: true })
+      }
+    />
+  );
+
   return (
     <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-y-6 tw-break-words">
       <CreateWaveStepHeader
@@ -102,36 +115,16 @@ export default function CreateWaveOverview({
           }
         />
       </div>
-      <details
-        open={isMultiCompetitionEnabled() ? undefined : true}
-        className={
-          isMultiCompetitionEnabled()
-            ? "tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-p-4"
-            : "[&>summary]:tw-hidden"
-        }
-      >
-        <summary className="tw-cursor-pointer tw-text-sm tw-text-iron-300">
-          {t(locale, "competitions.first")}
-        </summary>
-        <CreateWaveType
-          isSubwave={isSubwave}
-          selected={overview.typeSelected ? overview.type : null}
-          errors={errors}
-          onChange={(type) =>
-            // Record the explicit pick so the selector highlights it and the
-            // Overview "type required" gate clears.
-            setOverview({ ...overview, type, typeSelected: true })
-          }
-        />
-      </details>
-      {overview.type === ApiWaveType.Rank && (
+      {!isMultiCompetitionEnabled() && competitionTypeSelector}
+      {!isMultiCompetitionEnabled() && overview.type === ApiWaveType.Rank && (
         <RankScheduleModeSelector
           ongoingRanking={ongoingRanking}
           onChange={onOngoingRankingChange}
         />
       )}
-      {overview.type === ApiWaveType.Rank ||
-      overview.type === ApiWaveType.Approve ? (
+      {!isMultiCompetitionEnabled() &&
+      (overview.type === ApiWaveType.Rank ||
+        overview.type === ApiWaveType.Approve) ? (
         <CreateWaveDisplaySettings
           display={display}
           errors={errors}

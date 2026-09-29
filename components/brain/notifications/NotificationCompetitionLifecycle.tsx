@@ -12,7 +12,8 @@ export default function NotificationCompetitionLifecycle({
 }) {
   const locale = useBrowserLocale();
   const context = notification.additional_context;
-  const label = getEventLabel(context.event_type.toUpperCase());
+  if (context.event_type.toUpperCase() !== "COMPETITION_DECISION_COMPLETED")
+    return null;
   const entryQuery = context.entry_id
     ? `?entry=${encodeURIComponent(context.entry_id)}`
     : "";
@@ -21,7 +22,7 @@ export default function NotificationCompetitionLifecycle({
   return (
     <div className="tw-space-y-2 tw-py-3">
       <p className="tw-m-0 tw-text-sm tw-text-iron-300">
-        {t(locale, `competitions.notification.${label}`)}{" "}
+        {t(locale, "competitions.notification.winners")}{" "}
         <NotificationTimestamp createdAt={notification.created_at} />
       </p>
       <Link
@@ -32,23 +33,4 @@ export default function NotificationCompetitionLifecycle({
       </Link>
     </div>
   );
-}
-
-const EVENT_LABELS = {
-  COMPETITION_PUBLISHED: "published",
-  COMPETITION_CANCELLED: "cancelled",
-  COMPETITION_ENDED: "ended",
-  COMPETITION_SCHEDULE_CHANGED: "updated",
-  COMPETITION_PAUSED: "paused",
-  COMPETITION_RESUMED: "resumed",
-  COMPETITION_STARTED: "updated",
-  COMPETITION_DECISION_COMPLETED: "winners",
-  COMPETITION_UPDATED: "updated",
-  ENTRY_DISQUALIFIED: "disqualified",
-} as const;
-
-function getEventLabel(event: string) {
-  return Object.hasOwn(EVENT_LABELS, event)
-    ? EVENT_LABELS[event as keyof typeof EVENT_LABELS]
-    : "updated";
 }

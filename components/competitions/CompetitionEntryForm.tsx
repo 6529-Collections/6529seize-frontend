@@ -207,7 +207,7 @@ export default function CompetitionEntryForm({
             })),
           ],
           wave_id: wave.id,
-          drop_type: ApiDropType.Chat,
+          drop_type: ApiDropType.Participatory,
           signature: null,
         };
         request = {

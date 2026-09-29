@@ -23,20 +23,22 @@ export function useCompetitionViewer() {
     : null;
 }
 
-export function useCompetitionHub(waveId: string) {
+export function useCompetitionHub(waveId: string, enabled = true) {
   const viewer = useCompetitionViewer();
   return useQuery({
     queryKey: [QueryKey.COMPETITION_HUB, { wave_id: waveId, viewer }],
     queryFn: ({ signal }) => fetchCompetitionHub(waveId, signal),
     retry: false,
     staleTime: 30_000,
+    enabled,
   });
 }
 
 export function useCompetitionList(
   waveId: string,
   filter: CompetitionCollectionFilter = "all",
-  enabled = true
+  enabled = true,
+  refetchInterval: number | false = false
 ) {
   const viewer = useCompetitionViewer();
   return useInfiniteQuery({
@@ -47,6 +49,7 @@ export function useCompetitionList(
     getNextPageParam: (page) => (page.has_more ? page.next_cursor : undefined),
     retry: false,
     staleTime: 30_000,
+    refetchInterval,
     enabled,
   });
 }

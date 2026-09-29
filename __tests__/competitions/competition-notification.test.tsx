@@ -3,7 +3,7 @@ import NotificationCompetitionLifecycle from "@/components/brain/notifications/N
 import { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
 import type { INotificationCompetitionLifecycle } from "@/types/feed.types";
 
-it("identifies a disqualified entry and links to its competition history", () => {
+it("links winner notifications to the competition entry", () => {
   const notification: INotificationCompetitionLifecycle = {
     id: 1,
     created_at: 1,
@@ -14,16 +14,33 @@ it("identifies a disqualified entry and links to its competition history", () =>
       competition_id: "competition",
       competition_title: "Community competition",
       event_id: "event",
-      event_type: "ENTRY_DISQUALIFIED",
+      event_type: "COMPETITION_DECISION_COMPLETED",
       entry_id: "entry",
     },
   };
 
   render(<NotificationCompetitionLifecycle notification={notification} />);
 
-  expect(screen.getByText("Competition entry disqualified")).toBeVisible();
+  expect(screen.getByText("New competition results")).toBeVisible();
   expect(screen.queryByText("Competition updated")).toBeNull();
   expect(
     screen.getByRole("link", { name: "Community competition" })
   ).toHaveAttribute("href", "/waves/wave/competitions/competition?entry=entry");
+});
+
+it.each([
+  "ENTRY_DISQUALIFIED",
+  "COMPETITION_ENTRY_DISQUALIFIED",
+  "COMPETITION_ENTRY_WITHDRAWN",
+  "COMPETITION_ENTRY_DELETED",
+  "COMPETITION_UPDATED",
+])("hides cached removal and status notifications (%s)", (event_type) => {
+  const notification = {
+    cause: ApiNotificationCause.CompetitionLifecycle,
+    additional_context: { event_type },
+  } as INotificationCompetitionLifecycle;
+  const { container } = render(
+    <NotificationCompetitionLifecycle notification={notification} />
+  );
+  expect(container).toBeEmptyDOMElement();
 });

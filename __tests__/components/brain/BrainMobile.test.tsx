@@ -9,6 +9,10 @@ import BrainMobile from "@/components/brain/BrainMobile";
 import { BrainView } from "@/components/brain/mobile/brainMobileViews";
 import { SidebarTab } from "@/components/brain/right-sidebar/BrainRightSidebarTypes";
 
+jest.mock("@/hooks/competitions/useWaveCompetitionsTab", () => ({
+  useWaveCompetitionsTab: () => ({ hasCompetitions: false, activeCount: 0 }),
+}));
+
 jest.mock("next/image", () => ({
   __esModule: true,
   default: ({ alt, height, src, width }: any) => (

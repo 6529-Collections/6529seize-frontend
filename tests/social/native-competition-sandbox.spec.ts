@@ -128,6 +128,16 @@ async function installCompetitionApi(page: Page, selfNomination = false) {
     const suffix = url.pathname.split(`/v3/waves/${WAVE}`)[1];
     if (suffix === undefined) return route.fallback();
     const method = route.request().method();
+    // The shared-chat fixture contains legacy drops; native entry content is
+    // served separately by the competition fixtures below.
+    if (
+      suffix.startsWith("/drops/") &&
+      suffix.endsWith("/competition-context")
+    ) {
+      return route.fulfill({
+        json: { competition: null, entry: null, vote_summary: null },
+      });
+    }
     const parts = suffix.split("/").filter(Boolean);
     const id = parts[1] ?? "";
     const selected = competitions.find((item) => item.id === id);
@@ -254,9 +264,13 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await page.goto(ROOT);
     await dismissNextDevTools(page);
     await expect(
-      page.getByRole("heading", { name: "Competitions", exact: true })
+      page.getByRole("tab", { name: /^Competitions(?:\s+\d+\+?)?$/ })
     ).toBeVisible({ timeout: 30000 });
     await page.getByRole("link", { name: /Parallel Alpha/ }).click();
+    await expect(
+      page.getByRole("tab", { name: /^Competitions(?:\s+\d+\+?)?$/ })
+    ).toHaveAttribute("aria-selected", "true");
+    await expect(page.locator("#tabs-container")).toBeVisible();
     await expect(
       page.getByRole("heading", {
         name: "Parallel Alpha",
@@ -269,6 +283,27 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     ).toBeVisible({ timeout: 30000 });
     await page.getByRole("button", { name: "Your vote", exact: true }).click();
     const voteInput = page.getByRole("spinbutton", { name: "Your vote" });
+    await expect(
+      page.getByRole("button", {
+        name: "Use an existing drop",
+        exact: true,
+        includeHidden: true,
+      })
+    ).toHaveCount(0);
+    await expect(
+      page.getByRole("button", {
+        name: "End",
+        exact: true,
+        includeHidden: true,
+      })
+    ).toHaveCount(0);
+    await expect(
+      page.getByRole("button", {
+        name: "Cancel competition",
+        exact: true,
+        includeHidden: true,
+      })
+    ).toHaveCount(0);
     await voteInput.fill("");
     await expect(voteInput).toHaveAttribute("aria-invalid", "true");
     await expect(voteInput).toHaveAccessibleDescription(
@@ -290,6 +325,12 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       .getByRole("link", { name: "All competitions", exact: true })
       .click();
     await page.getByRole("link", { name: /Parallel Beta/ }).click();
+    await expect(
+      page.getByRole("tab", { name: "Entries", exact: true })
+    ).toHaveCount(0);
+    await expect(
+      page.getByRole("tab", { name: "Leaderboard", exact: true })
+    ).toHaveAttribute("aria-selected", "true");
     await expect(
       page.getByRole("heading", {
         name: "Parallel Beta",
@@ -329,12 +370,15 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await expect(
       page.getByText("Immutable alpha entry content", { exact: true })
     ).toHaveCount(0);
+    await expect(
+      page.getByRole("button", { name: /Withdraw entry|Disqualify entry/ })
+    ).toHaveCount(0);
     await expectNoHorizontalOverflow(page);
     await page.screenshot({
       path: testInfo.outputPath("native-competition.png"),
       fullPage: true,
     });
-    await page.getByRole("link", { name: "My votes", exact: true }).click();
+    await page.getByRole("tab", { name: "My votes", exact: true }).click();
     await expect(page).toHaveURL(/beta\?tab=votes$/);
     await page.goBack();
     await expect(page).toHaveURL(/\/beta$/);
@@ -342,10 +386,22 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await expect(
       page.getByRole("spinbutton", { name: "Your vote" })
     ).toHaveValue("0");
-    await page.getByRole("link", { name: "Shared chat", exact: true }).click();
+    await page.getByRole("tab", { name: "Chat", exact: true }).click();
     await expect(page).toHaveURL(new RegExp(`/waves/${WAVE}$`), {
       timeout: 30000,
     });
+    await expect(
+      page.getByRole("link", { name: "Add competition", exact: true })
+    ).toHaveCount(0);
+    const competitionsTab = page.getByRole("tab", {
+      name: /^Competitions(?:\s+\d+\+?)?$/,
+    });
+    await competitionsTab.click();
+    await expect(competitionsTab).toHaveAttribute("aria-selected", "true");
+    await expect(
+      page.getByRole("link", { name: /Parallel Alpha/ })
+    ).toBeVisible();
+    await page.getByRole("tab", { name: "Chat", exact: true }).click();
     await page.goBack();
     await expect(
       page.getByRole("heading", {
@@ -371,7 +427,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     const sandbox = await installCompetitionApi(page);
     await page.goto(ROOT);
     await page
-      .getByRole("link", { name: "New competition", exact: true })
+      .getByRole("link", { name: "Add competition", exact: true })
       .click();
     await expect(
       page.getByLabel("Competition name", { exact: true })
@@ -471,6 +527,10 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
   }) => {
     const sandbox = await installCompetitionApi(page);
     await page.goto("/waves/create");
+    await expect(page.getByText(/Configure the first competition/)).toHaveCount(
+      0
+    );
+    await expect(page.getByRole("radio", { name: "Chat only" })).toHaveCount(0);
     await page.getByLabel(/Wave Name/).fill("Native shared hub");
     await page.getByRole("button", { name: "Next", exact: true }).click();
     await expect(
@@ -488,7 +548,9 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await page
       .getByRole("button", { name: "Confirm and create", exact: true })
       .click();
-    await expect(page).toHaveURL(new RegExp(`${ROOT}$`), { timeout: 30000 });
+    await expect(page).toHaveURL(new RegExp(`/waves/${WAVE}$`), {
+      timeout: 30000,
+    });
     expect(sandbox.requests).toHaveLength(1);
     expect(sandbox.requests[0]?.path).toBe("/api/v3/waves");
     expect(sandbox.requests[0]?.body).toMatchObject({
@@ -508,7 +570,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       page.getByText(/This competition could not be loaded/)
     ).toBeVisible({ timeout: 30000 });
     await expect(
-      page.getByRole("link", { name: "Shared chat", exact: true })
+      page.getByRole("tab", { name: "Chat", exact: true })
     ).toBeVisible({ timeout: 30000 });
     await expect(
       page.getByRole("button", { name: "Try again", exact: true })

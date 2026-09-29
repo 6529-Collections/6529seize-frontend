@@ -1,5 +1,4 @@
 "use client";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCompetitionHub } from "@/hooks/competitions/useCompetitionQueries";
 import { useWaveData } from "@/hooks/useWaveData";
@@ -7,17 +6,15 @@ import {
   getCompetitionsRoute,
   isMultiCompetitionEnabled,
 } from "@/helpers/competition.helpers";
-import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import { t } from "@/i18n/messages";
-import { CompetitionState, COMPETITION_BUTTON } from "./CompetitionState";
+import { CompetitionState } from "./CompetitionState";
 import CompetitionDraftEditor from "./CompetitionDraftEditor";
+import CompetitionBackLink from "./CompetitionBackLink";
 
 export default function CompetitionDraftRoute({
   waveId,
 }: {
   readonly waveId: string;
 }) {
-  const locale = useBrowserLocale();
   const router = useRouter();
   const hub = useCompetitionHub(waveId);
   const wave = useWaveData({ waveId, onWaveNotFound: () => undefined });
@@ -36,12 +33,7 @@ export default function CompetitionDraftRoute({
   return (
     <section className="tw-h-full tw-min-h-0 tw-overflow-y-auto tw-p-4 sm:tw-p-6">
       <div className="tw-mx-auto tw-max-w-4xl tw-space-y-5">
-        <Link
-          href={getCompetitionsRoute(waveId)}
-          className={COMPETITION_BUTTON}
-        >
-          {t(locale, "competitions.back")}
-        </Link>
+        <CompetitionBackLink waveId={waveId} />
         {content}
       </div>
     </section>

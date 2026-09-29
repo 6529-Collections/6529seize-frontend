@@ -131,7 +131,10 @@ export function competitionDraftToForm(
     },
     approval: {
       threshold: input.rules.winning_threshold,
-      thresholdTimeMs: input.rules.winning_threshold_min_duration_ms,
+      thresholdTimeMs:
+        input.rules.winning_threshold_min_duration_ms === 0
+          ? null
+          : input.rules.winning_threshold_min_duration_ms,
       maxWinners: input.rules.max_winners,
     },
     outcomes: input.outcomes.map((outcome) => ({

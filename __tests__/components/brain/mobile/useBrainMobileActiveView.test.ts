@@ -28,6 +28,21 @@ const createProps = (
 });
 
 describe("useBrainMobileActiveView", () => {
+  it("opens competition deep links in Competitions even when Chat was restored", () => {
+    const props = createProps({
+      pathname: "/waves/wave-1/competitions/first",
+      restoredView: BrainView.DEFAULT,
+      isCompleted: false,
+    });
+    const { result, rerender } = renderHook(useBrainMobileActiveView, {
+      initialProps: props,
+    });
+    expect(result.current.activeView).toBe(BrainView.COMPETITIONS);
+    rerender({ ...props, pathname: "/waves/wave-1" });
+    expect(result.current.activeView).toBe(BrainView.DEFAULT);
+    rerender(props);
+    expect(result.current.activeView).toBe(BrainView.COMPETITIONS);
+  });
   it("keeps the selection callback stable until its route context changes", () => {
     const props = createProps({ isCompleted: false });
     const { result, rerender } = renderHook(useBrainMobileActiveView, {

@@ -1,4 +1,5 @@
 "use client";
+import type { ApiCompetition } from "@/generated/models/ApiCompetition";
 import { useSignMessage } from "wagmi";
 import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
@@ -7,10 +8,14 @@ import type { ApiCompetitionSignature } from "@/generated/models/ApiCompetitionS
 import { useCompetition } from "@/contexts/CompetitionContext";
 
 export function useCompetitionSignature() {
+  const { competition } = useCompetition();
+  return useCompetitionSignatureFor(competition);
+}
+
+export function useCompetitionSignatureFor(competition: ApiCompetition) {
   const { signMessageAsync } = useSignMessage();
   const { connectedProfile, activeProfileProxy } = useAuth();
   const { address } = useSeizeConnectContext();
-  const { competition } = useCompetition();
   return async (
     action: "ENTRY_CREATE" | "VOTE_SET",
     payload: unknown,

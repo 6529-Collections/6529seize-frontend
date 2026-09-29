@@ -107,19 +107,39 @@ const getPrivilegeGroupDefaults = ({
   };
 };
 
-// eslint-disable-next-line max-lines-per-function -- Existing controller; initialize inherited access here so validation and submission share the same state.
+function asChatOnlyConfig(config: CreateWaveConfig): CreateWaveConfig {
+  if (
+    config.overview.type === ApiWaveType.Chat &&
+    config.overview.typeSelected &&
+    config.chat.enabled
+  ) {
+    return config;
+  }
+  return {
+    ...config,
+    overview: {
+      ...config.overview,
+      type: ApiWaveType.Chat,
+      typeSelected: true,
+    },
+    chat: { enabled: true },
+  };
+}
+
 export function useWaveConfig({
   initialViewGroupId = null,
   initialWaveType = ApiWaveType.Chat,
   initialConfigTransform,
+  chatOnly = false,
 }: {
   readonly initialViewGroupId?: string | null | undefined;
   readonly initialWaveType?: ApiWaveType;
+  readonly chatOnly?: boolean;
   readonly initialConfigTransform?: (
     config: CreateWaveConfig
   ) => CreateWaveConfig;
 } = {}) {
-  const initialType = initialWaveType;
+  const initialType = chatOnly ? ApiWaveType.Chat : initialWaveType;
   const initialStep = CreateWaveStep.OVERVIEW;
 
   // Get initial config for a wave type
@@ -243,7 +263,7 @@ export function useWaveConfig({
   const navigationRequestId = useRef(0);
 
   const shouldLoadMemeCount =
-    config.voting.type === ApiWaveCreditType.CardSetTdh;
+    !chatOnly && config.voting.type === ApiWaveCreditType.CardSetTdh;
   const memeCountQuery = useMemeCardCount({ enabled: shouldLoadMemeCount });
   const memeCount =
     shouldLoadMemeCount && !memeCountQuery.isError
@@ -251,21 +271,25 @@ export function useWaveConfig({
       : null;
 
   const effectiveConfig = useMemo<CreateWaveConfig>(() => {
-    if (config.voting.creditNftMemeCount === memeCount) {
-      return config;
+    // Old wave drafts may contain competition settings. Wave creation now
+    // uses only their wave details; competitions have their own setup flow.
+    const currentConfig = chatOnly ? asChatOnlyConfig(config) : config;
+    if (currentConfig.voting.creditNftMemeCount === memeCount) {
+      return currentConfig;
     }
 
     return {
-      ...config,
+      ...currentConfig,
       voting: {
-        ...config.voting,
+        ...currentConfig.voting,
         creditNftMemeCount: memeCount,
       },
     };
-  }, [config, memeCount]);
+  }, [config, memeCount, chatOnly]);
   const groupValidationQuery = useWaveGroupValidation(effectiveConfig);
 
-  const replaceConfig = (nextConfig: CreateWaveConfig) => {
+  const replaceConfig = (replacement: CreateWaveConfig) => {
+    const nextConfig = chatOnly ? asChatOnlyConfig(replacement) : replacement;
     manuallySelectedPrivilegeGroups.current.clear();
     const { canView } = nextConfig.groups;
     const privilegeGroups: readonly [

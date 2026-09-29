@@ -1,5 +1,4 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
-import CompetitionExistingEntry from "@/components/competitions/CompetitionExistingEntry";
 import CompetitionEntryForm from "@/components/competitions/CompetitionEntryForm";
 import { createCompetitionEntry } from "@/services/api/competitions-api";
 
@@ -140,14 +139,14 @@ jest.mock("@/services/api/competitions-api", () => ({
   invalidateCompetition: jest.fn().mockResolvedValue(undefined),
 }));
 
-it("preserves wave and group mentions in the native CHAT command and strips legacy signing fields", async () => {
+it("preserves wave and group mentions in the competition submission command and strips legacy signing fields", async () => {
   render(<CompetitionEntryForm onClose={jest.fn()} />);
   fireEvent.click(screen.getByRole("button", { name: "Submit an entry" }));
   await waitFor(() => expect(createCompetitionEntry).toHaveBeenCalled());
   const body = jest.mocked(createCompetitionEntry).mock.calls[0]![1];
   expect(body.drop).toMatchObject({
     wave_id: "wave",
-    drop_type: "CHAT",
+    drop_type: "PARTICIPATORY",
     mentioned_waves: mockSnapshot.mentioned_waves,
     mentioned_groups: ["ADMINS"],
     hide_link_preview: true,
@@ -174,9 +173,9 @@ it("gives blank metadata requirements an accessible fallback name", () => {
   expect(field).toHaveAttribute("aria-invalid", "true");
 });
 
-it("keeps existing-entry terms separate from the checkbox accessible name", () => {
+it("keeps submission terms separate from the checkbox accessible name", () => {
   mockTerms = "The complete competition participation terms.";
-  render(<CompetitionExistingEntry onClose={jest.fn()} />);
+  render(<CompetitionEntryForm onClose={jest.fn()} />);
   const checkbox = screen.getByRole("checkbox", {
     name: "I agree to this competition’s terms.",
   });

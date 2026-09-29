@@ -1,3 +1,14 @@
+"use client";
+import { ApiCompetitionEntryStatus } from "@/generated/models/ApiCompetitionEntryStatus";
+
+import { useQuery } from "@tanstack/react-query";
+import { ApiDropType } from "@/generated/models/ApiDropType";
+import { QueryKey } from "@/components/react-query-wrapper/query-keys";
+import { CompetitionVoteForm } from "@/components/competitions/CompetitionVote";
+import { CompetitionState } from "@/components/competitions/CompetitionState";
+import { isMultiCompetitionEnabled } from "@/helpers/competition.helpers";
+import { useCompetitionViewer } from "@/hooks/competitions/useCompetitionQueries";
+import { fetchDropCompetitionContext } from "@/services/api/competitions-api";
 import dynamic from "next/dynamic";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import {
@@ -28,24 +39,63 @@ const SingleWaveDropVoteContent = dynamic(
   { ssr: false }
 );
 
-export const SingleWaveDropVote: React.FC<SingleWaveDropVoteProps> = ({
-  drop,
-  size = SingleWaveDropVoteSize.NORMAL,
-  onVoteSuccess,
-  onVoteRequestStarted,
-  submissionMode = SingleWaveDropVoteSubmissionMode.WAIT_FOR_CONFIRMATION,
-  voteMode,
-  onVoteModeChange,
-}) => {
+function CompetitionAwareDropVote(props: SingleWaveDropVoteProps) {
+  const viewer = useCompetitionViewer();
+  const { drop } = props;
+  const context = useQuery({
+    queryKey: [
+      QueryKey.COMPETITION_DROP_CONTEXT,
+      { wave_id: drop.wave.id, drop_id: drop.id, viewer },
+    ],
+    queryFn: ({ signal }) =>
+      fetchDropCompetitionContext(drop.wave.id, drop.id, signal),
+    retry: false,
+    staleTime: 0,
+  });
+  if (context.isPending) return <CompetitionState />;
+  if (context.isError)
+    return (
+      <CompetitionState
+        error
+        retry={() => {
+          void context.refetch();
+        }}
+      />
+    );
+  const { competition, entry } = context.data;
+  if (!competition || !entry)
+    return (
+      <SingleWaveDropVoteContent
+        {...props}
+        size={props.size ?? SingleWaveDropVoteSize.NORMAL}
+      />
+    );
   return (
-    <SingleWaveDropVoteContent
-      drop={drop}
-      size={size}
-      onVoteSuccess={onVoteSuccess}
-      onVoteRequestStarted={onVoteRequestStarted}
-      submissionMode={submissionMode}
-      voteMode={voteMode}
-      onVoteModeChange={onVoteModeChange}
+    <CompetitionVoteForm
+      competition={competition}
+      entryId={entry.id}
+      dropId={entry.drop_id}
+      disabled={entry.status !== ApiCompetitionEntryStatus.Active}
+      voteMode={props.voteMode ?? "slider"}
+      size={props.size}
+      onVoteSuccess={() => {
+        props.onVoteSuccess?.();
+        props.onVoteRequestStarted?.();
+      }}
     />
+  );
+}
+
+export const SingleWaveDropVote: React.FC<SingleWaveDropVoteProps> = ({
+  size = SingleWaveDropVoteSize.NORMAL,
+  submissionMode = SingleWaveDropVoteSubmissionMode.WAIT_FOR_CONFIRMATION,
+  ...props
+}) => {
+  const resolvedProps = { ...props, size, submissionMode };
+  return isMultiCompetitionEnabled() &&
+    props.drop.drop_type !== ApiDropType.Chat ? (
+    <CompetitionAwareDropVote {...resolvedProps} />
+  ) : (
+    <SingleWaveDropVoteContent {...resolvedProps} />
   );
 };

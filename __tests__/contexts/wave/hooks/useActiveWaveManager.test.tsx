@@ -1,6 +1,6 @@
 import { renderHook, act, waitFor } from "@testing-library/react";
 import { useActiveWaveManager } from "@/contexts/wave/hooks/useActiveWaveManager";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 jest.mock("@/hooks/useDeviceInfo", () => ({
   __esModule: true,
@@ -74,6 +74,48 @@ describe("useActiveWaveManager", () => {
       "",
       "/waves/wave-123?serialNo=42"
     );
+  });
+
+  it.each([
+    "/waves/abc/competitions",
+    "/waves/abc/competitions/competition-1",
+    "/waves/abc/competitions/new",
+    "/waves/abc/competitions/competition-1?edit=1",
+  ])("uses route navigation when switching waves from %s", (source) => {
+    globalThis.history.replaceState(null, "", source);
+    (usePathname as jest.Mock).mockReturnValue(source.split("?")[0]);
+    (useSearchParams as jest.Mock).mockReturnValue(
+      new URLSearchParams(globalThis.location.search)
+    );
+    const push = jest.fn();
+    (useRouter as jest.Mock).mockReturnValue({ push, replace: jest.fn() });
+    const pushStateSpy = jest.spyOn(globalThis.history, "pushState");
+    const { result } = renderHook(() => useActiveWaveManager());
+
+    act(() => {
+      result.current.setActiveWave("def", { divider: 42 });
+    });
+
+    expect(push).toHaveBeenCalledWith("/waves/def?divider=42");
+    expect(pushStateSpy).not.toHaveBeenCalled();
+    expect(result.current.activeWaveId).toBe("def");
+  });
+
+  it("uses route navigation when deselecting a wave from competitions", () => {
+    globalThis.history.replaceState(null, "", "/waves/abc/competitions");
+    (usePathname as jest.Mock).mockReturnValue("/waves/abc/competitions");
+    (useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams());
+    const push = jest.fn();
+    (useRouter as jest.Mock).mockReturnValue({ push, replace: jest.fn() });
+    const pushStateSpy = jest.spyOn(globalThis.history, "pushState");
+    const { result } = renderHook(() => useActiveWaveManager());
+
+    act(() => {
+      result.current.setActiveWave(null);
+    });
+
+    expect(push).toHaveBeenCalledWith("/waves");
+    expect(pushStateSpy).not.toHaveBeenCalled();
   });
 
   it("includes serialNo as string in URL", async () => {

@@ -4525,68 +4525,6 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiMintMetricsPage"
-  /v3/waves/{wave_id}/competitions/{competition_id}/entry-content-candidate/{drop_id}:
-    get:
-      tags:
-        - Competitions
-      summary: getCompetitionEntryContentCandidateV3
-      operationId: getCompetitionEntryContentCandidateV3
-      parameters:
-        - name: wave_id
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: competition_id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-        - name: drop_id
-          in: path
-          required: true
-          schema:
-            type: string
-      security:
-        - bearerAuth: []
-      x-6529-router:
-        enabled: true
-        auth: required
-        handler:
-          import: "@/api/competitions/competition-commands.handlers"
-          name: handleGetCompetitionEntryContentCandidateV3
-      responses:
-        "200":
-          description: Authorized competition resource
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiCreateDropRequest"
-        "400":
-          description: Invalid request.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiErrorResponse"
-        "401":
-          description: Authentication required.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiErrorResponse"
-        "403":
-          description: Action not permitted.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiErrorResponse"
-        "404":
-          description: Resource missing or inaccessible
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiErrorResponse"
   /v3/waves/{wave_id}/competitions/{competition_id}/entries/{entry_id}/content:
     get:
       tags:
@@ -5019,95 +4957,6 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/ApiSetCompetitionVoteRequest"
-  /v3/waves/{wave_id}/competitions/{competition_id}/entries/{entry_id}/actions/{action}:
-    post:
-      tags:
-        - Competitions
-      summary: execute Competition Entry Action V3
-      operationId: executeCompetitionEntryActionV3
-      parameters:
-        - name: wave_id
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: competition_id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-        - name: entry_id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-        - name: action
-          in: path
-          required: true
-          schema:
-            type: string
-            enum:
-              - withdraw
-              - disqualify
-      security:
-        - bearerAuth: []
-      x-6529-router:
-        enabled: true
-        auth: required
-        handler:
-          import: "@/api/competitions/competition-commands.handlers"
-          name: handleExecuteCompetitionEntryActionV3
-      responses:
-        "200":
-          description: Command result or identical idempotent replay.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiCompetitionEntry"
-        "400":
-          description: Invalid request.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiErrorResponse"
-        "401":
-          description: Authentication required.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiErrorResponse"
-        "403":
-          description: Action not permitted.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiErrorResponse"
-        "404":
-          description: Resource missing or parent not visible.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiErrorResponse"
-        "409":
-          description: Config, lifecycle, signature nonce or idempotency conflict.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiErrorResponse"
-        "422":
-          description: Competition eligibility or credit requirement not met.
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ApiErrorResponse"
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/ApiCompetitionActionRequest"
   /v3/waves/{wave_id}/competitions/{competition_id}/actions/{action}:
     post:
       tags:
@@ -5133,8 +4982,6 @@ paths:
             type: string
             enum:
               - publish
-              - end
-              - cancel
               - archive
               - clone
               - pause
@@ -5830,6 +5677,58 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiCompetitionError"
+  /v3/waves/{wave_id}/drops/{drop_id}/competition-context:
+    get:
+      tags:
+        - CompetitionsV3
+      summary: Resolve the native competition and entry for a visible drop
+      operationId: getDropCompetitionContextV3
+      security:
+        - bearerAuth: []
+        - {}
+      x-6529-router:
+        enabled: true
+        auth: optional
+        typeImportGroup: competitions-v3
+        handler:
+          import: "@/api/competitions/competition-commands.handlers"
+          name: handleGetDropCompetitionContextV3
+      parameters:
+        - name: wave_id
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 100
+        - name: drop_id
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 100
+      responses:
+        "200":
+          description: Native competition context, or null fields for a legacy or chat drop
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDropCompetitionContext"
+        "400":
+          description: Invalid path or query
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCompetitionError"
+        "404":
+          description: >-
+            Drop or competition is unavailable, deleted, or belongs to another
+            wave
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCompetitionError"
   /v3/waves/{wave_id}/competitions/{competition_id}/entries/{entry_id}:
     get:
       tags:
@@ -6000,6 +5899,9 @@ paths:
             type: string
             enum:
               - rating
+              - real_time_rating
+              - submitted_at
+              - trend
             default: rating
         - name: direction
           in: query
@@ -25207,6 +25109,10 @@ components:
           type: string
           nullable: true
           maxLength: 2000
+          description: >-
+            Required and non-blank for pause actions. The trimmed reason is
+            stored in the competition's public pause history. Optional for other
+            actions.
         starts_at:
           type: integer
           format: int64
@@ -25569,6 +25475,46 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiCreateWaveMetadataRequest"
+    ApiCompetitionDropVoteSummary:
+      type: object
+      additionalProperties: false
+      required:
+        - rating
+        - realtime_rating
+        - rating_prediction
+        - raters_count
+        - user_vote
+        - rank
+        - top_raters
+      properties:
+        over_threshold_since_ms:
+          type: integer
+          format: int64
+          nullable: true
+          description: When this entry first continuously reached its approval threshold.
+        rating:
+          type: integer
+          format: int64
+        realtime_rating:
+          type: integer
+          format: int64
+        rating_prediction:
+          type: integer
+          format: int64
+        raters_count:
+          type: integer
+          format: int64
+        user_vote:
+          type: integer
+          format: int64
+        rank:
+          type: integer
+          format: int64
+          nullable: true
+        top_raters:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiDropRater"
     ApiCompetitionEntry:
       type: object
       additionalProperties: false
@@ -27003,20 +26949,12 @@ components:
       required:
         - idempotency_key
         - config_version
+        - drop
       properties:
         idempotency_key: *ref_12
         config_version: *ref_13
         drop:
           $ref: "#/components/schemas/ApiCreateDropRequest"
-        drop_id:
-          type: string
-          maxLength: 100
-        drop_content_hash:
-          type: string
-          pattern: ^[0-9a-f]{64}$
-          description: >-
-            Required when a signed existing drop is attached. SHA-256 of the
-            canonical sanitized content snapshot; checked under the drop lock.
         signature:
           $ref: "#/components/schemas/ApiCompetitionSignature"
     ApiCreateCompetitionRequest:
@@ -28338,6 +28276,25 @@ components:
         boosted_at:
           type: integer
           format: int64
+    ApiDropCompetitionContext:
+      type: object
+      additionalProperties: false
+      required:
+        - competition
+        - entry
+      properties:
+        vote_summary:
+          nullable: true
+          allOf:
+            - $ref: "#/components/schemas/ApiCompetitionDropVoteSummary"
+        competition:
+          nullable: true
+          allOf:
+            - $ref: "#/components/schemas/ApiCompetition"
+        entry:
+          nullable: true
+          allOf:
+            - $ref: "#/components/schemas/ApiCompetitionEntry"
     ApiDropContextProfileContext:
       type: object
       required:

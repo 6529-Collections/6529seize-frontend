@@ -8,18 +8,21 @@ voting, dates, outcomes and display settings belong to each competition.
 
 ## Location in the Site
 
-Use `/waves/{waveId}/competitions/new` or **New competition** from the wave's
-competition collection. Management controls are inside the competition.
+Open the wave's **Competitions** tab, then **Add competition**, or use
+`/waves/{waveId}/competitions/new`. For an existing competition, open **Configuration**. The overview card shows the competition type, status, name, description and guidelines. Its edit control changes the name, description and guidelines in place. **Appearance and labels** contains its display controls. Drafts also have **Finish draft setup** for their unpublished execution settings. **Pause decisions** and **Resume decisions** are separate controls in the **Pause history** section.
 
 ## Entry Points
 
-Where the competition experience is available, wave creation can create a
-shared hub with no competition or prepare a first competition. An existing
-wave can add a competition later from its collection.
+Where the competition experience is available, creating a wave opens its shared
+chat without creating a competition. Wave administrators can add competitions
+afterward; competition setup is separate from wave creation.
+The **Competitions** tab sits beside **Chat**. It appears for administrators who
+can add competitions, and for other viewers when the wave has competitions they
+can access.
 
 ## User Journey
 
-1. Open **New competition** as a wave administrator.
+1. Open **Add competition** as a wave administrator.
 2. Choose Rank or Approve and configure eligibility, dates, submission
    requirements, voting credits, decision rules, outcomes and presentation.
 3. Save the draft. Drafts are visible to wave administrators.
@@ -31,15 +34,22 @@ wave can add a competition later from its collection.
 ## Common Scenarios
 
 - Rank can use an ongoing leaderboard or scheduled and rolling decisions.
-- Approve can use a threshold, a required duration above that threshold and a
-  winner limit. Voting limits and negative-vote rules remain per competition.
-- Presentation settings include labels, proposal display, rules and outcome
-  visibility. Editing them creates a new configuration version.
+- Approve requires an approval threshold that is a whole number greater than
+  zero. A required duration above that threshold and a winner limit are optional.
+  Voting limits and negative-vote rules remain per competition. Saving with invalid
+  voting settings returns to Voting and highlights the field; autosave waits until
+  those settings are valid. Your input stays in the editor.
+- In **Configuration**, use the gear beside Participation or Voting **Access** to edit
+  its criteria with the existing access editor. These controls remain available
+  after entries are submitted.
+  An access change preserves existing entries, votes, outcomes and decision progress.
+- Edit the name, description and guidelines together inside the overview card, then choose **Save changes** or **Cancel**. Published competitions no longer open a separate editing wizard.
+- Expand **Appearance and labels** in Configuration to change the submission button, proposal card display, Approve tab labels and outcome visibility. Save or cancel within that section. These changes create a new configuration version without changing execution rules or access.
 - **Pause decisions** stops decision execution without closing otherwise open
   entry or vote windows. **Resume decisions** allows evaluation again. A paused
   Rank occurrence is skipped without shifting later scheduled occurrences.
-- **End** or **Cancel competition** stops future participation, voting and decisions while
-  keeping history. Cancellation does not introduce a refund or final winner.
+- Competitions complete through their configured rules. Administrators cannot
+  manually end or cancel a competition.
 - **Archive** moves a draft or terminal competition into history. **Clone as a draft**
   creates a new draft from a terminal competition; review its dates before
   publishing.
@@ -47,12 +57,11 @@ wave can add a competition later from its collection.
 ## Edge Cases
 
 - A published competition cannot change between Rank and Approve.
-- After the first accepted entry, eligibility, credit, signing, submission,
-  timing, decision and outcome rules are fixed. Title, description and
-  presentation remain editable while the competition is published.
+- After the first accepted entry, credit, signing, submission, timing, decision
+  and outcome rules are fixed. Participation and voting access, title, description
+  and presentation remain editable while the competition is published.
 - A stale editing form is rejected if another administrator saved a newer
-  version. Reload and review that version before trying again, or use
-  **Save as a new draft** to preserve your configuration separately.
+  version. For inline settings, cancel and reopen the section to edit the latest version. The draft setup editor also supports saving a separate draft copy.
 - Terminal competitions cannot reopen. A clone has its own identity, entries,
   votes and budget.
 - A wave containing native competition history cannot be deleted. Archive its
@@ -79,3 +88,7 @@ competition does not replace that original competition or its links.
 - [Browse and participate](feature-competitions.md)
 - [Wave creation](../create/README.md)
 - [Wave outcomes](../feature-outcome-lists.md)
+
+### Pause history
+
+In **Configuration**, the **Pause history** section shows each pause’s start and end dates and reason to anyone who can view the competition. **Pause decisions** sits beside this history, beside the other Configuration sections. Its confirmation dialog requires a non-blank reason before confirming; the reason becomes part of the visible history. **Resume decisions** ends the current pause, retaining its dates and reason. Older pauses without a reason show “No reason recorded.”

@@ -1,3 +1,4 @@
+import type { ApiDropCompetitionContext } from "@/generated/models/ApiDropCompetitionContext";
 import { QueryKey } from "@/components/react-query-wrapper/query-keys";
 import { ApiCompetitionComputedPhase } from "@/generated/models/ApiCompetitionComputedPhase";
 import type { ApiCompetition } from "@/generated/models/ApiCompetition";
@@ -46,6 +47,30 @@ export const competitionQueryKey = (
   identity: CompetitionIdentity,
   viewer: string | null
 ) => [QueryKey.COMPETITION, { ...competitionScope(identity), viewer }] as const;
+
+export async function fetchDropCompetitionContext(
+  waveId: string,
+  dropId: string,
+  signal?: AbortSignal
+) {
+  const context = await commonApiFetch<ApiDropCompetitionContext>({
+    endpoint: `v3/waves/${encodeURIComponent(waveId)}/drops/${encodeURIComponent(dropId)}/competition-context`,
+    signal,
+    errorMode: "structured",
+  });
+  if (context.competition === null && context.entry === null) return context;
+  if (
+    !context.competition ||
+    !context.entry ||
+    context.competition.wave_id !== waveId ||
+    context.entry.wave_id !== waveId ||
+    context.entry.drop_id !== dropId ||
+    context.entry.competition_id !== context.competition.id
+  ) {
+    throw new Error("Invalid drop competition context");
+  }
+  return context;
+}
 
 export async function fetchCompetitionHub(
   waveId: string,
@@ -244,8 +269,6 @@ export type CompetitionAction =
   | "publish"
   | "pause"
   | "resume"
-  | "end"
-  | "cancel"
   | "archive"
   | "clone";
 export const performCompetitionAction = (
@@ -277,23 +300,17 @@ export const setCompetitionVote = (
     body,
     errorMode: "structured",
   });
-export const performCompetitionEntryAction = (
-  identity: CompetitionIdentity,
-  entryId: string,
-  action: "withdraw" | "disqualify",
-  body: ApiCompetitionActionRequest
-) =>
-  commonApiPost<ApiCompetitionActionRequest, ApiCompetitionEntry>({
-    endpoint: `${competitionEndpoint(identity)}/entries/${encodeURIComponent(entryId)}/actions/${action}`,
-    body,
-    errorMode: "structured",
-  });
-
 export async function invalidateCompetition(
   client: QueryClient,
   identity: CompetitionIdentity
 ) {
   await Promise.all([
+    client.invalidateQueries({
+      queryKey: [
+        QueryKey.COMPETITION_DROP_CONTEXT,
+        { wave_id: identity.waveId },
+      ],
+    }),
     client.invalidateQueries({
       queryKey: [QueryKey.COMPETITION, competitionScope(identity)],
     }),
@@ -303,6 +320,8 @@ export async function invalidateCompetition(
     client.invalidateQueries({
       queryKey: [QueryKey.COMPETITION_CREDITS, competitionScope(identity)],
     }),
+    client.invalidateQueries({ queryKey: [QueryKey.DROP_VOTERS] }),
+    client.invalidateQueries({ queryKey: [QueryKey.DROP_VOTE_LOGS] }),
     client.invalidateQueries({
       queryKey: [QueryKey.COMPETITIONS, { wave_id: identity.waveId }],
     }),

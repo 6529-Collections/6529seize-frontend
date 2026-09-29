@@ -103,6 +103,17 @@ function DraftForm({
   const pending = useRef<{ fingerprint: string; key: string } | null>(null);
   const inFlight = useRef(false);
   const conflictCopyKey = useRef<string | null>(null);
+  const formRef = useRef<HTMLElement>(null);
+  const [saveErrorFocusRequest, setSaveErrorFocusRequest] = useState(0);
+  const votingErrors = getCreateWaveValidationErrors({
+    config,
+    step: CreateWaveStep.VOTING,
+  });
+  const votingInvalid = !lockedRules && votingErrors.length > 0;
+  const visibleErrors =
+    saveErrorFocusRequest > 0 && step === CreateWaveStep.VOTING
+      ? votingErrors
+      : controller.errors;
   const { submit: submitGroup } = useGroupMutations({
     requestAuth,
     onGroupCreate: () => undefined,
@@ -115,6 +126,11 @@ function DraftForm({
         title: draft.title,
         description: draft.description,
         presentation: draft.presentation,
+        participation: {
+          ...initial.participation,
+          scope: draft.participation.scope,
+        },
+        voting: { ...initial.voting, scope: draft.voting.scope },
       };
     return {
       ...draft,
@@ -132,12 +148,39 @@ function DraftForm({
       ? STEPS.filter((value) => value !== CreateWaveStep.OUTCOMES)
       : STEPS;
   const steps = lockedRules
-    ? [CreateWaveStep.OVERVIEW, CreateWaveStep.RULES, CreateWaveStep.REVIEW]
+    ? [
+        CreateWaveStep.OVERVIEW,
+        CreateWaveStep.GROUPS,
+        CreateWaveStep.RULES,
+        CreateWaveStep.REVIEW,
+      ]
     : fullSteps;
   const index = steps.indexOf(step);
 
+  const validateVotingForSave = () => {
+    if (!votingInvalid) return true;
+    setError(null);
+    void controller.onStep({
+      step: CreateWaveStep.VOTING,
+      direction: "backward",
+    });
+    setSaveErrorFocusRequest((value) => value + 1);
+    return false;
+  };
+
+  useEffect(() => {
+    // eslint-disable-next-line react-you-might-not-need-an-effect/no-event-handler -- The invalid field must mount before focus can move to it.
+    if (!saveErrorFocusRequest && !controller.errorFocusRequest) return;
+    const field = formRef.current?.querySelector<HTMLElement>(
+      '[aria-invalid="true"]'
+    );
+    field?.focus({ preventScroll: true });
+    field?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [saveErrorFocusRequest, controller.errorFocusRequest, step]);
+
   const save = async () => {
     if (inFlight.current || !input.title.trim() || error === "conflict") return;
+    if (!validateVotingForSave()) return;
     inFlight.current = true;
     setBusy(true);
     setError(null);
@@ -178,6 +221,7 @@ function DraftForm({
   };
   const saveConflictCopy = async () => {
     if (inFlight.current) return;
+    if (!validateVotingForSave()) return;
     inFlight.current = true;
     setBusy(true);
     try {
@@ -204,6 +248,7 @@ function DraftForm({
     if (
       !competition ||
       published ||
+      votingInvalid ||
       input.title.length === 0 ||
       fingerprint === savedFingerprint ||
       error
@@ -216,6 +261,7 @@ function DraftForm({
   }, [
     competition,
     published,
+    votingInvalid,
     input.title,
     fingerprint,
     savedFingerprint,
@@ -353,7 +399,7 @@ function DraftForm({
   else
     content = (
       <CreateWaveStepContent
-        controller={controller}
+        controller={{ ...controller, errors: visibleErrors }}
         descriptionSnapshot={null}
         onCriteriaReplacementChange={() => undefined}
         onGroupResolutionChange={() => undefined}
@@ -365,7 +411,11 @@ function DraftForm({
   else if (fingerprint === savedFingerprint)
     saveStatus = t(locale, "competitions.saved");
   return (
-    <section className="tw-space-y-5" aria-labelledby="competition-draft-title">
+    <section
+      ref={formRef}
+      className="tw-space-y-5"
+      aria-labelledby="competition-draft-title"
+    >
       <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
         <h1
           id="competition-draft-title"
@@ -398,7 +448,7 @@ function DraftForm({
           )}
         </div>
       </fieldset>
-      {controller.errors.length > 0 && invalid && (
+      {visibleErrors.length > 0 && invalid && (
         <p role="alert" className="tw-text-red">
           {t(locale, "competitions.required")}
         </p>
