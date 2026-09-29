@@ -31,7 +31,7 @@ function subscribe(listener: () => void) {
   };
 }
 
-export function setWaveSidebarCollection(value: WaveSidebarCollection) {
+function setWaveSidebarCollection(value: WaveSidebarCollection) {
   fallback = value;
   try {
     localStorage.setItem(KEY, value);

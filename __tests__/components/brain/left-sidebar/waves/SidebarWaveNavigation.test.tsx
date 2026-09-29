@@ -106,3 +106,51 @@ it("exposes the selected collection through both semantics and an underline", ()
     "tw-underline"
   );
 });
+
+it("switches Joined and All through the replacement collection controls", () => {
+  const state = navigation({
+    queryText: "",
+    searching: false,
+    collection: "all",
+  });
+  const { rerender } = render(
+    <SidebarWaveNavigationControls navigation={state} />
+  );
+  expect(screen.getByRole("group", { name: "Wave list filter" })).toBeVisible();
+  expect(screen.getByRole("button", { name: "All" })).toHaveAttribute(
+    "aria-pressed",
+    "true"
+  );
+  fireEvent.click(screen.getByRole("button", { name: "Joined" }));
+  expect(state.setCollection).toHaveBeenCalledWith("joined");
+  rerender(
+    <SidebarWaveNavigationControls
+      navigation={{ ...state, collection: "joined" }}
+    />
+  );
+  expect(screen.getByRole("button", { name: "Joined" })).toHaveAttribute(
+    "aria-pressed",
+    "true"
+  );
+  fireEvent.click(screen.getByRole("button", { name: "All" }));
+  expect(state.setCollection).toHaveBeenCalledWith("all");
+});
+
+it("hides personal collection controls when the viewer cannot use them", () => {
+  render(
+    <SidebarWaveNavigationControls
+      navigation={navigation({
+        queryText: "",
+        searching: false,
+        canUseCollections: false,
+      })}
+    />
+  );
+  expect(
+    screen.queryByRole("group", { name: "Wave list filter" })
+  ).not.toBeInTheDocument();
+  expect(
+    screen.queryByRole("button", { name: "Joined" })
+  ).not.toBeInTheDocument();
+  expect(screen.getByText("All Waves")).toBeVisible();
+});

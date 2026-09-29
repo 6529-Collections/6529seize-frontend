@@ -27,10 +27,6 @@ import { ApiWaveType } from "@/generated/models/ApiWaveType";
 let mockDeviceInfo = { isApp: false, hasTouchScreen: false };
 
 jest.mock(
-  "@/components/brain/left-sidebar/waves/WavesFilterToggle",
-  () => () => <div data-testid="waves-filter-toggle" />
-);
-jest.mock(
   "@/components/brain/left-sidebar/waves/BrainLeftSidebarWave",
   () => (props: any) => (
     <div

@@ -20,7 +20,7 @@ import {
   type WaveSidebarCollection,
 } from "./useWaveSidebarCollection";
 
-export function selectSidebarCollection(
+function selectSidebarCollection(
   waves: readonly MinimalWave[],
   collection: WaveSidebarCollection,
   activeContainerId?: string | null

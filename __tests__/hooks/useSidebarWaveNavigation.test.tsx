@@ -3,7 +3,10 @@ import React from "react";
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useSidebarWaveNavigation } from "@/hooks/useSidebarWaveNavigation";
-import { setWaveSidebarCollection } from "@/hooks/useWaveSidebarCollection";
+import {
+  useWaveSidebarCollection,
+  type WaveSidebarCollection,
+} from "@/hooks/useWaveSidebarCollection";
 import { fetchWavesV2Page } from "@/services/api/waves-v2-api";
 import { createMockMinimalWave } from "@/__tests__/utils/mockFactories";
 
@@ -20,6 +23,11 @@ const waves = [
   createMockMinimalWave({ id: "joined", isFollowing: true }),
   createMockMinimalWave({ id: "other", isFollowing: false }),
 ];
+function selectCollection(collection: WaveSidebarCollection) {
+  const { result, unmount } = renderHook(() => useWaveSidebarCollection());
+  act(() => result.current[1](collection));
+  unmount();
+}
 function setup() {
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false } },
@@ -67,7 +75,7 @@ it("switches collections without making Pinned a prerequisite for All and restor
 });
 
 it("searches across all accessible waves from Pinned and restores Pinned when cleared", async () => {
-  setWaveSidebarCollection("pinned");
+  selectCollection("pinned");
   const { result } = setup();
   act(() => result.current.setQueryText("rare pepe"));
   await waitFor(() =>
@@ -113,7 +121,7 @@ it("restores the query after remount and isolates a different viewer", () => {
 });
 
 it("uses All after logout even with a saved personal collection", () => {
-  setWaveSidebarCollection("pinned");
+  selectCollection("pinned");
   const { result, rerender } = setup();
   mockViewer = { key: "guest", canUseCollections: false, enabled: true };
   rerender();
@@ -127,7 +135,7 @@ it("paginates the search query without adding the selected collection as a filte
     page,
     next: page === 1,
   }));
-  setWaveSidebarCollection("joined");
+  selectCollection("joined");
   const { result } = setup();
   act(() => result.current.setQueryText("rare pepe"));
   await waitFor(() => expect(result.current.results.hasNextPage).toBe(true));
@@ -213,4 +221,49 @@ it("respects user scrolling while a saved offset cannot yet be restored", () => 
   });
   rerender({ list: [...waves, createMockMinimalWave({ id: "loaded" })] });
   expect(container.scrollTop).toBe(50);
+});
+
+it("retains search scroll through pagination and refetch, then remembers the clamped position after results shrink", async () => {
+  fetchPage.mockImplementation(async ({ page }) => ({
+    waves: [{ id: `result-${page}` } as never],
+    page,
+    next: page === 1,
+  }));
+  const { result, container } = setup();
+  act(() => result.current.setQueryText("rare pepe"));
+  await waitFor(() => expect(result.current.resultWaves).toHaveLength(1));
+  act(() => {
+    container.scrollTop = 700;
+    container.dispatchEvent(new Event("scroll"));
+  });
+  await act(async () => {
+    await result.current.results.fetchNextPage();
+  });
+  await waitFor(() => expect(result.current.resultWaves).toHaveLength(2));
+  expect(container.scrollTop).toBe(700);
+  await act(async () => {
+    await result.current.results.refetch();
+  });
+  expect(container.scrollTop).toBe(700);
+  fetchPage.mockResolvedValue({
+    waves: [{ id: "smaller" } as never],
+    page: 1,
+    next: false,
+  });
+  Object.defineProperty(container, "scrollHeight", {
+    value: 650,
+    configurable: true,
+  });
+  await act(async () => {
+    await result.current.results.refetch();
+  });
+  await waitFor(() => expect(result.current.resultWaves).toHaveLength(1));
+  act(() => {
+    container.scrollTop = 150;
+    container.dispatchEvent(new Event("scroll"));
+  });
+  act(() => result.current.setQueryText(""));
+  act(() => result.current.setQueryText("rare pepe"));
+  await waitFor(() => expect(result.current.queryEnabled).toBe(true));
+  expect(container.scrollTop).toBe(150);
 });

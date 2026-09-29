@@ -14,8 +14,8 @@ Cards show the voting end or next decision when available, otherwise `Voting
 open`. Votes closing soonest appear first; open-ended votes appear last.
 Use `Load more` to browse additional results.
 
-This includes ongoing TDH, TDH + xTDH, and card-set TDH votes, including joined
-and pinned waves. Upcoming, ended, completed and unresolved-decision waves are
+This includes ongoing TDH, TDH + xTDH, and card-set TDH votes, regardless of
+whether you have joined or pinned the wave. Upcoming, ended, completed and unresolved-decision waves are
 excluded. DMs and inaccessible waves are excluded. Visibility does not guarantee
 that your profile meets a wave's voting rules.
 

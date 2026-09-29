@@ -53,10 +53,6 @@ jest.mock(
   )
 );
 jest.mock(
-  "@/components/brain/left-sidebar/waves/WavesFilterToggle",
-  () => () => <div data-testid="waves-filter-toggle" />
-);
-jest.mock(
   "@/components/brain/left-sidebar/web/WebBrainLeftSidebarWave/subcomponents/WaveAvatar",
   () => ({
     WaveAvatar: (props: {
