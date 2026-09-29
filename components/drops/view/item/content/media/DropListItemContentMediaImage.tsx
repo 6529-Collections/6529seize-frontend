@@ -4,6 +4,8 @@ import {
   DropImagePreview,
   getDropImagePreviewSources,
 } from "./DropImagePreview";
+import { GifPreviewLoadingIndicator } from "./GifPreviewLoadingIndicator";
+import { isGifImageUrl } from "@/helpers/gif-preview.helpers";
 import Button from "@/components/utils/button/Button";
 import { useDropImageGallery } from "@/components/drops/view/part/DropImageGalleryProvider";
 import { ImageScale } from "@/helpers/image.helpers";
@@ -99,7 +101,7 @@ function DropImageContent({
 
   return intrinsicHeight ? (
     <span
-      className="tw-relative tw-block tw-min-h-40 tw-w-full tw-max-w-full tw-overflow-hidden tw-bg-iron-900/40"
+      className={`tw-relative tw-block tw-min-h-40 tw-w-full tw-max-w-full tw-overflow-hidden ${isGifImageUrl(src) ? "" : "tw-bg-iron-900/40"}`}
       style={{
         aspectRatio: aspectRatio ?? INTRINSIC_IMAGE_RESERVED_ASPECT_RATIO,
         maxHeight: INTRINSIC_IMAGE_MAX_HEIGHT,
@@ -321,7 +323,7 @@ function DropListItemContentMediaImageContent({
           intrinsicHeight ? "tw-min-h-40" : "tw-h-full"
         } ${isCompetitionDrop ? "tw-justify-center" : ""}`}
       >
-        {!loaded && !unavailable && (
+        {!loaded && !unavailable && !isGifImageUrl(src) && (
           <LoadingPlaceholder hasTouchScreen={hasTouchScreen} />
         )}
 
@@ -346,6 +348,9 @@ function DropListItemContentMediaImageContent({
               handleIntrinsicImageError={handleIntrinsicImageError}
               handleError={handleError}
             />
+          )}
+          {shouldLoadImage && !loaded && !unavailable && isGifImageUrl(src) && (
+            <GifPreviewLoadingIndicator />
           )}
           {unavailable && !disableModal && (
             <div className="tw-absolute tw-bottom-3 tw-left-1/2 tw-z-30 -tw-translate-x-1/2">
