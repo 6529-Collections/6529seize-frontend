@@ -16,7 +16,8 @@ Use `Load more` to browse additional results.
 
 This includes ongoing TDH, TDH + xTDH, and card-set TDH votes, regardless of
 whether you have joined or pinned the wave. Upcoming, ended, completed and unresolved-decision waves are
-excluded. DMs and inaccessible waves are excluded. Visibility does not guarantee
+excluded. DMs, subwaves of DMs and inaccessible waves are excluded, even when
+you can read the DM parent. Visibility does not guarantee
 that your profile meets a wave's voting rules.
 
 Loading, no-active-votes, and request-failure states are explicit. Select
