@@ -53,12 +53,22 @@ it("shows active votes by default and retains the count when collapsed or browsi
   ).toHaveAttribute("aria-pressed", "true");
   expect(screen.getByText("Rare Pepe acquisition")).toBeVisible();
   expect(
+    screen.getByText(
+      "Ongoing votes that use TDH. Each wave sets its own voting rules."
+    )
+  ).toBeVisible();
+  expect(
     screen.getByRole("link", { name: "View all active votes" })
   ).toHaveAttribute("href", "/discover?view=active-votes");
   fireEvent.click(
     screen.getByRole("button", { name: "Collapse wave discovery" })
   );
   expect(screen.getByText("Rare Pepe acquisition")).not.toBeVisible();
+  expect(
+    screen.getByText(
+      "Ongoing votes that use TDH. Each wave sets its own voting rules."
+    )
+  ).not.toBeVisible();
   expect(screen.getByRole("button", { name: "Active Votes 3" })).toBeVisible();
   fireEvent.click(screen.getByRole("button", { name: "Worth Checking Out" }));
   expect(
@@ -76,6 +86,21 @@ it("uses recommendations at zero and allows inspecting the empty active tab", ()
   ).toHaveAttribute("aria-pressed", "true");
   fireEvent.click(screen.getByRole("button", { name: "Active Votes 0" }));
   expect(screen.getByText("No active TDH votes right now.")).toBeVisible();
+  expect(
+    screen.queryByRole("link", { name: "View all active votes" })
+  ).toBeNull();
+  fireEvent.click(
+    screen.getByRole("button", { name: "Browse Worth Checking Out" })
+  );
+  expect(
+    screen.getByRole("button", { name: "Worth Checking Out" })
+  ).toHaveAttribute("aria-pressed", "true");
+  expect(
+    screen.getByRole("button", { name: "Worth Checking Out" })
+  ).toHaveFocus();
+  expect(
+    screen.getByText("Highly rated waves you don’t follow yet.")
+  ).toBeVisible();
 });
 it("remembers the selected tab and collapse state after navigation", () => {
   const first = renderDiscovery();
@@ -112,3 +137,35 @@ it("opens a vote in the existing wave navigation", () => {
     isDirectMessage: false,
   });
 });
+
+it("keeps an explicitly selected Active Votes tab open when its last vote ends", () => {
+  const { rerender } = renderDiscovery();
+  fireEvent.click(screen.getByRole("button", { name: "Active Votes 3" }));
+  mockVotes.data.pages[0] = { count: 0, data: [] };
+  rerender(<SidebarDiscovery previewItems={[]} isTouchPreview={false} />);
+  expect(
+    screen.getByRole("button", { name: "Active Votes 0" })
+  ).toHaveAttribute("aria-pressed", "true");
+  expect(screen.getByText("No active TDH votes right now.")).toBeVisible();
+});
+
+it.each(["loading", "error"])(
+  "does not mistake %s for an empty votes result",
+  (state) => {
+    sessionStorage.setItem("wave-discovery-tab", "active-votes");
+    mockVotes = {
+      data: state === "error" ? { pages: [{ count: 0, data: [] }] } : undefined,
+      isPending: state === "loading",
+      isError: state === "error",
+      refetch: mockRefetch,
+    };
+    renderDiscovery();
+    expect(screen.queryByText("No active TDH votes right now.")).toBeNull();
+    expect(
+      screen.queryByRole("button", { name: "Browse Worth Checking Out" })
+    ).toBeNull();
+    expect(
+      screen.getByRole(state === "error" ? "alert" : "status")
+    ).toBeVisible();
+  }
+);

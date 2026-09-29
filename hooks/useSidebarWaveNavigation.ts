@@ -44,6 +44,10 @@ export function selectSidebarCollection(
     );
 }
 
+function restoreSidebarScroll(container: HTMLElement, top: number) {
+  container.scrollTop = top;
+}
+
 export function useSidebarWaveNavigation({
   waves,
   scrollContainerRef,
@@ -96,14 +100,14 @@ export function useSidebarWaveNavigation({
   );
   const positions = useRef(new Map<string, number>());
   const viewKey = searching ? "search:" + queryText.trim() : collection;
-  const scrollKey = `${viewer.key}:${viewKey}`;
+  const scrollKey = `${viewer.key ?? "guest"}:${viewKey}`;
   const restoredKey = useRef<string | null>(null);
   useLayoutEffect(() => {
     const container = scrollContainerRef.current;
     if (!enabled || !container) return;
     const desired = positions.current.get(scrollKey) ?? 0;
     if (restoredKey.current !== scrollKey) {
-      container.scrollTop = desired;
+      restoreSidebarScroll(container, desired);
       // Retry restoration after an asynchronously loaded collection gets taller.
       if (container.scrollHeight - container.clientHeight >= desired)
         restoredKey.current = scrollKey;

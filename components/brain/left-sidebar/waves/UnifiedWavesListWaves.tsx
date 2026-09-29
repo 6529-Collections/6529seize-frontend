@@ -224,7 +224,7 @@ const UnifiedWavesListWaves = forwardRef<
     );
     const navigation = useSidebarWaveNavigation({
       waves: collectionWaves,
-      scrollContainerRef: scrollContainerRef ?? listContainerRef,
+      scrollContainerRef,
       enabled: !isDirectMessage,
       activeContainerId: effectiveActiveParentWaveId ?? activeWaveId,
     });

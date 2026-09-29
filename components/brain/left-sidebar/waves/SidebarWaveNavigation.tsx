@@ -11,6 +11,12 @@ import { getWaveRoute } from "@/helpers/navigation.helpers";
 import WavePicture from "@/components/waves/WavePicture";
 import { t } from "@/i18n/messages";
 
+const COLLECTION_LABELS = {
+  pinned: "waves.sidebar.pinned",
+  joined: "waves.sidebar.filterJoined",
+  all: "waves.sidebar.filterAll",
+} as const;
+
 export function SidebarWaveNavigationControls({
   navigation,
 }: {
@@ -48,11 +54,12 @@ export function SidebarWaveNavigationControls({
           </button>
         )}
       </div>
-      {navigation.searching ? (
+      {navigation.searching && (
         <p className="tw-mb-0 tw-mt-3 tw-text-xs tw-text-iron-400">
           {t(locale, "waves.sidebar.searchResults")}
         </p>
-      ) : navigation.canUseCollections ? (
+      )}
+      {!navigation.searching && navigation.canUseCollections && (
         <div
           role="group"
           aria-label={t(locale, "waves.sidebar.filterAriaLabel")}
@@ -66,18 +73,12 @@ export function SidebarWaveNavigationControls({
               onClick={() => navigation.setCollection(tab)}
               className={`tw-min-h-9 tw-flex-1 tw-rounded-md tw-border-0 tw-px-2 tw-text-xs focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 ${navigation.collection === tab ? "tw-bg-iron-800 tw-text-white" : "tw-bg-transparent tw-text-iron-400"}`}
             >
-              {t(
-                locale,
-                tab === "pinned"
-                  ? "waves.sidebar.pinned"
-                  : tab === "joined"
-                    ? "waves.sidebar.filterJoined"
-                    : "waves.sidebar.filterAll"
-              )}
+              {t(locale, COLLECTION_LABELS[tab])}
             </button>
           ))}
         </div>
-      ) : (
+      )}
+      {!navigation.searching && !navigation.canUseCollections && (
         <p className="tw-mb-0 tw-mt-3 tw-text-xs tw-font-semibold tw-text-iron-400">
           {t(locale, "waves.sidebar.allWaves")}
         </p>

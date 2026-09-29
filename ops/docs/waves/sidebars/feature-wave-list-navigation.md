@@ -41,7 +41,14 @@ Wave and DM rows in the left list control which thread is open.
 - `Active Votes` and `Worth Checking Out` share one discovery section above the
   wave collections. Active Votes previews up to two named TDH votes, with their
   voting end or next decision. Its count remains visible when collapsed.
-- The chevron collapses only the discovery content. Choosing either tab expands
+- Each tab starts with a short inline explanation, available to signed-in and
+  signed-out visitors. `Active Votes` explains that these are ongoing TDH votes
+  and each wave sets its own voting rules. `Worth Checking Out` explains that
+  these are highly rated waves you do not follow yet.
+- When Active Votes is empty, it shows `No active TDH votes right now.` and
+  `Browse Worth Checking Out`, which switches to recommendations. The zero-count
+  tab remains available. Loading and request failures are separate states.
+- The chevron collapses only the discovery content, including its description. Choosing either tab expands
   it. The visit remembers the tab and collapse state; without a saved choice,
   active votes take priority when any exist, otherwise recommendations appear.
 - `View all active votes` opens `/discover?view=active-votes`.

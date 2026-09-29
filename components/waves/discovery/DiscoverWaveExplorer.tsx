@@ -396,12 +396,14 @@ function RecommendationsExplorer() {
   );
 }
 
+const ACTIVE_VOTES_VIEW = "active-votes";
+
 export function DiscoverWaveExplorer() {
   const locale = useBrowserLocale();
   const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();
-  const active = params?.get("view") === "active-votes";
+  const active = params.get("view") === ACTIVE_VOTES_VIEW;
   return (
     <>
       <div
@@ -409,23 +411,23 @@ export function DiscoverWaveExplorer() {
         aria-label={t(locale, "waves.discovery.label")}
         className="tw-flex tw-gap-2 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-px-4 tw-pt-4 md:tw-px-6 lg:tw-px-8"
       >
-        {(["active-votes", "recommendations"] as const).map((view) => (
+        {([ACTIVE_VOTES_VIEW, "recommendations"] as const).map((view) => (
           <button
             key={view}
             type="button"
-            aria-pressed={active === (view === "active-votes")}
+            aria-pressed={active === (view === ACTIVE_VOTES_VIEW)}
             onClick={() => {
-              const next = new URLSearchParams(params?.toString());
+              const next = new URLSearchParams(params.toString());
               next.set("view", view);
               router.replace(`${pathname}?${next.toString()}`, {
                 scroll: false,
               });
             }}
-            className={`tw-min-h-11 tw-rounded-md tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-border-solid tw-bg-transparent tw-px-3 tw-py-2 tw-text-sm tw-font-medium focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 ${active === (view === "active-votes") ? "tw-border-primary-400 tw-text-white" : "tw-border-transparent tw-text-iron-400"}`}
+            className={`tw-min-h-11 tw-rounded-md tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-border-solid tw-bg-transparent tw-px-3 tw-py-2 tw-text-sm tw-font-medium focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 ${active === (view === ACTIVE_VOTES_VIEW) ? "tw-border-primary-400 tw-text-white" : "tw-border-transparent tw-text-iron-400"}`}
           >
             {t(
               locale,
-              view === "active-votes"
+              view === ACTIVE_VOTES_VIEW
                 ? "waves.discovery.activeVotes"
                 : "waves.discovery.recommendations"
             )}

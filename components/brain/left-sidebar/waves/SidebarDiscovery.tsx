@@ -1,8 +1,6 @@
 "use client";
 
-import { SidebarCategoryInfo } from "./SidebarCategoryLabel";
-import { useAuth } from "@/components/auth/Auth";
-import { useId } from "react";
+import { useId, useRef } from "react";
 import { useWaveSidebarPreference } from "@/hooks/useWaveSidebarPreference";
 import Link from "next/link";
 import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/24/outline";
@@ -17,7 +15,8 @@ import {
   type HighlyRatedWavePreviewItem,
 } from "./HighlyRatedWavesToggle";
 
-type DiscoveryTab = "active-votes" | "recommendations";
+const ACTIVE_VOTES_TAB = "active-votes";
+type DiscoveryTab = typeof ACTIVE_VOTES_TAB | "recommendations";
 export function SidebarDiscovery({
   previewItems,
   isTouchPreview,
@@ -26,23 +25,23 @@ export function SidebarDiscovery({
   readonly isTouchPreview: boolean;
 }) {
   const locale = useBrowserLocale();
-  const { connectedProfile } = useAuth();
   const panelId = useId();
+  const recommendationsTabRef = useRef<HTMLButtonElement>(null);
   const { activeWave } = useMyStream();
   const votes = useActiveWaveVotes(2);
   const count = votes.data?.pages[0]?.count;
+  const isEmpty = !votes.isPending && !votes.isError && count === 0;
   const [savedChoice, setChoice] =
     useWaveSidebarPreference("wave-discovery-tab");
   const [collapsePreference, setCollapsePreference] = useWaveSidebarPreference(
     "wave-discovery-collapsed"
   );
   const collapsed = collapsePreference === "true";
+  const defaultTab = count === 0 ? "recommendations" : ACTIVE_VOTES_TAB;
   const selected =
-    savedChoice === "active-votes" || savedChoice === "recommendations"
+    savedChoice === ACTIVE_VOTES_TAB || savedChoice === "recommendations"
       ? savedChoice
-      : count === 0
-        ? "recommendations"
-        : "active-votes";
+      : defaultTab;
   const select = (tab: DiscoveryTab) => {
     setChoice(tab);
     setCollapsePreference("false");
@@ -58,9 +57,12 @@ export function SidebarDiscovery({
           role="group"
           aria-label={t(locale, "waves.discovery.label")}
         >
-          {(["active-votes", "recommendations"] as const).map((tab) => (
+          {([ACTIVE_VOTES_TAB, "recommendations"] as const).map((tab) => (
             <button
               key={tab}
+              ref={
+                tab === "recommendations" ? recommendationsTabRef : undefined
+              }
               type="button"
               aria-pressed={selected === tab}
               aria-controls={panelId}
@@ -69,11 +71,11 @@ export function SidebarDiscovery({
             >
               {t(
                 locale,
-                tab === "active-votes"
+                tab === ACTIVE_VOTES_TAB
                   ? "waves.discovery.activeVotes"
                   : "waves.discovery.recommendations"
               )}
-              {tab === "active-votes" && count !== undefined && (
+              {tab === ACTIVE_VOTES_TAB && count !== undefined && (
                 <span className="tw-ml-1 tw-inline-block tw-rounded-full tw-bg-primary-500/20 tw-px-1.5 tw-text-primary-300">
                   {formatInteger(locale, count)}
                 </span>
@@ -102,7 +104,15 @@ export function SidebarDiscovery({
         </button>
       </div>
       <div id={panelId} hidden={collapsed} className="tw-px-3 tw-pt-2">
-        {selected === "active-votes" ? (
+        <p className="tw-mb-2 tw-px-2 tw-text-xs tw-leading-relaxed tw-text-iron-400">
+          {t(
+            locale,
+            selected === ACTIVE_VOTES_TAB
+              ? "waves.discovery.activeVotesDescription"
+              : "waves.discovery.recommendationsDescription"
+          )}
+        </p>
+        {selected === ACTIVE_VOTES_TAB ? (
           <>
             {votes.isPending && (
               <p role="status" className="tw-p-2 tw-text-xs tw-text-iron-400">
@@ -121,8 +131,11 @@ export function SidebarDiscovery({
                 </button>
               </p>
             )}
-            {count === 0 && (
-              <p className="tw-p-2 tw-text-xs tw-text-iron-400">
+            {isEmpty && (
+              <p
+                role="status"
+                className="tw-mb-0 tw-px-2 tw-py-3 tw-text-sm tw-text-iron-300"
+              >
                 {t(locale, "waves.discovery.emptyVotes")}
               </p>
             )}
@@ -144,12 +157,25 @@ export function SidebarDiscovery({
                 }}
               />
             ))}
-            <Link
-              href="/discover?view=active-votes"
-              className="tw-inline-flex tw-min-h-9 tw-items-center tw-px-2 tw-text-xs tw-text-primary-300 tw-no-underline"
-            >
-              {t(locale, "waves.discovery.viewVotes")}
-            </Link>
+            {isEmpty ? (
+              <button
+                type="button"
+                onClick={() => {
+                  select("recommendations");
+                  recommendationsTabRef.current?.focus();
+                }}
+                className="tw-min-h-11 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-2 tw-text-left tw-text-xs tw-text-primary-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+              >
+                {t(locale, "waves.discovery.browseRecommendations")}
+              </button>
+            ) : (
+              <Link
+                href="/discover?view=active-votes"
+                className="tw-inline-flex tw-min-h-9 tw-items-center tw-px-2 tw-text-xs tw-text-primary-300 tw-no-underline"
+              >
+                {t(locale, "waves.discovery.viewVotes")}
+              </Link>
+            )}
           </>
         ) : (
           <>
@@ -170,14 +196,6 @@ export function SidebarDiscovery({
             >
               {t(locale, "waves.discovery.viewRecommendations")}
             </Link>
-            {connectedProfile?.handle && (
-              <SidebarCategoryInfo
-                tooltipContent={t(
-                  locale,
-                  "waves.sidebar.highlyRatedInfoTooltip"
-                )}
-              />
-            )}
           </>
         )}
       </div>

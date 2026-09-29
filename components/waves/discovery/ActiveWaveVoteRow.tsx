@@ -22,23 +22,21 @@ export function ActiveWaveVoteRow({
   const { wave, voting_ends_at: end, next_decision_at: decision } = vote;
   const deadline =
     end !== null && (decision === null || end <= decision) ? end : decision;
+  const deadlineMessage =
+    deadline === end
+      ? "waves.discovery.votingEnds"
+      : "waves.discovery.nextDecision";
   const deadlineLabel =
     deadline === null
       ? t(locale, "waves.discovery.votingOpen")
-      : t(
-          locale,
-          deadline === end
-            ? "waves.discovery.votingEnds"
-            : "waves.discovery.nextDecision",
-          {
-            date: formatDate(locale, deadline, {
-              month: "short",
-              day: "numeric",
-              hour: "numeric",
-              minute: "2-digit",
-            }),
-          }
-        );
+      : t(locale, deadlineMessage, {
+          date: formatDate(locale, deadline, {
+            month: "short",
+            day: "numeric",
+            hour: "numeric",
+            minute: "2-digit",
+          }),
+        });
   return (
     <Link
       href={getWaveRoute({ waveId: wave.id, isDirectMessage: false, isApp })}

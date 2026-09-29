@@ -212,30 +212,8 @@ it("renders announcement, highly rated preview, pinned, and one filterable botto
   expect(screen.getByLabelText("Announcement waves")).toBeInTheDocument();
   expect(screen.getByText("Worth Checking Out")).toBeInTheDocument();
   expect(
-    screen.getByRole("button", {
-      name: "Highly rated waves you don’t follow yet.",
-    })
-  ).toHaveClass("tw-size-6");
-  fireEvent.click(
-    screen.getByRole("button", {
-      name: "Highly rated waves you don’t follow yet.",
-    })
-  );
-  expect(
-    screen.getByRole("dialog", {
-      name: "Highly rated waves you don’t follow yet.",
-    })
-  ).toBeInTheDocument();
-  fireEvent.click(
-    screen.getByRole("dialog", {
-      name: "Highly rated waves you don’t follow yet.",
-    })
-  );
-  expect(
-    screen.queryByRole("dialog", {
-      name: "Highly rated waves you don’t follow yet.",
-    })
-  ).not.toBeInTheDocument();
+    screen.getByText("Highly rated waves you don’t follow yet.")
+  ).toBeVisible();
   expect(
     screen.queryByRole("button", {
       name: "Expand Worth Checking Out, 1 wave",
@@ -314,36 +292,24 @@ it("keeps discovery-only worth checking out waves out of Joined", () => {
   expect(screen.getByTestId("wave-joined-wave")).toBeInTheDocument();
 });
 
-it("keeps the worth checking out info tooltip available on touch devices", () => {
+it("shows the worth checking out description directly on touch devices", () => {
   const sentinelRef = React.createRef<HTMLDivElement>();
   mockIsTouchDevice = true;
 
   renderWebWaves({ sentinelRef });
 
   expect(
-    screen.getByRole("button", {
-      name: "Highly rated waves you don’t follow yet.",
-    })
-  ).toHaveClass("tw-size-6");
+    screen.getByText("Highly rated waves you don’t follow yet.")
+  ).toBeVisible();
   expect(screen.getByTestId("preview-avatar-h1")).toHaveAttribute(
     "data-size",
     "lg"
   );
-  const infoButton = screen.getByRole("button", {
-    name: "Highly rated waves you don’t follow yet.",
-  });
-  fireEvent.click(infoButton);
   expect(
-    screen.getByRole("dialog", {
+    screen.queryByRole("button", {
       name: "Highly rated waves you don’t follow yet.",
     })
-  ).toBeInTheDocument();
-  fireEvent.click(infoButton);
-  expect(
-    screen.queryByRole("dialog", {
-      name: "Highly rated waves you don’t follow yet.",
-    })
-  ).not.toBeInTheDocument();
+  ).toBeNull();
 });
 
 it("keeps the overlaid touch score inside the wave navigation link", () => {
@@ -389,7 +355,7 @@ it("keeps the overlaid touch score inside the wave navigation link", () => {
   ).not.toBeInTheDocument();
 });
 
-it("hides the worth checking out info tooltip when no profile is connected", () => {
+it("shows the worth checking out description when no profile is connected", () => {
   mockAuthResult = {
     connectedProfile: null,
     activeProfileProxy: null,
@@ -398,6 +364,9 @@ it("hides the worth checking out info tooltip when no profile is connected", () 
   renderWebWaves();
 
   expect(screen.getByText("Worth Checking Out")).toBeInTheDocument();
+  expect(
+    screen.getByText("Highly rated waves you don’t follow yet.")
+  ).toBeVisible();
   expect(
     screen.queryByRole("button", {
       name: "Highly rated waves you don’t follow yet.",

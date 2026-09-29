@@ -86,7 +86,7 @@ const WebUnifiedWavesList: React.FC<WebUnifiedWavesListProps> = (props) => {
           <UnifiedWavesListEmpty
             sortedWaves={waves}
             isFetching={isFetching}
-            isFetchingNextPage={!isSearching && isFetchingNextPage}
+            isFetchingNextPage={isFetchingNextPage}
             emptyMessage={
               isJoinedFilterActive
                 ? t(DEFAULT_LOCALE, "waves.sidebar.joinedEmptyMessage")

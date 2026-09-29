@@ -385,14 +385,35 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
     ).click();
     await expect(votes).toBeVisible();
     await votes.click();
-    const allVotes = await firstVisible(
-      page.getByRole("link", { name: "View all active votes" })
-    );
-    await expect(allVotes).toHaveAttribute(
-      "href",
-      "/discover?view=active-votes"
-    );
-    await allVotes.click();
+    const discovery = votes.locator("xpath=ancestor::section[1]");
+    await expect(
+      discovery.getByText(
+        "Ongoing votes that use TDH. Each wave sets its own voting rules."
+      )
+    ).toBeVisible();
+    const emptyVotes = discovery.getByText("No active TDH votes right now.");
+    const allVotes = discovery.getByRole("link", {
+      name: "View all active votes",
+    });
+    await expect(emptyVotes.or(allVotes)).toBeVisible();
+    if (await emptyVotes.isVisible()) {
+      await discovery
+        .getByRole("button", { name: "Browse Worth Checking Out" })
+        .click();
+      await expect(
+        discovery.getByText("Highly rated waves you don’t follow yet.")
+      ).toBeVisible();
+      await expect(
+        discovery.getByRole("button", { name: "Worth Checking Out" })
+      ).toBeFocused();
+      await gotoReady(page, "/discover?view=active-votes");
+    } else {
+      await expect(allVotes).toHaveAttribute(
+        "href",
+        "/discover?view=active-votes"
+      );
+      await allVotes.click();
+    }
     await expect(page).toHaveURL(/\/discover\?view=active-votes$/);
     await expect(
       page.getByRole("heading", { level: 1, name: /^Active Votes/ })
