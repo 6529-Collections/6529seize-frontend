@@ -1,88 +1,48 @@
-# Wave Discover Route and Navigation
+# Wave Discovery
 
 ## Overview
 
-`/discover` is a dedicated discovery route for active waves.
+`/discover` offers `Active Votes` and `Worth a Look` views. The default
+view is recommendations. Both are available without connecting a wallet,
+subject to wave visibility rules.
 
-- It renders one discovery grid with the route title
-  `Active discussions you are not yet following`.
-- It reuses the same wave-card surface as home discovery cards, but expands the
-  list to 20 results.
-- It does not expose local section tabs, a route-local search mode, or a
-  `View all` footer action.
+## Active Votes
 
-Navigation catalogs expose `Discovery` as a first-class destination on web
-sidebar, app drawer, mobile bottom navigation, and search `Pages` results.
+Open `/discover?view=active-votes`, or select `View all active votes` in the
+Waves sidebar. The page shows the total accessible count and named wave cards.
+Cards show the voting end or next decision when available, otherwise `Voting
+open`. Votes closing soonest appear first; open-ended votes appear last.
+Use `Load more` to browse additional results.
 
-## Location in the Site
+This includes ongoing TDH, TDH + xTDH, and card-set TDH votes, regardless of
+whether you have joined or pinned the wave. Upcoming, ended, completed and unresolved-decision waves are
+excluded. DMs, subwaves of DMs and inaccessible waves are excluded, even when
+you can read the DM parent. Visibility does not guarantee
+that your profile meets a wave's voting rules.
 
-- Dedicated route: `/discover`
-- Related navigation surfaces:
-  - web sidebar direct row: `Discovery`
-  - app drawer direct row: `Discovery`
-  - app bottom tab: `Discovery`
-  - search `Pages` result: `Discovery`
+Loading, no-active-votes, and request-failure states are explicit. Select
+`Try again` after a request failure. The count and list refresh periodically.
 
-## Access and Availability
+## Worth a Look
 
-- `/discover` has no dedicated wallet gate.
-- The route fetch requests include `exclude_followed=true` and are intended to
-  prioritize waves the current session is not already following.
-- Existing auth/profile rules for `/waves` and `/messages` still apply after
-  you open a thread from discovery.
+Open `/discover?view=recommendations&sort=QUALITY` from the sidebar's
+`View all recommendations` link. The existing discovery grid, sort options,
+score filters and pagination remain available. Switching views preserves those
+URL settings. Recommendations focus on waves outside the viewer's followed set.
 
-## Entry Points
+Selecting a wave opens its thread. Existing auth and access rules still apply
+when interacting there.
 
-- Open `/discover` directly.
-- Use `Discovery` in navigation surfaces.
-- Use [Header Search Modal](../../navigation/feature-header-search-modal.md)
-  and open the `Discovery` page result.
+## Navigation and Search
 
-## User Journey
+The `Discovery` destination remains available in web navigation, app drawer,
+mobile navigation and header search Pages results. The Waves header also has
+`Discover Waves`.
 
-1. Open `/discover` from a direct URL or a shell navigation entry.
-2. While data loads, the route renders discovery-card skeletons.
-3. When data resolves, the page shows up to 20 active-wave cards.
-4. Select a card to open `/waves/{waveId}` or `/messages/{waveId}` for
-   direct-message waves.
-5. Continue thread interaction in wave/message routes.
-
-## Common Scenarios
-
-- Open a dedicated discovery view that is broader than the six-card home grid.
-- Browse active waves outside your already-followed set.
-- Use shell navigation or search to return to `/discover` without going through
-  `/` or `/waves`.
-
-## Edge Cases
-
-- If discovery fetch fails or returns no waves, the route can render as a blank
-  page body because the shared section hides on empty/error.
-- Cards still route to `/messages/{waveId}` for direct-message waves.
-- `/discover` does not expose legacy `identity` filters, section tabs, or local
-  search controls.
-- The route does not render a `View all` footer link because it is already the
-  expanded discovery surface.
-
-## Failure and Recovery
-
-- If `/discover` looks blank, refresh the route to rerun discovery fetches.
-- If discovery still looks empty, cross-check active wave availability from `/`
-  or `/waves`.
-- If thread routing fails, open `/waves` or `/messages` first and re-enter the
-  target wave.
-
-## Limitations / Notes
-
-- `/discover` is a single-surface route, not a multi-section discovery hub.
-- Card rendering behavior is shared with Home discovery and documented in the
-  paired card page.
+The sidebar's `Find a wave…` searches accessible waves across collections;
+there is no new relevance algorithm or route-local search on `/discover`.
 
 ## Related Pages
 
-- [Wave Discovery Index](README.md)
-- [Wave Discover Cards](feature-discover-cards.md)
-- [Wave Participation Flow](../flow-wave-participation.md)
-- [Waves Index](../README.md)
-- [Home Boosted Drops and Most Active Waves](../../home/feature-home-discovery-grids.md)
-- [Header Search Modal](../../navigation/feature-header-search-modal.md)
+- [Wave List Navigation](../sidebars/feature-wave-list-navigation.md)
+- [Discover Cards](feature-discover-cards.md)

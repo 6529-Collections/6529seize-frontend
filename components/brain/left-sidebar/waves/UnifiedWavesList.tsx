@@ -1,4 +1,7 @@
 "use client";
+import { useWaveSidebarPreference } from "@/hooks/useWaveSidebarPreference";
+import { useWaveDiscoveryViewer } from "@/hooks/useWaveDiscoveryViewer";
+import { useWaveSidebarCollection } from "@/hooks/useWaveSidebarCollection";
 
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import useCreateModalState from "@/hooks/useCreateModalState";
@@ -11,7 +14,7 @@ import type { UnifiedWavesListWavesHandle } from "./UnifiedWavesListWaves";
 import UnifiedWavesListWaves from "./UnifiedWavesListWaves";
 import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
 import { useShowFollowingWaves } from "@/hooks/useShowFollowingWaves";
-import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { useAuth } from "@/components/auth/Auth";
 import Button from "@/components/utils/button/Button";
@@ -37,6 +40,14 @@ const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
 }) => {
   const { isApp } = useDeviceInfo();
   const { openWave } = useCreateModalState();
+  const locale = useBrowserLocale();
+  const [savedCollection] = useWaveSidebarCollection();
+  const { canUseCollections, key } = useWaveDiscoveryViewer();
+  const [search] = useWaveSidebarPreference(
+    `wave-sidebar-search:${key ?? "guest"}`
+  );
+  const isSearching = Boolean(search?.trim());
+  const collection = canUseCollections ? savedCollection : "all";
   const [following] = useShowFollowingWaves();
   const { connectedProfile, activeProfileProxy } = useAuth();
   const isJoinedFilterActive =
@@ -60,7 +71,14 @@ const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
   // Set up intersection observer for infinite scrolling
   useEffect(() => {
     const sentinel = listRef.current?.sentinelRef.current;
-    if (!sentinel || !hasNextPage || isFetchingNextPage) return;
+    if (
+      !sentinel ||
+      isSearching ||
+      collection === "pinned" ||
+      !hasNextPage ||
+      isFetchingNextPage
+    )
+      return;
 
     const cb = (entries: IntersectionObserverEntry[]) => {
       const [entry] = entries;
@@ -82,7 +100,7 @@ const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
     obs.observe(sentinel);
 
     return () => obs.disconnect();
-  }, [hasNextPage, isFetchingNextPage]);
+  }, [collection, isSearching, hasNextPage, isFetchingNextPage]);
 
   return (
     <div className="tw-mb-4">
@@ -109,6 +127,7 @@ const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
           {/* Unified Waves List */}
           <UnifiedWavesListWaves
             ref={listRef}
+            isLoading={isFetching || isFetchingNextPage}
             waves={waves}
             onHover={onHover}
             scrollContainerRef={scrollContainerRef}
@@ -116,21 +135,23 @@ const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
 
           {/* Loading indicator and intersection trigger */}
           <UnifiedWavesListLoader
-            isFetching={isFetching && waves.length === 0}
-            isFetchingNextPage={isFetchingNextPage}
+            isFetching={!isSearching && isFetching && waves.length === 0}
+            isFetchingNextPage={!isSearching && isFetchingNextPage}
           />
 
           {/* Empty state */}
-          <UnifiedWavesListEmpty
-            sortedWaves={waves}
-            isFetching={isFetching}
-            isFetchingNextPage={isFetchingNextPage}
-            emptyMessage={
-              isJoinedFilterActive
-                ? t(DEFAULT_LOCALE, "waves.sidebar.joinedEmptyMessage")
-                : undefined
-            }
-          />
+          {!isSearching && (
+            <UnifiedWavesListEmpty
+              sortedWaves={waves}
+              isFetching={isFetching}
+              isFetchingNextPage={isFetchingNextPage}
+              emptyMessage={
+                isJoinedFilterActive
+                  ? t(locale, "waves.sidebar.joinedEmptyMessage")
+                  : undefined
+              }
+            />
+          )}
         </div>
       </div>
     </div>

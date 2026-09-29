@@ -13,11 +13,11 @@ import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 
 const SIDEBAR_LOCALE = DEFAULT_LOCALE;
-export const HIGHLY_RATED_PREVIEW_MAX_VISIBLE_COUNT = 10 as const;
+export const HIGHLY_RATED_PREVIEW_MAX_VISIBLE_COUNT = 6 as const;
 const PREVIEW_THUMBNAIL_WIDTH_PX = 32;
 const PREVIEW_TOUCH_THUMBNAIL_WIDTH_PX = 44;
-const PREVIEW_GAP_PX = 6;
-const PREVIEW_TOUCH_GAP_PX = 8;
+const PREVIEW_GAP_PX = 12;
+const PREVIEW_TOUCH_GAP_PX = 16;
 
 export interface HighlyRatedWavePreviewItem {
   readonly wave: MinimalWave;
@@ -249,7 +249,7 @@ function HighlyRatedWavePreviewScoreBadge({
   return (
     <span
       aria-hidden="true"
-      className={`tw-absolute ${isTouchPreview ? "-tw-bottom-1.5 -tw-right-2" : "-tw-bottom-1 -tw-right-1.5"} tw-z-20 tw-inline-flex tw-h-6 tw-w-7 tw-cursor-pointer tw-items-center tw-justify-center tw-overflow-visible tw-drop-shadow-[0_3px_6px_rgba(0,0,0,0.35)]`}
+      className={`tw-absolute ${isTouchPreview ? "-tw-bottom-1.5" : "-tw-bottom-1"} tw-right-0 tw-z-20 tw-inline-flex tw-h-6 tw-w-7 tw-cursor-pointer tw-items-center tw-justify-center tw-overflow-visible tw-drop-shadow-[0_3px_6px_rgba(0,0,0,0.35)]`}
     >
       <svg
         aria-hidden="true"
@@ -435,7 +435,7 @@ export function HighlyRatedWavesToggle({
     >
       <div
         ref={previewStripRef}
-        className={`tw-flex tw-min-w-0 tw-items-center tw-justify-between ${isTouchPreview ? "tw-gap-x-2" : "tw-gap-x-1.5"}`}
+        className={`tw-flex tw-min-w-0 tw-items-center ${visiblePreviewItems.length === HIGHLY_RATED_PREVIEW_MAX_VISIBLE_COUNT ? "tw-justify-between" : "tw-justify-start"} ${isTouchPreview ? "tw-gap-x-4" : "tw-gap-x-3"}`}
       >
         {visiblePreviewItems.map((item) => (
           <HighlyRatedWavePreviewLink

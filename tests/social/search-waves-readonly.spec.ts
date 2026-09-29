@@ -350,6 +350,108 @@ async function openSearchOnFirstWaveWithSearch(page: Page) {
 }
 
 test.describe("Search and wave-detail read-only coverage @surface @medium @large @readonly", () => {
+  test("sidebar discovery and cross-collection search remain directly accessible", async ({
+    page,
+  }) => {
+    await gotoReady(page, "/waves");
+    const search = await firstVisible(
+      page.getByRole("searchbox", { name: "Find a wave…" })
+    );
+    await search.fill("xx");
+    await expect(
+      page.getByText("Search results · All waves").first()
+    ).toBeVisible();
+    await expect(
+      page.getByText("Type at least 3 characters to search all waves.").first()
+    ).toBeVisible();
+    const searchFeedback = page
+      .getByRole("region", { name: "Search results · All waves" })
+      .filter({ visible: true })
+      .getByRole("status");
+    await expect(searchFeedback).toHaveAttribute("aria-live", "polite");
+    await search.fill(UNMATCHABLE_WAVE_QUERY);
+    await expect(searchFeedback).toHaveText(
+      `No waves found for “${UNMATCHABLE_WAVE_QUERY}”.`,
+      { timeout: NAVIGATION_TIMEOUT_MS }
+    );
+    await (
+      await firstVisible(
+        page.getByRole("button", { name: "Clear wave search" })
+      )
+    ).click();
+    await expect(search).toHaveValue("");
+    const votes = await firstVisible(
+      page.getByRole("tab", { name: /^Active Votes/ })
+    );
+    await votes.click();
+    await (
+      await firstVisible(
+        page.getByRole("button", { name: "Collapse wave discovery" })
+      )
+    ).click();
+    await expect(votes).toBeVisible();
+    await page.evaluate(() => sessionStorage.clear());
+    await page.reload();
+    await expect(
+      await firstVisible(
+        page.getByRole("button", { name: "Expand wave discovery" })
+      )
+    ).toHaveAttribute("aria-expanded", "false");
+    await votes.click();
+    const discovery = page
+      .getByRole("region", { name: "Wave discovery", exact: true })
+      .filter({ visible: true });
+    await expect(
+      discovery.getByText("Community decisions powered by TDH.")
+    ).toBeVisible();
+    const emptyVotes = discovery.getByText("No active TDH votes right now.");
+    const allVotes = discovery.getByRole("link", {
+      name: "View all active votes",
+    });
+    await expect(emptyVotes.or(allVotes)).toBeVisible();
+    await expect(discovery.getByText("Loading waves…")).toBeHidden();
+    await discovery.evaluate(async (element) => {
+      await Promise.all(
+        element
+          .getAnimations({ subtree: true })
+          .map((animation) => animation.finished.catch(() => undefined))
+      );
+    });
+    const expandedHeight = (await discovery.boundingBox())!.height;
+    await discovery.getByRole("tab", { name: "Worth a Look" }).click();
+    await expect
+      .poll(async () => (await discovery.boundingBox())!.height)
+      .toBe(expandedHeight);
+    await expect(discovery.getByRole("tabpanel")).toHaveCount(1);
+    await votes.click();
+    await expect
+      .poll(async () => (await discovery.boundingBox())!.height)
+      .toBe(expandedHeight);
+    if (await emptyVotes.isVisible()) {
+      await discovery
+        .getByRole("button", { name: "Browse recommendations" })
+        .click();
+      await expect(
+        discovery.getByText("Highly rated waves you don’t follow.")
+      ).toBeVisible();
+      await expect(
+        discovery.getByRole("tab", { name: "Worth a Look" })
+      ).toBeFocused();
+      await gotoReady(page, "/discover?view=active-votes");
+    } else {
+      await expect(allVotes).toHaveAttribute(
+        "href",
+        "/discover?view=active-votes"
+      );
+      await allVotes.click();
+    }
+    await expect(page).toHaveURL(/\/discover\?view=active-votes$/);
+    await expect(
+      page.getByRole("heading", { level: 1, name: /^Active Votes/ })
+    ).toBeVisible();
+    await expectNoHorizontalOverflow(page);
+  });
+
   test("global header search preserves keyboard flow and page navigation", async ({
     page,
   }) => {

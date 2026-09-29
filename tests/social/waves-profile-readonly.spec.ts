@@ -95,7 +95,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
         page.locator("main").getByText("Waves").first()
       ).toBeVisible();
       await expect(
-        page.getByRole("link", { name: "Profile Waves Feed" })
+        page.getByRole("link", { name: /Profile Waves Feed/ })
       ).toHaveAttribute("href", "/waves?view=profile-feed");
       await expect(
         page.getByRole("region", {
@@ -111,7 +111,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       ).toBeVisible();
       await expect(page.getByText(PROFILE_FEED_DESCRIPTION)).toBeVisible();
       await expect(
-        page.getByRole("link", { name: "Profile Waves Feed" })
+        page.getByRole("link", { name: /Profile Waves Feed/ })
       ).toHaveAttribute("href", "/waves");
     }
   });
@@ -123,7 +123,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     await gotoReady(page, "/waves");
 
     const profileFeedLink = page.getByRole("link", {
-      name: "Profile Waves Feed",
+      name: /Profile Waves Feed/,
     });
     await expect(profileFeedLink).toBeVisible();
     await expect(profileFeedLink).toHaveAttribute(
@@ -256,7 +256,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       })
     ).toBeVisible();
     await expect(
-      page.getByRole("link", { name: "Profile Waves Feed" })
+      page.getByRole("link", { name: /Profile Waves Feed/ })
     ).toHaveAttribute("href", "/waves");
 
     await page.setViewportSize({ width: 1023, height: 900 });

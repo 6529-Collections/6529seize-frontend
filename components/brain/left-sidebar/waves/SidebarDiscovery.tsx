@@ -1,0 +1,257 @@
+"use client";
+
+import { useId, useRef } from "react";
+import { useWaveSidebarPreference } from "@/hooks/useWaveSidebarPreference";
+import Link from "next/link";
+import { ChevronRightIcon } from "@heroicons/react/24/outline";
+import { useActiveWaveVotes } from "@/hooks/useActiveWaveVotes";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useMyStream } from "@/contexts/wave/MyStreamContext";
+import { ActiveWaveVoteRow } from "@/components/waves/discovery/ActiveWaveVoteRow";
+import { formatInteger } from "@/i18n/format";
+import { t } from "@/i18n/messages";
+import {
+  HighlyRatedWavesToggle,
+  type HighlyRatedWavePreviewItem,
+} from "./HighlyRatedWavesToggle";
+
+const ACTIVE_VOTES_TAB = "active-votes";
+type DiscoveryTab = typeof ACTIVE_VOTES_TAB | "recommendations";
+export function SidebarDiscovery({
+  previewItems,
+  isTouchPreview,
+}: {
+  readonly previewItems: readonly HighlyRatedWavePreviewItem[];
+  readonly isTouchPreview: boolean;
+}) {
+  const locale = useBrowserLocale();
+  const panelId = useId();
+  const activeTabRef = useRef<HTMLButtonElement>(null);
+  const recommendationsTabRef = useRef<HTMLButtonElement>(null);
+  const { activeWave } = useMyStream();
+  const votes = useActiveWaveVotes(2);
+  const count = votes.data?.pages[0]?.count;
+  const isEmpty = !votes.isPending && !votes.isError && count === 0;
+  const [savedChoice, setChoice] = useWaveSidebarPreference(
+    "wave-discovery-tab",
+    "local"
+  );
+  const [collapsePreference, setCollapsePreference] = useWaveSidebarPreference(
+    "wave-discovery-collapsed",
+    "local"
+  );
+  const collapsed = collapsePreference === "true";
+  const defaultTab = count === 0 ? "recommendations" : ACTIVE_VOTES_TAB;
+  const selected =
+    savedChoice === ACTIVE_VOTES_TAB || savedChoice === "recommendations"
+      ? savedChoice
+      : defaultTab;
+  const select = (tab: DiscoveryTab) => {
+    setChoice(tab);
+    setCollapsePreference("false");
+  };
+  return (
+    <section
+      aria-label={t(locale, "waves.discovery.label")}
+      className="tailwind-scope tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-pb-2"
+    >
+      <div className="tw-flex tw-items-center tw-gap-1 tw-px-4">
+        <div
+          role="tablist"
+          className="tw-m-0 tw-grid tw-min-w-0 tw-flex-1 tw-grid-cols-2 tw-gap-2 tw-border-0 tw-p-0"
+          aria-label={t(locale, "waves.discovery.label")}
+        >
+          {([ACTIVE_VOTES_TAB, "recommendations"] as const).map((tab) => (
+            <button
+              key={tab}
+              ref={
+                tab === "recommendations" ? recommendationsTabRef : activeTabRef
+              }
+              type="button"
+              id={`${panelId}-${tab}-tab`}
+              role="tab"
+              aria-selected={selected === tab}
+              tabIndex={selected === tab ? 0 : -1}
+              aria-controls={`${panelId}-${tab}`}
+              onKeyDown={(event) => {
+                let next: DiscoveryTab;
+                if (event.key === "Home") next = ACTIVE_VOTES_TAB;
+                else if (event.key === "End") next = "recommendations";
+                else if (
+                  event.key === "ArrowRight" ||
+                  event.key === "ArrowLeft"
+                )
+                  next =
+                    tab === ACTIVE_VOTES_TAB
+                      ? "recommendations"
+                      : ACTIVE_VOTES_TAB;
+                else return;
+                event.preventDefault();
+                select(next);
+                (next === ACTIVE_VOTES_TAB
+                  ? activeTabRef
+                  : recommendationsTabRef
+                ).current?.focus();
+              }}
+              onClick={() => select(tab)}
+              className={`tw-flex tw-min-h-10 tw-min-w-0 tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-none tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-border-solid tw-bg-transparent tw-px-0 tw-py-2 tw-text-xs tw-font-medium focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 touch-only:tw-min-h-11 ${selected === tab ? "tw-border-primary-400 tw-text-white" : "tw-border-transparent tw-text-iron-400"}`}
+            >
+              <span className="tw-truncate">
+                {t(
+                  locale,
+                  tab === ACTIVE_VOTES_TAB
+                    ? "waves.discovery.activeVotes"
+                    : "waves.discovery.recommendations"
+                )}
+              </span>
+              {tab === ACTIVE_VOTES_TAB && count !== undefined && (
+                <span className="tw-ml-1 tw-inline-block tw-shrink-0 tw-rounded-full tw-bg-primary-500/20 tw-px-1.5 tw-text-primary-300">
+                  {formatInteger(locale, count)}
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
+        <button
+          type="button"
+          aria-expanded={!collapsed}
+          aria-controls={panelId}
+          aria-label={t(
+            locale,
+            collapsed ? "waves.discovery.expand" : "waves.discovery.collapse"
+          )}
+          onClick={() => {
+            setCollapsePreference(String(!collapsed));
+          }}
+          className="tw-flex tw-size-9 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 touch-only:tw-size-11"
+        >
+          <ChevronRightIcon
+            className={`tw-size-4 tw-transition-transform tw-duration-200 tw-ease-[cubic-bezier(0.34,1.56,0.64,1)] motion-reduce:tw-transition-none ${collapsed ? "" : "tw-rotate-90"}`}
+            aria-hidden="true"
+          />
+        </button>
+      </div>
+      <div
+        id={panelId}
+        aria-hidden={collapsed}
+        inert={collapsed}
+        className={`tw-grid tw-transition-[grid-template-rows,visibility] tw-duration-200 tw-ease-out motion-reduce:tw-transition-none ${collapsed ? "tw-invisible tw-grid-rows-[0fr]" : "tw-visible tw-grid-rows-[1fr]"}`}
+      >
+        <div className="tw-min-h-0 tw-overflow-hidden">
+          {/* Both panels share a grid cell so changing tabs never moves the list below. */}
+          <div className="tw-grid tw-px-4 tw-pt-2">
+            <div
+              id={`${panelId}-active-votes`}
+              role="tabpanel"
+              aria-labelledby={`${panelId}-active-votes-tab`}
+              tabIndex={!collapsed && selected === ACTIVE_VOTES_TAB ? 0 : -1}
+              aria-hidden={selected !== ACTIVE_VOTES_TAB}
+              inert={selected !== ACTIVE_VOTES_TAB}
+              className={`tw-col-start-1 tw-row-start-1 tw-flex tw-min-w-0 tw-flex-col tw-transition-[opacity,transform,visibility] tw-duration-150 tw-ease-out motion-reduce:tw-transform-none motion-reduce:tw-transition-none ${selected === ACTIVE_VOTES_TAB ? "tw-visible tw-translate-y-0 tw-opacity-100" : "tw-invisible tw-translate-y-1 tw-opacity-0"}`}
+            >
+              <p className="tw-m-0 tw-mb-2 tw-text-xs tw-leading-4 tw-text-iron-400">
+                {t(locale, "waves.discovery.activeVotesDescription")}
+              </p>
+              <div className="tw-flex-1">
+                {votes.isPending && (
+                  <output className="tw-m-0 tw-flex tw-min-h-12 tw-items-center tw-py-2 tw-text-xs tw-leading-4 tw-text-iron-400">
+                    {t(locale, "waves.discovery.loading")}
+                  </output>
+                )}
+                {votes.isError && (
+                  <p
+                    role="alert"
+                    className="tw-m-0 tw-flex tw-min-h-12 tw-flex-wrap tw-items-center tw-gap-x-1 tw-py-2 tw-text-xs tw-leading-4 tw-text-iron-400"
+                  >
+                    <span>{t(locale, "waves.discovery.error")}</span>
+                    <button
+                      type="button"
+                      onClick={() => void votes.refetch()}
+                      className="tw-inline-flex tw-min-h-8 tw-items-center tw-border-0 tw-bg-transparent tw-p-0 tw-text-xs tw-leading-4 tw-text-primary-300"
+                    >
+                      {t(locale, "waves.discovery.retry")}
+                    </button>
+                  </p>
+                )}
+                {isEmpty && (
+                  <output className="tw-m-0 tw-flex tw-min-h-12 tw-items-center tw-py-2 tw-text-xs tw-leading-4 tw-text-iron-300">
+                    {t(locale, "waves.discovery.emptyVotes")}
+                  </output>
+                )}
+                {votes.data?.pages[0]?.data.map((vote) => (
+                  <ActiveWaveVoteRow
+                    key={vote.wave.id}
+                    vote={vote}
+                    onClick={(event) => {
+                      if (
+                        event.metaKey ||
+                        event.ctrlKey ||
+                        event.shiftKey ||
+                        event.altKey ||
+                        event.button !== 0
+                      )
+                        return;
+                      event.preventDefault();
+                      activeWave.set(vote.wave.id, { isDirectMessage: false });
+                    }}
+                  />
+                ))}
+              </div>
+              {isEmpty ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    select("recommendations");
+                    recommendationsTabRef.current?.focus();
+                  }}
+                  className="tw-min-h-8 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-0 tw-text-left tw-text-xs tw-text-primary-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+                >
+                  {t(locale, "waves.discovery.browseRecommendations")}
+                </button>
+              ) : (
+                <Link
+                  href="/discover?view=active-votes"
+                  className="tw-inline-flex tw-min-h-8 tw-items-center tw-text-xs tw-text-primary-300 tw-no-underline"
+                >
+                  {t(locale, "waves.discovery.viewVotes")}
+                </Link>
+              )}
+            </div>
+            <div
+              id={`${panelId}-recommendations`}
+              role="tabpanel"
+              aria-labelledby={`${panelId}-recommendations-tab`}
+              tabIndex={!collapsed && selected === "recommendations" ? 0 : -1}
+              aria-hidden={selected !== "recommendations"}
+              inert={selected !== "recommendations"}
+              className={`tw-col-start-1 tw-row-start-1 tw-flex tw-min-w-0 tw-flex-col tw-transition-[opacity,transform,visibility] tw-duration-150 tw-ease-out motion-reduce:tw-transform-none motion-reduce:tw-transition-none ${selected === "recommendations" ? "tw-visible tw-translate-y-0 tw-opacity-100" : "tw-invisible tw-translate-y-1 tw-opacity-0"}`}
+            >
+              <p className="tw-m-0 tw-mb-2 tw-text-xs tw-leading-4 tw-text-iron-400">
+                {t(locale, "waves.discovery.recommendationsDescription")}
+              </p>
+              <div className="tw-grid tw-min-w-0 tw-flex-1 tw-grid-cols-1 tw-content-center">
+                {previewItems.length > 0 ? (
+                  <HighlyRatedWavesToggle
+                    isTouchPreview={isTouchPreview}
+                    paddingClassName="tw-px-0"
+                    previewItems={[...previewItems]}
+                  />
+                ) : (
+                  <p className="tw-m-0 tw-py-2 tw-text-xs tw-text-iron-400">
+                    {t(locale, "waves.discovery.emptyRecommendations")}
+                  </p>
+                )}
+              </div>
+              <Link
+                href="/discover?view=recommendations&sort=QUALITY"
+                className="tw-inline-flex tw-min-h-8 tw-items-center tw-text-xs tw-text-primary-300 tw-no-underline"
+              >
+                {t(locale, "waves.discovery.viewRecommendations")}
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}

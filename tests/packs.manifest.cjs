@@ -286,7 +286,7 @@ const PACKS = [
   ),
   localReadonlyPack(
     "test:e2e:search-waves-readonly",
-    "Global and wave-local search coverage.",
+    "Global, sidebar wave discovery/search, and wave-local message search coverage.",
     READONLY_SPECS.searchWaves
   ),
   museumPack({

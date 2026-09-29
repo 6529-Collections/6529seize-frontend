@@ -11,10 +11,10 @@ Wave and DM rows in the left list control which thread is open.
 - On expanded rows, pin/unpin sits in the trailing metadata cluster before the
   wave score instead of beside the wave name, keeping the score at the far
   right.
-- In `Worth Checking Out`, each avatar and its overlaid score shield form one
+- In `Worth a Look`, each avatar and its overlaid score shield form one
   wave navigation link. Hovering or focusing the combined link shows score
   details without creating a competing click target.
-- `Worth Checking Out` is an overlapping discovery view: every recommended
+- `Worth a Look` is an overlapping discovery view: every recommended
   wave also appears in the `All` list at its recent-activity position. The
   `Joined` list normally includes only waves the user has joined, so
   discovery-only recommendations stay out of that bottom list.
@@ -25,16 +25,55 @@ Wave and DM rows in the left list control which thread is open.
   its subwaves are loaded, the parent opens, and the active child row is
   highlighted.
 - Navigating to a wave scrolls its active row into the nearest visible position.
-- Switching `All` / `Joined` preserves the current list position instead of
-  jumping back to the active wave. A shorter list can clamp the scroll position
-  to its available content; selecting another wave enables active-row reveal again.
+- `All`, `Pinned`, and `Joined` are peer collections below one sticky search
+  and collection control. Switch directly without scrolling through pinned waves.
+  Each collection remembers its scroll position; selecting another wave enables
+  active-row reveal again. Signed-out visitors see `All Waves` without personal
+  collection controls.
 - The expanded web Waves panel header includes a secondary `Discover Waves`
   link to `/discover`.
-- On mobile web, `Profile Waves Feed` appears above the Wave rows and opens
+- Select the `Waves` heading and its small feed icon to open Profile Waves Feed.
+  On desktop, this clears the selected wave; on mobile web, it opens
   `/waves?view=profile-feed`. The feed's `Waves` link returns to the list.
+  Hover or focus the heading for `Waves Feed`. The collapsed rail
+  retains an icon-only feed link; there is no separate feed row in the expanded panel.
 - Browser back/forward keeps the active row and URL in sync.
 - In the native app, swipe right from the left edge of a standard wave detail
   view to return to the Waves list.
+
+## Discovery and wave search
+
+Both discovery panels keep the same height when switching. Content fades gently
+between tabs; expanding and collapsing uses a short reveal and rotating chevron.
+Reduced-motion preferences disable these transitions. The feed icon is blue
+when the desktop feed is active or the heading is hovered or keyboard-focused.
+
+- `Active Votes` and `Worth a Look` share one discovery section above the
+  wave collections. Active Votes previews up to two named TDH votes, with their
+  voting end or next decision. Its count remains visible when collapsed.
+- Each tab starts with a short inline explanation, available to signed-in and
+  signed-out visitors. `Active Votes` explains: “Community decisions powered by TDH.” `Worth a Look` explains that
+  these are highly rated waves you do not follow yet.
+- When Active Votes is empty, it shows `No active TDH votes right now.` and
+  `Browse recommendations`, which switches to recommendations. The zero-count
+  tab remains available. Loading and request failures are separate states.
+- The down chevron collapses only the discovery content, including its description;
+  the right chevron expands it. Choosing either tab expands
+  it. This browser remembers the tab and collapse state across visits; without a saved choice,
+  active votes take priority when any exist, otherwise recommendations appear.
+- Worth a Look shows up to six spaced previews, with fewer on narrow screens.
+- The compact plus button retains its light colour and shows `Create wave` on hover or keyboard focus.
+- `View all active votes` opens `/discover?view=active-votes`.
+  `View all recommendations` opens `/discover?view=recommendations&sort=QUALITY`.
+- `Find a wave…` searches all accessible non-DM waves, independently of the
+  selected collection. Type at least three characters. Results show name,
+  creator, and joined/pinned status, with `Load more` for additional matches.
+- Search replaces the lower list, labels its scope `Search results · All waves`,
+  and keeps the query while opening a result. Clearing restores the collection
+  and its scroll position. Queries are kept separately for each viewer.
+- This uses the existing name matching. Typo tolerance and relevance changes
+  are outside this redesign. Unread state, pin controls and subwaves remain on
+  normal collection rows; the DM list retains its existing behavior.
 
 ## Location in the Site
 
@@ -48,7 +87,7 @@ Wave and DM rows in the left list control which thread is open.
 - Open the `Waves` or `Messages` shell with the left list visible.
 - From the expanded web Waves panel header, open `Discover Waves` for the
   `/discover` route.
-- On mobile web, select `Profile Waves Feed` above the list to scan recent
+- On mobile web, select the `Waves` heading to scan recent
   posts across public Profile Waves.
 - Select an inactive wave or DM row from the list by clicking the row body.
 - In the native app, open a standard wave and swipe right from the left edge of
@@ -71,7 +110,7 @@ Wave and DM rows in the left list control which thread is open.
 
 - Wave rows open `/waves/{waveId}`.
 - Direct-message rows open `/messages/{waveId}`.
-- `Worth Checking Out` avatars and their overlaid score shields open the wave
+- `Worth a Look` avatars and their overlaid score shields open the wave
   on the first activation; hovering or focusing either visual shows score
   details.
 - Active-row re-click returns to `/waves` or `/messages`.
@@ -99,7 +138,7 @@ Wave and DM rows in the left list control which thread is open.
   idle desktop rows do not reserve the hidden pin width.
 - Non-touch devices can prefetch an inactive row on hover.
 - Touch devices do not use hover prefetch.
-- `Worth Checking Out` keeps the avatar and overlaid score in one keyboard and
+- `Worth a Look` keeps the avatar and overlaid score in one keyboard and
   touch target, so the score cannot intercept wave navigation. The link's
   accessible name includes the score; hover or keyboard focus exposes the score
   details card, while touch activation opens the wave.
