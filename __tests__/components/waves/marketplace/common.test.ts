@@ -220,12 +220,29 @@ describe("patchFromMediaLinkUpdate", () => {
         lastSuccessfullyUpdatedMs: 1735689600000,
         failedSinceMs: 1735689700000,
       }),
-      update: createMediaLinkUpdatedPayload(),
+      update: createMediaLinkUpdatedPayload({
+        last_successfully_updated: 1735689600000,
+      }),
     });
 
     expect(patched.lastErrorMessage).toBeNull();
-    expect(patched.lastSuccessfullyUpdatedMs).toBeNull();
+    expect(patched.lastSuccessfullyUpdatedMs).toBe(1735689600000);
     expect(patched.failedSinceMs).toBeNull();
+  });
+
+  it("ignores a delayed unresolved NFT snapshot after a successful refresh", () => {
+    const current = createCurrentData({
+      lastSuccessfullyUpdatedMs: 1735689600000,
+    });
+    expect(
+      patchFromMediaLinkUpdate({
+        current,
+        update: createMediaLinkUpdatedPayload({
+          last_successfully_updated: null,
+          name: "old unresolved name",
+        }),
+      })
+    ).toBe(current);
   });
 });
 

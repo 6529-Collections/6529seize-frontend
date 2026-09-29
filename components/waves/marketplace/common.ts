@@ -529,8 +529,8 @@ export const patchFromMediaLinkUpdate = ({
   // A delayed queue snapshot must not roll back a successful newer fetch.
   if (
     current.lastSuccessfullyUpdatedMs !== null &&
-    nextLastSuccessfullyUpdatedMs !== null &&
-    nextLastSuccessfullyUpdatedMs < current.lastSuccessfullyUpdatedMs
+    (nextLastSuccessfullyUpdatedMs === null ||
+      nextLastSuccessfullyUpdatedMs < current.lastSuccessfullyUpdatedMs)
   ) {
     return current;
   }
