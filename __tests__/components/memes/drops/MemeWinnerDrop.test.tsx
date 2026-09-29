@@ -63,7 +63,13 @@ jest.mock(
 );
 jest.mock(
   "@/components/drops/view/item/content/media/DropListItemContentMedia",
-  () => (props: any) => <img data-testid="media" src={props.media_url} />
+  () => (props: any) => (
+    <div
+      data-testid="media"
+      data-media-url={props.media_url}
+      data-fill-video-container={String(props.fillVideoContainer)}
+    />
+  )
 );
 
 jest.mock("@/components/waves/drops/DropContext", () => ({
@@ -97,6 +103,27 @@ test("renders actions when desktop hover actions are active", () => {
   expect(screen.getByTestId("identity")).toBeInTheDocument();
   fireEvent.click(screen.getByTestId("reply"));
   expect(onReply).toHaveBeenCalled();
+});
+
+test("bounds video media to the winner card media area", () => {
+  const videoDrop = {
+    ...drop,
+    parts: [
+      {
+        ...drop.parts[0],
+        media: [{ url: "video", mime_type: "video/mp4" }],
+      },
+    ],
+  };
+
+  render(
+    <MemeWinnerDrop drop={videoDrop} showReplyAndQuote onReply={jest.fn()} />
+  );
+
+  expect(screen.getByTestId("media")).toHaveAttribute(
+    "data-fill-video-container",
+    "true"
+  );
 });
 
 test("keeps actions for desktop hover mode even when the user agent is mobile", () => {

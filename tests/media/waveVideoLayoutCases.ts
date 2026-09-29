@@ -3,10 +3,116 @@ import {
   dismissNextDevTools,
   LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
 } from "../support/localSandbox";
-import { installVideoArtworkSandbox } from "../support/videoArtworkSandbox";
+import {
+  installLinkedDropVideoSandbox,
+  installVideoArtworkSandbox,
+} from "../support/videoArtworkSandbox";
 
 // Registered inside the composer sandbox suite, which supplies its local-only guard.
 export function defineWaveVideoLayoutTests() {
+  test("contains linked-drop video and controls for every major aspect ratio", async ({
+    page,
+    baseURL,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    const fixturePath = await installLinkedDropVideoSandbox(page, baseURL);
+    await page.goto(fixturePath, { waitUntil: "domcontentloaded" });
+    await waitForRouteReady(page);
+    await dismissNextDevTools(page);
+
+    const card = page
+      .getByRole("heading", {
+        name: "Local linked video fixture",
+        exact: true,
+      })
+      .locator("xpath=ancestor::div[contains(@class, 'tw-border')][1]");
+    await expect(card).toBeVisible({
+      timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+    });
+    const video = card.getByLabel("Video player", { exact: true });
+    await expect(video).toBeVisible();
+    await expect
+      .poll(() =>
+        video.evaluate((element: HTMLVideoElement) => element.videoWidth)
+      )
+      .toBeGreaterThan(0);
+    await video.evaluate((element: HTMLVideoElement) => element.pause());
+
+    for (const [width, height] of [
+      [600, 900],
+      [900, 900],
+      [1600, 900],
+    ] as const) {
+      await video.evaluate(
+        (element: HTMLVideoElement, dimensions) => {
+          Object.defineProperties(element, {
+            videoWidth: { configurable: true, value: dimensions.width },
+            videoHeight: { configurable: true, value: dimensions.height },
+          });
+          element.dispatchEvent(new Event("loadedmetadata"));
+        },
+        { width, height }
+      );
+      await expect
+        .poll(() =>
+          video.evaluate((element: HTMLVideoElement) =>
+            element.parentElement!.parentElement!.style.getPropertyValue(
+              "--video-ratio"
+            )
+          )
+        )
+        .toBe(String(width / height));
+
+      const geometry = await video.evaluate((element: HTMLVideoElement) => {
+        const mediaBox = element.closest<HTMLElement>(".tw-h-96")!;
+        const surface = element.closest<HTMLElement>("[data-video-surface]")!;
+        const slider = surface.querySelector<HTMLElement>(
+          'input[type="range"]'
+        )!;
+        const bounds = {
+          card: cardBounds(mediaBox.parentElement!),
+          mediaBox: cardBounds(mediaBox),
+          mediaBoxBackground: getComputedStyle(mediaBox).backgroundColor,
+          slider: cardBounds(slider),
+          surface: cardBounds(surface),
+          video: cardBounds(element),
+        };
+
+        function cardBounds(target: Element) {
+          const rect = target.getBoundingClientRect();
+          return {
+            top: rect.top,
+            right: rect.right,
+            bottom: rect.bottom,
+            left: rect.left,
+            height: rect.height,
+            width: rect.width,
+          };
+        }
+
+        return bounds;
+      });
+
+      expect(geometry.mediaBox.height).toBe(384);
+      expect(geometry.mediaBoxBackground).toBe("rgba(28, 28, 33, 0.3)");
+      for (const bounded of [
+        geometry.surface,
+        geometry.video,
+        geometry.slider,
+      ]) {
+        expect(bounded.top).toBeGreaterThanOrEqual(geometry.mediaBox.top - 2);
+        expect(bounded.right).toBeLessThanOrEqual(geometry.mediaBox.right + 2);
+        expect(bounded.bottom).toBeLessThanOrEqual(
+          geometry.mediaBox.bottom + 2
+        );
+        expect(bounded.left).toBeGreaterThanOrEqual(geometry.mediaBox.left - 2);
+      }
+      expect(geometry.video.bottom).toBeLessThanOrEqual(
+        geometry.card.bottom + 2
+      );
+    }
+  });
+
   for (const viewport of [
     { width: 390, height: 844 },
     { width: 390, height: 600 },
