@@ -10,7 +10,7 @@ import { UnifiedWavesListLoader } from "../waves/UnifiedWavesListLoader";
 import WebUnifiedWavesListWaves from "./WebUnifiedWavesListWaves";
 import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
 import { useShowFollowingWaves } from "@/hooks/useShowFollowingWaves";
-import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { useAuth } from "@/components/auth/Auth";
 
@@ -39,6 +39,7 @@ const WebUnifiedWavesList: React.FC<WebUnifiedWavesListProps> = (props) => {
     showProfileFeedShortcut = true,
   } = props;
   const sentinelRef = useRef<HTMLDivElement>(null);
+  const locale = useBrowserLocale();
   const [savedCollection] = useWaveSidebarCollection();
   const { canUseCollections, key } = useWaveDiscoveryViewer();
   const [search] = useWaveSidebarPreference(
@@ -89,7 +90,7 @@ const WebUnifiedWavesList: React.FC<WebUnifiedWavesListProps> = (props) => {
             isFetchingNextPage={isFetchingNextPage}
             emptyMessage={
               isJoinedFilterActive
-                ? t(DEFAULT_LOCALE, "waves.sidebar.joinedEmptyMessage")
+                ? t(locale, "waves.sidebar.joinedEmptyMessage")
                 : undefined
             }
           />

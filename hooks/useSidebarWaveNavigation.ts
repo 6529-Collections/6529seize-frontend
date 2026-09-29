@@ -113,12 +113,26 @@ export function useSidebarWaveNavigation({
         restoredKey.current = scrollKey;
     }
     const onScroll = () => {
+      const clamped = Math.min(
+        desired,
+        Math.max(0, container.scrollHeight - container.clientHeight)
+      );
+      // A programmatic restore may be clamped until async rows finish loading.
+      // Keep the original target; a different position reflects user scrolling.
+      if (restoredKey.current !== scrollKey && container.scrollTop === clamped)
+        return;
       positions.current.set(scrollKey, container.scrollTop);
       restoredKey.current = scrollKey;
     };
     container.addEventListener("scroll", onScroll, { passive: true });
     return () => container.removeEventListener("scroll", onScroll);
-  }, [enabled, scrollContainerRef, scrollKey, visibleWaves.length]);
+  }, [
+    enabled,
+    scrollContainerRef,
+    scrollKey,
+    visibleWaves.length,
+    results.data,
+  ]);
 
   return {
     collection,

@@ -57,6 +57,7 @@ import {
   isValidSidebarWave,
   prioritizeActiveWaveContainer,
 } from "../waves/sidebarWaveListUtils";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import Link from "next/link";
@@ -231,6 +232,7 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
   isDirectMessage = false,
   sentinelRef,
 }) => {
+  const locale = useBrowserLocale();
   const listContainerRef = useRef<HTMLDivElement>(null);
   const [following] = useShowFollowingWaves();
   const { connectedProfile, activeProfileProxy } = useAuth();
@@ -561,7 +563,7 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
                   }}
                   aria-label={
                     navigation.collection === "pinned" && !isDirectMessage
-                      ? t(SIDEBAR_LOCALE, "waves.sidebar.pinned")
+                      ? t(locale, "waves.sidebar.pinned")
                       : virtualizedAriaLabel
                   }
                 >
@@ -616,12 +618,9 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
                   style={{ minHeight: EMPTY_WAVES_PLACEHOLDER_HEIGHT }}
                 >
                   {!isDirectMessage && !isLoading && waves.length > 0 && (
-                    <p
-                      role="status"
-                      className="tw-px-4 tw-py-3 tw-text-sm tw-text-iron-400"
-                    >
-                      {t(SIDEBAR_LOCALE, "waves.sidebar.collectionEmpty")}
-                    </p>
+                    <output className="tw-block tw-px-4 tw-py-3 tw-text-sm tw-text-iron-400">
+                      {t(locale, "waves.sidebar.collectionEmpty")}
+                    </output>
                   )}
                 </div>
               )}

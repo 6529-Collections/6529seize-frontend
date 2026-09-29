@@ -364,10 +364,16 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
     await expect(
       page.getByText("Type at least 3 characters to search all waves.").first()
     ).toBeVisible();
+    const searchFeedback = page
+      .getByRole("region", { name: "Search results · All waves" })
+      .filter({ visible: true })
+      .getByRole("status");
+    await expect(searchFeedback).toHaveAttribute("aria-live", "polite");
     await search.fill(UNMATCHABLE_WAVE_QUERY);
-    await expect(
-      page.getByText(`No waves found for “${UNMATCHABLE_WAVE_QUERY}”.`).first()
-    ).toBeVisible({ timeout: NAVIGATION_TIMEOUT_MS });
+    await expect(searchFeedback).toHaveText(
+      `No waves found for “${UNMATCHABLE_WAVE_QUERY}”.`,
+      { timeout: NAVIGATION_TIMEOUT_MS }
+    );
     await (
       await firstVisible(
         page.getByRole("button", { name: "Clear wave search" })

@@ -26,7 +26,7 @@ function setup() {
   });
   const container = document.createElement("div");
   Object.defineProperties(container, {
-    scrollHeight: { value: 2000 },
+    scrollHeight: { value: 2000, configurable: true },
     clientHeight: { value: 500 },
   });
   const scrollContainerRef = { current: container };
@@ -35,8 +35,9 @@ function setup() {
   );
   return {
     ...renderHook(
-      () => useSidebarWaveNavigation({ waves, scrollContainerRef }),
-      { wrapper }
+      ({ list } = { list: waves }) =>
+        useSidebarWaveNavigation({ waves: list, scrollContainerRef }),
+      { wrapper, initialProps: { list: waves } }
     ),
     container,
   };
@@ -163,4 +164,53 @@ it("keeps collection switching usable when browser storage rejects writes", () =
     spy.mockRestore();
     act(() => result.current.setCollection("all"));
   }
+});
+
+it("keeps a saved offset when restoration is clamped by rows still loading", () => {
+  const { result, container, rerender } = setup();
+  act(() => {
+    container.scrollTop = 1000;
+    container.dispatchEvent(new Event("scroll"));
+  });
+  act(() => result.current.setCollection("pinned"));
+  Object.defineProperty(container, "scrollHeight", {
+    value: 600,
+    configurable: true,
+  });
+  act(() => result.current.setCollection("all"));
+  // Model the browser clamping an attempted restoration to the current maximum.
+  act(() => {
+    container.scrollTop = 100;
+    container.dispatchEvent(new Event("scroll"));
+  });
+  Object.defineProperty(container, "scrollHeight", {
+    value: 2000,
+    configurable: true,
+  });
+  rerender({ list: [...waves, createMockMinimalWave({ id: "loaded" })] });
+  expect(container.scrollTop).toBe(1000);
+});
+
+it("respects user scrolling while a saved offset cannot yet be restored", () => {
+  const { result, container, rerender } = setup();
+  act(() => {
+    container.scrollTop = 1000;
+    container.dispatchEvent(new Event("scroll"));
+  });
+  act(() => result.current.setCollection("pinned"));
+  Object.defineProperty(container, "scrollHeight", {
+    value: 600,
+    configurable: true,
+  });
+  act(() => result.current.setCollection("all"));
+  act(() => {
+    container.scrollTop = 50;
+    container.dispatchEvent(new Event("scroll"));
+  });
+  Object.defineProperty(container, "scrollHeight", {
+    value: 2000,
+    configurable: true,
+  });
+  rerender({ list: [...waves, createMockMinimalWave({ id: "loaded" })] });
+  expect(container.scrollTop).toBe(50);
 });

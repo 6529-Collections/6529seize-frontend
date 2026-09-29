@@ -22,7 +22,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { KeyboardEvent } from "react";
-import { useCallback, useMemo } from "react";
+import { useCallback, useId, useMemo } from "react";
 
 type DiscoverScoreFilter = "ALL" | "SCORE_50" | "HOT_60" | "REP_60";
 type DiscoverChronologySort = "NEWEST" | "LATEST_POSTS";
@@ -403,19 +403,20 @@ export function DiscoverWaveExplorer() {
   const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();
+  const panelId = useId();
   const active = params.get("view") === ACTIVE_VOTES_VIEW;
   return (
     <>
-      <div
-        role="group"
+      <fieldset
         aria-label={t(locale, "waves.discovery.label")}
-        className="tw-flex tw-gap-2 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-px-4 tw-pt-4 md:tw-px-6 lg:tw-px-8"
+        className="tw-m-0 tw-flex tw-min-w-0 tw-gap-2 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-px-4 tw-pb-0 tw-pt-4 md:tw-px-6 lg:tw-px-8"
       >
         {([ACTIVE_VOTES_VIEW, "recommendations"] as const).map((view) => (
           <button
             key={view}
             type="button"
             aria-pressed={active === (view === ACTIVE_VOTES_VIEW)}
+            aria-controls={panelId}
             onClick={() => {
               const next = new URLSearchParams(params.toString());
               next.set("view", view);
@@ -433,8 +434,10 @@ export function DiscoverWaveExplorer() {
             )}
           </button>
         ))}
+      </fieldset>
+      <div id={panelId}>
+        {active ? <ActiveWaveVotes /> : <RecommendationsExplorer />}
       </div>
-      {active ? <ActiveWaveVotes /> : <RecommendationsExplorer />}
     </>
   );
 }

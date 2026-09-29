@@ -52,9 +52,8 @@ export function SidebarDiscovery({
       className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-pb-2"
     >
       <div className="tw-flex tw-items-center tw-gap-1 tw-px-3">
-        <div
-          className="tw-flex tw-min-w-0 tw-flex-1"
-          role="group"
+        <fieldset
+          className="tw-m-0 tw-flex tw-min-w-0 tw-flex-1 tw-border-0 tw-p-0"
           aria-label={t(locale, "waves.discovery.label")}
         >
           {([ACTIVE_VOTES_TAB, "recommendations"] as const).map((tab) => (
@@ -82,7 +81,7 @@ export function SidebarDiscovery({
               )}
             </button>
           ))}
-        </div>
+        </fieldset>
         <button
           type="button"
           aria-expanded={!collapsed}
@@ -115,9 +114,9 @@ export function SidebarDiscovery({
         {selected === ACTIVE_VOTES_TAB ? (
           <>
             {votes.isPending && (
-              <p role="status" className="tw-p-2 tw-text-xs tw-text-iron-400">
+              <output className="tw-block tw-p-2 tw-text-xs tw-text-iron-400">
                 {t(locale, "waves.discovery.loading")}
-              </p>
+              </output>
             )}
             {votes.isError && (
               <p role="alert" className="tw-p-2 tw-text-xs tw-text-iron-400">
@@ -132,12 +131,9 @@ export function SidebarDiscovery({
               </p>
             )}
             {isEmpty && (
-              <p
-                role="status"
-                className="tw-mb-0 tw-px-2 tw-py-3 tw-text-sm tw-text-iron-300"
-              >
+              <output className="tw-mb-0 tw-block tw-px-2 tw-py-3 tw-text-sm tw-text-iron-300">
                 {t(locale, "waves.discovery.emptyVotes")}
-              </p>
+              </output>
             )}
             {votes.data?.pages[0]?.data.map((vote) => (
               <ActiveWaveVoteRow

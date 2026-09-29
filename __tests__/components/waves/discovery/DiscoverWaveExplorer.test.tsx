@@ -77,3 +77,18 @@ describe("DiscoverWaveExplorer", () => {
     });
   });
 });
+
+it("associates discovery view controls with the rendered panel", () => {
+  searchParams = "";
+  render(<DiscoverWaveExplorer />);
+  const votes = screen.getByRole("button", { name: "Active Votes" });
+  const recommendations = screen.getByRole("button", {
+    name: "Worth Checking Out",
+  });
+  expect(votes.getAttribute("aria-controls")).toBe(
+    recommendations.getAttribute("aria-controls")
+  );
+  expect(
+    document.getElementById(votes.getAttribute("aria-controls")!)
+  ).toBeInTheDocument();
+});

@@ -14,7 +14,7 @@ import type { UnifiedWavesListWavesHandle } from "./UnifiedWavesListWaves";
 import UnifiedWavesListWaves from "./UnifiedWavesListWaves";
 import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
 import { useShowFollowingWaves } from "@/hooks/useShowFollowingWaves";
-import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { useAuth } from "@/components/auth/Auth";
 import Button from "@/components/utils/button/Button";
@@ -40,6 +40,7 @@ const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
 }) => {
   const { isApp } = useDeviceInfo();
   const { openWave } = useCreateModalState();
+  const locale = useBrowserLocale();
   const [savedCollection] = useWaveSidebarCollection();
   const { canUseCollections, key } = useWaveDiscoveryViewer();
   const [search] = useWaveSidebarPreference(
@@ -146,7 +147,7 @@ const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
               isFetchingNextPage={isFetchingNextPage}
               emptyMessage={
                 isJoinedFilterActive
-                  ? t(DEFAULT_LOCALE, "waves.sidebar.joinedEmptyMessage")
+                  ? t(locale, "waves.sidebar.joinedEmptyMessage")
                   : undefined
               }
             />

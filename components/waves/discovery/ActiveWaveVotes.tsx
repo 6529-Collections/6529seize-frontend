@@ -27,9 +27,9 @@ export function ActiveWaveVotes() {
         {t(locale, "waves.discovery.voteDescription")}
       </p>
       {votes.isPending && (
-        <p role="status" className="tw-text-iron-400">
+        <output className="tw-block tw-text-iron-400">
           {t(locale, "waves.discovery.loading")}
-        </p>
+        </output>
       )}
       {votes.isError && (
         <p role="alert" className="tw-text-iron-400">
@@ -43,10 +43,10 @@ export function ActiveWaveVotes() {
           </button>
         </p>
       )}
-      {count === 0 && (
-        <p role="status" className="tw-text-iron-400">
+      {!votes.isPending && !votes.isError && count === 0 && (
+        <output className="tw-block tw-text-iron-400">
           {t(locale, "waves.discovery.emptyVotes")}
-        </p>
+        </output>
       )}
       <div className="tw-grid tw-grid-cols-1 tw-gap-3 md:tw-grid-cols-2 xl:tw-grid-cols-3">
         {votes.data?.pages
@@ -64,6 +64,7 @@ export function ActiveWaveVotes() {
         <button
           type="button"
           disabled={votes.isFetchingNextPage}
+          aria-busy={votes.isFetchingNextPage}
           onClick={() => void votes.fetchNextPage()}
           className="tw-mt-6 tw-min-h-11 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-5 tw-text-sm tw-text-primary-300"
         >
