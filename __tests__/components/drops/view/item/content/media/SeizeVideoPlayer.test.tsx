@@ -793,28 +793,35 @@ describe("SeizeVideoPlayer", () => {
     expect(screen.getByRole("slider")).toBeDisabled();
   });
 
-  it("uses the complete supplied viewing area without natural sizing caps", () => {
-    const { container } = render(
-      <SeizeVideoPlayer src="video.mp4" layout="fill" align="center" />
-    );
-    const video = container.querySelector("video")!;
-    Object.defineProperties(video, {
-      videoWidth: { value: 600 },
-      videoHeight: { value: 900 },
-    });
-    fireEvent.loadedMetadata(video);
-    expect(container.firstElementChild).toHaveClass("tw-h-full", "tw-w-full");
-    const player = container.firstElementChild as HTMLElement;
-    expect(player.style.maxWidth).toBe("");
-    expect(player.style.maxHeight).toBe("");
-    expect(player.style.getPropertyValue("--video-ratio")).toBe(
-      String(600 / 900)
-    );
-    const surface = video.parentElement!;
-    expect(surface).toHaveAttribute("data-video-surface");
-    expect(surface).toContainElement(screen.getByRole("slider"));
-    expect(video).toHaveClass("tw-object-contain");
-  });
+  it.each([
+    [600, 900],
+    [900, 900],
+    [1600, 900],
+  ])(
+    "uses the complete supplied viewing area for %s x %s video without natural sizing caps",
+    (width, height) => {
+      const { container } = render(
+        <SeizeVideoPlayer src="video.mp4" layout="fill" align="center" />
+      );
+      const video = container.querySelector("video")!;
+      Object.defineProperties(video, {
+        videoWidth: { value: width },
+        videoHeight: { value: height },
+      });
+      fireEvent.loadedMetadata(video);
+      expect(container.firstElementChild).toHaveClass("tw-h-full", "tw-w-full");
+      const player = container.firstElementChild as HTMLElement;
+      expect(player.style.maxWidth).toBe("");
+      expect(player.style.maxHeight).toBe("");
+      expect(player.style.getPropertyValue("--video-ratio")).toBe(
+        String(width / height)
+      );
+      const surface = video.parentElement!;
+      expect(surface).toHaveAttribute("data-video-surface");
+      expect(surface).toContainElement(screen.getByRole("slider"));
+      expect(video).toHaveClass("tw-object-contain");
+    }
+  );
 
   it.each([
     [600, 900],
