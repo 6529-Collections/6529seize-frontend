@@ -30,6 +30,8 @@ Wave and DM rows in the left list control which thread is open.
   to its available content; selecting another wave enables active-row reveal again.
 - The expanded web Waves panel header includes a secondary `Discover Waves`
   link to `/discover`.
+- On mobile web, `Profile Waves Feed` appears above the Wave rows and opens
+  `/waves?view=profile-feed`. The feed's `Waves` link returns to the list.
 - Browser back/forward keeps the active row and URL in sync.
 - In the native app, swipe right from the left edge of a standard wave detail
   view to return to the Waves list.
@@ -46,6 +48,8 @@ Wave and DM rows in the left list control which thread is open.
 - Open the `Waves` or `Messages` shell with the left list visible.
 - From the expanded web Waves panel header, open `Discover Waves` for the
   `/discover` route.
+- On mobile web, select `Profile Waves Feed` above the list to scan recent
+  posts across public Profile Waves.
 - Select an inactive wave or DM row from the list by clicking the row body.
 - In the native app, open a standard wave and swipe right from the left edge of
   the main content.
@@ -107,6 +111,8 @@ Wave and DM rows in the left list control which thread is open.
   their normal touch behavior.
 - Browser-default behavior is kept for modified clicks such as Cmd/Ctrl-click,
   Shift/Alt-click, middle-click, and right-click/context menu.
+- The mobile Profile Waves Feed link is a normal browser link, so opening it,
+  entering a Wave from a post, and using Back preserve browser history.
 - Route-context rows keep their server-returned pin and join state. Their
   temporary visibility does not change account preferences.
 - A private or inaccessible parent is never synthesized: only parent metadata

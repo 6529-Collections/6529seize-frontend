@@ -221,12 +221,15 @@ test.describe("Critical read-only route shells @critical-shell @medium @large", 
     await expect(page.locator("#waves-content")).toBeVisible();
     const viewport = page.viewportSize();
     expect(viewport, "Expected a configured browser viewport").not.toBeNull();
-    if (viewport !== null && viewport.width < 768) {
+    if (viewport !== null && viewport.width < 1024) {
       await expect(
         page.getByRole("region", {
           name: "All recent waves list",
         })
       ).toBeVisible();
+      await expect(
+        page.getByRole("link", { name: "Profile Waves Feed" })
+      ).toHaveAttribute("href", "/waves?view=profile-feed");
     } else {
       await expect(
         page.getByRole("heading", {

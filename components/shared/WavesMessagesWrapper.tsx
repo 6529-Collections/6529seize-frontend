@@ -37,8 +37,13 @@ import {
   BRAIN_RIGHT_SIDEBAR_ENTER_TRANSITION,
   BRAIN_RIGHT_SIDEBAR_EXIT_TRANSITION,
 } from "@/components/brain/right-sidebar/BrainRightSidebarTypes";
+import { SIDEBAR_MOBILE_BREAKPOINT } from "@/constants/sidebar";
 
-const useBreakpoint = createBreakpoint({ XL: 1400, LG: 1024, S: 0 });
+const useBreakpoint = createBreakpoint({
+  XL: 1400,
+  LG: SIDEBAR_MOBILE_BREAKPOINT,
+  S: 0,
+});
 
 interface WavesMessagesWrapperProps {
   readonly children: ReactNode;
@@ -124,13 +129,17 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
 
   // Clear logic for when to show each part
   const hasWave = waveId !== undefined;
+  const isProfileFeedView =
+    defaultPath === "/waves" &&
+    pathname === "/waves" &&
+    searchParams.get("view") === "profile-feed";
   // The create route has no waveId but IS the main content; without this it
   // is unreachable on mobile (the wave list renders instead of the form).
   // Trailing slashes are tolerated so a normalization change upstream cannot
   // silently re-break mobile reachability.
   const isCreateRoute = isCreateWavePathname(pathname);
-  const canShowMainContent = !isMobile || hasWave || isCreateRoute;
-  const showProfileFeedShortcut = !isMobile;
+  const canShowMainContent =
+    !isMobile || hasWave || isCreateRoute || isProfileFeedView;
   const shouldShowLeftSidebar =
     showLeftSidebar && (!isMobile || (!hasWave && !canShowMainContent));
   const shouldShowMainContent = canShowMainContent;
@@ -167,7 +176,7 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
                 {shouldShowLeftSidebar && (
                   <WebBrainLeftSidebar
                     isCollapsed={isInlineRightOpen}
-                    showProfileFeedShortcut={showProfileFeedShortcut}
+                    showProfileFeedShortcut={defaultPath === "/waves"}
                   />
                 )}
                 {shouldShowMainContent && (
