@@ -92,7 +92,6 @@ describe("MemeCalendarOverview upcoming mints card", () => {
           });
         const table = within(container).getByRole("table", {
           name: tableName,
-          exact: true,
         });
         expect(within(table).getAllByRole("row")[1]).toHaveTextContent(
           localMintTime(firstTableMintTime)
