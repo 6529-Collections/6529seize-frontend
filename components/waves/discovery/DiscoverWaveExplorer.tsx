@@ -22,7 +22,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { KeyboardEvent } from "react";
-import { useCallback, useId, useMemo } from "react";
+import { useCallback, useId, useMemo, useRef } from "react";
 
 type DiscoverScoreFilter = "ALL" | "SCORE_50" | "HOT_60" | "REP_60";
 type DiscoverChronologySort = "NEWEST" | "LATEST_POSTS";
@@ -405,24 +405,43 @@ export function DiscoverWaveExplorer() {
   const params = useSearchParams();
   const panelId = useId();
   const active = params.get("view") === ACTIVE_VOTES_VIEW;
+  const views = [ACTIVE_VOTES_VIEW, "recommendations"] as const;
+  const tabsRef = useRef<(HTMLButtonElement | null)[]>([]);
+  const selectView = (view: (typeof views)[number]) => {
+    const next = new URLSearchParams(params.toString());
+    next.set("view", view);
+    router.replace(`${pathname}?${next.toString()}`, { scroll: false });
+  };
   return (
     <>
-      <fieldset
+      <div
+        role="tablist"
         aria-label={t(locale, "waves.discovery.label")}
         className="tw-m-0 tw-flex tw-min-w-0 tw-gap-2 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-px-4 tw-pb-0 tw-pt-4 md:tw-px-6 lg:tw-px-8"
       >
-        {([ACTIVE_VOTES_VIEW, "recommendations"] as const).map((view) => (
+        {views.map((view, index) => (
           <button
             key={view}
             type="button"
-            aria-pressed={active === (view === ACTIVE_VOTES_VIEW)}
-            aria-controls={panelId}
-            onClick={() => {
-              const next = new URLSearchParams(params.toString());
-              next.set("view", view);
-              router.replace(`${pathname}?${next.toString()}`, {
-                scroll: false,
-              });
+            ref={(element) => {
+              tabsRef.current[index] = element;
+            }}
+            id={`${panelId}-${view}-tab`}
+            role="tab"
+            tabIndex={active === (view === ACTIVE_VOTES_VIEW) ? 0 : -1}
+            aria-selected={active === (view === ACTIVE_VOTES_VIEW)}
+            aria-controls={`${panelId}-${view}`}
+            onClick={() => selectView(view)}
+            onKeyDown={(event) => {
+              let next: number;
+              if (event.key === "Home") next = 0;
+              else if (event.key === "End") next = 1;
+              else if (event.key === "ArrowLeft" || event.key === "ArrowRight")
+                next = 1 - index;
+              else return;
+              event.preventDefault();
+              selectView(views[next]!);
+              tabsRef.current[next]?.focus();
             }}
             className={`tw-min-h-11 tw-rounded-md tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-border-solid tw-bg-transparent tw-px-3 tw-py-2 tw-text-sm tw-font-medium focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 ${active === (view === ACTIVE_VOTES_VIEW) ? "tw-border-primary-400 tw-text-white" : "tw-border-transparent tw-text-iron-400"}`}
           >
@@ -434,10 +453,20 @@ export function DiscoverWaveExplorer() {
             )}
           </button>
         ))}
-      </fieldset>
-      <div id={panelId}>
-        {active ? <ActiveWaveVotes /> : <RecommendationsExplorer />}
       </div>
+      {views.map((view) => (
+        <div
+          key={view}
+          id={`${panelId}-${view}`}
+          role="tabpanel"
+          aria-labelledby={`${panelId}-${view}-tab`}
+          tabIndex={0}
+          hidden={active !== (view === ACTIVE_VOTES_VIEW)}
+        >
+          {active === (view === ACTIVE_VOTES_VIEW) &&
+            (active ? <ActiveWaveVotes /> : <RecommendationsExplorer />)}
+        </div>
+      ))}
     </>
   );
 }

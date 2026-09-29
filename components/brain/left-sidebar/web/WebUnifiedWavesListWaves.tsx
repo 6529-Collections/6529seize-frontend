@@ -22,7 +22,6 @@ import { Tooltip as ReactTooltip } from "react-tooltip";
 import type { VirtualItem } from "../../../../hooks/useVirtualizedWaves";
 import { useVirtualizedWaves } from "../../../../hooks/useVirtualizedWaves";
 import { useAuth } from "../../../auth/Auth";
-import { useShowFollowingWaves } from "@/hooks/useShowFollowingWaves";
 import {
   buildHighlyRatedWavePreviewItems,
   getHighlyRatedPreviewWaves,
@@ -243,8 +242,7 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
 }) => {
   const locale = useBrowserLocale();
   const listContainerRef = useRef<HTMLDivElement>(null);
-  const [following] = useShowFollowingWaves();
-  const { connectedProfile, activeProfileProxy } = useAuth();
+  const { connectedProfile } = useAuth();
   const { openWave, isApp } = useCreateModalState();
   const isTouchDevice = useIsTouchDevice();
   const prefetchWaveData = usePrefetchWaveData();
@@ -278,8 +276,6 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
 
   const showCreateWaveButton = !isApp && !!connectedProfile;
   const shouldShowProfileFeedShortcut = !hideHeaders && showProfileFeedShortcut;
-  const isJoinedFilterActive =
-    following && !!connectedProfile?.handle && !activeProfileProxy;
 
   const { announcementWaves, highlyRatedWaves } = useMemo(
     () =>
@@ -350,7 +346,7 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
   const virtualizedRows = animatedAllRows;
   const virtualizedAriaLabel = getVirtualizedAriaLabel({
     isDirectMessage,
-    isJoinedFilterActive,
+    isJoinedFilterActive: !isCollapsed && navigation.collection === "joined",
   });
   const headerPaddingClassName = "tw-px-4";
   const shouldShowBottomHeader = !hideHeaders && !isCollapsed;

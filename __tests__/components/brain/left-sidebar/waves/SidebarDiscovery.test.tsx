@@ -48,21 +48,24 @@ beforeEach(() => {
 });
 it("shows active votes by default and retains the count when collapsed or browsing recommendations", () => {
   renderDiscovery();
-  expect(
-    screen.getByRole("button", { name: "Active Votes 3" })
-  ).toHaveAttribute("aria-pressed", "true");
+  expect(screen.getByRole("tab", { name: "Active Votes 3" })).toHaveAttribute(
+    "aria-selected",
+    "true"
+  );
   expect(screen.getByText("Rare Pepe acquisition")).toBeVisible();
-  expect(screen.getByText("Ongoing TDH votes")).toBeVisible();
+  expect(screen.getByText("Community decisions powered by TDH.")).toBeVisible();
   expect(
     screen.getByRole("link", { name: "View all active votes" })
   ).toHaveAttribute("href", "/discover?view=active-votes");
   fireEvent.click(
     screen.getByRole("button", { name: "Collapse wave discovery" })
   );
-  expect(screen.getByText("Rare Pepe acquisition")).not.toBeVisible();
-  expect(screen.getByText("Ongoing TDH votes")).not.toBeVisible();
-  expect(screen.getByRole("button", { name: "Active Votes 3" })).toBeVisible();
-  fireEvent.click(screen.getByRole("button", { name: "Discover" }));
+  expect(
+    screen.queryByRole("link", { name: /Rare Pepe acquisition/ })
+  ).toBeNull();
+  expect(screen.queryByRole("tabpanel")).toBeNull();
+  expect(screen.getByRole("tab", { name: "Active Votes 3" })).toBeVisible();
+  fireEvent.click(screen.getByRole("tab", { name: "Worth a Look" }));
   expect(
     screen.getByRole("button", { name: "Collapse wave discovery" })
   ).toHaveAttribute("aria-expanded", "true");
@@ -73,11 +76,11 @@ it("shows active votes by default and retains the count when collapsed or browsi
 it("uses recommendations at zero and allows inspecting the empty active tab", () => {
   mockVotes.data.pages[0] = { count: 0, data: [] };
   renderDiscovery();
-  expect(screen.getByRole("button", { name: "Discover" })).toHaveAttribute(
-    "aria-pressed",
+  expect(screen.getByRole("tab", { name: "Worth a Look" })).toHaveAttribute(
+    "aria-selected",
     "true"
   );
-  fireEvent.click(screen.getByRole("button", { name: "Active Votes 0" }));
+  fireEvent.click(screen.getByRole("tab", { name: "Active Votes 0" }));
   expect(screen.getByText("No active TDH votes right now.")).toBeVisible();
   expect(
     screen.queryByRole("link", { name: "View all active votes" })
@@ -85,25 +88,25 @@ it("uses recommendations at zero and allows inspecting the empty active tab", ()
   fireEvent.click(
     screen.getByRole("button", { name: "Browse recommendations" })
   );
-  expect(screen.getByRole("button", { name: "Discover" })).toHaveAttribute(
-    "aria-pressed",
+  expect(screen.getByRole("tab", { name: "Worth a Look" })).toHaveAttribute(
+    "aria-selected",
     "true"
   );
-  expect(screen.getByRole("button", { name: "Discover" })).toHaveFocus();
+  expect(screen.getByRole("tab", { name: "Worth a Look" })).toHaveFocus();
   expect(
     screen.getByText("Highly rated waves you don’t follow.")
   ).toBeVisible();
 });
 it("remembers the selected tab and collapse state after navigation", () => {
   const first = renderDiscovery();
-  fireEvent.click(screen.getByRole("button", { name: "Discover" }));
+  fireEvent.click(screen.getByRole("tab", { name: "Worth a Look" }));
   fireEvent.click(
     screen.getByRole("button", { name: "Collapse wave discovery" })
   );
   first.unmount();
   renderDiscovery();
-  expect(screen.getByRole("button", { name: "Discover" })).toHaveAttribute(
-    "aria-pressed",
+  expect(screen.getByRole("tab", { name: "Worth a Look" })).toHaveAttribute(
+    "aria-selected",
     "true"
   );
   expect(
@@ -121,7 +124,7 @@ it("offers a retry instead of treating a failed request as zero votes", () => {
   expect(screen.getByRole("alert")).toBeVisible();
   fireEvent.click(screen.getByRole("button", { name: "Try again" }));
   expect(mockRefetch).toHaveBeenCalledTimes(1);
-  expect(screen.queryByRole("button", { name: "Active Votes 0" })).toBeNull();
+  expect(screen.queryByRole("tab", { name: "Active Votes 0" })).toBeNull();
 });
 it("opens a vote in the existing wave navigation", () => {
   renderDiscovery();
@@ -133,12 +136,13 @@ it("opens a vote in the existing wave navigation", () => {
 
 it("keeps an explicitly selected Active Votes tab open when its last vote ends", () => {
   const { rerender } = renderDiscovery();
-  fireEvent.click(screen.getByRole("button", { name: "Active Votes 3" }));
+  fireEvent.click(screen.getByRole("tab", { name: "Active Votes 3" }));
   mockVotes.data.pages[0] = { count: 0, data: [] };
   rerender(<SidebarDiscovery previewItems={[]} isTouchPreview={false} />);
-  expect(
-    screen.getByRole("button", { name: "Active Votes 0" })
-  ).toHaveAttribute("aria-pressed", "true");
+  expect(screen.getByRole("tab", { name: "Active Votes 0" })).toHaveAttribute(
+    "aria-selected",
+    "true"
+  );
   expect(screen.getByText("No active TDH votes right now.")).toBeVisible();
 });
 
@@ -162,3 +166,33 @@ it.each(["loading", "error"])(
     ).toBeVisible();
   }
 );
+
+it("keeps inactive panels mounted for layout but removes their controls from accessibility and focus", () => {
+  renderDiscovery();
+  const active = screen.getByRole("tab", { name: "Active Votes 3" });
+  fireEvent.keyDown(active, { key: "ArrowRight" });
+  const recommendations = screen.getByRole("tab", { name: "Worth a Look" });
+  expect(recommendations).toHaveFocus();
+  expect(recommendations).toHaveAttribute("aria-selected", "true");
+  expect(screen.getByRole("tabpanel")).toHaveAttribute(
+    "aria-labelledby",
+    recommendations.id
+  );
+  expect(
+    screen.queryByRole("link", { name: /Rare Pepe acquisition/ })
+  ).toBeNull();
+  const inactive = document.getElementById(
+    active.getAttribute("aria-controls")!
+  );
+  expect(inactive).toHaveAttribute("inert");
+  expect(inactive).toHaveTextContent("Rare Pepe acquisition");
+  fireEvent.keyDown(recommendations, { key: "Home" });
+  expect(active).toHaveFocus();
+  expect(
+    screen.getByRole("link", { name: /Rare Pepe acquisition/ })
+  ).toBeInTheDocument();
+  fireEvent.click(
+    screen.getByRole("button", { name: "Collapse wave discovery" })
+  );
+  expect(screen.queryByRole("tabpanel")).toBeNull();
+});

@@ -92,7 +92,7 @@ it("keeps one live status node through debounce, results, empty and failure", ()
   fireEvent.click(screen.getByRole("button", { name: "Try again" }));
   expect(state.results.refetch).toHaveBeenCalled();
 });
-it("exposes the selected collection through both semantics and an underline", () => {
+it("exposes the selected collection through semantics and emphasis, with All first", () => {
   render(
     <SidebarWaveNavigationControls
       navigation={navigation({ queryText: "", searching: false })}
@@ -102,7 +102,10 @@ it("exposes the selected collection through both semantics and an underline", ()
     "aria-pressed",
     "true"
   );
-  expect(screen.getByRole("button", { name: "Pinned" })).toHaveClass(
+  expect(
+    screen.getAllByRole("button").map((button) => button.textContent)
+  ).toEqual(["All", "Pinned", "Joined"]);
+  expect(screen.getByRole("button", { name: "Pinned" })).not.toHaveClass(
     "tw-underline"
   );
 });

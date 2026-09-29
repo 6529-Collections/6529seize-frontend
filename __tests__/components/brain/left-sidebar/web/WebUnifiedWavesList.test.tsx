@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import React from "react";
 import WebUnifiedWavesList from "@/components/brain/left-sidebar/web/WebUnifiedWavesList";
+import { useInfiniteScroll } from "@/hooks/useInfiniteScroll";
 import { useShowFollowingWaves } from "@/hooks/useShowFollowingWaves";
 
 jest.mock("@/hooks/useInfiniteScroll", () => ({
@@ -51,6 +52,8 @@ const mockUseShowFollowingWaves = useShowFollowingWaves as jest.Mock;
 describe("WebUnifiedWavesList", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    localStorage.clear();
+    sessionStorage.clear();
     receivedCollapsed = false;
     mockUseShowFollowingWaves.mockReturnValue([false, jest.fn()]);
   });
@@ -121,3 +124,25 @@ jest.mock("@/hooks/useWaveDiscoveryViewer", () => ({
     ),
   }),
 }));
+
+it.each([true, false])(
+  "enables pagination only in the collapsed rail for a saved Pinned collection (collapsed=%s)",
+  (isCollapsed) => {
+    localStorage.setItem("wave-sidebar-collection", "pinned");
+    render(
+      <WebUnifiedWavesList
+        waves={[]}
+        fetchNextPage={jest.fn()}
+        hasNextPage
+        isFetching={false}
+        isFetchingNextPage={false}
+        onHover={jest.fn()}
+        scrollContainerRef={React.createRef()}
+        isCollapsed={isCollapsed}
+      />
+    );
+    expect(jest.mocked(useInfiniteScroll).mock.calls.at(-1)?.[0]).toBe(
+      isCollapsed
+    );
+  }
+);

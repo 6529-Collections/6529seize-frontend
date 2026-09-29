@@ -54,7 +54,7 @@ const WebUnifiedWavesList: React.FC<WebUnifiedWavesListProps> = (props) => {
 
   // Use the custom hook for infinite scroll
   useInfiniteScroll(
-    !isSearching && collection !== "pinned" && hasNextPage,
+    !isSearching && (isCollapsed || collection !== "pinned") && hasNextPage,
     isFetchingNextPage,
     fetchNextPage,
     scrollContainerRef,

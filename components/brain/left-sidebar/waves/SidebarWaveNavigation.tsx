@@ -65,13 +65,13 @@ export function SidebarWaveNavigationControls({
           aria-label={t(locale, "waves.sidebar.filterAriaLabel")}
           className="tw-m-0 tw-mt-2 tw-flex tw-min-w-0 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-0.5"
         >
-          {(["pinned", "joined", "all"] as const).map((tab) => (
+          {(["all", "pinned", "joined"] as const).map((tab) => (
             <button
               key={tab}
               type="button"
               aria-pressed={navigation.collection === tab}
               onClick={() => navigation.setCollection(tab)}
-              className={`tw-min-h-7 tw-min-w-0 tw-flex-1 tw-rounded-md tw-border-0 tw-px-2 tw-text-xs focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 ${navigation.collection === tab ? "tw-bg-iron-800 tw-font-semibold tw-text-white tw-underline tw-decoration-2 tw-underline-offset-2" : "tw-bg-transparent tw-text-iron-400"}`}
+              className={`tw-min-h-7 tw-min-w-0 tw-flex-1 tw-rounded-md tw-border-0 tw-px-2 tw-text-xs focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 ${navigation.collection === tab ? "tw-bg-iron-800 tw-font-semibold tw-text-white" : "tw-bg-transparent tw-text-iron-400"}`}
             >
               {t(locale, COLLECTION_LABELS[tab])}
             </button>

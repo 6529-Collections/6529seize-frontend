@@ -98,7 +98,7 @@ export function WebProfileFeedShortcut({
           aria-current={isActive ? "page" : undefined}
           className="tw-flex tw-items-center tw-justify-center tw-no-underline"
           data-tooltip-id={PROFILE_FEED_TOOLTIP_ID}
-          data-tooltip-content={profileFeedLabel}
+          data-tooltip-content={t(locale, "waves.sidebar.openProfileFeed")}
         >
           <ProfileFeedAvatar isActive={isActive} />
         </Link>
@@ -113,12 +113,14 @@ export function WebProfileFeedShortcut({
       onClick={handleClick}
       aria-label={t(locale, "waves.sidebar.profileFeedHeaderLabel")}
       aria-current={isActive ? "page" : undefined}
-      className="tailwind-scope tw-inline-flex tw-min-h-9 tw-items-center tw-gap-2 tw-rounded-md tw-text-xl tw-font-semibold tw-tracking-tight tw-text-iron-50 tw-no-underline focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black desktop-hover:hover:tw-text-primary-300"
+      className="tailwind-scope tw-group/feed tw-inline-flex tw-min-h-9 tw-items-center tw-gap-2 tw-rounded-md tw-text-xl tw-font-semibold tw-tracking-tight tw-text-iron-50 tw-no-underline focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black desktop-hover:hover:tw-text-primary-300"
       data-tooltip-id={PROFILE_FEED_TOOLTIP_ID}
       data-tooltip-content={t(locale, "waves.sidebar.openProfileFeed")}
     >
       <span>{t(locale, "navigation.primary.waves")}</span>
-      <span className="tw-inline-flex tw-text-iron-400">
+      <span
+        className={`tw-inline-flex group-focus-visible/feed:tw-text-primary-300 desktop-hover:group-hover/feed:tw-text-primary-300 ${isActive ? "tw-text-primary-300" : "tw-text-iron-400"}`}
+      >
         <MasonryGridIcon />
       </span>
     </Link>

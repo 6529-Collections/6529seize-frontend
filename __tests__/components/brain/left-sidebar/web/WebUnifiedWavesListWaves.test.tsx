@@ -213,13 +213,13 @@ it("renders announcement, highly rated preview, pinned, and one filterable botto
     screen.getByRole("button", { name: "Joined", exact: true })
   ).toBeInTheDocument();
   expect(screen.getByLabelText("Announcement waves")).toBeInTheDocument();
-  expect(screen.getByText("Discover")).toBeInTheDocument();
+  expect(screen.getByText("Worth a Look")).toBeInTheDocument();
   expect(
     screen.getByText("Highly rated waves you don’t follow.")
   ).toBeVisible();
   expect(
     screen.queryByRole("button", {
-      name: "Expand Discover, 1 wave",
+      name: "Expand Worth a Look, 1 wave",
     })
   ).toBeNull();
   expect(
@@ -272,8 +272,8 @@ it("keeps worth checking out waves in All at their recent-activity position", ()
   ]);
 });
 
-it("keeps discovery-only worth checking out waves out of Joined", () => {
-  mockUseShowFollowingWaves.mockReturnValue([true, jest.fn()]);
+it("labels the rendered Joined collection even when the legacy filter disagrees", () => {
+  mockUseShowFollowingWaves.mockReturnValue([false, jest.fn()]);
   localStorage.setItem("wave-sidebar-collection", "joined");
 
   renderWebWaves({
@@ -366,7 +366,7 @@ it("shows the worth checking out description when no profile is connected", () =
 
   renderWebWaves();
 
-  expect(screen.getByText("Discover")).toBeInTheDocument();
+  expect(screen.getByText("Worth a Look")).toBeInTheDocument();
   expect(
     screen.getByText("Highly rated waves you don’t follow.")
   ).toBeVisible();

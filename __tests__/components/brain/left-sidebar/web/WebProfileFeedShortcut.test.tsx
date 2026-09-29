@@ -43,10 +43,7 @@ describe("WebProfileFeedShortcut", () => {
       name: "Waves — Open Profile Waves Feed",
     });
     expect(link).toHaveTextContent("Waves");
-    expect(link).toHaveAttribute(
-      "data-tooltip-content",
-      "Open Profile Waves Feed"
-    );
+    expect(link).toHaveAttribute("data-tooltip-content", "Waves Feed");
     const click = createEvent.click(link);
     fireEvent(link, click);
     expect(click.defaultPrevented).toBe(true);

@@ -381,7 +381,7 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
     ).click();
     await expect(search).toHaveValue("");
     const votes = await firstVisible(
-      page.getByRole("button", { name: /^Active Votes/ })
+      page.getByRole("tab", { name: /^Active Votes/ })
     );
     await votes.click();
     await (
@@ -394,12 +394,32 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
     const discovery = page
       .getByRole("region", { name: "Wave discovery", exact: true })
       .filter({ visible: true });
-    await expect(discovery.getByText("Ongoing TDH votes")).toBeVisible();
+    await expect(
+      discovery.getByText("Community decisions powered by TDH.")
+    ).toBeVisible();
     const emptyVotes = discovery.getByText("No active TDH votes right now.");
     const allVotes = discovery.getByRole("link", {
       name: "View all active votes",
     });
     await expect(emptyVotes.or(allVotes)).toBeVisible();
+    await expect(discovery.getByText("Loading waves…")).toBeHidden();
+    await discovery.evaluate(async (element) => {
+      await Promise.all(
+        element
+          .getAnimations({ subtree: true })
+          .map((animation) => animation.finished.catch(() => undefined))
+      );
+    });
+    const expandedHeight = (await discovery.boundingBox())!.height;
+    await discovery.getByRole("tab", { name: "Worth a Look" }).click();
+    await expect
+      .poll(async () => (await discovery.boundingBox())!.height)
+      .toBe(expandedHeight);
+    await expect(discovery.getByRole("tabpanel")).toHaveCount(1);
+    await votes.click();
+    await expect
+      .poll(async () => (await discovery.boundingBox())!.height)
+      .toBe(expandedHeight);
     if (await emptyVotes.isVisible()) {
       await discovery
         .getByRole("button", { name: "Browse recommendations" })
@@ -408,7 +428,7 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
         discovery.getByText("Highly rated waves you don’t follow.")
       ).toBeVisible();
       await expect(
-        discovery.getByRole("button", { name: "Discover" })
+        discovery.getByRole("tab", { name: "Worth a Look" })
       ).toBeFocused();
       await gotoReady(page, "/discover?view=active-votes");
     } else {

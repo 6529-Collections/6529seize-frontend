@@ -356,13 +356,13 @@ it("renders announcement, highly rated preview, pinned, and one filterable botto
   );
   expect(screen.getByTestId("header-All Waves")).toBeInTheDocument();
   expect(screen.getByLabelText("Announcement waves")).toBeInTheDocument();
-  expect(screen.getByText("Discover")).toBeInTheDocument();
+  expect(screen.getByText("Worth a Look")).toBeInTheDocument();
   expect(
     screen.getByText("Highly rated waves you don’t follow.")
   ).toBeVisible();
   expect(
     screen.queryByRole("button", {
-      name: "Expand Discover, 1 wave",
+      name: "Expand Worth a Look, 1 wave",
     })
   ).toBeNull();
   expect(
@@ -846,7 +846,7 @@ it("shows the worth checking out description when no profile is connected", () =
     />
   );
 
-  expect(screen.getByText("Discover")).toBeInTheDocument();
+  expect(screen.getByText("Worth a Look")).toBeInTheDocument();
   expect(
     screen.getByText("Highly rated waves you don’t follow.")
   ).toBeVisible();
