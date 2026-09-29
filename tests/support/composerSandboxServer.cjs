@@ -3025,6 +3025,7 @@ function buildPublicRuntime() {
     PORT: String(frontendPort),
     WS_ENDPOINT: mockWsOrigin,
     USE_DEV_AUTH: useDevAuth ? "true" : "false",
+    DEV_MODE_MEMES_WAVE_ID: composerSandboxConstants.linkedDropMemesWaveId,
     ...(useDevAuth
       ? {
           DEV_MODE_WALLET_ADDRESS: SANDBOX_WALLET,
