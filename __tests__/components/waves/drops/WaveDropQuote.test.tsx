@@ -232,7 +232,7 @@ test("does not mount long quoted markdown until the user expands it", async () =
   expect(screen.queryByTestId("markdown")).not.toBeInTheDocument();
 
   await userEvent.click(
-    screen.getByRole("button", { name: "Show more", exact: true })
+    screen.getByRole("button", { name: /^Show more$/ })
   );
 
   expect(screen.getByTestId("markdown")).toBeInTheDocument();
