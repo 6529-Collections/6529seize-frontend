@@ -72,6 +72,7 @@ export function defineWaveVideoLayoutTests() {
         const bounds = {
           card: cardBounds(mediaBox.parentElement!),
           mediaBox: cardBounds(mediaBox),
+          mediaBoxBackground: getComputedStyle(mediaBox).backgroundColor,
           slider: cardBounds(slider),
           surface: cardBounds(surface),
           video: cardBounds(element),
@@ -93,6 +94,7 @@ export function defineWaveVideoLayoutTests() {
       });
 
       expect(geometry.mediaBox.height).toBe(384);
+      expect(geometry.mediaBoxBackground).toBe("rgba(28, 28, 33, 0.3)");
       for (const bounded of [
         geometry.surface,
         geometry.video,

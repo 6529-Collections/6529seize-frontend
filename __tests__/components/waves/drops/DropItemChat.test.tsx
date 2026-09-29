@@ -78,6 +78,9 @@ describe("DropItemChat", () => {
       "data-fill-video-container",
       "true"
     );
+    expect(screen.getByTestId("media").parentElement).toHaveClass(
+      "tw-bg-iron-900/30"
+    );
     expect(screen.getByTestId("href-buttons")).toHaveTextContent("/p");
   });
 
