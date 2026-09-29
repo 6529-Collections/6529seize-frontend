@@ -6,7 +6,10 @@ import {
 } from "@/components/brain/left-sidebar/waves/SidebarWaveNavigation";
 import { useSidebarWaveNavigation } from "@/hooks/useSidebarWaveNavigation";
 
-import Button from "@/components/utils/button/Button";
+import {
+  DiscoverWavesLink,
+  WAVE_HEADER_ACTION_CLASSES,
+} from "../waves/WaveHeaderActions";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import useCreateModalState from "@/hooks/useCreateModalState";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
@@ -59,7 +62,6 @@ import {
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import Link from "next/link";
 
 const EMPTY_WAVES_PLACEHOLDER_HEIGHT = "48px" as const;
 
@@ -134,36 +136,16 @@ function CreateWaveButton({ onClick }: { readonly onClick: () => void }) {
   const locale = useBrowserLocale();
   const label = t(locale, "waves.sidebar.createWave");
   return (
-    <div className="tw-inline-flex tw-items-center tw-justify-center touch-only:tw-size-11">
-      <Button
-        onClick={onClick}
-        aria-label={label}
-        data-tooltip-id="create-wave-tooltip"
-        data-tooltip-content={label}
-        variant="primary"
-        size={null}
-        className="tw-relative tw-size-7 tw-p-0 touch-only:after:tw-absolute touch-only:after:-tw-inset-2 touch-only:after:tw-content-['']"
-      >
-        <FontAwesomeIcon
-          icon={faPlus}
-          className="tw-size-3.5 tw-flex-shrink-0"
-        />
-      </Button>
-    </div>
-  );
-}
-
-function DiscoverWavesLink() {
-  const label = t(SIDEBAR_LOCALE, "navigation.waves.discover");
-
-  return (
-    <Link
-      href="/discover"
-      className="active:tw-text-primary-100 desktop-hover:hover:tw-text-primary-200 tw-inline-flex tw-h-7 tw-items-center tw-rounded-md tw-px-1.5 tw-text-[13px] tw-font-medium tw-leading-none tw-text-primary-300 tw-no-underline tw-transition-colors tw-duration-150 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black motion-reduce:tw-transition-none"
+    <button
+      type="button"
+      onClick={onClick}
       aria-label={label}
+      data-tooltip-id="create-wave-tooltip"
+      data-tooltip-content={label}
+      className={`${WAVE_HEADER_ACTION_CLASSES} tw-text-iron-300`}
     >
-      {label}
-    </Link>
+      <FontAwesomeIcon icon={faPlus} className="tw-size-4" aria-hidden="true" />
+    </button>
   );
 }
 
@@ -197,14 +179,12 @@ function WebWavesListHeader({
   return (
     <SectionHeader
       label="Waves"
-      labelContent={
-        showProfileFeedShortcut ? (
-          <WebProfileFeedShortcut basePath={basePath} isCollapsed={false} />
-        ) : undefined
-      }
       paddingClassName={`${headerPaddingClassName} tw-pb-2`}
       rightContent={
         <div className="tw-flex tw-items-center tw-gap-x-1.5">
+          {showProfileFeedShortcut && (
+            <WebProfileFeedShortcut basePath={basePath} isCollapsed={false} />
+          )}
           <DiscoverWavesLink />
           {showCreateWaveButton && <CreateWaveButton onClick={onCreateWave} />}
         </div>
@@ -645,6 +625,14 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
       {!isTouchDevice && (
         <>
           <ReactTooltip
+            id="discover-waves-tooltip"
+            place="bottom"
+            offset={8}
+            opacity={1}
+            style={TOOLTIP_STYLE}
+            border={SIDEBAR_TOOLTIP_BORDER}
+          />
+          <ReactTooltip
             id="create-wave-tooltip"
             place="bottom"
             offset={8}
@@ -655,7 +643,7 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
           {shouldShowProfileFeedShortcut && (
             <ReactTooltip
               id={PROFILE_FEED_TOOLTIP_ID}
-              place="right"
+              place={isCollapsed ? "right" : "bottom"}
               offset={8}
               opacity={1}
               style={TOOLTIP_STYLE}

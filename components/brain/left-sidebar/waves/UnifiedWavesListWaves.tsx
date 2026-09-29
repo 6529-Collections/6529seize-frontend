@@ -22,6 +22,7 @@ import {
   getHighlyRatedPreviewWaves,
 } from "./HighlyRatedWavesToggle";
 import SectionHeader from "./SectionHeader";
+import { DiscoverWavesLink } from "./WaveHeaderActions";
 import { WebProfileFeedShortcut } from "../web/WebProfileFeedShortcut";
 import type { VirtualItem } from "@/hooks/useVirtualizedWaves";
 import { useVirtualizedWaves } from "@/hooks/useVirtualizedWaves";
@@ -431,13 +432,19 @@ const UnifiedWavesListWaves = forwardRef<
     return (
       <div className="tw-flex tw-flex-col">
         {!hideHeaders && !isDirectMessage && (
-          <h2 className="tw-m-0 tw-px-4">
-            <WebProfileFeedShortcut
-              basePath="/waves"
-              isCollapsed={false}
-              mobile
-            />
-          </h2>
+          <div className="tw-flex tw-items-center tw-justify-between tw-px-4">
+            <h2 className="tw-m-0 tw-text-xl tw-font-semibold tw-tracking-tight tw-text-iron-50">
+              {t(locale, "navigation.primary.waves")}
+            </h2>
+            <div className="tw-flex tw-items-center tw-gap-1.5">
+              <WebProfileFeedShortcut
+                basePath="/waves"
+                isCollapsed={false}
+                mobile
+              />
+              <DiscoverWavesLink />
+            </div>
+          </div>
         )}
         {!hideHeaders && isDirectMessage && (
           <SectionHeader

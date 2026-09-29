@@ -193,7 +193,7 @@ it("renders announcement, highly rated preview, pinned, and one filterable botto
 
   expect(screen.getByTestId("header-Waves")).toBeInTheDocument();
   const feedLink = screen.getByRole("link", {
-    name: "Waves — Open Profile Waves Feed",
+    name: "Profile Waves Feed",
   });
   expect(screen.getByTestId("header-Waves")).toContainElement(feedLink);
   expect(
@@ -207,8 +207,18 @@ it("renders announcement, highly rated preview, pinned, and one filterable botto
     name: "Discover Waves",
   });
   expect(discoverWavesLink).toHaveAttribute("href", "/discover");
-  expect(discoverWavesLink).toHaveClass("tw-text-[13px]", "tw-font-medium");
-  expect(discoverWavesLink.querySelector("svg")).toBeNull();
+  expect(discoverWavesLink).toHaveAttribute(
+    "data-tooltip-content",
+    "Discover Waves"
+  );
+  expect(discoverWavesLink.querySelector("svg")).toBeInTheDocument();
+  expect(
+    screen.queryByRole("link", { name: "Waves", exact: true })
+  ).not.toBeInTheDocument();
+  expect(
+    feedLink.compareDocumentPosition(discoverWavesLink) &
+      Node.DOCUMENT_POSITION_FOLLOWING
+  ).toBeTruthy();
   expect(screen.getByRole("button", { name: "Joined" })).toBeInTheDocument();
   expect(screen.getByLabelText("Announcement waves")).toBeInTheDocument();
   expect(screen.getByText("Worth Checking Out")).toBeInTheDocument();

@@ -26,23 +26,24 @@ describe("WebProfileFeedShortcut", () => {
     jest.clearAllMocks();
   });
 
-  it("keeps the desktop section-home link selected", () => {
+  it("keeps the desktop feed action selected", () => {
     render(<WebProfileFeedShortcut basePath="/waves" isCollapsed={false} />);
 
     const link = screen.getByRole("link", {
-      name: "Waves — Open Profile Waves Feed",
+      name: "Profile Waves Feed",
     });
     expect(link).toHaveAttribute("href", "/waves");
     expect(link).toHaveAttribute("aria-current", "page");
   });
 
-  it("clears a selected wave from the desktop heading while preserving modified clicks", () => {
+  it("clears a selected wave from the desktop feed action while preserving modified clicks", () => {
     activeWaveId = "rare-pepe";
     render(<WebProfileFeedShortcut basePath="/waves" isCollapsed={false} />);
     const link = screen.getByRole("link", {
-      name: "Waves — Open Profile Waves Feed",
+      name: "Profile Waves Feed",
     });
-    expect(link).toHaveTextContent("Waves");
+    expect(link).toHaveTextContent("");
+    expect(link.querySelector("svg")).toBeInTheDocument();
     expect(link).toHaveAttribute("data-tooltip-content", "Waves Feed");
     const click = createEvent.click(link);
     fireEvent(link, click);
@@ -71,7 +72,7 @@ describe("WebProfileFeedShortcut", () => {
     render(<WebProfileFeedShortcut basePath="/waves" isCollapsed={false} />);
 
     const link = screen.getByRole("link", {
-      name: "Waves — Open Profile Waves Feed",
+      name: "Profile Waves Feed",
     });
     expect(link).toHaveAttribute("href", "/waves?view=profile-feed");
     expect(link).not.toHaveAttribute("aria-current");
@@ -81,11 +82,12 @@ describe("WebProfileFeedShortcut", () => {
       <WebProfileFeedShortcut basePath="/waves" isCollapsed={false} mobile />
     );
     const link = screen.getByRole("link", {
-      name: "Waves — Open Profile Waves Feed",
+      name: "Profile Waves Feed",
     });
     expect(link).toHaveAttribute("href", "/waves?view=profile-feed");
     expect(link).not.toHaveAttribute("aria-current");
-    expect(link).toHaveTextContent("Waves");
+    expect(link).toHaveTextContent("");
+    expect(link.querySelector("svg")).toBeInTheDocument();
     expect(link.querySelector("svg")).toBeInTheDocument();
     const click = createEvent.click(link);
     fireEvent(link, click);

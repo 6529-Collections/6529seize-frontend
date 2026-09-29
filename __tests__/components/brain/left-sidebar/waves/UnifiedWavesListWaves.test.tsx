@@ -182,10 +182,10 @@ it("renders structure even when no waves", () => {
   );
   expect(container.firstChild).not.toBeNull();
   expect(
-    screen.getByRole("heading", { name: "Waves — Open Profile Waves Feed" })
+    screen.getByRole("heading", { name: "Waves", exact: true })
   ).toBeInTheDocument();
   expect(
-    screen.getByRole("link", { name: "Waves — Open Profile Waves Feed" })
+    screen.getByRole("link", { name: "Profile Waves Feed" })
   ).toHaveAttribute("href", "/waves?view=profile-feed");
   expect(screen.getByRole("button", { name: "Joined" })).toBeInTheDocument();
 });
@@ -354,7 +354,7 @@ it("renders announcement, highly rated preview, pinned, and one filterable botto
     />
   );
   expect(
-    screen.getByRole("heading", { name: "Waves — Open Profile Waves Feed" })
+    screen.getByRole("heading", { name: "Waves", exact: true })
   ).toBeInTheDocument();
   expect(screen.getByLabelText("Announcement waves")).toBeInTheDocument();
   expect(screen.getByText("Worth Checking Out")).toBeInTheDocument();
