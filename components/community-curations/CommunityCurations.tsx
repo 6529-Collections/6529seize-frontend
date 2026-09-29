@@ -7,9 +7,11 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useCommunityCurationsDrops } from "@/hooks/useCommunityCurationsDrops";
 import { t } from "@/i18n/messages";
 import { usePersistentScrollOffset } from "@/components/token-list/hooks/usePersistentScrollOffset";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useLayoutEffect, useRef, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
 
+// Desktop and mobile web render the same logical feed. Sharing this key keeps
+// the reading position intact when the viewport crosses the layout breakpoint.
 const PROFILE_WAVES_FEED_SCROLL_KEY = "profile-waves-feed";
 
 const COMMUNITY_CURATIONS_SKELETON_COLUMNS = [
@@ -152,6 +154,7 @@ export default function CommunityCurations({
     PROFILE_WAVES_FEED_SCROLL_KEY,
     scrollContainerRef
   );
+  const hasRestoredScrollOffsetRef = useRef(initialScrollOffset === 0);
   const {
     allDrops,
     drops,
@@ -176,11 +179,28 @@ export default function CommunityCurations({
   const setScrollContainerElement = useCallback(
     (element: HTMLElement | null) => {
       scrollContainerRef.current = element;
-      element?.scrollTo({ top: initialScrollOffset });
       setScrollContainer(element);
     },
-    [initialScrollOffset]
+    []
   );
+
+  useLayoutEffect(() => {
+    if (hasRestoredScrollOffsetRef.current || !shouldShowMasonry) {
+      return;
+    }
+
+    const frameId = requestAnimationFrame(() => {
+      const element = scrollContainerRef.current;
+      if (!element) {
+        return;
+      }
+
+      element.scrollTo({ top: initialScrollOffset });
+      hasRestoredScrollOffsetRef.current = true;
+    });
+
+    return () => cancelAnimationFrame(frameId);
+  }, [initialScrollOffset, shouldShowMasonry]);
 
   return (
     <section

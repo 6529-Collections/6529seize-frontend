@@ -14,6 +14,8 @@ const englishMessages: Readonly<Record<string, string>> = EN_US_MESSAGES;
 const PROFILE_FEED_DESCRIPTION =
   englishMessages["waves.profileFeed.description"] ??
   "Drops 6529 users are featuring from their own profile waves.";
+const APP_SECTIONS_LABEL =
+  englishMessages["wave.navigation.appSections"] ?? "App sections";
 
 const PROFILE_TAB_PATHS = [
   {
@@ -135,7 +137,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       })
     ).toBeVisible();
     const feedNavigation = page.getByRole("navigation", {
-      name: "App sections",
+      name: APP_SECTIONS_LABEL,
     });
     await expect(
       feedNavigation.getByRole("link", { name: "Waves" })
