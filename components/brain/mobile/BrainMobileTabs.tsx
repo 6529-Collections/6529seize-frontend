@@ -16,6 +16,8 @@ import { useWaveCurationTabs } from "@/hooks/waves/useWaveCurationTabs";
 import MyStreamWaveCreateActionsMenu from "../my-stream/tabs/MyStreamWaveCreateActionsMenu";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import { TabCountBadge } from "@/components/common/TabCountBadge";
+import { isCompetitionPathname } from "@/helpers/competition.helpers";
 
 const ACTIVE_TAB_BACKGROUND = "tw-border-primary-300 tw-bg-transparent";
 const INACTIVE_TAB_BACKGROUND =
@@ -83,6 +85,8 @@ interface BrainMobileTabsProps {
   readonly wave?: ApiWave | undefined;
   readonly waveActive: boolean;
   readonly hasPolls?: boolean | undefined;
+  readonly hasCompetitions?: boolean | undefined;
+  readonly activeCompetitionCount?: number | undefined;
   readonly outcomesVisible?: boolean | undefined;
   readonly waveNavigationReady?: boolean | undefined;
   readonly showWavesTab: boolean;
@@ -96,6 +100,8 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
   wave,
   waveActive,
   hasPolls = false,
+  hasCompetitions = false,
+  activeCompetitionCount,
   outcomesVisible = true,
   waveNavigationReady = true,
   showWavesTab,
@@ -104,6 +110,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
 }) => {
   const router = useRouter();
   const pathname = usePathname();
+  const isCompetitionRoute = isCompetitionPathname(pathname);
   const searchParams = useSearchParams();
   const locale = useBrowserLocale();
   const { registerRef } = useLayout();
@@ -437,8 +444,8 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
                 </span>
               </button>
             )}
-            {!isCompetitionWave && salesTabButton}
-            {waveActive && wave && isCompetitionWave && (
+            {!isCompetitionRoute && !isCompetitionWave && salesTabButton}
+            {!isCompetitionRoute && waveActive && wave && isCompetitionWave && (
               <>
                 <MyStreamWaveTabsLeaderboard
                   wave={wave}
@@ -534,6 +541,25 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
                   </button>
                 );
               })}
+            {waveActive && hasCompetitions && (
+              <button
+                {...getTabStateProps(activeView === BrainView.COMPETITIONS)}
+                ref={getActiveButtonRef(activeView === BrainView.COMPETITIONS)}
+                onClick={() => handleWaveViewChange(BrainView.COMPETITIONS)}
+                className={getTabButtonClassName(
+                  activeView === BrainView.COMPETITIONS
+                )}
+              >
+                <span
+                  className={getTabTextClassName({
+                    isActive: activeView === BrainView.COMPETITIONS,
+                  })}
+                >
+                  {t(locale, "competitions.title")}
+                </span>
+                <TabCountBadge count={activeCompetitionCount} />
+              </button>
+            )}
             {!isApp && !waveActive && (
               <button
                 {...getTabStateProps(activeView === BrainView.NOTIFICATIONS)}

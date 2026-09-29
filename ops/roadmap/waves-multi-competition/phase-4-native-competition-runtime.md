@@ -4,7 +4,9 @@
 
 ## Tracking
 
-- Status: Not started
+- [Native delivery evidence](./native-delivery/implementation-evidence.md): implementation and local verification; environment rollout is not complete.
+
+- Status: In progress
 - Delivery target: To be selected
 - Owner: Unassigned
 - Evidence: Add links to decisions, implementation, validation, and deployment

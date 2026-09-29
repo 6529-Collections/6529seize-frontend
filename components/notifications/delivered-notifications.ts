@@ -1,3 +1,4 @@
+import { isMultiCompetitionEnabled } from "@/helpers/competition.helpers";
 import {
   PushNotifications,
   type PushNotificationSchema,
@@ -54,7 +55,13 @@ export async function reconcileDeliveredNotifications(
         if (id === null) return;
         const response = await commonApiFetch<ApiNotificationsResponseV2>({
           endpoint: "v2/notifications",
-          params: { limit: "1", id_less_than: String(id + 1) },
+          params: {
+            limit: "1",
+            id_less_than: String(id + 1),
+            ...(isMultiCompetitionEnabled()
+              ? { include_competitions: "true" }
+              : {}),
+          },
           headers: { Authorization: `Bearer ${scope.authJwt}` },
           cache: "no-store",
           signal: scope.signal,

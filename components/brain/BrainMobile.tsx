@@ -1,4 +1,6 @@
 "use client";
+import { useWaveCompetitionsTab } from "@/hooks/competitions/useWaveCompetitionsTab";
+import { isCompetitionPathname } from "@/helpers/competition.helpers";
 
 import type { ReactNode } from "react";
 import React, {
@@ -33,6 +35,7 @@ import {
   getActiveWaveIdFromUrl,
   getHomeRoute,
   getWaveHomeRoute,
+  getWavePathRoute,
 } from "@/helpers/navigation.helpers";
 import CreateWaveModal from "@/components/waves/create-wave/CreateWaveModal";
 import CreateDirectMessageModal from "@/components/waves/create-dm/CreateDirectMessageModal";
@@ -139,6 +142,12 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
     enabled: isCompetitionWave,
   });
   const outcomesVisible = useWaveOutcomeVisibility(wave);
+  const {
+    hasCompetitions: hasAvailableCompetitions,
+    activeCount: activeCompetitionCount,
+  } = useWaveCompetitionsTab(wave);
+  const hasCompetitions =
+    hasAvailableCompetitions || isCompetitionPathname(pathname);
 
   const {
     voting: { isCompleted },
@@ -166,6 +175,7 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
     isRankWave,
     isApproveWave,
     showOutcomeView: outcomesVisible,
+    hasCompetitions,
     hasPolls,
     pathname,
     searchParams,
@@ -179,8 +189,15 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
       if (isApp && waveId) {
         rememberWaveView({ waveId, view });
       }
+      if (
+        waveId &&
+        isCompetitionPathname(pathname) &&
+        view !== BrainView.COMPETITIONS
+      ) {
+        router.push(getWavePathRoute(waveId), { scroll: false });
+      }
     },
-    [selectView, isApp, waveId, rememberWaveView]
+    [selectView, isApp, waveId, rememberWaveView, pathname, router]
   );
   const [aboutTabState, setAboutTabState] = useState<MobileAboutTabState>({
     waveId: null,
@@ -322,6 +339,8 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
           wave={wave}
           waveActive={hasWave}
           hasPolls={hasPolls}
+          hasCompetitions={hasCompetitions}
+          activeCompetitionCount={activeCompetitionCount}
           outcomesVisible={outcomesVisible}
           waveNavigationReady={waveNavigationReady}
           showWavesTab={hydrated}

@@ -396,6 +396,7 @@ export const useNotificationsController =
       !hasTimedOut &&
       isInitialQueryDone &&
       !isFetching &&
+      !hasNextPage &&
       rawItems.length === 0;
     const showErrorState =
       (!!errorMessage || hasTimedOut) && rawItems.length === 0;

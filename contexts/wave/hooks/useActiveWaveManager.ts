@@ -1,5 +1,6 @@
 "use client";
 
+import { isCompetitionPathname } from "@/helpers/competition.helpers";
 import {
   getActiveWaveIdFromUrl,
   getWaveHomeRoute,
@@ -33,7 +34,10 @@ const getRouteContext = (): { isOnWaves: boolean; isOnMessages: boolean } => {
 
   const pathname = window.location.pathname;
   return {
-    isOnWaves: pathname === "/waves" || pathname.startsWith("/waves/"),
+    // Competition pages have route-bound content that a history update cannot replace.
+    isOnWaves:
+      !isCompetitionPathname(pathname) &&
+      (pathname === "/waves" || pathname.startsWith("/waves/")),
     isOnMessages: pathname === "/messages" || pathname.startsWith("/messages/"),
   };
 };

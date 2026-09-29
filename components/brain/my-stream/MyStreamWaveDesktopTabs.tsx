@@ -30,6 +30,7 @@ import {
 import { getProfileWaveIdentity, useProfileWave } from "@/hooks/useProfileWave";
 import { useWave } from "@/hooks/useWave";
 import { useWavePollSummary } from "@/hooks/useWaveHasPolls";
+import { useWaveCompetitionsTab } from "@/hooks/competitions/useWaveCompetitionsTab";
 import { useDecisionPoints } from "@/hooks/waves/useDecisionPoints";
 import { useWaveTimers } from "@/hooks/useWaveTimers";
 import { Time } from "@/helpers/time";
@@ -53,6 +54,7 @@ interface MyStreamWaveDesktopTabsProps {
   readonly activeCurationId: string | null;
   readonly onSelectCuration: (curationId: string | null) => void;
   readonly showCreateActionsMenu?: boolean | undefined;
+  readonly competitionOnly?: boolean;
 }
 
 interface TabOption {
@@ -113,6 +115,7 @@ const AUTO_EXPAND_LIMIT = 5;
 
 const TAB_LABELS: Record<MyStreamWaveTab, string> = {
   [MyStreamWaveTab.CHAT]: "Chat",
+  [MyStreamWaveTab.COMPETITIONS]: "Competitions",
   [MyStreamWaveTab.LEADERBOARD]: "Leaderboard",
   [MyStreamWaveTab.SUBMISSIONS]: "Submissions",
   [MyStreamWaveTab.SALES]: "Sales",
@@ -327,9 +330,12 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
   activeCurationId,
   onSelectCuration,
   showCreateActionsMenu = true,
+  competitionOnly = false,
 }) => {
   const searchParams = useSearchParams();
   const { availableTabs, updateAvailableTabs } = useContentTab();
+  const { hasCompetitions, activeCount: activeCompetitionCount } =
+    useWaveCompetitionsTab(wave);
   const { activeProfileProxy, connectedProfile } = useAuth();
   const hasAuthenticatedProfile = Boolean(connectedProfile?.handle);
   const {
@@ -447,6 +453,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
       isMemesWave,
       isChatWave,
       hasPolls,
+      hasCompetitions,
       hasAuthenticatedProfile,
       isCurationWave,
       isApproveWave,
@@ -460,6 +467,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
     isMemesWave,
     isChatWave,
     hasPolls,
+    hasCompetitions,
     isApproveWave,
     outcomesVisible,
     hasAuthenticatedProfile,
@@ -491,13 +499,18 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
           }
           return true;
         })
-        .map((tab) => ({
-          key: tab,
-          label: getTabLabel({ approveLabels, isApproveWave, tab }),
-          panelId: getContentTabPanelId(tab),
-          badgeCount:
-            tab === MyStreamWaveTab.POLLS ? unansweredPolls : undefined,
-        })),
+        .map((tab) => {
+          let badgeCount: number | undefined;
+          if (tab === MyStreamWaveTab.COMPETITIONS)
+            badgeCount = activeCompetitionCount;
+          else if (tab === MyStreamWaveTab.POLLS) badgeCount = unansweredPolls;
+          return {
+            key: tab,
+            label: getTabLabel({ approveLabels, isApproveWave, tab }),
+            panelId: getContentTabPanelId(tab),
+            badgeCount,
+          };
+        }),
     [
       availableTabs,
       approveLabels,
@@ -508,12 +521,13 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
       isCurationWave,
       outcomesVisible,
       unansweredPolls,
+      activeCompetitionCount,
     ]
   );
 
   const curationOptions: TabOption[] = useMemo(
     () =>
-      curations.map((curation) => ({
+      (competitionOnly ? [] : curations).map((curation) => ({
         key: getCurationTabKey(curation.id),
         label: curation.name,
         panelId: getCurationPanelId(curation.id),
@@ -550,11 +564,23 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
       onSelectCuration,
       profileCurationId,
       wave,
+      competitionOnly,
     ]
   );
 
+  const competitionOption = standardOptions.find(
+    (option) => option.key === String(MyStreamWaveTab.COMPETITIONS)
+  );
   const options: TabOption[] = useMemo(
-    () => [...standardOptions, ...curationOptions],
+    () => [
+      ...standardOptions.filter(
+        (option) => option.key !== String(MyStreamWaveTab.COMPETITIONS)
+      ),
+      ...curationOptions,
+      ...standardOptions.filter(
+        (option) => option.key === String(MyStreamWaveTab.COMPETITIONS)
+      ),
+    ],
     [curationOptions, standardOptions]
   );
 
@@ -657,17 +683,21 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
           onDragEnd={handleCurationDragEnd}
         >
           <div className="tw-flex tw-w-auto tw-gap-x-[13px]" role="tablist">
-            {standardOptions.map((option) => (
-              <DesktopTabOption
-                key={option.key}
-                option={option}
-                activeKey={activeKey}
-                onSelect={(key) => {
-                  onSelectCuration(null);
-                  setActiveTab(key as MyStreamWaveTab);
-                }}
-              />
-            ))}
+            {standardOptions
+              .filter(
+                (option) => option.key !== String(MyStreamWaveTab.COMPETITIONS)
+              )
+              .map((option) => (
+                <DesktopTabOption
+                  key={option.key}
+                  option={option}
+                  activeKey={activeKey}
+                  onSelect={(key) => {
+                    onSelectCuration(null);
+                    setActiveTab(key as MyStreamWaveTab);
+                  }}
+                />
+              ))}
             <SortableContext
               items={curationTabKeys}
               strategy={horizontalListSortingStrategy}
@@ -695,6 +725,16 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
                 </React.Fragment>
               ))}
             </SortableContext>
+            {competitionOption && (
+              <DesktopTabOption
+                option={competitionOption}
+                activeKey={activeKey}
+                onSelect={() => {
+                  onSelectCuration(null);
+                  setActiveTab(MyStreamWaveTab.COMPETITIONS);
+                }}
+              />
+            )}
           </div>
         </DndContext>
       </div>

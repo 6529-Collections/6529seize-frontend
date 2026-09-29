@@ -1,3 +1,4 @@
+import { isMultiCompetitionEnabled } from "@/helpers/competition.helpers";
 import { ApiDropMainType } from "@/generated/models/ApiDropMainType";
 import { ApiIdentitySubscriptionTargetAction } from "@/generated/models/ApiIdentitySubscriptionTargetAction";
 import { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
@@ -6,6 +7,10 @@ import { ApiSubscriptionCoverageStatus } from "@/generated/models/ApiSubscriptio
 import { commonApiFetch } from "@/services/api/common-api";
 import { fetchNotificationsV2 } from "@/services/api/notifications-v2-api";
 import type { INotificationDropReacted } from "@/types/feed.types";
+
+jest.mock("@/helpers/competition.helpers", () => ({
+  isMultiCompetitionEnabled: jest.fn(() => false),
+}));
 
 jest.mock("@/services/api/common-api", () => ({
   commonApiFetch: jest.fn(),
@@ -83,6 +88,20 @@ const drop = {
 describe("fetchNotificationsV2", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.mocked(isMultiCompetitionEnabled).mockReturnValue(false);
+  });
+
+  it("opts in to native notifications only when enabled", async () => {
+    jest.mocked(isMultiCompetitionEnabled).mockReturnValue(true);
+    jest
+      .mocked(commonApiFetch)
+      .mockResolvedValue({ unread_count: 0, notifications: [] });
+    await fetchNotificationsV2({ limit: "30" });
+    expect(commonApiFetch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        params: { limit: "30", include_competitions: "true" },
+      })
+    );
   });
 
   it("fetches v2 notifications and expands grouped reaction reactors", async () => {
@@ -132,13 +151,11 @@ describe("fetchNotificationsV2", () => {
       (notification): notification is INotificationDropReacted =>
         notification.cause === ApiNotificationCause.DropReacted
     );
+    expect(reactionNotifications.map((n) => n.related_identity.handle)).toEqual(
+      ["alice", "bob"]
+    );
     expect(
-      reactionNotifications.map((n) => n.related_identity.handle)
-    ).toEqual(["alice", "bob"]);
-    expect(
-      reactionNotifications.map(
-        (n) => n.related_identity.subscribed_actions
-      )
+      reactionNotifications.map((n) => n.related_identity.subscribed_actions)
     ).toEqual([[ApiIdentitySubscriptionTargetAction.WaveCreated], []]);
     const [firstNotification] = reactionNotifications;
     if (firstNotification) {
@@ -463,5 +480,59 @@ describe("fetchNotificationsV2", () => {
     } finally {
       consoleErrorSpy.mockRestore();
     }
+  });
+  it("maps competition lifecycle notifications without a related identity or shared drops", async () => {
+    const context = {
+      event_id: "event",
+      event_type: "WINNER_SELECTED",
+      wave_id: "wave",
+      competition_id: "competition",
+      competition_title: "Native Rank",
+      entry_id: "entry",
+    };
+    (commonApiFetch as jest.Mock).mockResolvedValue({
+      unread_count: 1,
+      notifications: [
+        {
+          id: 100,
+          cause: ApiNotificationCause.CompetitionLifecycle,
+          created_at: 1000,
+          read_at: null,
+          related_identity: null,
+          related_drops: [],
+          additional_context: context,
+        },
+      ],
+    });
+    const response = await fetchNotificationsV2({ limit: "30" });
+    expect(response.notifications).toEqual([
+      {
+        id: 100,
+        cause: ApiNotificationCause.CompetitionLifecycle,
+        created_at: 1000,
+        read_at: null,
+        additional_context: context,
+      },
+    ]);
+  });
+
+  it("does not invent competition context for incomplete lifecycle events", async () => {
+    (commonApiFetch as jest.Mock).mockResolvedValue({
+      unread_count: 1,
+      notifications: [
+        {
+          id: 100,
+          cause: ApiNotificationCause.CompetitionLifecycle,
+          created_at: 1000,
+          read_at: null,
+          related_identity: null,
+          related_drops: [],
+          additional_context: { wave_id: "wave" },
+        },
+      ],
+    });
+    const response = await fetchNotificationsV2({ limit: "30" });
+    expect(response.notifications).toEqual([]);
+    expect(response.nextPageParam).toBe(100);
   });
 });

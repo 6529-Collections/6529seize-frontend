@@ -2,6 +2,8 @@
 
 import type { ReactNode } from "react";
 import dynamic from "next/dynamic";
+import { usePathname } from "next/navigation";
+import { isCompetitionPathname } from "@/helpers/competition.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import BrainMobileWaves from "./BrainMobileWaves";
@@ -63,6 +65,13 @@ const MyStreamWaveMyVotes = dynamic(
 const MyStreamWaveFAQ = dynamic(() => import("../my-stream/MyStreamWaveFAQ"), {
   loading: () => <BrainMobileViewLoadingFallback />,
 });
+
+const CompetitionHub = dynamic(
+  () => import("@/components/competitions/CompetitionHub"),
+  {
+    loading: () => <BrainMobileViewLoadingFallback />,
+  }
+);
 
 const BrainMobileMessages = dynamic(() => import("./BrainMobileMessages"), {
   loading: () => <BrainMobileViewLoadingFallback />,
@@ -132,9 +141,7 @@ interface BrainMobileFAQViewProps {
 function BrainMobileProfileFeed() {
   const { mobileWavesViewStyle } = useLayout();
 
-  return (
-    <CommunityCurations heightStyle={mobileWavesViewStyle} />
-  );
+  return <CommunityCurations heightStyle={mobileWavesViewStyle} />;
 }
 
 function BrainMobileLeaderboardView({
@@ -270,11 +277,17 @@ export default function BrainMobileViewContent({
   onPrefetchQuickVote,
   wave,
 }: BrainMobileViewContentProps) {
+  const isCompetitionRoute = isCompetitionPathname(usePathname());
   const isCompetitionWave = isRankWave || isApproveWave;
 
   switch (activeView) {
     case BrainView.DEFAULT:
       return children;
+    case BrainView.COMPETITIONS:
+      if (isCompetitionRoute) return children;
+      return wave ? (
+        <CompetitionHub key={wave.id} waveId={wave.id} embedded />
+      ) : null;
     case BrainView.ABOUT:
       return (
         <BrainMobileAbout

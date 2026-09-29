@@ -19,9 +19,18 @@ import { ApiSubscriptionCoverageStatus } from '../models/ApiSubscriptionCoverage
 import { HttpFile } from '../http/http';
 
 /**
-* Notification-specific additional context. For DROP_REACTED notifications this includes reaction and reactors, where each reactor only has handle, pfp, and subscribed.
+* Notification-specific additional context. For DROP_REACTED notifications this includes reaction and reactors, where each reactor only has handle, pfp, and subscribed. COMPETITION_LIFECYCLE always includes event_id, event_type, wave_id, competition_id and competition_title; winner events also include entry_id and drop_id. These identify the native competition destination independently of the shared drop\'s legacy projection.
 */
 export class ApiNotificationAdditionalContextV2 {
+    /**
+    * Stable idempotency identifier for COMPETITION_LIFECYCLE.
+    */
+    'event_id'?: string;
+    'event_type'?: string;
+    'competition_id'?: string;
+    'competition_title'?: string;
+    'entry_id'?: string;
+    'drop_id'?: string;
     'amount'?: number;
     'rater_rating'?: number;
     'total'?: number;
@@ -59,6 +68,42 @@ export class ApiNotificationAdditionalContextV2 {
     static readonly mapping: {[index: string]: string} | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
+        {
+            "name": "event_id",
+            "baseName": "event_id",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "event_type",
+            "baseName": "event_type",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "competition_id",
+            "baseName": "competition_id",
+            "type": "string",
+            "format": "uuid"
+        },
+        {
+            "name": "competition_title",
+            "baseName": "competition_title",
+            "type": "string",
+            "format": ""
+        },
+        {
+            "name": "entry_id",
+            "baseName": "entry_id",
+            "type": "string",
+            "format": "uuid"
+        },
+        {
+            "name": "drop_id",
+            "baseName": "drop_id",
+            "type": "string",
+            "format": ""
+        },
         {
             "name": "amount",
             "baseName": "amount",

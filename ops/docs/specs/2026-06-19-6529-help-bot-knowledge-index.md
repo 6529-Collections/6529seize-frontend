@@ -18,6 +18,12 @@ scrollable two-row voting window, pagination, compact empty/error states and
 independently persisted collapse preferences. Active Votes comes first; Worth a
 Look retains its own compact preview height.
 
+The `waves.native-competitions` record covers competition collections and links,
+shared chat, independent credits, native entry content, draft/publication and
+terminal lifecycle rules. It qualifies availability rather than promising
+controls in every deployment, and retains the original-wave experience in its
+navigation guidance. Backend runtime continues consuming the published corpus.
+
 ## Problem Statement
 
 Users often ask practical product questions in Waves instead of finding the

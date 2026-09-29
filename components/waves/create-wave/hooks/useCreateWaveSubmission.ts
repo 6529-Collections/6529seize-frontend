@@ -28,6 +28,15 @@ import {
 import { getWaveGroupValidationRequest } from "@/helpers/waves/wave-group-validation.helpers";
 import { validateWaveGroups } from "@/services/api/wave-group-validation-api";
 import { useSubwaveAccessConfirmation } from "@/components/waves/hooks/useSubwaveAccessConfirmation";
+import {
+  isMultiCompetitionEnabled,
+  isRejectedCompetitionCommand,
+  newCompetitionRequestKey,
+} from "@/helpers/competition.helpers";
+import { commonApiPost } from "@/services/api/common-api";
+import type { ApiCreateWaveMetadataRequest } from "@/generated/models/ApiCreateWaveMetadataRequest";
+import type { ApiCreateWaveHubRequest } from "@/generated/models/ApiCreateWaveHubRequest";
+import type { ApiWaveV3 } from "@/generated/models/ApiWaveV3";
 
 interface UseCreateWaveSubmissionParams {
   readonly config: CreateWaveConfig;
@@ -104,6 +113,8 @@ export function useCreateWaveSubmission({
   );
   const [submitting, setSubmitting] = useState(false);
   const submissionInProgressRef = useRef(false);
+  const nativeHubRequest = useRef<ApiCreateWaveHubRequest | null>(null);
+  const nativeDisplayMetadata = useRef<ApiCreateWaveMetadataRequest[]>([]);
   const [showDropError, setShowDropError] = useState(false);
   const { submit: submitInlineGroup } = useGroupMutations({
     requestAuth,
@@ -152,8 +163,8 @@ export function useCreateWaveSubmission({
     onError: (error) => {
       setToast({
         type: "error",
-        title: "Couldn't create this wave.",
-        description: "Please try again.",
+        title: t(locale, "competitions.waveCreationFailure"),
+        description: t(locale, "competitions.tryAgain"),
         details: getToastErrorDetails(error),
       });
     },
@@ -324,17 +335,70 @@ export function useCreateWaveSubmission({
         ongoingRanking: submissionConfig.dates.ongoingRanking ?? false,
       });
 
+      if (isMultiCompetitionEnabled()) {
+        if (!nativeHubRequest.current) {
+          nativeDisplayMetadata.current = displayMetadataRequests;
+          nativeHubRequest.current = {
+            idempotency_key: newCompetitionRequestKey(),
+            name: waveBody.name,
+            picture: waveBody.picture,
+            description_drop: waveBody.description_drop,
+            visibility: waveBody.visibility,
+            chat: waveBody.chat,
+            admin_group: { group_id: adminGroupId },
+            ...(parentWaveId ? { parent_wave_id: parentWaveId } : {}),
+          };
+        }
+        const hub = await commonApiPost<ApiCreateWaveHubRequest, ApiWaveV3>({
+          endpoint: "v3/waves",
+          body: nativeHubRequest.current,
+          errorMode: "structured",
+        });
+        if (nativeDisplayMetadata.current.length > 0) {
+          try {
+            await Promise.all(
+              nativeDisplayMetadata.current.map((body) =>
+                createWaveMetadata({ waveId: hub.id, body })
+              )
+            );
+          } catch {
+            setToast({
+              type: "warning",
+              message: t(locale, "competitions.hubDisplayFailure"),
+            });
+          }
+        }
+        const destination = getWaveRoute({
+          waveId: hub.id,
+          isDirectMessage: false,
+          isApp,
+        });
+        nativeHubRequest.current = null;
+        nativeDisplayMetadata.current = [];
+        onWaveCreated();
+        onSuccess?.();
+        finishSubmitting();
+        if (isApp) router.replace(destination);
+        else router.push(destination);
+        return;
+      }
+
       mutationStarted = true;
       await addWaveMutation.mutateAsync({
         body: waveBody,
         displayMetadataRequests,
       });
     } catch (error) {
+      if (isRejectedCompetitionCommand(error)) {
+        nativeHubRequest.current = null;
+      }
       if (!mutationStarted) {
         setToast({
           type: "error",
-          title: "Couldn't create this wave.",
-          description: "Please try again.",
+          title: t(locale, "competitions.waveCreationFailure"),
+          description: nativeHubRequest.current
+            ? t(locale, "competitions.hubRetry")
+            : t(locale, "competitions.tryAgain"),
           details: getToastErrorDetails(error, "Could not create wave."),
         });
         finishSubmitting();

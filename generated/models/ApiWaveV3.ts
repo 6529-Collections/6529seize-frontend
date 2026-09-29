@@ -16,6 +16,10 @@ import { ApiWaveV3Permissions } from '../models/ApiWaveV3Permissions';
 import { HttpFile } from '../http/http';
 
 export class ApiWaveV3 {
+    /**
+    * Immutable original competition selected by all legacy routes; null for chat hubs.
+    */
+    'legacy_primary_competition_id'?: string | null;
     'id': string;
     'name': string;
     'picture': string | null;
@@ -28,6 +32,12 @@ export class ApiWaveV3 {
     static readonly mapping: {[index: string]: string} | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
+        {
+            "name": "legacy_primary_competition_id",
+            "baseName": "legacy_primary_competition_id",
+            "type": "string",
+            "format": ""
+        },
         {
             "name": "id",
             "baseName": "id",

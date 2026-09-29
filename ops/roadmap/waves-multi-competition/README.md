@@ -301,17 +301,19 @@ Update this table and the phase's tracking section together.
 | --- | --- | --- | --- |
 | [0](./phase-0-contract-and-baseline.md) | Contract and baseline | Complete | None |
 | [1](./phase-1-additive-backend-foundation.md) | Additive backend foundation | In progress | None |
-| [2](./phase-2-frontend-competition-context.md) | Frontend competition context | Not started | No intended visual change |
-| [3](./phase-3-separate-creation-flows.md) | Separate hub and competition creation | Not started | New creation/admin flow behind rollout controls |
-| [4](./phase-4-native-competition-runtime.md) | Native competition execution | Not started | Multiple competitions become operational for cohorts |
+| [2](./phase-2-frontend-competition-context.md) | Frontend competition context | In progress | No intended visual change |
+| [3](./phase-3-separate-creation-flows.md) | Separate hub and competition creation | In progress | New creation/admin flow behind rollout controls |
+| [4](./phase-4-native-competition-runtime.md) | Native competition execution | In progress | Multiple competitions become operational for cohorts |
 | [5](./phase-5-legacy-data-migration.md) | Legacy data migration | Not started | No intended behavior change |
-| [6](./phase-6-progressive-rollout.md) | Progressive rollout | Not started | Multi-competition hubs become broadly available |
+| [6](./phase-6-progressive-rollout.md) | Progressive rollout | In progress | Multi-competition hubs become broadly available |
 | [7](./phase-7-retire-wave-coupling.md) | Retire internal legacy coupling | Not started | Legacy execution/storage are removed while current GET contracts remain supported |
 
 Phase 1's [current evidence](./phase-1/implementation-evidence.md) records the
 2026-09-28 local follow-up: independent legacy read comparisons replace the
 original self-comparison. Remaining-credit validation and shared-environment
-acceptance remain open. Phase 2 has not started.
+acceptance remain open in that record. The [native delivery evidence](./native-delivery/implementation-evidence.md)
+records local budget validation and the implementation of roadmap Phases 2–4
+plus discovery from Phase 6; environment acceptance remains separate.
 
 ## Global Success Criteria
 
