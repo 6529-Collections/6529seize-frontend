@@ -49,7 +49,7 @@ describe("DiscoverWaveExplorer", () => {
   it("personalizes discussion copy for an authenticated viewer", () => {
     mockCanUseCollections = true;
     render(<DiscoverWaveExplorer />);
-    expect(latestExploreProps?.title).toBe(
+    expect(latestExploreProps?.["title"]).toBe(
       "Active discussions you are not yet following"
     );
   });

@@ -12,7 +12,6 @@ const vote = {
   wave: {
     id: "vote-wave",
     name: "Community acquisition",
-    pfp: null,
     wave_score: {
       visibility_score: 83,
       quality_score: 78,
