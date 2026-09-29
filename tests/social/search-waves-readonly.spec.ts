@@ -354,13 +354,18 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
     page,
   }) => {
     await gotoReady(page, "/waves");
-    const search = await firstVisible(
-      page.getByRole("searchbox", { name: "Find a wave…" })
-    );
+    const search = page
+      .getByRole("searchbox", { name: "Find a wave…" })
+      .filter({ visible: true });
+    await expect(search).toBeEnabled();
     await search.fill("xx");
+    await expect(search).toHaveValue("xx");
     await expect(
-      page.getByText("Search results · All waves").first()
-    ).toBeVisible();
+      page
+        .getByRole("button", { name: "Clear wave search" })
+        .filter({ visible: true })
+    ).toHaveCount(1);
+    await expect(page.getByText("Search results · All waves")).toHaveCount(0);
     await expect(
       page.getByText("Type at least 3 characters to search all waves.").first()
     ).toBeVisible();
@@ -374,6 +379,7 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
       `No waves found for “${UNMATCHABLE_WAVE_QUERY}”.`,
       { timeout: NAVIGATION_TIMEOUT_MS }
     );
+    await expect(search).toHaveAttribute("aria-busy", "false");
     await (
       await firstVisible(
         page.getByRole("button", { name: "Clear wave search" })
@@ -397,7 +403,7 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
       discovery.getByText("Community decisions powered by TDH.")
     ).toBeVisible();
     await expect(
-      discovery.getByText("Highly rated waves you don’t follow.")
+      discovery.getByText("Highly rated waves.", { exact: true })
     ).toBeVisible();
     const voteList = discovery.getByRole("region", {
       name: "Active voting waves",
@@ -430,6 +436,14 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
     await expect(page).toHaveURL(/\/discover\?view=active-votes$/);
     await expect(
       page.getByRole("heading", { level: 1, name: /^Active Votes/ })
+    ).toBeVisible();
+    await page.getByRole("tab", { name: "Worth a Look" }).click();
+    await expect(
+      page.getByRole("heading", {
+        level: 1,
+        name: "Active discussions",
+        exact: true,
+      })
     ).toBeVisible();
     await expectNoHorizontalOverflow(page);
   });

@@ -58,6 +58,7 @@ when the desktop feed is active or the heading is hovered or keyboard-focused.
 - Each expanded section starts with its own short explanation, available to
   signed-in and signed-out visitors. Active Votes says “Community decisions
   powered by TDH.” Worth a Look says “Highly rated waves you don’t follow.”
+  Signed-out visitors see “Highly rated waves.”
 - Empty Active Votes shows `No active TDH votes right now.` in a compact area.
   Loading and request failures are separate states; failed pages can be retried
   without discarding previously loaded votes. Both view-all links remain available.
@@ -72,8 +73,9 @@ when the desktop feed is active or the heading is hovered or keyboard-focused.
 - `Find a wave…` searches all accessible non-DM waves, independently of the
   selected collection. Type at least three characters. Results show name,
   creator, and joined/pinned status, with `Load more` for additional matches.
-- Search replaces the lower list, labels its scope `Search results · All waves`,
-  and keeps the query while opening a result. Clearing restores the collection
+- Search replaces the lower list and keeps the query while opening a result.
+  A small spinner replaces the search icon while results are loading; one clear
+  button resets the query. Clearing restores the collection
   and its scroll position. Queries are kept separately for each viewer.
 - This uses the existing name matching. Typo tolerance and relevance changes
   are outside this redesign. Unread state, pin controls and subwaves remain on

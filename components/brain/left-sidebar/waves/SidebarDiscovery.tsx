@@ -6,6 +6,7 @@ import { ChevronRightIcon } from "@heroicons/react/24/outline";
 import { useWaveSidebarPreference } from "@/hooks/useWaveSidebarPreference";
 import { useActiveWaveVotes } from "@/hooks/useActiveWaveVotes";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useWaveDiscoveryViewer } from "@/hooks/useWaveDiscoveryViewer";
 import { formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 import { SidebarActiveVotes } from "./SidebarActiveVotes";
@@ -88,6 +89,7 @@ export function SidebarDiscovery({
 }) {
   const locale = useBrowserLocale();
   const votes = useActiveWaveVotes();
+  const { canUseCollections } = useWaveDiscoveryViewer();
   const [activePreference, setActivePreference] = useWaveSidebarPreference(
     "wave-discovery-active-collapsed",
     "local"
@@ -100,9 +102,8 @@ export function SidebarDiscovery({
   const activeCollapsed = activePreference === "true";
   const recommendationsCollapsed = recommendationsPreference === "true";
   return (
-    <div
+    <section
       className="tailwind-scope"
-      role="region"
       aria-label={t(locale, "waves.discovery.label")}
     >
       <DiscoverySection
@@ -130,7 +131,12 @@ export function SidebarDiscovery({
         }
       >
         <p className="tw-m-0 tw-mb-2 tw-text-xs tw-leading-4 tw-text-iron-400">
-          {t(locale, "waves.discovery.recommendationsDescription")}
+          {t(
+            locale,
+            canUseCollections
+              ? "waves.discovery.recommendationsDescription"
+              : "waves.discovery.publicRecommendationsDescription"
+          )}
         </p>
         {previewItems.length > 0 ? (
           <HighlyRatedWavesToggle
@@ -150,6 +156,6 @@ export function SidebarDiscovery({
           {t(locale, "waves.discovery.viewRecommendations")}
         </Link>
       </DiscoverySection>
-    </div>
+    </section>
   );
 }

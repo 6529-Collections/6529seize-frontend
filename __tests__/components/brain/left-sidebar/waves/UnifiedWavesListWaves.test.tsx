@@ -839,12 +839,10 @@ it("shows the worth checking out description when no profile is connected", () =
   );
 
   expect(screen.getByText("Worth a Look")).toBeInTheDocument();
-  expect(
-    screen.getByText("Highly rated waves you don’t follow.")
-  ).toBeVisible();
+  expect(screen.getByText("Highly rated waves.")).toBeVisible();
   expect(
     screen.queryByRole("button", {
-      name: "Highly rated waves you don’t follow.",
+      name: "Highly rated waves.",
     })
   ).not.toBeInTheDocument();
 });

@@ -1,6 +1,7 @@
 "use client";
 import { ActiveWaveVotes } from "./ActiveWaveVotes";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useWaveDiscoveryViewer } from "@/hooks/useWaveDiscoveryViewer";
 import { t } from "@/i18n/messages";
 
 import { WAVE_SCORE_DISCOVERY_PARAMS } from "@/components/react-query-wrapper/utils/query-utils";
@@ -303,6 +304,8 @@ function DiscoverWaveControls({
 }
 
 function RecommendationsExplorer() {
+  const locale = useBrowserLocale();
+  const { canUseCollections } = useWaveDiscoveryViewer();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -329,10 +332,10 @@ function RecommendationsExplorer() {
   const activeFilterScores: DiscoverFilterScores = activeSortIsScoreSort
     ? filterScores
     : {};
-  const title =
-    activeSort === "NEWEST"
-      ? "Newest waves"
-      : "Active discussions you are not yet following";
+  let title = t(locale, "waves.discovery.activeDiscussions");
+  if (canUseCollections)
+    title = t(locale, "waves.discovery.unfollowedDiscussions");
+  if (activeSort === "NEWEST") title = t(locale, "waves.discovery.newestWaves");
 
   const updateParams = useCallback(
     (updates: {
@@ -417,7 +420,7 @@ export function DiscoverWaveExplorer() {
       <div
         role="tablist"
         aria-label={t(locale, "waves.discovery.label")}
-        className="tw-m-0 tw-flex tw-min-w-0 tw-gap-2 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-px-4 tw-pb-0 tw-pt-4 md:tw-px-6 lg:tw-px-8"
+        className="tw-m-0 tw-flex tw-min-w-0 tw-gap-6 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-px-4 tw-pb-0 tw-pt-2 md:tw-px-6 lg:tw-px-8"
       >
         {views.map((view, index) => (
           <button
@@ -443,7 +446,7 @@ export function DiscoverWaveExplorer() {
               selectView(views[next]!);
               tabsRef.current[next]?.focus();
             }}
-            className={`tw-min-h-11 tw-rounded-md tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-border-solid tw-bg-transparent tw-px-3 tw-py-2 tw-text-sm tw-font-medium focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 ${active === (view === ACTIVE_VOTES_VIEW) ? "tw-border-primary-400 tw-text-white" : "tw-border-transparent tw-text-iron-400"}`}
+            className={`-tw-mb-px tw-min-h-11 tw-whitespace-nowrap tw-rounded-none tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-border-solid tw-bg-transparent tw-px-0 tw-py-2 tw-text-sm focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 ${active === (view === ACTIVE_VOTES_VIEW) ? "tw-border-primary-400 tw-font-semibold tw-text-white" : "tw-border-transparent tw-font-medium tw-text-iron-400"}`}
           >
             {t(
               locale,

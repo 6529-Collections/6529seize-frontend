@@ -17,7 +17,7 @@ export function SidebarActiveVotes({
 }) {
   const locale = useBrowserLocale();
   const { activeWave } = useMyStream();
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
   const items = votes.data?.pages.flatMap((page) => page.data) ?? [];
@@ -62,9 +62,8 @@ export function SidebarActiveVotes({
   );
   return (
     <div className="tw-relative">
-      <div
+      <section
         ref={scrollRef}
-        role="region"
         aria-label={t(locale, "waves.discovery.voteList")}
         tabIndex={items.length > 2 && !collapsed ? 0 : -1}
         className="tw-max-h-32 tw-overflow-y-auto tw-overscroll-y-contain tw-rounded-lg [scrollbar-color:theme(colors.iron.700)_transparent] [scrollbar-width:thin] focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
@@ -102,11 +101,13 @@ export function SidebarActiveVotes({
               <span>{t(locale, "waves.discovery.error")}</span>
               <button
                 type="button"
-                onClick={() =>
-                  void (votes.isFetchNextPageError
-                    ? votes.fetchNextPage()
-                    : votes.refetch())
-                }
+                onClick={() => {
+                  if (votes.isFetchNextPageError) {
+                    void votes.fetchNextPage();
+                  } else {
+                    void votes.refetch();
+                  }
+                }}
                 className="tw-inline-flex tw-min-h-8 tw-items-center tw-border-0 tw-bg-transparent tw-p-0 tw-text-xs tw-leading-4 tw-text-primary-300"
               >
                 {t(locale, "waves.discovery.retry")}
@@ -137,7 +138,7 @@ export function SidebarActiveVotes({
             </div>
           )}
         </div>
-      </div>
+      </section>
       {moreBelow && !collapsed && (
         <div
           aria-hidden="true"

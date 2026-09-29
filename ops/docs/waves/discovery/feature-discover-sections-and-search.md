@@ -29,6 +29,9 @@ Open `/discover?view=recommendations&sort=QUALITY` from the sidebar's
 `View all recommendations` link. The existing discovery grid, sort options,
 score filters and pagination remain available. Switching views preserves those
 URL settings. Recommendations focus on waves outside the viewer's followed set.
+Signed-out visitors see the heading `Active discussions`, without following
+language. Signed-in personal views say `Active discussions you are not yet
+following`. The Newest sort uses `Newest waves` for everyone.
 
 Selecting a wave opens its thread. Existing auth and access rules still apply
 when interacting there.

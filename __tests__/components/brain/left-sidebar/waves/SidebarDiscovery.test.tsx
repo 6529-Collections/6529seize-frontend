@@ -32,6 +32,10 @@ const makeVotes = () => ({
   fetchNextPage: mockNext,
 });
 let mockVotes = makeVotes();
+let mockCanUseCollections = false;
+jest.mock("@/hooks/useWaveDiscoveryViewer", () => ({
+  useWaveDiscoveryViewer: () => ({ canUseCollections: mockCanUseCollections }),
+}));
 let observerCallback: IntersectionObserverCallback;
 const mockObserve = jest.fn();
 const mockDisconnect = jest.fn();
@@ -59,6 +63,7 @@ beforeEach(() => {
   localStorage.clear();
   jest.clearAllMocks();
   mockVotes = makeVotes();
+  mockCanUseCollections = false;
   window.IntersectionObserver = jest.fn(
     (callback: IntersectionObserverCallback) => {
       observerCallback = callback;
@@ -86,15 +91,20 @@ it("shows both sections in order with both view-all links", () => {
   ).toBeTruthy();
   expect(active).toHaveTextContent("23");
   expect(screen.getByText("Rare Pepe acquisition")).toBeVisible();
-  expect(
-    screen.getByText("Highly rated waves you don’t follow.")
-  ).toBeVisible();
+  expect(screen.getByText("Highly rated waves.")).toBeVisible();
   expect(
     screen.getByRole("link", { name: "View all active votes" })
   ).toHaveAttribute("href", "/discover?view=active-votes");
   expect(
     screen.getByRole("link", { name: "View all recommendations" })
   ).toHaveAttribute("href", "/discover?view=recommendations&sort=QUALITY");
+});
+it("uses personalized recommendations copy only for an authenticated viewer", () => {
+  mockCanUseCollections = true;
+  renderDiscovery();
+  expect(
+    screen.getByText("Highly rated waves you don’t follow.")
+  ).toBeVisible();
 });
 it("collapses each section independently and makes its contents inert", () => {
   renderDiscovery();
