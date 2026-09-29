@@ -212,9 +212,7 @@ it("renders announcement, highly rated preview, pinned, and one filterable botto
     "Discover Waves"
   );
   expect(discoverWavesLink.querySelector("svg")).toBeInTheDocument();
-  expect(
-    screen.queryByRole("link", { name: "Waves", exact: true })
-  ).not.toBeInTheDocument();
+  expect(screen.queryByRole("link", { name: "Waves" })).not.toBeInTheDocument();
   expect(
     feedLink.compareDocumentPosition(discoverWavesLink) &
       Node.DOCUMENT_POSITION_FOLLOWING

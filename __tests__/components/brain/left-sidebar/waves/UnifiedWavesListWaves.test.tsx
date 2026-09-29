@@ -181,9 +181,7 @@ it("renders structure even when no waves", () => {
     />
   );
   expect(container.firstChild).not.toBeNull();
-  expect(
-    screen.getByRole("heading", { name: "Waves", exact: true })
-  ).toBeInTheDocument();
+  expect(screen.getByRole("heading", { name: "Waves" })).toBeInTheDocument();
   expect(
     screen.getByRole("link", { name: "Profile Waves Feed" })
   ).toHaveAttribute("href", "/waves?view=profile-feed");
@@ -353,9 +351,7 @@ it("renders announcement, highly rated preview, pinned, and one filterable botto
       ref={ref}
     />
   );
-  expect(
-    screen.getByRole("heading", { name: "Waves", exact: true })
-  ).toBeInTheDocument();
+  expect(screen.getByRole("heading", { name: "Waves" })).toBeInTheDocument();
   expect(screen.getByLabelText("Announcement waves")).toBeInTheDocument();
   expect(screen.getByText("Worth Checking Out")).toBeInTheDocument();
   expect(
