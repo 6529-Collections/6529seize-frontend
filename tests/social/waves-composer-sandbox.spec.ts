@@ -187,7 +187,9 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     );
     await gotoSandboxWave(page);
 
-    const longDrop = page.locator('[data-serial-no="2"]');
+    const longDrop = page
+      .getByText("Long timeline detail", { exact: false })
+      .locator('xpath=ancestor::*[@data-serial-no="2"][1]');
     await expect(longDrop).toBeVisible({
       timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
     });
@@ -199,6 +201,7 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     expect(controlledContentId).toBeTruthy();
 
     const scrollContainer = page
+      .getByRole("main")
       .locator("[data-wave-drops-scroll-container]")
       .first();
     await expect
