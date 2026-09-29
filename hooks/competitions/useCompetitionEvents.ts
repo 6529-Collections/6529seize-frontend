@@ -3,7 +3,7 @@ import { useEffect, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useWebSocket } from "@/services/websocket/useWebSocket";
 import { WsMessageType } from "@/helpers/Types";
-import { invalidateCompetition } from "@/services/api/competitions-api";
+import { invalidateCompetitionWave } from "@/services/api/competitions-api";
 
 function parseCompetitionEvent(
   value: unknown
@@ -28,20 +28,28 @@ export function useCompetitionEvents(waveId: string) {
   const { subscribe } = useWebSocket();
   const client = useQueryClient();
   const seen = useRef(new Set<string>());
-  useEffect(
-    () =>
-      subscribe(WsMessageType.COMPETITION_UPDATE, (data: unknown) => {
+  useEffect(() => {
+    let refresh: ReturnType<typeof setTimeout> | undefined;
+    const unsubscribe = subscribe(
+      WsMessageType.COMPETITION_UPDATE,
+      (data: unknown) => {
         const event = parseCompetitionEvent(data);
         if (event?.wave_id !== waveId || seen.current.has(event.event_id))
           return;
         seen.current.add(event.event_id);
         if (seen.current.size > 500)
           seen.current.delete(seen.current.values().next().value!);
-        void invalidateCompetition(client, {
-          waveId,
-          competitionId: event.competition_id,
-        });
-      }),
-    [client, subscribe, waveId]
-  );
+        // The decision loop sends a burst for every competition in the wave.
+        // Refresh each active query once per batch, not once per event.
+        refresh ??= setTimeout(() => {
+          refresh = undefined;
+          void invalidateCompetitionWave(client, waveId);
+        }, 1_000);
+      }
+    );
+    return () => {
+      unsubscribe();
+      if (refresh !== undefined) clearTimeout(refresh);
+    };
+  }, [client, subscribe, waveId]);
 }

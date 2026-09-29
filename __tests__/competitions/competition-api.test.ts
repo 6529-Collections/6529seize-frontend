@@ -8,6 +8,7 @@ import {
   fetchCompetitionPauseState,
   fetchCompetitions,
   invalidateCompetition,
+  invalidateCompetitionWave,
   setCompetitionVote,
 } from "@/services/api/competitions-api";
 import { commonApiFetch, commonApiPut } from "@/services/api/common-api";
@@ -78,6 +79,31 @@ describe("explicit competition transport", () => {
       expect.objectContaining({
         params: { limit: "100", direction: "DESC", cursor: "older" },
       })
+    );
+  });
+  it("refreshes a wave batch once per active query and leaves other waves fresh", async () => {
+    const client = new QueryClient();
+    const keys = [
+      competitionQueryKey(identity, "alice"),
+      competitionQueryKey(other, "bob"),
+      [
+        QueryKey.COMPETITION_RESOURCE,
+        { ...competitionScope(identity), viewer: "alice" },
+        "entries",
+      ],
+      [QueryKey.COMPETITION_CREDITS, competitionScope(other)],
+      [QueryKey.COMPETITION_HUB, { wave_id: "wave" }],
+      [QueryKey.COMPETITIONS, { wave_id: "wave", filter: "active" }],
+      competitionQueryKey(
+        { waveId: "elsewhere", competitionId: "one" },
+        "alice"
+      ),
+      [QueryKey.DROPS, { waveId: "wave" }],
+    ];
+    keys.forEach((key) => client.setQueryData(key, { value: true }));
+    await invalidateCompetitionWave(client, "wave");
+    expect(keys.map((key) => client.getQueryState(key)?.isInvalidated)).toEqual(
+      [true, true, true, true, true, true, false, false]
     );
   });
   it("does not report unpaused when pause history cannot be resolved", async () => {

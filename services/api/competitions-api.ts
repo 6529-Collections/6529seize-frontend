@@ -290,29 +290,45 @@ export async function invalidateCompetition(
   client: QueryClient,
   identity: CompetitionIdentity
 ) {
+  await invalidateCompetitionScope(
+    client,
+    identity.waveId,
+    competitionScope(identity)
+  );
+}
+
+export async function invalidateCompetitionWave(
+  client: QueryClient,
+  waveId: string
+) {
+  await invalidateCompetitionScope(client, waveId, { wave_id: waveId });
+}
+
+async function invalidateCompetitionScope(
+  client: QueryClient,
+  waveId: string,
+  scope: { wave_id: string; competition_id?: string }
+) {
   await Promise.all([
     client.invalidateQueries({
-      queryKey: [
-        QueryKey.COMPETITION_DROP_CONTEXT,
-        { wave_id: identity.waveId },
-      ],
+      queryKey: [QueryKey.COMPETITION_DROP_CONTEXT, { wave_id: waveId }],
     }),
     client.invalidateQueries({
-      queryKey: [QueryKey.COMPETITION, competitionScope(identity)],
+      queryKey: [QueryKey.COMPETITION, scope],
     }),
     client.invalidateQueries({
-      queryKey: [QueryKey.COMPETITION_RESOURCE, competitionScope(identity)],
+      queryKey: [QueryKey.COMPETITION_RESOURCE, scope],
     }),
     client.invalidateQueries({
-      queryKey: [QueryKey.COMPETITION_CREDITS, competitionScope(identity)],
+      queryKey: [QueryKey.COMPETITION_CREDITS, scope],
     }),
     client.invalidateQueries({ queryKey: [QueryKey.DROP_VOTERS] }),
     client.invalidateQueries({ queryKey: [QueryKey.DROP_VOTE_LOGS] }),
     client.invalidateQueries({
-      queryKey: [QueryKey.COMPETITIONS, { wave_id: identity.waveId }],
+      queryKey: [QueryKey.COMPETITIONS, { wave_id: waveId }],
     }),
     client.invalidateQueries({
-      queryKey: [QueryKey.COMPETITION_HUB, { wave_id: identity.waveId }],
+      queryKey: [QueryKey.COMPETITION_HUB, { wave_id: waveId }],
     }),
   ]);
 }
