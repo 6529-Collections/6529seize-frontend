@@ -111,6 +111,13 @@ If the connected profile has a primary wallet, the form pre-fills:
 - `Preview Image`, `Promo Video`, `Additional Media`, `About the Artist`, and
   `Artwork Commentary` each render only when data exists.
 - `Additional Media` shows at most `4` items.
+- Click or tap `Preview Image` or an image in `Additional Media` to open the
+  [image viewer](../drop-actions/feature-image-viewer-and-scaling.md), with zoom,
+  download, open-original, and fullscreen controls where supported. Desktop
+  hover and keyboard focus also reveal quick actions on the image.
+- `Promo Video` and supporting videos keep inline playback and fullscreen
+  controls, with download and open-original actions. Formats that cannot open
+  directly in the browser, such as MOV, offer download instead.
 
 ## Failure and Recovery
 

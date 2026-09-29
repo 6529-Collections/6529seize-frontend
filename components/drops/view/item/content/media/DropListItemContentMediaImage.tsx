@@ -54,6 +54,7 @@ function LoadingPlaceholder({
 
 function DropImageContent({
   src,
+  alt,
   imageScale,
   retryTick,
   imgRef,
@@ -66,6 +67,7 @@ function DropImageContent({
   handleError,
 }: {
   readonly src: string;
+  readonly alt: string;
   readonly imageScale: ImageScale;
   readonly retryTick: number;
   readonly imgRef: React.RefObject<HTMLImageElement | null>;
@@ -111,7 +113,7 @@ function DropImageContent({
         ref={imgRef}
         originalSrc={src}
         imageScale={imageScale}
-        alt={t(DEFAULT_LOCALE, "drop.media.alt")}
+        alt={alt}
         fill
         loading={loadStrategy === "eager" ? "eager" : undefined}
         sizes="(max-width: 768px) 100vw, 768px"
@@ -127,7 +129,7 @@ function DropImageContent({
       ref={imgRef}
       originalSrc={src}
       imageScale={imageScale}
-      alt={t(DEFAULT_LOCALE, "drop.media.alt")}
+      alt={alt}
       fill
       loading={loadStrategy === "eager" ? "eager" : undefined}
       sizes="(max-width: 768px) 100vw, 768px"
@@ -171,6 +173,8 @@ function ImageInteractionLayer({
 
 type DropListItemContentMediaImageProps = {
   readonly src: string;
+  readonly alt?: string | undefined;
+  readonly openPreviewLabel?: string | undefined;
   readonly maxRetries?: number | undefined;
   readonly isCompetitionDrop?: boolean | undefined;
   readonly disableModal?: boolean | undefined;
@@ -198,6 +202,8 @@ function DropListItemContentMediaImage({
 
 function DropListItemContentMediaImageContent({
   src,
+  alt = t(DEFAULT_LOCALE, "drop.media.alt"),
+  openPreviewLabel = t(DEFAULT_LOCALE, "drop.media.openPreview"),
   maxRetries = 0,
   isCompetitionDrop = false,
   disableModal = false,
@@ -330,6 +336,7 @@ function DropListItemContentMediaImageContent({
           {shouldLoadImage && (
             <DropImageContent
               src={src}
+              alt={alt}
               imageScale={imageScale}
               retryTick={retryTick}
               imgRef={imgRef}
@@ -360,7 +367,7 @@ function DropListItemContentMediaImageContent({
           {!disableModal && (
             <ImageInteractionLayer
               boundsStyle={imageActionBoundsStyle}
-              label={t(DEFAULT_LOCALE, "drop.media.openPreview")}
+              label={openPreviewLabel}
               onClick={handleImageClick}
               actions={
                 loaded || unavailable ? (
