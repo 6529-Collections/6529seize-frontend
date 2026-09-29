@@ -209,9 +209,7 @@ it("renders announcement, highly rated preview, pinned, and one filterable botto
   expect(discoverWavesLink).toHaveAttribute("href", "/discover");
   expect(discoverWavesLink).toHaveClass("tw-text-[13px]", "tw-font-medium");
   expect(discoverWavesLink.querySelector("svg")).toBeNull();
-  expect(
-    screen.getByRole("button", { name: "Joined", exact: true })
-  ).toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "Joined" })).toBeInTheDocument();
   expect(screen.getByLabelText("Announcement waves")).toBeInTheDocument();
   expect(screen.getByText("Worth a Look")).toBeInTheDocument();
   expect(
@@ -227,9 +225,7 @@ it("renders announcement, highly rated preview, pinned, and one filterable botto
   ).toBeInTheDocument();
   expect(screen.getByTestId("preview-avatar-h1")).toBeInTheDocument();
   expect(screen.queryByLabelText("Worth checking out waves")).toBeNull();
-  expect(
-    screen.getByRole("button", { name: "Pinned", exact: true })
-  ).toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "Pinned" })).toBeInTheDocument();
   expect(screen.queryByLabelText("Pinned waves")).toBeNull();
   expect(screen.getByLabelText("All recent waves list")).toBeInTheDocument();
   expect(screen.queryByLabelText("Following waves")).toBeNull();
@@ -486,9 +482,7 @@ it("does not give special placement to official waves", () => {
     ],
   });
 
-  expect(
-    screen.getByRole("button", { name: "Pinned", exact: true })
-  ).toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "Pinned" })).toBeInTheDocument();
   expect(screen.queryByLabelText("Pinned waves")).toBeNull();
   expect(screen.getByTestId("wave-o1")).toHaveAttribute("data-pin", "true");
 });

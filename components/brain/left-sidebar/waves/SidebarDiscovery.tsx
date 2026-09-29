@@ -139,7 +139,7 @@ export function SidebarDiscovery({
               id={`${panelId}-active-votes`}
               role="tabpanel"
               aria-labelledby={`${panelId}-active-votes-tab`}
-              tabIndex={0}
+              tabIndex={!collapsed && selected === ACTIVE_VOTES_TAB ? 0 : -1}
               aria-hidden={selected !== ACTIVE_VOTES_TAB}
               inert={selected !== ACTIVE_VOTES_TAB}
               className={`tw-col-start-1 tw-row-start-1 tw-flex tw-min-w-0 tw-flex-col tw-transition-[opacity,transform,visibility] tw-duration-150 tw-ease-out motion-reduce:tw-transform-none motion-reduce:tw-transition-none ${selected === ACTIVE_VOTES_TAB ? "tw-visible tw-translate-y-0 tw-opacity-100" : "tw-invisible tw-translate-y-1 tw-opacity-0"}`}
@@ -216,7 +216,7 @@ export function SidebarDiscovery({
               id={`${panelId}-recommendations`}
               role="tabpanel"
               aria-labelledby={`${panelId}-recommendations-tab`}
-              tabIndex={0}
+              tabIndex={!collapsed && selected === "recommendations" ? 0 : -1}
               aria-hidden={selected !== "recommendations"}
               inert={selected !== "recommendations"}
               className={`tw-col-start-1 tw-row-start-1 tw-flex tw-min-w-0 tw-flex-col tw-transition-[opacity,transform,visibility] tw-duration-150 tw-ease-out motion-reduce:tw-transform-none motion-reduce:tw-transition-none ${selected === "recommendations" ? "tw-visible tw-translate-y-0 tw-opacity-100" : "tw-invisible tw-translate-y-1 tw-opacity-0"}`}

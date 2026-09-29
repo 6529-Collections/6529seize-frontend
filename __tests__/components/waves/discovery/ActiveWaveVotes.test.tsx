@@ -1,19 +1,70 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { ActiveWaveVotes } from "@/components/waves/discovery/ActiveWaveVotes";
+import type { InfiniteData } from "@tanstack/react-query";
+import type { ApiActiveWaveVotesPage } from "@/generated/models/ApiActiveWaveVotesPage";
 import { useActiveWaveVotes } from "@/hooks/useActiveWaveVotes";
 jest.mock("@/hooks/useActiveWaveVotes");
 const mockVotes = jest.mocked(useActiveWaveVotes);
 const refetch = jest.fn();
-function state(overrides: object = {}) {
-  return {
-    isPending: false,
-    isError: false,
-    hasNextPage: false,
+function state({
+  isError = false,
+  hasNextPage = false,
+  isFetchingNextPage = false,
+} = {}): ReturnType<typeof useActiveWaveVotes> {
+  const data: InfiniteData<ApiActiveWaveVotesPage> = {
+    pages: [{ count: 0, data: [], page: 1, next: false }],
+    pageParams: [1],
+  };
+  const shared = {
+    data,
+    dataUpdatedAt: 0,
+    errorUpdatedAt: 0,
+    failureCount: 0,
+    failureReason: null,
+    errorUpdateCount: 0,
+    isFetched: true,
+    isFetchedAfterMount: true,
+    isFetching: isFetchingNextPage,
+    isLoading: false as const,
+    isPending: false as const,
+    isLoadingError: false as const,
+    isInitialLoading: false,
+    isPaused: false,
+    isPlaceholderData: false as const,
+    isRefetching: false,
+    isStale: false,
+    isEnabled: true,
     refetch,
-    data: { pages: [{ count: 0, data: [] }] },
-    ...overrides,
-  } as ReturnType<typeof useActiveWaveVotes>;
+    fetchStatus: "idle" as const,
+    promise: Promise.resolve(data),
+    fetchNextPage: jest.fn(),
+    fetchPreviousPage: jest.fn(),
+    hasNextPage,
+    hasPreviousPage: false,
+    isFetchNextPageError: false as const,
+    isFetchingNextPage,
+    isFetchPreviousPageError: false as const,
+    isFetchingPreviousPage: false,
+  };
+  return isError
+    ? {
+        ...shared,
+        status: "error",
+        error: new Error("Unavailable"),
+        isError: true,
+        isRefetchError: true,
+        isSuccess: false,
+      }
+    : {
+        ...shared,
+        status: "success",
+        error: null,
+        isError: false,
+        isRefetchError: false,
+        isSuccess: true,
+      };
 }
+
 it("shows an error and retry without presenting cached zero as empty", () => {
   mockVotes.mockReturnValue(state({ isError: true }));
   render(<ActiveWaveVotes />);

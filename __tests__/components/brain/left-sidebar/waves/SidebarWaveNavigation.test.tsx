@@ -5,7 +5,7 @@ import {
 } from "@/components/brain/left-sidebar/waves/SidebarWaveNavigation";
 import type { SidebarWaveNavigation } from "@/hooks/useSidebarWaveNavigation";
 import { mapApiWaveOverviewToSidebarWave } from "@/services/api/waves-v2-api";
-import type { ApiWaveOverview } from "@/generated/models/ApiWaveOverview";
+import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
 
 const mockSet = jest.fn();
 jest.mock("@/contexts/wave/MyStreamContext", () => ({
@@ -25,17 +25,48 @@ const wave = mapApiWaveOverviewToSidebarWave({
   id: "rare",
   name: "Rare Pepe acquisition",
   created_at: 123,
-  creator: { handle: "DarrenSRS" },
+  creator: {
+    id: "darren",
+    handle: "DarrenSRS",
+    pfp: null,
+    banner1_color: null,
+    banner2_color: null,
+    cic: 0,
+    rep: 0,
+    tdh: 0,
+    tdh_rate: 0,
+    xtdh: 0,
+    xtdh_rate: 0,
+    level: 0,
+    classification: ApiProfileClassification.Pseudonym,
+    sub_classification: null,
+    primary_address: "0x0000000000000000000000000000000000000000",
+    subscribed_actions: [],
+    archived: false,
+    active_main_stage_submission_ids: [],
+    winner_main_stage_drop_ids: [],
+    artist_of_prevote_cards: [],
+    profile_wave_id: null,
+    is_wave_creator: true,
+  },
   pfp: "https://example.com/pepe.png",
+  subscribers_count: 1,
+  links_disabled: false,
   has_competition: true,
   is_dm_wave: false,
   has_subwaves: false,
-  description_drop: { contents: null, media: [] },
+  description_drop: { media: [] },
   total_drops_count: 4,
   is_private: false,
   last_drop_time: 456,
-  context_profile_context: { pinned: true, subscribed: true, muted: false },
-} as ApiWaveOverview);
+  context_profile_context: {
+    pinned: true,
+    subscribed: true,
+    muted: false,
+    can_chat: true,
+    unread_drops: 0,
+  },
+});
 function navigation(
   overrides: Partial<SidebarWaveNavigation> = {}
 ): SidebarWaveNavigation {
@@ -85,7 +116,25 @@ it("keeps one live status node through debounce, results, empty and failure", ()
   expect(status).toHaveTextContent(/No waves/);
   rerender(
     <SidebarWaveSearchResults
-      navigation={{ ...state, results: { ...state.results, isError: true } }}
+      navigation={{
+        ...state,
+        results: {
+          ...state.results,
+          data: {
+            pages: [{ waves: [wave], page: 1, next: false }],
+            pageParams: [1],
+          },
+          error: new Error("Search unavailable"),
+          status: "error",
+          isError: true,
+          isPending: false,
+          isLoading: false,
+          isLoadingError: false,
+          isRefetchError: true,
+          isSuccess: false,
+          isPlaceholderData: false,
+        },
+      }}
     />
   );
   expect(screen.getByRole("status")).toBe(status);

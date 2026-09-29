@@ -43,7 +43,7 @@ function setup() {
   );
   return {
     ...renderHook(
-      ({ list } = { list: waves }) =>
+      ({ list }: { list: typeof waves } = { list: waves }) =>
         useSidebarWaveNavigation({ waves: list, scrollContainerRef }),
       { wrapper, initialProps: { list: waves } }
     ),
@@ -267,3 +267,34 @@ it("retains search scroll through pagination and refetch, then remembers the cla
   await waitFor(() => expect(result.current.queryEnabled).toBe(true));
   expect(container.scrollTop).toBe(150);
 });
+
+it.each(["wheel", "touchstart", "pointerdown", "keydown"])(
+  "preserves the exact clamped maximum after %s interaction",
+  (eventType) => {
+    const { result, container, rerender } = setup();
+    act(() => {
+      container.scrollTop = 1000;
+      container.dispatchEvent(new Event("scroll"));
+    });
+    act(() => result.current.setCollection("pinned"));
+    Object.defineProperty(container, "scrollHeight", {
+      value: 600,
+      configurable: true,
+    });
+    act(() => result.current.setCollection("all"));
+    act(() => {
+      container.scrollTop = 100;
+      container.dispatchEvent(new Event("scroll"));
+      container.dispatchEvent(new Event(eventType));
+    });
+    Object.defineProperty(container, "scrollHeight", {
+      value: 2000,
+      configurable: true,
+    });
+    rerender({ list: [...waves, createMockMinimalWave({ id: "loaded" })] });
+    expect(container.scrollTop).toBe(100);
+    act(() => result.current.setCollection("pinned"));
+    act(() => result.current.setCollection("all"));
+    expect(container.scrollTop).toBe(100);
+  }
+);

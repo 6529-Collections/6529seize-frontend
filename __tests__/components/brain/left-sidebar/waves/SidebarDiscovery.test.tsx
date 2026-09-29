@@ -1,4 +1,3 @@
-import React from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { SidebarDiscovery } from "@/components/brain/left-sidebar/waves/SidebarDiscovery";
 const mockSetActive = jest.fn();
@@ -185,6 +184,8 @@ it("keeps inactive panels mounted for layout but removes their controls from acc
     active.getAttribute("aria-controls")!
   );
   expect(inactive).toHaveAttribute("inert");
+  expect(inactive).toHaveAttribute("tabindex", "-1");
+  expect(screen.getByRole("tabpanel")).toHaveAttribute("tabindex", "0");
   expect(inactive).toHaveTextContent("Rare Pepe acquisition");
   fireEvent.keyDown(recommendations, { key: "Home" });
   expect(active).toHaveFocus();
@@ -195,4 +196,23 @@ it("keeps inactive panels mounted for layout but removes their controls from acc
     screen.getByRole("button", { name: "Collapse wave discovery" })
   );
   expect(screen.queryByRole("tabpanel")).toBeNull();
+});
+
+it("wraps tab keyboard navigation in both directions and supports End", () => {
+  renderDiscovery();
+  const active = screen.getByRole("tab", { name: "Active Votes 3" });
+  const recommendations = screen.getByRole("tab", { name: "Worth a Look" });
+  expect(active).toHaveAttribute("tabindex", "0");
+  expect(recommendations).toHaveAttribute("tabindex", "-1");
+  fireEvent.keyDown(active, { key: "ArrowLeft" });
+  expect(recommendations).toHaveFocus();
+  fireEvent.keyDown(recommendations, { key: "ArrowRight" });
+  expect(active).toHaveFocus();
+  fireEvent.keyDown(active, { key: "End" });
+  expect(recommendations).toHaveFocus();
+  const panel = screen.getByRole("tabpanel");
+  fireEvent.click(
+    screen.getByRole("button", { name: "Collapse wave discovery" })
+  );
+  expect(panel).toHaveAttribute("tabindex", "-1");
 });

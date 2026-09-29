@@ -186,9 +186,7 @@ it("renders structure even when no waves", () => {
     "data-padding",
     "tw-px-4"
   );
-  expect(
-    screen.getByRole("button", { name: "Joined", exact: true })
-  ).toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "Joined" })).toBeInTheDocument();
 });
 
 it("calculates how many highly rated preview avatars fit", () => {
@@ -370,15 +368,11 @@ it("renders announcement, highly rated preview, pinned, and one filterable botto
   ).toBeInTheDocument();
   expect(screen.getByTestId("preview-avatar-h1")).toBeInTheDocument();
   expect(screen.queryByLabelText("Worth checking out waves")).toBeNull();
-  expect(
-    screen.getByRole("button", { name: "Pinned", exact: true })
-  ).toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "Pinned" })).toBeInTheDocument();
   expect(screen.queryByLabelText("Pinned waves")).toBeNull();
   expect(screen.getByLabelText("All recent waves list")).toBeInTheDocument();
   expect(screen.queryByLabelText("Following waves")).toBeNull();
-  expect(
-    screen.getByRole("button", { name: "Joined", exact: true })
-  ).toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "Joined" })).toBeInTheDocument();
   expect(screen.getByTestId("wave-a1")).toHaveAttribute("data-pin", "false");
   expect(screen.getByTestId("wave-h1")).toHaveAttribute("data-pin", "true");
   expect(screen.getByTestId("wave-p1")).toHaveAttribute("data-pin", "true");
@@ -781,9 +775,7 @@ it("does not give special placement to official waves", () => {
     />
   );
 
-  expect(
-    screen.getByRole("button", { name: "Pinned", exact: true })
-  ).toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "Pinned" })).toBeInTheDocument();
   expect(screen.queryByLabelText("Pinned waves")).toBeNull();
   expect(screen.getByTestId("wave-o1")).toHaveAttribute("data-pin", "true");
 });

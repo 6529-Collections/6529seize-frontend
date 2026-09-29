@@ -124,8 +124,26 @@ export function useSidebarWaveNavigation({
       positions.current.set(scrollKey, container.scrollTop);
       restoredKey.current = scrollKey;
     };
+    // Any direct interaction takes over from a pending restoration, even when
+    // the user is already at the short list's maximum and no scroll event fires.
+    const onInteraction = () => {
+      positions.current.set(scrollKey, container.scrollTop);
+      restoredKey.current = scrollKey;
+    };
+    const interactionEvents = [
+      "wheel",
+      "touchstart",
+      "pointerdown",
+      "keydown",
+    ] as const;
     container.addEventListener("scroll", onScroll, { passive: true });
-    return () => container.removeEventListener("scroll", onScroll);
+    for (const event of interactionEvents)
+      container.addEventListener(event, onInteraction, { passive: true });
+    return () => {
+      container.removeEventListener("scroll", onScroll);
+      for (const event of interactionEvents)
+        container.removeEventListener(event, onInteraction);
+    };
   }, [
     enabled,
     scrollContainerRef,
