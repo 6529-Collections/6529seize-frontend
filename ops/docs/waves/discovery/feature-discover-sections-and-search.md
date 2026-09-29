@@ -2,7 +2,7 @@
 
 ## Overview
 
-`/discover` offers `Active Votes` and `Worth a Look` views. The default
+`/discover` offers `Active Votes` and `Worth Checking Out` views. The default
 view is recommendations. Both are available without connecting a wallet,
 subject to wave visibility rules.
 
@@ -23,7 +23,7 @@ that your profile meets a wave's voting rules.
 Loading, no-active-votes, and request-failure states are explicit. Select
 `Try again` after a request failure. The count and list refresh periodically.
 
-## Worth a Look
+## Worth Checking Out
 
 Open `/discover?view=recommendations&sort=QUALITY` from the sidebar's
 `View all recommendations` link. The existing discovery grid, sort options,

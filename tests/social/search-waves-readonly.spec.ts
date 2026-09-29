@@ -393,7 +393,7 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
       name: /(?:Expand|Collapse) Active Votes/,
     });
     const recommendationsToggle = discovery.getByRole("button", {
-      name: /(?:Expand|Collapse) Worth a Look/,
+      name: /(?:Expand|Collapse) Worth Checking Out/,
     });
     if ((await activeToggle.getAttribute("aria-expanded")) === "false")
       await activeToggle.click();
@@ -437,7 +437,7 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
     await expect(
       page.getByRole("heading", { level: 1, name: /^Active Votes/ })
     ).toBeVisible();
-    await page.getByRole("tab", { name: "Worth a Look" }).click();
+    await page.getByRole("tab", { name: "Worth Checking Out" }).click();
     await expect(
       page.getByRole("heading", {
         level: 1,

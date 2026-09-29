@@ -96,7 +96,7 @@ it("associates discovery view controls with the rendered panel", () => {
   render(<DiscoverWaveExplorer />);
   const votes = screen.getByRole("tab", { name: "Active Votes" });
   const recommendations = screen.getByRole("tab", {
-    name: "Worth a Look",
+    name: "Worth Checking Out",
   });
   expect(screen.getByRole("tabpanel")).toHaveAttribute(
     "id",

@@ -4300,7 +4300,7 @@ export const EN_US_MESSAGES = {
   "collect.activity.viewOrders": "View in Orders",
   "collect.activity.dismiss": "Dismiss transaction progress",
   "waves.discovery.activeVotes": "Active Votes",
-  "waves.discovery.recommendations": "Worth a Look",
+  "waves.discovery.recommendations": "Worth Checking Out",
   "waves.discovery.activeVotesDescription":
     "Community decisions powered by TDH.",
   "waves.discovery.recommendationsDescription":

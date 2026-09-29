@@ -83,7 +83,7 @@ it("shows both sections in order with both view-all links", () => {
   renderDiscovery();
   const active = screen.getByRole("button", { name: "Collapse Active Votes" });
   const recommendations = screen.getByRole("button", {
-    name: "Collapse Worth a Look",
+    name: "Collapse Worth Checking Out",
   });
   expect(
     active.compareDocumentPosition(recommendations) &
@@ -120,7 +120,7 @@ it("collapses each section independently and makes its contents inert", () => {
     screen.getByRole("button", { name: "Expand Active Votes" })
   ).toHaveTextContent("23");
   fireEvent.click(
-    screen.getByRole("button", { name: "Collapse Worth a Look" })
+    screen.getByRole("button", { name: "Collapse Worth Checking Out" })
   );
   fireEvent.click(screen.getByRole("button", { name: "Expand Active Votes" }));
   expect(screen.getByRole("link", { name: /Rare Pepe/ })).toBeVisible();
@@ -140,7 +140,7 @@ it("persists independent collapse preferences across browser sessions", () => {
     screen.getByRole("button", { name: "Expand Active Votes" })
   ).toHaveAttribute("aria-expanded", "false");
   expect(
-    screen.getByRole("button", { name: "Collapse Worth a Look" })
+    screen.getByRole("button", { name: "Collapse Worth Checking Out" })
   ).toHaveAttribute("aria-expanded", "true");
 });
 it("shows compact empty feedback without hiding either section or view-all link", () => {
@@ -152,7 +152,7 @@ it("shows compact empty feedback without hiding either section or view-all link"
     screen.getByRole("link", { name: "View all active votes" })
   ).toBeVisible();
   expect(
-    screen.getByRole("button", { name: "Collapse Worth a Look" })
+    screen.getByRole("button", { name: "Collapse Worth Checking Out" })
   ).toBeVisible();
 });
 it.each(["loading", "error"])(

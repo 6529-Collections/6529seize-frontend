@@ -140,6 +140,7 @@ export function SidebarDiscovery({
         </p>
         {previewItems.length > 0 ? (
           <HighlyRatedWavesToggle
+            compactTouchPadding
             isTouchPreview={isTouchPreview}
             paddingClassName="tw-px-0"
             previewItems={[...previewItems]}

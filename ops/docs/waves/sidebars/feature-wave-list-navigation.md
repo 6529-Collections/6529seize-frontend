@@ -11,10 +11,10 @@ Wave and DM rows in the left list control which thread is open.
 - On expanded rows, pin/unpin sits in the trailing metadata cluster before the
   wave score instead of beside the wave name, keeping the score at the far
   right.
-- In `Worth a Look`, each avatar and its overlaid score shield form one
+- In `Worth Checking Out`, each avatar and its overlaid score shield form one
   wave navigation link. Hovering or focusing the combined link shows score
   details without creating a competing click target.
-- `Worth a Look` is an overlapping discovery view: every recommended
+- `Worth Checking Out` is an overlapping discovery view: every recommended
   wave also appears in the `All` list at its recent-activity position. The
   `Joined` list normally includes only waves the user has joined, so
   discovery-only recommendations stay out of that bottom list.
@@ -43,12 +43,12 @@ Wave and DM rows in the left list control which thread is open.
 
 ## Discovery and wave search
 
-Both discovery panels keep the same height when switching. Content fades gently
-between tabs; expanding and collapsing uses a short reveal and rotating chevron.
+The discovery sections have independent heights. Expanding and collapsing uses
+a short reveal and rotating chevron.
 Reduced-motion preferences disable these transitions. The feed icon is blue
 when the desktop feed is active or the heading is hovered or keyboard-focused.
 
-- `Active Votes` appears first, followed by `Worth a Look`, as independently
+- `Active Votes` appears first, followed by `Worth Checking Out`, as independently
   collapsible sections above the wave collections. Both start expanded.
 - Active Votes has a scrollable window approximately two rows tall, with named
   TDH votes and their voting end or next decision. Scroll to browse the list;
@@ -57,16 +57,20 @@ when the desktop feed is active or the heading is hovered or keyboard-focused.
   visible when collapsed. The description and view-all link stay outside the list.
 - Each expanded section starts with its own short explanation, available to
   signed-in and signed-out visitors. Active Votes says “Community decisions
-  powered by TDH.” Worth a Look says “Highly rated waves you don’t follow.”
+  powered by TDH.” Worth Checking Out says “Highly rated waves you don’t follow.”
   Signed-out visitors see “Highly rated waves.”
 - Empty Active Votes shows `No active TDH votes right now.` in a compact area.
   Loading and request failures are separate states; failed pages can be retried
   without discarding previously loaded votes. Both view-all links remain available.
 - Each heading toggles only its own section. The chevron points down when open
   and right when closed. Both collapse preferences persist locally in this browser
-  across visits. The old shared tab preference is no longer used.
-- Worth a Look shows up to six spaced previews, with fewer on narrow screens,
-  and uses its own compact height independently of the vote list.
+  across visits, including signed-out visits, and are shared across profiles on
+  the same browser/device. The old shared tab preference is no longer used.
+- Announcements keeps its megaphone, timestamp, unread state and score shield in a compact row.
+- Active Votes rows include the wave score shield; select it for score details without opening the wave.
+- Worth Checking Out shows up to six spaced previews, with fewer on narrow screens,
+  with score shields overlapping the bottom-right corner of each avatar.
+  The section keeps its own compact height independently of the vote list.
 - The compact plus button retains its light colour and shows `Create wave` on hover or keyboard focus.
 - `View all active votes` opens `/discover?view=active-votes`.
   `View all recommendations` opens `/discover?view=recommendations&sort=QUALITY`.
@@ -116,7 +120,7 @@ when the desktop feed is active or the heading is hovered or keyboard-focused.
 
 - Wave rows open `/waves/{waveId}`.
 - Direct-message rows open `/messages/{waveId}`.
-- `Worth a Look` avatars and their overlaid score shields open the wave
+- `Worth Checking Out` avatars and their overlaid score shields open the wave
   on the first activation; hovering or focusing either visual shows score
   details.
 - Active-row re-click returns to `/waves` or `/messages`.
@@ -144,7 +148,7 @@ when the desktop feed is active or the heading is hovered or keyboard-focused.
   idle desktop rows do not reserve the hidden pin width.
 - Non-touch devices can prefetch an inactive row on hover.
 - Touch devices do not use hover prefetch.
-- `Worth a Look` keeps the avatar and overlaid score in one keyboard and
+- `Worth Checking Out` keeps the avatar and overlaid score in one keyboard and
   touch target, so the score cannot intercept wave navigation. The link's
   accessible name includes the score; hover or keyboard focus exposes the score
   details card, while touch activation opens the wave.
