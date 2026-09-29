@@ -391,12 +391,10 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
     ).click();
     await expect(votes).toBeVisible();
     await votes.click();
-    const discovery = votes.locator("xpath=ancestor::section[1]");
-    await expect(
-      discovery.getByText(
-        "Ongoing votes that use TDH. Each wave sets its own voting rules."
-      )
-    ).toBeVisible();
+    const discovery = page
+      .getByRole("region", { name: "Wave discovery", exact: true })
+      .filter({ visible: true });
+    await expect(discovery.getByText("Ongoing TDH votes")).toBeVisible();
     const emptyVotes = discovery.getByText("No active TDH votes right now.");
     const allVotes = discovery.getByRole("link", {
       name: "View all active votes",
@@ -404,13 +402,13 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
     await expect(emptyVotes.or(allVotes)).toBeVisible();
     if (await emptyVotes.isVisible()) {
       await discovery
-        .getByRole("button", { name: "Browse Worth Checking Out" })
+        .getByRole("button", { name: "Browse recommendations" })
         .click();
       await expect(
-        discovery.getByText("Highly rated waves you don’t follow yet.")
+        discovery.getByText("Highly rated waves you don’t follow.")
       ).toBeVisible();
       await expect(
-        discovery.getByRole("button", { name: "Worth Checking Out" })
+        discovery.getByRole("button", { name: "Discover" })
       ).toBeFocused();
       await gotoReady(page, "/discover?view=active-votes");
     } else {

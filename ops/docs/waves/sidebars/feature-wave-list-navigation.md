@@ -11,10 +11,10 @@ Wave and DM rows in the left list control which thread is open.
 - On expanded rows, pin/unpin sits in the trailing metadata cluster before the
   wave score instead of beside the wave name, keeping the score at the far
   right.
-- In `Worth Checking Out`, each avatar and its overlaid score shield form one
+- In `Discover`, each avatar and its overlaid score shield form one
   wave navigation link. Hovering or focusing the combined link shows score
   details without creating a competing click target.
-- `Worth Checking Out` is an overlapping discovery view: every recommended
+- `Discover` is an overlapping discovery view: every recommended
   wave also appears in the `All` list at its recent-activity position. The
   `Joined` list normally includes only waves the user has joined, so
   discovery-only recommendations stay out of that bottom list.
@@ -38,17 +38,17 @@ Wave and DM rows in the left list control which thread is open.
 
 ## Discovery and wave search
 
-- `Active Votes` and `Worth Checking Out` share one discovery section above the
+- `Active Votes` and `Discover` share one discovery section above the
   wave collections. Active Votes previews up to two named TDH votes, with their
   voting end or next decision. Its count remains visible when collapsed.
 - Each tab starts with a short inline explanation, available to signed-in and
-  signed-out visitors. `Active Votes` explains that these are ongoing TDH votes
-  and each wave sets its own voting rules. `Worth Checking Out` explains that
+  signed-out visitors. `Active Votes` describes ongoing TDH votes. `Discover` explains that
   these are highly rated waves you do not follow yet.
 - When Active Votes is empty, it shows `No active TDH votes right now.` and
-  `Browse Worth Checking Out`, which switches to recommendations. The zero-count
+  `Browse recommendations`, which switches to recommendations. The zero-count
   tab remains available. Loading and request failures are separate states.
-- The chevron collapses only the discovery content, including its description. Choosing either tab expands
+- The down chevron collapses only the discovery content, including its description;
+  the right chevron expands it. Choosing either tab expands
   it. The visit remembers the tab and collapse state; without a saved choice,
   active votes take priority when any exist, otherwise recommendations appear.
 - `View all active votes` opens `/discover?view=active-votes`.
@@ -96,7 +96,7 @@ Wave and DM rows in the left list control which thread is open.
 
 - Wave rows open `/waves/{waveId}`.
 - Direct-message rows open `/messages/{waveId}`.
-- `Worth Checking Out` avatars and their overlaid score shields open the wave
+- `Discover` avatars and their overlaid score shields open the wave
   on the first activation; hovering or focusing either visual shows score
   details.
 - Active-row re-click returns to `/waves` or `/messages`.
@@ -124,7 +124,7 @@ Wave and DM rows in the left list control which thread is open.
   idle desktop rows do not reserve the hidden pin width.
 - Non-touch devices can prefetch an inactive row on hover.
 - Touch devices do not use hover prefetch.
-- `Worth Checking Out` keeps the avatar and overlaid score in one keyboard and
+- `Discover` keeps the avatar and overlaid score in one keyboard and
   touch target, so the score cannot intercept wave navigation. The link's
   accessible name includes the score; hover or keyboard focus exposes the score
   details card, while touch activation opens the wave.

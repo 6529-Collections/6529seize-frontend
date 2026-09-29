@@ -52,11 +52,7 @@ it("shows active votes by default and retains the count when collapsed or browsi
     screen.getByRole("button", { name: "Active Votes 3" })
   ).toHaveAttribute("aria-pressed", "true");
   expect(screen.getByText("Rare Pepe acquisition")).toBeVisible();
-  expect(
-    screen.getByText(
-      "Ongoing votes that use TDH. Each wave sets its own voting rules."
-    )
-  ).toBeVisible();
+  expect(screen.getByText("Ongoing TDH votes")).toBeVisible();
   expect(
     screen.getByRole("link", { name: "View all active votes" })
   ).toHaveAttribute("href", "/discover?view=active-votes");
@@ -64,13 +60,9 @@ it("shows active votes by default and retains the count when collapsed or browsi
     screen.getByRole("button", { name: "Collapse wave discovery" })
   );
   expect(screen.getByText("Rare Pepe acquisition")).not.toBeVisible();
-  expect(
-    screen.getByText(
-      "Ongoing votes that use TDH. Each wave sets its own voting rules."
-    )
-  ).not.toBeVisible();
+  expect(screen.getByText("Ongoing TDH votes")).not.toBeVisible();
   expect(screen.getByRole("button", { name: "Active Votes 3" })).toBeVisible();
-  fireEvent.click(screen.getByRole("button", { name: "Worth Checking Out" }));
+  fireEvent.click(screen.getByRole("button", { name: "Discover" }));
   expect(
     screen.getByRole("button", { name: "Collapse wave discovery" })
   ).toHaveAttribute("aria-expanded", "true");
@@ -81,38 +73,39 @@ it("shows active votes by default and retains the count when collapsed or browsi
 it("uses recommendations at zero and allows inspecting the empty active tab", () => {
   mockVotes.data.pages[0] = { count: 0, data: [] };
   renderDiscovery();
-  expect(
-    screen.getByRole("button", { name: "Worth Checking Out" })
-  ).toHaveAttribute("aria-pressed", "true");
+  expect(screen.getByRole("button", { name: "Discover" })).toHaveAttribute(
+    "aria-pressed",
+    "true"
+  );
   fireEvent.click(screen.getByRole("button", { name: "Active Votes 0" }));
   expect(screen.getByText("No active TDH votes right now.")).toBeVisible();
   expect(
     screen.queryByRole("link", { name: "View all active votes" })
   ).toBeNull();
   fireEvent.click(
-    screen.getByRole("button", { name: "Browse Worth Checking Out" })
+    screen.getByRole("button", { name: "Browse recommendations" })
   );
+  expect(screen.getByRole("button", { name: "Discover" })).toHaveAttribute(
+    "aria-pressed",
+    "true"
+  );
+  expect(screen.getByRole("button", { name: "Discover" })).toHaveFocus();
   expect(
-    screen.getByRole("button", { name: "Worth Checking Out" })
-  ).toHaveAttribute("aria-pressed", "true");
-  expect(
-    screen.getByRole("button", { name: "Worth Checking Out" })
-  ).toHaveFocus();
-  expect(
-    screen.getByText("Highly rated waves you don’t follow yet.")
+    screen.getByText("Highly rated waves you don’t follow.")
   ).toBeVisible();
 });
 it("remembers the selected tab and collapse state after navigation", () => {
   const first = renderDiscovery();
-  fireEvent.click(screen.getByRole("button", { name: "Worth Checking Out" }));
+  fireEvent.click(screen.getByRole("button", { name: "Discover" }));
   fireEvent.click(
     screen.getByRole("button", { name: "Collapse wave discovery" })
   );
   first.unmount();
   renderDiscovery();
-  expect(
-    screen.getByRole("button", { name: "Worth Checking Out" })
-  ).toHaveAttribute("aria-pressed", "true");
+  expect(screen.getByRole("button", { name: "Discover" })).toHaveAttribute(
+    "aria-pressed",
+    "true"
+  );
   expect(
     screen.getByRole("button", { name: "Expand wave discovery" })
   ).toHaveAttribute("aria-expanded", "false");
@@ -162,7 +155,7 @@ it.each(["loading", "error"])(
     renderDiscovery();
     expect(screen.queryByText("No active TDH votes right now.")).toBeNull();
     expect(
-      screen.queryByRole("button", { name: "Browse Worth Checking Out" })
+      screen.queryByRole("button", { name: "Browse recommendations" })
     ).toBeNull();
     expect(
       screen.getByRole(state === "error" ? "alert" : "status")

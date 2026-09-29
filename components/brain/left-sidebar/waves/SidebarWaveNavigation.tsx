@@ -26,11 +26,11 @@ export function SidebarWaveNavigationControls({
   const locale = useBrowserLocale();
   const inputId = useId();
   return (
-    <div className="tw-sticky tw-top-0 tw-z-10 tw-bg-black tw-px-4 tw-py-2">
+    <div className="tailwind-scope tw-sticky tw-top-0 tw-z-10 tw-bg-black tw-px-4 tw-py-2">
       <label htmlFor={inputId} className="tw-sr-only">
         {t(locale, "waves.sidebar.findWave")}
       </label>
-      <div className="tw-flex tw-min-h-11 tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-3 focus-within:tw-border-primary-400">
+      <div className="tw-flex tw-min-h-9 tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-2.5 focus-within:tw-border-primary-400">
         <MagnifyingGlassIcon
           className="tw-size-4 tw-shrink-0 tw-text-iron-400"
           aria-hidden="true"
@@ -42,7 +42,7 @@ export function SidebarWaveNavigationControls({
           onChange={(event) => navigation.setQueryText(event.target.value)}
           placeholder={t(locale, "waves.sidebar.findWave")}
           autoComplete="off"
-          className="tw-w-full tw-min-w-0 tw-border-0 tw-bg-transparent tw-py-2 tw-text-sm tw-text-white tw-outline-none tw-ring-0 placeholder:tw-text-iron-400 focus:tw-ring-0"
+          className="tw-w-full tw-min-w-0 tw-border-0 tw-bg-transparent tw-py-1.5 tw-text-xs tw-leading-5 tw-text-white tw-outline-none tw-ring-0 placeholder:tw-text-iron-400 focus:tw-ring-0 touch-only:tw-text-base"
         />
         {navigation.searching && (
           <button
@@ -63,7 +63,7 @@ export function SidebarWaveNavigationControls({
       {!navigation.searching && navigation.canUseCollections && (
         <fieldset
           aria-label={t(locale, "waves.sidebar.filterAriaLabel")}
-          className="tw-m-0 tw-mt-2 tw-flex tw-min-w-0 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-1"
+          className="tw-m-0 tw-mt-2 tw-flex tw-min-w-0 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-0.5"
         >
           {(["pinned", "joined", "all"] as const).map((tab) => (
             <button
@@ -71,7 +71,7 @@ export function SidebarWaveNavigationControls({
               type="button"
               aria-pressed={navigation.collection === tab}
               onClick={() => navigation.setCollection(tab)}
-              className={`tw-min-h-9 tw-min-w-0 tw-flex-1 tw-rounded-md tw-border-0 tw-px-2 tw-text-xs focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 ${navigation.collection === tab ? "tw-bg-iron-800 tw-font-semibold tw-text-white tw-underline tw-decoration-2 tw-underline-offset-4" : "tw-bg-transparent tw-text-iron-400"}`}
+              className={`tw-min-h-7 tw-min-w-0 tw-flex-1 tw-rounded-md tw-border-0 tw-px-2 tw-text-xs focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 ${navigation.collection === tab ? "tw-bg-iron-800 tw-font-semibold tw-text-white tw-underline tw-decoration-2 tw-underline-offset-2" : "tw-bg-transparent tw-text-iron-400"}`}
             >
               {t(locale, COLLECTION_LABELS[tab])}
             </button>

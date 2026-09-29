@@ -4300,12 +4300,11 @@ export const EN_US_MESSAGES = {
   "collect.activity.viewOrders": "View in Orders",
   "collect.activity.dismiss": "Dismiss transaction progress",
   "waves.discovery.activeVotes": "Active Votes",
-  "waves.discovery.recommendations": "Worth Checking Out",
-  "waves.discovery.activeVotesDescription":
-    "Ongoing votes that use TDH. Each wave sets its own voting rules.",
+  "waves.discovery.recommendations": "Discover",
+  "waves.discovery.activeVotesDescription": "Ongoing TDH votes",
   "waves.discovery.recommendationsDescription":
-    "Highly rated waves you don’t follow yet.",
-  "waves.discovery.browseRecommendations": "Browse Worth Checking Out",
+    "Highly rated waves you don’t follow.",
+  "waves.discovery.browseRecommendations": "Browse recommendations",
   "waves.discovery.label": "Wave discovery",
   "waves.discovery.expand": "Expand wave discovery",
   "waves.discovery.collapse": "Collapse wave discovery",

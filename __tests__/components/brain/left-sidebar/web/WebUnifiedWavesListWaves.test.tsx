@@ -206,13 +206,13 @@ it("renders announcement, highly rated preview, pinned, and one filterable botto
     screen.getByRole("button", { name: "Joined", exact: true })
   ).toBeInTheDocument();
   expect(screen.getByLabelText("Announcement waves")).toBeInTheDocument();
-  expect(screen.getByText("Worth Checking Out")).toBeInTheDocument();
+  expect(screen.getByText("Discover")).toBeInTheDocument();
   expect(
-    screen.getByText("Highly rated waves you don’t follow yet.")
+    screen.getByText("Highly rated waves you don’t follow.")
   ).toBeVisible();
   expect(
     screen.queryByRole("button", {
-      name: "Expand Worth Checking Out, 1 wave",
+      name: "Expand Discover, 1 wave",
     })
   ).toBeNull();
   expect(
@@ -295,7 +295,7 @@ it("shows the worth checking out description directly on touch devices", () => {
   renderWebWaves({ sentinelRef });
 
   expect(
-    screen.getByText("Highly rated waves you don’t follow yet.")
+    screen.getByText("Highly rated waves you don’t follow.")
   ).toBeVisible();
   expect(screen.getByTestId("preview-avatar-h1")).toHaveAttribute(
     "data-size",
@@ -303,7 +303,7 @@ it("shows the worth checking out description directly on touch devices", () => {
   );
   expect(
     screen.queryByRole("button", {
-      name: "Highly rated waves you don’t follow yet.",
+      name: "Highly rated waves you don’t follow.",
     })
   ).toBeNull();
 });
@@ -359,13 +359,13 @@ it("shows the worth checking out description when no profile is connected", () =
 
   renderWebWaves();
 
-  expect(screen.getByText("Worth Checking Out")).toBeInTheDocument();
+  expect(screen.getByText("Discover")).toBeInTheDocument();
   expect(
-    screen.getByText("Highly rated waves you don’t follow yet.")
+    screen.getByText("Highly rated waves you don’t follow.")
   ).toBeVisible();
   expect(
     screen.queryByRole("button", {
-      name: "Highly rated waves you don’t follow yet.",
+      name: "Highly rated waves you don’t follow.",
     })
   ).not.toBeInTheDocument();
 });

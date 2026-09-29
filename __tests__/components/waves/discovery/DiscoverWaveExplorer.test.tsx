@@ -83,7 +83,7 @@ it("associates discovery view controls with the rendered panel", () => {
   render(<DiscoverWaveExplorer />);
   const votes = screen.getByRole("button", { name: "Active Votes" });
   const recommendations = screen.getByRole("button", {
-    name: "Worth Checking Out",
+    name: "Discover",
   });
   expect(votes.getAttribute("aria-controls")).toBe(
     recommendations.getAttribute("aria-controls")

@@ -3,7 +3,7 @@
 import { useId, useRef } from "react";
 import { useWaveSidebarPreference } from "@/hooks/useWaveSidebarPreference";
 import Link from "next/link";
-import { ChevronDownIcon, ChevronUpIcon } from "@heroicons/react/24/outline";
+import { ChevronDownIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 import { useActiveWaveVotes } from "@/hooks/useActiveWaveVotes";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
@@ -49,9 +49,9 @@ export function SidebarDiscovery({
   return (
     <section
       aria-label={t(locale, "waves.discovery.label")}
-      className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-pb-2"
+      className="tailwind-scope tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-pb-2"
     >
-      <div className="tw-flex tw-items-center tw-gap-1 tw-px-3">
+      <div className="tw-flex tw-items-center tw-gap-1 tw-px-4">
         <fieldset
           className="tw-m-0 tw-flex tw-min-w-0 tw-flex-1 tw-border-0 tw-p-0"
           aria-label={t(locale, "waves.discovery.label")}
@@ -66,7 +66,7 @@ export function SidebarDiscovery({
               aria-pressed={selected === tab}
               aria-controls={panelId}
               onClick={() => select(tab)}
-              className={`tw-min-h-11 tw-flex-1 tw-rounded-md tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-border-solid tw-bg-transparent tw-px-1 tw-py-2 tw-text-xs tw-font-medium focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 ${selected === tab ? "tw-border-primary-400 tw-text-white" : "tw-border-transparent tw-text-iron-400"}`}
+              className={`tw-flex tw-min-h-10 tw-min-w-0 tw-flex-1 tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-none tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-border-solid tw-bg-transparent tw-px-1 tw-py-2 tw-text-xs tw-font-medium focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 touch-only:tw-min-h-11 ${selected === tab ? "tw-border-primary-400 tw-text-white" : "tw-border-transparent tw-text-iron-400"}`}
             >
               {t(
                 locale,
@@ -93,17 +93,17 @@ export function SidebarDiscovery({
           onClick={() => {
             setCollapsePreference(String(!collapsed));
           }}
-          className="tw-flex tw-size-11 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+          className="tw-flex tw-size-9 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 touch-only:tw-size-11"
         >
           {collapsed ? (
-            <ChevronDownIcon className="tw-size-4" />
+            <ChevronRightIcon className="tw-size-4" aria-hidden="true" />
           ) : (
-            <ChevronUpIcon className="tw-size-4" />
+            <ChevronDownIcon className="tw-size-4" aria-hidden="true" />
           )}
         </button>
       </div>
-      <div id={panelId} hidden={collapsed} className="tw-px-3 tw-pt-2">
-        <p className="tw-mb-2 tw-px-2 tw-text-xs tw-leading-relaxed tw-text-iron-400">
+      <div id={panelId} hidden={collapsed} className="tw-px-4 tw-pt-2">
+        <p className="tw-m-0 tw-mb-2 tw-text-xs tw-leading-4 tw-text-iron-400">
           {t(
             locale,
             selected === ACTIVE_VOTES_TAB
@@ -114,24 +114,27 @@ export function SidebarDiscovery({
         {selected === ACTIVE_VOTES_TAB ? (
           <>
             {votes.isPending && (
-              <output className="tw-block tw-p-2 tw-text-xs tw-text-iron-400">
+              <output className="tw-m-0 tw-block tw-py-2 tw-text-xs tw-text-iron-400">
                 {t(locale, "waves.discovery.loading")}
               </output>
             )}
             {votes.isError && (
-              <p role="alert" className="tw-p-2 tw-text-xs tw-text-iron-400">
+              <p
+                role="alert"
+                className="tw-m-0 tw-py-2 tw-text-xs tw-text-iron-400"
+              >
                 {t(locale, "waves.discovery.error")}{" "}
                 <button
                   type="button"
                   onClick={() => void votes.refetch()}
-                  className="tw-border-0 tw-bg-transparent tw-text-primary-300"
+                  className="tw-min-h-8 tw-border-0 tw-bg-transparent tw-p-0 tw-text-xs tw-text-primary-300"
                 >
                   {t(locale, "waves.discovery.retry")}
                 </button>
               </p>
             )}
             {isEmpty && (
-              <output className="tw-mb-0 tw-block tw-px-2 tw-py-3 tw-text-sm tw-text-iron-300">
+              <output className="tw-m-0 tw-block tw-py-2 tw-text-xs tw-text-iron-300">
                 {t(locale, "waves.discovery.emptyVotes")}
               </output>
             )}
@@ -160,14 +163,14 @@ export function SidebarDiscovery({
                   select("recommendations");
                   recommendationsTabRef.current?.focus();
                 }}
-                className="tw-min-h-11 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-2 tw-text-left tw-text-xs tw-text-primary-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+                className="tw-min-h-8 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-0 tw-text-left tw-text-xs tw-text-primary-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
               >
                 {t(locale, "waves.discovery.browseRecommendations")}
               </button>
             ) : (
               <Link
                 href="/discover?view=active-votes"
-                className="tw-inline-flex tw-min-h-9 tw-items-center tw-px-2 tw-text-xs tw-text-primary-300 tw-no-underline"
+                className="tw-inline-flex tw-min-h-8 tw-items-center tw-text-xs tw-text-primary-300 tw-no-underline"
               >
                 {t(locale, "waves.discovery.viewVotes")}
               </Link>
@@ -178,17 +181,17 @@ export function SidebarDiscovery({
             {previewItems.length > 0 ? (
               <HighlyRatedWavesToggle
                 isTouchPreview={isTouchPreview}
-                paddingClassName="tw-px-2"
+                paddingClassName="tw-px-0"
                 previewItems={[...previewItems]}
               />
             ) : (
-              <p className="tw-p-2 tw-text-xs tw-text-iron-400">
+              <p className="tw-m-0 tw-py-2 tw-text-xs tw-text-iron-400">
                 {t(locale, "waves.discovery.emptyRecommendations")}
               </p>
             )}
             <Link
               href="/discover?view=recommendations&sort=QUALITY"
-              className="tw-inline-flex tw-min-h-9 tw-items-center tw-px-2 tw-text-xs tw-text-primary-300 tw-no-underline"
+              className="tw-inline-flex tw-min-h-8 tw-items-center tw-text-xs tw-text-primary-300 tw-no-underline"
             >
               {t(locale, "waves.discovery.viewRecommendations")}
             </Link>
