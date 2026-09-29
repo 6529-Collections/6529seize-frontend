@@ -49,6 +49,17 @@ describe("WavesView", () => {
     expect(link.closest("nav")).toHaveClass("lg:tw-hidden");
   });
 
+  it("leaves profile feed navigation to the native app header", () => {
+    isApp = true;
+
+    render(<WavesView />);
+
+    expect(screen.queryByTestId("profile-feed")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: "Waves" })
+    ).not.toBeInTheDocument();
+  });
+
   it("keeps the selected Wave conversation path unchanged", () => {
     activeWaveId = "wave-1";
 
