@@ -3,6 +3,7 @@ import type { Page } from "@playwright/test";
 import { expect, expectNoHorizontalOverflow, test } from "../testHelpers";
 import {
   dismissNextDevTools,
+  getSandboxApiOrigin,
   useLocalSandboxMutationGuard,
 } from "../support/localSandbox";
 
@@ -69,7 +70,15 @@ const competition = (id: string, title: string) => ({
     winning_threshold_min_duration_ms: 0,
   },
   outcome_config: [],
-  presentation: [],
+  presentation:
+    id === "beta"
+      ? [
+          {
+            data_key: "wave_display.submission.button_label",
+            data_value: "Enter Beta",
+          },
+        ]
+      : [],
   capabilities: [],
   permissions: { view: true, submit: true, vote: true, administer: true },
   created_at: 1,
@@ -81,6 +90,11 @@ const competition = (id: string, title: string) => ({
 });
 
 async function installCompetitionApi(page: Page, selfNomination = false) {
+  const fixtureResponse = await page.request.get(
+    `${getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"])}/api/v2/waves/${WAVE}/drops`
+  );
+  expect(fixtureResponse.ok()).toBe(true);
+  const entryFixture = await fixtureResponse.json();
   await page.route("**/api/open-graph**", (route) =>
     route.fulfill({ json: {} })
   );
@@ -268,15 +282,11 @@ async function installCompetitionApi(page: Page, selfNomination = false) {
     const dropId = new URL(route.request().url()).pathname.split("/").at(-1);
     const owner = competitions.find((item) => entryDropId(item.id) === dropId);
     if (!owner) return route.fallback();
-    const response = await route.fetch({
-      url: new URL(`/api/v2/waves/${WAVE}/drops`, route.request().url()).href,
-    });
-    const source = await response.json();
     return route.fulfill({
       json: {
-        wave: source.wave,
+        wave: entryFixture.wave,
         drop: {
-          ...source.drops[0],
+          ...entryFixture.drops[0],
           id: dropId,
           drop_type: "PARTICIPATORY",
           title: `Recorded ${owner.id} entry`,
@@ -289,6 +299,10 @@ async function installCompetitionApi(page: Page, selfNomination = false) {
 }
 
 test.describe("Native competition sandbox @auth @medium @local-only", () => {
+  test.afterEach(async ({ page }) => {
+    // Let fixture responses finish before Playwright disposes their request context.
+    await page.unrouteAll({ behavior: "wait" });
+  });
   useLocalSandboxMutationGuard(
     test,
     "PLAYWRIGHT_AUTH_SANDBOX",
@@ -385,6 +399,12 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       name: "All competitions",
       exact: true,
     });
+    await expect(
+      page.getByRole("button", { name: "Enter Beta", exact: true })
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Drop", exact: true })
+    ).toHaveCount(0);
     const topNavigation = await backLink.evaluate((element) => {
       const box = element.getBoundingClientRect();
       return {

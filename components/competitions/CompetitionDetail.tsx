@@ -5,7 +5,8 @@ import {
   getWaveOutcomeVisibilityFromMetadata,
   getApproveWaveDisplayMetadataDraft,
 } from "@/helpers/waves/wave-metadata.helpers";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { WaveDisplayMetadataContext } from "@/contexts/WaveDisplayMetadataContext";
 import { TabToggle } from "@/components/common/TabToggle";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import {
@@ -40,10 +41,17 @@ function NativeCompetitionContent() {
   const pathname = usePathname();
   const router = useRouter();
   const search = useSearchParams();
-  const presentation = (competition.presentation ?? []).map((item, id) => ({
-    ...item,
-    id,
-  }));
+  const displayMetadata = useMemo(
+    () => ({
+      waveId: wave.id,
+      metadata: (competition.presentation ?? []).map((item, id) => ({
+        ...item,
+        id,
+      })),
+    }),
+    [wave.id, competition.presentation]
+  );
+  const presentation = displayMetadata.metadata;
   const outcomesVisible = getWaveOutcomeVisibilityFromMetadata(presentation);
   const selectedTab = getCompetitionTab(
     search.get("edit") === "1" &&
@@ -138,17 +146,19 @@ function NativeCompetitionContent() {
         aria-label={tabLabel(tab)}
         className="tw-space-y-5"
       >
-        <CompetitionResources
-          key={tab}
-          tab={tab}
-          onCreateDrop={
-            mutationsEnabled &&
-            competition.permissions.submit &&
-            competition.lifecycle === ApiCompetitionLifecycle.Published
-              ? () => setEntering((current) => !current)
-              : undefined
-          }
-        />
+        <WaveDisplayMetadataContext.Provider value={displayMetadata}>
+          <CompetitionResources
+            key={tab}
+            tab={tab}
+            onCreateDrop={
+              mutationsEnabled &&
+              competition.permissions.submit &&
+              competition.lifecycle === ApiCompetitionLifecycle.Published
+                ? () => setEntering((current) => !current)
+                : undefined
+            }
+          />
+        </WaveDisplayMetadataContext.Provider>
         {tab === "rules" && (
           <CompetitionAdmin
             paused={paused}
