@@ -60,7 +60,7 @@ function DiscoverySection({
             {count !== undefined && (
               <span
                 id={`${id}-count`}
-                className="tw-rounded-full tw-bg-primary-500/20 tw-px-1.5 tw-text-primary-300"
+                className="tw-rounded-full tw-bg-primary-500/20 tw-px-1.5 tw-py-0.5 tw-text-primary-300"
               >
                 {formatInteger(locale, count)}
               </span>

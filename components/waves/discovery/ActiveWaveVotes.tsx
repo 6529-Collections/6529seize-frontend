@@ -18,7 +18,7 @@ export function ActiveWaveVotes() {
       <h1 className="tw-m-0 tw-mb-4 tw-text-2xl tw-font-semibold tw-leading-8 tw-text-white">
         {t(locale, "waves.discovery.activeVotes")}
         {count !== undefined && (
-          <span className="tw-ml-3 tw-text-iron-400">
+          <span className="tw-ml-3 tw-inline-flex tw-rounded-full tw-bg-primary-500/20 tw-px-1.5 tw-py-0.5 tw-align-middle tw-text-xs tw-font-medium tw-text-primary-300">
             {formatInteger(locale, count)}
           </span>
         )}
