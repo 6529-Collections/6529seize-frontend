@@ -1,4 +1,5 @@
 import path from "node:path";
+import type { Page } from "@playwright/test";
 import type { ApiDropV2 } from "../../generated/models/ApiDropV2";
 import { ApiDropMainType } from "../../generated/models/ApiDropMainType";
 import type { ApiWaveOverview } from "../../generated/models/ApiWaveOverview";
@@ -18,6 +19,21 @@ const DROP_ID = "00000000-0000-4000-8000-000000000530";
 const MEDIA_ROOT =
   "https://d3lqz0a4bldqgf.cloudfront.net/drops/preview-safety/";
 
+async function fetchSandboxDrop(page: Page, baseURL: string | undefined) {
+  const apiOrigin = getSandboxApiOrigin(baseURL);
+  const response = await page.request.get(
+    `${apiOrigin}/api/v2/waves/${WAVE_ID}/drops`
+  );
+  expect(response.ok()).toBe(true);
+  const feed = (await response.json()) as {
+    wave: ApiWaveOverview;
+    drops: ApiDropV2[];
+  };
+  const source = feed.drops.find((drop) => drop.id === DROP_ID);
+  if (!source) throw new Error("Image fixture requires the sandbox drop");
+  return { apiOrigin, feed, source };
+}
+
 // The parent composer suite supplies the local-only mutation guard and both
 // desktop/touch projects. Browser requests, decoding and gallery resets are the
 // regression risk here; pixel-budget arithmetic belongs in the resizer tests.
@@ -26,18 +42,7 @@ export function defineWaveImagePreviewTests() {
     page,
     baseURL,
   }) => {
-    const apiOrigin = getSandboxApiOrigin(baseURL);
-    const response = await page.request.get(
-      `${apiOrigin}/api/v2/waves/${WAVE_ID}/drops`
-    );
-    expect(response.ok()).toBe(true);
-    const feed = (await response.json()) as {
-      wave: ApiWaveOverview;
-      drops: ApiDropV2[];
-    };
-    const source = feed.drops.find((drop) => drop.id === DROP_ID);
-    if (!source)
-      throw new Error("Supplemental media requires the sandbox drop");
+    const { apiOrigin, feed, source } = await fetchSandboxDrop(page, baseURL);
     const images = [`${MEDIA_ROOT}preview.jpg`, `${MEDIA_ROOT}supporting.jpg`];
     const metadata = [
       {
@@ -84,7 +89,7 @@ export function defineWaveImagePreviewTests() {
         .getByRole("heading", { name: heading, exact: true })
         .locator("..");
       const trigger = section.getByRole("button", {
-        name: "Open image preview",
+        name: /^Open (preview image|additional media \d+)$/,
       });
       await trigger.scrollIntoViewIfNeeded();
       await trigger.click();
@@ -113,18 +118,7 @@ export function defineWaveImagePreviewTests() {
     page,
     baseURL,
   }) => {
-    const apiOrigin = getSandboxApiOrigin(baseURL);
-    const response = await page.request.get(
-      `${apiOrigin}/api/v2/waves/${WAVE_ID}/drops`
-    );
-    expect(response.ok()).toBe(true);
-    const feed = (await response.json()) as {
-      wave: ApiWaveOverview;
-      drops: ApiDropV2[];
-    };
-    const source = feed.drops.find((drop) => drop.id === DROP_ID);
-    if (!source)
-      throw new Error("Image preview fixture requires the sandbox drop");
+    const { apiOrigin, feed, source } = await fetchSandboxDrop(page, baseURL);
     const originals = [`${MEDIA_ROOT}large.jpg`, `${MEDIA_ROOT}long.gif`];
     const drop: ApiDropV2 = {
       ...source,

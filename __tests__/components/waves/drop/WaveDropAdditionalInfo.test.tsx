@@ -10,6 +10,7 @@ import { WaveDropAdditionalInfo } from "@/components/waves/drop/WaveDropAddition
 import { MemesSubmissionAdditionalInfoKey } from "@/components/waves/memes/submission/types/OperationalData";
 import type SeizeVideoPlayer from "@/components/drops/view/item/content/media/SeizeVideoPlayer";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { downloadMediaUrl } from "@/helpers/media-download.helpers";
 
 type MockImageProps = ComponentProps<"img"> & {
@@ -50,6 +51,9 @@ jest.mock(
   })
 );
 
+jest.mock("@/hooks/useBrowserLocale", () => ({
+  useBrowserLocale: jest.fn(() => "en-US"),
+}));
 jest.mock("@/hooks/useCapacitor", () => ({
   __esModule: true,
   default: () => ({ isCapacitor: false }),
@@ -82,6 +86,7 @@ describe("WaveDropAdditionalInfo", () => {
   beforeEach(() => {
     jest.mocked(downloadMediaUrl).mockClear();
     mockVideoPlayer.mockClear();
+    jest.mocked(useBrowserLocale).mockReturnValue("en-US");
   });
 
   it("does not render when there is no commentary or media", () => {
@@ -225,12 +230,74 @@ describe("WaveDropAdditionalInfo", () => {
       />
     );
 
-    const image = screen.getByRole("img", { name: "Drop media" });
+    const image = screen.getByRole("img", { name: "Preview image" });
     expect(image.getAttribute("src")).toContain(
       encodeURIComponent(resolvedPreviewImage)
     );
     expect(image).not.toHaveAttribute("src", resolvedPreviewImage);
   });
+
+  it.each(["en-US", "en-GB", "fr-FR", "es-ES", "de-DE"] as const)(
+    "keeps headings and distinct image names available through %s fallback",
+    (locale) => {
+      jest.mocked(useBrowserLocale).mockReturnValue(locale);
+      render(
+        <WaveDropAdditionalInfo
+          drop={buildDrop([
+            {
+              data_key: MemesSubmissionAdditionalInfoKey.ABOUT_ARTIST,
+              data_value: "Artist bio",
+            },
+            {
+              data_key: MemesSubmissionAdditionalInfoKey.COMMENTARY,
+              data_value: "Artist commentary",
+            },
+            {
+              data_key: MemesSubmissionAdditionalInfoKey.ADDITIONAL_MEDIA,
+              data_value: JSON.stringify({
+                preview_image: "https://example.com/preview.jpg",
+                promo_video: "https://example.com/promo.mp4",
+                artwork_commentary_media: [
+                  "https://example.com/one.jpg",
+                  "https://example.com/two.jpg",
+                ],
+              }),
+            },
+          ])}
+        />
+      );
+      for (const heading of [
+        "Preview Image",
+        "Promo Video",
+        "Additional Media",
+        "About the Artist",
+        "Artwork Commentary",
+      ]) {
+        expect(
+          screen.getByRole("heading", { name: heading })
+        ).toBeInTheDocument();
+      }
+      for (const name of [
+        "Preview image",
+        "Additional media 1",
+        "Additional media 2",
+      ]) {
+        expect(screen.getByRole("img", { name })).toBeInTheDocument();
+      }
+      expect(
+        screen.getByRole("button", { name: "Open preview image" })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "Open additional media 1" })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "Open additional media 2" })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "Open in new tab" })
+      ).toBeInTheDocument();
+    }
+  );
 
   it("opens each supplemental image with actions for its own original URL", async () => {
     const urls = [
@@ -256,10 +323,14 @@ describe("WaveDropAdditionalInfo", () => {
 
     for (const [index, url] of urls.entries()) {
       fireEvent.load(
-        screen.getAllByRole("img", { name: "Drop media" })[index]!
+        screen.getAllByRole("img", {
+          name: /^(Preview image|Additional media \d+)$/,
+        })[index]!
       );
       fireEvent.click(
-        screen.getAllByRole("button", { name: "Open image preview" })[index]!
+        screen.getAllByRole("button", {
+          name: /^Open (preview image|additional media \d+)$/,
+        })[index]!
       );
       const image = screen.getByRole("img", { name: "Expanded image preview" });
       expect(image.getAttribute("src")).toContain(encodeURIComponent(url));
