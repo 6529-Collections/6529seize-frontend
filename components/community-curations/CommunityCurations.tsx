@@ -6,8 +6,13 @@ import { useLayout } from "@/components/brain/my-stream/layout/LayoutContext";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useCommunityCurationsDrops } from "@/hooks/useCommunityCurationsDrops";
 import { t } from "@/i18n/messages";
-import { useCallback, useState } from "react";
+import { usePersistentScrollOffset } from "@/components/token-list/hooks/usePersistentScrollOffset";
+import { useCallback, useLayoutEffect, useRef, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
+
+// Desktop and mobile web render the same logical feed. Sharing this key keeps
+// the reading position intact when the viewport crosses the layout breakpoint.
+const PROFILE_WAVES_FEED_SCROLL_KEY = "profile-waves-feed";
 
 const COMMUNITY_CURATIONS_SKELETON_COLUMNS = [
   {
@@ -141,9 +146,15 @@ export default function CommunityCurations({
 }: CommunityCurationsProps = {}) {
   const locale = useBrowserLocale();
   const { waveViewStyle } = useLayout();
+  const scrollContainerRef = useRef<HTMLElement | null>(null);
   const [scrollContainer, setScrollContainer] = useState<HTMLElement | null>(
     null
   );
+  const initialScrollOffset = usePersistentScrollOffset(
+    PROFILE_WAVES_FEED_SCROLL_KEY,
+    scrollContainerRef
+  );
+  const hasRestoredScrollOffsetRef = useRef(initialScrollOffset === 0);
   const {
     allDrops,
     drops,
@@ -165,10 +176,31 @@ export default function CommunityCurations({
   const handleFetchNextPage = useCallback(async () => {
     await fetchNextPage();
   }, [fetchNextPage]);
+  const setScrollContainerElement = useCallback(
+    (element: HTMLElement | null) => {
+      scrollContainerRef.current = element;
+      setScrollContainer(element);
+    },
+    []
+  );
+
+  useLayoutEffect(() => {
+    if (hasRestoredScrollOffsetRef.current || !shouldShowMasonry) {
+      return;
+    }
+
+    const element = scrollContainerRef.current;
+    if (!element) {
+      return;
+    }
+
+    element.scrollTo({ top: initialScrollOffset });
+    hasRestoredScrollOffsetRef.current = true;
+  }, [initialScrollOffset, shouldShowMasonry]);
 
   return (
     <section
-      ref={setScrollContainer}
+      ref={setScrollContainerElement}
       className="tw-flex tw-min-h-0 tw-w-full tw-flex-grow tw-flex-col tw-overflow-y-auto tw-overflow-x-hidden tw-overscroll-contain tw-px-4 tw-py-8 tw-scrollbar-thin tw-scrollbar-track-iron-900 tw-scrollbar-thumb-iron-600 desktop-hover:hover:tw-scrollbar-thumb-iron-500 sm:tw-px-6 lg:tw-px-8"
       style={heightStyle ?? waveViewStyle}
     >
