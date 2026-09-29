@@ -47,17 +47,6 @@ describe("CommunityCurations", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseCommunityCurationsDrops.mockReturnValue(loadingState);
-    jest
-      .spyOn(globalThis, "requestAnimationFrame")
-      .mockImplementation((callback) => {
-        callback(0);
-        return 1;
-      });
-    jest.spyOn(globalThis, "cancelAnimationFrame").mockImplementation(() => {});
-  });
-
-  afterEach(() => {
-    jest.restoreAllMocks();
   });
 
   it("restores the saved offset after asynchronous feed content renders", () => {

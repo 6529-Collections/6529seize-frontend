@@ -189,17 +189,13 @@ export default function CommunityCurations({
       return;
     }
 
-    const frameId = requestAnimationFrame(() => {
-      const element = scrollContainerRef.current;
-      if (!element) {
-        return;
-      }
+    const element = scrollContainerRef.current;
+    if (!element) {
+      return;
+    }
 
-      element.scrollTo({ top: initialScrollOffset });
-      hasRestoredScrollOffsetRef.current = true;
-    });
-
-    return () => cancelAnimationFrame(frameId);
+    element.scrollTo({ top: initialScrollOffset });
+    hasRestoredScrollOffsetRef.current = true;
   }, [initialScrollOffset, shouldShowMasonry]);
 
   return (
