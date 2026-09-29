@@ -127,7 +127,9 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     });
     await expect(profileFeedLink).toBeVisible();
     await expect(profileFeedLink).toHaveText("Waves");
-    await expect(profileFeedLink.locator("svg")).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: /Profile Waves Feed/ }).locator("svg")
+    ).toBeVisible();
     await expect(
       page.getByText("Profile Waves Feed", { exact: true })
     ).toHaveCount(0);
