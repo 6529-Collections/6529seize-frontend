@@ -30,7 +30,11 @@ images have no HD control or GIF badge.
 ## User Journey
 
 1. Open a thread and find a drop that contains image media.
-2. The image renders inline with a loading placeholder.
+2. The image renders inline with a loading placeholder. GIF attachments and
+   embedded GIF links show a left-aligned pulsing placeholder, capped at 16rem
+   wide and tall and constrained to the available space, while their preview loads. It
+   disappears when the preview is ready; failed previews use the existing
+   retry or unavailable state. Reduced-motion settings disable the pulse. The placeholder uses a fallback size, not the GIF’s actual dimensions.
 3. Click or tap the image to open the modal viewer.
 4. Zoom the image and use modal controls:
    - `Open in Browser` opens the source URL in a new tab.
