@@ -12,10 +12,10 @@ export function ActiveWaveVotes() {
   const count = votes.data?.pages[0]?.count;
   return (
     <section
-      className="tw-px-4 tw-py-6 md:tw-px-6 lg:tw-px-8"
+      className="tw-px-4 tw-pb-6 tw-pt-4 md:tw-px-6 lg:tw-px-8"
       aria-label={t(locale, "waves.discovery.activeVotes")}
     >
-      <h1 className="tw-text-2xl tw-font-semibold tw-text-white">
+      <h1 className="tw-m-0 tw-mb-4 tw-text-2xl tw-font-semibold tw-leading-8 tw-text-white">
         {t(locale, "waves.discovery.activeVotes")}
         {count !== undefined && (
           <span className="tw-ml-3 tw-text-iron-400">
