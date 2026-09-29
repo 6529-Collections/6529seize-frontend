@@ -107,29 +107,20 @@ export function WebProfileFeedShortcut({
   }
 
   return (
-    <div
-      className={`tw-group tw-mt-2 tw-flex tw-items-center tw-gap-x-4 tw-px-5 tw-py-2 tw-transition-all tw-duration-200 tw-ease-out ${
-        isActive
-          ? "tw-bg-iron-700/60 desktop-hover:hover:tw-bg-iron-700/70"
-          : "desktop-hover:hover:tw-bg-iron-900/80"
-      }`}
+    <Link
+      href={href}
+      prefetch={false}
+      onClick={handleClick}
+      aria-label={t(locale, "waves.sidebar.profileFeedHeaderLabel")}
+      aria-current={isActive ? "page" : undefined}
+      className="tailwind-scope tw-inline-flex tw-min-h-9 tw-items-center tw-gap-2 tw-rounded-md tw-text-xl tw-font-semibold tw-tracking-tight tw-text-iron-50 tw-no-underline focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black desktop-hover:hover:tw-text-primary-300"
+      data-tooltip-id={PROFILE_FEED_TOOLTIP_ID}
+      data-tooltip-content={t(locale, "waves.sidebar.openProfileFeed")}
     >
-      <Link
-        href={href}
-        prefetch={false}
-        onClick={handleClick}
-        aria-current={isActive ? "page" : undefined}
-        className={`tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-space-x-3 tw-py-1 tw-no-underline tw-transition-all tw-duration-200 tw-ease-out ${
-          isActive
-            ? "tw-font-medium tw-text-white desktop-hover:group-hover:tw-text-white"
-            : "tw-font-normal tw-text-iron-400 desktop-hover:group-hover:tw-text-iron-300"
-        }`}
-      >
-        <ProfileFeedAvatar isActive={isActive} />
-        <div className="tw-min-w-0 tw-flex-1">
-          <div className="tw-truncate tw-text-sm">{profileFeedLabel}</div>
-        </div>
-      </Link>
-    </div>
+      <span>{t(locale, "navigation.primary.waves")}</span>
+      <span className="tw-inline-flex tw-text-iron-400">
+        <MasonryGridIcon />
+      </span>
+    </Link>
   );
 }

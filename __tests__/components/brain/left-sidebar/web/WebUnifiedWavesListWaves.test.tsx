@@ -46,7 +46,7 @@ jest.mock(
       data-testid={`header-${props.label}`}
       data-padding={props.paddingClassName}
     >
-      {props.label}
+      {props.labelContent ?? props.label}
       {props.labelTrailingContent}
       {props.rightContent}
     </div>
@@ -192,9 +192,16 @@ it("renders announcement, highly rated preview, pinned, and one filterable botto
   renderWebWaves({ sentinelRef });
 
   expect(screen.getByTestId("header-Waves")).toBeInTheDocument();
+  const feedLink = screen.getByRole("link", {
+    name: "Waves — Open Profile Waves Feed",
+  });
+  expect(screen.getByTestId("header-Waves")).toContainElement(feedLink);
+  expect(
+    screen.getAllByRole("link", { name: /Profile Waves Feed/ })
+  ).toHaveLength(1);
   expect(screen.getByTestId("header-Waves")).toHaveAttribute(
     "data-padding",
-    "tw-px-4"
+    "tw-px-4 tw-pb-2"
   );
   const discoverWavesLink = screen.getByRole("link", {
     name: "Discover Waves",

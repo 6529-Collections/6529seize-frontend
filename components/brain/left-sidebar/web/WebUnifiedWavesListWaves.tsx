@@ -165,11 +165,15 @@ function DiscoverWavesLink() {
 }
 
 function WebWavesListHeader({
+  basePath,
+  showProfileFeedShortcut,
   headerPaddingClassName,
   isCollapsed,
   onCreateWave,
   showCreateWaveButton,
 }: {
+  readonly basePath: string;
+  readonly showProfileFeedShortcut: boolean;
   readonly headerPaddingClassName: string;
   readonly isCollapsed: boolean;
   readonly onCreateWave: () => void;
@@ -190,7 +194,12 @@ function WebWavesListHeader({
   return (
     <SectionHeader
       label="Waves"
-      paddingClassName={headerPaddingClassName}
+      labelContent={
+        showProfileFeedShortcut ? (
+          <WebProfileFeedShortcut basePath={basePath} isCollapsed={false} />
+        ) : undefined
+      }
+      paddingClassName={`${headerPaddingClassName} tw-pb-2`}
       rightContent={
         <div className="tw-flex tw-items-center tw-gap-x-1.5">
           <DiscoverWavesLink />
@@ -500,13 +509,15 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
       <div className="tw-flex tw-flex-col">
         {!hideHeaders && (
           <WebWavesListHeader
+            basePath={basePath}
+            showProfileFeedShortcut={shouldShowProfileFeedShortcut}
             headerPaddingClassName={headerPaddingClassName}
             isCollapsed={isCollapsed}
             onCreateWave={openWave}
             showCreateWaveButton={showCreateWaveButton}
           />
         )}
-        {shouldShowProfileFeedShortcut && (
+        {shouldShowProfileFeedShortcut && isCollapsed && (
           <WebProfileFeedShortcut
             basePath={basePath}
             isCollapsed={isCollapsed}

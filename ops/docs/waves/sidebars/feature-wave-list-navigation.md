@@ -32,8 +32,11 @@ Wave and DM rows in the left list control which thread is open.
   collection controls.
 - The expanded web Waves panel header includes a secondary `Discover Waves`
   link to `/discover`.
-- On mobile web, `Profile Waves Feed` appears above the Wave rows and opens
+- Select the `Waves` heading and its small feed icon to open Profile Waves Feed.
+  On desktop, this clears the selected wave; on mobile web, it opens
   `/waves?view=profile-feed`. The feed's `Waves` link returns to the list.
+  Hover or focus the heading for `Open Profile Waves Feed`. The collapsed rail
+  retains an icon-only feed link; there is no separate feed row in the expanded panel.
 - Browser back/forward keeps the active row and URL in sync.
 - In the native app, swipe right from the left edge of a standard wave detail
   view to return to the Waves list.
@@ -77,7 +80,7 @@ Wave and DM rows in the left list control which thread is open.
 - Open the `Waves` or `Messages` shell with the left list visible.
 - From the expanded web Waves panel header, open `Discover Waves` for the
   `/discover` route.
-- On mobile web, select `Profile Waves Feed` above the list to scan recent
+- On mobile web, select the `Waves` heading to scan recent
   posts across public Profile Waves.
 - Select an inactive wave or DM row from the list by clicking the row body.
 - In the native app, open a standard wave and swipe right from the left edge of

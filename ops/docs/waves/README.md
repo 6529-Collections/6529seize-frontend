@@ -42,7 +42,7 @@ Use this area for wave and direct-message tasks:
 - Posts appear newest first. Each card identifies the author, posting time, and
   originating Profile Wave. Curated replies can also appear.
 - On mobile web, the default `/waves` view remains a Wave navigator. Select
-  `Profile Waves Feed` above the Wave list to open the cross-Wave feed at
+  the `Waves` heading and feed icon above the Wave list to open the cross-Wave feed at
   `/waves?view=profile-feed`; use `Waves` at the top of the feed to return.
 - Opening a feed post enters its Wave conversation. Browser Back returns to the
   feed, while the Wave navigation control returns to the main Wave list.
