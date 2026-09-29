@@ -4,6 +4,8 @@ import {
   DropImagePreview,
   getDropImagePreviewSources,
 } from "@/components/drops/view/item/content/media/DropImagePreview";
+import { GifPreviewLoadingIndicator } from "@/components/drops/view/item/content/media/GifPreviewLoadingIndicator";
+import { isGifImageUrl } from "@/helpers/gif-preview.helpers";
 import Button from "@/components/utils/button/Button";
 import {
   ImageMediaModal,
@@ -113,7 +115,7 @@ function NaturalHeightImage({
 
   return (
     <span
-      className="tw-relative tw-block tw-min-h-40 tw-w-full tw-max-w-full tw-overflow-hidden tw-rounded-xl tw-bg-iron-900/40"
+      className={`tw-relative tw-block tw-min-h-40 tw-w-full tw-max-w-full tw-overflow-hidden tw-rounded-xl ${isGifImageUrl(src) ? "" : "tw-bg-iron-900/40"}`}
       style={{
         aspectRatio: aspectRatio ?? NATURAL_IMAGE_RESERVED_ASPECT_RATIO,
         maxHeight: NATURAL_IMAGE_MAX_HEIGHT,
@@ -352,6 +354,11 @@ function WaveDropPartContentMediaImageContent({
   const hasPreview = getDropImagePreviewSources(src, imageScale).length > 0;
   const showError =
     !hasPreview || imageViewState.failedAttempts >= MAX_FAILED_LOAD_ATTEMPTS;
+  const showGifLoading =
+    isGifImageUrl(src) &&
+    !imageViewState.loaded &&
+    !showError &&
+    !imageViewState.retryPending;
   const image = fillContainer ? (
     <FillContainerImage
       key={imageViewState.retryTick}
@@ -385,6 +392,7 @@ function WaveDropPartContentMediaImageContent({
         }`}
       >
         {image}
+        {showGifLoading && <GifPreviewLoadingIndicator />}
         {showError && <ImageLoadErrorState onRetry={manualRetry} />}
         {!showError && imageViewState.retryPending && (
           <div className="tw-absolute tw-inset-0 tw-rounded-xl tw-bg-iron-900">
@@ -419,7 +427,9 @@ function WaveDropPartContentMediaImageContent({
       <div className="tw-sr-only" role="status">
         {showError
           ? t(DEFAULT_LOCALE, "drop.media.previewUnavailable")
-          : !imageViewState.loaded && t(DEFAULT_LOCALE, "drop.media.loading")}
+          : !imageViewState.loaded &&
+            !showGifLoading &&
+            t(DEFAULT_LOCALE, "drop.media.loading")}
       </div>
 
       {imageViewState.isModalOpen && (
