@@ -35,3 +35,14 @@ it("keeps adjacent Markdown image URLs separate in curation previews", () => {
     getAnimatedImagePreviewUri(item.media.imageUrl, ImageScale.W_200_H_200)
   ).toBe(png.replace("/image.png", "/200x200/image.png"));
 });
+
+it("keeps a URL-only title available as a link preview", () => {
+  const url = "https://example.com/story";
+  const drop: PreviewDrop = {
+    id: "title-link",
+    title: `  ${url}  `,
+    parts: [{ content: null, media: [] }],
+  };
+
+  expect(getPreviewItems([drop])[0]).toMatchObject({ kind: "link", url });
+});
