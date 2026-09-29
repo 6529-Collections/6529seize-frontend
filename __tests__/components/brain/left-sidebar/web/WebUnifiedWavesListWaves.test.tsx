@@ -291,6 +291,35 @@ it("labels the rendered Joined collection even when the legacy filter disagrees"
   expect(screen.getByTestId("wave-joined-wave")).toBeInTheDocument();
 });
 
+it.each(["pinned", "joined"])(
+  "labels the collapsed rail as All despite the saved %s collection",
+  (collection) => {
+    localStorage.setItem("wave-sidebar-collection", collection);
+    renderWebWaves({
+      isCollapsed: true,
+      waves: [
+        createMockMinimalWave({
+          id: "personal-wave",
+          isPinned: true,
+          isFollowing: true,
+        }),
+        createMockMinimalWave({ id: "other-wave" }),
+      ],
+    });
+
+    expect(screen.getByLabelText("All recent waves list")).toBeInTheDocument();
+    expect(
+      screen.queryByRole("region", { name: "Pinned" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByLabelText("Following waves list")
+    ).not.toBeInTheDocument();
+    expect(screen.getByTestId("wave-personal-wave")).toBeInTheDocument();
+    expect(screen.getByTestId("wave-other-wave")).toBeInTheDocument();
+    expect(localStorage.getItem("wave-sidebar-collection")).toBe(collection);
+  }
+);
+
 it("shows the worth checking out description directly on touch devices", () => {
   const sentinelRef = React.createRef<HTMLDivElement>();
   mockIsTouchDevice = true;
