@@ -177,7 +177,9 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       }
     );
     expect(visibleFeedPostIndex).toBeGreaterThanOrEqual(0);
-    await feedPostButtons.nth(visibleFeedPostIndex).click();
+    const visibleFeedPost = feedPostButtons.nth(visibleFeedPostIndex);
+    await visibleFeedPost.focus();
+    await visibleFeedPost.press("Enter");
     await expect(page).toHaveURL(
       (url) =>
         /^\/waves\/[0-9a-f-]{36}$/i.test(url.pathname) &&
