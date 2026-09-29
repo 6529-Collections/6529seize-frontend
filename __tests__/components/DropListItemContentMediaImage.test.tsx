@@ -61,6 +61,55 @@ beforeEach(() => {
 });
 
 describe("DropListItemContentMediaImage", () => {
+  it("shows a GIF loading spinner until ready and resets it for another source", () => {
+    const { rerender } = render(
+      <DropListItemContentMediaImage src="https://example.com/first.gif" />
+    );
+    const loader = screen.getByRole("status", { name: "Loading image" });
+    expect(loader).toBeInTheDocument();
+    expect(loader).toHaveClass("tw-pointer-events-none", "tw-inset-0");
+    expect(loader.querySelector('[aria-hidden="true"]')).toHaveClass(
+      "motion-safe:tw-animate-spin"
+    );
+    fireEvent.load(screen.getByAltText("Drop media"));
+    expect(
+      screen.queryByRole("status", { name: "Loading image" })
+    ).not.toBeInTheDocument();
+    rerender(
+      <DropListItemContentMediaImage src="https://example.com/second.GIF?version=2" />
+    );
+    expect(
+      screen.getByRole("status", { name: "Loading image" })
+    ).toBeInTheDocument();
+  });
+
+  it("does not add a GIF spinner to static images", () => {
+    render(
+      <DropListItemContentMediaImage src="https://example.com/still.png" />
+    );
+    expect(
+      screen.queryByRole("status", { name: "Loading image" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("replaces the spinner on failure and restores it when retrying", () => {
+    render(
+      <DropListItemContentMediaImage src="https://example.com/failure.gif" />
+    );
+    fireEvent.error(screen.getByAltText("Drop media"));
+    expect(
+      screen.queryByRole("status", { name: "Loading image" })
+    ).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Retry" }));
+    expect(
+      screen.getByRole("status", { name: "Loading image" })
+    ).toBeInTheDocument();
+    fireEvent.load(screen.getByAltText("Drop media"));
+    expect(
+      screen.queryByRole("status", { name: "Loading image" })
+    ).not.toBeInTheDocument();
+  });
+
   it("keeps GIF quality controls in the popup and omits the inline preview badge", () => {
     render(<DropListItemContentMediaImage src="https://example.com/art.gif" />);
     fireEvent.load(screen.getByAltText("Drop media"));
