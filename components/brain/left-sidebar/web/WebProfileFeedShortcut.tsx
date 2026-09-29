@@ -55,25 +55,22 @@ function isModifiedClick(event: React.MouseEvent<HTMLAnchorElement>) {
 export function WebProfileFeedShortcut({
   basePath,
   isCollapsed,
+  mobile = false,
 }: {
   readonly basePath: string;
   readonly isCollapsed: boolean;
+  readonly mobile?: boolean;
 }) {
   const { activeWave } = useMyStream();
   const locale = useBrowserLocale();
   const isMobileLayoutViewport = useIsMobileLayoutViewport();
-  const href = isMobileLayoutViewport
-    ? `${basePath}?view=profile-feed`
-    : basePath;
-  const isActive = activeWave.id === null && !isMobileLayoutViewport;
+  const opensMobileFeed = mobile || isMobileLayoutViewport;
+  const href = opensMobileFeed ? `${basePath}?view=profile-feed` : basePath;
+  const isActive = activeWave.id === null && !opensMobileFeed;
   const profileFeedLabel = t(locale, "waves.mobile.profileFeed.title");
 
   const handleClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
-    if (
-      isMobileLayoutViewport ||
-      event.defaultPrevented ||
-      isModifiedClick(event)
-    ) {
+    if (opensMobileFeed || event.defaultPrevented || isModifiedClick(event)) {
       return;
     }
 
@@ -113,7 +110,7 @@ export function WebProfileFeedShortcut({
       onClick={handleClick}
       aria-label={t(locale, "waves.sidebar.profileFeedHeaderLabel")}
       aria-current={isActive ? "page" : undefined}
-      className="tailwind-scope tw-group/feed tw-inline-flex tw-min-h-9 tw-items-center tw-gap-2 tw-rounded-md tw-text-xl tw-font-semibold tw-tracking-tight tw-text-iron-50 tw-no-underline focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black desktop-hover:hover:tw-text-primary-300"
+      className="tailwind-scope tw-group/feed tw-inline-flex tw-min-h-9 tw-items-center tw-gap-2 tw-rounded-md tw-text-xl tw-font-semibold tw-tracking-tight tw-text-iron-50 tw-no-underline focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black desktop-hover:hover:tw-text-primary-300 touch-only:tw-min-h-11"
       data-tooltip-id={PROFILE_FEED_TOOLTIP_ID}
       data-tooltip-content={t(locale, "waves.sidebar.openProfileFeed")}
     >

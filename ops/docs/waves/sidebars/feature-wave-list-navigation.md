@@ -32,7 +32,9 @@ Wave and DM rows in the left list control which thread is open.
   collection controls.
 - The expanded web Waves panel header includes a secondary `Discover Waves`
   link to `/discover`.
-- Select the `Waves` heading and its small feed icon to open Profile Waves Feed.
+- Select the `Waves` heading and its small feed icon to open Profile Waves Feed
+  on desktop, mobile web, or in the native app. The mobile list heading is
+  `Waves`, and there is no separate feed card.
   On desktop, this clears the selected wave; on mobile web, it opens
   `/waves?view=profile-feed`. The feed's `Waves` link returns to the list.
   Hover or focus the heading for `Waves Feed`. The collapsed rail

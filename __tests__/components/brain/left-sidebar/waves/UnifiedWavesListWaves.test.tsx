@@ -181,11 +181,12 @@ it("renders structure even when no waves", () => {
     />
   );
   expect(container.firstChild).not.toBeNull();
-  expect(screen.getByTestId("header-All Waves")).toBeInTheDocument();
-  expect(screen.getByTestId("header-All Waves")).toHaveAttribute(
-    "data-padding",
-    "tw-px-4"
-  );
+  expect(
+    screen.getByRole("heading", { name: "Waves — Open Profile Waves Feed" })
+  ).toBeInTheDocument();
+  expect(
+    screen.getByRole("link", { name: "Waves — Open Profile Waves Feed" })
+  ).toHaveAttribute("href", "/waves?view=profile-feed");
   expect(screen.getByRole("button", { name: "Joined" })).toBeInTheDocument();
 });
 
@@ -352,7 +353,9 @@ it("renders announcement, highly rated preview, pinned, and one filterable botto
       ref={ref}
     />
   );
-  expect(screen.getByTestId("header-All Waves")).toBeInTheDocument();
+  expect(
+    screen.getByRole("heading", { name: "Waves — Open Profile Waves Feed" })
+  ).toBeInTheDocument();
   expect(screen.getByLabelText("Announcement waves")).toBeInTheDocument();
   expect(screen.getByText("Worth Checking Out")).toBeInTheDocument();
   expect(
@@ -397,8 +400,8 @@ it("uses darker section dividers in the app without changing the web tone", () =
     Array.from(container.querySelectorAll("div.tw-border-t"));
 
   expect(getSectionDividers()).toHaveLength(1);
-  expect(getSectionDividers()[0]).toHaveClass("tw-mb-1", "tw-mt-2");
-  expect(getSectionDividers()[0]).not.toHaveClass("tw-my-3");
+  expect(getSectionDividers()[0]).toHaveClass("tw-mt-2");
+  expect(getSectionDividers()[0]).not.toHaveClass("tw-mb-1", "tw-my-3");
   getSectionDividers().forEach((divider) => {
     expect(divider).toHaveClass("tw-border-iron-700");
     expect(divider).not.toHaveClass("tw-border-iron-800");
@@ -414,8 +417,8 @@ it("uses darker section dividers in the app without changing the web tone", () =
   );
 
   expect(getSectionDividers()).toHaveLength(1);
-  expect(getSectionDividers()[0]).toHaveClass("tw-my-3");
-  expect(getSectionDividers()[0]).not.toHaveClass("tw-mb-1", "tw-mt-2");
+  expect(getSectionDividers()[0]).toHaveClass("tw-mt-3");
+  expect(getSectionDividers()[0]).not.toHaveClass("tw-mt-2");
   getSectionDividers().forEach((divider) => {
     expect(divider).toHaveClass("tw-border-iron-800");
     expect(divider).not.toHaveClass("tw-border-iron-700");

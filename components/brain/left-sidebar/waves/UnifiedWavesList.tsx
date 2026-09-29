@@ -107,8 +107,8 @@ const UnifiedWavesList: React.FC<UnifiedWavesListProps> = ({
       <div
         className={
           isApp
-            ? "tw-h-full tw-bg-transparent tw-py-1"
-            : "tw-h-full tw-rounded-xl tw-bg-iron-950 tw-py-4 tw-ring-1 tw-ring-inset tw-ring-iron-800"
+            ? "tw-h-full tw-bg-transparent tw-py-1 [--wave-sidebar-background:#0d0d0e]"
+            : "tw-h-full tw-rounded-xl tw-bg-iron-950 tw-py-4 tw-ring-1 tw-ring-inset tw-ring-iron-800 [--wave-sidebar-background:theme(colors.iron.950)]"
         }
       >
         {!isApp && (

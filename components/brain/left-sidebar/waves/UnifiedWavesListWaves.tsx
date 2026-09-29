@@ -22,6 +22,7 @@ import {
   getHighlyRatedPreviewWaves,
 } from "./HighlyRatedWavesToggle";
 import SectionHeader from "./SectionHeader";
+import { WebProfileFeedShortcut } from "../web/WebProfileFeedShortcut";
 import type { VirtualItem } from "@/hooks/useVirtualizedWaves";
 import { useVirtualizedWaves } from "@/hooks/useVirtualizedWaves";
 import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
@@ -69,12 +70,12 @@ const SIDEBAR_LOCALE = DEFAULT_LOCALE;
 
 const APP_SECTION_DIVIDER_STYLES = {
   colorClass: "tw-border-iron-800",
-  firstSpacingClass: "tw-my-3",
+  firstSpacingClass: "tw-mt-3",
 } as const;
 
 const DESKTOP_SECTION_DIVIDER_STYLES = {
   colorClass: "tw-border-iron-700",
-  firstSpacingClass: "tw-mb-1 tw-mt-2",
+  firstSpacingClass: "tw-mt-2",
 } as const;
 
 const getSectionDividerStyles = (isApp: boolean) =>
@@ -429,7 +430,16 @@ const UnifiedWavesListWaves = forwardRef<
 
     return (
       <div className="tw-flex tw-flex-col">
-        {!hideHeaders && (
+        {!hideHeaders && !isDirectMessage && (
+          <h2 className="tw-m-0 tw-px-4">
+            <WebProfileFeedShortcut
+              basePath="/waves"
+              isCollapsed={false}
+              mobile
+            />
+          </h2>
+        )}
+        {!hideHeaders && isDirectMessage && (
           <SectionHeader
             label={t(SIDEBAR_LOCALE, "waves.sidebar.allWaves")}
             paddingClassName="tw-px-4"

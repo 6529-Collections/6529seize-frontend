@@ -76,4 +76,20 @@ describe("WebProfileFeedShortcut", () => {
     expect(link).toHaveAttribute("href", "/waves?view=profile-feed");
     expect(link).not.toHaveAttribute("aria-current");
   });
+  it("keeps native feed navigation even on a wide app viewport", () => {
+    render(
+      <WebProfileFeedShortcut basePath="/waves" isCollapsed={false} mobile />
+    );
+    const link = screen.getByRole("link", {
+      name: "Waves — Open Profile Waves Feed",
+    });
+    expect(link).toHaveAttribute("href", "/waves?view=profile-feed");
+    expect(link).not.toHaveAttribute("aria-current");
+    expect(link).toHaveTextContent("Waves");
+    expect(link.querySelector("svg")).toBeInTheDocument();
+    const click = createEvent.click(link);
+    fireEvent(link, click);
+    expect(click.defaultPrevented).toBe(false);
+    expect(setActiveWave).not.toHaveBeenCalled();
+  });
 });

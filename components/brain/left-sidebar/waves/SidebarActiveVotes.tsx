@@ -142,7 +142,7 @@ export function SidebarActiveVotes({
       {moreBelow && !collapsed && (
         <div
           aria-hidden="true"
-          className="tw-pointer-events-none tw-absolute tw-inset-x-0 tw-bottom-0 tw-h-3 tw-bg-gradient-to-t tw-from-black tw-to-transparent"
+          className="tw-pointer-events-none tw-absolute tw-inset-x-0 tw-bottom-0 tw-h-3 tw-bg-gradient-to-t tw-from-[var(--wave-sidebar-background,#000)] tw-to-transparent"
         />
       )}
     </div>
