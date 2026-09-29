@@ -4,8 +4,8 @@ import {
   AdditionalMedia,
   MemesSubmissionAdditionalInfoKey,
 } from "@/components/waves/memes/submission/types/OperationalData";
-import { DropImagePreview } from "@/components/drops/view/item/content/media/DropImagePreview";
-import SeizeVideoPlayer from "@/components/drops/view/item/content/media/SeizeVideoPlayer";
+import DropListItemContentMediaImage from "@/components/drops/view/item/content/media/DropListItemContentMediaImage";
+import { WaveDropAdditionalInfoVideo } from "./WaveDropAdditionalInfoVideo";
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 import { getFileInfoFromUrl } from "@/helpers/file.helpers";
 import { ImageScale } from "@/helpers/image.helpers";
@@ -139,13 +139,10 @@ export const WaveDropAdditionalInfo = ({
           </h3>
           <div className="tw-flex tw-justify-center">
             <div className="tw-relative tw-aspect-[4/3] tw-w-full tw-max-w-2xl tw-overflow-hidden tw-bg-white/[0.02]">
-              <DropImagePreview
-                originalSrc={previewImage}
+              <DropListItemContentMediaImage
+                src={previewImage}
                 imageScale={ImageScale.AUTOx600}
-                alt="Preview image"
-                fill
-                sizes="(min-width: 768px) 400px, 100vw"
-                className="tw-object-contain"
+                imageObjectPosition="center"
               />
             </div>
           </div>
@@ -159,12 +156,10 @@ export const WaveDropAdditionalInfo = ({
           </h3>
           <div className="tw-flex tw-justify-center">
             <div className="tw-flex tw-w-full tw-max-w-2xl tw-justify-center">
-              <SeizeVideoPlayer
+              <WaveDropAdditionalInfoVideo
                 src={promoVideo}
-                template="watch-media"
                 preload="metadata"
                 layout="prominent"
-                align="center"
               />
             </div>
           </div>
@@ -177,7 +172,7 @@ export const WaveDropAdditionalInfo = ({
             Additional Media
           </h3>
           <div className="tw-grid tw-grid-cols-2 tw-gap-3 md:tw-gap-4">
-            {displayedMedia.map((item, index) => (
+            {displayedMedia.map((item) => (
               <div
                 key={item.url}
                 className={`tw-relative tw-overflow-hidden tw-bg-white/[0.02] ${
@@ -187,20 +182,16 @@ export const WaveDropAdditionalInfo = ({
                 }`}
               >
                 {item.isVideo ? (
-                  <SeizeVideoPlayer
+                  <WaveDropAdditionalInfoVideo
                     src={item.url}
-                    template="watch-media"
                     preload="none"
                     layout="fill"
                   />
                 ) : (
-                  <DropImagePreview
-                    originalSrc={item.url}
+                  <DropListItemContentMediaImage
+                    src={item.url}
                     imageScale={ImageScale.AUTOx600}
-                    alt={`Additional media ${index + 1}`}
-                    fill
-                    sizes="(min-width: 816px) 376px, calc(50vw - 1.5rem)"
-                    className="tw-object-contain"
+                    imageObjectPosition="center"
                   />
                 )}
               </div>

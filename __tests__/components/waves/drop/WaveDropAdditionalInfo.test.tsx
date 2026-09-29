@@ -1,33 +1,72 @@
-import { render, screen } from "@testing-library/react";
+import { forwardRef, type ComponentProps } from "react";
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import { WaveDropAdditionalInfo } from "@/components/waves/drop/WaveDropAdditionalInfo";
 import { MemesSubmissionAdditionalInfoKey } from "@/components/waves/memes/submission/types/OperationalData";
-import { DropImagePreview } from "@/components/drops/view/item/content/media/DropImagePreview";
+import type SeizeVideoPlayer from "@/components/drops/view/item/content/media/SeizeVideoPlayer";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
+import { downloadMediaUrl } from "@/helpers/media-download.helpers";
 
-const mockVideoPlayer = jest.fn((props: any) => (
-  <video data-testid="video-player" preload={props.preload} />
-));
+type MockImageProps = ComponentProps<"img"> & {
+  readonly fill?: boolean;
+  readonly unoptimized?: boolean;
+};
+
+const mockVideoPlayer = jest.fn(
+  (props: ComponentProps<typeof SeizeVideoPlayer>) => (
+    <div>
+      <video data-testid="video-player" preload={props.preload} />
+      {props.onOpen && (
+        <button onClick={props.onOpen}>{props.openLabel}</button>
+      )}
+      <button onClick={props.onDownload} disabled={props.isDownloading}>
+        Download video
+      </button>
+    </div>
+  )
+);
 
 jest.mock("next/image", () => ({
   __esModule: true,
-  default: (props: any) => <img {...props} alt={props.alt ?? ""} />,
+  default: forwardRef<HTMLImageElement, MockImageProps>(function MockImage(
+    { fill: _fill, unoptimized: _unoptimized, alt, ...props },
+    ref
+  ) {
+    return <img {...props} ref={ref} alt={alt ?? ""} />;
+  }),
 }));
-
-jest.mock(
-  "@/components/drops/view/item/content/media/DropImagePreview",
-  () => ({
-    DropImagePreview: jest.fn((props: any) => (
-      <img src={props.originalSrc} alt={props.alt ?? ""} />
-    )),
-  })
-);
 
 jest.mock(
   "@/components/drops/view/item/content/media/SeizeVideoPlayer",
   () => ({
     __esModule: true,
-    default: (props: any) => mockVideoPlayer(props),
+    default: (props: ComponentProps<typeof SeizeVideoPlayer>) =>
+      mockVideoPlayer(props),
   })
 );
+
+jest.mock("@/hooks/useCapacitor", () => ({
+  __esModule: true,
+  default: () => ({ isCapacitor: false }),
+}));
+jest.mock("@/hooks/useDeviceInfo", () => ({
+  __esModule: true,
+  default: () => ({ hasTouchScreen: false }),
+}));
+jest.mock("@/hooks/useInView", () => ({ useInView: () => [jest.fn(), true] }));
+jest.mock("@/hooks/useFullScreenSupported", () => ({
+  useFullScreenSupported: () => true,
+}));
+jest.mock("@/helpers/media-download.helpers", () => ({
+  downloadMediaUrl: jest.fn().mockResolvedValue(undefined),
+  getDownloadFilenameFromUrl: () => "media",
+  triggerDirectDownload: jest.fn(),
+}));
 
 jest.mock("@/components/ipfs/IPFSContext", () => ({
   resolveIpfsUrlSync: (url: string) =>
@@ -37,13 +76,11 @@ jest.mock("@/components/ipfs/IPFSContext", () => ({
 }));
 
 const buildDrop = (metadata: { data_key: string; data_value: string }[]) =>
-  ({ metadata }) as any;
-
-const previewImageMock = DropImagePreview as jest.Mock;
+  ({ metadata }) as ExtendedDrop;
 
 describe("WaveDropAdditionalInfo", () => {
   beforeEach(() => {
-    previewImageMock.mockClear();
+    jest.mocked(downloadMediaUrl).mockClear();
     mockVideoPlayer.mockClear();
   });
 
@@ -168,7 +205,7 @@ describe("WaveDropAdditionalInfo", () => {
     expect(screen.queryByText("Promo Video")).not.toBeInTheDocument();
   });
 
-  it("uses original preview image as fallback", () => {
+  it("resolves IPFS preview images without automatically loading the original", () => {
     const previewImage = "ipfs://preview-image";
     const resolvedPreviewImage = "https://ipfs-gateway.test/ipfs/preview-image";
     const additionalMedia = JSON.stringify({
@@ -188,14 +225,111 @@ describe("WaveDropAdditionalInfo", () => {
       />
     );
 
-    const previewImageCall = previewImageMock.mock.calls.find(
-      ([props]) => props.alt === "Preview image"
+    const image = screen.getByRole("img", { name: "Drop media" });
+    expect(image.getAttribute("src")).toContain(
+      encodeURIComponent(resolvedPreviewImage)
+    );
+    expect(image).not.toHaveAttribute("src", resolvedPreviewImage);
+  });
+
+  it("opens each supplemental image with actions for its own original URL", async () => {
+    const urls = [
+      "https://example.com/preview.jpg",
+      "https://example.com/extra.jpg",
+    ];
+    const open = jest
+      .spyOn(globalThis.window, "open")
+      .mockImplementation(() => null);
+    render(
+      <WaveDropAdditionalInfo
+        drop={buildDrop([
+          {
+            data_key: MemesSubmissionAdditionalInfoKey.ADDITIONAL_MEDIA,
+            data_value: JSON.stringify({
+              preview_image: urls[0],
+              artwork_commentary_media: [urls[1]],
+            }),
+          },
+        ])}
+      />
     );
 
-    expect(previewImageCall?.[0]).toEqual(
-      expect.objectContaining({
-        originalSrc: resolvedPreviewImage,
-      })
+    for (const [index, url] of urls.entries()) {
+      fireEvent.load(
+        screen.getAllByRole("img", { name: "Drop media" })[index]!
+      );
+      fireEvent.click(
+        screen.getAllByRole("button", { name: "Open image preview" })[index]!
+      );
+      const image = screen.getByRole("img", { name: "Expanded image preview" });
+      expect(image.getAttribute("src")).toContain(encodeURIComponent(url));
+      const modal = screen.getByRole("button", {
+        name: "Close media",
+      }).parentElement!;
+      expect(
+        within(modal).getByRole("button", { name: "Full screen" })
+      ).toBeInTheDocument();
+      fireEvent.click(
+        within(modal).getByRole("button", { name: "Open in new tab" })
+      );
+      expect(open).toHaveBeenLastCalledWith(
+        url,
+        "_blank",
+        "noopener,noreferrer"
+      );
+      fireEvent.click(
+        within(modal).getByRole("button", { name: "Download media" })
+      );
+      await waitFor(() =>
+        expect(downloadMediaUrl).toHaveBeenLastCalledWith(
+          expect.objectContaining({ url })
+        )
+      );
+      fireEvent.click(screen.getByRole("button", { name: "Close media" }));
+      expect(
+        screen.queryByRole("img", { name: "Expanded image preview" })
+      ).not.toBeInTheDocument();
+    }
+    open.mockRestore();
+  });
+
+  it("offers original-file actions on promo and supporting videos without changing preloads", async () => {
+    const promo = "https://example.com/promo.mp4";
+    const supporting = "https://example.com/support.MOV?version=1";
+    const open = jest
+      .spyOn(globalThis.window, "open")
+      .mockImplementation(() => null);
+    render(
+      <WaveDropAdditionalInfo
+        drop={buildDrop([
+          {
+            data_key: MemesSubmissionAdditionalInfoKey.ADDITIONAL_MEDIA,
+            data_value: JSON.stringify({
+              promo_video: promo,
+              artwork_commentary_media: [supporting],
+            }),
+          },
+        ])}
+      />
     );
+    const videos = screen.getAllByTestId("video-player");
+    expect(videos[0]).toHaveAttribute("preload", "metadata");
+    expect(videos[1]).toHaveAttribute("preload", "none");
+    expect(
+      screen.getAllByRole("button", { name: "Open in new tab" })
+    ).toHaveLength(1);
+    fireEvent.click(screen.getByRole("button", { name: "Open in new tab" }));
+    expect(open).toHaveBeenCalledWith(promo, "_blank", "noopener,noreferrer");
+    for (const [index, url] of [promo, supporting].entries()) {
+      fireEvent.click(
+        screen.getAllByRole("button", { name: "Download video" })[index]!
+      );
+      await waitFor(() =>
+        expect(downloadMediaUrl).toHaveBeenLastCalledWith(
+          expect.objectContaining({ url })
+        )
+      );
+    }
+    open.mockRestore();
   });
 });

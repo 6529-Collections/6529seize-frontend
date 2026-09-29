@@ -4140,6 +4140,7 @@ export const EN_US_MESSAGES = {
   "drop.media.openPreview": "Open image preview",
   "drop.media.openMedia": "Open drop media",
   "drop.media.saveDialogTitle": "Save image",
+  "drop.additionalInfo.saveVideo": "Save video",
   "drop.media.processingFailed": "Image processing failed.",
   "drop.media.processingTimedOut": "Image processing timed out.",
   "media.interactive.untrustedContent": "Untrusted interactive content",
