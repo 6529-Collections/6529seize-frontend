@@ -523,7 +523,7 @@ it("keeps the overlaid score inside the wave link and opens details on hover", a
   expect(scoreBadge).toHaveClass(
     "tw-absolute",
     "-tw-bottom-1",
-    "-tw-right-1.5",
+    "tw-right-0",
     "tw-h-6",
     "tw-w-7",
     "tw-cursor-pointer"

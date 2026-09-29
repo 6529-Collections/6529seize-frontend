@@ -342,7 +342,7 @@ it("keeps the overlaid touch score inside the wave navigation link", () => {
   expect(scoreBadge).toHaveClass(
     "tw-absolute",
     "-tw-bottom-1.5",
-    "-tw-right-2",
+    "tw-right-0",
     "tw-h-6",
     "tw-w-7",
     "tw-cursor-pointer"

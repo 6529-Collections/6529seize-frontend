@@ -58,7 +58,7 @@ export function SidebarDiscovery({
       <div className="tw-flex tw-items-center tw-gap-1 tw-px-4">
         <div
           role="tablist"
-          className="tw-m-0 tw-flex tw-min-w-0 tw-flex-1 tw-gap-4 tw-border-0 tw-p-0"
+          className="tw-m-0 tw-grid tw-min-w-0 tw-flex-1 tw-grid-cols-2 tw-gap-2 tw-border-0 tw-p-0"
           aria-label={t(locale, "waves.discovery.label")}
         >
           {([ACTIVE_VOTES_TAB, "recommendations"] as const).map((tab) => (
@@ -94,16 +94,18 @@ export function SidebarDiscovery({
                 ).current?.focus();
               }}
               onClick={() => select(tab)}
-              className={`tw-flex tw-min-h-10 tw-min-w-0 tw-items-center tw-justify-start tw-whitespace-nowrap tw-rounded-none tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-border-solid tw-bg-transparent tw-px-0 tw-py-2 tw-text-xs tw-font-medium focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 touch-only:tw-min-h-11 ${selected === tab ? "tw-border-primary-400 tw-text-white" : "tw-border-transparent tw-text-iron-400"}`}
+              className={`tw-flex tw-min-h-10 tw-min-w-0 tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-none tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-border-solid tw-bg-transparent tw-px-0 tw-py-2 tw-text-xs tw-font-medium focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 touch-only:tw-min-h-11 ${selected === tab ? "tw-border-primary-400 tw-text-white" : "tw-border-transparent tw-text-iron-400"}`}
             >
-              {t(
-                locale,
-                tab === ACTIVE_VOTES_TAB
-                  ? "waves.discovery.activeVotes"
-                  : "waves.discovery.recommendations"
-              )}
+              <span className="tw-truncate">
+                {t(
+                  locale,
+                  tab === ACTIVE_VOTES_TAB
+                    ? "waves.discovery.activeVotes"
+                    : "waves.discovery.recommendations"
+                )}
+              </span>
               {tab === ACTIVE_VOTES_TAB && count !== undefined && (
-                <span className="tw-ml-1 tw-inline-block tw-rounded-full tw-bg-primary-500/20 tw-px-1.5 tw-text-primary-300">
+                <span className="tw-ml-1 tw-inline-block tw-shrink-0 tw-rounded-full tw-bg-primary-500/20 tw-px-1.5 tw-text-primary-300">
                   {formatInteger(locale, count)}
                 </span>
               )}
@@ -152,27 +154,27 @@ export function SidebarDiscovery({
               </p>
               <div className="tw-flex-1">
                 {votes.isPending && (
-                  <output className="tw-m-0 tw-block tw-py-2 tw-text-xs tw-text-iron-400">
+                  <output className="tw-m-0 tw-flex tw-min-h-12 tw-items-center tw-py-2 tw-text-xs tw-leading-4 tw-text-iron-400">
                     {t(locale, "waves.discovery.loading")}
                   </output>
                 )}
                 {votes.isError && (
                   <p
                     role="alert"
-                    className="tw-m-0 tw-py-2 tw-text-xs tw-text-iron-400"
+                    className="tw-m-0 tw-flex tw-min-h-12 tw-flex-wrap tw-items-center tw-gap-x-1 tw-py-2 tw-text-xs tw-leading-4 tw-text-iron-400"
                   >
-                    {t(locale, "waves.discovery.error")}{" "}
+                    <span>{t(locale, "waves.discovery.error")}</span>
                     <button
                       type="button"
                       onClick={() => void votes.refetch()}
-                      className="tw-min-h-8 tw-border-0 tw-bg-transparent tw-p-0 tw-text-xs tw-text-primary-300"
+                      className="tw-inline-flex tw-min-h-8 tw-items-center tw-border-0 tw-bg-transparent tw-p-0 tw-text-xs tw-leading-4 tw-text-primary-300"
                     >
                       {t(locale, "waves.discovery.retry")}
                     </button>
                   </p>
                 )}
                 {isEmpty && (
-                  <output className="tw-m-0 tw-block tw-py-2 tw-text-xs tw-text-iron-300">
+                  <output className="tw-m-0 tw-flex tw-min-h-12 tw-items-center tw-py-2 tw-text-xs tw-leading-4 tw-text-iron-300">
                     {t(locale, "waves.discovery.emptyVotes")}
                   </output>
                 )}
