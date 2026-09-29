@@ -8,8 +8,8 @@ subject to wave visibility rules.
 
 ## Active Votes
 
-Open `/discover?view=active-votes`, or select `View all active votes` in the
-Waves sidebar. The page shows the total accessible count and named wave cards.
+Open `/discover?view=active-votes`, or select `View all` in the Active Votes
+sidebar heading. The page shows the total accessible count and named wave cards.
 Cards show the voting end or next decision when available, otherwise `Voting
 open`. Votes closing soonest appear first; open-ended votes appear last.
 Use `Load more` to browse additional results.
@@ -26,7 +26,7 @@ Loading, no-active-votes, and request-failure states are explicit. Select
 ## Worth Checking Out
 
 Open `/discover?view=recommendations&sort=QUALITY` from the sidebar's
-`View all recommendations` link. The existing discovery grid, sort options,
+`View all` link in the Worth Checking Out sidebar heading. The existing discovery grid, sort options,
 score filters and pagination remain available. Switching views preserves those
 URL settings. Recommendations focus on waves outside the viewer's followed set.
 Signed-out visitors see the heading `Active discussions`, without following

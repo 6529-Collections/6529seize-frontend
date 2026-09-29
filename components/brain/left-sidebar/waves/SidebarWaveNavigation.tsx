@@ -32,7 +32,7 @@ export function SidebarWaveNavigationControls({
     navigation.queryText.trim().length >= 3 &&
     (!navigation.queryEnabled || navigation.results.isFetching);
   return (
-    <div className="tailwind-scope tw-sticky tw-top-0 tw-z-10 tw-bg-black tw-px-4 tw-py-2">
+    <div className="tailwind-scope tw-sticky tw-top-0 tw-z-10 tw-bg-[var(--wave-sidebar-background,#000)] tw-px-4 tw-py-2">
       <label htmlFor={inputId} className="tw-sr-only">
         {t(locale, "waves.sidebar.findWave")}
       </label>

@@ -46,7 +46,8 @@ Use this area for wave and direct-message tasks:
   `/waves?view=profile-feed`; use `Waves` at the top of the feed to return.
 - Opening a feed post enters its Wave conversation. Browser Back returns to the
   feed, while the Wave navigation control returns to the main Wave list.
-- The native app keeps its existing Profile Waves Feed entry in the Waves view.
+- In the native app, the same `Waves` heading and feed icon open the feed; there
+  is no separate Profile Waves Feed card.
 
 ## Access and Availability
 

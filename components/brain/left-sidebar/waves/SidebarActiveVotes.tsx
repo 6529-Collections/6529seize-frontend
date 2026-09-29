@@ -66,7 +66,7 @@ export function SidebarActiveVotes({
         ref={scrollRef}
         aria-label={t(locale, "waves.discovery.voteList")}
         tabIndex={items.length > 2 && !collapsed ? 0 : -1}
-        className="tw-max-h-32 tw-overflow-y-auto tw-overscroll-y-contain tw-rounded-lg [scrollbar-color:theme(colors.iron.700)_transparent] [scrollbar-width:thin] focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+        className="tw-max-h-28 tw-overflow-y-auto tw-overscroll-y-contain tw-rounded-lg [scrollbar-color:theme(colors.iron.700)_transparent] [scrollbar-width:thin] focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
       >
         <div ref={contentRef}>
           {items.map((vote) => (
@@ -142,7 +142,7 @@ export function SidebarActiveVotes({
       {moreBelow && !collapsed && (
         <div
           aria-hidden="true"
-          className="tw-pointer-events-none tw-absolute tw-inset-x-0 tw-bottom-0 tw-h-3 tw-bg-gradient-to-t tw-from-black tw-to-transparent"
+          className="tw-pointer-events-none tw-absolute tw-inset-x-0 tw-bottom-0 tw-h-3 tw-bg-gradient-to-t tw-from-[var(--wave-sidebar-background,#000)] tw-to-transparent"
         />
       )}
     </div>
