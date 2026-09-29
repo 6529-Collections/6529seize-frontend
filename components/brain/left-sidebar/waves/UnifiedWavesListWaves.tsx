@@ -360,10 +360,7 @@ const UnifiedWavesListWaves = forwardRef<
 
     const virtual = useVirtualizedWaves<AnimatedSidebarWaveTreeRow>({
       items: virtualizedRows,
-      key: isDirectMessage
-        ? virtualizedKey
-        : `${virtualizedKey}:${navigation.scrollKey}`,
-      isActive: !navigation.searching,
+      key: virtualizedKey,
       scrollContainerRef,
       listContainerRef,
       rowHeight: getSidebarRowHeight,

@@ -430,10 +430,7 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
 
   const virtual = useVirtualizedWaves<AnimatedSidebarWaveTreeRow>({
     items: virtualizedRows,
-    key: isDirectMessage
-      ? virtualizedKey
-      : `${virtualizedKey}:${navigation.scrollKey}`,
-    isActive: !navigation.searching,
+    key: virtualizedKey,
     scrollContainerRef: scrollContainerRef ?? listContainerRef,
     listContainerRef,
     rowHeight: getSidebarRowHeight,
