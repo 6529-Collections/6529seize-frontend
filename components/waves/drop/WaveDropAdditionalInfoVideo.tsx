@@ -22,8 +22,8 @@ export function WaveDropAdditionalInfoVideo({
       dialogTitle: t(locale, "drop.additionalInfo.saveVideo"),
       mimeType: "video",
       labels: {
-        openInBrowser: t(locale, "media.openInBrowser"),
-        openInNewTab: t(locale, "media.openInNewTab"),
+        openInBrowser: t(locale, "theMemes.detail.art.media.openInBrowser"),
+        openInNewTab: t(locale, "theMemes.detail.art.media.openInNewTab"),
       },
     });
 
