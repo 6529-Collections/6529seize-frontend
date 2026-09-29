@@ -32,10 +32,13 @@ export function SidebarDiscovery({
   const votes = useActiveWaveVotes(2);
   const count = votes.data?.pages[0]?.count;
   const isEmpty = !votes.isPending && !votes.isError && count === 0;
-  const [savedChoice, setChoice] =
-    useWaveSidebarPreference("wave-discovery-tab");
+  const [savedChoice, setChoice] = useWaveSidebarPreference(
+    "wave-discovery-tab",
+    "local"
+  );
   const [collapsePreference, setCollapsePreference] = useWaveSidebarPreference(
-    "wave-discovery-collapsed"
+    "wave-discovery-collapsed",
+    "local"
   );
   const collapsed = collapsePreference === "true";
   const defaultTab = count === 0 ? "recommendations" : ACTIVE_VOTES_TAB;
@@ -224,7 +227,7 @@ export function SidebarDiscovery({
               <p className="tw-m-0 tw-mb-2 tw-text-xs tw-leading-4 tw-text-iron-400">
                 {t(locale, "waves.discovery.recommendationsDescription")}
               </p>
-              <div className="tw-grid tw-flex-1 tw-content-center">
+              <div className="tw-grid tw-min-w-0 tw-flex-1 tw-grid-cols-1 tw-content-center">
                 {previewItems.length > 0 ? (
                   <HighlyRatedWavesToggle
                     isTouchPreview={isTouchPreview}

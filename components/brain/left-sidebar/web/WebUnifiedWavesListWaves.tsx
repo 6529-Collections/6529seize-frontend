@@ -131,19 +131,23 @@ interface WebUnifiedWavesListWavesProps {
 }
 
 function CreateWaveButton({ onClick }: { readonly onClick: () => void }) {
+  const locale = useBrowserLocale();
+  const label = t(locale, "waves.sidebar.createWave");
   return (
-    <div
-      data-tooltip-id="create-wave-tooltip"
-      data-tooltip-content="Create wave"
-    >
+    <div className="tw-inline-flex tw-items-center tw-justify-center touch-only:tw-size-11">
       <Button
         onClick={onClick}
-        aria-label="Create wave"
+        aria-label={label}
+        data-tooltip-id="create-wave-tooltip"
+        data-tooltip-content={label}
         variant="primary"
         size={null}
-        className="tw-size-9 tw-p-0"
+        className="tw-relative tw-size-7 tw-p-0 touch-only:after:tw-absolute touch-only:after:-tw-inset-2 touch-only:after:tw-content-['']"
       >
-        <FontAwesomeIcon icon={faPlus} className="tw-size-4 tw-flex-shrink-0" />
+        <FontAwesomeIcon
+          icon={faPlus}
+          className="tw-size-3.5 tw-flex-shrink-0"
+        />
       </Button>
     </div>
   );

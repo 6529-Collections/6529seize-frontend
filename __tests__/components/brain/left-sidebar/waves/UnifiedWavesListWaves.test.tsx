@@ -191,15 +191,15 @@ it("renders structure even when no waves", () => {
 
 it("calculates how many highly rated preview avatars fit", () => {
   expect(getFittingPreviewCount({ itemCount: 0, width: 220 })).toBe(0);
-  expect(getFittingPreviewCount({ itemCount: 10, width: 0 })).toBe(10);
+  expect(getFittingPreviewCount({ itemCount: 10, width: 0 })).toBe(6);
   expect(getFittingPreviewCount({ itemCount: 10, width: 32 })).toBe(1);
-  expect(getFittingPreviewCount({ itemCount: 10, width: 70 })).toBe(2);
-  expect(getFittingPreviewCount({ itemCount: 12, width: 1000 })).toBe(10);
+  expect(getFittingPreviewCount({ itemCount: 10, width: 76 })).toBe(2);
+  expect(getFittingPreviewCount({ itemCount: 12, width: 1000 })).toBe(6);
   expect(
     getFittingPreviewCount({
       isTouchPreview: true,
       itemCount: 10,
-      width: 220,
+      width: 224,
     })
   ).toBe(4);
 });
@@ -215,9 +215,9 @@ it("keeps the active highly rated preview visible within the capped strip", () =
   expect(
     getVisibleHighlyRatedPreviewItems({
       previewItems,
-      visiblePreviewCount: 10,
+      visiblePreviewCount: 6,
     }).map((item) => item.wave.id)
-  ).toEqual(["h1", "h2", "h3", "h4", "h5", "h6", "h7", "h8", "h9", "h11"]);
+  ).toEqual(["h1", "h2", "h3", "h4", "h5", "h11"]);
   expect(
     getVisibleHighlyRatedPreviewItems({
       previewItems,
@@ -639,7 +639,7 @@ it("opens the combined highly rated score card when the wave link receives focus
   expect(screen.getByText("Keyboard Discovery")).toBeInTheDocument();
 });
 
-it("caps highly rated previews at ten without rendering an overflow control", () => {
+it("caps highly rated previews at six without rendering an overflow control", () => {
   const waves = Array.from({ length: 11 }, (_, index) =>
     createMockMinimalWave({
       id: `h${index + 1}`,
@@ -657,8 +657,8 @@ it("caps highly rated previews at ten without rendering an overflow control", ()
   );
 
   expect(screen.getByTestId("preview-avatar-h1")).toBeInTheDocument();
-  expect(screen.getByTestId("preview-avatar-h10")).toBeInTheDocument();
-  expect(screen.queryByTestId("preview-avatar-h11")).toBeNull();
+  expect(screen.getByTestId("preview-avatar-h6")).toBeInTheDocument();
+  expect(screen.queryByTestId("preview-avatar-h7")).toBeNull();
   expect(
     screen.queryByRole("button", {
       name: /more Highly Rated/,

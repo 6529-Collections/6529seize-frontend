@@ -4325,6 +4325,7 @@ export const EN_US_MESSAGES = {
   "waves.sidebar.openProfileFeed": "Waves Feed",
   "waves.sidebar.profileFeedHeaderLabel": "Waves — Open Profile Waves Feed",
   "waves.sidebar.findWave": "Find a wave…",
+  "waves.sidebar.createWave": "Create wave",
   "waves.sidebar.clearSearch": "Clear wave search",
   "waves.sidebar.searchResultCount": "Waves shown: {count}",
   "waves.sidebar.searchResults": "Search results · All waves",

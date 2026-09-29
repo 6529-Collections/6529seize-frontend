@@ -24,6 +24,7 @@ const renderDiscovery = () =>
   render(<SidebarDiscovery previewItems={[]} isTouchPreview={false} />);
 beforeEach(() => {
   sessionStorage.clear();
+  localStorage.clear();
   jest.clearAllMocks();
   mockVotes = {
     data: {
@@ -148,7 +149,7 @@ it("keeps an explicitly selected Active Votes tab open when its last vote ends",
 it.each(["loading", "error"])(
   "does not mistake %s for an empty votes result",
   (state) => {
-    sessionStorage.setItem("wave-discovery-tab", "active-votes");
+    localStorage.setItem("wave-discovery-tab", "active-votes");
     mockVotes = {
       data: state === "error" ? { pages: [{ count: 0, data: [] }] } : undefined,
       isPending: state === "loading",
@@ -215,4 +216,24 @@ it("wraps tab keyboard navigation in both directions and supports End", () => {
     screen.getByRole("button", { name: "Collapse wave discovery" })
   );
   expect(panel).toHaveAttribute("tabindex", "-1");
+});
+
+it("retains discovery preferences after the browser session ends", () => {
+  const first = renderDiscovery();
+  fireEvent.click(screen.getByRole("tab", { name: "Worth a Look" }));
+  fireEvent.click(
+    screen.getByRole("button", { name: "Collapse wave discovery" })
+  );
+  expect(localStorage.getItem("wave-discovery-tab")).toBe("recommendations");
+  expect(localStorage.getItem("wave-discovery-collapsed")).toBe("true");
+  first.unmount();
+  sessionStorage.clear();
+  renderDiscovery();
+  expect(screen.getByRole("tab", { name: "Worth a Look" })).toHaveAttribute(
+    "aria-selected",
+    "true"
+  );
+  expect(
+    screen.getByRole("button", { name: "Expand wave discovery" })
+  ).toHaveAttribute("aria-expanded", "false");
 });

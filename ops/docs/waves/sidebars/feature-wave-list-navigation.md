@@ -59,8 +59,10 @@ when the desktop feed is active or the heading is hovered or keyboard-focused.
   tab remains available. Loading and request failures are separate states.
 - The down chevron collapses only the discovery content, including its description;
   the right chevron expands it. Choosing either tab expands
-  it. The visit remembers the tab and collapse state; without a saved choice,
+  it. This browser remembers the tab and collapse state across visits; without a saved choice,
   active votes take priority when any exist, otherwise recommendations appear.
+- Worth a Look shows up to six spaced previews, with fewer on narrow screens.
+- The compact plus button retains its light colour and shows `Create wave` on hover or keyboard focus.
 - `View all active votes` opens `/discover?view=active-votes`.
   `View all recommendations` opens `/discover?view=recommendations&sort=QUALITY`.
 - `Find a wave…` searches all accessible non-DM waves, independently of the

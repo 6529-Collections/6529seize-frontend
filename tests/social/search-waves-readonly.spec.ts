@@ -390,6 +390,13 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
       )
     ).click();
     await expect(votes).toBeVisible();
+    await page.evaluate(() => sessionStorage.clear());
+    await page.reload();
+    await expect(
+      await firstVisible(
+        page.getByRole("button", { name: "Expand wave discovery" })
+      )
+    ).toHaveAttribute("aria-expanded", "false");
     await votes.click();
     const discovery = page
       .getByRole("region", { name: "Wave discovery", exact: true })

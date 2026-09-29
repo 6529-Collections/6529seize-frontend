@@ -14,29 +14,35 @@ function subscribe(listener: () => void) {
   };
 }
 
-/** Session preferences survive navigation, with an SSR-safe initial snapshot. */
-export function useWaveSidebarPreference(key: string) {
+/** Browser-local preferences with session scope by default and an SSR-safe snapshot. */
+export function useWaveSidebarPreference(
+  key: string,
+  storage: "session" | "local" = "session"
+) {
+  const fallbackKey = `${storage}:${key}`;
   const read = useCallback(() => {
-    if (fallback.has(key)) return fallback.get(key) ?? null;
+    if (fallback.has(fallbackKey)) return fallback.get(fallbackKey) ?? null;
     try {
-      return sessionStorage.getItem(key);
+      const store = storage === "local" ? localStorage : sessionStorage;
+      return store.getItem(key);
     } catch {
-      return fallback.get(key) ?? null;
+      return fallback.get(fallbackKey) ?? null;
     }
-  }, [key]);
+  }, [key, storage, fallbackKey]);
   const value = useSyncExternalStore(subscribe, read, () => null);
   const setValue = useCallback(
     (next: string) => {
       try {
-        sessionStorage.setItem(key, next);
-        fallback.delete(key);
+        const store = storage === "local" ? localStorage : sessionStorage;
+        store.setItem(key, next);
+        fallback.delete(fallbackKey);
       } catch {
-        fallback.set(key, next);
+        fallback.set(fallbackKey, next);
         // Keep navigation usable when browser storage is unavailable.
       }
       window.dispatchEvent(new Event(EVENT));
     },
-    [key]
+    [key, storage, fallbackKey]
   );
   return [value, setValue] as const;
 }

@@ -373,7 +373,7 @@ it("shows the worth checking out description when no profile is connected", () =
   ).not.toBeInTheDocument();
 });
 
-it("caps highly rated previews at ten without rendering an overflow control", () => {
+it("caps highly rated previews at six without rendering an overflow control", () => {
   const waves = Array.from({ length: 11 }, (_, index) =>
     createMockMinimalWave({
       id: `h${index + 1}`,
@@ -385,8 +385,8 @@ it("caps highly rated previews at ten without rendering an overflow control", ()
   renderWebWaves({ waves });
 
   expect(screen.getByTestId("preview-avatar-h1")).toBeInTheDocument();
-  expect(screen.getByTestId("preview-avatar-h10")).toBeInTheDocument();
-  expect(screen.queryByTestId("preview-avatar-h11")).toBeNull();
+  expect(screen.getByTestId("preview-avatar-h6")).toBeInTheDocument();
+  expect(screen.queryByTestId("preview-avatar-h7")).toBeNull();
   expect(
     screen.queryByRole("button", {
       name: /more Highly Rated/,
