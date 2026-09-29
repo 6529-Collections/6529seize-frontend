@@ -100,7 +100,7 @@ describe("DropListItemContentMediaImage", () => {
     expect(
       screen.queryByRole("status", { name: "Loading image" })
     ).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Retry", exact: true }));
+    fireEvent.click(screen.getByRole("button", { name: "Retry" }));
     expect(
       screen.getByRole("status", { name: "Loading image" })
     ).toBeInTheDocument();

@@ -85,26 +85,25 @@ describe("WaveDropPartContentMediaImage", () => {
   });
 
   it("does not add a GIF spinner to static images", () => {
-    render(
+    const { container } = render(
       <WaveDropPartContentMediaImage src="https://example.com/still.png" />
     );
-    expect(
-      screen.queryByRole("status", { name: "Loading image" })
-    ).not.toBeInTheDocument();
+    expect(container.querySelector("output")).not.toBeInTheDocument();
+    expect(screen.getByRole("status")).toHaveTextContent("Loading image");
   });
 
   it("uses the existing processing state between GIF retry attempts", () => {
     jest.useFakeTimers();
-    render(
+    const { container } = render(
       <WaveDropPartContentMediaImage
         src="https://example.com/failure.gif"
         fillContainer
       />
     );
     fireEvent.error(screen.getByAltText("Drop media"));
-    expect(
-      screen.queryByRole("status", { name: "Loading image" })
-    ).not.toBeInTheDocument();
+    expect(container.querySelector("output")).not.toBeInTheDocument();
+    expect(screen.getByRole("status")).toHaveTextContent("Loading image");
+    expect(screen.getByText("Processing image")).toBeInTheDocument();
     act(() => {
       jest.advanceTimersByTime(1500);
     });
