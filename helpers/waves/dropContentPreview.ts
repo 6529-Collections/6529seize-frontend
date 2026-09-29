@@ -26,11 +26,22 @@ const truncateAtWordBoundary = (text: string, limit: number): string => {
 
 export const getDropContentPreview = (content: string): DropContentPreview => {
   const source = content.trim();
+  const lineCount = source.length === 0 ? 0 : source.split(/\r?\n/).length;
+  const mightBeLong =
+    source.length > LONG_DROP_CONTENT_CHARACTER_THRESHOLD ||
+    lineCount > LONG_DROP_CONTENT_LINE_THRESHOLD;
+
+  if (!mightBeLong) {
+    return {
+      isLong: false,
+      text: source,
+    };
+  }
+
   const text = markdownToPlainText(source, {
     includeImageUrls: false,
     includeLinkDestinations: false,
   });
-  const lineCount = source.length === 0 ? 0 : source.split(/\r?\n/).length;
   const isLong =
     text.length > 0 &&
     (text.length > LONG_DROP_CONTENT_CHARACTER_THRESHOLD ||

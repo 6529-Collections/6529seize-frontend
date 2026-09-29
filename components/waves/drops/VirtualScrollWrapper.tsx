@@ -14,6 +14,9 @@ interface ResizeSubscription {
   readonly updateHeight: (height: number) => void;
 }
 
+const getPlaceholderHeight = (measuredHeight: number | null) =>
+  measuredHeight ?? "auto";
+
 const resizeSubscriptions = new Map<Element, ResizeSubscription>();
 let sharedResizeObserver: ResizeObserver | null = null;
 
@@ -303,7 +306,7 @@ export default function VirtualScrollWrapper({
         ) : (
           <div
             style={{
-              height: measuredHeight,
+              height: getPlaceholderHeight(measuredHeight),
             }}
           />
         )}

@@ -96,6 +96,9 @@ const WaveDropPartContentMarkdown: React.FC<
   const dropId = drop?.id;
   const dropSerialNo = drop?.serial_no;
   const waveId = wave.id;
+  const expansionScopeId =
+    dropId ??
+    (dropSerialNo !== undefined ? `${waveId}:${dropSerialNo}` : "pending-drop");
   const currentDropEmbedPath = React.useMemo(() => {
     const path = embedPath ? [...embedPath] : [];
     if (!dropId || path.includes(dropId)) {
@@ -195,7 +198,7 @@ const WaveDropPartContentMarkdown: React.FC<
         ) : (
           <WaveDropLongContent
             content={part.content ?? ""}
-            expansionKey={`${drop?.id ?? wave.id}:${part.part_id}`}
+            expansionKey={`${expansionScopeId}:${part.part_id}`}
           >
             <DropPartMarkdownWithPropLogger
               mentionedUsers={mentionedUsers}

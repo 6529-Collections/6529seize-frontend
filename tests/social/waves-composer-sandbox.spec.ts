@@ -205,18 +205,26 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
       .poll(() => scrollContainer.evaluate((node) => node.scrollTop))
       .toBe(0);
 
-    await showMore.click();
+    await showMore.focus();
+    await expect(showMore).toBeFocused();
+    await showMore.press("Enter");
 
     await expect(longDrop).toContainText(LONG_DROP_END_MARKER);
-    await expect(
-      longDrop.getByRole("button", { name: "Show less" })
-    ).toHaveAttribute("aria-expanded", "true");
+    const showLess = longDrop.getByRole("button", { name: "Show less" });
+    await expect(showLess).toHaveAttribute("aria-expanded", "true");
+    await expect(showLess).toBeFocused();
+    await expect(showLess).toBeInViewport({ ratio: 1 });
     await expect
       .poll(() => scrollContainer.evaluate((node) => node.scrollTop))
       .toBe(0);
 
-    await longDrop.getByRole("button", { name: "Show less" }).click();
+    await showLess.press("Enter");
     await expect(longDrop).not.toContainText(LONG_DROP_END_MARKER);
+    const collapsedToggle = longDrop.getByRole("button", {
+      name: "Show more",
+    });
+    await expect(collapsedToggle).toBeFocused();
+    await expect(collapsedToggle).toBeInViewport({ ratio: 1 });
     await expectNoHorizontalOverflow(page);
     await expectNoUnsafeSandboxMutations(baseURL);
   });

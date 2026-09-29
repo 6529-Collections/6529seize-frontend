@@ -46,6 +46,8 @@ export default function WaveDropLongContent({
       !button ||
       scrollContainerRef.current !== pendingAnchor.scrollContainer
     ) {
+      // The drop may have been virtualized before this layout effect. Its
+      // measured placeholder already preserves the occupied scroll space.
       return;
     }
 
