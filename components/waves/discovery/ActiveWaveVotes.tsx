@@ -15,10 +15,10 @@ export function ActiveWaveVotes() {
       className="tw-px-4 tw-pb-6 tw-pt-4 md:tw-px-6 lg:tw-px-8"
       aria-label={t(locale, "waves.discovery.activeVotes")}
     >
-      <h1 className="tw-m-0 tw-mb-4 tw-text-2xl tw-font-semibold tw-leading-8 tw-text-white">
+      <h1 className="tw-m-0 tw-mb-4 tw-flex tw-items-center tw-gap-3 tw-text-2xl tw-font-semibold tw-leading-8 tw-text-white">
         {t(locale, "waves.discovery.activeVotes")}
         {count !== undefined && (
-          <span className="tw-ml-3 tw-inline-flex tw-rounded-full tw-bg-primary-500/20 tw-px-1.5 tw-py-0.5 tw-align-middle tw-text-xs tw-font-medium tw-text-primary-300">
+          <span className="tw-shrink-0 tw-rounded-full tw-bg-primary-500/20 tw-px-2 tw-py-0.5 tw-text-base tw-font-medium tw-text-primary-300">
             {formatInteger(locale, count)}
           </span>
         )}
