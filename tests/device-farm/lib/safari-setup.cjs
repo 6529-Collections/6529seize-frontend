@@ -61,6 +61,11 @@ async function openSettingsRoot(driver) {
     const { atRoot, back } = await settingsNavigation(driver);
     if (atRoot) return;
     if (depth === 8) break;
+    if (!back) {
+      throw new Error(
+        "Settings back control is missing after navigation readiness"
+      );
+    }
     await back.click();
   }
   throw new Error("Could not reach the Settings root for Safari Web Inspector");
