@@ -69,6 +69,11 @@ do not become clean passes. The native command is unchanged.
 On iOS 16.4+, Safari starts through an ordinary native XCTest app launch.
 Before opening the target or connecting Web Inspector, the harness launches
 Settings and follows Safari > Advanced (Apps > Safari > Advanced on iOS 18+).
+After each app launch, it waits for `mobile: activeAppInfo` to identify that
+app before reading controls or opening a URL. Settings navigation waits for
+its root title or a visible back control before choosing an action; a missing
+root during a transition is not treated as a nested screen. Each readiness
+wait is bounded to ten seconds, and native command errors remain terminal.
 It reads the Web Inspector switch, enables it only when off, and verifies it
 is on before returning to Safari. The configured device pools use English
 Settings labels. Navigation back to the Settings root is bounded; missing,
@@ -88,6 +93,11 @@ Web Inspector shutting down because its preference was disabled, while Safari
 loaded the page. All seven iPhone 16 tests remained unexecuted. Device setup
 changes only this debugging preference; tests remain logged out and read-only
 against the target site. The native Settings path requires fresh device evidence.
+
+Run `36573433144` exposed an app-switch race in that preparation: both iPhones
+queried controls before Settings became active and tried to click a nonexistent
+back button. Neither reached the Inspector switch or any site assertion;
+Android passed. Foreground and navigation readiness now guard those reads.
 
 Each Android web page check creates a fresh blank tab through W3C `createWindow`,
 closes the previous tab, verifies it is gone, and switches to the new handle.

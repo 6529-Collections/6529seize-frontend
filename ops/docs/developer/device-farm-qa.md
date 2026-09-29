@@ -272,6 +272,24 @@ was three, matching the three distinct recovered device reports.
 
 ### Safari startup and reliability validation
 
+Native app launch returning does not establish that WDA has switched its active
+accessibility hierarchy. After launching Settings or returning to Safari, wait
+up to ten seconds for [Appium's active app information](https://appium.github.io/appium-xcuitest-driver/9.10/reference/execute-methods/#mobile-activeappinfo)
+to identify the intended bundle. Before navigating back, wait for either the
+Settings root title (navigation bar or large static title) or a visible back
+control. Missing controls during a transition never cause a blind click. These
+waits observe readiness; they do not relaunch apps or replay failed commands.
+
+[Run 36573433144](https://github.com/6529-Collections/6529seize-frontend/actions/runs/36573433144)
+at `2a86dd91c2` passed Android but failed setup on both iPhones. The iPhone 16
+log shows root queries snapshotting Safari PID 563 immediately after Settings
+launch returned, before WDA switched to Settings PID 462. Both failure screenshots
+show Settings at its root, with no back button. The preparation wrongly treated
+the missing root as a nested screen and clicked a nonexistent control. Neither
+iPhone reached Web Inspector configuration or any of the seven app assertions.
+The foreground/navigation waits address that regression; the corrected native
+Settings path still requires a fresh hardware run.
+
 Before connecting the debugger on iOS 16.4+, verify Web Inspector through native
 Settings: Safari > Advanced, or Apps > Safari > Advanced on iOS 18+. Read the
 switch, turn it on only when its value is `0`, and read it back before returning

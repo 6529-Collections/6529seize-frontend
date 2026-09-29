@@ -4,20 +4,64 @@ const SETTINGS_BUNDLE_ID = "com.apple.Preferences";
 const SAFARI_BUNDLE_ID = "com.apple.mobilesafari";
 const INSPECTOR_PREDICATE =
   'type == "XCUIElementTypeSwitch" AND (name == "Web Inspector" OR label == "Web Inspector")';
+const SETTINGS_ROOT_SELECTOR =
+  '-ios predicate string:(type == "XCUIElementTypeNavigationBar" OR type == "XCUIElementTypeStaticText") AND name == "Settings"';
+const BACK_SELECTOR =
+  "-ios class chain:**/XCUIElementTypeNavigationBar/XCUIElementTypeButton[1]";
+
+/** Observe readiness without replaying a failed native command. */
+async function waitForNativeState(driver, observe, timeoutMsg) {
+  let failure;
+  await driver.waitUntil(
+    async () => {
+      try {
+        return await observe();
+      } catch (error) {
+        failure = error;
+        return true;
+      }
+    },
+    { timeout: 10000, interval: 250, timeoutMsg }
+  );
+  if (failure) throw failure;
+}
+
+async function launchForegroundApp(driver, bundleId) {
+  await driver.execute("mobile: launchApp", { bundleId });
+  // launchApp can return while WDA still selects the preceding application's
+  // hierarchy. Do not interpret that application's missing controls as Settings.
+  await waitForNativeState(
+    driver,
+    async () =>
+      (await driver.execute("mobile: activeAppInfo")).bundleId === bundleId,
+    `App did not become active: ${bundleId}`
+  );
+}
+
+async function settingsNavigation(driver) {
+  let atRoot = false;
+  let back;
+  await waitForNativeState(
+    driver,
+    async () => {
+      atRoot = await (await driver.$(SETTINGS_ROOT_SELECTOR)).isDisplayed();
+      if (atRoot) return true;
+      back = await driver.$(BACK_SELECTOR);
+      return back.isDisplayed();
+    },
+    "Settings navigation did not become ready"
+  );
+  return { atRoot, back };
+}
 
 /** Return Settings to its root without assuming the previous allocation's screen. */
 async function openSettingsRoot(driver) {
-  await driver.execute("mobile: launchApp", { bundleId: SETTINGS_BUNDLE_ID });
-  const rootSelector =
-    '-ios predicate string:type == "XCUIElementTypeNavigationBar" AND name == "Settings"';
+  await launchForegroundApp(driver, SETTINGS_BUNDLE_ID);
   for (let depth = 0; depth <= 8; depth += 1) {
-    if (await (await driver.$(rootSelector)).isDisplayed()) return;
+    const { atRoot, back } = await settingsNavigation(driver);
+    if (atRoot) return;
     if (depth === 8) break;
-    await (
-      await driver.$(
-        "-ios class chain:**/XCUIElementTypeNavigationBar/XCUIElementTypeButton[1]"
-      )
-    ).click();
+    await back.click();
   }
   throw new Error("Could not reach the Settings root for Safari Web Inspector");
 }
@@ -74,7 +118,7 @@ async function ensureSafariWebInspector(driver, osVersion) {
     console.log(
       `Safari Web Inspector verified enabled (initial value: ${initialValue})`
     );
-    await driver.execute("mobile: launchApp", { bundleId: SAFARI_BUNDLE_ID });
+    await launchForegroundApp(driver, SAFARI_BUNDLE_ID);
   } catch (error) {
     error.code = "SAFARI_WEB_INSPECTOR_SETUP";
     error.deviceFarmDiagnostics = { startupStage: "web-inspector-setup" };
