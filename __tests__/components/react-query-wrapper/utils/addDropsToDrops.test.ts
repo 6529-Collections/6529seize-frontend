@@ -1,3 +1,4 @@
+import { ApiDrop } from "@/generated/models/ApiDrop";
 import { QueryClient } from "@tanstack/react-query";
 import {
   addDropToDrops,
@@ -187,10 +188,7 @@ test("keeps a newer REST snapshot when an older websocket edit arrives", () => {
   const original = { pages: [{ drops: [current] }] };
   queryClient.setQueryData(key, original);
   upsertDropIntoMatchingDropsQueries(queryClient, {
-    drop: {
-      ...current,
-      updated_at: 100,
-    } as import("@/generated/models/ApiDrop").ApiDrop,
+    drop: Object.assign(new ApiDrop(), current, { updated_at: 100 }),
   });
   expect(queryClient.getQueryData(key)).toEqual(original);
 });

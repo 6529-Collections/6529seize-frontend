@@ -705,7 +705,7 @@ export function useWaveRealtimeUpdater({
   const processAttachmentStatusUpdate = useAttachmentStatusUpdate({
     activeWaveId,
     getData,
-    updateData,
+    updateData: updateLiveData,
     queryClient,
   });
 
