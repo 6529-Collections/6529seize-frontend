@@ -526,6 +526,15 @@ export const patchFromMediaLinkUpdate = ({
   );
   const nextFailedSinceMs = asNullableTimestampMs(update.failed_since);
 
+  // A delayed queue snapshot must not roll back a successful newer fetch.
+  if (
+    current.lastSuccessfullyUpdatedMs !== null &&
+    (nextLastSuccessfullyUpdatedMs === null ||
+      nextLastSuccessfullyUpdatedMs < current.lastSuccessfullyUpdatedMs)
+  ) {
+    return current;
+  }
+
   const patched: MarketplacePreviewData = {
     ...current,
     canonicalId: nextCanonicalId ?? current.canonicalId,

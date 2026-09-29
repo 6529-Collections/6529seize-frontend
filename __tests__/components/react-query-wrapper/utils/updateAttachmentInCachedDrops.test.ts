@@ -5,7 +5,7 @@ import {
   updateAttachmentInCachedDrops,
   updateDropInCachedDrops,
 } from "@/components/react-query-wrapper/utils/updateAttachmentInCachedDrops";
-import type { ApiDrop } from "@/generated/models/ApiDrop";
+import { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiAttachmentStatus } from "@/generated/models/ApiAttachmentStatus";
 import {
   ProcessIncomingDropType,
@@ -566,4 +566,16 @@ describe("cached drop websocket updates", () => {
       })
     ).toBe(partialDrop);
   });
+});
+
+test("does not overwrite newer cached content with a delayed websocket edit", () => {
+  const queryClient = new QueryClient();
+  const key = [QueryKey.DROP, { dropId: "drop-1" }];
+  const current = { id: "drop-1", serial_no: 1, updated_at: 200, parts: [] };
+  queryClient.setQueryData(key, current);
+  updateDropInCachedDrops(
+    queryClient,
+    Object.assign(new ApiDrop(), current, { updated_at: 100 })
+  );
+  expect(queryClient.getQueryData(key)).toEqual(current);
 });
