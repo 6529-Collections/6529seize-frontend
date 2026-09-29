@@ -205,7 +205,7 @@ it("does not autosave an empty threshold and resumes autosaving after it is corr
     />
   );
   for (let step = 0; step < 4; step++) {
-    fireEvent.click(screen.getByRole("button", { name: "Next", exact: true }));
+    fireEvent.click(screen.getByRole("button", { name: "Next" }));
   }
   const threshold = screen.getByRole("textbox", { name: "Approval threshold" });
   fireEvent.change(threshold, { target: { value: "" } });

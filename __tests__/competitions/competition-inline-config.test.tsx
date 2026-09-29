@@ -194,7 +194,7 @@ it("edits appearance in its own section without changing guidelines, access, or 
   });
   fireEvent.click(screen.getByRole("button", { name: "Save changes" }));
   await waitFor(() => expect(updateCompetition).toHaveBeenCalled());
-  const saved = jest.mocked(updateCompetition).mock.calls[0][1].config;
+  const saved = jest.mocked(updateCompetition).mock.calls[0]![1].config;
   expect(saved).toMatchObject({ ...config, presentation: expect.any(Array) });
   expect(saved.presentation).toContainEqual({
     data_key: keys.customRules,
@@ -213,7 +213,7 @@ it("uses the existing Approve label validation", () => {
   );
   const inputs = screen.getAllByRole("textbox");
   expect(inputs).toHaveLength(3);
-  fireEvent.change(inputs[1], { target: { value: "Same" } });
-  fireEvent.change(inputs[2], { target: { value: "Same" } });
+  fireEvent.change(inputs[1]!, { target: { value: "Same" } });
+  fireEvent.change(inputs[2]!, { target: { value: "Same" } });
   expect(screen.getByRole("button", { name: "Save changes" })).toBeDisabled();
 });

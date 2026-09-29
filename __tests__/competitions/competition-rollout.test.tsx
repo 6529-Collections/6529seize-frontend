@@ -71,12 +71,11 @@ it("preserves native deep-link reads with edits and mutation controls hidden whe
     screen.getByRole("heading", { name: "Readable native competition" })
   ).toBeVisible();
   expect(screen.getByText("Readable native entries")).toBeVisible();
-  expect(
-    screen.queryByRole("tab", { name: "Entries", exact: true })
-  ).toBeNull();
-  expect(
-    screen.getByRole("tab", { name: "Configuration", exact: true })
-  ).toHaveAttribute("aria-selected", "true");
+  expect(screen.queryByRole("tab", { name: "Entries" })).toBeNull();
+  expect(screen.getByRole("tab", { name: "Configuration" })).toHaveAttribute(
+    "aria-selected",
+    "true"
+  );
   expect(screen.queryByText("Native draft editor")).toBeNull();
   expect(screen.queryByRole("button", { name: "Submit an entry" })).toBeNull();
   expect(

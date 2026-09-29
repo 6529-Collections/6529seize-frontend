@@ -9,7 +9,6 @@ import type { ApiCompetitionDecisionPage } from "@/generated/models/ApiCompetiti
 import type { ApiCompetitionOutcomePage } from "@/generated/models/ApiCompetitionOutcomePage";
 import type { ApiCompetitionVoterPage } from "@/generated/models/ApiCompetitionVoterPage";
 import type { ApiCompetitionPausePage } from "@/generated/models/ApiCompetitionPausePage";
-import type { ApiCompetitionEntryVotePage } from "@/generated/models/ApiCompetitionEntryVotePage";
 import type { ApiCompetitionDistributionItemPage } from "@/generated/models/ApiCompetitionDistributionItemPage";
 import type { ApiCompetitionConfigVersionPage } from "@/generated/models/ApiCompetitionConfigVersionPage";
 import type { ApiWaveV3 } from "@/generated/models/ApiWaveV3";
@@ -209,19 +208,6 @@ export async function fetchCompetitionPauseState(
   }
   throw new Error("Pause history could not be resolved");
 }
-
-export const fetchCompetitionEntryVotes = (
-  identity: CompetitionIdentity,
-  entryId: string,
-  cursor: string | null,
-  signal?: AbortSignal
-) =>
-  commonApiFetch<ApiCompetitionEntryVotePage>({
-    endpoint: `${competitionEndpoint(identity)}/entries/${encodeURIComponent(entryId)}/votes`,
-    params: { limit: "50", ...(cursor ? { cursor } : {}) },
-    signal,
-    errorMode: "structured",
-  });
 
 export const fetchCompetitionDistribution = (
   identity: CompetitionIdentity,

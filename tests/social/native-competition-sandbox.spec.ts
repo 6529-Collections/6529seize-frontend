@@ -311,7 +311,6 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await expect(
       page.getByRole("tab", { name: /^Competitions(?:\s+\d+\+?)?$/ })
     ).toHaveAttribute("aria-selected", "true");
-    await expect(page.locator("#tabs-container")).toBeVisible();
     await expect(
       page.getByRole("heading", {
         name: "Parallel Alpha",
@@ -425,7 +424,17 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await expect(page).toHaveURL(/beta\?tab=votes$/);
     await page.goBack();
     await expect(page).toHaveURL(/\/beta$/);
+    await expect(
+      page.getByRole("tab", { name: "Leaderboard", exact: true })
+    ).toHaveAttribute("aria-selected", "true");
+    await expect(
+      page.getByRole("spinbutton", { name: "Your vote" })
+    ).toHaveCount(0);
     await page.goForward();
+    await expect(page).toHaveURL(/beta\?tab=votes$/);
+    await expect(
+      page.getByRole("tab", { name: "My votes", exact: true })
+    ).toHaveAttribute("aria-selected", "true");
     await expect(
       page.getByRole("spinbutton", { name: "Your vote" })
     ).toHaveValue("0");

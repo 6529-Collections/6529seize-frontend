@@ -129,10 +129,6 @@ jest.mock(
     }),
   })
 );
-jest.mock(
-  "@/components/competitions/CompetitionEntryContent",
-  () => () => null
-);
 jest.mock("@/services/api/competitions-api", () => ({
   competitionScope: () => ({}),
   createCompetitionEntry: jest.fn().mockResolvedValue({ id: "entry" }),

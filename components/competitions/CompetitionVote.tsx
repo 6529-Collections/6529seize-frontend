@@ -1,7 +1,6 @@
 "use client";
 import { useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useCompetition } from "@/contexts/CompetitionContext";
 import { useAuth } from "@/components/auth/Auth";
 import { QueryKey } from "@/components/react-query-wrapper/query-keys";
 import {
@@ -15,7 +14,6 @@ import { useCompetitionViewer } from "@/hooks/competitions/useCompetitionQueries
 import { useCompetitionSignatureFor } from "@/hooks/competitions/useCompetitionSignature";
 import {
   newCompetitionRequestKey,
-  isMultiCompetitionEnabled,
   isRejectedCompetitionCommand,
 } from "@/helpers/competition.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -338,15 +336,4 @@ export function CompetitionVoteForm({
       </form>
     </div>
   );
-}
-
-function ContextualCompetitionVote(props: CompetitionVoteProps) {
-  const { competition } = useCompetition();
-  return <CompetitionVoteForm {...props} competition={competition} />;
-}
-
-export default function CompetitionVote(props: CompetitionVoteProps) {
-  return isMultiCompetitionEnabled() ? (
-    <ContextualCompetitionVote {...props} />
-  ) : null;
 }

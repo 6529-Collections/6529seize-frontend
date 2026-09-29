@@ -14,7 +14,7 @@ import {
 import { applyCompetitionDropSummary } from "./useCompetitionDrop";
 import { useCompetitionViewer } from "./useCompetitionQueries";
 
-export interface CompetitionEntryReference {
+interface CompetitionEntryReference {
   readonly entryId: string;
   readonly dropId: string;
 }
