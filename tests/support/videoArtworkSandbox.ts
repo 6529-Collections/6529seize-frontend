@@ -12,6 +12,37 @@ const WAVE_ID = "00000000-0000-4000-8000-000000000529";
 const DROP_ID = "00000000-0000-4000-8000-000000000530";
 const LINKING_DROP_ID = "00000000-0000-4000-8000-000000000546";
 
+/** Load and validate the shared wave/drop seed before installing route overrides. */
+async function loadSandboxSeed(
+  page: Page,
+  baseURL: string | undefined,
+  fixtureName: string
+): Promise<{
+  apiOrigin: string;
+  feed: { wave: ApiWaveOverview; drops: ApiDropV2[] };
+  source: ApiDropV2;
+}> {
+  const apiOrigin = getSandboxApiOrigin(baseURL);
+  const response = await page.request.get(
+    `${apiOrigin}/api/v2/waves/${WAVE_ID}/drops`
+  );
+  expect(
+    response.ok(),
+    `Local ${fixtureName} fixture requires the sandbox wave feed`
+  ).toBe(true);
+  const feed = (await response.json()) as {
+    wave: ApiWaveOverview;
+    drops: ApiDropV2[];
+  };
+  const source = feed.drops.find((drop) => drop.id === DROP_ID);
+  if (!source || feed.wave.id !== WAVE_ID) {
+    throw new Error(
+      `Local ${fixtureName} fixture is missing its sandbox wave/drop seed`
+    );
+  }
+  return { apiOrigin, feed, source };
+}
+
 /** Override only this browser context; no live data or shared sandbox state changes. */
 export async function installVideoArtworkSandbox(
   page: Page,
@@ -25,24 +56,11 @@ export async function installLinkedDropVideoSandbox(
   page: Page,
   baseURL: string | undefined
 ): Promise<string> {
-  const apiOrigin = getSandboxApiOrigin(baseURL);
-  const response = await page.request.get(
-    `${apiOrigin}/api/v2/waves/${WAVE_ID}/drops`
+  const { apiOrigin, feed, source } = await loadSandboxSeed(
+    page,
+    baseURL,
+    "linked-video"
   );
-  expect(
-    response.ok(),
-    "Local linked-video fixture requires the sandbox wave feed"
-  ).toBe(true);
-  const feed = (await response.json()) as {
-    wave: ApiWaveOverview;
-    drops: ApiDropV2[];
-  };
-  const source = feed.drops.find((drop) => drop.id === DROP_ID);
-  if (!source || feed.wave.id !== WAVE_ID) {
-    throw new Error(
-      "Local linked-video fixture is missing its sandbox wave/drop seed"
-    );
-  }
 
   const videoUrl = new URL("/__video-fixture/portrait.mp4", baseURL).href;
   const linkedDrop: ApiDropV2 = {
@@ -116,24 +134,11 @@ async function installArtworkSandbox(
   baseURL: string | undefined,
   dimensions?: { width: number; height: number }
 ): Promise<string> {
-  const apiOrigin = getSandboxApiOrigin(baseURL);
-  const response = await page.request.get(
-    `${apiOrigin}/api/v2/waves/${WAVE_ID}/drops`
+  const { apiOrigin, feed, source } = await loadSandboxSeed(
+    page,
+    baseURL,
+    "artwork"
   );
-  expect(
-    response.ok(),
-    "Local video fixture requires the sandbox wave feed"
-  ).toBe(true);
-  const feed = (await response.json()) as {
-    wave: ApiWaveOverview;
-    drops: ApiDropV2[];
-  };
-  const source = feed.drops.find((drop) => drop.id === DROP_ID);
-  if (!source || feed.wave.id !== WAVE_ID) {
-    throw new Error(
-      "Local video fixture is missing its sandbox wave/drop seed"
-    );
-  }
 
   const videoUrl = new URL(
     dimensions
