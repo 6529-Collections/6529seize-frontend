@@ -192,3 +192,30 @@ test("keeps a newer REST snapshot when an older websocket edit arrives", () => {
   });
   expect(queryClient.getQueryData(key)).toEqual(original);
 });
+
+test.each([100, 200])(
+  "checks all matching caches before inserting revision %s",
+  (updated_at) => {
+    const queryClient = new QueryClient();
+    const emptyKey = [QueryKey.DROPS, { waveId: "w", limit: 20 }];
+    const newerKey = [QueryKey.DROPS, { waveId: "w", limit: 50 }];
+    const empty = { pages: [{ drops: [] }] };
+    const current = Object.assign(new ApiDrop(), {
+      id: "d",
+      wave: { id: "w" },
+      updated_at: 200,
+      parts: [],
+    });
+    // Register the empty cache first: no mutation may precede the revision check.
+    queryClient.setQueryData(emptyKey, empty);
+    queryClient.setQueryData(newerKey, { pages: [{ drops: [current] }] });
+    const incoming = Object.assign(new ApiDrop(), current, { updated_at });
+    upsertDropIntoMatchingDropsQueries(queryClient, { drop: incoming });
+    expect(queryClient.getQueryData(emptyKey)).toEqual(
+      updated_at < 200 ? empty : { pages: [{ drops: [incoming] }] }
+    );
+    expect(queryClient.getQueryData(newerKey)).toEqual({
+      pages: [{ drops: [current] }],
+    });
+  }
+);
