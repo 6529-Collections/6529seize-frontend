@@ -26,6 +26,10 @@ const PREVIEW_URL = "https://example.com/6529-composer-preview";
 const PREVIEW_TITLE = "Sandbox Preview Title";
 const PREVIEW_DESCRIPTION = "Deterministic local preview served by Playwright.";
 const SANDBOX_CHAT_DROP_CONTENT = "Local-only chat drop from Playwright.";
+const LONG_DROP_END_MARKER = "END-OF-LONG-SANDBOX-POST";
+const LONG_DROP_CONTENT = `${"Long timeline detail for browser coverage. ".repeat(
+  30
+)}${LONG_DROP_END_MARKER}`;
 const SANDBOX_POLL_QUESTION = "Which sandbox option do you prefer?";
 const SANDBOX_GUIDELINES_FIRST_LINE =
   "1. Keep discussions constructive and stay on topic in this local sandbox wave.";
@@ -141,6 +145,78 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     await expect(
       page.getByRole("button", { name: "Post" }).last()
     ).toBeEnabled();
+    await expectNoHorizontalOverflow(page);
+    await expectNoUnsafeSandboxMutations(baseURL);
+  });
+
+  test("expands and collapses a long chat drop without leaving the latest position", async ({
+    baseURL,
+    page,
+  }) => {
+    await page.route(
+      `**/api/v2/waves/${SANDBOX_WAVE_ID}/drops**`,
+      async (route) => {
+        const response = await route.fetch();
+        const payload = (await response.json()) as {
+          drops: Array<Record<string, unknown>>;
+          wave: Record<string, unknown>;
+        };
+        const sourceDrop = payload.drops[0];
+        if (!sourceDrop) {
+          throw new Error(
+            "Expected the sandbox wave to return one source drop."
+          );
+        }
+        await route.fulfill({
+          response,
+          json: {
+            ...payload,
+            drops: [
+              sourceDrop,
+              {
+                ...sourceDrop,
+                id: "00000000-0000-4000-8000-000000000546",
+                serial_no: 2,
+                created_at: Number(sourceDrop["created_at"] ?? 0) + 1,
+                content: LONG_DROP_CONTENT,
+              },
+            ],
+          },
+        });
+      }
+    );
+    await gotoSandboxWave(page);
+
+    const longDrop = page.locator('[data-serial-no="2"]');
+    await expect(longDrop).toBeVisible({
+      timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+    });
+    await expect(longDrop).not.toContainText(LONG_DROP_END_MARKER);
+
+    const showMore = longDrop.getByRole("button", { name: "Show more" });
+    await expect(showMore).toHaveAttribute("aria-expanded", "false");
+    const controlledContentId = await showMore.getAttribute("aria-controls");
+    expect(controlledContentId).toBeTruthy();
+
+    const scrollContainer = page
+      .locator("[data-wave-drops-scroll-container]")
+      .first();
+    await expect
+      .poll(() => scrollContainer.evaluate((node) => node.scrollTop))
+      .toBe(0);
+
+    await showMore.click();
+
+    await expect(longDrop).toContainText(LONG_DROP_END_MARKER);
+    await expect(
+      longDrop.getByRole("button", { name: "Show less" })
+    ).toHaveAttribute("aria-expanded", "true");
+    await expect
+      .poll(() => scrollContainer.evaluate((node) => node.scrollTop))
+      .toBe(0);
+
+    await longDrop.getByRole("button", { name: "Show less" }).click();
+    await expect(longDrop).not.toContainText(LONG_DROP_END_MARKER);
     await expectNoHorizontalOverflow(page);
     await expectNoUnsafeSandboxMutations(baseURL);
   });
