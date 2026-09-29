@@ -16,6 +16,9 @@ function resetNavigationRetries() {
 
 function classifyFailure(error) {
   const message = error.message || "";
+  if (error.code === "SAFARI_WEB_INSPECTOR_SETUP") {
+    return "safari-session-startup";
+  }
   if (
     error.code === "DEVICE_OFFLINE" ||
     /net::ERR_INTERNET_DISCONNECTED\b/.test(message)

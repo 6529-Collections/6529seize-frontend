@@ -67,12 +67,27 @@ contents. Missing evidence, known infrastructure failures, and recovered runs
 do not become clean passes. The native command is unchanged.
 
 On iOS 16.4+, Safari starts through an ordinary native XCTest app launch.
+Before opening the target or connecting Web Inspector, the harness launches
+Settings and follows Safari > Advanced (Apps > Safari > Advanced on iOS 18+).
+It reads the Web Inspector switch, enables it only when off, and verifies it
+is on before returning to Safari. The configured device pools use English
+Settings labels. Navigation back to the Settings root is bounded; missing,
+locked, unknown, or non-persisting controls fail setup without a fallback or
+session retry. The simulator-only `mobile: updateSafariPreferences` API is
+not used on these physical devices. Setup failures retain a screenshot before
+cleanup; Inspector-preparation errors include `web-inspector-setup` diagnostics.
 The harness then opens the target once with `mobile: deepLink`, waits for a
 Safari context matching its origin/path, and switches to web automation.
 It does not use WDA's `initialDeeplinkUrl` cold-launch path or automatically
 attach to an old tab. Failed attachment closes the session without retrying;
 Xcode output is included in the Appium log. Older/unknown iOS versions retain
 the default Safari session path.
+
+This prerequisite addresses run `36566055869`: iPhone 16's system log recorded
+Web Inspector shutting down because its preference was disabled, while Safari
+loaded the page. All seven iPhone 16 tests remained unexecuted. Device setup
+changes only this debugging preference; tests remain logged out and read-only
+against the target site. The native Settings path requires fresh device evidence.
 
 Each Android web page check creates a fresh blank tab through W3C `createWindow`,
 closes the previous tab, verifies it is gone, and switches to the new handle.

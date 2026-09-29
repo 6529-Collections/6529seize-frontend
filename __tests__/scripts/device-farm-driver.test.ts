@@ -3,7 +3,11 @@ import { runInNewContext } from "node:vm";
 import assert from "node:assert";
 
 const mockRemote = jest.fn();
+const mockEnsureSafariWebInspector = jest.fn();
 jest.mock("webdriverio", () => ({ remote: mockRemote }), { virtual: true });
+jest.mock("../../tests/device-farm/lib/safari-setup.cjs", () => ({
+  ensureSafariWebInspector: mockEnsureSafariWebInspector,
+}));
 const {
   openPage,
   assertPageBody,
@@ -28,6 +32,7 @@ describe("Device Farm browser startup and diagnostics", () => {
       getContexts: jest.fn().mockResolvedValue([safariPage]),
       switchContext: jest.fn().mockResolvedValue(undefined),
       deleteSession: jest.fn().mockResolvedValue(undefined),
+      saveScreenshot: jest.fn().mockResolvedValue(undefined),
       waitUntil: jest.fn(
         async (
           predicate: () => Promise<boolean>,
@@ -43,6 +48,7 @@ describe("Device Farm browser startup and diagnostics", () => {
   }
   beforeEach(() => {
     jest.clearAllMocks();
+    mockEnsureSafariWebInspector.mockReset();
     process.env = {
       ...originalEnv,
       TARGET_URL: "https://staging.6529.io",
@@ -87,6 +93,10 @@ describe("Device Farm browser startup and diagnostics", () => {
         ],
       ]);
       expect(driver.switchContext.mock.calls).toEqual([[safariPage.id]]);
+      expect(mockEnsureSafariWebInspector).toHaveBeenCalledWith(driver, version);
+      expect(driver.execute.mock.invocationCallOrder[0]).toBeGreaterThan(
+        mockEnsureSafariWebInspector.mock.invocationCallOrder[0]!
+      );
       expect(driver.getContexts.mock.invocationCallOrder[0]).toBeGreaterThan(
         driver.execute.mock.invocationCallOrder[0]
       );
@@ -127,6 +137,49 @@ describe("Device Farm browser startup and diagnostics", () => {
     finishLaunch(driver);
     await expect(session).resolves.toBe(driver);
     expect(mockRemote).toHaveBeenCalledTimes(1);
+  });
+
+  it("stops before deep linking or context discovery when Inspector setup fails", async () => {
+    process.env["DEVICEFARM_DEVICE_OS_VERSION"] = "18.6.2";
+    const driver = safariDriver();
+    const error = Object.assign(new Error("Web Inspector setting locked"), {
+      code: "SAFARI_WEB_INSPECTOR_SETUP",
+      deviceFarmDiagnostics: { startupStage: "web-inspector-setup" },
+    });
+    mockEnsureSafariWebInspector.mockRejectedValue(error);
+    mockRemote.mockResolvedValue(driver);
+    await expect(startWebSession()).rejects.toBe(error);
+    expect(driver.execute).not.toHaveBeenCalled();
+    expect(driver.getContexts).not.toHaveBeenCalled();
+    expect(driver.saveScreenshot).toHaveBeenCalledTimes(1);
+    expect(driver.deleteSession).toHaveBeenCalledTimes(1);
+    expect(mockRemote).toHaveBeenCalledTimes(1);
+    expect(classifyFailure(error)).toBe("safari-session-startup");
+  });
+
+  it("waits for Inspector preparation to finish before opening the target", async () => {
+    process.env["DEVICEFARM_DEVICE_OS_VERSION"] = "18.6.2";
+    const driver = safariDriver();
+    let finishSetup!: () => void;
+    let setupStarted!: () => void;
+    const enteredSetup = new Promise<void>((resolve) => {
+      setupStarted = resolve;
+    });
+    const pendingSetup = new Promise<void>((resolve) => {
+      finishSetup = resolve;
+    });
+    mockEnsureSafariWebInspector.mockImplementation(() => {
+      setupStarted();
+      return pendingSetup;
+    });
+    mockRemote.mockResolvedValue(driver);
+    const startup = startWebSession();
+    await enteredSetup;
+    expect(mockEnsureSafariWebInspector).toHaveBeenCalledTimes(1);
+    expect(driver.execute).not.toHaveBeenCalled();
+    finishSetup();
+    await expect(startup).resolves.toBe(driver);
+    expect(driver.execute).toHaveBeenCalledTimes(1);
   });
 
   it("waits for the target Safari context rather than attaching another tab or app", async () => {
@@ -204,6 +257,7 @@ describe("Device Farm browser startup and diagnostics", () => {
     expect(mockRemote.mock.calls[1][0].capabilities).not.toHaveProperty(
       "browserName"
     );
+    expect(mockEnsureSafariWebInspector).not.toHaveBeenCalled();
   });
 
   it("preserves session startup failures instead of retrying outside the driver", async () => {

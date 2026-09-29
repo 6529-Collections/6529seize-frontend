@@ -59,6 +59,9 @@ README). Device Farm test spec files live in `tests/device-farm/testspecs/`.
 All packs are read-only against live environments: navigation and DOM reads
 only, no authentication, no mutations — consistent with the
 `readonlyMutationGuard` discipline in the Playwright packs.
+The iOS web harness prepares its allocated test device by verifying and, when
+necessary, enabling Safari's Web Inspector preference through native Settings.
+This changes device configuration, not target-site data.
 
 ## Cost model
 
@@ -268,6 +271,24 @@ summary preserves the original Pixel failure; no new tests ran. `run.totalJobs`
 was three, matching the three distinct recovered device reports.
 
 ### Safari startup and reliability validation
+
+Before connecting the debugger on iOS 16.4+, verify Web Inspector through native
+Settings: Safari > Advanced, or Apps > Safari > Advanced on iOS 18+. Read the
+switch, turn it on only when its value is `0`, and read it back before returning
+to Safari. This is a device-preparation step before any app test, not a recovery
+after a failed attachment. Navigation to the Settings root is bounded. A missing,
+locked, unknown, or non-persisting control fails setup, retains a screenshot,
+and records `startupStage: web-inspector-setup`. The Settings selectors assume
+the configured pools' English UI. The simulator-only Safari-preference API is
+not used. See [Appium's real-device prerequisites](https://appium.github.io/appium-xcuitest-driver/8.4/preparation/real-device-config/).
+
+[Run 36566055869](https://github.com/6529-Collections/6529seize-frontend/actions/runs/36566055869)
+broke a seven-run streak at `49054984b3`. Android and iPhone SE passed; iPhone 16
+executed zero tests. Its device log recorded `Shutting Down, Preference Disabled`
+from Web Inspector at 12:10:13 UTC, while Safari finished loading at 12:10:15.
+Appium received no applications during the 30-second debugger connection wait.
+The new preparation path addresses the disabled prerequisite instead of extending
+that timeout; native Settings navigation still requires fresh device validation.
 
 For iOS 16.4 and newer, start a native XCUITest session for Safari's bundle ID,
 using the ordinary XCTest app launch. After launch completes, issue one

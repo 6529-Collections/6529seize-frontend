@@ -13,6 +13,7 @@
 
 const path = require("node:path");
 const { remote } = require("webdriverio");
+const { ensureSafariWebInspector } = require("./safari-setup.cjs");
 
 const APPIUM_HOSTNAME = "127.0.0.1";
 const APPIUM_PORT = 4723;
@@ -135,8 +136,10 @@ async function startWebSession() {
   const driver = await connect(capabilities, 0);
   if (capabilities["appium:bundleId"] === SAFARI_BUNDLE_ID) {
     try {
+      await ensureSafariWebInspector(driver, env("DEVICEFARM_DEVICE_OS_VERSION"));
       await attachSafariPage(driver);
     } catch (error) {
+      await saveScreenshot(driver, "web-safari-setup-failed");
       // The caller never receives this session if attachment fails.
       await driver.deleteSession().catch(() => {});
       throw error;
