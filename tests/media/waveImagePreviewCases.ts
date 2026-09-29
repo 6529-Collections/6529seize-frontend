@@ -87,22 +87,34 @@ export function defineWaveImagePreviewTests() {
         })
         .last();
       await expect(inlineLoader).toBeVisible();
-      const alignment = await inlineLoader.evaluate((element) => {
-        const frame = element.getBoundingClientRect();
-        const spinner = element
-          .querySelector('[aria-hidden="true"]')!
-          .getBoundingClientRect();
+      const bounds = await inlineLoader.evaluate((element) => {
+        const placeholder = element.getBoundingClientRect();
+        const frame = element.parentElement!.getBoundingClientRect();
+        const maxSize =
+          16 *
+          Number.parseFloat(
+            getComputedStyle(document.documentElement).fontSize
+          );
         return {
-          width: frame.width,
-          height: frame.height,
-          x: spinner.x + spinner.width / 2 - frame.x - frame.width / 2,
-          y: spinner.y + spinner.height / 2 - frame.y - frame.height / 2,
+          width: placeholder.width,
+          height: placeholder.height,
+          maxWidth: Math.min(maxSize, frame.width),
+          maxHeight: Math.min(maxSize, frame.height),
+          x: placeholder.x - frame.x,
+          y: placeholder.y - frame.y,
         };
       });
-      expect(alignment.width).toBeGreaterThan(0);
-      expect(alignment.height).toBeGreaterThan(0);
-      expect(Math.abs(alignment.x)).toBeLessThanOrEqual(1);
-      expect(Math.abs(alignment.y)).toBeLessThanOrEqual(1);
+      expect(bounds.width).toBeGreaterThan(0);
+      expect(bounds.height).toBeGreaterThan(0);
+      expect(Math.abs(bounds.width - bounds.maxWidth)).toBeLessThanOrEqual(1);
+      expect(Math.abs(bounds.height - bounds.maxHeight)).toBeLessThanOrEqual(1);
+      expect(Math.abs(bounds.x)).toBeLessThanOrEqual(1);
+      expect(Math.abs(bounds.y)).toBeLessThanOrEqual(1);
+      await page.emulateMedia({ reducedMotion: "reduce" });
+      await expect(inlineLoader.locator('[aria-hidden="true"]')).toHaveCSS(
+        "animation-name",
+        "none"
+      );
       await expectNoHorizontalOverflow(page);
     } finally {
       releasePreviews();
