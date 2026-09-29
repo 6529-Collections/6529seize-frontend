@@ -46,15 +46,15 @@ export function ActiveWaveVoteRow({
         });
   return (
     <div
-      className={`${compact ? "tw-h-16" : ""} tw-relative tw-flex tw-min-w-0 tw-items-center tw-rounded-lg tw-p-2 hover:tw-bg-iron-900`}
+      className={`${compact ? "tw-h-14" : ""} tw-relative tw-flex tw-min-w-0 tw-items-center tw-rounded-lg tw-p-2 hover:tw-bg-iron-900`}
     >
       <Link
         href={getWaveRoute({ waveId: wave.id, isDirectMessage: false, isApp })}
         {...(onClick ? { onClick } : {})}
         prefetch={false}
-        className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-3 tw-text-iron-100 tw-no-underline before:tw-absolute before:tw-inset-0 before:tw-rounded-lg before:tw-content-[''] focus-visible:tw-outline-none focus-visible:before:tw-ring-2 focus-visible:before:tw-ring-primary-400"
+        className={`${compact ? "tw-gap-2" : "tw-gap-3"} tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-text-iron-100 tw-no-underline before:tw-absolute before:tw-inset-0 before:tw-rounded-lg before:tw-content-[''] focus-visible:tw-outline-none focus-visible:before:tw-ring-2 focus-visible:before:tw-ring-primary-400`}
       >
-        <span className="tw-size-10 tw-shrink-0">
+        <span className={`${compact ? "tw-size-8" : "tw-size-10"} tw-shrink-0`}>
           <WavePicture
             name={wave.name}
             picture={wave.pfp ?? null}
@@ -64,20 +64,20 @@ export function ActiveWaveVoteRow({
         <span className="tw-min-w-0 tw-flex-1">
           <span
             title={compact ? wave.name : undefined}
-            className={`${compact ? "tw-block tw-truncate" : "tw-line-clamp-2"} ${hasScore ? "tw-pr-12" : ""} tw-text-sm tw-font-medium`}
+            className={`${compact ? "tw-block tw-truncate tw-text-xs" : "tw-line-clamp-2 tw-text-sm"} ${hasScore ? "tw-pr-12" : ""} tw-font-medium`}
           >
             {wave.name}
           </span>
           <span
             title={compact ? deadlineLabel : undefined}
-            className={`${compact ? "tw-truncate" : ""} tw-mt-1 tw-block tw-text-xs tw-text-primary-300`}
+            className={`${compact ? "tw-mt-0.5 tw-truncate tw-text-[11px] tw-leading-4" : "tw-mt-1 tw-text-xs"} tw-block tw-text-primary-300`}
           >
             {deadlineLabel}
           </span>
         </span>
       </Link>
       <WaveTrustSignals
-        className={`tw-absolute tw-right-2 tw-z-10 ${compact ? "tw-top-4" : "tw-top-3"}`}
+        className="tw-absolute tw-right-2 tw-top-3 tw-z-10"
         waveRep={wave.wave_rep}
         waveScore={wave.wave_score}
         variant="sidebar-inline"

@@ -99,6 +99,21 @@ it("shows both sections in order with both view-all links", () => {
     screen.getByRole("link", { name: "View all recommendations" })
   ).toHaveAttribute("href", "/discover?view=recommendations&sort=QUALITY");
 });
+it("keeps header navigation separate from disclosure toggles", () => {
+  renderDiscovery();
+  const active = screen.getByRole("button", { name: "Collapse Active Votes" });
+  const link = screen.getByRole("link", { name: "View all active votes" });
+  expect(link).toHaveTextContent("View all");
+  expect(active).not.toContainElement(link);
+  fireEvent.click(link, { ctrlKey: true });
+  expect(active).toHaveAttribute("aria-expanded", "true");
+  fireEvent.click(active);
+  expect(link).toBeVisible();
+  fireEvent.click(link, { ctrlKey: true });
+  expect(
+    screen.getByRole("button", { name: "Expand Active Votes" })
+  ).toHaveAttribute("aria-expanded", "false");
+});
 it("uses personalized recommendations copy only for an authenticated viewer", () => {
   mockCanUseCollections = true;
   renderDiscovery();
@@ -125,8 +140,8 @@ it("collapses each section independently and makes its contents inert", () => {
   fireEvent.click(screen.getByRole("button", { name: "Expand Active Votes" }));
   expect(screen.getByRole("link", { name: /Rare Pepe/ })).toBeVisible();
   expect(
-    screen.queryByRole("link", { name: "View all recommendations" })
-  ).toBeNull();
+    screen.getByRole("link", { name: "View all recommendations" })
+  ).toBeVisible();
 });
 it("persists independent collapse preferences across browser sessions", () => {
   const first = renderDiscovery();

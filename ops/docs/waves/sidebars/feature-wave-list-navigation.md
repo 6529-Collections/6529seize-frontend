@@ -72,8 +72,10 @@ when the desktop feed is active or the heading is hovered or keyboard-focused.
   with score shields overlapping the bottom-right corner of each avatar.
   The section keeps its own compact height independently of the vote list.
 - The compact plus button retains its light colour and shows `Create wave` on hover or keyboard focus.
-- `View all active votes` opens `/discover?view=active-votes`.
-  `View all recommendations` opens `/discover?view=recommendations&sort=QUALITY`.
+- Each heading has a separate `View all` link before the chevron, available
+  even when collapsed. Active Votes opens `/discover?view=active-votes`;
+  Worth Checking Out opens `/discover?view=recommendations&sort=QUALITY`.
+  Selecting the link navigates without toggling the section.
 - `Find a wave…` searches all accessible non-DM waves, independently of the
   selected collection. Type at least three characters. Results show name,
   creator, and joined/pinned status, with `Load more` for additional matches.

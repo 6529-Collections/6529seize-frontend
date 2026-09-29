@@ -4325,6 +4325,7 @@ export const EN_US_MESSAGES = {
   "waves.discovery.expandSection": "Expand {section}",
   "waves.discovery.collapseSection": "Collapse {section}",
   "waves.discovery.voteList": "Active voting waves",
+  "waves.discovery.viewAll": "View all",
   "waves.discovery.viewVotes": "View all active votes",
   "waves.discovery.viewRecommendations": "View all recommendations",
   "waves.discovery.votingOpen": "Voting open",
