@@ -1,4 +1,6 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen, within } from "@testing-library/react";
+import { hydrateRoot } from "react-dom/client";
+import { renderToString } from "react-dom/server";
 import {
   SidebarWaveNavigationControls,
   SidebarWaveSearchResults,
@@ -6,6 +8,7 @@ import {
 import type { SidebarWaveNavigation } from "@/hooks/useSidebarWaveNavigation";
 import { mapApiWaveOverviewToSidebarWave } from "@/services/api/waves-v2-api";
 import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
+import { useWaveSidebarPreference } from "@/hooks/useWaveSidebarPreference";
 
 const mockSet = jest.fn();
 jest.mock("@/contexts/wave/MyStreamContext", () => ({
@@ -82,12 +85,65 @@ function navigation(
     results: {
       isPending: false,
       isError: false,
+      isFetching: false,
       hasNextPage: false,
       refetch: jest.fn(),
     },
     ...overrides,
   } as SidebarWaveNavigation;
 }
+
+function HydrationSearch() {
+  const [query, setQueryText] = useWaveSidebarPreference("hydration-search");
+  const state = navigation({
+    queryText: query ?? "",
+    setQueryText,
+    searching: Boolean(query),
+    queryEnabled: false,
+    canUseCollections: false,
+  });
+  return (
+    <>
+      <SidebarWaveNavigationControls navigation={state} />
+      {state.searching && <SidebarWaveSearchResults navigation={state} />}
+    </>
+  );
+}
+
+it.each(["", "pepe"])(
+  "waits for hydration before accepting input and restores saved query %j",
+  async (savedQuery) => {
+    sessionStorage.setItem("hydration-search", savedQuery);
+    const container = document.createElement("div");
+    document.body.appendChild(container);
+    container.innerHTML = renderToString(<HydrationSearch />);
+    const input = within(container).getByRole("searchbox");
+    expect(input).toBeDisabled();
+    expect(input).toHaveValue("");
+    const onRecoverableError = jest.fn();
+    let root: ReturnType<typeof hydrateRoot> | undefined;
+    try {
+      await act(async () => {
+        root = hydrateRoot(container, <HydrationSearch />, {
+          onRecoverableError,
+        });
+      });
+      expect(input).toBeEnabled();
+      expect(input).toHaveValue(savedQuery);
+      fireEvent.change(input, { target: { value: "xx" } });
+      expect(input).toHaveValue("xx");
+      expect(within(container).getByRole("status")).toHaveTextContent(
+        "Type at least 3 characters to search all waves."
+      );
+      expect(sessionStorage.getItem("hydration-search")).toBe("xx");
+      expect(onRecoverableError).not.toHaveBeenCalled();
+    } finally {
+      act(() => root?.unmount());
+      container.remove();
+      sessionStorage.removeItem("hydration-search");
+    }
+  }
+);
 it("renders the SEARCH response's creator, picture and pin/follow metadata", () => {
   render(<SidebarWaveSearchResults navigation={navigation()} />);
   expect(screen.getByText("by DarrenSRS")).toBeVisible();
@@ -98,6 +154,40 @@ it("renders the SEARCH response's creator, picture and pin/follow metadata", () 
   );
   fireEvent.click(screen.getByRole("link", { name: /Rare Pepe acquisition/ }));
   expect(mockSet).toHaveBeenCalledWith("rare", { isDirectMessage: false });
+});
+it("shows input loading only for a searchable query waiting or fetching", () => {
+  const state = navigation();
+  const { rerender } = render(
+    <SidebarWaveNavigationControls navigation={state} />
+  );
+  const input = screen.getByRole("searchbox");
+  expect(input).toHaveAttribute("aria-busy", "false");
+  expect(screen.queryByText("Search results · All waves")).toBeNull();
+  expect(
+    screen.getAllByRole("button", { name: "Clear wave search" })
+  ).toHaveLength(1);
+  rerender(
+    <SidebarWaveNavigationControls
+      navigation={{ ...state, queryEnabled: false }}
+    />
+  );
+  expect(input).toHaveAttribute("aria-busy", "true");
+  rerender(
+    <SidebarWaveNavigationControls
+      navigation={{ ...state, results: { ...state.results, isFetching: true } }}
+    />
+  );
+  expect(input).toHaveAttribute("aria-busy", "true");
+  rerender(<SidebarWaveNavigationControls navigation={state} />);
+  expect(input).toHaveAttribute("aria-busy", "false");
+  rerender(
+    <SidebarWaveNavigationControls
+      navigation={{ ...state, queryText: "xx", queryEnabled: false }}
+    />
+  );
+  expect(input).toHaveAttribute("aria-busy", "false");
+  fireEvent.click(screen.getByRole("button", { name: "Clear wave search" }));
+  expect(state.setQueryText).toHaveBeenCalledWith("");
 });
 it("keeps one live status node through debounce, results, empty and failure", () => {
   const state = navigation();

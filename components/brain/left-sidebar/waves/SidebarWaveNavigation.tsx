@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useId } from "react";
 import type { SidebarWaveNavigation } from "@/hooks/useSidebarWaveNavigation";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useHasHydrated } from "@/hooks/useHasHydrated";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import WavePicture from "@/components/waves/WavePicture";
@@ -25,24 +26,38 @@ export function SidebarWaveNavigationControls({
 }) {
   const locale = useBrowserLocale();
   const inputId = useId();
+  const hasHydrated = useHasHydrated();
+  const searchLoading =
+    navigation.searching &&
+    navigation.queryText.trim().length >= 3 &&
+    (!navigation.queryEnabled || navigation.results.isFetching);
   return (
     <div className="tailwind-scope tw-sticky tw-top-0 tw-z-10 tw-bg-black tw-px-4 tw-py-2">
       <label htmlFor={inputId} className="tw-sr-only">
         {t(locale, "waves.sidebar.findWave")}
       </label>
       <div className="tw-flex tw-min-h-9 tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-2.5 focus-within:tw-border-primary-400">
-        <MagnifyingGlassIcon
-          className="tw-size-4 tw-shrink-0 tw-text-iron-400"
-          aria-hidden="true"
-        />
+        {searchLoading ? (
+          <span
+            aria-hidden="true"
+            className="tw-size-4 tw-shrink-0 tw-animate-spin tw-rounded-full tw-border tw-border-solid tw-border-iron-600 tw-border-t-primary-300 motion-reduce:tw-animate-none"
+          />
+        ) : (
+          <MagnifyingGlassIcon
+            className="tw-size-4 tw-shrink-0 tw-text-iron-400"
+            aria-hidden="true"
+          />
+        )}
         <input
           id={inputId}
           type="search"
+          disabled={!hasHydrated}
+          aria-busy={searchLoading}
           value={navigation.queryText}
           onChange={(event) => navigation.setQueryText(event.target.value)}
           placeholder={t(locale, "waves.sidebar.findWave")}
           autoComplete="off"
-          className="tw-w-full tw-min-w-0 tw-border-0 tw-bg-transparent tw-py-1.5 tw-text-xs tw-leading-5 tw-text-white tw-outline-none tw-ring-0 placeholder:tw-text-iron-400 focus:tw-ring-0 touch-only:tw-text-base"
+          className="tw-w-full tw-min-w-0 tw-border-0 tw-bg-transparent tw-py-1.5 tw-text-xs tw-leading-5 tw-text-white tw-outline-none tw-ring-0 placeholder:tw-text-iron-400 focus:tw-ring-0 touch-only:tw-text-base [&::-webkit-search-cancel-button]:tw-appearance-none"
         />
         {navigation.searching && (
           <button
@@ -55,11 +70,6 @@ export function SidebarWaveNavigationControls({
           </button>
         )}
       </div>
-      {navigation.searching && (
-        <p className="tw-mb-0 tw-mt-3 tw-text-xs tw-text-iron-400">
-          {t(locale, "waves.sidebar.searchResults")}
-        </p>
-      )}
       {!navigation.searching && navigation.canUseCollections && (
         <fieldset
           aria-label={t(locale, "waves.sidebar.filterAriaLabel")}

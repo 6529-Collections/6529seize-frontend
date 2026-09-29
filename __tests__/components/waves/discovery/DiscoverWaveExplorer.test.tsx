@@ -7,6 +7,10 @@ import { ApiWavesV2ListType } from "@/generated/models/ApiWavesV2ListType";
 const replaceMock = jest.fn();
 let searchParams = "";
 let latestExploreProps: Record<string, any> | null = null;
+let mockCanUseCollections = false;
+jest.mock("@/hooks/useWaveDiscoveryViewer", () => ({
+  useWaveDiscoveryViewer: () => ({ canUseCollections: mockCanUseCollections }),
+}));
 
 jest.mock("next/navigation", () => ({
   usePathname: () => "/discover",
@@ -26,19 +30,28 @@ describe("DiscoverWaveExplorer", () => {
     replaceMock.mockClear();
     searchParams = "";
     latestExploreProps = null;
+    mockCanUseCollections = false;
   });
 
   it("uses combined score discovery by default", () => {
     render(<DiscoverWaveExplorer />);
 
     expect(latestExploreProps).toMatchObject({
-      title: "Active discussions you are not yet following",
+      title: "Active discussions",
       excludeFollowed: true,
       view: ApiWavesV2ListType.Overview,
       overviewType: ApiWavesOverviewType.ScoredRecentlyDroppedTo,
       scoreSort: ApiWaveScoreSort.Balanced,
       statusLabel: "Balanced waves",
     });
+  });
+
+  it("personalizes discussion copy for an authenticated viewer", () => {
+    mockCanUseCollections = true;
+    render(<DiscoverWaveExplorer />);
+    expect(latestExploreProps?.["title"]).toBe(
+      "Active discussions you are not yet following"
+    );
   });
 
   it("uses the latest-post backend overview without score filters", () => {
@@ -83,7 +96,7 @@ it("associates discovery view controls with the rendered panel", () => {
   render(<DiscoverWaveExplorer />);
   const votes = screen.getByRole("tab", { name: "Active Votes" });
   const recommendations = screen.getByRole("tab", {
-    name: "Worth a Look",
+    name: "Worth Checking Out",
   });
   expect(screen.getByRole("tabpanel")).toHaveAttribute(
     "id",

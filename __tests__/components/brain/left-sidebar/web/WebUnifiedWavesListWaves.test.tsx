@@ -211,13 +211,13 @@ it("renders announcement, highly rated preview, pinned, and one filterable botto
   expect(discoverWavesLink.querySelector("svg")).toBeNull();
   expect(screen.getByRole("button", { name: "Joined" })).toBeInTheDocument();
   expect(screen.getByLabelText("Announcement waves")).toBeInTheDocument();
-  expect(screen.getByText("Worth a Look")).toBeInTheDocument();
+  expect(screen.getByText("Worth Checking Out")).toBeInTheDocument();
   expect(
     screen.getByText("Highly rated waves you don’t follow.")
   ).toBeVisible();
   expect(
     screen.queryByRole("button", {
-      name: "Expand Worth a Look, 1 wave",
+      name: "Expand Worth Checking Out, 1 wave",
     })
   ).toBeNull();
   expect(
@@ -291,6 +291,35 @@ it("labels the rendered Joined collection even when the legacy filter disagrees"
   expect(screen.getByTestId("wave-joined-wave")).toBeInTheDocument();
 });
 
+it.each(["pinned", "joined"])(
+  "labels the collapsed rail as All despite the saved %s collection",
+  (collection) => {
+    localStorage.setItem("wave-sidebar-collection", collection);
+    renderWebWaves({
+      isCollapsed: true,
+      waves: [
+        createMockMinimalWave({
+          id: "personal-wave",
+          isPinned: true,
+          isFollowing: true,
+        }),
+        createMockMinimalWave({ id: "other-wave" }),
+      ],
+    });
+
+    expect(screen.getByLabelText("All recent waves list")).toBeInTheDocument();
+    expect(
+      screen.queryByRole("region", { name: "Pinned" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByLabelText("Following waves list")
+    ).not.toBeInTheDocument();
+    expect(screen.getByTestId("wave-personal-wave")).toBeInTheDocument();
+    expect(screen.getByTestId("wave-other-wave")).toBeInTheDocument();
+    expect(localStorage.getItem("wave-sidebar-collection")).toBe(collection);
+  }
+);
+
 it("shows the worth checking out description directly on touch devices", () => {
   const sentinelRef = React.createRef<HTMLDivElement>();
   mockIsTouchDevice = true;
@@ -342,7 +371,7 @@ it("keeps the overlaid touch score inside the wave navigation link", () => {
   expect(scoreBadge).toHaveClass(
     "tw-absolute",
     "-tw-bottom-1.5",
-    "tw-right-0",
+    "-tw-right-2",
     "tw-h-6",
     "tw-w-7",
     "tw-cursor-pointer"
@@ -362,13 +391,11 @@ it("shows the worth checking out description when no profile is connected", () =
 
   renderWebWaves();
 
-  expect(screen.getByText("Worth a Look")).toBeInTheDocument();
-  expect(
-    screen.getByText("Highly rated waves you don’t follow.")
-  ).toBeVisible();
+  expect(screen.getByText("Worth Checking Out")).toBeInTheDocument();
+  expect(screen.getByText("Highly rated waves.")).toBeVisible();
   expect(
     screen.queryByRole("button", {
-      name: "Highly rated waves you don’t follow.",
+      name: "Highly rated waves.",
     })
   ).not.toBeInTheDocument();
 });

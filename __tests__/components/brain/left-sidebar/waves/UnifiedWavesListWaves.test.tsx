@@ -354,13 +354,13 @@ it("renders announcement, highly rated preview, pinned, and one filterable botto
   );
   expect(screen.getByTestId("header-All Waves")).toBeInTheDocument();
   expect(screen.getByLabelText("Announcement waves")).toBeInTheDocument();
-  expect(screen.getByText("Worth a Look")).toBeInTheDocument();
+  expect(screen.getByText("Worth Checking Out")).toBeInTheDocument();
   expect(
     screen.getByText("Highly rated waves you don’t follow.")
   ).toBeVisible();
   expect(
     screen.queryByRole("button", {
-      name: "Expand Worth a Look, 1 wave",
+      name: "Expand Worth Checking Out, 1 wave",
     })
   ).toBeNull();
   expect(
@@ -523,7 +523,7 @@ it("keeps the overlaid score inside the wave link and opens details on hover", a
   expect(scoreBadge).toHaveClass(
     "tw-absolute",
     "-tw-bottom-1",
-    "tw-right-0",
+    "-tw-right-1.5",
     "tw-h-6",
     "tw-w-7",
     "tw-cursor-pointer"
@@ -838,13 +838,11 @@ it("shows the worth checking out description when no profile is connected", () =
     />
   );
 
-  expect(screen.getByText("Worth a Look")).toBeInTheDocument();
-  expect(
-    screen.getByText("Highly rated waves you don’t follow.")
-  ).toBeVisible();
+  expect(screen.getByText("Worth Checking Out")).toBeInTheDocument();
+  expect(screen.getByText("Highly rated waves.")).toBeVisible();
   expect(
     screen.queryByRole("button", {
-      name: "Highly rated waves you don’t follow.",
+      name: "Highly rated waves.",
     })
   ).not.toBeInTheDocument();
 });

@@ -573,7 +573,9 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
                     position: "relative",
                   }}
                   aria-label={
-                    navigation.collection === "pinned" && !isDirectMessage
+                    navigation.collection === "pinned" &&
+                    !isDirectMessage &&
+                    !isCollapsed
                       ? t(locale, "waves.sidebar.pinned")
                       : virtualizedAriaLabel
                   }
