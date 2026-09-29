@@ -61,10 +61,10 @@ export function ActiveWaveVoteRow({
             contributors={[]}
           />
         </span>
-        <span className="tw-min-w-0 tw-flex-1">
+        <span className={`tw-min-w-0 tw-flex-1 ${hasScore ? "tw-pr-12" : ""}`}>
           <span
             title={compact ? wave.name : undefined}
-            className={`${compact ? "tw-block tw-truncate tw-text-xs" : "tw-line-clamp-2 tw-text-sm"} ${hasScore ? "tw-pr-12" : ""} tw-font-medium`}
+            className={`${compact ? "tw-block tw-truncate tw-text-xs" : "tw-line-clamp-2 tw-text-sm"} tw-font-medium`}
           >
             {wave.name}
           </span>
@@ -77,7 +77,7 @@ export function ActiveWaveVoteRow({
         </span>
       </Link>
       <WaveTrustSignals
-        className="tw-absolute tw-right-2 tw-top-3 tw-z-10"
+        className="tw-absolute tw-right-2 tw-top-1/2 -tw-translate-y-1/2 tw-z-10"
         waveRep={wave.wave_rep}
         waveScore={wave.wave_score}
         variant="sidebar-inline"

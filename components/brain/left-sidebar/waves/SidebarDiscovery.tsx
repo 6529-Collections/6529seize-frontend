@@ -127,7 +127,7 @@ export function SidebarDiscovery({
         collapsed={activeCollapsed}
         onToggle={() => setActivePreference(String(!activeCollapsed))}
       >
-        <p className="tw-m-0 tw-mb-1 tw-text-[11px] tw-leading-4 tw-text-iron-400">
+        <p className="tw-m-0 tw-mb-2 tw-text-[11px] tw-leading-4 tw-text-iron-400">
           {t(locale, "waves.discovery.activeVotesDescription")}
         </p>
         <SidebarActiveVotes votes={votes} collapsed={activeCollapsed} />
@@ -141,7 +141,7 @@ export function SidebarDiscovery({
           setRecommendationsPreference(String(!recommendationsCollapsed))
         }
       >
-        <p className="tw-m-0 tw-mb-1 tw-text-[11px] tw-leading-4 tw-text-iron-400">
+        <p className="tw-m-0 tw-mb-2 tw-text-[11px] tw-leading-4 tw-text-iron-400">
           {t(
             locale,
             canUseCollections
