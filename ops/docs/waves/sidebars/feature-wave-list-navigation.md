@@ -25,14 +25,36 @@ Wave and DM rows in the left list control which thread is open.
   its subwaves are loaded, the parent opens, and the active child row is
   highlighted.
 - Navigating to a wave scrolls its active row into the nearest visible position.
-- Switching `All` / `Joined` preserves the current list position instead of
-  jumping back to the active wave. A shorter list can clamp the scroll position
-  to its available content; selecting another wave enables active-row reveal again.
+- `Pinned`, `Joined`, and `All` are peer collections below one sticky search
+  and collection control. Switch directly without scrolling through pinned waves.
+  Each collection remembers its scroll position; selecting another wave enables
+  active-row reveal again. Signed-out visitors see `All Waves` without personal
+  collection controls.
 - The expanded web Waves panel header includes a secondary `Discover Waves`
   link to `/discover`.
 - Browser back/forward keeps the active row and URL in sync.
 - In the native app, swipe right from the left edge of a standard wave detail
   view to return to the Waves list.
+
+## Discovery and wave search
+
+- `Active Votes` and `Worth Checking Out` share one discovery section above the
+  wave collections. Active Votes previews up to two named TDH votes, with their
+  voting end or next decision. Its count remains visible when collapsed.
+- The chevron collapses only the discovery content. Choosing either tab expands
+  it. The visit remembers the tab and collapse state; without a saved choice,
+  active votes take priority when any exist, otherwise recommendations appear.
+- `View all active votes` opens `/discover?view=active-votes`.
+  `View all recommendations` opens `/discover?view=recommendations&sort=QUALITY`.
+- `Find a wave…` searches all accessible non-DM waves, independently of the
+  selected collection. Type at least three characters. Results show name,
+  creator, and joined/pinned status, with `Load more` for additional matches.
+- Search replaces the lower list, labels its scope `Search results · All waves`,
+  and keeps the query while opening a result. Clearing restores the collection
+  and its scroll position. Queries are kept separately for each viewer.
+- This uses the existing name matching. Typo tolerance and relevance changes
+  are outside this redesign. Unread state, pin controls and subwaves remain on
+  normal collection rows; the DM list retains its existing behavior.
 
 ## Location in the Site
 

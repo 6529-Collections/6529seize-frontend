@@ -1,8 +1,9 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import React from "react";
 import {
   act,
   fireEvent,
-  render,
+  render as rtlRender,
   screen,
   waitFor,
   within,
@@ -185,9 +186,10 @@ it("renders announcement, highly rated preview, pinned, and one filterable botto
       { index: 0, start: 0, size: 62 },
       { index: 1, start: 62, size: 62 },
       { index: 2, start: 124, size: 62 },
-      { index: 3, start: 186, size: 1 },
+      { index: 3, start: 186, size: 62 },
+      { index: 4, start: 248, size: 1 },
     ],
-    totalHeight: 187,
+    totalHeight: 249,
     scrollToIndex: jest.fn(() => true),
   });
 
@@ -204,7 +206,9 @@ it("renders announcement, highly rated preview, pinned, and one filterable botto
   expect(discoverWavesLink).toHaveAttribute("href", "/discover");
   expect(discoverWavesLink).toHaveClass("tw-text-[13px]", "tw-font-medium");
   expect(discoverWavesLink.querySelector("svg")).toBeNull();
-  expect(screen.getByTestId("waves-filter-toggle")).toBeInTheDocument();
+  expect(
+    screen.getByRole("button", { name: "Joined", exact: true })
+  ).toBeInTheDocument();
   expect(screen.getByLabelText("Announcement waves")).toBeInTheDocument();
   expect(screen.getByText("Worth Checking Out")).toBeInTheDocument();
   expect(
@@ -242,7 +246,10 @@ it("renders announcement, highly rated preview, pinned, and one filterable botto
   ).toBeInTheDocument();
   expect(screen.getByTestId("preview-avatar-h1")).toBeInTheDocument();
   expect(screen.queryByLabelText("Worth checking out waves")).toBeNull();
-  expect(screen.getByLabelText("Pinned waves")).toBeInTheDocument();
+  expect(
+    screen.getByRole("button", { name: "Pinned", exact: true })
+  ).toBeInTheDocument();
+  expect(screen.queryByLabelText("Pinned waves")).toBeNull();
   expect(screen.getByLabelText("All recent waves list")).toBeInTheDocument();
   expect(screen.queryByLabelText("Following waves")).toBeNull();
   expect(screen.getByTestId("wave-a1")).toHaveAttribute("data-pin", "false");
@@ -252,7 +259,7 @@ it("renders announcement, highly rated preview, pinned, and one filterable botto
   expect(screen.getByTestId("wave-r1")).toHaveAttribute("data-pin", "true");
   expect(
     screen.getAllByTestId(/^wave-/).map((item) => item.dataset.testid)
-  ).toEqual(["wave-a1", "wave-p1", "wave-h1", "wave-f1", "wave-r1"]);
+  ).toEqual(["wave-a1", "wave-h1", "wave-p1", "wave-f1", "wave-r1"]);
   expect(sentinelRef.current).toBeInstanceOf(HTMLDivElement);
 });
 
@@ -286,6 +293,7 @@ it("keeps worth checking out waves in All at their recent-activity position", ()
 
 it("keeps discovery-only worth checking out waves out of Joined", () => {
   mockUseShowFollowingWaves.mockReturnValue([true, jest.fn()]);
+  localStorage.setItem("wave-sidebar-collection", "joined");
 
   renderWebWaves({
     waves: [
@@ -506,7 +514,10 @@ it("does not give special placement to official waves", () => {
     ],
   });
 
-  expect(screen.getByLabelText("Pinned waves")).toBeInTheDocument();
+  expect(
+    screen.getByRole("button", { name: "Pinned", exact: true })
+  ).toBeInTheDocument();
+  expect(screen.queryByLabelText("Pinned waves")).toBeNull();
   expect(screen.getByTestId("wave-o1")).toHaveAttribute("data-pin", "true");
 });
 
@@ -765,7 +776,7 @@ it("drops highly rated child rows when their parent leaves the section", async (
     );
 
     const worthCheckingOutWaves = screen.getByLabelText(
-      "Worth checking out waves"
+      "All recent waves list"
     );
     fireEvent.click(
       within(worthCheckingOutWaves).getByRole("button", {
@@ -792,7 +803,7 @@ it("drops highly rated child rows when their parent leaves the section", async (
 
     expect(screen.queryByTestId("wave-highly-rated-parent")).toBeNull();
     expect(screen.queryByTestId("wave-highly-rated-child")).toBeNull();
-    expect(screen.queryByLabelText("Worth checking out waves")).toBeNull();
+    expect(screen.queryByLabelText("All recent waves list")).toBeNull();
   } finally {
     jest.useRealTimers();
   }
@@ -962,3 +973,30 @@ it("loads a direct active subwave parent before showing it expanded", async () =
     expect(loadSubwavesForParent).toHaveBeenCalledWith("parent");
   });
 });
+
+function render(ui: React.ReactElement) {
+  const client = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  return rtlRender(ui, {
+    wrapper: ({ children }) => (
+      <QueryClientProvider client={client}>{children}</QueryClientProvider>
+    ),
+  });
+}
+jest.mock("@/hooks/useActiveWaveVotes", () => ({
+  useActiveWaveVotes: () => ({
+    data: { pages: [{ count: 0, data: [] }] },
+    isPending: false,
+    isError: false,
+  }),
+}));
+jest.mock("@/hooks/useWaveDiscoveryViewer", () => ({
+  useWaveDiscoveryViewer: () => ({
+    key: null,
+    enabled: true,
+    canUseCollections: Boolean(
+      require("@/components/auth/Auth").useAuth().connectedProfile?.handle
+    ),
+  }),
+}));

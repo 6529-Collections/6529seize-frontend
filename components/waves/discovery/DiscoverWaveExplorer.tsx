@@ -1,4 +1,7 @@
 "use client";
+import { ActiveWaveVotes } from "./ActiveWaveVotes";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 
 import { WAVE_SCORE_DISCOVERY_PARAMS } from "@/components/react-query-wrapper/utils/query-utils";
 import { ExploreWavesSection } from "@/components/home/explore-waves/ExploreWavesSection";
@@ -299,7 +302,7 @@ function DiscoverWaveControls({
   );
 }
 
-export function DiscoverWaveExplorer() {
+function RecommendationsExplorer() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -390,5 +393,46 @@ export function DiscoverWaveExplorer() {
         />
       }
     />
+  );
+}
+
+export function DiscoverWaveExplorer() {
+  const locale = useBrowserLocale();
+  const router = useRouter();
+  const pathname = usePathname();
+  const params = useSearchParams();
+  const active = params?.get("view") === "active-votes";
+  return (
+    <>
+      <div
+        role="group"
+        aria-label={t(locale, "waves.discovery.label")}
+        className="tw-flex tw-gap-2 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-px-4 tw-pt-4 md:tw-px-6 lg:tw-px-8"
+      >
+        {(["active-votes", "recommendations"] as const).map((view) => (
+          <button
+            key={view}
+            type="button"
+            aria-pressed={active === (view === "active-votes")}
+            onClick={() => {
+              const next = new URLSearchParams(params?.toString());
+              next.set("view", view);
+              router.replace(`${pathname}?${next.toString()}`, {
+                scroll: false,
+              });
+            }}
+            className={`tw-min-h-11 tw-rounded-md tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-border-solid tw-bg-transparent tw-px-3 tw-py-2 tw-text-sm tw-font-medium focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 ${active === (view === "active-votes") ? "tw-border-primary-400 tw-text-white" : "tw-border-transparent tw-text-iron-400"}`}
+          >
+            {t(
+              locale,
+              view === "active-votes"
+                ? "waves.discovery.activeVotes"
+                : "waves.discovery.recommendations"
+            )}
+          </button>
+        ))}
+      </div>
+      {active ? <ActiveWaveVotes /> : <RecommendationsExplorer />}
+    </>
   );
 }

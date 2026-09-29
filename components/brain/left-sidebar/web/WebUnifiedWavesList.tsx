@@ -1,4 +1,7 @@
 "use client";
+import { useWaveSidebarPreference } from "@/hooks/useWaveSidebarPreference";
+import { useWaveDiscoveryViewer } from "@/hooks/useWaveDiscoveryViewer";
+import { useWaveSidebarCollection } from "@/hooks/useWaveSidebarCollection";
 
 import React, { useRef } from "react";
 import { useInfiniteScroll } from "../../../../hooks/useInfiniteScroll";
@@ -36,6 +39,13 @@ const WebUnifiedWavesList: React.FC<WebUnifiedWavesListProps> = (props) => {
     showProfileFeedShortcut = true,
   } = props;
   const sentinelRef = useRef<HTMLDivElement>(null);
+  const [savedCollection] = useWaveSidebarCollection();
+  const { canUseCollections, key } = useWaveDiscoveryViewer();
+  const [search] = useWaveSidebarPreference(
+    `wave-sidebar-search:${key ?? "guest"}`
+  );
+  const isSearching = !isCollapsed && Boolean(search?.trim());
+  const collection = canUseCollections ? savedCollection : "all";
   const [following] = useShowFollowingWaves();
   const { connectedProfile, activeProfileProxy } = useAuth();
   const isJoinedFilterActive =
@@ -43,7 +53,7 @@ const WebUnifiedWavesList: React.FC<WebUnifiedWavesListProps> = (props) => {
 
   // Use the custom hook for infinite scroll
   useInfiniteScroll(
-    hasNextPage,
+    !isSearching && collection !== "pinned" && hasNextPage,
     isFetchingNextPage,
     fetchNextPage,
     scrollContainerRef,
@@ -56,6 +66,7 @@ const WebUnifiedWavesList: React.FC<WebUnifiedWavesListProps> = (props) => {
       <div className="tw-w-full">
         {/* Unified Waves List */}
         <WebUnifiedWavesListWaves
+          isLoading={isFetching || isFetchingNextPage}
           waves={waves}
           onHover={onHover}
           scrollContainerRef={scrollContainerRef}
@@ -66,21 +77,23 @@ const WebUnifiedWavesList: React.FC<WebUnifiedWavesListProps> = (props) => {
 
         {/* Loading indicator and intersection trigger */}
         <UnifiedWavesListLoader
-          isFetching={isFetching && waves.length === 0}
-          isFetchingNextPage={isFetchingNextPage}
+          isFetching={!isSearching && isFetching && waves.length === 0}
+          isFetchingNextPage={!isSearching && isFetchingNextPage}
         />
 
         {/* Empty state */}
-        <UnifiedWavesListEmpty
-          sortedWaves={waves}
-          isFetching={isFetching}
-          isFetchingNextPage={isFetchingNextPage}
-          emptyMessage={
-            isJoinedFilterActive
-              ? t(DEFAULT_LOCALE, "waves.sidebar.joinedEmptyMessage")
-              : undefined
-          }
-        />
+        {!isSearching && (
+          <UnifiedWavesListEmpty
+            sortedWaves={waves}
+            isFetching={isFetching}
+            isFetchingNextPage={!isSearching && isFetchingNextPage}
+            emptyMessage={
+              isJoinedFilterActive
+                ? t(DEFAULT_LOCALE, "waves.sidebar.joinedEmptyMessage")
+                : undefined
+            }
+          />
+        )}
       </div>
     </div>
   );
