@@ -9,13 +9,27 @@ interface DropContentPreview {
   readonly text: string;
 }
 
+const findLastWhitespaceRunStart = (text: string): number => {
+  let whitespaceRunStart = -1;
+
+  for (let index = text.length - 1; index > 0; index -= 1) {
+    if (/\s/.test(text.charAt(index))) {
+      whitespaceRunStart = index;
+    } else if (whitespaceRunStart >= 0) {
+      break;
+    }
+  }
+
+  return whitespaceRunStart;
+};
+
 const truncateAtWordBoundary = (text: string, limit: number): string => {
   if (text.length <= limit) {
     return text;
   }
 
   const candidate = text.slice(0, limit + 1);
-  const lastWhitespaceIndex = candidate.search(/\s+\S*$/);
+  const lastWhitespaceIndex = findLastWhitespaceRunStart(candidate);
   const truncated =
     lastWhitespaceIndex > 0
       ? candidate.slice(0, lastWhitespaceIndex)

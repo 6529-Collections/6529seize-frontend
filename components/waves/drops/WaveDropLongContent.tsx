@@ -12,6 +12,7 @@ const BOTTOM_SCROLL_THRESHOLD_PX = 50;
 interface PendingAnchor {
   readonly buttonTop: number;
   readonly scrollContainer: HTMLDivElement;
+  readonly scrollTop: number;
   readonly wasAtBottom: boolean;
 }
 
@@ -65,7 +66,7 @@ export default function WaveDropLongContent({
     );
     pendingAnchor.scrollContainer.scrollTop = Math.max(
       minimumScrollTop,
-      Math.min(0, pendingAnchor.scrollContainer.scrollTop + buttonTopDelta)
+      Math.min(0, pendingAnchor.scrollTop + buttonTopDelta)
     );
   }, [isExpanded, scrollContainerRef]);
 
@@ -81,6 +82,7 @@ export default function WaveDropLongContent({
       pendingAnchorRef.current = {
         buttonTop: button.getBoundingClientRect().top,
         scrollContainer,
+        scrollTop: scrollContainer.scrollTop,
         wasAtBottom:
           Math.abs(scrollContainer.scrollTop) <= BOTTOM_SCROLL_THRESHOLD_PX,
       };

@@ -1,8 +1,10 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import WaveDropQuote from "@/components/waves/drops/WaveDropQuote";
+import { WaveDropContentExpansionProvider } from "@/components/waves/drops/WaveDropContentExpansionContext";
 import { LinkPreviewProvider } from "@/components/waves/LinkPreviewContext";
 import { ApiDropModerationStatus } from "@/generated/models/ApiDropModerationStatus";
+import type { RefObject } from "react";
 
 let markdownProps: any;
 let mockProposalCardPresentation = "default";
@@ -198,6 +200,44 @@ test("displays quoted part content", () => {
   render(<WaveDropQuote drop={drop} partId={5} onQuoteClick={jest.fn()} />);
   expect(screen.getByTestId("markdown")).toHaveTextContent("text");
   expect(markdownProps.quotePath).toContain("w1:42");
+});
+
+test("does not mount long quoted markdown until the user expands it", async () => {
+  const longContent = "Long quoted post content ".repeat(80);
+  const drop = {
+    id: "quoted-drop",
+    serial_no: 42,
+    wave: { id: "w1", name: "wave" },
+    author: { handle: "a", level: 1, cic: "BRONZE", pfp: null },
+    parts: [{ part_id: 5, content: longContent }],
+    created_at: "2020-01-01",
+    mentioned_users: [],
+    referenced_nfts: [],
+    moderation: visibleModeration,
+  } as any;
+  const onQuoteClick = jest.fn();
+  const scrollContainerRef: RefObject<HTMLDivElement | null> = {
+    current: document.createElement("div"),
+  };
+
+  render(
+    <WaveDropContentExpansionProvider
+      enabled={true}
+      scrollContainerRef={scrollContainerRef}
+    >
+      <WaveDropQuote drop={drop} partId={5} onQuoteClick={onQuoteClick} />
+    </WaveDropContentExpansionProvider>
+  );
+
+  expect(screen.queryByTestId("markdown")).not.toBeInTheDocument();
+
+  await userEvent.click(
+    screen.getByRole("button", { name: "Show more", exact: true })
+  );
+
+  expect(screen.getByTestId("markdown")).toBeInTheDocument();
+  expect(markdownProps.partContent).toBe(longContent);
+  expect(onQuoteClick).not.toHaveBeenCalled();
 });
 
 test("uses the reusable compact card for a quoted proposal in an opted-in wave", () => {

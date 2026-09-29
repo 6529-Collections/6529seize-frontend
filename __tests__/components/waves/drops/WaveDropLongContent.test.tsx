@@ -78,6 +78,34 @@ describe("WaveDropLongContent", () => {
     expect(scrollContainer.scrollTop).toBe(-350);
   });
 
+  it("anchors collapse from the pre-toggle position if the browser clamps scroll", () => {
+    const scrollContainer = document.createElement("div");
+    Object.defineProperties(scrollContainer, {
+      clientHeight: { configurable: true, value: 500 },
+      scrollHeight: { configurable: true, value: 2_000 },
+      scrollTop: { configurable: true, value: -500, writable: true },
+    });
+    renderLongContent({ scrollContainer });
+    const button = screen.getByRole("button", { name: "Show more" });
+    let rectReadCount = 0;
+    jest.spyOn(button, "getBoundingClientRect").mockImplementation(() => {
+      rectReadCount += 1;
+      if (rectReadCount === 1) return { top: 200 } as DOMRect;
+      if (rectReadCount === 2) return { top: 350 } as DOMRect;
+      if (rectReadCount === 3) return { top: 350 } as DOMRect;
+
+      scrollContainer.scrollTop = -100;
+      return { top: 200 } as DOMRect;
+    });
+
+    fireEvent.click(button);
+    expect(scrollContainer.scrollTop).toBe(-350);
+
+    fireEvent.click(screen.getByRole("button", { name: "Show less" }));
+
+    expect(scrollContainer.scrollTop).toBe(-500);
+  });
+
   it("stays pinned to the latest drop when expanded at the bottom", () => {
     const scrollContainer = document.createElement("div");
     Object.defineProperties(scrollContainer, {
