@@ -62,15 +62,22 @@ const failCurrentPreview = () => {
 };
 
 describe("WaveDropPartContentMediaImage", () => {
-  it("shows a GIF loading spinner until ready and resets it for another source", () => {
+  it("shows a GIF loading placeholder until ready and resets it for another source", () => {
     const { rerender } = render(
       <WaveDropPartContentMediaImage src="https://example.com/first.gif" />
     );
     const loader = screen.getByRole("status", { name: "Loading image" });
     expect(loader).toBeInTheDocument();
-    expect(loader).toHaveClass("tw-pointer-events-none", "tw-inset-0");
+    expect(loader).toHaveClass(
+      "tw-pointer-events-none",
+      "tw-left-0",
+      "tw-top-0",
+      "tw-w-64",
+      "tw-max-w-full",
+      "tw-max-h-64"
+    );
     expect(loader.querySelector('[aria-hidden="true"]')).toHaveClass(
-      "motion-safe:tw-animate-spin"
+      "motion-safe:tw-animate-pulse"
     );
     fireEvent.load(screen.getByAltText("Drop media"));
     expect(
@@ -84,7 +91,7 @@ describe("WaveDropPartContentMediaImage", () => {
     ).toBeInTheDocument();
   });
 
-  it("does not add a GIF spinner to static images", () => {
+  it("does not add a GIF placeholder to static images", () => {
     const { container } = render(
       <WaveDropPartContentMediaImage src="https://example.com/still.png" />
     );
