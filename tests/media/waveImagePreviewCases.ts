@@ -147,14 +147,61 @@ export function defineWaveImagePreviewTests() {
     page.on("request", (request) => {
       if (request.url().startsWith(MEDIA_ROOT)) requests.push(request.url());
     });
-    await page.route(`${MEDIA_ROOT}**`, (route) =>
-      route.fulfill({ status: 422, body: "Preview unavailable" })
-    );
-    await page.goto(`/waves/${WAVE_ID}?drop=${DROP_ID}`, {
-      waitUntil: "domcontentloaded",
+    let releasePreviews = () => {};
+    const previewResponseGate = new Promise<void>((resolve) => {
+      releasePreviews = resolve;
     });
-    await waitForRouteReady(page);
-    await dismissNextDevTools(page);
+    await page.route(`${MEDIA_ROOT}**`, async (route) => {
+      await previewResponseGate;
+      await route.fulfill({ status: 422, body: "Preview unavailable" });
+    });
+    try {
+      await page.goto(`/waves/${WAVE_ID}?drop=${DROP_ID}`, {
+        waitUntil: "domcontentloaded",
+      });
+      await waitForRouteReady(page);
+      await dismissNextDevTools(page);
+      const inlineLoader = page
+        .getByRole("status", {
+          name: "Loading image",
+          exact: true,
+        })
+        .last();
+      await expect(inlineLoader).toBeVisible();
+      const bounds = await inlineLoader.evaluate((element) => {
+        const placeholder = element.getBoundingClientRect();
+        const frame = element.parentElement!.getBoundingClientRect();
+        const maxSize =
+          16 *
+          Number.parseFloat(
+            getComputedStyle(document.documentElement).fontSize
+          );
+        return {
+          width: placeholder.width,
+          height: placeholder.height,
+          maxWidth: Math.min(maxSize, frame.width),
+          maxHeight: Math.min(maxSize, frame.height),
+          x: placeholder.x - frame.x,
+          y: placeholder.y - frame.y,
+        };
+      });
+      expect(bounds.width).toBeGreaterThan(0);
+      expect(bounds.height).toBeGreaterThan(0);
+      expect(Math.abs(bounds.width - bounds.maxWidth)).toBeLessThanOrEqual(1);
+      expect(Math.abs(bounds.height - bounds.maxHeight)).toBeLessThanOrEqual(1);
+      expect(Math.abs(bounds.x)).toBeLessThanOrEqual(1);
+      expect(Math.abs(bounds.y)).toBeLessThanOrEqual(1);
+      await page.emulateMedia({ reducedMotion: "reduce" });
+      await expect(
+        page
+          .getByRole("status", { name: "Loading image", exact: true })
+          .last()
+          .locator('[aria-hidden="true"]')
+      ).toHaveCSS("animation-name", "none");
+      await expectNoHorizontalOverflow(page);
+    } finally {
+      releasePreviews();
+    }
     await page
       .getByRole("button", { name: /^Open (image preview|drop media)$/ })
       .first()
