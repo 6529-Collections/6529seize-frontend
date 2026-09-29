@@ -16,6 +16,7 @@ const PROFILE_FEED_DESCRIPTION =
   "Drops 6529 users are featuring from their own profile waves.";
 const APP_SECTIONS_LABEL =
   englishMessages["wave.navigation.appSections"] ?? "App sections";
+const PROFILE_FEED_TITLE = "Latest From Profile Waves";
 
 const PROFILE_TAB_PATHS = [
   {
@@ -71,6 +72,12 @@ async function getFirstWaveId(page: Page) {
     `Expected first wave href to use /waves/{id}; got ${href}`
   ).not.toBeNull();
   return match?.[1] ?? "";
+}
+
+function getProfileFeed(page: Page): Locator {
+  return page
+    .getByRole("heading", { level: 1, name: PROFILE_FEED_TITLE })
+    .locator("xpath=ancestor::section[1]");
 }
 
 test.describe("Waves and profile read-only coverage @surface @medium @large @readonly", () => {
@@ -143,18 +150,10 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       feedNavigation.getByRole("link", { name: "Waves" })
     ).toHaveAttribute("href", "/waves");
 
-    const profileFeed = page
-      .locator("section")
-      .filter({
-        has: page.getByRole("heading", {
-          level: 1,
-          name: "Latest From Profile Waves",
-        }),
-      })
-      .first();
-    const feedPostButtons = profileFeed.locator(
-      'article [role="button"][tabindex="0"]'
-    );
+    const profileFeed = getProfileFeed(page);
+    const feedPostButtons = profileFeed
+      .getByRole("article")
+      .locator('[role="button"][tabindex="0"]');
     await expect(feedPostButtons.first()).toBeVisible({ timeout: 15000 });
     const feedScrollOffset = await profileFeed.evaluate((element) => {
       const maxScrollOffset = element.scrollHeight - element.clientHeight;
@@ -200,15 +199,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
         name: "Latest From Profile Waves",
       })
     ).toBeVisible();
-    const restoredProfileFeed = page
-      .locator("section")
-      .filter({
-        has: page.getByRole("heading", {
-          level: 1,
-          name: "Latest From Profile Waves",
-        }),
-      })
-      .first();
+    const restoredProfileFeed = getProfileFeed(page);
     await expect
       .poll(() => restoredProfileFeed.evaluate((element) => element.scrollTop))
       .toBeGreaterThan(0);
