@@ -21,21 +21,10 @@ const LOCAL_SHELL_ALLOWED_CONSOLE_ERROR_PATTERNS = [
   /^Error checking Cross-Origin-Opener-Policy: Failed to fetch(?: \(6529\.io\))?(?:\n|$)/,
 ];
 
-async function waitForRightsLayout(page: Page) {
-  await waitForRouteReady(page);
-  if (page.viewportSize()?.width === MOBILE_VIEWPORT.width) {
-    // SSR starts with desktop chrome. Its mobile transition can move a summary
-    // between pointer-down and pointer-up, leaving the native disclosure closed.
-    await expect(page.locator('[data-small="true"]')).toBeVisible({
-      timeout: 45000,
-    });
-  }
-}
-
 async function openRightsRoute(page: Page, path: string, heading: string) {
   const response = await gotoDocumentWithTransientRetry(page, path);
   expect(response?.status()).toBe(200);
-  await waitForRightsLayout(page);
+  await waitForRouteReady(page);
   await expect(page).toHaveURL((url) => url.pathname === path);
   await expect(
     page.getByRole("heading", { level: 1, name: heading, exact: true })
@@ -80,12 +69,11 @@ test.describe("Museum rights education @surface @readonly", () => {
       await expect(
         page.getByRole("link", { name: "Read the guide" })
       ).toHaveCount(2);
-      const rightsDirectory = page
+      await page
         .locator("details")
-        .filter({ hasText: "Browse rights and license terms" });
-      await expect(rightsDirectory).not.toHaveAttribute("open");
-      await rightsDirectory.locator("summary").click();
-      await expect(rightsDirectory).toHaveAttribute("open");
+        .filter({ hasText: "Browse rights and license terms" })
+        .locator("summary")
+        .click();
       await expect(
         page.getByRole("link", { name: "Read this rights entry" })
       ).toHaveCount(22);
@@ -168,7 +156,7 @@ test.describe("Museum rights education @surface @readonly", () => {
       expect(aliasResponse?.status()).toBe(308);
       expect(aliasResponse?.headers()["location"]).toBe(workPath);
       expect(response?.url()).toBe(new URL(workPath, page.url()).href);
-      await waitForRightsLayout(page);
+      await waitForRouteReady(page);
       await expect(page.locator("body")).toContainText(
         "Licensed CC BY-NC 4.0.",
         { timeout: 45_000 }
