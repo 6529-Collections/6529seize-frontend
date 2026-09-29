@@ -68,7 +68,7 @@ export default function DropItemChat({
             </>
           )}
           {artworkMedia && (
-            <div className="tw-mt-4 tw-flex tw-h-96 tw-justify-center">
+            <div className="tw-mt-4 tw-flex tw-h-96 tw-justify-center tw-bg-iron-900/30">
               <DropListItemContentMedia
                 media_mime_type={artworkMedia.mime_type}
                 media_url={artworkMedia.url}
@@ -76,6 +76,7 @@ export default function DropItemChat({
                   drop.drop_type === ApiDropType.Participatory ||
                   drop.drop_type === ApiDropType.Winner
                 }
+                fillVideoContainer
               />
             </div>
           )}
