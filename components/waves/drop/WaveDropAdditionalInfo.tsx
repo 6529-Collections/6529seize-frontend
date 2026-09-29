@@ -4,13 +4,15 @@ import {
   AdditionalMedia,
   MemesSubmissionAdditionalInfoKey,
 } from "@/components/waves/memes/submission/types/OperationalData";
-import { DropImagePreview } from "@/components/drops/view/item/content/media/DropImagePreview";
-import SeizeVideoPlayer from "@/components/drops/view/item/content/media/SeizeVideoPlayer";
+import DropListItemContentMediaImage from "@/components/drops/view/item/content/media/DropListItemContentMediaImage";
+import { WaveDropAdditionalInfoVideo } from "./WaveDropAdditionalInfoVideo";
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 import { getFileInfoFromUrl } from "@/helpers/file.helpers";
 import { ImageScale } from "@/helpers/image.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useMemo } from "react";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 
 const MAX_MEDIA = 4;
 const VIDEO_EXTENSIONS = new Set(["mp4", "mov", "m4v", "webm", "ogv"]);
@@ -65,6 +67,7 @@ interface WaveDropAdditionalInfoProps {
 export const WaveDropAdditionalInfo = ({
   drop,
 }: WaveDropAdditionalInfoProps) => {
+  const locale = useBrowserLocale();
   const { commentary, aboutArtist, previewImage, promoVideo, mediaItems } =
     useMemo(() => {
       const metadata = drop.metadata ?? [];
@@ -135,17 +138,19 @@ export const WaveDropAdditionalInfo = ({
       {previewImage && (
         <div className="tw-space-y-2">
           <h3 className="tw-text-base tw-font-semibold tw-text-iron-100">
-            Preview Image
+            {t(locale, "drop.additionalInfo.previewImage")}
           </h3>
           <div className="tw-flex tw-justify-center">
             <div className="tw-relative tw-aspect-[4/3] tw-w-full tw-max-w-2xl tw-overflow-hidden tw-bg-white/[0.02]">
-              <DropImagePreview
-                originalSrc={previewImage}
+              <DropListItemContentMediaImage
+                src={previewImage}
+                alt={t(locale, "drop.additionalInfo.previewImageAlt")}
+                openPreviewLabel={t(
+                  locale,
+                  "drop.additionalInfo.openPreviewImage"
+                )}
                 imageScale={ImageScale.AUTOx600}
-                alt="Preview image"
-                fill
-                sizes="(min-width: 768px) 400px, 100vw"
-                className="tw-object-contain"
+                imageObjectPosition="center"
               />
             </div>
           </div>
@@ -155,16 +160,14 @@ export const WaveDropAdditionalInfo = ({
       {promoVideo && (
         <div className="tw-space-y-2">
           <h3 className="tw-text-base tw-font-semibold tw-text-iron-100">
-            Promo Video
+            {t(locale, "drop.additionalInfo.promoVideo")}
           </h3>
           <div className="tw-flex tw-justify-center">
             <div className="tw-flex tw-w-full tw-max-w-2xl tw-justify-center">
-              <SeizeVideoPlayer
+              <WaveDropAdditionalInfoVideo
                 src={promoVideo}
-                template="watch-media"
                 preload="metadata"
                 layout="prominent"
-                align="center"
               />
             </div>
           </div>
@@ -174,7 +177,7 @@ export const WaveDropAdditionalInfo = ({
       {displayedMedia.length > 0 && (
         <div className="tw-space-y-2">
           <h3 className="tw-text-base tw-font-semibold tw-text-iron-100">
-            Additional Media
+            {t(locale, "drop.additionalInfo.additionalMedia")}
           </h3>
           <div className="tw-grid tw-grid-cols-2 tw-gap-3 md:tw-gap-4">
             {displayedMedia.map((item, index) => (
@@ -187,20 +190,24 @@ export const WaveDropAdditionalInfo = ({
                 }`}
               >
                 {item.isVideo ? (
-                  <SeizeVideoPlayer
+                  <WaveDropAdditionalInfoVideo
                     src={item.url}
-                    template="watch-media"
                     preload="none"
                     layout="fill"
                   />
                 ) : (
-                  <DropImagePreview
-                    originalSrc={item.url}
+                  <DropListItemContentMediaImage
+                    src={item.url}
+                    alt={t(locale, "drop.additionalInfo.mediaAlt", {
+                      index: index + 1,
+                    })}
+                    openPreviewLabel={t(
+                      locale,
+                      "drop.additionalInfo.openMedia",
+                      { index: index + 1 }
+                    )}
                     imageScale={ImageScale.AUTOx600}
-                    alt={`Additional media ${index + 1}`}
-                    fill
-                    sizes="(min-width: 816px) 376px, calc(50vw - 1.5rem)"
-                    className="tw-object-contain"
+                    imageObjectPosition="center"
                   />
                 )}
               </div>
@@ -212,7 +219,7 @@ export const WaveDropAdditionalInfo = ({
       {aboutArtist && (
         <div className="tw-space-y-2">
           <h3 className="tw-text-base tw-font-semibold tw-text-iron-100">
-            About the Artist
+            {t(locale, "drop.additionalInfo.aboutArtist")}
           </h3>
           <p className="tw-mb-0 tw-whitespace-pre-wrap tw-text-sm tw-leading-relaxed tw-text-iron-400">
             {aboutArtist}
@@ -223,7 +230,7 @@ export const WaveDropAdditionalInfo = ({
       {commentary && (
         <div className="tw-space-y-2">
           <h3 className="tw-text-base tw-font-semibold tw-text-iron-100">
-            Artwork Commentary
+            {t(locale, "drop.additionalInfo.commentary")}
           </h3>
           <p className="tw-mb-0 tw-whitespace-pre-wrap tw-text-sm tw-leading-relaxed tw-text-iron-400">
             {commentary}
