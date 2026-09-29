@@ -111,10 +111,12 @@ export function defineWaveImagePreviewTests() {
       expect(Math.abs(bounds.x)).toBeLessThanOrEqual(1);
       expect(Math.abs(bounds.y)).toBeLessThanOrEqual(1);
       await page.emulateMedia({ reducedMotion: "reduce" });
-      await expect(inlineLoader.locator('[aria-hidden="true"]')).toHaveCSS(
-        "animation-name",
-        "none"
-      );
+      await expect(
+        page
+          .getByRole("status", { name: "Loading image", exact: true })
+          .last()
+          .locator('[aria-hidden="true"]')
+      ).toHaveCSS("animation-name", "none");
       await expectNoHorizontalOverflow(page);
     } finally {
       releasePreviews();
