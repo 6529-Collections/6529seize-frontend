@@ -1,8 +1,40 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { SidebarDiscovery } from "@/components/brain/left-sidebar/waves/SidebarDiscovery";
 const mockSetActive = jest.fn();
 const mockRefetch = jest.fn();
-let mockVotes: any;
+const mockNext = jest.fn();
+const vote = (id: string) => ({
+  wave: { id, name: id, pfp: null },
+  voting_ends_at: null,
+  next_decision_at: null,
+});
+const makeVotes = () => ({
+  data: {
+    pages: [
+      {
+        count: 23,
+        data: [
+          vote("Rare Pepe acquisition"),
+          vote("QUORUM"),
+          vote("Third vote"),
+        ],
+      },
+    ],
+  } as
+    | { pages: { count: number; data: ReturnType<typeof vote>[] }[] }
+    | undefined,
+  isPending: false,
+  isError: false,
+  hasNextPage: true,
+  isFetchingNextPage: false,
+  isFetchNextPageError: false,
+  refetch: mockRefetch,
+  fetchNextPage: mockNext,
+});
+let mockVotes = makeVotes();
+let observerCallback: IntersectionObserverCallback;
+const mockObserve = jest.fn();
+const mockDisconnect = jest.fn();
 jest.mock("@/hooks/useActiveWaveVotes", () => ({
   useActiveWaveVotes: () => mockVotes,
 }));
@@ -26,214 +58,159 @@ beforeEach(() => {
   sessionStorage.clear();
   localStorage.clear();
   jest.clearAllMocks();
-  mockVotes = {
-    data: {
-      pages: [
-        {
-          count: 3,
-          data: [
-            {
-              wave: { id: "rare", name: "Rare Pepe acquisition", pfp: null },
-              voting_ends_at: null,
-              next_decision_at: null,
-            },
-          ],
-        },
-      ],
-    },
-    isPending: false,
-    isError: false,
-    refetch: mockRefetch,
-  };
-});
-it("shows active votes by default and retains the count when collapsed or browsing recommendations", () => {
-  renderDiscovery();
-  expect(screen.getByRole("tab", { name: "Active Votes 3" })).toHaveAttribute(
-    "aria-selected",
-    "true"
+  mockVotes = makeVotes();
+  window.IntersectionObserver = jest.fn(
+    (callback: IntersectionObserverCallback) => {
+      observerCallback = callback;
+      return {
+        observe: mockObserve,
+        disconnect: mockDisconnect,
+        unobserve: jest.fn(),
+        takeRecords: () => [],
+        root: null,
+        rootMargin: "32px",
+        thresholds: [0],
+      };
+    }
   );
+});
+it("shows both sections in order with both view-all links", () => {
+  renderDiscovery();
+  const active = screen.getByRole("button", { name: "Collapse Active Votes" });
+  const recommendations = screen.getByRole("button", {
+    name: "Collapse Worth a Look",
+  });
+  expect(
+    active.compareDocumentPosition(recommendations) &
+      Node.DOCUMENT_POSITION_FOLLOWING
+  ).toBeTruthy();
+  expect(active).toHaveTextContent("23");
   expect(screen.getByText("Rare Pepe acquisition")).toBeVisible();
-  expect(screen.getByText("Community decisions powered by TDH.")).toBeVisible();
+  expect(
+    screen.getByText("Highly rated waves you don’t follow.")
+  ).toBeVisible();
   expect(
     screen.getByRole("link", { name: "View all active votes" })
   ).toHaveAttribute("href", "/discover?view=active-votes");
-  fireEvent.click(
-    screen.getByRole("button", { name: "Collapse wave discovery" })
-  );
-  expect(
-    screen.queryByRole("link", { name: /Rare Pepe acquisition/ })
-  ).toBeNull();
-  expect(screen.queryByRole("tabpanel")).toBeNull();
-  expect(screen.getByRole("tab", { name: "Active Votes 3" })).toBeVisible();
-  fireEvent.click(screen.getByRole("tab", { name: "Worth a Look" }));
-  expect(
-    screen.getByRole("button", { name: "Collapse wave discovery" })
-  ).toHaveAttribute("aria-expanded", "true");
   expect(
     screen.getByRole("link", { name: "View all recommendations" })
   ).toHaveAttribute("href", "/discover?view=recommendations&sort=QUALITY");
 });
-it("uses recommendations at zero and allows inspecting the empty active tab", () => {
-  mockVotes.data.pages[0] = { count: 0, data: [] };
+it("collapses each section independently and makes its contents inert", () => {
   renderDiscovery();
-  expect(screen.getByRole("tab", { name: "Worth a Look" })).toHaveAttribute(
-    "aria-selected",
-    "true"
-  );
-  fireEvent.click(screen.getByRole("tab", { name: "Active Votes 0" }));
-  expect(screen.getByText("No active TDH votes right now.")).toBeVisible();
+  const active = screen.getByRole("button", { name: "Collapse Active Votes" });
+  const panel = document.getElementById(active.getAttribute("aria-controls")!);
+  fireEvent.click(active);
+  expect(panel).toHaveAttribute("inert");
+  expect(screen.queryByRole("link", { name: /Rare Pepe/ })).toBeNull();
   expect(
-    screen.queryByRole("link", { name: "View all active votes" })
-  ).toBeNull();
-  fireEvent.click(
-    screen.getByRole("button", { name: "Browse recommendations" })
-  );
-  expect(screen.getByRole("tab", { name: "Worth a Look" })).toHaveAttribute(
-    "aria-selected",
-    "true"
-  );
-  expect(screen.getByRole("tab", { name: "Worth a Look" })).toHaveFocus();
-  expect(
-    screen.getByText("Highly rated waves you don’t follow.")
+    screen.getByRole("link", { name: "View all recommendations" })
   ).toBeVisible();
-});
-it("remembers the selected tab and collapse state after navigation", () => {
-  const first = renderDiscovery();
-  fireEvent.click(screen.getByRole("tab", { name: "Worth a Look" }));
+  expect(
+    screen.getByRole("button", { name: "Expand Active Votes" })
+  ).toHaveTextContent("23");
   fireEvent.click(
-    screen.getByRole("button", { name: "Collapse wave discovery" })
+    screen.getByRole("button", { name: "Collapse Worth a Look" })
   );
-  first.unmount();
-  renderDiscovery();
-  expect(screen.getByRole("tab", { name: "Worth a Look" })).toHaveAttribute(
-    "aria-selected",
-    "true"
-  );
+  fireEvent.click(screen.getByRole("button", { name: "Expand Active Votes" }));
+  expect(screen.getByRole("link", { name: /Rare Pepe/ })).toBeVisible();
   expect(
-    screen.getByRole("button", { name: "Expand wave discovery" })
-  ).toHaveAttribute("aria-expanded", "false");
-});
-it("offers a retry instead of treating a failed request as zero votes", () => {
-  mockVotes = {
-    data: undefined,
-    isPending: false,
-    isError: true,
-    refetch: mockRefetch,
-  };
-  renderDiscovery();
-  expect(screen.getByRole("alert")).toBeVisible();
-  fireEvent.click(screen.getByRole("button", { name: "Try again" }));
-  expect(mockRefetch).toHaveBeenCalledTimes(1);
-  expect(screen.queryByRole("tab", { name: "Active Votes 0" })).toBeNull();
-});
-it("opens a vote in the existing wave navigation", () => {
-  renderDiscovery();
-  fireEvent.click(screen.getByRole("link", { name: /Rare Pepe acquisition/ }));
-  expect(mockSetActive).toHaveBeenCalledWith("rare", {
-    isDirectMessage: false,
-  });
-});
-
-it("keeps an explicitly selected Active Votes tab open when its last vote ends", () => {
-  const { rerender } = renderDiscovery();
-  fireEvent.click(screen.getByRole("tab", { name: "Active Votes 3" }));
-  mockVotes.data.pages[0] = { count: 0, data: [] };
-  rerender(<SidebarDiscovery previewItems={[]} isTouchPreview={false} />);
-  expect(screen.getByRole("tab", { name: "Active Votes 0" })).toHaveAttribute(
-    "aria-selected",
-    "true"
-  );
-  expect(screen.getByText("No active TDH votes right now.")).toBeVisible();
-});
-
-it.each(["loading", "error"])(
-  "does not mistake %s for an empty votes result",
-  (state) => {
-    localStorage.setItem("wave-discovery-tab", "active-votes");
-    mockVotes = {
-      data: state === "error" ? { pages: [{ count: 0, data: [] }] } : undefined,
-      isPending: state === "loading",
-      isError: state === "error",
-      refetch: mockRefetch,
-    };
-    renderDiscovery();
-    expect(screen.queryByText("No active TDH votes right now.")).toBeNull();
-    expect(
-      screen.queryByRole("button", { name: "Browse recommendations" })
-    ).toBeNull();
-    expect(
-      screen.getByRole(state === "error" ? "alert" : "status")
-    ).toBeVisible();
-  }
-);
-
-it("keeps inactive panels mounted for layout but removes their controls from accessibility and focus", () => {
-  renderDiscovery();
-  const active = screen.getByRole("tab", { name: "Active Votes 3" });
-  fireEvent.keyDown(active, { key: "ArrowRight" });
-  const recommendations = screen.getByRole("tab", { name: "Worth a Look" });
-  expect(recommendations).toHaveFocus();
-  expect(recommendations).toHaveAttribute("aria-selected", "true");
-  expect(screen.getByRole("tabpanel")).toHaveAttribute(
-    "aria-labelledby",
-    recommendations.id
-  );
-  expect(
-    screen.queryByRole("link", { name: /Rare Pepe acquisition/ })
+    screen.queryByRole("link", { name: "View all recommendations" })
   ).toBeNull();
-  const inactive = document.getElementById(
-    active.getAttribute("aria-controls")!
-  );
-  expect(inactive).toHaveAttribute("inert");
-  expect(inactive).toHaveAttribute("tabindex", "-1");
-  expect(screen.getByRole("tabpanel")).toHaveAttribute("tabindex", "0");
-  expect(inactive).toHaveTextContent("Rare Pepe acquisition");
-  fireEvent.keyDown(recommendations, { key: "Home" });
-  expect(active).toHaveFocus();
-  expect(
-    screen.getByRole("link", { name: /Rare Pepe acquisition/ })
-  ).toBeInTheDocument();
-  fireEvent.click(
-    screen.getByRole("button", { name: "Collapse wave discovery" })
-  );
-  expect(screen.queryByRole("tabpanel")).toBeNull();
 });
-
-it("wraps tab keyboard navigation in both directions and supports End", () => {
-  renderDiscovery();
-  const active = screen.getByRole("tab", { name: "Active Votes 3" });
-  const recommendations = screen.getByRole("tab", { name: "Worth a Look" });
-  expect(active).toHaveAttribute("tabindex", "0");
-  expect(recommendations).toHaveAttribute("tabindex", "-1");
-  fireEvent.keyDown(active, { key: "ArrowLeft" });
-  expect(recommendations).toHaveFocus();
-  fireEvent.keyDown(recommendations, { key: "ArrowRight" });
-  expect(active).toHaveFocus();
-  fireEvent.keyDown(active, { key: "End" });
-  expect(recommendations).toHaveFocus();
-  const panel = screen.getByRole("tabpanel");
-  fireEvent.click(
-    screen.getByRole("button", { name: "Collapse wave discovery" })
-  );
-  expect(panel).toHaveAttribute("tabindex", "-1");
-});
-
-it("retains discovery preferences after the browser session ends", () => {
+it("persists independent collapse preferences across browser sessions", () => {
   const first = renderDiscovery();
-  fireEvent.click(screen.getByRole("tab", { name: "Worth a Look" }));
   fireEvent.click(
-    screen.getByRole("button", { name: "Collapse wave discovery" })
+    screen.getByRole("button", { name: "Collapse Active Votes" })
   );
-  expect(localStorage.getItem("wave-discovery-tab")).toBe("recommendations");
-  expect(localStorage.getItem("wave-discovery-collapsed")).toBe("true");
   first.unmount();
   sessionStorage.clear();
   renderDiscovery();
-  expect(screen.getByRole("tab", { name: "Worth a Look" })).toHaveAttribute(
-    "aria-selected",
-    "true"
-  );
   expect(
-    screen.getByRole("button", { name: "Expand wave discovery" })
+    screen.getByRole("button", { name: "Expand Active Votes" })
   ).toHaveAttribute("aria-expanded", "false");
+  expect(
+    screen.getByRole("button", { name: "Collapse Worth a Look" })
+  ).toHaveAttribute("aria-expanded", "true");
+});
+it("shows compact empty feedback without hiding either section or view-all link", () => {
+  mockVotes.data = { pages: [{ count: 0, data: [] }] };
+  mockVotes.hasNextPage = false;
+  renderDiscovery();
+  expect(screen.getByText("No active TDH votes right now.")).toBeVisible();
+  expect(
+    screen.getByRole("link", { name: "View all active votes" })
+  ).toBeVisible();
+  expect(
+    screen.getByRole("button", { name: "Collapse Worth a Look" })
+  ).toBeVisible();
+});
+it.each(["loading", "error"])(
+  "does not mistake %s for no active votes",
+  (state) => {
+    mockVotes.data = undefined;
+    mockVotes.isPending = state === "loading";
+    mockVotes.isError = state === "error";
+    mockVotes.hasNextPage = false;
+    renderDiscovery();
+    expect(screen.queryByText("No active TDH votes right now.")).toBeNull();
+    expect(
+      screen.getByRole(state === "error" ? "alert" : "status")
+    ).toBeVisible();
+    if (state === "error") {
+      fireEvent.click(screen.getByRole("button", { name: "Try again" }));
+      expect(mockRefetch).toHaveBeenCalledTimes(1);
+    }
+  }
+);
+it("retains loaded rows and retries a failed next page without refetching from the beginning", () => {
+  mockVotes.isError = true;
+  mockVotes.isFetchNextPageError = true;
+  renderDiscovery();
+  expect(screen.getByText("Rare Pepe acquisition")).toBeVisible();
+  expect(mockObserve).not.toHaveBeenCalled();
+  fireEvent.click(screen.getByRole("button", { name: "Try again" }));
+  expect(mockNext).toHaveBeenCalledTimes(1);
+  expect(mockRefetch).not.toHaveBeenCalled();
+});
+it("uses the vote scroll area for pagination, guards duplicate loads, and renders later pages", () => {
+  const { rerender } = renderDiscovery();
+  const list = screen.getByRole("region", { name: "Active voting waves" });
+  expect(window.IntersectionObserver).toHaveBeenCalledWith(
+    expect.any(Function),
+    { root: list, rootMargin: "32px" }
+  );
+  const entry = { isIntersecting: true } as IntersectionObserverEntry;
+  act(() => {
+    observerCallback([entry], {} as IntersectionObserver);
+    observerCallback([entry], {} as IntersectionObserver);
+  });
+  expect(mockNext).toHaveBeenCalledTimes(1);
+  mockVotes.data!.pages.push({ count: 23, data: [vote("Later page vote")] });
+  rerender(<SidebarDiscovery previewItems={[]} isTouchPreview={false} />);
+  expect(
+    within(list).getByRole("link", { name: /Later page vote/ })
+  ).toBeVisible();
+  fireEvent.click(
+    screen.getByRole("button", { name: "Collapse Active Votes" })
+  );
+  expect(mockDisconnect).toHaveBeenCalled();
+});
+it("provides a keyboard-accessible load-more fallback and disables it while fetching", () => {
+  const { rerender } = renderDiscovery();
+  fireEvent.click(screen.getByRole("button", { name: "Load more" }));
+  expect(mockNext).toHaveBeenCalledTimes(1);
+  mockVotes.isFetchingNextPage = true;
+  rerender(<SidebarDiscovery previewItems={[]} isTouchPreview={false} />);
+  expect(screen.getByRole("button", { name: "Loading waves…" })).toBeDisabled();
+});
+it("opens a vote in the existing navigation but preserves modified clicks", () => {
+  renderDiscovery();
+  const link = screen.getByRole("link", { name: /Rare Pepe/ });
+  fireEvent.click(link, { ctrlKey: true });
+  expect(mockSetActive).not.toHaveBeenCalled();
+  fireEvent.click(link);
+  expect(mockSetActive).toHaveBeenCalledWith("Rare Pepe acquisition", {
+    isDirectMessage: false,
+  });
 });

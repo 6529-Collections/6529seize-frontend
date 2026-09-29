@@ -12,10 +12,11 @@ The `about.6529-apps` record includes a concise `brief_answer` naming both
 page. The companion backend uses it for short availability/download requests
 such as "is there an app", "6529 app", and contextual "link?" replies.
 
-The Wave discovery record describes Active Votes and Worth Checking Out, their
-inline explanations and view-all destinations. It distinguishes an empty active
-vote list from loading or failure, and explains the Browse Worth Checking Out
-action and the always-available zero-count tab.
+The Wave discovery record describes the independent Active Votes and Worth a Look
+sidebar sections, their explanations and view-all destinations. It covers the
+scrollable two-row voting window, pagination, compact empty/error states and
+independently persisted collapse preferences. Active Votes comes first; Worth a
+Look retains its own compact preview height.
 
 ## Problem Statement
 
