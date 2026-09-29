@@ -15,12 +15,10 @@ jest.mock("@/contexts/CompetitionContext", () => ({
 
 describe("competition wallet identity", () => {
   it("binds proxy actions to the represented profile while retaining the actual signing wallet", async () => {
-    jest
-      .mocked(useAuth)
-      .mockReturnValue({
-        connectedProfile: { id: "delegate" },
-        activeProfileProxy: { created_by: { id: "represented" } },
-      } as ReturnType<typeof useAuth>);
+    jest.mocked(useAuth).mockReturnValue({
+      connectedProfile: { id: "delegate" },
+      activeProfileProxy: { created_by: { id: "represented" } },
+    } as ReturnType<typeof useAuth>);
     const { result } = renderHook(() => useCompetitionSignature());
     const signed = await result.current(
       "VOTE_SET",
@@ -38,12 +36,10 @@ describe("competition wallet identity", () => {
     expect(signMessageAsync).toHaveBeenCalledWith({ message: signed.message });
   });
   it("rejects signing after the authenticated profile is removed", async () => {
-    jest
-      .mocked(useAuth)
-      .mockReturnValue({
-        connectedProfile: null,
-        activeProfileProxy: null,
-      } as ReturnType<typeof useAuth>);
+    jest.mocked(useAuth).mockReturnValue({
+      connectedProfile: null,
+      activeProfileProxy: null,
+    } as ReturnType<typeof useAuth>);
     const { result } = renderHook(() => useCompetitionSignature());
     await expect(
       result.current("VOTE_SET", { value: 1 }, "entry", "drop")

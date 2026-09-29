@@ -23,6 +23,14 @@ import { DEFAULT_PROPOSAL_CARD_RECIPE } from "@/helpers/waves/proposal-card.help
 import { useWaveGroupValidation } from "./useWaveGroupValidation";
 import type { ApiWaveGroupRole } from "@/generated/models/ApiWaveGroupRole";
 
+import {
+  type PrivilegeGroupKey,
+  getPrivilegeGroupKeys,
+  updateManualPrivilegeSelections,
+  getMatchingPrivilegeUpdates,
+  getPrivilegeGroupDefaults,
+} from "./waveConfigGroups";
+
 // Stable empty reference so the derived `errors` keeps identity while there
 // is nothing to show (no surfaced errors), avoiding needless re-renders.
 const EMPTY_VALIDATION_ERRORS: CREATE_WAVE_VALIDATION_ERROR[] = [];
@@ -32,80 +40,6 @@ interface EndDateConfig {
   time: number | null;
   period: Period | null;
 }
-
-type PrivilegeGroupKey = "canDrop" | "canVote" | "canChat";
-
-const getPrivilegeGroupKeys = (
-  waveType: ApiWaveType
-): readonly PrivilegeGroupKey[] =>
-  waveType === ApiWaveType.Chat
-    ? ["canChat"]
-    : ["canChat", "canDrop", "canVote"];
-
-const updateManualPrivilegeSelections = ({
-  groups,
-  manuallySelected,
-  privilegeGroups,
-  syncMatchingViewGroups,
-  syncPrivilegeGroups,
-}: {
-  readonly groups: CreateWaveConfig["groups"];
-  readonly manuallySelected: Set<PrivilegeGroupKey>;
-  readonly privilegeGroups: readonly PrivilegeGroupKey[];
-  readonly syncMatchingViewGroups: boolean;
-  readonly syncPrivilegeGroups: boolean;
-}) => {
-  if (syncMatchingViewGroups) {
-    for (const privilegeGroup of privilegeGroups) {
-      if (groups[privilegeGroup] === groups.canView) {
-        manuallySelected.delete(privilegeGroup);
-      } else {
-        manuallySelected.add(privilegeGroup);
-      }
-    }
-    return;
-  }
-  if (!syncPrivilegeGroups) {
-    for (const privilegeGroup of privilegeGroups) {
-      manuallySelected.add(privilegeGroup);
-    }
-  }
-};
-
-const getMatchingPrivilegeUpdates = ({
-  groups,
-  nextGroupId,
-  privilegeGroups,
-}: {
-  readonly groups: CreateWaveConfig["groups"];
-  readonly nextGroupId: string | null;
-  readonly privilegeGroups: readonly PrivilegeGroupKey[];
-}): Partial<CreateWaveConfig["groups"]> =>
-  Object.fromEntries(
-    privilegeGroups
-      .filter((privilegeGroup) => groups[privilegeGroup] === groups.canView)
-      .map((privilegeGroup) => [privilegeGroup, nextGroupId])
-  );
-
-const getPrivilegeGroupDefaults = ({
-  groupId,
-  waveType,
-  manuallySelected,
-}: {
-  readonly groupId: string | null;
-  readonly waveType: ApiWaveType;
-  readonly manuallySelected: ReadonlySet<PrivilegeGroupKey>;
-}): Partial<CreateWaveConfig["groups"]> => {
-  return {
-    ...(!manuallySelected.has("canChat") ? { canChat: groupId } : {}),
-    ...(waveType !== ApiWaveType.Chat && !manuallySelected.has("canDrop")
-      ? { canDrop: groupId }
-      : {}),
-    ...(waveType !== ApiWaveType.Chat && !manuallySelected.has("canVote")
-      ? { canVote: groupId }
-      : {}),
-  };
-};
 
 function asChatOnlyConfig(config: CreateWaveConfig): CreateWaveConfig {
   if (

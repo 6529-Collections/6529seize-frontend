@@ -8,7 +8,10 @@ import {
 
 const WAVE = "00000000-0000-4000-8000-000000000529";
 const PROFILE = "00000000-0000-4000-8000-000000000531";
-const DROP = "00000000-0000-4000-8000-000000000530";
+const entryDropId = (id: string) =>
+  id === "alpha"
+    ? "00000000-0000-4000-8000-000000000532"
+    : "00000000-0000-4000-8000-000000000533";
 const ROOT = `/waves/${WAVE}/competitions`;
 const pageResult = (data: unknown[]) => ({
   data,
@@ -114,7 +117,7 @@ async function installCompetitionApi(page: Page, selfNomination = false) {
     id: `entry-${id}`,
     wave_id: WAVE,
     competition_id: id,
-    drop_id: DROP,
+    drop_id: entryDropId(id),
     submitter: { id: PROFILE, handle: "playwright", pfp: null },
     status: "ACTIVE",
     config_version: 1,
@@ -128,14 +131,31 @@ async function installCompetitionApi(page: Page, selfNomination = false) {
     const suffix = url.pathname.split(`/v3/waves/${WAVE}`)[1];
     if (suffix === undefined) return route.fallback();
     const method = route.request().method();
-    // The shared-chat fixture contains legacy drops; native entry content is
-    // served separately by the competition fixtures below.
     if (
       suffix.startsWith("/drops/") &&
       suffix.endsWith("/competition-context")
     ) {
+      const dropId = suffix.split("/")[2];
+      const owner = competitions.find(
+        (item) => entryDropId(item.id) === dropId
+      );
       return route.fulfill({
-        json: { competition: null, entry: null, vote_summary: null },
+        json: {
+          competition: owner ?? null,
+          entry: owner ? entry(owner.id) : null,
+          vote_summary: owner
+            ? {
+                rating: votes[owner.id] ?? 0,
+                realtime_rating: votes[owner.id] ?? 0,
+                rating_prediction: votes[owner.id] ?? 0,
+                user_vote: votes[owner.id] ?? 0,
+                rank: 1,
+                raters_count: votes[owner.id] ? 1 : 0,
+                top_raters: [],
+                over_threshold_since_ms: null,
+              }
+            : null,
+        },
       });
     }
     const parts = suffix.split("/").filter(Boolean);
@@ -211,7 +231,7 @@ async function installCompetitionApi(page: Page, selfNomination = false) {
         {
           competition_id: id,
           entry_id: `entry-${id}`,
-          drop_id: DROP,
+          drop_id: entryDropId(id),
           rating: votes[id],
           real_time_rating: votes[id],
           rank: 1,
@@ -223,7 +243,7 @@ async function installCompetitionApi(page: Page, selfNomination = false) {
       body = pageResult([
         {
           entry_id: `entry-${id}`,
-          drop_id: DROP,
+          drop_id: entryDropId(id),
           value: votes[id],
           credit_spent: Math.abs(votes[id] ?? 0),
           entry_status: "ACTIVE",
@@ -243,6 +263,27 @@ async function installCompetitionApi(page: Page, selfNomination = false) {
     else if (resource === `entries/entry-${id}`) body = entry(id);
     else body = pageResult([]);
     return route.fulfill({ json: body });
+  });
+  await page.route("**/v2/drops/*", async (route) => {
+    const dropId = new URL(route.request().url()).pathname.split("/").at(-1);
+    const owner = competitions.find((item) => entryDropId(item.id) === dropId);
+    if (!owner) return route.fallback();
+    const response = await route.fetch({
+      url: new URL(`/api/v2/waves/${WAVE}/drops`, route.request().url()).href,
+    });
+    const source = await response.json();
+    return route.fulfill({
+      json: {
+        wave: source.wave,
+        drop: {
+          ...source.drops[0],
+          id: dropId,
+          drop_type: "PARTICIPATORY",
+          title: `Recorded ${owner.id} entry`,
+          content: `Immutable ${owner.id} entry content`,
+        },
+      },
+    });
   });
   return { requests };
 }
@@ -281,7 +322,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await expect(
       page.getByText("Immutable alpha entry content", { exact: true })
     ).toBeVisible({ timeout: 30000 });
-    await page.getByRole("button", { name: "Your vote", exact: true }).click();
+    await page.getByRole("tab", { name: "My votes", exact: true }).click();
     const voteInput = page.getByRole("spinbutton", { name: "Your vote" });
     await expect(
       page.getByRole("button", {
@@ -312,7 +353,10 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await voteInput.fill("25");
     await expect(voteInput).toHaveAttribute("aria-invalid", "false");
     await page.getByRole("button", { name: "Save vote", exact: true }).click();
-    await expect(page.getByText("Saved", { exact: true })).toBeVisible();
+    await expect(voteInput).toHaveValue("25");
+    await expect(
+      page.getByRole("button", { name: "Save vote", exact: true })
+    ).toBeDisabled();
     expect(sandbox.requests).toHaveLength(1);
     expect(sandbox.requests[0]?.path).toContain(
       "/alpha/entries/entry-alpha/votes/me"
@@ -363,7 +407,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       testInfo.outputPath("top-navigation.json"),
       JSON.stringify(topNavigation, null, 2)
     );
-    await page.getByRole("button", { name: "Your vote", exact: true }).click();
+    await page.getByRole("tab", { name: "My votes", exact: true }).click();
     await expect(
       page.getByRole("spinbutton", { name: "Your vote" })
     ).toHaveValue("0");
@@ -378,7 +422,6 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       path: testInfo.outputPath("native-competition.png"),
       fullPage: true,
     });
-    await page.getByRole("tab", { name: "My votes", exact: true }).click();
     await expect(page).toHaveURL(/beta\?tab=votes$/);
     await page.goBack();
     await expect(page).toHaveURL(/\/beta$/);
@@ -467,14 +510,12 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await expectNoHorizontalOverflow(page);
   });
 
-  test("creates one native identity entry and ordinary chat content in the same command", async ({
+  test("creates one native identity entry with dedicated immutable drop content", async ({
     page,
   }) => {
     const sandbox = await installCompetitionApi(page, true);
     await page.goto(`${ROOT}/alpha`);
-    await page
-      .getByRole("button", { name: "Submit an entry", exact: true })
-      .click();
+    await page.getByRole("button", { name: "Drop", exact: true }).click();
     const composer = page.getByRole("region", {
       name: "Submit an entry",
       exact: true,
@@ -508,7 +549,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       config_version: 1,
       drop: {
         wave_id: WAVE,
-        drop_type: "CHAT",
+        drop_type: "PARTICIPATORY",
         title: "New native entry",
         signature: null,
         metadata: [
