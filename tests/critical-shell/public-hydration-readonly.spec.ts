@@ -84,8 +84,9 @@ test("hydrates browser-local calendar clocks with a different client time and ti
   await page.goto("/meme-calendar?locale=de-DE", {
     waitUntil: "domcontentloaded",
   });
+  // After the final mint in a season, the calendar shows the next-season heading.
   await expect(
-    page.getByRole("table", { name: /Upcoming Mints for SZN/ })
+    page.getByRole("table", { name: /^Upcoming (?:Mints for )?SZN \d+$/ })
   ).toBeVisible();
   await page.getByRole("tab", { name: "UTC", exact: true }).click();
   await expect(
