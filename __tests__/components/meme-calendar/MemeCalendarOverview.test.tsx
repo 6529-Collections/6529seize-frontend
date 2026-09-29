@@ -4,7 +4,7 @@ import {
   getSeasonIndexForDate,
   nextMintDateOnOrAfter,
 } from "@/components/meme-calendar/meme-calendar.helpers";
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { renderToString } from "react-dom/server";
 import { hydrateRoot } from "react-dom/client";
 
@@ -49,26 +49,62 @@ describe("MemeCalendarOverview upcoming mints card", () => {
     jest.useRealTimers();
   });
 
-  it("keeps the heading in SSR and starts browser clocks without hydration mismatches", async () => {
-    jest.useFakeTimers().setSystemTime(new Date("2026-09-15T23:59:59Z"));
-    const element = <MemeCalendarOverview displayTz="local" locale="de-DE" />;
-    const html = renderToString(element);
-    expect(html).toContain("The Memes Minting Calendar");
-    expect(html).not.toContain("<table");
-    const container = document.createElement("div");
-    document.body.appendChild(container);
-    container.innerHTML = html;
-    jest.setSystemTime(new Date("2026-09-16T00:01:30Z"));
-    const onRecoverableError = jest.fn();
-    let root: ReturnType<typeof hydrateRoot>;
-    await act(async () => {
-      root = hydrateRoot(container, element, { onRecoverableError });
-    });
-    expect(container.querySelector("table")).not.toBeNull();
-    expect(onRecoverableError).not.toHaveBeenCalled();
-    act(() => root!.unmount());
-    container.remove();
-  });
+  it.each([
+    {
+      serverTime: "2026-09-15T23:59:59Z",
+      tableName: "Upcoming Mints for SZN 16",
+      nextMintTime: "2026-09-16T14:40:00Z",
+      firstTableMintTime: "2026-09-18T14:40:00Z",
+    },
+    {
+      serverTime: "2026-09-28T23:59:59Z",
+      tableName: "Upcoming SZN 17",
+      nextMintTime: "2026-09-30T14:40:00Z",
+      firstTableMintTime: "2026-10-02T14:40:00Z",
+    },
+  ])(
+    "hydrates $tableName with clock skew and excludes the Next Mint card's mint",
+    async ({ serverTime, tableName, nextMintTime, firstTableMintTime }) => {
+      const serverNow = new Date(serverTime);
+      jest.useFakeTimers().setSystemTime(serverNow);
+      const element = <MemeCalendarOverview displayTz="local" locale="de-DE" />;
+      const html = renderToString(element);
+      expect(html).toContain("The Memes Minting Calendar");
+      expect(html).not.toContain("<table");
+      const container = document.createElement("div");
+      document.body.appendChild(container);
+      container.innerHTML = html;
+      jest.setSystemTime(new Date(serverNow.getTime() + 90_000));
+      const onRecoverableError = jest.fn();
+      let root: ReturnType<typeof hydrateRoot>;
+      await act(async () => {
+        root = hydrateRoot(container, element, { onRecoverableError });
+      });
+      try {
+        const localMintTime = (instant: string) =>
+          new Date(instant).toLocaleString("de-DE", {
+            weekday: "short",
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+          });
+        const table = within(container).getByRole("table", {
+          name: tableName,
+        });
+        expect(within(table).getAllByRole("row")[1]).toHaveTextContent(
+          localMintTime(firstTableMintTime)
+        );
+        expect(container).toHaveTextContent(localMintTime(nextMintTime));
+        expect(table).not.toHaveTextContent(localMintTime(nextMintTime));
+        expect(onRecoverableError).not.toHaveBeenCalled();
+      } finally {
+        act(() => root!.unmount());
+        container.remove();
+      }
+    }
+  );
 
   it("shows next season when current season has no upcoming mints", () => {
     jest.useFakeTimers().setSystemTime(new Date(Date.UTC(2025, 11, 31)));
