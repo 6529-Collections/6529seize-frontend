@@ -127,7 +127,34 @@ test("desktop account updates do not move utilities, including in short expanded
     ).toBeVisible();
 
     await page.setViewportSize({ width: 1440, height: 460 });
-    await sidebar.getByRole("button", { name: "Toggle right sidebar" }).click();
+    const sidebarToggle = sidebar.getByRole("button", {
+      name: "Toggle right sidebar",
+    });
+    const logo = sidebar.getByRole("img", { name: "6529Seize" });
+    await search.blur();
+    await page.mouse.move(1000, 400);
+    await expect(sidebarToggle).toHaveCSS("opacity", "0");
+    // Hovering a distant menu control reveals the header toggle too.
+    await search.hover();
+    await expect(sidebarToggle).toHaveCSS("opacity", "1");
+    const railBox = await sidebar.boundingBox();
+    const toggleBox = await sidebarToggle.boundingBox();
+    const logoBox = await logo.boundingBox();
+    expect(railBox).not.toBeNull();
+    expect(toggleBox).not.toBeNull();
+    expect(logoBox).not.toBeNull();
+    expect(toggleBox!.x + toggleBox!.width).toBeLessThanOrEqual(
+      railBox!.x + railBox!.width
+    );
+    expect(logoBox!.x + logoBox!.width).toBeLessThan(toggleBox!.x);
+    await logo.hover();
+    await expect(logo).toHaveCSS("box-shadow", "none");
+    await expect(logo).toHaveCSS("transform", "none");
+    await page.mouse.move(1000, 400);
+    await sidebarToggle.focus();
+    await expect(sidebarToggle).toHaveCSS("opacity", "1");
+    await page.keyboard.press("Enter");
+    await expect(sidebarToggle).toHaveAttribute("aria-expanded", "true");
     const nav = sidebar.getByRole("navigation", {
       name: "Desktop navigation",
     });

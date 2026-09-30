@@ -209,7 +209,7 @@ export default function CommunityCurations({
         {topContent}
         <div className="tw-flex tw-flex-col tw-items-start tw-gap-4 lg:tw-flex-row lg:tw-justify-between">
           <div className="tw-min-w-0 tw-max-w-2xl">
-            <h1 className="tw-mb-0 tw-text-lg tw-font-bold tw-text-white md:tw-text-xl">
+            <h1 className="tw-m-0 tw-text-lg tw-font-bold tw-text-white md:tw-text-xl">
               {t(locale, "waves.profileFeed.title")}
             </h1>
             <p className="tw-mb-0 tw-mt-1 tw-text-pretty tw-text-sm tw-text-iron-400">

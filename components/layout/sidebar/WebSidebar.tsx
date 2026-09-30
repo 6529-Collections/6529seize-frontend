@@ -143,7 +143,7 @@ function WebSidebar({
         style={isMobile ? undefined : { left: "var(--layout-margin, 0px)" }}
       >
         <div
-          className="tw-group tw-relative tw-z-50 tw-h-full tw-border-0 tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-800 tw-bg-black tw-transition-[width] tw-duration-300 tw-ease-in-out focus:tw-outline-none"
+          className="tw-group/sidebar tw-group tw-relative tw-z-50 tw-h-full tw-border-0 tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-800 tw-bg-black tw-transition-[width] tw-duration-300 tw-ease-in-out focus:tw-outline-none"
           style={{ width: sidebarWidth }}
           aria-label="Primary sidebar"
           ref={scrollContainerRef}

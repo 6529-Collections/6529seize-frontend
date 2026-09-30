@@ -15,7 +15,11 @@ On web layouts, route switching is sidebar-first.
   intent delay; tap or click remains available for touch and pointer users.
 - Collapsed flyouts enter with a short opacity and horizontal-position reveal;
   reduced-motion preferences show them immediately without animation.
-- The 6529 logo links to `/`; there is no labeled `Home` product row.
+- The 36px 6529 logo links to `/`; there is no labeled `Home` product row.
+  Hover uses a flat background highlight without glow or scaling.
+- A slim single-chevron toggle stays inside the sidebar beside the logo.
+  Hover anywhere in the sidebar or focus a control to reveal it; touch layouts
+  keep it visible. Expand and collapse use the same footprint.
 - Primary menu concepts are ordered `NFTs`, `Museum`, `Waves`, `DMs`,
   `Join 6529`, and `About` so art destinations stay together while Waves and
   DMs remain adjacent.
@@ -68,7 +72,7 @@ On web layouts, route switching is sidebar-first.
 - Open `Museum` directly from the primary sidebar row.
 - Open `Waves` directly from the primary sidebar row.
 - Open `Join 6529` directly from the primary sidebar row.
-- Open `Discover Waves` from the expanded Waves panel header or search.
+- Open `Discover Waves` from the Profile Waves Feed header or search.
 - Open `Drop Forge` from the standalone row after `About` when the current
   wallet can access `/drop-forge`.
 - Open `Search` from the desktop sidebar row.

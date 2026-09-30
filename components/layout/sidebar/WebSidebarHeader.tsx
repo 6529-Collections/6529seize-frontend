@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDoubleLeftIcon } from "@heroicons/react/24/outline";
+import { ChevronLeftIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import Link from "next/link";
 import EnvironmentBadge from "@/components/common/EnvironmentBadge";
@@ -12,11 +12,11 @@ interface WebSidebarHeaderProps {
 
 function WebSidebarHeader({ collapsed, onToggle }: WebSidebarHeaderProps) {
   return (
-    <div className="tw-relative tw-shrink-0 tw-px-2">
+    <div className="tw-relative tw-shrink-0">
       <div className="tw-flex tw-h-16 tw-items-center tw-justify-between">
         <Link
           href="/"
-          className="tw-relative tw-z-10 tw-ml-3 tw-flex tw-size-10 tw-items-center tw-ease-in-out"
+          className="tw-relative tw-ml-3.5 tw-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-md tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-bg-iron-900 motion-reduce:tw-transition-none"
         >
           <Image
             unoptimized
@@ -24,14 +24,14 @@ function WebSidebarHeader({ collapsed, onToggle }: WebSidebarHeaderProps) {
             priority
             alt="6529Seize"
             src="/6529.svg"
-            className="tw-h-10 tw-w-10 tw-flex-shrink-0 tw-transition-all tw-duration-100 hover:tw-scale-[1.02] desktop-hover:hover:tw-shadow-[0_0_20px_10px_rgba(255,215,215,0.3)]"
-            width={40}
-            height={40}
+            className="tw-size-9 tw-shrink-0"
+            width={36}
+            height={36}
           />
         </Link>
       </div>
       <div
-        className={`tw-flex tw-pb-2 empty:tw-hidden ${
+        className={`tw-flex tw-px-2 tw-pb-2 empty:tw-hidden ${
           collapsed ? "tw-justify-center" : "tw-ml-3 tw-justify-start"
         }`}
       >
@@ -41,16 +41,21 @@ function WebSidebarHeader({ collapsed, onToggle }: WebSidebarHeaderProps) {
         type="button"
         onClick={onToggle}
         onMouseDown={(event) => event.preventDefault()}
-        className={`tw-absolute tw-top-8 tw-flex -tw-translate-y-1/2 tw-items-center tw-justify-center tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-shadow-[0_12px_28px_rgba(0,0,0,0.35)] desktop-hover:hover:tw-border-iron-600 desktop-hover:hover:tw-bg-iron-700 desktop-hover:hover:tw-shadow-[0_16px_34px_rgba(0,0,0,0.4)] ${
-          collapsed
-            ? "-tw-right-3 tw-h-6 tw-w-6 tw-rotate-180 tw-rounded-lg"
-            : "tw-right-4 tw-h-8 tw-w-8 tw-rounded-xl"
-        }`}
+        className="tw-absolute tw-right-0 tw-top-8 tw-flex tw-h-11 tw-w-6 -tw-translate-y-1/2 tw-items-center tw-justify-end tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-800 tw-opacity-0 tw-transition-opacity group-focus-within/sidebar:tw-opacity-100 group-hover/sidebar:tw-opacity-100 focus-visible:tw-opacity-100 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-text-iron-700 touch-only:tw-opacity-100 motion-reduce:tw-transition-none"
         aria-label="Toggle right sidebar"
+        aria-expanded={!collapsed}
       >
-        <ChevronDoubleLeftIcon
+        <svg
+          viewBox="0 0 16 44"
+          aria-hidden="true"
+          className={`tw-h-11 tw-w-4 tw-fill-current ${collapsed ? "-tw-scale-x-100" : ""}`}
+        >
+          <path d="M16 0C16 8 0 6 0 17V27C0 38 16 36 16 44Z" />
+        </svg>
+        <ChevronLeftIcon
           strokeWidth={2}
-          className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-200 tw-transition-all tw-duration-300 tw-ease-in-out group-hover:desktop-hover:hover:tw-text-white"
+          aria-hidden="true"
+          className={`tw-absolute tw-right-0 tw-size-4 tw-text-iron-200 ${collapsed ? "tw-rotate-180" : ""}`}
         />
       </button>
     </div>
