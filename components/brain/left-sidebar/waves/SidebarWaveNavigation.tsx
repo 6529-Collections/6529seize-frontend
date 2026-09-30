@@ -104,7 +104,7 @@ export function SidebarWaveNavigationControls({
             {navigation.canUseCollections && (
               <fieldset
                 aria-label={t(locale, "waves.sidebar.filterAriaLabel")}
-                className="tw-m-0 tw-flex tw-min-w-0 tw-flex-1 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-0.5"
+                className="tw-m-0 tw-flex tw-h-9 tw-min-w-0 tw-flex-1 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-0.5 touch-only:tw-h-11"
               >
                 {(["all", "pinned", "joined"] as const).map((tab) => (
                   <button

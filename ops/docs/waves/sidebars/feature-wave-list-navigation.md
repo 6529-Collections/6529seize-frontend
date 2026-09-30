@@ -26,7 +26,9 @@ Wave and DM rows in the left list control which thread is open.
   highlighted.
 - Navigating to a wave scrolls its active row into the nearest visible position.
 - `All`, `Pinned`, and `Joined` are peer collections in one sticky row, with
-  a separate search icon on the right. Switch directly without scrolling through pinned waves.
+  a separate search icon on the right. The collection group matches the search
+  button height, including the larger touch controls. Switch directly without
+  scrolling through pinned waves.
   Each collection remembers its scroll position; selecting another wave enables
   active-row reveal again. Signed-out visitors have the search icon without personal collection controls.
 - The `Waves` heading is plain text. Header actions sit at the far right:

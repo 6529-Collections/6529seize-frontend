@@ -79,6 +79,11 @@ the successful deployment run ID in `automatic_deploy_run_id`. The default
 `post-deploy` scope preserves ordinary deployment validation. Both modes reject
 a selected deployment that is no longer live.
 
+The production source resolver retries transient GitHub API transport errors
+and HTTP 5xx responses immediately, up to three attempts per read. Authentication
+errors and invalid deployment provenance fail immediately. Successful responses
+must still satisfy the deploy-run, canonical-job, and live-version checks.
+
 Run these only after the corresponding merge and within the authorized scope.
 Select the service needed by the change; `api` below is an example.
 
