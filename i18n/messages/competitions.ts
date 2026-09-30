@@ -92,6 +92,19 @@ export const COMPETITION_MESSAGES = {
   "competitions.entryBudget":
     "Credits are calculated separately for each entry.",
   "competitions.saved": "Saved",
+  "competitions.savedLocally": "Saved on this device",
+  "competitions.unsaved": "Unsaved changes",
+  "competitions.scopeLabel": "Whole competition",
+  "competitions.scopeDescription":
+    "Each identity has one voting budget across this competition.",
+  "competitions.guidelinesLabel": "Competition guidelines",
+  "competitions.guidelinesDescription":
+    "These guidelines apply to this competition’s entries and voting.",
+  "competitions.guidelinesPlaceholder": "Add competition guidelines…",
+  "competitions.announceDescription":
+    "Winners are announced on a schedule you’ll set on the Schedule step — a fixed timeline that ends the competition, or repeating cycles.",
+  "competitions.reviewDescription":
+    "Review your competition before publishing.",
   "competitions.saving": "Saving…",
   "competitions.save": "Save changes",
   "competitions.next": "Next",

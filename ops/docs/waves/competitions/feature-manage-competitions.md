@@ -25,8 +25,13 @@ can access.
 1. Open **Add competition** as a wave administrator.
 2. Choose Rank or Approve and configure eligibility, dates, submission
    requirements, voting credits, decision rules, outcomes and presentation.
-3. Save the draft. Drafts are visible to wave administrators.
-4. Review and publish it. A scheduled first decision must be in the future,
+3. Changes save automatically. Incomplete settings are retained on this device;
+   valid drafts sync to the server and are visible to wave administrators.
+   Opening a draft returns directly to the setup wizard with saved settings
+   prefilled. **Close editor** returns to the competition list without publishing
+   and preserves your draft.
+4. The final step has **Previous**, **Close editor** and **Publish**. Review and
+   publish it. A scheduled first decision must be in the future,
    and participation or voting periods must not already have ended.
 5. Manage the competition through its administration controls while shared
    wave chat continues independently.
@@ -36,15 +41,17 @@ can access.
 - Rank can use an ongoing leaderboard or scheduled and rolling decisions.
 - Approve requires an approval threshold that is a whole number greater than
   zero. A required duration above that threshold and a winner limit are optional.
-  Voting limits and negative-vote rules remain per competition. Saving with invalid
-  voting settings returns to Voting and highlights the field; autosave waits until
-  those settings are valid. Your input stays in the editor.
+  Voting limits and negative-vote rules remain per competition. Next highlights invalid voting settings; server autosave waits until
+  those settings are valid. Incomplete input is saved on this device.
+- **Whole competition** shares one voting budget across the competition’s entries.
+  **Competition guidelines** apply to its entries and voting; chat and its
+  guidelines belong to the parent wave.
 - In **Configuration**, use the gear beside Participation or Voting **Access** to edit
   its criteria with the existing access editor. These controls remain available
   after entries are submitted.
   An access change preserves existing entries, votes, outcomes and decision progress.
 - Edit the name, description and guidelines together inside the overview card, then choose **Save changes** or **Cancel**. Published competitions no longer open a separate editing wizard.
-- Expand **Appearance and labels** in Configuration to change the submission button, proposal card display, Approve tab labels and outcome visibility. Save or cancel within that section. These changes create a new configuration version without changing execution rules or access.
+- Expand **Appearance and labels** in Configuration to change the submission button, proposal card display, Approve tab labels and outcome visibility. Approve competitions default to **Proposals** and **Approved**; custom labels apply to that competition's tabs. Save or cancel within that section. These changes create a new configuration version without changing execution rules or access.
 - **Pause decisions** stops decision execution without closing otherwise open
   entry or vote windows. **Resume decisions** allows evaluation again. A paused
   Rank occurrence is skipped without shifting later scheduled occurrences.

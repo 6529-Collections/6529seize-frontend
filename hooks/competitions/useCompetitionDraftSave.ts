@@ -1,0 +1,205 @@
+"use client";
+
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import type { ApiCompetitionDraftInput } from "@/generated/models/ApiCompetitionDraftInput";
+import type { ApiCompetition } from "@/generated/models/ApiCompetition";
+import { newCompetitionRequestKey } from "@/helpers/competition.helpers";
+import { getStructuredApiErrorStatus } from "@/services/api/common-api";
+import {
+  createCompetition,
+  updateCompetition,
+  invalidateCompetition,
+} from "@/services/api/competitions-api";
+
+import {
+  createCompetitionDraftStorage,
+  type CompetitionEditorDraft,
+  type SavedCompetitionDraft as SavedCompetition,
+} from "@/helpers/competition-editor-draft.helpers";
+
+function useUnsavedCompetitionWarning(unsaved: boolean) {
+  useEffect(() => {
+    if (!unsaved) return;
+    const preventExit = (event: BeforeUnloadEvent) => event.preventDefault();
+    globalThis.addEventListener("beforeunload", preventExit);
+    return () => globalThis.removeEventListener("beforeunload", preventExit);
+  }, [unsaved]);
+}
+
+interface CompetitionDraftSaveOptions {
+  readonly waveId: string;
+  readonly storageKey: string;
+  readonly input: ApiCompetitionDraftInput;
+  readonly competition: ApiCompetition | undefined;
+  readonly restored: CompetitionEditorDraft | null;
+  readonly initialFingerprint: string;
+  readonly canSave: boolean;
+  readonly requestAuth: () => Promise<{ success: boolean }>;
+}
+
+export function useCompetitionDraftSave({
+  waveId,
+  storageKey,
+  input,
+  competition,
+  restored,
+  initialFingerprint,
+  canSave,
+  requestAuth,
+}: CompetitionDraftSaveOptions) {
+  const client = useQueryClient();
+  const fingerprint = JSON.stringify(input);
+  const server = useRef<SavedCompetition | null>(
+    restored?.competition ?? competition ?? null
+  );
+  const pending = useRef(restored?.pending ?? null);
+  const [savedFingerprint, setSavedFingerprint] = useState(
+    restored?.savedFingerprint ?? initialFingerprint
+  );
+  const saved = useRef(savedFingerprint);
+  const current = useRef({ input, fingerprint, canSave });
+  useLayoutEffect(() => {
+    current.current = { input, fingerprint, canSave };
+  }, [input, fingerprint, canSave]);
+  const [busy, setBusy] = useState(false);
+  const [backup] = useState(() => createCompetitionDraftStorage(storageKey));
+  const localFingerprint = useSyncExternalStore(
+    backup.subscribe,
+    backup.getSnapshot,
+    backup.getServerSnapshot
+  );
+  const localSaved = localFingerprint === fingerprint;
+  const [error, setError] = useState<"conflict" | "failure" | null>(null);
+  const failed = useRef<{ fingerprint: string; conflict: boolean } | null>(
+    null
+  );
+  const inFlight = useRef<Promise<SavedCompetition | null> | null>(null);
+
+  const retain = useCallback(
+    () =>
+      backup.write({
+        input: current.current.input,
+        competition: server.current,
+        savedFingerprint: saved.current,
+        pending: pending.current,
+      }),
+    [backup]
+  );
+
+  useEffect(() => {
+    // Sync every edit to external storage, including temporarily invalid fields.
+    // eslint-disable-next-line react-you-might-not-need-an-effect/no-pass-live-state-to-parent, react-you-might-not-need-an-effect/no-pass-data-to-parent, react-you-might-not-need-an-effect/no-pass-ref-to-parent -- This writes to a localStorage-backed external store, not a parent callback.
+    backup.write({
+      input,
+      competition: server.current,
+      savedFingerprint,
+      pending: pending.current,
+    });
+  }, [input, savedFingerprint, backup]);
+
+  const save = useCallback(async (): Promise<SavedCompetition | null> => {
+    if (inFlight.current) {
+      const previous = await inFlight.current;
+      if (!previous) return null;
+    }
+    const snapshot = current.current;
+    if (snapshot.fingerprint === saved.current) return server.current;
+    if (!snapshot.canSave || failed.current?.conflict) return null;
+    // A second caller may have started the next save while this one was awaiting.
+    if (inFlight.current) return inFlight.current;
+    setBusy(true);
+    setError(null);
+    const operation = async () => {
+      try {
+        if (!(await requestAuth()).success) {
+          failed.current = {
+            fingerprint: snapshot.fingerprint,
+            conflict: false,
+          };
+          setError("failure");
+          return null;
+        }
+        if (pending.current?.fingerprint !== snapshot.fingerprint) {
+          pending.current = {
+            fingerprint: snapshot.fingerprint,
+            key: newCompetitionRequestKey(),
+          };
+        }
+        retain();
+        const result = server.current
+          ? await updateCompetition(
+              { waveId, competitionId: server.current.id },
+              {
+                idempotency_key: pending.current.key,
+                config_version: server.current.config_version,
+                config: snapshot.input,
+              }
+            )
+          : await createCompetition(waveId, {
+              idempotency_key: pending.current.key,
+              config: snapshot.input,
+            });
+        server.current = {
+          id: result.id,
+          config_version: result.config_version,
+        };
+        saved.current = snapshot.fingerprint;
+        pending.current = null;
+        failed.current = null;
+        setSavedFingerprint(snapshot.fingerprint);
+        retain();
+        await invalidateCompetition(client, {
+          waveId,
+          competitionId: result.id,
+        });
+        return server.current;
+      } catch (failure) {
+        const conflict = getStructuredApiErrorStatus(failure) === 409;
+        failed.current = { fingerprint: snapshot.fingerprint, conflict };
+        setError(conflict ? "conflict" : "failure");
+        return null;
+      } finally {
+        inFlight.current = null;
+        setBusy(false);
+      }
+    };
+    inFlight.current = operation();
+    return inFlight.current;
+  }, [client, requestAuth, retain, waveId]);
+
+  useEffect(() => {
+    if (
+      busy ||
+      !canSave ||
+      fingerprint === savedFingerprint ||
+      failed.current?.conflict ||
+      failed.current?.fingerprint === fingerprint
+    )
+      return;
+    const timer = setTimeout(() => {
+      void save();
+    }, 800);
+    return () => clearTimeout(timer);
+  }, [busy, canSave, fingerprint, savedFingerprint, save]);
+
+  useUnsavedCompetitionWarning(!localSaved && fingerprint !== savedFingerprint);
+
+  const clear = () => backup.clear(server.current);
+  return {
+    save,
+    retain,
+    clear,
+    busy,
+    error,
+    localSaved,
+    isSaved: fingerprint === savedFingerprint,
+  };
+}

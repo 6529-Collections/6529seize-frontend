@@ -3,7 +3,7 @@ import { ApiCompetitionLifecycle } from "@/generated/models/ApiCompetitionLifecy
 import { ApiCompetitionType } from "@/generated/models/ApiCompetitionType";
 import {
   getWaveOutcomeVisibilityFromMetadata,
-  getApproveWaveDisplayMetadataDraft,
+  getApproveWaveTabLabelsFromMetadata,
 } from "@/helpers/waves/wave-metadata.helpers";
 import { useMemo, useState } from "react";
 import { WaveDisplayMetadataContext } from "@/contexts/WaveDisplayMetadataContext";
@@ -22,6 +22,7 @@ import {
 import {
   COMPETITION_TABS,
   getCompetitionTab,
+  getCompetitionsRoute,
   isMultiCompetitionEnabled,
 } from "@/helpers/competition.helpers";
 import { ContentTabProvider } from "@/components/brain/ContentTabContext";
@@ -63,27 +64,24 @@ function NativeCompetitionContent() {
     selectedTab === "outcomes" && !outcomesVisible
       ? "leaderboard"
       : selectedTab;
-  const approveLabels = getApproveWaveDisplayMetadataDraft(presentation);
+  const approveLabels = getApproveWaveTabLabelsFromMetadata(presentation);
   const tabLabel = (value: (typeof COMPETITION_TABS)[number]) => {
     if (value === "rules") return t(locale, "competitions.configuration");
     if (competition.type === ApiCompetitionType.Approve) {
-      if (value === "leaderboard" && approveLabels.approvalsTabLabel)
-        return approveLabels.approvalsTabLabel;
-      if (value === "decisions" && approveLabels.approvedTabLabel)
-        return approveLabels.approvedTabLabel;
+      if (value === "leaderboard") return approveLabels.approvals;
+      if (value === "decisions") return approveLabels.approved;
     }
     return t(locale, `competitions.${value}`);
   };
   const [entering, setEntering] = useState(false);
   const mutationsEnabled = isMultiCompetitionEnabled();
-  const editing = mutationsEnabled && search.get("edit") === "1";
   const pauses = useCompetitionPauseState({
     waveId: wave.id,
     competitionId: competition.id,
   });
   const paused = pauses.isSuccess ? pauses.data : null;
   if (
-    editing &&
+    mutationsEnabled &&
     competition.lifecycle === ApiCompetitionLifecycle.Draft &&
     competition.permissions.administer
   )
@@ -91,7 +89,7 @@ function NativeCompetitionContent() {
       <CompetitionDraftEditor
         wave={wave}
         competition={competition}
-        onClose={() => router.replace(pathname)}
+        onClose={() => router.replace(getCompetitionsRoute(wave.id))}
       />
     );
   return (
@@ -221,6 +219,7 @@ export default function CompetitionDetail({
             <CompetitionBackLink waveId={waveId} />
           </nav>
           {competition.data &&
+            competition.data.lifecycle !== ApiCompetitionLifecycle.Draft &&
             hub.data &&
             hub.data.legacy_primary_competition_id !== competitionId && (
               <h1 className="tw-m-0 tw-min-w-0 tw-break-words tw-text-xl tw-font-bold tw-leading-tight tw-text-iron-50 sm:tw-text-2xl">
