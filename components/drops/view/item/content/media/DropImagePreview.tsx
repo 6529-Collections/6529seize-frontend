@@ -111,7 +111,7 @@ const PreviewAttempt = forwardRef<HTMLImageElement, Props>(
             ref={ref}
             src={source}
             unoptimized={source !== highQualitySrc}
-            quality={source === highQualitySrc ? 100 : undefined}
+            {...(source === highQualitySrc ? { quality: 100 } : {})}
             onError={() => {
               // Repeated errors from one source must not skip its fallback or
               // notify the parent twice before React commits the next render.

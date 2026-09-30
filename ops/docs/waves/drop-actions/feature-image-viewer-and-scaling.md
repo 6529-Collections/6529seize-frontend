@@ -55,7 +55,7 @@ on touch devices. The initial artwork and popup share the selected quality.
 - The Memes submission artwork view and its popup use responsive, quality-100
   previews generated directly from uploaded first-party still artwork. The browser
   selects a suitable resolution for its display density; GIFs keep their animated
-  CDN previews. If the high-quality preview fails, existing scaled previews are
+  CDN previews. If the high-quality preview request fails, existing scaled previews are
   tried. Feeds, DMs, and supplemental images keep their existing scaling.
 - Submission descriptions preserve authored line breaks, blank lines, and spaces.
   They remain plain text rather than Markdown.
@@ -84,7 +84,8 @@ on touch devices. The initial artwork and popup share the selected quality.
 - If a larger preview fails, the viewer tries the smaller `AUTOx450` preview.
   Feeds and the viewer never automatically display the full-size original as a
   fallback. The submission artwork optimizer reads the source on the server to
-  generate its responsive preview; the browser receives the optimized version.
+  generate its responsive preview. Next may pass through source bytes for
+  animations in other raster formats or when it cannot re-encode a valid image.
 - If no supported preview is available, the image frame stays in place and shows
   `Preview unavailable`. Thread images retry briefly while new uploads process,
   then offer `Retry`; the viewer offers `Retry preview`.
