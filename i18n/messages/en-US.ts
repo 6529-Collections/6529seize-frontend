@@ -4344,6 +4344,7 @@ export const EN_US_MESSAGES = {
   "waves.sidebar.findWave": "Find a wave…",
   "waves.sidebar.createWave": "Create wave",
   "waves.sidebar.clearSearch": "Clear wave search",
+  "waves.sidebar.closeSearch": "Close wave search",
   "waves.sidebar.searchResultCount": "Waves shown: {count}",
   "waves.sidebar.searchResults": "Search results · All waves",
   "waves.sidebar.searchHint": "Type at least 3 characters to search all waves.",

@@ -354,15 +354,20 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
     page,
   }) => {
     await gotoReady(page, "/waves");
+    const searchToggle = page
+      .getByRole("button", { name: "Find a wave…", exact: true })
+      .filter({ visible: true });
+    await searchToggle.click();
     const search = page
       .getByRole("searchbox", { name: "Find a wave…" })
       .filter({ visible: true });
     await expect(search).toBeEnabled();
+    await expect(search).toBeFocused();
     await search.fill("xx");
     await expect(search).toHaveValue("xx");
     await expect(
       page
-        .getByRole("button", { name: "Clear wave search" })
+        .getByRole("button", { name: "Close wave search" })
         .filter({ visible: true })
     ).toHaveCount(1);
     await expect(page.getByText("Search results · All waves")).toHaveCount(0);
@@ -382,10 +387,10 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
     await expect(search).toHaveAttribute("aria-busy", "false");
     await (
       await firstVisible(
-        page.getByRole("button", { name: "Clear wave search" })
+        page.getByRole("button", { name: "Close wave search" })
       )
     ).click();
-    await expect(search).toHaveValue("");
+    await expect(search).toHaveCount(0);
     const discovery = page
       .getByRole("region", { name: "Wave discovery", exact: true })
       .filter({ visible: true });
@@ -417,10 +422,11 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
     await expect(
       discovery.getByRole("link", { name: "View all recommendations" })
     ).toBeVisible();
+    await searchToggle.click();
     await search.fill("refresh query");
     await page.reload();
-    await expect(search).toBeEnabled();
-    await expect(search).toHaveValue("");
+    await expect(searchToggle).toBeEnabled();
+    await expect(search).toHaveCount(0);
     await expect(activeToggle).toHaveAttribute("aria-expanded", "false");
     await expect(recommendationsToggle).toHaveAttribute(
       "aria-expanded",

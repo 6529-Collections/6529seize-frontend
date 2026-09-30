@@ -142,9 +142,11 @@ it.each(["", "pepe"])(
     container.innerHTML = renderToString(
       <HydrationSearch viewerKey={`hydration-${savedQuery}`} />
     );
-    const input = within(container).getByRole("searchbox");
-    expect(input).toBeDisabled();
-    expect(input).toHaveValue("");
+    const toggle = within(container).getByRole("button", {
+      name: "Find a wave…",
+    });
+    expect(toggle).toBeDisabled();
+    expect(within(container).queryByRole("searchbox")).not.toBeInTheDocument();
     const onRecoverableError = jest.fn();
     let root: ReturnType<typeof hydrateRoot> | undefined;
     try {
@@ -157,7 +159,10 @@ it.each(["", "pepe"])(
           }
         );
       });
-      expect(input).toBeEnabled();
+      expect(toggle).toBeEnabled();
+      fireEvent.click(toggle);
+      const input = within(container).getByRole("searchbox");
+      expect(input).toHaveFocus();
       expect(input).toHaveValue("");
       fireEvent.change(input, { target: { value: "xx" } });
       expect(input).toHaveValue("xx");
@@ -193,7 +198,7 @@ it("shows input loading only for a searchable query waiting or fetching", () => 
   expect(input).toHaveAttribute("aria-busy", "false");
   expect(screen.queryByText("Search results · All waves")).toBeNull();
   expect(
-    screen.getAllByRole("button", { name: "Clear wave search" })
+    screen.getAllByRole("button", { name: "Close wave search" })
   ).toHaveLength(1);
   rerender(
     <SidebarWaveNavigationControls
@@ -215,7 +220,7 @@ it("shows input loading only for a searchable query waiting or fetching", () => 
     />
   );
   expect(input).toHaveAttribute("aria-busy", "false");
-  fireEvent.click(screen.getByRole("button", { name: "Clear wave search" }));
+  fireEvent.click(screen.getByRole("button", { name: "Close wave search" }));
   expect(state.setQueryText).toHaveBeenCalledWith("");
 });
 it("keeps one live status node through debounce, results, empty and failure", () => {
@@ -271,7 +276,9 @@ it("exposes the selected collection through semantics and emphasis, with All fir
     "true"
   );
   expect(
-    screen.getAllByRole("button").map((button) => button.textContent)
+    within(screen.getByRole("group", { name: "Wave list filter" }))
+      .getAllByRole("button")
+      .map((button) => button.textContent)
   ).toEqual(["All", "Pinned", "Joined"]);
   expect(screen.getByRole("button", { name: "Pinned" })).not.toHaveClass(
     "tw-underline"
@@ -324,4 +331,43 @@ it("hides personal collection controls when the viewer cannot use them", () => {
     screen.queryByRole("button", { name: "Joined" })
   ).not.toBeInTheDocument();
   expect(screen.queryByText("All Waves")).not.toBeInTheDocument();
+});
+
+it("opens and focuses search, then restores the selected collection on Escape", async () => {
+  const state = navigation({ queryText: "", searching: false });
+  render(<SidebarWaveNavigationControls navigation={state} />);
+  expect(screen.queryByRole("searchbox")).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button", { name: "Find a wave…" }));
+  const input = screen.getByRole("searchbox");
+  expect(input).toHaveFocus();
+  expect(
+    screen.queryByRole("group", { name: "Wave list filter" })
+  ).not.toBeInTheDocument();
+  fireEvent.keyDown(input, { key: "Escape" });
+  expect(state.setQueryText).toHaveBeenCalledWith("");
+  expect(screen.queryByRole("searchbox")).not.toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "Pinned" })).toHaveAttribute(
+    "aria-pressed",
+    "true"
+  );
+  await act(async () => {
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+  });
+  expect(screen.getByRole("button", { name: "Find a wave…" })).toHaveFocus();
+});
+
+it("lets guests open and close an empty search", () => {
+  render(
+    <SidebarWaveNavigationControls
+      navigation={navigation({
+        queryText: "",
+        searching: false,
+        canUseCollections: false,
+      })}
+    />
+  );
+  fireEvent.click(screen.getByRole("button", { name: "Find a wave…" }));
+  expect(screen.getByRole("searchbox")).toHaveFocus();
+  fireEvent.click(screen.getByRole("button", { name: "Close wave search" }));
+  expect(screen.queryByRole("searchbox")).not.toBeInTheDocument();
 });
