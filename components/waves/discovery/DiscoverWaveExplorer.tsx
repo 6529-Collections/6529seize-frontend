@@ -407,11 +407,11 @@ export function DiscoverWaveExplorer() {
   const pathname = usePathname();
   const params = useSearchParams();
   const panelId = useId();
-  const active = params.get("view") === ACTIVE_VOTES_VIEW;
+  const active = params?.get("view") === ACTIVE_VOTES_VIEW;
   const views = ["recommendations", ACTIVE_VOTES_VIEW] as const;
   const tabsRef = useRef<(HTMLButtonElement | null)[]>([]);
   const selectView = (view: (typeof views)[number]) => {
-    const next = new URLSearchParams(params.toString());
+    const next = new URLSearchParams(params?.toString() ?? "");
     next.set("view", view);
     router.replace(`${pathname}?${next.toString()}`, { scroll: false });
   };
