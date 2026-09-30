@@ -1,0 +1,2 @@
+export const WAVE_HEADER_ACTION_CLASSES =
+  "tw-inline-flex tw-cursor-pointer tw-size-8 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-p-0 tw-no-underline tw-transition-colors desktop-hover:hover:tw-bg-iron-700 desktop-hover:hover:tw-text-primary-300 active:tw-bg-iron-700 focus-visible:tw-text-primary-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 touch-only:tw-size-11 motion-reduce:tw-transition-none";

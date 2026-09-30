@@ -1,5 +1,6 @@
 "use client";
 
+import { DiscoverWavesLink } from "@/components/waves/discovery/DiscoverWavesLink";
 import { COMMUNITY_CURATIONS_LIMIT } from "@/components/community-curations/communityCurations.constants";
 import CommunityCurationsMasonry from "@/components/community-curations/CommunityCurationsMasonry";
 import { useLayout } from "@/components/brain/my-stream/layout/LayoutContext";
@@ -201,20 +202,21 @@ export default function CommunityCurations({
   return (
     <section
       ref={setScrollContainerElement}
-      className="tw-flex tw-min-h-0 tw-w-full tw-flex-grow tw-flex-col tw-overflow-y-auto tw-overflow-x-hidden tw-overscroll-contain tw-px-4 tw-py-8 tw-scrollbar-thin tw-scrollbar-track-iron-900 tw-scrollbar-thumb-iron-600 desktop-hover:hover:tw-scrollbar-thumb-iron-500 sm:tw-px-6 lg:tw-px-8"
+      className="tw-flex tw-min-h-0 tw-w-full tw-flex-grow tw-flex-col tw-overflow-y-auto tw-overflow-x-hidden tw-overscroll-contain tw-px-4 tw-py-8 tw-scrollbar-thin tw-scrollbar-track-iron-900 tw-scrollbar-thumb-iron-600 desktop-hover:hover:tw-scrollbar-thumb-iron-500 sm:tw-px-6 lg:tw-px-8 lg:tw-pt-4"
       style={heightStyle ?? waveViewStyle}
     >
       <div className="tw-mx-auto tw-w-full tw-max-w-6xl">
         {topContent}
-        <div className="tw-flex tw-flex-col tw-gap-4">
-          <div className="tw-max-w-2xl">
-            <h1 className="tw-mb-0 tw-text-lg tw-font-bold tw-text-white md:tw-text-xl">
+        <div className="tw-flex tw-flex-col tw-items-start tw-gap-4 lg:tw-flex-row lg:tw-justify-between">
+          <div className="tw-min-w-0 tw-max-w-2xl">
+            <h1 className="tw-m-0 tw-text-lg tw-font-bold tw-text-white md:tw-text-xl lg:tw-flex lg:tw-min-h-8 lg:tw-items-center touch-only:lg:tw-min-h-11">
               {t(locale, "waves.profileFeed.title")}
             </h1>
             <p className="tw-mb-0 tw-mt-1 tw-text-pretty tw-text-sm tw-text-iron-400">
               {t(locale, "waves.profileFeed.description")}
             </p>
           </div>
+          <DiscoverWavesLink />
         </div>
 
         <div className="tw-mt-6">

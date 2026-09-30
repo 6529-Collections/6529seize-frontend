@@ -17054,6 +17054,49 @@ paths:
                 $ref: "#/components/schemas/ApiWaveOverviewPage"
         "400":
           description: Invalid request
+  /v2/waves/active-votes:
+    get:
+      tags:
+        - WavesV2
+      summary: Find waves with active TDH voting
+      description: >-
+        Lists readable, non-DM voting waves using TDH, TDH_PLUS_XTDH or
+        CARD_SET_TDH, regardless of follow or pin status. Excludes upcoming,
+        ended and completed voting and unresolved decisions. Orders the nearest
+        voting end or next decision first, then open-ended waves, with a stable
+        wave ID tie-breaker. Wave and parent visibility apply before counting
+        and pagination. This is discovery, not personal voting eligibility.
+      operationId: getActiveWaveVotes
+      x-6529-router:
+        enabled: true
+        auth: optional
+        handler:
+          import: "@/api/waves/active-wave-votes.handler"
+          name: handleGetActiveWaveVotes
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 1000000
+            default: 1
+        - name: page_size
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 20
+      responses:
+        "200":
+          description: Active votes and total accessible wave count
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiActiveWaveVotesPage"
+        "400":
+          description: Invalid pagination parameters
   /v2/waves/profile-activity/{identity}:
     get:
       tags:
@@ -18436,6 +18479,42 @@ components:
         spots_allowlist:
           type: integer
           format: int64
+    ApiActiveWaveVote:
+      type: object
+      required:
+        - wave
+        - voting_ends_at
+        - next_decision_at
+      properties:
+        wave:
+          $ref: "#/components/schemas/ApiWaveOverview"
+        voting_ends_at:
+          type: integer
+          format: int64
+          nullable: true
+        next_decision_at:
+          type: integer
+          format: int64
+          nullable: true
+    ApiActiveWaveVotesPage:
+      type: object
+      required:
+        - data
+        - page
+        - next
+        - count
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiActiveWaveVote"
+        page:
+          type: integer
+        next:
+          type: boolean
+        count:
+          type: integer
+          description: Total readable active voting waves before pagination.
     ApiAddReactionToDropRequest:
       type: object
       required:

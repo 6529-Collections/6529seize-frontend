@@ -164,12 +164,18 @@ export function ExploreWavesSection({
       : "tw-mx-auto tw-w-full tw-max-w-5xl tw-text-center";
 
   return (
-    <section className="tw-px-4 tw-py-10 md:tw-px-6 md:tw-py-16 lg:tw-px-8">
+    <section
+      className={
+        headingVariant === "page"
+          ? "tw-px-4 tw-pb-10 tw-pt-4 md:tw-px-6 md:tw-pb-16 lg:tw-px-8"
+          : "tw-px-4 tw-py-10 md:tw-px-6 md:tw-py-16 lg:tw-px-8"
+      }
+    >
       <div>
         <div className={headerClassName}>
           <div className={titleClassName}>
             {headingVariant === "page" ? (
-              <h1 className="tw-m-0 tw-mb-5 tw-text-balance tw-text-3xl tw-font-semibold tw-leading-[1.05] tw-tracking-[-0.035em] tw-text-iron-50 md:tw-text-4xl">
+              <h1 className="tw-m-0 tw-text-2xl tw-font-semibold tw-leading-8 tw-text-white">
                 {effectiveTitle}
               </h1>
             ) : (

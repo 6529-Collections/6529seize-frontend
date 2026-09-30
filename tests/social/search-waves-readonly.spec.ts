@@ -350,6 +350,121 @@ async function openSearchOnFirstWaveWithSearch(page: Page) {
 }
 
 test.describe("Search and wave-detail read-only coverage @surface @medium @large @readonly", () => {
+  test("sidebar discovery and cross-collection search remain directly accessible", async ({
+    page,
+  }) => {
+    await gotoReady(page, "/waves");
+    const searchToggle = page
+      .getByRole("button", { name: "Find a wave…", exact: true })
+      .filter({ visible: true });
+    await searchToggle.click();
+    const search = page
+      .getByRole("searchbox", { name: "Find a wave…" })
+      .filter({ visible: true });
+    await expect(search).toBeEnabled();
+    await expect(search).toBeFocused();
+    await search.fill("xx");
+    await expect(search).toHaveValue("xx");
+    await expect(
+      page
+        .getByRole("button", { name: "Close wave search" })
+        .filter({ visible: true })
+    ).toHaveCount(1);
+    await expect(page.getByText("Search results · All waves")).toHaveCount(0);
+    await expect(
+      page.getByText("Type at least 3 characters to search all waves.").first()
+    ).toBeVisible();
+    const searchFeedback = page
+      .getByRole("region", { name: "Search results · All waves" })
+      .filter({ visible: true })
+      .getByRole("status");
+    await expect(searchFeedback).toHaveAttribute("aria-live", "polite");
+    await search.fill(UNMATCHABLE_WAVE_QUERY);
+    await expect(searchFeedback).toHaveText(
+      `No waves found for “${UNMATCHABLE_WAVE_QUERY}”.`,
+      { timeout: NAVIGATION_TIMEOUT_MS }
+    );
+    await expect(search).toHaveAttribute("aria-busy", "false");
+    await (
+      await firstVisible(
+        page.getByRole("button", { name: "Close wave search" })
+      )
+    ).click();
+    await expect(search).toHaveCount(0);
+    const discovery = page
+      .getByRole("region", { name: "Wave discovery", exact: true })
+      .filter({ visible: true });
+    const activeToggle = discovery.getByRole("button", {
+      name: /(?:Expand|Collapse) Active Votes/,
+    });
+    const recommendationsToggle = discovery.getByRole("button", {
+      name: /(?:Expand|Collapse) Worth Checking Out/,
+    });
+    if ((await activeToggle.getAttribute("aria-expanded")) === "false")
+      await activeToggle.click();
+    if ((await recommendationsToggle.getAttribute("aria-expanded")) === "false")
+      await recommendationsToggle.click();
+    await expect(
+      discovery.getByText("Community decisions powered by TDH.")
+    ).toBeVisible();
+    await expect(
+      discovery.getByText("Highly rated waves.", { exact: true })
+    ).toBeVisible();
+    const voteList = discovery.getByRole("region", {
+      name: "Active voting waves",
+    });
+    await expect(voteList).toBeVisible();
+    expect((await voteList.boundingBox())!.height).toBeLessThanOrEqual(145);
+    await activeToggle.click();
+    await expect(
+      discovery.getByRole("link", { name: "View all active votes" })
+    ).toBeVisible();
+    await expect(
+      discovery.getByRole("link", { name: "View all recommendations" })
+    ).toBeVisible();
+    await searchToggle.click();
+    await search.fill("refresh query");
+    await page.reload();
+    await expect(searchToggle).toBeEnabled();
+    await expect(search).toHaveCount(0);
+    await expect(activeToggle).toHaveAttribute("aria-expanded", "false");
+    await expect(recommendationsToggle).toHaveAttribute(
+      "aria-expanded",
+      "true"
+    );
+    await activeToggle.click();
+    const allVotes = discovery.getByRole("link", {
+      name: "View all active votes",
+    });
+    await expect(allVotes).toHaveAttribute(
+      "href",
+      "/discover?view=active-votes"
+    );
+    await allVotes.click();
+    await expect(page).toHaveURL(/\/discover\?view=active-votes$/);
+    await expect(
+      page.getByRole("heading", { level: 1, name: /^Active Votes/ })
+    ).toBeVisible();
+    const voteCards = page.getByRole("link", { name: /^View wave / });
+    if ((await voteCards.count()) > 0) {
+      await expect(
+        voteCards
+          .first()
+          .getByText(/^(Next decision |Voting ends |Voting open$)/)
+      ).toBeVisible();
+    }
+    await expectNoHorizontalOverflow(page);
+    await page.getByRole("tab", { name: "Worth Checking Out" }).click();
+    await expect(
+      page.getByRole("heading", {
+        level: 1,
+        name: "Active discussions",
+        exact: true,
+      })
+    ).toBeVisible();
+    await expectNoHorizontalOverflow(page);
+  });
+
   test("global header search preserves keyboard flow and page navigation", async ({
     page,
   }) => {

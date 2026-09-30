@@ -24,6 +24,9 @@ import type { ReactNode } from "react";
 
 interface ExploreWaveCardProps {
   readonly wave: SidebarWave;
+  readonly headingDetails?: ReactNode;
+  readonly isApp?: boolean;
+  readonly compact?: boolean;
 }
 
 interface ExploreWaveMetric {
@@ -233,11 +236,16 @@ const getMetricsSummaryLabel = (
   return metrics.map((metric) => metric.ariaLabel).join(". ");
 };
 
-export function ExploreWaveCard({ wave }: ExploreWaveCardProps) {
+export function ExploreWaveCard({
+  wave,
+  headingDetails,
+  isApp = false,
+  compact = false,
+}: ExploreWaveCardProps) {
   const waveHref = getWaveRoute({
     waveId: wave.id,
     isDirectMessage: wave.isDirectMessage,
-    isApp: false,
+    isApp,
   });
 
   const banner1 = getRandomColorWithSeed(wave.id);
@@ -287,40 +295,77 @@ export function ExploreWaveCard({ wave }: ExploreWaveCardProps) {
     <Link
       href={waveHref}
       prefetch={false}
-      className="tw-group tw-relative tw-flex tw-h-full tw-transform-gpu tw-flex-col tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.05] tw-bg-iron-950 tw-text-left tw-no-underline tw-shadow-[0_10px_28px_rgba(0,0,0,0.2)] tw-transition-[transform,border-color,box-shadow] tw-duration-300 tw-ease-out focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/60 desktop-hover:hover:-tw-translate-y-1 desktop-hover:hover:tw-border-white/15 desktop-hover:hover:tw-shadow-[0_14px_34px_rgba(0,0,0,0.36)] motion-reduce:tw-transform-none motion-reduce:tw-transition-none"
+      className={`${compact ? "tw-flex-row" : "tw-flex-col"} tw-group tw-relative tw-flex tw-h-full tw-transform-gpu tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.05] tw-bg-iron-950 tw-text-left tw-no-underline tw-shadow-[0_10px_28px_rgba(0,0,0,0.2)] tw-transition-[transform,border-color,box-shadow] tw-duration-300 tw-ease-out focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/60 desktop-hover:hover:-tw-translate-y-1 desktop-hover:hover:tw-border-white/15 desktop-hover:hover:tw-shadow-[0_14px_34px_rgba(0,0,0,0.36)] motion-reduce:tw-transform-none motion-reduce:tw-transition-none`}
       aria-label={cardAriaLabel}
     >
-      <div
-        className="tw-relative tw-h-44 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-t-lg tw-bg-iron-900 sm:tw-h-48 lg:tw-h-44 xl:tw-h-48"
-        style={imageAreaStyle}
-      >
-        {wave.picture && (
-          <Image
-            src={getScaledImageUri(wave.picture, ImageScale.AUTOx450)}
-            alt={t(EXPLORE_WAVE_CARD_LOCALE, "waves.explore.card.coverAlt", {
-              waveName: wave.name,
-            })}
-            fill
-            sizes="(max-width: 639px) 100vw, (max-width: 1023px) 50vw, 33vw"
-            className="tw-transform-gpu tw-object-cover tw-saturate-[.9] tw-transition-[transform,filter] tw-duration-700 tw-ease-out group-focus-visible:tw-saturate-100 desktop-hover:group-hover:tw-scale-105 desktop-hover:group-hover:tw-saturate-100 touch-only:tw-saturate-100 motion-reduce:tw-transform-none motion-reduce:tw-transition-none"
-          />
-        )}
+      {compact && (
         <div
-          aria-hidden="true"
-          className="tw-pointer-events-none tw-absolute tw-inset-x-0 tw-bottom-0 tw-h-2/3 tw-bg-gradient-to-t tw-from-iron-950 tw-via-iron-950/50 tw-to-transparent"
+          className="tw-relative tw-w-20 tw-shrink-0 tw-self-stretch tw-overflow-hidden tw-bg-iron-900 sm:tw-w-24"
+          style={imageAreaStyle}
+        >
+          {wave.picture && (
+            <Image
+              src={getScaledImageUri(wave.picture, ImageScale.W_200_H_200)}
+              alt={t(EXPLORE_WAVE_CARD_LOCALE, "waves.explore.card.coverAlt", {
+                waveName: wave.name,
+              })}
+              fill
+              sizes="96px"
+              className="tw-object-cover"
+            />
+          )}
+          <div
+            aria-hidden="true"
+            className="tw-pointer-events-none tw-absolute tw-inset-0 tw-bg-gradient-to-r tw-from-transparent tw-to-iron-950/30"
+          />
+        </div>
+      )}
+      {!compact && (
+        <div
+          className="tw-relative tw-h-44 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-t-lg tw-bg-iron-900 sm:tw-h-48 lg:tw-h-44 xl:tw-h-48"
+          style={imageAreaStyle}
+        >
+          {wave.picture && (
+            <Image
+              src={getScaledImageUri(wave.picture, ImageScale.AUTOx450)}
+              alt={t(EXPLORE_WAVE_CARD_LOCALE, "waves.explore.card.coverAlt", {
+                waveName: wave.name,
+              })}
+              fill
+              sizes="(max-width: 639px) 100vw, (max-width: 1023px) 50vw, 33vw"
+              className="tw-transform-gpu tw-object-cover tw-saturate-[.9] tw-transition-[transform,filter] tw-duration-700 tw-ease-out group-focus-visible:tw-saturate-100 desktop-hover:group-hover:tw-scale-105 desktop-hover:group-hover:tw-saturate-100 touch-only:tw-saturate-100 motion-reduce:tw-transform-none motion-reduce:tw-transition-none"
+            />
+          )}
+          <div
+            aria-hidden="true"
+            className="tw-pointer-events-none tw-absolute tw-inset-x-0 tw-bottom-0 tw-h-2/3 tw-bg-gradient-to-t tw-from-iron-950 tw-via-iron-950/50 tw-to-transparent"
+          />
+        </div>
+      )}
+
+      <div
+        className={`tw-relative tw-z-10 tw-flex tw-min-w-0 tw-flex-1 tw-flex-col ${compact ? "tw-p-3" : "tw-px-4 tw-pb-4 tw-pt-2"}`}
+      >
+        <div
+          className={compact ? "tw-flex tw-min-w-0 tw-items-start" : undefined}
+        >
+          <span
+            className={`${compact ? "tw-flex-1 tw-truncate tw-text-base tw-leading-6" : "tw-line-clamp-1 tw-text-lg tw-leading-tight"} tw-m-0 tw-min-w-0 tw-break-words tw-font-semibold tw-tracking-tight tw-text-iron-50 tw-transition-colors tw-duration-300 group-focus-visible:tw-text-primary-300 desktop-hover:group-hover:tw-text-primary-300`}
+          >
+            {wave.name}
+          </span>
+        </div>
+
+        {headingDetails}
+
+        <MessagePreviewContent
+          previewContent={descriptionPreview}
+          compact={compact}
         />
-      </div>
 
-      <div className="tw-relative tw-z-10 tw-flex tw-flex-1 tw-flex-col tw-px-4 tw-pb-4 tw-pt-2">
-        <span className="tw-m-0 tw-line-clamp-1 tw-min-w-0 tw-break-words tw-text-lg tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 tw-transition-colors tw-duration-300 group-focus-visible:tw-text-primary-300 desktop-hover:group-hover:tw-text-primary-300">
-          {wave.name}
-        </span>
+        <ExploreWaveCompactMetrics metrics={metrics} compact={compact} />
 
-        <MessagePreviewContent previewContent={descriptionPreview} />
-
-        <ExploreWaveCompactMetrics metrics={metrics} />
-
-        {hasDrops && (
+        {!compact && hasDrops && (
           <div className="tw-mt-2.5 tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-text-xs tw-text-iron-500">
             <ClockIcon
               aria-hidden="true"
@@ -331,7 +376,7 @@ export function ExploreWaveCard({ wave }: ExploreWaveCardProps) {
           </div>
         )}
 
-        {!hasDrops && (
+        {!compact && !hasDrops && (
           <div className="tw-mt-2.5 tw-text-xs tw-text-iron-500">
             {t(EXPLORE_WAVE_CARD_LOCALE, "waves.explore.card.noDropsYet")}
           </div>
@@ -343,11 +388,15 @@ export function ExploreWaveCard({ wave }: ExploreWaveCardProps) {
 
 function ExploreWaveCompactMetrics({
   metrics,
+  compact,
 }: {
   readonly metrics: readonly ExploreWaveMetric[];
+  readonly compact: boolean;
 }) {
   return (
-    <span className="explore-wave-card-metrics tw-mt-3 tw-flex tw-min-h-5 tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-1.5">
+    <span
+      className={`explore-wave-card-metrics ${compact ? "tw-mt-2" : "tw-mt-3"} tw-flex tw-min-h-5 tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-1.5`}
+    >
       {metrics.map((metric) => (
         <span
           key={`${metric.ariaLabel}-${metric.value}`}
@@ -371,19 +420,26 @@ function ExploreWaveCompactMetrics({
 
 function MessagePreviewContent({
   previewContent,
+  compact,
 }: {
   readonly previewContent: ProcessedContent | null;
+  readonly compact: boolean;
 }) {
   if (!previewContent) {
-    return <div aria-hidden="true" className="tw-mt-2 tw-min-h-10" />;
+    return (
+      <div
+        aria-hidden="true"
+        className={compact ? "tw-mt-1.5 tw-h-[18px]" : "tw-mt-2 tw-min-h-10"}
+      />
+    );
   }
 
   return (
     <ContentDisplay
       content={previewContent}
       shouldClamp={false}
-      className="tw-mt-1.5 tw-flex tw-min-h-9 tw-min-w-0 tw-items-start tw-gap-1 tw-overflow-hidden"
-      textClassName="tw-line-clamp-2 tw-break-words tw-text-[13px] tw-font-normal tw-leading-[18px] tw-text-iron-500"
+      className={`${compact ? "tw-h-[18px]" : "tw-min-h-9"} tw-mt-1.5 tw-flex tw-min-w-0 tw-items-start tw-gap-1 tw-overflow-hidden`}
+      textClassName={`${compact ? "tw-line-clamp-1" : "tw-line-clamp-2"} tw-break-words tw-text-[13px] tw-font-normal tw-leading-[18px] tw-text-iron-500`}
       linkify={false}
     />
   );

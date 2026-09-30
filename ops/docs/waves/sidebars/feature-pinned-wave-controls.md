@@ -35,8 +35,8 @@ independent and do not sync.
 ## User Journey
 
 1. Open `/waves/{waveId}` and select `Pin wave` from the header or wave row.
-2. The wave appears in the pinned block above regular waves.
-3. Unpin from either control to remove it from the pinned block.
+2. The wave appears in the `Pinned` collection. Use its tab beside `Joined` and `All`.
+3. Unpin from either control to remove it from the `Pinned` collection.
 4. If 100 ordinary waves are already pinned, pinning is blocked until you unpin one.
 5. In native app small-screen mode, opened threads are added to local shortcuts
    (newest first, max 20).
