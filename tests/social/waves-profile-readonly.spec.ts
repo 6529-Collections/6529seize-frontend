@@ -81,6 +81,74 @@ function getProfileFeed(page: Page): Locator {
 }
 
 test.describe("Waves and profile read-only coverage @surface @medium @large @readonly", () => {
+  test("preserves Main Stage's dedicated tabs, timeline, and winner cards", async ({
+    page,
+  }, testInfo) => {
+    const settingsResponse = page.waitForResponse(
+      (response) => new URL(response.url()).pathname === "/api/settings"
+    );
+    await gotoReady(page, "/waves");
+    const response = await settingsResponse;
+    expect(response.ok()).toBe(true);
+    const settings = await response.json();
+    expect(settings.memes_wave_id).toMatch(/^[0-9a-f-]{36}$/i);
+
+    await gotoReady(page, `/waves/${settings.memes_wave_id}`);
+    await expect(
+      page.getByRole("heading", { level: 1, name: "The Memes - Main Stage" })
+    ).toBeVisible({ timeout: 15000 });
+    for (const name of ["Leaderboard", "Chat", "Winners", "Outcome", "FAQ"]) {
+      await expect(page.getByRole("tab", { name, exact: true })).toBeAttached();
+    }
+    // This pack runs signed out; personal voting controls remain authenticated.
+    await expect(
+      page.getByRole("tab", { name: "My Votes", exact: true })
+    ).toHaveCount(0);
+    await expect(
+      page.getByRole("button", {
+        name: /^(How to Submit|Submit Work|Submit Work to The Memes)$/,
+      })
+    ).toBeVisible();
+
+    await page.getByRole("tab", { name: "Leaderboard", exact: true }).click();
+    await expect(
+      page.getByRole("button", { name: "Toggle decision timeline" })
+    ).toBeVisible();
+    const projectedVote = page.getByRole("tab", {
+      name: "Projected Vote",
+      exact: true,
+    });
+    const sortDropdown = page.getByRole("button", {
+      name: "Sort: Current Vote",
+      exact: true,
+    });
+    await expect(projectedVote.or(sortDropdown)).toBeVisible();
+    if (await sortDropdown.isVisible()) {
+      await sortDropdown.click();
+      await page
+        .getByRole("menuitem", { name: "Projected Vote", exact: true })
+        .click();
+      await expect(
+        page.getByRole("button", { name: "Sort: Projected Vote", exact: true })
+      ).toBeVisible();
+    } else {
+      await projectedVote.click();
+      await expect(projectedVote).toHaveAttribute("aria-selected", "true");
+    }
+    await page.getByRole("tab", { name: "Winners", exact: true }).click();
+    const winners = page.getByRole("tabpanel");
+    await expect(
+      winners.getByRole("link", { name: /^The Memes #\d+$/ }).first()
+    ).toBeVisible();
+    await expect(
+      winners.getByText("Mint date:", { exact: true }).first()
+    ).toBeVisible();
+    await testInfo.attach("main-stage-winners", {
+      body: await page.screenshot(),
+      contentType: "image/png",
+    });
+  });
+
   test("renders the public Waves landing without write interaction", async ({
     page,
   }) => {
