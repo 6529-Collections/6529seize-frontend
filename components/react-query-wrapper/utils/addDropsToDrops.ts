@@ -190,11 +190,7 @@ export function upsertDropIntoMatchingDropsQueries(
     .getQueryCache()
     .findAll({ queryKey: [QueryKey.DROPS] });
 
-  const matchingQueries = queries.filter((query) => {
-    const params = readDropsQueryParams(query.queryKey);
-    return params !== null && isMatchingDropsQuery(params, drop);
-  });
-  const hasNewerRevision = matchingQueries.some((query) => {
+  const hasNewerRevision = queries.some((query) => {
     const data = queryClient.getQueryData<DropsInfiniteData>(query.queryKey);
     return data?.pages?.some((page) =>
       page.drops?.some(
@@ -204,6 +200,11 @@ export function upsertDropIntoMatchingDropsQueries(
     );
   });
   if (hasNewerRevision) return;
+
+  const matchingQueries = queries.filter((query) => {
+    const params = readDropsQueryParams(query.queryKey);
+    return params !== null && isMatchingDropsQuery(params, drop);
+  });
 
   for (const query of matchingQueries) {
     queryClient.setQueryData<DropsInfiniteData | undefined>(
