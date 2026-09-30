@@ -4,6 +4,7 @@ import type { ReadonlyURLSearchParams } from "next/navigation";
 import { useCallback, useMemo, useState } from "react";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { BrainView } from "./brainMobileViews";
+import { isCompetitionPathname } from "@/helpers/competition.helpers";
 
 const GLOBAL_VIEWS = new Set([
   BrainView.DEFAULT,
@@ -26,6 +27,7 @@ interface UseBrainMobileActiveViewParams {
   readonly isCompleted: boolean;
   readonly hasAuthenticatedProfile: boolean;
   readonly hasPolls?: boolean | undefined;
+  readonly hasCompetitions?: boolean | undefined;
   readonly isCurationWave: boolean;
   readonly isMemesWave: boolean;
   readonly isRankWave: boolean;
@@ -47,6 +49,7 @@ interface WaveViewState {
   readonly firstDecisionDone: boolean;
   readonly hasAuthenticatedProfile: boolean;
   readonly hasPolls: boolean;
+  readonly hasCompetitions: boolean;
   readonly isApproveWave: boolean;
   readonly isCompleted: boolean;
   readonly isCurationWave: boolean;
@@ -123,6 +126,7 @@ function getWaveViewAvailability({
   firstDecisionDone,
   hasAuthenticatedProfile,
   hasPolls = false,
+  hasCompetitions,
   isApproveWave,
   isCompleted,
   isCurationWave,
@@ -133,6 +137,7 @@ function getWaveViewAvailability({
   const isCompetitionWave = isRankWave || isApproveWave;
 
   return {
+    [BrainView.COMPETITIONS]: hasCompetitions,
     [BrainView.LEADERBOARD]: isCompetitionWave,
     [BrainView.SUBMISSIONS]: isRankWave && !isApproveWave && isCompleted,
     [BrainView.SALES]: isCurationWave,
@@ -154,6 +159,7 @@ function normalizeActiveView({
   isCompleted,
   hasAuthenticatedProfile,
   hasPolls,
+  hasCompetitions,
   isCurationWave,
   isMemesWave,
   isRankWave,
@@ -168,6 +174,7 @@ function normalizeActiveView({
   readonly isCompleted: boolean;
   readonly hasAuthenticatedProfile: boolean;
   readonly hasPolls: boolean;
+  readonly hasCompetitions: boolean;
   readonly isCurationWave: boolean;
   readonly isMemesWave: boolean;
   readonly isRankWave: boolean;
@@ -181,6 +188,7 @@ function normalizeActiveView({
     firstDecisionDone,
     hasAuthenticatedProfile,
     hasPolls,
+    hasCompetitions,
     isApproveWave,
     isCompleted,
     isCurationWave,
@@ -235,6 +243,7 @@ export function useBrainMobileActiveView({
   isCompleted,
   hasAuthenticatedProfile,
   hasPolls = false,
+  hasCompetitions = false,
   isCurationWave,
   isMemesWave,
   isRankWave,
@@ -248,6 +257,7 @@ export function useBrainMobileActiveView({
 }: UseBrainMobileActiveViewParams): UseBrainMobileActiveViewResult {
   const [selection, setSelection] = useState<ActiveViewSelection | null>(null);
   const hasWave = Boolean(waveId);
+  const isCompetitionRoute = isCompetitionPathname(pathname);
   const viewParam = searchParams.get("view");
   const createParam = searchParams.get("create");
   const serialNoParam = searchParams.get("serialNo");
@@ -260,8 +270,9 @@ export function useBrainMobileActiveView({
   });
   const shellContextKey = `shell:${pathname}:${viewParam ?? ""}`;
   const chatTargetKey = serialNoParam === null ? "" : `serial:${serialNoParam}`;
+  const waveTargetKey = isCompetitionRoute ? pathname : chatTargetKey;
   const currentContextKey = waveId
-    ? `wave:${waveId}:${chatTargetKey}`
+    ? `wave:${waveId}:${waveTargetKey}`
     : shellContextKey;
   const currentContextToken = useMemo(
     () => Symbol(currentContextKey),
@@ -276,10 +287,9 @@ export function useBrainMobileActiveView({
   });
   let baseView = routeDefaultView ?? BrainView.DEFAULT;
   if (hasWave) {
-    baseView =
-      serialNoParam !== null
-        ? BrainView.DEFAULT
-        : (restoredView ?? waveDefaultView);
+    baseView = restoredView ?? waveDefaultView;
+    if (serialNoParam !== null) baseView = BrainView.DEFAULT;
+    if (isCompetitionRoute) baseView = BrainView.COMPETITIONS;
   }
   const candidateView =
     selection?.contextToken === currentContextToken ? selection.view : baseView;
@@ -301,6 +311,7 @@ export function useBrainMobileActiveView({
     isCompleted,
     hasAuthenticatedProfile,
     hasPolls,
+    hasCompetitions: hasCompetitions || isCompetitionRoute,
     isCurationWave,
     isMemesWave,
     isRankWave,

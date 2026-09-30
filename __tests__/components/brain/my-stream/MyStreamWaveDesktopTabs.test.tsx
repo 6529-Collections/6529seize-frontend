@@ -12,6 +12,10 @@ const onSelectCuration = jest.fn();
 let mockCurations: ApiWaveCuration[] = [];
 let mockWavePollSummary = { hasPolls: false, unansweredPolls: 0 };
 
+jest.mock("@/hooks/competitions/useWaveCompetitionsTab", () => ({
+  useWaveCompetitionsTab: () => ({ hasCompetitions: false, activeCount: 0 }),
+}));
+
 jest.mock("next/navigation", () => ({
   useSearchParams: () => ({
     get: searchParamsGet,
@@ -449,9 +453,7 @@ describe("MyStreamWaveDesktopTabs", () => {
       name: "Scroll wave sections right",
     });
     expect(rightControl).toBeInTheDocument();
-    expect(rightControl.querySelector("svg")).toHaveClass(
-      "tw-translate-x-1.5"
-    );
+    expect(rightControl.querySelector("svg")).toHaveClass("tw-translate-x-1.5");
 
     scroller.scrollLeft = 120;
     fireEvent.scroll(scroller);
@@ -459,9 +461,7 @@ describe("MyStreamWaveDesktopTabs", () => {
       name: "Scroll wave sections left",
     });
     expect(leftControl).toBeInTheDocument();
-    expect(leftControl.querySelector("svg")).toHaveClass(
-      "-tw-translate-x-1.5"
-    );
+    expect(leftControl.querySelector("svg")).toHaveClass("-tw-translate-x-1.5");
     expect(
       screen.getByRole("button", { name: "Scroll wave sections right" })
     ).toBeInTheDocument();

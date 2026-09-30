@@ -1,3 +1,4 @@
+import { isMultiCompetitionEnabled } from "@/helpers/competition.helpers";
 import type { DeviceInfo } from "@capacitor/device";
 import * as Sentry from "@sentry/nextjs";
 import { commonApiPost } from "@/services/api/common-api";
@@ -67,6 +68,7 @@ export function sendPreparedPushRegistration(
       token: registration.token,
       platform: registration.deviceInfo.platform,
       profile_id: registration.profileId,
+      ...(isMultiCompetitionEnabled() ? { include_competitions: true } : {}),
     },
     errorMode: "structured",
   });

@@ -11,12 +11,14 @@ interface Props {
 }
 
 // For now, reuse the existing BrainMobile until we create wave-specific mobile components
-const WavesMobile: React.FC<Props> = ({ children }) => (
-  <SidebarProvider>
-    <ContentTabProvider>
-      <BrainMobile>{children}</BrainMobile>
-    </ContentTabProvider>
-  </SidebarProvider>
-);
+const WavesMobile: React.FC<Props> = ({ children }) => {
+  return (
+    <SidebarProvider>
+      <ContentTabProvider>
+        <BrainMobile>{children}</BrainMobile>
+      </ContentTabProvider>
+    </SidebarProvider>
+  );
+};
 
 export default WavesMobile;

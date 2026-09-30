@@ -1,5 +1,6 @@
 "use client";
 
+import MemeDropVoteStats from "@/components/memes/drops/meme-participation-drop/MemeDropVoteStats";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import { Children, type ReactNode } from "react";
@@ -38,7 +39,7 @@ export default function ParticipationDropFooter({
   const { canShowVote } = useDropInteractionRules(drop);
   const isVotingActionLocked = isVotingClosed || isVotingControlsLocked;
   const canShowVoting = canShowVote && !isVotingActionLocked;
-  const hasRatings = drop.raters_count > 0;
+  const hasRatings = drop.raters_count > 0 || Boolean(drop.competition_id);
   const hasWinningThreshold =
     typeof winningThreshold === "number" && winningThreshold > 0;
   const shouldShowRatings = hasRatings || hasWinningThreshold;
@@ -72,6 +73,19 @@ export default function ParticipationDropFooter({
     proposalFooterSurfaceClass =
       "tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-3";
   }
+
+  const ratings = drop.competition_id ? (
+    <MemeDropVoteStats drop={drop} />
+  ) : (
+    <ParticipationDropRatings
+      drop={drop}
+      rank={drop.rank}
+      winningThreshold={winningThreshold}
+      winningThresholdMinDurationMs={winningThresholdMinDurationMs}
+      isVotingClosed={isVotingClosed}
+      emphasizeCurrent={isProposalCard}
+    />
+  );
 
   if (!showInteractions) {
     return <div className="tw-pb-4" />;
@@ -107,19 +121,12 @@ export default function ParticipationDropFooter({
             {shouldShowRatings && (
               <div
                 className={
-                  useInlineVotingLayout
+                  useInlineVotingLayout || drop.competition_id
                     ? "tw-min-w-0 tw-flex-1 tw-px-4"
                     : "tw-px-4"
                 }
               >
-                <ParticipationDropRatings
-                  drop={drop}
-                  rank={drop.rank}
-                  winningThreshold={winningThreshold}
-                  winningThresholdMinDurationMs={winningThresholdMinDurationMs}
-                  isVotingClosed={isVotingClosed}
-                  emphasizeCurrent={isProposalCard}
-                />
+                {ratings}
               </div>
             )}
 
@@ -143,14 +150,7 @@ export default function ParticipationDropFooter({
         <div
           className={`${indentContent ? "tw-ml-[3.25rem]" : ""} ${isProposalCard ? "tw-mt-2" : "tw-mt-4"} tw-px-4 ${proposalFooterSurfaceClass}`}
         >
-          <ParticipationDropRatings
-            drop={drop}
-            rank={drop.rank}
-            winningThreshold={winningThreshold}
-            winningThresholdMinDurationMs={winningThresholdMinDurationMs}
-            isVotingClosed={isVotingClosed}
-            emphasizeCurrent={isProposalCard}
-          />
+          {ratings}
         </div>
       )}
 

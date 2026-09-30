@@ -35,9 +35,8 @@ linked section pages.
 ## Tab Availability and Order
 
 - Base section order for all waves: `About`, `REP`, `Configuration`.
-- `Configuration` is the consolidated rules and settings experience, starting with the
-  wave type and access configuration sections. Perpetual ranking waves are
-  labeled `Perpetual Rank` instead of the generic `Rank`. Access groups show
+- `Configuration` is the consolidated rules and settings experience, starting with
+  access configuration. Access groups show
   their member count and criteria; viewers who can administer the wave also see
   a gear menu for reconfiguring each applicable group. For Rank and Approve waves,
   Configuration shows chat status even when chat is disabled; wave

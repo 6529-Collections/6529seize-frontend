@@ -3020,6 +3020,7 @@ function buildPublicRuntime() {
       process.env.IPFS_GATEWAY_ENDPOINT || "https://ipfs.6529.io/ipfs/",
     MEDIA_RESOLVER_ENDPOINT:
       process.env.MEDIA_RESOLVER_ENDPOINT || "https://media.6529.io",
+    NEXT_PUBLIC_FEATURE_MULTI_COMPETITION: process.env.NEXT_PUBLIC_FEATURE_MULTI_COMPETITION || "false",
     NODE_ENV: "development",
     PORT: String(frontendPort),
     WS_ENDPOINT: mockWsOrigin,

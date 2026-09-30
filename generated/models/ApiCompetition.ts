@@ -20,9 +20,11 @@ import { ApiCompetitionPermissions } from '../models/ApiCompetitionPermissions';
 import { ApiCompetitionType } from '../models/ApiCompetitionType';
 import { ApiCompetitionVotingConfig } from '../models/ApiCompetitionVotingConfig';
 import { ApiCompetitionWinnerConfig } from '../models/ApiCompetitionWinnerConfig';
+import { ApiCreateWaveMetadataRequest } from '../models/ApiCreateWaveMetadataRequest';
 import { HttpFile } from '../http/http';
 
 export class ApiCompetition {
+    'presentation'?: Array<ApiCreateWaveMetadataRequest>;
     'id': string;
     'wave_id': string;
     'type': ApiCompetitionType;
@@ -50,6 +52,12 @@ export class ApiCompetition {
     static readonly mapping: {[index: string]: string} | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
+        {
+            "name": "presentation",
+            "baseName": "presentation",
+            "type": "Array<ApiCreateWaveMetadataRequest>",
+            "format": ""
+        },
         {
             "name": "id",
             "baseName": "id",

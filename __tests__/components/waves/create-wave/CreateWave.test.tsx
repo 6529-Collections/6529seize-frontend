@@ -481,6 +481,7 @@ describe("CreateWave", () => {
     );
     expect(mockedUseWaveConfig).toHaveBeenCalledWith({
       initialViewGroupId: "parent-view-group",
+      chatOnly: false,
     });
   });
 

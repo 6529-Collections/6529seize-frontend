@@ -26,6 +26,15 @@ being estimated.
 | D-17 | DEFERRED | Cancelled and archived competitions remain directly deep-linkable to authorized members. Product must choose whether they also appear by default in the hub history or behind a status filter. APIs always support explicit status filtering, so the choice is presentation-only. | Product + design | Must resolve before roadmap Phase 6 broad rollout. |
 | D-18 | APPROVED | Native resources use `/v3/waves/{wave_id}/competitions...`. Existing unversioned and v2 GETs remain permanent compatibility façades rather than acquiring zero/one/many semantics. | API owners | Roadmap Phase 1. |
 
+## Native implementation defaults
+
+The [native delivery record](../native-delivery/implementation-evidence.md)
+implements D-05's already specified conservative cancellation semantics for
+current derived budgets. It adds no consumable-credit system or compensating
+command. D-17 uses a reversible History filter in the current UI; the broad
+rollout product gate remains separate. These implementation choices do not
+assert shared-environment approval or deployment.
+
 ## Decision Change Control
 
 Changing an approved decision requires an amendment in this register, an

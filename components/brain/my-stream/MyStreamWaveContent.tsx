@@ -1,4 +1,5 @@
 "use client";
+import dynamic from "next/dynamic";
 
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -17,6 +18,7 @@ import { useDrop } from "@/hooks/useDrop";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import MyStreamWaveLeaderboard from "./MyStreamWaveLeaderboard";
+import MyStreamWaveDesktopTabs from "./MyStreamWaveDesktopTabs";
 import MyStreamWaveSubmissions from "./MyStreamWaveSubmissions";
 import MyStreamWaveOutcome from "./MyStreamWaveOutcome";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
@@ -35,7 +37,11 @@ import {
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { useWaveEligibility } from "@/contexts/wave/WaveEligibilityContext";
 import { createBreakpoint } from "react-use";
-import { getHomeRoute, getWaveHomeRoute } from "@/helpers/navigation.helpers";
+import {
+  getHomeRoute,
+  getWaveHomeRoute,
+  getWavePathRoute,
+} from "@/helpers/navigation.helpers";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { MEMES_NOMINEE_REQUIRED_REP } from "@/helpers/waves/memes-nomination";
 import { useWaveViewMode } from "@/hooks/useWaveViewMode";
@@ -58,10 +64,17 @@ import type {
   ChatSubmitDropState,
 } from "./chatSubmitDrop.types";
 import { getChatSubmitDropLabels } from "./chatSubmitDrop.types";
+import { isCompetitionPathname } from "@/helpers/competition.helpers";
 
 export interface MyStreamWaveProps {
   readonly waveId: string;
+  readonly competitionContent?: React.ReactNode;
+  readonly competitionOnly?: boolean;
 }
+
+const CompetitionHub = dynamic(
+  () => import("@/components/competitions/CompetitionHub")
+);
 
 const getContentTabPanelId = (tab: MyStreamWaveTab): string =>
   `my-stream-wave-tabpanel-${tab.toLowerCase()}`;
@@ -204,7 +217,11 @@ const getMemesHeaderDropActionState = ({
   };
 };
 
-const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({ waveId }) => {
+const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
+  waveId,
+  competitionContent,
+  competitionOnly = false,
+}) => {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
@@ -299,8 +316,10 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({ waveId }) => {
   const stableWaveKey = `wave-${waveId}`;
 
   // Get the active tab and utilities from global context
-  const { activeContentTab } = useContentTab();
-  const activeCurationId = searchParams.get("curation");
+  const { activeContentTab, setActiveContentTab } = useContentTab();
+  const activeCurationId = competitionOnly
+    ? null
+    : searchParams.get("curation");
   const loadedWaveId = wave?.id ?? null;
   const { editingDropId, setEditingDropId } = useEditingDrop();
   const requestedEditPostId = searchParams.get("editPost") ?? "";
@@ -612,7 +631,11 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({ waveId }) => {
     }
 
     const nextQuery = params.toString();
-    const nextUrl = nextQuery ? `${pathname}?${nextQuery}` : pathname;
+    const basePath =
+      isCompetitionPathname(pathname) && curationId
+        ? getWavePathRoute(waveId)
+        : pathname;
+    const nextUrl = nextQuery ? `${basePath}?${nextQuery}` : basePath;
     const currentQuery = searchParams.toString();
     const currentUrl = currentQuery ? `${pathname}?${currentQuery}` : pathname;
     if (nextUrl === currentUrl) {
@@ -643,6 +666,9 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({ waveId }) => {
     !isApprovalVotingControlsLocked;
   // Create component instances with wave-specific props and stable measurements
   const components: Record<MyStreamWaveTab, React.ReactNode> = {
+    [MyStreamWaveTab.COMPETITIONS]: competitionContent ?? (
+      <CompetitionHub waveId={wave.id} embedded />
+    ),
     [MyStreamWaveTab.CHAT]: (
       <MyStreamWaveChat
         wave={wave}
@@ -685,16 +711,29 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({ waveId }) => {
       className="tailwind-scope tw-relative tw-flex tw-h-full tw-min-h-0 tw-min-w-0 tw-flex-col"
       key={stableWaveKey}
     >
-      {/* Always render tab container (hidden on app inside MyStreamWaveTabs) */}
-      <MyStreamWaveTabs
-        wave={wave}
-        viewMode={viewMode}
-        onToggleViewMode={toggleViewMode}
-        showGalleryToggle={showGalleryToggle}
-        activeCurationId={activeCurationId}
-        onSelectCuration={onSelectCuration}
-        chatSubmitDropAction={chatSubmitDropAction}
-      />
+      {competitionOnly ? (
+        <div className="tw-shrink-0 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-bg-iron-950">
+          <MyStreamWaveDesktopTabs
+            wave={wave}
+            activeTab={activeContentTab}
+            setActiveTab={setActiveContentTab}
+            activeCurationId={null}
+            onSelectCuration={() => {}}
+            showCreateActionsMenu={false}
+            competitionOnly
+          />
+        </div>
+      ) : (
+        <MyStreamWaveTabs
+          wave={wave}
+          viewMode={viewMode}
+          onToggleViewMode={toggleViewMode}
+          showGalleryToggle={showGalleryToggle}
+          activeCurationId={activeCurationId}
+          onSelectCuration={onSelectCuration}
+          chatSubmitDropAction={chatSubmitDropAction}
+        />
+      )}
 
       <div
         className="tw-relative tw-min-h-0 tw-min-w-0 tw-flex-grow tw-overflow-hidden"

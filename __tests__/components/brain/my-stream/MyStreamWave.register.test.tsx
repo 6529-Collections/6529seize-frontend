@@ -207,6 +207,11 @@ jest.mock("@/components/brain/my-stream/tabs/MyStreamWaveTabs", () => ({
   MyStreamWaveTabs: () => <div data-testid="tabs" />,
 }));
 
+jest.mock("@/components/brain/my-stream/MyStreamWaveDesktopTabs", () => ({
+  __esModule: true,
+  default: () => <div data-testid="competition-tabs" />,
+}));
+
 jest.mock("@/components/waves/memes/MemesArtSubmissionModal", () => ({
   __esModule: true,
   default: (props: any) => mockMemesArtSubmissionModal(props),
@@ -272,6 +277,16 @@ describe("MyStreamWave registration", () => {
       expect(mockRegisterWave).toHaveBeenCalledWith("wave-1", true);
       expect(mockCompleteInitialRegistration).toHaveBeenCalledWith("wave-1");
     });
+  });
+
+  it("renders embedded competition tabs without a second wave header", () => {
+    render(
+      <HeaderProvider>
+        <MyStreamWave waveId="wave-1" competitionOnly />
+      </HeaderProvider>
+    );
+    expect(screen.getByTestId("competition-tabs")).toBeVisible();
+    expect(screen.queryByTestId("tabs")).not.toBeInTheDocument();
   });
 
   it("marks wave metadata as loaded for launch timing", async () => {

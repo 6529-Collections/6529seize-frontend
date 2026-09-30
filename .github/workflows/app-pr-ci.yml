@@ -30,6 +30,7 @@ jobs:
       build_required: ${{ steps.plan_outputs.outputs.build_required }}
       playwright_smoke_required: ${{ steps.plan_outputs.outputs.playwright_smoke_required }}
       playwright_artwork_documentation_required: ${{ steps.plan_outputs.outputs.playwright_artwork_documentation_required }}
+      playwright_native_competition_required: ${{ steps.plan_outputs.outputs.playwright_native_competition_required }}
       playwright_collect_required: ${{ steps.plan_outputs.outputs.playwright_collect_required }}
       playwright_critical_shell_required: ${{ steps.plan_outputs.outputs.playwright_critical_shell_required }}
       playwright_museum_required: ${{ steps.plan_outputs.outputs.playwright_museum_required }}
@@ -209,6 +210,9 @@ jobs:
           }
           if (plan.checks.playwright_smoke.required || collectBrowserRequired || plan.checks.playwright_artwork_documentation.required) {
             corePlaywrightLanes.push({ lane: "playwright-smoke", label: "Playwright smoke", runner: defaultRunner });
+          }
+          if (plan.checks.playwright_native_competition?.required) {
+            corePlaywrightLanes.push({ lane: "playwright-native-competition", label: "Native competitions desktop and mobile", runner: defaultRunner });
           }
           if (plan.checks.playwright_critical_shell.required) {
             corePlaywrightLanes.push({
@@ -400,6 +404,13 @@ jobs:
           PLAYWRIGHT_OUTPUT_DIR: "test-results/playwright/artwork-documentation"
           PLAYWRIGHT_HTML_REPORT_DIR: "playwright-report/artwork-documentation"
         run: ./bin/6529 run test:e2e:artwork-documentation-sandbox
+
+      - name: Run native competition browser regression pack
+        if: matrix.lane == 'playwright-native-competition'
+        env:
+          PLAYWRIGHT_OUTPUT_DIR: "test-results/playwright/native-competition"
+          PLAYWRIGHT_HTML_REPORT_DIR: "playwright-report/native-competition"
+        run: ./bin/6529 run test:e2e:native-competition-sandbox
 
       - name: Run critical route-shell Playwright pack
         if: matrix.lane == 'playwright-critical-shell'

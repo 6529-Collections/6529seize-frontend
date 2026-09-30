@@ -11,6 +11,7 @@ type EffectivePlan = {
     playwright_critical_shell?: { required: boolean };
     playwright_museum: { required: boolean };
     playwright_artwork_documentation: { required: boolean };
+    playwright_native_competition: { required: boolean };
     install: { required: boolean };
   };
 };
@@ -59,6 +60,41 @@ function executePlan(changedFiles: string[]): EffectivePlan {
 }
 
 describe("effective App PR CI plan", () => {
+  it.each([
+    "components/competitions/CompetitionVote.tsx",
+    "hooks/competitions/useCompetitionQueries.ts",
+    "__tests__/competitions/competition-api.test.ts",
+    "app/waves/[wave]/competitions/[competition]/page.tsx",
+    "components/waves/create-wave/hooks/useCreateWaveSubmission.ts",
+    "generated/models/ApiCompetition.ts",
+    "contexts/CompetitionContext.tsx",
+    "helpers/competition.helpers.ts",
+    "helpers/competition-config.helpers.ts",
+    "services/api/competitions-api.ts",
+    "services/wallet-signatures/competition-signature.ts",
+    "i18n/messages/competitions.ts",
+    "tests/social/native-competition-sandbox.spec.ts",
+    "tests/support/composerSandboxServer.cjs",
+    "components/waves/WavesMobile.tsx",
+    "components/brain/BrainMobile.tsx",
+    "components/brain/my-stream/MyStreamWaveContent.tsx",
+    "tests/packs.manifest.cjs",
+    "openapi.yaml",
+    ".github/workflows/app-pr-ci.yml",
+    "scripts/app-pr-ci-effective-plan.cjs",
+    "__tests__/scripts/app-pr-ci-effective-plan.test.ts",
+  ])("selects native competition browser evidence for %s", (file) => {
+    expect(
+      executePlan([file]).checks.playwright_native_competition.required
+    ).toBe(true);
+  });
+  it("keeps unrelated documentation out of the native competition browser lane", () => {
+    expect(
+      executePlan(["ops/docs/README.md"]).checks.playwright_native_competition
+        .required
+    ).toBe(false);
+  });
+
   it.each([
     "app/artwork-documentation/page.tsx",
     "components/providers/LayoutWrapper.tsx",

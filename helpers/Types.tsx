@@ -349,6 +349,7 @@ export enum Period {
 }
 
 export enum WsMessageType {
+  COMPETITION_UPDATE = "COMPETITION_UPDATE",
   DROP_UPDATE = "DROP_UPDATE",
   DROP_UPDATE_REF = "DROP_UPDATE_REF",
   DROP_DELETE = "DROP_DELETE",

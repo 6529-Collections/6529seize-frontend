@@ -4,7 +4,6 @@ import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { ApiWaveCreditScope } from "@/generated/models/ApiWaveCreditScope";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import WaveAuthor from "./WaveAuthor";
-import WaveTypeIcon from "./WaveTypeIcon";
 import WaveRating from "./WaveRating";
 import { WaveIdentitySubmissionSpecsRows } from "./WaveIdentitySubmissionSpecs";
 import { getWavePathRoute } from "@/helpers/navigation.helpers";
@@ -49,15 +48,6 @@ export default function WaveSpecs({ wave, useRing = true }: WaveSpecsProps) {
         </div>
 
         <div className="tw-mt-2.5 tw-flex tw-flex-col tw-gap-y-0.5 tw-px-2">
-          <div className="tw-group tw-grid tw-min-h-9 tw-w-full tw-grid-cols-[minmax(5.5rem,0.7fr)_minmax(0,1.3fr)] tw-items-center tw-gap-2 tw-px-2 tw-py-1.5 tw-text-sm">
-            <span className="tw-min-w-0 tw-font-normal tw-leading-5 tw-text-iron-500">
-              {waveRightPanelText("waves.sidebar.rightPanel.specs.type")}
-            </span>
-            <div className="tw-flex tw-min-w-0 tw-items-center tw-justify-end tw-gap-x-1 tw-text-right">
-              <WaveTypeIcon waveType={wave.wave.type} />
-            </div>
-          </div>
-
           {parentWave && parentWaveName && (
             <div className="tw-group tw-grid tw-min-h-9 tw-w-full tw-grid-cols-[minmax(5.5rem,0.7fr)_minmax(0,1.3fr)] tw-items-center tw-gap-2 tw-px-2 tw-py-1.5 tw-text-sm">
               <span className="tw-min-w-0 tw-font-normal tw-leading-5 tw-text-iron-500">

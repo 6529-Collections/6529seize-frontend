@@ -21,6 +21,7 @@ import MyStreamWaveMyVoteInput from "./MyStreamWaveMyVoteInput";
 import MyStreamWaveMyVoteVotes from "./MyStreamWaveMyVoteVotes";
 
 interface MyStreamWaveMyVoteProps {
+  readonly voteInput?: React.ReactNode;
   readonly drop: ExtendedDrop;
   readonly onDropClick: (drop: ExtendedDrop) => void;
   readonly onExplainVote?:
@@ -145,6 +146,7 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
   isResetting = false,
   isVotingClosed = false,
   winningThreshold,
+  voteInput,
 }) => {
   const locale = useBrowserLocale();
   const dropTitle = drop.title ?? t(locale, "waves.leaderboard.grid.untitled");
@@ -217,9 +219,7 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
       onClick={handleRowClick}
       className={`tw-px-2 tw-py-5 tw-transition-colors tw-duration-200 tw-@container/my-vote motion-reduce:tw-transition-none sm:tw-px-4 sm:tw-py-6 ${
         isSelectionDisabled ? "" : "tw-cursor-pointer"
-      } ${
-        isSelected ? "tw-bg-primary-500/10" : "tw-bg-iron-950"
-      } ${
+      } ${isSelected ? "tw-bg-primary-500/10" : "tw-bg-iron-950"} ${
         !isSelected && !isSelectionDisabled
           ? "desktop-hover:hover:tw-bg-iron-900"
           : ""
@@ -233,7 +233,7 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
         }`}
       >
         <div className="tw-flex tw-h-24 tw-items-center tw-justify-center sm:@[36rem]/my-vote:tw-row-span-2">
-          {!isVotingClosed ? (
+          {!isVotingClosed && onToggleCheck ? (
             <label
               htmlFor={selectionInputId}
               className="tw-relative tw-flex tw-size-11 tw-flex-shrink-0 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-lg"
@@ -368,7 +368,7 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
           </div>
         </div>
 
-        <div className="tw-col-span-3 tw-row-start-3 tw-flex tw-min-h-6 tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2 sm:@[16rem]/my-vote:tw-row-start-2 sm:@[36rem]/my-vote:tw-col-span-1 sm:@[36rem]/my-vote:tw-col-start-3 sm:@[36rem]/my-vote:tw-self-start @[46rem]/my-vote:tw-min-h-8">
+        <div className="tw-col-span-3 tw-row-start-3 tw-flex tw-min-h-6 tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2 @[46rem]/my-vote:tw-min-h-8 sm:@[16rem]/my-vote:tw-row-start-2 sm:@[36rem]/my-vote:tw-col-span-1 sm:@[36rem]/my-vote:tw-col-start-3 sm:@[36rem]/my-vote:tw-self-start">
           <MyStreamWaveMyVoteVotes
             drop={drop}
             winningThreshold={winningThreshold}
@@ -451,14 +451,15 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
           )}
         </div>
 
-        {!isVotingClosed && (
-          <MyStreamWaveMyVoteInput
-            drop={drop}
-            isResetting={isResetting}
-            isVotingClosed={isVotingClosed}
-            onExplainVote={onExplainVote ? handleExplainVote : undefined}
-          />
-        )}
+        {!isVotingClosed &&
+          (voteInput ?? (
+            <MyStreamWaveMyVoteInput
+              drop={drop}
+              isResetting={isResetting}
+              isVotingClosed={isVotingClosed}
+              onExplainVote={onExplainVote ? handleExplainVote : undefined}
+            />
+          ))}
       </div>
     </article>
   );
