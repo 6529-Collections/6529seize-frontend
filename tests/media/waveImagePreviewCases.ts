@@ -38,6 +38,176 @@ async function fetchSandboxDrop(page: Page, baseURL: string | undefined) {
 // desktop/touch projects. Browser requests, decoding and gallery resets are the
 // regression risk here; pixel-budget arithmetic belongs in the resizer tests.
 export function defineWaveImagePreviewTests() {
+  for (const extension of ["jpg", "gif"] as const) {
+    test(`shows artwork HD in both views and preserves description lines for ${extension}`, async ({
+      page,
+      baseURL,
+    }) => {
+      const { apiOrigin, feed, source } = await fetchSandboxDrop(page, baseURL);
+      const original = `${MEDIA_ROOT}artwork.${extension}`;
+      const description =
+        "First photographic line\nSecond photographic line\n\nA separate paragraph";
+      const metadata = [{ data_key: "description", data_value: description }];
+      const drop: ApiDropV2 = {
+        ...source,
+        title: "Artwork quality fixture",
+        content: "",
+        drop_type: ApiDropMainType.Submission,
+        priority_metadata: metadata,
+        media: [
+          {
+            url: original,
+            mime_type: extension === "gif" ? "image/gif" : "image/jpeg",
+          },
+        ],
+      };
+      const headers = { "access-control-allow-origin": "*" };
+      await page.route(`${apiOrigin}/api/settings`, (route) =>
+        route.fulfill({ headers, json: { memes_wave_id: WAVE_ID } })
+      );
+      await page.route(`${apiOrigin}/api/v2/drops/${DROP_ID}`, (route) =>
+        route.fulfill({ headers, json: { drop, wave: feed.wave } })
+      );
+      await page.route(
+        `${apiOrigin}/api/v2/drops/${DROP_ID}/metadata`,
+        (route) => route.fulfill({ headers, json: metadata })
+      );
+      await page.route(`${apiOrigin}/api/v2/waves/${WAVE_ID}/drops*`, (route) =>
+        route.fulfill({ headers, json: { ...feed, drops: [drop] } })
+      );
+      await page.route("**/_next/image?**", (route) => {
+        if (
+          !new URL(route.request().url()).searchParams
+            .get("url")
+            ?.startsWith(MEDIA_ROOT)
+        )
+          return route.fallback();
+        return route.fulfill({
+          contentType: "image/png",
+          path: path.resolve("public/test-wave-icon.png"),
+        });
+      });
+      const directOriginalRequests: string[] = [];
+      await page.route(`${MEDIA_ROOT}**`, (route) => {
+        const isOriginal = route.request().url() === original;
+        if (isOriginal) directOriginalRequests.push(original);
+        const animation = isOriginal && extension === "gif";
+        return route.fulfill({
+          contentType: animation ? "image/gif" : "image/png",
+          path: path.resolve(
+            animation
+              ? "tests/media/fixtures/animation.gif"
+              : "public/test-wave-icon.png"
+          ),
+        });
+      });
+      await page.goto(`/waves/${WAVE_ID}?drop=${DROP_ID}`, {
+        waitUntil: "domcontentloaded",
+      });
+      await waitForRouteReady(page);
+      await dismissNextDevTools(page);
+      // Keep the artwork scope stable while HD hides its optimized preview.
+      const hero = page
+        .getByRole("img", {
+          name: "Drop media",
+          exact: true,
+          includeHidden: true,
+        })
+        .locator("xpath=ancestor::*[@data-image-artwork]");
+      const preview = hero.getByRole("img", {
+        name: "Drop media",
+        exact: true,
+      });
+      await expect(preview).toBeVisible();
+      await expect
+        .poll(() =>
+          preview.evaluate((img: HTMLImageElement) => img.naturalWidth)
+        )
+        .toBeGreaterThan(0);
+      if (extension === "jpg") {
+        const previewUrl = new URL(
+          (await preview.getAttribute("src"))!,
+          page.url()
+        );
+        expect(previewUrl.pathname).toMatch(/\/_next\/image$/);
+        expect(previewUrl.searchParams.get("url")).toBe(original);
+        expect(previewUrl.searchParams.get("q")).toBe("100");
+        await expect(preview).toHaveAttribute("srcset", /w=1920/);
+      } else {
+        await expect(preview).toHaveAttribute("src", /AUTOx1080_gifv2/);
+      }
+      expect(directOriginalRequests).toEqual([]);
+      const paragraph = page.getByText("First photographic line", {
+        exact: false,
+      });
+      await expect(paragraph).toHaveCSS("white-space", "pre-wrap");
+      expect(await paragraph.textContent()).toBe(description);
+      const inlineToggle = hero.getByRole("button", {
+        name: "View original",
+        exact: true,
+      });
+      await expect(inlineToggle).toBeVisible();
+      await expect(
+        hero
+          .getByRole("button", { name: "View original", exact: true })
+          .locator("..")
+          .getByRole("button")
+          .first()
+      ).toHaveAccessibleName("View original");
+      await inlineToggle.click();
+      const originalAlt =
+        extension === "gif" ? "Original GIF animation" : "Original image";
+      const inlineOriginal = hero.getByRole("img", {
+        name: originalAlt,
+        exact: true,
+      });
+      await expect(inlineOriginal).toBeVisible();
+      await expect(preview).toBeHidden();
+      expect(directOriginalRequests.length).toBeGreaterThan(0);
+      await hero
+        .getByRole("button", { name: "Open image preview", exact: true })
+        .click();
+      const popupToggle = page
+        .getByRole("button", { name: "View optimized", exact: true })
+        .last();
+      await expect(popupToggle).toBeVisible();
+      await expect(popupToggle).toHaveAttribute("aria-pressed", "true");
+      await expect(
+        page
+          .getByRole("button", { name: "View optimized", exact: true })
+          .last()
+          .locator("..")
+          .getByRole("button")
+          .first()
+      ).toHaveAccessibleName("View optimized");
+      await popupToggle.click();
+      await expect(preview).toBeVisible();
+      const popupPreview = page.getByRole("img", {
+        name: "Expanded image preview",
+        exact: true,
+      });
+      await expect(popupPreview).toBeVisible();
+      if (extension === "jpg")
+        await expect(popupPreview).toHaveAttribute("src", /q=100/);
+      await page
+        .getByRole("button", { name: "View original", exact: true })
+        .last()
+        .click();
+      await expect(
+        page.getByRole("img", { name: originalAlt, exact: true }).last()
+      ).toBeVisible();
+      await page
+        .getByTestId("modal-backdrop")
+        .click({ position: { x: 5, y: 5 } });
+      await expect(inlineOriginal).toBeVisible();
+      await hero
+        .getByRole("button", { name: "View optimized", exact: true })
+        .click();
+      await expect(preview).toBeVisible();
+      await expectNoHorizontalOverflow(page);
+    });
+  }
+
   test("opens preview and additional images above the Memes drop detail view", async ({
     page,
     baseURL,
@@ -155,6 +325,17 @@ export function defineWaveImagePreviewTests() {
       await previewResponseGate;
       await route.fulfill({ status: 422, body: "Preview unavailable" });
     });
+    // The submission's responsive still preview also falls back on optimizer
+    // failure. Intercept it so this fixture never depends on a live CDN source.
+    await page.route("**/_next/image?**", (route) => {
+      if (
+        !new URL(route.request().url()).searchParams
+          .get("url")
+          ?.startsWith(MEDIA_ROOT)
+      )
+        return route.fallback();
+      return route.fulfill({ status: 422, body: "Preview unavailable" });
+    });
     try {
       await page.goto(`/waves/${WAVE_ID}?drop=${DROP_ID}`, {
         waitUntil: "domcontentloaded",
@@ -233,7 +414,9 @@ export function defineWaveImagePreviewTests() {
         path: path.resolve("tests/media/fixtures/animation.gif"),
       })
     );
-    const qualityToggle = page.getByRole("button", { name: "View original" });
+    const qualityToggle = page
+      .getByRole("button", { name: "View original" })
+      .last();
     await expect(qualityToggle).toHaveAttribute("title", "View original");
     await expect(qualityToggle).toHaveAttribute("aria-pressed", "false");
     const toggleBounds = await qualityToggle.boundingBox();

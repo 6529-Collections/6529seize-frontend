@@ -6,13 +6,20 @@ import { ImageScale } from "@/helpers/image.helpers";
 type MockImageProps = ComponentProps<"img"> & {
   readonly fill?: boolean;
   readonly unoptimized?: boolean;
+  readonly quality?: number;
 };
 jest.mock("next/image", () => ({
   __esModule: true,
   default: forwardRef<HTMLImageElement, MockImageProps>(
     // eslint-disable-next-line react/display-name
-    ({ fill: _fill, unoptimized: _unoptimized, alt, ...props }, ref) =>
-      createElement("img", { ...props, ref, alt })
+    ({ fill: _fill, unoptimized, quality, alt, ...props }, ref) =>
+      createElement("img", {
+        ...props,
+        ref,
+        alt,
+        "data-unoptimized": String(unoptimized),
+        "data-quality": quality,
+      })
   ),
 }));
 jest.mock("@/components/ipfs/IPFSContext", () => ({
@@ -23,6 +30,52 @@ jest.mock("@/components/ipfs/IPFSContext", () => ({
 const original = "https://d3lqz0a4bldqgf.cloudfront.net/drops/author/file.jpg";
 const preview = (size: string) =>
   original.replace("file.jpg", `${size}/file.jpg`);
+
+it.each(["JPG", "jpeg", "png", "webp", "avif"])(
+  "allows first-party %s artwork as a high-quality optimizer source",
+  (extension) => {
+    const src = original.replace("jpg", extension) + "?version=2";
+    render(
+      <DropImagePreview
+        originalSrc={src}
+        imageScale={ImageScale.AUTOx1080}
+        alt="Artwork"
+        fill
+        preferHighQuality
+      />
+    );
+    const image = screen.getByAltText("Artwork");
+    expect(image).toHaveAttribute("src", src);
+    expect(image).toHaveAttribute("data-unoptimized", "false");
+    expect(image).toHaveAttribute("data-quality", "100");
+  }
+);
+
+it.each([
+  original.replace("jpg", "gif"),
+  original.replace("jpg", "svg"),
+  "https://example.com/drops/file.jpg",
+  "https://d3lqz0a4bldqgf.cloudfront.net/images/file.jpg",
+  "https://d3lqz0a4bldqgf.cloudfront.net.evil.test/drops/file.jpg",
+  "http://d3lqz0a4bldqgf.cloudfront.net/drops/file.jpg",
+  "javascript:photo.jpg",
+])("leaves other media and hosts on the existing preview path: %s", (src) => {
+  render(
+    <DropImagePreview
+      originalSrc={src}
+      imageScale={ImageScale.AUTOx1080}
+      alt="Artwork"
+      fill
+      preferHighQuality
+    />
+  );
+  const image = screen.queryByAltText("Artwork");
+  expect(image?.getAttribute("src")).not.toBe(src);
+  if (image) {
+    expect(image).toHaveAttribute("data-unoptimized", "true");
+    expect(image).not.toHaveAttribute("data-quality");
+  }
+});
 
 it("tries only bounded previews and reports exhaustion once", () => {
   const onError = jest.fn();
