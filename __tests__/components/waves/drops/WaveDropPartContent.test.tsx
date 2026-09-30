@@ -9,15 +9,12 @@ import {
 let mockGalleryItems: any[] | undefined;
 let mockMarkdownProps: any;
 
-jest.mock(
-  "@/components/drops/view/part/DropImageGalleryProvider",
-  () => ({
-    DropImageGalleryProvider: (props: any) => {
-      mockGalleryItems = props.items;
-      return <div data-testid="gallery-provider">{props.children}</div>;
-    },
-  })
-);
+jest.mock("@/components/drops/view/part/DropImageGalleryProvider", () => ({
+  DropImageGalleryProvider: (props: any) => {
+    mockGalleryItems = props.items;
+    return <div data-testid="gallery-provider">{props.children}</div>;
+  },
+}));
 jest.mock(
   "@/components/waves/drops/WaveDropPartContentMarkdown",
   () => (props: any) => {
@@ -66,6 +63,15 @@ it("renders medias and navigation", async () => {
   };
   render(<WaveDropPartContent {...props} />);
   expect(screen.getByTestId("medias")).toBeInTheDocument();
+  expect(
+    screen.getAllByLabelText("Previous part")[0]?.parentElement
+  ).toHaveClass("tw-mt-4");
+  expect(
+    screen.getAllByLabelText("Previous part")[1]?.parentElement
+  ).toHaveClass("md:tw-pt-4");
+  expect(screen.getAllByLabelText("Next part")[1]?.parentElement).toHaveClass(
+    "md:tw-pt-4"
+  );
   await user.click(screen.getAllByLabelText("Next part")[0]);
   expect(props.setActivePartIndex).toHaveBeenCalledWith(
     props.activePartIndex + 1

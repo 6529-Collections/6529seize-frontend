@@ -30,6 +30,8 @@ it.each(["video/mp4", "video/webm"])(
       fillVideoContainer: false,
       videoAlign: "center",
       loadStrategy: "eager",
+      showOriginalQualityToggle: false,
+      preferHighQualityImage: false,
     });
     const frame = screen.getByTestId("media").parentElement!;
     const hero = frame.closest("[data-video-artwork]")!;
@@ -83,6 +85,12 @@ it("fits a submission image below the header with the shared screen budget", () 
   expect(frame).toHaveClass("submissionImage");
   expect(frame).not.toHaveClass("lg:tw-h-[95vh]");
   expect(frame.closest("[data-image-artwork]")).toHaveClass("artworkStage");
+  expect(
+    jest.mocked(DropListItemContentMedia).mock.calls.at(-1)?.[0]
+  ).toMatchObject({
+    showOriginalQualityToggle: true,
+    preferHighQualityImage: true,
+  });
   expect(frame.parentElement?.parentElement).toHaveClass(
     "[--video-frame-padding:2rem]",
     "lg:[--video-frame-padding:4rem]"

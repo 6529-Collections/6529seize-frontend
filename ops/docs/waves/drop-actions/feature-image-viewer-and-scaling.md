@@ -11,8 +11,9 @@ The viewer opens an optimized preview. For GIFs, the **HD** icon in the popup's
 top-right toolbar offers **View original**. Selecting it loads the original in
 the same viewer and highlights HD. The optimized image stays visible with a
 small loader until the original is ready; **View optimized** switches back or
-cancels a pending switch. Moving to another image resets this choice. Inline
-images have no HD control or GIF badge.
+cancels a pending switch. Moving to another image resets this choice. Thread images have no HD control or GIF badge. In the Memes submission artwork
+view, the HD control is always visible for both still images and GIFs, including
+on touch devices. The initial artwork and popup share the selected quality.
 
 ## Location in the Site
 
@@ -40,6 +41,9 @@ images have no HD control or GIF badge.
    - `Open in Browser` opens the source URL in a new tab.
    - `Download` saves the source image.
    - `HD` switches GIFs between original and optimized versions inside the popup.
+     In the Memes submission artwork view, it also supports still images and is
+     available before opening the popup. HD is the leftmost action in both
+     toolbars, before fullscreen, open-original, and download.
    - `Full screen` enters browser fullscreen when supported and not in native app.
    - `Reset zoom` appears after zooming in.
    - `Close` exits the modal.
@@ -49,6 +53,13 @@ images have no HD control or GIF badge.
 
 - Thread attachment images request `AUTOx450` scaled URLs.
 - Single-drop attachment views request `AUTOx1080` scaled URLs.
+- The Memes submission artwork view and its popup use responsive, quality-100
+  previews generated directly from uploaded first-party still artwork. The browser
+  selects a suitable resolution for its display density; GIFs keep their animated
+  CDN previews. If the high-quality preview request fails, existing scaled previews are
+  tried. Feeds, DMs, and supplemental images keep their existing scaling.
+- Submission descriptions preserve authored line breaks, blank lines, and spaces.
+  They remain plain text rather than Markdown.
 - Markdown image embeds use the same modal controls but keep `AUTOx450` scaling,
   including inside single-drop views.
 - Touch devices show a static loading placeholder for attachment images.
@@ -72,7 +83,10 @@ images have no HD control or GIF badge.
 ## Failure and Recovery
 
 - If a larger preview fails, the viewer tries the smaller `AUTOx450` preview.
-  Feeds and the viewer never automatically load the original as a fallback.
+  Feeds and the viewer never automatically display the full-size original as a
+  fallback. The submission artwork optimizer reads the source on the server to
+  generate its responsive preview. Next may pass through source bytes for
+  animations in other raster formats or when it cannot re-encode a valid image.
 - If no supported preview is available, the image frame stays in place and shows
   `Preview unavailable`. Thread images retry briefly while new uploads process,
   then offer `Retry`; the viewer offers `Retry preview`.

@@ -147,8 +147,9 @@ const classifyDrop = (inputDrop: PreviewDrop): PreviewItem | null => {
   const drop = getQuotedDrop(inputDrop);
   const rawText = getDropDisplayText(drop);
   const rawContents = drop.parts.map((part) => part.content ?? "");
+  // Plain-text conversion can join adjacent Markdown image URLs.
   const urls = extractUrls(
-    rawText,
+    drop.title,
     ...rawContents,
     ...(drop.nft_links?.map((link) => link.url_in_text) ?? [])
   );
