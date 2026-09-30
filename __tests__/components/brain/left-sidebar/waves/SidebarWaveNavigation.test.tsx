@@ -110,7 +110,7 @@ function HydrationSearch({ viewerKey }: { viewerKey: string }) {
   );
 }
 
-it("shows loading feedback only in the selected collection tab", () => {
+it("shows collection loading below the tabs without changing their labels", () => {
   const state = navigation({
     searching: false,
     collection: "pinned",
@@ -119,15 +119,14 @@ it("shows loading feedback only in the selected collection tab", () => {
   const { rerender } = render(
     <SidebarWaveNavigationControls navigation={state} isCollectionLoading />
   );
-  expect(screen.getByRole("button", { name: "Pinned" })).toHaveAttribute(
-    "aria-busy",
-    "true"
+  const spinner = screen.getByRole("status", { name: "Loading waves…" });
+  expect(spinner).toBeVisible();
+  expect(screen.getByRole("button", { name: "Pinned" })).toHaveTextContent(
+    /^Pinned$/
   );
-  expect(screen.getByRole("button", { name: "All" })).toHaveAttribute(
-    "aria-busy",
-    "false"
-  );
-  expect(screen.getByRole("status", { name: "Loading waves…" })).toBeVisible();
+  expect(
+    screen.getByRole("group", { name: "Wave list filter" })
+  ).not.toContainElement(spinner);
   rerender(<SidebarWaveNavigationControls navigation={state} />);
   expect(
     screen.queryByRole("status", { name: "Loading waves…" })

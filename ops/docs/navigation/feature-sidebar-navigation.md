@@ -21,7 +21,7 @@ On web layouts, route switching is sidebar-first.
   intent delay; tap or click remains available for touch and pointer users.
 - Collapsed flyouts enter with a short opacity and horizontal-position reveal;
   reduced-motion preferences show them immediately without animation.
-- The 36px 6529 logo links to `/`; there is no labeled `Home` product row.
+- The 40px 6529 logo links to `/`; there is no labeled `Home` product row.
   Hover adds a subtle glow and a slight scale-up; reduced motion disables scaling.
 - A single-chevron toggle stays inside the sidebar’s right edge, vertically
   centered in both states (20px wide in both states).

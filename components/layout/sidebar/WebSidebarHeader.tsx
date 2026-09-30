@@ -24,9 +24,9 @@ function WebSidebarHeader({ collapsed, onToggle }: WebSidebarHeaderProps) {
             priority
             alt="6529Seize"
             src="/6529.svg"
-            className="tw-size-9 tw-shrink-0 tw-transition-[transform,box-shadow] tw-duration-150 desktop-hover:group-hover/sidebar-logo:tw-shadow-[0_0_20px_10px_rgba(255,215,215,0.4)] motion-safe:desktop-hover:group-hover/sidebar-logo:tw-scale-[1.02] motion-reduce:tw-transition-none"
-            width={36}
-            height={36}
+            className="tw-size-10 tw-shrink-0 tw-transition-[transform,box-shadow] tw-duration-150 desktop-hover:group-hover/sidebar-logo:tw-shadow-[0_0_20px_10px_rgba(255,215,215,0.35)] motion-safe:desktop-hover:group-hover/sidebar-logo:tw-scale-[1.02] motion-reduce:tw-transition-none"
+            width={40}
+            height={40}
           />
         </Link>
       </div>
