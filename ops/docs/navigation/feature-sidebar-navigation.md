@@ -16,7 +16,7 @@ On web layouts, route switching is sidebar-first.
 - Collapsed flyouts enter with a short opacity and horizontal-position reveal;
   reduced-motion preferences show them immediately without animation.
 - The 36px 6529 logo links to `/`; there is no labeled `Home` product row.
-  Hover uses a flat background highlight without glow or scaling.
+  Hover adds a subtle glow and a slight scale-up; reduced motion disables scaling.
 - A slim single-chevron toggle stays inside the sidebar beside the logo.
   Hover anywhere in the sidebar or focus a control to reveal it; touch layouts
   keep it visible. Expand and collapse use the same footprint.

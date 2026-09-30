@@ -147,8 +147,11 @@ test("desktop account updates do not move utilities, including in short expanded
       railBox!.x + railBox!.width
     );
     expect(logoBox!.x + logoBox!.width).toBeLessThan(toggleBox!.x);
+    await page.emulateMedia({ reducedMotion: "no-preference" });
     await logo.hover();
-    await expect(logo).toHaveCSS("box-shadow", "none");
+    await expect(logo).not.toHaveCSS("box-shadow", "none");
+    await expect(logo).not.toHaveCSS("transform", "none");
+    await page.emulateMedia({ reducedMotion: "reduce" });
     await expect(logo).toHaveCSS("transform", "none");
     await page.mouse.move(1000, 400);
     await sidebarToggle.focus();
