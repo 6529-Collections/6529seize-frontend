@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import WaveDropQuote from "@/components/waves/drops/WaveDropQuote";
 import { WaveDropContentExpansionProvider } from "@/components/waves/drops/WaveDropContentExpansionContext";
@@ -202,7 +202,7 @@ test("displays quoted part content", () => {
   expect(markdownProps.quotePath).toContain("w1:42");
 });
 
-test("does not mount long quoted markdown until the user expands it", async () => {
+function renderLongQuote() {
   const longContent = "Long quoted post content ".repeat(80);
   const drop = {
     id: "quoted-drop",
@@ -216,19 +216,27 @@ test("does not mount long quoted markdown until the user expands it", async () =
     moderation: visibleModeration,
   } as any;
   const onQuoteClick = jest.fn();
+  const onParentClick = jest.fn();
   const scrollContainerRef: RefObject<HTMLDivElement | null> = {
     current: document.createElement("div"),
   };
 
   render(
-    <WaveDropContentExpansionProvider
-      enabled={true}
-      scrollContainerRef={scrollContainerRef}
-    >
-      <WaveDropQuote drop={drop} partId={5} onQuoteClick={onQuoteClick} />
-    </WaveDropContentExpansionProvider>
+    <div onClick={onParentClick}>
+      <WaveDropContentExpansionProvider
+        enabled={true}
+        scrollContainerRef={scrollContainerRef}
+      >
+        <WaveDropQuote drop={drop} partId={5} onQuoteClick={onQuoteClick} />
+      </WaveDropContentExpansionProvider>
+    </div>
   );
 
+  return { drop, longContent, onQuoteClick, onParentClick };
+}
+
+test("expands and collapses long quoted markdown with mouse clicks without navigation", async () => {
+  const { longContent, onQuoteClick, onParentClick } = renderLongQuote();
   expect(screen.queryByTestId("markdown")).not.toBeInTheDocument();
 
   await userEvent.click(screen.getByRole("button", { name: /^Show more$/ }));
@@ -236,7 +244,70 @@ test("does not mount long quoted markdown until the user expands it", async () =
   expect(screen.getByTestId("markdown")).toBeInTheDocument();
   expect(markdownProps.partContent).toBe(longContent);
   expect(onQuoteClick).not.toHaveBeenCalled();
+  expect(onParentClick).not.toHaveBeenCalled();
+
+  await userEvent.click(screen.getByRole("button", { name: /^Show less$/ }));
+
+  expect(screen.queryByTestId("markdown")).not.toBeInTheDocument();
+  expect(onQuoteClick).not.toHaveBeenCalled();
+  expect(onParentClick).not.toHaveBeenCalled();
 });
+
+test.each([
+  ["Enter", "{Enter}"],
+  ["Space", " "],
+])(
+  "expands and collapses a long quote with %s without navigation",
+  async (_label, key) => {
+    const { longContent, onQuoteClick } = renderLongQuote();
+    const user = userEvent.setup();
+    const showMore = screen.getByRole("button", { name: /^Show more$/ });
+    showMore.focus();
+
+    await user.keyboard(key);
+
+    const showLess = screen.getByRole("button", { name: /^Show less$/ });
+    expect(showLess).toHaveFocus();
+    expect(showLess).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getByTestId("markdown")).toHaveTextContent(
+      longContent.trim()
+    );
+    expect(onQuoteClick).not.toHaveBeenCalled();
+
+    await user.keyboard(key);
+
+    expect(screen.getByRole("button", { name: /^Show more$/ })).toHaveFocus();
+    expect(screen.queryByTestId("markdown")).not.toBeInTheDocument();
+    expect(onQuoteClick).not.toHaveBeenCalled();
+  }
+);
+
+test.each([
+  ["Enter", "{Enter}"],
+  ["Space", " "],
+])("opens the quote card itself with %s", async (_label, key) => {
+  const { drop, onQuoteClick, onParentClick } = renderLongQuote();
+  const user = userEvent.setup();
+  screen.getByRole("button", { name: /Long quoted post content/ }).focus();
+
+  await user.keyboard(key);
+
+  expect(onQuoteClick).toHaveBeenCalledTimes(1);
+  expect(onQuoteClick).toHaveBeenCalledWith(drop);
+  expect(onParentClick).not.toHaveBeenCalled();
+  expect(screen.queryByTestId("markdown")).not.toBeInTheDocument();
+});
+
+test.each(["Enter", " "])(
+  "does not intercept a nested link's %s keydown",
+  (key) => {
+    const { onQuoteClick } = renderLongQuote();
+    const link = screen.getByRole("link", { name: "wave" });
+
+    expect(fireEvent.keyDown(link, { key })).toBe(true);
+    expect(onQuoteClick).not.toHaveBeenCalled();
+  }
+);
 
 test("uses the reusable compact card for a quoted proposal in an opted-in wave", () => {
   mockProposalCardPresentation = "proposalCard";
