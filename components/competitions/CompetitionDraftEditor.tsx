@@ -1,6 +1,12 @@
 "use client";
 import { ApiCompetitionLifecycle } from "@/generated/models/ApiCompetitionLifecycle";
-import { useEffect, useEffectEvent, useMemo, useRef, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import { useRouter } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { ApiCompetition } from "@/generated/models/ApiCompetition";
@@ -8,7 +14,8 @@ import type { ApiCompetitionDraftInput } from "@/generated/models/ApiCompetition
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { useWaveConfig } from "@/components/waves/create-wave/hooks/useWaveConfig";
-import MobileWrapperConfirmationDialog from "@/components/mobile-wrapper-dialog/MobileWrapperConfirmationDialog";
+import { useCompetitionDraftSave } from "@/hooks/competitions/useCompetitionDraftSave";
+import { readCompetitionEditorDraft } from "@/helpers/competition-editor-draft.helpers";
 import CreateWaveStepContent from "@/components/waves/create-wave/CreateWaveStepContent";
 import CreateWaveGroup from "@/components/waves/create-wave/groups/CreateWaveGroup";
 import CreateWaveDisplaySettings from "@/components/waves/create-wave/overview/CreateWaveDisplaySettings";
@@ -27,7 +34,7 @@ import {
   competitionEndpoint,
   competitionScope,
   createCompetition,
-  updateCompetition,
+  performCompetitionAction,
   invalidateCompetition,
 } from "@/services/api/competitions-api";
 import {
@@ -49,6 +56,8 @@ import {
   COMPETITION_INPUT,
 } from "./CompetitionState";
 
+const subscribeHydration = () => () => undefined;
+
 const STEPS = [
   CreateWaveStep.OVERVIEW,
   CreateWaveStep.GROUPS,
@@ -59,6 +68,20 @@ const STEPS = [
   CreateWaveStep.RULES,
   CreateWaveStep.REVIEW,
 ];
+
+function getSaveStatus(
+  locale: ReturnType<typeof useBrowserLocale>,
+  persistence: ReturnType<typeof useCompetitionDraftSave>
+) {
+  if (persistence.busy) return t(locale, "competitions.saving");
+  if (persistence.isSaved) return t(locale, "competitions.saved");
+  return t(
+    locale,
+    persistence.localSaved
+      ? "competitions.savedLocally"
+      : "competitions.unsaved"
+  );
+}
 
 function DraftForm({
   wave,
@@ -77,12 +100,18 @@ function DraftForm({
   const router = useRouter();
   const client = useQueryClient();
   const { connectedProfile, requestAuth } = useAuth();
+  const viewer = useCompetitionViewer();
+  const storageKey = `competition-editor:v1:${viewer ?? "anonymous"}:${wave.id}:${competition?.id ?? "new"}`;
+  const [restored] = useState(() =>
+    readCompetitionEditorDraft(storageKey, Boolean(competition))
+  );
+  const seed = restored?.input ?? initial;
   const controller = useWaveConfig({
     initialViewGroupId: wave.visibility.scope.group?.id ?? null,
     initialWaveType: ApiWaveType.Rank,
     initialConfigTransform: (defaults) =>
-      initial
-        ? competitionDraftToForm(initial, defaults, wave)
+      seed
+        ? competitionDraftToForm(seed, defaults, wave)
         : {
             ...defaults,
             groups: {
@@ -92,15 +121,13 @@ function DraftForm({
           },
   });
   const { config, step } = controller;
-  const [description, setDescription] = useState(initial?.description ?? "");
+  const [description, setDescription] = useState(seed?.description ?? "");
   const [voteSignature, setVoteSignature] = useState(
-    initial?.voting.signature_required ?? false
+    seed?.voting.signature_required ?? false
   );
-  const [confirmClose, setConfirmClose] = useState(false);
-  const [busy, setBusy] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<"conflict" | "failure" | null>(null);
-  const [version, setVersion] = useState(competition?.config_version ?? 0);
-  const pending = useRef<{ fingerprint: string; key: string } | null>(null);
+  const publishCommand = useRef<{ version: number; key: string } | null>(null);
   const inFlight = useRef(false);
   const conflictCopyKey = useRef<string | null>(null);
   const formRef = useRef<HTMLElement>(null);
@@ -138,9 +165,19 @@ function DraftForm({
     };
   }, [config, description, voteSignature, lockedRules, initial]);
   const fingerprint = JSON.stringify(input);
-  const [savedFingerprint, setSavedFingerprint] = useState(
-    initial ? fingerprint : ""
-  );
+  const [initialFingerprint] = useState(initial ? fingerprint : "");
+  const persistence = useCompetitionDraftSave({
+    waveId: wave.id,
+    storageKey,
+    input,
+    competition,
+    restored,
+    initialFingerprint,
+    canSave: !votingInvalid && Boolean(input.title.trim()),
+    requestAuth,
+  });
+  const busy = submitting;
+  const displayedError = error ?? persistence.error;
   const published =
     competition?.lifecycle === ApiCompetitionLifecycle.Published;
   const fullSteps =
@@ -178,52 +215,75 @@ function DraftForm({
     field?.scrollIntoView({ behavior: "smooth", block: "center" });
   }, [saveErrorFocusRequest, controller.errorFocusRequest, step]);
 
-  const save = async () => {
-    if (inFlight.current || !input.title.trim() || error === "conflict") return;
-    if (!validateVotingForSave()) return;
+  const close = async () => {
+    if (inFlight.current) return;
     inFlight.current = true;
-    setBusy(true);
+    setSubmitting(true);
+    try {
+      const result = await persistence.save();
+      const retained = persistence.retain();
+      if (!result && !retained) {
+        setError("failure");
+        return;
+      }
+      if (result) persistence.clear();
+      onClose();
+    } finally {
+      inFlight.current = false;
+      setSubmitting(false);
+    }
+  };
+  const publish = async () => {
+    if (inFlight.current || !validateVotingForSave()) return;
+    const invalidStep = steps.find(
+      (value) =>
+        getCreateWaveValidationErrors({ config, step: value }).length > 0
+    );
+    if (invalidStep !== undefined) {
+      void controller.onStep({ step: invalidStep, direction: "backward" });
+      setSaveErrorFocusRequest((value) => value + 1);
+      return;
+    }
+    inFlight.current = true;
+    setSubmitting(true);
     setError(null);
     try {
-      if (!(await requestAuth()).success) return;
-      if (pending.current?.fingerprint !== fingerprint)
-        pending.current = { fingerprint, key: newCompetitionRequestKey() };
-      const result = competition
-        ? await updateCompetition(
-            { waveId: wave.id, competitionId: competition.id },
-            {
-              idempotency_key: pending.current.key,
-              config_version: version,
-              config: input,
-            }
-          )
-        : await createCompetition(wave.id, {
-            idempotency_key: pending.current.key,
-            config: input,
-          });
-      setVersion(result.config_version);
-      setSavedFingerprint(fingerprint);
-      pending.current = null;
+      const savedCompetition = await persistence.save();
+      if (!savedCompetition || !(await requestAuth()).success) return;
+      if (publishCommand.current?.version !== savedCompetition.config_version) {
+        publishCommand.current = {
+          version: savedCompetition.config_version,
+          key: newCompetitionRequestKey(),
+        };
+      }
+      const result = await performCompetitionAction(
+        { waveId: wave.id, competitionId: savedCompetition.id },
+        "publish",
+        {
+          idempotency_key: publishCommand.current.key,
+          config_version: savedCompetition.config_version,
+        }
+      );
+      persistence.clear();
       await invalidateCompetition(client, {
         waveId: wave.id,
         competitionId: result.id,
       });
-      if (!competition)
-        router.replace(`${getCompetitionRoute(wave.id, result.id)}?edit=1`);
+      router.replace(getCompetitionRoute(wave.id, result.id));
     } catch (failure) {
       setError(
         getStructuredApiErrorStatus(failure) === 409 ? "conflict" : "failure"
       );
     } finally {
       inFlight.current = false;
-      setBusy(false);
+      setSubmitting(false);
     }
   };
   const saveConflictCopy = async () => {
     if (inFlight.current) return;
     if (!validateVotingForSave()) return;
     inFlight.current = true;
-    setBusy(true);
+    setSubmitting(true);
     try {
       if (!(await requestAuth()).success) return;
       conflictCopyKey.current ??= newCompetitionRequestKey();
@@ -240,46 +300,9 @@ function DraftForm({
       setError("conflict");
     } finally {
       inFlight.current = false;
-      setBusy(false);
+      setSubmitting(false);
     }
   };
-  const autosave = useEffectEvent(save);
-  useEffect(() => {
-    if (
-      !competition ||
-      published ||
-      votingInvalid ||
-      input.title.length === 0 ||
-      fingerprint === savedFingerprint ||
-      error
-    )
-      return;
-    const timer = setTimeout(() => {
-      void autosave();
-    }, 1500);
-    return () => clearTimeout(timer);
-  }, [
-    competition,
-    published,
-    votingInvalid,
-    input.title,
-    fingerprint,
-    savedFingerprint,
-    error,
-  ]);
-
-  useEffect(() => {
-    if (fingerprint === savedFingerprint) return;
-    const preventExit = (event: BeforeUnloadEvent) => {
-      event.preventDefault();
-      // Older embedded WebViews require this property to protect unsaved edits.
-      // eslint-disable-next-line @typescript-eslint/no-deprecated -- Retain beforeunload compatibility.
-      event.returnValue = "";
-    };
-    globalThis.addEventListener("beforeunload", preventExit);
-    return () => globalThis.removeEventListener("beforeunload", preventExit);
-  }, [fingerprint, savedFingerprint]);
-
   const move = (direction: "forward" | "backward") => {
     const next = steps[index + (direction === "forward" ? 1 : -1)];
     if (next !== undefined) void controller.onStep({ step: next, direction });
@@ -348,6 +371,7 @@ function DraftForm({
         </label>
         {!lockedRules && config.overview.type === ApiWaveType.Rank && (
           <RankScheduleModeSelector
+            isCompetition
             ongoingRanking={config.dates.ongoingRanking ?? false}
             onChange={(ongoingRanking) =>
               controller.setDates({ ...config.dates, ongoingRanking })
@@ -399,6 +423,7 @@ function DraftForm({
   else
     content = (
       <CreateWaveStepContent
+        isCompetition
         controller={{ ...controller, errors: visibleErrors }}
         descriptionSnapshot={null}
         onCriteriaReplacementChange={() => undefined}
@@ -406,10 +431,7 @@ function DraftForm({
         onInlineGroupCreate={onInlineGroupCreate}
       />
     );
-  let saveStatus = t(locale, "competitions.version", { version });
-  if (busy) saveStatus = t(locale, "competitions.saving");
-  else if (fingerprint === savedFingerprint)
-    saveStatus = t(locale, "competitions.saved");
+  const saveStatus = getSaveStatus(locale, persistence);
   return (
     <section
       ref={formRef}
@@ -421,7 +443,7 @@ function DraftForm({
           id="competition-draft-title"
           className="tw-text-xl tw-font-semibold tw-text-iron-100"
         >
-          {t(locale, competition ? "competitions.edit" : "competitions.new")}
+          {t(locale, published ? "competitions.edit" : "competitions.new")}
         </h1>
         <span role="status" className="tw-text-xs tw-text-iron-400">
           {saveStatus}
@@ -431,7 +453,7 @@ function DraftForm({
         {t(locale, "competitions.overlap")}
       </p>
       <fieldset
-        disabled={busy || error === "conflict"}
+        disabled={busy || displayedError === "conflict"}
         className="tw-min-w-0 tw-border-0 tw-p-0"
       >
         <div className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-p-4">
@@ -453,17 +475,29 @@ function DraftForm({
           {t(locale, "competitions.required")}
         </p>
       )}
-      {error && (
+      {displayedError && (
         <p role="alert" className="tw-text-red">
           {t(
             locale,
-            error === "conflict"
+            displayedError === "conflict"
               ? "competitions.conflict"
               : "competitions.failure"
           )}
         </p>
       )}
-      {error === "conflict" && (
+      {persistence.error === "failure" && (
+        <button
+          type="button"
+          className={COMPETITION_BUTTON}
+          disabled={busy || persistence.busy}
+          onClick={() => {
+            void persistence.save();
+          }}
+        >
+          {t(locale, "competitions.retry")}
+        </button>
+      )}
+      {displayedError === "conflict" && (
         <button
           type="button"
           className={COMPETITION_BUTTON}
@@ -475,11 +509,14 @@ function DraftForm({
           {t(locale, "competitions.saveCopy")}
         </button>
       )}
-      {error === "conflict" && (
+      {displayedError === "conflict" && (
         <button
           type="button"
           className={COMPETITION_BUTTON}
-          onClick={() => globalThis.location.reload()}
+          onClick={() => {
+            persistence.clear();
+            globalThis.location.reload();
+          }}
         >
           {t(locale, "competitions.reload")}
         </button>
@@ -508,35 +545,26 @@ function DraftForm({
         <button
           type="button"
           className={COMPETITION_BUTTON}
-          disabled={busy || !input.title.trim() || error === "conflict"}
-          onClick={() => {
-            void save();
-          }}
-        >
-          {t(locale, "competitions.save")}
-        </button>
-        <button
-          type="button"
-          className={COMPETITION_BUTTON}
           disabled={busy}
-          onClick={() =>
-            fingerprint === savedFingerprint ? onClose() : setConfirmClose(true)
-          }
+          onClick={() => {
+            void close();
+          }}
         >
           {t(locale, "competitions.cancelEdit")}
         </button>
+        {index === steps.length - 1 && !published && (
+          <button
+            type="button"
+            className={COMPETITION_BUTTON}
+            disabled={busy || displayedError === "conflict"}
+            onClick={() => {
+              void publish();
+            }}
+          >
+            {t(locale, "competitions.publish")}
+          </button>
+        )}
       </div>
-      {confirmClose && (
-        <MobileWrapperConfirmationDialog
-          isOpen
-          title={t(locale, "competitions.discardTitle")}
-          message={t(locale, "competitions.discardMessage")}
-          confirmText={t(locale, "competitions.discard")}
-          cancelText={t(locale, "competitions.dismiss")}
-          onClose={() => setConfirmClose(false)}
-          onConfirm={onClose}
-        />
-      )}
     </section>
   );
 }
@@ -550,6 +578,11 @@ export default function CompetitionDraftEditor({
   readonly competition?: ApiCompetition;
   readonly onClose: () => void;
 }) {
+  const hydrated = useSyncExternalStore(
+    subscribeHydration,
+    () => true,
+    () => false
+  );
   const viewer = useCompetitionViewer();
   const identity = { waveId: wave.id, competitionId: competition?.id ?? "new" };
   const query = useQuery({
@@ -573,7 +606,15 @@ export default function CompetitionDraftEditor({
     { limit: "1" },
     competition?.lifecycle === ApiCompetitionLifecycle.Published
   );
-  if (!competition) return <DraftForm wave={wave} onClose={onClose} />;
+  if (!hydrated) return <CompetitionState />;
+  if (!competition)
+    return (
+      <DraftForm
+        key={`${wave.id}:${viewer ?? "anonymous"}`}
+        wave={wave}
+        onClose={onClose}
+      />
+    );
   if (
     query.isPending ||
     (competition.lifecycle === ApiCompetitionLifecycle.Published &&
@@ -592,7 +633,7 @@ export default function CompetitionDraftEditor({
     );
   return (
     <DraftForm
-      key={competition.id}
+      key={`${competition.id}:${viewer ?? "anonymous"}`}
       wave={wave}
       competition={competition}
       initial={query.data}

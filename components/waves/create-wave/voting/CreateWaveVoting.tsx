@@ -165,9 +165,11 @@ function CreditScopePreview({
 }
 
 function CreateWaveCreditScopeSelect({
+  isCompetition,
   creditScope,
   onCreditScopeChange,
 }: {
+  readonly isCompetition?: boolean;
   readonly creditScope: ApiWaveCreditScope;
   readonly onCreditScopeChange: (scope: ApiWaveCreditScope) => void;
 }) {
@@ -175,8 +177,18 @@ function CreateWaveCreditScopeSelect({
   const creditScopeOptions = [
     {
       scope: ApiWaveCreditScope.Wave,
-      label: t(locale, "waves.create.voting.scope.wave.label"),
-      description: t(locale, "waves.create.voting.scope.wave.description"),
+      label: t(
+        locale,
+        isCompetition
+          ? "competitions.scopeLabel"
+          : "waves.create.voting.scope.wave.label"
+      ),
+      description: t(
+        locale,
+        isCompetition
+          ? "competitions.scopeDescription"
+          : "waves.create.voting.scope.wave.description"
+      ),
     },
     {
       scope: ApiWaveCreditScope.Drop,
@@ -258,6 +270,7 @@ function CreateWaveCreditScopeSelect({
 }
 
 export default function CreateWaveVoting({
+  isCompetition = false,
   waveType,
   selectedType,
   category,
@@ -289,6 +302,7 @@ export default function CreateWaveVoting({
   readonly category: string | null;
   readonly profileId: string | null;
   readonly creditNfts: ApiWaveCreditNft[];
+  readonly isCompetition?: boolean;
   readonly creditScope: ApiWaveCreditScope;
   readonly memeCount: number | null;
   readonly isMemeCountLoading: boolean;
@@ -423,6 +437,7 @@ export default function CreateWaveVoting({
       </div>
 
       <CreateWaveCreditScopeSelect
+        isCompetition={isCompetition}
         creditScope={creditScope}
         onCreditScopeChange={onCreditScopeChange}
       />

@@ -1,9 +1,12 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import CompetitionDetail from "@/components/competitions/CompetitionDetail";
+import type { ApiCreateWaveMetadataRequest } from "@/generated/models/ApiCreateWaveMetadataRequest";
+import { WAVE_DISPLAY_METADATA_KEYS } from "@/helpers/waves/wave-metadata.helpers";
 let mockEnabled = false;
 let mockPrimary: string | null = null;
 let mockSearch = "edit=1";
 const mockPush = jest.fn();
+const mockReplace = jest.fn();
 const mockCompetition = {
   id: "native",
   wave_id: "wave",
@@ -15,13 +18,14 @@ const mockCompetition = {
   config_version: 1,
   permissions: { submit: true, administer: true },
   voting: { ends_at: null },
+  presentation: [] as ApiCreateWaveMetadataRequest[],
 };
 jest.mock("@/helpers/competition.helpers", () => ({
   ...jest.requireActual("@/helpers/competition.helpers"),
   isMultiCompetitionEnabled: () => mockEnabled,
 }));
 jest.mock("next/navigation", () => ({
-  useRouter: () => ({ push: mockPush, replace: jest.fn() }),
+  useRouter: () => ({ push: mockPush, replace: mockReplace }),
   usePathname: () => "/waves/wave/competitions/native",
   useSearchParams: () => new URLSearchParams(mockSearch),
 }));
@@ -54,13 +58,23 @@ jest.mock(
       </div>
     )
 );
-jest.mock("@/components/competitions/CompetitionDraftEditor", () => () => (
-  <div>Native draft editor</div>
-));
+jest.mock(
+  "@/components/competitions/CompetitionDraftEditor",
+  () =>
+    ({ onClose }: { onClose: () => void }) => (
+      <div>
+        Native draft editor<button onClick={onClose}>Close editor</button>
+      </div>
+    )
+);
 jest.mock("@/components/competitions/CompetitionEntryForm", () => () => null);
 
 beforeEach(() => {
   mockEnabled = false;
+  mockCompetition.lifecycle = "PUBLISHED";
+  mockCompetition.type = "RANK";
+  mockCompetition.presentation = [];
+  mockReplace.mockClear();
   mockPrimary = null;
   mockSearch = "edit=1";
   mockPush.mockClear();
@@ -97,6 +111,56 @@ it("preserves the original primary experience with the flag off", () => {
   expect(screen.getByText("Original primary experience")).toBeVisible();
 });
 
+it.each<[string, string, string, string]>([
+  ["", "", "Proposals", "Approved"],
+  ["Proposals", "Approved", "Proposals", "Approved"],
+  ["Suggestions", "Accepted", "Suggestions", "Accepted"],
+  ["Same", "Same", "Proposals", "Approved"],
+])(
+  "resolves Approve tab mappings (%s, %s) with the original display defaults",
+  (approvals, approved, expectedApprovals, expectedApproved) => {
+    mockCompetition.type = "APPROVE";
+    mockSearch = "";
+    mockCompetition.presentation = [
+      {
+        data_key: WAVE_DISPLAY_METADATA_KEYS.approvalsTabLabel,
+        data_value: approvals,
+      },
+      {
+        data_key: WAVE_DISPLAY_METADATA_KEYS.approvedTabLabel,
+        data_value: approved,
+      },
+    ].filter((item) => item.data_value);
+    const { rerender } = render(
+      <CompetitionDetail waveId="wave" competitionId="native" />
+    );
+    expect(
+      screen.getByRole("tab", { name: expectedApprovals })
+    ).toHaveAttribute("aria-selected", "true");
+    expect(
+      screen.getByRole("tabpanel", { name: expectedApprovals })
+    ).toBeVisible();
+    fireEvent.click(
+      screen.getByRole("tab", { name: expectedApproved })
+    );
+    expect(mockPush).toHaveBeenCalledWith(
+      "/waves/wave/competitions/native?tab=decisions",
+      { scroll: false }
+    );
+    mockSearch = "tab=decisions";
+    rerender(<CompetitionDetail waveId="wave" competitionId="native" />);
+    expect(
+      screen.getByRole("tabpanel", { name: expectedApproved })
+    ).toBeVisible();
+    expect(
+      screen.queryByRole("tab", { name: "Leaderboard" })
+    ).toBeNull();
+    expect(
+      screen.queryByRole("tab", { name: "Winners" })
+    ).toBeNull();
+  }
+);
+
 it("keeps the entry action in the competition view and exposes details and management through Configuration", () => {
   mockEnabled = true;
   mockSearch = "";
@@ -126,3 +190,18 @@ it("keeps the entry action in the competition view and exposes details and manag
     screen.getByRole("button", { name: "Manage native competition" })
   ).toBeVisible();
 });
+
+it.each(["", "tab=rules", "edit=1"])(
+  "opens drafts directly in the setup wizard for query %s",
+  (search) => {
+    mockEnabled = true;
+    mockSearch = search;
+    mockCompetition.lifecycle = "DRAFT";
+    render(<CompetitionDetail waveId="wave" competitionId="native" />);
+    expect(screen.getByText("Native draft editor")).toBeVisible();
+    expect(screen.queryByText("Readable native entries")).toBeNull();
+    expect(screen.queryByRole("tab", { name: "Leaderboard" })).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Close editor" }));
+    expect(mockReplace).toHaveBeenCalledWith("/waves/wave/competitions");
+  }
+);

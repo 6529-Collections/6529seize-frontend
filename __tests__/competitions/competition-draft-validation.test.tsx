@@ -16,6 +16,7 @@ import type { ApiCompetitionDraftInput } from "@/generated/models/ApiCompetition
 import {
   createCompetition,
   updateCompetition,
+  performCompetitionAction,
 } from "@/services/api/competitions-api";
 
 let mockConfiguration: ApiCompetitionDraftInput | undefined;
@@ -103,6 +104,9 @@ jest.mock("@/services/api/competitions-api", () => ({
     .fn()
     .mockResolvedValue({ id: "draft", config_version: 2 }),
   invalidateCompetition: jest.fn().mockResolvedValue(undefined),
+  performCompetitionAction: jest
+    .fn()
+    .mockResolvedValue({ id: "draft", config_version: 3 }),
 }));
 
 const wave = {
@@ -119,12 +123,14 @@ const draft = {
 
 beforeEach(() => {
   jest.clearAllMocks();
+  localStorage.clear();
   mockConfiguration = undefined;
   HTMLElement.prototype.scrollIntoView = jest.fn();
 });
 afterEach(() => jest.useRealTimers());
 
-it("shows and focuses the missing approval threshold before sending a save, then saves the corrected number", async () => {
+it("keeps an incomplete Approve draft locally and validates the threshold before the next step", async () => {
+  jest.useFakeTimers();
   render(<CompetitionDraftEditor wave={wave} onClose={jest.fn()} />);
   fireEvent.change(screen.getByRole("combobox", { name: "Competition type" }), {
     target: { value: "APPROVE" },
@@ -132,23 +138,23 @@ it("shows and focuses the missing approval threshold before sending a save, then
   fireEvent.change(screen.getByRole("textbox", { name: "Competition name" }), {
     target: { value: "Approve test" },
   });
-  fireEvent.click(screen.getByRole("button", { name: "Save changes" }));
+  await act(async () => {
+    jest.advanceTimersByTime(1000);
+  });
+  expect(createCompetition).not.toHaveBeenCalled();
+  expect(
+    screen.queryByRole("button", { name: "Save changes" })
+  ).not.toBeInTheDocument();
+  for (let step = 0; step < 5; step++)
+    fireEvent.click(screen.getByRole("button", { name: "Next" }));
   const threshold = screen.getByRole("textbox", { name: "Approval threshold" });
   expect(threshold).toHaveFocus();
   expect(threshold).toHaveAttribute("aria-invalid", "true");
-  expect(
-    screen.getByText("Enter an approval threshold greater than 0.")
-  ).toBeVisible();
-  expect(mockRequestAuth).not.toHaveBeenCalled();
-  expect(createCompetition).not.toHaveBeenCalled();
-
   fireEvent.change(threshold, { target: { value: "50" } });
-  expect(threshold).toHaveAttribute("aria-invalid", "false");
-  expect(
-    screen.queryByText("Enter an approval threshold greater than 0.")
-  ).toBeNull();
-  fireEvent.click(screen.getByRole("button", { name: "Save changes" }));
-  await waitFor(() => expect(createCompetition).toHaveBeenCalledTimes(1));
+  await act(async () => {
+    jest.advanceTimersByTime(1000);
+  });
+  expect(createCompetition).toHaveBeenCalledTimes(1);
   expect(createCompetition).toHaveBeenCalledWith(
     "wave",
     expect.objectContaining({
@@ -165,8 +171,9 @@ it("continues to save Rank drafts without an approval threshold", async () => {
   fireEvent.change(screen.getByRole("textbox", { name: "Competition name" }), {
     target: { value: "Rank test" },
   });
-  fireEvent.click(screen.getByRole("button", { name: "Save changes" }));
-  await waitFor(() => expect(createCompetition).toHaveBeenCalledTimes(1));
+  await waitFor(() => expect(createCompetition).toHaveBeenCalledTimes(1), {
+    timeout: 1500,
+  });
   expect(createCompetition).toHaveBeenCalledWith(
     "wave",
     expect.objectContaining({
@@ -216,7 +223,7 @@ it("does not autosave an empty threshold and resumes autosaving after it is corr
   expect(mockRequestAuth).not.toHaveBeenCalled();
   expect(threshold).toHaveAttribute("aria-invalid", "false");
 
-  fireEvent.click(screen.getByRole("button", { name: "Save changes" }));
+  fireEvent.click(screen.getByRole("button", { name: "Next" }));
   expect(threshold).toHaveAttribute("aria-invalid", "true");
   expect(updateCompetition).not.toHaveBeenCalled();
   fireEvent.change(threshold, { target: { value: "75" } });
@@ -233,4 +240,205 @@ it("does not autosave an empty threshold and resumes autosaving after it is corr
       }),
     })
   );
+});
+
+it("flushes the latest edit when closing without publishing", async () => {
+  const onClose = jest.fn();
+  render(<CompetitionDraftEditor wave={wave} onClose={onClose} />);
+  fireEvent.change(screen.getByRole("textbox", { name: "Competition name" }), {
+    target: { value: "Quick close" },
+  });
+  fireEvent.click(screen.getByRole("button", { name: "Close editor" }));
+  await waitFor(() => expect(createCompetition).toHaveBeenCalledTimes(1));
+  await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
+  expect(mockReplace).not.toHaveBeenCalled();
+});
+
+it("restores incomplete edits after closing and reopening", async () => {
+  const onClose = jest.fn();
+  const view = render(<CompetitionDraftEditor wave={wave} onClose={onClose} />);
+  fireEvent.change(screen.getByRole("combobox", { name: "Competition type" }), {
+    target: { value: "APPROVE" },
+  });
+  fireEvent.change(screen.getByRole("textbox", { name: "Competition name" }), {
+    target: { value: "Incomplete Approve" },
+  });
+  fireEvent.click(screen.getByRole("button", { name: "Close editor" }));
+  await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
+  view.unmount();
+  render(<CompetitionDraftEditor wave={wave} onClose={onClose} />);
+  expect(screen.getByRole("textbox", { name: "Competition name" })).toHaveValue(
+    "Incomplete Approve"
+  );
+  expect(
+    screen.getByRole("combobox", { name: "Competition type" })
+  ).toHaveValue("APPROVE");
+  expect(createCompetition).not.toHaveBeenCalled();
+});
+
+it("saves edits made during creation using the returned draft version before closing", async () => {
+  jest.useFakeTimers();
+  let completeCreate!: (value: ApiCompetition) => void;
+  jest.mocked(createCompetition).mockImplementationOnce(
+    () =>
+      new Promise((resolve) => {
+        completeCreate = resolve;
+      })
+  );
+  const onClose = jest.fn();
+  render(<CompetitionDraftEditor wave={wave} onClose={onClose} />);
+  fireEvent.change(screen.getByRole("textbox", { name: "Competition name" }), {
+    target: { value: "First name" },
+  });
+  await act(async () => {
+    jest.advanceTimersByTime(1000);
+  });
+  expect(createCompetition).toHaveBeenCalledTimes(1);
+  expect(
+    screen.getByRole("textbox", { name: "Competition name" })
+  ).toBeEnabled();
+  fireEvent.change(screen.getByRole("textbox", { name: "Competition name" }), {
+    target: { value: "Latest name" },
+  });
+  fireEvent.click(screen.getByRole("button", { name: "Close editor" }));
+  await act(async () => {
+    completeCreate({ id: "draft", config_version: 1 } as ApiCompetition);
+  });
+  expect(createCompetition).toHaveBeenCalledTimes(1);
+  expect(updateCompetition).toHaveBeenCalledWith(
+    { waveId: "wave", competitionId: "draft" },
+    expect.objectContaining({
+      config_version: 1,
+      config: expect.objectContaining({ title: "Latest name" }),
+    })
+  );
+  expect(onClose).toHaveBeenCalledTimes(1);
+  expect(mockReplace).not.toHaveBeenCalled();
+});
+
+it("replays an uncertain create before saving newer edits after reopening", async () => {
+  jest.useFakeTimers();
+  jest
+    .mocked(createCompetition)
+    .mockRejectedValueOnce(new TypeError("Lost response"));
+  const view = render(
+    <CompetitionDraftEditor wave={wave} onClose={jest.fn()} />
+  );
+  fireEvent.change(screen.getByRole("textbox", { name: "Competition name" }), {
+    target: { value: "Original name" },
+  });
+  await act(async () => {
+    jest.advanceTimersByTime(1000);
+  });
+  expect(createCompetition).toHaveBeenCalledTimes(1);
+  const originalRequest = jest.mocked(createCompetition).mock.calls[0];
+  view.unmount();
+  const onClose = jest.fn();
+  render(<CompetitionDraftEditor wave={wave} onClose={onClose} />);
+  fireEvent.change(screen.getByRole("textbox", { name: "Competition name" }), {
+    target: { value: "Recovered name" },
+  });
+  await act(async () => {
+    fireEvent.click(screen.getByRole("button", { name: "Close editor" }));
+  });
+  expect(createCompetition).toHaveBeenCalledTimes(2);
+  expect(jest.mocked(createCompetition).mock.calls[1]).toEqual(originalRequest);
+  expect(updateCompetition).toHaveBeenCalledWith(
+    { waveId: "wave", competitionId: "draft" },
+    expect.objectContaining({
+      config_version: 1,
+      config: expect.objectContaining({ title: "Recovered name" }),
+    })
+  );
+  expect(onClose).toHaveBeenCalledTimes(1);
+});
+
+it("resolves a lost update response before reverting to the last saved values", async () => {
+  jest.useFakeTimers();
+  const view = render(
+    <CompetitionDraftEditor wave={wave} onClose={jest.fn()} />
+  );
+  const name = screen.getByRole("textbox", { name: "Competition name" });
+  fireEvent.change(name, { target: { value: "Saved name" } });
+  await act(async () => {
+    jest.advanceTimersByTime(1000);
+  });
+  mockConfiguration = jest.mocked(createCompetition).mock.calls[0]![1].config;
+  jest
+    .mocked(updateCompetition)
+    .mockRejectedValueOnce(new TypeError("Lost response"));
+  fireEvent.change(name, { target: { value: "Uncertain name" } });
+  await act(async () => {
+    jest.advanceTimersByTime(1000);
+  });
+  const uncertainRequest = jest.mocked(updateCompetition).mock.calls[0];
+  fireEvent.change(name, { target: { value: "Saved name" } });
+  view.unmount();
+  const onClose = jest.fn();
+  render(
+    <CompetitionDraftEditor wave={wave} competition={draft} onClose={onClose} />
+  );
+  await act(async () => {
+    fireEvent.click(screen.getByRole("button", { name: "Close editor" }));
+  });
+  expect(updateCompetition).toHaveBeenCalledTimes(3);
+  expect(jest.mocked(updateCompetition).mock.calls[1]).toEqual(
+    uncertainRequest
+  );
+  expect(jest.mocked(updateCompetition).mock.calls[2]).toEqual([
+    { waveId: "wave", competitionId: "draft" },
+    expect.objectContaining({
+      config_version: 2,
+      config: expect.objectContaining({ title: "Saved name" }),
+    }),
+  ]);
+  expect(onClose).toHaveBeenCalledTimes(1);
+});
+
+it("offers Previous, Close editor and Publish on review and publishes the saved version", async () => {
+  const form = renderHook(() =>
+    useWaveConfig({ initialWaveType: ApiWaveType.Rank })
+  );
+  mockConfiguration = competitionFormToDraft(
+    {
+      ...form.result.current.config,
+      overview: {
+        ...form.result.current.config.overview,
+        name: "Publish test",
+      },
+      dates: { ...form.result.current.config.dates, ongoingRanking: true },
+    },
+    ""
+  );
+  form.unmount();
+  render(
+    <CompetitionDraftEditor
+      wave={wave}
+      competition={draft}
+      onClose={jest.fn()}
+    />
+  );
+  fireEvent.change(screen.getByRole("textbox", { name: "Description" }), {
+    target: { value: "Latest description" },
+  });
+  for (let step = 0; step < 6; step++)
+    fireEvent.click(screen.getByRole("button", { name: "Next" }));
+  expect(
+    screen.getAllByRole("button").map((button) => button.textContent)
+  ).toEqual(["Previous", "Close editor", "Publish"]);
+  fireEvent.click(screen.getByRole("button", { name: "Publish" }));
+  await waitFor(() =>
+    expect(performCompetitionAction).toHaveBeenCalledWith(
+      { waveId: "wave", competitionId: "draft" },
+      "publish",
+      expect.objectContaining({ config_version: 2 })
+    )
+  );
+  expect(updateCompetition).toHaveBeenCalledWith(
+    expect.anything(),
+    expect.objectContaining({
+      config: expect.objectContaining({ description: "Latest description" }),
+    })
+  );
+  expect(mockReplace).toHaveBeenCalledWith("/waves/wave/competitions/draft");
 });

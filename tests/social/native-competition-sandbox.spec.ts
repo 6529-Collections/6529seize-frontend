@@ -507,20 +507,11 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await page
       .getByLabel("Competition name", { exact: true })
       .fill("Native draft");
-    const beforeUnload = page.waitForEvent("dialog");
-    await page.evaluate(() => {
-      setTimeout(() => globalThis.location.reload(), 0);
-    });
-    const dialog = await beforeUnload;
-    expect(dialog.type()).toBe("beforeunload");
-    await dialog.dismiss();
     await expect(
-      page.getByLabel("Competition name", { exact: true })
-    ).toHaveValue("Native draft");
-    await page
-      .getByRole("button", { name: "Save changes", exact: true })
-      .click();
-    await expect(page).toHaveURL(/\/draft\?edit=1$/, { timeout: 30000 });
+      page.getByRole("button", { name: "Save changes", exact: true })
+    ).toHaveCount(0);
+    await expect.poll(() => sandbox.requests.length).toBe(1);
+    await page.reload();
     await expect(
       page.getByLabel("Competition name", { exact: true })
     ).toHaveValue("Native draft");
@@ -533,9 +524,20 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await page
       .getByRole("button", { name: "Close editor", exact: true })
       .click();
+    await expect(page).toHaveURL(ROOT);
+    await page.getByRole("tab", { name: "Drafts", exact: true }).click();
+    await page
+      .getByRole("link")
+      .filter({
+        has: page.getByRole("heading", { name: "Native draft", exact: true }),
+      })
+      .click();
     await expect(
-      page.getByRole("heading", { name: "Native draft", level: 1 })
-    ).toBeVisible({ timeout: 30000 });
+      page.getByLabel("Competition name", { exact: true })
+    ).toHaveValue("Native draft");
+    await expect(
+      page.getByRole("tab", { name: "Leaderboard", exact: true })
+    ).toHaveCount(0);
     await expectNoHorizontalOverflow(page);
   });
 

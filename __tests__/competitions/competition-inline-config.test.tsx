@@ -217,3 +217,26 @@ it("uses the existing Approve label validation", () => {
   fireEvent.change(inputs[2]!, { target: { value: "Same" } });
   expect(screen.getByRole("button", { name: "Save changes" })).toBeDisabled();
 });
+
+it("saves custom Approve tab labels in the competition presentation", async () => {
+  mockCompetition.type = "APPROVE";
+  setup(<CompetitionAppearance />);
+  fireEvent.click(
+    screen.getByRole("button", { name: "Appearance and labels" })
+  );
+  fireEvent.change(screen.getByPlaceholderText("Proposals"), {
+    target: { value: "Suggestions" },
+  });
+  fireEvent.change(screen.getByPlaceholderText("Approved"), {
+    target: { value: "Accepted" },
+  });
+  fireEvent.click(screen.getByRole("button", { name: "Save changes" }));
+  await waitFor(() => expect(updateCompetition).toHaveBeenCalled());
+  const saved = jest.mocked(updateCompetition).mock.calls[0]![1].config;
+  expect(saved.presentation).toEqual(
+    expect.arrayContaining([
+      { data_key: keys.approvalsTabLabel, data_value: "Suggestions" },
+      { data_key: keys.approvedTabLabel, data_value: "Accepted" },
+    ])
+  );
+});
