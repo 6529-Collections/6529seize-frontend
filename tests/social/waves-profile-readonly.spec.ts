@@ -194,11 +194,19 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       name: /Profile Waves Feed/,
     });
     await expect(profileFeedLink).toBeVisible();
+    const wavesHeader = page
+      .getByRole("heading", {
+        name: "Waves",
+        exact: true,
+        level: 2,
+      })
+      .locator("..");
+    await expect(wavesHeader).toContainText("Waves");
     await expect(
-      page.getByRole("link", { name: "Waves", exact: true })
+      wavesHeader.getByRole("link", { name: "Waves", exact: true })
     ).toHaveCount(0);
     await expect(
-      page.getByRole("link", { name: "Discover Waves", exact: true })
+      wavesHeader.getByRole("link", { name: "Discover Waves", exact: true })
     ).toHaveCount(0);
     await expect(
       page.getByRole("link", { name: /Profile Waves Feed/ }).locator("svg")

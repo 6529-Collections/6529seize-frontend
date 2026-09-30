@@ -3,7 +3,7 @@ import useDeviceInfo from "@/hooks/useDeviceInfo";
 
 import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
-import { useId } from "react";
+import { useCallback, useId, useRef, useState } from "react";
 import type { SidebarWaveNavigation } from "@/hooks/useSidebarWaveNavigation";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useHasHydrated } from "@/hooks/useHasHydrated";
@@ -29,6 +29,22 @@ export function SidebarWaveNavigationControls({
   const locale = useBrowserLocale();
   const inputId = useId();
   const hasHydrated = useHasHydrated();
+  const [searchOpen, setSearchOpen] = useState(false);
+  const toggleRef = useRef<HTMLButtonElement>(null);
+  const showSearch = searchOpen || navigation.searching;
+  const focusSearch = useCallback(
+    (input: HTMLInputElement | null) => {
+      if (input && hasHydrated) input.focus();
+    },
+    [hasHydrated]
+  );
+  const findWaveLabel = t(locale, "waves.sidebar.findWave");
+  const closeSearch = () => {
+    navigation.setQueryText("");
+    setSearchOpen(false);
+    // The search toggle returns on the next render.
+    requestAnimationFrame(() => toggleRef.current?.focus());
+  };
   const searchLoading =
     navigation.searching &&
     navigation.queryText.trim().length >= 3 &&
@@ -36,61 +52,87 @@ export function SidebarWaveNavigationControls({
   return (
     <>
       <div className="tailwind-scope tw-sticky tw-top-0 tw-z-10 tw-bg-[var(--wave-sidebar-background,#000)] tw-px-4 tw-py-2">
-        <label htmlFor={inputId} className="tw-sr-only">
-          {t(locale, "waves.sidebar.findWave")}
-        </label>
-        <div className="tw-flex tw-min-h-9 tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-2.5 focus-within:tw-border-primary-400">
-          {searchLoading ? (
-            <span
-              aria-hidden="true"
-              className="tw-size-4 tw-shrink-0 tw-animate-spin tw-rounded-full tw-border tw-border-solid tw-border-iron-600 tw-border-t-primary-300 motion-reduce:tw-animate-none"
-            />
-          ) : (
-            <MagnifyingGlassIcon
-              className="tw-size-4 tw-shrink-0 tw-text-iron-400"
-              aria-hidden="true"
-            />
-          )}
-          <input
-            id={inputId}
-            type="search"
-            disabled={!hasHydrated}
-            aria-busy={searchLoading}
-            value={navigation.queryText}
-            onChange={(event) => navigation.setQueryText(event.target.value)}
-            placeholder={t(locale, "waves.sidebar.findWave")}
-            autoComplete="off"
-            className="tw-w-full tw-min-w-0 tw-border-0 tw-bg-transparent tw-py-1.5 tw-text-xs tw-leading-5 tw-text-white tw-outline-none tw-ring-0 placeholder:tw-text-iron-400 focus:tw-ring-0 touch-only:tw-text-base [&::-webkit-search-cancel-button]:tw-appearance-none"
-          />
-          {navigation.searching && (
-            <button
-              type="button"
-              onClick={() => navigation.setQueryText("")}
-              aria-label={t(locale, "waves.sidebar.clearSearch")}
-              className="tw-flex tw-size-8 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-transparent tw-text-iron-300"
-            >
-              <XMarkIcon className="tw-size-4" />
-            </button>
-          )}
-        </div>
-        {!navigation.searching && navigation.canUseCollections && (
-          <fieldset
-            aria-label={t(locale, "waves.sidebar.filterAriaLabel")}
-            className="tw-m-0 tw-mt-2 tw-flex tw-min-w-0 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-0.5"
-          >
-            {(["all", "pinned", "joined"] as const).map((tab) => (
+        {showSearch ? (
+          <>
+            <label htmlFor={inputId} className="tw-sr-only">
+              {findWaveLabel}
+            </label>
+            <div className="tw-flex tw-min-h-9 tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-2.5 focus-within:tw-border-primary-400">
+              {searchLoading ? (
+                <span
+                  aria-hidden="true"
+                  className="tw-size-4 tw-shrink-0 tw-animate-spin tw-rounded-full tw-border tw-border-solid tw-border-iron-600 tw-border-t-primary-300 motion-reduce:tw-animate-none"
+                />
+              ) : (
+                <MagnifyingGlassIcon
+                  className="tw-size-4 tw-shrink-0 tw-text-iron-400"
+                  aria-hidden="true"
+                />
+              )}
+              <input
+                ref={focusSearch}
+                id={inputId}
+                type="search"
+                disabled={!hasHydrated}
+                aria-busy={searchLoading}
+                value={navigation.queryText}
+                onChange={(event) =>
+                  navigation.setQueryText(event.target.value)
+                }
+                onKeyDown={(event) => {
+                  if (event.key === "Escape") {
+                    event.preventDefault();
+                    closeSearch();
+                  }
+                }}
+                placeholder={findWaveLabel}
+                autoComplete="off"
+                className="tw-w-full tw-min-w-0 tw-border-0 tw-bg-transparent tw-py-1.5 tw-text-xs tw-leading-5 tw-text-white tw-outline-none tw-ring-0 placeholder:tw-text-iron-400 focus:tw-ring-0 touch-only:tw-text-base [&::-webkit-search-cancel-button]:tw-appearance-none"
+              />
               <button
-                key={tab}
                 type="button"
-                aria-label={t(locale, COLLECTION_LABELS[tab])}
-                aria-pressed={navigation.collection === tab}
-                onClick={() => navigation.setCollection(tab)}
-                className={`tw-inline-flex tw-min-h-7 tw-min-w-0 tw-flex-1 tw-items-center tw-justify-center tw-gap-1.5 tw-rounded-md tw-border-0 tw-px-2 tw-text-xs focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 ${navigation.collection === tab ? "tw-bg-iron-800 tw-font-semibold tw-text-white" : "tw-bg-transparent tw-text-iron-400"}`}
+                onClick={closeSearch}
+                aria-label={t(locale, "waves.sidebar.closeSearch")}
+                className="tw-flex tw-size-8 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-transparent tw-text-iron-300"
               >
-                {t(locale, COLLECTION_LABELS[tab])}
+                <XMarkIcon className="tw-size-4" />
               </button>
-            ))}
-          </fieldset>
+            </div>
+          </>
+        ) : (
+          <div className="tw-flex tw-items-center tw-gap-2">
+            {navigation.canUseCollections && (
+              <fieldset
+                aria-label={t(locale, "waves.sidebar.filterAriaLabel")}
+                className="tw-m-0 tw-flex tw-min-w-0 tw-flex-1 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-0.5"
+              >
+                {(["all", "pinned", "joined"] as const).map((tab) => (
+                  <button
+                    key={tab}
+                    type="button"
+                    aria-label={t(locale, COLLECTION_LABELS[tab])}
+                    aria-pressed={navigation.collection === tab}
+                    onClick={() => navigation.setCollection(tab)}
+                    className={`tw-inline-flex tw-min-h-7 tw-min-w-0 tw-flex-1 tw-items-center tw-justify-center tw-gap-1.5 tw-rounded-md tw-border-0 tw-px-2 tw-text-xs focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 ${navigation.collection === tab ? "tw-bg-iron-800 tw-font-semibold tw-text-white" : "tw-bg-transparent tw-text-iron-400"}`}
+                  >
+                    {t(locale, COLLECTION_LABELS[tab])}
+                  </button>
+                ))}
+              </fieldset>
+            )}
+            <button
+              ref={toggleRef}
+              type="button"
+              disabled={!hasHydrated}
+              aria-label={findWaveLabel}
+              title={findWaveLabel}
+              aria-expanded={false}
+              onClick={() => setSearchOpen(true)}
+              className="tw-ml-auto tw-flex tw-size-9 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-white touch-only:tw-size-11"
+            >
+              <MagnifyingGlassIcon className="tw-size-4" aria-hidden="true" />
+            </button>
+          </div>
         )}
       </div>
       {!navigation.searching &&

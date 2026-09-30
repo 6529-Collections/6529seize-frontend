@@ -25,11 +25,10 @@ Wave and DM rows in the left list control which thread is open.
   its subwaves are loaded, the parent opens, and the active child row is
   highlighted.
 - Navigating to a wave scrolls its active row into the nearest visible position.
-- `All`, `Pinned`, and `Joined` are peer collections below one sticky search
-  and collection control. Switch directly without scrolling through pinned waves.
+- `All`, `Pinned`, and `Joined` are peer collections in one sticky row, with
+  a separate search icon on the right. Switch directly without scrolling through pinned waves.
   Each collection remembers its scroll position; selecting another wave enables
-  active-row reveal again. Signed-out visitors see `All Waves` without personal
-  collection controls.
+  active-row reveal again. Signed-out visitors have the search icon without personal collection controls.
 - The `Waves` heading is plain text. Header actions sit at the far right:
   feed, then create on desktop; feed only in the mobile list.
   The app keeps create in its top bar.
@@ -80,14 +79,17 @@ when the desktop feed is active or its button is hovered or keyboard-focused.
   even when collapsed. Active Votes opens `/discover?view=active-votes`;
   Worth Checking Out opens `/discover?view=recommendations&sort=QUALITY`.
   Selecting the link navigates without toggling the section.
-- `Find a wave…` searches all accessible non-DM waves, independently of the
+- Select the search icon beside the collection controls to reveal and focus
+  `Find a wave…`. Search replaces the controls while open. Close it with the
+  close button or Escape to return to the selected collection.
+  `Find a wave…` searches all accessible non-DM waves, independently of the
   selected collection. Type at least three characters. Results show name,
   creator, and joined/pinned status, with `Load more` for additional matches.
 - Search replaces the lower list and keeps the query while opening a result.
   Signed-out and auth-loading views omit the redundant `All Waves` heading below
   the search input; personal collection tabs appear when available.
-  A small spinner replaces the search icon while results are loading; one clear
-  button resets the query. Clearing restores the collection
+  A small spinner replaces the search icon while results are loading; one close
+  button resets the query and hides search. Closing restores the collection
   and its scroll position. Queries are kept separately for each viewer only
   while the page is running. Refresh starts with an empty search and restores
   the last selected All / Pinned / Joined collection. The list area below the tabs shows a small centered spinner only while the

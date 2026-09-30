@@ -5,7 +5,7 @@ import { ApiWavesOverviewType } from "@/generated/models/ApiWavesOverviewType";
 import { ApiWavesV2ListType } from "@/generated/models/ApiWavesV2ListType";
 
 const replaceMock = jest.fn();
-let searchParams = "";
+let searchParams: string | null = "";
 let latestExploreProps: Record<string, any> | null = null;
 let mockCanUseCollections = false;
 jest.mock("@/hooks/useWaveDiscoveryViewer", () => ({
@@ -15,7 +15,8 @@ jest.mock("@/hooks/useWaveDiscoveryViewer", () => ({
 jest.mock("next/navigation", () => ({
   usePathname: () => "/discover",
   useRouter: () => ({ replace: replaceMock }),
-  useSearchParams: () => new URLSearchParams(searchParams),
+  useSearchParams: () =>
+    searchParams === null ? null : new URLSearchParams(searchParams),
 }));
 
 jest.mock("@/components/home/explore-waves/ExploreWavesSection", () => ({
@@ -51,6 +52,34 @@ describe("DiscoverWaveExplorer", () => {
     render(<DiscoverWaveExplorer />);
     expect(latestExploreProps?.["title"]).toBe(
       "Active discussions you are not yet following"
+    );
+  });
+
+  it("defaults to recommendations and permits navigation when search params are unavailable", () => {
+    searchParams = null;
+    render(<DiscoverWaveExplorer />);
+
+    expect(
+      screen.getByRole("tab", { name: "Worth Checking Out" })
+    ).toHaveAttribute("aria-selected", "true");
+    expect(latestExploreProps).toMatchObject({
+      scoreSort: ApiWaveScoreSort.Balanced,
+      statusLabel: "Balanced waves",
+    });
+
+    fireEvent.click(screen.getByRole("tab", { name: "Active Votes" }));
+    expect(replaceMock).toHaveBeenLastCalledWith(
+      "/discover?view=active-votes",
+      {
+        scroll: false,
+      }
+    );
+    fireEvent.click(screen.getByRole("tab", { name: "Worth Checking Out" }));
+    expect(replaceMock).toHaveBeenLastCalledWith(
+      "/discover?view=recommendations",
+      {
+        scroll: false,
+      }
     );
   });
 

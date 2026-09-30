@@ -344,15 +344,13 @@ export function ExploreWaveCard({
       )}
 
       <div
-        className={`tw-relative tw-z-10 tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-px-4 tw-pb-4 ${compact ? "tw-pt-4" : "tw-pt-2"}`}
+        className={`tw-relative tw-z-10 tw-flex tw-min-w-0 tw-flex-1 tw-flex-col ${compact ? "tw-p-3" : "tw-px-4 tw-pb-4 tw-pt-2"}`}
       >
         <div
-          className={
-            compact ? "tw-flex tw-min-h-12 tw-items-start tw-gap-3" : undefined
-          }
+          className={compact ? "tw-flex tw-min-w-0 tw-items-start" : undefined}
         >
           <span
-            className={`${compact ? "tw-line-clamp-2 tw-h-12 tw-flex-1 tw-text-base tw-leading-6" : "tw-line-clamp-1 tw-text-lg tw-leading-tight"} tw-m-0 tw-min-w-0 tw-break-words tw-font-semibold tw-tracking-tight tw-text-iron-50 tw-transition-colors tw-duration-300 group-focus-visible:tw-text-primary-300 desktop-hover:group-hover:tw-text-primary-300`}
+            className={`${compact ? "tw-flex-1 tw-truncate tw-text-base tw-leading-6" : "tw-line-clamp-1 tw-text-lg tw-leading-tight"} tw-m-0 tw-min-w-0 tw-break-words tw-font-semibold tw-tracking-tight tw-text-iron-50 tw-transition-colors tw-duration-300 group-focus-visible:tw-text-primary-300 desktop-hover:group-hover:tw-text-primary-300`}
           >
             {wave.name}
           </span>
@@ -365,7 +363,7 @@ export function ExploreWaveCard({
           compact={compact}
         />
 
-        <ExploreWaveCompactMetrics metrics={metrics} />
+        <ExploreWaveCompactMetrics metrics={metrics} compact={compact} />
 
         {!compact && hasDrops && (
           <div className="tw-mt-2.5 tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-text-xs tw-text-iron-500">
@@ -390,11 +388,15 @@ export function ExploreWaveCard({
 
 function ExploreWaveCompactMetrics({
   metrics,
+  compact,
 }: {
   readonly metrics: readonly ExploreWaveMetric[];
+  readonly compact: boolean;
 }) {
   return (
-    <span className="explore-wave-card-metrics tw-mt-3 tw-flex tw-min-h-5 tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-1.5">
+    <span
+      className={`explore-wave-card-metrics ${compact ? "tw-mt-2" : "tw-mt-3"} tw-flex tw-min-h-5 tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-1.5`}
+    >
       {metrics.map((metric) => (
         <span
           key={`${metric.ariaLabel}-${metric.value}`}
@@ -427,7 +429,7 @@ function MessagePreviewContent({
     return (
       <div
         aria-hidden="true"
-        className={compact ? "tw-mt-1.5 tw-h-9" : "tw-mt-2 tw-min-h-10"}
+        className={compact ? "tw-mt-1.5 tw-h-[18px]" : "tw-mt-2 tw-min-h-10"}
       />
     );
   }
@@ -436,8 +438,8 @@ function MessagePreviewContent({
     <ContentDisplay
       content={previewContent}
       shouldClamp={false}
-      className={`${compact ? "tw-h-9" : "tw-min-h-9"} tw-mt-1.5 tw-flex tw-min-w-0 tw-items-start tw-gap-1 tw-overflow-hidden`}
-      textClassName="tw-line-clamp-2 tw-break-words tw-text-[13px] tw-font-normal tw-leading-[18px] tw-text-iron-500"
+      className={`${compact ? "tw-h-[18px]" : "tw-min-h-9"} tw-mt-1.5 tw-flex tw-min-w-0 tw-items-start tw-gap-1 tw-overflow-hidden`}
+      textClassName={`${compact ? "tw-line-clamp-1" : "tw-line-clamp-2"} tw-break-words tw-text-[13px] tw-font-normal tw-leading-[18px] tw-text-iron-500`}
       linkify={false}
     />
   );
