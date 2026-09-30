@@ -14,9 +14,6 @@ jest.mock("next/link", () => ({
     </a>
   ),
 }));
-jest.mock("@/components/waves/specs/WaveTypeIcon", () => () => (
-  <div data-testid="wave-type-icon" />
-));
 jest.mock("@/components/waves/specs/WaveRating", () => () => (
   <div data-testid="wave-rating" />
 ));
