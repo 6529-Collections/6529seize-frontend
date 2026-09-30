@@ -25,6 +25,10 @@ import {
   NATIVE_STARTUP_SCRIPT,
   NATIVE_STARTUP_STYLES,
 } from "@/components/layout/nativeStartup";
+import {
+  SIDEBAR_STARTUP_SCRIPT,
+  SIDEBAR_STARTUP_STYLES,
+} from "@/components/layout/sidebarStartup";
 import Providers from "@/components/providers/Providers";
 import RuntimeFavicon from "@/components/providers/RuntimeFavicon";
 import { getAppMetadata } from "@/components/providers/metadata";
@@ -73,6 +77,11 @@ export default async function RootLayout({
         <script
           id="native-startup-bootstrap"
           dangerouslySetInnerHTML={{ __html: NATIVE_STARTUP_SCRIPT }}
+        />
+        <style dangerouslySetInnerHTML={{ __html: SIDEBAR_STARTUP_STYLES }} />
+        <script
+          id="sidebar-startup-bootstrap"
+          dangerouslySetInnerHTML={{ __html: SIDEBAR_STARTUP_SCRIPT }}
         />
         <style dangerouslySetInnerHTML={{ __html: VERSION_RELOAD_STYLES }} />
         {/* Restore reload feedback during HTML parsing, before hydration. */}

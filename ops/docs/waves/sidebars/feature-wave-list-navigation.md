@@ -25,16 +25,79 @@ Wave and DM rows in the left list control which thread is open.
   its subwaves are loaded, the parent opens, and the active child row is
   highlighted.
 - Navigating to a wave scrolls its active row into the nearest visible position.
-- Switching `All` / `Joined` preserves the current list position instead of
-  jumping back to the active wave. A shorter list can clamp the scroll position
-  to its available content; selecting another wave enables active-row reveal again.
-- The expanded web Waves panel header includes a secondary `Discover Waves`
-  link to `/discover`.
-- On mobile web, `Profile Waves Feed` appears above the Wave rows and opens
+- `All`, `Pinned`, and `Joined` are peer collections in one sticky row, with
+  a separate search icon on the right. Switch directly without scrolling through pinned waves.
+  Each collection remembers its scroll position; selecting another wave enables
+  active-row reveal again. Signed-out visitors have the search icon without personal collection controls.
+- The `Waves` heading is plain text. Header actions sit at the far right:
+  feed, then create on desktop; feed only in the mobile list.
+  The app keeps create in its top bar.
+- Select the feed icon to open Profile Waves Feed. On desktop, it clears the
+  selected wave; on mobile web and in the native app, it opens
   `/waves?view=profile-feed`. The feed's `Waves` link returns to the list.
+- The feed tooltip reads `Profile Waves Feed`. Create keeps a compact white
+  button with a dark plus. Both have visible keyboard focus and larger touch
+  targets. The feed content header has a `Discover Waves` link with a compass
+  to `/discover`; the sidebar keeps the two section-specific `View all` links.
+  The collapsed rail retains its icon-only feed link.
 - Browser back/forward keeps the active row and URL in sync.
 - In the native app, swipe right from the left edge of a standard wave detail
   view to return to the Waves list.
+
+## Discovery and wave search
+
+The discovery sections have independent heights. Expanding and collapsing uses
+a short reveal and rotating chevron.
+Reduced-motion preferences disable these transitions. The feed icon is blue
+when the desktop feed is active or its button is hovered or keyboard-focused.
+
+- `Worth Checking Out` appears first, followed by `Active Votes`, as independently
+  collapsible sections above the wave collections. Both start expanded.
+- Active Votes has a scrollable window three compact rows tall, with named
+  TDH votes and their voting end or next decision. Scroll to browse the list;
+  more pages load near the bottom, with a `Load more` button as a fallback.
+  A thin scrollbar and bottom fade indicate more content below. The count stays
+  visible when collapsed. The description and view-all link stay outside the list.
+- Each expanded section starts with its own short explanation, available to
+  signed-in and signed-out visitors. Active Votes says “Community decisions
+  powered by TDH.” Worth Checking Out says “Highly rated waves you don’t follow.”
+  Signed-out visitors see “Highly rated waves.”
+- Empty Active Votes shows `No active TDH votes right now.` in a compact area.
+  Loading and request failures are separate states; failed pages can be retried
+  without discarding previously loaded votes. Both view-all links remain available.
+- Each heading toggles only its own section. The chevron points down when open
+  and right when closed. Both collapse preferences persist locally in this browser
+  across visits, including signed-out visits, and are shared across profiles on
+  the same browser/device. The old shared tab preference is no longer used.
+- Announcements keeps its megaphone, timestamp, unread state and score shield in a compact row.
+- Active Votes rows include the wave score shield; select it for score details without opening the wave.
+- Worth Checking Out shows up to six spaced previews, with fewer on narrow screens,
+  with score shields overlapping the bottom-right corner of each avatar.
+  The section keeps its own compact height independently of the vote list.
+- The compact plus button retains its light colour and shows `Create wave` on hover or keyboard focus.
+- Each heading has a separate `View all` link before the chevron, available
+  even when collapsed. Active Votes opens `/discover?view=active-votes`;
+  Worth Checking Out opens `/discover?view=recommendations&sort=QUALITY`.
+  Selecting the link navigates without toggling the section.
+- Select the search icon beside the collection controls to reveal and focus
+  `Find a wave…`. Search replaces the controls while open. Close it with the
+  close button or Escape to return to the selected collection.
+  `Find a wave…` searches all accessible non-DM waves, independently of the
+  selected collection. Type at least three characters. Results show name,
+  creator, and joined/pinned status, with `Load more` for additional matches.
+- Search replaces the lower list and keeps the query while opening a result.
+  Signed-out and auth-loading views omit the redundant `All Waves` heading below
+  the search input; personal collection tabs appear when available.
+  A small spinner replaces the search icon while results are loading; one close
+  button resets the query and hides search. Closing restores the collection
+  and its scroll position. Queries are kept separately for each viewer only
+  while the page is running. Refresh starts with an empty search and restores
+  the last selected All / Pinned / Joined collection. The list area below the tabs shows a small centered spinner only while the
+  selected collection has no rows and is loading. Existing rows refresh silently;
+  an empty message appears only after loading finishes.
+- This uses the existing name matching. Typo tolerance and relevance changes
+  are outside this redesign. Unread state, pin controls and subwaves remain on
+  normal collection rows; the DM list retains its existing behavior.
 
 ## Location in the Site
 
@@ -46,9 +109,9 @@ Wave and DM rows in the left list control which thread is open.
 ## Entry Points
 
 - Open the `Waves` or `Messages` shell with the left list visible.
-- From the expanded web Waves panel header, open `Discover Waves` for the
+- From the Profile Waves Feed content header, open `Discover Waves` for the
   `/discover` route.
-- On mobile web, select `Profile Waves Feed` above the list to scan recent
+- On mobile web, select the feed icon to scan recent
   posts across public Profile Waves.
 - Select an inactive wave or DM row from the list by clicking the row body.
 - In the native app, open a standard wave and swipe right from the left edge of
