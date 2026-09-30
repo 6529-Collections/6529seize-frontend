@@ -50,6 +50,9 @@ describe("QuorumProposalCompactContent", () => {
     );
 
     expect(screen.getByText("Slow Mode")).toBeInTheDocument();
+    expect(
+      screen.getByTestId("proposal-card-context-label")
+    ).toBeInTheDocument();
     expect(screen.getByText("Summary")).toBeInTheDocument();
     expect(screen.getByText("Keep the feed readable.")).toBeInTheDocument();
     expect(

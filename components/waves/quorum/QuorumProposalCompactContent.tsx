@@ -105,12 +105,12 @@ function ProposalSectionCard({
     <details
       open={isOpen}
       onToggle={(event) => onOpenChange(sectionKey, event.currentTarget.open)}
-      className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950/70"
+      className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-primary-400/15 tw-bg-primary-500/5"
     >
       <summary
         onClick={stopPropagation}
         onKeyDown={stopPropagation}
-        className="tw-group tw-flex tw-cursor-pointer tw-list-none tw-items-center tw-justify-between tw-gap-3 tw-px-4 tw-py-3 tw-transition-colors tw-duration-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-bg-iron-900/80 motion-reduce:tw-transition-none [&::-webkit-details-marker]:tw-hidden"
+        className="tw-group tw-flex tw-cursor-pointer tw-list-none tw-items-center tw-justify-between tw-gap-3 tw-px-4 tw-py-3 tw-transition-colors tw-duration-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-bg-primary-500/5 motion-reduce:tw-transition-none [&::-webkit-details-marker]:tw-hidden"
       >
         <span className="tw-text-sm tw-font-semibold tw-text-iron-100 tw-transition-colors tw-duration-200 group-focus-visible:tw-text-iron-50 desktop-hover:group-hover:tw-text-iron-50 motion-reduce:tw-transition-none">
           {section.heading}
@@ -126,7 +126,7 @@ function ProposalSectionCard({
           role="presentation"
           onClick={stopPropagation}
           onKeyDown={stopPropagation}
-          className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-px-4 tw-pb-4 tw-pt-3"
+          className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-primary-400/15 tw-px-4 tw-pb-4 tw-pt-3"
         >
           <ProposalMarkdownBlock
             bodyGalleryBlockKey={sectionKey}
@@ -195,13 +195,13 @@ export default function QuorumProposalCompactContent({
 
   return (
     <div className="tw-mt-3 tw-flex tw-flex-col tw-gap-y-3">
-      <div className="tw-group/proposal-card tw-rounded-2xl tw-border tw-border-solid tw-border-primary-400/20 tw-bg-primary-500/5 tw-px-4 tw-pb-4 tw-pt-3">
+      <div className="tw-group/proposal-card tw-rounded-xl tw-border tw-border-solid tw-border-primary-400/20 tw-bg-primary-500/5 tw-p-4 sm:tw-p-5">
         <ProposalCardContextLabel />
-        <h2 className="tw-[overflow-wrap:anywhere] tw-m-0 tw-mb-3 tw-text-pretty tw-break-words tw-text-base tw-font-semibold !tw-leading-[1.3] tw-tracking-tight tw-text-iron-50 tw-transition-colors tw-duration-200 desktop-hover:group-hover/proposal-card:tw-text-primary-300 sm:tw-text-lg">
+        <h2 className="tw-[overflow-wrap:anywhere] tw-m-0 tw-mb-4 tw-text-pretty tw-break-words tw-text-lg tw-font-medium tw-leading-[1.3] tw-tracking-tight tw-text-iron-50 tw-transition-colors tw-duration-200 desktop-hover:group-hover/proposal-card:tw-text-primary-300">
           {proposal.title}
         </h2>
-        <div className="tw-rounded-xl tw-bg-iron-950/80 tw-px-4 tw-py-3">
-          <p className="tw-mb-2 tw-text-[10px] tw-font-bold tw-uppercase tw-leading-none tw-tracking-[0.14em] tw-text-iron-400">
+        <div>
+          <p className="tw-mb-2 tw-text-[10px] tw-font-semibold tw-uppercase tw-leading-none tw-tracking-[0.14em] tw-text-primary-300/60">
             Summary
           </p>
           <div className="[&_li]:!tw-text-sm [&_li]:!tw-leading-[1.6] [&_li]:!tw-text-iron-300 [&_p]:!tw-text-sm [&_p]:!tw-leading-[1.6] [&_p]:!tw-text-iron-300">
@@ -213,7 +213,7 @@ export default function QuorumProposalCompactContent({
           </div>
         </div>
         {sectionCount > 0 && (
-          <div className="tw-mt-3 tw-flex tw-justify-start">
+          <div className="tw-mt-5 tw-flex tw-justify-start">
             <button
               type="button"
               aria-expanded={resolvedAreDetailsVisible}
@@ -223,7 +223,7 @@ export default function QuorumProposalCompactContent({
                 setDetailsVisible(!resolvedAreDetailsVisible);
               }}
               onKeyDown={stopPropagation}
-              className="tw-inline-flex tw-min-h-8 tw-items-center tw-gap-2 tw-rounded-full tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950/60 tw-px-3 tw-py-1.5 tw-text-xs tw-font-semibold tw-leading-5 tw-text-primary-300 tw-transition-colors hover:tw-border-primary-400/40 hover:tw-text-iron-50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+              className="tw-inline-flex tw-min-h-9 tw-items-center tw-gap-1.5 tw-rounded-full tw-border tw-border-solid tw-border-primary-400/20 tw-bg-transparent tw-px-4 tw-py-1.5 tw-text-xs tw-font-medium tw-leading-5 tw-text-primary-300/80 tw-transition-colors tw-duration-200 hover:tw-border-primary-400/50 hover:tw-text-iron-50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 motion-reduce:tw-transition-none"
             >
               <span>{detailsToggleLabel}</span>
               <ChevronRightIcon
