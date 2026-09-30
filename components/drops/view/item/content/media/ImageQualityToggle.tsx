@@ -6,21 +6,26 @@ import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
 import { useId } from "react";
 
-export function GifQualityToggle({
+export function ImageQualityToggle({
   showingOriginal,
   failed,
   onToggle,
+  isGif = true,
 }: {
   readonly showingOriginal: boolean;
   readonly failed: boolean;
   readonly onToggle: () => void;
+  readonly isGif?: boolean | undefined;
 }) {
   const errorId = useId();
   const label = t(
     DEFAULT_LOCALE,
     showingOriginal ? "drop.media.viewOptimized" : "drop.media.viewOriginal"
   );
-  const error = t(DEFAULT_LOCALE, "drop.media.originalGifFailed");
+  const error = t(
+    DEFAULT_LOCALE,
+    isGif ? "drop.media.originalGifFailed" : "drop.media.originalImageFailed"
+  );
 
   return (
     <>
@@ -48,7 +53,7 @@ export function GifQualityToggle({
           <ExclamationTriangleIcon
             className="tw-size-5"
             aria-hidden="true"
-            data-testid="gif-quality-error"
+            data-testid={isGif ? "gif-quality-error" : "image-quality-error"}
           />
         ) : (
           <svg
