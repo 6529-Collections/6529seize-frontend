@@ -97,8 +97,7 @@ export function SidebarWaveNavigationControls({
         navigation.canUseCollections &&
         isCollectionLoading && (
           <div className="tailwind-scope tw-flex tw-min-h-12 tw-items-center tw-justify-center tw-py-3">
-            <span
-              role="status"
+            <output
               aria-label={t(locale, "waves.discovery.loading")}
               className="tw-size-4 tw-shrink-0 tw-animate-spin tw-rounded-full tw-border tw-border-solid tw-border-iron-600 tw-border-t-primary-300 motion-reduce:tw-animate-none"
             />

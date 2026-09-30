@@ -222,9 +222,11 @@ for (const { width, stored, expectedWidth } of [
   test(`restores sidebar ${stored} at ${width}px before hydration @smoke @medium @large`, async ({
     page,
   }, testInfo) => {
+    // This contract covers desktop-web session restoration; native/mobile
+    // layouts deliberately ignore the saved desktop sidebar width.
     test.skip(
       !isDesktopWebProject(testInfo.project.name),
-      "Desktop sidebar restoration"
+      "Saved desktop sidebar width does not apply to native or mobile layouts"
     );
     await page.setViewportSize({ width, height: 900 });
     await page.addInitScript((value) => {
