@@ -164,3 +164,13 @@ describe("UnifiedWavesList", () => {
     expect(listSurface).not.toHaveClass("tw-ring-iron-800");
   });
 });
+
+jest.mock("@/hooks/useWaveDiscoveryViewer", () => ({
+  useWaveDiscoveryViewer: () => ({
+    key: null,
+    enabled: true,
+    canUseCollections: Boolean(
+      require("@/components/auth/Auth").useAuth().connectedProfile?.handle
+    ),
+  }),
+}));

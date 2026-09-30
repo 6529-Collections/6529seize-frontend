@@ -37,6 +37,23 @@ function getSafeVideoSource(source: string): string | null {
   }
 }
 
+async function playFallbackVideo(videoEl: HTMLVideoElement): Promise<void> {
+  try {
+    await videoEl.play();
+  } catch (error) {
+    // Pausing, changing sources, or unloading can cancel a pending play().
+    if (
+      typeof error === "object" &&
+      error !== null &&
+      "name" in error &&
+      error.name === "AbortError"
+    ) {
+      return;
+    }
+    console.warn("Fallback autoplay failed:", error);
+  }
+}
+
 /**
  * A custom hook for Hls.js setup/cleanup.
  *
@@ -140,9 +157,7 @@ export function useHlsPlayer({
     videoEl.load();
     setIsLoading(false);
     if (autoPlay) {
-      void videoEl
-        .play()
-        .catch((err) => console.warn("Fallback autoplay failed:", err));
+      void playFallbackVideo(videoEl);
     }
   }
 

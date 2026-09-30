@@ -4,6 +4,7 @@ import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 
 interface SectionHeaderProps {
   readonly label: string;
+  readonly labelContent?: React.ReactNode;
   readonly icon?: IconDefinition | undefined;
   readonly labelTrailingContent?: React.ReactNode | undefined;
   readonly rightContent?: React.ReactNode | undefined;
@@ -12,6 +13,7 @@ interface SectionHeaderProps {
 
 const SectionHeader: React.FC<SectionHeaderProps> = ({
   label,
+  labelContent,
   icon,
   labelTrailingContent,
   rightContent,
@@ -25,9 +27,11 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({
         {icon !== undefined && (
           <FontAwesomeIcon icon={icon} className="tw-size-3 tw-text-iron-400" />
         )}
-        <span className="tw-text-xl tw-font-semibold tw-tracking-tight tw-text-iron-50">
-          {label}
-        </span>
+        {labelContent ?? (
+          <span className="tw-text-xl tw-font-semibold tw-tracking-tight tw-text-iron-50">
+            {label}
+          </span>
+        )}
         {labelTrailingContent}
       </div>
       {rightContent !== undefined && rightContent !== null && (

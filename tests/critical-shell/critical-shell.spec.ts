@@ -228,7 +228,7 @@ test.describe("Critical read-only route shells @critical-shell @medium @large", 
         })
       ).toBeVisible();
       await expect(
-        page.getByRole("link", { name: "Profile Waves Feed" })
+        page.getByRole("link", { name: /Profile Waves Feed/ })
       ).toHaveAttribute("href", "/waves?view=profile-feed");
     } else {
       await expect(
@@ -241,7 +241,7 @@ test.describe("Critical read-only route shells @critical-shell @medium @large", 
         page.getByText("See what the community is sharing in Profile Waves.")
       ).toBeVisible();
       await expect(
-        page.getByRole("link", { name: "Profile Waves Feed" })
+        page.getByRole("link", { name: /Profile Waves Feed/ })
       ).toHaveAttribute("href", "/waves");
     }
     await expectRouteShellHealthy(page, diagnostics, {

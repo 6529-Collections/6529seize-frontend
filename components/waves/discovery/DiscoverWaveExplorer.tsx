@@ -1,4 +1,8 @@
 "use client";
+import { ActiveWaveVotes } from "./ActiveWaveVotes";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useWaveDiscoveryViewer } from "@/hooks/useWaveDiscoveryViewer";
+import { t } from "@/i18n/messages";
 
 import { WAVE_SCORE_DISCOVERY_PARAMS } from "@/components/react-query-wrapper/utils/query-utils";
 import { ExploreWavesSection } from "@/components/home/explore-waves/ExploreWavesSection";
@@ -19,7 +23,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { KeyboardEvent } from "react";
-import { useCallback, useMemo } from "react";
+import { useCallback, useId, useMemo, useRef } from "react";
 
 type DiscoverScoreFilter = "ALL" | "SCORE_50" | "HOT_60" | "REP_60";
 type DiscoverChronologySort = "NEWEST" | "LATEST_POSTS";
@@ -299,7 +303,9 @@ function DiscoverWaveControls({
   );
 }
 
-export function DiscoverWaveExplorer() {
+function RecommendationsExplorer() {
+  const locale = useBrowserLocale();
+  const { canUseCollections } = useWaveDiscoveryViewer();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -326,10 +332,10 @@ export function DiscoverWaveExplorer() {
   const activeFilterScores: DiscoverFilterScores = activeSortIsScoreSort
     ? filterScores
     : {};
-  const title =
-    activeSort === "NEWEST"
-      ? "Newest waves"
-      : "Active discussions you are not yet following";
+  let title = t(locale, "waves.discovery.activeDiscussions");
+  if (canUseCollections)
+    title = t(locale, "waves.discovery.unfollowedDiscussions");
+  if (activeSort === "NEWEST") title = t(locale, "waves.discovery.newestWaves");
 
   const updateParams = useCallback(
     (updates: {
@@ -390,5 +396,86 @@ export function DiscoverWaveExplorer() {
         />
       }
     />
+  );
+}
+
+const ACTIVE_VOTES_VIEW = "active-votes";
+
+function normalizeDiscoveryParams(
+  params: ReturnType<typeof useSearchParams> | null
+) {
+  return new URLSearchParams(params?.toString() ?? "");
+}
+
+export function DiscoverWaveExplorer() {
+  const locale = useBrowserLocale();
+  const router = useRouter();
+  const pathname = usePathname();
+  const params = normalizeDiscoveryParams(useSearchParams());
+  const panelId = useId();
+  const active = params.get("view") === ACTIVE_VOTES_VIEW;
+  const views = ["recommendations", ACTIVE_VOTES_VIEW] as const;
+  const tabsRef = useRef<(HTMLButtonElement | null)[]>([]);
+  const selectView = (view: (typeof views)[number]) => {
+    const next = new URLSearchParams(params);
+    next.set("view", view);
+    router.replace(`${pathname}?${next.toString()}`, { scroll: false });
+  };
+  return (
+    <>
+      <div
+        role="tablist"
+        aria-label={t(locale, "waves.discovery.label")}
+        className="tw-m-0 tw-flex tw-min-w-0 tw-gap-6 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-px-4 tw-pb-0 tw-pt-2 md:tw-px-6 lg:tw-px-8"
+      >
+        {views.map((view, index) => (
+          <button
+            key={view}
+            type="button"
+            ref={(element) => {
+              tabsRef.current[index] = element;
+            }}
+            id={`${panelId}-${view}-tab`}
+            role="tab"
+            tabIndex={active === (view === ACTIVE_VOTES_VIEW) ? 0 : -1}
+            aria-selected={active === (view === ACTIVE_VOTES_VIEW)}
+            aria-controls={`${panelId}-${view}`}
+            onClick={() => selectView(view)}
+            onKeyDown={(event) => {
+              let next: number;
+              if (event.key === "Home") next = 0;
+              else if (event.key === "End") next = 1;
+              else if (event.key === "ArrowLeft" || event.key === "ArrowRight")
+                next = 1 - index;
+              else return;
+              event.preventDefault();
+              selectView(views[next]!);
+              tabsRef.current[next]?.focus();
+            }}
+            className={`-tw-mb-px tw-min-h-11 tw-whitespace-nowrap tw-rounded-none tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-border-solid tw-bg-transparent tw-px-0 tw-py-2 tw-text-sm focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 ${active === (view === ACTIVE_VOTES_VIEW) ? "tw-border-primary-400 tw-font-semibold tw-text-white" : "tw-border-transparent tw-font-medium tw-text-iron-400"}`}
+          >
+            {t(
+              locale,
+              view === ACTIVE_VOTES_VIEW
+                ? "waves.discovery.activeVotes"
+                : "waves.discovery.recommendations"
+            )}
+          </button>
+        ))}
+      </div>
+      {views.map((view) => (
+        <div
+          key={view}
+          id={`${panelId}-${view}`}
+          role="tabpanel"
+          aria-labelledby={`${panelId}-${view}-tab`}
+          tabIndex={0}
+          hidden={active !== (view === ACTIVE_VOTES_VIEW)}
+        >
+          {active === (view === ACTIVE_VOTES_VIEW) &&
+            (active ? <ActiveWaveVotes /> : <RecommendationsExplorer />)}
+        </div>
+      ))}
+    </>
   );
 }

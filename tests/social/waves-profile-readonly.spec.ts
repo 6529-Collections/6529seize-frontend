@@ -163,7 +163,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
         page.locator("main").getByText("Waves").first()
       ).toBeVisible();
       await expect(
-        page.getByRole("link", { name: "Profile Waves Feed" })
+        page.getByRole("link", { name: /Profile Waves Feed/ })
       ).toHaveAttribute("href", "/waves?view=profile-feed");
       await expect(
         page.getByRole("region", {
@@ -179,7 +179,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       ).toBeVisible();
       await expect(page.getByText(PROFILE_FEED_DESCRIPTION)).toBeVisible();
       await expect(
-        page.getByRole("link", { name: "Profile Waves Feed" })
+        page.getByRole("link", { name: /Profile Waves Feed/ })
       ).toHaveAttribute("href", "/waves");
     }
   });
@@ -191,12 +191,29 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     await gotoReady(page, "/waves");
 
     const profileFeedLink = page.getByRole("link", {
-      name: "Profile Waves Feed",
+      name: /Profile Waves Feed/,
     });
     await expect(profileFeedLink).toBeVisible();
-    // The primary sidebar can still expose its global Waves link at this width.
+    // Scope header links separately from the primary sidebar's global links.
+    const wavesHeader = page
+      .getByRole("heading", {
+        name: "Waves",
+        exact: true,
+        level: 2,
+      })
+      .locator("..");
+    await expect(wavesHeader).toContainText("Waves");
     await expect(
-      page.getByRole("main").getByRole("link", { name: "Waves", exact: true })
+      wavesHeader.getByRole("link", { name: "Waves", exact: true })
+    ).toHaveCount(0);
+    await expect(
+      wavesHeader.getByRole("link", { name: "Discover Waves", exact: true })
+    ).toHaveCount(0);
+    await expect(
+      page.getByRole("link", { name: /Profile Waves Feed/ }).locator("svg")
+    ).toBeVisible();
+    await expect(
+      page.getByText("Profile Waves Feed", { exact: true })
     ).toHaveCount(0);
     await expect(profileFeedLink).toHaveAttribute(
       "href",
@@ -215,6 +232,9 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
         name: "Latest From Profile Waves",
       })
     ).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: "Discover Waves", exact: true })
+    ).toHaveAttribute("href", "/discover");
     const feedNavigation = page.getByRole("navigation", {
       name: APP_SECTIONS_LABEL,
     });
@@ -328,7 +348,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       })
     ).toBeVisible();
     await expect(
-      page.getByRole("link", { name: "Profile Waves Feed" })
+      page.getByRole("link", { name: /Profile Waves Feed/ })
     ).toHaveAttribute("href", "/waves");
 
     await page.setViewportSize({ width: 1023, height: 900 });
