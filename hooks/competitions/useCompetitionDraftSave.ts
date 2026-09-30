@@ -7,6 +7,7 @@ import {
   useRef,
   useState,
   useSyncExternalStore,
+  type RefObject,
 } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import type { ApiCompetitionDraftInput } from "@/generated/models/ApiCompetitionDraftInput";
@@ -43,6 +44,24 @@ function persistDraft(
     : createCompetition(waveId, { idempotency_key: pending.key, config });
 }
 
+function saveOrder(pending: CompetitionEditorDraft["pending"], next: string) {
+  return pending && pending.fingerprint !== next
+    ? [pending.fingerprint, next]
+    : [next];
+}
+
+function useLatestDraftInput(
+  input: ApiCompetitionDraftInput,
+  fingerprint: string,
+  canSave: boolean
+) {
+  const current = useRef({ input, fingerprint, canSave });
+  useLayoutEffect(() => {
+    current.current = { input, fingerprint, canSave };
+  }, [input, fingerprint, canSave]);
+  return current;
+}
+
 function useUnsavedCompetitionWarning(unsaved: boolean) {
   useEffect(() => {
     if (!unsaved) return;
@@ -67,6 +86,36 @@ interface CompetitionDraftSaveOptions {
   readonly requestAuth: () => Promise<{ success: boolean }>;
 }
 
+function useDraftAutosave({
+  enabled,
+  fingerprint,
+  savedFingerprint,
+  failed,
+  pending,
+  save,
+}: {
+  readonly enabled: boolean;
+  readonly fingerprint: string;
+  readonly savedFingerprint: string;
+  readonly failed: RefObject<{ fingerprint: string; conflict: boolean } | null>;
+  readonly pending: RefObject<CompetitionEditorDraft["pending"]>;
+  readonly save: () => Promise<SavedCompetition | null>;
+}) {
+  useEffect(() => {
+    if (
+      !enabled ||
+      (fingerprint === savedFingerprint && !pending.current) ||
+      failed.current?.conflict ||
+      failed.current?.fingerprint === fingerprint
+    )
+      return;
+    const timer = setTimeout(() => {
+      void save();
+    }, 800);
+    return () => clearTimeout(timer);
+  }, [enabled, fingerprint, savedFingerprint, failed, pending, save]);
+}
+
 export function useCompetitionDraftSave({
   waveId,
   storageKey,
@@ -87,10 +136,7 @@ export function useCompetitionDraftSave({
     restored?.savedFingerprint ?? initialFingerprint
   );
   const saved = useRef(savedFingerprint);
-  const current = useRef({ input, fingerprint, canSave });
-  useLayoutEffect(() => {
-    current.current = { input, fingerprint, canSave };
-  }, [input, fingerprint, canSave]);
+  const current = useLatestDraftInput(input, fingerprint, canSave);
   const [busy, setBusy] = useState(false);
   const [backup] = useState(() => createCompetitionDraftStorage(storageKey));
   const localFingerprint = useSyncExternalStore(
@@ -115,7 +161,7 @@ export function useCompetitionDraftSave({
         savedFingerprint: saved.current,
         pending: pending.current,
       }),
-    [backup]
+    [backup, current]
   );
 
   useEffect(() => {
@@ -154,11 +200,7 @@ export function useCompetitionDraftSave({
         }
         // Resolve an uncertain request with its original payload and key before
         // saving newer edits. The first response may have been lost after commit.
-        const fingerprints =
-          pending.current &&
-          pending.current.fingerprint !== snapshot.fingerprint
-            ? [pending.current.fingerprint, snapshot.fingerprint]
-            : [snapshot.fingerprint];
+        const fingerprints = saveOrder(pending.current, snapshot.fingerprint);
         for (const nextFingerprint of fingerprints) {
           if (pending.current?.fingerprint !== nextFingerprint) {
             pending.current = {
@@ -209,22 +251,16 @@ export function useCompetitionDraftSave({
     };
     inFlight.current = operation();
     return inFlight.current;
-  }, [client, requestAuth, retain, waveId]);
+  }, [client, current, requestAuth, retain, waveId]);
 
-  useEffect(() => {
-    if (
-      busy ||
-      !canSave ||
-      (fingerprint === savedFingerprint && !pending.current) ||
-      failed.current?.conflict ||
-      failed.current?.fingerprint === fingerprint
-    )
-      return;
-    const timer = setTimeout(() => {
-      void save();
-    }, 800);
-    return () => clearTimeout(timer);
-  }, [busy, canSave, fingerprint, savedFingerprint, save]);
+  useDraftAutosave({
+    enabled: !busy && canSave,
+    fingerprint,
+    savedFingerprint,
+    failed,
+    pending,
+    save,
+  });
 
   useUnsavedCompetitionWarning(!localSaved && fingerprint !== savedFingerprint);
 
