@@ -47,6 +47,7 @@ export function readCompetitionEditorDraft(
     if (!isEditorDraft(value)) return null;
     if (
       existingCompetition &&
+      !value.pending &&
       JSON.stringify(value.input) === value.savedFingerprint
     )
       return null;

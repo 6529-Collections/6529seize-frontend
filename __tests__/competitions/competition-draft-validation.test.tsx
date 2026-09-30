@@ -316,6 +316,85 @@ it("saves edits made during creation using the returned draft version before clo
   expect(mockReplace).not.toHaveBeenCalled();
 });
 
+it("replays an uncertain create before saving newer edits after reopening", async () => {
+  jest.useFakeTimers();
+  jest
+    .mocked(createCompetition)
+    .mockRejectedValueOnce(new TypeError("Lost response"));
+  const view = render(
+    <CompetitionDraftEditor wave={wave} onClose={jest.fn()} />
+  );
+  fireEvent.change(screen.getByRole("textbox", { name: "Competition name" }), {
+    target: { value: "Original name" },
+  });
+  await act(async () => {
+    jest.advanceTimersByTime(1000);
+  });
+  expect(createCompetition).toHaveBeenCalledTimes(1);
+  const originalRequest = jest.mocked(createCompetition).mock.calls[0];
+  view.unmount();
+  const onClose = jest.fn();
+  render(<CompetitionDraftEditor wave={wave} onClose={onClose} />);
+  fireEvent.change(screen.getByRole("textbox", { name: "Competition name" }), {
+    target: { value: "Recovered name" },
+  });
+  await act(async () => {
+    fireEvent.click(screen.getByRole("button", { name: "Close editor" }));
+  });
+  expect(createCompetition).toHaveBeenCalledTimes(2);
+  expect(jest.mocked(createCompetition).mock.calls[1]).toEqual(originalRequest);
+  expect(updateCompetition).toHaveBeenCalledWith(
+    { waveId: "wave", competitionId: "draft" },
+    expect.objectContaining({
+      config_version: 1,
+      config: expect.objectContaining({ title: "Recovered name" }),
+    })
+  );
+  expect(onClose).toHaveBeenCalledTimes(1);
+});
+
+it("resolves a lost update response before reverting to the last saved values", async () => {
+  jest.useFakeTimers();
+  const view = render(
+    <CompetitionDraftEditor wave={wave} onClose={jest.fn()} />
+  );
+  const name = screen.getByRole("textbox", { name: "Competition name" });
+  fireEvent.change(name, { target: { value: "Saved name" } });
+  await act(async () => {
+    jest.advanceTimersByTime(1000);
+  });
+  mockConfiguration = jest.mocked(createCompetition).mock.calls[0]![1].config;
+  jest
+    .mocked(updateCompetition)
+    .mockRejectedValueOnce(new TypeError("Lost response"));
+  fireEvent.change(name, { target: { value: "Uncertain name" } });
+  await act(async () => {
+    jest.advanceTimersByTime(1000);
+  });
+  const uncertainRequest = jest.mocked(updateCompetition).mock.calls[0];
+  fireEvent.change(name, { target: { value: "Saved name" } });
+  view.unmount();
+  const onClose = jest.fn();
+  render(
+    <CompetitionDraftEditor wave={wave} competition={draft} onClose={onClose} />
+  );
+  await act(async () => {
+    fireEvent.click(screen.getByRole("button", { name: "Close editor" }));
+  });
+  expect(updateCompetition).toHaveBeenCalledTimes(3);
+  expect(jest.mocked(updateCompetition).mock.calls[1]).toEqual(
+    uncertainRequest
+  );
+  expect(jest.mocked(updateCompetition).mock.calls[2]).toEqual([
+    { waveId: "wave", competitionId: "draft" },
+    expect.objectContaining({
+      config_version: 2,
+      config: expect.objectContaining({ title: "Saved name" }),
+    }),
+  ]);
+  expect(onClose).toHaveBeenCalledTimes(1);
+});
+
 it("offers Previous, Close editor and Publish on review and publishes the saved version", async () => {
   const form = renderHook(() =>
     useWaveConfig({ initialWaveType: ApiWaveType.Rank })

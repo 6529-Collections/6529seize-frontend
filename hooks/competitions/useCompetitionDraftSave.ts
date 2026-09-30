@@ -25,10 +25,32 @@ import {
   type SavedCompetitionDraft as SavedCompetition,
 } from "@/helpers/competition-editor-draft.helpers";
 
+function persistDraft(
+  waveId: string,
+  competition: SavedCompetition | null,
+  pending: NonNullable<CompetitionEditorDraft["pending"]>
+) {
+  const config = JSON.parse(pending.fingerprint) as ApiCompetitionDraftInput;
+  return competition
+    ? updateCompetition(
+        { waveId, competitionId: competition.id },
+        {
+          idempotency_key: pending.key,
+          config_version: competition.config_version,
+          config,
+        }
+      )
+    : createCompetition(waveId, { idempotency_key: pending.key, config });
+}
+
 function useUnsavedCompetitionWarning(unsaved: boolean) {
   useEffect(() => {
     if (!unsaved) return;
-    const preventExit = (event: BeforeUnloadEvent) => event.preventDefault();
+    const preventExit = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      // eslint-disable-next-line @typescript-eslint/no-deprecated -- Older browser engines require this alongside preventDefault to show the unsaved-change prompt.
+      event.returnValue = "";
+    };
     globalThis.addEventListener("beforeunload", preventExit);
     return () => globalThis.removeEventListener("beforeunload", preventExit);
   }, [unsaved]);
@@ -77,7 +99,9 @@ export function useCompetitionDraftSave({
     backup.getServerSnapshot
   );
   const localSaved = localFingerprint === fingerprint;
-  const [error, setError] = useState<"conflict" | "failure" | null>(null);
+  const [error, setError] = useState<"conflict" | "failure" | null>(
+    restored?.pending ? "failure" : null
+  );
   const failed = useRef<{ fingerprint: string; conflict: boolean } | null>(
     null
   );
@@ -111,7 +135,8 @@ export function useCompetitionDraftSave({
       if (!previous) return null;
     }
     const snapshot = current.current;
-    if (snapshot.fingerprint === saved.current) return server.current;
+    if (snapshot.fingerprint === saved.current && !pending.current)
+      return server.current;
     if (!snapshot.canSave || failed.current?.conflict) return null;
     // A second caller may have started the next save while this one was awaiting.
     if (inFlight.current) return inFlight.current;
@@ -127,42 +152,53 @@ export function useCompetitionDraftSave({
           setError("failure");
           return null;
         }
-        if (pending.current?.fingerprint !== snapshot.fingerprint) {
-          pending.current = {
-            fingerprint: snapshot.fingerprint,
-            key: newCompetitionRequestKey(),
+        // Resolve an uncertain request with its original payload and key before
+        // saving newer edits. The first response may have been lost after commit.
+        const fingerprints =
+          pending.current &&
+          pending.current.fingerprint !== snapshot.fingerprint
+            ? [pending.current.fingerprint, snapshot.fingerprint]
+            : [snapshot.fingerprint];
+        for (const nextFingerprint of fingerprints) {
+          if (pending.current?.fingerprint !== nextFingerprint) {
+            pending.current = {
+              fingerprint: nextFingerprint,
+              key: newCompetitionRequestKey(),
+            };
+          }
+          retain();
+          const result = await persistDraft(
+            waveId,
+            server.current,
+            pending.current
+          );
+          server.current = {
+            id: result.id,
+            config_version: result.config_version,
           };
+          saved.current = nextFingerprint;
+          pending.current = null;
+          failed.current = null;
+          setSavedFingerprint(nextFingerprint);
+          retain();
+          await invalidateCompetition(client, {
+            waveId,
+            competitionId: result.id,
+          });
         }
-        retain();
-        const result = server.current
-          ? await updateCompetition(
-              { waveId, competitionId: server.current.id },
-              {
-                idempotency_key: pending.current.key,
-                config_version: server.current.config_version,
-                config: snapshot.input,
-              }
-            )
-          : await createCompetition(waveId, {
-              idempotency_key: pending.current.key,
-              config: snapshot.input,
-            });
-        server.current = {
-          id: result.id,
-          config_version: result.config_version,
-        };
-        saved.current = snapshot.fingerprint;
-        pending.current = null;
-        failed.current = null;
-        setSavedFingerprint(snapshot.fingerprint);
-        retain();
-        await invalidateCompetition(client, {
-          waveId,
-          competitionId: result.id,
-        });
         return server.current;
       } catch (failure) {
-        const conflict = getStructuredApiErrorStatus(failure) === 409;
+        const status = getStructuredApiErrorStatus(failure);
+        const conflict = status === 409;
+        if (
+          status !== undefined &&
+          status >= 400 &&
+          status < 500 &&
+          !conflict
+        ) {
+          pending.current = null;
+          retain();
+        }
         failed.current = { fingerprint: snapshot.fingerprint, conflict };
         setError(conflict ? "conflict" : "failure");
         return null;
@@ -179,7 +215,7 @@ export function useCompetitionDraftSave({
     if (
       busy ||
       !canSave ||
-      fingerprint === savedFingerprint ||
+      (fingerprint === savedFingerprint && !pending.current) ||
       failed.current?.conflict ||
       failed.current?.fingerprint === fingerprint
     )
@@ -200,6 +236,6 @@ export function useCompetitionDraftSave({
     busy,
     error,
     localSaved,
-    isSaved: fingerprint === savedFingerprint,
+    isSaved: fingerprint === savedFingerprint && !busy && error === null,
   };
 }
