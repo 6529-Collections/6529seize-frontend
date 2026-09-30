@@ -16,7 +16,7 @@ function WebSidebarHeader({ collapsed, onToggle }: WebSidebarHeaderProps) {
       <div className="tw-flex tw-h-16 tw-items-center tw-justify-between">
         <Link
           href="/"
-          className="tw-relative tw-ml-3.5 tw-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-md tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-bg-iron-900 motion-reduce:tw-transition-none"
+          className="tw-relative tw-ml-5 tw-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-md tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-ring-1 desktop-hover:hover:tw-ring-inset desktop-hover:hover:tw-ring-iron-600 motion-reduce:tw-transition-none"
         >
           <Image
             unoptimized
@@ -41,14 +41,14 @@ function WebSidebarHeader({ collapsed, onToggle }: WebSidebarHeaderProps) {
         type="button"
         onClick={onToggle}
         onMouseDown={(event) => event.preventDefault()}
-        className="tw-absolute tw-right-0 tw-top-8 tw-flex tw-h-11 tw-w-6 -tw-translate-y-1/2 tw-items-center tw-justify-end tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-800 tw-opacity-0 tw-transition-opacity group-focus-within/sidebar:tw-opacity-100 group-hover/sidebar:tw-opacity-100 focus-visible:tw-opacity-100 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-text-iron-700 touch-only:tw-opacity-100 motion-reduce:tw-transition-none"
+        className="tw-absolute tw-right-0 tw-top-8 tw-flex tw-h-11 tw-w-4 -tw-translate-y-1/2 tw-items-center tw-justify-end tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-800 tw-opacity-0 tw-transition-opacity group-focus-within/sidebar:tw-opacity-100 group-hover/sidebar:tw-opacity-100 focus-visible:tw-opacity-100 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-text-iron-700 touch-only:tw-opacity-100 motion-reduce:tw-transition-none"
         aria-label="Toggle right sidebar"
         aria-expanded={!collapsed}
       >
         <svg
           viewBox="0 0 16 44"
           aria-hidden="true"
-          className={`tw-h-11 tw-w-4 tw-fill-current ${collapsed ? "-tw-scale-x-100" : ""}`}
+          className="tw-h-11 tw-w-4 tw-fill-current"
         >
           <path d="M16 0C16 8 0 6 0 17V27C0 38 16 36 16 44Z" />
         </svg>
