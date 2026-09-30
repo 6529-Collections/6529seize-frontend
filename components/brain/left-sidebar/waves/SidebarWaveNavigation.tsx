@@ -92,11 +92,6 @@ export function SidebarWaveNavigationControls({
             ))}
           </fieldset>
         )}
-        {!navigation.searching && !navigation.canUseCollections && (
-          <p className="tw-mb-0 tw-mt-3 tw-text-xs tw-font-semibold tw-text-iron-400">
-            {t(locale, "waves.sidebar.allWaves")}
-          </p>
-        )}
       </div>
       {!navigation.searching &&
         navigation.canUseCollections &&

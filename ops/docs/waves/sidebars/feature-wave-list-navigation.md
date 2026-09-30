@@ -84,6 +84,8 @@ when the desktop feed is active or its button is hovered or keyboard-focused.
   selected collection. Type at least three characters. Results show name,
   creator, and joined/pinned status, with `Load more` for additional matches.
 - Search replaces the lower list and keeps the query while opening a result.
+  Signed-out and auth-loading views omit the redundant `All Waves` heading below
+  the search input; personal collection tabs appear when available.
   A small spinner replaces the search icon while results are loading; one clear
   button resets the query. Clearing restores the collection
   and its scroll position. Queries are kept separately for each viewer only

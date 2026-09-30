@@ -4,6 +4,7 @@ import { useActiveWaveVotes } from "@/hooks/useActiveWaveVotes";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
+import { ExploreWaveCardSkeleton } from "@/components/home/explore-waves/ExploreWaveCardSkeleton";
 import { ActiveWaveVoteCard } from "./ActiveWaveVoteCard";
 
 export function ActiveWaveVotes() {
@@ -14,6 +15,7 @@ export function ActiveWaveVotes() {
     <section
       className="tw-px-4 tw-pb-6 tw-pt-4 md:tw-px-6 lg:tw-px-8"
       aria-label={t(locale, "waves.discovery.activeVotes")}
+      aria-busy={votes.isPending}
     >
       <h1 className="tw-m-0 tw-mb-4 tw-flex tw-items-center tw-gap-3 tw-text-2xl tw-font-semibold tw-leading-8 tw-text-white">
         {t(locale, "waves.discovery.activeVotes")}
@@ -27,7 +29,7 @@ export function ActiveWaveVotes() {
         {t(locale, "waves.discovery.voteDescription")}
       </p>
       {votes.isPending && (
-        <output className="tw-block tw-text-iron-400">
+        <output className="tw-sr-only">
           {t(locale, "waves.discovery.loading")}
         </output>
       )}
@@ -49,6 +51,10 @@ export function ActiveWaveVotes() {
         </output>
       )}
       <div className="tw-grid tw-grid-cols-1 tw-gap-x-3 tw-gap-y-4 sm:tw-grid-cols-2 sm:tw-gap-6 lg:tw-grid-cols-3">
+        {votes.isPending &&
+          Array.from({ length: 6 }, (_, index) => (
+            <ExploreWaveCardSkeleton key={`vote-skeleton-${index}`} compact />
+          ))}
         {votes.data?.pages
           .flatMap((page) => page.data)
           .map((vote) => (

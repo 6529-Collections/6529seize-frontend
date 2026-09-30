@@ -323,5 +323,5 @@ it("hides personal collection controls when the viewer cannot use them", () => {
   expect(
     screen.queryByRole("button", { name: "Joined" })
   ).not.toBeInTheDocument();
-  expect(screen.getByText("All Waves")).toBeVisible();
+  expect(screen.queryByText("All Waves")).not.toBeInTheDocument();
 });

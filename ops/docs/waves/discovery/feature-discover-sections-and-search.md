@@ -9,8 +9,9 @@ subject to wave visibility rules.
 ## Active Votes
 
 Open `/discover?view=active-votes`, or select `View all` in the Active Votes
-sidebar heading. The page shows the total accessible count and the same large
-image cards used by Worth Checking Out. A prominent line beneath each wave name
+sidebar heading. The page shows the total accessible count and compact discovery
+cards with rectangular artwork on the left, aligned two-line titles and two-line
+description previews. A prominent line beneath each wave name
 shows the voting end or next decision when available, otherwise `Voting open`. Votes closing soonest appear first; open-ended votes appear last.
 Use `Load more` to browse additional results.
 
@@ -20,7 +21,8 @@ excluded. DMs, subwaves of DMs and inaccessible waves are excluded, even when
 you can read the DM parent. Visibility does not guarantee
 that your profile meets a wave's voting rules.
 
-Loading, no-active-votes, and request-failure states are explicit. Select
+Initial loading uses matching shimmer cards. No-active-votes and request-failure
+states are explicit. Select
 `Try again` after a request failure. The count and list refresh periodically.
 
 ## Worth Checking Out

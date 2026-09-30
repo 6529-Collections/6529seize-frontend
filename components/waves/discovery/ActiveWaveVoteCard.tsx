@@ -18,6 +18,7 @@ export function ActiveWaveVoteCard({
     <ExploreWaveCard
       wave={mapApiWaveOverviewToSidebarWave(vote.wave)}
       isApp={isApp}
+      compact
       headingDetails={
         <span className="tw-mt-2 tw-flex tw-items-start tw-gap-2 tw-text-sm tw-font-semibold tw-leading-5 tw-text-primary-300">
           <ClockIcon
