@@ -224,6 +224,126 @@ export function useCreateWaveSubmission({
     return drop;
   };
 
+  const validateRestrictedAccess = async (
+    configuredAdminGroupId: string | null
+  ): Promise<boolean> => {
+    if (config.groups.canView === null) return true;
+    let groupValidation;
+    try {
+      groupValidation = await validateWaveGroups(
+        getWaveGroupValidationRequest({
+          groups: {
+            ...config.groups,
+            admin: configuredAdminGroupId,
+          },
+          waveType: config.overview.type,
+          chatEnabled: config.chat.enabled,
+          includeAuthenticatedUserAsAdmin: true,
+        })
+      );
+    } catch {
+      setToast({
+        type: "error",
+        title: t(locale, "waves.create.groups.validation.unavailableTitle"),
+        description: t(locale, "waves.create.groups.validation.unavailable"),
+      });
+      return false;
+    }
+    if (!groupValidation.valid) {
+      setToast({
+        type: "error",
+        title: t(locale, "waves.create.groups.validation.invalidTitle"),
+        description: t(
+          locale,
+          "waves.create.groups.validation.invalidDescription"
+        ),
+      });
+      return false;
+    }
+    return true;
+  };
+
+  const createNativeHub = async (
+    waveBody: ReturnType<typeof getCreateNewWaveBody>,
+    displayMetadataRequests: ApiCreateWaveMetadataRequest[],
+    adminGroupId: string
+  ): Promise<void> => {
+    if (!nativeHubRequest.current) {
+      nativeDisplayMetadata.current = displayMetadataRequests;
+      nativeHubRequest.current = {
+        idempotency_key: newCompetitionRequestKey(),
+        name: waveBody.name,
+        picture: waveBody.picture,
+        description_drop: waveBody.description_drop,
+        visibility: waveBody.visibility,
+        chat: waveBody.chat,
+        admin_group: { group_id: adminGroupId },
+        ...(parentWaveId ? { parent_wave_id: parentWaveId } : {}),
+      };
+    }
+    const hub = await commonApiPost<ApiCreateWaveHubRequest, ApiWaveV3>({
+      endpoint: "v3/waves",
+      body: nativeHubRequest.current,
+      errorMode: "structured",
+    });
+    if (nativeDisplayMetadata.current.length > 0) {
+      try {
+        await Promise.all(
+          nativeDisplayMetadata.current.map((body) =>
+            createWaveMetadata({ waveId: hub.id, body })
+          )
+        );
+      } catch {
+        setToast({
+          type: "warning",
+          message: t(locale, "competitions.hubDisplayFailure"),
+        });
+      }
+    }
+    const destination = getWaveRoute({
+      waveId: hub.id,
+      isDirectMessage: false,
+      isApp,
+    });
+    nativeHubRequest.current = null;
+    nativeDisplayMetadata.current = [];
+    onWaveCreated();
+    onSuccess?.();
+    finishSubmitting();
+    if (isApp) router.replace(destination);
+    else router.push(destination);
+  };
+
+  const prepareWaveSubmission = async (
+    drop: CreateDropConfig,
+    adminGroupId: string
+  ) => {
+    const dropRequest = await getCreateWaveDropRequest(drop);
+    const picture = config.overview.image
+      ? await multiPartUpload({ file: config.overview.image, path: "wave" })
+      : null;
+
+    const submissionConfig: CreateWaveConfig = {
+      ...config,
+      groups: {
+        ...config.groups,
+        admin: adminGroupId,
+      },
+    };
+    const waveBody = getCreateNewWaveBody({
+      config: submissionConfig,
+      picture: picture?.url ?? null,
+      drop: dropRequest,
+      parentWaveId,
+    });
+    const displayMetadataRequests = getCreateWaveDisplayMetadataRequests({
+      display: submissionConfig.display,
+      waveType: submissionConfig.overview.type,
+      ongoingRanking: submissionConfig.dates.ongoingRanking ?? false,
+    });
+    return { waveBody, displayMetadataRequests };
+  };
+
   const onComplete = async (): Promise<void> => {
     if (submissionInProgressRef.current) {
       return;
@@ -248,44 +368,9 @@ export function useCreateWaveSubmission({
 
       const configuredAdminGroupId =
         config.groups.admin ?? parentAdminGroupId ?? null;
-      if (config.groups.canView !== null) {
-        let groupValidation;
-        try {
-          groupValidation = await validateWaveGroups(
-            getWaveGroupValidationRequest({
-              groups: {
-                ...config.groups,
-                admin: configuredAdminGroupId,
-              },
-              waveType: config.overview.type,
-              chatEnabled: config.chat.enabled,
-              includeAuthenticatedUserAsAdmin: true,
-            })
-          );
-        } catch {
-          setToast({
-            type: "error",
-            title: t(locale, "waves.create.groups.validation.unavailableTitle"),
-            description: t(
-              locale,
-              "waves.create.groups.validation.unavailable"
-            ),
-          });
-          finishSubmitting();
-          return;
-        }
-        if (!groupValidation.valid) {
-          setToast({
-            type: "error",
-            title: t(locale, "waves.create.groups.validation.invalidTitle"),
-            description: t(
-              locale,
-              "waves.create.groups.validation.invalidDescription"
-            ),
-          });
-          finishSubmitting();
-          return;
-        }
+      if (!(await validateRestrictedAccess(configuredAdminGroupId))) {
+        finishSubmitting();
+        return;
       }
 
       const parentAccessConfirmed =
@@ -311,75 +396,13 @@ export function useCreateWaveSubmission({
         return;
       }
 
-      const dropRequest = await getCreateWaveDropRequest(drop);
-      const picture = config.overview.image
-        ? await multiPartUpload({ file: config.overview.image, path: "wave" })
-        : null;
-
-      const submissionConfig: CreateWaveConfig = {
-        ...config,
-        groups: {
-          ...config.groups,
-          admin: adminGroupId,
-        },
-      };
-      const waveBody = getCreateNewWaveBody({
-        config: submissionConfig,
-        picture: picture?.url ?? null,
-        drop: dropRequest,
-        parentWaveId,
-      });
-      const displayMetadataRequests = getCreateWaveDisplayMetadataRequests({
-        display: submissionConfig.display,
-        waveType: submissionConfig.overview.type,
-        ongoingRanking: submissionConfig.dates.ongoingRanking ?? false,
-      });
+      const { waveBody, displayMetadataRequests } = await prepareWaveSubmission(
+        drop,
+        adminGroupId
+      );
 
       if (isMultiCompetitionEnabled()) {
-        if (!nativeHubRequest.current) {
-          nativeDisplayMetadata.current = displayMetadataRequests;
-          nativeHubRequest.current = {
-            idempotency_key: newCompetitionRequestKey(),
-            name: waveBody.name,
-            picture: waveBody.picture,
-            description_drop: waveBody.description_drop,
-            visibility: waveBody.visibility,
-            chat: waveBody.chat,
-            admin_group: { group_id: adminGroupId },
-            ...(parentWaveId ? { parent_wave_id: parentWaveId } : {}),
-          };
-        }
-        const hub = await commonApiPost<ApiCreateWaveHubRequest, ApiWaveV3>({
-          endpoint: "v3/waves",
-          body: nativeHubRequest.current,
-          errorMode: "structured",
-        });
-        if (nativeDisplayMetadata.current.length > 0) {
-          try {
-            await Promise.all(
-              nativeDisplayMetadata.current.map((body) =>
-                createWaveMetadata({ waveId: hub.id, body })
-              )
-            );
-          } catch {
-            setToast({
-              type: "warning",
-              message: t(locale, "competitions.hubDisplayFailure"),
-            });
-          }
-        }
-        const destination = getWaveRoute({
-          waveId: hub.id,
-          isDirectMessage: false,
-          isApp,
-        });
-        nativeHubRequest.current = null;
-        nativeDisplayMetadata.current = [];
-        onWaveCreated();
-        onSuccess?.();
-        finishSubmitting();
-        if (isApp) router.replace(destination);
-        else router.push(destination);
+        await createNativeHub(waveBody, displayMetadataRequests, adminGroupId);
         return;
       }
 

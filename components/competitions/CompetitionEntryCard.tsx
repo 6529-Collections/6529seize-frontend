@@ -3,7 +3,6 @@ import { ApiCompetitionType } from "@/generated/models/ApiCompetitionType";
 
 import { isMultiCompetitionEnabled } from "@/helpers/competition.helpers";
 import { useCompetition } from "@/contexts/CompetitionContext";
-import type { ApiCompetitionEntry } from "@/generated/models/ApiCompetitionEntry";
 import { useCompetitionEntryDrops } from "@/hooks/competitions/useCompetitionEntryDrops";
 import { useCompetitionDropNavigation } from "@/hooks/competitions/useCompetitionDropNavigation";
 import { DefaultWaveLeaderboardDrop } from "@/components/waves/leaderboard/drops/DefaultWaveLeaderboardDrop";
@@ -16,10 +15,6 @@ export default function CompetitionEntryCard({
 }: {
   readonly entryId: string;
   readonly dropId: string;
-  readonly entry?: ApiCompetitionEntry;
-  readonly rating?: number;
-  readonly rank?: number | null;
-  readonly selected?: boolean;
   readonly disabled?: boolean;
 }) {
   const { competition } = useCompetition();

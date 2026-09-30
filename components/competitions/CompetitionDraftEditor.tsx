@@ -270,9 +270,9 @@ function DraftForm({
         competitionId: result.id,
       });
       router.replace(getCompetitionRoute(wave.id, result.id));
-    } catch (failure) {
+    } catch (error_) {
       setError(
-        getStructuredApiErrorStatus(failure) === 409 ? "conflict" : "failure"
+        getStructuredApiErrorStatus(error_) === 409 ? "conflict" : "failure"
       );
     } finally {
       inFlight.current = false;
@@ -445,9 +445,7 @@ function DraftForm({
         >
           {t(locale, published ? "competitions.edit" : "competitions.new")}
         </h1>
-        <span role="status" className="tw-text-xs tw-text-iron-400">
-          {saveStatus}
-        </span>
+        <output className="tw-text-xs tw-text-iron-400">{saveStatus}</output>
       </div>
       <p className="tw-text-sm tw-text-iron-400">
         {t(locale, "competitions.overlap")}

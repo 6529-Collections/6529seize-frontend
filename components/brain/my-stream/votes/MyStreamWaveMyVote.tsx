@@ -137,6 +137,121 @@ const resolveCurationPreviewMedia = (
   return null;
 };
 
+function MyVoteAuthor({ author }: { readonly author: ExtendedDrop["author"] }) {
+  return (
+    <div className="tw-mt-3 tw-flex tw-min-w-0 tw-items-center tw-gap-2">
+      <div className="tw-relative tw-size-6 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-white/10">
+        {author.pfp ? (
+          <Image
+            src={author.pfp}
+            alt=""
+            width={24}
+            height={24}
+            unoptimized
+            className="tw-h-full tw-w-full tw-bg-iron-800 tw-object-contain"
+          />
+        ) : (
+          <div className="tw-h-full tw-w-full tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-white/10"></div>
+        )}
+      </div>
+      <UserProfileTooltipWrapper user={author.handle ?? author.id}>
+        <Link
+          href={`/${author.handle ?? author.primary_address}`}
+          onClick={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            globalThis.open(
+              `/${author.handle ?? author.primary_address}`,
+              "_blank"
+            );
+          }}
+          className="tw-min-w-0 tw-text-sm tw-font-semibold tw-leading-5 tw-tracking-identity tw-text-white tw-no-underline tw-transition-colors tw-duration-200 [overflow-wrap:anywhere] desktop-hover:hover:tw-underline motion-reduce:tw-transition-none"
+        >
+          {author.handle ?? author.primary_address}
+        </Link>
+      </UserProfileTooltipWrapper>
+      <UserCICAndLevel
+        level={author.level || 0}
+        size={UserCICAndLevelSize.SMALL}
+      />
+    </div>
+  );
+}
+
+function MyVoteVoters({ drop }: { readonly drop: ExtendedDrop }) {
+  const locale = useBrowserLocale();
+  return (
+    <div className="tw-flex tw-items-center tw-gap-2">
+      {drop.top_raters.length > 0 && (
+        <div className="tw-flex tw-items-center -tw-space-x-2">
+          {drop.top_raters.slice(0, 3).map((voter) => (
+            <React.Fragment
+              key={voter.profile.id || voter.profile.primary_address}
+            >
+              <Link
+                href={`/${voter.profile.handle ?? voter.profile.primary_address}`}
+                data-tooltip-id={`my-vote-voter-${drop.id}-${voter.profile.handle ?? voter.profile.primary_address}`}
+                aria-label={t(locale, "waves.myVotes.voterAvatar", {
+                  profile:
+                    voter.profile.handle ?? voter.profile.primary_address,
+                })}
+                className="tw-rounded-md focus-visible:tw-relative focus-visible:tw-z-10 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+              >
+                {voter.profile.pfp ? (
+                  <Image
+                    className="tw-size-6 tw-rounded-md tw-border-2 tw-border-solid tw-border-[#111] tw-bg-iron-800 tw-object-contain"
+                    src={voter.profile.pfp}
+                    width={24}
+                    height={24}
+                    unoptimized
+                    alt={t(locale, "waves.myVotes.voterAvatar", {
+                      profile:
+                        voter.profile.handle ?? voter.profile.primary_address,
+                    })}
+                  />
+                ) : (
+                  <div className="tw-size-6 tw-rounded-md tw-border-2 tw-border-solid tw-border-[#111] tw-bg-iron-800" />
+                )}
+              </Link>
+              <Tooltip
+                id={`my-vote-voter-${drop.id}-${voter.profile.handle ?? voter.profile.primary_address}`}
+                place="top"
+                offset={8}
+                opacity={1}
+                style={{
+                  padding: "4px 8px",
+                  background: "#37373E",
+                  color: "white",
+                  fontSize: "13px",
+                  fontWeight: 500,
+                  borderRadius: "6px",
+                  boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+                  zIndex: 99999,
+                  pointerEvents: "none",
+                }}
+              >
+                {voter.profile.handle ?? voter.profile.primary_address} -{" "}
+                {formatInteger(locale, voter.rating)}
+              </Tooltip>
+            </React.Fragment>
+          ))}
+        </div>
+      )}
+      <span className="tw-whitespace-nowrap tw-text-sm tw-leading-6 tw-text-iron-400">
+        <span className="tw-font-semibold tw-text-iron-300">
+          {formatInteger(locale, drop.raters_count)}
+        </span>{" "}
+        {t(
+          locale,
+          drop.raters_count === 1
+            ? "waves.myVotes.voter.one"
+            : "waves.myVotes.voter.other"
+        )}
+      </span>
+    </div>
+  );
+}
+
 const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
   drop,
   onDropClick,
@@ -328,44 +443,7 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
               </button>
             </h3>
           </div>
-          <div className="tw-mt-3 tw-flex tw-min-w-0 tw-items-center tw-gap-2">
-            <div className="tw-relative tw-size-6 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-white/10">
-              {drop.author.pfp ? (
-                <Image
-                  src={drop.author.pfp}
-                  alt=""
-                  width={24}
-                  height={24}
-                  unoptimized
-                  className="tw-h-full tw-w-full tw-bg-iron-800 tw-object-contain"
-                />
-              ) : (
-                <div className="tw-h-full tw-w-full tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-white/10"></div>
-              )}
-            </div>
-            <UserProfileTooltipWrapper
-              user={drop.author.handle ?? drop.author.id}
-            >
-              <Link
-                href={`/${drop.author.handle ?? drop.author.primary_address}`}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  e.preventDefault();
-                  window.open(
-                    `/${drop.author.handle ?? drop.author.primary_address}`,
-                    "_blank"
-                  );
-                }}
-                className="tw-min-w-0 tw-text-sm tw-font-semibold tw-leading-5 tw-tracking-identity tw-text-white tw-no-underline tw-transition-colors tw-duration-200 [overflow-wrap:anywhere] desktop-hover:hover:tw-underline motion-reduce:tw-transition-none"
-              >
-                {drop.author.handle ?? drop.author.primary_address}
-              </Link>
-            </UserProfileTooltipWrapper>
-            <UserCICAndLevel
-              level={drop.author.level || 0}
-              size={UserCICAndLevelSize.SMALL}
-            />
-          </div>
+          <MyVoteAuthor author={drop.author} />
         </div>
 
         <div className="tw-col-span-3 tw-row-start-3 tw-flex tw-min-h-6 tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-4 tw-gap-y-2 @[46rem]/my-vote:tw-min-h-8 sm:@[16rem]/my-vote:tw-row-start-2 sm:@[36rem]/my-vote:tw-col-span-1 sm:@[36rem]/my-vote:tw-col-start-3 sm:@[36rem]/my-vote:tw-self-start">
@@ -373,75 +451,7 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
             drop={drop}
             winningThreshold={winningThreshold}
           />
-          <div className="tw-flex tw-items-center tw-gap-2">
-            {drop.top_raters.length > 0 && (
-              <div className="tw-flex tw-items-center -tw-space-x-2">
-                {drop.top_raters.slice(0, 3).map((voter) => (
-                  <React.Fragment
-                    key={voter.profile.id || voter.profile.primary_address}
-                  >
-                    <Link
-                      href={`/${voter.profile.handle ?? voter.profile.primary_address}`}
-                      data-tooltip-id={`my-vote-voter-${drop.id}-${voter.profile.handle ?? voter.profile.primary_address}`}
-                      aria-label={t(locale, "waves.myVotes.voterAvatar", {
-                        profile:
-                          voter.profile.handle ?? voter.profile.primary_address,
-                      })}
-                      className="tw-rounded-md focus-visible:tw-relative focus-visible:tw-z-10 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
-                    >
-                      {voter.profile.pfp ? (
-                        <Image
-                          className="tw-size-6 tw-rounded-md tw-border-2 tw-border-solid tw-border-[#111] tw-bg-iron-800 tw-object-contain"
-                          src={voter.profile.pfp}
-                          width={24}
-                          height={24}
-                          unoptimized
-                          alt={t(locale, "waves.myVotes.voterAvatar", {
-                            profile:
-                              voter.profile.handle ??
-                              voter.profile.primary_address,
-                          })}
-                        />
-                      ) : (
-                        <div className="tw-size-6 tw-rounded-md tw-border-2 tw-border-solid tw-border-[#111] tw-bg-iron-800" />
-                      )}
-                    </Link>
-                    <Tooltip
-                      id={`my-vote-voter-${drop.id}-${voter.profile.handle ?? voter.profile.primary_address}`}
-                      place="top"
-                      offset={8}
-                      opacity={1}
-                      style={{
-                        padding: "4px 8px",
-                        background: "#37373E",
-                        color: "white",
-                        fontSize: "13px",
-                        fontWeight: 500,
-                        borderRadius: "6px",
-                        boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
-                        zIndex: 99999,
-                        pointerEvents: "none",
-                      }}
-                    >
-                      {voter.profile.handle ?? voter.profile.primary_address} -{" "}
-                      {formatInteger(locale, voter.rating)}
-                    </Tooltip>
-                  </React.Fragment>
-                ))}
-              </div>
-            )}
-            <span className="tw-whitespace-nowrap tw-text-sm tw-leading-6 tw-text-iron-400">
-              <span className="tw-font-semibold tw-text-iron-300">
-                {formatInteger(locale, drop.raters_count)}
-              </span>{" "}
-              {t(
-                locale,
-                drop.raters_count === 1
-                  ? "waves.myVotes.voter.one"
-                  : "waves.myVotes.voter.other"
-              )}
-            </span>
-          </div>
+          <MyVoteVoters drop={drop} />
           {typeof drop.rank === "number" && (
             <SingleWaveDropPosition
               rank={drop.rank}

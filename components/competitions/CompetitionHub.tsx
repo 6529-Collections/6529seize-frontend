@@ -143,9 +143,9 @@ function CompetitionCollection({ hub }: { readonly hub: ApiWaveV3 }) {
         ))}
       </ul>
     ) : (
-      <p role="status" className="tw-py-6 tw-text-iron-400">
+      <output className="tw-block tw-py-6 tw-text-iron-400">
         {t(locale, "competitions.empty")}
-      </p>
+      </output>
     );
   const filters: CompetitionCollectionFilter[] = ["active", "history"];
   if (hub.permissions.administer) filters.push("drafts");

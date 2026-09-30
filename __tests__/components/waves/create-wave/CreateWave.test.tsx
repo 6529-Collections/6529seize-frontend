@@ -6,6 +6,9 @@ import {
   waitFor,
 } from "@testing-library/react";
 import { useRouter } from "next/navigation";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { isMultiCompetitionEnabled } from "@/helpers/competition.helpers";
+import { commonApiPost } from "@/services/api/common-api";
 import { useNativeKeyboard } from "@/hooks/useNativeKeyboard";
 import React from "react";
 import { AuthContext } from "@/components/auth/Auth";
@@ -79,7 +82,14 @@ jest.mock("@/components/waves/create-wave/hooks/useWaveConfig", () => ({
   useWaveConfig: jest.fn(),
 }));
 
+jest.mock("@/helpers/competition.helpers", () => ({
+  ...jest.requireActual("@/helpers/competition.helpers"),
+  isMultiCompetitionEnabled: jest.fn(() => false),
+}));
+
 jest.mock("@/services/api/common-api", () => ({
+  ...jest.requireActual("@/services/api/common-api"),
+  commonApiPost: jest.fn(),
   commonApiFetch: jest.fn().mockResolvedValue({
     id: "parent-admin-group",
     name: "Parent admins",
@@ -251,6 +261,7 @@ const mockedValidateWaveGroups = validateWaveGroups as jest.Mock;
 describe("CreateWave", () => {
   const mockRouter = {
     push: jest.fn(),
+    replace: jest.fn(),
   };
 
   const mockProfile: ApiIdentity = {
@@ -389,6 +400,11 @@ describe("CreateWave", () => {
   beforeEach(() => {
     localStorage.clear();
     jest.clearAllMocks();
+    jest.mocked(isMultiCompetitionEnabled).mockReturnValue(false);
+    jest.mocked(commonApiPost).mockReset();
+    jest
+      .mocked(useDeviceInfo)
+      .mockReturnValue({ isApp: false } as ReturnType<typeof useDeviceInfo>);
     mockGetDropSnapshot.mockReturnValue({
       parts: [{ content: "Test content" }],
       title: "Test Drop",
@@ -742,6 +758,192 @@ describe("CreateWave", () => {
       mockedGetCreateNewWaveBody.mockReturnValue({
         name: "Test Wave",
         description: "Test description",
+      });
+    });
+
+    describe("native hub submission", () => {
+      beforeEach(() => {
+        jest.mocked(isMultiCompetitionEnabled).mockReturnValue(true);
+        jest.mocked(commonApiPost).mockResolvedValue({ id: "native-hub" });
+        mockedGetCreateNewWaveBody.mockReturnValue({
+          name: "Test Wave",
+          picture: null,
+          description_drop: { parts: [{ content: "Test content" }] },
+          visibility: { scope: { group_id: null } },
+          chat: { enabled: true },
+        });
+        mockedUseWaveConfig.mockReturnValue({
+          ...mockWaveConfig,
+          step: CreateWaveStep.DESCRIPTION,
+        });
+      });
+
+      it.each([false, true])(
+        "creates once and navigates after success (app: %s)",
+        async (isApp) => {
+          jest
+            .mocked(useDeviceInfo)
+            .mockReturnValue({ isApp } as ReturnType<typeof useDeviceInfo>);
+          let complete!: (value: { id: string }) => void;
+          jest.mocked(commonApiPost).mockImplementationOnce(
+            () =>
+              new Promise((resolve) => {
+                complete = resolve;
+              })
+          );
+          renderCreateWave({ parentWaveId: "parent-wave" });
+          const button = screen.getByRole("button", { name: /complete/i });
+          fireEvent.click(button);
+          fireEvent.click(button);
+          await waitFor(() => expect(commonApiPost).toHaveBeenCalledTimes(1));
+          expect(commonApiPost).toHaveBeenCalledWith({
+            endpoint: "v3/waves",
+            errorMode: "structured",
+            body: expect.objectContaining({
+              name: "Test Wave",
+              admin_group: { group_id: "admin-group-id" },
+              parent_wave_id: "parent-wave",
+              idempotency_key: expect.any(String),
+            }),
+          });
+          expect(mockRouter.push).not.toHaveBeenCalled();
+          expect(mockRouter.replace).not.toHaveBeenCalled();
+          expect(mockQueryContext.onWaveCreated).not.toHaveBeenCalled();
+          await act(async () => complete({ id: "native-hub" }));
+          expect(
+            isApp ? mockRouter.replace : mockRouter.push
+          ).toHaveBeenCalledWith("/waves/native-hub");
+          expect(
+            isApp ? mockRouter.push : mockRouter.replace
+          ).not.toHaveBeenCalled();
+          expect(mockQueryContext.onWaveCreated).toHaveBeenCalledTimes(1);
+          expect(mockAddWaveMutation.mutateAsync).not.toHaveBeenCalled();
+        }
+      );
+
+      it.each([undefined, 400])(
+        "keeps the original request only for uncertain failures (status: %s)",
+        async (status) => {
+          const originalConfig = {
+            ...mockWaveConfig,
+            step: CreateWaveStep.DESCRIPTION,
+            config: {
+              ...mockWaveConfig.config,
+              display: {
+                ...mockWaveConfig.config.display,
+                customRules: "Original guidelines",
+              },
+            },
+          };
+          mockedUseWaveConfig.mockReturnValue(originalConfig);
+          jest
+            .mocked(commonApiPost)
+            .mockRejectedValueOnce(
+              Object.assign(new Error("Request failed"), { status })
+            );
+          const { rerender } = renderCreateWave();
+          fireEvent.click(screen.getByRole("button", { name: /complete/i }));
+          await waitFor(() =>
+            expect(mockAuthContext.setToast).toHaveBeenCalledWith(
+              expect.objectContaining({ type: "error" })
+            )
+          );
+          const originalRequest = jest.mocked(commonApiPost).mock.calls[0]![0];
+          expect(mockQueryContext.onWaveCreated).not.toHaveBeenCalled();
+          mockedUseWaveConfig.mockReturnValue({
+            ...originalConfig,
+            config: {
+              ...originalConfig.config,
+              display: {
+                ...originalConfig.config.display,
+                customRules: "Edited guidelines",
+              },
+            },
+          });
+          mockedGetCreateNewWaveBody.mockReturnValue({ name: "Edited Wave" });
+          rerender(createWaveElement());
+          fireEvent.click(screen.getByRole("button", { name: /complete/i }));
+          await waitFor(() =>
+            expect(mockRouter.push).toHaveBeenCalledWith("/waves/native-hub")
+          );
+          const retriedRequest = jest.mocked(commonApiPost).mock.calls[1]![0];
+          if (status === undefined) {
+            expect(retriedRequest).toEqual(originalRequest);
+          } else {
+            expect(retriedRequest.body).toMatchObject({ name: "Edited Wave" });
+            expect(retriedRequest.body).not.toEqual(originalRequest.body);
+          }
+          expect(mockedCreateWaveMetadata).toHaveBeenCalledTimes(1);
+          expect(mockedCreateWaveMetadata).toHaveBeenCalledWith({
+            waveId: "native-hub",
+            body: {
+              data_key: "wave_display.rules.custom",
+              data_value:
+                status === undefined
+                  ? "Original guidelines"
+                  : "Edited guidelines",
+            },
+          });
+          expect(mockQueryContext.onWaveCreated).toHaveBeenCalledTimes(1);
+        }
+      );
+
+      it("finishes hub creation with a warning if display metadata fails", async () => {
+        mockedUseWaveConfig.mockReturnValue({
+          ...mockWaveConfig,
+          step: CreateWaveStep.DESCRIPTION,
+          config: {
+            ...mockWaveConfig.config,
+            display: {
+              ...mockWaveConfig.config.display,
+              customRules: "Guidelines",
+            },
+          },
+        });
+        mockedCreateWaveMetadata.mockRejectedValueOnce(
+          new Error("Metadata unavailable")
+        );
+        renderCreateWave();
+        fireEvent.click(screen.getByRole("button", { name: /complete/i }));
+        await waitFor(() =>
+          expect(mockRouter.push).toHaveBeenCalledWith("/waves/native-hub")
+        );
+        expect(mockAuthContext.setToast).toHaveBeenCalledWith({
+          type: "warning",
+          message:
+            "Your wave was created, but its display settings could not be saved.",
+        });
+        expect(mockQueryContext.onWaveCreated).toHaveBeenCalledTimes(1);
+        expect(commonApiPost).toHaveBeenCalledTimes(1);
+      });
+
+      it("stops when access validation is unavailable and permits a later retry", async () => {
+        mockedUseWaveConfig.mockReturnValue({
+          ...mockWaveConfig,
+          step: CreateWaveStep.DESCRIPTION,
+          config: {
+            ...mockWaveConfig.config,
+            groups: { ...mockWaveConfig.config.groups, canView: "view-group" },
+          },
+        });
+        mockedValidateWaveGroups.mockRejectedValueOnce(
+          new Error("Unavailable")
+        );
+        renderCreateWave();
+        fireEvent.click(screen.getByRole("button", { name: /complete/i }));
+        await waitFor(() =>
+          expect(mockAuthContext.setToast).toHaveBeenCalledWith(
+            expect.objectContaining({ title: "Couldn't verify group access." })
+          )
+        );
+        expect(mockedGetAdminGroupId).not.toHaveBeenCalled();
+        expect(commonApiPost).not.toHaveBeenCalled();
+        fireEvent.click(screen.getByRole("button", { name: /complete/i }));
+        await waitFor(() =>
+          expect(mockRouter.push).toHaveBeenCalledWith("/waves/native-hub")
+        );
+        expect(mockedValidateWaveGroups).toHaveBeenCalledTimes(2);
+        expect(commonApiPost).toHaveBeenCalledTimes(1);
       });
     });
 

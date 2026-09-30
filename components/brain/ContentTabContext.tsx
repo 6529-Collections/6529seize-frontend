@@ -359,30 +359,7 @@ export const ContentTabProvider: React.FC<{
   // Wrapper for setActiveContentTab that validates the tab
   const setActiveContentTab = useCallback(
     (tab: MyStreamWaveTab, options?: SetActiveContentTabOptions) => {
-      // Only set the tab if it's available
-      if (availableTabs.includes(tab)) {
-        setActiveTabInternal(tab);
-        const waveId = currentWaveIdRef.current;
-        if (isCompetitionRoute && tab !== MyStreamWaveTab.COMPETITIONS) {
-          const routeWaveId = getWaveIdFromPathname(pathname);
-          if (routeWaveId)
-            router.push(getWavePathRoute(routeWaveId), { scroll: false });
-        }
-        if (options?.persist === false) {
-          transientTabOverrideRef.current =
-            waveId === null ? null : { waveId, tab };
-          return;
-        }
-        transientTabOverrideRef.current = null;
-        if (waveId) {
-          const nextMap = {
-            ...tabsByWaveIdRef.current,
-            [waveId]: tab,
-          };
-          tabsByWaveIdRef.current = nextMap;
-          setTabsByWaveId(nextMap);
-        }
-      } else {
+      if (!availableTabs.includes(tab)) {
         // Keep unavailable selections inside the current view's tabs.
         transientTabOverrideRef.current = null;
         setActiveTabInternal(
@@ -390,6 +367,28 @@ export const ContentTabProvider: React.FC<{
             ? (availableTabs[0] ?? initialTab)
             : MyStreamWaveTab.CHAT
         );
+        return;
+      }
+      setActiveTabInternal(tab);
+      const waveId = currentWaveIdRef.current;
+      if (isCompetitionRoute && tab !== MyStreamWaveTab.COMPETITIONS) {
+        const routeWaveId = getWaveIdFromPathname(pathname);
+        if (routeWaveId)
+          router.push(getWavePathRoute(routeWaveId), { scroll: false });
+      }
+      if (options?.persist === false) {
+        transientTabOverrideRef.current =
+          waveId === null ? null : { waveId, tab };
+        return;
+      }
+      transientTabOverrideRef.current = null;
+      if (waveId) {
+        const nextMap = {
+          ...tabsByWaveIdRef.current,
+          [waveId]: tab,
+        };
+        tabsByWaveIdRef.current = nextMap;
+        setTabsByWaveId(nextMap);
       }
     },
     [

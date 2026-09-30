@@ -329,9 +329,9 @@ export function CompetitionVoteForm({
           </p>
         )}
         {saved && (
-          <p role="status" className="tw-text-sm tw-text-emerald-400">
+          <output className="tw-block tw-text-sm tw-text-emerald-400">
             {t(locale, "competitions.saved")}
-          </p>
+          </output>
         )}
       </form>
     </div>
