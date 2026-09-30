@@ -157,7 +157,7 @@ describe("wave drop structured data", () => {
 
   it("requires an author name and can use the author's address", () => {
     const data = metadata();
-    data.author = undefined;
+    delete data.author;
     expect(posting(data)).toBeUndefined();
     data.author = { id: "author-id", handle: " ", primary_address: " " };
     expect(posting(data)).toBeUndefined();

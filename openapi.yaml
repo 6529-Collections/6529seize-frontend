@@ -32226,7 +32226,6 @@ components:
         - id
         - serial_no
         - drop_type
-        - created_at
       properties:
         id:
           type: string

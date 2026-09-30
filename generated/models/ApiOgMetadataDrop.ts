@@ -25,7 +25,7 @@ export class ApiOgMetadataDrop {
     /**
     * Original drop publication time in Unix milliseconds, for CHAT and SUBMISSION drops.
     */
-    'created_at': number;
+    'created_at'?: number;
     'submission_status'?: ApiSubmissionDropStatus;
     'submitted_at'?: number | null;
     'won_at'?: number | null;
