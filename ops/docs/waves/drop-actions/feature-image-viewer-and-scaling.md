@@ -42,7 +42,8 @@ on touch devices. The initial artwork and popup share the selected quality.
    - `Download` saves the source image.
    - `HD` switches GIFs between original and optimized versions inside the popup.
      In the Memes submission artwork view, it also supports still images and is
-     available before opening the popup.
+     available before opening the popup. HD is the leftmost action in both
+     toolbars, before fullscreen, open-original, and download.
    - `Full screen` enters browser fullscreen when supported and not in native app.
    - `Reset zoom` appears after zooming in.
    - `Close` exits the modal.

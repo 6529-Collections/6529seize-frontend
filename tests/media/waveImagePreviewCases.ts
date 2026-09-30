@@ -147,6 +147,13 @@ export function defineWaveImagePreviewTests() {
         exact: true,
       });
       await expect(inlineToggle).toBeVisible();
+      await expect(
+        hero
+          .getByRole("button", { name: "View original", exact: true })
+          .locator("..")
+          .getByRole("button")
+          .first()
+      ).toHaveAccessibleName("View original");
       await inlineToggle.click();
       const originalAlt =
         extension === "gif" ? "Original GIF animation" : "Original image";
@@ -165,6 +172,14 @@ export function defineWaveImagePreviewTests() {
         .last();
       await expect(popupToggle).toBeVisible();
       await expect(popupToggle).toHaveAttribute("aria-pressed", "true");
+      await expect(
+        page
+          .getByRole("button", { name: "View optimized", exact: true })
+          .last()
+          .locator("..")
+          .getByRole("button")
+          .first()
+      ).toHaveAccessibleName("View optimized");
       await popupToggle.click();
       await expect(preview).toBeVisible();
       const popupPreview = page.getByRole("img", {
