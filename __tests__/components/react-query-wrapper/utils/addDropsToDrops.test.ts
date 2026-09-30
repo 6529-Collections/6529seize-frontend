@@ -219,3 +219,37 @@ test.each([100, 200])(
     });
   }
 );
+
+test.each([100, 200, 300])(
+  "checks nonmatching media caches before inserting revision %s",
+  (updated_at) => {
+    const queryClient = new QueryClient();
+    const emptyKey = [QueryKey.DROPS, { waveId: "w" }];
+    const mediaKey = [QueryKey.DROPS, { waveId: "w", containsMedia: true }];
+    const empty = { pages: [{ drops: [] }] };
+    const current = Object.assign(new ApiDrop(), {
+      id: "d",
+      wave: { id: "w" },
+      updated_at: 200,
+      parts: [
+        {
+          media: [
+            { url: "https://example.com/image.png", mime_type: "image/png" },
+          ],
+        },
+      ],
+    });
+    const mediaData = { pages: [{ drops: [current] }] };
+    queryClient.setQueryData(emptyKey, empty);
+    queryClient.setQueryData(mediaKey, mediaData);
+    const incoming = Object.assign(new ApiDrop(), current, {
+      updated_at,
+      parts: [],
+    });
+    upsertDropIntoMatchingDropsQueries(queryClient, { drop: incoming });
+    expect(queryClient.getQueryData(emptyKey)).toEqual(
+      updated_at < 200 ? empty : { pages: [{ drops: [incoming] }] }
+    );
+    expect(queryClient.getQueryData(mediaKey)).toEqual(mediaData);
+  }
+);
