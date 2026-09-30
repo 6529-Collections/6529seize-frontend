@@ -22,7 +22,7 @@ export default function HeroHeader() {
       <p className="tw-mb-3 tw-mt-0 tw-text-xs tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-400">
         6529
       </p>
-      <h1 className="tw-m-0 tw-max-w-3xl tw-text-balance tw-text-3xl tw-font-medium tw-leading-tight tw-tracking-tight tw-text-iron-100 md:tw-text-4xl">
+      <h1 className="tw-m-0 tw-max-w-3xl tw-text-balance tw-text-3xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-100 md:tw-text-4xl">
         Building a decentralized network state
       </h1>
     </section>
