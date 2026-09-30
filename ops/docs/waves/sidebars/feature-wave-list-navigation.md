@@ -134,6 +134,8 @@ when the desktop feed is active or its button is hovered or keyboard-focused.
 
 ## Common Scenarios
 
+- The current wave also highlights in Active Votes when it appears there,
+  including when the same wave is highlighted in the collection list below.
 - Wave rows open `/waves/{waveId}`.
 - Direct-message rows open `/messages/{waveId}`.
 - `Worth Checking Out` avatars and their overlaid score shields open the wave

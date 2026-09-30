@@ -207,7 +207,7 @@ describe("daily production canary", () => {
       },
     });
     expect(result.status).toBe(0);
-    expect(result.attempts.run).toBe(2);
+    expect(result.attempts["run"]).toBe(2);
     expect(result.output).toContain("deploy-run-id=99");
   });
 
@@ -222,8 +222,8 @@ describe("daily production canary", () => {
         apiFailure: { endpoint: "run", count: 3, message },
       });
       expect(result.status).not.toBe(0);
-      expect(result.attempts.run).toBe(attempts);
-      expect(result.attempts.jobs).toBe(0);
+      expect(result.attempts["run"]).toBe(attempts);
+      expect(result.attempts["jobs"]).toBe(0);
       expect(result.output).toBe("");
     }
   );
@@ -231,8 +231,8 @@ describe("daily production canary", () => {
   it("does not retry a successful API response with rejected deployment provenance", () => {
     const result = resolveSource({ run: { conclusion: "failure" } });
     expect(result.status).not.toBe(0);
-    expect(result.attempts.run).toBe(1);
-    expect(result.attempts.jobs).toBe(0);
+    expect(result.attempts["run"]).toBe(1);
+    expect(result.attempts["jobs"]).toBe(0);
     expect(result.output).toBe("");
   });
 

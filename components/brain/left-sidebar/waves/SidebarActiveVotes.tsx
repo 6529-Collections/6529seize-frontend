@@ -74,6 +74,7 @@ export function SidebarActiveVotes({
               key={vote.wave.id}
               vote={vote}
               compact
+              isActive={activeWave.id === vote.wave.id}
               onClick={(event) => {
                 if (
                   event.metaKey ||
