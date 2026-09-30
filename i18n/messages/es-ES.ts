@@ -223,6 +223,8 @@ export const ES_ES_MESSAGES = {
   "waves.drop.actions.copyFailed": "No se pudo copiar",
   "waves.drop.actions.menuLabel": "Acciones del drop",
   "waves.drop.actions.reactionPickerLabel": "Añadir una reacción al drop",
+  "waves.drop.actions.showMore": "Mostrar más",
+  "waves.drop.actions.showLess": "Mostrar menos",
   "media.video.captions": "Subtitulos",
   "media.video.download": "Descargar multimedia",
   "media.video.downloading": "Descargando multimedia",

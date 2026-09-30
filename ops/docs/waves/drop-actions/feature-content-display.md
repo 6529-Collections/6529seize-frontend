@@ -4,11 +4,14 @@ Parent: [Wave Drop Actions Index](README.md)
 
 ## Overview
 
-Standard Wave and direct-message drop cards render full body text inline.
-There is no `Show full post` or collapse toggle for long bodies. Published
-proposals in a standard Wave configured for compact proposal cards are the
-exception: list, winner, approved, and quoted-preview surfaces show an authored
-preview card, and selecting it opens the complete original proposal.
+Standard Wave and direct-message timelines shorten long text bodies. Select
+`Show more` to render the complete markdown body and `Show less` to return to
+the plain-text preview. Short bodies still render in full. Single-drop views
+opened with `?drop=...` also keep the complete body visible.
+
+Published proposals in a standard Wave configured for compact proposal cards
+use their authored preview card instead. Selecting that card opens the complete
+original proposal.
 
 The shared body renderer handles markdown, mentions, emoji shortcodes, and links.
 Multipart drops ("storms") stay in one card while users switch parts.
@@ -17,7 +20,7 @@ Multipart drops ("storms") stay in one card while users switch parts.
 
 - Public or group waves: `/waves/{waveId}`
 - Direct messages: `/messages/{waveId}`
-- Wave/DM drop cards and quoted-drop cards that reuse the shared markdown renderer.
+- Wave/DM timeline drop cards and quoted-drop cards that reuse the shared markdown renderer.
 
 ## Entry Points
 
@@ -28,18 +31,22 @@ Multipart drops ("storms") stay in one card while users switch parts.
 ## User Journey
 
 1. Open a thread and locate a drop.
-2. Read full content inline in the card, or select a configured compact proposal
-   card to open the complete proposal.
+2. Read a short body in full. For a long body, read its plain-text preview and
+   select `Show more` to reveal the complete markdown.
 3. Use markdown links, mentions, and quoted-drop content from the body.
-4. If the drop is a storm, switch parts with previous/next controls and the part counter.
-5. In click-through surfaces, open drop detail only when no text is selected.
-6. Marketplace preview-card interactions stay scoped to the preview and do not
+4. Select `Show less` to shorten an expanded body again.
+5. If the drop is a storm, switch parts with previous/next controls and the part counter.
+6. In click-through surfaces, open drop detail only when no text is selected.
+7. Marketplace preview-card interactions stay scoped to the preview and do not
    bubble to parent-card click-through navigation.
 
 ## Common Scenarios
 
-- Full markdown body renders inline, including headings, lists, quotes, and code.
-- Normal messages remain full inline content even when the Wave uses compact
+- Long timeline bodies start as a plain-text preview. Full markdown, links,
+  mentions, and inline preview cards mount after `Show more` is selected.
+- Expanded state remains with the drop while it is temporarily replaced by a
+  virtual-scroll placeholder.
+- Normal messages use the long-body control even when the Wave uses compact
   cards for published proposals.
 - Ordered lists accept both `1.` and `1)` markers and keep the chosen delimiter
   when rendered.
@@ -61,6 +68,8 @@ Multipart drops ("storms") stay in one card while users switch parts.
 - If a drop part contains `quoted_drop` data, a quoted-drop block renders below that part.
 - Edited drops show an `(edited)` marker below content.
 - Media attachments in the same part render under the text body in the same card.
+- Media and file attachments outside the markdown body stay visible while the
+  text preview is collapsed.
 - Drop-author profile pictures first request a scaled image variant when supported by the media host.
 - If that optimized avatar load fails, the card retries with an unoptimized load of the same source.
 - If both avatar attempts fail (or no avatar source exists), the card keeps layout with a neutral profile placeholder.
@@ -72,6 +81,9 @@ Multipart drops ("storms") stay in one card while users switch parts.
 - Quote-card expansion is depth-limited and cycle-guarded; guarded links fall back to plain links.
 - Selecting text in the body blocks card click-through so copy actions do not open drop detail.
 - Link and button interactions in the body stop propagation to avoid accidental parent-card navigation.
+- Expanding or collapsing a body keeps the reader's current place in the
+  reverse-scrolling thread. If the reader is already at the latest drop, the
+  thread remains pinned there.
 - Marketplace preview-card click events are contained within the preview so
   curation marketplace clicks do not trigger parent-card navigation.
 
@@ -85,8 +97,10 @@ Multipart drops ("storms") stay in one card while users switch parts.
 
 ## Limitations / Notes
 
-- Users cannot collapse long posts back to shortened previews in standard drop
-  cards.
+- The preview is plain text. Markdown formatting and interactive links are
+  available after expansion.
+- Long-body detection uses the saved source text and line count. It does not
+  continuously measure rendered post height.
 - Compact proposal cards are a per-Wave proposal presentation, not a generic
   long-post collapse control.
 - Mention links render only when the drop includes matching mention data.

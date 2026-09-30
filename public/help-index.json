@@ -6460,6 +6460,9 @@
         "read drop",
         "drop display",
         "drop media",
+        "show more",
+        "show less",
+        "long post",
         "ordered list",
         "numbered list"
       ],
@@ -6471,12 +6474,17 @@
         "media",
         "text",
         "markdown",
+        "preview",
+        "expand",
+        "collapse",
         "list",
         "numbered"
       ],
       "facts": [
         "Wave drop content display docs explain how posted drop content is rendered.",
-        "Content display is separate from composer submission behavior.",
+        "Long Wave and direct-message timeline posts start as a short plain-text preview. Select Show more for the complete markdown body and Show less to shorten it again.",
+        "Expanding or collapsing a long post keeps the reader's place in the reverse-scrolling chat. Short posts and single-drop views remain fully visible.",
+        "Media and file attachments outside the text body remain visible while a long text preview is collapsed. Content display is separate from composer submission behavior.",
         "Ordered lists accept both 1. and 1) markers and preserve the chosen delimiter when rendered.",
         "Media, quote links, replies, and selection copy have additional drop-action records."
       ],

@@ -304,8 +304,9 @@ Surface matrix:
 - `test:e2e:composer-sandbox` runs a local-only authenticated Waves composer
   sandbox on both baseline web projects. It starts a mock API runtime,
   renders a real wave detail route, verifies attachment queue/remove behavior
-  and deterministic link previews, plus exact synthetic chat-drop and poll
-  submits. The poll flow covers its responsive layout, options, type, closing
+  and deterministic link previews, long-drop expansion at the latest scroll
+  position, plus exact synthetic chat-drop and poll submits. The poll flow
+  covers its responsive layout, options, type, closing
   time, audience, and anonymity controls. The mock API allows only those
   queryless `/api/drops` shapes, with signer
   limited to the configured sandbox wallet or the empty unsigned direct-contract
@@ -520,7 +521,8 @@ Large-pack ownership:
   require separate package-build and runtime-smoke evidence.
 - `test:e2e:composer-sandbox` is owned by PR or train owners changing Waves
   composer input, attachment preview/removal, link preview rendering, dev-auth
-  composer eligibility, or local sandbox/mock API coverage. The pack may use
+  composer eligibility, long-drop timeline rendering, or local sandbox/mock API
+  coverage. The pack may use
   local synthetic auth and a mock API, and it may submit only the synthetic
   chat-drop shape modeled by the mock API with the bounded sandbox signer. It
   must never submit drops or upload files to staging or production. Treat it as
