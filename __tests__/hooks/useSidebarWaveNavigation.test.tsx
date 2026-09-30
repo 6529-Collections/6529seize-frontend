@@ -2,6 +2,7 @@ jest.unmock("react-use");
 import React from "react";
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useWaveSidebarSearch } from "@/hooks/useWaveSidebarSearch";
 import { useSidebarWaveNavigation } from "@/hooks/useSidebarWaveNavigation";
 import {
   useWaveSidebarCollection,
@@ -55,6 +56,9 @@ beforeEach(() => {
   sessionStorage.clear();
   jest.clearAllMocks();
   mockViewer = { key: "alice", canUseCollections: true, enabled: true };
+  const search = renderHook(() => useWaveSidebarSearch("alice"));
+  act(() => search.result.current[1](""));
+  search.unmount();
   fetchPage.mockResolvedValue({ waves: [], page: 1, next: false });
 });
 
@@ -108,7 +112,7 @@ it("hides old results immediately while a new query is debouncing", async () => 
   expect(result.current.queryEnabled).toBe(false);
 });
 
-it("restores the query after remount and isolates a different viewer", () => {
+it("keeps the query during in-page remounts and isolates a different viewer", () => {
   const first = setup();
   act(() => first.result.current.setQueryText("rare pepe"));
   first.unmount();
@@ -118,6 +122,20 @@ it("restores the query after remount and isolates a different viewer", () => {
   second.rerender();
   expect(second.result.current.queryText).toBe("");
   expect(second.result.current.resultWaves).toEqual([]);
+});
+
+it("ignores a previously saved search and restores the last collection", () => {
+  sessionStorage.setItem("wave-sidebar-search:alice", "old query");
+  selectCollection("joined");
+  const { result } = setup();
+  expect(result.current.queryText).toBe("");
+  expect(result.current.searching).toBe(false);
+  expect(result.current.collection).toBe("joined");
+  expect(result.current.visibleWaves.map((wave) => wave.id)).toEqual([
+    "joined",
+  ]);
+  act(() => result.current.setQueryText("new query"));
+  expect(sessionStorage.getItem("wave-sidebar-search:alice")).toBe("old query");
 });
 
 it("uses All after logout even with a saved personal collection", () => {

@@ -231,6 +231,10 @@ const UnifiedWavesListWaves = forwardRef<
       enabled: !isDirectMessage,
       activeContainerId: effectiveActiveParentWaveId ?? activeWaveId,
     });
+    const collectionLoading =
+      isLoading ||
+      (navigation.collection === "pinned" &&
+        streamWaves.isPinnedWavesLoading === true);
     const announcementRows = useMemo(
       () => getRows(announcementWaves),
       [announcementWaves, getRows]
@@ -493,7 +497,10 @@ const UnifiedWavesListWaves = forwardRef<
           />
         )}
         {!isDirectMessage && !hideToggle && (
-          <SidebarWaveNavigationControls navigation={navigation} />
+          <SidebarWaveNavigationControls
+            navigation={navigation}
+            isCollectionLoading={collectionLoading}
+          />
         )}
         {navigation.searching ? (
           <SidebarWaveSearchResults navigation={navigation} />
@@ -564,7 +571,7 @@ const UnifiedWavesListWaves = forwardRef<
               </section>
             ) : (
               <div ref={listContainerRef} style={emptyPlaceholderStyle}>
-                {!isDirectMessage && !isLoading && waves.length > 0 && (
+                {!isDirectMessage && !collectionLoading && waves.length > 0 && (
                   <output className="tw-block tw-px-4 tw-py-3 tw-text-sm tw-text-iron-400">
                     {t(locale, "waves.sidebar.collectionEmpty")}
                   </output>

@@ -284,6 +284,10 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
     enabled: !isDirectMessage && !isCollapsed,
     activeContainerId: effectiveActiveParentWaveId ?? activeWaveId,
   });
+  const collectionLoading =
+    isLoading ||
+    (navigation.collection === "pinned" &&
+      streamWaves.isPinnedWavesLoading === true);
   const announcementRows = useMemo(
     () => getRows(announcementWaves),
     [announcementWaves, getRows]
@@ -536,7 +540,10 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
             />
           )}
           {!isDirectMessage && !hideToggle && !isCollapsed && (
-            <SidebarWaveNavigationControls navigation={navigation} />
+            <SidebarWaveNavigationControls
+              navigation={navigation}
+              isCollectionLoading={collectionLoading}
+            />
           )}
           {navigation.searching && !isCollapsed ? (
             <SidebarWaveSearchResults navigation={navigation} />
@@ -607,11 +614,13 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
                   ref={listContainerRef}
                   style={{ minHeight: EMPTY_WAVES_PLACEHOLDER_HEIGHT }}
                 >
-                  {!isDirectMessage && !isLoading && waves.length > 0 && (
-                    <output className="tw-block tw-px-4 tw-py-3 tw-text-sm tw-text-iron-400">
-                      {t(locale, "waves.sidebar.collectionEmpty")}
-                    </output>
-                  )}
+                  {!isDirectMessage &&
+                    !collectionLoading &&
+                    waves.length > 0 && (
+                      <output className="tw-block tw-px-4 tw-py-3 tw-text-sm tw-text-iron-400">
+                        {t(locale, "waves.sidebar.collectionEmpty")}
+                      </output>
+                    )}
                 </div>
               )}
             </>

@@ -13,7 +13,7 @@ import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { ApiWavesV2ListType } from "@/generated/models/ApiWavesV2ListType";
 import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
 import { fetchWavesV2Page } from "@/services/api/waves-v2-api";
-import { useWaveSidebarPreference } from "./useWaveSidebarPreference";
+import { useWaveSidebarSearch } from "./useWaveSidebarSearch";
 import { useWaveDiscoveryViewer } from "./useWaveDiscoveryViewer";
 import {
   useWaveSidebarCollection,
@@ -62,10 +62,7 @@ export function useSidebarWaveNavigation({
   const viewer = useWaveDiscoveryViewer();
   const [savedCollection, setCollection] = useWaveSidebarCollection();
   const collection = viewer.canUseCollections ? savedCollection : "all";
-  const [savedQuery, setQueryText] = useWaveSidebarPreference(
-    `wave-sidebar-search:${viewer.key ?? "guest"}`
-  );
-  const queryText = savedQuery ?? "";
+  const [queryText, setQueryText] = useWaveSidebarSearch(viewer.key ?? "guest");
   const [debounced, setDebounced] = useState("");
   useDebounce(() => setDebounced(queryText.trim()), 350, [queryText]);
   const searching = enabled && queryText.trim().length > 0;

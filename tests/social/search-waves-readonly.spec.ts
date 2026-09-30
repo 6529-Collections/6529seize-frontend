@@ -417,8 +417,10 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
     await expect(
       discovery.getByRole("link", { name: "View all recommendations" })
     ).toBeVisible();
-    await page.evaluate(() => sessionStorage.clear());
+    await search.fill("refresh query");
     await page.reload();
+    await expect(search).toBeEnabled();
+    await expect(search).toHaveValue("");
     await expect(activeToggle).toHaveAttribute("aria-expanded", "false");
     await expect(recommendationsToggle).toHaveAttribute(
       "aria-expanded",

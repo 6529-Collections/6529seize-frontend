@@ -86,7 +86,11 @@ when the desktop feed is active or its button is hovered or keyboard-focused.
 - Search replaces the lower list and keeps the query while opening a result.
   A small spinner replaces the search icon while results are loading; one clear
   button resets the query. Clearing restores the collection
-  and its scroll position. Queries are kept separately for each viewer.
+  and its scroll position. Queries are kept separately for each viewer only
+  while the page is running. Refresh starts with an empty search and restores
+  the last selected All / Pinned / Joined collection. The selected collection
+  shows a small spinner while its data is loading; an empty message appears only
+  after loading finishes.
 - This uses the existing name matching. Typo tolerance and relevance changes
   are outside this redesign. Unread state, pin controls and subwaves remain on
   normal collection rows; the DM list retains its existing behavior.

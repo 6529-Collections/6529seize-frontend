@@ -8,7 +8,7 @@ import {
 import type { SidebarWaveNavigation } from "@/hooks/useSidebarWaveNavigation";
 import { mapApiWaveOverviewToSidebarWave } from "@/services/api/waves-v2-api";
 import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
-import { useWaveSidebarPreference } from "@/hooks/useWaveSidebarPreference";
+import { useWaveSidebarSearch } from "@/hooks/useWaveSidebarSearch";
 
 const mockSet = jest.fn();
 jest.mock("@/contexts/wave/MyStreamContext", () => ({
@@ -93,8 +93,8 @@ function navigation(
   } as SidebarWaveNavigation;
 }
 
-function HydrationSearch() {
-  const [query, setQueryText] = useWaveSidebarPreference("hydration-search");
+function HydrationSearch({ viewerKey }: { viewerKey: string }) {
+  const [query, setQueryText] = useWaveSidebarSearch(viewerKey);
   const state = navigation({
     queryText: query ?? "",
     setQueryText,
@@ -110,13 +110,39 @@ function HydrationSearch() {
   );
 }
 
+it("shows loading feedback only in the selected collection tab", () => {
+  const state = navigation({
+    searching: false,
+    collection: "pinned",
+    canUseCollections: true,
+  });
+  const { rerender } = render(
+    <SidebarWaveNavigationControls navigation={state} isCollectionLoading />
+  );
+  expect(screen.getByRole("button", { name: "Pinned" })).toHaveAttribute(
+    "aria-busy",
+    "true"
+  );
+  expect(screen.getByRole("button", { name: "All" })).toHaveAttribute(
+    "aria-busy",
+    "false"
+  );
+  expect(screen.getByRole("status", { name: "Loading waves…" })).toBeVisible();
+  rerender(<SidebarWaveNavigationControls navigation={state} />);
+  expect(
+    screen.queryByRole("status", { name: "Loading waves…" })
+  ).not.toBeInTheDocument();
+});
+
 it.each(["", "pepe"])(
-  "waits for hydration before accepting input and restores saved query %j",
+  "starts empty after hydration despite legacy saved query %j",
   async (savedQuery) => {
     sessionStorage.setItem("hydration-search", savedQuery);
     const container = document.createElement("div");
     document.body.appendChild(container);
-    container.innerHTML = renderToString(<HydrationSearch />);
+    container.innerHTML = renderToString(
+      <HydrationSearch viewerKey={`hydration-${savedQuery}`} />
+    );
     const input = within(container).getByRole("searchbox");
     expect(input).toBeDisabled();
     expect(input).toHaveValue("");
@@ -124,18 +150,22 @@ it.each(["", "pepe"])(
     let root: ReturnType<typeof hydrateRoot> | undefined;
     try {
       await act(async () => {
-        root = hydrateRoot(container, <HydrationSearch />, {
-          onRecoverableError,
-        });
+        root = hydrateRoot(
+          container,
+          <HydrationSearch viewerKey={`hydration-${savedQuery}`} />,
+          {
+            onRecoverableError,
+          }
+        );
       });
       expect(input).toBeEnabled();
-      expect(input).toHaveValue(savedQuery);
+      expect(input).toHaveValue("");
       fireEvent.change(input, { target: { value: "xx" } });
       expect(input).toHaveValue("xx");
       expect(within(container).getByRole("status")).toHaveTextContent(
         "Type at least 3 characters to search all waves."
       );
-      expect(sessionStorage.getItem("hydration-search")).toBe("xx");
+      expect(sessionStorage.getItem("hydration-search")).toBe(savedQuery);
       expect(onRecoverableError).not.toHaveBeenCalled();
     } finally {
       act(() => root?.unmount());

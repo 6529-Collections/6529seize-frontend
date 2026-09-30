@@ -21,8 +21,10 @@ const COLLECTION_LABELS = {
 
 export function SidebarWaveNavigationControls({
   navigation,
+  isCollectionLoading = false,
 }: {
   readonly navigation: SidebarWaveNavigation;
+  readonly isCollectionLoading?: boolean;
 }) {
   const locale = useBrowserLocale();
   const inputId = useId();
@@ -79,11 +81,20 @@ export function SidebarWaveNavigationControls({
             <button
               key={tab}
               type="button"
+              aria-label={t(locale, COLLECTION_LABELS[tab])}
               aria-pressed={navigation.collection === tab}
+              aria-busy={navigation.collection === tab && isCollectionLoading}
               onClick={() => navigation.setCollection(tab)}
-              className={`tw-min-h-7 tw-min-w-0 tw-flex-1 tw-rounded-md tw-border-0 tw-px-2 tw-text-xs focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 ${navigation.collection === tab ? "tw-bg-iron-800 tw-font-semibold tw-text-white" : "tw-bg-transparent tw-text-iron-400"}`}
+              className={`tw-inline-flex tw-min-h-7 tw-min-w-0 tw-flex-1 tw-items-center tw-justify-center tw-gap-1.5 tw-rounded-md tw-border-0 tw-px-2 tw-text-xs focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 ${navigation.collection === tab ? "tw-bg-iron-800 tw-font-semibold tw-text-white" : "tw-bg-transparent tw-text-iron-400"}`}
             >
               {t(locale, COLLECTION_LABELS[tab])}
+              {navigation.collection === tab && isCollectionLoading && (
+                <span
+                  role="status"
+                  aria-label={t(locale, "waves.discovery.loading")}
+                  className="tw-size-3 tw-shrink-0 tw-animate-spin tw-rounded-full tw-border tw-border-solid tw-border-iron-600 tw-border-t-primary-300 motion-reduce:tw-animate-none"
+                />
+              )}
             </button>
           ))}
         </fieldset>
