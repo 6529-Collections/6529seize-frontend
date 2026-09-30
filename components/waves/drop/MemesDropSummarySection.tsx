@@ -56,7 +56,7 @@ export function MemesDropSummarySection({
             {title}
           </h1>
           {description && (
-            <p className="tw-mb-0 tw-text-sm tw-text-white/60 lg:tw-text-md">
+            <p className="tw-mb-0 tw-whitespace-pre-wrap tw-break-words tw-text-sm tw-text-white/60 lg:tw-text-md">
               {description}
             </p>
           )}
@@ -112,10 +112,7 @@ export function MemesDropSummarySection({
         {hasMemeCard && (
           <div className="tw-mt-4 tw-flex tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-2">
             {manualOutcomes.map((outcome) => (
-              <span
-                key={outcome}
-                className="tw-text-sm tw-text-amber-400/70"
-              >
+              <span key={outcome} className="tw-text-sm tw-text-amber-400/70">
                 {outcome}
               </span>
             ))}

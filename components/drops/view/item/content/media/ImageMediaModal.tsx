@@ -17,7 +17,11 @@ import { createPortal } from "react-dom";
 import useKeyPressEvent from "react-use/lib/useKeyPressEvent";
 import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch";
 import { ExpandedMediaToolbar } from "./MediaActionToolbar";
-import { GifQualityToggle } from "./GifQualityToggle";
+import { ImageQualityToggle } from "./ImageQualityToggle";
+import {
+  useOriginalImage,
+  type OriginalImageQuality,
+} from "./useOriginalImage";
 
 export function requestCenteredImageFullscreen(
   fullscreenTarget: HTMLImageElement
@@ -53,6 +57,8 @@ export function ImageMediaModal({
   onFullscreen,
   fullscreenTargetAvailable = true,
   gallery,
+  originalQuality,
+  preferHighQualityPreview = false,
 }: {
   readonly src: string;
   readonly imageRef: React.RefObject<HTMLImageElement | null>;
@@ -63,6 +69,8 @@ export function ImageMediaModal({
   readonly isDownloading: boolean;
   readonly onFullscreen: () => void;
   readonly fullscreenTargetAvailable?: boolean | undefined;
+  readonly originalQuality?: OriginalImageQuality | undefined;
+  readonly preferHighQualityPreview?: boolean | undefined;
   readonly gallery?:
     | {
         readonly canGoNext: boolean;
@@ -74,18 +82,15 @@ export function ImageMediaModal({
       }
     | undefined;
 }) {
-  const [originalState, setOriginalState] = useState({
-    src,
-    playing: false,
-    loaded: false,
-    failed: false,
-  });
-  if (originalState.src !== src)
-    setOriginalState({ src, playing: false, loaded: false, failed: false });
-  const originalRequested = originalState.src === src && originalState.playing;
-  const playingOriginal = originalRequested && originalState.loaded;
-  const loadingOriginal = originalRequested && !originalState.loaded;
-  const canPlayOriginal = isGifImageUrl(src) && /^(https?:|ipfs:)/i.test(src);
+  const localOriginalQuality = useOriginalImage(src);
+  const quality = originalQuality ?? localOriginalQuality;
+  const originalRequested = quality.requested;
+  const playingOriginal = quality.showingOriginal;
+  const isGif = isGifImageUrl(src);
+  const loadingOriginalLabel = t(
+    DEFAULT_LOCALE,
+    isGif ? "drop.media.loadingOriginalGif" : "drop.media.loadingOriginalImage"
+  );
   const [zoomState, setZoomState] = useState({ src, isZoomed: false });
   if (zoomState.src !== src) setZoomState({ src, isZoomed: false });
   const isZoomed = zoomState.src === src && zoomState.isZoomed;
@@ -212,31 +217,19 @@ export function ImageMediaModal({
                         key={`original-${src}`}
                         ref={playingOriginal ? imageRef : null}
                         src={resolveIpfsUrlSync(src)}
-                        alt={t(DEFAULT_LOCALE, "drop.media.originalGifAlt")}
+                        alt={t(
+                          DEFAULT_LOCALE,
+                          isGif
+                            ? "drop.media.originalGifAlt"
+                            : "drop.media.originalImageAlt"
+                        )}
                         fill
                         sizes="95vw"
                         unoptimized
                         loading="eager"
                         hidden={!playingOriginal}
-                        onLoad={() =>
-                          setOriginalState((current) =>
-                            current === originalState
-                              ? { ...current, loaded: true }
-                              : current
-                          )
-                        }
-                        onError={() =>
-                          setOriginalState((current) =>
-                            current === originalState
-                              ? {
-                                  src,
-                                  playing: false,
-                                  loaded: false,
-                                  failed: true,
-                                }
-                              : current
-                          )
-                        }
+                        onLoad={quality.onLoad}
+                        onError={quality.onError}
                         style={{
                           objectFit: "contain",
                           objectPosition: "center",
@@ -255,6 +248,7 @@ export function ImageMediaModal({
                         onLoad={() => setFailedSource(null)}
                         originalSrc={src}
                         imageScale={ImageScale.AUTOx1080}
+                        preferHighQuality={preferHighQualityPreview}
                         alt={t(DEFAULT_LOCALE, "drop.media.previewAlt")}
                         fill
                         sizes="95vw"
@@ -272,14 +266,12 @@ export function ImageMediaModal({
           </div>
         )}
       </TransformWrapper>
-      {loadingOriginal && (
+      {quality.loading && (
         <output
-          aria-label={t(DEFAULT_LOCALE, "drop.media.loadingOriginalGif")}
+          aria-label={loadingOriginalLabel}
           className="tw-pointer-events-none tw-fixed tw-left-1/2 tw-top-1/2 tw-z-[1101] -tw-translate-x-1/2 -tw-translate-y-1/2 tw-rounded-full tw-bg-black/60 tw-p-3"
         >
-          <span className="tw-sr-only">
-            {t(DEFAULT_LOCALE, "drop.media.loadingOriginalGif")}
-          </span>
+          <span className="tw-sr-only">{loadingOriginalLabel}</span>
           <span
             aria-hidden="true"
             className="tw-block tw-size-6 tw-rounded-full tw-border-2 tw-border-solid tw-border-iron-100/30 tw-border-t-iron-100 motion-safe:tw-animate-spin"
@@ -349,18 +341,12 @@ export function ImageMediaModal({
         }
         onClose={onClose}
       >
-        {canPlayOriginal && (
-          <GifQualityToggle
+        {quality.canViewOriginal && (
+          <ImageQualityToggle
             showingOriginal={originalRequested}
-            failed={originalState.src === src && originalState.failed}
-            onToggle={() =>
-              setOriginalState({
-                src,
-                playing: !originalRequested,
-                loaded: false,
-                failed: false,
-              })
-            }
+            failed={quality.failed}
+            isGif={isGif}
+            onToggle={quality.toggle}
           />
         )}
       </ExpandedMediaToolbar>

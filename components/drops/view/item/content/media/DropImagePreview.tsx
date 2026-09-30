@@ -39,19 +39,57 @@ export function getDropImagePreviewSources(src: string, scale: ImageScale) {
   return [`/api/og-metadata/image?${query.toString()}`];
 }
 
+// Submission artwork uses the existing Next optimizer on the uploaded source,
+// rather than optimizing a previously downscaled CDN copy. Keep this opt-in
+// limited to first-party raster uploads covered by next.config remotePatterns.
+function getHighQualityArtworkImageSrc(src: string): string | null {
+  const original = resolveIpfsUrlSync(src);
+  try {
+    const url = new URL(original);
+    if (
+      url.origin === "https://d3lqz0a4bldqgf.cloudfront.net" &&
+      url.pathname.startsWith("/drops/") &&
+      /\.(jpe?g|png|webp|avif)$/i.test(url.pathname)
+    )
+      return original;
+  } catch {
+    return null;
+  }
+  return null;
+}
+
 type Props = Omit<ImageProps, "src" | "unoptimized" | "onError"> & {
   readonly fallback?: ReactNode;
   readonly originalSrc: string;
   readonly imageScale: ImageScale;
   readonly onError?: (() => void) | undefined;
+  readonly preferHighQuality?: boolean | undefined;
 };
 
 const PreviewAttempt = forwardRef<HTMLImageElement, Props>(
-  ({ originalSrc, imageScale, onError, alt, fallback, ...props }, ref) => {
+  (
+    {
+      originalSrc,
+      imageScale,
+      onError,
+      alt,
+      fallback,
+      preferHighQuality = false,
+      ...props
+    },
+    ref
+  ) => {
     const [attempt, setAttempt] = useState(0);
     const failedAttempt = useRef<number | null>(null);
-    const sources = getDropImagePreviewSources(originalSrc, imageScale);
+    const highQualitySrc = preferHighQuality
+      ? getHighQualityArtworkImageSrc(originalSrc)
+      : null;
+    const previewSources = getDropImagePreviewSources(originalSrc, imageScale);
+    const sources = highQualitySrc
+      ? [highQualitySrc, ...previewSources]
+      : previewSources;
     const source = sources[attempt];
+    const optimizationProps = source === highQualitySrc ? { quality: 100 } : {};
 
     return (
       <>
@@ -73,7 +111,8 @@ const PreviewAttempt = forwardRef<HTMLImageElement, Props>(
             alt={alt}
             ref={ref}
             src={source}
-            unoptimized
+            unoptimized={source !== highQualitySrc}
+            {...optimizationProps}
             onError={() => {
               // Repeated errors from one source must not skip its fallback or
               // notify the parent twice before React commits the next render.
@@ -96,7 +135,7 @@ PreviewAttempt.displayName = "PreviewAttempt";
 export const DropImagePreview = forwardRef<HTMLImageElement, Props>(
   (props, ref) => (
     <PreviewAttempt
-      key={`${props.originalSrc}:${props.imageScale}`}
+      key={`${props.originalSrc}:${props.imageScale}:${props.preferHighQuality ?? false}`}
       {...props}
       ref={ref}
     />
