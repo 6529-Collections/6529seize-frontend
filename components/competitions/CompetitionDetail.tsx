@@ -120,12 +120,9 @@ function NativeCompetitionContent() {
         />
       )}
       {paused && (
-        <p
-          role="status"
-          className="tw-rounded-lg tw-bg-iron-900 tw-p-4 tw-text-sm tw-text-amber-300"
-        >
+        <output className="tw-block tw-rounded-lg tw-bg-iron-900 tw-p-4 tw-text-sm tw-text-amber-300">
           {t(locale, "competitions.paused")}
-        </p>
+        </output>
       )}
       {!competition.permissions.submit && (
         <p className="tw-text-sm tw-text-iron-400">

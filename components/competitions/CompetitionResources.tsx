@@ -58,13 +58,7 @@ function EntryFocus({ entryId }: { readonly entryId: string }) {
       />
     );
   return (
-    <CompetitionEntryCard
-      entryId={entry.data.id}
-      dropId={entry.data.drop_id}
-      entry={entry.data}
-      rank={entry.data.rank}
-      selected
-    />
+    <CompetitionEntryCard entryId={entry.data.id} dropId={entry.data.drop_id} />
   );
 }
 

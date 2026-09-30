@@ -92,7 +92,9 @@ export default function CompetitionEntryForm({
   const [title, setTitle] = useState("");
   const [nominee, setNominee] = useState<SelectableIdentityOption | null>(null);
   const [metadata, setMetadata] = useState<Record<string, string>>({});
-  const [acceptedTermsVersion, setTermsVersion] = useState<number | null>(null);
+  const [acceptedTermsVersion, setAcceptedTermsVersion] = useState<
+    number | null
+  >(null);
   const terms = acceptedTermsVersion === competition.config_version;
   const [canSubmit, setCanSubmit] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -244,9 +246,9 @@ export default function CompetitionEntryForm({
   };
   if (!profile)
     return (
-      <p role="status" className="tw-text-iron-400">
+      <output className="tw-block tw-text-iron-400">
         {t(locale, "competitions.signIn")}
-      </p>
+      </output>
     );
   return (
     <section
@@ -372,7 +374,7 @@ export default function CompetitionEntryForm({
               aria-describedby={termsId}
               checked={terms}
               onChange={(event) =>
-                setTermsVersion(
+                setAcceptedTermsVersion(
                   event.target.checked ? competition.config_version : null
                 )
               }
@@ -388,9 +390,9 @@ export default function CompetitionEntryForm({
         </p>
       )}
       {!competition.permissions.submit && (
-        <p role="status" className="tw-text-sm tw-text-iron-400">
+        <output className="tw-block tw-text-sm tw-text-iron-400">
           {t(locale, "competitions.submitClosed")}
-        </p>
+        </output>
       )}
       <div className="tw-flex tw-flex-wrap tw-gap-2">
         <button

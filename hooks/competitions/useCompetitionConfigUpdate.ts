@@ -78,8 +78,8 @@ export function useCompetitionConfigUpdate() {
       pending.current = null;
       await invalidateCompetition(client, identity);
       return true;
-    } catch (failure) {
-      const conflict = getStructuredApiErrorStatus(failure) === 409;
+    } catch (error_) {
+      const conflict = getStructuredApiErrorStatus(error_) === 409;
       setError(conflict ? "conflict" : "failure");
       if (conflict) await invalidateCompetition(client, identity);
       return false;
