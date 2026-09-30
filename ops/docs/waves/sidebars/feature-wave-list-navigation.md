@@ -26,7 +26,9 @@ Wave and DM rows in the left list control which thread is open.
   highlighted.
 - Navigating to a wave scrolls its active row into the nearest visible position.
 - `All`, `Pinned`, and `Joined` are peer collections in one sticky row, with
-  a separate search icon on the right. Switch directly without scrolling through pinned waves.
+  a separate search icon on the right. The collection group matches the search
+  button height, including the larger touch controls. Switch directly without
+  scrolling through pinned waves.
   Each collection remembers its scroll position; selecting another wave enables
   active-row reveal again. Signed-out visitors have the search icon without personal collection controls.
 - The `Waves` heading is plain text. Header actions sit at the far right:
@@ -132,6 +134,8 @@ when the desktop feed is active or its button is hovered or keyboard-focused.
 
 ## Common Scenarios
 
+- The current wave also highlights in Active Votes when it appears there,
+  including when the same wave is highlighted in the collection list below.
 - Wave rows open `/waves/{waveId}`.
 - Direct-message rows open `/messages/{waveId}`.
 - `Worth Checking Out` avatars and their overlaid score shields open the wave

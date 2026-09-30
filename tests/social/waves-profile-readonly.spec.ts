@@ -349,6 +349,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     await expect(
       page.getByRole("link", { name: /Profile Waves Feed/ })
     ).toHaveAttribute("href", "/waves");
+    await expect(feedNavigation).toBeHidden();
 
     await expect(feedNavigation).toBeHidden();
 

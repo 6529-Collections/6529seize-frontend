@@ -17,8 +17,10 @@ export function ActiveWaveVoteRow({
   vote,
   onClick,
   compact = false,
+  isActive = false,
 }: {
   readonly compact?: boolean;
+  readonly isActive?: boolean;
   readonly vote: ApiActiveWaveVote;
   readonly onClick?: MouseEventHandler<HTMLAnchorElement>;
 }) {
@@ -29,12 +31,13 @@ export function ActiveWaveVoteRow({
   const deadlineLabel = getActiveWaveVoteDeadlineLabel(vote, locale);
   return (
     <div
-      className={`${compact ? "tw-h-12 tw-px-2 tw-py-1" : "tw-p-2"} tw-relative tw-flex tw-min-w-0 tw-items-center tw-rounded-lg hover:tw-bg-iron-900`}
+      className={`${compact ? "tw-h-12 tw-px-2 tw-py-1" : "tw-p-2"} tw-relative tw-flex tw-min-w-0 tw-items-center tw-rounded-lg ${isActive ? "tw-bg-iron-700/50 desktop-hover:hover:tw-bg-iron-700/70" : "desktop-hover:hover:tw-bg-iron-900"}`}
     >
       <Link
         href={getWaveRoute({ waveId: wave.id, isDirectMessage: false, isApp })}
         {...(onClick ? { onClick } : {})}
         prefetch={false}
+        aria-current={isActive ? "page" : undefined}
         className={`${compact ? "tw-gap-2" : "tw-gap-3"} tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-text-iron-100 tw-no-underline before:tw-absolute before:tw-inset-0 before:tw-rounded-lg before:tw-content-[''] focus-visible:tw-outline-none focus-visible:before:tw-ring-2 focus-visible:before:tw-ring-primary-400`}
       >
         <span className={`${compact ? "tw-size-8" : "tw-size-10"} tw-shrink-0`}>
