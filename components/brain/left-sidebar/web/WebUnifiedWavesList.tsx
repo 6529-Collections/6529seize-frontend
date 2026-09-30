@@ -45,7 +45,7 @@ const WebUnifiedWavesList: React.FC<WebUnifiedWavesListProps> = (props) => {
   const [savedCollection] = useWaveSidebarCollection();
   const { canUseCollections, key } = useWaveDiscoveryViewer();
   const [search] = useWaveSidebarSearch(key ?? "guest");
-  const isSearching = !isCollapsed && Boolean(search?.trim());
+  const isSearching = !isCollapsed && Boolean(search.trim());
   const collection = canUseCollections ? savedCollection : "all";
   const collectionFetching =
     isFetching || (collection === "pinned" && isPinnedWavesLoading);

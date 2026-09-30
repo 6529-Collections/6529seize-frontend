@@ -81,6 +81,52 @@ describe("useHlsPlayer", () => {
     (HTMLVideoElement.prototype.canPlayType as jest.Mock).mockReturnValue("");
   });
 
+  it("does not warn when pausing cancels pending fallback autoplay", async () => {
+    const warn = jest.spyOn(console, "warn").mockImplementation(() => {});
+    let rejectPlayback: ((reason: unknown) => void) | undefined;
+    const pendingPlayback = new Promise<void>((_resolve, reject) => {
+      rejectPlayback = reject;
+    });
+    (HTMLVideoElement.prototype.play as jest.Mock).mockReturnValueOnce(
+      pendingPlayback
+    );
+    try {
+      const { rerender } = render(
+        <TestComponent src="video.mp4" isHls={false} autoPlay />
+      );
+      expect(HTMLVideoElement.prototype.play).toHaveBeenCalled();
+      rerender(
+        <TestComponent src="video.mp4" isHls={false} autoPlay enabled={false} />
+      );
+      expect(HTMLVideoElement.prototype.pause).toHaveBeenCalled();
+      await act(async () => {
+        rejectPlayback?.(
+          new DOMException("Playback interrupted", "AbortError")
+        );
+        await pendingPlayback.catch(() => {});
+      });
+      expect(warn).not.toHaveBeenCalled();
+    } finally {
+      warn.mockRestore();
+    }
+  });
+
+  it.each([
+    new DOMException("Autoplay blocked", "NotAllowedError"),
+    new Error("Playback failed"),
+  ])("still warns for other fallback autoplay failures: %s", async (error) => {
+    const warn = jest.spyOn(console, "warn").mockImplementation(() => {});
+    (HTMLVideoElement.prototype.play as jest.Mock).mockRejectedValueOnce(error);
+    try {
+      render(<TestComponent src="video.mp4" isHls={false} autoPlay />);
+      await waitFor(() => {
+        expect(warn).toHaveBeenCalledWith("Fallback autoplay failed:", error);
+      });
+    } finally {
+      warn.mockRestore();
+    }
+  });
+
   it("handles non-HLS video sources correctly", () => {
     const { getByTestId } = render(
       <TestComponent src="video.mp4" isHls={false} />
