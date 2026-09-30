@@ -44,12 +44,6 @@ function persistDraft(
     : createCompetition(waveId, { idempotency_key: pending.key, config });
 }
 
-function saveOrder(pending: CompetitionEditorDraft["pending"], next: string) {
-  return pending && pending.fingerprint !== next
-    ? [pending.fingerprint, next]
-    : [next];
-}
-
 function useLatestDraftInput(
   input: ApiCompetitionDraftInput,
   fingerprint: string,
@@ -67,8 +61,6 @@ function useUnsavedCompetitionWarning(unsaved: boolean) {
     if (!unsaved) return;
     const preventExit = (event: BeforeUnloadEvent) => {
       event.preventDefault();
-      // eslint-disable-next-line @typescript-eslint/no-deprecated -- Older browser engines require this alongside preventDefault to show the unsaved-change prompt.
-      event.returnValue = "";
     };
     globalThis.addEventListener("beforeunload", preventExit);
     return () => globalThis.removeEventListener("beforeunload", preventExit);
@@ -200,8 +192,7 @@ export function useCompetitionDraftSave({
         }
         // Resolve an uncertain request with its original payload and key before
         // saving newer edits. The first response may have been lost after commit.
-        const fingerprints = saveOrder(pending.current, snapshot.fingerprint);
-        for (const nextFingerprint of fingerprints) {
+        const saveFingerprint = async (nextFingerprint: string) => {
           if (pending.current?.fingerprint !== nextFingerprint) {
             pending.current = {
               fingerprint: nextFingerprint,
@@ -227,10 +218,17 @@ export function useCompetitionDraftSave({
             waveId,
             competitionId: result.id,
           });
+        };
+        if (
+          pending.current &&
+          pending.current.fingerprint !== snapshot.fingerprint
+        ) {
+          await saveFingerprint(pending.current.fingerprint);
         }
+        await saveFingerprint(snapshot.fingerprint);
         return server.current;
-      } catch (failure) {
-        const status = getStructuredApiErrorStatus(failure);
+      } catch (error_) {
+        const status = getStructuredApiErrorStatus(error_);
         const conflict = status === 409;
         if (
           status !== undefined &&

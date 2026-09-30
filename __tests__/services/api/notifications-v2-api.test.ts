@@ -516,7 +516,21 @@ describe("fetchNotificationsV2", () => {
     ]);
   });
 
-  it("does not invent competition context for incomplete lifecycle events", async () => {
+  it.each([
+    "wave_id",
+    "competition_id",
+    "competition_title",
+    "event_id",
+    "event_type",
+  ])("rejects lifecycle events missing %s", async (missingField) => {
+    const context: Record<string, string> = {
+      wave_id: "wave",
+      competition_id: "competition",
+      competition_title: "Rank",
+      event_id: "event",
+      event_type: "WINNER_SELECTED",
+    };
+    delete context[missingField];
     (commonApiFetch as jest.Mock).mockResolvedValue({
       unread_count: 1,
       notifications: [
@@ -527,7 +541,7 @@ describe("fetchNotificationsV2", () => {
           read_at: null,
           related_identity: null,
           related_drops: [],
-          additional_context: { wave_id: "wave" },
+          additional_context: context,
         },
       ],
     });

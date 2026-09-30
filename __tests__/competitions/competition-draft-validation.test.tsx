@@ -442,3 +442,36 @@ it("offers Previous, Close editor and Publish on review and publishes the saved 
   );
   expect(mockReplace).toHaveBeenCalledWith("/waves/wave/competitions/draft");
 });
+
+it.each([false, true])(
+  "warns before leaving an unsaved draft only when local backup is unavailable: %s",
+  (storageUnavailable) => {
+    const storage = jest.spyOn(Storage.prototype, "setItem");
+    if (storageUnavailable)
+      storage.mockImplementation(() => {
+        throw new Error("Storage unavailable");
+      });
+    try {
+      const view = render(
+        <CompetitionDraftEditor wave={wave} onClose={jest.fn()} />
+      );
+      fireEvent.change(
+        screen.getByRole("combobox", { name: "Competition type" }),
+        { target: { value: "APPROVE" } }
+      );
+      fireEvent.change(
+        screen.getByRole("textbox", { name: "Competition name" }),
+        { target: { value: "Unfinished approve draft" } }
+      );
+      const leaving = new Event("beforeunload", { cancelable: true });
+      globalThis.dispatchEvent(leaving);
+      expect(leaving.defaultPrevented).toBe(storageUnavailable);
+      view.unmount();
+      const afterClosing = new Event("beforeunload", { cancelable: true });
+      globalThis.dispatchEvent(afterClosing);
+      expect(afterClosing.defaultPrevented).toBe(false);
+    } finally {
+      storage.mockRestore();
+    }
+  }
+);

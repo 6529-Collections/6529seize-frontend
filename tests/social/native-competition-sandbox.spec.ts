@@ -541,6 +541,42 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await expectNoHorizontalOverflow(page);
   });
 
+  test("protects an unfinished draft when browser storage is unavailable", async ({
+    page,
+  }) => {
+    await page.addInitScript(() => {
+      const setItem = Storage.prototype.setItem;
+      Storage.prototype.setItem = function (key: string, value: string) {
+        if (key.startsWith("competition-editor:"))
+          throw new DOMException("Storage unavailable", "QuotaExceededError");
+        return setItem.call(this, key, value);
+      };
+    });
+    const sandbox = await installCompetitionApi(page);
+    await page.goto(ROOT);
+    await page
+      .getByRole("link", { name: "Add competition", exact: true })
+      .click();
+    await page
+      .getByRole("combobox", { name: "Competition type", exact: true })
+      .selectOption("APPROVE");
+    await page
+      .getByLabel("Competition name", { exact: true })
+      .fill("Unsaved approve draft");
+    const dialogPromise = page.waitForEvent("dialog");
+    const reload = page.evaluate(() => {
+      globalThis.location.reload();
+    });
+    const dialog = await dialogPromise;
+    expect(dialog.type()).toBe("beforeunload");
+    await dialog.dismiss();
+    await reload;
+    await expect(
+      page.getByLabel("Competition name", { exact: true })
+    ).toHaveValue("Unsaved approve draft");
+    expect(sandbox.requests).toHaveLength(0);
+  });
+
   test("creates one native identity entry with dedicated immutable drop content", async ({
     page,
   }) => {
