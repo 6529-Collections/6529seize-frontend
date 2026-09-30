@@ -401,17 +401,23 @@ function RecommendationsExplorer() {
 
 const ACTIVE_VOTES_VIEW = "active-votes";
 
+function normalizeDiscoveryParams(
+  params: ReturnType<typeof useSearchParams> | null
+) {
+  return new URLSearchParams(params?.toString() ?? "");
+}
+
 export function DiscoverWaveExplorer() {
   const locale = useBrowserLocale();
   const router = useRouter();
   const pathname = usePathname();
-  const params = useSearchParams();
+  const params = normalizeDiscoveryParams(useSearchParams());
   const panelId = useId();
-  const active = params?.get("view") === ACTIVE_VOTES_VIEW;
+  const active = params.get("view") === ACTIVE_VOTES_VIEW;
   const views = ["recommendations", ACTIVE_VOTES_VIEW] as const;
   const tabsRef = useRef<(HTMLButtonElement | null)[]>([]);
   const selectView = (view: (typeof views)[number]) => {
-    const next = new URLSearchParams(params?.toString() ?? "");
+    const next = new URLSearchParams(params);
     next.set("view", view);
     router.replace(`${pathname}?${next.toString()}`, { scroll: false });
   };
