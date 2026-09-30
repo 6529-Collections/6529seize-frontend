@@ -42,7 +42,7 @@ function WebSidebarHeader({ collapsed, onToggle }: WebSidebarHeaderProps) {
         type="button"
         onClick={onToggle}
         onMouseDown={(event) => event.preventDefault()}
-        className={`tw-group/sidebar-toggle tw-absolute tw-right-0 tw-top-1/2 tw-z-20 tw-flex tw-h-[52px] -tw-translate-y-1/2 tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-p-0 tw-opacity-0 tw-transition-opacity tw-duration-150 group-focus-within/sidebar:tw-opacity-100 group-hover/sidebar:tw-opacity-100 focus-visible:tw-opacity-100 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 touch-only:tw-opacity-100 motion-reduce:tw-transition-none ${collapsed ? "tw-w-5 [body:has([data-sidebar-flyout])_&]:tw-hidden" : "tw-w-6"}`}
+        className={`tw-group/sidebar-toggle tw-absolute tw-right-0 tw-top-1/2 tw-z-20 tw-flex tw-h-[52px] tw-w-5 -tw-translate-y-1/2 tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-p-0 tw-opacity-0 tw-transition-opacity tw-duration-150 group-focus-within/sidebar:tw-opacity-100 group-hover/sidebar:tw-opacity-100 focus-visible:tw-opacity-100 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 touch-only:tw-opacity-100 motion-reduce:tw-transition-none ${collapsed ? "[body:has([data-sidebar-flyout])_&]:tw-hidden" : ""}`}
         aria-label="Toggle right sidebar"
         aria-expanded={!collapsed}
       >

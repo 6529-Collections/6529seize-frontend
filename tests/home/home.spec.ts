@@ -169,7 +169,7 @@ test("desktop account updates do not move utilities, including in short expanded
     await expect(sidebarToggle).toHaveCSS("opacity", "1");
     await page.keyboard.press("Enter");
     await expect(sidebarToggle).toHaveAttribute("aria-expanded", "true");
-    await expect(sidebarToggle).toHaveCSS("width", "24px");
+    await expect(sidebarToggle).toHaveCSS("width", "20px");
     const expandedToggleBox = await sidebarToggle.boundingBox();
     expect(expandedToggleBox).not.toBeNull();
     expect(expandedToggleBox!.y + expandedToggleBox!.height / 2).toBeCloseTo(
