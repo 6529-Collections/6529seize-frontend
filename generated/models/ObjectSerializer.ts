@@ -4,6 +4,8 @@ export * from '../models/AddActionToProxyRequest';
 export * from '../models/AirdropAddressResponse';
 export * from '../models/AirdropAddressResponseTdhWallet';
 export * from '../models/AllowlistNormalizedEntry';
+export * from '../models/ApiActiveWaveVote';
+export * from '../models/ApiActiveWaveVotesPage';
 export * from '../models/ApiAddReactionToDropRequest';
 export * from '../models/ApiAggregatedActivity';
 export * from '../models/ApiAggregatedActivityMemes';
@@ -878,6 +880,8 @@ import { AddActionToProxyRequest    } from '../models/AddActionToProxyRequest';
 import { AirdropAddressResponse } from '../models/AirdropAddressResponse';
 import { AirdropAddressResponseTdhWallet } from '../models/AirdropAddressResponseTdhWallet';
 import { AllowlistNormalizedEntry } from '../models/AllowlistNormalizedEntry';
+import { ApiActiveWaveVote } from '../models/ApiActiveWaveVote';
+import { ApiActiveWaveVotesPage } from '../models/ApiActiveWaveVotesPage';
 import { ApiAddReactionToDropRequest } from '../models/ApiAddReactionToDropRequest';
 import { ApiAggregatedActivity } from '../models/ApiAggregatedActivity';
 import { ApiAggregatedActivityMemes } from '../models/ApiAggregatedActivityMemes';
@@ -1421,7 +1425,7 @@ import { ApiNotificationsResponse } from '../models/ApiNotificationsResponse';
 import { ApiNotificationsResponseV2 } from '../models/ApiNotificationsResponseV2';
 import { ApiOgMediaAsset } from '../models/ApiOgMediaAsset';
 import { ApiOgMetadata       } from '../models/ApiOgMetadata';
-import { ApiOgMetadataDrop              } from '../models/ApiOgMetadataDrop';
+import { ApiOgMetadataDrop               } from '../models/ApiOgMetadataDrop';
 import { ApiOgMetadataEntityType } from '../models/ApiOgMetadataEntityType';
 import { ApiOgMetadataProfile                  } from '../models/ApiOgMetadataProfile';
 import { ApiOgMetadataProfileBanner } from '../models/ApiOgMetadataProfileBanner';
@@ -2037,6 +2041,8 @@ let typeMap: {[index: string]: any} = {
     "AirdropAddressResponse": AirdropAddressResponse,
     "AirdropAddressResponseTdhWallet": AirdropAddressResponseTdhWallet,
     "AllowlistNormalizedEntry": AllowlistNormalizedEntry,
+    "ApiActiveWaveVote": ApiActiveWaveVote,
+    "ApiActiveWaveVotesPage": ApiActiveWaveVotesPage,
     "ApiAddReactionToDropRequest": ApiAddReactionToDropRequest,
     "ApiAggregatedActivity": ApiAggregatedActivity,
     "ApiAggregatedActivityMemes": ApiAggregatedActivityMemes,
