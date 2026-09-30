@@ -1,4 +1,5 @@
 import path from "node:path";
+import type { Page } from "@playwright/test";
 import type { ApiDropV2 } from "../../generated/models/ApiDropV2";
 import { ApiDropMainType } from "../../generated/models/ApiDropMainType";
 import type { ApiWaveOverview } from "../../generated/models/ApiWaveOverview";
@@ -18,26 +19,106 @@ const DROP_ID = "00000000-0000-4000-8000-000000000530";
 const MEDIA_ROOT =
   "https://d3lqz0a4bldqgf.cloudfront.net/drops/preview-safety/";
 
+async function fetchSandboxDrop(page: Page, baseURL: string | undefined) {
+  const apiOrigin = getSandboxApiOrigin(baseURL);
+  const response = await page.request.get(
+    `${apiOrigin}/api/v2/waves/${WAVE_ID}/drops`
+  );
+  expect(response.ok()).toBe(true);
+  const feed = (await response.json()) as {
+    wave: ApiWaveOverview;
+    drops: ApiDropV2[];
+  };
+  const source = feed.drops.find((drop) => drop.id === DROP_ID);
+  if (!source) throw new Error("Image fixture requires the sandbox drop");
+  return { apiOrigin, feed, source };
+}
+
 // The parent composer suite supplies the local-only mutation guard and both
 // desktop/touch projects. Browser requests, decoding and gallery resets are the
 // regression risk here; pixel-budget arithmetic belongs in the resizer tests.
 export function defineWaveImagePreviewTests() {
+  test("opens preview and additional images above the Memes drop detail view", async ({
+    page,
+    baseURL,
+  }) => {
+    const { apiOrigin, feed, source } = await fetchSandboxDrop(page, baseURL);
+    const images = [`${MEDIA_ROOT}preview.jpg`, `${MEDIA_ROOT}supporting.jpg`];
+    const metadata = [
+      {
+        data_key: "additional_media",
+        data_value: JSON.stringify({
+          preview_image: images[0],
+          artwork_commentary_media: [images[1]],
+        }),
+      },
+    ];
+    const drop: ApiDropV2 = {
+      ...source,
+      title: "Supplemental media fixture",
+      drop_type: ApiDropMainType.Submission,
+      priority_metadata: metadata,
+    };
+    const headers = { "access-control-allow-origin": "*" };
+    await page.route(`${apiOrigin}/api/settings`, (route) =>
+      route.fulfill({ headers, json: { memes_wave_id: WAVE_ID } })
+    );
+    await page.route(`${apiOrigin}/api/v2/drops/${DROP_ID}`, (route) =>
+      route.fulfill({ headers, json: { drop, wave: feed.wave } })
+    );
+    await page.route(`${apiOrigin}/api/v2/drops/${DROP_ID}/metadata`, (route) =>
+      route.fulfill({ headers, json: metadata })
+    );
+    await page.route(`${apiOrigin}/api/v2/waves/${WAVE_ID}/drops*`, (route) =>
+      route.fulfill({ headers, json: { ...feed, drops: [drop] } })
+    );
+    await page.route(`${MEDIA_ROOT}**`, (route) =>
+      route.fulfill({
+        contentType: "image/png",
+        path: path.resolve("public/test-wave-icon.png"),
+      })
+    );
+    await page.goto(`/waves/${WAVE_ID}?drop=${DROP_ID}`, {
+      waitUntil: "domcontentloaded",
+    });
+    await waitForRouteReady(page);
+    await dismissNextDevTools(page);
+
+    for (const heading of ["Preview Image", "Additional Media"]) {
+      const section = page
+        .getByRole("heading", { name: heading, exact: true })
+        .locator("..");
+      const trigger = section.getByRole("button", {
+        name: /^Open (preview image|additional media \d+)$/,
+      });
+      await trigger.scrollIntoViewIfNeeded();
+      await trigger.click();
+      const expanded = page.getByRole("img", {
+        name: "Expanded image preview",
+      });
+      await expect(expanded).toBeVisible();
+      await expect(expanded).toHaveAttribute("src", /AUTOx1080/);
+      await expect(
+        page.getByRole("button", { name: "Download media" }).last()
+      ).toBeVisible();
+      await expect(
+        page.getByRole("button", { name: "Open in new tab" }).last()
+      ).toBeVisible();
+      await page.getByRole("button", { name: "Close media" }).click();
+      await expect(expanded).toBeHidden();
+      // The image viewer must close without also closing its underlying drop.
+      await expect(
+        section.getByRole("heading", { name: heading, exact: true })
+      ).toBeVisible();
+    }
+    await expectNoHorizontalOverflow(page);
+  });
+
   test("keeps failed drop previews and gallery navigation off original files", async ({
     page,
     baseURL,
   }) => {
-    const apiOrigin = getSandboxApiOrigin(baseURL);
-    const response = await page.request.get(
-      `${apiOrigin}/api/v2/waves/${WAVE_ID}/drops`
-    );
-    expect(response.ok()).toBe(true);
-    const feed = (await response.json()) as {
-      wave: ApiWaveOverview;
-      drops: ApiDropV2[];
-    };
-    const source = feed.drops.find((drop) => drop.id === DROP_ID);
-    if (!source)
-      throw new Error("Image preview fixture requires the sandbox drop");
+    const { apiOrigin, feed, source } = await fetchSandboxDrop(page, baseURL);
     const originals = [`${MEDIA_ROOT}large.jpg`, `${MEDIA_ROOT}long.gif`];
     const drop: ApiDropV2 = {
       ...source,
@@ -66,14 +147,61 @@ export function defineWaveImagePreviewTests() {
     page.on("request", (request) => {
       if (request.url().startsWith(MEDIA_ROOT)) requests.push(request.url());
     });
-    await page.route(`${MEDIA_ROOT}**`, (route) =>
-      route.fulfill({ status: 422, body: "Preview unavailable" })
-    );
-    await page.goto(`/waves/${WAVE_ID}?drop=${DROP_ID}`, {
-      waitUntil: "domcontentloaded",
+    let releasePreviews = () => {};
+    const previewResponseGate = new Promise<void>((resolve) => {
+      releasePreviews = resolve;
     });
-    await waitForRouteReady(page);
-    await dismissNextDevTools(page);
+    await page.route(`${MEDIA_ROOT}**`, async (route) => {
+      await previewResponseGate;
+      await route.fulfill({ status: 422, body: "Preview unavailable" });
+    });
+    try {
+      await page.goto(`/waves/${WAVE_ID}?drop=${DROP_ID}`, {
+        waitUntil: "domcontentloaded",
+      });
+      await waitForRouteReady(page);
+      await dismissNextDevTools(page);
+      const inlineLoader = page
+        .getByRole("status", {
+          name: "Loading image",
+          exact: true,
+        })
+        .last();
+      await expect(inlineLoader).toBeVisible();
+      const bounds = await inlineLoader.evaluate((element) => {
+        const placeholder = element.getBoundingClientRect();
+        const frame = element.parentElement!.getBoundingClientRect();
+        const maxSize =
+          16 *
+          Number.parseFloat(
+            getComputedStyle(document.documentElement).fontSize
+          );
+        return {
+          width: placeholder.width,
+          height: placeholder.height,
+          maxWidth: Math.min(maxSize, frame.width),
+          maxHeight: Math.min(maxSize, frame.height),
+          x: placeholder.x - frame.x,
+          y: placeholder.y - frame.y,
+        };
+      });
+      expect(bounds.width).toBeGreaterThan(0);
+      expect(bounds.height).toBeGreaterThan(0);
+      expect(Math.abs(bounds.width - bounds.maxWidth)).toBeLessThanOrEqual(1);
+      expect(Math.abs(bounds.height - bounds.maxHeight)).toBeLessThanOrEqual(1);
+      expect(Math.abs(bounds.x)).toBeLessThanOrEqual(1);
+      expect(Math.abs(bounds.y)).toBeLessThanOrEqual(1);
+      await page.emulateMedia({ reducedMotion: "reduce" });
+      await expect(
+        page
+          .getByRole("status", { name: "Loading image", exact: true })
+          .last()
+          .locator('[aria-hidden="true"]')
+      ).toHaveCSS("animation-name", "none");
+      await expectNoHorizontalOverflow(page);
+    } finally {
+      releasePreviews();
+    }
     await page
       .getByRole("button", { name: /^Open (image preview|drop media)$/ })
       .first()

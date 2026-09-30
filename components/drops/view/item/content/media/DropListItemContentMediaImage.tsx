@@ -4,6 +4,8 @@ import {
   DropImagePreview,
   getDropImagePreviewSources,
 } from "./DropImagePreview";
+import { GifPreviewLoadingIndicator } from "./GifPreviewLoadingIndicator";
+import { isGifImageUrl } from "@/helpers/gif-preview.helpers";
 import Button from "@/components/utils/button/Button";
 import { useDropImageGallery } from "@/components/drops/view/part/DropImageGalleryProvider";
 import { ImageScale } from "@/helpers/image.helpers";
@@ -52,6 +54,7 @@ function LoadingPlaceholder({
 
 function DropImageContent({
   src,
+  alt,
   imageScale,
   retryTick,
   imgRef,
@@ -64,6 +67,7 @@ function DropImageContent({
   handleError,
 }: {
   readonly src: string;
+  readonly alt: string;
   readonly imageScale: ImageScale;
   readonly retryTick: number;
   readonly imgRef: React.RefObject<HTMLImageElement | null>;
@@ -97,7 +101,7 @@ function DropImageContent({
 
   return intrinsicHeight ? (
     <span
-      className="tw-relative tw-block tw-min-h-40 tw-w-full tw-max-w-full tw-overflow-hidden tw-bg-iron-900/40"
+      className={`tw-relative tw-block tw-min-h-40 tw-w-full tw-max-w-full tw-overflow-hidden ${isGifImageUrl(src) ? "" : "tw-bg-iron-900/40"}`}
       style={{
         aspectRatio: aspectRatio ?? INTRINSIC_IMAGE_RESERVED_ASPECT_RATIO,
         maxHeight: INTRINSIC_IMAGE_MAX_HEIGHT,
@@ -109,7 +113,7 @@ function DropImageContent({
         ref={imgRef}
         originalSrc={src}
         imageScale={imageScale}
-        alt={t(DEFAULT_LOCALE, "drop.media.alt")}
+        alt={alt}
         fill
         loading={loadStrategy === "eager" ? "eager" : undefined}
         sizes="(max-width: 768px) 100vw, 768px"
@@ -125,7 +129,7 @@ function DropImageContent({
       ref={imgRef}
       originalSrc={src}
       imageScale={imageScale}
-      alt={t(DEFAULT_LOCALE, "drop.media.alt")}
+      alt={alt}
       fill
       loading={loadStrategy === "eager" ? "eager" : undefined}
       sizes="(max-width: 768px) 100vw, 768px"
@@ -169,6 +173,8 @@ function ImageInteractionLayer({
 
 type DropListItemContentMediaImageProps = {
   readonly src: string;
+  readonly alt?: string | undefined;
+  readonly openPreviewLabel?: string | undefined;
   readonly maxRetries?: number | undefined;
   readonly isCompetitionDrop?: boolean | undefined;
   readonly disableModal?: boolean | undefined;
@@ -196,6 +202,8 @@ function DropListItemContentMediaImage({
 
 function DropListItemContentMediaImageContent({
   src,
+  alt = t(DEFAULT_LOCALE, "drop.media.alt"),
+  openPreviewLabel = t(DEFAULT_LOCALE, "drop.media.openPreview"),
   maxRetries = 0,
   isCompetitionDrop = false,
   disableModal = false,
@@ -315,7 +323,7 @@ function DropListItemContentMediaImageContent({
           intrinsicHeight ? "tw-min-h-40" : "tw-h-full"
         } ${isCompetitionDrop ? "tw-justify-center" : ""}`}
       >
-        {!loaded && !unavailable && (
+        {!loaded && !unavailable && !isGifImageUrl(src) && (
           <LoadingPlaceholder hasTouchScreen={hasTouchScreen} />
         )}
 
@@ -328,6 +336,7 @@ function DropListItemContentMediaImageContent({
           {shouldLoadImage && (
             <DropImageContent
               src={src}
+              alt={alt}
               imageScale={imageScale}
               retryTick={retryTick}
               imgRef={imgRef}
@@ -339,6 +348,9 @@ function DropListItemContentMediaImageContent({
               handleIntrinsicImageError={handleIntrinsicImageError}
               handleError={handleError}
             />
+          )}
+          {shouldLoadImage && !loaded && !unavailable && isGifImageUrl(src) && (
+            <GifPreviewLoadingIndicator />
           )}
           {unavailable && !disableModal && (
             <div className="tw-absolute tw-bottom-3 tw-left-1/2 tw-z-30 -tw-translate-x-1/2">
@@ -355,7 +367,7 @@ function DropListItemContentMediaImageContent({
           {!disableModal && (
             <ImageInteractionLayer
               boundsStyle={imageActionBoundsStyle}
-              label={t(DEFAULT_LOCALE, "drop.media.openPreview")}
+              label={openPreviewLabel}
               onClick={handleImageClick}
               actions={
                 loaded || unavailable ? (
