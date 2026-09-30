@@ -194,23 +194,19 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       name: /Profile Waves Feed/,
     });
     await expect(profileFeedLink).toBeVisible();
-    // The primary sidebar can still expose its global Waves link at this width.
+    const wavesMain = page.getByRole("main");
     await expect(
-      page.getByRole("main").getByRole("link", { name: "Waves", exact: true })
-    ).toHaveCount(0);
-    const wavesHeader = page
-      .getByRole("heading", {
-        name: "Waves",
-        exact: true,
-        level: 2,
+      page.getByRole("region", {
+        name: /All recent waves list|Regular waves list/,
       })
-      .locator("..");
-    await expect(wavesHeader).toContainText("Waves");
+    ).toBeVisible();
+    // Global navigation can still expose Waves here. The list header is plain
+    // text on web, so scope its navigation invariant to main without a heading.
     await expect(
-      wavesHeader.getByRole("link", { name: "Waves", exact: true })
+      wavesMain.getByRole("link", { name: "Waves", exact: true })
     ).toHaveCount(0);
     await expect(
-      wavesHeader.getByRole("link", { name: "Discover Waves", exact: true })
+      wavesMain.getByRole("link", { name: "Discover Waves", exact: true })
     ).toHaveCount(0);
     await expect(
       page.getByRole("link", { name: /Profile Waves Feed/ }).locator("svg")
@@ -353,6 +349,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     await expect(
       page.getByRole("link", { name: /Profile Waves Feed/ })
     ).toHaveAttribute("href", "/waves");
+    await expect(feedNavigation).toBeHidden();
 
     await page.setViewportSize({ width: 1023, height: 900 });
     await expect(
