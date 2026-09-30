@@ -23,6 +23,10 @@ import {
 } from "./ImageMediaModal";
 import type { MediaLoadStrategy } from "./mediaLoadStrategy";
 import { useMediaActions } from "./useMediaActions";
+import Image from "next/image";
+import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
+import { ImageQualityToggle } from "./ImageQualityToggle";
+import { useOriginalImage } from "./useOriginalImage";
 
 const loadingPlaceholderStyle: React.CSSProperties = {
   width: "100%",
@@ -36,6 +40,21 @@ const loadingPlaceholderStyle: React.CSSProperties = {
 };
 const INTRINSIC_IMAGE_RESERVED_ASPECT_RATIO = "16 / 9";
 const INTRINSIC_IMAGE_MAX_HEIGHT = "16rem";
+
+function OriginalImageLoadingIndicator({ isGif }: { readonly isGif: boolean }) {
+  const label = t(
+    DEFAULT_LOCALE,
+    isGif ? "drop.media.loadingOriginalGif" : "drop.media.loadingOriginalImage"
+  );
+  return (
+    <output
+      aria-label={label}
+      className="tw-pointer-events-none tw-absolute tw-left-1/2 tw-top-1/2 tw-z-30 -tw-translate-x-1/2 -tw-translate-y-1/2 tw-rounded-lg tw-bg-iron-950/90 tw-px-3 tw-py-2 tw-text-sm tw-text-iron-100"
+    >
+      {label}
+    </output>
+  );
+}
 
 function LoadingPlaceholder({
   hasTouchScreen,
@@ -65,6 +84,7 @@ function DropImageContent({
   handleImageLoad,
   handleIntrinsicImageError,
   handleError,
+  preferHighQualityImage,
 }: {
   readonly src: string;
   readonly alt: string;
@@ -78,6 +98,7 @@ function DropImageContent({
   readonly handleImageLoad: () => void;
   readonly handleIntrinsicImageError: () => void;
   readonly handleError: () => void;
+  readonly preferHighQualityImage: boolean;
 }) {
   const [aspectRatio, setAspectRatio] = useState<string | undefined>();
   const imageClassName = `${
@@ -113,6 +134,7 @@ function DropImageContent({
         ref={imgRef}
         originalSrc={src}
         imageScale={imageScale}
+        preferHighQuality={preferHighQualityImage}
         alt={alt}
         fill
         loading={loadStrategy === "eager" ? "eager" : undefined}
@@ -129,10 +151,15 @@ function DropImageContent({
       ref={imgRef}
       originalSrc={src}
       imageScale={imageScale}
+      preferHighQuality={preferHighQualityImage}
       alt={alt}
       fill
       loading={loadStrategy === "eager" ? "eager" : undefined}
-      sizes="(max-width: 768px) 100vw, 768px"
+      sizes={
+        preferHighQualityImage
+          ? "(max-width: 1024px) 100vw, 896px"
+          : "(max-width: 768px) 100vw, 768px"
+      }
       className={imageClassName}
       style={{
         objectFit: "contain",
@@ -183,6 +210,8 @@ type DropListItemContentMediaImageProps = {
   readonly loadStrategy?: MediaLoadStrategy | undefined;
   readonly intrinsicHeight?: boolean | undefined;
   readonly galleryItemId?: string | undefined;
+  readonly showOriginalQualityToggle?: boolean | undefined;
+  readonly preferHighQualityImage?: boolean | undefined;
 };
 
 function DropListItemContentMediaImage({
@@ -212,6 +241,8 @@ function DropListItemContentMediaImageContent({
   loadStrategy = "in-view",
   intrinsicHeight = false,
   galleryItemId,
+  showOriginalQualityToggle = false,
+  preferHighQualityImage = false,
 }: DropListItemContentMediaImageProps & { readonly imageScale: ImageScale }) {
   const [ref, inView] = useInView<HTMLDivElement>();
   const [loaded, setLoaded] = useState(false);
@@ -221,9 +252,14 @@ function DropListItemContentMediaImageContent({
   const { isCapacitor } = useCapacitor();
   const { hasTouchScreen } = useDeviceInfo();
   const imageGallery = useDropImageGallery();
+  const quality = useOriginalImage(src, showOriginalQualityToggle);
+  const canToggleOriginal =
+    showOriginalQualityToggle && quality.canViewOriginal;
+  const isGif = isGifImageUrl(src);
 
   const imageFrameRef = useRef<HTMLDivElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
+  const originalImgRef = useRef<HTMLImageElement>(null);
   const modalImageRef = useRef<HTMLImageElement>(null);
   const { downloadMedia, isDownloading, openLabel, openMedia } =
     useMediaActions({
@@ -260,12 +296,16 @@ function DropListItemContentMediaImageContent({
       return;
     }
 
-    if (galleryItemId && imageGallery?.openImage(galleryItemId)) {
+    if (
+      !showOriginalQualityToggle &&
+      galleryItemId &&
+      imageGallery?.openImage(galleryItemId)
+    ) {
       return;
     }
 
     setIsModalOpen(true);
-  }, [disableModal, galleryItemId, imageGallery]);
+  }, [disableModal, galleryItemId, imageGallery, showOriginalQualityToggle]);
 
   const handleImageClick = useCallback(
     (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -292,11 +332,13 @@ function DropListItemContentMediaImageContent({
   );
 
   const handleFullScreen = useCallback(() => {
-    const fullscreenTarget = modalImageRef.current ?? imgRef.current;
+    const fullscreenTarget =
+      modalImageRef.current ??
+      (quality.showingOriginal ? originalImgRef.current : imgRef.current);
     if (fullscreenTarget) {
       requestCenteredImageFullscreen(fullscreenTarget);
     }
-  }, []);
+  }, [quality.showingOriginal]);
 
   const shouldLoadImage = loadStrategy === "eager" || inView;
   const unavailable =
@@ -307,8 +349,8 @@ function DropListItemContentMediaImageContent({
     imageObjectPosition ?? (isCompetitionDrop ? "center" : "left top");
   const imageActionBoundsStyle = useContainedImageBoundsStyle({
     containerRef: imageFrameRef,
-    imageRef: imgRef,
-    loaded,
+    imageRef: quality.showingOriginal ? originalImgRef : imgRef,
+    loaded: quality.showingOriginal || loaded,
     objectPosition: resolvedObjectPosition,
   });
   const handleIntrinsicImageError = useCallback(() => {
@@ -323,7 +365,7 @@ function DropListItemContentMediaImageContent({
           intrinsicHeight ? "tw-min-h-40" : "tw-h-full"
         } ${isCompetitionDrop ? "tw-justify-center" : ""}`}
       >
-        {!loaded && !unavailable && !isGifImageUrl(src) && (
+        {!loaded && !unavailable && !quality.showingOriginal && !isGif && (
           <LoadingPlaceholder hasTouchScreen={hasTouchScreen} />
         )}
 
@@ -333,26 +375,62 @@ function DropListItemContentMediaImageContent({
             intrinsicHeight ? "tw-w-full" : "tw-h-full tw-w-full"
           }`}
         >
-          {shouldLoadImage && (
-            <DropImageContent
-              src={src}
-              alt={alt}
-              imageScale={imageScale}
-              retryTick={retryTick}
-              imgRef={imgRef}
-              loaded={loaded}
-              intrinsicHeight={intrinsicHeight}
-              loadStrategy={loadStrategy}
-              resolvedObjectPosition={resolvedObjectPosition}
-              handleImageLoad={handleImageLoad}
-              handleIntrinsicImageError={handleIntrinsicImageError}
-              handleError={handleError}
+          {shouldLoadImage && quality.requested && canToggleOriginal && (
+            <Image
+              ref={originalImgRef}
+              src={resolveIpfsUrlSync(src)}
+              alt={t(
+                DEFAULT_LOCALE,
+                isGif
+                  ? "drop.media.originalGifAlt"
+                  : "drop.media.originalImageAlt"
+              )}
+              fill
+              sizes="(max-width: 768px) 100vw, 768px"
+              unoptimized
+              loading="eager"
+              hidden={!quality.showingOriginal}
+              style={{
+                objectFit: "contain",
+                objectPosition: resolvedObjectPosition,
+              }}
+              onLoad={quality.onLoad}
+              onError={quality.onError}
             />
           )}
-          {shouldLoadImage && !loaded && !unavailable && isGifImageUrl(src) && (
-            <GifPreviewLoadingIndicator />
+          {shouldLoadImage && (
+            <span
+              className={
+                intrinsicHeight ? "tw-block" : "tw-absolute tw-inset-0"
+              }
+              hidden={quality.showingOriginal && canToggleOriginal}
+            >
+              <DropImageContent
+                src={src}
+                alt={alt}
+                imageScale={imageScale}
+                retryTick={retryTick}
+                imgRef={imgRef}
+                loaded={loaded}
+                intrinsicHeight={intrinsicHeight}
+                loadStrategy={loadStrategy}
+                resolvedObjectPosition={resolvedObjectPosition}
+                handleImageLoad={handleImageLoad}
+                handleIntrinsicImageError={handleIntrinsicImageError}
+                handleError={handleError}
+                preferHighQualityImage={preferHighQualityImage}
+              />
+            </span>
           )}
-          {unavailable && !disableModal && (
+          {quality.loading && canToggleOriginal && !isModalOpen && (
+            <OriginalImageLoadingIndicator isGif={isGif} />
+          )}
+          {shouldLoadImage &&
+            !loaded &&
+            !unavailable &&
+            !quality.showingOriginal &&
+            isGif && <GifPreviewLoadingIndicator />}
+          {unavailable && !quality.showingOriginal && !disableModal && (
             <div className="tw-absolute tw-bottom-3 tw-left-1/2 tw-z-30 -tw-translate-x-1/2">
               <Button
                 type="button"
@@ -370,7 +448,7 @@ function DropListItemContentMediaImageContent({
               label={openPreviewLabel}
               onClick={handleImageClick}
               actions={
-                loaded || unavailable ? (
+                loaded || unavailable || canToggleOriginal ? (
                   <InlineMediaActions
                     variant="image"
                     onOpen={openMedia}
@@ -378,9 +456,27 @@ function DropListItemContentMediaImageContent({
                     onDownload={downloadMedia}
                     isDownloading={isDownloading}
                     onFullscreen={handleFullScreen}
-                    fullscreenTargetAvailable={!isCapacitor && loaded}
-                    visibility={unavailable ? "always" : "desktop-hover"}
-                  />
+                    fullscreenTargetAvailable={
+                      !isCapacitor && (loaded || quality.showingOriginal)
+                    }
+                    visibility={
+                      unavailable || canToggleOriginal
+                        ? "always"
+                        : "desktop-hover"
+                    }
+                    className={
+                      canToggleOriginal ? "tw-pointer-events-auto" : undefined
+                    }
+                  >
+                    {canToggleOriginal && (
+                      <ImageQualityToggle
+                        showingOriginal={quality.requested}
+                        failed={quality.failed}
+                        onToggle={quality.toggle}
+                        isGif={isGif}
+                      />
+                    )}
+                  </InlineMediaActions>
                 ) : null
               }
             />
@@ -398,6 +494,8 @@ function DropListItemContentMediaImageContent({
           isDownloading={isDownloading}
           onFullscreen={handleFullScreen}
           fullscreenTargetAvailable={!isCapacitor}
+          originalQuality={canToggleOriginal ? quality : undefined}
+          preferHighQualityPreview={preferHighQualityImage}
         />
       )}
     </>

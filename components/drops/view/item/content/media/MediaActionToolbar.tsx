@@ -125,6 +125,7 @@ export function InlineMediaActions({
         className
       )}
     >
+      {children}
       {canFullscreen && (
         <ToolbarButton
           label={actionLabels.fullscreen}
@@ -149,7 +150,6 @@ export function InlineMediaActions({
           <ArrowDownTrayIcon className="tw-size-4" aria-hidden="true" />
         </ToolbarButton>
       )}
-      {children}
     </div>
   );
 }
