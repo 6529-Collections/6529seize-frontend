@@ -194,6 +194,10 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       name: /Profile Waves Feed/,
     });
     await expect(profileFeedLink).toBeVisible();
+    // The primary sidebar can still expose its global Waves link at this width.
+    await expect(
+      page.getByRole("main").getByRole("link", { name: "Waves", exact: true })
+    ).toHaveCount(0);
     const wavesHeader = page
       .getByRole("heading", {
         name: "Waves",
