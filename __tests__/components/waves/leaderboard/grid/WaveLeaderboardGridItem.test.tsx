@@ -313,7 +313,7 @@ describe("WaveLeaderboardGridItem", () => {
     expect(screen.getByRole("heading", { name: "Bright title" })).toHaveClass(
       "tw-text-iron-100",
       "tw-text-sm",
-      "tw-font-semibold"
+      "tw-font-medium"
     );
     expect(screen.getByText("Description with external text.")).toHaveClass(
       "tw-text-iron-400",

@@ -975,6 +975,9 @@ export const EN_GB_MESSAGES = {
   "waves.create.drops.maxSimultaneousSubmissions.description":
     "Maximum number of simultaneous submissions per participant. Optional. Unlimited if left blank.",
   "waves.proposalCard.contextLabel": "Proposal",
+  "waves.proposalCard.summaryLabel": "Summary",
+  "waves.proposalCard.showDetails": "Show details ({count})",
+  "waves.proposalCard.hideDetails": "Hide details",
   "waves.proposalCard.readFull": "Read full",
   "waves.proposalCard.readFullNamed": "Read full: {title}",
   "waves.proposalCard.untitledProposal": "Untitled proposal",

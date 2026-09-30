@@ -14,11 +14,13 @@ describe("HeroHeader", () => {
   it("renders the hero heading copy", () => {
     render(<HeroHeader />);
 
-    expect(
-      screen.getByRole("heading", {
-        name: "Building a decentralized network state",
-      })
-    ).toBeInTheDocument();
+    const heading = screen.getByRole("heading", {
+      name: "Building a decentralized network state",
+    });
+
+    expect(heading).toBeInTheDocument();
+    expect(heading).toHaveClass("tw-font-semibold");
+    expect(heading).not.toHaveClass("tw-font-medium");
   });
 
   it("renders a quick link to network health", () => {

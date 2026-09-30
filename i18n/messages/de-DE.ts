@@ -990,6 +990,9 @@ export const DE_DE_MESSAGES = {
   "waves.create.drops.maxSimultaneousSubmissions.description":
     "Maximale Anzahl gleichzeitiger Einreichungen pro Teilnehmer. Optional. Leer lassen für unbegrenzt.",
   "waves.proposalCard.contextLabel": "Vorschlag",
+  "waves.proposalCard.summaryLabel": "Zusammenfassung",
+  "waves.proposalCard.showDetails": "Details anzeigen ({count})",
+  "waves.proposalCard.hideDetails": "Details ausblenden",
   "waves.proposalCard.readFull": "Vollständig lesen",
   "waves.proposalCard.readFullNamed": "Vollständig lesen: {title}",
   "waves.proposalCard.untitledProposal": "Unbenannter Vorschlag",
