@@ -3,6 +3,7 @@ import React from "react";
 import { WaveLeaderboardDropContent } from "@/components/waves/leaderboard/content/WaveLeaderboardDropContent";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ApiWaveParticipationSubmissionStrategyType } from "@/generated/models/ApiWaveParticipationSubmissionStrategyType";
+import ProposalCardContextLabel from "@/components/waves/drops/proposal/ProposalCardContextLabel";
 
 jest.mock("next/navigation", () => ({
   usePathname: jest.fn(),
@@ -10,10 +11,13 @@ jest.mock("next/navigation", () => ({
   useSearchParams: jest.fn(),
 }));
 const waveDropContentMock = jest.fn((props: any) => (
-  <div
-    data-testid="content"
-    onClick={() => props.onDropContentClick(props.drop)}
-  />
+  <>
+    <ProposalCardContextLabel />
+    <div
+      data-testid="content"
+      onClick={() => props.onDropContentClick(props.drop)}
+    />
+  </>
 ));
 jest.mock("@/components/waves/drops/WaveDropContent", () => ({
   __esModule: true,
@@ -75,6 +79,7 @@ describe("WaveLeaderboardDropContent", () => {
         contentPresentation: "quorumCompact",
       })
     );
+    expect(screen.queryByTestId("proposal-card-context-label")).toBeNull();
   });
 
   it("renders proposal cards with a working full-detail action", () => {

@@ -3,6 +3,7 @@ import { ApiDropType } from "@/generated/models/ApiDropType";
 import {
   CHAT_PROPOSAL_CARD_SURFACE_CLASS,
   PROPOSAL_CARD_SURFACE_CLASS,
+  QUORUM_PROPOSAL_CARD_SURFACE_CLASS,
   type DropContentPresentation,
 } from "../dropContentPresentation";
 import { DropLocation } from "../drop.types";
@@ -28,11 +29,13 @@ const getDropStyles = ({
   rank,
   isDrop,
   isChatProposal,
+  isQuorumCompact,
 }: {
   isActiveDrop: boolean;
   rank: number | null;
   isDrop: boolean;
   isChatProposal: boolean;
+  isQuorumCompact: boolean;
 }): string => {
   if (!isDrop) {
     return "";
@@ -44,6 +47,10 @@ const getDropStyles = ({
 
   if (isChatProposal) {
     return CHAT_PROPOSAL_CARD_SURFACE_CLASS;
+  }
+
+  if (isQuorumCompact) {
+    return QUORUM_PROPOSAL_CARD_SURFACE_CLASS;
   }
 
   if (rank === null) {
@@ -100,11 +107,13 @@ export default function ParticipationDropContainer({
   const isDrop = drop.drop_type === ApiDropType.Participatory;
   const isChatProposal =
     contentPresentation === "proposalCard" && alignCardWithContent;
+  const isQuorumCompact = contentPresentation === "quorumCompact";
   const dropStyles = getDropStyles({
     isActiveDrop,
     rank: useRankStyles ? drop.rank : null,
     isDrop,
     isChatProposal,
+    isQuorumCompact,
   });
   const backgroundClass = getBackgroundClass({
     isActiveDrop,
