@@ -41,6 +41,7 @@ import { useMarkWaveNotificationsRead } from "@/hooks/useMarkWaveNotificationsRe
 
 // Define nested structures for context data
 interface WavesContextData {
+  readonly isPinnedWavesLoading?: boolean;
   readonly list: MinimalWave[];
   readonly isFetching: boolean;
   readonly isFetchingNextPage: boolean;
@@ -517,6 +518,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
         : null;
 
     const waves: WavesContextData = {
+      isPinnedWavesLoading: mainWavesData.isPinnedWavesLoading,
       list: wavesHookData.waves,
       isFetching: wavesHookData.isFetching,
       isFetchingNextPage: wavesHookData.isFetchingNextPage,
@@ -586,6 +588,7 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
     };
   }, [
     wavesHookData.waves,
+    mainWavesData.isPinnedWavesLoading,
     wavesHookData.isFetching,
     wavesHookData.isFetchingNextPage,
     wavesHookData.hasNextPage,

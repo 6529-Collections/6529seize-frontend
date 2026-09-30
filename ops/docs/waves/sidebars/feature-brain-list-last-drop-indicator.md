@@ -84,7 +84,7 @@ Timestamp source and precedence:
 
 1. Non-muted rows sort above muted rows.
 2. Within each mute group, rows sort by newest timestamp.
-3. Pinned and regular wave sections each preserve this ordering.
+3. `Pinned`, `Joined`, and `All` collections each preserve this ordering.
 4. Direct-message rows still show `Last drop`, but row pin controls stay hidden.
 
 ## Recovery and Edge Cases

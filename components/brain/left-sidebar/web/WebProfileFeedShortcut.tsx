@@ -7,6 +7,7 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import Link from "next/link";
 import React from "react";
+import { WAVE_HEADER_ACTION_CLASSES } from "../waves/WaveHeaderActions";
 
 export const PROFILE_FEED_TOOLTIP_ID = "profile-feed-shortcut-tooltip";
 
@@ -55,25 +56,22 @@ function isModifiedClick(event: React.MouseEvent<HTMLAnchorElement>) {
 export function WebProfileFeedShortcut({
   basePath,
   isCollapsed,
+  mobile = false,
 }: {
   readonly basePath: string;
   readonly isCollapsed: boolean;
+  readonly mobile?: boolean;
 }) {
   const { activeWave } = useMyStream();
   const locale = useBrowserLocale();
   const isMobileLayoutViewport = useIsMobileLayoutViewport();
-  const href = isMobileLayoutViewport
-    ? `${basePath}?view=profile-feed`
-    : basePath;
-  const isActive = activeWave.id === null && !isMobileLayoutViewport;
+  const opensMobileFeed = mobile || isMobileLayoutViewport;
+  const href = opensMobileFeed ? `${basePath}?view=profile-feed` : basePath;
+  const isActive = activeWave.id === null && !opensMobileFeed;
   const profileFeedLabel = t(locale, "waves.mobile.profileFeed.title");
 
   const handleClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
-    if (
-      isMobileLayoutViewport ||
-      event.defaultPrevented ||
-      isModifiedClick(event)
-    ) {
+    if (opensMobileFeed || event.defaultPrevented || isModifiedClick(event)) {
       return;
     }
 
@@ -98,7 +96,7 @@ export function WebProfileFeedShortcut({
           aria-current={isActive ? "page" : undefined}
           className="tw-flex tw-items-center tw-justify-center tw-no-underline"
           data-tooltip-id={PROFILE_FEED_TOOLTIP_ID}
-          data-tooltip-content={profileFeedLabel}
+          data-tooltip-content={t(locale, "waves.sidebar.openProfileFeed")}
         >
           <ProfileFeedAvatar isActive={isActive} />
         </Link>
@@ -107,29 +105,17 @@ export function WebProfileFeedShortcut({
   }
 
   return (
-    <div
-      className={`tw-group tw-mt-2 tw-flex tw-items-center tw-gap-x-4 tw-px-5 tw-py-2 tw-transition-all tw-duration-200 tw-ease-out ${
-        isActive
-          ? "tw-bg-iron-700/60 desktop-hover:hover:tw-bg-iron-700/70"
-          : "desktop-hover:hover:tw-bg-iron-900/80"
-      }`}
+    <Link
+      href={href}
+      prefetch={false}
+      onClick={handleClick}
+      aria-label={profileFeedLabel}
+      aria-current={isActive ? "page" : undefined}
+      className={`${WAVE_HEADER_ACTION_CLASSES} ${isActive ? "tw-text-primary-300" : "tw-text-iron-300"}`}
+      data-tooltip-id={PROFILE_FEED_TOOLTIP_ID}
+      data-tooltip-content={t(locale, "waves.sidebar.openProfileFeed")}
     >
-      <Link
-        href={href}
-        prefetch={false}
-        onClick={handleClick}
-        aria-current={isActive ? "page" : undefined}
-        className={`tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-space-x-3 tw-py-1 tw-no-underline tw-transition-all tw-duration-200 tw-ease-out ${
-          isActive
-            ? "tw-font-medium tw-text-white desktop-hover:group-hover:tw-text-white"
-            : "tw-font-normal tw-text-iron-400 desktop-hover:group-hover:tw-text-iron-300"
-        }`}
-      >
-        <ProfileFeedAvatar isActive={isActive} />
-        <div className="tw-min-w-0 tw-flex-1">
-          <div className="tw-truncate tw-text-sm">{profileFeedLabel}</div>
-        </div>
-      </Link>
-    </div>
+      <MasonryGridIcon />
+    </Link>
   );
 }

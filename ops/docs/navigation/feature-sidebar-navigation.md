@@ -7,15 +7,26 @@ Parent: [Navigation Index](README.md)
 On web layouts, route switching is sidebar-first.
 
 - Desktop: fixed left rail with collapse/expand toggle.
+- Refresh restores the saved desktop width before the first paint, so an
+  expanded sidebar does not animate open or push the page after loading. Page
+  content renders immediately; sidebar contents appear once their saved state
+  is restored. Narrow-screen overlays keep their existing closed default.
 - Narrow desktop web: collapsed icon rail that can open as an overlay panel.
 - Touch small-screen web: header menu button opens the same sidebar as overlay.
+- While a collapsed-rail submenu flyout is open, the drawer expand handle is
+  hidden. It returns when the flyout closes.
 - In collapsed rail mode, flyout submenus keep the same subsection labels and
   nested route grouping shown in the expanded rail.
 - In collapsed rail mode, a mouse hover opens `NFTs` and `About` after a short
   intent delay; tap or click remains available for touch and pointer users.
 - Collapsed flyouts enter with a short opacity and horizontal-position reveal;
   reduced-motion preferences show them immediately without animation.
-- The 6529 logo links to `/`; there is no labeled `Home` product row.
+- The 40px 6529 logo links to `/`; there is no labeled `Home` product row.
+  Hover adds a subtle glow and a slight scale-up; reduced motion disables scaling.
+- A single-chevron toggle stays inside the sidebar’s right edge, vertically
+  centered in both states (20px wide in both states).
+  Hover anywhere in the sidebar or focus a control to reveal it; touch layouts
+  keep it visible. Expand and collapse use the same footprint.
 - Primary menu concepts are ordered `NFTs`, `Museum`, `Waves`, `DMs`,
   `Join 6529`, and `About` so art destinations stay together while Waves and
   DMs remain adjacent.
@@ -68,7 +79,7 @@ On web layouts, route switching is sidebar-first.
 - Open `Museum` directly from the primary sidebar row.
 - Open `Waves` directly from the primary sidebar row.
 - Open `Join 6529` directly from the primary sidebar row.
-- Open `Discover Waves` from the expanded Waves panel header or search.
+- Open `Discover Waves` from the Profile Waves Feed header or search.
 - Open `Drop Forge` from the standalone row after `About` when the current
   wallet can access `/drop-forge`.
 - Open `Search` from the desktop sidebar row.

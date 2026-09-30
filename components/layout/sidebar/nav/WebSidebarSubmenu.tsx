@@ -280,6 +280,7 @@ function WebSidebarSubmenu({
     <div
       ref={containerRef}
       id={`sidebar-flyout-${section.key}`}
+      data-sidebar-flyout="true"
       className="tailwind-scope tw-fixed tw-z-[95] tw-flex tw-max-h-[65vh] tw-w-64 tw-flex-col tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-shadow-[0_20px_45px_rgba(7,7,11,0.7)] motion-safe:tw-animate-sidebar-flyout-in motion-reduce:tw-animate-none"
       style={{
         left: leftStyle,
