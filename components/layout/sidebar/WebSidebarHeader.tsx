@@ -46,14 +46,16 @@ function WebSidebarHeader({ collapsed, onToggle }: WebSidebarHeaderProps) {
         aria-label="Toggle right sidebar"
         aria-expanded={!collapsed}
       >
+        {/* The open stroke meets the existing divider at its center; no second right edge. */}
         <svg
           viewBox="0 0 24 52"
           preserveAspectRatio="none"
           aria-hidden="true"
-          className="tw-absolute tw-inset-0 tw-h-full tw-w-full tw-fill-iron-800 tw-stroke-iron-700 tw-drop-shadow-[0_12px_14px_rgba(0,0,0,0.35)] tw-transition-[fill,stroke,filter] tw-duration-150 desktop-hover:group-hover/sidebar-toggle:tw-fill-iron-700 desktop-hover:group-hover/sidebar-toggle:tw-stroke-iron-600 desktop-hover:group-hover/sidebar-toggle:tw-drop-shadow-[0_16px_17px_rgba(0,0,0,0.4)] motion-reduce:tw-transition-none"
+          className="tw-absolute tw-inset-0 tw-h-full tw-w-[calc(100%+0.5px)] tw-overflow-visible tw-fill-iron-800 tw-stroke-iron-800 tw-drop-shadow-[0_12px_14px_rgba(0,0,0,0.35)] tw-transition-[fill,filter] tw-duration-150 desktop-hover:group-hover/sidebar-toggle:tw-fill-iron-700 desktop-hover:group-hover/sidebar-toggle:tw-drop-shadow-[0_16px_17px_rgba(0,0,0,0.4)] motion-reduce:tw-transition-none"
         >
           <path
-            d="M24 0C24 10 0 8 0 21V31C0 44 24 42 24 52Z"
+            d="M24 0C24 10 0 8 0 21V31C0 44 24 42 24 52"
+            strokeWidth={1}
             vectorEffect="non-scaling-stroke"
           />
         </svg>
