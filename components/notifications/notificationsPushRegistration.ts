@@ -57,6 +57,11 @@ function parseDevicePushData(raw: unknown): DevicePushData | null {
   }
   const wave_id = o["wave_id"];
   if (typeof wave_id === "string") data.wave_id = wave_id;
+  const competition_id = o["competition_id"];
+  if (typeof competition_id === "string") data.competition_id = competition_id;
+  const competition_entry_id = o["competition_entry_id"];
+  if (typeof competition_entry_id === "string")
+    data.competition_entry_id = competition_entry_id;
   const drop_id = o["drop_id"];
   if (typeof drop_id === "string") data.drop_id = drop_id;
   return data;

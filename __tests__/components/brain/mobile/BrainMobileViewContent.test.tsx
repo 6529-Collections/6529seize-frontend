@@ -3,6 +3,10 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import BrainMobileViewContent from "@/components/brain/mobile/BrainMobileViewContent";
 import { BrainView } from "@/components/brain/mobile/brainMobileViews";
 
+jest.mock("next/navigation", () => ({
+  usePathname: () => "/waves",
+}));
+
 jest.mock("next/dynamic", () => (loader: () => Promise<unknown>) => {
   const loaderSource = loader.toString();
   const dynamicImportSource =
@@ -14,6 +18,10 @@ jest.mock("next/dynamic", () => (loader: () => Promise<unknown>) => {
     exportName?: string,
   ][] = [
     ["./BrainMobileAbout", "@/components/brain/mobile/BrainMobileAbout"],
+    [
+      "@/components/competitions/CompetitionHub",
+      "@/components/competitions/CompetitionHub",
+    ],
     [
       "@/components/community-curations/CommunityCurations",
       "@/components/community-curations/CommunityCurations",
@@ -84,6 +92,11 @@ jest.mock("next/dynamic", () => (loader: () => Promise<unknown>) => {
 });
 
 const mockBrainMobileAbout = jest.fn(() => <div data-testid="about" />);
+jest.mock("@/components/competitions/CompetitionHub", () => ({
+  __esModule: true,
+  default: () => <div data-testid="competitions" />,
+}));
+
 jest.mock("@/components/brain/mobile/BrainMobileAbout", () => ({
   __esModule: true,
   default: (props: any) => mockBrainMobileAbout(props),

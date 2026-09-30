@@ -1,6 +1,9 @@
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { WAVE_LABELS } from "@/helpers/waves/waves.constants";
 import CommonBorderedRadioButton from "@/components/utils/radio/CommonBorderedRadioButton";
+import { isMultiCompetitionEnabled } from "@/helpers/competition.helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 
 // Not a real ApiWaveType: passed to the radios when nothing is selected yet so
 // none render as checked (the shared radio's `selected` prop is non-nullable).
@@ -13,6 +16,7 @@ export default function CreateWaveTypeInputs({
   readonly selected: ApiWaveType | null;
   readonly onChange: (type: ApiWaveType) => void;
 }) {
+  const locale = useBrowserLocale();
   const waveTypes: ApiWaveType[] = [
     ApiWaveType.Chat,
     ApiWaveType.Rank,
@@ -29,6 +33,10 @@ export default function CreateWaveTypeInputs({
     <div className="tw-grid tw-grid-cols-1 tw-gap-3 sm:tw-grid-cols-3 [&>div]:tw-rounded-xl [&>div]:tw-px-3 [&>div]:tw-py-3 [&>div]:tw-shadow-none [&_input]:tw-h-4 [&_input]:tw-w-4">
       {waveTypes.map((waveType) => {
         const isSelected = selected === waveType;
+        const label =
+          waveType === ApiWaveType.Chat && isMultiCompetitionEnabled()
+            ? t(locale, "competitions.chatOnly")
+            : WAVE_LABELS[waveType];
         let titleColorClass = "tw-text-iron-300 group-hover:tw-text-white";
         const descriptionColorClass = "tw-text-iron-400";
         if (isSelected) {
@@ -42,14 +50,14 @@ export default function CreateWaveTypeInputs({
             selected={selected ?? NO_SELECTION}
             variant="subtle"
             name="create-wave-type"
-            ariaLabel={WAVE_LABELS[waveType]}
+            ariaLabel={label}
             onChange={onChange}
           >
             <div className="tw-min-w-0 tw-whitespace-normal">
               <span
                 className={`tw-flex tw-min-h-4 tw-items-center tw-text-sm tw-font-medium ${titleColorClass}`}
               >
-                {WAVE_LABELS[waveType]}
+                {label}
               </span>
               <p
                 className={`tw-mb-0 tw-mt-1 tw-text-xs tw-font-normal tw-leading-4 ${descriptionColorClass}`}

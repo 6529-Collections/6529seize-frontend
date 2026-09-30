@@ -1,3 +1,4 @@
+import { isMultiCompetitionEnabled } from "@/helpers/competition.helpers";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropV2 } from "@/generated/models/ApiDropV2";
 import { ApiIdentitySubscriptionTargetAction } from "@/generated/models/ApiIdentitySubscriptionTargetAction";
@@ -303,6 +304,33 @@ const mapNotificationV2 = (
   if (notification.cause === ApiNotificationCause.SubscriptionCoverage) {
     return mapSubscriptionCoverageNotification(notification);
   }
+  if (notification.cause === ApiNotificationCause.CompetitionLifecycle) {
+    const context = notification.additional_context;
+    if (
+      !context.wave_id ||
+      !context.competition_id ||
+      !context.event_id ||
+      !context.event_type ||
+      !context.competition_title
+    )
+      return [];
+    return [
+      {
+        id: notification.id,
+        created_at: notification.created_at,
+        read_at: notification.read_at,
+        cause: ApiNotificationCause.CompetitionLifecycle,
+        additional_context: {
+          wave_id: context.wave_id,
+          competition_id: context.competition_id,
+          competition_title: context.competition_title,
+          event_id: context.event_id,
+          event_type: context.event_type,
+          ...(context.entry_id ? { entry_id: context.entry_id } : {}),
+        },
+      },
+    ];
+  }
   if (!notification.related_identity) {
     console.error(
       `Notification ${notification.id} is missing its related identity`
@@ -481,6 +509,7 @@ const mapNotificationsV2Response = (
 ): TypedNotificationsResponse => ({
   unread_count: response.unread_count,
   notifications: response.notifications.flatMap(mapNotificationV2),
+  nextPageParam: response.notifications.at(-1)?.id ?? null,
 });
 
 const buildNotificationsV2Params = ({
@@ -493,6 +522,9 @@ const buildNotificationsV2Params = ({
   "limit" | "cause" | "causeExclude" | "pageParam"
 >): Record<string, string> => {
   const params: Record<string, string> = { limit };
+  if (isMultiCompetitionEnabled()) {
+    params["include_competitions"] = "true";
+  }
 
   if (pageParam !== null && pageParam !== undefined) {
     params["id_less_than"] = String(pageParam);

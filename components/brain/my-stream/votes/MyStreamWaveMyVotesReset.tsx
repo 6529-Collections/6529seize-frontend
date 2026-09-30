@@ -19,6 +19,7 @@ import { formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 
 interface MyStreamWaveMyVotesResetProps {
+  readonly resetVote?: ((dropId: string) => Promise<void>) | undefined;
   readonly waveId: string;
   readonly haveDrops: boolean;
   readonly availableVotes?: number | null;
@@ -34,6 +35,7 @@ const DEFAULT_DROP_RATE_CATEGORY = "Rep";
 
 const MyStreamWaveMyVotesReset: React.FC<MyStreamWaveMyVotesResetProps> = ({
   waveId,
+  resetVote,
   haveDrops,
   availableVotes = null,
   selected,
@@ -54,19 +56,25 @@ const MyStreamWaveMyVotesReset: React.FC<MyStreamWaveMyVotesResetProps> = ({
   const selectedCount = selected.size;
 
   const rateChangeMutation = useMutation({
-    mutationFn: async (param: { dropId: string }) =>
-      await commonApiPost<DropRateChangeRequest, ApiDrop>({
+    mutationFn: async (param: { dropId: string }) => {
+      if (resetVote) {
+        await resetVote(param.dropId);
+        return null;
+      }
+      return await commonApiPost<DropRateChangeRequest, ApiDrop>({
         endpoint: `drops/${param.dropId}/ratings`,
         body: {
           rating: 0,
           category: DEFAULT_DROP_RATE_CATEGORY,
         },
-      }),
-    onSuccess: (response: ApiDrop) => {
-      applyWaveDropVoteUpdate(queryClient, response, waveId, {
-        invalidateWaveSummary: false,
       });
-      removeSelected(response.id);
+    },
+    onSuccess: (response: ApiDrop | null, { dropId }) => {
+      if (response)
+        applyWaveDropVoteUpdate(queryClient, response, waveId, {
+          invalidateWaveSummary: false,
+        });
+      removeSelected(dropId);
     },
     onError: (error) => {
       setToast({
@@ -107,7 +115,7 @@ const MyStreamWaveMyVotesReset: React.FC<MyStreamWaveMyVotesResetProps> = ({
       setTotalCount(0);
     }
 
-    if (didResetAnyDrop) {
+    if (didResetAnyDrop && !resetVote) {
       invalidateWaveApprovalSummaryQueries(queryClient, waveId);
     }
   };
@@ -171,9 +179,7 @@ const MyStreamWaveMyVotesReset: React.FC<MyStreamWaveMyVotesResetProps> = ({
                 : resetButtonLabel}
             </Button>
             {selectedCount > 0 && (
-              <output
-                className="tw-whitespace-nowrap tw-text-sm tw-leading-5 tw-text-iron-400"
-              >
+              <output className="tw-whitespace-nowrap tw-text-sm tw-leading-5 tw-text-iron-400">
                 {selectedLabel}
               </output>
             )}

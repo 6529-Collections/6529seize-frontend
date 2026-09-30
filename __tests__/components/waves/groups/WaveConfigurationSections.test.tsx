@@ -3,16 +3,6 @@ import WaveConfigurationSections from "@/components/waves/groups/WaveConfigurati
 import { WaveGroupType } from "@/components/waves/specs/groups/group/WaveGroup.types";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 
-jest.mock("@/components/waves/specs/WaveTypeIcon", () => ({
-  __esModule: true,
-  default: ({
-    waveType,
-    label,
-  }: {
-    readonly waveType: ApiWaveType;
-    readonly label?: string;
-  }) => <span>{label ?? waveType}</span>,
-}));
 jest.mock("@/components/waves/specs/WaveDisableLinks", () => ({
   __esModule: true,
   default: ({ display }: { readonly display?: string }) => (
@@ -100,9 +90,10 @@ describe("WaveConfigurationSections", () => {
   it("renders wave and chat access configuration", () => {
     render(<WaveConfigurationSections wave={makeWave(ApiWaveType.Chat)} />);
 
-    expect(screen.getByRole("heading", { name: "Wave" })).toBeInTheDocument();
-    expect(screen.getByText("Type")).toBeInTheDocument();
-    expect(screen.getByText(ApiWaveType.Chat)).toBeInTheDocument();
+    expect(
+      screen.queryByRole("heading", { name: "Wave" })
+    ).not.toBeInTheDocument();
+    expect(screen.queryByText("Type")).not.toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Access" })).toBeInTheDocument();
     expect(
       screen.getByTestId(`group-${WaveGroupType.VIEW}`)
@@ -169,14 +160,18 @@ describe("WaveConfigurationSections", () => {
     );
   });
 
-  it("identifies perpetual rank waves in the Wave section", () => {
+  it("omits the Wave type block for perpetual rank waves too", () => {
     render(
       <WaveConfigurationSections
         wave={makeWave(ApiWaveType.Rank, true, null)}
       />
     );
 
-    expect(screen.getByText("Perpetual Rank")).toBeInTheDocument();
+    expect(
+      screen.queryByRole("heading", { name: "Wave" })
+    ).not.toBeInTheDocument();
+    expect(screen.queryByText("Type")).not.toBeInTheDocument();
+    expect(screen.queryByText("Perpetual Rank")).not.toBeInTheDocument();
     expect(screen.queryByText(ApiWaveType.Rank)).not.toBeInTheDocument();
   });
 

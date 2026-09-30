@@ -111,6 +111,32 @@ function applyEffectiveAppPrCiPlan(plan) {
     ARTWORK_DOCUMENTATION_BROWSER_PATTERNS.some((pattern) => pattern.test(file))
   );
 
+  const playwrightNativeCompetition = files.some(
+    (file) =>
+      /^(?:components\/competitions\/|hooks\/competitions\/|__tests__\/competitions\/|app\/waves\/\[wave\]\/competitions\/|components\/waves\/create-wave\/|generated\/models\/ApiCompetition)/u.test(
+        file
+      ) ||
+      [
+        "contexts/CompetitionContext.tsx",
+        "helpers/competition.helpers.ts",
+        "helpers/competition-labels.helpers.ts",
+        "helpers/competition-config.helpers.ts",
+        "services/api/competitions-api.ts",
+        "services/wallet-signatures/competition-signature.ts",
+        "i18n/messages/competitions.ts",
+        "tests/social/native-competition-sandbox.spec.ts",
+        "tests/support/composerSandboxServer.cjs",
+        "components/waves/WavesMobile.tsx",
+        "components/brain/BrainMobile.tsx",
+        "components/brain/my-stream/MyStreamWaveContent.tsx",
+        "tests/packs.manifest.cjs",
+        "openapi.yaml",
+        ".github/workflows/app-pr-ci.yml",
+        "scripts/app-pr-ci-effective-plan.cjs",
+        "__tests__/scripts/app-pr-ci-effective-plan.test.ts",
+      ].includes(file)
+  );
+
   const checks = {
     ...plan.checks,
     install: check(
@@ -138,6 +164,12 @@ function applyEffectiveAppPrCiPlan(plan) {
       playwrightArtworkDocumentation
         ? "Artwork documentation editor, HTTP boundary fixtures or browser lane policy changed."
         : "No artwork documentation editor or browser lane contract changed."
+    ),
+    playwright_native_competition: check(
+      playwrightNativeCompetition,
+      playwrightNativeCompetition
+        ? "Native competition changes require desktop and mobile sandbox browser coverage."
+        : "No native competition surfaces changed."
     ),
     playwright_museum: check(
       playwrightMuseum,

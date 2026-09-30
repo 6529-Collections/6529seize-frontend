@@ -12,6 +12,12 @@ import React, {
 } from "react";
 import { MyStreamWaveTab } from "@/types/waves.types";
 import useLocalPreference from "@/hooks/useLocalPreference";
+import { usePathname, useRouter } from "next/navigation";
+import { isCompetitionPathname } from "@/helpers/competition.helpers";
+import {
+  getWaveIdFromPathname,
+  getWavePathRoute,
+} from "@/helpers/navigation.helpers";
 
 export enum WaveVotingState {
   NOT_STARTED = "NOT_STARTED",
@@ -24,6 +30,7 @@ type WaveTabParams = {
   waveId: string | null;
   isChatWave: boolean;
   hasPolls?: boolean | undefined;
+  hasCompetitions?: boolean | undefined;
   hasAuthenticatedProfile: boolean;
   isMemesWave: boolean;
   isCurationWave: boolean;
@@ -172,16 +179,37 @@ const ContentTabContext = createContext<ContentTabContextType>({
 });
 
 // Export a provider component
-export const ContentTabProvider: React.FC<{ children: ReactNode }> = ({
+export const ContentTabProvider: React.FC<{
+  children: ReactNode;
+  respectCompetitionRoute?: boolean;
+  competitionOnly?: boolean;
+}> = ({
   children,
+  respectCompetitionRoute = true,
+  competitionOnly = false,
 }) => {
+  const pathname = usePathname();
+  const router = useRouter();
+  const isCompetitionRoute =
+    respectCompetitionRoute &&
+    !competitionOnly &&
+    isCompetitionPathname(pathname);
+  const initialTab = competitionOnly
+    ? MyStreamWaveTab.LEADERBOARD
+    : MyStreamWaveTab.CHAT;
   const [tabsByWaveId, setTabsByWaveId] = useLocalPreference<
     Record<string, MyStreamWaveTab>
-  >(MEMES_WAVE_LAST_TAB_STORAGE_KEY, {}, isValidWaveTabMap);
+  >(
+    competitionOnly
+      ? "legacy_competition_last_tab_by_id"
+      : MEMES_WAVE_LAST_TAB_STORAGE_KEY,
+    {},
+    isValidWaveTabMap
+  );
   const [activeContentTabRaw, setActiveContentTabRaw] =
-    useState<MyStreamWaveTab>(MyStreamWaveTab.CHAT);
+    useState<MyStreamWaveTab>(initialTab);
   const [availableTabs, setAvailableTabs] = useState<MyStreamWaveTab[]>([
-    MyStreamWaveTab.CHAT,
+    initialTab,
   ]);
   const currentWaveIdRef = useRef<string | null>(null);
   const tabsByWaveIdRef = useRef<Record<string, MyStreamWaveTab>>(tabsByWaveId);
@@ -203,10 +231,10 @@ export const ContentTabProvider: React.FC<{ children: ReactNode }> = ({
   const updateAvailableTabs = useCallback(
     (params: WaveTabParams | null) => {
       if (!params) {
-        setAvailableTabs([MyStreamWaveTab.CHAT]);
+        setAvailableTabs([initialTab]);
         currentWaveIdRef.current = null;
         transientTabOverrideRef.current = null;
-        setActiveTabInternal(MyStreamWaveTab.CHAT);
+        setActiveTabInternal(initialTab);
         return;
       }
 
@@ -214,6 +242,7 @@ export const ContentTabProvider: React.FC<{ children: ReactNode }> = ({
         waveId,
         isChatWave,
         hasPolls = false,
+        hasCompetitions = false,
         hasAuthenticatedProfile,
         isMemesWave,
         isCurationWave,
@@ -256,6 +285,19 @@ export const ContentTabProvider: React.FC<{ children: ReactNode }> = ({
         );
       }
 
+      if (hasCompetitions) {
+        tabs.push(MyStreamWaveTab.COMPETITIONS);
+      }
+
+      if (competitionOnly) {
+        tabs = tabs.filter(
+          (tab) =>
+            tab !== MyStreamWaveTab.CHAT &&
+            tab !== MyStreamWaveTab.COMPETITIONS &&
+            tab !== MyStreamWaveTab.POLLS
+        );
+      }
+
       if (
         transientTabOverrideRef.current !== null &&
         transientTabOverrideRef.current.waveId !== waveId
@@ -292,7 +334,9 @@ export const ContentTabProvider: React.FC<{ children: ReactNode }> = ({
       }
 
       const storedTab = waveId ? tabsByWaveIdRef.current[waveId] : undefined;
-      let defaultTab = MyStreamWaveTab.CHAT;
+      let defaultTab = competitionOnly
+        ? (tabs[0] ?? initialTab)
+        : MyStreamWaveTab.CHAT;
       if (
         votingState === WaveVotingState.ENDED &&
         tabs.includes(MyStreamWaveTab.SUBMISSIONS)
@@ -309,7 +353,7 @@ export const ContentTabProvider: React.FC<{ children: ReactNode }> = ({
 
       setActiveTabInternal(nextTab);
     },
-    [setActiveTabInternal]
+    [competitionOnly, initialTab, setActiveTabInternal]
   );
 
   // Wrapper for setActiveContentTab that validates the tab
@@ -319,6 +363,11 @@ export const ContentTabProvider: React.FC<{ children: ReactNode }> = ({
       if (availableTabs.includes(tab)) {
         setActiveTabInternal(tab);
         const waveId = currentWaveIdRef.current;
+        if (isCompetitionRoute && tab !== MyStreamWaveTab.COMPETITIONS) {
+          const routeWaveId = getWaveIdFromPathname(pathname);
+          if (routeWaveId)
+            router.push(getWavePathRoute(routeWaveId), { scroll: false });
+        }
         if (options?.persist === false) {
           transientTabOverrideRef.current =
             waveId === null ? null : { waveId, tab };
@@ -334,28 +383,57 @@ export const ContentTabProvider: React.FC<{ children: ReactNode }> = ({
           setTabsByWaveId(nextMap);
         }
       } else {
-        // If tab is not available, default to CHAT
+        // Keep unavailable selections inside the current view's tabs.
         transientTabOverrideRef.current = null;
-        setActiveTabInternal(MyStreamWaveTab.CHAT);
+        setActiveTabInternal(
+          competitionOnly
+            ? (availableTabs[0] ?? initialTab)
+            : MyStreamWaveTab.CHAT
+        );
       }
     },
-    [availableTabs, setActiveTabInternal, setTabsByWaveId]
+    [
+      availableTabs,
+      setActiveTabInternal,
+      setTabsByWaveId,
+      isCompetitionRoute,
+      pathname,
+      router,
+      competitionOnly,
+      initialTab,
+    ]
   );
+
+  const activeContentTab = isCompetitionRoute
+    ? MyStreamWaveTab.COMPETITIONS
+    : activeContentTabRaw;
+  const visibleTabs = useMemo(() => {
+    if (!isCompetitionRoute) return availableTabs;
+    const tabs = availableTabs.filter(
+      (tab) =>
+        tab === MyStreamWaveTab.CHAT ||
+        tab === MyStreamWaveTab.COMPETITIONS ||
+        tab === MyStreamWaveTab.POLLS
+    );
+    if (!tabs.includes(MyStreamWaveTab.COMPETITIONS)) {
+      tabs.splice(
+        tabs.indexOf(MyStreamWaveTab.CHAT) + 1,
+        0,
+        MyStreamWaveTab.COMPETITIONS
+      );
+    }
+    return tabs;
+  }, [availableTabs, isCompetitionRoute]);
 
   // Memoize the context value to prevent unnecessary re-renders
   const contextValue = useMemo(
     () => ({
-      activeContentTab: activeContentTabRaw,
+      activeContentTab,
       setActiveContentTab,
-      availableTabs,
+      availableTabs: visibleTabs,
       updateAvailableTabs,
     }),
-    [
-      activeContentTabRaw,
-      setActiveContentTab,
-      availableTabs,
-      updateAvailableTabs,
-    ]
+    [activeContentTab, setActiveContentTab, visibleTabs, updateAvailableTabs]
   );
 
   return (

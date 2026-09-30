@@ -1,5 +1,6 @@
 "use client";
 
+import { resolvePushRedirectUrl } from "./push-redirect";
 import { usePushRegistrationRecovery } from "./usePushRegistrationRecovery";
 import { usePushBadgeRefresh } from "./usePushBadgeRefresh";
 import { Device, type DeviceInfo } from "@capacitor/device";
@@ -18,9 +19,7 @@ import React, {
   useReducer,
   useRef,
 } from "react";
-import { getUserPageTabByRoute } from "@/components/user/layout/userTabs.config";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import { getWaveRoute } from "@/helpers/navigation.helpers";
 import useCapacitor from "@/hooks/useCapacitor";
 import { getAuthTokenFingerprint } from "@/services/auth/auth-token-fingerprint";
 import {
@@ -59,27 +58,6 @@ type NotificationsContextType = {
 const NotificationsContext = createContext<
   NotificationsContextType | undefined
 >(undefined);
-
-const redirectConfig = {
-  path: ({ path }: { path: string }) => `/${path}`,
-  profile: ({ handle, subroute }: { handle: string; subroute?: string }) => {
-    if (!subroute) return `/${handle}`;
-    const validTab = getUserPageTabByRoute(subroute);
-    if (!validTab) return `/${handle}`;
-    return `/${handle}/${validTab.route}`;
-  },
-  "the-memes": ({ id }: { id: string }) => `/the-memes/${id}`,
-  "6529-gradient": ({ id }: { id: string }) => `/6529-gradient/${id}`,
-  "meme-lab": ({ id }: { id: string }) => `/meme-lab/${id}`,
-  waves: ({ wave_id, drop_id }: { wave_id: string; drop_id: string }) => {
-    return getWaveRoute({
-      waveId: wave_id,
-      serialNo: drop_id || undefined,
-      isDirectMessage: false,
-      isApp: false,
-    });
-  },
-};
 
 const captureReconciliationFailure = (failure: unknown) => {
   Sentry.captureException(
@@ -348,7 +326,7 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
       const redirectData: DevicePushData = handle
         ? { ...notificationDataWithoutHandle, handle }
         : notificationDataWithoutHandle;
-      const redirectUrl = resolveRedirectUrl(redirectData);
+      const redirectUrl = resolvePushRedirectUrl(redirectData);
       if (redirectUrl) {
         routerInstance.push(redirectUrl);
       } else {
@@ -770,19 +748,6 @@ export const NotificationsProvider: React.FC<{ children: React.ReactNode }> = ({
       {children}
     </NotificationsContext.Provider>
   );
-};
-
-const resolveRedirectUrl = (notificationData: DevicePushData) => {
-  const { redirect, ...params } = notificationData;
-
-  const resolveFn = redirectConfig[redirect];
-
-  try {
-    return (resolveFn as (params: Record<string, unknown>) => string)(params);
-  } catch (error) {
-    console.error("Error resolving redirect URL", error);
-    return null;
-  }
 };
 
 export const useNotificationsContext = () => {

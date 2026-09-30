@@ -20,7 +20,11 @@ import HeaderSearchModal from "@/components/header/header-search/HeaderSearchMod
 import { useWaveChatScrollOptional } from "@/contexts/wave/WaveChatScrollContext";
 import { useSeizeSettingsOptional } from "@/contexts/SeizeSettingsContext";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import { getWaveHomeRoute } from "@/helpers/navigation.helpers";
+import {
+  getWaveHomeRoute,
+  getWavePathRoute,
+} from "@/helpers/navigation.helpers";
+import { isCompetitionPathname } from "@/helpers/competition.helpers";
 import { getDirectMessageProfileHref } from "@/helpers/waves/direct-message-profile.helpers";
 import { getWaveDescriptionPreviewText } from "@/helpers/waves/waveDescriptionPreview";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
@@ -332,7 +336,7 @@ export default function MyStreamWaveTabsHeader({
   const handleSearchSelect = (serialNo: number) => {
     onSelectCuration(null);
     setActiveContentTab(MyStreamWaveTab.CHAT);
-    if (waveChatScroll) {
+    if (waveChatScroll && !isCompetitionPathname(pathname)) {
       waveChatScroll.requestScrollToSerialNo({ waveId: wave.id, serialNo });
       return;
     }
@@ -340,7 +344,10 @@ export default function MyStreamWaveTabsHeader({
     const params = new URLSearchParams(searchParams.toString() || "");
     params.delete("curation");
     params.set("serialNo", String(serialNo));
-    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    const chatPath = isCompetitionPathname(pathname)
+      ? getWavePathRoute(wave.id)
+      : pathname;
+    router.replace(`${chatPath}?${params.toString()}`, { scroll: false });
   };
 
   const searchMessagesLabel = "Search messages in this wave";
