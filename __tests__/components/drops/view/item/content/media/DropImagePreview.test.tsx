@@ -1,6 +1,9 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { createElement, forwardRef, type ComponentProps } from "react";
-import { DropImagePreview } from "@/components/drops/view/item/content/media/DropImagePreview";
+import {
+  DropImagePreview,
+  getHighQualityArtworkImageSrc,
+} from "@/components/drops/view/item/content/media/DropImagePreview";
 import { ImageScale } from "@/helpers/image.helpers";
 
 type MockImageProps = ComponentProps<"img"> & {
@@ -23,6 +26,26 @@ jest.mock("@/components/ipfs/IPFSContext", () => ({
 const original = "https://d3lqz0a4bldqgf.cloudfront.net/drops/author/file.jpg";
 const preview = (size: string) =>
   original.replace("file.jpg", `${size}/file.jpg`);
+
+it.each(["JPG", "jpeg", "png", "webp", "avif"])(
+  "allows first-party %s artwork as a high-quality optimizer source",
+  (extension) => {
+    const src = original.replace("jpg", extension) + "?version=2";
+    expect(getHighQualityArtworkImageSrc(src)).toBe(src);
+  }
+);
+
+it.each([
+  original.replace("jpg", "gif"),
+  original.replace("jpg", "svg"),
+  "https://example.com/drops/file.jpg",
+  "https://d3lqz0a4bldqgf.cloudfront.net/images/file.jpg",
+  "https://d3lqz0a4bldqgf.cloudfront.net.evil.test/drops/file.jpg",
+  "http://d3lqz0a4bldqgf.cloudfront.net/drops/file.jpg",
+  "javascript:photo.jpg",
+])("leaves other media and hosts on the existing preview path: %s", (src) => {
+  expect(getHighQualityArtworkImageSrc(src)).toBeNull();
+});
 
 it("tries only bounded previews and reports exhaustion once", () => {
   const onError = jest.fn();

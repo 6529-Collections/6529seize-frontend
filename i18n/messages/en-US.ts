@@ -4130,6 +4130,10 @@ export const EN_US_MESSAGES = {
   "drop.media.loadingOriginalGif": "Loading original GIF",
   "drop.media.originalGifFailed":
     "Couldn't load the original GIF. You can try again.",
+  "drop.media.originalImageAlt": "Original image",
+  "drop.media.loadingOriginalImage": "Loading original image",
+  "drop.media.originalImageFailed":
+    "Couldn't load the original image. You can try again.",
   "drop.media.previewAlt": "Expanded image preview",
   "drop.media.previewUnavailable": "Preview unavailable",
   "drop.media.retryPreview": "Retry preview",
