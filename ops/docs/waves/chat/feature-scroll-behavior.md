@@ -33,6 +33,8 @@ On Apple mobile only, new drops can stay pending until you return to bottom.
    - Pending drops: button reveals pending drops and returns to latest.
    - No pending drops: button returns to latest when you are away from bottom.
 9. If unread control is also visible, unread and bottom controls render as a stacked pair.
+10. Long drops start with a shortened preview. Expanding or collapsing one
+    keeps the toggle at the same visual position while you read older history.
 
 ## Common Scenarios
 
@@ -46,12 +48,15 @@ On Apple mobile only, new drops can stay pending until you return to bottom.
 - Temporary outgoing drops can trigger short auto-scroll when users are pinned.
 - When older-page loading toggles on/off, scroll controls stay attached to the
   same thread container, so jump-to-latest/unread controls do not reset.
+- Expanding a long drop while pinned at latest keeps the thread at latest.
+- A long drop remembers whether it is expanded while virtual scrolling
+  temporarily replaces the card with a same-height placeholder.
 
 ## Edge Cases
 
 - Older-page loading requires both `hasNextPage` and at least 25 loaded drops.
 - Bottom control hides when you are at latest and no pending drops exist.
-- Layout changes can shift pin detection briefly; pin state recalculates as container size changes.
+- Other layout changes can shift pin detection briefly; pin state recalculates as container size changes.
 - On Apple mobile, pending count starts from the newest visible serial when you leave bottom and clears after re-pin.
 - Rapid pagination state flips can briefly toggle the top loading bar, but do
   not replace the active scroll container.
@@ -60,7 +65,7 @@ On Apple mobile only, new drops can stay pending until you return to bottom.
 
 - If loading older pages fails, already loaded drops stay visible; scroll up again or refresh.
 - If pending/new-message controls appear out of sync, return to bottom and retry.
-- If scroll state feels stale after major layout changes, refresh the thread.
+- If scroll state feels stale after unrelated major layout changes, refresh the thread.
 
 ## Limitations / Notes
 
