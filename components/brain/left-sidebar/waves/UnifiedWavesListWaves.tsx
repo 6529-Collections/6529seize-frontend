@@ -499,7 +499,9 @@ const UnifiedWavesListWaves = forwardRef<
         {!isDirectMessage && !hideToggle && (
           <SidebarWaveNavigationControls
             navigation={navigation}
-            isCollectionLoading={collectionLoading}
+            isCollectionLoading={
+              collectionLoading && navigation.visibleWaves.length === 0
+            }
           />
         )}
         {navigation.searching ? (
@@ -571,7 +573,7 @@ const UnifiedWavesListWaves = forwardRef<
               </section>
             ) : (
               <div ref={listContainerRef} style={emptyPlaceholderStyle}>
-                {!isDirectMessage && !collectionLoading && waves.length > 0 && (
+                {!isDirectMessage && !collectionLoading && (
                   <output className="tw-block tw-px-4 tw-py-3 tw-text-sm tw-text-iron-400">
                     {t(locale, "waves.sidebar.collectionEmpty")}
                   </output>

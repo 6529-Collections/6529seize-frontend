@@ -439,6 +439,15 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
     await expect(
       page.getByRole("heading", { level: 1, name: /^Active Votes/ })
     ).toBeVisible();
+    const voteCards = page.getByRole("link", { name: /^View wave / });
+    if ((await voteCards.count()) > 0) {
+      await expect(
+        voteCards
+          .first()
+          .getByText(/^(Next decision |Voting ends |Voting open$)/)
+      ).toBeVisible();
+    }
+    await expectNoHorizontalOverflow(page);
     await page.getByRole("tab", { name: "Worth Checking Out" }).click();
     await expect(
       page.getByRole("heading", {

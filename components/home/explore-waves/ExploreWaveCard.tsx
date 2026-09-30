@@ -24,6 +24,8 @@ import type { ReactNode } from "react";
 
 interface ExploreWaveCardProps {
   readonly wave: SidebarWave;
+  readonly headingDetails?: ReactNode;
+  readonly isApp?: boolean;
 }
 
 interface ExploreWaveMetric {
@@ -233,11 +235,15 @@ const getMetricsSummaryLabel = (
   return metrics.map((metric) => metric.ariaLabel).join(". ");
 };
 
-export function ExploreWaveCard({ wave }: ExploreWaveCardProps) {
+export function ExploreWaveCard({
+  wave,
+  headingDetails,
+  isApp = false,
+}: ExploreWaveCardProps) {
   const waveHref = getWaveRoute({
     waveId: wave.id,
     isDirectMessage: wave.isDirectMessage,
-    isApp: false,
+    isApp,
   });
 
   const banner1 = getRandomColorWithSeed(wave.id);
@@ -315,6 +321,8 @@ export function ExploreWaveCard({ wave }: ExploreWaveCardProps) {
         <span className="tw-m-0 tw-line-clamp-1 tw-min-w-0 tw-break-words tw-text-lg tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 tw-transition-colors tw-duration-300 group-focus-visible:tw-text-primary-300 desktop-hover:group-hover:tw-text-primary-300">
           {wave.name}
         </span>
+
+        {headingDetails}
 
         <MessagePreviewContent previewContent={descriptionPreview} />
 

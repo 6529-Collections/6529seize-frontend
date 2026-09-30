@@ -4,7 +4,7 @@ import { useActiveWaveVotes } from "@/hooks/useActiveWaveVotes";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
-import { ActiveWaveVoteRow } from "./ActiveWaveVoteRow";
+import { ActiveWaveVoteCard } from "./ActiveWaveVoteCard";
 
 export function ActiveWaveVotes() {
   const locale = useBrowserLocale();
@@ -48,16 +48,11 @@ export function ActiveWaveVotes() {
           {t(locale, "waves.discovery.emptyVotes")}
         </output>
       )}
-      <div className="tw-grid tw-grid-cols-1 tw-gap-3 md:tw-grid-cols-2 xl:tw-grid-cols-3">
+      <div className="tw-grid tw-grid-cols-1 tw-gap-x-3 tw-gap-y-4 sm:tw-grid-cols-2 sm:tw-gap-6 lg:tw-grid-cols-3">
         {votes.data?.pages
           .flatMap((page) => page.data)
           .map((vote) => (
-            <div
-              key={vote.wave.id}
-              className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-2"
-            >
-              <ActiveWaveVoteRow vote={vote} />
-            </div>
+            <ActiveWaveVoteCard key={vote.wave.id} vote={vote} />
           ))}
       </div>
       {votes.hasNextPage && (

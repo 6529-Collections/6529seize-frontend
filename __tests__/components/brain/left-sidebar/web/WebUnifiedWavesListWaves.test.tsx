@@ -996,3 +996,41 @@ jest.mock("@/hooks/useWaveDiscoveryViewer", () => ({
     ),
   }),
 }));
+
+it("refreshes populated collections silently and loads an empty selected collection", async () => {
+  const waves = [
+    createMockMinimalWave({ id: "refresh-visible", isPinned: false }),
+  ];
+  const { rerender } = render(
+    <WebUnifiedWavesListWaves
+      waves={waves}
+      isLoading
+      onHover={jest.fn()}
+      scrollContainerRef={scrollRef}
+      sentinelRef={React.createRef<HTMLDivElement>()}
+    />
+  );
+  expect(
+    screen.queryByRole("status", { name: "Loading waves…" })
+  ).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button", { name: "Pinned" }));
+  expect(screen.getByRole("status", { name: "Loading waves…" })).toBeVisible();
+  expect(
+    screen.queryByText("No waves in this collection yet.")
+  ).not.toBeInTheDocument();
+  rerender(
+    <WebUnifiedWavesListWaves
+      waves={waves}
+      isLoading={false}
+      onHover={jest.fn()}
+      scrollContainerRef={scrollRef}
+      sentinelRef={React.createRef<HTMLDivElement>()}
+    />
+  );
+  expect(
+    screen.queryByRole("status", { name: "Loading waves…" })
+  ).not.toBeInTheDocument();
+  expect(
+    await screen.findByText("No waves in this collection yet.")
+  ).toBeVisible();
+});

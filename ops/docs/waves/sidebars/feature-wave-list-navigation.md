@@ -88,9 +88,9 @@ when the desktop feed is active or its button is hovered or keyboard-focused.
   button resets the query. Clearing restores the collection
   and its scroll position. Queries are kept separately for each viewer only
   while the page is running. Refresh starts with an empty search and restores
-  the last selected All / Pinned / Joined collection. The selected collection
-  shows a small spinner while its data is loading; an empty message appears only
-  after loading finishes.
+  the last selected All / Pinned / Joined collection. The list area below the tabs shows a small centered spinner only while the
+  selected collection has no rows and is loading. Existing rows refresh silently;
+  an empty message appears only after loading finishes.
 - This uses the existing name matching. Typo tolerance and relevance changes
   are outside this redesign. Unread state, pin controls and subwaves remain on
   normal collection rows; the DM list retains its existing behavior.

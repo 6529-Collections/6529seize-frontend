@@ -9,9 +9,9 @@ subject to wave visibility rules.
 ## Active Votes
 
 Open `/discover?view=active-votes`, or select `View all` in the Active Votes
-sidebar heading. The page shows the total accessible count and named wave cards.
-Cards show the voting end or next decision when available, otherwise `Voting
-open`. Votes closing soonest appear first; open-ended votes appear last.
+sidebar heading. The page shows the total accessible count and the same large
+image cards used by Worth Checking Out. A prominent line beneath each wave name
+shows the voting end or next decision when available, otherwise `Voting open`. Votes closing soonest appear first; open-ended votes appear last.
 Use `Load more` to browse additional results.
 
 This includes ongoing TDH, TDH + xTDH, and card-set TDH votes, regardless of

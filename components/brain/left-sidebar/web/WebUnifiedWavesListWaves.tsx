@@ -542,7 +542,9 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
           {!isDirectMessage && !hideToggle && !isCollapsed && (
             <SidebarWaveNavigationControls
               navigation={navigation}
-              isCollectionLoading={collectionLoading}
+              isCollectionLoading={
+                collectionLoading && navigation.visibleWaves.length === 0
+              }
             />
           )}
           {navigation.searching && !isCollapsed ? (
@@ -614,13 +616,11 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
                   ref={listContainerRef}
                   style={{ minHeight: EMPTY_WAVES_PLACEHOLDER_HEIGHT }}
                 >
-                  {!isDirectMessage &&
-                    !collectionLoading &&
-                    waves.length > 0 && (
-                      <output className="tw-block tw-px-4 tw-py-3 tw-text-sm tw-text-iron-400">
-                        {t(locale, "waves.sidebar.collectionEmpty")}
-                      </output>
-                    )}
+                  {!isDirectMessage && !collectionLoading && (
+                    <output className="tw-block tw-px-4 tw-py-3 tw-text-sm tw-text-iron-400">
+                      {t(locale, "waves.sidebar.collectionEmpty")}
+                    </output>
+                  )}
                 </div>
               )}
             </>
