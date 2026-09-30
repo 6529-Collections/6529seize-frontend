@@ -206,6 +206,21 @@ describe("mergeDrops", () => {
 });
 
 describe("fetchNewestWaveMessages", () => {
+  it("rethrows cancellation without logging a message-fetch failure", async () => {
+    const error = new DOMException("The user aborted a request.", "AbortError");
+    const consoleError = jest.spyOn(console, "error");
+    (commonApiFetchWithRetry as jest.Mock).mockRejectedValue(error);
+
+    try {
+      await expect(fetchNewestWaveMessages("wave-1", 10, 5)).rejects.toBe(
+        error
+      );
+      expect(consoleError).not.toHaveBeenCalled();
+    } finally {
+      consoleError.mockRestore();
+    }
+  });
+
   it("fetches latest drops and annotates wave data", async () => {
     (commonApiFetchWithRetry as jest.Mock).mockResolvedValue({
       drops: [sampleV2Drop],
