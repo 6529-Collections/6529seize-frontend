@@ -111,7 +111,7 @@ it("preserves the original primary experience with the flag off", () => {
   expect(screen.getByText("Original primary experience")).toBeVisible();
 });
 
-it.each([
+it.each<[string, string, string, string]>([
   ["", "", "Proposals", "Approved"],
   ["Proposals", "Approved", "Proposals", "Approved"],
   ["Suggestions", "Accepted", "Suggestions", "Accepted"],
@@ -135,13 +135,13 @@ it.each([
       <CompetitionDetail waveId="wave" competitionId="native" />
     );
     expect(
-      screen.getByRole("tab", { name: expectedApprovals, exact: true })
+      screen.getByRole("tab", { name: expectedApprovals })
     ).toHaveAttribute("aria-selected", "true");
     expect(
-      screen.getByRole("tabpanel", { name: expectedApprovals, exact: true })
+      screen.getByRole("tabpanel", { name: expectedApprovals })
     ).toBeVisible();
     fireEvent.click(
-      screen.getByRole("tab", { name: expectedApproved, exact: true })
+      screen.getByRole("tab", { name: expectedApproved })
     );
     expect(mockPush).toHaveBeenCalledWith(
       "/waves/wave/competitions/native?tab=decisions",
@@ -150,13 +150,13 @@ it.each([
     mockSearch = "tab=decisions";
     rerender(<CompetitionDetail waveId="wave" competitionId="native" />);
     expect(
-      screen.getByRole("tabpanel", { name: expectedApproved, exact: true })
+      screen.getByRole("tabpanel", { name: expectedApproved })
     ).toBeVisible();
     expect(
-      screen.queryByRole("tab", { name: "Leaderboard", exact: true })
+      screen.queryByRole("tab", { name: "Leaderboard" })
     ).toBeNull();
     expect(
-      screen.queryByRole("tab", { name: "Winners", exact: true })
+      screen.queryByRole("tab", { name: "Winners" })
     ).toBeNull();
   }
 );
