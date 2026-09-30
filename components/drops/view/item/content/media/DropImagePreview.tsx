@@ -42,7 +42,7 @@ export function getDropImagePreviewSources(src: string, scale: ImageScale) {
 // Submission artwork uses the existing Next optimizer on the uploaded source,
 // rather than optimizing a previously downscaled CDN copy. Keep this opt-in
 // limited to first-party raster uploads covered by next.config remotePatterns.
-export function getHighQualityArtworkImageSrc(src: string): string | null {
+function getHighQualityArtworkImageSrc(src: string): string | null {
   const original = resolveIpfsUrlSync(src);
   try {
     const url = new URL(original);
@@ -89,6 +89,7 @@ const PreviewAttempt = forwardRef<HTMLImageElement, Props>(
       ? [highQualitySrc, ...previewSources]
       : previewSources;
     const source = sources[attempt];
+    const optimizationProps = source === highQualitySrc ? { quality: 100 } : {};
 
     return (
       <>
@@ -111,7 +112,7 @@ const PreviewAttempt = forwardRef<HTMLImageElement, Props>(
             ref={ref}
             src={source}
             unoptimized={source !== highQualitySrc}
-            {...(source === highQualitySrc ? { quality: 100 } : {})}
+            {...optimizationProps}
             onError={() => {
               // Repeated errors from one source must not skip its fallback or
               // notify the parent twice before React commits the next render.

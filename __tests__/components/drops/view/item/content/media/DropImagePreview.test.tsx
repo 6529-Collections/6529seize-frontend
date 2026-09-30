@@ -1,21 +1,25 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { createElement, forwardRef, type ComponentProps } from "react";
-import {
-  DropImagePreview,
-  getHighQualityArtworkImageSrc,
-} from "@/components/drops/view/item/content/media/DropImagePreview";
+import { DropImagePreview } from "@/components/drops/view/item/content/media/DropImagePreview";
 import { ImageScale } from "@/helpers/image.helpers";
 
 type MockImageProps = ComponentProps<"img"> & {
   readonly fill?: boolean;
   readonly unoptimized?: boolean;
+  readonly quality?: number;
 };
 jest.mock("next/image", () => ({
   __esModule: true,
   default: forwardRef<HTMLImageElement, MockImageProps>(
     // eslint-disable-next-line react/display-name
-    ({ fill: _fill, unoptimized: _unoptimized, alt, ...props }, ref) =>
-      createElement("img", { ...props, ref, alt })
+    ({ fill: _fill, unoptimized, quality, alt, ...props }, ref) =>
+      createElement("img", {
+        ...props,
+        ref,
+        alt,
+        "data-unoptimized": String(unoptimized),
+        "data-quality": quality,
+      })
   ),
 }));
 jest.mock("@/components/ipfs/IPFSContext", () => ({
@@ -31,7 +35,19 @@ it.each(["JPG", "jpeg", "png", "webp", "avif"])(
   "allows first-party %s artwork as a high-quality optimizer source",
   (extension) => {
     const src = original.replace("jpg", extension) + "?version=2";
-    expect(getHighQualityArtworkImageSrc(src)).toBe(src);
+    render(
+      <DropImagePreview
+        originalSrc={src}
+        imageScale={ImageScale.AUTOx1080}
+        alt="Artwork"
+        fill
+        preferHighQuality
+      />
+    );
+    const image = screen.getByAltText("Artwork");
+    expect(image).toHaveAttribute("src", src);
+    expect(image).toHaveAttribute("data-unoptimized", "false");
+    expect(image).toHaveAttribute("data-quality", "100");
   }
 );
 
@@ -44,7 +60,21 @@ it.each([
   "http://d3lqz0a4bldqgf.cloudfront.net/drops/file.jpg",
   "javascript:photo.jpg",
 ])("leaves other media and hosts on the existing preview path: %s", (src) => {
-  expect(getHighQualityArtworkImageSrc(src)).toBeNull();
+  render(
+    <DropImagePreview
+      originalSrc={src}
+      imageScale={ImageScale.AUTOx1080}
+      alt="Artwork"
+      fill
+      preferHighQuality
+    />
+  );
+  const image = screen.queryByAltText("Artwork");
+  expect(image?.getAttribute("src")).not.toBe(src);
+  if (image) {
+    expect(image).toHaveAttribute("data-unoptimized", "true");
+    expect(image).not.toHaveAttribute("data-quality");
+  }
 });
 
 it("tries only bounded previews and reports exhaustion once", () => {

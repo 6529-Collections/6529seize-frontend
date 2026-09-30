@@ -41,6 +41,21 @@ const loadingPlaceholderStyle: React.CSSProperties = {
 const INTRINSIC_IMAGE_RESERVED_ASPECT_RATIO = "16 / 9";
 const INTRINSIC_IMAGE_MAX_HEIGHT = "16rem";
 
+function OriginalImageLoadingIndicator({ isGif }: { readonly isGif: boolean }) {
+  const label = t(
+    DEFAULT_LOCALE,
+    isGif ? "drop.media.loadingOriginalGif" : "drop.media.loadingOriginalImage"
+  );
+  return (
+    <output
+      aria-label={label}
+      className="tw-pointer-events-none tw-absolute tw-left-1/2 tw-top-1/2 tw-z-30 -tw-translate-x-1/2 -tw-translate-y-1/2 tw-rounded-lg tw-bg-iron-950/90 tw-px-3 tw-py-2 tw-text-sm tw-text-iron-100"
+    >
+      {label}
+    </output>
+  );
+}
+
 function LoadingPlaceholder({
   hasTouchScreen,
 }: {
@@ -408,22 +423,7 @@ function DropListItemContentMediaImageContent({
             </span>
           )}
           {quality.loading && canToggleOriginal && !isModalOpen && (
-            <output
-              aria-label={t(
-                DEFAULT_LOCALE,
-                isGif
-                  ? "drop.media.loadingOriginalGif"
-                  : "drop.media.loadingOriginalImage"
-              )}
-              className="tw-pointer-events-none tw-absolute tw-left-1/2 tw-top-1/2 tw-z-30 -tw-translate-x-1/2 -tw-translate-y-1/2 tw-rounded-lg tw-bg-iron-950/90 tw-px-3 tw-py-2 tw-text-sm tw-text-iron-100"
-            >
-              {t(
-                DEFAULT_LOCALE,
-                isGif
-                  ? "drop.media.loadingOriginalGif"
-                  : "drop.media.loadingOriginalImage"
-              )}
-            </output>
+            <OriginalImageLoadingIndicator isGif={isGif} />
           )}
           {shouldLoadImage &&
             !loaded &&
