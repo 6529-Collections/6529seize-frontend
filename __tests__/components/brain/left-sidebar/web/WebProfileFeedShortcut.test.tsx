@@ -44,7 +44,7 @@ describe("WebProfileFeedShortcut", () => {
     });
     expect(link).toHaveTextContent("");
     expect(link.querySelector("svg")).toBeInTheDocument();
-    expect(link).toHaveAttribute("data-tooltip-content", "Waves Feed");
+    expect(link).toHaveAttribute("data-tooltip-content", "Profile Waves Feed");
     const click = createEvent.click(link);
     fireEvent(link, click);
     expect(click.defaultPrevented).toBe(true);

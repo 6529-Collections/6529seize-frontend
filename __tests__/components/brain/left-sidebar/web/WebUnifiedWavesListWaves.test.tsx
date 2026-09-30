@@ -203,18 +203,13 @@ it("renders announcement, highly rated preview, pinned, and one filterable botto
     "data-padding",
     "tw-px-4 tw-pb-2"
   );
-  const discoverWavesLink = screen.getByRole("link", {
-    name: "Discover Waves",
-  });
-  expect(discoverWavesLink).toHaveAttribute("href", "/discover");
-  expect(discoverWavesLink).toHaveAttribute(
-    "data-tooltip-content",
-    "Discover Waves"
-  );
-  expect(discoverWavesLink.querySelector("svg")).toBeInTheDocument();
-  expect(screen.queryByRole("link", { name: "Waves" })).not.toBeInTheDocument();
   expect(
-    feedLink.compareDocumentPosition(discoverWavesLink) &
+    screen.queryByRole("link", { name: "Discover Waves" })
+  ).not.toBeInTheDocument();
+  expect(screen.queryByRole("link", { name: "Waves" })).not.toBeInTheDocument();
+  const createButton = screen.getByRole("button", { name: "Create wave" });
+  expect(
+    feedLink.compareDocumentPosition(createButton) &
       Node.DOCUMENT_POSITION_FOLLOWING
   ).toBeTruthy();
   expect(screen.getByRole("button", { name: "Joined" })).toBeInTheDocument();

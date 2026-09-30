@@ -120,19 +120,6 @@ export function SidebarDiscovery({
       aria-label={t(locale, "waves.discovery.label")}
     >
       <DiscoverySection
-        label={t(locale, "waves.discovery.activeVotes")}
-        count={votes.data?.pages[0]?.count}
-        viewAllHref="/discover?view=active-votes"
-        viewAllLabel={t(locale, "waves.discovery.viewVotes")}
-        collapsed={activeCollapsed}
-        onToggle={() => setActivePreference(String(!activeCollapsed))}
-      >
-        <p className="tw-m-0 tw-mb-2 tw-text-[11px] tw-leading-4 tw-text-iron-400">
-          {t(locale, "waves.discovery.activeVotesDescription")}
-        </p>
-        <SidebarActiveVotes votes={votes} collapsed={activeCollapsed} />
-      </DiscoverySection>
-      <DiscoverySection
         label={t(locale, "waves.discovery.recommendations")}
         viewAllHref="/discover?view=recommendations&sort=QUALITY"
         viewAllLabel={t(locale, "waves.discovery.viewRecommendations")}
@@ -161,6 +148,19 @@ export function SidebarDiscovery({
             {t(locale, "waves.discovery.emptyRecommendations")}
           </p>
         )}
+      </DiscoverySection>
+      <DiscoverySection
+        label={t(locale, "waves.discovery.activeVotes")}
+        count={votes.data?.pages[0]?.count}
+        viewAllHref="/discover?view=active-votes"
+        viewAllLabel={t(locale, "waves.discovery.viewVotes")}
+        collapsed={activeCollapsed}
+        onToggle={() => setActivePreference(String(!activeCollapsed))}
+      >
+        <p className="tw-m-0 tw-mb-2 tw-text-[11px] tw-leading-4 tw-text-iron-400">
+          {t(locale, "waves.discovery.activeVotesDescription")}
+        </p>
+        <SidebarActiveVotes votes={votes} collapsed={activeCollapsed} />
       </DiscoverySection>
     </section>
   );

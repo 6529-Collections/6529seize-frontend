@@ -22,7 +22,6 @@ import {
   getHighlyRatedPreviewWaves,
 } from "./HighlyRatedWavesToggle";
 import SectionHeader from "./SectionHeader";
-import { DiscoverWavesLink } from "./WaveHeaderActions";
 import { WebProfileFeedShortcut } from "../web/WebProfileFeedShortcut";
 import type { VirtualItem } from "@/hooks/useVirtualizedWaves";
 import { useVirtualizedWaves } from "@/hooks/useVirtualizedWaves";
@@ -442,7 +441,6 @@ const UnifiedWavesListWaves = forwardRef<
                 isCollapsed={false}
                 mobile
               />
-              <DiscoverWavesLink />
             </div>
           </div>
         )}

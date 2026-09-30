@@ -1,5 +1,6 @@
 "use client";
 
+import { DiscoverWavesLink } from "@/components/waves/discovery/DiscoverWavesLink";
 import { COMMUNITY_CURATIONS_LIMIT } from "@/components/community-curations/communityCurations.constants";
 import CommunityCurationsMasonry from "@/components/community-curations/CommunityCurationsMasonry";
 import { useLayout } from "@/components/brain/my-stream/layout/LayoutContext";
@@ -206,8 +207,8 @@ export default function CommunityCurations({
     >
       <div className="tw-mx-auto tw-w-full tw-max-w-6xl">
         {topContent}
-        <div className="tw-flex tw-flex-col tw-gap-4">
-          <div className="tw-max-w-2xl">
+        <div className="tw-flex tw-flex-col tw-items-start tw-gap-4 lg:tw-flex-row lg:tw-justify-between">
+          <div className="tw-min-w-0 tw-max-w-2xl">
             <h1 className="tw-mb-0 tw-text-lg tw-font-bold tw-text-white md:tw-text-xl">
               {t(locale, "waves.profileFeed.title")}
             </h1>
@@ -215,6 +216,7 @@ export default function CommunityCurations({
               {t(locale, "waves.profileFeed.description")}
             </p>
           </div>
+          <DiscoverWavesLink />
         </div>
 
         <div className="tw-mt-6">

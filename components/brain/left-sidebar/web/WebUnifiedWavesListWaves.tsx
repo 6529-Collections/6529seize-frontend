@@ -6,10 +6,7 @@ import {
 } from "@/components/brain/left-sidebar/waves/SidebarWaveNavigation";
 import { useSidebarWaveNavigation } from "@/hooks/useSidebarWaveNavigation";
 
-import {
-  DiscoverWavesLink,
-  WAVE_HEADER_ACTION_CLASSES,
-} from "../waves/WaveHeaderActions";
+import Button from "@/components/utils/button/Button";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import useCreateModalState from "@/hooks/useCreateModalState";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
@@ -136,16 +133,17 @@ function CreateWaveButton({ onClick }: { readonly onClick: () => void }) {
   const locale = useBrowserLocale();
   const label = t(locale, "waves.sidebar.createWave");
   return (
-    <button
-      type="button"
+    <Button
+      variant="primary"
+      size={null}
       onClick={onClick}
       aria-label={label}
       data-tooltip-id="create-wave-tooltip"
       data-tooltip-content={label}
-      className={`${WAVE_HEADER_ACTION_CLASSES} tw-text-iron-300`}
+      className="tw-size-8 tw-rounded-lg tw-p-0 touch-only:tw-size-11"
     >
       <FontAwesomeIcon icon={faPlus} className="tw-size-4" aria-hidden="true" />
-    </button>
+    </Button>
   );
 }
 
@@ -185,7 +183,6 @@ function WebWavesListHeader({
           {showProfileFeedShortcut && (
             <WebProfileFeedShortcut basePath={basePath} isCollapsed={false} />
           )}
-          <DiscoverWavesLink />
           {showCreateWaveButton && <CreateWaveButton onClick={onCreateWave} />}
         </div>
       }
@@ -624,14 +621,6 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
 
       {!isTouchDevice && (
         <>
-          <ReactTooltip
-            id="discover-waves-tooltip"
-            place="bottom"
-            offset={8}
-            opacity={1}
-            style={TOOLTIP_STYLE}
-            border={SIDEBAR_TOOLTIP_BORDER}
-          />
           <ReactTooltip
             id="create-wave-tooltip"
             place="bottom"

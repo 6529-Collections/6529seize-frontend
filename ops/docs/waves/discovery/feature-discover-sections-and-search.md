@@ -2,8 +2,8 @@
 
 ## Overview
 
-`/discover` offers `Active Votes` and `Worth Checking Out` views. The default
-view is recommendations. Both are available without connecting a wallet,
+`/discover` shows `Worth Checking Out` first and `Active Votes` second.
+Worth Checking Out remains the default. Both are available without connecting a wallet,
 subject to wave visibility rules.
 
 ## Active Votes
@@ -39,8 +39,9 @@ when interacting there.
 ## Navigation and Search
 
 The `Discovery` destination remains available in web navigation, app drawer,
-mobile navigation and header search Pages results. The Waves header also has
-`Discover Waves`.
+mobile navigation and header search Pages results. The Profile Waves Feed content header has a labeled `Discover Waves` link
+with a compass, aligned right on desktop and below the description on smaller
+screens. The sidebar uses each section’s `View all` link.
 
 The sidebar's `Find a wave…` searches accessible waves across collections;
 there is no new relevance algorithm or route-local search on `/discover`.

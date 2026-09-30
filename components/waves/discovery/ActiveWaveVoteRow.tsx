@@ -70,14 +70,14 @@ export function ActiveWaveVoteRow({
           </span>
           <span
             title={compact ? deadlineLabel : undefined}
-            className={`${compact ? "tw-mt-0.5 tw-truncate tw-text-[11px] tw-leading-4" : "tw-mt-1 tw-text-xs"} tw-block tw-text-primary-300`}
+            className={`${compact ? "tw-mt-0.5 tw-truncate tw-text-[11px] tw-leading-4" : "tw-mt-1 tw-text-xs"} tw-block tw-text-iron-400`}
           >
             {deadlineLabel}
           </span>
         </span>
       </Link>
       <WaveTrustSignals
-        className="tw-absolute tw-right-2 tw-top-1/2 -tw-translate-y-1/2 tw-z-10"
+        className="tw-absolute tw-right-2 tw-top-1/2 tw-z-10 -tw-translate-y-1/2"
         waveRep={wave.wave_rep}
         waveScore={wave.wave_score}
         variant="sidebar-inline"
