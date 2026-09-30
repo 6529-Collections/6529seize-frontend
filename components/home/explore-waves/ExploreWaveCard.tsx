@@ -311,7 +311,7 @@ export function ExploreWaveCard({
               })}
               fill
               sizes="96px"
-              className="tw-object-contain"
+              className="tw-object-cover"
             />
           )}
           <div
@@ -429,7 +429,7 @@ function MessagePreviewContent({
     return (
       <div
         aria-hidden="true"
-        className={compact ? "tw-mt-1.5 tw-h-9" : "tw-mt-2 tw-min-h-10"}
+        className={compact ? "tw-mt-1.5 tw-h-[18px]" : "tw-mt-2 tw-min-h-10"}
       />
     );
   }
@@ -438,8 +438,8 @@ function MessagePreviewContent({
     <ContentDisplay
       content={previewContent}
       shouldClamp={false}
-      className={`${compact ? "tw-h-9" : "tw-min-h-9"} tw-mt-1.5 tw-flex tw-min-w-0 tw-items-start tw-gap-1 tw-overflow-hidden`}
-      textClassName="tw-line-clamp-2 tw-break-words tw-text-[13px] tw-font-normal tw-leading-[18px] tw-text-iron-500"
+      className={`${compact ? "tw-h-[18px]" : "tw-min-h-9"} tw-mt-1.5 tw-flex tw-min-w-0 tw-items-start tw-gap-1 tw-overflow-hidden`}
+      textClassName={`${compact ? "tw-line-clamp-1" : "tw-line-clamp-2"} tw-break-words tw-text-[13px] tw-font-normal tw-leading-[18px] tw-text-iron-500`}
       linkify={false}
     />
   );

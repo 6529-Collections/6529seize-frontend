@@ -17,9 +17,8 @@ export function ExploreWaveCardSkeleton({
             <div className="tw-h-5 tw-w-3/4 tw-animate-pulse tw-rounded tw-bg-iron-800 motion-reduce:tw-animate-none" />
           </div>
           <div className="tw-mt-1 tw-h-4 tw-w-2/3 tw-animate-pulse tw-rounded tw-bg-iron-800/60 motion-reduce:tw-animate-none" />
-          <div className="tw-mt-1.5 tw-h-9 tw-space-y-2">
+          <div className="tw-mt-1.5 tw-h-[18px]">
             <div className="tw-h-3 tw-w-full tw-animate-pulse tw-rounded tw-bg-iron-800/60 motion-reduce:tw-animate-none" />
-            <div className="tw-h-3 tw-w-5/6 tw-animate-pulse tw-rounded tw-bg-iron-800/60 motion-reduce:tw-animate-none" />
           </div>
           <div className="tw-mt-2 tw-h-5 tw-w-1/2 tw-animate-pulse tw-rounded tw-bg-iron-800/60 motion-reduce:tw-animate-none" />
         </div>
