@@ -54,7 +54,7 @@ when the desktop feed is active or its button is hovered or keyboard-focused.
 
 - `Worth Checking Out` appears first, followed by `Active Votes`, as independently
   collapsible sections above the wave collections. Both start expanded.
-- Active Votes has a scrollable window approximately two rows tall, with named
+- Active Votes has a scrollable window three compact rows tall, with named
   TDH votes and their voting end or next decision. Scroll to browse the list;
   more pages load near the bottom, with a `Load more` button as a fallback.
   A thin scrollbar and bottom fade indicate more content below. The count stays

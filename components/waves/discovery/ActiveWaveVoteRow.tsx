@@ -46,7 +46,7 @@ export function ActiveWaveVoteRow({
         });
   return (
     <div
-      className={`${compact ? "tw-h-14" : ""} tw-relative tw-flex tw-min-w-0 tw-items-center tw-rounded-lg tw-p-2 hover:tw-bg-iron-900`}
+      className={`${compact ? "tw-h-12 tw-px-2 tw-py-1" : "tw-p-2"} tw-relative tw-flex tw-min-w-0 tw-items-center tw-rounded-lg hover:tw-bg-iron-900`}
     >
       <Link
         href={getWaveRoute({ waveId: wave.id, isDirectMessage: false, isApp })}

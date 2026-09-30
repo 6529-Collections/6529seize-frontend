@@ -149,6 +149,15 @@ test("desktop account updates do not move utilities, including in short expanded
       railBox!.y + railBox!.height / 2,
       0
     );
+    const about = sidebar.getByRole("button", { name: "About", exact: true });
+    await about.hover();
+    await expect(
+      page.getByRole("navigation", { name: "About sub-navigation" })
+    ).toBeVisible();
+    await expect(sidebarToggle).toBeHidden();
+    await page.keyboard.press("Escape");
+    await search.hover();
+    await expect(sidebarToggle).toBeVisible();
     await page.emulateMedia({ reducedMotion: "no-preference" });
     await logo.hover();
     await expect(logo).not.toHaveCSS("box-shadow", "none");

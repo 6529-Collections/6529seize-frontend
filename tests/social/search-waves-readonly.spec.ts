@@ -409,7 +409,7 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
       name: "Active voting waves",
     });
     await expect(voteList).toBeVisible();
-    expect((await voteList.boundingBox())!.height).toBeLessThanOrEqual(113);
+    expect((await voteList.boundingBox())!.height).toBeLessThanOrEqual(145);
     await activeToggle.click();
     await expect(
       discovery.getByRole("link", { name: "View all active votes" })

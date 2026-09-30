@@ -14,9 +14,9 @@ such as "is there an app", "6529 app", and contextual "link?" replies.
 
 The Wave discovery record describes the independent Active Votes and Worth Checking Out
 sidebar sections, their explanations and view-all destinations. It covers the
-scrollable two-row voting window, pagination, compact empty/error states and
-independently persisted collapse preferences. Active Votes comes first; Worth a
-Look retains its own compact preview height.
+scrollable three-row voting window, pagination, compact empty/error states and
+independently persisted collapse preferences. Worth Checking Out comes first
+and retains its own compact preview height.
 
 ## Problem Statement
 

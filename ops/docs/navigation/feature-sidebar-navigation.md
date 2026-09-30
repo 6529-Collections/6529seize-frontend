@@ -13,6 +13,8 @@ On web layouts, route switching is sidebar-first.
   is restored. Narrow-screen overlays keep their existing closed default.
 - Narrow desktop web: collapsed icon rail that can open as an overlay panel.
 - Touch small-screen web: header menu button opens the same sidebar as overlay.
+- While a collapsed-rail submenu flyout is open, the drawer expand handle is
+  hidden. It returns when the flyout closes.
 - In collapsed rail mode, flyout submenus keep the same subsection labels and
   nested route grouping shown in the expanded rail.
 - In collapsed rail mode, a mouse hover opens `NFTs` and `About` after a short
