@@ -17,7 +17,8 @@ On web layouts, route switching is sidebar-first.
   reduced-motion preferences show them immediately without animation.
 - The 36px 6529 logo links to `/`; there is no labeled `Home` product row.
   Hover adds a subtle glow and a slight scale-up; reduced motion disables scaling.
-- A slim single-chevron toggle stays inside the sidebar beside the logo.
+- A single-chevron toggle stays inside the sidebar’s right edge, vertically
+  centered in both states (20px wide collapsed, 24px expanded).
   Hover anywhere in the sidebar or focus a control to reveal it; touch layouts
   keep it visible. Expand and collapse use the same footprint.
 - Primary menu concepts are ordered `NFTs`, `Museum`, `Waves`, `DMs`,

@@ -139,14 +139,16 @@ test("desktop account updates do not move utilities, including in short expanded
     await expect(sidebarToggle).toHaveCSS("opacity", "1");
     const railBox = await sidebar.boundingBox();
     const toggleBox = await sidebarToggle.boundingBox();
-    const logoBox = await logo.boundingBox();
     expect(railBox).not.toBeNull();
     expect(toggleBox).not.toBeNull();
-    expect(logoBox).not.toBeNull();
     expect(toggleBox!.x + toggleBox!.width).toBeLessThanOrEqual(
       railBox!.x + railBox!.width
     );
-    expect(logoBox!.x + logoBox!.width).toBeLessThan(toggleBox!.x);
+    expect(toggleBox!.width).toBe(20);
+    expect(toggleBox!.y + toggleBox!.height / 2).toBeCloseTo(
+      railBox!.y + railBox!.height / 2,
+      0
+    );
     await page.emulateMedia({ reducedMotion: "no-preference" });
     await logo.hover();
     await expect(logo).not.toHaveCSS("box-shadow", "none");
@@ -158,6 +160,13 @@ test("desktop account updates do not move utilities, including in short expanded
     await expect(sidebarToggle).toHaveCSS("opacity", "1");
     await page.keyboard.press("Enter");
     await expect(sidebarToggle).toHaveAttribute("aria-expanded", "true");
+    await expect(sidebarToggle).toHaveCSS("width", "24px");
+    const expandedToggleBox = await sidebarToggle.boundingBox();
+    expect(expandedToggleBox).not.toBeNull();
+    expect(expandedToggleBox!.y + expandedToggleBox!.height / 2).toBeCloseTo(
+      railBox!.y + railBox!.height / 2,
+      0
+    );
     const nav = sidebar.getByRole("navigation", {
       name: "Desktop navigation",
     });

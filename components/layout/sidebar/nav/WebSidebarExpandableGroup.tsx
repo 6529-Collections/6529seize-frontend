@@ -56,7 +56,7 @@ function WebSidebarExpandableGroup({
       >
         <span className="tw-min-w-0 tw-flex-1 tw-break-words">{name}</span>
         <ChevronRightIcon
-          className={`tw-ml-3 tw-h-4 tw-w-4 tw-shrink-0 tw-transition-transform tw-duration-200 ${
+          className={`tw-ml-3 tw-mr-2 tw-h-4 tw-w-4 tw-shrink-0 tw-transition-transform tw-duration-200 ${
             expanded ? "tw-rotate-90" : ""
           }`}
         />

@@ -104,7 +104,7 @@ function WebSidebarExpandable({
         rightSlot={
           !collapsed && (
             <ChevronRightIcon
-              className={`tw-ml-auto tw-h-4 tw-w-4 tw-shrink-0 tw-transition-transform tw-duration-200 motion-reduce:tw-transition-none ${
+              className={`tw-ml-auto tw-mr-2 tw-h-4 tw-w-4 tw-shrink-0 tw-transition-transform tw-duration-200 motion-reduce:tw-transition-none ${
                 expanded ? "tw-rotate-90" : ""
               }`}
             />
