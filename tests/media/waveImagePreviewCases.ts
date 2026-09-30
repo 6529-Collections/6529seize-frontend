@@ -106,7 +106,14 @@ export function defineWaveImagePreviewTests() {
       });
       await waitForRouteReady(page);
       await dismissNextDevTools(page);
-      const hero = page.locator("[data-image-artwork]");
+      // Keep the artwork scope stable while HD hides its optimized preview.
+      const hero = page
+        .getByRole("img", {
+          name: "Drop media",
+          exact: true,
+          includeHidden: true,
+        })
+        .locator("xpath=ancestor::*[@data-image-artwork]");
       const preview = hero.getByRole("img", {
         name: "Drop media",
         exact: true,
