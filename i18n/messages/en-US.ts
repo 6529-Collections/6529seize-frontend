@@ -720,6 +720,9 @@ const WAVE_DROP_ACTIONS_MESSAGES = objectMessages("waves.drop.actions", {
 
 const WAVE_PROPOSAL_CARD_MESSAGES = objectMessages("waves.proposalCard", {
   contextLabel: "Proposal",
+  summaryLabel: "Summary",
+  showDetails: "Show details ({count})",
+  hideDetails: "Hide details",
   readFull: "Read full",
   readFullNamed: "Read full: {title}",
   untitledProposal: "Untitled proposal",
