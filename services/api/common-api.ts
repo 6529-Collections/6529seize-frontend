@@ -288,6 +288,9 @@ const parseApiResponse = async <T>(
   try {
     return await res.json();
   } catch (jsonError) {
+    if (jsonError instanceof DOMException && jsonError.name === "AbortError") {
+      throw jsonError;
+    }
     const errorMessage =
       jsonError instanceof Error ? jsonError.message : String(jsonError);
     throw new Error(
