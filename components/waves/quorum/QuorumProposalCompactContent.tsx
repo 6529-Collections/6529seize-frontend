@@ -3,6 +3,8 @@
 import DropPartMarkdownWithPropLogger from "@/components/drops/view/part/DropPartMarkdownWithPropLogger";
 import type { DropPartMarkdownProps } from "@/components/drops/view/part/DropPartMarkdown";
 import ProposalCardContextLabel from "@/components/waves/drops/proposal/ProposalCardContextLabel";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { ChevronRightIcon } from "@heroicons/react/20/solid";
 import { useId, useState } from "react";
 import type {
@@ -147,6 +149,7 @@ export default function QuorumProposalCompactContent({
   proposal,
   ...markdownProps
 }: QuorumProposalCompactContentProps) {
+  const locale = useBrowserLocale();
   const [internalAreDetailsVisible, setInternalAreDetailsVisible] =
     useState(false);
   const [internalOpenSectionKeys, setInternalOpenSectionKeys] = useState<
@@ -158,8 +161,8 @@ export default function QuorumProposalCompactContent({
   const detailsContainerId = useId();
   const sectionCount = proposal.sections.length;
   const detailsToggleLabel = resolvedAreDetailsVisible
-    ? "Hide details"
-    : `Show details (${sectionCount})`;
+    ? t(locale, "waves.proposalCard.hideDetails")
+    : t(locale, "waves.proposalCard.showDetails", { count: sectionCount });
   const setDetailsVisible = (nextAreDetailsVisible: boolean) => {
     if (onDetailsVisibleChange) {
       onDetailsVisibleChange(nextAreDetailsVisible);
@@ -201,8 +204,8 @@ export default function QuorumProposalCompactContent({
           {proposal.title}
         </h2>
         <div>
-          <p className="tw-mb-2 tw-text-[10px] tw-font-semibold tw-uppercase tw-leading-none tw-tracking-[0.14em] tw-text-primary-300/60">
-            Summary
+          <p className="tw-mb-2 tw-text-[10px] tw-font-semibold tw-uppercase tw-leading-none tw-tracking-[0.14em] tw-text-primary-300/80">
+            {t(locale, "waves.proposalCard.summaryLabel")}
           </p>
           <div className="[&_li]:!tw-text-sm [&_li]:!tw-leading-[1.6] [&_li]:!tw-text-iron-300 [&_p]:!tw-text-sm [&_p]:!tw-leading-[1.6] [&_p]:!tw-text-iron-300">
             <ProposalMarkdownBlock
