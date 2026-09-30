@@ -2,16 +2,17 @@
 
 ## Overview
 
-`/discover` offers `Active Votes` and `Worth Checking Out` views. The default
-view is recommendations. Both are available without connecting a wallet,
+`/discover` shows `Worth Checking Out` first and `Active Votes` second.
+Worth Checking Out remains the default. Both are available without connecting a wallet,
 subject to wave visibility rules.
 
 ## Active Votes
 
 Open `/discover?view=active-votes`, or select `View all` in the Active Votes
-sidebar heading. The page shows the total accessible count and named wave cards.
-Cards show the voting end or next decision when available, otherwise `Voting
-open`. Votes closing soonest appear first; open-ended votes appear last.
+sidebar heading. The page shows the total accessible count and compact discovery
+cards with rectangular artwork on the left, aligned two-line titles and two-line
+description previews. A prominent line beneath each wave name
+shows the voting end or next decision when available, otherwise `Voting open`. Votes closing soonest appear first; open-ended votes appear last.
 Use `Load more` to browse additional results.
 
 This includes ongoing TDH, TDH + xTDH, and card-set TDH votes, regardless of
@@ -20,7 +21,8 @@ excluded. DMs, subwaves of DMs and inaccessible waves are excluded, even when
 you can read the DM parent. Visibility does not guarantee
 that your profile meets a wave's voting rules.
 
-Loading, no-active-votes, and request-failure states are explicit. Select
+Initial loading uses matching shimmer cards. No-active-votes and request-failure
+states are explicit. Select
 `Try again` after a request failure. The count and list refresh periodically.
 
 ## Worth Checking Out
@@ -39,8 +41,9 @@ when interacting there.
 ## Navigation and Search
 
 The `Discovery` destination remains available in web navigation, app drawer,
-mobile navigation and header search Pages results. The Waves header also has
-`Discover Waves`.
+mobile navigation and header search Pages results. The Profile Waves Feed content header has a labeled `Discover Waves` link
+with a compass, aligned right on desktop and below the description on smaller
+screens. The sidebar uses each section’s `View all` link.
 
 The sidebar's `Find a wave…` searches accessible waves across collections;
 there is no new relevance algorithm or route-local search on `/discover`.

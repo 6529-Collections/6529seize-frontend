@@ -30,15 +30,17 @@ Wave and DM rows in the left list control which thread is open.
   Each collection remembers its scroll position; selecting another wave enables
   active-row reveal again. Signed-out visitors see `All Waves` without personal
   collection controls.
-- The expanded web Waves panel header includes a secondary `Discover Waves`
-  link to `/discover`.
-- Select the `Waves` heading and its small feed icon to open Profile Waves Feed
-  on desktop, mobile web, or in the native app. The mobile list heading is
-  `Waves`, and there is no separate feed card.
-  On desktop, this clears the selected wave; on mobile web, it opens
+- The `Waves` heading is plain text. Header actions sit at the far right:
+  feed, then create on desktop; feed only in the mobile list.
+  The app keeps create in its top bar.
+- Select the feed icon to open Profile Waves Feed. On desktop, it clears the
+  selected wave; on mobile web and in the native app, it opens
   `/waves?view=profile-feed`. The feed's `Waves` link returns to the list.
-  Hover or focus the heading for `Waves Feed`. The collapsed rail
-  retains an icon-only feed link; there is no separate feed row in the expanded panel.
+- The feed tooltip reads `Profile Waves Feed`. Create keeps a compact white
+  button with a dark plus. Both have visible keyboard focus and larger touch
+  targets. The feed content header has a `Discover Waves` link with a compass
+  to `/discover`; the sidebar keeps the two section-specific `View all` links.
+  The collapsed rail retains its icon-only feed link.
 - Browser back/forward keeps the active row and URL in sync.
 - In the native app, swipe right from the left edge of a standard wave detail
   view to return to the Waves list.
@@ -48,11 +50,11 @@ Wave and DM rows in the left list control which thread is open.
 The discovery sections have independent heights. Expanding and collapsing uses
 a short reveal and rotating chevron.
 Reduced-motion preferences disable these transitions. The feed icon is blue
-when the desktop feed is active or the heading is hovered or keyboard-focused.
+when the desktop feed is active or its button is hovered or keyboard-focused.
 
-- `Active Votes` appears first, followed by `Worth Checking Out`, as independently
+- `Worth Checking Out` appears first, followed by `Active Votes`, as independently
   collapsible sections above the wave collections. Both start expanded.
-- Active Votes has a scrollable window approximately two rows tall, with named
+- Active Votes has a scrollable window three compact rows tall, with named
   TDH votes and their voting end or next decision. Scroll to browse the list;
   more pages load near the bottom, with a `Load more` button as a fallback.
   A thin scrollbar and bottom fade indicate more content below. The count stays
@@ -82,9 +84,15 @@ when the desktop feed is active or the heading is hovered or keyboard-focused.
   selected collection. Type at least three characters. Results show name,
   creator, and joined/pinned status, with `Load more` for additional matches.
 - Search replaces the lower list and keeps the query while opening a result.
+  Signed-out and auth-loading views omit the redundant `All Waves` heading below
+  the search input; personal collection tabs appear when available.
   A small spinner replaces the search icon while results are loading; one clear
   button resets the query. Clearing restores the collection
-  and its scroll position. Queries are kept separately for each viewer.
+  and its scroll position. Queries are kept separately for each viewer only
+  while the page is running. Refresh starts with an empty search and restores
+  the last selected All / Pinned / Joined collection. The list area below the tabs shows a small centered spinner only while the
+  selected collection has no rows and is loading. Existing rows refresh silently;
+  an empty message appears only after loading finishes.
 - This uses the existing name matching. Typo tolerance and relevance changes
   are outside this redesign. Unread state, pin controls and subwaves remain on
   normal collection rows; the DM list retains its existing behavior.
@@ -99,9 +107,9 @@ when the desktop feed is active or the heading is hovered or keyboard-focused.
 ## Entry Points
 
 - Open the `Waves` or `Messages` shell with the left list visible.
-- From the expanded web Waves panel header, open `Discover Waves` for the
+- From the Profile Waves Feed content header, open `Discover Waves` for the
   `/discover` route.
-- On mobile web, select the `Waves` heading to scan recent
+- On mobile web, select the feed icon to scan recent
   posts across public Profile Waves.
 - Select an inactive wave or DM row from the list by clicking the row body.
 - In the native app, open a standard wave and swipe right from the left edge of

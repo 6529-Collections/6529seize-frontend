@@ -231,6 +231,10 @@ const UnifiedWavesListWaves = forwardRef<
       enabled: !isDirectMessage,
       activeContainerId: effectiveActiveParentWaveId ?? activeWaveId,
     });
+    const collectionLoading =
+      isLoading ||
+      (navigation.collection === "pinned" &&
+        streamWaves.isPinnedWavesLoading === true);
     const announcementRows = useMemo(
       () => getRows(announcementWaves),
       [announcementWaves, getRows]
@@ -431,13 +435,18 @@ const UnifiedWavesListWaves = forwardRef<
     return (
       <div className="tw-flex tw-flex-col">
         {!hideHeaders && !isDirectMessage && (
-          <h2 className="tw-m-0 tw-px-4">
-            <WebProfileFeedShortcut
-              basePath="/waves"
-              isCollapsed={false}
-              mobile
-            />
-          </h2>
+          <div className="tw-flex tw-items-center tw-justify-between tw-px-4">
+            <h2 className="tw-m-0 tw-text-xl tw-font-semibold tw-tracking-tight tw-text-iron-50">
+              {t(locale, "navigation.primary.waves")}
+            </h2>
+            <div className="tw-flex tw-items-center tw-gap-1.5">
+              <WebProfileFeedShortcut
+                basePath="/waves"
+                isCollapsed={false}
+                mobile
+              />
+            </div>
+          </div>
         )}
         {!hideHeaders && isDirectMessage && (
           <SectionHeader
@@ -488,7 +497,12 @@ const UnifiedWavesListWaves = forwardRef<
           />
         )}
         {!isDirectMessage && !hideToggle && (
-          <SidebarWaveNavigationControls navigation={navigation} />
+          <SidebarWaveNavigationControls
+            navigation={navigation}
+            isCollectionLoading={
+              collectionLoading && navigation.visibleWaves.length === 0
+            }
+          />
         )}
         {navigation.searching ? (
           <SidebarWaveSearchResults navigation={navigation} />
@@ -559,7 +573,7 @@ const UnifiedWavesListWaves = forwardRef<
               </section>
             ) : (
               <div ref={listContainerRef} style={emptyPlaceholderStyle}>
-                {!isDirectMessage && !isLoading && waves.length > 0 && (
+                {!isDirectMessage && !collectionLoading && (
                   <output className="tw-block tw-px-4 tw-py-3 tw-text-sm tw-text-iron-400">
                     {t(locale, "waves.sidebar.collectionEmpty")}
                   </output>

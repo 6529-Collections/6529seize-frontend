@@ -1,5 +1,5 @@
 "use client";
-import { useWaveSidebarPreference } from "@/hooks/useWaveSidebarPreference";
+import { useWaveSidebarSearch } from "@/hooks/useWaveSidebarSearch";
 import { useWaveDiscoveryViewer } from "@/hooks/useWaveDiscoveryViewer";
 import { useWaveSidebarCollection } from "@/hooks/useWaveSidebarCollection";
 
@@ -19,6 +19,7 @@ interface WebUnifiedWavesListProps {
   readonly fetchNextPage: () => void;
   readonly hasNextPage: boolean | undefined;
   readonly isFetching: boolean;
+  readonly isPinnedWavesLoading?: boolean;
   readonly isFetchingNextPage: boolean;
   readonly onHover: (waveId: string) => void;
   readonly scrollContainerRef: React.RefObject<HTMLElement | null>;
@@ -32,6 +33,7 @@ const WebUnifiedWavesList: React.FC<WebUnifiedWavesListProps> = (props) => {
     fetchNextPage,
     hasNextPage,
     isFetching,
+    isPinnedWavesLoading = false,
     isFetchingNextPage,
     onHover,
     scrollContainerRef,
@@ -42,11 +44,11 @@ const WebUnifiedWavesList: React.FC<WebUnifiedWavesListProps> = (props) => {
   const locale = useBrowserLocale();
   const [savedCollection] = useWaveSidebarCollection();
   const { canUseCollections, key } = useWaveDiscoveryViewer();
-  const [search] = useWaveSidebarPreference(
-    `wave-sidebar-search:${key ?? "guest"}`
-  );
-  const isSearching = !isCollapsed && Boolean(search?.trim());
+  const [search] = useWaveSidebarSearch(key ?? "guest");
+  const isSearching = !isCollapsed && Boolean(search.trim());
   const collection = canUseCollections ? savedCollection : "all";
+  const collectionFetching =
+    isFetching || (collection === "pinned" && isPinnedWavesLoading);
   const [following] = useShowFollowingWaves();
   const { connectedProfile, activeProfileProxy } = useAuth();
   const isJoinedFilterActive =
@@ -67,7 +69,7 @@ const WebUnifiedWavesList: React.FC<WebUnifiedWavesListProps> = (props) => {
       <div className="tw-w-full">
         {/* Unified Waves List */}
         <WebUnifiedWavesListWaves
-          isLoading={isFetching || isFetchingNextPage}
+          isLoading={collectionFetching || isFetchingNextPage}
           waves={waves}
           onHover={onHover}
           scrollContainerRef={scrollContainerRef}
@@ -78,7 +80,7 @@ const WebUnifiedWavesList: React.FC<WebUnifiedWavesListProps> = (props) => {
 
         {/* Loading indicator and intersection trigger */}
         <UnifiedWavesListLoader
-          isFetching={!isSearching && isFetching && waves.length === 0}
+          isFetching={!isSearching && collectionFetching && waves.length === 0}
           isFetchingNextPage={!isSearching && isFetchingNextPage}
         />
 
@@ -86,7 +88,7 @@ const WebUnifiedWavesList: React.FC<WebUnifiedWavesListProps> = (props) => {
         {!isSearching && (
           <UnifiedWavesListEmpty
             sortedWaves={waves}
-            isFetching={isFetching}
+            isFetching={collectionFetching}
             isFetchingNextPage={isFetchingNextPage}
             emptyMessage={
               isJoinedFilterActive

@@ -4347,7 +4347,7 @@ export const EN_US_MESSAGES = {
   "waves.discovery.loadMore": "Load more",
   "waves.discovery.voteDescription":
     "Explore ongoing TDH votes. Voting eligibility depends on each wave’s rules.",
-  "waves.sidebar.openProfileFeed": "Waves Feed",
+  "waves.sidebar.openProfileFeed": "Profile Waves Feed",
   "waves.sidebar.profileFeedHeaderLabel": "Waves — Open Profile Waves Feed",
   "waves.sidebar.findWave": "Find a wave…",
   "waves.sidebar.createWave": "Create wave",

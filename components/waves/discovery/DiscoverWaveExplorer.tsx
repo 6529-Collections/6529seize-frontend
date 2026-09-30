@@ -408,7 +408,7 @@ export function DiscoverWaveExplorer() {
   const params = useSearchParams();
   const panelId = useId();
   const active = params.get("view") === ACTIVE_VOTES_VIEW;
-  const views = [ACTIVE_VOTES_VIEW, "recommendations"] as const;
+  const views = ["recommendations", ACTIVE_VOTES_VIEW] as const;
   const tabsRef = useRef<(HTMLButtonElement | null)[]>([]);
   const selectView = (view: (typeof views)[number]) => {
     const next = new URLSearchParams(params.toString());

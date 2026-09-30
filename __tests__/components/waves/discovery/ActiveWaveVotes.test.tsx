@@ -7,6 +7,7 @@ jest.mock("@/hooks/useActiveWaveVotes");
 const mockVotes = jest.mocked(useActiveWaveVotes);
 const refetch = jest.fn();
 function state({
+  isPending = false,
   isError = false,
   hasNextPage = false,
   isFetchingNextPage = false,
@@ -46,6 +47,20 @@ function state({
     isFetchPreviousPageError: false as const,
     isFetchingPreviousPage: false,
   };
+  if (isPending) {
+    return {
+      ...shared,
+      data: undefined,
+      status: "pending",
+      isPending: true,
+      isLoading: true,
+      isInitialLoading: true,
+      error: null,
+      isError: false,
+      isRefetchError: false,
+      isSuccess: false,
+    };
+  }
   return isError
     ? {
         ...shared,
@@ -89,4 +104,24 @@ it("marks pagination busy while fetching more votes", () => {
   render(<ActiveWaveVotes />);
   expect(screen.getByRole("button")).toHaveAttribute("aria-busy", "true");
   expect(screen.getByRole("button")).toBeDisabled();
+});
+
+it("shows accessible shimmer loading without a visible loading message", () => {
+  mockVotes.mockReturnValue(state({ isPending: true }));
+  const { rerender } = render(<ActiveWaveVotes />);
+  expect(screen.getByRole("region", { name: "Active Votes" })).toHaveAttribute(
+    "aria-busy",
+    "true"
+  );
+  expect(screen.getByRole("status")).toHaveClass("tw-sr-only");
+  expect(
+    screen.queryByText("No active TDH votes right now.")
+  ).not.toBeInTheDocument();
+  mockVotes.mockReturnValue(state());
+  rerender(<ActiveWaveVotes />);
+  expect(screen.getByRole("region", { name: "Active Votes" })).toHaveAttribute(
+    "aria-busy",
+    "false"
+  );
+  expect(screen.queryByText("Loading waves…")).not.toBeInTheDocument();
 });

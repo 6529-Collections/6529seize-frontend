@@ -21,8 +21,10 @@ const COLLECTION_LABELS = {
 
 export function SidebarWaveNavigationControls({
   navigation,
+  isCollectionLoading = false,
 }: {
   readonly navigation: SidebarWaveNavigation;
+  readonly isCollectionLoading?: boolean;
 }) {
   const locale = useBrowserLocale();
   const inputId = useId();
@@ -32,68 +34,76 @@ export function SidebarWaveNavigationControls({
     navigation.queryText.trim().length >= 3 &&
     (!navigation.queryEnabled || navigation.results.isFetching);
   return (
-    <div className="tailwind-scope tw-sticky tw-top-0 tw-z-10 tw-bg-[var(--wave-sidebar-background,#000)] tw-px-4 tw-py-2">
-      <label htmlFor={inputId} className="tw-sr-only">
-        {t(locale, "waves.sidebar.findWave")}
-      </label>
-      <div className="tw-flex tw-min-h-9 tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-2.5 focus-within:tw-border-primary-400">
-        {searchLoading ? (
-          <span
-            aria-hidden="true"
-            className="tw-size-4 tw-shrink-0 tw-animate-spin tw-rounded-full tw-border tw-border-solid tw-border-iron-600 tw-border-t-primary-300 motion-reduce:tw-animate-none"
+    <>
+      <div className="tailwind-scope tw-sticky tw-top-0 tw-z-10 tw-bg-[var(--wave-sidebar-background,#000)] tw-px-4 tw-py-2">
+        <label htmlFor={inputId} className="tw-sr-only">
+          {t(locale, "waves.sidebar.findWave")}
+        </label>
+        <div className="tw-flex tw-min-h-9 tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-2.5 focus-within:tw-border-primary-400">
+          {searchLoading ? (
+            <span
+              aria-hidden="true"
+              className="tw-size-4 tw-shrink-0 tw-animate-spin tw-rounded-full tw-border tw-border-solid tw-border-iron-600 tw-border-t-primary-300 motion-reduce:tw-animate-none"
+            />
+          ) : (
+            <MagnifyingGlassIcon
+              className="tw-size-4 tw-shrink-0 tw-text-iron-400"
+              aria-hidden="true"
+            />
+          )}
+          <input
+            id={inputId}
+            type="search"
+            disabled={!hasHydrated}
+            aria-busy={searchLoading}
+            value={navigation.queryText}
+            onChange={(event) => navigation.setQueryText(event.target.value)}
+            placeholder={t(locale, "waves.sidebar.findWave")}
+            autoComplete="off"
+            className="tw-w-full tw-min-w-0 tw-border-0 tw-bg-transparent tw-py-1.5 tw-text-xs tw-leading-5 tw-text-white tw-outline-none tw-ring-0 placeholder:tw-text-iron-400 focus:tw-ring-0 touch-only:tw-text-base [&::-webkit-search-cancel-button]:tw-appearance-none"
           />
-        ) : (
-          <MagnifyingGlassIcon
-            className="tw-size-4 tw-shrink-0 tw-text-iron-400"
-            aria-hidden="true"
-          />
-        )}
-        <input
-          id={inputId}
-          type="search"
-          disabled={!hasHydrated}
-          aria-busy={searchLoading}
-          value={navigation.queryText}
-          onChange={(event) => navigation.setQueryText(event.target.value)}
-          placeholder={t(locale, "waves.sidebar.findWave")}
-          autoComplete="off"
-          className="tw-w-full tw-min-w-0 tw-border-0 tw-bg-transparent tw-py-1.5 tw-text-xs tw-leading-5 tw-text-white tw-outline-none tw-ring-0 placeholder:tw-text-iron-400 focus:tw-ring-0 touch-only:tw-text-base [&::-webkit-search-cancel-button]:tw-appearance-none"
-        />
-        {navigation.searching && (
-          <button
-            type="button"
-            onClick={() => navigation.setQueryText("")}
-            aria-label={t(locale, "waves.sidebar.clearSearch")}
-            className="tw-flex tw-size-8 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-transparent tw-text-iron-300"
+          {navigation.searching && (
+            <button
+              type="button"
+              onClick={() => navigation.setQueryText("")}
+              aria-label={t(locale, "waves.sidebar.clearSearch")}
+              className="tw-flex tw-size-8 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-transparent tw-text-iron-300"
+            >
+              <XMarkIcon className="tw-size-4" />
+            </button>
+          )}
+        </div>
+        {!navigation.searching && navigation.canUseCollections && (
+          <fieldset
+            aria-label={t(locale, "waves.sidebar.filterAriaLabel")}
+            className="tw-m-0 tw-mt-2 tw-flex tw-min-w-0 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-0.5"
           >
-            <XMarkIcon className="tw-size-4" />
-          </button>
+            {(["all", "pinned", "joined"] as const).map((tab) => (
+              <button
+                key={tab}
+                type="button"
+                aria-label={t(locale, COLLECTION_LABELS[tab])}
+                aria-pressed={navigation.collection === tab}
+                onClick={() => navigation.setCollection(tab)}
+                className={`tw-inline-flex tw-min-h-7 tw-min-w-0 tw-flex-1 tw-items-center tw-justify-center tw-gap-1.5 tw-rounded-md tw-border-0 tw-px-2 tw-text-xs focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 ${navigation.collection === tab ? "tw-bg-iron-800 tw-font-semibold tw-text-white" : "tw-bg-transparent tw-text-iron-400"}`}
+              >
+                {t(locale, COLLECTION_LABELS[tab])}
+              </button>
+            ))}
+          </fieldset>
         )}
       </div>
-      {!navigation.searching && navigation.canUseCollections && (
-        <fieldset
-          aria-label={t(locale, "waves.sidebar.filterAriaLabel")}
-          className="tw-m-0 tw-mt-2 tw-flex tw-min-w-0 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-0.5"
-        >
-          {(["all", "pinned", "joined"] as const).map((tab) => (
-            <button
-              key={tab}
-              type="button"
-              aria-pressed={navigation.collection === tab}
-              onClick={() => navigation.setCollection(tab)}
-              className={`tw-min-h-7 tw-min-w-0 tw-flex-1 tw-rounded-md tw-border-0 tw-px-2 tw-text-xs focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 ${navigation.collection === tab ? "tw-bg-iron-800 tw-font-semibold tw-text-white" : "tw-bg-transparent tw-text-iron-400"}`}
-            >
-              {t(locale, COLLECTION_LABELS[tab])}
-            </button>
-          ))}
-        </fieldset>
-      )}
-      {!navigation.searching && !navigation.canUseCollections && (
-        <p className="tw-mb-0 tw-mt-3 tw-text-xs tw-font-semibold tw-text-iron-400">
-          {t(locale, "waves.sidebar.allWaves")}
-        </p>
-      )}
-    </div>
+      {!navigation.searching &&
+        navigation.canUseCollections &&
+        isCollectionLoading && (
+          <div className="tailwind-scope tw-flex tw-min-h-12 tw-items-center tw-justify-center tw-py-3">
+            <output
+              aria-label={t(locale, "waves.discovery.loading")}
+              className="tw-size-4 tw-shrink-0 tw-animate-spin tw-rounded-full tw-border tw-border-solid tw-border-iron-600 tw-border-t-primary-300 motion-reduce:tw-animate-none"
+            />
+          </div>
+        )}
+    </>
   );
 }
 

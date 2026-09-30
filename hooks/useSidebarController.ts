@@ -24,7 +24,7 @@ const getBrowserWindow = (): Window | undefined => {
 };
 
 const subscribeToPreference = () => () => undefined;
-const getServerCollapsedSnapshot = () => true;
+const getServerCollapsedSnapshot = (): boolean | null => null;
 const getStoredCollapsedSnapshot = (): boolean => {
   try {
     const stored = safeSessionStorage.getItem("sidebarCollapsed");
@@ -93,13 +93,18 @@ export function useSidebarController() {
   const [collapsedOverride, setIsDesktopCollapsed] = useState<boolean | null>(
     null
   );
-  const isDesktopCollapsed = collapsedOverride ?? storedCollapsed;
+  const isDesktopCollapsed = collapsedOverride ?? storedCollapsed ?? true;
+  // Readiness and the preference come from the same snapshot, so the startup
+  // styles cannot be released while React still renders the server default.
+  const isSidebarReady = storedCollapsed !== null;
 
   const persistDesktopCollapsed = useCallback(
     (value: boolean | ((prev: boolean) => boolean)) => {
       setIsDesktopCollapsed((prev) => {
         const newValue =
-          typeof value === "function" ? value(prev ?? storedCollapsed) : value;
+          typeof value === "function"
+            ? value(prev ?? storedCollapsed ?? true)
+            : value;
         try {
           safeSessionStorage.setItem(
             "sidebarCollapsed",
@@ -199,6 +204,7 @@ export function useSidebarController() {
   }, [isOffcanvasMode, isOffcanvasOpen, isCollapsed]);
 
   return {
+    isSidebarReady,
     isMobile,
     isNarrow,
     isCollapsed,

@@ -409,7 +409,7 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
       name: "Active voting waves",
     });
     await expect(voteList).toBeVisible();
-    expect((await voteList.boundingBox())!.height).toBeLessThanOrEqual(113);
+    expect((await voteList.boundingBox())!.height).toBeLessThanOrEqual(145);
     await activeToggle.click();
     await expect(
       discovery.getByRole("link", { name: "View all active votes" })
@@ -417,8 +417,10 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
     await expect(
       discovery.getByRole("link", { name: "View all recommendations" })
     ).toBeVisible();
-    await page.evaluate(() => sessionStorage.clear());
+    await search.fill("refresh query");
     await page.reload();
+    await expect(search).toBeEnabled();
+    await expect(search).toHaveValue("");
     await expect(activeToggle).toHaveAttribute("aria-expanded", "false");
     await expect(recommendationsToggle).toHaveAttribute(
       "aria-expanded",
@@ -437,6 +439,15 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
     await expect(
       page.getByRole("heading", { level: 1, name: /^Active Votes/ })
     ).toBeVisible();
+    const voteCards = page.getByRole("link", { name: /^View wave / });
+    if ((await voteCards.count()) > 0) {
+      await expect(
+        voteCards
+          .first()
+          .getByText(/^(Next decision |Voting ends |Voting open$)/)
+      ).toBeVisible();
+    }
+    await expectNoHorizontalOverflow(page);
     await page.getByRole("tab", { name: "Worth Checking Out" }).click();
     await expect(
       page.getByRole("heading", {

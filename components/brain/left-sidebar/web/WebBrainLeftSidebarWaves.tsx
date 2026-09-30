@@ -27,6 +27,7 @@ const WebBrainLeftSidebarWaves: React.FC<WebBrainLeftSidebarWavesProps> = ({
       fetchNextPage={onNextPage}
       hasNextPage={waves.hasNextPage}
       isFetching={waves.isFetching}
+      isPinnedWavesLoading={waves.isPinnedWavesLoading ?? false}
       isFetchingNextPage={waves.isFetchingNextPage}
       onHover={registerWave}
       scrollContainerRef={scrollContainerRef}

@@ -181,11 +181,9 @@ it("renders structure even when no waves", () => {
     />
   );
   expect(container.firstChild).not.toBeNull();
+  expect(screen.getByRole("heading", { name: "Waves" })).toBeInTheDocument();
   expect(
-    screen.getByRole("heading", { name: "Waves — Open Profile Waves Feed" })
-  ).toBeInTheDocument();
-  expect(
-    screen.getByRole("link", { name: "Waves — Open Profile Waves Feed" })
+    screen.getByRole("link", { name: "Profile Waves Feed" })
   ).toHaveAttribute("href", "/waves?view=profile-feed");
   expect(screen.getByRole("button", { name: "Joined" })).toBeInTheDocument();
 });
@@ -353,9 +351,7 @@ it("renders announcement, highly rated preview, pinned, and one filterable botto
       ref={ref}
     />
   );
-  expect(
-    screen.getByRole("heading", { name: "Waves — Open Profile Waves Feed" })
-  ).toBeInTheDocument();
+  expect(screen.getByRole("heading", { name: "Waves" })).toBeInTheDocument();
   expect(screen.getByLabelText("Announcement waves")).toBeInTheDocument();
   expect(screen.getByText("Worth Checking Out")).toBeInTheDocument();
   expect(
@@ -1214,3 +1210,39 @@ jest.mock("@/hooks/useWaveDiscoveryViewer", () => ({
     ),
   }),
 }));
+
+it("refreshes populated collections silently and loads an empty selected collection", async () => {
+  const waves = [
+    createMockMinimalWave({ id: "refresh-visible", isPinned: false }),
+  ];
+  const { rerender } = render(
+    <UnifiedWavesListWaves
+      waves={waves}
+      isLoading
+      onHover={jest.fn()}
+      scrollContainerRef={scrollRef}
+    />
+  );
+  expect(
+    screen.queryByRole("status", { name: "Loading waves…" })
+  ).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button", { name: "Pinned" }));
+  expect(screen.getByRole("status", { name: "Loading waves…" })).toBeVisible();
+  expect(
+    screen.queryByText("No waves in this collection yet.")
+  ).not.toBeInTheDocument();
+  rerender(
+    <UnifiedWavesListWaves
+      waves={waves}
+      isLoading={false}
+      onHover={jest.fn()}
+      scrollContainerRef={scrollRef}
+    />
+  );
+  expect(
+    screen.queryByRole("status", { name: "Loading waves…" })
+  ).not.toBeInTheDocument();
+  expect(
+    await screen.findByText("No waves in this collection yet.")
+  ).toBeVisible();
+});

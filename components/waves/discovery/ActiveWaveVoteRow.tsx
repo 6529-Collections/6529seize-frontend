@@ -11,8 +11,7 @@ import {
 import WavePicture from "@/components/waves/WavePicture";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import { formatDate } from "@/i18n/format";
-import { t } from "@/i18n/messages";
+import { getActiveWaveVoteDeadlineLabel } from "./active-wave-vote.helpers";
 
 export function ActiveWaveVoteRow({
   vote,
@@ -25,28 +24,12 @@ export function ActiveWaveVoteRow({
 }) {
   const { isApp } = useDeviceInfo();
   const locale = useBrowserLocale();
-  const { wave, voting_ends_at: end, next_decision_at: decision } = vote;
+  const { wave } = vote;
   const hasScore = hasWaveTrustSummaryScore(wave.wave_score);
-  const deadline =
-    end !== null && (decision === null || end <= decision) ? end : decision;
-  const deadlineMessage =
-    deadline === end
-      ? "waves.discovery.votingEnds"
-      : "waves.discovery.nextDecision";
-  const deadlineLabel =
-    deadline === null
-      ? t(locale, "waves.discovery.votingOpen")
-      : t(locale, deadlineMessage, {
-          date: formatDate(locale, deadline, {
-            month: "short",
-            day: "numeric",
-            hour: "numeric",
-            minute: "2-digit",
-          }),
-        });
+  const deadlineLabel = getActiveWaveVoteDeadlineLabel(vote, locale);
   return (
     <div
-      className={`${compact ? "tw-h-14" : ""} tw-relative tw-flex tw-min-w-0 tw-items-center tw-rounded-lg tw-p-2 hover:tw-bg-iron-900`}
+      className={`${compact ? "tw-h-12 tw-px-2 tw-py-1" : "tw-p-2"} tw-relative tw-flex tw-min-w-0 tw-items-center tw-rounded-lg hover:tw-bg-iron-900`}
     >
       <Link
         href={getWaveRoute({ waveId: wave.id, isDirectMessage: false, isApp })}
@@ -70,14 +53,14 @@ export function ActiveWaveVoteRow({
           </span>
           <span
             title={compact ? deadlineLabel : undefined}
-            className={`${compact ? "tw-mt-0.5 tw-truncate tw-text-[11px] tw-leading-4" : "tw-mt-1 tw-text-xs"} tw-block tw-text-primary-300`}
+            className={`${compact ? "tw-mt-0.5 tw-truncate tw-text-[11px] tw-leading-4" : "tw-mt-1 tw-text-xs"} tw-block tw-text-iron-400`}
           >
             {deadlineLabel}
           </span>
         </span>
       </Link>
       <WaveTrustSignals
-        className="tw-absolute tw-right-2 tw-top-1/2 -tw-translate-y-1/2 tw-z-10"
+        className="tw-absolute tw-right-2 tw-top-1/2 tw-z-10 -tw-translate-y-1/2"
         waveRep={wave.wave_rep}
         waveScore={wave.wave_score}
         variant="sidebar-inline"

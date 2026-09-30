@@ -59,7 +59,6 @@ import {
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import Link from "next/link";
 
 const EMPTY_WAVES_PLACEHOLDER_HEIGHT = "48px" as const;
 
@@ -134,36 +133,17 @@ function CreateWaveButton({ onClick }: { readonly onClick: () => void }) {
   const locale = useBrowserLocale();
   const label = t(locale, "waves.sidebar.createWave");
   return (
-    <div className="tw-inline-flex tw-items-center tw-justify-center touch-only:tw-size-11">
-      <Button
-        onClick={onClick}
-        aria-label={label}
-        data-tooltip-id="create-wave-tooltip"
-        data-tooltip-content={label}
-        variant="primary"
-        size={null}
-        className="tw-relative tw-size-7 tw-p-0 touch-only:after:tw-absolute touch-only:after:-tw-inset-2 touch-only:after:tw-content-['']"
-      >
-        <FontAwesomeIcon
-          icon={faPlus}
-          className="tw-size-3.5 tw-flex-shrink-0"
-        />
-      </Button>
-    </div>
-  );
-}
-
-function DiscoverWavesLink() {
-  const label = t(SIDEBAR_LOCALE, "navigation.waves.discover");
-
-  return (
-    <Link
-      href="/discover"
-      className="active:tw-text-primary-100 desktop-hover:hover:tw-text-primary-200 tw-inline-flex tw-h-7 tw-items-center tw-rounded-md tw-px-1.5 tw-text-[13px] tw-font-medium tw-leading-none tw-text-primary-300 tw-no-underline tw-transition-colors tw-duration-150 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black motion-reduce:tw-transition-none"
+    <Button
+      variant="primary"
+      size={null}
+      onClick={onClick}
       aria-label={label}
+      data-tooltip-id="create-wave-tooltip"
+      data-tooltip-content={label}
+      className="tw-size-8 tw-rounded-lg tw-p-0 touch-only:tw-size-11"
     >
-      {label}
-    </Link>
+      <FontAwesomeIcon icon={faPlus} className="tw-size-4" aria-hidden="true" />
+    </Button>
   );
 }
 
@@ -197,15 +177,12 @@ function WebWavesListHeader({
   return (
     <SectionHeader
       label="Waves"
-      labelContent={
-        showProfileFeedShortcut ? (
-          <WebProfileFeedShortcut basePath={basePath} isCollapsed={false} />
-        ) : undefined
-      }
       paddingClassName={`${headerPaddingClassName} tw-pb-2`}
       rightContent={
         <div className="tw-flex tw-items-center tw-gap-x-1.5">
-          <DiscoverWavesLink />
+          {showProfileFeedShortcut && (
+            <WebProfileFeedShortcut basePath={basePath} isCollapsed={false} />
+          )}
           {showCreateWaveButton && <CreateWaveButton onClick={onCreateWave} />}
         </div>
       }
@@ -307,6 +284,10 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
     enabled: !isDirectMessage && !isCollapsed,
     activeContainerId: effectiveActiveParentWaveId ?? activeWaveId,
   });
+  const collectionLoading =
+    isLoading ||
+    (navigation.collection === "pinned" &&
+      streamWaves.isPinnedWavesLoading === true);
   const announcementRows = useMemo(
     () => getRows(announcementWaves),
     [announcementWaves, getRows]
@@ -559,7 +540,12 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
             />
           )}
           {!isDirectMessage && !hideToggle && !isCollapsed && (
-            <SidebarWaveNavigationControls navigation={navigation} />
+            <SidebarWaveNavigationControls
+              navigation={navigation}
+              isCollectionLoading={
+                collectionLoading && navigation.visibleWaves.length === 0
+              }
+            />
           )}
           {navigation.searching && !isCollapsed ? (
             <SidebarWaveSearchResults navigation={navigation} />
@@ -630,7 +616,7 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
                   ref={listContainerRef}
                   style={{ minHeight: EMPTY_WAVES_PLACEHOLDER_HEIGHT }}
                 >
-                  {!isDirectMessage && !isLoading && waves.length > 0 && (
+                  {!isDirectMessage && !collectionLoading && (
                     <output className="tw-block tw-px-4 tw-py-3 tw-text-sm tw-text-iron-400">
                       {t(locale, "waves.sidebar.collectionEmpty")}
                     </output>
@@ -655,7 +641,7 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
           {shouldShowProfileFeedShortcut && (
             <ReactTooltip
               id={PROFILE_FEED_TOOLTIP_ID}
-              place="right"
+              place={isCollapsed ? "right" : "bottom"}
               offset={8}
               opacity={1}
               style={TOOLTIP_STYLE}

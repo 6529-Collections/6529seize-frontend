@@ -16,6 +16,7 @@ jest.mock("@/components/auth/Auth", () => ({
 }));
 
 let receivedCollapsed = false;
+let receivedLoading = false;
 
 jest.mock(
   "@/components/brain/left-sidebar/web/WebUnifiedWavesListWaves",
@@ -25,6 +26,7 @@ jest.mock(
       const sentinelRef = React.useRef<HTMLDivElement>(null);
       React.useImperativeHandle(ref, () => ({ sentinelRef }));
       receivedCollapsed = props.isCollapsed;
+      receivedLoading = props.isLoading;
       return <div data-testid="waves" />;
     }),
   })
@@ -146,3 +148,22 @@ it.each([true, false])(
     );
   }
 );
+
+it("keeps the selected Pinned collection loading until its separate request finishes", () => {
+  localStorage.setItem("wave-sidebar-collection", "pinned");
+  const props = {
+    waves: [],
+    fetchNextPage: jest.fn(),
+    hasNextPage: false,
+    isFetching: false,
+    isFetchingNextPage: false,
+    onHover: jest.fn(),
+    scrollContainerRef: React.createRef<HTMLDivElement>(),
+  };
+  const { rerender } = render(
+    <WebUnifiedWavesList {...props} isPinnedWavesLoading />
+  );
+  expect(receivedLoading).toBe(true);
+  rerender(<WebUnifiedWavesList {...props} isPinnedWavesLoading={false} />);
+  expect(receivedLoading).toBe(false);
+});

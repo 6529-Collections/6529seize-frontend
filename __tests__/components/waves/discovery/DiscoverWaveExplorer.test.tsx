@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { DiscoverWaveExplorer } from "@/components/waves/discovery/DiscoverWaveExplorer";
 import { ApiWaveScoreSort } from "@/generated/models/ApiWaveScoreSort";
 import { ApiWavesOverviewType } from "@/generated/models/ApiWavesOverviewType";
@@ -102,13 +102,18 @@ it("associates discovery view controls with the rendered panel", () => {
     "id",
     recommendations.getAttribute("aria-controls")
   );
+  expect(
+    within(
+      screen.getByRole("tablist", { name: "Wave discovery" })
+    ).getAllByRole("tab")
+  ).toEqual([recommendations, votes]);
   expect(recommendations).toHaveAttribute("aria-selected", "true");
   fireEvent.keyDown(recommendations, { key: "ArrowLeft" });
   expect(votes).toHaveFocus();
   expect(replaceMock).toHaveBeenLastCalledWith("/discover?view=active-votes", {
     scroll: false,
   });
-  fireEvent.keyDown(votes, { key: "End" });
+  fireEvent.keyDown(votes, { key: "Home" });
   expect(recommendations).toHaveFocus();
   expect(replaceMock).toHaveBeenLastCalledWith(
     "/discover?view=recommendations",

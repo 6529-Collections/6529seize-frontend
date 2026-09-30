@@ -193,7 +193,7 @@ it("renders announcement, highly rated preview, pinned, and one filterable botto
 
   expect(screen.getByTestId("header-Waves")).toBeInTheDocument();
   const feedLink = screen.getByRole("link", {
-    name: "Waves — Open Profile Waves Feed",
+    name: "Profile Waves Feed",
   });
   expect(screen.getByTestId("header-Waves")).toContainElement(feedLink);
   expect(
@@ -203,12 +203,15 @@ it("renders announcement, highly rated preview, pinned, and one filterable botto
     "data-padding",
     "tw-px-4 tw-pb-2"
   );
-  const discoverWavesLink = screen.getByRole("link", {
-    name: "Discover Waves",
-  });
-  expect(discoverWavesLink).toHaveAttribute("href", "/discover");
-  expect(discoverWavesLink).toHaveClass("tw-text-[13px]", "tw-font-medium");
-  expect(discoverWavesLink.querySelector("svg")).toBeNull();
+  expect(
+    screen.queryByRole("link", { name: "Discover Waves" })
+  ).not.toBeInTheDocument();
+  expect(screen.queryByRole("link", { name: "Waves" })).not.toBeInTheDocument();
+  const createButton = screen.getByRole("button", { name: "Create wave" });
+  expect(
+    feedLink.compareDocumentPosition(createButton) &
+      Node.DOCUMENT_POSITION_FOLLOWING
+  ).toBeTruthy();
   expect(screen.getByRole("button", { name: "Joined" })).toBeInTheDocument();
   expect(screen.getByLabelText("Announcement waves")).toBeInTheDocument();
   expect(screen.getByText("Worth Checking Out")).toBeInTheDocument();
@@ -993,3 +996,41 @@ jest.mock("@/hooks/useWaveDiscoveryViewer", () => ({
     ),
   }),
 }));
+
+it("refreshes populated collections silently and loads an empty selected collection", async () => {
+  const waves = [
+    createMockMinimalWave({ id: "refresh-visible", isPinned: false }),
+  ];
+  const { rerender } = render(
+    <WebUnifiedWavesListWaves
+      waves={waves}
+      isLoading
+      onHover={jest.fn()}
+      scrollContainerRef={scrollRef}
+      sentinelRef={React.createRef<HTMLDivElement>()}
+    />
+  );
+  expect(
+    screen.queryByRole("status", { name: "Loading waves…" })
+  ).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button", { name: "Pinned" }));
+  expect(screen.getByRole("status", { name: "Loading waves…" })).toBeVisible();
+  expect(
+    screen.queryByText("No waves in this collection yet.")
+  ).not.toBeInTheDocument();
+  rerender(
+    <WebUnifiedWavesListWaves
+      waves={waves}
+      isLoading={false}
+      onHover={jest.fn()}
+      scrollContainerRef={scrollRef}
+      sentinelRef={React.createRef<HTMLDivElement>()}
+    />
+  );
+  expect(
+    screen.queryByRole("status", { name: "Loading waves…" })
+  ).not.toBeInTheDocument();
+  expect(
+    await screen.findByText("No waves in this collection yet.")
+  ).toBeVisible();
+});

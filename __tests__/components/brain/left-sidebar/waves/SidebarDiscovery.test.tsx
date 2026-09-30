@@ -86,7 +86,7 @@ it("shows both sections in order with both view-all links", () => {
     name: "Collapse Worth Checking Out",
   });
   expect(
-    active.compareDocumentPosition(recommendations) &
+    recommendations.compareDocumentPosition(active) &
       Node.DOCUMENT_POSITION_FOLLOWING
   ).toBeTruthy();
   expect(active).toHaveTextContent("23");
