@@ -86,6 +86,9 @@ describe("DropListItemContentMediaImage", () => {
         "tw-pointer-events-auto"
       );
       expect(toggle.parentElement).not.toHaveClass("tw-hidden");
+      expect(within(toggle.parentElement!).getAllByRole("button")[0]).toBe(
+        toggle
+      );
       expect(inline.queryByAltText(originalAlt)).toBeNull();
       fireEvent.load(preview);
       fireEvent.click(toggle);
@@ -105,6 +108,9 @@ describe("DropListItemContentMediaImage", () => {
         .getAllByRole("button", { name: "View optimized" })
         .at(-1)!;
       expect(popupToggle).toHaveAttribute("aria-pressed", "true");
+      expect(within(popupToggle.parentElement!).getAllByRole("button")[0]).toBe(
+        popupToggle
+      );
       fireEvent.click(popupToggle);
       expect(
         inline.getByRole("button", { name: "View original" })
