@@ -34,6 +34,7 @@ import type {
 import { DropLocation, hasDropFooter } from "../drop.types";
 import {
   CHAT_PROPOSAL_CARD_SURFACE_CLASS,
+  QUORUM_PROPOSAL_CARD_SURFACE_CLASS,
   type DropContentPresentation,
 } from "../dropContentPresentation";
 import ParticipationIdentityProfileCard from "./ParticipationIdentityProfileCard";
@@ -169,6 +170,9 @@ function EndedParticipationDropInner({
   let dropBackgroundClass = getDropLocationBackground();
   if (isChatProposal) {
     dropBackgroundClass = CHAT_PROPOSAL_CARD_SURFACE_CLASS;
+  }
+  if (contentPresentation === "quorumCompact") {
+    dropBackgroundClass = `${getDropLocationBackground()} ${QUORUM_PROPOSAL_CARD_SURFACE_CLASS}`;
   }
   if (isActiveDrop) {
     dropBackgroundClass = "tw-bg-[#3CCB7F]/10";

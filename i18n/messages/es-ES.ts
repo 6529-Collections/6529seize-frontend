@@ -983,6 +983,9 @@ export const ES_ES_MESSAGES = {
   "waves.create.drops.maxSimultaneousSubmissions.description":
     "Número máximo de envíos simultáneos por participante. Opcional. Sin límite si se deja en blanco.",
   "waves.proposalCard.contextLabel": "Propuesta",
+  "waves.proposalCard.summaryLabel": "Resumen",
+  "waves.proposalCard.showDetails": "Mostrar detalles ({count})",
+  "waves.proposalCard.hideDetails": "Ocultar detalles",
   "waves.proposalCard.readFull": "Leer completa",
   "waves.proposalCard.readFullNamed": "Leer completa: {title}",
   "waves.proposalCard.untitledProposal": "Propuesta sin título",

@@ -184,7 +184,7 @@ export const WaveLeaderboardGridItemViewport: React.FC<
         <div className={`tw-px-3 tw-pb-2 ${hasMedia ? "tw-pt-3" : "tw-pt-4"}`}>
           <h3
             id={titleId}
-            className="tw-mb-0 tw-line-clamp-3 tw-break-words tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-100"
+            className="tw-mb-0 tw-line-clamp-3 tw-break-words tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-100"
           >
             {displayTitle}
           </h3>
@@ -204,7 +204,7 @@ export const WaveLeaderboardGridItemViewport: React.FC<
               aria-label={t(locale, "waves.leaderboard.grid.openNamed", {
                 title: displayTitle,
               })}
-              className="tw-mt-1 tw-inline-flex tw-min-h-11 tw-items-center tw-gap-0.5 tw-border-0 tw-bg-transparent tw-p-0 tw-text-xs tw-font-semibold tw-text-primary-400 tw-underline-offset-2 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-primary-300 desktop-hover:hover:tw-underline"
+              className="tw-mt-3 tw-inline-flex tw-min-h-11 tw-items-center tw-gap-1.5 tw-rounded-full tw-border tw-border-solid tw-border-primary-400/20 tw-bg-transparent tw-px-3 tw-py-1 tw-text-xs tw-font-medium tw-text-primary-400 tw-transition-colors tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-border-primary-400/50 desktop-hover:hover:tw-text-primary-300 motion-reduce:tw-transition-none"
             >
               {openActionLabel}
               <ChevronRightIcon aria-hidden="true" className="tw-size-3.5" />
