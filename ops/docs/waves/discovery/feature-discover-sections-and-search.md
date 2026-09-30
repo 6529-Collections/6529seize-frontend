@@ -10,8 +10,8 @@ subject to wave visibility rules.
 
 Open `/discover?view=active-votes`, or select `View all` in the Active Votes
 sidebar heading. The page shows the total accessible count and compact discovery
-cards with rectangular artwork on the left, aligned two-line titles and two-line
-description previews. A prominent line beneath each wave name
+cards with contained rectangular artwork on the left, single-line ellipsized
+titles and two-line description previews. Tight padding keeps more cards visible. A prominent line beneath each wave name
 shows the voting end or next decision when available, otherwise `Voting open`. Votes closing soonest appear first; open-ended votes appear last.
 Use `Load more` to browse additional results.
 

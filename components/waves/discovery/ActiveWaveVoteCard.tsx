@@ -20,10 +20,10 @@ export function ActiveWaveVoteCard({
       isApp={isApp}
       compact
       headingDetails={
-        <span className="tw-mt-2 tw-flex tw-items-start tw-gap-2 tw-text-sm tw-font-semibold tw-leading-5 tw-text-primary-300">
+        <span className="tw-mt-1 tw-flex tw-items-start tw-gap-1.5 tw-text-xs tw-font-medium tw-leading-4 tw-text-primary-300">
           <ClockIcon
             aria-hidden="true"
-            className="tw-mt-0.5 tw-size-4 tw-shrink-0"
+            className="tw-mt-0.5 tw-size-3 tw-shrink-0"
           />
           <span>{getActiveWaveVoteDeadlineLabel(vote, locale)}</span>
         </span>
