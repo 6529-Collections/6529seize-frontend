@@ -146,9 +146,13 @@ function WebSidebar({
           className="tw-group/sidebar tw-group tw-relative tw-z-50 tw-h-full tw-border-0 tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-800 tw-bg-black tw-transition-[width] tw-duration-300 tw-ease-in-out focus:tw-outline-none"
           style={{ width: sidebarWidth }}
           aria-label="Primary sidebar"
+          data-primary-sidebar="true"
           ref={scrollContainerRef}
         >
-          <div className="tw-flex tw-h-full tw-min-h-0 tw-flex-col tw-pt-2">
+          <div
+            className="tw-flex tw-h-full tw-min-h-0 tw-flex-col tw-pt-2"
+            data-sidebar-content="true"
+          >
             <WebSidebarHeader
               collapsed={shouldShowCollapsed}
               onToggle={handleToggle}

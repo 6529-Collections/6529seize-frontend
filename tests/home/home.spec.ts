@@ -204,3 +204,61 @@ test("desktop account updates do not move utilities, including in short expanded
     releaseVersion();
   }
 });
+
+for (const { width, stored, expectedWidth } of [
+  { width: 1440, stored: "false", expectedWidth: 275 },
+  { width: 1440, stored: "true", expectedWidth: 80 },
+  { width: 1100, stored: "false", expectedWidth: 80 },
+]) {
+  test(`restores sidebar ${stored} at ${width}px before hydration @smoke @medium @large`, async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      !isDesktopWebProject(testInfo.project.name),
+      "Desktop sidebar restoration"
+    );
+    await page.setViewportSize({ width, height: 900 });
+    await page.addInitScript((value) => {
+      globalThis.sessionStorage.setItem("sidebarCollapsed", value);
+    }, stored);
+    let releaseScripts!: () => void;
+    const scriptsReady = new Promise<void>((resolve) => {
+      releaseScripts = resolve;
+    });
+    await page.route(/\/_next\/.*\.js(?:\?.*)?$/, async (route) => {
+      await scriptsReady;
+      await route.continue();
+    });
+    const sidebar = page.getByLabel("Primary sidebar", { exact: true });
+    const layout = page.getByRole("main").first().locator("..");
+    try {
+      await page.goto("/", { waitUntil: "commit" });
+      await expect(layout).toHaveAttribute("data-sidebar-ready", "false");
+      await expect(sidebar).toHaveCSS("width", `${expectedWidth}px`);
+      await expect(page.getByRole("main").first()).toHaveCSS(
+        "padding-left",
+        `${expectedWidth}px`
+      );
+      await expect(page.getByRole("main").first()).toBeVisible();
+      if (width >= 1280 && stored === "false") {
+        await expect(
+          page
+            .getByLabel("Primary sidebar", { exact: true })
+            .locator("[data-sidebar-content]")
+        ).toHaveCSS("visibility", "hidden");
+      }
+    } finally {
+      releaseScripts();
+    }
+    await expect(layout).toHaveAttribute("data-sidebar-ready", "true");
+    await expect(sidebar).toHaveCSS("width", `${expectedWidth}px`);
+    await expect(page.getByRole("main").first()).toHaveCSS(
+      "padding-left",
+      `${expectedWidth}px`
+    );
+    await expect(
+      sidebar.getByRole("button", { name: "Toggle right sidebar" })
+    ).toBeVisible();
+    await expectNoHorizontalOverflow(page);
+  });
+}

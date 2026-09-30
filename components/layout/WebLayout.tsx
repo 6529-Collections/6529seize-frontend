@@ -17,6 +17,7 @@ interface WebLayoutProps {
 
 const WebLayoutContent = ({ children, isSmall = false }: WebLayoutProps) => {
   const {
+    isSidebarReady,
     isMobile,
     isNarrow,
     isCollapsed,
@@ -57,6 +58,7 @@ const WebLayoutContent = ({ children, isSmall = false }: WebLayoutProps) => {
       data-offcanvas={isOffcanvasOpen}
       data-right-open={isRightSidebarOpen}
       data-small={isSmall ? "true" : "false"}
+      data-sidebar-ready={isSidebarReady}
     >
       {isSmall && (
         <SmallScreenLayoutHeader

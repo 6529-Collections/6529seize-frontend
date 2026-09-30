@@ -7,6 +7,10 @@ Parent: [Navigation Index](README.md)
 On web layouts, route switching is sidebar-first.
 
 - Desktop: fixed left rail with collapse/expand toggle.
+- Refresh restores the saved desktop width before the first paint, so an
+  expanded sidebar does not animate open or push the page after loading. Page
+  content renders immediately; sidebar contents appear once their saved state
+  is restored. Narrow-screen overlays keep their existing closed default.
 - Narrow desktop web: collapsed icon rail that can open as an overlay panel.
 - Touch small-screen web: header menu button opens the same sidebar as overlay.
 - In collapsed rail mode, flyout submenus keep the same subsection labels and
