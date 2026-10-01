@@ -1404,7 +1404,6 @@ const NOTIFICATIONS_WAVE_FOLLOW_BUTTON_MESSAGES = objectMessages(
 );
 
 const WAVE_HEADER_MESSAGES = objectMessages("waves.header", {
-  createdBy: "Created by",
   createdLabel: "Created {relativeTime} · {date}",
   deleteCancel: "Cancel",
   deleteDescription: "Are you sure you want to delete this wave?",

@@ -197,9 +197,6 @@ export default function WaveHeader({
         </div>
 
         <div className="tw-mt-2 tw-flex tw-min-w-0 tw-items-center tw-gap-x-1.5 tw-text-sm">
-          <span className="tw-shrink-0 tw-text-iron-500">
-            {t(WAVE_HEADER_LOCALE, "waves.header.createdBy")}
-          </span>
           <WaveAuthor wave={wave} />
           <span aria-hidden="true" className="tw-shrink-0 tw-text-iron-500">
             ·

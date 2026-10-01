@@ -24,8 +24,7 @@ linked section pages.
 
 - Desktop/tablet: open a wave thread, select the `Show right sidebar` icon, and select a tab.
   `About` contains Add/Edit REP for eligible viewers and the labeled wave
-  share/copy action for every non-DM viewer. The header shows `Created by`, the
-  creator’s avatar and profile link, and the creation date on one line below
+  share/copy action for every non-DM viewer. The header shows the creator’s avatar and profile link, and the creation date on one line below
   the title. The current pinned drop is displayed below the
   header, with its content and media, instead of the voting overview block.
 - Compact web layouts: select the `Wave details` button beside the wave-search
