@@ -28,6 +28,27 @@ const createProps = (
 });
 
 describe("useBrainMobileActiveView", () => {
+  it.each([
+    ["sales", BrainView.SALES, { isCurationWave: true }],
+    ["faq", BrainView.FAQ, { isMemesWave: true }],
+  ] as const)(
+    "restores the available %s tab from a shared-wave return URL",
+    (tab, expectedView, availability) => {
+      const { result } = renderHook(() =>
+        useBrainMobileActiveView(
+          createProps({
+            ...availability,
+            pathname: "/waves/wave-1",
+            searchParams: createSearchParams(`tab=${tab}&competition=first`),
+            restoredView: BrainView.DEFAULT,
+            wave: { id: "wave-1" } as UseBrainMobileActiveViewProps["wave"],
+          })
+        )
+      );
+      expect(result.current.activeView).toBe(expectedView);
+    }
+  );
+
   it("opens competition deep links in Competitions even when Chat was restored", () => {
     const props = createProps({
       pathname: "/waves/wave-1/competitions/first",

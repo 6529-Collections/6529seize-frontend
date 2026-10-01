@@ -1,5 +1,6 @@
 import {
   getCompetitionRoute,
+  getCompetitionIdFromPathname,
   isCompetitionPathname,
 } from "@/helpers/competition.helpers";
 import { getWavePathRoute } from "@/helpers/navigation.helpers";
@@ -37,7 +38,11 @@ export function shouldResolveDefault(
     ].some((key) => search.has(key))
   )
     return false;
-  if (isCompetitionPathname(pathname)) return search.get("default") === "1";
+  if (isCompetitionPathname(pathname))
+    return (
+      getCompetitionIdFromPathname(pathname) !== null &&
+      search.get("default") === "1"
+    );
   if (search.get("default") === "1") return true;
   return !["chat", "polls", "about", "competitions"].includes(
     search.get("tab") ?? ""

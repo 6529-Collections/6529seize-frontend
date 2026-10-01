@@ -10,7 +10,7 @@ runtime and discovery are in production. Existing competitions still use the
 legacy engine; data migration and retirement have not started.
 
 The [default-competition experience](./default-competition.md) is implemented on development branches;
-delivery Phase 2 review/CI is in progress, and it is not merged or deployed. It is a Phase 6 follow-up that can ship during coexistence.
+delivery Phase 2 review and CI are tracked in the linked PRs, and it is not merged or deployed. It is a Phase 6 follow-up that can ship during coexistence.
 Use the [decision register](./phase-0/decision-register.md) for current product
 policy and the [Phase 0 package](./phase-0/README.md) for the frozen baseline.
 
@@ -324,7 +324,7 @@ Update this table and the phase's tracking section together.
 | [3](./phase-3-separate-creation-flows.md) | Separate hub and competition creation | In progress | Hub/draft/publication/admin flows shipped; original shortcut requirement and final product/device acceptance remain open. |
 | [4](./phase-4-native-competition-runtime.md) | Native competition execution | In progress | Rank/Approve runtime shipped and enabled; production-native completion/observability evidence and migration compatibility remain open. |
 | [5](./phase-5-legacy-data-migration.md) | Legacy data migration | Not started | Next migration project: old-API routing/projection, backfill, catch-up, parity, guarded cutover and rollback. |
-| [6](./phase-6-progressive-rollout.md) | Progressive rollout | In progress | Discovery/creation enabled in production; default competition is implemented on development branches with review/CI pending, with rollout/monitoring closeout still open. |
+| [6](./phase-6-progressive-rollout.md) | Progressive rollout | In progress | Discovery/creation enabled in production; default competition is implemented on development branches with PR review/CI tracked in delivery evidence; rollout/monitoring closeout is still open. |
 | [7](./phase-7-retire-wave-coupling.md) | Retire internal legacy coupling | Not started | Legacy creation, execution and storage remain; permanent GET contracts survive retirement. |
 
 Use the [production assessment and open gates](./native-delivery/production-status-2026-10-01.md)

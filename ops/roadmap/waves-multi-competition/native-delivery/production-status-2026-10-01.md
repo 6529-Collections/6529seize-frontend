@@ -95,9 +95,10 @@ that gate passed. Assign named execution owners when scheduling closeout.
 ## Remaining Sequence
 
 1. Keep this roadmap, its decisions and linked evidence aligned with production.
-2. Implement the approved default-competition experience as a Phase 6 product
-   follow-up, using Phase 2 context. This can ship during legacy/native
-   coexistence and does not require migrating old data first.
+2. Release the implemented default-competition experience after its linked PR
+   review/CI gates, following the backend-first order in delivery evidence. This
+   Phase 6 follow-up can ship during legacy/native coexistence without migrating
+   old data first.
 3. Prepare Phase 5 compatibility routing, restartable backfill, durable catch-up,
    parity reporting and cutover/rollback. Engineering can proceed while
    operational evidence is collected; production cutover waits for its gates.

@@ -261,7 +261,7 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
     wave,
     !competitionOnly
   );
-  useCompetitionEvents(competitionOnly ? "" : waveId);
+  useCompetitionEvents(waveId, !competitionOnly);
 
   useEffect(() => {
     registerWave(waveId, true);
@@ -716,6 +716,32 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
     [MyStreamWaveTab.FAQ]: <MyStreamWaveFAQ wave={wave} />,
   };
 
+  const isResolvingCompetitionTab =
+    defaultNavigation.resolve &&
+    waveCompetitionTabs[activeContentTab] !== undefined;
+  let activeTabContent = components[activeContentTab];
+  if (activeCurationId) {
+    activeTabContent = (
+      <MyStreamWaveCurationContent
+        key={activeCurationId}
+        wave={wave}
+        curationId={activeCurationId}
+        onDropClick={onDropClick}
+      />
+    );
+  } else if (isResolvingCompetitionTab) {
+    activeTabContent = (
+      <CompetitionState
+        error={defaultNavigation.selection.isError}
+        empty={
+          defaultNavigation.selection.isSuccess &&
+          defaultNavigation.selection.data.competition_id === null
+        }
+        retry={() => void defaultNavigation.selection.refetch()}
+      />
+    );
+  }
+
   return (
     <div
       className="tailwind-scope tw-relative tw-flex tw-h-full tw-min-h-0 tw-min-w-0 tw-flex-col"
@@ -745,12 +771,14 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
         />
       )}
 
-      {defaultNavigation.resolve && defaultNavigation.selection.isError && (
-        <CompetitionState
-          error
-          retry={() => void defaultNavigation.selection.refetch()}
-        />
-      )}
+      {defaultNavigation.resolve &&
+        !isResolvingCompetitionTab &&
+        defaultNavigation.selection.isError && (
+          <CompetitionState
+            error
+            retry={() => void defaultNavigation.selection.refetch()}
+          />
+        )}
 
       <div
         className="tw-relative tw-min-h-0 tw-min-w-0 tw-flex-grow tw-overflow-hidden"
@@ -761,26 +789,7 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
             : getContentTabPanelId(activeContentTab)
         }
       >
-        {activeCurationId ? (
-          <MyStreamWaveCurationContent
-            key={activeCurationId}
-            wave={wave}
-            curationId={activeCurationId}
-            onDropClick={onDropClick}
-          />
-        ) : defaultNavigation.resolve &&
-          waveCompetitionTabs[activeContentTab] !== undefined ? (
-          <CompetitionState
-            error={defaultNavigation.selection.isError}
-            empty={
-              defaultNavigation.selection.isSuccess &&
-              defaultNavigation.selection.data.competition_id === null
-            }
-            retry={() => void defaultNavigation.selection.refetch()}
-          />
-        ) : (
-          components[activeContentTab]
-        )}
+        {activeTabContent}
       </div>
       <MemesArtSubmissionModal
         isOpen={isAppMemesSubmitModalOpen}

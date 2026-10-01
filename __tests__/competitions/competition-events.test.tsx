@@ -76,3 +76,8 @@ it("cancels queued refreshes when changing waves or unmounting", () => {
   expect(invalidateCompetitionWave).not.toHaveBeenCalled();
   expect(mockUnsubscribe).toHaveBeenCalledTimes(2);
 });
+
+it("does not subscribe when explicitly disabled", () => {
+  renderHook(() => useCompetitionEvents("wave", false));
+  expect(mockSubscribe).not.toHaveBeenCalled();
+});

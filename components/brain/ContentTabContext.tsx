@@ -16,6 +16,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   getCompetitionRoute,
   isCompetitionPathname,
+  getCompetitionIdFromPathname,
 } from "@/helpers/competition.helpers";
 import {
   getLegacyCompetitionTab,
@@ -25,6 +26,15 @@ import {
   getWaveIdFromPathname,
   getWavePathRoute,
 } from "@/helpers/navigation.helpers";
+
+const getSharedWaveTabRoute = (pathname: string, tab: MyStreamWaveTab) => {
+  const waveId = getWaveIdFromPathname(pathname);
+  if (!waveId) return null;
+  const params = new URLSearchParams({ tab: tab.toLowerCase() });
+  const competitionId = getCompetitionIdFromPathname(pathname);
+  if (competitionId) params.set("competition", competitionId);
+  return `${getWavePathRoute(waveId)}?${params}`;
+};
 
 export enum WaveVotingState {
   NOT_STARTED = "NOT_STARTED",
@@ -384,21 +394,8 @@ export const ContentTabProvider: React.FC<{
     [competitionOnly, initialTab, setActiveTabInternal]
   );
 
-  // Wrapper for setActiveContentTab that validates the tab
-  const setActiveContentTab = useCallback(
-    (tab: MyStreamWaveTab, options?: SetActiveContentTabOptions) => {
-      if (!availableTabs.includes(tab)) {
-        // Keep unavailable selections inside the current view's tabs.
-        transientTabOverrideRef.current = null;
-        setActiveTabInternal(
-          competitionOnly
-            ? (availableTabs[0] ?? initialTab)
-            : MyStreamWaveTab.CHAT
-        );
-        return;
-      }
-      setActiveTabInternal(tab);
-      const waveId = currentWaveIdRef.current;
+  const navigateToTab = useCallback(
+    (tab: MyStreamWaveTab, waveId: string | null) => {
       if (waveId && competitionOnly) {
         const params = new URLSearchParams(search.toString());
         params.delete("default");
@@ -418,18 +415,11 @@ export const ContentTabProvider: React.FC<{
           ? `${getCompetitionRoute(waveId, selectedId)}?tab=${competitionTab}`
           : `${getWavePathRoute(waveId)}/competitions`;
         router.push(target, { scroll: false });
-        return;
+        return true;
       }
       if (isCompetitionRoute && tab !== MyStreamWaveTab.COMPETITIONS) {
-        const routeWaveId = getWaveIdFromPathname(pathname);
-        if (routeWaveId) {
-          const params = new URLSearchParams({ tab: tab.toLowerCase() });
-          const competitionId = pathname.split("/")[4];
-          if (competitionId) params.set("competition", competitionId);
-          router.push(`${getWavePathRoute(routeWaveId)}?${params}`, {
-            scroll: false,
-          });
-        }
+        const target = getSharedWaveTabRoute(pathname, tab);
+        if (target) router.push(target, { scroll: false });
       }
       if (
         waveId &&
@@ -442,6 +432,27 @@ export const ContentTabProvider: React.FC<{
         params.set("tab", tab.toLowerCase());
         router.replace(`${pathname}?${params}`, { scroll: false });
       }
+      return false;
+    },
+    [competitionOnly, isCompetitionRoute, pathname, router, search]
+  );
+
+  // Wrapper for setActiveContentTab that validates the tab
+  const setActiveContentTab = useCallback(
+    (tab: MyStreamWaveTab, options?: SetActiveContentTabOptions) => {
+      if (!availableTabs.includes(tab)) {
+        // Keep unavailable selections inside the current view's tabs.
+        transientTabOverrideRef.current = null;
+        setActiveTabInternal(
+          competitionOnly
+            ? (availableTabs[0] ?? initialTab)
+            : MyStreamWaveTab.CHAT
+        );
+        return;
+      }
+      setActiveTabInternal(tab);
+      const waveId = currentWaveIdRef.current;
+      if (navigateToTab(tab, waveId)) return;
       if (options?.persist === false) {
         transientTabOverrideRef.current =
           waveId === null ? null : { waveId, tab };
@@ -461,10 +472,7 @@ export const ContentTabProvider: React.FC<{
       availableTabs,
       setActiveTabInternal,
       setTabsByWaveId,
-      isCompetitionRoute,
-      pathname,
-      router,
-      search,
+      navigateToTab,
       competitionOnly,
       initialTab,
     ]
@@ -475,11 +483,15 @@ export const ContentTabProvider: React.FC<{
     : Object.values(MyStreamWaveTab).find(
         (tab) => tab.toLowerCase() === search.get("tab")
       );
-  const activeContentTab = isCompetitionRoute
-    ? MyStreamWaveTab.COMPETITIONS
-    : requestedTab && availableTabs.includes(requestedTab)
-      ? requestedTab
-      : activeContentTabRaw;
+  let activeContentTab = activeContentTabRaw;
+  if (isCompetitionRoute) {
+    activeContentTab = MyStreamWaveTab.COMPETITIONS;
+  } else if (
+    requestedTab !== undefined &&
+    availableTabs.includes(requestedTab)
+  ) {
+    activeContentTab = requestedTab;
+  }
   const visibleTabs = useMemo(() => {
     if (!isCompetitionRoute) return availableTabs;
     const tabs = availableTabs.filter(

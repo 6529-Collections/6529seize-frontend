@@ -91,6 +91,10 @@ const competition = (id: string, title: string) => ({
 });
 
 async function installCompetitionApi(page: Page, selfNomination = false) {
+  // Fixture the external analytics loader; keep the sandbox mutation guard strict.
+  await page.route("https://www.googletagmanager.com/gtag/js?**", (route) =>
+    route.fulfill({ contentType: "application/javascript", body: "" })
+  );
   const fixtureResponse = await page.request.get(
     `${getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"])}/api/v2/waves/${WAVE}/drops`
   );

@@ -40,7 +40,7 @@ export function useWaveCompetitionsTab(wave: ApiWave | null | undefined) {
   return {
     defaultSelectionEnabled: enabled,
     defaultCompetitionId:
-      defaultCompetition.isSuccess && !defaultCompetition.isError
+      !defaultCompetition.isError && defaultCompetition.isSuccess
         ? defaultCompetition.data.competition_id
         : null,
     hasCompetitions:

@@ -13,6 +13,17 @@ import {
 } from "@/helpers/default-competition.helpers";
 import { useDefaultCompetition } from "./useCompetitionQueries";
 
+const commandSelector = '[data-competition-command], [role="dialog"]';
+const hasAddedCommand = (records: MutationRecord[]) =>
+  records.some((record) =>
+    Array.from(record.addedNodes).some(
+      (node) =>
+        node instanceof Element &&
+        (node.matches(commandSelector) ||
+          node.querySelector(commandSelector) !== null)
+    )
+  );
+
 export function useDefaultCompetitionNavigation(
   wave: ApiWave | null | undefined,
   enabled: boolean
@@ -31,26 +42,25 @@ export function useDefaultCompetitionNavigation(
     if (!resolve || !isCompetitionPathname(pathname)) return;
     let pinned = false;
     const pinOpenCommand = () => {
-      if (pinned) return;
-      if (
-        !document.querySelector('[data-competition-command], [role="dialog"]')
-      )
-        return;
+      if (pinned || !document.querySelector(commandSelector)) return false;
       pinned = true;
       const params = new URLSearchParams(search.toString());
       params.delete("default");
       const target = params.size ? `${pathname}?${params}` : pathname;
       router.replace(target, { scroll: false });
+      return true;
     };
-    const observer = new MutationObserver(pinOpenCommand);
+    const observer = new MutationObserver((records) => {
+      if (!hasAddedCommand(records)) return;
+      if (pinOpenCommand()) observer.disconnect();
+    });
     observer.observe(document.body, { childList: true, subtree: true });
-    pinOpenCommand();
+    if (pinOpenCommand()) observer.disconnect();
     return () => observer.disconnect();
   }, [resolve, pathname, search, router]);
   useEffect(() => {
-    if (!resolve || !wave || !selection.isSuccess || selection.isError) return;
-    if (document.querySelector('[data-competition-command], [role="dialog"]'))
-      return;
+    if (!resolve || !wave || selection.isError || !selection.isSuccess) return;
+    if (document.querySelector(commandSelector)) return;
     // A zero-competition wave remains implicitly selected so publication can refresh it.
     if (
       selection.data.competition_id === null &&

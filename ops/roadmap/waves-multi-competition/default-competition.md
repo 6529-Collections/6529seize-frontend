@@ -6,7 +6,7 @@
 
 - Product policy: Approved on 2026-10-01 (D-19).
 - Implementation: Implemented on development branches; delivery Phase 2
-  review/CI in progress. Not merged or deployed. See [delivery evidence](./native-delivery/default-competition-delivery.md).
+  review and CI are tracked in the linked PRs. Not merged or deployed. See [delivery evidence](./native-delivery/default-competition-delivery.md).
 - Scope: Phase 6 product follow-up using Phase 2 competition context; assess
   backend selection/read support and frontend wave navigation together.
 

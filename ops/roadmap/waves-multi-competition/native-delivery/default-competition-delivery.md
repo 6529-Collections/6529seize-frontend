@@ -2,8 +2,9 @@
 
 [Approved contract](../default-competition.md) · [Master roadmap](../README.md)
 
-Status: implemented on development branches; delivery Phase 2 bot review and CI
-pending. Not merged or deployed. This delivery phase is separate from roadmap
+Status: implemented on development branches. Delivery Phase 2 bot review and CI
+are tracked in [backend PR #2131](https://github.com/6529-Collections/6529seize-backend/pull/2131)
+and [frontend PR #4147](https://github.com/6529-Collections/6529seize-frontend/pull/4147). Not merged or deployed. This delivery phase is separate from roadmap
 Phase 2 and makes no production-release claim.
 
 ## Read and navigation boundary
@@ -31,19 +32,26 @@ credit stay separate from navigation selection.
 
 ## Validation
 
-- Backend: 78 focused selector/service/API, legacy parity and MySQL index tests
-  passed. Root and API packaging checks are in progress.
-- Frontend: 177 competition/context/mobile tests and 5 selection-query tests passed.
-  Lint, full TypeScript, Playwright types and docs links passed. React Doctor
-  completed with 96/100 and no errors; warnings concern existing component
-  size/state/effects and search-param consumers covered by route Suspense.
-  Production build is in progress.
+- Backend: full local suite passed (675 suites, 8,440 tests), plus 50 review
+  follow-up selector/service/API/index regression tests. Legacy adapter parity,
+  actual MySQL covering-index EXPLAIN, root/API packaging, TypeScript and lint
+  passed. The reviewed endpoint/index changes passed GitHub CI with no new bot
+  findings; current head status lives in the linked PR.
+- Frontend: 211 focused competition/context/mobile tests passed, including
+  viewer-key invalidation, selection refresh, editor-route exclusion, form pinning
+  and explicit/default tab precedence. Changed-file quality, full TypeScript,
+  Playwright types and docs links passed. React Doctor reported no errors
+  (96/100 for initial implementation, 98/100 for review follow-up); warnings
+  concern existing component size/state/effects and route-Suspense-covered
+  search-param consumers. Production build passed with public CI configuration.
 - Browser: native competition sandbox retains existing vote isolation, shared
   chat, history, draft editing, submission and recovery journeys. Added implicit
   entry, corresponding tabs, explicit reload/history, server boundary refresh,
   open-entry pinning and zero-default chat coverage on desktop and mobile.
   All 20 desktop/mobile browser checks passed, including legacy desktop alias,
   simulated native-app entry and selection-error recovery.
+- The analytics script loader is locally stubbed so telemetry cannot cause
+  nondeterministic external writes; the sandbox mutation guard remains strict.
 - The existing `native-competition-sandbox` pack remains registered in
   `tests/packs.manifest.cjs` and the protected native-competition PR CI lane.
   Chat URL expectations now retain explicit selection to prevent default reentry;

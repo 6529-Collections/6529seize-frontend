@@ -1,9 +1,13 @@
 import { renderHook } from "@testing-library/react";
-import { useQuery } from "@tanstack/react-query";
+import { QueryClient, useQuery } from "@tanstack/react-query";
 import { useDefaultCompetition } from "@/hooks/competitions/useCompetitionQueries";
 import { QueryKey } from "@/components/react-query-wrapper/query-keys";
+import { invalidateCompetitionWave } from "@/services/api/competitions-api";
 
-jest.mock("@tanstack/react-query", () => ({ useQuery: jest.fn(() => ({})) }));
+jest.mock("@tanstack/react-query", () => ({
+  ...jest.requireActual("@tanstack/react-query"),
+  useQuery: jest.fn(() => ({})),
+}));
 jest.mock("@/components/auth/Auth", () => ({
   useAuth: () => ({
     connectedProfile: { id: "alice" },
@@ -26,11 +30,28 @@ it("partitions selection by viewer and keeps disabled queries disabled", () => {
   );
 });
 
+it("invalidates the actual viewer-partitioned selection key for its wave only", async () => {
+  renderHook(() => useDefaultCompetition("wave"));
+  const key = jest.mocked(useQuery).mock.calls.at(-1)![0].queryKey;
+  const otherKey = [
+    QueryKey.DEFAULT_COMPETITION,
+    { wave_id: "elsewhere", viewer: "alice:proxy" },
+  ];
+  const client = new QueryClient();
+  client.setQueryData(key, {});
+  client.setQueryData(otherKey, {});
+  await invalidateCompetitionWave(client, "wave");
+  expect(client.getQueryState(key)?.isInvalidated).toBe(true);
+  expect(client.getQueryState(otherKey)?.isInvalidated).toBe(false);
+});
+
 it.each([
   [null, 30_000],
   [101_000, 1_000],
   [300_000, 30_000],
-  [99_000, 250],
+  [99_000, 30_000],
+  [100_000, 30_000],
+  [100_001, 250],
 ])(
   "uses server durations and bounded lifecycle polling (%s)",
   (nextRefresh, delay) => {

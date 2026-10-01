@@ -3,9 +3,10 @@ import { useWaveCompetitionsTab } from "@/hooks/competitions/useWaveCompetitions
 import {
   getCompetitionRoute,
   isCompetitionPathname,
+  getCompetitionIdFromPathname,
 } from "@/helpers/competition.helpers";
 import { waveCompetitionTabs } from "@/helpers/default-competition.helpers";
-import { MyStreamWaveTab } from "@/types/waves.types";
+import type { MyStreamWaveTab } from "@/types/waves.types";
 import { useDefaultCompetitionNavigation } from "@/hooks/competitions/useDefaultCompetitionNavigation";
 
 import type { ReactNode } from "react";
@@ -198,7 +199,7 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
         waveCompetitionTabs[view as unknown as MyStreamWaveTab];
       if (waveId && defaultSelectionEnabled && competitionTab) {
         const selectedId = isCompetitionPathname(pathname)
-          ? pathname.split("/")[4]
+          ? getCompetitionIdFromPathname(pathname)
           : (searchParams.get("competition") ?? defaultCompetitionId);
         router.push(
           selectedId
@@ -217,7 +218,7 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
         isCompetitionPathname(pathname) &&
         view !== BrainView.COMPETITIONS
       ) {
-        const competitionId = pathname.split("/")[4];
+        const competitionId = getCompetitionIdFromPathname(pathname);
         const tab = view === BrainView.DEFAULT ? "chat" : view.toLowerCase();
         const params = new URLSearchParams({ tab });
         if (competitionId) params.set("competition", competitionId);

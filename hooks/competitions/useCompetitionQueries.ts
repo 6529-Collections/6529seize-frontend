@@ -46,10 +46,13 @@ export function useDefaultCompetition(waveId: string, enabled = true) {
     refetchInterval: (query) => {
       const data = query.state.data;
       // Use server durations so device clock skew cannot keep a completed contest active.
-      const delay =
-        data?.next_refresh_at == null
-          ? 30_000
-          : data.next_refresh_at - data.evaluated_at;
+      if (
+        data?.next_refresh_at === undefined ||
+        data.next_refresh_at === null ||
+        data.next_refresh_at <= data.evaluated_at
+      )
+        return 30_000;
+      const delay = data.next_refresh_at - data.evaluated_at;
       return Math.max(250, Math.min(30_000, delay));
     },
   });

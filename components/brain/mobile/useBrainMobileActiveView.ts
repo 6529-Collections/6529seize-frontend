@@ -21,6 +21,20 @@ const NON_WAVE_VIEWS = new Set([
   BrainView.PROFILE_FEED,
 ]);
 
+const WAVE_TAB_VIEWS: Readonly<Record<string, BrainView>> = {
+  chat: BrainView.DEFAULT,
+  competitions: BrainView.COMPETITIONS,
+  about: BrainView.ABOUT,
+  leaderboard: BrainView.LEADERBOARD,
+  submissions: BrainView.SUBMISSIONS,
+  sales: BrainView.SALES,
+  winners: BrainView.WINNERS,
+  outcome: BrainView.OUTCOME,
+  my_votes: BrainView.MY_VOTES,
+  polls: BrainView.POLLS,
+  faq: BrainView.FAQ,
+};
+
 interface UseBrainMobileActiveViewParams {
   readonly firstDecisionDone: boolean;
   readonly isApp: boolean;
@@ -292,9 +306,7 @@ export function useBrainMobileActiveView({
   if (hasWave) {
     baseView = restoredView ?? waveDefaultView;
     if (serialNoParam !== null) baseView = BrainView.DEFAULT;
-    if (tabParam === "chat") baseView = BrainView.DEFAULT;
-    if (tabParam === "polls") baseView = BrainView.POLLS;
-    if (tabParam === "about") baseView = BrainView.ABOUT;
+    if (tabParam !== null) baseView = WAVE_TAB_VIEWS[tabParam] ?? baseView;
     if (isCompetitionRoute) baseView = BrainView.COMPETITIONS;
   }
   const candidateView =

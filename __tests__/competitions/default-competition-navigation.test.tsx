@@ -150,10 +150,12 @@ it("does not navigate on selection errors, disabled rollout or direct messages",
     useDefaultCompetitionNavigation(wave, true)
   );
   expect(mockReplace).not.toHaveBeenCalled();
+  mockReplace.mockClear();
   mockError = false;
   mockEnabled = false;
   rerender();
   expect(mockReplace).not.toHaveBeenCalled();
+  mockReplace.mockClear();
   mockEnabled = true;
   renderHook(() =>
     useDefaultCompetitionNavigation(
@@ -182,3 +184,16 @@ it("maps the familiar legacy tabs and retains view parameters on implicit naviga
     )
   ).toBe("/waves/wave/competitions/alpha?tab=votes&default=1");
 });
+
+it.each([
+  "/waves/wave/competitions",
+  "/waves/wave/competitions/new",
+  "/waves/wave/competitions/draft",
+])(
+  "never resolves collection/editor routes even with an implicit marker (%s)",
+  (pathname) => {
+    expect(
+      shouldResolveDefault(pathname, new URLSearchParams("default=1"))
+    ).toBe(false);
+  }
+);

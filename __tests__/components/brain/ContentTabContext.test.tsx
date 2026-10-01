@@ -53,31 +53,37 @@ describe("ContentTabContext", () => {
     expect(result.current.activeContentTab).toBe(MyStreamWaveTab.COMPETITIONS);
   });
 
-  it("routes familiar tabs to the selected competition and preserves a Chat selection on reload", () => {
-    mockPathname = "/waves/hub";
-    mockSearch = new URLSearchParams("tab=chat&competition=older");
-    const { result } = setup();
-    act(() =>
-      result.current.updateAvailableTabs({
-        waveId: "hub",
-        isChatWave: true,
-        hasCompetitions: true,
-        hasAuthenticatedProfile: true,
-        isMemesWave: false,
-        isCurationWave: false,
-        votingState: WaveVotingState.ONGOING,
-        hasFirstDecisionPassed: false,
-        defaultCompetitionId: "newer",
-        defaultSelectionEnabled: true,
-      })
-    );
-    expect(result.current.activeContentTab).toBe(MyStreamWaveTab.CHAT);
-    act(() => result.current.setActiveContentTab(MyStreamWaveTab.WINNERS));
-    expect(mockPush).toHaveBeenCalledWith(
-      "/waves/hub/competitions/older?tab=decisions",
-      { scroll: false }
-    );
-  });
+  it.each([
+    ["tab=chat&competition=older", "older"],
+    ["tab=chat", "newer"],
+  ])(
+    "routes familiar tabs using explicit selection before default (%s)",
+    (query, competitionId) => {
+      mockPathname = "/waves/hub";
+      mockSearch = new URLSearchParams(query);
+      const { result } = setup();
+      act(() =>
+        result.current.updateAvailableTabs({
+          waveId: "hub",
+          isChatWave: true,
+          hasCompetitions: true,
+          hasAuthenticatedProfile: true,
+          isMemesWave: false,
+          isCurationWave: false,
+          votingState: WaveVotingState.ONGOING,
+          hasFirstDecisionPassed: false,
+          defaultCompetitionId: "newer",
+          defaultSelectionEnabled: true,
+        })
+      );
+      expect(result.current.activeContentTab).toBe(MyStreamWaveTab.CHAT);
+      act(() => result.current.setActiveContentTab(MyStreamWaveTab.WINNERS));
+      expect(mockPush).toHaveBeenCalledWith(
+        `/waves/hub/competitions/${competitionId}?tab=decisions`,
+        { scroll: false }
+      );
+    }
+  );
 
   it("defaults to CHAT when params null", () => {
     const { result } = setup();
