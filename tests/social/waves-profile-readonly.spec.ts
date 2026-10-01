@@ -455,8 +455,12 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     const aboutPanel = page
       .getByRole("complementary", { name: "Wave details" })
       .or(page.getByRole("dialog", { name: "Wave details" }));
-    await expect(aboutPanel.getByRole("time")).toBeVisible();
-    await expect(aboutPanel.getByRole("time")).toHaveAttribute(
+    const creationDate = page
+      .getByRole("complementary", { name: "Wave details" })
+      .or(page.getByRole("dialog", { name: "Wave details" }))
+      .locator("time[datetime]");
+    await expect(creationDate).toBeVisible();
+    await expect(creationDate).toHaveAttribute(
       "datetime",
       /^\d{4}-\d{2}-\d{2}T/
     );
