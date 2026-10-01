@@ -90,14 +90,19 @@ describe("WaveHeader", () => {
       </AuthContext.Provider>
     );
 
-  it("places the creator profile between the wave title and creation date", () => {
+  it("shows the creator and creation date in one row below the title", () => {
     wrapper(baseWave);
     const title = screen.getByTestId("name");
     const creator = screen.getByRole("link", { name: "a" });
-    const created = screen.getByText(/^Created /);
+    const createdBy = screen.getByText("Created by");
+    const created = screen.getByText("Jan 1, 1970");
 
-    expect(screen.getByText("Creator")).toBeVisible();
+    expect(createdBy).toBeVisible();
     expect(creator).toHaveAttribute("href", "/a");
+    expect(createdBy.parentElement).toContainElement(creator);
+    expect(createdBy.parentElement).toContainElement(created);
+    expect(created).toHaveAttribute("datetime", "1970-01-01T00:00:00.000Z");
+    expect(screen.queryByText("Creator")).not.toBeInTheDocument();
     expect(title.compareDocumentPosition(creator)).toBe(
       Node.DOCUMENT_POSITION_FOLLOWING
     );

@@ -451,7 +451,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       page.getByRole("tab", { name: "About", exact: true })
     ).toBeVisible();
     await page.getByRole("tab", { name: "About", exact: true }).click();
-    await expect(page.getByText("Creator", { exact: true })).toBeVisible();
+    await expect(page.getByText("Created by", { exact: true })).toBeVisible();
     await expect(
       page.getByRole("heading", { name: "Pinned drop", exact: true })
     ).toBeVisible();
