@@ -17,10 +17,10 @@ const BrainRightSidebarContent: React.FC<BrainRightSidebarContentProps> = ({
   }
 
   return (
-    <section className="tw-min-w-0 tw-px-2 tw-pb-4 tw-pt-4">
-      <h2 className="tw-mb-3 tw-px-2 !tw-text-[0.6875rem] !tw-font-semibold tw-uppercase !tw-leading-4 tw-tracking-[0.06em] !tw-text-iron-400 sm:tw-tracking-[0.1em]">
-        {waveRightPanelText("waves.sidebar.rightPanel.pinnedDrop")}
-      </h2>
+    <section
+      aria-label={waveRightPanelText("waves.sidebar.rightPanel.pinnedDrop")}
+      className="tw-min-w-0 tw-px-2 tw-pb-4 tw-pt-4"
+    >
       <Drop
         drop={{
           ...pinnedDrop,

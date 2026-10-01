@@ -457,8 +457,11 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       .or(page.getByRole("dialog", { name: "Wave details" }));
     await expect(aboutPanel.locator("time[datetime]")).toBeVisible();
     await expect(
-      page.getByRole("heading", { name: "Pinned drop", exact: true })
+      aboutPanel.getByRole("region", { name: "Pinned drop", exact: true })
     ).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Pinned drop", exact: true })
+    ).toHaveCount(0);
     await expect(
       page.getByRole("button", { name: /^(Share wave|Copy wave link)$/ })
     ).toBeVisible();

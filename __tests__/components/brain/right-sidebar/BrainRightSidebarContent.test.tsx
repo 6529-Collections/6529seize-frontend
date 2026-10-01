@@ -19,7 +19,10 @@ describe("BrainRightSidebarContent", () => {
       <BrainRightSidebarContent wave={makeWave("drop-1")} />
     );
 
-    expect(screen.getByRole("heading", { name: "Pinned drop" })).toBeVisible();
+    expect(screen.getByRole("region", { name: "Pinned drop" })).toBeVisible();
+    expect(
+      screen.queryByRole("heading", { name: "Pinned drop" })
+    ).not.toBeInTheDocument();
     expect(screen.getByTestId("pinned-drop")).toHaveTextContent("drop-1");
     expect(screen.queryByText("Overview")).not.toBeInTheDocument();
 
