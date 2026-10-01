@@ -49,6 +49,37 @@ describe("useBrainMobileActiveView", () => {
     }
   );
 
+  it.each([
+    ["sales", BrainView.SALES, { isCurationWave: true }],
+    ["faq", BrainView.FAQ, { isMemesWave: true }],
+  ] as const)(
+    "keeps serial-target Chat ahead of %s and restores the tab on return",
+    (tab, expectedView, availability) => {
+      const props = createProps({
+        ...availability,
+        pathname: "/waves/wave-1",
+        searchParams: createSearchParams(`tab=${tab}&competition=first`),
+        wave: { id: "wave-1" } as UseBrainMobileActiveViewProps["wave"],
+      });
+      const { result, rerender } = renderHook(useBrainMobileActiveView, {
+        initialProps: props,
+      });
+      expect(result.current.activeView).toBe(expectedView);
+
+      for (const serialNo of ["42", ""]) {
+        rerender({
+          ...props,
+          searchParams: createSearchParams(
+            `tab=${tab}&competition=first&serialNo=${serialNo}`
+          ),
+        });
+        expect(result.current.activeView).toBe(BrainView.DEFAULT);
+        rerender(props);
+        expect(result.current.activeView).toBe(expectedView);
+      }
+    }
+  );
+
   it("opens competition deep links in Competitions even when Chat was restored", () => {
     const props = createProps({
       pathname: "/waves/wave-1/competitions/first",

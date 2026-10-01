@@ -306,7 +306,8 @@ export function useBrainMobileActiveView({
   if (hasWave) {
     baseView = restoredView ?? waveDefaultView;
     if (serialNoParam !== null) baseView = BrainView.DEFAULT;
-    if (tabParam !== null) baseView = WAVE_TAB_VIEWS[tabParam] ?? baseView;
+    if (serialNoParam === null && tabParam !== null)
+      baseView = WAVE_TAB_VIEWS[tabParam] ?? baseView;
     if (isCompetitionRoute) baseView = BrainView.COMPETITIONS;
   }
   const candidateView =
