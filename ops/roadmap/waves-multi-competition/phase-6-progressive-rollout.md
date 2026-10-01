@@ -4,13 +4,16 @@
 
 ## Tracking
 
-- [Native delivery evidence](./native-delivery/implementation-evidence.md): implementation and local verification; environment rollout is not complete.
-
-- Status: In progress
-- Delivery target: To be selected
-- Owner: Unassigned
-- Evidence: Add links to decisions, implementation, validation, and deployment
-  records as the phase advances.
+- Status: In progress (shipped scope and open acceptance tracked separately)
+- Delivery: Competition discovery, creation controls, shared chat and production activation shipped before legacy migration.
+- Remaining: Default competition is approved but not implemented; rollout acceptance/monitoring and native-backed legacy compatibility remain open.
+- Responsible roles: Frontend + product + operations; assign named owners when scheduling the remaining work.
+- Evidence: [Production status and open gates](./native-delivery/production-status-2026-10-01.md),
+  [native implementation](./native-delivery/implementation-evidence.md) and
+  [current decisions](./phase-0/decision-register.md).
+- Roadmap numbering is distinct from delivery Phases 1–4. The sections below
+  define the milestone and remaining obligations; they are not a claim that
+  every listed acceptance check has passed.
 
 ## Outcome
 
@@ -23,15 +26,19 @@ experience for zero, one, sequential, and parallel competitions.
 
 ## Entry Criteria
 
-- Phase 5 exit criteria are complete.
-- Native runtime and migrated competitions have stable production evidence.
+- Native-only discovery/creation already shipped with Phases 2–4. Default
+  competition can be implemented during coexistence without Phase 5 completion.
+- Migrated-competition rollout and final retirement readiness require Phase 5
+  exit criteria and stable production evidence for migrated records.
 - High-risk parity mismatches are resolved.
 - Support, moderation, and operations have incident runbooks.
 - User-facing help content is ready to ship with the enabled cohorts.
 
 ## In Scope
 
-- General competition discovery and switching.
+- General competition discovery and switching (shipped).
+- [Default competition](./default-competition.md): approved, not implemented;
+  automatic wave-entry selection and corresponding competition-tab routing.
 - Active, upcoming, draft, ended, cancelled, and archived views.
 - Broad enablement of hub-only and additional-competition creation.
 - Existing-wave opt-in or automatic transition policy.
@@ -54,6 +61,11 @@ The wave remains the stable destination. It provides:
 - Competition discovery.
 - Wave-level rules, admins, and notification controls.
 - Aggregate activity and status.
+
+The approved default-competition follow-up makes wave entry and familiar
+competition tabs open the selected default's corresponding views. This default
+can differ from the immutable legacy primary. Explicit competition links or
+selection retain their own context, and chat remains wave-scoped.
 
 Competition detail provides its own local navigation:
 
@@ -95,7 +107,8 @@ Use the approved transition policy:
   competition.
 - A global automatic transition occurs only after analytics and support
   evidence show that the hub presentation is understood.
-- Existing deep links continue resolving to the stable legacy competition.
+- Explicit existing competition/entry deep links retain their resource identity;
+  implicit wave entry uses the approved default once that follow-up ships.
 - Existing legacy GET responses continue projecting that same competition
   regardless of the hub navigation selected by newer clients.
 
@@ -120,17 +133,15 @@ every advanced configuration is enabled.
 
 ## Notifications and Activity
 
-Review production volume and tune defaults for:
+Only winner notifications are emitted for competition lifecycle events.
+Publication, upcoming/opening/closing, pause/resume and generic end/archive
+announcements are not part of the shipped policy. Preserve ordinary mention/
+reply notifications and entry context. Any broader notification product needs
+an explicit new decision rather than treating the original proposal as approval.
 
-- Publication and upcoming reminders.
-- Participation and voting opening/closing.
-- Pause, resume, cancellation, and end.
-- Winner/outcome announcements.
-- Entry activity.
-
-Users following a wave should receive enough context to discover important
-competitions without receiving entry-level spam. If per-competition follow or
-mute controls are added, wave-level defaults and inheritance must remain clear.
+Review winner delivery, duplication, volume and mute/unfollow behavior during
+rollout. Internal lifecycle events may still drive cache invalidation and audit
+without sending user notifications.
 
 ## Help and Education
 
@@ -140,7 +151,8 @@ Document:
 - Waves as discussion hubs.
 - Creating a wave without a competition.
 - Creating and administering competitions.
-- Switching between parallel competitions.
+- Switching between parallel competitions and how default competition is chosen
+  once implemented, including paused decisions and archived completed history.
 - Where entries, votes, leaderboards, winners, and outcomes live.
 - What ended, cancelled, and archived states mean.
 - Why competition voting credits are isolated.
@@ -189,7 +201,10 @@ before enabling or deploying dependent frontend behavior.
 - Run Rank and Approve competitions in parallel.
 - Switch between competitions without state leakage.
 - View and share a completed competition.
-- Cancel a draft/upcoming/active competition according to policy.
+- Archive drafts/terminal competitions and clone terminal configurations;
+  manual end/cancel and withdrawal/disqualification remain unavailable.
+- Exercise every [default-selection scenario](./default-competition.md#acceptance-scenarios)
+  on desktop/mobile, including explicit links and stable legacy projections.
 - Existing wave owner adds a second competition and adopts hub navigation.
 
 ### UX and Accessibility
@@ -226,7 +241,7 @@ before enabling or deploying dependent frontend behavior.
 
 ## Deliverables
 
-- Complete hub and competition navigation.
+- Complete hub and competition navigation, including the approved default.
 - Cohort-based feature controls.
 - Existing-wave transition behavior.
 - Final loading/empty/error/lifecycle states.
@@ -239,6 +254,8 @@ before enabling or deploying dependent frontend behavior.
 - New waves can be created without competitions by default.
 - Eligible admins can create multiple sequential or parallel competitions.
 - Users can discover, enter, vote in, and revisit the correct competition.
+- Implicit wave entry and competition tabs use the approved default; explicit
+  selection, legacy primary projection and command identity remain stable.
 - Existing single-competition waves remain understandable and correct.
 - Production metrics show no cross-competition state or execution leakage.
 - Remaining legacy storage, mutation, and engine usage is low, known, and

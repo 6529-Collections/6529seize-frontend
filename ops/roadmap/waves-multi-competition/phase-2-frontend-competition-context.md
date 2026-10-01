@@ -4,13 +4,16 @@
 
 ## Tracking
 
-- [Native delivery evidence](./native-delivery/implementation-evidence.md): implementation and local verification; environment rollout is not complete.
-
-- Status: In progress
-- Delivery target: To be selected
-- Owner: Unassigned
-- Evidence: Add links to decisions, implementation, validation, and deployment
-  records as the phase advances.
+- Status: In progress (shipped scope and open acceptance tracked separately)
+- Delivery: Competition routes, scoped context/cache identity and native views shipped in production; the original-primary UI path remains.
+- Remaining: Final compatibility/device acceptance and the Phase 6 default-competition follow-up remain open.
+- Responsible roles: Frontend + product; assign named owners when scheduling the remaining work.
+- Evidence: [Production status and open gates](./native-delivery/production-status-2026-10-01.md),
+  [native implementation](./native-delivery/implementation-evidence.md) and
+  [current decisions](./phase-0/decision-register.md).
+- Roadmap numbering is distinct from delivery Phases 1–4. The sections below
+  define the milestone and remaining obligations; they are not a claim that
+  every listed acceptance check has passed.
 
 ## Outcome
 
@@ -98,7 +101,9 @@ Required behavior:
   wave chat access.
 - A competition from another wave is rejected or redirected safely.
 - Browser Back and Forward restore competition and local subview correctly.
-- Legacy wave routes continue selecting the stable legacy competition.
+- Shipped original-primary routes retain the legacy experience. The approved
+  [default-competition follow-up](./default-competition.md) will resolve implicit
+  wave entry separately; explicit routes and permanent GETs retain their identity.
 - Stored selection never overrides an explicit URL competition.
 
 If the final design initially uses a query parameter, the same identity and
@@ -126,7 +131,8 @@ shown within the existing layout.
 ## Entry Presentation
 
 Evolve submission context to include stable `competition_id` and `entry_id`.
-The same drop remains normal wave content and may link to its competition.
+Native entries use dedicated immutable competition drops, visible in shared
+wave content with a link to their one competition. Chat drops cannot be attached.
 
 For legacy data, derive the new context from the legacy adapter. Do not require
 the frontend to infer a winner only from drop type once explicit entry status
@@ -148,7 +154,8 @@ For a current rank or approve wave with one legacy competition:
 - Avoid adding a redundant one-item competition selector.
 
 Build the underlying states for zero, one, and many competitions, but keep
-multi-competition discovery gated until later phases.
+the same scoped context for the discovery now shipped from Phase 6. Automatic
+default selection and wave-level tab routing remain the linked follow-up.
 
 ## Loading and Failure States
 
@@ -242,4 +249,6 @@ No native creation or execution flag is enabled in this phase.
 
 ## Next Phase
 
-Proceed to [Phase 3: Separate Creation Flows](./phase-3-separate-creation-flows.md).
+Phase 3 and native runtime have shipped. Complete the remaining context
+acceptance and [default-competition navigation](./default-competition.md);
+retire the original-primary frontend coupling only with Phase 5/7 compatibility.
