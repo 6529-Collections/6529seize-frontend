@@ -4,13 +4,16 @@
 
 ## Tracking
 
-- [Native delivery evidence](./native-delivery/implementation-evidence.md): implementation and local verification; environment rollout is not complete.
-
-- Status: In progress
-- Delivery target: To be selected
-- Owner: Unassigned
-- Evidence: Add links to decisions, implementation, validation, and deployment
-  records as the phase advances.
+- Status: In progress (shipped scope and open acceptance tracked separately)
+- Delivery: Native Rank/Approve runtime shipped and enabled in production; legacy competitions retain legacy execution.
+- Remaining: Production-native completion, parity/observability evidence and compatibility dispatch for migration remain open.
+- Responsible roles: Backend + operations; assign named owners when scheduling the remaining work.
+- Evidence: [Production status and open gates](./native-delivery/production-status-2026-10-01.md),
+  [native implementation](./native-delivery/implementation-evidence.md) and
+  [current decisions](./phase-0/decision-register.md).
+- Roadmap numbering is distinct from delivery Phases 1–4. The sections below
+  define the milestone and remaining obligations; they are not a claim that
+  every listed acceptance check has passed.
 
 ## Outcome
 
@@ -25,7 +28,7 @@ operational for controlled cohorts.
 
 - Phase 3 exit criteria are complete.
 - Native competition drafts contain every required execution setting.
-- Decision, retry, cancellation, edit, and signature rules are approved.
+- Decision, retry, completion, edit, and signature rules are approved.
 - Worker deployment boundaries and feature controls are documented.
 - Test fixtures cover parallel Rank and Approve competitions.
 
@@ -60,9 +63,12 @@ ID. Validate:
 - Terms, signature, configuration version, and replay protection.
 - Any restriction on entering one drop into multiple competitions.
 
-Moderation commands support the approved withdrawn and disqualified behavior.
-They must define whether past votes remain visible, count toward history, or
-are excluded from decisions.
+Submission atomically creates a dedicated competition drop and its entry.
+Existing chat drops cannot be attached; a drop can enter only one competition
+across its lifetime. All submitted content is immutable, including unsigned
+entries. There are no withdrawal/disqualification actions. Deletion follows
+existing drop permissions, excludes removed content from public entries and
+history, removes its current votes/spend and preserves restricted audit history.
 
 The drop remains stable wave content. Entry state, including winner state,
 changes independently.
@@ -83,9 +89,9 @@ Votes target a competition entry, not only a drop. Enforce:
 A voter spending credits in one competition must not change their available
 credits in another parallel competition.
 
-Legacy vote endpoints remain available. Their compatibility handler resolves
-the stable legacy competition and dispatches according to that competition's
-storage mode.
+Legacy vote endpoints remain available for original legacy competitions.
+Dispatch through native commands after migration is still required preparation
+for Phase 5; the shipped native endpoint does not itself provide that routing.
 
 This mutation compatibility may follow a separate deprecation policy. All
 current external GET endpoints remain permanently compatible regardless of the
@@ -144,14 +150,15 @@ never inherit privileged behavior.
 Events retain `wave_id` and add competition and entry identity as appropriate.
 Define events for:
 
-- Competition published, started, paused, resumed, ended, cancelled, archived.
-- Entry created, withdrawn, disqualified, or selected as winner.
+- Competition configuration, publication, pauses/resumes, completion and archive.
+- Entry created, deleted, or selected as winner.
 - Vote/leaderboard changes at the approved aggregation level.
 - Decision and outcome completion.
 
-Wave-level subscribers may receive lifecycle announcements according to the
-approved defaults. Avoid per-entry notification volume unless a user explicitly
-opts in.
+Internal lifecycle/audit events are distinct from user notifications. Only
+winner notifications are emitted for competition lifecycle events. Preserve
+ordinary mention/reply behavior; publication, pause/resume and general lifecycle
+changes do not create follower announcements.
 
 Frontend cache invalidation should update the affected competition and the
 wave's aggregate summaries without refreshing unrelated competitions.
@@ -194,14 +201,15 @@ frontend is enabled.
 - Parallel competition eligibility and credit isolation.
 - Signature replay across competition IDs and config versions is rejected.
 - Maximum applications and duplicate policies under concurrency.
-- Withdrawal/disqualification behavior before and after voting.
+- Immutable entries and deletion before/after voting, including spend release
+  and suppression of deleted content in historical public views.
 - Old and native endpoint authorization and ambiguity handling.
 
 ### Leaderboard and Decisions
 
 - Rank and Approve behavior, thresholds, ties, time locks, and maximum winners.
 - Participation/voting boundary timestamps.
-- Pauses, resumes, cancellations, retries, and delayed worker execution.
+- Pauses, resumes, completion, retries, and delayed worker execution.
 - Two competitions in one wave becoming due simultaneously.
 - Duplicate worker delivery and lease contention.
 - One competition failing while another completes.
@@ -251,7 +259,8 @@ competition,” because abruptly switching engines is unsafe.
 - Native entry, voting, leaderboard, decision, outcome, and pause execution.
 - Competition-aware events, notifications, caching, and metrics.
 - Privileged competition capability routing.
-- Legacy endpoint compatibility dispatch.
+- Legacy endpoint compatibility dispatch remains required Phase 5 preparation;
+  it is not claimed as shipped by this native release.
 - Parallel-competition integration and browser evidence.
 - Native runtime incident and rollback runbook.
 
@@ -270,4 +279,6 @@ competition,” because abruptly switching engines is unsafe.
 
 ## Next Phase
 
-Proceed to [Phase 5: Legacy Data Migration](./phase-5-legacy-data-migration.md).
+Prepare [Phase 5: Legacy Data Migration](./phase-5-legacy-data-migration.md),
+including missing compatibility dispatch. Production cutover waits for the
+[open acceptance gates](./native-delivery/production-status-2026-10-01.md#open-acceptance-evidence).

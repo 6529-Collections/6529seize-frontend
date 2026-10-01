@@ -1,6 +1,18 @@
 # Phase 1 Implementation and Validation Evidence
 
-## Assessment — 2026-09-28
+## Current Status — 2026-10-01
+
+This file preserves the dated foundation follow-up evidence below. Its local-only
+scope, pending deployment, remaining-credit gap and not-started frontend status
+are historical, superseded by the [production assessment](../native-delivery/production-status-2026-10-01.md).
+Independent credit comparison and native frontend/runtime are now shipped.
+Production parity/performance acceptance and migration compatibility remain open.
+D-05/D-17 have been resolved in the amended [decision register](../phase-0/decision-register.md).
+Do not use the earlier preview or rollback instructions as the active native
+release runbook; preserve unified reads while current frontend consumers depend
+on them.
+
+## Historical Assessment — 2026-09-28
 
 Roadmap Phase 1 remains **In progress**. The original additive foundation is on
 main, but that fact does not establish its staging/production acceptance gates.
