@@ -137,7 +137,7 @@ describe("BrainMobileTabs", () => {
         />
       );
       for (const name of ["Outcome", "My Votes"]) {
-        const tab = screen.queryByRole("button", { name, exact: true });
+        const tab = screen.queryByRole("button", { name });
         if (hasDefaultCompetition) expect(tab).toBeInTheDocument();
         else expect(tab).not.toBeInTheDocument();
       }

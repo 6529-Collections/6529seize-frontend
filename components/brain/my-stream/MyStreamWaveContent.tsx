@@ -67,7 +67,7 @@ import { getChatSubmitDropLabels } from "./chatSubmitDrop.types";
 import { isCompetitionPathname } from "@/helpers/competition.helpers";
 import { useDefaultCompetitionNavigation } from "@/hooks/competitions/useDefaultCompetitionNavigation";
 import { useCompetitionEvents } from "@/hooks/competitions/useCompetitionEvents";
-import { CompetitionState } from "@/components/competitions/CompetitionState";
+import { DefaultCompetitionState } from "@/components/competitions/DefaultCompetitionState";
 import { waveCompetitionTabs } from "@/helpers/default-competition.helpers";
 
 export interface MyStreamWaveProps {
@@ -731,14 +731,7 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
     );
   } else if (isResolvingCompetitionTab) {
     activeTabContent = (
-      <CompetitionState
-        error={defaultNavigation.selection.isError}
-        empty={
-          defaultNavigation.selection.isSuccess &&
-          defaultNavigation.selection.data.competition_id === null
-        }
-        retry={() => void defaultNavigation.selection.refetch()}
-      />
+      <DefaultCompetitionState selection={defaultNavigation.selection} />
     );
   }
 
@@ -774,10 +767,7 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
       {defaultNavigation.resolve &&
         !isResolvingCompetitionTab &&
         defaultNavigation.selection.isError && (
-          <CompetitionState
-            error
-            retry={() => void defaultNavigation.selection.refetch()}
-          />
+          <DefaultCompetitionState selection={defaultNavigation.selection} />
         )}
 
       <div

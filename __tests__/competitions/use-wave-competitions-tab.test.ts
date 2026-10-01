@@ -2,7 +2,6 @@ import { renderHook } from "@testing-library/react";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { isMultiCompetitionEnabled } from "@/helpers/competition.helpers";
 import {
-  useDefaultCompetition,
   useCompetitionHub,
   useCompetitionList,
 } from "@/hooks/competitions/useCompetitionQueries";
