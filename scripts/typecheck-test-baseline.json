@@ -704,7 +704,6 @@
     "__tests__/components/waves/small-leaderboard/WaveSmallLeaderboardTopThreeDrop.test.tsx": 19,
     "__tests__/components/waves/specs/groups/group/WaveGroup.test.tsx": 1,
     "__tests__/components/waves/specs/groups/group/WaveGroupTitle.test.tsx": 1,
-    "__tests__/components/waves/specs/WaveRating.test.tsx": 2,
     "__tests__/components/waves/StormButton.test.tsx": 1,
     "__tests__/components/waves/TikTokCard.test.tsx": 1,
     "__tests__/components/waves/WaveDropQuoteWithSerialNo.test.tsx": 1,

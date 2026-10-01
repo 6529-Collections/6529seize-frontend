@@ -451,6 +451,29 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       page.getByRole("tab", { name: "About", exact: true })
     ).toBeVisible();
     await page.getByRole("tab", { name: "About", exact: true }).click();
+    await expect(page.getByText("Created by", { exact: true })).toHaveCount(0);
+    const aboutPanel = page
+      .getByRole("complementary", { name: "Wave details" })
+      .or(page.getByRole("dialog", { name: "Wave details" }));
+    const creationDate = page
+      .getByRole("complementary", { name: "Wave details" })
+      .locator("time[datetime]")
+      .or(
+        page
+          .getByRole("dialog", { name: "Wave details" })
+          .locator("time[datetime]")
+      );
+    await expect(creationDate).toBeVisible();
+    await expect(creationDate).toHaveAttribute(
+      "datetime",
+      /^\d{4}-\d{2}-\d{2}T/
+    );
+    await expect(
+      aboutPanel.getByRole("region", { name: "Pinned drop", exact: true })
+    ).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Pinned drop", exact: true })
+    ).toHaveCount(0);
     await expect(
       page.getByRole("button", { name: /^(Share wave|Copy wave link)$/ })
     ).toBeVisible();
