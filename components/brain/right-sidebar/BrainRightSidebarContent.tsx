@@ -11,8 +11,11 @@ interface BrainRightSidebarContentProps {
 const BrainRightSidebarContent: React.FC<BrainRightSidebarContentProps> = ({
   wave,
 }) => {
-  const pinnedDrop = wave.description_drop;
-  if (!pinnedDrop.id) {
+  const pinnedDrop = wave.description_drop as
+    | ApiWave["description_drop"]
+    | null
+    | undefined;
+  if (!pinnedDrop?.id) {
     return null;
   }
 

@@ -30,10 +30,12 @@ describe("BrainRightSidebarContent", () => {
     expect(screen.getByTestId("pinned-drop")).toHaveTextContent("drop-2");
   });
 
-  it("does not show an empty pinned section when the drop is unavailable", () => {
-    const { container } = render(
-      <BrainRightSidebarContent wave={makeWave("")} />
-    );
+  it.each<[string, ApiWave]>([
+    ["empty drop ID", makeWave("")],
+    ["missing drop", {} as ApiWave],
+    ["null drop", { description_drop: null } as unknown as ApiWave],
+  ])("does not show an empty pinned section for %s", (_, wave) => {
+    const { container } = render(<BrainRightSidebarContent wave={wave} />);
     expect(container).toBeEmptyDOMElement();
   });
 });
