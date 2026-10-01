@@ -65,6 +65,10 @@ import type {
 } from "./chatSubmitDrop.types";
 import { getChatSubmitDropLabels } from "./chatSubmitDrop.types";
 import { isCompetitionPathname } from "@/helpers/competition.helpers";
+import { useDefaultCompetitionNavigation } from "@/hooks/competitions/useDefaultCompetitionNavigation";
+import { useCompetitionEvents } from "@/hooks/competitions/useCompetitionEvents";
+import { CompetitionState } from "@/components/competitions/CompetitionState";
+import { waveCompetitionTabs } from "@/helpers/default-competition.helpers";
 
 export interface MyStreamWaveProps {
   readonly waveId: string;
@@ -253,6 +257,11 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
     },
   });
   const metadataWaveId = wave?.id;
+  const defaultNavigation = useDefaultCompetitionNavigation(
+    wave,
+    !competitionOnly
+  );
+  useCompetitionEvents(competitionOnly ? "" : waveId);
 
   useEffect(() => {
     registerWave(waveId, true);
@@ -484,6 +493,7 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
     );
     const params = new URLSearchParams(searchParams.toString() || "");
     params.set("drop", drop.id);
+    params.delete("default");
     router.push(`${pathname}?${params.toString()}`, { scroll: false });
   };
 
@@ -735,6 +745,13 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
         />
       )}
 
+      {defaultNavigation.resolve && defaultNavigation.selection.isError && (
+        <CompetitionState
+          error
+          retry={() => void defaultNavigation.selection.refetch()}
+        />
+      )}
+
       <div
         className="tw-relative tw-min-h-0 tw-min-w-0 tw-flex-grow tw-overflow-hidden"
         role="tabpanel"
@@ -750,6 +767,16 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
             wave={wave}
             curationId={activeCurationId}
             onDropClick={onDropClick}
+          />
+        ) : defaultNavigation.resolve &&
+          waveCompetitionTabs[activeContentTab] !== undefined ? (
+          <CompetitionState
+            error={defaultNavigation.selection.isError}
+            empty={
+              defaultNavigation.selection.isSuccess &&
+              defaultNavigation.selection.data.competition_id === null
+            }
+            retry={() => void defaultNavigation.selection.refetch()}
           />
         ) : (
           components[activeContentTab]

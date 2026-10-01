@@ -5,8 +5,8 @@
 ## Status and Meaning
 
 - Product policy: Approved on 2026-10-01 (D-19).
-- Implementation: Not started; this is a new roadmap requirement, not a claim
-  about the production UI.
+- Implementation: Implemented on development branches; delivery Phase 2
+  review/CI in progress. Not merged or deployed. See [delivery evidence](./native-delivery/default-competition-delivery.md).
 - Scope: Phase 6 product follow-up using Phase 2 competition context; assess
   backend selection/read support and frontend wave navigation together.
 

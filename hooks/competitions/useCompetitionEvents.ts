@@ -29,6 +29,7 @@ export function useCompetitionEvents(waveId: string) {
   const client = useQueryClient();
   const seen = useRef(new Set<string>());
   useEffect(() => {
+    if (!waveId) return;
     let refresh: ReturnType<typeof setTimeout> | undefined;
     const unsubscribe = subscribe(
       WsMessageType.COMPETITION_UPDATE,

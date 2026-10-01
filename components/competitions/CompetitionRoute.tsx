@@ -1,5 +1,4 @@
 "use client";
-import { useCompetitionEvents } from "@/hooks/competitions/useCompetitionEvents";
 import WavesLayout from "@/components/waves/layout/WavesLayout";
 import MyStreamWave from "@/components/brain/my-stream/MyStreamWave";
 import CompetitionHub from "./CompetitionHub";
@@ -13,7 +12,6 @@ export default function CompetitionRoute({
   readonly waveId: string;
   readonly competitionId?: string;
 }) {
-  useCompetitionEvents(waveId);
   let content = <CompetitionHub waveId={waveId} embedded />;
   if (competitionId === "new")
     content = <CompetitionDraftRoute waveId={waveId} />;

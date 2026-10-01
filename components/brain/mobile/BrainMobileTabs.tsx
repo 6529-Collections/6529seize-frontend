@@ -86,6 +86,7 @@ interface BrainMobileTabsProps {
   readonly waveActive: boolean;
   readonly hasPolls?: boolean | undefined;
   readonly hasCompetitions?: boolean | undefined;
+  readonly hasDefaultCompetition?: boolean | undefined;
   readonly activeCompetitionCount?: number | undefined;
   readonly outcomesVisible?: boolean | undefined;
   readonly waveNavigationReady?: boolean | undefined;
@@ -101,6 +102,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
   waveActive,
   hasPolls = false,
   hasCompetitions = false,
+  hasDefaultCompetition = false,
   activeCompetitionCount,
   outcomesVisible = true,
   waveNavigationReady = true,
@@ -146,7 +148,8 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
 
   const { isMemesWave, isCurationWave, isRankWave, isApproveWave } =
     useWave(wave);
-  const isCompetitionWave = isRankWave || isApproveWave;
+  const isCompetitionWave =
+    isRankWave || isApproveWave || hasDefaultCompetition;
   const supportsOutcomeView =
     isCompetitionWave && !isCurationWave && outcomesVisible;
   const canShowMyVotesTab = isCurationWave || hasAuthenticatedProfile;

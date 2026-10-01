@@ -2,6 +2,7 @@ import { renderHook } from "@testing-library/react";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { isMultiCompetitionEnabled } from "@/helpers/competition.helpers";
 import {
+  useDefaultCompetition,
   useCompetitionHub,
   useCompetitionList,
 } from "@/hooks/competitions/useCompetitionQueries";
@@ -15,6 +16,10 @@ jest.mock("@/helpers/competition.helpers", () => ({
 }));
 jest.mock("@/hooks/competitions/useCompetitionQueries", () => ({
   useCompetitionHub: jest.fn(),
+  useDefaultCompetition: jest.fn(() => ({
+    isSuccess: true,
+    data: { competition_id: "default" },
+  })),
   useCompetitionList: jest.fn(),
 }));
 

@@ -26,6 +26,29 @@ these tabs for users who can create competitions.
 Cards show the start date and, when set, the end date. Dates in the past use
 **Started** or **Ended**; future dates use **Starts** or **Ends**.
 
+## Default Competition
+
+Opening a wave without choosing a competition opens its default competition.
+Leaderboard, Winners, Outcomes and My votes use that competition. Chat remains
+shared by the whole wave, and Competitions still opens the collection.
+
+- One eligible competition is the default, including upcoming or completed history.
+- With running competitions, the earliest competition start wins. Paused
+  decisions still count as running.
+- With none running, the next competition to start wins over completed history.
+- With none running or upcoming, the most recently ended competition wins.
+  Archived completed competitions remain eligible; archiving does not change
+  their ending time.
+- Drafts, archived unpublished drafts and cancelled competitions are excluded.
+  With none eligible, the wave remains a chat hub.
+
+The default can change as competitions start, finish or are published. Choosing
+another competition or following a competition or entry link keeps that choice
+across tabs, reload and Back/Forward. Opening a submission or vote form keeps
+its original competition even if the default changes while the form is open.
+Returning to Chat preserves the competition context for the familiar competition
+tabs. The collection lets you choose a different competition at any time.
+
 ## User Journey
 
 1. Choose a competition and read its rules, dates and eligibility.
@@ -58,8 +81,8 @@ Cards show the start date and, when set, the end date. Dates in the past use
 - Spending credit in one competition does not reduce the budget in another.
   A budget can be shared across that competition's entries or apply separately
   to each entry, depending on its rules.
-- A wave with an existing competition keeps that original experience. Adding
-  another competition does not replace the original leaderboard or results.
+- Adding a competition can change the default under the rules above. Each
+  competition keeps its own leaderboard and results through its direct link.
 - A winning entry records a result in its competition. Its drop remains a
   dedicated competition submission.
 - Winner notifications link to the relevant competition or
@@ -86,6 +109,8 @@ Cards show the start date and, when set, the end date. Dates in the past use
 
 ## Failure and Recovery
 
+- If default selection cannot load, retry while shared chat remains usable.
+  Competition controls do not silently use a different competition.
 - If a resource cannot be loaded, retry or return to shared chat. A private or
   missing competition does not reveal its entries through a direct link.
 - If the rules changed, reload before submitting or voting again. Review the
@@ -101,10 +126,9 @@ Competition discovery, creation, participation and management depend on feature
 availability. Existing direct links can still show authorized competition
 history when these controls are unavailable. A link can show an unavailable
 state if the server has not enabled its support.
-There is no single current competition for a wave. Older wave links continue
-to open their established experience. Main Stage privileges apply only to an
-explicitly designated competition, never automatically to all competitions in
-its wave.
+The default controls navigation; it grants no participation, voting or Main
+Stage privileges. Main Stage privileges apply only to an explicitly designated
+competition, never automatically to all competitions in its wave.
 
 ## Related Pages
 

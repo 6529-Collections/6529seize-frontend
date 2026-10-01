@@ -261,6 +261,7 @@ export function useBrainMobileActiveView({
   const viewParam = searchParams.get("view");
   const createParam = searchParams.get("create");
   const serialNoParam = searchParams.get("serialNo");
+  const tabParam = searchParams.get("tab");
   const routeDefaultView = getRouteDefaultView({
     createParam,
     isApp,
@@ -270,7 +271,9 @@ export function useBrainMobileActiveView({
   });
   const shellContextKey = `shell:${pathname}:${viewParam ?? ""}`;
   const chatTargetKey = serialNoParam === null ? "" : `serial:${serialNoParam}`;
-  const waveTargetKey = isCompetitionRoute ? pathname : chatTargetKey;
+  const waveTargetKey = isCompetitionRoute
+    ? pathname
+    : `${chatTargetKey}:${tabParam ?? ""}`;
   const currentContextKey = waveId
     ? `wave:${waveId}:${waveTargetKey}`
     : shellContextKey;
@@ -289,6 +292,9 @@ export function useBrainMobileActiveView({
   if (hasWave) {
     baseView = restoredView ?? waveDefaultView;
     if (serialNoParam !== null) baseView = BrainView.DEFAULT;
+    if (tabParam === "chat") baseView = BrainView.DEFAULT;
+    if (tabParam === "polls") baseView = BrainView.POLLS;
+    if (tabParam === "about") baseView = BrainView.ABOUT;
     if (isCompetitionRoute) baseView = BrainView.COMPETITIONS;
   }
   const candidateView =

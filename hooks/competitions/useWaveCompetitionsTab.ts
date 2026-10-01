@@ -3,7 +3,11 @@
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { useEffect } from "react";
 import { isMultiCompetitionEnabled } from "@/helpers/competition.helpers";
-import { useCompetitionHub, useCompetitionList } from "./useCompetitionQueries";
+import {
+  useCompetitionHub,
+  useCompetitionList,
+  useDefaultCompetition,
+} from "./useCompetitionQueries";
 
 export function useWaveCompetitionsTab(wave: ApiWave | null | undefined) {
   const enabled =
@@ -11,6 +15,7 @@ export function useWaveCompetitionsTab(wave: ApiWave | null | undefined) {
     Boolean(wave) &&
     !wave?.chat.scope.group?.is_direct_message;
   const waveId = wave?.id ?? "";
+  const defaultCompetition = useDefaultCompetition(waveId, enabled);
   const hub = useCompetitionHub(waveId, enabled);
   const canReadCompetitions = enabled && hub.isSuccess;
   const canCreate = hub.data?.permissions.create_competition === true;
@@ -33,6 +38,11 @@ export function useWaveCompetitionsTab(wave: ApiWave | null | undefined) {
   }, [canReadCompetitions, hasNextPage, isFetching, isError, fetchNextPage]);
 
   return {
+    defaultSelectionEnabled: enabled,
+    defaultCompetitionId:
+      defaultCompetition.isSuccess && !defaultCompetition.isError
+        ? defaultCompetition.data.competition_id
+        : null,
     hasCompetitions:
       enabled &&
       (canCreate ||

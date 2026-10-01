@@ -50,7 +50,8 @@ delete rather than withdraw/disqualify; winner-only lifecycle notifications;
 editable participation/voting access groups; no manual end/cancel commands.
 
 The new [default competition](../default-competition.md) requirement is approved
-but **not implemented**. Existing explicit competition routes and the legacy
+but **not deployed**. Development-branch implementation and Phase 2 review/CI
+are tracked separately in [delivery evidence](./default-competition-delivery.md). Existing explicit competition routes and the legacy
 primary view do not satisfy automatic wave-entry/default-tab selection.
 
 ## Coexistence Boundary
