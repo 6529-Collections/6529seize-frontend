@@ -455,7 +455,11 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     const aboutPanel = page
       .getByRole("complementary", { name: "Wave details" })
       .or(page.getByRole("dialog", { name: "Wave details" }));
-    await expect(aboutPanel.locator("time[datetime]")).toBeVisible();
+    await expect(aboutPanel.getByRole("time")).toBeVisible();
+    await expect(aboutPanel.getByRole("time")).toHaveAttribute(
+      "datetime",
+      /^\d{4}-\d{2}-\d{2}T/
+    );
     await expect(
       aboutPanel.getByRole("region", { name: "Pinned drop", exact: true })
     ).toBeVisible();
