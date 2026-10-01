@@ -422,11 +422,14 @@ export const ContentTabProvider: React.FC<{
       }
       if (isCompetitionRoute && tab !== MyStreamWaveTab.COMPETITIONS) {
         const routeWaveId = getWaveIdFromPathname(pathname);
-        if (routeWaveId)
-          router.push(
-            `${getWavePathRoute(routeWaveId)}?tab=${tab.toLowerCase()}${pathname.split("/")[4] ? `&competition=${encodeURIComponent(pathname.split("/")[4]!)}` : ""}`,
-            { scroll: false }
-          );
+        if (routeWaveId) {
+          const params = new URLSearchParams({ tab: tab.toLowerCase() });
+          const competitionId = pathname.split("/")[4];
+          if (competitionId) params.set("competition", competitionId);
+          router.push(`${getWavePathRoute(routeWaveId)}?${params}`, {
+            scroll: false,
+          });
+        }
       }
       if (
         waveId &&

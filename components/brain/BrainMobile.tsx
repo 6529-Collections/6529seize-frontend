@@ -219,10 +219,9 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
       ) {
         const competitionId = pathname.split("/")[4];
         const tab = view === BrainView.DEFAULT ? "chat" : view.toLowerCase();
-        router.push(
-          `${getWavePathRoute(waveId)}?tab=${tab}${competitionId ? `&competition=${encodeURIComponent(competitionId)}` : ""}`,
-          { scroll: false }
-        );
+        const params = new URLSearchParams({ tab });
+        if (competitionId) params.set("competition", competitionId);
+        router.push(`${getWavePathRoute(waveId)}?${params}`, { scroll: false });
       }
     },
     [
