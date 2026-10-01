@@ -117,6 +117,8 @@ properties:
   competition_id: { type: string }
   drop_id: { type: string }
   submitter: { $ref: "#/components/schemas/ApiProfileMin" }
+  # WITHDRAWN/DISQUALIFIED are retained internal/history vocabulary, not public commands.
+  # Deleted content is suppressed from public reads regardless of stored status.
   status: { type: string, enum: [ACTIVE, WITHDRAWN, DISQUALIFIED, WINNER] }
   config_version: { type: integer, minimum: 1 }
   submitted_at: { type: integer, format: int64 }

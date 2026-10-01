@@ -234,7 +234,7 @@ policy; this permanent guarantee applies to GET APIs.
 
 These defaults reflect the shipped product decisions. Amendments belong in the
 decision register. The additional approved [default competition](./default-competition.md)
-selects the wave landing competition: one eligible; otherwise oldest active;
+selects the wave landing competition: one eligible; otherwise earliest-starting active;
 otherwise soonest upcoming; otherwise most recently ended. Paused decisions
 still count as active, drafts are excluded, and archived completed competitions
 remain eligible for the ended fallback. This navigation work is not yet shipped.

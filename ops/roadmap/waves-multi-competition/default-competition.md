@@ -20,7 +20,8 @@ choice, the last competition visited, or the immutable legacy primary.
 
 ## Agreed Selection Policy
 
-Apply these rules to competitions the viewer is allowed to read:
+Apply these rules to readable competitions eligible under the timing/lifecycle
+contract below:
 
 1. Exclude unpublished drafts, including drafts that were archived without
    ever running. Draft administration remains available separately.
@@ -58,8 +59,10 @@ and native competitions:
   legacy dates, open-ended contests and archived completed history before
   implementation is considered complete. Do not substitute creation, update or
   archive time for a known competition start/end.
-- Retained cancellation states need explicit read-only handling and must never
-  count as active/upcoming. This requirement adds no cancellation command.
+- Retained cancellation-only records are not eligible defaults. They count as
+  neither active/upcoming nor completed history: `cancelled_at` is not an end
+  timestamp. Keep authorized explicit reads available; any inclusion in default
+  selection requires a separate product decision. This adds no cancel command.
 - Read visibility controls eligibility for selection. Participation/voting
   group restrictions control actions, not whether a readable competition can be
   the default. Admin draft access must not make drafts the default.
@@ -129,6 +132,8 @@ capability; those remain attached to the designated competition.
 | No active/upcoming, with completed and archived completed history | Latest end wins; archive time is irrelevant. |
 | Equal starts or ends; winner is beyond first list page | Stable ID tie-break; correct result across all pages. |
 | Admin can see drafts; member cannot vote in selected competition | Drafts excluded; readable default identical, action permissions respected. |
+| Otherwise-preferred competition is not readable by this viewer | Exclude it before selection; use the next eligible competition or empty state without revealing the hidden record. |
+| Only retained cancellation records, or cancellation newer than a completed competition | No default in the first case; choose completed history in the second, never use cancellation time as end time. |
 | Legacy primary plus a native competition selected by the policy | UI tabs use native default; old GETs still return legacy primary. |
 | Explicit link to a non-default competition, then reload/Back/Forward | Explicit competition and view retained. |
 | Implicit default changes while a form is open | No silent command retargeting or data mixing. |
