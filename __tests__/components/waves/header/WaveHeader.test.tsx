@@ -37,6 +37,12 @@ jest.mock("@/components/waves/header/WaveHeaderShareButton", () => () => (
   <button type="button">Copy wave link</button>
 ));
 jest.mock("@/components/waves/WavePicture", () => () => <div />);
+jest.mock("@/components/waves/specs/WaveAuthor", () => ({
+  __esModule: true,
+  default: ({ wave }: { wave: { author: { handle: string } } }) => (
+    <a href={`/${wave.author.handle}`}>{wave.author.handle}</a>
+  ),
+}));
 jest.mock(
   "@/components/waves/specs/WaveNotificationSettings",
   () =>
@@ -83,6 +89,22 @@ describe("WaveHeader", () => {
         <WaveHeader wave={wave} onFollowersClick={jest.fn()} {...props} />
       </AuthContext.Provider>
     );
+
+  it("places the creator profile between the wave title and creation date", () => {
+    wrapper(baseWave);
+    const title = screen.getByTestId("name");
+    const creator = screen.getByRole("link", { name: "a" });
+    const created = screen.getByText(/^Created /);
+
+    expect(screen.getByText("Creator")).toBeVisible();
+    expect(creator).toHaveAttribute("href", "/a");
+    expect(title.compareDocumentPosition(creator)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING
+    );
+    expect(creator.compareDocumentPosition(created)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING
+    );
+  });
 
   it.each([
     ["logged out", null],

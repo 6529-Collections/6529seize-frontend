@@ -1,25 +1,36 @@
 import { render, screen } from "@testing-library/react";
 import BrainRightSidebarContent from "@/components/brain/right-sidebar/BrainRightSidebarContent";
+import type { ApiWave } from "@/generated/models/ApiWave";
 
-const captured: string[] = [];
-
-jest.mock("@/components/waves/specs/WaveSpecs", () => ({
+jest.mock("@/components/waves/drops/Drop", () => ({
   __esModule: true,
-  default: (props: any) => {
-    captured.push(`specs:${props.wave.id}`);
-    return <div data-testid="wave-specs" />;
-  },
+  default: ({ drop }: { drop: { id: string } }) => (
+    <div data-testid="pinned-drop">{drop.id}</div>
+  ),
+  DropLocation: { WAVE: "WAVE" },
 }));
 
+const makeWave = (dropId: string): ApiWave =>
+  ({ description_drop: { id: dropId } }) as ApiWave;
+
 describe("BrainRightSidebarContent", () => {
-  beforeEach(() => {
-    captured.length = 0;
+  it("shows the current pinned drop instead of the overview", () => {
+    const { rerender } = render(
+      <BrainRightSidebarContent wave={makeWave("drop-1")} />
+    );
+
+    expect(screen.getByRole("heading", { name: "Pinned drop" })).toBeVisible();
+    expect(screen.getByTestId("pinned-drop")).toHaveTextContent("drop-1");
+    expect(screen.queryByText("Overview")).not.toBeInTheDocument();
+
+    rerender(<BrainRightSidebarContent wave={makeWave("drop-2")} />);
+    expect(screen.getByTestId("pinned-drop")).toHaveTextContent("drop-2");
   });
 
-  it("renders the about section only", () => {
-    render(<BrainRightSidebarContent wave={{ id: "wave-1" } as any} />);
-
-    expect(screen.getByTestId("wave-specs")).toBeInTheDocument();
-    expect(captured).toEqual(["specs:wave-1"]);
+  it("does not show an empty pinned section when the drop is unavailable", () => {
+    const { container } = render(
+      <BrainRightSidebarContent wave={makeWave("")} />
+    );
+    expect(container).toBeEmptyDOMElement();
   });
 });

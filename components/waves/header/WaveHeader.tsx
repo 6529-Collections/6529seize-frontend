@@ -15,6 +15,7 @@ import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import WavePicture from "../WavePicture";
 import { Time } from "@/helpers/time";
 import WaveNotificationSettings from "../specs/WaveNotificationSettings";
+import WaveAuthor from "../specs/WaveAuthor";
 import { canEditWave } from "@/helpers/waves/waves.helpers";
 import WaveHeaderPictureEdit from "./picture/WaveHeaderPictureEdit";
 import WaveRepButton from "./rep/WaveRepButton";
@@ -199,7 +200,14 @@ export default function WaveHeader({
           )}
         </div>
 
-        <div className="tw-mt-1 tw-text-sm">
+        <div className="tw-mt-2 tw-flex tw-min-w-0 tw-items-center tw-gap-x-2 tw-text-sm">
+          <span className="tw-shrink-0 tw-text-iron-500">
+            {t(WAVE_HEADER_LOCALE, "waves.sidebar.rightPanel.specs.creator")}
+          </span>
+          <WaveAuthor wave={wave} />
+        </div>
+
+        <div className="tw-mt-2 tw-text-sm">
           <span className="tw-font-normal tw-text-iron-500">
             {t(WAVE_HEADER_LOCALE, "waves.header.createdLabel", {
               relativeTime: created,

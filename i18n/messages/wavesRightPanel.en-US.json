@@ -4,6 +4,7 @@
   "waves.sidebar.rightPanel.error": "Wave details couldn't be loaded.",
   "waves.sidebar.rightPanel.retry": "Retry",
   "waves.sidebar.rightPanel.close": "Close wave details",
+  "waves.sidebar.rightPanel.pinnedDrop": "Pinned drop",
   "waves.sidebar.rightPanel.controls.show": "Show right sidebar",
   "waves.sidebar.rightPanel.controls.hide": "Hide right sidebar",
   "waves.sidebar.rightPanel.controls.openDetails": "Wave details",
