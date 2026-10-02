@@ -88,7 +88,6 @@ function handleQuoteKeyDown(
   event: React.KeyboardEvent<HTMLDivElement>,
   goToQuoteDrop: () => void
 ) {
-  if (event.target !== event.currentTarget) return;
   if (event.key !== "Enter" && event.key !== " ") return;
   event.preventDefault();
   event.stopPropagation();
