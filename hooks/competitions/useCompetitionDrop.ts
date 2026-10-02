@@ -11,6 +11,22 @@ import { QueryKey } from "@/components/react-query-wrapper/query-keys";
 import { fetchDropCompetitionContext } from "@/services/api/competitions-api";
 import { useCompetitionViewer } from "./useCompetitionQueries";
 
+function winnerContext(
+  drop: ExtendedDrop,
+  entry: NonNullable<ApiDropCompetitionContext["entry"]>
+) {
+  if (drop.winning_context) return drop.winning_context;
+  if (
+    entry.rank === null ||
+    !Number.isSafeInteger(entry.rank) ||
+    entry.rank < 1 ||
+    entry.won_at === null ||
+    !Number.isFinite(entry.won_at)
+  )
+    return null;
+  return { place: entry.rank, decision_time: entry.won_at, awards: [] };
+}
+
 export function applyCompetitionDropSummary(
   drop: ExtendedDrop,
   context: ApiDropCompetitionContext | undefined
@@ -31,18 +47,12 @@ export function applyCompetitionDropSummary(
   const isWinner = entry.status === ApiCompetitionEntryStatus.Winner;
   if (!isWinner && entry.status !== ApiCompetitionEntryStatus.Active)
     return drop;
-  return {
+  const winningContext = isWinner ? winnerContext(drop, entry) : null;
+  if (isWinner && !winningContext) return drop;
+  const result = {
     ...drop,
     drop_type: isWinner ? ApiDropType.Winner : ApiDropType.Participatory,
-    ...(isWinner
-      ? {
-          winning_context: drop.winning_context ?? {
-            place: entry.rank ?? 1,
-            decision_time: entry.won_at ?? entry.submitted_at,
-            awards: [],
-          },
-        }
-      : {}),
+    ...(winningContext ? { winning_context: winningContext } : {}),
     competition_id: competition.id,
     competition_title: competition.title,
     rating: summary.rating,
@@ -64,6 +74,8 @@ export function applyCompetitionDropSummary(
       voting_period_end: competition.voting.ends_at,
     },
   };
+  if (!isWinner) delete result.winning_context;
+  return result;
 }
 
 export function useCompetitionDrop(drop: ExtendedDrop) {

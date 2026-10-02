@@ -558,6 +558,19 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     ).toEqual([]);
   });
 
+  test("renders frozen CHAT deep links with submission voting controls", async ({
+    page,
+  }) => {
+    await installCompetitionApi(page);
+    await page.goto(`${ROOT}/alpha?drop=${entryDropId("alpha")}`);
+    await expect(
+      page.getByText("Recorded alpha entry", { exact: true })
+    ).toBeVisible({ timeout: 30000 });
+    await expect(
+      page.getByRole("button", { name: "Vote", exact: true })
+    ).toBeVisible();
+  });
+
   test("saves and resumes a native draft through the existing configuration controls", async ({
     page,
   }) => {

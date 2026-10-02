@@ -2,6 +2,8 @@
 
 [Phase 5 scope](../phase-5-legacy-data-migration.md) · [Master roadmap](../README.md)
 
+Pull requests: [backend #2132](https://github.com/6529-Collections/6529seize-backend/pull/2132) and [frontend #4153](https://github.com/6529-Collections/6529seize-frontend/pull/4153).
+
 Status: implemented for delivery Phase 2 review. No staging/production deployment,
 legacy migration, privileged transfer or engine retirement is part of this task.
 A roadmap phase remains open until its production exit criteria are evidenced.
@@ -36,10 +38,10 @@ repository. Do not execute guessed SQL ownership flips or acceptance waivers.
 ## Validation and browser contract
 
 Focused frontend tests cover matching native context, raw CHAT promotion,
-winner presentation and owner/drop/wave mismatches, alongside default-query,
+winner provenance, drop-detail rendering and owner/drop/wave mismatches, alongside default-query,
 navigation and competition-entry behavior. Full TypeScript passes. React Doctor
-scanned four changed source files with no diagnostics (100/100). The registered
-`native-competition-sandbox` pack passed all 22 desktop/mobile browser checks.
+scanned the changed React source files with no diagnostics (100/100). The registered
+`native-competition-sandbox` pack passed all 24 desktop/mobile browser checks.
 
 Its old v2 native-submission fixture now returns CHAT. This expectation follows
 the permanent compatibility contract: old endpoints must not infer an arbitrary
