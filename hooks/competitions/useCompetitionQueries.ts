@@ -7,6 +7,7 @@ import {
   competitionQueryKey,
   competitionScope,
   fetchCompetition,
+  fetchDefaultCompetition,
   fetchCompetitionHub,
   fetchCompetitionPauseState,
   fetchCompetitions,
@@ -31,6 +32,29 @@ export function useCompetitionHub(waveId: string, enabled = true) {
     retry: false,
     staleTime: 30_000,
     enabled,
+  });
+}
+
+export function useDefaultCompetition(waveId: string, enabled = true) {
+  const viewer = useCompetitionViewer();
+  return useQuery({
+    queryKey: [QueryKey.DEFAULT_COMPETITION, { wave_id: waveId, viewer }],
+    queryFn: ({ signal }) => fetchDefaultCompetition(waveId, signal),
+    enabled,
+    retry: false,
+    staleTime: 0,
+    refetchInterval: (query) => {
+      const data = query.state.data;
+      // Use server durations so device clock skew cannot keep a completed contest active.
+      if (
+        data?.next_refresh_at === undefined ||
+        data.next_refresh_at === null ||
+        data.next_refresh_at <= data.evaluated_at
+      )
+        return 30_000;
+      const delay = data.next_refresh_at - data.evaluated_at;
+      return Math.max(250, Math.min(30_000, delay));
+    },
   });
 }
 

@@ -121,6 +121,29 @@ describe("BrainMobileTabs", () => {
     });
   });
 
+  it.each([true, false])(
+    "shows familiar competition tabs on a native hub when a default exists (%s)",
+    (hasDefaultCompetition) => {
+      render(
+        <BrainMobileTabs
+          activeView={BrainView.DEFAULT}
+          onViewChange={onViewChange}
+          wave={createWave()}
+          waveActive={true}
+          showWavesTab={false}
+          showStreamBack={false}
+          isApp={true}
+          hasDefaultCompetition={hasDefaultCompetition}
+        />
+      );
+      for (const name of ["Outcome", "My Votes"]) {
+        const tab = screen.queryByRole("button", { name });
+        if (hasDefaultCompetition) expect(tab).toBeInTheDocument();
+        else expect(tab).not.toBeInTheDocument();
+      }
+    }
+  );
+
   it("switches native curation tabs while preserving other URL state", async () => {
     const user = userEvent.setup();
     searchParams = new URLSearchParams("curation=curation-1&filter=active");

@@ -97,8 +97,13 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     await expect(
       page.getByRole("heading", { level: 1, name: "The Memes - Main Stage" })
     ).toBeVisible({ timeout: 15000 });
+    const waveTabs = page.getByRole("tablist").filter({
+      has: page.getByRole("tab", { name: "Chat", exact: true }),
+    });
     for (const name of ["Leaderboard", "Chat", "Winners", "Outcome", "FAQ"]) {
-      await expect(page.getByRole("tab", { name, exact: true })).toBeAttached();
+      await expect(
+        waveTabs.getByRole("tab", { name, exact: true })
+      ).toBeAttached();
     }
     // This pack runs signed out; personal voting controls remain authenticated.
     await expect(
@@ -110,7 +115,9 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       })
     ).toBeVisible();
 
-    await page.getByRole("tab", { name: "Leaderboard", exact: true }).click();
+    await waveTabs
+      .getByRole("tab", { name: "Leaderboard", exact: true })
+      .click();
     await expect(
       page.getByRole("button", { name: "Toggle decision timeline" })
     ).toBeVisible();
@@ -135,7 +142,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       await projectedVote.click();
       await expect(projectedVote).toHaveAttribute("aria-selected", "true");
     }
-    await page.getByRole("tab", { name: "Winners", exact: true }).click();
+    await waveTabs.getByRole("tab", { name: "Winners", exact: true }).click();
     const winners = page.getByRole("tabpanel");
     await expect(
       winners.getByRole("link", { name: /^The Memes #\d+$/ }).first()

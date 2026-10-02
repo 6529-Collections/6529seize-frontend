@@ -65,6 +65,10 @@ import type {
 } from "./chatSubmitDrop.types";
 import { getChatSubmitDropLabels } from "./chatSubmitDrop.types";
 import { isCompetitionPathname } from "@/helpers/competition.helpers";
+import { useDefaultCompetitionNavigation } from "@/hooks/competitions/useDefaultCompetitionNavigation";
+import { useCompetitionEvents } from "@/hooks/competitions/useCompetitionEvents";
+import { DefaultCompetitionState } from "@/components/competitions/DefaultCompetitionState";
+import { waveCompetitionTabs } from "@/helpers/default-competition.helpers";
 
 export interface MyStreamWaveProps {
   readonly waveId: string;
@@ -253,6 +257,11 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
     },
   });
   const metadataWaveId = wave?.id;
+  const defaultNavigation = useDefaultCompetitionNavigation(
+    wave,
+    !competitionOnly
+  );
+  useCompetitionEvents(waveId, !competitionOnly);
 
   useEffect(() => {
     registerWave(waveId, true);
@@ -484,6 +493,7 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
     );
     const params = new URLSearchParams(searchParams.toString() || "");
     params.set("drop", drop.id);
+    params.delete("default");
     router.push(`${pathname}?${params.toString()}`, { scroll: false });
   };
 
@@ -706,6 +716,25 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
     [MyStreamWaveTab.FAQ]: <MyStreamWaveFAQ wave={wave} />,
   };
 
+  const isResolvingCompetitionTab =
+    defaultNavigation.resolve &&
+    waveCompetitionTabs[activeContentTab] !== undefined;
+  let activeTabContent = components[activeContentTab];
+  if (activeCurationId) {
+    activeTabContent = (
+      <MyStreamWaveCurationContent
+        key={activeCurationId}
+        wave={wave}
+        curationId={activeCurationId}
+        onDropClick={onDropClick}
+      />
+    );
+  } else if (isResolvingCompetitionTab) {
+    activeTabContent = (
+      <DefaultCompetitionState selection={defaultNavigation.selection} />
+    );
+  }
+
   return (
     <div
       className="tailwind-scope tw-relative tw-flex tw-h-full tw-min-h-0 tw-min-w-0 tw-flex-col"
@@ -735,6 +764,12 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
         />
       )}
 
+      {defaultNavigation.resolve &&
+        !isResolvingCompetitionTab &&
+        defaultNavigation.selection.isError && (
+          <DefaultCompetitionState selection={defaultNavigation.selection} />
+        )}
+
       <div
         className="tw-relative tw-min-h-0 tw-min-w-0 tw-flex-grow tw-overflow-hidden"
         role="tabpanel"
@@ -744,16 +779,7 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
             : getContentTabPanelId(activeContentTab)
         }
       >
-        {activeCurationId ? (
-          <MyStreamWaveCurationContent
-            key={activeCurationId}
-            wave={wave}
-            curationId={activeCurationId}
-            onDropClick={onDropClick}
-          />
-        ) : (
-          components[activeContentTab]
-        )}
+        {activeTabContent}
       </div>
       <MemesArtSubmissionModal
         isOpen={isAppMemesSubmitModalOpen}

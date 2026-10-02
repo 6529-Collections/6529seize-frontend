@@ -5,6 +5,7 @@ import {
   competitionScope,
   fetchCompetition,
   fetchCompetitionHub,
+  fetchDefaultCompetition,
   fetchCompetitionPauseState,
   fetchCompetitions,
   invalidateCompetition,
@@ -24,6 +25,15 @@ const other = { waveId: "wave", competitionId: "two" };
 
 describe("explicit competition transport", () => {
   beforeEach(() => jest.clearAllMocks());
+  it("requests authoritative default selection with cancellation and structured errors", async () => {
+    const signal = new AbortController().signal;
+    await fetchDefaultCompetition("wave/encoded", signal);
+    expect(commonApiFetch).toHaveBeenCalledWith({
+      endpoint: "v3/waves/wave%2Fencoded/default-competition",
+      signal,
+      errorMode: "structured",
+    });
+  });
   it("rejects a mismatched parent rather than rendering another competition", async () => {
     jest
       .mocked(commonApiFetch)
@@ -94,6 +104,8 @@ describe("explicit competition transport", () => {
       [QueryKey.COMPETITION_CREDITS, competitionScope(other)],
       [QueryKey.COMPETITION_HUB, { wave_id: "wave" }],
       [QueryKey.COMPETITIONS, { wave_id: "wave", filter: "active" }],
+      [QueryKey.DEFAULT_COMPETITION, { wave_id: "wave", viewer: "alice" }],
+      [QueryKey.DEFAULT_COMPETITION, { wave_id: "elsewhere", viewer: "alice" }],
       competitionQueryKey(
         { waveId: "elsewhere", competitionId: "one" },
         "alice"
@@ -103,7 +115,7 @@ describe("explicit competition transport", () => {
     keys.forEach((key) => client.setQueryData(key, { value: true }));
     await invalidateCompetitionWave(client, "wave");
     expect(keys.map((key) => client.getQueryState(key)?.isInvalidated)).toEqual(
-      [true, true, true, true, true, true, false, false]
+      [true, true, true, true, true, true, true, false, false, false]
     );
   });
   it("does not report unpaused when pause history cannot be resolved", async () => {

@@ -252,6 +252,7 @@ export default function CompetitionEntryForm({
     );
   return (
     <section
+      data-competition-command
       className="tw-space-y-4 tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-p-4"
       aria-labelledby="native-entry-heading"
       aria-describedby={failureDescription}

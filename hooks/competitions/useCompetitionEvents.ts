@@ -24,11 +24,12 @@ function parseCompetitionEvent(
   };
 }
 
-export function useCompetitionEvents(waveId: string) {
+export function useCompetitionEvents(waveId: string, enabled = true) {
   const { subscribe } = useWebSocket();
   const client = useQueryClient();
   const seen = useRef(new Set<string>());
   useEffect(() => {
+    if (!enabled) return;
     let refresh: ReturnType<typeof setTimeout> | undefined;
     const unsubscribe = subscribe(
       WsMessageType.COMPETITION_UPDATE,
@@ -51,5 +52,5 @@ export function useCompetitionEvents(waveId: string) {
       unsubscribe();
       if (refresh !== undefined) clearTimeout(refresh);
     };
-  }, [client, subscribe, waveId]);
+  }, [client, subscribe, waveId, enabled]);
 }
