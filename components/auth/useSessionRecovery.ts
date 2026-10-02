@@ -14,14 +14,21 @@ export function useSessionRecovery(enabled: boolean): void {
   useEffect(() => {
     if (!enabled) return;
     let disposed = false;
-    const recover = () => {
+    const recover = (event?: Event) => {
       if (
         disposed ||
         document.visibilityState === "hidden" ||
         !navigator.onLine
       )
         return;
-      void ensureActiveSession({ renewBeforeSeconds: 60 }).catch(() => {
+      // Persistence emits these events synchronously. A newly issued token
+      // with a short lifetime must not trigger another proactive renewal loop.
+      const authChanged =
+        event?.type === AUTH_TOKEN_CHANGED_EVENT ||
+        event?.type === WALLET_ACCOUNTS_UPDATED_EVENT;
+      void ensureActiveSession({
+        renewBeforeSeconds: authChanged ? 0 : 60,
+      }).catch(() => {
         // Offline/overload is retried on the next tick, focus or online event.
         // Keep the saved session and existing content available meanwhile.
       });

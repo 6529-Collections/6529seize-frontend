@@ -72,6 +72,23 @@ it("pauses renewal while hidden and retries a temporary failure when visible aga
   expect(ensureActiveSession).toHaveBeenCalledTimes(2);
 });
 
+it("does not proactively renew a newly persisted short-lived token again", () => {
+  renderHook(() => useSessionRecovery(true));
+  act(() => {
+    window.dispatchEvent(new Event("token-change"));
+    window.dispatchEvent(new Event("account-change"));
+  });
+  expect(ensureActiveSession).toHaveBeenNthCalledWith(1, {
+    renewBeforeSeconds: 60,
+  });
+  expect(ensureActiveSession).toHaveBeenNthCalledWith(2, {
+    renewBeforeSeconds: 0,
+  });
+  expect(ensureActiveSession).toHaveBeenNthCalledWith(3, {
+    renewBeforeSeconds: 0,
+  });
+});
+
 it("handles native foreground activation and removes the native subscription", async () => {
   jest.mocked(Capacitor.isNativePlatform).mockReturnValue(true);
   const remove = jest.fn().mockResolvedValue(undefined);

@@ -17,6 +17,8 @@ import {
   setNativeRefreshToken,
 } from "@/services/auth/native-refresh-token-storage";
 import { validateAuthImmediate } from "@/services/auth/immediate-validation.utils";
+import { act, renderHook } from "@testing-library/react";
+import { useSessionRecovery } from "@/components/auth/useSessionRecovery";
 
 let mockAddress: string;
 let mockJwt: string | null;
@@ -24,10 +26,13 @@ let mockRole: string | null;
 let mockHasSession = true;
 const mockSetAuth = jest.fn((_address: string, token: string) => {
   mockJwt = token;
+  window.dispatchEvent(new Event("token-change"));
   return true;
 });
 
 jest.mock("@/services/auth/auth.utils", () => ({
+  AUTH_TOKEN_CHANGED_EVENT: "token-change",
+  WALLET_ACCOUNTS_UPDATED_EVENT: "account-change",
   getAuthJwt: () => mockJwt,
   getWalletAddress: () => mockAddress,
   getWalletRole: () => mockRole,
@@ -53,6 +58,7 @@ jest.mock("@/services/analytics/mixpanel", () => ({
 jest.mock("@capacitor/core", () => ({
   Capacitor: { isNativePlatform: jest.fn(() => false) },
 }));
+jest.mock("@capacitor/app", () => ({ App: { addListener: jest.fn() } }));
 jest.mock("capacitor-secure-storage-plugin", () => ({
   SecureStoragePlugin: { get: jest.fn(), set: jest.fn(), remove: jest.fn() },
 }));
@@ -103,6 +109,20 @@ beforeEach(() => {
 afterEach(() => {
   __resetSessionRefreshStateForTests();
   jest.useRealTimers();
+});
+
+it("does not start another refresh when persistence announces a short-lived access token", async () => {
+  jest.mocked(commonApiPost).mockResolvedValueOnce({
+    ...response(),
+    access_token: makeJwt(35),
+  });
+  const { unmount } = renderHook(() => useSessionRecovery(true));
+  await act(async () => {
+    await ensureActiveSession();
+  });
+  expect(mockSetAuth).toHaveBeenCalledTimes(1);
+  expect(commonApiPost).toHaveBeenCalledTimes(1);
+  unmount();
 });
 
 it("reopens with an expired JWT and sends concurrent reads and mutations only after one refresh", async () => {
