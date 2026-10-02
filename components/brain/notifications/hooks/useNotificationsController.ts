@@ -121,6 +121,7 @@ export const useNotificationsController =
         }
       },
       onError: (error) => {
+        if (getNotificationErrorDetails(error).isUnauthorized) return;
         setToast({
           type: "error",
           title: "Couldn't mark notifications as read.",
@@ -287,30 +288,32 @@ export const useNotificationsController =
       setErrorMessage(message);
       setHasTimedOut(false);
 
+      // eslint-disable-next-line react-you-might-not-need-an-effect/no-event-handler -- Query failures also arrive on mount/resume; synchronize recovery with the query result.
+      if (isUnauthorized) {
+        if (!reauthTriggeredRef.current) {
+          reauthTriggeredRef.current = true;
+          const recover = async () => {
+            try {
+              const { success } = await requestAuth({ serverRejected: true });
+              if (success) await refetch();
+            } catch (error) {
+              console.error("Failed to recover notifications session:", error);
+            }
+          };
+          void recover();
+        }
+        return;
+      }
       if (!errorToastShownRef.current) {
         setToast({
           type: "error",
-          title: isUnauthorized
-            ? "Please reconnect your wallet."
-            : "Couldn't load notifications.",
-          description: isUnauthorized
-            ? "Your session needs to be refreshed."
-            : "Please try again.",
+          title: "Couldn't load notifications.",
+          description: "Please try again.",
           details: getToastErrorDetails(queryError, message),
         });
         errorToastShownRef.current = true;
       }
-
-      if (isUnauthorized && !reauthTriggeredRef.current) {
-        requestAuth().catch((error) => {
-          console.error(
-            "Failed to re-authenticate after notifications error:",
-            error
-          );
-        });
-        reauthTriggeredRef.current = true;
-      }
-    }, [queryError, requestAuth, setToast]);
+    }, [queryError, requestAuth, setToast, refetch]);
 
     useEffect(() => {
       if (isSuccess) {

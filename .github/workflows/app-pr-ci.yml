@@ -419,6 +419,13 @@ jobs:
           PLAYWRIGHT_READONLY: "1"
         run: ./bin/6529 run test:e2e:critical-shell
 
+      - name: Run session recovery browser regression pack
+        if: matrix.lane == 'playwright-critical-shell'
+        env:
+          PLAYWRIGHT_OUTPUT_DIR: "test-results/playwright/session-recovery"
+          PLAYWRIGHT_HTML_REPORT_DIR: "playwright-report/session-recovery"
+        run: ./bin/6529 run test:e2e:session-recovery-sandbox
+
       - name: Upload app check artifacts
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4

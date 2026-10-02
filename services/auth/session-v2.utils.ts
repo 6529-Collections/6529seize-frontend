@@ -5,6 +5,8 @@ import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import { getWalletAddress, setAuthJwt } from "./auth.utils";
 import {
   getNativeRefreshToken,
+  getNativeRefreshRequestId,
+  persistRotatedNativeRefreshToken,
   removeNativeRefreshToken,
 } from "./native-refresh-token-storage";
 import {
@@ -23,6 +25,7 @@ import {
   getRateLimitCooldownMs,
   getSessionRefreshFailureCooldownMs,
   isRateLimitError,
+  SessionRefreshRateLimitError,
   type SessionRefreshFailureCooldownType,
 } from "./session-refresh-rate-limit.utils";
 import {
@@ -107,6 +110,8 @@ interface NativeConnectionShareSourceProof {
 }
 
 const sessionRefreshInFlight = new Map<string, SessionRefreshInFlight>();
+const persistedNativeRefreshResponses = new WeakSet<SessionRefreshResponse>();
+const refreshedResponses = new WeakSet<SessionRefreshResponse>();
 const sessionRefreshFailureCooldowns = new Map<
   string,
   SessionRefreshFailureCooldown
@@ -164,7 +169,10 @@ function settleSessionRefreshConsumer(
   key: string
 ): void {
   entry.activeConsumers = Math.max(0, entry.activeConsumers - 1);
+  // Native callers cannot cancel rotation before its credential is persisted.
+  // Web cookies are transport-owned and retain their existing lock cancellation.
   if (
+    key.startsWith("web:") &&
     entry.activeConsumers === 0 &&
     sessionRefreshInFlight.get(key) === entry
   ) {
@@ -324,7 +332,11 @@ async function executeSessionRefreshV2({
       return null;
     }
 
-    return await executeSessionRefreshRequest({
+    const refreshRequestId = await getNativeRefreshRequestId(
+      address,
+      nativeRefreshToken
+    );
+    const response = await executeSessionRefreshRequest({
       abortSignal,
       clientType,
       request: () =>
@@ -333,6 +345,7 @@ async function executeSessionRefreshV2({
             readonly client_type: RefreshTokenSessionClientType;
             readonly client_address: string;
             readonly native_refresh_token: string;
+            readonly refresh_request_id: string;
           },
           SessionNativeResponse
         >({
@@ -341,6 +354,7 @@ async function executeSessionRefreshV2({
             client_type: clientType,
             client_address: address,
             native_refresh_token: nativeRefreshToken,
+            refresh_request_id: refreshRequestId,
           },
           signal: abortSignal,
           credentials: getSessionCredentialsMode(),
@@ -348,6 +362,18 @@ async function executeSessionRefreshV2({
           includeWalletAuth: false,
         }),
     });
+    if (response) {
+      if (response.address.toLowerCase() !== address.toLowerCase()) {
+        throw new Error("Session refresh returned a different wallet");
+      }
+      await persistRotatedNativeRefreshToken(
+        address,
+        nativeRefreshToken,
+        response.native_refresh_token
+      );
+      persistedNativeRefreshResponses.add(response);
+    }
+    return response;
   }
 
   return await withCrossTabWebSessionRefreshLock({
@@ -399,6 +425,7 @@ async function executeSessionRefreshRequest<T extends SessionRefreshResponse>({
       abortSignal,
       task: request,
     });
+    refreshedResponses.add(response);
     recordSessionRefreshOutcome({
       clientType,
       outcome: "success",
@@ -446,6 +473,9 @@ export async function refreshSessionV2({
           ? "cooldown_used_empty"
           : "cooldown_used_rate_limit",
     });
+    if (cooldown.type === "rate_limit") {
+      throw new SessionRefreshRateLimitError(cooldown.expiresAtMs);
+    }
     return null;
   }
   if (cooldown?.type === "retry") {
@@ -518,7 +548,7 @@ export async function refreshSessionV2({
         rememberSessionRefreshFailure(
           key,
           "rate_limit",
-          getRateLimitCooldownMs()
+          getRateLimitCooldownMs(error)
         );
         return;
       }
@@ -553,10 +583,24 @@ export async function persistSessionResponse(
   response: SessionLoginResponse | SessionRefreshResponse,
   options: PersistSessionResponseOptions = {}
 ): Promise<boolean> {
-  const nativeRefreshTokenResult = await persistNativeRefreshTokenIfNeeded(
-    response,
-    options
-  );
+  if (
+    persistedNativeRefreshResponses.has(response) &&
+    response.client_type !== "web"
+  ) {
+    let currentToken: string | null;
+    try {
+      currentToken = await getNativeRefreshToken(response.address);
+    } catch {
+      // Storage availability is transient; retain the saved session and let
+      // callers report that access-token persistence could not finish.
+      return false;
+    }
+    if (currentToken !== response.native_refresh_token)
+      throw createAbortError();
+  }
+  const nativeRefreshTokenResult = persistedNativeRefreshResponses.has(response)
+    ? "not-required"
+    : await persistNativeRefreshTokenIfNeeded(response, options);
   if (nativeRefreshTokenResult === "unavailable") {
     return false;
   }
@@ -573,7 +617,9 @@ export async function persistSessionResponse(
       { authSessionVersion: "v2" }
     );
   } catch (error) {
-    await rollbackUnpersistedSession(response, didPersistNativeRefreshToken);
+    if (!refreshedResponses.has(response)) {
+      await rollbackUnpersistedSession(response, didPersistNativeRefreshToken);
+    }
     throw error;
   }
 
@@ -582,7 +628,9 @@ export async function persistSessionResponse(
     return true;
   }
 
-  await rollbackUnpersistedSession(response, didPersistNativeRefreshToken);
+  if (!refreshedResponses.has(response)) {
+    await rollbackUnpersistedSession(response, didPersistNativeRefreshToken);
+  }
   return false;
 }
 

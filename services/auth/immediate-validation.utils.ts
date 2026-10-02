@@ -166,9 +166,14 @@ const handleValidationError = async (
     callbacks.onShowSignModal(true);
   } else {
     callbacks.onLogError("validateJwt_general_error", error);
-    if (isConnected) {
-      callbacks.onShowSignModal(true);
-    }
+    // Transport, rate-limit and storage failures say nothing about whether the
+    // saved session is valid. Resume/online recovery can retry it later.
+    return createValidationResult(
+      false,
+      abortSignal.aborted,
+      false,
+      abortSignal.aborted ? "cancelled" : "failed"
+    );
   }
 
   return createValidationResult(
