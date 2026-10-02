@@ -15,6 +15,7 @@ import useLocalPreference from "@/hooks/useLocalPreference";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   getCompetitionRoute,
+  getCompetitionsRoute,
   isCompetitionPathname,
   getCompetitionIdFromPathname,
 } from "@/helpers/competition.helpers";
@@ -405,12 +406,22 @@ export const ContentTabProvider: React.FC<{
       const competitionTab = waveCompetitionTabs[tab];
       if (
         waveId &&
+        isCompetitionRoute &&
+        tab === MyStreamWaveTab.COMPETITIONS
+      ) {
+        router.push(getCompetitionsRoute(waveId), { scroll: false });
+        return true;
+      }
+      if (
+        waveId &&
         !competitionOnly &&
         competitionTab &&
         defaultCompetitionRef.current.enabled
       ) {
         const selectedId =
-          search.get("competition") ?? defaultCompetitionRef.current.id;
+          getCompetitionIdFromPathname(pathname) ??
+          search.get("competition") ??
+          defaultCompetitionRef.current.id;
         const target = selectedId
           ? `${getCompetitionRoute(waveId, selectedId)}?tab=${competitionTab}`
           : `${getWavePathRoute(waveId)}/competitions`;
@@ -425,7 +436,7 @@ export const ContentTabProvider: React.FC<{
         waveId &&
         !competitionOnly &&
         !isCompetitionRoute &&
-        search.has("tab")
+        (search.has("tab") || defaultCompetitionRef.current.enabled)
       ) {
         const params = new URLSearchParams(search.toString());
         params.delete("default");
@@ -440,7 +451,9 @@ export const ContentTabProvider: React.FC<{
   // Wrapper for setActiveContentTab that validates the tab
   const setActiveContentTab = useCallback(
     (tab: MyStreamWaveTab, options?: SetActiveContentTabOptions) => {
-      if (!availableTabs.includes(tab)) {
+      const isVisibleCollectionTab =
+        isCompetitionRoute && tab === MyStreamWaveTab.COMPETITIONS;
+      if (!availableTabs.includes(tab) && !isVisibleCollectionTab) {
         // Keep unavailable selections inside the current view's tabs.
         transientTabOverrideRef.current = null;
         setActiveTabInternal(
@@ -475,6 +488,7 @@ export const ContentTabProvider: React.FC<{
       navigateToTab,
       competitionOnly,
       initialTab,
+      isCompetitionRoute,
     ]
   );
 
@@ -494,12 +508,7 @@ export const ContentTabProvider: React.FC<{
   }
   const visibleTabs = useMemo(() => {
     if (!isCompetitionRoute) return availableTabs;
-    const tabs = availableTabs.filter(
-      (tab) =>
-        tab === MyStreamWaveTab.CHAT ||
-        tab === MyStreamWaveTab.COMPETITIONS ||
-        tab === MyStreamWaveTab.POLLS
-    );
+    const tabs = [...availableTabs];
     if (!tabs.includes(MyStreamWaveTab.COMPETITIONS)) {
       tabs.splice(
         tabs.indexOf(MyStreamWaveTab.CHAT) + 1,

@@ -11,12 +11,14 @@ const searchParamsGet = jest.fn();
 const onSelectCuration = jest.fn();
 let mockCurations: ApiWaveCuration[] = [];
 let mockWavePollSummary = { hasPolls: false, unansweredPolls: 0 };
+let mockPathname = "/waves/wave-1";
 
 jest.mock("@/hooks/competitions/useWaveCompetitionsTab", () => ({
   useWaveCompetitionsTab: () => ({ hasCompetitions: false, activeCount: 0 }),
 }));
 
 jest.mock("next/navigation", () => ({
+  usePathname: () => mockPathname,
   useSearchParams: () => ({
     get: searchParamsGet,
   }),
@@ -156,6 +158,7 @@ beforeEach(() => {
   mockApproveLabels.approvals = "Proposals";
   mockApproveLabels.approved = "Approved";
   searchParamsGet.mockReturnValue(null);
+  mockPathname = "/waves/wave-1";
   mockAvailableTabs = [MyStreamWaveTab.CHAT];
   mockWaveInfo = {
     isChatWave: false,
@@ -197,6 +200,19 @@ const setMobileScrollMetrics = (
 };
 
 describe("MyStreamWaveDesktopTabs", () => {
+  it("retains a directly selected competition while default data is unavailable", () => {
+    mockPathname = "/waves/wave-1/competitions/older";
+    mockWaveInfo.isChatWave = true;
+    searchParamsGet.mockImplementation((key) =>
+      key === "competition" ? "stale" : null
+    );
+    renderComponent();
+    expect(updateAvailableTabs).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        defaultCompetitionId: "older",
+      })
+    );
+  });
   it("keeps curations selectable in both desktop and mobile web tab strips", () => {
     mockCurations = [
       {

@@ -15,6 +15,27 @@ const entryDropId = (id: string) =>
     ? "00000000-0000-4000-8000-000000000532"
     : "00000000-0000-4000-8000-000000000533";
 const ROOT = `/waves/${WAVE}/competitions`;
+const competitionContent = (page: Page) =>
+  page.getByRole("tabpanel").filter({
+    has: page.getByRole("link", { name: "All competitions", exact: true }),
+  });
+const waveTabStrip = (page: Page) =>
+  page.getByRole("tablist").filter({
+    has: page.getByRole("tab", { name: "Chat", exact: true }),
+  });
+async function expectFamiliarWaveTabs(page: Page) {
+  for (const name of [
+    "Chat",
+    "Leaderboard",
+    "Winners",
+    "Outcome",
+    "My Votes",
+  ]) {
+    await expect(
+      waveTabStrip(page).getByRole("tab", { name, exact: true })
+    ).toBeVisible();
+  }
+}
 const pageResult = (data: unknown[]) => ({
   data,
   next_cursor: null,
@@ -363,7 +384,9 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await expect(
       page.getByText("Immutable alpha entry content", { exact: true })
     ).toBeVisible({ timeout: 30000 });
-    await page.getByRole("tab", { name: "My votes", exact: true }).click();
+    await competitionContent(page)
+      .getByRole("tab", { name: "My votes", exact: true })
+      .click();
     const voteInput = page.getByRole("spinbutton", { name: "Your vote" });
     await expect(
       page.getByRole("button", {
@@ -414,7 +437,10 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       page.getByRole("tab", { name: "Entries", exact: true })
     ).toHaveCount(0);
     await expect(
-      page.getByRole("tab", { name: "Leaderboard", exact: true })
+      competitionContent(page).getByRole("tab", {
+        name: "Leaderboard",
+        exact: true,
+      })
     ).toHaveAttribute("aria-selected", "true");
     await expect(
       page.getByRole("heading", {
@@ -454,7 +480,9 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       testInfo.outputPath("top-navigation.json"),
       JSON.stringify(topNavigation, null, 2)
     );
-    await page.getByRole("tab", { name: "My votes", exact: true }).click();
+    await competitionContent(page)
+      .getByRole("tab", { name: "My votes", exact: true })
+      .click();
     await expect(
       page.getByRole("spinbutton", { name: "Your vote" })
     ).toHaveValue("0");
@@ -473,7 +501,10 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await page.goBack();
     await expect(page).toHaveURL(/\/beta$/);
     await expect(
-      page.getByRole("tab", { name: "Leaderboard", exact: true })
+      competitionContent(page).getByRole("tab", {
+        name: "Leaderboard",
+        exact: true,
+      })
     ).toHaveAttribute("aria-selected", "true");
     await expect(
       page.getByRole("spinbutton", { name: "Your vote" })
@@ -481,7 +512,10 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await page.goForward();
     await expect(page).toHaveURL(/beta\?tab=votes$/);
     await expect(
-      page.getByRole("tab", { name: "My votes", exact: true })
+      competitionContent(page).getByRole("tab", {
+        name: "My votes",
+        exact: true,
+      })
     ).toHaveAttribute("aria-selected", "true");
     await expect(
       page.getByRole("spinbutton", { name: "Your vote" })
@@ -566,8 +600,15 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await expect(
       page.getByLabel("Competition name", { exact: true })
     ).toHaveValue("Native draft");
+    await expect(competitionContent(page)).toBeVisible();
     await expect(
-      page.getByRole("tab", { name: "Leaderboard", exact: true })
+      waveTabStrip(page).getByRole("tab", { name: "Leaderboard", exact: true })
+    ).toBeVisible();
+    await expect(
+      competitionContent(page).getByRole("tab", {
+        name: "Leaderboard",
+        exact: true,
+      })
     ).toHaveCount(0);
     await expectNoHorizontalOverflow(page);
   });
@@ -711,11 +752,19 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await expect(
       page.getByRole("heading", { name: "Parallel Alpha", level: 1 })
     ).toBeVisible();
-    await page.getByRole("tab", { name: "Winners", exact: true }).click();
+    await expectFamiliarWaveTabs(page);
+    await waveTabStrip(page)
+      .getByRole("tab", { name: "Winners", exact: true })
+      .click();
     await expect(page).toHaveURL(/alpha\?tab=decisions$/);
-    await page.getByRole("tab", { name: "Outcomes", exact: true }).click();
+    await expectFamiliarWaveTabs(page);
+    await competitionContent(page)
+      .getByRole("tab", { name: "Outcomes", exact: true })
+      .click();
     await expect(page).toHaveURL(/alpha\?tab=outcomes$/);
-    await page.getByRole("tab", { name: "My votes", exact: true }).click();
+    await competitionContent(page)
+      .getByRole("tab", { name: "My votes", exact: true })
+      .click();
     await expect(page).toHaveURL(/alpha\?tab=votes$/);
     sandbox.setDefault("beta");
     await page.reload();
@@ -723,12 +772,51 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       page.getByRole("heading", { name: "Parallel Alpha", level: 1 })
     ).toBeVisible();
     await expect(
-      page.getByRole("tab", { name: "My votes", exact: true })
+      competitionContent(page).getByRole("tab", {
+        name: "My votes",
+        exact: true,
+      })
     ).toHaveAttribute("aria-selected", "true");
+    await expectFamiliarWaveTabs(page);
     await page.goBack();
     await expect(page).toHaveURL(/alpha\?tab=outcomes$/);
+    await expect(
+      competitionContent(page).getByRole("tab", {
+        name: "Outcomes",
+        exact: true,
+      })
+    ).toHaveAttribute("aria-selected", "true");
+    await expectFamiliarWaveTabs(page);
     await page.goForward();
     await expect(page).toHaveURL(/alpha\?tab=votes$/);
+    await expect(
+      competitionContent(page).getByRole("tab", {
+        name: "My votes",
+        exact: true,
+      })
+    ).toHaveAttribute("aria-selected", "true");
+    await expectFamiliarWaveTabs(page);
+    await waveTabStrip(page)
+      .getByRole("tab", { name: "Winners", exact: true })
+      .click();
+    await expect(page).toHaveURL(/alpha\?tab=decisions$/);
+    await expect(
+      competitionContent(page).getByRole("tab", {
+        name: "Winners",
+        exact: true,
+      })
+    ).toHaveAttribute("aria-selected", "true");
+    await waveTabStrip(page)
+      .getByRole("tab", { name: /^Competitions(?:\s+\d+\+?)?$/ })
+      .click();
+    await expect(page).toHaveURL(ROOT, { timeout: 30000 });
+    await expectFamiliarWaveTabs(page);
+    await page.getByRole("link", { name: /Parallel Alpha/ }).click();
+    await expect(page).toHaveURL(`${ROOT}/alpha`);
+    await expect(
+      page.getByRole("heading", { name: "Parallel Alpha", level: 1 })
+    ).toBeVisible();
+    await expectFamiliarWaveTabs(page);
     await expectNoHorizontalOverflow(page);
     await page.screenshot({
       path: testInfo.outputPath("default-competition-navigation.png"),

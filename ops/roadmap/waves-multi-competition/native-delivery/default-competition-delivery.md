@@ -30,6 +30,11 @@ remain available. Reload and browser history preserve explicit competition and
 view. Legacy-primary reads, execution, Main Stage capabilities and per-competition
 credit stay separate from navigation selection.
 
+The familiar wave tab strip remains available on competition detail and
+collection routes. Its competition views retain an explicitly selected ID even
+when the current default changes; Competitions opens the collection. Explicit
+Chat intent is recorded even from a bare wave URL.
+
 ## Validation
 
 - Backend: full local suite passed (675 suites, 8,440 tests), plus 50 review
@@ -58,6 +63,13 @@ credit stay separate from navigation selection.
   competition-tab URLs now retain view to satisfy reload/Back/Forward requirements.
 - Product docs and canonical/generated help corpus describe the implemented UX.
   Roadmap status remains unmerged and undeployed until a separate release.
+- Stable-tab follow-up: 79 focused tests cover route transitions, direct detail
+  reload without default data, explicit competition precedence and bare-URL Chat
+  intent and a visible collection tab before hub availability loads. The
+  desktop/mobile pack also checks familiar tabs across inner-view
+  changes, reload, Back/Forward and collection navigation. Existing inner-tab
+  selectors are scoped to the competition panel because familiar labels now
+  remain available in the wave header as requested.
 
 ## Future zero-downtime release
 

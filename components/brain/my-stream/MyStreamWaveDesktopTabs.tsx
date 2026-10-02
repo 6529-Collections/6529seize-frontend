@@ -19,7 +19,8 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { TabToggle } from "@/components/common/TabToggle";
-import { useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
+import { getCompetitionIdFromPathname } from "@/helpers/competition.helpers";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { useWaveCurationTabs } from "@/hooks/waves/useWaveCurationTabs";
 import { useWaveCurationReorderMutation } from "@/hooks/waves/useWaveCurationReorderMutation";
@@ -333,6 +334,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
   competitionOnly = false,
 }) => {
   const searchParams = useSearchParams();
+  const pathname = usePathname();
   const { availableTabs, updateAvailableTabs } = useContentTab();
   const {
     hasCompetitions,
@@ -459,7 +461,9 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
       hasPolls,
       hasCompetitions,
       defaultCompetitionId:
-        searchParams.get("competition") ?? defaultCompetitionId,
+        getCompetitionIdFromPathname(pathname) ??
+        searchParams.get("competition") ??
+        defaultCompetitionId,
       defaultSelectionEnabled,
       hasAuthenticatedProfile,
       isCurationWave,
@@ -484,6 +488,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
     votingState,
     firstDecisionDone,
     searchParams,
+    pathname,
     updateAvailableTabs,
   ]);
 
