@@ -297,119 +297,6 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     await expectNoUnsafeSandboxMutations(baseURL);
   });
 
-  for (const key of ["Enter", "Space"]) {
-    test(`operates nested quote toggles with ${key} without opening the quoted post`, async ({
-      baseURL,
-      page,
-    }) => {
-      const parentDropId = "00000000-0000-4000-8000-000000000547";
-      const quotedDropId = "00000000-0000-4000-8000-000000000548";
-      const quotedWaveId = "00000000-0000-4000-8000-000000000549";
-      let quotedDrop: Record<string, unknown> | undefined;
-
-      await page.route(
-        `**/api/v2/waves/${SANDBOX_WAVE_ID}/drops**`,
-        async (route) => {
-          const response = await route.fetch();
-          const payload = (await response.json()) as {
-            drops: Array<Record<string, unknown>>;
-            wave: Record<string, unknown>;
-          };
-          const sourceDrop = payload.drops[0];
-          if (!sourceDrop) {
-            throw new Error("Expected one source drop for the quote fixture.");
-          }
-          quotedDrop = {
-            ...sourceDrop,
-            id: quotedDropId,
-            serial_no: 42,
-            content: LONG_DROP_CONTENT,
-            parts_count: 1,
-            wave: { ...payload.wave, id: quotedWaveId },
-          };
-          await route.fulfill({
-            response,
-            json: {
-              ...payload,
-              drops: [
-                {
-                  ...sourceDrop,
-                  id: parentDropId,
-                  serial_no: 2,
-                  content: "Parent quote keyboard fixture",
-                  parts_count: 2,
-                },
-              ],
-            },
-          });
-        }
-      );
-      await page.route(
-        `**/api/v2/drops/${parentDropId}/parts/2`,
-        async (route) => {
-          await route.fulfill({
-            json: {
-              part_no: 2,
-              content: "Reply containing a long quote",
-              media: [],
-              attachments: [],
-              quoted_drop: { drop_id: quotedDropId, drop_part_id: 1 },
-            },
-          });
-        }
-      );
-      await page.route("**/api/v2/drops?**", async (route) => {
-        const ids = new URL(route.request().url()).searchParams.get("ids");
-        if (ids !== quotedDropId) {
-          await route.fallback();
-          return;
-        }
-        if (!quotedDrop) {
-          throw new Error("Expected the quoted drop fixture to be ready.");
-        }
-        await route.fulfill({
-          json: { data: [quotedDrop], page: 1, next: false },
-        });
-      });
-      await gotoSandboxWave(page);
-      await page.getByRole("button", { name: "Next part" }).click();
-
-      const quoteCard = page.getByRole("button", {
-        name: /Long timeline detail/,
-      });
-      const showMore = quoteCard.getByRole("button", {
-        name: "Show more",
-        exact: true,
-      });
-      await expect(showMore).toBeVisible();
-      await showMore.focus();
-      await showMore.press(key);
-
-      const showLess = quoteCard.getByRole("button", {
-        name: "Show less",
-        exact: true,
-      });
-      await expect(showLess).toHaveAttribute("aria-expanded", "true");
-      await expect(showLess).toBeFocused();
-      await expect(quoteCard).toContainText(LONG_DROP_END_MARKER);
-      await expect(page).toHaveURL(new RegExp(`/waves/${SANDBOX_WAVE_ID}$`));
-      await showLess.press(key);
-
-      await expect(showMore).toHaveAttribute("aria-expanded", "false");
-      await expect(showMore).toBeFocused();
-      await expect(quoteCard).not.toContainText(LONG_DROP_END_MARKER);
-      await expect(page).toHaveURL(new RegExp(`/waves/${SANDBOX_WAVE_ID}$`));
-      await expectNoHorizontalOverflow(page);
-      await expectNoUnsafeSandboxMutations(baseURL);
-
-      await quoteCard.focus();
-      await quoteCard.press(key);
-      await expect(page).toHaveURL(
-        new RegExp(`/waves/${quotedWaveId}\\?serialNo=42$`)
-      );
-    });
-  }
-
   test("restores an in-progress chat draft across a full reload", async ({
     baseURL,
     page,
@@ -946,6 +833,120 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     await resetSandboxRequests(baseURL);
     await expectNoUnsafeSandboxMutations(baseURL);
   });
+
+  for (const key of ["Enter", "Space"]) {
+    test(`operates nested quote toggles with ${key} without opening the quoted post`, async ({
+      baseURL,
+      page,
+    }) => {
+      const parentDropId = "00000000-0000-4000-8000-000000000547";
+      const quotedDropId = "00000000-0000-4000-8000-000000000548";
+      const quotedWaveId = "00000000-0000-4000-8000-000000000549";
+
+      // Read the synthetic fixture before navigation so background route
+      // handlers never parse an APIResponse after the test context closes.
+      const fixtureResponse = await page.request.get(
+        `${getSandboxApiOrigin(baseURL)}/api/v2/waves/${SANDBOX_WAVE_ID}/drops`
+      );
+      expect(fixtureResponse.ok()).toBe(true);
+      const payload = (await fixtureResponse.json()) as {
+        drops: Array<Record<string, unknown>>;
+        wave: Record<string, unknown>;
+      };
+      const sourceDrop = payload.drops[0];
+      if (!sourceDrop) {
+        throw new Error("Expected one source drop for the quote fixture.");
+      }
+      const quotedDrop = {
+        ...sourceDrop,
+        id: quotedDropId,
+        serial_no: 42,
+        content: LONG_DROP_CONTENT,
+        parts_count: 1,
+        wave: { ...payload.wave, id: quotedWaveId },
+      };
+
+      await page.route(
+        `**/api/v2/waves/${SANDBOX_WAVE_ID}/drops**`,
+        async (route) => {
+          await route.fulfill({
+            json: {
+              ...payload,
+              drops: [
+                {
+                  ...sourceDrop,
+                  id: parentDropId,
+                  serial_no: 2,
+                  content: "Parent quote keyboard fixture",
+                  parts_count: 2,
+                },
+              ],
+            },
+          });
+        }
+      );
+      await page.route(
+        `**/api/v2/drops/${parentDropId}/parts/2`,
+        async (route) => {
+          await route.fulfill({
+            json: {
+              part_no: 2,
+              content: "Reply containing a long quote",
+              media: [],
+              attachments: [],
+              quoted_drop: { drop_id: quotedDropId, drop_part_id: 1 },
+            },
+          });
+        }
+      );
+      await page.route("**/api/v2/drops?**", async (route) => {
+        const ids = new URL(route.request().url()).searchParams.get("ids");
+        if (ids !== quotedDropId) {
+          await route.fallback();
+          return;
+        }
+        await route.fulfill({
+          json: { data: [quotedDrop], page: 1, next: false },
+        });
+      });
+      await gotoSandboxWave(page);
+      await page.getByRole("button", { name: "Next part" }).click();
+
+      const quoteCard = page.getByRole("button", {
+        name: /Long timeline detail/,
+      });
+      const showMore = quoteCard.getByRole("button", {
+        name: "Show more",
+        exact: true,
+      });
+      await expect(showMore).toBeVisible();
+      await showMore.focus();
+      await showMore.press(key);
+
+      const showLess = quoteCard.getByRole("button", {
+        name: "Show less",
+        exact: true,
+      });
+      await expect(showLess).toHaveAttribute("aria-expanded", "true");
+      await expect(showLess).toBeFocused();
+      await expect(quoteCard).toContainText(LONG_DROP_END_MARKER);
+      await expect(page).toHaveURL(new RegExp(`/waves/${SANDBOX_WAVE_ID}$`));
+      await showLess.press(key);
+
+      await expect(showMore).toHaveAttribute("aria-expanded", "false");
+      await expect(showMore).toBeFocused();
+      await expect(quoteCard).not.toContainText(LONG_DROP_END_MARKER);
+      await expect(page).toHaveURL(new RegExp(`/waves/${SANDBOX_WAVE_ID}$`));
+      await expectNoHorizontalOverflow(page);
+      await expectNoUnsafeSandboxMutations(baseURL);
+
+      await quoteCard.focus();
+      await quoteCard.press(key);
+      await expect(page).toHaveURL(
+        new RegExp(`/waves/${quotedWaveId}\\?serialNo=42$`)
+      );
+    });
+  }
 
   test("rejects non-exact chat drop mutation bodies", async ({ baseURL }) => {
     await resetSandboxRequests(baseURL);
