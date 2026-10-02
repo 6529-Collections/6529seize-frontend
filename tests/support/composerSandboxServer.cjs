@@ -940,6 +940,8 @@ function notificationResponse(searchParams) {
 function corsHeaders() {
   return {
     "Access-Control-Allow-Origin": frontendBaseUrl,
+    "Access-Control-Allow-Credentials": "true",
+    "Access-Control-Expose-Headers": "Retry-After",
     "Access-Control-Allow-Headers":
       "authorization, content-type, x-6529-auth, x-api-key",
     "Access-Control-Allow-Methods":

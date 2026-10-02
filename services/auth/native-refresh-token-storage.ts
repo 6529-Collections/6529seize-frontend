@@ -1,15 +1,50 @@
+import { TokenRefreshCancelledError } from "@/errors/authentication";
 import { Capacitor } from "@capacitor/core";
 import { SecureStoragePlugin } from "capacitor-secure-storage-plugin";
 
 const NATIVE_REFRESH_TOKEN_KEY_PREFIX = "6529-native-refresh-token";
 
-const inMemoryNativeRefreshTokens = new Map<string, string>();
+const inMemoryNativeRefreshTokens = new Map<string, string | null>();
+const storageOperations = new Map<string, Promise<unknown>>();
+
+function serializeStorage<T>(
+  address: string,
+  task: () => Promise<T>
+): Promise<T> {
+  const key = address.toLowerCase();
+  const previous = storageOperations.get(key) ?? Promise.resolve();
+  const pending = previous.catch(() => undefined).then(task);
+  storageOperations.set(key, pending);
+  void pending
+    .finally(() => {
+      if (storageOperations.get(key) === pending) storageOperations.delete(key);
+    })
+    .catch(() => undefined);
+  return pending;
+}
+
+function isMissingKey(error: unknown): boolean {
+  const message = error instanceof Error ? error.message : String(error);
+  return message === "Item with given key does not exist";
+}
+
+async function readStoredValue(key: string): Promise<string | null> {
+  try {
+    const result = await SecureStoragePlugin.get({ key });
+    return typeof result.value === "string" && result.value.trim()
+      ? result.value
+      : null;
+  } catch (error) {
+    if (isMissingKey(error)) return null;
+    throw error;
+  }
+}
 
 export function isNativeSecureStorageAvailable(): boolean {
   return Capacitor.isNativePlatform();
 }
 
-export async function setNativeRefreshToken({
+async function writeNativeRefreshToken({
   address,
   refreshToken,
 }: {
@@ -24,40 +59,91 @@ export async function setNativeRefreshToken({
   inMemoryNativeRefreshTokens.set(key, refreshToken);
 }
 
-export async function getNativeRefreshToken(
-  address: string
-): Promise<string | null> {
+async function readNativeRefreshToken(address: string): Promise<string | null> {
   if (!isNativeSecureStorageAvailable()) {
     return null;
   }
   const key = getNativeRefreshTokenKey(address);
   const cached = inMemoryNativeRefreshTokens.get(key);
-  if (cached) {
+  if (cached !== undefined) {
     return cached;
   }
-  try {
-    const result = await SecureStoragePlugin.get({ key });
-    if (typeof result.value !== "string" || result.value.trim().length === 0) {
-      return null;
-    }
-    inMemoryNativeRefreshTokens.set(key, result.value);
-    return result.value;
-  } catch {
-    return null;
-  }
+  const value = await readStoredValue(key);
+  if (value) inMemoryNativeRefreshTokens.set(key, value);
+  return value;
 }
 
-export async function removeNativeRefreshToken(address: string): Promise<void> {
-  const key = getNativeRefreshTokenKey(address);
-  inMemoryNativeRefreshTokens.delete(key);
-  if (!isNativeSecureStorageAvailable()) {
-    return;
-  }
-  try {
-    await SecureStoragePlugin.remove({ key });
-  } catch {
-    // Missing secure-storage keys are treated as already removed.
-  }
+export function setNativeRefreshToken(params: {
+  readonly address: string;
+  readonly refreshToken: string;
+}): Promise<void> {
+  return serializeStorage(params.address, () =>
+    writeNativeRefreshToken(params)
+  );
+}
+
+export function getNativeRefreshToken(address: string): Promise<string | null> {
+  return serializeStorage(address, () => readNativeRefreshToken(address));
+}
+
+export function getNativeRefreshRequestId(
+  address: string,
+  refreshToken: string
+): Promise<string> {
+  return serializeStorage(address, async () => {
+    if ((await readNativeRefreshToken(address)) !== refreshToken) {
+      throw new TokenRefreshCancelledError();
+    }
+    const key = `${getNativeRefreshTokenKey(address)}:pending-refresh`;
+    const stored = await readStoredValue(key);
+    if (stored) {
+      const attempt: unknown = JSON.parse(stored);
+      if (
+        typeof attempt === "object" &&
+        attempt !== null &&
+        "token" in attempt &&
+        attempt.token === refreshToken &&
+        "id" in attempt &&
+        typeof attempt.id === "string"
+      )
+        return attempt.id;
+    }
+    const id = crypto.randomUUID();
+    // Persist before sending: app termination must not lose the retry proof.
+    await SecureStoragePlugin.set({
+      key,
+      value: JSON.stringify({ token: refreshToken, id }),
+    });
+    return id;
+  });
+}
+
+export function persistRotatedNativeRefreshToken(
+  address: string,
+  previousToken: string,
+  refreshToken: string
+): Promise<void> {
+  return serializeStorage(address, async () => {
+    if ((await readNativeRefreshToken(address)) !== previousToken) {
+      throw new TokenRefreshCancelledError();
+    }
+    await writeNativeRefreshToken({ address, refreshToken });
+  });
+}
+
+export function removeNativeRefreshToken(address: string): Promise<void> {
+  return serializeStorage(address, async () => {
+    const key = getNativeRefreshTokenKey(address);
+    inMemoryNativeRefreshTokens.set(key, null);
+    if (!isNativeSecureStorageAvailable()) return;
+    for (const storedKey of [key, `${key}:pending-refresh`]) {
+      try {
+        await SecureStoragePlugin.remove({ key: storedKey });
+      } catch (error) {
+        if (!isMissingKey(error)) throw error;
+      }
+    }
+  });
 }
 
 function getNativeRefreshTokenKey(address: string): string {

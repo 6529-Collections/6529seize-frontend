@@ -81,6 +81,26 @@ The active `client_address` keeps multi-account web refresh/logout bound to the
 address-scoped cookie for the selected profile instead of whichever account last
 wrote the compatibility cookie.
 
+### Cold start and foreground recovery
+
+The auth client installs one shared session-readiness handler before component
+effects run. Default active-account API requests await renewal when the access
+token has expired, and retry an authentication rejection once with renewed auth.
+Explicit credentials for another account and auth endpoints bypass this handler.
+Account or role changes cancel pending work rather than replaying it under a
+different identity. WebSocket connection attempts also renew expired credentials
+before connecting and discard recovery after disconnect/unmount.
+
+`useSessionRecovery` checks on startup, browser focus/visibility/online, native
+`appStateChange`, and every 30 seconds while visible. It renews within 60 seconds
+of access-token expiry. A usable access token continues serving requests during
+proactive renewal. Session requests share in-flight work. `Retry-After` (or its
+JSON fallback) controls one automatic retry; a rate-limit cooldown remains a
+transient error. Network, storage, timeout and backend failures preserve saved
+credentials and do not open a signature prompt. Actual rejected/expired sessions
+still require reconnection. Offline time and server outages can delay recovery;
+this does not promise permanent login or zero network latency.
+
 ### Frontend Refresh Telemetry
 
 The frontend records privacy-safe Sentry logger events named
@@ -141,7 +161,23 @@ The native response includes:
 - `native_refresh_token`
 - `refresh_token_expires_at`
 
-Native refresh sends `client_type: "native"`, `client_address`, and the current `native_refresh_token`. The backend rotates the refresh token on every refresh, so secure storage must be updated with the newest token before the old token is discarded.
+Native refresh sends `client_type: "native"`, `client_address`, the current
+`native_refresh_token`, and a UUID `refresh_request_id`. The client durably stores
+the token/request-ID pair in secure storage before sending, and reuses that pair
+if a response is lost, including after app termination. The backend can recover
+only the immediate successor without extending expiry again. Once that
+successor rotates, the older pair stops working. The frontend serializes native
+storage operations and compares the previous token before persisting rotation;
+logout or a newer login prevents stale responses from restoring old credentials.
+UI cancellation does not abort native rotation before persistence. The shared
+request still times out, and the durable pair permits a later retry. Storage
+errors other than a confirmed missing key remain transient.
+
+Deploy the compatible backend `api` change first. There is no schema migration.
+Keep support for `refresh_request_id` when rolling the frontend back or forward;
+old clients continue working without the optional field. Native secure-storage
+values retain the previous raw-token format, with the retry journal in a separate
+key.
 
 Native logout sends the current native refresh token and `all_sessions`.
 
