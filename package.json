@@ -210,7 +210,7 @@
     "@types/lodash": "4.17.24",
     "@wagmi/core": "2.22.1",
     "aws-rum-web": "1.25.0",
-    "axios": "1.18.0",
+    "axios": "1.20.0",
     "capacitor-secure-storage-plugin": "0.13.0",
     "chart.js": "4.5.1",
     "cheerio": "1.2.0",
