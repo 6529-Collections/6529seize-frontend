@@ -97,14 +97,23 @@ export function getNativeRefreshRequestId(
     const key = `${getNativeRefreshTokenKey(address)}:pending-refresh`;
     const stored = await readStoredValue(key);
     if (stored) {
-      const attempt: unknown = JSON.parse(stored);
+      let attempt: unknown;
+      try {
+        attempt = JSON.parse(stored) as unknown;
+      } catch {
+        // A damaged journal must not permanently prevent fresh attempts.
+        attempt = null;
+      }
       if (
         typeof attempt === "object" &&
         attempt !== null &&
         "token" in attempt &&
         attempt.token === refreshToken &&
         "id" in attempt &&
-        typeof attempt.id === "string"
+        typeof attempt.id === "string" &&
+        /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+          attempt.id
+        )
       )
         return attempt.id;
     }

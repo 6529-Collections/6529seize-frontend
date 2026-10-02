@@ -22,6 +22,21 @@ import {
 } from "./session-refresh-rate-limit.utils";
 
 const pendingSessions = new Map<string, Promise<string>>();
+const PROACTIVE_SESSION_MAX_AGE_SECONDS = 60 * 60;
+
+function needsProactiveRefresh(
+  jwt: string | null,
+  nowSeconds: number
+): boolean {
+  if (!jwt) return true;
+  const { iat } = jwtDecode<{ iat?: number }>(jwt);
+  // Access tokens can outlive refresh sessions. Keep active sessions renewed
+  // without making protected requests wait while their JWT is still usable.
+  return (
+    typeof iat === "number" &&
+    nowSeconds - iat >= PROACTIVE_SESSION_MAX_AGE_SECONDS
+  );
+}
 
 export class SessionRecoveryError extends Error {
   readonly status: number;
@@ -118,7 +133,12 @@ export async function ensureActiveSession({
   const address = getWalletAddress()?.toLowerCase();
   const jwt = getAuthJwt();
   if (!address || !hasActiveSessionV2Auth({ address })) return jwt;
-  if (!force && isAuthJwtUsable(jwt, Date.now() / 1000 + renewBeforeSeconds))
+  const nowSeconds = Date.now() / 1000;
+  if (
+    !force &&
+    isAuthJwtUsable(jwt, nowSeconds + renewBeforeSeconds) &&
+    (renewBeforeSeconds === 0 || !needsProactiveRefresh(jwt, nowSeconds))
+  )
     return jwt;
   const key = JSON.stringify([address, jwt]);
   let pending = pendingSessions.get(key);

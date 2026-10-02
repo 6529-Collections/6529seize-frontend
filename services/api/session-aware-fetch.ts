@@ -50,7 +50,12 @@ export async function sessionAwareFetch(
   };
   await updateAuth(false);
   const response = await fetch(url, { ...init, headers });
-  if (response.status !== 401) return response;
+  const canReplayBody =
+    init.body === undefined ||
+    init.body === null ||
+    typeof init.body === "string" ||
+    init.body instanceof URLSearchParams;
+  if (response.status !== 401 || !canReplayBody) return response;
   if (!isCurrentAccount() || init.signal?.aborted) throw createAbortError();
   // A different caller may already have renewed the credential rejected here.
   const currentJwt = getAuthJwt();

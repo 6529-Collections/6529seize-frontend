@@ -93,8 +93,12 @@ before connecting and discard recovery after disconnect/unmount.
 
 `useSessionRecovery` checks on startup, browser focus/visibility/online, native
 `appStateChange`, and every 30 seconds while visible. It renews within 60 seconds
-of access-token expiry. A usable access token continues serving requests during
-proactive renewal. Session requests share in-flight work. `Retry-After` (or its
+of access-token expiry or once its issue time is at least one hour old. The
+hourly check keeps active refresh sessions alive even when the configured access
+token outlives the refresh token. Auth-persistence events only renew unusable
+tokens, avoiding a feedback loop for newly issued short-lived tokens. A usable
+access token continues serving requests during proactive renewal. Session
+requests share in-flight work. `Retry-After` (or its
 JSON fallback) controls one automatic retry; a rate-limit cooldown remains a
 transient error. Network, storage, timeout and backend failures preserve saved
 credentials and do not open a signature prompt. Actual rejected/expired sessions

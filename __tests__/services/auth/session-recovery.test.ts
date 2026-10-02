@@ -63,8 +63,8 @@ jest.mock("capacitor-secure-storage-plugin", () => ({
   SecureStoragePlugin: { get: jest.fn(), set: jest.fn(), remove: jest.fn() },
 }));
 
-const makeJwt = (expiresIn: number) =>
-  `e30.${btoa(JSON.stringify({ sub: mockAddress, exp: Date.now() / 1000 + expiresIn }))}.signature`;
+const makeJwt = (expiresIn: number, issuedAgo = 0) =>
+  `e30.${btoa(JSON.stringify({ sub: mockAddress, exp: Date.now() / 1000 + expiresIn, iat: Date.now() / 1000 - issuedAgo }))}.signature`;
 const response = (native = false) => ({
   address: mockAddress,
   role: null,
@@ -109,6 +109,26 @@ beforeEach(() => {
 afterEach(() => {
   __resetSessionRefreshStateForTests();
   jest.useRealTimers();
+});
+
+it("renews an old but usable JWT proactively without blocking protected requests", async () => {
+  mockJwt = makeJwt(30 * 86400, 3601);
+  const savedJwt = mockJwt;
+  await sessionAwareFetch(
+    "https://api.test/api/notifications",
+    { method: "GET" },
+    true
+  );
+  expect(commonApiPost).not.toHaveBeenCalled();
+  expect(
+    new Headers(jest.mocked(fetch).mock.calls[0]![1]?.headers).get(
+      "Authorization"
+    )
+  ).toBe(`Bearer ${savedJwt}`);
+  jest.mocked(commonApiPost).mockResolvedValueOnce(response());
+  await ensureActiveSession({ renewBeforeSeconds: 60 });
+  expect(commonApiPost).toHaveBeenCalledTimes(1);
+  expect(mockJwt).not.toBe(savedJwt);
 });
 
 it("does not start another refresh when persistence announces a short-lived access token", async () => {
@@ -192,6 +212,44 @@ it("preserves native authentication when the secure vault is temporarily unavail
   expect(mockJwt).toBe(savedJwt);
   expect(mockSetAuth).not.toHaveBeenCalled();
   expect(SecureStoragePlugin.remove).not.toHaveBeenCalled();
+  expect(commonApiPost).not.toHaveBeenCalled();
+});
+
+it.each([
+  "{broken",
+  JSON.stringify({ token: "a".repeat(128), id: "invalid-id" }),
+])(
+  "repairs a corrupt native retry journal without discarding the saved token",
+  async (stored) => {
+    jest.mocked(Capacitor.isNativePlatform).mockReturnValue(true);
+    const token = "a".repeat(128);
+    await setNativeRefreshToken({ address: mockAddress, refreshToken: token });
+    jest
+      .mocked(SecureStoragePlugin.get)
+      .mockResolvedValueOnce({ value: stored });
+    const requestId = await getNativeRefreshRequestId(mockAddress, token);
+    expect(requestId).toMatch(/^[0-9a-f-]{36}$/);
+    expect(await getNativeRefreshRequestId(mockAddress, token)).toBe(requestId);
+    expect(await getNativeRefreshToken(mockAddress)).toBe(token);
+    expect(SecureStoragePlugin.remove).not.toHaveBeenCalled();
+  }
+);
+
+it("returns a 401 without replaying a body outside the supported replayable types", async () => {
+  mockJwt = makeJwt(3600);
+  const rejected = { ok: false, status: 401 };
+  jest.mocked(fetch).mockResolvedValueOnce(rejected as Response);
+  await expect(
+    sessionAwareFetch(
+      "https://api.test/api/upload",
+      {
+        method: "POST",
+        body: new Blob(["payload"]),
+      },
+      true
+    )
+  ).resolves.toBe(rejected);
+  expect(fetch).toHaveBeenCalledTimes(1);
   expect(commonApiPost).not.toHaveBeenCalled();
 });
 
