@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useRef } from "react";
+import React, { useCallback, useMemo, useRef } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { BrainView } from "./brainMobileViews";
 import type { ApiWave } from "@/generated/models/ApiWave";
@@ -128,17 +128,18 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
   const searchParams = useSearchParams();
   const { flat, nativeCompetition } = useCompetitionNavigation();
   const locale = useBrowserLocale();
-  const nativeOutcomesVisible = nativeCompetition
-    ? getWaveOutcomeVisibilityFromMetadata(
-        (nativeCompetition.presentation ?? []).map((item, id) => ({
-          ...item,
-          id,
-        }))
-      )
-    : outcomesVisible;
-  const approveLabels = getApproveWaveTabLabelsFromMetadata(
-    (nativeCompetition?.presentation ?? []).map((item, id) => ({ ...item, id }))
+  const nativePresentation = useMemo(
+    () =>
+      (nativeCompetition?.presentation ?? []).map((item, id) => ({
+        ...item,
+        id,
+      })),
+    [nativeCompetition?.presentation]
   );
+  const nativeOutcomesVisible = nativeCompetition
+    ? getWaveOutcomeVisibilityFromMetadata(nativePresentation)
+    : outcomesVisible;
+  const approveLabels = getApproveWaveTabLabelsFromMetadata(nativePresentation);
   const nativeTabLabel = (tab: (typeof COMPETITION_TABS)[number]) => {
     if (nativeCompetition?.type === ApiCompetitionType.Approve) {
       if (tab === "leaderboard") return approveLabels.approvals;
@@ -557,7 +558,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
                               effectiveActiveView === BrainView.MY_VOTES,
                           })}
                         >
-                          My Votes
+                          {t(locale, "wave.navigation.myVotes")}
                         </span>
                       </button>
                     </>
@@ -580,7 +581,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
                           isActive: effectiveActiveView === BrainView.OUTCOME,
                         })}
                       >
-                        Outcome
+                        {t(locale, "wave.navigation.outcome")}
                       </span>
                     </button>
                   )}
@@ -602,7 +603,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
                           isActive: effectiveActiveView === BrainView.FAQ,
                         })}
                       >
-                        FAQ
+                        {t(locale, "wave.navigation.faq")}
                       </span>
                     </button>
                   )}

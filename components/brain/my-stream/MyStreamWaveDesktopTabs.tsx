@@ -305,15 +305,16 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
   } = useWave(wave);
   const waveApproveLabels = useApproveWaveCustomTabLabels(wave);
   const waveOutcomesVisible = useWaveOutcomeVisibility(wave);
+  const nativePresentation = useMemo(
+    () =>
+      (nativeDefault?.presentation ?? []).map((item, id) => ({ ...item, id })),
+    [nativeDefault?.presentation]
+  );
   const approveLabels = nativeDefault
-    ? getApproveWaveTabLabelsFromMetadata(
-        (nativeDefault.presentation ?? []).map((item, id) => ({ ...item, id }))
-      )
+    ? getApproveWaveTabLabelsFromMetadata(nativePresentation)
     : waveApproveLabels;
   const outcomesVisible = nativeDefault
-    ? getWaveOutcomeVisibilityFromMetadata(
-        (nativeDefault.presentation ?? []).map((item, id) => ({ ...item, id }))
-      )
+    ? getWaveOutcomeVisibilityFromMetadata(nativePresentation)
     : waveOutcomesVisible;
   const selectedIsApprove = nativeDefault
     ? nativeDefault.type === ApiCompetitionType.Approve

@@ -777,7 +777,8 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
 
       <div
         className="tw-relative tw-min-h-0 tw-min-w-0 tw-flex-grow tw-overflow-hidden"
-        role="tabpanel"
+        role={isApp && flat ? "region" : "tabpanel"}
+        aria-label={isApp && flat ? wave.name : undefined}
         id={
           activeCurationId
             ? `my-stream-wave-tabpanel-curation-${activeCurationId}`

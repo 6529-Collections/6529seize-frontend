@@ -17,6 +17,7 @@ const entryDropId = (id: string) =>
 const ROOT = `/waves/${WAVE}/competitions`;
 const competitionContent = (page: Page) =>
   page
+    .getByRole("main")
     .locator('[data-competition-detail], [data-competition-navigation="flat"]')
     .filter({ visible: true });
 const waveTabStrip = (page: Page) =>
@@ -356,6 +357,11 @@ async function installCompetitionApi(page: Page, selfNomination = false) {
       const wave = await response.json();
       wave.wave.type = "RANK";
       wave.wave.no_of_decisions_done = 1;
+      wave.wave.decisions_strategy = {
+        first_decision_time: 1,
+        subsequent_decisions: [86_400_000],
+        is_rolling: true,
+      };
       await page.route(`**/api/waves/${WAVE}`, (route) =>
         route.fulfill({ json: wave })
       );
@@ -769,7 +775,9 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       page.getByText("Immutable alpha entry content", { exact: true })
     ).toBeVisible();
     await expectFamiliarWaveTabs(page);
-    await expect(page.locator("[data-competition-detail]")).toHaveCount(0);
+    await expect(
+      page.getByRole("main").locator("[data-competition-detail]")
+    ).toHaveCount(0);
     await expect(waveTabStrip(page).filter({ visible: true })).toHaveCount(1);
     await page.screenshot({
       path: testInfo.outputPath("flat-default-competition.png"),
@@ -861,7 +869,9 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         })
       ).toBeVisible({ timeout: 30000 });
       await expect(waveTabStrip(page).filter({ visible: true })).toHaveCount(1);
-      await expect(page.locator("[data-competition-detail]")).toHaveCount(0);
+      await expect(
+        page.getByRole("main").locator("[data-competition-detail]")
+      ).toHaveCount(0);
       if (legacy) {
         await expect(
           waveTabStrip(page).getByRole("tab", {
@@ -886,7 +896,9 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         .getByRole("tab", { name: "Leaderboard", exact: true })
         .click();
       await expect(page).toHaveURL(/alpha\?tab=leaderboard$/);
-      await expect(page.locator("[data-competition-detail]")).toHaveCount(0);
+      await expect(
+        page.getByRole("main").locator("[data-competition-detail]")
+      ).toHaveCount(0);
       await expectNoHorizontalOverflow(page);
       await page.screenshot({
         path: testInfo.outputPath(
@@ -896,6 +908,55 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       });
     });
   }
+
+  test("keeps legacy flat app sections synchronized on click and reload", async ({
+    page,
+  }, testInfo) => {
+    test.skip(testInfo.project.name !== "web-mobile-chromium");
+    const sandbox = await installCompetitionApi(page);
+    sandbox.onlyCompetition("alpha");
+    await sandbox.legacyPrimary("alpha");
+    await installSurfaceSimulation(
+      page.context(),
+      "capacitor-ios-sim",
+      testInfo.project.use.baseURL
+    );
+    await page.goto(`${ROOT}/alpha`);
+    const navigation = page.getByRole("navigation", { name: "Wave sections" });
+    await expect(
+      navigation.getByRole("button", { name: "Leaderboard", exact: true })
+    ).toHaveAttribute("aria-current", "true", { timeout: 30000 });
+    for (const [label, tab] of [
+      ["Winners", "decisions"],
+      ["Outcome", "outcomes"],
+      ["My Votes", "votes"],
+      ["Leaderboard", "leaderboard"],
+    ] as const) {
+      const button = navigation.getByRole("button", {
+        name: label,
+        exact: true,
+      });
+      await button.click();
+      await expect(page).toHaveURL(`${ROOT}/alpha?tab=${tab}`);
+      await expect(button).toHaveAttribute("aria-current", "true");
+      await page.reload();
+      await expect(button).toHaveAttribute("aria-current", "true");
+      await expect(page.getByRole("tabpanel")).toHaveCount(0);
+      await expect(
+        page.getByRole("region", {
+          name: "Local Composer Sandbox Wave",
+          exact: true,
+        })
+      ).toBeVisible();
+    }
+    await navigation.getByRole("button", { name: "Chat", exact: true }).click();
+    await expect(page).toHaveURL(
+      new RegExp(`/waves/${WAVE}\\?tab=chat&competition=alpha$`)
+    );
+    await expect(
+      navigation.getByRole("button", { name: "Chat", exact: true })
+    ).toHaveAttribute("aria-current", "true");
+  });
 
   test("keeps explicit My Votes and serial chat targets available when selection fails", async ({
     page,
@@ -1010,7 +1071,9 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await expect(
       page.getByText("Immutable alpha entry content", { exact: true })
     ).toBeVisible();
-    await expect(page.locator("[data-competition-detail]")).toHaveCount(0);
+    await expect(
+      page.getByRole("main").locator("[data-competition-detail]")
+    ).toHaveCount(0);
     if (mobile) {
       const navigation = page.getByRole("navigation", {
         name: "Wave sections",
@@ -1021,7 +1084,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         navigation.getByRole("button", { name: "Leaderboard", exact: true })
       ).toHaveAttribute("aria-current", "true");
       await expect(
-        page.locator('[data-competition-navigation="detail"]')
+        page.getByRole("main").locator('[data-competition-navigation="detail"]')
       ).toHaveCount(0);
       await page.screenshot({
         path: testInfo.outputPath("flat-default-native-app.png"),

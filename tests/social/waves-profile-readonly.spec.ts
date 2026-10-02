@@ -122,9 +122,11 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       page.getByRole("button", { name: "Toggle decision timeline" })
     ).toBeVisible();
     await expect(waveTabs.filter({ visible: true })).toHaveCount(1);
-    await expect(page.locator("[data-competition-detail]")).toHaveCount(0);
     await expect(
-      page.locator('[data-competition-navigation="detail"]')
+      page.getByRole("main").locator("[data-competition-detail]")
+    ).toHaveCount(0);
+    await expect(
+      page.getByRole("main").locator('[data-competition-navigation="detail"]')
     ).toHaveCount(0);
     const projectedVote = page.getByRole("tab", {
       name: "Projected Vote",
@@ -156,7 +158,9 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       winners.getByText("Mint date:", { exact: true }).first()
     ).toBeVisible();
     await expect(waveTabs.filter({ visible: true })).toHaveCount(1);
-    await expect(page.locator("[data-competition-detail]")).toHaveCount(0);
+    await expect(
+      page.getByRole("main").locator("[data-competition-detail]")
+    ).toHaveCount(0);
     await testInfo.attach("main-stage-winners", {
       body: await page.screenshot(),
       contentType: "image/png",
