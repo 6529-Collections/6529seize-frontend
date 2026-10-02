@@ -472,6 +472,9 @@ const WAVE_NAVIGATION_MESSAGES = objectMessages("wave.navigation", {
   appSections: "App sections",
   loadingSections: "Loading wave sections",
   fallbackCuration: "Curation",
+  myVotes: "My Votes",
+  outcome: "Outcome",
+  faq: "FAQ",
 } as const);
 
 const MY_STREAM_CURATION_MESSAGES = objectMessages("waves.myStream.curation", {

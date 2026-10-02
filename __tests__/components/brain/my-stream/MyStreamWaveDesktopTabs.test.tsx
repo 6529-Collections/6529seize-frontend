@@ -18,6 +18,7 @@ jest.mock("@/hooks/competitions/useWaveCompetitionsTab", () => ({
 }));
 
 jest.mock("next/navigation", () => ({
+  useRouter: () => ({ push: jest.fn() }),
   usePathname: () => mockPathname,
   useSearchParams: () => ({
     get: searchParamsGet,

@@ -69,6 +69,7 @@ import { useDefaultCompetitionNavigation } from "@/hooks/competitions/useDefault
 import { useCompetitionEvents } from "@/hooks/competitions/useCompetitionEvents";
 import { DefaultCompetitionState } from "@/components/competitions/DefaultCompetitionState";
 import { waveCompetitionTabs } from "@/helpers/default-competition.helpers";
+import { useCompetitionNavigation } from "@/contexts/CompetitionNavigationContext";
 
 export interface MyStreamWaveProps {
   readonly waveId: string;
@@ -229,6 +230,7 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
+  const { flat } = useCompetitionNavigation();
   const { isApp } = useDeviceInfo();
   const queryClient = useQueryClient();
   const locale = useBrowserLocale();
@@ -719,6 +721,7 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
   const isResolvingCompetitionTab =
     defaultNavigation.resolve &&
     waveCompetitionTabs[activeContentTab] !== undefined;
+  const isFlatCompetitionView = flat && isCompetitionPathname(pathname);
   let activeTabContent = components[activeContentTab];
   if (activeCurationId) {
     activeTabContent = (
@@ -729,7 +732,9 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
         onDropClick={onDropClick}
       />
     );
-  } else if (isResolvingCompetitionTab) {
+  } else if (isFlatCompetitionView && competitionContent !== undefined) {
+    activeTabContent = competitionContent;
+  } else if (isResolvingCompetitionTab && !flat) {
     activeTabContent = (
       <DefaultCompetitionState selection={defaultNavigation.selection} />
     );
@@ -772,7 +777,8 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
 
       <div
         className="tw-relative tw-min-h-0 tw-min-w-0 tw-flex-grow tw-overflow-hidden"
-        role="tabpanel"
+        role={isApp && flat ? "region" : "tabpanel"}
+        aria-label={isApp && flat ? wave.name : undefined}
         id={
           activeCurationId
             ? `my-stream-wave-tabpanel-curation-${activeCurationId}`

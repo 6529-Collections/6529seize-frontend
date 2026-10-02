@@ -5,7 +5,10 @@
 Wave pages can expose a tab strip that switches the main content panel between
 wave sections such as `Chat`, `Leaderboard`, `Sales`, `Winners`, and other
 wave-dependent views. Named curations also appear here: each opens a selected
-collection of posts from the wave.
+collection of posts from the wave. The default competition shares this one row
+with Chat, and its views render directly below it. A separately opened non-default
+competition keeps its own detail navigation. See [Competitions](../competitions/feature-competitions.md)
+for default selection and switching.
 
 In the `My Votes` tab, non-image drops use a preview image from drop metadata when available, so rows render quickly and stay stable in list form.
 The web layout stores the last selected tab for each wave on the current device,
@@ -43,7 +46,8 @@ entry. Opening another wave normally still uses its default section.
    - Web restores a previously saved valid tab. Native app Back restores the
      section from that visit when it is still available.
 4. Select a tab to switch sections.
-5. The main content panel updates in place while staying on the same route.
+5. The main content panel updates. Competition views retain their competition
+   ID and selected tab in the URL so reload and Back/Forward restore the view.
 6. When open polls still need the signed-in user's answer and the user can
    respond, the `Polls` tab shows an unread-style count badge.
 7. On the `My Votes` tab, each voted drop entry can show a preview thumbnail and

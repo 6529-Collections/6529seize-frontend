@@ -19,7 +19,15 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { TabToggle } from "@/components/common/TabToggle";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useCompetitionNavigation } from "@/contexts/CompetitionNavigationContext";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
+import { ApiCompetitionType } from "@/generated/models/ApiCompetitionType";
+import {
+  getApproveWaveTabLabelsFromMetadata,
+  getWaveOutcomeVisibilityFromMetadata,
+} from "@/helpers/waves/wave-metadata.helpers";
 import { getCompetitionIdFromPathname } from "@/helpers/competition.helpers";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { useWaveCurationTabs } from "@/hooks/waves/useWaveCurationTabs";
@@ -36,7 +44,12 @@ import { useDecisionPoints } from "@/hooks/waves/useDecisionPoints";
 import { useWaveTimers } from "@/hooks/useWaveTimers";
 import { Time } from "@/helpers/time";
 import { useAuth } from "@/components/auth/Auth";
-import { TabCountBadge } from "@/components/common/TabCountBadge";
+import {
+  DesktopTabButton,
+  DesktopTabOption,
+  type DesktopTabButtonProps,
+  type TabOption,
+} from "./MyStreamWaveTabOption";
 import { MyStreamWaveTab } from "@/types/waves.types";
 import {
   useContentTab,
@@ -56,17 +69,6 @@ interface MyStreamWaveDesktopTabsProps {
   readonly onSelectCuration: (curationId: string | null) => void;
   readonly showCreateActionsMenu?: boolean | undefined;
   readonly competitionOnly?: boolean;
-}
-
-interface TabOption {
-  readonly key: string;
-  readonly label: string;
-  readonly panelId: string;
-  readonly badgeCount?: number | null | undefined;
-  readonly leadingIcon?: React.ReactNode | undefined;
-  readonly leadingIconTooltipId?: string | undefined;
-  readonly hasIndicator?: boolean | undefined;
-  readonly action?: React.ReactNode | undefined;
 }
 
 interface ApproveTabLabels {
@@ -165,41 +167,6 @@ const getWaveVotingState = ({
   return WaveVotingState.ONGOING;
 };
 
-interface DesktopTabButtonProps {
-  readonly option: TabOption;
-  readonly activeKey: string;
-  readonly onSelect: (key: string) => void;
-}
-
-function DesktopTabButton({
-  option,
-  activeKey,
-  onSelect,
-}: DesktopTabButtonProps) {
-  return (
-    <button
-      onClick={() => onSelect(option.key)}
-      role="tab"
-      aria-selected={activeKey === option.key}
-      aria-controls={option.panelId}
-      className={`tw-relative tw-whitespace-nowrap tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-border-solid tw-bg-transparent tw-py-3 tw-text-sm tw-font-medium tw-transition-all tw-duration-200 ${
-        activeKey === option.key
-          ? "tw-border-primary-300 tw-text-white"
-          : "tw-border-transparent tw-text-iron-500 desktop-hover:hover:tw-text-iron-200"
-      }`}
-    >
-      <span className="tw-inline-flex tw-h-5 tw-items-center tw-gap-1 tw-align-middle tw-leading-5">
-        <span className="tw-leading-5">{option.label}</span>
-        <TabCountBadge count={option.badgeCount} />
-        {option.leadingIcon}
-      </span>
-      {option.hasIndicator && (
-        <div className="tw-absolute -tw-right-1 tw-top-1 tw-h-2 tw-w-2 tw-rounded-full tw-bg-red"></div>
-      )}
-    </button>
-  );
-}
-
 function ProfileCurationIcon({ tooltipId }: { readonly tooltipId: string }) {
   return (
     <span
@@ -236,30 +203,6 @@ function ReorderHandleIcon({
       <circle cx="9" cy="18" r="1.5" />
       <circle cx="15" cy="18" r="1.5" />
     </svg>
-  );
-}
-
-function DesktopTabOption({
-  option,
-  activeKey,
-  onSelect,
-}: DesktopTabButtonProps) {
-  return (
-    <div className="tw-flex tw-items-center">
-      <DesktopTabButton
-        option={option}
-        activeKey={activeKey}
-        onSelect={onSelect}
-      />
-      {option.leadingIconTooltipId !== undefined && (
-        <MyStreamActionTooltip id={option.leadingIconTooltipId} />
-      )}
-      {option.action !== undefined && option.action !== null && (
-        <div className="tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-border-solid tw-border-transparent">
-          {option.action}
-        </div>
-      )}
-    </div>
   );
 }
 
@@ -335,6 +278,10 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
 }) => {
   const searchParams = useSearchParams();
   const pathname = usePathname();
+  const router = useRouter();
+  const locale = useBrowserLocale();
+  const { flat, nativeCompetition } = useCompetitionNavigation();
+  const nativeDefault = flat ? nativeCompetition : null;
   const { availableTabs, updateAvailableTabs } = useContentTab();
   const {
     hasCompetitions,
@@ -356,8 +303,22 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
     isRankWave,
     pauses: { filterDecisionsDuringPauses },
   } = useWave(wave);
-  const approveLabels = useApproveWaveCustomTabLabels(wave);
-  const outcomesVisible = useWaveOutcomeVisibility(wave);
+  const waveApproveLabels = useApproveWaveCustomTabLabels(wave);
+  const waveOutcomesVisible = useWaveOutcomeVisibility(wave);
+  const nativePresentation = useMemo(
+    () =>
+      (nativeDefault?.presentation ?? []).map((item, id) => ({ ...item, id })),
+    [nativeDefault?.presentation]
+  );
+  const approveLabels = nativeDefault
+    ? getApproveWaveTabLabelsFromMetadata(nativePresentation)
+    : waveApproveLabels;
+  const outcomesVisible = nativeDefault
+    ? getWaveOutcomeVisibilityFromMetadata(nativePresentation)
+    : waveOutcomesVisible;
+  const selectedIsApprove = nativeDefault
+    ? nativeDefault.type === ApiCompetitionType.Approve
+    : isApproveWave;
   const isCompetitionWave = isRankWave || isApproveWave;
   const {
     voting: { isUpcoming, isCompleted },
@@ -460,8 +421,8 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
     const hasSerialTarget = searchParams.get("serialNo") !== null;
     updateAvailableTabs({
       waveId: wave.id,
-      isMemesWave,
-      isChatWave,
+      isMemesWave: nativeDefault ? false : isMemesWave,
+      isChatWave: nativeDefault ? true : isChatWave,
       hasPolls,
       hasCompetitions,
       defaultCompetitionId: effectiveCompetitionId,
@@ -491,11 +452,12 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
     searchParams,
     pathname,
     updateAvailableTabs,
+    nativeDefault,
   ]);
 
   const standardOptions: TabOption[] = useMemo(
-    () =>
-      availableTabs
+    () => [
+      ...availableTabs
         .filter((tab) => {
           if (tab === MyStreamWaveTab.MY_VOTES) {
             return (
@@ -524,11 +486,28 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
           else if (tab === MyStreamWaveTab.POLLS) badgeCount = unansweredPolls;
           return {
             key: tab,
-            label: getTabLabel({ approveLabels, isApproveWave, tab }),
+            label: getTabLabel({
+              approveLabels,
+              isApproveWave: selectedIsApprove,
+              tab,
+            }),
             panelId: getContentTabPanelId(tab),
             badgeCount,
           };
         }),
+      ...(nativeDefault
+        ? ["voters", "rules"].map((tab) => ({
+            key: tab,
+            label: t(
+              locale,
+              tab === "rules"
+                ? "competitions.configuration"
+                : "competitions.voters"
+            ),
+            panelId: getContentTabPanelId(MyStreamWaveTab.COMPETITIONS),
+          }))
+        : []),
+    ],
     [
       availableTabs,
       approveLabels,
@@ -541,6 +520,9 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
       unansweredPolls,
       activeCompetitionCount,
       effectiveCompetitionId,
+      nativeDefault,
+      selectedIsApprove,
+      locale,
     ]
   );
 
@@ -603,9 +585,24 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
     [curationOptions, standardOptions]
   );
 
-  const activeKey = activeCurationId
-    ? getCurationTabKey(activeCurationId)
-    : activeTab;
+  let activeKey: string = activeTab;
+  const nativeTab =
+    searchParams.get("edit") === "1" ? "rules" : searchParams.get("tab");
+  if (
+    nativeDefault &&
+    nativeTab !== null &&
+    ["voters", "rules"].includes(nativeTab)
+  )
+    activeKey = nativeTab;
+  if (activeCurationId) activeKey = getCurationTabKey(activeCurationId);
+  const selectStandardTab = (key: string) => {
+    onSelectCuration(null);
+    if (nativeDefault && ["voters", "rules"].includes(key)) {
+      router.push(`${pathname}?tab=${key}`, { scroll: false });
+      return;
+    }
+    setActiveTab(key as MyStreamWaveTab);
+  };
   const curationTabKeys = useMemo(
     () => curations.map((curation) => getCurationTabKey(curation.id)),
     [curations]
@@ -667,7 +664,10 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
   }
 
   return (
-    <div className="tw-flex tw-w-full tw-items-center tw-gap-3 tw-px-2 tw-@container/tabs sm:tw-px-4">
+    <div
+      data-competition-navigation={flat ? "flat" : undefined}
+      className="tw-flex tw-w-full tw-items-center tw-gap-3 tw-px-2 tw-@container/tabs sm:tw-px-4"
+    >
       <div className="tw-relative tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-1 tw-overflow-hidden sm:tw-hidden">
         <div
           ref={mobileTabsScrollerRef}
@@ -684,8 +684,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
                   return;
                 }
 
-                onSelectCuration(null);
-                setActiveTab(key as MyStreamWaveTab);
+                selectStandardTab(key);
               }}
             />
           </div>
@@ -711,10 +710,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
                   key={option.key}
                   option={option}
                   activeKey={activeKey}
-                  onSelect={(key) => {
-                    onSelectCuration(null);
-                    setActiveTab(key as MyStreamWaveTab);
-                  }}
+                  onSelect={selectStandardTab}
                 />
               ))}
             <SortableContext

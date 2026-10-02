@@ -11,6 +11,7 @@ import React, {
   useRef,
 } from "react";
 import { MyStreamWaveTab } from "@/types/waves.types";
+import { useCompetitionNavigation } from "@/contexts/CompetitionNavigationContext";
 import useLocalPreference from "@/hooks/useLocalPreference";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
@@ -211,6 +212,7 @@ export const ContentTabProvider: React.FC<{
   const pathname = usePathname();
   const router = useRouter();
   const search = useSearchParams();
+  const { flat, nativeCompetition } = useCompetitionNavigation();
   const isCompetitionRoute =
     respectCompetitionRoute &&
     !competitionOnly &&
@@ -500,6 +502,22 @@ export const ContentTabProvider: React.FC<{
   let activeContentTab = activeContentTabRaw;
   if (isCompetitionRoute) {
     activeContentTab = MyStreamWaveTab.COMPETITIONS;
+    if (flat) {
+      const tab =
+        nativeCompetition && search.get("edit") === "1"
+          ? "rules"
+          : (search.get("tab") ?? "leaderboard");
+      let mapped = getLegacyCompetitionTab(tab);
+      if (
+        mapped === MyStreamWaveTab.LEADERBOARD &&
+        availableTabs.includes(MyStreamWaveTab.SUBMISSIONS)
+      )
+        mapped = MyStreamWaveTab.SUBMISSIONS;
+      if (mapped !== undefined)
+        activeContentTab = availableTabs.includes(mapped)
+          ? mapped
+          : MyStreamWaveTab.LEADERBOARD;
+    }
   } else if (
     (competitionOnly || search.get("serialNo") === null) &&
     requestedTab !== undefined &&
