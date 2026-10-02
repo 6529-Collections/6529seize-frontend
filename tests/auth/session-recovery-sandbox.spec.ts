@@ -16,6 +16,8 @@ test.describe("Session recovery sandbox @auth @local-only", () => {
     "PLAYWRIGHT_AUTH_SANDBOX",
     "Requires the local auth sandbox."
   );
+  // This conditional safety guard is disabled by the dedicated CI/local pack,
+  // which explicitly sets USE_DEV_AUTH=false; generic packs must not fake auth.
   test.skip(
     process.env["USE_DEV_AUTH"] !== "false",
     "This contract exercises saved sessions with dev auth disabled."

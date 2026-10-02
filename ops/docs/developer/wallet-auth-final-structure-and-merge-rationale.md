@@ -249,6 +249,22 @@ The frontend no longer gates this implementation behind session-v2, legacy-refre
 
 ## Reviewer Checklist
 
+### Localization follow-up
+
+The Help Bot corpus (`ops/help/help-index.json`, including `wallet.connect.profile`)
+remains an English source document; `public/help-index.json` is its generated
+copy, not an independent UI dictionary. Session-recovery service errors can
+also reach existing generic error surfaces, which currently use English on all
+locales. This release preserves that fallback for `en-US`, `en-GB`, `fr-FR`,
+`es-ES`, and `de-DE`; translated recovery explanations are not yet available.
+Frontend auth/help maintainers own the follow-up: add stable auth error codes
+mapped to localized messages at presentation boundaries and a locale-aware help
+corpus contract, then test every supported locale. This is existing surface
+debt, recorded here rather than coupling auth recovery to a wider localization
+migration.
+
+### Auth behavior
+
 - Session login requests `ApiSessionNonceResponse.signable_message` and never `nonce`.
 - Session nonce calls do not send `structured_signature`, `domain`, `client_origin`, or `session_type`.
 - Web refresh/logout requests include cookies and the active `client_address`.

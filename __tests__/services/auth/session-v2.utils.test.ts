@@ -1332,6 +1332,29 @@ describe("session-v2.utils", () => {
     expectNoSensitiveRefreshTelemetry(getSessionRefreshInfoTelemetry());
   });
 
+  it("retains a rotated native session when verification storage is unavailable", async () => {
+    jest.mocked(Capacitor.isNativePlatform).mockReturnValue(true);
+    jest.mocked(getNativeRefreshToken).mockResolvedValueOnce("previous-token");
+    const response = {
+      client_type: "native" as const,
+      address: "0xabc",
+      role: null,
+      access_token: "access-token",
+      access_token_expires_at: "2026-06-10T00:00:00.000Z",
+      native_refresh_token: "rotated-token",
+      refresh_token_expires_at: "2026-07-10T00:00:00.000Z",
+    };
+    jest.mocked(commonApiPost).mockResolvedValueOnce(response);
+    await refreshSessionV2({ address: "0xabc" });
+    jest
+      .mocked(getNativeRefreshToken)
+      .mockRejectedValueOnce(new Error("storage busy"));
+    await expect(persistSessionResponse(response)).resolves.toBe(false);
+    expect(setAuthJwt).not.toHaveBeenCalled();
+    expect(removeNativeRefreshToken).not.toHaveBeenCalled();
+    expect(queueNativePushLogout).not.toHaveBeenCalled();
+  });
+
   it("counts missing native refresh tokens as unauthorized without a backend request", async () => {
     (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(true);
     (getNativeRefreshToken as jest.Mock).mockResolvedValue(null);

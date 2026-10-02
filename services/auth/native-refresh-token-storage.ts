@@ -134,16 +134,22 @@ export function persistRotatedNativeRefreshToken(
 export function removeNativeRefreshToken(address: string): Promise<void> {
   return serializeStorage(address, async () => {
     const key = getNativeRefreshTokenKey(address);
+    // Keep this logout tombstone even if durable deletion fails: a late refresh
+    // must never restore credentials after an explicit logout in this process.
     inMemoryNativeRefreshTokens.set(key, null);
     if (!isNativeSecureStorageAvailable()) return;
-    for (const storedKey of [key, `${key}:pending-refresh`]) {
-      try {
-        await SecureStoragePlugin.remove({ key: storedKey });
-      } catch (error) {
-        if (!isMissingKey(error)) throw error;
-      }
-    }
+    // Delete the credential before its recovery proof.
+    await removeStoredValue(key);
+    await removeStoredValue(`${key}:pending-refresh`);
   });
+}
+
+async function removeStoredValue(key: string): Promise<void> {
+  try {
+    await SecureStoragePlugin.remove({ key });
+  } catch (error) {
+    if (!isMissingKey(error)) throw error;
+  }
 }
 
 function getNativeRefreshTokenKey(address: string): string {

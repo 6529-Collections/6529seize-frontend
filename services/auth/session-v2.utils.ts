@@ -585,11 +585,18 @@ export async function persistSessionResponse(
 ): Promise<boolean> {
   if (
     persistedNativeRefreshResponses.has(response) &&
-    response.client_type !== "web" &&
-    (await getNativeRefreshToken(response.address)) !==
-      response.native_refresh_token
+    response.client_type !== "web"
   ) {
-    throw createAbortError();
+    let currentToken: string | null;
+    try {
+      currentToken = await getNativeRefreshToken(response.address);
+    } catch {
+      // Storage availability is transient; retain the saved session and let
+      // callers report that access-token persistence could not finish.
+      return false;
+    }
+    if (currentToken !== response.native_refresh_token)
+      throw createAbortError();
   }
   const nativeRefreshTokenResult = persistedNativeRefreshResponses.has(response)
     ? "not-required"

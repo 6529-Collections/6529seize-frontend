@@ -61,7 +61,10 @@ export class SessionRefreshRateLimitError extends Error {
 
 export function getRateLimitCooldownMs(error?: unknown): number {
   if (error instanceof SessionRefreshRateLimitError) {
-    return Math.max(0, error.retryAtMs - Date.now());
+    return Math.min(
+      SESSION_REFRESH_RATE_LIMIT_COOLDOWN_MS,
+      Math.max(0, error.retryAtMs - Date.now())
+    );
   }
   if (typeof error !== "object" || error === null) {
     return SESSION_REFRESH_RATE_LIMIT_COOLDOWN_MS;
@@ -74,7 +77,8 @@ export function getRateLimitCooldownMs(error?: unknown): number {
     const seconds = /^\d+$/.test(retryAfter) ? Number(retryAfter) : null;
     const delay =
       seconds === null ? Date.parse(retryAfter) - Date.now() : seconds * 1000;
-    if (Number.isFinite(delay) && delay >= 0) return delay;
+    if (Number.isFinite(delay) && delay >= 0)
+      return Math.min(delay, SESSION_REFRESH_RATE_LIMIT_COOLDOWN_MS);
   }
   let body = apiError.response?.body;
   if (typeof body === "string") {
@@ -92,7 +96,10 @@ export function getRateLimitCooldownMs(error?: unknown): number {
     Number.isFinite(body.retryAfter) &&
     body.retryAfter >= 0
   ) {
-    return body.retryAfter * 1000;
+    return Math.min(
+      body.retryAfter * 1000,
+      SESSION_REFRESH_RATE_LIMIT_COOLDOWN_MS
+    );
   }
   return SESSION_REFRESH_RATE_LIMIT_COOLDOWN_MS;
 }

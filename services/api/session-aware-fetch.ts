@@ -58,6 +58,7 @@ export async function sessionAwareFetch(
     currentJwt !== null &&
       headers.get("Authorization") === `Bearer ${currentJwt}`
   );
-  // Authentication rejects before route handlers run. Retry that request once.
+  // common-api supplies replayable JSON/string bodies. Authentication rejects
+  // before route handlers run, so those requests can be retried once.
   return fetch(url, { ...init, headers });
 }
