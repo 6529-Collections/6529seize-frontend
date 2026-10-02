@@ -15,8 +15,8 @@ wave can run at the same time with different participation and voting rules.
 ## Entry Points
 
 Open **Competitions** from an eligible wave, follow a competition link, or open
-a competition notification. The collection, details, entry views and create/edit
-forms stay inside the wave's **Competitions** tab, with its header and tabs visible.
+a competition notification. The wave header and navigation stay visible. The
+collection and create/edit forms open from **Competitions**.
 The **Competitions** tab shows a count of active and upcoming competitions. The
 badge is hidden when there are none; drafts and completed competitions do not count.
 **Chat** returns to the wave's existing conversation. The collection has a second
@@ -29,8 +29,17 @@ Cards show the start date and, when set, the end date. Dates in the past use
 ## Default Competition
 
 Opening a wave without choosing a competition opens its default competition.
-Leaderboard, Winners, Outcomes and My votes use that competition. Chat remains
-shared by the whole wave, and Competitions still opens the collection.
+Chat and the competition views share one wave-level tab row, with the selected
+content directly below it. There is no second competition tab row or surrounding
+detail panel. This applies to single-competition waves and to the default in
+waves with multiple competitions. Native competitions also expose Voters and
+Configuration in that same row. Chat remains shared by the whole wave, and
+Competitions opens the collection.
+
+Explicitly opening a non-default competition from the collection or a direct
+link shows its title, an **All competitions** return link, and its own navigation
+inside the wave. Opening the default from the collection keeps the single-row
+layout.
 
 - One eligible competition is the default, including upcoming or completed history.
 - With running competitions, the earliest competition start wins. Paused
@@ -60,8 +69,8 @@ tabs. The collection lets you choose a different competition at any time.
    uses that entry's competition credit type and limits. Review its available, spent
    and remaining credit. Changing a vote replaces your current value; zero
    removes it. Negative votes are available only where the rules permit them.
-4. Competitions open on **Leaderboard**, with an underlined tab row for
-   Leaderboard, Winners, Outcomes, My votes, Voters and Configuration. The leaderboard
+4. Competitions open on **Leaderboard**. Use the wave tab row for the default,
+   or the competition detail row for an explicitly opened non-default. The leaderboard
    uses the familiar list/grid controls, sorting, rich drop cards and **Drop**
    action. Rank competitions show the schedule; Approve competitions show
    approval thresholds, progress and approved counts. Winners use the existing
