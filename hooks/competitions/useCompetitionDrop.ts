@@ -5,6 +5,8 @@ import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import type { ApiDropCompetitionContext } from "@/generated/models/ApiDropCompetitionContext";
 import type { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import type { ApiWaveCreditScope } from "@/generated/models/ApiWaveCreditScope";
+import { ApiDropType } from "@/generated/models/ApiDropType";
+import { ApiCompetitionEntryStatus } from "@/generated/models/ApiCompetitionEntryStatus";
 import { QueryKey } from "@/components/react-query-wrapper/query-keys";
 import { fetchDropCompetitionContext } from "@/services/api/competitions-api";
 import { useCompetitionViewer } from "./useCompetitionQueries";
@@ -14,10 +16,33 @@ export function applyCompetitionDropSummary(
   context: ApiDropCompetitionContext | undefined
 ): ExtendedDrop {
   const competition = context?.competition;
+  const entry = context?.entry;
   const summary = context?.vote_summary;
-  if (!competition || !summary) return drop;
+  if (
+    !competition ||
+    !entry ||
+    !summary ||
+    entry.drop_id !== drop.id ||
+    entry.wave_id !== drop.wave.id ||
+    entry.competition_id !== competition.id ||
+    competition.wave_id !== drop.wave.id
+  )
+    return drop;
+  const isWinner = entry.status === ApiCompetitionEntryStatus.Winner;
+  if (!isWinner && entry.status !== ApiCompetitionEntryStatus.Active)
+    return drop;
   return {
     ...drop,
+    drop_type: isWinner ? ApiDropType.Winner : ApiDropType.Participatory,
+    ...(isWinner
+      ? {
+          winning_context: drop.winning_context ?? {
+            place: entry.rank ?? 1,
+            decision_time: entry.won_at ?? entry.submitted_at,
+            awards: [],
+          },
+        }
+      : {}),
     competition_id: competition.id,
     competition_title: competition.title,
     rating: summary.rating,

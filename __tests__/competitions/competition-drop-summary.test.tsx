@@ -11,6 +11,7 @@ import {
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import type { ApiDropCompetitionContext } from "@/generated/models/ApiDropCompetitionContext";
 import type { ReactNode } from "react";
+import { ApiCompetitionEntryStatus } from "@/generated/models/ApiCompetitionEntryStatus";
 
 jest.mock("@/hooks/competitions/useCompetitionQueries", () => ({
   useCompetitionViewer: () => "viewer:self",
@@ -21,6 +22,7 @@ jest.mock("@/services/api/competitions-api", () => ({
 }));
 const drop = {
   id: "drop",
+  drop_type: "CHAT",
   wave: { id: "wave", voting_credit_type: "TDH" },
   rating: 0,
   raters_count: 0,
@@ -38,7 +40,16 @@ const context = {
       ends_at: 9999999999999,
     },
   },
-  entry: { id: "entry" },
+  entry: {
+    id: "entry",
+    wave_id: "wave",
+    competition_id: "competition",
+    drop_id: "drop",
+    status: "ACTIVE",
+    submitted_at: 10,
+    rank: null,
+    won_at: null,
+  },
   vote_summary: {
     rating: 120,
     realtime_rating: 200,
@@ -59,6 +70,7 @@ it("projects competition totals, current user vote, rank and credit type into th
     raters_count: 2,
     rank: 4,
     competition_id: "competition",
+    drop_type: "PARTICIPATORY",
     context_profile_context: { rating: -30, reaction: "heart" },
     wave: { id: "wave", voting_credit_type: "TDH_PLUS_XTDH" },
   });
@@ -69,6 +81,47 @@ it("preserves the old rendering data when there is no native competition", () =>
   expect(
     applyCompetitionDropSummary(drop, { competition: null, entry: null })
   ).toBe(drop);
+});
+it("uses scoped winner state when the frozen old GET still describes shared chat content", () => {
+  expect(
+    applyCompetitionDropSummary(drop, {
+      ...context,
+      entry: {
+        ...context.entry!,
+        status: ApiCompetitionEntryStatus.Winner,
+        rank: 2,
+        won_at: 99,
+      },
+    })
+  ).toMatchObject({
+    drop_type: "WINNER",
+    winning_context: { place: 2, decision_time: 99 },
+  });
+});
+it("preserves the original primary winner awards supplied by the frozen GET", () => {
+  const winner = {
+    ...drop,
+    winning_context: {
+      place: 2,
+      decision_time: 99,
+      awards: [{ description: "Original award" }],
+    },
+  } as unknown as ExtendedDrop;
+  const result = applyCompetitionDropSummary(winner, {
+    ...context,
+    entry: { ...context.entry!, status: ApiCompetitionEntryStatus.Winner },
+  });
+  expect(result.winning_context).toBe(winner.winning_context);
+});
+it("never promotes CHAT from another competition, wave, drop or an absent entry", () => {
+  for (const entry of [
+    null,
+    { ...context.entry!, drop_id: "other" },
+    { ...context.entry!, wave_id: "other" },
+    { ...context.entry!, competition_id: "other" },
+  ]) {
+    expect(applyCompetitionDropSummary(drop, { ...context, entry })).toBe(drop);
+  }
 });
 it("refreshes the card when competition votes are invalidated", async () => {
   const client = new QueryClient({

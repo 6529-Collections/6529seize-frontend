@@ -328,7 +328,7 @@ async function installCompetitionApi(page: Page, selfNomination = false) {
         drop: {
           ...entryFixture.drops[0],
           id: dropId,
-          drop_type: "PARTICIPATORY",
+          drop_type: "CHAT",
           title: `Recorded ${owner.id} entry`,
           content: `Immutable ${owner.id} entry content`,
         },
