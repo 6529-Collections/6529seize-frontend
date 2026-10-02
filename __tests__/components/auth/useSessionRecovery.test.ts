@@ -76,7 +76,12 @@ it("handles native foreground activation and removes the native subscription", a
   jest.mocked(Capacitor.isNativePlatform).mockReturnValue(true);
   const remove = jest.fn().mockResolvedValue(undefined);
   let onState!: (state: { isActive: boolean }) => void;
-  jest.mocked(App.addListener).mockImplementation((_name, listener) => {
+  // Select this overload explicitly; Jest otherwise uses the last (backButton).
+  const addStateListener: (
+    name: "appStateChange",
+    listener: (state: { isActive: boolean }) => void
+  ) => Promise<{ remove: () => Promise<void> }> = App.addListener;
+  jest.mocked(addStateListener).mockImplementation((_name, listener) => {
     onState = listener;
     return Promise.resolve({ remove });
   });
