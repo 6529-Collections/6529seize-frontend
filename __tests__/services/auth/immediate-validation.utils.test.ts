@@ -434,7 +434,7 @@ describe("validateAuthImmediate", () => {
         isValid: false,
         validationCompleted: false,
         wasCancelled: false,
-        shouldShowModal: true,
+        shouldShowModal: false,
         authRefreshOutcome: "failed",
       });
 
@@ -442,7 +442,8 @@ describe("validateAuthImmediate", () => {
         "validateJwt_general_error",
         error
       );
-      expect(mockCallbacks.onShowSignModal).toHaveBeenCalledWith(true);
+      expect(mockCallbacks.onShowSignModal).not.toHaveBeenCalled();
+      expect(mockCallbacks.onRemoveJwt).not.toHaveBeenCalled();
     });
 
     it("should not process errors when operation is aborted", async () => {

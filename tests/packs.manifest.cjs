@@ -399,6 +399,20 @@ const PACKS = [
     ["tests/social/wave-signature-sandbox.spec.ts"],
     AUTH_SANDBOX_ENV
   ),
+  {
+    ...sandboxPack(
+      "test:e2e:session-recovery-sandbox",
+      "Expired session cold-start and foreground recovery against the local mock API.",
+      ["tests/auth/session-recovery-sandbox.spec.ts"],
+      {
+        ...AUTH_SANDBOX_ENV,
+        USE_DEV_AUTH: "false",
+        NEXT_DEV_DIST_DIR: ".next-playwright-session-recovery",
+      },
+      [DESKTOP, MOBILE]
+    ),
+    triggers: ["pr-ci", "manual"],
+  },
   sandboxPack(
     "test:e2e:auth-sandbox",
     "Aggregate authenticated sandbox pack.",

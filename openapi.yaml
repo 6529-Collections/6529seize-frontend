@@ -36258,6 +36258,13 @@ components:
           type: string
         native_refresh_token:
           type: string
+        refresh_request_id:
+          type: string
+          format: uuid
+          description: >-
+            Persist a random UUID before refreshing and reuse it with the same
+            native refresh token after an interrupted request. A retry recovers
+            the already rotated token without rotating or extending it again.
     ApiSessionRefreshWebRequest:
       type: object
       required:

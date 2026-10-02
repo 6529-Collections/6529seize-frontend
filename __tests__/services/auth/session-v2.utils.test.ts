@@ -9,6 +9,7 @@ import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import { getWalletAddress, setAuthJwt } from "@/services/auth/auth.utils";
 import {
   getNativeRefreshToken,
+  getNativeRefreshRequestId,
   isNativeSecureStorageAvailable,
   removeNativeRefreshToken,
   setNativeRefreshToken,
@@ -48,6 +49,8 @@ jest.mock("@/services/auth/auth.utils", () => ({
 
 jest.mock("@/services/auth/native-refresh-token-storage", () => ({
   getNativeRefreshToken: jest.fn(),
+  getNativeRefreshRequestId: jest.fn().mockResolvedValue("refresh-request-id"),
+  persistRotatedNativeRefreshToken: jest.fn().mockResolvedValue(undefined),
   isNativeSecureStorageAvailable: jest.fn(),
   removeNativeRefreshToken: jest.fn(),
   setNativeRefreshToken: jest.fn(),
@@ -161,6 +164,9 @@ describe("session-v2.utils", () => {
   beforeEach(() => {
     __resetSessionRefreshStateForTests();
     jest.resetAllMocks();
+    jest
+      .mocked(getNativeRefreshRequestId)
+      .mockResolvedValue("refresh-request-id");
     (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(false);
     (commonApiFetch as jest.Mock).mockResolvedValue(undefined);
     (commonApiPost as jest.Mock).mockResolvedValue(undefined);
@@ -1029,7 +1035,7 @@ describe("session-v2.utils", () => {
     }
   });
 
-  it("short-circuits refresh retries for sixty seconds while rate limited", async () => {
+  it("preserves a transient error until the server Retry-After has elapsed", async () => {
     jest.useFakeTimers();
     const rateLimitError = Object.assign(new Error("Rate limit exceeded"), {
       status: 429,
@@ -1055,13 +1061,17 @@ describe("session-v2.utils", () => {
       await expect(refreshSessionV2({ address: "0xabc" })).rejects.toBe(
         rateLimitError
       );
-      await expect(refreshSessionV2({ address: "0xABC" })).resolves.toBeNull();
+      await expect(
+        refreshSessionV2({ address: "0xABC" })
+      ).rejects.toMatchObject({ status: 429 });
 
-      await jest.advanceTimersByTimeAsync(59_000);
-      await expect(refreshSessionV2({ address: "0xABC" })).resolves.toBeNull();
+      await jest.advanceTimersByTimeAsync(900);
+      await expect(
+        refreshSessionV2({ address: "0xABC" })
+      ).rejects.toMatchObject({ status: 429 });
       expect(commonApiPost).toHaveBeenCalledTimes(1);
 
-      await jest.advanceTimersByTimeAsync(1_000);
+      await jest.advanceTimersByTimeAsync(100);
       await expect(refreshSessionV2({ address: "0xABC" })).resolves.toBe(
         sessionResponse
       );
@@ -1269,16 +1279,7 @@ describe("session-v2.utils", () => {
       verifyActiveSessionV2WebSession({ address: "0xabc" })
     ).resolves.toBe(false);
 
-    expect(commonApiPost).toHaveBeenNthCalledWith(2, {
-      endpoint: "auth/session-logout",
-      body: {
-        client_type: "web",
-        client_address: "0xabc",
-        all_sessions: false,
-      },
-      credentials: "include",
-      parseJson: false,
-    });
+    expect(commonApiPost).toHaveBeenCalledTimes(1);
   });
 
   it("returns false when the active web session cannot be refreshed", async () => {
@@ -1331,6 +1332,29 @@ describe("session-v2.utils", () => {
     expectNoSensitiveRefreshTelemetry(getSessionRefreshInfoTelemetry());
   });
 
+  it("retains a rotated native session when verification storage is unavailable", async () => {
+    jest.mocked(Capacitor.isNativePlatform).mockReturnValue(true);
+    jest.mocked(getNativeRefreshToken).mockResolvedValueOnce("previous-token");
+    const response = {
+      client_type: "native" as const,
+      address: "0xabc",
+      role: null,
+      access_token: "access-token",
+      access_token_expires_at: "2026-06-10T00:00:00.000Z",
+      native_refresh_token: "rotated-token",
+      refresh_token_expires_at: "2026-07-10T00:00:00.000Z",
+    };
+    jest.mocked(commonApiPost).mockResolvedValueOnce(response);
+    await refreshSessionV2({ address: "0xabc" });
+    jest
+      .mocked(getNativeRefreshToken)
+      .mockRejectedValueOnce(new Error("storage busy"));
+    await expect(persistSessionResponse(response)).resolves.toBe(false);
+    expect(setAuthJwt).not.toHaveBeenCalled();
+    expect(removeNativeRefreshToken).not.toHaveBeenCalled();
+    expect(queueNativePushLogout).not.toHaveBeenCalled();
+  });
+
   it("counts missing native refresh tokens as unauthorized without a backend request", async () => {
     (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(true);
     (getNativeRefreshToken as jest.Mock).mockResolvedValue(null);
@@ -1369,6 +1393,7 @@ describe("session-v2.utils", () => {
         client_type: "native",
         client_address: "0xabc",
         native_refresh_token: "native-refresh-token",
+        refresh_request_id: "refresh-request-id",
       },
       signal: expect.any(AbortSignal),
       credentials: "include",
