@@ -200,6 +200,24 @@ const setMobileScrollMetrics = (
 };
 
 describe("MyStreamWaveDesktopTabs", () => {
+  it.each(["pathname", "query"])(
+    "shows My Votes for an explicitly selected chat competition from the %s without default data",
+    (source) => {
+      mockWaveInfo.isChatWave = true;
+      mockAvailableTabs = [MyStreamWaveTab.CHAT, MyStreamWaveTab.MY_VOTES];
+      if (source === "pathname") {
+        mockPathname = "/waves/wave-1/competitions/older";
+      } else {
+        searchParamsGet.mockImplementation((key) =>
+          key === "competition" ? "older" : null
+        );
+      }
+      renderComponent();
+      expect(
+        screen.getAllByRole("tab", { name: "My Votes", hidden: true })
+      ).toHaveLength(2);
+    }
+  );
   it("retains a directly selected competition while default data is unavailable", () => {
     mockPathname = "/waves/wave-1/competitions/older";
     mockWaveInfo.isChatWave = true;

@@ -70,6 +70,12 @@ Chat intent is recorded even from a bare wave URL.
   changes, reload, Back/Forward and collection navigation. Existing inner-tab
   selectors are scoped to the competition panel because familiar labels now
   remain available in the wave header as requested.
+- Review follow-up: serial-target Chat intent wins over retained FAQ/Sales tab
+  queries, and My Votes uses the same explicit/default competition ID as tab
+  availability. Six reproducing unit cases and a desktop/mobile selection-error
+  journey cover these gaps; the focused context/navigation/mobile set passes
+  110 tests, including preservation of legacy competition views on serial-target
+  entry links.
 
 ## Future zero-downtime release
 

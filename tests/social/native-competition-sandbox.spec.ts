@@ -824,6 +824,47 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     });
   });
 
+  test("keeps explicit My Votes and serial chat targets available when selection fails", async ({
+    page,
+  }) => {
+    await installCompetitionApi(page);
+    await page.route("**/v3/waves/**/default-competition", (route) =>
+      route.fulfill({ status: 503, json: { message: "Unavailable" } })
+    );
+    await page.goto(`${ROOT}/alpha`);
+    await expect(
+      page.getByRole("heading", { name: "Parallel Alpha", level: 1 })
+    ).toBeVisible({ timeout: 30000 });
+    const myVotes = waveTabStrip(page).getByRole("tab", {
+      name: "My Votes",
+      exact: true,
+    });
+    await expect(myVotes).toBeVisible();
+    await myVotes.click();
+    await expect(page).toHaveURL(/alpha\?tab=votes$/);
+    await expect(
+      competitionContent(page).getByRole("tab", {
+        name: "My votes",
+        exact: true,
+      })
+    ).toHaveAttribute("aria-selected", "true");
+    await page.goto(`/waves/${WAVE}?tab=chat&competition=alpha`);
+    await expect(myVotes).toBeVisible({ timeout: 30000 });
+    await myVotes.click();
+    await expect(page).toHaveURL(/alpha\?tab=votes$/);
+    await page.goto(
+      `/waves/${WAVE}?tab=leaderboard&competition=alpha&serialNo=1`
+    );
+    await expect(
+      waveTabStrip(page).getByRole("tab", { name: "Chat", exact: true })
+    ).toHaveAttribute("aria-selected", "true", { timeout: 30000 });
+    await expect(page).toHaveURL(/serialNo=1$/);
+    await expect(
+      page.getByRole("heading", { name: "Parallel Alpha", level: 1 })
+    ).toHaveCount(0);
+    await expectNoHorizontalOverflow(page);
+  });
+
   test("refreshes implicit selection at server time boundaries and pins an open entry form", async ({
     page,
   }) => {

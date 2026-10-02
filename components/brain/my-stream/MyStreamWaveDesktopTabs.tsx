@@ -342,6 +342,10 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
     defaultCompetitionId,
     defaultSelectionEnabled,
   } = useWaveCompetitionsTab(wave);
+  const effectiveCompetitionId =
+    getCompetitionIdFromPathname(pathname) ??
+    searchParams.get("competition") ??
+    defaultCompetitionId;
   const { activeProfileProxy, connectedProfile } = useAuth();
   const hasAuthenticatedProfile = Boolean(connectedProfile?.handle);
   const {
@@ -460,10 +464,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
       isChatWave,
       hasPolls,
       hasCompetitions,
-      defaultCompetitionId:
-        getCompetitionIdFromPathname(pathname) ??
-        searchParams.get("competition") ??
-        defaultCompetitionId,
+      defaultCompetitionId: effectiveCompetitionId,
       defaultSelectionEnabled,
       hasAuthenticatedProfile,
       isCurationWave,
@@ -479,7 +480,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
     isChatWave,
     hasPolls,
     hasCompetitions,
-    defaultCompetitionId,
+    effectiveCompetitionId,
     defaultSelectionEnabled,
     isApproveWave,
     outcomesVisible,
@@ -502,7 +503,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
               (hasAuthenticatedProfile &&
                 (isMemesWave ||
                   isCompetitionWave ||
-                  Boolean(defaultCompetitionId)))
+                  Boolean(effectiveCompetitionId)))
             );
           }
           if (tab === MyStreamWaveTab.SALES) {
@@ -539,7 +540,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
       outcomesVisible,
       unansweredPolls,
       activeCompetitionCount,
-      defaultCompetitionId,
+      effectiveCompetitionId,
     ]
   );
 

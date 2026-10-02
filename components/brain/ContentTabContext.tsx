@@ -501,6 +501,7 @@ export const ContentTabProvider: React.FC<{
   if (isCompetitionRoute) {
     activeContentTab = MyStreamWaveTab.COMPETITIONS;
   } else if (
+    (competitionOnly || search.get("serialNo") === null) &&
     requestedTab !== undefined &&
     availableTabs.includes(requestedTab)
   ) {

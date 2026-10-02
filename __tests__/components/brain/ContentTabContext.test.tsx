@@ -120,6 +120,27 @@ describe("ContentTabContext", () => {
     expect(result.current.activeContentTab).toBe(MyStreamWaveTab.COMPETITIONS);
   });
 
+  it("preserves a legacy competition view when its entry link includes a serial target", () => {
+    mockPathname = "/waves/legacy/competitions/primary";
+    mockSearch = new URLSearchParams("tab=decisions&serialNo=42");
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <ContentTabProvider competitionOnly>{children}</ContentTabProvider>
+    );
+    const { result } = renderHook(() => useContentTab(), { wrapper });
+    act(() =>
+      result.current.updateAvailableTabs({
+        waveId: "legacy",
+        isChatWave: false,
+        hasAuthenticatedProfile: true,
+        isMemesWave: false,
+        isCurationWave: false,
+        votingState: WaveVotingState.ONGOING,
+        hasFirstDecisionPassed: true,
+      })
+    );
+    expect(result.current.activeContentTab).toBe(MyStreamWaveTab.WINNERS);
+  });
+
   it("preserves tabs and explicit competition identity across route changes", () => {
     mockPathname = "/waves/hub";
     const { result, rerender } = setup();
@@ -321,6 +342,37 @@ describe("ContentTabContext", () => {
       MyStreamWaveTab.FAQ,
     ]);
   });
+
+  it.each([
+    [MyStreamWaveTab.FAQ, "42"],
+    [MyStreamWaveTab.FAQ, ""],
+    [MyStreamWaveTab.SALES, "42"],
+    [MyStreamWaveTab.SALES, ""],
+  ])(
+    "keeps a serial target on Chat ahead of %s (serialNo=%s)",
+    (tab, serialNo) => {
+      mockPathname = "/waves/serial-wave";
+      mockSearch = new URLSearchParams({ tab: tab.toLowerCase(), serialNo });
+      const { result, rerender } = setup();
+      act(() =>
+        result.current.updateAvailableTabs({
+          waveId: "serial-wave",
+          isChatWave: false,
+          hasAuthenticatedProfile: true,
+          isMemesWave: tab === MyStreamWaveTab.FAQ,
+          isCurationWave: tab === MyStreamWaveTab.SALES,
+          votingState: WaveVotingState.ONGOING,
+          hasFirstDecisionPassed: false,
+          transientPreferredTab: MyStreamWaveTab.CHAT,
+        })
+      );
+      expect(result.current.availableTabs).toContain(tab);
+      expect(result.current.activeContentTab).toBe(MyStreamWaveTab.CHAT);
+      mockSearch = new URLSearchParams({ tab: tab.toLowerCase() });
+      rerender();
+      expect(result.current.activeContentTab).toBe(tab);
+    }
+  );
 
   it("omits My Votes for guests on memes waves", () => {
     const { result } = setup();
