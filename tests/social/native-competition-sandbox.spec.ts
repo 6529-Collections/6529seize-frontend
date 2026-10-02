@@ -398,11 +398,11 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     ).toBeVisible({ timeout: 30000 });
     await page.getByRole("link", { name: /Parallel Alpha/ }).click();
     await expect(
-      page.getByRole("tab", { name: "Leaderboard", exact: true })
-    ).toHaveAttribute("aria-selected", "true");
-    await expect(
       page.getByText("Immutable alpha entry content", { exact: true })
     ).toBeVisible({ timeout: 30000 });
+    await expect(
+      page.getByRole("tab", { name: "Leaderboard", exact: true })
+    ).toHaveAttribute("aria-selected", "true");
     await competitionContent(page)
       .getByRole("tab", { name: /My [Vv]otes/, exact: true })
       .click();
