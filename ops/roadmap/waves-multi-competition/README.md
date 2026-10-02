@@ -3,22 +3,25 @@
 ## Status
 
 This is the master technical roadmap for separating competitions from waves.
-It defines the target architecture, compatibility model, sequencing, release
-gates, and the phase documents that should be completed in order.
+It records shipped functionality, remaining architecture work and acceptance
+gates. The [2026-10-01 production assessment](./native-delivery/production-status-2026-10-01.md)
+is the current evidence index: the native foundation, context, creation,
+runtime and discovery are in production. Existing competitions still use the
+legacy engine; data migration and retirement have not started.
 
-The roadmap describes future work. It is not documentation of current product
-behavior.
-
-Roadmap Phase 0 is complete. Its inspected baseline, approved defaults,
-machine-readable GET census, decision register, and implementation proposals
-are indexed in the [Phase 0 evidence package](./phase-0/README.md). Later phases
-remain future work.
+The [default-competition experience](./default-competition.md) is implemented on development branches;
+delivery Phase 2 review and CI are tracked in the linked PRs, and it is not merged or deployed. It is a Phase 6 follow-up that can ship during coexistence.
+Use the [decision register](./phase-0/decision-register.md) for current product
+policy and the [Phase 0 package](./phase-0/README.md) for the frozen baseline.
 
 ## How to Use This Roadmap
 
-Complete the roadmap phases in numerical order. A phase is complete only when
-all of its exit criteria are satisfied and its evidence is recorded in the
-corresponding phase document or linked implementation artifacts.
+Phase numbers describe dependencies, not a claim that every release followed
+strict numerical order: discovery and activation from Phase 6 shipped with
+Phases 2–4, before legacy migration. A phase is complete only when all of its
+exit criteria are satisfied and its evidence is recorded. Track shipped scope
+separately from acceptance still open; production deployment alone is not
+proof of migration readiness.
 
 Roadmap phases are architecture milestones. They are distinct from the
 repository's delivery workflow terminology:
@@ -26,7 +29,8 @@ repository's delivery workflow terminology:
 - Delivery Phase 1 means implementing and validating locally.
 - Delivery Phase 2 adds pull requests and review/check completion.
 - Delivery Phase 3 adds staging deployment and validation.
-- Delivery Phase 4 adds production deployment and release notes.
+- Delivery Phase 4 adds production promotion after the required staging gates.
+  The existing release automation owns release notes.
 
 For example, “roadmap Phase 2 to delivery Phase 3” means completing the
 frontend-context milestone and taking that work through staging.
@@ -44,22 +48,21 @@ Every GET API contract available to external clients at the Phase 0 baseline
 remains backwards compatible permanently, even after its data is served from
 the native competition model.
 
-## Current Constraint
+## Legacy Constraint
 
-The current system treats the wave as both the discussion container and the
-competition aggregate:
+At the Phase 0 baseline, the wave was both the discussion container and the
+competition aggregate. These dependencies remain for legacy competitions:
 
 - Competition type and configuration are stored on the wave.
-- Wave creation requires participation, voting, and outcome settings.
+- Legacy Rank/Approve creation carries participation, voting and outcomes.
 - Submissions and winners are represented through drop types.
 - Votes, leaderboards, pauses, outcomes, and decisions are keyed by wave.
-- Frontend navigation and timers assume one competition context per wave.
+- Original-primary frontend views retain wave-scoped navigation and timers.
 - Some privileged flows infer competition meaning from special wave IDs.
 
-This means the change cannot be limited to creation UI or a new
-`competitions[]` response field. The domain identity used by submission,
-voting, decision execution, winner handling, and special integrations must
-move from wave to competition.
+The native path now uses competition identity for submission, voting, execution
+and special integrations. Phase 5 migrates the remaining legacy records and
+clients; Phase 7 removes obsolete internal coupling once compatibility holds.
 
 ## Target Domain
 
@@ -105,8 +108,9 @@ The competition owns the rules and lifecycle of one contest:
 `CHAT` is not a competition type in the target model. Chat is a wave
 capability.
 
-Recommended stored lifecycle values are `DRAFT`, `PUBLISHED`, `ENDED`,
-`CANCELLED`, and `ARCHIVED`. User-facing phases such as upcoming, submissions
+Stored lifecycle values include `DRAFT`, `PUBLISHED`, `ENDED`, `CANCELLED`,
+and `ARCHIVED`; retaining an enum does not expose a manual end/cancel command.
+User-facing phases such as upcoming, submissions
 open, voting open, deciding, and completed should be derived from lifecycle and
 dates.
 
@@ -117,13 +121,16 @@ A competition entry connects stable wave content to one competition:
 - Stable entry ID.
 - `competition_id` and `drop_id`.
 - Submitter and submission timestamp.
-- Entry status such as active, withdrawn, disqualified, or winner.
+- Entry status and winner history; deletion follows existing drop permissions,
+  with removed content excluded from public entry/history views.
 - Winning timestamp, rank, and decision reference where applicable.
 - Configuration/signature version needed to validate the submission.
 
-Winning changes the entry, not the drop. This avoids mutating content identity
-and permits the domain to support one drop entering multiple competitions in a
-future product iteration.
+Winning changes the entry, not the drop. Native submission creates a dedicated
+competition drop, immutable even when unsigned. A drop belongs to at most one
+competition across its lifetime; existing chat drops cannot be attached. There
+are no withdrawal/disqualification actions. Future reuse would require a new
+product decision, not merely enabling an old proposal.
 
 ### Competition-Owned Records
 
@@ -157,7 +164,9 @@ rewriting of legacy history.
 
 ### Compatibility Rules
 
-- Existing `RANK` and `APPROVE` waves retain their current API and UI behavior.
+- Existing `RANK` and `APPROVE` waves retain their permanent API projection and
+  familiar single-competition experience. The approved UI default policy may
+  select a different competition after others are added, without changing APIs.
 - Existing clients continue to see the legacy wave projection permanently.
 - A new multi-competition hub projects as chat-only to legacy clients.
 - A legacy response must never select an arbitrary “active competition.”
@@ -210,15 +219,25 @@ policy; this permanent guarantee applies to GET APIs.
 - Sequential and parallel competitions are supported.
 - Competition entries remain visible as stable drops in the hub with explicit
   competition context.
-- The schema supports reuse of a drop, while the first UI may restrict a drop
-  to one active competition if required for moderation or signing safety.
-- Wave followers receive restrained lifecycle announcements rather than a
-  notification for every entry.
+- Submission creates one dedicated immutable competition drop; chat cannot be
+  converted into an entry and a drop cannot be reused in another competition.
+- Only winner notifications are emitted for competition lifecycle events;
+  ordinary mention/reply delivery remains supported.
+- Presentation and participation/voting access groups remain editable with an
+  audited config version. Credit, signature, submission, timing and decision
+  rules freeze after the first accepted entry.
+- Published competitions finish through configured rules; manual end/cancel
+  and entry withdrawal/disqualification are not exposed. Drafts/terminal
+  competitions can be archived and terminal configurations cloned.
 - Subwaves remain separate discussion destinations and are not used as
   permanent competition containers.
 
-Any departure from these defaults must be captured as a decision before the
-affected phase begins.
+These defaults reflect the shipped product decisions. Amendments belong in the
+decision register. The additional approved [default competition](./default-competition.md)
+selects the wave landing competition: one eligible; otherwise earliest-starting active;
+otherwise soonest upcoming; otherwise most recently ended. Paused decisions
+still count as active, drafts are excluded, and archived completed competitions
+remain eligible for the ended fallback. This navigation work is not yet shipped.
 
 ## Cross-Phase Engineering Rules
 
@@ -297,23 +316,27 @@ leaderboard, notification, or claim worker is unaware of them.
 Use `Not started`, `In progress`, `Blocked`, or `Complete` for phase status.
 Update this table and the phase's tracking section together.
 
-| Phase | Milestone | Status | User-visible impact |
+| Phase | Milestone | Status | Shipped scope / remaining work |
 | --- | --- | --- | --- |
-| [0](./phase-0-contract-and-baseline.md) | Contract and baseline | Complete | None |
-| [1](./phase-1-additive-backend-foundation.md) | Additive backend foundation | In progress | None |
-| [2](./phase-2-frontend-competition-context.md) | Frontend competition context | In progress | No intended visual change |
-| [3](./phase-3-separate-creation-flows.md) | Separate hub and competition creation | In progress | New creation/admin flow behind rollout controls |
-| [4](./phase-4-native-competition-runtime.md) | Native competition execution | In progress | Multiple competitions become operational for cohorts |
-| [5](./phase-5-legacy-data-migration.md) | Legacy data migration | Not started | No intended behavior change |
-| [6](./phase-6-progressive-rollout.md) | Progressive rollout | In progress | Multi-competition hubs become broadly available |
-| [7](./phase-7-retire-wave-coupling.md) | Retire internal legacy coupling | Not started | Legacy execution/storage are removed while current GET contracts remain supported |
+| [0](./phase-0-contract-and-baseline.md) | Contract and baseline | Complete | Frozen baseline retained; product decisions amended to match the release and approved default selection. |
+| [1](./phase-1-additive-backend-foundation.md) | Additive backend foundation | In progress | Shipped, including independent credit comparison; production parity/performance acceptance still open. |
+| [2](./phase-2-frontend-competition-context.md) | Frontend competition context | In progress | Routes, scoped context and native views shipped; original-primary path retained, final acceptance and default navigation follow-up remain. |
+| [3](./phase-3-separate-creation-flows.md) | Separate hub and competition creation | In progress | Hub/draft/publication/admin flows shipped; original shortcut requirement and final product/device acceptance remain open. |
+| [4](./phase-4-native-competition-runtime.md) | Native competition execution | In progress | Rank/Approve runtime shipped and enabled; production-native completion/observability evidence and migration compatibility remain open. |
+| [5](./phase-5-legacy-data-migration.md) | Legacy data migration | Not started | Next migration project: old-API routing/projection, backfill, catch-up, parity, guarded cutover and rollback. |
+| [6](./phase-6-progressive-rollout.md) | Progressive rollout | In progress | Discovery/creation enabled in production; default competition is implemented on development branches with PR review/CI tracked in delivery evidence; rollout/monitoring closeout is still open. |
+| [7](./phase-7-retire-wave-coupling.md) | Retire internal legacy coupling | Not started | Legacy creation, execution and storage remain; permanent GET contracts survive retirement. |
 
-Phase 1's [current evidence](./phase-1/implementation-evidence.md) records the
-2026-09-28 local follow-up: independent legacy read comparisons replace the
-original self-comparison. Remaining-credit validation and shared-environment
-acceptance remain open in that record. The [native delivery evidence](./native-delivery/implementation-evidence.md)
-records local budget validation and the implementation of roadmap Phases 2–4
-plus discovery from Phase 6; environment acceptance remains separate.
+Use the [production assessment and open gates](./native-delivery/production-status-2026-10-01.md)
+for current status, the [native implementation record](./native-delivery/implementation-evidence.md)
+for implementation details, and the dated [foundation record](./phase-1/implementation-evidence.md)
+for historical local evidence. Earlier pending-deployment/credit-gap statements
+in historical records are superseded by the production assessment.
+
+The next product follow-up is [default competition](./default-competition.md).
+The next migration project is Phase 5; engineering can begin before all
+operational evidence is collected, but production cutover cannot. Complete
+low-risk completed cohorts first and Main Stage/privileged competitions last.
 
 ## Global Success Criteria
 
@@ -321,6 +344,8 @@ The roadmap is complete when:
 
 - A wave can exist indefinitely without a competition.
 - A wave can run multiple sequential or parallel competitions.
+- Entering a wave and its competition tabs resolves the approved default,
+  while explicit competition links and selections retain their own context.
 - Chat history and drop identity remain stable across competition lifecycles.
 - Voting budgets, eligibility, leaderboards, decisions, and outcomes are
   isolated per competition.
@@ -341,12 +366,14 @@ The roadmap is complete when:
 Maintain resolved decisions in this master document or a linked decision
 record. At minimum, record:
 
-- Whether the same drop may enter multiple competitions in the first release.
+- Dedicated entry content, immutability, deletion and the one-competition-per-drop rule.
 - How competition submissions appear in the shared chat timeline.
 - Competition notification defaults.
 - Which published competition fields remain editable.
 - The public URL structure for competition detail.
-- Rules for ending, cancelling, archiving, and reopening competitions.
+- Rules for automatic completion, archiving and cloning; manual end/cancel and
+  reopening remain unavailable.
+- Default competition selection and its separation from the legacy primary.
 - How special competitions receive minting, claims, curation, quorum, or other
   system capabilities.
 - The exact manifest of GET APIs currently available to external clients and

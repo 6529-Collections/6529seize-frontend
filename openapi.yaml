@@ -5107,6 +5107,43 @@ paths:
           application/json:
             schema:
               $ref: "#/components/schemas/ApiCreateWaveHubRequest"
+  /v3/waves/{wave_id}/default-competition:
+    get:
+      tags:
+        - Competitions
+      summary: Resolve the viewer's default competition
+      operationId: getDefaultWaveCompetitionV3
+      description: >-
+        Selects from all readable published competitions, independently of list
+        pagination and the immutable legacy primary. Active competitions take
+        precedence, ordered by earliest start; otherwise soonest upcoming,
+        otherwise latest end. Drafts and cancellation-only records are excluded.
+        Archived completed history remains eligible. Null ID means no default.
+        Decisions paused or still pending after voting closes remain active.
+      parameters:
+        - name: wave_id
+          in: path
+          required: true
+          schema:
+            type: string
+      x-6529-router:
+        enabled: true
+        auth: optional
+        cache: false
+        handler:
+          import: "@/api/competitions/competitions-v3.handlers"
+          name: handleGetDefaultWaveCompetitionV3
+      responses:
+        "200":
+          description: Authoritative navigation selection at server time
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDefaultCompetition"
+        "400":
+          description: Invalid wave identifier or unexpected query parameter
+        "404":
+          description: Wave unavailable or unreadable
   /v3/waves/{wave_id}/competitions:
     post:
       tags:
@@ -28033,6 +28070,28 @@ components:
           type: array
           items:
             type: string
+    ApiDefaultCompetition:
+      type: object
+      required:
+        - competition_id
+        - evaluated_at
+        - next_refresh_at
+      properties:
+        competition_id:
+          type: string
+          format: uuid
+          nullable: true
+        evaluated_at:
+          type: integer
+          format: int64
+          description: Server evaluation time in milliseconds since epoch.
+        next_refresh_at:
+          type: integer
+          format: int64
+          nullable: true
+          description: >-
+            Next known timing boundary in milliseconds since epoch. Clients also
+            refresh on lifecycle changes and periodically for worker completion.
     ApiDeleteEulaConsentRequest:
       type: object
       additionalProperties: false

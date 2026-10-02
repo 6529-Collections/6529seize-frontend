@@ -15,6 +15,10 @@ jest.mock("@/helpers/competition.helpers", () => ({
 }));
 jest.mock("@/hooks/competitions/useCompetitionQueries", () => ({
   useCompetitionHub: jest.fn(),
+  useDefaultCompetition: jest.fn(() => ({
+    isSuccess: true,
+    data: { competition_id: "default" },
+  })),
   useCompetitionList: jest.fn(),
 }));
 

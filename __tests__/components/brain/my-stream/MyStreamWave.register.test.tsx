@@ -2,6 +2,11 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import MyStreamWave from "@/components/brain/my-stream/MyStreamWave";
 import { HeaderProvider, useHeaderContext } from "@/contexts/HeaderContext";
 import { markMobileLaunchStep } from "@/utils/monitoring/mobileLaunchTiming";
+import { useCompetitionEvents } from "@/hooks/competitions/useCompetitionEvents";
+
+jest.mock("@/hooks/competitions/useCompetitionEvents", () => ({
+  useCompetitionEvents: jest.fn(),
+}));
 
 jest.mock("@/utils/monitoring/mobileLaunchTiming", () => ({
   markMobileLaunchStep: jest.fn(),
@@ -272,6 +277,7 @@ describe("MyStreamWave registration", () => {
 
   it("registers the mounted wave for direct URL loads", async () => {
     renderWave();
+    expect(useCompetitionEvents).toHaveBeenCalledWith("wave-1", true);
 
     await waitFor(() => {
       expect(mockRegisterWave).toHaveBeenCalledWith("wave-1", true);
@@ -286,6 +292,7 @@ describe("MyStreamWave registration", () => {
       </HeaderProvider>
     );
     expect(screen.getByTestId("competition-tabs")).toBeVisible();
+    expect(useCompetitionEvents).toHaveBeenCalledWith("wave-1", false);
     expect(screen.queryByTestId("tabs")).not.toBeInTheDocument();
   });
 

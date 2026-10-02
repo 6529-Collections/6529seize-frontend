@@ -12,7 +12,9 @@
         "parallel competitions",
         "competition credits",
         "create competition",
-        "pause decisions"
+        "pause decisions",
+        "default competition",
+        "current competition"
       ],
       "keywords": [
         "wave",
@@ -24,11 +26,15 @@
         "credits",
         "results",
         "shared chat",
-        "archive"
+        "archive",
+        "default",
+        "upcoming",
+        "paused decisions"
       ],
       "facts": [
         "Where the competition experience is available, use Competitions in a wave to browse its active competitions and history. Each competition opens on Leaderboard and has its own entries, votes, rules, budget and results while Shared chat returns to the wave conversation. There is no separate Entries tab.",
-        "Competition links use /waves/{waveId}/competitions/{competitionId}; an entry link adds ?entry={entryId}. An original competition in an older wave keeps its established experience when another competition is added.",
+        "Competition links use /waves/{waveId}/competitions/{competitionId}; an entry link adds ?entry={entryId}. Explicit competition and entry links preserve that competition across tabs, reload and Back/Forward even when another competition becomes the default.",
+        "Opening a wave without choosing a competition opens its default. One eligible competition wins; otherwise the earliest-starting running competition wins, including paused decisions. With none running, the soonest upcoming wins over history; otherwise the most recently ended wins, including archived completed history. Drafts, archived never-published drafts and cancelled competitions are excluded. With none eligible, shared chat remains usable. Leaderboard, Winners, Outcomes and My votes use the selected competition. Chat stays shared. Defaults refresh as time or lifecycle changes, but explicit choices and open submission or vote forms keep their original competition. The competition collection remains available for switching.",
         "Where the competition experience is available, creating a wave opens shared chat without creating a competition. The Competitions tab appears beside Chat for administrators who can create competitions, and for other viewers when the wave has accessible competitions. Administrators open that tab and use Add competition to configure competitions afterward.",
         "Wave administrators can create Rank or Approve drafts and publish them. Drafts are visible only to wave administrators. Approve requires a whole-number approval threshold greater than zero. The competition setup editor saves changes automatically. Incomplete input is retained on this device; valid drafts sync to the server. Next highlights invalid voting settings. Opening a draft goes directly to the setup wizard with saved settings prefilled. Close editor returns to the competition list and preserves the draft without publishing. The final step has Previous, Close editor and Publish; Publish saves the latest edits before publication. Whole competition means one voting budget across that competition’s entries. Competition guidelines apply to its entries and voting; chat guidelines belong to the shared wave. Published types cannot change; after the first entry, credit, signing, submission, timing, decision and outcome rules are fixed. Participation and voting access groups, title, description and presentation can still be updated while published.",
         "Each entry creates a dedicated competition drop that belongs to exactly one competition. Chat messages cannot become competition entries, and competition drops cannot be reused in another competition. Competition submissions cannot be edited, including unsigned submissions. Delete removes the entry from all competition views and direct entry links. There are no Withdraw or Disqualify actions. Existing drop-deletion permissions apply.",
@@ -48,7 +54,8 @@
         "components/competitions/CompetitionEntryForm.tsx",
         "components/competitions/CompetitionAdmin.tsx",
         "ops/docs/waves/competitions/feature-competitions.md",
-        "ops/docs/waves/competitions/feature-manage-competitions.md"
+        "ops/docs/waves/competitions/feature-manage-competitions.md",
+        "hooks/competitions/useDefaultCompetitionNavigation.ts"
       ]
     },
     {

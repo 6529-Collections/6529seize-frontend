@@ -1,6 +1,13 @@
 "use client";
 import { useWaveCompetitionsTab } from "@/hooks/competitions/useWaveCompetitionsTab";
-import { isCompetitionPathname } from "@/helpers/competition.helpers";
+import {
+  getCompetitionRoute,
+  isCompetitionPathname,
+  getCompetitionIdFromPathname,
+} from "@/helpers/competition.helpers";
+import { waveCompetitionTabs } from "@/helpers/default-competition.helpers";
+import type { MyStreamWaveTab } from "@/types/waves.types";
+import { useDefaultCompetitionNavigation } from "@/hooks/competitions/useDefaultCompetitionNavigation";
 
 import type { ReactNode } from "react";
 import React, {
@@ -145,7 +152,10 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
   const {
     hasCompetitions: hasAvailableCompetitions,
     activeCount: activeCompetitionCount,
+    defaultCompetitionId,
+    defaultSelectionEnabled,
   } = useWaveCompetitionsTab(wave);
+  useDefaultCompetitionNavigation(wave, true);
   const hasCompetitions =
     hasAvailableCompetitions || isCompetitionPathname(pathname);
 
@@ -185,6 +195,20 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
   });
   const onViewChange = useCallback(
     (view: BrainView) => {
+      const competitionTab =
+        waveCompetitionTabs[view as unknown as MyStreamWaveTab];
+      if (waveId && defaultSelectionEnabled && competitionTab) {
+        const selectedId = isCompetitionPathname(pathname)
+          ? getCompetitionIdFromPathname(pathname)
+          : (searchParams.get("competition") ?? defaultCompetitionId);
+        router.push(
+          selectedId
+            ? `${getCompetitionRoute(waveId, selectedId)}?tab=${competitionTab}`
+            : `${getWavePathRoute(waveId)}/competitions`,
+          { scroll: false }
+        );
+        return;
+      }
       selectView(view);
       if (isApp && waveId) {
         rememberWaveView({ waveId, view });
@@ -194,10 +218,24 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
         isCompetitionPathname(pathname) &&
         view !== BrainView.COMPETITIONS
       ) {
-        router.push(getWavePathRoute(waveId), { scroll: false });
+        const competitionId = getCompetitionIdFromPathname(pathname);
+        const tab = view === BrainView.DEFAULT ? "chat" : view.toLowerCase();
+        const params = new URLSearchParams({ tab });
+        if (competitionId) params.set("competition", competitionId);
+        router.push(`${getWavePathRoute(waveId)}?${params}`, { scroll: false });
       }
     },
-    [selectView, isApp, waveId, rememberWaveView, pathname, router]
+    [
+      selectView,
+      isApp,
+      waveId,
+      rememberWaveView,
+      pathname,
+      router,
+      defaultSelectionEnabled,
+      defaultCompetitionId,
+      searchParams,
+    ]
   );
   const [aboutTabState, setAboutTabState] = useState<MobileAboutTabState>({
     waveId: null,
@@ -228,6 +266,7 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
   const onDropClick = (selectedDrop: ExtendedDrop) => {
     const params = new URLSearchParams(searchParams.toString() || "");
     params.set("drop", selectedDrop.id);
+    params.delete("default");
     router.push(`${pathname}?${params.toString()}`, { scroll: false });
   };
 
@@ -340,6 +379,9 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
           waveActive={hasWave}
           hasPolls={hasPolls}
           hasCompetitions={hasCompetitions}
+          hasDefaultCompetition={Boolean(
+            searchParams.get("competition") ?? defaultCompetitionId
+          )}
           activeCompetitionCount={activeCompetitionCount}
           outcomesVisible={outcomesVisible}
           waveNavigationReady={waveNavigationReady}

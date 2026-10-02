@@ -19,6 +19,17 @@ export const isCompetitionPathname = (pathname: string | null) => {
   );
 };
 
+export function getCompetitionIdFromPathname(
+  pathname: string | null
+): string | null {
+  if (!isCompetitionPathname(pathname)) return null;
+  const segments = (pathname ?? "").split("/").filter(Boolean);
+  const competitionId = segments[3];
+  return competitionId && !["new", "draft"].includes(competitionId)
+    ? competitionId
+    : null;
+}
+
 export const COMPETITION_TABS = [
   "leaderboard",
   "decisions",
