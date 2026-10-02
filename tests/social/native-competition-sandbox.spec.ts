@@ -403,9 +403,6 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await expect(
       page.getByText("Immutable alpha entry content", { exact: true })
     ).toBeVisible({ timeout: 30000 });
-    await expect(
-      page.getByText("Immutable alpha entry content", { exact: true })
-    ).toBeVisible({ timeout: 30000 });
     await competitionContent(page)
       .getByRole("tab", { name: /My [Vv]otes/, exact: true })
       .click();

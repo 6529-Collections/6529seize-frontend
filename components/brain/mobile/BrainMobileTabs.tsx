@@ -658,7 +658,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
               >
                 <span
                   className={getTabTextClassName({
-                    isActive: activeView === BrainView.COMPETITIONS,
+                    isActive: !flat && activeView === BrainView.COMPETITIONS,
                   })}
                 >
                   {t(locale, "competitions.title")}
