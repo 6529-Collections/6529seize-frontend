@@ -25,6 +25,7 @@ import {
 } from "@/helpers/competition.helpers";
 import { useCompetitionNavigation } from "@/contexts/CompetitionNavigationContext";
 import { getLegacyCompetitionTab } from "@/helpers/default-competition.helpers";
+import { useContentTab } from "../ContentTabContext";
 import { ApiCompetitionType } from "@/generated/models/ApiCompetitionType";
 import {
   getApproveWaveTabLabelsFromMetadata,
@@ -98,6 +99,7 @@ interface BrainMobileTabsProps {
   readonly waveActive: boolean;
   readonly hasPolls?: boolean | undefined;
   readonly hasCompetitions?: boolean | undefined;
+  readonly hideCompetitionsTab?: boolean | undefined;
   readonly hasDefaultCompetition?: boolean | undefined;
   readonly activeCompetitionCount?: number | undefined;
   readonly outcomesVisible?: boolean | undefined;
@@ -114,6 +116,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
   waveActive,
   hasPolls = false,
   hasCompetitions = false,
+  hideCompetitionsTab = false,
   hasDefaultCompetition = false,
   activeCompetitionCount,
   outcomesVisible = true,
@@ -127,6 +130,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
   const isCompetitionRoute = isCompetitionPathname(pathname);
   const searchParams = useSearchParams();
   const { flat, nativeCompetition } = useCompetitionNavigation();
+  const { activeContentTab } = useContentTab();
   const locale = useBrowserLocale();
   const nativePresentation = useMemo(
     () =>
@@ -160,10 +164,12 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
       ? "leaderboard"
       : requestedCompetitionTab;
   const mappedCompetitionTab = getLegacyCompetitionTab(selectedCompetitionTab);
+  const selectedLegacyView = nativeCompetition
+    ? (mappedCompetitionTab ?? BrainView.COMPETITIONS)
+    : activeContentTab;
   const effectiveActiveView =
     flat && isCompetitionRoute
-      ? ((mappedCompetitionTab ??
-          BrainView.COMPETITIONS) as unknown as BrainView)
+      ? (selectedLegacyView as unknown as BrainView)
       : activeView;
   const { registerRef } = useLayout();
   const { connectedProfile, isAuthenticated } = useAuth();
@@ -463,24 +469,6 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
                 {waveActive ? "Chat" : "My Stream"}
               </span>
             </button>
-            {waveActive && (
-              <button
-                {...getTabStateProps(activeView === BrainView.ABOUT)}
-                ref={getActiveButtonRef(activeView === BrainView.ABOUT)}
-                onClick={() => handleWaveViewChange(BrainView.ABOUT)}
-                className={getTabButtonClassName(
-                  activeView === BrainView.ABOUT
-                )}
-              >
-                <span
-                  className={getTabTextClassName({
-                    isActive: activeView === BrainView.ABOUT,
-                  })}
-                >
-                  About
-                </span>
-              </button>
-            )}
             {waveActive && wave && hasPolls && (
               <button
                 {...getTabStateProps(activeView === BrainView.POLLS)}
@@ -506,7 +494,8 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
               COMPETITION_TABS.filter(
                 (tab) =>
                   (nativeOutcomesVisible || tab !== "outcomes") &&
-                  (canShowMyVotesTab || tab !== "votes")
+                  (canShowMyVotesTab || tab !== "votes") &&
+                  tab !== "rules"
               ).map((tab) => {
                 const selected = selectedCompetitionTab === tab;
                 return (
@@ -637,7 +626,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
                   </button>
                 );
               })}
-            {waveActive && hasCompetitions && (
+            {waveActive && hasCompetitions && !hideCompetitionsTab && (
               <button
                 {...getTabStateProps(
                   !flat && activeView === BrainView.COMPETITIONS
@@ -664,6 +653,49 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
                   {t(locale, "competitions.title")}
                 </span>
                 <TabCountBadge count={activeCompetitionCount} />
+              </button>
+            )}
+            {waveActive &&
+              wave &&
+              (isCompetitionWave || Boolean(flat && nativeCompetition)) &&
+              (!isCompetitionRoute || flat) && (
+                <button
+                  {...getTabStateProps(
+                    effectiveActiveView === BrainView.CONFIGURATION
+                  )}
+                  ref={getActiveButtonRef(
+                    effectiveActiveView === BrainView.CONFIGURATION
+                  )}
+                  onClick={() => handleWaveViewChange(BrainView.CONFIGURATION)}
+                  className={getTabButtonClassName(
+                    effectiveActiveView === BrainView.CONFIGURATION
+                  )}
+                >
+                  <span
+                    className={getTabTextClassName({
+                      isActive: effectiveActiveView === BrainView.CONFIGURATION,
+                    })}
+                  >
+                    {t(locale, "competitions.configuration")}
+                  </span>
+                </button>
+              )}
+            {waveActive && (
+              <button
+                {...getTabStateProps(activeView === BrainView.ABOUT)}
+                ref={getActiveButtonRef(activeView === BrainView.ABOUT)}
+                onClick={() => handleWaveViewChange(BrainView.ABOUT)}
+                className={getTabButtonClassName(
+                  activeView === BrainView.ABOUT
+                )}
+              >
+                <span
+                  className={getTabTextClassName({
+                    isActive: activeView === BrainView.ABOUT,
+                  })}
+                >
+                  {t(locale, "wave.navigation.about")}
+                </span>
               </button>
             )}
             {!isApp && !waveActive && (

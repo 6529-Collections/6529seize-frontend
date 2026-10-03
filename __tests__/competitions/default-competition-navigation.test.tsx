@@ -197,3 +197,21 @@ it.each([
     ).toBe(false);
   }
 );
+
+it.each([
+  ["tab=configuration", "/waves/wave/competitions/alpha?tab=rules&default=1"],
+  [
+    "tab=configuration&competition=older",
+    "/waves/wave/competitions/older?tab=rules",
+  ],
+])(
+  "canonicalizes the selected competition configuration alias (%s)",
+  (query, target) => {
+    mockSearch = new URLSearchParams(query);
+    const { result } = renderHook(() =>
+      useDefaultCompetitionNavigation(wave, true)
+    );
+    expect(mockReplace).toHaveBeenCalledWith(target, { scroll: false });
+    expect(result.current.resolve).toBe(true);
+  }
+);

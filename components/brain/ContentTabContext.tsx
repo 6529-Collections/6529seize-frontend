@@ -50,6 +50,8 @@ type WaveTabParams = {
   isChatWave: boolean;
   hasPolls?: boolean | undefined;
   hasCompetitions?: boolean | undefined;
+  hideCompetitionsTab?: boolean | undefined;
+  hasCompetitionConfiguration?: boolean | undefined;
   defaultCompetitionId?: string | null | undefined;
   defaultSelectionEnabled?: boolean | undefined;
   hasAuthenticatedProfile: boolean;
@@ -234,10 +236,12 @@ export const ContentTabProvider: React.FC<{
   const [availableTabs, setAvailableTabs] = useState<MyStreamWaveTab[]>([
     initialTab,
   ]);
+  const [registeredWaveId, setRegisteredWaveId] = useState<string | null>(null);
   const currentWaveIdRef = useRef<string | null>(null);
   const defaultCompetitionRef = useRef<{ id: string | null; enabled: boolean }>(
     { id: null, enabled: false }
   );
+  const [hideCompetitionsTab, setHideCompetitionsTab] = useState(false);
   const tabsByWaveIdRef = useRef<Record<string, MyStreamWaveTab>>(tabsByWaveId);
   const transientTabOverrideRef = useRef<{
     waveId: string;
@@ -258,6 +262,7 @@ export const ContentTabProvider: React.FC<{
     (params: WaveTabParams | null) => {
       if (!params) {
         setAvailableTabs([initialTab]);
+        setRegisteredWaveId(null);
         currentWaveIdRef.current = null;
         transientTabOverrideRef.current = null;
         setActiveTabInternal(initialTab);
@@ -269,6 +274,8 @@ export const ContentTabProvider: React.FC<{
         isChatWave,
         hasPolls = false,
         hasCompetitions = false,
+        hideCompetitionsTab: hideCollection = false,
+        hasCompetitionConfiguration = false,
         defaultCompetitionId = null,
         defaultSelectionEnabled = false,
         hasAuthenticatedProfile,
@@ -313,7 +320,7 @@ export const ContentTabProvider: React.FC<{
         );
       }
 
-      if (hasCompetitions) {
+      if (hasCompetitions && !hideCollection) {
         tabs.push(MyStreamWaveTab.COMPETITIONS);
       }
 
@@ -334,6 +341,8 @@ export const ContentTabProvider: React.FC<{
             tab !== MyStreamWaveTab.POLLS
         );
       }
+      if (hasCompetitionConfiguration) tabs.push(MyStreamWaveTab.CONFIGURATION);
+      if (!competitionOnly) tabs.push(MyStreamWaveTab.ABOUT);
 
       if (
         transientTabOverrideRef.current !== null &&
@@ -355,6 +364,8 @@ export const ContentTabProvider: React.FC<{
       }
 
       setAvailableTabs(tabs);
+      setRegisteredWaveId(waveId ?? null);
+      setHideCompetitionsTab(hideCollection);
       currentWaveIdRef.current = waveId ?? null;
       defaultCompetitionRef.current = {
         id: defaultCompetitionId,
@@ -513,22 +524,30 @@ export const ContentTabProvider: React.FC<{
         availableTabs.includes(MyStreamWaveTab.SUBMISSIONS)
       )
         mapped = MyStreamWaveTab.SUBMISSIONS;
-      if (mapped !== undefined)
-        activeContentTab = availableTabs.includes(mapped)
-          ? mapped
+      // Honor canonical links while the wave is loading; apply its gates after registration.
+      if (mapped !== undefined) {
+        const fallback = availableTabs.includes(MyStreamWaveTab.SUBMISSIONS)
+          ? MyStreamWaveTab.SUBMISSIONS
           : MyStreamWaveTab.LEADERBOARD;
+        activeContentTab =
+          registeredWaveId !== getWaveIdFromPathname(pathname) ||
+          availableTabs.includes(mapped)
+            ? mapped
+            : fallback;
+      }
     }
   } else if (
     (competitionOnly || search.get("serialNo") === null) &&
     requestedTab !== undefined &&
-    availableTabs.includes(requestedTab)
+    (availableTabs.includes(requestedTab) ||
+      (hideCompetitionsTab && requestedTab === MyStreamWaveTab.COMPETITIONS))
   ) {
     activeContentTab = requestedTab;
   }
   const visibleTabs = useMemo(() => {
     if (!isCompetitionRoute) return availableTabs;
     const tabs = [...availableTabs];
-    if (!tabs.includes(MyStreamWaveTab.COMPETITIONS)) {
+    if (!hideCompetitionsTab && !tabs.includes(MyStreamWaveTab.COMPETITIONS)) {
       tabs.splice(
         tabs.indexOf(MyStreamWaveTab.CHAT) + 1,
         0,
@@ -536,7 +555,7 @@ export const ContentTabProvider: React.FC<{
       );
     }
     return tabs;
-  }, [availableTabs, isCompetitionRoute]);
+  }, [availableTabs, isCompetitionRoute, hideCompetitionsTab]);
 
   // Memoize the context value to prevent unnecessary re-renders
   const contextValue = useMemo(
