@@ -12,6 +12,7 @@ export const waveCompetitionTabs: Partial<Record<MyStreamWaveTab, string>> = {
   [MyStreamWaveTab.WINNERS]: "decisions",
   [MyStreamWaveTab.OUTCOME]: "outcomes",
   [MyStreamWaveTab.MY_VOTES]: "votes",
+  [MyStreamWaveTab.CONFIGURATION]: "rules",
 };
 
 export function getLegacyCompetitionTab(
@@ -56,6 +57,7 @@ export function getImplicitCompetitionRoute(
 ) {
   const params = new URLSearchParams(search);
   params.delete("wave");
+  if (params.get("tab") === "configuration") params.set("tab", "rules");
   if (competitionId === null) {
     params.set("default", "1");
     params.set("tab", "chat");

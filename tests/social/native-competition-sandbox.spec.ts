@@ -112,7 +112,11 @@ const competition = (id: string, title: string) => ({
   archived_at: null,
 });
 
-async function installCompetitionApi(page: Page, selfNomination = false) {
+async function installCompetitionApi(
+  page: Page,
+  selfNomination = false,
+  administer = true
+) {
   // Fixture the external analytics loader; keep the sandbox mutation guard strict.
   await page.route("https://www.googletagmanager.com/gtag/js?**", (route) =>
     route.fulfill({ contentType: "application/javascript", body: "" })
@@ -129,6 +133,9 @@ async function installCompetitionApi(page: Page, selfNomination = false) {
     competition("alpha", "Parallel Alpha"),
     competition("beta", "Parallel Beta"),
   ];
+  competitions.forEach((item) => {
+    item.permissions.administer = administer;
+  });
   if (selfNomination) {
     Object.assign(competitions[0]!.participation, {
       submission_type: "IDENTITY",
@@ -154,7 +161,7 @@ async function installCompetitionApi(page: Page, selfNomination = false) {
         id: WAVE,
         name: request["name"],
         legacy_primary_competition_id: legacyPrimaryId,
-        permissions: { view: true, administer: true, create_competition: true },
+        permissions: { view: true, administer, create_competition: administer },
       },
     });
   });
@@ -273,10 +280,16 @@ async function installCompetitionApi(page: Page, selfNomination = false) {
         id: WAVE,
         name: "Sandbox Composer Wave",
         legacy_primary_competition_id: legacyPrimaryId,
-        permissions: { view: true, administer: true, create_competition: true },
+        permissions: { view: true, administer, create_competition: administer },
       };
-    else if (suffix === "/competitions") body = pageResult(competitions);
-    else if (!selected)
+    else if (suffix === "/competitions") {
+      const phases = url.searchParams.getAll("phase");
+      body = pageResult(
+        competitions.filter(
+          (item) => phases.length === 0 || phases.includes(item.computed_phase)
+        )
+      );
+    } else if (!selected)
       return route.fulfill({ status: 404, json: { message: "Not found" } });
     else if (!resource) body = selected;
     else if (resource === "configuration") body = configurations.get(id);
@@ -339,6 +352,11 @@ async function installCompetitionApi(page: Page, selfNomination = false) {
   });
   return {
     requests,
+    setPhase: (id: string, phase: string) => {
+      const selected = competitions.find((item) => item.id === id);
+      expect(selected).toBeDefined();
+      selected!.computed_phase = phase;
+    },
     setDefault: (id: string | null) => {
       defaultId = id;
     },
@@ -356,6 +374,11 @@ async function installCompetitionApi(page: Page, selfNomination = false) {
       expect(response.ok()).toBe(true);
       const wave = await response.json();
       wave.wave.type = "RANK";
+      wave.wave.authenticated_user_eligible_for_admin = administer;
+      if (!administer) {
+        wave.author.id = "00000000-0000-4000-8000-000000000999";
+        wave.author.handle = "sandbox-wave-author";
+      }
       wave.wave.no_of_decisions_done = 1;
       wave.wave.decisions_strategy = {
         first_decision_time: 1,
@@ -851,6 +874,44 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     });
   });
 
+  test("keeps the legacy sidebar Configuration editor available beside the main row", async ({
+    page,
+  }) => {
+    const sandbox = await installCompetitionApi(page);
+    sandbox.onlyCompetition("alpha");
+    await sandbox.legacyPrimary("alpha");
+    await page.goto(`/waves/${WAVE}?tab=chat`);
+    const mobile = (page.viewportSize()?.width ?? 1280) < 768;
+    await page
+      .getByRole("button", {
+        name: mobile ? "Wave details" : "Show right sidebar",
+        exact: true,
+      })
+      .click();
+    const details = page
+      .getByRole("complementary", { name: "Wave details" })
+      .or(page.getByRole("dialog", { name: "Wave details" }));
+    await details
+      .getByRole("tab", { name: "Configuration", exact: true })
+      .click();
+    await details
+      .getByRole("button", { name: "Edit proposal card settings" })
+      .click();
+    const editor = page.getByRole("dialog", {
+      name: "Edit proposal card settings",
+    });
+    await expect(
+      editor.getByRole("radio", { name: "Full proposal", exact: true })
+    ).toBeVisible();
+    await expect(
+      editor.getByRole("radio", { name: "Summary card", exact: true })
+    ).toBeVisible();
+    await expect(
+      editor.getByRole("button", { name: "Save", exact: true })
+    ).toBeDisabled();
+    await expectNoHorizontalOverflow(page);
+  });
+
   for (const legacy of [false, true]) {
     test(`renders a ${legacy ? "legacy" : "native"} single competition in the wave row without a detail shell`, async ({
       page,
@@ -869,13 +930,30 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       await expect(
         page.getByRole("main").locator("[data-competition-detail]")
       ).toHaveCount(0);
-      if (legacy) {
-        await expect(
-          waveTabStrip(page).getByRole("tab", {
-            name: "Configuration",
+      await expect(
+        waveTabStrip(page).getByRole("tab", {
+          name: "Configuration",
+          exact: true,
+        })
+      ).toBeVisible();
+      const tabLabels = await waveTabStrip(page)
+        .filter({ visible: true })
+        .getByRole("tab")
+        .allTextContents();
+      expect(tabLabels.slice(-2)).toEqual(["Configuration", "About"]);
+      await waveTabStrip(page)
+        .getByRole("tab", { name: "Configuration", exact: true })
+        .click();
+      await expect(page).toHaveURL(/alpha\?tab=rules$/);
+      await expect(
+        page
+          .getByRole("heading", {
+            name: legacy ? "Schedule" : "Participation",
             exact: true,
           })
-        ).toHaveCount(0);
+          .first()
+      ).toBeVisible();
+      if (legacy) {
         await expect(
           waveTabStrip(page).getByRole("tab", { name: "Voters", exact: true })
         ).toHaveCount(0);
@@ -906,6 +984,127 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     });
   }
 
+  for (const legacy of [false, true]) {
+    test(`hides the sole default collection for a non-admin and retains readable ${legacy ? "legacy" : "native"} configuration`, async ({
+      page,
+    }, testInfo) => {
+      const sandbox = await installCompetitionApi(page, false, false);
+      sandbox.onlyCompetition("alpha");
+      if (legacy) await sandbox.legacyPrimary("alpha");
+      await page.goto(`${ROOT}/alpha?tab=rules`);
+      const tabs = waveTabStrip(page).filter({ visible: true });
+      await expect(
+        tabs.getByRole("tab", { name: "Configuration", exact: true })
+      ).toHaveAttribute("aria-selected", "true", { timeout: 30000 });
+      await expect(
+        tabs.getByRole("tab", { name: /^Competitions/ })
+      ).toHaveCount(0);
+      expect((await tabs.getByRole("tab").allTextContents()).slice(-2)).toEqual(
+        ["Configuration", "About"]
+      );
+      await expect(
+        page
+          .getByRole("heading", {
+            name: legacy ? "Schedule" : "Participation",
+            exact: true,
+          })
+          .first()
+      ).toBeVisible();
+      await expect(
+        page.getByRole("button", { name: "Edit competition details" })
+      ).toHaveCount(0);
+      await expect(
+        page.getByRole("button", { name: "Pause decisions", exact: true })
+      ).toHaveCount(0);
+      await expectNoHorizontalOverflow(page);
+      await page.screenshot({
+        path: testInfo.outputPath(
+          `configuration-${legacy ? "legacy" : "native"}-non-admin.png`
+        ),
+        fullPage: true,
+      });
+      await tabs.getByRole("tab", { name: "About", exact: true }).click();
+      await expect(page).toHaveURL(new RegExp(`tab=about&competition=alpha$`));
+      await tabs
+        .getByRole("tab", { name: "Configuration", exact: true })
+        .click();
+      await expect(page).toHaveURL(`${ROOT}/alpha?tab=rules`);
+      await page.goBack();
+      await expect(page).toHaveURL(/tab=about&competition=alpha$/);
+      await page.goForward();
+      await expect(page).toHaveURL(`${ROOT}/alpha?tab=rules`);
+      await page.goto(ROOT);
+      await expect(
+        page.getByRole("link", { name: /Parallel Alpha/ })
+      ).toBeVisible();
+      await expect(
+        tabs.getByRole("tab", { name: /^Competitions/ })
+      ).toHaveCount(0);
+    });
+  }
+
+  for (const phase of ["COMPLETED", "UPCOMING"]) {
+    test(`retains the collection for a non-admin with an active default plus ${phase}`, async ({
+      page,
+    }) => {
+      const sandbox = await installCompetitionApi(page, false, false);
+      sandbox.setPhase("beta", phase);
+      await page.goto(`${ROOT}/alpha`);
+      await expect(
+        waveTabStrip(page).getByRole("tab", { name: /^Competitions/ })
+      ).toBeVisible({ timeout: 30000 });
+      await waveTabStrip(page)
+        .getByRole("tab", { name: /^Competitions/ })
+        .click();
+      await expect(page).toHaveURL(ROOT);
+      await page.getByRole("tab", { name: "All", exact: true }).click();
+      await expect(
+        page.getByRole("link", { name: /Parallel Beta/ })
+      ).toBeVisible();
+    });
+  }
+
+  test("hides the sole native default collection in the app and resolves Configuration links", async ({
+    page,
+  }, testInfo) => {
+    test.skip(testInfo.project.name !== "web-mobile-chromium");
+    const sandbox = await installCompetitionApi(page, false, false);
+    sandbox.onlyCompetition("alpha");
+    await installSurfaceSimulation(
+      page.context(),
+      "capacitor-ios-sim",
+      testInfo.project.use.baseURL
+    );
+    await page.goto(`/waves/${WAVE}?tab=configuration&competition=alpha`);
+    await expect(page).toHaveURL(`${ROOT}/alpha?tab=rules`);
+    const navigation = page.getByRole("navigation", { name: "Wave sections" });
+    await expect(
+      navigation.getByRole("button", { name: "Configuration", exact: true })
+    ).toHaveAttribute("aria-current", "true");
+    await expect(
+      navigation.getByRole("button", { name: /^Competitions/ })
+    ).toHaveCount(0);
+    expect(
+      (
+        await navigation
+          .getByRole("button")
+          .filter({ hasText: /\S/ })
+          .allTextContents()
+      ).slice(-2)
+    ).toEqual(["Configuration", "About"]);
+    await expect(
+      page.getByRole("heading", { name: "Participation", exact: true })
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Edit competition details" })
+    ).toHaveCount(0);
+    await expectNoHorizontalOverflow(page);
+    await page.screenshot({
+      path: testInfo.outputPath("configuration-native-non-admin-app.png"),
+      fullPage: true,
+    });
+  });
+
   test("keeps legacy flat app sections synchronized on click and reload", async ({
     page,
   }, testInfo) => {
@@ -927,6 +1126,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       ["Winners", "decisions"],
       ["Outcome", "outcomes"],
       ["My Votes", "votes"],
+      ["Configuration", "rules"],
       ["Leaderboard", "leaderboard"],
     ] as const) {
       const button = navigation.getByRole("button", {

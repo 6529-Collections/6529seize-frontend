@@ -8,7 +8,10 @@ wave-dependent views. Named curations also appear here: each opens a selected
 collection of posts from the wave. The default competition shares this one row
 with Chat, and its views render directly below it. A separately opened non-default
 competition keeps its own detail navigation. See [Competitions](../competitions/feature-competitions.md)
-for default selection and switching.
+for default selection and switching. **About** is the final wave tab, with the
+competition’s **Configuration** immediately before it when a competition is
+available. Native and legacy defaults share this ordering on desktop, mobile
+web and the app.
 
 In the `My Votes` tab, non-image drops use a preview image from drop metadata when available, so rows render quickly and stay stable in list form.
 The web layout stores the last selected tab for each wave on the current device,

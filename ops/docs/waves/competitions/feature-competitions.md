@@ -32,9 +32,18 @@ Opening a wave without choosing a competition opens its default competition.
 Chat and the competition views share one wave-level tab row, with the selected
 content directly below it. There is no second competition tab row or surrounding
 detail panel. This applies to single-competition waves and to the default in
-waves with multiple competitions. Native competitions also expose Voters and
-Configuration in that same row. Chat remains shared by the whole wave, and
-Competitions opens the collection.
+waves with multiple competitions. Native competitions also expose Voters in
+that same row. Both native and legacy defaults expose **Configuration** immediately
+before the final **About** tab. Configuration opens the selected competition’s
+existing rules and settings, with the same read and edit permissions. Chat remains
+shared by the whole wave.
+
+For a logged-in non-admin, **Competitions** is hidden when the default is the
+wave’s sole visible competition. The check includes current, past and future
+competitions: an active default plus a past or future competition keeps the tab
+visible. Wave administrators retain the tab for management. While the count or
+permissions are unresolved, the tab stays available; logged-out visibility is
+unchanged. A direct collection link remains readable when the tab is hidden.
 
 Explicitly opening a non-default competition from the collection or a direct
 link shows its title, an **All competitions** return link, and its own navigation

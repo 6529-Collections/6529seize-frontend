@@ -22,6 +22,8 @@ export enum MyStreamWaveTab {
   MY_VOTES = "MY_VOTES",
   POLLS = "POLLS",
   FAQ = "FAQ",
+  CONFIGURATION = "CONFIGURATION",
+  ABOUT = "ABOUT",
 }
 
 export enum CreateWaveGroupConfigType {

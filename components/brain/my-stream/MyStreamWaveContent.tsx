@@ -25,6 +25,8 @@ import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import { WaveWinners } from "@/components/waves/winners/WaveWinners";
 import MemesArtSubmissionModal from "@/components/waves/memes/MemesArtSubmissionModal";
 import { MyStreamWaveTab } from "@/types/waves.types";
+import BrainRightSidebarConfiguration from "@/components/brain/right-sidebar/BrainRightSidebarConfiguration";
+import MyStreamWaveAbout from "./MyStreamWaveAbout";
 import { MyStreamWaveTabs } from "./tabs/MyStreamWaveTabs";
 import MyStreamWaveMyVotes from "./votes/MyStreamWaveMyVotes";
 import MyStreamWaveFAQ from "./MyStreamWaveFAQ";
@@ -716,6 +718,12 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
       <MyStreamWavePolls wave={wave} onDropClick={onDropClick} />
     ),
     [MyStreamWaveTab.FAQ]: <MyStreamWaveFAQ wave={wave} />,
+    [MyStreamWaveTab.CONFIGURATION]: (
+      <div className="tw-h-full tw-min-h-0 tw-overflow-y-auto">
+        <BrainRightSidebarConfiguration wave={wave} />
+      </div>
+    ),
+    [MyStreamWaveTab.ABOUT]: <MyStreamWaveAbout wave={wave} />,
   };
 
   const isResolvingCompetitionTab =

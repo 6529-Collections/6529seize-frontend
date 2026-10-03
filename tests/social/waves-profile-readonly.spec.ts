@@ -465,14 +465,14 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     }
 
     await details.click();
-    await expect(
-      page.getByRole("tab", { name: "About", exact: true })
-    ).toBeVisible();
-    await page.getByRole("tab", { name: "About", exact: true }).click();
-    await expect(page.getByText("Created by", { exact: true })).toHaveCount(0);
     const aboutPanel = page
       .getByRole("complementary", { name: "Wave details" })
       .or(page.getByRole("dialog", { name: "Wave details" }));
+    await expect(
+      aboutPanel.getByRole("tab", { name: "About", exact: true })
+    ).toBeVisible();
+    await aboutPanel.getByRole("tab", { name: "About", exact: true }).click();
+    await expect(page.getByText("Created by", { exact: true })).toHaveCount(0);
     const creationDate = page
       .getByRole("complementary", { name: "Wave details" })
       .locator("time[datetime]")
