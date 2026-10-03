@@ -1,4 +1,5 @@
 import type { Locator, Page } from "@playwright/test";
+import { installSurfaceSimulation } from "../support/surfaceSimulation";
 
 import { EN_US_MESSAGES } from "../../i18n/messages/en-US";
 import { expect, test } from "../testHelpers";
@@ -81,6 +82,82 @@ function getProfileFeed(page: Page): Locator {
 }
 
 test.describe("Waves and profile read-only coverage @surface @medium @large @readonly", () => {
+  test("matches Main Stage app artwork to its leaderboard response", async ({
+    page,
+  }, testInfo) => {
+    test.skip(testInfo.project.name !== "web-mobile-chromium");
+    await installSurfaceSimulation(
+      page.context(),
+      "capacitor-ios-sim",
+      testInfo.project.use.baseURL
+    );
+    const settingsResponse = page.waitForResponse(
+      (response) => new URL(response.url()).pathname === "/api/settings"
+    );
+    await gotoReady(page, "/waves");
+    const settings = await (await settingsResponse).json();
+    expect(settings.memes_wave_id).toMatch(/^[0-9a-f-]{36}$/i);
+    const leaderboardResponse = page.waitForResponse((response) => {
+      const url = new URL(response.url());
+      return (
+        url.pathname ===
+          `/api/v2/waves/${settings.memes_wave_id}/leaderboard` &&
+        url.searchParams.get("sort") === "RANK"
+      );
+    });
+    await gotoReady(page, `/waves/${settings.memes_wave_id}`);
+    const navigation = page.getByRole("navigation", { name: "Wave sections" });
+    await navigation
+      .getByRole("button", { name: "Leaderboard", exact: true })
+      .click();
+    const response = await leaderboardResponse;
+    expect(response.ok()).toBe(true);
+    const data = await response.json();
+    expect(data.wave.id).toBe(settings.memes_wave_id);
+    await testInfo.attach("main-stage-leaderboard-counts", {
+      body: JSON.stringify({
+        waveId: settings.memes_wave_id,
+        route: new URL(page.url()).pathname,
+        sort: "RANK",
+        count: data.count,
+        returned: data.drops.length,
+        withMedia: data.drops.filter((drop: { media?: unknown[] }) =>
+          Boolean(drop.media?.length)
+        ).length,
+      }),
+      contentType: "application/json",
+    });
+    expect(data.count).toBeGreaterThanOrEqual(0);
+    const artwork = data.drops.find((drop: { media?: unknown[] }) =>
+      Boolean(drop.media?.length)
+    );
+    await page.getByRole("tab", { name: "Grid view", exact: true }).click();
+    if (!artwork) {
+      await expect(
+        page.getByText("No drops to show", { exact: true })
+      ).toBeVisible();
+      await expect(
+        page.getByRole("list", { name: "Leaderboard drops" })
+      ).toHaveCount(0);
+      return;
+    }
+    await expect(
+      page.getByRole("list", { name: "Leaderboard drops" })
+    ).toBeVisible();
+    await expect(
+      page
+        .getByRole("list", { name: "Leaderboard drops" })
+        .locator(`[data-leaderboard-drop-id="${artwork.id}"]`)
+    ).toBeVisible();
+    await expect(
+      page.getByText("No drops to show", { exact: true })
+    ).toHaveCount(0);
+    await testInfo.attach("main-stage-app-leaderboard", {
+      body: await page.screenshot(),
+      contentType: "image/png",
+    });
+  });
+
   test("preserves Main Stage's dedicated tabs, timeline, and winner cards", async ({
     page,
   }, testInfo) => {

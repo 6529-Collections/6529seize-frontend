@@ -99,19 +99,27 @@ describe("ContentTabContext", () => {
     expect(result.current.activeContentTab).toBe(MyStreamWaveTab.COMPETITIONS);
   });
 
-  it("renders flat legacy rules before desktop tab availability is registered", () => {
-    mockPathname = "/waves/hub/competitions/alpha";
-    mockSearch = new URLSearchParams({ tab: "rules" });
-    const wrapper = ({ children }: { children: React.ReactNode }) => (
-      <CompetitionNavigationContext.Provider
-        value={{ flat: true, nativeCompetition: null }}
-      >
-        <ContentTabProvider>{children}</ContentTabProvider>
-      </CompetitionNavigationContext.Provider>
-    );
-    const { result } = renderHook(() => useContentTab(), { wrapper });
-    expect(result.current.activeContentTab).toBe(MyStreamWaveTab.CONFIGURATION);
-  });
+  it.each([
+    ["rules", MyStreamWaveTab.CONFIGURATION],
+    ["decisions", MyStreamWaveTab.WINNERS],
+    ["votes", MyStreamWaveTab.MY_VOTES],
+    ["outcomes", MyStreamWaveTab.OUTCOME],
+  ])(
+    "renders flat legacy %s before desktop tab availability is registered",
+    (tab, expected) => {
+      mockPathname = "/waves/hub/competitions/alpha";
+      mockSearch = new URLSearchParams({ tab });
+      const wrapper = ({ children }: { children: React.ReactNode }) => (
+        <CompetitionNavigationContext.Provider
+          value={{ flat: true, nativeCompetition: null }}
+        >
+          <ContentTabProvider>{children}</ContentTabProvider>
+        </CompetitionNavigationContext.Provider>
+      );
+      const { result } = renderHook(() => useContentTab(), { wrapper });
+      expect(result.current.activeContentTab).toBe(expected);
+    }
+  );
 
   it.each([
     ["tab=chat&competition=older", "older"],

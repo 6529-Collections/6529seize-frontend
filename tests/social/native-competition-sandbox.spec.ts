@@ -1,4 +1,5 @@
 import { writeFile } from "node:fs/promises";
+import composerSandboxConstants from "../support/composerSandboxConstants.json";
 import { installSurfaceSimulation } from "../support/surfaceSimulation";
 import type { Page } from "@playwright/test";
 import { expect, expectNoHorizontalOverflow, test } from "../testHelpers";
@@ -10,6 +11,7 @@ import {
 
 const WAVE = "00000000-0000-4000-8000-000000000529";
 const PROFILE = "00000000-0000-4000-8000-000000000531";
+const MEMES_WAVE = composerSandboxConstants.linkedDropMemesWaveId;
 const entryDropId = (id: string) =>
   id === "alpha"
     ? "00000000-0000-4000-8000-000000000532"
@@ -24,6 +26,33 @@ const waveTabStrip = (page: Page) =>
   page.getByRole("tablist").filter({
     has: page.getByRole("tab", { name: "Chat", exact: true }),
   });
+
+async function expectLegacySectionContent(page: Page, tab: string) {
+  if (tab === "decisions") {
+    await expect(
+      page.getByText("No Winners Yet", { exact: true })
+    ).toBeVisible();
+  } else if (tab === "outcomes") {
+    await expect(
+      page.getByText("No outcomes to show.", { exact: true })
+    ).toBeVisible();
+  } else if (tab === "votes") {
+    await expect(
+      page.getByText("You haven't voted on any submissions in this wave yet.", {
+        exact: true,
+      })
+    ).toBeVisible();
+  } else if (tab === "rules") {
+    await expect(
+      page.getByRole("heading", { name: "Schedule", exact: true }).first()
+    ).toBeVisible();
+  } else {
+    await expect(
+      page.getByRole("tablist", { name: "Leaderboard view modes" })
+    ).toBeVisible();
+  }
+}
+
 async function expectFamiliarWaveTabs(page: Page) {
   for (const name of [
     "Chat",
@@ -115,14 +144,15 @@ const competition = (id: string, title: string) => ({
 async function installCompetitionApi(
   page: Page,
   selfNomination = false,
-  administer = true
+  administer = true,
+  waveId = WAVE
 ) {
   // Fixture the external analytics loader; keep the sandbox mutation guard strict.
   await page.route("https://www.googletagmanager.com/gtag/js?**", (route) =>
     route.fulfill({ contentType: "application/javascript", body: "" })
   );
   const fixtureResponse = await page.request.get(
-    `${getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"])}/api/v2/waves/${WAVE}/drops`
+    `${getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"])}/api/v2/waves/${waveId}/drops`
   );
   expect(fixtureResponse.ok()).toBe(true);
   const entryFixture = await fixtureResponse.json();
@@ -135,6 +165,7 @@ async function installCompetitionApi(
   ];
   competitions.forEach((item) => {
     item.permissions.administer = administer;
+    item.wave_id = waveId;
   });
   if (selfNomination) {
     Object.assign(competitions[0]!.participation, {
@@ -158,7 +189,7 @@ async function installCompetitionApi(
     });
     return route.fulfill({
       json: {
-        id: WAVE,
+        id: waveId,
         name: request["name"],
         legacy_primary_competition_id: legacyPrimaryId,
         permissions: { view: true, administer, create_competition: administer },
@@ -167,7 +198,7 @@ async function installCompetitionApi(
   });
   const entry = (id: string) => ({
     id: `entry-${id}`,
-    wave_id: WAVE,
+    wave_id: waveId,
     competition_id: id,
     drop_id: entryDropId(id),
     submitter: { id: PROFILE, handle: "playwright", pfp: null },
@@ -180,7 +211,7 @@ async function installCompetitionApi(
   });
   await page.route("**/v3/waves/**", async (route) => {
     const url = new URL(route.request().url());
-    const suffix = url.pathname.split(`/v3/waves/${WAVE}`)[1];
+    const suffix = url.pathname.split(`/v3/waves/${waveId}`)[1];
     if (suffix === undefined) return route.fallback();
     const method = route.request().method();
     if (suffix === "/default-competition") {
@@ -277,7 +308,7 @@ async function installCompetitionApi(
       });
     else if (suffix === "")
       body = {
-        id: WAVE,
+        id: waveId,
         name: "Sandbox Composer Wave",
         legacy_primary_competition_id: legacyPrimaryId,
         permissions: { view: true, administer, create_competition: administer },
@@ -320,7 +351,7 @@ async function installCompetitionApi(
       ]);
     else if (resource.endsWith("/content"))
       body = {
-        wave_id: WAVE,
+        wave_id: waveId,
         title: `Recorded ${id} entry`,
         parts: [{ content: `Immutable ${id} entry content`, media: [] }],
         mentioned_users: [],
@@ -366,13 +397,15 @@ async function installCompetitionApi(
       competitions.splice(0, competitions.length, selected!);
       defaultId = id;
     },
-    legacyPrimary: async (id: string) => {
+    legacyPrimary: async (id: string, ended = false) => {
       legacyPrimaryId = id;
       const response = await page.request.get(
-        `${getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"])}/api/waves/${WAVE}`
+        `${getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"])}/api/waves/${waveId}`
       );
       expect(response.ok()).toBe(true);
       const wave = await response.json();
+      wave.id = waveId;
+      wave.description_drop.wave.id = waveId;
       wave.wave.type = "RANK";
       wave.wave.authenticated_user_eligible_for_admin = administer;
       if (!administer) {
@@ -382,10 +415,10 @@ async function installCompetitionApi(
       wave.wave.no_of_decisions_done = 1;
       wave.wave.decisions_strategy = {
         first_decision_time: 1,
-        subsequent_decisions: [86_400_000],
-        is_rolling: true,
+        subsequent_decisions: ended ? [] : [86_400_000],
+        is_rolling: !ended,
       };
-      await page.route(`**/api/waves/${WAVE}`, (route) =>
+      await page.route(`**/api/waves/${waveId}`, (route) =>
         route.fulfill({ json: wave })
       );
     },
@@ -1184,8 +1217,10 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       await button.click();
       await expect(page).toHaveURL(`${ROOT}/alpha?tab=${tab}`);
       await expect(button).toHaveAttribute("aria-current", "true");
+      await expectLegacySectionContent(page, tab);
       await page.reload();
       await expect(button).toHaveAttribute("aria-current", "true");
+      await expectLegacySectionContent(page, tab);
       await expect(page.getByRole("tabpanel")).toHaveCount(0);
       await expect(
         page.getByRole("region", {
@@ -1194,6 +1229,12 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         })
       ).toBeVisible();
     }
+    await page.goBack();
+    await expect(page).toHaveURL(`${ROOT}/alpha?tab=rules`);
+    await expectLegacySectionContent(page, "rules");
+    await page.goForward();
+    await expect(page).toHaveURL(`${ROOT}/alpha?tab=leaderboard`);
+    await expectLegacySectionContent(page, "leaderboard");
     await navigation.getByRole("button", { name: "Chat", exact: true }).click();
     await expect(page).toHaveURL(
       new RegExp(`/waves/${WAVE}\\?tab=chat&competition=alpha$`)
@@ -1202,6 +1243,224 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       navigation.getByRole("button", { name: "Chat", exact: true })
     ).toHaveAttribute("aria-current", "true");
   });
+
+  test("renders ended legacy app submissions and respects hidden Outcome", async ({
+    page,
+  }, testInfo) => {
+    test.skip(testInfo.project.name !== "web-mobile-chromium");
+    const sandbox = await installCompetitionApi(page);
+    sandbox.onlyCompetition("alpha");
+    await sandbox.legacyPrimary("alpha", true);
+    await page.route(`**/api/v2/waves/${WAVE}/metadata`, (route) =>
+      route.fulfill({
+        json: [
+          {
+            id: 1,
+            data_key: "wave_display.outcomes.visible",
+            data_value: "false",
+          },
+        ],
+      })
+    );
+    await installSurfaceSimulation(
+      page.context(),
+      "capacitor-ios-sim",
+      testInfo.project.use.baseURL
+    );
+    await page.goto(`${ROOT}/alpha?tab=leaderboard`);
+    const navigation = page.getByRole("navigation", { name: "Wave sections" });
+    const submissions = navigation.getByRole("button", {
+      name: "Submissions",
+      exact: true,
+    });
+    await expect(submissions).toHaveAttribute("aria-current", "true", {
+      timeout: 30000,
+    });
+    await expect(
+      page.getByText("No submissions to show.", { exact: true })
+    ).toBeVisible();
+    await expect(
+      navigation.getByRole("button", { name: "Outcome", exact: true })
+    ).toHaveCount(0);
+    await page.reload();
+    await expect(submissions).toHaveAttribute("aria-current", "true");
+    await expect(
+      page.getByText("No submissions to show.", { exact: true })
+    ).toBeVisible();
+    await page.goto(`${ROOT}/alpha?tab=outcomes`);
+    await expect(submissions).toHaveAttribute("aria-current", "true");
+    await expect(
+      page.getByText("No submissions to show.", { exact: true })
+    ).toBeVisible();
+    await expect(
+      navigation.getByRole("button", { name: "Outcome", exact: true })
+    ).toHaveCount(0);
+    await expect(
+      page.getByText("No outcomes to show.", { exact: true })
+    ).toHaveCount(0);
+  });
+
+  for (const surface of ["web", "app"] as const) {
+    test(`preserves populated legacy Main Stage artwork in ${surface} views`, async ({
+      page,
+    }, testInfo) => {
+      test.skip(
+        surface === "app" && testInfo.project.name !== "web-mobile-chromium"
+      );
+      const sandbox = await installCompetitionApi(
+        page,
+        false,
+        true,
+        MEMES_WAVE
+      );
+      sandbox.onlyCompetition("alpha");
+      await sandbox.legacyPrimary("alpha");
+      if (surface === "app") {
+        await installSurfaceSimulation(
+          page.context(),
+          "capacitor-ios-sim",
+          testInfo.project.use.baseURL
+        );
+      }
+      const response = await page.request.get(
+        `${getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"])}/api/v2/waves/${MEMES_WAVE}/drops`
+      );
+      expect(response.ok()).toBe(true);
+      const fixture = await response.json();
+      fixture.wave.id = MEMES_WAVE;
+      const sorts: string[] = [];
+      const artwork = {
+        ...fixture.drops[0],
+        id: entryDropId("alpha"),
+        drop_type: "SUBMISSION",
+        title: "Legacy Main Stage artwork",
+        content: "Existing artwork preserved on the legacy leaderboard.",
+        media: [
+          {
+            url: "https://d3lqz0a4bldqgf.cloudfront.net/drops/legacy-main-stage.png",
+            mime_type: "image/png",
+          },
+        ],
+        submission_context: {
+          status: "ACTIVE",
+          has_metadata: false,
+          voting: {
+            is_open: true,
+            total_votes_given: 100,
+            current_calculated_vote: 100,
+            predicted_final_vote: 120,
+            voters_count: 1,
+            place: 1,
+            context_profile_context: {
+              can_vote: true,
+              min: -1000,
+              max: 1000,
+              current: 100,
+            },
+          },
+        },
+      };
+      await page.route(
+        "https://d3lqz0a4bldqgf.cloudfront.net/drops/**/legacy-main-stage.png",
+        (route) =>
+          route.fulfill({
+            contentType: "image/png",
+            path: "public/test-wave-icon.png",
+          })
+      );
+      await page.route(
+        "https://d3lqz0a4bldqgf.cloudfront.net/drops/legacy-main-stage.png",
+        (route) =>
+          route.fulfill({
+            contentType: "image/png",
+            path: "public/test-wave-icon.png",
+          })
+      );
+      await page.route(
+        `**/api/v2/waves/${MEMES_WAVE}/leaderboard?**`,
+        (route) => {
+          sorts.push(
+            new URL(route.request().url()).searchParams.get("sort") ?? ""
+          );
+          return route.fulfill({
+            json: {
+              wave: fixture.wave,
+              drops: [artwork],
+              count: 1,
+              page: 1,
+              next: false,
+            },
+          });
+        }
+      );
+      const root = `/waves/${MEMES_WAVE}/competitions/alpha`;
+      await page.goto(`/waves/${MEMES_WAVE}`);
+      await expect(page).toHaveURL(`${root}?default=1`, { timeout: 30000 });
+      await dismissNextDevTools(page);
+      const modes = page.getByRole("tablist", {
+        name: "Leaderboard view modes",
+      });
+      const expectArtwork = async () => {
+        await expect(
+          page.getByRole("list", { name: "Leaderboard drops" })
+        ).toBeVisible();
+        await expect(
+          page.getByText("Legacy Main Stage artwork", { exact: true }).first()
+        ).toBeVisible();
+        await expect(
+          page.getByText("No drops to show", { exact: true })
+        ).toHaveCount(0);
+        await expect(
+          page.getByText("No artwork submissions yet", { exact: true })
+        ).toHaveCount(0);
+      };
+      await modes.getByRole("tab", { name: "Grid view", exact: true }).click();
+      await expectArtwork();
+      const image = page
+        .getByRole("img", { name: "Media content", exact: true })
+        .first();
+      await expect(image).toBeVisible();
+      await expect
+        .poll(() =>
+          image.evaluate(
+            (element) => (element as HTMLImageElement).naturalWidth
+          )
+        )
+        .toBeGreaterThan(0);
+      if (testInfo.project.name === "web-mobile-chromium") {
+        await page
+          .getByRole("button", { name: "Sort: Current Vote", exact: true })
+          .click();
+      }
+      const newestSort = page.getByRole(
+        testInfo.project.name === "web-mobile-chromium" ? "menuitem" : "tab",
+        { name: "Newest", exact: true }
+      );
+      await newestSort.click();
+      const selectedSort =
+        testInfo.project.name === "web-mobile-chromium"
+          ? page.getByRole("button", { name: "Sort: Newest", exact: true })
+          : newestSort;
+      await expect(selectedSort).toBeVisible();
+      if (testInfo.project.name === "web-desktop-chromium") {
+        await expect(selectedSort).toHaveAttribute("aria-selected", "true");
+      }
+      await expectArtwork();
+      await modes.getByRole("tab", { name: "List view", exact: true }).click();
+      await expectArtwork();
+      await modes.getByRole("tab", { name: "Grid view", exact: true }).click();
+      await expectArtwork();
+      await page.reload();
+      await expect(selectedSort).toBeVisible();
+      if (testInfo.project.name === "web-desktop-chromium") {
+        await expect(selectedSort).toHaveAttribute("aria-selected", "true");
+      }
+      await expectArtwork();
+      expect(sorts).toContain("RANK");
+      expect(sorts).toContain("CREATED_AT");
+      expect(sandbox.requests).toEqual([]);
+    });
+  }
 
   test("keeps explicit My Votes and serial chat targets available when selection fails", async ({
     page,
