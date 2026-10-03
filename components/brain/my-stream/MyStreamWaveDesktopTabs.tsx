@@ -124,7 +124,13 @@ const TRAILING_TABS = [
   MyStreamWaveTab.ABOUT,
 ];
 
-const TAB_LABELS: Record<MyStreamWaveTab, string> = {
+const TAB_LABELS: Record<
+  Exclude<
+    MyStreamWaveTab,
+    MyStreamWaveTab.CONFIGURATION | MyStreamWaveTab.ABOUT
+  >,
+  string
+> = {
   [MyStreamWaveTab.CHAT]: "Chat",
   [MyStreamWaveTab.COMPETITIONS]: "Competitions",
   [MyStreamWaveTab.LEADERBOARD]: "Leaderboard",
@@ -135,8 +141,6 @@ const TAB_LABELS: Record<MyStreamWaveTab, string> = {
   [MyStreamWaveTab.MY_VOTES]: "My Votes",
   [MyStreamWaveTab.POLLS]: "Polls",
   [MyStreamWaveTab.FAQ]: "FAQ",
-  [MyStreamWaveTab.CONFIGURATION]: "Configuration",
-  [MyStreamWaveTab.ABOUT]: "About",
 };
 
 const getTabLabel = ({

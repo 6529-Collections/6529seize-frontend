@@ -79,6 +79,7 @@ export function useWaveCompetitionsTab(wave: ApiWave | null | undefined) {
     !isFetchingCompetitions &&
     !isCompetitionsError &&
     !hasMoreCompetitions &&
+    // A missing next cursor is not proof of completeness: fail open if has_more disagrees.
     competitions.data.pages.at(-1)?.has_more === false &&
     competitionIds.size === 1 &&
     !defaultCompetition.isError &&

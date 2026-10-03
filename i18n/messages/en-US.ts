@@ -468,6 +468,7 @@ const TITLE_CONTEXT_MESSAGES = objectMessages("titleContext", {
 } as const);
 
 const WAVE_NAVIGATION_MESSAGES = objectMessages("wave.navigation", {
+  about: "About",
   waveSections: "Wave sections",
   appSections: "App sections",
   loadingSections: "Loading wave sections",
@@ -2827,7 +2828,6 @@ const MEME_DATA_TABLE_MESSAGES = objectMessages("memeData", {
 const TOKEN_NUMBER_MESSAGE = "Token #{tokenId}";
 
 export const EN_US_MESSAGES = {
-  "wave.navigation.about": "About",
   ...COMPETITION_MESSAGES,
   ...EN_DROP_REQUIREMENT_MESSAGES,
   ...EN_US_DROP_METADATA_MESSAGES,
