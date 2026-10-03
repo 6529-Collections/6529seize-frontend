@@ -24,6 +24,7 @@ let mockVoting = { isUpcoming: false, isCompleted: false };
 let mockFirstDecisionDone = false;
 let mockOutcomesVisible = true;
 let mockHasPolls = false;
+let mockFlat = false;
 
 jest.mock("next/navigation", () => ({
   usePathname: () => mockPathname,
@@ -53,7 +54,7 @@ jest.mock("@/components/auth/Auth", () => ({
 }));
 
 jest.mock("@/contexts/CompetitionNavigationContext", () => ({
-  useCompetitionNavigation: () => ({ flat: false, nativeCompetition: null }),
+  useCompetitionNavigation: () => ({ flat: mockFlat, nativeCompetition: null }),
 }));
 
 jest.mock("@/hooks/competitions/useWaveCompetitionsTab", () => ({
@@ -97,7 +98,28 @@ describe("useWaveContentTabRegistration", () => {
     mockFirstDecisionDone = false;
     mockOutcomesVisible = true;
     mockHasPolls = false;
+    mockFlat = false;
   });
+
+  it.each(["isRankWave", "isApproveWave"] as const)(
+    "registers Configuration for a flat legacy app rules route (%s)",
+    (waveType) => {
+      mockFlat = true;
+      mockPathname = "/waves/wave-1/competitions/legacy";
+      mockSearch.set("tab", "rules");
+      mockWaveInfo[waveType] = true;
+
+      renderHook(() => useWaveContentTabRegistration(wave, false));
+
+      expect(updateAvailableTabs).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          waveId: "wave-1",
+          hasCompetitionConfiguration: true,
+          defaultCompetitionId: "legacy",
+        })
+      );
+    }
+  );
 
   it("retains a directly selected competition while default data is unavailable", () => {
     mockPathname = "/waves/wave-1/competitions/older";

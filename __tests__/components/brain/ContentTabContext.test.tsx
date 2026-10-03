@@ -121,6 +121,49 @@ describe("ContentTabContext", () => {
     }
   );
 
+  it.each<[boolean, MyStreamWaveTab]>([
+    [true, MyStreamWaveTab.CONFIGURATION],
+    [false, MyStreamWaveTab.LEADERBOARD],
+  ])(
+    "applies registered Configuration availability to flat legacy rules (available=%s)",
+    (hasCompetitionConfiguration, expected) => {
+      mockPathname = "/waves/hub/competitions/alpha";
+      mockSearch = new URLSearchParams({ tab: "rules" });
+      const wrapper = ({ children }: { children: React.ReactNode }) => (
+        <CompetitionNavigationContext.Provider
+          value={{ flat: true, nativeCompetition: null }}
+        >
+          <ContentTabProvider>{children}</ContentTabProvider>
+        </CompetitionNavigationContext.Provider>
+      );
+      const { result } = renderHook(() => useContentTab(), { wrapper });
+      expect(result.current.activeContentTab).toBe(
+        MyStreamWaveTab.CONFIGURATION
+      );
+
+      act(() =>
+        result.current.updateAvailableTabs({
+          waveId: "hub",
+          isChatWave: false,
+          hasCompetitions: true,
+          hasCompetitionConfiguration,
+          defaultCompetitionId: "alpha",
+          defaultSelectionEnabled: true,
+          hasAuthenticatedProfile: true,
+          isMemesWave: false,
+          isCurationWave: false,
+          votingState: WaveVotingState.ONGOING,
+          hasFirstDecisionPassed: false,
+        })
+      );
+
+      expect(
+        result.current.availableTabs.includes(MyStreamWaveTab.CONFIGURATION)
+      ).toBe(hasCompetitionConfiguration);
+      expect(result.current.activeContentTab).toBe(expected);
+    }
+  );
+
   it.each([
     ["tab=chat&competition=older", "older"],
     ["tab=chat", "newer"],
