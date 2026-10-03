@@ -72,6 +72,11 @@ cover with fixtures; they do not alter the agreed priority order above.
 
 ## Navigation and State
 
+- Default competition views share one wave-level row with Chat and render
+  directly below it, including single-competition waves and defaults in
+  multi-competition waves. Only an explicitly opened non-default competition
+  uses nested detail navigation. Configuration and voter views remain available
+  for native defaults in the wave row.
 - Wave entry without an explicit competition resolves the default and uses its
   ID consistently for every competition tab, timer, entry/vote action and cache
   key. A one-competition wave has the familiar direct competition experience.

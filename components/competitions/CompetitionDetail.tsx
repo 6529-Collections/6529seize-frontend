@@ -36,7 +36,11 @@ import CompetitionEntryForm from "./CompetitionEntryForm";
 import CompetitionDraftEditor from "./CompetitionDraftEditor";
 import CompetitionBackLink from "./CompetitionBackLink";
 
-function NativeCompetitionContent() {
+export function NativeCompetitionContent({
+  embedded = false,
+}: {
+  readonly embedded?: boolean;
+}) {
   const { competition, wave } = useCompetition();
   const locale = useBrowserLocale();
   const pathname = usePathname();
@@ -93,24 +97,35 @@ function NativeCompetitionContent() {
       />
     );
   return (
-    <div className="tw-space-y-5">
-      <div className="tw-flex tw-items-center tw-gap-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-2 sm:tw-px-4">
-        <div className="tw-min-w-0 tw-flex-1 tw-overflow-x-auto tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500">
-          <TabToggle
-            options={COMPETITION_TABS.filter(
-              (value) => outcomesVisible || value !== "outcomes"
-            ).map((value) => ({
-              key: value,
-              label: tabLabel(value),
-              panelId: `competition-${competition.id}-${value}`,
-            }))}
-            activeKey={tab}
-            onSelect={(value) =>
-              router.push(`${pathname}?tab=${value}`, { scroll: false })
-            }
-          />
+    <div
+      className={
+        embedded
+          ? "tw-h-full tw-min-h-0 tw-space-y-5 tw-overflow-y-auto tw-p-4"
+          : "tw-space-y-5"
+      }
+    >
+      {!embedded && (
+        <div
+          data-competition-navigation="detail"
+          className="tw-flex tw-items-center tw-gap-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-2 sm:tw-px-4"
+        >
+          <div className="tw-min-w-0 tw-flex-1 tw-overflow-x-auto tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500">
+            <TabToggle
+              options={COMPETITION_TABS.filter(
+                (value) => outcomesVisible || value !== "outcomes"
+              ).map((value) => ({
+                key: value,
+                label: tabLabel(value),
+                panelId: `competition-${competition.id}-${value}`,
+              }))}
+              activeKey={tab}
+              onSelect={(value) =>
+                router.push(`${pathname}?tab=${value}`, { scroll: false })
+              }
+            />
+          </div>
         </div>
-      </div>
+      )}
       {pauses.isError && (
         <CompetitionState
           error
@@ -136,7 +151,7 @@ function NativeCompetitionContent() {
         />
       )}
       <section
-        role="tabpanel"
+        role={embedded ? undefined : "tabpanel"}
         id={`competition-${competition.id}-${tab}`}
         aria-label={tabLabel(tab)}
         className="tw-space-y-5"
@@ -209,7 +224,10 @@ export default function CompetitionDetail({
       </CompetitionProvider>
     );
   return (
-    <section className="tw-h-full tw-min-h-0 tw-overflow-y-auto tw-p-4 sm:tw-p-6">
+    <section
+      data-competition-detail
+      className="tw-h-full tw-min-h-0 tw-overflow-y-auto tw-p-4 sm:tw-p-6"
+    >
       <div className="tw-mx-auto tw-max-w-5xl tw-space-y-5">
         <header className="tw-space-y-3">
           <nav>

@@ -6,6 +6,7 @@ import {
   WaveVotingState,
 } from "@/components/brain/ContentTabContext";
 import { MyStreamWaveTab } from "@/types/waves.types";
+import { CompetitionNavigationContext } from "@/contexts/CompetitionNavigationContext";
 
 let mockPathname = "/waves";
 const mockPush = jest.fn();
@@ -32,6 +33,47 @@ describe("ContentTabContext", () => {
     mockPush.mockClear();
     mockReplace.mockClear();
   });
+
+  it.each([
+    ["leaderboard", MyStreamWaveTab.LEADERBOARD],
+    ["decisions", MyStreamWaveTab.WINNERS],
+    ["votes", MyStreamWaveTab.MY_VOTES],
+    ["outcomes", MyStreamWaveTab.OUTCOME],
+  ])(
+    "selects the wave-level %s tab on a flat default route",
+    (tab, expected) => {
+      mockPathname = "/waves/hub/competitions/alpha";
+      mockSearch = new URLSearchParams({ tab });
+      const wrapper = ({ children }: { children: React.ReactNode }) => (
+        <CompetitionNavigationContext.Provider
+          value={{ flat: true, nativeCompetition: null }}
+        >
+          <ContentTabProvider>{children}</ContentTabProvider>
+        </CompetitionNavigationContext.Provider>
+      );
+      const { result } = renderHook(() => useContentTab(), { wrapper });
+      act(() =>
+        result.current.updateAvailableTabs({
+          waveId: "hub",
+          isChatWave: true,
+          hasCompetitions: true,
+          defaultCompetitionId: "alpha",
+          defaultSelectionEnabled: true,
+          hasAuthenticatedProfile: true,
+          isMemesWave: false,
+          isCurationWave: false,
+          votingState: WaveVotingState.ONGOING,
+          hasFirstDecisionPassed: false,
+        })
+      );
+      expect(result.current.activeContentTab).toBe(expected);
+      act(() => result.current.setActiveContentTab(MyStreamWaveTab.CHAT));
+      expect(mockPush).toHaveBeenCalledWith(
+        "/waves/hub?tab=chat&competition=alpha",
+        { scroll: false }
+      );
+    }
+  );
 
   it("keeps a competition deep link selected and navigates Chat back to its wave", () => {
     mockPathname = "/waves/chat-wave/competitions/first";
