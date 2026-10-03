@@ -521,10 +521,13 @@ export const ContentTabProvider: React.FC<{
         availableTabs.includes(MyStreamWaveTab.SUBMISSIONS)
       )
         mapped = MyStreamWaveTab.SUBMISSIONS;
+      // App sections do not mount the desktop tabs that register Configuration availability.
       if (mapped !== undefined)
-        activeContentTab = availableTabs.includes(mapped)
-          ? mapped
-          : MyStreamWaveTab.LEADERBOARD;
+        activeContentTab =
+          mapped === MyStreamWaveTab.CONFIGURATION ||
+          availableTabs.includes(mapped)
+            ? mapped
+            : MyStreamWaveTab.LEADERBOARD;
     }
   } else if (
     (competitionOnly || search.get("serialNo") === null) &&

@@ -1075,9 +1075,20 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       "capacitor-ios-sim",
       testInfo.project.use.baseURL
     );
+    const navigation = page.getByRole("navigation", { name: "Wave sections" });
+    await page.goto(`/waves/${WAVE}?tab=about`);
+    await expect(
+      navigation.getByRole("button", { name: "About", exact: true })
+    ).toHaveAttribute("aria-current", "true");
+    await expect(
+      navigation.getByRole("button", { name: "Configuration", exact: true })
+    ).toBeVisible();
+    await navigation
+      .getByRole("button", { name: "Configuration", exact: true })
+      .click();
+    await expect(page).toHaveURL(`${ROOT}/alpha?tab=rules`);
     await page.goto(`/waves/${WAVE}?tab=configuration&competition=alpha`);
     await expect(page).toHaveURL(`${ROOT}/alpha?tab=rules`);
-    const navigation = page.getByRole("navigation", { name: "Wave sections" });
     await expect(
       navigation.getByRole("button", { name: "Configuration", exact: true })
     ).toHaveAttribute("aria-current", "true");
@@ -1103,6 +1114,43 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       path: testInfo.outputPath("configuration-native-non-admin-app.png"),
       fullPage: true,
     });
+  });
+
+  test("retains sole legacy Configuration in the app on a wave URL without a competition selection", async ({
+    page,
+  }, testInfo) => {
+    test.skip(testInfo.project.name !== "web-mobile-chromium");
+    const sandbox = await installCompetitionApi(page, false, false);
+    sandbox.onlyCompetition("alpha");
+    await sandbox.legacyPrimary("alpha");
+    await installSurfaceSimulation(
+      page.context(),
+      "capacitor-ios-sim",
+      testInfo.project.use.baseURL
+    );
+    await page.goto(`/waves/${WAVE}?tab=about`);
+    const navigation = page.getByRole("navigation", { name: "Wave sections" });
+    const configuration = navigation.getByRole("button", {
+      name: "Configuration",
+      exact: true,
+    });
+    await expect(configuration).toBeVisible();
+    await expect(
+      navigation.getByRole("button", { name: /^Competitions/ })
+    ).toHaveCount(0);
+    await configuration.click();
+    await expect(page).toHaveURL(`${ROOT}/alpha?tab=rules`);
+    await expect(configuration).toHaveAttribute("aria-current", "true");
+    await expect(
+      page.getByRole("heading", { name: "Schedule", exact: true }).first()
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Pause decisions", exact: true })
+    ).toHaveCount(0);
+    await page.goBack();
+    await expect(page).toHaveURL(`/waves/${WAVE}?tab=about`);
+    await expect(configuration).toBeVisible();
+    await expectNoHorizontalOverflow(page);
   });
 
   test("keeps legacy flat app sections synchronized on click and reload", async ({

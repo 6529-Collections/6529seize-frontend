@@ -99,6 +99,20 @@ describe("ContentTabContext", () => {
     expect(result.current.activeContentTab).toBe(MyStreamWaveTab.COMPETITIONS);
   });
 
+  it("renders flat legacy rules before desktop tab availability is registered", () => {
+    mockPathname = "/waves/hub/competitions/alpha";
+    mockSearch = new URLSearchParams({ tab: "rules" });
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <CompetitionNavigationContext.Provider
+        value={{ flat: true, nativeCompetition: null }}
+      >
+        <ContentTabProvider>{children}</ContentTabProvider>
+      </CompetitionNavigationContext.Provider>
+    );
+    const { result } = renderHook(() => useContentTab(), { wrapper });
+    expect(result.current.activeContentTab).toBe(MyStreamWaveTab.CONFIGURATION);
+  });
+
   it.each([
     ["tab=chat&competition=older", "older"],
     ["tab=chat", "newer"],
