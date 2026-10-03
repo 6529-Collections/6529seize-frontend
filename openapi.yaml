@@ -33580,6 +33580,12 @@ components:
           format: int64
         drop_type:
           $ref: "#/components/schemas/ApiDropMainType"
+        created_at:
+          type: integer
+          format: int64
+          description: >-
+            Original drop publication time in Unix milliseconds, for CHAT and
+            SUBMISSION drops.
         submission_status:
           $ref: "#/components/schemas/ApiSubmissionDropStatus"
         submitted_at:
