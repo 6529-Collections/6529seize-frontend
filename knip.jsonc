@@ -1,51 +1,60 @@
 {
     "$schema": "https://unpkg.com/knip@5/schema-jsonc.json",
 
-    // 1) Tell Knip where your code lives (project graph)
-    "project": [
-      "**/*.{ts,tsx,js,jsx,cjs,mjs}",
-      "!{node_modules,.next,coverage,public}/**",
-      "!{tmp_gen_outp,tmp_gen_final}/**",
-      "!.generated-backup-*/**"
-    ],
+    "workspaces": {
+      ".": {
+        // 1) Tell Knip where your code lives (project graph)
+        "project": [
+          "**/*.{ts,tsx,js,jsx,cjs,mjs}",
+          "!{node_modules,.next,coverage,public}/**",
+          "!{tmp_gen_outp,tmp_gen_final}/**",
+          "!.generated-backup-*/**"
+        ],
 
-    // 2) Optionally add entries Knip can't infer from scripts/configs
-    //    (Next.js entries are auto-added by the Next plugin)
-    "entry": [
-      // The generated serializer catalogs the full API, including models not used by today's UI.
-      "generated/models/ObjectSerializer.ts",
-      "scripts/**/*.{ts,js,cjs,mjs}",  // local CLIs used via package.json scripts
-      "bin/**/*.mjs",                // repo-local Node CLIs launched from shell helpers
-      "ops/skills/**/scripts/**/*.{js,cjs,mjs}", // repo-local skill CLIs invoked by SKILL.md instructions
-      "ops/workstreams/**/scripts/**/*.{js,cjs,mjs}", // campaign/workstream CLIs invoked per their plan docs
-      "ops/scripts/verify-production-artifact.cjs", // isolated production artifact verifier
-      "ops/scripts/profile-cms-recover.ts", // documented independent CMS recovery CLI
-      "ops/scripts/profile-cms/migrate-static-pages.ts", // documented static-page migration CLI
-      "app/**/route.{ts,tsx}",         // Next App Router route handlers (if used)
-      "standalone/standalone-memes-mint/src/app/layout.tsx",
-      "standalone/standalone-memes-mint/src/app/page.tsx",
-      "standalone/standalone-memes-mint/src/next.config.ts",
-      "standalone/standalone-memes-mint/src/postcss.config.js",
-      "standalone/standalone-memes-mint/src/tailwind.config.cjs",
-      // Downloadable local MCP CLI and its deterministic build/protocol test runners.
-      "standalone/profile-cms-agent/main.mjs",
-      "standalone/profile-cms-agent/build.mjs",
-      "standalone/profile-cms-agent/*.test.mjs",
-      "standalone/profile-cms-agent/test-fixtures/api.mjs",
-      "eslint.config.single.mjs",
-      "eslint.config.tight.mjs",
-      "eslint.config.diff.mjs",
-      "eslint.config.single.mjs",
-      ".deepsec/deepsec.config.ts",
-      "jest.config.js",
-      "jest.setup.js",
-      "next-sitemap.build.cjs",
-      "next-sitemap.config.ts",
-      "ops/scripts/build-delegation-docs-content.mjs",
-      "playwright.config.ts",
-      "tests/support/composerSandboxServer.cjs",
-      "services/**/index.{ts,tsx}"
-    ],
+        // 2) Optionally add entries Knip can't infer from scripts/configs
+        //    (Next.js entries are auto-added by the Next plugin)
+        "entry": [
+          // The generated serializer catalogs the full API, including models not used by today's UI.
+          "generated/models/ObjectSerializer.ts",
+          "scripts/**/*.{ts,js,cjs,mjs}",  // local CLIs used via package.json scripts
+          "bin/**/*.mjs",                // repo-local Node CLIs launched from shell helpers
+          "ops/skills/**/scripts/**/*.{js,cjs,mjs}", // repo-local skill CLIs invoked by SKILL.md instructions
+          "ops/workstreams/**/scripts/**/*.{js,cjs,mjs}", // campaign/workstream CLIs invoked per their plan docs
+          "ops/scripts/verify-production-artifact.cjs", // isolated production artifact verifier
+          "ops/scripts/profile-cms-recover.ts", // documented independent CMS recovery CLI
+          "ops/scripts/profile-cms/migrate-static-pages.ts", // documented static-page migration CLI
+          "app/**/route.{ts,tsx}",         // Next App Router route handlers (if used)
+          "standalone/standalone-memes-mint/src/app/layout.tsx",
+          "standalone/standalone-memes-mint/src/app/page.tsx",
+          "standalone/standalone-memes-mint/src/next.config.ts",
+          "standalone/standalone-memes-mint/src/postcss.config.js",
+          "standalone/standalone-memes-mint/src/tailwind.config.cjs",
+          // Downloadable local MCP CLI and its deterministic build/protocol test runners.
+          "standalone/profile-cms-agent/main.mjs",
+          "standalone/profile-cms-agent/build.mjs",
+          "standalone/profile-cms-agent/*.test.mjs",
+          "standalone/profile-cms-agent/test-fixtures/api.mjs",
+          "eslint.config.single.mjs",
+          "eslint.config.tight.mjs",
+          "eslint.config.diff.mjs",
+          "eslint.config.single.mjs",
+          ".deepsec/deepsec.config.ts",
+          "jest.config.js",
+          "jest.setup.js",
+          "next-sitemap.build.cjs",
+          "next-sitemap.config.ts",
+          "ops/scripts/build-delegation-docs-content.mjs",
+          "playwright.config.ts",
+          "tests/support/composerSandboxServer.cjs",
+          "services/**/index.{ts,tsx}"
+        ]
+      },
+      // Device Farm is an independent npm bundle, not a frontend dependency.
+      "tests/device-farm": {
+        "entry": ["specs/*.cjs", "unit/*.test.cjs", "lib/reporter.cjs"],
+        "project": ["{lib,specs,unit}/**/*.cjs"]
+      }
+    },
 
     // 3) Paths: Knip auto-imports TS path aliases from tsconfig,
     //    but you can add manual aliases here if needed.
