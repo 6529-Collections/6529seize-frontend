@@ -28,10 +28,7 @@ import {
   getApproveWaveTabLabelsFromMetadata,
   getWaveOutcomeVisibilityFromMetadata,
 } from "@/helpers/waves/wave-metadata.helpers";
-import {
-  getCompetitionIdFromPathname,
-  isCompetitionPathname,
-} from "@/helpers/competition.helpers";
+import { getCompetitionIdFromPathname } from "@/helpers/competition.helpers";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { useWaveCurationTabs } from "@/hooks/waves/useWaveCurationTabs";
 import { useWaveCurationReorderMutation } from "@/hooks/waves/useWaveCurationReorderMutation";
@@ -44,7 +41,6 @@ import { useWave } from "@/hooks/useWave";
 import { useWavePollSummary } from "@/hooks/useWaveHasPolls";
 import { useWaveCompetitionsTab } from "@/hooks/competitions/useWaveCompetitionsTab";
 import { useDecisionPoints } from "@/hooks/waves/useDecisionPoints";
-import { useWaveTimers } from "@/hooks/useWaveTimers";
 import { Time } from "@/helpers/time";
 import { useAuth } from "@/components/auth/Auth";
 import {
@@ -54,11 +50,7 @@ import {
   type TabOption,
 } from "./MyStreamWaveTabOption";
 import { MyStreamWaveTab } from "@/types/waves.types";
-import {
-  useContentTab,
-  WaveVotingState,
-  type SetActiveContentTab,
-} from "../ContentTabContext";
+import { useContentTab, type SetActiveContentTab } from "../ContentTabContext";
 import MyStreamActionTooltip from "./MyStreamActionTooltip";
 import MyStreamWaveCreateActionsMenu from "./tabs/MyStreamWaveCreateActionsMenu";
 import MyStreamWaveCurationTabMenu from "./tabs/MyStreamWaveCurationTabMenu";
@@ -166,24 +158,6 @@ const getTabLabel = ({
   }
 
   return TAB_LABELS[tab];
-};
-
-const getWaveVotingState = ({
-  isUpcoming,
-  isCompleted,
-}: {
-  readonly isUpcoming: boolean;
-  readonly isCompleted: boolean;
-}): WaveVotingState => {
-  if (isUpcoming) {
-    return WaveVotingState.NOT_STARTED;
-  }
-
-  if (isCompleted) {
-    return WaveVotingState.ENDED;
-  }
-
-  return WaveVotingState.ONGOING;
 };
 
 function ProfileCurationIcon({ tooltipId }: { readonly tooltipId: string }) {
@@ -301,14 +275,9 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
   const locale = useBrowserLocale();
   const { flat, nativeCompetition } = useCompetitionNavigation();
   const nativeDefault = flat ? nativeCompetition : null;
-  const { availableTabs, updateAvailableTabs } = useContentTab();
-  const {
-    hasCompetitions,
-    hideCompetitionsTab,
-    activeCount: activeCompetitionCount,
-    defaultCompetitionId,
-    defaultSelectionEnabled,
-  } = useWaveCompetitionsTab(wave);
+  const { availableTabs } = useContentTab();
+  const { activeCount: activeCompetitionCount, defaultCompetitionId } =
+    useWaveCompetitionsTab(wave);
   const effectiveCompetitionId =
     getCompetitionIdFromPathname(pathname) ??
     searchParams.get("competition") ??
@@ -340,10 +309,6 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
     ? nativeDefault.type === ApiCompetitionType.Approve
     : isApproveWave;
   const isCompetitionWave = isRankWave || isApproveWave;
-  const {
-    voting: { isUpcoming, isCompleted },
-    decisions: { firstDecisionDone },
-  } = useWaveTimers(wave);
   const { allDecisions, hasMoreFuture, loadMoreFuture } = useDecisionPoints(
     wave,
     {
@@ -376,7 +341,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
     isProfileWave &&
     isConnectedProfileWaveAuthor &&
     activeProfileProxy === null;
-  const { hasPolls, unansweredPolls } = useWavePollSummary({
+  const { unansweredPolls } = useWavePollSummary({
     waveId: wave.id,
   });
 
@@ -431,57 +396,6 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
       clearTimeout(timeoutId);
     };
   }, [nextDecisionTime, hasMoreFuture, loadMoreFuture]);
-
-  const votingState = getWaveVotingState({
-    isUpcoming,
-    isCompleted,
-  });
-
-  useEffect(() => {
-    const hasSerialTarget = searchParams.get("serialNo") !== null;
-    updateAvailableTabs({
-      waveId: wave.id,
-      isMemesWave: nativeDefault ? false : isMemesWave,
-      isChatWave: nativeDefault ? true : isChatWave,
-      hasPolls,
-      hasCompetitions,
-      hideCompetitionsTab,
-      hasCompetitionConfiguration:
-        (!isCompetitionPathname(pathname) || flat || competitionOnly) &&
-        (isCompetitionWave || Boolean(effectiveCompetitionId)),
-      defaultCompetitionId: effectiveCompetitionId,
-      defaultSelectionEnabled,
-      hasAuthenticatedProfile,
-      isCurationWave,
-      isApproveWave,
-      showOutcomeTab: outcomesVisible,
-      votingState,
-      hasFirstDecisionPassed: firstDecisionDone,
-      transientPreferredTab: hasSerialTarget ? MyStreamWaveTab.CHAT : null,
-    });
-  }, [
-    wave,
-    isMemesWave,
-    isChatWave,
-    hasPolls,
-    hasCompetitions,
-    hideCompetitionsTab,
-    isCompetitionWave,
-    flat,
-    competitionOnly,
-    effectiveCompetitionId,
-    defaultSelectionEnabled,
-    isApproveWave,
-    outcomesVisible,
-    hasAuthenticatedProfile,
-    isCurationWave,
-    votingState,
-    firstDecisionDone,
-    searchParams,
-    pathname,
-    updateAvailableTabs,
-    nativeDefault,
-  ]);
 
   const standardOptions: TabOption[] = useMemo(
     () => [

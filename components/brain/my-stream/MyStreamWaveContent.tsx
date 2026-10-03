@@ -27,6 +27,7 @@ import MemesArtSubmissionModal from "@/components/waves/memes/MemesArtSubmission
 import { MyStreamWaveTab } from "@/types/waves.types";
 import BrainRightSidebarConfiguration from "@/components/brain/right-sidebar/BrainRightSidebarConfiguration";
 import MyStreamWaveAbout from "./MyStreamWaveAbout";
+import { useWaveContentTabRegistration } from "./useWaveContentTabRegistration";
 import { MyStreamWaveTabs } from "./tabs/MyStreamWaveTabs";
 import MyStreamWaveMyVotes from "./votes/MyStreamWaveMyVotes";
 import MyStreamWaveFAQ from "./MyStreamWaveFAQ";
@@ -127,6 +128,7 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
     },
   });
   const metadataWaveId = wave?.id;
+  useWaveContentTabRegistration(wave, competitionOnly);
   const defaultNavigation = useDefaultCompetitionNavigation(
     wave,
     !competitionOnly

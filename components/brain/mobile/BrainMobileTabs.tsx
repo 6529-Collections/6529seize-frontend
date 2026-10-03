@@ -25,6 +25,7 @@ import {
 } from "@/helpers/competition.helpers";
 import { useCompetitionNavigation } from "@/contexts/CompetitionNavigationContext";
 import { getLegacyCompetitionTab } from "@/helpers/default-competition.helpers";
+import { useContentTab } from "../ContentTabContext";
 import { ApiCompetitionType } from "@/generated/models/ApiCompetitionType";
 import {
   getApproveWaveTabLabelsFromMetadata,
@@ -129,6 +130,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
   const isCompetitionRoute = isCompetitionPathname(pathname);
   const searchParams = useSearchParams();
   const { flat, nativeCompetition } = useCompetitionNavigation();
+  const { activeContentTab } = useContentTab();
   const locale = useBrowserLocale();
   const nativePresentation = useMemo(
     () =>
@@ -162,10 +164,12 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
       ? "leaderboard"
       : requestedCompetitionTab;
   const mappedCompetitionTab = getLegacyCompetitionTab(selectedCompetitionTab);
+  const selectedLegacyView = nativeCompetition
+    ? (mappedCompetitionTab ?? BrainView.COMPETITIONS)
+    : activeContentTab;
   const effectiveActiveView =
     flat && isCompetitionRoute
-      ? ((mappedCompetitionTab ??
-          BrainView.COMPETITIONS) as unknown as BrainView)
+      ? (selectedLegacyView as unknown as BrainView)
       : activeView;
   const { registerRef } = useLayout();
   const { connectedProfile, isAuthenticated } = useAuth();

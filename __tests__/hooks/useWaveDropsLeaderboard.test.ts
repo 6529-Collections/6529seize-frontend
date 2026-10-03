@@ -80,6 +80,7 @@ describe("useWaveDropsLeaderboard", () => {
     unmount();
     expect(queryClientMock.removeQueries).toHaveBeenCalledWith({
       queryKey: ["DROPS_LEADERBOARD", { waveId: "2" }],
+      predicate: expect.any(Function),
     });
   });
 

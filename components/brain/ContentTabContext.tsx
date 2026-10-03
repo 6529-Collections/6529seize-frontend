@@ -236,6 +236,7 @@ export const ContentTabProvider: React.FC<{
   const [availableTabs, setAvailableTabs] = useState<MyStreamWaveTab[]>([
     initialTab,
   ]);
+  const [registeredWaveId, setRegisteredWaveId] = useState<string | null>(null);
   const currentWaveIdRef = useRef<string | null>(null);
   const defaultCompetitionRef = useRef<{ id: string | null; enabled: boolean }>(
     { id: null, enabled: false }
@@ -261,6 +262,7 @@ export const ContentTabProvider: React.FC<{
     (params: WaveTabParams | null) => {
       if (!params) {
         setAvailableTabs([initialTab]);
+        setRegisteredWaveId(null);
         currentWaveIdRef.current = null;
         transientTabOverrideRef.current = null;
         setActiveTabInternal(initialTab);
@@ -362,6 +364,7 @@ export const ContentTabProvider: React.FC<{
       }
 
       setAvailableTabs(tabs);
+      setRegisteredWaveId(waveId ?? null);
       setHideCompetitionsTab(hideCollection);
       currentWaveIdRef.current = waveId ?? null;
       defaultCompetitionRef.current = {
@@ -521,13 +524,17 @@ export const ContentTabProvider: React.FC<{
         availableTabs.includes(MyStreamWaveTab.SUBMISSIONS)
       )
         mapped = MyStreamWaveTab.SUBMISSIONS;
-      // App sections do not mount the desktop tabs that register Configuration availability.
-      if (mapped !== undefined)
+      // Honor canonical links while the wave is loading; apply its gates after registration.
+      if (mapped !== undefined) {
+        const fallback = availableTabs.includes(MyStreamWaveTab.SUBMISSIONS)
+          ? MyStreamWaveTab.SUBMISSIONS
+          : MyStreamWaveTab.LEADERBOARD;
         activeContentTab =
-          mapped === MyStreamWaveTab.CONFIGURATION ||
+          registeredWaveId !== getWaveIdFromPathname(pathname) ||
           availableTabs.includes(mapped)
             ? mapped
-            : MyStreamWaveTab.LEADERBOARD;
+            : fallback;
+      }
     }
   } else if (
     (competitionOnly || search.get("serialNo") === null) &&
