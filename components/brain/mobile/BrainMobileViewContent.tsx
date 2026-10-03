@@ -2,8 +2,11 @@
 
 import type { ReactNode } from "react";
 import dynamic from "next/dynamic";
-import { usePathname } from "next/navigation";
-import { isCompetitionPathname } from "@/helpers/competition.helpers";
+import { usePathname, useSearchParams } from "next/navigation";
+import {
+  isCompetitionPathname,
+  isMultiCompetitionEnabled,
+} from "@/helpers/competition.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import BrainMobileWaves from "./BrainMobileWaves";
@@ -65,6 +68,10 @@ const MyStreamWaveMyVotes = dynamic(
 const MyStreamWaveFAQ = dynamic(() => import("../my-stream/MyStreamWaveFAQ"), {
   loading: () => <BrainMobileViewLoadingFallback />,
 });
+const BrainRightSidebarConfiguration = dynamic(
+  () => import("../right-sidebar/BrainRightSidebarConfiguration"),
+  { loading: () => <BrainMobileViewLoadingFallback /> }
+);
 
 const CompetitionHub = dynamic(
   () => import("@/components/competitions/CompetitionHub"),
@@ -278,6 +285,7 @@ export default function BrainMobileViewContent({
   wave,
 }: BrainMobileViewContentProps) {
   const isCompetitionRoute = isCompetitionPathname(usePathname());
+  const search = useSearchParams();
   const isCompetitionWave = isRankWave || isApproveWave;
 
   switch (activeView) {
@@ -296,6 +304,17 @@ export default function BrainMobileViewContent({
           setActiveTab={onAboutTabChange}
         />
       );
+    case BrainView.CONFIGURATION:
+      if (
+        isCompetitionRoute ||
+        (isMultiCompetitionEnabled() && search.get("competition"))
+      )
+        return children;
+      return wave ? (
+        <div className="tw-h-full tw-min-h-0 tw-overflow-y-auto">
+          <BrainRightSidebarConfiguration wave={wave} />
+        </div>
+      ) : null;
     case BrainView.LEADERBOARD:
       return (
         <BrainMobileLeaderboardView

@@ -468,6 +468,7 @@ const TITLE_CONTEXT_MESSAGES = objectMessages("titleContext", {
 } as const);
 
 const WAVE_NAVIGATION_MESSAGES = objectMessages("wave.navigation", {
+  about: "About",
   waveSections: "Wave sections",
   appSections: "App sections",
   loadingSections: "Loading wave sections",
