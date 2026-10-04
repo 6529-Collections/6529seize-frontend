@@ -31,6 +31,7 @@ interface OnchainTransactionModalProps {
   readonly successContent?: ReactNode | undefined;
   readonly pendingContent?: ReactNode | undefined;
   readonly closeLabel?: string | undefined;
+  readonly allowCloseWhilePending?: boolean | undefined;
   readonly onClose: () => void;
 }
 
@@ -260,12 +261,13 @@ export default function OnchainTransactionModal({
   successContent,
   pendingContent,
   closeLabel,
+  allowCloseWhilePending = false,
   onClose,
 }: OnchainTransactionModalProps) {
   const titleId = useId();
   const subtitleId = useId();
   const dialogRef = useRef<HTMLDialogElement>(null);
-  const closable = status === "success" || status === "error";
+  const closable = allowCloseWhilePending || status === "success" || status === "error";
   const hasSubtitle = subtitle !== undefined && subtitle !== null;
   const customContent = getCustomStatusContent(
     status,

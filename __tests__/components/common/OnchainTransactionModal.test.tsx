@@ -282,6 +282,15 @@ describe("OnchainTransactionModal", () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
+  it("allows an opt-in pre-sign review to close with Escape or the close button", () => {
+    const onClose = jest.fn();
+    render(<OnchainTransactionModal status="confirm_wallet" title="Review admin change" allowCloseWhilePending onClose={onClose} pendingContent={<button type="button">Confirm Add Admin</button>} />);
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(onClose).toHaveBeenCalledTimes(1);
+    fireEvent.click(screen.getByRole("button", { name: "Close modal" }));
+    expect(onClose).toHaveBeenCalledTimes(2);
+  });
+
   it("dismisses a terminal state with the backdrop", async () => {
     const user = userEvent.setup();
     const onClose = jest.fn();

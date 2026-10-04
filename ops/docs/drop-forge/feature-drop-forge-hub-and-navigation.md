@@ -9,6 +9,41 @@ two section cards:
 - `Launch Claims`: initialize claim phases, update claim config, and run
   airdrops
 
+Below the cards, `Contract Admins` shows the active chain and creator contract,
+then its owner first (marked `Owner`) and deduplicated on-chain admins.
+All landing-access wallets can read this list and refresh it. Craft access
+remains distribution-admin-only.
+
+## Contract Admin Changes
+
+- Add/Revoke controls are shown only to the owner or `CLAIMS_ADMIN_WALLETS`.
+  Other approved on-chain admins have Launch access but cannot manage admins.
+- Add accepts a wallet address or ENS name resolved through the existing
+  mainnet ENS input. Confirmation shows the exact resolved wallet address.
+  Invalid/unresolved names, the zero address, owner, and existing admins cannot
+  be added. Revoke requires confirmation and is never offered for the owner.
+- Transactions call `approveAdmin(address)` or `revokeAdmin(address)` on the
+  active creator contract, not the lazy-claim extension. The existing on-chain
+  dialog shows wallet confirmation, submission, receipt, and error states.
+  A successful receipt refreshes the list and shared creator permission reads.
+- Only the contract owner can execute these methods on-chain. Configured
+  claims admins intentionally see the controls for testing; non-owner calls
+  still fail. No environment admin list or ownership is changed by these calls.
+- On-chain reads refresh periodically and on refocus. A read failure shows a
+  retry and disables writes rather than trusting an old list. A wallet/network
+  change invalidates an unconfirmed operation; duplicate submissions are blocked.
+- The chain follows existing Drop Forge configuration: Sepolia uses the
+  testnet creator, other supported wallet contexts use the mainnet creator.
+  Sepolia launch action tracking is still unsupported by the backend.
+
+### Localization Fallback Debt
+
+The new contract-admin labels, validation and confirmation copy follow the
+existing English-only Drop Forge and ENS/transaction modal surfaces. They use
+the canonical en-US fallback in all locales. The frontend i18n backlog should
+add a shared Drop Forge/admin transaction message family, then verify wrapping
+and focus for every supported locale; transaction authority is unchanged.
+
 ## Location in the Site
 
 - Route: `/drop-forge`

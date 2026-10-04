@@ -10,6 +10,7 @@ import {
 import { DropForgePermissionFallback } from "@/components/drop-forge/DropForgePermissionFallback";
 import DropForgeTestnetIndicator from "@/components/drop-forge/DropForgeTestnetIndicator";
 import { useDropForgePermissions } from "@/hooks/useDropForgePermissions";
+import DropForgeContractAdmins from "@/components/drop-forge/contract-admins/DropForgeContractAdmins";
 
 export default function DropForgePageClient() {
   const {
@@ -100,6 +101,7 @@ export default function DropForgePageClient() {
           </p>
         </Link>
       </div>
+      <DropForgeContractAdmins />
     </div>
   );
 }
