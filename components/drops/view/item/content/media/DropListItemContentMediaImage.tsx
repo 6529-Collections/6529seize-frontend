@@ -400,6 +400,7 @@ function DropListItemContentMediaImageContent({
           )}
           {shouldLoadImage && (
             <span
+              data-drop-image-content
               className={
                 intrinsicHeight ? "tw-block" : "tw-absolute tw-inset-0"
               }
