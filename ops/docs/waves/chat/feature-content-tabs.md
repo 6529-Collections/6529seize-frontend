@@ -14,8 +14,8 @@ available. Native and legacy defaults share this ordering on desktop, mobile
 web and the app.
 
 In the `My Votes` tab, non-image drops use a preview image from drop metadata when available, so rows render quickly and stay stable in list form.
-The web layout stores the last selected tab for each wave on the current device,
-then restores it when that wave is opened again and the tab is still available.
+On web, tab choices made during the current visit survive background data
+loading. A fresh visit opens Chat, even if another tab was selected earlier.
 In the native app, Back restores the wave section from that navigation-history
 entry. Opening another wave normally still uses its default section.
 
