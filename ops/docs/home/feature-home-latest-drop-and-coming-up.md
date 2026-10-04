@@ -107,6 +107,8 @@ Use this page for visibility rules, state switches, and route targets.
   backend mapping is unavailable; home does not infer a relationship.
 - The home `Next Drop` artwork panel includes a labeled local-time `Mint Date`
   alongside its wave, submission time, and rating details.
+- On phone browsers and the mobile app, still artwork fills the panel width
+  at its natural aspect ratio and keeps its details below the image.
 - On iOS outside the US, the countdown `Mint` button is hidden.
 - On iOS outside the US, The Memes subscription row is hidden.
 - Latest Drop and mapped Next Drop cards always show `Your allowance`. Before a
