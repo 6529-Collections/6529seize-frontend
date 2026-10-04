@@ -1,4 +1,5 @@
 import {
+  COMPETITION_TABS,
   getCompetitionRoute,
   getCompetitionIdFromPathname,
   isCompetitionPathname,
@@ -14,6 +15,7 @@ export const waveCompetitionTabs: Partial<Record<MyStreamWaveTab, string>> = {
   [MyStreamWaveTab.MY_VOTES]: "votes",
   [MyStreamWaveTab.CONFIGURATION]: "rules",
 };
+const competitionTabNames: readonly string[] = COMPETITION_TABS;
 
 export function getLegacyCompetitionTab(
   tab: string | null
@@ -44,9 +46,12 @@ export function shouldResolveDefault(
       getCompetitionIdFromPathname(pathname) !== null &&
       search.get("default") === "1"
     );
-  if (search.get("default") === "1") return true;
-  return !["chat", "polls", "about", "competitions"].includes(
-    search.get("tab") ?? ""
+  // Resolving the competition supplies competition views, never the entry view.
+  const tab = search.get("tab");
+  return (
+    tab !== null &&
+    (competitionTabNames.includes(tab) ||
+      Object.keys(waveCompetitionTabs).some((key) => key.toLowerCase() === tab))
   );
 }
 
@@ -57,7 +62,12 @@ export function getImplicitCompetitionRoute(
 ) {
   const params = new URLSearchParams(search);
   params.delete("wave");
-  if (params.get("tab") === "configuration") params.set("tab", "rules");
+  const waveTab = Object.values(MyStreamWaveTab).find(
+    (tab) => tab.toLowerCase() === params.get("tab")
+  );
+  const competitionTab =
+    waveTab === undefined ? undefined : waveCompetitionTabs[waveTab];
+  if (competitionTab) params.set("tab", competitionTab);
   if (competitionId === null) {
     params.set("default", "1");
     params.set("tab", "chat");

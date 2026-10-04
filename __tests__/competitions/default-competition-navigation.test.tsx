@@ -15,6 +15,7 @@ const mockReplace = jest.fn();
 let mockEnabled = true;
 let mockId: string | null = "alpha";
 let mockError = false;
+let mockSuccess = true;
 jest.mock("next/navigation", () => ({
   usePathname: () => mockPathname,
   useSearchParams: () => mockSearch,
@@ -26,7 +27,7 @@ jest.mock("@/helpers/competition.helpers", () => ({
 }));
 jest.mock("@/hooks/competitions/useCompetitionQueries", () => ({
   useDefaultCompetition: jest.fn(() => ({
-    isSuccess: true,
+    isSuccess: mockSuccess,
     isError: mockError,
     data: { competition_id: mockId, evaluated_at: 100, next_refresh_at: 200 },
   })),
@@ -38,6 +39,7 @@ beforeEach(() => {
   mockEnabled = true;
   mockId = "alpha";
   mockError = false;
+  mockSuccess = true;
   jest.clearAllMocks();
 });
 
@@ -47,22 +49,43 @@ afterEach(() =>
     .forEach((element) => element.remove())
 );
 
-it("resolves bare wave entry and query-based app entry to a canonical implicit competition", () => {
-  const { rerender } = renderHook(() =>
-    useDefaultCompetitionNavigation(wave, true)
-  );
-  expect(mockReplace).toHaveBeenCalledWith(
-    "/waves/wave/competitions/alpha?default=1",
-    { scroll: false }
-  );
-  mockPathname = "/my-stream";
-  mockSearch = new URLSearchParams("wave=wave");
-  rerender();
-  expect(mockReplace).toHaveBeenLastCalledWith(
-    "/waves/wave/competitions/alpha?default=1",
-    { scroll: false }
-  );
-});
+it.each(["/waves/wave", "/my-stream"])(
+  "keeps bare entry in Chat after delayed default resolution (%s)",
+  (pathname) => {
+    mockPathname = pathname;
+    mockSearch = new URLSearchParams(
+      pathname === "/my-stream" ? "wave=wave" : ""
+    );
+    mockSuccess = false;
+    const { rerender } = renderHook(() =>
+      useDefaultCompetitionNavigation(wave, true)
+    );
+    expect(mockReplace).not.toHaveBeenCalled();
+    mockSuccess = true;
+    rerender();
+    expect(mockReplace).not.toHaveBeenCalled();
+    expect(useDefaultCompetition).toHaveBeenLastCalledWith("wave", false);
+  }
+);
+
+it.each([
+  ["leaderboard", "leaderboard"],
+  ["voters", "voters"],
+  ["winners", "decisions"],
+  ["my_votes", "votes"],
+  ["configuration", "rules"],
+  ["outcome", "outcomes"],
+])(
+  "resolves the default for an explicit %s destination",
+  (tab, destination) => {
+    mockSearch = new URLSearchParams({ tab });
+    renderHook(() => useDefaultCompetitionNavigation(wave, true));
+    expect(mockReplace).toHaveBeenCalledWith(
+      `/waves/wave/competitions/alpha?tab=${destination}&default=1`,
+      { scroll: false }
+    );
+  }
+);
 
 it.each([
   "entry=older",
@@ -70,6 +93,9 @@ it.each([
   "serialNo=23",
   "curation=gallery",
   "tab=chat",
+  "default=1",
+  "default=1&tab=chat",
+  "tab=faq",
   "competition=older&tab=chat",
 ])("preserves explicit wave targets (%s)", (search) => {
   mockSearch = new URLSearchParams(search);
@@ -116,7 +142,7 @@ it("keeps zero competitions implicitly refreshable and returns an emptied detail
       "/waves/wave",
       new URLSearchParams("default=1&tab=chat")
     )
-  ).toBe(true);
+  ).toBe(false);
 });
 
 it.each(["data-competition-command", "role"])(

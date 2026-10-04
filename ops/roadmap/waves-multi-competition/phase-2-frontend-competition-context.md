@@ -102,8 +102,8 @@ Required behavior:
 - A competition from another wave is rejected or redirected safely.
 - Browser Back and Forward restore competition and local subview correctly.
 - Shipped original-primary routes retain the legacy experience. The approved
-  [default-competition follow-up](./default-competition.md) will resolve implicit
-  wave entry separately; explicit routes and permanent GETs retain their identity.
+  [default-competition follow-up](./default-competition.md) resolves competition-tab context while ordinary
+  wave entry stays in Chat; explicit routes and permanent GETs retain their identity.
 - Stored selection never overrides an explicit URL competition.
 
 If the final design initially uses a query parameter, the same identity and
