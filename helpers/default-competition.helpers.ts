@@ -15,6 +15,7 @@ export const waveCompetitionTabs: Partial<Record<MyStreamWaveTab, string>> = {
   [MyStreamWaveTab.MY_VOTES]: "votes",
   [MyStreamWaveTab.CONFIGURATION]: "rules",
 };
+const competitionTabNames: readonly string[] = COMPETITION_TABS;
 
 export function getLegacyCompetitionTab(
   tab: string | null
@@ -49,7 +50,7 @@ export function shouldResolveDefault(
   const tab = search.get("tab");
   return (
     tab !== null &&
-    (COMPETITION_TABS.some((candidate) => candidate === tab) ||
+    (competitionTabNames.includes(tab) ||
       Object.keys(waveCompetitionTabs).some((key) => key.toLowerCase() === tab))
   );
 }

@@ -27,6 +27,25 @@ const waveTabStrip = (page: Page) =>
     has: page.getByRole("tab", { name: "Chat", exact: true }),
   });
 
+async function deferDefaultCompetition(page: Page) {
+  let releaseDefault!: () => void;
+  const pendingDefault = new Promise<void>((resolve) => {
+    releaseDefault = resolve;
+  });
+  await page.route("**/v3/waves/**/default-competition", async (route) => {
+    await pendingDefault;
+    await route.fallback();
+  });
+  return {
+    releaseDefault,
+    waitForDefaultResponse: () =>
+      page.waitForResponse(
+        (response) =>
+          response.url().endsWith("/default-competition") && response.ok()
+      ),
+  };
+}
+
 async function expectLegacySectionContent(page: Page, tab: string) {
   if (tab === "decisions") {
     await expect(
@@ -825,6 +844,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     test(`keeps rendered Chat after delayed default resolution (${mode})`, async ({
       page,
     }, testInfo) => {
+      // The native mobile shell has no desktop variant; web entry is covered above.
       test.skip(
         mode === "native-app" &&
           testInfo.project.name !== "web-mobile-chromium",
@@ -839,18 +859,9 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
           "capacitor-ios-sim",
           testInfo.project.use.baseURL
         );
-      let releaseDefault!: () => void;
-      const pendingDefault = new Promise<void>((resolve) => {
-        releaseDefault = resolve;
-      });
-      await page.route("**/v3/waves/**/default-competition", async (route) => {
-        await pendingDefault;
-        await route.fallback();
-      });
-      const selectionResponse = page.waitForResponse(
-        (response) =>
-          response.url().endsWith("/default-competition") && response.ok()
-      );
+      const { releaseDefault, waitForDefaultResponse } =
+        await deferDefaultCompetition(page);
+      const selectionResponse = waitForDefaultResponse();
       try {
         await page.goto(`/waves/${WAVE}`);
         const chatContent = page
@@ -920,18 +931,9 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         "capacitor-ios-sim",
         testInfo.project.use.baseURL
       );
-    let releaseDefault!: () => void;
-    const pendingDefault = new Promise<void>((resolve) => {
-      releaseDefault = resolve;
-    });
-    await page.route("**/v3/waves/**/default-competition", async (route) => {
-      await pendingDefault;
-      await route.fallback();
-    });
-    const selectionResponse = page.waitForResponse(
-      (response) =>
-        response.url().endsWith("/default-competition") && response.ok()
-    );
+    const { releaseDefault, waitForDefaultResponse } =
+      await deferDefaultCompetition(page);
+    const selectionResponse = waitForDefaultResponse();
     try {
       await page.goto(`/waves/${WAVE}`);
       const chatRegion = page.getByRole("region", {
@@ -982,14 +984,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         "capacitor-ios-sim",
         testInfo.project.use.baseURL
       );
-    let releaseDefault!: () => void;
-    const pendingDefault = new Promise<void>((resolve) => {
-      releaseDefault = resolve;
-    });
-    await page.route("**/v3/waves/**/default-competition", async (route) => {
-      await pendingDefault;
-      await route.fallback();
-    });
+    const { releaseDefault } = await deferDefaultCompetition(page);
     try {
       await page.goto(`/waves/${WAVE}`);
       await expect(
