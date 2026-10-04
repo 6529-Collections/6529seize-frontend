@@ -15,6 +15,9 @@ import { useDropForgeMintingConfig } from "@/components/drop-forge/drop-forge-co
 import Button from "@/components/utils/button/Button";
 import EnsAddressInput from "@/components/utils/input/ens-address/EnsAddressInput";
 import { useDropForgePermissions } from "@/hooks/useDropForgePermissions";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
+import type { SupportedLocale } from "@/i18n/locales";
 import { CREATOR_ADMIN_ABI } from "./creator-admin-abi";
 import {
   getAdminAddressError,
@@ -27,6 +30,7 @@ import {
 } from "./useContractAdminTransaction";
 
 export default function DropForgeContractAdmins() {
+  const locale = useBrowserLocale();
   const { contract, chain } = useDropForgeMintingConfig();
   const { address: activeWallet } = useSeizeConnectContext();
   const { canManageContractAdmins } = useDropForgePermissions();
@@ -80,8 +84,9 @@ export default function DropForgeContractAdmins() {
     ? getCreatorAdminRows(ownerQuery.data, admins)
     : [];
   const error = ensError
-    ? "Unable to resolve this ENS name."
-    : getAdminAddressError(resolvedAddress, ownerQuery.data, admins);
+    ? t(locale, "dropForge.admins.ensError")
+    : getAdminAddressError(resolvedAddress, ownerQuery.data, admins, locale);
+  const hasInputError = !!input && !resolving && !!error;
   const visibleConfirmation =
     !busy && !transaction && confirmation?.context === contextFingerprint
       ? confirmation
@@ -91,14 +96,14 @@ export default function DropForgeContractAdmins() {
   if (hasReadError) {
     listStatus = (
       <p role="alert" className="tw-text-red">
-        Unable to load contract admins. Try refreshing.
+        {t(locale, "dropForge.admins.loadError")}
       </p>
     );
   } else if (!ready) {
     listStatus = (
-      <p role="status" className="tw-text-iron-400">
-        Loading contract admins...
-      </p>
+      <output className="tw-block tw-text-iron-400">
+        {t(locale, "dropForge.admins.loading")}
+      </output>
     );
   }
   const refresh = () => {
@@ -113,13 +118,13 @@ export default function DropForgeContractAdmins() {
           id="contract-admins-heading"
           className="tw-mb-0 tw-text-xl tw-font-semibold tw-text-iron-50"
         >
-          Contract Admins
+          {t(locale, "dropForge.admins.heading")}
         </h2>
         <Button
           variant="secondary"
           size="sm"
-          aria-label="Refresh contract admins"
-          title="Refresh contract admins"
+          aria-label={t(locale, "dropForge.admins.refresh")}
+          title={t(locale, "dropForge.admins.refresh")}
           onClick={refresh}
           disabled={ownerQuery.isFetching || adminsQuery.isFetching}
         >
@@ -127,7 +132,7 @@ export default function DropForgeContractAdmins() {
         </Button>
       </div>
       <p className="tw-mt-2 tw-break-all tw-text-sm tw-text-iron-400">
-        {chain.name} · {getAddress(contract)}
+        {chain.name} · {contract}
       </p>
       {listStatus}
       {ready && (
@@ -142,7 +147,12 @@ export default function DropForgeContractAdmins() {
                   {admin.address}
                 </span>
                 <span className="tw-text-xs tw-text-iron-400">
-                  {admin.isOwner ? "Owner" : "Admin"}
+                  {t(
+                    locale,
+                    admin.isOwner
+                      ? "dropForge.admins.owner"
+                      : "dropForge.admins.admin"
+                  )}
                 </span>
               </div>
               {canManageContractAdmins && !admin.isOwner && (
@@ -150,8 +160,10 @@ export default function DropForgeContractAdmins() {
                   variant="destructive"
                   size="sm"
                   disabled={controlsDisabled}
-                  aria-label={`Revoke admin ${admin.address}`}
-                  title="Revoke admin"
+                  aria-label={t(locale, "dropForge.admins.revokeLabel", {
+                    address: admin.address,
+                  })}
+                  title={t(locale, "dropForge.admins.revokeTooltip")}
                   onClick={() =>
                     setConfirmation({
                       functionName: "revokeAdmin",
@@ -184,7 +196,7 @@ export default function DropForgeContractAdmins() {
             htmlFor="contract-admin-address"
             className="tw-mb-2 tw-block tw-text-sm tw-font-medium tw-text-iron-200"
           >
-            Admin wallet or ENS
+            {t(locale, "dropForge.admins.addressLabel")}
           </label>
           <div className="tw-flex tw-flex-col tw-gap-3 sm:tw-flex-row">
             <EnsAddressInput
@@ -193,6 +205,8 @@ export default function DropForgeContractAdmins() {
               variant="dark"
               disabled={controlsDisabled}
               ariaDescribedBy="contract-admin-validation"
+              ariaInvalid={hasInputError}
+              placeholder={t(locale, "dropForge.admins.addressPlaceholder")}
               onValueChange={setInput}
               onAddressChange={setResolvedAddress}
               onLoadingChange={setResolving}
@@ -205,19 +219,21 @@ export default function DropForgeContractAdmins() {
               className="tw-shrink-0"
             >
               <PlusIcon aria-hidden="true" className="tw-size-4" />
-              Add Admin
+              {t(locale, "dropForge.admins.add")}
             </Button>
           </div>
           <p
             id="contract-admin-validation"
-            aria-live="polite"
+            role={hasInputError ? "alert" : undefined}
+            aria-live={hasInputError ? undefined : "polite"}
             className="tw-mt-2 tw-min-h-5 tw-break-all tw-text-sm tw-text-iron-400"
           >
             {getAdminValidationMessage(
               resolving,
               input,
               error,
-              resolvedAddress
+              resolvedAddress,
+              locale
             )}
           </p>
         </form>
@@ -225,6 +241,10 @@ export default function DropForgeContractAdmins() {
       {visibleConfirmation && (
         <AdminConfirmation
           operation={visibleConfirmation}
+          locale={locale}
+          isOwner={
+            activeWallet?.toLowerCase() === ownerQuery.data?.toLowerCase()
+          }
           chain={chain}
           onClose={() => setConfirmation(null)}
           onConfirm={() => {
@@ -235,11 +255,12 @@ export default function DropForgeContractAdmins() {
       {transaction && (
         <OnchainTransactionModal
           status={transaction.status}
-          title={
+          title={t(
+            locale,
             transaction.functionName === "approveAdmin"
-              ? "Add Admin"
-              : "Revoke Admin"
-          }
+              ? "dropForge.admins.add"
+              : "dropForge.admins.revoke"
+          )}
           subtitle={<span className="tw-break-all">{transaction.address}</span>}
           message={transaction.message}
           transactionHash={transaction.hash}
@@ -256,11 +277,15 @@ export default function DropForgeContractAdmins() {
 
 function AdminConfirmation({
   operation,
+  locale,
+  isOwner,
   chain,
   onClose,
   onConfirm,
 }: Readonly<{
   operation: AdminOperation;
+  locale: SupportedLocale;
+  isOwner: boolean;
   chain: { id: number };
   onClose: () => void;
   onConfirm: () => void;
@@ -270,29 +295,45 @@ function AdminConfirmation({
     <OnchainTransactionModal
       status="confirm_wallet"
       allowCloseWhilePending
-      title={approving ? "Add Admin" : "Revoke Admin"}
+      title={t(
+        locale,
+        approving ? "dropForge.admins.add" : "dropForge.admins.revoke"
+      )}
       subtitle={<span className="tw-break-all">{operation.address}</span>}
       chain={chain}
       onClose={onClose}
       pendingContent={
         <div className="tw-space-y-4">
           <p className="tw-m-0 tw-text-sm tw-text-iron-300">
-            {approving
-              ? "Grant creator-contract admin access?"
-              : "Remove creator-contract admin access?"}
+            {t(
+              locale,
+              approving
+                ? "dropForge.admins.grantQuestion"
+                : "dropForge.admins.revokeQuestion"
+            )}
           </p>
           <p className="tw-m-0 tw-text-sm tw-text-iron-400">
-            Only the contract owner can authorize this transaction.
+            {t(locale, "dropForge.admins.ownerRequired")}
           </p>
+          {!isOwner && (
+            <p className="tw-m-0 tw-text-sm tw-text-red">
+              {t(locale, "dropForge.admins.nonOwnerWarning")}
+            </p>
+          )}
           <div className="tw-flex tw-flex-wrap tw-justify-center tw-gap-3">
             <Button variant="secondary" onClick={onClose}>
-              Cancel
+              {t(locale, "dropForge.admins.cancel")}
             </Button>
             <Button
               variant={approving ? "primary" : "destructive"}
               onClick={onConfirm}
             >
-              Confirm {approving ? "Add Admin" : "Revoke"}
+              {t(
+                locale,
+                approving
+                  ? "dropForge.admins.confirmAdd"
+                  : "dropForge.admins.confirmRevoke"
+              )}
             </Button>
           </div>
         </div>

@@ -1,10 +1,14 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { mainnet } from "viem/chains";
-import { useContractAdminTransaction } from "@/components/drop-forge/contract-admins/useContractAdminTransaction";
+import {
+  useContractAdminTransaction,
+  type AdminOperation,
+} from "@/components/drop-forge/contract-admins/useContractAdminTransaction";
+import type { Hash, WaitForTransactionReceiptParameters } from "viem";
 
 const owner = "0x0000000000000000000000000000000000000001";
 const admin = "0x0000000000000000000000000000000000000002";
-const hash = `0x${"1".repeat(64)}`;
+const hash: Hash = `0x${"1".repeat(64)}`;
 const mockWrite = jest.fn();
 const mockReceipt = jest.fn();
 const mockWallet = jest.fn();
@@ -26,8 +30,11 @@ jest.mock("@/components/auth/SeizeConnectContext", () => ({
 jest.mock("@/components/auth/useConnectedAction", () => ({
   useConnectedAction: () => (action: () => void) => action(),
 }));
-const operation = { functionName: "approveAdmin" as const, address: admin };
-const options = {
+const operation: AdminOperation = {
+  functionName: "approveAdmin",
+  address: admin,
+};
+const options: Parameters<typeof useContractAdminTransaction>[0] = {
   contract: owner,
   chain: mainnet,
   canManage: true,
@@ -123,15 +130,48 @@ it.each(["reverted", "rejected"])(
     expect(mockInvalidate).not.toHaveBeenCalled();
   }
 );
-it("does not report a cancellation replacement as a successful admin change", async () => {
-  mockReceipt.mockImplementation(async ({ onReplaced }) => {
-    onReplaced({
-      reason: "cancelled",
-      transactionReceipt: { transactionHash: hash },
-    });
-    return { status: "success", transactionHash: hash };
-  });
+it.each(["cancelled", "replaced"] as const)(
+  "does not report a %s replacement as a successful admin change",
+  async (reason) => {
+    mockReceipt.mockImplementation(
+      async ({ onReplaced }: WaitForTransactionReceiptParameters) => {
+        onReplaced?.(replacementEvent(reason, hash));
+        return { status: "success", transactionHash: hash };
+      }
+    );
+    const { result } = renderHook(() => useContractAdminTransaction(options));
+    act(() => result.current.submit(operation));
+    await waitFor(() =>
+      expect(result.current.transaction?.status).toBe("error")
+    );
+  }
+);
+
+it("reports the mined repriced hash and refreshes permissions", async () => {
+  const repricedHash: Hash = `0x${"2".repeat(64)}`;
+  mockReceipt.mockImplementation(
+    async ({ onReplaced }: WaitForTransactionReceiptParameters) => {
+      onReplaced?.(replacementEvent("repriced", repricedHash));
+      return { status: "success", transactionHash: repricedHash };
+    }
+  );
   const { result } = renderHook(() => useContractAdminTransaction(options));
   act(() => result.current.submit(operation));
-  await waitFor(() => expect(result.current.transaction?.status).toBe("error"));
+  await waitFor(() =>
+    expect(result.current.transaction?.status).toBe("success")
+  );
+  expect(result.current.transaction?.hash).toBe(repricedHash);
+  expect(mockInvalidate).toHaveBeenCalledTimes(1);
 });
+
+function replacementEvent(
+  reason: "repriced" | "cancelled" | "replaced",
+  transactionHash: Hash
+): Parameters<
+  NonNullable<WaitForTransactionReceiptParameters["onReplaced"]>
+>[0] {
+  // Only these receipt fields are consumed by the hook; chain payloads stay mocked.
+  return { reason, transactionReceipt: { transactionHash } } as Parameters<
+    NonNullable<WaitForTransactionReceiptParameters["onReplaced"]>
+  >[0];
+}

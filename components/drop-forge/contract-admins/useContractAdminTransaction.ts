@@ -9,6 +9,9 @@ import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { useConnectedAction } from "@/components/auth/useConnectedAction";
 import type { OnchainTransactionModalStatus } from "@/components/common/OnchainTransactionModal";
 import { CREATOR_ADMIN_ABI } from "./creator-admin-abi";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
+import type { SupportedLocale } from "@/i18n/locales";
 
 export type AdminOperation = {
   functionName: "approveAdmin" | "revokeAdmin";
@@ -34,6 +37,7 @@ export function useContractAdminTransaction({
   contextFingerprint: string;
 }) {
   const { address } = useSeizeConnectContext();
+  const locale = useBrowserLocale();
   const config = useConfig();
   const publicClient = usePublicClient({ chainId: chain.id });
   const { writeContractAsync } = useWriteContract();
@@ -66,9 +70,7 @@ export function useContractAdminTransaction({
         latestContext.current !== contextFingerprint ||
         wallet.account.address.toLowerCase() !== address.toLowerCase()
       ) {
-        throw new Error(
-          "Wallet or network changed. Review the admin change again."
-        );
+        throw new Error(t(locale, "dropForge.admins.contextChanged"));
       }
       const hash = await writeContractAsync({
         address: contract,
@@ -92,9 +94,7 @@ export function useContractAdminTransaction({
         },
       });
       if (replacement.changed || receipt.status !== "success")
-        throw new Error(
-          "The admin transaction was reverted, cancelled, or replaced."
-        );
+        throw new Error(t(locale, "dropForge.admins.transactionChanged"));
       setTransaction({
         ...snapshot,
         status: "success",
@@ -114,7 +114,7 @@ export function useContractAdminTransaction({
         },
       });
     } catch (error) {
-      const message = getAdminTransactionError(error);
+      const message = getAdminTransactionError(error, locale);
       setTransaction((current) => ({
         ...snapshot,
         hash: current?.hash,
@@ -138,8 +138,11 @@ export function useContractAdminTransaction({
   };
 }
 
-function getAdminTransactionError(error: unknown): string {
+function getAdminTransactionError(
+  error: unknown,
+  locale: SupportedLocale
+): string {
   if (error instanceof BaseError) return error.shortMessage;
   if (error instanceof Error) return error.message;
-  return "Unable to complete the admin transaction.";
+  return t(locale, "dropForge.admins.transactionError");
 }

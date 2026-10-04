@@ -28,7 +28,9 @@ remains distribution-admin-only.
   A successful receipt refreshes the list and shared creator permission reads.
 - Only the contract owner can execute these methods on-chain. Configured
   claims admins intentionally see the controls for testing; non-owner calls
-  still fail. No environment admin list or ownership is changed by these calls.
+  still fail. Their pre-sign review explicitly warns that this wallet is not
+  the owner and the transaction is expected to fail. No environment admin list
+  or ownership is changed by these calls.
 - On-chain reads refresh periodically and on refocus. A read failure shows a
   retry and disables writes rather than trusting an old list. A wallet/network
   change invalidates an unconfirmed operation; duplicate submissions are blocked.
@@ -38,11 +40,18 @@ remains distribution-admin-only.
 
 ### Localization Fallback Debt
 
-The new contract-admin labels, validation and confirmation copy follow the
-existing English-only Drop Forge and ENS/transaction modal surfaces. They use
-the canonical en-US fallback in all locales. The frontend i18n backlog should
-add a shared Drop Forge/admin transaction message family, then verify wrapping
-and focus for every supported locale; transaction authority is unchanged.
+- Route/component: `/drop-forge`, `DropForgeContractAdmins` and its transaction hook.
+- Untranslated surface: the `dropForge.admins.*` labels, accessible names,
+  validation, warnings, and transaction-error messages. All are message-backed;
+  other locale dictionaries currently fall back to the canonical en-US source.
+- User impact: users selecting en-GB, fr-FR, es-ES, or de-DE still see English
+  admin-management copy, without missing labels or errors.
+- Owner: frontend Drop Forge maintainers (`6529seize-maintainers`).
+- Remediation: translate `i18n/messages/drop-forge-admins.ts` keys into the four
+  locale dictionaries and verify wrapping, keyboard focus, and screen-reader
+  announcements on the authenticated admin surface in every supported locale.
+  Existing Craft/Launch and shared transaction-dialog fallback debt is outside
+  this admin-copy migration; transaction authority is unchanged.
 
 ## Location in the Site
 

@@ -7,6 +7,7 @@ const admin = "0x0000000000000000000000000000000000000002";
 const newAdmin = "0x0000000000000000000000000000000000000003";
 let mockCanManage = true;
 let mockReadError = false;
+let mockActiveWallet = owner;
 const mockRefresh = jest.fn();
 const mockSubmit = jest.fn();
 jest.mock("wagmi", () => ({
@@ -18,7 +19,7 @@ jest.mock("wagmi", () => ({
   }),
 }));
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
-  useSeizeConnectContext: () => ({ address: owner }),
+  useSeizeConnectContext: () => ({ address: mockActiveWallet }),
 }));
 jest.mock("@/hooks/useDropForgePermissions", () => ({
   useDropForgePermissions: () => ({ canManageContractAdmins: mockCanManage }),
@@ -61,15 +62,21 @@ jest.mock("@/components/utils/input/ens-address/EnsAddressInput", () => ({
     onAddressChange,
     onValueChange,
     disabled,
+    ariaInvalid,
+    ariaDescribedBy,
   }: {
     id: string;
     onAddressChange: (value: string) => void;
     onValueChange: (value: string) => void;
     disabled: boolean;
+    ariaInvalid: boolean;
+    ariaDescribedBy: string;
   }) => (
     <input
       id={id}
       disabled={disabled}
+      aria-invalid={ariaInvalid}
+      aria-describedby={ariaDescribedBy}
       onChange={(event) => {
         onValueChange(event.target.value);
         onAddressChange(
@@ -83,6 +90,7 @@ jest.mock("@/components/utils/input/ens-address/EnsAddressInput", () => ({
 beforeEach(() => {
   mockCanManage = true;
   mockReadError = false;
+  mockActiveWallet = owner;
   jest.clearAllMocks();
 });
 it("lists the owner first exactly once and never offers owner revocation", () => {
@@ -156,6 +164,24 @@ it.each([
     target: { value },
   });
   expect(screen.getByRole("button", { name: "Add Admin" })).toBeDisabled();
+  const field = screen.getByLabelText("Admin wallet or ENS");
+  expect(field).toHaveAttribute("aria-invalid", "true");
+  expect(field).toHaveAccessibleDescription(
+    screen.getByRole("alert").textContent ?? ""
+  );
+});
+
+it("warns a configured non-owner before signing without hiding testing controls", () => {
+  mockActiveWallet = admin;
+  render(<DropForgeContractAdmins />);
+  fireEvent.click(
+    screen.getByRole("button", { name: `Revoke admin ${admin}` })
+  );
+  expect(screen.getByRole("dialog")).toHaveTextContent(
+    "This wallet is not the owner. This transaction is expected to fail."
+  );
+  fireEvent.click(screen.getByRole("button", { name: "Confirm Revoke" }));
+  expect(mockSubmit).toHaveBeenCalled();
 });
 it("fails closed on read errors and offers a retry", () => {
   mockReadError = true;

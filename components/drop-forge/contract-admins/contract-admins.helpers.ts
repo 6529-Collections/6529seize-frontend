@@ -1,4 +1,12 @@
-import { getAddress, isAddress, zeroAddress, type Address } from "viem";
+import {
+  getAddress,
+  isAddress,
+  isAddressEqual,
+  zeroAddress,
+  type Address,
+} from "viem";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 
 export function getCreatorAdminRows(
   owner: Address,
@@ -18,16 +26,16 @@ export function getCreatorAdminRows(
 export function getAdminAddressError(
   address: string,
   owner: Address | undefined,
-  admins: readonly Address[]
+  admins: readonly Address[],
+  locale: SupportedLocale = DEFAULT_LOCALE
 ): string | null {
-  if (!isAddress(address))
-    return "Enter a valid wallet address or a resolvable ENS name.";
-  if (address.toLowerCase() === zeroAddress)
-    return "The zero address cannot be an admin.";
+  if (!isAddress(address)) return t(locale, "dropForge.admins.invalidAddress");
+  if (isAddressEqual(address, zeroAddress))
+    return t(locale, "dropForge.admins.zeroAddress");
   if (owner?.toLowerCase() === address.toLowerCase())
-    return "This wallet is already the owner.";
+    return t(locale, "dropForge.admins.existingOwner");
   if (admins.some((admin) => admin.toLowerCase() === address.toLowerCase()))
-    return "This wallet is already an admin.";
+    return t(locale, "dropForge.admins.existingAdmin");
   return null;
 }
 
@@ -35,9 +43,10 @@ export function getAdminValidationMessage(
   resolving: boolean,
   input: string,
   error: string | null,
-  resolvedAddress: string
+  resolvedAddress: string,
+  locale: SupportedLocale = DEFAULT_LOCALE
 ): string {
-  if (resolving) return "Resolving ENS...";
+  if (resolving) return t(locale, "dropForge.admins.resolving");
   if (input && error) return error;
   if (resolvedAddress && !error) return getAddress(resolvedAddress);
   return "";
