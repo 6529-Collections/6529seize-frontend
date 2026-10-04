@@ -4993,7 +4993,7 @@
         "Drop Forge is the area for claim/drop workflows from craft to launch.",
         "The hub links to Craft and Launch sections, with list and detail pages for each.",
         "The creator owner and approved on-chain admins have Drop Forge landing and Launch access alongside configured claims admins. Craft remains restricted to distribution admins.",
-        "Contract Admins lists the creator owner first and all approved on-chain admins for every wallet with landing access. Add accepts a wallet or ENS name; Add and Revoke controls are shown only to the owner and configured claims admins. The contract itself only permits the owner to approve or revoke admins; configured non-owner calls still fail. These transactions do not change environment admin lists or transfer ownership.",
+        "The Contract Admins card lists the creator owner first and all approved on-chain admins for every wallet with landing access. Rows include Owner/Admin badges, available mainnet ENS names, and full wallet addresses. The header's Add Admin button expands an inline wallet or ENS input above the list; Cancel closes and clears it. Refresh shows a spinner while reloading. Add and Revoke controls are shown only to the owner and configured claims admins. The contract itself only permits the owner to approve or revoke admins; configured non-owner calls still fail. These transactions do not change environment admin lists or transfer ownership.",
         "Launch claim pages can include mint stats and subscription airdrop sections when configured."
       ],
       "canonical_path": "/drop-forge",

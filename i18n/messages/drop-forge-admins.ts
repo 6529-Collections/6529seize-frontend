@@ -11,6 +11,7 @@ export const DROP_FORGE_ADMIN_MESSAGES = {
   "dropForge.admins.addressLabel": "Admin wallet or ENS",
   "dropForge.admins.addressPlaceholder": "0x... or ENS",
   "dropForge.admins.add": "Add Admin",
+  "dropForge.admins.review": "Review Admin",
   "dropForge.admins.revoke": "Revoke Admin",
   "dropForge.admins.confirmAdd": "Confirm Add Admin",
   "dropForge.admins.confirmRevoke": "Confirm Revoke",

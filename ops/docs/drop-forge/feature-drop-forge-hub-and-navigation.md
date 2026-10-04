@@ -9,8 +9,10 @@ two section cards:
 - `Launch Claims`: initialize claim phases, update claim config, and run
   airdrops
 
-Below the cards, `Contract Admins` shows the active chain and creator contract,
-then its owner first (marked `Owner`) and deduplicated on-chain admins.
+Below the cards, a static `Contract Admins` card shows the active chain and creator
+contract, then its owner first and deduplicated on-chain admins. Owner/Admin pills
+mark each role. Rows show mainnet ENS names when available and always retain the
+full wallet address; missing, loading, or failed ENS lookups do not hide the list.
 All landing-access wallets can read this list and refresh it. Craft access
 remains distribution-admin-only.
 
@@ -22,6 +24,10 @@ remains distribution-admin-only.
   mainnet ENS input. Confirmation shows the exact resolved wallet address.
   Invalid/unresolved names, the zero address, owner, and existing admins cannot
   be added. Revoke requires confirmation and is never offered for the owner.
+- The header's `Add Admin` button unfolds an inline form above the list, without
+  opening a separate input dialog. `Review Admin` opens the existing transaction
+  review; `Cancel` closes and resets the form and returns focus to `Add Admin`.
+  Refresh/Revoke use the shared app tooltips rather than native browser titles.
 - Transactions call `approveAdmin(address)` or `revokeAdmin(address)` on the
   active creator contract, not the lazy-claim extension. The existing on-chain
   dialog shows wallet confirmation, submission, receipt, and error states.
@@ -34,6 +40,9 @@ remains distribution-admin-only.
 - On-chain reads refresh periodically and on refocus. A read failure shows a
   retry and disables writes rather than trusting an old list. A wallet/network
   change invalidates an unconfirmed operation; duplicate submissions are blocked.
+- Manual Refresh displays a spinner and disables the refresh button for at least
+  1.5 seconds, and until both owner/admin reads finish if they take longer. The
+  visual minimum does not delay fresh list data or affect periodic refreshes.
 - The chain follows existing Drop Forge configuration: Sepolia uses the
   testnet creator, other supported wallet contexts use the mainnet creator.
   Sepolia launch action tracking is still unsupported by the backend.

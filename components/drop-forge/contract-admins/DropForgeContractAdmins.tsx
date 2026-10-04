@@ -2,10 +2,10 @@
 
 import {
   ArrowPathIcon,
+  ChevronUpIcon,
   PlusIcon,
-  TrashIcon,
 } from "@heroicons/react/24/outline";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { getAddress, type Address } from "viem";
 import { useReadContract } from "wagmi";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
@@ -14,11 +14,13 @@ import OnchainTransactionModal from "@/components/common/OnchainTransactionModal
 import { useDropForgeMintingConfig } from "@/components/drop-forge/drop-forge-config";
 import Button from "@/components/utils/button/Button";
 import EnsAddressInput from "@/components/utils/input/ens-address/EnsAddressInput";
+import CustomTooltip from "@/components/utils/tooltip/CustomTooltip";
 import { useDropForgePermissions } from "@/hooks/useDropForgePermissions";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import type { SupportedLocale } from "@/i18n/locales";
 import { CREATOR_ADMIN_ABI } from "./creator-admin-abi";
+import ContractAdminRow from "./ContractAdminRow";
 import {
   getAdminAddressError,
   getCreatorAdminRows,
@@ -28,6 +30,8 @@ import {
   useContractAdminTransaction,
   type AdminOperation,
 } from "./useContractAdminTransaction";
+
+const MIN_REFRESH_DURATION_MS = 1500;
 
 export default function DropForgeContractAdmins() {
   const locale = useBrowserLocale();
@@ -49,6 +53,10 @@ export default function DropForgeContractAdmins() {
   const [resolvedAddress, setResolvedAddress] = useState("");
   const [resolving, setResolving] = useState(false);
   const [ensError, setEnsError] = useState(false);
+  const [addExpanded, setAddExpanded] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const refreshInProgress = useRef(false);
+  const addButtonRef = useRef<HTMLButtonElement>(null);
   const contextFingerprint = getConnectedActionFingerprint({
     contract,
     chainId: chain.id,
@@ -106,82 +114,86 @@ export default function DropForgeContractAdmins() {
       </output>
     );
   }
-  const refresh = () => {
-    void ownerQuery.refetch();
-    void adminsQuery.refetch();
+  const refresh = async () => {
+    if (refreshInProgress.current) return;
+    refreshInProgress.current = true;
+    setRefreshing(true);
+    await Promise.allSettled([
+      ownerQuery.refetch(),
+      adminsQuery.refetch(),
+      new Promise<void>((resolve) =>
+        setTimeout(resolve, MIN_REFRESH_DURATION_MS)
+      ),
+    ]);
+    refreshInProgress.current = false;
+    setRefreshing(false);
+  };
+  const closeAddForm = () => {
+    setAddExpanded(false);
+    setInput("");
+    setResolvedAddress("");
+    setResolving(false);
+    setEnsError(false);
+    addButtonRef.current?.focus();
   };
 
   return (
-    <section aria-labelledby="contract-admins-heading" className="tw-mt-10">
-      <div className="tw-flex tw-items-center tw-justify-between tw-gap-4">
+    <section
+      aria-labelledby="contract-admins-heading"
+      className="tw-mt-6 tw-rounded-xl tw-bg-iron-950 tw-p-4 tw-ring-1 tw-ring-inset tw-ring-iron-800 sm:tw-p-6"
+    >
+      <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
         <h2
           id="contract-admins-heading"
           className="tw-mb-0 tw-text-xl tw-font-semibold tw-text-iron-50"
         >
           {t(locale, "dropForge.admins.heading")}
         </h2>
-        <Button
-          variant="secondary"
-          size="sm"
-          aria-label={t(locale, "dropForge.admins.refresh")}
-          title={t(locale, "dropForge.admins.refresh")}
-          onClick={refresh}
-          disabled={ownerQuery.isFetching || adminsQuery.isFetching}
-        >
-          <ArrowPathIcon aria-hidden="true" className="tw-size-4" />
-        </Button>
+        <div className="tw-flex tw-items-center tw-gap-2">
+          {canManageContractAdmins && (
+            <Button
+              ref={addButtonRef}
+              size="sm"
+              aria-expanded={addExpanded}
+              aria-controls="contract-admin-add-form"
+              disabled={controlsDisabled}
+              onClick={() => {
+                if (addExpanded) closeAddForm();
+                else setAddExpanded(true);
+              }}
+            >
+              {addExpanded ? (
+                <ChevronUpIcon aria-hidden="true" className="tw-size-4" />
+              ) : (
+                <PlusIcon aria-hidden="true" className="tw-size-4" />
+              )}
+              {t(locale, "dropForge.admins.add")}
+            </Button>
+          )}
+          <CustomTooltip content={t(locale, "dropForge.admins.refresh")}>
+            <Button
+              variant="secondary"
+              size="sm"
+              className="tw-w-9 tw-px-0"
+              aria-label={t(locale, "dropForge.admins.refresh")}
+              loading={refreshing}
+              hideChildrenWhenLoading
+              onClick={() => void refresh()}
+              disabled={ownerQuery.isFetching || adminsQuery.isFetching}
+            >
+              <ArrowPathIcon aria-hidden="true" className="tw-size-4" />
+            </Button>
+          </CustomTooltip>
+        </div>
       </div>
       <p className="tw-mt-2 tw-break-all tw-text-sm tw-text-iron-400">
         {chain.name} · {contract}
       </p>
       {listStatus}
-      {ready && (
-        <ul className="tw-m-0 tw-list-none tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-iron-800 tw-p-0">
-          {rows.map((admin) => (
-            <li
-              key={admin.address}
-              className="tw-flex tw-items-center tw-justify-between tw-gap-3 tw-py-4"
-            >
-              <div className="tw-min-w-0 tw-flex-1">
-                <span className="tw-block tw-break-all tw-font-mono tw-text-sm tw-text-iron-100">
-                  {admin.address}
-                </span>
-                <span className="tw-text-xs tw-text-iron-400">
-                  {t(
-                    locale,
-                    admin.isOwner
-                      ? "dropForge.admins.owner"
-                      : "dropForge.admins.admin"
-                  )}
-                </span>
-              </div>
-              {canManageContractAdmins && !admin.isOwner && (
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  disabled={controlsDisabled}
-                  aria-label={t(locale, "dropForge.admins.revokeLabel", {
-                    address: admin.address,
-                  })}
-                  title={t(locale, "dropForge.admins.revokeTooltip")}
-                  onClick={() =>
-                    setConfirmation({
-                      functionName: "revokeAdmin",
-                      address: admin.address,
-                      context: contextFingerprint,
-                    })
-                  }
-                >
-                  <TrashIcon aria-hidden="true" className="tw-size-4" />
-                </Button>
-              )}
-            </li>
-          ))}
-        </ul>
-      )}
-      {canManageContractAdmins && (
+      {canManageContractAdmins && addExpanded && (
         <form
-          className="tw-mt-6"
+          id="contract-admin-add-form"
+          className="tw-mb-3 tw-mt-5 tw-border-x-0 tw-border-y tw-border-solid tw-border-iron-800 tw-py-5"
           onSubmit={(event) => {
             event.preventDefault();
             if (controlsDisabled || resolving || error) return;
@@ -218,8 +230,14 @@ export default function DropForgeContractAdmins() {
               disabled={controlsDisabled || resolving || !!error}
               className="tw-shrink-0"
             >
-              <PlusIcon aria-hidden="true" className="tw-size-4" />
-              {t(locale, "dropForge.admins.add")}
+              {t(locale, "dropForge.admins.review")}
+            </Button>
+            <Button
+              variant="secondary"
+              disabled={controlsDisabled}
+              onClick={closeAddForm}
+            >
+              {t(locale, "dropForge.admins.cancel")}
             </Button>
           </div>
           <p
@@ -237,6 +255,27 @@ export default function DropForgeContractAdmins() {
             )}
           </p>
         </form>
+      )}
+      {ready && (
+        <ul className="tw-m-0 tw-list-none tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-iron-800 tw-p-0">
+          {rows.map((admin) => (
+            <ContractAdminRow
+              key={admin.address}
+              address={admin.address}
+              isOwner={admin.isOwner}
+              locale={locale}
+              canManage={canManageContractAdmins}
+              disabled={controlsDisabled}
+              onRevoke={() =>
+                setConfirmation({
+                  functionName: "revokeAdmin",
+                  address: admin.address,
+                  context: contextFingerprint,
+                })
+              }
+            />
+          ))}
+        </ul>
       )}
       {visibleConfirmation && (
         <AdminConfirmation
