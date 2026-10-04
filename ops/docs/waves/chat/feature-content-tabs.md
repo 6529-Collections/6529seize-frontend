@@ -8,7 +8,10 @@ wave-dependent views. Named curations also appear here: each opens a selected
 collection of posts from the wave. The default competition shares this one row
 with Chat, and its views render directly below it. A separately opened non-default
 competition keeps its own detail navigation. See [Competitions](../competitions/feature-competitions.md)
-for default selection and switching.
+for default selection and switching. **About** is the final wave tab, with the
+competition’s **Configuration** immediately before it when a competition is
+available. Native and legacy defaults share this ordering on desktop, mobile
+web and the app.
 
 In the `My Votes` tab, non-image drops use a preview image from drop metadata when available, so rows render quickly and stay stable in list form.
 The web layout stores the last selected tab for each wave on the current device,
@@ -48,6 +51,9 @@ entry. Opening another wave normally still uses its default section.
 4. Select a tab to switch sections.
 5. The main content panel updates. Competition views retain their competition
    ID and selected tab in the URL so reload and Back/Forward restore the view.
+   App tabs and their content use the same availability rules. An unavailable
+   legacy competition section opens `Leaderboard`, or `Submissions` after
+   voting has ended, and selects that visible tab.
 6. When open polls still need the signed-in user's answer and the user can
    respond, the `Polls` tab shows an unread-style count badge.
 7. On the `My Votes` tab, each voted drop entry can show a preview thumbnail and

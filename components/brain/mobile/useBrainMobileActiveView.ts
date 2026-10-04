@@ -25,6 +25,7 @@ const WAVE_TAB_VIEWS: Readonly<Record<string, BrainView>> = {
   chat: BrainView.DEFAULT,
   competitions: BrainView.COMPETITIONS,
   about: BrainView.ABOUT,
+  configuration: BrainView.CONFIGURATION,
   leaderboard: BrainView.LEADERBOARD,
   submissions: BrainView.SUBMISSIONS,
   sales: BrainView.SALES,

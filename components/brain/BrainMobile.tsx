@@ -151,6 +151,7 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
   const outcomesVisible = useWaveOutcomeVisibility(wave);
   const {
     hasCompetitions: hasAvailableCompetitions,
+    hideCompetitionsTab,
     activeCount: activeCompetitionCount,
     defaultCompetitionId,
     defaultSelectionEnabled,
@@ -379,6 +380,7 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
           waveActive={hasWave}
           hasPolls={hasPolls}
           hasCompetitions={hasCompetitions}
+          hideCompetitionsTab={hideCompetitionsTab}
           hasDefaultCompetition={Boolean(
             searchParams.get("competition") ?? defaultCompetitionId
           )}

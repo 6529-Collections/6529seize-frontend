@@ -41,7 +41,6 @@ import { useWave } from "@/hooks/useWave";
 import { useWavePollSummary } from "@/hooks/useWaveHasPolls";
 import { useWaveCompetitionsTab } from "@/hooks/competitions/useWaveCompetitionsTab";
 import { useDecisionPoints } from "@/hooks/waves/useDecisionPoints";
-import { useWaveTimers } from "@/hooks/useWaveTimers";
 import { Time } from "@/helpers/time";
 import { useAuth } from "@/components/auth/Auth";
 import {
@@ -51,11 +50,7 @@ import {
   type TabOption,
 } from "./MyStreamWaveTabOption";
 import { MyStreamWaveTab } from "@/types/waves.types";
-import {
-  useContentTab,
-  WaveVotingState,
-  type SetActiveContentTab,
-} from "../ContentTabContext";
+import { useContentTab, type SetActiveContentTab } from "../ContentTabContext";
 import MyStreamActionTooltip from "./MyStreamActionTooltip";
 import MyStreamWaveCreateActionsMenu from "./tabs/MyStreamWaveCreateActionsMenu";
 import MyStreamWaveCurationTabMenu from "./tabs/MyStreamWaveCurationTabMenu";
@@ -115,8 +110,19 @@ const getEffectiveProfileCurationId = ({
 };
 
 const AUTO_EXPAND_LIMIT = 5;
+const TRAILING_TABS = [
+  MyStreamWaveTab.COMPETITIONS,
+  MyStreamWaveTab.CONFIGURATION,
+  MyStreamWaveTab.ABOUT,
+];
 
-const TAB_LABELS: Record<MyStreamWaveTab, string> = {
+const TAB_LABELS: Record<
+  Exclude<
+    MyStreamWaveTab,
+    MyStreamWaveTab.CONFIGURATION | MyStreamWaveTab.ABOUT
+  >,
+  string
+> = {
   [MyStreamWaveTab.CHAT]: "Chat",
   [MyStreamWaveTab.COMPETITIONS]: "Competitions",
   [MyStreamWaveTab.LEADERBOARD]: "Leaderboard",
@@ -133,11 +139,16 @@ const getTabLabel = ({
   approveLabels,
   isApproveWave,
   tab,
+  locale,
 }: {
   readonly approveLabels: ApproveTabLabels;
   readonly isApproveWave: boolean;
   readonly tab: MyStreamWaveTab;
+  readonly locale: ReturnType<typeof useBrowserLocale>;
 }): string => {
+  if (tab === MyStreamWaveTab.CONFIGURATION)
+    return t(locale, "competitions.configuration");
+  if (tab === MyStreamWaveTab.ABOUT) return t(locale, "wave.navigation.about");
   if (isApproveWave && tab === MyStreamWaveTab.LEADERBOARD) {
     return approveLabels.approvals;
   }
@@ -147,24 +158,6 @@ const getTabLabel = ({
   }
 
   return TAB_LABELS[tab];
-};
-
-const getWaveVotingState = ({
-  isUpcoming,
-  isCompleted,
-}: {
-  readonly isUpcoming: boolean;
-  readonly isCompleted: boolean;
-}): WaveVotingState => {
-  if (isUpcoming) {
-    return WaveVotingState.NOT_STARTED;
-  }
-
-  if (isCompleted) {
-    return WaveVotingState.ENDED;
-  }
-
-  return WaveVotingState.ONGOING;
 };
 
 function ProfileCurationIcon({ tooltipId }: { readonly tooltipId: string }) {
@@ -282,13 +275,9 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
   const locale = useBrowserLocale();
   const { flat, nativeCompetition } = useCompetitionNavigation();
   const nativeDefault = flat ? nativeCompetition : null;
-  const { availableTabs, updateAvailableTabs } = useContentTab();
-  const {
-    hasCompetitions,
-    activeCount: activeCompetitionCount,
-    defaultCompetitionId,
-    defaultSelectionEnabled,
-  } = useWaveCompetitionsTab(wave);
+  const { availableTabs } = useContentTab();
+  const { activeCount: activeCompetitionCount, defaultCompetitionId } =
+    useWaveCompetitionsTab(wave);
   const effectiveCompetitionId =
     getCompetitionIdFromPathname(pathname) ??
     searchParams.get("competition") ??
@@ -320,10 +309,6 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
     ? nativeDefault.type === ApiCompetitionType.Approve
     : isApproveWave;
   const isCompetitionWave = isRankWave || isApproveWave;
-  const {
-    voting: { isUpcoming, isCompleted },
-    decisions: { firstDecisionDone },
-  } = useWaveTimers(wave);
   const { allDecisions, hasMoreFuture, loadMoreFuture } = useDecisionPoints(
     wave,
     {
@@ -356,7 +341,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
     isProfileWave &&
     isConnectedProfileWaveAuthor &&
     activeProfileProxy === null;
-  const { hasPolls, unansweredPolls } = useWavePollSummary({
+  const { unansweredPolls } = useWavePollSummary({
     waveId: wave.id,
   });
 
@@ -412,49 +397,6 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
     };
   }, [nextDecisionTime, hasMoreFuture, loadMoreFuture]);
 
-  const votingState = getWaveVotingState({
-    isUpcoming,
-    isCompleted,
-  });
-
-  useEffect(() => {
-    const hasSerialTarget = searchParams.get("serialNo") !== null;
-    updateAvailableTabs({
-      waveId: wave.id,
-      isMemesWave: nativeDefault ? false : isMemesWave,
-      isChatWave: nativeDefault ? true : isChatWave,
-      hasPolls,
-      hasCompetitions,
-      defaultCompetitionId: effectiveCompetitionId,
-      defaultSelectionEnabled,
-      hasAuthenticatedProfile,
-      isCurationWave,
-      isApproveWave,
-      showOutcomeTab: outcomesVisible,
-      votingState,
-      hasFirstDecisionPassed: firstDecisionDone,
-      transientPreferredTab: hasSerialTarget ? MyStreamWaveTab.CHAT : null,
-    });
-  }, [
-    wave,
-    isMemesWave,
-    isChatWave,
-    hasPolls,
-    hasCompetitions,
-    effectiveCompetitionId,
-    defaultSelectionEnabled,
-    isApproveWave,
-    outcomesVisible,
-    hasAuthenticatedProfile,
-    isCurationWave,
-    votingState,
-    firstDecisionDone,
-    searchParams,
-    pathname,
-    updateAvailableTabs,
-    nativeDefault,
-  ]);
-
   const standardOptions: TabOption[] = useMemo(
     () => [
       ...availableTabs
@@ -490,20 +432,16 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
               approveLabels,
               isApproveWave: selectedIsApprove,
               tab,
+              locale,
             }),
             panelId: getContentTabPanelId(tab),
             badgeCount,
           };
         }),
       ...(nativeDefault
-        ? ["voters", "rules"].map((tab) => ({
+        ? ["voters"].map((tab) => ({
             key: tab,
-            label: t(
-              locale,
-              tab === "rules"
-                ? "competitions.configuration"
-                : "competitions.voters"
-            ),
+            label: t(locale, "competitions.voters"),
             panelId: getContentTabPanelId(MyStreamWaveTab.COMPETITIONS),
           }))
         : []),
@@ -569,35 +507,34 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
     ]
   );
 
-  const competitionOption = standardOptions.find(
-    (option) => option.key === String(MyStreamWaveTab.COMPETITIONS)
+  const trailingOptions = useMemo(
+    () =>
+      TRAILING_TABS.flatMap((tab) =>
+        standardOptions.filter((option) => option.key === String(tab))
+      ),
+    [standardOptions]
+  );
+  const leadingOptions = useMemo(
+    () =>
+      standardOptions.filter(
+        (option) => !TRAILING_TABS.includes(option.key as MyStreamWaveTab)
+      ),
+    [standardOptions]
   );
   const options: TabOption[] = useMemo(
-    () => [
-      ...standardOptions.filter(
-        (option) => option.key !== String(MyStreamWaveTab.COMPETITIONS)
-      ),
-      ...curationOptions,
-      ...standardOptions.filter(
-        (option) => option.key === String(MyStreamWaveTab.COMPETITIONS)
-      ),
-    ],
-    [curationOptions, standardOptions]
+    () => [...leadingOptions, ...curationOptions, ...trailingOptions],
+    [curationOptions, leadingOptions, trailingOptions]
   );
 
   let activeKey: string = activeTab;
   const nativeTab =
     searchParams.get("edit") === "1" ? "rules" : searchParams.get("tab");
-  if (
-    nativeDefault &&
-    nativeTab !== null &&
-    ["voters", "rules"].includes(nativeTab)
-  )
+  if (nativeDefault && nativeTab !== null && nativeTab === "voters")
     activeKey = nativeTab;
   if (activeCurationId) activeKey = getCurationTabKey(activeCurationId);
   const selectStandardTab = (key: string) => {
     onSelectCuration(null);
-    if (nativeDefault && ["voters", "rules"].includes(key)) {
+    if (nativeDefault && key === "voters") {
       router.push(`${pathname}?tab=${key}`, { scroll: false });
       return;
     }
@@ -701,18 +638,14 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
           onDragEnd={handleCurationDragEnd}
         >
           <div className="tw-flex tw-w-auto tw-gap-x-[13px]" role="tablist">
-            {standardOptions
-              .filter(
-                (option) => option.key !== String(MyStreamWaveTab.COMPETITIONS)
-              )
-              .map((option) => (
-                <DesktopTabOption
-                  key={option.key}
-                  option={option}
-                  activeKey={activeKey}
-                  onSelect={selectStandardTab}
-                />
-              ))}
+            {leadingOptions.map((option) => (
+              <DesktopTabOption
+                key={option.key}
+                option={option}
+                activeKey={activeKey}
+                onSelect={selectStandardTab}
+              />
+            ))}
             <SortableContext
               items={curationTabKeys}
               strategy={horizontalListSortingStrategy}
@@ -740,16 +673,14 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
                 </React.Fragment>
               ))}
             </SortableContext>
-            {competitionOption && (
+            {trailingOptions.map((option) => (
               <DesktopTabOption
-                option={competitionOption}
+                key={option.key}
+                option={option}
                 activeKey={activeKey}
-                onSelect={() => {
-                  onSelectCuration(null);
-                  setActiveTab(MyStreamWaveTab.COMPETITIONS);
-                }}
+                onSelect={selectStandardTab}
               />
-            )}
+            ))}
           </div>
         </DndContext>
       </div>
