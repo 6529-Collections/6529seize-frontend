@@ -57,6 +57,10 @@ it.each(["approveAdmin", "revokeAdmin"] as const)(
         account: { address: owner },
       })
     );
+    expect(mockWallet).toHaveBeenCalledWith(expect.anything(), {
+      chainId: 1,
+      account: owner,
+    });
     expect(mockReceipt).toHaveBeenCalledWith(expect.objectContaining({ hash }));
     expect(mockInvalidate).toHaveBeenCalledTimes(1);
   }

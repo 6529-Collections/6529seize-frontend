@@ -58,7 +58,10 @@ export function useContractAdminTransaction({
     };
     setTransaction(snapshot);
     try {
-      const wallet = await getWalletClient(config, { chainId: chain.id });
+      const wallet = await getWalletClient(config, {
+        chainId: chain.id,
+        account: address as Address,
+      });
       if (
         latestContext.current !== contextFingerprint ||
         wallet.account.address.toLowerCase() !== address.toLowerCase()
