@@ -27,6 +27,26 @@ const waveTabStrip = (page: Page) =>
     has: page.getByRole("tab", { name: "Chat", exact: true }),
   });
 
+async function selectLegacyNewestSort(page: Page, mobile: boolean) {
+  if (mobile) {
+    await page
+      .getByRole("button", { name: "Sort: Current Vote", exact: true })
+      .click();
+  }
+  const newest = page.getByRole(mobile ? "menuitem" : "tab", {
+    name: "Newest",
+    exact: true,
+  });
+  if (mobile) await expect(newest).toBeInViewport({ ratio: 1 });
+  await newest.click();
+  const selected = mobile
+    ? page.getByRole("button", { name: "Sort: Newest", exact: true })
+    : newest;
+  await expect(selected).toBeVisible();
+  if (!mobile) await expect(selected).toHaveAttribute("aria-selected", "true");
+  return selected;
+}
+
 async function deferDefaultCompetition(page: Page) {
   let releaseDefault!: () => void;
   const pendingDefault = new Promise<void>((resolve) => {
@@ -1502,6 +1522,77 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     ).toHaveCount(0);
   });
 
+  test("waits for competition navigation before exposing legacy leaderboard controls", async ({
+    page,
+  }, testInfo) => {
+    const sandbox = await installCompetitionApi(page, false, true, MEMES_WAVE);
+    sandbox.onlyCompetition("alpha");
+    await sandbox.legacyPrimary("alpha");
+    // Compile the destination on the local dev server before holding navigation.
+    const destination = await page.request.get(
+      `/waves/${MEMES_WAVE}/competitions/alpha?tab=leaderboard`
+    );
+    expect(destination.ok()).toBe(true);
+    let releaseNavigation!: () => void;
+    const pendingNavigation = new Promise<void>((resolve) => {
+      releaseNavigation = resolve;
+    });
+    let navigationRequested!: () => void;
+    const navigationRequest = new Promise<void>((resolve) => {
+      navigationRequested = resolve;
+    });
+    await page.route(
+      `**/waves/${MEMES_WAVE}/competitions/alpha?**`,
+      async (route) => {
+        navigationRequested();
+        await pendingNavigation;
+        await route.fallback();
+      }
+    );
+    try {
+      const defaultResponse = page.waitForResponse(
+        (response) =>
+          response.url().endsWith("/default-competition") && response.ok()
+      );
+      await page.goto(`/waves/${MEMES_WAVE}`);
+      await defaultResponse;
+      await expect(
+        waveTabStrip(page).getByRole("tab", { name: "Chat", exact: true })
+      ).toHaveAttribute("aria-selected", "true");
+      await expect(
+        page.getByRole("region", {
+          name: "Wave chat file upload area",
+          exact: true,
+        })
+      ).toBeVisible();
+      await waveTabStrip(page)
+        .getByRole("tab", { name: "Leaderboard", exact: true })
+        .click();
+      await navigationRequest;
+      await expect(
+        page.getByRole("tablist", { name: "Leaderboard view modes" })
+      ).toHaveCount(0);
+      await expect(page).toHaveURL(new RegExp(`/waves/${MEMES_WAVE}$`));
+      releaseNavigation();
+      await expect(page).toHaveURL(
+        new RegExp(
+          `/waves/${MEMES_WAVE}/competitions/alpha\\?tab=leaderboard$`
+        ),
+        { timeout: 30000 }
+      );
+      await expect(
+        page.getByRole("tablist", { name: "Leaderboard view modes" })
+      ).toBeVisible();
+      await selectLegacyNewestSort(
+        page,
+        testInfo.project.name === "web-mobile-chromium"
+      );
+      expect(sandbox.requests).toEqual([]);
+    } finally {
+      releaseNavigation();
+    }
+  });
+
   for (const surface of ["web", "app"] as const) {
     test(`preserves populated legacy Main Stage artwork in ${surface} views`, async ({
       page,
@@ -1631,24 +1722,10 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
           )
         )
         .toBeGreaterThan(0);
-      if (testInfo.project.name === "web-mobile-chromium") {
-        await page
-          .getByRole("button", { name: "Sort: Current Vote", exact: true })
-          .click();
-      }
-      const newestSort = page.getByRole(
-        testInfo.project.name === "web-mobile-chromium" ? "menuitem" : "tab",
-        { name: "Newest", exact: true }
-      );
-      await newestSort.click();
-      const selectedSort =
+      const selectedSort = await selectLegacyNewestSort(
+        page,
         testInfo.project.name === "web-mobile-chromium"
-          ? page.getByRole("button", { name: "Sort: Newest", exact: true })
-          : newestSort;
-      await expect(selectedSort).toBeVisible();
-      if (testInfo.project.name === "web-desktop-chromium") {
-        await expect(selectedSort).toHaveAttribute("aria-selected", "true");
-      }
+      );
       await expectArtwork();
       await modes.getByRole("tab", { name: "List view", exact: true }).click();
       await expectArtwork();

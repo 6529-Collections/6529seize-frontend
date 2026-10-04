@@ -491,9 +491,11 @@ export const ContentTabProvider: React.FC<{
         );
         return;
       }
-      setActiveTabInternal(tab);
       const waveId = currentWaveIdRef.current;
+      // Routed tabs become interactive in their destination layout. Selecting
+      // them here first exposes a temporary view that navigation will unmount.
       if (navigateToTab(tab, waveId)) return;
+      setActiveTabInternal(tab);
       if (options?.persist === false) {
         transientTabOverrideRef.current =
           waveId === null ? null : { waveId, tab };

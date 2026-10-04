@@ -17,7 +17,7 @@ In the `My Votes` tab, non-image drops use a preview image from drop metadata wh
 On web, tab choices made during the current visit survive background data
 loading. A fresh visit opens Chat, even if another tab was selected earlier.
 In the native app, Back restores the wave section from that navigation-history
-entry. Opening another wave normally still uses its default section.
+entry. Opening another wave without an explicit destination opens Chat.
 
 ## Location in the Site
 
@@ -51,6 +51,8 @@ entry. Opening another wave normally still uses its default section.
 4. Select a tab to switch sections.
 5. The main content panel updates. Competition views retain their competition
    ID and selected tab in the URL so reload and Back/Forward restore the view.
+   When switching to a competition route, its controls appear after navigation
+   completes, so a newly opened sort sheet or form stays in that view.
    App tabs and their content use the same availability rules. An unavailable
    legacy competition section opens `Leaderboard`, or `Submissions` after
    voting has ended, and selects that visible tab.
@@ -85,7 +87,8 @@ entry. Opening another wave normally still uses its default section.
   their destination.
 - In the native app, open an author profile from Leaderboard and use Back to
   return to Leaderboard. Repeated profile visits preserve the same behavior.
-- A link targeting a specific chat message still opens Chat.
+- A link targeting a specific chat message still opens Chat, even when it also
+  names another section.
 - Polls can allow every reader to respond or limit responses to people who can
   chat. Readers who cannot respond still see poll results, but vote controls are
   hidden.

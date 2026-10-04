@@ -410,6 +410,32 @@ describe("MyStreamWaveChat", () => {
     expect(capturedCreatorPropsHolder.current.fixedDropMode).toBe("CHAT");
   });
 
+  it.each(["leaderboard", "winners"])(
+    "retains the serial target ahead of a conflicting %s destination",
+    async (tab) => {
+      const params = new URLSearchParams({
+        serialNo: "5",
+        tab,
+        competition: "alpha",
+      });
+      searchParamsMock.get.mockImplementation((key: string) => params.get(key));
+      searchParamsMock.toString.mockReturnValue(params.toString());
+      renderWithProvider(
+        <MyStreamWaveChat
+          wave={wave}
+          firstUnreadSerialNo={null}
+          viewMode="chat"
+          onDropClick={mockOnDropClick}
+        />
+      );
+      await waitFor(() =>
+        expect(mockFetchAroundSerialNo).toHaveBeenCalledWith("10", 5)
+      );
+      expect(capturedPropsHolder.current.initialDrop).toBe(5);
+      expect(replaceMock).not.toHaveBeenCalled();
+    }
+  );
+
   it("opens participation submit flow in a modal while keeping chat composer mounted", async () => {
     const onClose = jest.fn();
     searchParamsMock.get.mockReturnValue(null);
