@@ -67,6 +67,28 @@ describe("proxy", () => {
   );
 
   it.each([
+    ["drop=message///&tab=leaderboard", "drop=message&tab=leaderboard"],
+    ["serialNo=42/&tab=leaderboard", "serialNo=42&tab=leaderboard"],
+    [
+      "drop=message///&serialNo=42/&entry=older&tab=leaderboard",
+      "drop=message&serialNo=42&tab=leaderboard&entry=older",
+    ],
+  ])(
+    "keeps normalized chat targets alongside explicit view keys (%s)",
+    async (query, expected) => {
+      const request = createRequest("/my-stream");
+      request.nextUrl.search = `?wave=wave&${query}`;
+      jest
+        .mocked(request.headers.get)
+        .mockReturnValue("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)");
+      await proxy(request);
+      expect(mockRedirect).toHaveBeenCalledWith(
+        new URL(`/waves/wave?${expected}`, request.url)
+      );
+    }
+  );
+
+  it.each([
     "/help-index.json",
     "/llms.txt",
     "/glossary.json",

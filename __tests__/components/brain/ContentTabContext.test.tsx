@@ -219,6 +219,30 @@ describe("ContentTabContext", () => {
     expect(result.current.activeContentTab).toBe(MyStreamWaveTab.WINNERS);
   });
 
+  it("opens Chat when a fresh wave route changes only its competition context", () => {
+    mockPathname = "/waves/hub";
+    mockSearch = new URLSearchParams({ competition: "older" });
+    const { result, rerender } = setup();
+    const waveTabs = {
+      waveId: "hub",
+      isChatWave: false,
+      hasAuthenticatedProfile: true,
+      isMemesWave: false,
+      isCurationWave: false,
+      votingState: WaveVotingState.ONGOING,
+      hasFirstDecisionPassed: true,
+    };
+    act(() => result.current.updateAvailableTabs(waveTabs));
+    act(() => result.current.setActiveContentTab(MyStreamWaveTab.ABOUT));
+    expect(result.current.activeContentTab).toBe(MyStreamWaveTab.ABOUT);
+
+    mockSearch = new URLSearchParams({ competition: "newer" });
+    rerender();
+    expect(result.current.activeContentTab).toBe(MyStreamWaveTab.CHAT);
+    act(() => result.current.updateAvailableTabs(waveTabs));
+    expect(result.current.activeContentTab).toBe(MyStreamWaveTab.CHAT);
+  });
+
   it("defaults to CHAT when params null", () => {
     const { result } = setup();
     act(() => result.current.updateAvailableTabs(null));

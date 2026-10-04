@@ -248,6 +248,7 @@ function resolveMyStreamRedirect(
   });
   if (!wave) return target;
   const destination = new URL(target, req.url);
+  // The helper owns normalized drop/serialNo targets; these are separate view keys.
   for (const key of [
     "tab",
     "competition",

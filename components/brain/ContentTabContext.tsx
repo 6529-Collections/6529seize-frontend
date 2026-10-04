@@ -222,7 +222,7 @@ export const ContentTabProvider: React.FC<{
   const initialTab = competitionOnly
     ? MyStreamWaveTab.LEADERBOARD
     : MyStreamWaveTab.CHAT;
-  const routeKey = `${pathname}:${search.get("wave") ?? ""}:${search.get("tab") ?? ""}:${search.get("serialNo") ?? ""}`;
+  const routeKey = `${pathname}:${search.get("wave") ?? ""}:${search.get("tab") ?? ""}:${search.get("serialNo") ?? ""}:${search.get("competition") ?? ""}`;
   const routeToken = useMemo(() => Symbol(routeKey), [routeKey]);
   const [tabsByWaveId, setTabsByWaveId] = useLocalPreference<
     Record<string, MyStreamWaveTab>
