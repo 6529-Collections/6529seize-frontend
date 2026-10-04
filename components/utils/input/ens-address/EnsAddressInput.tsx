@@ -13,6 +13,7 @@ interface EnsAddressInputProps {
   readonly className?: string | undefined;
   readonly variant?: "default" | "dark" | undefined;
   readonly ariaDescribedBy?: string | undefined;
+  readonly ariaInvalid?: boolean | undefined;
   readonly chainId?: number;
   readonly onAddressChange: (address: string) => void;
   readonly onValueChange?: (value: string) => void;
@@ -35,6 +36,7 @@ export default function EnsAddressInput({
   className,
   variant = "default",
   ariaDescribedBy,
+  ariaInvalid,
   chainId = 1,
   onAddressChange,
   onValueChange,
@@ -94,6 +96,7 @@ export default function EnsAddressInput({
       autoFocus={autoFocus}
       placeholder={placeholder}
       aria-describedby={ariaDescribedBy}
+      aria-invalid={ariaInvalid}
       className={clsx(
         variant === "dark" ? darkInputClassName : defaultInputClassName,
         className
