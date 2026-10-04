@@ -153,6 +153,34 @@ function configureSingleCompetition() {
   });
 }
 
+it("continues reading default context when a wave gains a competition", () => {
+  configureSingleCompetition();
+  (useCompetitionList as jest.Mock).mockReturnValue({
+    isSuccess: true,
+    isFetching: false,
+    isError: false,
+    hasNextPage: false,
+    data: { pages: [{ data: [], has_more: false }] },
+  });
+  (useDefaultCompetition as jest.Mock).mockReturnValue({
+    isSuccess: true,
+    data: { competition_id: null },
+  });
+  const { result, rerender } = renderHook(() => useWaveCompetitionsTab(wave));
+  expect(useDefaultCompetition).toHaveBeenLastCalledWith("wave", true);
+  expect(result.current.defaultCompetitionId).toBeNull();
+  expect(result.current.hasCompetitions).toBe(false);
+
+  (useDefaultCompetition as jest.Mock).mockReturnValue({
+    isSuccess: true,
+    data: { competition_id: "sole" },
+  });
+  rerender();
+  expect(useDefaultCompetition).toHaveBeenLastCalledWith("wave", true);
+  expect(result.current.defaultCompetitionId).toBe("sole");
+  expect(result.current.hasCompetitions).toBe(true);
+});
+
 it.each(["legacy", "native", "UPCOMING", "COMPLETED", "ARCHIVED"])(
   "hides a proven sole default for a logged-in non-admin (%s)",
   (kind) => {

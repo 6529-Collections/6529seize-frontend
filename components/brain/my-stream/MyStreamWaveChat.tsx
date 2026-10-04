@@ -319,6 +319,12 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
     if (!params.has("serialNo") && !params.has("divider")) {
       return;
     }
+    // Keep a message target authoritative when the link also names another
+    // section. Removing it would reactivate that conflicting destination.
+    const requestedTab = params.get("tab");
+    if (params.has("serialNo") && requestedTab && requestedTab !== "chat") {
+      return;
+    }
     params.delete("serialNo");
     params.delete("divider");
     const href = params.toString()

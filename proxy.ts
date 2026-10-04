@@ -101,8 +101,7 @@ const STATIC_PATH_SUFFIXES = [
 function isPublicStreamReviewDataPath(req: NextRequest, pathname: string) {
   const rawPathname = new URL(req.url).pathname;
   return (
-    rawPathname === pathname &&
-    pathname.startsWith(STREAM_REVIEW_DATA_PREFIX)
+    rawPathname === pathname && pathname.startsWith(STREAM_REVIEW_DATA_PREFIX)
   );
 }
 
@@ -241,12 +240,28 @@ function resolveMyStreamRedirect(
   const drop = normalizeDropParam(params.get("drop"));
   const serialNo = normalizeSerialParam(params.get("serialNo"));
 
-  return resolveMyStreamHomeRedirect({
+  const target = resolveMyStreamHomeRedirect({
     view,
     wave,
     drop,
     serialNo,
   });
+  if (!wave) return target;
+  const destination = new URL(target, req.url);
+  // The helper owns normalized drop/serialNo targets; these are separate view keys.
+  for (const key of [
+    "tab",
+    "competition",
+    "default",
+    "curation",
+    "editPost",
+    "entry",
+    "edit",
+  ]) {
+    const value = params.get(key);
+    if (value !== null) destination.searchParams.set(key, value);
+  }
+  return `${destination.pathname}${destination.search}`;
 }
 
 function handleRedirects(req: NextRequest): NextResponse | undefined {

@@ -182,6 +182,20 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
         waveTabs.getByRole("tab", { name, exact: true })
       ).toBeAttached();
     }
+    await expect(
+      waveTabs.getByRole("tab", { name: "Chat", exact: true })
+    ).toHaveAttribute("aria-selected", "true");
+    await expect(
+      page.getByRole("region", {
+        name:
+          englishMessages["waves.chat.fileUploadAreaAriaLabel"] ??
+          "Wave chat file upload area",
+        exact: true,
+      })
+    ).toBeVisible();
+    await expect(page).toHaveURL(
+      new RegExp(`/waves/${settings.memes_wave_id}$`)
+    );
     // This pack runs signed out; personal voting controls remain authenticated.
     await expect(
       page.getByRole("tab", { name: "My Votes", exact: true })
@@ -216,9 +230,14 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     await expect(projectedVote.or(sortDropdown)).toBeVisible();
     if (await sortDropdown.isVisible()) {
       await sortDropdown.click();
-      await page
-        .getByRole("menuitem", { name: "Projected Vote", exact: true })
-        .click();
+      const projectedVoteItem = page.getByRole("menuitem", {
+        name: "Projected Vote",
+        exact: true,
+      });
+      // The mobile sort sheet starts below the viewport during its entrance.
+      // Wait for the target to enter before click's automatic scrolling.
+      await expect(projectedVoteItem).toBeInViewport({ ratio: 1 });
+      await projectedVoteItem.click();
       await expect(
         page.getByRole("button", { name: "Sort: Projected Vote", exact: true })
       ).toBeVisible();
