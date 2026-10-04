@@ -24,6 +24,9 @@ remains distribution-admin-only.
   mainnet ENS input. Confirmation shows the exact resolved wallet address.
   Invalid/unresolved names, the zero address, owner, and existing admins cannot
   be added. Revoke requires confirmation and is never offered for the owner.
+  Formatted ENS labels are forward-resolved, not trusted by their editable wallet
+  suffix. Editing the name invalidates an unconfirmed operation; pending, failed,
+  or missing resolution blocks Add rather than reusing the prior wallet.
 - The header's `Add Admin` button unfolds an inline form above the list, without
   opening a separate input dialog. `Review Admin` opens the existing transaction
   review; `Cancel` closes and resets the form and returns focus to `Add Admin`.

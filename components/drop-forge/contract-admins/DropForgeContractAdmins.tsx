@@ -62,6 +62,7 @@ export default function DropForgeContractAdmins() {
     chainId: chain.id,
     activeWallet,
     canManageContractAdmins,
+    input,
     resolvedAddress,
     owner: ownerQuery.data,
     admins: adminsQuery.data,
@@ -214,6 +215,7 @@ export default function DropForgeContractAdmins() {
             <EnsAddressInput
               id="contract-admin-address"
               value={input}
+              requireEnsResolution
               variant="dark"
               disabled={controlsDisabled}
               ariaDescribedBy="contract-admin-validation"
