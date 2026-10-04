@@ -1,5 +1,5 @@
-import { fireEvent, render, screen } from "@testing-library/react";
-import { mainnet } from "viem/chains";
+import { act, fireEvent, render, screen, within } from "@testing-library/react";
+import { mainnet, sepolia } from "viem/chains";
 import DropForgeContractAdmins from "@/components/drop-forge/contract-admins/DropForgeContractAdmins";
 
 const owner = "0x0000000000000000000000000000000000000001";
@@ -8,9 +8,12 @@ const newAdmin = "0x0000000000000000000000000000000000000003";
 let mockCanManage = true;
 let mockReadError = false;
 let mockActiveWallet = owner;
+let mockChain = mainnet as typeof mainnet | typeof sepolia;
+const mockEnsName = jest.fn();
 const mockRefresh = jest.fn();
 const mockSubmit = jest.fn();
 jest.mock("wagmi", () => ({
+  useEnsName: (parameters: unknown) => mockEnsName(parameters),
   useReadContract: ({ functionName }: { functionName: string }) => ({
     data: functionName === "owner" ? owner : [admin, owner, admin],
     isError: mockReadError,
@@ -25,7 +28,7 @@ jest.mock("@/hooks/useDropForgePermissions", () => ({
   useDropForgePermissions: () => ({ canManageContractAdmins: mockCanManage }),
 }));
 jest.mock("@/components/drop-forge/drop-forge-config", () => ({
-  useDropForgeMintingConfig: () => ({ contract: owner, chain: mainnet }),
+  useDropForgeMintingConfig: () => ({ contract: owner, chain: mockChain }),
 }));
 jest.mock(
   "@/components/drop-forge/contract-admins/useContractAdminTransaction",
@@ -64,6 +67,7 @@ jest.mock("@/components/utils/input/ens-address/EnsAddressInput", () => ({
     disabled,
     ariaInvalid,
     ariaDescribedBy,
+    value,
   }: {
     id: string;
     onAddressChange: (value: string) => void;
@@ -71,9 +75,11 @@ jest.mock("@/components/utils/input/ens-address/EnsAddressInput", () => ({
     disabled: boolean;
     ariaInvalid: boolean;
     ariaDescribedBy: string;
+    value: string;
   }) => (
     <input
       id={id}
+      value={value}
       disabled={disabled}
       aria-invalid={ariaInvalid}
       aria-describedby={ariaDescribedBy}
@@ -91,7 +97,13 @@ beforeEach(() => {
   mockCanManage = true;
   mockReadError = false;
   mockActiveWallet = owner;
+  mockChain = mainnet;
   jest.clearAllMocks();
+  mockRefresh.mockReset().mockResolvedValue(undefined);
+  mockEnsName.mockReset().mockReturnValue({ data: null });
+});
+afterEach(() => {
+  jest.useRealTimers();
 });
 it("lists the owner first exactly once and never offers owner revocation", () => {
   render(<DropForgeContractAdmins />);
@@ -116,10 +128,11 @@ it("keeps the list read-only for distribution or onchain-only admins", () => {
 });
 it("confirms the exact resolved ENS address before submission", () => {
   render(<DropForgeContractAdmins />);
+  fireEvent.click(screen.getByRole("button", { name: "Add Admin" }));
   fireEvent.change(screen.getByLabelText("Admin wallet or ENS"), {
     target: { value: "prxt0.eth" },
   });
-  fireEvent.click(screen.getByRole("button", { name: "Add Admin" }));
+  fireEvent.click(screen.getByRole("button", { name: "Review Admin" }));
   expect(mockSubmit).not.toHaveBeenCalled();
   expect(screen.getByRole("dialog")).toHaveTextContent(newAdmin);
   fireEvent.click(screen.getByRole("button", { name: "Confirm Add Admin" }));
@@ -160,10 +173,11 @@ it.each([
   "0x0000000000000000000000000000000000000000",
 ])("disables adding %s", (value) => {
   render(<DropForgeContractAdmins />);
+  fireEvent.click(screen.getByRole("button", { name: "Add Admin" }));
   fireEvent.change(screen.getByLabelText("Admin wallet or ENS"), {
     target: { value },
   });
-  expect(screen.getByRole("button", { name: "Add Admin" })).toBeDisabled();
+  expect(screen.getByRole("button", { name: "Review Admin" })).toBeDisabled();
   const field = screen.getByLabelText("Admin wallet or ENS");
   expect(field).toHaveAttribute("aria-invalid", "true");
   expect(field).toHaveAccessibleDescription(
@@ -183,7 +197,8 @@ it("warns a configured non-owner before signing without hiding testing controls"
   fireEvent.click(screen.getByRole("button", { name: "Confirm Revoke" }));
   expect(mockSubmit).toHaveBeenCalled();
 });
-it("fails closed on read errors and offers a retry", () => {
+it("fails closed on read errors and offers a retry", async () => {
+  jest.useFakeTimers();
   mockReadError = true;
   render(<DropForgeContractAdmins />);
   expect(screen.getByRole("alert")).toHaveTextContent("Unable to load");
@@ -192,4 +207,137 @@ it("fails closed on read errors and offers a retry", () => {
     screen.getByRole("button", { name: "Refresh contract admins" })
   );
   expect(mockRefresh).toHaveBeenCalledTimes(2);
+  await act(() => jest.advanceTimersByTimeAsync(1500));
+});
+
+it("unfolds the add form above the list and resets it on cancel", () => {
+  render(<DropForgeContractAdmins />);
+  const add = screen.getByRole("button", { name: "Add Admin" });
+  expect(add).toHaveAttribute("aria-expanded", "false");
+  expect(
+    screen.queryByLabelText("Admin wallet or ENS")
+  ).not.toBeInTheDocument();
+  fireEvent.click(add);
+  expect(add).toHaveAttribute("aria-expanded", "true");
+  const input = screen.getByLabelText("Admin wallet or ENS");
+  expect(
+    input.compareDocumentPosition(screen.getByRole("list")) &
+      Node.DOCUMENT_POSITION_FOLLOWING
+  ).toBeTruthy();
+  fireEvent.change(input, { target: { value: "prxt0.eth" } });
+  fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
+  expect(add).toHaveFocus();
+  expect(add).toHaveAttribute("aria-expanded", "false");
+  fireEvent.click(add);
+  expect(screen.getByLabelText("Admin wallet or ENS")).toHaveValue("");
+  expect(screen.getByRole("button", { name: "Review Admin" })).toBeDisabled();
+});
+
+it("shows mainnet ENS names beside role pills without replacing wallet addresses", () => {
+  mockChain = sepolia;
+  mockEnsName.mockImplementation(({ address }: { address: string }) => ({
+    data: address === owner ? "deployer2.6529.eth" : "prxt0.eth",
+  }));
+  render(<DropForgeContractAdmins />);
+  const rows = screen.getAllByRole("listitem");
+  expect(rows[0]).toHaveTextContent("deployer2.6529.eth");
+  expect(rows[0]).toHaveTextContent(owner);
+  expect(within(rows[0]!).getByText("Owner")).toHaveClass("tw-rounded-full");
+  expect(rows[1]).toHaveTextContent("prxt0.eth");
+  expect(rows[1]).toHaveTextContent(admin);
+  expect(within(rows[1]!).getByText("Admin")).toHaveClass("tw-rounded-full");
+  expect(mockEnsName).toHaveBeenCalledWith({ address: owner, chainId: 1 });
+  expect(mockEnsName).toHaveBeenCalledWith({ address: admin, chainId: 1 });
+});
+
+it.each([
+  { data: null, isLoading: true },
+  { data: null, isError: true },
+  { data: null },
+])("keeps full addresses and roles when ENS is unavailable: %s", (result) => {
+  mockEnsName.mockReturnValue(result);
+  render(<DropForgeContractAdmins />);
+  const rows = screen.getAllByRole("listitem");
+  expect(rows[0]).toHaveTextContent(owner);
+  expect(rows[0]).toHaveTextContent("Owner");
+  expect(rows[1]).toHaveTextContent(admin);
+  expect(
+    screen.getByRole("button", { name: `Revoke admin ${admin}` })
+  ).toBeEnabled();
+});
+
+it("keeps refresh busy for at least 1.5 seconds, including very fast reads", async () => {
+  jest.useFakeTimers();
+  render(<DropForgeContractAdmins />);
+  const refresh = screen.getByRole("button", {
+    name: "Refresh contract admins",
+  });
+  fireEvent.click(refresh);
+  expect(refresh).toHaveAttribute("aria-busy", "true");
+  expect(refresh).toBeDisabled();
+  expect(
+    within(refresh).getByRole("status", { hidden: true })
+  ).toBeInTheDocument();
+  fireEvent.click(refresh);
+  expect(mockRefresh).toHaveBeenCalledTimes(2);
+  await act(() => jest.advanceTimersByTimeAsync(1499));
+  expect(refresh).toBeDisabled();
+  await act(() => jest.advanceTimersByTimeAsync(1));
+  expect(refresh).toBeEnabled();
+  expect(refresh).not.toHaveAttribute("aria-busy", "true");
+});
+
+it("keeps refresh busy until both slow reads settle, including a failed read", async () => {
+  jest.useFakeTimers();
+  let finishOwner!: () => void;
+  let failAdmins!: (error: Error) => void;
+  mockRefresh
+    .mockImplementationOnce(
+      () =>
+        new Promise<void>((resolve) => {
+          finishOwner = resolve;
+        })
+    )
+    .mockImplementationOnce(
+      () =>
+        new Promise<void>((_, reject) => {
+          failAdmins = reject;
+        })
+    );
+  render(<DropForgeContractAdmins />);
+  const refresh = screen.getByRole("button", {
+    name: "Refresh contract admins",
+  });
+  fireEvent.click(refresh);
+  await act(() => jest.advanceTimersByTimeAsync(1500));
+  expect(refresh).toBeDisabled();
+  await act(async () => {
+    finishOwner();
+  });
+  expect(refresh).toBeDisabled();
+  await act(async () => {
+    failAdmins(new Error("RPC unavailable"));
+  });
+  expect(refresh).toBeEnabled();
+});
+
+it("uses app tooltips instead of native titles for refresh and revoke", async () => {
+  jest.useFakeTimers();
+  render(<DropForgeContractAdmins />);
+  const refresh = screen.getByRole("button", {
+    name: "Refresh contract admins",
+  });
+  const revoke = screen.getByRole("button", { name: `Revoke admin ${admin}` });
+  expect(refresh).not.toHaveAttribute("title");
+  expect(revoke).not.toHaveAttribute("title");
+  fireEvent.focus(revoke);
+  await act(() => jest.advanceTimersByTimeAsync(750));
+  expect(screen.getByRole("tooltip")).toHaveTextContent("Revoke admin");
+  expect(revoke).toHaveAccessibleDescription("Revoke admin");
+  fireEvent.blur(revoke);
+  fireEvent.mouseEnter(refresh);
+  await act(() => jest.advanceTimersByTimeAsync(750));
+  expect(screen.getByRole("tooltip")).toHaveTextContent(
+    "Refresh contract admins"
+  );
 });
