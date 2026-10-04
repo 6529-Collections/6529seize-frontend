@@ -42,8 +42,8 @@ hub without revealing the resource.
 
 ## Default Competition (Approved Follow-Up)
 
-Entering a wave without explicit competition selection must show its
-[default competition](../default-competition.md), with wave competition tabs
+Entering a wave without an explicit destination must stay in Chat. Its
+[default competition](../default-competition.md) supplies wave competition tabs
 opening that competition's leaderboard, winners and corresponding views.
 One eligible competition wins; otherwise choose the earliest-starting active;
 with none active choose the soonest upcoming, otherwise the most recently ended.

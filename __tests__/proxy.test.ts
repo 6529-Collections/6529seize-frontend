@@ -20,6 +20,7 @@ function createRequest(
 ): NextRequest {
   const requestUrl = new URL(`https://staging.6529.io${pathname}`);
   const nextUrl = new URL(requestUrl);
+  Object.assign(nextUrl, { clone: () => new URL(nextUrl) });
   nextUrl.pathname = nextUrlPathname;
   return {
     url: requestUrl.toString(),
@@ -42,6 +43,50 @@ describe("proxy", () => {
   afterEach(() => {
     jest.restoreAllMocks();
   });
+
+  it.each([
+    "",
+    "tab=chat",
+    "tab=leaderboard",
+    "tab=winners&competition=older",
+    "tab=configuration&competition=older",
+    "serialNo=42&tab=leaderboard",
+  ])(
+    "preserves explicit wave destinations in the desktop alias (%s)",
+    async (query) => {
+      const request = createRequest("/my-stream");
+      request.nextUrl.search = `?wave=wave${query ? `&${query}` : ""}`;
+      jest
+        .mocked(request.headers.get)
+        .mockReturnValue("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)");
+      await proxy(request);
+      expect(mockRedirect).toHaveBeenCalledWith(
+        new URL(`/waves/wave${query ? `?${query}` : ""}`, request.url)
+      );
+    }
+  );
+
+  it.each([
+    ["drop=message///&tab=leaderboard", "drop=message&tab=leaderboard"],
+    ["serialNo=42/&tab=leaderboard", "serialNo=42&tab=leaderboard"],
+    [
+      "drop=message///&serialNo=42/&entry=older&tab=leaderboard",
+      "drop=message&serialNo=42&tab=leaderboard&entry=older",
+    ],
+  ])(
+    "keeps normalized chat targets alongside explicit view keys (%s)",
+    async (query, expected) => {
+      const request = createRequest("/my-stream");
+      request.nextUrl.search = `?wave=wave&${query}`;
+      jest
+        .mocked(request.headers.get)
+        .mockReturnValue("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)");
+      await proxy(request);
+      expect(mockRedirect).toHaveBeenCalledWith(
+        new URL(`/waves/wave?${expected}`, request.url)
+      );
+    }
+  );
 
   it.each([
     "/help-index.json",

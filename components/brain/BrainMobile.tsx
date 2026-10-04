@@ -205,7 +205,7 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
         router.push(
           selectedId
             ? `${getCompetitionRoute(waveId, selectedId)}?tab=${competitionTab}`
-            : `${getWavePathRoute(waveId)}/competitions`,
+            : `${getWavePathRoute(waveId)}?tab=${view.toLowerCase()}`,
           { scroll: false }
         );
         return;

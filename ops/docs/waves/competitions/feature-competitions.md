@@ -28,7 +28,10 @@ Cards show the start date and, when set, the end date. Dates in the past use
 
 ## Default Competition
 
-Opening a wave without choosing a competition opens its default competition.
+Opening a wave without an explicit destination opens **Chat** and stays there
+while competition data loads or refreshes. Selecting a competition tab uses the
+default competition unless a link or earlier explicit selection supplies another
+competition.
 Chat and the competition views share one wave-level tab row, with the selected
 content directly below it. There is no second competition tab row or surrounding
 detail panel. This applies to single-competition waves and to the default in
