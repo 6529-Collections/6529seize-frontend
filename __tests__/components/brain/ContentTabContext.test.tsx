@@ -193,12 +193,13 @@ describe("ContentTabContext", () => {
         `/waves/hub/competitions/${competitionId}?tab=decisions`,
         { scroll: false }
       );
+      expect(result.current.activeContentTab).toBe(MyStreamWaveTab.CHAT);
     }
   );
 
   it("retains an intentional competition view while the default is still loading", () => {
     mockPathname = "/waves/hub";
-    const { result } = setup();
+    const { result, rerender } = setup();
     act(() =>
       result.current.updateAvailableTabs({
         waveId: "hub",
@@ -216,6 +217,9 @@ describe("ContentTabContext", () => {
     expect(mockPush).toHaveBeenCalledWith("/waves/hub?tab=winners", {
       scroll: false,
     });
+    expect(result.current.activeContentTab).toBe(MyStreamWaveTab.CHAT);
+    mockSearch = new URLSearchParams("tab=winners");
+    rerender();
     expect(result.current.activeContentTab).toBe(MyStreamWaveTab.WINNERS);
   });
 
