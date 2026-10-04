@@ -267,7 +267,8 @@ export default function OnchainTransactionModal({
   const titleId = useId();
   const subtitleId = useId();
   const dialogRef = useRef<HTMLDialogElement>(null);
-  const closable = allowCloseWhilePending || status === "success" || status === "error";
+  const closable =
+    allowCloseWhilePending || status === "success" || status === "error";
   const hasSubtitle = subtitle !== undefined && subtitle !== null;
   const customContent = getCustomStatusContent(
     status,

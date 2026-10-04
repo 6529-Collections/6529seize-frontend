@@ -277,8 +277,15 @@ function AdminConfirmation({
             Only the contract owner can authorize this transaction.
           </p>
           <div className="tw-flex tw-flex-wrap tw-justify-center tw-gap-3">
-            <Button variant="secondary" onClick={onClose}>Cancel</Button>
-            <Button variant={approving ? "primary" : "destructive"} onClick={onConfirm}>Confirm {approving ? "Add Admin" : "Revoke"}</Button>
+            <Button variant="secondary" onClick={onClose}>
+              Cancel
+            </Button>
+            <Button
+              variant={approving ? "primary" : "destructive"}
+              onClick={onConfirm}
+            >
+              Confirm {approving ? "Add Admin" : "Revoke"}
+            </Button>
           </div>
         </div>
       }

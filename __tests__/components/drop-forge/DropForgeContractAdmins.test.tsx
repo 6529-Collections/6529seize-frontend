@@ -133,7 +133,9 @@ it("requires confirmation to revoke an existing admin", () => {
 
 it("cancels the pre-sign review without submitting a transaction", () => {
   render(<DropForgeContractAdmins />);
-  fireEvent.click(screen.getByRole("button", { name: `Revoke admin ${admin}` }));
+  fireEvent.click(
+    screen.getByRole("button", { name: `Revoke admin ${admin}` })
+  );
   fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
   expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   expect(mockSubmit).not.toHaveBeenCalled();
