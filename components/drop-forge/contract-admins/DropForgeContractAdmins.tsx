@@ -64,7 +64,11 @@ export default function DropForgeContractAdmins() {
       contract: contract as Address,
       chain,
       canManage: canManageContractAdmins,
-      contextFingerprint,
+      contextFingerprint: getConnectedActionFingerprint({
+        contextFingerprint,
+        functionName: confirmation?.functionName,
+        target: confirmation?.address,
+      }),
     });
   const hasReadError = ownerQuery.isError || adminsQuery.isError;
   const ready =
@@ -79,7 +83,9 @@ export default function DropForgeContractAdmins() {
     ? "Unable to resolve this ENS name."
     : getAdminAddressError(resolvedAddress, ownerQuery.data, admins);
   const visibleConfirmation =
-    confirmation?.context === contextFingerprint ? confirmation : null;
+    !busy && !transaction && confirmation?.context === contextFingerprint
+      ? confirmation
+      : null;
   const controlsDisabled = busy || !ready || !!visibleConfirmation;
   let listStatus = null;
   if (hasReadError) {
@@ -223,7 +229,6 @@ export default function DropForgeContractAdmins() {
           onClose={() => setConfirmation(null)}
           onConfirm={() => {
             submit(visibleConfirmation);
-            setConfirmation(null);
           }}
         />
       )}
@@ -239,7 +244,10 @@ export default function DropForgeContractAdmins() {
           message={transaction.message}
           transactionHash={transaction.hash}
           chain={transaction.chain}
-          onClose={closeTransaction}
+          onClose={() => {
+            closeTransaction();
+            setConfirmation(null);
+          }}
         />
       )}
     </section>

@@ -129,6 +129,11 @@ it("requires confirmation to revoke an existing admin", () => {
   expect(mockSubmit).toHaveBeenCalledWith(
     expect.objectContaining({ functionName: "revokeAdmin", address: admin })
   );
+  // A connection request has not started signing yet; keep review cancellable.
+  expect(screen.getByRole("dialog")).toBeInTheDocument();
+  expect(
+    screen.getByRole("button", { name: `Revoke admin ${admin}` })
+  ).toBeDisabled();
 });
 
 it("cancels the pre-sign review without submitting a transaction", () => {
