@@ -816,14 +816,221 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     expect(sandbox.requests[0]?.body).not.toHaveProperty("voting");
   });
 
-  test("opens the default on wave entry and preserves explicit tabs, reload, back and forward", async ({
+  for (const mode of [
+    "native-multi",
+    "native-single",
+    "legacy-single",
+    "native-app",
+  ] as const) {
+    test(`keeps rendered Chat after delayed default resolution (${mode})`, async ({
+      page,
+    }, testInfo) => {
+      test.skip(
+        mode === "native-app" &&
+          testInfo.project.name !== "web-mobile-chromium",
+        "Native app simulation uses the mobile viewport."
+      );
+      const sandbox = await installCompetitionApi(page, false, false);
+      if (mode.endsWith("single")) sandbox.onlyCompetition("alpha");
+      if (mode === "legacy-single") await sandbox.legacyPrimary("alpha");
+      if (mode === "native-app")
+        await installSurfaceSimulation(
+          page.context(),
+          "capacitor-ios-sim",
+          testInfo.project.use.baseURL
+        );
+      let releaseDefault!: () => void;
+      const pendingDefault = new Promise<void>((resolve) => {
+        releaseDefault = resolve;
+      });
+      await page.route("**/v3/waves/**/default-competition", async (route) => {
+        await pendingDefault;
+        await route.fallback();
+      });
+      const selectionResponse = page.waitForResponse(
+        (response) =>
+          response.url().endsWith("/default-competition") && response.ok()
+      );
+      try {
+        await page.goto(`/waves/${WAVE}`);
+        const chatContent = page
+          .getByText("6529-composer-preview", { exact: false })
+          .first();
+        const chatTab = page.getByRole(
+          mode === "native-app" ? "button" : "tab",
+          {
+            name: "Chat",
+            exact: true,
+          }
+        );
+        await expect(chatContent).toBeVisible({ timeout: 30000 });
+        await expect(chatTab).toHaveAttribute(
+          mode === "native-app" ? "aria-current" : "aria-selected",
+          "true"
+        );
+        releaseDefault();
+        await (await selectionResponse).finished();
+        if (mode.endsWith("single"))
+          await expect(
+            page.getByRole(mode === "native-app" ? "button" : "tab", {
+              name: /^Competitions(?:\s+\d+\+?)?$/,
+            })
+          ).toHaveCount(0);
+        const leaderboard = page.getByRole(
+          mode === "native-app" ? "button" : "tab",
+          { name: "Leaderboard", exact: true }
+        );
+        await expect(leaderboard).toBeVisible({ timeout: 30000 });
+        await expect(chatContent).toBeVisible();
+        await expect(chatTab).toHaveAttribute(
+          mode === "native-app" ? "aria-current" : "aria-selected",
+          "true"
+        );
+        await expect(page).toHaveURL(new RegExp(`/waves/${WAVE}$`));
+        await expect(
+          page.getByText("Immutable alpha entry content", { exact: true })
+        ).toHaveCount(0);
+        await leaderboard.click();
+        await expect(page).toHaveURL(/competitions\/alpha\?tab=leaderboard$/);
+        if (mode === "legacy-single")
+          await expectLegacySectionContent(page, "leaderboard");
+        else
+          await expect(
+            page.getByText("Immutable alpha entry content", { exact: true })
+          ).toBeVisible();
+        await page.goBack();
+        await expect(chatContent).toBeVisible({ timeout: 30000 });
+        await expect(page).toHaveURL(new RegExp(`/waves/${WAVE}$`));
+        await page.goForward();
+        await expect(page).toHaveURL(/competitions\/alpha\?tab=leaderboard$/);
+      } finally {
+        releaseDefault();
+      }
+    });
+  }
+
+  test("preserves an intentional About selection while default data loads", async ({
+    page,
+  }, testInfo) => {
+    await installCompetitionApi(page);
+    const app = testInfo.project.name === "web-mobile-chromium";
+    if (app)
+      await installSurfaceSimulation(
+        page.context(),
+        "capacitor-ios-sim",
+        testInfo.project.use.baseURL
+      );
+    let releaseDefault!: () => void;
+    const pendingDefault = new Promise<void>((resolve) => {
+      releaseDefault = resolve;
+    });
+    await page.route("**/v3/waves/**/default-competition", async (route) => {
+      await pendingDefault;
+      await route.fallback();
+    });
+    const selectionResponse = page.waitForResponse(
+      (response) =>
+        response.url().endsWith("/default-competition") && response.ok()
+    );
+    try {
+      await page.goto(`/waves/${WAVE}`);
+      const chatRegion = page.getByRole("region", {
+        name: "Wave chat file upload area",
+        exact: true,
+      });
+      await expect(chatRegion).toBeVisible({ timeout: 30000 });
+      const about = page.getByRole(app ? "button" : "tab", {
+        name: "About",
+        exact: true,
+      });
+      await about.click();
+      const description = page.getByRole("region", {
+        name: "Pinned drop",
+        exact: true,
+      });
+      await expect(description).toBeVisible();
+      await expect(chatRegion).toHaveCount(0);
+      releaseDefault();
+      await (await selectionResponse).finished();
+      await expect(
+        page.getByRole(app ? "button" : "tab", {
+          name: "Leaderboard",
+          exact: true,
+        })
+      ).toBeVisible();
+      await expect(about).toHaveAttribute(
+        app ? "aria-current" : "aria-selected",
+        "true"
+      );
+      await expect(description).toBeVisible();
+      await expect(chatRegion).toHaveCount(0);
+      await expect(page).not.toHaveURL(/competitions\/alpha/);
+    } finally {
+      releaseDefault();
+    }
+  });
+
+  test("honors a Leaderboard click before default selection completes", async ({
+    page,
+  }, testInfo) => {
+    const sandbox = await installCompetitionApi(page);
+    await sandbox.legacyPrimary("alpha");
+    const app = testInfo.project.name === "web-mobile-chromium";
+    if (app)
+      await installSurfaceSimulation(
+        page.context(),
+        "capacitor-ios-sim",
+        testInfo.project.use.baseURL
+      );
+    let releaseDefault!: () => void;
+    const pendingDefault = new Promise<void>((resolve) => {
+      releaseDefault = resolve;
+    });
+    await page.route("**/v3/waves/**/default-competition", async (route) => {
+      await pendingDefault;
+      await route.fallback();
+    });
+    try {
+      await page.goto(`/waves/${WAVE}`);
+      await expect(
+        page.getByRole("region", {
+          name: "Wave chat file upload area",
+          exact: true,
+        })
+      ).toBeVisible({ timeout: 30000 });
+      const leaderboard = page.getByRole(app ? "button" : "tab", {
+        name: "Leaderboard",
+        exact: true,
+      });
+      await leaderboard.click();
+      await expect(page).toHaveURL(
+        new RegExp(`/waves/${WAVE}\\?tab=leaderboard$`)
+      );
+      releaseDefault();
+      await expect(page).toHaveURL(
+        /competitions\/alpha\?tab=leaderboard&default=1$/,
+        { timeout: 30000 }
+      );
+      await expectLegacySectionContent(page, "leaderboard");
+    } finally {
+      releaseDefault();
+    }
+  });
+
+  test("opens Chat on wave entry and preserves explicit tabs, reload, back and forward", async ({
     page,
   }, testInfo) => {
     const sandbox = await installCompetitionApi(page);
     await page.goto(`/waves/${WAVE}`);
-    await expect(page).toHaveURL(/competitions\/alpha\?default=1$/, {
-      timeout: 30000,
-    });
+    await expect(page.getByRole("tabpanel")).toContainText(
+      "6529-composer-preview",
+      { timeout: 30000 }
+    );
+    await expect(page).toHaveURL(new RegExp(`/waves/${WAVE}$`));
+    await waveTabStrip(page)
+      .getByRole("tab", { name: "Leaderboard", exact: true })
+      .click();
+    await expect(page).toHaveURL(/competitions\/alpha\?tab=leaderboard$/);
     await expect(
       page.getByText("Immutable alpha entry content", { exact: true })
     ).toBeVisible();
@@ -1394,8 +1601,10 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         }
       );
       const root = `/waves/${MEMES_WAVE}/competitions/alpha`;
-      await page.goto(`/waves/${MEMES_WAVE}`);
-      await expect(page).toHaveURL(`${root}?default=1`, { timeout: 30000 });
+      await page.goto(`/waves/${MEMES_WAVE}?tab=leaderboard`);
+      await expect(page).toHaveURL(`${root}?tab=leaderboard&default=1`, {
+        timeout: 30000,
+      });
       await dismissNextDevTools(page);
       const modes = page.getByRole("tablist", {
         name: "Leaderboard view modes",
@@ -1508,14 +1717,20 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
   }) => {
     const sandbox = await installCompetitionApi(page);
     sandbox.refreshAtBoundary();
-    await page.goto(`/waves/${WAVE}`);
-    await expect(page).toHaveURL(/competitions\/alpha\?default=1$/, {
-      timeout: 30000,
-    });
+    await page.goto(`/waves/${WAVE}?tab=leaderboard`);
+    await expect(page).toHaveURL(
+      /competitions\/alpha\?tab=leaderboard&default=1$/,
+      {
+        timeout: 30000,
+      }
+    );
     sandbox.setDefault("beta");
-    await expect(page).toHaveURL(/competitions\/beta\?default=1$/, {
-      timeout: 15000,
-    });
+    await expect(page).toHaveURL(
+      /competitions\/beta\?tab=leaderboard&default=1$/,
+      {
+        timeout: 15000,
+      }
+    );
     await expect(
       page.getByRole("button", { name: "Enter Beta", exact: true })
     ).toBeVisible();
@@ -1525,12 +1740,12 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       exact: true,
     });
     await expect(form).toBeVisible();
-    await expect(page).toHaveURL(/competitions\/beta$/);
+    await expect(page).toHaveURL(/competitions\/beta\?tab=leaderboard$/);
     sandbox.setDefault("alpha");
     const reads = sandbox.selectionReads();
     await expect.poll(() => sandbox.selectionReads()).toBeGreaterThan(reads);
     await expect(form).toBeVisible();
-    await expect(page).toHaveURL(/competitions\/beta$/);
+    await expect(page).toHaveURL(/competitions\/beta\?tab=leaderboard$/);
     await expect(
       page.getByRole("button", { name: "Enter Beta", exact: true })
     ).toBeVisible();
@@ -1568,10 +1783,17 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       );
     }
     // Desktop retains the old alias; mobile app entry uses the canonical wave route.
-    await page.goto(mobile ? `/waves/${WAVE}` : `/my-stream?wave=${WAVE}`);
-    await expect(page).toHaveURL(/competitions\/alpha\?default=1$/, {
-      timeout: 30000,
-    });
+    await page.goto(
+      mobile
+        ? `/waves/${WAVE}?tab=leaderboard`
+        : `/my-stream?wave=${WAVE}&tab=leaderboard`
+    );
+    await expect(page).toHaveURL(
+      /competitions\/alpha\?tab=leaderboard&default=1$/,
+      {
+        timeout: 30000,
+      }
+    );
     await expect(
       page.getByText("Immutable alpha entry content", { exact: true })
     ).toBeVisible();
@@ -1600,8 +1822,9 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     );
     await page.goto(`/waves/${WAVE}`);
     await expect(
-      page.getByRole("button", { name: "Try again", exact: true })
+      page.getByText("6529-composer-preview", { exact: false }).first()
     ).toBeVisible({ timeout: 30000 });
+    await expect(page).toHaveURL(new RegExp(`/waves/${WAVE}$`));
     await expect(
       page.getByRole(mobile ? "button" : "tab", { name: "Chat", exact: true })
     ).toBeVisible();

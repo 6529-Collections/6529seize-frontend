@@ -182,6 +182,20 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
         waveTabs.getByRole("tab", { name, exact: true })
       ).toBeAttached();
     }
+    await expect(
+      waveTabs.getByRole("tab", { name: "Chat", exact: true })
+    ).toHaveAttribute("aria-selected", "true");
+    await expect(
+      page.getByRole("region", {
+        name:
+          englishMessages["waves.chat.fileUploadAreaAriaLabel"] ??
+          "Wave chat file upload area",
+        exact: true,
+      })
+    ).toBeVisible();
+    await expect(page).toHaveURL(
+      new RegExp(`/waves/${settings.memes_wave_id}$`)
+    );
     // This pack runs signed out; personal voting controls remain authenticated.
     await expect(
       page.getByRole("tab", { name: "My Votes", exact: true })

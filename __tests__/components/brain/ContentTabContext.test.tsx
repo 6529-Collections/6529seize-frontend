@@ -196,6 +196,29 @@ describe("ContentTabContext", () => {
     }
   );
 
+  it("retains an intentional competition view while the default is still loading", () => {
+    mockPathname = "/waves/hub";
+    const { result } = setup();
+    act(() =>
+      result.current.updateAvailableTabs({
+        waveId: "hub",
+        isChatWave: false,
+        hasAuthenticatedProfile: true,
+        isMemesWave: false,
+        isCurationWave: false,
+        votingState: WaveVotingState.ONGOING,
+        hasFirstDecisionPassed: true,
+        defaultCompetitionId: null,
+        defaultSelectionEnabled: true,
+      })
+    );
+    act(() => result.current.setActiveContentTab(MyStreamWaveTab.WINNERS));
+    expect(mockPush).toHaveBeenCalledWith("/waves/hub?tab=winners", {
+      scroll: false,
+    });
+    expect(result.current.activeContentTab).toBe(MyStreamWaveTab.WINNERS);
+  });
+
   it("defaults to CHAT when params null", () => {
     const { result } = setup();
     act(() => result.current.updateAvailableTabs(null));
@@ -513,7 +536,7 @@ describe("ContentTabContext", () => {
     ]);
   });
 
-  it("defaults to LEADERBOARD for memes waves", () => {
+  it("defaults to CHAT for memes waves", () => {
     const { result } = setup();
     act(() =>
       result.current.updateAvailableTabs({
@@ -526,7 +549,7 @@ describe("ContentTabContext", () => {
         hasFirstDecisionPassed: false,
       })
     );
-    expect(result.current.activeContentTab).toBe(MyStreamWaveTab.LEADERBOARD);
+    expect(result.current.activeContentTab).toBe(MyStreamWaveTab.CHAT);
   });
 
   it("defaults to CHAT for non-memes waves", () => {
@@ -689,7 +712,7 @@ describe("ContentTabContext", () => {
     ]);
   });
 
-  it("shows SUBMISSIONS and defaults to it when voting ended", () => {
+  it("offers SUBMISSIONS while opening completed waves in CHAT", () => {
     const { result } = setup();
     act(() =>
       result.current.updateAvailableTabs({
@@ -713,7 +736,7 @@ describe("ContentTabContext", () => {
       MyStreamWaveTab.POLLS,
       MyStreamWaveTab.ABOUT,
     ]);
-    expect(result.current.activeContentTab).toBe(MyStreamWaveTab.SUBMISSIONS);
+    expect(result.current.activeContentTab).toBe(MyStreamWaveTab.CHAT);
   });
 
   it("adds My Votes for authenticated normal approve waves", () => {
@@ -866,7 +889,7 @@ describe("ContentTabContext", () => {
     expect(result.current.activeContentTab).toBe(MyStreamWaveTab.CHAT);
   });
 
-  it("does not persist transient tab overrides", () => {
+  it("opens a fresh visit in CHAT after a transient tab override", () => {
     const { result } = setup();
     act(() =>
       result.current.updateAvailableTabs({
@@ -909,7 +932,7 @@ describe("ContentTabContext", () => {
       })
     );
 
-    expect(result.current.activeContentTab).toBe(MyStreamWaveTab.LEADERBOARD);
+    expect(result.current.activeContentTab).toBe(MyStreamWaveTab.CHAT);
   });
 
   it("uses transient preferred tab to override stored or default tab", () => {
@@ -954,7 +977,7 @@ describe("ContentTabContext", () => {
     expect(result.current.activeContentTab).toBe(MyStreamWaveTab.CHAT);
   });
 
-  it("does not persist transient preferred tab after leaving the wave", () => {
+  it("opens a fresh visit in CHAT after leaving a transient preferred tab", () => {
     const { result } = setup();
     act(() =>
       result.current.updateAvailableTabs({
@@ -992,7 +1015,7 @@ describe("ContentTabContext", () => {
       })
     );
 
-    expect(result.current.activeContentTab).toBe(MyStreamWaveTab.LEADERBOARD);
+    expect(result.current.activeContentTab).toBe(MyStreamWaveTab.CHAT);
   });
 
   it("keeps transient active tab during same-wave availability recalculations", () => {
@@ -1058,7 +1081,7 @@ describe("ContentTabContext", () => {
     expect(result.current.activeContentTab).toBe(MyStreamWaveTab.CHAT);
   });
 
-  it("reapplies the stored tab on same-wave recalculation when there is no transient override", () => {
+  it("keeps the fallback CHAT when an unavailable tab becomes available again", () => {
     const { result } = setup();
     act(() =>
       result.current.updateAvailableTabs({
@@ -1098,7 +1121,7 @@ describe("ContentTabContext", () => {
       })
     );
 
-    expect(result.current.activeContentTab).toBe(MyStreamWaveTab.WINNERS);
+    expect(result.current.activeContentTab).toBe(MyStreamWaveTab.CHAT);
   });
 
   it("falls back to default when stored tab is unavailable", () => {

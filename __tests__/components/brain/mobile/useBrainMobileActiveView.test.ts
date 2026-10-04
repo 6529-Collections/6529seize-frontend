@@ -147,7 +147,7 @@ describe("useBrainMobileActiveView", () => {
       )
     );
 
-    expect(result.current.activeView).toBe(BrainView.SUBMISSIONS);
+    expect(result.current.activeView).toBe(BrainView.DEFAULT);
   });
 
   it.each(["42", ""])(
@@ -186,7 +186,7 @@ describe("useBrainMobileActiveView", () => {
     expect(result.current.activeView).toBe(BrainView.DEFAULT);
   });
 
-  it("defaults to submissions after a completed rank wave is loaded", () => {
+  it("keeps Chat after a completed rank wave is loaded", () => {
     const { result } = renderHook(() =>
       useBrainMobileActiveView(
         createProps({
@@ -195,7 +195,7 @@ describe("useBrainMobileActiveView", () => {
       )
     );
 
-    expect(result.current.activeView).toBe(BrainView.SUBMISSIONS);
+    expect(result.current.activeView).toBe(BrainView.DEFAULT);
   });
 
   it("does not switch completed approve waves to submissions", () => {
@@ -282,7 +282,7 @@ describe("useBrainMobileActiveView", () => {
     expect(result.current.activeView).toBe(BrainView.DEFAULT);
   });
 
-  it("resets Outcome to submissions for completed rank curation waves", () => {
+  it("resets unavailable Outcome to Chat for completed rank curation waves", () => {
     const { result } = renderHook(() =>
       useBrainMobileActiveView(
         createProps({
@@ -296,7 +296,7 @@ describe("useBrainMobileActiveView", () => {
       result.current.onViewChange(BrainView.OUTCOME);
     });
 
-    expect(result.current.activeView).toBe(BrainView.SUBMISSIONS);
+    expect(result.current.activeView).toBe(BrainView.DEFAULT);
   });
 
   it("keeps My Votes for authenticated normal rank waves", () => {
@@ -349,7 +349,7 @@ describe("useBrainMobileActiveView", () => {
       result.current.onViewChange(BrainView.MY_VOTES);
     });
 
-    expect(result.current.activeView).toBe(BrainView.SUBMISSIONS);
+    expect(result.current.activeView).toBe(BrainView.DEFAULT);
   });
 
   it("keeps My Votes for curation rank waves without requiring login", () => {

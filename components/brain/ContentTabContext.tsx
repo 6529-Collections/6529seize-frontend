@@ -222,6 +222,8 @@ export const ContentTabProvider: React.FC<{
   const initialTab = competitionOnly
     ? MyStreamWaveTab.LEADERBOARD
     : MyStreamWaveTab.CHAT;
+  const routeKey = `${pathname}:${search.get("wave") ?? ""}:${search.get("tab") ?? ""}:${search.get("serialNo") ?? ""}`;
+  const routeToken = useMemo(() => Symbol(routeKey), [routeKey]);
   const [tabsByWaveId, setTabsByWaveId] = useLocalPreference<
     Record<string, MyStreamWaveTab>
   >(
@@ -231,8 +233,13 @@ export const ContentTabProvider: React.FC<{
     {},
     isValidWaveTabMap
   );
-  const [activeContentTabRaw, setActiveContentTabRaw] =
-    useState<MyStreamWaveTab>(initialTab);
+  const [selection, setSelection] = useState({
+    routeToken,
+    waveId: null as string | null,
+    tab: initialTab,
+  });
+  const activeContentTabRaw =
+    selection.routeToken === routeToken ? selection.tab : initialTab;
   const [availableTabs, setAvailableTabs] = useState<MyStreamWaveTab[]>([
     initialTab,
   ]);
@@ -252,9 +259,12 @@ export const ContentTabProvider: React.FC<{
     tabsByWaveIdRef.current = tabsByWaveId;
   }, [tabsByWaveId]);
 
-  const setActiveTabInternal = useCallback((tab: MyStreamWaveTab) => {
-    setActiveContentTabRaw(tab);
-  }, []);
+  const setActiveTabInternal = useCallback(
+    (tab: MyStreamWaveTab) => {
+      setSelection({ routeToken, waveId: currentWaveIdRef.current, tab });
+    },
+    [routeToken]
+  );
 
   // Function to determine which tabs are available based on wave state
   // Now accepts a params object or null
@@ -385,27 +395,32 @@ export const ContentTabProvider: React.FC<{
         transientTabOverrideRef.current = null;
       }
 
-      const storedTab = waveId ? tabsByWaveIdRef.current[waveId] : undefined;
-      let defaultTab = competitionOnly
-        ? (tabs[0] ?? initialTab)
-        : MyStreamWaveTab.CHAT;
-      if (
-        votingState === WaveVotingState.ENDED &&
-        tabs.includes(MyStreamWaveTab.SUBMISSIONS)
-      ) {
-        defaultTab = MyStreamWaveTab.SUBMISSIONS;
-      } else if (isMemesWave && tabs.includes(MyStreamWaveTab.LEADERBOARD)) {
-        defaultTab = MyStreamWaveTab.LEADERBOARD;
+      if (!competitionOnly) {
+        // Preserve an intentional selection while queries register more tabs.
+        // A fresh route or wave always starts in the shared conversation.
+        setSelection((current) => {
+          let tab = MyStreamWaveTab.CHAT;
+          if (current.routeToken === routeToken && current.waveId === waveId) {
+            if (tabs.includes(current.tab)) tab = current.tab;
+            else if (
+              current.tab === MyStreamWaveTab.LEADERBOARD &&
+              tabs.includes(MyStreamWaveTab.SUBMISSIONS)
+            )
+              tab = MyStreamWaveTab.SUBMISSIONS;
+          }
+          return { routeToken, waveId, tab };
+        });
+        return;
       }
-
+      const storedTab = waveId ? tabsByWaveIdRef.current[waveId] : undefined;
       const nextTab =
         storedTab !== undefined && tabs.includes(storedTab)
           ? storedTab
-          : defaultTab;
+          : (tabs[0] ?? initialTab);
 
       setActiveTabInternal(nextTab);
     },
-    [competitionOnly, initialTab, setActiveTabInternal]
+    [competitionOnly, initialTab, routeToken, setActiveTabInternal]
   );
 
   const navigateToTab = useCallback(
@@ -437,7 +452,7 @@ export const ContentTabProvider: React.FC<{
           defaultCompetitionRef.current.id;
         const target = selectedId
           ? `${getCompetitionRoute(waveId, selectedId)}?tab=${competitionTab}`
-          : `${getWavePathRoute(waveId)}/competitions`;
+          : `${getWavePathRoute(waveId)}?tab=${tab.toLowerCase()}`;
         router.push(target, { scroll: false });
         return true;
       }
