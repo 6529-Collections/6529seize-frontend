@@ -35,7 +35,7 @@ const RULE_LABELS: Record<CreateWaveInlineGroupRuleType, MessageKey> = {
 type FilterView = CreateWaveInlineGroupRuleType | "identities";
 
 const NAV_BUTTON_CLASSES =
-  "tw-flex tw-min-h-11 tw-items-center tw-justify-center tw-gap-1.5 tw-rounded-lg tw-border-0 tw-px-2 tw-py-2 tw-text-sm tw-font-semibold focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 disabled:tw-opacity-50";
+  "tw-flex tw-min-h-10 tw-items-center tw-justify-center tw-gap-1.5 tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-border-solid tw-bg-transparent tw-px-1 tw-py-1 tw-text-sm tw-font-medium focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 disabled:tw-opacity-50";
 
 export default function CommunityMembersFilterPanel(
   props: CreateWaveGroupInlinePanelProps
@@ -86,12 +86,11 @@ export default function CommunityMembersFilterPanel(
 
   const changeView = (next: FilterView, focusEditor: boolean) => {
     setView(next);
-    requestAnimationFrame(() => {
-      if (focusEditor) {
-        editorRef.current?.focus({ preventScroll: true });
-      }
-      editorRef.current?.scrollIntoView({ block: "start" });
-    });
+    if (focusEditor) {
+      requestAnimationFrame(() => editorRef.current?.focus());
+    } else {
+      contentRef.current?.scrollTo({ top: 0 });
+    }
   };
 
   const configuredMark = (
@@ -151,14 +150,14 @@ export default function CommunityMembersFilterPanel(
               role="group"
               aria-label={t(locale, "network.groupFilter.title")}
             >
-              <div className="tw-mb-4 tw-grid tw-grid-cols-4 tw-gap-1 tw-rounded-xl tw-bg-iron-900 tw-p-1">
+              <div className="tw-mb-3 tw-flex tw-flex-wrap tw-items-center tw-gap-x-5 tw-gap-y-1">
                 {CREATE_WAVE_INLINE_GROUP_QUICK_RULES.map((rule) => (
                   <button
                     key={rule}
                     type="button"
                     aria-current={view === rule ? "true" : undefined}
                     onClick={(event) => changeView(rule, event.detail === 0)}
-                    className={`${NAV_BUTTON_CLASSES} ${view === rule ? "tw-bg-iron-700 tw-text-iron-50" : "tw-bg-transparent tw-text-iron-300 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-50"}`}
+                    className={`${NAV_BUTTON_CLASSES} ${view === rule ? "tw-border-primary-400 tw-text-iron-50" : "tw-border-transparent tw-text-iron-300 desktop-hover:hover:tw-text-iron-50"}`}
                   >
                     {t(locale, RULE_LABELS[rule])}
                     {configuredRules.has(rule) && configuredMark}
@@ -169,7 +168,7 @@ export default function CommunityMembersFilterPanel(
                 <h2 className="tw-mb-2 tw-mt-0 !tw-text-sm !tw-font-semibold !tw-text-iron-300">
                   {t(locale, "network.groupFilter.more")}
                 </h2>
-                <div className="tw-divide-y tw-divide-solid tw-divide-iron-800 tw-rounded-xl tw-bg-iron-900/50 tw-px-2">
+                <div className="tw-divide-y tw-divide-solid tw-divide-iron-800 tw-border-x-0 tw-border-b tw-border-t tw-border-solid tw-border-iron-800">
                   {(
                     [
                       "identities",
@@ -181,7 +180,7 @@ export default function CommunityMembersFilterPanel(
                       type="button"
                       aria-current={view === rule ? "true" : undefined}
                       onClick={(event) => changeView(rule, event.detail === 0)}
-                      className={`tw-flex tw-min-h-11 tw-w-full tw-items-center tw-justify-between tw-gap-2 tw-border-0 tw-bg-transparent tw-px-2 tw-py-2 tw-text-left tw-text-sm tw-font-medium focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 ${view === rule ? "tw-text-iron-50" : "tw-text-iron-300 desktop-hover:hover:tw-text-iron-50"}`}
+                      className={`tw-flex tw-min-h-10 tw-w-full tw-items-center tw-justify-between tw-gap-2 tw-border-0 tw-px-1 tw-py-1 tw-text-left tw-text-sm tw-font-medium focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 ${view === rule ? "tw-bg-iron-900/70 tw-text-iron-50" : "tw-bg-transparent tw-text-iron-300 desktop-hover:hover:tw-text-iron-50"}`}
                     >
                       <span className="tw-flex tw-items-center tw-gap-2">
                         {t(

@@ -178,7 +178,13 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
       "xTDH Grant",
     ]) {
       await filter.getByRole("button", { name, exact: true }).click();
-      await expect(filter.getByRole("region", { name })).toBeInViewport();
+      await expect(filter.getByRole("region", { name })).toBeVisible();
+      await expect(
+        filter.getByRole("button", { name: "Level", exact: true })
+      ).toBeInViewport();
+      await expect(
+        filter.getByRole("button", { name: "xTDH Grant", exact: true })
+      ).toBeInViewport();
     }
     await filter.getByRole("button", { name: "Level", exact: true }).click();
     await levelInput.fill("10");
