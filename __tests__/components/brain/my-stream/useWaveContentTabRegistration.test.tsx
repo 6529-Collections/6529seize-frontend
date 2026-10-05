@@ -82,6 +82,7 @@ jest.mock("@/hooks/useWaveTimers", () => ({
 }));
 
 jest.mock("@/hooks/waves/useWaveMetadata", () => ({
+  useWaveMetadata: () => ({ isPending: false }),
   useWaveOutcomeVisibility: () => mockOutcomesVisible,
 }));
 
