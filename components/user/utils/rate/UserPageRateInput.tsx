@@ -2,7 +2,7 @@ import { getStringAsNumberOrZero } from "@/helpers/Helpers";
 import type { RefObject } from "react";
 
 const INPUT_CLASS_NAME =
-  "tw-touch-manipulation tw-appearance-none tw-block tw-min-w-0 tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900/60 tw-px-4 tw-py-3 tw-text-center tw-leading-tight tw-font-medium tw-tabular-nums tw-tracking-tight tw-text-iron-100 tw-caret-primary-400 tw-ring-1 tw-ring-inset tw-ring-iron-800/60 hover:tw-bg-iron-900 hover:tw-ring-iron-700 focus:tw-bg-iron-900 focus:tw-outline-none placeholder:tw-text-iron-500 tw-transition-colors tw-duration-150 motion-reduce:tw-transition-none";
+  "tw-touch-manipulation tw-appearance-none tw-block tw-min-w-0 tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900/60 tw-px-10 tw-py-3 tw-text-center tw-leading-tight tw-font-medium tw-tabular-nums tw-tracking-tight tw-text-iron-100 tw-caret-primary-400 tw-ring-1 tw-ring-inset tw-ring-iron-800/60 hover:tw-bg-iron-900 hover:tw-ring-iron-700 focus:tw-bg-iron-900 focus:tw-outline-none placeholder:tw-text-iron-500 tw-transition-colors tw-duration-150 motion-reduce:tw-transition-none";
 
 const getValueStr = (val: string): string => {
   if (val.length > 1 && val.startsWith("0")) {
@@ -58,20 +58,43 @@ export default function UserPageRateInput({
   };
 
   return (
-    <input
-      ref={inputRef}
-      type="text"
-      data-rating-input="true"
-      id={inputId}
-      autoComplete="off"
-      required={required}
-      value={value}
-      onChange={handleChange}
-      onBlur={handleBlur}
-      className={`${
-        focusRingClassName ??
-        (isValidValue ? "focus:tw-ring-primary-400" : "focus:tw-ring-red")
-      } ${INPUT_CLASS_NAME} ${size === "prominent" ? "tw-text-4xl" : "tw-text-2xl"}`}
-    />
+    <div className="tw-relative tw-w-full tw-min-w-0">
+      <span
+        aria-hidden="true"
+        className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-left-4 tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-0.5 tw-text-iron-500"
+      >
+        <svg className="tw-size-3.5" viewBox="0 0 24 24" fill="none">
+          <path
+            d="M12 5V19M5 12H19"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+          />
+        </svg>
+        <svg className="tw-size-3.5" viewBox="0 0 24 24" fill="none">
+          <path
+            d="M5 12H19"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+          />
+        </svg>
+      </span>
+      <input
+        ref={inputRef}
+        type="text"
+        data-rating-input="true"
+        id={inputId}
+        autoComplete="off"
+        required={required}
+        value={value}
+        onChange={handleChange}
+        onBlur={handleBlur}
+        className={`${
+          focusRingClassName ??
+          (isValidValue ? "focus:tw-ring-primary-400" : "focus:tw-ring-red")
+        } ${INPUT_CLASS_NAME} ${size === "prominent" ? "tw-text-4xl" : "tw-text-2xl"}`}
+      />
+    </div>
   );
 }
