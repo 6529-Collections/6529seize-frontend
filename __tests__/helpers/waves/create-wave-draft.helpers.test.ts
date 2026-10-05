@@ -175,6 +175,7 @@ describe("create-wave-draft.helpers", () => {
     expect(restored.description).toBeNull();
     upsertCreateWaveDraft({ ...restored, updatedAt: 200 }, "wallet:profile");
     expect(readCreateWaveDrafts("wallet:profile")).toHaveLength(1);
-    expect(readCreateWaveDrafts("other:profile")[0]?.description).toBeNull();
+    expect(readCreateWaveDrafts("other:profile")).toEqual([]);
+    expect(readCreateWaveDrafts()).toEqual([]);
   });
 });

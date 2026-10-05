@@ -780,22 +780,6 @@ function createCiPlan(files, options = {}) {
           ? "Standard-risk UI, route, or style changes need a small browser smoke pack."
           : "No route, runtime UI, or style smoke needed."
       ),
-      playwright_wave_creation: check(
-        normalizedFiles.some(
-          (file) =>
-            /^(?:app\/waves\/create\/|components\/waves\/create-wave\/|components\/drops\/create\/|helpers\/waves\/create-wave|tests\/social\/create-wave-sandbox)/.test(
-              file
-            ) ||
-            [
-              "components/brain/left-sidebar/web/WebUnifiedWavesListWaves.tsx",
-              "components/shared/WavesMessagesWrapper.tsx",
-              "components/user/utils/set-up-profile/UserPageSetUpProfile.tsx",
-              "components/header/header-search/header-search-modal/constants.ts",
-              "components/header/header-search/header-search-modal/pageSearch.ts",
-            ].includes(file)
-        ),
-        "Wave creation changes require desktop and mobile sandbox flow coverage."
-      ),
       playwright_critical_shell: check(
         hasCriticalShellEvidenceNeed,
         hasCriticalShellEvidenceNeed

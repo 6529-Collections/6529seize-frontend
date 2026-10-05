@@ -57,7 +57,11 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
       page.getByRole("alert").filter({ hasText: "Write a first post" })
     ).toBeVisible();
     await expect(editor).toHaveAttribute("aria-invalid", "true");
+    await expect(editor).toHaveAttribute("aria-required", "true");
     await expect(editor).toBeFocused();
+    await expect(editor).toHaveAccessibleDescription(
+      "Write a first post or add media before continuing."
+    );
     await editor.fill("   ");
     await nextStepButton(page).click();
     await expect(editor).toHaveAttribute("aria-invalid", "true");

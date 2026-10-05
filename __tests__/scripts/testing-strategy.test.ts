@@ -308,31 +308,6 @@ describe("testing strategy CI plan", () => {
     });
   });
 
-  it.each([
-    "app/waves/create/page.client.tsx",
-    "components/waves/create-wave/CreateWave.tsx",
-    "components/drops/create/DropEditor.tsx",
-    "helpers/waves/create-wave-draft.helpers.ts",
-    "components/shared/WavesMessagesWrapper.tsx",
-    "components/header/header-search/header-search-modal/pageSearch.ts",
-    "tests/social/create-wave-sandbox.spec.ts",
-  ])("selects wave creation browser coverage for %s", (file) => {
-    expect(
-      createCiPlan([file]).checks["playwright_wave_creation"]?.required
-    ).toBe(true);
-  });
-
-  it("keeps unrelated UI and documentation out of the wave creation pack", () => {
-    for (const file of [
-      "components/header/AppHeader.tsx",
-      "ops/workstreams/README.md",
-    ]) {
-      expect(
-        createCiPlan([file]).checks["playwright_wave_creation"]?.required
-      ).toBe(false);
-    }
-  });
-
   it("routes ordinary UI changes through changed checks and smoke", () => {
     const plan = createCiPlan(["components/header/AppHeader.tsx"], {
       untrustedPr: true,

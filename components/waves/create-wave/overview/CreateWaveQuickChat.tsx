@@ -40,21 +40,20 @@ export function CreateWaveQuickChatOptions(props: Props) {
   const locale = useBrowserLocale();
   const { config, groupValidation, errors, setOverview } = props.controller;
   const isRestricted = config.groups.canView !== null;
+  let permissionsKey: Parameters<typeof t>[1];
+  if (isRestricted) {
+    permissionsKey = config.groups.admin
+      ? "waves.create.quick.restrictedGroupAdmins"
+      : "waves.create.quick.restrictedCreatorAdmin";
+  } else {
+    permissionsKey = config.groups.admin
+      ? "waves.create.quick.publicGroupAdmins"
+      : "waves.create.quick.publicCreatorAdmin";
+  }
   return (
     <div className="tw-mt-6 tw-space-y-4">
       <p className="tw-m-0 tw-rounded-lg tw-bg-iron-900 tw-p-4 tw-text-sm tw-leading-6 tw-text-iron-200">
-        {t(
-          locale,
-          isRestricted
-            ? "waves.create.quick.restricted"
-            : "waves.create.quick.public"
-        )}{" "}
-        {t(
-          locale,
-          config.groups.admin
-            ? "waves.create.quick.groupAdmins"
-            : "waves.create.quick.creatorAdmin"
-        )}
+        {t(locale, permissionsKey)}
       </p>
       <CreateWaveAdvancedSection
         title={t(locale, "waves.create.quick.optional")}

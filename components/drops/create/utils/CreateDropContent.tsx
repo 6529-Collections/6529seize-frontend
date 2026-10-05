@@ -329,10 +329,10 @@ const CreateDropContent = forwardRef<
                       aria-disabled={loading}
                       ariaLabel={draftContext?.label ?? placeholderText}
                       aria-invalid={draftContext?.invalid}
-                      aria-describedby={
+                      ariaDescribedBy={
                         draftContext?.invalid ? draftContext.errorId : undefined
                       }
-                      aria-required={draftContext ? true : undefined}
+                      ariaRequired={draftContext ? true : undefined}
                       className={`${
                         viewType === CreateDropViewType.COMPACT
                           ? "editor-input-one-liner tw-pr-12"

@@ -241,6 +241,12 @@ export const upsertCreateWaveDraft = (
     (existing) => existing.id !== draft.id
   );
   writeAll([storable, ...others], scope);
+  if (
+    scope &&
+    readStoredDrafts().some((existing) => existing.id === draft.id)
+  ) {
+    writeAll(readStoredDrafts().filter((existing) => existing.id !== draft.id));
+  }
 };
 
 export const deleteCreateWaveDraft = (id: string, scope?: string): void => {

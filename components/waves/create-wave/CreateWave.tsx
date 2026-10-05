@@ -413,11 +413,18 @@ export default function CreateWave({
           {quickChat && step === CreateWaveStep.OVERVIEW && (
             <CreateWaveQuickChatOptions {...contentProps} />
           )}
-          {mediaOmitted && draftLoaded && showDescription && (
-            <p role="status" className="tw-mt-4 tw-text-sm tw-text-iron-300">
-              {t(locale, "waves.create.quick.mediaOmitted")}
-            </p>
-          )}
+          <p
+            role="status"
+            className={
+              mediaOmitted && draftLoaded && showDescription
+                ? "tw-mt-4 tw-text-sm tw-text-iron-300"
+                : "tw-sr-only"
+            }
+          >
+            {mediaOmitted && draftLoaded && showDescription
+              ? t(locale, "waves.create.quick.mediaOmitted")
+              : null}
+          </p>
         </CreateWaveLayout>
       </CreateWaveFlow>
       <SubwaveAccessWarningDialog

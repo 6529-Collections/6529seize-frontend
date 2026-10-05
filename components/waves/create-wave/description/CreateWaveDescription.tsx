@@ -164,15 +164,19 @@ const CreateWaveDescription = forwardRef<
               </MentionSearchScopeProvider>
             </CreateDropEmojiPickerLayerProvider>
           </CreateDropDraftContext.Provider>
-          {showDropError && (
-            <p
-              id={errorId}
-              role="alert"
-              className="tw-mb-0 tw-mt-2 tw-text-sm tw-font-medium tw-text-error"
-            >
-              {t(locale, "waves.create.quick.firstPostRequired")}
-            </p>
-          )}
+          <p
+            id={errorId}
+            role="alert"
+            className={
+              showDropError
+                ? "tw-mb-0 tw-mt-2 tw-text-sm tw-font-medium tw-text-error"
+                : "tw-sr-only"
+            }
+          >
+            {showDropError
+              ? t(locale, "waves.create.quick.firstPostRequired")
+              : null}
+          </p>
         </div>
       </div>
     );
