@@ -3,7 +3,9 @@
 import { AuthContext } from "@/components/auth/Auth";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyActionType";
-import { formatNumberWithCommas } from "@/helpers/Helpers";
+import { formatNumber } from "@/i18n/format";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import Link from "next/link";
 import { useContext, useEffect, useState } from "react";
 
@@ -21,6 +23,7 @@ export default function UserPageIdentityHeaderCICRateStats({
   };
   readonly heroAvailableCredit: number;
 }) {
+  const locale = useBrowserLocale();
   const { activeProfileProxy } = useContext(AuthContext);
   const getProxyAvailableCredit = (): number | null => {
     const proxy = activeProfileProxy?.actions.find(
@@ -46,7 +49,7 @@ export default function UserPageIdentityHeaderCICRateStats({
     }
     return Math.abs(heroAvailableCredit) < Math.abs(proxyAvailableCredit ?? 0)
       ? heroAvailableCredit
-      : proxyAvailableCredit ?? 0;
+      : (proxyAvailableCredit ?? 0);
   };
 
   const [availableCredit, setAvailableCredit] = useState(getAvailableCredit());
@@ -57,72 +60,55 @@ export default function UserPageIdentityHeaderCICRateStats({
 
   const proxyItem = activeProfileProxy
     ? {
-        label: "Proxy for",
+        label: t(locale, "user.rate.nic.proxy"),
         value: (
           <Link href={`/${activeProfileProxy.created_by.handle}`}>
             {activeProfileProxy.created_by.handle}
           </Link>
         ),
-        valueColorClassName: "tw-text-emerald-400",
-        labelBreakAll: false,
+        valueColorClassName: "tw-text-primary-300",
       }
     : null;
 
   const creditItem = activeProfileProxy
     ? null
     : {
-        label: "Your available NIC:",
-        value: formatNumberWithCommas(availableCredit),
-        valueColorClassName: "tw-text-iron-300",
-        labelBreakAll: false,
+        label: t(locale, "user.rate.nic.available"),
+        value: formatNumber(locale, availableCredit),
+        valueColorClassName: "tw-text-iron-100",
       };
 
   const minMaxItem = activeProfileProxy
     ? null
     : {
-        label: `Your max/min NIC Rating to ${profile.handle}:`,
-        value: `+/- ${formatNumberWithCommas(minMaxValues.max)}`,
-        valueColorClassName: "tw-text-iron-300",
-        labelBreakAll: true,
+        label: t(locale, "user.rate.nic.limits", {
+          name: profile.handle ?? "",
+        }),
+        value: `+/- ${formatNumber(locale, minMaxValues.max)}`,
+        valueColorClassName: "tw-text-iron-100",
       };
 
   const items = [proxyItem, creditItem, minMaxItem].filter(
     (item): item is NonNullable<typeof item> => item !== null
   );
 
-  if (isTooltip) {
-    return (
-      <div className="tw-text-xs tw-flex tw-flex-col tw-space-y-1.5">
-        {items.map((item) => (
-          <span
-            key={item.label}
-            className={`tw-block tw-text-iron-500 tw-font-medium${
-              item.labelBreakAll ? " tw-break-all" : ""
-            }`}>
-            <span>
-              {item.label.endsWith(":") ? item.label : `${item.label}:`}
-            </span>
-            <span className={`tw-ml-1 tw-font-semibold ${item.valueColorClassName}`}>
-              {item.value}
-            </span>
-          </span>
-        ))}
-      </div>
-    );
-  }
-
   return (
-    <div className="tw-rounded-lg tw-bg-white/[0.03] tw-border tw-border-solid tw-border-white/[0.06] tw-px-4 tw-py-3 tw-space-y-2.5">
+    <div
+      className={`tw-space-y-1.5 tw-leading-5 ${isTooltip ? "tw-text-xs" : "tw-text-sm"}`}
+    >
       {items.map((item) => (
         <div
           key={item.label}
-          className="tw-flex tw-items-center tw-justify-between">
-          <span
-            className="tw-text-xs tw-text-iron-500 tw-font-medium">
-            {item.label}
+          className="tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-1.5 tw-gap-y-1 tw-text-iron-400"
+        >
+          <span className="tw-break-words">
+            {isTooltip && !item.label.endsWith(":")
+              ? `${item.label}:`
+              : item.label}
           </span>
           <span
-            className={`tw-whitespace-nowrap tw-text-xs tw-font-semibold ${item.valueColorClassName}`}>
+            className={`tw-break-words tw-font-semibold tw-tabular-nums ${item.valueColorClassName}`}
+          >
             {item.value}
           </span>
         </div>

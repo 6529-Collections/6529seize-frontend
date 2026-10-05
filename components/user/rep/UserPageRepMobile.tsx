@@ -1,5 +1,11 @@
 "use client";
 
+import {
+  USER_RATE_CLOSE_BUTTON_CLASS_NAME,
+  USER_RATE_CANCEL_BUTTON_CLASS_NAME,
+} from "@/components/user/utils/rate/userRateStyles";
+
+import Button from "@/components/utils/button/Button";
 import { AuthContext } from "@/components/auth/Auth";
 import { useHasHydrated } from "@/hooks/useHasHydrated";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
@@ -224,13 +230,28 @@ export default function UserPageRepMobile({
         title="Rate NIC"
         isOpen={isNicRateOpen}
         onClose={() => setIsNicRateOpen(false)}
-        noPadding
         tabletModal
         maxWidthClass="md:tw-max-w-md"
-        headerClassName="tw-pb-6 tw-pt-4"
+        headerClassName="tw-mb-4"
+        headerCloseButtonClassName={USER_RATE_CLOSE_BUTTON_CLASS_NAME}
       >
-        <div className="tw-px-4 tw-pb-6 sm:tw-px-6">
-          <UserPageRateWrapper profile={profile} type={RateMatter.NIC}>
+        <div className="tw-px-4 sm:tw-px-6">
+          <UserPageRateWrapper
+            profile={profile}
+            type={RateMatter.NIC}
+            unavailableFooter={
+              <div className="tw-mt-6 tw-flex tw-justify-end">
+                <Button
+                  variant="secondary"
+                  size="lg"
+                  className={USER_RATE_CANCEL_BUTTON_CLASS_NAME}
+                  onClick={() => setIsNicRateOpen(false)}
+                >
+                  Cancel
+                </Button>
+              </div>
+            }
+          >
             <UserPageIdentityHeaderCICRate
               profile={profile}
               isTooltip={false}

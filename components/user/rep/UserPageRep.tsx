@@ -1,5 +1,10 @@
 "use client";
 
+import {
+  USER_RATE_CLOSE_BUTTON_CLASS_NAME,
+  USER_RATE_CANCEL_BUTTON_CLASS_NAME,
+} from "@/components/user/utils/rate/userRateStyles";
+
 import type { ActivityLogParams } from "@/components/profile-activity/ProfileActivityLogs";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
@@ -415,29 +420,35 @@ export default function UserPageRep({
         title="Rate NIC"
         isOpen={isNicRateOpen}
         onClose={() => setIsNicRateOpen(false)}
-        noPadding
         tabletModal
         maxWidthClass="md:tw-max-w-md"
-        headerClassName="tw-pb-6 tw-pt-4"
+        headerClassName="tw-mb-4"
+        headerCloseButtonClassName={USER_RATE_CLOSE_BUTTON_CLASS_NAME}
       >
-        <div className="tw-px-4 tw-pb-6 sm:tw-px-6">
-          <UserPageRateWrapper profile={profile} type={RateMatter.NIC}>
+        <div className="tw-px-4 sm:tw-px-6">
+          <UserPageRateWrapper
+            profile={profile}
+            type={RateMatter.NIC}
+            unavailableFooter={
+              <div className="tw-mt-6 tw-flex tw-justify-end">
+                <Button
+                  variant="secondary"
+                  size="lg"
+                  className={USER_RATE_CANCEL_BUTTON_CLASS_NAME}
+                  onClick={() => setIsNicRateOpen(false)}
+                >
+                  Cancel
+                </Button>
+              </div>
+            }
+          >
             <UserPageIdentityHeaderCICRate
               profile={profile}
               isTooltip={false}
               onSuccess={() => setIsNicRateOpen(false)}
+              onCancel={() => setIsNicRateOpen(false)}
             />
           </UserPageRateWrapper>
-          <div className="tw-mt-3">
-            <Button
-              variant="secondary"
-              size="lg"
-              fullWidth
-              onClick={() => setIsNicRateOpen(false)}
-            >
-              Cancel
-            </Button>
-          </div>
         </div>
       </MobileWrapperDialog>
     </div>

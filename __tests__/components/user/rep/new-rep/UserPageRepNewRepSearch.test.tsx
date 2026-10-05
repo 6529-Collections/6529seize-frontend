@@ -151,7 +151,7 @@ describe("UserPageRepNewRepSearch", () => {
     await user.click(screen.getByRole("button", { name: "Memes nominee" }));
 
     await waitFor(() => expect(input).toHaveValue("Memes nominee"));
-    expect(input).toHaveClass("tw-border-white/10");
+    expect(input).toHaveClass("tw-border-iron-700");
     expect(input).not.toHaveClass("tw-border-amber-400/50");
     expect(
       screen.getByText(
@@ -181,6 +181,45 @@ describe("UserPageRepNewRepSearch", () => {
       endpoint: "/rep/categories/availability",
       params: { param: "memes nominee" },
     });
+  });
+
+  it("requires a selected category and a complete in-range total", async () => {
+    const user = userEvent.setup();
+    render(
+      <UserPageRepNewRepSearch
+        overview={null}
+        profile={{ query: "recipient" } as ApiIdentity}
+      />
+    );
+    const amount = screen.getByRole("textbox", {
+      name: "Total REP",
+      exact: true,
+    });
+    const grant = screen.getByRole("button", {
+      name: "Grant REP",
+      exact: true,
+    });
+    await user.clear(amount);
+    await user.type(amount, "5");
+    expect(grant).toBeDisabled();
+    await user.type(screen.getByLabelText("Category to grant REP for"), "meme");
+    await waitFor(() =>
+      expect(screen.getByRole("button", { name: "MemesNominee" })).toBeVisible()
+    );
+    await user.click(screen.getByRole("button", { name: "MemesNominee" }));
+    await user.clear(amount);
+    await user.type(amount, "-5");
+    expect(grant).toBeEnabled();
+    expect(amount).toHaveAccessibleDescription(/Current Rep:.*Adjustment:/);
+    await user.clear(amount);
+    await user.type(amount, "-");
+    expect(grant).toBeDisabled();
+    await user.clear(amount);
+    await user.type(amount, "101");
+    expect(grant).toBeDisabled();
+    await user.tab();
+    expect(amount).toHaveValue("100");
+    expect(grant).toBeEnabled();
   });
 
   it("surfaces only the exact submission category ahead of its presentation variant", () => {
