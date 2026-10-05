@@ -1,7 +1,11 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import UserPageIdentityStatementsConsolidatedAddresses from "@/components/user/identity/statements/consolidated-addresses/UserPageIdentityStatementsConsolidatedAddresses";
-import { AuthContext } from "@/components/auth/Auth";
+import { AuthContext, type AuthContextType } from "@/components/auth/Auth";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
+
+let mockIsOwner = true;
+let mockAddress: string | undefined = "0x2";
 
 jest.mock(
   "@/components/user/identity/statements/consolidated-addresses/UserPageIdentityStatementsConsolidatedAddressesItem",
@@ -24,14 +28,19 @@ jest.mock("next/link", () => ({
 }));
 jest.mock("@tanstack/react-query", () => ({ useQueries: () => [] }));
 jest.mock("@/helpers/Helpers", () => ({
-  amIUser: () => true,
+  amIUser: () => mockIsOwner,
   formatNumberWithCommasOrDash: (x: number) => String(x),
 }));
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
-  useSeizeConnectContext: () => ({ address: "0x2" }),
+  useSeizeConnectContext: () => ({ address: mockAddress }),
 }));
 
 describe("UserPageIdentityStatementsConsolidatedAddresses", () => {
+  beforeEach(() => {
+    mockIsOwner = true;
+    mockAddress = "0x2";
+  });
+
   const profile: ApiIdentity = {
     primary_wallet: null,
     wallets: [
@@ -39,6 +48,52 @@ describe("UserPageIdentityStatementsConsolidatedAddresses", () => {
       { wallet: "0x2", tdh: 2 } as any,
     ],
   } as any;
+
+  it("links owners to the existing consolidation form without prefills", () => {
+    render(
+      <AuthContext.Provider
+        value={{ activeProfileProxy: null } as AuthContextType}
+      >
+        <UserPageIdentityStatementsConsolidatedAddresses profile={profile} />
+      </AuthContext.Provider>
+    );
+
+    expect(
+      screen.getByRole("link", { name: "Add another wallet" })
+    ).toHaveAttribute("href", "/delegation/register-consolidation");
+    expect(
+      screen.getByText(
+        "Link another wallet you control. Your NFTs stay in their wallets."
+      )
+    ).toBeInTheDocument();
+  });
+
+  it.each(["visitor", "disconnected", "proxy"] as const)(
+    "hides the wallet entry for a %s while keeping Wallet Checker",
+    (viewer) => {
+      mockIsOwner = viewer === "proxy";
+      mockAddress = viewer === "disconnected" ? undefined : "0x2";
+      const activeProfileProxy =
+        viewer === "proxy" ? ({ id: "proxy" } as ApiProfileProxy) : null;
+      render(
+        <AuthContext.Provider value={{ activeProfileProxy } as AuthContextType}>
+          <UserPageIdentityStatementsConsolidatedAddresses profile={profile} />
+        </AuthContext.Provider>
+      );
+
+      expect(
+        screen.queryByRole("link", { name: "Add another wallet" })
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByText(
+          "Link another wallet you control. Your NFTs stay in their wallets."
+        )
+      ).not.toBeInTheDocument();
+      expect(
+        screen.getByRole("link", { name: "Wallet Checker" })
+      ).toBeInTheDocument();
+    }
+  );
 
   it("sorts wallets and sets wallet checker link", () => {
     render(
@@ -64,6 +119,9 @@ describe("UserPageIdentityStatementsConsolidatedAddresses", () => {
 
     expect(
       screen.queryByRole("link", { name: "Wallet Checker" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: "Add another wallet" })
     ).not.toBeInTheDocument();
   });
 

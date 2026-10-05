@@ -18,6 +18,7 @@ import UserPageIdentityStatementsConsolidatedAddressesItem from "./UserPageIdent
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 
+/** Returns the primary wallet, falling back to the highest-TDH wallet. */
 function getPrimaryAddress(profile: ApiIdentity): string | null {
   if (profile.primary_wallet) {
     return profile.primary_wallet.toLowerCase();
@@ -41,6 +42,7 @@ function getPrimaryAddress(profile: ApiIdentity): string | null {
   return highestTdhWallet.wallet.toLowerCase();
 }
 
+/** Orders wallets with the primary first, followed by descending TDH. */
 function sortByPrimary(
   wallets: ApiWallet[],
   primaryAddress: string | null
@@ -58,6 +60,10 @@ function sortByPrimary(
   });
 }
 
+/**
+ * Lists profile wallets and exposes consolidation registration to the connected
+ * owner outside proxy mode, provided the profile has a wallet to consolidate.
+ */
 export default function UserPageIdentityStatementsConsolidatedAddresses({
   profile,
   headerAction,
@@ -70,6 +76,7 @@ export default function UserPageIdentityStatementsConsolidatedAddresses({
   const { activeProfileProxy } = useContext(AuthContext);
   const canEdit = amIUser({ profile, address }) && !activeProfileProxy;
   const primaryAddress = getPrimaryAddress(profile);
+  const showAddWallet = canEdit && primaryAddress !== null;
   const sortedByPrimary = useMemo(
     () => sortByPrimary(profile.wallets ?? [], primaryAddress),
     [primaryAddress, profile.wallets]
@@ -167,6 +174,15 @@ export default function UserPageIdentityStatementsConsolidatedAddresses({
               {t(locale, "user.profile.identity.statements.walletChecker")}
             </ButtonLink>
           )}
+          {showAddWallet && (
+            <ButtonLink
+              href="/delegation/register-consolidation"
+              variant="primary"
+              size="xs"
+            >
+              {t(locale, "user.profile.identity.statements.addWallet")}
+            </ButtonLink>
+          )}
           <AnimatePresence mode="wait" initial={false}>
             {showDelegationCenter && (
               <ButtonLink
@@ -179,6 +195,11 @@ export default function UserPageIdentityStatementsConsolidatedAddresses({
             )}
           </AnimatePresence>
         </div>
+      )}
+      {showAddWallet && (
+        <p className="tw-mb-0 tw-mt-3 tw-text-xs tw-leading-5 tw-text-iron-300">
+          {t(locale, "user.profile.identity.statements.addWalletDescription")}
+        </p>
       )}
     </div>
   );
