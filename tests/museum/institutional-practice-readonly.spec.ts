@@ -424,6 +424,9 @@ test.describe("Museum institutional-practice publication @surface @large @readon
     await expect(page.locator("body")).not.toContainText(/Standfirst/iu);
     await expect(page.locator("main figure img")).toHaveCount(7);
     await expectNoUnresolvedMuseumMedia(page, "main", "figure img");
+    await expect(
+      page.locator('main figure img[src^="https://media-proxy.artblocks.io/"]')
+    ).toHaveCount(0);
     for (const href of CASEY_WORK_HREFS) {
       await expect(
         page.locator(`main figure:has(img):has(a[href="${href}"])`)
@@ -435,6 +438,9 @@ test.describe("Museum institutional-practice publication @surface @large @readon
     await expect(page.locator("main figure")).toHaveCount(7);
     await expect(page.locator("main figure img")).toHaveCount(7);
     await expectNoUnresolvedMuseumMedia(page, "main", "figure img");
+    await expect(
+      page.locator('main figure img[src^="https://media-proxy.artblocks.io/"]')
+    ).toHaveCount(0);
     for (const href of CASEY_WORK_HREFS) {
       await expect(
         page.locator(`main figure:has(img):has(a[href="${href}"])`)

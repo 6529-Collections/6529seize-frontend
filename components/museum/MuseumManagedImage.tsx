@@ -125,8 +125,8 @@ export function MuseumManagedImage({
     );
   }
   return (
-    // The publication retains the exact governed URI. Approved accession bytes
-    // traverse the strict same-origin delivery route without re-derivation.
+    // The publication retains the governed URI. Delivery uses verified publisher
+    // stills or the strict accession derivative route without re-derivation.
     <img
       ref={attachImage}
       key={`${deliveredSrc}:${attempt}`}

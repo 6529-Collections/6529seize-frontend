@@ -190,6 +190,7 @@ export async function expectCollectionAcceptance(page: Page) {
     '[data-testid="museum-landing-media-card"]'
   );
   await expect(holdingCards).toHaveCount(13);
+  await expect(holdingCards.locator("img")).toHaveCount(13);
   const veraCard = holdingCards.filter({
     has: page.getByRole("link", {
       name: "Themes and Variations #210",
@@ -211,6 +212,10 @@ export async function expectCollectionAcceptance(page: Page) {
     'section[aria-labelledby="collection-holdings-title"]',
     "img"
   );
+
+  await expect(
+    holdings.locator('img[src^="https://media-proxy.artblocks.io/"]')
+  ).toHaveCount(0);
 
   const magnumTitles = [
     "Patrolling the border between the Negev Desert and Jordan",
@@ -399,6 +404,9 @@ export async function expectResearchAcceptance(page: Page) {
 
   // Wait for the expected sections/cards before taking the media inventory.
   await expectNoUnresolvedMuseumMedia(page, "main", "img");
+  await expect(
+    museumMain(page).locator('img[src^="https://media-proxy.artblocks.io/"]')
+  ).toHaveCount(0);
 
   const imageArticles = await page
     .getByRole("main")
