@@ -18,6 +18,7 @@ import UserPageIdentityStatementsConsolidatedAddressesItem from "./UserPageIdent
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 
+/** Returns the primary wallet, falling back to the highest-TDH wallet. */
 function getPrimaryAddress(profile: ApiIdentity): string | null {
   if (profile.primary_wallet) {
     return profile.primary_wallet.toLowerCase();
@@ -41,6 +42,7 @@ function getPrimaryAddress(profile: ApiIdentity): string | null {
   return highestTdhWallet.wallet.toLowerCase();
 }
 
+/** Orders wallets with the primary first, followed by descending TDH. */
 function sortByPrimary(
   wallets: ApiWallet[],
   primaryAddress: string | null

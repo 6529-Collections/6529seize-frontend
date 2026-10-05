@@ -92,6 +92,7 @@ export default function NewConsolidationComponent(props: Readonly<Props>) {
           validate().length === 0 ? "registerDelegationAddress" : undefined,
       };
 
+  /** Returns validation errors for a missing collection or invalid target wallet. */
   function validate() {
     const newErrors: string[] = [];
     if (!newDelegationCollection || newDelegationCollection === "0") {
