@@ -37,8 +37,9 @@ no standalone Network Groups page.
 ## User Journey
 
 1. Open `/network` and select `Filter`.
-2. Set `Level`, `TDH`, `NIC`, or `Rep`, or directly select `Identities`,
-   `Required NFTs`, `Collection Access`, or `xTDH Grant` under `More filters`.
+2. Choose `Level`, `TDH`, `NIC`, `Rep`, `Identities`, `Required NFTs`,
+   `Collection Access`, or `xTDH Grant` from the visible list. On narrow
+   screens, `All filters` returns from a criterion editor to the list.
    Check `After editing`
    and `Preview matches`, then select `Create and use new group`. Network's
    criteria editor does not offer saved-group search or the

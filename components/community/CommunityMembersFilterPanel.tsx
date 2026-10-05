@@ -1,7 +1,11 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { CheckIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
+import {
+  CheckIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+} from "@heroicons/react/24/outline";
 import GroupMembersPreviewDialog from "@/components/groups/members/GroupMembersPreviewDialog";
 import GroupMembersPreviewTrigger from "@/components/groups/members/GroupMembersPreviewTrigger";
 import Button from "@/components/utils/button/Button";
@@ -33,9 +37,11 @@ const RULE_LABELS: Record<CreateWaveInlineGroupRuleType, MessageKey> = {
 };
 
 type FilterView = CreateWaveInlineGroupRuleType | "identities";
-
-const NAV_BUTTON_CLASSES =
-  "tw-flex tw-min-h-10 tw-items-center tw-justify-center tw-gap-1.5 tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-border-solid tw-bg-transparent tw-px-1 tw-py-1 tw-text-sm tw-font-medium focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 disabled:tw-opacity-50";
+const FILTER_VIEWS: readonly FilterView[] = [
+  ...CREATE_WAVE_INLINE_GROUP_QUICK_RULES,
+  "identities",
+  ...CREATE_WAVE_INLINE_GROUP_MORE_RULES,
+];
 
 export default function CommunityMembersFilterPanel(
   props: CreateWaveGroupInlinePanelProps
@@ -61,9 +67,10 @@ export default function CommunityMembersFilterPanel(
   const [view, setView] = useState<FilterView>(
     CreateWaveInlineGroupRuleType.LEVEL
   );
+  const [showEditor, setShowEditor] = useState(false);
   const [previewTarget, setPreviewTarget] =
     useState<GroupMembersPreviewTarget | null>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
   const editorRef = useRef<HTMLDivElement>(null);
   const configuredRules = new Set(
     getInlineGroupConfiguredRules(displayedBuilder.draft)
@@ -86,11 +93,20 @@ export default function CommunityMembersFilterPanel(
 
   const changeView = (next: FilterView, focusEditor: boolean) => {
     setView(next);
+    setShowEditor(true);
+    editorRef.current?.scrollTo({ top: 0 });
     if (focusEditor) {
       requestAnimationFrame(() => editorRef.current?.focus());
-    } else {
-      contentRef.current?.scrollTo({ top: 0 });
     }
+  };
+
+  const showFilterList = () => {
+    setShowEditor(false);
+    requestAnimationFrame(() => {
+      listRef.current
+        ?.querySelector<HTMLButtonElement>("[aria-current='true']")
+        ?.focus();
+    });
   };
 
   const configuredMark = (
@@ -138,72 +154,56 @@ export default function CommunityMembersFilterPanel(
             </p>
           )}
         </div>
-        <div
-          ref={contentRef}
-          className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-overscroll-contain tw-p-4 sm:tw-p-6"
+        <fieldset
+          disabled={isCreating}
+          className="tw-m-0 tw-flex tw-min-h-0 tw-min-w-0 tw-flex-1 tw-flex-col tw-border-0 tw-p-0 lg:tw-flex-row"
         >
-          <fieldset
-            disabled={isCreating}
-            className="tw-m-0 tw-min-w-0 tw-border-0 tw-p-0"
+          <div
+            ref={listRef}
+            role="group"
+            aria-label={t(locale, "network.groupFilter.title")}
+            className={`${showEditor ? "tw-hidden" : "tw-block"} tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-overscroll-contain tw-px-4 tw-py-0 sm:tw-px-6 lg:tw-block lg:tw-w-56 lg:tw-flex-none lg:tw-border-x-0 lg:tw-border-b-0 lg:tw-border-l-0 lg:tw-border-r lg:tw-border-t-0 lg:tw-border-solid lg:tw-border-iron-800 lg:tw-px-3 lg:tw-py-5`}
           >
-            <div
-              role="group"
-              aria-label={t(locale, "network.groupFilter.title")}
+            {FILTER_VIEWS.map((rule) => (
+              <button
+                key={rule}
+                type="button"
+                aria-current={view === rule ? "true" : undefined}
+                onClick={(event) => changeView(rule, event.detail === 0)}
+                className={`tw-flex tw-min-h-10 tw-w-full tw-items-center tw-justify-between tw-gap-2 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-bg-transparent tw-px-2 tw-py-1 tw-text-left tw-text-sm tw-font-medium focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 lg:tw-border-0 lg:tw-px-3 ${view === rule ? "tw-text-iron-50 lg:tw-border-l-2 lg:tw-border-solid lg:tw-border-primary-400 lg:tw-bg-iron-900/60 lg:tw-pl-2.5" : "tw-text-iron-300 desktop-hover:hover:tw-text-iron-50"}`}
+              >
+                <span className="tw-flex tw-items-center tw-gap-2">
+                  {t(
+                    locale,
+                    rule === "identities"
+                      ? "waves.create.groups.identities"
+                      : RULE_LABELS[rule]
+                  )}
+                  {(rule === "identities"
+                    ? identitiesConfigured
+                    : configuredRules.has(rule)) && configuredMark}
+                </span>
+                <ChevronRightIcon
+                  className="tw-size-4 tw-shrink-0 tw-text-iron-500 lg:tw-hidden"
+                  aria-hidden="true"
+                />
+              </button>
+            ))}
+          </div>
+          <div
+            ref={editorRef}
+            tabIndex={-1}
+            className={`${showEditor ? "tw-block" : "tw-hidden"} tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-overscroll-contain tw-p-4 sm:tw-p-6 lg:tw-block lg:tw-p-8`}
+          >
+            <button
+              type="button"
+              onClick={showFilterList}
+              className="tw-mb-5 tw-flex tw-min-h-10 tw-items-center tw-gap-1 tw-border-0 tw-bg-transparent tw-p-0 tw-text-sm tw-font-medium tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 lg:tw-hidden"
             >
-              <div className="tw-mb-3 tw-flex tw-flex-wrap tw-items-center tw-gap-x-5 tw-gap-y-1">
-                {CREATE_WAVE_INLINE_GROUP_QUICK_RULES.map((rule) => (
-                  <button
-                    key={rule}
-                    type="button"
-                    aria-current={view === rule ? "true" : undefined}
-                    onClick={(event) => changeView(rule, event.detail === 0)}
-                    className={`${NAV_BUTTON_CLASSES} ${view === rule ? "tw-border-primary-400 tw-text-iron-50" : "tw-border-transparent tw-text-iron-300 desktop-hover:hover:tw-text-iron-50"}`}
-                  >
-                    {t(locale, RULE_LABELS[rule])}
-                    {configuredRules.has(rule) && configuredMark}
-                  </button>
-                ))}
-              </div>
-              <div className="tw-mb-4">
-                <h2 className="tw-mb-2 tw-mt-0 !tw-text-sm !tw-font-semibold !tw-text-iron-300">
-                  {t(locale, "network.groupFilter.more")}
-                </h2>
-                <div className="tw-divide-y tw-divide-solid tw-divide-iron-800 tw-border-x-0 tw-border-b tw-border-t tw-border-solid tw-border-iron-800">
-                  {(
-                    [
-                      "identities",
-                      ...CREATE_WAVE_INLINE_GROUP_MORE_RULES,
-                    ] as const
-                  ).map((rule) => (
-                    <button
-                      key={rule}
-                      type="button"
-                      aria-current={view === rule ? "true" : undefined}
-                      onClick={(event) => changeView(rule, event.detail === 0)}
-                      className={`tw-flex tw-min-h-10 tw-w-full tw-items-center tw-justify-between tw-gap-2 tw-border-0 tw-px-1 tw-py-1 tw-text-left tw-text-sm tw-font-medium focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 ${view === rule ? "tw-bg-iron-900/70 tw-text-iron-50" : "tw-bg-transparent tw-text-iron-300 desktop-hover:hover:tw-text-iron-50"}`}
-                    >
-                      <span className="tw-flex tw-items-center tw-gap-2">
-                        {t(
-                          locale,
-                          rule === "identities"
-                            ? "waves.create.groups.identities"
-                            : RULE_LABELS[rule]
-                        )}
-                        {(rule === "identities"
-                          ? identitiesConfigured
-                          : configuredRules.has(rule)) && configuredMark}
-                      </span>
-                      <ChevronRightIcon
-                        className="tw-size-4 tw-shrink-0 tw-text-iron-500"
-                        aria-hidden="true"
-                      />
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
+              <ChevronLeftIcon className="tw-size-4" aria-hidden="true" />
+              {t(locale, "network.groupFilter.all")}
+            </button>
             <div
-              ref={editorRef}
               role="region"
               aria-label={t(
                 locale,
@@ -211,33 +211,43 @@ export default function CommunityMembersFilterPanel(
                   ? "waves.create.groups.identities"
                   : RULE_LABELS[view]
               )}
-              tabIndex={-1}
             >
               {view === "identities" ? (
-                <CreateWaveInlineGroupIdentities
-                  quiet
-                  includedIdentities={displayedBuilder.identities}
-                  excludedIdentities={displayedBuilder.excludedIdentities}
-                  includedWalletSources={displayedBuilder.includedWalletSources}
-                  excludedWalletSources={displayedBuilder.excludedWalletSources}
-                  onIncludedIdentitySelect={addIdentity}
-                  onIncludedIdentityRemove={removeIdentity}
-                  onExcludedIdentitySelect={addExcludedIdentity}
-                  onExcludedIdentityRemove={removeExcludedIdentity}
-                  onIncludedWalletSourcesChange={updateIncludedWalletSources}
-                  onExcludedWalletSourcesChange={updateExcludedWalletSources}
-                />
+                <>
+                  <h2 className="tw-mb-4 tw-mt-0 !tw-text-base !tw-font-semibold !tw-text-iron-100">
+                    {t(locale, "waves.create.groups.identities")}
+                  </h2>
+                  <CreateWaveInlineGroupIdentities
+                    quiet
+                    includedIdentities={displayedBuilder.identities}
+                    excludedIdentities={displayedBuilder.excludedIdentities}
+                    includedWalletSources={
+                      displayedBuilder.includedWalletSources
+                    }
+                    excludedWalletSources={
+                      displayedBuilder.excludedWalletSources
+                    }
+                    onIncludedIdentitySelect={addIdentity}
+                    onIncludedIdentityRemove={removeIdentity}
+                    onExcludedIdentitySelect={addExcludedIdentity}
+                    onExcludedIdentityRemove={removeExcludedIdentity}
+                    onIncludedWalletSourcesChange={updateIncludedWalletSources}
+                    onExcludedWalletSourcesChange={updateExcludedWalletSources}
+                  />
+                </>
               ) : (
-                <CreateWaveInlineGroupRuleEditor
-                  draft={displayedBuilder.draft}
-                  activeRule={view}
-                  onDraftChange={setDraft}
-                />
+                <div className="[&>div]:tw-border-0 [&>div]:tw-bg-transparent [&>div]:tw-p-0 [&>div]:tw-shadow-none">
+                  <CreateWaveInlineGroupRuleEditor
+                    draft={displayedBuilder.draft}
+                    activeRule={view}
+                    onDraftChange={setDraft}
+                  />
+                </div>
               )}
             </div>
-          </fieldset>
-        </div>
-        <div className="tw-shrink-0 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-4 sm:tw-px-6">
+          </div>
+        </fieldset>
+        <div className="tw-shrink-0 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-3 sm:tw-px-6">
           <div className="tw-max-h-32 tw-overflow-y-auto tw-overscroll-contain">
             <p className="tw-m-0 tw-mb-1 tw-text-xs tw-font-medium tw-text-iron-400">
               {t(locale, "waves.create.groups.draft.afterEditing")}

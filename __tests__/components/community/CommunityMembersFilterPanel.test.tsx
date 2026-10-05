@@ -64,7 +64,7 @@ beforeAll(() => {
   HTMLElement.prototype.scrollTo = jest.fn();
 });
 
-it("starts with the common criteria and retains readiness guidance without the identity empty states", () => {
+it("lists all eight criteria and retains readiness guidance without the identity empty states", () => {
   renderPanel();
   expect(
     screen.getByRole("spinbutton", { name: "Level at least" })
@@ -83,8 +83,10 @@ it("starts with the common criteria and retains readiness guidance without the i
       screen.getByRole("button", { name, exact: true })
     ).toBeInTheDocument();
   }
-  expect(screen.getByRole("heading", { name: "More filters" })).toBeVisible();
   expect(screen.getByRole("group", { name: "Filter Network" })).toBeVisible();
+  expect(
+    screen.getByRole("button", { name: "All filters" })
+  ).toBeInTheDocument();
   expect(screen.getByRole("button", { name: "Level" })).toHaveAttribute(
     "aria-current",
     "true"

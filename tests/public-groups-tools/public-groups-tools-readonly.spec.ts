@@ -141,10 +141,24 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
 
     await openGroupFilters(page);
     const filter = page.getByRole("dialog", { name: "Filter Network" });
+    const narrowFilter = await page.evaluate(
+      () => window.matchMedia("(max-width: 1023px)").matches
+    );
+    const allFilters = filter.getByRole("button", { name: "All filters" });
+    const openCriterion = async (name: string | RegExp) => {
+      if (narrowFilter && (await allFilters.isVisible())) {
+        await allFilters.click();
+      }
+      await filter.getByRole("button", { name }).click();
+    };
     const levelInput = filter.getByRole("spinbutton", {
       name: "Level at least",
     });
-    await expect(levelInput).toBeVisible();
+    if (narrowFilter) {
+      await expect(levelInput).toBeHidden();
+    } else {
+      await expect(levelInput).toBeVisible();
+    }
     for (const name of [
       "Level",
       "TDH",
@@ -168,29 +182,28 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
     await expect(apply).toBeDisabled();
     await expect(apply).toBeInViewport({ ratio: 1 });
     await expect(filter.getByText("After editing")).toBeInViewport();
-    await expect(
-      filter.getByRole("heading", { name: "More filters" })
-    ).toBeVisible();
     for (const name of [
       "Identities",
       "Required NFTs",
       "Collection Access",
       "xTDH Grant",
     ]) {
-      await filter.getByRole("button", { name, exact: true }).click();
+      await openCriterion(name);
       await expect(filter.getByRole("region", { name })).toBeVisible();
-      await expect(
-        filter.getByRole("button", { name: "Level", exact: true })
-      ).toBeInViewport();
-      await expect(
-        filter.getByRole("button", { name: "xTDH Grant", exact: true })
-      ).toBeInViewport();
+      if (narrowFilter) {
+        await expect(allFilters).toBeInViewport();
+      } else {
+        await expect(
+          filter.getByRole("button", { name: "Level", exact: true })
+        ).toBeInViewport();
+        await expect(
+          filter.getByRole("button", { name: "xTDH Grant", exact: true })
+        ).toBeInViewport();
+      }
     }
-    await filter.getByRole("button", { name: "Level", exact: true }).click();
+    await openCriterion("Level");
     await levelInput.fill("10");
-    await filter
-      .getByRole("button", { name: "Identities", exact: true })
-      .click();
+    await openCriterion("Identities");
     await expect(
       filter.getByText("No identities are explicitly included.")
     ).toBeVisible();
@@ -198,9 +211,7 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
     await expect(
       filter.getByText("No identities are explicitly excluded.")
     ).toBeVisible();
-    await filter
-      .getByRole("button", { name: /^Level(?: Configured)?$/ })
-      .click();
+    await openCriterion(/^Level(?: Configured)?$/);
     await expect(levelInput).toHaveValue("10");
     await expect(apply).toBeEnabled();
     await expect(apply).toBeInViewport({ ratio: 1 });

@@ -468,7 +468,7 @@ export default function CommunityMembers() {
         onClose={() => setMobileFilterOpen(false)}
         tall
         tabletModal
-        maxWidthClass="md:tw-max-w-2xl"
+        maxWidthClass="md:tw-max-w-2xl lg:tw-max-w-4xl"
         fixedHeight
         noPadding
         enableDragToClose

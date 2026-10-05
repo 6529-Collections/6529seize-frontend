@@ -17,7 +17,7 @@ import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.en-GB.jso
 
 export const EN_GB_MESSAGES = {
   "network.groupFilter.filter": "Filter",
-  "network.groupFilter.more": "More filters",
+  "network.groupFilter.all": "All filters",
   "network.groupFilter.level": "Level",
   "network.groupFilter.tdh": "TDH",
   "network.groupFilter.nic": "NIC",

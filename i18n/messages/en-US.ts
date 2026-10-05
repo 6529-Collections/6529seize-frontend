@@ -2197,7 +2197,7 @@ const NETWORK_GROUP_INSPECTION_MESSAGES = objectMessages(
 
 const NETWORK_GROUP_FILTER_MESSAGES = objectMessages("network.groupFilter", {
   filter: "Filter",
-  more: "More filters",
+  all: "All filters",
   level: "Level",
   tdh: "TDH",
   nic: "NIC",
