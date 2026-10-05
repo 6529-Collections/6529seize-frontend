@@ -83,7 +83,7 @@ function getProfileFeed(page: Page): Locator {
 
 test.describe("Waves and profile read-only coverage @surface @medium @large @readonly", () => {
   for (const surface of ["web", "app"] as const) {
-    test(`remembers Main Stage Leaderboard and Maybes Bar Chat (${surface})`, async ({
+    test(`remembers Main Stage Leaderboard and another wave's Chat (${surface})`, async ({
       page,
     }, testInfo) => {
       test.setTimeout(120000);
@@ -169,12 +169,19 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
         await expect(page).toHaveURL((url) => url.pathname === "/waves");
       };
       await gotoReady(page, "/waves");
+      // Staging has its own wave data and no Maybes Bar. Use its public chat
+      // counterpart; production and local production-data runs keep the exact journey.
+      const chatWaveName =
+        new URL(page.url()).hostname === "staging.6529.io"
+          ? "Memes-Chat"
+          : "maybe's dive bar";
       const mainStage = await openWave("The Memes - Main Stage");
       await expect(chat).toBeVisible({ timeout: 15000 });
       await section("Leaderboard").click();
       await expectLeaderboard();
       await returnToWaves();
-      const maybes = await openWave("maybe's dive bar");
+      const chatWave = await openWave(chatWaveName);
+      expect(chatWave).not.toBe(mainStage);
       await expect(chat).toBeVisible({ timeout: 15000 });
       await section("Chat").click();
       await returnToWaves();
@@ -187,7 +194,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       await page.reload();
       await expectLeaderboard();
       await returnToWaves();
-      expect(await openWave("maybe's dive bar")).toBe(maybes);
+      expect(await openWave(chatWaveName)).toBe(chatWave);
       await expect(section("Chat")).toHaveAttribute(
         surface === "app" ? "aria-current" : "aria-selected",
         "true"
@@ -195,8 +202,12 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       await expect(chat).toBeVisible({ timeout: 15000 });
       await expect(leaderboardContent).toHaveCount(0);
       await page.screenshot({
-        path: testInfo.outputPath(`remembered-${surface}-maybes-bar.png`),
+        path: testInfo.outputPath(`remembered-${surface}-chat-wave.png`),
         fullPage: true,
+      });
+      await testInfo.attach("remembered-wave-journey", {
+        body: JSON.stringify({ mainStage, chatWave, chatWaveName, surface }),
+        contentType: "application/json",
       });
     });
   }
