@@ -8,6 +8,7 @@ const LABEL_SEPARATOR = " - ";
 type UseEnsResolutionOptions = Readonly<{
   initialValue?: string | undefined;
   chainId?: number | undefined;
+  requireEnsResolution?: boolean | undefined;
 }>;
 
 type EnsResolutionState = Readonly<{
@@ -17,7 +18,11 @@ type EnsResolutionState = Readonly<{
 }>;
 
 export function useEnsResolution(options: UseEnsResolutionOptions = {}) {
-  const { initialValue = "", chainId = 1 } = options;
+  const {
+    initialValue = "",
+    chainId = 1,
+    requireEnsResolution = false,
+  } = options;
   const [state, setState] = useState<EnsResolutionState>(() => ({
     inputValue: initialValue,
     initialValue,
@@ -48,12 +53,16 @@ export function useEnsResolution(options: UseEnsResolutionOptions = {}) {
   const inputAddress = getResolvedAddressFromInputValue(
     currentState.inputValue
   );
-  const ensInputName = getEnsInputName(currentState.inputValue);
+  const ensInputName = getEnsInputName(
+    currentState.inputValue,
+    requireEnsResolution
+  );
 
   const ensNameQuery = useEnsName({
-    address: inputAddress.toLowerCase().startsWith("0x")
-      ? (inputAddress as `0x${string}`)
-      : undefined,
+    address:
+      !requireEnsResolution && inputAddress.toLowerCase().startsWith("0x")
+        ? (inputAddress as `0x${string}`)
+        : undefined,
     chainId,
   });
 
@@ -65,13 +74,20 @@ export function useEnsResolution(options: UseEnsResolutionOptions = {}) {
   const resolvedEnsAddress = getResolvedEnsAddress(ensAddressQuery.data);
   const isResolvingEnsAddress =
     ensInputName !== undefined && ensAddressQuery.isLoading;
+  // Forward-only callers must not trust an editable ENS label's wallet suffix.
+  const fallbackInputAddress =
+    requireEnsResolution &&
+    (ensInputName !== undefined ||
+      currentState.inputValue.includes(LABEL_SEPARATOR))
+      ? ""
+      : inputAddress;
   const resolvedAddress =
     currentState.addressOverride ??
     resolvedEnsAddress ??
-    (isResolvingEnsAddress ? "" : inputAddress);
+    (isResolvingEnsAddress ? "" : fallbackInputAddress);
   const inputValue = getDisplayInputValue({
     inputValue: currentState.inputValue,
-    ensName: ensNameQuery.data,
+    ensName: requireEnsResolution ? null : ensNameQuery.data,
     resolvedAddressFromEns: ensAddressQuery.data,
   });
 
@@ -106,15 +122,22 @@ export function useEnsResolution(options: UseEnsResolutionOptions = {}) {
     handleInputChange,
     ensNameQuery,
     ensAddressQuery,
+    ensInputName,
   };
 }
 
-function getEnsInputName(value: string): string | undefined {
-  if (value.includes(LABEL_SEPARATOR)) {
+function getEnsInputName(
+  value: string,
+  requireEnsResolution: boolean
+): string | undefined {
+  if (!requireEnsResolution && value.includes(LABEL_SEPARATOR)) {
     return undefined;
   }
 
-  return value.toLowerCase().endsWith(".eth") ? value : undefined;
+  const name = requireEnsResolution
+    ? value.split(LABEL_SEPARATOR)[0]?.trim()
+    : value;
+  return name?.toLowerCase().endsWith(".eth") ? name : undefined;
 }
 
 function getResolvedEnsAddress(
