@@ -4992,6 +4992,8 @@
       "facts": [
         "Drop Forge is the area for claim/drop workflows from craft to launch.",
         "The hub links to Craft and Launch sections, with list and detail pages for each.",
+        "The creator owner and approved on-chain admins have Drop Forge landing and Launch access alongside configured claims admins. Craft remains restricted to distribution admins.",
+        "The Contract Admins card lists the creator owner first and all approved on-chain admins for every wallet with landing access. The creator contract links to Etherscan for the active chain. Each row puts its Owner/Admin badge above the available mainnet ENS name and full wallet address, wrapping on narrow screens. The header's Add Admin button expands an inline wallet or ENS input above the list; Cancel closes and clears it. Refresh shows a spinner while reloading. Add and Revoke controls are shown only to the owner and configured claims admins. The contract itself only permits the owner to approve or revoke admins; configured non-owner calls still fail. These transactions do not change environment admin lists or transfer ownership.",
         "Launch claim pages can include mint stats and subscription airdrop sections when configured."
       ],
       "canonical_path": "/drop-forge",
@@ -8008,6 +8010,8 @@
       "facts": [
         "Drop Forge launch claims live under /drop-forge/launch.",
         "Launch claim detail pages use /drop-forge/launch/{id}.",
+        "Configured claims admins, creator owner, and approved on-chain admins can use Launch completion tracking. The mainnet API checks on-chain-only access fresh for each request and fails closed on RPC errors. Sepolia action tracking remains unsupported.",
+        "The signing wallet pays operation gas. Admin approval does not redirect mint revenue. Pay Artist is a direct ETH transfer from the signing wallet's balance plus gas, not a withdrawal from the mint-income wallet or contract.",
         "If the authorized wallet is disconnected, a launch on-chain action opens wallet connection and continues after connection succeeds when its transaction details are unchanged; refreshed details cancel the pending action so the user can review and retry.",
         "Launch claim pages can include mint stats and subscription airdrop sections when configured."
       ],

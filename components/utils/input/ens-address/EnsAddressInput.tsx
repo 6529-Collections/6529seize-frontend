@@ -13,7 +13,9 @@ interface EnsAddressInputProps {
   readonly className?: string | undefined;
   readonly variant?: "default" | "dark" | undefined;
   readonly ariaDescribedBy?: string | undefined;
+  readonly ariaInvalid?: boolean | undefined;
   readonly chainId?: number;
+  readonly requireEnsResolution?: boolean;
   readonly onAddressChange: (address: string) => void;
   readonly onValueChange?: (value: string) => void;
   readonly onLoadingChange?: (isLoading: boolean) => void;
@@ -35,7 +37,9 @@ export default function EnsAddressInput({
   className,
   variant = "default",
   ariaDescribedBy,
+  ariaInvalid,
   chainId = 1,
+  requireEnsResolution = false,
   onAddressChange,
   onValueChange,
   onLoadingChange,
@@ -47,7 +51,12 @@ export default function EnsAddressInput({
     handleInputChange,
     ensNameQuery,
     ensAddressQuery,
-  } = useEnsResolution({ initialValue: value, chainId });
+    ensInputName,
+  } = useEnsResolution({
+    initialValue: value,
+    chainId,
+    ...(requireEnsResolution ? { requireEnsResolution } : {}),
+  });
 
   const onAddressChangeEvent = useEffectEvent((addr: string) => {
     onAddressChange(addr);
@@ -79,13 +88,15 @@ export default function EnsAddressInput({
   }, [ensNameQuery.isLoading, ensAddressQuery.isLoading]);
 
   useEffect(() => {
-    const isEnsInput = inputValue?.toLowerCase().endsWith(".eth");
+    const isEnsInput = requireEnsResolution
+      ? ensInputName !== undefined
+      : inputValue.toLowerCase().endsWith(".eth");
     if (isEnsInput && ensAddressQuery.isError) {
       onErrorEvent(true);
     } else {
       onErrorEvent(false);
     }
-  }, [inputValue, ensAddressQuery.isError]);
+  }, [inputValue, ensAddressQuery.isError, requireEnsResolution, ensInputName]);
 
   return (
     <input
@@ -94,6 +105,7 @@ export default function EnsAddressInput({
       autoFocus={autoFocus}
       placeholder={placeholder}
       aria-describedby={ariaDescribedBy}
+      aria-invalid={ariaInvalid}
       className={clsx(
         variant === "dark" ? darkInputClassName : defaultInputClassName,
         className

@@ -53,6 +53,22 @@ describe("EnsAddressInput", () => {
     expect(screen.getByPlaceholderText("Enter wallet")).toBeInTheDocument();
   });
 
+  it("associates an invalid field with its error description", () => {
+    render(
+      <>
+        <EnsAddressInput
+          onAddressChange={mockOnAddressChange}
+          ariaInvalid
+          ariaDescribedBy="wallet-error"
+        />
+        <p id="wallet-error">Invalid wallet</p>
+      </>
+    );
+    const input = screen.getByRole("textbox");
+    expect(input).toHaveAttribute("aria-invalid", "true");
+    expect(input).toHaveAccessibleDescription("Invalid wallet");
+  });
+
   it("calls handleInputChange when user types", () => {
     render(<EnsAddressInput onAddressChange={mockOnAddressChange} />);
 
