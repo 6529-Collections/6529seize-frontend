@@ -70,6 +70,7 @@ export default function UserPageIdentityStatementsConsolidatedAddresses({
   const { activeProfileProxy } = useContext(AuthContext);
   const canEdit = amIUser({ profile, address }) && !activeProfileProxy;
   const primaryAddress = getPrimaryAddress(profile);
+  const showAddWallet = canEdit && primaryAddress !== null;
   const sortedByPrimary = useMemo(
     () => sortByPrimary(profile.wallets ?? [], primaryAddress),
     [primaryAddress, profile.wallets]
@@ -167,6 +168,15 @@ export default function UserPageIdentityStatementsConsolidatedAddresses({
               {t(locale, "user.profile.identity.statements.walletChecker")}
             </ButtonLink>
           )}
+          {showAddWallet && (
+            <ButtonLink
+              href="/delegation/register-consolidation"
+              variant="primary"
+              size="xs"
+            >
+              {t(locale, "user.profile.identity.statements.addWallet")}
+            </ButtonLink>
+          )}
           <AnimatePresence mode="wait" initial={false}>
             {showDelegationCenter && (
               <ButtonLink
@@ -179,6 +189,11 @@ export default function UserPageIdentityStatementsConsolidatedAddresses({
             )}
           </AnimatePresence>
         </div>
+      )}
+      {showAddWallet && (
+        <p className="tw-mb-0 tw-mt-3 tw-text-xs tw-leading-5 tw-text-iron-300">
+          {t(locale, "user.profile.identity.statements.addWalletDescription")}
+        </p>
       )}
     </div>
   );

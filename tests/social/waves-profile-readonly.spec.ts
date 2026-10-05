@@ -621,6 +621,16 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     await expect(page).toHaveTitle(new RegExp(PROFILE_HANDLE, "i"));
     await expectProfileShell(page);
     await expectProfileTabLinks(page);
+    const statements = page.getByRole("button", { name: /ID Statements/i });
+    if (await statements.isVisible()) {
+      await statements.click();
+    }
+    await expect(
+      page.getByRole("link", { name: "Wallet Checker" })
+    ).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: "Add another wallet" })
+    ).toHaveCount(0);
   });
 
   for (const tab of PROFILE_TAB_PATHS) {
