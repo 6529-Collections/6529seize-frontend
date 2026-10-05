@@ -10,9 +10,10 @@ two section cards:
   airdrops
 
 Below the cards, a static `Contract Admins` card shows the active chain and creator
-contract, then its owner first and deduplicated on-chain admins. Owner/Admin pills
-mark each role. Rows show mainnet ENS names when available and always retain the
-full wallet address; missing, loading, or failed ENS lookups do not hide the list.
+contract, linked to Etherscan for that chain, then its owner first and deduplicated
+on-chain admins. Each row puts its Owner/Admin pill above a mainnet ENS name and
+full wallet address on one line when space allows, wrapping on narrow screens.
+Missing, loading, or failed ENS lookups do not hide the address or list.
 All landing-access wallets can read this list and refresh it. Craft access
 remains distribution-admin-only.
 
