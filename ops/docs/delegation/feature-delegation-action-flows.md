@@ -20,6 +20,10 @@ and submit/recovery behavior.
   - `Register Consolidation` -> `/delegation/register-consolidation`
   - `Register Delegation Manager` -> `/delegation/register-sub-delegation`
 - Open write routes directly by URL.
+- Profile owners can select `Add another wallet` beside `Wallet Checker` in
+  `ID Statements` → `Consolidated Addresses` to open
+  `/delegation/register-consolidation`. This entry is hidden while a proxy
+  profile is active.
 - Open prefilled links such as
   `/delegation/register-delegation?collection=<contract>&use_case=<id>`.
 - From collection routes (`/delegation/any-collection`, `/delegation/the-memes`,
@@ -57,6 +61,13 @@ and submit/recovery behavior.
   UI note calls out current 6529.io support for `#1`, `#2`, and `#3`.
 - `register-consolidation` shows an on-page note that TDH consolidation should
   use `Any Collection` or `The Memes`.
+- The normal consolidation form explains the two registrations: register from
+  the connected wallet, then connect the other wallet and register the return
+  link. Each wallet needs ETH for gas. The ownership link is public, existing
+  profile data may be combined, and NFTs stay in their wallets.
+- Opening the form leaves `Collection` unselected and `Consolidating With`
+  empty. The two-wallet instruction block is omitted from manager-launched
+  forms, which use the delegation-manager signing path.
 
 ## Query Parameter Behavior
 
@@ -103,6 +114,9 @@ and submit/recovery behavior.
 
 - These routes submit onchain writes and need wallet confirmation.
 - Final success state depends on transaction confirmation timing.
+- The new consolidation instructions use canonical `en-US` messages. Other
+  supported locales currently use English fallback copy; the remaining form
+  labels and validation messages are not fully localized.
 - Collection tables, lock controls, edit, and revoke flows are documented in
   [Delegation Collection Management](feature-delegation-collection-management.md).
 

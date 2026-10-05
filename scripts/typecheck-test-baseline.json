@@ -116,7 +116,6 @@
     "__tests__/components/delegation/DelegationCenterMenu.test.tsx": 1,
     "__tests__/components/delegation/DelegationSubmitGroups.test.tsx": 9,
     "__tests__/components/delegation/DelegationWallet.test.tsx": 1,
-    "__tests__/components/delegation/NewConsolidation.test.tsx": 1,
     "__tests__/components/delegation/NewDelegation.test.tsx": 2,
     "__tests__/components/delegation/NewSubDelegation.test.tsx": 7,
     "__tests__/components/delegation/UpdateDelegation.test.tsx": 2,

@@ -93,13 +93,12 @@ const buildMemesTabs = (
   hasPolls: boolean,
   showOutcomeTab: boolean
 ) => {
-  const tabs: MyStreamWaveTab[] = [];
+  const tabs: MyStreamWaveTab[] = [MyStreamWaveTab.CHAT];
   if (votingState === WaveVotingState.ENDED) {
     tabs.push(MyStreamWaveTab.SUBMISSIONS);
   } else {
     tabs.push(MyStreamWaveTab.LEADERBOARD);
   }
-  tabs.push(MyStreamWaveTab.CHAT);
   if (hasFirstDecisionPassed) {
     tabs.push(MyStreamWaveTab.WINNERS);
   }

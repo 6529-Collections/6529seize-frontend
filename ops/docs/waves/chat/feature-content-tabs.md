@@ -134,7 +134,9 @@ when it is still available, ahead of the wave's latest remembered choice.
   assistive technologies.
 - Mobile tab-scroll controls have direction-specific accessible names, remain
   keyboard operable, and avoid smooth motion when reduced motion is requested.
-- Memes waves keep their existing tab order while opening Chat by default.
+- Memes wave tabs start with `Chat`, then `Leaderboard` (or `Submissions` after
+  voting ends), `Winners` when available, and `My Votes` for signed-in users.
+  Other available sections follow these tabs.
 - Curation waves do not expose an `Outcome` tab; `Sales` fills that dedicated
   results-slot instead.
 - In `My Votes`, non-image rows suppress inline media interaction even when the row
