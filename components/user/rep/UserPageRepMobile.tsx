@@ -1,15 +1,8 @@
 "use client";
 
-import {
-  USER_RATE_CLOSE_BUTTON_CLASS_NAME,
-  USER_RATE_CANCEL_BUTTON_CLASS_NAME,
-} from "@/components/user/utils/rate/userRateStyles";
-
-import Button from "@/components/utils/button/Button";
 import { AuthContext } from "@/components/auth/Auth";
 import { useHasHydrated } from "@/hooks/useHasHydrated";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
-import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import type { ActivityLogParams } from "@/components/profile-activity/ProfileActivityLogs";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { CicStatement } from "@/entities/IProfile";
@@ -19,14 +12,12 @@ import type { ApiCicOverview } from "@/generated/models/ApiCicOverview";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { STATEMENT_GROUP } from "@/helpers/Types";
 import { commonApiFetch } from "@/services/api/common-api";
-import { RateMatter } from "@/types/enums";
 import { useQuery } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
 import { useParams } from "next/navigation";
 import { useContext, useMemo, useState } from "react";
+import RateNicDialog from "../identity/header/cic-rate/RateNicDialog";
 import IdentityGettingStartedCard from "../identity/getting-started/IdentityGettingStartedCard";
-import UserPageIdentityHeaderCICRate from "../identity/header/cic-rate/UserPageIdentityHeaderCICRate";
-import UserPageRateWrapper from "../utils/rate/UserPageRateWrapper";
 import UserPageRepModifyModal from "./modify-rep/UserPageRepModifyModal";
 import GrantRepDialog from "./new-rep/GrantRepDialog";
 import type { RepDirection } from "./UserPageRep.helpers";
@@ -226,41 +217,11 @@ export default function UserPageRepMobile({
         onClose={() => setIsGrantRepOpen(false)}
       />
 
-      <MobileWrapperDialog
-        title="Rate NIC"
+      <RateNicDialog
+        profile={profile}
         isOpen={isNicRateOpen}
         onClose={() => setIsNicRateOpen(false)}
-        tabletModal
-        maxWidthClass="md:tw-max-w-md"
-        headerClassName="tw-mb-4"
-        headerCloseButtonClassName={USER_RATE_CLOSE_BUTTON_CLASS_NAME}
-      >
-        <div className="tw-px-4 sm:tw-px-6">
-          <UserPageRateWrapper
-            profile={profile}
-            type={RateMatter.NIC}
-            unavailableFooter={
-              <div className="tw-mt-6 tw-flex tw-justify-end">
-                <Button
-                  variant="secondary"
-                  size="lg"
-                  className={USER_RATE_CANCEL_BUTTON_CLASS_NAME}
-                  onClick={() => setIsNicRateOpen(false)}
-                >
-                  Cancel
-                </Button>
-              </div>
-            }
-          >
-            <UserPageIdentityHeaderCICRate
-              profile={profile}
-              isTooltip={false}
-              onSuccess={() => setIsNicRateOpen(false)}
-              onCancel={() => setIsNicRateOpen(false)}
-            />
-          </UserPageRateWrapper>
-        </div>
-      </MobileWrapperDialog>
+      />
 
       {canEditRep && editCategory && (
         <UserPageRepModifyModal

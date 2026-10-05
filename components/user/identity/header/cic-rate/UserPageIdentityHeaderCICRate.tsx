@@ -1,7 +1,7 @@
 "use client";
 
 import type { FormEvent } from "react";
-import { useContext, useEffect, useId, useState } from "react";
+import { useContext, useEffect, useId, useRef, useState } from "react";
 import type { ApiProfileRaterCicState } from "@/entities/IProfile";
 import { getStringAsNumberOrZero } from "@/helpers/Helpers";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
@@ -67,11 +67,11 @@ export default function UserPageIdentityHeaderCICRate({
     staleTime: 0,
   });
 
-  const [mutating, setMutating] = useState<boolean>(false);
+  const [mutating, setMutating] = useState(false);
+  const submissionInFlight = useRef(false);
 
   const updateCICMutation = useMutation({
     mutationFn: async (amount: number) => {
-      setMutating(true);
       return await commonApiPost({
         endpoint: `profiles/${profile.query}/cic/rating`,
         body: {
@@ -94,17 +94,6 @@ export default function UserPageIdentityHeaderCICRate({
         profileProxy: activeProfileProxy ?? null,
       });
       onSuccess?.();
-    },
-    onError: (error) => {
-      setToast({
-        type: "error",
-        title: t(locale, "user.rate.nic.updateFailed"),
-        description: t(locale, "rep.categories.grant.toast.tryAgain"),
-        details: getToastErrorDetails(error),
-      });
-    },
-    onSettled: () => {
-      setMutating(false);
     },
   });
 
@@ -199,20 +188,30 @@ export default function UserPageIdentityHeaderCICRate({
   const isSaveDisabled = !haveChanged || !isValidValue;
 
   const onSave = async () => {
-    if (mutating) return;
-    const { success } = await requestAuth();
-    if (!success) {
+    if (submissionInFlight.current || isSaveDisabled) return;
+    submissionInFlight.current = true;
+    setMutating(true);
+    try {
+      const { success } = await requestAuth();
+      if (!success) {
+        setToast({
+          message: t(locale, "rep.categories.grant.toast.loginRequired"),
+          type: "error",
+        });
+        return;
+      }
+      await updateCICMutation.mutateAsync(newRating);
+    } catch (error) {
       setToast({
-        message: t(locale, "rep.categories.grant.toast.loginRequired"),
         type: "error",
+        title: t(locale, "user.rate.nic.updateFailed"),
+        description: t(locale, "rep.categories.grant.toast.tryAgain"),
+        details: getToastErrorDetails(error),
       });
-      return;
+    } finally {
+      submissionInFlight.current = false;
+      setMutating(false);
     }
-    if (!haveChanged || !isValidValue) {
-      return;
-    }
-
-    updateCICMutation.mutate(newRating);
   };
 
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {

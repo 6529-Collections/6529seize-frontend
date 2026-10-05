@@ -1,5 +1,11 @@
 import type { ContextType } from "react";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import UserPageIdentityHeaderCICRate from "@/components/user/identity/header/cic-rate/UserPageIdentityHeaderCICRate";
 import { AuthContext } from "@/components/auth/Auth";
@@ -65,11 +71,9 @@ function setup({
 
 beforeEach(() => {
   jest.clearAllMocks();
-  jest
-    .mocked(useQuery)
-    .mockReturnValue({
-      data: { cic_rating_by_rater: 0, cic_ratings_left_to_give_by_rater: 5 },
-    } as ReturnType<typeof useQuery>);
+  jest.mocked(useQuery).mockReturnValue({
+    data: { cic_rating_by_rater: 0, cic_ratings_left_to_give_by_rater: 5 },
+  } as ReturnType<typeof useQuery>);
   jest.mocked(commonApiPost).mockResolvedValue(undefined);
 });
 
@@ -177,4 +181,53 @@ it("cancels without sending a rating", async () => {
   await user.click(screen.getByRole("button", { name: "Cancel", exact: true }));
   expect(onCancel).toHaveBeenCalledTimes(1);
   expect(commonApiPost).not.toHaveBeenCalled();
+});
+
+it("blocks repeated submits while authentication is pending", async () => {
+  let finishAuth: ((value: { success: boolean }) => void) | undefined;
+  const requestAuth = jest.fn().mockImplementation(
+    () =>
+      new Promise<{ success: boolean }>((resolve) => {
+        finishAuth = resolve;
+      })
+  );
+  const { onSuccess } = setup({ auth: { requestAuth } });
+  const input = screen.getByRole("textbox");
+  fireEvent.change(input, { target: { value: "2" } });
+  const form = input.closest("form")!;
+  fireEvent.submit(form);
+  fireEvent.submit(form);
+  expect(requestAuth).toHaveBeenCalledTimes(1);
+  expect(
+    screen.getByRole("button", { name: "Rate", exact: true })
+  ).toBeDisabled();
+  expect(
+    screen.getByRole("button", { name: "Cancel", exact: true })
+  ).toBeDisabled();
+  expect(commonApiPost).not.toHaveBeenCalled();
+  await act(async () => finishAuth?.({ success: true }));
+  await waitFor(() => expect(onSuccess).toHaveBeenCalledTimes(1));
+  expect(commonApiPost).toHaveBeenCalledTimes(1);
+});
+
+it("allows retry after authentication rejects", async () => {
+  const user = userEvent.setup();
+  const requestAuth = jest
+    .fn()
+    .mockRejectedValueOnce(new Error("Authentication failed"))
+    .mockResolvedValue({ success: true });
+  const { authValue, onSuccess } = setup({ auth: { requestAuth } });
+  fireEvent.change(screen.getByRole("textbox"), { target: { value: "2" } });
+  const submit = screen.getByRole("button", { name: "Rate", exact: true });
+  await user.click(submit);
+  await waitFor(() => expect(submit).toBeEnabled());
+  expect(authValue.setToast).toHaveBeenCalledWith(
+    expect.objectContaining({
+      title: "Couldn't update this NIC rating.",
+      type: "error",
+    })
+  );
+  expect(commonApiPost).not.toHaveBeenCalled();
+  await user.click(submit);
+  await waitFor(() => expect(onSuccess).toHaveBeenCalledTimes(1));
 });

@@ -2423,6 +2423,8 @@ const USER_RATE_MESSAGES = objectMessages("user.rate", {
   "subtitle.waveRep": "give Wave REP for",
   current: "Current {type}:",
   adjustment: "Adjustment:",
+  "rep.title": "Grant Rep",
+  "nic.title": "Rate NIC",
   "nic.label": "Your total NIC Rating of {name}",
   "nic.tooltipLabel": "Your total NIC Rating of {name}:",
   "nic.rate": "Rate",

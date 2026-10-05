@@ -1,4 +1,6 @@
 import { USER_RATE_CLOSE_BUTTON_CLASS_NAME } from "@/components/user/utils/rate/userRateStyles";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import type { ApiRepOverview } from "@/generated/models/ApiRepOverview";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { RateMatter } from "@/types/enums";
@@ -17,9 +19,10 @@ export default function GrantRepDialog({
   readonly isOpen: boolean;
   readonly onClose: () => void;
 }) {
+  const locale = useBrowserLocale();
   return (
     <MobileWrapperDialog
-      title="Grant Rep"
+      title={t(locale, "user.rate.rep.title")}
       isOpen={isOpen}
       onClose={onClose}
       tabletModal

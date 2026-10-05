@@ -117,6 +117,8 @@ Mobile (`< lg`):
 ### Localization fallback debt
 
 - Surface: profile Grant REP and Rate NIC forms and rating adjustment helpers.
+  Modify REP and wave REP retain existing English labels and action/toast copy;
+  their shared amount field and adjustment helpers use the same fallback.
 - Current fallback: `rep.categories.grant.*` and `user.rate.*` messages use the canonical `en-US`
   source copy in locales without translated entries.
 - User impact: supported non-English locales can see English fallback copy while
