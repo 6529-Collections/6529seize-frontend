@@ -124,6 +124,39 @@ export function useCreateWaveSubmission({
     submissionInProgressRef.current = false;
     setSubmitting(false);
   };
+  const showWaveCreatedToast = (waveId: string) => {
+    const copyWaveLink = async (): Promise<void> => {
+      try {
+        const url = new URL(
+          `/waves/${encodeURIComponent(waveId)}`,
+          globalThis.location.origin
+        ).href;
+        await navigator.clipboard.writeText(url);
+        setToast({
+          type: "success",
+          message: t(locale, "waves.create.quick.copied"),
+        });
+      } catch (error: unknown) {
+        setToast({
+          type: "error",
+          title: t(locale, "waves.create.quick.copyFailed"),
+          details: getToastErrorDetails(error),
+        });
+      }
+    };
+    setToast({
+      type: "success",
+      title: t(locale, "waves.create.quick.successTitle"),
+      description: t(locale, "waves.create.quick.successDescription"),
+      autoClose: 12000,
+      action: {
+        label: t(locale, "waves.create.quick.copyLink"),
+        onClick: () => {
+          void copyWaveLink();
+        },
+      },
+    });
+  };
 
   const addWaveMutation = useAddWaveMutation({
     onSuccess: async (response, variables) => {
@@ -154,37 +187,7 @@ export function useCreateWaveSubmission({
         isDirectMessage: false,
         isApp,
       });
-      const copyWaveLink = async (): Promise<void> => {
-        try {
-          const url = new URL(
-            `/waves/${encodeURIComponent(response.id)}`,
-            globalThis.location.origin
-          ).href;
-          await navigator.clipboard.writeText(url);
-          setToast({
-            type: "success",
-            message: t(locale, "waves.create.quick.copied"),
-          });
-        } catch (error: unknown) {
-          setToast({
-            type: "error",
-            title: t(locale, "waves.create.quick.copyFailed"),
-            details: getToastErrorDetails(error),
-          });
-        }
-      };
-      setToast({
-        type: "success",
-        title: t(locale, "waves.create.quick.successTitle"),
-        description: t(locale, "waves.create.quick.successDescription"),
-        autoClose: 12000,
-        action: {
-          label: t(locale, "waves.create.quick.copyLink"),
-          onClick: () => {
-            void copyWaveLink();
-          },
-        },
-      });
+      showWaveCreatedToast(response.id);
       if (isApp) {
         router.replace(createdWaveRoute);
       } else {
@@ -349,6 +352,7 @@ export function useCreateWaveSubmission({
     nativeDisplayMetadata.current = [];
     onWaveCreated();
     onSuccess?.();
+    showWaveCreatedToast(hub.id);
     finishSubmitting();
     if (isApp) router.replace(destination);
     else router.push(destination);
