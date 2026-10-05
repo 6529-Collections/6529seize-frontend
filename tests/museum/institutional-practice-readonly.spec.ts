@@ -18,6 +18,7 @@ import {
   RESPONSE_TIMEOUT_MS,
 } from "../support/routeReadiness";
 import { installLocalMuseumAppKitConfig } from "../support/localMuseumAppKitConfig";
+import { expectNoUnresolvedMuseumMedia } from "../support/museumReleaseAcceptance";
 
 const STUDY_PATH = "/museum/network/research/institutional-practice";
 const SOURCE_REPOSITORY = "6529-Collections/6529networkmuseum";
@@ -422,6 +423,7 @@ test.describe("Museum institutional-practice publication @surface @large @readon
     await expectStudyRoute(page, CASEY_ARTIST_ROUTE, REQUIRED_SOURCE_COMMIT);
     await expect(page.locator("body")).not.toContainText(/Standfirst/iu);
     await expect(page.locator("main figure img")).toHaveCount(7);
+    await expectNoUnresolvedMuseumMedia(page, "main", "figure img");
     for (const href of CASEY_WORK_HREFS) {
       await expect(
         page.locator(`main figure:has(img):has(a[href="${href}"])`)
@@ -432,6 +434,7 @@ test.describe("Museum institutional-practice publication @surface @large @readon
     await expect(page.locator("body")).not.toContainText(/Standfirst/iu);
     await expect(page.locator("main figure")).toHaveCount(7);
     await expect(page.locator("main figure img")).toHaveCount(7);
+    await expectNoUnresolvedMuseumMedia(page, "main", "figure img");
     for (const href of CASEY_WORK_HREFS) {
       await expect(
         page.locator(`main figure:has(img):has(a[href="${href}"])`)

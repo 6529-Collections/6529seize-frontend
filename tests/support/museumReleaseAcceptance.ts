@@ -58,48 +58,81 @@ export async function openMuseumAcceptanceRoute(
 
 async function settleImages(page: Page, selector: string) {
   const images = page.locator(selector);
-  let settledCount = 0;
-  let stableSince: number | undefined;
-  // Streaming/hydration may add lazy images while the first batch loads.
-  // Require a quiet interval, including for an initially empty inventory,
-  // rather than accepting the first unchanged recount.
+  const expected = new Map<string, number>();
+  let stableSince = Date.now();
+  // Track the media identity, not its position: a failed managed image can be
+  // replaced by an alert, shifting every subsequent img in the document.
+  const snapshot = () =>
+    images.evaluateAll((elements) => {
+      const counts = new Map<string, number>();
+      return elements.map((element) => {
+        const image = element as HTMLImageElement;
+        const key = `${image.alt} (${image.getAttribute("src") ?? ""})`;
+        const occurrence = (counts.get(key) ?? 0) + 1;
+        counts.set(key, occurrence);
+        return {
+          key,
+          occurrence,
+          loaded: image.complete && image.naturalWidth > 0,
+          failed: image.complete && image.naturalWidth === 0,
+        };
+      });
+    });
+
   await expect
     .poll(
       async () => {
-        const imageCount = await images.count();
-        if (imageCount === settledCount) {
-          stableSince ??= Date.now();
-          return Date.now() - stableSince >= 500;
+        const inventory = await snapshot();
+        for (const image of inventory) {
+          if (image.occurrence <= (expected.get(image.key) ?? 0)) continue;
+          expected.set(image.key, image.occurrence);
+          stableSince = Date.now();
+          await images.evaluateAll((elements, identity) => {
+            const matches = elements.filter((element) => {
+              const image = element as HTMLImageElement;
+              return (
+                `${image.alt} (${image.getAttribute("src") ?? ""})` ===
+                identity.key
+              );
+            });
+            matches[identity.occurrence - 1]?.scrollIntoView({
+              block: "center",
+            });
+          }, image);
+          // Give each lazy image a rendering frame in view before scrolling on.
+          await page.evaluate(
+            () =>
+              new Promise<void>((resolve) => {
+                requestAnimationFrame(() =>
+                  requestAnimationFrame(() => resolve())
+                );
+              })
+          );
         }
-        if (imageCount < settledCount) settledCount = 0;
-        for (let index = settledCount; index < imageCount; index += 1) {
-          await images.nth(index).scrollIntoViewIfNeeded();
+        const current = await snapshot();
+        const problems: string[] = [];
+        for (const [key, count] of expected) {
+          const matches = current.filter((image) => image.key === key);
+          if (matches.length < count)
+            problems.push(`Media disappeared or was replaced: ${key}`);
+          for (const image of matches) {
+            if (image.failed) problems.push(`Image failed to decode: ${key}`);
+            else if (!image.loaded)
+              problems.push(`Image still loading: ${key}`);
+          }
         }
-        await Promise.all(
-          Array.from(
-            { length: imageCount - settledCount },
-            async (_, offset) => {
-              const image = images.nth(settledCount + offset);
-              await expect
-                .poll(
-                  () =>
-                    image.evaluate((element) => {
-                      if (!(element instanceof HTMLImageElement)) return false;
-                      return element.complete && element.naturalWidth > 0;
-                    }),
-                  { timeout: 20_000 }
-                )
-                .toBe(true);
-            }
-          )
-        );
-        settledCount = imageCount;
-        stableSince = Date.now();
-        return false;
+        if (Date.now() - stableSince < 500)
+          problems.push("Media inventory is still settling");
+        return problems;
       },
-      { timeout: 30_000, intervals: [100, 250] }
+      {
+        timeout: 30_000,
+        intervals: [100, 250],
+        message:
+          "Every observed Museum image must remain present and decode successfully",
+      }
     )
-    .toBe(true);
+    .toEqual([]);
 }
 
 export async function expectNoUnresolvedMuseumMedia(
