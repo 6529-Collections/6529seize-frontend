@@ -67,8 +67,8 @@ See [AWS connection-timeout guidance](https://docs.aws.amazon.com/elasticloadbal
 ## Workflow dispatch examples
 
 Production E2E also runs a daily read-only canary at 05:30 UTC. It resolves the
-most recently started successful production deployment, verifies its canonical
-deploy job and current live version, and checks out that exact source before
+live production SHA against successful GitHub production deployment records,
+verifies the selected run's canonical deploy job and current live version, and checks out that exact source before
 running the manifest's production `cron` packs. It shares the post-deploy E2E
 concurrency group, installation steps, publication provenance, and artifacts.
 The canary runs the full cron set regardless of the previous deployment's change
@@ -83,6 +83,21 @@ The production source resolver retries transient GitHub API transport errors
 and HTTP 5xx responses immediately, up to three attempts per read. Authentication
 errors and invalid deployment provenance fail immediately. Successful responses
 must still satisfy the deploy-run, canonical-job, and live-version checks.
+
+Scheduled discovery reads the uncached live version first. It examines at most
+three pages of SHA-matching production deployment records and, if they omit the
+live deployment, at most three pages of SHA-bound workflow history. Every
+candidate must match the live SHA; old history never determines the expected
+version. Unsettled versions and missing or invalid provenance remain failures.
+The job preserves source discovery, run/job provenance, and live-version evidence
+even when browser checks cannot start. Canary alerts distinguish setup failures
+from browser-test failures.
+
+Wave browser coverage waits for a rendered data row after the sidebar shell
+mounts. Museum exact-source coverage allows a bounded server-side background
+refresh to settle through new documents, then retains the fresh-publication and
+immutable source-commit assertions. Persistent stale content, HTTP 5xx, missing
+data, and wrong source identities still fail validation.
 
 Run these only after the corresponding merge and within the authorized scope.
 Select the service needed by the change; `api` below is an example.

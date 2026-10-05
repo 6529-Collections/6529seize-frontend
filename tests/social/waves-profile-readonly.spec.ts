@@ -1,5 +1,6 @@
 import type { Locator, Page } from "@playwright/test";
 import { installSurfaceSimulation } from "../support/surfaceSimulation";
+import { RESPONSE_TIMEOUT_MS } from "../support/routeReadiness";
 
 import { EN_US_MESSAGES } from "../../i18n/messages/en-US";
 import { expect, test } from "../testHelpers";
@@ -44,11 +45,22 @@ async function getFirstWaveId(page: Page) {
     name: /All recent waves list|Regular waves list/,
   });
   await expect(waveList).toBeVisible({ timeout: 15000 });
+  // The region mounts with its loading shell. Await a rendered data row before
+  // inspecting its href; shell readiness does not establish API/data readiness.
+  const waveLinks = page
+    .getByRole("region", {
+      name: /All recent waves list|Regular waves list/,
+    })
+    .locator('a[href^="/waves/"]');
+  await waveLinks.first().waitFor({
+    state: "visible",
+    timeout: RESPONSE_TIMEOUT_MS,
+  });
   let href: string | null = null;
   await expect
     .poll(
       async () => {
-        href = await waveList.locator('a[href^="/waves/"]').evaluateAll(
+        href = await waveLinks.evaluateAll(
           (links, baseUrl) =>
             links
               .map((link) => link.getAttribute("href"))

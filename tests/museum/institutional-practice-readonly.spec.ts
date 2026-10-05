@@ -13,7 +13,10 @@ import {
   attachPageDiagnostics,
 } from "../support/pageAssertions";
 import { installLocalMuseumCountryCheck } from "../support/localMuseumCountryCheck";
-import { gotoDocumentWithTransientRetry } from "../support/routeReadiness";
+import {
+  gotoDocumentWithTransientRetry,
+  RESPONSE_TIMEOUT_MS,
+} from "../support/routeReadiness";
 import { installLocalMuseumAppKitConfig } from "../support/localMuseumAppKitConfig";
 
 const STUDY_PATH = "/museum/network/research/institutional-practice";
@@ -213,6 +216,33 @@ async function expectFreshExactSource(
     'aside[aria-labelledby="museum-open-source-title"]'
   );
   await expect(sourcePanel).toBeVisible();
+  // Background publication refresh is server-side; an already rendered page
+  // cannot become fresh by waiting on its locator. Synchronize with the refresh
+  // through new documents, retaining all exact-source assertions below.
+  await expect
+    .poll(
+      async () => {
+        const pending = (await sourcePanel.innerText()).includes(
+          "Latest verified public record; a source refresh is in progress."
+        );
+        if (pending) {
+          await page.reload({
+            waitUntil: "domcontentloaded",
+            timeout: RESPONSE_TIMEOUT_MS,
+          });
+          await waitForRouteReady(page, { timeout: RESPONSE_TIMEOUT_MS });
+        }
+        return pending;
+      },
+      {
+        message:
+          "Museum publication refresh must settle before exact-source validation",
+        // Budget for a reload, bounded route readiness, and the next probe.
+        timeout: RESPONSE_TIMEOUT_MS * 3,
+        intervals: [1000, 2000, 4000],
+      }
+    )
+    .toBe(false);
   await expect(sourcePanel).toContainText(
     "Published from the Museum's public record."
   );
