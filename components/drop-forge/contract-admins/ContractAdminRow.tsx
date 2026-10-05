@@ -29,12 +29,7 @@ export default function ContractAdminRow({
   return (
     <li className="tw-flex tw-items-center tw-justify-between tw-gap-3 tw-py-4">
       <div className="tw-min-w-0 tw-flex-1">
-        <div className="tw-mb-1.5 tw-flex tw-flex-wrap tw-items-center tw-gap-2">
-          {ensName && (
-            <span className="tw-break-all tw-text-sm tw-font-medium tw-text-iron-100">
-              {ensName}
-            </span>
-          )}
+        <div className="tw-mb-1.5">
           <span
             className={`tw-inline-flex tw-shrink-0 tw-items-center tw-rounded-full tw-px-2 tw-py-0.5 tw-text-xs tw-font-medium tw-ring-1 tw-ring-inset ${
               isOwner
@@ -48,20 +43,26 @@ export default function ContractAdminRow({
             )}
           </span>
         </div>
-        <span className="tw-block tw-break-all tw-font-mono tw-text-sm tw-text-iron-300">
-          {address}
-        </span>
+        <p className="tw-m-0 tw-break-words tw-text-sm tw-text-iron-300 [overflow-wrap:anywhere]">
+          {ensName && (
+            <strong className="tw-font-semibold tw-text-iron-100">
+              {ensName} -{" "}
+            </strong>
+          )}
+          <span className="tw-font-mono">{address}</span>
+        </p>
       </div>
       {canManage && !isOwner && (
         <CustomTooltip content={t(locale, "dropForge.admins.revokeTooltip")}>
           <Button
             variant="destructiveOutline"
-            size="sm"
+            size="md"
+            className="tw-w-10 !tw-px-0"
             disabled={disabled}
             aria-label={t(locale, "dropForge.admins.revokeLabel", { address })}
             onClick={onRevoke}
           >
-            <TrashIcon aria-hidden="true" className="tw-size-4" />
+            <TrashIcon aria-hidden="true" className="tw-size-5" />
           </Button>
         </CustomTooltip>
       )}

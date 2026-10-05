@@ -61,6 +61,35 @@ describe("OnchainTransactionModal", () => {
   });
 
   it.each(["confirm_wallet", "submitted", "success", "error"] as const)(
+    "gives the address subtitle the full header width in %s state",
+    (status) => {
+      const address = "0x7f3774EAdae4beB01919deC7f32A72e417Ab5DE3";
+      render(
+        <OnchainTransactionModal
+          status={status}
+          title="Add Admin"
+          subtitle={<span>{address}</span>}
+          pendingContent={<p>Review creator admin access</p>}
+          allowCloseWhilePending
+          onClose={jest.fn()}
+        />
+      );
+      const dialog = screen.getByRole("dialog", { name: "Add Admin" });
+      const subtitle = document.getElementById(
+        dialog.getAttribute("aria-describedby")!
+      )!;
+      const titleRow = subtitle.previousElementSibling!;
+      expect(titleRow).toContainElement(screen.getByRole("heading"));
+      expect(titleRow).toContainElement(
+        screen.getByRole("button", { name: "Close modal" })
+      );
+      expect(titleRow).not.toContainElement(subtitle);
+      expect(subtitle).toHaveClass("[overflow-wrap:anywhere]");
+      expect(dialog).toHaveAccessibleDescription(address);
+    }
+  );
+
+  it.each(["confirm_wallet", "submitted", "success", "error"] as const)(
     "only shows custom success content after confirmation (%s)",
     (status) => {
       render(

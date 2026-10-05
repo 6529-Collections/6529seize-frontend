@@ -19,6 +19,7 @@ import { useDropForgePermissions } from "@/hooks/useDropForgePermissions";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import type { SupportedLocale } from "@/i18n/locales";
+import { getAddressEtherscanLink } from "@/helpers/Helpers";
 import { CREATOR_ADMIN_ABI } from "./creator-admin-abi";
 import ContractAdminRow from "./ContractAdminRow";
 import {
@@ -141,7 +142,7 @@ export default function DropForgeContractAdmins() {
   return (
     <section
       aria-labelledby="contract-admins-heading"
-      className="tw-mt-6 tw-rounded-xl tw-bg-iron-950 tw-p-4 tw-ring-1 tw-ring-inset tw-ring-iron-800 sm:tw-p-6"
+      className="tailwind-scope tw-mt-6 tw-rounded-xl tw-bg-iron-950 tw-p-4 tw-ring-1 tw-ring-inset tw-ring-iron-800 sm:tw-p-6"
     >
       <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
         <h2
@@ -154,7 +155,7 @@ export default function DropForgeContractAdmins() {
           {canManageContractAdmins && (
             <Button
               ref={addButtonRef}
-              size="sm"
+              size="md"
               aria-expanded={addExpanded}
               aria-controls="contract-admin-add-form"
               disabled={controlsDisabled}
@@ -164,9 +165,9 @@ export default function DropForgeContractAdmins() {
               }}
             >
               {addExpanded ? (
-                <ChevronUpIcon aria-hidden="true" className="tw-size-4" />
+                <ChevronUpIcon aria-hidden="true" className="tw-size-5" />
               ) : (
-                <PlusIcon aria-hidden="true" className="tw-size-4" />
+                <PlusIcon aria-hidden="true" className="tw-size-5" />
               )}
               {t(locale, "dropForge.admins.add")}
             </Button>
@@ -174,21 +175,29 @@ export default function DropForgeContractAdmins() {
           <CustomTooltip content={t(locale, "dropForge.admins.refresh")}>
             <Button
               variant="secondary"
-              size="sm"
-              className="tw-w-9 tw-px-0"
+              size="md"
+              className="tw-w-10 !tw-px-0"
               aria-label={t(locale, "dropForge.admins.refresh")}
               loading={refreshing}
               hideChildrenWhenLoading
               onClick={() => void refresh()}
               disabled={ownerQuery.isFetching || adminsQuery.isFetching}
             >
-              <ArrowPathIcon aria-hidden="true" className="tw-size-4" />
+              <ArrowPathIcon aria-hidden="true" className="tw-size-5" />
             </Button>
           </CustomTooltip>
         </div>
       </div>
       <p className="tw-mt-2 tw-break-all tw-text-sm tw-text-iron-400">
-        {chain.name} · {contract}
+        {chain.name} ·{" "}
+        <a
+          href={getAddressEtherscanLink(chain.id, contract)}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="tw-text-iron-400 tw-underline tw-decoration-iron-600 tw-underline-offset-2 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-text-iron-200"
+        >
+          {contract}
+        </a>
       </p>
       {listStatus}
       {canManageContractAdmins && addExpanded && (
@@ -211,7 +220,7 @@ export default function DropForgeContractAdmins() {
           >
             {t(locale, "dropForge.admins.addressLabel")}
           </label>
-          <div className="tw-flex tw-flex-col tw-gap-3 sm:tw-flex-row">
+          <div className="tw-flex tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-items-center">
             <EnsAddressInput
               id="contract-admin-address"
               value={input}
@@ -225,22 +234,25 @@ export default function DropForgeContractAdmins() {
               onAddressChange={setResolvedAddress}
               onLoadingChange={setResolving}
               onError={setEnsError}
-              className="tw-flex-1"
+              className="tw-min-w-0 tw-flex-1"
             />
-            <Button
-              type="submit"
-              disabled={controlsDisabled || resolving || !!error}
-              className="tw-shrink-0"
-            >
-              {t(locale, "dropForge.admins.review")}
-            </Button>
-            <Button
-              variant="secondary"
-              disabled={controlsDisabled}
-              onClick={closeAddForm}
-            >
-              {t(locale, "dropForge.admins.cancel")}
-            </Button>
+            <div className="tw-flex tw-shrink-0 tw-flex-wrap tw-gap-2">
+              <Button
+                type="submit"
+                size="md"
+                disabled={controlsDisabled || resolving || !!error}
+              >
+                {t(locale, "dropForge.admins.review")}
+              </Button>
+              <Button
+                variant="secondary"
+                size="md"
+                disabled={controlsDisabled}
+                onClick={closeAddForm}
+              >
+                {t(locale, "dropForge.admins.cancel")}
+              </Button>
+            </div>
           </div>
           <p
             id="contract-admin-validation"
@@ -302,7 +314,11 @@ export default function DropForgeContractAdmins() {
               ? "dropForge.admins.add"
               : "dropForge.admins.revoke"
           )}
-          subtitle={<span className="tw-break-all">{transaction.address}</span>}
+          subtitle={
+            <span className="tw-block tw-break-all tw-font-mono">
+              {transaction.address}
+            </span>
+          }
           message={transaction.message}
           transactionHash={transaction.hash}
           chain={transaction.chain}
@@ -340,7 +356,11 @@ function AdminConfirmation({
         locale,
         approving ? "dropForge.admins.add" : "dropForge.admins.revoke"
       )}
-      subtitle={<span className="tw-break-all">{operation.address}</span>}
+      subtitle={
+        <span className="tw-block tw-break-all tw-font-mono">
+          {operation.address}
+        </span>
+      }
       chain={chain}
       onClose={onClose}
       pendingContent={
@@ -362,11 +382,12 @@ function AdminConfirmation({
             </p>
           )}
           <div className="tw-flex tw-flex-wrap tw-justify-center tw-gap-3">
-            <Button variant="secondary" onClick={onClose}>
+            <Button variant="secondary" size="md" onClick={onClose}>
               {t(locale, "dropForge.admins.cancel")}
             </Button>
             <Button
               variant={approving ? "primary" : "destructive"}
+              size="md"
               onClick={onConfirm}
             >
               {t(

@@ -233,7 +233,7 @@ it("unfolds the add form above the list and resets it on cancel", () => {
   expect(screen.getByRole("button", { name: "Review Admin" })).toBeDisabled();
 });
 
-it("shows mainnet ENS names beside role pills without replacing wallet addresses", () => {
+it("puts role pills above the ENS/address line without replacing wallet addresses", () => {
   mockChain = sepolia;
   mockEnsName.mockImplementation(({ address }: { address: string }) => ({
     data: address === owner ? "deployer2.6529.eth" : "prxt0.eth",
@@ -248,6 +248,51 @@ it("shows mainnet ENS names beside role pills without replacing wallet addresses
   expect(within(rows[1]!).getByText("Admin")).toHaveClass("tw-rounded-full");
   expect(mockEnsName).toHaveBeenCalledWith({ address: owner, chainId: 1 });
   expect(mockEnsName).toHaveBeenCalledWith({ address: admin, chainId: 1 });
+  for (const row of rows) {
+    const pill = within(row).getByText(/^(Owner|Admin)$/);
+    const identity = row.querySelector("p")!;
+    expect(pill.parentElement?.nextElementSibling).toBe(identity);
+    expect(identity.querySelector("strong")).toHaveTextContent(/\.eth -$/);
+    expect(identity.querySelector("span")).toHaveTextContent(/^0x/);
+    expect(identity).toHaveClass("[overflow-wrap:anywhere]");
+  }
+});
+
+it.each([
+  [mainnet, "https://etherscan.io"],
+  [sepolia, "https://sepolia.etherscan.io"],
+] as const)(
+  "links the creator contract to its %s explorer",
+  (chain, explorer) => {
+    mockChain = chain;
+    render(<DropForgeContractAdmins />);
+    const contractLink = screen.getByRole("link", { name: owner });
+    expect(contractLink).toHaveAttribute(
+      "href",
+      `${explorer}/address/${owner}`
+    );
+    expect(contractLink).toHaveAttribute("target", "_blank");
+    expect(contractLink).toHaveAttribute("rel", "noopener noreferrer");
+  }
+);
+
+it("keeps admin controls scoped and consistently sized, including the refresh icon", () => {
+  render(<DropForgeContractAdmins />);
+  const add = screen.getByRole("button", { name: "Add Admin" });
+  expect(add.closest("section")).toHaveClass("tailwind-scope");
+  const refresh = screen.getByRole("button", {
+    name: "Refresh contract admins",
+  });
+  const revoke = screen.getByRole("button", { name: `Revoke admin ${admin}` });
+  fireEvent.click(add);
+  const review = screen.getByRole("button", { name: "Review Admin" });
+  const cancel = screen.getByRole("button", { name: "Cancel" });
+  for (const control of [add, refresh, revoke, review, cancel]) {
+    expect(control).toHaveClass("tw-h-10", "tw-text-sm");
+  }
+  expect(refresh).toHaveClass("tw-w-10", "!tw-px-0");
+  expect(revoke).toHaveClass("tw-w-10", "!tw-px-0");
+  expect(refresh.querySelector("svg")).toHaveClass("tw-size-5");
 });
 
 it.each([
