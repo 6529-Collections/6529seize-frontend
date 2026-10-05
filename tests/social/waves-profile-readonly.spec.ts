@@ -107,6 +107,13 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     });
     await gotoReady(page, `/waves/${settings.memes_wave_id}`);
     const navigation = page.getByRole("navigation", { name: "Wave sections" });
+    await expect(
+      navigation.getByRole("button", { name: /^(Chat|Leaderboard|Winners)$/ })
+    ).toHaveText(["Chat", "Leaderboard", "Winners"]);
+    await testInfo.attach("main-stage-chat-first-app-tabs", {
+      body: await page.screenshot(),
+      contentType: "image/png",
+    });
     await navigation
       .getByRole("button", { name: "Leaderboard", exact: true })
       .click();
@@ -177,11 +184,14 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     const waveTabs = page.getByRole("tablist").filter({
       has: page.getByRole("tab", { name: "Chat", exact: true }),
     });
-    for (const name of ["Leaderboard", "Chat", "Winners", "Outcome", "FAQ"]) {
+    for (const name of ["Chat", "Leaderboard", "Winners", "Outcome", "FAQ"]) {
       await expect(
         waveTabs.getByRole("tab", { name, exact: true })
       ).toBeAttached();
     }
+    await expect(waveTabs.getByRole("tab").nth(0)).toHaveText("Chat");
+    await expect(waveTabs.getByRole("tab").nth(1)).toHaveText("Leaderboard");
+    await expect(waveTabs.getByRole("tab").nth(2)).toHaveText("Winners");
     await expect(
       waveTabs.getByRole("tab", { name: "Chat", exact: true })
     ).toHaveAttribute("aria-selected", "true");
@@ -196,6 +206,10 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     await expect(page).toHaveURL(
       new RegExp(`/waves/${settings.memes_wave_id}$`)
     );
+    await testInfo.attach("main-stage-chat-first-web-tabs", {
+      body: await page.screenshot(),
+      contentType: "image/png",
+    });
     // This pack runs signed out; personal voting controls remain authenticated.
     await expect(
       page.getByRole("tab", { name: "My Votes", exact: true })
