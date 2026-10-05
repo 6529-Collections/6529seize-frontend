@@ -69,11 +69,24 @@ it("starts with the common criteria and retains readiness guidance without the i
   expect(
     screen.getByRole("spinbutton", { name: "Level at least" })
   ).toHaveValue(null);
-  for (const name of ["Level", "TDH", "NIC", "Rep", "More filters"]) {
+  for (const name of [
+    "Level",
+    "TDH",
+    "NIC",
+    "Rep",
+    "Identities",
+    "Required NFTs",
+    "Collection Access",
+    "xTDH Grant",
+  ]) {
     expect(
       screen.getByRole("button", { name, exact: true })
     ).toBeInTheDocument();
   }
+  expect(screen.getByRole("heading", { name: "More filters" })).toBeVisible();
+  expect(
+    screen.queryByRole("button", { name: "More filters" })
+  ).not.toBeInTheDocument();
   expect(
     screen.queryByText("No identities are explicitly included.")
   ).not.toBeInTheDocument();
@@ -102,19 +115,9 @@ it("preserves common criteria while visiting advanced criteria and submits the e
     screen.getByRole("spinbutton", { name: "TDH + xTDH at least" }),
     "100"
   );
-  await user.click(
-    screen.getByRole("button", { name: "More filters", exact: true })
-  );
-  for (const name of [
-    "Identities",
-    "Required NFTs",
-    "Collection Access",
-    "xTDH Grant",
-  ]) {
-    expect(
-      screen.getByRole("button", { name, exact: true })
-    ).toBeInTheDocument();
-  }
+  expect(
+    screen.getByRole("spinbutton", { name: "TDH + xTDH at least" })
+  ).toHaveValue(100);
   await user.click(
     screen.getByRole("button", { name: "Identities", exact: true })
   );
@@ -130,10 +133,7 @@ it("preserves common criteria while visiting advanced criteria and submits the e
     screen.getByText("No identities are explicitly excluded.")
   ).toBeInTheDocument();
   await user.click(
-    screen.getByRole("button", { name: "More filters", exact: true })
-  );
-  await user.click(
-    screen.getByRole("button", { name: "Filter Network", exact: true })
+    screen.getByRole("button", { name: /^Level(?: Configured)?$/ })
   );
   expect(
     screen.getByRole("spinbutton", { name: "Level at least" })

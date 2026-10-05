@@ -30,9 +30,9 @@ pagination, and profile links.
 ## Controls and URL State
 
 - `Filter` opens `Filter Network` with `Level` selected. `TDH`, `NIC`, and
-  `Rep` are available beside it. `More filters` opens `Identities`,
-  `Required NFTs`, `Collection Access`, and `xTDH Grant`. Switching between
-  criteria keeps the draft's values.
+  `Rep` are available beside it. Under `More filters`, `Identities`,
+  `Required NFTs`, `Collection Access`, and `xTDH Grant` are visible and open
+  directly. Switching between criteria keeps the draft's values.
 - The `After editing` summary and `Create and use new group` action stay at
   the bottom while the criteria scroll. A valid draft also offers
   `Preview matches`. Expand `Not ready yet.` to read the readiness guidance.
@@ -60,8 +60,8 @@ pagination, and profile links.
 
 1. Open `/network`.
 2. (Optional) open `Filter` and set `Level`, `TDH`, `NIC`, or `Rep`.
-   Use `More filters` for identities, required NFTs, collection access, or an
-   xTDH grant. All criteria can be combined.
+   Select an option under `More filters` for identities, required NFTs,
+   collection access, or an xTDH grant. All criteria can be combined.
 3. Select `Create and use new group` to save and apply the criteria.
 4. (Optional) use the REP or NIC criteria action in the selected-group summary
    to grant credits to every matching member.
