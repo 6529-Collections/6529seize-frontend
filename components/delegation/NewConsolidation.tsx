@@ -41,6 +41,10 @@ interface Props {
   onSetToast(toast: DelegationToastState): void;
 }
 
+/**
+ * Renders the consolidation registration form with reciprocal-wallet guidance
+ * for direct registrations and the existing manager registration flow.
+ */
 export default function NewConsolidationComponent(props: Readonly<Props>) {
   const locale = useBrowserLocale();
   const [newDelegationCollection, setNewDelegationCollection] =

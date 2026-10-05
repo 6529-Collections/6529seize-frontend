@@ -58,6 +58,10 @@ function sortByPrimary(
   });
 }
 
+/**
+ * Lists profile wallets and exposes consolidation registration to the connected
+ * owner outside proxy mode, provided the profile has a wallet to consolidate.
+ */
 export default function UserPageIdentityStatementsConsolidatedAddresses({
   profile,
   headerAction,
