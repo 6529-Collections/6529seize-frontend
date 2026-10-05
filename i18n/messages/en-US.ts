@@ -56,6 +56,7 @@ import { ARTWORK_DOCUMENTATION_MESSAGES } from "@/i18n/messages/artwork-document
 import { ARTWORK_DOCUMENTATION_INTEGRATION_MESSAGES } from "@/i18n/messages/artwork-documentation-integration";
 import { COLLECT_MESSAGES } from "@/i18n/messages/collect";
 import { COLLECT_TDH_TARGET_MESSAGES } from "@/i18n/messages/collect-tdh-target";
+import { DROP_FORGE_ADMIN_MESSAGES } from "@/i18n/messages/drop-forge-admins";
 
 type MessageEntry = readonly [key: string, value: string];
 
@@ -1089,6 +1090,9 @@ const USER_PROFILE_IDENTITY_STATEMENTS_MESSAGES = objectMessages(
     retry: "Try again",
     add: "Add",
     walletChecker: "Wallet Checker",
+    addWallet: "Add another wallet",
+    addWalletDescription:
+      "Link another wallet you control. Your NFTs stay in their wallets.",
     delegationCenter: "Delegation Center",
     primary: "Primary",
     setPrimary: "Set primary",
@@ -2831,6 +2835,12 @@ export const EN_US_MESSAGES = {
   ...COMPETITION_MESSAGES,
   ...EN_DROP_REQUIREMENT_MESSAGES,
   ...EN_US_DROP_METADATA_MESSAGES,
+  "delegation.consolidation.instructions.title":
+    "Two wallets · two registrations",
+  "delegation.consolidation.instructions.steps":
+    "Register from this wallet, then connect the other wallet and register the return link. Each wallet needs ETH for gas.",
+  "delegation.consolidation.instructions.publicLink":
+    "The link is public. Existing profile data may be combined.",
   "drop.composer.image": "Image",
   "drop.composer.selectImage": "Select image",
   "drop.composer.removeImage": "Remove image",
@@ -2902,6 +2912,7 @@ export const EN_US_MESSAGES = {
   ...artworkShareMessages,
   ...COLLECT_MESSAGES,
   ...COLLECT_TDH_TARGET_MESSAGES,
+  ...DROP_FORGE_ADMIN_MESSAGES,
   ...profileCmsStudioMessages,
   ...profileCmsAgentMessages,
   ...studioTemplateDescriptions,
