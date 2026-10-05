@@ -484,13 +484,15 @@ export default function UserPageRepNewRepSearch({
                   </AnimatePresence>
                 </form>
                 <div className="[&>div]:tw-justify-center">
-                  <div className="tw-relative tw-mx-auto tw-flex tw-w-full tw-max-w-[14rem]">
+                  <div className="tw-relative tw-mx-auto tw-flex tw-w-full tw-max-w-[13rem]">
                     <UserPageRateInput
                       value={amountStr}
                       onChange={setAmountStr}
                       minMax={minMaxValues}
                       isProxy={!!activeProfileProxy}
                       size="prominent"
+                      withStepper
+                      inputLabel={t(locale, "rating.amount.label")}
                     />
                   </div>
                   {selectedCategory && (

@@ -61,6 +61,25 @@ describe("UserPageRepNewRepSearch", () => {
     });
   });
 
+  it("lets the stepper edit the amount while category selection remains required", async () => {
+    const user = userEvent.setup();
+    render(
+      <UserPageRepNewRepSearch
+        overview={null}
+        profile={{ query: "recipient" } as ApiIdentity}
+      />
+    );
+    await user.click(
+      screen.getByRole("button", { name: "Increase rating by 1" })
+    );
+    expect(screen.getByRole("textbox", { name: "Rating amount" })).toHaveValue(
+      "1"
+    );
+    expect(
+      screen.getByRole("button", { name: "Grant REP", exact: true })
+    ).toBeDisabled();
+  });
+
   it("shows loading instead of the minimum-length prompt once three characters are entered", async () => {
     const user = userEvent.setup();
     render(

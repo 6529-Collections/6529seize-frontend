@@ -2832,6 +2832,9 @@ const MEME_DATA_TABLE_MESSAGES = objectMessages("memeData", {
 const TOKEN_NUMBER_MESSAGE = "Token #{tokenId}";
 
 export const EN_US_MESSAGES = {
+  "rating.amount.label": "Rating amount",
+  "rating.amount.decrease": "Decrease rating by 1",
+  "rating.amount.increase": "Increase rating by 1",
   ...COMPETITION_MESSAGES,
   ...EN_DROP_REQUIREMENT_MESSAGES,
   ...EN_US_DROP_METADATA_MESSAGES,

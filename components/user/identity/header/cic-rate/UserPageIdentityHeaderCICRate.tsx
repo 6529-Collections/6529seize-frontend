@@ -213,7 +213,7 @@ export default function UserPageIdentityHeaderCICRate({
       className={`tw-relative tw-flex tw-w-full ${
         isTooltip
           ? "tw-mt-2 tw-max-w-[12rem]"
-          : "tw-mx-auto tw-mb-5 tw-mt-4 tw-max-w-[14rem]"
+          : "tw-mx-auto tw-mb-5 tw-mt-4 tw-max-w-[13rem]"
       }`}
     >
       <UserPageRateInput
@@ -222,6 +222,7 @@ export default function UserPageIdentityHeaderCICRate({
         minMax={minMaxValues}
         isProxy={isProxy}
         size={isTooltip ? "compact" : "prominent"}
+        withStepper={!isTooltip}
         inputId="nic-rating-input"
         focusRingClassName={CIC_FOCUS_RING_CLASS_NAME}
         required
