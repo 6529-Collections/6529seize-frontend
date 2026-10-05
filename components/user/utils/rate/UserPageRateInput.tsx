@@ -4,7 +4,7 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 
 const INPUT_CLASS_NAME =
-  "tw-touch-manipulation tw-appearance-none tw-block tw-min-w-0 tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900/60 tw-py-3 tw-text-center tw-leading-tight tw-font-medium tw-tabular-nums tw-tracking-tight tw-text-iron-100 tw-caret-primary-400 tw-ring-1 tw-ring-inset tw-ring-iron-800/60 hover:tw-bg-iron-900 hover:tw-ring-iron-700 focus:tw-bg-iron-900 focus:tw-outline-none placeholder:tw-text-iron-500 tw-transition-colors tw-duration-150 motion-reduce:tw-transition-none";
+  "tw-touch-manipulation tw-appearance-none tw-block tw-min-w-0 tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900/60 tw-text-center tw-text-2xl tw-leading-tight tw-font-medium tw-tabular-nums tw-tracking-tight tw-text-iron-100 tw-caret-primary-400 tw-ring-1 tw-ring-inset tw-ring-iron-800/60 hover:tw-bg-iron-900 hover:tw-ring-iron-700 focus:tw-bg-iron-900 focus:tw-outline-none placeholder:tw-text-iron-500 tw-transition-colors tw-duration-150 motion-reduce:tw-transition-none";
 
 const STEP_BUTTON_CLASS_NAME =
   "tw-absolute tw-top-1/2 -tw-translate-y-1/2 tw-inline-flex tw-size-11 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-400 tw-transition-colors enabled:tw-cursor-pointer enabled:hover:tw-bg-iron-800/60 enabled:hover:tw-text-iron-100 disabled:tw-cursor-not-allowed disabled:tw-text-iron-700 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 motion-reduce:tw-transition-none";
@@ -141,7 +141,7 @@ export default function UserPageRateInput({
         className={`${
           focusRingClassName ??
           (isValidValue ? "focus:tw-ring-primary-400" : "focus:tw-ring-red")
-        } ${INPUT_CLASS_NAME} ${withStepper ? "tw-px-12" : "tw-px-10"} ${size === "prominent" ? "tw-text-[2rem]" : "tw-text-2xl"}`}
+        } ${INPUT_CLASS_NAME} ${withStepper ? "tw-px-12" : "tw-px-10"} ${size === "prominent" ? "tw-h-12 tw-py-2" : "tw-py-3"}`}
       />
       {withStepper && (
         <button

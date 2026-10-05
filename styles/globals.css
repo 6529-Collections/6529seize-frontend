@@ -280,7 +280,7 @@ body {
   overflow: auto;
 }
 
-/* Rating amounts own their 24px/32px type scale, above the iOS zoom threshold. */
+/* Rating amounts own their typography, above the iOS zoom threshold. */
 .mobile-wrapper-dialog input:not([data-rating-input]),
 .mobile-wrapper-dialog textarea,
 .mobile-wrapper-dialog select {
