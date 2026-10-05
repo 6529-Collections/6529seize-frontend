@@ -509,7 +509,7 @@ function TypedProjectPage({
             </div>
           ) : (
             <MuseumMarkdown
-              className="tw-mt-6"
+              className="tw-mt-6 tw-break-words"
               embeddedDocument
               sourceCommit={publication.identity.commit}
               sourcePath={document.sourcePath}
@@ -537,9 +537,7 @@ export async function generateMetadata({
   const publication = publicationState.publication
     ? applyMuseumCollectionSemantics(publicationState.publication)
     : null;
-  const project = publication?.projects.find(
-    (item) => item.slug === slug
-  );
+  const project = publication?.projects.find((item) => item.slug === slug);
   const workArtistIds = new Set(
     project && publication
       ? museumProjectWorks(publication, project).map((work) => work.artistId)

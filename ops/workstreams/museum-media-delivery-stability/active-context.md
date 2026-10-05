@@ -58,9 +58,10 @@ not suppress ORB or failed media responses.
 ## Release
 
 The exact-build tablet geometry check found a long source URL overflowing the
-Casey artist and acquisition documents. Artist profile and acquisition document
-renderers now allow long source links to wrap. The capture inventory includes
-all artist and acquisition routes using these shared renderers, in addition to
+Casey artist and acquisition documents. Mobile capture also found the same
+problem in the CENTURY project bibliography. Artist profile, acquisition and
+project document renderers now allow long source links to wrap. The capture
+inventory includes all routes using these shared renderers, in addition to
 the 25 routes affected by the delivery mapping. Initial parallel local browser
 runs hit public API rate limits; those captures are superseded and final local
 validation runs at reduced concurrency.
