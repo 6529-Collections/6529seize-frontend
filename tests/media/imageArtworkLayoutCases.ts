@@ -90,6 +90,7 @@ export function defineNftImageLayoutTests() {
         const details = detailsElement.getBoundingClientRect();
         return {
           width: bounds.width,
+          columnHeight: artwork.height,
           availableWidth: artwork.width,
           height: bounds.height,
           naturalHeight:
@@ -99,6 +100,10 @@ export function defineNftImageLayoutTests() {
         };
       });
       expect(layout.width).toBeGreaterThan(0);
+      expect(layout.columnHeight).toBeGreaterThan(0);
+      expect(Math.abs(layout.columnHeight - layout.height)).toBeLessThanOrEqual(
+        2
+      );
       expect(
         Math.abs(layout.width - layout.availableWidth)
       ).toBeLessThanOrEqual(2);
