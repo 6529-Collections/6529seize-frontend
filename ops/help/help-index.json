@@ -6074,6 +6074,7 @@
       ],
       "facts": [
         "Wave content tabs organize the visible wave content area. App tabs and their content share the same availability rules. An unavailable legacy competition section opens Leaderboard, or Submissions after voting ends, and selects that visible tab.",
+        "Memes wave tabs start with Chat, followed by Leaderboard or Submissions after voting ends, Winners when available, and My Votes for signed-in users. Other available sections follow these tabs.",
         "Some waves can switch between chat and gallery-style views.",
         "Available tabs depend on wave type, state, and content.",
         "Named curations are collections of posts from a wave. Switch between them using their tabs below the wave header on desktop and mobile web, or alongside the main wave navigation tabs in the native app. Select a regular tab such as Chat to leave the curation view.",

@@ -1692,6 +1692,22 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         timeout: 30000,
       });
       await dismissNextDevTools(page);
+      const sections =
+        surface === "app"
+          ? page
+              .getByRole("navigation", { name: "Wave sections" })
+              .getByRole("button", {
+                name: /^(Chat|Leaderboard|Winners|My Votes)$/,
+              })
+          : waveTabStrip(page).getByRole("tab", {
+              name: /^(Chat|Leaderboard|Winners|My Votes)$/,
+            });
+      await expect(sections).toHaveText([
+        "Chat",
+        "Leaderboard",
+        "Winners",
+        "My Votes",
+      ]);
       const modes = page.getByRole("tablist", {
         name: "Leaderboard view modes",
       });
@@ -1740,6 +1756,15 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       expect(sorts).toContain("RANK");
       expect(sorts).toContain("CREATED_AT");
       expect(sandbox.requests).toEqual([]);
+      await expectNoHorizontalOverflow(page);
+      const screenshotPath = testInfo.outputPath(
+        `main-stage-chat-first-${surface}-tabs.png`
+      );
+      await page.screenshot({ path: screenshotPath });
+      await testInfo.attach(`main-stage-chat-first-${surface}-tabs`, {
+        path: screenshotPath,
+        contentType: "image/png",
+      });
     });
   }
 
