@@ -101,9 +101,9 @@ export default function CreateWave({
   const [descriptionSnapshot, setDescriptionSnapshot] =
     useState<CreateDropConfig | null>(null);
   const quickChat = !isSubwave && config.overview.type === ApiWaveType.Chat;
+  const isQuickChatOverview = quickChat && step === CreateWaveStep.OVERVIEW;
   const showDescription =
-    step === CreateWaveStep.DESCRIPTION ||
-    (quickChat && step === CreateWaveStep.OVERVIEW);
+    step === CreateWaveStep.DESCRIPTION || isQuickChatOverview;
   const [initialDescription, setInitialDescription] =
     useState<CreateDropConfig | null>(null);
   const [editorKey, setEditorKey] = useState(0);
@@ -284,9 +284,7 @@ export default function CreateWave({
     return onStep({
       step: targetStep,
       direction,
-      ...(quickChat &&
-      step === CreateWaveStep.OVERVIEW &&
-      direction === "forward"
+      ...(isQuickChatOverview && direction === "forward"
         ? { validateGroups: true }
         : {}),
     });
@@ -383,7 +381,7 @@ export default function CreateWave({
           setStep={setStep}
           onComplete={onComplete}
         >
-          {quickChat && step === CreateWaveStep.OVERVIEW ? (
+          {isQuickChatOverview ? (
             <CreateWaveQuickChatHeader {...contentProps} />
           ) : (
             <CreateWaveStepContent {...contentProps} />
@@ -410,11 +408,10 @@ export default function CreateWave({
               />
             </div>
           )}
-          {quickChat && step === CreateWaveStep.OVERVIEW && (
+          {isQuickChatOverview && (
             <CreateWaveQuickChatOptions {...contentProps} />
           )}
-          <p
-            role="status"
+          <output
             className={
               mediaOmitted && draftLoaded && showDescription
                 ? "tw-mt-4 tw-text-sm tw-text-iron-300"
@@ -424,7 +421,7 @@ export default function CreateWave({
             {mediaOmitted && draftLoaded && showDescription
               ? t(locale, "waves.create.quick.mediaOmitted")
               : null}
-          </p>
+          </output>
         </CreateWaveLayout>
       </CreateWaveFlow>
       <SubwaveAccessWarningDialog
