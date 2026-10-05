@@ -93,6 +93,19 @@ it("keeps search open for an empty query until explicitly closed", () => {
   expect(result.current.searchOpen).toBe(false);
 });
 
+it("keeps the search input visible whenever a nonempty query is being searched", () => {
+  const { result } = setup();
+  act(() => result.current.setQueryText("xx"));
+  expect(result.current.searching).toBe(true);
+  expect(result.current.searchOpen).toBe(true);
+  act(() => result.current.setSearchOpen(false));
+  expect(result.current.searching).toBe(true);
+  expect(result.current.searchOpen).toBe(true);
+  act(() => result.current.setQueryText(""));
+  expect(result.current.searching).toBe(false);
+  expect(result.current.searchOpen).toBe(false);
+});
+
 it("searches across all accessible waves from Pinned and restores Pinned when cleared", async () => {
   selectCollection("pinned");
   const { result } = setup();
