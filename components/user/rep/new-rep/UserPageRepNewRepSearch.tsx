@@ -376,13 +376,13 @@ export default function UserPageRepNewRepSearch({
           <div ref={listRef} className="tw-w-full">
             <div className="tw-relative tw-w-full tw-bg-iron-950">
               <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-1.5 tw-px-4 sm:tw-px-6">
-                <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-2 tw-text-xs tw-font-medium tw-text-iron-500">
+                <div className="tw-flex tw-w-full tw-flex-col tw-gap-2 tw-text-xs tw-font-normal tw-text-iron-400">
                   <span>
                     {t(locale, "rep.categories.grant.availableRep", {
                       amount: formatNumberWithCommas(heroAvailableRep),
                     })}
                   </span>
-                  <span className="tw-h-3 tw-w-px tw-bg-white/20" />
+                  <span className="tw-hidden" />
                   <span>
                     {t(locale, "rep.categories.grant.assignedRep", {
                       name: profile.query ?? "",
@@ -393,7 +393,7 @@ export default function UserPageRepNewRepSearch({
                   </span>
                 </div>
               </div>
-              <div className="tw-mt-3 tw-flex tw-flex-col tw-items-stretch tw-gap-3 tw-px-4 sm:tw-px-6">
+              <div className="tw-mt-6 tw-flex tw-flex-col tw-items-stretch tw-gap-6 tw-px-4 sm:tw-px-6">
                 <form
                   onSubmit={onSearchSubmit}
                   className="tw-relative tw-w-full"
@@ -403,7 +403,7 @@ export default function UserPageRepNewRepSearch({
                   </label>
                   <div className="tw-relative tw-w-full">
                     <svg
-                      className="tw-pointer-events-none tw-absolute tw-left-3 tw-top-3.5 tw-h-4 tw-w-4 tw-text-iron-500"
+                      className="tw-pointer-events-none tw-absolute tw-left-4 tw-top-1/2 -tw-translate-y-1/2 tw-h-4 tw-w-4 tw-text-iron-500"
                       viewBox="0 0 20 20"
                       fill="currentColor"
                       aria-hidden="true"
@@ -431,7 +431,7 @@ export default function UserPageRepNewRepSearch({
                           ? SUBMISSION_GUIDANCE_ID
                           : undefined
                       }
-                      className="tw-form-input tw-block tw-w-full tw-appearance-none tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-[#0A0A0A]/80 tw-py-3 tw-pl-9 tw-pr-3 tw-text-sm tw-font-medium tw-text-white tw-caret-primary-400 tw-transition tw-duration-300 tw-ease-out placeholder:tw-font-normal placeholder:tw-text-iron-500 focus:tw-border-blue-500/50 focus:tw-outline-none lg:tw-font-semibold lg:placeholder:tw-text-iron-400"
+                      className="tw-form-input tw-block tw-w-full tw-appearance-none tw-rounded-lg tw-border-0 tw-bg-iron-900/60 tw-py-4 tw-pl-11 tw-pr-10 tw-text-base tw-font-normal tw-text-iron-100 tw-caret-primary-400 tw-ring-1 tw-ring-inset tw-ring-iron-800/60 hover:tw-bg-iron-900 hover:tw-ring-iron-700 focus:tw-bg-iron-900 focus:tw-outline-none focus:tw-ring-primary-400 placeholder:tw-text-iron-400 tw-transition-colors tw-duration-150 motion-reduce:tw-transition-none"
                       placeholder={t(
                         locale,
                         "rep.categories.grant.searchPlaceholder"
@@ -470,7 +470,7 @@ export default function UserPageRepNewRepSearch({
                         transition={{ duration: 0.15, ease: "easeOut" }}
                         className="tw-mt-1 tw-will-change-transform"
                       >
-                        <div className="tw-rounded-lg tw-bg-iron-900/70 tw-p-2 tw-shadow-xl tw-ring-1 tw-ring-white/5">
+                        <div className="tw-rounded-lg tw-bg-iron-900 tw-p-2 tw-ring-1 tw-ring-iron-800">
                           <UserPageRepNewRepSearchDropdown
                             categories={categoriesToDisplay}
                             state={repSearchState}
@@ -483,15 +483,15 @@ export default function UserPageRepNewRepSearch({
                     )}
                   </AnimatePresence>
                 </form>
-                <div>
-                  <div className="tw-relative tw-flex tw-w-full">
+                <div className="[&>div]:tw-justify-center">
+                  <div className="tw-relative tw-mx-auto tw-flex tw-w-full tw-max-w-[14rem]">
                     <UserPageRateInput
                       value={amountStr}
                       onChange={setAmountStr}
                       minMax={minMaxValues}
                       isProxy={!!activeProfileProxy}
-                      spanClassName="tw-flex tw-flex-col tw-items-center tw-justify-center tw-rounded-l-lg tw-border tw-border-solid tw-border-white/10 tw-bg-[#0A0A0A]/80 tw-px-3"
-                      inputClassName="tw-form-input tw-appearance-none -tw-ml-px tw-block tw-w-full tw-rounded-l-none tw-rounded-r-lg tw-border tw-border-solid tw-border-white/10 tw-py-3 tw-px-3 tw-bg-[#0A0A0A]/80 tw-text-white tw-text-sm tw-font-medium lg:tw-font-semibold tw-caret-primary-400 placeholder:tw-text-iron-500 lg:placeholder:tw-text-iron-400 focus:tw-outline-none focus:tw-border-blue-500/50 tw-transition tw-duration-300 tw-ease-out"
+                      spanClassName="tw-hidden"
+                      inputClassName="tw-appearance-none tw-block tw-min-w-0 tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900/60 tw-px-4 tw-py-3 tw-text-center !tw-text-4xl [body.capacitor-native_&]:!tw-text-4xl !tw-leading-tight tw-font-medium tw-tabular-nums tw-tracking-tight tw-text-iron-100 tw-caret-primary-400 tw-shadow-none tw-ring-1 tw-ring-inset tw-ring-iron-800/60 hover:tw-bg-iron-900 hover:tw-ring-iron-700 focus:tw-bg-iron-900 focus:tw-outline-none focus:tw-ring-1 placeholder:tw-text-iron-500 tw-transition-colors tw-duration-150 motion-reduce:tw-transition-none"
                     />
                   </div>
                   {selectedCategory && (
@@ -504,14 +504,14 @@ export default function UserPageRepNewRepSearch({
                   )}
                 </div>
               </div>
-              <div className="tw-mt-4 tw-flex tw-flex-col tw-gap-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800/60 tw-px-4 tw-pt-4 sm:tw-px-6">
+              <div className="tw-mt-7 tw-flex tw-flex-col tw-gap-1 tw-px-4 sm:tw-px-6">
                 <Button
                   disabled={isGrantDisabled}
                   onClick={onGrantRep}
                   loading={mutating}
                   size="lg"
                   fullWidth
-                  className="tw-shadow-none"
+                  className="!tw-min-h-12 !tw-border-0 !tw-bg-iron-100 !tw-text-iron-950 !tw-font-medium !tw-shadow-none desktop-hover:hover:!tw-bg-white active:!tw-bg-iron-200 disabled:!tw-bg-iron-900 disabled:!tw-text-iron-500 disabled:!tw-opacity-100 motion-reduce:tw-transition-none"
                 >
                   {t(locale, "rep.categories.grant.actions.grant")}
                 </Button>
@@ -522,7 +522,7 @@ export default function UserPageRepNewRepSearch({
                     variant="secondary"
                     size="lg"
                     fullWidth
-                    className="tw-shadow-none"
+                    className="!tw-min-h-11 !tw-border-0 !tw-bg-transparent !tw-text-iron-400 !tw-font-medium !tw-shadow-none desktop-hover:hover:!tw-bg-iron-900/50 desktop-hover:hover:!tw-text-iron-100 active:!tw-bg-iron-900 motion-reduce:tw-transition-none"
                   >
                     {t(locale, "rep.categories.grant.actions.cancel")}
                   </Button>

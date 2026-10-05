@@ -22,16 +22,16 @@ import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 
 const CIC_SPAN_CLASS_NAME =
-  "tw-flex tw-flex-col tw-items-center tw-justify-center tw-bg-black/40 tw-rounded-l-lg tw-border tw-border-solid tw-border-white/[0.15] tw-px-3";
+  "tw-hidden";
 
 const CIC_FOCUS_RING_CLASS_NAME =
-  "focus:tw-border-emerald-500 focus:tw-ring-1 focus:tw-ring-emerald-500/30";
+  "focus:tw-ring-primary-400";
 
 const CIC_INPUT_TOOLTIP_CLASS_NAME =
-  "tw-max-w-[12rem] -tw-ml-0.5 tw-appearance-none tw-block tw-rounded-l-none tw-rounded-r-lg tw-border tw-border-solid tw-border-white/[0.15] tw-py-3 tw-px-3 tw-bg-black/40 focus:tw-bg-black/60 tw-text-white tw-font-semibold tw-caret-emerald-400 tw-shadow-inner hover:tw-border-white/30 placeholder:tw-text-iron-500 focus:tw-outline-none tw-text-base sm:tw-text-sm tw-transition tw-duration-300 tw-ease-out";
+  "tw-appearance-none tw-block tw-min-w-0 tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900/60 tw-px-4 tw-py-3 tw-text-center !tw-text-2xl [body.capacitor-native_&]:!tw-text-2xl !tw-leading-tight tw-font-medium tw-tabular-nums tw-tracking-tight tw-text-iron-100 tw-caret-primary-400 tw-shadow-none tw-ring-1 tw-ring-inset tw-ring-iron-800/60 hover:tw-bg-iron-900 hover:tw-ring-iron-700 focus:tw-bg-iron-900 focus:tw-outline-none focus:tw-ring-1 placeholder:tw-text-iron-500 tw-transition-colors tw-duration-150 motion-reduce:tw-transition-none tw-max-w-[12rem]";
 
 const CIC_INPUT_FULL_CLASS_NAME =
-  "tw-w-full -tw-ml-0.5 tw-appearance-none tw-block tw-rounded-l-none tw-rounded-r-lg tw-border tw-border-solid tw-border-white/[0.15] tw-py-3.5 tw-px-4 tw-bg-black/40 focus:tw-bg-black/60 tw-text-white tw-font-semibold tw-caret-emerald-400 tw-shadow-inner hover:tw-border-white/30 placeholder:tw-text-iron-500 focus:tw-outline-none tw-text-base sm:tw-text-sm tw-transition tw-duration-300 tw-ease-out";
+  "tw-appearance-none tw-block tw-min-w-0 tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900/60 tw-px-4 tw-py-3 tw-text-center !tw-text-4xl [body.capacitor-native_&]:!tw-text-4xl !tw-leading-tight tw-font-medium tw-tabular-nums tw-tracking-tight tw-text-iron-100 tw-caret-primary-400 tw-shadow-none tw-ring-1 tw-ring-inset tw-ring-iron-800/60 hover:tw-bg-iron-900 hover:tw-ring-iron-700 focus:tw-bg-iron-900 focus:tw-outline-none focus:tw-ring-1 placeholder:tw-text-iron-500 tw-transition-colors tw-duration-150 motion-reduce:tw-transition-none";
 
 export default function UserPageIdentityHeaderCICRate({
   profile,
@@ -221,7 +221,7 @@ export default function UserPageIdentityHeaderCICRate({
   const rateInput = (
     <div
       className={`tw-relative tw-flex tw-w-full ${
-        isTooltip ? "tw-mt-1.5" : "tw-mb-2"
+        isTooltip ? "tw-mt-2" : "tw-mx-auto tw-mb-5 tw-mt-4 tw-max-w-[14rem]"
       }`}
     >
       <UserPageRateInput
@@ -263,10 +263,10 @@ export default function UserPageIdentityHeaderCICRate({
         {isTooltip ? (
           <>
             <div className="tw-flex tw-items-end tw-gap-3">
-              <div className="tw-w-full sm:tw-w-auto">
+              <div className="tw-min-w-0 tw-flex-1">
                 <label
                   htmlFor="nic-rating-input"
-                  className="tw-block tw-max-w-[12rem] tw-text-sm tw-font-normal tw-text-iron-200"
+                  className="tw-block tw-max-w-[12rem] tw-text-sm tw-font-normal tw-text-iron-400"
                 >
                   Your total NIC Rating of{" "}
                   <span className="tw-whitespace-nowrap">{profile.query}:</span>
@@ -282,7 +282,7 @@ export default function UserPageIdentityHeaderCICRate({
                     variant="success"
                     size="lg"
                     fullWidth
-                    className="sm:tw-w-auto"
+                    className="sm:tw-w-auto !tw-min-h-12 !tw-border-0 !tw-bg-iron-100 !tw-text-iron-950 !tw-font-medium !tw-shadow-none desktop-hover:hover:!tw-bg-white active:!tw-bg-iron-200 disabled:!tw-bg-iron-900 disabled:!tw-text-iron-500 disabled:!tw-opacity-100 motion-reduce:tw-transition-none"
                   >
                     Rate
                   </Button>
@@ -295,7 +295,7 @@ export default function UserPageIdentityHeaderCICRate({
           <>
             <label
               htmlFor="nic-rating-input"
-              className="tw-mb-2 tw-block tw-text-sm tw-font-medium tw-text-iron-400"
+              className="tw-mb-2 tw-block tw-text-center tw-text-sm tw-font-normal tw-text-iron-400"
             >
               Your total NIC Rating of{" "}
               <span className="tw-whitespace-nowrap">{profile.query}</span>
@@ -304,7 +304,7 @@ export default function UserPageIdentityHeaderCICRate({
 
             {adjustmentHelper}
 
-            <div className="tw-mt-4 tw-flex tw-flex-col tw-gap-3 md:tw-flex-row-reverse">
+            <div className="tw-mt-7 tw-flex tw-flex-col tw-gap-1">
               <Button
                 type="submit"
                 disabled={isSaveDisabled}
@@ -312,7 +312,7 @@ export default function UserPageIdentityHeaderCICRate({
                 variant="success"
                 size="lg"
                 fullWidth
-                className="md:tw-w-auto md:tw-flex-1"
+                className="!tw-min-h-12 !tw-border-0 !tw-bg-iron-100 !tw-text-iron-950 !tw-font-medium !tw-shadow-none desktop-hover:hover:!tw-bg-white active:!tw-bg-iron-200 disabled:!tw-bg-iron-900 disabled:!tw-text-iron-500 disabled:!tw-opacity-100 motion-reduce:tw-transition-none"
               >
                 Rate
               </Button>
@@ -322,7 +322,7 @@ export default function UserPageIdentityHeaderCICRate({
                   variant="secondary"
                   size="lg"
                   fullWidth
-                  className="md:tw-w-auto md:tw-flex-1"
+                  className="!tw-min-h-11 !tw-border-0 !tw-bg-transparent !tw-text-iron-400 !tw-font-medium !tw-shadow-none desktop-hover:hover:!tw-bg-iron-900/50 desktop-hover:hover:!tw-text-iron-100 active:!tw-bg-iron-900 motion-reduce:tw-transition-none"
                 >
                   Cancel
                 </Button>

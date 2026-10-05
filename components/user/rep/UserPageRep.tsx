@@ -418,7 +418,9 @@ export default function UserPageRep({
         noPadding
         tabletModal
         maxWidthClass="md:tw-max-w-md"
-        headerClassName="tw-pb-6 tw-pt-4"
+        headerClassName="tw-pb-5 tw-pt-4"
+        titleClassName="!tw-text-xl !tw-font-medium tw-tracking-tight"
+        headerCloseButtonClassName="!tw-mr-0 !tw-h-10 !tw-w-10 !tw-rounded-lg !tw-p-0 !tw-text-iron-400 [&>span]:!tw-rounded-lg [&>span]:!tw-border-0 [&>span]:!tw-bg-transparent desktop-hover:hover:[&>span]:!tw-bg-iron-900 [&_svg]:!tw-h-5 [&_svg]:!tw-w-5"
       >
         <div className="tw-px-4 tw-pb-6 sm:tw-px-6">
           <UserPageRateWrapper profile={profile} type={RateMatter.NIC}>
@@ -428,11 +430,12 @@ export default function UserPageRep({
               onSuccess={() => setIsNicRateOpen(false)}
             />
           </UserPageRateWrapper>
-          <div className="tw-mt-3">
+          <div className="tw-mt-1">
             <Button
               variant="secondary"
               size="lg"
               fullWidth
+              className="!tw-min-h-11 !tw-border-0 !tw-bg-transparent !tw-text-iron-400 !tw-font-medium !tw-shadow-none desktop-hover:hover:!tw-bg-iron-900/50 desktop-hover:hover:!tw-text-iron-100 active:!tw-bg-iron-900 motion-reduce:tw-transition-none"
               onClick={() => setIsNicRateOpen(false)}
             >
               Cancel

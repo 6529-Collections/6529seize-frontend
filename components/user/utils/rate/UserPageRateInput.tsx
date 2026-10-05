@@ -2,10 +2,10 @@ import { getStringAsNumberOrZero } from "@/helpers/Helpers";
 import type { RefObject } from "react";
 
 const DEFAULT_INPUT_CLASS_NAME =
-  "tw-appearance-none -tw-ml-0.5 tw-block tw-w-full tw-rounded-l-none tw-rounded-r-lg tw-border-0 tw-py-3 tw-px-3 tw-bg-iron-900 focus:tw-bg-iron-950 tw-text-white tw-font-medium tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-ring-iron-600 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset tw-text-sm tw-transition tw-duration-300 tw-ease-out";
+  "tw-appearance-none tw-block tw-min-w-0 tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900/60 tw-px-4 tw-py-3 tw-text-center !tw-text-2xl [body.capacitor-native_&]:!tw-text-2xl !tw-leading-tight tw-font-medium tw-tabular-nums tw-tracking-tight tw-text-iron-100 tw-caret-primary-400 tw-shadow-none tw-ring-1 tw-ring-inset tw-ring-iron-800/60 hover:tw-bg-iron-900 hover:tw-ring-iron-700 focus:tw-bg-iron-900 focus:tw-outline-none focus:tw-ring-1 placeholder:tw-text-iron-500 tw-transition-colors tw-duration-150 motion-reduce:tw-transition-none";
 
 const DEFAULT_SPAN_CLASS_NAME =
-  "tw-flex tw-flex-col tw-items-center tw-justify-center tw-bg-iron-900 tw-rounded-l-lg tw-border tw-border-solid tw-border-iron-700 tw-px-3";
+  "tw-hidden";
 
 const getValueStr = (val: string): string => {
   if (val.length > 1 && val.startsWith("0")) {

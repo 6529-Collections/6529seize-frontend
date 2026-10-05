@@ -151,7 +151,7 @@ describe("UserPageRepNewRepSearch", () => {
     await user.click(screen.getByRole("button", { name: "Memes nominee" }));
 
     await waitFor(() => expect(input).toHaveValue("Memes nominee"));
-    expect(input).toHaveClass("tw-border-white/10");
+    expect(input).toHaveClass("tw-ring-iron-800/60");
     expect(input).not.toHaveClass("tw-border-amber-400/50");
     expect(
       screen.getByText(
