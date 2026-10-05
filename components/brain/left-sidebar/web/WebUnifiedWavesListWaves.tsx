@@ -476,6 +476,7 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
 
     return (
       <WebBrainLeftSidebarWave
+        scoreDetailsDisabled={navigation.searchOpen}
         isAnnouncement={isAnnouncement}
         wave={row.wave}
         onHover={onHover}
@@ -544,6 +545,7 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
 
           {!isDirectMessage && !hideHeaders && !isCollapsed && (
             <SidebarDiscovery
+              scoreDetailsDisabled={navigation.searchOpen}
               previewItems={highlyRatedPreviewItems}
               isTouchPreview={isTouchDevice}
             />

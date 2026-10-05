@@ -281,9 +281,11 @@ function HighlyRatedWavePreviewScoreBadge({
 function HighlyRatedWavePreviewLink({
   isTouchPreview,
   item,
+  scoreDetailsDisabled,
 }: {
   readonly isTouchPreview: boolean;
   readonly item: HighlyRatedWavePreviewItem;
+  readonly scoreDetailsDisabled: boolean;
 }) {
   const { wave } = item;
   const isDropWave = wave.type !== ApiWaveType.Chat;
@@ -315,6 +317,7 @@ function HighlyRatedWavePreviewLink({
 
   return (
     <WaveScoreSummaryHoverCard
+      disabled={scoreDetailsDisabled}
       closeOnContentClick
       stopClickPropagation
       summaryHeader={{
@@ -370,11 +373,13 @@ export function HighlyRatedWavesToggle({
   compactTouchPadding = false,
   paddingClassName,
   previewItems,
+  scoreDetailsDisabled = false,
 }: {
   readonly isTouchPreview?: boolean | undefined;
   readonly compactTouchPadding?: boolean | undefined;
   readonly paddingClassName: string;
   readonly previewItems: readonly HighlyRatedWavePreviewItem[];
+  readonly scoreDetailsDisabled?: boolean;
 }) {
   const previewStripRef = useRef<HTMLDivElement>(null);
   const [visiblePreviewCount, setVisiblePreviewCount] = useState<number>(
@@ -440,6 +445,7 @@ export function HighlyRatedWavesToggle({
         {visiblePreviewItems.map((item) => (
           <HighlyRatedWavePreviewLink
             isTouchPreview={isTouchPreview}
+            scoreDetailsDisabled={scoreDetailsDisabled}
             key={item.wave.id}
             item={item}
           />
