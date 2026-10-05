@@ -24,8 +24,7 @@ export default function GrantRepDialog({
       tabletModal
       maxWidthClass="md:tw-max-w-md"
       headerClassName="tw-mb-5"
-      titleClassName="!tw-text-xl !tw-font-medium tw-tracking-tight"
-      headerCloseButtonClassName="!tw-mr-0 !tw-h-10 !tw-w-10 !tw-rounded-lg !tw-p-0 !tw-text-iron-400 [&>span]:!tw-rounded-lg [&>span]:!tw-border-0 [&>span]:!tw-bg-transparent desktop-hover:hover:[&>span]:!tw-bg-iron-900 [&_svg]:!tw-h-5 [&_svg]:!tw-w-5"
+      headerVariant="minimal"
     >
       <UserPageRateWrapper profile={profile} type={RateMatter.REP}>
         <UserPageRepNewRep

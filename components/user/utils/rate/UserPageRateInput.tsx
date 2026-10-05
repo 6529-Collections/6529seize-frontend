@@ -1,11 +1,8 @@
 import { getStringAsNumberOrZero } from "@/helpers/Helpers";
 import type { RefObject } from "react";
 
-const DEFAULT_INPUT_CLASS_NAME =
-  "tw-appearance-none tw-block tw-min-w-0 tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900/60 tw-px-4 tw-py-3 tw-text-center !tw-text-2xl [body.capacitor-native_&]:!tw-text-2xl !tw-leading-tight tw-font-medium tw-tabular-nums tw-tracking-tight tw-text-iron-100 tw-caret-primary-400 tw-shadow-none tw-ring-1 tw-ring-inset tw-ring-iron-800/60 hover:tw-bg-iron-900 hover:tw-ring-iron-700 focus:tw-bg-iron-900 focus:tw-outline-none focus:tw-ring-1 placeholder:tw-text-iron-500 tw-transition-colors tw-duration-150 motion-reduce:tw-transition-none";
-
-const DEFAULT_SPAN_CLASS_NAME =
-  "tw-hidden";
+const INPUT_CLASS_NAME =
+  "tw-touch-manipulation tw-appearance-none tw-block tw-min-w-0 tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900/60 tw-px-4 tw-py-3 tw-text-center tw-leading-tight tw-font-medium tw-tabular-nums tw-tracking-tight tw-text-iron-100 tw-caret-primary-400 tw-ring-1 tw-ring-inset tw-ring-iron-800/60 hover:tw-bg-iron-900 hover:tw-ring-iron-700 focus:tw-bg-iron-900 focus:tw-outline-none placeholder:tw-text-iron-500 tw-transition-colors tw-duration-150 motion-reduce:tw-transition-none";
 
 const getValueStr = (val: string): string => {
   if (val.length > 1 && val.startsWith("0")) {
@@ -20,8 +17,7 @@ export default function UserPageRateInput({
   minMax,
   isProxy,
   inputRef,
-  inputClassName = DEFAULT_INPUT_CLASS_NAME,
-  spanClassName = DEFAULT_SPAN_CLASS_NAME,
+  size = "compact",
   inputId,
   focusRingClassName,
   required = false,
@@ -31,8 +27,7 @@ export default function UserPageRateInput({
   readonly minMax: { min: number; max: number };
   readonly isProxy: boolean;
   readonly inputRef?: RefObject<HTMLInputElement | null>;
-  readonly inputClassName?: string;
-  readonly spanClassName?: string;
+  readonly size?: "compact" | "prominent";
   readonly inputId?: string;
   readonly focusRingClassName?: string;
   readonly required?: boolean;
@@ -63,51 +58,20 @@ export default function UserPageRateInput({
   };
 
   return (
-    <>
-      <span className={spanClassName}>
-        <svg
-          className="tw-w-3.5 tw-h-3.5 tw-flex-shrink-0 tw-text-iron-500"
-          viewBox="0 0 24 24"
-          fill="none"
-          aria-hidden="true"
-          xmlns="http://www.w3.org/2000/svg">
-          <path
-            d="M12 5V19M5 12H19"
-            stroke="currentColor"
-            strokeWidth="3"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-        <svg
-          className="tw-w-3.5 tw-h-3.5 tw-flex-shrink-0 tw-text-iron-500"
-          viewBox="0 0 24 24"
-          fill="none"
-          aria-hidden="true"
-          xmlns="http://www.w3.org/2000/svg">
-          <path
-            d="M5 12H19"
-            stroke="currentColor"
-            strokeWidth="3"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      </span>
-      <input
-        ref={inputRef}
-        type="text"
-        id={inputId}
-        autoComplete="off"
-        required={required}
-        value={value}
-        onChange={handleChange}
-        onBlur={handleBlur}
-        className={`${
-          focusRingClassName ??
-          (isValidValue ? "focus:tw-ring-primary-400" : "focus:tw-ring-red")
-        } ${inputClassName}`}
-      />
-    </>
+    <input
+      ref={inputRef}
+      type="text"
+      data-rating-input="true"
+      id={inputId}
+      autoComplete="off"
+      required={required}
+      value={value}
+      onChange={handleChange}
+      onBlur={handleBlur}
+      className={`${
+        focusRingClassName ??
+        (isValidValue ? "focus:tw-ring-primary-400" : "focus:tw-ring-red")
+      } ${INPUT_CLASS_NAME} ${size === "prominent" ? "tw-text-4xl" : "tw-text-2xl"}`}
+    />
   );
 }

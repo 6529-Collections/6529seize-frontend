@@ -403,7 +403,7 @@ export default function UserPageRepNewRepSearch({
                   </label>
                   <div className="tw-relative tw-w-full">
                     <svg
-                      className="tw-pointer-events-none tw-absolute tw-left-4 tw-top-1/2 -tw-translate-y-1/2 tw-h-4 tw-w-4 tw-text-iron-500"
+                      className="tw-pointer-events-none tw-absolute tw-left-4 tw-top-1/2 tw-h-4 tw-w-4 -tw-translate-y-1/2 tw-text-iron-500"
                       viewBox="0 0 20 20"
                       fill="currentColor"
                       aria-hidden="true"
@@ -431,7 +431,7 @@ export default function UserPageRepNewRepSearch({
                           ? SUBMISSION_GUIDANCE_ID
                           : undefined
                       }
-                      className="tw-form-input tw-block tw-w-full tw-appearance-none tw-rounded-lg tw-border-0 tw-bg-iron-900/60 tw-py-4 tw-pl-11 tw-pr-10 tw-text-base tw-font-normal tw-text-iron-100 tw-caret-primary-400 tw-ring-1 tw-ring-inset tw-ring-iron-800/60 hover:tw-bg-iron-900 hover:tw-ring-iron-700 focus:tw-bg-iron-900 focus:tw-outline-none focus:tw-ring-primary-400 placeholder:tw-text-iron-400 tw-transition-colors tw-duration-150 motion-reduce:tw-transition-none"
+                      className="tw-form-input tw-block tw-w-full tw-appearance-none tw-rounded-lg tw-border-0 tw-bg-iron-900/60 tw-py-4 tw-pl-11 tw-pr-10 tw-text-base tw-font-normal tw-text-iron-100 tw-caret-primary-400 tw-ring-1 tw-ring-inset tw-ring-iron-800/60 tw-transition-colors tw-duration-150 placeholder:tw-text-iron-400 hover:tw-bg-iron-900 hover:tw-ring-iron-700 focus:tw-bg-iron-900 focus:tw-outline-none focus:tw-ring-primary-400 motion-reduce:tw-transition-none"
                       placeholder={t(
                         locale,
                         "rep.categories.grant.searchPlaceholder"
@@ -490,8 +490,7 @@ export default function UserPageRepNewRepSearch({
                       onChange={setAmountStr}
                       minMax={minMaxValues}
                       isProxy={!!activeProfileProxy}
-                      spanClassName="tw-hidden"
-                      inputClassName="tw-appearance-none tw-block tw-min-w-0 tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900/60 tw-px-4 tw-py-3 tw-text-center !tw-text-4xl [body.capacitor-native_&]:!tw-text-4xl !tw-leading-tight tw-font-medium tw-tabular-nums tw-tracking-tight tw-text-iron-100 tw-caret-primary-400 tw-shadow-none tw-ring-1 tw-ring-inset tw-ring-iron-800/60 hover:tw-bg-iron-900 hover:tw-ring-iron-700 focus:tw-bg-iron-900 focus:tw-outline-none focus:tw-ring-1 placeholder:tw-text-iron-500 tw-transition-colors tw-duration-150 motion-reduce:tw-transition-none"
+                      size="prominent"
                     />
                   </div>
                   {selectedCategory && (
@@ -509,9 +508,9 @@ export default function UserPageRepNewRepSearch({
                   disabled={isGrantDisabled}
                   onClick={onGrantRep}
                   loading={mutating}
-                  size="lg"
+                  variant="primaryFlat"
+                  size="xl"
                   fullWidth
-                  className="!tw-min-h-12 !tw-border-0 !tw-bg-iron-100 !tw-text-iron-950 !tw-font-medium !tw-shadow-none desktop-hover:hover:!tw-bg-white active:!tw-bg-iron-200 disabled:!tw-bg-iron-900 disabled:!tw-text-iron-500 disabled:!tw-opacity-100 motion-reduce:tw-transition-none"
                 >
                   {t(locale, "rep.categories.grant.actions.grant")}
                 </Button>
@@ -519,10 +518,9 @@ export default function UserPageRepNewRepSearch({
                   <Button
                     onClick={onCancel}
                     disabled={mutating}
-                    variant="secondary"
+                    variant="ghost"
                     size="lg"
                     fullWidth
-                    className="!tw-min-h-11 !tw-border-0 !tw-bg-transparent !tw-text-iron-400 !tw-font-medium !tw-shadow-none desktop-hover:hover:!tw-bg-iron-900/50 desktop-hover:hover:!tw-text-iron-100 active:!tw-bg-iron-900 motion-reduce:tw-transition-none"
                   >
                     {t(locale, "rep.categories.grant.actions.cancel")}
                   </Button>

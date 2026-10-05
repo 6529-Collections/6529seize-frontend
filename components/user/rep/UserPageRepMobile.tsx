@@ -228,8 +228,7 @@ export default function UserPageRepMobile({
         tabletModal
         maxWidthClass="md:tw-max-w-md"
         headerClassName="tw-pb-5 tw-pt-4"
-        titleClassName="!tw-text-xl !tw-font-medium tw-tracking-tight"
-        headerCloseButtonClassName="!tw-mr-0 !tw-h-10 !tw-w-10 !tw-rounded-lg !tw-p-0 !tw-text-iron-400 [&>span]:!tw-rounded-lg [&>span]:!tw-border-0 [&>span]:!tw-bg-transparent desktop-hover:hover:[&>span]:!tw-bg-iron-900 [&_svg]:!tw-h-5 [&_svg]:!tw-w-5"
+        headerVariant="minimal"
       >
         <div className="tw-px-4 tw-pb-6 sm:tw-px-6">
           <UserPageRateWrapper profile={profile} type={RateMatter.NIC}>

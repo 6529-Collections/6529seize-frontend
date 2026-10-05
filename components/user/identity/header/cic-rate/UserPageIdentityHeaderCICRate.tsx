@@ -21,17 +21,7 @@ import UserPageIdentityHeaderCICRateStats from "./UserPageIdentityHeaderCICRateS
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 
-const CIC_SPAN_CLASS_NAME =
-  "tw-hidden";
-
-const CIC_FOCUS_RING_CLASS_NAME =
-  "focus:tw-ring-primary-400";
-
-const CIC_INPUT_TOOLTIP_CLASS_NAME =
-  "tw-appearance-none tw-block tw-min-w-0 tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900/60 tw-px-4 tw-py-3 tw-text-center !tw-text-2xl [body.capacitor-native_&]:!tw-text-2xl !tw-leading-tight tw-font-medium tw-tabular-nums tw-tracking-tight tw-text-iron-100 tw-caret-primary-400 tw-shadow-none tw-ring-1 tw-ring-inset tw-ring-iron-800/60 hover:tw-bg-iron-900 hover:tw-ring-iron-700 focus:tw-bg-iron-900 focus:tw-outline-none focus:tw-ring-1 placeholder:tw-text-iron-500 tw-transition-colors tw-duration-150 motion-reduce:tw-transition-none tw-max-w-[12rem]";
-
-const CIC_INPUT_FULL_CLASS_NAME =
-  "tw-appearance-none tw-block tw-min-w-0 tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900/60 tw-px-4 tw-py-3 tw-text-center !tw-text-4xl [body.capacitor-native_&]:!tw-text-4xl !tw-leading-tight tw-font-medium tw-tabular-nums tw-tracking-tight tw-text-iron-100 tw-caret-primary-400 tw-shadow-none tw-ring-1 tw-ring-inset tw-ring-iron-800/60 hover:tw-bg-iron-900 hover:tw-ring-iron-700 focus:tw-bg-iron-900 focus:tw-outline-none focus:tw-ring-1 placeholder:tw-text-iron-500 tw-transition-colors tw-duration-150 motion-reduce:tw-transition-none";
+const CIC_FOCUS_RING_CLASS_NAME = "focus:tw-ring-primary-400";
 
 export default function UserPageIdentityHeaderCICRate({
   profile,
@@ -221,7 +211,9 @@ export default function UserPageIdentityHeaderCICRate({
   const rateInput = (
     <div
       className={`tw-relative tw-flex tw-w-full ${
-        isTooltip ? "tw-mt-2" : "tw-mx-auto tw-mb-5 tw-mt-4 tw-max-w-[14rem]"
+        isTooltip
+          ? "tw-mt-2 tw-max-w-[12rem]"
+          : "tw-mx-auto tw-mb-5 tw-mt-4 tw-max-w-[14rem]"
       }`}
     >
       <UserPageRateInput
@@ -229,10 +221,7 @@ export default function UserPageIdentityHeaderCICRate({
         onChange={setAdjustedRatingStr}
         minMax={minMaxValues}
         isProxy={isProxy}
-        spanClassName={CIC_SPAN_CLASS_NAME}
-        inputClassName={
-          isTooltip ? CIC_INPUT_TOOLTIP_CLASS_NAME : CIC_INPUT_FULL_CLASS_NAME
-        }
+        size={isTooltip ? "compact" : "prominent"}
         inputId="nic-rating-input"
         focusRingClassName={CIC_FOCUS_RING_CLASS_NAME}
         required
@@ -279,10 +268,10 @@ export default function UserPageIdentityHeaderCICRate({
                     type="submit"
                     disabled={isSaveDisabled}
                     loading={mutating}
-                    variant="success"
-                    size="lg"
+                    variant="primaryFlat"
+                    size="xl"
                     fullWidth
-                    className="sm:tw-w-auto !tw-min-h-12 !tw-border-0 !tw-bg-iron-100 !tw-text-iron-950 !tw-font-medium !tw-shadow-none desktop-hover:hover:!tw-bg-white active:!tw-bg-iron-200 disabled:!tw-bg-iron-900 disabled:!tw-text-iron-500 disabled:!tw-opacity-100 motion-reduce:tw-transition-none"
+                    className="sm:tw-w-auto"
                   >
                     Rate
                   </Button>
@@ -309,21 +298,14 @@ export default function UserPageIdentityHeaderCICRate({
                 type="submit"
                 disabled={isSaveDisabled}
                 loading={mutating}
-                variant="success"
-                size="lg"
+                variant="primaryFlat"
+                size="xl"
                 fullWidth
-                className="!tw-min-h-12 !tw-border-0 !tw-bg-iron-100 !tw-text-iron-950 !tw-font-medium !tw-shadow-none desktop-hover:hover:!tw-bg-white active:!tw-bg-iron-200 disabled:!tw-bg-iron-900 disabled:!tw-text-iron-500 disabled:!tw-opacity-100 motion-reduce:tw-transition-none"
               >
                 Rate
               </Button>
               {onCancel && (
-                <Button
-                  onClick={onCancel}
-                  variant="secondary"
-                  size="lg"
-                  fullWidth
-                  className="!tw-min-h-11 !tw-border-0 !tw-bg-transparent !tw-text-iron-400 !tw-font-medium !tw-shadow-none desktop-hover:hover:!tw-bg-iron-900/50 desktop-hover:hover:!tw-text-iron-100 active:!tw-bg-iron-900 motion-reduce:tw-transition-none"
-                >
+                <Button onClick={onCancel} variant="ghost" size="lg" fullWidth>
                   Cancel
                 </Button>
               )}
