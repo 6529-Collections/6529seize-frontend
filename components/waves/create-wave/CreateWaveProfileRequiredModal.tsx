@@ -14,7 +14,8 @@ interface CreateWaveProfileRequiredModalProps {
 
 const getIdentityHref = (profile: ApiIdentity): string => {
   const identity = profile.primary_wallet.trim() || profile.query?.trim();
-  return identity ? `/${encodeURIComponent(identity)}` : "/profile";
+  const path = identity ? `/${encodeURIComponent(identity)}` : "/profile";
+  return `${path}?returnTo=${encodeURIComponent("/waves/create")}`;
 };
 
 export default function CreateWaveProfileRequiredModal({

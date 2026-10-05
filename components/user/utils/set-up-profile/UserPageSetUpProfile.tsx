@@ -100,7 +100,13 @@ export default function UserPageSetUpProfile({
         }
         return `/${updatedHandle}`;
       })();
-      router.replace(newPath, { scroll: false });
+      router.replace(
+        new URLSearchParams(globalThis.location.search).get("returnTo") ===
+          "/waves/create"
+          ? "/waves/create"
+          : newPath,
+        { scroll: false }
+      );
       onProfileEdit({
         profile: updatedProfile,
         previousProfile: null,

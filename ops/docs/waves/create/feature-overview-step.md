@@ -3,7 +3,9 @@
 ## Overview
 
 `Setup` is the first step in wave creation.
-Set the wave name, optional image, and wave type before moving to later steps.
+A standalone Chat wave starts with its name and first post on one screen.
+Use Optional settings for access, picture, and guidelines, then Review wave.
+Rank, Approve, and subwaves use the guided steps below.
 
 ## Location in the Site
 
@@ -21,7 +23,8 @@ Set the wave name, optional image, and wave type before moving to later steps.
 
 ## Step Paths
 
-- `Chat`: `Setup` -> `Access` -> `Guidelines` -> `Description` -> `Overview`
+- Standalone `Chat`: `Start a chat wave` -> `Review`
+- Chat subwave: `Setup` -> `Access` -> `Guidelines` -> `Description` -> `Overview`
 - `Rank`: `Setup` -> `Access` -> `Schedule` -> `Drops` -> `Voting` -> `Outcomes` ->
   `Guidelines` -> `Description` -> `Overview`
 - `Approve`: `Setup` -> `Access` -> `Schedule` -> `Drops` -> `Voting` -> `Outcomes` ->
@@ -64,7 +67,8 @@ Set the wave name, optional image, and wave type before moving to later steps.
 ## Navigation Behavior
 
 - `Setup` always opens first.
-- `Next` moves to `Access` when overview validation passes.
+- Chat: `Review wave` validates the name, first post, and restricted permissions.
+- Rank, Approve, and subwaves: `Next` moves to `Access` when setup validation passes.
 - `Next` stays enabled; validation runs when clicked.
 - `Previous` is not shown on `Setup`.
 - On large screens, the step rail can reopen completed steps, including
@@ -80,7 +84,7 @@ Set the wave name, optional image, and wave type before moving to later steps.
 - Image upload accepts `JPEG`, `JPG`, `PNG`, `GIF`, and `WEBP` only.
 - Unsupported image formats show toast: `Invalid file type`.
 - Images larger than `10MB` show toast: `File size must be less than 10MB`.
-- Changing wave type resets all non-overview settings to that type's defaults
+- Changing wave type asks for confirmation before resetting all non-overview settings to that type's defaults
   (`groups`, `chat`, `dates`, `drops`, `voting`, `outcomes`).
 - Outcome visibility is configured on the `Outcomes` step for scheduled `Rank`
   and `Approve` waves.
@@ -96,8 +100,10 @@ Set the wave name, optional image, and wave type before moving to later steps.
 
 - If `Next` does not advance, confirm name is present and `<= 250` characters.
 - If upload validation fails, pick a supported file under `10MB` and retry.
-- If type changes reset later steps, confirm the final type first, then
-  reconfigure later steps.
+- Cancel the type-change confirmation to keep your existing settings. Confirming
+  keeps the name, picture, and first post, and resets type-specific settings.
+- Named standalone waves save settings and first-post text under Saved Drafts
+  for the current wallet and profile on this device. Add media again after restoring.
 - If stale modal state appears, close create-wave to clear the `create` query,
   then reopen.
 

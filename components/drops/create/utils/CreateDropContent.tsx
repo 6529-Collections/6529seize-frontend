@@ -2,6 +2,8 @@
 
 import type { InitialConfigType } from "@lexical/react/LexicalComposer";
 import { LexicalComposer } from "@lexical/react/LexicalComposer";
+import { $convertFromMarkdownString } from "@lexical/markdown";
+import { CreateDropDraftContext } from "../CreateDropDraftContext";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import type { EditorState } from "lexical";
@@ -46,6 +48,7 @@ import type { ClearEditorPluginHandles } from "../lexical/plugins/ClearEditorPlu
 import ClearEditorPlugin from "../lexical/plugins/ClearEditorPlugin";
 import {
   forwardRef,
+  useContext,
   useCallback,
   useEffect,
   useImperativeHandle,
@@ -134,6 +137,9 @@ const CreateDropContent = forwardRef<
     },
     ref
   ) => {
+    const draftContext = useContext(CreateDropDraftContext);
+    const initialMarkdown =
+      draftContext?.initialDrop?.parts.at(-1)?.content ?? "";
     const editorConfig: InitialConfigType = {
       namespace: "User Drop",
       nodes: [
@@ -155,7 +161,18 @@ const CreateDropContent = forwardRef<
         ImageNode,
         EmojiNode,
       ],
-      editorState,
+      editorState:
+        editorState ??
+        (initialMarkdown
+          ? () =>
+              $convertFromMarkdownString(initialMarkdown, [
+                ...SAFE_MARKDOWN_TRANSFORMERS,
+                MENTION_TRANSFORMER,
+                HASHTAG_TRANSFORMER,
+                WAVE_MENTION_TRANSFORMER,
+                IMAGE_TRANSFORMER,
+              ])
+          : null),
       onError(error: Error): void {
         throw error;
       },
@@ -310,7 +327,12 @@ const CreateDropContent = forwardRef<
                       spellCheck={true}
                       autoCorrect="on"
                       aria-disabled={loading}
-                      ariaLabel={placeholderText}
+                      ariaLabel={draftContext?.label ?? placeholderText}
+                      aria-invalid={draftContext?.invalid}
+                      aria-describedby={
+                        draftContext?.invalid ? draftContext.errorId : undefined
+                      }
+                      aria-required={draftContext ? true : undefined}
                       className={`${
                         viewType === CreateDropViewType.COMPACT
                           ? "editor-input-one-liner tw-pr-12"
@@ -375,7 +397,7 @@ const CreateDropContent = forwardRef<
                 canSubmitWithEnter={canSubmitWithEnter}
                 disabled={loading}
               />
-              <AutoFocusPlugin />
+              {draftContext?.autoFocus !== false && <AutoFocusPlugin />}
               <EmojiPlugin disabled={loading} />
             </div>
             {children && <div>{children}</div>}
