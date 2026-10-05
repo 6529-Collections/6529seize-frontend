@@ -484,7 +484,11 @@ describe("ContentTabContext", () => {
     ]);
   });
 
-  it("sets meme wave tabs correctly", () => {
+  it.each([
+    WaveVotingState.NOT_STARTED,
+    WaveVotingState.ONGOING,
+    WaveVotingState.ENDED,
+  ])("puts Chat first in meme wave tabs when voting is %s", (votingState) => {
     const { result } = setup();
     act(() =>
       result.current.updateAvailableTabs({
@@ -494,13 +498,16 @@ describe("ContentTabContext", () => {
         isMemesWave: true,
         isCurationWave: false,
         hasPolls: true,
-        votingState: WaveVotingState.NOT_STARTED,
-        hasFirstDecisionPassed: false,
+        votingState,
+        hasFirstDecisionPassed: true,
       })
     );
     expect(result.current.availableTabs).toEqual([
-      MyStreamWaveTab.LEADERBOARD,
       MyStreamWaveTab.CHAT,
+      votingState === WaveVotingState.ENDED
+        ? MyStreamWaveTab.SUBMISSIONS
+        : MyStreamWaveTab.LEADERBOARD,
+      MyStreamWaveTab.WINNERS,
       MyStreamWaveTab.MY_VOTES,
       MyStreamWaveTab.POLLS,
       MyStreamWaveTab.OUTCOME,
@@ -555,8 +562,8 @@ describe("ContentTabContext", () => {
       })
     );
     expect(result.current.availableTabs).toEqual([
-      MyStreamWaveTab.LEADERBOARD,
       MyStreamWaveTab.CHAT,
+      MyStreamWaveTab.LEADERBOARD,
       MyStreamWaveTab.POLLS,
       MyStreamWaveTab.OUTCOME,
       MyStreamWaveTab.FAQ,
