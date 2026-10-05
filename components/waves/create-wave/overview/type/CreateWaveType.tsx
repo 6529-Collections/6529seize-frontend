@@ -1,5 +1,6 @@
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import { isMultiCompetitionEnabled } from "@/helpers/competition.helpers";
 import type { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
 import CreateWaveTypeInputs from "./CreateWaveTypeInputs";
@@ -24,16 +25,16 @@ export default function CreateWaveType({
   );
   const errorId = "create-wave-type-error";
 
+  const typeLabel = isSubwave
+    ? ("waves.create.overview.subwaveType" as const)
+    : ("waves.create.overview.type" as const);
+  const heading = isMultiCompetitionEnabled()
+    ? t(locale, "competitions.type")
+    : t(locale, typeLabel);
+
   return (
     <div className="tw-space-y-3">
-      <h3 className={CREATE_WAVE_FORM_STYLES.sectionTitle}>
-        {t(
-          locale,
-          isSubwave
-            ? "waves.create.overview.subwaveType"
-            : "waves.create.overview.type"
-        )}
-      </h3>
+      <h3 className={CREATE_WAVE_FORM_STYLES.sectionTitle}>{heading}</h3>
       <div
         aria-invalid={isTypeError}
         aria-describedby={isTypeError ? errorId : undefined}

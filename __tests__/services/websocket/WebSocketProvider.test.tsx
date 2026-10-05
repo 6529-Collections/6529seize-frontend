@@ -1,3 +1,4 @@
+import { ensureActiveSession } from "@/services/auth/session-readiness";
 import React from "react";
 import { renderHook, act } from "@testing-library/react";
 import { WebSocketProvider } from "@/services/websocket/WebSocketProvider";
@@ -13,9 +14,14 @@ import {
 } from "@/helpers/Types";
 import * as authUtils from "@/services/auth/auth.utils";
 
+jest.mock("@/services/auth/session-readiness", () => ({
+  ensureActiveSession: jest.fn(),
+}));
+
 // Mock auth utils
 jest.mock("@/services/auth/auth.utils", () => ({
   getAuthJwt: jest.fn(),
+  isAuthJwtUsable: jest.fn(() => true),
 }));
 
 let shouldAutoAuthenticate = true;
@@ -119,6 +125,42 @@ describe("WebSocketProvider", () => {
     );
 
   describe("Basic Connection Management", () => {
+    it.each([false, true])(
+      "awaits an expired token and respects intervening disconnect: %s",
+      async (disconnect) => {
+        jest
+          .mocked(authUtils.isAuthJwtUsable)
+          .mockImplementation((token) => token !== "expired-token");
+        let finish!: (token: string) => void;
+        jest.mocked(ensureActiveSession).mockReturnValueOnce(
+          new Promise((resolve) => {
+            finish = resolve;
+          })
+        );
+        const { result, unmount } = renderHook(
+          () => React.useContext(WebSocketContext)!,
+          {
+            wrapper: createWrapper({ url: "ws://test" }),
+          }
+        );
+        act(() => {
+          result.current.connect("expired-token");
+        });
+        expect(globalThis.WebSocket).not.toHaveBeenCalled();
+        if (disconnect)
+          act(() => {
+            result.current.disconnect();
+          });
+        await act(async () => {
+          finish("fresh-token");
+          await Promise.resolve();
+        });
+        expect(globalThis.WebSocket).toHaveBeenCalledTimes(disconnect ? 0 : 1);
+        unmount();
+        jest.mocked(authUtils.isAuthJwtUsable).mockReturnValue(true);
+      }
+    );
+
     it("initializes with disconnected status", () => {
       const wrapper = createWrapper({ url: "ws://test" });
       const { result } = renderHook(() => React.useContext(WebSocketContext)!, {

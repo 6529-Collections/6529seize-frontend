@@ -26,7 +26,9 @@ export default function DropsListItemDeleteDropModal({
   closeModal,
   onDropDeleted,
 }: {
-  readonly drop: ApiDrop;
+  readonly drop: Pick<ApiDrop, "id" | "drop_type"> & {
+    readonly wave: Pick<ApiDrop["wave"], "id">;
+  };
   readonly closeModal: () => void;
   readonly onDropDeleted?: (() => void) | undefined;
 }) {

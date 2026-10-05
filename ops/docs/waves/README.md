@@ -15,6 +15,7 @@ Use this area for wave and direct-message tasks:
 - Discovery route: `/discover`
 - Waves list: `/waves`
 - Wave thread: `/waves/{waveId}`
+- Competitions: `/waves/{waveId}/competitions`
 - Messages list: `/messages`
 - Direct-message thread: `/messages/{waveId}`
 - App create routes: `/waves/create` and `/messages/create`
@@ -74,6 +75,9 @@ Use this area for wave and direct-message tasks:
 - Wave and direct-message creation form behavior is owned by Waves Create docs.
 
 ## Features
+
+- [Competitions](competitions/README.md): parallel Rank/Approve competitions,
+  independent votes and credits, administration and shared chat.
 
 - [Discovery](discovery/README.md): dedicated `/discover` route, card behavior,
   and navigation entry points.

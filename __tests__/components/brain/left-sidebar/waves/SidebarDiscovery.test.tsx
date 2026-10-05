@@ -1,6 +1,7 @@
 import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { SidebarDiscovery } from "@/components/brain/left-sidebar/waves/SidebarDiscovery";
 const mockSetActive = jest.fn();
+let mockActiveWaveId: string | null = null;
 const mockRefetch = jest.fn();
 const mockNext = jest.fn();
 const vote = (id: string) => ({
@@ -43,7 +44,9 @@ jest.mock("@/hooks/useActiveWaveVotes", () => ({
   useActiveWaveVotes: () => mockVotes,
 }));
 jest.mock("@/contexts/wave/MyStreamContext", () => ({
-  useMyStream: () => ({ activeWave: { set: mockSetActive } }),
+  useMyStream: () => ({
+    activeWave: { id: mockActiveWaveId, set: mockSetActive },
+  }),
 }));
 jest.mock("@/components/auth/Auth", () => ({
   useAuth: () => ({ connectedProfile: null }),
@@ -64,6 +67,7 @@ beforeEach(() => {
   jest.clearAllMocks();
   mockVotes = makeVotes();
   mockCanUseCollections = false;
+  mockActiveWaveId = null;
   window.IntersectionObserver = jest.fn(
     (callback: IntersectionObserverCallback) => {
       observerCallback = callback;
@@ -238,4 +242,25 @@ it("opens a vote in the existing navigation but preserves modified clicks", () =
   expect(mockSetActive).toHaveBeenCalledWith("Rare Pepe acquisition", {
     isDirectMessage: false,
   });
+});
+
+it("tracks the current wave in Active Votes when selection changes elsewhere", () => {
+  mockActiveWaveId = "QUORUM";
+  const { rerender } = renderDiscovery();
+  const quorum = screen.getByRole("link", { name: /QUORUM/ });
+  const rarePepe = screen.getByRole("link", { name: /Rare Pepe/ });
+  expect(quorum).toHaveAttribute("aria-current", "page");
+  expect(quorum.parentElement).toHaveClass("tw-bg-iron-700/50");
+  expect(rarePepe).not.toHaveAttribute("aria-current");
+
+  mockActiveWaveId = "Rare Pepe acquisition";
+  rerender(<SidebarDiscovery previewItems={[]} isTouchPreview={false} />);
+  expect(rarePepe).toHaveAttribute("aria-current", "page");
+  expect(quorum).not.toHaveAttribute("aria-current");
+  expect(quorum.parentElement).not.toHaveClass("tw-bg-iron-700/50");
+
+  mockActiveWaveId = null;
+  rerender(<SidebarDiscovery previewItems={[]} isTouchPreview={false} />);
+  expect(rarePepe).not.toHaveAttribute("aria-current");
+  expect(rarePepe.parentElement).not.toHaveClass("tw-bg-iron-700/50");
 });

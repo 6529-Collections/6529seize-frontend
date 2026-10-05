@@ -7,8 +7,8 @@
 - Status: Not started
 - Delivery target: To be selected
 - Owner: Unassigned
-- Evidence: Add links to decisions, implementation, validation, and deployment
-  records as the phase advances.
+- Evidence: [2026-10-01 production assessment](./native-delivery/production-status-2026-10-01.md).
+  No migration/cutover or retirement implementation is claimed by the native release.
 
 ## Outcome
 
@@ -17,6 +17,19 @@ storage one at a time without losing entries, votes, decisions, outcomes, or
 special capabilities and without interrupting their hub chat.
 
 Legacy data remains available for rollback until the retirement phase.
+
+## Current Starting Point
+
+This is the next migration development. The native runtime is in production,
+but old competition views/writes still rely on legacy data. Build the complete
+native-backed GET facade and storage-aware old mutation dispatch as part of
+migration preparation; neither is proved by the existing dual read interface.
+
+Engineering and non-production rehearsal can start while acceptance evidence
+is collected. The entry criteria below gate production migration/cutover.
+The approved [default competition](./default-competition.md) is a separate UI
+follow-up that can ship during coexistence. It never changes primary mappings,
+source authority, capability assignment or this phase's migration unit.
 
 ## Entry Criteria
 
@@ -268,4 +281,5 @@ In all cases:
 
 ## Next Phase
 
-Proceed to [Phase 6: Progressive Rollout](./phase-6-progressive-rollout.md).
+Complete the remaining [Phase 6 rollout acceptance](./phase-6-progressive-rollout.md),
+whose native discovery/creation shipped earlier, before Phase 7 retirement.

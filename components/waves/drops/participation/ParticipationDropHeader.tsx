@@ -2,6 +2,7 @@ import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "@/components/user/utils/UserCICAndLevel";
 import ApprovalStatusBadge from "@/components/waves/approval/ApprovalStatusBadge";
+import { getCompetitionRoute } from "@/helpers/competition.helpers";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import { isOfficiallyApprovedDrop } from "@/helpers/waves/approve-wave.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
@@ -86,6 +87,15 @@ export default function ParticipationDropHeader({
         </div>
         {isStackedTimestamp && <WaveDropTime timestamp={drop.created_at} />}
       </div>
+      {drop.competition_id && drop.competition_title && (
+        <Link
+          href={getCompetitionRoute(drop.wave.id, drop.competition_id)}
+          onClick={(event) => event.stopPropagation()}
+          className="tw-mt-1 tw-block tw-break-words tw-text-xs tw-font-medium tw-text-iron-400 tw-no-underline hover:tw-text-iron-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+        >
+          {drop.competition_title}
+        </Link>
+      )}
       {showWaveInfo &&
         (() => {
           const waveMeta = (

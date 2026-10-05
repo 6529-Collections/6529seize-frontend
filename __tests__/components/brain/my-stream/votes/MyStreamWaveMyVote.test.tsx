@@ -113,6 +113,44 @@ describe("MyStreamWaveMyVote", () => {
     }
   );
 
+  it("shows the first three voter profiles without turning profile navigation into row selection", () => {
+    const onToggleCheck = jest.fn();
+    const onDropClick = jest.fn();
+    const voters = ["bob", "carol", "dave", "erin"].map((handle) => ({
+      profile: {
+        id: handle,
+        handle,
+        primary_address: `address-${handle}`,
+        pfp: handle === "bob" ? "https://example.com/bob.png" : null,
+      },
+      rating: 10,
+    }));
+    render(
+      <MyStreamWaveMyVote
+        drop={{ ...drop, top_raters: voters, raters_count: 4 }}
+        onDropClick={onDropClick}
+        onToggleCheck={onToggleCheck}
+      />
+    );
+    const bob = screen.getByRole("link", { name: /bob/i });
+    expect(bob).toHaveAttribute("href", "/bob");
+    expect(screen.getByRole("link", { name: /carol/i })).toHaveAttribute(
+      "href",
+      "/carol"
+    );
+    expect(screen.getByRole("link", { name: /dave/i })).toHaveAttribute(
+      "href",
+      "/dave"
+    );
+    expect(
+      screen.queryByRole("link", { name: /erin/i })
+    ).not.toBeInTheDocument();
+    expect(screen.getByText("4")).toBeInTheDocument();
+    fireEvent.click(bob);
+    expect(onToggleCheck).not.toHaveBeenCalled();
+    expect(onDropClick).not.toHaveBeenCalled();
+  });
+
   it("does not toggle or open the row when text is selected", () => {
     const onDropClick = jest.fn();
     const onToggleCheck = jest.fn();
@@ -251,9 +289,7 @@ describe("MyStreamWaveMyVote", () => {
     (buttonName) => {
       const onDropClick = jest.fn();
       (globalThis.getSelection as any) = () => ({ toString: () => "sel" });
-      render(
-        <MyStreamWaveMyVote drop={drop} onDropClick={onDropClick} />
-      );
+      render(<MyStreamWaveMyVote drop={drop} onDropClick={onDropClick} />);
       fireEvent.click(screen.getByRole("button", { name: buttonName }));
       expect(onDropClick).not.toHaveBeenCalled();
     }

@@ -1,3 +1,6 @@
+jest.mock("@/components/auth/useSessionRecovery", () => ({
+  useSessionRecovery: jest.fn(),
+}));
 import {
   act,
   render,

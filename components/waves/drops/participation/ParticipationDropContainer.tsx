@@ -115,11 +115,17 @@ export default function ParticipationDropContainer({
     isChatProposal,
     isQuorumCompact,
   });
-  const backgroundClass = getBackgroundClass({
-    isActiveDrop,
-    contentPresentation,
-    isChatProposal,
-  });
+  const backgroundClass =
+    drop.competition_id &&
+    location === DropLocation.WAVE &&
+    !isActiveDrop &&
+    contentPresentation === "default"
+      ? "tw-bg-iron-900/80"
+      : getBackgroundClass({
+          isActiveDrop,
+          contentPresentation,
+          isChatProposal,
+        });
   const cardWidthClass = alignCardWithContent
     ? "tw-w-full sm:tw-ml-[3.25rem] sm:tw-w-[calc(100%-3.25rem)]"
     : "tw-w-full";

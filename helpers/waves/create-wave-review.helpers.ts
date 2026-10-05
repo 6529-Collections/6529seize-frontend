@@ -91,11 +91,13 @@ function getOutcomeSection(
 
 export function buildCreateWaveReview({
   config,
+  isCompetition = false,
   groupsCache,
   locale,
   parentWaveName,
 }: {
   readonly config: CreateWaveConfig;
+  readonly isCompetition?: boolean;
   readonly groupsCache: Readonly<Record<string, ApiGroupFull>>;
   readonly locale: SupportedLocale;
   readonly parentWaveName?: string | null | undefined;
@@ -129,6 +131,43 @@ export function buildCreateWaveReview({
         getOutcomeSection(outcome, index, config.overview.type, locale)
       )
     );
+  }
+  if (isCompetition) {
+    const sharedRows = new Set([
+      "can-view",
+      "admin",
+      "chat-access",
+      "chat-status",
+      "admin-delete",
+    ]);
+    return {
+      ...rules,
+      automatic: automatic
+        .filter((section) => section.id !== "chat")
+        .map((section) => ({
+          ...section,
+          title:
+            section.id === "overview"
+              ? t(locale, "competitions.overview")
+              : section.title,
+          rows: section.rows
+            .filter((row) => !sharedRows.has(row.id))
+            .map((row) => {
+              if (row.id === "credit-scope")
+                return {
+                  ...row,
+                  value: t(
+                    locale,
+                    `competitions.scope.${config.voting.creditScope}`
+                  ),
+                };
+              if (row.id === "wave-type")
+                return { ...row, label: t(locale, "competitions.type") };
+              return row;
+            }),
+        }))
+        .filter((section) => section.rows.length > 0),
+    };
   }
   return { ...rules, automatic };
 }

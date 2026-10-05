@@ -37,6 +37,12 @@ jest.mock("@/components/waves/header/WaveHeaderShareButton", () => () => (
   <button type="button">Copy wave link</button>
 ));
 jest.mock("@/components/waves/WavePicture", () => () => <div />);
+jest.mock("@/components/waves/specs/WaveAuthor", () => ({
+  __esModule: true,
+  default: ({ wave }: { wave: { author: { handle: string } } }) => (
+    <a href={`/${wave.author.handle}`}>{wave.author.handle}</a>
+  ),
+}));
 jest.mock(
   "@/components/waves/specs/WaveNotificationSettings",
   () =>
@@ -83,6 +89,26 @@ describe("WaveHeader", () => {
         <WaveHeader wave={wave} onFollowersClick={jest.fn()} {...props} />
       </AuthContext.Provider>
     );
+
+  it("shows the creator and creation date in one row below the title", () => {
+    wrapper(baseWave);
+    const title = screen.getByTestId("name");
+    const creator = screen.getByRole("link", { name: "a" });
+    const created = screen.getByText("Jan 1, 1970");
+
+    expect(creator).toBeVisible();
+    expect(creator).toHaveAttribute("href", "/a");
+    expect(creator.parentElement).toContainElement(created);
+    expect(created).toHaveAttribute("datetime", "1970-01-01T00:00:00.000Z");
+    expect(screen.queryByText("Created by")).not.toBeInTheDocument();
+    expect(screen.queryByText("Creator")).not.toBeInTheDocument();
+    expect(title.compareDocumentPosition(creator)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING
+    );
+    expect(creator.compareDocumentPosition(created)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING
+    );
+  });
 
   it.each([
     ["logged out", null],

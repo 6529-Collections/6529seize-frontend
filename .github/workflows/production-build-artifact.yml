@@ -72,6 +72,7 @@ concurrency:
 
 env:
   API_ENDPOINT: "https://api.6529.io"
+  NEXT_PUBLIC_FEATURE_MULTI_COMPETITION: "true"
   WS_ENDPOINT: "wss://ws.6529.io"
   ALLOWLIST_API_ENDPOINT: "https://allowlist-api.6529.io"
   BASE_ENDPOINT: "https://6529.io"

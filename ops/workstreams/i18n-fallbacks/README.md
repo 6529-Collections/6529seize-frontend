@@ -21,6 +21,7 @@ fallback dictionaries.
 | [Sidebar navigation](sidebar-navigation.md)                         | `useSidebarSections` still resolves shared navigation through `DEFAULT_LOCALE` and retains residual hardcoded labels          |
 | [Wallet and profile setup controls](wallet-profile-setup-controls.md) | App-wallet dialogs, profile-setup gates, and app-sidebar feedback remain source-locale English                               |
 | [Wave competition badges](wave-competition-badges.md)               | The source locale contains `waves.competitionBadges.*`; supported locale dictionaries still rely on fallback for this surface |
+| [Wave navigation](wave-navigation.md) | About and Configuration use locale dictionaries with source-locale fallback; other desktop section labels retain existing English copy |
 | [Wave rules](wave-rules.md)                                         | Wave rule creation/rendering still includes direct English strings and non-localized formatting                               |
 | [Public wave sign-in](public-wave-sign-in.md) | New sign-in copy falls back to `en-US`; existing composer restriction messages remain English |
 | [EMMA entry and help](emma-entry-help.md) | EMMA entry, help, and plans header use source-locale copy with complete English fallback |

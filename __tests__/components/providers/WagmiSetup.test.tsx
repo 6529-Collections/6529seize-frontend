@@ -30,7 +30,9 @@ jest.mock("capacitor-secure-storage-plugin", () => ({
 }));
 
 // Mock all external dependencies
-jest.mock("@/components/auth/Auth");
+jest.mock("@/components/auth/Auth", () => ({
+  useAuth: jest.fn(),
+}));
 jest.mock("@/components/app-wallets/AppWalletsContext", () => ({
   useAppWallets: jest.fn(),
 }));

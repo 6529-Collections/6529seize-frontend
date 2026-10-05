@@ -1,5 +1,6 @@
 "use client";
 
+import { isMultiCompetitionEnabled } from "@/helpers/competition.helpers";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
@@ -121,7 +122,12 @@ const fetchUnreadCountForAccount = async (
   try {
     const notifications = await commonApiFetch<ApiNotificationsResponseV2>({
       endpoint: "v2/notifications",
-      params: { limit: "1" },
+      params: {
+        limit: "1",
+        ...(isMultiCompetitionEnabled()
+          ? { include_competitions: "true" }
+          : {}),
+      },
       headers: {
         Authorization: `Bearer ${account.jwt}`,
       },
@@ -168,7 +174,7 @@ export function useConnectedAccountsUnreadNotifications(
   const queryKey = [
     QueryKey.CONNECTED_ACCOUNT_UNREAD_NOTIFICATIONS,
     "connected-account-unread-counts",
-    "v2",
+    isMultiCompetitionEnabled() ? "v2-native-competitions" : "v2",
     pollableAccounts.map((account) => toAddressKey(account.address)),
   ] as const;
   const isRealtimeCovered =

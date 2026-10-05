@@ -1273,7 +1273,12 @@ async function checkProposalCardConfiguration(page: Page) {
       exact: true,
     })
     .click();
-  await page.getByRole("tab", { name: "Configuration", exact: true }).click();
+  const details = page
+    .getByRole("complementary", { name: "Wave details" })
+    .or(page.getByRole("dialog", { name: "Wave details" }));
+  await details
+    .getByRole("tab", { name: "Configuration", exact: true })
+    .click();
   const edit = page.getByRole("button", {
     name: "Edit proposal card settings",
   });

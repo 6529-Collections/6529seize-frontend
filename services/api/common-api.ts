@@ -7,6 +7,7 @@ import {
   getWalletRole,
 } from "../auth/auth.utils";
 import { prepareSubmissionRequestKey } from "./submission-request-key";
+import { sessionAwareFetch } from "./session-aware-fetch";
 
 type ApiErrorMode = "legacy-string" | "structured";
 type ApiRequestOrigin = "api" | "app";
@@ -227,6 +228,7 @@ const handleApiError = async (
 };
 
 interface ExecuteApiRequestParams {
+  readonly manageWalletAuth?: boolean | undefined;
   readonly url: string;
   readonly method: string;
   readonly headers: Record<string, string>;
@@ -350,6 +352,7 @@ const normalizeFetchError = (error: unknown, url: string): unknown => {
 };
 
 const executeApiRequest = async <T>({
+  manageWalletAuth = true,
   url,
   method,
   headers,
@@ -372,7 +375,7 @@ const executeApiRequest = async <T>({
   });
 
   try {
-    const res = await fetch(url, requestInit);
+    const res = await sessionAwareFetch(url, requestInit, manageWalletAuth);
     status = res.status;
 
     if (!res.ok) {
@@ -425,6 +428,7 @@ export const commonApiFetch = async <T, U = Record<string, string>>(param: {
   );
 
   return executeApiRequest<T>({
+    manageWalletAuth: param.includeWalletAuth !== false,
     url,
     method: "GET",
     headers: getHeaders(
@@ -583,6 +587,7 @@ export const commonApiPost = async <T, U, Z = Record<string, string>>(param: {
             : "";
         });
   const result = await executeApiRequest<U>({
+    manageWalletAuth: param.includeWalletAuth !== false,
     url,
     method: "POST",
     headers: getHeaders(

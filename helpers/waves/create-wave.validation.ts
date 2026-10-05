@@ -77,7 +77,7 @@ const MAX_NAME_LENGTH = 250;
 const MINUTE_IN_MS = 60 * 1000;
 const HOUR_IN_MS = 60 * MINUTE_IN_MS;
 
-const getOverviewValidationErrors = ({
+export const getOverviewValidationErrors = ({
   overview,
   display,
 }: {

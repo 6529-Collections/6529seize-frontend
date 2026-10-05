@@ -19,11 +19,13 @@ import CreateWaveReviewDescription from "./CreateWaveReviewDescription";
 
 export default function CreateWaveReview({
   config,
+  isCompetition = false,
   groupsCache,
   description,
   parentWaveName,
 }: {
   readonly config: CreateWaveConfig;
+  readonly isCompetition?: boolean;
   readonly groupsCache: Readonly<Record<string, ApiGroupFull>>;
   readonly description: CreateDropConfig | null;
   readonly parentWaveName?: string | null | undefined;
@@ -35,11 +37,12 @@ export default function CreateWaveReview({
     () =>
       buildCreateWaveReview({
         config,
+        isCompetition,
         groupsCache,
         locale,
         parentWaveName,
       }),
-    [config, groupsCache, locale, parentWaveName]
+    [config, isCompetition, groupsCache, locale, parentWaveName]
   );
   const groupIdsByRuleId: Readonly<Record<string, string | null>> = {
     "can-view": config.groups.canView,
@@ -78,7 +81,12 @@ export default function CreateWaveReview({
     <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-y-6">
       <CreateWaveStepHeader
         title={t(locale, "waves.create.review.title")}
-        description={t(locale, "waves.create.review.description")}
+        description={t(
+          locale,
+          isCompetition
+            ? "competitions.reviewDescription"
+            : "waves.create.review.description"
+        )}
       />
       {picture && (
         <Image
