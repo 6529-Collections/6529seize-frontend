@@ -838,6 +838,12 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await expect(page).toHaveURL(new RegExp(`/waves/${WAVE}$`), {
       timeout: 30000,
     });
+    await expect(
+      page.getByText("Your wave is ready", { exact: true })
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Copy wave link", exact: true })
+    ).toBeVisible();
     expect(sandbox.requests).toHaveLength(1);
     expect(sandbox.requests[0]?.path).toBe("/api/v3/waves");
     expect(sandbox.requests[0]?.body).toMatchObject({
