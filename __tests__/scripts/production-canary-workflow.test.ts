@@ -51,6 +51,9 @@ function resolveSource(
     run?: Record<string, unknown>;
     jobs?: Record<string, unknown>[];
     emptyHistory?: boolean;
+    discoveryFailure?: boolean;
+    missingEvidence?: boolean;
+    liveSha?: string;
     apiFailure?: {
       endpoint: "runs" | "run" | "jobs";
       count: number;
@@ -122,8 +125,14 @@ gh() {
   cat "$FIXTURE_ROOT/$fixture.json"
 }
 node() {
+  if [ "$DISCOVERY_FAILURE" = true ]; then
+    printf '{"state":"setup-failed"}\\n' > "$RUNNER_TEMP/production-canary-source.json"
+    return 1
+  fi
   [ "$EMPTY_HISTORY" != true ] || return 1
-  printf '{"sha":"%s"}\\n' "$LIVE_SHA" > "$RUNNER_TEMP/production-canary-source.json"
+  if [ "$MISSING_EVIDENCE" != true ]; then
+    printf '{"sha":"%s"}\\n' "$LIVE_SHA" > "$RUNNER_TEMP/production-canary-source.json"
+  fi
   printf '101\\n'
 }
 ${source.run}
@@ -144,7 +153,9 @@ ${source.run}
           GITHUB_OUTPUT: path.join(root, "output").replaceAll("\\", "/"),
           FAILED_ENDPOINT: options.apiFailure?.endpoint ?? "",
           FAILURE_COUNT: String(options.apiFailure?.count ?? 0),
-          LIVE_SHA: sha,
+          LIVE_SHA: options.liveSha ?? sha,
+          DISCOVERY_FAILURE: String(options.discoveryFailure ?? false),
+          MISSING_EVIDENCE: String(options.missingEvidence ?? false),
           EMPTY_HISTORY: String(options.emptyHistory ?? false),
           FAILURE_MESSAGE:
             options.apiFailure?.message ?? "gh: Server Error (HTTP 502)",
@@ -159,6 +170,12 @@ ${source.run}
         : "",
       selected: fs.existsSync(path.join(root, "selected-run"))
         ? fs.readFileSync(path.join(root, "selected-run"), "utf8")
+        : "",
+      evidence: fs.existsSync(path.join(root, "production-canary-source.json"))
+        ? fs.readFileSync(
+            path.join(root, "production-canary-source.json"),
+            "utf8"
+          )
         : "",
       attempts: Object.fromEntries(
         ["runs", "run", "jobs"].map((endpoint) => {
@@ -193,6 +210,33 @@ describe("daily production canary", () => {
     });
     expect(result.status).toBe(0);
     expect(result.selected).toContain("/actions/runs/99");
+    expect(result.output).toContain(`sha=${sha}`);
+  });
+
+  it("preserves setup-failure evidence and stops before selecting a deployment", () => {
+    const result = resolveSource({ discoveryFailure: true });
+    expect(result.status).not.toBe(0);
+    expect(result.selected).toBe("");
+    expect(result.output).toBe("");
+    expect(JSON.parse(result.evidence)).toEqual({ state: "setup-failed" });
+  });
+
+  it("rejects missing discovery evidence even when run and job lookups succeed", () => {
+    const result = resolveSource({ missingEvidence: true });
+    expect(result.status).not.toBe(0);
+    expect(result.attempts["jobs"]).toBe(1);
+    expect(result.output).toBe("");
+  });
+
+  it("rejects a manual canary whose selected run differs from the live SHA", () => {
+    const result = resolveSource({
+      event: "workflow_dispatch",
+      scope: "canary",
+      liveSha: "b".repeat(40),
+    });
+    expect(result.status).not.toBe(0);
+    expect(result.selected).toContain("/actions/runs/99");
+    expect(result.output).toBe("");
   });
 
   it("exercises live discovery on manual canary reruns while preserving their exact run", () => {
@@ -202,6 +246,7 @@ describe("daily production canary", () => {
     });
     expect(result.status).toBe(0);
     expect(result.selected).toContain("/actions/runs/99");
+    expect(result.output).toContain(`sha=${sha}`);
   });
 
   it.each(["run", "jobs"] as const)(

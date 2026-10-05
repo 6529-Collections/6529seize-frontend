@@ -43,13 +43,19 @@ async function liveProductionVersion(fetchImpl = globalThis.fetch) {
     redirect: "manual",
     signal: AbortSignal.timeout(10000),
   });
-  const body = await response.json();
   if (
     response.status !== 200 ||
-    !response.headers
-      .get("cache-control")
-      ?.toLowerCase()
-      .includes("no-store") ||
+    !response.headers.get("cache-control")?.toLowerCase().includes("no-store")
+  ) {
+    throw new Error("Production version is unavailable, stale, or invalid.");
+  }
+  let body;
+  try {
+    body = await response.json();
+  } catch {
+    throw new Error("Production version is unavailable, stale, or invalid.");
+  }
+  if (
     !SHA_PATTERN.test(body?.version) ||
     body.stale === true ||
     (body.announced_version !== undefined &&

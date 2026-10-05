@@ -84,23 +84,24 @@ describe("production canary deployment discovery", () => {
   );
 
   it("bounds discovery when every response repeats an old page", async () => {
-    const getJson = jest
-      .fn()
-      .mockImplementation(async (endpoint: string) =>
-        endpoint.includes("/deployments?")
-          ? Array.from({ length: 100 }, () => ({ ...deployment, sha: oldSha }))
-          : {
-              workflow_runs: Array.from({ length: 100 }, () => ({
-                ...run,
-                head_sha: oldSha,
-              })),
-            }
-      );
+    const getJson = jest.fn().mockImplementation(async (endpoint: string) =>
+      endpoint.includes("/deployments?")
+        ? Array.from({ length: 100 }, () => ({ ...deployment, sha: oldSha }))
+        : {
+            workflow_runs: Array.from({ length: 100 }, () => ({
+              ...run,
+              head_sha: oldSha,
+            })),
+          }
+    );
     await expect(
       discoverProductionRun({ repository, sha, getJson })
     ).rejects.toThrow("No successful production deployment evidence");
     expect(getJson).toHaveBeenCalledTimes(6);
     expect(getJson.mock.calls.at(-1)?.[0]).toContain("page=3");
+    expect(
+      getJson.mock.calls.some(([endpoint]) => endpoint.includes("/statuses"))
+    ).toBe(false);
   });
 
   it.each([
@@ -144,30 +145,44 @@ describe("production canary deployment discovery", () => {
     { version: sha, stale: true },
     { version: "invalid" },
   ])("rejects an invalid or unsettled live version: %j", async (body) => {
-    const fetchImpl = jest
-      .fn()
-      .mockResolvedValue({
-        status: 200,
-        headers: new Headers({ "cache-control": "no-store" }),
-        json: async () => body,
-      });
+    const fetchImpl = jest.fn().mockResolvedValue({
+      status: 200,
+      headers: new Headers({ "cache-control": "no-store" }),
+      json: async () => body,
+    });
     await expect(liveProductionVersion(fetchImpl)).rejects.toThrow(
       "stale, or invalid"
     );
   });
 
-  it("requires an uncached successful live version response", async () => {
-    const fetchImpl = jest
-      .fn()
-      .mockResolvedValue({
-        status: 200,
+  it.each([200, 503])(
+    "reports a malformed HTTP %s version response clearly",
+    async (httpStatus) => {
+      const json = jest
+        .fn()
+        .mockRejectedValue(new SyntaxError("HTML response"));
+      const fetchImpl = jest.fn().mockResolvedValue({
+        status: httpStatus,
         headers: new Headers({ "cache-control": "no-store" }),
-        json: async () => ({
-          version: sha,
-          announced_version: sha,
-          stale: false,
-        }),
+        json,
       });
+      await expect(liveProductionVersion(fetchImpl)).rejects.toThrow(
+        "Production version is unavailable, stale, or invalid."
+      );
+      expect(json).toHaveBeenCalledTimes(httpStatus === 200 ? 1 : 0);
+    }
+  );
+
+  it("requires an uncached successful live version response", async () => {
+    const fetchImpl = jest.fn().mockResolvedValue({
+      status: 200,
+      headers: new Headers({ "cache-control": "no-store" }),
+      json: async () => ({
+        version: sha,
+        announced_version: sha,
+        stale: false,
+      }),
+    });
     await expect(liveProductionVersion(fetchImpl)).resolves.toBe(sha);
     fetchImpl.mockResolvedValue({
       status: 200,
