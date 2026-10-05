@@ -84,6 +84,10 @@ when the desktop feed is active or its button is hovered or keyboard-focused.
 - Select the search icon beside the collection controls to reveal and focus
   `Find a wave…`. Search replaces the controls while open. Close it with the
   close button or Escape to return to the selected collection.
+  While search is open, sidebar scores stay visible but their details cards
+  are temporarily unavailable, including when the search field is empty.
+  Closing search restores score hover, focus, and selection. Recommendation
+  links remain available while searching.
   `Find a wave…` searches all accessible non-DM waves, independently of the
   selected collection. Type at least three characters. Results show name,
   creator, and joined/pinned status, with `Load more` for additional matches.
