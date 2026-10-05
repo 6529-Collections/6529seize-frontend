@@ -106,14 +106,22 @@ const DropEditorBody = forwardRef<DropEditorHandles, DropEditorProps>(
     );
     const [drop, setDrop] = useState<CreateDropConfig | null>(
       initialDrop && initialDrop.parts.length > 1
-        ? { ...initialDrop, parts: initialDrop.parts.slice(0, -1) }
+        ? {
+            ...initialDrop,
+            parts: initialDrop.parts.slice(0, -1).map((part, index) => ({
+              ...part,
+              clientId: part.clientId ?? `restored-${index}`,
+            })),
+          }
         : null
     );
     const [viewType, setViewType] = useState<CreateDropViewType>(
       CreateDropViewType.COMPACT
     );
 
-    const [isStormMode, setIsStormMode] = useState(false);
+    const [isStormMode, setIsStormMode] = useState(
+      (initialDrop?.parts.length ?? 0) > 1
+    );
 
     const onMentionedUser = (
       newUser: Omit<MentionedUser, "current_handle">

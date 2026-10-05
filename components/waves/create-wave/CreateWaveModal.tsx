@@ -83,6 +83,11 @@ export default function CreateWaveModal({
         isOpen={isOpen}
         onClose={onClose}
         profile={profile}
+        returnTo={
+          parentWaveId
+            ? `/waves/${encodeURIComponent(parentWaveId)}`
+            : "/waves/create"
+        }
       />
     );
   }

@@ -75,7 +75,8 @@ when saved or restored values differ from the defaults and opens as
 - Create forms render only when the connected identity has a profile handle.
 - Signed-out entry explains Connect to create a wave and preserves the create URL.
 - Without a profile handle, Create Wave entry points open a compact profile
-  setup dialog with `Go to Identity`; completing setup returns to wave creation.
+  setup dialog with `Go to Identity`; completing setup returns to standalone
+  wave creation, or to the parent wave when creating a subwave.
 
 ## Flows
 

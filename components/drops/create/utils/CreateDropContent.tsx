@@ -259,7 +259,9 @@ const CreateDropContent = forwardRef<
       setCharsCount(markdown.length);
     }, [editorState]);
 
-    const [isStormMode, setIsStormMode] = useState(false);
+    const [isStormMode, setIsStormMode] = useState(
+      (draftContext?.initialDrop?.parts.length ?? 0) > 1
+    );
     const breakIntoStorm = () => {
       if (loading) {
         return;

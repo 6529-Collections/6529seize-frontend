@@ -37,7 +37,7 @@ mobile viewports.
    handle, a compact `Create your
    profile first` dialog opens instead. `Go to Identity` starts profile setup;
    closing returns to the current page. Completing profile setup returns to
-   `/waves/create`.
+   `/waves/create` for a standalone wave; subwave entry returns to its parent wave.
 5. With a profile handle, the `Create Wave` dialog opens above the current page
    context while the underlying list/content view remains visible. At widths
    below `768px`, it uses the mobile bottom sheet; wider viewports retain the

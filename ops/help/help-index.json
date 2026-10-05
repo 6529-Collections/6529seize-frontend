@@ -2968,7 +2968,7 @@
       ],
       "facts": [
         "On web, select the labeled Create wave button in the desktop Waves panel or mobile Waves list. A collapsed sidebar keeps the plus icon. You can also open /waves?create=wave or /waves/create, or search Create wave, New wave, or Start a wave in global Search.",
-        "Signed-out entry explains Connect to create a wave and preserves the creation URL after wallet connection. An identity without a profile handle sees Create your profile first; Go to Identity carries a return link so completed profile setup returns to /waves/create.",
+        "Signed-out entry explains Connect to create a wave and preserves the creation URL after wallet connection. An identity without a profile handle sees Create your profile first; Go to Identity carries a return link so completed profile setup returns to /waves/create for standalone creation, or to the parent wave for a subwave.",
         "Chat uses two screens: name and first post, then a review with Confirm and create. Optional settings holds access, picture, and guidelines. Rank, Approve, and subwaves keep guided setup.",
         "In Create Wave and Create subwave, Close, Escape, and clicking or tapping outside close an untouched form immediately. If work has been entered, Discard your changes? offers Keep editing or Discard changes. Keep editing preserves the current settings, picture, description, and step. Discard changes closes the form and loses unsaved work; existing saved drafts remain.",
         "Named standalone waves save text and settings in Saved Drafts on this device for the current wallet and profile. Media and attachments must be added again. Older drafts restore settings only. Restoring opens the first screen; subwaves have no draft-resume control.",

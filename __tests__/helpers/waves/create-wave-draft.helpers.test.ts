@@ -153,9 +153,9 @@ describe("create-wave-draft.helpers", () => {
     ])
       expect(serialized).not.toContain(forbidden);
     const restored = readCreateWaveDrafts("wallet:profile")[0]!;
-    expect(restored.description?.parts[0]?.content).toContain(
-      "Keep **this** text"
-    );
+    // Preserve the author's remaining Markdown whitespace rather than trimming
+    // line breaks or indentation while removing images.
+    expect(restored.description?.parts[0]?.content).toBe("Keep **this** text  ");
     expect(restored.description?.parts[0]?.media).toEqual([]);
     expect(restored.mediaOmitted).toBe(true);
   });

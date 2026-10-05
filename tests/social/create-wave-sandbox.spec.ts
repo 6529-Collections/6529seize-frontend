@@ -101,6 +101,63 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
     await expectNoUnsafeSandboxMutations(baseURL);
   });
 
+  test("restores multipart first posts with visible parts that can be removed", async ({
+    page,
+    baseURL,
+  }) => {
+    await gotoCreateWave(page);
+    await page.getByLabel(/Wave Name/).fill("Multipart draft recovery");
+    const editor = page.getByRole("textbox", {
+      name: "First post",
+      exact: true,
+    });
+    await editor.fill("Earlier part that must stay visible.");
+    await page
+      .getByRole("button", { name: "Break into storm", exact: true })
+      .click();
+    await editor.fill("Current restored part.");
+    await expect
+      .poll(() =>
+        page.evaluate(() =>
+          Object.keys(localStorage)
+            .filter((key) => key.startsWith("create-wave-drafts:v2:"))
+            .map((key) => localStorage.getItem(key))
+            .join("\n")
+        )
+      )
+      .toContain("Current restored part.");
+    await page.reload({ waitUntil: "domcontentloaded" });
+    await waitForRouteReady(page);
+    await dismissNextDevTools(page);
+    await page
+      .getByRole("button", { name: "Saved Drafts", exact: true })
+      .click();
+    await page
+      .getByRole("button", { name: /^Multipart draft recovery/ })
+      .click();
+    await expect(
+      page.getByText("Earlier part that must stay visible.", { exact: true })
+    ).toBeVisible();
+    await expect(editor).toContainText("Current restored part.");
+    await expect(
+      page.getByRole("button", { name: "Continue storm", exact: true })
+    ).toBeVisible();
+    await page
+      .getByRole("button", { name: "Remove part", exact: true })
+      .click();
+    await expect(
+      page.getByText("Earlier part that must stay visible.", { exact: true })
+    ).toHaveCount(0);
+    await nextStepButton(page).click();
+    await expect(
+      page.getByText("Current restored part.", { exact: true }).first()
+    ).toBeVisible();
+    await expect(
+      page.getByText("Earlier part that must stay visible.", { exact: true })
+    ).toHaveCount(0);
+    await expectNoUnsafeSandboxMutations(baseURL);
+  });
+
   test("creates a chat wave with only explicit sandbox mutations", async ({
     baseURL,
     page,
