@@ -29,11 +29,18 @@ pagination, and profile links.
 
 ## Controls and URL State
 
-- `Filter` opens the shared criteria builder with criteria creation open by
-  default. The Network version omits `Choose group` and `Hide criteria and
-  members`.
+- `Filter` opens `Filter Network` with `Level` selected. `TDH`, `NIC`, and
+  `Rep` are available beside it. `More filters` opens `Identities`,
+  `Required NFTs`, `Collection Access`, and `xTDH Grant`. Switching between
+  criteria keeps the draft's values.
+- The `After editing` summary and `Create and use new group` action stay at
+  the bottom while the criteria scroll. A valid draft also offers
+  `Preview matches`. Expand `Not ready yet.` to read the readiness guidance.
+- `Before editing` shows the current scope. With a selected group, expand it
+  to inspect its criteria, count, and `View members` without changing the draft.
 - Applying new criteria creates a saved group and immediately uses it as the
-  Network scope. Choosing `All Network members` clears the group scope.
+  Network scope. `Clear selected group` above the results clears the scope.
+  The filter does not offer saved-group search or `Hide criteria and members`.
 - When a signed-in user has an active Network scope with at least one
   criterion, the selected-group summary shows `REP everyone matching criteria`
   and `NIC everyone matching criteria` directly below the group name.
@@ -52,8 +59,9 @@ pagination, and profile links.
 ## User Journey
 
 1. Open `/network`.
-2. (Optional) open `Filter` and build a group with identities, Level, TDH,
-   NIC, REP, required NFTs, collection access, or an xTDH grant.
+2. (Optional) open `Filter` and set `Level`, `TDH`, `NIC`, or `Rep`.
+   Use `More filters` for identities, required NFTs, collection access, or an
+   xTDH grant. All criteria can be combined.
 3. Select `Create and use new group` to save and apply the criteria.
 4. (Optional) use the REP or NIC criteria action in the selected-group summary
    to grant credits to every matching member.

@@ -2193,6 +2193,15 @@ const NETWORK_GROUP_INSPECTION_MESSAGES = objectMessages(
 );
 
 const NETWORK_GROUP_FILTER_MESSAGES = objectMessages("network.groupFilter", {
+  filter: "Filter",
+  more: "More filters",
+  level: "Level",
+  tdh: "TDH",
+  nic: "NIC",
+  rep: "Rep",
+  nfts: "Required NFTs",
+  collections: "Collection Access",
+  xtdhGrant: "xTDH Grant",
   title: "Filter Network",
   suggestedName: "Network filter",
   defaultLabel: "All Network members",

@@ -71,11 +71,16 @@ function resolveApiEndpoint(baseURL: string): string {
 }
 
 async function getStagingApiHeaders(
-  page: Page
+  page: Page,
+  apiEndpoint: string
 ): Promise<Record<string, string>> {
-  const apiAuth = (await page.context().cookies()).find(
-    (cookie) => cookie.name === "x-6529-auth"
-  )?.value;
+  if (new URL(apiEndpoint).hostname !== "api.staging.6529.io") {
+    return {};
+  }
+  const apiAuth =
+    (await page.context().cookies()).find(
+      (cookie) => cookie.name === "x-6529-auth"
+    )?.value ?? process.env["STAGING_API_KEY"];
 
   return apiAuth ? { "x-6529-auth": apiAuth } : {};
 }
@@ -135,11 +140,59 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
     await gotoReady(page, "/network");
 
     await openGroupFilters(page);
+    const filter = page.getByRole("dialog", { name: "Filter Network" });
+    const levelInput = filter.getByRole("spinbutton", {
+      name: "Level at least",
+    });
+    await expect(levelInput).toBeVisible();
+    for (const name of ["Level", "TDH", "NIC", "Rep", "More filters"]) {
+      await expect(
+        filter.getByRole("button", { name, exact: true })
+      ).toBeInViewport();
+    }
     await expect(
-      page
-        .getByRole("button", { name: "Edit criteria" })
-        .filter({ visible: true })
-    ).toBeVisible({ timeout: 30000 });
+      filter.getByRole("button", { name: "Edit criteria" })
+    ).toHaveCount(0);
+    const apply = filter.getByRole("button", {
+      name: "Create and use new group",
+    });
+    await expect(apply).toBeDisabled();
+    await expect(apply).toBeInViewport({ ratio: 1 });
+    await expect(filter.getByText("After editing")).toBeInViewport();
+    await levelInput.fill("10");
+    await filter.getByRole("button", { name: "More filters" }).click();
+    for (const name of [
+      "Identities",
+      "Required NFTs",
+      "Collection Access",
+      "xTDH Grant",
+    ]) {
+      await expect(
+        filter.getByRole("button", { name, exact: true })
+      ).toBeVisible();
+    }
+    await filter
+      .getByRole("button", { name: "Identities", exact: true })
+      .click();
+    await expect(
+      filter.getByText("No identities are explicitly included.")
+    ).toBeVisible();
+    await filter.getByRole("button", { name: "Excluded", exact: true }).click();
+    await expect(
+      filter.getByText("No identities are explicitly excluded.")
+    ).toBeVisible();
+    await filter
+      .getByRole("button", { name: "More filters", exact: true })
+      .click();
+    await filter
+      .getByRole("button", { name: "Filter Network", exact: true })
+      .click();
+    await expect(levelInput).toHaveValue("10");
+    await expect(apply).toBeEnabled();
+    await expect(apply).toBeInViewport({ ratio: 1 });
+    await expect(
+      filter.getByRole("button", { name: "Preview matches" })
+    ).toBeInViewport();
     await expect(
       page
         .getByRole("button", { name: "Choose group" })
@@ -147,12 +200,18 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
     ).toHaveCount(0);
     await expect(page.getByText("Hide criteria and members")).toHaveCount(0);
 
+    await filter.getByRole("button", { name: "Close", exact: true }).click();
+    await expect(filter).toBeHidden();
+    await expect(
+      page.getByRole("button", { name: "Open group filters" })
+    ).toBeFocused();
+
     // Resolve a real group id read-only so the deep-link behavior remains
     // portable across local, staging, and production data sets.
-    const groupsResponse = await page.request.get(
-      `${resolveApiEndpoint(baseURL ?? "http://localhost:3001")}/api/groups`,
-      { headers: await getStagingApiHeaders(page) }
-    );
+    const apiEndpoint = resolveApiEndpoint(baseURL ?? "http://localhost:3001");
+    const groupsResponse = await page.request.get(`${apiEndpoint}/api/groups`, {
+      headers: await getStagingApiHeaders(page, apiEndpoint),
+    });
     expect(groupsResponse.ok()).toBe(true);
     const groupsPayload = (await groupsResponse.json()) as
       | { readonly id?: string; readonly name?: string }[]

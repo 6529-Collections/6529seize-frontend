@@ -16,6 +16,15 @@ import type { MessageKey } from "@/i18n/messages/en-US";
 import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.en-GB.json";
 
 export const EN_GB_MESSAGES = {
+  "network.groupFilter.filter": "Filter",
+  "network.groupFilter.more": "More filters",
+  "network.groupFilter.level": "Level",
+  "network.groupFilter.tdh": "TDH",
+  "network.groupFilter.nic": "NIC",
+  "network.groupFilter.rep": "Rep",
+  "network.groupFilter.nfts": "Required NFTs",
+  "network.groupFilter.collections": "Collection Access",
+  "network.groupFilter.xtdhGrant": "xTDH Grant",
   ...EN_DROP_REQUIREMENT_MESSAGES,
   ...EN_US_DROP_METADATA_MESSAGES,
   "profile.subscriptions.noAllocation": "No subscription allocation",
