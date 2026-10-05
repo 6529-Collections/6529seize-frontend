@@ -1248,3 +1248,181 @@ describe("ContentTabContext", () => {
     }
   );
 });
+
+const rememberedWaveParams = {
+  isChatWave: false,
+  hasAuthenticatedProfile: true,
+  isMemesWave: false,
+  isCurationWave: false,
+  votingState: WaveVotingState.ONGOING,
+  hasFirstDecisionPassed: true,
+};
+
+describe("remembered wave entries", () => {
+  beforeEach(() => {
+    localStorage.clear();
+    window.history.replaceState(null, "", "/");
+    mockSearch = new URLSearchParams();
+    mockPathname = "/waves/main-stage";
+    mockPush.mockClear();
+    mockReplace.mockClear();
+  });
+
+  it("keeps Main Stage Leaderboard and Maybes Bar Chat independent across visits and remounts", () => {
+    const { result, rerender, unmount } = setup();
+    act(() =>
+      result.current.updateAvailableTabs({
+        ...rememberedWaveParams,
+        waveId: "main-stage",
+      })
+    );
+    expect(result.current.activeContentTab).toBe(MyStreamWaveTab.CHAT);
+    act(() => result.current.setActiveContentTab(MyStreamWaveTab.LEADERBOARD));
+    mockPathname = "/waves/maybes-bar";
+    rerender();
+    act(() =>
+      result.current.updateAvailableTabs({
+        ...rememberedWaveParams,
+        waveId: "maybes-bar",
+      })
+    );
+    expect(result.current.activeContentTab).toBe(MyStreamWaveTab.CHAT);
+    act(() => result.current.setActiveContentTab(MyStreamWaveTab.CHAT));
+    mockPathname = "/waves/main-stage";
+    rerender();
+    act(() =>
+      result.current.updateAvailableTabs({
+        ...rememberedWaveParams,
+        waveId: "main-stage",
+      })
+    );
+    expect(result.current.activeContentTab).toBe(MyStreamWaveTab.LEADERBOARD);
+    unmount();
+    const remount = setup();
+    act(() =>
+      remount.result.current.updateAvailableTabs({
+        ...rememberedWaveParams,
+        waveId: "main-stage",
+      })
+    );
+    expect(remount.result.current.activeContentTab).toBe(
+      MyStreamWaveTab.LEADERBOARD
+    );
+    mockPathname = "/waves/maybes-bar";
+    remount.rerender();
+    act(() =>
+      remount.result.current.updateAvailableTabs({
+        ...rememberedWaveParams,
+        waveId: "maybes-bar",
+      })
+    );
+    expect(remount.result.current.activeContentTab).toBe(MyStreamWaveTab.CHAT);
+  });
+
+  it.each([
+    "tab=chat",
+    "drop=some-drop",
+    "serialNo=3",
+    "curation=gallery",
+    "editPost=some-drop",
+    "create=wave",
+  ])("keeps %s ahead of remembered Leaderboard", (query) => {
+    localStorage.setItem(
+      "memes_wave_last_tab_by_id",
+      JSON.stringify({ "main-stage": MyStreamWaveTab.LEADERBOARD })
+    );
+    mockSearch = new URLSearchParams(query);
+    const { result } = setup();
+    act(() =>
+      result.current.updateAvailableTabs({
+        ...rememberedWaveParams,
+        waveId: "main-stage",
+      })
+    );
+    expect(result.current.activeContentTab).toBe(MyStreamWaveTab.CHAT);
+    expect(
+      JSON.parse(localStorage.getItem("memes_wave_last_tab_by_id")!)
+    ).toEqual({ "main-stage": MyStreamWaveTab.LEADERBOARD });
+  });
+
+  it("waits for available tabs without overwriting a saved section, then preserves a deliberate new choice", () => {
+    localStorage.setItem(
+      "memes_wave_last_tab_by_id",
+      JSON.stringify({ "main-stage": MyStreamWaveTab.POLLS })
+    );
+    const { result } = setup();
+    act(() =>
+      result.current.updateAvailableTabs({
+        ...rememberedWaveParams,
+        waveId: "main-stage",
+        hasPolls: false,
+      })
+    );
+    expect(result.current.activeContentTab).toBe(MyStreamWaveTab.CHAT);
+    act(() =>
+      result.current.updateAvailableTabs({
+        ...rememberedWaveParams,
+        waveId: "main-stage",
+        hasPolls: true,
+      })
+    );
+    expect(result.current.activeContentTab).toBe(MyStreamWaveTab.POLLS);
+    act(() => result.current.setActiveContentTab(MyStreamWaveTab.ABOUT));
+    act(() =>
+      result.current.updateAvailableTabs({
+        ...rememberedWaveParams,
+        waveId: "main-stage",
+        hasPolls: true,
+      })
+    );
+    expect(result.current.activeContentTab).toBe(MyStreamWaveTab.ABOUT);
+  });
+
+  it("falls back from inaccessible My Votes without changing storage", () => {
+    localStorage.setItem(
+      "memes_wave_last_tab_by_id",
+      JSON.stringify({ "main-stage": MyStreamWaveTab.MY_VOTES })
+    );
+    const { result } = setup();
+    act(() =>
+      result.current.updateAvailableTabs({
+        ...rememberedWaveParams,
+        waveId: "main-stage",
+        hasAuthenticatedProfile: false,
+      })
+    );
+    expect(result.current.activeContentTab).toBe(MyStreamWaveTab.CHAT);
+    expect(result.current.availableTabs).not.toContain(
+      MyStreamWaveTab.MY_VOTES
+    );
+    expect(localStorage.getItem("memes_wave_last_tab_by_id")).toContain(
+      "MY_VOTES"
+    );
+  });
+
+  it("records a routed choice with its competition without mounting temporary controls", () => {
+    const { result } = setup();
+    act(() =>
+      result.current.updateAvailableTabs({
+        ...rememberedWaveParams,
+        waveId: "main-stage",
+        defaultSelectionEnabled: true,
+        defaultCompetitionId: "primary",
+      })
+    );
+    act(() => result.current.setActiveContentTab(MyStreamWaveTab.LEADERBOARD));
+    expect(result.current.activeContentTab).toBe(MyStreamWaveTab.CHAT);
+    expect(mockPush).toHaveBeenCalledWith(
+      "/waves/main-stage/competitions/primary?tab=leaderboard",
+      { scroll: false }
+    );
+    expect(
+      JSON.parse(localStorage.getItem("memes_wave_last_tab_by_id")!)
+    ).toEqual({
+      "main-stage": {
+        tab: MyStreamWaveTab.LEADERBOARD,
+        competitionId: "primary",
+      },
+    });
+  });
+});

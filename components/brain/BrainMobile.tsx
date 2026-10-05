@@ -6,7 +6,11 @@ import {
   getCompetitionIdFromPathname,
 } from "@/helpers/competition.helpers";
 import { waveCompetitionTabs } from "@/helpers/default-competition.helpers";
-import type { MyStreamWaveTab } from "@/types/waves.types";
+import { MyStreamWaveTab } from "@/types/waves.types";
+import {
+  useWaveTabPreference,
+  rememberHistoryWaveTab,
+} from "@/hooks/useWaveTabPreference";
 import { useDefaultCompetitionNavigation } from "@/hooks/competitions/useDefaultCompetitionNavigation";
 
 import type { ReactNode } from "react";
@@ -90,6 +94,7 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const { isApp } = useDeviceInfo();
+  const { rememberTab } = useWaveTabPreference();
   const { currentWaveView, rememberWaveView } = useNavigationHistoryContext();
   const shouldReduceMotion = useReducedMotion() ?? false;
   const { registerRef } = useLayout();
@@ -188,6 +193,7 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
     showOutcomeView: outcomesVisible,
     hasCompetitions,
     hasPolls,
+    defaultSelectionEnabled,
     pathname,
     searchParams,
     wave,
@@ -202,6 +208,7 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
         const selectedId = isCompetitionPathname(pathname)
           ? getCompetitionIdFromPathname(pathname)
           : (searchParams.get("competition") ?? defaultCompetitionId);
+        rememberTab(waveId, view as unknown as MyStreamWaveTab, selectedId);
         router.push(
           selectedId
             ? `${getCompetitionRoute(waveId, selectedId)}?tab=${competitionTab}`
@@ -211,6 +218,16 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
         return;
       }
       selectView(view);
+      if (waveId) {
+        const tab =
+          view === BrainView.DEFAULT
+            ? MyStreamWaveTab.CHAT
+            : (view as unknown as MyStreamWaveTab);
+        if (Object.values(MyStreamWaveTab).includes(tab)) {
+          rememberTab(waveId, tab);
+          rememberHistoryWaveTab(waveId, tab);
+        }
+      }
       if (isApp && waveId) {
         rememberWaveView({ waveId, view });
       }
@@ -228,6 +245,7 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
     },
     [
       selectView,
+      rememberTab,
       isApp,
       waveId,
       rememberWaveView,

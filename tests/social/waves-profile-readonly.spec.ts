@@ -82,6 +82,124 @@ function getProfileFeed(page: Page): Locator {
 }
 
 test.describe("Waves and profile read-only coverage @surface @medium @large @readonly", () => {
+  for (const surface of ["web", "app"] as const) {
+    test(`remembers Main Stage Leaderboard and Maybes Bar Chat (${surface})`, async ({
+      page,
+    }, testInfo) => {
+      test.setTimeout(120000);
+      test.skip(
+        surface === "app" && testInfo.project.name !== "web-mobile-chromium",
+        "The shared app layout uses the mobile viewport."
+      );
+      if (surface === "app")
+        await installSurfaceSimulation(
+          page.context(),
+          "capacitor-ios-sim",
+          testInfo.project.use.baseURL
+        );
+      const section = (name: string) =>
+        page.getByRole(surface === "app" ? "button" : "tab", {
+          name,
+          exact: true,
+        });
+      const chat = page.getByRole("region", {
+        name: "Wave chat file upload area",
+        exact: true,
+      });
+      const leaderboardContent = page.getByRole("tablist", {
+        name: "Leaderboard view modes",
+      });
+      const expectLeaderboard = async () => {
+        await expect(section("Leaderboard")).toHaveAttribute(
+          surface === "app" ? "aria-current" : "aria-selected",
+          "true",
+          { timeout: 30000 }
+        );
+        await expect(leaderboardContent).toBeVisible({ timeout: 30000 });
+        await expect(
+          page
+            .getByRole("list", { name: "Leaderboard drops", exact: true })
+            .or(page.getByText("No drops to show", { exact: true }))
+        ).toBeVisible({ timeout: 30000 });
+        await expect(chat).toHaveCount(0);
+        await expect(
+          page.getByText(
+            "This competition could not be loaded. It may be unavailable or you may not have access.",
+            { exact: true }
+          )
+        ).toHaveCount(0);
+      };
+      const openWave = async (name: string) => {
+        const toggle = page
+          .getByRole("button", { name: "Find a wave…", exact: true })
+          .filter({ visible: true });
+        const search = page
+          .getByRole("searchbox", { name: "Find a wave…" })
+          .filter({ visible: true });
+        await expect(search.or(toggle)).toBeVisible();
+        if (!(await search.isVisible())) await toggle.click();
+        await search.fill(name);
+        const results = page
+          .getByRole("region", { name: "Search results · All waves" })
+          .filter({ visible: true });
+        const link = results
+          .getByRole("link")
+          .filter({ hasText: name })
+          .first();
+        await expect(link).toBeVisible({ timeout: 15000 });
+        const href = await link.getAttribute("href");
+        expect(href).toMatch(/^\/waves\/[0-9a-f-]{36}$/i);
+        await link.click();
+        return href;
+      };
+      const returnToWaves = async () => {
+        if (surface === "app")
+          await page.getByRole("button", { name: "Back", exact: true }).click();
+        else if (testInfo.project.name === "web-mobile-chromium")
+          await page
+            .getByRole("button", { name: "Go back", exact: true })
+            .click();
+        else
+          await page
+            .getByRole("link", { name: "Waves", exact: true })
+            .filter({ visible: true })
+            .first()
+            .click();
+        await expect(page).toHaveURL((url) => url.pathname === "/waves");
+      };
+      await gotoReady(page, "/waves");
+      const mainStage = await openWave("The Memes - Main Stage");
+      await expect(chat).toBeVisible({ timeout: 15000 });
+      await section("Leaderboard").click();
+      await expectLeaderboard();
+      await returnToWaves();
+      const maybes = await openWave("maybe's dive bar");
+      await expect(chat).toBeVisible({ timeout: 15000 });
+      await section("Chat").click();
+      await returnToWaves();
+      expect(await openWave("The Memes - Main Stage")).toBe(mainStage);
+      await expectLeaderboard();
+      await page.screenshot({
+        path: testInfo.outputPath(`remembered-${surface}-main-stage.png`),
+        fullPage: true,
+      });
+      await page.reload();
+      await expectLeaderboard();
+      await returnToWaves();
+      expect(await openWave("maybe's dive bar")).toBe(maybes);
+      await expect(section("Chat")).toHaveAttribute(
+        surface === "app" ? "aria-current" : "aria-selected",
+        "true"
+      );
+      await expect(chat).toBeVisible({ timeout: 15000 });
+      await expect(leaderboardContent).toHaveCount(0);
+      await page.screenshot({
+        path: testInfo.outputPath(`remembered-${surface}-maybes-bar.png`),
+        fullPage: true,
+      });
+    });
+  }
+
   test("matches Main Stage app artwork to its leaderboard response", async ({
     page,
   }, testInfo) => {

@@ -940,6 +940,147 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     });
   }
 
+  for (const mode of ["native", "legacy", "app"] as const) {
+    test(`remembers independent wave tabs on an ordinary round trip (${mode})`, async ({
+      page,
+    }, testInfo) => {
+      test.skip(
+        mode === "app" && testInfo.project.name !== "web-mobile-chromium",
+        "The shared app layout uses the mobile viewport."
+      );
+      if (mode === "app")
+        await installSurfaceSimulation(
+          page.context(),
+          "capacitor-ios-sim",
+          testInfo.project.use.baseURL
+        );
+      const BAR = "00000000-0000-4000-8000-000000000536";
+      const mainStage = await installCompetitionApi(page, false, false, WAVE);
+      if (mode !== "native") await mainStage.legacyPrimary("alpha");
+      await page.route(`**/v3/waves/${BAR}**`, (route) => {
+        const path = new URL(route.request().url()).pathname;
+        if (path.endsWith("/default-competition"))
+          return route.fulfill({
+            json: {
+              competition_id: null,
+              evaluated_at: Date.now(),
+              next_refresh_at: null,
+            },
+          });
+        if (path.endsWith("/competitions"))
+          return route.fulfill({ json: pageResult([]) });
+        return route.fulfill({
+          json: {
+            id: BAR,
+            name: "The Memes - Maybes Bar",
+            legacy_primary_competition_id: null,
+            permissions: {
+              view: true,
+              administer: false,
+              create_competition: false,
+            },
+          },
+        });
+      });
+      const response = await page.request.get(
+        `${getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"])}/api/v2/waves/${BAR}/drops`
+      );
+      const data = await response.json();
+      const overview = data.wave;
+      const main = {
+        ...overview,
+        id: WAVE,
+        name: "The Memes - Main Stage",
+      };
+      const bar = { ...overview, id: BAR, name: "The Memes - Maybes Bar" };
+      await page.route(/\/api\/v2\/waves(?:\?|$)/, (route) =>
+        route.fulfill({ json: { data: [main, bar], page: 1, next: false } })
+      );
+      await page.route("**/api/v2/official-waves", (route) =>
+        route.fulfill({ json: [main, bar] })
+      );
+      const openWaveFromList = async (name: string) => {
+        const list = page.getByRole("region", {
+          name: /All recent waves list|Regular waves list/,
+        });
+        await expect(list).toBeVisible({ timeout: 30000 });
+        await list.getByRole("link").filter({ hasText: name }).first().click();
+      };
+      const returnToList = async () => {
+        if (mode === "app")
+          await page.getByRole("button", { name: "Back", exact: true }).click();
+        else if (testInfo.project.name === "web-mobile-chromium")
+          await page
+            .getByRole("button", { name: "Go back", exact: true })
+            .click();
+        else
+          await page
+            .getByRole("link", { name: "Waves", exact: true })
+            .filter({ visible: true })
+            .first()
+            .click();
+        await expect(page).toHaveURL(
+          (url) => url.pathname === "/waves" && !url.searchParams.has("wave")
+        );
+      };
+      const chat = page.getByRole("region", {
+        name: "Wave chat file upload area",
+        exact: true,
+      });
+      const leaderboard = page.getByRole(mode === "app" ? "button" : "tab", {
+        name: "Leaderboard",
+        exact: true,
+      });
+      await page.goto("/waves");
+      await openWaveFromList("The Memes - Main Stage");
+      await expect(chat).toBeVisible({ timeout: 30000 });
+      await leaderboard.click();
+      if (mode === "native")
+        await expect(
+          page.getByText("Immutable alpha entry content", { exact: true })
+        ).toBeVisible();
+      else await expectLegacySectionContent(page, "leaderboard");
+      await returnToList();
+      await openWaveFromList("The Memes - Maybes Bar");
+      await expect(chat).toBeVisible({ timeout: 30000 });
+      await page
+        .getByRole(mode === "app" ? "button" : "tab", {
+          name: "Chat",
+          exact: true,
+        })
+        .click();
+      await returnToList();
+      await openWaveFromList("The Memes - Main Stage");
+      await expect(page).toHaveURL(
+        new RegExp(`/waves/${WAVE}/competitions/alpha\\?tab=leaderboard$`)
+      );
+      if (mode === "native")
+        await expect(
+          page.getByText("Immutable alpha entry content", { exact: true })
+        ).toBeVisible();
+      else await expectLegacySectionContent(page, "leaderboard");
+      await expect(chat).toHaveCount(0);
+      await page.screenshot({
+        path: testInfo.outputPath(`remembered-${mode}-leaderboard.png`),
+        fullPage: true,
+      });
+      await page.reload();
+      if (mode === "native")
+        await expect(
+          page.getByText("Immutable alpha entry content", { exact: true })
+        ).toBeVisible();
+      else await expectLegacySectionContent(page, "leaderboard");
+      await returnToList();
+      await openWaveFromList("The Memes - Maybes Bar");
+      await expect(chat).toBeVisible({ timeout: 30000 });
+      await expect(page).toHaveURL(new RegExp(`/waves/${BAR}$`));
+      await page.screenshot({
+        path: testInfo.outputPath(`remembered-${mode}-chat.png`),
+        fullPage: true,
+      });
+    });
+  }
+
   test("preserves an intentional About selection while default data loads", async ({
     page,
   }, testInfo) => {

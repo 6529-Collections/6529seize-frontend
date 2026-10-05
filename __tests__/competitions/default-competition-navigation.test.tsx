@@ -16,6 +16,7 @@ let mockEnabled = true;
 let mockId: string | null = "alpha";
 let mockError = false;
 let mockSuccess = true;
+let mockTabs = [MyStreamWaveTab.CHAT, MyStreamWaveTab.LEADERBOARD];
 jest.mock("next/navigation", () => ({
   usePathname: () => mockPathname,
   useSearchParams: () => mockSearch,
@@ -26,14 +27,24 @@ jest.mock("@/helpers/competition.helpers", () => ({
   isMultiCompetitionEnabled: () => mockEnabled,
 }));
 jest.mock("@/hooks/competitions/useCompetitionQueries", () => ({
+  useCompetitionHub: jest.fn(() => ({
+    isSuccess: true,
+    data: { legacy_primary_competition_id: "alpha" },
+  })),
   useDefaultCompetition: jest.fn(() => ({
     isSuccess: mockSuccess,
     isError: mockError,
     data: { competition_id: mockId, evaluated_at: 100, next_refresh_at: 200 },
   })),
 }));
+jest.mock("@/components/brain/ContentTabContext", () => ({
+  useContentTab: () => ({ availableTabs: mockTabs }),
+}));
 const wave = { id: "wave", chat: { scope: { group: null } } } as ApiWave;
 beforeEach(() => {
+  mockTabs = [MyStreamWaveTab.CHAT, MyStreamWaveTab.LEADERBOARD];
+  localStorage.clear();
+  window.history.replaceState(null, "", "/");
   mockPathname = "/waves/wave";
   mockSearch = new URLSearchParams();
   mockEnabled = true;
@@ -241,3 +252,90 @@ it.each([
     expect(result.current.resolve).toBe(true);
   }
 );
+
+it("restores remembered Leaderboard only after delayed default identity and tabs are available", () => {
+  localStorage.setItem(
+    "memes_wave_last_tab_by_id",
+    JSON.stringify({ wave: { tab: "LEADERBOARD", competitionId: "alpha" } })
+  );
+  mockSuccess = false;
+  mockTabs = [MyStreamWaveTab.CHAT];
+  const { rerender } = renderHook(() =>
+    useDefaultCompetitionNavigation(wave, true)
+  );
+  expect(mockReplace).not.toHaveBeenCalled();
+  mockSuccess = true;
+  rerender();
+  expect(mockReplace).not.toHaveBeenCalled();
+  mockTabs = [MyStreamWaveTab.CHAT, MyStreamWaveTab.LEADERBOARD];
+  rerender();
+  expect(mockReplace).toHaveBeenCalledWith(
+    "/waves/wave/competitions/alpha?tab=leaderboard",
+    { scroll: false }
+  );
+});
+it("does not restore a saved competition view into a different default", () => {
+  localStorage.setItem(
+    "memes_wave_last_tab_by_id",
+    JSON.stringify({ wave: { tab: "LEADERBOARD", competitionId: "older" } })
+  );
+  renderHook(() => useDefaultCompetitionNavigation(wave, true));
+  expect(mockReplace).not.toHaveBeenCalled();
+});
+it("restores the ended legacy leaderboard as Submissions", () => {
+  localStorage.setItem(
+    "memes_wave_last_tab_by_id",
+    JSON.stringify({ wave: { tab: "LEADERBOARD", competitionId: "alpha" } })
+  );
+  mockTabs = [MyStreamWaveTab.CHAT, MyStreamWaveTab.SUBMISSIONS];
+  renderHook(() => useDefaultCompetitionNavigation(wave, true));
+  expect(mockReplace).toHaveBeenCalledWith(
+    "/waves/wave/competitions/alpha?tab=leaderboard",
+    { scroll: false }
+  );
+});
+it.each([
+  "tab=chat",
+  "drop=some-drop",
+  "serialNo=3",
+  "curation=gallery",
+  "editPost=some-drop",
+  "create=wave",
+  "competition=older",
+])("keeps explicit %s ahead of remembered competition navigation", (query) => {
+  localStorage.setItem(
+    "memes_wave_last_tab_by_id",
+    JSON.stringify({ wave: { tab: "LEADERBOARD", competitionId: "alpha" } })
+  );
+  mockSearch = new URLSearchParams(query);
+  renderHook(() => useDefaultCompetitionNavigation(wave, true));
+  expect(mockReplace).not.toHaveBeenCalled();
+});
+it("restores unqualified old preferences only to the immutable legacy primary", () => {
+  localStorage.setItem(
+    "memes_wave_last_tab_by_id",
+    JSON.stringify({ wave: "LEADERBOARD" })
+  );
+  const { rerender } = renderHook(() =>
+    useDefaultCompetitionNavigation(wave, true)
+  );
+  expect(mockReplace).toHaveBeenCalledWith(
+    "/waves/wave/competitions/alpha?tab=leaderboard",
+    { scroll: false }
+  );
+  mockReplace.mockClear();
+  mockId = "beta";
+  rerender();
+  expect(mockReplace).not.toHaveBeenCalled();
+});
+it("pins an in-progress form even during remembered restoration", () => {
+  localStorage.setItem(
+    "memes_wave_last_tab_by_id",
+    JSON.stringify({ wave: { tab: "LEADERBOARD", competitionId: "alpha" } })
+  );
+  const form = document.createElement("div");
+  form.dataset["competitionCommand"] = "entry";
+  document.body.append(form);
+  renderHook(() => useDefaultCompetitionNavigation(wave, true));
+  expect(mockReplace).not.toHaveBeenCalled();
+});

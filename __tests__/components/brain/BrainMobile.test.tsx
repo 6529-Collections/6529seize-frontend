@@ -343,6 +343,8 @@ describe("BrainMobile", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    localStorage.clear();
+    window.history.replaceState(null, "", "/");
     mockSearchParams = new URLSearchParams();
     mockPathname = "/";
     mockPush.mockClear();
@@ -663,7 +665,7 @@ describe("BrainMobile", () => {
     });
   });
 
-  it("does not resurrect a stale tab selection when revisiting a wave", async () => {
+  it("restores the remembered tab independently when revisiting a wave", async () => {
     mockSearchParams.set("wave", "1");
     waveData = createWave(false);
 
@@ -693,8 +695,8 @@ describe("BrainMobile", () => {
     rerender(<BrainMobile>child</BrainMobile>);
 
     await waitFor(() => {
-      expect(screen.queryByTestId("about")).toBeNull();
-      expect(screen.getByText("child")).toBeInTheDocument();
+      expect(screen.getByTestId("about")).toBeInTheDocument();
+      expect(screen.queryByText("child")).toBeNull();
     });
   });
 
