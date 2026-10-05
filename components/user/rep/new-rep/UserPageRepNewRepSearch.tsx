@@ -376,22 +376,28 @@ export default function UserPageRepNewRepSearch({
           <div ref={listRef} className="tw-w-full">
             <div className="tw-relative tw-w-full tw-bg-iron-950">
               <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-1.5 tw-px-4 sm:tw-px-6">
-                <div className="tw-flex tw-w-full tw-flex-col tw-gap-2 tw-text-xs tw-font-normal tw-text-iron-400">
-                  <span>
-                    {t(locale, "rep.categories.grant.availableRep", {
-                      amount: formatNumberWithCommas(heroAvailableRep),
-                    })}
-                  </span>
-                  <span className="tw-hidden" />
-                  <span>
-                    {t(locale, "rep.categories.grant.assignedRep", {
-                      name: profile.query ?? "",
-                      amount: formatNumberWithCommas(
+                <dl className="tw-m-0 tw-flex tw-w-full tw-flex-col tw-gap-2 tw-text-xs tw-font-normal tw-text-iron-400">
+                  <div className="tw-grid tw-grid-cols-[minmax(0,1fr)_auto] tw-items-baseline tw-gap-x-4">
+                    <dt className="tw-min-w-0 tw-break-words">
+                      {t(locale, "rep.categories.grant.availableRepLabel")}
+                    </dt>
+                    <dd className="tw-m-0 tw-whitespace-nowrap tw-text-right tw-font-medium tw-tabular-nums tw-text-iron-300">
+                      {formatNumberWithCommas(heroAvailableRep)}
+                    </dd>
+                  </div>
+                  <div className="tw-grid tw-grid-cols-[minmax(0,1fr)_auto] tw-items-baseline tw-gap-x-4">
+                    <dt className="tw-min-w-0 tw-break-words">
+                      {t(locale, "rep.categories.grant.assignedRepLabel", {
+                        name: profile.query ?? "",
+                      })}
+                    </dt>
+                    <dd className="tw-m-0 tw-whitespace-nowrap tw-text-right tw-font-medium tw-tabular-nums tw-text-iron-300">
+                      {formatNumberWithCommas(
                         overview?.authenticated_user_contribution ?? 0
-                      ),
-                    })}
-                  </span>
-                </div>
+                      )}
+                    </dd>
+                  </div>
+                </dl>
               </div>
               <div className="tw-mt-6 tw-flex tw-flex-col tw-items-stretch tw-gap-6 tw-px-4 sm:tw-px-6">
                 <form
