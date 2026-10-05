@@ -98,3 +98,13 @@ it("scopes a replaced history entry to its new wave", () => {
   rememberHistoryWaveTab("second", MyStreamWaveTab.ABOUT);
   expect(getHistoryWaveTab("second")).toBe(MyStreamWaveTab.ABOUT);
 });
+
+it.each([null, undefined])(
+  "does not record a missing wave identity (%s)",
+  (waveId) => {
+    const state = { __NA: true, tree: ["waves"] };
+    window.history.replaceState(state, "", "/waves");
+    rememberHistoryWaveTab(waveId, MyStreamWaveTab.CHAT);
+    expect(window.history.state).toEqual(state);
+  }
+);

@@ -8,6 +8,10 @@ import {
 import BrainMobile from "@/components/brain/BrainMobile";
 import { BrainView } from "@/components/brain/mobile/brainMobileViews";
 import { SidebarTab } from "@/components/brain/right-sidebar/BrainRightSidebarTypes";
+import {
+  getHistoryWaveTab,
+  WAVE_TAB_STORAGE_KEY,
+} from "@/hooks/useWaveTabPreference";
 
 jest.mock("@/hooks/competitions/useDefaultCompetitionNavigation", () => ({
   useDefaultCompetitionNavigation: jest.fn(),
@@ -741,6 +745,19 @@ describe("BrainMobile", () => {
       expect(mockRememberWaveView).not.toHaveBeenCalled();
     }
   );
+
+  it("does not remember a non-wave view as a wave tab", async () => {
+    mockSearchParams.set("wave", "1");
+    waveData = createWave(false);
+    window.history.replaceState(null, "", "/waves/1");
+    const initial = JSON.stringify({ "1": "ABOUT" });
+    localStorage.setItem(WAVE_TAB_STORAGE_KEY, initial);
+    render(<BrainMobile>child</BrainMobile>);
+    await waitFor(() => expect(screen.getByTestId("tabs")).toBeInTheDocument());
+    act(() => latestTabsProps.onViewChange(BrainView.MESSAGES));
+    expect(localStorage.getItem(WAVE_TAB_STORAGE_KEY)).toBe(initial);
+    expect(getHistoryWaveTab("1")).toBeUndefined();
+  });
 
   it("keeps the selected shell tab when web create modal query changes", async () => {
     isApp = false;

@@ -71,10 +71,10 @@ export function getHistoryWaveTab(
     : undefined;
 }
 export function rememberHistoryWaveTab(
-  waveId: string,
+  waveId: string | null | undefined,
   value: RememberedWaveTab
 ) {
-  if (typeof window === "undefined") return;
+  if (typeof window === "undefined" || !waveId) return;
   const url = new URL(window.location.href);
   if (
     getActiveWaveIdFromUrl({

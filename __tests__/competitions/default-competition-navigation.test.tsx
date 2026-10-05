@@ -1,4 +1,4 @@
-import { renderHook, waitFor } from "@testing-library/react";
+import { act, renderHook, waitFor } from "@testing-library/react";
 import { useDefaultCompetitionNavigation } from "@/hooks/competitions/useDefaultCompetitionNavigation";
 import { useDefaultCompetition } from "@/hooks/competitions/useCompetitionQueries";
 import type { ApiWave } from "@/generated/models/ApiWave";
@@ -411,3 +411,28 @@ it("cancels remembered navigation when a command opens before the destination co
   rerender();
   expect(mockReplace).not.toHaveBeenCalled();
 });
+
+it.each(["data-competition-command", "role"])(
+  "keeps the committed destination when its %s control mounts before effect cleanup",
+  async (attribute) => {
+    window.history.replaceState(null, "", "/waves/wave");
+    localStorage.setItem(
+      "memes_wave_last_tab_by_id",
+      JSON.stringify({ wave: { tab: "LEADERBOARD", competitionId: "alpha" } })
+    );
+    renderHook(() => useDefaultCompetitionNavigation(wave, true));
+    const target = "/waves/wave/competitions/alpha?tab=leaderboard";
+    expect(mockReplace).toHaveBeenCalledWith(target, { scroll: false });
+    // Commit the URL without a rerender, retaining the previous render's observer.
+    window.history.replaceState(null, "", target);
+    const command = document.createElement("section");
+    command.setAttribute(attribute, attribute === "role" ? "dialog" : "entry");
+    await act(async () => {
+      document.body.append(command);
+      await Promise.resolve();
+    });
+    expect(mockReplace).toHaveBeenCalledTimes(1);
+    expect(window.location.pathname).toBe("/waves/wave/competitions/alpha");
+    expect(getHistoryWaveTab("wave")).toBeUndefined();
+  }
+);

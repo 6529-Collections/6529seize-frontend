@@ -112,6 +112,16 @@ export function useDefaultCompetitionNavigation(
     const current = search.toString() ? `${pathname}?${search}` : pathname;
     const observer = new MutationObserver((records) => {
       if (!hasAddedCommand(records)) return;
+      // The browser URL commits before passive-effect cleanup. Commands from
+      // the committed destination must not cancel its legitimate navigation.
+      if (
+        window.location.pathname !== pathname ||
+        new URLSearchParams(window.location.search).toString() !==
+          search.toString()
+      ) {
+        observer.disconnect();
+        return;
+      }
       rememberHistoryWaveTab(wave.id, MyStreamWaveTab.CHAT);
       router.replace(current, { scroll: false });
       observer.disconnect();

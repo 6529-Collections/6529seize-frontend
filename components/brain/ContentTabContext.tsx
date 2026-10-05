@@ -563,8 +563,7 @@ export const ContentTabProvider: React.FC<{
         return;
       }
       const waveId = currentWaveIdRef.current;
-      if (waveId && options?.persist === false)
-        rememberHistoryWaveTab(waveId, tab);
+      if (options?.persist === false) rememberHistoryWaveTab(waveId, tab);
       // Routed tabs become interactive in their destination layout. Selecting
       // them here first exposes a temporary view that navigation will unmount.
       if (waveId && options?.persist !== false) {
@@ -577,8 +576,7 @@ export const ContentTabProvider: React.FC<{
       }
       if (navigateToTab(tab, waveId)) return;
       setActiveTabInternal(tab, true);
-      if (waveId && options?.persist !== false)
-        rememberHistoryWaveTab(waveId, tab);
+      if (options?.persist !== false) rememberHistoryWaveTab(waveId, tab);
       if (options?.persist === false) {
         transientTabOverrideRef.current =
           waveId === null ? null : { waveId, tab };
