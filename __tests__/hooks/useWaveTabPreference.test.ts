@@ -64,3 +64,37 @@ it("rejects malformed history values", () => {
   );
   expect(getHistoryWaveTab("first")).toBeUndefined();
 });
+
+it("does not rewrite the same competition preference with reordered keys", () => {
+  localStorage.setItem(
+    WAVE_TAB_STORAGE_KEY,
+    JSON.stringify({
+      first: { competitionId: "alpha", tab: MyStreamWaveTab.LEADERBOARD },
+    })
+  );
+  const write = jest.spyOn(Storage.prototype, "setItem");
+  try {
+    const { result } = renderHook(() => useWaveTabPreference());
+    const original = result.current.tabs;
+    act(() =>
+      result.current.rememberTab("first", MyStreamWaveTab.LEADERBOARD, "alpha")
+    );
+    expect(result.current.tabs).toBe(original);
+    expect(write).not.toHaveBeenCalledWith(
+      WAVE_TAB_STORAGE_KEY,
+      expect.any(String)
+    );
+  } finally {
+    write.mockRestore();
+  }
+});
+
+it("scopes a replaced history entry to its new wave", () => {
+  rememberHistoryWaveTab("first", MyStreamWaveTab.CHAT);
+  window.history.replaceState(window.history.state, "", "/waves/second");
+  expect(getHistoryWaveTab("second")).toBeUndefined();
+  rememberHistoryWaveTab("first", MyStreamWaveTab.ABOUT);
+  expect(getHistoryWaveTab("second")).toBeUndefined();
+  rememberHistoryWaveTab("second", MyStreamWaveTab.ABOUT);
+  expect(getHistoryWaveTab("second")).toBe(MyStreamWaveTab.ABOUT);
+});

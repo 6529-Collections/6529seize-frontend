@@ -88,6 +88,14 @@ const getRestoredWaveView = (
 ): BrainView | null =>
   isApp && currentWaveView?.waveId === waveId ? currentWaveView.view : null;
 
+function getWaveTab(view: BrainView): MyStreamWaveTab | undefined {
+  const tab =
+    view === BrainView.DEFAULT
+      ? MyStreamWaveTab.CHAT
+      : (view as unknown as MyStreamWaveTab);
+  return Object.values(MyStreamWaveTab).includes(tab) ? tab : undefined;
+}
+
 const BrainMobileContent: React.FC<Props> = ({ children }) => {
   const router = useRouter();
   // react-doctor-disable-next-line react-doctor/nextjs-no-use-search-params-without-suspense covered by BrainMobile Suspense wrapper
@@ -218,15 +226,10 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
         return;
       }
       selectView(view);
-      if (waveId) {
-        const tab =
-          view === BrainView.DEFAULT
-            ? MyStreamWaveTab.CHAT
-            : (view as unknown as MyStreamWaveTab);
-        if (Object.values(MyStreamWaveTab).includes(tab)) {
-          rememberTab(waveId, tab);
-          rememberHistoryWaveTab(waveId, tab);
-        }
+      const tab = getWaveTab(view);
+      if (waveId && tab !== undefined) {
+        rememberTab(waveId, tab);
+        rememberHistoryWaveTab(waveId, tab);
       }
       if (isApp && waveId) {
         rememberWaveView({ waveId, view });

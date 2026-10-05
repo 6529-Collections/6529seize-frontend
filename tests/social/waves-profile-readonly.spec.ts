@@ -87,6 +87,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       page,
     }, testInfo) => {
       test.setTimeout(120000);
+      // The app simulation is mobile-only; the web case covers the desktop viewport.
       test.skip(
         surface === "app" && testInfo.project.name !== "web-mobile-chromium",
         "The shared app layout uses the mobile viewport."

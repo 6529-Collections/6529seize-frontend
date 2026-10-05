@@ -242,6 +242,22 @@ interface ActiveViewSelection {
   readonly view: BrainView;
 }
 
+function getRememberedView(
+  remembered: ReturnType<typeof getHistoryWaveTab>,
+  searchParams: ReadonlyURLSearchParams,
+  defaultSelectionEnabled: boolean
+): BrainView | null {
+  const savedTab = getRememberedTab(remembered);
+  if (
+    hasWaveDestination(searchParams) ||
+    typeof remembered !== "string" ||
+    savedTab === undefined ||
+    (defaultSelectionEnabled && waveCompetitionTabs[savedTab])
+  )
+    return null;
+  return WAVE_TAB_VIEWS[savedTab.toLowerCase()] ?? null;
+}
+
 export function useBrainMobileActiveView({
   firstDecisionDone,
   isApp,
@@ -293,14 +309,11 @@ export function useBrainMobileActiveView({
     const remembered =
       getHistoryWaveTab(waveId ?? undefined) ??
       (waveId ? tabs[waveId] : undefined);
-    const savedTab = getRememberedTab(remembered);
-    const hasDestination = hasWaveDestination(searchParams);
-    const restore =
-      !hasDestination &&
-      typeof remembered === "string" &&
-      savedTab !== undefined &&
-      !(defaultSelectionEnabled && waveCompetitionTabs[savedTab]);
-    const savedView = restore ? WAVE_TAB_VIEWS[savedTab.toLowerCase()] : null;
+    const savedView = getRememberedView(
+      remembered,
+      searchParams,
+      defaultSelectionEnabled
+    );
     baseView = restoredView ?? savedView ?? BrainView.DEFAULT;
     if (serialNoParam !== null) baseView = BrainView.DEFAULT;
     if (serialNoParam === null && tabParam !== null)

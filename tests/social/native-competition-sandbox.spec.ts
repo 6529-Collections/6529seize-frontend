@@ -944,6 +944,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     test(`remembers independent wave tabs on an ordinary round trip (${mode})`, async ({
       page,
     }, testInfo) => {
+      // The app simulation is mobile-only; desktop web is covered by native and legacy cases.
       test.skip(
         mode === "app" && testInfo.project.name !== "web-mobile-chromium",
         "The shared app layout uses the mobile viewport."

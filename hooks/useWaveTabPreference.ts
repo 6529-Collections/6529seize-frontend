@@ -6,7 +6,7 @@ import { getActiveWaveIdFromUrl } from "@/helpers/navigation.helpers";
 import { MyStreamWaveTab } from "@/types/waves.types";
 
 export const WAVE_TAB_STORAGE_KEY = "memes_wave_last_tab_by_id";
-export type RememberedWaveTab =
+type RememberedWaveTab =
   | MyStreamWaveTab
   | { readonly tab: MyStreamWaveTab; readonly competitionId: string };
 type WaveTabs = Record<string, RememberedWaveTab>;
@@ -107,8 +107,14 @@ export function useWaveTabPreference(storageKey = WAVE_TAB_STORAGE_KEY) {
       const value: RememberedWaveTab = competitionId
         ? { tab, competitionId }
         : tab;
-      if (JSON.stringify(tabsRef.current[waveId]) === JSON.stringify(value))
-        return;
+      const previous = tabsRef.current[waveId];
+      const unchanged =
+        typeof value === "string"
+          ? previous === value
+          : typeof previous === "object" &&
+            previous.tab === value.tab &&
+            previous.competitionId === value.competitionId;
+      if (unchanged) return;
       const next = { ...tabsRef.current, [waveId]: value };
       tabsRef.current = next;
       setTabs(next);

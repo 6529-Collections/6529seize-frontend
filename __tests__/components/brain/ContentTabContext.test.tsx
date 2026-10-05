@@ -7,6 +7,21 @@ import {
 } from "@/components/brain/ContentTabContext";
 import { MyStreamWaveTab } from "@/types/waves.types";
 import { CompetitionNavigationContext } from "@/contexts/CompetitionNavigationContext";
+import type { ApiWave } from "@/generated/models/ApiWave";
+import * as competitionHelpers from "@/helpers/competition.helpers";
+import { useDefaultCompetitionNavigation } from "@/hooks/competitions/useDefaultCompetitionNavigation";
+
+jest.mock("@/hooks/competitions/useCompetitionQueries", () => ({
+  useDefaultCompetition: () => ({
+    isSuccess: true,
+    isError: false,
+    data: { competition_id: "primary" },
+  }),
+  useCompetitionHub: () => ({
+    isSuccess: true,
+    data: { legacy_primary_competition_id: "primary" },
+  }),
+}));
 
 let mockPathname = "/waves";
 const mockPush = jest.fn();
@@ -1322,9 +1337,11 @@ describe("remembered wave entries", () => {
   it.each([
     "tab=chat",
     "drop=some-drop",
+    "entry=some-entry",
     "serialNo=3",
     "curation=gallery",
     "editPost=some-drop",
+    "edit=1",
     "create=wave",
   ])("keeps %s ahead of remembered Leaderboard", (query) => {
     localStorage.setItem(
@@ -1424,5 +1441,60 @@ describe("remembered wave entries", () => {
         competitionId: "primary",
       },
     });
+  });
+
+  it("keeps a serial-message visit in Chat after URL cleanup without losing remembered Leaderboard", () => {
+    const enabled = jest
+      .spyOn(competitionHelpers, "isMultiCompetitionEnabled")
+      .mockReturnValue(true);
+    try {
+      const saved = {
+        "main-stage": {
+          tab: MyStreamWaveTab.LEADERBOARD,
+          competitionId: "primary",
+        },
+      };
+      localStorage.setItem("memes_wave_last_tab_by_id", JSON.stringify(saved));
+      mockSearch = new URLSearchParams("serialNo=3");
+      window.history.replaceState(null, "", "/waves/main-stage?serialNo=3");
+      const wave = {
+        id: "main-stage",
+        chat: { scope: { group: null } },
+      } as ApiWave;
+      const wrapper = ({ children }: { children: React.ReactNode }) => (
+        <ContentTabProvider>{children}</ContentTabProvider>
+      );
+      const { result, rerender } = renderHook(
+        () => {
+          useDefaultCompetitionNavigation(wave, true);
+          return useContentTab();
+        },
+        { wrapper }
+      );
+      act(() =>
+        result.current.updateAvailableTabs({
+          ...rememberedWaveParams,
+          waveId: wave.id,
+          defaultSelectionEnabled: true,
+          defaultCompetitionId: "primary",
+          transientPreferredTab: MyStreamWaveTab.CHAT,
+        })
+      );
+      expect(mockReplace).not.toHaveBeenCalled();
+      mockSearch = new URLSearchParams();
+      window.history.replaceState(
+        window.history.state,
+        "",
+        "/waves/main-stage"
+      );
+      rerender();
+      expect(result.current.activeContentTab).toBe(MyStreamWaveTab.CHAT);
+      expect(mockReplace).not.toHaveBeenCalled();
+      expect(
+        JSON.parse(localStorage.getItem("memes_wave_last_tab_by_id")!)
+      ).toEqual(saved);
+    } finally {
+      enabled.mockRestore();
+    }
   });
 });

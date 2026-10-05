@@ -8,6 +8,7 @@ import {
   shouldResolveDefault,
 } from "@/helpers/default-competition.helpers";
 import { MyStreamWaveTab } from "@/types/waves.types";
+import { getHistoryWaveTab } from "@/hooks/useWaveTabPreference";
 
 let mockPathname = "/waves/wave";
 let mockSearch = new URLSearchParams();
@@ -17,6 +18,7 @@ let mockId: string | null = "alpha";
 let mockError = false;
 let mockSuccess = true;
 let mockTabs = [MyStreamWaveTab.CHAT, MyStreamWaveTab.LEADERBOARD];
+let mockLegacyPrimaryId: string | null | undefined = "alpha";
 jest.mock("next/navigation", () => ({
   usePathname: () => mockPathname,
   useSearchParams: () => mockSearch,
@@ -29,7 +31,7 @@ jest.mock("@/helpers/competition.helpers", () => ({
 jest.mock("@/hooks/competitions/useCompetitionQueries", () => ({
   useCompetitionHub: jest.fn(() => ({
     isSuccess: true,
-    data: { legacy_primary_competition_id: "alpha" },
+    data: { legacy_primary_competition_id: mockLegacyPrimaryId },
   })),
   useDefaultCompetition: jest.fn(() => ({
     isSuccess: mockSuccess,
@@ -43,6 +45,7 @@ jest.mock("@/components/brain/ContentTabContext", () => ({
 const wave = { id: "wave", chat: { scope: { group: null } } } as ApiWave;
 beforeEach(() => {
   mockTabs = [MyStreamWaveTab.CHAT, MyStreamWaveTab.LEADERBOARD];
+  mockLegacyPrimaryId = "alpha";
   localStorage.clear();
   window.history.replaceState(null, "", "/");
   mockPathname = "/waves/wave";
@@ -297,9 +300,11 @@ it("restores the ended legacy leaderboard as Submissions", () => {
 it.each([
   "tab=chat",
   "drop=some-drop",
+  "entry=some-entry",
   "serialNo=3",
   "curation=gallery",
   "editPost=some-drop",
+  "edit=1",
   "create=wave",
   "competition=older",
 ])("keeps explicit %s ahead of remembered competition navigation", (query) => {
@@ -337,5 +342,72 @@ it("pins an in-progress form even during remembered restoration", () => {
   form.dataset["competitionCommand"] = "entry";
   document.body.append(form);
   renderHook(() => useDefaultCompetitionNavigation(wave, true));
+  expect(mockReplace).not.toHaveBeenCalled();
+});
+
+it.each([null, undefined])(
+  "waits for a missing legacy primary identity (%s)",
+  (id) => {
+    window.history.replaceState(null, "", "/waves/wave");
+    localStorage.setItem(
+      "memes_wave_last_tab_by_id",
+      JSON.stringify({ wave: "LEADERBOARD" })
+    );
+    mockLegacyPrimaryId = id;
+    const { rerender } = renderHook(() =>
+      useDefaultCompetitionNavigation(wave, true)
+    );
+    expect(mockReplace).not.toHaveBeenCalled();
+    expect(getHistoryWaveTab("wave")).toBeUndefined();
+    mockLegacyPrimaryId = "alpha";
+    rerender();
+    expect(mockReplace).toHaveBeenCalledWith(
+      "/waves/wave/competitions/alpha?tab=leaderboard",
+      { scroll: false }
+    );
+  }
+);
+
+it("preserves a form opened while remembered default data is pending", () => {
+  localStorage.setItem(
+    "memes_wave_last_tab_by_id",
+    JSON.stringify({ wave: { tab: "LEADERBOARD", competitionId: "alpha" } })
+  );
+  mockSuccess = false;
+  const { rerender } = renderHook(() =>
+    useDefaultCompetitionNavigation(wave, true)
+  );
+  const dialog = document.createElement("section");
+  dialog.setAttribute("role", "dialog");
+  document.body.append(dialog);
+  mockSuccess = true;
+  rerender();
+  expect(mockReplace).not.toHaveBeenCalled();
+});
+
+it("cancels remembered navigation when a command opens before the destination commits", async () => {
+  window.history.replaceState(null, "", "/waves/wave");
+  localStorage.setItem(
+    "memes_wave_last_tab_by_id",
+    JSON.stringify({ wave: { tab: "LEADERBOARD", competitionId: "alpha" } })
+  );
+  const { rerender } = renderHook(() =>
+    useDefaultCompetitionNavigation(wave, true)
+  );
+  expect(mockReplace).toHaveBeenCalledWith(
+    "/waves/wave/competitions/alpha?tab=leaderboard",
+    { scroll: false }
+  );
+  const command = document.createElement("section");
+  command.setAttribute("data-competition-command", "entry");
+  document.body.append(command);
+  await waitFor(() =>
+    expect(mockReplace).toHaveBeenLastCalledWith("/waves/wave", {
+      scroll: false,
+    })
+  );
+  expect(getHistoryWaveTab("wave")).toBe(MyStreamWaveTab.CHAT);
+  mockReplace.mockClear();
+  rerender();
   expect(mockReplace).not.toHaveBeenCalled();
 });

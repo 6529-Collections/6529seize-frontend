@@ -89,6 +89,7 @@ export function useDefaultCompetitionNavigation(
       typeof remembered === "object"
         ? remembered.competitionId
         : legacyHub.data?.legacy_primary_competition_id;
+    if (rememberedId === null || rememberedId === undefined) return;
     if (!selectedId || selectedId !== rememberedId) {
       rememberHistoryWaveTab(wave.id, MyStreamWaveTab.CHAT);
       return;
@@ -106,9 +107,20 @@ export function useDefaultCompetitionNavigation(
     params.delete("wave");
     params.delete("default");
     params.set("tab", waveCompetitionTabs[savedTab]!);
+    // Keep a command opened during a pending route transition in its original
+    // visit. Once the destination commits this effect's observer is removed.
+    const current = search.toString() ? `${pathname}?${search}` : pathname;
+    const observer = new MutationObserver((records) => {
+      if (!hasAddedCommand(records)) return;
+      rememberHistoryWaveTab(wave.id, MyStreamWaveTab.CHAT);
+      router.replace(current, { scroll: false });
+      observer.disconnect();
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
     router.replace(`${getCompetitionRoute(wave.id, selectedId)}?${params}`, {
       scroll: false,
     });
+    return () => observer.disconnect();
   }, [
     restore,
     wave,
@@ -120,6 +132,7 @@ export function useDefaultCompetitionNavigation(
     legacyHub.isSuccess,
     legacyHub.data,
     availableTabs,
+    pathname,
     search,
     router,
   ]);

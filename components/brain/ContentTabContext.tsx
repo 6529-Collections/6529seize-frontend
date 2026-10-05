@@ -376,6 +376,9 @@ export const ContentTabProvider: React.FC<{
           : null;
 
       if (transientTab !== null && tabs.includes(transientTab)) {
+        // URL cleanup must preserve this message visit without replacing the
+        // wave's remembered ordinary-entry preference.
+        if (waveId) rememberHistoryWaveTab(waveId, transientTab);
         setActiveTabInternal(transientTab);
         return;
       }
@@ -560,6 +563,8 @@ export const ContentTabProvider: React.FC<{
         return;
       }
       const waveId = currentWaveIdRef.current;
+      if (waveId && options?.persist === false)
+        rememberHistoryWaveTab(waveId, tab);
       // Routed tabs become interactive in their destination layout. Selecting
       // them here first exposes a temporary view that navigation will unmount.
       if (waveId && options?.persist !== false) {
