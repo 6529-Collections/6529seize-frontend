@@ -41,10 +41,7 @@ const mockReplace = jest.fn();
 const mockMemesArtSubmissionModal = jest.fn((props: any) =>
   props.isOpen ? <div data-testid="memes-submit-modal" /> : null
 );
-const mockSearchParams = {
-  get: jest.fn(),
-  toString: jest.fn(),
-};
+let mockSearchParams = new URLSearchParams();
 const mockWave = {
   id: "wave-1",
   name: "Wave 1",
@@ -193,6 +190,7 @@ jest.mock("@/hooks/waves/useApprovalWaveStatus", () => ({
 }));
 
 jest.mock("@/hooks/waves/useWaveMetadata", () => ({
+  useWaveMetadata: () => ({ isPending: false }),
   useWaveOutcomeVisibility: () => true,
   useWaveSubmissionButtonLabelOverride: () => null,
 }));
@@ -297,8 +295,7 @@ describe("MyStreamWave registration", () => {
     jest.clearAllMocks();
     mockIsApp = false;
     mockWaveInfo = getDefaultMockWaveInfo();
-    mockSearchParams.get.mockReturnValue(null);
-    mockSearchParams.toString.mockReturnValue("");
+    mockSearchParams = new URLSearchParams();
   });
 
   it("registers the mounted wave for direct URL loads", async () => {
