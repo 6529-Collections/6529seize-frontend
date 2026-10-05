@@ -56,6 +56,7 @@ import { ARTWORK_DOCUMENTATION_MESSAGES } from "@/i18n/messages/artwork-document
 import { ARTWORK_DOCUMENTATION_INTEGRATION_MESSAGES } from "@/i18n/messages/artwork-documentation-integration";
 import { COLLECT_MESSAGES } from "@/i18n/messages/collect";
 import { COLLECT_TDH_TARGET_MESSAGES } from "@/i18n/messages/collect-tdh-target";
+import { DROP_FORGE_ADMIN_MESSAGES } from "@/i18n/messages/drop-forge-admins";
 
 type MessageEntry = readonly [key: string, value: string];
 
@@ -2902,6 +2903,7 @@ export const EN_US_MESSAGES = {
   ...artworkShareMessages,
   ...COLLECT_MESSAGES,
   ...COLLECT_TDH_TARGET_MESSAGES,
+  ...DROP_FORGE_ADMIN_MESSAGES,
   ...profileCmsStudioMessages,
   ...profileCmsAgentMessages,
   ...studioTemplateDescriptions,

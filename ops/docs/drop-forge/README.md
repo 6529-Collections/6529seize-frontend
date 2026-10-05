@@ -12,6 +12,7 @@ This area covers:
 - launch claim queue and launch-detail operations
 - publishing claim assets to Arweave
 - initializing or updating on-chain launch phases and running airdrops
+- listing and managing creator-contract admins
 
 ## Route Coverage
 
@@ -33,6 +34,12 @@ This area covers:
   distribution-admin access, claims-admin access, or Drop Forge admin access.
 - `Craft Claims` access is narrower: distribution-admin wallets only.
 - `Launch Claims` access is narrower: claims-admin or Drop Forge admin wallets.
+- Drop Forge admin means the active creator contract's owner or an approved
+  on-chain admin. These wallets also have launch action-tracking access.
+- Every wallet that can see the landing route can see `Contract Admins`, with
+  the owner first. Add/Revoke controls are restricted to the owner and
+  configured claims-admin wallets; the contract itself only accepts these
+  changes from its owner.
 - While permissions are still resolving, Drop Forge routes show
   `Checking permissions...`.
 - If the wallet lacks access after permissions resolve, the page shows
