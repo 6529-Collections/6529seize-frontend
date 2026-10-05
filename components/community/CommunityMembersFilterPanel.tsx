@@ -150,60 +150,57 @@ export default function CommunityMembersFilterPanel(
             <div
               role="group"
               aria-label={t(locale, "network.groupFilter.title")}
-              className="tw-mb-4 tw-grid tw-grid-cols-4 tw-gap-1 tw-rounded-xl tw-bg-iron-900 tw-p-1"
             >
-              {CREATE_WAVE_INLINE_GROUP_QUICK_RULES.map((rule) => (
-                <button
-                  key={rule}
-                  type="button"
-                  aria-pressed={view === rule}
-                  onClick={(event) => changeView(rule, event.detail === 0)}
-                  className={`${NAV_BUTTON_CLASSES} ${view === rule ? "tw-bg-iron-700 tw-text-iron-50" : "tw-bg-transparent tw-text-iron-300 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-50"}`}
-                >
-                  {t(locale, RULE_LABELS[rule])}
-                  {configuredRules.has(rule) && configuredMark}
-                </button>
-              ))}
-            </div>
-            <div className="tw-mb-4">
-              <h2 className="tw-mb-2 tw-mt-0 !tw-text-sm !tw-font-semibold !tw-text-iron-300">
-                {t(locale, "network.groupFilter.more")}
-              </h2>
-              <div
-                role="group"
-                aria-label={t(locale, "network.groupFilter.more")}
-                className="tw-divide-y tw-divide-solid tw-divide-iron-800 tw-rounded-xl tw-bg-iron-900/50 tw-px-2"
-              >
-                {(
-                  [
-                    "identities",
-                    ...CREATE_WAVE_INLINE_GROUP_MORE_RULES,
-                  ] as const
-                ).map((rule) => (
+              <div className="tw-mb-4 tw-grid tw-grid-cols-4 tw-gap-1 tw-rounded-xl tw-bg-iron-900 tw-p-1">
+                {CREATE_WAVE_INLINE_GROUP_QUICK_RULES.map((rule) => (
                   <button
                     key={rule}
                     type="button"
-                    aria-pressed={view === rule}
+                    aria-current={view === rule ? "true" : undefined}
                     onClick={(event) => changeView(rule, event.detail === 0)}
-                    className={`tw-flex tw-min-h-11 tw-w-full tw-items-center tw-justify-between tw-gap-2 tw-border-0 tw-bg-transparent tw-px-2 tw-py-2 tw-text-left tw-text-sm tw-font-medium focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 ${view === rule ? "tw-text-iron-50" : "tw-text-iron-300 desktop-hover:hover:tw-text-iron-50"}`}
+                    className={`${NAV_BUTTON_CLASSES} ${view === rule ? "tw-bg-iron-700 tw-text-iron-50" : "tw-bg-transparent tw-text-iron-300 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-50"}`}
                   >
-                    <span className="tw-flex tw-items-center tw-gap-2">
-                      {t(
-                        locale,
-                        rule === "identities"
-                          ? "waves.create.groups.identities"
-                          : RULE_LABELS[rule]
-                      )}
-                      {(rule === "identities"
-                        ? identitiesConfigured
-                        : configuredRules.has(rule)) && configuredMark}
-                    </span>
-                    <ChevronRightIcon
-                      className="tw-size-4 tw-shrink-0 tw-text-iron-500"
-                      aria-hidden="true"
-                    />
+                    {t(locale, RULE_LABELS[rule])}
+                    {configuredRules.has(rule) && configuredMark}
                   </button>
                 ))}
+              </div>
+              <div className="tw-mb-4">
+                <h2 className="tw-mb-2 tw-mt-0 !tw-text-sm !tw-font-semibold !tw-text-iron-300">
+                  {t(locale, "network.groupFilter.more")}
+                </h2>
+                <div className="tw-divide-y tw-divide-solid tw-divide-iron-800 tw-rounded-xl tw-bg-iron-900/50 tw-px-2">
+                  {(
+                    [
+                      "identities",
+                      ...CREATE_WAVE_INLINE_GROUP_MORE_RULES,
+                    ] as const
+                  ).map((rule) => (
+                    <button
+                      key={rule}
+                      type="button"
+                      aria-current={view === rule ? "true" : undefined}
+                      onClick={(event) => changeView(rule, event.detail === 0)}
+                      className={`tw-flex tw-min-h-11 tw-w-full tw-items-center tw-justify-between tw-gap-2 tw-border-0 tw-bg-transparent tw-px-2 tw-py-2 tw-text-left tw-text-sm tw-font-medium focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 ${view === rule ? "tw-text-iron-50" : "tw-text-iron-300 desktop-hover:hover:tw-text-iron-50"}`}
+                    >
+                      <span className="tw-flex tw-items-center tw-gap-2">
+                        {t(
+                          locale,
+                          rule === "identities"
+                            ? "waves.create.groups.identities"
+                            : RULE_LABELS[rule]
+                        )}
+                        {(rule === "identities"
+                          ? identitiesConfigured
+                          : configuredRules.has(rule)) && configuredMark}
+                      </span>
+                      <ChevronRightIcon
+                        className="tw-size-4 tw-shrink-0 tw-text-iron-500"
+                        aria-hidden="true"
+                      />
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
             <div

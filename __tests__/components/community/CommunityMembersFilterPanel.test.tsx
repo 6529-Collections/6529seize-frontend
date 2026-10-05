@@ -84,6 +84,14 @@ it("starts with the common criteria and retains readiness guidance without the i
     ).toBeInTheDocument();
   }
   expect(screen.getByRole("heading", { name: "More filters" })).toBeVisible();
+  expect(screen.getByRole("group", { name: "Filter Network" })).toBeVisible();
+  expect(screen.getByRole("button", { name: "Level" })).toHaveAttribute(
+    "aria-current",
+    "true"
+  );
+  expect(
+    screen.getByRole("button", { name: "Identities" })
+  ).not.toHaveAttribute("aria-current");
   expect(
     screen.queryByRole("button", { name: "More filters" })
   ).not.toBeInTheDocument();
@@ -121,6 +129,13 @@ it("preserves common criteria while visiting advanced criteria and submits the e
   await user.click(
     screen.getByRole("button", { name: "Identities", exact: true })
   );
+  expect(screen.getByRole("button", { name: "Identities" })).toHaveAttribute(
+    "aria-current",
+    "true"
+  );
+  expect(
+    screen.getByRole("button", { name: /^Level(?: Configured)?$/ })
+  ).not.toHaveAttribute("aria-current");
   expect(
     screen.getByText("No identities are explicitly included.")
   ).toBeInTheDocument();
