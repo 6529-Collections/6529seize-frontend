@@ -2796,7 +2796,6 @@
         "From the mobile web Profile Waves Feed, Waves returns to the Wave list. Opening a feed post enters its Wave conversation, and browser Back returns to the feed.",
         "Announcements uses a compact row with its timestamp, unread state and score shield. Active Votes rows also have a score shield that opens score details. The current wave highlights in Active Votes as well as in the collection list below when it appears in both. In Worth Checking Out, each avatar and its bottom-right score shield form one wave navigation link; hovering or focusing the combined link shows score details.",
         "Every Worth Checking Out recommendation also appears in All at its recent-activity position; Joined normally includes only waves the user has joined.",
-
         "Switching All and Joined preserves list position instead of jumping to the active wave; a shorter list can clamp the position. Selecting another wave reveals its active row again.",
         "A Wave opened from a direct link remains visible and highlighted in the left sidebar even when it is not followed, pinned, or present in the loaded overview; this temporary route context does not join or pin it.",
         "When a direct link opens a subwave, the sidebar surfaces its visible parent, loads and expands the subwave list, reveals the selected child row, and keeps that parent tree ahead of paginated activity rows so every sibling remains reachable.",
@@ -2968,13 +2967,12 @@
         "sidebar"
       ],
       "facts": [
-        "To create a wave on web, click the + button in the Waves panel or open /waves?create=wave.",
-        "If the connected identity has no profile handle, Create Wave opens a Create your profile first dialog with Go to Identity and Not now instead of opening the multi-step form.",
-        "With a profile handle, Create Wave opens in a centered modal on desktop and the standard bottom sheet below 768px; both use the same multi-step form.",
+        "On web, select the labeled Create wave button in the desktop Waves panel or mobile Waves list. A collapsed sidebar keeps the plus icon. You can also open /waves?create=wave or /waves/create, or search Create wave, New wave, or Start a wave in global Search.",
+        "Signed-out entry explains Connect to create a wave and preserves the creation URL after wallet connection. An identity without a profile handle sees Create your profile first; Go to Identity carries a return link so completed profile setup returns to /waves/create for standalone creation, or to the parent wave for a subwave.",
+        "Chat uses two screens: name and first post, then a review with Confirm and create. Optional settings holds access, picture, and guidelines. Rank, Approve, and subwaves keep guided setup.",
         "In Create Wave and Create subwave, Close, Escape, and clicking or tapping outside close an untouched form immediately. If work has been entered, Discard your changes? offers Keep editing or Discard changes. Keep editing preserves the current settings, picture, description, and step. Discard changes closes the form and loses unsaved work; existing saved drafts remain.",
-        "After leaving Setup, named wave settings may be recovered from Saved Drafts on the same browser and device if browser storage is available. Drafts do not restore pictures, descriptions, or the current step, and subwave creation has no draft-resume control.",
-        "The app full-page create route remains /waves/create where app mode uses it.",
-        "Wave creation requires a connected profile and the necessary permissions for the selected groups/settings."
+        "Named standalone waves save text and settings in Saved Drafts on this device for the current wallet and profile. Media and attachments must be added again. Older drafts restore settings only. Restoring opens the first screen; subwaves have no draft-resume control.",
+        "Creating a wave requires a connected profile and valid permissions for the selected groups. Successful creation opens the new wave and offers Copy wave link."
       ],
       "canonical_path": "/waves?create=wave",
       "related_paths": ["/waves"],
@@ -3005,8 +3003,8 @@
         "description"
       ],
       "facts": [
-        "The wave creation flow starts with Setup and then configures access, rules, description, and additional steps depending on wave type. A final read-only Overview follows Description, with Confirm and create as the submit action.",
-        "The Setup step begins with the Create Wave heading and keeps the wave name, picture, type, and Rank ranking mode visible; Appearance and labels contains display, proposal-card, and applicable tab-label customization.",
+        "Standalone Chat starts with the name and First post, then Review wave opens the final review. Confirm and create submits. Access, picture, and guidelines are in Optional settings. Rank, Approve, and subwaves keep their guided sequence and final Overview.",
+        "Rank, Approve, and subwave Setup keeps the wave name, picture, type, and applicable Rank ranking mode visible; Appearance and labels contains display, proposal-card, and applicable tab-label customization.",
         "Optional sections are named for their contents instead of repeating Advanced settings. They show Customized for non-default values and open automatically when a hidden field needs attention.",
         "The Access step initially shows one Who can access this wave control. By default, that group can also chat and, for Rank and Approve waves, submit and vote; only the creator can administer the wave.",
         "Customize other permissions expands the separate chat, submission, voting, and admin group controls when a wave needs different access rules.",

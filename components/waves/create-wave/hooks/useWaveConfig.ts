@@ -370,9 +370,11 @@ export function useWaveConfig({
   const onStep = async ({
     step: newStep,
     direction,
+    validateGroups = false,
   }: {
     readonly step: CreateWaveStep;
     readonly direction: "forward" | "backward";
+    readonly validateGroups?: boolean;
   }) => {
     const requestId = ++navigationRequestId.current;
     if (direction === "forward") {
@@ -386,7 +388,7 @@ export function useWaveConfig({
         return;
       }
       if (
-        step === CreateWaveStep.GROUPS &&
+        (step === CreateWaveStep.GROUPS || validateGroups) &&
         effectiveConfig.groups.canView !== null
       ) {
         const groupsAreValid = await validateCurrentGroups(requestId);
