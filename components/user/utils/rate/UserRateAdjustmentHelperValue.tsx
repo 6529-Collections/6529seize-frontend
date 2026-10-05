@@ -1,7 +1,7 @@
 "use client";
 
-import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import { formatNumber } from "@/i18n/format";
+import { useEffect, useState } from "react";
+import { formatNumberWithCommas } from "@/helpers/Helpers";
 
 enum VALUE_STATE {
   POSITIVE = "POSITIVE",
@@ -22,7 +22,6 @@ export default function UserRateAdjustmentHelperValue({
   readonly value: number;
   readonly title: string;
 }) {
-  const locale = useBrowserLocale();
   const getValueState = (n: number) => {
     if (n > 0) {
       return VALUE_STATE.POSITIVE;
@@ -33,19 +32,23 @@ export default function UserRateAdjustmentHelperValue({
     }
   };
 
-  const valueState = getValueState(value);
-  const valueString = formatNumber(locale, value, {
-    signDisplay: "exceptZero",
-  });
+  const getValueString = (n: number) =>
+    n > 0 ? `+${formatNumberWithCommas(n)}` : `${formatNumberWithCommas(n)}`;
+
+  const [valueState, setValueState] = useState(getValueState(value));
+  const [valueString, setValueString] = useState(getValueString(value));
+
+  useEffect(() => {
+    setValueState(getValueState(value));
+    setValueString(getValueString(value));
+  }, [value]);
 
   return (
-    <div className="tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-1.5 tw-gap-y-1">
-      <span className="tw-text-xs tw-font-medium tw-text-iron-400">
+    <div className="tw-flex tw-items-center tw-gap-1.5 tw-px-2 tw-py-1.5 tw-bg-iron-800/50 tw-border tw-border-solid tw-border-iron-700/50 tw-rounded">
+      <span className="tw-text-xs tw-text-iron-500 tw-font-medium">
         {title}
       </span>
-      <span
-        className={`${CLASSES[valueState]} tw-text-xs tw-font-semibold tw-tabular-nums`}
-      >
+      <span className={`${CLASSES[valueState]} tw-text-xs tw-font-semibold`}>
         {valueString}
       </span>
     </div>

@@ -254,7 +254,6 @@ const REP_CATEGORY_MESSAGES = objectMessages("rep.categories", {
   "search.resultsLabel": "REP category search results",
   "helpBotReserved.error": "{category} is managed by help6529.",
   "grant.searchPlaceholder": "Category to grant REP for",
-  "grant.amountLabel": "Total REP",
   "grant.minimumCharacters": "Type at least {min} characters.",
   "grant.maximumCharacters": "Type at most {max} characters.",
   "grant.searching": "Finding existing categories...",
@@ -2421,18 +2420,6 @@ const PROFILE_ACTIVITY_RATE_MESSAGES = objectMessages("profileActivity.rate", {
 
 const USER_RATE_MESSAGES = objectMessages("user.rate", {
   "subtitle.waveRep": "give Wave REP for",
-  current: "Current {type}:",
-  adjustment: "Adjustment:",
-  "rep.title": "Grant Rep",
-  "nic.title": "Rate NIC",
-  "nic.label": "Your total NIC Rating of {name}",
-  "nic.tooltipLabel": "Your total NIC Rating of {name}:",
-  "nic.rate": "Rate",
-  "nic.available": "Your available NIC:",
-  "nic.limits": "Your max/min NIC Rating to {name}:",
-  "nic.proxy": "Proxy for",
-  "nic.updated": "NIC rating updated.",
-  "nic.updateFailed": "Couldn't update this NIC rating.",
 } as const);
 
 const ABOUT_TECH_MESSAGES = objectMessages("about.tech", {

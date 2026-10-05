@@ -10,7 +10,7 @@ import { getStringAsNumberOrZero } from "@/helpers/Helpers";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { commonApiPost } from "@/services/api/common-api";
 import { useMutation } from "@tanstack/react-query";
-import { useContext, useEffect, useId, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
 import { useClickAway, useKeyPressEvent } from "react-use";
@@ -31,7 +31,6 @@ export default function UserPageRepModifyModal({
   readonly profile: ApiIdentity;
   readonly category: string;
 }) {
-  const inputId = useId();
   const { onProfileRepModify } = useContext(ReactQueryWrapperContext);
   const { requestAuth, setToast, connectedProfile, activeProfileProxy } =
     useContext(AuthContext);
@@ -89,10 +88,9 @@ export default function UserPageRepModifyModal({
 
   const adjustedValueNum = getStringAsNumberOrZero(adjustedRatingStr);
   const isValidValue =
-    /^-?\d+$/.test(adjustedRatingStr) &&
-    (!!activeProfileProxy ||
-      (adjustedValueNum >= minMaxValues.min &&
-        adjustedValueNum <= minMaxValues.max));
+    !!activeProfileProxy ||
+    (adjustedValueNum >= minMaxValues.min &&
+      adjustedValueNum <= minMaxValues.max);
 
   const [newRating, setNewRating] = useState<number>(
     getStringAsNumberOrZero(adjustedRatingStr)
@@ -176,7 +174,7 @@ export default function UserPageRepModifyModal({
 
   const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (mutating || isSaveDisabled) {
+    if (mutating) {
       return;
     }
     setMutating(true);
@@ -211,7 +209,7 @@ export default function UserPageRepModifyModal({
       exit={{ opacity: 0 }}
       className="tailwind-scope tw-fixed tw-inset-0 tw-z-[1100] tw-cursor-default"
     >
-      <div className="tw-absolute tw-inset-0 tw-bg-gray-600 tw-bg-opacity-50" />
+      <div className="tw-absolute tw-inset-0 tw-bg-gray-600 tw-bg-opacity-50 tw-backdrop-blur-[1px]" />
       <div className="tw-relative tw-flex tw-min-h-full tw-w-full tw-items-end tw-justify-center tw-overflow-y-auto tw-p-2 tw-text-center sm:tw-items-center lg:tw-p-0">
         <div
           ref={modalRef}
@@ -230,10 +228,7 @@ export default function UserPageRepModifyModal({
           )}
           <form onSubmit={onSubmit} className="tw-mt-4">
             <div>
-              <label
-                htmlFor={inputId}
-                className="tw-block tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-300"
-              >
+              <label className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-500">
                 Your total Rep for{" "}
                 <span className="tw-font-semibold tw-text-iron-300">
                   {category}
@@ -247,7 +242,6 @@ export default function UserPageRepModifyModal({
                   minMax={minMaxValues}
                   isProxy={!!activeProfileProxy}
                   inputRef={inputRef}
-                  inputId={inputId}
                   required
                 />
               </div>

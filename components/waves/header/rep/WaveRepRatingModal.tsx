@@ -5,7 +5,6 @@ import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrappe
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import Button from "@/components/utils/button/Button";
 import UserRateAdjustmentHelper from "@/components/user/utils/rate/UserRateAdjustmentHelper";
-import { USER_RATE_FIELD_CLASS_NAME } from "@/components/user/utils/rate/userRateStyles";
 import UserPageRateInput from "@/components/user/utils/rate/UserPageRateInput";
 import useKeyboardFocusScroll from "@/components/waves/create-wave/hooks/useKeyboardFocusScroll";
 import type { ApiChangeWaveRepRating } from "@/generated/models/ApiChangeWaveRepRating";
@@ -91,10 +90,7 @@ export default function WaveRepRatingModal({
   }, [allocationReady, amountDirty, currentRating, settledCategory]);
 
   const amount = getStringAsNumberOrZero(amountStr);
-  const amountValid =
-    /^-?\d+$/.test(amountStr) &&
-    amount >= minMaxValues.min &&
-    amount <= minMaxValues.max;
+  const amountValid = amount >= minMaxValues.min && amount <= minMaxValues.max;
   const haveChanged = amount !== currentRating;
   const isProxyMode = Boolean(activeProfileProxy);
   const isSaveDisabled =
@@ -232,7 +228,10 @@ export default function WaveRepRatingModal({
       title={t(WAVE_REP_MODAL_LOCALE, "waves.rep.modal.title")}
       isOpen
       onClose={onClose}
-      closeLabel={t(WAVE_REP_MODAL_LOCALE, "waves.rep.modal.closeAriaLabel")}
+      closeLabel={t(
+        WAVE_REP_MODAL_LOCALE,
+        "waves.rep.modal.closeAriaLabel"
+      )}
       tabletModal
       showScrollbar
       enableDragToClose
@@ -278,7 +277,7 @@ export default function WaveRepRatingModal({
               aria-invalid={!categoryValid}
               value={category}
               onChange={(event) => setCategory(event.currentTarget.value)}
-              className={`${USER_RATE_FIELD_CLASS_NAME} tw-mt-1.5`}
+              className="tw-mt-1.5 tw-block tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-3 tw-text-sm tw-font-medium tw-text-white tw-caret-primary-400 tw-transition focus:tw-border-primary-400 focus:tw-outline-none"
             />
             <p
               id={categoryErrorId}

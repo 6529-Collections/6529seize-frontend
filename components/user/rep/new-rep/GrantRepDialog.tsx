@@ -1,6 +1,3 @@
-import { USER_RATE_CLOSE_BUTTON_CLASS_NAME } from "@/components/user/utils/rate/userRateStyles";
-import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import { t } from "@/i18n/messages";
 import type { ApiRepOverview } from "@/generated/models/ApiRepOverview";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { RateMatter } from "@/types/enums";
@@ -19,16 +16,15 @@ export default function GrantRepDialog({
   readonly isOpen: boolean;
   readonly onClose: () => void;
 }) {
-  const locale = useBrowserLocale();
   return (
     <MobileWrapperDialog
-      title={t(locale, "user.rate.rep.title")}
+      title="Grant Rep"
       isOpen={isOpen}
       onClose={onClose}
       tabletModal
       maxWidthClass="md:tw-max-w-md"
       headerClassName="tw-mb-4"
-      headerCloseButtonClassName={USER_RATE_CLOSE_BUTTON_CLASS_NAME}
+      headerCloseButtonClassName="!tw-mr-0 !tw-h-9 !tw-w-9 !tw-rounded-lg !tw-p-0 [&_svg]:!tw-h-5 [&_svg]:!tw-w-5"
     >
       <UserPageRateWrapper profile={profile} type={RateMatter.REP}>
         <UserPageRepNewRep

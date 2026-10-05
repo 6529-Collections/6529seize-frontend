@@ -2,9 +2,9 @@
 
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
-import { useContext, useEffect, useId, useMemo, useRef, useState } from "react";
+import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { InformationCircleIcon } from "@heroicons/react/24/outline";
 import type { ApiRepOverview } from "@/generated/models/ApiRepOverview";
 import UserPageRepNewRepSearchDropdown from "./UserPageRepNewRepSearchDropdown";
@@ -18,7 +18,10 @@ import {
 } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { AuthContext } from "@/components/auth/Auth";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import { getStringAsNumberOrZero } from "@/helpers/Helpers";
+import {
+  formatNumberWithCommas,
+  getStringAsNumberOrZero,
+} from "@/helpers/Helpers";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import UserRateAdjustmentHelper from "@/components/user/utils/rate/UserRateAdjustmentHelper";
 import UserPageRateInput from "@/components/user/utils/rate/UserPageRateInput";
@@ -28,14 +31,8 @@ import {
   isHelpBotCreditRepCategory,
 } from "@/components/utils/input/rep-category/repCategoryConstants";
 import { getRepCategoryViolation } from "@/components/utils/input/rep-category/repCategoryValidation";
-import { formatNumber } from "@/i18n/format";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import { t, tRich } from "@/i18n/messages";
-import {
-  USER_RATE_FIELD_CLASS_NAME,
-  USER_RATE_SAVE_BUTTON_CLASS_NAME,
-  USER_RATE_CANCEL_BUTTON_CLASS_NAME,
-} from "@/components/user/utils/rate/userRateStyles";
+import { t } from "@/i18n/messages";
 import {
   isMemesNomineeLookalike,
   MEMES_NOMINEE_CATEGORY,
@@ -78,11 +75,6 @@ export default function UserPageRepNewRepSearch({
   readonly onCancel?: (() => void) | undefined;
 }) {
   const locale = useBrowserLocale();
-  const amountInputId = useId();
-  const amountInputRef = useRef<HTMLInputElement>(null);
-  const statsId = useId();
-  const adjustmentId = useId();
-  const reduceMotion = useReducedMotion();
   const { onProfileRepModify } = useContext(ReactQueryWrapperContext);
   const { requestAuth, setToast, connectedProfile, activeProfileProxy } =
     useContext(AuthContext);
@@ -141,9 +133,8 @@ export default function UserPageRepNewRepSearch({
 
   const amountNum = getStringAsNumberOrZero(amountStr);
   const isValidValue =
-    /^-?\d+$/.test(amountStr) &&
-    (!!activeProfileProxy ||
-      (amountNum >= minMaxValues.min && amountNum <= minMaxValues.max));
+    !!activeProfileProxy ||
+    (amountNum >= minMaxValues.min && amountNum <= minMaxValues.max);
 
   const newRating = getStringAsNumberOrZero(amountStr);
   const haveChanged = newRating !== (repState?.rater_contribution ?? 0);
@@ -204,7 +195,6 @@ export default function UserPageRepNewRepSearch({
       setErrorMsg(null);
       setShowErrorDetails(true);
       setIsOpen(false);
-      amountInputRef.current?.focus();
     } catch (error: unknown) {
       setErrorMsg(
         getErrorMessage(error, t(locale, "rep.categories.grant.errors.generic"))
@@ -260,14 +250,7 @@ export default function UserPageRepNewRepSearch({
   });
 
   const onGrantRep = async () => {
-    if (
-      mutating ||
-      !selectedCategory ||
-      !amountStr ||
-      !profile.query ||
-      !isValidValue
-    )
-      return;
+    if (mutating || !selectedCategory || !amountStr || !profile.query) return;
     if (isHelpBotCreditRepCategory(selectedCategory)) {
       showHelpBotCreditRepCategoryError();
       return;
@@ -323,7 +306,7 @@ export default function UserPageRepNewRepSearch({
     showSubmissionSearchHint;
   const submissionHint = t(locale, "rep.categories.grant.submissionHint", {
     category: MEMES_NOMINEE_CATEGORY,
-    amount: formatNumber(locale, MEMES_NOMINEE_REQUIRED_REP),
+    amount: formatNumberWithCommas(MEMES_NOMINEE_REQUIRED_REP),
   });
   const submissionLookalikeInfo = selectedNonQualifyingLookalike
     ? t(locale, "rep.categories.grant.submissionLookalikeInfo", {
@@ -392,53 +375,35 @@ export default function UserPageRepNewRepSearch({
         <div className="tw-w-full">
           <div ref={listRef} className="tw-w-full">
             <div className="tw-relative tw-w-full tw-bg-iron-950">
-              <div
-                id={statsId}
-                className="tw-space-y-1.5 tw-px-4 tw-text-sm tw-leading-5 tw-text-iron-400 sm:tw-px-6"
-              >
-                <div>
-                  {tRich(locale, "rep.categories.grant.availableRep", {
-                    amount: (
-                      <span
-                        key="available"
-                        className="tw-font-semibold tw-tabular-nums tw-text-iron-100"
-                      >
-                        {formatNumber(locale, heroAvailableRep)}
-                      </span>
-                    ),
-                  })}
-                </div>
-                <div className="tw-break-words">
-                  {tRich(locale, "rep.categories.grant.assignedRep", {
-                    name: profile.query ?? "",
-                    amount: (
-                      <span
-                        key="assigned"
-                        className="tw-font-semibold tw-tabular-nums tw-text-iron-100"
-                      >
-                        {formatNumber(
-                          locale,
-                          overview?.authenticated_user_contribution ?? 0
-                        )}
-                      </span>
-                    ),
-                  })}
+              <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-1.5 tw-px-4 sm:tw-px-6">
+                <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-2 tw-text-xs tw-font-medium tw-text-iron-500">
+                  <span>
+                    {t(locale, "rep.categories.grant.availableRep", {
+                      amount: formatNumberWithCommas(heroAvailableRep),
+                    })}
+                  </span>
+                  <span className="tw-h-3 tw-w-px tw-bg-white/20" />
+                  <span>
+                    {t(locale, "rep.categories.grant.assignedRep", {
+                      name: profile.query ?? "",
+                      amount: formatNumberWithCommas(
+                        overview?.authenticated_user_contribution ?? 0
+                      ),
+                    })}
+                  </span>
                 </div>
               </div>
-              <div className="tw-mt-5 tw-flex tw-flex-col tw-items-stretch tw-gap-5 tw-px-4 sm:tw-px-6">
+              <div className="tw-mt-3 tw-flex tw-flex-col tw-items-stretch tw-gap-3 tw-px-4 sm:tw-px-6">
                 <form
                   onSubmit={onSearchSubmit}
                   className="tw-relative tw-w-full"
                 >
-                  <label
-                    htmlFor="search-rep"
-                    className="tw-mb-2 tw-block tw-text-sm tw-font-medium tw-text-iron-300"
-                  >
+                  <label htmlFor="search-rep" className="tw-sr-only">
                     {t(locale, "rep.categories.grant.searchPlaceholder")}
                   </label>
                   <div className="tw-relative tw-w-full">
                     <svg
-                      className="tw-pointer-events-none tw-absolute tw-left-3 tw-top-4 tw-h-4 tw-w-4 tw-text-iron-400"
+                      className="tw-pointer-events-none tw-absolute tw-left-3 tw-top-3.5 tw-h-4 tw-w-4 tw-text-iron-500"
                       viewBox="0 0 20 20"
                       fill="currentColor"
                       aria-hidden="true"
@@ -466,7 +431,7 @@ export default function UserPageRepNewRepSearch({
                           ? SUBMISSION_GUIDANCE_ID
                           : undefined
                       }
-                      className={`${USER_RATE_FIELD_CLASS_NAME} !tw-pl-9 !tw-pr-10`}
+                      className="tw-form-input tw-block tw-w-full tw-appearance-none tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-[#0A0A0A]/80 tw-py-3 tw-pl-9 tw-pr-3 tw-text-sm tw-font-medium tw-text-white tw-caret-primary-400 tw-transition tw-duration-300 tw-ease-out placeholder:tw-font-normal placeholder:tw-text-iron-500 focus:tw-border-blue-500/50 focus:tw-outline-none lg:tw-font-semibold lg:placeholder:tw-text-iron-400"
                       placeholder={t(
                         locale,
                         "rep.categories.grant.searchPlaceholder"
@@ -499,18 +464,13 @@ export default function UserPageRepNewRepSearch({
                   <AnimatePresence initial={false}>
                     {isOpen && !selectedCategory && (
                       <motion.div
-                        initial={reduceMotion ? false : { opacity: 0, y: -4 }}
+                        initial={{ opacity: 0, y: -4 }}
                         animate={{ opacity: 1, y: 0 }}
-                        exit={
-                          reduceMotion ? { opacity: 1 } : { opacity: 0, y: -4 }
-                        }
-                        transition={{
-                          duration: reduceMotion ? 0 : 0.15,
-                          ease: "easeOut",
-                        }}
-                        className="tw-mt-2"
+                        exit={{ opacity: 0, y: -4 }}
+                        transition={{ duration: 0.15, ease: "easeOut" }}
+                        className="tw-mt-1 tw-will-change-transform"
                       >
-                        <div className="tw-rounded-lg tw-bg-iron-900 tw-p-2">
+                        <div className="tw-rounded-lg tw-bg-iron-900/70 tw-p-2 tw-shadow-xl tw-ring-1 tw-ring-white/5">
                           <UserPageRepNewRepSearchDropdown
                             categories={categoriesToDisplay}
                             state={repSearchState}
@@ -524,30 +484,18 @@ export default function UserPageRepNewRepSearch({
                   </AnimatePresence>
                 </form>
                 <div>
-                  <label
-                    htmlFor={amountInputId}
-                    className="tw-mb-2 tw-block tw-text-sm tw-font-medium tw-text-iron-300"
-                  >
-                    {t(locale, "rep.categories.grant.amountLabel")}
-                  </label>
                   <div className="tw-relative tw-flex tw-w-full">
                     <UserPageRateInput
                       value={amountStr}
                       onChange={setAmountStr}
                       minMax={minMaxValues}
                       isProxy={!!activeProfileProxy}
-                      inputId={amountInputId}
-                      inputRef={amountInputRef}
-                      descriptionId={
-                        selectedCategory
-                          ? `${statsId} ${adjustmentId}`
-                          : statsId
-                      }
+                      spanClassName="tw-flex tw-flex-col tw-items-center tw-justify-center tw-rounded-l-lg tw-border tw-border-solid tw-border-white/10 tw-bg-[#0A0A0A]/80 tw-px-3"
+                      inputClassName="tw-form-input tw-appearance-none -tw-ml-px tw-block tw-w-full tw-rounded-l-none tw-rounded-r-lg tw-border tw-border-solid tw-border-white/10 tw-py-3 tw-px-3 tw-bg-[#0A0A0A]/80 tw-text-white tw-text-sm tw-font-medium lg:tw-font-semibold tw-caret-primary-400 placeholder:tw-text-iron-500 lg:placeholder:tw-text-iron-400 focus:tw-outline-none focus:tw-border-blue-500/50 tw-transition tw-duration-300 tw-ease-out"
                     />
                   </div>
                   {selectedCategory && (
                     <UserRateAdjustmentHelper
-                      id={adjustmentId}
                       inLineValues={true}
                       originalValue={repState?.rater_contribution ?? 0}
                       adjustedValue={newRating}
@@ -556,27 +504,29 @@ export default function UserPageRepNewRepSearch({
                   )}
                 </div>
               </div>
-              <div className="tw-mt-6 tw-flex tw-flex-wrap tw-justify-end tw-gap-2 tw-px-4 sm:tw-px-6">
+              <div className="tw-mt-4 tw-flex tw-flex-col tw-gap-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800/60 tw-px-4 tw-pt-4 sm:tw-px-6">
+                <Button
+                  disabled={isGrantDisabled}
+                  onClick={onGrantRep}
+                  loading={mutating}
+                  size="lg"
+                  fullWidth
+                  className="tw-shadow-none"
+                >
+                  {t(locale, "rep.categories.grant.actions.grant")}
+                </Button>
                 {onCancel && (
                   <Button
                     onClick={onCancel}
                     disabled={mutating}
                     variant="secondary"
                     size="lg"
-                    className={USER_RATE_CANCEL_BUTTON_CLASS_NAME}
+                    fullWidth
+                    className="tw-shadow-none"
                   >
                     {t(locale, "rep.categories.grant.actions.cancel")}
                   </Button>
                 )}
-                <Button
-                  disabled={isGrantDisabled}
-                  onClick={onGrantRep}
-                  loading={mutating}
-                  size="lg"
-                  className={USER_RATE_SAVE_BUTTON_CLASS_NAME}
-                >
-                  {t(locale, "rep.categories.grant.actions.grant")}
-                </Button>
               </div>
             </div>
           </div>

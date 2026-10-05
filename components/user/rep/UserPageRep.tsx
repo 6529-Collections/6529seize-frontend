@@ -9,8 +9,11 @@ import type { ApiRepCategoriesPage } from "@/generated/models/ApiRepCategoriesPa
 import type { ApiCicOverview } from "@/generated/models/ApiCicOverview";
 import { commonApiFetch } from "@/services/api/common-api";
 import { AuthContext } from "@/components/auth/Auth";
+import Button from "@/components/utils/button/Button";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import GlobalRepCategoryDialog from "@/components/rep/categories/GlobalRepCategoryDialog";
+import { RateMatter } from "@/types/enums";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 import {
@@ -21,10 +24,11 @@ import {
   useRef,
   useState,
 } from "react";
-import RateNicDialog from "../identity/header/cic-rate/RateNicDialog";
 import IdentityGettingStartedCard from "../identity/getting-started/IdentityGettingStartedCard";
 import UserPageIdentityHeader from "../identity/header/UserPageIdentityHeader";
+import UserPageIdentityHeaderCICRate from "../identity/header/cic-rate/UserPageIdentityHeaderCICRate";
 import UserPageIdentityStatements from "../identity/statements/UserPageIdentityStatements";
+import UserPageRateWrapper from "../utils/rate/UserPageRateWrapper";
 
 import UserPageCombinedActivityLog from "./UserPageCombinedActivityLog";
 import type { RepDirection } from "./UserPageRep.helpers";
@@ -407,11 +411,35 @@ export default function UserPageRep({
         onClose={() => setRepDialog(null)}
       />
 
-      <RateNicDialog
-        profile={profile}
+      <MobileWrapperDialog
+        title="Rate NIC"
         isOpen={isNicRateOpen}
         onClose={() => setIsNicRateOpen(false)}
-      />
+        noPadding
+        tabletModal
+        maxWidthClass="md:tw-max-w-md"
+        headerClassName="tw-pb-6 tw-pt-4"
+      >
+        <div className="tw-px-4 tw-pb-6 sm:tw-px-6">
+          <UserPageRateWrapper profile={profile} type={RateMatter.NIC}>
+            <UserPageIdentityHeaderCICRate
+              profile={profile}
+              isTooltip={false}
+              onSuccess={() => setIsNicRateOpen(false)}
+            />
+          </UserPageRateWrapper>
+          <div className="tw-mt-3">
+            <Button
+              variant="secondary"
+              size="lg"
+              fullWidth
+              onClick={() => setIsNicRateOpen(false)}
+            >
+              Cancel
+            </Button>
+          </div>
+        </div>
+      </MobileWrapperDialog>
     </div>
   );
 }

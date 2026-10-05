@@ -33,12 +33,10 @@ export default function UserPageRateWrapper({
   type,
   children,
   hideOwnProfileMessage = false,
-  unavailableFooter,
 }: {
   readonly profile: ApiIdentity;
   readonly type: RateMatter;
   readonly children: React.ReactNode;
-  readonly unavailableFooter?: React.ReactNode;
   readonly hideOwnProfileMessage?: boolean;
 }) {
   const { address } = useSeizeConnectContext();
@@ -124,12 +122,7 @@ export default function UserPageRateWrapper({
   }
 
   if (raterContextMessage) {
-    return (
-      <>
-        <CommonInfoBox message={raterContextMessage} />
-        {unavailableFooter}
-      </>
-    );
+    return <CommonInfoBox message={raterContextMessage} />;
   }
 
   return <>{children}</>;

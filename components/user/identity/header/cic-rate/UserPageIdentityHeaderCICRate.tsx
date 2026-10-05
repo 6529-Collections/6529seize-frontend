@@ -1,7 +1,7 @@
 "use client";
 
 import type { FormEvent } from "react";
-import { useContext, useEffect, useId, useRef, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import type { ApiProfileRaterCicState } from "@/entities/IProfile";
 import { getStringAsNumberOrZero } from "@/helpers/Helpers";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
@@ -21,12 +21,17 @@ import UserPageIdentityHeaderCICRateStats from "./UserPageIdentityHeaderCICRateS
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 
-import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import { t, tRich } from "@/i18n/messages";
-import {
-  USER_RATE_SAVE_BUTTON_CLASS_NAME,
-  USER_RATE_CANCEL_BUTTON_CLASS_NAME,
-} from "@/components/user/utils/rate/userRateStyles";
+const CIC_SPAN_CLASS_NAME =
+  "tw-flex tw-flex-col tw-items-center tw-justify-center tw-bg-black/40 tw-rounded-l-lg tw-border tw-border-solid tw-border-white/[0.15] tw-px-3";
+
+const CIC_FOCUS_RING_CLASS_NAME =
+  "focus:tw-border-emerald-500 focus:tw-ring-1 focus:tw-ring-emerald-500/30";
+
+const CIC_INPUT_TOOLTIP_CLASS_NAME =
+  "tw-max-w-[12rem] -tw-ml-0.5 tw-appearance-none tw-block tw-rounded-l-none tw-rounded-r-lg tw-border tw-border-solid tw-border-white/[0.15] tw-py-3 tw-px-3 tw-bg-black/40 focus:tw-bg-black/60 tw-text-white tw-font-semibold tw-caret-emerald-400 tw-shadow-inner hover:tw-border-white/30 placeholder:tw-text-iron-500 focus:tw-outline-none tw-text-base sm:tw-text-sm tw-transition tw-duration-300 tw-ease-out";
+
+const CIC_INPUT_FULL_CLASS_NAME =
+  "tw-w-full -tw-ml-0.5 tw-appearance-none tw-block tw-rounded-l-none tw-rounded-r-lg tw-border tw-border-solid tw-border-white/[0.15] tw-py-3.5 tw-px-4 tw-bg-black/40 focus:tw-bg-black/60 tw-text-white tw-font-semibold tw-caret-emerald-400 tw-shadow-inner hover:tw-border-white/30 placeholder:tw-text-iron-500 focus:tw-outline-none tw-text-base sm:tw-text-sm tw-transition tw-duration-300 tw-ease-out";
 
 export default function UserPageIdentityHeaderCICRate({
   profile,
@@ -39,10 +44,6 @@ export default function UserPageIdentityHeaderCICRate({
   readonly onSuccess?: () => void;
   readonly onCancel?: () => void;
 }) {
-  const locale = useBrowserLocale();
-  const inputId = useId();
-  const statsId = useId();
-  const adjustmentId = useId();
   const { address } = useSeizeConnectContext();
   const { requestAuth, setToast, connectedProfile, activeProfileProxy } =
     useContext(AuthContext);
@@ -67,11 +68,11 @@ export default function UserPageIdentityHeaderCICRate({
     staleTime: 0,
   });
 
-  const [mutating, setMutating] = useState(false);
-  const submissionInFlight = useRef(false);
+  const [mutating, setMutating] = useState<boolean>(false);
 
   const updateCICMutation = useMutation({
     mutationFn: async (amount: number) => {
+      setMutating(true);
       return await commonApiPost({
         endpoint: `profiles/${profile.query}/cic/rating`,
         body: {
@@ -81,7 +82,7 @@ export default function UserPageIdentityHeaderCICRate({
     },
     onSuccess: () => {
       setToast({
-        message: t(locale, "user.rate.nic.updated"),
+        message: "NIC rating updated.",
         type: "success",
       });
       onProfileCICModify({
@@ -94,6 +95,17 @@ export default function UserPageIdentityHeaderCICRate({
         profileProxy: activeProfileProxy ?? null,
       });
       onSuccess?.();
+    },
+    onError: (error) => {
+      setToast({
+        type: "error",
+        title: "Couldn't update this NIC rating.",
+        description: "Please try again.",
+        details: getToastErrorDetails(error),
+      });
+    },
+    onSettled: () => {
+      setMutating(false);
     },
   });
 
@@ -182,36 +194,23 @@ export default function UserPageIdentityHeaderCICRate({
   const haveChanged = newRating !== originalRating;
   const isProxy = !!activeProfileProxy;
   const isValidValue =
-    /^-?\d+$/.test(adjustedRatingStr) &&
-    (isProxy ||
-      (newRating >= minMaxValues.min && newRating <= minMaxValues.max));
+    isProxy || (newRating >= minMaxValues.min && newRating <= minMaxValues.max);
   const isSaveDisabled = !haveChanged || !isValidValue;
 
   const onSave = async () => {
-    if (submissionInFlight.current || isSaveDisabled) return;
-    submissionInFlight.current = true;
-    setMutating(true);
-    try {
-      const { success } = await requestAuth();
-      if (!success) {
-        setToast({
-          message: t(locale, "rep.categories.grant.toast.loginRequired"),
-          type: "error",
-        });
-        return;
-      }
-      await updateCICMutation.mutateAsync(newRating);
-    } catch (error) {
+    const { success } = await requestAuth();
+    if (!success) {
       setToast({
+        message: "Log in to continue.",
         type: "error",
-        title: t(locale, "user.rate.nic.updateFailed"),
-        description: t(locale, "rep.categories.grant.toast.tryAgain"),
-        details: getToastErrorDetails(error),
       });
-    } finally {
-      submissionInFlight.current = false;
-      setMutating(false);
+      return;
     }
+    if (!haveChanged || !isValidValue) {
+      return;
+    }
+
+    await updateCICMutation.mutateAsync(newRating);
   };
 
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -221,15 +220,21 @@ export default function UserPageIdentityHeaderCICRate({
 
   const rateInput = (
     <div
-      className={`tw-relative tw-mt-2 tw-flex tw-w-full ${isTooltip ? "sm:tw-max-w-48" : ""}`}
+      className={`tw-relative tw-flex tw-w-full ${
+        isTooltip ? "tw-mt-1.5" : "tw-mb-2"
+      }`}
     >
       <UserPageRateInput
         value={adjustedRatingStr}
         onChange={setAdjustedRatingStr}
         minMax={minMaxValues}
         isProxy={isProxy}
-        inputId={inputId}
-        descriptionId={`${statsId} ${adjustmentId}`}
+        spanClassName={CIC_SPAN_CLASS_NAME}
+        inputClassName={
+          isTooltip ? CIC_INPUT_TOOLTIP_CLASS_NAME : CIC_INPUT_FULL_CLASS_NAME
+        }
+        inputId="nic-rating-input"
+        focusRingClassName={CIC_FOCUS_RING_CLASS_NAME}
         required
       />
     </div>
@@ -237,94 +242,91 @@ export default function UserPageIdentityHeaderCICRate({
 
   const adjustmentHelper = (
     <UserRateAdjustmentHelper
-      id={adjustmentId}
-      inLineValues={true}
+      inLineValues={isTooltip}
       originalValue={originalRating}
       adjustedValue={newRating}
       adjustmentType="NIC"
     />
   );
 
-  const label = tRich(
-    locale,
-    isTooltip ? "user.rate.nic.tooltipLabel" : "user.rate.nic.label",
-    {
-      name: (
-        <span key="profile" className="tw-break-words">
-          {profile.query}
-        </span>
-      ),
-    }
-  );
-
   return (
     <div>
-      <div id={statsId}>
-        <UserPageIdentityHeaderCICRateStats
-          isTooltip={isTooltip}
-          profile={profile}
-          minMaxValues={minMaxValues}
-          heroAvailableCredit={
-            currentCICState?.cic_ratings_left_to_give_by_rater ?? 0
-          }
-        />
-      </div>
-      <form onSubmit={onSubmit} className="tw-mt-5">
+      <UserPageIdentityHeaderCICRateStats
+        isTooltip={isTooltip}
+        profile={profile}
+        minMaxValues={minMaxValues}
+        heroAvailableCredit={
+          currentCICState?.cic_ratings_left_to_give_by_rater ?? 0
+        }
+      />
+      <form onSubmit={onSubmit} className="tw-mt-6">
         {isTooltip ? (
           <>
             <div className="tw-flex tw-items-end tw-gap-3">
-              <div className="tw-min-w-0 tw-flex-1">
+              <div className="tw-w-full sm:tw-w-auto">
                 <label
-                  htmlFor={inputId}
-                  className="tw-block tw-text-sm tw-font-medium tw-text-iron-300"
+                  htmlFor="nic-rating-input"
+                  className="tw-block tw-max-w-[12rem] tw-text-sm tw-font-normal tw-text-iron-200"
                 >
-                  {label}
+                  Your total NIC Rating of{" "}
+                  <span className="tw-whitespace-nowrap">{profile.query}:</span>
                 </label>
                 {rateInput}
               </div>
-              <Button
-                type="submit"
-                disabled={isSaveDisabled}
-                loading={mutating}
-                size="lg"
-                className={USER_RATE_SAVE_BUTTON_CLASS_NAME}
-              >
-                {t(locale, "user.rate.nic.rate")}
-              </Button>
+              <div className="tw-w-full sm:tw-w-auto">
+                <div className="tw-inline-flex tw-w-full tw-items-end tw-space-x-6 sm:tw-w-auto">
+                  <Button
+                    type="submit"
+                    disabled={isSaveDisabled}
+                    loading={mutating}
+                    variant="success"
+                    size="lg"
+                    fullWidth
+                    className="sm:tw-w-auto"
+                  >
+                    Rate
+                  </Button>
+                </div>
+              </div>
             </div>
             {adjustmentHelper}
           </>
         ) : (
           <>
             <label
-              htmlFor={inputId}
-              className="tw-block tw-text-sm tw-font-medium tw-text-iron-300"
+              htmlFor="nic-rating-input"
+              className="tw-mb-2 tw-block tw-text-sm tw-font-medium tw-text-iron-400"
             >
-              {label}
+              Your total NIC Rating of{" "}
+              <span className="tw-whitespace-nowrap">{profile.query}</span>
             </label>
             {rateInput}
+
             {adjustmentHelper}
-            <div className="tw-mt-6 tw-flex tw-flex-wrap tw-justify-end tw-gap-2">
-              {onCancel && (
-                <Button
-                  onClick={onCancel}
-                  disabled={mutating}
-                  variant="secondary"
-                  size="lg"
-                  className={USER_RATE_CANCEL_BUTTON_CLASS_NAME}
-                >
-                  {t(locale, "rep.categories.grant.actions.cancel")}
-                </Button>
-              )}
+
+            <div className="tw-mt-4 tw-flex tw-flex-col tw-gap-3 md:tw-flex-row-reverse">
               <Button
                 type="submit"
                 disabled={isSaveDisabled}
                 loading={mutating}
+                variant="success"
                 size="lg"
-                className={USER_RATE_SAVE_BUTTON_CLASS_NAME}
+                fullWidth
+                className="md:tw-w-auto md:tw-flex-1"
               >
-                {t(locale, "user.rate.nic.rate")}
+                Rate
               </Button>
+              {onCancel && (
+                <Button
+                  onClick={onCancel}
+                  variant="secondary"
+                  size="lg"
+                  fullWidth
+                  className="md:tw-w-auto md:tw-flex-1"
+                >
+                  Cancel
+                </Button>
+              )}
             </div>
           </>
         )}
