@@ -230,14 +230,15 @@ async function expectFreshExactSource(
             waitUntil: "domcontentloaded",
             timeout: RESPONSE_TIMEOUT_MS,
           });
-          await waitForRouteReady(page);
+          await waitForRouteReady(page, { timeout: RESPONSE_TIMEOUT_MS });
         }
         return pending;
       },
       {
         message:
           "Museum publication refresh must settle before exact-source validation",
-        timeout: RESPONSE_TIMEOUT_MS,
+        // Budget for a reload, bounded route readiness, and the next probe.
+        timeout: RESPONSE_TIMEOUT_MS * 3,
         intervals: [1000, 2000, 4000],
       }
     )
