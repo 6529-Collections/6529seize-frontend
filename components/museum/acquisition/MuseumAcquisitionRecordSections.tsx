@@ -131,7 +131,7 @@ export function AcquisitionDocumentSection({
         </div>
       ) : (
         <MuseumMarkdown
-          className="tw-mt-6"
+          className="tw-mt-6 tw-break-words"
           embeddedDocument
           sourceCommit={sourceCommit}
           sourcePath={document.sourcePath}

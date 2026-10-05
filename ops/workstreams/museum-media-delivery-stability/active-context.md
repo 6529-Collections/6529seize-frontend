@@ -57,6 +57,14 @@ not suppress ORB or failed media responses.
 
 ## Release
 
+The exact-build tablet geometry check found a long source URL overflowing the
+Casey artist and acquisition documents. Artist profile and acquisition document
+renderers now allow long source links to wrap. The capture inventory includes
+all artist and acquisition routes using these shared renderers, in addition to
+the 25 routes affected by the delivery mapping. Initial parallel local browser
+runs hit public API rate limits; those captures are superseded and final local
+validation runs at reduced concurrency.
+
 Frontend only; no backend Lambda deployment or database change is required.
 Complete the Museum screenshot review before opening the PR. Follow normal PR
 bot review and CI, then staging deployment and the affected E2E gate before
