@@ -4,6 +4,7 @@ import type { ButtonVariant } from "@/components/utils/button/buttonStyles";
 import Button from "@/components/utils/button/Button";
 import MobileWrapperDialog from "./MobileWrapperDialog";
 import { Description } from "@headlessui/react";
+import type { ReactNode } from "react";
 
 interface MobileWrapperConfirmationDialogProps {
   readonly isOpen: boolean;
@@ -17,6 +18,7 @@ interface MobileWrapperConfirmationDialogProps {
   readonly confirmDisabled?: boolean | undefined;
   readonly confirmVariant?: ButtonVariant | undefined;
   readonly zIndexClassName?: string | undefined;
+  readonly children?: ReactNode;
 }
 
 export default function MobileWrapperConfirmationDialog({
@@ -31,6 +33,7 @@ export default function MobileWrapperConfirmationDialog({
   confirmDisabled = false,
   confirmVariant = "primary",
   zIndexClassName,
+  children,
 }: MobileWrapperConfirmationDialogProps) {
   return (
     <MobileWrapperDialog
@@ -45,6 +48,7 @@ export default function MobileWrapperConfirmationDialog({
         <Description className="tw-mb-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-400">
           {message}
         </Description>
+        {children}
 
         <div className="tw-mt-6 tw-flex tw-flex-col tw-gap-2 sm:tw-flex-row sm:tw-justify-end sm:tw-gap-3">
           <Button

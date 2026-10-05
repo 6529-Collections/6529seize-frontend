@@ -4,6 +4,7 @@ import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { BrainView } from "../mobile/brainMobileViews";
 import { useWaveTimers } from "@/hooks/useWaveTimers";
 import { useApproveWaveCustomTabLabels } from "@/hooks/waves/useWaveMetadata";
+import { useCompetitionNavigation } from "@/contexts/CompetitionNavigationContext";
 
 type RegisterTabRef = (view: BrainView, el: HTMLButtonElement | null) => void;
 
@@ -24,6 +25,7 @@ const MyStreamWaveTabsLeaderboard: React.FC<
   registerTabRef,
   renderAfterLeaderboard,
 }) => {
+  const { flat, nativeCompetition } = useCompetitionNavigation();
   const {
     voting: { isCompleted },
     decisions: { firstDecisionDone },
@@ -34,6 +36,9 @@ const MyStreamWaveTabsLeaderboard: React.FC<
     isCompleted && !isApproveWave
       ? BrainView.SUBMISSIONS
       : BrainView.LEADERBOARD;
+  const isPrimaryActive =
+    activeView === primaryView ||
+    (flat && !nativeCompetition && activeView === BrainView.LEADERBOARD);
   let primaryLabel: string;
   if (isApproveWave) {
     primaryLabel = approveLabels.approvals;
@@ -67,10 +72,10 @@ const MyStreamWaveTabsLeaderboard: React.FC<
           registerTabRef?.(primaryView, el);
         }}
         onClick={() => onViewChange(primaryView)}
-        aria-current={activeView === primaryView ? "true" : undefined}
-        className={getButtonStateClasses(activeView === primaryView)}
+        aria-current={isPrimaryActive ? "true" : undefined}
+        className={getButtonStateClasses(isPrimaryActive)}
       >
-        <span className={getButtonTextClasses(activeView === primaryView)}>
+        <span className={getButtonTextClasses(isPrimaryActive)}>
           {primaryLabel}
         </span>
       </button>

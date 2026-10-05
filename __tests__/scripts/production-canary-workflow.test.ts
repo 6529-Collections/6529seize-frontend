@@ -50,6 +50,11 @@ function resolveSource(
     run?: Record<string, unknown>;
     jobs?: Record<string, unknown>[];
     emptyHistory?: boolean;
+    apiFailure?: {
+      endpoint: "runs" | "run" | "jobs";
+      count: number;
+      message?: string;
+    };
   } = {}
 ) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "production-canary-"));
@@ -97,11 +102,23 @@ function resolveSource(
         "-c",
         `
 gh() {
-  case "$2" in
-    */actions/workflows/*) cat "$FIXTURE_ROOT/runs.json" ;;
-    */attempts/*) cat "$FIXTURE_ROOT/jobs.json" ;;
-    *) printf '%s\\n' "$2" > "$FIXTURE_ROOT/selected-run"; cat "$FIXTURE_ROOT/run.json" ;;
+  local endpoint="\${@: -1}" fixture count_file count
+  case "$endpoint" in
+    */actions/workflows/*) fixture=runs ;;
+    */attempts/*) fixture=jobs ;;
+    *) fixture=run; printf '%s\\n' "$endpoint" > "$FIXTURE_ROOT/selected-run" ;;
   esac
+  count_file="$FIXTURE_ROOT/$fixture-count"
+  count=0
+  if [ -f "$count_file" ]; then read -r count < "$count_file"; fi
+  count=$((count + 1))
+  printf '%s\\n' "$count" > "$count_file"
+  if [ "$fixture" = "$FAILED_ENDPOINT" ] && [ "$count" -le "$FAILURE_COUNT" ]; then
+    printf 'partial failed response'
+    printf '%s\\n' "$FAILURE_MESSAGE" >&2
+    return 1
+  fi
+  cat "$FIXTURE_ROOT/$fixture.json"
 }
 ${source.run}
 `,
@@ -118,6 +135,10 @@ ${source.run}
           FIXTURE_ROOT: root.replaceAll("\\", "/"),
           RUNNER_TEMP: root.replaceAll("\\", "/"),
           GITHUB_OUTPUT: path.join(root, "output").replaceAll("\\", "/"),
+          FAILED_ENDPOINT: options.apiFailure?.endpoint ?? "",
+          FAILURE_COUNT: String(options.apiFailure?.count ?? 0),
+          FAILURE_MESSAGE:
+            options.apiFailure?.message ?? "gh: Server Error (HTTP 502)",
         },
       }
     );
@@ -130,6 +151,17 @@ ${source.run}
       selected: fs.existsSync(path.join(root, "selected-run"))
         ? fs.readFileSync(path.join(root, "selected-run"), "utf8")
         : "",
+      attempts: Object.fromEntries(
+        ["runs", "run", "jobs"].map((endpoint) => {
+          const counter = path.join(root, `${endpoint}-count`);
+          return [
+            endpoint,
+            fs.existsSync(counter)
+              ? Number(fs.readFileSync(counter, "utf8"))
+              : 0,
+          ];
+        })
+      ),
     };
   } finally {
     fs.rmSync(root, { recursive: true, force: true });
@@ -152,6 +184,56 @@ describe("daily production canary", () => {
     });
     expect(result.status).toBe(0);
     expect(result.selected).toContain("/actions/runs/99");
+  });
+
+  it.each(["runs", "run", "jobs"] as const)(
+    "recovers %s lookup after transient 502s without accepting partial responses",
+    (endpoint) => {
+      const result = resolveSource({ apiFailure: { endpoint, count: 2 } });
+      expect(result.status).toBe(0);
+      expect(result.attempts[endpoint]).toBe(3);
+      expect(result.output).toContain(`sha=${sha}`);
+      expect(result.output).toContain("deploy-run-id=101");
+    }
+  );
+
+  it("recovers a transport failure on the exact post-deploy run lookup", () => {
+    const result = resolveSource({
+      event: "workflow_dispatch",
+      apiFailure: {
+        endpoint: "run",
+        count: 1,
+        message: "error connecting to api.github.com: dial tcp: i/o timeout",
+      },
+    });
+    expect(result.status).toBe(0);
+    expect(result.attempts["run"]).toBe(2);
+    expect(result.output).toContain("deploy-run-id=99");
+  });
+
+  it.each([
+    { message: "gh: Server Error (HTTP 502)", attempts: 3 },
+    { message: "gh: Forbidden (HTTP 403)", attempts: 1 },
+    { message: "gh: Not Found (HTTP 404)", attempts: 1 },
+  ])(
+    "fails closed after $attempts attempts for $message",
+    ({ message, attempts }) => {
+      const result = resolveSource({
+        apiFailure: { endpoint: "run", count: 3, message },
+      });
+      expect(result.status).not.toBe(0);
+      expect(result.attempts["run"]).toBe(attempts);
+      expect(result.attempts["jobs"]).toBe(0);
+      expect(result.output).toBe("");
+    }
+  );
+
+  it("does not retry a successful API response with rejected deployment provenance", () => {
+    const result = resolveSource({ run: { conclusion: "failure" } });
+    expect(result.status).not.toBe(0);
+    expect(result.attempts["run"]).toBe(1);
+    expect(result.attempts["jobs"]).toBe(0);
+    expect(result.output).toBe("");
   });
 
   it.each([

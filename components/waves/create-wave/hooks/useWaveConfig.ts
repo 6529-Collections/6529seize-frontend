@@ -23,6 +23,14 @@ import { DEFAULT_PROPOSAL_CARD_RECIPE } from "@/helpers/waves/proposal-card.help
 import { useWaveGroupValidation } from "./useWaveGroupValidation";
 import type { ApiWaveGroupRole } from "@/generated/models/ApiWaveGroupRole";
 
+import {
+  type PrivilegeGroupKey,
+  getPrivilegeGroupKeys,
+  updateManualPrivilegeSelections,
+  getMatchingPrivilegeUpdates,
+  getPrivilegeGroupDefaults,
+} from "./waveConfigGroups";
+
 // Stable empty reference so the derived `errors` keeps identity while there
 // is nothing to show (no surfaced errors), avoiding needless re-renders.
 const EMPTY_VALIDATION_ERRORS: CREATE_WAVE_VALIDATION_ERROR[] = [];
@@ -33,87 +41,39 @@ interface EndDateConfig {
   period: Period | null;
 }
 
-type PrivilegeGroupKey = "canDrop" | "canVote" | "canChat";
-
-const getPrivilegeGroupKeys = (
-  waveType: ApiWaveType
-): readonly PrivilegeGroupKey[] =>
-  waveType === ApiWaveType.Chat
-    ? ["canChat"]
-    : ["canChat", "canDrop", "canVote"];
-
-const updateManualPrivilegeSelections = ({
-  groups,
-  manuallySelected,
-  privilegeGroups,
-  syncMatchingViewGroups,
-  syncPrivilegeGroups,
-}: {
-  readonly groups: CreateWaveConfig["groups"];
-  readonly manuallySelected: Set<PrivilegeGroupKey>;
-  readonly privilegeGroups: readonly PrivilegeGroupKey[];
-  readonly syncMatchingViewGroups: boolean;
-  readonly syncPrivilegeGroups: boolean;
-}) => {
-  if (syncMatchingViewGroups) {
-    for (const privilegeGroup of privilegeGroups) {
-      if (groups[privilegeGroup] === groups.canView) {
-        manuallySelected.delete(privilegeGroup);
-      } else {
-        manuallySelected.add(privilegeGroup);
-      }
-    }
-    return;
+function asChatOnlyConfig(config: CreateWaveConfig): CreateWaveConfig {
+  if (
+    config.overview.type === ApiWaveType.Chat &&
+    config.overview.typeSelected &&
+    config.chat.enabled
+  ) {
+    return config;
   }
-  if (!syncPrivilegeGroups) {
-    for (const privilegeGroup of privilegeGroups) {
-      manuallySelected.add(privilegeGroup);
-    }
-  }
-};
-
-const getMatchingPrivilegeUpdates = ({
-  groups,
-  nextGroupId,
-  privilegeGroups,
-}: {
-  readonly groups: CreateWaveConfig["groups"];
-  readonly nextGroupId: string | null;
-  readonly privilegeGroups: readonly PrivilegeGroupKey[];
-}): Partial<CreateWaveConfig["groups"]> =>
-  Object.fromEntries(
-    privilegeGroups
-      .filter((privilegeGroup) => groups[privilegeGroup] === groups.canView)
-      .map((privilegeGroup) => [privilegeGroup, nextGroupId])
-  );
-
-const getPrivilegeGroupDefaults = ({
-  groupId,
-  waveType,
-  manuallySelected,
-}: {
-  readonly groupId: string | null;
-  readonly waveType: ApiWaveType;
-  readonly manuallySelected: ReadonlySet<PrivilegeGroupKey>;
-}): Partial<CreateWaveConfig["groups"]> => {
   return {
-    ...(!manuallySelected.has("canChat") ? { canChat: groupId } : {}),
-    ...(waveType !== ApiWaveType.Chat && !manuallySelected.has("canDrop")
-      ? { canDrop: groupId }
-      : {}),
-    ...(waveType !== ApiWaveType.Chat && !manuallySelected.has("canVote")
-      ? { canVote: groupId }
-      : {}),
+    ...config,
+    overview: {
+      ...config.overview,
+      type: ApiWaveType.Chat,
+      typeSelected: true,
+    },
+    chat: { enabled: true },
   };
-};
+}
 
-// eslint-disable-next-line max-lines-per-function -- Existing controller; initialize inherited access here so validation and submission share the same state.
 export function useWaveConfig({
   initialViewGroupId = null,
+  initialWaveType = ApiWaveType.Chat,
+  initialConfigTransform,
+  chatOnly = false,
 }: {
   readonly initialViewGroupId?: string | null | undefined;
+  readonly initialWaveType?: ApiWaveType;
+  readonly chatOnly?: boolean;
+  readonly initialConfigTransform?: (
+    config: CreateWaveConfig
+  ) => CreateWaveConfig;
 } = {}) {
-  const initialType = ApiWaveType.Chat;
+  const initialType = chatOnly ? ApiWaveType.Chat : initialWaveType;
   const initialStep = CreateWaveStep.OVERVIEW;
 
   // Get initial config for a wave type
@@ -199,11 +159,10 @@ export function useWaveConfig({
   };
 
   // State management
-  const [config, setConfig] = useState<CreateWaveConfig>(
-    getInitialConfig({
-      type: initialType,
-    })
-  );
+  const [config, setConfig] = useState<CreateWaveConfig>(() => {
+    const initial = getInitialConfig({ type: initialType });
+    return initialConfigTransform ? initialConfigTransform(initial) : initial;
+  });
 
   const [endDateConfig, setEndDateConfig] = useState<EndDateConfig>({
     time: null,
@@ -238,7 +197,7 @@ export function useWaveConfig({
   const navigationRequestId = useRef(0);
 
   const shouldLoadMemeCount =
-    config.voting.type === ApiWaveCreditType.CardSetTdh;
+    !chatOnly && config.voting.type === ApiWaveCreditType.CardSetTdh;
   const memeCountQuery = useMemeCardCount({ enabled: shouldLoadMemeCount });
   const memeCount =
     shouldLoadMemeCount && !memeCountQuery.isError
@@ -246,21 +205,25 @@ export function useWaveConfig({
       : null;
 
   const effectiveConfig = useMemo<CreateWaveConfig>(() => {
-    if (config.voting.creditNftMemeCount === memeCount) {
-      return config;
+    // Old wave drafts may contain competition settings. Wave creation now
+    // uses only their wave details; competitions have their own setup flow.
+    const currentConfig = chatOnly ? asChatOnlyConfig(config) : config;
+    if (currentConfig.voting.creditNftMemeCount === memeCount) {
+      return currentConfig;
     }
 
     return {
-      ...config,
+      ...currentConfig,
       voting: {
-        ...config.voting,
+        ...currentConfig.voting,
         creditNftMemeCount: memeCount,
       },
     };
-  }, [config, memeCount]);
+  }, [config, memeCount, chatOnly]);
   const groupValidationQuery = useWaveGroupValidation(effectiveConfig);
 
-  const replaceConfig = (nextConfig: CreateWaveConfig) => {
+  const replaceConfig = (replacement: CreateWaveConfig) => {
+    const nextConfig = chatOnly ? asChatOnlyConfig(replacement) : replacement;
     manuallySelectedPrivilegeGroups.current.clear();
     const { canView } = nextConfig.groups;
     const privilegeGroups: readonly [

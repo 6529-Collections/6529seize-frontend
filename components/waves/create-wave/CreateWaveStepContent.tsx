@@ -18,6 +18,7 @@ type WaveConfigController = ReturnType<typeof useWaveConfig>;
 
 export default function CreateWaveStepContent({
   controller,
+  isCompetition = false,
   overviewLeading,
   isSubwave = false,
   parentWaveName,
@@ -27,6 +28,7 @@ export default function CreateWaveStepContent({
   onInlineGroupCreate,
 }: {
   readonly controller: WaveConfigController;
+  readonly isCompetition?: boolean;
   /** Rendered above the Overview step's fields (e.g. saved drafts). */
   readonly overviewLeading?: ReactNode;
   readonly isSubwave?: boolean;
@@ -137,10 +139,17 @@ export default function CreateWaveStepContent({
         />
       );
     case CreateWaveStep.RULES:
-      return <CreateWaveRules config={config} setDisplay={setDisplay} />;
+      return (
+        <CreateWaveRules
+          config={config}
+          setDisplay={setDisplay}
+          isCompetition={isCompetition}
+        />
+      );
     case CreateWaveStep.VOTING:
       return (
         <CreateWaveVoting
+          isCompetition={isCompetition}
           waveType={config.overview.type}
           selectedType={config.voting.type}
           category={config.voting.category}
@@ -191,6 +200,7 @@ export default function CreateWaveStepContent({
     case CreateWaveStep.REVIEW:
       return (
         <CreateWaveReview
+          isCompetition={isCompetition}
           config={config}
           groupsCache={groupsCache}
           description={descriptionSnapshot}

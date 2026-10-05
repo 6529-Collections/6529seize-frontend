@@ -28,6 +28,73 @@ const createProps = (
 });
 
 describe("useBrainMobileActiveView", () => {
+  it.each([
+    ["sales", BrainView.SALES, { isCurationWave: true }],
+    ["faq", BrainView.FAQ, { isMemesWave: true }],
+  ] as const)(
+    "restores the available %s tab from a shared-wave return URL",
+    (tab, expectedView, availability) => {
+      const { result } = renderHook(() =>
+        useBrainMobileActiveView(
+          createProps({
+            ...availability,
+            pathname: "/waves/wave-1",
+            searchParams: createSearchParams(`tab=${tab}&competition=first`),
+            restoredView: BrainView.DEFAULT,
+            wave: { id: "wave-1" } as UseBrainMobileActiveViewProps["wave"],
+          })
+        )
+      );
+      expect(result.current.activeView).toBe(expectedView);
+    }
+  );
+
+  it.each([
+    ["sales", BrainView.SALES, { isCurationWave: true }],
+    ["faq", BrainView.FAQ, { isMemesWave: true }],
+  ] as const)(
+    "keeps serial-target Chat ahead of %s and restores the tab on return",
+    (tab, expectedView, availability) => {
+      const props = createProps({
+        ...availability,
+        pathname: "/waves/wave-1",
+        searchParams: createSearchParams(`tab=${tab}&competition=first`),
+        wave: { id: "wave-1" } as UseBrainMobileActiveViewProps["wave"],
+      });
+      const { result, rerender } = renderHook(useBrainMobileActiveView, {
+        initialProps: props,
+      });
+      expect(result.current.activeView).toBe(expectedView);
+
+      for (const serialNo of ["42", ""]) {
+        rerender({
+          ...props,
+          searchParams: createSearchParams(
+            `tab=${tab}&competition=first&serialNo=${serialNo}`
+          ),
+        });
+        expect(result.current.activeView).toBe(BrainView.DEFAULT);
+        rerender(props);
+        expect(result.current.activeView).toBe(expectedView);
+      }
+    }
+  );
+
+  it("opens competition deep links in Competitions even when Chat was restored", () => {
+    const props = createProps({
+      pathname: "/waves/wave-1/competitions/first",
+      restoredView: BrainView.DEFAULT,
+      isCompleted: false,
+    });
+    const { result, rerender } = renderHook(useBrainMobileActiveView, {
+      initialProps: props,
+    });
+    expect(result.current.activeView).toBe(BrainView.COMPETITIONS);
+    rerender({ ...props, pathname: "/waves/wave-1" });
+    expect(result.current.activeView).toBe(BrainView.DEFAULT);
+    rerender(props);
+    expect(result.current.activeView).toBe(BrainView.COMPETITIONS);
+  });
   it("keeps the selection callback stable until its route context changes", () => {
     const props = createProps({ isCompleted: false });
     const { result, rerender } = renderHook(useBrainMobileActiveView, {
@@ -80,7 +147,7 @@ describe("useBrainMobileActiveView", () => {
       )
     );
 
-    expect(result.current.activeView).toBe(BrainView.SUBMISSIONS);
+    expect(result.current.activeView).toBe(BrainView.DEFAULT);
   });
 
   it.each(["42", ""])(
@@ -119,7 +186,7 @@ describe("useBrainMobileActiveView", () => {
     expect(result.current.activeView).toBe(BrainView.DEFAULT);
   });
 
-  it("defaults to submissions after a completed rank wave is loaded", () => {
+  it("keeps Chat after a completed rank wave is loaded", () => {
     const { result } = renderHook(() =>
       useBrainMobileActiveView(
         createProps({
@@ -128,7 +195,7 @@ describe("useBrainMobileActiveView", () => {
       )
     );
 
-    expect(result.current.activeView).toBe(BrainView.SUBMISSIONS);
+    expect(result.current.activeView).toBe(BrainView.DEFAULT);
   });
 
   it("does not switch completed approve waves to submissions", () => {
@@ -215,7 +282,7 @@ describe("useBrainMobileActiveView", () => {
     expect(result.current.activeView).toBe(BrainView.DEFAULT);
   });
 
-  it("resets Outcome to submissions for completed rank curation waves", () => {
+  it("resets unavailable Outcome to Chat for completed rank curation waves", () => {
     const { result } = renderHook(() =>
       useBrainMobileActiveView(
         createProps({
@@ -229,7 +296,7 @@ describe("useBrainMobileActiveView", () => {
       result.current.onViewChange(BrainView.OUTCOME);
     });
 
-    expect(result.current.activeView).toBe(BrainView.SUBMISSIONS);
+    expect(result.current.activeView).toBe(BrainView.DEFAULT);
   });
 
   it("keeps My Votes for authenticated normal rank waves", () => {
@@ -282,7 +349,7 @@ describe("useBrainMobileActiveView", () => {
       result.current.onViewChange(BrainView.MY_VOTES);
     });
 
-    expect(result.current.activeView).toBe(BrainView.SUBMISSIONS);
+    expect(result.current.activeView).toBe(BrainView.DEFAULT);
   });
 
   it("keeps My Votes for curation rank waves without requiring login", () => {

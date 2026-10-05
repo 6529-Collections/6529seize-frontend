@@ -3,6 +3,11 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import BrainMobileViewContent from "@/components/brain/mobile/BrainMobileViewContent";
 import { BrainView } from "@/components/brain/mobile/brainMobileViews";
 
+jest.mock("next/navigation", () => ({
+  usePathname: () => "/waves",
+  useSearchParams: () => new URLSearchParams(),
+}));
+
 jest.mock("next/dynamic", () => (loader: () => Promise<unknown>) => {
   const loaderSource = loader.toString();
   const dynamicImportSource =
@@ -13,7 +18,15 @@ jest.mock("next/dynamic", () => (loader: () => Promise<unknown>) => {
     modulePath: string,
     exportName?: string,
   ][] = [
+    [
+      "../right-sidebar/BrainRightSidebarConfiguration",
+      "@/components/brain/right-sidebar/BrainRightSidebarConfiguration",
+    ],
     ["./BrainMobileAbout", "@/components/brain/mobile/BrainMobileAbout"],
+    [
+      "@/components/competitions/CompetitionHub",
+      "@/components/competitions/CompetitionHub",
+    ],
     [
       "@/components/community-curations/CommunityCurations",
       "@/components/community-curations/CommunityCurations",
@@ -83,7 +96,20 @@ jest.mock("next/dynamic", () => (loader: () => Promise<unknown>) => {
   return MockDynamicComponent;
 });
 
+jest.mock(
+  "@/components/brain/right-sidebar/BrainRightSidebarConfiguration",
+  () => ({
+    __esModule: true,
+    default: () => <div data-testid="configuration" />,
+  })
+);
+
 const mockBrainMobileAbout = jest.fn(() => <div data-testid="about" />);
+jest.mock("@/components/competitions/CompetitionHub", () => ({
+  __esModule: true,
+  default: () => <div data-testid="competitions" />,
+}));
+
 jest.mock("@/components/brain/mobile/BrainMobileAbout", () => ({
   __esModule: true,
   default: (props: any) => mockBrainMobileAbout(props),

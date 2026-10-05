@@ -24,6 +24,9 @@ export interface ExtendedDrop extends ApiDropV2View {
   stableKey: string;
   stableHash: string;
   clientDeliveryState?: DropClientDeliveryState | undefined;
+  competition_id?: string | undefined;
+  competition_title?: string | undefined;
+  over_threshold_since_ms?: number | null | undefined;
 }
 
 export type LightDropSummary = Pick<ApiLightDrop, "id" | "serial_no"> &

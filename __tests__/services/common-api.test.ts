@@ -6,6 +6,9 @@ import { getUserProfile } from "@/helpers/server.helpers";
 jest.mock("@/services/auth/auth.utils", () => ({
   getStagingAuth: jest.fn(),
   getAuthJwt: jest.fn(),
+  getWalletAddress: jest.fn(() => null),
+  getWalletRole: jest.fn(() => null),
+  hasActiveSessionV2Auth: jest.fn(() => false),
 }));
 
 const fetchMock = global.fetch as jest.Mock;

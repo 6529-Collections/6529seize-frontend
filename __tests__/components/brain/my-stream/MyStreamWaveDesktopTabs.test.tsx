@@ -6,13 +6,19 @@ import { Time } from "@/helpers/time";
 import type { ApiWaveCuration } from "@/generated/models/ApiWaveCuration";
 
 const setActiveTab = jest.fn();
-const updateAvailableTabs = jest.fn();
 const searchParamsGet = jest.fn();
 const onSelectCuration = jest.fn();
 let mockCurations: ApiWaveCuration[] = [];
 let mockWavePollSummary = { hasPolls: false, unansweredPolls: 0 };
+let mockPathname = "/waves/wave-1";
+
+jest.mock("@/hooks/competitions/useWaveCompetitionsTab", () => ({
+  useWaveCompetitionsTab: () => ({ hasCompetitions: false, activeCount: 0 }),
+}));
 
 jest.mock("next/navigation", () => ({
+  useRouter: () => ({ push: jest.fn() }),
+  usePathname: () => mockPathname,
   useSearchParams: () => ({
     get: searchParamsGet,
   }),
@@ -27,7 +33,6 @@ jest.mock("@/components/brain/ContentTabContext", () => {
     ...actual,
     useContentTab: () => ({
       availableTabs: mockAvailableTabs,
-      updateAvailableTabs,
     }),
   };
 });
@@ -152,6 +157,7 @@ beforeEach(() => {
   mockApproveLabels.approvals = "Proposals";
   mockApproveLabels.approved = "Approved";
   searchParamsGet.mockReturnValue(null);
+  mockPathname = "/waves/wave-1";
   mockAvailableTabs = [MyStreamWaveTab.CHAT];
   mockWaveInfo = {
     isChatWave: false,
@@ -193,6 +199,24 @@ const setMobileScrollMetrics = (
 };
 
 describe("MyStreamWaveDesktopTabs", () => {
+  it.each(["pathname", "query"])(
+    "shows My Votes for an explicitly selected chat competition from the %s without default data",
+    (source) => {
+      mockWaveInfo.isChatWave = true;
+      mockAvailableTabs = [MyStreamWaveTab.CHAT, MyStreamWaveTab.MY_VOTES];
+      if (source === "pathname") {
+        mockPathname = "/waves/wave-1/competitions/older";
+      } else {
+        searchParamsGet.mockImplementation((key) =>
+          key === "competition" ? "older" : null
+        );
+      }
+      renderComponent();
+      expect(
+        screen.getAllByRole("tab", { name: "My Votes", hidden: true })
+      ).toHaveLength(2);
+    }
+  );
   it("keeps curations selectable in both desktop and mobile web tab strips", () => {
     mockCurations = [
       {
@@ -449,9 +473,7 @@ describe("MyStreamWaveDesktopTabs", () => {
       name: "Scroll wave sections right",
     });
     expect(rightControl).toBeInTheDocument();
-    expect(rightControl.querySelector("svg")).toHaveClass(
-      "tw-translate-x-1.5"
-    );
+    expect(rightControl.querySelector("svg")).toHaveClass("tw-translate-x-1.5");
 
     scroller.scrollLeft = 120;
     fireEvent.scroll(scroller);
@@ -459,9 +481,7 @@ describe("MyStreamWaveDesktopTabs", () => {
       name: "Scroll wave sections left",
     });
     expect(leftControl).toBeInTheDocument();
-    expect(leftControl.querySelector("svg")).toHaveClass(
-      "-tw-translate-x-1.5"
-    );
+    expect(leftControl.querySelector("svg")).toHaveClass("-tw-translate-x-1.5");
     expect(
       screen.getByRole("button", { name: "Scroll wave sections right" })
     ).toBeInTheDocument();
@@ -618,28 +638,6 @@ describe("MyStreamWaveDesktopTabs", () => {
     spy.mockRestore();
   });
 
-  it("passes curation flag into tab availability update", () => {
-    mockWaveInfo = {
-      isChatWave: false,
-      isApproveWave: false,
-      isMemesWave: false,
-      isCurationWave: true,
-      isRankWave: false,
-    };
-
-    renderComponent(MyStreamWaveTab.CHAT);
-
-    expect(updateAvailableTabs).toHaveBeenCalledWith(
-      expect.objectContaining({
-        isChatWave: false,
-        hasAuthenticatedProfile: true,
-        isMemesWave: false,
-        isCurationWave: true,
-        isApproveWave: false,
-      })
-    );
-  });
-
   it("renames approve wave tabs", () => {
     mockWaveInfo = {
       isChatWave: false,
@@ -685,21 +683,5 @@ describe("MyStreamWaveDesktopTabs", () => {
     expect(screen.getAllByText("Selected").length).toBeGreaterThan(0);
     expect(screen.queryByText("Proposals")).toBeNull();
     expect(screen.queryByText("Approved")).toBeNull();
-  });
-
-  it("forces a transient switch to Chat when serialNo is present", () => {
-    searchParamsGet.mockImplementation((key: string) =>
-      key === "serialNo" ? "42" : null
-    );
-    mockAvailableTabs = [MyStreamWaveTab.CHAT, MyStreamWaveTab.LEADERBOARD];
-
-    renderComponent(MyStreamWaveTab.LEADERBOARD);
-
-    expect(updateAvailableTabs).toHaveBeenCalledWith(
-      expect.objectContaining({
-        transientPreferredTab: MyStreamWaveTab.CHAT,
-      })
-    );
-    expect(setActiveTab).not.toHaveBeenCalled();
   });
 });

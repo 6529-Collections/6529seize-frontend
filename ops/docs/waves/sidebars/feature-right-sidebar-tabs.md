@@ -24,7 +24,9 @@ linked section pages.
 
 - Desktop/tablet: open a wave thread, select the `Show right sidebar` icon, and select a tab.
   `About` contains Add/Edit REP for eligible viewers and the labeled wave
-  share/copy action for every non-DM viewer.
+  share/copy action for every non-DM viewer. The header shows the creator’s avatar and profile link, and the creation date on one line below
+  the title. The current pinned drop is displayed below the
+  header, with its content and media, instead of the voting overview block.
 - Compact web layouts: select the `Wave details` button beside the wave-search
   action. It opens the same information sidebar as the desktop control without
   requiring the `More wave actions` menu.
@@ -35,9 +37,8 @@ linked section pages.
 ## Tab Availability and Order
 
 - Base section order for all waves: `About`, `REP`, `Configuration`.
-- `Configuration` is the consolidated rules and settings experience, starting with the
-  wave type and access configuration sections. Perpetual ranking waves are
-  labeled `Perpetual Rank` instead of the generic `Rank`. Access groups show
+- `Configuration` is the consolidated rules and settings experience, starting with
+  access configuration. Access groups show
   their member count and criteria; viewers who can administer the wave also see
   a gear menu for reconfiguring each applicable group. For Rank and Approve waves,
   Configuration shows chat status even when chat is disabled; wave

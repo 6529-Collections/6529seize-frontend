@@ -5,6 +5,62 @@
   "base_url": "https://6529.io",
   "records": [
     {
+      "id": "waves.native-competitions",
+      "kind": "workflow",
+      "title": "Several competitions in one wave",
+      "aliases": [
+        "parallel competitions",
+        "competition credits",
+        "create competition",
+        "pause decisions",
+        "default competition",
+        "current competition"
+      ],
+      "keywords": [
+        "wave",
+        "competitions",
+        "Rank",
+        "Approve",
+        "entries",
+        "votes",
+        "credits",
+        "results",
+        "shared chat",
+        "archive",
+        "default",
+        "upcoming",
+        "paused decisions"
+      ],
+      "facts": [
+        "Where the competition experience is available, use Competitions in a wave to browse its active competitions and history. Each competition opens on Leaderboard and has its own entries, votes, rules, budget and results while Shared chat returns to the wave conversation. There is no separate Entries tab.",
+        "Competition links use /waves/{waveId}/competitions/{competitionId}; an entry link adds ?entry={entryId}. Explicit competition and entry links preserve that competition across tabs, reload and Back/Forward even when another competition becomes the default.",
+        "When switching to a competition route, its controls appear after navigation completes, so a newly opened sort sheet or form stays in that view.",
+        "A wave link targeting a specific chat message remains in Chat even when the link also names another section. The message target takes priority over that conflicting destination.",
+        "Opening a wave without an explicit destination opens Chat and remains there after competition data loads or refreshes, including Memes and completed waves on web and in the native app. Explicit tab and competition links retain their destination. Competition tabs use the default unless an explicit selection supplies another competition. One eligible competition wins; otherwise the earliest-starting running competition wins, including paused decisions. With none running, the soonest upcoming wins over history; otherwise the most recently ended wins, including archived completed history. Drafts, archived never-published drafts and cancelled competitions are excluded. With none eligible, shared chat remains usable. Chat and the default competition views share a single wave-level tab row, with content directly below and no nested detail panel. This also applies to the default in a wave with multiple competitions. Native defaults include Voters in that row. Both native and legacy defaults expose Configuration immediately before the final About tab. Configuration opens the selected competition’s existing rules and settings, retaining the same read and edit permissions. An explicitly opened non-default competition retains its title, All competitions return link and separate detail navigation. Leaderboard, Winners, Outcomes and My votes use the selected competition. Chat stays shared. Defaults refresh as time or lifecycle changes, but explicit choices and open submission or vote forms keep their original competition. For a logged-in non-admin, the Competitions tab is hidden only when the server-selected default is the wave’s sole visible competition across current, past and future records. An active default plus a past or future competition keeps the tab visible. Wave administrators retain Competitions for management. Unknown counts or permissions keep it visible; logged-out behavior is unchanged. Direct competition collection links remain readable when the tab is hidden.",
+        "Where the competition experience is available, creating a wave opens shared chat without creating a competition. The Competitions tab is available to wave administrators for management, and to other viewers with accessible competitions except for the logged-in sole-default case described above. Administrators open that tab and use Add competition to configure competitions afterward.",
+        "Wave administrators can create Rank or Approve drafts and publish them. Drafts are visible only to wave administrators. Approve requires a whole-number approval threshold greater than zero. The competition setup editor saves changes automatically. Incomplete input is retained on this device; valid drafts sync to the server. Next highlights invalid voting settings. Opening a draft goes directly to the setup wizard with saved settings prefilled. Close editor returns to the competition list and preserves the draft without publishing. The final step has Previous, Close editor and Publish; Publish saves the latest edits before publication. Whole competition means one voting budget across that competition’s entries. Competition guidelines apply to its entries and voting; chat guidelines belong to the shared wave. Published types cannot change; after the first entry, credit, signing, submission, timing, decision and outcome rules are fixed. Participation and voting access groups, title, description and presentation can still be updated while published.",
+        "Each entry creates a dedicated competition drop that belongs to exactly one competition. Chat messages cannot become competition entries, and competition drops cannot be reused in another competition. Competition submissions cannot be edited, including unsigned submissions. Delete removes the entry from all competition views and direct entry links. There are no Withdraw or Disqualify actions. Existing drop-deletion permissions apply.",
+        "The wave header and tabs stay visible. The default competition renders directly under the single wave tab row; explicitly opened non-default competitions have their own detail navigation. The collection and create/edit forms open from Competitions. The Competitions tab shows a badge counting active and upcoming competitions, hidden at zero; drafts and completed competitions do not count. The collection has a second tab row for Active and upcoming, Completed, Drafts for administrators, and All. Add competition sits alongside these tabs for users who can create competitions. Competition cards show the start date and any configured end date, using Starts or Ends for future dates and Started or Ended for past dates. New competitions use an underlined tab row for Leaderboard, Winners, Outcomes, My votes, Voters and Configuration. The leaderboard uses the familiar schedule or approval-status bar, list/grid controls, sorting and rich drop cards with the Drop action. Winners use Rank podium/timeline or Approve result cards; Outcomes use expandable reward cards; My votes uses editable rows and reset controls; Voters shows profile rows and vote totals. Open Configuration for an overview with the competition type, status, name, description and guidelines, followed by Participation, Voting and Winners settings cards. Administrators can use Edit competition details on the overview card to edit the name, description and guidelines together in place, then Save changes or Cancel. Published competitions no longer open a separate editing wizard. Administrators can use the gear beside Participation or Voting Access to edit its criteria, including after entries have been submitted. Access changes preserve existing entries, votes, outcomes and decision progress. Administrators can expand Appearance and labels below these cards to edit the submission button label, proposal card display, Approve tab labels and outcome visibility, with Save changes and Cancel in that section. Approve competitions default to Proposals and Approved; custom tab labels apply to that competition. Drafts also have Finish draft setup for unpublished execution settings. Select Chat to return to the conversation. Competition drop cards in shared chat show the competition name beneath the author, linked to that competition, plus the entry’s current total, your vote, rank, and voter count. The voter dropdown shows the entry’s voters and vote history. Voting credit is independent per competition. Voting on a competition drop from shared chat uses that entry’s competition credit type, available budget, and rules. A budget can be shared across that competition or apply per entry. Zero removes a vote; negative values depend on the rules. Winning or deleting an entry releases its active voting spend. Deleted entries and their votes no longer appear in competition views.",
+        "Competition winner notifications link to the relevant competition or entry. Competition status changes and entry deletion do not send notifications or appear in the notification feed.",
+        "Pause decisions stops winner selection while otherwise eligible entries and votes remain available. In Configuration, Pause decisions and Resume decisions sit beside Pause history, alongside the other Configuration sections. Pausing requires a non-blank reason in the confirmation dialog. Anyone who can view the competition can see each pause’s dates and reason in Pause history, including after resuming. Older pauses without a reason show No reason recorded. Approve may finalize accepted votes after voting closes when a hold or pause finishes. Competitions complete through their configured rules; administrators cannot manually end or cancel them. Archive moves a draft or completed competition into history. Terminal competitions can be cloned into new drafts but cannot reopen.",
+        "Main Stage privileges belong only to an explicitly designated competition. Other competitions in the same wave do not inherit them. A wave containing native competition history cannot be deleted, and ordinary chat-history deletion preserves competition content.",
+        "If a competition cannot load, retry or return to Shared chat. Reload after changed rules, credit, or membership. Discovery, creation, participation and management controls depend on availability. Authorized direct links can still show history while these controls are unavailable; a link may show unavailable support if the server is not ready."
+      ],
+      "canonical_path": "/waves",
+      "link_label": "Open Waves",
+      "related_paths": ["/waves/create"],
+      "tags": ["waves", "competitions", "voting", "creation"],
+      "source_refs": [
+        "components/competitions/CompetitionHub.tsx",
+        "components/competitions/CompetitionDetail.tsx",
+        "components/competitions/CompetitionEntryForm.tsx",
+        "components/competitions/CompetitionAdmin.tsx",
+        "ops/docs/waves/competitions/feature-competitions.md",
+        "ops/docs/waves/competitions/feature-manage-competitions.md",
+        "hooks/competitions/useDefaultCompetitionNavigation.ts"
+      ]
+    },
+    {
       "id": "media.video-player",
       "kind": "ui_affordance",
       "title": "Video playback controls and timeline",
@@ -1665,6 +1721,7 @@
       ],
       "facts": [
         "Wallet authentication lets a user connect, sign in, and act as a 6529 profile.",
+        "When you reopen the app, a saved session renews automatically if its access token has expired. Temporary network or rate-limit failures keep the saved session and do not require a new wallet signature; recovery retries when the app is active or reconnects. A genuinely expired or revoked session still requires reconnecting the wallet. Offline time and server outages can delay recovery.",
         "After connecting an unauthenticated wallet, the Sign in to 6529 dialog shows the wallet address and explains: Sign a message to confirm this address is yours. Choose Sign message, then confirm in the wallet when Check your wallet appears. Signing in creates no transaction, costs no gas, and approves no tokens. Cancel or Escape before signing returns to browsing; after rejection, reconnect and retry.",
         "Profile switching and account controls live in the wallet/account area of the app header.",
         "In the app sidebar, selecting another connected profile switches to it and closes the drawer; the add-profile button closes the drawer as the wallet connection flow opens.",
@@ -2737,7 +2794,7 @@
         "On desktop with no selected Wave, /waves shows the latest posts from members' effective public Profile Wave curations, newest first.",
         "Each latest-profile-post card identifies the author, posting time, and originating Profile Wave; curated replies can also appear. On mobile web and in the native app, the default /waves view remains a Wave navigator with no separate Profile Waves Feed card, and the feed icon at the far right of the plain Waves heading opens the cross-Wave feed at /waves?view=profile-feed. On desktop, the same feed icon clears the selected wave to show Profile Waves Feed. The heading is not clickable. Header actions are feed then create on desktop, with Profile Waves Feed and Create Wave tooltips. Create uses a compact white button. The mobile list shows only feed; the app keeps create in its top bar. The Profile Waves Feed content header has a Discover Waves link with a compass, aligned right on desktop and below the description on small screens. The expanded sidebar has no separate feed row.",
         "From the mobile web Profile Waves Feed, Waves returns to the Wave list. Opening a feed post enters its Wave conversation, and browser Back returns to the feed.",
-        "Announcements uses a compact row with its timestamp, unread state and score shield. Active Votes rows also have a score shield that opens score details. In Worth Checking Out, each avatar and its bottom-right score shield form one wave navigation link; hovering or focusing the combined link shows score details.",
+        "Announcements uses a compact row with its timestamp, unread state and score shield. Active Votes rows also have a score shield that opens score details. The current wave highlights in Active Votes as well as in the collection list below when it appears in both. In Worth Checking Out, each avatar and its bottom-right score shield form one wave navigation link; hovering or focusing the combined link shows score details.",
         "Every Worth Checking Out recommendation also appears in All at its recent-activity position; Joined normally includes only waves the user has joined.",
 
         "Switching All and Joined preserves list position instead of jumping to the active wave; a shorter list can clamp the position. Selecting another wave reveals its active row again.",
@@ -3109,8 +3166,9 @@
       ],
       "facts": [
         "Desktop wave information sections live in the right sidebar in this order: About, REP, and Configuration. Open them with the Show right sidebar icon in the conversation header.",
+        "About shows the creator’s avatar and profile link, and the creation date on one line below the title, followed by the current pinned drop with its content and media. The pinned drop replaces the voting overview block and updates when an administrator uses Set as pinned drop.",
         "On desktop and tablet web, Add REP or Edit REP appears to the left of the conversation header icon buttons. It is also available in the right sidebar's About section, which is the REP entry point on compact web. The action appears for connected non-author, non-proxy profiles and is absent for DMs. A small shield and number beside the desktop wave name opens Wave Score details and Learn more.",
-        "Configuration is the consolidated rules and settings surface. It includes wave type, access, chat, display, schedules and other generated rules, guidelines, acceptance-required rules, admin-only shared controls, and personal display controls. Approve waves place Approve after, Hold time, Max approved drops, and Approval window directly after Schedule. Shared edits use gears, while read-only creation-time values have no edit control.",
+        "Configuration is the consolidated rules and settings surface. It includes access, chat, display, schedules and other generated rules, guidelines, acceptance-required rules, admin-only shared controls, and personal display controls. Approve waves place Approve after, Hold time, Max approved drops, and Approval window directly after Schedule. Shared edits use gears, while read-only creation-time values have no edit control.",
         "For Rank and Approve waves, the desktop right sidebar adds Voters and Activity as direct tabs after the three base sections. Scroll the tab strip horizontally if needed. A single remaining section is shown directly; More is used only when it contains at least two sections.",
         "In the native app, the main About view opens compact Overview, REP, and Configuration pills; Rank and Approve waves expose Voters and Activity from More.",
         "While native About is active, its information pills replace the subwave pills in the same contextual row; selecting another main tab restores the subwave pills.",
@@ -5962,7 +6020,7 @@
       ],
       "facts": [
         "Worth Checking Out comes first and Active Votes follows as separate collapsible sections in the Waves sidebar, each with its own description and view-all link, including for signed-out visitors.",
-        "Active Votes shows ongoing TDH votes in a scrollable window three compact rows tall. Scroll to load additional pages, or use Load more. The total count stays visible when collapsed. Its compact header includes a separate View all link before the chevron, available even when collapsed; the link opens /discover?view=active-votes without toggling the section. Direct messages and their subwaves are excluded even when readable. Each wave sets its own voting rules.",
+        "Active Votes shows ongoing TDH votes in a scrollable window three compact rows tall. Scroll to load additional pages, or use Load more. The total count stays visible when collapsed. The currently open wave is highlighted here, even when it is also highlighted in the collection list. Its compact header includes a separate View all link before the chevron, available even when collapsed; the link opens /discover?view=active-votes without toggling the section. Direct messages and their subwaves are excluded even when readable. Each wave sets its own voting rules.",
         "Worth Checking Out shows up to six highly rated waves, excluding followed waves for signed-in personal viewers, with fewer previews on narrow screens. Its sidebar description is Highly rated waves for signed-out visitors, without following language. The full discovery page uses Active discussions for signed-out visitors and Newest waves for the Newest sort. It has its own compact height. The header’s separate View all link stays available when collapsed and opens /discover?view=recommendations&sort=QUALITY.",
         "If there are no active votes, Active Votes shows No active TDH votes right now in a compact area. Its heading, zero count and view-all link remain available. Loading and request errors are distinct from empty results; retrying a failed next page keeps previously loaded votes.",
         "Both sidebar discovery sections start expanded. Each heading toggles only its own content, and each collapsed state is saved locally in this browser across visits. The chevron points down when expanded and right when collapsed. The former shared tab and collapse preferences are no longer used.",
@@ -6005,7 +6063,7 @@
         "curation"
       ],
       "facts": [
-        "Wave content tabs organize the visible wave content area.",
+        "Wave content tabs organize the visible wave content area. App tabs and their content share the same availability rules. An unavailable legacy competition section opens Leaderboard, or Submissions after voting ends, and selects that visible tab.",
         "Some waves can switch between chat and gallery-style views.",
         "Available tabs depend on wave type, state, and content.",
         "Named curations are collections of posts from a wave. Switch between them using their tabs below the wave header on desktop and mobile web, or alongside the main wave navigation tabs in the native app. Select a regular tab such as Chat to leave the curation view.",

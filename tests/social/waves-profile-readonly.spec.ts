@@ -1,4 +1,5 @@
 import type { Locator, Page } from "@playwright/test";
+import { installSurfaceSimulation } from "../support/surfaceSimulation";
 
 import { EN_US_MESSAGES } from "../../i18n/messages/en-US";
 import { expect, test } from "../testHelpers";
@@ -81,6 +82,187 @@ function getProfileFeed(page: Page): Locator {
 }
 
 test.describe("Waves and profile read-only coverage @surface @medium @large @readonly", () => {
+  test("matches Main Stage app artwork to its leaderboard response", async ({
+    page,
+  }, testInfo) => {
+    test.skip(testInfo.project.name !== "web-mobile-chromium");
+    await installSurfaceSimulation(
+      page.context(),
+      "capacitor-ios-sim",
+      testInfo.project.use.baseURL
+    );
+    const settingsResponse = page.waitForResponse(
+      (response) => new URL(response.url()).pathname === "/api/settings"
+    );
+    await gotoReady(page, "/waves");
+    const settings = await (await settingsResponse).json();
+    expect(settings.memes_wave_id).toMatch(/^[0-9a-f-]{36}$/i);
+    const leaderboardResponse = page.waitForResponse((response) => {
+      const url = new URL(response.url());
+      return (
+        url.pathname ===
+          `/api/v2/waves/${settings.memes_wave_id}/leaderboard` &&
+        url.searchParams.get("sort") === "RANK"
+      );
+    });
+    await gotoReady(page, `/waves/${settings.memes_wave_id}`);
+    const navigation = page.getByRole("navigation", { name: "Wave sections" });
+    await navigation
+      .getByRole("button", { name: "Leaderboard", exact: true })
+      .click();
+    const response = await leaderboardResponse;
+    expect(response.ok()).toBe(true);
+    const data = await response.json();
+    expect(data.wave.id).toBe(settings.memes_wave_id);
+    await testInfo.attach("main-stage-leaderboard-counts", {
+      body: JSON.stringify({
+        waveId: settings.memes_wave_id,
+        route: new URL(page.url()).pathname,
+        sort: "RANK",
+        count: data.count,
+        returned: data.drops.length,
+        withMedia: data.drops.filter((drop: { media?: unknown[] }) =>
+          Boolean(drop.media?.length)
+        ).length,
+      }),
+      contentType: "application/json",
+    });
+    expect(data.count).toBeGreaterThanOrEqual(0);
+    const artwork = data.drops.find((drop: { media?: unknown[] }) =>
+      Boolean(drop.media?.length)
+    );
+    await page.getByRole("tab", { name: "Grid view", exact: true }).click();
+    if (!artwork) {
+      await expect(
+        page.getByText("No drops to show", { exact: true })
+      ).toBeVisible();
+      await expect(
+        page.getByRole("list", { name: "Leaderboard drops" })
+      ).toHaveCount(0);
+      return;
+    }
+    await expect(
+      page.getByRole("list", { name: "Leaderboard drops" })
+    ).toBeVisible();
+    await expect(
+      page
+        .getByRole("list", { name: "Leaderboard drops" })
+        .locator(`[data-leaderboard-drop-id="${artwork.id}"]`)
+    ).toBeVisible();
+    await expect(
+      page.getByText("No drops to show", { exact: true })
+    ).toHaveCount(0);
+    await testInfo.attach("main-stage-app-leaderboard", {
+      body: await page.screenshot(),
+      contentType: "image/png",
+    });
+  });
+
+  test("preserves Main Stage's dedicated tabs, timeline, and winner cards", async ({
+    page,
+  }, testInfo) => {
+    const settingsResponse = page.waitForResponse(
+      (response) => new URL(response.url()).pathname === "/api/settings"
+    );
+    await gotoReady(page, "/waves");
+    const response = await settingsResponse;
+    expect(response.ok()).toBe(true);
+    const settings = await response.json();
+    expect(settings.memes_wave_id).toMatch(/^[0-9a-f-]{36}$/i);
+
+    await gotoReady(page, `/waves/${settings.memes_wave_id}`);
+    await expect(
+      page.getByRole("heading", { level: 1, name: "The Memes - Main Stage" })
+    ).toBeVisible({ timeout: 15000 });
+    const waveTabs = page.getByRole("tablist").filter({
+      has: page.getByRole("tab", { name: "Chat", exact: true }),
+    });
+    for (const name of ["Leaderboard", "Chat", "Winners", "Outcome", "FAQ"]) {
+      await expect(
+        waveTabs.getByRole("tab", { name, exact: true })
+      ).toBeAttached();
+    }
+    await expect(
+      waveTabs.getByRole("tab", { name: "Chat", exact: true })
+    ).toHaveAttribute("aria-selected", "true");
+    await expect(
+      page.getByRole("region", {
+        name:
+          englishMessages["waves.chat.fileUploadAreaAriaLabel"] ??
+          "Wave chat file upload area",
+        exact: true,
+      })
+    ).toBeVisible();
+    await expect(page).toHaveURL(
+      new RegExp(`/waves/${settings.memes_wave_id}$`)
+    );
+    // This pack runs signed out; personal voting controls remain authenticated.
+    await expect(
+      page.getByRole("tab", { name: "My Votes", exact: true })
+    ).toHaveCount(0);
+    await expect(
+      page.getByRole("button", {
+        name: /^(How to Submit|Submit Work|Submit Work to The Memes)$/,
+      })
+    ).toBeVisible();
+
+    await waveTabs
+      .getByRole("tab", { name: "Leaderboard", exact: true })
+      .click();
+    await expect(
+      page.getByRole("button", { name: "Toggle decision timeline" })
+    ).toBeVisible();
+    await expect(waveTabs.filter({ visible: true })).toHaveCount(1);
+    await expect(
+      page.getByRole("main").locator("[data-competition-detail]")
+    ).toHaveCount(0);
+    await expect(
+      page.getByRole("main").locator('[data-competition-navigation="detail"]')
+    ).toHaveCount(0);
+    const projectedVote = page.getByRole("tab", {
+      name: "Projected Vote",
+      exact: true,
+    });
+    const sortDropdown = page.getByRole("button", {
+      name: "Sort: Current Vote",
+      exact: true,
+    });
+    await expect(projectedVote.or(sortDropdown)).toBeVisible();
+    if (await sortDropdown.isVisible()) {
+      await sortDropdown.click();
+      const projectedVoteItem = page.getByRole("menuitem", {
+        name: "Projected Vote",
+        exact: true,
+      });
+      // The mobile sort sheet starts below the viewport during its entrance.
+      // Wait for the target to enter before click's automatic scrolling.
+      await expect(projectedVoteItem).toBeInViewport({ ratio: 1 });
+      await projectedVoteItem.click();
+      await expect(
+        page.getByRole("button", { name: "Sort: Projected Vote", exact: true })
+      ).toBeVisible();
+    } else {
+      await projectedVote.click();
+      await expect(projectedVote).toHaveAttribute("aria-selected", "true");
+    }
+    await waveTabs.getByRole("tab", { name: "Winners", exact: true }).click();
+    const winners = page.getByRole("tabpanel");
+    await expect(
+      winners.getByRole("link", { name: /^The Memes #\d+$/ }).first()
+    ).toBeVisible();
+    await expect(
+      winners.getByText("Mint date:", { exact: true }).first()
+    ).toBeVisible();
+    await expect(waveTabs.filter({ visible: true })).toHaveCount(1);
+    await expect(
+      page.getByRole("main").locator("[data-competition-detail]")
+    ).toHaveCount(0);
+    await testInfo.attach("main-stage-winners", {
+      body: await page.screenshot(),
+      contentType: "image/png",
+    });
+  });
+
   test("renders the public Waves landing without write interaction", async ({
     page,
   }) => {
@@ -126,19 +308,19 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       name: /Profile Waves Feed/,
     });
     await expect(profileFeedLink).toBeVisible();
-    const wavesHeader = page
-      .getByRole("heading", {
-        name: "Waves",
-        exact: true,
-        level: 2,
-      })
-      .locator("..");
-    await expect(wavesHeader).toContainText("Waves");
+    const wavesMain = page.getByRole("main");
     await expect(
-      wavesHeader.getByRole("link", { name: "Waves", exact: true })
+      page.getByRole("region", {
+        name: /All recent waves list|Regular waves list/,
+      })
+    ).toBeVisible();
+    // Global navigation can still expose Waves here. The list header is plain
+    // text on web, so scope its navigation invariant to main without a heading.
+    await expect(
+      wavesMain.getByRole("link", { name: "Waves", exact: true })
     ).toHaveCount(0);
     await expect(
-      wavesHeader.getByRole("link", { name: "Discover Waves", exact: true })
+      wavesMain.getByRole("link", { name: "Discover Waves", exact: true })
     ).toHaveCount(0);
     await expect(
       page.getByRole("link", { name: /Profile Waves Feed/ }).locator("svg")
@@ -281,6 +463,9 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     await expect(
       page.getByRole("link", { name: /Profile Waves Feed/ })
     ).toHaveAttribute("href", "/waves");
+    await expect(feedNavigation).toBeHidden();
+
+    await expect(feedNavigation).toBeHidden();
 
     await page.setViewportSize({ width: 1023, height: 900 });
     await expect(
@@ -376,10 +561,33 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     }
 
     await details.click();
+    const aboutPanel = page
+      .getByRole("complementary", { name: "Wave details" })
+      .or(page.getByRole("dialog", { name: "Wave details" }));
     await expect(
-      page.getByRole("tab", { name: "About", exact: true })
+      aboutPanel.getByRole("tab", { name: "About", exact: true })
     ).toBeVisible();
-    await page.getByRole("tab", { name: "About", exact: true }).click();
+    await aboutPanel.getByRole("tab", { name: "About", exact: true }).click();
+    await expect(page.getByText("Created by", { exact: true })).toHaveCount(0);
+    const creationDate = page
+      .getByRole("complementary", { name: "Wave details" })
+      .locator("time[datetime]")
+      .or(
+        page
+          .getByRole("dialog", { name: "Wave details" })
+          .locator("time[datetime]")
+      );
+    await expect(creationDate).toBeVisible();
+    await expect(creationDate).toHaveAttribute(
+      "datetime",
+      /^\d{4}-\d{2}-\d{2}T/
+    );
+    await expect(
+      aboutPanel.getByRole("region", { name: "Pinned drop", exact: true })
+    ).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Pinned drop", exact: true })
+    ).toHaveCount(0);
     await expect(
       page.getByRole("button", { name: /^(Share wave|Copy wave link)$/ })
     ).toBeVisible();
