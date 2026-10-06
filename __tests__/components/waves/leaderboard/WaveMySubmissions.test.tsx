@@ -18,6 +18,7 @@ jest.mock("@/components/auth/Auth", () => ({
 jest.mock("next/navigation", () => ({
   useRouter: () => ({ push: mockPush }),
   usePathname: () => "/waves/wave",
+  useSearchParams: () => new URLSearchParams(),
 }));
 jest.mock("@/services/api/wave-drops-v2-api", () => ({
   fetchDropV2ById: jest.fn(),
@@ -107,11 +108,17 @@ it("keeps a failed status check distinct from submission and retries only its re
   } as ApiDrop);
   renderView();
   await waitFor(() =>
-    expect(screen.getByRole("status")).toHaveTextContent("We couldn’t confirm")
+    expect(screen.getByRole("alert")).toHaveTextContent("We couldn’t confirm")
   );
   expect(screen.getByRole("status")).toHaveTextContent(
     "Your artwork is saved."
   );
+  expect(
+    screen.getByRole("region", { name: "Your artwork is saved." })
+  ).toBeVisible();
+  expect(
+    screen.getByRole("button", { name: "Check again" })
+  ).toHaveAccessibleDescription(/Your artwork is saved.*We couldn’t confirm/);
   fireEvent.click(screen.getByRole("button", { name: "Check again" }));
   await waitFor(() =>
     expect(screen.getByRole("status")).toHaveTextContent(

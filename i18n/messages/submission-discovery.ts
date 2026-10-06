@@ -11,6 +11,12 @@ export const EN_SUBMISSION_DISCOVERY_MESSAGES = {
   "waves.submissions.close": "Close my submissions",
   "waves.submissions.empty":
     "You haven’t submitted an entry to this competition yet.",
+  "waves.submissions.entryStatus.ACTIVE": "Status: Active",
+  "waves.submissions.entryStatus.WITHDRAWN": "Status: Withdrawn",
+  "waves.submissions.entryStatus.DISQUALIFIED": "Status: Disqualified",
+  "waves.submissions.entryStatus.WINNER": "Status: Winner",
+  "waves.leaderboard.empty": "No drops to show",
+  "waves.leaderboard.loading": "Loading drops...",
   "waves.leaderboard.loadError": "Couldn’t load submissions.",
   "waves.leaderboard.refreshError":
     "Couldn’t refresh submissions. Showing the entries already loaded.",
@@ -33,6 +39,12 @@ export const FR_SUBMISSION_DISCOVERY_MESSAGES = {
   "waves.submissions.dismiss": "Fermer la confirmation de participation",
   "waves.submissions.close": "Fermer mes participations",
   "waves.submissions.empty": "Vous n’avez pas encore participé à ce concours.",
+  "waves.submissions.entryStatus.ACTIVE": "Statut : active",
+  "waves.submissions.entryStatus.WITHDRAWN": "Statut : retirée",
+  "waves.submissions.entryStatus.DISQUALIFIED": "Statut : disqualifiée",
+  "waves.submissions.entryStatus.WINNER": "Statut : gagnante",
+  "waves.leaderboard.empty": "Aucun drop à afficher",
+  "waves.leaderboard.loading": "Chargement des drops…",
   "waves.leaderboard.loadError": "Impossible de charger les participations.",
   "waves.leaderboard.refreshError":
     "Impossible d’actualiser les participations. Les participations déjà chargées restent affichées.",
@@ -55,6 +67,12 @@ export const ES_SUBMISSION_DISCOVERY_MESSAGES = {
   "waves.submissions.close": "Cerrar mis participaciones",
   "waves.submissions.empty":
     "Todavía no has enviado una participación a este concurso.",
+  "waves.submissions.entryStatus.ACTIVE": "Estado: activa",
+  "waves.submissions.entryStatus.WITHDRAWN": "Estado: retirada",
+  "waves.submissions.entryStatus.DISQUALIFIED": "Estado: descalificada",
+  "waves.submissions.entryStatus.WINNER": "Estado: ganadora",
+  "waves.leaderboard.empty": "No hay drops que mostrar",
+  "waves.leaderboard.loading": "Cargando drops…",
   "waves.leaderboard.loadError": "No se pudieron cargar las participaciones.",
   "waves.leaderboard.refreshError":
     "No se pudieron actualizar las participaciones. Se muestran las que ya se habían cargado.",
@@ -78,6 +96,12 @@ export const DE_SUBMISSION_DISCOVERY_MESSAGES = {
   "waves.submissions.close": "Meine Einreichungen schließen",
   "waves.submissions.empty":
     "Du hast noch keinen Beitrag zu diesem Wettbewerb eingereicht.",
+  "waves.submissions.entryStatus.ACTIVE": "Status: aktiv",
+  "waves.submissions.entryStatus.WITHDRAWN": "Status: zurückgezogen",
+  "waves.submissions.entryStatus.DISQUALIFIED": "Status: disqualifiziert",
+  "waves.submissions.entryStatus.WINNER": "Status: Gewinner",
+  "waves.leaderboard.empty": "Keine Drops zum Anzeigen",
+  "waves.leaderboard.loading": "Drops werden geladen…",
   "waves.leaderboard.loadError": "Einreichungen konnten nicht geladen werden.",
   "waves.leaderboard.refreshError":
     "Einreichungen konnten nicht aktualisiert werden. Bereits geladene Beiträge werden weiterhin angezeigt.",

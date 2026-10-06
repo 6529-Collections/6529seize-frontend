@@ -106,14 +106,26 @@ function renderGallery(overrides: any) {
 
 it("shows loading when fetching and no drops", () => {
   renderGallery({ isFetching: true });
-  expect(
-    screen.getByText("Loading drops...", { selector: "div" })
-  ).toBeInTheDocument();
+  expect(screen.getByRole("status")).toHaveTextContent("Loading drops...");
 });
 
 it("shows empty message when no drops", () => {
   renderGallery({});
   expect(screen.getByText("No drops to show")).toBeInTheDocument();
+});
+
+it("does not claim gallery entries are visible when loaded drops have no media", () => {
+  renderGallery({
+    isError: true,
+    drops: [{ id: "text-only", parts: [{ media: [] }] }],
+  });
+  expect(screen.getByRole("alert")).toHaveTextContent(
+    "Couldn’t load submissions."
+  );
+  expect(screen.getByRole("alert")).not.toHaveTextContent(
+    "Showing the entries already loaded."
+  );
+  expect(screen.queryAllByTestId("item")).toHaveLength(0);
 });
 
 it.each([false, true])(

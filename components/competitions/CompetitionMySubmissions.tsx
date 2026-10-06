@@ -28,14 +28,15 @@ export default function CompetitionMySubmissions() {
     isOpen
   );
   if (!authorId || activeProfileProxy) return null;
-  const entries = query.data?.pages.flatMap((page) => page.data) ?? [];
-  const invalidEntries = entries.some(
+  const loadedEntries = query.data?.pages.flatMap((page) => page.data) ?? [];
+  const entries = loadedEntries.filter(
     (entry) =>
-      entry.wave_id !== competition.wave_id ||
-      entry.competition_id !== competition.id ||
-      entry.submitter.id !== authorId
+      entry.wave_id === competition.wave_id &&
+      entry.competition_id === competition.id &&
+      entry.submitter.id === authorId
   );
-  const hasEntries = entries.length > 0 && !invalidEntries;
+  const invalidEntries = entries.length !== loadedEntries.length;
+  const hasEntries = entries.length > 0;
   return (
     <>
       <MySubmissionsButton onClick={() => setOpenScope(scope)}>
@@ -62,29 +63,23 @@ export default function CompetitionMySubmissions() {
               !query.isError &&
               !invalidEntries &&
               !hasEntries && (
-                <p role="status" className="tw-text-sm tw-text-iron-300">
+                <output className="tw-block tw-text-sm tw-text-iron-300">
                   {t(locale, "waves.submissions.empty")}
-                </p>
+                </output>
               )}
-            {!invalidEntries &&
-              entries.map((entry) => (
-                <div key={entry.id} className="tw-space-y-2">
-                  <p className="tw-m-0 tw-text-sm tw-text-iron-300">
-                    {t(locale, "competitions.status", {
-                      status: t(
-                        locale,
-                        `competitions.entryStatus.${entry.status}`
-                      ),
-                    })}
-                  </p>
-                  <CompetitionEntryCard
-                    entryId={entry.id}
-                    dropId={entry.drop_id}
-                    onOpenDrop={() => setOpenScope(null)}
-                  />
-                </div>
-              ))}
-            {!invalidEntries && <CompetitionLoadMore query={query} />}
+            {entries.map((entry) => (
+              <div key={entry.id} className="tw-space-y-2">
+                <p className="tw-m-0 tw-text-sm tw-text-iron-300">
+                  {t(locale, `waves.submissions.entryStatus.${entry.status}`)}
+                </p>
+                <CompetitionEntryCard
+                  entryId={entry.id}
+                  dropId={entry.drop_id}
+                  onOpenDrop={() => setOpenScope(null)}
+                />
+              </div>
+            ))}
+            <CompetitionLoadMore query={query} />
           </div>
         )}
       </MySubmissionsDialog>

@@ -899,10 +899,18 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await ownEntries
       .getByRole("button", { name: "Close my submissions" })
       .click();
+    await expect(ownEntries).toHaveCount(0);
+    const mySubmissions = page.getByRole("button", {
+      name: "My submissions",
+      exact: true,
+    });
+    await expect(mySubmissions).toBeFocused();
     await expect(page).toHaveURL(/\?entry=entry-alpha$/);
-    await page
-      .getByRole("button", { name: "My submissions", exact: true })
-      .click();
+    await mySubmissions.click();
+    await page.keyboard.press("Escape");
+    await expect(ownEntries).toHaveCount(0);
+    await expect(mySubmissions).toBeFocused();
+    await mySubmissions.click();
     await ownEntries.getByText("Recorded alpha entry", { exact: true }).click();
     await expect(ownEntries).toHaveCount(0);
     await expect(page).toHaveURL(

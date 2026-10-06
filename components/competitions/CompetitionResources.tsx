@@ -112,11 +112,9 @@ function EntryFocus({ entryId }: { readonly entryId: string }) {
       </div>
       {confirmation}
       {isOwnEntry && !isAccepted && (
-        <p role="status" className="tw-text-sm tw-text-iron-300">
-          {t(locale, "competitions.status", {
-            status: t(locale, `competitions.entryStatus.${saved.status}`),
-          })}
-        </p>
+        <output className="tw-block tw-text-sm tw-text-iron-300">
+          {t(locale, `waves.submissions.entryStatus.${saved.status}`)}
+        </output>
       )}
       {content}
     </div>

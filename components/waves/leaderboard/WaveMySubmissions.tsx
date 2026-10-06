@@ -15,7 +15,7 @@ import { t } from "@/i18n/messages";
 import { fetchDropV2ById } from "@/services/api/wave-drops-v2-api";
 import type { ApiDropV2View } from "@/services/api/drop-v2-view.types";
 import { useQuery } from "@tanstack/react-query";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState, type ReactNode } from "react";
 import MySubmissionsDialog from "./MySubmissionsDialog";
 import MySubmissionsButton from "./MySubmissionsButton";
@@ -82,12 +82,13 @@ export default function WaveMySubmissions({
   const locale = useBrowserLocale();
   const router = useRouter();
   const pathname = usePathname();
+  const search = useSearchParams();
   const [isOpen, setIsOpen] = useState(false);
   const [kind, setKind] = useState<WaveCompetitionPreviewTab>("active");
   const authorId = connectedProfile?.id;
   if (!authorId || activeProfileProxy) return renderHeader?.(null) ?? null;
   const onViewEntry = (drop: ApiDrop) => {
-    const params = new URLSearchParams(globalThis.window.location.search);
+    const params = new URLSearchParams(search.toString());
     params.set("drop", drop.id);
     router.push(`${pathname}?${params.toString()}`, { scroll: false });
     globalThis.window.dispatchEvent(new CustomEvent("single-drop:close-chat"));
@@ -121,9 +122,8 @@ export default function WaveMySubmissions({
       >
         {(isApp) => (
           <>
-            <div
-              className="tw-mb-4 tw-flex tw-flex-wrap tw-gap-2"
-              role="group"
+            <fieldset
+              className="tw-m-0 tw-mb-4 tw-flex tw-min-w-0 tw-flex-wrap tw-gap-2 tw-border-0 tw-p-0"
               aria-label={t(locale, "waves.submissions.mine")}
             >
               {(["active", "winners"] as const).map((tab) => (
@@ -142,7 +142,7 @@ export default function WaveMySubmissions({
                   )}
                 </Button>
               ))}
-            </div>
+            </fieldset>
             <WaveCompetitionEntries
               authorId={authorId}
               wave={toApiWaveMin(wave)}

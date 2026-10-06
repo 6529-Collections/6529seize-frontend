@@ -1,7 +1,6 @@
 "use client";
 
 import { AuthContext } from "@/components/auth/Auth";
-import Button from "@/components/utils/button/Button";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { resolveWaveSubmissionExperience } from "@/helpers/waves/wave-submission-experience.helpers";
@@ -11,7 +10,6 @@ import { useWave } from "@/hooks/useWave";
 import type { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";
 import { AnimatePresence, motion } from "framer-motion";
 import { XMarkIcon } from "@heroicons/react/24/outline";
-import { PlusIcon } from "@heroicons/react/24/solid";
 import React, {
   useCallback,
   useContext,
@@ -26,17 +24,23 @@ import type { LeaderboardViewMode } from "../types";
 import {
   getActionsRemeasureVariant,
   getHeaderRowFlexClass,
+  getHeaderControlsRowClass,
   getLeaderboardViewModes,
   HeaderViewModeTabs,
   MeasurementProbes,
   PriceActions,
+  PriceActionsRow,
+  SubmissionActionsRow,
 } from "./WaveLeaderboardHeaderAuxiliary";
 import { useLeaderboardHeaderControlMeasurements } from "./useLeaderboardHeaderControlMeasurements";
 import {
   getWaveLeaderboardSortItems,
   WaveleaderboardSort,
 } from "./WaveleaderboardSort";
-import { resolveWaveLeaderboardHeaderLayout } from "./waveLeaderboardHeaderLayout";
+import {
+  resolveSubmissionToolbarLayout,
+  resolveWaveLeaderboardHeaderLayout,
+} from "./waveLeaderboardHeaderLayout";
 
 interface WaveLeaderboardHeaderProps {
   readonly wave: ApiWave;
@@ -392,20 +396,6 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
     [measurements, showPriceActions]
   );
   const sortMode = isLargeScreen ? "tabs" : "dropdown";
-  const minimumToolbarWidth =
-    measurements.viewModesWidth +
-    measurements.sortControlWidth +
-    measurements.submissionActionsWidth +
-    16; // Two tw-gap-2 gaps.
-  const balanceSubmissionRows =
-    showAdditionalActions &&
-    !showPriceActions &&
-    measurements.rowWidth > 0 &&
-    measurements.sortControlWidth > 0 &&
-    measurements.submissionActionsWidth > 0 &&
-    minimumToolbarWidth > measurements.rowWidth + 1;
-  const compactSubmissionControls =
-    balanceSubmissionRows && measurements.rowWidth < 240;
 
   const onTogglePriceFilters = () => {
     if (hasActivePriceFilters) {
@@ -425,13 +415,16 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
   });
   const controlsRowBasisClass =
     layout.wrapActions && !shouldRenderActionsInPriceRow ? "tw-basis-full" : "";
-  let controlsRowFlexClass = "tw-flex-1";
-  if (showAdditionalActions) {
-    controlsRowFlexClass =
-      controlsRowBasisClass !== "" || balanceSubmissionRows
-        ? "tw-flex-[1_1_100%]"
-        : "tw-flex-[1_1_auto]";
-  }
+  const {
+    balanceSubmissionRows,
+    compactSubmissionControls,
+    controlsRowFlexClass,
+  } = resolveSubmissionToolbarLayout({
+    ...measurements,
+    showAdditionalActions,
+    showPriceActions,
+    hasFullControlsBasis: controlsRowBasisClass !== "",
+  });
   const showHeaderActions = showPriceActions && !shouldRenderActionsInPriceRow;
   const priceActionControls = (
     <>
@@ -462,17 +455,13 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
         <div
           ref={controlsRowRef}
           data-testid="leaderboard-header-controls-row"
-          className={`tw-flex tw-min-w-0 ${controlsRowFlexClass} tw-flex-nowrap tw-items-start ${
-            compactSubmissionControls
-              ? "tw-gap-1 [&_[role=tab]]:tw-w-[26px]"
-              : "tw-gap-2"
-          } ${controlsRowBasisClass} ${
-            balanceSubmissionRows ? "tw-justify-between" : ""
-          } ${
-            layout.enableControlsScroll
-              ? "tw-no-scrollbar tw-overflow-x-auto tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/60"
-              : "tw-overflow-x-hidden"
-          }`}
+          className={getHeaderControlsRowClass({
+            flexClass: controlsRowFlexClass,
+            basisClass: controlsRowBasisClass,
+            compactSubmissionControls,
+            balanceSubmissionRows,
+            enableControlsScroll: layout.enableControlsScroll,
+          })}
         >
           <HeaderViewModeTabs
             refObject={viewModeTabsRef}
@@ -490,38 +479,26 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
             />
           </div>
         </div>
-        {showHeaderActions && (
-          <div
-            data-testid="leaderboard-header-actions-row"
-            data-action-mode={layout.actionMode}
-            data-wrap={layout.wrapActions ? "yes" : "no"}
-            className={`tw-ml-auto tw-flex tw-flex-shrink-0 tw-items-center tw-gap-2 ${
-              showAdditionalActions ? "tw-max-w-full tw-flex-wrap" : ""
-            } ${layout.wrapActions ? "tw-basis-auto" : ""}`}
-          >
-            {priceActionControls}
-          </div>
-        )}
-        {(showDefaultCreateRow ||
-          (!showPriceActions && showAdditionalActions)) && (
-          <div
-            data-testid="leaderboard-submission-actions"
-            ref={submissionActionsRowRef}
-            className={`tw-flex tw-max-w-full tw-flex-wrap tw-items-center tw-gap-2 ${
-              balanceSubmissionRows
-                ? "tw-w-full tw-justify-between"
-                : "tw-ml-auto"
-            } ${isMemesWave ? "lg:tw-hidden" : ""}`}
-          >
-            {showAdditionalActions && additionalActions}
-            {canCreateDrop && onCreateDrop && (
-              <Button onClick={onCreateDrop} variant="primary" size="sm">
-                <PlusIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
-                <span>{createLabel}</span>
-              </Button>
-            )}
-          </div>
-        )}
+        <PriceActionsRow
+          isVisible={showHeaderActions}
+          testId="leaderboard-header-actions-row"
+          actionMode={layout.actionMode}
+          wrapActions={layout.wrapActions}
+          showAdditionalActions={showAdditionalActions}
+        >
+          {priceActionControls}
+        </PriceActionsRow>
+        <SubmissionActionsRow
+          isVisible={
+            showDefaultCreateRow || (!showPriceActions && showAdditionalActions)
+          }
+          refObject={submissionActionsRowRef}
+          balanceRows={balanceSubmissionRows}
+          isMemesWave={isMemesWave}
+          additionalActions={showAdditionalActions ? additionalActions : null}
+          onCreateDrop={canCreateDrop ? onCreateDrop : undefined}
+          createLabel={createLabel}
+        />
       </div>
 
       {showPriceControls && (
@@ -548,18 +525,13 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
                   setIsActiveFiltersCollapsed(false);
                 }}
                 trailingActions={
-                  shouldRenderActionsInPriceRow ? (
-                    <div
-                      data-testid="leaderboard-price-actions-row"
-                      className={`tw-ml-auto tw-flex tw-flex-shrink-0 tw-items-center tw-gap-2 ${
-                        showAdditionalActions
-                          ? "tw-max-w-full tw-flex-wrap"
-                          : ""
-                      }`}
-                    >
-                      {priceActionControls}
-                    </div>
-                  ) : undefined
+                  <PriceActionsRow
+                    isVisible={shouldRenderActionsInPriceRow}
+                    testId="leaderboard-price-actions-row"
+                    showAdditionalActions={showAdditionalActions}
+                  >
+                    {priceActionControls}
+                  </PriceActionsRow>
                 }
               />
             </motion.div>

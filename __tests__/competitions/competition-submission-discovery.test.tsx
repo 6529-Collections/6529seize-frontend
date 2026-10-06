@@ -152,6 +152,20 @@ it("closes My submissions when its artwork is opened", () => {
   expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
 });
 
+it("preserves valid personal entries when another row has the wrong scope", () => {
+  mockEntries = [
+    entry,
+    { ...entry, id: "other-entry", competition_id: "beta" },
+  ];
+  renderWithClient(<CompetitionMySubmissions />);
+  fireEvent.click(screen.getByRole("button", { name: "My submissions" }));
+  expect(screen.getAllByTestId("entry")).toHaveLength(1);
+  expect(screen.getByTestId("entry")).toHaveTextContent("entry-alpha");
+  expect(screen.getByRole("alert")).toHaveTextContent(
+    "Showing the entries already loaded."
+  );
+});
+
 it("recovers a saved native entry after its status lookup fails without creating another entry", async () => {
   mockEntryId = entry.id;
   jest

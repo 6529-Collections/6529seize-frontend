@@ -21,6 +21,8 @@ import {
 import { WaveLeaderboardGridItem } from "./WaveLeaderboardGridItem";
 import ContentModerationDropGate from "@/components/content-moderation/ContentModerationDropGate";
 import WaveLeaderboardError from "../WaveLeaderboardError";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 
 export type WaveLeaderboardGridMode = "compact" | "content_only";
 
@@ -51,6 +53,7 @@ export const WaveLeaderboardGrid: React.FC<WaveLeaderboardGridProps> = ({
   priceCurrency,
   scrollContainerRef,
 }) => {
+  const locale = useBrowserLocale();
   const winningThreshold =
     wave.wave.type === ApiWaveType.Approve ? wave.wave.winning_threshold : null;
   const winningThresholdMinDurationMs =
@@ -132,7 +135,7 @@ export const WaveLeaderboardGrid: React.FC<WaveLeaderboardGridProps> = ({
     }
     return (
       <div className="tw-flex tw-h-32 tw-items-center tw-justify-center tw-text-sm tw-text-iron-500">
-        No drops to show
+        {t(locale, "waves.leaderboard.empty")}
       </div>
     );
   }
