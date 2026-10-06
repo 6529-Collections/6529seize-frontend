@@ -469,7 +469,7 @@ export default function CreateWaveInlineGroupWalletSources(
         sources={props.sources}
         onChange={props.onChange}
         quiet={props.quiet ?? false}
-        networkPresentation={props.networkPresentation}
+        networkPresentation={props.networkPresentation ?? false}
       />
       <CsvWalletSource {...props} />
     </div>

@@ -215,7 +215,18 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
     await expect(
       filter.getByText("No identities are explicitly included.")
     ).toBeVisible();
-    await filter.getByRole("button", { name: "Excluded", exact: true }).click();
+    const identityModes = filter.getByRole("tablist", {
+      name: "Identity treatment",
+    });
+    await expect(
+      identityModes.getByRole("tab", { name: "Included", exact: true })
+    ).toHaveAttribute("aria-selected", "true");
+    await identityModes
+      .getByRole("tab", { name: "Excluded", exact: true })
+      .click();
+    await expect(
+      identityModes.getByRole("tab", { name: "Excluded", exact: true })
+    ).toHaveAttribute("aria-selected", "true");
     await expect(
       filter.getByText("No identities are explicitly excluded.")
     ).toBeVisible();

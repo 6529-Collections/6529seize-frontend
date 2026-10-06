@@ -108,6 +108,15 @@ it("starts with Identities first and keeps all eight criteria and readiness guid
   expect(
     screen.getByText("No identities are explicitly included.")
   ).toBeInTheDocument();
+  const identityModes = screen.getByRole("tablist", {
+    name: "Identity treatment",
+  });
+  expect(
+    within(identityModes).getByRole("tab", { name: "Included" })
+  ).toHaveAttribute("aria-selected", "true");
+  expect(
+    within(identityModes).getByRole("tab", { name: "Excluded" })
+  ).toHaveAttribute("aria-selected", "false");
   expect(
     screen.queryByRole("button", { name: "Edit criteria" })
   ).not.toBeInTheDocument();
@@ -150,7 +159,11 @@ it("preserves common criteria while visiting advanced criteria and submits the e
   ).toBeInTheDocument();
   expect(screen.getByText("No allowlist added.")).toBeInTheDocument();
   expect(screen.getByText("No CSV file added.")).toBeInTheDocument();
-  await user.click(screen.getByRole("button", { name: "Excluded" }));
+  await user.click(screen.getByRole("tab", { name: "Excluded" }));
+  expect(screen.getByRole("tab", { name: "Excluded" })).toHaveAttribute(
+    "aria-selected",
+    "true"
+  );
   expect(
     screen.getByText("No identities are explicitly excluded.")
   ).toBeInTheDocument();

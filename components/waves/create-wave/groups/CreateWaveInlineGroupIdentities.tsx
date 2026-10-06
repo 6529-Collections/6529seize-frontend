@@ -6,6 +6,8 @@ import { useAuth } from "@/components/auth/Auth";
 import GroupCreateIdentitySelectedItems from "@/components/groups/page/create/config/GroupCreateIdentitySelectedItems";
 import GroupCreateIdentitiesSearch from "@/components/groups/page/create/config/identities/select/GroupCreateIdentitiesSearch";
 import type { GroupCreateIdentitiesSearchResultsLayout } from "@/components/groups/page/create/config/identities/select/GroupCreateIdentitiesSearchItems";
+import type { CommonSelectItem } from "@/components/utils/select/CommonSelect";
+import CommonTabs from "@/components/utils/select/tabs/CommonTabs";
 import { areEqualAddresses } from "@/helpers/Helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
@@ -342,6 +344,26 @@ export default function CreateWaveInlineGroupIdentities(
         limit: formatInteger(locale, identityLimit),
       })
     : null;
+  const includedLabel = t(
+    locale,
+    "waves.create.groups.inlineIdentities.included.label"
+  );
+  const excludedLabel = t(
+    locale,
+    "waves.create.groups.inlineIdentities.excluded.label"
+  );
+  const modeItems: CommonSelectItem<InlineIdentityMode>[] = [
+    {
+      label: includedLabel,
+      value: "included",
+      key: "included",
+    },
+    {
+      label: excludedLabel,
+      value: "excluded",
+      key: "excluded",
+    },
+  ];
   let containerClasses = quiet ? "tw-space-y-4" : "tw-space-y-5";
   let searchSectionClasses = quiet ? "tw-space-y-3" : "tw-space-y-4";
   if (networkPresentation) {
@@ -351,38 +373,51 @@ export default function CreateWaveInlineGroupIdentities(
 
   return (
     <div className={containerClasses}>
-      <div
-        role="group"
-        aria-label={t(locale, "waves.create.groups.inlineIdentities.modeLabel")}
-        className={`${
-          quiet
-            ? "tw-relative tw-isolate tw-inline-flex tw-min-h-11 tw-w-fit tw-items-center tw-rounded-lg tw-bg-transparent tw-p-0 before:tw-pointer-events-none before:tw-absolute before:tw-inset-x-0 before:tw-inset-y-1 before:-tw-z-10 before:tw-rounded-lg before:tw-bg-iron-900 before:tw-ring-1 before:tw-ring-inset before:tw-ring-iron-800 before:tw-content-['']"
-            : "tw-flex tw-flex-wrap tw-gap-1.5"
-        } ${networkPresentation ? "tw-mb-5" : ""}`}
-      >
-        <DraftChipButton
-          label={t(
+      {networkPresentation ? (
+        <div className="tw-mb-5 tw-w-fit">
+          <CommonTabs<InlineIdentityMode>
+            items={modeItems}
+            activeItem={mode}
+            setSelected={setMode}
+            filterLabel={t(
+              locale,
+              "waves.create.groups.inlineIdentities.modeLabel"
+            )}
+            fill={false}
+            size="sm"
+          />
+        </div>
+      ) : (
+        <div
+          role="group"
+          aria-label={t(
             locale,
-            "waves.create.groups.inlineIdentities.included.label"
+            "waves.create.groups.inlineIdentities.modeLabel"
           )}
-          active={isIncludedMode}
-          quiet={quiet}
-          quietStyle="segment"
-          isToggle={true}
-          onClick={() => setMode("included")}
-        />
-        <DraftChipButton
-          label={t(
-            locale,
-            "waves.create.groups.inlineIdentities.excluded.label"
-          )}
-          active={!isIncludedMode}
-          quiet={quiet}
-          quietStyle="segment"
-          isToggle={true}
-          onClick={() => setMode("excluded")}
-        />
-      </div>
+          className={
+            quiet
+              ? "tw-relative tw-isolate tw-inline-flex tw-min-h-11 tw-w-fit tw-items-center tw-rounded-lg tw-bg-transparent tw-p-0 before:tw-pointer-events-none before:tw-absolute before:tw-inset-x-0 before:tw-inset-y-1 before:-tw-z-10 before:tw-rounded-lg before:tw-bg-iron-900 before:tw-ring-1 before:tw-ring-inset before:tw-ring-iron-800 before:tw-content-['']"
+              : "tw-flex tw-flex-wrap tw-gap-1.5"
+          }
+        >
+          <DraftChipButton
+            label={includedLabel}
+            active={isIncludedMode}
+            quiet={quiet}
+            quietStyle="segment"
+            isToggle={true}
+            onClick={() => setMode("included")}
+          />
+          <DraftChipButton
+            label={excludedLabel}
+            active={!isIncludedMode}
+            quiet={quiet}
+            quietStyle="segment"
+            isToggle={true}
+            onClick={() => setMode("excluded")}
+          />
+        </div>
+      )}
 
       <div className={searchSectionClasses}>
         {networkPresentation && (
