@@ -542,6 +542,25 @@ async function installCompetitionApi(
   };
 }
 
+/** Open contextual rules with the keyboard while leaving a chat draft pending. */
+async function openLockedSubmissionRules(page: Page, draft: string) {
+  await page
+    .getByRole("textbox", { name: "Write a chat message" })
+    .last()
+    .fill(draft);
+  await page
+    .getByRole("button", { name: "Submit drop", exact: true })
+    .press("Enter");
+  const details = page.getByRole("dialog", { name: "Submit drop" });
+  await expect(details).toBeFocused();
+  await page.keyboard.press("Tab");
+  await page.keyboard.press("Tab");
+  await expect(
+    details.getByRole("link", { name: "View submission rules" })
+  ).toBeFocused();
+  await page.keyboard.press("Enter");
+}
+
 test.describe("Native competition sandbox @auth @medium @local-only", () => {
   test.afterEach(async ({ page }) => {
     // Let fixture responses finish before Playwright disposes their request context.
@@ -568,21 +587,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await dismissNextDevTools(page);
     const draft =
       "Keep my chat draft when opening competition submission rules.";
-    await page
-      .getByRole("textbox", { name: "Write a chat message" })
-      .last()
-      .fill(draft);
-    await page
-      .getByRole("button", { name: "Submit drop", exact: true })
-      .press("Enter");
-    const details = page.getByRole("dialog", { name: "Submit drop" });
-    await expect(details).toBeFocused();
-    await page.keyboard.press("Tab");
-    await page.keyboard.press("Tab");
-    await expect(
-      details.getByRole("link", { name: "View submission rules" })
-    ).toBeFocused();
-    await page.keyboard.press("Enter");
+    await openLockedSubmissionRules(page, draft);
     await expect(page).toHaveURL(
       `/waves/${ACCESS_WAVE}/competitions/alpha?tab=rules`,
       { timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS }
@@ -640,21 +645,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       await chat.click(); // Exercise an explicit mobile view selection as well.
       await expect(chat).toHaveAttribute("aria-current", "true");
       const draft = "Keep my chat draft when opening app submission rules.";
-      await page
-        .getByRole("textbox", { name: "Write a chat message" })
-        .last()
-        .fill(draft);
-      await page
-        .getByRole("button", { name: "Submit drop", exact: true })
-        .press("Enter");
-      const details = page.getByRole("dialog", { name: "Submit drop" });
-      await expect(details).toBeFocused();
-      await page.keyboard.press("Tab");
-      await page.keyboard.press("Tab");
-      await expect(
-        details.getByRole("link", { name: "View submission rules" })
-      ).toBeFocused();
-      await page.keyboard.press("Enter");
+      await openLockedSubmissionRules(page, draft);
 
       const configuration = navigation.getByRole("button", {
         name: "Configuration",
