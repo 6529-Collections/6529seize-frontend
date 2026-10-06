@@ -213,7 +213,7 @@ export default function UserPageIdentityHeaderCICRate({
       className={`tw-relative tw-flex tw-w-full ${
         isTooltip
           ? "tw-mt-2 tw-max-w-[12rem]"
-          : "tw-mx-auto tw-mb-5 tw-mt-4 tw-max-w-[12rem]"
+          : "tw-mb-5 tw-mt-2"
       }`}
     >
       <UserPageRateInput
@@ -221,8 +221,7 @@ export default function UserPageIdentityHeaderCICRate({
         onChange={setAdjustedRatingStr}
         minMax={minMaxValues}
         isProxy={isProxy}
-        size={isTooltip ? "compact" : "prominent"}
-        withStepper={!isTooltip}
+        variant={isTooltip ? "compact" : "form"}
         inputId="nic-rating-input"
         focusRingClassName={CIC_FOCUS_RING_CLASS_NAME}
         required
@@ -285,7 +284,7 @@ export default function UserPageIdentityHeaderCICRate({
           <>
             <label
               htmlFor="nic-rating-input"
-              className="tw-mb-2 tw-block tw-text-center tw-text-sm tw-font-normal tw-text-iron-400"
+              className="tw-mb-2 tw-block tw-text-sm tw-font-normal tw-text-iron-400"
             >
               Your total NIC Rating of{" "}
               <span className="tw-whitespace-nowrap">{profile.query}</span>

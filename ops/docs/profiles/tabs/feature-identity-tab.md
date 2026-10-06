@@ -106,9 +106,8 @@ Mobile (`< lg`):
 - Selecting an option validates availability before enabling the REP amount.
 - If availability fails, inline error is shown.
 - Editing text after category selection clears selected category and amount.
-- Amount accepts integers. In the Grant REP and Rate NIC dialogs, use minus
-  or plus to change the entered amount by one within the available rating
-  limits. These buttons edit the amount only; confirm separately to save.
+- Amount accepts integers. Type the desired amount in Grant REP and Rate NIC.
+  The plus/minus symbols indicate signed amounts and are not buttons.
 - In non-proxy mode, amount clamps to allowed min/max on blur.
 - `Grant Rep` stays disabled until category is selected, amount changed, amount
   is valid, and submit is idle.
@@ -117,9 +116,8 @@ Mobile (`< lg`):
 
 - Surface: the Grant REP dialog under the profile Identity tab.
 - Current fallback: `rep.categories.grant.*` messages use the canonical `en-US`
-  source copy in locales without translated entries. The rating amount label
-  and stepper button names (`rating.amount.*`) use the same fallback in both
-  Grant REP and Rate NIC.
+  source copy in locales without translated entries, including the REP amount
+  label.
 - User impact: supported non-English locales can see English fallback copy while
   the complete grant flow remains functional.
 - Owner/follow-up: frontend localization maintainers can add translated entries

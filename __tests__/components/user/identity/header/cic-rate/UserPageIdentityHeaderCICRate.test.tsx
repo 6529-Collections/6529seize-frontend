@@ -40,10 +40,11 @@ describe('UserPageIdentityHeaderCICRate', () => {
     return { authValue, queryCtx };
   }
 
-  it('edits NIC by one without starting authentication or saving', async () => {
+  it('allows manual NIC entry without starting authentication or saving', async () => {
     const user = userEvent.setup();
     const { authValue } = setup();
-    await user.click(screen.getByRole('button', { name: 'Decrease rating by 1' }));
+    await user.clear(screen.getByLabelText(/Your total NIC Rating/));
+    await user.type(screen.getByLabelText(/Your total NIC Rating/), '-1');
     expect(screen.getByLabelText(/Your total NIC Rating/)).toHaveValue('-1');
     expect(authValue.requestAuth).not.toHaveBeenCalled();
     expect(screen.getByRole('button', { name: 'Rate', exact: true })).toBeEnabled();

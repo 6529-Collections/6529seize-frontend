@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
-import { useContext, useEffect, useMemo, useRef, useState } from "react";
+import { useContext, useEffect, useId, useMemo, useRef, useState } from "react";
 import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
 import { AnimatePresence, motion } from "framer-motion";
 import { InformationCircleIcon } from "@heroicons/react/24/outline";
@@ -75,6 +75,7 @@ export default function UserPageRepNewRepSearch({
   readonly onCancel?: (() => void) | undefined;
 }) {
   const locale = useBrowserLocale();
+  const amountInputId = useId();
   const { onProfileRepModify } = useContext(ReactQueryWrapperContext);
   const { requestAuth, setToast, connectedProfile, activeProfileProxy } =
     useContext(AuthContext);
@@ -490,15 +491,20 @@ export default function UserPageRepNewRepSearch({
                   </AnimatePresence>
                 </form>
                 <div className="[&>div]:tw-justify-center">
-                  <div className="tw-relative tw-mx-auto tw-flex tw-w-full tw-max-w-[12rem]">
+                  <label
+                    htmlFor={amountInputId}
+                    className="tw-mb-2 tw-block tw-text-sm tw-font-normal tw-text-iron-400"
+                  >
+                    {t(locale, "rep.categories.grant.amountLabel")}
+                  </label>
+                  <div className="tw-relative tw-flex tw-w-full">
                     <UserPageRateInput
                       value={amountStr}
                       onChange={setAmountStr}
                       minMax={minMaxValues}
                       isProxy={!!activeProfileProxy}
-                      size="prominent"
-                      withStepper
-                      inputLabel={t(locale, "rating.amount.label")}
+                      variant="form"
+                      inputId={amountInputId}
                     />
                   </div>
                   {selectedCategory && (

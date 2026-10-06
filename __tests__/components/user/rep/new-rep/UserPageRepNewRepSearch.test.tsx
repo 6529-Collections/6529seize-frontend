@@ -61,7 +61,7 @@ describe("UserPageRepNewRepSearch", () => {
     });
   });
 
-  it("lets the stepper edit the amount while category selection remains required", async () => {
+  it("lets users type an amount while category selection remains required", async () => {
     const user = userEvent.setup();
     render(
       <UserPageRepNewRepSearch
@@ -69,10 +69,9 @@ describe("UserPageRepNewRepSearch", () => {
         profile={{ query: "recipient" } as ApiIdentity}
       />
     );
-    await user.click(
-      screen.getByRole("button", { name: "Increase rating by 1" })
-    );
-    expect(screen.getByRole("textbox", { name: "Rating amount" })).toHaveValue(
+    await user.clear(screen.getByRole("textbox", { name: "REP amount" }));
+    await user.type(screen.getByRole("textbox", { name: "REP amount" }), "1");
+    expect(screen.getByRole("textbox", { name: "REP amount" })).toHaveValue(
       "1"
     );
     expect(
