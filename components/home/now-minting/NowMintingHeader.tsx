@@ -28,6 +28,7 @@ export default function NowMintingHeader({
         <MainStageMemeCardPill memeCardId={cardNumber} variant="subtle" />
       </div>
       <Link
+        data-home-action="Open artwork"
         href={`/the-memes/${cardNumber}`}
         className="tw-mt-2 tw-w-fit tw-max-w-full tw-text-balance tw-rounded-sm tw-text-2xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 tw-no-underline tw-transition-colors tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-4 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-iron-300 motion-reduce:tw-transition-none md:tw-text-3xl"
       >

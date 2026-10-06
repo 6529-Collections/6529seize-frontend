@@ -1,6 +1,9 @@
 export default function HomePageTextSection() {
   return (
-    <section className="tw-relative tw-px-3 tw-pb-12 tw-pt-10 sm:tw-px-4 md:tw-px-6 md:tw-pb-16 md:tw-pt-12 lg:tw-px-8">
+    <section
+      data-home-section="About 6529"
+      className="tw-relative tw-px-3 tw-pb-12 tw-pt-10 sm:tw-px-4 md:tw-px-6 md:tw-pb-16 md:tw-pt-12 lg:tw-px-8"
+    >
       <div
         className="tw-pointer-events-none tw-absolute tw-inset-0 tw-overflow-hidden"
         aria-hidden="true"

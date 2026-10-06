@@ -74,6 +74,7 @@ export default function NowMintingCountdownActive({
 
       {countdown.showMintBtn && (
         <ButtonLink
+          data-home-action="Mint"
           href="/the-memes/mint"
           size="md"
           fullWidth
