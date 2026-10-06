@@ -453,7 +453,7 @@ export default function UserPageRepNewRepSearch({
                   {showSubmissionGuidance && (
                     <output
                       id={SUBMISSION_GUIDANCE_ID}
-                      className={`tw-mb-0 tw-mt-2 tw-flex tw-items-start tw-gap-1.5 tw-px-1 tw-text-xs tw-font-normal tw-leading-relaxed ${
+                      className={`tw-mb-0 tw-mt-2 tw-flex tw-items-start tw-gap-1.5 tw-text-xs tw-font-normal tw-leading-5 ${
                         selectedNonQualifyingLookalike
                           ? "tw-text-amber-300"
                           : "tw-text-iron-400"
@@ -475,9 +475,9 @@ export default function UserPageRepNewRepSearch({
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -4 }}
                         transition={{ duration: 0.15, ease: "easeOut" }}
-                        className="tw-mt-1 tw-will-change-transform"
+                        className="tw-mt-2 tw-will-change-transform"
                       >
-                        <div className="tw-rounded-lg tw-bg-iron-900 tw-p-2 tw-ring-1 tw-ring-iron-800">
+                        <div className="tw-rounded-lg tw-bg-iron-900/40 tw-p-2 tw-ring-1 tw-ring-inset tw-ring-iron-800/60">
                           <UserPageRepNewRepSearchDropdown
                             categories={categoriesToDisplay}
                             state={repSearchState}
