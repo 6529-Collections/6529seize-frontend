@@ -7,6 +7,7 @@ import {
   MIXPANEL_PRIVATE_PROPERTIES,
   MIXPANEL_PRIVACY_CONFIG,
   sanitizeMixpanelEnvelope,
+  sanitizeMixpanelIdentityEnvelope,
 } from "./mixpanelPrivacy";
 
 export type AnalyticsProperties = Record<
@@ -132,34 +133,46 @@ const isAnalyticsReady = (): boolean => {
 
 const guardBatchDelivery = (): void => {
   // SDK 2.76.0 skips before_send_events for recovered orphaned queue entries.
-  // Install the final event transport guard before starting any batch sender.
-  type EventBatcher = {
+  // Guard event and identity transports before starting any batch sender.
+  type SdkBatcher = {
     sendRequest: (
-      events: BeforeSendHookPayload[],
+      payloads: unknown[],
       options: unknown,
       onResponse: (response: unknown) => void
     ) => void;
   };
   const batchSdk = mixpanel as typeof mixpanel & {
     _batch_requests: boolean;
-    request_batchers: { events?: EventBatcher };
+    request_batchers: Partial<
+      Record<"events" | "people" | "groups", SdkBatcher>
+    >;
   };
-  const batcher = batchSdk.request_batchers.events;
   // In 2.76.0 init_batchers runs synchronously before persistence/loaded.
   // Unsupported XHR/storage sets _batch_requests=false and uses the direct hook.
-  if (!batcher) {
-    if (batchSdk._batch_requests === false) return;
-    throw new Error("Mixpanel event batcher unavailable before startup");
+  if (!batchSdk.request_batchers.events && batchSdk._batch_requests === false)
+    return;
+  for (const kind of ["events", "people", "groups"] as const) {
+    const batcher = batchSdk.request_batchers[kind];
+    if (!batcher)
+      throw new Error(`Mixpanel ${kind} batcher unavailable before startup`);
+    const sendRequest = batcher.sendRequest.bind(batcher);
+    batcher.sendRequest = (payloads, options, onResponse) => {
+      if (!isAnalyticsReady()) {
+        onResponse(1); // Drop a withdrawn batch without a network request.
+        return;
+      }
+      const sanitized = payloads.map((payload) =>
+        kind === "events"
+          ? sanitizeMixpanelEnvelope(payload as BeforeSendHookPayload)
+          : sanitizeMixpanelIdentityEnvelope(payload as Record<string, unknown>)
+      );
+      sendRequest(sanitized, options, onResponse);
+    };
   }
-  const sendRequest = batcher.sendRequest.bind(batcher);
-  batcher.sendRequest = (events, options, onResponse) => {
-    if (!isAnalyticsReady()) {
-      onResponse(1); // Drop a withdrawn batch without a network request.
-      return;
-    }
-    sendRequest(events.map(sanitizeMixpanelEnvelope), options, onResponse);
-  };
 };
+
+const guardIdentityDelivery = (payload: Record<string, unknown>) =>
+  isAnalyticsReady() ? sanitizeMixpanelIdentityEnvelope(payload) : null;
 
 export const initAnalytics = (): boolean => {
   const token = MIXPANEL_TOKEN;
@@ -173,6 +186,13 @@ export const initAnalytics = (): boolean => {
       mixpanel.start_batch_senders();
       return false;
     }
+    // Runtime People/groups hooks are supported in 2.76.0 but omitted from its types.
+    const hooks = {
+      before_send_events: (payload: BeforeSendHookPayload) =>
+        isAnalyticsReady() ? sanitizeMixpanelEnvelope(payload) : null,
+      before_send_people: guardIdentityDelivery,
+      before_send_groups: guardIdentityDelivery,
+    };
     mixpanel.init(token, {
       ...MIXPANEL_PRIVACY_CONFIG,
       batch_autostart: false,
@@ -180,10 +200,7 @@ export const initAnalytics = (): boolean => {
       loaded: (sdk) => {
         clearPrivateSuperProperties(sdk);
       },
-      hooks: {
-        before_send_events: (payload) =>
-          isAnalyticsReady() ? sanitizeMixpanelEnvelope(payload) : null,
-      },
+      hooks,
     });
     clearPrivateSuperProperties();
     guardBatchDelivery();

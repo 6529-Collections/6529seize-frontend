@@ -7,10 +7,16 @@ const unregisterMock = jest.fn();
 const startBatchMock = jest.fn();
 const stopBatchMock = jest.fn();
 const sendBatchMock = jest.fn();
+const sendPeopleMock = jest.fn();
+const sendGroupsMock = jest.fn();
 
 const mixpanelMock = {
   _batch_requests: true,
-  request_batchers: { events: { sendRequest: sendBatchMock } },
+  request_batchers: {
+    events: { sendRequest: sendBatchMock },
+    people: { sendRequest: sendPeopleMock },
+    groups: { sendRequest: sendGroupsMock },
+  },
   persistence: {
     properties: () => ({ $initial_referrer: "legacy", mp_keyword: "legacy" }),
   },
@@ -43,8 +49,12 @@ const loadModule = async ({
   startBatchMock.mockReset();
   stopBatchMock.mockReset();
   sendBatchMock.mockReset();
+  sendPeopleMock.mockReset();
+  sendGroupsMock.mockReset();
   mixpanelMock._batch_requests = true;
   mixpanelMock.request_batchers.events.sendRequest = sendBatchMock;
+  mixpanelMock.request_batchers.people.sendRequest = sendPeopleMock;
+  mixpanelMock.request_batchers.groups.sendRequest = sendGroupsMock;
 
   jest.doMock("@/config/env", () => ({
     publicEnv: {
@@ -67,6 +77,42 @@ describe("mixpanel analytics wrapper", () => {
   afterEach(() => {
     document.cookie = "performance-cookies-consent=; Max-Age=0; path=/";
   });
+
+  it.each(["people", "groups"] as const)(
+    "guards direct, pending and recovered %s updates while preserving explicit traits",
+    async (kind) => {
+      const analytics = await loadModule({
+        nodeEnv: "production",
+        token: "public-token",
+      });
+      analytics.initAnalytics();
+      const config = initMock.mock.calls[0]?.[1];
+      const hook = config.hooks[`before_send_${kind}`];
+      const payload = {
+        $token: "public-token",
+        $distinct_id: "42",
+        $set: { handle: "alice", $current_url: "private-url" },
+        $set_once: { plan: "legacy", $initial_referrer: "private-referrer" },
+      };
+      const expected = {
+        $token: "public-token",
+        $distinct_id: "42",
+        $set: { handle: "alice" },
+        $set_once: { plan: "legacy" },
+      };
+      expect(hook(payload)).toEqual(expected);
+      const send = kind === "people" ? sendPeopleMock : sendGroupsMock;
+      mixpanelMock.request_batchers[kind].sendRequest([payload], {}, jest.fn());
+      expect(send).toHaveBeenCalledWith([expected], {}, expect.any(Function));
+      send.mockClear();
+      document.cookie = "performance-cookies-consent=; Max-Age=0; path=/";
+      expect(hook(payload)).toBeNull();
+      const dropped = jest.fn();
+      mixpanelMock.request_batchers[kind].sendRequest([payload], {}, dropped);
+      expect(send).not.toHaveBeenCalled();
+      expect(dropped).toHaveBeenCalledWith(1);
+    }
+  );
 
   it.each([true, false])(
     "only allows a missing event batcher when SDK batching is disabled (%s)",

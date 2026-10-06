@@ -79,9 +79,13 @@ unregistered at initialization and around tracking/identity calls. The SDK's
 search attribution can briefly be populated while constructing an event and
 is removed after the call; it is blacklisted from the outgoing event.
 
-A send-time hook and final event batch transport guard strip the same fields,
-check current consent and allowlist Wave pilot envelope properties. The pinned
-SDK bypasses its hook for recovered orphaned queue entries, so batch senders
+A send-time event hook and final event batch transport guard strip the same fields,
+check current consent and allowlist Wave pilot envelope properties. People/group
+send hooks and batch transports apply the same consent gate, including pending
+and recovered updates. Their `$set`/`$set_once` operations remove reserved SDK
+navigation/attribution fields while preserving explicit traits and identity
+metadata. The pinned SDK bypasses its hook for recovered orphaned queue entries,
+so batch senders
 start only after the final guard is installed. This narrow SDK integration
 must be checked when upgrading Mixpanel. The pinned SDK creates batchers
 synchronously; an unexpected missing batcher keeps delivery closed. The SDK's

@@ -92,6 +92,8 @@ const stubs = new Map([
   ],
 ]);
 const events = [];
+const people = [];
+const groups = [];
 
 async function start() {
   const result = await esbuild.build({
@@ -174,13 +176,21 @@ async function start() {
       res.end(css.css);
       return;
     }
-    if (pathname === "/events") {
+    if (["/events", "/people", "/groups"].includes(pathname)) {
       res.setHeader("Content-Type", "application/json");
-      res.end(JSON.stringify(events));
+      const captured =
+        pathname === "/people"
+          ? people
+          : pathname === "/groups"
+            ? groups
+            : events;
+      res.end(JSON.stringify(captured));
       return;
     }
     if (pathname === "/clear") {
       events.length = 0;
+      people.length = 0;
+      groups.length = 0;
       res.end("1");
       return;
     }
@@ -197,7 +207,12 @@ async function start() {
             ? data
             : Buffer.from(data, "base64").toString()
         );
-        events.push(...(Array.isArray(decoded) ? decoded : [decoded]));
+        const captured = pathname.startsWith("/capture/engage")
+          ? people
+          : pathname.startsWith("/capture/groups")
+            ? groups
+            : events;
+        captured.push(...(Array.isArray(decoded) ? decoded : [decoded]));
       }
       res.setHeader("Content-Type", "application/json");
       res.end("1");

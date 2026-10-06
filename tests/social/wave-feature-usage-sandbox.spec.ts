@@ -6,6 +6,17 @@ interface CapturedEvent {
   properties: Record<string, unknown>;
 }
 
+interface CapturedIdentity {
+  $token: string;
+  $distinct_id: string;
+  $set?: Record<string, unknown>;
+  $set_once?: Record<string, unknown>;
+}
+
+async function peopleUpdates(page: Page): Promise<CapturedIdentity[]> {
+  return page.evaluate(async () => (await fetch("/people")).json());
+}
+
 async function events(page: Page): Promise<CapturedEvent[]> {
   return page.evaluate(async () => {
     const response = await fetch("/events");
@@ -75,8 +86,95 @@ test.beforeEach(async ({ page, request, baseURL }) => {
           },
         ])
       );
+      if (new URLSearchParams(location.search).get("people") === "1") {
+        localStorage.setItem(
+          "__mpq_synthetic-wave-feature-pilot_pp",
+          JSON.stringify([
+            {
+              id: "synthetic-queued-identity",
+              flushAfter: 0,
+              payload: {
+                $token: "synthetic-wave-feature-pilot",
+                $distinct_id: "529",
+                $set_once: {
+                  fixture_trait: "recovered",
+                  $initial_referrer: "https://example.test/private-handle",
+                },
+              },
+            },
+          ])
+        );
+      }
     }
   });
+});
+
+test("identity transports preserve explicit traits and strip recovered SDK attribution", async ({
+  page,
+}) => {
+  for (const transport of ["batch", "direct"]) {
+    await page.request.get("/clear");
+    await page.goto(`/waves/private-wave?transport=${transport}&people=1`);
+    await page
+      .getByRole("button", { name: "Enable synthetic telemetry" })
+      .click();
+    await page.evaluate(() => window.featureFixture.updateTraits());
+    await expect
+      .poll(async () =>
+        (await peopleUpdates(page)).some(
+          (update) => update.$set?.["fixture_trait"] === "allowed"
+        )
+      )
+      .toBe(true);
+    if (transport === "batch") {
+      await expect
+        .poll(async () =>
+          (await peopleUpdates(page)).some(
+            (update) => update.$set_once?.["fixture_trait"] === "recovered"
+          )
+        )
+        .toBe(true);
+    }
+    for (const update of await peopleUpdates(page)) {
+      expect(update.$token).toBe("synthetic-wave-feature-pilot");
+      expect(update.$distinct_id).toBe("529");
+      expect(JSON.stringify(update)).not.toContain("private-handle");
+      expect(update.$set_once ?? {}).not.toHaveProperty("$initial_referrer");
+    }
+    await page.request.get("/clear");
+    await page.evaluate((mode) => {
+      if (mode === "batch") window.featureFixture.updateTraits();
+      document.cookie = "performance-cookies-consent=; Max-Age=0; path=/";
+      if (mode === "direct") window.featureFixture.updateTraits();
+    }, transport);
+    // Prove non-delivery across two 300ms batch flush intervals.
+    await page.waitForTimeout(700);
+    expect(await peopleUpdates(page)).toEqual([]);
+  }
+});
+
+test("recovered identity batches are dropped if consent disappears before startup flush", async ({
+  page,
+}) => {
+  await page.goto("/waves/private-wave?transport=batch&people=1");
+  await page.evaluate(() => {
+    window.featureFixture.enable();
+    document.cookie = "performance-cookies-consent=; Max-Age=0; path=/";
+  });
+  await page.waitForTimeout(1200);
+  expect(await peopleUpdates(page)).toEqual([]);
+  await page.evaluate(() => {
+    document.cookie = "performance-cookies-consent=true; path=/";
+    window.featureFixture.lateEvent();
+  });
+  await expect
+    .poll(
+      async () =>
+        (await featureEvents(page, "Wave Feature Activated", "chat")).length
+    )
+    .toBe(1);
+  await page.waitForTimeout(400);
+  expect(await peopleUpdates(page)).toEqual([]);
 });
 
 test.afterEach(async ({ page }) => {

@@ -3,6 +3,7 @@ declare global {
   interface Window {
     featureFixture: {
       logout: () => void;
+      updateTraits: () => void;
       resetVisit: () => void;
       revoke: () => void;
       enable: () => void;

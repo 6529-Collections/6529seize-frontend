@@ -96,6 +96,27 @@ export function sanitizeMixpanelEnvelope(
   };
 }
 
+export function sanitizeMixpanelIdentityEnvelope(
+  payload: Record<string, unknown>
+): Record<string, unknown> {
+  const sanitized = { ...payload };
+  for (const operation of ["$set", "$set_once"]) {
+    const properties = payload[operation];
+    if (
+      properties !== null &&
+      typeof properties === "object" &&
+      !Array.isArray(properties)
+    ) {
+      sanitized[operation] = Object.fromEntries(
+        Object.entries(properties).filter(
+          ([key]) => !PRIVATE_PROPERTIES.has(key)
+        )
+      );
+    }
+  }
+  return sanitized;
+}
+
 export const MIXPANEL_PRIVACY_CONFIG = {
   autocapture: false,
   track_pageview: false,
