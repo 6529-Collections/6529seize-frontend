@@ -56,6 +56,15 @@ export async function openMuseumAcceptanceRoute(
   await expect(page.locator("main").first()).toBeVisible();
 }
 
+async function waitForLazyImageFrame(page: Page) {
+  await page.evaluate(
+    () =>
+      new Promise<void>((resolve) => {
+        requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+      })
+  );
+}
+
 async function settleImages(page: Page, selector: string) {
   const images = page.locator(selector);
   const expected = new Map<string, number>();
@@ -87,6 +96,7 @@ async function settleImages(page: Page, selector: string) {
           if (image.occurrence <= (expected.get(image.key) ?? 0)) continue;
           expected.set(image.key, image.occurrence);
           stableSince = Date.now();
+          // Sequential scrolling gives each lazy image its own viewport visit.
           await images.evaluateAll((elements, identity) => {
             const matches = elements.filter((element) => {
               const image = element as HTMLImageElement;
@@ -100,14 +110,7 @@ async function settleImages(page: Page, selector: string) {
             });
           }, image);
           // Give each lazy image a rendering frame in view before scrolling on.
-          await page.evaluate(
-            () =>
-              new Promise<void>((resolve) => {
-                requestAnimationFrame(() =>
-                  requestAnimationFrame(() => resolve())
-                );
-              })
-          );
+          await waitForLazyImageFrame(page);
         }
         const current = await snapshot();
         const problems: string[] = [];

@@ -46,7 +46,7 @@ export async function attachMuseumMediaDiagnostics(
   diagnostics: PageDiagnostics
 ) {
   if (page.context().browser()?.browserType().name() !== "chromium") {
-    return async () => undefined;
+    return () => Promise.resolve();
   }
   const session = await page.context().newCDPSession(page);
   const requests = new Map<string, string>();
