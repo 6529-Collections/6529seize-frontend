@@ -303,6 +303,37 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
     await expectNoHorizontalOverflow(page);
   });
 
+  test("keeps the Network filter as a sheet at tablet and touch widths", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 820, height: 900 });
+    await gotoReady(page, "/network");
+    await openGroupFilters(page);
+    const sheet = page
+      .getByRole("dialog", { name: "Filter Network" })
+      .locator(".mobile-wrapper-dialog");
+    await expect
+      .poll(async () => (await sheet.boundingBox())?.y)
+      .toBeLessThan(100);
+    const tabletBounds = await sheet.boundingBox();
+    expect(
+      (tabletBounds?.y ?? 0) + (tabletBounds?.height ?? 0)
+    ).toBeGreaterThan(880);
+
+    if (
+      await page.evaluate(() => matchMedia("(any-pointer: coarse)").matches)
+    ) {
+      await page.setViewportSize({ width: 1280, height: 900 });
+      await expect
+        .poll(async () => (await sheet.boundingBox())?.y)
+        .toBeLessThan(100);
+      const touchBounds = await sheet.boundingBox();
+      expect(
+        (touchBounds?.y ?? 0) + (touchBounds?.height ?? 0)
+      ).toBeGreaterThan(880);
+    }
+  });
+
   test("renders the subscriptions report read-only and keeps download actions explicit", async ({
     page,
   }) => {
