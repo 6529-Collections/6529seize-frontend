@@ -235,7 +235,7 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
     await expect(apply).toBeEnabled();
     await expect(apply).toBeInViewport({ ratio: 1 });
     await expect(
-      filter.getByRole("button", { name: "Preview matches" })
+      filter.getByRole("button", { name: "View members" })
     ).toBeInViewport();
     await expect(
       page

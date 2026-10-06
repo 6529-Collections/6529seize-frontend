@@ -37,9 +37,9 @@ pagination, and profile links.
   Switching keeps the draft's values.
 - The `After editing` summary and `Create and use new group` action stay at
   the bottom while the criteria scroll. A valid draft also offers
-  `Preview matches`. Expand `Not ready yet.` to read the readiness guidance.
-- `Before editing` shows the current scope. With a selected group, expand it
-  to inspect its criteria, count, and `View members` without changing the draft.
+  `View members`. Expand `Not ready yet.` to read the readiness guidance.
+- `Before editing` shows the current scope. With a selected group, its
+  criteria, count, and `View members` are visible without changing the draft.
 - Applying new criteria creates a saved group and immediately uses it as the
   Network scope. `Clear selected group` above the results clears the scope.
   The filter does not offer saved-group search or `Hide criteria and members`.

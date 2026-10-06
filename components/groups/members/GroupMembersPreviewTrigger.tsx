@@ -16,7 +16,6 @@ import {
 
 export default function GroupMembersPreviewTrigger({
   target,
-  actionLabel,
   disabled = false,
   appearance = "details",
   quiet = false,
@@ -24,7 +23,6 @@ export default function GroupMembersPreviewTrigger({
   onOpen,
 }: {
   readonly target: GroupMembersPreviewTarget;
-  readonly actionLabel?: string;
   readonly disabled?: boolean | undefined;
   readonly appearance?: "details" | "summary" | "inline" | undefined;
   readonly quiet?: boolean;
@@ -139,7 +137,7 @@ export default function GroupMembersPreviewTrigger({
           onClick={onOpen}
           className="desktop-hover:hover:tw-text-primary-200 tw-inline-flex tw-min-h-8 tw-items-center tw-rounded-md tw-border-0 tw-bg-transparent tw-p-0 tw-text-xs tw-font-semibold tw-text-primary-300 tw-underline-offset-2 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:hover:tw-underline"
         >
-          {actionLabel ?? t(locale, "waves.create.groups.members.view")}
+          {t(locale, "waves.create.groups.members.view")}
         </button>
       </div>
     );
@@ -169,7 +167,7 @@ export default function GroupMembersPreviewTrigger({
           onClick={onOpen}
           className={`desktop-hover:hover:tw-text-primary-200 tw-rounded-md tw-border-0 tw-bg-transparent tw-p-0 tw-text-xs tw-font-semibold tw-text-primary-300 tw-underline-offset-2 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:hover:tw-underline ${quiet ? "tw-inline-flex tw-min-h-8 tw-items-center" : ""}`}
         >
-          {actionLabel ?? t(locale, "waves.create.groups.members.view")}
+          {t(locale, "waves.create.groups.members.view")}
         </button>
       </div>
       <p

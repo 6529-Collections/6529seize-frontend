@@ -41,7 +41,7 @@ no standalone Network Groups page.
    `Collection Access`, or `xTDH Grant` from the visible list. On narrow
    screens, `All filters` returns from a criterion editor to the list.
    Check `After editing`
-   and `Preview matches`, then select `Create and use new group`. Network's
+   and `View members`, then select `Create and use new group`. Network's
    criteria editor does not offer saved-group search or the
    `Hide criteria and members` setting.
 3. `/network` applies the selected scope and stores its group id in the URL.

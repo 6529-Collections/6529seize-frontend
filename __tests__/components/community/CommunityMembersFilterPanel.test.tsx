@@ -1,11 +1,5 @@
 import type { ComponentProps } from "react";
-import {
-  fireEvent,
-  render,
-  screen,
-  waitFor,
-  within,
-} from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import CommunityMembersFilterPanel from "@/components/community/CommunityMembersFilterPanel";
 import type GroupMembersPreviewTrigger from "@/components/groups/members/GroupMembersPreviewTrigger";
@@ -17,14 +11,13 @@ jest.mock("@/components/groups/members/GroupMembersPreviewTrigger", () => ({
   __esModule: true,
   default: ({
     target,
-    actionLabel,
     onOpen,
   }: ComponentProps<typeof GroupMembersPreviewTrigger>) => (
     <div>
       <span>
         {target.kind === "draft" ? target.summary : target.group.name}
       </span>
-      <button onClick={onOpen}>{actionLabel ?? "View members"}</button>
+      <button onClick={onOpen}>View members</button>
     </div>
   ),
 }));
@@ -218,13 +211,15 @@ it("prefills a saved group, keeps both previews, and does not change the origina
   expect(
     screen.getByRole("spinbutton", { name: "Level at least" })
   ).toHaveValue(20);
-  fireEvent.click(screen.getByText("Before editing"));
-  await user.click(screen.getByRole("button", { name: "View members" }));
+  expect(screen.getAllByRole("button", { name: "View members" })).toHaveLength(
+    2
+  );
+  await user.click(screen.getAllByRole("button", { name: "View members" })[0]!);
   expect(
     screen.getByRole("dialog", { name: "Member preview" })
   ).toHaveTextContent("saved");
   await user.click(screen.getByRole("button", { name: "Close preview" }));
-  await user.click(screen.getByRole("button", { name: "Preview matches" }));
+  await user.click(screen.getAllByRole("button", { name: "View members" })[1]!);
   expect(
     screen.getByRole("dialog", { name: "Member preview" })
   ).toHaveTextContent("draft");
@@ -274,4 +269,35 @@ it("keeps a failed or cancelled draft for another attempt", async () => {
     screen.getByRole("spinbutton", { name: "Level at least" })
   ).toHaveValue(10);
   expect(onChange).not.toHaveBeenCalled();
+});
+
+it("keeps criteria editable while group creation is pending", async () => {
+  const user = userEvent.setup();
+  let resolveCreate!: (group: ApiGroupFull | null) => void;
+  const onCreateGroup = jest.fn(
+    () =>
+      new Promise<ApiGroupFull | null>((resolve) => {
+        resolveCreate = resolve;
+      })
+  );
+  renderPanel({ onCreateGroup });
+  await user.click(screen.getByRole("button", { name: "Level" }));
+  await user.type(
+    screen.getByRole("spinbutton", { name: "Level at least" }),
+    "10"
+  );
+  await user.click(
+    screen.getByRole("button", { name: "Create and use new group" })
+  );
+  expect(onCreateGroup).toHaveBeenCalledTimes(1);
+  expect(
+    screen.getByRole("spinbutton", { name: "Level at least" })
+  ).toBeEnabled();
+  expect(screen.getByRole("button", { name: "TDH" })).toBeEnabled();
+  resolveCreate(null);
+  await waitFor(() =>
+    expect(
+      screen.getByRole("button", { name: "Create and use new group" })
+    ).toBeEnabled()
+  );
 });

@@ -125,35 +125,24 @@ export default function CommunityMembersFilterPanel(
         ref={panelRef}
         className="tw-flex tw-min-h-0 tw-flex-1 tw-flex-col tw-overflow-hidden"
       >
-        <div className="tw-shrink-0 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-px-4 tw-py-2 sm:tw-px-6">
-          {savedTarget ? (
-            <details className="tw-text-xs tw-text-iron-400">
-              <summary className="tw-cursor-pointer tw-rounded-lg tw-py-2 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400">
-                {t(locale, "waves.create.groups.currentGroup")}{" "}
-                <span className="tw-ml-2 tw-break-words tw-font-medium tw-text-iron-200">
-                  {currentGroupLabel}
-                </span>
-              </summary>
-              <div className="tw-max-h-32 tw-overflow-y-auto tw-pb-2">
-                <GroupMembersPreviewTrigger
-                  target={savedTarget}
-                  quiet
-                  disabled={isCreating}
-                  onOpen={() => setPreviewTarget(savedTarget)}
-                />
-              </div>
-            </details>
-          ) : (
-            <p className="tw-m-0 tw-py-2 tw-text-xs tw-text-iron-400">
-              {t(locale, "waves.create.groups.currentGroup")}{" "}
-              <span className="tw-ml-2 tw-font-medium tw-text-iron-200">
-                {currentGroupLabel}
-              </span>
-            </p>
+        <div className="tw-flex tw-shrink-0 tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-1 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-px-4 tw-py-3 sm:tw-px-6">
+          <span className="tw-text-xs tw-text-iron-400">
+            {t(locale, "waves.create.groups.currentGroup")}
+          </span>
+          <span className="tw-break-words tw-text-xs tw-font-medium tw-text-iron-200">
+            {currentGroupLabel}
+          </span>
+          {savedTarget && (
+            <GroupMembersPreviewTrigger
+              target={savedTarget}
+              appearance="inline"
+              disabled={props.disabled ?? false}
+              onOpen={() => setPreviewTarget(savedTarget)}
+            />
           )}
         </div>
         <fieldset
-          disabled={isCreating}
+          disabled={props.disabled ?? false}
           className="tw-m-0 tw-flex tw-min-h-0 tw-min-w-0 tw-flex-1 tw-flex-col tw-border-0 tw-p-0 lg:tw-flex-row"
         >
           <div
@@ -255,11 +244,7 @@ export default function CommunityMembersFilterPanel(
               <GroupMembersPreviewTrigger
                 target={draftTarget}
                 appearance="inline"
-                disabled={isCreating}
-                actionLabel={t(
-                  locale,
-                  "waves.create.groups.members.previewDraft"
-                )}
+                disabled={(props.disabled ?? false) || isCreating}
                 onOpen={() => setPreviewTarget(draftTarget)}
               />
             ) : (
