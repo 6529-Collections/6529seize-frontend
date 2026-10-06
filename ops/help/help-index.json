@@ -3374,7 +3374,7 @@
         "On mobile and in the app, the GIF picker uses the same drag handle and swipe-down dismissal as the emoji picker.",
         "Composer availability depends on the wave, groups, permissions, and current state.",
         "Available chat has no permission summary or access-details row above the composer, including when submissions are restricted. Chatting or following a wave does not grant submission or voting access. Existing sign-in, profile, proxy, and moderation guards still apply.",
-        "An unavailable Submit drop action in ordinary Rank and Approve Chat headers opens a details card with the restriction reason, submission access group, and View submission rules. Other submission entry surfaces keep their own eligibility displays.",
+        "An unavailable Submit drop action in ordinary Rank and Approve Chat headers opens a details card with the restriction reason, submission access group, and View submission rules. Enter or Space opens it; Tab reaches its links; Escape closes it and restores focus to the action. Opening rules moves focus to Configuration or its app content. Returning to Chat preserves an ordinary text draft in the same browser tab, but does not save attachments or media. Other submission entry surfaces keep their own eligibility displays.",
         "If an authenticated wallet has no profile handle yet, public wave content can stay readable while the composer prompts the user to create a profile before participating."
       ],
       "canonical_path": "/waves",

@@ -201,6 +201,50 @@ describe("HoverCard", () => {
     });
   });
 
+  it.each(["Enter", " "])(
+    "focuses click-opened details with %s and restores focus on Escape",
+    async (key) => {
+      render(
+        <HoverCard
+          content={<a href="/rules">View rules</a>}
+          ariaLabel={hoverCardAriaLabel}
+          delayShow={0}
+          openOnClick
+        >
+          <button type="button">Trigger</button>
+        </HoverCard>
+      );
+      const trigger = screen.getByRole("button", { name: "Trigger" });
+      act(() => trigger.focus());
+      // Keyboard activation must also work after focus has already opened it.
+      await screen.findByRole("dialog");
+
+      fireEvent.keyDown(trigger, { key });
+
+      expect(screen.getByRole("dialog")).toHaveFocus();
+      act(() => screen.getByRole("link", { name: "View rules" }).focus());
+      fireEvent.keyDown(document, { key: "Escape" });
+
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+      expect(trigger).toHaveFocus();
+      await waitFor(() =>
+        expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+      );
+    }
+  );
+
+  it("does not intercept Enter when click opening is disabled", () => {
+    render(
+      <HoverCard content="Details" ariaLabel={hoverCardAriaLabel}>
+        <a href="/destination">Trigger</a>
+      </HoverCard>
+    );
+    expect(fireEvent.keyDown(screen.getByRole("link"), { key: "Enter" })).toBe(
+      true
+    );
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
   it("can stop click propagation and close when the card is clicked", async () => {
     const handleParentClick = jest.fn();
 

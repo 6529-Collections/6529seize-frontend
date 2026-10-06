@@ -1,7 +1,14 @@
 "use client";
 import dynamic from "next/dynamic";
 
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/components/auth/Auth";
 import { useSetWaveData } from "@/contexts/TitleContext";
@@ -91,6 +98,7 @@ const getContentTabPanelId = (tab: MyStreamWaveTab): string =>
 
 const useBreakpoint = createBreakpoint({ LG: 1024, S: 0 });
 
+/** Coordinate shared chat and competition views within the current wave. */
 const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
   waveId,
   competitionContent,
@@ -105,6 +113,8 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
   const locale = useBrowserLocale();
   const { connectedProfile, activeProfileProxy, setToast } = useAuth();
   const { setWaveDropAction } = useHeaderContext();
+  const contentRef = useRef<HTMLDivElement>(null);
+  const focusSubmissionRulesRef = useRef(false);
   const {
     waves,
     directMessages,
@@ -434,9 +444,30 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
     setAppMemesSubmitWaveId(null);
   }, []);
 
+  /** Open existing rules and move focus out of the disappearing details card. */
   const viewSubmissionRules = useCallback(() => {
+    focusSubmissionRulesRef.current = true;
     setActiveContentTab(MyStreamWaveTab.CONFIGURATION);
   }, [setActiveContentTab]);
+
+  useLayoutEffect(() => {
+    if (
+      !focusSubmissionRulesRef.current ||
+      activeContentTab !== MyStreamWaveTab.CONFIGURATION
+    ) {
+      return;
+    }
+    focusSubmissionRulesRef.current = false;
+    const tabs = contentRef.current?.querySelectorAll<HTMLButtonElement>(
+      `[role="tab"][aria-controls="${getContentTabPanelId(MyStreamWaveTab.CONFIGURATION)}"]`
+    );
+    const target =
+      Array.from(tabs ?? []).find((tab) => tab.getClientRects().length > 0) ??
+      contentRef.current?.querySelector<HTMLElement>(
+        `#${getContentTabPanelId(MyStreamWaveTab.CONFIGURATION)}`
+      );
+    target?.focus();
+  }, [activeContentTab]);
 
   const chatSubmitDropAction = useMemo<ChatSubmitDropAction>(
     () => ({
@@ -628,6 +659,7 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
 
   return (
     <div
+      ref={contentRef}
       className="tailwind-scope tw-relative tw-flex tw-h-full tw-min-h-0 tw-min-w-0 tw-flex-col"
       key={stableWaveKey}
     >
@@ -664,6 +696,7 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
       <div
         className="tw-relative tw-min-h-0 tw-min-w-0 tw-flex-grow tw-overflow-hidden"
         role={isApp && flat ? "region" : "tabpanel"}
+        tabIndex={-1}
         aria-label={isApp && flat ? wave.name : undefined}
         id={
           activeCurationId

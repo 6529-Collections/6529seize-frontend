@@ -33,6 +33,7 @@ interface MyStreamWaveTabsDefaultProps {
   readonly chatSubmitDropAction?: ChatSubmitDropAction | null | undefined;
 }
 
+/** Keep chat submission actions and display controls beside the wave tabs. */
 const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
   wave,
   viewMode,

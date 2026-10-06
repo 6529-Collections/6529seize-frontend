@@ -38,6 +38,7 @@ const MATCHABLE_GROUP_KEY_BY_TYPE: Partial<
   [CreateWaveGroupConfigType.CAN_VOTE]: "canVote",
 };
 
+/** Edit access scopes and preview the effect of separate chat/submission groups. */
 export default function CreateWaveGroups({
   waveName,
   waveType,

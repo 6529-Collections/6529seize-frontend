@@ -39,6 +39,10 @@ interface HoverCardProps {
   readonly triggerDisplay?: CSSProperties["display"] | undefined;
   readonly contentStyle?: CSSProperties | undefined;
 }
+/**
+ * Show nonmodal details on hover or explicit activation. Keyboard activation
+ * focuses the card; dismissal returns focus when it was inside the card.
+ */
 export default function HoverCard({
   children,
   content,
@@ -142,6 +146,9 @@ export default function HoverCard({
       resetCardInteractionState();
       focusCardOnOpenRef.current = focusCard;
       setIsVisible(true);
+      if (focusCard) {
+        cardRef.current?.focus();
+      }
     },
     [disabled, resetCardInteractionState]
   );
@@ -160,9 +167,16 @@ export default function HoverCard({
   }, [cancelHideTimer, cancelShowTimer, delayHide, hoverTransitionDelay]);
 
   const closeCardImmediately = useCallback(() => {
+    const restoreTriggerFocus = cardRef.current?.contains(
+      document.activeElement
+    );
     resetCardInteractionState();
     setIsVisible(false);
-  }, [resetCardInteractionState]);
+    if (restoreTriggerFocus) {
+      triggerRef.current?.focus();
+      cancelShowTimer();
+    }
+  }, [cancelShowTimer, resetCardInteractionState]);
 
   const handleTriggerMouseEnter = useCallback(() => {
     resolveTriggerNode();
@@ -204,13 +218,16 @@ export default function HoverCard({
         return;
       }
 
-      if (event.key === "ArrowDown") {
+      if (
+        event.key === "ArrowDown" ||
+        (openOnClick && (event.key === "Enter" || event.key === " "))
+      ) {
         event.preventDefault();
         resolveTriggerNode();
         showImmediately({ focusCard: true });
       }
     },
-    [closeCardImmediately, resolveTriggerNode, showImmediately]
+    [closeCardImmediately, openOnClick, resolveTriggerNode, showImmediately]
   );
 
   const handleTriggerClick = useCallback(
@@ -405,7 +422,9 @@ export default function HoverCard({
 
     document.addEventListener("keydown", handleKeyDown);
     document.addEventListener("mousedown", handlePointerDown);
-    document.addEventListener("touchstart", handlePointerDown);
+    document.addEventListener("touchstart", handlePointerDown, {
+      passive: true,
+    });
 
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
@@ -472,7 +491,9 @@ export default function HoverCard({
               tabIndex={-1}
               className={joinTooltipClassNames(
                 styles["tooltip"],
-                styles["tooltip--" + actualPlacement]
+                styles["hoverCard"],
+                styles["tooltip--" + actualPlacement],
+                "focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
               )}
               style={{
                 position: "fixed",

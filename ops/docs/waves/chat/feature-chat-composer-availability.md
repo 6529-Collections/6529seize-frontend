@@ -62,6 +62,9 @@ availability. Submission availability is exposed through the Chat tab
   criteria and members; hidden and direct-message groups show only `Private group`.
 - Following `View submission rules` and returning to Chat preserves an ordinary
   text draft in the same browser tab. This does not save attachments or media.
+- Use Enter or Space to open locked submission details, Tab to reach its links,
+  and Escape to close it and return focus to the action. Opening submission rules
+  moves focus to Configuration, or its content when app tabs are outside the view.
 - Chatting or following a wave does not grant submission or voting access.
   Submission eligibility, timing, limits, and signing requirements still apply.
 - If submission is available, users enter it from `Submit drop` in the Chat tab

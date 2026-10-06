@@ -17,6 +17,7 @@ interface WaveHeaderRestrictionButtonProps {
   readonly "data-full-width"?: string | undefined;
 }
 
+/** Explain a locked action on demand, with optional safe submission details. */
 export default function WaveHeaderRestrictionButton({
   label,
   reason,

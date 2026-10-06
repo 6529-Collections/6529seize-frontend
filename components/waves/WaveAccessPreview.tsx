@@ -3,6 +3,7 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t, type MessageKey } from "@/i18n/messages";
 import type { WaveGroupsConfig } from "@/types/waves.types";
 
+/** Describe the selected audiences without implying that other rules disappear. */
 function getPreviewKey(
   waveType: ApiWaveType,
   groups: Pick<WaveGroupsConfig, "canChat" | "canDrop">,
@@ -26,6 +27,7 @@ function getPreviewKey(
     : "waves.access.preview.differentGroups";
 }
 
+/** Announce the access consequence as organizers change chat/submission groups. */
 export default function WaveAccessPreview({
   waveType,
   groups,
@@ -38,11 +40,8 @@ export default function WaveAccessPreview({
   const locale = useBrowserLocale();
 
   return (
-    <p
-      role="status"
-      className="tw-m-0 tw-text-pretty tw-text-sm tw-leading-6 tw-text-iron-300"
-    >
+    <output className="tw-m-0 tw-block tw-text-pretty tw-text-sm tw-leading-6 tw-text-iron-300">
       {t(locale, getPreviewKey(waveType, groups, chatEnabled))}
-    </p>
+    </output>
   );
 }

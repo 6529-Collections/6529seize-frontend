@@ -291,6 +291,7 @@ const HeaderTitleContent = ({
   );
 };
 
+/** Keep an unavailable drop action interactive so its restriction is readable. */
 const HeaderDropActionButton = ({
   action,
 }: {

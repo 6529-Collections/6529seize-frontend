@@ -85,6 +85,7 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
       .getByRole("button", { name: "Submit drop", exact: true })
       .press("Enter");
     const restriction = page.getByRole("dialog", { name: "Submit drop" });
+    await expect(restriction).toBeFocused();
     await expect(restriction).toContainText(
       "You don't have permission to submit in this wave"
     );
@@ -103,12 +104,32 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
       "Chat access is separate from submission access."
     );
     await expectNoHorizontalOverflow(page);
-    await restriction
-      .getByRole("link", { name: "View submission rules" })
-      .click();
+    await page.keyboard.press("Escape");
+    const lockedSubmit = page.getByRole("button", {
+      name: "Submit drop",
+      exact: true,
+    });
+    await expect(lockedSubmit).toBeFocused();
+    await expect(restriction).toHaveCount(0);
+    await page.keyboard.press("Space");
+    await expect(restriction).toBeFocused();
+    await page.keyboard.press("Tab");
+    await expect(
+      restriction.getByRole("link", {
+        name: "Inspect Sandbox Submission Club group criteria and members",
+      })
+    ).toBeFocused();
+    await page.keyboard.press("Tab");
+    await expect(
+      restriction.getByRole("link", { name: "View submission rules" })
+    ).toBeFocused();
+    await page.keyboard.press("Enter");
     await expect(
       page.getByRole("tab", { name: "Configuration", exact: true }).first()
     ).toHaveAttribute("aria-selected", "true");
+    await expect(
+      page.getByRole("tab", { name: "Configuration", exact: true }).first()
+    ).toBeFocused();
     await page.getByRole("tab", { name: "Chat", exact: true }).first().click();
     await expect(
       page.getByRole("textbox", { name: "Write a chat message" }).last()

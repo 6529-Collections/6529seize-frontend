@@ -5,6 +5,10 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import WaveGroupScope from "./specs/groups/group/WaveGroupScope";
 
+/**
+ * Show safe submission-group details only after the locked action is opened.
+ * Normal activation can use the current tab; copied links retain a rules URL.
+ */
 export default function WaveSubmissionAccessDetails({
   wave,
   onViewRules,

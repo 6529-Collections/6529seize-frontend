@@ -18,6 +18,7 @@ import CreateWaveStepHeader from "../utils/CreateWaveStepHeader";
 import CreateWaveReviewDescription from "./CreateWaveReviewDescription";
 import WaveAccessPreview from "../../WaveAccessPreview";
 
+/** Review selected wave settings and their audience before creating the wave. */
 export default function CreateWaveReview({
   config,
   isCompetition = false,
