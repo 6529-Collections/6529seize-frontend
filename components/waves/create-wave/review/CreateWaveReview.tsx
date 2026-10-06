@@ -22,12 +22,14 @@ import WaveAccessPreview from "../../WaveAccessPreview";
 export default function CreateWaveReview({
   config,
   isCompetition = false,
+  chatRestricted,
   groupsCache,
   description,
   parentWaveName,
 }: {
   readonly config: CreateWaveConfig;
   readonly isCompetition?: boolean;
+  readonly chatRestricted?: boolean | undefined;
   readonly groupsCache: Readonly<Record<string, ApiGroupFull>>;
   readonly description: CreateDropConfig | null;
   readonly parentWaveName?: string | null | undefined;
@@ -110,6 +112,7 @@ export default function CreateWaveReview({
         waveType={config.overview.type}
         groups={config.groups}
         chatEnabled={config.chat.enabled}
+        chatRestricted={chatRestricted}
       />
       {description && <CreateWaveReviewDescription description={description} />}
     </div>

@@ -56,6 +56,8 @@ waves show these controls inside `Optional settings` on the first screen.
 - When creating or reviewing a competition inside an existing Wave, the summary
   uses that parent Wave's current chat group and enabled state. Competition
   submission groups are separate; competition draft settings do not change chat.
+  A private parent chat remains group-restricted when its group ID or name is
+  withheld. Without the ID, the summary does not claim the groups match or differ.
 - This summary describes group access. Sign-in, profile, submission timing,
   limits, and other posting requirements still apply. Voting access is separate.
 - `Allow admins to delete posts` is enabled by default.

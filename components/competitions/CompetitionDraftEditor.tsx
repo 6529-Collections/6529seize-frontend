@@ -426,6 +426,7 @@ function DraftForm({
     content = (
       <CreateWaveStepContent
         isCompetition
+        chatRestricted={wave.chat.scope.group !== null}
         controller={{
           ...controller,
           errors: visibleErrors,

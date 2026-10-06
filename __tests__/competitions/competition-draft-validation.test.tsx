@@ -84,8 +84,10 @@ jest.mock("@/components/waves/create-wave/CreateWaveStepContent", () => {
     __esModule: true,
     default: ({
       controller,
+      chatRestricted,
     }: {
       controller: ReturnType<typeof useWaveConfig>;
+      chatRestricted?: boolean | undefined;
     }) => {
       if (controller.step === CreateWaveStep.VOTING)
         return (
@@ -102,6 +104,7 @@ jest.mock("@/components/waves/create-wave/CreateWaveStepContent", () => {
           <Review
             config={controller.config}
             isCompetition
+            chatRestricted={chatRestricted}
             groupsCache={{}}
             description={null}
           />
@@ -164,17 +167,25 @@ afterEach(() => jest.useRealTimers());
 it.each([
   {
     enabled: true,
+    group: { id: "chat-club", name: "Chat Club", is_hidden: true },
+    expected:
+      "Chat is limited to its selected group. Submission group access is public. Voting access is separate.",
+  },
+  {
+    enabled: true,
+    group: { is_hidden: true },
     expected:
       "Chat is limited to its selected group. Submission group access is public. Voting access is separate.",
   },
   {
     enabled: false,
+    group: { is_hidden: true },
     expected:
       "Chat is disabled. Submission group access is public. Voting access is separate.",
   },
 ])(
   "reviews a new competition with the parent's actual chat: $expected",
-  ({ enabled, expected }) => {
+  ({ enabled, group, expected }) => {
     const parent: ApiWave = {
       ...wave,
       chat: {
@@ -182,7 +193,7 @@ it.each([
         enabled,
         scope: {
           ...wave.chat.scope,
-          group: { id: "chat-club", name: "Chat Club", is_hidden: true },
+          group,
         },
       },
     };

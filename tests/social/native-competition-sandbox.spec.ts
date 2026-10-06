@@ -947,8 +947,12 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     ).toEqual([]);
   });
 
-  for (const chatEnabled of [true, false]) {
-    test(`reviews competition access with parent chat ${chatEnabled ? "restricted" : "disabled"}`, async ({
+  for (const { chatEnabled, hideGroupMetadata, label } of [
+    { chatEnabled: true, hideGroupMetadata: false, label: "restricted" },
+    { chatEnabled: true, hideGroupMetadata: true, label: "hidden without metadata" },
+    { chatEnabled: false, hideGroupMetadata: true, label: "disabled" },
+  ]) {
+    test(`reviews competition access with parent chat ${label}`, async ({
       page,
     }) => {
       await installCompetitionApi(page);
@@ -958,11 +962,13 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       const parent = await response.json();
       parent.visibility.scope.group = null;
       parent.chat.enabled = chatEnabled;
-      parent.chat.scope.group = {
-        id: "parent-chat-club",
-        name: "Parent Chat Club",
-        is_hidden: true,
-      };
+      parent.chat.scope.group = hideGroupMetadata
+        ? { is_hidden: true }
+        : {
+            id: "parent-chat-club",
+            name: "Parent Chat Club",
+            is_hidden: true,
+          };
       await page.route(`**/api/waves/${WAVE}`, (route) =>
         route.fulfill({ json: parent })
       );

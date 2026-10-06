@@ -68,6 +68,35 @@ describe("WaveAccessPreview", () => {
     {
       canDrop: null,
       expected:
+        "Chat is limited to its selected group. Submission group access is public. Voting access is separate.",
+    },
+    {
+      canDrop: "submission-club",
+      expected:
+        "Chat is limited to its selected group. Only the submission group can submit. Voting access is separate.",
+    },
+  ])(
+    "preserves restricted chat when its group ID is withheld: $canDrop",
+    ({ canDrop, expected }) => {
+      render(
+        <WaveAccessPreview
+          waveType={ApiWaveType.Approve}
+          groups={{ canChat: null, canDrop }}
+          chatEnabled
+          chatRestricted
+        />
+      );
+      expect(screen.getByRole("status")).toHaveTextContent(expected);
+      expect(screen.getByRole("status")).not.toHaveTextContent(
+        "can chat and submit"
+      );
+    }
+  );
+
+  it.each([
+    {
+      canDrop: null,
+      expected:
         "Chat is disabled. Submission group access is public. Voting access is separate.",
     },
     {
