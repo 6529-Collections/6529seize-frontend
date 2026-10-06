@@ -571,6 +571,46 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     "PLAYWRIGHT_AUTH_SANDBOX",
     "Native competition tests require an isolated local mock API."
   );
+  test("keeps the non-default competition in a copied submission rules link", async ({
+    page,
+    baseURL,
+  }) => {
+    const sandbox = await installCompetitionApi(
+      page,
+      false,
+      false,
+      ACCESS_WAVE
+    );
+    await sandbox.legacyPrimary("alpha");
+    await page.goto(`/waves/${ACCESS_WAVE}?tab=chat&competition=beta`);
+    await dismissNextDevTools(page);
+    await page
+      .getByRole("button", { name: "Submit drop", exact: true })
+      .press("Enter");
+    const href = await page
+      .getByRole("dialog", { name: "Submit drop" })
+      .getByRole("link", { name: "View submission rules" })
+      .getAttribute("href");
+    expect(href).toBe(
+      `/waves/${ACCESS_WAVE}?tab=configuration&competition=beta`
+    );
+    if (!href)
+      throw new Error(
+        "The submission rules link must have a real destination."
+      );
+    // Loading the copied URL bypasses the normal onNavigate callback.
+    await page.goto(href);
+    await expect(page).toHaveURL(
+      `/waves/${ACCESS_WAVE}/competitions/beta?tab=rules`,
+      {
+        timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+      }
+    );
+    await expect(
+      page.getByRole("tab", { name: "Configuration", exact: true }).first()
+    ).toHaveAttribute("aria-selected", "true");
+    await expectNoUnsafeSandboxMutations(baseURL);
+  });
   test("opens locked submission rules on the web competition route and restores Chat", async ({
     page,
     baseURL,

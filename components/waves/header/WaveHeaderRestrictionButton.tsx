@@ -1,7 +1,7 @@
 "use client";
 
 import clsx from "clsx";
-import { useId, type ReactNode } from "react";
+import { Suspense, useId, type ReactNode } from "react";
 import HoverCard from "@/components/utils/tooltip/HoverCard";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import WaveSubmissionAccessDetails from "../WaveSubmissionAccessDetails";
@@ -43,10 +43,12 @@ export default function WaveHeaderRestrictionButton({
           </p>
           {accessWave && (
             <div className="tw-mt-3">
-              <WaveSubmissionAccessDetails
-                wave={accessWave}
-                onViewRules={onViewRules}
-              />
+              <Suspense fallback={null}>
+                <WaveSubmissionAccessDetails
+                  wave={accessWave}
+                  onViewRules={onViewRules}
+                />
+              </Suspense>
             </div>
           )}
         </div>

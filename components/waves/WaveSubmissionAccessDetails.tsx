@@ -1,6 +1,11 @@
 import Link from "next/link";
+import { usePathname, useSearchParams } from "next/navigation";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import { getWavePathRoute } from "@/helpers/navigation.helpers";
+import {
+  getActiveWaveIdFromUrl,
+  getWavePathRoute,
+} from "@/helpers/navigation.helpers";
+import { getCompetitionIdFromPathname } from "@/helpers/competition.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import WaveGroupScope from "./specs/groups/group/WaveGroupScope";
@@ -17,6 +22,15 @@ export default function WaveSubmissionAccessDetails({
   readonly onViewRules?: (() => void) | undefined;
 }) {
   const locale = useBrowserLocale();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const competitionId =
+    getActiveWaveIdFromUrl({ pathname, searchParams }) === wave.id
+      ? (getCompetitionIdFromPathname(pathname) ??
+        searchParams.get("competition"))
+      : null;
+  const rulesParams = new URLSearchParams({ tab: "configuration" });
+  if (competitionId) rulesParams.set("competition", competitionId);
   const group = wave.participation.scope.group;
 
   return (
@@ -32,7 +46,7 @@ export default function WaveSubmissionAccessDetails({
         <p className="tw-m-0">{t(locale, "waves.access.signature")}</p>
       )}
       <Link
-        href={`${getWavePathRoute(wave.id)}?tab=configuration`}
+        href={`${getWavePathRoute(wave.id)}?${rulesParams}`}
         prefetch={false}
         onNavigate={(event) => {
           if (onViewRules) {

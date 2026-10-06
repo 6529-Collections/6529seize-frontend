@@ -1,10 +1,15 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import type Link from "next/link";
+import { usePathname, useSearchParams } from "next/navigation";
 import type { ComponentProps } from "react";
 import WaveSubmissionAccessDetails from "@/components/waves/WaveSubmissionAccessDetails";
 import { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiGroup } from "@/generated/models/ApiGroup";
 
+jest.mock("next/navigation", () => ({
+  usePathname: jest.fn(),
+  useSearchParams: jest.fn(),
+}));
 jest.mock("next/link", () => ({
   __esModule: true,
   default: ({
@@ -42,6 +47,53 @@ function makeWave(group: ApiGroup | null = null): ApiWave {
 }
 
 describe("WaveSubmissionAccessDetails", () => {
+  beforeEach(() => {
+    jest.mocked(usePathname).mockReturnValue("/waves/wave-1");
+    jest
+      .mocked(useSearchParams)
+      .mockReturnValue(
+        new URLSearchParams() as ReturnType<typeof useSearchParams>
+      );
+  });
+
+  it.each([
+    {
+      pathname: "/waves/wave-1",
+      query: "competition=beta",
+      expected: "&competition=beta",
+    },
+    {
+      pathname: "/waves/wave-1/competitions/beta",
+      query: "competition=alpha",
+      expected: "&competition=beta",
+    },
+    {
+      pathname: "/my-stream",
+      query: "wave=wave-1&competition=beta",
+      expected: "&competition=beta",
+    },
+    {
+      pathname: "/waves/wave-1",
+      query: "competition=beta%20%2F1",
+      expected: "&competition=beta+%2F1",
+    },
+    { pathname: "/waves/wave-2", query: "competition=beta", expected: "" },
+  ])(
+    "preserves only this Wave's selected competition in the real href: $pathname $query",
+    ({ pathname, query, expected }) => {
+      jest.mocked(usePathname).mockReturnValue(pathname);
+      jest
+        .mocked(useSearchParams)
+        .mockReturnValue(
+          new URLSearchParams(query) as ReturnType<typeof useSearchParams>
+        );
+      render(<WaveSubmissionAccessDetails wave={makeWave()} />);
+      expect(
+        screen.getByRole("link", { name: "View submission rules" })
+      ).toHaveAttribute("href", `/waves/wave-1?tab=configuration${expected}`);
+    }
+  );
+
   it("links inspectable submission groups and uses existing rules navigation", () => {
     const onViewRules = jest.fn();
     render(
