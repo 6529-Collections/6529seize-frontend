@@ -59,7 +59,7 @@ export function getHomepageClick(
   ) {
     return null;
   }
-  const action = control.dataset.homeAction ?? null;
+  const action = control.dataset["homeAction"] ?? null;
   const section =
     control.closest(SECTION_SELECTOR)?.getAttribute(SECTION_ATTRIBUTE) ?? null;
   if (!isAction(action) || !isSection(section)) return null;
