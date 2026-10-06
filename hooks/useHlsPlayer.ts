@@ -98,7 +98,15 @@ export function useHlsPlayer({
   const isAppActive = useMobileAppActivity();
   const isMobileEnvironment = useMobileBatterySavings();
   const [loadedSource, setLoadedSource] = useState<string | null>(null);
-  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [fullscreenState, setFullscreenState] = useState({
+    src,
+    fallbackSrc,
+    value: false,
+  });
+  const isFullscreen =
+    fullscreenState.src === src &&
+    fullscreenState.fallbackSrc === fallbackSrc &&
+    fullscreenState.value;
   const initialize = isMobileEnvironment
     ? (enabled && isAppActive) || loadedSource === src
     : enabled;
@@ -135,10 +143,13 @@ export function useHlsPlayer({
     if (!video) return;
     let nativeFullscreen = false;
     const updateFullscreen = () =>
-      setIsFullscreen(
-        nativeFullscreen ||
-          (document.fullscreenElement?.contains(video) ?? false)
-      );
+      setFullscreenState({
+        src,
+        fallbackSrc,
+        value:
+          nativeFullscreen ||
+          (document.fullscreenElement?.contains(video) ?? false),
+      });
     const begin = () => {
       nativeFullscreen = true;
       updateFullscreen();
@@ -155,7 +166,7 @@ export function useHlsPlayer({
       video.removeEventListener("webkitendfullscreen", end);
       document.removeEventListener("fullscreenchange", updateFullscreen);
     };
-  }, []);
+  }, [src, fallbackSrc]);
 
   const retry = useCallback(() => {
     setIsLoading(true);

@@ -26,6 +26,10 @@ export function defineMobileVideoBatteryTest(
       .first();
     await expect(pauseButton).toBeVisible();
     await pauseButton.click();
+    await page
+      .getByRole("button", { name: "Unmute video", exact: true })
+      .first()
+      .click();
     await video.evaluate((element: HTMLVideoElement) => {
       element.currentTime = 1;
     });
@@ -51,6 +55,9 @@ export function defineMobileVideoBatteryTest(
         video.evaluate((element: HTMLVideoElement) => element.currentTime)
       )
       .toBeCloseTo(1, 1);
+    expect(
+      await video.evaluate((element: HTMLVideoElement) => element.muted)
+    ).toBe(false);
     await page.evaluate(() => {
       Object.defineProperty(document, "visibilityState", {
         configurable: true,
@@ -80,5 +87,8 @@ export function defineMobileVideoBatteryTest(
     expect(
       await video.evaluate((element: HTMLVideoElement) => element.paused)
     ).toBe(true);
+    expect(
+      await video.evaluate((element: HTMLVideoElement) => element.muted)
+    ).toBe(false);
   });
 }

@@ -32,9 +32,15 @@ export function useWaveWebSocket(waveId: string): UseWaveWebSocketResult {
   const reconnectAttemptsRef = useRef<number>(0);
   const reconnectTimeoutRef = useRef<number | null>(null);
   const shouldReconnectRef = useRef<boolean>(true);
+  const manuallyDisconnectedRef = useRef(false);
+  const activeWaveRef = useRef(waveId);
 
   useEffect(() => {
-    if (!waveId || !isAppActive) {
+    if (activeWaveRef.current !== waveId) {
+      activeWaveRef.current = waveId;
+      manuallyDisconnectedRef.current = false;
+    }
+    if (!waveId || !isAppActive || manuallyDisconnectedRef.current) {
       if (socketRef.current) {
         socketRef.current.close();
         socketRef.current = null;
@@ -108,6 +114,7 @@ export function useWaveWebSocket(waveId: string): UseWaveWebSocketResult {
 
   // manual disconnect function
   const disconnect = () => {
+    manuallyDisconnectedRef.current = true;
     // disable future reconnects
     shouldReconnectRef.current = false;
     // stop any pending reconnect

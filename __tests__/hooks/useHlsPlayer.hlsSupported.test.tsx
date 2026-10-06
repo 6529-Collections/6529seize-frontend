@@ -93,6 +93,49 @@ describe("useHlsPlayer hls supported", () => {
     (require("hls.js").default as any).instances.length = 0;
   });
 
+  it("moves fullscreen listeners to a replacement video with the same rendition", async () => {
+    jest.spyOn(Capacitor, "isNativePlatform").mockReturnValue(true);
+    function RecreatedVideo({ original }: { original: string }) {
+      const { videoRef, isFullscreen } = useHlsPlayer({
+        src: "a.m3u8",
+        fallbackSrc: original,
+        isHls: true,
+        enabled: true,
+        bufferingEnabled: false,
+      });
+      return (
+        <video
+          key={original}
+          ref={videoRef}
+          data-testid="recreated"
+          data-fullscreen={isFullscreen}
+        />
+      );
+    }
+    const Hls = require("hls.js").default;
+    const { getByTestId, rerender } = render(
+      <RecreatedVideo original="first.mp4" />
+    );
+    await waitFor(() => expect(Hls.instances).toHaveLength(1));
+    const first = getByTestId("recreated");
+    act(() => first.dispatchEvent(new Event("webkitbeginfullscreen")));
+    expect(first).toHaveAttribute("data-fullscreen", "true");
+    rerender(<RecreatedVideo original="second.mp4" />);
+    const second = getByTestId("recreated");
+    expect(second).not.toBe(first);
+    expect(second).toHaveAttribute("data-fullscreen", "false");
+    await waitFor(() => expect(Hls.instances).toHaveLength(2));
+    expect(Hls.instances[0].destroy).toHaveBeenCalled();
+    expect(Hls.instances[1].attachMedia).toHaveBeenCalledWith(second);
+    expect(Hls.instances[1].stopLoad).toHaveBeenCalled();
+    act(() => first.dispatchEvent(new Event("webkitbeginfullscreen")));
+    expect(second).toHaveAttribute("data-fullscreen", "false");
+    act(() => second.dispatchEvent(new Event("webkitbeginfullscreen")));
+    expect(second).toHaveAttribute("data-fullscreen", "true");
+    act(() => second.dispatchEvent(new Event("webkitendfullscreen")));
+    expect(second).toHaveAttribute("data-fullscreen", "false");
+  });
+
   it("stops HLS downloads and playback while inactive without destroying the player", async () => {
     const Hls = require("hls.js").default;
     const { getByTestId, rerender } = render(
@@ -115,6 +158,35 @@ describe("useHlsPlayer hls supported", () => {
     expect(Hls.instances).toHaveLength(1);
     expect(video.currentTime).toBe(12);
   });
+
+  it.each([true, false])(
+    "keeps an attached mobile HLS pipeline when activity alone changes (native=%s)",
+    async (native) => {
+      jest.spyOn(Capacitor, "isNativePlatform").mockReturnValue(native);
+      jest.spyOn(touchFirst, "isTouchFirstEnvironment").mockReturnValue(true);
+      const Hls = require("hls.js").default;
+      const props = { src: "a.m3u8", isHls: true, enabled: true };
+      const { getByTestId, rerender } = render(<TestComp {...props} />);
+      await waitFor(() => expect(Hls.instances).toHaveLength(1));
+      const hls = Hls.instances[0];
+      const video = getByTestId("v") as HTMLVideoElement;
+      video.currentTime = 480;
+      jest.mocked(HTMLVideoElement.prototype.load).mockClear();
+      mockAppActive = false;
+      rerender(<TestComp {...props} />);
+      expect(hls.stopLoad).toHaveBeenCalledTimes(1);
+      expect(hls.destroy).not.toHaveBeenCalled();
+      expect(hls.detachMedia).not.toHaveBeenCalled();
+      mockAppActive = true;
+      rerender(<TestComp {...props} />);
+      expect(hls.startLoad).toHaveBeenCalledWith(-1);
+      expect(Hls.instances).toHaveLength(1);
+      expect(hls.loadSource).toHaveBeenCalledTimes(1);
+      expect(hls.attachMedia).toHaveBeenCalledTimes(1);
+      expect(video.currentTime).toBe(480);
+      expect(HTMLVideoElement.prototype.load).not.toHaveBeenCalled();
+    }
+  );
 
   it.each([true, false])(
     "reuses only the HLS pipeline across rapid mobile visibility/activity changes (native=%s)",

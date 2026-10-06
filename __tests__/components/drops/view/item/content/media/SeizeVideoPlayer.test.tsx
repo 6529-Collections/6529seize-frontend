@@ -248,6 +248,23 @@ describe("SeizeVideoPlayer", () => {
     }
   );
 
+  it("does not carry native fullscreen into a replacement offscreen video", () => {
+    jest.spyOn(Capacitor, "isNativePlatform").mockReturnValue(true);
+    const observer = installIntersectionObserverMock();
+    const { container, rerender } = render(
+      <SeizeVideoPlayer src="first.mp4" autoPlay />
+    );
+    observer.trigger(true);
+    const first = container.querySelector("video")!;
+    act(() => first.dispatchEvent(new Event("webkitbeginfullscreen")));
+    observer.trigger(false);
+    expect(first).toHaveAttribute("src");
+    rerender(<SeizeVideoPlayer src="second.mp4" autoPlay />);
+    const second = container.querySelector("video")!;
+    expect(second).not.toBe(first);
+    expect(second).not.toHaveAttribute("src");
+  });
+
   it.each([true, false])(
     "withholds an unopened mobile source while inactive and attaches it on return (native=%s)",
     (native) => {
@@ -1077,8 +1094,13 @@ describe("SeizeVideoPlayer", () => {
       />
     );
     expect(player.style.getPropertyValue("--video-ratio")).toBe("2");
-    Object.defineProperty(video, "videoWidth", { value: 1600 });
-    fireEvent.loadedMetadata(video);
+    const landscape = container.querySelector("video")!;
+    expect(landscape).not.toBe(video);
+    Object.defineProperties(landscape, {
+      videoWidth: { value: 1600 },
+      videoHeight: { value: 900 },
+    });
+    fireEvent.loadedMetadata(landscape);
     expect(player.style.getPropertyValue("--video-ratio")).toBe(
       String(1600 / 900)
     );

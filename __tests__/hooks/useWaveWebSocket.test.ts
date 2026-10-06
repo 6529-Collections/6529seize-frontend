@@ -29,6 +29,7 @@ class MockWebSocket {
 }
 
 const socketFactory = jest.fn((url: string) => new MockWebSocket(url));
+Object.assign(socketFactory, { CLOSED: MockWebSocket.CLOSED });
 function getSocket(index = 0): MockWebSocket {
   const socket = socketFactory.mock.results[index]?.value;
   if (!socket) throw new Error("Expected a WebSocket connection");
@@ -110,5 +111,31 @@ describe("useWaveWebSocket", () => {
     const second = getSocket(1);
     act(() => second.triggerOpen());
     expect(second.send).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps a manual disconnect across activity changes but permits a new wave", () => {
+    const { result, rerender } = renderHook(
+      ({ waveId }) => useWaveWebSocket(waveId),
+      { initialProps: { waveId: "wave1" } }
+    );
+    act(() => result.current.disconnect());
+    mockAppActive = false;
+    rerender({ waveId: "wave1" });
+    mockAppActive = true;
+    rerender({ waveId: "wave1" });
+    act(() => jest.advanceTimersByTime(60_000));
+    expect(globalThis.WebSocket).toHaveBeenCalledTimes(1);
+    expect(result.current.readyState).toBe(MockWebSocket.CLOSED);
+    expect(result.current.socket).toBeNull();
+    expect(jest.getTimerCount()).toBe(0);
+    rerender({ waveId: "wave2" });
+    expect(globalThis.WebSocket).toHaveBeenCalledTimes(2);
+    const second = getSocket(1);
+    act(() => second.triggerOpen());
+    expect(second.send).toHaveBeenCalledWith(
+      JSON.stringify({ type: "SUBSCRIBE_TO_WAVE", wave_id: "wave2" })
+    );
+    rerender({ waveId: "wave1" });
+    expect(globalThis.WebSocket).toHaveBeenCalledTimes(3);
   });
 });

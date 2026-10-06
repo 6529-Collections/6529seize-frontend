@@ -50,6 +50,22 @@ wait until visible before loading; videos with manual playback and posters avoid
 preloading video data. Duration can remain `—` until playback starts, and starting
 or resuming an unloaded video can take longer on a slow connection.
 
+## Wave and DM chat playback
+
+Chat videos start only when you press Play, on desktop, mobile browsers, and
+in the app. Opening a chat or scrolling a video into view does not start it.
+The video source waits for Play, including videos without a poster. When a
+poster is provided it stays visible; otherwise the player shows its empty
+frame and Play control. Duration can remain `—` until the video loads.
+
+Starting another chat video pauses the previous one. Scrolling away or hiding
+the tab pauses playback; fullscreen stays active while the app/tab is visible.
+Returning to the message or tab waits for Play and retains position, mute
+choice, and volume, including when the message leaves the render window.
+These preferences last while the message remains in the open chat; leaving
+the chat or reloading can reset them. Desktop autoplay on NFT and submission
+pages follows those pages' existing playback rules.
+
 ## Seeking
 
 The timeline sits above the control row. Drag its small circular handle or
