@@ -23,6 +23,7 @@ interface GroupCreateXtdhGrantRowProps {
   readonly interactive?: boolean | undefined;
   readonly asListItem?: boolean | undefined;
   readonly className?: string | undefined;
+  readonly quiet?: boolean;
   readonly onSelect?: ((grant: ApiXTdhGrant) => void) | undefined;
 }
 
@@ -42,7 +43,14 @@ const getStatusPillClasses = (statusLabel: string): string => {
   return "tw-bg-red/20 tw-text-red";
 };
 
-const getStateClasses = (interactive: boolean, isSelected: boolean): string => {
+const getStateClasses = (
+  interactive: boolean,
+  isSelected: boolean,
+  quiet: boolean
+): string => {
+  if (quiet && !isSelected) {
+    return `tw-border-transparent tw-bg-iron-900/50 ${interactive ? "tw-cursor-pointer desktop-hover:hover:tw-bg-iron-900" : ""}`;
+  }
   if (interactive && isSelected) {
     return "tw-cursor-pointer tw-border-primary-400 tw-bg-primary-500/10";
   }
@@ -60,13 +68,15 @@ const getRowClasses = ({
   interactive,
   stateClasses,
   className,
+  quiet,
 }: {
   readonly asListItem: boolean;
   readonly interactive: boolean;
   readonly stateClasses: string;
   readonly className: string | undefined;
+  readonly quiet: boolean;
 }): string =>
-  `${asListItem ? "tw-list-none " : ""}tw-rounded-lg tw-border tw-border-solid tw-p-3 tw-outline-none tw-transition tw-duration-200 ${interactive ? "focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400" : ""} ${stateClasses} ${className ?? ""}`.trim();
+  `${asListItem ? "tw-list-none " : ""}${quiet ? "tw-rounded-xl tw-p-4 focus-visible:tw-ring-inset" : "tw-rounded-lg tw-p-3"} tw-border tw-border-solid tw-outline-none tw-transition tw-duration-200 ${interactive ? "focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400" : ""} ${stateClasses} ${className ?? ""}`.trim();
 
 const getInteractiveProps = (
   interactive: boolean,
@@ -100,6 +110,7 @@ export default function GroupCreateXtdhGrantRow({
   asListItem = false,
   className,
   onSelect,
+  quiet = false,
 }: GroupCreateXtdhGrantRowProps) {
   const statusLabel = getGrantStatusLabel({
     status: grant.status,
@@ -137,7 +148,7 @@ export default function GroupCreateXtdhGrantRow({
       level={grantor.level}
       cicType={cicToType(grantor.cic)}
       size={ProfileBadgeSize.SMALL}
-      className={`tw-min-w-0 ${
+      className={`tw-min-w-0 ${quiet ? "desktop-hover:[&_a:hover]:tw-text-iron-200 [&_a]:tw-text-iron-350 [&_p]:tw-m-0 [&_p]:tw-text-xxs [&_p]:tw-font-normal [&_p]:tw-text-iron-350" : ""} ${
         shouldTruncateGrantor
           ? "[&>div>div]:tw-min-w-0 [&>div]:tw-min-w-0 [&_p]:tw-truncate"
           : ""
@@ -166,12 +177,13 @@ export default function GroupCreateXtdhGrantRow({
     handleSelect();
   };
 
-  const stateClasses = getStateClasses(interactive, isSelected);
+  const stateClasses = getStateClasses(interactive, isSelected, quiet);
   const rowClasses = getRowClasses({
     asListItem,
     interactive,
     stateClasses,
     className,
+    quiet,
   });
   const interactiveProps = getInteractiveProps(
     interactive,
@@ -180,30 +192,54 @@ export default function GroupCreateXtdhGrantRow({
   );
   const ContainerTag = asListItem ? "li" : "div";
 
+  const rate = (
+    <p
+      className={`tw-m-0 tw-whitespace-nowrap tw-text-iron-400 ${quiet ? "tw-text-xxs tw-font-normal" : "tw-text-xs tw-font-semibold"}`}
+    >
+      Rate:{" "}
+      <span className={quiet ? "tw-font-medium tw-text-iron-200" : undefined}>
+        {formatAmount(grant.rate)}
+      </span>
+    </p>
+  );
+
   const rowContent = (
     <div className="tw-flex tw-flex-col tw-gap-3">
-      <div className="tw-min-w-0 tw-flex-1 tw-space-y-1.5">
-        <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
-          <span
-            className={`tw-inline-flex tw-items-center tw-rounded-full tw-px-2 tw-py-0.5 tw-text-[11px] tw-font-semibold tw-tracking-wide ${getStatusPillClasses(
-              statusLabel
-            )}`}
+      <div
+        className={`tw-min-w-0 tw-flex-1 ${quiet ? "tw-space-y-2" : "tw-space-y-1.5"}`}
+      >
+        <div
+          className={`tw-flex tw-flex-wrap tw-items-center tw-gap-2 ${quiet ? "tw-justify-between" : ""}`}
+        >
+          <div
+            className={
+              quiet
+                ? "tw-flex tw-min-w-0 tw-flex-1 tw-flex-wrap tw-items-center tw-gap-2"
+                : "tw-contents"
+            }
           >
-            {statusLabel}
-          </span>
-          <p className="tw-m-0 tw-truncate tw-text-sm tw-font-semibold tw-text-iron-50">
-            {targetLabel}
-          </p>
+            <span
+              className={`tw-inline-flex tw-items-center tw-px-2 tw-tracking-wide ${quiet ? "tw-rounded-lg tw-py-1 tw-text-[10px] tw-font-medium" : "tw-rounded-full tw-py-0.5 tw-text-[11px] tw-font-semibold"} ${getStatusPillClasses(statusLabel)}`}
+            >
+              {statusLabel}
+            </span>
+            <p
+              className={`tw-m-0 tw-truncate tw-text-iron-50 ${quiet ? "tw-text-md tw-font-medium" : "tw-text-sm tw-font-semibold"}`}
+            >
+              {targetLabel}
+            </p>
+          </div>
+          {quiet && rate}
         </div>
 
         <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-2">
           <div className="tw-min-w-0 tw-flex-1">{grantorSummary}</div>
-          <p className="tw-m-0 tw-whitespace-nowrap tw-text-xs tw-font-semibold tw-text-iron-400">
-            Rate: {formatAmount(grant.rate)}
-          </p>
+          {!quiet && rate}
         </div>
 
-        <p className="tw-m-0 tw-text-xs tw-text-iron-500">
+        <p
+          className={`tw-m-0 tw-text-xs tw-text-iron-500 ${quiet ? "tw-pl-9" : ""}`}
+        >
           Valid:{" "}
           {formatDateTime(grant.valid_from ?? null, {
             fallbackLabel: "Immediately",
