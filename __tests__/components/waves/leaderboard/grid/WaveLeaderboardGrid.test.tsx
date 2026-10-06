@@ -2,6 +2,7 @@ import React from "react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { WaveLeaderboardGrid } from "@/components/waves/leaderboard/grid/WaveLeaderboardGrid";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";
 
 const mockOpenVotingModal = jest.fn();
 
@@ -98,7 +99,7 @@ describe("WaveLeaderboardGrid", () => {
       render(
         <WaveLeaderboardGrid
           wave={wave}
-          sort="RANK"
+          sort={WaveDropsLeaderboardSort.RANK}
           mode="compact"
           onDropClick={jest.fn()}
           scrollContainerRef={scrollContainerRef}

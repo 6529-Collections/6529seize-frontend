@@ -33,6 +33,7 @@ interface DefaultWaveLeaderboardDropProps {
   readonly drop: ExtendedDrop;
   readonly onDropClick: (drop: ExtendedDrop) => void;
   readonly onOpenDrop?: (() => void) | undefined;
+  readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
   readonly onVoteClick?: ((drop: ExtendedDrop) => void) | undefined;
   readonly winningThreshold?: number | null | undefined;
   readonly winningThresholdMinDurationMs?: number | null | undefined;
@@ -54,6 +55,7 @@ export const DefaultWaveLeaderboardDrop: React.FC<
   drop,
   onDropClick,
   onOpenDrop,
+  onDropContentClick,
   onVoteClick,
   winningThreshold,
   winningThresholdMinDurationMs,
@@ -191,6 +193,7 @@ export const DefaultWaveLeaderboardDrop: React.FC<
               mediaContainerHeightClassName={mediaContainerHeightClassName}
               contentPresentation={contentPresentation}
               onOpenDrop={onOpenDrop}
+              onDropContentClick={onDropContentClick}
             />
             <div
               className={`tw-flex tw-justify-between tw-gap-x-2 ${

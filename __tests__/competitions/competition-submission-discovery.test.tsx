@@ -119,9 +119,7 @@ beforeEach(() => {
 
 it("requests only the current submitter and selected competition, and closes on competition change", () => {
   const view = renderWithClient(<CompetitionMySubmissions />);
-  fireEvent.click(
-    screen.getByRole("button", { name: "My submissions", exact: true })
-  );
+  fireEvent.click(screen.getByRole("button", { name: "My submissions" }));
   expect(mockReadEntries).toHaveBeenLastCalledWith(
     { waveId: "wave", competitionId: "alpha" },
     "entries",
@@ -141,19 +139,15 @@ it("requests only the current submitter and selected competition, and closes on 
 it("does not display entries returned for another submitter", () => {
   mockEntries = [{ ...entry, submitter: { id: "other" } }];
   renderWithClient(<CompetitionMySubmissions />);
-  fireEvent.click(
-    screen.getByRole("button", { name: "My submissions", exact: true })
-  );
+  fireEvent.click(screen.getByRole("button", { name: "My submissions" }));
   expect(screen.queryByTestId("entry")).not.toBeInTheDocument();
-  fireEvent.click(screen.getByRole("button", { name: "Retry", exact: true }));
+  fireEvent.click(screen.getByRole("button", { name: "Retry" }));
   expect(mockRefetch).toHaveBeenCalledTimes(1);
 });
 
 it("closes My submissions when its artwork is opened", () => {
   renderWithClient(<CompetitionMySubmissions />);
-  fireEvent.click(
-    screen.getByRole("button", { name: "My submissions", exact: true })
-  );
+  fireEvent.click(screen.getByRole("button", { name: "My submissions" }));
   fireEvent.click(screen.getByTestId("entry"));
   expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
 });
@@ -171,16 +165,12 @@ it("recovers a saved native entry after its status lookup fails without creating
   await waitFor(() =>
     expect(screen.getByText(/We couldn’t confirm/)).toBeVisible()
   );
-  fireEvent.click(
-    screen.getByRole("button", { name: "Check again", exact: true })
-  );
+  fireEvent.click(screen.getByRole("button", { name: "Check again" }));
   await waitFor(() =>
     expect(screen.getByText("Your entry is in Art competition.")).toBeVisible()
   );
   expect(commonApiFetch).toHaveBeenCalledTimes(2);
-  fireEvent.click(
-    screen.getByRole("button", { name: "View my entry", exact: true })
-  );
+  fireEvent.click(screen.getByRole("button", { name: "View my entry" }));
   expect(mockNavigate).toHaveBeenCalledWith({ id: "drop" });
 });
 

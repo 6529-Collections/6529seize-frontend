@@ -123,9 +123,7 @@ it("keeps a failed status check distinct from submission and retries only its re
 
 it("opens only this viewer’s entries in this wave, without a rank filter", () => {
   renderView(null);
-  fireEvent.click(
-    screen.getByRole("button", { name: "My submissions", exact: true })
-  );
+  fireEvent.click(screen.getByRole("button", { name: "My submissions" }));
   expect(screen.getByTestId("entries")).toHaveTextContent("me:wave:active");
   fireEvent.click(screen.getByRole("button", { name: "Winning entries" }));
   expect(screen.getByTestId("entries")).toHaveTextContent("me:wave:winners");

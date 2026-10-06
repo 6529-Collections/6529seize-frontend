@@ -17,6 +17,7 @@ interface WaveLeaderboardDropContentProps {
   readonly mediaContainerHeightClassName?: string | undefined;
   readonly contentPresentation?: DropContentPresentation | undefined;
   readonly onOpenDrop?: (() => void) | undefined;
+  readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
 }
 
 export const WaveLeaderboardDropContent: React.FC<
@@ -27,11 +28,16 @@ export const WaveLeaderboardDropContent: React.FC<
   mediaContainerHeightClassName,
   contentPresentation = "default",
   onOpenDrop,
+  onDropContentClick: onOpenContent,
 }) => {
   const router = useRouter();
   const [activePartIndex, setActivePartIndex] = useState<number>(0);
 
   const onDropContentClick = (clickedDrop: ExtendedDrop) => {
+    if (onOpenContent) {
+      onOpenContent(clickedDrop);
+      return;
+    }
     const href = getWaveRoute({
       waveId: clickedDrop.wave.id,
       serialNo: clickedDrop.serial_no,

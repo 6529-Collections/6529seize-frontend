@@ -404,6 +404,8 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
     measurements.sortControlWidth > 0 &&
     measurements.submissionActionsWidth > 0 &&
     minimumToolbarWidth > measurements.rowWidth + 1;
+  const compactSubmissionControls =
+    balanceSubmissionRows && measurements.rowWidth < 240;
 
   const onTogglePriceFilters = () => {
     if (hasActivePriceFilters) {
@@ -460,7 +462,11 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
         <div
           ref={controlsRowRef}
           data-testid="leaderboard-header-controls-row"
-          className={`tw-flex tw-min-w-0 ${controlsRowFlexClass} tw-flex-nowrap tw-items-start tw-gap-2 ${controlsRowBasisClass} ${
+          className={`tw-flex tw-min-w-0 ${controlsRowFlexClass} tw-flex-nowrap tw-items-start ${
+            compactSubmissionControls
+              ? "tw-gap-1 [&_[role=tab]]:tw-w-[26px]"
+              : "tw-gap-2"
+          } ${controlsRowBasisClass} ${
             balanceSubmissionRows ? "tw-justify-between" : ""
           } ${
             layout.enableControlsScroll
