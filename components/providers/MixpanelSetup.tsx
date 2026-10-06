@@ -11,6 +11,7 @@ import {
   trackPageView,
 } from "@/services/analytics/mixpanel";
 import { classifyPageView } from "@/services/analytics/pageClassification";
+import { resetWaveFeatureVisit } from "@/services/analytics/waveFeatureUsage";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useRef } from "react";
 
@@ -88,6 +89,7 @@ export default function MixpanelSetup() {
     }
 
     lastTrackedPageKeyRef.current = pageView.trackingKey;
+    resetWaveFeatureVisit();
     trackPageView(pageView.routePattern, {
       has_connected_profile:
         connectedProfile?.id !== undefined && connectedProfile.id !== null,

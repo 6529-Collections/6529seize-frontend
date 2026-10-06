@@ -3,8 +3,16 @@ const trackMock = jest.fn();
 const identifyMock = jest.fn();
 const peopleSetMock = jest.fn();
 const resetMock = jest.fn();
+const unregisterMock = jest.fn();
+const startBatchMock = jest.fn();
+const stopBatchMock = jest.fn();
+const sendBatchMock = jest.fn();
 
 const mixpanelMock = {
+  request_batchers: { events: { sendRequest: sendBatchMock } },
+  persistence: {
+    properties: () => ({ $initial_referrer: "legacy", mp_keyword: "legacy" }),
+  },
   identify: identifyMock,
   init: initMock,
   people: {
@@ -12,6 +20,9 @@ const mixpanelMock = {
   },
   reset: resetMock,
   track: trackMock,
+  unregister: unregisterMock,
+  start_batch_senders: startBatchMock,
+  stop_batch_senders: stopBatchMock,
 };
 
 const loadModule = async ({
@@ -27,6 +38,11 @@ const loadModule = async ({
   identifyMock.mockReset();
   peopleSetMock.mockReset();
   resetMock.mockReset();
+  unregisterMock.mockReset();
+  startBatchMock.mockReset();
+  stopBatchMock.mockReset();
+  sendBatchMock.mockReset();
+  mixpanelMock.request_batchers.events.sendRequest = sendBatchMock;
 
   jest.doMock("@/config/env", () => ({
     publicEnv: {
@@ -43,6 +59,31 @@ const loadModule = async ({
 };
 
 describe("mixpanel analytics wrapper", () => {
+  afterEach(() => {
+    document.cookie = "performance-cookies-consent=; Max-Age=0; path=/";
+  });
+
+  it("blocks sends immediately when the consent cookie changes before the effect runs", async () => {
+    const analytics = await loadModule({
+      nodeEnv: "production",
+      token: "public-token",
+    });
+    analytics.initAnalytics();
+    const config = initMock.mock.calls[0]?.[1];
+    document.cookie = "performance-cookies-consent=false; path=/";
+    expect(analytics.isAnalyticsTrackingAllowed()).toBe(false);
+    analytics.trackAnalyticsEvent("Product Event");
+    analytics.identify("42");
+    expect(
+      config.hooks.before_send_events({
+        event: "Product Event",
+        properties: {},
+      })
+    ).toBeNull();
+    expect(trackMock).not.toHaveBeenCalled();
+    expect(identifyMock).not.toHaveBeenCalled();
+  });
+
   it("is a no-op outside production", async () => {
     const analytics = await loadModule({
       nodeEnv: "development",
@@ -90,11 +131,18 @@ describe("mixpanel analytics wrapper", () => {
     analytics.trackPageView("/after-logout");
 
     expect(initMock).toHaveBeenCalledTimes(1);
-    expect(initMock).toHaveBeenCalledWith("public-token", {
-      autocapture: false,
-      persistence: "localStorage",
-      track_pageview: false,
-    });
+    expect(initMock).toHaveBeenCalledWith(
+      "public-token",
+      expect.objectContaining({
+        autocapture: false,
+        persistence: "localStorage",
+        track_pageview: false,
+        save_referrer: false,
+        track_marketing: false,
+        skip_first_touch_marketing: true,
+        record_sessions_percent: 0,
+      })
+    );
     expect(trackMock).toHaveBeenCalledWith("Page Viewed", {
       has_connected_profile: true,
       path: "/waves",
@@ -179,5 +227,85 @@ describe("mixpanel analytics wrapper", () => {
       refresh_outcome: "success",
       status_bucket: "2xx",
     });
+  });
+
+  it("closes the send-time gate and clears batching on withdrawal", async () => {
+    const analytics = await loadModule({
+      nodeEnv: "production",
+      token: "public-token",
+    });
+    analytics.initAnalytics();
+    const config = initMock.mock.calls[0]?.[1];
+    const payload = {
+      event: "Wave Feature Seen",
+      properties: {
+        feature: "wave_tab",
+        value: "chat",
+        $current_url: "https://example.test/private?wallet=secret",
+        $initial_referrer: "https://example.test/alice",
+        profile_handle: "alice",
+        distinct_id: "42",
+      },
+    };
+    expect(config.hooks.before_send_events(payload).properties).toEqual({
+      feature: "wave_tab",
+      value: "chat",
+      distinct_id: "42",
+    });
+    analytics.disableAnalytics();
+    expect(config.hooks.before_send_events(payload)).toBeNull();
+    expect(stopBatchMock).toHaveBeenCalledTimes(1);
+    analytics.initAnalytics();
+    expect(startBatchMock).toHaveBeenCalledTimes(2);
+    expect(config.hooks.before_send_events(payload)).not.toBeNull();
+  });
+
+  it("fails open when SDK initialization, tracking or identity fails", async () => {
+    const analytics = await loadModule({
+      nodeEnv: "production",
+      token: "public-token",
+    });
+    initMock.mockImplementationOnce(() => {
+      throw new Error("SDK unavailable");
+    });
+    expect(analytics.initAnalytics()).toBe(false);
+    expect(analytics.isAnalyticsTrackingAllowed()).toBe(false);
+    expect(analytics.initAnalytics()).toBe(true);
+    trackMock.mockImplementation(() => {
+      throw new Error("send failed");
+    });
+    identifyMock.mockImplementation(() => {
+      throw new Error("identity failed");
+    });
+    expect(() => analytics.trackAnalyticsEvent("Product Event")).not.toThrow();
+    expect(() => analytics.identify("42")).not.toThrow();
+    expect(unregisterMock).toHaveBeenCalledWith("$initial_referrer");
+    expect(unregisterMock).toHaveBeenCalledWith("mp_keyword");
+  });
+
+  it("guards orphaned batches at the final transport and drops them after consent withdrawal", async () => {
+    const analytics = await loadModule({
+      nodeEnv: "production",
+      token: "public-token",
+    });
+    analytics.initAnalytics();
+    const onResponse = jest.fn();
+    const payload = [
+      {
+        event: "Product Event",
+        properties: { path: "/waves/:waveId", $current_url: "private" },
+      },
+    ];
+    mixpanelMock.request_batchers.events.sendRequest(payload, {}, onResponse);
+    expect(sendBatchMock).toHaveBeenCalledWith(
+      [{ event: "Product Event", properties: { path: "/waves/:waveId" } }],
+      {},
+      onResponse
+    );
+    sendBatchMock.mockClear();
+    document.cookie = "performance-cookies-consent=false; path=/";
+    mixpanelMock.request_batchers.events.sendRequest(payload, {}, onResponse);
+    expect(sendBatchMock).not.toHaveBeenCalled();
+    expect(onResponse).toHaveBeenCalledWith(1);
   });
 });

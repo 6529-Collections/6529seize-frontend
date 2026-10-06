@@ -12,6 +12,7 @@ type EffectivePlan = {
     playwright_museum: { required: boolean };
     playwright_artwork_documentation: { required: boolean };
     playwright_native_competition: { required: boolean };
+    playwright_wave_feature_usage: { required: boolean };
     install: { required: boolean };
   };
 };
@@ -58,6 +59,27 @@ function executeRawPlan(rawPlan: unknown): EffectivePlan {
 function executePlan(changedFiles: string[]): EffectivePlan {
   return executeRawPlan(plan(changedFiles));
 }
+
+it.each([
+  "services/analytics/mixpanelPrivacy.ts",
+  "hooks/useWaveFeatureUsage.ts",
+  "components/brain/left-sidebar/waves/SidebarDiscovery.tsx",
+  "components/brain/my-stream/MyStreamWaveDesktopTabs.tsx",
+  "components/waves/leaderboard/header/WaveleaderboardSort.tsx",
+  "components/utils/select/dropdown/CommonDropdownItem.tsx",
+  "playwright.config.ts",
+  "tsconfig.playwright.json",
+])("selects the isolated Wave tracking browser lane for %s", (file) => {
+  expect(
+    executePlan([file]).checks.playwright_wave_feature_usage.required
+  ).toBe(true);
+});
+
+it("keeps the Wave tracking browser lane out of unrelated changes", () => {
+  expect(
+    executePlan(["README.md"]).checks.playwright_wave_feature_usage.required
+  ).toBe(false);
+});
 
 describe("effective App PR CI plan", () => {
   it.each([

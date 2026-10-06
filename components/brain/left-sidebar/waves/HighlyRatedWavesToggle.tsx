@@ -3,6 +3,7 @@
 import type { MouseEvent } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { waveFeatureAttributes } from "@/services/analytics/waveFeatureUsage";
 import BrainLeftSidebarWaveDropTime from "./BrainLeftSidebarWaveDropTime";
 import { WaveAvatar } from "../web/WebBrainLeftSidebarWave/subcomponents/WaveAvatar";
 import { WaveScoreSummaryHoverCard } from "@/components/waves/WaveTrustSignals";
@@ -339,6 +340,7 @@ function HighlyRatedWavePreviewLink({
     >
       <Link
         href={item.href}
+        {...waveFeatureAttributes("sidebar_entry", "recommendations_wave")}
         prefetch={false}
         aria-label={linkLabel}
         onClick={handleLinkClick}

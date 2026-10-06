@@ -137,6 +137,27 @@ function applyEffectiveAppPrCiPlan(plan) {
       ].includes(file)
   );
 
+  const playwrightWaveFeatureUsage = files.some(
+    (file) =>
+      /^(?:services\/analytics\/(?:mixpanel|waveFeature)|hooks\/useWaveFeatureUsage|tests\/(?:social\/wave-feature-usage-sandbox|support\/waveFeature)|components\/brain\/left-sidebar\/waves\/(?:SidebarDiscovery|SidebarActiveVotes|SidebarWaveNavigation|HighlyRatedWavesToggle)|components\/utils\/select\/)/u.test(
+        file
+      ) ||
+      [
+        "components/brain/my-stream/MyStreamWaveDesktopTabs.tsx",
+        "components/brain/my-stream/MyStreamWaveTabOption.tsx",
+        "components/common/TabToggle.tsx",
+        "components/providers/MixpanelSetup.tsx",
+        "components/brain/left-sidebar/web/WebProfileFeedShortcut.tsx",
+        "components/waves/leaderboard/header/WaveleaderboardSort.tsx",
+        "components/waves/leaderboard/header/WaveleaderboardHeader.tsx",
+        "playwright.config.ts",
+        "tsconfig.playwright.json",
+        "tests/packs.manifest.cjs",
+        "scripts/app-pr-ci-effective-plan.cjs",
+        ".github/workflows/app-pr-ci.yml",
+      ].includes(file)
+  );
+
   const checks = {
     ...plan.checks,
     install: check(
@@ -170,6 +191,12 @@ function applyEffectiveAppPrCiPlan(plan) {
       playwrightNativeCompetition
         ? "Native competition changes require desktop and mobile sandbox browser coverage."
         : "No native competition surfaces changed."
+    ),
+    playwright_wave_feature_usage: check(
+      playwrightWaveFeatureUsage,
+      playwrightWaveFeatureUsage
+        ? "Wave tracking controls or SDK policy require isolated desktop/mobile visibility and privacy coverage."
+        : "No Wave feature tracking boundary changed."
     ),
     playwright_museum: check(
       playwrightMuseum,

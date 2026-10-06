@@ -40,7 +40,7 @@
       "automatic": [],
       "sampling": "consented production sessions; no custom event sampler",
       "release": "not attached",
-      "notes": "autocapture and automatic page views are disabled"
+      "notes": "autocapture, automatic page views and replay are disabled; SDK URL, referrer, search and campaign properties are blocked after enrichment; Wave feature pilot envelopes also allowlist properties"
     },
     {
       "id": "google-tag",
@@ -52,6 +52,34 @@
     }
   ],
   "signals": [
+    {
+      "name": "Wave Feature Seen",
+      "kind": "event",
+      "question": "Which available Wave controls were actually visible in a foreground session?",
+      "owner": "mixpanel",
+      "producer": "services/analytics/waveFeatureUsage.ts",
+      "destinations": ["mixpanel:owner"],
+      "sampling": "consented production sessions; one exposure per control value and placement per visit",
+      "privacy": "bounded feature, placement, value, platform, viewer, eligibility and route family; booleans and schema version; existing SDK identity and transport metadata",
+      "externalUsage": "new pilot; live dashboard unverified",
+      "lifecycle": "keep",
+      "replacement": null,
+      "reviewBy": "2026-11-10"
+    },
+    {
+      "name": "Wave Feature Activated",
+      "kind": "event",
+      "question": "Which exposed Wave controls did people deliberately use?",
+      "owner": "mixpanel",
+      "producer": "services/analytics/waveFeatureUsage.ts",
+      "destinations": ["mixpanel:owner"],
+      "sampling": "consented production sessions; semantic user actions only",
+      "privacy": "same bounded envelope as Wave Feature Seen plus an allowlisted action",
+      "externalUsage": "new pilot; live dashboard unverified",
+      "lifecycle": "keep",
+      "replacement": null,
+      "reviewBy": "2026-11-10"
+    },
     {
       "name": "Page Viewed",
       "kind": "event",

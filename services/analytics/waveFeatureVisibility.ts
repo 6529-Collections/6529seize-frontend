@@ -1,0 +1,270 @@
+import {
+  getWaveFeatureDescriptor,
+  hasWaveFeatureBeenSeen,
+  recordWaveFeatureActivation,
+  recordWaveFeatureSeen,
+  type WaveFeatureContext,
+  type WaveFeaturePlacement,
+} from "./waveFeatureUsage";
+import { getAnalyticsGeneration } from "./mixpanel";
+
+export function isWaveFeatureVisible(element: HTMLElement): boolean {
+  if (
+    !element.isConnected ||
+    document.visibilityState !== "visible" ||
+    !document.hasFocus() ||
+    element.closest('[inert], [aria-hidden="true"]') ||
+    element.matches(":disabled")
+  )
+    return false;
+
+  const rect = element.getBoundingClientRect();
+  if (rect.width <= 0 || rect.height <= 0) return false;
+  let left = Math.max(0, rect.left);
+  let top = Math.max(0, rect.top);
+  let right = Math.min(window.innerWidth, rect.right);
+  let bottom = Math.min(window.innerHeight, rect.bottom);
+  for (
+    let ancestor: HTMLElement | null = element;
+    ancestor;
+    ancestor = ancestor.parentElement
+  ) {
+    const style = getComputedStyle(ancestor);
+    if (
+      style.display === "none" ||
+      style.visibility !== "visible" ||
+      Number(style.opacity) === 0
+    )
+      return false;
+    // Root overflow applies to the viewport, already clipped above. Its content
+    // box can be shorter than fixed portal dialogs when scrolling is locked.
+    if (ancestor === document.documentElement) continue;
+    const bounds = ancestor.getBoundingClientRect();
+    if (/(auto|scroll|hidden|clip)/.test(style.overflowX)) {
+      left = Math.max(left, bounds.left);
+      right = Math.min(right, bounds.right);
+    }
+    if (/(auto|scroll|hidden|clip)/.test(style.overflowY)) {
+      top = Math.max(top, bounds.top);
+      bottom = Math.min(bottom, bounds.bottom);
+    }
+  }
+  if (
+    (Math.max(0, right - left) * Math.max(0, bottom - top)) /
+      (rect.width * rect.height) <
+    0.5
+  )
+    return false;
+  // Hit-test inside the clipped area so overlays/sticky controls do not count.
+  if (typeof document.elementFromPoint !== "function") return false;
+  const hit = document.elementFromPoint((left + right) / 2, (top + bottom) / 2);
+  return hit !== null && element.contains(hit);
+}
+
+interface WaveFeatureObserverOptions {
+  readonly root: HTMLElement;
+  readonly placement: WaveFeaturePlacement;
+  readonly getContext: () => WaveFeatureContext | null;
+}
+
+function createExposureChecks({
+  root,
+  placement,
+  getContext,
+}: WaveFeatureObserverOptions) {
+  const selector =
+    placement === "wave_tabs"
+      ? '[role="tab"]'
+      : '[data-wave-feature], [data-wave-feature-list="active-votes"] a';
+  const controls = (): HTMLElement[] => {
+    const descendants = [...root.querySelectorAll<HTMLElement>(selector)];
+    return root.matches(selector) ? [root, ...descendants] : descendants;
+  };
+  const timers = new Map<
+    HTMLElement,
+    {
+      timer: ReturnType<typeof setTimeout>;
+      value: string;
+      generation: number;
+      contextKey: string;
+    }
+  >();
+  const stopTimer = (element: HTMLElement) => {
+    const pending = timers.get(element);
+    if (pending) clearTimeout(pending.timer);
+    timers.delete(element);
+  };
+  const safely = (measure: () => void) => {
+    try {
+      measure();
+    } catch {
+      // Failed measurements must neither count exposure nor interrupt controls.
+      for (const element of timers.keys()) stopTimer(element);
+    }
+  };
+  const check = () =>
+    safely(() => {
+      const context = getContext();
+      const elements = controls();
+      for (const element of timers.keys()) {
+        const pending = timers.get(element);
+        const descriptor = getWaveFeatureDescriptor(element, placement);
+        if (
+          !root.contains(element) ||
+          !context ||
+          !isWaveFeatureVisible(element) ||
+          pending?.contextKey !== context.key ||
+          pending.generation !== getAnalyticsGeneration() ||
+          pending.value !== descriptor?.value
+        )
+          stopTimer(element);
+      }
+      if (!context) return;
+      for (const element of elements) {
+        const descriptor = getWaveFeatureDescriptor(element, placement);
+        if (
+          timers.has(element) ||
+          !descriptor ||
+          hasWaveFeatureBeenSeen(context, descriptor) ||
+          !isWaveFeatureVisible(element)
+        )
+          continue;
+        const startingKey = context.key;
+        const startingGeneration = getAnalyticsGeneration();
+        const timer = setTimeout(
+          () =>
+            safely(() => {
+              stopTimer(element);
+              const latest = getContext();
+              const latestDescriptor = getWaveFeatureDescriptor(
+                element,
+                placement
+              );
+              if (
+                latest?.key === startingKey &&
+                startingGeneration === getAnalyticsGeneration() &&
+                latestDescriptor &&
+                isWaveFeatureVisible(element)
+              ) {
+                recordWaveFeatureSeen(
+                  latest,
+                  latestDescriptor,
+                  "foreground_dwell"
+                );
+              }
+            }),
+          1000
+        );
+        timers.set(element, {
+          timer,
+          value: descriptor.value,
+          generation: startingGeneration,
+          contextKey: startingKey,
+        });
+      }
+    });
+  const cancel = () => {
+    for (const element of timers.keys()) stopTimer(element);
+  };
+  return { selector, controls, safely, check, cancel };
+}
+
+export function observeWaveFeatures(
+  options: WaveFeatureObserverOptions
+): () => void {
+  const { root, placement, getContext } = options;
+  const { selector, controls, safely, check, cancel } =
+    createExposureChecks(options);
+  const onClick = (event: MouseEvent) =>
+    safely(() => {
+      // Dropdown selection is recorded by its semantic selection callback.
+      if (placement === "leaderboard_dropdown") return;
+      if (
+        event.button !== 0 ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.altKey ||
+        event.shiftKey
+      )
+        return;
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+      const element = target.closest<HTMLElement>(selector);
+      const context = getContext();
+      if (
+        !element ||
+        !root.contains(element) ||
+        !context ||
+        !isWaveFeatureVisible(element)
+      )
+        return;
+      const descriptor = getWaveFeatureDescriptor(element, placement);
+      if (!descriptor) return;
+      let action: "choose" | "open" | "expand" | "collapse" = "choose";
+      if (descriptor.feature === "sidebar_entry") action = "open";
+      if (descriptor.feature === "sidebar_section") {
+        action =
+          element.getAttribute("aria-expanded") === "true"
+            ? "collapse"
+            : "expand";
+      }
+      recordWaveFeatureActivation(context, descriptor, action);
+    });
+  let mutation: MutationObserver | undefined;
+  let controlsMutation: MutationObserver | undefined;
+  let intersection: IntersectionObserver | undefined;
+  const cleanup = () => {
+    mutation?.disconnect();
+    controlsMutation?.disconnect();
+    intersection?.disconnect();
+    cancel();
+    root.removeEventListener("click", onClick, true);
+    window.removeEventListener("scroll", check, true);
+    window.removeEventListener("resize", check);
+    window.removeEventListener("blur", check);
+    window.removeEventListener("focus", check);
+    document.removeEventListener("visibilitychange", check);
+  };
+  try {
+    mutation = new MutationObserver(check);
+    mutation.observe(root, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+    });
+    for (
+      let ancestor = root.parentElement;
+      ancestor;
+      ancestor = ancestor.parentElement
+    ) {
+      mutation.observe(ancestor, { attributes: true });
+    }
+    // Portal dialogs can occlude controls without changing their intersections.
+    mutation.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["class", "style", "inert", "aria-hidden", "hidden"],
+    });
+    intersection = new IntersectionObserver(check, { threshold: [0, 0.5, 1] });
+    const observeControls = () =>
+      safely(() => {
+        intersection?.disconnect();
+        for (const element of controls()) intersection?.observe(element);
+        check();
+      });
+    controlsMutation = new MutationObserver(observeControls);
+    controlsMutation.observe(root, { childList: true, subtree: true });
+    // Capture sees the pre-action state, including keyboard clicks.
+    root.addEventListener("click", onClick, true);
+    window.addEventListener("scroll", check, true);
+    window.addEventListener("resize", check);
+    window.addEventListener("blur", check);
+    window.addEventListener("focus", check);
+    document.addEventListener("visibilitychange", check);
+    observeControls();
+  } catch {
+    cleanup();
+  }
+  return cleanup;
+}

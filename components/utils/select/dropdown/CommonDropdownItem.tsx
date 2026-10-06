@@ -1,6 +1,12 @@
 "use client";
 
-import { cloneElement, isValidElement, useEffect, useState } from "react";
+import {
+  cloneElement,
+  isValidElement,
+  useEffect,
+  useState,
+  type MouseEvent,
+} from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCheck } from "@fortawesome/free-solid-svg-icons";
 import CommonTableSortIcon from "@/components/user/utils/icons/CommonTableSortIcon";
@@ -21,7 +27,8 @@ export default function CommonDropdownItem<T, U = unknown>(
 
   const [shouldRotate, setShouldRotate] = useState<boolean>(false);
 
-  const onSelected = () => {
+  const onSelected = (event: MouseEvent<HTMLButtonElement>) => {
+    props.onItemSelection?.(item.value, event.currentTarget);
     setSelected(item.value);
     setShouldRotate(false);
   };

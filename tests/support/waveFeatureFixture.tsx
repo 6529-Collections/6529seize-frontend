@@ -1,0 +1,159 @@
+// Isolated component fixture. Its bundler replaces provider/data dependencies,
+// but uses the production components, telemetry helpers and pinned Mixpanel SDK.
+import { createContext, useContext, useState } from "react";
+import { createRoot } from "react-dom/client";
+import mixpanel from "mixpanel-browser";
+import type { ApiWave } from "@/generated/models/ApiWave";
+import { MyStreamWaveTab } from "@/types/waves.types";
+import { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";
+import { SidebarDiscovery } from "@/components/brain/left-sidebar/waves/SidebarDiscovery";
+import MyStreamWaveDesktopTabs from "@/components/brain/my-stream/MyStreamWaveDesktopTabs";
+import { SidebarWaveNavigationControls } from "@/components/brain/left-sidebar/waves/SidebarWaveNavigation";
+import type { SidebarWaveNavigation } from "@/hooks/useSidebarWaveNavigation";
+import { WebProfileFeedShortcut } from "@/components/brain/left-sidebar/web/WebProfileFeedShortcut";
+import type {} from "./waveFeatureFixtureApi";
+import { WaveleaderboardSort } from "@/components/waves/leaderboard/header/WaveleaderboardSort";
+import {
+  disableAnalytics,
+  identify,
+  initAnalytics,
+  trackAnalyticsEvent,
+} from "@/services/analytics/mixpanel";
+
+export const AuthContext = createContext({
+  connectedProfile: null,
+  activeProfileProxy: null,
+});
+export const useAuth = () => useContext(AuthContext);
+const ConsentContext = createContext({ performanceConsent: false });
+export const useOptionalCookieConsent = () => useContext(ConsentContext);
+export const useCookieConsent = useOptionalCookieConsent;
+export const tabs = [
+  MyStreamWaveTab.CHAT,
+  MyStreamWaveTab.LEADERBOARD,
+  MyStreamWaveTab.WINNERS,
+  MyStreamWaveTab.ABOUT,
+];
+const wave = {
+  id: "fixture-wave",
+  author: { id: "fixture-author" },
+  wave: { authenticated_user_eligible_for_admin: false },
+} as unknown as ApiWave;
+
+export const useActiveWaveVotes = () => ({
+  data: {
+    pages: [
+      {
+        count: 12,
+        data: Array.from({ length: 12 }, (_, index) => ({
+          wave: {
+            id: `fixture-vote-${index}`,
+            name: `Synthetic vote ${index}`,
+            pfp: null,
+          },
+          voting_ends_at: null,
+          next_decision_at: null,
+        })),
+      },
+    ],
+  },
+  isPending: false,
+  isError: false,
+  hasNextPage: false,
+  isFetchingNextPage: false,
+});
+export const useMyStream = () => ({
+  activeWave: { id: null, set: () => undefined },
+});
+export const useWaveDiscoveryViewer = () => ({ canUseCollections: false });
+export const useContentTab = () => ({ availableTabs: tabs });
+
+function Fixture() {
+  const [consent, setConsent] = useState(false);
+  const [instance, setInstance] = useState(0);
+  const [tab, setTab] = useState(MyStreamWaveTab.CHAT);
+  const [sort, setSort] = useState(WaveDropsLeaderboardSort.RANK);
+  const [collection, setCollection] = useState<"all" | "pinned" | "joined">(
+    "all"
+  );
+  const [queryText, setQueryText] = useState("");
+  const navigation = {
+    collection,
+    setCollection,
+    canUseCollections: true,
+    searching: false,
+    queryText,
+    setQueryText,
+    results: { isFetching: false },
+  } as unknown as SidebarWaveNavigation;
+  const enable = () => {
+    initAnalytics();
+    identify("529");
+    mixpanel.register({
+      raw_path: "/private-handle?wallet=private-wallet",
+      profile_handle: "private-handle",
+    });
+    setConsent(true);
+  };
+  window.featureFixture = {
+    enable,
+    revoke: () => {
+      disableAnalytics();
+      setConsent(false);
+    },
+    remount: () => setInstance((value) => value + 1),
+    navigate: (path) => {
+      history.pushState({}, "", path);
+      setInstance((value) => value + 1);
+    },
+    lateEvent: () =>
+      trackAnalyticsEvent("Wave Feature Activated", {
+        feature: "wave_tab",
+        value: "chat",
+      }),
+    failSdk: () => {
+      mixpanel.track = () => {
+        throw new Error("Synthetic SDK failure");
+      };
+    },
+  };
+  return (
+    <ConsentContext.Provider value={{ performanceConsent: consent }}>
+      <button type="button" onClick={enable}>
+        Enable synthetic telemetry
+      </button>
+      <main key={instance}>
+        <SidebarWaveNavigationControls navigation={navigation} />
+        <WebProfileFeedShortcut basePath="/waves" isCollapsed={false} />
+        <div
+          id="nested-scroll"
+          style={{ height: 220, width: 300, overflow: "auto" }}
+        >
+          <SidebarDiscovery previewItems={[]} isTouchPreview={false} />
+        </div>
+        <MyStreamWaveDesktopTabs
+          wave={wave}
+          activeTab={tab}
+          setActiveTab={setTab}
+          activeCurationId={null}
+          onSelectCuration={() => undefined}
+          showCreateActionsMenu={false}
+        />
+        <div id="sort-controls">
+          <WaveleaderboardSort
+            sort={sort}
+            onSortChange={setSort}
+            mode={window.innerWidth < 640 ? "dropdown" : "tabs"}
+            telemetryScope={wave.id}
+          />
+        </div>
+        <output aria-label="Selected fixture state">
+          {tab}:{sort}
+        </output>
+      </main>
+    </ConsentContext.Provider>
+  );
+}
+
+const root = document.getElementById("root");
+if (root) createRoot(root).render(<Fixture />);

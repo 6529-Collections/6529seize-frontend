@@ -445,6 +445,7 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
           <div className="tw-flex-shrink-0">
             <WaveleaderboardSort
               sort={sort}
+              telemetryScope={wave.id}
               onSortChange={onSortChange}
               mode={sortMode}
               items={sortItems}
@@ -468,11 +469,7 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
             className={`tw-flex tw-flex-col tw-items-end ${isMemesWave ? "lg:tw-hidden" : ""}`}
           >
             {canCreateDrop && onCreateDrop && (
-              <Button
-                onClick={onCreateDrop}
-                variant="primary"
-                size="sm"
-              >
+              <Button onClick={onCreateDrop} variant="primary" size="sm">
                 <PlusIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
                 <span>{createLabel}</span>
               </Button>

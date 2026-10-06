@@ -1,5 +1,13 @@
 import { publicEnv } from "@/config/env";
 import mixpanel from "mixpanel-browser";
+import type { BeforeSendHookPayload } from "mixpanel-browser";
+import Cookies from "js-cookie";
+import { CONSENT_PERFORMANCE_COOKIE } from "@/constants/constants";
+import {
+  MIXPANEL_PRIVATE_PROPERTIES,
+  MIXPANEL_PRIVACY_CONFIG,
+  sanitizeMixpanelEnvelope,
+} from "./mixpanelPrivacy";
 
 export type AnalyticsProperties = Record<
   string,
@@ -68,6 +76,23 @@ const MIXPANEL_TOKEN = publicEnv.NEXT_PUBLIC_MIXPANEL_TOKEN;
 let hasInitialized = false;
 let identifiedDistinctId: string | null = null;
 let isTrackingAllowed = false;
+let analyticsGeneration = 0;
+
+export const getAnalyticsGeneration = (): number => analyticsGeneration;
+export const isAnalyticsTrackingAllowed = (): boolean => isAnalyticsReady();
+
+const clearPrivateSuperProperties = (
+  sdk: Pick<typeof mixpanel, "unregister"> = mixpanel
+): void => {
+  // Exported by the pinned SDK; read once rather than rereading storage for every absent key.
+  const persistenceSdk = sdk as typeof sdk & {
+    persistence: { properties: () => Record<string, unknown> };
+  };
+  const persisted = persistenceSdk.persistence.properties();
+  for (const key of MIXPANEL_PRIVATE_PROPERTIES) {
+    if (Object.hasOwn(persisted, key)) sdk.unregister(key);
+  }
+};
 
 const sanitizeProperties = (
   properties: AnalyticsProperties = {}
@@ -93,8 +118,36 @@ const isAnalyticsEnvironmentSupported = (): boolean => {
 
 const isAnalyticsReady = (): boolean => {
   return (
-    hasInitialized && isTrackingAllowed && isAnalyticsEnvironmentSupported()
+    hasInitialized &&
+    isTrackingAllowed &&
+    Cookies.get(CONSENT_PERFORMANCE_COOKIE) !== "false" &&
+    isAnalyticsEnvironmentSupported()
   );
+};
+
+const guardBatchDelivery = (): void => {
+  // SDK 2.76.0 skips before_send_events for recovered orphaned queue entries.
+  // Install the final event transport guard before starting any batch sender.
+  type EventBatcher = {
+    sendRequest: (
+      events: BeforeSendHookPayload[],
+      options: unknown,
+      onResponse: (response: unknown) => void
+    ) => void;
+  };
+  const batchSdk = mixpanel as typeof mixpanel & {
+    request_batchers: { events?: EventBatcher };
+  };
+  const batcher = batchSdk.request_batchers.events;
+  if (!batcher) return; // Direct delivery still passes through the SDK hook.
+  const sendRequest = batcher.sendRequest.bind(batcher);
+  batcher.sendRequest = (events, options, onResponse) => {
+    if (!isAnalyticsReady()) {
+      onResponse(1); // Drop a withdrawn batch without a network request.
+      return;
+    }
+    sendRequest(events.map(sanitizeMixpanelEnvelope), options, onResponse);
+  };
 };
 
 export const initAnalytics = (): boolean => {
@@ -102,19 +155,34 @@ export const initAnalytics = (): boolean => {
   if (!isAnalyticsEnvironmentSupported() || !token) {
     return false;
   }
-  isTrackingAllowed = true;
-
-  if (hasInitialized) {
+  try {
+    if (!isTrackingAllowed) analyticsGeneration += 1;
+    isTrackingAllowed = true;
+    if (hasInitialized) {
+      mixpanel.start_batch_senders();
+      return false;
+    }
+    mixpanel.init(token, {
+      ...MIXPANEL_PRIVACY_CONFIG,
+      batch_autostart: false,
+      persistence: "localStorage",
+      loaded: (sdk) => {
+        clearPrivateSuperProperties(sdk);
+      },
+      hooks: {
+        before_send_events: (payload) =>
+          isAnalyticsReady() ? sanitizeMixpanelEnvelope(payload) : null,
+      },
+    });
+    clearPrivateSuperProperties();
+    guardBatchDelivery();
+    hasInitialized = true;
+    mixpanel.start_batch_senders();
+    return true;
+  } catch {
+    isTrackingAllowed = false;
     return false;
   }
-
-  mixpanel.init(token, {
-    autocapture: false,
-    persistence: "localStorage",
-    track_pageview: false,
-  });
-  hasInitialized = true;
-  return true;
 };
 
 const track = (eventName: string, properties?: AnalyticsProperties): void => {
@@ -122,7 +190,14 @@ const track = (eventName: string, properties?: AnalyticsProperties): void => {
     return;
   }
 
-  mixpanel.track(eventName, sanitizeProperties(properties));
+  try {
+    clearPrivateSuperProperties();
+    mixpanel.track(eventName, sanitizeProperties(properties));
+    // The SDK can repopulate search attribution while building an event.
+    clearPrivateSuperProperties();
+  } catch {
+    // Telemetry must never interrupt a product action.
+  }
 };
 
 export const trackAnalyticsEvent = (
@@ -141,28 +216,40 @@ export const identify = (
   }
 
   const distinctId = String(profileId);
-  if (identifiedDistinctId !== distinctId) {
-    mixpanel.identify(distinctId);
-    identifiedDistinctId = distinctId;
-  }
-
-  const sanitizedTraits = sanitizeProperties(traits);
-  if (Object.keys(sanitizedTraits).length > 0) {
-    mixpanel.people.set(sanitizedTraits);
+  try {
+    clearPrivateSuperProperties();
+    if (identifiedDistinctId !== distinctId) {
+      mixpanel.identify(distinctId);
+      identifiedDistinctId = distinctId;
+      analyticsGeneration += 1;
+    }
+    const sanitizedTraits = sanitizeProperties(traits);
+    if (Object.keys(sanitizedTraits).length > 0) {
+      mixpanel.people.set(sanitizedTraits);
+    }
+    clearPrivateSuperProperties();
+  } catch {
+    // Identity telemetry is also best effort.
   }
 };
 
 export const clearIdentity = (): void => {
+  analyticsGeneration += 1;
   identifiedDistinctId = null;
 
   if (!isAnalyticsReady()) {
     return;
   }
 
-  mixpanel.reset();
+  try {
+    mixpanel.reset();
+  } catch {
+    /* Best effort. */
+  }
 };
 
 export const disableAnalytics = (): void => {
+  analyticsGeneration += 1;
   isTrackingAllowed = false;
   identifiedDistinctId = null;
 
@@ -170,7 +257,16 @@ export const disableAnalytics = (): void => {
     return;
   }
 
-  mixpanel.reset();
+  try {
+    // Public SDK method (2.76.0), omitted from its bundled TypeScript interface.
+    const batchControl = mixpanel as typeof mixpanel & {
+      stop_batch_senders: () => void;
+    };
+    batchControl.stop_batch_senders();
+    mixpanel.reset();
+  } catch {
+    /* The synchronous send gate is already closed. */
+  }
 };
 
 export const trackPageView = (
