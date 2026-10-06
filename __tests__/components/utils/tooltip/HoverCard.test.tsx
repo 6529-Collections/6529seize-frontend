@@ -7,13 +7,9 @@ import {
   waitFor,
 } from "@testing-library/react";
 import "@testing-library/jest-dom";
+import userEvent from "@testing-library/user-event";
 import HoverCard from "@/components/utils/tooltip/HoverCard";
 import { CUSTOM_TOOLTIP_CLOSE_ALL_EVENT } from "@/helpers/tooltip.helpers";
-
-jest.mock("react-dom", () => ({
-  ...jest.requireActual("react-dom"),
-  createPortal: (children: React.ReactNode) => children,
-}));
 
 const hoverCardAriaLabel = "Test hover card";
 
@@ -252,6 +248,93 @@ describe("HoverCard", () => {
       expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     }
   );
+
+  describe("portal keyboard boundaries", () => {
+    beforeEach(() => {
+      // JSDOM has no layout; the real browser regression checks visibility too.
+      jest
+        .spyOn(HTMLElement.prototype, "getClientRects")
+        .mockReturnValue([
+          { width: 20, height: 20 } as DOMRect,
+        ] as unknown as DOMRectList);
+    });
+    afterEach(() => jest.restoreAllMocks());
+
+    it("returns to the trigger backwards and continues after it forwards", async () => {
+      const user = userEvent.setup();
+      render(
+        <>
+          <button type="button">Before</button>
+          <HoverCard
+            content={
+              <>
+                <a href="/group">Inspect group</a>
+                <a href="/rules">View rules</a>
+              </>
+            }
+            ariaLabel={hoverCardAriaLabel}
+            openOnClick
+            focusOnKeyboardActivation
+          >
+            <button type="button">Trigger</button>
+          </HoverCard>
+          <button type="button" hidden>
+            Hidden
+          </button>
+          <button type="button" disabled>
+            Disabled
+          </button>
+          <div inert>
+            <button type="button">Inert</button>
+          </div>
+          <button type="button">After</button>
+          <button type="button">End of page</button>
+        </>
+      );
+      const trigger = screen.getByRole("button", { name: "Trigger" });
+      act(() => trigger.focus());
+      await user.keyboard("{Enter}");
+      const card = screen.getByRole("dialog");
+      expect(card.parentElement).toBe(document.body);
+      await user.tab({ shift: true });
+      expect(trigger).toHaveFocus();
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+      await user.keyboard("{Enter}");
+      await user.tab();
+      expect(screen.getByRole("link", { name: "Inspect group" })).toHaveFocus();
+      await user.tab({ shift: true });
+      expect(trigger).toHaveFocus();
+      await user.keyboard("{Enter}");
+      await user.tab();
+      await user.tab();
+      expect(screen.getByRole("link", { name: "View rules" })).toHaveFocus();
+      await user.tab();
+      expect(screen.getByRole("button", { name: "After" })).toHaveFocus();
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    });
+
+    it("returns a card with no links to the next control after its trigger", async () => {
+      const user = userEvent.setup();
+      render(
+        <>
+          <HoverCard
+            content="Details"
+            ariaLabel={hoverCardAriaLabel}
+            openOnClick
+            focusOnKeyboardActivation
+          >
+            <button type="button">Trigger</button>
+          </HoverCard>
+          <button type="button">After</button>
+        </>
+      );
+      act(() => screen.getByRole("button", { name: "Trigger" }).focus());
+      await user.keyboard("{Enter}");
+      await user.tab();
+      expect(screen.getByRole("button", { name: "After" })).toHaveFocus();
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    });
+  });
 
   it("can stop click propagation and close when the card is clicked", async () => {
     const handleParentClick = jest.fn();

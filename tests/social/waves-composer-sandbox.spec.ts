@@ -111,6 +111,35 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     });
     await expect(lockedSubmit).toBeFocused();
     await expect(restriction).toHaveCount(0);
+    // Capture the native next control before opening the body-level portal.
+    await page.keyboard.press("Tab");
+    const nextPageControl = await page.evaluateHandle(
+      () => document.activeElement
+    );
+    await lockedSubmit.press("Space");
+    await expect(restriction).toBeFocused();
+    await page.keyboard.press("Shift+Tab");
+    await expect(lockedSubmit).toBeFocused();
+    await expect(restriction).toHaveCount(0);
+    await page.keyboard.press("Enter");
+    await page.keyboard.press("Tab");
+    await page.keyboard.press("Shift+Tab");
+    await expect(lockedSubmit).toBeFocused();
+    await expect(restriction).toHaveCount(0);
+    await page.keyboard.press("Space");
+    await page.keyboard.press("Tab");
+    await page.keyboard.press("Tab");
+    await page.keyboard.press("Tab");
+    await expect
+      .poll(() =>
+        nextPageControl.evaluate(
+          (element) => element === document.activeElement
+        )
+      )
+      .toBe(true);
+    await expect(restriction).toHaveCount(0);
+    await nextPageControl.dispose();
+    await lockedSubmit.focus();
     await page.keyboard.press("Space");
     await expect(restriction).toBeFocused();
     await page.keyboard.press("Tab");

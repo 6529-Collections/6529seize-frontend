@@ -22,6 +22,7 @@ import {
   type TooltipPlacement,
 } from "./tooltipPositioning";
 import { useTooltipReposition } from "./useTooltipReposition";
+import { getHoverCardTabExitTarget } from "./hoverCardFocus";
 
 interface HoverCardProps {
   readonly children: React.ReactElement;
@@ -223,6 +224,10 @@ export default function HoverCard({
 
       if (
         event.key === "ArrowDown" ||
+        (event.key === "Tab" &&
+          !event.shiftKey &&
+          isVisible &&
+          focusOnKeyboardActivation) ||
         (openOnClick &&
           focusOnKeyboardActivation &&
           (event.key === "Enter" || event.key === " "))
@@ -235,6 +240,7 @@ export default function HoverCard({
     [
       closeCardImmediately,
       focusOnKeyboardActivation,
+      isVisible,
       openOnClick,
       resolveTriggerNode,
       showImmediately,
@@ -284,6 +290,26 @@ export default function HoverCard({
     isFocusWithinCardRef.current = true;
     cancelHideTimer();
   }, [cancelHideTimer]);
+
+  const handleCardKeyDown = useCallback(
+    (event: React.KeyboardEvent<HTMLDivElement>) => {
+      if (event.key !== "Tab" || event.defaultPrevented) return;
+      const card = cardRef.current;
+      const trigger = triggerRef.current;
+      if (!card || !trigger) return;
+      const target = getHoverCardTabExitTarget({
+        card,
+        trigger,
+        shiftKey: event.shiftKey,
+      });
+      if (!target) return;
+      event.preventDefault();
+      closeCardImmediately();
+      target.focus();
+      cancelShowTimer();
+    },
+    [cancelShowTimer, closeCardImmediately]
+  );
 
   const handleCardBlur = useCallback(
     (event: React.FocusEvent<HTMLDivElement>) => {
@@ -517,6 +543,7 @@ export default function HoverCard({
               onMouseLeave={handleCardMouseLeave}
               onFocus={handleCardFocus}
               onBlur={handleCardBlur}
+              onKeyDown={handleCardKeyDown}
             >
               <div
                 className={joinTooltipClassNames(

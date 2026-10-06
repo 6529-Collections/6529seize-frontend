@@ -157,6 +157,40 @@ describe("WaveSubmissionAccessDetails", () => {
     expect(screen.queryByText("Legacy Club")).not.toBeInTheDocument();
   });
 
+  it("waits for selected group access without announcing it as private", () => {
+    selectCompetition({ group_id: "public-group", signature_required: false });
+    (useQuery as jest.Mock).mockReturnValue({
+      data: undefined,
+      isPending: true,
+    });
+    const { rerender } = render(
+      <WaveSubmissionAccessDetails wave={makeWave()} />
+    );
+    expect(screen.getByText("Loading submission access…")).toBeVisible();
+    expect(screen.queryByText("Private group")).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "View submission rules" })
+    ).toBeVisible();
+    (useQuery as jest.Mock).mockReturnValue({
+      data: {
+        name: "Public Club",
+        visible: true,
+        is_private: false,
+        is_direct_message: false,
+      },
+      isPending: false,
+    });
+    rerender(<WaveSubmissionAccessDetails wave={makeWave()} />);
+    expect(
+      screen.queryByText("Loading submission access…")
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("link", {
+        name: "Inspect Public Club group criteria and members",
+      })
+    ).toBeVisible();
+  });
+
   it.each([
     { isPending: true, isError: false, expected: "Loading submission access…" },
     {

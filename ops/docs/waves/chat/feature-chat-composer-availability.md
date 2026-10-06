@@ -69,7 +69,9 @@ availability. Submission availability is exposed through the Chat tab
   loads these details on demand. An unavailable lookup keeps the rules link
   available and does not substitute another competition's access settings.
 - Use Enter or Space to open locked submission details, Tab to reach its links,
-  and Escape to close it and return focus to the action. Opening submission rules
+  and Escape to close it and return focus to the action. Shift+Tab from the card
+  or its first link returns to the action; Tab after the final link closes the
+  card and continues to the next page control. Opening submission rules
   moves focus to Configuration, or to the rules content after a route change.
 - Chatting or following a wave does not grant submission or voting access.
   Submission eligibility, timing, limits, and signing requirements still apply.

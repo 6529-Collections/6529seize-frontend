@@ -74,6 +74,8 @@ function CompetitionSubmissionScope({
     return <p className="tw-m-0">{t(locale, "waves.access.loading")}</p>;
   if (competitionQuery.isError || !competition)
     return <p className="tw-m-0">{t(locale, "waves.access.unavailable")}</p>;
+  if (groupId !== null && groupQuery.isPending)
+    return <p className="tw-m-0">{t(locale, "waves.access.loading")}</p>;
   const group: ApiGroup | null =
     groupId === null
       ? null
