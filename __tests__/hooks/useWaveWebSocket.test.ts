@@ -2,8 +2,9 @@ import { act, renderHook, waitFor } from "@testing-library/react";
 import { useWaveWebSocket } from "@/hooks/useWaveWebSocket";
 
 let mockAppActive = true;
-jest.mock("@/hooks/useNativeAppActivity", () => ({
-  useNativeAppActivity: () => mockAppActive,
+jest.mock("@/hooks/useMobileAppActivity", () => ({
+  ...jest.requireActual("@/hooks/useMobileAppActivity"),
+  useMobileAppActivity: () => mockAppActive,
 }));
 
 class MockWebSocket {

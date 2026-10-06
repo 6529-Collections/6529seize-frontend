@@ -2,8 +2,9 @@ import { renderHook, act } from "@testing-library/react";
 import { useWaveTimers } from "@/hooks/useWaveTimers";
 
 let mockAppActive = true;
-jest.mock("@/hooks/useNativeAppActivity", () => ({
-  useNativeAppActivity: () => mockAppActive,
+jest.mock("@/hooks/useMobileAppActivity", () => ({
+  ...jest.requireActual("@/hooks/useMobileAppActivity"),
+  useMobileAppActivity: () => mockAppActive,
 }));
 
 describe("useWaveTimers", () => {

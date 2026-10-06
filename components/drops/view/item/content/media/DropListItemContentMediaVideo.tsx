@@ -1,6 +1,6 @@
 "use client";
 
-import { Capacitor } from "@capacitor/core";
+import { useMobileBatterySavings } from "@/hooks/useMobileAppActivity";
 import { useInView } from "@/hooks/useInView";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useOptimizedVideo } from "@/hooks/useOptimizedVideo";
@@ -39,9 +39,10 @@ function DropListItemContentMediaVideo({
   loadStrategy = "in-view",
 }: Props) {
   const { isApp } = useDeviceInfo();
+  const isMobileEnvironment = useMobileBatterySavings();
   const [wrapperRef, inView] = useInView<HTMLDivElement>({
     freezeOnceVisible: false,
-    rootMargin: Capacitor.isNativePlatform() ? "0px" : "400px 0px",
+    rootMargin: isMobileEnvironment ? "0px" : "400px 0px",
     threshold: 0.1,
   });
   const wasFullscreenRef = useRef(false);

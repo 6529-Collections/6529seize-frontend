@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useWaveWebSocket } from "./useWaveWebSocket";
-import { useNativeAppActivity } from "./useNativeAppActivity";
+import { useMobileAppActivity } from "./useMobileAppActivity";
 import type {
   WsDropUpdateMessage,
   WsDropUpdateRefMessage,
@@ -128,7 +128,7 @@ export function useWaveIsTyping(
   options?: { readonly enabled?: boolean | undefined }
 ): string {
   const enabled = options?.enabled ?? true;
-  const isAppActive = useNativeAppActivity();
+  const isAppActive = useMobileAppActivity();
   const shouldSubscribe = enabled && !disabled && isAppActive;
   const { socket } = useWaveWebSocket(shouldSubscribe ? waveId : "");
   const scopeKey = `${waveId}:${shouldSubscribe ? "subscribed" : "paused"}`;

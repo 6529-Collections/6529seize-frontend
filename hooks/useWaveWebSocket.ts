@@ -3,7 +3,7 @@
 import { publicEnv } from "@/config/env";
 import { useEffect, useRef, useState } from "react";
 import { WsMessageType } from "@/helpers/Types";
-import { useNativeAppActivity } from "./useNativeAppActivity";
+import { useMobileAppActivity } from "./useMobileAppActivity";
 
 interface UseWaveWebSocketResult {
   socket: WebSocket | null;
@@ -26,7 +26,7 @@ const MAX_RECONNECT_ATTEMPTS = 20;
  * @param waveId - The wave ID to subscribe to. Pass empty string to disable.
  */
 export function useWaveWebSocket(waveId: string): UseWaveWebSocketResult {
-  const isAppActive = useNativeAppActivity();
+  const isAppActive = useMobileAppActivity();
   const socketRef = useRef<WebSocket | null>(null);
   const [readyState, setReadyState] = useState<number>(WebSocket.CLOSED);
   const reconnectAttemptsRef = useRef<number>(0);

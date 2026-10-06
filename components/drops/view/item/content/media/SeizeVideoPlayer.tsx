@@ -1,9 +1,11 @@
 "use client";
 
 import { flushSync } from "react-dom";
-import { Capacitor } from "@capacitor/core";
 import { useVideoLoading } from "./useVideoLoading";
-import { useNativeAppActivity } from "@/hooks/useNativeAppActivity";
+import {
+  useMobileAppActivity,
+  useMobileBatterySavings,
+} from "@/hooks/useMobileAppActivity";
 
 import { PlayIcon } from "@heroicons/react/24/solid";
 import clsx from "clsx";
@@ -135,8 +137,8 @@ export default function SeizeVideoPlayer({
   "data-disable": dataDisable,
   "data-nft-media-renderer": dataNftMediaRenderer,
 }: SeizeVideoPlayerProps) {
-  const isAppActive = useNativeAppActivity();
-  const isNative = Capacitor.isNativePlatform();
+  const isAppActive = useMobileAppActivity();
+  const isMobileEnvironment = useMobileBatterySavings();
   const [openedSource, setOpenedSource] = useState<string | undefined>();
   const wrapperRef = useRef<HTMLDivElement>(null);
   const internalVideoRef = useRef<HTMLVideoElement | null>(null);
@@ -531,7 +533,7 @@ export default function SeizeVideoPlayer({
   }
 
   function handleError(event: React.SyntheticEvent<HTMLVideoElement, Event>) {
-    if (!isAppActive || (isNative && !canLoadDirectSource)) return;
+    if (!isAppActive || (isMobileEnvironment && !canLoadDirectSource)) return;
     const currentIndex = orderedFallbackSources.findIndex(
       (candidate) => candidate === directSrc
     );
@@ -621,7 +623,7 @@ export default function SeizeVideoPlayer({
   const { canLoadDirectSource, renderedSrc, videoPreload } = useVideoLoading({
     directSrc,
     videoElement,
-    isNative,
+    isMobileEnvironment,
     isAppActive,
     isInView,
     isAnyFullscreen,

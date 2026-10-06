@@ -59,7 +59,8 @@ type in the current thread.
   delivery state.
 - Labels update when typing or posting events arrive and expire after about five
   seconds without a fresh signal. An idle thread needs no periodic typing refresh.
-- Backgrounding the mobile app clears typing labels and pauses its subscription.
+- Backgrounding the Capacitor app or hiding a mobile browser tab clears typing
+  labels and pauses its subscription.
   Returning starts a fresh subscription for the active thread.
 - There is no dedicated typing-connection error banner.
 

@@ -1,7 +1,9 @@
 "use client";
 
+import { Capacitor } from "@capacitor/core";
+
 import { useCallback, useEffect, useRef } from "react";
-import { useNativeAppActivity } from "@/hooks/useNativeAppActivity";
+import { useMobileAppActivity } from "@/hooks/useMobileAppActivity";
 import {
   AUTH_TOKEN_CHANGED_EVENT,
   getAuthJwt,
@@ -61,7 +63,7 @@ const isAuthCookieChange = (event: CookieChangeEventLike): boolean => {
  * - Fresh References: Checks use current WebSocket context to avoid stale closures
  */
 export function useWebSocketHealth() {
-  const isAppActive = useNativeAppActivity();
+  const isAppActive = useMobileAppActivity();
   const isAppActiveRef = useRef(isAppActive);
   const webSocketState = useWebSocket();
   const lastTokenRef = useRef<string | null>(null);
@@ -81,7 +83,7 @@ export function useWebSocketHealth() {
     token: string | null;
     reason: string | null;
   } => {
-    if (!isAppActiveRef.current) {
+    if (!isAppActiveRef.current && Capacitor.isNativePlatform()) {
       return { action: "none", token: null, reason: "native-app-inactive" };
     }
     const currentToken = getAuthJwt();
@@ -180,7 +182,7 @@ export function useWebSocketHealth() {
     // Unexpected-close recovery belongs to WebSocketProvider's backoff loop.
     if (isAppActive) {
       performHealthCheck();
-    } else {
+    } else if (Capacitor.isNativePlatform()) {
       webSocketStateRef.current.disconnect();
     }
   }, [isAppActive, performHealthCheck]);

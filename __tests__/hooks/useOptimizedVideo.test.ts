@@ -8,8 +8,9 @@ import {
 
 jest.mock("@/helpers/video.helpers");
 let mockAppActive = true;
-jest.mock("@/hooks/useNativeAppActivity", () => ({
-  useNativeAppActivity: () => mockAppActive,
+jest.mock("@/hooks/useMobileAppActivity", () => ({
+  ...jest.requireActual("@/hooks/useMobileAppActivity"),
+  useMobileAppActivity: () => mockAppActive,
 }));
 beforeEach(() => {
   mockAppActive = true;

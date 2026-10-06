@@ -14,7 +14,7 @@ const getServerSnapshot = () => false;
 interface VideoLoadingOptions {
   readonly directSrc: string | undefined;
   readonly videoElement: HTMLVideoElement | null;
-  readonly isNative: boolean;
+  readonly isMobileEnvironment: boolean;
   readonly isAppActive: boolean;
   readonly isInView: boolean;
   readonly isAnyFullscreen: boolean;
@@ -29,7 +29,7 @@ interface VideoLoadingOptions {
 export function useVideoLoading({
   directSrc,
   videoElement,
-  isNative,
+  isMobileEnvironment,
   isAppActive,
   isInView,
   isAnyFullscreen,
@@ -39,8 +39,8 @@ export function useVideoLoading({
   autoPlay,
   preload,
 }: VideoLoadingOptions) {
-  // SSR cannot identify the native shell. Attach sources after hydration so
-  // native visibility policy applies before the browser can start a request.
+  // SSR cannot identify the mobile shell. Attach sources after hydration so
+  // mobile visibility policy applies before the browser can start a request.
   const isHydrated = useSyncExternalStore(
     subscribeNoop,
     getClientSnapshot,
@@ -51,7 +51,7 @@ export function useVideoLoading({
     value: SuspendedVideoSource;
   } | null>(null);
   const canLoadDirectSource =
-    isAppActive && (!isNative || isInView || isAnyFullscreen);
+    isAppActive && (!isMobileEnvironment || isInView || isAnyFullscreen);
   const deferPosterSource =
     Boolean(poster) &&
     (isPosterGateClosed ||
@@ -59,24 +59,24 @@ export function useVideoLoading({
         !isInView &&
         !isAnyFullscreen &&
         openedSource !== directSrc));
-  // preload is only a hint. Withhold never-opened native sources until needed.
+  // preload is only a hint. Withhold never-opened mobile sources until needed.
   // Keep opened sources stable in React so suspension can capture their position.
-  const deferNativeSource =
-    isNative && !canLoadDirectSource && openedSource !== directSrc;
+  const deferMobileSource =
+    isMobileEnvironment && !canLoadDirectSource && openedSource !== directSrc;
   const renderedSrc =
-    !isHydrated || deferPosterSource || deferNativeSource
+    !isHydrated || deferPosterSource || deferMobileSource
       ? undefined
       : directSrc;
   const videoPreload =
     !isHydrated ||
     !isAppActive ||
-    (isNative && (!canLoadDirectSource || (poster && !autoPlay))) ||
+    (isMobileEnvironment && (!canLoadDirectSource || (poster && !autoPlay))) ||
     (poster && isPosterGateClosed)
       ? "none"
       : preload;
 
   useEffect(() => {
-    if (!isNative || !videoElement || !directSrc) return;
+    if (!isMobileEnvironment || !videoElement || !directSrc) return;
     let removeRestoreListener: (() => void) | undefined;
     if (suspendedSourceRef.current?.source !== directSrc)
       suspendedSourceRef.current = null;
@@ -95,7 +95,13 @@ export function useVideoLoading({
       }
     }
     return () => removeRestoreListener?.();
-  }, [canLoadDirectSource, directSrc, isNative, renderedSrc, videoElement]);
+  }, [
+    canLoadDirectSource,
+    directSrc,
+    isMobileEnvironment,
+    renderedSrc,
+    videoElement,
+  ]);
 
   return { canLoadDirectSource, renderedSrc, videoPreload };
 }

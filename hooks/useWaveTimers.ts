@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useNativeAppActivity } from "./useNativeAppActivity";
+import { useMobileAppActivity } from "./useMobileAppActivity";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { Time } from "@/helpers/time";
 import type { TimeLeft } from "@/helpers/waves/time.utils";
@@ -46,7 +46,7 @@ interface WaveTimersResult {
  * Hook for handling timers in waves.
  *
  * This hook is designed to be used separately from useWave to control interval timers.
- * Native timers pause while the app is inactive and catch up on resume.
+ * Mobile timers pause while the app/tab is inactive and catch up on resume.
  *
  * @param wave The wave object
  * @returns Timer states
@@ -54,7 +54,7 @@ interface WaveTimersResult {
 export function useWaveTimers(
   wave: ApiWave | null | undefined
 ): WaveTimersResult {
-  const isAppActive = useNativeAppActivity();
+  const isAppActive = useMobileAppActivity();
   // Extract time period boundaries with stable fallback values
   const participationStartTime =
     wave?.participation.period?.min ?? FALLBACK_START_TIME;

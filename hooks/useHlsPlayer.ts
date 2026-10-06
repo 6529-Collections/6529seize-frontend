@@ -7,7 +7,6 @@ import {
   useRef,
   useState,
 } from "react";
-import { Capacitor } from "@capacitor/core";
 import {
   restoreVideoSource,
   suspendVideoSource,
@@ -15,13 +14,16 @@ import {
 } from "@/services/media/video-loading";
 import type HlsType from "hls.js";
 import type { ErrorData } from "hls.js";
-import { useNativeAppActivity } from "./useNativeAppActivity";
-import { getNativeAppActivity } from "@/services/app-activity/native-app-activity";
+import {
+  useMobileAppActivity,
+  useMobileBatterySavings,
+} from "./useMobileAppActivity";
+import { getMobileAppActivity } from "@/services/app-activity/mobile-app-activity";
 
 interface UseHlsPlayerParams {
   /** If false, keep the video element inert and do not attach a source yet. */
   enabled?: boolean | undefined;
-  /** Native buffering may pause independently of eager source initialization. */
+  /** Mobile buffering may pause independently of eager source initialization. */
   bufferingEnabled?: boolean | undefined;
   /** The final video URL to load (m3u8 if isHls=true, or MP4, etc.) */
   src: string;
@@ -93,15 +95,15 @@ export function useHlsPlayer({
   onManifestParsed,
   fallbackSrc,
 }: UseHlsPlayerParams) {
-  const isAppActive = useNativeAppActivity();
-  const isNative = Capacitor.isNativePlatform();
+  const isAppActive = useMobileAppActivity();
+  const isMobileEnvironment = useMobileBatterySavings();
   const [loadedSource, setLoadedSource] = useState<string | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const initialize = isNative
+  const initialize = isMobileEnvironment
     ? (enabled && isAppActive) || loadedSource === src
     : enabled;
   const canLoad =
-    isAppActive && (!isNative || bufferingEnabled || isFullscreen);
+    isAppActive && (!isMobileEnvironment || bufferingEnabled || isFullscreen);
   const canLoadRef = useRef(canLoad);
   const callbacksRef = useRef({ autoPlay, onError, onManifestParsed });
   useEffect(() => {
@@ -220,14 +222,14 @@ export function useHlsPlayer({
       videoEl.src = safeFallback;
       videoEl.load();
       setIsLoading(false);
-      if (isNative && !canLoadRef.current) {
+      if (isMobileEnvironment && !canLoadRef.current) {
         suspendedVideoRef.current = suspendVideoSource(videoEl);
         return;
       }
       if (
         callbacksRef.current.autoPlay &&
         canLoadRef.current &&
-        getNativeAppActivity()
+        getMobileAppActivity()
       ) {
         void playFallbackVideo(videoEl);
       }
@@ -255,7 +257,7 @@ export function useHlsPlayer({
       if (
         hlsRef.current !== hls ||
         !canLoadRef.current ||
-        !getNativeAppActivity()
+        !getMobileAppActivity()
       )
         return;
       callbacksRef.current.onError?.(data);
@@ -281,7 +283,7 @@ export function useHlsPlayer({
               if (
                 hlsRef.current === hls &&
                 canLoadRef.current &&
-                getNativeAppActivity()
+                getMobileAppActivity()
               ) {
                 needsManifestReloadRef.current = false;
                 hls.loadSource(hlsSrc);
@@ -360,7 +362,7 @@ export function useHlsPlayer({
 
         const hls = new HlsConstructor({
           debug: false,
-          autoStartLoad: canLoadRef.current && getNativeAppActivity(),
+          autoStartLoad: canLoadRef.current && getMobileAppActivity(),
           enableWorker: true,
           lowLatencyMode: false,
           backBufferLength: 90,
@@ -397,7 +399,7 @@ export function useHlsPlayer({
             !isCleaningUpRef.current &&
             callbacksRef.current.autoPlay &&
             canLoadRef.current &&
-            getNativeAppActivity()
+            getMobileAppActivity()
           ) {
             void videoEl.play().catch(() => {});
           }
@@ -405,7 +407,7 @@ export function useHlsPlayer({
 
         hls.loadSource(safeHlsSrc);
         hls.attachMedia(videoEl);
-        if (!canLoadRef.current || !getNativeAppActivity()) {
+        if (!canLoadRef.current || !getMobileAppActivity()) {
           suspendedHlsRef.current = hls;
           hls.stopLoad();
         }
@@ -432,7 +434,7 @@ export function useHlsPlayer({
     const nativeErrorHandler = () => {
       if (
         !isCurrentSetup(setupVersion, videoEl) ||
-        (isNative && !canLoadRef.current)
+        (isMobileEnvironment && !canLoadRef.current)
       ) {
         return;
       }
@@ -441,7 +443,9 @@ export function useHlsPlayer({
       fallbackToSrc(videoEl, fallbackSrc ?? src);
     };
 
-    if (!initialize) {
+    // Hydration starts with the server's active snapshot. Check live visibility
+    // before imperative source attachment so a hidden mobile tab cannot download.
+    if (!initialize || !getMobileAppActivity()) {
       setIsLoading(false);
       if (document.fullscreenElement?.contains(videoEl) ?? false) {
         return;
@@ -457,7 +461,7 @@ export function useHlsPlayer({
       return;
     }
 
-    if (isNative) setLoadedSource(src);
+    if (isMobileEnvironment) setLoadedSource(src);
     suspendedVideoRef.current = null;
     needsManifestReloadRef.current = false;
 
@@ -509,7 +513,15 @@ export function useHlsPlayer({
       videoEl.removeAttribute("src");
       videoEl.load();
     };
-  }, [src, isHls, initialize, isNative, fallbackSrc, cleanupHls, retryVersion]);
+  }, [
+    src,
+    isHls,
+    initialize,
+    isMobileEnvironment,
+    fallbackSrc,
+    cleanupHls,
+    retryVersion,
+  ]);
 
   const suspendLoading = useEffectEvent((video: HTMLVideoElement) => {
     if (hlsRetryTimeoutRef.current !== null) {
@@ -520,7 +532,7 @@ export function useHlsPlayer({
     if (hlsRef.current) {
       suspendedHlsRef.current = hlsRef.current;
       hlsRef.current.stopLoad();
-    } else if (isNative) {
+    } else if (isMobileEnvironment) {
       suspendedVideoRef.current ??= suspendVideoSource(video);
     }
   });
@@ -550,7 +562,7 @@ export function useHlsPlayer({
     if (canLoad) removeRestoreListener = resumeLoading(video);
     else suspendLoading(video);
     return () => removeRestoreListener?.();
-  }, [canLoad, isNative, src, initialize, retryVersion]);
+  }, [canLoad, isMobileEnvironment, src, initialize, retryVersion]);
 
   return {
     /** A ref to the <video> element, which the caller can render. */

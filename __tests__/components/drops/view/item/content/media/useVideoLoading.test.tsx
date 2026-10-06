@@ -4,16 +4,16 @@ import { renderToString } from "react-dom/server";
 import { useVideoLoading } from "@/components/drops/view/item/content/media/useVideoLoading";
 
 function Video({
-  isNative,
+  isMobileEnvironment,
   isInView = false,
 }: {
-  readonly isNative: boolean;
+  readonly isMobileEnvironment: boolean;
   readonly isInView?: boolean;
 }) {
   const { renderedSrc, videoPreload } = useVideoLoading({
     directSrc: "clip.mp4",
     videoElement: null,
-    isNative,
+    isMobileEnvironment,
     isInView,
     isAppActive: true,
     isAnyFullscreen: false,
@@ -27,10 +27,10 @@ function Video({
 }
 
 it.each([false, true])(
-  "hydrates without attaching an offscreen native source (native=%s)",
-  async (isNative) => {
+  "hydrates without attaching an offscreen mobile source (mobile=%s)",
+  async (isMobileEnvironment) => {
     const container = document.createElement("div");
-    container.innerHTML = renderToString(<Video isNative={false} />);
+    container.innerHTML = renderToString(<Video isMobileEnvironment={false} />);
     const video = container.querySelector("video")!;
     expect(video).not.toHaveAttribute("src");
     expect(video.preload).toBe("none");
@@ -41,13 +41,17 @@ it.each([false, true])(
     let root: ReturnType<typeof hydrateRoot> | undefined;
     try {
       await act(async () => {
-        root = hydrateRoot(container, <Video isNative={isNative} />, {
-          onRecoverableError,
-        });
+        root = hydrateRoot(
+          container,
+          <Video isMobileEnvironment={isMobileEnvironment} />,
+          {
+            onRecoverableError,
+          }
+        );
       });
       expect(onRecoverableError).not.toHaveBeenCalled();
       expect(consoleError).not.toHaveBeenCalled();
-      if (isNative) {
+      if (isMobileEnvironment) {
         expect(video).not.toHaveAttribute("src");
         expect(video.preload).toBe("none");
       } else {
@@ -55,7 +59,9 @@ it.each([false, true])(
         expect(video.preload).toBe("metadata");
       }
       await act(async () =>
-        root?.render(<Video isNative={isNative} isInView />)
+        root?.render(
+          <Video isMobileEnvironment={isMobileEnvironment} isInView />
+        )
       );
       expect(video).toHaveAttribute("src", "clip.mp4");
     } finally {

@@ -1,3 +1,4 @@
+import { defineMobileVideoBatteryTest } from "./mobileVideoBatteryCases";
 import {
   defineNftImageLayoutTests,
   expectContainedImage,
@@ -264,6 +265,11 @@ test.describe("Staging video artwork sizing @surface @medium @large @readonly", 
       return true;
     }
   }, "video fixtures 549 and 550 are qualified on staging only");
+
+  defineMobileVideoBatteryTest(
+    "mobile browser artwork stops offscreen buffering and restores position after tab hiding",
+    (project) => project === "web-mobile-chromium"
+  );
 
   test("centers homepage artwork without resizing when its column grows", async ({
     page,

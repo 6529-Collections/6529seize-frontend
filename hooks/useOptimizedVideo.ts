@@ -1,6 +1,6 @@
 "use client";
 
-import { useNativeAppActivity } from "./useNativeAppActivity";
+import { useMobileAppActivity } from "./useMobileAppActivity";
 import { useState, useEffect, useRef } from "react";
 import {
   isVideoUrl,
@@ -47,7 +47,7 @@ export function useOptimizedVideo(
     exponentialBackoff = false,
   } = options;
 
-  const isAppActive = useNativeAppActivity();
+  const isAppActive = useMobileAppActivity();
   const sourceRef = useRef<string | null>(null);
   const optimizedSourceRef = useRef<string | null>(null);
   const [rendition, setRendition] = useState({

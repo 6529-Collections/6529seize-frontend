@@ -3,8 +3,9 @@ import { useWaveIsTyping } from "@/hooks/useWaveIsTyping";
 import { WsMessageType } from "@/helpers/Types";
 
 let mockAppActive = true;
-jest.mock("@/hooks/useNativeAppActivity", () => ({
-  useNativeAppActivity: () => mockAppActive,
+jest.mock("@/hooks/useMobileAppActivity", () => ({
+  ...jest.requireActual("@/hooks/useMobileAppActivity"),
+  useMobileAppActivity: () => mockAppActive,
 }));
 
 const listeners: any[] = [];
