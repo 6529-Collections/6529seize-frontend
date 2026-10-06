@@ -225,8 +225,7 @@ export default function CommunityMembersFilterPanel(
               <ChevronLeftIcon className="tw-size-4" aria-hidden="true" />
               {t(locale, "network.groupFilter.all")}
             </button>
-            <div
-              role="region"
+            <section
               aria-label={t(
                 locale,
                 view === "identities"
@@ -268,7 +267,7 @@ export default function CommunityMembersFilterPanel(
                   />
                 </div>
               )}
-            </div>
+            </section>
           </div>
         </fieldset>
         <div className="tw-flex tw-shrink-0 tw-flex-col tw-gap-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-bg-iron-950 tw-px-4 tw-py-2 sm:tw-flex-row sm:tw-items-center sm:tw-gap-4 sm:tw-px-6">

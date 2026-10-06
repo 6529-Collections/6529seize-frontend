@@ -15,6 +15,64 @@ import {
   type GroupMembersPreviewTarget,
 } from "@/services/api/group-members-api";
 
+function InlineGroupMembersPreview({
+  criteriaLabel,
+  countLabel,
+  isLoading,
+  inlineCriteriaItems,
+  disabled,
+  actionLabel,
+  onOpen,
+}: {
+  readonly criteriaLabel: string;
+  readonly countLabel: string;
+  readonly isLoading: boolean;
+  readonly inlineCriteriaItems: readonly string[] | undefined;
+  readonly disabled: boolean;
+  readonly actionLabel: string;
+  readonly onOpen: () => void;
+}) {
+  return (
+    <div
+      className={`tw-flex tw-min-w-0 tw-max-w-full tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-1 ${inlineCriteriaItems ? "tw-w-full" : ""}`}
+    >
+      {inlineCriteriaItems ? (
+        <div className="tw-min-w-0 tw-basis-full">
+          <GroupCriteriaTags items={inlineCriteriaItems} />
+        </div>
+      ) : (
+        <p
+          aria-live="polite"
+          className="tw-m-0 tw-min-w-0 tw-break-words tw-text-sm tw-font-medium tw-text-iron-100"
+        >
+          {criteriaLabel}
+        </p>
+      )}
+      <span
+        aria-live="polite"
+        className="tw-inline-flex tw-items-center tw-gap-1.5 tw-text-xs tw-font-medium tw-text-iron-400"
+      >
+        <UsersIcon aria-hidden="true" className="tw-size-4" />
+        {isLoading ? (
+          <span className="tw-h-3 tw-w-28 tw-animate-pulse tw-rounded tw-bg-iron-700 motion-reduce:tw-animate-none">
+            <span className="tw-sr-only">{countLabel}</span>
+          </span>
+        ) : (
+          countLabel
+        )}
+      </span>
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={onOpen}
+        className="desktop-hover:hover:tw-text-primary-200 tw-inline-flex tw-min-h-8 tw-items-center tw-rounded-md tw-border-0 tw-bg-transparent tw-p-0 tw-text-xs tw-font-semibold tw-text-primary-300 tw-underline-offset-2 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:hover:tw-underline"
+      >
+        {actionLabel}
+      </button>
+    </div>
+  );
+}
+
 export default function GroupMembersPreviewTrigger({
   target,
   disabled = false,
@@ -114,43 +172,15 @@ export default function GroupMembersPreviewTrigger({
 
   if (appearance === "inline") {
     return (
-      <div
-        className={`tw-flex tw-min-w-0 tw-max-w-full tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-1 ${inlineCriteriaItems ? "tw-w-full" : ""}`}
-      >
-        {inlineCriteriaItems ? (
-          <div className="tw-min-w-0 tw-basis-full">
-            <GroupCriteriaTags items={inlineCriteriaItems} />
-          </div>
-        ) : (
-          <p
-            aria-live="polite"
-            className="tw-m-0 tw-min-w-0 tw-break-words tw-text-sm tw-font-medium tw-text-iron-100"
-          >
-            {criteriaLabel}
-          </p>
-        )}
-        <span
-          aria-live="polite"
-          className="tw-inline-flex tw-items-center tw-gap-1.5 tw-text-xs tw-font-medium tw-text-iron-400"
-        >
-          <UsersIcon aria-hidden="true" className="tw-size-4" />
-          {isLoading ? (
-            <span className="tw-h-3 tw-w-28 tw-animate-pulse tw-rounded tw-bg-iron-700 motion-reduce:tw-animate-none">
-              <span className="tw-sr-only">{countLabel}</span>
-            </span>
-          ) : (
-            countLabel
-          )}
-        </span>
-        <button
-          type="button"
-          disabled={disabled}
-          onClick={onOpen}
-          className="desktop-hover:hover:tw-text-primary-200 tw-inline-flex tw-min-h-8 tw-items-center tw-rounded-md tw-border-0 tw-bg-transparent tw-p-0 tw-text-xs tw-font-semibold tw-text-primary-300 tw-underline-offset-2 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:hover:tw-underline"
-        >
-          {t(locale, "waves.create.groups.members.view")}
-        </button>
-      </div>
+      <InlineGroupMembersPreview
+        criteriaLabel={criteriaLabel}
+        countLabel={countLabel}
+        isLoading={isLoading}
+        inlineCriteriaItems={inlineCriteriaItems}
+        disabled={disabled}
+        actionLabel={t(locale, "waves.create.groups.members.view")}
+        onOpen={onOpen}
+      />
     );
   }
 
