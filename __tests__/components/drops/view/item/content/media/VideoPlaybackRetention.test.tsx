@@ -354,7 +354,7 @@ describe("video playback across DM virtualization", () => {
     mockIsApp = false;
     jest.spyOn(Capacitor, "isNativePlatform").mockReturnValue(false);
     jest.spyOn(touchFirst, "isTouchFirstEnvironment").mockReturnValue(false);
-    const { rerender } = render(chatVideos());
+    render(chatVideos());
     playChatVideo("first-video");
     const first =
       screen.getAllByLabelText<HTMLVideoElement>("Video player")[0]!;
