@@ -148,7 +148,7 @@ function CreateWaveButton({
       className={
         compact
           ? "tw-size-8 tw-rounded-lg tw-p-0 touch-only:tw-size-11"
-          : "tw-min-h-11 tw-gap-2 tw-rounded-lg tw-px-3 tw-py-2 tw-text-xs"
+          : "tw-h-8 tw-gap-2 tw-rounded-lg tw-px-3 tw-py-0 tw-text-xs touch-only:tw-h-11"
       }
     >
       <FontAwesomeIcon icon={faPlus} className="tw-size-4" aria-hidden="true" />
