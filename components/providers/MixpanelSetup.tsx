@@ -9,6 +9,7 @@ import {
   identify,
   initAnalytics,
   isAnalyticsTrackingAllowed,
+  subscribeAnalyticsRecovery,
   trackPageView,
 } from "@/services/analytics/mixpanel";
 import { classifyPageView } from "@/services/analytics/pageClassification";
@@ -75,13 +76,15 @@ export default function MixpanelSetup() {
 
     let retryTimer: ReturnType<typeof setTimeout> | undefined;
     let retryAttempt = 0;
-    const attemptSetup = () => {
+    let setupComplete = false;
+    const attemptSetup = (recovered = false) => {
       const ready = profileId
         ? identify(profileId)
         : isAnalyticsTrackingAllowed();
       if (ready) {
+        setupComplete = true;
         identifiedProfileIdRef.current = profileId;
-        if (retryAttempt > 0) {
+        if (retryAttempt > 0 || recovered) {
           resetWaveFeatureVisit();
           setAnalyticsRecoveryGeneration((generation) => generation + 1);
         }
@@ -96,8 +99,15 @@ export default function MixpanelSetup() {
         attemptSetup();
       }, retryDelay);
     };
+    const unsubscribe = subscribeAnalyticsRecovery(() => {
+      if (setupComplete) return;
+      if (retryTimer !== undefined) clearTimeout(retryTimer);
+      initAnalytics();
+      attemptSetup(true);
+    });
     attemptSetup();
     return () => {
+      unsubscribe();
       if (retryTimer !== undefined) clearTimeout(retryTimer);
     };
   }, [connectedProfile?.id, hasConsent]);

@@ -3,6 +3,7 @@ import mixpanel from "mixpanel-browser";
 import type { BeforeSendHookPayload } from "mixpanel-browser";
 import Cookies from "js-cookie";
 import { CONSENT_PERFORMANCE_COOKIE } from "@/constants/constants";
+import { guardMixpanelBatching, type BatchSdk } from "./mixpanelBatching";
 import {
   MIXPANEL_PRIVATE_PROPERTIES,
   MIXPANEL_PRIVACY_CONFIG,
@@ -79,6 +80,45 @@ let identifiedDistinctId: string | null = null;
 let identityResetPending = false;
 let isTrackingAllowed = false;
 let analyticsGeneration = 0;
+let batchGuard: ReturnType<typeof guardMixpanelBatching> | undefined;
+let queueClearState: "ready" | "pending" | "failed" = "ready";
+let resumeRequested = false;
+const recoveryListeners = new Set<() => void>();
+
+export const subscribeAnalyticsRecovery = (
+  listener: () => void
+): (() => void) => {
+  recoveryListeners.add(listener);
+  return () => {
+    recoveryListeners.delete(listener);
+  };
+};
+
+const clearAnalyticsQueues = (): void => {
+  if (queueClearState === "pending") return;
+  queueClearState = "pending";
+  if (!batchGuard) {
+    queueClearState = "failed";
+    return;
+  }
+  void batchGuard.stopAndClear().then(
+    () => {
+      queueClearState = "ready";
+      if (!resumeRequested) return;
+      resumeRequested = false;
+      for (const listener of recoveryListeners) {
+        try {
+          listener();
+        } catch {
+          /* Optional telemetry recovery. */
+        }
+      }
+    },
+    () => {
+      queueClearState = "failed";
+    }
+  );
+};
 
 export const getAnalyticsGeneration = (): number => analyticsGeneration;
 export const isAnalyticsTrackingAllowed = (): boolean => isAnalyticsReady();
@@ -123,6 +163,7 @@ const isAnalyticsReady = (): boolean => {
     !hasInitialized ||
     !isTrackingAllowed ||
     identityResetPending ||
+    queueClearState !== "ready" ||
     !isAnalyticsEnvironmentSupported()
   )
     return false;
@@ -133,52 +174,17 @@ const isAnalyticsReady = (): boolean => {
   }
 };
 
-const guardBatchDelivery = (): void => {
-  // SDK 2.76.0 skips before_send_events for recovered orphaned queue entries.
-  // Guard event and identity transports before starting any batch sender.
-  type SdkBatcher = {
-    sendRequest: (
-      payloads: unknown[],
-      options: unknown,
-      onResponse: (response: unknown) => void
-    ) => void;
-  };
-  const batchSdk = mixpanel as typeof mixpanel & {
-    _batch_requests: boolean;
-    request_batchers: Partial<
-      Record<"events" | "people" | "groups", SdkBatcher>
-    >;
-  };
-  // In 2.76.0 init_batchers runs synchronously before persistence/loaded.
-  // Unsupported XHR/storage sets _batch_requests=false and uses the direct hook.
-  if (!batchSdk.request_batchers.events && batchSdk._batch_requests === false)
-    return;
-  for (const kind of ["events", "people", "groups"] as const) {
-    const batcher = batchSdk.request_batchers[kind];
-    if (!batcher)
-      throw new Error(`Mixpanel ${kind} batcher unavailable before startup`);
-    const sendRequest = batcher.sendRequest.bind(batcher);
-    batcher.sendRequest = (payloads, options, onResponse) => {
-      if (!isAnalyticsReady()) {
-        onResponse(1); // Drop a withdrawn batch without a network request.
-        return;
-      }
-      const sanitized = payloads.map((payload) =>
-        kind === "events"
-          ? sanitizeMixpanelEnvelope(payload as BeforeSendHookPayload)
-          : sanitizeMixpanelIdentityEnvelope(payload as Record<string, unknown>)
-      );
-      sendRequest(sanitized, options, onResponse);
-    };
-  }
-};
-
 const guardIdentityDelivery = (payload: Record<string, unknown>) =>
   isAnalyticsReady() ? sanitizeMixpanelIdentityEnvelope(payload) : null;
 
 export const initAnalytics = (): boolean => {
   const token = MIXPANEL_TOKEN;
   if (!isAnalyticsEnvironmentSupported() || !token) {
+    return false;
+  }
+  if (queueClearState !== "ready") {
+    resumeRequested = true;
+    if (queueClearState === "failed") clearAnalyticsQueues();
     return false;
   }
   try {
@@ -209,7 +215,10 @@ export const initAnalytics = (): boolean => {
       hooks,
     });
     clearPrivateSuperProperties();
-    guardBatchDelivery();
+    batchGuard = guardMixpanelBatching(
+      mixpanel as typeof mixpanel & BatchSdk,
+      isAnalyticsReady
+    );
     hasInitialized = true;
     mixpanel.start_batch_senders();
     return true;
@@ -219,7 +228,10 @@ export const initAnalytics = (): boolean => {
   }
 };
 
-const track = (eventName: string, properties?: AnalyticsProperties): boolean => {
+const track = (
+  eventName: string,
+  properties?: AnalyticsProperties
+): boolean => {
   if (!isAnalyticsReady()) {
     return false;
   }
@@ -299,22 +311,19 @@ export const disableAnalytics = (): void => {
   analyticsGeneration += 1;
   isTrackingAllowed = false;
   identifiedDistinctId = null;
+  resumeRequested = false;
 
   if (!hasInitialized || !isAnalyticsEnvironmentSupported()) {
     return;
   }
 
   identityResetPending = true;
+  clearAnalyticsQueues();
   try {
-    // Public SDK method (2.76.0), omitted from its bundled TypeScript interface.
-    const batchControl = mixpanel as typeof mixpanel & {
-      stop_batch_senders: () => void;
-    };
-    batchControl.stop_batch_senders();
     mixpanel.reset();
     identityResetPending = false;
   } catch {
-    /* Delivery stays closed until initialization can reset identity. */
+    /* Delivery stays closed until queues clear and initialization resets identity. */
   }
 };
 

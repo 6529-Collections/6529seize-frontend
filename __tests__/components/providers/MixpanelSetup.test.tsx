@@ -9,6 +9,7 @@ const identifyMock = jest.fn();
 const initAnalyticsMock = jest.fn();
 const isAnalyticsTrackingAllowedMock = jest.fn();
 const trackPageViewMock = jest.fn();
+const recoveryListeners = new Set<() => void>();
 
 let connectedProfile: {
   id: number;
@@ -45,6 +46,12 @@ jest.mock("@/services/analytics/mixpanel", () => ({
   initAnalytics: (...args: unknown[]) => initAnalyticsMock(...args),
   isAnalyticsTrackingAllowed: () => isAnalyticsTrackingAllowedMock(),
   trackPageView: (...args: unknown[]) => trackPageViewMock(...args),
+  subscribeAnalyticsRecovery: (listener: () => void) => {
+    recoveryListeners.add(listener);
+    return () => {
+      recoveryListeners.delete(listener);
+    };
+  },
 }));
 
 describe("MixpanelSetup", () => {
@@ -63,6 +70,7 @@ describe("MixpanelSetup", () => {
     initAnalyticsMock.mockReset();
     isAnalyticsTrackingAllowedMock.mockReset().mockReturnValue(true);
     trackPageViewMock.mockReset().mockReturnValue(true);
+    recoveryListeners.clear();
   });
 
   it("does not initialize or track without consent", () => {
@@ -253,6 +261,58 @@ describe("MixpanelSetup", () => {
     expect(trackPageViewMock).toHaveBeenCalledTimes(1);
   });
 
+  it.each([null, { id: 42 }])(
+    "recovers current identity and a dropped page view after slow queue clearing (%p)",
+    (profile) => {
+      jest.useFakeTimers();
+      connectedProfile = profile;
+      performanceConsent = true;
+      isAnalyticsTrackingAllowedMock.mockReturnValue(false);
+      identifyMock.mockReturnValue(false);
+      trackPageViewMock.mockReturnValueOnce(false);
+      render(<MixpanelSetup />);
+      act(() => jest.advanceTimersByTime(60000));
+      expect(initAnalyticsMock).toHaveBeenCalledTimes(3);
+      isAnalyticsTrackingAllowedMock.mockReturnValue(true);
+      identifyMock.mockReturnValue(true);
+      act(() => recoveryListeners.forEach((listener) => listener()));
+      expect(initAnalyticsMock).toHaveBeenCalledTimes(4);
+      if (profile) expect(identifyMock).toHaveBeenLastCalledWith("42");
+      else expect(identifyMock).not.toHaveBeenCalled();
+      expect(trackPageViewMock).toHaveBeenCalledTimes(2);
+      act(() => recoveryListeners.forEach((listener) => listener()));
+      expect(initAnalyticsMock).toHaveBeenCalledTimes(4);
+    }
+  );
+
+  it.each(["consent", "profile", "unmount"] as const)(
+    "cancels deferred queue recovery after %s changes",
+    (change) => {
+      performanceConsent = true;
+      connectedProfile = { id: 42 };
+      identifyMock.mockReturnValue(false);
+      const { rerender, unmount } = render(<MixpanelSetup />);
+      const previousListeners = [...recoveryListeners];
+      if (change === "unmount") unmount();
+      else {
+        if (change === "consent") performanceConsent = false;
+        else connectedProfile = { id: 43 };
+        rerender(<MixpanelSetup />);
+      }
+      expect(
+        previousListeners.every((listener) => !recoveryListeners.has(listener))
+      ).toBe(true);
+      const previousCalls = initAnalyticsMock.mock.calls.length;
+      identifyMock.mockReturnValue(true);
+      act(() => recoveryListeners.forEach((listener) => listener()));
+      expect(initAnalyticsMock).toHaveBeenCalledTimes(
+        previousCalls + (change === "profile" ? 1 : 0)
+      );
+      if (change === "profile")
+        expect(identifyMock).toHaveBeenLastCalledWith("43");
+    }
+  );
+
   it.each(["consent", "profile", "unmount"] as const)(
     "cancels guest initialization retry after %s changes",
     (change) => {
@@ -292,9 +352,12 @@ describe("MixpanelSetup", () => {
         rerender(<MixpanelSetup />);
       }
       act(() => jest.advanceTimersByTime(60000));
-      expect(identifyMock.mock.calls.filter(([id]) => id === "42")).toHaveLength(1);
+      expect(
+        identifyMock.mock.calls.filter(([id]) => id === "42")
+      ).toHaveLength(1);
       expect(initAnalyticsMock).toHaveBeenCalledTimes(1);
-      if (change === "profile") expect(identifyMock).toHaveBeenLastCalledWith("43");
+      if (change === "profile")
+        expect(identifyMock).toHaveBeenLastCalledWith("43");
     }
   );
 

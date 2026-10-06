@@ -386,8 +386,9 @@ test("dropdown entry activation is independent from choosing a portal sort", asy
   if (isMobile) await trigger.tap();
   else await trigger.click();
   await expect
-    .poll(async () =>
-      (await featureEvents(page, "Wave Feature Activated", "menu")).length
+    .poll(
+      async () =>
+        (await featureEvents(page, "Wave Feature Activated", "menu")).length
     )
     .toBe(1);
   const [opened] = await featureEvents(page, "Wave Feature Activated", "menu");
@@ -421,8 +422,10 @@ test("dropdown entry activation is independent from choosing a portal sort", asy
   if (isMobile) await choice.tap();
   else await choice.click();
   await expect
-    .poll(async () =>
-      (await featureEvents(page, "Wave Feature Activated", "created_at")).length
+    .poll(
+      async () =>
+        (await featureEvents(page, "Wave Feature Activated", "created_at"))
+          .length
     )
     .toBe(1);
   expect(
@@ -523,8 +526,9 @@ test("failed logout reset keeps SDK delivery closed until anonymous reset succee
       window.featureFixture.lateEvent();
     });
     await expect
-      .poll(async () =>
-        (await featureEvents(page, "Wave Feature Activated", "chat")).length
+      .poll(
+        async () =>
+          (await featureEvents(page, "Wave Feature Activated", "chat")).length
       )
       .toBe(1);
     const [guest] = await featureEvents(page, "Wave Feature Activated", "chat");
@@ -593,7 +597,9 @@ test("failed profile switching closes real SDK delivery until identity setup suc
   }
 });
 
-test("a chat-only Wave starts observing tabs that appear after content registration", async ({ page }) => {
+test("a chat-only Wave starts observing tabs that appear after content registration", async ({
+  page,
+}) => {
   await page.goto("/waves/private-wave?late-tabs=1");
   await page
     .getByRole("button", { name: "Enable synthetic telemetry" })
@@ -602,15 +608,23 @@ test("a chat-only Wave starts observing tabs that appear after content registrat
   await page.evaluate(() => window.featureFixture.showTabs());
   await expect(visibleTab(page, "Chat")).toBeVisible();
   await expect
-    .poll(async () => (await featureEvents(page, "Wave Feature Seen", "chat")).length)
+    .poll(
+      async () =>
+        (await featureEvents(page, "Wave Feature Seen", "chat")).length
+    )
     .toBe(1);
   await visibleTab(page, "About").click();
   await expect
-    .poll(async () => (await featureEvents(page, "Wave Feature Activated", "about")).length)
+    .poll(
+      async () =>
+        (await featureEvents(page, "Wave Feature Activated", "about")).length
+    )
     .toBe(1);
 });
 
-test("a failed direct Seen suppresses Activated until a later accepted exposure", async ({ page }) => {
+test("a failed direct Seen suppresses Activated until a later accepted exposure", async ({
+  page,
+}) => {
   for (const transport of ["batch", "direct"]) {
     await page.request.get("/clear");
     await page.goto(`/waves/private-wave?transport=${transport}`);
@@ -625,13 +639,16 @@ test("a failed direct Seen suppresses Activated until a later accepted exposure"
     await visibleTab(page, "Chat").click();
     await visibleTab(page, "Winners").click();
     await expect
-      .poll(async () =>
-        (await featureEvents(page, "Wave Feature Seen", "winners")).length
+      .poll(
+        async () =>
+          (await featureEvents(page, "Wave Feature Seen", "winners")).length
       )
       .toBe(1);
     await expect
-      .poll(async () =>
-        (await featureEvents(page, "Wave Feature Activated", "winners")).length
+      .poll(
+        async () =>
+          (await featureEvents(page, "Wave Feature Activated", "winners"))
+            .length
       )
       .toBe(1);
   }
@@ -719,54 +736,191 @@ test("a visit reset with the same context cancels previously accumulated dwell",
     .toBe(1);
 });
 
-test("message drop navigation cancels dwell and starts fresh exposure visits", async ({
+for (const [name, pathname, query, routeFamily] of [
+  ["message drop", "/messages/private-wave", "drop", "/messages/:waveId"],
+  ["Wave serial number", "/waves/private-wave", "serialNo", "/waves/:waveId"],
+] as const) {
+  test(`${name} navigation cancels dwell and starts fresh exposure visits`, async ({
+    page,
+  }) => {
+    await page.goto(pathname);
+    await page
+      .getByRole("button", { name: "Enable synthetic telemetry" })
+      .click();
+    await page.waitForTimeout(600);
+    await page.evaluate((query) => {
+      history.pushState({}, "", `?${query}=private-drop-one`);
+      window.dispatchEvent(new Event("resize"));
+    }, query);
+    // The former dwell would have elapsed; the new visit has only 600ms.
+    await page.waitForTimeout(600);
+    expect(await featureEvents(page, "Wave Feature Seen", "chat")).toHaveLength(
+      0
+    );
+    await expect
+      .poll(
+        async () =>
+          (await featureEvents(page, "Wave Feature Seen", "chat")).length
+      )
+      .toBe(1);
+    await page.evaluate((query) => {
+      history.pushState({}, "", `?${query}=private-drop-two`);
+      window.dispatchEvent(new Event("resize"));
+    }, query);
+    await expect
+      .poll(
+        async () =>
+          (await featureEvents(page, "Wave Feature Seen", "chat")).length
+      )
+      .toBe(2);
+    await page.evaluate((pathname) => {
+      history.pushState({}, "", pathname);
+      window.dispatchEvent(new Event("resize"));
+    }, pathname);
+    await expect
+      .poll(
+        async () =>
+          (await featureEvents(page, "Wave Feature Seen", "chat")).length
+      )
+      .toBe(3);
+    const captured = (await events(page)).filter((event) =>
+      event.event.startsWith("Wave Feature")
+    );
+    for (const event of captured)
+      expect(event.properties["route_family"]).toBe(routeFamily);
+    expect(JSON.stringify(captured)).not.toContain("private-wave");
+    expect(JSON.stringify(captured)).not.toContain("private-drop");
+  });
+}
+
+test("rapid consent regrant waits for all real SDK queue deletions", async ({
   page,
 }) => {
-  await page.goto("/messages/private-wave");
+  await page.goto("/waves/private-wave?transport=batch");
   await page
     .getByRole("button", { name: "Enable synthetic telemetry" })
     .click();
-  await page.waitForTimeout(600);
-  await page.evaluate(() => {
-    history.pushState({}, "", "?drop=private-drop-one");
-    window.dispatchEvent(new Event("resize"));
-  });
-  // The former dwell would have elapsed; the new visit has only 600ms.
-  await page.waitForTimeout(600);
-  expect(await featureEvents(page, "Wave Feature Seen", "chat")).toHaveLength(0);
   await expect
-    .poll(
-      async () =>
-        (await featureEvents(page, "Wave Feature Seen", "chat")).length
+    .poll(async () =>
+      (await events(page)).some((event) => event.event === "$identify")
     )
-    .toBe(1);
-  await page.evaluate(() => {
-    history.pushState({}, "", "?drop=private-drop-two");
-    window.dispatchEvent(new Event("resize"));
+    .toBe(true);
+  await page.request.get("/clear");
+  await page.evaluate(async () => {
+    await window.featureFixture.seedPendingQueues();
+    window.featureFixture.holdQueueClears();
+    window.featureFixture.revoke();
+    window.featureFixture.enable();
+    window.featureFixture.lateEvent();
+    window.featureFixture.updateTraits();
   });
   await expect
-    .poll(
-      async () =>
-        (await featureEvents(page, "Wave Feature Seen", "chat")).length
-    )
-    .toBe(2);
-  await page.evaluate(() => {
-    history.pushState({}, "", "/messages/private-wave");
-    window.dispatchEvent(new Event("resize"));
-  });
-  await expect
-    .poll(
-      async () =>
-        (await featureEvents(page, "Wave Feature Seen", "chat")).length
+    .poll(() =>
+      page.evaluate(() => window.featureFixture.pendingQueueClears().length)
     )
     .toBe(3);
-  const captured = (await events(page)).filter((event) =>
-    event.event.startsWith("Wave Feature")
-  );
-  for (const event of captured)
-    expect(event.properties["route_family"]).toBe("/messages/:waveId");
-  expect(JSON.stringify(captured)).not.toContain("private-wave");
-  expect(JSON.stringify(captured)).not.toContain("private-drop");
+  await visibleTab(page, "Winners").click();
+  await expect(
+    page.getByRole("status", { name: "Selected fixture state" })
+  ).toHaveText("WINNERS:RANK");
+  // No delivery through several flush intervals while deletion is pending.
+  await page.waitForTimeout(1200);
+  expect(await events(page)).toEqual([]);
+  expect(await peopleUpdates(page)).toEqual([]);
+  expect(
+    await page.evaluate(async () => (await fetch("/groups")).json())
+  ).toEqual([]);
+  await page.evaluate(() => {
+    window.featureFixture.releaseQueueClear("events");
+    window.featureFixture.releaseQueueClear("people");
+    window.featureFixture.resumeAnalytics();
+    window.featureFixture.lateEvent();
+  });
+  await page.waitForTimeout(700);
+  expect(await events(page)).toEqual([]);
+  await page.evaluate(() => window.featureFixture.releaseQueueClear("groups"));
+  await expect
+    .poll(() =>
+      page.evaluate(() =>
+        ["ev", "pp", "gr"].every(
+          (kind) =>
+            localStorage.getItem(
+              `__mpq_synthetic-wave-feature-pilot_${kind}`
+            ) === null
+        )
+      )
+    )
+    .toBe(true);
+  await page.evaluate(() => {
+    window.featureFixture.enable();
+    window.featureFixture.lateEvent();
+    window.featureFixture.updateTraits();
+  });
+  await expect
+    .poll(
+      async () =>
+        (await featureEvents(page, "Wave Feature Activated", "chat")).length
+    )
+    .toBe(1);
+  await expect
+    .poll(async () =>
+      (await peopleUpdates(page)).some(
+        (update) => update.$set?.["fixture_trait"] === "allowed"
+      )
+    )
+    .toBe(true);
+  expect(JSON.stringify(await events(page))).not.toContain("withdrawn");
+  expect(JSON.stringify(await peopleUpdates(page))).not.toContain("withdrawn");
+  expect(
+    await page.evaluate(async () => (await fetch("/groups")).json())
+  ).toEqual([]);
+});
+
+test("failed real SDK persisted deletion stays closed until clearing succeeds", async ({
+  page,
+}) => {
+  await page.goto("/waves/private-wave?transport=batch");
+  await page
+    .getByRole("button", { name: "Enable synthetic telemetry" })
+    .click();
+  await expect
+    .poll(async () =>
+      (await events(page)).some((event) => event.event === "$identify")
+    )
+    .toBe(true);
+  await page.request.get("/clear");
+  await page.evaluate(async () => {
+    await window.featureFixture.seedPendingQueues();
+    window.featureFixture.failQueueClearOnce();
+    window.featureFixture.revoke();
+    window.featureFixture.enable();
+    window.featureFixture.lateEvent();
+  });
+  await page.waitForTimeout(1200);
+  expect(await events(page)).toEqual([]);
+  expect(await peopleUpdates(page)).toEqual([]);
+  await page.evaluate(() => {
+    window.featureFixture.resumeAnalytics();
+    window.featureFixture.lateEvent();
+  });
+  await expect
+    .poll(() =>
+      page.evaluate(() =>
+        localStorage.getItem("__mpq_synthetic-wave-feature-pilot_ev")
+      )
+    )
+    .toBeNull();
+  await page.evaluate(() => {
+    window.featureFixture.enable();
+    window.featureFixture.lateEvent();
+  });
+  await expect
+    .poll(
+      async () =>
+        (await featureEvents(page, "Wave Feature Activated", "chat")).length
+    )
+    .toBe(1);
+  expect(JSON.stringify(await events(page))).not.toContain("withdrawn");
 });
 
 test("fast deliberate tab and sort selections work with mouse, touch and keyboard", async ({

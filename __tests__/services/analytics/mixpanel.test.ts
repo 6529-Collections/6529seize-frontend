@@ -9,14 +9,31 @@ const stopBatchMock = jest.fn();
 const sendBatchMock = jest.fn();
 const sendPeopleMock = jest.fn();
 const sendGroupsMock = jest.fn();
+const createBatcher = (sendRequest: typeof sendBatchMock) => ({
+  sendRequest,
+  enqueue: jest.fn<Promise<unknown>, [unknown]>().mockResolvedValue(true),
+  flush: jest.fn<Promise<unknown>, [unknown?]>().mockResolvedValue(undefined),
+  clear: jest.fn<Promise<unknown>, []>().mockResolvedValue(undefined),
+});
+const originalBatchers = {
+  events: createBatcher(sendBatchMock),
+  people: createBatcher(sendPeopleMock),
+  groups: createBatcher(sendGroupsMock),
+};
+const batcherMethods = new Map(
+  Object.values(originalBatchers).map((batcher) => [
+    batcher,
+    {
+      enqueue: batcher.enqueue,
+      flush: batcher.flush,
+      clear: batcher.clear,
+    },
+  ])
+);
 
 const mixpanelMock = {
   _batch_requests: true,
-  request_batchers: {
-    events: { sendRequest: sendBatchMock },
-    people: { sendRequest: sendPeopleMock },
-    groups: { sendRequest: sendGroupsMock },
-  },
+  request_batchers: originalBatchers,
   persistence: {
     properties: () => ({ $initial_referrer: "legacy", mp_keyword: "legacy" }),
   },
@@ -46,8 +63,15 @@ const loadModule = async ({
   peopleSetMock.mockReset();
   resetMock.mockReset();
   unregisterMock.mockReset();
-  startBatchMock.mockReset();
-  stopBatchMock.mockReset();
+  startBatchMock.mockReset().mockImplementation(() => {
+    mixpanelMock._batch_requests = true;
+  });
+  stopBatchMock.mockReset().mockImplementation(() => {
+    mixpanelMock._batch_requests = false;
+    Object.values(mixpanelMock.request_batchers).forEach((batcher) => {
+      void batcher.clear();
+    });
+  });
   sendBatchMock.mockReset();
   sendPeopleMock.mockReset();
   sendGroupsMock.mockReset();
@@ -55,6 +79,11 @@ const loadModule = async ({
   mixpanelMock.request_batchers.events.sendRequest = sendBatchMock;
   mixpanelMock.request_batchers.people.sendRequest = sendPeopleMock;
   mixpanelMock.request_batchers.groups.sendRequest = sendGroupsMock;
+  for (const [batcher, methods] of batcherMethods) {
+    batcher.enqueue = methods.enqueue.mockReset().mockResolvedValue(true);
+    batcher.flush = methods.flush.mockReset().mockResolvedValue(undefined);
+    batcher.clear = methods.clear.mockReset().mockResolvedValue(undefined);
+  }
 
   jest.doMock("@/config/env", () => ({
     publicEnv: {
@@ -68,6 +97,17 @@ const loadModule = async ({
   }));
 
   return import("@/services/analytics/mixpanel");
+};
+
+const retryAfterClearing = async (
+  analytics: Awaited<ReturnType<typeof loadModule>>
+) => {
+  const recovered = jest.fn();
+  const unsubscribe = analytics.subscribeAnalyticsRecovery(recovered);
+  analytics.initAnalytics();
+  await waitFor(() => expect(recovered).toHaveBeenCalledTimes(1));
+  unsubscribe();
+  analytics.initAnalytics();
 };
 
 describe("mixpanel analytics wrapper", () => {
@@ -127,16 +167,20 @@ describe("mixpanel analytics wrapper", () => {
         nodeEnv: "production",
         token: "public-token",
       });
-      const batcher = mixpanelMock.request_batchers.events;
+      const batchers = { ...mixpanelMock.request_batchers };
       mixpanelMock._batch_requests = batching;
-      Reflect.deleteProperty(mixpanelMock.request_batchers, "events");
+      if (batching)
+        Reflect.deleteProperty(mixpanelMock.request_batchers, "events");
+      else
+        for (const kind of ["events", "people", "groups"] as const)
+          Reflect.deleteProperty(mixpanelMock.request_batchers, kind);
       try {
         expect(analytics.initAnalytics()).toBe(!batching);
         analytics.trackAnalyticsEvent("Product Event");
         expect(startBatchMock).toHaveBeenCalledTimes(batching ? 0 : 1);
         expect(trackMock).toHaveBeenCalledTimes(batching ? 0 : 1);
       } finally {
-        mixpanelMock.request_batchers.events = batcher;
+        Object.assign(mixpanelMock.request_batchers, batchers);
       }
     }
   );
@@ -341,7 +385,7 @@ describe("mixpanel analytics wrapper", () => {
     analytics.initAnalytics();
     analytics.disableAnalytics();
     analytics.trackPageView("/blocked");
-    analytics.initAnalytics();
+    await retryAfterClearing(analytics);
     analytics.trackAnalyticsEvent("Product Event", {
       product_failure: false,
     });
@@ -374,6 +418,7 @@ describe("mixpanel analytics wrapper", () => {
       else analytics.disableAnalytics();
       expect(analytics.isAnalyticsTrackingAllowed()).toBe(false);
       expect(analytics.initAnalytics()).toBe(false);
+      if (operation === "disable") await retryAfterClearing(analytics);
       expect(analytics.isAnalyticsTrackingAllowed()).toBe(false);
       expect(analytics.trackAnalyticsEvent("Guest Event")).toBe(false);
       expect(analytics.identify("43")).toBe(false);
@@ -381,9 +426,14 @@ describe("mixpanel analytics wrapper", () => {
       expect(startBatchMock).toHaveBeenCalledTimes(1);
       const config = initMock.mock.calls[0]?.[1];
       expect(
-        config.hooks.before_send_events({ event: "Guest Event", properties: {} })
+        config.hooks.before_send_events({
+          event: "Guest Event",
+          properties: {},
+        })
       ).toBeNull();
-      expect(config.hooks.before_send_people({ $distinct_id: "42" })).toBeNull();
+      expect(
+        config.hooks.before_send_people({ $distinct_id: "42" })
+      ).toBeNull();
       expect(config.hooks.before_send_groups({ $group_id: "42" })).toBeNull();
       for (const kind of ["events", "people", "groups"] as const) {
         mixpanelMock.request_batchers[kind].sendRequest([], {}, jest.fn());
@@ -476,9 +526,84 @@ describe("mixpanel analytics wrapper", () => {
     analytics.disableAnalytics();
     expect(config.hooks.before_send_events(payload)).toBeNull();
     expect(stopBatchMock).toHaveBeenCalledTimes(1);
-    analytics.initAnalytics();
+    await retryAfterClearing(analytics);
     expect(startBatchMock).toHaveBeenCalledTimes(2);
     expect(config.hooks.before_send_events(payload)).not.toBeNull();
+  });
+
+  it("blocks rapid regrant until every queue has cleared and coalesces repeated withdrawal", async () => {
+    const analytics = await loadModule({
+      nodeEnv: "production",
+      token: "public-token",
+    });
+    const releases: Array<() => void> = [];
+    for (const methods of batcherMethods.values()) {
+      methods.clear.mockImplementation(
+        () =>
+          new Promise<void>((resolve) => {
+            releases.push(resolve);
+          })
+      );
+    }
+    analytics.initAnalytics();
+    analytics.disableAnalytics();
+    analytics.disableAnalytics();
+    const recovered = jest.fn();
+    const unsubscribe = analytics.subscribeAnalyticsRecovery(recovered);
+    analytics.initAnalytics();
+    await waitFor(() => expect(releases).toHaveLength(3));
+    expect(stopBatchMock).toHaveBeenCalledTimes(1);
+    expect(analytics.isAnalyticsTrackingAllowed()).toBe(false);
+    expect(analytics.trackAnalyticsEvent("Withdrawn Event")).toBe(false);
+    expect(analytics.identify("43", { plan: "explicit" })).toBe(false);
+    const config = initMock.mock.calls[0]?.[1];
+    for (const kind of ["events", "people", "groups"] as const) {
+      expect(config.hooks[`before_send_${kind}`]({})).toBeNull();
+      mixpanelMock.request_batchers[kind].sendRequest([], {}, jest.fn());
+    }
+    expect(sendBatchMock).not.toHaveBeenCalled();
+    expect(sendPeopleMock).not.toHaveBeenCalled();
+    expect(sendGroupsMock).not.toHaveBeenCalled();
+    releases[0]?.();
+    releases[1]?.();
+    analytics.initAnalytics();
+    expect(startBatchMock).toHaveBeenCalledTimes(1);
+    expect(recovered).not.toHaveBeenCalled();
+    releases[2]?.();
+    await waitFor(() => expect(recovered).toHaveBeenCalledTimes(1));
+    unsubscribe();
+    expect(analytics.isAnalyticsTrackingAllowed()).toBe(false);
+    analytics.initAnalytics();
+    expect(analytics.identify("43")).toBe(true);
+    expect(analytics.trackAnalyticsEvent("New Event")).toBe(true);
+    expect(startBatchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("keeps a rejected deletion closed and retries clearing before reinitializing", async () => {
+    const analytics = await loadModule({
+      nodeEnv: "production",
+      token: "public-token",
+    });
+    const events = batcherMethods.get(originalBatchers.events);
+    if (!events) throw new Error("Missing event batcher mock");
+    events.clear.mockRejectedValueOnce(new Error("Storage deletion failed"));
+    analytics.initAnalytics();
+    analytics.disableAnalytics();
+    const recovered = jest.fn();
+    const unsubscribe = analytics.subscribeAnalyticsRecovery(recovered);
+    analytics.initAnalytics();
+    await waitFor(() => expect(events.clear).toHaveBeenCalledTimes(1));
+    expect(recovered).not.toHaveBeenCalled();
+    expect(analytics.isAnalyticsTrackingAllowed()).toBe(false);
+    expect(analytics.trackAnalyticsEvent("Withdrawn Event")).toBe(false);
+    analytics.initAnalytics();
+    expect(analytics.isAnalyticsTrackingAllowed()).toBe(false);
+    await waitFor(() => expect(recovered).toHaveBeenCalledTimes(1));
+    expect(events.clear).toHaveBeenCalledTimes(2);
+    expect(startBatchMock).toHaveBeenCalledTimes(1);
+    unsubscribe();
+    analytics.initAnalytics();
+    expect(analytics.trackAnalyticsEvent("New Event")).toBe(true);
   });
 
   it("fails open when SDK initialization, tracking or identity fails", async () => {
@@ -533,9 +658,14 @@ describe("mixpanel analytics wrapper", () => {
       expect(trackMock).not.toHaveBeenCalled();
       const config = initMock.mock.calls[0]?.[1];
       expect(
-        config.hooks.before_send_events({ event: "Product Event", properties: {} })
+        config.hooks.before_send_events({
+          event: "Product Event",
+          properties: {},
+        })
       ).toBeNull();
-      expect(config.hooks.before_send_people({ $distinct_id: "42" })).toBeNull();
+      expect(
+        config.hooks.before_send_people({ $distinct_id: "42" })
+      ).toBeNull();
       for (const kind of ["events", "people", "groups"] as const) {
         mixpanelMock.request_batchers[kind].sendRequest([], {}, jest.fn());
       }
@@ -543,7 +673,7 @@ describe("mixpanel analytics wrapper", () => {
       expect(sendPeopleMock).not.toHaveBeenCalled();
       expect(sendGroupsMock).not.toHaveBeenCalled();
 
-      analytics.initAnalytics();
+      await retryAfterClearing(analytics);
       expect(analytics.identify("43")).toBe(true);
       expect(identifyMock).toHaveBeenLastCalledWith("43");
       analytics.trackAnalyticsEvent("Product Event");
@@ -604,3 +734,4 @@ describe("mixpanel analytics wrapper", () => {
     expect(onResponse).toHaveBeenCalledWith(1);
   });
 });
+import { waitFor } from "@testing-library/react";

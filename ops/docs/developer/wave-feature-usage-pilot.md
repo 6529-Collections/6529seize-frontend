@@ -16,8 +16,9 @@ fast action records Seen with `exposure_kind=direct_activation`; it does not
 pretend the one-second dwell occurred. Seen deduplicates responsive copies,
 repeated preview rows and child remounts within a route/viewer visit. It resets after
 navigation or a consent/identity generation change. Entering, switching or leaving
-a `drop` query view on Waves or Messages changes the internal visit key; the raw
-drop identifier stays in memory and never enters event properties.
+a `drop` query view or a first-party `serialNo` link on Waves or Messages changes
+the internal visit key; raw drop identifiers and serial numbers stay in memory
+and never enter event properties.
 
 Visit resets invalidate pending dwell through an epoch and notify active
 observers even when the pathname and feature context stay the same.
@@ -107,7 +108,10 @@ Failure to scrub persisted private properties also keeps delivery closed rather
 than silently continuing with uncleared storage. Missing or malformed performance
 consent cookies fail closed even while React consent state is stale. Existing
 Mixpanel identity and delivery metadata remain. Consent withdrawal synchronously
-closes the send gate, clears SDK batches and resets identity.
+closes the send gate and resets identity. Delivery remains blocked until pending
+enqueue/flush writes settle and all event, People and group queues finish their
+persisted deletion. Rapid regrant cannot restart senders during that barrier;
+a rejected deletion keeps delivery closed and initialization retries clearing.
 Logout clears local identity even when consent is missing or inaccessible;
 delivery stays closed until affirmative consent returns. If the SDK reset fails,
 delivery stays closed and initialization must complete that reset before any
@@ -118,7 +122,10 @@ successful setup. The provider retries failed initialization for guests and
 initialization/identity setup for connected profiles after one second, then five
 seconds if needed. Profile or consent
 changes and unmount cancel pending retries. Delivery stays closed if both retries
-fail; a later consent grant or reload can retry again. Already dispatched
+fail; a later consent grant or reload can retry again. A pending clear that
+finishes after those retries wakes setup for the current consent/profile and
+retries the dropped page view. That recovery subscription also cancels on
+consent/profile changes or unmount. Already dispatched
 network requests cannot be recalled. SDK and observer failures are best effort
 and must not interrupt controls.
 

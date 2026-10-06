@@ -12,6 +12,7 @@ import { SidebarWaveNavigationControls } from "@/components/brain/left-sidebar/w
 import type { SidebarWaveNavigation } from "@/hooks/useSidebarWaveNavigation";
 import { WebProfileFeedShortcut } from "@/components/brain/left-sidebar/web/WebProfileFeedShortcut";
 import type {} from "./waveFeatureFixtureApi";
+import { queueFixture } from "./waveFeatureQueueFixture";
 import { resetWaveFeatureVisit } from "@/services/analytics/waveFeatureUsage";
 import { WaveleaderboardSort } from "@/components/waves/leaderboard/header/WaveleaderboardSort";
 import {
@@ -111,7 +112,9 @@ function Fixture() {
     setConsent(true);
   };
   window.featureFixture = {
-    showTabs: () => setAvailableTabs([MyStreamWaveTab.CHAT, MyStreamWaveTab.ABOUT]),
+    ...queueFixture,
+    showTabs: () =>
+      setAvailableTabs([MyStreamWaveTab.CHAT, MyStreamWaveTab.ABOUT]),
     logout: clearIdentity,
     switchProfile: identify,
     resumeAnalytics: () => {
@@ -138,7 +141,10 @@ function Fixture() {
       const original = mixpanel.track.bind(mixpanel);
       mixpanel.track = (...args) => {
         const [eventName, properties] = args;
-        if (eventName === "Wave Feature Seen" && properties?.["value"] === value) {
+        if (
+          eventName === "Wave Feature Seen" &&
+          properties?.["value"] === value
+        ) {
           mixpanel.track = original;
           throw new Error("Synthetic Seen failure");
         }

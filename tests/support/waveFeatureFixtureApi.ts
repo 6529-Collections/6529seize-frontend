@@ -17,6 +17,11 @@ declare global {
       navigate: (path: string) => void;
       lateEvent: () => void;
       failSdk: () => void;
+      seedPendingQueues: () => Promise<void>;
+      holdQueueClears: () => void;
+      pendingQueueClears: () => Array<"events" | "people" | "groups">;
+      releaseQueueClear: (kind: "events" | "people" | "groups") => void;
+      failQueueClearOnce: () => void;
     };
   }
 }

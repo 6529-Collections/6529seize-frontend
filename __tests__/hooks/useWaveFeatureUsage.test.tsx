@@ -96,9 +96,14 @@ it("attaches an already mounted root after consent is granted", () => {
   expect(mockObserve).toHaveBeenCalledTimes(1);
 });
 
-it.each(["/waves/private-wave", "/messages/private-wave"])(
-  "includes entering, switching and leaving drop views in the visit key on %s",
-  (pathname) => {
+it.each([
+  ["/waves/private-wave", "drop"],
+  ["/messages/private-wave", "drop"],
+  ["/waves/private-wave", "serialNo"],
+  ["/messages/private-wave", "serialNo"],
+])(
+  "includes entering, switching and leaving %s?%s views in the visit key",
+  (pathname, query) => {
     const originalUrl = window.location.href;
     try {
       window.history.replaceState({}, "", pathname);
@@ -107,10 +112,10 @@ it.each(["/waves/private-wave", "/messages/private-wave"])(
       if (!getContext) throw new Error("Expected an observed telemetry root");
       const initialKey = getContext()?.key;
       expect(initialKey).toBeDefined();
-      window.history.replaceState({}, "", "?drop=private-drop-one");
+      window.history.replaceState({}, "", `?${query}=private-drop-one`);
       const firstDropKey = getContext()?.key;
       expect(firstDropKey).not.toBe(initialKey);
-      window.history.replaceState({}, "", "?drop=private-drop-two");
+      window.history.replaceState({}, "", `?${query}=private-drop-two`);
       const secondDropKey = getContext()?.key;
       expect(secondDropKey).not.toBe(firstDropKey);
       window.history.replaceState({}, "", pathname);
