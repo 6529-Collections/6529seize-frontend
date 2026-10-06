@@ -127,7 +127,8 @@ or an unavailable page. US iOS, web, and Android retain their existing behavior.
     appears for unsubscribed rows, unpublished distribution, or failed lookups
   - phase and publication details refresh once per minute while the tab is visible
   - subscribed rows keep the numeric quantity selector with every value from 1
-    through current eligibility
+    through current eligibility when eligibility is positive; at zero eligibility,
+    it shows a single `0` option and is disabled without changing the saved request
   - untouched automatic rows in Automatic / All eligible mode follow eligibility
     increases and decreases when consolidated balances are refreshed
   - choosing a quantity saves a manual override for that card, including later
