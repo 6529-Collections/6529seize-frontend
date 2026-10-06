@@ -1,5 +1,6 @@
 import {
   getWaveFeatureDescriptor,
+  hasWaveFeatureBeenSeen,
   recordWaveFeatureActivation,
   recordWaveFeatureSeen,
   resetWaveFeatureVisit,
@@ -35,7 +36,7 @@ const descriptor = {
 beforeEach(() => {
   mockGeneration += 1;
   mockAllowed = true;
-  mockTrack.mockClear();
+  mockTrack.mockReset().mockReturnValue(true);
 });
 
 it("starts a fresh visit after navigation away and back to the same route", () => {
@@ -79,6 +80,21 @@ it("records a fast action as direct exposure, and resets on navigation, viewer o
   mockGeneration += 1;
   recordWaveFeatureSeen(context, descriptor, "foreground_dwell");
   expect(mockTrack).toHaveBeenCalledTimes(4);
+});
+
+it("retries Seen after synchronous tracking rejection before a later activation", () => {
+  mockTrack.mockReturnValueOnce(false);
+  recordWaveFeatureSeen(context, descriptor, "foreground_dwell");
+  expect(hasWaveFeatureBeenSeen(context, descriptor)).toBe(false);
+  recordWaveFeatureActivation(context, descriptor, "choose");
+  expect(mockTrack.mock.calls.map(([event]) => event)).toEqual([
+    "Wave Feature Seen",
+    "Wave Feature Seen",
+    "Wave Feature Activated",
+  ]);
+  expect(hasWaveFeatureBeenSeen(context, descriptor)).toBe(true);
+  recordWaveFeatureSeen(context, descriptor, "foreground_dwell");
+  expect(mockTrack).toHaveBeenCalledTimes(3);
 });
 
 it("does not send during withdrawn consent or transmit unbounded feature values", () => {

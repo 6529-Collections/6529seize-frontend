@@ -1,4 +1,5 @@
 import MixpanelSetup from "@/components/providers/MixpanelSetup";
+import { subscribeWaveFeatureVisitReset } from "@/services/analytics/waveFeatureUsage";
 import { act, render } from "@testing-library/react";
 import React from "react";
 
@@ -58,7 +59,7 @@ describe("MixpanelSetup", () => {
     disableAnalyticsMock.mockReset();
     identifyMock.mockReset().mockReturnValue(true);
     initAnalyticsMock.mockReset();
-    trackPageViewMock.mockReset();
+    trackPageViewMock.mockReset().mockReturnValue(true);
   });
 
   it("does not initialize or track without consent", () => {
@@ -158,6 +159,29 @@ describe("MixpanelSetup", () => {
     expect(identifyMock).toHaveBeenNthCalledWith(3, "43");
     act(() => jest.advanceTimersByTime(60000));
     expect(identifyMock).toHaveBeenCalledTimes(3);
+  });
+
+  it("retries a dropped page view and notifies visibility observers after identity recovery", () => {
+    jest.useFakeTimers();
+    performanceConsent = true;
+    connectedProfile = { id: 42 };
+    identifyMock.mockReturnValueOnce(false);
+    trackPageViewMock.mockReturnValueOnce(false);
+    const onReset = jest.fn();
+    const unsubscribe = subscribeWaveFeatureVisitReset(onReset);
+    try {
+      const { rerender } = render(<MixpanelSetup />);
+      expect(trackPageViewMock).toHaveBeenCalledTimes(1);
+      onReset.mockClear();
+      act(() => jest.advanceTimersByTime(1000));
+      expect(identifyMock).toHaveBeenCalledTimes(2);
+      expect(onReset).toHaveBeenCalled();
+      expect(trackPageViewMock).toHaveBeenCalledTimes(2);
+      rerender(<MixpanelSetup />);
+      expect(trackPageViewMock).toHaveBeenCalledTimes(2);
+    } finally {
+      unsubscribe();
+    }
   });
 
   it("bounds retries when identity setup keeps failing", () => {

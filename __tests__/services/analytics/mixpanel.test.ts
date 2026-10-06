@@ -41,7 +41,7 @@ const loadModule = async ({
 }) => {
   jest.resetModules();
   initMock.mockReset();
-  trackMock.mockReset();
+  trackMock.mockReset().mockReturnValue({ event: "accepted", properties: {} });
   identifyMock.mockReset();
   peopleSetMock.mockReset();
   resetMock.mockReset();
@@ -499,6 +499,33 @@ describe("mixpanel analytics wrapper", () => {
       expect(trackMock).toHaveBeenCalledTimes(1);
     }
   );
+
+  it.each([false, null, undefined])(
+    "reports a rejected SDK tracking attempt (%s) without interrupting controls",
+    async (result) => {
+      const analytics = await loadModule({
+        nodeEnv: "production",
+        token: "public-token",
+      });
+      analytics.initAnalytics();
+      trackMock.mockReturnValueOnce(result);
+      expect(analytics.trackAnalyticsEvent("Product Event")).toBe(false);
+      expect(analytics.trackAnalyticsEvent("Product Event")).toBe(true);
+    }
+  );
+
+  it("reports synchronous tracking failure and accepts a later retry", async () => {
+    const analytics = await loadModule({
+      nodeEnv: "production",
+      token: "public-token",
+    });
+    analytics.initAnalytics();
+    trackMock.mockImplementationOnce(() => {
+      throw new Error("Synthetic tracking failure");
+    });
+    expect(analytics.trackPageView("/waves")).toBe(false);
+    expect(analytics.trackPageView("/waves")).toBe(true);
+  });
 
   it("guards orphaned batches at the final transport and drops them after consent withdrawal", async () => {
     const analytics = await loadModule({

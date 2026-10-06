@@ -106,6 +106,12 @@ fail; a later consent grant or reload can retry again. Already dispatched
 network requests cannot be recalled. SDK and observer failures are best effort
 and must not interrupt controls.
 
+Successful delayed identity recovery resets the current feature visit and wakes
+visibility observers. Page Viewed and Seen are cached only after synchronous
+SDK acceptance, so a rejected attempt can retry in the same visit. Acceptance
+means the SDK initiated or queued the event; it does not confirm network or
+backend delivery. Async transport failures remain best effort.
+
 Existing explicit event properties and optional identity traits are preserved.
 Dashboards relying on SDK raw URLs, referrers, search or campaign attribution
 will stop receiving those fields and should use the existing normalized route

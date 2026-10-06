@@ -13,7 +13,7 @@ import {
 import { classifyPageView } from "@/services/analytics/pageClassification";
 import { resetWaveFeatureVisit } from "@/services/analytics/waveFeatureUsage";
 import { usePathname, useSearchParams } from "next/navigation";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const IDENTITY_RETRY_DELAYS = [1000, 5000] as const;
 
@@ -28,6 +28,7 @@ export default function MixpanelSetup() {
   const { performanceConsent } = useCookieConsent();
   const lastTrackedPageKeyRef = useRef<string | null>(null);
   const identifiedProfileIdRef = useRef<string | null>(null);
+  const [identityRecoveryGeneration, setIdentityRecoveryGeneration] = useState(0);
   const hasConsent = performanceConsent === true;
   const pageView = classifyPageView({
     pathname,
@@ -78,6 +79,10 @@ export default function MixpanelSetup() {
     const attemptIdentity = () => {
       if (identify(profileId)) {
         identifiedProfileIdRef.current = profileId;
+        if (retryAttempt > 0) {
+          resetWaveFeatureVisit();
+          setIdentityRecoveryGeneration((generation) => generation + 1);
+        }
         return;
       }
       identifiedProfileIdRef.current = null;
@@ -108,9 +113,8 @@ export default function MixpanelSetup() {
       return;
     }
 
-    lastTrackedPageKeyRef.current = pageView.trackingKey;
     resetWaveFeatureVisit();
-    trackPageView(pageView.routePattern, {
+    const accepted = trackPageView(pageView.routePattern, {
       has_connected_profile:
         connectedProfile?.id !== undefined && connectedProfile.id !== null,
       logical_page: pageView.logicalPage,
@@ -118,10 +122,12 @@ export default function MixpanelSetup() {
       profile_viewer_context: profileViewerContext ?? undefined,
       route_pattern: pageView.routePattern,
     });
+    if (accepted) lastTrackedPageKeyRef.current = pageView.trackingKey;
   }, [
     connectedProfile?.id,
     fetchingProfile,
     hasConsent,
+    identityRecoveryGeneration,
     pageView,
     pathname,
     profileViewerContext,

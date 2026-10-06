@@ -157,11 +157,11 @@ export function recordWaveFeatureSeen(
   const visit = getVisit(context);
   const key = descriptorKey(context, descriptor);
   if (visit.seen.has(key)) return;
-  visit.seen.add(key);
-  trackAnalyticsEvent("Wave Feature Seen", {
+  const accepted = trackAnalyticsEvent("Wave Feature Seen", {
     ...properties(context, descriptor),
     exposure_kind: exposureKind,
   });
+  if (accepted) visit.seen.add(key);
 }
 
 export function hasWaveFeatureBeenSeen(

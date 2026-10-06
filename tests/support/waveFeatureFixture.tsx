@@ -111,6 +111,17 @@ function Fixture() {
         throw new Error("Synthetic identity failure");
       };
     },
+    failSeenOnce: (value) => {
+      const original = mixpanel.track.bind(mixpanel);
+      mixpanel.track = (...args) => {
+        const [eventName, properties] = args;
+        if (eventName === "Wave Feature Seen" && properties?.["value"] === value) {
+          mixpanel.track = original;
+          throw new Error("Synthetic Seen failure");
+        }
+        return original(...args);
+      };
+    },
     updateTraits: () => identify("529", { fixture_trait: "allowed" }),
     resetVisit: () => {
       history.pushState({}, "", "?drop=fixture-drop");

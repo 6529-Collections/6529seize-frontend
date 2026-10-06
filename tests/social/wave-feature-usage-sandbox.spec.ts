@@ -469,6 +469,30 @@ test("failed profile switching closes real SDK delivery until identity setup suc
   }
 });
 
+test("a failed Seen attempt remains retryable in the same visit", async ({ page }) => {
+  for (const transport of ["batch", "direct"]) {
+    await page.request.get("/clear");
+    await page.goto(`/waves/private-wave?transport=${transport}`);
+    await page.evaluate(() => window.featureFixture.failSeenOnce("winners"));
+    await page
+      .getByRole("button", { name: "Enable synthetic telemetry" })
+      .click();
+    await visibleTab(page, "Winners").click();
+    await visibleTab(page, "Chat").click();
+    await visibleTab(page, "Winners").click();
+    await expect
+      .poll(async () =>
+        (await featureEvents(page, "Wave Feature Seen", "winners")).length
+      )
+      .toBe(1);
+    await expect
+      .poll(async () =>
+        (await featureEvents(page, "Wave Feature Activated", "winners")).length
+      )
+      .toBe(2);
+  }
+});
+
 test("missing or malformed cookie blocks delivery despite stale UI consent", async ({
   page,
 }) => {

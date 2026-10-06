@@ -213,26 +213,33 @@ export const initAnalytics = (): boolean => {
   }
 };
 
-const track = (eventName: string, properties?: AnalyticsProperties): void => {
+const track = (eventName: string, properties?: AnalyticsProperties): boolean => {
   if (!isAnalyticsReady()) {
-    return;
+    return false;
   }
 
   try {
     clearPrivateSuperProperties();
-    mixpanel.track(eventName, sanitizeProperties(properties));
+    // 2.76.0 documents an acceptance result, omitted from its bundled types.
+    const sdkTrack = mixpanel.track.bind(mixpanel) as (
+      name: string,
+      properties: ReturnType<typeof sanitizeProperties>
+    ) => unknown;
+    const accepted = sdkTrack(eventName, sanitizeProperties(properties));
     // The SDK can repopulate search attribution while building an event.
     clearPrivateSuperProperties();
+    return Boolean(accepted);
   } catch {
     // Telemetry must never interrupt a product action.
+    return false;
   }
 };
 
 export const trackAnalyticsEvent = (
   eventName: string,
   properties?: AnalyticsProperties
-): void => {
-  track(eventName, properties);
+): boolean => {
+  return track(eventName, properties);
 };
 
 export const identify = (
@@ -304,11 +311,11 @@ export const disableAnalytics = (): void => {
 export const trackPageView = (
   path: string,
   properties?: AnalyticsProperties
-): void => {
+): boolean => {
   const sanitizedProperties = sanitizeProperties(properties);
   const { path: _ignoredPath, ...pageViewProperties } = sanitizedProperties;
 
-  track(PAGE_VIEW_EVENT_NAME, {
+  return track(PAGE_VIEW_EVENT_NAME, {
     ...pageViewProperties,
     path,
   });
