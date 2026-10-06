@@ -67,7 +67,8 @@ Platforms are `desktop_web`, `mobile_web`, `native`, `desktop_app`; viewer is
 `guest`, `profile`, or `proxy`. These are availability cohorts, not claims that
 the user can vote, submit or administer a Wave. Gates still determine which
 controls exist. Route families are Waves, My Stream, Messages, or `/other`.
-Wave creation uses `/other`, keeping its sidebar traffic outside Wave detail cohorts.
+Wave and message creation use `/other`, keeping their sidebar traffic outside
+detail cohorts. Trailing slashes preserve the index, creation or detail family.
 
 Seen uses `selection_source=automatic` for default, restored, deep-linked,
 history-driven and other selections without a recorded action in the current

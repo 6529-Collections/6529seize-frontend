@@ -202,3 +202,25 @@ it("removes SDK attribution after enrichment while preserving existing product a
     value: "chat",
   });
 });
+
+it.each([
+  ["/waves/create", "/other"],
+  ["/waves/create/", "/other"],
+  ["/waves/create/step", "/other"],
+  ["/messages/create", "/other"],
+  ["/messages/create/", "/other"],
+  ["/messages/create/step", "/other"],
+  ["/waves/", "/waves"],
+  ["/messages/", "/messages"],
+  ["/my-stream/", "/my-stream"],
+  ["/messages/private-id", "/messages/:waveId"],
+  ["/messages/private-id/", "/messages/:waveId"],
+  ["/messages/create-private-id", "/messages/:waveId"],
+  ["/waves/create-private-id", "/waves/:waveId"],
+  ["/", "/other"],
+])(
+  "classifies %s as %s without mixing creation and detail cohorts",
+  (path, family) => {
+    expect(waveFeatureRouteFamily(path)).toBe(family);
+  }
+);

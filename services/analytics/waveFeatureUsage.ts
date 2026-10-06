@@ -227,12 +227,18 @@ export function getWaveFeatureDescriptor(
 export function waveFeatureRouteFamily(
   pathname: string
 ): WaveFeatureContext["routeFamily"] {
-  if (pathname === "/waves") return "/waves";
-  if (pathname === "/waves/create" || pathname.startsWith("/waves/create/"))
+  const routePath = pathname.endsWith("/") ? pathname.slice(0, -1) : pathname;
+  if (
+    routePath === "/waves/create" ||
+    routePath.startsWith("/waves/create/") ||
+    routePath === "/messages/create" ||
+    routePath.startsWith("/messages/create/")
+  )
     return "/other";
-  if (pathname.startsWith("/waves/")) return "/waves/:waveId";
-  if (pathname === "/my-stream") return "/my-stream";
-  if (pathname === "/messages") return "/messages";
-  if (pathname.startsWith("/messages/")) return "/messages/:waveId";
+  if (routePath === "/waves") return "/waves";
+  if (routePath.startsWith("/waves/")) return "/waves/:waveId";
+  if (routePath === "/my-stream") return "/my-stream";
+  if (routePath === "/messages") return "/messages";
+  if (routePath.startsWith("/messages/")) return "/messages/:waveId";
   return "/other";
 }
