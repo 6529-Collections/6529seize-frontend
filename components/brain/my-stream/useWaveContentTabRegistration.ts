@@ -14,7 +14,10 @@ import { useWaveCompetitionsTab } from "@/hooks/competitions/useWaveCompetitions
 import { useWave } from "@/hooks/useWave";
 import { useWavePollSummary } from "@/hooks/useWaveHasPolls";
 import { useWaveTimers } from "@/hooks/useWaveTimers";
-import { useWaveOutcomeVisibility } from "@/hooks/waves/useWaveMetadata";
+import {
+  useWaveMetadata,
+  useWaveOutcomeVisibility,
+} from "@/hooks/waves/useWaveMetadata";
 import { MyStreamWaveTab } from "@/types/waves.types";
 import { useContentTab, WaveVotingState } from "../ContentTabContext";
 
@@ -35,7 +38,7 @@ export function useWaveContentTabRegistration(
   const { updateAvailableTabs } = useContentTab();
   const pathname = usePathname();
   const search = useSearchParams();
-  const { connectedProfile } = useAuth();
+  const { connectedProfile, fetchingProfile } = useAuth();
   const hasAuthenticatedProfile = Boolean(connectedProfile?.handle);
   const { flat, nativeCompetition } = useCompetitionNavigation();
   const nativeDefault = flat ? nativeCompetition : null;
@@ -43,6 +46,7 @@ export function useWaveContentTabRegistration(
     useWave(wave);
   const {
     hasCompetitions,
+    isPending: competitionsPending,
     hideCompetitionsTab,
     defaultCompetitionId,
     defaultSelectionEnabled,
@@ -51,7 +55,7 @@ export function useWaveContentTabRegistration(
     getCompetitionIdFromPathname(pathname) ??
     search.get("competition") ??
     defaultCompetitionId;
-  const { hasPolls } = useWavePollSummary({
+  const { hasPolls, isPending: pollsPending } = useWavePollSummary({
     waveId: wave?.id,
     enabled: Boolean(wave),
   });
@@ -69,12 +73,21 @@ export function useWaveContentTabRegistration(
   const outcomesVisible = nativeDefault
     ? getWaveOutcomeVisibilityFromMetadata(nativePresentation)
     : waveOutcomesVisible;
+  const { isPending: metadataPending } = useWaveMetadata(wave?.id, {
+    enabled: isRankWave || isApproveWave,
+  });
+  const tabsReady =
+    !fetchingProfile &&
+    !competitionsPending &&
+    !pollsPending &&
+    !((isRankWave || isApproveWave) && metadataPending);
   const hasSerialTarget = search.get("serialNo") !== null;
 
   useEffect(() => {
     if (!wave) return;
     updateAvailableTabs({
       waveId: wave.id,
+      tabsReady,
       isMemesWave: nativeDefault ? false : isMemesWave,
       isChatWave: nativeDefault ? true : isChatWave,
       hasPolls,
@@ -95,6 +108,7 @@ export function useWaveContentTabRegistration(
     });
   }, [
     wave,
+    tabsReady,
     nativeDefault,
     isMemesWave,
     isChatWave,

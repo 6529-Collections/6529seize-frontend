@@ -3,6 +3,8 @@
 import { DELEGATION_ABI } from "@/abis/abis";
 import { DELEGATION_CONTRACT, NEVER_DATE } from "@/constants/constants";
 import { isValidEthAddress } from "@/helpers/Helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
@@ -39,7 +41,12 @@ interface Props {
   onSetToast(toast: DelegationToastState): void;
 }
 
+/**
+ * Renders the consolidation registration form with reciprocal-wallet guidance
+ * for direct registrations and the existing manager registration flow.
+ */
 export default function NewConsolidationComponent(props: Readonly<Props>) {
+  const locale = useBrowserLocale();
   const [newDelegationCollection, setNewDelegationCollection] =
     useState<string>("0");
 
@@ -85,6 +92,7 @@ export default function NewConsolidationComponent(props: Readonly<Props>) {
           validate().length === 0 ? "registerDelegationAddress" : undefined,
       };
 
+  /** Returns validation errors for a missing collection or invalid target wallet. */
   function validate() {
     const newErrors: string[] = [];
     if (!newDelegationCollection || newDelegationCollection === "0") {
@@ -114,6 +122,19 @@ export default function NewConsolidationComponent(props: Readonly<Props>) {
       closeTitle="Consolidation"
       onHide={props.onHide}
     >
+      {!props.subdelegation && (
+        <div className="tw-mb-6 tw-rounded-lg tw-bg-iron-950 tw-p-4">
+          <h3 className="tw-mb-2 tw-mt-0 tw-text-sm tw-font-semibold tw-text-iron-100">
+            {t(locale, "delegation.consolidation.instructions.title")}
+          </h3>
+          <p className="tw-mb-2 tw-text-sm tw-leading-6 tw-text-iron-300">
+            {t(locale, "delegation.consolidation.instructions.steps")}
+          </p>
+          <p className="tw-mb-0 tw-text-sm tw-leading-6 tw-text-iron-300">
+            {t(locale, "delegation.consolidation.instructions.publicLink")}
+          </p>
+        </div>
+      )}
       <form>
         {props.subdelegation && (
           <DelegationFormOriginalDelegatorFormGroup

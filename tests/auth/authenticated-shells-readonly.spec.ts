@@ -181,6 +181,50 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
     );
   });
 
+  test("opens the existing consolidation form from the own-profile wallet entry", async ({
+    page,
+  }) => {
+    await gotoReady(page, PROFILE_BASE_PATH);
+    await expectProfileShell(page, "Identity");
+    const statements = page.getByRole("button", { name: /ID Statements/i });
+    if (await statements.isVisible()) {
+      await statements.click();
+    }
+
+    await expect(
+      page.getByRole("link", { name: "Wallet Checker" })
+    ).toBeVisible();
+    const addWallet = page.getByRole("link", {
+      name: "Add another wallet",
+      exact: true,
+    });
+    await expect(addWallet).toBeVisible();
+    await expect(addWallet).toHaveAttribute(
+      "href",
+      "/delegation/register-consolidation"
+    );
+    await addWallet.click();
+
+    await expect(page).toHaveURL(
+      (url) =>
+        url.pathname === "/delegation/register-consolidation" &&
+        url.search === ""
+    );
+    await expect(
+      page.getByRole("heading", { name: "Register Consolidation", exact: true })
+    ).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Two wallets · two registrations" })
+    ).toBeVisible();
+    await expect(page.getByLabel("Collection", { exact: true })).toHaveValue(
+      "0"
+    );
+    await expect(
+      page.getByLabel("Consolidating With", { exact: true })
+    ).toHaveValue("");
+    await expectNoHorizontalOverflow(page);
+  });
+
   test("renders the own-profile subscriptions shell read-only", async ({
     page,
   }) => {

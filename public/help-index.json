@@ -69,7 +69,7 @@
         "Competition links use /waves/{waveId}/competitions/{competitionId}; an entry link adds ?entry={entryId}. Explicit competition and entry links preserve that competition across tabs, reload and Back/Forward even when another competition becomes the default.",
         "When switching to a competition route, its controls appear after navigation completes, so a newly opened sort sheet or form stays in that view.",
         "A wave link targeting a specific chat message remains in Chat even when the link also names another section. The message target takes priority over that conflicting destination.",
-        "Opening a wave without an explicit destination opens Chat and remains there after competition data loads or refreshes, including Memes and completed waves on web and in the native app. Explicit tab and competition links retain their destination. Competition tabs use the default unless an explicit selection supplies another competition. One eligible competition wins; otherwise the earliest-starting running competition wins, including paused decisions. With none running, the soonest upcoming wins over history; otherwise the most recently ended wins, including archived completed history. Drafts, archived never-published drafts and cancelled competitions are excluded. With none eligible, shared chat remains usable. Chat and the default competition views share a single wave-level tab row, with content directly below and no nested detail panel. This also applies to the default in a wave with multiple competitions. Native defaults include Voters in that row. Both native and legacy defaults expose Configuration immediately before the final About tab. Configuration opens the selected competition’s existing rules and settings, retaining the same read and edit permissions. An explicitly opened non-default competition retains its title, All competitions return link and separate detail navigation. Leaderboard, Winners, Outcomes and My votes use the selected competition. Chat stays shared. Defaults refresh as time or lifecycle changes, but explicit choices and open submission or vote forms keep their original competition. For a logged-in non-admin, the Competitions tab is hidden only when the server-selected default is the wave’s sole visible competition across current, past and future records. An active default plus a past or future competition keeps the tab visible. Wave administrators retain Competitions for management. Unknown counts or permissions keep it visible; logged-out behavior is unchanged. Direct competition collection links remain readable when the tab is hidden.",
+        "Ordinary wave navigation restores each wave’s last selected valid tab in the same browser or app, including after reloads or app restarts. Main Stage can remember Leaderboard while Maybes Bar independently remembers Chat. With no valid remembered choice, Chat is the fallback, including Memes and completed waves. Loading or refreshing competition data does not override deliberate Chat selections. Remembered competition views retain their competition identity; if the default changes, ordinary entry falls back to Chat. Explicit tab and competition links retain their destination. Competition tabs use the default unless an explicit selection supplies another competition. One eligible competition wins; otherwise the earliest-starting running competition wins, including paused decisions. With none running, the soonest upcoming wins over history; otherwise the most recently ended wins, including archived completed history. Drafts, archived never-published drafts and cancelled competitions are excluded. With none eligible, shared chat remains usable. Chat and the default competition views share a single wave-level tab row, with content directly below and no nested detail panel. This also applies to the default in a wave with multiple competitions. Native defaults include Voters in that row. Both native and legacy defaults expose Configuration immediately before the final About tab. Configuration opens the selected competition’s existing rules and settings, retaining the same read and edit permissions. An explicitly opened non-default competition retains its title, All competitions return link and separate detail navigation. Leaderboard, Winners, Outcomes and My votes use the selected competition. Chat stays shared. Defaults refresh as time or lifecycle changes, but explicit choices and open submission or vote forms keep their original competition. For a logged-in non-admin, the Competitions tab is hidden only when the server-selected default is the wave’s sole visible competition across current, past and future records. An active default plus a past or future competition keeps the tab visible. Wave administrators retain Competitions for management. Unknown counts or permissions keep it visible; logged-out behavior is unchanged. Direct competition collection links remain readable when the tab is hidden.",
         "Where the competition experience is available, creating a wave opens shared chat without creating a competition. The Competitions tab is available to wave administrators for management, and to other viewers with accessible competitions except for the logged-in sole-default case described above. Administrators open that tab and use Add competition to configure competitions afterward.",
         "Wave administrators can create Rank or Approve drafts and publish them. Drafts are visible only to wave administrators. Approve requires a whole-number approval threshold greater than zero. The competition setup editor saves changes automatically. Incomplete input is retained on this device; valid drafts sync to the server. Next highlights invalid voting settings. Opening a draft goes directly to the setup wizard with saved settings prefilled. Close editor returns to the competition list and preserves the draft without publishing. The final step has Previous, Close editor and Publish; Publish saves the latest edits before publication. Whole competition means one voting budget across that competition’s entries. Competition guidelines apply to its entries and voting; chat guidelines belong to the shared wave. Published types cannot change; after the first entry, credit, signing, submission, timing, decision and outcome rules are fixed. Participation and voting access groups, title, description and presentation can still be updated while published.",
         "Each entry creates a dedicated competition drop that belongs to exactly one competition. Chat messages cannot become competition entries, and competition drops cannot be reused in another competition. Competition submissions cannot be edited, including unsigned submissions. Delete removes the entry from all competition views and direct entry links. There are no Withdraw or Disqualify actions. Existing drop-deletion permissions apply.",
@@ -4096,7 +4096,8 @@
         "register consolidation form",
         "open register consolidation",
         "where is register consolidation",
-        "register a consolidation form"
+        "register a consolidation form",
+        "add another wallet"
       ],
       "keywords": [
         "consolidation",
@@ -4113,6 +4114,8 @@
       "facts": [
         "The Register Consolidation form is the Delegation Center action for connecting wallets you control for supported 6529 metrics.",
         "The form requires a connected wallet, Collection, and Consolidating With address.",
+        "Profile owners can open this form from Add another wallet beside Wallet Checker in ID Statements / Consolidated Addresses; the entry is hidden while a proxy profile is active.",
+        "The normal form explains registering from the connected wallet, then connecting the other wallet and registering the return link. Each wallet needs ETH for gas; the link is public and existing profile data may be combined. NFTs stay in their wallets.",
         "For TDH consolidation, use Any Collection or The Memes."
       ],
       "canonical_path": "/delegation/register-consolidation",
@@ -5696,6 +5699,7 @@
         "On mobile, the add-statements sheet presents four compact statement groups, keeps public-visibility notes under About identity statements, and provides header close, back, backdrop, Escape, and swipe-down dismissal paths.",
         "On mobile web and Capacitor, deeper add-statement forms stay above the software keyboard and keep their focused fields and Save/Cancel actions reachable by scrolling.",
         "Consolidated wallet rows expand to show the full address and ENS name when available as full-field copy controls, plus labeled mobile links to Etherscan and OpenSea.",
+        "Add another wallet appears beside Wallet Checker for the connected profile owner when no proxy profile is active and a primary or consolidated wallet address is available. It opens /delegation/register-consolidation without prefilling Collection or Consolidating With; it is separate from Add for identity statements.",
         "URL-capable statement rows open from the row and show a right-aligned external-link cue; Copy remains an independent inline action that does not open the destination, while eligible owners can also Delete.",
         "NFT Accounts includes Ninfa and Other. Other asks for a display name such as AOTM and a secure HTTPS URL, then shows the display name with the destination hostname.",
         "New NFT account links must use HTTPS, cannot contain URL credentials, reject duplicate normalized URLs, and are limited to 20 per profile; Ninfa links must use ninfa.io or a ninfa.io subdomain.",
@@ -5703,7 +5707,11 @@
         "If statements fail to load, the page keeps consolidated addresses visible and shows a Retry action; empty statement groups are omitted without an overall placeholder."
       ],
       "canonical_path": "/{user}",
-      "related_paths": ["/{user}/identity", "/delegation/wallet-checker"],
+      "related_paths": [
+        "/{user}/identity",
+        "/delegation/wallet-checker",
+        "/delegation/register-consolidation"
+      ],
       "tags": ["profiles", "identity", "statements"],
       "source_refs": ["ops/docs/profiles/tabs/feature-identity-statements.md"]
     },
@@ -6092,13 +6100,14 @@
       ],
       "facts": [
         "Wave content tabs organize the visible wave content area. App tabs and their content share the same availability rules. An unavailable legacy competition section opens Leaderboard, or Submissions after voting ends, and selects that visible tab.",
+        "Memes wave tabs start with Chat, followed by Leaderboard or Submissions after voting ends, Winners when available, and My Votes for signed-in users. Other available sections follow these tabs.",
         "Some waves can switch between chat and gallery-style views.",
         "Available tabs depend on wave type, state, and content.",
         "Named curations are collections of posts from a wave. Switch between them using their tabs below the wave header on desktop and mobile web, or alongside the main wave navigation tabs in the native app. Select a regular tab such as Chat to leave the curation view.",
         "Curation navigation is available to viewers and admins through the tabs. Configuration contains admin-only curation management, with no separate curation view picker.",
         "A single curation has its own named tab. When many tabs overflow the row, scroll horizontally or swipe on touch layouts; the active tab scrolls into view.",
         "A valid ?curation={curationId} wave link opens that curation. If the curation was deleted or does not belong to this wave, the wave returns to its regular view after available curations load successfully. Loading or a failed request does not discard the linked curation.",
-        "Native app Back restores the wave section from that visit, such as returning from an author profile to Leaderboard; normally opening another wave still uses its default section.",
+        "Each wave independently remembers its last selected valid tab locally in this browser or app. Ordinary wave navigation restores it; a first visit or unavailable saved section falls back to Chat. Explicit tab, competition, curation and chat/drop/serialNo links take precedence. Browser Back/Forward and native app Back restore the section from that visit when still available, ahead of the latest remembered preference. Tab preferences survive reloads and app restarts but do not sync between devices; clearing local browser/app data removes them.",
         "Open unanswered polls can show a View results control so eligible readers can inspect counts and percentages before voting, then return to Vote while the poll is open."
       ],
       "canonical_path": "/waves",
