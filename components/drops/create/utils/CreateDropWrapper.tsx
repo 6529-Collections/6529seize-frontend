@@ -9,6 +9,7 @@ import { getContentType } from "@/services/uploads/mediaUploadMimeType";
 
 import {
   forwardRef,
+  useContext,
   useEffect,
   useImperativeHandle,
   useRef,
@@ -16,6 +17,7 @@ import {
   type JSX,
 } from "react";
 import type { CreateDropCompactHandles } from "../compact/CreateDropCompact";
+import { CreateDropDraftContext } from "../CreateDropDraftContext";
 import CreateDropCompact from "../compact/CreateDropCompact";
 
 import type { CreateDropFullHandles } from "../full/CreateDropFull";
@@ -215,6 +217,7 @@ const CreateDropWrapper = forwardRef<
     });
 
     const [editorState, setEditorState] = useState<EditorState | null>(null);
+    const draftContext = useContext(CreateDropDraftContext);
     const [files, setFiles] = useState<File[]>([]);
 
     const { setToast } = useAuth();
@@ -435,7 +438,9 @@ const CreateDropWrapper = forwardRef<
       !!drop?.parts.some((part) => !isDropPartWithinLimits(part.content ?? ""));
 
     const getCanSubmit = () =>
-      !!(!!getMarkdown() || !!files.length || !!drop?.parts.length) &&
+      (!!getMarkdown()?.trim() ||
+        files.length > 0 ||
+        (drop?.parts.length ?? 0) > 0) &&
       !getHasPendingInlineImageUpload() &&
       !getIsDropLimit() &&
       !getIsPartLimit() &&
@@ -445,7 +450,8 @@ const CreateDropWrapper = forwardRef<
 
     const canSubmit = getCanSubmit();
 
-    const getHaveMarkdownOrFile = () => !!getMarkdown() || !!files.length;
+    const getHaveMarkdownOrFile = () =>
+      !!getMarkdown()?.trim() || !!files.length;
     const getCanAddPart = () =>
       getHaveMarkdownOrFile() &&
       !getHasPendingInlineImageUpload() &&
@@ -495,7 +501,7 @@ const CreateDropWrapper = forwardRef<
       markdown: string | null,
       existingPartsCount: number
     ): CreateDropPart | null => {
-      const hasMarkdown = markdown !== null && markdown.length > 0;
+      const hasMarkdown = !!markdown?.trim();
 
       if (!hasMarkdown && files.length === 0) {
         return null;
@@ -628,6 +634,20 @@ const CreateDropWrapper = forwardRef<
       getDropSnapshot,
       requestDrop,
     }));
+    const onDraftChange = draftContext?.onChange;
+    useEffect(() => {
+      onDraftChange?.();
+    }, [
+      onDraftChange,
+      editorState,
+      files,
+      drop,
+      title,
+      metadata,
+      mentionedUsers,
+      mentionedWaves,
+      referencedNfts,
+    ]);
 
     const components: Record<CreateDropViewType, JSX.Element> = {
       [CreateDropViewType.COMPACT]: (

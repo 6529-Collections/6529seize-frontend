@@ -19,6 +19,9 @@ import {
   WaveLeaderboardVotingModal,
 } from "../WaveLeaderboardVotingModal";
 import ContentModerationDropGate from "@/components/content-moderation/ContentModerationDropGate";
+import WaveLeaderboardError from "../WaveLeaderboardError";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 
 interface WaveLeaderboardGalleryProps {
   readonly wave: ApiWave;
@@ -55,6 +58,7 @@ export const WaveLeaderboardGallery: React.FC<WaveLeaderboardGalleryProps> = ({
   priceCurrency,
   scrollContainerRef,
 }) => {
+  const locale = useBrowserLocale();
   const winningThreshold =
     wave.wave.type === ApiWaveType.Approve ? wave.wave.winning_threshold : null;
   const winningThresholdMinDurationMs =
@@ -70,6 +74,8 @@ export const WaveLeaderboardGallery: React.FC<WaveLeaderboardGalleryProps> = ({
     hasNextPage,
     hasPreviousPage,
     isFetching,
+    isError,
+    refetch,
     isFetchingNextPage,
     isFetchingPreviousPage,
     isFetchNextPageError,
@@ -108,21 +114,41 @@ export const WaveLeaderboardGallery: React.FC<WaveLeaderboardGalleryProps> = ({
   if (isFetching && dropsWithMedia.length === 0) {
     return (
       <div className="tw-flex tw-h-32 tw-items-center tw-justify-center">
-        <div className="tw-text-sm tw-text-iron-500">Loading drops...</div>
+        <output className="tw-block tw-text-sm tw-text-iron-500">
+          {t(locale, "waves.leaderboard.loading")}
+        </output>
       </div>
     );
   }
 
   if (dropsWithMedia.length === 0) {
+    if (isError) {
+      return (
+        <WaveLeaderboardError
+          onRetry={() => {
+            void refetch();
+          }}
+        />
+      );
+    }
     return (
       <div className="tw-flex tw-h-32 tw-items-center tw-justify-center tw-text-sm tw-text-iron-500">
-        No drops to show
+        {t(locale, "waves.leaderboard.empty")}
       </div>
     );
   }
 
   return (
     <>
+      {isError && !isFetchNextPageError && !isFetchPreviousPageError && (
+        <WaveLeaderboardError
+          hasEntries
+          retrying={isFetching}
+          onRetry={() => {
+            void refetch();
+          }}
+        />
+      )}
       <WaveLeaderboardVirtualizedRows
         items={dropsWithMedia}
         getItemId={getDropId}

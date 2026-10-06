@@ -20,6 +20,8 @@ import { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";
 import { CompetitionState } from "./CompetitionState";
 import { CompetitionLoadMore } from "./CompetitionLoadMore";
 import { Time } from "@/helpers/time";
+import CompetitionMySubmissions from "./CompetitionMySubmissions";
+import WaveLeaderboardError from "@/components/waves/leaderboard/WaveLeaderboardError";
 
 const sorts: Partial<Record<WaveDropsLeaderboardSort, string>> = {
   RANK: "rating",
@@ -78,11 +80,26 @@ export default function CompetitionLeaderboard({
   if (maxReached) closeStatus = "max_reached";
   let content;
   if (query.isPending) content = <CompetitionState />;
-  else if (query.isError) {
-    content = <CompetitionState error retry={() => void query.refetch()} />;
+  else if (query.isError && !entries.length) {
+    content = (
+      <WaveLeaderboardError
+        onRetry={() => {
+          void query.refetch();
+        }}
+      />
+    );
   } else {
     content = (
       <>
+        {query.isError && (
+          <WaveLeaderboardError
+            hasEntries
+            retrying={query.isFetching}
+            onRetry={() => {
+              void query.refetch();
+            }}
+          />
+        )}
         {!entries.length && <CompetitionState empty />}
         <div
           className={
@@ -157,6 +174,7 @@ export default function CompetitionLeaderboard({
         sort={sort}
         onSortChange={setSort}
         onCreateDrop={onCreateDrop}
+        additionalActions={<CompetitionMySubmissions />}
       />
       {content}
     </div>

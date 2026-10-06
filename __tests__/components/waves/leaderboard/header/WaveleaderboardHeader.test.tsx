@@ -36,6 +36,9 @@ jest.mock("@/components/waves/leaderboard/header/WaveleaderboardSort", () => {
 jest.mock(
   "@/components/waves/leaderboard/header/waveLeaderboardHeaderLayout",
   () => ({
+    ...jest.requireActual(
+      "@/components/waves/leaderboard/header/waveLeaderboardHeaderLayout"
+    ),
     resolveWaveLeaderboardHeaderLayout: (...args: any[]) =>
       resolveHeaderLayoutMock(...args),
   })

@@ -406,14 +406,14 @@ describe("CreateWave", () => {
       .mocked(useDeviceInfo)
       .mockReturnValue({ isApp: false } as ReturnType<typeof useDeviceInfo>);
     mockGetDropSnapshot.mockReturnValue({
-      parts: [{ content: "Test content" }],
+      parts: [{ content: "Test content", media: [], quoted_drop: null }],
       title: "Test Drop",
       referenced_nfts: [],
       mentioned_users: [],
       metadata: [],
     });
     mockRequestDrop.mockReturnValue({
-      parts: [{ content: "Saved content" }],
+      parts: [{ content: "Saved content", media: [], quoted_drop: null }],
       title: "Saved Drop",
       referenced_nfts: [],
       mentioned_users: [],
@@ -481,7 +481,7 @@ describe("CreateWave", () => {
     expect(screen.getByTestId("create-wave-flow-title")).toHaveTextContent(
       'Create Wave "Test Wave"'
     );
-    expect(screen.getByTestId("create-wave-overview")).toBeInTheDocument();
+    expect(screen.getByLabelText(/Wave Name/)).toBeVisible();
   });
 
   it("uses subwave title when creating under a parent wave", () => {
@@ -576,7 +576,7 @@ describe("CreateWave", () => {
     });
     rerender(createWaveElement());
     mockGetDropSnapshot.mockReturnValue({
-      parts: [{ content: "Current description" }],
+      parts: [{ content: "Current description", media: [], quoted_drop: null }],
     });
     fireEvent.click(screen.getByTestId("mock-next"));
     mockedUseWaveConfig.mockReturnValue({
@@ -595,7 +595,7 @@ describe("CreateWave", () => {
       step: CreateWaveStep.DESCRIPTION,
     });
     mockGetDropSnapshot.mockReturnValue({
-      parts: [{ content: "![Seize](loading)" }],
+      parts: [{ content: "![Seize](loading)", media: [], quoted_drop: null }],
     });
     renderCreateWave();
     fireEvent.click(screen.getByTestId("mock-next"));
@@ -624,6 +624,7 @@ describe("CreateWave", () => {
   });
 
   it("calls onBack when back button is clicked", () => {
+    mockGetDropSnapshot.mockReturnValue(null);
     renderCreateWave();
 
     const backButton = screen.getByRole("button", { name: /all waves/i });
@@ -768,7 +769,9 @@ describe("CreateWave", () => {
         mockedGetCreateNewWaveBody.mockReturnValue({
           name: "Test Wave",
           picture: null,
-          description_drop: { parts: [{ content: "Test content" }] },
+          description_drop: {
+            parts: [{ content: "Test content", media: [], quoted_drop: null }],
+          },
           visibility: { scope: { group_id: null } },
           chat: { enabled: true },
         });
@@ -967,7 +970,11 @@ describe("CreateWave", () => {
         step: CreateWaveStep.DESCRIPTION,
       });
       rerender(createWaveElement());
-      const updatedPart = { content: "Edited before confirming" };
+      const updatedPart = {
+        content: "Edited before confirming",
+        media: [],
+        quoted_drop: null,
+      };
       mockGetDropSnapshot.mockReturnValue({
         parts: [updatedPart],
         title: "Updated",
@@ -1261,7 +1268,13 @@ describe("CreateWave", () => {
 
     it("blocks submission while inline image uploads are still pending", async () => {
       mockGetDropSnapshot.mockReturnValue({
-        parts: [{ content: "Draft with ![Seize](loading)" }],
+        parts: [
+          {
+            content: "Draft with ![Seize](loading)",
+            media: [],
+            quoted_drop: null,
+          },
+        ],
         title: "Test Drop",
         referenced_nfts: [],
         mentioned_users: [],
@@ -1308,7 +1321,11 @@ describe("CreateWave", () => {
     it("allows submission once inline image uploads have finished", async () => {
       mockGetDropSnapshot.mockReturnValue({
         parts: [
-          { content: "Draft with ![Seize](https://cdn.example/image.png)" },
+          {
+            content: "Draft with ![Seize](https://cdn.example/image.png)",
+            media: [],
+            quoted_drop: null,
+          },
         ],
         title: "Test Drop",
         referenced_nfts: [],

@@ -6,6 +6,13 @@ jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: jest.fn(),
 }));
 
+jest.mock("@/components/home/useHomepageTracking", () => ({
+  useHomepageTracking: () => ({
+    rootRef: { current: null },
+    onClickCapture: jest.fn(),
+  }),
+}));
+
 jest.mock("@/components/home/hero", () => ({
   HeroHeader: () => <div>Hero</div>,
 }));

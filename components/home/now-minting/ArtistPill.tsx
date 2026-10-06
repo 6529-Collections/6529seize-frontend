@@ -80,6 +80,7 @@ export default function ArtistPill({
 
   return (
     <Link
+      data-home-action="Open artist profile"
       href={href}
       className="tw-inline-flex tw-items-center tw-leading-none tw-no-underline"
     >

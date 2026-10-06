@@ -63,6 +63,7 @@ export function useSidebarWaveNavigation({
   const [savedCollection, setCollection] = useWaveSidebarCollection();
   const collection = viewer.canUseCollections ? savedCollection : "all";
   const [queryText, setQueryText] = useWaveSidebarSearch(viewer.key ?? "guest");
+  const [searchOpen, setSearchOpen] = useState(false);
   const [debounced, setDebounced] = useState("");
   useDebounce(() => setDebounced(queryText.trim()), 350, [queryText]);
   const searching = enabled && queryText.trim().length > 0;
@@ -154,6 +155,8 @@ export function useSidebarWaveNavigation({
     setCollection,
     canUseCollections: viewer.canUseCollections,
     visibleWaves,
+    searchOpen: enabled && (searchOpen || searching),
+    setSearchOpen,
     searching,
     queryText,
     setQueryText,

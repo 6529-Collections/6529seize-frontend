@@ -28,10 +28,15 @@ Cards show the start date and, when set, the end date. Dates in the past use
 
 ## Default Competition
 
-Opening a wave without an explicit destination opens **Chat** and stays there
-while competition data loads or refreshes. Selecting a competition tab uses the
-default competition unless a link or earlier explicit selection supplies another
-competition.
+Ordinary wave navigation restores that wave's last selected valid tab in this
+browser or app. **Chat** is the fallback when there is no valid remembered choice,
+and loading or refreshing competition data does not override a deliberate Chat
+selection. Remembered competition views retain their competition identity; if
+another competition has become the default, ordinary entry falls back to Chat.
+Explicit destination links and Back/Forward retain their intended section.
+Selecting a competition tab uses the default competition unless a link or earlier
+explicit selection supplies another competition. See [Wave Content Tabs](../chat/feature-content-tabs.md)
+for the per-wave navigation contract.
 Chat and the competition views share one wave-level tab row, with the selected
 content directly below it. There is no second competition tab row or surrounding
 detail panel. This applies to single-competition waves and to the default in
@@ -95,6 +100,16 @@ tabs. The collection lets you choose a different competition at any time.
 
 ## Common Scenarios
 
+- After a submission is accepted, its entry opens with a confirmation naming
+  the competition and **View my entry**. **My submissions** is available on the
+  leaderboard and direct-entry view for your own signed-in profile.
+  On the leaderboard, it is a text button beside **Drop**. When the toolbar
+  needs two rows, view and sort controls occupy the top row; **My submissions**
+  aligns left and **Drop** aligns right below.
+- **My submissions** lists your entries in the selected competition, including
+  their recorded status, with older entries available through **Load more**.
+  It keeps the selected competition, leaderboard sort and view unchanged.
+
 - Competition drops in shared chat show their competition name beneath the author,
   linked to that competition. They also show their current total, your vote, rank,
   and voter count using the existing competition-card layout. The voter dropdown
@@ -129,6 +144,12 @@ tabs. The collection lets you choose a different competition at any time.
   do not accept new entries or votes.
 
 ## Failure and Recovery
+
+- If a leaderboard load fails, use **Retry**. Already loaded rows remain visible
+  if a refresh fails. Entry recovery does not create another submission.
+- If a saved submission’s entry status cannot be loaded, use **Check again** or
+  **View artwork** before submitting another copy. A failed artwork load does
+  not undo a confirmed entry; retry the artwork load or use **My submissions**.
 
 - If default selection cannot load, retry while shared chat remains usable.
   Competition controls do not silently use a different competition.

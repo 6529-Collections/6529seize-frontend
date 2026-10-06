@@ -3,6 +3,12 @@ import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrappe
 import CreateWaveModal from "@/components/waves/create-wave/CreateWaveModal";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import CreateWave from "@/components/waves/create-wave/CreateWave";
+import CreateWaveProfileRequiredModal from "@/components/waves/create-wave/CreateWaveProfileRequiredModal";
+
+jest.mock(
+  "@/components/waves/create-wave/CreateWaveProfileRequiredModal",
+  () => ({ __esModule: true, default: jest.fn(() => null) })
+);
 
 jest.mock("@/hooks/useBrowserLocale", () => ({
   useBrowserLocale: () => "en-US",
@@ -74,5 +80,22 @@ describe("CreateWaveModal", () => {
     expect(dialogProps.fixedHeight).toBe(true);
     expect(dialogProps.tall).toBe(true);
     expect(dialogProps.surfaceClassName).toContain("md:tw-max-h-[56rem]");
+  });
+
+  it("returns profile setup to the originating parent wave", () => {
+    const parentId = "00000000-0000-4000-8000-000000000529";
+    render(
+      <CreateWaveModal
+        isOpen
+        onClose={jest.fn()}
+        profile={{ handle: null, primary_wallet: "0x529" } as ApiIdentity}
+        parentWaveId={parentId}
+      />
+    );
+    expect(CreateWaveProfileRequiredModal).toHaveBeenCalledWith(
+      expect.objectContaining({ returnTo: `/waves/${parentId}` }),
+      undefined
+    );
+    expect(CreateWave).not.toHaveBeenCalled();
   });
 });

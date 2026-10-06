@@ -8,16 +8,23 @@ import HomeNewcomerIntro from "@/components/home/newcomer/HomeNewcomerIntro";
 import { NextMintLeadingSection } from "@/components/home/next-mint-leading/NextMintLeadingSection";
 import { HeroHeader } from "./hero";
 import { LatestDropSection } from "./now-minting";
+import { useHomepageTracking } from "./useHomepageTracking";
 
 export default function HomePageContent() {
   const { connectionState, hasValidWalletAuth } = useSeizeConnectContext();
+  const { rootRef, onClickCapture } = useHomepageTracking(hasValidWalletAuth);
   const showNewcomerIntro =
     connectionState !== "initializing" &&
     connectionState !== "connecting" &&
     !hasValidWalletAuth;
 
   return (
-    <div className="tw-overflow-x-hidden tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-800">
+    <div
+      ref={rootRef}
+      onClickCapture={onClickCapture}
+      onAuxClickCapture={onClickCapture}
+      className="tw-overflow-x-hidden tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-800"
+    >
       <HeroHeader />
       {showNewcomerIntro && <HomeNewcomerIntro />}
       <LatestDropSection />

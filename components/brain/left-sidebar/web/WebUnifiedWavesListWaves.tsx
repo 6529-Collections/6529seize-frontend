@@ -21,7 +21,6 @@ import React, { useCallback, useMemo, useRef } from "react";
 import { Tooltip as ReactTooltip } from "react-tooltip";
 import type { VirtualItem } from "../../../../hooks/useVirtualizedWaves";
 import { useVirtualizedWaves } from "../../../../hooks/useVirtualizedWaves";
-import { useAuth } from "../../../auth/Auth";
 import {
   buildHighlyRatedWavePreviewItems,
   getHighlyRatedPreviewWaves,
@@ -129,7 +128,13 @@ interface WebUnifiedWavesListWavesProps {
   readonly sentinelRef: React.RefObject<HTMLDivElement | null>;
 }
 
-function CreateWaveButton({ onClick }: { readonly onClick: () => void }) {
+function CreateWaveButton({
+  onClick,
+  compact = false,
+}: {
+  readonly onClick: () => void;
+  readonly compact?: boolean;
+}) {
   const locale = useBrowserLocale();
   const label = t(locale, "waves.sidebar.createWave");
   return (
@@ -140,9 +145,14 @@ function CreateWaveButton({ onClick }: { readonly onClick: () => void }) {
       aria-label={label}
       data-tooltip-id="create-wave-tooltip"
       data-tooltip-content={label}
-      className="tw-size-8 tw-rounded-lg tw-p-0 touch-only:tw-size-11"
+      className={
+        compact
+          ? "tw-size-8 tw-rounded-lg tw-p-0 touch-only:tw-size-11"
+          : "tw-h-8 tw-gap-2 tw-rounded-lg tw-px-3 tw-py-0 tw-text-xs touch-only:tw-h-11"
+      }
     >
       <FontAwesomeIcon icon={faPlus} className="tw-size-4" aria-hidden="true" />
+      {!compact && <span>{label}</span>}
     </Button>
   );
 }
@@ -169,7 +179,7 @@ function WebWavesListHeader({
 
     return (
       <div className="tw-mb-3.5 tw-mt-2 tw-flex tw-justify-center tw-px-2">
-        <CreateWaveButton onClick={onCreateWave} />
+        <CreateWaveButton onClick={onCreateWave} compact />
       </div>
     );
   }
@@ -223,7 +233,6 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
 }) => {
   const locale = useBrowserLocale();
   const listContainerRef = useRef<HTMLDivElement>(null);
-  const { connectedProfile } = useAuth();
   const { openWave, isApp } = useCreateModalState();
   const isTouchDevice = useIsTouchDevice();
   const prefetchWaveData = usePrefetchWaveData();
@@ -255,7 +264,7 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
   });
   useLoadPersistedExpandedSubwaves({ waves });
 
-  const showCreateWaveButton = !isApp && !!connectedProfile;
+  const showCreateWaveButton = !isApp;
   const shouldShowProfileFeedShortcut = !hideHeaders && showProfileFeedShortcut;
 
   const { announcementWaves, highlyRatedWaves } = useMemo(
@@ -467,6 +476,7 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
 
     return (
       <WebBrainLeftSidebarWave
+        scoreDetailsDisabled={navigation.searchOpen}
         isAnnouncement={isAnnouncement}
         wave={row.wave}
         onHover={onHover}
@@ -535,6 +545,7 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
 
           {!isDirectMessage && !hideHeaders && !isCollapsed && (
             <SidebarDiscovery
+              scoreDetailsDisabled={navigation.searchOpen}
               previewItems={highlyRatedPreviewItems}
               isTouchPreview={isTouchDevice}
             />

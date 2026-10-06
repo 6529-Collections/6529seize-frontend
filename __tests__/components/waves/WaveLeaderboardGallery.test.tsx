@@ -78,6 +78,8 @@ function renderGallery(overrides: any) {
     fetchNextPage: overrides.fetchNextPage || jest.fn(),
     hasNextPage: overrides.hasNextPage || false,
     isFetching: overrides.isFetching || false,
+    isError: overrides.isError ?? false,
+    refetch: overrides.refetch ?? jest.fn(),
     isFetchingNextPage: overrides.isFetchingNextPage || false,
     isFetchingPreviousPage: false,
     isFetchNextPageError: false,
@@ -104,15 +106,54 @@ function renderGallery(overrides: any) {
 
 it("shows loading when fetching and no drops", () => {
   renderGallery({ isFetching: true });
-  expect(
-    screen.getByText("Loading drops...", { selector: "div" })
-  ).toBeInTheDocument();
+  expect(screen.getByRole("status")).toHaveTextContent("Loading drops...");
 });
 
 it("shows empty message when no drops", () => {
   renderGallery({});
   expect(screen.getByText("No drops to show")).toBeInTheDocument();
 });
+
+it("does not claim gallery entries are visible when loaded drops have no media", () => {
+  renderGallery({
+    isError: true,
+    drops: [{ id: "text-only", parts: [{ media: [] }] }],
+  });
+  expect(screen.getByRole("alert")).toHaveTextContent(
+    "Couldn’t load submissions."
+  );
+  expect(screen.getByRole("alert")).not.toHaveTextContent(
+    "Showing the entries already loaded."
+  );
+  expect(screen.queryAllByTestId("item")).toHaveLength(0);
+});
+
+it.each([false, true])(
+  "offers retry without hiding loaded gallery artwork (%s)",
+  (hasEntries) => {
+    const refetch = jest.fn();
+    renderGallery({
+      isError: true,
+      refetch,
+      drops: hasEntries
+        ? [
+            {
+              id: "saved-row",
+              parts: [{ media: [{ url: "art", mime_type: "image/png" }] }],
+            },
+          ]
+        : [],
+    });
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      hasEntries
+        ? "Showing the entries already loaded."
+        : "Couldn’t load submissions."
+    );
+    expect(screen.queryAllByTestId("item")).toHaveLength(hasEntries ? 1 : 0);
+    fireEvent.click(screen.getByRole("button", { name: "Retry" }));
+    expect(refetch).toHaveBeenCalledTimes(1);
+  }
+);
 
 it("renders drops with load more button", () => {
   const fetchNextPage = jest.fn();

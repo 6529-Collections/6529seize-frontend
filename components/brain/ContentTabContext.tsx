@@ -4,7 +4,6 @@ import type { ReactNode } from "react";
 import React, {
   createContext,
   useState,
-  useEffect,
   useContext,
   useCallback,
   useMemo,
@@ -12,7 +11,13 @@ import React, {
 } from "react";
 import { MyStreamWaveTab } from "@/types/waves.types";
 import { useCompetitionNavigation } from "@/contexts/CompetitionNavigationContext";
-import useLocalPreference from "@/hooks/useLocalPreference";
+import {
+  hasWaveDestination,
+  getHistoryWaveTab,
+  getRememberedTab,
+  rememberHistoryWaveTab,
+  useWaveTabPreference,
+} from "@/hooks/useWaveTabPreference";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   getCompetitionRoute,
@@ -47,6 +52,7 @@ export enum WaveVotingState {
 // Define a type for the updateAvailableTabs parameters
 type WaveTabParams = {
   waveId: string | null;
+  tabsReady?: boolean | undefined;
   isChatWave: boolean;
   hasPolls?: boolean | undefined;
   hasCompetitions?: boolean | undefined;
@@ -80,21 +86,6 @@ interface ContentTabContextType {
   updateAvailableTabs: (params: WaveTabParams | null) => void;
 }
 
-const MEMES_WAVE_LAST_TAB_STORAGE_KEY = "memes_wave_last_tab_by_id";
-
-const isValidWaveTab = (value: unknown): value is MyStreamWaveTab =>
-  Object.values(MyStreamWaveTab).includes(value as MyStreamWaveTab);
-
-const isValidWaveTabMap = (
-  value: unknown
-): value is Record<string, MyStreamWaveTab> => {
-  if (value === null || value === undefined || typeof value !== "object") {
-    return false;
-  }
-
-  return Object.values(value).every((tab) => isValidWaveTab(tab));
-};
-
 const buildMemesTabs = (
   hasAuthenticatedProfile: boolean,
   votingState: WaveVotingState,
@@ -102,13 +93,12 @@ const buildMemesTabs = (
   hasPolls: boolean,
   showOutcomeTab: boolean
 ) => {
-  const tabs: MyStreamWaveTab[] = [];
+  const tabs: MyStreamWaveTab[] = [MyStreamWaveTab.CHAT];
   if (votingState === WaveVotingState.ENDED) {
     tabs.push(MyStreamWaveTab.SUBMISSIONS);
   } else {
     tabs.push(MyStreamWaveTab.LEADERBOARD);
   }
-  tabs.push(MyStreamWaveTab.CHAT);
   if (hasFirstDecisionPassed) {
     tabs.push(MyStreamWaveTab.WINNERS);
   }
@@ -224,19 +214,14 @@ export const ContentTabProvider: React.FC<{
     : MyStreamWaveTab.CHAT;
   const routeKey = `${pathname}:${search.get("wave") ?? ""}:${search.get("tab") ?? ""}:${search.get("serialNo") ?? ""}:${search.get("competition") ?? ""}`;
   const routeToken = useMemo(() => Symbol(routeKey), [routeKey]);
-  const [tabsByWaveId, setTabsByWaveId] = useLocalPreference<
-    Record<string, MyStreamWaveTab>
-  >(
-    competitionOnly
-      ? "legacy_competition_last_tab_by_id"
-      : MEMES_WAVE_LAST_TAB_STORAGE_KEY,
-    {},
-    isValidWaveTabMap
+  const { tabsRef: tabsByWaveIdRef, rememberTab } = useWaveTabPreference(
+    competitionOnly ? "legacy_competition_last_tab_by_id" : undefined
   );
   const [selection, setSelection] = useState({
     routeToken,
     waveId: null as string | null,
     tab: initialTab,
+    intentional: false,
   });
   const activeContentTabRaw =
     selection.routeToken === routeToken ? selection.tab : initialTab;
@@ -249,19 +234,20 @@ export const ContentTabProvider: React.FC<{
     { id: null, enabled: false }
   );
   const [hideCompetitionsTab, setHideCompetitionsTab] = useState(false);
-  const tabsByWaveIdRef = useRef<Record<string, MyStreamWaveTab>>(tabsByWaveId);
+  const recordedRouteRef = useRef<symbol | null>(null);
   const transientTabOverrideRef = useRef<{
     waveId: string;
     tab: MyStreamWaveTab;
   } | null>(null);
 
-  useEffect(() => {
-    tabsByWaveIdRef.current = tabsByWaveId;
-  }, [tabsByWaveId]);
-
   const setActiveTabInternal = useCallback(
-    (tab: MyStreamWaveTab) => {
-      setSelection({ routeToken, waveId: currentWaveIdRef.current, tab });
+    (tab: MyStreamWaveTab, intentional = false) => {
+      setSelection({
+        routeToken,
+        waveId: currentWaveIdRef.current,
+        tab,
+        intentional,
+      });
     },
     [routeToken]
   );
@@ -281,6 +267,7 @@ export const ContentTabProvider: React.FC<{
 
       const {
         waveId,
+        tabsReady = true,
         isChatWave,
         hasPolls = false,
         hasCompetitions = false,
@@ -388,6 +375,9 @@ export const ContentTabProvider: React.FC<{
           : null;
 
       if (transientTab !== null && tabs.includes(transientTab)) {
+        // URL cleanup must preserve this message visit without replacing the
+        // wave's remembered ordinary-entry preference.
+        if (waveId) rememberHistoryWaveTab(waveId, transientTab);
         setActiveTabInternal(transientTab);
         return;
       }
@@ -395,12 +385,79 @@ export const ContentTabProvider: React.FC<{
         transientTabOverrideRef.current = null;
       }
 
+      const competitionId = getCompetitionIdFromPathname(pathname);
+      const routeTab = getLegacyCompetitionTab(
+        search.get("tab") ?? "leaderboard"
+      );
+      if (
+        flat &&
+        waveId &&
+        competitionId &&
+        routeTab !== undefined &&
+        tabs.includes(routeTab) &&
+        recordedRouteRef.current !== routeToken
+      ) {
+        recordedRouteRef.current = routeToken;
+        rememberTab(waveId, routeTab, competitionId);
+      }
+      if (
+        waveId &&
+        !isCompetitionRoute &&
+        !hasWaveDestination(search) &&
+        getHistoryWaveTab(waveId) === undefined
+      ) {
+        const saved = getRememberedTab(tabsByWaveIdRef.current[waveId]);
+        if (
+          (saved === undefined || tabsReady) &&
+          !(
+            defaultSelectionEnabled &&
+            saved !== undefined &&
+            waveCompetitionTabs[saved] !== undefined &&
+            (tabs.includes(saved) ||
+              (saved === MyStreamWaveTab.LEADERBOARD &&
+                tabs.includes(MyStreamWaveTab.SUBMISSIONS)))
+          )
+        ) {
+          let validTab = MyStreamWaveTab.CHAT;
+          if (saved !== undefined && tabs.includes(saved)) validTab = saved;
+          else if (
+            saved === MyStreamWaveTab.LEADERBOARD &&
+            tabs.includes(MyStreamWaveTab.SUBMISSIONS)
+          )
+            validTab = MyStreamWaveTab.SUBMISSIONS;
+          rememberHistoryWaveTab(waveId, validTab);
+        }
+      }
+
       if (!competitionOnly) {
-        // Preserve an intentional selection while queries register more tabs.
-        // A fresh route or wave always starts in the shared conversation.
+        // Loading can register more tabs later. Preserve deliberate choices,
+        // but do not let an initial fallback erase a remembered valid section.
         setSelection((current) => {
+          const remembered =
+            getHistoryWaveTab(waveId ?? undefined) ??
+            (waveId ? tabsByWaveIdRef.current[waveId] : undefined);
+          const savedTab = getRememberedTab(remembered);
+          const hasDestination = hasWaveDestination(search);
           let tab = MyStreamWaveTab.CHAT;
-          if (current.routeToken === routeToken && current.waveId === waveId) {
+          // Competition views restore through their committed destination route.
+          if (
+            !hasDestination &&
+            savedTab !== undefined &&
+            typeof remembered === "string" &&
+            !(defaultSelectionEnabled && waveCompetitionTabs[savedTab])
+          ) {
+            if (tabs.includes(savedTab)) tab = savedTab;
+            else if (
+              savedTab === MyStreamWaveTab.LEADERBOARD &&
+              tabs.includes(MyStreamWaveTab.SUBMISSIONS)
+            )
+              tab = MyStreamWaveTab.SUBMISSIONS;
+          }
+          const intentional =
+            current.routeToken === routeToken &&
+            current.waveId === waveId &&
+            current.intentional;
+          if (intentional) {
             if (tabs.includes(current.tab)) tab = current.tab;
             else if (
               current.tab === MyStreamWaveTab.LEADERBOARD &&
@@ -408,11 +465,13 @@ export const ContentTabProvider: React.FC<{
             )
               tab = MyStreamWaveTab.SUBMISSIONS;
           }
-          return { routeToken, waveId, tab };
+          return { routeToken, waveId, tab, intentional };
         });
         return;
       }
-      const storedTab = waveId ? tabsByWaveIdRef.current[waveId] : undefined;
+      const storedTab = getRememberedTab(
+        waveId ? tabsByWaveIdRef.current[waveId] : undefined
+      );
       const nextTab =
         storedTab !== undefined && tabs.includes(storedTab)
           ? storedTab
@@ -420,7 +479,18 @@ export const ContentTabProvider: React.FC<{
 
       setActiveTabInternal(nextTab);
     },
-    [competitionOnly, initialTab, routeToken, setActiveTabInternal]
+    [
+      competitionOnly,
+      initialTab,
+      routeToken,
+      search,
+      setActiveTabInternal,
+      tabsByWaveIdRef,
+      flat,
+      pathname,
+      isCompetitionRoute,
+      rememberTab,
+    ]
   );
 
   const navigateToTab = useCallback(
@@ -492,29 +562,33 @@ export const ContentTabProvider: React.FC<{
         return;
       }
       const waveId = currentWaveIdRef.current;
+      if (options?.persist === false) rememberHistoryWaveTab(waveId, tab);
       // Routed tabs become interactive in their destination layout. Selecting
       // them here first exposes a temporary view that navigation will unmount.
+      if (waveId && options?.persist !== false) {
+        const competitionId = waveCompetitionTabs[tab]
+          ? (getCompetitionIdFromPathname(pathname) ??
+            search.get("competition") ??
+            defaultCompetitionRef.current.id)
+          : null;
+        rememberTab(waveId, tab, competitionId);
+      }
       if (navigateToTab(tab, waveId)) return;
-      setActiveTabInternal(tab);
+      setActiveTabInternal(tab, true);
+      if (options?.persist !== false) rememberHistoryWaveTab(waveId, tab);
       if (options?.persist === false) {
         transientTabOverrideRef.current =
           waveId === null ? null : { waveId, tab };
         return;
       }
       transientTabOverrideRef.current = null;
-      if (waveId) {
-        const nextMap = {
-          ...tabsByWaveIdRef.current,
-          [waveId]: tab,
-        };
-        tabsByWaveIdRef.current = nextMap;
-        setTabsByWaveId(nextMap);
-      }
     },
     [
       availableTabs,
       setActiveTabInternal,
-      setTabsByWaveId,
+      rememberTab,
+      pathname,
+      search,
       navigateToTab,
       competitionOnly,
       initialTab,

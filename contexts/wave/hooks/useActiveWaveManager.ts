@@ -1,5 +1,6 @@
 "use client";
 
+import { runWaveNavigationTransition } from "@/helpers/waves/wave-navigation-transition";
 import { isCompetitionPathname } from "@/helpers/competition.helpers";
 import {
   getActiveWaveIdFromUrl,
@@ -95,7 +96,7 @@ export function useActiveWaveManager() {
     []
   );
 
-  const { state: activeWaveId, navigate: setActiveWave } = useClientNavigation<
+  const { state: activeWaveId, navigate } = useClientNavigation<
     string | null,
     WaveNavigationOptions
   >({
@@ -104,6 +105,22 @@ export function useActiveWaveManager() {
     parseUrl: getWaveFromWindow,
     canUsePushState,
   });
+
+  const setActiveWave = useCallback<typeof navigate>(
+    (waveId, options) => {
+      const navigateToWave = () => navigate(waveId, options);
+      if (
+        isApp &&
+        !options?.isDirectMessage &&
+        canUsePushState(buildUrl(waveId, options), options)
+      ) {
+        runWaveNavigationTransition(waveId ? "wave" : "list", navigateToWave);
+      } else {
+        navigateToWave();
+      }
+    },
+    [navigate, isApp, canUsePushState, buildUrl]
+  );
 
   return {
     activeWaveId,
