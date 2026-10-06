@@ -61,7 +61,7 @@ export default function UserPageRateInput({
     <div className="tw-relative tw-w-full tw-min-w-0">
       <span
         aria-hidden="true"
-        className={`tw-pointer-events-none tw-absolute tw-inset-y-0 tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-0.5 tw-text-iron-500 ${variant === "form" ? "tw-right-4" : "tw-left-4"}`}
+        className={`tw-pointer-events-none tw-absolute tw-inset-y-0 tw-flex tw-flex-col tw-items-center tw-justify-center tw-gap-0.5 tw-text-iron-500 ${variant === "form" ? "tw-right-4 tw-translate-y-0.5" : "tw-left-4"}`}
       >
         <svg className="tw-size-3.5" viewBox="0 0 24 24" fill="none">
           <path
