@@ -166,9 +166,16 @@ describe("SeizeVideoPlayer", () => {
     const video = container.querySelector("video")!;
     expect(video).not.toHaveAttribute("src");
     expect(video.preload).toBe("none");
+    const sourceAndPlay: string[] = [];
+    const setAttribute = video.setAttribute.bind(video);
+    jest.spyOn(video, "setAttribute").mockImplementation((name, value) => {
+      if (name === "src") sourceAndPlay.push("src");
+      setAttribute(name, value);
+    });
     jest
       .mocked(HTMLMediaElement.prototype.play)
       .mockImplementationOnce(function (this: HTMLMediaElement) {
+        sourceAndPlay.push("play");
         expect(this.getAttribute("src")).toBe("clip.mp4");
         return Promise.resolve();
       });
@@ -177,6 +184,7 @@ describe("SeizeVideoPlayer", () => {
     );
     expect(video).toHaveAttribute("src", "clip.mp4");
     expect(video).toHaveAttribute("controls");
+    expect(sourceAndPlay).toEqual(["src", "play"]);
   });
 
   it("defers native ambient video behind its poster until visible, then suspends offscreen buffering", () => {

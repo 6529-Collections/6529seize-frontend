@@ -1,5 +1,6 @@
 "use client";
 
+import { flushSync } from "react-dom";
 import { Capacitor } from "@capacitor/core";
 import {
   restoreVideoSource,
@@ -411,9 +412,13 @@ export default function SeizeVideoPlayer({
 
   function prepareDirectSource(video: HTMLVideoElement) {
     if (directSrc && !video.getAttribute("src")) {
-      video.src = directSrc;
-      video.load();
-      setOpenedSource(directSrc);
+      // Commit the source before play() in the same user gesture. A later React
+      // src assignment could otherwise abort the pending playback request.
+      flushSync(() => setOpenedSource(directSrc));
+      if (!video.getAttribute("src")) {
+        video.src = directSrc;
+        video.load();
+      }
     }
   }
 
@@ -518,8 +523,11 @@ export default function SeizeVideoPlayer({
   function openPosterGate(event: React.MouseEvent<HTMLButtonElement>) {
     event.preventDefault();
     event.stopPropagation();
-    setOpenPosterGateKey(posterGateKey);
-    setUserPausedAutoplaySrc(null);
+    flushSync(() => {
+      setOpenPosterGateKey(posterGateKey);
+      setOpenedSource(directSrc);
+      setUserPausedAutoplaySrc(null);
+    });
     const video = videoElement;
     if (!video) {
       return;
