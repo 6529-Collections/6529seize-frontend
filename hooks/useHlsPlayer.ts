@@ -343,9 +343,7 @@ export function useHlsPlayer({
         // stall without producing an error. Native HLS remains the Safari path.
         if (!HlsConstructor.isSupported()) {
           if (videoEl.canPlayType("application/vnd.apple.mpegurl")) {
-            videoEl.addEventListener("error", nativeErrorHandler, {
-              once: true,
-            });
+            videoEl.addEventListener("error", nativeErrorHandler);
             fallbackToSrc(videoEl, safeHlsSrc);
             return;
           }
@@ -438,6 +436,8 @@ export function useHlsPlayer({
       ) {
         return;
       }
+      // Inactive errors must leave recovery armed for the reloaded source.
+      videoEl.removeEventListener("error", nativeErrorHandler);
       fallbackToSrc(videoEl, fallbackSrc ?? src);
     };
 

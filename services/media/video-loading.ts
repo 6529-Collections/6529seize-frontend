@@ -31,7 +31,8 @@ export function restoreVideoSource(
   video.addEventListener("loadedmetadata", restorePosition, { once: true });
   video.src = suspended.src;
   video.load();
-  // Before metadata, currentTime also records the default playback start position.
+  // Seed the default start position before metadata; reapply on loadedmetadata
+  // because loading/metadata may reset it in some media engines.
   restorePosition();
   return () => video.removeEventListener("loadedmetadata", restorePosition);
 }

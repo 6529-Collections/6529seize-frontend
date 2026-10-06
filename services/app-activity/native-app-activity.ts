@@ -71,7 +71,7 @@ function startListening(): () => void {
     if (typeof document !== "undefined")
       document.removeEventListener("visibilitychange", notifySubscribers);
     if (handle) void removeListener(handle);
-    nativeIsActive = true;
+    // Preserve the last native state until the next subscription refreshes it.
   };
 }
 

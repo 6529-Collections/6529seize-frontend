@@ -852,7 +852,8 @@ test("native artwork video stops offscreen buffering and restores position after
 }, testInfo) => {
   test.skip(
     !isCapacitorSimulationProject(testInfo.project.name),
-    "Native media loading policy"
+    // Web/Electron intentionally retain different offscreen buffering policies.
+    "Native media loading policy only applies to the Capacitor simulation projects"
   );
   await gotoReady(page, "/the-memes/549");
   const video = page.getByLabel("Video player", { exact: true });

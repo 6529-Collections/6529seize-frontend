@@ -1,3 +1,6 @@
+import { createElement } from "react";
+import { hydrateRoot } from "react-dom/client";
+import { renderToString } from "react-dom/server";
 import { act, renderHook } from "@testing-library/react";
 import { App } from "@capacitor/app";
 import { Capacitor, type PluginListenerHandle } from "@capacitor/core";
@@ -106,4 +109,48 @@ it("preserves browser behavior without registering native listeners", () => {
   expect(result.current).toBe(true);
   expect(App.addListener).not.toHaveBeenCalled();
   expect(App.getState).not.toHaveBeenCalled();
+});
+
+it("retains inactive state across a gap with no subscribers", async () => {
+  const first = renderHook(useNativeAppActivity);
+  await flushState();
+  act(() => sendState({ isActive: false }));
+  first.unmount();
+
+  let resolveState: ((state: { isActive: boolean }) => void) | undefined;
+  jest.mocked(App.getState).mockReturnValue(
+    new Promise((resolve) => {
+      resolveState = resolve;
+    })
+  );
+  const second = renderHook(useNativeAppActivity);
+  expect(second.result.current).toBe(false);
+  await act(async () => resolveState?.({ isActive: true }));
+  expect(second.result.current).toBe(true);
+});
+
+it("hydrates the server snapshot before applying a hidden native snapshot", async () => {
+  function Activity() {
+    return createElement("span", null, String(useNativeAppActivity()));
+  }
+  const container = document.createElement("div");
+  container.innerHTML = renderToString(createElement(Activity));
+  expect(container.textContent).toBe("true");
+  document.body.appendChild(container);
+  Object.defineProperty(document, "visibilityState", { value: "hidden" });
+  jest.mocked(App.getState).mockResolvedValue({ isActive: false });
+  const onRecoverableError = jest.fn();
+  let root: ReturnType<typeof hydrateRoot> | undefined;
+  try {
+    await act(async () => {
+      root = hydrateRoot(container, createElement(Activity), {
+        onRecoverableError,
+      });
+    });
+    expect(onRecoverableError).not.toHaveBeenCalled();
+    expect(container.textContent).toBe("false");
+  } finally {
+    act(() => root?.unmount());
+    container.remove();
+  }
 });

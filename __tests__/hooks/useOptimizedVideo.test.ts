@@ -67,6 +67,26 @@ describe("useOptimizedVideo", () => {
     expect(mockCheckAvailability).toHaveBeenCalledTimes(1);
   });
 
+  it("drops a previous source rendition when the URL changes and probes a returning URL", async () => {
+    mockIsVideoUrl.mockReturnValue(true);
+    mockGetConversions.mockImplementation((url: string) => ({
+      HLS: `${url}.m3u8`,
+      MP4_1080P: `${url}.1080.mp4`,
+      MP4_720P: `${url}.720.mp4`,
+    }));
+    mockCheckAvailability.mockResolvedValue(true);
+    const { result, rerender } = renderHook(
+      ({ url }) => useOptimizedVideo(url),
+      { initialProps: { url: "a.mp4" } }
+    );
+    await waitFor(() => expect(result.current.playableUrl).toBe("a.mp4.m3u8"));
+    rerender({ url: "b.mp4" });
+    await waitFor(() => expect(result.current.playableUrl).toBe("b.mp4.m3u8"));
+    rerender({ url: "a.mp4" });
+    await waitFor(() => expect(result.current.playableUrl).toBe("a.mp4.m3u8"));
+    expect(mockCheckAvailability).toHaveBeenCalledTimes(3);
+  });
+
   it("stops the probe chain if inactivity starts while a request is in flight", async () => {
     mockIsVideoUrl.mockReturnValue(true);
     mockGetConversions.mockReturnValue({

@@ -212,6 +212,33 @@ describe("SeizeVideoPlayer", () => {
     expect(video).not.toHaveAttribute("src");
   });
 
+  it("retries suspended raw sources and surfaces errors after visibility returns", () => {
+    jest.spyOn(Capacitor, "isNativePlatform").mockReturnValue(true);
+    const observer = installIntersectionObserverMock();
+    const onError = jest.fn();
+    const { container } = render(
+      <SeizeVideoPlayer
+        src="broken.mp4"
+        fallbackSources={["fallback.mp4"]}
+        onError={onError}
+      />
+    );
+    observer.trigger(true);
+    const video = container.querySelector("video")!;
+    observer.trigger(false);
+    fireEvent.error(video);
+    expect(video).not.toHaveAttribute("src");
+    expect(onError).not.toHaveBeenCalled();
+    jest.mocked(HTMLMediaElement.prototype.load).mockClear();
+    observer.trigger(true);
+    expect(video).toHaveAttribute("src", "broken.mp4");
+    expect(HTMLMediaElement.prototype.load).toHaveBeenCalled();
+    fireEvent.error(video);
+    expect(video).toHaveAttribute("src", "fallback.mp4");
+    fireEvent.error(video);
+    expect(onError).toHaveBeenCalledTimes(1);
+  });
+
   it("reserves a stable aspect ratio before video metadata loads", () => {
     const { container } = render(
       <SeizeVideoPlayer src="https://example.com/video.mp4" />

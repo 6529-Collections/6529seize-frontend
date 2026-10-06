@@ -258,6 +258,37 @@ describe("useHlsPlayer", () => {
     expect(video.getAttribute("data-loading")).toBe("false");
   });
 
+  it("keeps native HLS recovery armed after an offscreen error", async () => {
+    const native = jest
+      .spyOn(Capacitor, "isNativePlatform")
+      .mockReturnValue(true);
+    (HTMLVideoElement.prototype.canPlayType as jest.Mock).mockReturnValue(
+      "probably"
+    );
+    try {
+      const props = {
+        src: "video.m3u8",
+        isHls: true,
+        fallbackSrc: "fallback.mp4",
+      };
+      const { getByTestId, rerender } = render(
+        <TestComponent {...props} enabled />
+      );
+      const video = getByTestId("vid") as HTMLVideoElement;
+      await waitFor(() => expect(video.src).toContain("video.m3u8"));
+      rerender(<TestComponent {...props} enabled={false} />);
+      expect(video).not.toHaveAttribute("src");
+      fireEvent.error(video);
+      expect(video).not.toHaveAttribute("src");
+      rerender(<TestComponent {...props} enabled />);
+      expect(video.src).toContain("video.m3u8");
+      fireEvent.error(video);
+      expect(video.src).toContain("fallback.mp4");
+    } finally {
+      native.mockRestore();
+    }
+  });
+
   it("sets src correctly for HLS when fallback is provided and HLS fails", async () => {
     const { getByTestId } = render(
       <TestComponent src="video.m3u8" isHls={true} fallbackSrc="fallback.mp4" />
