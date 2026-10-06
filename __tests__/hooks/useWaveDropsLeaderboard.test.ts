@@ -56,6 +56,14 @@ const getLatestInfiniteQueryOptions = () => {
 };
 
 describe("useWaveDropsLeaderboard", () => {
+  it("stops reporting initial loading once the first request fails", () => {
+    mockInfiniteQueryReturn({ data: null, isError: true });
+    const { result } = renderHook(() =>
+      useWaveDropsLeaderboard({ waveId: "failed-first-page" })
+    );
+    expect(result.current.isError).toBe(true);
+    expect(result.current.isFetching).toBe(false);
+  });
   beforeEach(() => {
     jest.clearAllMocks();
     mockInfiniteQueryReturn();
