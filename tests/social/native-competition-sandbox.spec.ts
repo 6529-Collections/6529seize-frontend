@@ -951,7 +951,9 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       name: "My submissions",
       exact: true,
     });
-    const entry = ownEntries.locator('[data-competition-entry="entry-alpha"]');
+    const entry = page
+      .getByRole("dialog", { name: "My submissions", exact: true })
+      .locator('[data-competition-entry="entry-alpha"]');
     const title = entry.getByText("Recorded alpha entry", { exact: true });
     await expect(title).toBeVisible();
     if (isMobile) {
