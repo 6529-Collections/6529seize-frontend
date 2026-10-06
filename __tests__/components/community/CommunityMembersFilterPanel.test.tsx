@@ -85,9 +85,7 @@ it("starts with Identities first and keeps all eight criteria and readiness guid
     "Collection Access",
     "xTDH Grant",
   ]) {
-    expect(
-      screen.getByRole("button", { name, exact: true })
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name })).toBeInTheDocument();
   }
   const choices = screen.getByRole("group", { name: "Filter Network" });
   expect(choices).toBeVisible();
@@ -126,12 +124,12 @@ it("starts with Identities first and keeps all eight criteria and readiness guid
 it("preserves common criteria while visiting advanced criteria and submits the existing group payload", async () => {
   const user = userEvent.setup();
   const { onCreateGroup, onChange } = renderPanel();
-  await user.click(screen.getByRole("button", { name: "Level", exact: true }));
+  await user.click(screen.getByRole("button", { name: "Level" }));
   await user.type(
     screen.getByRole("spinbutton", { name: "Level at least" }),
     "10"
   );
-  await user.click(screen.getByRole("button", { name: "TDH", exact: true }));
+  await user.click(screen.getByRole("button", { name: "TDH" }));
   await user.type(
     screen.getByRole("spinbutton", { name: "TDH + xTDH at least" }),
     "100"
@@ -139,9 +137,7 @@ it("preserves common criteria while visiting advanced criteria and submits the e
   expect(
     screen.getByRole("spinbutton", { name: "TDH + xTDH at least" })
   ).toHaveValue(100);
-  await user.click(
-    screen.getByRole("button", { name: "Identities", exact: true })
-  );
+  await user.click(screen.getByRole("button", { name: "Identities" }));
   expect(screen.getByRole("button", { name: "Identities" })).toHaveAttribute(
     "aria-current",
     "true"
@@ -154,9 +150,7 @@ it("preserves common criteria while visiting advanced criteria and submits the e
   ).toBeInTheDocument();
   expect(screen.getByText("No allowlist added.")).toBeInTheDocument();
   expect(screen.getByText("No CSV file added.")).toBeInTheDocument();
-  await user.click(
-    screen.getByRole("button", { name: "Excluded", exact: true })
-  );
+  await user.click(screen.getByRole("button", { name: "Excluded" }));
   expect(
     screen.getByText("No identities are explicitly excluded.")
   ).toBeInTheDocument();
@@ -250,7 +244,7 @@ it("keeps a failed or cancelled draft for another attempt", async () => {
   const onCreateGroup = jest.fn().mockResolvedValue(null);
   const onChange = jest.fn();
   renderPanel({ onCreateGroup, onChange });
-  await user.click(screen.getByRole("button", { name: "Level", exact: true }));
+  await user.click(screen.getByRole("button", { name: "Level" }));
   await user.type(
     screen.getByRole("spinbutton", { name: "Level at least" }),
     "10"

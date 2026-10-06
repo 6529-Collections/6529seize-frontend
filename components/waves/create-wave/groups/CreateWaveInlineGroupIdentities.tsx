@@ -27,6 +27,7 @@ type InlineIdentityMode = "included" | "excluded";
 
 interface CreateWaveInlineGroupIdentitiesProps {
   readonly quiet?: boolean;
+  readonly networkPresentation?: boolean;
   readonly includedIdentities: readonly CommunityMemberMinimal[];
   readonly excludedIdentities: readonly CommunityMemberMinimal[];
   readonly includedWalletSources: InlineGroupWalletSources;
@@ -115,8 +116,7 @@ function includesCurrentUser({
   if (!currentUserIdentity) {
     return false;
   }
-  const wallets =
-    getInlineIdentityAddresses(identities, walletSources) ?? [];
+  const wallets = getInlineIdentityAddresses(identities, walletSources) ?? [];
   return wallets.some((wallet) =>
     areEqualAddresses(wallet, currentUserIdentity.wallet)
   );
@@ -257,8 +257,7 @@ function IdentityStatus({
   readonly quiet: boolean;
   readonly totalText: string;
 }) {
-  let toneClasses =
-    "tw-border-white/5 tw-bg-iron-950/60 tw-text-iron-300";
+  let toneClasses = "tw-border-white/5 tw-bg-iron-950/60 tw-text-iron-300";
   if (quiet) {
     toneClasses = "tw-text-iron-400";
   }
@@ -292,6 +291,7 @@ export default function CreateWaveInlineGroupIdentities(
     onIncludedIdentityRemove,
     resultsLayout = "popover",
     quiet = false,
+    networkPresentation = false,
   } = props;
   const { connectedProfile } = useAuth();
   const locale = useBrowserLocale();
@@ -338,23 +338,27 @@ export default function CreateWaveInlineGroupIdentities(
     count: formatInteger(locale, selectedWallets.length),
   });
   const limitText = isOverIdentityLimit
-    ? t(
-        locale,
-        getIdentityLimitMessageKey(mode),
-        { limit: formatInteger(locale, identityLimit) }
-      )
+    ? t(locale, getIdentityLimitMessageKey(mode), {
+        limit: formatInteger(locale, identityLimit),
+      })
     : null;
+  let containerClasses = quiet ? "tw-space-y-4" : "tw-space-y-5";
+  let searchSectionClasses = quiet ? "tw-space-y-3" : "tw-space-y-4";
+  if (networkPresentation) {
+    containerClasses = "";
+    searchSectionClasses = "tw-space-y-3 tw-pb-5";
+  }
 
   return (
-    <div className={quiet ? "tw-space-y-4" : "tw-space-y-5"}>
+    <div className={containerClasses}>
       <div
         role="group"
         aria-label={t(locale, "waves.create.groups.inlineIdentities.modeLabel")}
-        className={
+        className={`${
           quiet
-            ? "tw-relative tw-isolate tw-inline-flex tw-min-h-11 tw-w-fit tw-items-center tw-rounded-lg tw-bg-transparent tw-p-0 before:tw-pointer-events-none before:tw-absolute before:-tw-z-10 before:tw-inset-x-0 before:tw-inset-y-1 before:tw-rounded-lg before:tw-bg-iron-900 before:tw-ring-1 before:tw-ring-inset before:tw-ring-iron-800 before:tw-content-['']"
+            ? "tw-relative tw-isolate tw-inline-flex tw-min-h-11 tw-w-fit tw-items-center tw-rounded-lg tw-bg-transparent tw-p-0 before:tw-pointer-events-none before:tw-absolute before:tw-inset-x-0 before:tw-inset-y-1 before:-tw-z-10 before:tw-rounded-lg before:tw-bg-iron-900 before:tw-ring-1 before:tw-ring-inset before:tw-ring-iron-800 before:tw-content-['']"
             : "tw-flex tw-flex-wrap tw-gap-1.5"
-        }
+        } ${networkPresentation ? "tw-mb-5" : ""}`}
       >
         <DraftChipButton
           label={t(
@@ -380,7 +384,12 @@ export default function CreateWaveInlineGroupIdentities(
         />
       </div>
 
-      <div className={quiet ? "tw-space-y-3" : "tw-space-y-4"}>
+      <div className={searchSectionClasses}>
+        {networkPresentation && (
+          <h3 className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-100">
+            {searchLabel}
+          </h3>
+        )}
         <GroupCreateIdentitiesSearch
           key={mode}
           selectedWallets={selectedWallets}
@@ -427,6 +436,7 @@ export default function CreateWaveInlineGroupIdentities(
         sources={activeWalletSources}
         onChange={onWalletSourcesChange}
         quiet={quiet}
+        networkPresentation={networkPresentation}
       />
       <IdentityStatus
         isOverIdentityLimit={isOverIdentityLimit}

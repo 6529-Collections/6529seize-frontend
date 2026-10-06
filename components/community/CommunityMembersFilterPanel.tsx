@@ -212,11 +212,12 @@ export default function CommunityMembersFilterPanel(
             >
               {view === "identities" ? (
                 <>
-                  <h2 className="tw-mb-4 tw-mt-0 !tw-text-base !tw-font-semibold !tw-text-iron-100">
+                  <h2 className="tw-mb-4 tw-mt-0 !tw-text-base !tw-font-semibold !tw-text-iron-100 lg:tw-sr-only">
                     {t(locale, "waves.create.groups.identities")}
                   </h2>
                   <CreateWaveInlineGroupIdentities
                     quiet
+                    networkPresentation
                     includedIdentities={displayedBuilder.identities}
                     excludedIdentities={displayedBuilder.excludedIdentities}
                     includedWalletSources={
