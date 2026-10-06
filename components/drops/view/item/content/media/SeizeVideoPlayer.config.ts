@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useRef, useSyncExternalStore } from "react";
-import type { Ref } from "react";
+import type { CSSProperties, Ref } from "react";
 
 export type VideoLayout = "natural" | "fill" | "prominent" | "artwork";
 export type VideoAlign = "left" | "center";
@@ -229,4 +229,61 @@ export function getNaturalWidthClassName(
     return "tw-w-[min(100%,32rem)]";
   }
   return "tw-w-full";
+}
+
+export function getResponsiveVideoStyle({
+  layout,
+  isFullscreen,
+  videoSize,
+  directSrc,
+  aspectRatioHint,
+  aspectRatio,
+  viewportHeight,
+}: {
+  readonly layout: VideoLayout;
+  readonly isFullscreen: boolean;
+  readonly videoSize:
+    | {
+        readonly width: number;
+        readonly height: number;
+        readonly src: string | undefined;
+      }
+    | undefined;
+  readonly directSrc: string | undefined;
+  readonly aspectRatioHint: number | undefined;
+  readonly aspectRatio: string | undefined;
+  readonly viewportHeight: number | undefined;
+}): CSSProperties {
+  const isFillLayout = layout === "fill";
+  if (isFillLayout || layout === "artwork" || isFullscreen) {
+    const measuredRatio =
+      videoSize?.src === directSrc
+        ? getVideoRatio(videoSize?.width, videoSize?.height)
+        : undefined;
+    return {
+      "--video-ratio":
+        measuredRatio ?? getVideoRatio(aspectRatioHint, 1) ?? 16 / 9,
+    } as CSSProperties;
+  }
+
+  const style: CSSProperties = {};
+  style.aspectRatio = aspectRatio ?? "16 / 9";
+
+  const fallbackViewportHeight = viewportHeight ?? 900;
+  const maxViewportHeight =
+    layout === "prominent"
+      ? Math.max(320, fallbackViewportHeight - 220)
+      : Math.max(260, fallbackViewportHeight - 160);
+  const maxHeight = Math.min(
+    layout === "prominent" ? 650 : 520,
+    maxViewportHeight
+  );
+  style.maxHeight = `${maxHeight}px`;
+
+  if (videoSize && videoSize.height > videoSize.width) {
+    const ratio = videoSize.width / videoSize.height;
+    style.maxWidth = `${Math.floor(maxHeight * ratio)}px`;
+  }
+
+  return style;
 }

@@ -1,5 +1,17 @@
-import { render, act } from "@testing-library/react";
+import { render, act, waitFor } from "@testing-library/react";
 import React from "react";
+import { Capacitor } from "@capacitor/core";
+import * as touchFirst from "@/helpers/touch-first.helpers";
+
+let mockAppActive = true;
+jest.mock("@/hooks/useMobileAppActivity", () => ({
+  ...jest.requireActual("@/hooks/useMobileAppActivity"),
+  useMobileAppActivity: () => mockAppActive,
+}));
+jest.mock("@/services/app-activity/mobile-app-activity", () => ({
+  ...jest.requireActual("@/services/app-activity/mobile-app-activity"),
+  getMobileAppActivity: () => mockAppActive,
+}));
 
 declare const global: any;
 
@@ -66,6 +78,7 @@ Object.defineProperty(HTMLVideoElement.prototype, "canPlayType", {
 
 afterEach(() => {
   jest.useRealTimers();
+  jest.restoreAllMocks();
 });
 
 function TestComp(props: any) {
@@ -75,7 +88,113 @@ function TestComp(props: any) {
 
 describe("useHlsPlayer hls supported", () => {
   beforeEach(() => {
+    mockAppActive = true;
+    jest.clearAllMocks();
     (require("hls.js").default as any).instances.length = 0;
+  });
+
+  it("stops HLS downloads and playback while inactive without destroying the player", async () => {
+    const Hls = require("hls.js").default;
+    const { getByTestId, rerender } = render(
+      <TestComp src="a.m3u8" isHls autoPlay />
+    );
+    await waitFor(() => expect(Hls.instances).toHaveLength(1));
+    const hls = Hls.instances[0];
+    const video = getByTestId("v") as HTMLVideoElement;
+    video.currentTime = 12;
+    mockAppActive = false;
+    rerender(<TestComp src="a.m3u8" isHls autoPlay />);
+    expect(hls.stopLoad).toHaveBeenCalled();
+    expect(hls.destroy).not.toHaveBeenCalled();
+    expect(video.currentTime).toBe(12);
+    act(() => hls.trigger("manifest"));
+    expect(HTMLVideoElement.prototype.play).not.toHaveBeenCalled();
+    mockAppActive = true;
+    rerender(<TestComp src="a.m3u8" isHls autoPlay />);
+    expect(hls.startLoad).toHaveBeenCalledWith(-1);
+    expect(Hls.instances).toHaveLength(1);
+    expect(video.currentTime).toBe(12);
+  });
+
+  it.each([true, false])(
+    "reuses only the HLS pipeline across rapid mobile visibility/activity changes (native=%s)",
+    async (native) => {
+      jest.spyOn(Capacitor, "isNativePlatform").mockReturnValue(native);
+      jest.spyOn(touchFirst, "isTouchFirstEnvironment").mockReturnValue(true);
+      const Hls = require("hls.js").default;
+      const props = { src: "a.m3u8", isHls: true };
+      const { getByTestId, rerender } = render(<TestComp {...props} enabled />);
+      await waitFor(() => expect(Hls.instances).toHaveLength(1));
+      const hls = Hls.instances[0];
+      const video = getByTestId("v");
+      jest.mocked(HTMLVideoElement.prototype.load).mockClear();
+      for (let cycle = 0; cycle < 3; cycle += 1) {
+        rerender(<TestComp {...props} enabled={false} />);
+        mockAppActive = false;
+        rerender(<TestComp {...props} enabled />);
+        mockAppActive = true;
+        rerender(<TestComp {...props} enabled />);
+      }
+      expect(Hls.instances).toHaveLength(1);
+      expect(hls.startLoad).toHaveBeenCalledTimes(3);
+      expect(hls.startLoad).toHaveBeenLastCalledWith(-1);
+      expect(hls.destroy).not.toHaveBeenCalled();
+      expect(video).not.toHaveAttribute("src");
+      expect(HTMLVideoElement.prototype.load).not.toHaveBeenCalled();
+    }
+  );
+
+  it.each([true, false])(
+    "suspends an offscreen mobile HLS player, preserves fullscreen, and reuses the same instance (native=%s)",
+    async (native) => {
+      jest.spyOn(Capacitor, "isNativePlatform").mockReturnValue(native);
+      jest.spyOn(touchFirst, "isTouchFirstEnvironment").mockReturnValue(true);
+      const Hls = require("hls.js").default;
+      const { getByTestId, rerender } = render(
+        <TestComp src="a.m3u8" isHls enabled />
+      );
+      await waitFor(() => expect(Hls.instances).toHaveLength(1));
+      const hls = Hls.instances[0];
+      const video = getByTestId("v");
+      act(() => video.dispatchEvent(new Event("webkitbeginfullscreen")));
+      rerender(<TestComp src="a.m3u8" isHls enabled={false} />);
+      expect(hls.stopLoad).not.toHaveBeenCalled();
+      act(() => video.dispatchEvent(new Event("webkitendfullscreen")));
+      expect(hls.stopLoad).toHaveBeenCalled();
+      expect(hls.destroy).not.toHaveBeenCalled();
+      rerender(<TestComp src="a.m3u8" isHls enabled />);
+      expect(hls.startLoad).toHaveBeenCalledWith(-1);
+      expect(Hls.instances).toHaveLength(1);
+    }
+  );
+
+  it("keeps eager native initialization from buffering offscreen video", async () => {
+    jest.spyOn(Capacitor, "isNativePlatform").mockReturnValue(true);
+    const Hls = require("hls.js").default;
+    const { rerender } = render(
+      <TestComp src="a.m3u8" isHls enabled bufferingEnabled={false} />
+    );
+    await waitFor(() => expect(Hls.instances).toHaveLength(1));
+    const hls = Hls.instances[0];
+    expect(hls.stopLoad).toHaveBeenCalled();
+    rerender(<TestComp src="a.m3u8" isHls enabled bufferingEnabled />);
+    expect(hls.startLoad).toHaveBeenCalledWith(-1);
+    expect(hls.destroy).not.toHaveBeenCalled();
+  });
+
+  it("does not autoplay after a native source is suspended during the HLS import", async () => {
+    jest.spyOn(Capacitor, "isNativePlatform").mockReturnValue(true);
+    const Hls = require("hls.js").default;
+    const { rerender } = render(
+      <TestComp src="a.m3u8" isHls enabled autoPlay />
+    );
+    mockAppActive = false;
+    rerender(<TestComp src="a.m3u8" isHls enabled autoPlay />);
+    await waitFor(() => expect(Hls.instances).toHaveLength(1));
+    const hls = Hls.instances[0];
+    expect(hls.stopLoad).toHaveBeenCalled();
+    act(() => hls.trigger("manifest"));
+    expect(HTMLVideoElement.prototype.play).not.toHaveBeenCalled();
   });
 
   it("initializes Hls and handles manifest parsed", async () => {

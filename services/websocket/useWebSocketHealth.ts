@@ -1,6 +1,9 @@
 "use client";
 
+import { Capacitor } from "@capacitor/core";
+
 import { useCallback, useEffect, useRef } from "react";
+import { useMobileAppActivity } from "@/hooks/useMobileAppActivity";
 import {
   AUTH_TOKEN_CHANGED_EVENT,
   getAuthJwt,
@@ -60,6 +63,8 @@ const isAuthCookieChange = (event: CookieChangeEventLike): boolean => {
  * - Fresh References: Checks use current WebSocket context to avoid stale closures
  */
 export function useWebSocketHealth() {
+  const isAppActive = useMobileAppActivity();
+  const isAppActiveRef = useRef(isAppActive);
   const webSocketState = useWebSocket();
   const lastTokenRef = useRef<string | null>(null);
   const webSocketStateRef = useRef(webSocketState);
@@ -68,13 +73,19 @@ export function useWebSocketHealth() {
   const lastResumeCheckAtRef = useRef(0);
 
   // Keep ref updated with current WebSocket state
-  webSocketStateRef.current = webSocketState;
+  useEffect(() => {
+    isAppActiveRef.current = isAppActive;
+    webSocketStateRef.current = webSocketState;
+  }, [isAppActive, webSocketState]);
 
   const performHealthCheck = useCallback((): {
     action: HealthCheckAction;
     token: string | null;
     reason: string | null;
   } => {
+    if (!isAppActiveRef.current && Capacitor.isNativePlatform()) {
+      return { action: "none", token: null, reason: "native-app-inactive" };
+    }
     const currentToken = getAuthJwt();
     const previousToken = lastTokenRef.current;
     const tokenChanged = currentToken !== previousToken;
@@ -122,6 +133,7 @@ export function useWebSocketHealth() {
 
   const performResumeHealthCheck = useCallback(() => {
     if (
+      !isAppActiveRef.current ||
       typeof document === "undefined" ||
       document.visibilityState !== "visible"
     ) {
@@ -168,8 +180,12 @@ export function useWebSocketHealth() {
 
   useEffect(() => {
     // Unexpected-close recovery belongs to WebSocketProvider's backoff loop.
-    performHealthCheck();
-  }, [performHealthCheck]);
+    if (isAppActive) {
+      performHealthCheck();
+    } else if (Capacitor.isNativePlatform()) {
+      webSocketStateRef.current.disconnect();
+    }
+  }, [isAppActive, performHealthCheck]);
 
   useEffect(() => {
     if (typeof document === "undefined") {
@@ -298,9 +314,10 @@ export function useWebSocketHealth() {
   }, [performHealthCheck]);
 
   useEffect(() => {
+    if (!isAppActive) return;
     const healthCheck = window.setInterval(() => {
       performHealthCheck();
     }, HEALTH_CHECK_INTERVAL_MS);
     return () => window.clearInterval(healthCheck);
-  }, [performHealthCheck]);
+  }, [isAppActive, performHealthCheck]);
 }

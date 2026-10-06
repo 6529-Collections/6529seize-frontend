@@ -2,6 +2,12 @@ import { renderHook, act } from "@testing-library/react";
 import { useWaveIsTyping } from "@/hooks/useWaveIsTyping";
 import { WsMessageType } from "@/helpers/Types";
 
+let mockAppActive = true;
+jest.mock("@/hooks/useMobileAppActivity", () => ({
+  ...jest.requireActual("@/hooks/useMobileAppActivity"),
+  useMobileAppActivity: () => mockAppActive,
+}));
+
 const listeners: any[] = [];
 const mockAddEventListener = jest.fn((_: string, cb: any) =>
   listeners.push(cb)
@@ -21,10 +27,72 @@ jest.mock("@/hooks/useWaveWebSocket", () => ({
 }));
 
 beforeEach(() => {
+  mockAppActive = true;
   listeners.length = 0;
   mockAddEventListener.mockClear();
   mockRemoveEventListener.mockClear();
   mockUseWaveWebSocket.mockClear();
+});
+
+test("has no typing timer while idle and stops after the final typer expires", () => {
+  jest.useFakeTimers();
+  const { result, unmount } = renderHook(() => useWaveIsTyping("wave", null));
+  expect(jest.getTimerCount()).toBe(0);
+  act(() =>
+    listeners[0]({
+      data: JSON.stringify({
+        type: WsMessageType.USER_IS_TYPING,
+        data: { wave_id: "wave", profile: { handle: "A", level: 1 } },
+      }),
+    })
+  );
+  expect(result.current).toContain("A is typing");
+  expect(jest.getTimerCount()).toBe(1);
+  act(() => jest.advanceTimersByTime(5000));
+  expect(result.current).toBe("");
+  expect(jest.getTimerCount()).toBe(0);
+  unmount();
+});
+
+test("extends typing expiry when a new event arrives", () => {
+  jest.useFakeTimers();
+  const { result } = renderHook(() => useWaveIsTyping("wave", null));
+  const event = {
+    data: JSON.stringify({
+      type: WsMessageType.USER_IS_TYPING,
+      data: { wave_id: "wave", profile: { handle: "A", level: 1 } },
+    }),
+  };
+  act(() => listeners[0](event));
+  act(() => jest.advanceTimersByTime(4000));
+  act(() => listeners[0](event));
+  act(() => jest.advanceTimersByTime(1000));
+  expect(result.current).toContain("A is typing");
+  act(() => jest.advanceTimersByTime(4000));
+  expect(result.current).toBe("");
+  expect(jest.getTimerCount()).toBe(0);
+});
+
+test("clears timers and subscriptions while the native app is inactive", () => {
+  jest.useFakeTimers();
+  const { result, rerender } = renderHook(() => useWaveIsTyping("wave", null));
+  act(() =>
+    listeners[0]({
+      data: JSON.stringify({
+        type: WsMessageType.USER_IS_TYPING,
+        data: { wave_id: "wave", profile: { handle: "A", level: 1 } },
+      }),
+    })
+  );
+  mockAppActive = false;
+  rerender();
+  expect(result.current).toBe("");
+  expect(mockUseWaveWebSocket).toHaveBeenLastCalledWith("");
+  expect(jest.getTimerCount()).toBe(0);
+  mockAppActive = true;
+  mockUseWaveWebSocket.mockReturnValueOnce({ socket: null });
+  rerender();
+  expect(result.current).toBe("");
 });
 
 afterEach(() => {

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef } from "react";
+import { useMobileBatterySavings } from "@/hooks/useMobileAppActivity";
 import { useInView } from "@/hooks/useInView";
 import { useOptimizedVideo } from "@/hooks/useOptimizedVideo";
 import { useHlsPlayer } from "@/hooks/useHlsPlayer";
@@ -27,15 +28,15 @@ const MediaDisplayVideo: React.FC<Props> = ({
   isInertPreview = false,
   fillContainer = false,
 }) => {
-  // Intersection observer for scroll-based triggers
+  const { isApp } = useDeviceInfo();
+  const isMobileEnvironment = useMobileBatterySavings();
   const [wrapperRef, inView] = useInView<HTMLDivElement>({
     freezeOnceVisible: false,
-    rootMargin: "400px 0px",
+    rootMargin: isMobileEnvironment ? "0px" : "400px 0px",
     threshold: 0.1,
   });
   const wasFullscreenRef = useRef(false);
   const locale = useBrowserLocale();
-  const { isApp } = useDeviceInfo();
   const shouldAutoPlay = inView && !isApp;
   const { downloadMedia, isDownloading, openLabel, openMedia } =
     useMediaActions({
@@ -55,7 +56,12 @@ const MediaDisplayVideo: React.FC<Props> = ({
   });
 
   // Use HLS hook to handle the video ref, loading states, etc.
-  const { videoRef, isLoading, retry } = useHlsPlayer({
+  const {
+    videoRef,
+    isLoading,
+    retry,
+    isFullscreen: isVideoFullscreen,
+  } = useHlsPlayer({
     enabled: inView,
     src: playableUrl,
     isHls,
@@ -81,7 +87,7 @@ const MediaDisplayVideo: React.FC<Props> = ({
     const vid = videoRef.current;
     if (!vid || isLoading) return;
     const fullscreenElement = document.fullscreenElement;
-    if (fullscreenElement?.contains(vid) ?? false) {
+    if (isVideoFullscreen || (fullscreenElement?.contains(vid) ?? false)) {
       wasFullscreenRef.current = true;
       return;
     }
@@ -92,7 +98,7 @@ const MediaDisplayVideo: React.FC<Props> = ({
       // Attempt to play if we're in view
       void vid.play().catch(() => {});
     }
-  }, [inView, isApp, isLoading, videoRef]);
+  }, [inView, isApp, isLoading, isVideoFullscreen, videoRef]);
 
   useEffect(() => {
     if (!isApp) {
@@ -106,7 +112,7 @@ const MediaDisplayVideo: React.FC<Props> = ({
       }
 
       const fullscreenElement = document.fullscreenElement;
-      if (fullscreenElement?.contains(vid) ?? false) {
+      if (isVideoFullscreen || (fullscreenElement?.contains(vid) ?? false)) {
         wasFullscreenRef.current = true;
         return;
       }
@@ -124,7 +130,7 @@ const MediaDisplayVideo: React.FC<Props> = ({
         pauseWhenFullscreenCloses
       );
     };
-  }, [isApp, videoRef]);
+  }, [isApp, isVideoFullscreen, videoRef]);
 
   return (
     <div
@@ -138,6 +144,7 @@ const MediaDisplayVideo: React.FC<Props> = ({
     >
       <SeizeVideoPlayer
         videoRef={videoRef}
+        data-url={src}
         template={isInertPreview ? "card-preview" : "ambient-media"}
         autoPlay={shouldAutoPlay}
         layout={fillContainer ? "fill" : "natural"}
