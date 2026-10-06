@@ -33,6 +33,10 @@ export function restoreVideoSource(
   video.load();
   // Seed the default start position before metadata; reapply on loadedmetadata
   // because loading/metadata may reset it in some media engines.
-  restorePosition();
+  try {
+    restorePosition();
+  } catch {
+    // Some engines cannot seek yet. Keep the metadata listener armed to retry.
+  }
   return () => video.removeEventListener("loadedmetadata", restorePosition);
 }

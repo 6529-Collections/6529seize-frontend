@@ -41,7 +41,9 @@ video retains its playback position. Manually started videos stay paused until
 you press play again. Ambient autoplay resumes only when the video is visible,
 reduced motion permits it, and you have not explicitly paused it.
 
-Existing posters stay visible before playback. Poster-gated videos with a poster
+New videos in the mobile app wait until visible and active before attaching
+their source, including videos without a poster. Existing posters stay visible
+before playback. Poster-gated videos with a poster
 attach their video source when you press play. Ambient videos with posters
 wait until visible before loading; videos with manual playback and posters avoid
 preloading video data. Duration can remain `—` until playback starts, and starting

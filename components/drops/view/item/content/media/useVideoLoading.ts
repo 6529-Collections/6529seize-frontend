@@ -1,11 +1,15 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useSyncExternalStore } from "react";
 import {
   restoreVideoSource,
   suspendVideoSource,
   type SuspendedVideoSource,
 } from "@/services/media/video-loading";
+
+const subscribeNoop = () => () => undefined;
+const getClientSnapshot = () => true;
+const getServerSnapshot = () => false;
 
 interface VideoLoadingOptions {
   readonly directSrc: string | undefined;
@@ -35,6 +39,13 @@ export function useVideoLoading({
   autoPlay,
   preload,
 }: VideoLoadingOptions) {
+  // SSR cannot identify the native shell. Attach sources after hydration so
+  // native visibility policy applies before the browser can start a request.
+  const isHydrated = useSyncExternalStore(
+    subscribeNoop,
+    getClientSnapshot,
+    getServerSnapshot
+  );
   const suspendedSourceRef = useRef<{
     source: string;
     value: SuspendedVideoSource;
@@ -48,8 +59,16 @@ export function useVideoLoading({
         !isInView &&
         !isAnyFullscreen &&
         openedSource !== directSrc));
-  const renderedSrc = deferPosterSource ? undefined : directSrc;
+  // preload is only a hint. Withhold never-opened native sources until needed.
+  // Keep opened sources stable in React so suspension can capture their position.
+  const deferNativeSource =
+    isNative && !canLoadDirectSource && openedSource !== directSrc;
+  const renderedSrc =
+    !isHydrated || deferPosterSource || deferNativeSource
+      ? undefined
+      : directSrc;
   const videoPreload =
+    !isHydrated ||
     !isAppActive ||
     (isNative && (!canLoadDirectSource || (poster && !autoPlay))) ||
     (poster && isPosterGateClosed)

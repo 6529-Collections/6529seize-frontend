@@ -113,6 +113,30 @@ describe("useHlsPlayer hls supported", () => {
     expect(video.currentTime).toBe(12);
   });
 
+  it("reuses only the HLS pipeline across rapid native visibility/activity changes", async () => {
+    jest.spyOn(Capacitor, "isNativePlatform").mockReturnValue(true);
+    const Hls = require("hls.js").default;
+    const props = { src: "a.m3u8", isHls: true };
+    const { getByTestId, rerender } = render(<TestComp {...props} enabled />);
+    await waitFor(() => expect(Hls.instances).toHaveLength(1));
+    const hls = Hls.instances[0];
+    const video = getByTestId("v");
+    jest.mocked(HTMLVideoElement.prototype.load).mockClear();
+    for (let cycle = 0; cycle < 3; cycle += 1) {
+      rerender(<TestComp {...props} enabled={false} />);
+      mockAppActive = false;
+      rerender(<TestComp {...props} enabled />);
+      mockAppActive = true;
+      rerender(<TestComp {...props} enabled />);
+    }
+    expect(Hls.instances).toHaveLength(1);
+    expect(hls.startLoad).toHaveBeenCalledTimes(3);
+    expect(hls.startLoad).toHaveBeenLastCalledWith(-1);
+    expect(hls.destroy).not.toHaveBeenCalled();
+    expect(video).not.toHaveAttribute("src");
+    expect(HTMLVideoElement.prototype.load).not.toHaveBeenCalled();
+  });
+
   it("suspends an offscreen native HLS player, preserves fullscreen, and reuses the same instance", async () => {
     jest.spyOn(Capacitor, "isNativePlatform").mockReturnValue(true);
     const Hls = require("hls.js").default;

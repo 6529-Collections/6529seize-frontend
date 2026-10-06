@@ -212,6 +212,52 @@ describe("SeizeVideoPlayer", () => {
     expect(video).not.toHaveAttribute("src");
   });
 
+  it("never attaches an unopened offscreen native source even without a poster", () => {
+    jest.spyOn(Capacitor, "isNativePlatform").mockReturnValue(true);
+    const observer = installIntersectionObserverMock();
+    const assignedSources: string[] = [];
+    const setAttribute = HTMLVideoElement.prototype.setAttribute;
+    jest
+      .spyOn(HTMLVideoElement.prototype, "setAttribute")
+      .mockImplementation(function (this: HTMLVideoElement, name, value) {
+        if (name === "src") assignedSources.push(value);
+        setAttribute.call(this, name, value);
+      });
+    const { container } = render(
+      <SeizeVideoPlayer src="clip.mp4" template="watch-media" />
+    );
+    const video = container.querySelector("video")!;
+    expect(video).not.toHaveAttribute("src");
+    expect(assignedSources).toEqual([]);
+    expect(HTMLMediaElement.prototype.load).not.toHaveBeenCalled();
+    observer.trigger(true);
+    expect(video).toHaveAttribute("src", "clip.mp4");
+    fireEvent.loadedMetadata(video);
+    video.currentTime = 12;
+    observer.trigger(false);
+    expect(video).not.toHaveAttribute("src");
+    observer.trigger(true);
+    fireEvent.loadedMetadata(video);
+    expect(video).toHaveAttribute("src", "clip.mp4");
+    expect(video.currentTime).toBe(12);
+  });
+
+  it("withholds an unopened native source while inactive and attaches it on return", () => {
+    jest.spyOn(Capacitor, "isNativePlatform").mockReturnValue(true);
+    mockAppActive = false;
+    const observer = installIntersectionObserverMock();
+    const { container, rerender } = render(
+      <SeizeVideoPlayer src="clip.mp4" template="watch-media" />
+    );
+    observer.trigger(true);
+    const video = container.querySelector("video")!;
+    expect(video).not.toHaveAttribute("src");
+    expect(HTMLMediaElement.prototype.load).not.toHaveBeenCalled();
+    mockAppActive = true;
+    rerender(<SeizeVideoPlayer src="clip.mp4" template="watch-media" />);
+    expect(video).toHaveAttribute("src", "clip.mp4");
+  });
+
   it("retries suspended raw sources and surfaces errors after visibility returns", () => {
     jest.spyOn(Capacitor, "isNativePlatform").mockReturnValue(true);
     const observer = installIntersectionObserverMock();
@@ -225,6 +271,7 @@ describe("SeizeVideoPlayer", () => {
     );
     observer.trigger(true);
     const video = container.querySelector("video")!;
+    fireEvent.loadedMetadata(video);
     observer.trigger(false);
     fireEvent.error(video);
     expect(video).not.toHaveAttribute("src");
