@@ -5660,6 +5660,7 @@
         "On mobile, a compact selector switches between Total Rep, NIC, and ID Statements without changing the profile URL.",
         "Grant REP keeps its compact category pills and existing search and selection behavior, including similarly named categories remaining separate and selectable.",
         "The exact MemesNominee category pill is marked as counting toward the 50,000 REP submission requirement and is surfaced first when the typed value differs only by capitalization, spacing, punctuation, or Unicode width; search guidance stays neutral until a category is selected, selecting exact MemesNominee confirms the requirement in green, and selecting a subdued look-alike shows an amber note explaining that it remains a separate category.",
+        "In the Grant REP and Rate NIC dialogs, type the desired rating amount. The plus/minus symbols are informational, not buttons. Use Grant REP or Rate to save, or Cancel to leave without saving.",
         "Owner and permission rules affect which identity actions are visible."
       ],
       "canonical_path": "/{user}",
@@ -6979,8 +6980,8 @@
         "controls"
       ],
       "facts": [
-        "The Network filter opens the shared criteria builder with criteria creation open by default. Its Network-specific version omits Choose group and Hide criteria and members.",
-        "Create and use new group saves the criteria as a new group and immediately applies it to the Network member list; All Network members clears the scope.",
+        "Filter opens Filter Network with all eight criteria visible in one list: Identities, Level, TDH, NIC, Rep, Required NFTs, Collection Access, and xTDH Grant. Wide screens start with the Identities editor beside the list; narrow screens open an editor after one selection and All filters returns to the list. Switching criteria preserves the draft.",
+        "After editing shows selected criteria as separate tags and View members for valid criteria. Long tag lists scroll while the preview and create action remain visible. Incomplete criteria show Not ready yet. and its guidance directly. Before editing shows the current scope and, with a selected group, its criteria, count, and View members without an extra disclosure step. Create and use new group saves the criteria as a new group and immediately applies it to the Network member list. Clear selected group above the results clears the scope.",
         "When a group is already active, reopening the filter prefills its criteria and identity lists. Saving edits creates a new group without mutating the original.",
         "Signed-in users with active Network criteria can use REP everyone matching criteria or NIC everyone matching criteria below the selected Network filter name to grant credits to every matching member.",
         "Criteria-matched bulk REP requires an amount and category; bulk NIC requires an amount. The actions are hidden when criteria are empty, loading, unavailable, or the viewer is signed out.",
