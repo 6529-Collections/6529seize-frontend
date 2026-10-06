@@ -80,6 +80,34 @@ function SourceCount({
   );
 }
 
+function getWalletSourceClasses(quiet: boolean, networkPresentation: boolean) {
+  if (networkPresentation) {
+    return {
+      section:
+        "tw-min-w-0 tw-rounded-xl tw-bg-iron-900/50 tw-p-4 lg:tw-row-span-5 lg:tw-grid lg:tw-grid-rows-subgrid",
+      input: "[&_input]:tw-h-11 [&_input]:tw-py-0",
+      title: "tw-m-0 tw-text-sm tw-font-medium tw-text-iron-100",
+      description:
+        "tw-mb-3 tw-mt-2 tw-text-xxs tw-font-normal tw-leading-5 tw-text-iron-350",
+      status:
+        "tw-flex tw-justify-between tw-gap-3 tw-mt-2 tw-items-start lg:tw-row-start-5",
+      empty: "tw-m-0 tw-text-xs tw-text-iron-500 tw-font-normal",
+    };
+  }
+  return {
+    section: quiet
+      ? "tw-min-w-0 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-4"
+      : "tw-min-w-0 tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950/60 tw-p-3 sm:tw-p-4",
+    input: "",
+    title: "tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-100",
+    description:
+      "tw-mb-3 tw-mt-1 tw-text-xs tw-leading-relaxed tw-text-iron-500",
+    status:
+      "tw-flex tw-justify-between tw-gap-3 tw-mt-3 tw-min-h-9 tw-items-center",
+    empty: "tw-m-0 tw-text-xs tw-text-iron-500 tw-font-medium",
+  };
+}
+
 function EmmaWalletSource({
   sources,
   onChange,
@@ -160,28 +188,14 @@ function EmmaWalletSource({
     sources.emmaWallets === null &&
     !!connectedProfile?.handle &&
     loadState === "loading";
-  let sectionClasses = quiet
-    ? "tw-min-w-0 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-4"
-    : "tw-min-w-0 tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950/60 tw-p-3 sm:tw-p-4";
-  if (networkPresentation) {
-    sectionClasses =
-      "tw-min-w-0 tw-rounded-xl tw-bg-iron-900/50 tw-p-4 lg:tw-row-span-5 lg:tw-grid lg:tw-grid-rows-subgrid [&_input]:tw-h-11 [&_input]:tw-py-0";
-  }
+  const sourceClasses = getWalletSourceClasses(quiet, networkPresentation);
 
   return (
-    <section className={sectionClasses}>
-      <h3
-        className={
-          networkPresentation
-            ? "tw-m-0 tw-text-sm tw-font-medium tw-text-iron-100"
-            : "tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-100"
-        }
-      >
+    <section className={`${sourceClasses.section} ${sourceClasses.input}`}>
+      <h3 className={sourceClasses.title}>
         {t(locale, "waves.create.groups.inlineIdentities.sources.emma.title")}
       </h3>
-      <p
-        className={`tw-mb-3 ${networkPresentation ? "tw-mt-2 tw-text-xxs tw-font-normal tw-leading-5 tw-text-iron-350" : "tw-mt-1 tw-text-xs tw-leading-relaxed tw-text-iron-500"}`}
-      >
+      <p className={sourceClasses.description}>
         {t(
           locale,
           "waves.create.groups.inlineIdentities.sources.emma.description"
@@ -204,13 +218,9 @@ function EmmaWalletSource({
           "waves.create.groups.inlineIdentities.sources.emma.searchEmpty"
         )}
       />
-      <div
-        className={`tw-flex tw-justify-between tw-gap-3 ${networkPresentation ? "tw-mt-2 tw-items-start lg:tw-row-start-5" : "tw-mt-3 tw-min-h-9 tw-items-center"}`}
-      >
+      <div className={sourceClasses.status}>
         {selectedId === null ? (
-          <p
-            className={`tw-m-0 tw-text-xs tw-text-iron-500 ${networkPresentation ? "tw-font-normal" : "tw-font-medium"}`}
-          >
+          <p className={sourceClasses.empty}>
             {t(
               locale,
               "waves.create.groups.inlineIdentities.sources.emma.empty"
@@ -374,28 +384,14 @@ function CsvWalletSource({
   if (networkPresentation) {
     dropzoneLayoutClasses = "tw-min-h-11 tw-flex-row tw-px-2 tw-py-2";
   }
-  let sectionClasses = quiet
-    ? "tw-min-w-0 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-4"
-    : "tw-min-w-0 tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950/60 tw-p-3 sm:tw-p-4";
-  if (networkPresentation) {
-    sectionClasses =
-      "tw-min-w-0 tw-rounded-xl tw-bg-iron-900/50 tw-p-4 lg:tw-row-span-5 lg:tw-grid lg:tw-grid-rows-subgrid";
-  }
+  const sourceClasses = getWalletSourceClasses(quiet, networkPresentation);
 
   return (
-    <section className={sectionClasses}>
-      <h3
-        className={
-          networkPresentation
-            ? "tw-m-0 tw-text-sm tw-font-medium tw-text-iron-100"
-            : "tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-100"
-        }
-      >
+    <section className={sourceClasses.section}>
+      <h3 className={sourceClasses.title}>
         {t(locale, "waves.create.groups.inlineIdentities.sources.csv.title")}
       </h3>
-      <p
-        className={`tw-mb-3 ${networkPresentation ? "tw-mt-2 tw-text-xxs tw-font-normal tw-leading-5 tw-text-iron-350" : "tw-mt-1 tw-text-xs tw-leading-relaxed tw-text-iron-500"}`}
-      >
+      <p className={sourceClasses.description}>
         {t(
           locale,
           "waves.create.groups.inlineIdentities.sources.csv.description"
@@ -455,13 +451,9 @@ function CsvWalletSource({
           {errorMessage}
         </p>
       ) : null}
-      <div
-        className={`tw-flex tw-justify-between tw-gap-3 ${networkPresentation ? "tw-mt-2 tw-items-start lg:tw-row-start-5" : "tw-mt-3 tw-min-h-9 tw-items-center"}`}
-      >
+      <div className={sourceClasses.status}>
         {sources.uploadedWallets === null ? (
-          <p
-            className={`tw-m-0 tw-text-xs tw-text-iron-500 ${networkPresentation ? "tw-font-normal" : "tw-font-medium"}`}
-          >
+          <p className={sourceClasses.empty}>
             {t(
               locale,
               "waves.create.groups.inlineIdentities.sources.csv.empty"

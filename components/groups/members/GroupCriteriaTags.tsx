@@ -3,6 +3,7 @@ export default function GroupCriteriaTags({
 }: {
   readonly items: readonly string[];
 }) {
+  // Preserve Safari list semantics when the visual list markers are removed.
   return (
     <ul
       role="list"

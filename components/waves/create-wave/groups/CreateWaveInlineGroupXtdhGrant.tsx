@@ -49,6 +49,53 @@ const INITIAL_GRANT_FINDER_FILTERS: GrantFinderFilters = {
   selectedStatus: ApiXTdhGrantStatus.Granted,
 };
 
+const GRANT_PRESENTATIONS = {
+  network: {
+    titleWeight: "tw-font-medium",
+    description: "tw-mb-0 tw-mt-2 tw-text-xxs tw-leading-5 tw-text-iron-350",
+    actionAlignment: "tw-justify-start",
+    changeVariant: "secondary",
+    actionSize: "sm",
+    finder: "tw-mt-6 tw-space-y-5",
+    iconPosition: "tw-top-1/2 -tw-translate-y-1/2",
+    filterGap: "tw-gap-x-4 tw-gap-y-2",
+    filterLayout:
+      "tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-2",
+    filterLabel:
+      "tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-500",
+    results: "tw-space-y-3",
+    resultsHeader: "tw-flex tw-items-center tw-justify-between tw-px-1",
+    resultsTitle:
+      "tw-m-0 tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-500",
+    resultsPadding: "tw-p-0.5",
+    resultsGap: "tw-gap-3",
+    pagination: "",
+  },
+  standard: {
+    titleWeight: "tw-font-semibold",
+    description: "tw-m-0 tw-mt-0.5 tw-text-sm tw-text-iron-400",
+    actionAlignment: "tw-justify-end",
+    changeVariant: "tertiary",
+    actionSize: "md",
+    finder:
+      "tw-mt-4 tw-space-y-4 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-pt-4 sm:tw-mt-5 sm:tw-pt-5",
+    iconPosition: undefined,
+    filterGap: "tw-gap-3",
+    filterLayout: "tw-min-w-0 tw-flex-1",
+    filterLabel:
+      "tw-mb-2 tw-block tw-text-[11px] tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-500",
+    results:
+      "tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900/40",
+    resultsHeader:
+      "tw-flex tw-items-center tw-justify-between tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-px-4 tw-py-2.5",
+    resultsTitle:
+      "tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-400",
+    resultsPadding: "tw-p-2 sm:tw-p-3",
+    resultsGap: "tw-gap-2",
+    pagination: "tw-border-t tw-border-solid tw-border-iron-800 tw-p-3",
+  },
+} as const;
+
 export default function CreateWaveInlineGroupXtdhGrant({
   beneficiaryGrantId,
   beneficiaryGrantMatchMode,
@@ -63,6 +110,9 @@ export default function CreateWaveInlineGroupXtdhGrant({
   ) => void;
   readonly networkPresentation?: boolean;
 }) {
+  const presentation = networkPresentation
+    ? GRANT_PRESENTATIONS.network
+    : GRANT_PRESENTATIONS.standard;
   const normalizedGrantId = beneficiaryGrantId?.trim() ?? "";
   const hasSelectedGrant = normalizedGrantId.length > 0;
   const locale = useBrowserLocale();
@@ -143,17 +193,11 @@ export default function CreateWaveInlineGroupXtdhGrant({
     <div className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-3 tw-shadow sm:tw-p-5">
       <div>
         <p
-          className={`tw-m-0 tw-text-base tw-text-iron-50 ${networkPresentation ? "tw-font-medium" : "tw-font-semibold"}`}
+          className={`tw-m-0 tw-text-base tw-text-iron-50 ${presentation.titleWeight}`}
         >
           xTDH Grant Beneficiary
         </p>
-        <p
-          className={
-            networkPresentation
-              ? "tw-mb-0 tw-mt-2 tw-text-xxs tw-leading-5 tw-text-iron-350"
-              : "tw-m-0 tw-mt-0.5 tw-text-sm tw-text-iron-400"
-          }
-        >
+        <p className={presentation.description}>
           Require identities to be beneficiaries of a selected xTDH grant.
         </p>
       </div>
@@ -178,11 +222,11 @@ export default function CreateWaveInlineGroupXtdhGrant({
 
       {hasSelectedGrant && (
         <div
-          className={`tw-mt-3 tw-flex tw-flex-wrap tw-gap-2 ${networkPresentation ? "tw-justify-start" : "tw-justify-end"}`}
+          className={`tw-mt-3 tw-flex tw-flex-wrap tw-gap-2 ${presentation.actionAlignment}`}
         >
           <Button
-            variant={networkPresentation ? "secondary" : "tertiary"}
-            size={networkPresentation ? "sm" : "md"}
+            variant={presentation.changeVariant}
+            size={presentation.actionSize}
             onClick={() => setIsChangingGrant((current) => !current)}
             aria-expanded={isChangingGrant}
             aria-controls="create-wave-inline-xtdh-grant-finder"
@@ -193,7 +237,7 @@ export default function CreateWaveInlineGroupXtdhGrant({
           </Button>
           <Button
             variant="tertiary"
-            size={networkPresentation ? "sm" : "md"}
+            size={presentation.actionSize}
             onClick={onRemoveGrant}
           >
             {t(locale, "waves.create.groups.xtdhGrant.remove")}
@@ -204,21 +248,13 @@ export default function CreateWaveInlineGroupXtdhGrant({
       {showGrantFinder && (
         <div
           id="create-wave-inline-xtdh-grant-finder"
-          className={
-            networkPresentation
-              ? "tw-mt-6 tw-space-y-5"
-              : "tw-mt-4 tw-space-y-4 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-pt-4 sm:tw-mt-5 sm:tw-pt-5"
-          }
+          className={presentation.finder}
         >
           <div className="tw-grid tw-grid-cols-1 tw-gap-3 lg:tw-grid-cols-2">
             <IdentitySearch
               label="Grantor"
               size={IdentitySearchSize.SM}
-              iconPositionClassName={
-                networkPresentation
-                  ? "tw-top-1/2 -tw-translate-y-1/2"
-                  : undefined
-              }
+              iconPositionClassName={presentation.iconPosition}
               identity={selectedGrantor}
               setIdentity={(identity) =>
                 setGrantFinderFilters((current) => ({
@@ -243,24 +279,10 @@ export default function CreateWaveInlineGroupXtdhGrant({
           </div>
 
           <div
-            className={`tw-flex tw-flex-wrap tw-items-end tw-justify-between ${networkPresentation ? "tw-gap-x-4 tw-gap-y-2" : "tw-gap-3"}`}
+            className={`tw-flex tw-flex-wrap tw-items-end tw-justify-between ${presentation.filterGap}`}
           >
-            <div
-              className={
-                networkPresentation
-                  ? "tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-2"
-                  : "tw-min-w-0 tw-flex-1"
-              }
-            >
-              <span
-                className={
-                  networkPresentation
-                    ? "tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-500"
-                    : "tw-mb-2 tw-block tw-text-[11px] tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-500"
-                }
-              >
-                Filter by status
-              </span>
+            <div className={presentation.filterLayout}>
+              <span className={presentation.filterLabel}>Filter by status</span>
               <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
                 {STATUS_OPTIONS.map((status) => {
                   const isActive = selectedStatus === status;
@@ -310,36 +332,16 @@ export default function CreateWaveInlineGroupXtdhGrant({
             )}
           </div>
 
-          <div
-            className={
-              networkPresentation
-                ? "tw-space-y-3"
-                : "tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900/40"
-            }
-          >
-            <div
-              className={
-                networkPresentation
-                  ? "tw-flex tw-items-center tw-justify-between tw-px-1"
-                  : "tw-flex tw-items-center tw-justify-between tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-px-4 tw-py-2.5"
-              }
-            >
-              <p
-                className={
-                  networkPresentation
-                    ? "tw-m-0 tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-500"
-                    : "tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-400"
-                }
-              >
-                Results
-              </p>
+          <div className={presentation.results}>
+            <div className={presentation.resultsHeader}>
+              <p className={presentation.resultsTitle}>Results</p>
               <p className="tw-m-0 tw-text-xs tw-text-iron-500">
                 {totalCount} total
               </p>
             </div>
 
             <div
-              className={`tw-max-h-80 tw-overflow-y-auto ${networkPresentation ? "tw-p-0.5" : "tw-p-2 sm:tw-p-3"}`}
+              className={`tw-max-h-80 tw-overflow-y-auto ${presentation.resultsPadding}`}
             >
               {isLoading && !grants.length && (
                 <p className="tw-m-0 tw-rounded-lg tw-bg-iron-900 tw-p-4 tw-text-sm tw-text-iron-400">
@@ -375,7 +377,7 @@ export default function CreateWaveInlineGroupXtdhGrant({
 
               {!!grants.length && (
                 <ul
-                  className={`tw-m-0 tw-flex tw-list-none tw-flex-col tw-p-0 ${networkPresentation ? "tw-gap-3" : "tw-gap-2"}`}
+                  className={`tw-m-0 tw-flex tw-list-none tw-flex-col tw-p-0 ${presentation.resultsGap}`}
                 >
                   {grants.map((grantItem) => (
                     <GroupCreateXtdhGrantRow
@@ -402,13 +404,7 @@ export default function CreateWaveInlineGroupXtdhGrant({
             </div>
 
             {hasNextPage && (
-              <div
-                className={
-                  networkPresentation
-                    ? ""
-                    : "tw-border-t tw-border-solid tw-border-iron-800 tw-p-3"
-                }
-              >
+              <div className={presentation.pagination}>
                 {networkPresentation ? (
                   <button
                     type="button"
