@@ -490,7 +490,7 @@ export default function UserPageRepNewRepSearch({
                     )}
                   </AnimatePresence>
                 </form>
-                <div className="[&>div]:tw-justify-center">
+                <div>
                   <label
                     htmlFor={amountInputId}
                     className="tw-mb-2 tw-block tw-text-sm tw-font-normal tw-text-iron-400"
@@ -510,6 +510,7 @@ export default function UserPageRepNewRepSearch({
                   {selectedCategory && (
                     <UserRateAdjustmentHelper
                       inLineValues={true}
+                      valueLayout="inline"
                       originalValue={repState?.rater_contribution ?? 0}
                       adjustedValue={newRating}
                       adjustmentType="Rep"
