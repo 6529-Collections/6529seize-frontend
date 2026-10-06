@@ -34,6 +34,7 @@ interface MemesArtSubmissionStepContentProps {
   readonly onPromoVideoChange: (url: string) => void;
 }
 
+/** Wire the active submission step to its draft, including the optional public plan. */
 export function MemesArtSubmissionStepContent({
   form,
   wave,

@@ -14,6 +14,7 @@ interface MemesSingleWaveDropProps {
   readonly onClose: () => void;
 }
 
+/** Connect the Memes detail view to shared drop data and metadata readiness. */
 export const MemesSingleWaveDrop: React.FC<MemesSingleWaveDropProps> = ({
   drop: initialDrop,
   onClose,

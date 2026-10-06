@@ -28,6 +28,7 @@ interface MemesArtSubmissionModalProps {
   readonly onSourceDropDeleted?: (() => void) | undefined;
 }
 
+/** Wait for complete saved metadata before initializing a resubmission, with retry and close available. */
 const MemesArtSubmissionModal: React.FC<MemesArtSubmissionModalProps> = ({
   isOpen,
   wave,

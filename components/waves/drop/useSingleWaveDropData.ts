@@ -10,6 +10,7 @@ import { useWaveData } from "@/hooks/useWaveData";
 import { useDropVoteSummary } from "./useDropVoteSummary";
 import { useDropDetailMetadata } from "./useDropDetailMetadata";
 
+/** Combine wave, full metadata, and vote-summary state for Memes detail panels. */
 export const useSingleWaveDropData = (
   initialDrop: ExtendedDrop,
   onClose: () => void

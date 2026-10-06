@@ -64,6 +64,7 @@ interface AdditionalInfoStepProps {
   readonly submitLabel?: string | undefined;
 }
 
+/** Validate operational fields and review the public plan before preview or submission. */
 const AdditionalInfoStep: FC<AdditionalInfoStepProps> = ({
   traits,
   isAdditionalActionPromised = false,

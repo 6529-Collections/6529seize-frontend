@@ -33,6 +33,7 @@ interface MemesSingleWaveDropInfoPanelProps {
   readonly outcomesVisible?: boolean | undefined;
 }
 
+/** Pass metadata readiness through the saved submission's information panel. */
 export const MemesSingleWaveDropInfoPanel = ({
   drop,
   voteSummary = DISABLED_DROP_VOTE_SUMMARY_STATE,

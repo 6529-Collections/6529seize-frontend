@@ -67,6 +67,7 @@ interface WaveDropAdditionalInfoProps {
   readonly metadataState?: DropMetadataState | undefined;
 }
 
+/** Display the public plan separately from artist bio, commentary, and supporting media. */
 export const WaveDropAdditionalInfo = ({
   drop,
   metadataState,

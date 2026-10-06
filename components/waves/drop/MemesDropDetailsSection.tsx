@@ -29,6 +29,7 @@ interface MemesDropDetailsSectionProps {
   readonly onClose?: (() => void) | undefined;
 }
 
+/** Render submission details with explicit metadata loading and recovery states. */
 export function MemesDropDetailsSection({
   drop,
   voteSummary,

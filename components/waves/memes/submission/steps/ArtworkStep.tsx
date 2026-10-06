@@ -258,6 +258,7 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
     />
   );
 
+  /** Keep the action declaration and plan editor together in the artwork details panel. */
   const renderArtworkDetailsPanel = () => (
     <ArtworkDetails
       title={traits.title}

@@ -5,6 +5,7 @@ import { t } from "@/i18n/messages";
 import type { ProposalCardLayout } from "@/lib/proposal-card/document";
 import { useId } from "react";
 
+/** Choose optional proposal framing using the shared submission option-card styling. */
 export function ProposalCardOption({
   layout,
   onChange,

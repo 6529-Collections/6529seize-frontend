@@ -30,6 +30,7 @@ interface MemesSubmissionPreviewScreenProps {
   readonly submitLabel?: string | undefined;
 }
 
+/** Review the metadata-backed drop and its operational information before submitting. */
 export function MemesSubmissionPreviewScreen({
   proposalCard,
   previewDrop,
