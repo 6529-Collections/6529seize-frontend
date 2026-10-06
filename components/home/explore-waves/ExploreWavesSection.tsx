@@ -165,6 +165,9 @@ export function ExploreWavesSection({
 
   return (
     <section
+      data-home-section={
+        !isLoading && !hasNoWaves ? "Explore waves" : undefined
+      }
       className={
         headingVariant === "page"
           ? "tw-px-4 tw-pb-10 tw-pt-4 md:tw-px-6 md:tw-pb-16 lg:tw-px-8"
@@ -233,6 +236,7 @@ export function ExploreWavesSection({
         {viewAllHref && (
           <div className="tw-mt-8 tw-flex tw-justify-center md:tw-mt-10">
             <Link
+              data-home-action="View all"
               href={viewAllHref}
               className="tw-inline-flex tw-items-center tw-gap-1.5 tw-text-sm tw-font-medium tw-text-iron-400 tw-no-underline tw-transition-colors hover:tw-text-white"
             >

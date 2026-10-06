@@ -1,4 +1,5 @@
 import { EN_US_DROP_METADATA_MESSAGES } from "@/i18n/messages/drop-metadata";
+import { EN_SUBMISSION_DISCOVERY_MESSAGES } from "@/i18n/messages/submission-discovery";
 import { EN_DROP_REQUIREMENT_MESSAGES } from "@/i18n/messages/drop-requirements";
 import artworkShareMessages from "@/i18n/messages/artworkShare.en-GB.json";
 import profileCmsAgentMessages from "@/i18n/messages/profileCmsAgent.en-GB.json";
@@ -25,6 +26,7 @@ export const EN_GB_MESSAGES = {
   "network.groupFilter.nfts": "Required NFTs",
   "network.groupFilter.collections": "Collection Access",
   "network.groupFilter.xtdhGrant": "xTDH Grant",
+  ...EN_SUBMISSION_DISCOVERY_MESSAGES,
   ...EN_DROP_REQUIREMENT_MESSAGES,
   ...EN_US_DROP_METADATA_MESSAGES,
   "profile.subscriptions.noAllocation": "No subscription allocation",

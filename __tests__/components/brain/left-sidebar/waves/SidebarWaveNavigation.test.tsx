@@ -1,6 +1,7 @@
 import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import { hydrateRoot } from "react-dom/client";
 import { renderToString } from "react-dom/server";
+import { useState } from "react";
 import {
   SidebarWaveNavigationControls,
   SidebarWaveSearchResults,
@@ -73,7 +74,7 @@ const wave = mapApiWaveOverviewToSidebarWave({
 function navigation(
   overrides: Partial<SidebarWaveNavigation> = {}
 ): SidebarWaveNavigation {
-  return {
+  const state = {
     collection: "pinned",
     setCollection: jest.fn(),
     canUseCollections: true,
@@ -81,6 +82,7 @@ function navigation(
     queryEnabled: true,
     searching: true,
     setQueryText: jest.fn(),
+    setSearchOpen: jest.fn(),
     resultWaves: [wave],
     results: {
       isPending: false,
@@ -90,12 +92,36 @@ function navigation(
       refetch: jest.fn(),
     },
     ...overrides,
+  };
+  return {
+    ...state,
+    searchOpen: overrides.searchOpen ?? state.searching,
   } as SidebarWaveNavigation;
+}
+
+function InteractiveSearchControls({
+  state,
+}: {
+  state: SidebarWaveNavigation;
+}) {
+  const [searchOpen, setSearchOpen] = useState(false);
+  return (
+    <SidebarWaveNavigationControls
+      navigation={{
+        ...state,
+        searchOpen: searchOpen || state.searching,
+        setSearchOpen,
+      }}
+    />
+  );
 }
 
 function HydrationSearch({ viewerKey }: { viewerKey: string }) {
   const [query, setQueryText] = useWaveSidebarSearch(viewerKey);
+  const [searchOpen, setSearchOpen] = useState(false);
   const state = navigation({
+    searchOpen: searchOpen || Boolean(query),
+    setSearchOpen,
     queryText: query ?? "",
     setQueryText,
     searching: Boolean(query),
@@ -314,7 +340,7 @@ it("switches Joined and All through the replacement collection controls", () => 
   expect(state.setCollection).toHaveBeenCalledWith("all");
 });
 
-it("hides personal collection controls when the viewer cannot use them", () => {
+it("labels the public list without showing personal collection controls", () => {
   render(
     <SidebarWaveNavigationControls
       navigation={navigation({
@@ -330,12 +356,12 @@ it("hides personal collection controls when the viewer cannot use them", () => {
   expect(
     screen.queryByRole("button", { name: "Joined" })
   ).not.toBeInTheDocument();
-  expect(screen.queryByText("All Waves")).not.toBeInTheDocument();
+  expect(screen.getByText("All Waves")).toBeVisible();
 });
 
 it("opens and focuses search, then restores the selected collection on Escape", async () => {
   const state = navigation({ queryText: "", searching: false });
-  render(<SidebarWaveNavigationControls navigation={state} />);
+  render(<InteractiveSearchControls state={state} />);
   expect(screen.queryByRole("searchbox")).not.toBeInTheDocument();
   fireEvent.click(screen.getByRole("button", { name: "Find a wave…" }));
   const input = screen.getByRole("searchbox");
@@ -358,8 +384,8 @@ it("opens and focuses search, then restores the selected collection on Escape", 
 
 it("lets guests open and close an empty search", () => {
   render(
-    <SidebarWaveNavigationControls
-      navigation={navigation({
+    <InteractiveSearchControls
+      state={navigation({
         queryText: "",
         searching: false,
         canUseCollections: false,

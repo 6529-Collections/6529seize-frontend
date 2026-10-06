@@ -34,6 +34,7 @@ export default function HomeNewcomerIntro() {
 
   return (
     <section
+      data-home-section="Get started"
       aria-labelledby="home-newcomer-title"
       className="tw-px-4 tw-pb-2 tw-pt-5 md:tw-mx-auto md:tw-max-w-3xl md:tw-px-6 md:tw-pb-4 lg:tw-px-8"
     >
@@ -42,6 +43,7 @@ export default function HomeNewcomerIntro() {
       </h2>
       <div className="tw-flex tw-flex-wrap tw-gap-2 md:tw-justify-center">
         <ButtonLink
+          data-home-action="Get started"
           href="/join-6529"
           size="lg"
           className="tw-min-w-32 tw-flex-1 md:tw-flex-none"
@@ -53,6 +55,7 @@ export default function HomeNewcomerIntro() {
           />
         </ButtonLink>
         <Button
+          data-home-action="Connect wallet"
           variant="secondary"
           size="lg"
           loading={isConnectBusy}
