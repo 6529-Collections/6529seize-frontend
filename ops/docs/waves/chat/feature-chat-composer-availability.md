@@ -64,6 +64,10 @@ availability. Submission availability is exposed through the Chat tab
   text draft in the same browser tab. This does not save attachments or media.
 - If Chat was opened from a competition, the rules link retains that competition,
   including when copied or opened in a new tab.
+- When competition support is enabled, group and signing details describe the
+  selected competition, or the current default when none was selected. The card
+  loads these details on demand. An unavailable lookup keeps the rules link
+  available and does not substitute another competition's access settings.
 - Use Enter or Space to open locked submission details, Tab to reach its links,
   and Escape to close it and return focus to the action. Opening submission rules
   moves focus to Configuration, or to the rules content after a route change.

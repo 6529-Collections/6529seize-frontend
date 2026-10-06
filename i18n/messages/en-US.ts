@@ -1495,6 +1495,8 @@ const WAVE_NOTIFICATION_SETTINGS_MESSAGES = namespaceMessages(
 );
 
 const WAVE_ACCESS_MESSAGES = objectMessages("waves.access", {
+  loading: "Loading submission access…",
+  unavailable: "Submission access details are unavailable.",
   submissionScope: "Submission group",
   publicScope: "Public. Other submission rules still apply.",
   independent: "Chat access is separate from submission access.",

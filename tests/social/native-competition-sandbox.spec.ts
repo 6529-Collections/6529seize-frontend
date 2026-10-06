@@ -517,6 +517,37 @@ async function installCompetitionApi(
       );
       expect(response.ok()).toBe(true);
       const wave = await response.json();
+      const legacyCompetition = competitions.find((item) => item.id === id);
+      if (legacyCompetition) {
+        legacyCompetition.participation.group_id =
+          wave.participation.scope.group?.id ?? null;
+        legacyCompetition.participation.signature_required =
+          wave.participation.signature_required;
+      }
+      const group = wave.participation.scope.group;
+      if (group) {
+        const groupResponse = await page.request.get(
+          `${getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"])}/api/groups/${composerSandboxConstants.previewGroupId}`
+        );
+        expect(groupResponse.ok()).toBe(true);
+        const groupFixture = await groupResponse.json();
+        await page.route(
+          `**/api/groups/${encodeURIComponent(group.id)}`,
+          (route) =>
+            route.fulfill({
+              json: {
+                id: group.id,
+                name: group.name,
+                visible: true,
+                is_private: group.is_hidden,
+                is_direct_message: group.is_direct_message ?? false,
+                group: groupFixture.group,
+                created_at: 1,
+                created_by: wave.author,
+              },
+            })
+        );
+      }
       wave.id = waveId;
       wave.description_drop.wave.id = waveId;
       wave.wave.type = "RANK";
@@ -553,6 +584,11 @@ async function openLockedSubmissionRules(page: Page, draft: string) {
     .press("Enter");
   const details = page.getByRole("dialog", { name: "Submit drop" });
   await expect(details).toBeFocused();
+  await expect(
+    details.getByRole("link", {
+      name: "Inspect Sandbox Submission Club group criteria and members",
+    })
+  ).toBeVisible();
   await page.keyboard.press("Tab");
   await page.keyboard.press("Tab");
   await expect(
@@ -587,6 +623,13 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await page
       .getByRole("button", { name: "Submit drop", exact: true })
       .press("Enter");
+    const details = page.getByRole("dialog", { name: "Submit drop" });
+    await expect(
+      details.getByText("Public. Other submission rules still apply.", {
+        exact: true,
+      })
+    ).toBeVisible();
+    await expect(details).not.toContainText("Sandbox Submission Club");
     const href = await page
       .getByRole("dialog", { name: "Submit drop" })
       .getByRole("link", { name: "View submission rules" })
