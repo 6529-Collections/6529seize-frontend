@@ -114,14 +114,18 @@ Mobile (`< lg`):
 
 ### Localization fallback debt
 
-- Surface: the Grant REP dialog under the profile Identity tab.
+- Surfaces: the Grant REP and Rate NIC dialogs under the profile Identity tab,
+  including their desktop/mobile entry points and Current / Adjustment summaries.
 - Current fallback: `rep.categories.grant.*` messages use the canonical `en-US`
   source copy in locales without translated entries, including the REP amount
-  label.
-- User impact: supported non-English locales can see English fallback copy while
-  the complete grant flow remains functional.
-- Owner/follow-up: frontend localization maintainers can add translated entries
-  during the next profile localization pass.
+  label. Dialog titles, NIC labels and actions, unavailable-state Cancel buttons,
+  proxy labels, rating feedback, and adjustment summaries retain existing English
+  strings. Rating summaries retain the existing comma-separated number formatting.
+- User impact: supported non-English locales can see English copy and number
+  formatting while both rating flows remain functional.
+- Owner/follow-up: frontend localization maintainers can migrate the remaining
+  strings and number formatting and add translations during the next profile
+  localization pass.
 
 ## NIC and Statements Behavior
 
