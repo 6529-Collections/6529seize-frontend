@@ -405,9 +405,12 @@ test("collapsed and nested-scroll rows stay unexposed until they are actually vi
     await featureEvents(page, "Wave Feature Seen", "active_votes_wave")
   ).toHaveLength(0);
   await page.getByRole("button", { name: "Expand Active Votes" }).click();
-  await page.locator("#nested-scroll").evaluate((element) => {
-    element.scrollTop = element.scrollHeight;
-  });
+  await page
+    .getByRole("region", { name: "Wave discovery", exact: true })
+    .evaluate((element) => {
+      const scroller = element.parentElement;
+      if (scroller) scroller.scrollTop = scroller.scrollHeight;
+    });
   await expect
     .poll(
       async () =>
@@ -416,7 +419,7 @@ test("collapsed and nested-scroll rows stay unexposed until they are actually vi
     )
     .toBe(1);
   await page
-    .locator('[data-wave-feature-list="active-votes"]')
+    .getByRole("region", { name: "Active voting waves", exact: true })
     .evaluate((element) => {
       element.scrollTop = element.scrollHeight;
     });
