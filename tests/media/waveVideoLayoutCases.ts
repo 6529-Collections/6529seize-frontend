@@ -20,6 +20,14 @@ export function defineWaveVideoLayoutTests() {
     await dismissNextDevTools(page);
     const video = page.getByLabel("Video player", { exact: true }).first();
     await video.scrollIntoViewIfNeeded();
+    await expect(video).not.toHaveAttribute("src", /.+/);
+    expect(
+      await video.evaluate((element: HTMLVideoElement) => element.paused)
+    ).toBe(true);
+    await page
+      .getByRole("button", { name: "Play video", exact: true })
+      .first()
+      .click();
     await expect
       .poll(() =>
         video.evaluate((element: HTMLVideoElement) => element.readyState)
@@ -64,11 +72,7 @@ export function defineWaveVideoLayoutTests() {
     }, previousStyle);
     const restored = anchor.getByLabel("Video player", { exact: true });
     await expect(restored).toBeVisible();
-    await expect
-      .poll(() =>
-        restored.evaluate((element: HTMLVideoElement) => element.currentTime)
-      )
-      .toBeCloseTo(1, 1);
+    await expect(restored).not.toHaveAttribute("src", /.+/);
     expect(
       await restored.evaluate((element: HTMLVideoElement) => element.paused)
     ).toBe(true);
@@ -84,6 +88,11 @@ export function defineWaveVideoLayoutTests() {
         restored.evaluate((element: HTMLVideoElement) => element.paused)
       )
       .toBe(false);
+    await expect
+      .poll(() =>
+        restored.evaluate((element: HTMLVideoElement) => element.currentTime)
+      )
+      .toBeGreaterThanOrEqual(0.9);
     expect(
       await restored.evaluate(
         (element: HTMLVideoElement) => element.currentTime
@@ -115,6 +124,10 @@ export function defineWaveVideoLayoutTests() {
     });
     const video = card.getByLabel("Video player", { exact: true });
     await expect(video).toBeVisible();
+    await card
+      .getByRole("button", { name: "Play video", exact: true })
+      .first()
+      .click();
     await expect
       .poll(() =>
         video.evaluate((element: HTMLVideoElement) => element.videoWidth)

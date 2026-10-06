@@ -1,9 +1,18 @@
 import React from "react";
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  within,
+  waitFor,
+} from "@testing-library/react";
 import { Capacitor } from "@capacitor/core";
 import * as touchFirst from "@/helpers/touch-first.helpers";
 import * as config from "@/components/drops/view/item/content/media/SeizeVideoPlayer.config";
 import DropListItemContentMediaVideo from "@/components/drops/view/item/content/media/DropListItemContentMediaVideo";
+import MediaDisplayVideo from "@/components/drops/view/item/content/media/MediaDisplayVideo";
+import { ChatVideoPlaybackProvider } from "@/components/drops/view/item/content/media/ChatVideoPlayback";
 import VirtualScrollWrapper from "@/components/waves/drops/VirtualScrollWrapper";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 
@@ -11,6 +20,7 @@ let mockInView = true;
 let mockIsApp = true;
 let mockSetInView: React.Dispatch<React.SetStateAction<boolean>>;
 const mockFetchAround = jest.fn();
+const mockVisibilityListeners = new Set<() => void>();
 jest.mock("@/contexts/wave/MyStreamContext", () => ({
   useMyStream: () => ({ fetchAroundSerialNo: mockFetchAround }),
 }));
@@ -23,7 +33,10 @@ jest.mock("@/hooks/useInView", () => ({
   },
 }));
 jest.mock("@/hooks/useOptimizedVideo", () => ({
-  useOptimizedVideo: (src: string) => ({ playableUrl: src, isHls: false }),
+  useOptimizedVideo: jest.fn((src: string) => ({
+    playableUrl: src,
+    isHls: false,
+  })),
 }));
 
 describe("video playback across DM virtualization", () => {
@@ -36,7 +49,18 @@ describe("video playback across DM virtualization", () => {
   beforeEach(() => {
     mockInView = true;
     mockIsApp = true;
-    jest.spyOn(config, "useElementInView").mockImplementation(() => mockInView);
+    jest.spyOn(config, "useElementInView").mockImplementation(() =>
+      React.useSyncExternalStore(
+        (notify) => {
+          mockVisibilityListeners.add(notify);
+          return () => {
+            mockVisibilityListeners.delete(notify);
+          };
+        },
+        () => mockInView,
+        () => false
+      )
+    );
     jest.spyOn(touchFirst, "isTouchFirstEnvironment").mockReturnValue(true);
     Object.defineProperty(globalThis, "IntersectionObserver", {
       configurable: true,
@@ -115,14 +139,16 @@ describe("video playback across DM virtualization", () => {
 
   function dropContent(src = "long.mp4") {
     return (
-      <VirtualScrollWrapper
-        scrollContainerRef={{ current: null }}
-        dropSerialNo={1}
-        waveId="wave"
-        type={DropSize.FULL}
-      >
-        <DropListItemContentMediaVideo src={src} />
-      </VirtualScrollWrapper>
+      <ChatVideoPlaybackProvider>
+        <VirtualScrollWrapper
+          scrollContainerRef={{ current: null }}
+          dropSerialNo={1}
+          waveId="wave"
+          type={DropSize.FULL}
+        >
+          <DropListItemContentMediaVideo src={src} />
+        </VirtualScrollWrapper>
+      </ChatVideoPlaybackProvider>
     );
   }
 
@@ -142,6 +168,9 @@ describe("video playback across DM virtualization", () => {
       jest.spyOn(Capacitor, "isNativePlatform").mockReturnValue(native);
       const { container } = renderDrop();
       const video = screen.getByLabelText<HTMLVideoElement>("Video player");
+      fireEvent.click(
+        screen.getAllByRole("button", { name: "Play video" })[0]!
+      );
       metadata(video);
       if (!video.paused)
         fireEvent.click(screen.getByRole("button", { name: "Pause video" }));
@@ -221,6 +250,7 @@ describe("video playback across DM virtualization", () => {
     jest.spyOn(Capacitor, "isNativePlatform").mockReturnValue(true);
     const { rerender } = render(dropContent());
     const video = screen.getByLabelText<HTMLVideoElement>("Video player");
+    fireEvent.click(screen.getAllByRole("button", { name: "Play video" })[0]!);
     metadata(video);
     video.currentTime = 480;
     fireEvent.seeked(video);
@@ -228,11 +258,13 @@ describe("video playback across DM virtualization", () => {
     rerender(dropContent("other.mp4"));
     const other = screen.getByLabelText<HTMLVideoElement>("Video player");
     expect(other).not.toBe(video);
+    fireEvent.click(screen.getAllByRole("button", { name: "Play video" })[0]!);
     metadata(other);
     expect(other.currentTime).toBe(0);
     expect(other.muted).toBe(true);
     rerender(dropContent());
     const restored = screen.getByLabelText<HTMLVideoElement>("Video player");
+    fireEvent.click(screen.getAllByRole("button", { name: "Play video" })[0]!);
     metadata(restored);
     expect(restored.currentTime).toBe(480);
     expect(restored.muted).toBe(false);
@@ -242,6 +274,7 @@ describe("video playback across DM virtualization", () => {
     jest.spyOn(Capacitor, "isNativePlatform").mockReturnValue(true);
     const { unmount } = renderDrop();
     const video = screen.getByLabelText<HTMLVideoElement>("Video player");
+    fireEvent.click(screen.getAllByRole("button", { name: "Play video" })[0]!);
     metadata(video);
     video.currentTime = 480;
     fireEvent.seeked(video);
@@ -252,5 +285,208 @@ describe("video playback across DM virtualization", () => {
     metadata(fresh);
     expect(fresh.currentTime).toBe(0);
     expect(fresh.muted).toBe(true);
+  });
+
+  function chatVideos() {
+    return (
+      <ChatVideoPlaybackProvider>
+        <div data-testid="first-video">
+          <DropListItemContentMediaVideo src="first.mp4" />
+        </div>
+        <div data-testid="second-video">
+          <MediaDisplayVideo src="second.mp4" />
+        </div>
+        <div data-testid="third-video">
+          <DropListItemContentMediaVideo src="third.mp4" />
+        </div>
+      </ChatVideoPlaybackProvider>
+    );
+  }
+
+  function playChatVideo(name: string) {
+    fireEvent.click(
+      within(screen.getByTestId(name)).getAllByRole("button", {
+        name: "Play video",
+      })[0]!
+    );
+  }
+
+  it.each(["desktop", "mobile-browser", "native"])(
+    "requires Play for each chat source and plays only one at a time (%s)",
+    (environment) => {
+      mockIsApp = environment === "native";
+      jest.spyOn(Capacitor, "isNativePlatform").mockReturnValue(mockIsApp);
+      jest
+        .spyOn(touchFirst, "isTouchFirstEnvironment")
+        .mockReturnValue(environment !== "desktop");
+      render(chatVideos());
+      const videos = screen.getAllByLabelText<HTMLVideoElement>("Video player");
+      for (const video of videos) {
+        expect(video).not.toHaveAttribute("src");
+        expect(video).toHaveAttribute("preload", "none");
+        expect(video.autoplay).toBe(false);
+      }
+      expect(HTMLMediaElement.prototype.play).not.toHaveBeenCalled();
+      playChatVideo("first-video");
+      expect(videos[0]).toHaveAttribute(
+        "src",
+        expect.stringContaining("first.mp4")
+      );
+      expect(videos[0]!.paused).toBe(false);
+      metadata(videos[0]!);
+      videos[0]!.currentTime = 480;
+      fireEvent.seeked(videos[0]!);
+      fireEvent.click(
+        within(screen.getByTestId("first-video")).getByRole("button", {
+          name: "Unmute video",
+        })
+      );
+      playChatVideo("second-video");
+      expect(videos[0]!.paused).toBe(true);
+      expect(videos[0]!.currentTime).toBe(480);
+      expect(videos[0]!.muted).toBe(false);
+      expect(videos[1]!.paused).toBe(false);
+      expect(videos[2]).not.toHaveAttribute("src");
+    }
+  );
+
+  it("pauses desktop chat videos offscreen and while hidden without resuming on return", () => {
+    mockIsApp = false;
+    jest.spyOn(Capacitor, "isNativePlatform").mockReturnValue(false);
+    jest.spyOn(touchFirst, "isTouchFirstEnvironment").mockReturnValue(false);
+    const { rerender } = render(chatVideos());
+    playChatVideo("first-video");
+    const first =
+      screen.getAllByLabelText<HTMLVideoElement>("Video player")[0]!;
+    metadata(first);
+    first.currentTime = 480;
+    fireEvent.seeked(first);
+    act(() => {
+      mockInView = false;
+      mockVisibilityListeners.forEach((notify) => notify());
+    });
+    expect(first.paused).toBe(true);
+    act(() => {
+      mockInView = true;
+      mockVisibilityListeners.forEach((notify) => notify());
+    });
+    expect(first.paused).toBe(true);
+    playChatVideo("first-video");
+    Object.defineProperty(document, "visibilityState", {
+      configurable: true,
+      value: "hidden",
+    });
+    fireEvent(document, new Event("visibilitychange"));
+    expect(first.paused).toBe(true);
+    Object.defineProperty(document, "visibilityState", {
+      configurable: true,
+      value: "visible",
+    });
+    fireEvent(document, new Event("visibilitychange"));
+    expect(first.paused).toBe(true);
+    expect(first.currentTime).toBe(480);
+    playChatVideo("first-video");
+    expect(first.paused).toBe(false);
+  });
+
+  it("keeps a user-started chat source stable if a better rendition appears later", () => {
+    const optimize = jest.requireMock("@/hooks/useOptimizedVideo")
+      .useOptimizedVideo as jest.Mock;
+    const { rerender } = render(chatVideos());
+    playChatVideo("first-video");
+    const first =
+      screen.getAllByLabelText<HTMLVideoElement>("Video player")[0]!;
+    const original = first.getAttribute("src");
+    optimize.mockImplementation((src: string) => ({
+      playableUrl: `optimized-${src}`,
+      isHls: false,
+    }));
+    rerender(chatVideos());
+    expect(first.getAttribute("src")).toBe(original);
+    expect(first.paused).toBe(false);
+    optimize.mockImplementation((src: string) => ({
+      playableUrl: src,
+      isHls: false,
+    }));
+  });
+
+  it("preserves desktop autoplay outside the chat provider for submission media", () => {
+    mockIsApp = false;
+    jest.spyOn(Capacitor, "isNativePlatform").mockReturnValue(false);
+    jest.spyOn(touchFirst, "isTouchFirstEnvironment").mockReturnValue(false);
+    render(
+      <>
+        <DropListItemContentMediaVideo src="submission.mp4" />
+        <MediaDisplayVideo src="artwork.mp4" />
+      </>
+    );
+    const videos = screen.getAllByLabelText<HTMLVideoElement>("Video player");
+    expect(
+      videos.every(
+        (video) => Boolean(video.getAttribute("src")) && !video.paused
+      )
+    ).toBe(true);
+  });
+
+  it.each([false, true])(
+    "completes an asynchronous HLS Play only if it is still the selected video (superseded=%s)",
+    async (superseded) => {
+      const optimize = jest.requireMock("@/hooks/useOptimizedVideo")
+        .useOptimizedVideo as jest.Mock;
+      optimize.mockImplementation((src: string) => ({
+        playableUrl: src === "first.mp4" ? "first.m3u8" : src,
+        isHls: src === "first.mp4",
+      }));
+      const play = jest.mocked(HTMLMediaElement.prototype.play);
+      const usualPlay = play.getMockImplementation()!;
+      play.mockImplementation(function (this: HTMLMediaElement) {
+        if (!this.getAttribute("src"))
+          return Promise.reject(
+            new DOMException("No source yet", "NotSupportedError")
+          );
+        return usualPlay.call(this);
+      });
+      render(chatVideos());
+      const videos = screen.getAllByLabelText<HTMLVideoElement>("Video player");
+      playChatVideo("first-video");
+      if (superseded) playChatVideo("second-video");
+      await waitFor(() =>
+        expect(videos[0]).toHaveAttribute(
+          "src",
+          expect.stringContaining("first.mp4")
+        )
+      );
+      metadata(videos[0]!);
+      expect(videos[0]!.paused).toBe(superseded);
+      if (superseded) expect(videos[1]!.paused).toBe(false);
+      optimize.mockImplementation((src: string) => ({
+        playableUrl: src,
+        isHls: false,
+      }));
+    }
+  );
+
+  it("keeps native fullscreen playback while offscreen and pauses when fullscreen closes", () => {
+    jest.spyOn(Capacitor, "isNativePlatform").mockReturnValue(true);
+    render(chatVideos());
+    playChatVideo("first-video");
+    const first =
+      screen.getAllByLabelText<HTMLVideoElement>("Video player")[0]!;
+    Object.defineProperty(first, "webkitDisplayingFullscreen", {
+      configurable: true,
+      value: true,
+    });
+    fireEvent(first, new Event("webkitbeginfullscreen"));
+    act(() => {
+      mockInView = false;
+      mockVisibilityListeners.forEach((notify) => notify());
+    });
+    expect(first.paused).toBe(false);
+    Object.defineProperty(first, "webkitDisplayingFullscreen", {
+      configurable: true,
+      value: false,
+    });
+    fireEvent(first, new Event("webkitendfullscreen"));
+    expect(first.paused).toBe(true);
   });
 });

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import { useMobileBatterySavings } from "@/hooks/useMobileAppActivity";
 import { useInView } from "@/hooks/useInView";
 import { useOptimizedVideo } from "@/hooks/useOptimizedVideo";
@@ -12,6 +12,8 @@ import SeizeVideoPlayer from "./SeizeVideoPlayer";
 import VideoPlaybackErrorOverlay from "./VideoPlaybackErrorOverlay";
 import { useVideoPlaybackError } from "./useVideoPlaybackError";
 import { useMediaActions } from "./useMediaActions";
+import { assignRef } from "./SeizeVideoPlayer.config";
+import { useChatVideoPlayback } from "./ChatVideoPlayback";
 import { useRememberedVideoPlayback } from "./VideoPlaybackMemory";
 
 interface Props {
@@ -38,8 +40,11 @@ const MediaDisplayVideo: React.FC<Props> = ({
   });
   const wasFullscreenRef = useRef(false);
   const locale = useBrowserLocale();
+  const chat = useChatVideoPlayback(src);
   const savedPlayback = useRememberedVideoPlayback(src);
-  const shouldAutoPlay = inView && !isApp && !savedPlayback?.userControlled;
+  const shouldAutoPlay =
+    inView && !isApp && !chat.isChat && !savedPlayback?.userControlled;
+  const shouldLoadVideo = inView && (!chat.isChat || chat.requested);
   const { downloadMedia, isDownloading, openLabel, openMedia } =
     useMediaActions({
       url: src,
@@ -50,7 +55,7 @@ const MediaDisplayVideo: React.FC<Props> = ({
 
   // Poll for HLS → MP4 → fallback original
   const { playableUrl, isHls } = useOptimizedVideo(src, {
-    enabled: inView,
+    enabled: inView && (!chat.isChat || !chat.requested),
     pollInterval: 15000,
     maxRetries: 8,
     preferHls: true,
@@ -63,12 +68,21 @@ const MediaDisplayVideo: React.FC<Props> = ({
     retry,
     isFullscreen: isVideoFullscreen,
   } = useHlsPlayer({
-    enabled: inView,
-    src: playableUrl,
-    isHls,
+    enabled: shouldLoadVideo,
+    src: chat.rendition?.playableUrl ?? playableUrl,
+    isHls: chat.rendition?.isHls ?? isHls,
     fallbackSrc: src, // if HLS fails, revert to original
     autoPlay: shouldAutoPlay,
   });
+  const { setVideoElement } = chat;
+  const setVideoRef = useCallback(
+    (element: HTMLVideoElement | null) => {
+      assignRef(videoRef, element);
+      setVideoElement(element);
+    },
+    [videoRef, setVideoElement]
+  );
+
   const { handlePlaybackError, hasPlaybackError, retryPlayback } =
     useVideoPlaybackError({
       onRetry: retry,
@@ -127,7 +141,13 @@ const MediaDisplayVideo: React.FC<Props> = ({
       )}
     >
       <SeizeVideoPlayer
-        videoRef={videoRef}
+        videoRef={setVideoRef}
+        onPlaybackRequest={
+          chat.isChat
+            ? () => chat.requestPlayback({ playableUrl, isHls })
+            : undefined
+        }
+        preload={chat.isChat && !chat.requested ? "none" : undefined}
         data-url={src}
         template={isInertPreview ? "card-preview" : "ambient-media"}
         autoPlay={shouldAutoPlay}

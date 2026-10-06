@@ -89,6 +89,7 @@ interface SeizeVideoPlayerProps {
   readonly onVideoClick?:
     | ((event: React.MouseEvent<HTMLElement>) => void)
     | undefined;
+  readonly onPlaybackRequest?: (() => void) | undefined;
   readonly onError?: React.ReactEventHandler<HTMLVideoElement> | undefined;
   readonly "aria-label"?: string | undefined;
   readonly "data-testid"?: string | undefined;
@@ -131,6 +132,7 @@ export default function SeizeVideoPlayer({
   isDownloading = false,
   fallbackSources,
   onVideoClick,
+  onPlaybackRequest,
   onError,
   "aria-label": ariaLabel,
   "data-testid": dataTestId,
@@ -414,6 +416,7 @@ export default function SeizeVideoPlayer({
     if (video.paused || video.ended) {
       rememberUserControl();
       setUserPausedAutoplaySrc(null);
+      if (onPlaybackRequest) flushSync(onPlaybackRequest);
       prepareDirectSource(video);
       video.play().catch(() => {
         setIsPaused(true);
@@ -683,7 +686,6 @@ export default function SeizeVideoPlayer({
     videoElement.muted = isMuted;
     videoElement.defaultMuted = isMuted;
   }, [isMuted, videoElement]);
-
   return (
     <div
       ref={setWrapperRef}
@@ -745,7 +747,6 @@ export default function SeizeVideoPlayer({
           videoControls={videoControls}
           videoTabIndex={showMinimalControls ? 0 : undefined}
         />
-
         {isPosterGateClosed && (
           <div className="tw-pointer-events-none tw-absolute tw-inset-0 tw-z-20 tw-flex tw-items-center tw-justify-center">
             <button
@@ -758,7 +759,6 @@ export default function SeizeVideoPlayer({
             </button>
           </div>
         )}
-
         {showMinimalControls && (
           <SeizeVideoMinimalControls
             isAnyFullscreen={isAnyFullscreen}

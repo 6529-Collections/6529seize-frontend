@@ -7,13 +7,14 @@ import { useOptimizedVideo } from "@/hooks/useOptimizedVideo";
 import { useHlsPlayer } from "@/hooks/useHlsPlayer";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import clsx from "clsx";
-import React, { useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import SeizeVideoPlayer from "./SeizeVideoPlayer";
-import { usePrefersReducedMotion } from "./SeizeVideoPlayer.config";
+import { assignRef, usePrefersReducedMotion } from "./SeizeVideoPlayer.config";
 import VideoPlaybackErrorOverlay from "./VideoPlaybackErrorOverlay";
 import { useVideoPlaybackError } from "./useVideoPlaybackError";
 import { useMediaActions } from "./useMediaActions";
 import type { MediaLoadStrategy } from "./mediaLoadStrategy";
+import { useChatVideoPlayback } from "./ChatVideoPlayback";
 import { useRememberedVideoPlayback } from "./VideoPlaybackMemory";
 
 interface Props {
@@ -49,13 +50,16 @@ function DropListItemContentMediaVideo({
   const wasFullscreenRef = useRef(false);
   const locale = useBrowserLocale();
   const prefersReducedMotion = usePrefersReducedMotion();
+  const chat = useChatVideoPlayback(src);
   const savedPlayback = useRememberedVideoPlayback(src);
-  const shouldLoadVideo = loadStrategy === "eager" || inView;
+  const shouldLoadVideo =
+    (loadStrategy === "eager" || inView) && (!chat.isChat || chat.requested);
   const canAutoPlayInCurrentEnvironment = allowAutoPlayInApp
     ? !prefersReducedMotion
     : !isApp;
   const shouldAutoPlay =
     inView &&
+    !chat.isChat &&
     !disableAutoPlay &&
     canAutoPlayInCurrentEnvironment &&
     !savedPlayback?.userControlled;
@@ -69,7 +73,8 @@ function DropListItemContentMediaVideo({
 
   // 1) Pick up the best URL (HLS or MP4)
   const { playableUrl, isHls } = useOptimizedVideo(src, {
-    enabled: shouldLoadVideo,
+    enabled:
+      (loadStrategy === "eager" || inView) && (!chat.isChat || !chat.requested),
     pollInterval: 10000,
     maxRetries: 8,
     preferHls: true,
@@ -84,13 +89,22 @@ function DropListItemContentMediaVideo({
   } = useHlsPlayer({
     enabled: shouldLoadVideo,
     bufferingEnabled: inView,
-    src: playableUrl,
-    isHls,
+    src: chat.rendition?.playableUrl ?? playableUrl,
+    isHls: chat.rendition?.isHls ?? isHls,
     fallbackSrc: src,
     autoPlay: shouldAutoPlay,
   });
 
   // The shared player owns autoplay and user mute/pause preferences.
+  const { setVideoElement } = chat;
+  const setVideoRef = useCallback(
+    (element: HTMLVideoElement | null) => {
+      assignRef(videoRef, element);
+      setVideoElement(element);
+    },
+    [videoRef, setVideoElement]
+  );
+
   const { handlePlaybackError, hasPlaybackError, retryPlayback } =
     useVideoPlaybackError({
       onRetry: retry,
@@ -155,7 +169,13 @@ function DropListItemContentMediaVideo({
       )}
     >
       <SeizeVideoPlayer
-        videoRef={videoRef}
+        videoRef={setVideoRef}
+        onPlaybackRequest={
+          chat.isChat
+            ? () => chat.requestPlayback({ playableUrl, isHls })
+            : undefined
+        }
+        preload={chat.isChat && !chat.requested ? "none" : undefined}
         data-url={src}
         template="ambient-media"
         autoPlay={shouldAutoPlay}
