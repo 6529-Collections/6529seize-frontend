@@ -92,13 +92,19 @@ describe("mixpanel analytics wrapper", () => {
         $token: "public-token",
         $distinct_id: "42",
         $set: { handle: "alice", $current_url: "private-url" },
-        $set_once: { plan: "legacy", $initial_referrer: "private-referrer" },
+        $set_once: {
+          plan: "legacy",
+          initial_plan: "explicit-trait",
+          $initial_referrer: "private-referrer",
+          initial_utm_source: "private-source",
+          initial_utm_campaign: "private-campaign",
+        },
       };
       const expected = {
         $token: "public-token",
         $distinct_id: "42",
         $set: { handle: "alice" },
-        $set_once: { plan: "legacy" },
+        $set_once: { plan: "legacy", initial_plan: "explicit-trait" },
       };
       expect(hook(payload)).toEqual(expected);
       const send = kind === "people" ? sendPeopleMock : sendGroupsMock;

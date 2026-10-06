@@ -40,6 +40,7 @@ export const MIXPANEL_PRIVATE_PROPERTIES = [
   "current_url_protocol",
   "current_url_search",
   ...ATTRIBUTION_KEYS,
+  ...ATTRIBUTION_KEYS.map((key) => `initial_${key}`),
   ...ATTRIBUTION_KEYS.map((key) => `$initial_${key}`),
 ];
 

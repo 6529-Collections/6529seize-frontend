@@ -9,6 +9,8 @@ const loadConfig = require("tailwindcss/loadConfig");
 const root = path.resolve(__dirname, "../..");
 const fixture = path.join(__dirname, "waveFeatureFixture.tsx");
 const port = Number(process.env.PORT || 3302);
+if (!Number.isInteger(port) || port < 1 || port > 65535)
+  throw new Error("Synthetic Wave fixture PORT must be an integer from 1 to 65535");
 const fixtureExport = (names) =>
   `export { ${names} } from ${JSON.stringify(fixture)};`;
 const stubs = new Map([

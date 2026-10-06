@@ -99,6 +99,8 @@ test.beforeEach(async ({ page, request, baseURL }) => {
                 $set_once: {
                   fixture_trait: "recovered",
                   $initial_referrer: "https://example.test/private-handle",
+                  initial_utm_source: "private-campaign-source",
+                  initial_utm_campaign: "private-campaign-name",
                 },
               },
             },
@@ -139,7 +141,10 @@ test("identity transports preserve explicit traits and strip recovered SDK attri
       expect(update.$token).toBe("synthetic-wave-feature-pilot");
       expect(update.$distinct_id).toBe("529");
       expect(JSON.stringify(update)).not.toContain("private-handle");
+      expect(JSON.stringify(update)).not.toContain("private-campaign");
       expect(update.$set_once ?? {}).not.toHaveProperty("$initial_referrer");
+      expect(update.$set_once ?? {}).not.toHaveProperty("initial_utm_source");
+      expect(update.$set_once ?? {}).not.toHaveProperty("initial_utm_campaign");
     }
     await page.request.get("/clear");
     await page.evaluate((mode) => {

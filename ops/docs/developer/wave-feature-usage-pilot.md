@@ -84,7 +84,8 @@ A send-time event hook and final event batch transport guard strip the same fiel
 check current consent and allowlist Wave pilot envelope properties. People/group
 send hooks and batch transports apply the same consent gate, including pending
 and recovered updates. Their `$set`/`$set_once` operations remove reserved SDK
-navigation/attribution fields while preserving explicit traits and identity
+navigation/attribution fields, including the SDK's unprefixed `initial_utm_*`
+first-touch keys, while preserving explicit traits and identity
 metadata. The pinned SDK bypasses its hook for recovered orphaned queue entries,
 so batch senders start only after the final guard is installed. This narrow SDK integration
 must be checked when upgrading Mixpanel. The pinned SDK creates batchers
