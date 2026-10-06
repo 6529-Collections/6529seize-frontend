@@ -427,6 +427,22 @@ const PACKS = [
     ],
     AUTH_SANDBOX_ENV
   ),
+  {
+    ...sandboxPack(
+      "test:e2e:wave-creation-sandbox",
+      "Wave creation, permissions, and draft recovery on desktop and mobile.",
+      ["tests/social/create-wave-sandbox.spec.ts"],
+      {
+        ...AUTH_SANDBOX_ENV,
+        PLAYWRIGHT_BASE_URL: "http://localhost:3298",
+        PLAYWRIGHT_WEB_SERVER_URL: "http://localhost:3298",
+        PLAYWRIGHT_COMPOSER_SANDBOX_API_PORT: "4298",
+        NEXT_DEV_DIST_DIR: ".next-playwright-wave-creation",
+      },
+      [DESKTOP, MOBILE]
+    ),
+    triggers: ["pr-ci", "manual"],
+  },
 
   localPack(
     "test:e2e:smoke:surface-matrix",

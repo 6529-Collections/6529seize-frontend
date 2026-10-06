@@ -85,7 +85,7 @@ export const getOverviewValidationErrors = ({
   readonly display?: CreateWaveDisplayConfig | undefined;
 }): CREATE_WAVE_VALIDATION_ERROR[] => {
   const errors: CREATE_WAVE_VALIDATION_ERROR[] = [];
-  if (!overview.name) {
+  if (!overview.name.trim()) {
     errors.push(CREATE_WAVE_VALIDATION_ERROR.NAME_REQUIRED);
   } else if (overview.name.length > MAX_NAME_LENGTH) {
     errors.push(CREATE_WAVE_VALIDATION_ERROR.NAME_TOO_LONG);
