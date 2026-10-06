@@ -245,8 +245,8 @@ export default function CommunityMembersFilterPanel(
             </div>
           </div>
         </fieldset>
-        <div className="tw-shrink-0 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-3 tw-py-2 sm:tw-px-6">
-          <div className="tw-flex tw-max-h-32 tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-1 tw-overflow-y-auto tw-overscroll-contain">
+        <div className="tw-flex tw-shrink-0 tw-flex-col tw-gap-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-3 tw-py-2 sm:tw-flex-row sm:tw-items-center sm:tw-gap-4 sm:tw-px-6">
+          <div className="tw-flex tw-max-h-32 tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-1 tw-overflow-y-auto tw-overscroll-contain sm:tw-flex-1">
             <span className="tw-shrink-0 tw-text-xs tw-font-medium tw-text-iron-400">
               {t(locale, "waves.create.groups.draft.afterEditing")}
             </span>
@@ -263,7 +263,7 @@ export default function CommunityMembersFilterPanel(
               />
             ) : (
               <p
-                className="tw-m-0 tw-min-w-0 tw-flex-1 tw-break-words tw-text-sm tw-font-medium tw-text-iron-100"
+                className="tw-m-0 tw-min-w-0 tw-break-words tw-text-sm tw-font-medium tw-text-iron-100"
                 aria-live="polite"
               >
                 {draftSummary ??
@@ -271,7 +271,7 @@ export default function CommunityMembersFilterPanel(
               </p>
             )}
             {!isDraftValid && (
-              <details className="tw-ml-auto tw-text-xs tw-leading-5 tw-text-iron-400 open:tw-ml-0 open:tw-basis-full">
+              <details className="tw-text-xs tw-leading-5 tw-text-iron-400 open:tw-basis-full">
                 <summary className="tw-w-fit tw-cursor-pointer tw-rounded tw-py-1 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400">
                   {t(locale, "waves.create.groups.draft.notReadyTitle")}
                 </summary>
@@ -284,8 +284,7 @@ export default function CommunityMembersFilterPanel(
           <Button
             variant="action"
             size="md"
-            fullWidth
-            className="tw-mt-2 tw-min-h-11"
+            className="tw-min-h-11 tw-w-full sm:tw-w-auto sm:tw-min-w-56"
             disabled={!canCreateDraft}
             loading={isCreating}
             onClick={onCreateAndUse}

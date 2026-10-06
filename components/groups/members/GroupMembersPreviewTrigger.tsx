@@ -113,10 +113,10 @@ export default function GroupMembersPreviewTrigger({
 
   if (appearance === "inline") {
     return (
-      <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-1">
+      <div className="tw-flex tw-min-w-0 tw-max-w-full tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-1">
         <p
           aria-live="polite"
-          className="tw-m-0 tw-min-w-0 tw-flex-1 tw-break-words tw-text-sm tw-font-medium tw-text-iron-100"
+          className="tw-m-0 tw-min-w-0 tw-break-words tw-text-sm tw-font-medium tw-text-iron-100"
         >
           {criteriaLabel}
         </p>
