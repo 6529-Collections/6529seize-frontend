@@ -97,6 +97,22 @@ it("retries Seen after synchronous tracking rejection before a later activation"
   expect(mockTrack).toHaveBeenCalledTimes(3);
 });
 
+it("requires accepted direct Seen before Activated, leaving a rejected attempt retryable", () => {
+  mockTrack.mockReturnValueOnce(false);
+  recordWaveFeatureActivation(context, descriptor, "choose");
+  expect(mockTrack.mock.calls.map(([event]) => event)).toEqual([
+    "Wave Feature Seen",
+  ]);
+  expect(hasWaveFeatureBeenSeen(context, descriptor)).toBe(false);
+  recordWaveFeatureActivation(context, descriptor, "choose");
+  expect(mockTrack.mock.calls.map(([event]) => event)).toEqual([
+    "Wave Feature Seen",
+    "Wave Feature Seen",
+    "Wave Feature Activated",
+  ]);
+  expect(hasWaveFeatureBeenSeen(context, descriptor)).toBe(true);
+});
+
 it("does not send during withdrawn consent or transmit unbounded feature values", () => {
   mockAllowed = false;
   recordWaveFeatureSeen(context, descriptor, "foreground_dwell");

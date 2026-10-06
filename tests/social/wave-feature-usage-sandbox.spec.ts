@@ -491,7 +491,7 @@ test("a chat-only Wave starts observing tabs that appear after content registrat
     .toBe(1);
 });
 
-test("a failed Seen attempt remains retryable in the same visit", async ({ page }) => {
+test("a failed direct Seen suppresses Activated until a later accepted exposure", async ({ page }) => {
   for (const transport of ["batch", "direct"]) {
     await page.request.get("/clear");
     await page.goto(`/waves/private-wave?transport=${transport}`);
@@ -500,6 +500,9 @@ test("a failed Seen attempt remains retryable in the same visit", async ({ page 
       .getByRole("button", { name: "Enable synthetic telemetry" })
       .click();
     await visibleTab(page, "Winners").click();
+    await expect(
+      page.getByRole("status", { name: "Selected fixture state" })
+    ).toHaveText("WINNERS:RANK");
     await visibleTab(page, "Chat").click();
     await visibleTab(page, "Winners").click();
     await expect
@@ -511,7 +514,7 @@ test("a failed Seen attempt remains retryable in the same visit", async ({ page 
       .poll(async () =>
         (await featureEvents(page, "Wave Feature Activated", "winners")).length
       )
-      .toBe(2);
+      .toBe(1);
   }
 });
 

@@ -28,6 +28,9 @@ loss and visit resets still cancel dwell immediately.
 Observer attachment follows the mounted root, including a chat-only Wave whose
 tab row appears later after content registration. Root replacement and unmount
 disconnect the previous observer and capture listener.
+Activated is emitted only after that feature's Seen has been synchronously
+accepted in the same visit. A rejected direct Seen suppresses that activation;
+the control still works, and a later deliberate action can retry exposure.
 
 `Wave Feature Activated` records semantic clicks, including keyboard-generated
 clicks and touch activation. Script-generated clicks, hover, focus, prefetch, background requests,

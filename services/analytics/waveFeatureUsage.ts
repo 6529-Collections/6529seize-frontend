@@ -152,16 +152,18 @@ export function recordWaveFeatureSeen(
   context: WaveFeatureContext,
   descriptor: WaveFeatureDescriptor,
   exposureKind: "foreground_dwell" | "direct_activation"
-): void {
-  if (!isAnalyticsTrackingAllowed() || !isDescriptorValid(descriptor)) return;
+): boolean {
+  if (!isAnalyticsTrackingAllowed() || !isDescriptorValid(descriptor))
+    return false;
   const visit = getVisit(context);
   const key = descriptorKey(context, descriptor);
-  if (visit.seen.has(key)) return;
+  if (visit.seen.has(key)) return true;
   const accepted = trackAnalyticsEvent("Wave Feature Seen", {
     ...properties(context, descriptor),
     exposure_kind: exposureKind,
   });
   if (accepted) visit.seen.add(key);
+  return accepted;
 }
 
 export function hasWaveFeatureBeenSeen(
@@ -178,7 +180,7 @@ export function recordWaveFeatureActivation(
 ): void {
   if (!isAnalyticsTrackingAllowed() || !isDescriptorValid(descriptor)) return;
   getVisit(context).chosen.add(descriptorKey(context, descriptor));
-  recordWaveFeatureSeen(context, descriptor, "direct_activation");
+  if (!recordWaveFeatureSeen(context, descriptor, "direct_activation")) return;
   trackAnalyticsEvent("Wave Feature Activated", {
     ...properties(context, descriptor),
     selection_source: "user",
