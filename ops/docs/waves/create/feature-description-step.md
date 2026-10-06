@@ -2,8 +2,9 @@
 
 ## Overview
 
-`Description` is the step before the final read-only Overview.
-Write the first wave drop here, then click `Next` to review the full wave.
+For standalone Chat waves, First post appears beside the name on the first
+screen. Click Review wave, then Confirm and create. Rank, Approve, and
+subwaves keep a Description step before their final read-only Overview.
 
 ## Location in the Site
 
@@ -14,7 +15,8 @@ Write the first wave drop here, then click `Next` to review the full wave.
 
 ## Step Paths
 
-- `Chat`: `Setup` -> `Access` -> `Guidelines` -> `Description` -> `Overview`
+- Standalone `Chat`: `Start a chat wave` -> `Review`
+- Chat subwave: `Setup` -> `Access` -> `Guidelines` -> `Description` -> `Overview`
 - Scheduled `Rank`: `Setup` -> `Access` -> `Schedule` -> `Drops` -> `Voting` -> `Outcomes` ->
   `Guidelines` -> `Description` -> `Overview`
 - `Perpetual Ranking`: `Setup` -> `Access` -> `Schedule` -> `Drops` -> `Voting` ->
@@ -46,13 +48,15 @@ Write the first wave drop here, then click `Next` to review the full wave.
 5. If no admin group is set, create-wave tries to create and publish a personal
    admin group (`Only {handle}` / `Only Me`) before submit.
 6. On success, create-wave opens the new route: `/waves/{waveId}`.
+   Your wave is ready includes Copy wave link for inviting people.
    Desktop modal mode closes as route state changes away from `create=wave`.
 
 ## Edge Cases
 
 - `Confirm and create` is disabled only while submit is in progress.
-- Empty description content blocks `Next` and shows the editor content error
-  state. Pending inline image uploads must finish before reviewing.
+- Empty or whitespace-only content blocks review and shows a readable error
+  associated with the focused editor. Media can serve as the first post.
+  Pending inline image uploads must finish before reviewing.
 - Title input stops accepting characters after `250`.
 - If admin-group setup fails (for example no primary wallet or group API
   failure), submit stops on `Overview`.
@@ -62,7 +66,10 @@ Write the first wave drop here, then click `Next` to review the full wave.
 - If auth is rejected or canceled, complete auth and click `Confirm and create` again.
 - If wave create API submit fails, an error toast appears and current edits
   stay in place; retry from `Overview`.
-- If media upload fails, return to Description to correct the media and retry.
+- If media upload fails, return to First post or Description to correct it.
+- Saved Drafts recovers text, title, references, and settings for the current
+  wallet and profile on this device. Media and attachments must be added again.
+  Older drafts contain settings only.
 - If admin-group setup fails, fix wallet/group prerequisites and retry.
 
 ## Limitations / Notes

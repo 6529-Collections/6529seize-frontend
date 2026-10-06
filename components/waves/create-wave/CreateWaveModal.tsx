@@ -9,15 +9,51 @@ import type { ApiIdentity } from "../../../generated/models/ApiIdentity";
 import CreateWave from "./CreateWave";
 import type { CreateWaveHandles } from "./CreateWave";
 import CreateWaveProfileRequiredModal from "./CreateWaveProfileRequiredModal";
+import HeaderUserConnect from "@/components/header/user/HeaderUserConnect";
+import AuthLoadingPlaceholder from "@/components/auth/AuthLoadingPlaceholder";
+import { useAuth } from "@/components/auth/Auth";
+import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import { isAuthResolving } from "@/components/auth/authResolution";
 
 interface CreateWaveModalProps {
   readonly isOpen: boolean;
   readonly onClose: () => void;
-  readonly profile: ApiIdentity;
+  readonly profile?: ApiIdentity | null;
   readonly parentWaveId?: string | null | undefined;
   readonly parentWaveName?: string | null | undefined;
   readonly parentAdminGroupId?: string | null | undefined;
   readonly parentViewGroupId?: string | null | undefined;
+}
+
+function CreateWaveConnectRequired({
+  isOpen,
+  onClose,
+}: Pick<CreateWaveModalProps, "isOpen" | "onClose">) {
+  const locale = useBrowserLocale();
+  const { fetchingProfile } = useAuth();
+  const { connectionState } = useSeizeConnectContext();
+  return (
+    <MobileWrapperDialog
+      title={t(locale, "waves.create.quick.connectTitle")}
+      isOpen={isOpen}
+      onClose={onClose}
+      closeLabel={t(locale, "common.close")}
+      tabletModal
+      maxWidthClass="md:tw-max-w-md"
+      zIndexClassName="tw-z-[9999]"
+    >
+      {isAuthResolving(connectionState, fetchingProfile) ? (
+        <AuthLoadingPlaceholder />
+      ) : (
+        <div className="tw-space-y-6 tw-px-4">
+          <p className="tw-text-sm tw-leading-6 tw-text-iron-300">
+            {t(locale, "waves.create.quick.connectDescription")}
+          </p>
+          <HeaderUserConnect />
+        </div>
+      )}
+    </MobileWrapperDialog>
+  );
 }
 
 export default function CreateWaveModal({
@@ -39,12 +75,19 @@ export default function CreateWaveModal({
     }
   };
 
+  if (!profile)
+    return <CreateWaveConnectRequired isOpen={isOpen} onClose={onClose} />;
   if (!profile.handle?.trim()) {
     return (
       <CreateWaveProfileRequiredModal
         isOpen={isOpen}
         onClose={onClose}
         profile={profile}
+        returnTo={
+          parentWaveId
+            ? `/waves/${encodeURIComponent(parentWaveId)}`
+            : "/waves/create"
+        }
       />
     );
   }
@@ -73,6 +116,7 @@ export default function CreateWaveModal({
     >
       <div className="tw-flex tw-min-h-0 tw-flex-1 tw-flex-col">
         <CreateWave
+          key={`${profile.primary_wallet}:${profile.id ?? ""}`}
           ref={createWaveRef}
           profile={profile}
           onBack={onClose}

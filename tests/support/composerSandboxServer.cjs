@@ -93,6 +93,7 @@ const requests = [];
 // wave drafts remain resolvable after the request log is reset between tests.
 let sandboxDropReaction = null;
 let sandboxWaveGuidelinesEnabled = false;
+let sandboxCreatedWaveType = "CHAT";
 let sandboxRuleGroupSequence = 0;
 const sandboxRuleGroups = new Map();
 const sandboxRuleGroupWallets = new Map();
@@ -665,6 +666,13 @@ const createdWave = {
     authenticated_user_eligible_for_admin: true,
   },
 };
+
+function currentCreatedWave() {
+  return {
+    ...createdWave,
+    wave: { ...createdWave.wave, type: sandboxCreatedWaveType },
+  };
+}
 
 const createdWaveDrop = {
   ...localDrop,
@@ -2489,6 +2497,7 @@ function handleDiagnostics(method, pathname, res) {
     requests.length = 0;
     sandboxDropReaction = null;
     sandboxWaveGuidelinesEnabled = false;
+    sandboxCreatedWaveType = "CHAT";
     writeJson(res, 200, { ok: true });
     return true;
   }
@@ -2551,7 +2560,7 @@ const mockApiExactReadRoutes = new Map([
       drops: [mentionDrop, reactionDrop, allDropsNotificationDrop],
     }),
   ],
-  [`/api/waves/${SANDBOX_CREATED_WAVE_ID}`, () => createdWave],
+  [`/api/waves/${SANDBOX_CREATED_WAVE_ID}`, currentCreatedWave],
   [
     `/api/v2/waves/${SANDBOX_CREATED_WAVE_ID}/drops`,
     () => ({ wave: createdWaveOverview, drops: [createdWaveDrop] }),
@@ -2750,7 +2759,10 @@ const mockApiKnownPostRoutes = [
   },
   {
     matches: (pathname) => pathname === "/api/waves",
-    respond: (res) => writeJsonResponse(res, createdWave),
+    respond: (res, body) => {
+      sandboxCreatedWaveType = body.wave.type;
+      return writeJsonResponse(res, currentCreatedWave());
+    },
   },
   {
     matches: (pathname) =>
@@ -3022,7 +3034,8 @@ function buildPublicRuntime() {
       process.env.IPFS_GATEWAY_ENDPOINT || "https://ipfs.6529.io/ipfs/",
     MEDIA_RESOLVER_ENDPOINT:
       process.env.MEDIA_RESOLVER_ENDPOINT || "https://media.6529.io",
-    NEXT_PUBLIC_FEATURE_MULTI_COMPETITION: process.env.NEXT_PUBLIC_FEATURE_MULTI_COMPETITION || "false",
+    NEXT_PUBLIC_FEATURE_MULTI_COMPETITION:
+      process.env.NEXT_PUBLIC_FEATURE_MULTI_COMPETITION || "false",
     NODE_ENV: "development",
     PORT: String(frontendPort),
     WS_ENDPOINT: mockWsOrigin,

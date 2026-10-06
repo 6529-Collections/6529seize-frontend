@@ -1,6 +1,14 @@
 "use client";
 
-import { forwardRef, useImperativeHandle, useRef } from "react";
+import {
+  forwardRef,
+  useEffect,
+  useId,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+} from "react";
+import { CreateDropDraftContext } from "@/components/drops/create/CreateDropDraftContext";
 import type { CreateDropConfig } from "@/entities/IDrop";
 
 import type { DropEditorHandles } from "@/components/drops/create/DropEditor";
@@ -27,6 +35,9 @@ interface CreateWaveDescriptionWaveProps {
 
 interface CreateWaveDescriptionProps {
   readonly profile: ApiIdentity;
+  readonly quickChat?: boolean;
+  readonly initialDrop?: CreateDropConfig | null;
+  readonly onDraftChange?: () => void;
   readonly wave: CreateWaveDescriptionWaveProps;
   readonly submitting: boolean;
   readonly showDropError: boolean;
@@ -44,6 +55,9 @@ const CreateWaveDescription = forwardRef<
   (
     {
       profile,
+      quickChat = false,
+      initialDrop = null,
+      onDraftChange,
       submitting,
       showDropError,
       visibilityGroupId,
@@ -53,6 +67,31 @@ const CreateWaveDescription = forwardRef<
     ref
   ) => {
     const locale = useBrowserLocale();
+    const errorId = useId();
+    const editorContainerRef = useRef<HTMLDivElement>(null);
+    const context = useMemo(
+      () => ({
+        initialDrop,
+        onChange: onDraftChange ?? (() => {}),
+        label: t(
+          locale,
+          quickChat
+            ? "waves.create.quick.firstPost"
+            : "waves.create.description.title"
+        ),
+        errorId,
+        invalid: showDropError,
+        autoFocus: !quickChat,
+      }),
+      [initialDrop, onDraftChange, locale, quickChat, errorId, showDropError]
+    );
+    useEffect(() => {
+      if (showDropError) {
+        editorContainerRef.current
+          ?.querySelector<HTMLElement>('[contenteditable="true"]')
+          ?.focus();
+      }
+    }, [showDropError]);
     const dropEditorRef = useRef<DropEditorHandles | null>(null);
     const profileMin = profileAndConsolidationsToProfileMin({ profile });
 
@@ -83,36 +122,61 @@ const CreateWaveDescription = forwardRef<
     return (
       <div>
         <CreateWaveStepHeader
-          title={t(locale, "waves.create.description.title")}
-          description={t(locale, "waves.create.description.description")}
+          title={t(
+            locale,
+            quickChat
+              ? "waves.create.quick.firstPost"
+              : "waves.create.description.title"
+          )}
+          description={t(
+            locale,
+            quickChat
+              ? "waves.create.quick.firstPostDescription"
+              : "waves.create.description.description"
+          )}
         />
-        <div className="tw-mt-6">
-          <CreateDropEmojiPickerLayerProvider
-            desktopZIndex={10000}
-            mobileZIndexClassName="tw-z-[10000]"
+        <div ref={editorContainerRef} className="tw-mt-4">
+          <CreateDropDraftContext.Provider value={context}>
+            <CreateDropEmojiPickerLayerProvider
+              desktopZIndex={10000}
+              mobileZIndexClassName="tw-z-[10000]"
+            >
+              <MentionSearchScopeProvider visibilityGroupId={visibilityGroupId}>
+                <DropEditor
+                  ref={dropEditorRef}
+                  className={CREATE_WAVE_DESCRIPTION_EDITOR_CLASSES}
+                  waveId={null}
+                  profile={profileMin}
+                  quotedDrop={null}
+                  // The step embeds the editor in the page flow; the MOBILE
+                  // branch is a modal sheet and must never be used here.
+                  forceScreenType={CreateDropScreenType.DESKTOP}
+                  type={CreateDropType.DROP}
+                  loading={submitting}
+                  showSubmit={false}
+                  submitOnEnter={false}
+                  dropEditorRefreshKey={1}
+                  showDropError={showDropError}
+                  wave={wave}
+                  onSubmitDrop={() => {}}
+                  onCanSubmitChange={onHaveDropToSubmitChange}
+                />
+              </MentionSearchScopeProvider>
+            </CreateDropEmojiPickerLayerProvider>
+          </CreateDropDraftContext.Provider>
+          <p
+            id={errorId}
+            role="alert"
+            className={
+              showDropError
+                ? "tw-mb-0 tw-mt-2 tw-text-sm tw-font-medium tw-text-error"
+                : "tw-sr-only"
+            }
           >
-            <MentionSearchScopeProvider visibilityGroupId={visibilityGroupId}>
-              <DropEditor
-                ref={dropEditorRef}
-                className={CREATE_WAVE_DESCRIPTION_EDITOR_CLASSES}
-                waveId={null}
-                profile={profileMin}
-                quotedDrop={null}
-                // The step embeds the editor in the page flow; the MOBILE
-                // branch is a modal sheet and must never be used here.
-                forceScreenType={CreateDropScreenType.DESKTOP}
-                type={CreateDropType.DROP}
-                loading={submitting}
-                showSubmit={false}
-                submitOnEnter={false}
-                dropEditorRefreshKey={1}
-                showDropError={showDropError}
-                wave={wave}
-                onSubmitDrop={() => {}}
-                onCanSubmitChange={onHaveDropToSubmitChange}
-              />
-            </MentionSearchScopeProvider>
-          </CreateDropEmojiPickerLayerProvider>
+            {showDropError
+              ? t(locale, "waves.create.quick.firstPostRequired")
+              : null}
+          </p>
         </div>
       </div>
     );
