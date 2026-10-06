@@ -13,6 +13,7 @@ import type { ApiCommunityMemberOverview } from "@/generated/models/ApiCommunity
 import type { Page } from "@/helpers/Types";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useHasHydrated } from "@/hooks/useHasHydrated";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { t } from "@/i18n/messages";
 import { commonApiFetch } from "@/services/api/common-api";
 import { useQuery } from "@tanstack/react-query";
@@ -101,6 +102,9 @@ export default function CommunityMembers() {
   useSetTitle("Network");
   const locale = useBrowserLocale();
   const { activeProfileProxy, connectedProfile, isAuthenticated } = useAuth();
+  const isDesktopViewport = useMediaQuery("(min-width: 1024px)");
+  const hasTouchPointer = useMediaQuery("(any-pointer: coarse)");
+  const centeredFilterModal = isDesktopViewport && !hasTouchPointer;
 
   const defaultSortBy = ApiCommunityMembersSortOption.Level;
   const defaultSortDirection = SortDirection.DESC;
@@ -409,16 +413,18 @@ export default function CommunityMembers() {
           <h1 className={`${NETWORK_PAGE_TITLE_CLASSES} tw-flex-shrink-0`}>
             Network
           </h1>
-          <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-1 tw-rounded-lg tw-bg-iron-900/75 tw-p-1 tw-shadow-lg tw-shadow-black/30 tw-ring-1 tw-ring-inset tw-ring-white/10 tw-backdrop-blur">
+          <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-1 tw-rounded-lg tw-bg-iron-900/75 tw-p-1 tw-shadow-lg tw-shadow-black/30 tw-ring-1 tw-ring-inset tw-ring-white/10">
             <NetworkHeaderActionButton
               active={!!activeGroupId}
-              compact
               expanded={mobileFilterOpen}
               hasPopup
               onClick={() => setMobileFilterOpen(true)}
               label="Open group filters"
             >
-              <FunnelIcon className="tw-size-4" />
+              <FunnelIcon className="tw-size-4" aria-hidden="true" />
+              <span className="tw-hidden sm:tw-inline">
+                {t(locale, "network.groupFilter.filter")}
+              </span>
             </NetworkHeaderActionButton>
             <div className="sm:tw-hidden">
               <NetworkHeaderActionButton
@@ -435,7 +441,7 @@ export default function CommunityMembers() {
           </div>
         </div>
         <div className="tw-ml-auto tw-flex tw-flex-shrink-0 tw-items-center">
-          <div className="tw-flex tw-items-center tw-rounded-lg tw-bg-iron-900/75 tw-p-1 tw-shadow-lg tw-shadow-black/30 tw-ring-1 tw-ring-inset tw-ring-white/10 tw-backdrop-blur">
+          <div className="tw-flex tw-items-center tw-rounded-lg tw-bg-iron-900/75 tw-p-1 tw-shadow-lg tw-shadow-black/30 tw-ring-1 tw-ring-inset tw-ring-white/10">
             <NetworkHeaderActionButton
               label="Open Nerd view"
               onClick={goToNerd}
@@ -467,14 +473,16 @@ export default function CommunityMembers() {
         isOpen={mobileFilterOpen}
         onClose={() => setMobileFilterOpen(false)}
         tall
+        tabletModal={centeredFilterModal}
+        maxWidthClass="md:tw-max-w-2xl lg:tw-max-w-5xl"
         fixedHeight
         noPadding
         enableDragToClose
         showHeaderCloseButton
-        surfaceClassName="tw-bg-iron-950 tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-shadow-2xl tw-shadow-black/60"
-        titleClassName="tw-text-base !tw-font-bold !tw-text-white tw-tracking-tight"
-        headerClassName={NETWORK_DIALOG_HEADER_CLASS_NAME}
-        headerCloseButtonClassName="-tw-mt-1"
+        surfaceClassName={`tw-bg-iron-950 tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-shadow-2xl tw-shadow-black/60 ${centeredFilterModal ? "lg:!tw-h-[min(44rem,calc(100dvh-4rem))]" : ""}`}
+        titleClassName="tw-text-base !tw-font-semibold !tw-text-iron-100 tw-tracking-tight"
+        headerClassName={`${NETWORK_DIALOG_HEADER_CLASS_NAME} tw-shrink-0`}
+        headerCloseButtonClassName="-tw-mt-1 !tw-size-11 max-md:!tw-inline-flex"
       >
         <CommunityMembersGroupFilter
           activeGroupId={activeGroupId}

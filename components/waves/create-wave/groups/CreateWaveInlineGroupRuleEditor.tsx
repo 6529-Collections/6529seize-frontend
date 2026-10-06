@@ -14,10 +14,12 @@ export default function CreateWaveInlineGroupRuleEditor({
   draft,
   activeRule,
   onDraftChange,
+  networkPresentation = false,
 }: {
   readonly draft: ApiCreateGroup;
   readonly activeRule: CreateWaveInlineGroupRuleType | null;
   readonly onDraftChange: (draft: ApiCreateGroup) => void;
+  readonly networkPresentation?: boolean;
 }) {
   if (activeRule === null) {
     return null;
@@ -87,6 +89,7 @@ export default function CreateWaveInlineGroupRuleEditor({
     case CreateWaveInlineGroupRuleType.COLLECTIONS:
       return (
         <GroupCreateCollections
+          singleRowOnDesktop={networkPresentation}
           nfts={draft.group.owns_nfts}
           setNfts={(owns_nfts) =>
             onDraftChange({
@@ -99,6 +102,7 @@ export default function CreateWaveInlineGroupRuleEditor({
     case CreateWaveInlineGroupRuleType.XTDH_GRANT:
       return (
         <CreateWaveInlineGroupXtdhGrant
+          networkPresentation={networkPresentation}
           beneficiaryGrantId={draft.group.is_beneficiary_of_grant_id}
           beneficiaryGrantMatchMode={
             draft.group.is_beneficiary_of_grant_match_mode
