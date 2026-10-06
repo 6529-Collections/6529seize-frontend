@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useContext, useEffect, useRef } from "react";
+import { useCallback, useContext } from "react";
 import { AuthContext } from "@/components/auth/authContext";
 import { useOptionalCookieConsent } from "@/components/cookies/CookieConsentContext";
 import useDeviceInfo from "./useDeviceInfo";
@@ -17,12 +17,11 @@ import {
   type WaveFeaturePlacement,
 } from "@/services/analytics/waveFeatureUsage";
 
-export function useWaveFeatureUsage<T extends HTMLElement = HTMLDivElement>(
+export function useWaveFeatureUsage(
   placement: WaveFeaturePlacement,
   scope = "sidebar",
   enabled = true
 ) {
-  const rootRef = useRef<T>(null);
   const consent = useOptionalCookieConsent();
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const { isApp } = useDeviceInfo();
@@ -66,25 +65,30 @@ export function useWaveFeatureUsage<T extends HTMLElement = HTMLDivElement>(
     }
   };
 
-  useEffect(() => {
-    const root = rootRef.current;
-    if (
-      !root ||
-      !enabled ||
-      !hasConsent ||
-      typeof IntersectionObserver === "undefined"
-    )
-      return;
-    try {
-      return observeWaveFeatures({
-        root,
-        placement,
-        getContext,
-      });
-    } catch {
-      // Observers and telemetry are optional; controls retain their normal behavior.
-      return undefined;
-    }
-  }, [enabled, getContext, hasConsent, placement]);
-  return { ref: rootRef, activate };
+  const ref = useCallback(
+    (root: HTMLElement | null) => {
+      if (
+        !root ||
+        !enabled ||
+        !hasConsent ||
+        typeof IntersectionObserver === "undefined"
+      )
+        return;
+      try {
+        const cleanup = observeWaveFeatures({ root, placement, getContext });
+        return () => {
+          try {
+            cleanup();
+          } catch {
+            // Optional telemetry must not interrupt root replacement or unmount.
+          }
+        };
+      } catch {
+        // Observers and telemetry are optional; controls retain their normal behavior.
+        return undefined;
+      }
+    },
+    [enabled, getContext, hasConsent, placement]
+  );
+  return { ref, activate };
 }

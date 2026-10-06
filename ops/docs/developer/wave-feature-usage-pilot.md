@@ -25,6 +25,9 @@ intersection and mutation checks share one animation frame across roots, with
 each root checked at most once in that frame. One shared page observer covers
 portal occlusion and disconnects when its last root unmounts. Visibility/focus
 loss and visit resets still cancel dwell immediately.
+Observer attachment follows the mounted root, including a chat-only Wave whose
+tab row appears later after content registration. Root replacement and unmount
+disconnect the previous observer and capture listener.
 
 `Wave Feature Activated` records semantic clicks, including keyboard-generated
 clicks and touch activation. Script-generated clicks, hover, focus, prefetch, background requests,

@@ -474,6 +474,23 @@ test("failed profile switching closes real SDK delivery until identity setup suc
   }
 });
 
+test("a chat-only Wave starts observing tabs that appear after content registration", async ({ page }) => {
+  await page.goto("/waves/private-wave?late-tabs=1");
+  await page
+    .getByRole("button", { name: "Enable synthetic telemetry" })
+    .click();
+  await expect(visibleTab(page, "Chat")).toHaveCount(0);
+  await page.evaluate(() => window.featureFixture.showTabs());
+  await expect(visibleTab(page, "Chat")).toBeVisible();
+  await expect
+    .poll(async () => (await featureEvents(page, "Wave Feature Seen", "chat")).length)
+    .toBe(1);
+  await visibleTab(page, "About").click();
+  await expect
+    .poll(async () => (await featureEvents(page, "Wave Feature Activated", "about")).length)
+    .toBe(1);
+});
+
 test("a failed Seen attempt remains retryable in the same visit", async ({ page }) => {
   for (const transport of ["batch", "direct"]) {
     await page.request.get("/clear");

@@ -54,7 +54,7 @@ const stubs = new Map([
   ],
   [
     "@/hooks/useWave",
-    "export const useWave = () => ({ isChatWave:false, isApproveWave:false, isMemesWave:false, isCurationWave:false, isRankWave:true, pauses:{filterDecisionsDuringPauses:(items)=>items} });",
+    "export const useWave = () => ({ isChatWave:new URLSearchParams(location.search).has('late-tabs'), isApproveWave:false, isMemesWave:false, isCurationWave:false, isRankWave:!new URLSearchParams(location.search).has('late-tabs'), pauses:{filterDecisionsDuringPauses:(items)=>items} });",
   ],
   [
     "@/hooks/waves/useWaveCurationTabs",

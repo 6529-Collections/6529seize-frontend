@@ -2,6 +2,7 @@ export {};
 declare global {
   interface Window {
     featureFixture: {
+      showTabs: () => void;
       logout: () => void;
       switchProfile: (profileId: string) => boolean;
       resumeAnalytics: () => void;

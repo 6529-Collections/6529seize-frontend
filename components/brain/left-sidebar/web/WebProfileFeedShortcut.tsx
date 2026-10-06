@@ -65,8 +65,7 @@ export function WebProfileFeedShortcut({
   readonly mobile?: boolean;
 }) {
   const { activeWave } = useMyStream();
-  const { ref: featureUsageRef } =
-    useWaveFeatureUsage<HTMLAnchorElement>("sidebar");
+  const { ref: featureUsageRef } = useWaveFeatureUsage("sidebar");
   const locale = useBrowserLocale();
   const isMobileLayoutViewport = useIsMobileLayoutViewport();
   const opensMobileFeed = mobile || isMobileLayoutViewport;

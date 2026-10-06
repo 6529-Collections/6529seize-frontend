@@ -68,7 +68,10 @@ export const useMyStream = () => ({
   activeWave: { id: null, set: () => undefined },
 });
 export const useWaveDiscoveryViewer = () => ({ canUseCollections: false });
-export const useContentTab = () => ({ availableTabs: tabs });
+const ContentTabsContext = createContext(tabs);
+export const useContentTab = () => ({
+  availableTabs: useContext(ContentTabsContext),
+});
 
 function Fixture() {
   const [consent, setConsent] = useState(false);
@@ -79,6 +82,11 @@ function Fixture() {
     "all"
   );
   const [queryText, setQueryText] = useState("");
+  const [availableTabs, setAvailableTabs] = useState(() =>
+    new URLSearchParams(location.search).has("late-tabs")
+      ? [MyStreamWaveTab.CHAT]
+      : tabs
+  );
   const navigation = {
     collection,
     setCollection,
@@ -99,6 +107,7 @@ function Fixture() {
     setConsent(true);
   };
   window.featureFixture = {
+    showTabs: () => setAvailableTabs([MyStreamWaveTab.CHAT, MyStreamWaveTab.ABOUT]),
     logout: clearIdentity,
     switchProfile: identify,
     resumeAnalytics: () => {
@@ -163,14 +172,16 @@ function Fixture() {
         >
           <SidebarDiscovery previewItems={[]} isTouchPreview={false} />
         </div>
-        <MyStreamWaveDesktopTabs
-          wave={wave}
-          activeTab={tab}
-          setActiveTab={setTab}
-          activeCurationId={null}
-          onSelectCuration={() => undefined}
-          showCreateActionsMenu={false}
-        />
+        <ContentTabsContext.Provider value={availableTabs}>
+          <MyStreamWaveDesktopTabs
+            wave={wave}
+            activeTab={tab}
+            setActiveTab={setTab}
+            activeCurationId={null}
+            onSelectCuration={() => undefined}
+            showCreateActionsMenu={false}
+          />
+        </ContentTabsContext.Provider>
         <div id="sort-controls">
           <WaveleaderboardSort
             sort={sort}
