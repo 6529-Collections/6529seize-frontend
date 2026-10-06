@@ -40,10 +40,13 @@ export function useVideoPlaybackMemory(
       capturePreferences = true
     ) => {
       const previous = memory.get(key);
-      if (userControlled && pendingPreferences.current) {
+      if (userControlled && capturePreferences && pendingPreferences.current) {
         pendingPreferences.current = {
           muted: element.muted,
-          volume: element.volume,
+          volume:
+            element.readyState >= 1
+              ? element.volume
+              : pendingPreferences.current.volume,
         };
       }
       const preferences = pendingPreferences.current;
@@ -119,9 +122,12 @@ export function useVideoPlaybackMemory(
     };
   }, [video, memory, key, remember]);
 
-  const rememberUserControl = useCallback(() => {
-    if (video) remember(video, true);
-  }, [video, remember]);
+  const rememberUserControl = useCallback(
+    (capturePreferences = false) => {
+      if (video) remember(video, true, capturePreferences);
+    },
+    [video, remember]
+  );
   const isUserControlled = useCallback(
     () => memory.get(key)?.userControlled === true,
     [memory, key]

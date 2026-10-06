@@ -174,6 +174,11 @@ describe("video playback across DM virtualization", () => {
       );
       const recreated = screen.getByLabelText<HTMLVideoElement>("Video player");
       expect(recreated).not.toBe(video);
+      // A quick Play/Pause before metadata must not save loading-time defaults.
+      fireEvent.click(
+        screen.getAllByRole("button", { name: "Play video" })[0]!
+      );
+      fireEvent.click(screen.getByRole("button", { name: "Pause video" }));
       metadata(recreated);
       expect(recreated.currentTime).toBe(480);
       expect(screen.getByRole("slider", { name: "Seek video" })).toHaveValue(

@@ -338,6 +338,7 @@ export default function SeizeVideoPlayer({
       handleNativeFullscreenBegin
     );
     video.addEventListener("webkitendfullscreen", handleNativeFullscreenEnd);
+    handleNativeFullscreenEnd();
     return () => {
       video.removeEventListener(
         "webkitbeginfullscreen",
@@ -443,7 +444,7 @@ export default function SeizeVideoPlayer({
       video.muted = nextMuted;
       video.defaultMuted = nextMuted;
     }
-    rememberUserControl();
+    rememberUserControl(true);
     setMutedState({
       prop: resolvedTemplate.muted,
       src: muteIdentity,
