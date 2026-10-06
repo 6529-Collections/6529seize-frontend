@@ -14,6 +14,7 @@ import VideoPlaybackErrorOverlay from "./VideoPlaybackErrorOverlay";
 import { useVideoPlaybackError } from "./useVideoPlaybackError";
 import { useMediaActions } from "./useMediaActions";
 import type { MediaLoadStrategy } from "./mediaLoadStrategy";
+import { useRememberedVideoPlayback } from "./VideoPlaybackMemory";
 
 interface Props {
   readonly src: string;
@@ -48,12 +49,16 @@ function DropListItemContentMediaVideo({
   const wasFullscreenRef = useRef(false);
   const locale = useBrowserLocale();
   const prefersReducedMotion = usePrefersReducedMotion();
+  const savedPlayback = useRememberedVideoPlayback(src);
   const shouldLoadVideo = loadStrategy === "eager" || inView;
   const canAutoPlayInCurrentEnvironment = allowAutoPlayInApp
     ? !prefersReducedMotion
     : !isApp;
   const shouldAutoPlay =
-    inView && !disableAutoPlay && canAutoPlayInCurrentEnvironment;
+    inView &&
+    !disableAutoPlay &&
+    canAutoPlayInCurrentEnvironment &&
+    !savedPlayback?.userControlled;
   const { downloadMedia, isDownloading, openLabel, openMedia } =
     useMediaActions({
       url: src,
@@ -74,7 +79,6 @@ function DropListItemContentMediaVideo({
   // 2) Setup HLS (or native) once and get back the videoRef + loading state
   const {
     videoRef,
-    isLoading,
     retry,
     isFullscreen: isVideoFullscreen,
   } = useHlsPlayer({
@@ -86,32 +90,13 @@ function DropListItemContentMediaVideo({
     autoPlay: shouldAutoPlay,
   });
 
-  // 3) Play/pause & mute based on scroll visibility
+  // The shared player owns autoplay and user mute/pause preferences.
   const { handlePlaybackError, hasPlaybackError, retryPlayback } =
     useVideoPlaybackError({
       onRetry: retry,
       resetKey: playableUrl,
       videoRef,
     });
-
-  useEffect(() => {
-    const videoEl = videoRef.current;
-    if (!videoEl || isLoading) return;
-    const fullscreenElement = document.fullscreenElement;
-    if (isVideoFullscreen || (fullscreenElement?.contains(videoEl) ?? false)) {
-      wasFullscreenRef.current = true;
-      return;
-    }
-
-    if (shouldAutoPlay) {
-      // ensure muted autoplay works
-      videoEl.muted = true;
-      if (!isApp) videoEl.play().catch(() => {});
-    } else {
-      videoEl.pause();
-      videoEl.muted = true;
-    }
-  }, [shouldAutoPlay, isApp, isLoading, isVideoFullscreen, videoRef]);
 
   // 4) Inline attributes for iOS / legacy WebKit
   useEffect(() => {
@@ -147,6 +132,7 @@ function DropListItemContentMediaVideo({
       }
     };
 
+    pauseWhenFullscreenCloses();
     document.addEventListener("fullscreenchange", pauseWhenFullscreenCloses);
 
     return () => {

@@ -3,6 +3,32 @@ export interface SuspendedVideoSource {
   readonly currentTime: number;
 }
 
+/** Native media engines may reject a seek until their timeline is available. */
+export function seekVideoPosition(
+  video: HTMLVideoElement,
+  currentTime: number
+): boolean {
+  if (!Number.isFinite(currentTime) || currentTime < 0) return false;
+  try {
+    video.currentTime =
+      Number.isFinite(video.duration) && video.duration > 0
+        ? Math.min(currentTime, video.duration)
+        : currentTime;
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export function restoreVideoPreferences(
+  video: HTMLVideoElement,
+  muted: boolean,
+  volume: number
+) {
+  video.muted = muted;
+  video.volume = volume;
+}
+
 /** Unloading raw/native media aborts buffering; retain its position for reload. */
 export function suspendVideoSource(
   video: HTMLVideoElement
@@ -21,22 +47,24 @@ export function restoreVideoSource(
   suspended: SuspendedVideoSource
 ): () => void {
   const restorePosition = () => {
-    if (Number.isFinite(suspended.currentTime) && suspended.currentTime > 0) {
-      video.currentTime =
-        Number.isFinite(video.duration) && video.duration > 0
-          ? Math.min(suspended.currentTime, video.duration)
-          : suspended.currentTime;
-    }
+    return (
+      suspended.currentTime <= 0 ||
+      seekVideoPosition(video, suspended.currentTime)
+    );
   };
-  video.addEventListener("loadedmetadata", restorePosition, { once: true });
+  const restoreEvents = ["loadedmetadata", "loadeddata", "canplay"];
+  const cleanup = () =>
+    restoreEvents.forEach((event) =>
+      video.removeEventListener(event, retryRestore)
+    );
+  const retryRestore = () => {
+    if (restorePosition()) cleanup();
+  };
+  restoreEvents.forEach((event) => video.addEventListener(event, retryRestore));
   video.src = suspended.src;
   video.load();
   // Seed the default start position before metadata; reapply on loadedmetadata
   // because loading/metadata may reset it in some media engines.
-  try {
-    restorePosition();
-  } catch {
-    // Some engines cannot seek yet. Keep the metadata listener armed to retry.
-  }
-  return () => video.removeEventListener("loadedmetadata", restorePosition);
+  restorePosition();
+  return cleanup;
 }

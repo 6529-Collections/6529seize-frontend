@@ -50,6 +50,12 @@ wait until visible before loading; videos with manual playback and posters avoid
 preloading video data. Duration can remain `—` until playback starts, and starting
 or resuming an unloaded video can take longer on a slow connection.
 
+In Wave and DM chats, scrolling away pauses a video and keeps its position,
+mute choice, and volume even when the message leaves the render window. A
+video you started or paused yourself waits for Play when you return. These
+preferences last while that message remains in the open chat; leaving the chat
+or reloading the page can reset them.
+
 ## Seeking
 
 The timeline sits above the control row. Drag its small circular handle or

@@ -12,6 +12,7 @@ import SeizeVideoPlayer from "./SeizeVideoPlayer";
 import VideoPlaybackErrorOverlay from "./VideoPlaybackErrorOverlay";
 import { useVideoPlaybackError } from "./useVideoPlaybackError";
 import { useMediaActions } from "./useMediaActions";
+import { useRememberedVideoPlayback } from "./VideoPlaybackMemory";
 
 interface Props {
   readonly src: string;
@@ -37,7 +38,8 @@ const MediaDisplayVideo: React.FC<Props> = ({
   });
   const wasFullscreenRef = useRef(false);
   const locale = useBrowserLocale();
-  const shouldAutoPlay = inView && !isApp;
+  const savedPlayback = useRememberedVideoPlayback(src);
+  const shouldAutoPlay = inView && !isApp && !savedPlayback?.userControlled;
   const { downloadMedia, isDownloading, openLabel, openMedia } =
     useMediaActions({
       url: src,
@@ -58,7 +60,6 @@ const MediaDisplayVideo: React.FC<Props> = ({
   // Use HLS hook to handle the video ref, loading states, etc.
   const {
     videoRef,
-    isLoading,
     retry,
     isFullscreen: isVideoFullscreen,
   } = useHlsPlayer({
@@ -81,24 +82,6 @@ const MediaDisplayVideo: React.FC<Props> = ({
     vid.setAttribute("webkit-playsinline", "true");
     vid.setAttribute("x5-playsinline", "true");
   }, [videoRef]);
-
-  // Additional effect: if out of view, we can pause
-  useEffect(() => {
-    const vid = videoRef.current;
-    if (!vid || isLoading) return;
-    const fullscreenElement = document.fullscreenElement;
-    if (isVideoFullscreen || (fullscreenElement?.contains(vid) ?? false)) {
-      wasFullscreenRef.current = true;
-      return;
-    }
-
-    if (!inView || isApp) {
-      vid.pause();
-    } else {
-      // Attempt to play if we're in view
-      void vid.play().catch(() => {});
-    }
-  }, [inView, isApp, isLoading, isVideoFullscreen, videoRef]);
 
   useEffect(() => {
     if (!isApp) {
@@ -123,6 +106,7 @@ const MediaDisplayVideo: React.FC<Props> = ({
       }
     };
 
+    pauseWhenFullscreenCloses();
     document.addEventListener("fullscreenchange", pauseWhenFullscreenCloses);
     return () => {
       document.removeEventListener(

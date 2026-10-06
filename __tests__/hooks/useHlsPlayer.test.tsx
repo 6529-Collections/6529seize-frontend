@@ -85,59 +85,80 @@ describe("useHlsPlayer", () => {
     (HTMLVideoElement.prototype.canPlayType as jest.Mock).mockReturnValue("");
   });
 
-  it("does not request a raw source while hydrating a hidden mobile browser tab", async () => {
-    const mobile = jest
-      .spyOn(touchFirst, "isTouchFirstEnvironment")
-      .mockReturnValue(true);
-    const native = jest
-      .spyOn(Capacitor, "isNativePlatform")
-      .mockReturnValue(false);
-    const loadedSources: string[] = [];
-    const load = jest
-      .spyOn(HTMLVideoElement.prototype, "load")
-      .mockImplementation(function (this: HTMLVideoElement) {
-        const source = this.getAttribute("src");
-        if (source) loadedSources.push(source);
+  it.each([false, true])(
+    "does not request raw or HLS media while hydrating a hidden mobile browser tab (HLS=%s)",
+    async (isHls) => {
+      mockHlsSupported = isHls;
+      const src = isHls ? "clip.m3u8" : "clip.mp4";
+      const mobile = jest
+        .spyOn(touchFirst, "isTouchFirstEnvironment")
+        .mockReturnValue(true);
+      const native = jest
+        .spyOn(Capacitor, "isNativePlatform")
+        .mockReturnValue(false);
+      const loadedSources: string[] = [];
+      const load = jest
+        .spyOn(HTMLVideoElement.prototype, "load")
+        .mockImplementation(function (this: HTMLVideoElement) {
+          const source = this.getAttribute("src");
+          if (source) loadedSources.push(source);
+        });
+      Object.defineProperty(document, "visibilityState", {
+        configurable: true,
+        value: "hidden",
       });
-    Object.defineProperty(document, "visibilityState", {
-      configurable: true,
-      value: "hidden",
-    });
-    const container = document.createElement("div");
-    container.innerHTML = renderToString(
-      <TestComponent src="clip.mp4" isHls={false} />
-    );
-    const onRecoverableError = jest.fn();
-    let root: ReturnType<typeof hydrateRoot> | undefined;
-    try {
-      await act(async () => {
-        root = hydrateRoot(
-          container,
-          <TestComponent src="clip.mp4" isHls={false} />,
-          { onRecoverableError }
-        );
-      });
-      expect(onRecoverableError).not.toHaveBeenCalled();
-      expect(loadedSources).toEqual([]);
-      expect(container.querySelector("video")).not.toHaveAttribute("src");
-      act(() => {
+      const container = document.createElement("div");
+      container.innerHTML = renderToString(
+        <TestComponent src={src} isHls={isHls} />
+      );
+      const onRecoverableError = jest.fn();
+      let root: ReturnType<typeof hydrateRoot> | undefined;
+      try {
+        await act(async () => {
+          root = hydrateRoot(
+            container,
+            <TestComponent src={src} isHls={isHls} />,
+            { onRecoverableError }
+          );
+        });
+        expect(onRecoverableError).not.toHaveBeenCalled();
+        expect(loadedSources).toEqual([]);
+        expect(mockHlsLoadSource).not.toHaveBeenCalled();
+        expect(mockHlsAttachMedia).not.toHaveBeenCalled();
+        expect(container.querySelector("video")).not.toHaveAttribute("src");
+        act(() => {
+          Object.defineProperty(document, "visibilityState", {
+            value: "visible",
+          });
+          document.dispatchEvent(new Event("visibilitychange"));
+        });
+        if (isHls) {
+          await waitFor(() =>
+            expect(mockHlsLoadSource).toHaveBeenCalledWith(
+              new URL(src, document.baseURI).href
+            )
+          );
+          expect(mockHlsAttachMedia).toHaveBeenCalledWith(
+            container.querySelector("video")
+          );
+          expect(loadedSources).toEqual([]);
+        } else {
+          expect(container.querySelector("video")).toHaveAttribute(
+            "src",
+            new URL(src, document.baseURI).href
+          );
+        }
+      } finally {
+        act(() => root?.unmount());
         Object.defineProperty(document, "visibilityState", {
           value: "visible",
         });
-        document.dispatchEvent(new Event("visibilitychange"));
-      });
-      expect(container.querySelector("video")).toHaveAttribute(
-        "src",
-        new URL("clip.mp4", document.baseURI).href
-      );
-    } finally {
-      act(() => root?.unmount());
-      Object.defineProperty(document, "visibilityState", { value: "visible" });
-      load.mockRestore();
-      native.mockRestore();
-      mobile.mockRestore();
+        load.mockRestore();
+        native.mockRestore();
+        mobile.mockRestore();
+      }
     }
-  });
+  );
 
   it("does not warn when pausing cancels pending fallback autoplay", async () => {
     const warn = jest.spyOn(console, "warn").mockImplementation(() => {});
