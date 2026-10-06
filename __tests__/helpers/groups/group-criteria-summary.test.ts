@@ -36,6 +36,12 @@ describe("getGroupCriteriaSummary", () => {
     expect(summary).toEqual({
       status: "available",
       text: "REP at least 12, NIC from punk6529 at least 3, 4 explicitly included users, and 1 explicitly excluded user",
+      parts: [
+        "REP at least 12",
+        "NIC from punk6529 at least 3",
+        "4 explicitly included users",
+        "1 explicitly excluded user",
+      ],
     });
   });
 
@@ -45,7 +51,7 @@ describe("getGroupCriteriaSummary", () => {
         locale: "en-US",
         group: {} as never,
       })
-    ).toEqual({ status: "unavailable", text: null });
+    ).toEqual({ status: "unavailable", text: null, parts: [] });
   });
 
   it("uses resolved profile handles for wallet-based REP and NIC identities", () => {
@@ -123,7 +129,11 @@ describe("getGroupCriteriaSummary", () => {
       } as never,
     });
 
-    expect(summary).toEqual({ status: "available", text: "REP at least 12" });
+    expect(summary).toEqual({
+      status: "available",
+      text: "REP at least 12",
+      parts: ["REP at least 12"],
+    });
   });
 
   it("uses the embedded grant collection name for saved groups", () => {
@@ -166,6 +176,7 @@ describe("getGroupCriteriaSummary", () => {
     expect(summary).toEqual({
       status: "available",
       text: "xTDH grant NextGen 6529",
+      parts: ["xTDH grant NextGen 6529"],
     });
     expect(summary.text).not.toContain(grantId);
   });
@@ -206,6 +217,10 @@ describe("getGroupCriteriaSummary", () => {
       },
     });
 
-    expect(summary).toEqual({ status: "available", text: expected });
+    expect(summary).toEqual({
+      status: "available",
+      text: expected,
+      parts: [expected],
+    });
   });
 });

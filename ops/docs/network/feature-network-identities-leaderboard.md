@@ -34,10 +34,12 @@ pagination, and profile links.
   `Collection Access`, and `xTDH Grant`. On wide screens, the selected editor
   sits beside the list with `Identities` open first. On narrow screens,
   selecting a criterion opens its editor; `All filters` returns to the list.
-  Switching keeps the draft's values.
-- The `After editing` summary and `Create and use new group` action stay at
-  the bottom while the criteria scroll. A valid draft also offers
-  `View members`. Expand `Not ready yet.` to read the readiness guidance.
+  Switching keeps the draft's values. On phone widths, the trigger shows only
+  the filter icon.
+- `After editing` shows each selected criterion as a separate tag. Long tag
+  lists scroll within the summary, keeping `View members` and
+  `Create and use new group` visible. A valid draft offers `View members`;
+  incomplete criteria show `Not ready yet.` and its guidance directly.
 - `Before editing` shows the current scope. With a selected group, its
   criteria, count, and `View members` are visible without changing the draft.
 - Applying new criteria creates a saved group and immediately uses it as the

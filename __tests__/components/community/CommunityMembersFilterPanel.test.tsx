@@ -117,7 +117,7 @@ it("starts with Identities first and keeps all eight criteria and readiness guid
     screen.getByText(
       "Finish the missing group rules before you create this group."
     )
-  ).toBeInTheDocument();
+  ).toBeVisible();
   expect(
     screen.getByRole("button", { name: "Create and use new group" })
   ).toBeDisabled();

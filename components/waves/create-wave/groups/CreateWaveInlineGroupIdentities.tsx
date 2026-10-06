@@ -199,6 +199,7 @@ function IdentityControlsRow({
   includeMeLabel,
   isCurrentUserIncluded,
   isIncludedMode,
+  networkPresentation,
   onCurrentUserToggle,
   onRemove,
   quiet,
@@ -210,6 +211,7 @@ function IdentityControlsRow({
   readonly includeMeLabel: string;
   readonly isCurrentUserIncluded: boolean;
   readonly isIncludedMode: boolean;
+  readonly networkPresentation: boolean;
   readonly onCurrentUserToggle: (checked: boolean) => void;
   readonly onRemove: (wallet: string) => void;
   readonly quiet: boolean;
@@ -233,7 +235,9 @@ function IdentityControlsRow({
         />
       )}
       {selectedWalletCount === 0 && (
-        <p className="tw-m-0 tw-text-sm tw-font-normal tw-leading-relaxed tw-text-iron-500">
+        <p
+          className={`tw-m-0 tw-font-normal tw-text-iron-500 ${networkPresentation ? "tw-text-xs" : "tw-text-sm tw-leading-relaxed"}`}
+        >
           {emptyText}
         </p>
       )}
@@ -366,15 +370,21 @@ export default function CreateWaveInlineGroupIdentities(
   ];
   let containerClasses = quiet ? "tw-space-y-4" : "tw-space-y-5";
   let searchSectionClasses = quiet ? "tw-space-y-3" : "tw-space-y-4";
+  let searchInputClasses = quiet
+    ? ""
+    : "tw-border-white/10 tw-bg-iron-950 tw-ring-white/10 desktop-hover:hover:tw-ring-white/15 desktop-hover:hover:focus:tw-ring-primary-400 focus:tw-border-primary-400 focus:tw-bg-iron-950 focus:tw-ring-primary-400";
   if (networkPresentation) {
-    containerClasses = "";
-    searchSectionClasses = "tw-space-y-3 tw-pb-5";
+    containerClasses = "tw-space-y-4";
+    searchSectionClasses =
+      "tw-space-y-3 tw-rounded-xl tw-bg-iron-900/50 tw-p-4";
+    searchInputClasses =
+      "focus:!tw-ring-1 desktop-hover:hover:focus:tw-ring-primary-400";
   }
 
   return (
     <div className={containerClasses}>
       {networkPresentation ? (
-        <div className="tw-mb-5 tw-w-fit">
+        <div className="tw-w-fit">
           <CommonTabs<InlineIdentityMode>
             items={modeItems}
             activeItem={mode}
@@ -421,7 +431,7 @@ export default function CreateWaveInlineGroupIdentities(
 
       <div className={searchSectionClasses}>
         {networkPresentation && (
-          <h3 className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-100">
+          <h3 className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-200">
             {searchLabel}
           </h3>
         )}
@@ -433,11 +443,7 @@ export default function CreateWaveInlineGroupIdentities(
           placeholder={searchPlaceholder}
           hideLabel={true}
           inputAppearance={quiet ? "modal" : "default"}
-          inputClassName={
-            quiet
-              ? ""
-              : "tw-border-white/10 tw-bg-iron-950 tw-ring-white/10 desktop-hover:hover:tw-ring-white/15 desktop-hover:hover:focus:tw-ring-primary-400 focus:tw-border-primary-400 focus:tw-bg-iron-950 focus:tw-ring-primary-400"
-          }
+          inputClassName={searchInputClasses}
           iconClassName="tw-text-iron-500"
           resultsLayout={resultsLayout}
           sort="level"
@@ -452,6 +458,7 @@ export default function CreateWaveInlineGroupIdentities(
           )}
           isCurrentUserIncluded={isCurrentUserIncluded}
           isIncludedMode={isIncludedMode}
+          networkPresentation={networkPresentation}
           onCurrentUserToggle={(checked) =>
             updateCurrentUserSelection({
               checked,

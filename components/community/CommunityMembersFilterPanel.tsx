@@ -5,8 +5,10 @@ import {
   CheckIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
+  InformationCircleIcon,
 } from "@heroicons/react/24/outline";
 import GroupMembersPreviewDialog from "@/components/groups/members/GroupMembersPreviewDialog";
+import GroupCriteriaTags from "@/components/groups/members/GroupCriteriaTags";
 import GroupMembersPreviewTrigger from "@/components/groups/members/GroupMembersPreviewTrigger";
 import Button from "@/components/utils/button/Button";
 import CreateWaveInlineGroupIdentities from "@/components/waves/create-wave/groups/CreateWaveInlineGroupIdentities";
@@ -43,6 +45,27 @@ const FILTER_VIEWS: readonly FilterView[] = [
   ...CREATE_WAVE_INLINE_GROUP_MORE_RULES,
 ];
 
+// Keep shared controls intact and retain the dialog's 16px touch-input sizing.
+const FILTER_INPUT_PRESENTATION_CLASS_NAME = [
+  "[&_input]:tw-text-base/6 [&_textarea]:tw-text-base/6 [&_select]:tw-text-base/6 [&_input~label]:tw-text-base/6",
+  "[&_input]:tw-font-normal [&_textarea]:tw-font-normal [&_select]:tw-font-normal [&_input~label]:tw-font-normal",
+  "[@media(min-width:1024px)_and_(pointer:fine)_and_(hover:hover)]:[&_input]:tw-text-sm/6",
+  "[@media(min-width:1024px)_and_(pointer:fine)_and_(hover:hover)]:[&_textarea]:tw-text-sm/6",
+  "[@media(min-width:1024px)_and_(pointer:fine)_and_(hover:hover)]:[&_select]:tw-text-sm/6",
+  "[@media(min-width:1024px)_and_(pointer:fine)_and_(hover:hover)]:[&_input~label]:tw-text-sm/6",
+  "[&_input.tw-form-input]:tw-bg-iron-900 [&_input.tw-form-input:focus]:tw-bg-iron-900",
+  "desktop-hover:[&_input.tw-form-input:enabled:hover]:tw-bg-iron-800/80",
+  // Keep invalid outlines and disabled controls owned by the shared input.
+  "[&_input.tw-form-input:not([aria-invalid=true]):not(:focus)]:tw-ring-iron-700",
+  "desktop-hover:[&_input.tw-form-input:not([aria-invalid=true]):not(:focus):enabled:hover]:tw-ring-iron-650",
+  "[&_input.tw-form-input:not([aria-invalid=true]):focus]:tw-ring-1 [&_input.tw-form-input:not([aria-invalid=true]):focus]:tw-ring-primary-400",
+  "[&_input.tw-form-input::placeholder]:tw-text-iron-500 [&_input:not(:focus)~label]:tw-text-iron-500",
+  "[&_input:not([aria-invalid=true]):focus~label]:tw-text-primary-400",
+  "[&_input:placeholder-shown:not(:focus)~label]:tw-bg-transparent",
+  // Each editor places its decorative search icon immediately after the input.
+  "[&_input+svg]:tw-size-4 [&_input+svg]:tw-top-1/2 [&_input+svg]:-tw-translate-y-1/2 [&_input+svg]:tw-text-iron-400",
+].join(" ");
+
 export default function CommunityMembersFilterPanel(
   props: CreateWaveGroupInlinePanelProps
 ) {
@@ -50,6 +73,7 @@ export default function CommunityMembersFilterPanel(
   const {
     displayedBuilder,
     draftSummary,
+    draftSummaryParts,
     isDraftValid,
     isCreating,
     panelRef,
@@ -110,7 +134,7 @@ export default function CommunityMembersFilterPanel(
   const configuredMark = (
     <>
       <CheckIcon
-        className="tw-size-3.5 tw-shrink-0 tw-text-primary-300"
+        className="tw-size-3.5 tw-shrink-0 tw-text-success"
         aria-hidden="true"
       />
       <span className="tw-sr-only">
@@ -119,13 +143,24 @@ export default function CommunityMembersFilterPanel(
     </>
   );
 
+  const draftCriteriaContent = draftSummaryParts.length ? (
+    <GroupCriteriaTags items={draftSummaryParts} />
+  ) : (
+    <p
+      className="tw-m-0 tw-min-w-0 tw-break-words tw-text-sm tw-font-medium tw-text-iron-100"
+      aria-live="polite"
+    >
+      {draftSummary ?? t(locale, "waves.create.groups.members.noCriteria")}
+    </p>
+  );
+
   return (
     <>
       <div
         ref={panelRef}
         className="tw-flex tw-min-h-0 tw-flex-1 tw-flex-col tw-overflow-hidden"
       >
-        <div className="tw-flex tw-shrink-0 tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-1 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-px-4 tw-py-3 sm:tw-px-6">
+        <div className="tw-flex tw-shrink-0 tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-1 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/5 tw-px-4 tw-py-3 sm:tw-px-6">
           <span className="tw-text-xs tw-text-iron-400">
             {t(locale, "waves.create.groups.currentGroup")}
           </span>
@@ -143,13 +178,13 @@ export default function CommunityMembersFilterPanel(
         </div>
         <fieldset
           disabled={props.disabled ?? false}
-          className="tw-m-0 tw-flex tw-min-h-0 tw-min-w-0 tw-flex-1 tw-flex-col tw-border-0 tw-p-0 lg:tw-flex-row"
+          className={`tw-m-0 tw-flex tw-min-h-0 tw-min-w-0 tw-flex-1 tw-flex-col tw-border-0 tw-p-0 lg:tw-flex-row ${FILTER_INPUT_PRESENTATION_CLASS_NAME}`}
         >
           <div
             ref={listRef}
             role="group"
             aria-label={t(locale, "network.groupFilter.title")}
-            className={`${showEditor ? "tw-hidden" : "tw-block"} tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-overscroll-contain tw-px-4 tw-py-0 sm:tw-px-6 lg:tw-block lg:tw-w-56 lg:tw-flex-none lg:tw-border-x-0 lg:tw-border-b-0 lg:tw-border-l-0 lg:tw-border-r lg:tw-border-t-0 lg:tw-border-solid lg:tw-border-iron-800 lg:tw-px-3 lg:tw-py-5`}
+            className={`${showEditor ? "tw-hidden" : "tw-block"} tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-overscroll-contain tw-px-4 tw-py-0 sm:tw-px-6 lg:tw-block lg:tw-w-52 lg:tw-flex-none lg:tw-space-y-1 lg:tw-border-x-0 lg:tw-border-b-0 lg:tw-border-l-0 lg:tw-border-r lg:tw-border-t-0 lg:tw-border-solid lg:tw-border-white/5 lg:tw-px-3 lg:tw-py-6`}
           >
             {FILTER_VIEWS.map((rule) => (
               <button
@@ -157,7 +192,7 @@ export default function CommunityMembersFilterPanel(
                 type="button"
                 aria-current={view === rule ? "true" : undefined}
                 onClick={(event) => changeView(rule, event.detail === 0)}
-                className={`tw-flex tw-min-h-10 tw-w-full tw-items-center tw-justify-between tw-gap-2 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-bg-transparent tw-px-2 tw-py-1 tw-text-left tw-text-sm tw-font-medium focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 lg:tw-border-0 lg:tw-px-3 ${view === rule ? "tw-text-iron-50 lg:tw-border-l-2 lg:tw-border-solid lg:tw-border-primary-400 lg:tw-bg-iron-900/60 lg:tw-pl-2.5" : "tw-text-iron-300 desktop-hover:hover:tw-text-iron-50"}`}
+                className={`tw-flex tw-min-h-10 tw-w-full tw-items-center tw-justify-between tw-gap-2 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/5 tw-bg-transparent tw-px-2 tw-py-1 tw-text-left tw-text-sm tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 lg:tw-rounded-lg lg:tw-border-0 lg:tw-px-3 ${view === rule ? "tw-font-normal tw-text-iron-400 lg:tw-bg-white/5 lg:tw-font-medium lg:tw-text-iron-50" : "tw-font-normal tw-text-iron-400 lg:desktop-hover:hover:tw-bg-white/[0.03] lg:desktop-hover:hover:tw-text-iron-100"}`}
               >
                 <span className="tw-flex tw-items-center tw-gap-2">
                   {t(
@@ -180,7 +215,7 @@ export default function CommunityMembersFilterPanel(
           <div
             ref={editorRef}
             tabIndex={-1}
-            className={`${showEditor ? "tw-block" : "tw-hidden"} tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-overscroll-contain tw-p-4 sm:tw-p-6 lg:tw-block lg:tw-p-8`}
+            className={`${showEditor ? "tw-block" : "tw-hidden"} tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-overscroll-contain tw-p-4 sm:tw-p-6 lg:tw-block lg:tw-px-8 lg:tw-py-6`}
           >
             <button
               type="button"
@@ -226,6 +261,7 @@ export default function CommunityMembersFilterPanel(
               ) : (
                 <div className="[&>div]:tw-border-0 [&>div]:tw-bg-transparent [&>div]:tw-p-0 [&>div]:tw-shadow-none">
                   <CreateWaveInlineGroupRuleEditor
+                    networkPresentation
                     draft={displayedBuilder.draft}
                     activeRule={view}
                     onDraftChange={setDraft}
@@ -235,36 +271,39 @@ export default function CommunityMembersFilterPanel(
             </div>
           </div>
         </fieldset>
-        <div className="tw-flex tw-shrink-0 tw-flex-col tw-gap-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-3 tw-py-2 sm:tw-flex-row sm:tw-items-center sm:tw-gap-4 sm:tw-px-6">
-          <div className="tw-flex tw-max-h-32 tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-1 tw-overflow-y-auto tw-overscroll-contain sm:tw-flex-1">
-            <span className="tw-shrink-0 tw-text-xs tw-font-medium tw-text-iron-400">
+        <div className="tw-flex tw-shrink-0 tw-flex-col tw-gap-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-bg-iron-950 tw-px-4 tw-py-2 sm:tw-flex-row sm:tw-items-center sm:tw-gap-4 sm:tw-px-6">
+          <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-2 sm:tw-flex-1">
+            <span
+              className={`tw-shrink-0 tw-text-xs tw-font-medium tw-text-iron-400 ${draftSummaryParts.length ? "tw-basis-full" : ""}`}
+            >
               {t(locale, "waves.create.groups.draft.afterEditing")}
             </span>
             {draftTarget ? (
               <GroupMembersPreviewTrigger
                 target={draftTarget}
                 appearance="inline"
+                inlineCriteriaItems={draftSummaryParts}
                 disabled={(props.disabled ?? false) || isCreating}
                 onOpen={() => setPreviewTarget(draftTarget)}
               />
             ) : (
-              <p
-                className="tw-m-0 tw-min-w-0 tw-break-words tw-text-sm tw-font-medium tw-text-iron-100"
-                aria-live="polite"
-              >
-                {draftSummary ??
-                  t(locale, "waves.create.groups.members.noCriteria")}
-              </p>
+              draftCriteriaContent
             )}
             {!isDraftValid && (
-              <details className="tw-text-xs tw-leading-5 tw-text-iron-400 open:tw-basis-full">
-                <summary className="tw-w-fit tw-cursor-pointer tw-rounded tw-py-1 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400">
-                  {t(locale, "waves.create.groups.draft.notReadyTitle")}
-                </summary>
-                <p className="tw-mb-0 tw-mt-1">
-                  {t(locale, "waves.create.groups.draft.notReadyDescription")}
-                </p>
-              </details>
+              <p className="tw-m-0 tw-flex tw-basis-full tw-items-start tw-gap-2 tw-text-xs tw-leading-5 tw-text-iron-400">
+                <InformationCircleIcon
+                  aria-hidden="true"
+                  className="tw-mt-0.5 tw-size-4 tw-shrink-0 tw-text-amber-500"
+                />
+                <span>
+                  <span className="tw-font-medium">
+                    {t(locale, "waves.create.groups.draft.notReadyTitle")}
+                  </span>{" "}
+                  <span>
+                    {t(locale, "waves.create.groups.draft.notReadyDescription")}
+                  </span>
+                </span>
+              </p>
             )}
           </div>
           <Button

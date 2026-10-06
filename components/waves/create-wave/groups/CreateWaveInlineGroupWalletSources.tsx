@@ -165,16 +165,22 @@ function EmmaWalletSource({
     : "tw-min-w-0 tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950/60 tw-p-3 sm:tw-p-4";
   if (networkPresentation) {
     sectionClasses =
-      "tw-min-w-0 tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900/30 tw-p-4";
+      "tw-min-w-0 tw-rounded-xl tw-bg-iron-900/50 tw-p-4 lg:tw-row-span-5 lg:tw-grid lg:tw-grid-rows-subgrid [&_input]:tw-h-11 [&_input]:tw-py-0";
   }
 
   return (
     <section className={sectionClasses}>
-      <h3 className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-100">
+      <h3
+        className={
+          networkPresentation
+            ? "tw-m-0 tw-text-sm tw-font-medium tw-text-iron-100"
+            : "tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-100"
+        }
+      >
         {t(locale, "waves.create.groups.inlineIdentities.sources.emma.title")}
       </h3>
       <p
-        className={`tw-mb-3 tw-mt-1 tw-text-xs tw-leading-relaxed tw-text-iron-500 ${networkPresentation ? "tw-min-h-10" : ""}`}
+        className={`tw-mb-3 ${networkPresentation ? "tw-mt-2 tw-text-xxs tw-font-normal tw-leading-5 tw-text-iron-350" : "tw-mt-1 tw-text-xs tw-leading-relaxed tw-text-iron-500"}`}
       >
         {t(
           locale,
@@ -198,9 +204,13 @@ function EmmaWalletSource({
           "waves.create.groups.inlineIdentities.sources.emma.searchEmpty"
         )}
       />
-      <div className="tw-mt-3 tw-flex tw-min-h-9 tw-items-center tw-justify-between tw-gap-3">
+      <div
+        className={`tw-flex tw-justify-between tw-gap-3 ${networkPresentation ? "tw-mt-2 tw-items-start lg:tw-row-start-5" : "tw-mt-3 tw-min-h-9 tw-items-center"}`}
+      >
         {selectedId === null ? (
-          <p className="tw-m-0 tw-text-xs tw-font-medium tw-text-iron-500">
+          <p
+            className={`tw-m-0 tw-text-xs tw-text-iron-500 ${networkPresentation ? "tw-font-normal" : "tw-font-medium"}`}
+          >
             {t(
               locale,
               "waves.create.groups.inlineIdentities.sources.emma.empty"
@@ -362,23 +372,29 @@ function CsvWalletSource({
     ? "tw-min-h-20 tw-flex-col tw-p-3"
     : "tw-min-h-24 tw-flex-col tw-p-3";
   if (networkPresentation) {
-    dropzoneLayoutClasses = "tw-h-12 tw-flex-row tw-px-2 tw-py-2";
+    dropzoneLayoutClasses = "tw-min-h-11 tw-flex-row tw-px-2 tw-py-2";
   }
   let sectionClasses = quiet
     ? "tw-min-w-0 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-4"
     : "tw-min-w-0 tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950/60 tw-p-3 sm:tw-p-4";
   if (networkPresentation) {
     sectionClasses =
-      "tw-min-w-0 tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900/30 tw-p-4";
+      "tw-min-w-0 tw-rounded-xl tw-bg-iron-900/50 tw-p-4 lg:tw-row-span-5 lg:tw-grid lg:tw-grid-rows-subgrid";
   }
 
   return (
     <section className={sectionClasses}>
-      <h3 className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-100">
+      <h3
+        className={
+          networkPresentation
+            ? "tw-m-0 tw-text-sm tw-font-medium tw-text-iron-100"
+            : "tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-100"
+        }
+      >
         {t(locale, "waves.create.groups.inlineIdentities.sources.csv.title")}
       </h3>
       <p
-        className={`tw-mb-3 tw-mt-1 tw-text-xs tw-leading-relaxed tw-text-iron-500 ${networkPresentation ? "tw-min-h-10" : ""}`}
+        className={`tw-mb-3 ${networkPresentation ? "tw-mt-2 tw-text-xxs tw-font-normal tw-leading-5 tw-text-iron-350" : "tw-mt-1 tw-text-xs tw-leading-relaxed tw-text-iron-500"}`}
       >
         {t(
           locale,
@@ -439,9 +455,13 @@ function CsvWalletSource({
           {errorMessage}
         </p>
       ) : null}
-      <div className="tw-mt-3 tw-flex tw-min-h-9 tw-items-center tw-justify-between tw-gap-3">
+      <div
+        className={`tw-flex tw-justify-between tw-gap-3 ${networkPresentation ? "tw-mt-2 tw-items-start lg:tw-row-start-5" : "tw-mt-3 tw-min-h-9 tw-items-center"}`}
+      >
         {sources.uploadedWallets === null ? (
-          <p className="tw-m-0 tw-text-xs tw-font-medium tw-text-iron-500">
+          <p
+            className={`tw-m-0 tw-text-xs tw-text-iron-500 ${networkPresentation ? "tw-font-normal" : "tw-font-medium"}`}
+          >
             {t(
               locale,
               "waves.create.groups.inlineIdentities.sources.csv.empty"
@@ -473,7 +493,8 @@ export default function CreateWaveInlineGroupWalletSources(
 ) {
   let gridClasses = `tw-grid tw-grid-cols-1 lg:tw-grid-cols-2 ${props.quiet ? "tw-gap-4" : "tw-gap-3"}`;
   if (props.networkPresentation) {
-    gridClasses = "tw-grid tw-grid-cols-1 tw-gap-3 lg:tw-grid-cols-2";
+    gridClasses =
+      "tw-grid tw-grid-cols-1 tw-gap-4 lg:tw-grid-cols-2 lg:tw-gap-y-0";
   }
   return (
     <div className={gridClasses}>

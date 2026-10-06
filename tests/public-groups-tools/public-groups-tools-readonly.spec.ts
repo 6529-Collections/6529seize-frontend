@@ -234,6 +234,26 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
     await expect(levelInput).toHaveValue("10");
     await expect(apply).toBeEnabled();
     await expect(apply).toBeInViewport({ ratio: 1 });
+    await openCriterion("TDH");
+    await filter
+      .getByRole("spinbutton", { name: "TDH + xTDH at least" })
+      .fill("1000");
+    await openCriterion("Collection Access");
+    for (const name of ["Gradients", "Memes", "Memelab", "Nextgen"]) {
+      await filter
+        .getByRole("region", { name: "Collection Access", exact: true })
+        .getByRole("button", { name, exact: true })
+        .click();
+    }
+    const criteriaTags = filter.getByRole("list").filter({
+      has: page.getByText("Level at least 10", { exact: true }),
+    });
+    await expect(criteriaTags.getByRole("listitem")).toHaveCount(6);
+    await expect(
+      criteriaTags.getByText("TDH + xTDH at least 1,000", { exact: true })
+    ).toBeVisible();
+    await expect(apply).toBeInViewport({ ratio: 1 });
+    await expectNoHorizontalOverflow(page);
     await expect(
       filter.getByRole("button", { name: "View members" })
     ).toBeInViewport();

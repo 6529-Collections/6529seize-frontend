@@ -8,6 +8,7 @@ import { useGroupCriteriaIdentityLabels } from "@/hooks/useGroupCriteriaIdentity
 import { t } from "@/i18n/messages";
 import { getGroupCriteriaSummary } from "@/helpers/groups/group-criteria-summary";
 import { formatGroupMembersCount } from "@/helpers/groups/group-members-count";
+import GroupCriteriaTags from "./GroupCriteriaTags";
 import {
   fetchGroupMembersPage,
   getGroupMembersTargetKey,
@@ -20,6 +21,7 @@ export default function GroupMembersPreviewTrigger({
   appearance = "details",
   quiet = false,
   criteriaStatus,
+  inlineCriteriaItems,
   onOpen,
 }: {
   readonly target: GroupMembersPreviewTarget;
@@ -27,6 +29,7 @@ export default function GroupMembersPreviewTrigger({
   readonly appearance?: "details" | "summary" | "inline" | undefined;
   readonly quiet?: boolean;
   readonly criteriaStatus?: "loading" | "unavailable" | undefined;
+  readonly inlineCriteriaItems?: readonly string[] | undefined;
   readonly onOpen: () => void;
 }) {
   const locale = useBrowserLocale();
@@ -111,13 +114,21 @@ export default function GroupMembersPreviewTrigger({
 
   if (appearance === "inline") {
     return (
-      <div className="tw-flex tw-min-w-0 tw-max-w-full tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-1">
-        <p
-          aria-live="polite"
-          className="tw-m-0 tw-min-w-0 tw-break-words tw-text-sm tw-font-medium tw-text-iron-100"
-        >
-          {criteriaLabel}
-        </p>
+      <div
+        className={`tw-flex tw-min-w-0 tw-max-w-full tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-1 ${inlineCriteriaItems ? "tw-w-full" : ""}`}
+      >
+        {inlineCriteriaItems ? (
+          <div className="tw-min-w-0 tw-basis-full">
+            <GroupCriteriaTags items={inlineCriteriaItems} />
+          </div>
+        ) : (
+          <p
+            aria-live="polite"
+            className="tw-m-0 tw-min-w-0 tw-break-words tw-text-sm tw-font-medium tw-text-iron-100"
+          >
+            {criteriaLabel}
+          </p>
+        )}
         <span
           aria-live="polite"
           className="tw-inline-flex tw-items-center tw-gap-1.5 tw-text-xs tw-font-medium tw-text-iron-400"
