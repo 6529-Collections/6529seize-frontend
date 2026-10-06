@@ -223,6 +223,7 @@ const BoostedDropCardFooter = memo(
   }) => (
     <div className={FOOTER_CLASSES}>
       <Link
+        data-home-action="Open artist profile"
         href={author.handle ? `/${author.handle}` : "#"}
         onClick={(event) => event.stopPropagation()}
         className={PROFILE_LINK_CLASSES}
@@ -244,6 +245,7 @@ const BoostedDropCardFooter = memo(
         <BoostedDropCardChatBoostButton drop={drop} />
       ) : (
         <Link
+          data-home-action="Open wave"
           href={waveHref}
           onClick={(event) => event.stopPropagation()}
           className={WAVE_LINK_CLASSES}
@@ -282,6 +284,7 @@ const BoostedDropCardOpenButton = memo(
 
     return (
       <button
+        data-home-action="Open drop"
         type="button"
         className={OPEN_DROP_BUTTON_CLASSES}
         onClick={onClick}

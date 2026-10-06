@@ -1,4 +1,5 @@
 import { DE_DE_DROP_METADATA_MESSAGES } from "@/i18n/messages/drop-metadata";
+import { DE_SUBMISSION_DISCOVERY_MESSAGES } from "@/i18n/messages/submission-discovery";
 import { DE_DE_DROP_REQUIREMENT_MESSAGES } from "@/i18n/messages/drop-requirements";
 import artworkShareMessages from "@/i18n/messages/artworkShare.de-DE.json";
 import profileCmsAgentMessages from "@/i18n/messages/profileCmsAgent.de-DE.json";
@@ -21,6 +22,7 @@ import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.de-DE.jso
 const RETRY_LABEL = "Erneut versuchen";
 
 export const DE_DE_MESSAGES = {
+  ...DE_SUBMISSION_DISCOVERY_MESSAGES,
   ...DE_DE_DROP_REQUIREMENT_MESSAGES,
   ...DE_DE_DROP_METADATA_MESSAGES,
   "profile.subscriptions.noAllocation": "Keine Abonnement-Zuteilung",
