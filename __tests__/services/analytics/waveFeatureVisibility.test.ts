@@ -124,3 +124,71 @@ it("coalesces relevant scrolls per frame and ignores an unrelated feed", () => {
   window.dispatchEvent(new Event("scroll"));
   expect(requestFrame).toHaveBeenCalledTimes(1);
 });
+
+it("shares page occlusion observation and one frame across roots until the last cleanup", () => {
+  Object.defineProperty(globalThis, "IntersectionObserver", {
+    configurable: true,
+    value: jest.fn(() => ({ observe: jest.fn(), disconnect: jest.fn() })),
+  });
+  const observers: {
+    callback: () => void;
+    observe: jest.Mock;
+    disconnect: jest.Mock;
+  }[] = [];
+  jest.spyOn(globalThis, "MutationObserver").mockImplementation((callback) => {
+    const observer = {
+      callback: () => callback([], {} as MutationObserver),
+      observe: jest.fn(),
+      disconnect: jest.fn(),
+    };
+    observers.push(observer);
+    return observer as unknown as MutationObserver;
+  });
+  const frames: FrameRequestCallback[] = [];
+  const requestFrame = jest.fn((measure: FrameRequestCallback) => {
+    frames.push(measure);
+    return 1;
+  });
+  Object.defineProperty(window, "requestAnimationFrame", {
+    configurable: true,
+    value: requestFrame,
+  });
+  const roots = [document.createElement("div"), document.createElement("div")];
+  document.body.append(...roots);
+  const contexts = [jest.fn(() => null), jest.fn(() => null)];
+  const cleanups = roots.map((root, index) =>
+    observeWaveFeatures({
+      root,
+      placement: "sidebar",
+      getContext: contexts[index]!,
+    })
+  );
+  try {
+    expect(requestFrame).toHaveBeenCalledTimes(1);
+    frames[0]?.(0);
+    const bodyObservers = observers.filter((observer) =>
+      observer.observe.mock.calls.some(
+        ([target, options]) => target === document.body && options?.subtree
+      )
+    );
+    expect(bodyObservers).toHaveLength(1);
+    requestFrame.mockClear();
+    for (let index = 0; index < 10; index += 1) bodyObservers[0]?.callback();
+    expect(requestFrame).toHaveBeenCalledTimes(1);
+    frames[1]?.(0);
+    for (const context of contexts) expect(context).toHaveBeenCalledTimes(2);
+    cleanups[0]?.();
+    expect(bodyObservers[0]?.disconnect).not.toHaveBeenCalled();
+    bodyObservers[0]?.callback();
+    frames[2]?.(0);
+    expect(contexts[0]).toHaveBeenCalledTimes(2);
+    expect(contexts[1]).toHaveBeenCalledTimes(3);
+    cleanups[1]?.();
+    expect(bodyObservers[0]?.disconnect).toHaveBeenCalledTimes(1);
+    requestFrame.mockClear();
+    bodyObservers[0]?.callback();
+    expect(requestFrame).not.toHaveBeenCalled();
+  } finally {
+    for (const cleanup of cleanups) cleanup();
+  }
+});

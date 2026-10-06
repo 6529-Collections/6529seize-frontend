@@ -176,25 +176,73 @@ function createExposureChecks({
   return { selector, controls, safely, check, cancel };
 }
 
+const frameChecks = new Set<() => void>();
+let measurementFrame: number | null = null;
+
+function flushFrameChecks() {
+  measurementFrame = null;
+  const pending = [...frameChecks];
+  frameChecks.clear();
+  for (const check of pending) check();
+}
+
+function scheduleFrameCheck(check: () => void) {
+  frameChecks.add(check);
+  if (measurementFrame !== null) return;
+  try {
+    measurementFrame = window.requestAnimationFrame(flushFrameChecks);
+  } catch {
+    flushFrameChecks();
+  }
+}
+
 function createFrameScheduler(check: () => void) {
-  let frame: number | null = null;
-  const schedule = () => {
-    if (frame !== null) return;
-    try {
-      frame = window.requestAnimationFrame(() => {
-        frame = null;
-        check();
-      });
-    } catch {
-      frame = null;
-      check();
+  const schedule = () => scheduleFrameCheck(check);
+  const cancel = () => {
+    frameChecks.delete(check);
+    if (frameChecks.size === 0 && measurementFrame !== null) {
+      window.cancelAnimationFrame(measurementFrame);
+      measurementFrame = null;
     }
   };
-  const cancel = () => {
-    if (frame !== null) window.cancelAnimationFrame(frame);
-    frame = null;
-  };
   return { schedule, cancel };
+}
+
+const occlusionChecks = new Set<() => void>();
+let pageOcclusion: MutationObserver | undefined;
+
+function observePageOcclusion(check: () => void): () => void {
+  occlusionChecks.add(check);
+  try {
+    if (!pageOcclusion) {
+      const observer = new MutationObserver(() => {
+        for (const measure of occlusionChecks) scheduleFrameCheck(measure);
+      });
+      try {
+        // One shared observer covers portal overlays outside telemetry roots.
+        observer.observe(document.body, {
+          childList: true,
+          subtree: true,
+          attributes: true,
+          attributeFilter: ["class", "style", "inert", "aria-hidden", "hidden"],
+        });
+      } catch (error) {
+        observer.disconnect();
+        throw error;
+      }
+      pageOcclusion = observer;
+    }
+  } catch (error) {
+    occlusionChecks.delete(check);
+    throw error;
+  }
+  return () => {
+    occlusionChecks.delete(check);
+    if (occlusionChecks.size === 0) {
+      pageOcclusion?.disconnect();
+      pageOcclusion = undefined;
+    }
+  };
 }
 
 function observeRelevantScroll(
@@ -230,6 +278,7 @@ export function observeWaveFeatures(
   const scheduled = createFrameScheduler(check);
   let stopScroll: () => void = () => undefined;
   let unsubscribe: () => void = () => undefined;
+  let stopOcclusion: () => void = () => undefined;
   const onClick = (event: MouseEvent) =>
     safely(() => {
       // Dropdown selection is recorded by its semantic selection callback.
@@ -277,6 +326,7 @@ export function observeWaveFeatures(
     scheduled.cancel();
     stopScroll();
     unsubscribe();
+    stopOcclusion();
     root.removeEventListener("click", onClick, true);
     window.removeEventListener("resize", scheduled.schedule);
     window.removeEventListener("blur", check);
@@ -297,13 +347,6 @@ export function observeWaveFeatures(
     ) {
       mutation.observe(ancestor, { attributes: true });
     }
-    // Portal dialogs can occlude controls without changing their intersections.
-    mutation.observe(document.body, {
-      childList: true,
-      subtree: true,
-      attributes: true,
-      attributeFilter: ["class", "style", "inert", "aria-hidden", "hidden"],
-    });
     intersection = new IntersectionObserver(scheduled.schedule, {
       threshold: [0, 0.5, 1],
     });
@@ -319,6 +362,7 @@ export function observeWaveFeatures(
     root.addEventListener("click", onClick, true);
     stopScroll = observeRelevantScroll(root, scheduled.schedule);
     unsubscribe = subscribeWaveFeatureVisitReset(check);
+    stopOcclusion = observePageOcclusion(check);
     window.addEventListener("resize", scheduled.schedule);
     window.addEventListener("blur", check);
     window.addEventListener("focus", check);

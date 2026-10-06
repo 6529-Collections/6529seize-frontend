@@ -21,7 +21,9 @@ Visit resets invalidate pending dwell through an epoch and notify active
 observers, including query navigation that keeps the same feature context.
 Scroll listeners cover each root, its ancestors and viewport scrolling;
 unrelated nested scroll events do not trigger those listeners. Scroll, resize,
-intersection and mutation checks coalesce to one animation frame per root. Visibility/focus
+intersection and mutation checks share one animation frame across roots, with
+each root checked at most once in that frame. One shared page observer covers
+portal occlusion and disconnects when its last root unmounts. Visibility/focus
 loss and visit resets still cancel dwell immediately.
 
 `Wave Feature Activated` records semantic clicks, including keyboard-generated
