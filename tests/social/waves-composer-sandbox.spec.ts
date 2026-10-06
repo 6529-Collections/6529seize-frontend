@@ -26,6 +26,10 @@ const PREVIEW_URL = "https://example.com/6529-composer-preview";
 const PREVIEW_TITLE = "Sandbox Preview Title";
 const PREVIEW_DESCRIPTION = "Deterministic local preview served by Playwright.";
 const SANDBOX_CHAT_DROP_CONTENT = "Local-only chat drop from Playwright.";
+const LONG_DROP_END_MARKER = "END-OF-LONG-SANDBOX-POST";
+const LONG_DROP_CONTENT = `${"Long timeline detail for browser coverage. ".repeat(
+  30
+)}${LONG_DROP_END_MARKER}`;
 const SANDBOX_POLL_QUESTION = "Which sandbox option do you prefer?";
 const SANDBOX_GUIDELINES_FIRST_LINE =
   "1. Keep discussions constructive and stay on topic in this local sandbox wave.";
@@ -206,6 +210,89 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     await expect(
       page.getByRole("button", { name: "Post" }).last()
     ).toBeEnabled();
+    await expectNoHorizontalOverflow(page);
+    await expectNoUnsafeSandboxMutations(baseURL);
+  });
+
+  test("expands and collapses a long chat drop without leaving the latest position", async ({
+    baseURL,
+    page,
+  }) => {
+    await page.route(
+      `**/api/v2/waves/${SANDBOX_WAVE_ID}/drops**`,
+      async (route) => {
+        const response = await route.fetch();
+        const payload = (await response.json()) as {
+          drops: Array<Record<string, unknown>>;
+          wave: Record<string, unknown>;
+        };
+        const sourceDrop = payload.drops[0];
+        if (!sourceDrop) {
+          throw new Error(
+            "Expected the sandbox wave to return one source drop."
+          );
+        }
+        await route.fulfill({
+          response,
+          json: {
+            ...payload,
+            drops: [
+              sourceDrop,
+              {
+                ...sourceDrop,
+                id: "00000000-0000-4000-8000-000000000546",
+                serial_no: 2,
+                created_at: Number(sourceDrop["created_at"] ?? 0) + 1,
+                content: LONG_DROP_CONTENT,
+              },
+            ],
+          },
+        });
+      }
+    );
+    await gotoSandboxWave(page);
+
+    const longDrop = page
+      .getByText("Long timeline detail", { exact: false })
+      .locator('xpath=ancestor::*[@data-serial-no="2"][1]');
+    await expect(longDrop).toBeVisible({
+      timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+    });
+    await expect(longDrop).not.toContainText(LONG_DROP_END_MARKER);
+
+    const showMore = longDrop.getByRole("button", { name: "Show more" });
+    await expect(showMore).toHaveAttribute("aria-expanded", "false");
+    const controlledContentId = await showMore.getAttribute("aria-controls");
+    expect(controlledContentId).toBeTruthy();
+
+    const scrollContainer = page
+      .getByRole("main")
+      .locator("[data-wave-drops-scroll-container]")
+      .first();
+    await expect
+      .poll(() => scrollContainer.evaluate((node) => node.scrollTop))
+      .toBe(0);
+
+    await showMore.focus();
+    await expect(showMore).toBeFocused();
+    await showMore.press("Enter");
+
+    await expect(longDrop).toContainText(LONG_DROP_END_MARKER);
+    const showLess = longDrop.getByRole("button", { name: "Show less" });
+    await expect(showLess).toHaveAttribute("aria-expanded", "true");
+    await expect(showLess).toBeFocused();
+    await expect(showLess).toBeInViewport({ ratio: 1 });
+    await expect
+      .poll(() => scrollContainer.evaluate((node) => node.scrollTop))
+      .toBe(0);
+
+    await showLess.press("Enter");
+    await expect(longDrop).not.toContainText(LONG_DROP_END_MARKER);
+    const collapsedToggle = longDrop.getByRole("button", {
+      name: "Show more",
+    });
+    await expect(collapsedToggle).toBeFocused();
+    await expect(collapsedToggle).toBeInViewport({ ratio: 1 });
     await expectNoHorizontalOverflow(page);
     await expectNoUnsafeSandboxMutations(baseURL);
   });
@@ -746,6 +833,120 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     await resetSandboxRequests(baseURL);
     await expectNoUnsafeSandboxMutations(baseURL);
   });
+
+  for (const key of ["Enter", "Space"]) {
+    test(`operates nested quote toggles with ${key} without opening the quoted post`, async ({
+      baseURL,
+      page,
+    }) => {
+      const parentDropId = "00000000-0000-4000-8000-000000000547";
+      const quotedDropId = "00000000-0000-4000-8000-000000000548";
+      const quotedWaveId = "00000000-0000-4000-8000-000000000549";
+
+      // Read the synthetic fixture before navigation so background route
+      // handlers never parse an APIResponse after the test context closes.
+      const fixtureResponse = await page.request.get(
+        `${getSandboxApiOrigin(baseURL)}/api/v2/waves/${SANDBOX_WAVE_ID}/drops`
+      );
+      expect(fixtureResponse.ok()).toBe(true);
+      const payload = (await fixtureResponse.json()) as {
+        drops: Array<Record<string, unknown>>;
+        wave: Record<string, unknown>;
+      };
+      const sourceDrop = payload.drops[0];
+      if (!sourceDrop) {
+        throw new Error("Expected one source drop for the quote fixture.");
+      }
+      const quotedDrop = {
+        ...sourceDrop,
+        id: quotedDropId,
+        serial_no: 42,
+        content: LONG_DROP_CONTENT,
+        parts_count: 1,
+        wave: { ...payload.wave, id: quotedWaveId },
+      };
+
+      await page.route(
+        `**/api/v2/waves/${SANDBOX_WAVE_ID}/drops**`,
+        async (route) => {
+          await route.fulfill({
+            json: {
+              ...payload,
+              drops: [
+                {
+                  ...sourceDrop,
+                  id: parentDropId,
+                  serial_no: 2,
+                  content: "Parent quote keyboard fixture",
+                  parts_count: 2,
+                },
+              ],
+            },
+          });
+        }
+      );
+      await page.route(
+        `**/api/v2/drops/${parentDropId}/parts/2`,
+        async (route) => {
+          await route.fulfill({
+            json: {
+              part_no: 2,
+              content: "Reply containing a long quote",
+              media: [],
+              attachments: [],
+              quoted_drop: { drop_id: quotedDropId, drop_part_id: 1 },
+            },
+          });
+        }
+      );
+      await page.route("**/api/v2/drops?**", async (route) => {
+        const ids = new URL(route.request().url()).searchParams.get("ids");
+        if (ids !== quotedDropId) {
+          await route.fallback();
+          return;
+        }
+        await route.fulfill({
+          json: { data: [quotedDrop], page: 1, next: false },
+        });
+      });
+      await gotoSandboxWave(page);
+      await page.getByRole("button", { name: "Next part" }).click();
+
+      const quoteCard = page.getByRole("button", {
+        name: /Long timeline detail/,
+      });
+      const showMore = quoteCard.getByRole("button", {
+        name: "Show more",
+        exact: true,
+      });
+      await expect(showMore).toBeVisible();
+      await showMore.focus();
+      await showMore.press(key);
+
+      const showLess = quoteCard.getByRole("button", {
+        name: "Show less",
+        exact: true,
+      });
+      await expect(showLess).toHaveAttribute("aria-expanded", "true");
+      await expect(showLess).toBeFocused();
+      await expect(quoteCard).toContainText(LONG_DROP_END_MARKER);
+      await expect(page).toHaveURL(new RegExp(`/waves/${SANDBOX_WAVE_ID}$`));
+      await showLess.press(key);
+
+      await expect(showMore).toHaveAttribute("aria-expanded", "false");
+      await expect(showMore).toBeFocused();
+      await expect(quoteCard).not.toContainText(LONG_DROP_END_MARKER);
+      await expect(page).toHaveURL(new RegExp(`/waves/${SANDBOX_WAVE_ID}$`));
+      await expectNoHorizontalOverflow(page);
+      await expectNoUnsafeSandboxMutations(baseURL);
+
+      await quoteCard.focus();
+      await quoteCard.press(key);
+      await expect(page).toHaveURL(
+        new RegExp(`/waves/${quotedWaveId}\\?serialNo=42$`)
+      );
+    });
+  }
 
   test("rejects non-exact chat drop mutation bodies", async ({ baseURL }) => {
     await resetSandboxRequests(baseURL);

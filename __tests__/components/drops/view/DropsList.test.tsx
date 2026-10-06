@@ -25,6 +25,7 @@ jest.mock("@/components/waves/drops/Drop", () => {
     DropLocation: {
       MY_STREAM: "MY_STREAM",
       WAVE: "WAVE",
+      PROFILE: "PROFILE",
     },
   };
 });
@@ -127,9 +128,74 @@ describe("DropsList", () => {
     expect(dropProps).toHaveLength(1);
     expect(lightProps).toHaveLength(1);
     expect(wrapperProps).toEqual([
-      expect.objectContaining({ rootMargin: "1200px 0px" }),
-      expect.objectContaining({ rootMargin: "1200px 0px" }),
+      expect.objectContaining({
+        rootMargin: "1200px 0px",
+        enableLongContentCollapse: true,
+      }),
+      expect.objectContaining({
+        rootMargin: "1200px 0px",
+        enableLongContentCollapse: true,
+      }),
     ]);
+  });
+
+  it("keeps full content in focused single-drop views", () => {
+    render(
+      <DropsList
+        scrollContainerRef={{ current: null }}
+        drops={
+          [
+            {
+              stableKey: "a",
+              serial_no: 1,
+              type: DropSize.FULL,
+              wave: { id: "w" },
+            },
+          ] as any
+        }
+        showWaveInfo={false}
+        activeDrop={null}
+        showReplyAndQuote={false}
+        onReply={jest.fn()}
+        onReplyClick={jest.fn()}
+        serialNo={null}
+        targetDropRef={null}
+        onQuoteClick={jest.fn()}
+        dropViewDropId="drop-1"
+      />
+    );
+
+    expect(wrapperProps[0].enableLongContentCollapse).toBe(false);
+  });
+
+  it("keeps full content outside Wave and direct-message timelines", () => {
+    render(
+      <DropsList
+        scrollContainerRef={{ current: null }}
+        drops={
+          [
+            {
+              stableKey: "a",
+              serial_no: 1,
+              type: DropSize.FULL,
+              wave: { id: "w" },
+            },
+          ] as any
+        }
+        showWaveInfo={false}
+        activeDrop={null}
+        showReplyAndQuote={false}
+        onReply={jest.fn()}
+        onReplyClick={jest.fn()}
+        serialNo={null}
+        targetDropRef={null}
+        onQuoteClick={jest.fn()}
+        dropViewDropId={null}
+        location={"PROFILE" as any}
+      />
+    );
+
+    expect(wrapperProps[0].enableLongContentCollapse).toBe(false);
   });
 
   it("hydrates historical light drops after serial scrolling settles", () => {
