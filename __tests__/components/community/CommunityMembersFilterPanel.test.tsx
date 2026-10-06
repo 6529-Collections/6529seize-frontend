@@ -1,5 +1,11 @@
 import type { ComponentProps } from "react";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import CommunityMembersFilterPanel from "@/components/community/CommunityMembersFilterPanel";
 import type GroupMembersPreviewTrigger from "@/components/groups/members/GroupMembersPreviewTrigger";
@@ -64,11 +70,11 @@ beforeAll(() => {
   HTMLElement.prototype.scrollTo = jest.fn();
 });
 
-it("lists all eight criteria and retains readiness guidance without the identity empty states", () => {
+it("starts with Identities first and keeps all eight criteria and readiness guidance", () => {
   renderPanel();
   expect(
-    screen.getByRole("spinbutton", { name: "Level at least" })
-  ).toHaveValue(null);
+    screen.queryByRole("spinbutton", { name: "Level at least" })
+  ).not.toBeInTheDocument();
   for (const name of [
     "Level",
     "TDH",
@@ -83,23 +89,27 @@ it("lists all eight criteria and retains readiness guidance without the identity
       screen.getByRole("button", { name, exact: true })
     ).toBeInTheDocument();
   }
-  expect(screen.getByRole("group", { name: "Filter Network" })).toBeVisible();
+  const choices = screen.getByRole("group", { name: "Filter Network" });
+  expect(choices).toBeVisible();
+  expect(within(choices).getAllByRole("button")[0]).toHaveTextContent(
+    "Identities"
+  );
   expect(
     screen.getByRole("button", { name: "All filters" })
   ).toBeInTheDocument();
-  expect(screen.getByRole("button", { name: "Level" })).toHaveAttribute(
+  expect(screen.getByRole("button", { name: "Identities" })).toHaveAttribute(
     "aria-current",
     "true"
   );
-  expect(
-    screen.getByRole("button", { name: "Identities" })
-  ).not.toHaveAttribute("aria-current");
+  expect(screen.getByRole("button", { name: "Level" })).not.toHaveAttribute(
+    "aria-current"
+  );
   expect(
     screen.queryByRole("button", { name: "More filters" })
   ).not.toBeInTheDocument();
   expect(
-    screen.queryByText("No identities are explicitly included.")
-  ).not.toBeInTheDocument();
+    screen.getByText("No identities are explicitly included.")
+  ).toBeInTheDocument();
   expect(
     screen.queryByRole("button", { name: "Edit criteria" })
   ).not.toBeInTheDocument();
@@ -116,6 +126,7 @@ it("lists all eight criteria and retains readiness guidance without the identity
 it("preserves common criteria while visiting advanced criteria and submits the existing group payload", async () => {
   const user = userEvent.setup();
   const { onCreateGroup, onChange } = renderPanel();
+  await user.click(screen.getByRole("button", { name: "Level", exact: true }));
   await user.type(
     screen.getByRole("spinbutton", { name: "Level at least" }),
     "10"
@@ -194,6 +205,9 @@ it("prefills a saved group, keeps both previews, and does not change the origina
       "0x0000000000000000000000000000000000000002",
     ],
   });
+  await user.click(
+    screen.getByRole("button", { name: /^Level(?: Configured)?$/ })
+  );
   expect(
     screen.getByRole("spinbutton", { name: "Level at least" })
   ).toHaveValue(20);
@@ -236,6 +250,7 @@ it("keeps a failed or cancelled draft for another attempt", async () => {
   const onCreateGroup = jest.fn().mockResolvedValue(null);
   const onChange = jest.fn();
   renderPanel({ onCreateGroup, onChange });
+  await user.click(screen.getByRole("button", { name: "Level", exact: true }));
   await user.type(
     screen.getByRole("spinbutton", { name: "Level at least" }),
     "10"

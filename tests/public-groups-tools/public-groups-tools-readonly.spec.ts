@@ -144,31 +144,39 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
     const narrowFilter = await page.evaluate(
       () => window.matchMedia("(max-width: 1023px)").matches
     );
+    const choices = filter.getByRole("group", { name: "Filter Network" });
     const allFilters = filter.getByRole("button", { name: "All filters" });
     const openCriterion = async (name: string | RegExp) => {
       if (narrowFilter && (await allFilters.isVisible())) {
         await allFilters.click();
       }
-      await filter.getByRole("button", { name }).click();
+      await choices.getByRole("button", { name, exact: true }).click();
     };
     const levelInput = filter.getByRole("spinbutton", {
       name: "Level at least",
     });
-    if (narrowFilter) {
-      await expect(levelInput).toBeHidden();
-    } else {
-      await expect(levelInput).toBeVisible();
-    }
-    for (const name of [
+    await expect(levelInput).toBeHidden();
+    const criteria = [
+      "Identities",
       "Level",
       "TDH",
       "NIC",
       "Rep",
-      "Identities",
       "Required NFTs",
       "Collection Access",
       "xTDH Grant",
-    ]) {
+    ];
+    await expect(choices.getByRole("button")).toHaveText(criteria);
+    if (narrowFilter) {
+      await expect(
+        filter.getByRole("region", { name: "Identities" })
+      ).toBeHidden();
+    } else {
+      await expect(
+        filter.getByRole("region", { name: "Identities" })
+      ).toBeVisible();
+    }
+    for (const name of criteria) {
       await expect(
         filter.getByRole("button", { name, exact: true })
       ).toBeInViewport();

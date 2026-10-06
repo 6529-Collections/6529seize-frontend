@@ -38,8 +38,8 @@ const RULE_LABELS: Record<CreateWaveInlineGroupRuleType, MessageKey> = {
 
 type FilterView = CreateWaveInlineGroupRuleType | "identities";
 const FILTER_VIEWS: readonly FilterView[] = [
-  ...CREATE_WAVE_INLINE_GROUP_QUICK_RULES,
   "identities",
+  ...CREATE_WAVE_INLINE_GROUP_QUICK_RULES,
   ...CREATE_WAVE_INLINE_GROUP_MORE_RULES,
 ];
 
@@ -64,9 +64,7 @@ export default function CommunityMembersFilterPanel(
     updateIncludedWalletSources,
     updateExcludedWalletSources,
   } = useCreateWaveGroupInlinePanel(props);
-  const [view, setView] = useState<FilterView>(
-    CreateWaveInlineGroupRuleType.LEVEL
-  );
+  const [view, setView] = useState<FilterView>("identities");
   const [showEditor, setShowEditor] = useState(false);
   const [previewTarget, setPreviewTarget] =
     useState<GroupMembersPreviewTarget | null>(null);

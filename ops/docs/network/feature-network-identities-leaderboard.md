@@ -30,10 +30,11 @@ pagination, and profile links.
 ## Controls and URL State
 
 - `Filter` opens `Filter Network` with all eight criteria visible in one list:
-  `Level`, `TDH`, `NIC`, `Rep`, `Identities`, `Required NFTs`,
+  `Identities`, `Level`, `TDH`, `NIC`, `Rep`, `Required NFTs`,
   `Collection Access`, and `xTDH Grant`. On wide screens, the selected editor
-  sits beside the list. On narrow screens, selecting a criterion opens its
-  editor; `All filters` returns to the list. Switching keeps the draft's values.
+  sits beside the list with `Identities` open first. On narrow screens,
+  selecting a criterion opens its editor; `All filters` returns to the list.
+  Switching keeps the draft's values.
 - The `After editing` summary and `Create and use new group` action stay at
   the bottom while the criteria scroll. A valid draft also offers
   `Preview matches`. Expand `Not ready yet.` to read the readiness guidance.
