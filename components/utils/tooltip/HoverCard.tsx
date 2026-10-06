@@ -292,11 +292,13 @@ export default function HoverCard({
   }, [cancelHideTimer]);
 
   const handleCardKeyDown = useCallback(
-    (event: React.KeyboardEvent<HTMLDivElement>) => {
+    (event: KeyboardEvent) => {
       if (event.key !== "Tab" || event.defaultPrevented) return;
       const card = cardRef.current;
       const trigger = triggerRef.current;
-      if (!card || !trigger) return;
+      if (!card || !trigger || !card.contains(event.target as Node | null)) {
+        return;
+      }
       const target = getHoverCardTabExitTarget({
         card,
         trigger,
@@ -438,7 +440,10 @@ export default function HoverCard({
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         closeCardImmediately();
+        return;
       }
+
+      handleCardKeyDown(event);
     };
 
     const handlePointerDown = (event: MouseEvent | TouchEvent) => {
@@ -468,7 +473,7 @@ export default function HoverCard({
       document.removeEventListener("mousedown", handlePointerDown);
       document.removeEventListener("touchstart", handlePointerDown);
     };
-  }, [closeCardImmediately, isVisible]);
+  }, [closeCardImmediately, handleCardKeyDown, isVisible]);
 
   useEffect(() => {
     if (typeof document === "undefined") return;
@@ -543,7 +548,6 @@ export default function HoverCard({
               onMouseLeave={handleCardMouseLeave}
               onFocus={handleCardFocus}
               onBlur={handleCardBlur}
-              onKeyDown={handleCardKeyDown}
             >
               <div
                 className={joinTooltipClassNames(

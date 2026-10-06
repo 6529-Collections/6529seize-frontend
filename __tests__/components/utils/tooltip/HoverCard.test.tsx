@@ -335,6 +335,37 @@ describe("HoverCard", () => {
       expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     });
 
+    it("leaves Tab outside the card and prevented content events alone", () => {
+      render(
+        <>
+          <HoverCard
+            content={
+              <button type="button" onKeyDown={(event) => event.preventDefault()}>
+                Custom control
+              </button>
+            }
+            ariaLabel={hoverCardAriaLabel}
+            openOnClick
+          >
+            <button type="button">Trigger</button>
+          </HoverCard>
+          <button type="button">After</button>
+        </>
+      );
+      fireEvent.click(screen.getByRole("button", { name: "Trigger" }));
+      const outside = screen.getByRole("button", { name: "After" });
+      act(() => outside.focus());
+      expect(fireEvent.keyDown(outside, { key: "Tab" })).toBe(true);
+      expect(outside).toHaveFocus();
+      expect(screen.getByRole("dialog")).toBeInTheDocument();
+
+      const customControl = screen.getByRole("button", { name: "Custom control" });
+      act(() => customControl.focus());
+      expect(fireEvent.keyDown(customControl, { key: "Tab" })).toBe(false);
+      expect(customControl).toHaveFocus();
+      expect(screen.getByRole("dialog")).toBeInTheDocument();
+    });
+
     it("continues from the portal to a native summary after its trigger", async () => {
       const user = userEvent.setup();
       render(
