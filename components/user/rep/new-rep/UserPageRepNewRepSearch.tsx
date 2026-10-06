@@ -522,7 +522,7 @@ export default function UserPageRepNewRepSearch({
                   disabled={isGrantDisabled}
                   onClick={onGrantRep}
                   loading={mutating}
-                  variant="primaryFlat"
+                  variant="primary"
                   size="xl"
                   fullWidth
                 >
