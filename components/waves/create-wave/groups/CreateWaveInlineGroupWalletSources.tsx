@@ -403,7 +403,9 @@ function CsvWalletSource({
           aria-hidden="true"
           className="tw-size-5 tw-text-iron-300"
         />
-        <span className="tw-text-xs tw-font-medium tw-leading-relaxed tw-text-iron-300">
+        <span
+          className={`tw-text-xs tw-font-medium tw-leading-relaxed tw-text-iron-300 ${networkPresentation ? "tw-text-balance" : ""}`}
+        >
           {t(
             locale,
             "waves.create.groups.inlineIdentities.sources.csv.dropLabel"
