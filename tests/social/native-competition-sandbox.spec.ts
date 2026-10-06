@@ -592,7 +592,9 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       .first();
     await expect(configuration).toHaveAttribute("aria-selected", "true");
     await expect(
-      page.locator("#my-stream-wave-tabpanel-configuration")
+      page.getByRole("tabpanel").filter({
+        has: page.getByRole("heading", { name: "Access", exact: true }),
+      })
     ).toBeFocused();
     await page.getByRole("tab", { name: "Chat", exact: true }).first().click();
     await expect(
