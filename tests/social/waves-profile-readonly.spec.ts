@@ -55,7 +55,10 @@ async function getFirstWaveId(page: Page) {
   await expect(waveList).toBeVisible({ timeout: 15000 });
   // The region mounts with its loading shell. Await a rendered data row before
   // inspecting its href; shell readiness does not establish API/data readiness.
-  const waveLinks = waveList
+  const waveLinks = page
+    .getByRole("region", {
+      name: /All recent waves list|Regular waves list/,
+    })
     .locator('a[href^="/waves/"]')
     .filter({ visible: true });
   let href: string | null = null;
