@@ -19,7 +19,7 @@ export default function MobileWrapperDialogCloseButton({
       className={clsx(
         "tw-group tw-inline-flex tw-size-10 tw-flex-none tw-items-center tw-justify-center tw-border-none tw-bg-transparent tw-p-0 tw-transition-[color,transform] tw-duration-150 tw-ease-out focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 active:tw-scale-95 desktop-hover:hover:tw-text-white motion-reduce:tw-transform-none motion-reduce:tw-transition-none",
         variant === "minimal"
-          ? "tw-rounded-lg tw-text-iron-400"
+          ? "-tw-mr-3 tw-rounded-lg tw-text-iron-400"
           : "tw-rounded-full tw-text-iron-300",
         className
       )}
