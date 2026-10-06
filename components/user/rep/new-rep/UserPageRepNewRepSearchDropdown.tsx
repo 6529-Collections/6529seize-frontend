@@ -78,17 +78,17 @@ export default function UserPageRepNewRepSearchDropdown({
               event.stopPropagation();
               onRepSelect(category);
             }}
-            className={`tw-flex tw-max-w-full tw-cursor-pointer tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-rounded-lg tw-border tw-border-solid tw-px-3 tw-py-2 tw-text-left tw-text-sm tw-font-medium tw-leading-5 tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 motion-reduce:tw-transition-none ${categoryAppearance}`}
+            className={`tw-flex tw-max-w-full tw-cursor-pointer tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-rounded-lg tw-border tw-border-solid tw-min-h-8 tw-px-2.5 tw-py-1 tw-text-left tw-text-xs tw-font-normal tw-leading-5 tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 motion-reduce:tw-transition-none ${categoryAppearance}`}
           >
             <span
               className={`tw-min-w-0 tw-max-w-full tw-break-words ${
-                isMemesSubmissionCategory ? "tw-font-semibold" : ""
+                isMemesSubmissionCategory ? "tw-font-medium" : ""
               }`}
             >
               {category}
             </span>
             {isMemesSubmissionCategory && (
-              <span className="tw-whitespace-nowrap tw-text-xs tw-font-normal tw-leading-5 tw-text-emerald-300">
+              <span className="tw-whitespace-nowrap tw-text-[11px] tw-font-normal tw-leading-5 tw-text-emerald-300">
                 {t(locale, "rep.categories.grant.submissionBadge")}
               </span>
             )}
