@@ -28,7 +28,7 @@ export default function CommonDropdownItem<T, U = unknown>(
   const [shouldRotate, setShouldRotate] = useState<boolean>(false);
 
   const onSelected = (event: MouseEvent<HTMLButtonElement>) => {
-    props.onItemSelection?.(item.value, event.currentTarget);
+    props.onItemSelection?.(item.value, event.currentTarget, event.isTrusted);
     setSelected(item.value);
     setShouldRotate(false);
   };

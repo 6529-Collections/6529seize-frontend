@@ -69,6 +69,7 @@ it("records a fast action as direct exposure, and resets on navigation, viewer o
   recordWaveFeatureActivation(context, descriptor, "choose");
   expect(mockTrack.mock.calls[0]?.[1]).toMatchObject({
     exposure_kind: "direct_activation",
+    selection_source: "user",
   });
   recordWaveFeatureSeen(
     { ...context, key: "another-visit" },

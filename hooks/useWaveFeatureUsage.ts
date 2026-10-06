@@ -52,8 +52,10 @@ export function useWaveFeatureUsage<T extends HTMLElement = HTMLDivElement>(
 
   const activate = (
     descriptor: WaveFeatureDescriptor,
-    element: HTMLElement
+    element: HTMLElement,
+    isTrusted: boolean
   ) => {
+    if (!isTrusted) return;
     try {
       const context = getContext();
       if (context && isWaveFeatureVisible(element)) {

@@ -23,7 +23,7 @@ interface CommonSelectDefaultProps<T, U> {
     | Readonly<Record<`data-${string}`, string>>
     | undefined;
   readonly onItemSelection?:
-    | ((value: T, element: HTMLButtonElement) => void)
+    | ((value: T, element: HTMLButtonElement, isTrusted: boolean) => void)
     | undefined;
   readonly items: readonly CommonSelectItem<T, U>[];
   readonly activeItem: T;
@@ -54,7 +54,7 @@ interface CommonSelectsWithSortProps<T, U> extends CommonSelectDefaultProps<
 
 export interface CommonSelectItemProps<T, U> {
   readonly onItemSelection?:
-    | ((value: T, element: HTMLButtonElement) => void)
+    | ((value: T, element: HTMLButtonElement, isTrusted: boolean) => void)
     | undefined;
   readonly item: CommonSelectItem<T, U>;
   readonly activeItem: T;

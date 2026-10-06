@@ -59,9 +59,39 @@ const loadModule = async ({
 };
 
 describe("mixpanel analytics wrapper", () => {
+  beforeEach(() => {
+    document.cookie = "performance-cookies-consent=true; path=/";
+  });
   afterEach(() => {
     document.cookie = "performance-cookies-consent=; Max-Age=0; path=/";
   });
+
+  it.each([undefined, "invalid", "false"])(
+    "blocks delivery when consent is missing or malformed (%s)",
+    async (consent) => {
+      const analytics = await loadModule({
+        nodeEnv: "production",
+        token: "public-token",
+      });
+      analytics.initAnalytics();
+      document.cookie =
+        consent === undefined
+          ? "performance-cookies-consent=; Max-Age=0; path=/"
+          : `performance-cookies-consent=${consent}; path=/`;
+      analytics.trackAnalyticsEvent("Product Event");
+      expect(trackMock).not.toHaveBeenCalled();
+      const payload = { event: "Product Event", properties: {} };
+      expect(
+        initMock.mock.calls[0]?.[1].hooks.before_send_events(payload)
+      ).toBeNull();
+      mixpanelMock.request_batchers.events.sendRequest(
+        [payload],
+        {},
+        jest.fn()
+      );
+      expect(sendBatchMock).not.toHaveBeenCalled();
+    }
+  );
 
   it("blocks sends immediately when the consent cookie changes before the effect runs", async () => {
     const analytics = await loadModule({

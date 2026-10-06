@@ -227,7 +227,7 @@ export const WaveleaderboardSort: React.FC<WaveleaderboardSortProps> = ({
         activeItem={sort}
         filterLabel="Sort"
         setSelected={onSortChange}
-        onItemSelection={(value, element) => {
+        onItemSelection={(value, element, isTrusted) => {
           activate(
             {
               feature: "leaderboard_sort",
@@ -235,7 +235,8 @@ export const WaveleaderboardSort: React.FC<WaveleaderboardSortProps> = ({
               placement,
               selected: sort === value,
             },
-            element
+            element,
+            isTrusted
           );
         }}
         size="sm"

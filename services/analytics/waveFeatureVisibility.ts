@@ -180,6 +180,7 @@ export function observeWaveFeatures(
       // Dropdown selection is recorded by its semantic selection callback.
       if (placement === "leaderboard_dropdown") return;
       if (
+        !event.isTrusted ||
         event.button !== 0 ||
         event.metaKey ||
         event.ctrlKey ||

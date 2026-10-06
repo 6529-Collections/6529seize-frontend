@@ -233,6 +233,70 @@ test("production SDK strips automatic and persisted navigation properties for ba
   }
 });
 
+test("scripted selections retain product behavior without counting deliberate use", async ({
+  page,
+  isMobile,
+}) => {
+  await page.goto("/waves/private-wave");
+  await page
+    .getByRole("button", { name: "Enable synthetic telemetry" })
+    .click();
+  await page
+    .getByRole("button", { name: "Pinned", exact: true })
+    .evaluate((button: HTMLButtonElement) => button.click());
+  await expect(
+    page.getByRole("button", { name: "Pinned", exact: true })
+  ).toHaveAttribute("aria-pressed", "true");
+  if (isMobile) {
+    await page.getByRole("button", { name: "Sort: Current Vote" }).tap();
+    await page
+      .getByRole("menuitem", { name: "Newest", exact: true })
+      .evaluate((button: HTMLButtonElement) => button.click());
+  } else {
+    await page
+      .getByRole("tab", { name: "Newest", exact: true })
+      .evaluate((button: HTMLButtonElement) => button.click());
+  }
+  await expect(
+    page.getByRole("status", { name: "Selected fixture state" })
+  ).toHaveText("CHAT:CREATED_AT");
+  await page.waitForTimeout(1200);
+  expect(
+    (await events(page)).filter(
+      (event) => event.event === "Wave Feature Activated"
+    )
+  ).toHaveLength(0);
+});
+
+test("missing or malformed cookie blocks delivery despite stale UI consent", async ({
+  page,
+}) => {
+  for (const consent of [undefined, "invalid", "false"]) {
+    await page.request.get("/clear");
+    await page.goto("/waves/private-wave");
+    await page
+      .getByRole("button", { name: "Enable synthetic telemetry" })
+      .click();
+    await page.evaluate((value) => {
+      document.cookie =
+        value === undefined
+          ? "performance-cookies-consent=; Max-Age=0; path=/"
+          : `performance-cookies-consent=${value}; path=/`;
+      window.featureFixture.lateEvent();
+    }, consent);
+    await visibleTab(page, "Winners").click();
+    await expect(
+      page.getByRole("status", { name: "Selected fixture state" })
+    ).toHaveText("WINNERS:RANK");
+    await page.waitForTimeout(1200);
+    expect(
+      (await events(page)).filter((event) =>
+        event.event.startsWith("Wave Feature")
+      )
+    ).toHaveLength(0);
+  }
+});
+
 test("counts only the visible responsive tab copy, and deduplicates remounts within a visit", async ({
   page,
 }) => {
@@ -288,6 +352,11 @@ test("fast deliberate tab and sort selections work with mouse, touch and keyboar
       "exposure_kind"
     ]
   ).toBe("direct_activation");
+  expect(
+    (await featureEvents(page, "Wave Feature Seen", "winners"))[0]?.properties[
+      "selection_source"
+    ]
+  ).toBe("user");
   await visibleTab(page, "Chat").focus();
   await page.keyboard.press("Enter");
   await expect

@@ -9,7 +9,7 @@ export const WAVE_FEATURE_EVENT_NAMES = [
   "Wave Feature Activated",
 ] as const;
 
-export const WAVE_FEATURE_VALUES = {
+const WAVE_FEATURE_VALUES = {
   sidebar_section: ["recommendations", "active_votes"],
   sidebar_entry: [
     "recommendations_all",
@@ -52,7 +52,7 @@ export type WaveFeaturePlacement =
   | "wave_tabs"
   | "leaderboard_tabs"
   | "leaderboard_dropdown";
-export type WaveFeatureAction = "choose" | "open" | "expand" | "collapse";
+type WaveFeatureAction = "choose" | "open" | "expand" | "collapse";
 export interface WaveFeatureDescriptor {
   readonly feature: WaveFeature;
   readonly value: string;
@@ -156,13 +156,13 @@ export function recordWaveFeatureActivation(
   action: WaveFeatureAction
 ): void {
   if (!isAnalyticsTrackingAllowed() || !isDescriptorValid(descriptor)) return;
+  getVisit(context).chosen.add(descriptorKey(context, descriptor));
   recordWaveFeatureSeen(context, descriptor, "direct_activation");
   trackAnalyticsEvent("Wave Feature Activated", {
     ...properties(context, descriptor),
     selection_source: "user",
     action,
   });
-  getVisit(context).chosen.add(descriptorKey(context, descriptor));
 }
 
 export function waveFeatureAttributes(feature: WaveFeature, value: string) {

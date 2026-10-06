@@ -18,7 +18,7 @@ repeated preview rows and child remounts within a route/viewer visit. It resets 
 navigation or a consent/identity generation change.
 
 `Wave Feature Activated` records semantic clicks, including keyboard-generated
-clicks and touch activation. Hover, focus, prefetch, background requests,
+clicks and touch activation. Script-generated clicks, hover, focus, prefetch, background requests,
 restoration and default selection do not activate a feature. Modified links
 retain their existing behavior and are outside this pilot's activation count.
 Dropdown choices are recorded from the actual portal menu button before it
@@ -74,7 +74,8 @@ A send-time hook and final event batch transport guard strip the same fields,
 check current consent and allowlist Wave pilot envelope properties. The pinned
 SDK bypasses its hook for recovered orphaned queue entries, so batch senders
 start only after the final guard is installed. This narrow SDK integration
-must be checked when upgrading Mixpanel. Existing
+must be checked when upgrading Mixpanel. Missing or malformed performance
+consent cookies fail closed even while React consent state is stale. Existing
 Mixpanel identity and delivery metadata remain. Consent withdrawal synchronously
 closes the send gate, clears SDK batches and resets identity. Already dispatched
 network requests cannot be recalled. SDK and observer failures are best effort

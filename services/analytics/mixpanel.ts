@@ -120,7 +120,7 @@ const isAnalyticsReady = (): boolean => {
   return (
     hasInitialized &&
     isTrackingAllowed &&
-    Cookies.get(CONSENT_PERFORMANCE_COOKIE) !== "false" &&
+    Cookies.get(CONSENT_PERFORMANCE_COOKIE) === "true" &&
     isAnalyticsEnvironmentSupported()
   );
 };

@@ -87,6 +87,7 @@ function Fixture() {
     results: { isFetching: false },
   } as unknown as SidebarWaveNavigation;
   const enable = () => {
+    document.cookie = "performance-cookies-consent=true; path=/";
     initAnalytics();
     identify("529");
     mixpanel.register({
@@ -98,6 +99,7 @@ function Fixture() {
   window.featureFixture = {
     enable,
     revoke: () => {
+      document.cookie = "performance-cookies-consent=false; path=/";
       disableAnalytics();
       setConsent(false);
     },
