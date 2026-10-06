@@ -7,6 +7,7 @@ const clearIdentityMock = jest.fn();
 const disableAnalyticsMock = jest.fn();
 const identifyMock = jest.fn();
 const initAnalyticsMock = jest.fn();
+const isAnalyticsTrackingAllowedMock = jest.fn();
 const trackPageViewMock = jest.fn();
 
 let connectedProfile: {
@@ -42,6 +43,7 @@ jest.mock("@/services/analytics/mixpanel", () => ({
   disableAnalytics: (...args: unknown[]) => disableAnalyticsMock(...args),
   identify: (...args: unknown[]) => identifyMock(...args),
   initAnalytics: (...args: unknown[]) => initAnalyticsMock(...args),
+  isAnalyticsTrackingAllowed: () => isAnalyticsTrackingAllowedMock(),
   trackPageView: (...args: unknown[]) => trackPageViewMock(...args),
 }));
 
@@ -59,6 +61,7 @@ describe("MixpanelSetup", () => {
     disableAnalyticsMock.mockReset();
     identifyMock.mockReset().mockReturnValue(true);
     initAnalyticsMock.mockReset();
+    isAnalyticsTrackingAllowedMock.mockReset().mockReturnValue(true);
     trackPageViewMock.mockReset().mockReturnValue(true);
   });
 
@@ -195,6 +198,82 @@ describe("MixpanelSetup", () => {
     expect(initAnalyticsMock).toHaveBeenCalledTimes(3);
     expect(identifyMock).toHaveBeenCalledTimes(3);
   });
+
+  it("recovers failed guest initialization without a route or consent change", () => {
+    jest.useFakeTimers();
+    performanceConsent = true;
+    pathname = "/waves";
+    isAnalyticsTrackingAllowedMock.mockReturnValueOnce(false);
+    trackPageViewMock.mockReturnValueOnce(false);
+    const onReset = jest.fn();
+    const unsubscribe = subscribeWaveFeatureVisitReset(onReset);
+    try {
+      const { rerender } = render(<MixpanelSetup />);
+      expect(initAnalyticsMock).toHaveBeenCalledTimes(1);
+      expect(trackPageViewMock).toHaveBeenCalledTimes(1);
+      onReset.mockClear();
+      act(() => jest.advanceTimersByTime(999));
+      expect(initAnalyticsMock).toHaveBeenCalledTimes(1);
+      act(() => jest.advanceTimersByTime(1));
+      expect(initAnalyticsMock).toHaveBeenCalledTimes(2);
+      expect(identifyMock).not.toHaveBeenCalled();
+      expect(onReset).toHaveBeenCalled();
+      expect(trackPageViewMock).toHaveBeenCalledTimes(2);
+      expect(trackPageViewMock).toHaveBeenLastCalledWith("/waves", {
+        has_connected_profile: false,
+        logical_page: "waves_index",
+        page_group: "waves",
+        route_pattern: "/waves",
+      });
+      rerender(<MixpanelSetup />);
+      act(() => jest.advanceTimersByTime(60000));
+      expect(initAnalyticsMock).toHaveBeenCalledTimes(2);
+      expect(trackPageViewMock).toHaveBeenCalledTimes(2);
+    } finally {
+      unsubscribe();
+    }
+  });
+
+  it("bounds guest initialization retries when delivery stays closed", () => {
+    jest.useFakeTimers();
+    performanceConsent = true;
+    isAnalyticsTrackingAllowedMock.mockReturnValue(false);
+    trackPageViewMock.mockReturnValue(false);
+    render(<MixpanelSetup />);
+
+    act(() => jest.advanceTimersByTime(1000));
+    expect(initAnalyticsMock).toHaveBeenCalledTimes(2);
+    act(() => jest.advanceTimersByTime(4999));
+    expect(initAnalyticsMock).toHaveBeenCalledTimes(2);
+    act(() => jest.advanceTimersByTime(1));
+    expect(initAnalyticsMock).toHaveBeenCalledTimes(3);
+    act(() => jest.advanceTimersByTime(60000));
+    expect(initAnalyticsMock).toHaveBeenCalledTimes(3);
+    expect(identifyMock).not.toHaveBeenCalled();
+    expect(trackPageViewMock).toHaveBeenCalledTimes(1);
+  });
+
+  it.each(["consent", "profile", "unmount"] as const)(
+    "cancels guest initialization retry after %s changes",
+    (change) => {
+      jest.useFakeTimers();
+      performanceConsent = true;
+      isAnalyticsTrackingAllowedMock.mockReturnValue(false);
+      const { rerender, unmount } = render(<MixpanelSetup />);
+
+      if (change === "unmount") {
+        unmount();
+      } else {
+        if (change === "consent") performanceConsent = false;
+        else connectedProfile = { id: 42 };
+        rerender(<MixpanelSetup />);
+      }
+      act(() => jest.advanceTimersByTime(60000));
+      expect(initAnalyticsMock).toHaveBeenCalledTimes(1);
+      if (change === "profile") expect(identifyMock).toHaveBeenCalledWith("42");
+      else expect(identifyMock).not.toHaveBeenCalled();
+    }
+  );
 
   it.each(["consent", "profile", "unmount"] as const)(
     "cancels failed-profile retry after %s changes",

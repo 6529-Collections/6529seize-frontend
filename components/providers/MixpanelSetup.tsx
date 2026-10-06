@@ -8,6 +8,7 @@ import {
   disableAnalytics,
   identify,
   initAnalytics,
+  isAnalyticsTrackingAllowed,
   trackPageView,
 } from "@/services/analytics/mixpanel";
 import { classifyPageView } from "@/services/analytics/pageClassification";
@@ -15,7 +16,7 @@ import { resetWaveFeatureVisit } from "@/services/analytics/waveFeatureUsage";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
-const IDENTITY_RETRY_DELAYS = [1000, 5000] as const;
+const ANALYTICS_RETRY_DELAYS = [1000, 5000] as const;
 
 const getProfileRouteTarget = (pathname: string): string | null => {
   return pathname.split("/").find((segment) => segment.length > 0) ?? null;
@@ -28,7 +29,8 @@ export default function MixpanelSetup() {
   const { performanceConsent } = useCookieConsent();
   const lastTrackedPageKeyRef = useRef<string | null>(null);
   const identifiedProfileIdRef = useRef<string | null>(null);
-  const [identityRecoveryGeneration, setIdentityRecoveryGeneration] = useState(0);
+  const [analyticsRecoveryGeneration, setAnalyticsRecoveryGeneration] =
+    useState(0);
   const hasConsent = performanceConsent === true;
   const pageView = classifyPageView({
     pathname,
@@ -62,39 +64,39 @@ export default function MixpanelSetup() {
         ? String(connectedProfile.id)
         : null;
 
-    if (!profileId) {
-      if (identifiedProfileIdRef.current !== null) {
-        clearIdentity();
-        identifiedProfileIdRef.current = null;
-      }
-      return;
+    if (!profileId && identifiedProfileIdRef.current !== null) {
+      clearIdentity();
+      identifiedProfileIdRef.current = null;
     }
 
-    if (identifiedProfileIdRef.current === profileId) {
+    if (profileId && identifiedProfileIdRef.current === profileId) {
       return;
     }
 
     let retryTimer: ReturnType<typeof setTimeout> | undefined;
     let retryAttempt = 0;
-    const attemptIdentity = () => {
-      if (identify(profileId)) {
+    const attemptSetup = () => {
+      const ready = profileId
+        ? identify(profileId)
+        : isAnalyticsTrackingAllowed();
+      if (ready) {
         identifiedProfileIdRef.current = profileId;
         if (retryAttempt > 0) {
           resetWaveFeatureVisit();
-          setIdentityRecoveryGeneration((generation) => generation + 1);
+          setAnalyticsRecoveryGeneration((generation) => generation + 1);
         }
         return;
       }
       identifiedProfileIdRef.current = null;
-      const retryDelay = IDENTITY_RETRY_DELAYS.at(retryAttempt);
+      const retryDelay = ANALYTICS_RETRY_DELAYS.at(retryAttempt);
       if (retryDelay === undefined) return;
       retryAttempt += 1;
       retryTimer = setTimeout(() => {
         initAnalytics();
-        attemptIdentity();
+        attemptSetup();
       }, retryDelay);
     };
-    attemptIdentity();
+    attemptSetup();
     return () => {
       if (retryTimer !== undefined) clearTimeout(retryTimer);
     };
@@ -127,7 +129,7 @@ export default function MixpanelSetup() {
     connectedProfile?.id,
     fetchingProfile,
     hasConsent,
-    identityRecoveryGeneration,
+    analyticsRecoveryGeneration,
     pageView,
     pathname,
     profileViewerContext,

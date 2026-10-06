@@ -106,14 +106,15 @@ Logout clears local identity even when consent is missing or inaccessible;
 delivery stays closed until affirmative consent returns. If profile identity
 setup fails, delivery closes and local identity resets rather than attributing
 the new profile's activity to the previous profile. The provider caches only
-successful setup. For the same profile, the provider retries initialization and
-identity setup after one second, then five seconds if needed. Profile or consent
+successful setup. The provider retries failed initialization for guests and
+initialization/identity setup for connected profiles after one second, then five
+seconds if needed. Profile or consent
 changes and unmount cancel pending retries. Delivery stays closed if both retries
 fail; a later consent grant or reload can retry again. Already dispatched
 network requests cannot be recalled. SDK and observer failures are best effort
 and must not interrupt controls.
 
-Successful delayed identity recovery resets the current feature visit and wakes
+Successful delayed analytics recovery resets the current feature visit and wakes
 visibility observers. Page Viewed and Seen are cached only after synchronous
 SDK acceptance, so a rejected attempt can retry in the same visit. Acceptance
 means the SDK initiated or queued the event; it does not confirm network or
