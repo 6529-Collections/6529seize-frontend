@@ -1,5 +1,6 @@
 import emmaMessages from "@/i18n/messages/emma.en-US.json";
 import { EN_SUBMISSION_DISCOVERY_MESSAGES } from "@/i18n/messages/submission-discovery";
+import waveCreationMessages from "@/i18n/messages/wave-creation.en-US.json";
 import { COMPETITION_MESSAGES } from "@/i18n/messages/competitions";
 import { EN_US_DROP_METADATA_MESSAGES } from "@/i18n/messages/drop-metadata";
 import { EN_DROP_REQUIREMENT_MESSAGES } from "@/i18n/messages/drop-requirements";
@@ -2834,6 +2835,7 @@ const TOKEN_NUMBER_MESSAGE = "Token #{tokenId}";
 
 export const EN_US_MESSAGES = {
   ...EN_SUBMISSION_DISCOVERY_MESSAGES,
+  ...waveCreationMessages,
   ...COMPETITION_MESSAGES,
   ...EN_DROP_REQUIREMENT_MESSAGES,
   ...EN_US_DROP_METADATA_MESSAGES,

@@ -1053,25 +1053,24 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     );
     await expect(page.getByRole("radio", { name: "Chat only" })).toHaveCount(0);
     await page.getByLabel(/Wave Name/).fill("Native shared hub");
-    await page.getByRole("button", { name: "Next", exact: true }).click();
-    await expect(
-      page.getByRole("heading", { name: "Access", level: 2 })
-    ).toBeVisible({ timeout: 30000 });
-    await page.getByRole("button", { name: "Next", exact: true }).click();
-    await expect(
-      page.getByRole("heading", { name: "Guidelines", level: 2, exact: true })
-    ).toBeVisible();
-    await page.getByRole("button", { name: "Next", exact: true }).click();
     await page
-      .getByRole("textbox", { name: "Describe your wave", exact: true })
+      .getByRole("textbox", { name: "First post", exact: true })
       .fill("A shared chat with independently configured competitions.");
-    await page.getByRole("button", { name: "Next", exact: true }).click();
+    await page
+      .getByRole("button", { name: "Review wave", exact: true })
+      .click();
     await page
       .getByRole("button", { name: "Confirm and create", exact: true })
       .click();
     await expect(page).toHaveURL(new RegExp(`/waves/${WAVE}$`), {
       timeout: 30000,
     });
+    await expect(
+      page.getByText("Your wave is ready", { exact: true })
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Copy wave link", exact: true })
+    ).toBeVisible();
     expect(sandbox.requests).toHaveLength(1);
     expect(sandbox.requests[0]?.path).toBe("/api/v3/waves");
     expect(sandbox.requests[0]?.body).toMatchObject({

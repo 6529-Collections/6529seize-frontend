@@ -23,7 +23,10 @@ import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useLayout } from "@/components/brain/my-stream/layout/LayoutContext";
 import { CreateWaveStep } from "@/types/waves.types";
-import type { CreateWaveGroupConfigType } from "@/types/waves.types";
+import type {
+  CreateWaveGroupConfigType,
+  WaveOverviewConfig,
+} from "@/types/waves.types";
 import CreateWaveFlow from "./CreateWaveFlow";
 import CreateWaveLayout from "./CreateWaveLayout";
 import CreateWaveStepContent from "./CreateWaveStepContent";
@@ -35,6 +38,16 @@ import { useCreateWaveSubmission } from "./hooks/useCreateWaveSubmission";
 import useKeyboardFocusScroll from "./hooks/useKeyboardFocusScroll";
 import { useSubwaveWaveConfig } from "./hooks/useSubwaveWaveConfig";
 import CreateWaveDraftsSection from "./overview/CreateWaveDraftsSection";
+import {
+  CreateWaveQuickChatHeader,
+  CreateWaveQuickChatOptions,
+} from "./overview/CreateWaveQuickChat";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import { getCreateWaveValidationErrors } from "@/helpers/waves/create-wave.validation";
+import {
+  getCreateWaveTextDraft,
+  hasCreateWaveDraftMedia,
+} from "@/helpers/waves/create-wave-draft.helpers";
 import SubwaveAccessWarningDialog from "@/components/waves/groups/SubwaveAccessWarningDialog";
 
 export interface CreateWaveHandles {
@@ -87,6 +100,19 @@ export default function CreateWave({
   const [descriptionVisited, setDescriptionVisited] = useState(false);
   const [descriptionSnapshot, setDescriptionSnapshot] =
     useState<CreateDropConfig | null>(null);
+  const quickChat = !isSubwave && config.overview.type === ApiWaveType.Chat;
+  const isQuickChatOverview = quickChat && step === CreateWaveStep.OVERVIEW;
+  const showDescription =
+    step === CreateWaveStep.DESCRIPTION || isQuickChatOverview;
+  const [initialDescription, setInitialDescription] =
+    useState<CreateDropConfig | null>(null);
+  const [editorKey, setEditorKey] = useState(0);
+  const [descriptionDraft, setDescriptionDraft] =
+    useState<CreateDropConfig | null>(null);
+  const [mediaOmitted, setMediaOmitted] = useState(false);
+  const [draftLoaded, setDraftLoaded] = useState(false);
+  const [pendingOverview, setPendingOverview] =
+    useState<WaveOverviewConfig | null>(null);
   const descriptionRef = useRef<CreateWaveDescriptionHandles | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [criteriaReplacementByGroup, setCriteriaReplacementByGroup] = useState<
@@ -150,8 +176,22 @@ export default function CreateWave({
     invalidField.focus({ preventScroll: true });
     invalidField.scrollIntoView({ behavior: "smooth", block: "center" });
   }, [errorFocusRequest]);
-  const { drafts, loadDraft, deleteDraft, clearActiveDraft } =
-    useCreateWaveDrafts({ config, endDateConfig, step });
+  const onDescriptionDraftChange = useCallback(() => {
+    const snapshot = descriptionRef.current?.getDropSnapshot() ?? null;
+    const text = getCreateWaveTextDraft(snapshot);
+    setDescriptionDraft((current) => (isEqual(current, text) ? current : text));
+    if (hasCreateWaveDraftMedia(snapshot)) setMediaOmitted(true);
+  }, []);
+  const { drafts, loadDraft, deleteDraft, clearActiveDraft, saveNow } =
+    useCreateWaveDrafts({
+      config,
+      endDateConfig,
+      step,
+      scope: `${profile.primary_wallet.toLowerCase()}:${profile.id ?? ""}`,
+      description: descriptionDraft,
+      mediaOmitted,
+      enabled: !isSubwave,
+    });
 
   const resetTransientGroupState = useCallback(() => {
     setCriteriaReplacementByGroup({});
@@ -161,10 +201,17 @@ export default function CreateWave({
   const onLoadDraft = (draft: CreateWaveDraft) => {
     setDescriptionVisited(false);
     setDescriptionSnapshot(null);
+    const description = getCreateWaveTextDraft(draft.description ?? null);
+    setInitialDescription(description);
+    setDescriptionDraft(description);
+    setMediaOmitted(!!draft.mediaOmitted);
+    setDraftLoaded(true);
+    setEditorKey((key) => key + 1);
     resetTransientGroupState();
     replaceConfig(draft.config);
     setEndDateConfig(draft.endDateConfig);
     loadDraft(draft);
+    void onStep({ step: CreateWaveStep.OVERVIEW, direction: "backward" });
   };
 
   const {
@@ -190,6 +237,7 @@ export default function CreateWave({
 
   const requestClose = () => {
     const description = descriptionRef.current?.getDropSnapshot();
+    saveNow(description ?? null);
     const hasChanges =
       !isEqual(config, initialForm.current.config) ||
       !isEqual(endDateConfig, initialForm.current.endDateConfig) ||
@@ -220,6 +268,12 @@ export default function CreateWave({
       setDescriptionVisited(true);
     }
     if (targetStep === CreateWaveStep.REVIEW) {
+      if (quickChat && getCreateWaveValidationErrors({ config, step }).length) {
+        // onStep validates the current screen and blocks navigation while
+        // surfacing its errors and focus request. Do not snapshot invalid input.
+        await onStep({ step: targetStep, direction });
+        return;
+      }
       const snapshot = getDescriptionForReview();
       if (!snapshot) {
         return;
@@ -229,7 +283,13 @@ export default function CreateWave({
     if (targetStep !== CreateWaveStep.GROUPS) {
       resetTransientGroupState();
     }
-    return onStep({ step: targetStep, direction });
+    return onStep({
+      step: targetStep,
+      direction,
+      ...(isQuickChatOverview && direction === "forward"
+        ? { validateGroups: true }
+        : {}),
+    });
   };
 
   const onCriteriaReplacementChange = useCallback(
@@ -263,7 +323,32 @@ export default function CreateWave({
 
   const actionInProgress =
     submitting ||
-    (step === CreateWaveStep.GROUPS && waveConfig.groupValidation.isFetching);
+    ((step === CreateWaveStep.GROUPS || quickChat) &&
+      waveConfig.groupValidation.isFetching);
+  const controller = {
+    ...waveConfig,
+    setOverview: (overview: WaveOverviewConfig) => {
+      if (!isSubwave && overview.type !== config.overview.type)
+        setPendingOverview(overview);
+      else waveConfig.setOverview(overview);
+    },
+  };
+  const contentProps = {
+    controller,
+    isSubwave,
+    parentWaveName,
+    descriptionSnapshot,
+    overviewLeading: !isSubwave && (
+      <CreateWaveDraftsSection
+        drafts={drafts}
+        onLoad={onLoadDraft}
+        onDelete={deleteDraft}
+      />
+    ),
+    onCriteriaReplacementChange,
+    onGroupResolutionChange,
+    onInlineGroupCreate,
+  };
 
   return (
     // The bottom safe-area region is inside the viewport (viewport-fit=cover)
@@ -287,6 +372,7 @@ export default function CreateWave({
         scrollResetKey={step}
       >
         <CreateWaveLayout
+          quickChat={quickChat}
           config={config}
           step={step}
           showActions={selectedOutcomeType === null}
@@ -297,34 +383,26 @@ export default function CreateWave({
           setStep={setStep}
           onComplete={onComplete}
         >
-          <CreateWaveStepContent
-            controller={waveConfig}
-            isSubwave={isSubwave}
-            parentWaveName={parentWaveName}
-            descriptionSnapshot={descriptionSnapshot}
-            overviewLeading={
-              !isSubwave && (
-                <CreateWaveDraftsSection
-                  drafts={drafts}
-                  onLoad={onLoadDraft}
-                  onDelete={deleteDraft}
-                />
-              )
-            }
-            onCriteriaReplacementChange={onCriteriaReplacementChange}
-            onGroupResolutionChange={onGroupResolutionChange}
-            onInlineGroupCreate={onInlineGroupCreate}
-          />
+          {isQuickChatOverview ? (
+            <CreateWaveQuickChatHeader {...contentProps} />
+          ) : (
+            <CreateWaveStepContent {...contentProps} />
+          )}
           {/* Keep the composer mounted after its first visit: hiding it preserves
               Lexical state, unsaved text, uploads, and its snapshot handle. */}
-          {(descriptionVisited ||
+          {(quickChat ||
+            descriptionVisited ||
             step === CreateWaveStep.DESCRIPTION ||
             step === CreateWaveStep.REVIEW) && (
-            <div hidden={step !== CreateWaveStep.DESCRIPTION}>
+            <div hidden={!showDescription}>
               <CreateWaveDescription
+                key={editorKey}
                 ref={descriptionRef}
+                quickChat={quickChat}
+                initialDrop={initialDescription}
+                onDraftChange={onDescriptionDraftChange}
                 profile={profile}
-                submitting={submitting || step !== CreateWaveStep.DESCRIPTION}
+                submitting={submitting || !showDescription}
                 showDropError={showDropError}
                 visibilityGroupId={config.groups.canView}
                 wave={{ name: config.overview.name, image: imageUrl, id: null }}
@@ -332,12 +410,43 @@ export default function CreateWave({
               />
             </div>
           )}
+          {isQuickChatOverview && (
+            <CreateWaveQuickChatOptions {...contentProps} />
+          )}
+          <output
+            className={
+              mediaOmitted && draftLoaded && showDescription
+                ? "tw-mt-4 tw-text-sm tw-text-iron-300"
+                : "tw-sr-only"
+            }
+          >
+            {mediaOmitted && draftLoaded && showDescription
+              ? t(locale, "waves.create.quick.mediaOmitted")
+              : null}
+          </output>
         </CreateWaveLayout>
       </CreateWaveFlow>
       <SubwaveAccessWarningDialog
         isOpen={subwaveAccessConfirmation.isOpen}
         onDecision={subwaveAccessConfirmation.onDecision}
       />
+      {pendingOverview && (
+        <MobileWrapperConfirmationDialog
+          isOpen
+          title={t(locale, "waves.create.quick.switchTitle")}
+          message={t(locale, "waves.create.quick.switchMessage")}
+          confirmText={t(locale, "waves.create.quick.switchConfirm")}
+          cancelText={t(locale, "waves.create.dialog.keepEditing")}
+          onClose={() => setPendingOverview(null)}
+          onConfirm={() => {
+            setDescriptionVisited(true);
+            resetTransientGroupState();
+            waveConfig.setOverview(pendingOverview);
+            setPendingOverview(null);
+          }}
+          zIndexClassName="tw-z-[10000]"
+        />
+      )}
       {showDiscardConfirmation && (
         <MobileWrapperConfirmationDialog
           isOpen

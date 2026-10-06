@@ -115,6 +115,15 @@ jest.mock("@/components/waves/create-wave/CreateWaveStepContent", () => ({
   },
 }));
 jest.mock(
+  "@/components/waves/create-wave/overview/CreateWaveQuickChat",
+  () => ({
+    CreateWaveQuickChatHeader: jest.requireMock(
+      "@/components/waves/create-wave/CreateWaveStepContent"
+    ).default,
+    CreateWaveQuickChatOptions: () => null,
+  })
+);
+jest.mock(
   "@/components/waves/create-wave/description/CreateWaveDescription",
   () => ({
     __esModule: true,
@@ -151,7 +160,9 @@ jest.mock(
             Description attachment
             <input
               type="file"
-              onChange={(event) => setFiles(Array.from(event.target.files ?? []))}
+              onChange={(event) =>
+                setFiles(Array.from(event.target.files ?? []))
+              }
             />
           </label>
         </>
@@ -170,7 +181,13 @@ function Harness({ parentWaveId }: { readonly parentWaveId?: string }) {
       <CreateWaveModal
         isOpen={open}
         onClose={() => setOpen(false)}
-        profile={{ handle: "alice" } as ApiIdentity}
+        profile={
+          {
+            handle: "alice",
+            id: "alice-id",
+            primary_wallet: "0x0000000000000000000000000000000000000529",
+          } as ApiIdentity
+        }
         parentWaveId={parentWaveId}
         parentAdminGroupId={parentWaveId ? "parent-admin" : undefined}
         parentViewGroupId={parentWaveId ? "parent-view" : undefined}
