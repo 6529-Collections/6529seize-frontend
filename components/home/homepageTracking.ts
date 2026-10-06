@@ -3,7 +3,7 @@ export const HOMEPAGE_EVENT_NAMES = {
   actionClicked: "Homepage action clicked",
 } as const;
 
-export const HOMEPAGE_SECTIONS = [
+const HOMEPAGE_SECTIONS = [
   "Introduction",
   "Get started",
   "Latest drop",
@@ -14,7 +14,7 @@ export const HOMEPAGE_SECTIONS = [
   "Explore waves",
 ] as const;
 
-export const HOMEPAGE_ACTIONS = [
+const HOMEPAGE_ACTIONS = [
   "Open network health",
   "Get started",
   "Connect wallet",
@@ -31,7 +31,7 @@ export const HOMEPAGE_ACTIONS = [
 ] as const;
 
 export type HomepageSection = (typeof HOMEPAGE_SECTIONS)[number];
-export type HomepageAction = (typeof HOMEPAGE_ACTIONS)[number];
+type HomepageAction = (typeof HOMEPAGE_ACTIONS)[number];
 
 const SECTION_ATTRIBUTE = "data-home-section";
 const SECTION_SELECTOR = `[${SECTION_ATTRIBUTE}]`;
@@ -52,10 +52,14 @@ export function getHomepageClick(
 ) {
   if (!(target instanceof Element)) return null;
   const control = target.closest("a,button,summary");
-  if (!control || !root.contains(control) || control.matches(":disabled")) {
+  if (
+    !(control instanceof HTMLElement) ||
+    !root.contains(control) ||
+    control.matches(":disabled")
+  ) {
     return null;
   }
-  const action = control.getAttribute("data-home-action");
+  const action = control.dataset.homeAction ?? null;
   const section =
     control.closest(SECTION_SELECTOR)?.getAttribute(SECTION_ATTRIBUTE) ?? null;
   if (!isAction(action) || !isSection(section)) return null;
