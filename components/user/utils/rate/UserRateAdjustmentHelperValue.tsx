@@ -18,9 +18,11 @@ const CLASSES: Record<VALUE_STATE, string> = {
 export default function UserRateAdjustmentHelperValue({
   value,
   title,
+  layout = "stacked",
 }: {
   readonly value: number;
   readonly title: string;
+  readonly layout?: "stacked" | "inline";
 }) {
   const getValueState = (n: number) => {
     if (n > 0) {
@@ -44,7 +46,9 @@ export default function UserRateAdjustmentHelperValue({
   }, [value]);
 
   return (
-    <div className="tw-flex tw-flex-col tw-items-center tw-gap-1">
+    <div
+      className={`tw-flex ${layout === "inline" ? "tw-items-center tw-gap-1.5" : "tw-flex-col tw-items-center tw-gap-1"}`}
+    >
       <span className="tw-text-xs tw-text-iron-400 tw-font-normal">
         {title}
       </span>

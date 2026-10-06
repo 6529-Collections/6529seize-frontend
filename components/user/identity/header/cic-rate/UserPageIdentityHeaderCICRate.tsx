@@ -232,6 +232,7 @@ export default function UserPageIdentityHeaderCICRate({
   const adjustmentHelper = (
     <UserRateAdjustmentHelper
       inLineValues={isTooltip}
+      valueLayout="inline"
       originalValue={originalRating}
       adjustedValue={newRating}
       adjustmentType="NIC"

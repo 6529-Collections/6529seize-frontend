@@ -5,25 +5,29 @@ export default function UserRateAdjustmentHelper({
   originalValue,
   adjustedValue,
   adjustmentType,
+  valueLayout = "stacked",
 }: {
   readonly inLineValues: boolean;
   readonly originalValue: number;
   readonly adjustedValue: number;
   readonly adjustmentType: string;
+  readonly valueLayout?: "stacked" | "inline";
 }) {
   return (
     <div
       className={`${
         inLineValues
           ? "tw-mt-3 tw-flex tw-flex-wrap tw-gap-x-6 tw-gap-y-2"
-          : "tw-mx-auto tw-mb-4 tw-grid tw-max-w-[16rem] tw-grid-cols-2 tw-gap-4"
+          : "tw-mb-4 tw-flex tw-flex-wrap tw-gap-x-6 tw-gap-y-2"
       } `}
     >
       <UserRateAdjustmentHelperValue
+        layout={valueLayout}
         value={originalValue}
         title={`Current ${adjustmentType}:`}
       />
       <UserRateAdjustmentHelperValue
+        layout={valueLayout}
         value={adjustedValue - originalValue}
         title="Adjustment:"
       />
