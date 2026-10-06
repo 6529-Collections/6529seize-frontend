@@ -10,17 +10,20 @@ interface CreateWaveProfileRequiredModalProps {
   readonly isOpen: boolean;
   readonly onClose: () => void;
   readonly profile: ApiIdentity;
+  readonly returnTo?: string;
 }
 
-const getIdentityHref = (profile: ApiIdentity): string => {
+const getIdentityHref = (profile: ApiIdentity, returnTo: string): string => {
   const identity = profile.primary_wallet.trim() || profile.query?.trim();
-  return identity ? `/${encodeURIComponent(identity)}` : "/profile";
+  const path = identity ? `/${encodeURIComponent(identity)}` : "/profile";
+  return `${path}?returnTo=${encodeURIComponent(returnTo)}`;
 };
 
 export default function CreateWaveProfileRequiredModal({
   isOpen,
   onClose,
   profile,
+  returnTo = "/waves/create",
 }: CreateWaveProfileRequiredModalProps) {
   const locale = useBrowserLocale();
 
@@ -42,7 +45,7 @@ export default function CreateWaveProfileRequiredModal({
 
         <div className="tw-mt-6 tw-flex sm:tw-justify-end">
           <ButtonLink
-            href={getIdentityHref(profile)}
+            href={getIdentityHref(profile, returnTo)}
             variant="primary"
             size="lg"
             fullWidth

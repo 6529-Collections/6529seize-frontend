@@ -3,19 +3,21 @@
 ## Overview
 
 Use `Access` to choose who can open a wave and, when needed, give different
-groups permission to chat, submit, vote, or administer it. This step is
-user-reachable for `Chat`, `Rank`, and `Approve` waves.
+groups permission to chat, submit, vote, or administer it. Standalone `Chat`
+waves show these controls inside `Optional settings` on the first screen.
+`Rank`, `Approve`, and Chat subwaves use a separate `Access` step.
 
 ## Location in the Site
 
 - Full-page create route: `/waves/create`
 - Desktop modal create route mode: `?create=wave` on `/waves`,
   `/waves/{waveId}`, `/messages`, and `/messages/{waveId}`
-- Step label: `Access`
+- Guided step label: `Access`
 
 ## Step Paths
 
-- `Chat`: `Setup` -> `Access` -> `Guidelines` -> `Description` -> `Overview`
+- Standalone `Chat`: `Start a chat wave` -> `Review`
+- Chat subwave: `Setup` -> `Access` -> `Guidelines` -> `Description` -> `Overview`
 - `Rank`: `Setup` -> `Access` -> `Schedule` -> `Drops` -> `Voting` -> `Outcomes` ->
   `Guidelines` -> `Description` -> `Overview`
 - `Approve`: `Setup` -> `Access` -> `Schedule` -> `Drops` -> `Voting` -> `Outcomes` ->
@@ -23,9 +25,12 @@ user-reachable for `Chat`, `Rank`, and `Approve` waves.
 
 ## Entry Points
 
-- Continue from `Setup` to `Access`.
-- Use `Back` from later steps to return to `Access`.
-- On large screens, reopen `Access` from the step rail after moving past it.
+- Standalone Chat: expand `Optional settings` on the first screen. From Review,
+  use `Previous` to return to that screen.
+- Guided creation: continue from `Setup` to `Access`, or use `Previous` from
+  later steps to return.
+- On large screens in guided creation, reopen `Access` from the step rail after
+  moving past it.
 
 ## Default Access
 
@@ -81,7 +86,8 @@ user-reachable for `Chat`, `Rank`, and `Approve` waves.
   members but hidden from everyone else. It starts off for a new group and
   preserves the setting copied from an existing assignment.
 - `Save changes` creates a new group and assigns it to the row; the existing
-  group is not mutated. `Next` remains unavailable while an edit is pending.
+  group is not mutated. `Next`, or `Review wave` for standalone Chat, remains
+  unavailable while an edit is pending.
 - While an edit is open, the header action becomes `Cancel`. Cancel discards
   the draft and restores the applied audience. There is no separate Close,
   Discard draft, or Preview matches action.
@@ -147,14 +153,15 @@ user-reachable for `Chat`, `Rank`, and `Approve` waves.
 - When wave access is restricted, every active Drop, Vote, Chat, and Admins
   group must contain only people who can also access the wave.
 - The app validates active groups together, exposes and highlights incompatible
-  rows, and keeps `Next` unavailable while validation runs or fails.
+  rows, and keeps `Next` or `Review wave` unavailable while validation runs or
+  fails.
 - If current criteria or members cannot load, the editor preserves the draft
   and offers `Try again`. Older saved assignments whose criteria are unavailable
   can still show any current members the group endpoint resolves.
 - EMMA load failures offer retry or removal. CSV import accepts `.csv`, ignores
   malformed entries, and reports when no valid Ethereum addresses are found.
-- If access cannot be checked, `Next` keeps the step open; changing a group
-  starts a fresh check.
+- If access cannot be checked, `Next` or `Review wave` keeps the current screen
+  open; changing a group starts a fresh check.
 - If no admin group is selected, submission creates and publishes a personal
   admin group for a top-level wave. A subwave reuses its parent admin group.
 - Submission checks the final group configuration again after authentication

@@ -26,8 +26,10 @@ export default function CreateWaveStepContent({
   onCriteriaReplacementChange,
   onGroupResolutionChange,
   onInlineGroupCreate,
+  stepOverride,
 }: {
   readonly controller: WaveConfigController;
+  readonly stepOverride?: CreateWaveStep;
   readonly isCompetition?: boolean;
   /** Rendered above the Overview step's fields (e.g. saved drafts). */
   readonly overviewLeading?: ReactNode;
@@ -78,7 +80,7 @@ export default function CreateWaveStepContent({
     onChatEnabledChange,
   } = controller;
 
-  switch (step) {
+  switch (stepOverride ?? step) {
     case CreateWaveStep.OVERVIEW:
       return (
         <div className="tw-flex tw-flex-col tw-gap-y-4">

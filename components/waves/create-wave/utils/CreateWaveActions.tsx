@@ -5,6 +5,7 @@ import {
   getCreateWavePreviousStep,
 } from "@/helpers/waves/create-wave.helpers";
 import type { CreateWaveConfig, CreateWaveStep } from "@/types/waves.types";
+import { CreateWaveStep as Step } from "@/types/waves.types";
 import CreateWaveBackStep from "./CreateWaveBackStep";
 import CreateWaveNextStep from "./CreateWaveNextStep";
 
@@ -13,6 +14,7 @@ export default function CreateWaveActions({
   step,
   submitting,
   nextDisabled = false,
+  quickChat = false,
   setStep,
   onComplete,
 }: {
@@ -20,6 +22,7 @@ export default function CreateWaveActions({
   readonly step: CreateWaveStep;
   readonly submitting: boolean;
   readonly nextDisabled?: boolean | undefined;
+  readonly quickChat?: boolean;
   readonly setStep: (
     step: CreateWaveStep,
     direction: "forward" | "backward"
@@ -32,11 +35,14 @@ export default function CreateWaveActions({
     if (nextDisabled) {
       return;
     }
-    const nextStep = getCreateWaveNextStep({
-      step,
-      waveType: config.overview.type,
-      ongoingRanking,
-    });
+    const quickNext = step === Step.OVERVIEW ? Step.REVIEW : null;
+    const nextStep = quickChat
+      ? quickNext
+      : getCreateWaveNextStep({
+          step,
+          waveType: config.overview.type,
+          ongoingRanking,
+        });
     if (nextStep !== null) {
       void setStep(nextStep, "forward");
       return;
@@ -44,11 +50,14 @@ export default function CreateWaveActions({
     void onComplete();
   };
 
-  const previousStep = getCreateWavePreviousStep({
-    step,
-    waveType: config.overview.type,
-    ongoingRanking,
-  });
+  const quickPrevious = step === Step.REVIEW ? Step.OVERVIEW : null;
+  const previousStep = quickChat
+    ? quickPrevious
+    : getCreateWavePreviousStep({
+        step,
+        waveType: config.overview.type,
+        ongoingRanking,
+      });
 
   return (
     <div className="tw-flex tw-items-center tw-justify-between tw-gap-x-4">
@@ -68,6 +77,7 @@ export default function CreateWaveActions({
           disabled={nextDisabled}
           step={step}
           submitting={submitting}
+          quickChat={quickChat}
         />
       </div>
     </div>
