@@ -79,7 +79,9 @@ detail cohorts. Trailing slashes preserve the index, creation or detail family.
 Seen uses `selection_source=automatic` for default, restored, deep-linked,
 history-driven and other selections without a recorded action in the current
 visit. Activated always uses `selection_source=user`. `selected` describes
-the control before the action. No reading-completion event is generated.
+the control before the action. Recommendation links expose their existing active
+Wave through `aria-current`, including before a deliberate deselection. No
+reading-completion event is generated.
 
 ## Privacy and compatibility
 

@@ -28,6 +28,24 @@ async function featureEvents(page: Page, event: string, value: string) {
     (item) => item.event === event && item.properties["value"] === value
   );
 }
+async function enableIdentifiedAnalytics(
+  page: Page,
+  transport: "batch" | "direct"
+) {
+  await page.goto(`/waves/private-wave?transport=${transport}`);
+  await page
+    .getByRole("button", { name: "Enable synthetic telemetry" })
+    .click();
+  await expect
+    .poll(async () =>
+      (await events(page)).some(
+        (event) =>
+          event.event === "$identify" &&
+          event.properties["distinct_id"] === "529"
+      )
+    )
+    .toBe(true);
+}
 const visibleTab = (page: Page, name: string) =>
   page.getByRole("tab", { name, exact: true }).filter({ visible: true });
 const browserErrors = new WeakMap<Page, string[]>();
@@ -444,20 +462,8 @@ test("dropdown entry activation is independent from choosing a portal sort", asy
 test("logout clears persisted identity without consent before anonymous delivery resumes", async ({
   page,
 }) => {
-  for (const transport of ["batch", "direct"]) {
-    await page.goto(`/waves/private-wave?transport=${transport}`);
-    await page
-      .getByRole("button", { name: "Enable synthetic telemetry" })
-      .click();
-    await expect
-      .poll(async () =>
-        (await events(page)).some(
-          (event) =>
-            event.event === "$identify" &&
-            event.properties["distinct_id"] === "529"
-        )
-      )
-      .toBe(true);
+  for (const transport of ["batch", "direct"] as const) {
+    await enableIdentifiedAnalytics(page, transport);
     await page.evaluate(() => {
       document.cookie = "performance-cookies-consent=; Max-Age=0; path=/";
       window.featureFixture.logout();
@@ -489,20 +495,8 @@ test("logout clears persisted identity without consent before anonymous delivery
 test("failed logout reset keeps SDK delivery closed until anonymous reset succeeds", async ({
   page,
 }) => {
-  for (const transport of ["batch", "direct"]) {
-    await page.goto(`/waves/private-wave?transport=${transport}`);
-    await page
-      .getByRole("button", { name: "Enable synthetic telemetry" })
-      .click();
-    await expect
-      .poll(async () =>
-        (await events(page)).some(
-          (event) =>
-            event.event === "$identify" &&
-            event.properties["distinct_id"] === "529"
-        )
-      )
-      .toBe(true);
+  for (const transport of ["batch", "direct"] as const) {
+    await enableIdentifiedAnalytics(page, transport);
     await page.evaluate(() => {
       window.featureFixture.failResetTwice();
       window.featureFixture.logout();
@@ -545,20 +539,8 @@ test("failed logout reset keeps SDK delivery closed until anonymous reset succee
 test("failed profile switching closes real SDK delivery until identity setup succeeds", async ({
   page,
 }) => {
-  for (const transport of ["batch", "direct"]) {
-    await page.goto(`/waves/private-wave?transport=${transport}`);
-    await page
-      .getByRole("button", { name: "Enable synthetic telemetry" })
-      .click();
-    await expect
-      .poll(async () =>
-        (await events(page)).some(
-          (event) =>
-            event.event === "$identify" &&
-            event.properties["distinct_id"] === "529"
-        )
-      )
-      .toBe(true);
+  for (const transport of ["batch", "direct"] as const) {
+    await enableIdentifiedAnalytics(page, transport);
     expect(
       await page.evaluate(() => {
         window.featureFixture.failIdentityOnce();
@@ -793,18 +775,91 @@ for (const [name, pathname, query, routeFamily] of [
   });
 }
 
-test("rapid consent regrant waits for all real SDK queue deletions", async ({
+test("recommendation telemetry preserves active state before keyboard and pointer toggles", async ({
   page,
 }) => {
-  await page.goto("/waves/private-wave?transport=batch");
+  await page.goto("/waves/private-wave?recommendations=1");
+  const link = page.getByRole("link", {
+    name: "Open Synthetic recommendation",
+    exact: true,
+  });
+  await expect(link).toHaveAttribute("aria-current", "page");
   await page
     .getByRole("button", { name: "Enable synthetic telemetry" })
     .click();
   await expect
-    .poll(async () =>
-      (await events(page)).some((event) => event.event === "$identify")
+    .poll(
+      async () =>
+        (await featureEvents(page, "Wave Feature Seen", "recommendations_wave"))
+          .length
     )
-    .toBe(true);
+    .toBe(1);
+  expect(
+    (await featureEvents(page, "Wave Feature Seen", "recommendations_wave"))[0]
+      ?.properties["selected"]
+  ).toBe(true);
+  await link.focus();
+  await link.press("Enter");
+  await expect(link).not.toHaveAttribute("aria-current");
+  await expect
+    .poll(
+      async () =>
+        (
+          await featureEvents(
+            page,
+            "Wave Feature Activated",
+            "recommendations_wave"
+          )
+        ).length
+    )
+    .toBe(1);
+  expect(
+    (
+      await featureEvents(
+        page,
+        "Wave Feature Activated",
+        "recommendations_wave"
+      )
+    )[0]?.properties["selected"]
+  ).toBe(true);
+  await link.click();
+  await expect(link).toHaveAttribute("aria-current", "page");
+  await expect
+    .poll(
+      async () =>
+        (
+          await featureEvents(
+            page,
+            "Wave Feature Activated",
+            "recommendations_wave"
+          )
+        ).length
+    )
+    .toBe(2);
+  expect(
+    (
+      await featureEvents(
+        page,
+        "Wave Feature Activated",
+        "recommendations_wave"
+      )
+    )[1]?.properties["selected"]
+  ).toBe(false);
+  expect(
+    JSON.stringify(
+      await featureEvents(
+        page,
+        "Wave Feature Activated",
+        "recommendations_wave"
+      )
+    )
+  ).not.toContain("private-recommendation");
+});
+
+test("rapid consent regrant waits for all real SDK queue deletions", async ({
+  page,
+}) => {
+  await enableIdentifiedAnalytics(page, "batch");
   await page.request.get("/clear");
   await page.evaluate(async () => {
     await window.featureFixture.seedPendingQueues();
@@ -879,15 +934,7 @@ test("rapid consent regrant waits for all real SDK queue deletions", async ({
 test("failed real SDK persisted deletion stays closed until clearing succeeds", async ({
   page,
 }) => {
-  await page.goto("/waves/private-wave?transport=batch");
-  await page
-    .getByRole("button", { name: "Enable synthetic telemetry" })
-    .click();
-  await expect
-    .poll(async () =>
-      (await events(page)).some((event) => event.event === "$identify")
-    )
-    .toBe(true);
+  await enableIdentifiedAnalytics(page, "batch");
   await page.request.get("/clear");
   await page.evaluate(async () => {
     await window.featureFixture.seedPendingQueues();

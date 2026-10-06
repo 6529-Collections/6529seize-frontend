@@ -7,6 +7,8 @@ import type { ApiWave } from "@/generated/models/ApiWave";
 import { MyStreamWaveTab } from "@/types/waves.types";
 import { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";
 import { SidebarDiscovery } from "@/components/brain/left-sidebar/waves/SidebarDiscovery";
+import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
+import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import MyStreamWaveDesktopTabs from "@/components/brain/my-stream/MyStreamWaveDesktopTabs";
 import { SidebarWaveNavigationControls } from "@/components/brain/left-sidebar/waves/SidebarWaveNavigation";
 import type { SidebarWaveNavigation } from "@/hooks/useSidebarWaveNavigation";
@@ -42,6 +44,37 @@ const wave = {
   author: { id: "fixture-author" },
   wave: { authenticated_user_eligible_for_admin: false },
 } as unknown as ApiWave;
+const recommendationWave: MinimalWave = {
+  id: "private-recommendation",
+  name: "Synthetic recommendation",
+  type: ApiWaveType.Chat,
+  createdAt: 0,
+  newDropsCount: {
+    count: 0,
+    latestDropTimestamp: null,
+    firstUnreadSerialNo: null,
+  },
+  picture: null,
+  contributors: [],
+  isPinned: false,
+  isFollowing: false,
+  isOfficial: false,
+  isMuted: false,
+  parentWaveId: null,
+  hasSubwaves: false,
+  followedSubwavesCount: 0,
+  latestFollowedSubwaveDropTimestamp: null,
+  unreadSubwaveDrops: 0,
+  unreadDropsCount: 0,
+  latestReadTimestamp: 0,
+  firstUnreadDropSerialNo: null,
+  firstUnreadFollowedSubwaveDropSerialNo: null,
+  waveRep: null,
+  waveScore: null,
+  sidebarSection: "highly-rated",
+  sidebarActivityTimestamp: null,
+  isFollowedSubwaveContainer: false,
+};
 
 export const useActiveWaveVotes = () => ({
   data: {
@@ -84,6 +117,7 @@ function Fixture() {
   );
   const [queryText, setQueryText] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
+  const [recommendationActive, setRecommendationActive] = useState(true);
   const [availableTabs, setAvailableTabs] = useState(() =>
     new URLSearchParams(location.search).has("late-tabs")
       ? [MyStreamWaveTab.CHAT]
@@ -189,7 +223,24 @@ function Fixture() {
           id="nested-scroll"
           style={{ height: 220, width: 300, overflow: "auto" }}
         >
-          <SidebarDiscovery previewItems={[]} isTouchPreview={false} />
+          <SidebarDiscovery
+            previewItems={
+              new URLSearchParams(location.search).has("recommendations")
+                ? [
+                    {
+                      wave: recommendationWave,
+                      href: "/waves/private-recommendation",
+                      isActive: recommendationActive,
+                      onClick: (event) => {
+                        event.preventDefault();
+                        setRecommendationActive((active) => !active);
+                      },
+                    },
+                  ]
+                : []
+            }
+            isTouchPreview={false}
+          />
         </div>
         <ContentTabsContext.Provider value={availableTabs}>
           <MyStreamWaveDesktopTabs

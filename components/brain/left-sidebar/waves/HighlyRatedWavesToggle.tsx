@@ -346,6 +346,7 @@ function HighlyRatedWavePreviewLink({
         {...waveFeatureAttributes("sidebar_entry", "recommendations_wave")}
         prefetch={false}
         aria-label={linkLabel}
+        aria-current={item.isActive ? "page" : undefined}
         onClick={handleLinkClick}
         {...(item.onMouseEnter ? { onMouseEnter: item.onMouseEnter } : {})}
         className={`tw-group/preview tw-relative tw-flex ${isTouchPreview ? "tw-size-11" : "tw-size-8"} tw-flex-shrink-0 tw-cursor-pointer tw-items-center tw-justify-center tw-overflow-visible tw-rounded-full tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400`}
