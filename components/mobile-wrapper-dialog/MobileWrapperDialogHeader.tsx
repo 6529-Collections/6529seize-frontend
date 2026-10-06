@@ -6,6 +6,7 @@ import MobileWrapperDialogCloseButton from "./MobileWrapperDialogCloseButton";
 
 export default function MobileWrapperDialogHeader({
   title,
+  variant = "default",
   showDesktopCloseButton,
   onClose,
   onBack,
@@ -21,6 +22,7 @@ export default function MobileWrapperDialogHeader({
   closeLabel,
 }: {
   readonly title: string | undefined;
+  readonly variant?: "default" | "minimal" | undefined;
   readonly showDesktopCloseButton: boolean;
   readonly onClose: () => void;
   readonly onBack?: (() => void) | undefined;
@@ -62,7 +64,10 @@ export default function MobileWrapperDialogHeader({
                 ref={titleRef}
                 tabIndex={-1}
                 className={clsx(
-                  "tw-m-0 tw-text-base tw-font-semibold tw-text-iron-50 focus:tw-outline-none",
+                  "tw-m-0 tw-text-iron-50 focus:tw-outline-none",
+                  variant === "minimal"
+                    ? "tw-text-xl tw-font-medium tw-tracking-tight"
+                    : "tw-text-base tw-font-semibold",
                   titleClassName
                 )}
               >
@@ -80,6 +85,7 @@ export default function MobileWrapperDialogHeader({
           <MobileWrapperDialogCloseButton
             onClick={onClose}
             label={closeLabel}
+            variant={variant}
             className={clsx(
               "tw-hidden md:tw-inline-flex",
               headerCloseButtonClassName
@@ -90,6 +96,7 @@ export default function MobileWrapperDialogHeader({
           <MobileWrapperDialogCloseButton
             onClick={onClose}
             label={closeLabel}
+            variant={variant}
             className={clsx("tw-inline-flex", headerCloseButtonClassName)}
           />
         )}

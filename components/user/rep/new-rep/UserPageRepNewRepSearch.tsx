@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
-import { useContext, useEffect, useMemo, useRef, useState } from "react";
+import { useContext, useEffect, useId, useMemo, useRef, useState } from "react";
 import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
 import { AnimatePresence, motion } from "framer-motion";
 import { InformationCircleIcon } from "@heroicons/react/24/outline";
@@ -75,6 +75,7 @@ export default function UserPageRepNewRepSearch({
   readonly onCancel?: (() => void) | undefined;
 }) {
   const locale = useBrowserLocale();
+  const amountInputId = useId();
   const { onProfileRepModify } = useContext(ReactQueryWrapperContext);
   const { requestAuth, setToast, connectedProfile, activeProfileProxy } =
     useContext(AuthContext);
@@ -376,24 +377,30 @@ export default function UserPageRepNewRepSearch({
           <div ref={listRef} className="tw-w-full">
             <div className="tw-relative tw-w-full tw-bg-iron-950">
               <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-1.5 tw-px-4 sm:tw-px-6">
-                <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-2 tw-text-xs tw-font-medium tw-text-iron-500">
-                  <span>
-                    {t(locale, "rep.categories.grant.availableRep", {
-                      amount: formatNumberWithCommas(heroAvailableRep),
-                    })}
-                  </span>
-                  <span className="tw-h-3 tw-w-px tw-bg-white/20" />
-                  <span>
-                    {t(locale, "rep.categories.grant.assignedRep", {
-                      name: profile.query ?? "",
-                      amount: formatNumberWithCommas(
+                <dl className="tw-m-0 tw-flex tw-w-full tw-flex-col tw-gap-2 tw-text-xs tw-font-normal tw-text-iron-400">
+                  <div className="tw-grid tw-grid-cols-[minmax(0,1fr)_auto] tw-items-baseline tw-gap-x-4">
+                    <dt className="tw-min-w-0 tw-break-words">
+                      {t(locale, "rep.categories.grant.availableRepLabel")}
+                    </dt>
+                    <dd className="tw-m-0 tw-whitespace-nowrap tw-text-right tw-font-medium tw-tabular-nums tw-text-iron-300">
+                      {formatNumberWithCommas(heroAvailableRep)}
+                    </dd>
+                  </div>
+                  <div className="tw-grid tw-grid-cols-[minmax(0,1fr)_auto] tw-items-baseline tw-gap-x-4">
+                    <dt className="tw-min-w-0 tw-break-words">
+                      {t(locale, "rep.categories.grant.assignedRepLabel", {
+                        name: profile.query ?? "",
+                      })}
+                    </dt>
+                    <dd className="tw-m-0 tw-whitespace-nowrap tw-text-right tw-font-medium tw-tabular-nums tw-text-iron-300">
+                      {formatNumberWithCommas(
                         overview?.authenticated_user_contribution ?? 0
-                      ),
-                    })}
-                  </span>
-                </div>
+                      )}
+                    </dd>
+                  </div>
+                </dl>
               </div>
-              <div className="tw-mt-3 tw-flex tw-flex-col tw-items-stretch tw-gap-3 tw-px-4 sm:tw-px-6">
+              <div className="tw-mt-6 tw-flex tw-flex-col tw-items-stretch tw-gap-6 tw-px-4 sm:tw-px-6">
                 <form
                   onSubmit={onSearchSubmit}
                   className="tw-relative tw-w-full"
@@ -403,7 +410,7 @@ export default function UserPageRepNewRepSearch({
                   </label>
                   <div className="tw-relative tw-w-full">
                     <svg
-                      className="tw-pointer-events-none tw-absolute tw-left-3 tw-top-3.5 tw-h-4 tw-w-4 tw-text-iron-500"
+                      className="tw-pointer-events-none tw-absolute tw-left-4 tw-top-1/2 tw-h-4 tw-w-4 -tw-translate-y-1/2 tw-text-iron-500"
                       viewBox="0 0 20 20"
                       fill="currentColor"
                       aria-hidden="true"
@@ -431,7 +438,7 @@ export default function UserPageRepNewRepSearch({
                           ? SUBMISSION_GUIDANCE_ID
                           : undefined
                       }
-                      className="tw-form-input tw-block tw-w-full tw-appearance-none tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-[#0A0A0A]/80 tw-py-3 tw-pl-9 tw-pr-3 tw-text-sm tw-font-medium tw-text-white tw-caret-primary-400 tw-transition tw-duration-300 tw-ease-out placeholder:tw-font-normal placeholder:tw-text-iron-500 focus:tw-border-blue-500/50 focus:tw-outline-none lg:tw-font-semibold lg:placeholder:tw-text-iron-400"
+                      className="tw-block tw-h-[46px] tw-w-full tw-appearance-none tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-py-3 tw-pl-11 tw-pr-10 tw-text-sm tw-font-normal tw-text-iron-100 tw-caret-primary-400 tw-ring-1 tw-ring-inset tw-ring-iron-700/60 tw-transition-colors tw-duration-150 placeholder:tw-text-iron-500 hover:tw-bg-iron-900 hover:tw-ring-iron-700 focus:tw-bg-iron-900 focus:tw-outline-none focus:tw-ring-primary-400 motion-reduce:tw-transition-none"
                       placeholder={t(
                         locale,
                         "rep.categories.grant.searchPlaceholder"
@@ -446,7 +453,7 @@ export default function UserPageRepNewRepSearch({
                   {showSubmissionGuidance && (
                     <output
                       id={SUBMISSION_GUIDANCE_ID}
-                      className={`tw-mb-0 tw-mt-2 tw-flex tw-items-start tw-gap-1.5 tw-px-1 tw-text-xs tw-font-normal tw-leading-relaxed ${
+                      className={`tw-mb-0 tw-mt-2 tw-flex tw-items-start tw-gap-1.5 tw-text-xs tw-font-normal tw-leading-5 ${
                         selectedNonQualifyingLookalike
                           ? "tw-text-amber-300"
                           : "tw-text-iron-400"
@@ -468,9 +475,9 @@ export default function UserPageRepNewRepSearch({
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -4 }}
                         transition={{ duration: 0.15, ease: "easeOut" }}
-                        className="tw-mt-1 tw-will-change-transform"
+                        className="tw-mt-2 tw-will-change-transform"
                       >
-                        <div className="tw-rounded-lg tw-bg-iron-900/70 tw-p-2 tw-shadow-xl tw-ring-1 tw-ring-white/5">
+                        <div className="tw-rounded-lg tw-bg-iron-900/40 tw-p-2 tw-ring-1 tw-ring-inset tw-ring-iron-800/60">
                           <UserPageRepNewRepSearchDropdown
                             categories={categoriesToDisplay}
                             state={repSearchState}
@@ -484,19 +491,26 @@ export default function UserPageRepNewRepSearch({
                   </AnimatePresence>
                 </form>
                 <div>
+                  <label
+                    htmlFor={amountInputId}
+                    className="tw-mb-2 tw-block tw-text-sm tw-font-normal tw-text-iron-400"
+                  >
+                    {t(locale, "rep.categories.grant.amountLabel")}
+                  </label>
                   <div className="tw-relative tw-flex tw-w-full">
                     <UserPageRateInput
                       value={amountStr}
                       onChange={setAmountStr}
                       minMax={minMaxValues}
                       isProxy={!!activeProfileProxy}
-                      spanClassName="tw-flex tw-flex-col tw-items-center tw-justify-center tw-rounded-l-lg tw-border tw-border-solid tw-border-white/10 tw-bg-[#0A0A0A]/80 tw-px-3"
-                      inputClassName="tw-form-input tw-appearance-none -tw-ml-px tw-block tw-w-full tw-rounded-l-none tw-rounded-r-lg tw-border tw-border-solid tw-border-white/10 tw-py-3 tw-px-3 tw-bg-[#0A0A0A]/80 tw-text-white tw-text-sm tw-font-medium lg:tw-font-semibold tw-caret-primary-400 placeholder:tw-text-iron-500 lg:placeholder:tw-text-iron-400 focus:tw-outline-none focus:tw-border-blue-500/50 tw-transition tw-duration-300 tw-ease-out"
+                      variant="form"
+                      inputId={amountInputId}
                     />
                   </div>
                   {selectedCategory && (
                     <UserRateAdjustmentHelper
                       inLineValues={true}
+                      valueLayout="inline"
                       originalValue={repState?.rater_contribution ?? 0}
                       adjustedValue={newRating}
                       adjustmentType="Rep"
@@ -504,14 +518,14 @@ export default function UserPageRepNewRepSearch({
                   )}
                 </div>
               </div>
-              <div className="tw-mt-4 tw-flex tw-flex-col tw-gap-3 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800/60 tw-px-4 tw-pt-4 sm:tw-px-6">
+              <div className="tw-mt-7 tw-flex tw-flex-col tw-gap-1 tw-px-4 sm:tw-px-6">
                 <Button
                   disabled={isGrantDisabled}
                   onClick={onGrantRep}
                   loading={mutating}
-                  size="lg"
+                  variant="action"
+                  size="xl"
                   fullWidth
-                  className="tw-shadow-none"
                 >
                   {t(locale, "rep.categories.grant.actions.grant")}
                 </Button>
@@ -519,10 +533,9 @@ export default function UserPageRepNewRepSearch({
                   <Button
                     onClick={onCancel}
                     disabled={mutating}
-                    variant="secondary"
+                    variant="ghost"
                     size="lg"
                     fullWidth
-                    className="tw-shadow-none"
                   >
                     {t(locale, "rep.categories.grant.actions.cancel")}
                   </Button>
