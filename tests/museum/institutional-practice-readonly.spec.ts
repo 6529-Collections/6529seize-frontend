@@ -18,6 +18,8 @@ import {
   RESPONSE_TIMEOUT_MS,
 } from "../support/routeReadiness";
 import { installLocalMuseumAppKitConfig } from "../support/localMuseumAppKitConfig";
+import { expectNoUnresolvedMuseumMedia } from "../support/museumReleaseAcceptance";
+import { expectMuseumPath } from "../support/museumNavigation";
 
 const STUDY_PATH = "/museum/network/research/institutional-practice";
 const SOURCE_REPOSITORY = "6529-Collections/6529networkmuseum";
@@ -304,7 +306,7 @@ async function expectStudyRoute(
     expect(response?.status()).toBe(200);
     await waitForRouteReady(page);
 
-    await expect(page).toHaveURL((url) => url.pathname === route.path, {
+    await expectMuseumPath(page, route.path, {
       timeout: ROUTE_URL_SETTLEMENT_TIMEOUT_MS,
     });
     await expect(page).not.toHaveTitle(/404|PAGE NOT FOUND/iu);
@@ -422,6 +424,13 @@ test.describe("Museum institutional-practice publication @surface @large @readon
     await expectStudyRoute(page, CASEY_ARTIST_ROUTE, REQUIRED_SOURCE_COMMIT);
     await expect(page.locator("body")).not.toContainText(/Standfirst/iu);
     await expect(page.locator("main figure img")).toHaveCount(7);
+    await expectNoUnresolvedMuseumMedia(page, "main", "figure img");
+    await expect(
+      page
+        .getByRole("main")
+        .last()
+        .locator('figure img[src^="https://media-proxy.artblocks.io/"]')
+    ).toHaveCount(0);
     for (const href of CASEY_WORK_HREFS) {
       await expect(
         page.locator(`main figure:has(img):has(a[href="${href}"])`)
@@ -432,6 +441,13 @@ test.describe("Museum institutional-practice publication @surface @large @readon
     await expect(page.locator("body")).not.toContainText(/Standfirst/iu);
     await expect(page.locator("main figure")).toHaveCount(7);
     await expect(page.locator("main figure img")).toHaveCount(7);
+    await expectNoUnresolvedMuseumMedia(page, "main", "figure img");
+    await expect(
+      page
+        .getByRole("main")
+        .last()
+        .locator('figure img[src^="https://media-proxy.artblocks.io/"]')
+    ).toHaveCount(0);
     for (const href of CASEY_WORK_HREFS) {
       await expect(
         page.locator(`main figure:has(img):has(a[href="${href}"])`)

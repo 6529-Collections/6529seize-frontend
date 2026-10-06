@@ -498,7 +498,10 @@ function TypedProjectPage({
           className="tw-mt-14 tw-max-w-4xl tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-10"
         >
           <h2 className="tw-m-0 tw-text-2xl tw-font-semibold tw-text-iron-50">
-            {document.title}
+            {document.kind === "source_record" &&
+            document.sourcePath.endsWith(".json")
+              ? t(DEFAULT_LOCALE, "museum.network.detail.sourceRecord")
+              : document.title}
           </h2>
           {document.kind === "source_record" ? (
             <div className="tw-mt-6">
@@ -509,7 +512,7 @@ function TypedProjectPage({
             </div>
           ) : (
             <MuseumMarkdown
-              className="tw-mt-6"
+              className="tw-mt-6 tw-break-words"
               embeddedDocument
               sourceCommit={publication.identity.commit}
               sourcePath={document.sourcePath}
@@ -537,9 +540,7 @@ export async function generateMetadata({
   const publication = publicationState.publication
     ? applyMuseumCollectionSemantics(publicationState.publication)
     : null;
-  const project = publication?.projects.find(
-    (item) => item.slug === slug
-  );
+  const project = publication?.projects.find((item) => item.slug === slug);
   const workArtistIds = new Set(
     project && publication
       ? museumProjectWorks(publication, project).map((work) => work.artistId)
