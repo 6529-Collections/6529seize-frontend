@@ -7,7 +7,10 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import Link from "next/link";
 import React from "react";
-import { WAVE_HEADER_ACTION_CLASSES } from "../waves/WaveHeaderActions";
+import {
+  WAVE_HEADER_ACTION_CLASSES,
+  WAVE_HEADER_ACTION_SURFACE_CLASSES,
+} from "../waves/WaveHeaderActions";
 
 export const PROFILE_FEED_TOOLTIP_ID = "profile-feed-shortcut-tooltip";
 
@@ -115,7 +118,9 @@ export function WebProfileFeedShortcut({
       data-tooltip-id={PROFILE_FEED_TOOLTIP_ID}
       data-tooltip-content={t(locale, "waves.sidebar.openProfileFeed")}
     >
-      <MasonryGridIcon />
+      <span className={WAVE_HEADER_ACTION_SURFACE_CLASSES}>
+        <MasonryGridIcon />
+      </span>
     </Link>
   );
 }

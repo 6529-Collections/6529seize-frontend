@@ -465,8 +465,12 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
   }, [navAdjustedSpaces]);
 
   const mobileWavesViewStyle = useMemo<React.CSSProperties>(() => {
-    return calculateHeightStyle({ ...navAdjustedSpaces, mobileNavSpace: 0 }, 0);
-  }, [navAdjustedSpaces]);
+    return calculateNativeKeyboardHeightStyle(
+      { ...navAdjustedSpaces, mobileNavSpace: 0 },
+      isCapacitor,
+      isViewportLocked
+    );
+  }, [navAdjustedSpaces, isCapacitor, isViewportLocked]);
 
   const mobileAboutViewStyle = useMemo<React.CSSProperties>(() => {
     return calculateHeightStyle(navAdjustedSpaces, 0);
