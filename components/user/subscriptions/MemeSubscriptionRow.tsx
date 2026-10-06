@@ -115,12 +115,6 @@ export default function MemeSubscriptionRow(
     setSelectedCount(subscribedCount);
   }, [subscribedCount]);
 
-  useEffect(() => {
-    if (selectedCount > props.eligibilityCount) {
-      setSelectedCount(Math.max(0, props.eligibilityCount));
-    }
-  }, [props.eligibilityCount, selectedCount]);
-
   const { final, hasNoAllocation } = useSubscriptionAllocationStatus({
     profileKey: props.profileKey,
     contract: props.subscription.contract,
@@ -304,7 +298,7 @@ export default function MemeSubscriptionRow(
         <span className="tw-relative tw-inline-flex tw-items-center">
           <select
             className={SUBSCRIPTION_COUNT_SELECT_CLASS}
-            value={selectedCount}
+            value={Math.min(selectedCount, props.eligibilityCount)}
             disabled={isCountSelectDisabled}
             onChange={(e) => {
               handleCountChange(e.target.value).catch(() => undefined);
