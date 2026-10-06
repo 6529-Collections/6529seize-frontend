@@ -1502,8 +1502,10 @@ const WAVE_ACCESS_MESSAGES = objectMessages("waves.access", {
   viewRules: "View submission rules",
   "preview.chatPublic": "People with wave access can chat.",
   "preview.chatGroup": "Chat is limited to its selected group.",
-  "preview.chatDisabled":
-    "Chat is disabled. Submission and voting access stay as selected.",
+  "preview.chatDisabledSubmitPublic":
+    "Chat is disabled. Submission group access is public. Voting access is separate.",
+  "preview.chatDisabledSubmitGroup":
+    "Chat is disabled. Only the submission group can submit. Voting access is separate.",
   "preview.bothPublic":
     "People with wave access can chat and submit. Voting access is separate.",
   "preview.chatPublicSubmitGroup":

@@ -29,6 +29,7 @@ const WAVE_ID = "wave-1";
 const makeEditorState = (json: unknown) =>
   ({ toJSON: () => json }) as unknown as EditorState;
 
+/** Mount draft persistence with independently changeable chat/submission state. */
 const renderPersistence = (
   initialProps: Partial<{
     isDropMode: boolean;

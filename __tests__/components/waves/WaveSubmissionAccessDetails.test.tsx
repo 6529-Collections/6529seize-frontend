@@ -30,6 +30,7 @@ jest.mock("@/helpers/image.helpers", () => ({
   ImageScale: { W_AUTO_H_50: "50" },
 }));
 
+/** Build a signed-submission fixture with the audience under test. */
 function makeWave(group: ApiGroup | null = null): ApiWave {
   return Object.assign(new ApiWave(), {
     id: "wave-1",

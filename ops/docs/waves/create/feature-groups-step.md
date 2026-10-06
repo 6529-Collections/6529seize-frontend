@@ -51,7 +51,8 @@ waves show these controls inside `Optional settings` on the first screen.
 - Below the access controls, a live summary explains what the selected chat
   and submission groups mean. For example, chat can be open to people with
   wave access while submissions remain limited to their own group. The same
-  summary appears in Review or Overview before creation.
+  summary appears in Review or Overview before creation. When chat is disabled,
+  it still explains whether submissions are public or limited to their group.
 - This summary describes group access. Sign-in, profile, submission timing,
   limits, and other posting requirements still apply. Voting access is separate.
 - `Allow admins to delete posts` is enabled by default.

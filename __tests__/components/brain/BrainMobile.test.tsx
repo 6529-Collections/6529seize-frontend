@@ -351,6 +351,7 @@ const { useAuth } = require("@/components/auth/Auth");
 
 // Tests
 
+/** Exercise the rules navigation exposed to nested mobile Wave content. */
 function SubmissionRulesTrigger() {
   const viewRules = useBrainMobileSubmissionRules();
   return (

@@ -900,6 +900,7 @@ function buildExactChatDropBody() {
   };
 }
 
+/** Open a local fixture only after its Wave shell and composer are ready. */
 async function gotoSandboxWave(
   page: Page,
   waveId = SANDBOX_WAVE_ID,

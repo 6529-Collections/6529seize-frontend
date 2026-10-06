@@ -14,7 +14,11 @@ function getPreviewKey(
       ? "waves.access.preview.chatPublic"
       : "waves.access.preview.chatGroup";
   }
-  if (!chatEnabled) return "waves.access.preview.chatDisabled";
+  if (!chatEnabled) {
+    return groups.canDrop === null
+      ? "waves.access.preview.chatDisabledSubmitPublic"
+      : "waves.access.preview.chatDisabledSubmitGroup";
+  }
   if (groups.canChat === null) {
     return groups.canDrop === null
       ? "waves.access.preview.bothPublic"

@@ -264,7 +264,12 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
       onConfigurationButtonRef?.(element);
       if (isConfigurationActive) {
         scrollActiveButtonIntoView(element);
-        if (element && waveId && consumeSubmissionRulesFocus?.(waveId)) {
+        if (
+          isApp &&
+          element &&
+          waveId &&
+          consumeSubmissionRulesFocus?.(waveId)
+        ) {
           element.focus();
         }
       }
@@ -274,6 +279,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
       isConfigurationActive,
       scrollActiveButtonIntoView,
       consumeSubmissionRulesFocus,
+      isApp,
       waveId,
     ]
   );

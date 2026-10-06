@@ -552,6 +552,55 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     "PLAYWRIGHT_AUTH_SANDBOX",
     "Native competition tests require an isolated local mock API."
   );
+  test("opens locked submission rules on the web competition route and restores Chat", async ({
+    page,
+    baseURL,
+  }) => {
+    const sandbox = await installCompetitionApi(
+      page,
+      false,
+      false,
+      ACCESS_WAVE
+    );
+    sandbox.onlyCompetition("alpha");
+    await sandbox.legacyPrimary("alpha");
+    await page.goto(`/waves/${ACCESS_WAVE}?tab=chat`);
+    await dismissNextDevTools(page);
+    const draft =
+      "Keep my chat draft when opening competition submission rules.";
+    await page
+      .getByRole("textbox", { name: "Write a chat message" })
+      .last()
+      .fill(draft);
+    await page
+      .getByRole("button", { name: "Submit drop", exact: true })
+      .press("Enter");
+    const details = page.getByRole("dialog", { name: "Submit drop" });
+    await expect(details).toBeFocused();
+    await page.keyboard.press("Tab");
+    await page.keyboard.press("Tab");
+    await expect(
+      details.getByRole("link", { name: "View submission rules" })
+    ).toBeFocused();
+    await page.keyboard.press("Enter");
+    await expect(page).toHaveURL(
+      `/waves/${ACCESS_WAVE}/competitions/alpha?tab=rules`,
+      { timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS }
+    );
+    const configuration = page
+      .getByRole("tab", { name: "Configuration", exact: true })
+      .first();
+    await expect(configuration).toHaveAttribute("aria-selected", "true");
+    await expect(
+      page.locator("#my-stream-wave-tabpanel-configuration")
+    ).toBeFocused();
+    await page.getByRole("tab", { name: "Chat", exact: true }).first().click();
+    await expect(
+      page.getByRole("textbox", { name: "Write a chat message" }).last()
+    ).toContainText(draft, { timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
+    await expectNoHorizontalOverflow(page);
+    await expectNoUnsafeSandboxMutations(baseURL);
+  });
   for (const destination of ["shared-wave", "default-competition"] as const) {
     test(`opens locked submission rules in the app and restores Chat (${destination})`, async ({
       page,

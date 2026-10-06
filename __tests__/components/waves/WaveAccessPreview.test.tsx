@@ -64,18 +64,30 @@ describe("WaveAccessPreview", () => {
     );
   });
 
-  it("distinguishes disabled chat from restricted chat", () => {
-    render(
-      <WaveAccessPreview
-        waveType={ApiWaveType.Rank}
-        groups={{ canChat: null, canDrop: "club" }}
-        chatEnabled={false}
-      />
-    );
-    expect(screen.getByRole("status")).toHaveTextContent(
-      "Chat is disabled. Submission and voting access stay as selected."
-    );
-  });
+  it.each([
+    {
+      canDrop: null,
+      expected:
+        "Chat is disabled. Submission group access is public. Voting access is separate.",
+    },
+    {
+      canDrop: "club",
+      expected:
+        "Chat is disabled. Only the submission group can submit. Voting access is separate.",
+    },
+  ])(
+    "explains submission access with chat disabled: $expected",
+    ({ canDrop, expected }) => {
+      render(
+        <WaveAccessPreview
+          waveType={ApiWaveType.Rank}
+          groups={{ canChat: null, canDrop }}
+          chatEnabled={false}
+        />
+      );
+      expect(screen.getByRole("status")).toHaveTextContent(expected);
+    }
+  );
 
   it("describes only chat access for a Chat wave", () => {
     render(

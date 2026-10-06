@@ -94,6 +94,7 @@ const CompetitionHub = dynamic(
   () => import("@/components/competitions/CompetitionHub")
 );
 
+/** Give tabs and their panels the same stable accessibility identifier. */
 const getContentTabPanelId = (tab: MyStreamWaveTab): string =>
   `my-stream-wave-tabpanel-${tab.toLowerCase()}`;
 
@@ -114,9 +115,12 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
   const queryClient = useQueryClient();
   const locale = useBrowserLocale();
   const { connectedProfile, activeProfileProxy, setToast } = useAuth();
-  const { setWaveDropAction } = useHeaderContext();
+  const {
+    setWaveDropAction,
+    requestSubmissionRulesFocus,
+    consumeSubmissionRulesFocus,
+  } = useHeaderContext();
   const contentRef = useRef<HTMLDivElement>(null);
-  const focusSubmissionRulesRef = useRef(false);
   const {
     waves,
     directMessages,
@@ -452,28 +456,43 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
       viewMobileSubmissionRules();
       return;
     }
-    focusSubmissionRulesRef.current = true;
+    requestSubmissionRulesFocus(waveId);
     setActiveContentTab(MyStreamWaveTab.CONFIGURATION);
-  }, [isApp, setActiveContentTab, viewMobileSubmissionRules]);
+  }, [
+    isApp,
+    requestSubmissionRulesFocus,
+    setActiveContentTab,
+    viewMobileSubmissionRules,
+    waveId,
+  ]);
 
   useLayoutEffect(() => {
-    if (
-      !focusSubmissionRulesRef.current ||
-      activeContentTab !== MyStreamWaveTab.CONFIGURATION
-    ) {
+    if (isApp || activeContentTab !== MyStreamWaveTab.CONFIGURATION) {
       return;
     }
-    focusSubmissionRulesRef.current = false;
     const tabs = contentRef.current?.querySelectorAll<HTMLButtonElement>(
       `[role="tab"][aria-controls="${getContentTabPanelId(MyStreamWaveTab.CONFIGURATION)}"]`
     );
-    const target =
-      Array.from(tabs ?? []).find((tab) => tab.getClientRects().length > 0) ??
-      contentRef.current?.querySelector<HTMLElement>(
-        `#${getContentTabPanelId(MyStreamWaveTab.CONFIGURATION)}`
-      );
-    target?.focus();
-  }, [activeContentTab]);
+    const panel = contentRef.current?.querySelector<HTMLElement>(
+      `#${getContentTabPanelId(MyStreamWaveTab.CONFIGURATION)}`
+    );
+    // Routed rules render their content before the tab strip finishes loading.
+    const target = isCompetitionPathname(pathname)
+      ? panel
+      : (Array.from(tabs ?? []).find(
+          (tab) => tab.getClientRects().length > 0
+        ) ?? panel);
+    if (target && consumeSubmissionRulesFocus(waveId)) {
+      target.focus();
+    }
+  }, [
+    activeContentTab,
+    consumeSubmissionRulesFocus,
+    isApp,
+    loadedWaveId,
+    pathname,
+    waveId,
+  ]);
 
   const chatSubmitDropAction = useMemo<ChatSubmitDropAction>(
     () => ({
