@@ -47,7 +47,7 @@ describe('UserPageIdentityHeaderCICRate', () => {
     await user.type(screen.getByLabelText(/Your total NIC Rating/), '-1');
     expect(screen.getByLabelText(/Your total NIC Rating/)).toHaveValue('-1');
     expect(authValue.requestAuth).not.toHaveBeenCalled();
-    expect(screen.getByRole('button', { name: 'Rate', exact: true })).toBeEnabled();
+    expect(screen.getByRole('button', { name: 'Rate' })).toBeEnabled();
   });
 
   it('submits rating when authenticated', async () => {

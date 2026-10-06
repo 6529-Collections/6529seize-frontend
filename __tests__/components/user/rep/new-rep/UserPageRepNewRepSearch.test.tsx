@@ -75,7 +75,7 @@ describe("UserPageRepNewRepSearch", () => {
       "1"
     );
     expect(
-      screen.getByRole("button", { name: "Grant REP", exact: true })
+      screen.getByRole("button", { name: "Grant REP" })
     ).toBeDisabled();
   });
 
