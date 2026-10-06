@@ -227,7 +227,8 @@ export default function UserPageRepMobile({
         noPadding
         tabletModal
         maxWidthClass="md:tw-max-w-md"
-        headerClassName="tw-pb-6 tw-pt-4"
+        headerClassName="tw-pb-5 tw-pt-4"
+        headerVariant="minimal"
       >
         <div className="tw-px-4 tw-pb-6 sm:tw-px-6">
           <UserPageRateWrapper profile={profile} type={RateMatter.NIC}>

@@ -418,7 +418,8 @@ export default function UserPageRep({
         noPadding
         tabletModal
         maxWidthClass="md:tw-max-w-md"
-        headerClassName="tw-pb-6 tw-pt-4"
+        headerClassName="tw-pb-5 tw-pt-4"
+        headerVariant="minimal"
       >
         <div className="tw-px-4 tw-pb-6 sm:tw-px-6">
           <UserPageRateWrapper profile={profile} type={RateMatter.NIC}>
@@ -428,9 +429,9 @@ export default function UserPageRep({
               onSuccess={() => setIsNicRateOpen(false)}
             />
           </UserPageRateWrapper>
-          <div className="tw-mt-3">
+          <div className="tw-mt-1">
             <Button
-              variant="secondary"
+              variant="ghost"
               size="lg"
               fullWidth
               onClick={() => setIsNicRateOpen(false)}

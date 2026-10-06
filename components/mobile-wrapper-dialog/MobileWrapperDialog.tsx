@@ -39,6 +39,7 @@ type MobileWrapperDialogProps = {
   readonly maxWidthClass?: string | undefined;
   readonly zIndexClassName?: string | undefined;
   readonly headerClassName?: string | undefined;
+  readonly headerVariant?: "default" | "minimal" | undefined;
   readonly titleActions?: ReactNode;
   readonly headerActions?: ReactNode;
   readonly mobileCloseButtonClassName?: string | undefined;
@@ -402,6 +403,7 @@ export default function MobileWrapperDialog({
   maxWidthClass,
   zIndexClassName = "tw-z-[1010]",
   headerClassName,
+  headerVariant,
   titleActions,
   headerActions,
   mobileCloseButtonClassName,
@@ -594,6 +596,7 @@ export default function MobileWrapperDialog({
                           onClose={handleClose}
                           onBack={dismissible ? onBack : undefined}
                           className={headerClassName}
+                          variant={headerVariant}
                           titleActions={titleActions}
                           headerActions={headerActions}
                           showHeaderCloseButton={showInlineHeaderCloseButton}
