@@ -26,6 +26,7 @@ interface UseArtworkSubmissionFormActionsParams {
   readonly shouldApplyProfileDefaults?: boolean | undefined;
 }
 
+/** Provide stable draft updates; changing the action marker does not discard its plan text. */
 export function useArtworkSubmissionFormActions({
   state,
   dispatch,

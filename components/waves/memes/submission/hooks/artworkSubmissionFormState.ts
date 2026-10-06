@@ -344,6 +344,7 @@ const buildEmptyExternalMediaState = (): ExternalMediaState => ({
   isValid: false,
 });
 
+/** Initialize optional submission fields, including an empty action plan, without publishing defaults. */
 const getDefaultOperationalData = (): OperationalData => ({
   airdrop_config: [{ id: "initial", address: "", count: AIRDROP_TOTAL }],
   payment_info: {
@@ -400,6 +401,7 @@ export const createInitialState = ({
   return reduceProfileDefaults(state, profileDefaults ?? {});
 };
 
+/** Update the draft while keeping the action plan intact when its checkbox is toggled off. */
 export function formReducer(state: FormState, action: FormAction): FormState {
   switch (action.type) {
     case "SET_PROPOSAL_FRAME":

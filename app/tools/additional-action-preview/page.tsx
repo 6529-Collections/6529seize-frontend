@@ -5,6 +5,7 @@ import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import AdditionalActionPreview from "./page.client";
 
+/** Keep the development fixture out of search indexes using the app's metadata defaults. */
 export function generateMetadata(): Metadata {
   return getAppMetadata(
     {
@@ -15,6 +16,7 @@ export function generateMetadata(): Metadata {
   );
 }
 
+/** Restrict the component fixture to development requests on an exact loopback host. */
 export default async function AdditionalActionPreviewPage() {
   if (getNodeEnv() !== "development") {
     notFound();

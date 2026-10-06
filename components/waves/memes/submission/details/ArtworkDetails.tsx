@@ -106,6 +106,7 @@ const FieldCharacterCount = ({
   );
 };
 
+/** Mark the artist's declaration independently of the optional plan text. */
 const AdditionalActionPromiseCheckbox = ({
   checked,
   onChange,
@@ -154,6 +155,7 @@ const AdditionalActionPromiseCheckbox = ({
   );
 };
 
+/** Edit and count the trimmed public plan, retaining errors for over-limit restored values. */
 const AdditionalActionPlanField = ({
   value,
   onChange,

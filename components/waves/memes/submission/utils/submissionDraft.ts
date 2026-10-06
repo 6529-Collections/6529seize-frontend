@@ -32,6 +32,7 @@ export interface MemesSubmissionInitialDraft {
   readonly isAdditionalActionPromised: boolean;
 }
 
+/** Supply empty optional fields for resubmissions whose older metadata omits them. */
 const getDefaultOperationalData = (): OperationalData => ({
   airdrop_config: [{ id: "initial", address: "", count: AIRDROP_TOTAL }],
   payment_info: {
@@ -194,6 +195,7 @@ const parseAdditionalMedia = (value: unknown): AdditionalMedia => {
   };
 };
 
+/** Restore dedicated operational fields without interpreting bio or commentary as an action plan. */
 const buildOperationalDataDraft = (drop: ApiDrop): OperationalData => {
   const metadata = buildMetadataMap(drop);
 

@@ -13,6 +13,7 @@ interface AdditionalActionSummaryProps {
   readonly metadataState?: DropMetadataState | undefined;
 }
 
+/** Review an action declaration without mistaking unavailable metadata for an absent plan. */
 export function AdditionalActionSummary({
   isAdditionalActionPromised,
   plan,

@@ -134,6 +134,10 @@ const mergeMetadata = (
   ];
 };
 
+/**
+ * Hydrate full metadata while preserving priority fields and abort semantics.
+ * Strict detail consumers opt into throwing failures so partial fallback data is not cached as complete.
+ */
 export const fetchDropMetadataByIdV2 = async ({
   dropId,
   headers,

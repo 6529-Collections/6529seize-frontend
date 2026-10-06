@@ -5,6 +5,7 @@ import { AdditionalActionSummary } from "@/components/waves/memes/submission/com
 import { useState } from "react";
 import { useHasHydrated } from "@/hooks/useHasHydrated";
 
+/** Render the real artwork controls with page-local draft state and no submission side effects. */
 export default function AdditionalActionPreview() {
   const hasHydrated = useHasHydrated();
   const [title, setTitle] = useState("");

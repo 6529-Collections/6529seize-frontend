@@ -44,6 +44,7 @@ interface MetadataLengthValidationResult {
   readonly hasErrors: boolean;
 }
 
+/** Serialize operational fields and include a nonblank trimmed plan only for a marked action. */
 const buildOperationalMetadata = (
   operationalData: OperationalData | undefined,
   isAdditionalActionPromised: boolean
@@ -109,6 +110,7 @@ const buildOperationalMetadata = (
   return operationalMetadata;
 };
 
+/** Build the shared metadata payload used by both the artwork preview and API submission. */
 export const buildSubmissionMetadata = ({
   traits,
   operationalData,
@@ -182,6 +184,7 @@ const validateMetadataValueLengths = (
   };
 };
 
+/** Validate exactly the metadata that will be submitted, excluding unchecked action drafts. */
 export const getSubmissionMetadataLengthValidation = ({
   traits,
   operationalData,

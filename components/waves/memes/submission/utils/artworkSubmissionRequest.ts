@@ -6,6 +6,7 @@ import type { OperationalData } from "../types/OperationalData";
 import type { TraitsData } from "../types/TraitsData";
 import { buildSubmissionMetadata } from "./submissionMetadata";
 
+/** Convert a validated artwork draft into the API request, preserving the action marker and its metadata. */
 export const transformToApiRequest = (data: {
   waveId: string;
   traits: TraitsData;

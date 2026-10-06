@@ -81,6 +81,7 @@ const buildPreviewMedia = ({
   };
 };
 
+/** Construct a local review drop using the same action-dependent metadata as the submitted request. */
 export const buildPreviewDrop = ({
   wave,
   traits,

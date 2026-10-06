@@ -27,6 +27,7 @@ const getProfileBio = (statements: CicStatement[] | null | undefined): string =>
       statement.statement_group === STATEMENT_GROUP.GENERAL
   )?.statement_value ?? "";
 
+/** Own the artwork draft and expose field actions while retaining edits across submission steps. */
 export function useArtworkSubmissionForm(
   agreement: SubmissionAgreement,
   initialDraft?: MemesSubmissionInitialDraft
