@@ -314,7 +314,7 @@ it("switches Joined and All through the replacement collection controls", () => 
   expect(state.setCollection).toHaveBeenCalledWith("all");
 });
 
-it("hides personal collection controls when the viewer cannot use them", () => {
+it("labels the public list without showing personal collection controls", () => {
   render(
     <SidebarWaveNavigationControls
       navigation={navigation({
@@ -330,7 +330,7 @@ it("hides personal collection controls when the viewer cannot use them", () => {
   expect(
     screen.queryByRole("button", { name: "Joined" })
   ).not.toBeInTheDocument();
-  expect(screen.queryByText("All Waves")).not.toBeInTheDocument();
+  expect(screen.getByText("All Waves")).toBeVisible();
 });
 
 it("opens and focuses search, then restores the selected collection on Escape", async () => {

@@ -1,0 +1,75 @@
+/* View-transition pseudo-elements live outside the component tree. Scope these
+   rules to the brief native Wave transition; Tailwind cannot target them here. */
+:global(html[data-wave-navigation-transition]::view-transition-group(root)),
+:global(html[data-wave-navigation-transition]::view-transition-new(root)) {
+  animation: none;
+}
+
+:global(html[data-wave-navigation-transition]::view-transition-old(root)) {
+  display: none;
+}
+
+:global(
+  html[data-wave-navigation-transition]::view-transition-group(wave-navigation)
+) {
+  animation: none;
+  min-height: var(--wave-transition-height);
+  overflow: clip;
+}
+
+:global(
+  html[data-wave-navigation-transition]::view-transition-old(wave-navigation)
+) {
+  mix-blend-mode: normal;
+  animation: leave-wave 160ms ease-out both;
+}
+
+:global(
+  html[data-wave-navigation-transition]::view-transition-new(wave-navigation)
+) {
+  mix-blend-mode: normal;
+  animation: enter-wave 260ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+:global(html[data-wave-navigation-transition="forward"]) {
+  --wave-enter-scale: 0.98;
+  --wave-exit-scale: 1;
+}
+
+:global(html[data-wave-navigation-transition="back"]) {
+  --wave-enter-scale: 1;
+  --wave-exit-scale: 0.98;
+}
+
+@keyframes leave-wave {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(var(--wave-exit-scale));
+  }
+}
+
+@keyframes enter-wave {
+  from {
+    opacity: 0;
+    transform: scale(var(--wave-enter-scale));
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :global(
+    html[data-wave-navigation-transition]::view-transition-old(wave-navigation)
+  ),
+  :global(
+    html[data-wave-navigation-transition]::view-transition-new(wave-navigation)
+  ) {
+    animation: none;
+  }
+}

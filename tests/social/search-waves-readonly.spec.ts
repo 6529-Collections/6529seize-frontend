@@ -350,6 +350,52 @@ async function openSearchOnFirstWaveWithSearch(page: Page) {
 }
 
 test.describe("Search and wave-detail read-only coverage @surface @medium @large @readonly", () => {
+  test("mobile wave shortcuts keep generous touch areas around compact buttons", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      !testInfo.project.use.hasTouch,
+      "Touch target geometry is mobile-only"
+    );
+    await gotoReady(page, "/waves");
+    const shortcuts = [
+      page.getByRole("link", { name: "Profile Waves Feed", exact: true }),
+      page.getByRole("button", { name: "Find a wave…", exact: true }),
+    ];
+    for (const shortcut of shortcuts) {
+      const visibleShortcut = shortcut.filter({ visible: true });
+      await visibleShortcut.scrollIntoViewIfNeeded();
+      const geometry = await visibleShortcut.evaluate((element) => {
+        const target = element.getBoundingClientRect();
+        const surface = element.firstElementChild?.getBoundingClientRect();
+        const icon = element.querySelector("svg")?.getBoundingClientRect();
+        const corners = [
+          [target.left + 1, target.top + 1],
+          [target.right - 1, target.top + 1],
+          [target.left + 1, target.bottom - 1],
+          [target.right - 1, target.bottom - 1],
+        ] as const;
+        return {
+          target: [target.width, target.height],
+          surface: [surface?.width, surface?.height],
+          icon: [icon?.width, icon?.height],
+          cornersReachTarget: corners.every(([x, y]) =>
+            element.contains(document.elementFromPoint(x, y))
+          ),
+        };
+      });
+      expect(geometry).toEqual({
+        target: [44, 44],
+        surface: [40, 40],
+        icon: [16, 16],
+        cornersReachTarget: true,
+      });
+    }
+    await page.screenshot({
+      path: testInfo.outputPath("mobile-shortcuts.png"),
+    });
+  });
+
   test("sidebar discovery and cross-collection search remain directly accessible", async ({
     page,
   }) => {
@@ -357,6 +403,10 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
     const searchToggle = page
       .getByRole("button", { name: "Find a wave…", exact: true })
       .filter({ visible: true });
+    const publicListLabel = page
+      .getByText("All Waves", { exact: true })
+      .filter({ visible: true });
+    await expect(publicListLabel).toBeVisible();
     await searchToggle.click();
     const search = page
       .getByRole("searchbox", { name: "Find a wave…" })
@@ -391,6 +441,7 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
       )
     ).click();
     await expect(search).toHaveCount(0);
+    await expect(publicListLabel).toBeVisible();
     const discovery = page
       .getByRole("region", { name: "Wave discovery", exact: true })
       .filter({ visible: true });
