@@ -258,7 +258,11 @@ describe("Upcoming quantity eligibility changes", () => {
   const auth = createMockAuthContext({
     requestAuth: jest.fn(async () => ({ success: true })),
   });
-  const row = (eligibilityCount: number, subscribedCount = 11) => (
+  const row = (
+    eligibilityCount: number,
+    subscribedCount = 11,
+    variant: "default" | "compact" = "default"
+  ) => (
     <AuthContext.Provider value={auth}>
       <MemeSubscriptionRow
         profileKey="test-key"
@@ -270,6 +274,7 @@ describe("Upcoming quantity eligibility changes", () => {
         minting_today={false}
         first={false}
         date={null}
+        variant={variant}
       />
     </AuthContext.Provider>
   );
@@ -303,6 +308,22 @@ describe("Upcoming quantity eligibility changes", () => {
     expect(commonApiPost).not.toHaveBeenCalled();
   });
 
+  it.each(["default", "compact"] as const)(
+    "disables the %s quantity selector at zero eligibility and restores the saved request",
+    (variant) => {
+      const { rerender } = render(row(24, 11, variant));
+      const selector = screen.getByRole("combobox");
+      rerender(row(0, 11, variant));
+      expect(selector).toBeDisabled();
+      expect(selector).toHaveValue("0");
+      expect(screen.getAllByRole("option")).toHaveLength(1);
+      rerender(row(12, 11, variant));
+      expect(selector).toBeEnabled();
+      expect(selector).toHaveValue("11");
+      expect(commonApiPost).not.toHaveBeenCalled();
+    }
+  );
+
   it("posts a real manual selection after the automatic quantity increases", async () => {
     jest.mocked(commonApiPost).mockResolvedValue({ count: 11 });
     const { rerender } = render(row(24, 24));
@@ -314,9 +335,10 @@ describe("Upcoming quantity eligibility changes", () => {
       })
     );
     await waitFor(() => expect(screen.getByRole("combobox")).toBeEnabled());
-    rerender(row(10, 11));
+    // A lagging parent refresh must not replace the successful local selection.
+    rerender(row(10, 24));
     expect(screen.getByRole("combobox")).toHaveValue("10");
-    rerender(row(12, 11));
+    rerender(row(12, 24));
     expect(screen.getByRole("combobox")).toHaveValue("11");
     expect(commonApiPost).toHaveBeenCalledTimes(1);
   });
@@ -330,5 +352,10 @@ describe("Upcoming quantity eligibility changes", () => {
     await waitFor(() => expect(commonApiPost).toHaveBeenCalledTimes(1));
     await waitFor(() => expect(screen.getByRole("combobox")).toBeEnabled());
     expect(screen.getByRole("combobox")).toHaveValue("10");
+    expect(commonApiPost).toHaveBeenCalledWith({
+      endpoint: "subscriptions/test-key/subscription-count",
+      body: { contract: "0x123", token_id: 558, count: 9 },
+    });
+    expect(commonApiPost).toHaveBeenCalledTimes(1);
   });
 });
