@@ -24,6 +24,20 @@ interface Props {
   readonly fillContainer?: boolean | undefined;
 }
 
+function getVideoPresentation(fillContainer: boolean, isInertPreview: boolean) {
+  return {
+    className: clsx(
+      "tw-relative tw-flex tw-w-full tw-items-start",
+      fillContainer
+        ? "tw-h-full tw-max-h-full tw-justify-center"
+        : "tw-justify-start"
+    ),
+    template: isInertPreview ? "card-preview" : "ambient-media",
+    layout: fillContainer ? "fill" : "natural",
+    align: fillContainer ? "center" : "left",
+  } as const;
+}
+
 const MediaDisplayVideo: React.FC<Props> = ({
   src,
   mimeType,
@@ -137,26 +151,19 @@ const MediaDisplayVideo: React.FC<Props> = ({
   const actionProps = showControls
     ? { onDownload: downloadMedia, onOpen: openMedia, openLabel }
     : {};
+  const presentation = getVideoPresentation(fillContainer, isInertPreview);
 
   return (
-    <div
-      ref={wrapperRef}
-      className={clsx(
-        "tw-relative tw-flex tw-w-full tw-items-start",
-        fillContainer
-          ? "tw-h-full tw-max-h-full tw-justify-center"
-          : "tw-justify-start"
-      )}
-    >
+    <div ref={wrapperRef} className={presentation.className}>
       <SeizeVideoPlayer
         videoRef={setVideoRef}
         onPlaybackRequest={onPlaybackRequest}
         preload={preload}
         data-url={src}
-        template={isInertPreview ? "card-preview" : "ambient-media"}
+        template={presentation.template}
         autoPlay={shouldAutoPlay}
-        layout={fillContainer ? "fill" : "natural"}
-        align={fillContainer ? "center" : "left"}
+        layout={presentation.layout}
+        align={presentation.align}
         showActions={showControls}
         {...actionProps}
         isDownloading={isDownloading}
