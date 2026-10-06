@@ -46,10 +46,14 @@ const deployment = {
 function resolveSource(
   options: {
     event?: string;
+    scope?: string;
     ref?: string;
     run?: Record<string, unknown>;
     jobs?: Record<string, unknown>[];
     emptyHistory?: boolean;
+    discoveryFailure?: boolean;
+    missingEvidence?: boolean;
+    liveSha?: string;
     apiFailure?: {
       endpoint: "runs" | "run" | "jobs";
       count: number;
@@ -120,6 +124,17 @@ gh() {
   fi
   cat "$FIXTURE_ROOT/$fixture.json"
 }
+node() {
+  if [ "$DISCOVERY_FAILURE" = true ]; then
+    printf '{"state":"setup-failed"}\\n' > "$RUNNER_TEMP/production-canary-source.json"
+    return 1
+  fi
+  [ "$EMPTY_HISTORY" != true ] || return 1
+  if [ "$MISSING_EVIDENCE" != true ]; then
+    printf '{"sha":"%s"}\\n' "$LIVE_SHA" > "$RUNNER_TEMP/production-canary-source.json"
+  fi
+  printf '101\\n'
+}
 ${source.run}
 `,
       ],
@@ -129,6 +144,7 @@ ${source.run}
         env: {
           ...process.env,
           EVENT_NAME: options.event ?? "schedule",
+          CANARY_SCOPE: options.scope ?? "post-deploy",
           AUTOMATIC_DEPLOY_RUN_ID: "99",
           GITHUB_REF: options.ref ?? "refs/heads/main",
           GITHUB_REPOSITORY: repository,
@@ -137,6 +153,10 @@ ${source.run}
           GITHUB_OUTPUT: path.join(root, "output").replaceAll("\\", "/"),
           FAILED_ENDPOINT: options.apiFailure?.endpoint ?? "",
           FAILURE_COUNT: String(options.apiFailure?.count ?? 0),
+          LIVE_SHA: options.liveSha ?? sha,
+          DISCOVERY_FAILURE: String(options.discoveryFailure ?? false),
+          MISSING_EVIDENCE: String(options.missingEvidence ?? false),
+          EMPTY_HISTORY: String(options.emptyHistory ?? false),
           FAILURE_MESSAGE:
             options.apiFailure?.message ?? "gh: Server Error (HTTP 502)",
         },
@@ -150,6 +170,12 @@ ${source.run}
         : "",
       selected: fs.existsSync(path.join(root, "selected-run"))
         ? fs.readFileSync(path.join(root, "selected-run"), "utf8")
+        : "",
+      evidence: fs.existsSync(path.join(root, "production-canary-source.json"))
+        ? fs.readFileSync(
+            path.join(root, "production-canary-source.json"),
+            "utf8"
+          )
         : "",
       attempts: Object.fromEntries(
         ["runs", "run", "jobs"].map((endpoint) => {
@@ -169,7 +195,7 @@ ${source.run}
 }
 
 describe("daily production canary", () => {
-  it("discovers the newest successful deployment and verifies its canonical job", () => {
+  it("verifies the live-SHA discovery result and its canonical job", () => {
     const result = resolveSource();
     expect(result.status).toBe(0);
     expect(result.selected).toContain("/actions/runs/101");
@@ -184,9 +210,46 @@ describe("daily production canary", () => {
     });
     expect(result.status).toBe(0);
     expect(result.selected).toContain("/actions/runs/99");
+    expect(result.output).toContain(`sha=${sha}`);
   });
 
-  it.each(["runs", "run", "jobs"] as const)(
+  it("preserves setup-failure evidence and stops before selecting a deployment", () => {
+    const result = resolveSource({ discoveryFailure: true });
+    expect(result.status).not.toBe(0);
+    expect(result.selected).toBe("");
+    expect(result.output).toBe("");
+    expect(JSON.parse(result.evidence)).toEqual({ state: "setup-failed" });
+  });
+
+  it("rejects missing discovery evidence even when run and job lookups succeed", () => {
+    const result = resolveSource({ missingEvidence: true });
+    expect(result.status).not.toBe(0);
+    expect(result.attempts["jobs"]).toBe(1);
+    expect(result.output).toBe("");
+  });
+
+  it("rejects a manual canary whose selected run differs from the live SHA", () => {
+    const result = resolveSource({
+      event: "workflow_dispatch",
+      scope: "canary",
+      liveSha: "b".repeat(40),
+    });
+    expect(result.status).not.toBe(0);
+    expect(result.selected).toContain("/actions/runs/99");
+    expect(result.output).toBe("");
+  });
+
+  it("exercises live discovery on manual canary reruns while preserving their exact run", () => {
+    const result = resolveSource({
+      event: "workflow_dispatch",
+      scope: "canary",
+    });
+    expect(result.status).toBe(0);
+    expect(result.selected).toContain("/actions/runs/99");
+    expect(result.output).toContain(`sha=${sha}`);
+  });
+
+  it.each(["run", "jobs"] as const)(
     "recovers %s lookup after transient 502s without accepting partial responses",
     (endpoint) => {
       const result = resolveSource({ apiFailure: { endpoint, count: 2 } });
@@ -243,6 +306,7 @@ describe("daily production canary", () => {
     { run: { head_repository: { full_name: "example/fork" } } },
     { run: { conclusion: "failure" } },
     { run: { head_sha: "invalid" } },
+    { run: { head_sha: "b".repeat(40) } },
     { jobs: [] },
     {
       jobs: [
@@ -292,8 +356,61 @@ describe("daily production canary", () => {
     const notification = workflow.jobs["notify-canary-failure"].steps.at(-1);
     expect(notification.env.CI_PIPELINES_ALERT_TYPE).toBe("workflow");
     expect(notification.env.CI_PIPELINES_TITLE).toBe(
-      "Production E2E: read-only canary failed"
+      "${{ needs.readonly.outputs.failure-stage == 'browser-tests' && 'Production E2E: canary browser tests failed' || 'Production E2E: canary setup failed' }}"
     );
     expect(notification.env.CI_PIPELINES_PARENT_DEPLOY_RUN_ID).toBeUndefined();
   });
+
+  it("loads trusted discovery before source selection and preserves preflight evidence", () => {
+    expect(steps[0]?.name).toBe(
+      "Check out trusted canary discovery and version verifier"
+    );
+    expect(source.run).toContain("resolve-production-canary.cjs");
+    expect(source.run).not.toContain("status=success&per_page=100");
+    expect(source.run).toContain('test "$deployed_sha" =');
+    expect(workflow.jobs.readonly.permissions.deployments).toBe("read");
+    expect(
+      requiredStep("Preserve Museum selection and publication evidence").run
+    ).toContain("manual-production-version.json");
+    expect(requiredStep("Classify production validation outcome").if).toBe(
+      "always()"
+    );
+  });
+
+  it.each([
+    ["skipped", "skipped", "setup"],
+    ["failure", "skipped", "browser-tests"],
+    ["skipped", "failure", "browser-tests"],
+    ["success", "skipped", "none"],
+  ])(
+    "classifies canary %s and post-deploy %s as %s",
+    (canary, postDeploy, expected) => {
+      const root = fs.mkdtempSync(path.join(os.tmpdir(), "canary-outcome-"));
+      try {
+        const output = path.join(root, "output");
+        const result = spawnSync(
+          bash,
+          [
+            "-c",
+            requiredStep("Classify production validation outcome").run ?? "",
+          ],
+          {
+            env: {
+              ...process.env,
+              CANARY_TEST_OUTCOME: canary,
+              POST_DEPLOY_TEST_OUTCOME: postDeploy,
+              GITHUB_OUTPUT: output,
+              GITHUB_STEP_SUMMARY: path.join(root, "summary"),
+            },
+          }
+        );
+        expect(result.status).toBe(0);
+        expect(fs.readFileSync(output, "utf8")).toContain(
+          `failure-stage=${expected}`
+        );
+      } finally {
+        fs.rmSync(root, { recursive: true, force: true });
+      }
+    }
+  );
 });

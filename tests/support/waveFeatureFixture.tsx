@@ -82,6 +82,7 @@ function Fixture() {
     "all"
   );
   const [queryText, setQueryText] = useState("");
+  const [searchOpen, setSearchOpen] = useState(false);
   const [availableTabs, setAvailableTabs] = useState(() =>
     new URLSearchParams(location.search).has("late-tabs")
       ? [MyStreamWaveTab.CHAT]
@@ -91,7 +92,10 @@ function Fixture() {
     collection,
     setCollection,
     canUseCollections: true,
-    searching: false,
+    searchOpen: searchOpen || queryText.trim().length > 0,
+    setSearchOpen,
+    searching: queryText.trim().length > 0,
+    queryEnabled: queryText.trim().length >= 3,
     queryText,
     setQueryText,
     results: { isFetching: false },

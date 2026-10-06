@@ -1,5 +1,7 @@
 "use client";
 
+import "./WaveNavigationTransition.module.css";
+
 import dynamic from "next/dynamic";
 import type { CSSProperties, ReactNode } from "react";
 import { Suspense, useCallback, useMemo, useRef } from "react";
@@ -7,6 +9,10 @@ import { usePathname, useSearchParams } from "next/navigation";
 import BottomNavigation from "../navigation/BottomNavigation";
 import { getActiveViewFromUrl } from "../navigation/ViewContext";
 import BrainMobileWaves from "../brain/mobile/BrainMobileWaves";
+import {
+  getWaveNavigationScreen,
+  useWaveNavigationTransition,
+} from "../brain/mobile/useWaveNavigationTransition";
 import { useLayout } from "../brain/my-stream/layout/LayoutContext";
 import HeaderPlaceholder from "../header/HeaderPlaceholder";
 import { useHeaderContext } from "@/contexts/HeaderContext";
@@ -141,6 +147,8 @@ function AppLayoutContent({ children }: Props) {
     activeWaveId: waveParam,
     searchParams,
   });
+  const waveNavigationScreen = getWaveNavigationScreen(pathname, waveParam);
+  const waveNavigationRef = useWaveNavigationTransition(waveNavigationScreen);
   const shouldHideBottomNavForRoute = hidesMobileBottomNavigation({
     pathname,
   });
@@ -200,7 +208,7 @@ function AppLayoutContent({ children }: Props) {
     <>
       <div
         data-mobile-bottom-nav-scroll-target="true"
-        className={`${safeAreaClass} ${"tw-overflow-auto"}`}
+        className={`${safeAreaClass} tw-overflow-y-auto tw-overflow-x-hidden`}
         style={streamRouteLoadingReserveStyle}
       >
         <PullToRefresh contentRef={pullContentRef} triggerZoneRef={headerRef} />
@@ -211,10 +219,16 @@ function AppLayoutContent({ children }: Props) {
           <div ref={headerWrapperRef}>
             <TouchDeviceHeader />
           </div>
-          {activeContent}
-          {isNavVisible && !shouldUseContentBottomClearance && (
-            <div className="tw-h-[104px] tw-w-full" />
-          )}
+          <div
+            ref={waveNavigationRef}
+            data-testid="wave-navigation-content"
+            data-wave-navigation-screen={waveNavigationScreen ?? undefined}
+          >
+            {activeContent}
+            {isNavVisible && !shouldUseContentBottomClearance && (
+              <div className="tw-h-[104px] tw-w-full" />
+            )}
+          </div>
         </div>
       </div>
       {shouldRenderBottomNav && (

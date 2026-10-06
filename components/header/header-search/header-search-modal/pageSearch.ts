@@ -13,6 +13,12 @@ export interface RankedPageMatch {
 }
 
 export const PAGE_SEARCH_ALIASES_BY_HREF: Record<string, string[]> = {
+  "/waves/create": [
+    "Create wave",
+    "New wave",
+    "Start a wave",
+    "Start a chat wave",
+  ],
   "/about/6529-apps": [
     "6529 Apps",
     "6529 Desktop",

@@ -102,9 +102,11 @@ function DiscoverySection({
 export function SidebarDiscovery({
   previewItems,
   isTouchPreview,
+  scoreDetailsDisabled = false,
 }: {
   readonly previewItems: readonly HighlyRatedWavePreviewItem[];
   readonly isTouchPreview: boolean;
+  readonly scoreDetailsDisabled?: boolean;
 }) {
   const locale = useBrowserLocale();
   const votes = useActiveWaveVotes();
@@ -149,6 +151,7 @@ export function SidebarDiscovery({
           <HighlyRatedWavesToggle
             compactTouchPadding
             isTouchPreview={isTouchPreview}
+            scoreDetailsDisabled={scoreDetailsDisabled}
             paddingClassName="tw-px-0"
             previewItems={[...previewItems]}
           />
@@ -170,7 +173,11 @@ export function SidebarDiscovery({
         <p className="tw-m-0 tw-mb-2 tw-text-[11px] tw-leading-4 tw-text-iron-400">
           {t(locale, "waves.discovery.activeVotesDescription")}
         </p>
-        <SidebarActiveVotes votes={votes} collapsed={activeCollapsed} />
+        <SidebarActiveVotes
+          votes={votes}
+          collapsed={activeCollapsed}
+          scoreDetailsDisabled={scoreDetailsDisabled}
+        />
       </DiscoverySection>
     </section>
   );

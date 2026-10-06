@@ -221,7 +221,10 @@ export const WaveleaderboardSort: React.FC<WaveleaderboardSortProps> = ({
   }
 
   return (
-    <div ref={featureUsageRef} className="tw-min-w-0 tw-flex-shrink-0">
+    <div
+      ref={featureUsageRef}
+      className="tw-min-w-0 tw-flex-shrink-0 [&_button]:tw-pl-2 [&_button]:tw-pr-6"
+    >
       <CommonDropdown<WaveDropsLeaderboardSort>
         items={items}
         activeItem={sort}
@@ -241,7 +244,7 @@ export const WaveleaderboardSort: React.FC<WaveleaderboardSortProps> = ({
         }}
         size="sm"
         variant="toolbar"
-        showFilterLabel={true}
+        showFilterLabel={false}
         buttonDataAttributes={waveFeatureAttributes("leaderboard_sort", "menu")}
       />
     </div>

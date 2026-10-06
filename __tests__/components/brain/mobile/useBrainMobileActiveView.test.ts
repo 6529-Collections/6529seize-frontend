@@ -407,3 +407,54 @@ describe("useBrainMobileActiveView", () => {
     expect(result.current.activeView).toBe(BrainView.DEFAULT);
   });
 });
+
+describe("mobile remembered wave tabs", () => {
+  beforeEach(() => {
+    localStorage.clear();
+    window.history.replaceState(null, "", "/");
+  });
+  it.each([false, true])(
+    "restores each wave independently on web/app (app=%s)",
+    (isApp) => {
+      localStorage.setItem(
+        "memes_wave_last_tab_by_id",
+        JSON.stringify({ "wave-1": "LEADERBOARD", "wave-2": "CHAT" })
+      );
+      const props = createProps({
+        isApp,
+        isCompleted: false,
+        pathname: "/waves/wave-1",
+        wave: { id: "wave-1" } as UseBrainMobileActiveViewProps["wave"],
+      });
+      const { result, rerender } = renderHook(useBrainMobileActiveView, {
+        initialProps: props,
+      });
+      expect(result.current.activeView).toBe(BrainView.LEADERBOARD);
+      rerender({
+        ...props,
+        waveId: "wave-2",
+        pathname: "/waves/wave-2",
+        wave: { id: "wave-2" } as UseBrainMobileActiveViewProps["wave"],
+      });
+      expect(result.current.activeView).toBe(BrainView.DEFAULT);
+      rerender(props);
+      expect(result.current.activeView).toBe(BrainView.LEADERBOARD);
+      rerender({ ...props, searchParams: createSearchParams("tab=chat") });
+      expect(result.current.activeView).toBe(BrainView.DEFAULT);
+    }
+  );
+  it("defers a remembered competition view to its destination navigation", () => {
+    localStorage.setItem(
+      "memes_wave_last_tab_by_id",
+      JSON.stringify({
+        "wave-1": { tab: "LEADERBOARD", competitionId: "primary" },
+      })
+    );
+    const { result } = renderHook(() =>
+      useBrainMobileActiveView(
+        createProps({ defaultSelectionEnabled: true, isCompleted: false })
+      )
+    );
+    expect(result.current.activeView).toBe(BrainView.DEFAULT);
+  });
+});

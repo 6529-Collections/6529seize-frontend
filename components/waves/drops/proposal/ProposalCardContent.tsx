@@ -10,6 +10,7 @@ import {
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useWaveProposalCardRecipe } from "@/hooks/waves/useWaveProposalCardRecipe";
 import { t } from "@/i18n/messages";
+import { PlayCircleIcon } from "@heroicons/react/24/outline";
 import { useMemo, type ReactNode } from "react";
 
 interface ProposalCardContentProps {
@@ -69,6 +70,10 @@ const getContextLabels = ({
   readonly locale: ReturnType<typeof useBrowserLocale>;
 }): readonly string[] => {
   const labels: string[] = [];
+
+  if (viewModel.hasVideo && !viewModel.showVideoPlaceholder) {
+    labels.push(t(locale, "waves.proposalCard.video"));
+  }
 
   if (viewModel.partCount > 1) {
     labels.push(
@@ -202,6 +207,17 @@ export default function ProposalCardContent({
             ) : null}
           </div>
         ) : null}
+        {viewModel.showVideoPlaceholder && (
+          <div
+            data-testid={`proposal-card-video-${drop.id}`}
+            className={`tw-flex tw-flex-shrink-0 tw-flex-col tw-items-center tw-justify-center tw-gap-1.5 tw-rounded-lg tw-bg-iron-900 tw-text-iron-300 tw-ring-1 tw-ring-inset tw-ring-primary-400/15 ${isCompact ? "tw-size-20" : "tw-size-24"}`}
+          >
+            <PlayCircleIcon aria-hidden="true" className="tw-size-8" />
+            <span className="tw-text-xs tw-font-medium">
+              {t(locale, "waves.proposalCard.video")}
+            </span>
+          </div>
+        )}
       </div>
     </div>
   );

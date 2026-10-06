@@ -50,6 +50,9 @@ identity statements` when the public-visibility notes are needed.
 7. Select a URL-capable statement row to open its destination. Use the
    independent copy icon to copy its value; eligible owners can also delete it.
 8. On non-primary wallet rows, use `Set primary` when available.
+9. To link another wallet you control, select `Add another wallet` beside
+   `Wallet Checker`. This opens the existing
+   [Register Consolidation form](../../delegation/feature-delegation-action-flows.md).
 
 ## Statement Types in Add Sheet or Dialog
 
@@ -87,7 +90,13 @@ URLs, and contact details are not rewritten by mobile keyboards.
 - On mobile, expanded wallet rows show labeled `Open on Etherscan` and `Open on
 OpenSea` actions. Desktop retains compact external-link actions.
 - `Primary` badge marks the active primary wallet.
-- `Wallet Checker` link is always shown.
+- `Wallet Checker` is shown when the profile has a primary or consolidated
+  wallet address.
+- `Add another wallet` is shown beside `Wallet Checker` only when the connected
+  wallet belongs to the viewed profile, no proxy profile is active, and a
+  primary or consolidated wallet address is available. It opens
+  `/delegation/register-consolidation` without preselecting a collection or
+  target address. This is separate from `Add`, which adds identity statements.
 - `Delegation Center` link is shown only when the connected wallet appears in
   at least one consolidation relationship for that profile.
 - Statement rows are grouped by section and sorted newest first in each section.
@@ -125,6 +134,9 @@ OpenSea` actions. Desktop retains compact external-link actions.
   and open the wallet on Etherscan or OpenSea without edit controls.
 - Eligible profile owners see `Add`, `Delete`, and `Set primary` where those
   actions apply.
+- Owners can start wallet consolidation from `Add another wallet`. The wallets
+  keep their NFTs; the ownership link is public, and existing profile data may
+  be combined.
 - Mobile users can complete the add flow inside a bottom sheet and return to the
   statement-group choices without closing it.
 - Keyboard users can dismiss the add or delete dialog with standard dialog

@@ -5,8 +5,12 @@ import Link from "next/link";
 
 export default function HeroHeader() {
   return (
-    <section className="tw-relative tw-px-4 tw-pt-10 md:tw-mx-auto md:tw-max-w-3xl md:tw-px-6 md:tw-pt-12 md:tw-text-center lg:tw-px-8">
+    <section
+      data-home-section="Introduction"
+      className="tw-relative tw-px-4 tw-pt-10 md:tw-mx-auto md:tw-max-w-3xl md:tw-px-6 md:tw-pt-12 md:tw-text-center lg:tw-px-8"
+    >
       <Link
+        data-home-action="Open network health"
         href="/network/health"
         aria-label="Open network health dashboard"
         title="Network health"

@@ -267,6 +267,319 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
     });
   });
 
+  for (const reducedMotion of [false, true]) {
+    test(`iOS Waves navigation ${reducedMotion ? "respects reduced motion" : "moves into and out of a wave"}`, async ({
+      page,
+    }, testInfo) => {
+      // This flow exercises the native iOS layout, not the web/Electron shells.
+      test.skip(
+        testInfo.project.name !== "capacitor-ios-sim",
+        "Wave content navigation uses the native app layout"
+      );
+      await page.emulateMedia({
+        reducedMotion: reducedMotion ? "reduce" : "no-preference",
+      });
+      await gotoReady(page, "/waves");
+      const surface = page.getByTestId("wave-navigation-content");
+      await expect(surface).toHaveAttribute(
+        "data-wave-navigation-screen",
+        "list"
+      );
+      const waveList = page.getByRole("region", {
+        name: "All recent waves list",
+        exact: true,
+      });
+      const waveLink = waveList.getByRole("link").first();
+      await expect(waveLink).toBeVisible();
+
+      const waitForMotion = (snapshots = false) =>
+        page.waitForFunction((useSnapshots) => {
+          const animations = useSnapshots
+            ? document
+                .getAnimations()
+                .filter(
+                  (animation) =>
+                    animation.effect instanceof KeyframeEffect &&
+                    animation.effect.pseudoElement?.includes("wave-navigation")
+                )
+            : (document
+                .querySelector("[data-wave-navigation-screen]")
+                ?.getAnimations() ?? []);
+          const animation = useSnapshots
+            ? animations.find(
+                (item) =>
+                  item.effect instanceof KeyframeEffect &&
+                  item.effect.pseudoElement ===
+                    "::view-transition-new(wave-navigation)"
+              )
+            : animations[0];
+          if (!animation || animation.playState !== "running") return null;
+          const effect = animation.effect;
+          if (!(effect instanceof KeyframeEffect)) return null;
+          const frames = effect.getKeyframes();
+          for (const item of animations) {
+            item.pause();
+            item.currentTime = 100;
+          }
+          return {
+            transform: frames[0]?.["transform"],
+            duration: effect.getTiming().duration,
+            outgoingVisible: animations.some(
+              (item) =>
+                item.effect instanceof KeyframeEffect &&
+                item.effect.pseudoElement ===
+                  "::view-transition-old(wave-navigation)"
+            ),
+          };
+        }, snapshots);
+      const finishMotion = () =>
+        page.evaluate(() => {
+          for (const animation of document.getAnimations()) {
+            if (
+              animation.effect instanceof KeyframeEffect &&
+              animation.effect.pseudoElement?.includes("wave-navigation")
+            )
+              animation.finish();
+          }
+          document
+            .querySelector("[data-wave-navigation-screen]")
+            ?.getAnimations()
+            .forEach((animation) => animation.finish());
+        });
+      const listHeight = await surface.evaluate(
+        (element) => element.getBoundingClientRect().height
+      );
+      const readHeaderGeometry = () =>
+        surface.evaluate((element) => {
+          const header = element.previousElementSibling;
+          if (!header)
+            throw new Error("Expected header outside the animated content");
+          const { x, y, width, height } = header.getBoundingClientRect();
+          return {
+            x,
+            y,
+            width,
+            height,
+            transform: getComputedStyle(header).transform,
+          };
+        });
+      const headerGeometry = await readHeaderGeometry();
+      const opening = reducedMotion ? null : waitForMotion(true);
+      // Read the clicked destination at activation: live activity can reorder rows.
+      const clickedDestination = page.evaluate(
+        () =>
+          new Promise<string | null>((resolve) => {
+            document.addEventListener(
+              "click",
+              (event) => {
+                const target = event.target;
+                resolve(
+                  target instanceof Element
+                    ? (target.closest("a")?.getAttribute("href") ?? null)
+                    : null
+                );
+              },
+              { once: true, capture: true }
+            );
+          })
+      );
+      await waveLink.click();
+      const path = await clickedDestination;
+      if (!path) throw new Error("Expected a clicked wave destination");
+      await expect(page).toHaveURL(new URL(path, page.url()).toString());
+      await expect(surface).toHaveAttribute(
+        "data-wave-navigation-screen",
+        "wave"
+      );
+      if (opening) {
+        expect(await (await opening).jsonValue()).toEqual({
+          transform: "scale(0.98)",
+          duration: 260,
+          outgoingVisible: true,
+        });
+        expect(
+          await page.evaluate(() =>
+            Number.parseFloat(
+              getComputedStyle(
+                document.documentElement,
+                "::view-transition-group(wave-navigation)"
+              ).height
+            )
+          )
+        ).toBeGreaterThanOrEqual(listHeight);
+        expect(await readHeaderGeometry()).toEqual(headerGeometry);
+        await page.screenshot({
+          path: testInfo.outputPath("wave-opening.png"),
+        });
+        await finishMotion();
+      } else {
+        expect(
+          await surface.evaluate((element) => element.getAnimations().length)
+        ).toBe(0);
+      }
+      await expect
+        .poll(() =>
+          surface.evaluate((element) => getComputedStyle(element).transform)
+        )
+        .toBe("none");
+      await expect(page.locator("html")).not.toHaveAttribute(
+        "data-wave-navigation-transition"
+      );
+      const returning = reducedMotion ? null : waitForMotion();
+      await page.goBack();
+      await expect(surface).toHaveAttribute(
+        "data-wave-navigation-screen",
+        "list"
+      );
+      if (returning) {
+        expect(await (await returning).jsonValue()).toEqual({
+          transform: "scale(1.02)",
+          duration: 240,
+          outgoingVisible: false,
+        });
+        await finishMotion();
+      } else {
+        expect(
+          await surface.evaluate((element) => element.getAnimations().length)
+        ).toBe(0);
+      }
+      await expect(
+        page.getByRole("button", { name: "Find a wave…", exact: true })
+      ).toBeVisible();
+      if (!reducedMotion) {
+        const reopened = waitForMotion(true);
+        await waveLink.click();
+        await reopened;
+        await finishMotion();
+        await expect(page.locator("html")).not.toHaveAttribute(
+          "data-wave-navigation-transition"
+        );
+        const closing = waitForMotion(true);
+        await page.getByRole("button", { name: "Back", exact: true }).click();
+        expect(await (await closing).jsonValue()).toEqual({
+          transform: "scale(1)",
+          duration: 260,
+          outgoingVisible: true,
+        });
+        expect(await readHeaderGeometry()).toEqual(headerGeometry);
+        await page.screenshot({
+          path: testInfo.outputPath("wave-returning.png"),
+        });
+        await finishMotion();
+        await expect(surface).toHaveAttribute(
+          "data-wave-navigation-screen",
+          "list"
+        );
+        await expect(page.locator("html")).not.toHaveAttribute(
+          "data-wave-navigation-transition"
+        );
+      }
+    });
+  }
+
+  test("iOS Waves search stays above the keyboard and restores its list height", async ({
+    page,
+  }, testInfo) => {
+    // Native keyboard overlay geometry differs from web and Electron layouts.
+    test.skip(
+      testInfo.project.name !== "capacitor-ios-sim",
+      "Keyboard geometry is covered on the iOS Capacitor simulation"
+    );
+    await gotoReady(page, "/waves");
+    const scrollport = page
+      .getByRole("region", { name: "Wave discovery", exact: true })
+      .locator(
+        'xpath=ancestor::div[@data-mobile-bottom-nav-scroll-target="true"][1]'
+      )
+      .filter({ visible: true });
+    await expect(scrollport).toBeVisible();
+    const searchToggle = page.getByRole("button", {
+      name: "Find a wave…",
+      exact: true,
+    });
+    await expect(searchToggle).toBeVisible();
+    await expect
+      .poll(() =>
+        scrollport.evaluate(
+          (element) => element.scrollHeight - element.clientHeight
+        )
+      )
+      .toBeGreaterThan(500);
+    await scrollport.evaluate(async (element) => {
+      await new Promise<void>((resolve) =>
+        requestAnimationFrame(() => resolve())
+      );
+      element.scrollTo({ top: 1000, behavior: "instant" });
+    });
+    await expect
+      .poll(() => scrollport.evaluate((element) => element.scrollTop))
+      .toBeGreaterThan(500);
+    await page.screenshot({ path: testInfo.outputPath("sticky-search.png") });
+    await expect
+      .poll(() =>
+        searchToggle.evaluate((element) => {
+          const controls = element.closest(".tw-sticky");
+          const scrollport = element.closest(
+            '[data-mobile-bottom-nav-scroll-target="true"]'
+          );
+          if (!controls || !scrollport) return Number.POSITIVE_INFINITY;
+          return Math.abs(
+            controls.getBoundingClientRect().top -
+              scrollport.getBoundingClientRect().top
+          );
+        })
+      )
+      .toBeLessThanOrEqual(1);
+    // Compare the same layout measurement before and after the keyboard cycle.
+    const restingHeight = await scrollport.evaluate(
+      (element) => element.clientHeight
+    );
+    await searchToggle.click();
+    const input = page.getByRole("searchbox", { name: "Find a wave…" });
+    await expect(input).toBeFocused();
+
+    // Match native overlay mode: the visual viewport shrinks while the layout
+    // viewport stays full height. The shared keyboard hook owns the CSS inset.
+    await page.evaluate(() => {
+      const viewport = globalThis.visualViewport;
+      if (!viewport) throw new Error("Expected a visual viewport");
+      Object.defineProperty(viewport, "height", {
+        configurable: true,
+        value: globalThis.innerHeight - 320,
+      });
+      viewport.dispatchEvent(new Event("resize"));
+    });
+    await expect
+      .poll(() => scrollport.evaluate((element) => element.clientHeight))
+      .toBeLessThan(restingHeight - 250);
+    await expect
+      .poll(() =>
+        input.evaluate((element) => {
+          const bounds = element.getBoundingClientRect();
+          const scrollport = element.closest(
+            '[data-mobile-bottom-nav-scroll-target="true"]'
+          );
+          if (!scrollport) return false;
+          const visible = scrollport.getBoundingClientRect();
+          return bounds.top >= visible.top && bounds.bottom <= visible.bottom;
+        })
+      )
+      .toBe(true);
+    await input.fill("xx");
+    await expect(input).toHaveValue("xx");
+    await page.getByRole("button", { name: "Close wave search" }).click();
+    await page.evaluate(() => {
+      const viewport = globalThis.visualViewport;
+      if (!viewport) throw new Error("Expected a visual viewport");
+      Reflect.deleteProperty(viewport, "height");
+      viewport.dispatchEvent(new Event("resize"));
+    });
+    await expect
+      .poll(() => scrollport.evaluate((element) => element.clientHeight))
+      .toBeCloseTo(restingHeight, 0);
+    await expect(page.getByText("All Waves", { exact: true })).toBeVisible();
+  });
+
   test("iOS native simulation hides non-US subscription downloads", async ({
     page,
   }, testInfo) => {
