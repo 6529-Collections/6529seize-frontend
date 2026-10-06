@@ -1,9 +1,17 @@
 import type { Locator, Page } from "@playwright/test";
 import { installSurfaceSimulation } from "../support/surfaceSimulation";
-import { RESPONSE_TIMEOUT_MS } from "../support/routeReadiness";
+import {
+  gotoDocumentWithTransientRetry,
+  RESPONSE_TIMEOUT_MS,
+} from "../support/routeReadiness";
 
 import { EN_US_MESSAGES } from "../../i18n/messages/en-US";
-import { expect, test } from "../testHelpers";
+import {
+  expect,
+  expectNoHorizontalOverflow,
+  test,
+  waitForRouteReady,
+} from "../testHelpers";
 import {
   expectProfileShell,
   expectProfileTabLinks,
@@ -51,11 +59,8 @@ async function getFirstWaveId(page: Page) {
     .getByRole("region", {
       name: /All recent waves list|Regular waves list/,
     })
-    .locator('a[href^="/waves/"]');
-  await waveLinks.first().waitFor({
-    state: "visible",
-    timeout: RESPONSE_TIMEOUT_MS,
-  });
+    .locator('a[href^="/waves/"]')
+    .filter({ visible: true });
   let href: string | null = null;
   await expect
     .poll(
@@ -74,11 +79,14 @@ async function getFirstWaveId(page: Page) {
         );
         return href !== null;
       },
-      { message: "Expected wave list to contain a wave detail link" }
+      {
+        timeout: RESPONSE_TIMEOUT_MS,
+        message: "Expected wave list to contain a rendered wave detail link",
+      }
     )
     .toBe(true);
   const pathname = href ? new URL(href, page.url()).pathname : "";
-  const match = pathname.match(/^\/waves\/([^/]+)$/);
+  const match = pathname.match(/^\/waves\/([0-9a-f-]{36})$/i);
 
   expect(
     match,
@@ -752,18 +760,22 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
   test("handles legacy wave query links without mutation", async ({ page }) => {
     const waveId = await getFirstWaveId(page);
 
-    await gotoReady(page, `/waves?wave=${waveId}&serialNo=1`);
+    await gotoDocumentWithTransientRetry(
+      page,
+      `/waves?wave=${waveId}&serialNo=1`
+    );
+    // Next can emit the redirect in the streamed document. The initial shell
+    // is visible before that navigation destroys its execution context.
+    await page.waitForURL((url) => url.pathname === `/waves/${waveId}`, {
+      waitUntil: "domcontentloaded",
+      timeout: 45_000,
+    });
+    await waitForRouteReady(page);
+    await expectNoHorizontalOverflow(page);
 
     const url = new URL(page.url());
-    if (url.pathname === "/waves") {
-      await expect(url.searchParams.get("wave")).toBe(waveId);
-    } else {
-      await expect(url.pathname).toBe(`/waves/${waveId}`);
-      const serialNo = url.searchParams.get("serialNo");
-      if (serialNo !== null) {
-        await expect(serialNo).toBe("1");
-      }
-    }
+    expect(url.searchParams.get("wave")).toBeNull();
+    expect(url.searchParams.get("serialNo")).toBe("1");
   });
 
   test("renders the stable public profile shell read-only", async ({
