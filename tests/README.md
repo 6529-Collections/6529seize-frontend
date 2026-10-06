@@ -69,6 +69,18 @@ and run a non-empty pack set sequentially. Deployed-environment entries are
 validated as explicitly read-only and must use the exact approved base URL.
 Their artifacts can be preserved per pack with `--artifact-root <path>`.
 
+PR selection for `test:e2e:native-competition-sandbox` is owned by
+`scripts/app-pr-ci-effective-plan.cjs`. Its desktop and mobile scenarios cover
+native competitions plus shared submission dialogs, leaderboard controls and
+drop navigation. Changes under `components/waves/leaderboard/` or its
+`__tests__/components/waves/leaderboard/` tests therefore select this pack, as
+do the desktop `components/waves/drops/WaveDropActionsOpen.tsx` and mobile
+`components/waves/drops/WaveDropMobileMenuOpen.tsx` actions and their focused
+tests.
+Keep those ownership rules covered in
+`__tests__/scripts/app-pr-ci-effective-plan.test.ts`; merely registering a
+pack here does not make a product-only PR select it.
+
 <!-- BEGIN GENERATED: e2e-pack-table -->
 
 Generated from `tests/packs.manifest.cjs` by
