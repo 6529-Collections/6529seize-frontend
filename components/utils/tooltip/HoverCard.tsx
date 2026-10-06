@@ -34,14 +34,16 @@ interface HoverCardProps {
   readonly offset?: number | undefined;
   readonly hoverTransitionDelay?: number | undefined;
   readonly openOnClick?: boolean | undefined;
+  readonly focusOnKeyboardActivation?: boolean | undefined;
   readonly closeOnContentClick?: boolean | undefined;
   readonly stopClickPropagation?: boolean | undefined;
   readonly triggerDisplay?: CSSProperties["display"] | undefined;
   readonly contentStyle?: CSSProperties | undefined;
 }
 /**
- * Show nonmodal details on hover or explicit activation. Keyboard activation
- * focuses the card; dismissal returns focus when it was inside the card.
+ * Show nonmodal details on hover or explicit activation. Disclosure triggers
+ * can opt into Enter/Space card focus without intercepting navigation triggers.
+ * Dismissal returns focus when it was inside the card.
  */
 export default function HoverCard({
   children,
@@ -54,6 +56,7 @@ export default function HoverCard({
   offset = 8,
   hoverTransitionDelay = 150,
   openOnClick = false,
+  focusOnKeyboardActivation = false,
   closeOnContentClick = false,
   stopClickPropagation = false,
   triggerDisplay = "contents",
@@ -220,14 +223,22 @@ export default function HoverCard({
 
       if (
         event.key === "ArrowDown" ||
-        (openOnClick && (event.key === "Enter" || event.key === " "))
+        (openOnClick &&
+          focusOnKeyboardActivation &&
+          (event.key === "Enter" || event.key === " "))
       ) {
         event.preventDefault();
         resolveTriggerNode();
         showImmediately({ focusCard: true });
       }
     },
-    [closeCardImmediately, openOnClick, resolveTriggerNode, showImmediately]
+    [
+      closeCardImmediately,
+      focusOnKeyboardActivation,
+      openOnClick,
+      resolveTriggerNode,
+      showImmediately,
+    ]
   );
 
   const handleTriggerClick = useCallback(

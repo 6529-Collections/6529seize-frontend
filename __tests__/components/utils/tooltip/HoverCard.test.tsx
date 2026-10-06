@@ -210,6 +210,7 @@ describe("HoverCard", () => {
           ariaLabel={hoverCardAriaLabel}
           delayShow={0}
           openOnClick
+          focusOnKeyboardActivation
         >
           <button type="button">Trigger</button>
         </HoverCard>
@@ -233,17 +234,24 @@ describe("HoverCard", () => {
     }
   );
 
-  it("does not intercept Enter when click opening is disabled", () => {
-    render(
-      <HoverCard content="Details" ariaLabel={hoverCardAriaLabel}>
-        <a href="/destination">Trigger</a>
-      </HoverCard>
-    );
-    expect(fireEvent.keyDown(screen.getByRole("link"), { key: "Enter" })).toBe(
-      true
-    );
-    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
-  });
+  it.each([true, false])(
+    "preserves link Enter activation with openOnClick=%s",
+    (openOnClick) => {
+      render(
+        <HoverCard
+          content="Details"
+          ariaLabel={hoverCardAriaLabel}
+          openOnClick={openOnClick}
+        >
+          <a href="/destination">Trigger</a>
+        </HoverCard>
+      );
+      expect(
+        fireEvent.keyDown(screen.getByRole("link"), { key: "Enter" })
+      ).toBe(true);
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    }
+  );
 
   it("can stop click propagation and close when the card is clicked", async () => {
     const handleParentClick = jest.fn();

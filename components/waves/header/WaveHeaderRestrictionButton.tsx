@@ -56,6 +56,7 @@ export default function WaveHeaderRestrictionButton({
       delayHide={0}
       offset={10}
       openOnClick={true}
+      focusOnKeyboardActivation
       triggerDisplay="inline-flex"
     >
       <button
