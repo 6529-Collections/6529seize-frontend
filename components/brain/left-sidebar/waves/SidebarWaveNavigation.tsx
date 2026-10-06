@@ -3,7 +3,7 @@ import useDeviceInfo from "@/hooks/useDeviceInfo";
 
 import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
-import { useCallback, useId, useRef, useState } from "react";
+import { useCallback, useId, useRef } from "react";
 import type { SidebarWaveNavigation } from "@/hooks/useSidebarWaveNavigation";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useHasHydrated } from "@/hooks/useHasHydrated";
@@ -29,9 +29,8 @@ export function SidebarWaveNavigationControls({
   const locale = useBrowserLocale();
   const inputId = useId();
   const hasHydrated = useHasHydrated();
-  const [searchOpen, setSearchOpen] = useState(false);
+  const { searchOpen, setSearchOpen } = navigation;
   const toggleRef = useRef<HTMLButtonElement>(null);
-  const showSearch = searchOpen || navigation.searching;
   const focusSearch = useCallback(
     (input: HTMLInputElement | null) => {
       if (input && hasHydrated) input.focus();
@@ -52,7 +51,7 @@ export function SidebarWaveNavigationControls({
   return (
     <>
       <div className="tailwind-scope tw-sticky tw-top-0 tw-z-10 tw-bg-[var(--wave-sidebar-background,#000)] tw-px-4 tw-py-2">
-        {showSearch ? (
+        {searchOpen ? (
           <>
             <label htmlFor={inputId} className="tw-sr-only">
               {findWaveLabel}

@@ -18,9 +18,11 @@ export function ActiveWaveVoteRow({
   onClick,
   compact = false,
   isActive = false,
+  scoreDetailsDisabled = false,
 }: {
   readonly compact?: boolean;
   readonly isActive?: boolean;
+  readonly scoreDetailsDisabled?: boolean;
   readonly vote: ApiActiveWaveVote;
   readonly onClick?: MouseEventHandler<HTMLAnchorElement>;
 }) {
@@ -68,6 +70,7 @@ export function ActiveWaveVoteRow({
         waveScore={wave.wave_score}
         variant="sidebar-inline"
         mode="summary"
+        scoreDetailsDisabled={scoreDetailsDisabled}
       />
     </div>
   );

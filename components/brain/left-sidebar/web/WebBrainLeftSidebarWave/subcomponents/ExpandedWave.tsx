@@ -23,6 +23,7 @@ import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore
 const SUBWAVE_PREFETCH_HOVER_INTENT_MS = 150;
 
 interface ExpandedWaveProps {
+  readonly scoreDetailsDisabled?: boolean | undefined;
   readonly formattedWaveName: string;
   readonly haveNewDrops: boolean;
   readonly href: string;
@@ -50,6 +51,7 @@ interface ExpandedWaveProps {
 }
 
 export const ExpandedWave = ({
+  scoreDetailsDisabled = false,
   formattedWaveName,
   haveNewDrops,
   href,
@@ -248,6 +250,7 @@ export const ExpandedWave = ({
                 )}
                 {hasSummaryScore && (
                   <WaveTrustSignals
+                    scoreDetailsDisabled={scoreDetailsDisabled}
                     waveRep={wave.waveRep}
                     waveScore={wave.waveScore}
                     variant="sidebar-inline"

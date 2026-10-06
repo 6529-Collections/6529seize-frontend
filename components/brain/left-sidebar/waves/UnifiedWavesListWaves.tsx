@@ -412,6 +412,7 @@ const UnifiedWavesListWaves = forwardRef<
 
       return (
         <BrainLeftSidebarWave
+          scoreDetailsDisabled={navigation.searchOpen}
           isAnnouncement={isAnnouncement}
           wave={row.wave}
           onHover={onHover}
@@ -492,6 +493,7 @@ const UnifiedWavesListWaves = forwardRef<
 
         {!isDirectMessage && !hideHeaders && (
           <SidebarDiscovery
+            scoreDetailsDisabled={navigation.searchOpen}
             previewItems={highlyRatedPreviewItems}
             isTouchPreview={hasTouchScreen}
           />
