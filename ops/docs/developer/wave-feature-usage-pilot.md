@@ -48,8 +48,11 @@ closes. Repeated deliberate actions remain repeated actions.
 | `leaderboard_sort`   | Actual sort tabs and dropdown entry/choices                                 | `rank`, `rating_prediction`, `realtime_vote`, `trend`, `created_at`, `price`, `menu`                                                                |
 
 The dropdown's visible trigger uses `value=menu`: a closed dropdown does not
-expose its individual choices. A deliberate choice records its bounded value
-with direct exposure. Width-measurement probes receive no tracking scope.
+expose its individual choices. Trusted trigger openings record `action=open`,
+and a direct trigger toggle that closes it records `action=collapse`. Closing
+through the portal or Escape does not choose a sort. A deliberate choice records
+its bounded value with direct exposure. Width-measurement probes receive no
+tracking scope.
 Custom curation IDs/labels, general Wave rows, announcements, search queries,
 REP, submissions, votes, Quick DMs, creation and content outcomes are excluded.
 Viewing the Submissions or My Votes **tab control** does not track submitting

@@ -281,8 +281,7 @@ export function observeWaveFeatures(
   let stopOcclusion: () => void = () => undefined;
   const onClick = (event: MouseEvent) =>
     safely(() => {
-      // Dropdown selection is recorded by its semantic selection callback.
-      if (placement === "leaderboard_dropdown") return;
+      // Root triggers are captured here; portal choices use their selection callback.
       if (
         !event.isTrusted ||
         event.button !== 0 ||
@@ -305,8 +304,14 @@ export function observeWaveFeatures(
         return;
       const descriptor = getWaveFeatureDescriptor(element, placement);
       if (!descriptor) return;
+      if (placement === "leaderboard_dropdown" && descriptor.value !== "menu")
+        return;
       let action: "choose" | "open" | "expand" | "collapse" = "choose";
       if (descriptor.feature === "sidebar_entry") action = "open";
+      if (descriptor.feature === "leaderboard_sort" && descriptor.value === "menu") {
+        action =
+          element.getAttribute("aria-expanded") === "true" ? "collapse" : "open";
+      }
       if (descriptor.feature === "sidebar_section") {
         action =
           element.getAttribute("aria-expanded") === "true"

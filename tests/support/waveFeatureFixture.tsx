@@ -200,7 +200,12 @@ function Fixture() {
           <WaveleaderboardSort
             sort={sort}
             onSortChange={setSort}
-            mode={window.innerWidth < 640 ? "dropdown" : "tabs"}
+            mode={
+              window.innerWidth < 640 ||
+              new URLSearchParams(location.search).has("dropdown")
+                ? "dropdown"
+                : "tabs"
+            }
             telemetryScope={wave.id}
           />
         </div>

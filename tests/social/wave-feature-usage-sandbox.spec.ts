@@ -368,10 +368,74 @@ test("scripted selections retain product behavior without counting deliberate us
   ).toHaveText("CHAT:CREATED_AT");
   await page.waitForTimeout(1200);
   expect(
-    (await events(page)).filter(
-      (event) => event.event === "Wave Feature Activated"
+    (await events(page))
+      .filter((event) => event.event === "Wave Feature Activated")
+      .map((event) => event.properties["value"])
+  ).toEqual(isMobile ? ["menu"] : []);
+});
+
+test("dropdown entry activation is independent from choosing a portal sort", async ({
+  page,
+  isMobile,
+}) => {
+  await page.goto("/waves/private-wave?dropdown=1");
+  await page
+    .getByRole("button", { name: "Enable synthetic telemetry" })
+    .click();
+  const trigger = page.getByRole("button", { name: "Sort: Current Vote" });
+  if (isMobile) await trigger.tap();
+  else await trigger.click();
+  await expect
+    .poll(async () =>
+      (await featureEvents(page, "Wave Feature Activated", "menu")).length
     )
-  ).toHaveLength(0);
+    .toBe(1);
+  const [opened] = await featureEvents(page, "Wave Feature Activated", "menu");
+  expect(opened?.properties).toMatchObject({
+    action: "open",
+    feature: "leaderboard_sort",
+    placement: "leaderboard_dropdown",
+  });
+  if (isMobile) await page.getByRole("button", { name: "Close panel" }).tap();
+  else await trigger.click();
+  const initialActions = isMobile ? ["open"] : ["open", "collapse"];
+  await expect(
+    page.getByRole("menuitem", { name: "Newest", exact: true })
+  ).toHaveCount(0);
+  await expect(
+    page.getByRole("status", { name: "Selected fixture state" })
+  ).toHaveText("CHAT:RANK");
+  expect(
+    (await events(page))
+      .filter((event) => event.event === "Wave Feature Activated")
+      .map((event) => event.properties["value"])
+  ).toEqual(initialActions.map(() => "menu"));
+  expect(
+    (await featureEvents(page, "Wave Feature Activated", "menu")).map(
+      (event) => event.properties["action"]
+    )
+  ).toEqual(initialActions);
+  if (isMobile) await trigger.tap();
+  else await trigger.click();
+  const choice = page.getByRole("menuitem", { name: "Newest", exact: true });
+  if (isMobile) await choice.tap();
+  else await choice.click();
+  await expect
+    .poll(async () =>
+      (await featureEvents(page, "Wave Feature Activated", "created_at")).length
+    )
+    .toBe(1);
+  expect(
+    (await featureEvents(page, "Wave Feature Activated", "menu")).map(
+      (event) => event.properties["action"]
+    )
+  ).toEqual([...initialActions, "open"]);
+  expect(
+    await featureEvents(page, "Wave Feature Seen", "created_at")
+  ).toHaveLength(1);
+  await expect(
+    page.getByRole("status", { name: "Selected fixture state" })
+  ).toHaveText("CHAT:CREATED_AT");
 });
 
 test("logout clears persisted identity without consent before anonymous delivery resumes", async ({
