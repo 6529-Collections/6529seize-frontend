@@ -19,6 +19,7 @@ import {
   WaveLeaderboardVotingModal,
 } from "../WaveLeaderboardVotingModal";
 import ContentModerationDropGate from "@/components/content-moderation/ContentModerationDropGate";
+import WaveLeaderboardError from "../WaveLeaderboardError";
 
 interface WaveLeaderboardGalleryProps {
   readonly wave: ApiWave;
@@ -70,6 +71,8 @@ export const WaveLeaderboardGallery: React.FC<WaveLeaderboardGalleryProps> = ({
     hasNextPage,
     hasPreviousPage,
     isFetching,
+    isError,
+    refetch,
     isFetchingNextPage,
     isFetchingPreviousPage,
     isFetchNextPageError,
@@ -114,6 +117,16 @@ export const WaveLeaderboardGallery: React.FC<WaveLeaderboardGalleryProps> = ({
   }
 
   if (dropsWithMedia.length === 0) {
+    if (isError) {
+      return (
+        <WaveLeaderboardError
+          hasEntries={drops.length > 0}
+          onRetry={() => {
+            void refetch();
+          }}
+        />
+      );
+    }
     return (
       <div className="tw-flex tw-h-32 tw-items-center tw-justify-center tw-text-sm tw-text-iron-500">
         No drops to show
@@ -123,6 +136,15 @@ export const WaveLeaderboardGallery: React.FC<WaveLeaderboardGalleryProps> = ({
 
   return (
     <>
+      {isError && !isFetchNextPageError && !isFetchPreviousPageError && (
+        <WaveLeaderboardError
+          hasEntries
+          retrying={isFetching}
+          onRetry={() => {
+            void refetch();
+          }}
+        />
+      )}
       <WaveLeaderboardVirtualizedRows
         items={dropsWithMedia}
         getItemId={getDropId}

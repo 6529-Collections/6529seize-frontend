@@ -20,6 +20,7 @@ import {
 } from "../WaveLeaderboardVotingModal";
 import { WaveLeaderboardGridItem } from "./WaveLeaderboardGridItem";
 import ContentModerationDropGate from "@/components/content-moderation/ContentModerationDropGate";
+import WaveLeaderboardError from "../WaveLeaderboardError";
 
 export type WaveLeaderboardGridMode = "compact" | "content_only";
 
@@ -67,6 +68,8 @@ export const WaveLeaderboardGrid: React.FC<WaveLeaderboardGridProps> = ({
     hasNextPage,
     hasPreviousPage,
     isFetching,
+    isError,
+    refetch,
     isFetchingNextPage,
     isFetchingPreviousPage,
     isFetchNextPageError,
@@ -118,6 +121,15 @@ export const WaveLeaderboardGrid: React.FC<WaveLeaderboardGridProps> = ({
   }
 
   if (drops.length === 0) {
+    if (isError) {
+      return (
+        <WaveLeaderboardError
+          onRetry={() => {
+            void refetch();
+          }}
+        />
+      );
+    }
     return (
       <div className="tw-flex tw-h-32 tw-items-center tw-justify-center tw-text-sm tw-text-iron-500">
         No drops to show
@@ -127,6 +139,15 @@ export const WaveLeaderboardGrid: React.FC<WaveLeaderboardGridProps> = ({
 
   return (
     <>
+      {isError && !isFetchNextPageError && !isFetchPreviousPageError && (
+        <WaveLeaderboardError
+          hasEntries
+          retrying={isFetching}
+          onRetry={() => {
+            void refetch();
+          }}
+        />
+      )}
       <WaveLeaderboardVirtualizedRows
         items={drops}
         getItemId={getDropId}

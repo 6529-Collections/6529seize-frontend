@@ -24,12 +24,14 @@ const mockSnapshot = {
   signer_address: "old-signer",
   is_safe_signature: true,
 };
+const mockSaveReceipt = jest.fn();
 jest.mock("next/navigation", () => ({
   useRouter: () => ({ push: jest.fn() }),
 }));
 jest.mock("@tanstack/react-query", () => ({
   useQuery: () => ({ isError: false }),
   useQueryClient: () => ({
+    setQueryData: mockSaveReceipt,
     invalidateQueries: jest.fn().mockResolvedValue(undefined),
   }),
 }));
@@ -150,6 +152,10 @@ it("preserves wave and group mentions in the competition submission command and 
   });
   expect(body.drop).not.toHaveProperty("signer_address");
   expect(body.drop).not.toHaveProperty("is_safe_signature");
+  expect(mockSaveReceipt).toHaveBeenCalledWith(
+    expect.arrayContaining(["submission-receipt", "entry"]),
+    { id: "entry" }
+  );
 });
 
 afterEach(() => {

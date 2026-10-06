@@ -41,6 +41,7 @@ import { resolveWaveLeaderboardHeaderLayout } from "./waveLeaderboardHeaderLayou
 interface WaveLeaderboardHeaderProps {
   readonly wave: ApiWave;
   readonly onCreateDrop?: (() => void) | undefined;
+  readonly additionalActions?: React.ReactNode | undefined;
   readonly viewMode: LeaderboardViewMode;
   readonly onViewModeChange: (mode: LeaderboardViewMode) => void;
   readonly sort: WaveDropsLeaderboardSort;
@@ -281,6 +282,7 @@ const WaveLeaderboardPriceFilters: React.FC<
 export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
   wave,
   onCreateDrop,
+  additionalActions,
   viewMode = "list",
   onViewModeChange,
   sort,
@@ -309,6 +311,10 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
     ]
   );
   const isLoggedIn = Boolean(connectedProfile?.handle);
+  const showAdditionalActions =
+    Boolean(additionalActions) &&
+    Boolean(connectedProfile?.id) &&
+    !activeProfileProxy;
   const { canCreateDrop } = getWaveDropEligibility({
     isLoggedIn,
     isProxy: Boolean(activeProfileProxy),
@@ -353,7 +359,7 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
     submissionExperience,
     waveId: wave.id,
   });
-  const remeasureKey = `${activeSortLabel}|actions:${actionsRemeasureVariant}|create:${createLabel}`;
+  const remeasureKey = `${activeSortLabel}|actions:${actionsRemeasureVariant}|create:${createLabel}|personal:${showAdditionalActions}`;
 
   const {
     headerRowRef,
@@ -361,11 +367,13 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
     viewModeTabsRef,
     sortTabsProbeRef,
     sortDropdownProbeRef,
+    sortControlRef,
+    submissionActionsRowRef,
     actionsFullProbeRef,
     actionsIconProbeRef,
     measurements,
   } = useLeaderboardHeaderControlMeasurements({
-    measureAgainstHeaderRow: showPriceActions,
+    measureAgainstHeaderRow: showPriceActions || showAdditionalActions,
     remeasureKey,
   });
 
@@ -384,6 +392,18 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
     [measurements, showPriceActions]
   );
   const sortMode = isLargeScreen ? "tabs" : "dropdown";
+  const minimumToolbarWidth =
+    measurements.viewModesWidth +
+    measurements.sortControlWidth +
+    measurements.submissionActionsWidth +
+    16; // Two tw-gap-2 gaps.
+  const balanceSubmissionRows =
+    showAdditionalActions &&
+    !showPriceActions &&
+    measurements.rowWidth > 0 &&
+    measurements.sortControlWidth > 0 &&
+    measurements.submissionActionsWidth > 0 &&
+    minimumToolbarWidth > measurements.rowWidth + 1;
 
   const onTogglePriceFilters = () => {
     if (hasActivePriceFilters) {
@@ -403,18 +423,28 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
   });
   const controlsRowBasisClass =
     layout.wrapActions && !shouldRenderActionsInPriceRow ? "tw-basis-full" : "";
+  let controlsRowFlexClass = "tw-flex-1";
+  if (showAdditionalActions) {
+    controlsRowFlexClass =
+      controlsRowBasisClass !== "" || balanceSubmissionRows
+        ? "tw-flex-[1_1_100%]"
+        : "tw-flex-[1_1_auto]";
+  }
   const showHeaderActions = showPriceActions && !shouldRenderActionsInPriceRow;
   const priceActionControls = (
-    <PriceActions
-      createLabel={createLabel}
-      isCompactActions={isCompactActions}
-      isPriceFiltersOpen={isPriceFiltersOpen}
-      hasActivePriceFilters={hasActivePriceFilters}
-      showCreateAction={showCreateAction}
-      waveId={wave.id}
-      onCreateDrop={onCreateDrop}
-      onTogglePriceFilters={onTogglePriceFilters}
-    />
+    <>
+      {showAdditionalActions && additionalActions}
+      <PriceActions
+        createLabel={createLabel}
+        isCompactActions={isCompactActions}
+        isPriceFiltersOpen={isPriceFiltersOpen}
+        hasActivePriceFilters={hasActivePriceFilters}
+        showCreateAction={showCreateAction}
+        waveId={wave.id}
+        onCreateDrop={onCreateDrop}
+        onTogglePriceFilters={onTogglePriceFilters}
+      />
+    </>
   );
 
   return (
@@ -422,13 +452,16 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
       <div
         ref={headerRowRef}
         data-testid="leaderboard-header-row"
-        className={`tw-flex tw-items-start tw-gap-2 ${headerRowFlexClass}`}
+        data-submission-layout={balanceSubmissionRows ? "two-rows" : "inline"}
+        className={`tw-flex tw-items-start tw-gap-2 ${
+          showAdditionalActions ? "tw-flex-wrap" : headerRowFlexClass
+        }`}
       >
         <div
           ref={controlsRowRef}
           data-testid="leaderboard-header-controls-row"
-          className={`tw-flex tw-min-w-0 tw-flex-1 tw-flex-nowrap tw-items-start tw-gap-2 ${
-            controlsRowBasisClass
+          className={`tw-flex tw-min-w-0 ${controlsRowFlexClass} tw-flex-nowrap tw-items-start tw-gap-2 ${controlsRowBasisClass} ${
+            balanceSubmissionRows ? "tw-justify-between" : ""
           } ${
             layout.enableControlsScroll
               ? "tw-no-scrollbar tw-overflow-x-auto tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/60"
@@ -442,7 +475,7 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
             waveId={wave.id}
             onViewModeChange={onViewModeChange}
           />
-          <div className="tw-flex-shrink-0">
+          <div ref={sortControlRef} className="tw-flex-shrink-0">
             <WaveleaderboardSort
               sort={sort}
               onSortChange={onSortChange}
@@ -457,22 +490,26 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
             data-action-mode={layout.actionMode}
             data-wrap={layout.wrapActions ? "yes" : "no"}
             className={`tw-ml-auto tw-flex tw-flex-shrink-0 tw-items-center tw-gap-2 ${
-              layout.wrapActions ? "tw-basis-auto" : ""
-            }`}
+              showAdditionalActions ? "tw-max-w-full tw-flex-wrap" : ""
+            } ${layout.wrapActions ? "tw-basis-auto" : ""}`}
           >
             {priceActionControls}
           </div>
         )}
-        {showDefaultCreateRow && (
+        {(showDefaultCreateRow ||
+          (!showPriceActions && showAdditionalActions)) && (
           <div
-            className={`tw-flex tw-flex-col tw-items-end ${isMemesWave ? "lg:tw-hidden" : ""}`}
+            data-testid="leaderboard-submission-actions"
+            ref={submissionActionsRowRef}
+            className={`tw-flex tw-max-w-full tw-flex-wrap tw-items-center tw-gap-2 ${
+              balanceSubmissionRows
+                ? "tw-w-full tw-justify-between"
+                : "tw-ml-auto"
+            } ${isMemesWave ? "lg:tw-hidden" : ""}`}
           >
+            {showAdditionalActions && additionalActions}
             {canCreateDrop && onCreateDrop && (
-              <Button
-                onClick={onCreateDrop}
-                variant="primary"
-                size="sm"
-              >
+              <Button onClick={onCreateDrop} variant="primary" size="sm">
                 <PlusIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
                 <span>{createLabel}</span>
               </Button>
@@ -508,7 +545,11 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
                   shouldRenderActionsInPriceRow ? (
                     <div
                       data-testid="leaderboard-price-actions-row"
-                      className="tw-ml-auto tw-flex tw-flex-shrink-0 tw-items-center tw-gap-2"
+                      className={`tw-ml-auto tw-flex tw-flex-shrink-0 tw-items-center tw-gap-2 ${
+                        showAdditionalActions
+                          ? "tw-max-w-full tw-flex-wrap"
+                          : ""
+                      }`}
                     >
                       {priceActionControls}
                     </div>

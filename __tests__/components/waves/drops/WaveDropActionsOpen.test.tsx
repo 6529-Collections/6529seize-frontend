@@ -48,6 +48,7 @@ test("returns null for chat drops", () => {
 test("pushes route on click", async () => {
   const user = userEvent.setup();
   const push = jest.fn();
+  const onOpen = jest.fn();
   const drop = { id: "2", drop_type: ApiDropType.Winner } as any;
   (useRouter as jest.Mock).mockReturnValue({
     push,
@@ -56,7 +57,7 @@ test("pushes route on click", async () => {
   (useSearchParams as jest.Mock).mockReturnValue({
     get: jest.fn(),
   });
-  render(<WaveDropActionsOpen drop={drop} />);
+  render(<WaveDropActionsOpen drop={drop} onOpen={onOpen} />);
   const button = screen.getByRole("button", { name: "Open drop" });
   expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
   await user.hover(button);
@@ -68,6 +69,7 @@ test("pushes route on click", async () => {
   expect(tooltip.parentElement).toBe(document.body);
   await user.click(button);
   expect(push).toHaveBeenCalled();
+  expect(onOpen).toHaveBeenCalledTimes(1);
 });
 
 test("does not bubble the open action to a parent card", async () => {

@@ -12,10 +12,12 @@ export default function CompetitionEntryCard({
   entryId,
   dropId,
   disabled = false,
+  onOpenDrop,
 }: {
   readonly entryId: string;
   readonly dropId: string;
   readonly disabled?: boolean;
+  readonly onOpenDrop?: (() => void) | undefined;
 }) {
   const { competition } = useCompetition();
   const [query] = useCompetitionEntryDrops([{ entryId, dropId }]);
@@ -28,7 +30,11 @@ export default function CompetitionEntryCard({
     <div id={`entry-${entryId}`} data-competition-entry={entryId}>
       <DefaultWaveLeaderboardDrop
         drop={query.data.drop}
-        onDropClick={onDropClick}
+        onOpenDrop={onOpenDrop}
+        onDropClick={(drop) => {
+          onDropClick(drop);
+          onOpenDrop?.();
+        }}
         winningThreshold={
           competition.type === ApiCompetitionType.Approve
             ? competition.winners.winning_min_threshold

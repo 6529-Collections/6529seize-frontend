@@ -293,9 +293,8 @@ export const MeasurementProbes: React.FC<MeasurementProbesProps> = ({
 
     <div
       ref={sortDropdownProbeRef}
-      className="tailwind-scope tw-inline-flex tw-whitespace-nowrap tw-rounded-lg tw-py-2.5 tw-pl-3.5 tw-pr-8 tw-text-xs tw-font-semibold tw-ring-1 tw-ring-inset tw-ring-iron-700"
+      className="tailwind-scope tw-inline-flex tw-whitespace-nowrap tw-rounded-lg tw-py-2.5 tw-pl-2 tw-pr-6 tw-text-xs tw-font-semibold tw-ring-1 tw-ring-inset tw-ring-iron-700"
     >
-      <span className="tw-font-semibold tw-text-iron-500">Sort: </span>
       {activeSortLabel}
     </div>
 

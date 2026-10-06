@@ -86,6 +86,7 @@ const WaveDropActionsOpen: React.FC<WaveDropActionsOpenProps> = ({
         onClick={(event) => {
           event.stopPropagation();
           onDropClick(drop);
+          onOpen?.();
         }}
         aria-label="Open drop"
       >

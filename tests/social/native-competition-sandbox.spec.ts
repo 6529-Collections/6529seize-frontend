@@ -27,6 +27,77 @@ const waveTabStrip = (page: Page) =>
     has: page.getByRole("tab", { name: "Chat", exact: true }),
   });
 
+async function expectSubmissionActionsGrouped(page: Page, singleRow = false) {
+  const toolbar = page.getByTestId("leaderboard-header-row");
+  const mine = toolbar.getByRole("button", {
+    name: "My submissions",
+    exact: true,
+  });
+  const create = toolbar.getByRole("button", { name: "Drop", exact: true });
+  await expect(mine).toBeInViewport({ ratio: 1 });
+  await expect(create).toBeInViewport({ ratio: 1 });
+  await expect
+    .poll(async () => {
+      const mineBox = await mine.boundingBox();
+      const createBox = await create.boundingBox();
+      return mineBox && createBox
+        ? Math.abs(mineBox.y - createBox.y)
+        : Number.POSITIVE_INFINITY;
+    })
+    .toBeLessThanOrEqual(1);
+  if (singleRow) {
+    const controls = toolbar.getByTestId("leaderboard-header-controls-row");
+    await expect
+      .poll(async () => {
+        const controlsBox = await controls.boundingBox();
+        const mineBox = await mine.boundingBox();
+        return controlsBox && mineBox
+          ? Math.abs(controlsBox.y - mineBox.y)
+          : Number.POSITIVE_INFINITY;
+      })
+      .toBeLessThanOrEqual(1);
+  }
+}
+
+async function expectBalancedSubmissionRows(page: Page) {
+  const toolbar = page.getByTestId("leaderboard-header-row");
+  await expect(toolbar).toHaveAttribute("data-submission-layout", "two-rows");
+  await expectSubmissionActionsGrouped(page);
+  const controls = toolbar.getByTestId("leaderboard-header-controls-row");
+  await expect
+    .poll(async () =>
+      controls.evaluate((element) => element.scrollWidth - element.clientWidth)
+    )
+    .toBeLessThanOrEqual(1);
+  const mine = toolbar.getByRole("button", {
+    name: "My submissions",
+    exact: true,
+  });
+  const create = toolbar.getByRole("button", { name: "Drop", exact: true });
+  const sort = toolbar.getByRole("button", {
+    name: "Sort: Current Vote",
+    exact: true,
+  });
+  await expect(sort).toBeInViewport({ ratio: 1 });
+  await expect(sort).not.toContainText("Sort:");
+  await expect
+    .poll(async () => {
+      const rowBox = await toolbar.boundingBox();
+      const mineBox = await mine.boundingBox();
+      const createBox = await create.boundingBox();
+      const sortBox = await sort.boundingBox();
+      if (!rowBox || !mineBox || !createBox || !sortBox) {
+        return Number.POSITIVE_INFINITY;
+      }
+      return Math.max(
+        Math.abs(mineBox.x - rowBox.x),
+        Math.abs(createBox.x + createBox.width - rowBox.x - rowBox.width),
+        Math.abs(sortBox.x + sortBox.width - createBox.x - createBox.width)
+      );
+    })
+    .toBeLessThanOrEqual(1);
+}
+
 async function selectLegacyNewestSort(page: Page, mobile: boolean) {
   if (mobile) {
     await page
@@ -768,6 +839,19 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
   }) => {
     const sandbox = await installCompetitionApi(page, true);
     await page.goto(`${ROOT}/alpha`);
+    await expectSubmissionActionsGrouped(page);
+    await expectNoHorizontalOverflow(page);
+    const initialViewport = page.viewportSize();
+    await page.setViewportSize({ width: 653, height: 897 });
+    await expectSubmissionActionsGrouped(page, true);
+    await expectNoHorizontalOverflow(page);
+    await page.setViewportSize({ width: 442, height: 897 });
+    await expectBalancedSubmissionRows(page);
+    await expectNoHorizontalOverflow(page);
+    await page.setViewportSize({ width: 320, height: 780 });
+    await expectBalancedSubmissionRows(page);
+    await expectNoHorizontalOverflow(page);
+    if (initialViewport) await page.setViewportSize(initialViewport);
     await page.getByRole("button", { name: "Drop", exact: true }).click();
     const composer = page.getByRole("region", {
       name: "Submit an entry",
@@ -796,6 +880,35 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       .getByRole("button", { name: "Submit an entry", exact: true })
       .click();
     await expect(page).toHaveURL(/\?entry=entry-alpha$/, { timeout: 30000 });
+    await expect(
+      page.getByRole("status").filter({ hasText: "Your entry is in" })
+    ).toBeVisible();
+    await page
+      .getByRole("button", { name: "My submissions", exact: true })
+      .click();
+    const ownEntries = page.getByRole("dialog", {
+      name: "My submissions",
+      exact: true,
+    });
+    await expect(
+      ownEntries.getByText("Recorded alpha entry", { exact: true })
+    ).toBeVisible();
+    await expect(
+      ownEntries.getByText("Recorded beta entry", { exact: true })
+    ).toHaveCount(0);
+    await ownEntries
+      .getByRole("button", { name: "Close my submissions" })
+      .click();
+    await expect(page).toHaveURL(/\?entry=entry-alpha$/);
+    await page
+      .getByRole("button", { name: "My submissions", exact: true })
+      .click();
+    await ownEntries.getByText("Recorded alpha entry", { exact: true }).click();
+    await expect(ownEntries).toHaveCount(0);
+    await expect(page).toHaveURL(
+      new RegExp(`entry=entry-alpha&drop=${entryDropId("alpha")}`)
+    );
+    await expectNoHorizontalOverflow(page);
     expect(sandbox.requests).toHaveLength(1);
     expect(sandbox.requests[0]?.path).toContain("/alpha/entries");
     expect(sandbox.requests[0]?.body).toMatchObject({
@@ -814,6 +927,39 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         parts: [{ content: "Entry body in shared chat" }],
       },
     });
+  });
+
+  test("recovers a failed first legacy leaderboard load without changing its view", async ({
+    page,
+  }) => {
+    const sandbox = await installCompetitionApi(page);
+    sandbox.onlyCompetition("alpha");
+    await sandbox.legacyPrimary("alpha");
+    let failLeaderboard = true;
+    await page.route(`**/v2/waves/${WAVE}/leaderboard*`, async (route) => {
+      if (!failLeaderboard) return route.fallback();
+      return route.fulfill({
+        status: 503,
+        json: { message: "Temporary leaderboard failure" },
+      });
+    });
+    await page.goto(`${ROOT}/alpha`);
+    const error = page
+      .getByRole("alert")
+      .filter({ hasText: "Couldn’t load submissions." });
+    await expect(error).toBeVisible({ timeout: 30000 });
+    await expect(
+      page.getByRole("button", { name: "My submissions", exact: true })
+    ).toBeVisible();
+    await expectSubmissionActionsGrouped(page);
+    failLeaderboard = false;
+    await error.getByRole("button", { name: "Retry", exact: true }).click();
+    await expect(error).toHaveCount(0);
+    await expect(
+      page.getByRole("tab", { name: "List view", exact: true })
+    ).toHaveAttribute("aria-selected", "true");
+    await expectNoHorizontalOverflow(page);
+    expect(sandbox.requests).toHaveLength(0);
   });
 
   test("creates a chat-only hub with no implicit competition", async ({

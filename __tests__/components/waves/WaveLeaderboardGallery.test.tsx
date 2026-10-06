@@ -78,6 +78,8 @@ function renderGallery(overrides: any) {
     fetchNextPage: overrides.fetchNextPage || jest.fn(),
     hasNextPage: overrides.hasNextPage || false,
     isFetching: overrides.isFetching || false,
+    isError: overrides.isError ?? false,
+    refetch: overrides.refetch ?? jest.fn(),
     isFetchingNextPage: overrides.isFetchingNextPage || false,
     isFetchingPreviousPage: false,
     isFetchNextPageError: false,
@@ -113,6 +115,33 @@ it("shows empty message when no drops", () => {
   renderGallery({});
   expect(screen.getByText("No drops to show")).toBeInTheDocument();
 });
+
+it.each([false, true])(
+  "offers retry without hiding loaded gallery artwork (%s)",
+  (hasEntries) => {
+    const refetch = jest.fn();
+    renderGallery({
+      isError: true,
+      refetch,
+      drops: hasEntries
+        ? [
+            {
+              id: "saved-row",
+              parts: [{ media: [{ url: "art", mime_type: "image/png" }] }],
+            },
+          ]
+        : [],
+    });
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      hasEntries
+        ? "Showing the entries already loaded."
+        : "Couldn’t load submissions."
+    );
+    expect(screen.queryAllByTestId("item")).toHaveLength(hasEntries ? 1 : 0);
+    fireEvent.click(screen.getByRole("button", { name: "Retry" }));
+    expect(refetch).toHaveBeenCalledTimes(1);
+  }
+);
 
 it("renders drops with load more button", () => {
   const fetchNextPage = jest.fn();
