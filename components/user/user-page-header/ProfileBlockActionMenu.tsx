@@ -10,13 +10,13 @@ import { faBell, faBellSlash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   ArrowPathIcon,
-  EllipsisHorizontalIcon,
+  EllipsisVerticalIcon,
   MinusCircleIcon,
   NoSymbolIcon,
 } from "@heroicons/react/24/outline";
 
 const TRIGGER_CLASS_NAME =
-  "tw-flex tw-size-9 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-iron-800 tw-p-0 tw-text-iron-300 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 disabled:tw-cursor-default disabled:tw-opacity-60 desktop-hover:hover:tw-bg-iron-700 desktop-hover:hover:tw-text-iron-100 md:tw-size-10";
+  "tw-flex tw-size-9 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-iron-800 tw-p-0 tw-text-iron-300 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 disabled:tw-cursor-default disabled:tw-opacity-60 desktop-hover:hover:tw-bg-iron-700 desktop-hover:hover:tw-text-iron-100";
 
 export default function ProfileBlockActionMenu({
   handle,
@@ -92,7 +92,7 @@ export default function ProfileBlockActionMenu({
       : []),
   ];
   const trigger = (
-    <EllipsisHorizontalIcon aria-hidden="true" className="tw-size-5" />
+    <EllipsisVerticalIcon aria-hidden="true" className="tw-size-5" />
   );
 
   if (isMobileLayoutViewport) {
