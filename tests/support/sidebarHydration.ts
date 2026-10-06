@@ -13,7 +13,10 @@ type BundleTiming = {
   error?: string;
 };
 
-/** Download real bundles while withholding their execution during SSR checks. */
+/**
+ * Download real bundles while withholding their execution during SSR checks.
+ * Call release() in a finally block so a failed assertion cannot strand delivery.
+ */
 export async function gateSidebarHydration(page: Page) {
   const started = Date.now();
   const bundles = new Map<string, BundleTiming>();
@@ -52,14 +55,12 @@ export async function gateSidebarHydration(page: Page) {
       await expect
         .poll(
           async () => {
-            const sources = await page
-              .locator("script[src]")
-              .evaluateAll((scripts) =>
-                scripts
-                  .filter((script) => !(script as HTMLScriptElement).noModule)
-                  .map((script) => (script as HTMLScriptElement).src)
-                  .filter((src) => /\/_next\/.*\.js(?:\?.*)?$/.test(src))
-              );
+            const sources = await page.evaluate(() =>
+              [...document.scripts]
+                .filter((script) => !script.noModule)
+                .map((script) => script.src)
+                .filter((src) => /\/_next\/.*\.js(?:\?.*)?$/.test(src))
+            );
             missingBundles = sources
               .filter((src) => !bundles.has(src))
               .map((src) => new URL(src).pathname);
@@ -87,7 +88,7 @@ export async function gateSidebarHydration(page: Page) {
     },
     async waitForReady() {
       await expect(
-        page.locator("[data-sidebar-ready]").first()
+        page.getByRole("main").first().locator("..")
       ).toHaveAttribute("data-sidebar-ready", "true", { timeout: 15_000 });
       readyMs = Date.now() - started;
     },

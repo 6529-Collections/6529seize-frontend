@@ -33,6 +33,7 @@ it("delivers Themes and Variations from the observed Sotheby's publisher bucket"
 });
 
 it.each([
+  "https://media-proxy.artblocks.io/1/0x99a9b7c1116f9ceeb1652de04d5969cce509b069/100000031.png",
   "https://media-proxy.artblocks.io/1/0xa7d8d9ef8d8ce8992df33d8b8cf4aebabd5bd270/100000032.png",
   "https://media-proxy.artblocks.io/1/0xa7d8d9ef8d8ce8992df33d8b8cf4aebabd5bd270/100000031.png?redirect=https://example.com",
   "https://media-proxy.artblocks.io/1/0xa7d8d9ef8d8ce8992df33d8b8cf4aebabd5bd270/100000031.png#fragment",

@@ -41,6 +41,10 @@ occurrences, rather than an index in a changing list of image nodes. Every
 observed image must remain present and decode. A replaced failure panel reports
 the original image identity. Required holdings and artwork counts remain intact.
 The Casey artist and gift checks additionally require all seven images to decode.
+Responsive-candidate assertions apply to the five retained Magnum photographs.
+Their existing content-addressed WebP variants are unchanged. The delivery
+route relays those existing derivatives; it does not produce new variants.
+The Vera Collection/object card also retains its published WebP variants.
 
 Sidebar restoration downloads the actual Next.js bundles while withholding
 delivery to the browser. The pre-hydration saved-width and page-padding assertions
@@ -54,6 +58,35 @@ Museum-only Chromium diagnostics capture bounded original status/header and
 transport evidence, including responses hidden by ORB. URLs omit credentials,
 query values, and fragments; only selected headers are retained. Assertions do
 not suppress ORB or failed media responses.
+
+## Publisher availability monitoring
+
+The existing Production E2E daily canary runs at 05:30 UTC. Its
+`museum-institutional-practice` cron pack includes the institutional-practice
+and network-IA specs at desktop and mobile. These checks require the seven
+Casey images and Collection, Acquisitions, and Research media to remain present
+and decode, including the eighth mapped still in Acquisitions. The
+post-deployment pack repeats the same contracts. Failure notifications use the
+existing CI wave workflow; no new
+schedule or notification channel is introduced. A dead publisher URL must fail
+these checks rather than be accepted as a fallback panel. Availability between
+scheduled checks remains an external publisher dependency.
+
+On a failure, inspect the retained original browser status/MIME/transport
+evidence and the canonical redirect chain. Update an exact destination only
+after verifying the publisher's actual image, then review and deploy normally.
+Do not infer a storage layout for new contracts or retain replacement bytes.
+The full contract-and-token source URL is the lookup key; a different contract
+using an existing token number receives no override.
+
+The repeated Source record headings describe each section's purpose, while the
+separately named native disclosure summaries retain record identification and
+keyboard access. Heading-only navigation loses some specificity, especially in
+the System acquisition's longer record list. Independent visual review records
+this as a non-blocking improvement: use approved human descriptions in a future
+editorial pass rather than numbering the records. DOM IDs do not disambiguate
+spoken heading names. This release makes no claim of a complete assistive
+technology audit.
 
 ## Release
 

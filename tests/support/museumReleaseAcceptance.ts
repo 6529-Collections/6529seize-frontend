@@ -190,7 +190,7 @@ export async function expectCollectionAcceptance(page: Page) {
     '[data-testid="museum-landing-media-card"]'
   );
   await expect(holdingCards).toHaveCount(13);
-  await expect(holdingCards.locator("img")).toHaveCount(13);
+  await expect(holdingCards.getByRole("img")).toHaveCount(13);
   const veraCard = holdingCards.filter({
     has: page.getByRole("link", {
       name: "Themes and Variations #210",
@@ -214,7 +214,12 @@ export async function expectCollectionAcceptance(page: Page) {
   );
 
   await expect(
-    holdings.locator('img[src^="https://media-proxy.artblocks.io/"]')
+    page
+      .getByRole("main")
+      .last()
+      .locator(
+        'section[aria-labelledby="collection-holdings-title"] img[src^="https://media-proxy.artblocks.io/"]'
+      )
   ).toHaveCount(0);
 
   const magnumTitles = [
@@ -405,7 +410,10 @@ export async function expectResearchAcceptance(page: Page) {
   // Wait for the expected sections/cards before taking the media inventory.
   await expectNoUnresolvedMuseumMedia(page, "main", "img");
   await expect(
-    museumMain(page).locator('img[src^="https://media-proxy.artblocks.io/"]')
+    page
+      .getByRole("main")
+      .last()
+      .locator('img[src^="https://media-proxy.artblocks.io/"]')
   ).toHaveCount(0);
 
   const imageArticles = await page
