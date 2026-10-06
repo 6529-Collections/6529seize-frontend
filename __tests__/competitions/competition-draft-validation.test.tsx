@@ -72,6 +72,10 @@ jest.mock(
 jest.mock("@/components/waves/create-wave/CreateWaveStepContent", () => {
   const Threshold =
     require("@/components/waves/create-wave/voting/CreateWaveVotingThreshold").default;
+  const Review =
+    require("@/components/waves/create-wave/review/CreateWaveReview").default;
+  const Outcomes =
+    require("@/components/waves/create-wave/outcomes/CreateWaveOutcomes").default;
   const { CreateWaveStep } = require("@/types/waves.types");
   const {
     CREATE_WAVE_VALIDATION_ERROR,
@@ -80,18 +84,49 @@ jest.mock("@/components/waves/create-wave/CreateWaveStepContent", () => {
     __esModule: true,
     default: ({
       controller,
+      chatRestricted,
     }: {
       controller: ReturnType<typeof useWaveConfig>;
-    }) =>
-      controller.step === CreateWaveStep.VOTING ? (
-        <Threshold
-          threshold={controller.config.approval.threshold}
-          error={controller.errors.includes(
-            CREATE_WAVE_VALIDATION_ERROR.APPROVAL_THRESHOLD_REQUIRED
-          )}
-          setThreshold={controller.onThresholdChange}
-        />
-      ) : null,
+      chatRestricted?: boolean | undefined;
+    }) => {
+      if (controller.step === CreateWaveStep.VOTING)
+        return (
+          <Threshold
+            threshold={controller.config.approval.threshold}
+            error={controller.errors.includes(
+              CREATE_WAVE_VALIDATION_ERROR.APPROVAL_THRESHOLD_REQUIRED
+            )}
+            setThreshold={controller.onThresholdChange}
+          />
+        );
+      if (controller.step === CreateWaveStep.REVIEW)
+        return (
+          <Review
+            config={controller.config}
+            isCompetition
+            chatRestricted={chatRestricted}
+            groupsCache={{}}
+            description={null}
+          />
+        );
+      if (controller.step === CreateWaveStep.OUTCOMES)
+        return (
+          <Outcomes
+            outcomes={controller.config.outcomes}
+            outcomeType={controller.selectedOutcomeType}
+            waveType={controller.config.overview.type}
+            errors={controller.errors}
+            dates={controller.config.dates}
+            display={controller.config.display}
+            maxWinners={controller.config.approval.maxWinners}
+            setOutcomeType={controller.onOutcomeTypeChange}
+            setOutcomes={controller.setOutcomes}
+            setDisplay={controller.setDisplay}
+            setMaxWinners={controller.onApprovalMaxWinnersChange}
+          />
+        );
+      return null;
+    },
   };
 });
 jest.mock("@/services/api/competitions-api", () => ({
@@ -112,7 +147,7 @@ jest.mock("@/services/api/competitions-api", () => ({
 const wave = {
   id: "wave",
   visibility: { scope: { group: null } },
-  chat: { scope: { group: null } },
+  chat: { scope: { group: null }, enabled: true },
   wave: { admin_group: { group: null } },
 } as ApiWave;
 const draft = {
@@ -128,6 +163,75 @@ beforeEach(() => {
   HTMLElement.prototype.scrollIntoView = jest.fn();
 });
 afterEach(() => jest.useRealTimers());
+
+it.each([
+  {
+    enabled: true,
+    group: { id: "chat-club", name: "Chat Club", is_hidden: true },
+    expected:
+      "Chat is limited to its selected group. Submission group access is public. Voting access is separate.",
+  },
+  {
+    enabled: true,
+    group: { is_hidden: true },
+    expected:
+      "Chat is limited to its selected group. Submission group access is public. Voting access is separate.",
+  },
+  {
+    enabled: false,
+    group: { is_hidden: true },
+    expected:
+      "Chat is disabled. Submission group access is public. Voting access is separate.",
+  },
+])(
+  "reviews a new competition with the parent's actual chat: $expected",
+  ({ enabled, group, expected }) => {
+    const parent: ApiWave = {
+      ...wave,
+      chat: {
+        ...wave.chat,
+        enabled,
+        scope: {
+          ...wave.chat.scope,
+          group,
+        },
+      },
+    };
+    render(<CompetitionDraftEditor wave={parent} onClose={jest.fn()} />);
+    // Switching type resets form defaults; review must still read the parent chat.
+    fireEvent.change(
+      screen.getByRole("combobox", { name: "Competition type" }),
+      {
+        target: { value: "APPROVE" },
+      }
+    );
+    fireEvent.change(
+      screen.getByRole("textbox", { name: "Competition name" }),
+      {
+        target: { value: "Review chat access" },
+      }
+    );
+    for (let step = 0; step < 4; step++) {
+      fireEvent.click(screen.getByRole("button", { name: "Next" }));
+    }
+    fireEvent.change(
+      screen.getByRole("textbox", { name: "Approval threshold" }),
+      {
+        target: { value: "50" },
+      }
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Next" }));
+    fireEvent.click(screen.getByRole("radio", { name: "Manual" }));
+    fireEvent.change(screen.getByRole("textbox", { name: "Manual action" }), {
+      target: { value: "Recognize the winner" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Save" }));
+    for (let step = 0; step < 2; step++) {
+      fireEvent.click(screen.getByRole("button", { name: "Next" }));
+    }
+    expect(screen.getByText(expected)).toBeVisible();
+  }
+);
 
 it("keeps an incomplete Approve draft locally and validates the threshold before the next step", async () => {
   jest.useFakeTimers();

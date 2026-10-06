@@ -1494,6 +1494,34 @@ const WAVE_NOTIFICATION_SETTINGS_MESSAGES = namespaceMessages(
   ] as const
 );
 
+const WAVE_ACCESS_MESSAGES = objectMessages("waves.access", {
+  loading: "Loading submission access…",
+  unavailable: "Submission access details are unavailable.",
+  submissionScope: "Submission group",
+  publicScope: "Public. Other submission rules still apply.",
+  independent: "Chat access is separate from submission access.",
+  signature: "Submissions require a wallet signature.",
+  viewRules: "View submission rules",
+  "preview.chatPublic": "People with wave access can chat.",
+  "preview.chatGroup": "Chat is limited to its selected group.",
+  "preview.chatDisabledSubmitPublic":
+    "Chat is disabled. Submission group access is public. Voting access is separate.",
+  "preview.chatDisabledSubmitGroup":
+    "Chat is disabled. Only the submission group can submit. Voting access is separate.",
+  "preview.bothPublic":
+    "People with wave access can chat and submit. Voting access is separate.",
+  "preview.chatPublicSubmitGroup":
+    "People with wave access can chat, but only the submission group can submit. Voting access is separate.",
+  "preview.chatGroupSubmitPublic":
+    "Chat is limited to its selected group. Submission group access is public. Voting access is separate.",
+  "preview.chatGroupSubmitGroup":
+    "Chat is limited to its selected group. Only the submission group can submit. Voting access is separate.",
+  "preview.sameGroup":
+    "Chat and submissions use the same selected group. Voting access is separate.",
+  "preview.differentGroups":
+    "Chat and submissions use different access groups. Permission for one does not grant the other. Voting access is separate.",
+} as const);
+
 const WAVE_CREATE_GROUPS_MESSAGES = objectMessages("waves.create.groups", {
   title: "Access",
   description: "Choose who can access, participate in, and manage this wave.",
@@ -4236,6 +4264,7 @@ export const EN_US_MESSAGES = {
   ...WAVE_CREATE_DIALOG_MESSAGES,
   ...WAVE_CREATE_ADVANCED_MESSAGES,
   ...WAVE_CREATE_OVERVIEW_MESSAGES,
+  ...WAVE_ACCESS_MESSAGES,
   ...WAVE_CREATE_GROUPS_MESSAGES,
   "waves.subwaves.accessWarning.title": "Parent wave restrictions apply",
   "waves.subwaves.accessWarning.message":

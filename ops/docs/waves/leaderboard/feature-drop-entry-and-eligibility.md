@@ -88,6 +88,14 @@ Entry behavior differs by wave type:
   desktop, tablet, and phone. Their details card retains the full reason,
   including opening or closing dates and submission limits. The Memes
   `How to Submit` helper keeps its desktop label.
+- In ordinary Rank and Approve Chat headers, that details card also shows the
+  submission access group and a `View submission rules` link to Configuration.
+  The rules link preserves a competition selected before entering Chat, including
+  when copied or opened in a new tab.
+  With competition support enabled, group and signing details use that competition
+  or the current default. Loading and unavailable states keep the rules link usable.
+  Hidden and direct-message groups show only `Private group`. These details
+  appear on demand; restricted submissions do not add an access panel to chat.
 - Available Memes desktop submit labels are responsive: compact desktop widths
   can show `Submit Work`, while extra-wide desktop shows
   `Submit Work to The Memes`.

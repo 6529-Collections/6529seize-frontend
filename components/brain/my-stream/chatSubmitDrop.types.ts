@@ -1,6 +1,7 @@
 import { WaveSubmissionExperience } from "@/helpers/waves/wave-submission-experience.helpers";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import type { ApiWave } from "@/generated/models/ApiWave";
 
 export interface ChatSubmitDropAction {
   readonly isVisible: boolean;
@@ -8,6 +9,8 @@ export interface ChatSubmitDropAction {
   readonly label: string;
   readonly compactLabel: string;
   readonly restrictionMessage: string | null;
+  readonly accessWave?: ApiWave | undefined;
+  readonly onViewRules?: (() => void) | undefined;
   readonly onOpen: () => void;
   readonly onOpenWithCurationUrl: (url: string) => void;
 }

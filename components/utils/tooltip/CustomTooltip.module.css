@@ -10,6 +10,31 @@
     transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* Interactive cards must accept keyboard focus as soon as they mount. */
+.hoverCard {
+  visibility: visible;
+  animation-name: hoverCardIn;
+}
+
+@keyframes hoverCardIn {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hoverCard {
+    animation: none;
+    opacity: 1;
+  }
+}
+
 .tooltip--top {
   transform-origin: center bottom;
 }

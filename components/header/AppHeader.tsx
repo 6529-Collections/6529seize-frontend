@@ -291,6 +291,7 @@ const HeaderTitleContent = ({
   );
 };
 
+/** Keep an unavailable drop action interactive so its restriction is readable. */
 const HeaderDropActionButton = ({
   action,
 }: {
@@ -326,6 +327,8 @@ const HeaderDropActionButton = ({
       <WaveHeaderRestrictionButton
         label={action.label}
         reason={title}
+        accessWave={action.accessWave}
+        onViewRules={action.onViewRules}
         className={HEADER_RESTRICTION_BUTTON_CLASS}
       >
         <LockClosedIcon className="tw-size-5 tw-flex-shrink-0" />
