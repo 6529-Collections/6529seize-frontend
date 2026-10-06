@@ -124,6 +124,16 @@ function Fixture() {
         throw new Error("Synthetic identity failure");
       };
     },
+    failResetTwice: () => {
+      const original = mixpanel.reset.bind(mixpanel);
+      let attempts = 0;
+      mixpanel.reset = () => {
+        attempts += 1;
+        if (attempts <= 2) throw new Error("Synthetic reset failure");
+        mixpanel.reset = original;
+        original();
+      };
+    },
     failSeenOnce: (value) => {
       const original = mixpanel.track.bind(mixpanel);
       mixpanel.track = (...args) => {

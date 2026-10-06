@@ -103,7 +103,9 @@ consent cookies fail closed even while React consent state is stale. Existing
 Mixpanel identity and delivery metadata remain. Consent withdrawal synchronously
 closes the send gate, clears SDK batches and resets identity.
 Logout clears local identity even when consent is missing or inaccessible;
-delivery stays closed until affirmative consent returns. If profile identity
+delivery stays closed until affirmative consent returns. If the SDK reset fails,
+delivery stays closed and initialization must complete that reset before any
+guest or profile delivery resumes. If profile identity
 setup fails, delivery closes and local identity resets rather than attributing
 the new profile's activity to the previous profile. The provider caches only
 successful setup. The provider retries failed initialization for guests and

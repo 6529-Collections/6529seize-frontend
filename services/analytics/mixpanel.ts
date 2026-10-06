@@ -76,6 +76,7 @@ const MIXPANEL_TOKEN = publicEnv.NEXT_PUBLIC_MIXPANEL_TOKEN;
 
 let hasInitialized = false;
 let identifiedDistinctId: string | null = null;
+let identityResetPending = false;
 let isTrackingAllowed = false;
 let analyticsGeneration = 0;
 
@@ -121,6 +122,7 @@ const isAnalyticsReady = (): boolean => {
   if (
     !hasInitialized ||
     !isTrackingAllowed ||
+    identityResetPending ||
     !isAnalyticsEnvironmentSupported()
   )
     return false;
@@ -180,6 +182,10 @@ export const initAnalytics = (): boolean => {
     return false;
   }
   try {
+    if (identityResetPending) {
+      mixpanel.reset();
+      identityResetPending = false;
+    }
     if (!isTrackingAllowed) analyticsGeneration += 1;
     isTrackingAllowed = true;
     if (hasInitialized) {
@@ -280,10 +286,12 @@ export const clearIdentity = (): void => {
     return;
   }
 
+  identityResetPending = true;
   try {
     mixpanel.reset();
+    identityResetPending = false;
   } catch {
-    /* Best effort. */
+    isTrackingAllowed = false;
   }
 };
 
@@ -296,6 +304,7 @@ export const disableAnalytics = (): void => {
     return;
   }
 
+  identityResetPending = true;
   try {
     // Public SDK method (2.76.0), omitted from its bundled TypeScript interface.
     const batchControl = mixpanel as typeof mixpanel & {
@@ -303,8 +312,9 @@ export const disableAnalytics = (): void => {
     };
     batchControl.stop_batch_senders();
     mixpanel.reset();
+    identityResetPending = false;
   } catch {
-    /* The synchronous send gate is already closed. */
+    /* Delivery stays closed until initialization can reset identity. */
   }
 };
 

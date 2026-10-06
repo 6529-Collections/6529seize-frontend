@@ -419,6 +419,61 @@ test("logout clears persisted identity without consent before anonymous delivery
   }
 });
 
+test("failed logout reset keeps SDK delivery closed until anonymous reset succeeds", async ({
+  page,
+}) => {
+  for (const transport of ["batch", "direct"]) {
+    await page.goto(`/waves/private-wave?transport=${transport}`);
+    await page
+      .getByRole("button", { name: "Enable synthetic telemetry" })
+      .click();
+    await expect
+      .poll(async () =>
+        (await events(page)).some(
+          (event) =>
+            event.event === "$identify" &&
+            event.properties["distinct_id"] === "529"
+        )
+      )
+      .toBe(true);
+    await page.evaluate(() => {
+      window.featureFixture.failResetTwice();
+      window.featureFixture.logout();
+    });
+    await page.request.get("/clear");
+    await page.evaluate(() => {
+      window.featureFixture.lateEvent();
+      window.featureFixture.resumeAnalytics();
+      window.featureFixture.lateEvent();
+    });
+    await visibleTab(page, "Winners").click();
+    await expect(
+      page.getByRole("status", { name: "Selected fixture state" })
+    ).toHaveText("WINNERS:RANK");
+    // No delivery during dwell or multiple batch flush intervals after both failures.
+    await page.waitForTimeout(1200);
+    expect(await events(page)).toHaveLength(0);
+    expect(await peopleUpdates(page)).toHaveLength(0);
+    await page.evaluate(() => {
+      window.featureFixture.resumeAnalytics();
+      window.featureFixture.lateEvent();
+    });
+    await expect
+      .poll(async () =>
+        (await featureEvents(page, "Wave Feature Activated", "chat")).length
+      )
+      .toBe(1);
+    const [guest] = await featureEvents(page, "Wave Feature Activated", "chat");
+    expect(guest?.properties["distinct_id"]).toMatch(/^\$device:/);
+    expect(guest?.properties["$user_id"]).not.toBe("529");
+    expect(
+      (await events(page)).some(
+        (event) => event.properties["distinct_id"] === "529"
+      )
+    ).toBe(false);
+  }
+});
+
 test("failed profile switching closes real SDK delivery until identity setup succeeds", async ({
   page,
 }) => {

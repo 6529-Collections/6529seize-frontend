@@ -357,6 +357,51 @@ describe("mixpanel analytics wrapper", () => {
     expect(resetMock).toHaveBeenCalledTimes(1);
   });
 
+  it.each(["logout", "disable"] as const)(
+    "keeps delivery closed after %s reset fails until reset recovery succeeds",
+    async (operation) => {
+      const analytics = await loadModule({
+        nodeEnv: "production",
+        token: "public-token",
+      });
+      analytics.initAnalytics();
+      analytics.identify("42");
+      resetMock.mockImplementation(() => {
+        throw new Error("Synthetic persistence failure");
+      });
+
+      if (operation === "logout") analytics.clearIdentity();
+      else analytics.disableAnalytics();
+      expect(analytics.isAnalyticsTrackingAllowed()).toBe(false);
+      expect(analytics.initAnalytics()).toBe(false);
+      expect(analytics.isAnalyticsTrackingAllowed()).toBe(false);
+      expect(analytics.trackAnalyticsEvent("Guest Event")).toBe(false);
+      expect(analytics.identify("43")).toBe(false);
+      expect(trackMock).not.toHaveBeenCalled();
+      expect(startBatchMock).toHaveBeenCalledTimes(1);
+      const config = initMock.mock.calls[0]?.[1];
+      expect(
+        config.hooks.before_send_events({ event: "Guest Event", properties: {} })
+      ).toBeNull();
+      expect(config.hooks.before_send_people({ $distinct_id: "42" })).toBeNull();
+      expect(config.hooks.before_send_groups({ $group_id: "42" })).toBeNull();
+      for (const kind of ["events", "people", "groups"] as const) {
+        mixpanelMock.request_batchers[kind].sendRequest([], {}, jest.fn());
+      }
+      expect(sendBatchMock).not.toHaveBeenCalled();
+      expect(sendPeopleMock).not.toHaveBeenCalled();
+      expect(sendGroupsMock).not.toHaveBeenCalled();
+
+      resetMock.mockImplementation(() => undefined);
+      analytics.initAnalytics();
+      expect(resetMock).toHaveBeenCalledTimes(3);
+      expect(analytics.isAnalyticsTrackingAllowed()).toBe(true);
+      expect(startBatchMock).toHaveBeenCalledTimes(2);
+      expect(analytics.trackAnalyticsEvent("Guest Event")).toBe(true);
+      expect(identifyMock).toHaveBeenCalledTimes(1);
+    }
+  );
+
   it("keeps the page view path authoritative", async () => {
     const analytics = await loadModule({
       nodeEnv: "production",

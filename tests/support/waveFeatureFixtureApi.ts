@@ -7,6 +7,7 @@ declare global {
       switchProfile: (profileId: string) => boolean;
       resumeAnalytics: () => void;
       failIdentityOnce: () => void;
+      failResetTwice: () => void;
       failSeenOnce: (value: string) => void;
       updateTraits: () => void;
       resetVisit: () => void;
