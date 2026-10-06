@@ -15,7 +15,7 @@ import { useWaveRankReward } from "@/hooks/waves/useWaveRankReward";
 import { useCallback, useMemo } from "react";
 import { MemesDropArtworkHero } from "./MemesDropArtworkHero";
 import { MemesDropDetailsSection } from "./MemesDropDetailsSection";
-import type { DropMetadataState } from "./useSingleWaveDropData";
+import type { DropMetadataState } from "./useDropDetailMetadata";
 import { MemesDropSummarySection } from "./MemesDropSummarySection";
 import {
   DISABLED_DROP_VOTE_SUMMARY_STATE,

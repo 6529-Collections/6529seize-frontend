@@ -106,6 +106,8 @@ reached), select the header restriction control to see the reason, then use
   The marker is the artist's commitment and does not confirm approval or delivery.
 - Resubmitting restores the saved plan and checkbox. Existing artist bio and
   commentary stay in their own fields; they are not copied into the plan.
+- Resubmission waits for the saved submission to load before opening its fields.
+  If loading fails, select `Retry loading submission` or `Close` and try later.
 - Closing the modal discards an unsaved plan with the rest of the draft.
 
 ## Common Scenarios

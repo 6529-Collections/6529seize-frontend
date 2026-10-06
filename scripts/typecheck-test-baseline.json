@@ -670,7 +670,6 @@
     "__tests__/components/waves/memes/file-upload/UploadArea.test.tsx": 1,
     "__tests__/components/waves/memes/file-upload/utils/fileValidation.test.ts": 2,
     "__tests__/components/waves/memes/MemesArtSubmissionFile.test.tsx": 1,
-    "__tests__/components/waves/memes/MemesArtSubmissionModal.test.tsx": 1,
     "__tests__/components/waves/memes/MemesArtSubmissionTraits.test.tsx": 1,
     "__tests__/components/waves/memes/submission/components/AllowlistBatchManager.test.tsx": 1,
     "__tests__/components/waves/memes/submission/hooks/useArtworkSubmissionForm.test.ts": 2,

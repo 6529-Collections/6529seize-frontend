@@ -153,7 +153,9 @@ describe("WaveDropAdditionalInfo", () => {
         metadataState={{ status: "loading", retry }}
       />
     );
-    expect(screen.getByText("Loading the artist’s plan…")).toBeInTheDocument();
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Loading the artist’s plan…"
+    );
     expect(
       screen.queryByText("Additional Action marked. No separate plan provided.")
     ).not.toBeInTheDocument();
@@ -163,9 +165,9 @@ describe("WaveDropAdditionalInfo", () => {
         metadataState={{ status: "error", retry }}
       />
     );
-    expect(
-      screen.getByText("The artist’s plan could not be loaded.")
-    ).toBeInTheDocument();
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "The artist’s plan could not be loaded."
+    );
     fireEvent.click(screen.getByRole("button", { name: "Retry loading plan" }));
     expect(retry).toHaveBeenCalledTimes(1);
     rerender(
@@ -183,6 +185,10 @@ describe("WaveDropAdditionalInfo", () => {
       />
     );
     expect(screen.getByText("Recovered plan")).toBeInTheDocument();
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "The artist’s plan has loaded."
+    );
+    expect(screen.getByRole("status")).not.toHaveTextContent("Recovered plan");
     expect(
       screen.queryByRole("button", { name: "Retry loading plan" })
     ).not.toBeInTheDocument();

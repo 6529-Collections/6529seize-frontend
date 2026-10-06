@@ -5,7 +5,7 @@ import { formatInteger } from "@/i18n/format";
 import { t, type MessageKey } from "@/i18n/messages";
 import { useId } from "react";
 import { ADDITIONAL_ACTION_PLAN_MAX_LENGTH } from "../utils/submissionMetadata";
-import type { DropMetadataState } from "@/components/waves/drop/useSingleWaveDropData";
+import type { DropMetadataState } from "@/components/waves/drop/useDropDetailMetadata";
 
 interface AdditionalActionSummaryProps {
   readonly isAdditionalActionPromised: boolean;
@@ -31,6 +31,13 @@ export function AdditionalActionSummary({
   } else if (unavailableState?.status === "loading") {
     messageKey = "memes.additionalAction.loading";
   }
+  let announcement = "";
+  if (isAdditionalActionPromised && metadataState) {
+    announcement = t(locale, messageKey);
+    if (savedPlan) {
+      announcement = t(locale, "memes.additionalAction.loaded");
+    }
+  }
 
   return (
     <section
@@ -43,6 +50,14 @@ export function AdditionalActionSummary({
       >
         {t(locale, "memes.additionalAction.label")}
       </h3>
+      <span
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+        className="tw-sr-only"
+      >
+        {announcement}
+      </span>
       <p className="tw-m-0 tw-whitespace-pre-wrap tw-break-words tw-text-sm tw-leading-relaxed tw-text-iron-300">
         {savedPlan || t(locale, messageKey)}
       </p>

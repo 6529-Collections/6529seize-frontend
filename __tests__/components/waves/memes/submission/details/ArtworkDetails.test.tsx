@@ -263,4 +263,34 @@ describe("ArtworkDetails", () => {
       screen.getByRole("textbox", { name: "Your plan (optional)" })
     ).toHaveValue(props.additionalActionPlan);
   });
+
+  it("counts the saved text and flags an over-limit restored plan", () => {
+    const props = {
+      title: "",
+      description: "",
+      onTitleChange: jest.fn(),
+      onDescriptionChange: jest.fn(),
+      showAdditionalActionPromised: true as const,
+      isAdditionalActionPromised: true,
+      onAdditionalActionPromisedChange: jest.fn(),
+      onAdditionalActionPlanChange: jest.fn(),
+    };
+    const { rerender } = render(
+      <ArtworkDetails
+        {...props}
+        additionalActionPlan={`  ${"p".repeat(4999)}  `}
+      />
+    );
+    expect(screen.getByText("4,999 / 5,000")).toBeInTheDocument();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    rerender(
+      <ArtworkDetails {...props} additionalActionPlan={"p".repeat(5001)} />
+    );
+    expect(
+      screen.getByRole("textbox", { name: "Your plan (optional)" })
+    ).toHaveAttribute("aria-invalid", "true");
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "Shorten your plan to 5,000 characters or fewer."
+    );
+  });
 });

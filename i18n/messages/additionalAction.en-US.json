@@ -8,6 +8,11 @@
   "memes.additionalAction.loading": "Loading the artist’s plan…",
   "memes.additionalAction.loadError": "The artist’s plan could not be loaded.",
   "memes.additionalAction.retry": "Retry loading plan",
+  "memes.additionalAction.loaded": "The artist’s plan has loaded.",
+  "memes.submission.resubmit.loading": "Loading the saved submission…",
+  "memes.submission.resubmit.loaded": "The saved submission has loaded.",
+  "memes.submission.resubmit.loadError": "The saved submission could not be loaded. Retry before editing to preserve its fields.",
+  "memes.submission.resubmit.retry": "Retry loading submission",
   "memes.additionalAction.declaration": "This is the artist’s commitment. It does not confirm approval or delivery.",
   "memes.additionalAction.tooLong": "Shorten your plan to {limit} characters or fewer."
 }

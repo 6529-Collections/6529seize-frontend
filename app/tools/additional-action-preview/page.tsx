@@ -5,13 +5,15 @@ import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import AdditionalActionPreview from "./page.client";
 
-export const metadata: Metadata = {
-  ...getAppMetadata({
-    title: "Additional Action — Current Component",
-    description: "Local preview of the current Memes artwork form fields.",
-  }),
-  robots: { index: false, follow: false },
-};
+export function generateMetadata(): Metadata {
+  return getAppMetadata(
+    {
+      title: "Additional Action — Current Component",
+      description: "Local preview of the current Memes artwork form fields.",
+    },
+    { robots: { index: false, follow: false } }
+  );
+}
 
 export default async function AdditionalActionPreviewPage() {
   if (getNodeEnv() !== "development") {

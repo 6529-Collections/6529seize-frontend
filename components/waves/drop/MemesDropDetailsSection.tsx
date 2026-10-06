@@ -13,7 +13,7 @@ import type {
   MemesDropMedia,
 } from "./memesDropPanelTypes";
 import type { DropVoteSummaryState } from "./useDropVoteSummary";
-import type { DropMetadataState } from "./useSingleWaveDropData";
+import type { DropMetadataState } from "./useDropDetailMetadata";
 
 interface MemesDropDetailsSectionProps {
   readonly drop: ExtendedDrop;

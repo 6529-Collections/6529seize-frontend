@@ -162,7 +162,8 @@ const AdditionalActionPlanField = ({
   readonly onChange: (value: string) => void;
 }) => {
   const locale = useBrowserLocale();
-  const hasError = value.trim().length > ADDITIONAL_ACTION_PLAN_MAX_LENGTH;
+  const planLength = value.trim().length;
+  const hasError = planLength > ADDITIONAL_ACTION_PLAN_MAX_LENGTH;
   return (
     <div className="tw-mt-3 tw-space-y-2">
       <label
@@ -190,7 +191,7 @@ const AdditionalActionPlanField = ({
       />
       <div id="additional-action-plan-count" className="tw-flex tw-justify-end">
         <FieldCharacterCount
-          length={value.length}
+          length={planLength}
           maxLength={ADDITIONAL_ACTION_PLAN_MAX_LENGTH}
           dangerThreshold={4750}
           locale={locale}
@@ -303,11 +304,8 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = (props) => {
   );
 
   // Check if fields are filled
-  const isTitleFilled = useMemo(() => title.trim().length > 0, [title]);
-  const isDescriptionFilled = useMemo(
-    () => description.trim().length > 0,
-    [description]
-  );
+  const isTitleFilled = title.trim().length > 0;
+  const isDescriptionFilled = description.trim().length > 0;
   const titleStateClass = getFieldStateClass(
     Boolean(titleError),
     isTitleFilled

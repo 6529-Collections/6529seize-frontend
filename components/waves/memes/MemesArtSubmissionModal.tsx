@@ -8,11 +8,14 @@ import {
   Transition,
   TransitionChild,
 } from "@headlessui/react";
-import React, { Fragment } from "react";
+import React, { Fragment, useMemo } from "react";
 import { createPortal } from "react-dom";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import MemesArtSubmissionContainer from "./submission/MemesArtSubmissionContainer";
+import { useDropDetailMetadata } from "@/components/waves/drop/useDropDetailMetadata";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t, type MessageKey } from "@/i18n/messages";
 
 const NATIVE_KEYBOARD_LAYOUT_TRANSITION_DURATION =
   "var(--native-keyboard-layout-transition-duration, 0ms)";
@@ -32,9 +35,21 @@ const MemesArtSubmissionModal: React.FC<MemesArtSubmissionModalProps> = ({
   sourceDrop,
   onSourceDropDeleted,
 }) => {
+  const locale = useBrowserLocale();
+  const { metadata, metadataState } = useDropDetailMetadata(sourceDrop, isOpen);
+  const hydratedSourceDrop = useMemo(
+    () => (sourceDrop && metadata ? { ...sourceDrop, metadata } : undefined),
+    [sourceDrop, metadata]
+  );
   const dialogTitle = sourceDrop
     ? "Resubmit Work to The Memes"
     : "Submit Work to The Memes";
+  let metadataMessageKey: MessageKey = "memes.submission.resubmit.loaded";
+  if (metadataState.status === "loading") {
+    metadataMessageKey = "memes.submission.resubmit.loading";
+  } else if (metadataState.status === "error") {
+    metadataMessageKey = "memes.submission.resubmit.loadError";
+  }
 
   if (typeof document === "undefined") return null;
 
@@ -78,12 +93,42 @@ const MemesArtSubmissionModal: React.FC<MemesArtSubmissionModalProps> = ({
             >
               <DialogTitle className="tw-sr-only">{dialogTitle}</DialogTitle>
               <div className="tw-flex tw-h-full tw-flex-col tw-overflow-hidden">
-                <MemesArtSubmissionContainer
-                  onClose={onClose}
-                  wave={wave}
-                  sourceDrop={sourceDrop}
-                  onSourceDropDeleted={onSourceDropDeleted}
-                />
+                <span
+                  role="status"
+                  aria-live="polite"
+                  aria-atomic="true"
+                  className="tw-sr-only"
+                >
+                  {sourceDrop ? t(locale, metadataMessageKey) : ""}
+                </span>
+                {sourceDrop && metadataState.status !== "ready" ? (
+                  <div className="tw-space-y-4 tw-rounded-xl tw-bg-iron-950 tw-p-6 tw-text-iron-100">
+                    <p className="tw-m-0">{t(locale, metadataMessageKey)}</p>
+                    {metadataState.status === "error" && (
+                      <button
+                        type="button"
+                        onClick={metadataState.retry}
+                        className="tw-min-h-11 tw-rounded-lg tw-bg-iron-800 tw-px-4 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+                      >
+                        {t(locale, "memes.submission.resubmit.retry")}
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={onClose}
+                      className="tw-min-h-11 tw-rounded-lg tw-bg-iron-800 tw-px-4 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+                    >
+                      {t(locale, "singleDrop.close")}
+                    </button>
+                  </div>
+                ) : (
+                  <MemesArtSubmissionContainer
+                    onClose={onClose}
+                    wave={wave}
+                    sourceDrop={hydratedSourceDrop}
+                    onSourceDropDeleted={onSourceDropDeleted}
+                  />
+                )}
               </div>
             </DialogPanel>
           </TransitionChild>

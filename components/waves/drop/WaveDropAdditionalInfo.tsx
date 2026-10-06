@@ -14,7 +14,7 @@ import { useMemo } from "react";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { AdditionalActionSummary } from "@/components/waves/memes/submission/components/AdditionalActionSummary";
-import type { DropMetadataState } from "./useSingleWaveDropData";
+import type { DropMetadataState } from "./useDropDetailMetadata";
 
 const MAX_MEDIA = 4;
 const VIDEO_EXTENSIONS = new Set(["mp4", "mov", "m4v", "webm", "ogv"]);
