@@ -209,6 +209,7 @@ export default function LatestDropNextMintPanel({
                 />
               </div>
               <Link
+                data-home-action="Open drop"
                 href={`/waves?wave=${drop.wave.id}&drop=${drop.id}`}
                 className="tw-mt-3 tw-w-fit tw-max-w-full tw-text-balance tw-rounded-sm tw-text-2xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-50 tw-no-underline tw-transition-colors tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-4 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-iron-300 motion-reduce:tw-transition-none md:tw-text-3xl"
               >
@@ -255,6 +256,7 @@ export default function LatestDropNextMintPanel({
                   label={t(locale, "home.nextMint.stats.wave")}
                   value={
                     <Link
+                      data-home-action="Open wave"
                       href={`/waves/${drop.wave.id}`}
                       className="tw-inline-flex tw-max-w-full tw-items-center tw-text-iron-200 tw-no-underline desktop-hover:hover:tw-text-iron-100"
                     >
