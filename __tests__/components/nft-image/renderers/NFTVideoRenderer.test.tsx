@@ -73,6 +73,27 @@ const createDefaultProps = (
 });
 
 describe("NFTVideoRenderer", () => {
+  beforeEach(() => {
+    jest.spyOn(videoConfig, "useElementInView").mockReturnValue(true);
+  });
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it("keeps the existing NFT poster without attaching its video until visible", () => {
+    jest.spyOn(videoConfig, "useElementInView").mockReturnValue(false);
+    const props = createDefaultProps();
+    const { container, rerender } = render(<NFTVideoRenderer {...props} />);
+    const video = container.querySelector("video")!;
+    expect(video).toHaveAttribute("poster", "https://example.com/scaled.png");
+    expect(video).not.toHaveAttribute("src");
+    jest.spyOn(videoConfig, "useElementInView").mockReturnValue(true);
+    rerender(<NFTVideoRenderer {...props} />);
+    expect(video).toHaveAttribute(
+      "src",
+      "https://example.com/compressed-video.mp4"
+    );
+  });
   it("fills an explicit artwork frame without inherited NFT height caps", () => {
     const { container } = render(
       <NFTVideoRenderer {...createDefaultProps({ fillContainer: true })} />

@@ -1,5 +1,6 @@
 import { render, waitFor, act, fireEvent } from "@testing-library/react";
 import React from "react";
+import { Capacitor } from "@capacitor/core";
 import { useHlsPlayer } from "@/hooks/useHlsPlayer";
 
 let mockHlsSupported = false;
@@ -124,6 +125,29 @@ describe("useHlsPlayer", () => {
       });
     } finally {
       warn.mockRestore();
+    }
+  });
+
+  it("unloads offscreen native raw video and restores its position without starting playback", () => {
+    const native = jest
+      .spyOn(Capacitor, "isNativePlatform")
+      .mockReturnValue(true);
+    try {
+      const { getByTestId, rerender } = render(
+        <TestComponent src="video.mp4" isHls={false} />
+      );
+      const video = getByTestId("vid") as HTMLVideoElement;
+      video.currentTime = 12;
+      jest.mocked(HTMLVideoElement.prototype.play).mockClear();
+      rerender(<TestComponent src="video.mp4" isHls={false} enabled={false} />);
+      expect(video).not.toHaveAttribute("src");
+      rerender(<TestComponent src="video.mp4" isHls={false} enabled />);
+      expect(video.src).toContain("video.mp4");
+      fireEvent.loadedMetadata(video);
+      expect(video.currentTime).toBe(12);
+      expect(HTMLVideoElement.prototype.play).not.toHaveBeenCalled();
+    } finally {
+      native.mockRestore();
     }
   });
 

@@ -32,6 +32,21 @@ screen. Compact feed previews retain their smaller viewing areas.
 - The existing circular mute and fullscreen buttons remain on the right.
   Open and download actions appear on surfaces that provide them.
 
+## Mobile app loading and backgrounding
+
+In the mobile app, leaving the app pauses videos and their loading. Moving a
+video outside the viewport also stops buffering; fullscreen video stays active
+until fullscreen closes or the app goes into the background. Returning to the
+video retains its playback position. Manually started videos stay paused until
+you press play again. Ambient autoplay resumes only when the video is visible,
+reduced motion permits it, and you have not explicitly paused it.
+
+Existing posters stay visible before playback. Poster-gated videos with a poster
+attach their video source when you press play. Ambient videos with posters
+wait until visible before loading; videos with manual playback and posters avoid
+preloading video data. Duration can remain `—` until playback starts, and starting
+or resuming an unloaded video can take longer on a slow connection.
+
 ## Seeking
 
 The timeline sits above the control row. Drag its small circular handle or

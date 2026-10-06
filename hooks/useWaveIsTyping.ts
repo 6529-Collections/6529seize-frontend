@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useWaveWebSocket } from "./useWaveWebSocket";
+import { useNativeAppActivity } from "./useNativeAppActivity";
 import type {
   WsDropUpdateMessage,
   WsDropUpdateRefMessage,
@@ -30,7 +31,6 @@ interface TypingMessageState {
 /* ------------------------------------------------------------------ */
 
 const TYPING_WINDOW_MS = 5_000; // still typing if ≤ 5 s old
-const CLEANUP_INTERVAL_MS = 1_000; // prune/check once per second
 
 /* ------------------------------------------------------------------ */
 /*  Helper to convert active typers → human string                    */
@@ -128,7 +128,8 @@ export function useWaveIsTyping(
   options?: { readonly enabled?: boolean | undefined }
 ): string {
   const enabled = options?.enabled ?? true;
-  const shouldSubscribe = enabled && !disabled;
+  const isAppActive = useNativeAppActivity();
+  const shouldSubscribe = enabled && !disabled && isAppActive;
   const { socket } = useWaveWebSocket(shouldSubscribe ? waveId : "");
   const scopeKey = `${waveId}:${shouldSubscribe ? "subscribed" : "paused"}`;
 
@@ -148,6 +149,30 @@ export function useWaveIsTyping(
   useEffect(() => {
     if (!shouldSubscribe || !socket) return;
 
+    let expiryTimer: ReturnType<typeof setTimeout> | undefined;
+    const updateTypingMessage = () => {
+      clearTimeout(expiryTimer);
+      expiryTimer = undefined;
+      const now = Date.now();
+      let nextExpiry = Infinity;
+      typersRef.current.forEach((entry, handle) => {
+        const expiresAt = entry.lastTypingAt + TYPING_WINDOW_MS;
+        if (expiresAt <= now) typersRef.current.delete(handle);
+        else nextExpiry = Math.min(nextExpiry, expiresAt);
+      });
+
+      const message = buildTypingString(Array.from(typersRef.current.values()));
+      setTypingMessageState((previous) =>
+        previous.scopeKey === scopeKey && previous.message === message
+          ? previous
+          : { scopeKey, message }
+      );
+      // An idle Wave has no typing timer. Wake only when a typer expires.
+      if (Number.isFinite(nextExpiry)) {
+        expiryTimer = setTimeout(updateTypingMessage, nextExpiry - now);
+      }
+    };
+
     const onMessage = (event: MessageEvent) => {
       let msg: unknown;
       try {
@@ -159,6 +184,7 @@ export function useWaveIsTyping(
         const authorHandle = msg.data.author.handle;
         if (authorHandle) {
           typersRef.current.delete(authorHandle);
+          updateTypingMessage();
         }
       }
       if (
@@ -170,6 +196,7 @@ export function useWaveIsTyping(
         // Wave's typing state so a completed large post cannot leave a stale
         // indicator behind.
         typersRef.current.clear();
+        updateTypingMessage();
       }
       if (!isWsTypingMessage(msg)) return;
       const data = msg.data;
@@ -180,45 +207,17 @@ export function useWaveIsTyping(
         profile: data.profile,
         lastTypingAt: Date.now(),
       });
+      updateTypingMessage();
     };
 
     const currentSocket = socket;
+    updateTypingMessage();
     currentSocket.addEventListener("message", onMessage);
     return () => {
+      clearTimeout(expiryTimer);
       currentSocket.removeEventListener("message", onMessage);
     };
-  }, [socket, waveId, myHandle, shouldSubscribe]);
-
-  /* ----- 3. Periodic cleanup + state update ------------------------ */
-  useEffect(() => {
-    if (!shouldSubscribe) {
-      return;
-    }
-
-    const intervalId = setInterval(() => {
-      const now = Date.now();
-      // Prune stale typers
-      typersRef.current.forEach((entry, handle) => {
-        if (now - entry.lastTypingAt > TYPING_WINDOW_MS) {
-          typersRef.current.delete(handle);
-        }
-      });
-
-      // Derive the new string
-      const newMessage = buildTypingString(
-        Array.from(typersRef.current.values())
-      );
-
-      // Only trigger re‑render if text actually changed
-      setTypingMessageState((prev) =>
-        prev.scopeKey === scopeKey && prev.message === newMessage
-          ? prev
-          : { scopeKey, message: newMessage }
-      );
-    }, CLEANUP_INTERVAL_MS);
-
-    return () => clearInterval(intervalId);
-  }, [scopeKey, shouldSubscribe]);
+  }, [socket, waveId, myHandle, shouldSubscribe, scopeKey]);
 
   return shouldSubscribe && typingMessageState.scopeKey === scopeKey
     ? typingMessageState.message

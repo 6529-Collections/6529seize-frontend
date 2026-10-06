@@ -1,8 +1,22 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useEffectEvent,
+  useRef,
+  useState,
+} from "react";
+import { Capacitor } from "@capacitor/core";
+import {
+  restoreVideoSource,
+  suspendVideoSource,
+  type SuspendedVideoSource,
+} from "@/services/media/video-loading";
 import type HlsType from "hls.js";
 import type { ErrorData } from "hls.js";
+import { useNativeAppActivity } from "./useNativeAppActivity";
+import { getNativeAppActivity } from "@/services/app-activity/native-app-activity";
 
 interface UseHlsPlayerParams {
   /** If false, keep the video element inert and do not attach a source yet. */
@@ -76,11 +90,27 @@ export function useHlsPlayer({
   onManifestParsed,
   fallbackSrc,
 }: UseHlsPlayerParams) {
+  const isAppActive = useNativeAppActivity();
+  const isNative = Capacitor.isNativePlatform();
+  const [loadedSource, setLoadedSource] = useState<string | null>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const initialize = isNative
+    ? (enabled && isAppActive) || loadedSource === src
+    : enabled;
+  const canLoad = isAppActive && (!isNative || enabled || isFullscreen);
+  const canLoadRef = useRef(canLoad);
+  const callbacksRef = useRef({ autoPlay, onError, onManifestParsed });
+  useEffect(() => {
+    canLoadRef.current = canLoad;
+    callbacksRef.current = { autoPlay, onError, onManifestParsed };
+  }, [canLoad, autoPlay, onError, onManifestParsed]);
   const videoRef = useRef<HTMLVideoElement>(null);
   const hlsRef = useRef<HlsType | null>(null);
+  const suspendedHlsRef = useRef<HlsType | null>(null);
 
   const cleanupTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const hlsRetryTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const needsManifestReloadRef = useRef(false);
   const manifestRetryCountRef = useRef(0);
   const networkRecoveryCountRef = useRef(0);
   const setupVersionRef = useRef(0);
@@ -91,6 +121,35 @@ export function useHlsPlayer({
 
   const [isLoading, setIsLoading] = useState(true);
   const [retryVersion, setRetryVersion] = useState(0);
+
+  const suspendedVideoRef = useRef<SuspendedVideoSource | null>(null);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    let nativeFullscreen = false;
+    const updateFullscreen = () =>
+      setIsFullscreen(
+        nativeFullscreen ||
+          (document.fullscreenElement?.contains(video) ?? false)
+      );
+    const begin = () => {
+      nativeFullscreen = true;
+      updateFullscreen();
+    };
+    const end = () => {
+      nativeFullscreen = false;
+      updateFullscreen();
+    };
+    video.addEventListener("webkitbeginfullscreen", begin);
+    video.addEventListener("webkitendfullscreen", end);
+    document.addEventListener("fullscreenchange", updateFullscreen);
+    return () => {
+      video.removeEventListener("webkitbeginfullscreen", begin);
+      video.removeEventListener("webkitendfullscreen", end);
+      document.removeEventListener("fullscreenchange", updateFullscreen);
+    };
+  }, []);
 
   const retry = useCallback(() => {
     setIsLoading(true);
@@ -144,22 +203,32 @@ export function useHlsPlayer({
   /**
    * Fallback to a raw MP4 (or original src) if HLS is unsupported or fails.
    */
-  function fallbackToSrc(videoEl: HTMLVideoElement, fallback: string) {
-    const safeFallback = getSafeVideoSource(fallback);
-    if (safeFallback === null) {
-      videoEl.removeAttribute("src");
+  const fallbackToSrc = useEffectEvent(
+    (videoEl: HTMLVideoElement, fallback: string) => {
+      const safeFallback = getSafeVideoSource(fallback);
+      if (safeFallback === null) {
+        videoEl.removeAttribute("src");
+        videoEl.load();
+        setIsLoading(false);
+        return;
+      }
+
+      videoEl.src = safeFallback;
       videoEl.load();
       setIsLoading(false);
-      return;
+      if (isNative && !canLoadRef.current) {
+        suspendedVideoRef.current = suspendVideoSource(videoEl);
+        return;
+      }
+      if (
+        callbacksRef.current.autoPlay &&
+        canLoadRef.current &&
+        getNativeAppActivity()
+      ) {
+        void playFallbackVideo(videoEl);
+      }
     }
-
-    videoEl.src = safeFallback;
-    videoEl.load();
-    setIsLoading(false);
-    if (autoPlay) {
-      void playFallbackVideo(videoEl);
-    }
-  }
+  );
 
   function stopHlsAndFallback(videoEl: HTMLVideoElement) {
     cleanupHls(true);
@@ -179,7 +248,13 @@ export function useHlsPlayer({
     hlsSrc: string
   ) {
     hls.on(HlsConstructor.Events.ERROR, (_event: unknown, data: ErrorData) => {
-      onError?.(data);
+      if (
+        hlsRef.current !== hls ||
+        !canLoadRef.current ||
+        !getNativeAppActivity()
+      )
+        return;
+      callbacksRef.current.onError?.(data);
 
       if (data.fatal !== true) {
         return;
@@ -197,8 +272,14 @@ export function useHlsPlayer({
               return;
             }
             manifestRetryCountRef.current += 1;
+            needsManifestReloadRef.current = true;
             hlsRetryTimeoutRef.current = setTimeout(() => {
-              if (hlsRef.current === hls) {
+              if (
+                hlsRef.current === hls &&
+                canLoadRef.current &&
+                getNativeAppActivity()
+              ) {
+                needsManifestReloadRef.current = false;
                 hls.loadSource(hlsSrc);
               }
             }, HLS_MANIFEST_RETRY_DELAY_MS);
@@ -233,96 +314,113 @@ export function useHlsPlayer({
   /**
    * Sets up the Hls instance, attaches to the <video>, and starts loading.
    */
-  async function initHls(
-    videoEl: HTMLVideoElement,
-    changedSource: boolean,
-    setupVersion: number,
-    nativeErrorHandler: () => void
-  ) {
-    try {
-      const mod = await import("hls.js");
-      const HlsConstructor = mod.default; // typed import, no unsafe cast
-      if (!isCurrentSetup(setupVersion, videoEl)) {
-        return;
-      }
-
-      const safeHlsSrc = getSafeVideoSource(src);
-      if (safeHlsSrc === null) {
-        fallbackToSrc(videoEl, fallbackSrc ?? src);
-        return;
-      }
-
-      // Prefer Hls.js wherever Media Source Extensions are available. Some
-      // Chromium builds report "maybe" for native HLS even though playback can
-      // stall without producing an error. Native HLS remains the Safari path.
-      if (!HlsConstructor.isSupported()) {
-        if (videoEl.canPlayType("application/vnd.apple.mpegurl")) {
-          videoEl.addEventListener("error", nativeErrorHandler, { once: true });
-          fallbackToSrc(videoEl, safeHlsSrc);
+  const initHls = useEffectEvent(
+    async (
+      videoEl: HTMLVideoElement,
+      changedSource: boolean,
+      setupVersion: number,
+      nativeErrorHandler: () => void
+    ) => {
+      try {
+        const mod = await import("hls.js");
+        const HlsConstructor = mod.default; // typed import, no unsafe cast
+        if (!isCurrentSetup(setupVersion, videoEl)) {
           return;
         }
 
-        fallbackToSrc(videoEl, fallbackSrc ?? src);
-        return;
-      }
+        const safeHlsSrc = getSafeVideoSource(src);
+        if (safeHlsSrc === null) {
+          fallbackToSrc(videoEl, fallbackSrc ?? src);
+          return;
+        }
 
-      if (changedSource) {
-        cleanupHls(true);
-      }
-      manifestRetryCountRef.current = 0;
-      networkRecoveryCountRef.current = 0;
+        // Prefer Hls.js wherever Media Source Extensions are available. Some
+        // Chromium builds report "maybe" for native HLS even though playback can
+        // stall without producing an error. Native HLS remains the Safari path.
+        if (!HlsConstructor.isSupported()) {
+          if (videoEl.canPlayType("application/vnd.apple.mpegurl")) {
+            videoEl.addEventListener("error", nativeErrorHandler, {
+              once: true,
+            });
+            fallbackToSrc(videoEl, safeHlsSrc);
+            return;
+          }
 
-      const hls = new HlsConstructor({
-        debug: false,
-        enableWorker: true,
-        lowLatencyMode: false,
-        backBufferLength: 90,
-        maxBufferLength: 30,
-        maxMaxBufferLength: 600,
-        maxBufferSize: 60 * 1000 * 1000,
-        maxBufferHole: 0.5,
-        highBufferWatchdogPeriod: 2,
-        nudgeOffset: 0.1,
-        nudgeMaxRetry: 3,
-        maxFragLookUpTolerance: 0.25,
-        enableSoftwareAES: true,
-        startLevel: -1,
-        fragLoadingTimeOut: 20000,
-        fragLoadingMaxRetry: 6,
-        fragLoadingRetryDelay: 1000,
-        fragLoadingMaxRetryTimeout: 64000,
-      });
+          fallbackToSrc(videoEl, fallbackSrc ?? src);
+          return;
+        }
 
-      hlsRef.current = hls;
-
-      // Configure error handlers
-      setupHlsErrorHandlers(hls, HlsConstructor, videoEl, safeHlsSrc);
-
-      // Once the manifest is parsed, we can attempt autoplay
-      hls.on(HlsConstructor.Events.MANIFEST_PARSED, () => {
+        if (changedSource) {
+          cleanupHls(true);
+        }
         manifestRetryCountRef.current = 0;
         networkRecoveryCountRef.current = 0;
-        setIsLoading(false);
-        onManifestParsed?.();
-        if (!isCleaningUpRef.current && autoPlay) {
-          void videoEl.play().catch(() => {});
-        }
-      });
 
-      hls.loadSource(safeHlsSrc);
-      hls.attachMedia(videoEl);
-    } catch (error) {
-      // If dynamic import fails, fallback if possible
-      console.error("HLS import/setup error:", error);
-      setIsLoading(false);
-      if (fallbackSrc !== undefined) {
-        fallbackToSrc(videoEl, fallbackSrc);
-      } else {
-        // If no fallback is provided, we log the error and let the user handle it
-        throw error; // or console.warn("No fallback source provided.");
+        const hls = new HlsConstructor({
+          debug: false,
+          autoStartLoad: canLoadRef.current && getNativeAppActivity(),
+          enableWorker: true,
+          lowLatencyMode: false,
+          backBufferLength: 90,
+          maxBufferLength: 30,
+          maxMaxBufferLength: 600,
+          maxBufferSize: 60 * 1000 * 1000,
+          maxBufferHole: 0.5,
+          highBufferWatchdogPeriod: 2,
+          nudgeOffset: 0.1,
+          nudgeMaxRetry: 3,
+          maxFragLookUpTolerance: 0.25,
+          enableSoftwareAES: true,
+          startLevel: -1,
+          fragLoadingTimeOut: 20000,
+          fragLoadingMaxRetry: 6,
+          fragLoadingRetryDelay: 1000,
+          fragLoadingMaxRetryTimeout: 64000,
+        });
+
+        hlsRef.current = hls;
+
+        // Configure error handlers
+        setupHlsErrorHandlers(hls, HlsConstructor, videoEl, safeHlsSrc);
+
+        // Once the manifest is parsed, we can attempt autoplay
+        hls.on(HlsConstructor.Events.MANIFEST_PARSED, () => {
+          if (hlsRef.current !== hls || !isCurrentSetup(setupVersion, videoEl))
+            return;
+          manifestRetryCountRef.current = 0;
+          networkRecoveryCountRef.current = 0;
+          setIsLoading(false);
+          callbacksRef.current.onManifestParsed?.();
+          if (
+            !isCleaningUpRef.current &&
+            callbacksRef.current.autoPlay &&
+            canLoadRef.current &&
+            getNativeAppActivity()
+          ) {
+            void videoEl.play().catch(() => {});
+          }
+        });
+
+        hls.loadSource(safeHlsSrc);
+        hls.attachMedia(videoEl);
+        if (!canLoadRef.current || !getNativeAppActivity()) {
+          suspendedHlsRef.current = hls;
+          hls.stopLoad();
+        }
+      } catch (error) {
+        if (!isCurrentSetup(setupVersion, videoEl)) return;
+        // If dynamic import fails, fallback if possible
+        console.error("HLS import/setup error:", error);
+        setIsLoading(false);
+        if (fallbackSrc !== undefined) {
+          fallbackToSrc(videoEl, fallbackSrc);
+        } else {
+          // If no fallback is provided, we log the error and let the user handle it
+          throw error; // or console.warn("No fallback source provided.");
+        }
       }
     }
-  }
+  );
 
   useEffect(() => {
     setupVersionRef.current += 1;
@@ -330,13 +428,16 @@ export function useHlsPlayer({
     const videoEl = videoRef.current;
     if (!videoEl) return;
     const nativeErrorHandler = () => {
-      if (!isCurrentSetup(setupVersion, videoEl)) {
+      if (
+        !isCurrentSetup(setupVersion, videoEl) ||
+        (isNative && !canLoadRef.current)
+      ) {
         return;
       }
       fallbackToSrc(videoEl, fallbackSrc ?? src);
     };
 
-    if (!enabled) {
+    if (!initialize) {
       setIsLoading(false);
       if (document.fullscreenElement?.contains(videoEl) ?? false) {
         return;
@@ -351,6 +452,10 @@ export function useHlsPlayer({
       videoEl.load();
       return;
     }
+
+    if (isNative) setLoadedSource(src);
+    suspendedVideoRef.current = null;
+    needsManifestReloadRef.current = false;
 
     // Check if this is a new source vs. initial mount
     const isInitialMount = isFirstMountRef.current;
@@ -400,23 +505,55 @@ export function useHlsPlayer({
       videoEl.removeAttribute("src");
       videoEl.load();
     };
-  }, [
-    src,
-    isHls,
-    enabled,
-    autoPlay,
-    fallbackSrc,
-    onError,
-    onManifestParsed,
-    cleanupHls,
-    retryVersion,
-  ]);
+  }, [src, isHls, initialize, isNative, fallbackSrc, cleanupHls, retryVersion]);
+
+  const suspendLoading = useEffectEvent((video: HTMLVideoElement) => {
+    if (hlsRetryTimeoutRef.current !== null) {
+      clearTimeout(hlsRetryTimeoutRef.current);
+      hlsRetryTimeoutRef.current = null;
+    }
+    video.pause();
+    if (hlsRef.current) {
+      suspendedHlsRef.current = hlsRef.current;
+      hlsRef.current.stopLoad();
+    } else if (isNative) {
+      suspendedVideoRef.current ??= suspendVideoSource(video);
+    }
+  });
+
+  const resumeLoading = useEffectEvent((video: HTMLVideoElement) => {
+    if (hlsRef.current && suspendedHlsRef.current === hlsRef.current) {
+      suspendedHlsRef.current = null;
+      if (needsManifestReloadRef.current) {
+        needsManifestReloadRef.current = false;
+        const safeSource = getSafeVideoSource(src);
+        if (safeSource) hlsRef.current.loadSource(safeSource);
+      }
+      hlsRef.current.startLoad(-1);
+    }
+    const suspended = suspendedVideoRef.current;
+    if (suspended) {
+      suspendedVideoRef.current = null;
+      return restoreVideoSource(video, suspended);
+    }
+    return undefined;
+  });
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    let removeRestoreListener: (() => void) | undefined;
+    if (canLoad) removeRestoreListener = resumeLoading(video);
+    else suspendLoading(video);
+    return () => removeRestoreListener?.();
+  }, [canLoad, isNative, src, initialize, retryVersion]);
 
   return {
     /** A ref to the <video> element, which the caller can render. */
     videoRef,
     /** True if still loading or parsing the manifest, etc. */
     isLoading,
+    isFullscreen,
     /** Rebuild the selected playback pipeline after a terminal media error. */
     retry,
   };

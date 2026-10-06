@@ -1,6 +1,11 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { useWaveWebSocket } from "@/hooks/useWaveWebSocket";
 
+let mockAppActive = true;
+jest.mock("@/hooks/useNativeAppActivity", () => ({
+  useNativeAppActivity: () => mockAppActive,
+}));
+
 class MockWebSocket {
   static CONNECTING = 0;
   static OPEN = 1;
@@ -25,6 +30,7 @@ class MockWebSocket {
 describe("useWaveWebSocket", () => {
   let originalWs: any;
   beforeEach(() => {
+    mockAppActive = true;
     originalWs = global.WebSocket;
     (global as any).WebSocket = jest.fn(
       (url: string) => new MockWebSocket(url)
@@ -71,5 +77,33 @@ describe("useWaveWebSocket", () => {
       result.current.disconnect();
     });
     expect(instance.close).toHaveBeenCalled();
+  });
+
+  it("closes and cancels retries when inactive, then subscribes once on resume", () => {
+    const { rerender } = renderHook(() => useWaveWebSocket("wave1"));
+    const first = (globalThis.WebSocket as jest.Mock).mock.results[0]
+      ?.value as MockWebSocket;
+    act(() => first.onclose?.({}));
+    expect(jest.getTimerCount()).toBe(1);
+    mockAppActive = false;
+    rerender();
+    expect(first.close).toHaveBeenCalled();
+    act(() => jest.advanceTimersByTime(60_000));
+    expect(globalThis.WebSocket).toHaveBeenCalledTimes(1);
+    mockAppActive = true;
+    rerender();
+    expect(globalThis.WebSocket).toHaveBeenCalledTimes(2);
+    // An old close/open callback must not reconnect or subscribe after resume.
+    act(() => {
+      first.onclose?.({});
+      first.triggerOpen();
+    });
+    act(() => jest.advanceTimersByTime(5000));
+    expect(globalThis.WebSocket).toHaveBeenCalledTimes(2);
+    expect(first.send).not.toHaveBeenCalled();
+    const second = (globalThis.WebSocket as jest.Mock).mock.results[1]
+      ?.value as MockWebSocket;
+    act(() => second.triggerOpen());
+    expect(second.send).toHaveBeenCalledTimes(1);
   });
 });

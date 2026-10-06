@@ -1,5 +1,13 @@
 "use client";
 
+import { Capacitor } from "@capacitor/core";
+import {
+  restoreVideoSource,
+  suspendVideoSource,
+  type SuspendedVideoSource,
+} from "@/services/media/video-loading";
+import { useNativeAppActivity } from "@/hooks/useNativeAppActivity";
+
 import { PlayIcon } from "@heroicons/react/24/solid";
 import clsx from "clsx";
 import frameStyles from "./SeizeVideoFrame.module.css";
@@ -131,6 +139,13 @@ export default function SeizeVideoPlayer({
   "data-disable": dataDisable,
   "data-nft-media-renderer": dataNftMediaRenderer,
 }: SeizeVideoPlayerProps) {
+  const isAppActive = useNativeAppActivity();
+  const isNative = Capacitor.isNativePlatform();
+  const [openedSource, setOpenedSource] = useState<string | undefined>();
+  const suspendedSourceRef = useRef<{
+    source: string;
+    value: SuspendedVideoSource;
+  } | null>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const internalVideoRef = useRef<HTMLVideoElement | null>(null);
   const isScrubbingRef = useRef(false);
@@ -359,6 +374,7 @@ export default function SeizeVideoPlayer({
 
   function handleMetadata(event: React.SyntheticEvent<HTMLVideoElement>) {
     const video = event.currentTarget;
+    setOpenedSource(directSrc);
     setVideoSize({
       width: video.videoWidth,
       height: video.videoHeight,
@@ -387,10 +403,18 @@ export default function SeizeVideoPlayer({
     }
 
     if (playerOwnsAutoplay) {
-      setUserPausedAutoplaySrc(directSrc ?? null);
+      setUserPausedAutoplaySrc(autoplayIdentity);
     }
     video.pause();
     handlePause();
+  }
+
+  function prepareDirectSource(video: HTMLVideoElement) {
+    if (directSrc && !video.getAttribute("src")) {
+      video.src = directSrc;
+      video.load();
+      setOpenedSource(directSrc);
+    }
   }
 
   function togglePlayback() {
@@ -399,6 +423,7 @@ export default function SeizeVideoPlayer({
 
     if (video.paused || video.ended) {
       setUserPausedAutoplaySrc(null);
+      prepareDirectSource(video);
       video.play().catch(() => {
         setIsPaused(true);
         setControlsVisible(true);
@@ -499,6 +524,7 @@ export default function SeizeVideoPlayer({
     if (!video) {
       return;
     }
+    prepareDirectSource(video);
     video.play().catch(() => {
       setIsPaused(true);
       setControlsVisible(true);
@@ -506,6 +532,7 @@ export default function SeizeVideoPlayer({
   }
 
   function handleError(event: React.SyntheticEvent<HTMLVideoElement, Event>) {
+    if (!isAppActive || (isNative && !canLoadDirectSource)) return;
     const currentIndex = orderedFallbackSources.findIndex(
       (candidate) => candidate === directSrc
     );
@@ -577,7 +604,10 @@ export default function SeizeVideoPlayer({
     (resolvedTemplate.mode === "ambient" ||
       resolvedTemplate.mode === "inert-preview");
   const videoAutoPlay =
-    resolvedTemplate.autoPlay && !playerOwnsAutoplay && !isPosterGateClosed;
+    isAppActive &&
+    resolvedTemplate.autoPlay &&
+    !playerOwnsAutoplay &&
+    !isPosterGateClosed;
   const minimalVideoHandlers = getMinimalVideoHandlers({
     hideControlsSoon,
     revealControls,
@@ -590,10 +620,28 @@ export default function SeizeVideoPlayer({
       ? mutedState.value
       : resolvedTemplate.muted;
   const isAnyFullscreen = isFullscreen || isNativeFullscreen;
+  const canLoadDirectSource =
+    isAppActive && (!isNative || isInView || isAnyFullscreen);
+  const deferPosterSource =
+    Boolean(poster) &&
+    (isPosterGateClosed ||
+      (resolvedTemplate.autoPlay &&
+        !isInView &&
+        !isAnyFullscreen &&
+        openedSource !== directSrc));
+  const renderedSrc = deferPosterSource ? undefined : directSrc;
+  const videoPreload =
+    !isAppActive ||
+    (isNative &&
+      (!canLoadDirectSource || (poster && !resolvedTemplate.autoPlay))) ||
+    (poster && isPosterGateClosed)
+      ? "none"
+      : resolvedTemplate.preload;
   const isWrapperFullscreen = isFullscreen;
   const controlsAreVisible = controlsVisible || isPaused || isAnyFullscreen;
   const responsiveMediaStyle = getResponsiveMediaStyle();
-  const hasUserPausedOwnedAutoplay = userPausedAutoplaySrc === directSrc;
+  const autoplayIdentity = directSrc ?? dataUrl ?? id ?? "external-video";
+  const hasUserPausedOwnedAutoplay = userPausedAutoplaySrc === autoplayIdentity;
   const labels = useMemo<SeizeVideoLabels>(
     () => ({
       captions: t(locale, "media.video.captions"),
@@ -614,17 +662,41 @@ export default function SeizeVideoPlayer({
   );
   const resolvedCaptionsLabel = captionsLabel ?? labels.captions;
 
+  useEffect(() => {
+    if (!isNative || !videoElement || !directSrc) return;
+    let removeRestoreListener: (() => void) | undefined;
+    if (suspendedSourceRef.current?.source !== directSrc)
+      suspendedSourceRef.current = null;
+    if (!canLoadDirectSource) {
+      const suspended = suspendVideoSource(videoElement);
+      if (suspended)
+        suspendedSourceRef.current = { source: directSrc, value: suspended };
+    } else {
+      const suspended = suspendedSourceRef.current;
+      if (suspended) {
+        suspendedSourceRef.current = null;
+        removeRestoreListener = restoreVideoSource(
+          videoElement,
+          suspended.value
+        );
+      }
+    }
+    return () => removeRestoreListener?.();
+  }, [canLoadDirectSource, directSrc, isNative, renderedSrc, videoElement]);
+
   const syncOwnedAutoplay = useCallback(() => {
     const video = videoElement;
     if (!video || !playerOwnsAutoplay) {
       return;
     }
 
-    if (!isInView || prefersReducedMotion) {
+    if (hasUserPausedOwnedAutoplay) return;
+    if (
+      !isAppActive ||
+      (!isInView && !isFullscreen && !isNativeFullscreen) ||
+      prefersReducedMotion
+    ) {
       video.pause();
-      return;
-    }
-    if (hasUserPausedOwnedAutoplay) {
       return;
     }
 
@@ -635,6 +707,9 @@ export default function SeizeVideoPlayer({
   }, [
     hasUserPausedOwnedAutoplay,
     isInView,
+    isAppActive,
+    isFullscreen,
+    isNativeFullscreen,
     playerOwnsAutoplay,
     prefersReducedMotion,
     videoElement,
@@ -644,6 +719,10 @@ export default function SeizeVideoPlayer({
     // Browser playback is an imperative media side effect of visibility policy.
     syncOwnedAutoplay();
   }, [directSrc, syncOwnedAutoplay]);
+
+  useEffect(() => {
+    if (!isAppActive) videoElement?.pause();
+  }, [isAppActive, videoElement]);
 
   useEffect(() => {
     if (!videoElement) {
@@ -705,9 +784,9 @@ export default function SeizeVideoPlayer({
           onTimeUpdate={updateProgress}
           onTouchStart={minimalVideoHandlers.onTouchStart}
           poster={poster}
-          preload={resolvedTemplate.preload}
+          preload={videoPreload}
           setVideoRef={setVideoRef}
-          src={directSrc}
+          src={renderedSrc}
           videoAutoPlay={videoAutoPlay}
           videoClassName={videoClassName}
           videoControls={videoControls}

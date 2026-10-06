@@ -1,6 +1,7 @@
 import React from "react";
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
+import * as videoConfig from "@/components/drops/view/item/content/media/SeizeVideoPlayer.config";
 import DropListItemContentMediaVideo from "@/components/drops/view/item/content/media/DropListItemContentMediaVideo";
 
 const downloadMediaUrlMock = jest.fn();
@@ -223,6 +224,7 @@ describe("DropListItemContentMediaVideo", () => {
   });
 
   it("starts an opted-in app video when it enters view after setup", () => {
+    jest.spyOn(videoConfig, "useElementInView").mockReturnValue(true);
     mockIsApp = true;
     mockPrefersReducedMotion(false);
     const ref = {

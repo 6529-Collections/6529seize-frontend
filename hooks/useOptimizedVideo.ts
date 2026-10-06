@@ -1,5 +1,6 @@
 "use client";
 
+import { useNativeAppActivity } from "./useNativeAppActivity";
 import { useState, useEffect, useRef } from "react";
 import {
   isVideoUrl,
@@ -46,23 +47,37 @@ export function useOptimizedVideo(
     exponentialBackoff = false,
   } = options;
 
-  const [playableUrl, setPlayableUrl] = useState(originalUrl);
-  const [isOptimized, setIsOptimized] = useState(false);
-  const [isChecking, setIsChecking] = useState(false);
-  const [isHls, setIsHls] = useState(false);
-
+  const isAppActive = useNativeAppActivity();
+  const sourceRef = useRef<string | null>(null);
+  const optimizedSourceRef = useRef<string | null>(null);
+  const [rendition, setRendition] = useState({
+    source: originalUrl,
+    playableUrl: originalUrl,
+    isOptimized: false,
+    isChecking: false,
+    isHls: false,
+  });
   const retriesRef = useRef(0);
   const timeoutRef = useRef<number | null>(null);
 
   useEffect(() => {
-    // Reset state whenever the originalUrl changes
-    setPlayableUrl(originalUrl);
-    setIsOptimized(false);
-    setIsHls(false);
-    setIsChecking(false);
-    retriesRef.current = 0;
-
-    if (!enabled) {
+    if (sourceRef.current !== originalUrl) {
+      sourceRef.current = originalUrl;
+      optimizedSourceRef.current = null;
+      setRendition({
+        source: originalUrl,
+        playableUrl: originalUrl,
+        isOptimized: false,
+        isHls: false,
+        isChecking: false,
+      });
+      retriesRef.current = 0;
+    }
+    if (
+      !enabled ||
+      !isAppActive ||
+      optimizedSourceRef.current === originalUrl
+    ) {
       return;
     }
 
@@ -77,49 +92,70 @@ export function useOptimizedVideo(
     }
 
     let isMounted = true;
+    const isCurrentProbe = () => isMounted;
 
     const checkOptimized = async () => {
-      if (!isMounted) return;
+      if (!isCurrentProbe()) return;
 
       // If we've retried too many times, settle on the original
       if (retriesRef.current >= maxRetries) {
-        setPlayableUrl(originalUrl);
-        setIsChecking(false);
+        setRendition({
+          source: originalUrl,
+          playableUrl: originalUrl,
+          isOptimized: false,
+          isHls: false,
+          isChecking: false,
+        });
         return;
       }
 
-      setIsChecking(true);
+      setRendition((previous) => ({ ...previous, isChecking: true }));
 
       try {
         // 1) Try HLS first if preferHls is true
         if (preferHls) {
           const hlsOk = await checkVideoAvailability(conversions.HLS);
-          if (hlsOk && isMounted) {
-            setPlayableUrl(conversions.HLS);
-            setIsOptimized(true);
-            setIsHls(true);
-            setIsChecking(false);
+          if (!isCurrentProbe()) return;
+          if (hlsOk) {
+            optimizedSourceRef.current = originalUrl;
+            setRendition({
+              source: originalUrl,
+              playableUrl: conversions.HLS,
+              isOptimized: true,
+              isHls: true,
+              isChecking: false,
+            });
             return;
           }
         }
 
         // 2) Try 1080p MP4
         const ok1080 = await checkVideoAvailability(conversions.MP4_1080P);
-        if (ok1080 && isMounted) {
-          setPlayableUrl(conversions.MP4_1080P);
-          setIsOptimized(true);
-          setIsHls(false);
-          setIsChecking(false);
+        if (!isCurrentProbe()) return;
+        if (ok1080) {
+          optimizedSourceRef.current = originalUrl;
+          setRendition({
+            source: originalUrl,
+            playableUrl: conversions.MP4_1080P,
+            isOptimized: true,
+            isHls: false,
+            isChecking: false,
+          });
           return;
         }
 
         // 3) Try 720p MP4
         const ok720 = await checkVideoAvailability(conversions.MP4_720P);
-        if (ok720 && isMounted) {
-          setPlayableUrl(conversions.MP4_720P);
-          setIsOptimized(true);
-          setIsHls(false);
-          setIsChecking(false);
+        if (!isCurrentProbe()) return;
+        if (ok720) {
+          optimizedSourceRef.current = originalUrl;
+          setRendition({
+            source: originalUrl,
+            playableUrl: conversions.MP4_720P,
+            isOptimized: true,
+            isHls: false,
+            isChecking: false,
+          });
           return;
         }
 
@@ -136,8 +172,8 @@ export function useOptimizedVideo(
         }, delay);
       } catch {
       } finally {
-        if (isMounted) {
-          setIsChecking(false);
+        if (isCurrentProbe()) {
+          setRendition((previous) => ({ ...previous, isChecking: false }));
         }
       }
     };
@@ -153,6 +189,7 @@ export function useOptimizedVideo(
   }, [
     originalUrl,
     enabled,
+    isAppActive,
     pollInterval,
     maxRetries,
     preferHls,
@@ -160,9 +197,14 @@ export function useOptimizedVideo(
   ]);
 
   return {
-    playableUrl,
-    isOptimized,
-    isChecking,
-    isHls,
+    playableUrl:
+      rendition.source === originalUrl ? rendition.playableUrl : originalUrl,
+    isOptimized: rendition.source === originalUrl && rendition.isOptimized,
+    isChecking:
+      enabled &&
+      isAppActive &&
+      rendition.source === originalUrl &&
+      rendition.isChecking,
+    isHls: rendition.source === originalUrl && rendition.isHls,
   };
 }

@@ -37,14 +37,14 @@ function DropListItemContentMediaVideo({
   showFullscreen = true,
   loadStrategy = "in-view",
 }: Props) {
+  const { isApp } = useDeviceInfo();
   const [wrapperRef, inView] = useInView<HTMLDivElement>({
     freezeOnceVisible: false,
-    rootMargin: "400px 0px",
+    rootMargin: isApp ? "0px" : "400px 0px",
     threshold: 0.1,
   });
   const wasFullscreenRef = useRef(false);
   const locale = useBrowserLocale();
-  const { isApp } = useDeviceInfo();
   const prefersReducedMotion = usePrefersReducedMotion();
   const shouldLoadVideo = loadStrategy === "eager" || inView;
   const canAutoPlayInCurrentEnvironment = allowAutoPlayInApp
@@ -70,7 +70,12 @@ function DropListItemContentMediaVideo({
   });
 
   // 2) Setup HLS (or native) once and get back the videoRef + loading state
-  const { videoRef, isLoading, retry } = useHlsPlayer({
+  const {
+    videoRef,
+    isLoading,
+    retry,
+    isFullscreen: isVideoFullscreen,
+  } = useHlsPlayer({
     enabled: shouldLoadVideo,
     src: playableUrl,
     isHls,
@@ -90,7 +95,7 @@ function DropListItemContentMediaVideo({
     const videoEl = videoRef.current;
     if (!videoEl || isLoading) return;
     const fullscreenElement = document.fullscreenElement;
-    if (fullscreenElement?.contains(videoEl) ?? false) {
+    if (isVideoFullscreen || (fullscreenElement?.contains(videoEl) ?? false)) {
       wasFullscreenRef.current = true;
       return;
     }
@@ -103,7 +108,7 @@ function DropListItemContentMediaVideo({
       videoEl.pause();
       videoEl.muted = true;
     }
-  }, [shouldAutoPlay, isApp, isLoading, videoRef]);
+  }, [shouldAutoPlay, isApp, isLoading, isVideoFullscreen, videoRef]);
 
   // 4) Inline attributes for iOS / legacy WebKit
   useEffect(() => {
@@ -125,7 +130,10 @@ function DropListItemContentMediaVideo({
       }
 
       const fullscreenElement = document.fullscreenElement;
-      if (fullscreenElement?.contains(videoEl) ?? false) {
+      if (
+        isVideoFullscreen ||
+        (fullscreenElement?.contains(videoEl) ?? false)
+      ) {
         wasFullscreenRef.current = true;
         return;
       }
@@ -144,7 +152,7 @@ function DropListItemContentMediaVideo({
         pauseWhenFullscreenCloses
       );
     };
-  }, [isApp, videoRef]);
+  }, [isApp, isVideoFullscreen, videoRef]);
 
   const videoLayout = artworkLayout ? "artwork" : "natural";
 
@@ -159,6 +167,7 @@ function DropListItemContentMediaVideo({
     >
       <SeizeVideoPlayer
         videoRef={videoRef}
+        data-url={src}
         template="ambient-media"
         autoPlay={shouldAutoPlay}
         layout={fillContainer ? "fill" : videoLayout}

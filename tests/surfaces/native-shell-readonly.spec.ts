@@ -846,3 +846,79 @@ test.describe("Native iPad drop actions @surface @medium @readonly", () => {
     await expect(copyTextAction).toBeHidden({ timeout: 10_000 });
   });
 });
+
+test("native artwork video stops offscreen buffering and restores position after backgrounding", async ({
+  page,
+}, testInfo) => {
+  test.skip(
+    !isCapacitorSimulationProject(testInfo.project.name),
+    "Native media loading policy"
+  );
+  await gotoReady(page, "/the-memes/549");
+  const video = page.getByLabel("Video player", { exact: true });
+  await video.scrollIntoViewIfNeeded();
+  await expect
+    .poll(() =>
+      video.evaluate((element: HTMLVideoElement) => element.readyState)
+    )
+    .toBeGreaterThanOrEqual(1);
+  const pauseButton = page
+    .getByRole("button", { name: "Pause video", exact: true })
+    .first();
+  await expect(pauseButton).toBeVisible();
+  await pauseButton.click();
+  await video.evaluate((element: HTMLVideoElement) => {
+    element.currentTime = 1;
+  });
+  const source = await video.getAttribute("src");
+  expect(source).toBeTruthy();
+  if (!source)
+    throw new Error("Visible artwork video did not attach its source");
+  const originalStyle = await video.evaluate((element) => {
+    const wrapper = element.parentElement!.parentElement!;
+    const style = wrapper.getAttribute("style");
+    wrapper.style.transform = "translateY(300vh)";
+    return style;
+  });
+  await expect(video).not.toHaveAttribute("src");
+  await video.evaluate((element, style) => {
+    const wrapper = element.parentElement!.parentElement!;
+    if (style === null) wrapper.removeAttribute("style");
+    else wrapper.setAttribute("style", style);
+  }, originalStyle);
+  await expect(video).toHaveAttribute("src", source);
+  await expect
+    .poll(() =>
+      video.evaluate((element: HTMLVideoElement) => element.currentTime)
+    )
+    .toBeCloseTo(1, 1);
+  await page.evaluate(() => {
+    Object.defineProperty(document, "visibilityState", {
+      configurable: true,
+      value: "hidden",
+    });
+    document.dispatchEvent(new Event("visibilitychange"));
+  });
+  await expect(video).not.toHaveAttribute("src");
+  await page.evaluate(() => {
+    Object.defineProperty(document, "visibilityState", {
+      configurable: true,
+      value: "visible",
+    });
+    document.dispatchEvent(new Event("visibilitychange"));
+  });
+  await expect(video).toHaveAttribute("src", source);
+  await expect
+    .poll(() =>
+      video.evaluate((element: HTMLVideoElement) => element.readyState)
+    )
+    .toBeGreaterThanOrEqual(1);
+  await expect
+    .poll(() =>
+      video.evaluate((element: HTMLVideoElement) => element.currentTime)
+    )
+    .toBeCloseTo(1, 1);
+  expect(
+    await video.evaluate((element: HTMLVideoElement) => element.paused)
+  ).toBe(true);
+});

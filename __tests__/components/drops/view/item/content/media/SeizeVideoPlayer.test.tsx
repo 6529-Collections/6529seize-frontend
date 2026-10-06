@@ -7,8 +7,14 @@ import {
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Profiler } from "react";
+import { Capacitor } from "@capacitor/core";
 
 import SeizeVideoPlayer from "@/components/drops/view/item/content/media/SeizeVideoPlayer";
+
+let mockAppActive = true;
+jest.mock("@/hooks/useNativeAppActivity", () => ({
+  useNativeAppActivity: () => mockAppActive,
+}));
 
 function installIntersectionObserverMock() {
   let callback: IntersectionObserverCallback | undefined;
@@ -66,6 +72,7 @@ function mockPrefersReducedMotion(matches: boolean) {
 
 describe("SeizeVideoPlayer", () => {
   beforeEach(() => {
+    mockAppActive = true;
     jest.restoreAllMocks();
     Object.defineProperty(HTMLElement.prototype, "setPointerCapture", {
       configurable: true,
@@ -90,6 +97,111 @@ describe("SeizeVideoPlayer", () => {
     jest
       .spyOn(HTMLMediaElement.prototype, "pause")
       .mockImplementation(() => undefined);
+  });
+
+  it("pauses native ambient playback and resumes without replacing the video or its position", () => {
+    const observer = installIntersectionObserverMock();
+    const { container, rerender } = render(
+      <SeizeVideoPlayer src="clip.mp4" autoPlay />
+    );
+    observer.trigger(true);
+    const video = container.querySelector("video")!;
+    video.currentTime = 12;
+    jest.mocked(HTMLMediaElement.prototype.play).mockClear();
+    jest.mocked(HTMLMediaElement.prototype.pause).mockClear();
+    mockAppActive = false;
+    rerender(<SeizeVideoPlayer src="clip.mp4" autoPlay />);
+    expect(HTMLMediaElement.prototype.pause).toHaveBeenCalled();
+    expect(HTMLMediaElement.prototype.play).not.toHaveBeenCalled();
+    expect(container.querySelector("video")).toBe(video);
+    expect(video.currentTime).toBe(12);
+    mockAppActive = true;
+    rerender(<SeizeVideoPlayer src="clip.mp4" autoPlay />);
+    expect(HTMLMediaElement.prototype.play).toHaveBeenCalled();
+    expect(video.currentTime).toBe(12);
+  });
+
+  it("pauses manually started video on inactivity without autoplaying it on return", () => {
+    const { rerender } = render(
+      <SeizeVideoPlayer src="clip.mp4" autoPlay={false} />
+    );
+    jest.mocked(HTMLMediaElement.prototype.play).mockClear();
+    mockAppActive = false;
+    rerender(<SeizeVideoPlayer src="clip.mp4" autoPlay={false} />);
+    expect(HTMLMediaElement.prototype.pause).toHaveBeenCalled();
+    mockAppActive = true;
+    rerender(<SeizeVideoPlayer src="clip.mp4" autoPlay={false} />);
+    expect(HTMLMediaElement.prototype.play).not.toHaveBeenCalled();
+  });
+
+  it("respects an explicit pause for a video whose source is owned by the HLS hook", async () => {
+    const observer = installIntersectionObserverMock();
+    const { container, rerender } = render(
+      <SeizeVideoPlayer autoPlay data-url="external.mp4" />
+    );
+    observer.trigger(true);
+    const video = container.querySelector("video")!;
+    Object.defineProperty(video, "paused", {
+      configurable: true,
+      value: false,
+    });
+    fireEvent.play(video);
+    await userEvent.click(screen.getByRole("button", { name: "Pause video" }));
+    jest.mocked(HTMLMediaElement.prototype.play).mockClear();
+    mockAppActive = false;
+    rerender(<SeizeVideoPlayer autoPlay data-url="external.mp4" />);
+    mockAppActive = true;
+    rerender(<SeizeVideoPlayer autoPlay data-url="external.mp4" />);
+    expect(HTMLMediaElement.prototype.play).not.toHaveBeenCalled();
+  });
+
+  it("defers poster-gated downloads until the play gesture attaches the source", async () => {
+    const { container } = render(
+      <SeizeVideoPlayer
+        src="clip.mp4"
+        poster="poster.jpg"
+        template="poster-gated"
+      />
+    );
+    const video = container.querySelector("video")!;
+    expect(video).not.toHaveAttribute("src");
+    expect(video.preload).toBe("none");
+    jest
+      .mocked(HTMLMediaElement.prototype.play)
+      .mockImplementationOnce(function (this: HTMLMediaElement) {
+        expect(this.getAttribute("src")).toBe("clip.mp4");
+        return Promise.resolve();
+      });
+    await userEvent.click(
+      screen.getByRole("button", { name: "Play video preview" })
+    );
+    expect(video).toHaveAttribute("src", "clip.mp4");
+    expect(video).toHaveAttribute("controls");
+  });
+
+  it("defers native ambient video behind its poster until visible, then suspends offscreen buffering", () => {
+    jest.spyOn(Capacitor, "isNativePlatform").mockReturnValue(true);
+    const observer = installIntersectionObserverMock();
+    const { container, rerender } = render(
+      <SeizeVideoPlayer src="clip.mp4" poster="poster.jpg" autoPlay />
+    );
+    const video = container.querySelector("video")!;
+    expect(video).not.toHaveAttribute("src");
+    observer.trigger(true);
+    expect(video).toHaveAttribute("src", "clip.mp4");
+    fireEvent.loadedMetadata(video);
+    video.currentTime = 12;
+    observer.trigger(false);
+    expect(video).not.toHaveAttribute("src");
+    observer.trigger(true);
+    fireEvent.loadedMetadata(video);
+    expect(video.currentTime).toBe(12);
+    act(() => video.dispatchEvent(new Event("webkitbeginfullscreen")));
+    observer.trigger(false);
+    expect(video).toHaveAttribute("src");
+    mockAppActive = false;
+    rerender(<SeizeVideoPlayer src="clip.mp4" poster="poster.jpg" autoPlay />);
+    expect(video).not.toHaveAttribute("src");
   });
 
   it("reserves a stable aspect ratio before video metadata loads", () => {

@@ -3,6 +3,7 @@
 import { publicEnv } from "@/config/env";
 import { useEffect, useRef, useState } from "react";
 import { WsMessageType } from "@/helpers/Types";
+import { useNativeAppActivity } from "./useNativeAppActivity";
 
 interface UseWaveWebSocketResult {
   socket: WebSocket | null;
@@ -25,6 +26,7 @@ const MAX_RECONNECT_ATTEMPTS = 20;
  * @param waveId - The wave ID to subscribe to. Pass empty string to disable.
  */
 export function useWaveWebSocket(waveId: string): UseWaveWebSocketResult {
+  const isAppActive = useNativeAppActivity();
   const socketRef = useRef<WebSocket | null>(null);
   const [readyState, setReadyState] = useState<number>(WebSocket.CLOSED);
   const reconnectAttemptsRef = useRef<number>(0);
@@ -32,7 +34,7 @@ export function useWaveWebSocket(waveId: string): UseWaveWebSocketResult {
   const shouldReconnectRef = useRef<boolean>(true);
 
   useEffect(() => {
-    if (!waveId) {
+    if (!waveId || !isAppActive) {
       if (socketRef.current) {
         socketRef.current.close();
         socketRef.current = null;
@@ -42,17 +44,21 @@ export function useWaveWebSocket(waveId: string): UseWaveWebSocketResult {
     }
 
     shouldReconnectRef.current = true;
+    reconnectAttemptsRef.current = 0;
     const url =
       publicEnv.WS_ENDPOINT ??
       publicEnv.API_ENDPOINT?.replace("https://api", "wss://ws") ??
       "wss://default-fallback-url";
+    let disposed = false;
 
     function connect() {
+      if (disposed || !shouldReconnectRef.current) return;
       const ws = new WebSocket(url);
       socketRef.current = ws;
       setReadyState(ws.readyState);
 
       ws.onopen = () => {
+        if (disposed || socketRef.current !== ws) return;
         setReadyState(ws.readyState);
         reconnectAttemptsRef.current = 0;
         ws.send(
@@ -64,6 +70,7 @@ export function useWaveWebSocket(waveId: string): UseWaveWebSocketResult {
       };
 
       ws.onclose = () => {
+        if (disposed || socketRef.current !== ws) return;
         setReadyState(WebSocket.CLOSED);
         // only reconnect if allowed
         if (
@@ -86,6 +93,7 @@ export function useWaveWebSocket(waveId: string): UseWaveWebSocketResult {
     connect();
 
     return () => {
+      disposed = true;
       // disable future reconnects on cleanup
       shouldReconnectRef.current = false;
       if (reconnectTimeoutRef.current != null) {
@@ -93,9 +101,10 @@ export function useWaveWebSocket(waveId: string): UseWaveWebSocketResult {
       }
       if (socketRef.current) {
         socketRef.current.close();
+        socketRef.current = null;
       }
     };
-  }, [waveId]);
+  }, [waveId, isAppActive]);
 
   // manual disconnect function
   const disconnect = () => {
