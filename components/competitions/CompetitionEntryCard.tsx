@@ -35,7 +35,6 @@ export default function CompetitionEntryCard({
     <div id={`entry-${entryId}`} data-competition-entry={entryId}>
       <DefaultWaveLeaderboardDrop
         drop={query.data.drop}
-        onOpenDrop={onOpenDrop}
         onDropClick={openDrop}
         onDropContentClick={openDrop}
         winningThreshold={

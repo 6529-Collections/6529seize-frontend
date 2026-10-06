@@ -182,7 +182,11 @@ export const DefaultWaveLeaderboardDrop: React.FC<
               />
               <div className="tw-hidden tw-h-8 tw-items-center lg:tw-flex">
                 {!isProposalCard && (
-                  <WaveDropActionsOpen drop={drop} onOpen={onOpenDrop} />
+                  <WaveDropActionsOpen
+                    drop={drop}
+                    onOpen={onOpenDrop}
+                    onNavigate={onDropContentClick}
+                  />
                 )}
                 {canDelete && <WaveDropActionsOptions drop={drop} />}
               </div>
@@ -273,6 +277,7 @@ export const DefaultWaveLeaderboardDrop: React.FC<
                 {/* Open drop option */}
                 <WaveDropMobileMenuOpen
                   drop={drop}
+                  onNavigate={onDropContentClick}
                   onOpenChange={() => {
                     handleMobileMenuClose();
                     onOpenDrop?.();

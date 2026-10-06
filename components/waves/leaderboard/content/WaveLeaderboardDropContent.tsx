@@ -57,6 +57,7 @@ export const WaveLeaderboardDropContent: React.FC<
               drop={drop}
               variant="readFull"
               onOpen={onOpenDrop}
+              onNavigate={onOpenContent}
             />
           }
         />

@@ -937,6 +937,77 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     });
   });
 
+  test("opens personal entry actions through explicit competition navigation", async ({
+    page,
+    isMobile,
+  }) => {
+    const sandbox = await installCompetitionApi(page);
+    await page.goto(`${ROOT}/alpha?tab=leaderboard&default=1`);
+    await expect(page).toHaveURL(/tab=leaderboard&default=1$/);
+    await page
+      .getByRole("button", { name: "My submissions", exact: true })
+      .click();
+    const ownEntries = page.getByRole("dialog", {
+      name: "My submissions",
+      exact: true,
+    });
+    const entry = ownEntries.locator('[data-competition-entry="entry-alpha"]');
+    const title = entry.getByText("Recorded alpha entry", { exact: true });
+    await expect(title).toBeVisible();
+    if (isMobile) {
+      const touchTarget = await title.elementHandle();
+      if (!touchTarget) throw new Error("Personal entry title was not mounted");
+      await touchTarget.evaluate((element) => {
+        const box = element.getBoundingClientRect();
+        const touch = new Touch({
+          identifier: 1,
+          target: element,
+          clientX: box.x + box.width / 2,
+          clientY: box.y + box.height / 2,
+        });
+        element.dispatchEvent(
+          new TouchEvent("touchstart", {
+            bubbles: true,
+            cancelable: true,
+            touches: [touch],
+            changedTouches: [touch],
+          })
+        );
+      });
+      await expect(
+        page.getByRole("button", { name: "Open drop", exact: true })
+      ).toBeVisible();
+      await touchTarget.evaluate((element) => {
+        const box = element.getBoundingClientRect();
+        const touch = new Touch({
+          identifier: 1,
+          target: element,
+          clientX: box.x + box.width / 2,
+          clientY: box.y + box.height / 2,
+        });
+        element.dispatchEvent(
+          new TouchEvent("touchend", {
+            bubbles: true,
+            touches: [],
+            changedTouches: [touch],
+          })
+        );
+      });
+      await page
+        .getByRole("button", { name: "Open drop", exact: true })
+        .click();
+    } else {
+      await entry
+        .getByRole("button", { name: "Open drop", exact: true })
+        .click();
+    }
+    await expect(ownEntries).toHaveCount(0);
+    await expect(page).toHaveURL(
+      `${ROOT}/alpha?tab=leaderboard&drop=${entryDropId("alpha")}`
+    );
+    expect(sandbox.requests).toHaveLength(0);
+  });
+
   test("recovers a failed first legacy leaderboard load without changing its view", async ({
     page,
   }) => {

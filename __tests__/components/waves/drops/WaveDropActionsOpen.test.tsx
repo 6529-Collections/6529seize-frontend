@@ -1,10 +1,12 @@
-import { render, screen } from "@testing-library/react";
+import { render, renderHook, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { CSSProperties, ReactNode } from "react";
 import WaveDropActionsOpen from "@/components/waves/drops/WaveDropActionsOpen";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useCompetitionDropNavigation } from "@/hooks/competitions/useCompetitionDropNavigation";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 
 // Mock ResizeObserver
 global.ResizeObserver = jest.fn().mockImplementation(() => ({
@@ -33,6 +35,44 @@ jest.mock("react-tooltip", () => ({
 }));
 
 afterEach(() => jest.clearAllMocks());
+
+test.each([false, true])(
+  "uses competition navigation for the explicit open action (dropdown=%s)",
+  async (isDropdownItem) => {
+    const user = userEvent.setup();
+    const push = jest.fn();
+    const onOpen = jest.fn();
+    const drop = {
+      id: "entry-art",
+      drop_type: ApiDropType.Participatory,
+    } as ExtendedDrop;
+    (useRouter as jest.Mock).mockReturnValue({ push });
+    (usePathname as jest.Mock).mockReturnValue("/waves/w/competitions/alpha");
+    (useSearchParams as jest.Mock).mockReturnValue(
+      new URLSearchParams("tab=leaderboard&default=1")
+    );
+    const { result } = renderHook(() => useCompetitionDropNavigation());
+    render(
+      <WaveDropActionsOpen
+        drop={drop}
+        isDropdownItem={isDropdownItem}
+        onNavigate={result.current}
+        onOpen={onOpen}
+      />
+    );
+    await user.click(
+      screen.getByRole("button", {
+        name: isDropdownItem ? "Open" : "Open drop",
+      })
+    );
+    expect(push).toHaveBeenCalledTimes(1);
+    expect(push).toHaveBeenCalledWith(
+      "/waves/w/competitions/alpha?tab=leaderboard&drop=entry-art",
+      { scroll: false }
+    );
+    expect(onOpen).toHaveBeenCalledTimes(1);
+  }
+);
 
 test("returns null for chat drops", () => {
   const drop = { id: "1", drop_type: ApiDropType.Chat } as any;
