@@ -6,7 +6,7 @@ import {
   skipWaveNavigationTransition,
 } from "@/helpers/waves/wave-navigation-transition";
 
-export type WaveNavigationScreen = "list" | "wave" | null;
+type WaveNavigationScreen = "list" | "wave" | null;
 
 export function getWaveNavigationScreen(
   pathname: string,

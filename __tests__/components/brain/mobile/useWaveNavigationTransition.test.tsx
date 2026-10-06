@@ -2,11 +2,13 @@ import { act, render } from "@testing-library/react";
 import {
   getWaveNavigationScreen,
   useWaveNavigationTransition,
-  type WaveNavigationScreen,
 } from "@/components/brain/mobile/useWaveNavigationTransition";
 
 const cancel = jest.fn();
-const animate = jest.fn(() => ({ cancel }));
+const animate = jest.fn<
+  Pick<Animation, "cancel">,
+  [Keyframe[], KeyframeAnimationOptions]
+>(() => ({ cancel }));
 const media = {
   matches: false,
   addEventListener: jest.fn(),
@@ -15,7 +17,11 @@ const media = {
 const originalAnimate = HTMLElement.prototype.animate;
 const originalMatchMedia = window.matchMedia;
 
-function Surface({ screen }: { readonly screen: WaveNavigationScreen }) {
+function Surface({
+  screen,
+}: {
+  readonly screen: Parameters<typeof useWaveNavigationTransition>[0];
+}) {
   const ref = useWaveNavigationTransition(screen);
   return <div ref={ref}>Wave content</div>;
 }

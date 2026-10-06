@@ -221,6 +221,7 @@ function AppLayoutContent({ children }: Props) {
           </div>
           <div
             ref={waveNavigationRef}
+            data-testid="wave-navigation-content"
             data-wave-navigation-screen={waveNavigationScreen ?? undefined}
           >
             {activeContent}

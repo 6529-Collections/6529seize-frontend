@@ -279,7 +279,7 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
         reducedMotion: reducedMotion ? "reduce" : "no-preference",
       });
       await gotoReady(page, "/waves");
-      const surface = page.locator("[data-wave-navigation-screen]");
+      const surface = page.getByTestId("wave-navigation-content");
       await expect(surface).toHaveAttribute(
         "data-wave-navigation-screen",
         "list"
@@ -288,7 +288,7 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
         name: "All recent waves list",
         exact: true,
       });
-      const waveLink = waveList.locator('a[href^="/waves/"]').first();
+      const waveLink = waveList.getByRole("link").first();
       await expect(waveLink).toBeVisible();
 
       const waitForMotion = (snapshots = false) =>
@@ -485,14 +485,12 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
     );
     await gotoReady(page, "/waves");
     const scrollport = page
+      .getByRole("region", { name: "Wave discovery", exact: true })
       .locator(
-        '[data-mobile-bottom-nav-scroll-target="true"]:not(:has([data-mobile-bottom-nav-scroll-target="true"]))'
+        'xpath=ancestor::div[@data-mobile-bottom-nav-scroll-target="true"][1]'
       )
       .filter({ visible: true });
     await expect(scrollport).toBeVisible();
-    const restingHeight = await scrollport.evaluate(
-      (element) => element.getBoundingClientRect().height
-    );
     const searchToggle = page.getByRole("button", {
       name: "Find a wave…",
       exact: true,
@@ -530,6 +528,10 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
         })
       )
       .toBeLessThanOrEqual(1);
+    // Compare the same layout measurement before and after the keyboard cycle.
+    const restingHeight = await scrollport.evaluate(
+      (element) => element.clientHeight
+    );
     await searchToggle.click();
     const input = page.getByRole("searchbox", { name: "Find a wave…" });
     await expect(input).toBeFocused();
