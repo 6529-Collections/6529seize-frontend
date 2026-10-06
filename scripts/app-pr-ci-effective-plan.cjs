@@ -113,7 +113,7 @@ function applyEffectiveAppPrCiPlan(plan) {
 
   const playwrightNativeCompetition = files.some(
     (file) =>
-      /^(?:components\/competitions\/|hooks\/competitions\/|__tests__\/competitions\/|app\/waves\/\[wave\]\/competitions\/|components\/waves\/create-wave\/|generated\/models\/ApiCompetition)/u.test(
+      /^(?:components\/competitions\/|hooks\/competitions\/|__tests__\/competitions\/|app\/waves\/\[wave\]\/competitions\/|components\/waves\/create-wave\/|components\/waves\/leaderboard\/|__tests__\/components\/waves\/leaderboard\/|generated\/models\/ApiCompetition)/u.test(
         file
       ) ||
       [
@@ -129,6 +129,10 @@ function applyEffectiveAppPrCiPlan(plan) {
         "components/waves/WavesMobile.tsx",
         "components/brain/BrainMobile.tsx",
         "components/brain/my-stream/MyStreamWaveContent.tsx",
+        "components/waves/drops/WaveDropActionsOpen.tsx",
+        "__tests__/components/waves/drops/WaveDropActionsOpen.test.tsx",
+        "components/waves/drops/WaveDropMobileMenuOpen.tsx",
+        "__tests__/components/waves/drops/WaveDropMobileMenuOpen.test.tsx",
         "tests/packs.manifest.cjs",
         "openapi.yaml",
         ".github/workflows/app-pr-ci.yml",
