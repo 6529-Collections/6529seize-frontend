@@ -79,13 +79,34 @@ let currentVisit: {
   seen: Set<string>;
   chosen: Set<string>;
 } | null = null;
+let visitEpoch = 0;
+const visitResetListeners = new Set<() => void>();
+
+export const getWaveFeatureVisitEpoch = (): number => visitEpoch;
+
+export function subscribeWaveFeatureVisitReset(
+  listener: () => void
+): () => void {
+  visitResetListeners.add(listener);
+  return () => {
+    visitResetListeners.delete(listener);
+  };
+}
 
 export function resetWaveFeatureVisit(): void {
+  visitEpoch += 1;
   currentVisit = null;
+  for (const listener of visitResetListeners) {
+    try {
+      listener();
+    } catch {
+      /* Telemetry cannot interrupt navigation. */
+    }
+  }
 }
 
 function getVisit(context: WaveFeatureContext) {
-  const key = `${getAnalyticsGeneration()}:${context.key}`;
+  const key = `${getAnalyticsGeneration()}:${visitEpoch}:${context.key}`;
   if (currentVisit?.key !== key) {
     currentVisit = { key, seen: new Set(), chosen: new Set() };
   }

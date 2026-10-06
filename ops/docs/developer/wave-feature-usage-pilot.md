@@ -17,6 +17,13 @@ pretend the one-second dwell occurred. Seen deduplicates responsive copies,
 repeated preview rows and child remounts within a route/viewer visit. It resets after
 navigation or a consent/identity generation change.
 
+Visit resets invalidate pending dwell through an epoch and notify active
+observers, including query navigation that keeps the same feature context.
+Scroll listeners cover each root, its ancestors and viewport scrolling;
+unrelated nested scroll events do not trigger those listeners. Scroll, resize,
+intersection and mutation checks coalesce to one animation frame per root. Visibility/focus
+loss and visit resets still cancel dwell immediately.
+
 `Wave Feature Activated` records semantic clicks, including keyboard-generated
 clicks and touch activation. Script-generated clicks, hover, focus, prefetch, background requests,
 restoration and default selection do not activate a feature. Modified links

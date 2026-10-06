@@ -12,6 +12,7 @@ import { SidebarWaveNavigationControls } from "@/components/brain/left-sidebar/w
 import type { SidebarWaveNavigation } from "@/hooks/useSidebarWaveNavigation";
 import { WebProfileFeedShortcut } from "@/components/brain/left-sidebar/web/WebProfileFeedShortcut";
 import type {} from "./waveFeatureFixtureApi";
+import { resetWaveFeatureVisit } from "@/services/analytics/waveFeatureUsage";
 import { WaveleaderboardSort } from "@/components/waves/leaderboard/header/WaveleaderboardSort";
 import {
   disableAnalytics,
@@ -97,6 +98,10 @@ function Fixture() {
     setConsent(true);
   };
   window.featureFixture = {
+    resetVisit: () => {
+      history.pushState({}, "", "?drop=fixture-drop");
+      resetWaveFeatureVisit();
+    },
     enable,
     revoke: () => {
       document.cookie = "performance-cookies-consent=false; path=/";

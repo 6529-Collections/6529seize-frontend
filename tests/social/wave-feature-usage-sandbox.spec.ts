@@ -329,6 +329,27 @@ test("counts only the visible responsive tab copy, and deduplicates remounts wit
   );
 });
 
+test("a visit reset with the same context cancels previously accumulated dwell", async ({
+  page,
+}) => {
+  await page.goto("/waves/private-wave");
+  await page
+    .getByRole("button", { name: "Enable synthetic telemetry" })
+    .click();
+  await page.waitForTimeout(600);
+  await page.evaluate(() => window.featureFixture.resetVisit());
+  await page.waitForTimeout(600);
+  expect(await featureEvents(page, "Wave Feature Seen", "chat")).toHaveLength(
+    0
+  );
+  await expect
+    .poll(
+      async () =>
+        (await featureEvents(page, "Wave Feature Seen", "chat")).length
+    )
+    .toBe(1);
+});
+
 test("fast deliberate tab and sort selections work with mouse, touch and keyboard", async ({
   page,
   isMobile,

@@ -66,6 +66,29 @@ describe("mixpanel analytics wrapper", () => {
     document.cookie = "performance-cookies-consent=; Max-Age=0; path=/";
   });
 
+  it("fails closed without interrupting controls when cookie access throws", async () => {
+    const analytics = await loadModule({
+      nodeEnv: "production",
+      token: "public-token",
+    });
+    analytics.initAnalytics();
+    const cookie = jest
+      .spyOn(document, "cookie", "get")
+      .mockImplementation(() => {
+        throw new Error("Cookie access unavailable");
+      });
+    try {
+      expect(analytics.isAnalyticsTrackingAllowed()).toBe(false);
+      expect(() =>
+        analytics.trackAnalyticsEvent("Product Event")
+      ).not.toThrow();
+      expect(() => analytics.identify("42")).not.toThrow();
+      expect(trackMock).not.toHaveBeenCalled();
+    } finally {
+      cookie.mockRestore();
+    }
+  });
+
   it.each([undefined, "invalid", "false"])(
     "blocks delivery when consent is missing or malformed (%s)",
     async (consent) => {

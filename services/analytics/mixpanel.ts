@@ -117,12 +117,17 @@ const isAnalyticsEnvironmentSupported = (): boolean => {
 };
 
 const isAnalyticsReady = (): boolean => {
-  return (
-    hasInitialized &&
-    isTrackingAllowed &&
-    Cookies.get(CONSENT_PERFORMANCE_COOKIE) === "true" &&
-    isAnalyticsEnvironmentSupported()
-  );
+  if (
+    !hasInitialized ||
+    !isTrackingAllowed ||
+    !isAnalyticsEnvironmentSupported()
+  )
+    return false;
+  try {
+    return Cookies.get(CONSENT_PERFORMANCE_COOKIE) === "true";
+  } catch {
+    return false;
+  }
 };
 
 const guardBatchDelivery = (): void => {

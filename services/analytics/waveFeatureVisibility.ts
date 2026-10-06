@@ -1,8 +1,10 @@
 import {
   getWaveFeatureDescriptor,
+  getWaveFeatureVisitEpoch,
   hasWaveFeatureBeenSeen,
   recordWaveFeatureActivation,
   recordWaveFeatureSeen,
+  subscribeWaveFeatureVisitReset,
   type WaveFeatureContext,
   type WaveFeaturePlacement,
 } from "./waveFeatureUsage";
@@ -86,6 +88,7 @@ function createExposureChecks({
       timer: ReturnType<typeof setTimeout>;
       value: string;
       generation: number;
+      epoch: number;
       contextKey: string;
     }
   >();
@@ -115,6 +118,7 @@ function createExposureChecks({
           !isWaveFeatureVisible(element) ||
           pending?.contextKey !== context.key ||
           pending.generation !== getAnalyticsGeneration() ||
+          pending.epoch !== getWaveFeatureVisitEpoch() ||
           pending.value !== descriptor?.value
         )
           stopTimer(element);
@@ -131,6 +135,7 @@ function createExposureChecks({
           continue;
         const startingKey = context.key;
         const startingGeneration = getAnalyticsGeneration();
+        const startingEpoch = getWaveFeatureVisitEpoch();
         const timer = setTimeout(
           () =>
             safely(() => {
@@ -143,6 +148,7 @@ function createExposureChecks({
               if (
                 latest?.key === startingKey &&
                 startingGeneration === getAnalyticsGeneration() &&
+                startingEpoch === getWaveFeatureVisitEpoch() &&
                 latestDescriptor &&
                 isWaveFeatureVisible(element)
               ) {
@@ -159,6 +165,7 @@ function createExposureChecks({
           timer,
           value: descriptor.value,
           generation: startingGeneration,
+          epoch: startingEpoch,
           contextKey: startingKey,
         });
       }
@@ -169,12 +176,60 @@ function createExposureChecks({
   return { selector, controls, safely, check, cancel };
 }
 
+function createFrameScheduler(check: () => void) {
+  let frame: number | null = null;
+  const schedule = () => {
+    if (frame !== null) return;
+    try {
+      frame = window.requestAnimationFrame(() => {
+        frame = null;
+        check();
+      });
+    } catch {
+      frame = null;
+      check();
+    }
+  };
+  const cancel = () => {
+    if (frame !== null) window.cancelAnimationFrame(frame);
+    frame = null;
+  };
+  return { schedule, cancel };
+}
+
+function observeRelevantScroll(
+  root: HTMLElement,
+  schedule: () => void
+): () => void {
+  const ancestors: HTMLElement[] = [];
+  for (
+    let ancestor = root.parentElement;
+    ancestor;
+    ancestor = ancestor.parentElement
+  )
+    ancestors.push(ancestor);
+  root.addEventListener("scroll", schedule, true);
+  for (const ancestor of ancestors)
+    ancestor.addEventListener("scroll", schedule);
+  // Viewport scrolling only; unrelated nested feeds do not bubble here.
+  window.addEventListener("scroll", schedule);
+  return () => {
+    root.removeEventListener("scroll", schedule, true);
+    for (const ancestor of ancestors)
+      ancestor.removeEventListener("scroll", schedule);
+    window.removeEventListener("scroll", schedule);
+  };
+}
+
 export function observeWaveFeatures(
   options: WaveFeatureObserverOptions
 ): () => void {
   const { root, placement, getContext } = options;
   const { selector, controls, safely, check, cancel } =
     createExposureChecks(options);
+  const scheduled = createFrameScheduler(check);
+  let stopScroll: () => void = () => undefined;
+  let unsubscribe: () => void = () => undefined;
   const onClick = (event: MouseEvent) =>
     safely(() => {
       // Dropdown selection is recorded by its semantic selection callback.
@@ -219,15 +274,17 @@ export function observeWaveFeatures(
     controlsMutation?.disconnect();
     intersection?.disconnect();
     cancel();
+    scheduled.cancel();
+    stopScroll();
+    unsubscribe();
     root.removeEventListener("click", onClick, true);
-    window.removeEventListener("scroll", check, true);
-    window.removeEventListener("resize", check);
+    window.removeEventListener("resize", scheduled.schedule);
     window.removeEventListener("blur", check);
     window.removeEventListener("focus", check);
     document.removeEventListener("visibilitychange", check);
   };
   try {
-    mutation = new MutationObserver(check);
+    mutation = new MutationObserver(scheduled.schedule);
     mutation.observe(root, {
       childList: true,
       subtree: true,
@@ -247,19 +304,22 @@ export function observeWaveFeatures(
       attributes: true,
       attributeFilter: ["class", "style", "inert", "aria-hidden", "hidden"],
     });
-    intersection = new IntersectionObserver(check, { threshold: [0, 0.5, 1] });
+    intersection = new IntersectionObserver(scheduled.schedule, {
+      threshold: [0, 0.5, 1],
+    });
     const observeControls = () =>
       safely(() => {
         intersection?.disconnect();
         for (const element of controls()) intersection?.observe(element);
-        check();
+        scheduled.schedule();
       });
     controlsMutation = new MutationObserver(observeControls);
     controlsMutation.observe(root, { childList: true, subtree: true });
     // Capture sees the pre-action state, including keyboard clicks.
     root.addEventListener("click", onClick, true);
-    window.addEventListener("scroll", check, true);
-    window.addEventListener("resize", check);
+    stopScroll = observeRelevantScroll(root, scheduled.schedule);
+    unsubscribe = subscribeWaveFeatureVisitReset(check);
+    window.addEventListener("resize", scheduled.schedule);
     window.addEventListener("blur", check);
     window.addEventListener("focus", check);
     document.addEventListener("visibilitychange", check);
