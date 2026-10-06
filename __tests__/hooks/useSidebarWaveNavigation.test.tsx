@@ -78,6 +78,34 @@ it("switches collections without making Pinned a prerequisite for All and restor
   expect(container.scrollTop).toBe(300);
 });
 
+it("keeps search open for an empty query until explicitly closed", () => {
+  const { result } = setup();
+  expect(result.current.searchOpen).toBe(false);
+  act(() => result.current.setSearchOpen(true));
+  expect(result.current.searchOpen).toBe(true);
+  expect(result.current.searching).toBe(false);
+  expect(result.current.queryEnabled).toBe(false);
+  act(() => result.current.setQueryText("xx"));
+  expect(result.current.searching).toBe(true);
+  act(() => result.current.setQueryText(""));
+  expect(result.current.searchOpen).toBe(true);
+  act(() => result.current.setSearchOpen(false));
+  expect(result.current.searchOpen).toBe(false);
+});
+
+it("keeps the search input visible whenever a nonempty query is being searched", () => {
+  const { result } = setup();
+  act(() => result.current.setQueryText("xx"));
+  expect(result.current.searching).toBe(true);
+  expect(result.current.searchOpen).toBe(true);
+  act(() => result.current.setSearchOpen(false));
+  expect(result.current.searching).toBe(true);
+  expect(result.current.searchOpen).toBe(true);
+  act(() => result.current.setQueryText(""));
+  expect(result.current.searching).toBe(false);
+  expect(result.current.searchOpen).toBe(false);
+});
+
 it("searches across all accessible waves from Pinned and restores Pinned when cleared", async () => {
   selectCollection("pinned");
   const { result } = setup();

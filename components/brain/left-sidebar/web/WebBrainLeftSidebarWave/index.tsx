@@ -14,6 +14,7 @@ import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
 
 interface WebBrainLeftSidebarWaveProps {
+  readonly scoreDetailsDisabled?: boolean | undefined;
   readonly isAnnouncement?: boolean | undefined;
   readonly wave: MinimalWave;
   readonly onHover: (waveId: string) => void;
@@ -31,6 +32,7 @@ interface WebBrainLeftSidebarWaveProps {
 const TOOLTIP_PLACEMENT = "right" as const;
 
 const WebBrainLeftSidebarWave = ({
+  scoreDetailsDisabled = false,
   isAnnouncement = false,
   wave,
   onHover,
@@ -106,6 +108,7 @@ const WebBrainLeftSidebarWave = ({
 
   return (
     <ExpandedWave
+      scoreDetailsDisabled={scoreDetailsDisabled}
       formattedWaveName={formattedWaveName}
       haveNewDrops={haveNewDrops}
       href={href}
