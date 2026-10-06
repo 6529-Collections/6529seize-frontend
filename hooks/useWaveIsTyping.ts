@@ -139,6 +139,12 @@ export function useWaveIsTyping(
       message: "",
     });
 
+  // Reset the display when its subscription changes, including before a new
+  // socket connects. Returning to the same Wave must not revive stale labels.
+  if (typingMessageState.scopeKey !== scopeKey) {
+    setTypingMessageState({ scopeKey, message: "" });
+  }
+
   const typersRef = useRef<Map<string, TypingEntry>>(new Map());
 
   useEffect(() => {

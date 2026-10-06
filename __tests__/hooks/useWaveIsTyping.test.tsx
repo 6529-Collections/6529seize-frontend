@@ -89,6 +89,7 @@ test("clears timers and subscriptions while the native app is inactive", () => {
   expect(mockUseWaveWebSocket).toHaveBeenLastCalledWith("");
   expect(jest.getTimerCount()).toBe(0);
   mockAppActive = true;
+  mockUseWaveWebSocket.mockReturnValueOnce({ socket: null });
   rerender();
   expect(result.current).toBe("");
 });
