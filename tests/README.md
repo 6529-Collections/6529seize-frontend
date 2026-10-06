@@ -58,8 +58,9 @@ in `tests/packs.manifest.cjs`.
 
 ## Pack registry
 
-The social-readonly pack includes a local-development-only Additional Action
-component-preview case in `tests/social/waves-profile-readonly.spec.ts`. It checks
+The PR CI smoke pack includes a local-development-only Additional Action
+component-preview case in `tests/pages/additional-action-preview.spec.ts`, tagged
+`@smoke` and registered in `SMOKE_SPECS`. It checks
 the conditional optional plan, preserved checkbox draft, review text, keyboard
 exit, and horizontal overflow at desktop and phone widths. It skips deployed
 hosts because `/tools/additional-action-preview` is guarded to development and
@@ -99,7 +100,7 @@ Generated from `tests/packs.manifest.cjs` by
 | `test:e2e`                                          | —                             | local    | local       | manual                    | 60m     | Full local suite on the desktop web shell.                                                            |
 | `test:e2e:all-projects`                             | —                             | local    | local       | manual                    | 90m     | Full local suite across every configured project.                                                     |
 | `test:e2e:ui`                                       | —                             | local    | local       | manual                    | 90m     | Playwright UI mode for local debugging.                                                               |
-| `test:e2e:smoke`                                    | —                             | local    | local       | pr-ci, manual             | 15m     | Fast @smoke subset of home, about, and The Memes.                                                     |
+| `test:e2e:smoke`                                    | —                             | local    | local       | pr-ci, manual             | 15m     | Fast @smoke subset of home, about, The Memes, and the local Additional Action preview.                |
 | `test:e2e:critical-shell`                           | —                             | local    | local       | pr-ci, manual             | 15m     | Boot and guarded route-shell resilience pack.                                                         |
 | `test:e2e:social-readonly`                          | —                             | readonly | local       | pr-ci, manual             | 15m     | Waves and profile read-only journeys.                                                                 |
 | `test:e2e:input-detection-readonly`                 | —                             | readonly | local       | pr-ci, manual             | 15m     | Windows touch-input detection read-only contract.                                                     |
