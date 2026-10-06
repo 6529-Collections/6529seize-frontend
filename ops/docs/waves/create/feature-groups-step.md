@@ -53,6 +53,9 @@ waves show these controls inside `Optional settings` on the first screen.
   wave access while submissions remain limited to their own group. The same
   summary appears in Review or Overview before creation. When chat is disabled,
   it still explains whether submissions are public or limited to their group.
+- When creating or reviewing a competition inside an existing Wave, the summary
+  uses that parent Wave's current chat group and enabled state. Competition
+  submission groups are separate; competition draft settings do not change chat.
 - This summary describes group access. Sign-in, profile, submission timing,
   limits, and other posting requirements still apply. Voting access is separate.
 - `Allow admins to delete posts` is enabled by default.

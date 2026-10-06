@@ -83,6 +83,7 @@ function getSaveStatus(
   );
 }
 
+/** Edit competition rules while retaining the parent Wave's shared chat settings. */
 function DraftForm({
   wave,
   competition,
@@ -424,7 +425,19 @@ function DraftForm({
     content = (
       <CreateWaveStepContent
         isCompetition
-        controller={{ ...controller, errors: visibleErrors }}
+        controller={{
+          ...controller,
+          errors: visibleErrors,
+          config: {
+            ...config,
+            // Competitions share the parent chat; draft defaults cannot change it.
+            chat: { enabled: wave.chat.enabled },
+            groups: {
+              ...config.groups,
+              canChat: wave.chat.scope.group?.id ?? null,
+            },
+          },
+        }}
         descriptionSnapshot={null}
         onCriteriaReplacementChange={() => undefined}
         onGroupResolutionChange={() => undefined}

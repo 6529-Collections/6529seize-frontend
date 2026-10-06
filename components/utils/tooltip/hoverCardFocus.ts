@@ -1,5 +1,5 @@
 const TAB_STOP_SELECTOR =
-  "a[href],button,input,select,textarea,[tabindex],[contenteditable='true']";
+  "a[href],area[href],button,input,select,textarea,summary,iframe,object,audio[controls],video[controls],[tabindex],[contenteditable='true']";
 
 /** Find visible tab stops in browser order, including positive tabindex values. */
 function getTabStops(container: HTMLElement): HTMLElement[] {

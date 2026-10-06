@@ -334,6 +334,33 @@ describe("HoverCard", () => {
       expect(screen.getByRole("button", { name: "After" })).toHaveFocus();
       expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     });
+
+    it("continues from the portal to a native summary after its trigger", async () => {
+      const user = userEvent.setup();
+      render(
+        <>
+          <HoverCard
+            content={<a href="/rules">View rules</a>}
+            ariaLabel={hoverCardAriaLabel}
+            openOnClick
+            focusOnKeyboardActivation
+          >
+            <button type="button">Trigger</button>
+          </HoverCard>
+          <details>
+            <summary>More details</summary>Extra content
+          </details>
+          <button type="button">After details</button>
+        </>
+      );
+      act(() => screen.getByRole("button", { name: "Trigger" }).focus());
+      await user.keyboard("{Enter}");
+      await user.tab();
+      expect(screen.getByRole("link", { name: "View rules" })).toHaveFocus();
+      await user.tab();
+      expect(screen.getByText("More details")).toHaveFocus();
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    });
   });
 
   it("can stop click propagation and close when the card is clicked", async () => {

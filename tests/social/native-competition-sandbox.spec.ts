@@ -946,6 +946,72 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     ).toEqual([]);
   });
 
+  for (const chatEnabled of [true, false]) {
+    test(`reviews competition access with parent chat ${chatEnabled ? "restricted" : "disabled"}`, async ({
+      page,
+    }) => {
+      await installCompetitionApi(page);
+      const response = await page.request.get(
+        `${getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"])}/api/waves/${WAVE}`
+      );
+      const parent = await response.json();
+      parent.visibility.scope.group = null;
+      parent.chat.enabled = chatEnabled;
+      parent.chat.scope.group = {
+        id: "parent-chat-club",
+        name: "Parent Chat Club",
+        is_hidden: true,
+      };
+      await page.route(`**/api/waves/${WAVE}`, (route) =>
+        route.fulfill({ json: parent })
+      );
+      await page.goto(ROOT);
+      await page
+        .getByRole("link", { name: "Add competition", exact: true })
+        .click();
+      await page
+        .getByRole("combobox", { name: "Competition type", exact: true })
+        .selectOption("APPROVE");
+      await page
+        .getByLabel("Competition name", { exact: true })
+        .fill("Parent chat review");
+      await dismissNextDevTools(page);
+      // Use normal keyboard activation so the development toolbar cannot cover Next.
+      for (let step = 0; step < 4; step++) {
+        await page
+          .getByRole("button", { name: "Next", exact: true })
+          .press("Enter");
+      }
+      await page
+        .getByRole("textbox", { name: "Approval threshold", exact: true })
+        .fill("50");
+      await page
+        .getByRole("button", { name: "Next", exact: true })
+        .press("Enter");
+      await page
+        .getByRole("radio", { name: "Manual", exact: true })
+        .press("Space");
+      await page
+        .getByRole("textbox", { name: "Manual action", exact: true })
+        .fill("Recognize the winner");
+      await page.getByRole("button", { name: "Save", exact: true }).click();
+      for (let step = 0; step < 2; step++) {
+        await page
+          .getByRole("button", { name: "Next", exact: true })
+          .press("Enter");
+      }
+      await expect(
+        page.getByText(
+          chatEnabled
+            ? "Chat is limited to its selected group. Submission group access is public. Voting access is separate."
+            : "Chat is disabled. Submission group access is public. Voting access is separate.",
+          { exact: true }
+        )
+      ).toBeVisible();
+      await expectNoHorizontalOverflow(page);
+    });
+  }
+
   test("saves and resumes a native draft through the existing configuration controls", async ({
     page,
   }) => {
