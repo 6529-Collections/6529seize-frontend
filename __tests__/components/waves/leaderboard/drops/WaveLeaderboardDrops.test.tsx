@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
 import { WaveLeaderboardDrops } from "@/components/waves/leaderboard/drops/WaveLeaderboardDrops";
 import { AuthContext, type AuthContextType } from "@/components/auth/Auth";
@@ -200,6 +200,26 @@ describe("WaveLeaderboardDrops", () => {
       hasNextPage: false,
     });
     expect(screen.getByTestId("empty")).toBeInTheDocument();
+  });
+
+  it("offers a read retry after first-page failure instead of loading or empty copy", () => {
+    const refetch = jest.fn();
+    renderComp({ isError: true, refetch });
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "Couldn’t load submissions."
+    );
+    expect(screen.queryByTestId("loading")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("empty")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Retry" }));
+    expect(refetch).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps loaded rows visible if a refresh fails", () => {
+    renderComp({ drops: [makeDrop("saved-row")], isError: true });
+    expect(screen.getByTestId("drop")).toBeInTheDocument();
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "Showing the entries already loaded."
+    );
   });
 
   it("renders drops and enables automatic next-page loading", () => {

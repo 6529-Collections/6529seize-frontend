@@ -100,6 +100,16 @@ tabs. The collection lets you choose a different competition at any time.
 
 ## Common Scenarios
 
+- After a submission is accepted, its entry opens with a confirmation naming
+  the competition and **View my entry**. **My submissions** is available on the
+  leaderboard and direct-entry view for your own signed-in profile.
+  On the leaderboard, it is a text button beside **Drop**. When the toolbar
+  needs two rows, view and sort controls occupy the top row; **My submissions**
+  aligns left and **Drop** aligns right below.
+- **My submissions** lists your entries in the selected competition, including
+  their recorded status, with older entries available through **Load more**.
+  It keeps the selected competition, leaderboard sort and view unchanged.
+
 - Competition drops in shared chat show their competition name beneath the author,
   linked to that competition. They also show their current total, your vote, rank,
   and voter count using the existing competition-card layout. The voter dropdown
@@ -134,6 +144,12 @@ tabs. The collection lets you choose a different competition at any time.
   do not accept new entries or votes.
 
 ## Failure and Recovery
+
+- If a leaderboard load fails, use **Retry**. Already loaded rows remain visible
+  if a refresh fails. Entry recovery does not create another submission.
+- If a saved submission’s entry status cannot be loaded, use **Check again** or
+  **View artwork** before submitting another copy. A failed artwork load does
+  not undo a confirmed entry; retry the artwork load or use **My submissions**.
 
 - If default selection cannot load, retry while shared chat remains usable.
   Competition controls do not silently use a different competition.
