@@ -10,14 +10,19 @@ export default function CreateWaveNextStep({
   step,
   submitting,
   onClick,
+  quickChat = false,
 }: {
   readonly disabled: boolean;
   readonly step: CreateWaveStep;
   readonly submitting: boolean;
   readonly onClick: () => void;
+  readonly quickChat?: boolean;
 }) {
   const locale = useBrowserLocale();
   const isCompleteStep = step === CreateWaveStep.REVIEW;
+  const forwardLabel = quickChat
+    ? "waves.create.quick.review"
+    : "waves.create.actions.next";
 
   return (
     <Button
@@ -27,12 +32,7 @@ export default function CreateWaveNextStep({
       disabled={disabled || submitting}
       loading={submitting}
     >
-      {t(
-        locale,
-        isCompleteStep
-          ? "waves.create.review.submit"
-          : "waves.create.actions.next"
-      )}
+      {t(locale, isCompleteStep ? "waves.create.review.submit" : forwardLabel)}
     </Button>
   );
 }

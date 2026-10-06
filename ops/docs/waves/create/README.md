@@ -19,7 +19,7 @@ Use this area to create:
   `/messages/{waveId}`.
 - Use `/waves?create=wave` as the direct web link for creating a Wave.
 - Desktop wave-create controls are available on:
-  - `/waves` and `/waves/{waveId}` left-sidebar `Waves` section (`+`)
+  - `/waves` and `/waves/{waveId}` Waves panel (`Create wave`; plus icon when collapsed)
   - `/waves` empty-content placeholder (`Create Wave`)
 - Desktop `/messages` routes support wave-create mode by URL only
   (`?create=wave`).
@@ -52,7 +52,7 @@ Use this area to create:
   8. [Wave Creation Description Step](feature-description-step.md)
   9. [Final Overview](feature-final-overview-step.md)
 - Step path by wave type:
-  - `Chat`: `Setup -> Access -> Guidelines -> Description -> Overview`
+  - Standalone `Chat`: `Start a chat wave -> Review`; access, picture, and guidelines are optional settings on the first screen. Chat subwaves retain the guided sequence.
   - Scheduled `Rank`: `Setup -> Access -> Schedule -> Drops -> Voting -> Outcomes -> Guidelines -> Description -> Overview`
   - `Perpetual Ranking`: `Setup -> Access -> Schedule -> Drops -> Voting -> Guidelines -> Description -> Overview`
   - `Approve`: `Setup -> Access -> Schedule -> Drops -> Voting -> Outcomes -> Guidelines -> Description -> Overview`
@@ -73,9 +73,10 @@ when saved or restored values differ from the defaults and opens as
 ### Access and Availability
 
 - Create forms render only when the connected identity has a profile handle.
+- Signed-out entry explains Connect to create a wave and preserves the create URL.
 - Without a profile handle, Create Wave entry points open a compact profile
-  setup dialog with `Go to Identity` and `Not now`; the multi-step form does not
-  render.
+  setup dialog with `Go to Identity`; completing setup returns to standalone
+  wave creation, or to the parent wave when creating a subwave.
 
 ## Flows
 

@@ -76,7 +76,7 @@ when the desktop feed is active or its button is hovered or keyboard-focused.
 - Worth Checking Out shows up to six spaced previews, with fewer on narrow screens,
   with score shields overlapping the bottom-right corner of each avatar.
   The section keeps its own compact height independently of the vote list.
-- The compact plus button retains its light colour and shows `Create wave` on hover or keyboard focus.
+- Create wave has a visible label in the expanded desktop Waves panel and mobile Waves list, including signed-out visits. The collapsed sidebar keeps the plus icon and accessible Create wave name.
 - Each heading has a separate `View all` link before the chevron, available
   even when collapsed. Active Votes opens `/discover?view=active-votes`;
   Worth Checking Out opens `/discover?view=recommendations&sort=QUALITY`.

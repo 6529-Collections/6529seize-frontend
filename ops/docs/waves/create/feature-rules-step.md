@@ -2,8 +2,9 @@
 
 ## Overview
 
-Use `Guidelines` to add optional chat guidelines. The textbox is always visible,
-with no expand/collapse control. Signing rules for Rank and Approve waves are
+Use `Guidelines` to add optional chat guidelines. For standalone Chat, expand
+`Optional settings` on the first screen to show the textbox. In guided creation,
+the textbox is visible on the `Guidelines` step. Signing rules for Rank and Approve waves are
 configured in `Drops` under `Submission requirements`. The read-only
 configuration summary is in the final [Overview step](feature-final-overview-step.md).
 
@@ -15,12 +16,13 @@ configuration summary is in the final [Overview step](feature-final-overview-ste
   - `/waves/{waveId}`
   - `/messages`
   - `/messages/{waveId}`
-- Step label: `Guidelines`
+- Guided step label: `Guidelines`
 - User-reachable in `Chat`, `Rank`, and `Approve` creation
 
 ## Step Path
 
-- `Chat`: `Setup -> Access -> Guidelines -> Description -> Overview`
+- Standalone `Chat`: `Start a chat wave -> Review`
+- Chat subwave: `Setup -> Access -> Guidelines -> Description -> Overview`
 - `Rank`: `Setup -> Access -> Schedule -> Drops -> Voting -> Outcomes -> Guidelines -> Description -> Overview`
 - `Approve`: `Setup -> Access -> Schedule -> Drops -> Voting -> Outcomes -> Guidelines -> Description -> Overview`
 
@@ -38,12 +40,16 @@ that step.
 
 ## User Journey
 
-1. Complete `Access` for `Chat`, `Voting` for Perpetual Ranking, or
+For standalone Chat, expand `Optional settings`, enter guidelines if needed,
+then select `Review wave` after completing the name and first post.
+
+For guided creation:
+
+1. Complete `Access` for a Chat subwave, `Voting` for Perpetual Ranking, or
    `Outcomes` for scheduled `Rank` and `Approve`.
 2. Open `Guidelines`.
 3. Optionally enter chat guidelines in the visible field.
-4. Click `Next` to continue to `Description`. Guidelines is directly before
-   Description for every wave type.
+4. Click `Next` to continue to `Description`.
 
 ## Participant Visibility
 
