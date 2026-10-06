@@ -2,7 +2,7 @@ import { getStringAsNumberOrZero } from "@/helpers/Helpers";
 import type { RefObject } from "react";
 
 const INPUT_CLASS_NAME =
-  "tw-touch-manipulation tw-appearance-none tw-block tw-min-w-0 tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900/60 tw-tabular-nums tw-text-iron-100 tw-caret-primary-400 tw-ring-1 tw-ring-inset tw-ring-iron-800/60 hover:tw-bg-iron-900 hover:tw-ring-iron-700 focus:tw-bg-iron-900 focus:tw-outline-none placeholder:tw-text-iron-500 tw-transition-colors tw-duration-150 motion-reduce:tw-transition-none";
+  "tw-touch-manipulation tw-appearance-none tw-block tw-min-w-0 tw-w-full tw-rounded-lg tw-border-0 tw-tabular-nums tw-text-iron-100 tw-caret-primary-400 tw-ring-1 tw-ring-inset tw-ring-iron-800/60 hover:tw-bg-iron-900 hover:tw-ring-iron-700 focus:tw-bg-iron-900 focus:tw-outline-none placeholder:tw-text-iron-500 tw-transition-colors tw-duration-150 motion-reduce:tw-transition-none";
 
 const getValueStr = (val: string): string => {
   if (val.length > 1 && val.startsWith("0")) {
@@ -93,7 +93,7 @@ export default function UserPageRateInput({
         className={`${
           focusRingClassName ??
           (isValidValue ? "focus:tw-ring-primary-400" : "focus:tw-ring-red")
-        } ${INPUT_CLASS_NAME} ${variant === "form" ? "tw-h-[46px] tw-py-3 tw-pl-4 tw-pr-10 tw-text-left tw-text-base tw-font-normal tw-leading-5" : "tw-px-10 tw-py-3 tw-text-center tw-text-2xl tw-font-medium tw-leading-tight tw-tracking-tight"}`}
+        } ${INPUT_CLASS_NAME} ${variant === "form" ? "tw-bg-iron-900 tw-h-[46px] tw-py-3 tw-pl-4 tw-pr-10 tw-text-left tw-text-base tw-font-normal tw-leading-5" : "tw-bg-iron-900/60 tw-px-10 tw-py-3 tw-text-center tw-text-2xl tw-font-medium tw-leading-tight tw-tracking-tight"}`}
       />
     </div>
   );
