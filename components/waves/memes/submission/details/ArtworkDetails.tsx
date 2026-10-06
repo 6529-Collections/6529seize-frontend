@@ -5,7 +5,7 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 import type { SupportedLocale } from "@/i18n/locales";
-import React, { useCallback, useMemo, useRef } from "react";
+import React, { useCallback, useRef } from "react";
 import FormSection from "../ui/FormSection";
 import ValidationError from "../ui/ValidationError";
 import {
