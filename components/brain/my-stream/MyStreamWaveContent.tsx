@@ -719,7 +719,7 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
         )}
 
       <div
-        className="tw-relative tw-min-h-0 tw-min-w-0 tw-flex-grow tw-overflow-hidden"
+        className="tw-relative tw-min-h-0 tw-min-w-0 tw-flex-grow tw-overflow-hidden focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-2px] focus-visible:tw-outline-primary-400"
         role={isApp && flat ? "region" : "tabpanel"}
         tabIndex={-1}
         aria-label={isApp && flat ? wave.name : undefined}

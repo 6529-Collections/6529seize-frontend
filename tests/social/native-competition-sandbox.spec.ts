@@ -679,11 +679,12 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       .getByRole("tab", { name: "Configuration", exact: true })
       .first();
     await expect(configuration).toHaveAttribute("aria-selected", "true");
-    await expect(
-      page.getByRole("tabpanel").filter({
-        has: page.getByRole("heading", { name: "Access", exact: true }),
-      })
-    ).toBeFocused();
+    const configurationPanel = page.getByRole("tabpanel").filter({
+      has: page.getByRole("heading", { name: "Access", exact: true }),
+    });
+    await expect(configurationPanel).toBeFocused();
+    await expect(configurationPanel).toHaveCSS("outline-style", "solid");
+    await expect(configurationPanel).toHaveCSS("outline-width", "2px");
     await page.getByRole("tab", { name: "Chat", exact: true }).first().click();
     await expect(
       page.getByRole("textbox", { name: "Write a chat message" }).last()
