@@ -1077,8 +1077,13 @@ describe("SeizeVideoPlayer", () => {
       />
     );
     expect(player.style.getPropertyValue("--video-ratio")).toBe("2");
-    Object.defineProperty(video, "videoWidth", { value: 1600 });
-    fireEvent.loadedMetadata(video);
+    const landscape = container.querySelector("video")!;
+    expect(landscape).not.toBe(video);
+    Object.defineProperties(landscape, {
+      videoWidth: { value: 1600 },
+      videoHeight: { value: 900 },
+    });
+    fireEvent.loadedMetadata(landscape);
     expect(player.style.getPropertyValue("--video-ratio")).toBe(
       String(1600 / 900)
     );

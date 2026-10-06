@@ -28,9 +28,9 @@ export function useVideoPlaybackMemory(
   const memory = sharedMemory ?? localMemory;
   const key = identity ?? "";
   const pendingPosition = useRef<number | null>(null);
-  const attachedIdentity = useRef<{
-    video: HTMLVideoElement;
-    key: string;
+  const pendingPreferences = useRef<{
+    muted: boolean;
+    volume: number;
   } | null>(null);
 
   const remember = useCallback(
@@ -40,19 +40,28 @@ export function useVideoPlaybackMemory(
       capturePreferences = true
     ) => {
       const previous = memory.get(key);
+      if (userControlled && pendingPreferences.current) {
+        pendingPreferences.current = {
+          muted: element.muted,
+          volume: element.volume,
+        };
+      }
+      const preferences = pendingPreferences.current;
       const hasPosition =
         pendingPosition.current === null &&
         element.readyState >= 1 &&
         Number.isFinite(element.currentTime);
+      const canCapturePreferences =
+        capturePreferences && (hasPosition || userControlled);
       memory.set(key, {
         currentTime: hasPosition
           ? element.currentTime
           : (previous?.currentTime ?? 0),
-        muted: capturePreferences
-          ? element.muted
+        muted: canCapturePreferences
+          ? (preferences?.muted ?? element.muted)
           : (previous?.muted ?? element.muted),
-        volume: capturePreferences
-          ? element.volume
+        volume: canCapturePreferences
+          ? (preferences?.volume ?? element.volume)
           : (previous?.volume ?? element.volume),
         userControlled: userControlled || previous?.userControlled === true,
       });
@@ -61,23 +70,31 @@ export function useVideoPlaybackMemory(
   );
 
   useLayoutEffect(() => {
-    if (!video) return;
-    const isReusedForAnotherVideo =
-      attachedIdentity.current?.video === video &&
-      attachedIdentity.current.key !== key;
-    attachedIdentity.current = { video, key };
+    // Callback-ref state may briefly still refer to the previous source's node.
+    if (video?.dataset["playbackIdentity"] !== key) return;
     const saved = memory.get(key);
     pendingPosition.current = saved?.currentTime ?? 0;
+    pendingPreferences.current = saved ?? null;
     if (saved) {
       restoreVideoPreferences(video, saved.muted, saved.volume);
     }
     const capture = () => remember(video);
     const emptied = () => {
-      pendingPosition.current = memory.get(key)?.currentTime ?? null;
+      const snapshot = memory.get(key);
+      pendingPosition.current = snapshot?.currentTime ?? null;
+      pendingPreferences.current = snapshot ?? null;
     };
     const restore = () => {
+      if (video.readyState < 1) return;
+      const preferences = pendingPreferences.current;
+      if (
+        preferences &&
+        restoreVideoPreferences(video, preferences.muted, preferences.volume)
+      ) {
+        pendingPreferences.current = null;
+      }
       const position = pendingPosition.current;
-      if (position === null || video.readyState < 1) return;
+      if (position === null) return;
       if (seekVideoPosition(video, position)) {
         pendingPosition.current = null;
         capture();
@@ -88,9 +105,9 @@ export function useVideoPlaybackMemory(
     captureEvents.forEach((event) => video.addEventListener(event, capture));
     restoreEvents.forEach((event) => video.addEventListener(event, restore));
     video.addEventListener("emptied", emptied);
-    if (!isReusedForAnotherVideo) restore();
+    restore();
     return () => {
-      // React may already have applied the next video's mute attribute.
+      // Media teardown may already have reset the element's preferences.
       remember(video, false, false);
       captureEvents.forEach((event) =>
         video.removeEventListener(event, capture)

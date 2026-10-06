@@ -43,11 +43,14 @@ export function defineWaveVideoLayoutTests() {
       .toBeCloseTo(1, 1);
     // Move the drop beyond the real render window; its wrapper stays mounted
     // while IntersectionObserver removes and then recreates the entire player.
-    const drop = page.locator('[id^="drop-"]').filter({ has: video });
+    const drop = page
+      .getByRole("main")
+      .locator('[id^="drop-"]')
+      .filter({ has: video });
     const dropId = await drop.getAttribute("id");
     if (!dropId)
       throw new Error("Video fixture is missing its virtualized chat drop");
-    const anchor = page.locator(`[id="${dropId}"]`);
+    const anchor = page.getByRole("main").locator(`[id="${dropId}"]`);
     const previousStyle = await anchor.getAttribute("style");
     await anchor.evaluate((element: HTMLElement) => {
       element.style.transform = "translateY(20000px)";

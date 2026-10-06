@@ -62,6 +62,10 @@ describe("video playback across DM virtualization", () => {
         value: Number.NaN,
       });
       this.dispatchEvent(new Event("emptied"));
+      // Model a media engine resetting preferences while a source is loading.
+      this.muted = true;
+      this.volume = 1;
+      this.dispatchEvent(new Event("volumechange"));
     });
     jest
       .spyOn(HTMLMediaElement.prototype, "pause")
@@ -217,13 +221,16 @@ describe("video playback across DM virtualization", () => {
     fireEvent.seeked(video);
     fireEvent.click(screen.getByRole("button", { name: "Unmute video" }));
     rerender(dropContent("other.mp4"));
-    metadata(video);
-    expect(video.currentTime).toBe(0);
-    expect(video.muted).toBe(true);
+    const other = screen.getByLabelText<HTMLVideoElement>("Video player");
+    expect(other).not.toBe(video);
+    metadata(other);
+    expect(other.currentTime).toBe(0);
+    expect(other.muted).toBe(true);
     rerender(dropContent());
-    metadata(video);
-    expect(video.currentTime).toBe(480);
-    expect(video.muted).toBe(false);
+    const restored = screen.getByLabelText<HTMLVideoElement>("Video player");
+    metadata(restored);
+    expect(restored.currentTime).toBe(480);
+    expect(restored.muted).toBe(false);
   });
 
   it("clears remembered playback when the chat wrapper is removed", () => {

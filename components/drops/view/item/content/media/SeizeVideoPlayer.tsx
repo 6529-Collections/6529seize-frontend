@@ -712,6 +712,8 @@ export default function SeizeVideoPlayer({
           dataMime={dataMime}
           dataTestId={dataTestId}
           dataUrl={dataUrl}
+          playbackIdentity={muteIdentity}
+          key={muteIdentity}
           id={id}
           isMuted={isMuted}
           isWrapperFullscreen={isWrapperFullscreen}
