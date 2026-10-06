@@ -847,7 +847,7 @@ test.describe("Native iPad drop actions @surface @medium @readonly", () => {
   });
 });
 
-test("native artwork video stops offscreen buffering and restores position after backgrounding", async ({
+test("native artwork video stops offscreen buffering and restores position after backgrounding @surface @medium @readonly", async ({
   page,
 }, testInfo) => {
   test.skip(

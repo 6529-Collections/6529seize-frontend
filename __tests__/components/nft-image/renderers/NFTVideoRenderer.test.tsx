@@ -74,6 +74,7 @@ const createDefaultProps = (
 
 describe("NFTVideoRenderer", () => {
   beforeEach(() => {
+    jest.spyOn(HTMLMediaElement.prototype, "play").mockResolvedValue(undefined);
     jest.spyOn(videoConfig, "useElementInView").mockReturnValue(true);
   });
   afterEach(() => {
