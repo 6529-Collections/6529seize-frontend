@@ -50,6 +50,8 @@ test("Additional Action draft is readable and preserved on desktop and phone @me
   page,
   baseURL,
 }) => {
+  // This fixture exists only in development on loopback hosts, so deployed runs
+  // cannot exercise it; local runs retain the full desktop and phone checks.
   test.skip(
     !baseURL ||
       !["localhost", "127.0.0.1", "[::1]"].includes(new URL(baseURL).hostname),
