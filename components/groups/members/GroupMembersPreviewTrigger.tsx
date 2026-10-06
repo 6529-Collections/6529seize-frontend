@@ -26,7 +26,7 @@ export default function GroupMembersPreviewTrigger({
   readonly target: GroupMembersPreviewTarget;
   readonly actionLabel?: string;
   readonly disabled?: boolean | undefined;
-  readonly appearance?: "details" | "summary" | undefined;
+  readonly appearance?: "details" | "summary" | "inline" | undefined;
   readonly quiet?: boolean;
   readonly criteriaStatus?: "loading" | "unavailable" | undefined;
   readonly onOpen: () => void;
@@ -107,6 +107,40 @@ export default function GroupMembersPreviewTrigger({
         >
           {criteriaLabel}
         </p>
+      </div>
+    );
+  }
+
+  if (appearance === "inline") {
+    return (
+      <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-1">
+        <p
+          aria-live="polite"
+          className="tw-m-0 tw-min-w-0 tw-flex-1 tw-break-words tw-text-sm tw-font-medium tw-text-iron-100"
+        >
+          {criteriaLabel}
+        </p>
+        <span
+          aria-live="polite"
+          className="tw-inline-flex tw-items-center tw-gap-1.5 tw-text-xs tw-font-medium tw-text-iron-400"
+        >
+          <UsersIcon aria-hidden="true" className="tw-size-4" />
+          {isLoading ? (
+            <span className="tw-h-3 tw-w-28 tw-animate-pulse tw-rounded tw-bg-iron-700 motion-reduce:tw-animate-none">
+              <span className="tw-sr-only">{countLabel}</span>
+            </span>
+          ) : (
+            countLabel
+          )}
+        </span>
+        <button
+          type="button"
+          disabled={disabled}
+          onClick={onOpen}
+          className="desktop-hover:hover:tw-text-primary-200 tw-inline-flex tw-min-h-8 tw-items-center tw-rounded-md tw-border-0 tw-bg-transparent tw-p-0 tw-text-xs tw-font-semibold tw-text-primary-300 tw-underline-offset-2 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:hover:tw-underline"
+        >
+          {actionLabel ?? t(locale, "waves.create.groups.members.view")}
+        </button>
       </div>
     );
   }

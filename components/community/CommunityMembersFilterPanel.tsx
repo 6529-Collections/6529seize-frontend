@@ -245,15 +245,15 @@ export default function CommunityMembersFilterPanel(
             </div>
           </div>
         </fieldset>
-        <div className="tw-shrink-0 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-3 sm:tw-px-6">
-          <div className="tw-max-h-32 tw-overflow-y-auto tw-overscroll-contain">
-            <p className="tw-m-0 tw-mb-1 tw-text-xs tw-font-medium tw-text-iron-400">
+        <div className="tw-shrink-0 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-3 tw-py-2 sm:tw-px-6">
+          <div className="tw-flex tw-max-h-32 tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-1 tw-overflow-y-auto tw-overscroll-contain">
+            <span className="tw-shrink-0 tw-text-xs tw-font-medium tw-text-iron-400">
               {t(locale, "waves.create.groups.draft.afterEditing")}
-            </p>
+            </span>
             {draftTarget ? (
               <GroupMembersPreviewTrigger
                 target={draftTarget}
-                quiet
+                appearance="inline"
                 disabled={isCreating}
                 actionLabel={t(
                   locale,
@@ -263,7 +263,7 @@ export default function CommunityMembersFilterPanel(
               />
             ) : (
               <p
-                className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-100"
+                className="tw-m-0 tw-min-w-0 tw-flex-1 tw-break-words tw-text-sm tw-font-medium tw-text-iron-100"
                 aria-live="polite"
               >
                 {draftSummary ??
@@ -271,7 +271,7 @@ export default function CommunityMembersFilterPanel(
               </p>
             )}
             {!isDraftValid && (
-              <details className="tw-mt-1 tw-text-xs tw-leading-5 tw-text-iron-400">
+              <details className="tw-ml-auto tw-text-xs tw-leading-5 tw-text-iron-400 open:tw-ml-0 open:tw-basis-full">
                 <summary className="tw-w-fit tw-cursor-pointer tw-rounded tw-py-1 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400">
                   {t(locale, "waves.create.groups.draft.notReadyTitle")}
                 </summary>
@@ -285,7 +285,7 @@ export default function CommunityMembersFilterPanel(
             variant="action"
             size="md"
             fullWidth
-            className="tw-mt-3 tw-min-h-11"
+            className="tw-mt-2 tw-min-h-11"
             disabled={!canCreateDraft}
             loading={isCreating}
             onClick={onCreateAndUse}
