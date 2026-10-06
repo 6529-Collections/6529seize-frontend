@@ -9,6 +9,10 @@ import {
   test,
 } from "./testHelpers";
 
+// Image preparation has a 30-second application timeout; allow it to settle
+// before checking layout, including a small margin for rendering the PNG.
+const ARTWORK_PREPARATION_TIMEOUT_MS = 35000;
+
 const FORMATS = [
   { name: "Feed · 4:5", key: "portrait", width: 1080, height: 1350 },
   { name: "Square · 1:1", key: "square", width: 1080, height: 1080 },
@@ -150,9 +154,13 @@ test.describe("Individual artwork sharing @readonly @surface", () => {
       });
       await expect(dialog).toBeVisible();
       await expect(close).toBeFocused();
-      await expect(
-        dialog.getByRole("img", { name: /^Share image for / })
-      ).toBeInViewport();
+      const initialPreview = dialog.getByRole("img", {
+        name: /^Share image for /,
+      });
+      await expect(initialPreview).toBeVisible({
+        timeout: ARTWORK_PREPARATION_TIMEOUT_MS,
+      });
+      await expect(initialPreview).toBeInViewport();
       await expect(
         dialog.getByTestId("artwork-image-primary")
       ).toBeInViewport();
@@ -189,7 +197,9 @@ test.describe("Individual artwork sharing @readonly @surface", () => {
           const preview = dialog.getByRole("img", {
             name: /^Share image for /,
           });
-          await expect(preview).toBeVisible({ timeout: 35000 });
+          await expect(preview).toBeVisible({
+            timeout: ARTWORK_PREPARATION_TIMEOUT_MS,
+          });
           await expect
             .poll(() =>
               preview.evaluate((image: HTMLImageElement) => image.naturalWidth)
