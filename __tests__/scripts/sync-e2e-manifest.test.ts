@@ -44,7 +44,7 @@ describe("E2E pack manifest", () => {
 
   it("defines every package pack once and satisfies the safety contract", () => {
     expect(manifestTools.validateManifest(packs, { root: ROOT })).toEqual([]);
-    expect(packs).toHaveLength(74);
+    expect(packs).toHaveLength(75);
 
     const rendered = manifestTools.renderPackageJsonScripts(packs);
     const packageScripts = JSON.parse(
@@ -56,6 +56,31 @@ describe("E2E pack manifest", () => {
       )
     );
     expect(checkedInE2eScripts).toEqual(rendered);
+  });
+
+  it("runs wave creation on both web shells in its isolated PR sandbox lane", () => {
+    expect(
+      packs.find((pack) => pack.scriptKey === "test:e2e:wave-creation-sandbox")
+    ).toMatchObject({
+      safety: "sandbox",
+      environments: ["local"],
+      triggers: ["pr-ci", "manual"],
+      specs: ["tests/social/create-wave-sandbox.spec.ts"],
+      projects: ["web-desktop-chromium", "web-mobile-chromium"],
+      env: {
+        PLAYWRIGHT_BASE_URL: "http://localhost:3298",
+        NEXT_DEV_DIST_DIR: ".next-playwright-wave-creation",
+      },
+    });
+    const workflow = fs.readFileSync(
+      path.join(ROOT, ".github/workflows/app-pr-ci.yml"),
+      "utf8"
+    );
+    expect(workflow).toContain("if (waveCreationBrowserRequired)");
+    expect(workflow).toContain("if: matrix.lane == 'playwright-wave-creation'");
+    expect(workflow).toContain(
+      "run: ./bin/6529 run test:e2e:wave-creation-sandbox"
+    );
   });
 
   it("runs native competitions on both web shells in a dedicated PR sandbox lane", () => {

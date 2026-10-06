@@ -5,6 +5,39 @@
   "base_url": "https://6529.io",
   "records": [
     {
+      "id": "waves.my-submissions",
+      "kind": "workflow",
+      "title": "Find and confirm your competition submission",
+      "aliases": [
+        "my submissions",
+        "where is my artwork",
+        "missing competition entry",
+        "submission confirmation"
+      ],
+      "keywords": [
+        "waves",
+        "competition",
+        "entry",
+        "saved",
+        "leaderboard",
+        "retry",
+        "video"
+      ],
+      "facts": [
+        "On ordinary wave leaderboards, My submissions opens your active and winning entries in that wave. Native competition leaderboards and direct-entry views show My submissions for the selected competition, including each entry's recorded status. On leaderboards it is a text button beside the entry action. On leaderboards without price controls, the controls stay on one row when they fit. Otherwise, view controls align left and the selected sort aligns right on the top row, with My submissions on the left and the entry action on the right below. Curation leaderboards retain their price-control layout. The sort button shows the selected sort without a visible Sort prefix. The control is available on your own signed-in profile and hidden in proxy mode. It does not change leaderboard sort or filters. The Memes retains its specialized submission flow.",
+        "After a standard or Quorum drop is saved, the confirmation checks that saved drop's competition entry directly. A confirmed entry offers View my entry. If the artwork is saved but entry membership cannot be confirmed, use Check again or View artwork before submitting another copy. Check again only reads the saved entry; it never submits another drop.",
+        "A native competition submission opens its saved entry and checks its status. A confirmed entry names the competition. If entry status cannot be loaded, use Check again or View artwork before submitting another copy. A failed artwork load does not undo a confirmed entry; retry the read or use My submissions.",
+        "Full list, grid and gallery leaderboards offer Couldn't load submissions and Retry after a failed first load. A refresh failure retains already loaded entries with a retry message. Failed loads do not establish that there are no entries."
+      ],
+      "canonical_path": "/waves",
+      "tags": ["waves", "competitions", "submissions", "recovery"],
+      "source_refs": [
+        "ops/docs/waves/leaderboard/feature-drop-entry-and-eligibility.md",
+        "ops/docs/waves/leaderboard/feature-drop-states.md",
+        "ops/docs/waves/competitions/feature-competitions.md"
+      ]
+    },
+    {
       "id": "waves.native-competitions",
       "kind": "workflow",
       "title": "Several competitions in one wave",
@@ -2788,6 +2821,7 @@
         "Each latest-profile-post card identifies the author, posting time, and originating Profile Wave; curated replies can also appear. On mobile web and in the native app, the default /waves view remains a Wave navigator with no separate Profile Waves Feed card, and the feed icon at the far right of the plain Waves heading opens the cross-Wave feed at /waves?view=profile-feed. On desktop, the same feed icon clears the selected wave to show Profile Waves Feed. The heading is not clickable. Header actions are feed then create on desktop, with Profile Waves Feed and Create Wave tooltips. Create uses a compact white button. The mobile list shows only feed; the app keeps create in its top bar. The Profile Waves Feed content header has a Discover Waves link with a compass, aligned right on desktop and below the description on small screens. The expanded sidebar has no separate feed row.",
         "From the mobile web Profile Waves Feed, Waves returns to the Wave list. Opening a feed post enters its Wave conversation, and browser Back returns to the feed.",
         "Announcements uses a compact row with its timestamp, unread state and score shield. Active Votes rows also have a score shield that opens score details. The current wave highlights in Active Votes as well as in the collection list below when it appears in both. In Worth Checking Out, each avatar and its bottom-right score shield form one wave navigation link; hovering or focusing the combined link shows score details.",
+        "While Find a wave is open, sidebar scores remain visible but their details cards are temporarily unavailable, including for an empty search field. Closing search restores score hover, focus and selection. Recommendation links remain available while searching.",
         "Every Worth Checking Out recommendation also appears in All at its recent-activity position; Joined normally includes only waves the user has joined.",
         "Switching All and Joined preserves list position instead of jumping to the active wave; a shorter list can clamp the position. Selecting another wave reveals its active row again.",
         "A Wave opened from a direct link remains visible and highlighted in the left sidebar even when it is not followed, pinned, or present in the loaded overview; this temporary route context does not join or pin it.",
@@ -2866,6 +2900,7 @@
         "Other existing standard Waves keep their current presentation unless the Wave is explicitly configured to use custom proposal cards.",
         "A compact card uses the proposal's stored title or first authored non-empty line, an excerpt from the original authored text, real multipart/media/attachment counts, and at most one ready static image preview.",
         "Compact proposal cards do not generate summaries, categories, or proposal metadata.",
+        "Summary cards identify uploaded videos with Video and a View artwork action. A video-only card shows a Video tile when thumbnails are enabled; hiding thumbnails keeps the Video label. Summary cards do not mount or autoplay video players. Full proposal presentation and ready still-image previews remain available.",
         "Selecting a proposal card opens the complete original proposal, including its full markdown, media, attachments, and multipart navigation.",
         "Memes, Curation, and Quorum Waves keep their specialized proposal presentations.",
         "Wave creators can choose Full proposal or Summary card under Appearance and labels when creating a Rank or Approve Wave. New Waves default to Summary card; existing Waves and older drafts without this setting keep Full proposal except for the Network Museum compatibility fallback.",
@@ -2960,13 +2995,12 @@
         "sidebar"
       ],
       "facts": [
-        "To create a wave on web, click the + button in the Waves panel or open /waves?create=wave.",
-        "If the connected identity has no profile handle, Create Wave opens a Create your profile first dialog with Go to Identity and Not now instead of opening the multi-step form.",
-        "With a profile handle, Create Wave opens in a centered modal on desktop and the standard bottom sheet below 768px; both use the same multi-step form.",
+        "On web, select the labeled Create wave button in the desktop Waves panel or mobile Waves list. A collapsed sidebar keeps the plus icon. You can also open /waves?create=wave or /waves/create, or search Create wave, New wave, or Start a wave in global Search.",
+        "Signed-out entry explains Connect to create a wave and preserves the creation URL after wallet connection. An identity without a profile handle sees Create your profile first; Go to Identity carries a return link so completed profile setup returns to /waves/create for standalone creation, or to the parent wave for a subwave.",
+        "Chat uses two screens: name and first post, then a review with Confirm and create. Optional settings holds access, picture, and guidelines. Rank, Approve, and subwaves keep guided setup.",
         "In Create Wave and Create subwave, Close, Escape, and clicking or tapping outside close an untouched form immediately. If work has been entered, Discard your changes? offers Keep editing or Discard changes. Keep editing preserves the current settings, picture, description, and step. Discard changes closes the form and loses unsaved work; existing saved drafts remain.",
-        "After leaving Setup, named wave settings may be recovered from Saved Drafts on the same browser and device if browser storage is available. Drafts do not restore pictures, descriptions, or the current step, and subwave creation has no draft-resume control.",
-        "The app full-page create route remains /waves/create where app mode uses it.",
-        "Wave creation requires a connected profile and the necessary permissions for the selected groups/settings."
+        "Named standalone waves save text and settings in Saved Drafts on this device for the current wallet and profile. Media and attachments must be added again. Older drafts restore settings only. Restoring opens the first screen; subwaves have no draft-resume control.",
+        "Creating a wave requires a connected profile and valid permissions for the selected groups. Successful creation opens the new wave and offers Copy wave link."
       ],
       "canonical_path": "/waves?create=wave",
       "related_paths": ["/waves"],
@@ -2997,12 +3031,12 @@
         "description"
       ],
       "facts": [
-        "The wave creation flow starts with Setup and then configures access, rules, description, and additional steps depending on wave type. A final read-only Overview follows Description, with Confirm and create as the submit action.",
-        "The Setup step begins with the Create Wave heading and keeps the wave name, picture, type, and Rank ranking mode visible; Appearance and labels contains display, proposal-card, and applicable tab-label customization.",
+        "Standalone Chat starts with the name and First post, then Review wave opens the final review. Confirm and create submits. Access, picture, and guidelines are in Optional settings. Rank, Approve, and subwaves keep their guided sequence and final Overview.",
+        "Rank, Approve, and subwave Setup keeps the wave name, picture, type, and applicable Rank ranking mode visible; Appearance and labels contains display, proposal-card, and applicable tab-label customization.",
         "Optional sections are named for their contents instead of repeating Advanced settings. They show Customized for non-default values and open automatically when a hidden field needs attention.",
         "The Access step initially shows one Who can access this wave control. By default, that group can also chat and, for Rank and Approve waves, submit and vote; only the creator can administer the wave.",
         "Customize other permissions expands the separate chat, submission, voting, and admin group controls when a wave needs different access rules.",
-        "Each Access row offers one Edit action with a pencil icon and no Choose group action. Edit opens Identities immediately alongside the rule choices, supports explicitly included and excluded identities, and Next stays disabled until the pending replacement is saved or cancelled.",
+        "Each Access row offers one Edit action with a pencil icon and no Choose group action. Edit opens Identities immediately alongside the rule choices, supports explicitly included and excluded identities, and Next or Review wave stays disabled until the pending replacement is saved or cancelled.",
         "The inline criteria editor includes a Hide criteria and members switch. Its tooltip explains that the criteria and member list remain visible to group members but are hidden from everyone else. The switch starts off for a new inline group, preserves the setting copied from the current assignment, and applies the current setting when Save changes is selected.",
         "The inline Identities editor can add either included or excluded identities through profile search, an authenticated EMMA allowlist, or a dragged or selected CSV file. Source wallets are normalized and deduplicated, source choices persist while the group remains an unsaved draft, and the latest include or exclude action wins when the same wallet appears on both sides.",
         "Inline group identity search ranks exact, prefix, and substring profile-handle matches before ENS-only matches, then orders each match group by profile level, highest first.",
@@ -3018,10 +3052,10 @@
         "Wave creation verifies the final access groups again after authentication and before creating a personal group for the Admins scope or the Wave.",
         "New inline groups include the connected creator by default, even when the group otherwise contains only rules; choosing a saved group preserves the saved group's membership instead.",
         "Inline identity groups warn when the connected creator is excluded, because excluding yourself from a view group can prevent you from opening the created wave.",
-        "All wave types include Guidelines; Rank and Approve also include Schedule, Drops, and Voting. Scheduled Rank and Approve include Outcomes, while Perpetual Ranking skips Outcomes.",
+        "Standalone Chat includes guidelines in Optional settings on its first screen. Rank, Approve, and Chat subwaves have a separate Guidelines step. Rank and Approve also include Schedule, Drops, and Voting. Scheduled Rank and Approve include Outcomes, while Perpetual Ranking skips Outcomes.",
         "Schedule keeps Submissions Open, Voting Opens, and applicable first-announcement controls visible under Opening dates. Winner schedule or Wave end reveals secondary controls; Perpetual Ranking has no Schedule optional section.",
         "Drops shows submission type and Submission requirements as always-visible sections. Submission requirements contains required media types, metadata, the simultaneous-submission limit, and signing rules, with no expand/collapse control.",
-        "Guidelines always shows the Chat guidelines textbox. For Rank and Approve, Rules that require acceptance is in Drops under Submission requirements, below the simultaneous-submission limit. The section is always visible. Entering signing rules requires a wallet signature before submitting; leaving the textbox empty or clearing it removes that requirement. There is no acceptance toggle. The generated configuration summary appears in the final read-only Overview.",
+        "The Chat guidelines textbox is visible inside Optional settings for standalone Chat, or on the Guidelines step in guided creation. For Rank and Approve, Rules that require acceptance is in Drops under Submission requirements, below the simultaneous-submission limit. The section is always visible. Entering signing rules requires a wallet signature before submitting; leaving the textbox empty or clearing it removes that requirement. There is no acceptance toggle. The generated configuration summary appears in the final read-only Overview.",
         "Voting keeps the power model, scope, required Rep or Memes details, and Approve threshold visible; named Vote limits sections contain negative-vote behavior, time weighting, and Approve hold timing.",
         "Outcomes keeps outcome selection, reward configuration, and Show outcomes menu section visible. Show outcomes menu section controls the Outcomes tab and reward details on leaderboard and winner cards; rewards still apply when hidden. Approve waves place the optional maximum winner count under Winner limits.",
         "In Description, individual @ mention suggestions follow the draft wave's Visibility group; private drafts suggest only eligible profiles.",
@@ -3058,7 +3092,7 @@
       ],
       "facts": [
         "Chat waves are conversation-focused waves.",
-        "Chat wave creation uses Setup, Access, Guidelines, Description, and final Overview steps.",
+        "Standalone Chat wave creation has two screens: name and First post with Optional settings, then Review with Confirm and create. Access, picture, and guidelines remain available in Optional settings. Chat subwaves use Setup, Access, Guidelines, Description, and final Overview steps.",
         "Use Chat when the wave does not need ranking or approval mechanics."
       ],
       "canonical_path": "/waves?create=wave",
@@ -3246,8 +3280,8 @@
         "mobile"
       ],
       "facts": [
-        "Guidelines is for editing optional chat guidelines. Acceptance-required rules are configured in Drops under Submission requirements. The read-only configuration summary is in the final Overview after Description. Overview shows access, schedules, submissions, voting, approval settings, detailed outcomes, acceptance-required rules and guidelines, and the description. Confirm and create submits only from this last step. Previous returns to Description without clearing text or attachments.",
-        "Guidelines is directly before Description for every wave type. Chat enters it after Access, Perpetual Ranking after Voting, and scheduled Rank and Approve after Outcomes.",
+        "Guidelines is for editing optional chat guidelines. Standalone Chat exposes them in Optional settings on the first screen, with the read-only summary on Review; Previous returns to the first screen without clearing the first post. Guided creation shows the summary in the final Overview after Description; Previous returns to Description without clearing text or attachments. The summary includes the applicable access, schedules, submissions, voting, approval settings, outcomes, acceptance-required rules, guidelines, and description. Confirm and create submits only from the final review. Acceptance-required rules are configured in Drops under Submission requirements.",
+        "In guided creation, Guidelines is directly before Description. Chat subwaves enter it after Access, Perpetual Ranking after Voting, and scheduled Rank and Approve after Outcomes. Standalone Chat uses Optional settings on its first screen instead of a separate Guidelines step.",
         "Generated rules summarize the wave setup. Chat rules focus on wave type, access, and chat settings; Rank and Approve rules also include timing, submissions, voting, approval, and outcome visibility.",
         "Creators use the Chat guidelines section and Add chat guidelines... textbox to add guidelines. The subtitle explains that users see them when sending their first chat message. Guidelines are saved as wave metadata and also shown under Guidelines in the wave rules panel.",
         "When a wave has guidelines, a profile with no prior chat messages or participation drops in that wave reviews them before its first chat message is sent. Agree sends the pending message; Decline keeps the draft and shows the guidelines again on the next attempt.",

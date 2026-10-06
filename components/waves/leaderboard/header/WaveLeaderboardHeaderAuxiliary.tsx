@@ -18,6 +18,101 @@ import type { LeaderboardViewMode } from "../types";
 type ActionsRemeasureVariant = "none" | "filter-only" | "with-drop";
 type LeaderboardSortItem = CommonSelectItem<WaveDropsLeaderboardSort>;
 
+export function getHeaderControlsRowClass({
+  flexClass,
+  basisClass,
+  compactSubmissionControls,
+  balanceSubmissionRows,
+  enableControlsScroll,
+}: {
+  readonly flexClass: string;
+  readonly basisClass: string;
+  readonly compactSubmissionControls: boolean;
+  readonly balanceSubmissionRows: boolean;
+  readonly enableControlsScroll: boolean;
+}) {
+  return `tw-flex tw-min-w-0 ${flexClass} tw-flex-nowrap tw-items-start ${
+    compactSubmissionControls
+      ? "tw-gap-1 [&_[role=tab]]:tw-w-[26px]"
+      : "tw-gap-2"
+  } ${basisClass} ${balanceSubmissionRows ? "tw-justify-between" : ""} ${
+    enableControlsScroll
+      ? "tw-no-scrollbar tw-overflow-x-auto tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/60"
+      : "tw-overflow-x-hidden"
+  }`;
+}
+
+export function PriceActionsRow({
+  isVisible,
+  testId,
+  showAdditionalActions,
+  actionMode,
+  wrapActions,
+  children,
+}: {
+  readonly isVisible: boolean;
+  readonly testId:
+    | "leaderboard-header-actions-row"
+    | "leaderboard-price-actions-row";
+  readonly showAdditionalActions: boolean;
+  readonly actionMode?: "full" | "icon" | undefined;
+  readonly wrapActions?: boolean | undefined;
+  readonly children: React.ReactNode;
+}) {
+  if (!isVisible) return null;
+  let wrapStatus: "yes" | "no" | undefined;
+  if (wrapActions !== undefined) wrapStatus = wrapActions ? "yes" : "no";
+  return (
+    <div
+      data-testid={testId}
+      data-action-mode={actionMode}
+      data-wrap={wrapStatus}
+      className={`tw-ml-auto tw-flex tw-flex-shrink-0 tw-items-center tw-gap-2 ${
+        showAdditionalActions ? "tw-max-w-full tw-flex-wrap" : ""
+      } ${wrapActions ? "tw-basis-auto" : ""}`}
+    >
+      {children}
+    </div>
+  );
+}
+
+export function SubmissionActionsRow({
+  isVisible,
+  refObject,
+  balanceRows,
+  isMemesWave,
+  additionalActions,
+  onCreateDrop,
+  createLabel,
+}: {
+  readonly isVisible: boolean;
+  readonly refObject: React.RefObject<HTMLDivElement | null>;
+  readonly balanceRows: boolean;
+  readonly isMemesWave: boolean;
+  readonly additionalActions: React.ReactNode;
+  readonly onCreateDrop: (() => void) | undefined;
+  readonly createLabel: string;
+}) {
+  if (!isVisible) return null;
+  return (
+    <div
+      data-testid="leaderboard-submission-actions"
+      ref={refObject}
+      className={`tw-flex tw-max-w-full tw-flex-wrap tw-items-center tw-gap-2 ${
+        balanceRows ? "tw-w-full tw-justify-between" : "tw-ml-auto"
+      } ${isMemesWave ? "lg:tw-hidden" : ""}`}
+    >
+      {additionalActions}
+      {onCreateDrop && (
+        <Button onClick={onCreateDrop} variant="primary" size="sm">
+          <PlusIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
+          <span>{createLabel}</span>
+        </Button>
+      )}
+    </div>
+  );
+}
+
 export const getLeaderboardViewModes = (
   isMemesWave: boolean
 ): readonly LeaderboardViewMode[] =>
@@ -293,9 +388,8 @@ export const MeasurementProbes: React.FC<MeasurementProbesProps> = ({
 
     <div
       ref={sortDropdownProbeRef}
-      className="tailwind-scope tw-inline-flex tw-whitespace-nowrap tw-rounded-lg tw-py-2.5 tw-pl-3.5 tw-pr-8 tw-text-xs tw-font-semibold tw-ring-1 tw-ring-inset tw-ring-iron-700"
+      className="tailwind-scope tw-inline-flex tw-whitespace-nowrap tw-rounded-lg tw-py-2.5 tw-pl-2 tw-pr-6 tw-text-xs tw-font-semibold tw-ring-1 tw-ring-inset tw-ring-iron-700"
     >
-      <span className="tw-font-semibold tw-text-iron-500">Sort: </span>
       {activeSortLabel}
     </div>
 

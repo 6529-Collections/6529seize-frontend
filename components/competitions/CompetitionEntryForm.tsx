@@ -45,6 +45,7 @@ import {
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { COMPETITION_BUTTON, COMPETITION_INPUT } from "./CompetitionState";
+import { competitionSubmissionReceiptKey } from "@/helpers/competition-submission.helpers";
 
 function getEntryReferences(
   snapshot: NonNullable<ReturnType<DropEditorHandles["getDropSnapshot"]>>,
@@ -227,6 +228,10 @@ export default function CompetitionEntryForm({
         pending.current = { fingerprint, request };
       }
       const entry = await createCompetitionEntry(identity, request);
+      client.setQueryData(
+        competitionSubmissionReceiptKey(identity, viewer, entry.id),
+        entry
+      );
       pending.current = null;
       await invalidateCompetition(client, identity);
       await client.invalidateQueries({

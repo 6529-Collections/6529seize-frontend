@@ -51,6 +51,16 @@ Entry behavior differs by wave type:
    - hidden controls
    - restriction controls that reveal why submission is unavailable
    - empty-state restriction message
+5. After a standard or Quorum submission is saved, a confirmation checks its
+   competition entry directly. A confirmed entry offers **View my entry**.
+6. On ordinary wave leaderboards, **My submissions** opens your active and
+   winning entries in that wave without changing the leaderboard sort or filters.
+   It appears as a text button beside the entry action in the toolbar. On
+   leaderboards without price controls, the controls stay on one row when they
+   fit. Otherwise, view controls and the selected sort occupy the first row,
+   with **My submissions** on the left and the entry action on the right below.
+   Curation leaderboards retain their price-control layout. The sort button
+   shows the selected sort without a visible `Sort:` prefix.
 
 ## Common Scenarios
 
@@ -113,12 +123,19 @@ Entry behavior differs by wave type:
 - If curation `Drop Artwork` modal closes accidentally, reopen from header
   `Drop Art` or empty-state `Drop`.
 - If a create panel/modal opens but submit fails, retry from the same surface.
+- If the artwork was saved but its competition entry cannot be confirmed, use
+  **Check again** or **View artwork** before submitting another copy. **Check
+  again** reads the saved entry; it does not submit another drop.
+- **My submissions** remains available to signed-in users on their own profile,
+  even when they cannot currently submit. Proxy mode hides this personal control.
 - If wave timing or eligibility changed while viewing, refresh leaderboard to
   re-evaluate entry controls.
 
 ## Limitations / Notes
 
-- This page owns entry gating and start controls only.
+- This page owns entry gating, start controls and ordinary-wave submission recovery.
+- The Memes keeps its specialized submission flow. Native competitions have
+  their own [entry confirmation and My submissions](../competitions/feature-competitions.md).
 - Full submit format and validation rules live in curation and memes submission
   pages.
 - Restriction helper text is most explicit in empty states; populated lists can

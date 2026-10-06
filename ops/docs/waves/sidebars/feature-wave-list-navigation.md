@@ -83,7 +83,7 @@ when the desktop feed is active or its button is hovered or keyboard-focused.
 - Worth Checking Out shows up to six spaced previews, with fewer on narrow screens,
   with score shields overlapping the bottom-right corner of each avatar.
   The section keeps its own compact height independently of the vote list.
-- The compact plus button retains its light colour and shows `Create wave` on hover or keyboard focus.
+- Create wave has a visible label in the expanded desktop Waves panel and mobile Waves list, including signed-out visits. The collapsed sidebar keeps the plus icon and accessible Create wave name.
 - Each heading has a separate `View all` link before the chevron, available
   even when collapsed. Active Votes opens `/discover?view=active-votes`;
   Worth Checking Out opens `/discover?view=recommendations&sort=QUALITY`.
@@ -94,6 +94,10 @@ when the desktop feed is active or its button is hovered or keyboard-focused.
   On touch devices, the focused field scrolls into view when the keyboard opens.
   In the native app, the Waves list also resizes above the keyboard so the input
   and results stay reachable; dismissing the keyboard restores the list height.
+  While search is open, sidebar scores stay visible but their details cards
+  are temporarily unavailable, including when the search field is empty.
+  Closing search restores score hover, focus, and selection. Recommendation
+  links remain available while searching.
   `Find a wave…` searches all accessible non-DM waves, independently of the
   selected collection. Type at least three characters. Results show name,
   creator, and joined/pinned status, with `Load more` for additional matches.

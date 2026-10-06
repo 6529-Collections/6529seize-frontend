@@ -34,6 +34,7 @@ import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore
 const SUBWAVE_PREFETCH_HOVER_INTENT_MS = 150;
 
 interface BrainLeftSidebarWaveProps {
+  readonly scoreDetailsDisabled?: boolean | undefined;
   readonly isAnnouncement?: boolean | undefined;
   readonly wave: MinimalWave;
   readonly onHover: (waveId: string) => void;
@@ -101,6 +102,7 @@ const getRowPresentationClasses = (
 };
 
 const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
+  scoreDetailsDisabled = false,
   isAnnouncement = false,
   wave,
   onHover,
@@ -385,6 +387,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
                 )}
                 {hasSummaryScore && (
                   <WaveTrustSignals
+                    scoreDetailsDisabled={scoreDetailsDisabled}
                     waveRep={wave.waveRep}
                     waveScore={wave.waveScore}
                     variant="sidebar-inline"
