@@ -216,6 +216,22 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
     waveId,
     restoredView: getRestoredWaveView(isApp, waveId, currentWaveView),
   });
+
+  /** Select the shell view and keep explicitly routed Chat content in sync. */
+  const selectViewAndContent = useCallback(
+    (view: BrainView) => {
+      selectView(view);
+      if (
+        waveId &&
+        view === BrainView.DEFAULT &&
+        !isCompetitionPathname(pathname)
+      ) {
+        setActiveContentTab(MyStreamWaveTab.CHAT, { persist: false });
+      }
+    },
+    [pathname, selectView, setActiveContentTab, waveId]
+  );
+
   const onViewChange = useCallback(
     (view: BrainView) => {
       const competitionTab =
@@ -233,7 +249,7 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
         );
         return;
       }
-      selectView(view);
+      selectViewAndContent(view);
       const tab = getWaveTab(view);
       if (waveId && tab !== undefined) {
         rememberTab(waveId, tab);
@@ -241,14 +257,6 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
       }
       if (isApp && waveId) {
         rememberWaveView({ waveId, view });
-      }
-      if (
-        waveId &&
-        view === BrainView.DEFAULT &&
-        !isCompetitionPathname(pathname)
-      ) {
-        // Explicit rules URLs must return the nested Wave content to Chat too.
-        setActiveContentTab(MyStreamWaveTab.CHAT, { persist: false });
       }
       if (
         waveId &&
@@ -264,7 +272,7 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
       }
     },
     [
-      selectView,
+      selectViewAndContent,
       rememberTab,
       isApp,
       waveId,
@@ -274,7 +282,6 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
       defaultSelectionEnabled,
       defaultCompetitionId,
       searchParams,
-      setActiveContentTab,
     ]
   );
   const configurationButtonRef = useRef<HTMLButtonElement>(null);

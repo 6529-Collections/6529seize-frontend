@@ -557,6 +557,8 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       page,
       baseURL,
     }, testInfo) => {
+      // The native app shell has no desktop variant. Web keyboard navigation
+      // remains covered by the composer sandbox's desktop and phone cases.
       test.skip(
         testInfo.project.name !== "web-mobile-chromium",
         "Native app simulation uses the mobile viewport."
