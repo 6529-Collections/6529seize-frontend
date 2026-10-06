@@ -1,4 +1,5 @@
 import { EN_US_DROP_METADATA_MESSAGES } from "@/i18n/messages/drop-metadata";
+import { EN_SUBMISSION_DISCOVERY_MESSAGES } from "@/i18n/messages/submission-discovery";
 import { EN_DROP_REQUIREMENT_MESSAGES } from "@/i18n/messages/drop-requirements";
 import artworkShareMessages from "@/i18n/messages/artworkShare.en-GB.json";
 import profileCmsAgentMessages from "@/i18n/messages/profileCmsAgent.en-GB.json";
@@ -16,6 +17,7 @@ import type { MessageKey } from "@/i18n/messages/en-US";
 import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.en-GB.json";
 
 export const EN_GB_MESSAGES = {
+  ...EN_SUBMISSION_DISCOVERY_MESSAGES,
   ...EN_DROP_REQUIREMENT_MESSAGES,
   ...EN_US_DROP_METADATA_MESSAGES,
   "profile.subscriptions.noAllocation": "No subscription allocation",
@@ -975,6 +977,9 @@ export const EN_GB_MESSAGES = {
   "waves.create.drops.maxSimultaneousSubmissions.description":
     "Maximum number of simultaneous submissions per participant. Optional. Unlimited if left blank.",
   "waves.proposalCard.contextLabel": "Proposal",
+  "waves.proposalCard.summaryLabel": "Summary",
+  "waves.proposalCard.showDetails": "Show details ({count})",
+  "waves.proposalCard.hideDetails": "Hide details",
   "waves.proposalCard.readFull": "Read full",
   "waves.proposalCard.readFullNamed": "Read full: {title}",
   "waves.proposalCard.untitledProposal": "Untitled proposal",

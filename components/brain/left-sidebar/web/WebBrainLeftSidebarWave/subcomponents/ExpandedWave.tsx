@@ -23,6 +23,7 @@ import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore
 const SUBWAVE_PREFETCH_HOVER_INTENT_MS = 150;
 
 interface ExpandedWaveProps {
+  readonly scoreDetailsDisabled?: boolean | undefined;
   readonly formattedWaveName: string;
   readonly haveNewDrops: boolean;
   readonly href: string;
@@ -50,6 +51,7 @@ interface ExpandedWaveProps {
 }
 
 export const ExpandedWave = ({
+  scoreDetailsDisabled = false,
   formattedWaveName,
   haveNewDrops,
   href,
@@ -92,7 +94,8 @@ export const ExpandedWave = ({
   const shouldShowPinButton = showPin && depth === 0;
   const hasSummaryScore = hasWaveTrustSummaryScore(wave.waveScore);
   const shouldShowDropTime = presentLatestDropTimestamp !== null;
-  const rowVerticalPaddingClasses = isChildRow ? "tw-py-1" : "tw-py-2";
+  const rowVerticalPaddingClasses =
+    isChildRow || isAnnouncement ? "tw-py-1" : "tw-py-2";
   const contentGapClasses = isChildRow ? "tw-gap-y-0.5" : "tw-gap-y-1";
   const titleTextClasses = isChildRow ? "tw-text-[13px]" : "tw-text-sm";
   const timestampTextClasses = isChildRow ? "tw-text-[11px]" : "tw-text-xs";
@@ -104,6 +107,7 @@ export const ExpandedWave = ({
     guideLineOffsetClasses,
   } = getSidebarWaveRowLayoutClasses({
     isChildRow,
+    isAnnouncement,
     variant: "web",
   });
   const subwavePrefetchTimerRef = useRef<ReturnType<
@@ -246,6 +250,7 @@ export const ExpandedWave = ({
                 )}
                 {hasSummaryScore && (
                   <WaveTrustSignals
+                    scoreDetailsDisabled={scoreDetailsDisabled}
                     waveRep={wave.waveRep}
                     waveScore={wave.waveScore}
                     variant="sidebar-inline"

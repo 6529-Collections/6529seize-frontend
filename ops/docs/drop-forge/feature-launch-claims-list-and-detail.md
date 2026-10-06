@@ -14,7 +14,8 @@ The launch surface combines:
 - a temporary on-chain loading state before live claim status resolves
 - auto-selected phase setup and updates
 - artist/team/subscription/research airdrop actions
-- claims-admin action-completion tracking for airdrop steps
+- action-completion tracking for configured claims admins, creator owner, and
+  approved on-chain admins
 
 ## Location in the Site
 
@@ -107,7 +108,7 @@ The launch surface combines:
     airdrop summaries.
   - Selecting `Phase 2` can show both `Phase 2 Subscription Airdrops` and
     `Public Phase Subscription Airdrops`.
-  - Claims-admin wallets can get `Completed` toggles beside artist, team,
+  - Launch-authorized wallets can get `Completed` toggles beside artist, team,
     subscription, and research airdrop sections when the backend exposes
     tracked action names.
   - Successful airdrops auto-mark the matched tracked action complete; the same
@@ -148,7 +149,8 @@ The launch surface combines:
   wallet may launch claims but cannot edit craft claims.
 - `Phase 1`, `Phase 2`, `Public Phase`, and `Airdrop to Research` stay disabled
   until the claim is initialized.
-- Completion toggles appear only for claims-admin wallets, and only when the
+- Completion toggles appear for configured claims admins, creator owner, and
+  approved on-chain admins, and only when the
   action-tracking API returns supported action names for that claim.
 - Public phase does not show merkle-root fields.
 - Media preview can render image-only, animation-only, both tabs, or a missing
@@ -167,7 +169,9 @@ The launch surface combines:
 - Queue or claim-detail fetch failures show inline errors and keep the user on
   the current launch route.
 - If tracked-action toggles fail to load or update, the page stays usable; retry
-  once claims-admin auth and API access are available again.
+  once launch authorization and API access are available again. On-chain-only
+  permissions are checked fresh by the mainnet API; RPC failure returns 503
+  rather than retaining stale access. Sepolia tracking remains unsupported.
 - If on-chain roots or phase-airdrop data fail to load, their error messages stay
   visible above the rest of the launch content.
 - Failed write operations leave the claim open so the user can adjust values and
@@ -182,9 +186,16 @@ The launch surface combines:
 ## Limitations / Notes
 
 - Launch access is limited to claims-admin and Drop Forge admin wallets.
+- Drop Forge admins include the active creator's owner and approved on-chain
+  admins. This does not grant craft access or owner-only admin-management rights.
+- The signing wallet pays gas for initialize/update/airdrop operations. Approving
+  an admin does not redirect mint revenue: phase initialize/update retains the
+  configured `MEMES_DEPLOYER` payment receiver, and metadata-only updates preserve
+  the claim's current receiver. `Pay Artist` sends ETH directly from the signing
+  wallet's own balance, in addition to gas; it does not withdraw mint revenue.
 - Launch uses the craft claim as its content source; unpublished craft metadata
   blocks launch initialization.
-- Tracked completion toggles are claims-admin workflow metadata; they do not
+- Tracked completion toggles are launch workflow metadata; they do not
   replace on-chain claim or airdrop state.
 - Claim cards and launch detail use the connected chain to choose mainnet or
   Sepolia minting configuration.

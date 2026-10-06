@@ -34,6 +34,7 @@ import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore
 const SUBWAVE_PREFETCH_HOVER_INTENT_MS = 150;
 
 interface BrainLeftSidebarWaveProps {
+  readonly scoreDetailsDisabled?: boolean | undefined;
   readonly isAnnouncement?: boolean | undefined;
   readonly wave: MinimalWave;
   readonly onHover: (waveId: string) => void;
@@ -69,7 +70,10 @@ const isModifiedAnchorClick = (event: React.MouseEvent<HTMLAnchorElement>) =>
   event.altKey ||
   event.button === 1;
 
-const getRowPresentationClasses = (isChildRow: boolean) => {
+const getRowPresentationClasses = (
+  isChildRow: boolean,
+  isAnnouncement: boolean
+) => {
   if (isChildRow) {
     return {
       avatarSizeClasses: "tw-size-7",
@@ -90,7 +94,7 @@ const getRowPresentationClasses = (isChildRow: boolean) => {
       "tw-ring-1 tw-ring-offset-2 tw-ring-offset-iron-900 tw-ring-primary-400",
     dropBadgeClasses:
       "tw-absolute tw-bottom-[-2px] tw-right-[-2px] tw-flex tw-size-3.5 tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-950 tw-shadow-lg",
-    rowVerticalPaddingClasses: "tw-py-2",
+    rowVerticalPaddingClasses: isAnnouncement ? "tw-py-1" : "tw-py-2",
     contentGapClasses: "tw-gap-y-1",
     titleTextClasses: "tw-text-sm tw-font-medium",
     timestampTextClasses: "tw-text-xs",
@@ -98,6 +102,7 @@ const getRowPresentationClasses = (isChildRow: boolean) => {
 };
 
 const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
+  scoreDetailsDisabled = false,
   isAnnouncement = false,
   wave,
   onHover,
@@ -231,6 +236,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
     guideLineOffsetClasses,
   } = getSidebarWaveRowLayoutClasses({
     isChildRow,
+    isAnnouncement,
     variant: "app",
   });
   const {
@@ -241,7 +247,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
     contentGapClasses,
     titleTextClasses,
     timestampTextClasses,
-  } = getRowPresentationClasses(isChildRow);
+  } = getRowPresentationClasses(isChildRow, isAnnouncement);
 
   return (
     <div
@@ -381,6 +387,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
                 )}
                 {hasSummaryScore && (
                   <WaveTrustSignals
+                    scoreDetailsDisabled={scoreDetailsDisabled}
                     waveRep={wave.waveRep}
                     waveScore={wave.waveScore}
                     variant="sidebar-inline"

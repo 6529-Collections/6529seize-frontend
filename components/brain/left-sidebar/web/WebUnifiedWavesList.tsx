@@ -1,4 +1,7 @@
 "use client";
+import { useWaveSidebarSearch } from "@/hooks/useWaveSidebarSearch";
+import { useWaveDiscoveryViewer } from "@/hooks/useWaveDiscoveryViewer";
+import { useWaveSidebarCollection } from "@/hooks/useWaveSidebarCollection";
 
 import React, { useRef } from "react";
 import { useInfiniteScroll } from "../../../../hooks/useInfiniteScroll";
@@ -7,7 +10,7 @@ import { UnifiedWavesListLoader } from "../waves/UnifiedWavesListLoader";
 import WebUnifiedWavesListWaves from "./WebUnifiedWavesListWaves";
 import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
 import { useShowFollowingWaves } from "@/hooks/useShowFollowingWaves";
-import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { useAuth } from "@/components/auth/Auth";
 
@@ -16,6 +19,7 @@ interface WebUnifiedWavesListProps {
   readonly fetchNextPage: () => void;
   readonly hasNextPage: boolean | undefined;
   readonly isFetching: boolean;
+  readonly isPinnedWavesLoading?: boolean;
   readonly isFetchingNextPage: boolean;
   readonly onHover: (waveId: string) => void;
   readonly scrollContainerRef: React.RefObject<HTMLElement | null>;
@@ -29,6 +33,7 @@ const WebUnifiedWavesList: React.FC<WebUnifiedWavesListProps> = (props) => {
     fetchNextPage,
     hasNextPage,
     isFetching,
+    isPinnedWavesLoading = false,
     isFetchingNextPage,
     onHover,
     scrollContainerRef,
@@ -36,6 +41,14 @@ const WebUnifiedWavesList: React.FC<WebUnifiedWavesListProps> = (props) => {
     showProfileFeedShortcut = true,
   } = props;
   const sentinelRef = useRef<HTMLDivElement>(null);
+  const locale = useBrowserLocale();
+  const [savedCollection] = useWaveSidebarCollection();
+  const { canUseCollections, key } = useWaveDiscoveryViewer();
+  const [search] = useWaveSidebarSearch(key ?? "guest");
+  const isSearching = !isCollapsed && Boolean(search.trim());
+  const collection = canUseCollections ? savedCollection : "all";
+  const collectionFetching =
+    isFetching || (collection === "pinned" && isPinnedWavesLoading);
   const [following] = useShowFollowingWaves();
   const { connectedProfile, activeProfileProxy } = useAuth();
   const isJoinedFilterActive =
@@ -43,7 +56,7 @@ const WebUnifiedWavesList: React.FC<WebUnifiedWavesListProps> = (props) => {
 
   // Use the custom hook for infinite scroll
   useInfiniteScroll(
-    hasNextPage,
+    !isSearching && (isCollapsed || collection !== "pinned") && hasNextPage,
     isFetchingNextPage,
     fetchNextPage,
     scrollContainerRef,
@@ -56,6 +69,7 @@ const WebUnifiedWavesList: React.FC<WebUnifiedWavesListProps> = (props) => {
       <div className="tw-w-full">
         {/* Unified Waves List */}
         <WebUnifiedWavesListWaves
+          isLoading={collectionFetching || isFetchingNextPage}
           waves={waves}
           onHover={onHover}
           scrollContainerRef={scrollContainerRef}
@@ -66,21 +80,23 @@ const WebUnifiedWavesList: React.FC<WebUnifiedWavesListProps> = (props) => {
 
         {/* Loading indicator and intersection trigger */}
         <UnifiedWavesListLoader
-          isFetching={isFetching && waves.length === 0}
-          isFetchingNextPage={isFetchingNextPage}
+          isFetching={!isSearching && collectionFetching && waves.length === 0}
+          isFetchingNextPage={!isSearching && isFetchingNextPage}
         />
 
         {/* Empty state */}
-        <UnifiedWavesListEmpty
-          sortedWaves={waves}
-          isFetching={isFetching}
-          isFetchingNextPage={isFetchingNextPage}
-          emptyMessage={
-            isJoinedFilterActive
-              ? t(DEFAULT_LOCALE, "waves.sidebar.joinedEmptyMessage")
-              : undefined
-          }
-        />
+        {!isSearching && (
+          <UnifiedWavesListEmpty
+            sortedWaves={waves}
+            isFetching={collectionFetching}
+            isFetchingNextPage={isFetchingNextPage}
+            emptyMessage={
+              isJoinedFilterActive
+                ? t(locale, "waves.sidebar.joinedEmptyMessage")
+                : undefined
+            }
+          />
+        )}
       </div>
     </div>
   );

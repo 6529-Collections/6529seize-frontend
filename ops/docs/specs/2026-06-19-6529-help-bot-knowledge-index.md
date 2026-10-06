@@ -12,6 +12,18 @@ The `about.6529-apps` record includes a concise `brief_answer` naming both
 page. The companion backend uses it for short availability/download requests
 such as "is there an app", "6529 app", and contextual "link?" replies.
 
+The `waves.native-competitions` record covers competition collections and links,
+shared chat, independent credits, native entry content, draft/publication and
+terminal lifecycle rules. It qualifies availability rather than promising
+controls in every deployment, and retains the original-wave experience in its
+navigation guidance. Backend runtime continues consuming the published corpus.
+
+The Wave discovery record describes the independent Active Votes and Worth Checking Out
+sidebar sections, their explanations and view-all destinations. It covers the
+scrollable three-row voting window, pagination, compact empty/error states and
+independently persisted collapse preferences. Worth Checking Out comes first
+and retains its own compact preview height.
+
 ## Problem Statement
 
 Users often ask practical product questions in Waves instead of finding the

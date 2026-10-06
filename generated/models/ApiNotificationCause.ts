@@ -27,5 +27,6 @@ export enum ApiNotificationCause {
     WaveCreated = 'WAVE_CREATED',
     AllDrops = 'ALL_DROPS',
     PriorityAlert = 'PRIORITY_ALERT',
-    SubscriptionCoverage = 'SUBSCRIPTION_COVERAGE'
+    SubscriptionCoverage = 'SUBSCRIPTION_COVERAGE',
+    CompetitionLifecycle = 'COMPETITION_LIFECYCLE'
 }

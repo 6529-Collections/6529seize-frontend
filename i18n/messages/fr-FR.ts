@@ -1,4 +1,5 @@
 import { FR_FR_DROP_METADATA_MESSAGES } from "@/i18n/messages/drop-metadata";
+import { FR_SUBMISSION_DISCOVERY_MESSAGES } from "@/i18n/messages/submission-discovery";
 import { FR_FR_DROP_REQUIREMENT_MESSAGES } from "@/i18n/messages/drop-requirements";
 import artworkShareMessages from "@/i18n/messages/artworkShare.fr-FR.json";
 import profileCmsAgentMessages from "@/i18n/messages/profileCmsAgent.fr-FR.json";
@@ -19,6 +20,7 @@ import type { MessageKey } from "@/i18n/messages/en-US";
 import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.fr-FR.json";
 
 export const FR_FR_MESSAGES = {
+  ...FR_SUBMISSION_DISCOVERY_MESSAGES,
   ...FR_FR_DROP_REQUIREMENT_MESSAGES,
   ...FR_FR_DROP_METADATA_MESSAGES,
   "profile.subscriptions.noAllocation": "Aucune allocation d’abonnement",
@@ -996,6 +998,9 @@ export const FR_FR_MESSAGES = {
   "waves.create.drops.maxSimultaneousSubmissions.description":
     "Nombre maximal de soumissions simultanées par participant. Facultatif. Illimité si ce champ est vide.",
   "waves.proposalCard.contextLabel": "Proposition",
+  "waves.proposalCard.summaryLabel": "Résumé",
+  "waves.proposalCard.showDetails": "Afficher les détails ({count})",
+  "waves.proposalCard.hideDetails": "Masquer les détails",
   "waves.proposalCard.readFull": "Lire en entier",
   "waves.proposalCard.readFullNamed": "Lire en entier : {title}",
   "waves.proposalCard.untitledProposal": "Proposition sans titre",

@@ -18,21 +18,26 @@ mobile viewports.
 
 ## Entry Points
 
-- `/waves` and `/waves/{waveId}`: click `+` in the left-sidebar `Waves`
-  section.
+- `/waves` and `/waves/{waveId}`: click the labeled Create wave button in the
+  Waves panel, including the mobile Waves list. Collapsed sidebars keep the plus icon.
+- Global Search: find Create wave, New wave, or Start a wave. Search opens
+  `/waves/create`, which is also a direct link on web and in the app.
 - `/waves`: click `Create Wave` in the empty-content placeholder.
 - `/messages`: open by URL only (`?create=wave`).
 - Open a supported web route URL with `?create=wave`.
 
 ## URL and Modal Behavior
 
-1. Open a web waves or messages route with an authenticated wallet.
+1. Open a web waves or messages route. Create wave is available while signed out.
 2. Start create-wave from an available control, or from a URL that already has
    `create=wave`.
 3. The current URL keeps the same path/context and sets `create=wave`.
-4. If the connected identity has no profile handle, a compact `Create your
+4. While signed out, Connect to create a wave explains wallet connection. The
+   create URL remains open after connecting. If the identity has no profile
+   handle, a compact `Create your
    profile first` dialog opens instead. `Go to Identity` starts profile setup;
-   `Not now` returns to the current page without opening the create flow.
+   closing returns to the current page. Completing profile setup returns to
+   `/waves/create` for a standalone wave; subwave entry returns to its parent wave.
 5. With a profile handle, the `Create Wave` dialog opens above the current page
    context while the underlying list/content view remains visible. At widths
    below `768px`, it uses the mobile bottom sheet; wider viewports retain the
@@ -75,10 +80,11 @@ mobile viewports.
   clears the create state and returns to the underlying page context.
 - Confirming `Discard changes` closes the form and loses unsaved work. Existing
   saved drafts remain; reopening starts at Setup.
-- After leaving Setup, named wave settings can appear under `Saved Drafts` on
-  the same browser and device. Saving depends on browser storage and is delayed
-  briefly after edits. Pictures, descriptions, and the current step are not
-  restored. Subwave creation has no draft-resume control.
+- Named standalone waves save settings and first-post text to Saved Drafts for
+  the current wallet and profile on this device, including edits on the first
+  Chat screen. Saving depends on browser storage and is delayed briefly after
+  edits. Pictures and attachments must be added again. Older drafts restore
+  settings only. Restoring opens the first screen; subwaves have no draft resume.
 - On mobile, the sheet keeps its header and close control visible while the
   multi-step form scrolls within the available viewport.
 - Keyboard users can Tab to `Close` and activate it with Enter or Space, or press
@@ -90,8 +96,8 @@ mobile viewports.
 - This page documents responsive web waves/messages shell behavior.
 - App create actions route to `/waves/create` instead of this responsive web
   dialog.
-- Create-wave visibility depends on the URL create mode and connected-profile
-  availability.
+- The creation form requires a profile handle. Signed-out entry shows connection
+  guidance; an identity without a handle shows profile setup guidance.
 - Web wave/message layouts are expected to render one create-wave overlay at a
   time.
 

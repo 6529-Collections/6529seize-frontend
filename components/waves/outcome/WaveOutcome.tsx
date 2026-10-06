@@ -1,7 +1,6 @@
 "use client";
 
-import type { FC} from "react";
-import { type JSX, useMemo } from "react";
+import { type FC, type JSX, useMemo } from "react";
 import type { ApiWaveOutcome } from "@/generated/models/ApiWaveOutcome";
 import type { WaveOutcomeDistributionState } from "@/types/waves.types";
 import { useWaveOutcomeDistributionQuery } from "@/hooks/waves/useWaveOutcomeDistributionQuery";
@@ -58,6 +57,13 @@ export const WaveOutcome: FC<WaveOutcomeProps> = ({ waveId, outcome }) => {
     ]
   );
 
+  return <WaveOutcomeView outcome={outcome} distribution={distributionState} />;
+};
+
+export const WaveOutcomeView: FC<{
+  readonly outcome: ApiWaveOutcome;
+  readonly distribution: WaveOutcomeDistributionState;
+}> = ({ outcome, distribution }) => {
   const getOutcomeType = (): OutcomeType => {
     if (outcome.credit === ApiWaveOutcomeCredit.Rep) {
       return OutcomeType.REP;
@@ -72,15 +78,15 @@ export const WaveOutcome: FC<WaveOutcomeProps> = ({ waveId, outcome }) => {
 
   const component: Record<OutcomeType, JSX.Element> = {
     [OutcomeType.REP]: (
-      <WaveRepOutcome outcome={outcome} distribution={distributionState} />
+      <WaveRepOutcome outcome={outcome} distribution={distribution} />
     ),
     [OutcomeType.NIC]: (
-      <WaveNICOutcome outcome={outcome} distribution={distributionState} />
+      <WaveNICOutcome outcome={outcome} distribution={distribution} />
     ),
     [OutcomeType.MANUAL]: (
-      <WaveManualOutcome outcome={outcome} distribution={distributionState} />
+      <WaveManualOutcome outcome={outcome} distribution={distribution} />
     ),
   };
 
   return <div>{component[outcomeType]}</div>;
-}; 
+};

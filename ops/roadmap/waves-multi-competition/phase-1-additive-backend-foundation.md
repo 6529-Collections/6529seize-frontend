@@ -4,19 +4,23 @@
 
 ## Tracking
 
-- Status: In progress
-- Delivery target: Repository delivery Phase 3 (review and staging of the foundation follow-up)
-- Shared-environment acceptance: Pending staging deployment and related E2E; production is outside this delivery
-- Owner: Waves multi-competition Phase 1 foundation follow-up
-- Evidence: [Phase 1 implementation and validation record](./phase-1/implementation-evidence.md),
-  [accepted Phase 0 package](./phase-0/README.md), and the backend competition
-  read-boundary runbook at `docs/competition-read-boundary-runbook.md`.
+- Status: In progress (shipped scope and open acceptance tracked separately)
+- Delivery: Foundation and independent read/credit comparison shipped in production.
+- Remaining: Production parity windows, sample coverage/cost and performance evidence remain open.
+- Responsible roles: Backend + operations; assign named owners when scheduling the remaining work.
+- Evidence: [Production status and open gates](./native-delivery/production-status-2026-10-01.md),
+  [native implementation](./native-delivery/implementation-evidence.md) and
+  [current decisions](./phase-0/decision-register.md).
+- Roadmap numbering is distinct from delivery Phases 1–4. The sections below
+  define the milestone and remaining obligations; they are not a claim that
+  every listed acceptance check has passed.
 
 ## Outcome
 
 The backend can represent and read both legacy and native competitions through
-one contract, while all production writes and execution continue using the
-legacy model.
+one contract. At the foundation milestone all writes/execution were legacy;
+the later native release now adds a parallel native path without migrating
+existing competitions.
 
 This phase is intentionally additive and not user-visible.
 
@@ -83,13 +87,14 @@ wave, lifecycle, timing, and legacy mapping.
 - `drop_id`
 - Submitter identity
 - Entry status
-- Created, withdrawn, disqualified, and won timestamps as required
+- Entry creation/winner timestamps and retained deletion audit as required;
+  reserved historical status fields do not authorize withdraw/disqualify commands
 - Rank and decision reference where applicable
 - Configuration/signature version
 
-Define uniqueness according to the Phase 0 decision on drop reuse. Even if the
-first UI prevents reuse, avoid making the schema unable to support it later
-unless there is a strong integrity reason.
+Enforce the amended D-01 one-competition-per-drop lifetime policy in commands.
+Existing additive schema flexibility does not authorize reuse later; that would
+require an explicit product amendment.
 
 ### Supporting Records
 

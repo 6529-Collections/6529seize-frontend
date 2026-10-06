@@ -61,6 +61,35 @@ describe("OnchainTransactionModal", () => {
   });
 
   it.each(["confirm_wallet", "submitted", "success", "error"] as const)(
+    "gives the address subtitle the full header width in %s state",
+    (status) => {
+      const address = "0x7f3774EAdae4beB01919deC7f32A72e417Ab5DE3";
+      render(
+        <OnchainTransactionModal
+          status={status}
+          title="Add Admin"
+          subtitle={<span>{address}</span>}
+          pendingContent={<p>Review creator admin access</p>}
+          allowCloseWhilePending
+          onClose={jest.fn()}
+        />
+      );
+      const dialog = screen.getByRole("dialog", { name: "Add Admin" });
+      const subtitle = document.getElementById(
+        dialog.getAttribute("aria-describedby")!
+      )!;
+      const titleRow = subtitle.previousElementSibling!;
+      expect(titleRow).toContainElement(screen.getByRole("heading"));
+      expect(titleRow).toContainElement(
+        screen.getByRole("button", { name: "Close modal" })
+      );
+      expect(titleRow).not.toContainElement(subtitle);
+      expect(subtitle).toHaveClass("[overflow-wrap:anywhere]");
+      expect(dialog).toHaveAccessibleDescription(address);
+    }
+  );
+
+  it.each(["confirm_wallet", "submitted", "success", "error"] as const)(
     "only shows custom success content after confirmation (%s)",
     (status) => {
       render(
@@ -280,6 +309,23 @@ describe("OnchainTransactionModal", () => {
     fireEvent.keyDown(document, { key: "Escape" });
 
     expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it("allows an opt-in pre-sign review to close with Escape or the close button", () => {
+    const onClose = jest.fn();
+    render(
+      <OnchainTransactionModal
+        status="confirm_wallet"
+        title="Review admin change"
+        allowCloseWhilePending
+        onClose={onClose}
+        pendingContent={<button type="button">Confirm Add Admin</button>}
+      />
+    );
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(onClose).toHaveBeenCalledTimes(1);
+    fireEvent.click(screen.getByRole("button", { name: "Close modal" }));
+    expect(onClose).toHaveBeenCalledTimes(2);
   });
 
   it("dismisses a terminal state with the backdrop", async () => {

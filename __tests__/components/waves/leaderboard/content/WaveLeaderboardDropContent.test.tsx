@@ -3,6 +3,8 @@ import React from "react";
 import { WaveLeaderboardDropContent } from "@/components/waves/leaderboard/content/WaveLeaderboardDropContent";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ApiWaveParticipationSubmissionStrategyType } from "@/generated/models/ApiWaveParticipationSubmissionStrategyType";
+import ProposalCardContextLabel from "@/components/waves/drops/proposal/ProposalCardContextLabel";
+import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 
 jest.mock("next/navigation", () => ({
   usePathname: jest.fn(),
@@ -10,10 +12,13 @@ jest.mock("next/navigation", () => ({
   useSearchParams: jest.fn(),
 }));
 const waveDropContentMock = jest.fn((props: any) => (
-  <div
-    data-testid="content"
-    onClick={() => props.onDropContentClick(props.drop)}
-  />
+  <>
+    <ProposalCardContextLabel />
+    <div
+      data-testid="content"
+      onClick={() => props.onDropContentClick(props.drop)}
+    />
+  </>
 ));
 jest.mock("@/components/waves/drops/WaveDropContent", () => ({
   __esModule: true,
@@ -75,6 +80,29 @@ describe("WaveLeaderboardDropContent", () => {
         contentPresentation: "quorumCompact",
       })
     );
+    expect(screen.queryByTestId("proposal-card-context-label")).toBeNull();
+  });
+
+  it("uses the competition navigation when opening entry content", () => {
+    const push = jest.fn();
+    routerMock.mockReturnValue({ push });
+    const onOpenContent = jest.fn();
+    const drop = {
+      id: "entry-drop",
+      wave: { id: "w" },
+      serial_no: 5,
+      metadata: [],
+    } as unknown as ExtendedDrop;
+
+    render(
+      <WaveLeaderboardDropContent
+        drop={drop}
+        onDropContentClick={onOpenContent}
+      />
+    );
+    fireEvent.click(screen.getByTestId("content"));
+    expect(onOpenContent).toHaveBeenCalledWith(drop);
+    expect(push).not.toHaveBeenCalled();
   });
 
   it("renders proposal cards with a working full-detail action", () => {

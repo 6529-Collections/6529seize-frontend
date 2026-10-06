@@ -49,6 +49,13 @@ describe("CommunityCurations", () => {
     mockUseCommunityCurationsDrops.mockReturnValue(loadingState);
   });
 
+  it("offers discovery from the feed header even while loading", () => {
+    render(<CommunityCurations />);
+    expect(
+      screen.getByRole("link", { name: "Discover Waves" })
+    ).toHaveAttribute("href", "/discover");
+  });
+
   it("restores the saved offset after asynchronous feed content renders", () => {
     const { rerender } = render(<CommunityCurations />);
 

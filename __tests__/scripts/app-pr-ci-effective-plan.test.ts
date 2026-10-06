@@ -11,6 +11,7 @@ type EffectivePlan = {
     playwright_critical_shell?: { required: boolean };
     playwright_museum: { required: boolean };
     playwright_artwork_documentation: { required: boolean };
+    playwright_native_competition: { required: boolean };
     install: { required: boolean };
   };
 };
@@ -59,6 +60,91 @@ function executePlan(changedFiles: string[]): EffectivePlan {
 }
 
 describe("effective App PR CI plan", () => {
+  it.each([
+    "components/competitions/CompetitionVote.tsx",
+    "hooks/competitions/useCompetitionQueries.ts",
+    "__tests__/competitions/competition-api.test.ts",
+    "app/waves/[wave]/competitions/[competition]/page.tsx",
+    "components/waves/create-wave/hooks/useCreateWaveSubmission.ts",
+    "generated/models/ApiCompetition.ts",
+    "contexts/CompetitionContext.tsx",
+    "helpers/competition.helpers.ts",
+    "helpers/competition-config.helpers.ts",
+    "services/api/competitions-api.ts",
+    "services/wallet-signatures/competition-signature.ts",
+    "i18n/messages/competitions.ts",
+    "tests/social/native-competition-sandbox.spec.ts",
+    "tests/support/composerSandboxServer.cjs",
+    "components/waves/WavesMobile.tsx",
+    "components/brain/BrainMobile.tsx",
+    "components/brain/my-stream/MyStreamWaveContent.tsx",
+    "tests/packs.manifest.cjs",
+    "openapi.yaml",
+    ".github/workflows/app-pr-ci.yml",
+    "scripts/app-pr-ci-effective-plan.cjs",
+    "__tests__/scripts/app-pr-ci-effective-plan.test.ts",
+  ])("selects native competition browser evidence for %s", (file) => {
+    expect(
+      executePlan([file]).checks.playwright_native_competition.required
+    ).toBe(true);
+  });
+  it.each([
+    "components/waves/leaderboard/WaveMySubmissions.tsx",
+    "components/waves/leaderboard/MySubmissionsButton.tsx",
+    "components/waves/leaderboard/MySubmissionsDialog.tsx",
+    "components/waves/leaderboard/SubmissionConfirmation.tsx",
+    "components/waves/leaderboard/WaveLeaderboardError.tsx",
+    "components/waves/leaderboard/content/WaveLeaderboardDropContent.tsx",
+    "components/waves/leaderboard/drops/DefaultWaveLeaderboardDrop.tsx",
+    "components/waves/leaderboard/drops/WaveLeaderboardDrops.tsx",
+    "components/waves/leaderboard/gallery/WaveLeaderboardGallery.tsx",
+    "components/waves/leaderboard/grid/WaveLeaderboardGrid.tsx",
+    "components/waves/leaderboard/header/WaveleaderboardHeader.tsx",
+    "components/waves/leaderboard/header/WaveLeaderboardHeaderAuxiliary.tsx",
+    "components/waves/leaderboard/header/WaveleaderboardSort.tsx",
+    "components/waves/leaderboard/header/useLeaderboardHeaderControlMeasurements.ts",
+    "components/waves/leaderboard/header/waveLeaderboardHeaderLayout.ts",
+    "__tests__/components/waves/leaderboard/WaveMySubmissions.test.tsx",
+    "components/waves/drops/WaveDropActionsOpen.tsx",
+    "__tests__/components/waves/drops/WaveDropActionsOpen.test.tsx",
+    "components/waves/drops/WaveDropMobileMenuOpen.tsx",
+    "__tests__/components/waves/drops/WaveDropMobileMenuOpen.test.tsx",
+    "components\\waves\\leaderboard\\MySubmissionsDialog.tsx",
+  ])(
+    "selects native competition browser evidence for shared surface %s",
+    (file) => {
+      expect(
+        executePlan([file]).checks.playwright_native_competition.required
+      ).toBe(true);
+    }
+  );
+
+  it("selects the shared surface browser lane in a mixed change set", () => {
+    expect(
+      executePlan([
+        "ops/docs/README.md",
+        "components/waves/leaderboard/MySubmissionsButton.tsx",
+      ]).checks.playwright_native_competition.required
+    ).toBe(true);
+  });
+
+  it.each([
+    "ops/docs/README.md",
+    "components/waves/drops/WaveDropActions.tsx",
+    "__tests__/components/waves/drops/WaveDropActions.test.tsx",
+    "components/waves/drops/WaveDropMobileMenuCopyLink.tsx",
+    "__tests__/components/waves/drops/WaveDropMobileMenuCopyLink.test.tsx",
+    "components/waves/leaderboard-preview/Preview.tsx",
+    "__tests__/components/waves/leaderboard-preview/Preview.test.tsx",
+  ])(
+    "keeps unrelated path %s out of the native competition browser lane",
+    (file) => {
+      expect(
+        executePlan([file]).checks.playwright_native_competition.required
+      ).toBe(false);
+    }
+  );
+
   it.each([
     "app/artwork-documentation/page.tsx",
     "components/providers/LayoutWrapper.tsx",

@@ -1,6 +1,7 @@
 import clsx from "clsx";
 
 export type ButtonVariant =
+  | "ghost"
   | "primary"
   | "action"
   | "secondary"
@@ -9,9 +10,11 @@ export type ButtonVariant =
   | "destructive"
   | "destructiveOutline";
 
-export type ButtonSize = "xs" | "sm" | "md" | "lg";
+export type ButtonSize = "xs" | "sm" | "md" | "lg" | "xl";
 
 const VARIANT_CLASSES: Record<ButtonVariant, string> = {
+  ghost:
+    "tw-bg-transparent tw-text-iron-400 enabled:desktop-hover:hover:tw-bg-iron-900/50 enabled:desktop-hover:hover:tw-text-iron-100 enabled:active:tw-bg-iron-900 disabled:tw-opacity-50",
   primary:
     "tw-border-iron-200 tw-bg-iron-200 tw-text-iron-950 desktop-hover:hover:tw-border-iron-300 desktop-hover:hover:tw-bg-iron-300 desktop-hover:hover:tw-text-iron-950 active:tw-border-iron-400 active:tw-bg-iron-400",
   action:
@@ -33,6 +36,7 @@ const SIZE_CLASSES: Record<ButtonSize, string> = {
   sm: "tw-h-9 tw-px-3 tw-text-xs",
   md: "tw-h-10 tw-px-3.5 tw-text-sm",
   lg: "tw-min-h-11 tw-px-5 tw-py-2.5 tw-text-sm",
+  xl: "tw-min-h-12 tw-px-5 tw-py-3 tw-text-sm",
 };
 
 interface ButtonStyleOptions {
@@ -49,7 +53,10 @@ export function getButtonClasses({
   className,
 }: ButtonStyleOptions = {}): string {
   return clsx(
-    "tw-inline-flex tw-flex-shrink-0 tw-items-center tw-justify-center tw-gap-x-1.5 tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-font-semibold tw-shadow-sm tw-shadow-black/20 tw-transition-colors tw-duration-200 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 enabled:tw-cursor-pointer disabled:tw-cursor-not-allowed disabled:tw-opacity-50",
+    "tw-inline-flex tw-flex-shrink-0 tw-items-center tw-justify-center tw-gap-x-1.5 tw-whitespace-nowrap tw-rounded-lg tw-transition-colors tw-duration-200 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 enabled:tw-cursor-pointer disabled:tw-cursor-not-allowed",
+    variant === "ghost"
+      ? "tw-border-0 tw-font-medium tw-shadow-none motion-reduce:tw-transition-none"
+      : "tw-border tw-border-solid tw-font-semibold tw-shadow-sm tw-shadow-black/20 disabled:tw-opacity-50",
     variant === "destructive" || variant === "destructiveOutline"
       ? "focus-visible:tw-outline-red"
       : "focus-visible:tw-outline-primary-400",

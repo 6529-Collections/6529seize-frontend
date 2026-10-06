@@ -98,9 +98,11 @@ function RankScheduleModePreview({
 
 export default function RankScheduleModeSelector({
   ongoingRanking,
+  isCompetition = false,
   onChange,
 }: {
   readonly ongoingRanking: boolean;
+  readonly isCompetition?: boolean;
   readonly onChange: (ongoingRanking: boolean) => void;
 }) {
   const selectedScheduleMode: RankScheduleMode = ongoingRanking
@@ -179,7 +181,9 @@ export default function RankScheduleModeSelector({
                   <span
                     className={`tw-mt-1 tw-block tw-text-xs tw-font-normal tw-leading-4 ${descriptionColorClass}`}
                   >
-                    {description}
+                    {isCompetition && mode === "ANNOUNCE_WINNERS"
+                      ? t(DEFAULT_LOCALE, "competitions.announceDescription")
+                      : description}
                   </span>
                 </span>
               </div>

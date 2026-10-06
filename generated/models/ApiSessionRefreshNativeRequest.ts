@@ -17,6 +17,10 @@ export class ApiSessionRefreshNativeRequest {
     'client_type': ApiSessionRefreshNativeRequestClientTypeEnum;
     'client_address': string;
     'native_refresh_token': string;
+    /**
+    * Persist a random UUID before refreshing and reuse it with the same native refresh token after an interrupted request. A retry recovers the already rotated token without rotating or extending it again.
+    */
+    'refresh_request_id'?: string;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -40,6 +44,12 @@ export class ApiSessionRefreshNativeRequest {
             "baseName": "native_refresh_token",
             "type": "string",
             "format": ""
+        },
+        {
+            "name": "refresh_request_id",
+            "baseName": "refresh_request_id",
+            "type": "string",
+            "format": "uuid"
         }    ];
 
     static getAttributeTypeMap() {

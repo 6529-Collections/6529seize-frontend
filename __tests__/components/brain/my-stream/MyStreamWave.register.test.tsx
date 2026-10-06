@@ -1,7 +1,13 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import MyStreamWave from "@/components/brain/my-stream/MyStreamWave";
+import type * as ContentTabContext from "@/components/brain/ContentTabContext";
 import { HeaderProvider, useHeaderContext } from "@/contexts/HeaderContext";
 import { markMobileLaunchStep } from "@/utils/monitoring/mobileLaunchTiming";
+import { useCompetitionEvents } from "@/hooks/competitions/useCompetitionEvents";
+
+jest.mock("@/hooks/competitions/useCompetitionEvents", () => ({
+  useCompetitionEvents: jest.fn(),
+}));
 
 jest.mock("@/utils/monitoring/mobileLaunchTiming", () => ({
   markMobileLaunchStep: jest.fn(),
@@ -24,6 +30,7 @@ jest.mock("@/contexts/EditingDropContext", () => ({
 }));
 
 const mockRegisterWave = jest.fn();
+const mockUpdateAvailableTabs = jest.fn();
 const mockCompleteInitialRegistration = jest.fn();
 const mockSetQueryData = jest.fn();
 const mockSetWaveData = jest.fn();
@@ -34,10 +41,7 @@ const mockReplace = jest.fn();
 const mockMemesArtSubmissionModal = jest.fn((props: any) =>
   props.isOpen ? <div data-testid="memes-submit-modal" /> : null
 );
-const mockSearchParams = {
-  get: jest.fn(),
-  toString: jest.fn(),
-};
+let mockSearchParams = new URLSearchParams();
 const mockWave = {
   id: "wave-1",
   name: "Wave 1",
@@ -116,8 +120,32 @@ jest.mock("@/components/react-query-wrapper/ReactQueryWrapper", () => ({
 }));
 
 jest.mock("@/components/brain/ContentTabContext", () => ({
+  ...jest.requireActual<typeof ContentTabContext>(
+    "@/components/brain/ContentTabContext"
+  ),
   useContentTab: () => ({
     activeContentTab: "CHAT",
+    updateAvailableTabs: mockUpdateAvailableTabs,
+  }),
+}));
+
+jest.mock("@/hooks/competitions/useWaveCompetitionsTab", () => ({
+  useWaveCompetitionsTab: () => ({
+    hasCompetitions: false,
+    hideCompetitionsTab: false,
+    defaultCompetitionId: null,
+    defaultSelectionEnabled: false,
+  }),
+}));
+
+jest.mock("@/hooks/useWaveHasPolls", () => ({
+  useWavePollSummary: () => ({ hasPolls: false }),
+}));
+
+jest.mock("@/hooks/useWaveTimers", () => ({
+  useWaveTimers: () => ({
+    voting: { isUpcoming: false, isCompleted: false },
+    decisions: { firstDecisionDone: false },
   }),
 }));
 
@@ -162,6 +190,7 @@ jest.mock("@/hooks/waves/useApprovalWaveStatus", () => ({
 }));
 
 jest.mock("@/hooks/waves/useWaveMetadata", () => ({
+  useWaveMetadata: () => ({ isPending: false }),
   useWaveOutcomeVisibility: () => true,
   useWaveSubmissionButtonLabelOverride: () => null,
 }));
@@ -205,6 +234,11 @@ jest.mock("@/components/waves/winners/WaveWinners", () => ({
 
 jest.mock("@/components/brain/my-stream/tabs/MyStreamWaveTabs", () => ({
   MyStreamWaveTabs: () => <div data-testid="tabs" />,
+}));
+
+jest.mock("@/components/brain/my-stream/MyStreamWaveDesktopTabs", () => ({
+  __esModule: true,
+  default: () => <div data-testid="competition-tabs" />,
 }));
 
 jest.mock("@/components/waves/memes/MemesArtSubmissionModal", () => ({
@@ -261,17 +295,31 @@ describe("MyStreamWave registration", () => {
     jest.clearAllMocks();
     mockIsApp = false;
     mockWaveInfo = getDefaultMockWaveInfo();
-    mockSearchParams.get.mockReturnValue(null);
-    mockSearchParams.toString.mockReturnValue("");
+    mockSearchParams = new URLSearchParams();
   });
 
   it("registers the mounted wave for direct URL loads", async () => {
     renderWave();
+    expect(useCompetitionEvents).toHaveBeenCalledWith("wave-1", true);
 
     await waitFor(() => {
       expect(mockRegisterWave).toHaveBeenCalledWith("wave-1", true);
       expect(mockCompleteInitialRegistration).toHaveBeenCalledWith("wave-1");
+      expect(mockUpdateAvailableTabs).toHaveBeenCalledWith(
+        expect.objectContaining({ waveId: "wave-1" })
+      );
     });
+  });
+
+  it("renders embedded competition tabs without a second wave header", () => {
+    render(
+      <HeaderProvider>
+        <MyStreamWave waveId="wave-1" competitionOnly />
+      </HeaderProvider>
+    );
+    expect(screen.getByTestId("competition-tabs")).toBeVisible();
+    expect(useCompetitionEvents).toHaveBeenCalledWith("wave-1", false);
+    expect(screen.queryByTestId("tabs")).not.toBeInTheDocument();
   });
 
   it("marks wave metadata as loaded for launch timing", async () => {
@@ -294,6 +342,14 @@ describe("MyStreamWave registration", () => {
         "Submit drop"
       );
     });
+    expect(screen.queryByTestId("competition-tabs")).not.toBeInTheDocument();
+    expect(mockUpdateAvailableTabs).toHaveBeenCalledWith(
+      expect.objectContaining({
+        waveId: "wave-1",
+        hasAuthenticatedProfile: true,
+        votingState: "ONGOING",
+      })
+    );
   });
 
   it("does not expose the app header drop action while editing", async () => {

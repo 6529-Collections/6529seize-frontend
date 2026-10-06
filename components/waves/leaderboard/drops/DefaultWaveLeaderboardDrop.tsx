@@ -13,6 +13,7 @@ import WaveDropMobileMenuCopyLink from "@/components/waves/drops/WaveDropMobileM
 import WaveDropMobileMenuOpen from "@/components/waves/drops/WaveDropMobileMenuOpen";
 import {
   PROPOSAL_LIST_CARD_SURFACE_CLASS,
+  QUORUM_PROPOSAL_CARD_SURFACE_CLASS,
   type DropContentPresentation,
 } from "@/components/waves/drops/dropContentPresentation";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
@@ -31,6 +32,8 @@ import { WaveLeaderboardDropRaters } from "./header/WaveleaderboardDropRaters";
 interface DefaultWaveLeaderboardDropProps {
   readonly drop: ExtendedDrop;
   readonly onDropClick: (drop: ExtendedDrop) => void;
+  readonly onOpenDrop?: (() => void) | undefined;
+  readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
   readonly onVoteClick?: ((drop: ExtendedDrop) => void) | undefined;
   readonly winningThreshold?: number | null | undefined;
   readonly winningThresholdMinDurationMs?: number | null | undefined;
@@ -51,6 +54,8 @@ export const DefaultWaveLeaderboardDrop: React.FC<
 > = ({
   drop,
   onDropClick,
+  onOpenDrop,
+  onDropContentClick,
   onVoteClick,
   winningThreshold,
   winningThresholdMinDurationMs,
@@ -72,6 +77,7 @@ export const DefaultWaveLeaderboardDrop: React.FC<
   const [isReportOpen, setIsReportOpen] = React.useState(false);
   const suppressNextClickRef = React.useRef(false);
   const isProposalCard = contentPresentation === "proposalCard";
+  const isQuorumCompact = contentPresentation === "quorumCompact";
 
   const handleInteractionStart = React.useCallback(() => {
     suppressNextClickRef.current = true;
@@ -117,6 +123,10 @@ export const DefaultWaveLeaderboardDrop: React.FC<
   }, [handleMobileMenuOpenChange]);
 
   const getBorderClasses = () => {
+    if (isQuorumCompact) {
+      return `tw-overflow-hidden tw-rounded-xl tw-bg-iron-950 ${QUORUM_PROPOSAL_CARD_SURFACE_CLASS} tw-p-4 tw-transition-all tw-duration-200 tw-ease-out md:tw-p-5`;
+    }
+
     const backgroundClass = isProposalCard
       ? PROPOSAL_LIST_CARD_SURFACE_CLASS
       : "tw-bg-iron-950";
@@ -171,7 +181,13 @@ export const DefaultWaveLeaderboardDrop: React.FC<
                 winningThreshold={winningThreshold}
               />
               <div className="tw-hidden tw-h-8 tw-items-center lg:tw-flex">
-                {!isProposalCard && <WaveDropActionsOpen drop={drop} />}
+                {!isProposalCard && (
+                  <WaveDropActionsOpen
+                    drop={drop}
+                    onOpen={onOpenDrop}
+                    onNavigate={onDropContentClick}
+                  />
+                )}
                 {canDelete && <WaveDropActionsOptions drop={drop} />}
               </div>
             </div>
@@ -180,6 +196,8 @@ export const DefaultWaveLeaderboardDrop: React.FC<
               isCompetitionDrop={true}
               mediaContainerHeightClassName={mediaContainerHeightClassName}
               contentPresentation={contentPresentation}
+              onOpenDrop={onOpenDrop}
+              onDropContentClick={onDropContentClick}
             />
             <div
               className={`tw-flex tw-justify-between tw-gap-x-2 ${
@@ -259,7 +277,11 @@ export const DefaultWaveLeaderboardDrop: React.FC<
                 {/* Open drop option */}
                 <WaveDropMobileMenuOpen
                   drop={drop}
-                  onOpenChange={handleMobileMenuClose}
+                  onNavigate={onDropContentClick}
+                  onOpenChange={() => {
+                    handleMobileMenuClose();
+                    onOpenDrop?.();
+                  }}
                 />
                 <WaveDropMobileMenuCopyLink
                   drop={drop}

@@ -295,6 +295,33 @@ describe("LayoutProvider", () => {
     expect(content.style.maxHeight).not.toContain("- 80px");
   });
 
+  it.each([true, false])(
+    "makes the Waves list follow the keyboard only in the native app (%s)",
+    (isCapacitor) => {
+      mockCapacitorValues = {
+        isCapacitor,
+        isAndroid: false,
+        isIos: isCapacitor,
+      };
+      render(
+        <LayoutProvider>
+          <MobileWavesTestComponent />
+        </LayoutProvider>
+      );
+      const { style } = screen.getByTestId("mobile-waves");
+      expect(style.height.includes("--native-keyboard-inset-bottom")).toBe(
+        isCapacitor
+      );
+      expect(style.maxHeight).toBe(style.height);
+      expect(
+        style.transition.includes(
+          "--native-keyboard-layout-transition-duration"
+        )
+      ).toBe(isCapacitor);
+      expect(style.height).not.toContain("- 80px");
+    }
+  );
+
   it("subtracts the shared keyboard inset from native notifications", () => {
     mockCapacitorValues = { isCapacitor: true, isAndroid: false, isIos: true };
 

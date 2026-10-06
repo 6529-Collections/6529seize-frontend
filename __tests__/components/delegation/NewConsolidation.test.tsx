@@ -1,12 +1,26 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import NewConsolidationComponent from "@/components/delegation/NewConsolidation";
+import type { DelegationSubmitGroups } from "@/components/delegation/DelegationFormParts";
+import { DELEGATION_ABI } from "@/abis/abis";
+import { DELEGATION_CONTRACT, NEVER_DATE } from "@/constants/constants";
+import { CONSOLIDATION_USE_CASE } from "@/components/delegation/delegation-constants";
+import type { ComponentProps } from "react";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { SUPPORTED_LOCALES } from "@/i18n/locales";
+
+jest.mock("@/hooks/useBrowserLocale", () => ({
+  useBrowserLocale: jest.fn(() => "en-US"),
+}));
 
 jest.mock("@fortawesome/react-fontawesome", () => ({
   FontAwesomeIcon: () => <svg data-testid="icon" />,
 }));
 
-const mockSubmitGroups = jest.fn(() => null);
+const mockSubmitGroups = jest.fn<
+  null,
+  [ComponentProps<typeof DelegationSubmitGroups>]
+>(() => null);
 
 jest.mock("@/components/delegation/DelegationFormParts", () => {
   const actual = jest.requireActual(
@@ -57,17 +71,64 @@ const baseProps = {
 
 beforeEach(() => {
   mockSubmitGroups.mockClear();
+  jest.mocked(useBrowserLocale).mockReturnValue("en-US");
 });
 
 describe("NewConsolidationComponent", () => {
-  it("renders without subdelegation", () => {
+  it.each(SUPPORTED_LOCALES)(
+    "renders normal instructions with %s fallback",
+    (locale) => {
+      jest.mocked(useBrowserLocale).mockReturnValue(locale);
+      render(<NewConsolidationComponent {...baseProps} />);
+      expect(screen.getByRole("heading", { level: 2 })).toHaveTextContent(
+        "Register Consolidation"
+      );
+      expect(screen.queryByTestId("original")).toBeNull();
+      expect(
+        screen.getByRole("heading", { name: "Two wallets · two registrations" })
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          "Register from this wallet, then connect the other wallet and register the return link. Each wallet needs ETH for gas."
+        )
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          "The link is public. Existing profile data may be combined."
+        )
+      ).toBeInTheDocument();
+      expect(screen.getByTestId("collection")).toHaveValue("0");
+      expect(screen.getByTestId("delegate")).toHaveValue("");
+      expect(
+        mockSubmitGroups.mock.calls[0]?.[0].writeParams.functionName
+      ).toBeUndefined();
+    }
+  );
+
+  it("keeps the normal registration contract and arguments", async () => {
+    const user = userEvent.setup();
     render(<NewConsolidationComponent {...baseProps} />);
-    expect(screen.getByRole("heading", { level: 2 })).toHaveTextContent(
-      "Register Consolidation"
+
+    await user.selectOptions(screen.getByTestId("collection"), "1");
+    await user.type(
+      screen.getByRole("textbox", { name: "Consolidating With" }),
+      "0x1111111111111111111111111111111111111111"
     );
-    expect(screen.queryByTestId("original")).toBeNull();
-    const params = (mockSubmitGroups.mock.calls[0] as any)[0].writeParams;
-    expect(params.functionName).toBeUndefined();
+
+    expect(mockSubmitGroups.mock.calls.at(-1)?.[0].writeParams).toEqual({
+      address: DELEGATION_CONTRACT.contract,
+      abi: DELEGATION_ABI,
+      chainId: DELEGATION_CONTRACT.chain_id,
+      functionName: "registerDelegationAddress",
+      args: [
+        "1",
+        "0x1111111111111111111111111111111111111111",
+        NEVER_DATE,
+        CONSOLIDATION_USE_CASE.use_case,
+        true,
+        0,
+      ],
+    });
   });
 
   it("handles subdelegation and passes write params", async () => {
@@ -88,6 +149,9 @@ describe("NewConsolidationComponent", () => {
       "Register Consolidation as Delegation Manager"
     );
     expect(screen.getByTestId("original")).toHaveTextContent("0xdef");
+    expect(
+      screen.queryByRole("heading", { name: "Two wallets · two registrations" })
+    ).not.toBeInTheDocument();
 
     await user.selectOptions(screen.getByTestId("collection"), "1");
     await user.type(
@@ -95,12 +159,20 @@ describe("NewConsolidationComponent", () => {
       "0x1111111111111111111111111111111111111111"
     );
 
-    const params = (mockSubmitGroups.mock.calls.at(-1) as any)[0].writeParams;
-    expect(params.args[0]).toBe("0xdef");
-    expect(params.args[1]).toBe("1");
-    expect(params.args[2]).toBe("0x1111111111111111111111111111111111111111");
-    expect(params.functionName).toBe(
-      "registerDelegationAddressUsingSubDelegation"
-    );
+    expect(mockSubmitGroups.mock.calls.at(-1)?.[0].writeParams).toEqual({
+      address: DELEGATION_CONTRACT.contract,
+      abi: DELEGATION_ABI,
+      chainId: DELEGATION_CONTRACT.chain_id,
+      functionName: "registerDelegationAddressUsingSubDelegation",
+      args: [
+        "0xdef",
+        "1",
+        "0x1111111111111111111111111111111111111111",
+        NEVER_DATE,
+        CONSOLIDATION_USE_CASE.use_case,
+        true,
+        0,
+      ],
+    });
   });
 });

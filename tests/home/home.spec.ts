@@ -6,6 +6,8 @@ import {
 } from "../testHelpers";
 import { getAppEnvironment } from "../../config/appEnvironment";
 import { isDesktopWebProject } from "../support/surfaceSimulation";
+import { gateSidebarHydration } from "../support/sidebarHydration";
+import { buildSync } from "esbuild";
 
 test.describe("Home Page @smoke @medium @large", () => {
   test.beforeEach(async ({ page }) => {
@@ -52,6 +54,73 @@ test.describe("Home Page @smoke @medium @large", () => {
       await expect(page.locator('[aria-label^="Environment:"]')).toHaveCount(0);
     });
   }
+});
+
+test("homepage tracking follows nested scrolling and loaded sections @smoke @medium @large", async ({
+  page,
+}) => {
+  // Exercise the production observer with real browser geometry, without
+  // contacting Mixpanel or requiring production analytics configuration.
+  await page.setContent(`
+    <main aria-label="Homepage test" style="height:240px;overflow:auto">
+      <section data-home-section="Introduction" style="height:180px">
+        <h1>Introduction</h1>
+      </section>
+      <div style="height:700px"></div>
+      <section aria-label="Loading section" style="height:180px">
+        <button data-home-action="Open wave">Open wave</button>
+      </section>
+    </main>
+    <ol aria-label="Sections seen"></ol>
+    <ol aria-label="Actions clicked"></ol>
+  `);
+  const script = buildSync({
+    stdin: {
+      resolveDir: process.cwd(),
+      contents: `
+        import { observeHomepageSections, getHomepageClick } from './components/home/homepageTracking';
+        const root = document.querySelector('main');
+        const append = (label, text) => {
+          const item = document.createElement('li');
+          item.textContent = text;
+          document.querySelector('ol[aria-label="' + label + '"]').append(item);
+        };
+        observeHomepageSections(root, section => append('Sections seen', section), new Set());
+        root.addEventListener('click', event => {
+          const click = getHomepageClick(root, event.target);
+          if (click) append('Actions clicked', click.section + ': ' + click.action);
+        }, true);
+        root.querySelector('button').addEventListener('click', event => event.stopPropagation());
+      `,
+    },
+    bundle: true,
+    format: "iife",
+    write: false,
+  });
+  await page.addScriptTag({ content: script.outputFiles[0]!.text });
+  const seen = page
+    .getByRole("list", { name: "Sections seen" })
+    .getByRole("listitem");
+  await expect(seen).toHaveText(["Introduction"]);
+  const loading = page.getByRole("region", { name: "Loading section" });
+  await loading.scrollIntoViewIfNeeded();
+  await page.getByRole("button", { name: "Open wave", exact: true }).click();
+  await expect(
+    page.getByRole("list", { name: "Actions clicked" }).getByRole("listitem")
+  ).toHaveCount(0);
+  await loading.evaluate((element) =>
+    element.setAttribute("data-home-section", "Explore waves")
+  );
+  await expect(seen).toHaveText(["Introduction", "Explore waves"]);
+  await page.getByRole("button", { name: "Open wave", exact: true }).focus();
+  await page.keyboard.press("Enter");
+  await expect(
+    page.getByRole("list", { name: "Actions clicked" }).getByRole("listitem")
+  ).toHaveText(["Explore waves: Open wave"]);
+  await page
+    .getByRole("heading", { name: "Introduction" })
+    .scrollIntoViewIfNeeded();
+  await expect(seen).toHaveText(["Introduction", "Explore waves"]);
 });
 
 test("desktop account updates do not move utilities, including in short expanded sidebars @smoke @medium @large", async ({
@@ -127,7 +196,55 @@ test("desktop account updates do not move utilities, including in short expanded
     ).toBeVisible();
 
     await page.setViewportSize({ width: 1440, height: 460 });
-    await sidebar.getByRole("button", { name: "Toggle right sidebar" }).click();
+    const sidebarToggle = sidebar.getByRole("button", {
+      name: "Toggle right sidebar",
+    });
+    const logo = sidebar.getByRole("img", { name: "6529Seize" });
+    await search.blur();
+    await page.mouse.move(1000, 400);
+    await expect(sidebarToggle).toHaveCSS("opacity", "0");
+    // Hovering a distant menu control reveals the header toggle too.
+    await search.hover();
+    await expect(sidebarToggle).toHaveCSS("opacity", "1");
+    const railBox = await sidebar.boundingBox();
+    const toggleBox = await sidebarToggle.boundingBox();
+    expect(railBox).not.toBeNull();
+    expect(toggleBox).not.toBeNull();
+    expect(toggleBox!.x + toggleBox!.width).toBeLessThanOrEqual(
+      railBox!.x + railBox!.width
+    );
+    expect(toggleBox!.width).toBe(20);
+    expect(toggleBox!.y + toggleBox!.height / 2).toBeCloseTo(
+      railBox!.y + railBox!.height / 2,
+      0
+    );
+    const about = sidebar.getByRole("button", { name: "About", exact: true });
+    await about.hover();
+    await expect(
+      page.getByRole("navigation", { name: "About sub-navigation" })
+    ).toBeVisible();
+    await expect(sidebarToggle).toBeHidden();
+    await page.keyboard.press("Escape");
+    await search.hover();
+    await expect(sidebarToggle).toBeVisible();
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await logo.hover();
+    await expect(logo).not.toHaveCSS("box-shadow", "none");
+    await expect(logo).not.toHaveCSS("transform", "none");
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await expect(logo).toHaveCSS("transform", "none");
+    await page.mouse.move(1000, 400);
+    await sidebarToggle.focus();
+    await expect(sidebarToggle).toHaveCSS("opacity", "1");
+    await page.keyboard.press("Enter");
+    await expect(sidebarToggle).toHaveAttribute("aria-expanded", "true");
+    await expect(sidebarToggle).toHaveCSS("width", "20px");
+    const expandedToggleBox = await sidebarToggle.boundingBox();
+    expect(expandedToggleBox).not.toBeNull();
+    expect(expandedToggleBox!.y + expandedToggleBox!.height / 2).toBeCloseTo(
+      railBox!.y + railBox!.height / 2,
+      0
+    );
     const nav = sidebar.getByRole("navigation", {
       name: "Desktop navigation",
     });
@@ -165,3 +282,62 @@ test("desktop account updates do not move utilities, including in short expanded
     releaseVersion();
   }
 });
+
+for (const { width, stored, expectedWidth } of [
+  { width: 1440, stored: "false", expectedWidth: 275 },
+  { width: 1440, stored: "true", expectedWidth: 80 },
+  { width: 1100, stored: "false", expectedWidth: 80 },
+]) {
+  test(`restores sidebar ${stored} at ${width}px before hydration @smoke @medium @large`, async ({
+    page,
+  }, testInfo) => {
+    // This contract covers desktop-web session restoration; native/mobile
+    // layouts deliberately ignore the saved desktop sidebar width.
+    test.skip(
+      !isDesktopWebProject(testInfo.project.name),
+      "Saved desktop sidebar width does not apply to native or mobile layouts"
+    );
+    await page.setViewportSize({ width, height: 900 });
+    await page.addInitScript((value) => {
+      globalThis.sessionStorage.setItem("sidebarCollapsed", value);
+    }, stored);
+    const hydration = await gateSidebarHydration(page);
+    const sidebar = page.getByLabel("Primary sidebar", { exact: true });
+    const layout = page.getByRole("main").first().locator("..");
+    try {
+      const documentResponse = await page.goto("/", { waitUntil: "commit" });
+      await expect(layout).toHaveAttribute("data-sidebar-ready", "false");
+      await expect(sidebar).toHaveCSS("width", `${expectedWidth}px`);
+      await expect(page.getByRole("main").first()).toHaveCSS(
+        "padding-left",
+        `${expectedWidth}px`
+      );
+      await expect(page.getByRole("main").first()).toBeVisible();
+      if (width >= 1280 && stored === "false") {
+        await expect(
+          page
+            .getByLabel("Primary sidebar", { exact: true })
+            .locator("[data-sidebar-content]")
+        ).toHaveCSS("visibility", "hidden");
+      }
+      expect(documentResponse).not.toBeNull();
+      expect(await documentResponse?.finished()).toBeNull();
+      await hydration.waitForDownloads();
+      hydration.release();
+      await hydration.waitForReady();
+    } finally {
+      hydration.release();
+      await hydration.attachEvidence(testInfo);
+    }
+    await expect(layout).toHaveAttribute("data-sidebar-ready", "true");
+    await expect(sidebar).toHaveCSS("width", `${expectedWidth}px`);
+    await expect(page.getByRole("main").first()).toHaveCSS(
+      "padding-left",
+      `${expectedWidth}px`
+    );
+    await expect(
+      sidebar.getByRole("button", { name: "Toggle right sidebar" })
+    ).toBeVisible();
+    await expectNoHorizontalOverflow(page);
+  });
+}

@@ -4,6 +4,8 @@ export * from '../models/AddActionToProxyRequest';
 export * from '../models/AirdropAddressResponse';
 export * from '../models/AirdropAddressResponseTdhWallet';
 export * from '../models/AllowlistNormalizedEntry';
+export * from '../models/ApiActiveWaveVote';
+export * from '../models/ApiActiveWaveVotesPage';
 export * from '../models/ApiAddReactionToDropRequest';
 export * from '../models/ApiAggregatedActivity';
 export * from '../models/ApiAggregatedActivityMemes';
@@ -216,10 +218,14 @@ export * from '../models/ApiCommunityMetricSample';
 export * from '../models/ApiCommunityMetrics';
 export * from '../models/ApiCommunityMetricsSeries';
 export * from '../models/ApiCompetition';
+export * from '../models/ApiCompetitionActionRequest';
+export * from '../models/ApiCompetitionAward';
+export * from '../models/ApiCompetitionAwardPage';
 export * from '../models/ApiCompetitionCapability';
 export * from '../models/ApiCompetitionComputedPhase';
 export * from '../models/ApiCompetitionConfigVersion';
 export * from '../models/ApiCompetitionConfigVersionPage';
+export * from '../models/ApiCompetitionCreditBudget';
 export * from '../models/ApiCompetitionDecision';
 export * from '../models/ApiCompetitionDecisionConfig';
 export * from '../models/ApiCompetitionDecisionPage';
@@ -227,6 +233,8 @@ export * from '../models/ApiCompetitionDecisionStatus';
 export * from '../models/ApiCompetitionDecisionWinner';
 export * from '../models/ApiCompetitionDistributionItem';
 export * from '../models/ApiCompetitionDistributionItemPage';
+export * from '../models/ApiCompetitionDraftInput';
+export * from '../models/ApiCompetitionDropVoteSummary';
 export * from '../models/ApiCompetitionEntry';
 export * from '../models/ApiCompetitionEntryPage';
 export * from '../models/ApiCompetitionEntryStatus';
@@ -236,6 +244,8 @@ export * from '../models/ApiCompetitionError';
 export * from '../models/ApiCompetitionLeaderboardEntry';
 export * from '../models/ApiCompetitionLeaderboardPage';
 export * from '../models/ApiCompetitionLifecycle';
+export * from '../models/ApiCompetitionMyVote';
+export * from '../models/ApiCompetitionMyVotePage';
 export * from '../models/ApiCompetitionOutcome';
 export * from '../models/ApiCompetitionOutcomePage';
 export * from '../models/ApiCompetitionPage';
@@ -243,6 +253,8 @@ export * from '../models/ApiCompetitionParticipationConfig';
 export * from '../models/ApiCompetitionPause';
 export * from '../models/ApiCompetitionPausePage';
 export * from '../models/ApiCompetitionPermissions';
+export * from '../models/ApiCompetitionRulesInput';
+export * from '../models/ApiCompetitionSignature';
 export * from '../models/ApiCompetitionSortDirection';
 export * from '../models/ApiCompetitionType';
 export * from '../models/ApiCompetitionVoter';
@@ -282,6 +294,8 @@ export * from '../models/ApiContentModerationUserReport';
 export * from '../models/ApiContentModeratorAccess';
 export * from '../models/ApiCreateAttachmentMultipartUploadRequest';
 export * from '../models/ApiCreateAttachmentMultipartUploadResponse';
+export * from '../models/ApiCreateCompetitionEntryRequest';
+export * from '../models/ApiCreateCompetitionRequest';
 export * from '../models/ApiCreateConnectionShareRequest';
 export * from '../models/ApiCreateConnectionShareResponse';
 export * from '../models/ApiCreateDropMedia';
@@ -318,6 +332,7 @@ export * from '../models/ApiCreateProfileCmsAgentGrantRequest';
 export * from '../models/ApiCreateProfileCmsWalletGallerySnapshotRequest';
 export * from '../models/ApiCreateWaveConfig';
 export * from '../models/ApiCreateWaveDropRequest';
+export * from '../models/ApiCreateWaveHubRequest';
 export * from '../models/ApiCreateWaveMetadataRequest';
 export * from '../models/ApiCreateWaveOutcome';
 export * from '../models/ApiCreateWaveOutcomeDistributionItem';
@@ -327,6 +342,7 @@ export * from '../models/ApiCurationDrop';
 export * from '../models/ApiCurationDropsPage';
 export * from '../models/ApiDecentralizedMediaProtocol';
 export * from '../models/ApiDecentralizedMediaResolution';
+export * from '../models/ApiDefaultCompetition';
 export * from '../models/ApiDeleteEulaConsentRequest';
 export * from '../models/ApiDeleteEulaConsentResponse';
 export * from '../models/ApiDeleteMyWaveChatHistoryResponse';
@@ -342,6 +358,7 @@ export * from '../models/ApiDropAttachmentReference';
 export * from '../models/ApiDropBoost';
 export * from '../models/ApiDropBoostV2';
 export * from '../models/ApiDropBoostsPage';
+export * from '../models/ApiDropCompetitionContext';
 export * from '../models/ApiDropContextProfileContext';
 export * from '../models/ApiDropCuration';
 export * from '../models/ApiDropCurationRequest';
@@ -657,6 +674,7 @@ export * from '../models/ApiSessionNonceResponse';
 export * from '../models/ApiSessionRefreshNativeRequest';
 export * from '../models/ApiSessionRefreshWebRequest';
 export * from '../models/ApiSessionWebResponse';
+export * from '../models/ApiSetCompetitionVoteRequest';
 export * from '../models/ApiSetPinnedDropRequest';
 export * from '../models/ApiSetProfileWaveRequest';
 export * from '../models/ApiStartMultipartMediaUploadResponse';
@@ -700,6 +718,7 @@ export * from '../models/ApiTransactionPage';
 export * from '../models/ApiUndiscoveredDrop';
 export * from '../models/ApiUnpublishProfileCmsPackageRequest';
 export * from '../models/ApiUpcomingMemeSubscriptionStatus';
+export * from '../models/ApiUpdateCompetitionRequest';
 export * from '../models/ApiUpdateDropRequest';
 export * from '../models/ApiUpdateProfileNotificationCategories';
 export * from '../models/ApiUpdateProfilePreferences';
@@ -878,6 +897,8 @@ import { AddActionToProxyRequest    } from '../models/AddActionToProxyRequest';
 import { AirdropAddressResponse } from '../models/AirdropAddressResponse';
 import { AirdropAddressResponseTdhWallet } from '../models/AirdropAddressResponseTdhWallet';
 import { AllowlistNormalizedEntry } from '../models/AllowlistNormalizedEntry';
+import { ApiActiveWaveVote } from '../models/ApiActiveWaveVote';
+import { ApiActiveWaveVotesPage } from '../models/ApiActiveWaveVotesPage';
 import { ApiAddReactionToDropRequest } from '../models/ApiAddReactionToDropRequest';
 import { ApiAggregatedActivity } from '../models/ApiAggregatedActivity';
 import { ApiAggregatedActivityMemes } from '../models/ApiAggregatedActivityMemes';
@@ -1089,11 +1110,15 @@ import { ApiCommunityMetric } from '../models/ApiCommunityMetric';
 import { ApiCommunityMetricSample } from '../models/ApiCommunityMetricSample';
 import { ApiCommunityMetrics } from '../models/ApiCommunityMetrics';
 import { ApiCommunityMetricsSeries } from '../models/ApiCommunityMetricsSeries';
-import { ApiCompetition                      } from '../models/ApiCompetition';
+import { ApiCompetition                       } from '../models/ApiCompetition';
+import { ApiCompetitionActionRequest } from '../models/ApiCompetitionActionRequest';
+import { ApiCompetitionAward } from '../models/ApiCompetitionAward';
+import { ApiCompetitionAwardPage } from '../models/ApiCompetitionAwardPage';
 import { ApiCompetitionCapability } from '../models/ApiCompetitionCapability';
 import { ApiCompetitionComputedPhase } from '../models/ApiCompetitionComputedPhase';
 import { ApiCompetitionConfigVersion } from '../models/ApiCompetitionConfigVersion';
 import { ApiCompetitionConfigVersionPage } from '../models/ApiCompetitionConfigVersionPage';
+import { ApiCompetitionCreditBudget            } from '../models/ApiCompetitionCreditBudget';
 import { ApiCompetitionDecision       } from '../models/ApiCompetitionDecision';
 import { ApiCompetitionDecisionConfig } from '../models/ApiCompetitionDecisionConfig';
 import { ApiCompetitionDecisionPage } from '../models/ApiCompetitionDecisionPage';
@@ -1101,7 +1126,9 @@ import { ApiCompetitionDecisionStatus } from '../models/ApiCompetitionDecisionSt
 import { ApiCompetitionDecisionWinner } from '../models/ApiCompetitionDecisionWinner';
 import { ApiCompetitionDistributionItem } from '../models/ApiCompetitionDistributionItem';
 import { ApiCompetitionDistributionItemPage } from '../models/ApiCompetitionDistributionItemPage';
-import { ApiCompetitionEntry            } from '../models/ApiCompetitionEntry';
+import { ApiCompetitionDraftInput } from '../models/ApiCompetitionDraftInput';
+import { ApiCompetitionDropVoteSummary } from '../models/ApiCompetitionDropVoteSummary';
+import { ApiCompetitionEntry             } from '../models/ApiCompetitionEntry';
 import { ApiCompetitionEntryPage } from '../models/ApiCompetitionEntryPage';
 import { ApiCompetitionEntryStatus } from '../models/ApiCompetitionEntryStatus';
 import { ApiCompetitionEntryVote } from '../models/ApiCompetitionEntryVote';
@@ -1110,6 +1137,8 @@ import { ApiCompetitionError } from '../models/ApiCompetitionError';
 import { ApiCompetitionLeaderboardEntry } from '../models/ApiCompetitionLeaderboardEntry';
 import { ApiCompetitionLeaderboardPage } from '../models/ApiCompetitionLeaderboardPage';
 import { ApiCompetitionLifecycle } from '../models/ApiCompetitionLifecycle';
+import { ApiCompetitionMyVote      } from '../models/ApiCompetitionMyVote';
+import { ApiCompetitionMyVotePage } from '../models/ApiCompetitionMyVotePage';
 import { ApiCompetitionOutcome } from '../models/ApiCompetitionOutcome';
 import { ApiCompetitionOutcomePage } from '../models/ApiCompetitionOutcomePage';
 import { ApiCompetitionPage } from '../models/ApiCompetitionPage';
@@ -1117,6 +1146,8 @@ import { ApiCompetitionParticipationConfig    , ApiCompetitionParticipationConfi
 import { ApiCompetitionPause } from '../models/ApiCompetitionPause';
 import { ApiCompetitionPausePage } from '../models/ApiCompetitionPausePage';
 import { ApiCompetitionPermissions } from '../models/ApiCompetitionPermissions';
+import { ApiCompetitionRulesInput, ApiCompetitionRulesInputTypeEnum         } from '../models/ApiCompetitionRulesInput';
+import { ApiCompetitionSignature } from '../models/ApiCompetitionSignature';
 import { ApiCompetitionSortDirection } from '../models/ApiCompetitionSortDirection';
 import { ApiCompetitionType } from '../models/ApiCompetitionType';
 import { ApiCompetitionVoter } from '../models/ApiCompetitionVoter';
@@ -1156,6 +1187,8 @@ import { ApiContentModerationUserReport              } from '../models/ApiConten
 import { ApiContentModeratorAccess } from '../models/ApiContentModeratorAccess';
 import { ApiCreateAttachmentMultipartUploadRequest   } from '../models/ApiCreateAttachmentMultipartUploadRequest';
 import { ApiCreateAttachmentMultipartUploadResponse     } from '../models/ApiCreateAttachmentMultipartUploadResponse';
+import { ApiCreateCompetitionEntryRequest } from '../models/ApiCreateCompetitionEntryRequest';
+import { ApiCreateCompetitionRequest } from '../models/ApiCreateCompetitionRequest';
 import { ApiCreateConnectionShareRequest, ApiCreateConnectionShareRequestTargetClientTypeEnum   , ApiCreateConnectionShareRequestClientTypeEnum     } from '../models/ApiCreateConnectionShareRequest';
 import { ApiCreateConnectionShareResponse    , ApiCreateConnectionShareResponseTargetClientTypeEnum    } from '../models/ApiCreateConnectionShareResponse';
 import { ApiCreateDropMedia } from '../models/ApiCreateDropMedia';
@@ -1192,6 +1225,7 @@ import { ApiCreateProfileCmsAgentGrantRequest } from '../models/ApiCreateProfile
 import { ApiCreateProfileCmsWalletGallerySnapshotRequest } from '../models/ApiCreateProfileCmsWalletGallerySnapshotRequest';
 import { ApiCreateWaveConfig          } from '../models/ApiCreateWaveConfig';
 import { ApiCreateWaveDropRequest } from '../models/ApiCreateWaveDropRequest';
+import { ApiCreateWaveHubRequest } from '../models/ApiCreateWaveHubRequest';
 import { ApiCreateWaveMetadataRequest } from '../models/ApiCreateWaveMetadataRequest';
 import { ApiCreateWaveOutcome        } from '../models/ApiCreateWaveOutcome';
 import { ApiCreateWaveOutcomeDistributionItem } from '../models/ApiCreateWaveOutcomeDistributionItem';
@@ -1201,6 +1235,7 @@ import { ApiCurationDrop                                   } from '../models/Api
 import { ApiCurationDropsPage } from '../models/ApiCurationDropsPage';
 import { ApiDecentralizedMediaProtocol } from '../models/ApiDecentralizedMediaProtocol';
 import { ApiDecentralizedMediaResolution          } from '../models/ApiDecentralizedMediaResolution';
+import { ApiDefaultCompetition } from '../models/ApiDefaultCompetition';
 import { ApiDeleteEulaConsentRequest } from '../models/ApiDeleteEulaConsentRequest';
 import { ApiDeleteEulaConsentResponse } from '../models/ApiDeleteEulaConsentResponse';
 import { ApiDeleteMyWaveChatHistoryResponse } from '../models/ApiDeleteMyWaveChatHistoryResponse';
@@ -1216,6 +1251,7 @@ import { ApiDropAttachmentReference } from '../models/ApiDropAttachmentReference
 import { ApiDropBoost } from '../models/ApiDropBoost';
 import { ApiDropBoostV2 } from '../models/ApiDropBoostV2';
 import { ApiDropBoostsPage } from '../models/ApiDropBoostsPage';
+import { ApiDropCompetitionContext } from '../models/ApiDropCompetitionContext';
 import { ApiDropContextProfileContext } from '../models/ApiDropContextProfileContext';
 import { ApiDropCuration } from '../models/ApiDropCuration';
 import { ApiDropCurationRequest } from '../models/ApiDropCurationRequest';
@@ -1412,7 +1448,7 @@ import { ApiNftOwnerPage } from '../models/ApiNftOwnerPage';
 import { ApiNftsPage } from '../models/ApiNftsPage';
 import { ApiNonceResponse } from '../models/ApiNonceResponse';
 import { ApiNotification        } from '../models/ApiNotification';
-import { ApiNotificationAdditionalContextV2                                } from '../models/ApiNotificationAdditionalContextV2';
+import { ApiNotificationAdditionalContextV2                                      } from '../models/ApiNotificationAdditionalContextV2';
 import { ApiNotificationCause } from '../models/ApiNotificationCause';
 import { ApiNotificationDropReactedReactor } from '../models/ApiNotificationDropReactedReactor';
 import { ApiNotificationPollVoteOption } from '../models/ApiNotificationPollVoteOption';
@@ -1421,7 +1457,7 @@ import { ApiNotificationsResponse } from '../models/ApiNotificationsResponse';
 import { ApiNotificationsResponseV2 } from '../models/ApiNotificationsResponseV2';
 import { ApiOgMediaAsset } from '../models/ApiOgMediaAsset';
 import { ApiOgMetadata       } from '../models/ApiOgMetadata';
-import { ApiOgMetadataDrop              } from '../models/ApiOgMetadataDrop';
+import { ApiOgMetadataDrop               } from '../models/ApiOgMetadataDrop';
 import { ApiOgMetadataEntityType } from '../models/ApiOgMetadataEntityType';
 import { ApiOgMetadataProfile                  } from '../models/ApiOgMetadataProfile';
 import { ApiOgMetadataProfileBanner } from '../models/ApiOgMetadataProfileBanner';
@@ -1528,9 +1564,10 @@ import { ApiSessionLogoutWebRequest, ApiSessionLogoutWebRequestClientTypeEnum   
 import { ApiSessionNativeResponse    , ApiSessionNativeResponseClientTypeEnum     } from '../models/ApiSessionNativeResponse';
 import { ApiSessionNonceQuery , ApiSessionNonceQueryClientTypeEnum    } from '../models/ApiSessionNonceQuery';
 import { ApiSessionNonceResponse } from '../models/ApiSessionNonceResponse';
-import { ApiSessionRefreshNativeRequest, ApiSessionRefreshNativeRequestClientTypeEnum     } from '../models/ApiSessionRefreshNativeRequest';
+import { ApiSessionRefreshNativeRequest, ApiSessionRefreshNativeRequestClientTypeEnum      } from '../models/ApiSessionRefreshNativeRequest';
 import { ApiSessionRefreshWebRequest, ApiSessionRefreshWebRequestClientTypeEnum    } from '../models/ApiSessionRefreshWebRequest';
 import { ApiSessionWebResponse    , ApiSessionWebResponseClientTypeEnum   } from '../models/ApiSessionWebResponse';
+import { ApiSetCompetitionVoteRequest } from '../models/ApiSetCompetitionVoteRequest';
 import { ApiSetPinnedDropRequest } from '../models/ApiSetPinnedDropRequest';
 import { ApiSetProfileWaveRequest } from '../models/ApiSetProfileWaveRequest';
 import { ApiStartMultipartMediaUploadResponse     } from '../models/ApiStartMultipartMediaUploadResponse';
@@ -1574,6 +1611,7 @@ import { ApiTransactionPage } from '../models/ApiTransactionPage';
 import { ApiUndiscoveredDrop } from '../models/ApiUndiscoveredDrop';
 import { ApiUnpublishProfileCmsPackageRequest } from '../models/ApiUnpublishProfileCmsPackageRequest';
 import { ApiUpcomingMemeSubscriptionStatus   , ApiUpcomingMemeSubscriptionStatusSourceEnum   } from '../models/ApiUpcomingMemeSubscriptionStatus';
+import { ApiUpdateCompetitionRequest } from '../models/ApiUpdateCompetitionRequest';
 import { ApiUpdateDropRequest } from '../models/ApiUpdateDropRequest';
 import { ApiUpdateProfileNotificationCategories } from '../models/ApiUpdateProfileNotificationCategories';
 import { ApiUpdateProfilePreferences, ApiUpdateProfilePreferencesDirectMessagePolicyEnum  , ApiUpdateProfilePreferencesNotificationLevelEnum    } from '../models/ApiUpdateProfilePreferences';
@@ -1849,6 +1887,7 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiCompetitionEntryStatus",
     "ApiCompetitionLifecycle",
     "ApiCompetitionParticipationConfigRequiredMediaEnum",
+    "ApiCompetitionRulesInputTypeEnum",
     "ApiCompetitionSortDirection",
     "ApiCompetitionType",
     "ApiConsolidatedTdhMetricsCollector",
@@ -2037,6 +2076,8 @@ let typeMap: {[index: string]: any} = {
     "AirdropAddressResponse": AirdropAddressResponse,
     "AirdropAddressResponseTdhWallet": AirdropAddressResponseTdhWallet,
     "AllowlistNormalizedEntry": AllowlistNormalizedEntry,
+    "ApiActiveWaveVote": ApiActiveWaveVote,
+    "ApiActiveWaveVotesPage": ApiActiveWaveVotesPage,
     "ApiAddReactionToDropRequest": ApiAddReactionToDropRequest,
     "ApiAggregatedActivity": ApiAggregatedActivity,
     "ApiAggregatedActivityMemes": ApiAggregatedActivityMemes,
@@ -2238,14 +2279,20 @@ let typeMap: {[index: string]: any} = {
     "ApiCommunityMetrics": ApiCommunityMetrics,
     "ApiCommunityMetricsSeries": ApiCommunityMetricsSeries,
     "ApiCompetition": ApiCompetition,
+    "ApiCompetitionActionRequest": ApiCompetitionActionRequest,
+    "ApiCompetitionAward": ApiCompetitionAward,
+    "ApiCompetitionAwardPage": ApiCompetitionAwardPage,
     "ApiCompetitionConfigVersion": ApiCompetitionConfigVersion,
     "ApiCompetitionConfigVersionPage": ApiCompetitionConfigVersionPage,
+    "ApiCompetitionCreditBudget": ApiCompetitionCreditBudget,
     "ApiCompetitionDecision": ApiCompetitionDecision,
     "ApiCompetitionDecisionConfig": ApiCompetitionDecisionConfig,
     "ApiCompetitionDecisionPage": ApiCompetitionDecisionPage,
     "ApiCompetitionDecisionWinner": ApiCompetitionDecisionWinner,
     "ApiCompetitionDistributionItem": ApiCompetitionDistributionItem,
     "ApiCompetitionDistributionItemPage": ApiCompetitionDistributionItemPage,
+    "ApiCompetitionDraftInput": ApiCompetitionDraftInput,
+    "ApiCompetitionDropVoteSummary": ApiCompetitionDropVoteSummary,
     "ApiCompetitionEntry": ApiCompetitionEntry,
     "ApiCompetitionEntryPage": ApiCompetitionEntryPage,
     "ApiCompetitionEntryVote": ApiCompetitionEntryVote,
@@ -2253,6 +2300,8 @@ let typeMap: {[index: string]: any} = {
     "ApiCompetitionError": ApiCompetitionError,
     "ApiCompetitionLeaderboardEntry": ApiCompetitionLeaderboardEntry,
     "ApiCompetitionLeaderboardPage": ApiCompetitionLeaderboardPage,
+    "ApiCompetitionMyVote": ApiCompetitionMyVote,
+    "ApiCompetitionMyVotePage": ApiCompetitionMyVotePage,
     "ApiCompetitionOutcome": ApiCompetitionOutcome,
     "ApiCompetitionOutcomePage": ApiCompetitionOutcomePage,
     "ApiCompetitionPage": ApiCompetitionPage,
@@ -2260,6 +2309,8 @@ let typeMap: {[index: string]: any} = {
     "ApiCompetitionPause": ApiCompetitionPause,
     "ApiCompetitionPausePage": ApiCompetitionPausePage,
     "ApiCompetitionPermissions": ApiCompetitionPermissions,
+    "ApiCompetitionRulesInput": ApiCompetitionRulesInput,
+    "ApiCompetitionSignature": ApiCompetitionSignature,
     "ApiCompetitionVoter": ApiCompetitionVoter,
     "ApiCompetitionVoterPage": ApiCompetitionVoterPage,
     "ApiCompetitionVotingConfig": ApiCompetitionVotingConfig,
@@ -2290,6 +2341,8 @@ let typeMap: {[index: string]: any} = {
     "ApiContentModeratorAccess": ApiContentModeratorAccess,
     "ApiCreateAttachmentMultipartUploadRequest": ApiCreateAttachmentMultipartUploadRequest,
     "ApiCreateAttachmentMultipartUploadResponse": ApiCreateAttachmentMultipartUploadResponse,
+    "ApiCreateCompetitionEntryRequest": ApiCreateCompetitionEntryRequest,
+    "ApiCreateCompetitionRequest": ApiCreateCompetitionRequest,
     "ApiCreateConnectionShareRequest": ApiCreateConnectionShareRequest,
     "ApiCreateConnectionShareResponse": ApiCreateConnectionShareResponse,
     "ApiCreateDropMedia": ApiCreateDropMedia,
@@ -2326,6 +2379,7 @@ let typeMap: {[index: string]: any} = {
     "ApiCreateProfileCmsWalletGallerySnapshotRequest": ApiCreateProfileCmsWalletGallerySnapshotRequest,
     "ApiCreateWaveConfig": ApiCreateWaveConfig,
     "ApiCreateWaveDropRequest": ApiCreateWaveDropRequest,
+    "ApiCreateWaveHubRequest": ApiCreateWaveHubRequest,
     "ApiCreateWaveMetadataRequest": ApiCreateWaveMetadataRequest,
     "ApiCreateWaveOutcome": ApiCreateWaveOutcome,
     "ApiCreateWaveOutcomeDistributionItem": ApiCreateWaveOutcomeDistributionItem,
@@ -2334,6 +2388,7 @@ let typeMap: {[index: string]: any} = {
     "ApiCurationDrop": ApiCurationDrop,
     "ApiCurationDropsPage": ApiCurationDropsPage,
     "ApiDecentralizedMediaResolution": ApiDecentralizedMediaResolution,
+    "ApiDefaultCompetition": ApiDefaultCompetition,
     "ApiDeleteEulaConsentRequest": ApiDeleteEulaConsentRequest,
     "ApiDeleteEulaConsentResponse": ApiDeleteEulaConsentResponse,
     "ApiDeleteMyWaveChatHistoryResponse": ApiDeleteMyWaveChatHistoryResponse,
@@ -2349,6 +2404,7 @@ let typeMap: {[index: string]: any} = {
     "ApiDropBoost": ApiDropBoost,
     "ApiDropBoostV2": ApiDropBoostV2,
     "ApiDropBoostsPage": ApiDropBoostsPage,
+    "ApiDropCompetitionContext": ApiDropCompetitionContext,
     "ApiDropContextProfileContext": ApiDropContextProfileContext,
     "ApiDropCuration": ApiDropCuration,
     "ApiDropCurationRequest": ApiDropCurationRequest,
@@ -2636,6 +2692,7 @@ let typeMap: {[index: string]: any} = {
     "ApiSessionRefreshNativeRequest": ApiSessionRefreshNativeRequest,
     "ApiSessionRefreshWebRequest": ApiSessionRefreshWebRequest,
     "ApiSessionWebResponse": ApiSessionWebResponse,
+    "ApiSetCompetitionVoteRequest": ApiSetCompetitionVoteRequest,
     "ApiSetPinnedDropRequest": ApiSetPinnedDropRequest,
     "ApiSetProfileWaveRequest": ApiSetProfileWaveRequest,
     "ApiStartMultipartMediaUploadResponse": ApiStartMultipartMediaUploadResponse,
@@ -2669,6 +2726,7 @@ let typeMap: {[index: string]: any} = {
     "ApiUndiscoveredDrop": ApiUndiscoveredDrop,
     "ApiUnpublishProfileCmsPackageRequest": ApiUnpublishProfileCmsPackageRequest,
     "ApiUpcomingMemeSubscriptionStatus": ApiUpcomingMemeSubscriptionStatus,
+    "ApiUpdateCompetitionRequest": ApiUpdateCompetitionRequest,
     "ApiUpdateDropRequest": ApiUpdateDropRequest,
     "ApiUpdateProfileNotificationCategories": ApiUpdateProfileNotificationCategories,
     "ApiUpdateProfilePreferences": ApiUpdateProfilePreferences,

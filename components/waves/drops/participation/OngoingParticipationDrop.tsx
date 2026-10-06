@@ -325,7 +325,7 @@ function OngoingParticipationDropInner({
             drop={drop}
             voteAction={voteAction}
             contentPresentation={contentPresentation}
-            indentContent={!isChatProposal}
+            indentContent={!isChatProposal && !drop.competition_id}
             inlineVotingActions={location === DropLocation.WAVE}
             showInteractions={showInteractions}
             winningThreshold={winningThreshold}

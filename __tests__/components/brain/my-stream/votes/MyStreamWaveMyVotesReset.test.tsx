@@ -48,7 +48,7 @@ beforeEach(() => {
       const result = { id: param.dropId, wave: { id: "wave-1" } };
       // Simulate the onSuccess callback
       if (config.onSuccess) {
-        config.onSuccess(result);
+        config.onSuccess(result, param);
       }
       return result;
     },
@@ -255,7 +255,7 @@ test("cleans up and invalidates once when a later reset fails", async () => {
         }
 
         const result = { id: param.dropId, wave: { id: "wave-1" } };
-        config.onSuccess?.(result);
+        config.onSuccess?.(result, param);
         return result;
       },
     };

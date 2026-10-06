@@ -94,6 +94,11 @@ function NotificationItemsComponent({
 
     // Match the child renderers before adding a row label.
     switch (item.cause) {
+      case ApiNotificationCause.CompetitionLifecycle:
+        return (
+          item.additional_context.event_type.toUpperCase() ===
+          "COMPETITION_DECISION_COMPLETED"
+        );
       case ApiNotificationCause.DropReacted: {
         if (!Array.isArray(item.related_drops) || !item.related_drops[0]) {
           return false;

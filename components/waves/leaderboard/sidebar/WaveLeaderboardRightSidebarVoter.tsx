@@ -13,7 +13,15 @@ import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 import { getWaveRightPanelProfileIdentifier } from "@/helpers/waves/wave-right-panel.helpers";
 
 interface WaveLeaderboardRightSidebarVoterProps {
-  readonly voter: ApiWaveVoter;
+  readonly voter: Pick<
+    ApiWaveVoter,
+    "absolute_votes_summed" | "positive_votes_summed" | "negative_votes_summed"
+  > & {
+    readonly voter: Pick<
+      ApiWaveVoter["voter"],
+      "id" | "handle" | "pfp" | "primary_address"
+    >;
+  };
   readonly position: number;
   readonly creditType: ApiWaveCreditType;
 }

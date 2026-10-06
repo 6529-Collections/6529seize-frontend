@@ -8,5 +8,7 @@ export interface DevicePushData {
   handle?: string;
   subroute?: "rep" | "identity" | "subscriptions";
   wave_id?: string;
+  competition_id?: string;
+  competition_entry_id?: string;
   drop_id?: string;
 }

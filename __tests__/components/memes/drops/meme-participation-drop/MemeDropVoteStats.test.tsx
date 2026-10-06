@@ -1,6 +1,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import MemeDropVoteStats from '@/components/memes/drops/meme-participation-drop/MemeDropVoteStats';
+import { ApiWaveCreditType } from '@/generated/models/ApiWaveCreditType';
 import type { ApiDropRater } from '@/generated/models/ApiDropRater';
 
 jest.mock('next/link', () => ({__esModule:true, default: ({href,children}:any) => <a href={href}>{children}</a>}));
@@ -24,7 +25,7 @@ describe('MemeDropVoteStats', () => {
     rating_prediction: 12,
     raters_count: 1,
     top_raters: voters,
-    wave: { voting_credit_type: "NIC" },
+    wave: { voting_credit_type: ApiWaveCreditType.Tdh },
     context_profile_context: { rating: -2 },
   } as any;
 
@@ -39,7 +40,7 @@ describe('MemeDropVoteStats', () => {
       })
     ).toBeInTheDocument();
     expect(screen.getByText((content, element) => {
-      return element?.textContent === '-2 NIC';
+      return element?.textContent === '-2 TDH';
     })).toBeInTheDocument();
   });
 });

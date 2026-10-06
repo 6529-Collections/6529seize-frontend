@@ -1,4 +1,7 @@
 import emmaMessages from "@/i18n/messages/emma.en-US.json";
+import { EN_SUBMISSION_DISCOVERY_MESSAGES } from "@/i18n/messages/submission-discovery";
+import waveCreationMessages from "@/i18n/messages/wave-creation.en-US.json";
+import { COMPETITION_MESSAGES } from "@/i18n/messages/competitions";
 import { EN_US_DROP_METADATA_MESSAGES } from "@/i18n/messages/drop-metadata";
 import { EN_DROP_REQUIREMENT_MESSAGES } from "@/i18n/messages/drop-requirements";
 import artworkShareMessages from "@/i18n/messages/artworkShare.en-US.json";
@@ -55,6 +58,7 @@ import { ARTWORK_DOCUMENTATION_MESSAGES } from "@/i18n/messages/artwork-document
 import { ARTWORK_DOCUMENTATION_INTEGRATION_MESSAGES } from "@/i18n/messages/artwork-documentation-integration";
 import { COLLECT_MESSAGES } from "@/i18n/messages/collect";
 import { COLLECT_TDH_TARGET_MESSAGES } from "@/i18n/messages/collect-tdh-target";
+import { DROP_FORGE_ADMIN_MESSAGES } from "@/i18n/messages/drop-forge-admins";
 
 type MessageEntry = readonly [key: string, value: string];
 
@@ -260,6 +264,9 @@ const REP_CATEGORY_MESSAGES = objectMessages("rep.categories", {
     "Memes submissions require {amount} REP in {category}.",
   "grant.submissionLookalikeInfo":
     '"{category}" is a separate category. Only {submissionCategory} counts for submissions.',
+  "grant.amountLabel": "REP amount",
+  "grant.availableRepLabel": "Your available REP:",
+  "grant.assignedRepLabel": "Your REP assigned to {name}:",
   "grant.availableRep": "Your available REP: {amount}",
   "grant.assignedRep": "Your REP assigned to {name}: {amount}",
   "grant.actions.grant": "Grant REP",
@@ -467,10 +474,14 @@ const TITLE_CONTEXT_MESSAGES = objectMessages("titleContext", {
 } as const);
 
 const WAVE_NAVIGATION_MESSAGES = objectMessages("wave.navigation", {
+  about: "About",
   waveSections: "Wave sections",
   appSections: "App sections",
   loadingSections: "Loading wave sections",
   fallbackCuration: "Curation",
+  myVotes: "My Votes",
+  outcome: "Outcome",
+  faq: "FAQ",
 } as const);
 
 const MY_STREAM_CURATION_MESSAGES = objectMessages("waves.myStream.curation", {
@@ -722,6 +733,9 @@ const WAVE_DROP_ACTIONS_MESSAGES = objectMessages("waves.drop.actions", {
 
 const WAVE_PROPOSAL_CARD_MESSAGES = objectMessages("waves.proposalCard", {
   contextLabel: "Proposal",
+  summaryLabel: "Summary",
+  showDetails: "Show details ({count})",
+  hideDetails: "Hide details",
   readFull: "Read full",
   readFullNamed: "Read full: {title}",
   untitledProposal: "Untitled proposal",
@@ -1083,6 +1097,9 @@ const USER_PROFILE_IDENTITY_STATEMENTS_MESSAGES = objectMessages(
     retry: "Try again",
     add: "Add",
     walletChecker: "Wallet Checker",
+    addWallet: "Add another wallet",
+    addWalletDescription:
+      "Link another wallet you control. Your NFTs stay in their wallets.",
     delegationCenter: "Delegation Center",
     primary: "Primary",
     setPrimary: "Set primary",
@@ -2822,8 +2839,17 @@ const MEME_DATA_TABLE_MESSAGES = objectMessages("memeData", {
 const TOKEN_NUMBER_MESSAGE = "Token #{tokenId}";
 
 export const EN_US_MESSAGES = {
+  ...EN_SUBMISSION_DISCOVERY_MESSAGES,
+  ...waveCreationMessages,
+  ...COMPETITION_MESSAGES,
   ...EN_DROP_REQUIREMENT_MESSAGES,
   ...EN_US_DROP_METADATA_MESSAGES,
+  "delegation.consolidation.instructions.title":
+    "Two wallets · two registrations",
+  "delegation.consolidation.instructions.steps":
+    "Register from this wallet, then connect the other wallet and register the return link. Each wallet needs ETH for gas.",
+  "delegation.consolidation.instructions.publicLink":
+    "The link is public. Existing profile data may be combined.",
   "drop.composer.image": "Image",
   "drop.composer.selectImage": "Select image",
   "drop.composer.removeImage": "Remove image",
@@ -2895,6 +2921,7 @@ export const EN_US_MESSAGES = {
   ...artworkShareMessages,
   ...COLLECT_MESSAGES,
   ...COLLECT_TDH_TARGET_MESSAGES,
+  ...DROP_FORGE_ADMIN_MESSAGES,
   ...profileCmsStudioMessages,
   ...profileCmsAgentMessages,
   ...studioTemplateDescriptions,
@@ -4132,6 +4159,10 @@ export const EN_US_MESSAGES = {
   "drop.media.loadingOriginalGif": "Loading original GIF",
   "drop.media.originalGifFailed":
     "Couldn't load the original GIF. You can try again.",
+  "drop.media.originalImageAlt": "Original image",
+  "drop.media.loadingOriginalImage": "Loading original image",
+  "drop.media.originalImageFailed":
+    "Couldn't load the original image. You can try again.",
   "drop.media.previewAlt": "Expanded image preview",
   "drop.media.previewUnavailable": "Preview unavailable",
   "drop.media.retryPreview": "Retry preview",
@@ -4311,6 +4342,49 @@ export const EN_US_MESSAGES = {
     "You can check the latest status in Orders. No new transaction will be sent automatically.",
   "collect.activity.viewOrders": "View in Orders",
   "collect.activity.dismiss": "Dismiss transaction progress",
+  "waves.discovery.activeVotes": "Active Votes",
+  "waves.discovery.recommendations": "Worth Checking Out",
+  "waves.discovery.activeVotesDescription":
+    "Community decisions powered by TDH.",
+  "waves.discovery.recommendationsDescription":
+    "Highly rated waves you don’t follow.",
+  "waves.discovery.publicRecommendationsDescription": "Highly rated waves.",
+  "waves.discovery.activeDiscussions": "Active discussions",
+  "waves.discovery.unfollowedDiscussions":
+    "Active discussions you are not yet following",
+  "waves.discovery.newestWaves": "Newest waves",
+  "waves.discovery.browseRecommendations": "Browse recommendations",
+  "waves.discovery.label": "Wave discovery",
+  "waves.discovery.expandSection": "Expand {section}",
+  "waves.discovery.collapseSection": "Collapse {section}",
+  "waves.discovery.voteList": "Active voting waves",
+  "waves.discovery.viewAll": "View all",
+  "waves.discovery.viewVotes": "View all active votes",
+  "waves.discovery.viewRecommendations": "View all recommendations",
+  "waves.discovery.votingOpen": "Voting open",
+  "waves.discovery.votingEnds": "Voting ends {date}",
+  "waves.discovery.nextDecision": "Next decision {date}",
+  "waves.discovery.emptyVotes": "No active TDH votes right now.",
+  "waves.discovery.emptyRecommendations": "No recommendations right now.",
+  "waves.discovery.loading": "Loading waves…",
+  "waves.discovery.error": "Couldn’t load waves.",
+  "waves.discovery.retry": "Try again",
+  "waves.discovery.loadMore": "Load more",
+  "waves.discovery.voteDescription":
+    "Explore ongoing TDH votes. Voting eligibility depends on each wave’s rules.",
+  "waves.sidebar.openProfileFeed": "Profile Waves Feed",
+  "waves.sidebar.profileFeedHeaderLabel": "Waves — Open Profile Waves Feed",
+  "waves.sidebar.findWave": "Find a wave…",
+  "waves.sidebar.createWave": "Create wave",
+  "waves.sidebar.clearSearch": "Clear wave search",
+  "waves.sidebar.closeSearch": "Close wave search",
+  "waves.sidebar.searchResultCount": "Waves shown: {count}",
+  "waves.sidebar.searchResults": "Search results · All waves",
+  "waves.sidebar.searchHint": "Type at least 3 characters to search all waves.",
+  "waves.sidebar.searchEmpty": "No waves found for “{query}”.",
+  "waves.sidebar.collectionEmpty": "No waves in this collection yet.",
+  "waves.sidebar.allWaves": "All Waves",
+  "waves.sidebar.byCreator": "by {creator}",
 } as const;
 
 export type MessageKey = keyof typeof EN_US_MESSAGES;

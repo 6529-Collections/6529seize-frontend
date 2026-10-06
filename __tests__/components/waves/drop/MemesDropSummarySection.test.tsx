@@ -29,6 +29,27 @@ const renderSummary = (drop: ExtendedDrop) =>
   );
 
 describe("MemesDropSummarySection", () => {
+  it("preserves authored line breaks, blank lines, and spaces in the description", () => {
+    const description = "First line\nSecond line\n\nA  spaced paragraph";
+    render(
+      <MemesDropSummarySection
+        drop={{ submission_context: {} } as ExtendedDrop}
+        title="Photographic artwork"
+        description={description}
+        isWinner={false}
+        isVotingEnded={false}
+        canShowVote={false}
+        manualOutcomes={[]}
+        nicTotal={0}
+        repTotal={0}
+        onVoteClick={jest.fn()}
+      />
+    );
+    const paragraph = screen.getByText(/First line/);
+    expect(paragraph.textContent).toBe(description);
+    expect(paragraph).toHaveClass("tw-whitespace-pre-wrap", "tw-break-words");
+  });
+
   it("shows a compact mapped Meme card pill with the minted outcome", () => {
     renderSummary({
       submission_context: { meme_card_id: 521 },
