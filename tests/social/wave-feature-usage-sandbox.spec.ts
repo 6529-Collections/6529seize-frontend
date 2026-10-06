@@ -271,6 +271,51 @@ test("scripted selections retain product behavior without counting deliberate us
   ).toHaveLength(0);
 });
 
+test("logout clears persisted identity without consent before anonymous delivery resumes", async ({
+  page,
+}) => {
+  for (const transport of ["batch", "direct"]) {
+    await page.goto(`/waves/private-wave?transport=${transport}`);
+    await page
+      .getByRole("button", { name: "Enable synthetic telemetry" })
+      .click();
+    await expect
+      .poll(async () =>
+        (await events(page)).some(
+          (event) =>
+            event.event === "$identify" &&
+            event.properties["distinct_id"] === "529"
+        )
+      )
+      .toBe(true);
+    await page.evaluate(() => {
+      document.cookie = "performance-cookies-consent=; Max-Age=0; path=/";
+      window.featureFixture.logout();
+    });
+    const identity = await page.evaluate(() => {
+      const persisted = localStorage.getItem(
+        "mp_synthetic-wave-feature-pilot_mixpanel"
+      );
+      return persisted ? JSON.parse(persisted).distinct_id : null;
+    });
+    expect(identity).toMatch(/^\$device:/);
+    await page.request.get("/clear");
+    await page.evaluate(() => {
+      document.cookie = "performance-cookies-consent=true; path=/";
+      window.featureFixture.lateEvent();
+    });
+    await expect
+      .poll(
+        async () =>
+          (await featureEvents(page, "Wave Feature Activated", "chat")).length
+      )
+      .toBe(1);
+    const [guest] = await featureEvents(page, "Wave Feature Activated", "chat");
+    expect(guest?.properties["distinct_id"]).toBe(identity);
+    expect(guest?.properties["$user_id"]).not.toBe("529");
+  }
+});
+
 test("missing or malformed cookie blocks delivery despite stale UI consent", async ({
   page,
 }) => {

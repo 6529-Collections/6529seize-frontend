@@ -248,7 +248,8 @@ export const clearIdentity = (): void => {
   analyticsGeneration += 1;
   identifiedDistinctId = null;
 
-  if (!isAnalyticsReady()) {
+  // Logout must clear local identity even while the delivery gate is closed.
+  if (!hasInitialized || !isAnalyticsEnvironmentSupported()) {
     return;
   }
 

@@ -90,7 +90,9 @@ Failure to scrub persisted private properties also keeps delivery closed rather
 than silently continuing with uncleared storage. Missing or malformed performance
 consent cookies fail closed even while React consent state is stale. Existing
 Mixpanel identity and delivery metadata remain. Consent withdrawal synchronously
-closes the send gate, clears SDK batches and resets identity. Already dispatched
+closes the send gate, clears SDK batches and resets identity.
+Logout clears local identity even when consent is missing or inaccessible;
+delivery stays closed until affirmative consent returns. Already dispatched
 network requests cannot be recalled. SDK and observer failures are best effort
 and must not interrupt controls.
 

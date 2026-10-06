@@ -2,6 +2,7 @@ export {};
 declare global {
   interface Window {
     featureFixture: {
+      logout: () => void;
       resetVisit: () => void;
       revoke: () => void;
       enable: () => void;

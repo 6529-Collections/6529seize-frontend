@@ -15,6 +15,7 @@ import type {} from "./waveFeatureFixtureApi";
 import { resetWaveFeatureVisit } from "@/services/analytics/waveFeatureUsage";
 import { WaveleaderboardSort } from "@/components/waves/leaderboard/header/WaveleaderboardSort";
 import {
+  clearIdentity,
   disableAnalytics,
   identify,
   initAnalytics,
@@ -98,6 +99,7 @@ function Fixture() {
     setConsent(true);
   };
   window.featureFixture = {
+    logout: clearIdentity,
     resetVisit: () => {
       history.pushState({}, "", "?drop=fixture-drop");
       resetWaveFeatureVisit();

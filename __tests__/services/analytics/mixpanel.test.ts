@@ -129,11 +129,36 @@ describe("mixpanel analytics wrapper", () => {
         analytics.trackAnalyticsEvent("Product Event")
       ).not.toThrow();
       expect(() => analytics.identify("42")).not.toThrow();
+      expect(() => analytics.clearIdentity()).not.toThrow();
+      expect(resetMock).toHaveBeenCalledTimes(1);
       expect(trackMock).not.toHaveBeenCalled();
     } finally {
       cookie.mockRestore();
     }
   });
+
+  it.each([undefined, "invalid", "false"])(
+    "clears local logout identity while delivery consent is unavailable (%s)",
+    async (consent) => {
+      const analytics = await loadModule({
+        nodeEnv: "production",
+        token: "public-token",
+      });
+      analytics.initAnalytics();
+      analytics.identify("42");
+      document.cookie =
+        consent === undefined
+          ? "performance-cookies-consent=; Max-Age=0; path=/"
+          : `performance-cookies-consent=${consent}; path=/`;
+      analytics.clearIdentity();
+      expect(resetMock).toHaveBeenCalledTimes(1);
+      analytics.trackAnalyticsEvent("Product Event");
+      expect(trackMock).not.toHaveBeenCalled();
+      document.cookie = "performance-cookies-consent=true; path=/";
+      analytics.identify("42");
+      expect(identifyMock).toHaveBeenCalledTimes(2);
+    }
+  );
 
   it.each([undefined, "invalid", "false"])(
     "blocks delivery when consent is missing or malformed (%s)",
