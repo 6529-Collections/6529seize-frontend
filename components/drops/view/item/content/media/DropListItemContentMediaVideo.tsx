@@ -1,5 +1,6 @@
 "use client";
 
+import { Capacitor } from "@capacitor/core";
 import { useInView } from "@/hooks/useInView";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useOptimizedVideo } from "@/hooks/useOptimizedVideo";
@@ -40,7 +41,7 @@ function DropListItemContentMediaVideo({
   const { isApp } = useDeviceInfo();
   const [wrapperRef, inView] = useInView<HTMLDivElement>({
     freezeOnceVisible: false,
-    rootMargin: isApp ? "0px" : "400px 0px",
+    rootMargin: Capacitor.isNativePlatform() ? "0px" : "400px 0px",
     threshold: 0.1,
   });
   const wasFullscreenRef = useRef(false);
@@ -77,6 +78,7 @@ function DropListItemContentMediaVideo({
     isFullscreen: isVideoFullscreen,
   } = useHlsPlayer({
     enabled: shouldLoadVideo,
+    bufferingEnabled: inView,
     src: playableUrl,
     isHls,
     fallbackSrc: src,

@@ -133,6 +133,20 @@ describe("useHlsPlayer hls supported", () => {
     expect(Hls.instances).toHaveLength(1);
   });
 
+  it("keeps eager native initialization from buffering offscreen video", async () => {
+    jest.spyOn(Capacitor, "isNativePlatform").mockReturnValue(true);
+    const Hls = require("hls.js").default;
+    const { rerender } = render(
+      <TestComp src="a.m3u8" isHls enabled bufferingEnabled={false} />
+    );
+    await waitFor(() => expect(Hls.instances).toHaveLength(1));
+    const hls = Hls.instances[0];
+    expect(hls.stopLoad).toHaveBeenCalled();
+    rerender(<TestComp src="a.m3u8" isHls enabled bufferingEnabled />);
+    expect(hls.startLoad).toHaveBeenCalledWith(-1);
+    expect(hls.destroy).not.toHaveBeenCalled();
+  });
+
   it("does not autoplay after a native source is suspended during the HLS import", async () => {
     jest.spyOn(Capacitor, "isNativePlatform").mockReturnValue(true);
     const Hls = require("hls.js").default;

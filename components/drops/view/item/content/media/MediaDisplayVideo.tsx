@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef } from "react";
+import { Capacitor } from "@capacitor/core";
 import { useInView } from "@/hooks/useInView";
 import { useOptimizedVideo } from "@/hooks/useOptimizedVideo";
 import { useHlsPlayer } from "@/hooks/useHlsPlayer";
@@ -30,7 +31,7 @@ const MediaDisplayVideo: React.FC<Props> = ({
   const { isApp } = useDeviceInfo();
   const [wrapperRef, inView] = useInView<HTMLDivElement>({
     freezeOnceVisible: false,
-    rootMargin: isApp ? "0px" : "400px 0px",
+    rootMargin: Capacitor.isNativePlatform() ? "0px" : "400px 0px",
     threshold: 0.1,
   });
   const wasFullscreenRef = useRef(false);

@@ -21,6 +21,8 @@ import { getNativeAppActivity } from "@/services/app-activity/native-app-activit
 interface UseHlsPlayerParams {
   /** If false, keep the video element inert and do not attach a source yet. */
   enabled?: boolean | undefined;
+  /** Native buffering may pause independently of eager source initialization. */
+  bufferingEnabled?: boolean | undefined;
   /** The final video URL to load (m3u8 if isHls=true, or MP4, etc.) */
   src: string;
   /** True if the above src is an .m3u8 that needs Hls.js. */
@@ -83,6 +85,7 @@ async function playFallbackVideo(videoEl: HTMLVideoElement): Promise<void> {
  */
 export function useHlsPlayer({
   enabled = true,
+  bufferingEnabled = enabled,
   src,
   isHls,
   autoPlay,
@@ -97,7 +100,8 @@ export function useHlsPlayer({
   const initialize = isNative
     ? (enabled && isAppActive) || loadedSource === src
     : enabled;
-  const canLoad = isAppActive && (!isNative || enabled || isFullscreen);
+  const canLoad =
+    isAppActive && (!isNative || bufferingEnabled || isFullscreen);
   const canLoadRef = useRef(canLoad);
   const callbacksRef = useRef({ autoPlay, onError, onManifestParsed });
   useEffect(() => {
