@@ -434,6 +434,10 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
     setAppMemesSubmitWaveId(null);
   }, []);
 
+  const viewSubmissionRules = useCallback(() => {
+    setActiveContentTab(MyStreamWaveTab.CONFIGURATION);
+  }, [setActiveContentTab]);
+
   const chatSubmitDropAction = useMemo<ChatSubmitDropAction>(
     () => ({
       isVisible: showChatSubmitDropAction,
@@ -441,6 +445,8 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
       label: chatSubmitDropLabels.label,
       compactLabel: chatSubmitDropLabels.compactLabel,
       restrictionMessage: chatSubmitDropRestrictionMessage,
+      accessWave: wave,
+      onViewRules: viewSubmissionRules,
       onOpen: () => openChatSubmitDrop(null),
       onOpenWithCurationUrl: openChatSubmitDrop,
     }),
@@ -449,6 +455,8 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
       chatSubmitDropLabels.compactLabel,
       chatSubmitDropLabels.label,
       chatSubmitDropRestrictionMessage,
+      viewSubmissionRules,
+      wave,
       openChatSubmitDrop,
       showChatSubmitDropAction,
     ]
@@ -484,6 +492,8 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
       label: chatSubmitDropAction.label,
       compactLabel: chatSubmitDropAction.compactLabel,
       restrictionMessage: chatSubmitDropAction.restrictionMessage,
+      accessWave: chatSubmitDropAction.accessWave,
+      onViewRules: chatSubmitDropAction.onViewRules,
       onOpen: chatSubmitDropAction.onOpen,
     };
   }, [

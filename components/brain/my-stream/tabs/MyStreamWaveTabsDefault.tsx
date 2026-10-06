@@ -72,6 +72,8 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
           <WaveHeaderRestrictionButton
             label={action.label}
             reason={chatSubmitDropTooltip ?? action.label}
+            accessWave={action.accessWave}
+            onViewRules={action.onViewRules}
             className="tw-h-8 tw-w-8 tw-min-w-8 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-p-0 tw-text-iron-300 desktop-hover:hover:tw-border-iron-500 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-100"
           >
             <LockClosedIcon className="tw-size-4 tw-flex-shrink-0" />

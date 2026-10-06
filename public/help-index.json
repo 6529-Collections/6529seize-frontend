@@ -3036,6 +3036,7 @@
         "Optional sections are named for their contents instead of repeating Advanced settings. They show Customized for non-default values and open automatically when a hidden field needs attention.",
         "The Access step initially shows one Who can access this wave control. By default, that group can also chat and, for Rank and Approve waves, submit and vote; only the creator can administer the wave.",
         "Customize other permissions expands the separate chat, submission, voting, and admin group controls when a wave needs different access rules.",
+        "A live summary below the Access controls explains whether chat and submissions use public, shared, or separate group access, or chat is disabled. Review or Overview repeats that summary before creation. It describes group access; authentication, profile, submission timing, limits, and signing requirements still apply. Voting access is separate.",
         "Each Access row offers one Edit action with a pencil icon and no Choose group action. Edit opens Identities immediately alongside the rule choices, supports explicitly included and excluded identities, and Next or Review wave stays disabled until the pending replacement is saved or cancelled.",
         "The inline criteria editor includes a Hide criteria and members switch. Its tooltip explains that the criteria and member list remain visible to group members but are hidden from everyone else. The switch starts off for a new inline group, preserves the setting copied from the current assignment, and applies the current setting when Save changes is selected.",
         "The inline Identities editor can add either included or excluded identities through profile search, an authenticated EMMA allowlist, or a dragged or selected CSV file. Source wallets are normalized and deduplicated, source choices persist while the group remains an unsaved draft, and the latest include or exclude action wins when the same wallet appears on both sides.",
@@ -3365,6 +3366,8 @@
         "Poll and Storm are mutually exclusive on narrow composer rows: while Poll is open, the plus control and separate Poll action are hidden and the poll header close control removes the poll; while Storm is active, Poll remains visible but unavailable until the Storm is finished or discarded.",
         "On mobile and in the app, the GIF picker uses the same drag handle and swipe-down dismissal as the emoji picker.",
         "Composer availability depends on the wave, groups, permissions, and current state.",
+        "Available chat has no permission summary or access-details row above the composer, including when submissions are restricted. Chatting or following a wave does not grant submission or voting access. Existing sign-in, profile, proxy, and moderation guards still apply.",
+        "An unavailable Submit drop action in ordinary Rank and Approve Chat headers opens a details card with the restriction reason, submission access group, and View submission rules. Other submission entry surfaces keep their own eligibility displays.",
         "If an authenticated wallet has no profile handle yet, public wave content can stay readable while the composer prompts the user to create a profile before participating."
       ],
       "canonical_path": "/waves",

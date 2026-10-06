@@ -48,6 +48,12 @@ waves show these controls inside `Optional settings` on the first screen.
   differs from access, chat is disabled, or admin deletion is disabled.
 - `Enable chat` controls whether `Who can chat` is active on `Rank` and
   `Approve` waves.
+- Below the access controls, a live summary explains what the selected chat
+  and submission groups mean. For example, chat can be open to people with
+  wave access while submissions remain limited to their own group. The same
+  summary appears in Review or Overview before creation.
+- This summary describes group access. Sign-in, profile, submission timing,
+  limits, and other posting requirements still apply. Voting access is separate.
 - `Allow admins to delete posts` is enabled by default.
 - Top-level waves default to `Everyone` for access, drop, vote, and chat, and
   `Only me` for administration.

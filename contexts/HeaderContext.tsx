@@ -9,6 +9,7 @@ import React, {
   useState,
 } from "react";
 import type { ReactNode, RefObject } from "react";
+import type { ApiWave } from "@/generated/models/ApiWave";
 
 export interface HeaderWaveDropAction {
   readonly waveId: string;
@@ -16,6 +17,8 @@ export interface HeaderWaveDropAction {
   readonly label: string;
   readonly compactLabel: string;
   readonly restrictionMessage: string | null;
+  readonly accessWave?: ApiWave | undefined;
+  readonly onViewRules?: (() => void) | undefined;
   readonly restrictionKind?: "memes-nomination" | undefined;
   readonly onOpen: () => void;
 }

@@ -16,6 +16,7 @@ import CreateWaveRulesGroupMembers from "../rules/CreateWaveRulesGroupMembers";
 import { getOnlyMeGroupDescription } from "../services/waveGroupService";
 import CreateWaveStepHeader from "../utils/CreateWaveStepHeader";
 import CreateWaveReviewDescription from "./CreateWaveReviewDescription";
+import WaveAccessPreview from "../../WaveAccessPreview";
 
 export default function CreateWaveReview({
   config,
@@ -103,6 +104,11 @@ export default function CreateWaveReview({
         showTitle={false}
         variant="form"
         renderRowValue={renderRuleValue}
+      />
+      <WaveAccessPreview
+        waveType={config.overview.type}
+        groups={config.groups}
+        chatEnabled={config.chat.enabled}
       />
       {description && <CreateWaveReviewDescription description={description} />}
     </div>

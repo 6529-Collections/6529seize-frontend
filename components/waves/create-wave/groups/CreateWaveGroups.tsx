@@ -12,6 +12,7 @@ import { t } from "@/i18n/messages";
 import { CreateWaveGroupConfigType } from "@/types/waves.types";
 import type { WaveGroupsConfig } from "@/types/waves.types";
 import CreateWaveGroup from "./CreateWaveGroup";
+import WaveAccessPreview from "../../WaveAccessPreview";
 import CreateWaveStepHeader from "../utils/CreateWaveStepHeader";
 import CreateWaveAdvancedSection from "../utils/CreateWaveAdvancedSection";
 import { CREATE_WAVE_FORM_STYLES } from "../utils/createWaveFormStyles";
@@ -216,6 +217,11 @@ export default function CreateWaveGroups({
           ))}
         </div>
       </CreateWaveAdvancedSection>
+      <WaveAccessPreview
+        waveType={waveType}
+        groups={groups}
+        chatEnabled={chatEnabled}
+      />
     </div>
   );
 }

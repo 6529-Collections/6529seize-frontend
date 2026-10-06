@@ -54,6 +54,14 @@ availability. Submission availability is exposed through the Chat tab
 - Main chat composers use `DropMode.CHAT`.
 - Dedicated submission panels use `DropMode.PARTICIPATION`.
 - Chat composers do not render a chat/drop mode toggle.
+- Available chat has no permission summary or access-details row above the
+  composer, including when submissions are restricted.
+- In ordinary `Rank` and `Approve` Chat headers, activate the unavailable
+  `Submit drop` action to see the submission restriction, submission group, and
+  `View submission rules` link to Configuration. Public groups link to their
+  criteria and members; hidden and direct-message groups show only `Private group`.
+- Chatting or following a wave does not grant submission or voting access.
+  Submission eligibility, timing, limits, and signing requirements still apply.
 - If submission is available, users enter it from `Submit drop` in the Chat tab
   header or app composer area.
 - The standard `Submit drop` dialog follows the app keyboard as it opens and
@@ -86,8 +94,9 @@ availability. Submission availability is exposed through the Chat tab
   syntax.
 - The signed-out panel opens sign-in, and the profile setup panel links to profile
   creation. Other blocked panels are informational.
-- When both chat and submission are blocked for non-auth reasons, messaging is
-  generic, not reason-specific.
+- Submission details are shown on demand from the locked submission action.
+  Sign-in, profile setup, proxy and moderation guards retain their existing
+  panels. Other submission entry surfaces retain their own eligibility displays.
 
 ## Related Pages
 

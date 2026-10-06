@@ -3,10 +3,14 @@
 import clsx from "clsx";
 import { useId, type ReactNode } from "react";
 import HoverCard from "@/components/utils/tooltip/HoverCard";
+import type { ApiWave } from "@/generated/models/ApiWave";
+import WaveSubmissionAccessDetails from "../WaveSubmissionAccessDetails";
 
 interface WaveHeaderRestrictionButtonProps {
   readonly label: string;
   readonly reason: string;
+  readonly accessWave?: ApiWave | undefined;
+  readonly onViewRules?: (() => void) | undefined;
   readonly children: ReactNode;
   readonly className?: string | undefined;
   readonly "data-testid"?: string | undefined;
@@ -16,6 +20,8 @@ interface WaveHeaderRestrictionButtonProps {
 export default function WaveHeaderRestrictionButton({
   label,
   reason,
+  accessWave,
+  onViewRules,
   children,
   className,
   "data-testid": testId,
@@ -34,6 +40,14 @@ export default function WaveHeaderRestrictionButton({
           <p className="tw-mb-0 tw-mt-1.5 tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-100">
             {reason}
           </p>
+          {accessWave && (
+            <div className="tw-mt-3">
+              <WaveSubmissionAccessDetails
+                wave={accessWave}
+                onViewRules={onViewRules}
+              />
+            </div>
+          )}
         </div>
       }
       placement="auto"

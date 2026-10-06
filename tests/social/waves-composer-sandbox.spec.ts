@@ -21,6 +21,7 @@ import {
 } from "../support/localSandbox";
 
 const SANDBOX_WAVE_ID = "00000000-0000-4000-8000-000000000529";
+const SANDBOX_ACCESS_WAVE_ID = "00000000-0000-4000-8000-000000000566";
 const SANDBOX_WALLET = "0x0000000000000000000000000000000000000529";
 const PREVIEW_URL = "https://example.com/6529-composer-preview";
 const PREVIEW_TITLE = "Sandbox Preview Title";
@@ -52,6 +53,74 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
   defineWaveVideoLayoutTests();
   defineWaveImageLayoutTests();
   defineWaveImagePreviewTests();
+
+  test("explains restricted submissions without interrupting a chat draft", async ({
+    baseURL,
+    page,
+  }) => {
+    await gotoSandboxWave(
+      page,
+      SANDBOX_ACCESS_WAVE_ID,
+      "Local Access Sandbox Wave"
+    );
+    const composer = page
+      .getByRole("textbox", { name: "Write a chat message" })
+      .last();
+    const draft = "Chat access is independent of submission access.";
+    await composer.fill(draft);
+    // Submission restrictions must not add permission UI to an available chat.
+    await expect(page.getByText("Access details", { exact: true })).toHaveCount(
+      0
+    );
+    await expect(
+      page.getByRole("link", { name: "View submission rules" })
+    ).toHaveCount(0);
+    await expect(composer).toContainText(draft);
+    await expect(
+      page.getByRole("button", { name: "Post", exact: true }).last()
+    ).toBeEnabled();
+    await expectNoHorizontalOverflow(page);
+
+    await page
+      .getByRole("button", { name: "Submit drop", exact: true })
+      .press("Enter");
+    const restriction = page.getByRole("dialog", { name: "Submit drop" });
+    await expect(restriction).toContainText(
+      "You don't have permission to submit in this wave"
+    );
+    await expect(
+      restriction.getByRole("link", {
+        name: "Inspect Sandbox Submission Club group criteria and members",
+      })
+    ).toBeVisible();
+    await expect(
+      restriction.getByRole("link", { name: "View submission rules" })
+    ).toHaveAttribute(
+      "href",
+      `/waves/${SANDBOX_ACCESS_WAVE_ID}?tab=configuration`
+    );
+    await expect(restriction).toContainText(
+      "Chat access is separate from submission access."
+    );
+    await expectNoHorizontalOverflow(page);
+    await restriction
+      .getByRole("link", { name: "View submission rules" })
+      .click();
+    await expect(
+      page.getByRole("tab", { name: "Configuration", exact: true }).first()
+    ).toHaveAttribute("aria-selected", "true");
+    await page.getByRole("tab", { name: "Chat", exact: true }).first().click();
+    await expect(
+      page.getByRole("textbox", { name: "Write a chat message" }).last()
+    ).toContainText(draft);
+    await expect(page.getByText("Access details", { exact: true })).toHaveCount(
+      0
+    );
+    await expect(
+      page.getByRole("button", { name: "Post", exact: true }).last()
+    ).toBeEnabled();
+    await expectNoUnsafeSandboxMutations(baseURL);
+  });
 
   test("queues and removes an attachment without upload or submit", async ({
     baseURL,
@@ -810,21 +879,25 @@ function buildExactChatDropBody() {
   };
 }
 
-async function gotoSandboxWave(page: Page) {
+async function gotoSandboxWave(
+  page: Page,
+  waveId = SANDBOX_WAVE_ID,
+  waveName = "Local Composer Sandbox Wave"
+) {
   await installExternalDataFixtures(page);
   await installOpenGraphFixture(page);
-  await page.goto(`/waves/${SANDBOX_WAVE_ID}`, {
+  await page.goto(`/waves/${waveId}`, {
     waitUntil: "domcontentloaded",
   });
   await waitForRouteReady(page);
-  await expect(page).toHaveURL(new RegExp(`/waves/${SANDBOX_WAVE_ID}$`));
+  await expect(page).toHaveURL(new RegExp(`/waves/${waveId}$`));
   await expect(
     page
       .getByRole("heading", {
         level: 1,
-        name: "Local Composer Sandbox Wave",
+        name: waveName,
       })
-      .or(page.getByText("Local Composer Sandbox Wave", { exact: true }))
+      .or(page.getByText(waveName, { exact: true }))
       .first()
   ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
   await expect(
