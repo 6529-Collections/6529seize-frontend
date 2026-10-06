@@ -51,11 +51,27 @@ export function runWaveNavigationTransition(
   surface.style.viewTransitionName = "wave-navigation";
   root.dataset["waveNavigationTransition"] =
     screen === "wave" ? "forward" : "back";
-  const transition = document.startViewTransition(async () => {
+  const clearSurface = () => {
+    delete root.dataset["waveNavigationTransition"];
+    surface.style.removeProperty("view-transition-name");
+    root.style.removeProperty("--wave-transition-height");
+  };
+  let transition: ViewTransition;
+  try {
+    transition = document.startViewTransition(async () => {
+      navigate();
+      await committed;
+    });
+  } catch {
+    // Motion is optional: an engine failure must not prevent navigation.
+    clearSurface();
     navigate();
-    await committed;
-  });
+    return;
+  }
+  let stopped = false;
   const skip = () => {
+    if (stopped) return;
+    stopped = true;
     commit();
     transition.skipTransition();
   };
@@ -72,13 +88,12 @@ export function runWaveNavigationTransition(
   activeTransition = pending;
   reducedMotion.addEventListener("change", skip, { once: true });
   const cleanup = () => {
+    stopped = true;
     window.clearTimeout(timeout);
     reducedMotion.removeEventListener("change", skip);
     if (activeTransition !== pending) return;
     activeTransition = null;
-    delete root.dataset["waveNavigationTransition"];
-    surface.style.removeProperty("view-transition-name");
-    root.style.removeProperty("--wave-transition-height");
+    clearSurface();
   };
   // Skipping a transition rejects ready but still runs the navigation callback.
   void transition.ready.catch(() => {});

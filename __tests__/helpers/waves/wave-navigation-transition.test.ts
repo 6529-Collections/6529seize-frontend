@@ -112,3 +112,37 @@ it("skips an in-flight transition when motion preferences change", async () => {
     document.documentElement.dataset["waveNavigationTransition"]
   ).toBeUndefined();
 });
+
+it("falls back to navigation and restores the surface when transition startup throws", () => {
+  start.mockImplementationOnce(() => {
+    throw new Error("Transition unavailable");
+  });
+  const navigate = jest.fn();
+  expect(() => runWaveNavigationTransition("wave", navigate)).not.toThrow();
+  expect(navigate).toHaveBeenCalledTimes(1);
+  expect(commitWaveNavigationTransition("wave")).toBe(false);
+  expect(
+    document.documentElement.dataset["waveNavigationTransition"]
+  ).toBeUndefined();
+  expect(
+    document.documentElement.style.getPropertyValue("--wave-transition-height")
+  ).toBe("");
+  expect(
+    document.querySelector<HTMLElement>("[data-wave-navigation-screen]")?.style
+      .viewTransitionName
+  ).toBe("");
+});
+
+it("cancels only once across repeated interruption and motion preference events", async () => {
+  runWaveNavigationTransition("wave", jest.fn());
+  await Promise.resolve();
+  const preferenceChanged = media.addEventListener.mock.calls[0]?.[1];
+  skipWaveNavigationTransition();
+  skipWaveNavigationTransition();
+  preferenceChanged();
+  await updateDone;
+  jest.advanceTimersByTime(500);
+  preferenceChanged();
+  expect(skip).toHaveBeenCalledTimes(1);
+  expect(commitWaveNavigationTransition("wave")).toBe(false);
+});

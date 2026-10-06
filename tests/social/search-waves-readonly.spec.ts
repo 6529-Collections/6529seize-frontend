@@ -387,6 +387,7 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
   test("mobile wave shortcuts keep generous touch areas around compact buttons", async ({
     page,
   }, testInfo) => {
+    // Desktop keeps its smaller controls; 44px targets apply to touch input.
     test.skip(
       !testInfo.project.use.hasTouch,
       "Touch target geometry is mobile-only"

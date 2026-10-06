@@ -271,6 +271,7 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
     test(`iOS Waves navigation ${reducedMotion ? "respects reduced motion" : "moves into and out of a wave"}`, async ({
       page,
     }, testInfo) => {
+      // This flow exercises the native iOS layout, not the web/Electron shells.
       test.skip(
         testInfo.project.name !== "capacitor-ios-sim",
         "Wave content navigation uses the native app layout"
@@ -321,7 +322,7 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
             item.currentTime = 100;
           }
           return {
-            transform: frames[0]?.transform,
+            transform: frames[0]?.["transform"],
             duration: effect.getTiming().duration,
             outgoingVisible: animations.some(
               (item) =>
@@ -479,6 +480,7 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
   test("iOS Waves search stays above the keyboard and restores its list height", async ({
     page,
   }, testInfo) => {
+    // Native keyboard overlay geometry differs from web and Electron layouts.
     test.skip(
       testInfo.project.name !== "capacitor-ios-sim",
       "Keyboard geometry is covered on the iOS Capacitor simulation"
