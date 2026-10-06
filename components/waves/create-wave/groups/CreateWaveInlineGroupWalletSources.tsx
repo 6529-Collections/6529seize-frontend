@@ -164,7 +164,8 @@ function EmmaWalletSource({
     ? "tw-min-w-0 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-4"
     : "tw-min-w-0 tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950/60 tw-p-3 sm:tw-p-4";
   if (networkPresentation) {
-    sectionClasses = "tw-min-w-0 tw-py-4 lg:tw-pr-5";
+    sectionClasses =
+      "tw-min-w-0 tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900/30 tw-p-4";
   }
 
   return (
@@ -172,7 +173,9 @@ function EmmaWalletSource({
       <h3 className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-100">
         {t(locale, "waves.create.groups.inlineIdentities.sources.emma.title")}
       </h3>
-      <p className="tw-mb-3 tw-mt-1 tw-text-xs tw-leading-relaxed tw-text-iron-500">
+      <p
+        className={`tw-mb-3 tw-mt-1 tw-text-xs tw-leading-relaxed tw-text-iron-500 ${networkPresentation ? "tw-min-h-10" : ""}`}
+      >
         {t(
           locale,
           "waves.create.groups.inlineIdentities.sources.emma.description"
@@ -355,12 +358,18 @@ function CsvWalletSource({
   if (isDragging) {
     dropzoneStateClasses = "tw-border-primary-400 tw-bg-primary-500/10";
   }
+  let dropzoneLayoutClasses = quiet
+    ? "tw-min-h-20 tw-flex-col tw-p-3"
+    : "tw-min-h-24 tw-flex-col tw-p-3";
+  if (networkPresentation) {
+    dropzoneLayoutClasses = "tw-h-12 tw-flex-row tw-px-2 tw-py-2";
+  }
   let sectionClasses = quiet
     ? "tw-min-w-0 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-4"
     : "tw-min-w-0 tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-950/60 tw-p-3 sm:tw-p-4";
   if (networkPresentation) {
     sectionClasses =
-      "tw-min-w-0 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-py-4 lg:tw-border-l lg:tw-border-t-0 lg:tw-pl-5";
+      "tw-min-w-0 tw-rounded-xl tw-border tw-border-solid tw-border-white/5 tw-bg-iron-900/30 tw-p-4";
   }
 
   return (
@@ -368,7 +377,9 @@ function CsvWalletSource({
       <h3 className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-100">
         {t(locale, "waves.create.groups.inlineIdentities.sources.csv.title")}
       </h3>
-      <p className="tw-mb-3 tw-mt-1 tw-text-xs tw-leading-relaxed tw-text-iron-500">
+      <p
+        className={`tw-mb-3 tw-mt-1 tw-text-xs tw-leading-relaxed tw-text-iron-500 ${networkPresentation ? "tw-min-h-10" : ""}`}
+      >
         {t(
           locale,
           "waves.create.groups.inlineIdentities.sources.csv.description"
@@ -386,7 +397,7 @@ function CsvWalletSource({
           event.preventDefault();
           setIsDragging(false);
         }}
-        className={`tw-flex tw-cursor-pointer tw-flex-col tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-border-dashed tw-p-3 tw-text-center tw-transition focus-within:tw-ring-2 focus-within:tw-ring-primary-400 ${quiet ? "tw-min-h-20 tw-border" : "tw-min-h-24 tw-border-2"} ${dropzoneStateClasses}`}
+        className={`tw-flex tw-cursor-pointer tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-border-dashed tw-text-center tw-transition focus-within:tw-ring-2 focus-within:tw-ring-primary-400 ${quiet ? "tw-border" : "tw-border-2"} ${dropzoneLayoutClasses} ${dropzoneStateClasses}`}
       >
         <ArrowUpTrayIcon
           aria-hidden="true"
@@ -460,8 +471,7 @@ export default function CreateWaveInlineGroupWalletSources(
 ) {
   let gridClasses = `tw-grid tw-grid-cols-1 lg:tw-grid-cols-2 ${props.quiet ? "tw-gap-4" : "tw-gap-3"}`;
   if (props.networkPresentation) {
-    gridClasses =
-      "tw-grid tw-grid-cols-1 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 lg:tw-grid-cols-2";
+    gridClasses = "tw-grid tw-grid-cols-1 tw-gap-3 lg:tw-grid-cols-2";
   }
   return (
     <div className={gridClasses}>
