@@ -269,7 +269,7 @@ export default function UserPageIdentityHeaderCICRate({
                     type="submit"
                     disabled={isSaveDisabled}
                     loading={mutating}
-                    variant="primary"
+                    variant="success"
                     size="xl"
                     fullWidth
                     className="sm:tw-w-auto"
@@ -299,7 +299,7 @@ export default function UserPageIdentityHeaderCICRate({
                 type="submit"
                 disabled={isSaveDisabled}
                 loading={mutating}
-                variant="primary"
+                variant="success"
                 size="xl"
                 fullWidth
               >
