@@ -107,6 +107,8 @@ describe("effective App PR CI plan", () => {
     "__tests__/components/waves/leaderboard/WaveMySubmissions.test.tsx",
     "components/waves/drops/WaveDropActionsOpen.tsx",
     "__tests__/components/waves/drops/WaveDropActionsOpen.test.tsx",
+    "components/waves/drops/WaveDropMobileMenuOpen.tsx",
+    "__tests__/components/waves/drops/WaveDropMobileMenuOpen.test.tsx",
     "components\\waves\\leaderboard\\MySubmissionsDialog.tsx",
   ])(
     "selects native competition browser evidence for shared surface %s",
@@ -130,6 +132,8 @@ describe("effective App PR CI plan", () => {
     "ops/docs/README.md",
     "components/waves/drops/WaveDropActions.tsx",
     "__tests__/components/waves/drops/WaveDropActions.test.tsx",
+    "components/waves/drops/WaveDropMobileMenuCopyLink.tsx",
+    "__tests__/components/waves/drops/WaveDropMobileMenuCopyLink.test.tsx",
     "components/waves/leaderboard-preview/Preview.tsx",
     "__tests__/components/waves/leaderboard-preview/Preview.test.tsx",
   ])(

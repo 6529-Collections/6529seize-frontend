@@ -74,7 +74,9 @@ PR selection for `test:e2e:native-competition-sandbox` is owned by
 native competitions plus shared submission dialogs, leaderboard controls and
 drop navigation. Changes under `components/waves/leaderboard/` or its
 `__tests__/components/waves/leaderboard/` tests therefore select this pack, as
-do `components/waves/drops/WaveDropActionsOpen.tsx` and its focused test.
+do the desktop `components/waves/drops/WaveDropActionsOpen.tsx` and mobile
+`components/waves/drops/WaveDropMobileMenuOpen.tsx` actions and their focused
+tests.
 Keep those ownership rules covered in
 `__tests__/scripts/app-pr-ci-effective-plan.test.ts`; merely registering a
 pack here does not make a product-only PR select it.
