@@ -9,10 +9,23 @@ import {
   getCompetitionRoute,
 } from "@/helpers/competition.helpers";
 import {
+  waveCompetitionTabs,
   getImplicitCompetitionRoute,
   shouldResolveDefault,
 } from "@/helpers/default-competition.helpers";
-import { useDefaultCompetition } from "./useCompetitionQueries";
+import { useContentTab } from "@/components/brain/ContentTabContext";
+import {
+  hasWaveDestination,
+  getHistoryWaveTab,
+  getRememberedTab,
+  rememberHistoryWaveTab,
+  useWaveTabPreference,
+} from "@/hooks/useWaveTabPreference";
+import { MyStreamWaveTab } from "@/types/waves.types";
+import {
+  useCompetitionHub,
+  useDefaultCompetition,
+} from "./useCompetitionQueries";
 
 const commandSelector = '[data-competition-command], [role="dialog"]';
 const hasAddedCommand = (records: MutationRecord[]) =>
@@ -38,7 +51,101 @@ export function useDefaultCompetitionNavigation(
     Boolean(wave) &&
     !wave?.chat.scope.group?.is_direct_message &&
     shouldResolveDefault(pathname, new URLSearchParams(search.toString()));
-  const selection = useDefaultCompetition(wave?.id ?? "", resolve);
+  const { tabs } = useWaveTabPreference();
+  const { availableTabs } = useContentTab();
+  const remembered =
+    getHistoryWaveTab(wave?.id) ?? (wave ? tabs[wave.id] : undefined);
+  const savedTab = getRememberedTab(remembered);
+  const ordinaryEntry =
+    !isCompetitionPathname(pathname) && !hasWaveDestination(search);
+  const restore = Boolean(
+    enabled &&
+    isMultiCompetitionEnabled() &&
+    wave &&
+    !wave.chat.scope.group?.is_direct_message &&
+    ordinaryEntry &&
+    savedTab !== undefined &&
+    waveCompetitionTabs[savedTab] !== undefined
+  );
+  const selection = useDefaultCompetition(wave?.id ?? "", resolve || restore);
+  // Old preferences had no competition identity. They can only name the
+  // immutable legacy primary; new preferences always pin their selected ID.
+  const legacyHub = useCompetitionHub(
+    wave?.id ?? "",
+    restore && typeof remembered === "string"
+  );
+  useEffect(() => {
+    if (
+      !restore ||
+      !wave ||
+      savedTab === undefined ||
+      selection.isError ||
+      !selection.isSuccess
+    )
+      return;
+    if (typeof remembered === "string" && !legacyHub.isSuccess) return;
+    const selectedId = selection.data.competition_id;
+    const rememberedId =
+      typeof remembered === "object"
+        ? remembered.competitionId
+        : legacyHub.data?.legacy_primary_competition_id;
+    if (rememberedId === null || rememberedId === undefined) return;
+    if (!selectedId || selectedId !== rememberedId) {
+      rememberHistoryWaveTab(wave.id, MyStreamWaveTab.CHAT);
+      return;
+    }
+    if (
+      !(
+        availableTabs.includes(savedTab) ||
+        (savedTab === MyStreamWaveTab.LEADERBOARD &&
+          availableTabs.includes(MyStreamWaveTab.SUBMISSIONS))
+      ) ||
+      document.querySelector(commandSelector)
+    )
+      return;
+    const params = new URLSearchParams(search.toString());
+    params.delete("wave");
+    params.delete("default");
+    params.set("tab", waveCompetitionTabs[savedTab]!);
+    // Keep a command opened during a pending route transition in its original
+    // visit. Once the destination commits this effect's observer is removed.
+    const current = search.toString() ? `${pathname}?${search}` : pathname;
+    const observer = new MutationObserver((records) => {
+      if (!hasAddedCommand(records)) return;
+      // The browser URL commits before passive-effect cleanup. Commands from
+      // the committed destination must not cancel its legitimate navigation.
+      if (
+        window.location.pathname !== pathname ||
+        new URLSearchParams(window.location.search).toString() !==
+          search.toString()
+      ) {
+        observer.disconnect();
+        return;
+      }
+      rememberHistoryWaveTab(wave.id, MyStreamWaveTab.CHAT);
+      router.replace(current, { scroll: false });
+      observer.disconnect();
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+    router.replace(`${getCompetitionRoute(wave.id, selectedId)}?${params}`, {
+      scroll: false,
+    });
+    return () => observer.disconnect();
+  }, [
+    restore,
+    wave,
+    savedTab,
+    selection.isSuccess,
+    selection.isError,
+    selection.data,
+    remembered,
+    legacyHub.isSuccess,
+    legacyHub.data,
+    availableTabs,
+    pathname,
+    search,
+    router,
+  ]);
   const explicitConfiguration = Boolean(
     enabled &&
     isMultiCompetitionEnabled() &&

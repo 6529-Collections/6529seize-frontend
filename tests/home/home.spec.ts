@@ -6,6 +6,7 @@ import {
 } from "../testHelpers";
 import { getAppEnvironment } from "../../config/appEnvironment";
 import { isDesktopWebProject } from "../support/surfaceSimulation";
+import { gateSidebarHydration } from "../support/sidebarHydration";
 
 test.describe("Home Page @smoke @medium @large", () => {
   test.beforeEach(async ({ page }) => {
@@ -232,18 +233,11 @@ for (const { width, stored, expectedWidth } of [
     await page.addInitScript((value) => {
       globalThis.sessionStorage.setItem("sidebarCollapsed", value);
     }, stored);
-    let releaseScripts!: () => void;
-    const scriptsReady = new Promise<void>((resolve) => {
-      releaseScripts = resolve;
-    });
-    await page.route(/\/_next\/.*\.js(?:\?.*)?$/, async (route) => {
-      await scriptsReady;
-      await route.continue();
-    });
+    const hydration = await gateSidebarHydration(page);
     const sidebar = page.getByLabel("Primary sidebar", { exact: true });
     const layout = page.getByRole("main").first().locator("..");
     try {
-      await page.goto("/", { waitUntil: "commit" });
+      const documentResponse = await page.goto("/", { waitUntil: "commit" });
       await expect(layout).toHaveAttribute("data-sidebar-ready", "false");
       await expect(sidebar).toHaveCSS("width", `${expectedWidth}px`);
       await expect(page.getByRole("main").first()).toHaveCSS(
@@ -258,8 +252,14 @@ for (const { width, stored, expectedWidth } of [
             .locator("[data-sidebar-content]")
         ).toHaveCSS("visibility", "hidden");
       }
+      expect(documentResponse).not.toBeNull();
+      expect(await documentResponse?.finished()).toBeNull();
+      await hydration.waitForDownloads();
+      hydration.release();
+      await hydration.waitForReady();
     } finally {
-      releaseScripts();
+      hydration.release();
+      await hydration.attachEvidence(testInfo);
     }
     await expect(layout).toHaveAttribute("data-sidebar-ready", "true");
     await expect(sidebar).toHaveCSS("width", `${expectedWidth}px`);

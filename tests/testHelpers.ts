@@ -8,6 +8,7 @@ import {
 } from "./support/pageAssertions";
 import { installReadonlyMutationGuard } from "./support/readonlyMutationGuard";
 import { installSurfaceSimulation } from "./support/surfaceSimulation";
+import { attachMuseumMediaDiagnostics } from "./support/museumMediaDiagnostics";
 
 const STAGING_HOSTNAME = "staging.6529.io";
 const STAGING_ACCESS_COOKIE_NAME = "x-6529-auth";
@@ -157,6 +158,9 @@ const test = base.extend({
   },
   page: async ({ page, baseURL }, runTest, testInfo) => {
     const diagnostics = attachPageDiagnostics(page);
+    const detachMuseumDiagnostics = testInfo.file.includes("/museum/")
+      ? await attachMuseumMediaDiagnostics(page, diagnostics)
+      : undefined;
 
     if (shouldUnlockStaging(baseURL)) {
       await installStagingAccessUnlock(page);
@@ -164,6 +168,7 @@ const test = base.extend({
 
     await runTest(page);
 
+    await detachMuseumDiagnostics?.();
     await attachPageDiagnosticsArtifact(testInfo, diagnostics);
     assertNoPageErrors(diagnostics);
   },
