@@ -32,6 +32,8 @@ import { WaveLeaderboardDropRaters } from "./header/WaveleaderboardDropRaters";
 interface DefaultWaveLeaderboardDropProps {
   readonly drop: ExtendedDrop;
   readonly onDropClick: (drop: ExtendedDrop) => void;
+  readonly onOpenDrop?: (() => void) | undefined;
+  readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
   readonly onVoteClick?: ((drop: ExtendedDrop) => void) | undefined;
   readonly winningThreshold?: number | null | undefined;
   readonly winningThresholdMinDurationMs?: number | null | undefined;
@@ -52,6 +54,8 @@ export const DefaultWaveLeaderboardDrop: React.FC<
 > = ({
   drop,
   onDropClick,
+  onOpenDrop,
+  onDropContentClick,
   onVoteClick,
   winningThreshold,
   winningThresholdMinDurationMs,
@@ -177,7 +181,13 @@ export const DefaultWaveLeaderboardDrop: React.FC<
                 winningThreshold={winningThreshold}
               />
               <div className="tw-hidden tw-h-8 tw-items-center lg:tw-flex">
-                {!isProposalCard && <WaveDropActionsOpen drop={drop} />}
+                {!isProposalCard && (
+                  <WaveDropActionsOpen
+                    drop={drop}
+                    onOpen={onOpenDrop}
+                    onNavigate={onDropContentClick}
+                  />
+                )}
                 {canDelete && <WaveDropActionsOptions drop={drop} />}
               </div>
             </div>
@@ -186,6 +196,8 @@ export const DefaultWaveLeaderboardDrop: React.FC<
               isCompetitionDrop={true}
               mediaContainerHeightClassName={mediaContainerHeightClassName}
               contentPresentation={contentPresentation}
+              onOpenDrop={onOpenDrop}
+              onDropContentClick={onDropContentClick}
             />
             <div
               className={`tw-flex tw-justify-between tw-gap-x-2 ${
@@ -265,7 +277,11 @@ export const DefaultWaveLeaderboardDrop: React.FC<
                 {/* Open drop option */}
                 <WaveDropMobileMenuOpen
                   drop={drop}
-                  onOpenChange={handleMobileMenuClose}
+                  onNavigate={onDropContentClick}
+                  onOpenChange={() => {
+                    handleMobileMenuClose();
+                    onOpenDrop?.();
+                  }}
                 />
                 <WaveDropMobileMenuCopyLink
                   drop={drop}

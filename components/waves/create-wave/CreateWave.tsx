@@ -269,6 +269,8 @@ export default function CreateWave({
     }
     if (targetStep === CreateWaveStep.REVIEW) {
       if (quickChat && getCreateWaveValidationErrors({ config, step }).length) {
+        // onStep validates the current screen and blocks navigation while
+        // surfacing its errors and focus request. Do not snapshot invalid input.
         await onStep({ step: targetStep, direction });
         return;
       }

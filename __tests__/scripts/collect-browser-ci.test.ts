@@ -63,13 +63,62 @@ it.each([
   const outputs = select([file]);
   expect(outputs["playwright_collect_required"]).toBe("true");
   expect(JSON.parse(outputs["core_playwright_matrix"]!)).toMatchObject({
-    include: [{ lane: "playwright-smoke" }],
+    include: expect.arrayContaining([
+      expect.objectContaining({ lane: "playwright-smoke" }),
+    ]),
   });
 });
 it("does not add Collect browser work for unrelated documentation", () => {
   const outputs = select(["ops/docs/about/some-guide.md"]);
   expect(outputs["playwright_collect_required"]).toBe("false");
   expect(outputs["core_playwright_required"]).toBe("false");
+});
+it.each([
+  "i18n/messages/en-US.ts",
+  "i18n/messages/wave-creation.en-US.json",
+  "components/waves/create-wave/CreateWave.tsx",
+  "tests/social/create-wave-sandbox.spec.ts",
+])("selects the wave creation browser lane for %s", (file) => {
+  const outputs = select([file]);
+  expect(JSON.parse(outputs["core_playwright_matrix"]!)).toEqual({
+    include: [
+      {
+        lane: "playwright-wave-creation",
+        label: "Wave creation desktop and mobile",
+        runner: "ubuntu-latest",
+      },
+    ],
+  });
+  expect(outputs["core_playwright_required"]).toBe("true");
+});
+it("does not select wave creation for unrelated locale messages", () => {
+  const outputs = select(["i18n/messages/collect.ts"]);
+  expect(JSON.parse(outputs["core_playwright_matrix"]!)).toEqual({
+    include: [
+      {
+        lane: "playwright-smoke",
+        label: "Playwright smoke",
+        runner: "ubuntu-latest",
+      },
+    ],
+  });
+});
+it("selects both browser lanes when their shared workflow changes", () => {
+  const outputs = select([".github/workflows/app-pr-ci.yml"]);
+  expect(JSON.parse(outputs["core_playwright_matrix"]!)).toEqual({
+    include: [
+      {
+        lane: "playwright-smoke",
+        label: "Playwright smoke",
+        runner: "ubuntu-latest",
+      },
+      {
+        lane: "playwright-wave-creation",
+        label: "Wave creation desktop and mobile",
+        runner: "ubuntu-latest",
+      },
+    ],
+  });
 });
 it("runs only the isolated Collect spec on both supported browser viewports", () => {
   const job = workflow.jobs["core-playwright-checks"]!;

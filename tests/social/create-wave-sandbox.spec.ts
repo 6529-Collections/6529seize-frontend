@@ -101,6 +101,72 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
     await expectNoUnsafeSandboxMutations(baseURL);
   });
 
+  test("blocks invalid names after Review and submits only the refreshed first post", async ({
+    page,
+    baseURL,
+  }) => {
+    await gotoCreateWave(page);
+    const name = page.getByLabel(/Wave Name/);
+    const editor = page.getByRole("textbox", {
+      name: "First post",
+      exact: true,
+    });
+    const originalPost = "First post shown in the original review.";
+    const editedPost = SANDBOX_CREATED_WAVE_DESCRIPTION;
+    const review = page.getByRole("region", {
+      name: "Description",
+      exact: true,
+    });
+    await name.fill(SANDBOX_CREATED_WAVE_NAME);
+    await editor.fill(originalPost);
+    await nextStepButton(page).click();
+    await expect(review.getByText(originalPost, { exact: true })).toBeVisible();
+    await previousStepButton(page).click();
+    await name.fill("   ");
+    await editor.fill(editedPost);
+    await nextStepButton(page).click();
+    await expect(
+      page.getByRole("alert").filter({ hasText: "Name is required" })
+    ).toBeVisible();
+    await expect(name).toBeFocused();
+    await expect(editor).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Confirm and create", exact: true })
+    ).toHaveCount(0);
+    expect(
+      (await fetchSandboxRequests(baseURL)).filter(
+        (request) => request.method === "POST" && request.path === "/api/waves"
+      )
+    ).toEqual([]);
+
+    await name.fill(SANDBOX_CREATED_WAVE_NAME);
+    await nextStepButton(page).click();
+    await expect(review.getByText(editedPost, { exact: true })).toBeVisible();
+    await expect(review.getByText(originalPost, { exact: true })).toHaveCount(
+      0
+    );
+    await page
+      .getByRole("button", { name: "Confirm and create", exact: true })
+      .click();
+    await expect(page).toHaveURL(
+      new RegExp(`/waves/${SANDBOX_CREATED_WAVE_ID}$`),
+      { timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS }
+    );
+    expect(await fetchSandboxRequests(baseURL)).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          method: "POST",
+          path: "/api/waves",
+          body: expect.objectContaining({
+            name: SANDBOX_CREATED_WAVE_NAME,
+            description: editedPost,
+          }),
+        }),
+      ])
+    );
+    await expectNoUnsafeSandboxMutations(baseURL);
+  });
+
   test("restores multipart first posts with visible parts that can be removed", async ({
     page,
     baseURL,
