@@ -10,8 +10,7 @@
   audit history. It is not a subwave.
 - **Competition entry** — stable association between a competition and a drop.
   It owns submission/winner status; the drop remains durable content.
-- **Default competition** — computed UI selection for implicit wave entry and
-  corresponding competition tabs, under [D-19](../default-competition.md).
+- **Default competition** — computed UI selection for competition tabs; ordinary wave entry remains in Chat, under [D-19](../default-competition.md).
   This approved follow-up is not implemented. It can change over time without
   changing the legacy primary, explicit links, privileges or execution owner.
 - **Legacy primary competition** — immutable competition identity assigned to

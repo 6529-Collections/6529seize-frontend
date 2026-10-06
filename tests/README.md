@@ -69,6 +69,18 @@ and run a non-empty pack set sequentially. Deployed-environment entries are
 validated as explicitly read-only and must use the exact approved base URL.
 Their artifacts can be preserved per pack with `--artifact-root <path>`.
 
+PR selection for `test:e2e:native-competition-sandbox` is owned by
+`scripts/app-pr-ci-effective-plan.cjs`. Its desktop and mobile scenarios cover
+native competitions plus shared submission dialogs, leaderboard controls and
+drop navigation. Changes under `components/waves/leaderboard/` or its
+`__tests__/components/waves/leaderboard/` tests therefore select this pack, as
+do the desktop `components/waves/drops/WaveDropActionsOpen.tsx` and mobile
+`components/waves/drops/WaveDropMobileMenuOpen.tsx` actions and their focused
+tests.
+Keep those ownership rules covered in
+`__tests__/scripts/app-pr-ci-effective-plan.test.ts`; merely registering a
+pack here does not make a product-only PR select it.
+
 <!-- BEGIN GENERATED: e2e-pack-table -->
 
 Generated from `tests/packs.manifest.cjs` by
@@ -106,7 +118,9 @@ Generated from `tests/packs.manifest.cjs` by
 | `test:e2e:edit-drop-sandbox`                        | —                             | sandbox  | local       | manual                    | 15m     | Drop edit sandbox against the local mock API.                                                         |
 | `test:e2e:native-competition-sandbox`               | —                             | sandbox  | local       | pr-ci, manual             | 15m     | Native competition context, parallel budgets and navigation against the local mock API.               |
 | `test:e2e:signature-sandbox`                        | —                             | sandbox  | local       | manual                    | 15m     | Signed participation sandbox that fails closed unsigned.                                              |
+| `test:e2e:session-recovery-sandbox`                 | —                             | sandbox  | local       | pr-ci, manual             | 15m     | Expired session cold-start and foreground recovery against the local mock API.                        |
 | `test:e2e:auth-sandbox`                             | —                             | sandbox  | local       | manual                    | 15m     | Aggregate authenticated sandbox pack.                                                                 |
+| `test:e2e:wave-creation-sandbox`                    | —                             | sandbox  | local       | pr-ci, manual             | 15m     | Wave creation, permissions, and draft recovery on desktop and mobile.                                 |
 | `test:e2e:smoke:surface-matrix`                     | —                             | local    | local       | pr-ci, manual             | 15m     | @smoke subset on desktop and mobile web shells.                                                       |
 | `test:e2e:surface-matrix`                           | —                             | local    | local       | pr-ci, manual             | 15m     | Core surfaces on desktop and mobile web shells.                                                       |
 | `test:e2e:browser-diversity`                        | —                             | local    | local       | pr-ci, manual             | 15m     | Engine-diversity pass on Firefox and WebKit.                                                          |

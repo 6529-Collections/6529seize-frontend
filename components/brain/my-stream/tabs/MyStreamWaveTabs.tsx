@@ -11,6 +11,7 @@ import type { WaveViewMode } from "@/hooks/useWaveViewMode";
 import type { ChatSubmitDropAction } from "../chatSubmitDrop.types";
 import { usePathname } from "next/navigation";
 import { isCompetitionPathname } from "@/helpers/competition.helpers";
+import { useCompetitionNavigation } from "@/contexts/CompetitionNavigationContext";
 
 interface MyStreamWaveTabsProps {
   readonly wave: ApiWave;
@@ -33,6 +34,7 @@ export const MyStreamWaveTabs: React.FC<MyStreamWaveTabsProps> = ({
 }) => {
   const { isMemesWave } = useWave(wave);
   const pathname = usePathname();
+  const { flat, nativeCompetition } = useCompetitionNavigation();
   const { registerRef } = useLayout();
   const { isApp } = useDeviceInfo();
 
@@ -65,7 +67,8 @@ export const MyStreamWaveTabs: React.FC<MyStreamWaveTabsProps> = ({
     <div className="tw-flex-shrink-0" ref={setTabsRef} id="tabs-container">
       <div className="tw-w-full tw-bg-iron-950">
         <div className="tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-x-3">
-          {isMemesWave && !isCompetitionPathname(pathname) ? (
+          {isMemesWave &&
+          (!isCompetitionPathname(pathname) || (flat && !nativeCompetition)) ? (
             <MyStreamWaveTabsMeme
               wave={wave}
               activeCurationId={activeCurationId}

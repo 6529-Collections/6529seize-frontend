@@ -3,11 +3,11 @@
 ## Overview
 
 `Overview` is the final, read-only step when creating a wave or subwave.
-It follows `Description` for Chat, scheduled Rank, Perpetual Ranking, and
+It follows the first Chat screen or `Description` for scheduled Rank, Perpetual Ranking, and
 Approve waves. The first step is named `Setup`.
 
 Review the configuration, then select `Confirm and create`. Use `Previous`
-to return to Description or use completed steps in the desktop rail to edit
+to return to the first Chat screen or Description, or use completed guided steps to edit
 earlier settings. Description text, media, and attachments stay available when
 moving backward and forward within the open wizard.
 

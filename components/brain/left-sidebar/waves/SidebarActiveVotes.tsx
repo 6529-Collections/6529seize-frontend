@@ -11,9 +11,11 @@ import { t } from "@/i18n/messages";
 export function SidebarActiveVotes({
   votes,
   collapsed,
+  scoreDetailsDisabled = false,
 }: {
   readonly votes: ReturnType<typeof useActiveWaveVotes>;
   readonly collapsed: boolean;
+  readonly scoreDetailsDisabled?: boolean;
 }) {
   const locale = useBrowserLocale();
   const { activeWave } = useMyStream();
@@ -74,6 +76,7 @@ export function SidebarActiveVotes({
               key={vote.wave.id}
               vote={vote}
               compact
+              scoreDetailsDisabled={scoreDetailsDisabled}
               isActive={activeWave.id === vote.wave.id}
               onClick={(event) => {
                 if (

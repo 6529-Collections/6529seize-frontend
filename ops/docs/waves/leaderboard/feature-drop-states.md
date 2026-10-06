@@ -26,7 +26,8 @@ This page covers:
 
 1. Open leaderboard content.
 2. First-page loading state appears while leaderboard data is pending.
-3. If drops are returned, entries render and pagination continues.
+3. If drops are returned, entries render and pagination continues. If the first
+   load fails after retries, full views show **Couldn’t load submissions** and **Retry**.
 4. If no drops are returned, the view resolves to a wave-specific empty state.
 
 ## Common Scenarios
@@ -60,8 +61,12 @@ This page covers:
 
 - If the first successful response contains no drops, the UI resolves to empty
   messaging instead of keeping a loading spinner.
-- If first-page requests fail repeatedly, full leaderboard views can stay in a
-  loading presentation and the sidebar list can stay blank until a later retry.
+- If first-page requests fail repeatedly, full list, grid and gallery views show
+  **Couldn’t load submissions** and **Retry**. A failed request does not mean
+  that the competition has no entries.
+- If refreshing fails after entries have loaded, full views retain those entries
+  and show **Couldn’t refresh submissions** with **Retry**.
+- The compact sidebar has separate failure presentation.
 - If pagination fails, already rendered entries remain visible and users can
   retry with scroll/load-more actions.
 - Reloading the thread restarts loading and attempts a fresh fetch.

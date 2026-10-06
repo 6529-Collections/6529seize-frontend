@@ -10,8 +10,10 @@
 - Scope: Phase 6 product follow-up using Phase 2 competition context; assess
   backend selection/read support and frontend wave navigation together.
 
-The **default competition** is the competition presented when a user enters a
-wave without explicitly choosing a competition. The familiar competition tabs,
+A wave entered without an explicit destination opens **Chat** and remains there
+after all asynchronous competition queries resolve. The **default competition**
+is the competition used when the user opens a competition tab without
+explicitly choosing a competition. The familiar competition tabs,
 including leaderboard, winners, outcomes and My Votes where applicable, open
 that competition's corresponding view. Chat remains shared wave content.
 
@@ -72,9 +74,15 @@ cover with fixtures; they do not alter the agreed priority order above.
 
 ## Navigation and State
 
-- Wave entry without an explicit competition resolves the default and uses its
-  ID consistently for every competition tab, timer, entry/vote action and cache
-  key. A one-competition wave has the familiar direct competition experience.
+- Default competition views share one wave-level row with Chat and render
+  directly below it, including single-competition waves and defaults in
+  multi-competition waves. Only an explicitly opened non-default competition
+  uses nested detail navigation. Configuration and voter views remain available
+  for native defaults in the wave row.
+- Wave entry without an explicit destination stays in Chat. Resolve the default
+  as competition context without replacing the wave route or changing its view.
+  Competition tabs use its ID consistently for timers, entry/vote actions and
+  cache keys. This applies to single-competition and multi-competition waves.
 - Explicit competition/entry deep links and an explicit user selection take
   precedence. Opening an older competition must keep showing that competition
   across its tabs, reload and Back/Forward.
@@ -109,7 +117,7 @@ capability; those remain attached to the designated competition.
 2. Implement deterministic selection with legacy/native parity fixtures and
    suitable query/index cost. Prefer one authoritative policy over independent
    frontend guesses or scanning a partially loaded list.
-3. Wire wave entry and all relevant competition tabs to the resolved context;
+3. Keep ordinary wave entry in Chat and wire competition tabs to the resolved context;
    preserve explicit routing, shared chat and command identity.
 4. Deploy any additive backend read support first, then merge/deploy dependent
    frontend. This selection feature needs no legacy-data cutover. Determine
@@ -122,6 +130,8 @@ capability; those remain attached to the designated competition.
 
 | Wave state / action | Expected result |
 | --- | --- |
+| Ordinary wave entry, with delayed/loading/error default data | Chat content and selection persist; no automatic competition redirect. |
+| Explicit competition-view link or intentional tab selection | Requested competition view remains selected after background queries. |
 | No competitions, or only drafts/archived never-published drafts | Chat hub and empty competition state. |
 | One readable published competition | It is default whether upcoming, running or completed. |
 | One archived completed competition | It remains the historical default. |

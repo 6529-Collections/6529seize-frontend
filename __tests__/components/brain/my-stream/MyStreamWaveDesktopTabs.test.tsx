@@ -6,7 +6,6 @@ import { Time } from "@/helpers/time";
 import type { ApiWaveCuration } from "@/generated/models/ApiWaveCuration";
 
 const setActiveTab = jest.fn();
-const updateAvailableTabs = jest.fn();
 const searchParamsGet = jest.fn();
 const onSelectCuration = jest.fn();
 let mockCurations: ApiWaveCuration[] = [];
@@ -18,6 +17,7 @@ jest.mock("@/hooks/competitions/useWaveCompetitionsTab", () => ({
 }));
 
 jest.mock("next/navigation", () => ({
+  useRouter: () => ({ push: jest.fn() }),
   usePathname: () => mockPathname,
   useSearchParams: () => ({
     get: searchParamsGet,
@@ -33,7 +33,6 @@ jest.mock("@/components/brain/ContentTabContext", () => {
     ...actual,
     useContentTab: () => ({
       availableTabs: mockAvailableTabs,
-      updateAvailableTabs,
     }),
   };
 });
@@ -218,19 +217,6 @@ describe("MyStreamWaveDesktopTabs", () => {
       ).toHaveLength(2);
     }
   );
-  it("retains a directly selected competition while default data is unavailable", () => {
-    mockPathname = "/waves/wave-1/competitions/older";
-    mockWaveInfo.isChatWave = true;
-    searchParamsGet.mockImplementation((key) =>
-      key === "competition" ? "stale" : null
-    );
-    renderComponent();
-    expect(updateAvailableTabs).toHaveBeenLastCalledWith(
-      expect.objectContaining({
-        defaultCompetitionId: "older",
-      })
-    );
-  });
   it("keeps curations selectable in both desktop and mobile web tab strips", () => {
     mockCurations = [
       {
@@ -652,28 +638,6 @@ describe("MyStreamWaveDesktopTabs", () => {
     spy.mockRestore();
   });
 
-  it("passes curation flag into tab availability update", () => {
-    mockWaveInfo = {
-      isChatWave: false,
-      isApproveWave: false,
-      isMemesWave: false,
-      isCurationWave: true,
-      isRankWave: false,
-    };
-
-    renderComponent(MyStreamWaveTab.CHAT);
-
-    expect(updateAvailableTabs).toHaveBeenCalledWith(
-      expect.objectContaining({
-        isChatWave: false,
-        hasAuthenticatedProfile: true,
-        isMemesWave: false,
-        isCurationWave: true,
-        isApproveWave: false,
-      })
-    );
-  });
-
   it("renames approve wave tabs", () => {
     mockWaveInfo = {
       isChatWave: false,
@@ -719,21 +683,5 @@ describe("MyStreamWaveDesktopTabs", () => {
     expect(screen.getAllByText("Selected").length).toBeGreaterThan(0);
     expect(screen.queryByText("Proposals")).toBeNull();
     expect(screen.queryByText("Approved")).toBeNull();
-  });
-
-  it("forces a transient switch to Chat when serialNo is present", () => {
-    searchParamsGet.mockImplementation((key: string) =>
-      key === "serialNo" ? "42" : null
-    );
-    mockAvailableTabs = [MyStreamWaveTab.CHAT, MyStreamWaveTab.LEADERBOARD];
-
-    renderComponent(MyStreamWaveTab.LEADERBOARD);
-
-    expect(updateAvailableTabs).toHaveBeenCalledWith(
-      expect.objectContaining({
-        transientPreferredTab: MyStreamWaveTab.CHAT,
-      })
-    );
-    expect(setActiveTab).not.toHaveBeenCalled();
   });
 });

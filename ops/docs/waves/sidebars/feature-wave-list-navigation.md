@@ -5,6 +5,12 @@
 Wave and DM rows in the left list control which thread is open.
 
 - Click the body of an inactive row to open that thread.
+- In the native app, opening a wave from the Waves list uses a brief fade and
+  slight scale into the content. The header and bottom navigation do not move.
+  Supported app browsers briefly preserve the outgoing list as the wave appears;
+  the app Back button reverses this handoff. Reduced Motion disables the animation.
+  Older app browsers use a simpler entry transition. Navigation does not wait for
+  the animation to finish.
 - Click the body of the active row to clear selection and return to section
   home.
 - Row pin and subwave expand/collapse buttons remain separate controls.
@@ -30,7 +36,8 @@ Wave and DM rows in the left list control which thread is open.
   button height, including the larger touch controls. Switch directly without
   scrolling through pinned waves.
   Each collection remembers its scroll position; selecting another wave enables
-  active-row reveal again. Signed-out visitors have the search icon without personal collection controls.
+  active-row reveal again. Signed-out visitors see an `All Waves` label on the
+  left and the same search icon on the right, without personal collection controls.
 - The `Waves` heading is plain text. Header actions sit at the far right:
   feed, then create on desktop; feed only in the mobile list.
   The app keeps create in its top bar.
@@ -76,7 +83,7 @@ when the desktop feed is active or its button is hovered or keyboard-focused.
 - Worth Checking Out shows up to six spaced previews, with fewer on narrow screens,
   with score shields overlapping the bottom-right corner of each avatar.
   The section keeps its own compact height independently of the vote list.
-- The compact plus button retains its light colour and shows `Create wave` on hover or keyboard focus.
+- Create wave has a visible label in the expanded desktop Waves panel and mobile Waves list, including signed-out visits. The collapsed sidebar keeps the plus icon and accessible Create wave name.
 - Each heading has a separate `View all` link before the chevron, available
   even when collapsed. Active Votes opens `/discover?view=active-votes`;
   Worth Checking Out opens `/discover?view=recommendations&sort=QUALITY`.
@@ -84,6 +91,13 @@ when the desktop feed is active or its button is hovered or keyboard-focused.
 - Select the search icon beside the collection controls to reveal and focus
   `Find a wave…`. Search replaces the controls while open. Close it with the
   close button or Escape to return to the selected collection.
+  On touch devices, the focused field scrolls into view when the keyboard opens.
+  In the native app, the Waves list also resizes above the keyboard so the input
+  and results stay reachable; dismissing the keyboard restores the list height.
+  While search is open, sidebar scores stay visible but their details cards
+  are temporarily unavailable, including when the search field is empty.
+  Closing search restores score hover, focus, and selection. Recommendation
+  links remain available while searching.
   `Find a wave…` searches all accessible non-DM waves, independently of the
   selected collection. Type at least three characters. Results show name,
   creator, and joined/pinned status, with `Load more` for additional matches.

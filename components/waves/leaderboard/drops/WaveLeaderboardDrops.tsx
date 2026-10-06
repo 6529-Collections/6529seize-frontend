@@ -21,6 +21,7 @@ import { WaveLeaderboardEmptyState } from "./WaveLeaderboardEmptyState";
 import { WaveLeaderboardLoading } from "./WaveLeaderboardLoading";
 import { useWaveProposalCardPresentation } from "@/hooks/waves/useWaveProposalCardPresentation";
 import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
+import WaveLeaderboardError from "../WaveLeaderboardError";
 
 const PROPOSAL_CARD_ROW_ESTIMATE_PX = 360;
 
@@ -60,6 +61,7 @@ export const WaveLeaderboardDrops: React.FC<WaveLeaderboardDropsProps> = ({
     hasNextPage,
     hasPreviousPage,
     isFetching,
+    isError,
     isFetchingNextPage,
     isFetchingPreviousPage,
     isFetchNextPageError,
@@ -98,6 +100,15 @@ export const WaveLeaderboardDrops: React.FC<WaveLeaderboardDropsProps> = ({
   }
 
   if (drops.length === 0) {
+    if (isError) {
+      return (
+        <WaveLeaderboardError
+          onRetry={() => {
+            void refetch();
+          }}
+        />
+      );
+    }
     return (
       <WaveLeaderboardEmptyState onCreateDrop={onCreateDrop} wave={wave} />
     );
@@ -105,6 +116,15 @@ export const WaveLeaderboardDrops: React.FC<WaveLeaderboardDropsProps> = ({
 
   return (
     <>
+      {isError && !isFetchNextPageError && !isFetchPreviousPageError && (
+        <WaveLeaderboardError
+          hasEntries
+          retrying={isFetching}
+          onRetry={() => {
+            void refetch();
+          }}
+        />
+      )}
       <WaveLeaderboardVirtualizedRows
         items={drops}
         getItemId={getDropId}

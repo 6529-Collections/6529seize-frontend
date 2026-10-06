@@ -214,7 +214,7 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
           </div>
         </div>
       </div>
-      {connectedProfile && (
+      {isWaveModalOpen && (
         <CreateWaveModal
           isOpen={isWaveModalOpen}
           onClose={close}

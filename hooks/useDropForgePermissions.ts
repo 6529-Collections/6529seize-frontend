@@ -24,22 +24,29 @@ export function useDropForgePermissions() {
     () => JSON.parse(claimsAdminWalletsKey) as string[],
     [claimsAdminWalletsKey]
   );
-  const { isDropForgeAdmin, isFetching: isDropForgeAdminFetching } =
-    useIsDropForgeAdmin();
+  const {
+    isDropForgeAdmin,
+    isDropForgeOwner,
+    isFetching: isDropForgeAdminFetching,
+  } = useIsDropForgeAdmin();
 
   return useMemo(() => {
     const hasWallet = !!address;
     const isWalletInitializing = isAuthResolving(connectionState);
-    const permissionsLoading =
-      isWalletInitializing ||
-      (hasWallet && !isLoaded) ||
-      (hasWallet && isDropForgeAdminFetching);
     const isDistributionAdmin =
       hasWallet &&
       distributionAdminWallets.some((w) => areEqualAddresses(w, address));
     const isClaimsAdmin =
       hasWallet &&
       claimsAdminWallets.some((w) => areEqualAddresses(w, address));
+    const permissionsLoading =
+      isWalletInitializing ||
+      (hasWallet && !isLoaded) ||
+      (hasWallet &&
+        !isDistributionAdmin &&
+        !isClaimsAdmin &&
+        !isDropForgeAdmin &&
+        isDropForgeAdminFetching);
     const canLaunch = hasWallet && (isClaimsAdmin || isDropForgeAdmin);
     const canAccessLanding =
       hasWallet && (isDistributionAdmin || isClaimsAdmin || isDropForgeAdmin);
@@ -56,12 +63,16 @@ export function useDropForgePermissions() {
       isDistributionAdmin,
       isClaimsAdmin,
       isDropForgeAdmin,
+      isDropForgeOwner,
+      canManageContractAdmins: hasWallet && (isClaimsAdmin || isDropForgeOwner),
+      canManageClaimActions: canLaunch,
     };
   }, [
     address,
     connectionState,
     isLoaded,
     isDropForgeAdmin,
+    isDropForgeOwner,
     isDropForgeAdminFetching,
     distributionAdminWallets,
     claimsAdminWallets,

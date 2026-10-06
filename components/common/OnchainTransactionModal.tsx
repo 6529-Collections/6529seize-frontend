@@ -31,6 +31,7 @@ interface OnchainTransactionModalProps {
   readonly successContent?: ReactNode | undefined;
   readonly pendingContent?: ReactNode | undefined;
   readonly closeLabel?: string | undefined;
+  readonly allowCloseWhilePending?: boolean | undefined;
   readonly onClose: () => void;
 }
 
@@ -260,12 +261,14 @@ export default function OnchainTransactionModal({
   successContent,
   pendingContent,
   closeLabel,
+  allowCloseWhilePending = false,
   onClose,
 }: OnchainTransactionModalProps) {
   const titleId = useId();
   const subtitleId = useId();
   const dialogRef = useRef<HTMLDialogElement>(null);
-  const closable = status === "success" || status === "error";
+  const closable =
+    allowCloseWhilePending || status === "success" || status === "error";
   const hasSubtitle = subtitle !== undefined && subtitle !== null;
   const customContent = getCustomStatusContent(
     status,
@@ -382,39 +385,40 @@ export default function OnchainTransactionModal({
       >
         <div
           className={clsx(
-            "tw-flex tw-items-start tw-justify-between tw-gap-4",
             !hasCustomContent && "tw-border-b tw-border-iron-800 tw-pb-3"
           )}
         >
-          <div className="tw-min-w-0">
-            <h2
-              id={titleId}
-              className={clsx(
-                "tw-m-0 tw-whitespace-pre-line tw-break-words tw-font-semibold",
-                getTitleClasses(hasCustomContent, status)
-              )}
-            >
-              {hasCustomContent && <CustomStatusIcon status={status} />}
-              {title}
-            </h2>
-            {hasSubtitle ? (
-              <p
-                id={subtitleId}
-                className="tw-mb-0 tw-mt-1 tw-text-sm tw-text-iron-400"
+          <div className="tw-flex tw-items-start tw-justify-between tw-gap-4">
+            <div className="tw-min-w-0 tw-flex-1">
+              <h2
+                id={titleId}
+                className={clsx(
+                  "tw-m-0 tw-whitespace-pre-line tw-break-words tw-font-semibold",
+                  getTitleClasses(hasCustomContent, status)
+                )}
               >
-                {subtitle}
-              </p>
+                {hasCustomContent && <CustomStatusIcon status={status} />}
+                {title}
+              </h2>
+            </div>
+            {closable ? (
+              <button
+                type="button"
+                aria-label={closeLabel ?? "Close modal"}
+                onClick={onClose}
+                className="tw--mr-2 tw--mt-2 tw-inline-flex tw-size-11 tw-flex-none tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-text-iron-300 tw-transition-colors focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-text-white"
+              >
+                <XMarkIcon className="tw-size-5" aria-hidden="true" />
+              </button>
             ) : null}
           </div>
-          {closable ? (
-            <button
-              type="button"
-              aria-label={closeLabel ?? "Close modal"}
-              onClick={onClose}
-              className="tw--mr-2 tw--mt-2 tw-inline-flex tw-size-11 tw-flex-none tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-text-iron-300 tw-transition-colors focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-text-white"
+          {hasSubtitle ? (
+            <p
+              id={subtitleId}
+              className="tw-mb-0 tw-mt-1 tw-text-sm tw-text-iron-400 [overflow-wrap:anywhere]"
             >
-              <XMarkIcon className="tw-size-5" aria-hidden="true" />
-            </button>
+              {subtitle}
+            </p>
           ) : null}
         </div>
 

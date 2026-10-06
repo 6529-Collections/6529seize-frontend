@@ -1,3 +1,5 @@
+import { getArtBlocksPublisherDeliveryUrl } from "./artBlocksDelivery";
+
 const MUSEUM_MEDIA_PROXY_PATH = "/api/museum/media";
 
 export const MUSEUM_MEDIA_PROXY_ALLOWED_HOSTS = [
@@ -34,6 +36,8 @@ export function isMuseumMediaProxyAllowedUrl(value: string): boolean {
 }
 
 export function getMuseumMediaDeliveryUrl(value: string): string {
+  const publisherUrl = getArtBlocksPublisherDeliveryUrl(value);
+  if (publisherUrl !== undefined) return publisherUrl;
   if (!isMuseumMediaProxyAllowedUrl(value)) return value;
   return `${MUSEUM_MEDIA_PROXY_PATH}?url=${encodeURIComponent(value)}`;
 }

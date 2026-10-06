@@ -97,7 +97,12 @@ function SubscriptionAction({
 
   if (href) {
     return (
-      <Link href={href} aria-label={label} className={className}>
+      <Link
+        data-home-action="Manage subscriptions"
+        href={href}
+        aria-label={label}
+        className={className}
+      >
         {children}
       </Link>
     );
@@ -105,6 +110,7 @@ function SubscriptionAction({
 
   return (
     <button
+      data-home-action="Manage subscriptions"
       type="button"
       aria-label={label}
       disabled={disabled}
@@ -130,6 +136,7 @@ function SubscriptionInfoLink({
   return (
     <>
       <Link
+        data-home-action="About subscriptions"
         href={href}
         aria-label={label}
         data-tooltip-id={tooltipId}

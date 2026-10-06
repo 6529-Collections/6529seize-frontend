@@ -62,8 +62,8 @@ The wave remains the stable destination. It provides:
 - Wave-level rules, admins, and notification controls.
 - Aggregate activity and status.
 
-The approved default-competition follow-up makes wave entry and familiar
-competition tabs open the selected default's corresponding views. This default
+The approved default-competition follow-up keeps ordinary wave entry in Chat while
+familiar competition tabs open the selected default's corresponding views. This default
 can differ from the immutable legacy primary. Explicit competition links or
 selection retain their own context, and chat remains wave-scoped.
 
@@ -108,7 +108,7 @@ Use the approved transition policy:
 - A global automatic transition occurs only after analytics and support
   evidence show that the hub presentation is understood.
 - Explicit existing competition/entry deep links retain their resource identity;
-  implicit wave entry uses the approved default once that follow-up ships.
+  ordinary wave entry stays in Chat while competition tabs use the approved default.
 - Existing legacy GET responses continue projecting that same competition
   regardless of the hub navigation selected by newer clients.
 

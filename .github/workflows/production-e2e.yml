@@ -34,15 +34,30 @@ jobs:
     permissions:
       actions: read
       contents: read
+      deployments: read
     outputs:
       expected-sha: ${{ steps.source.outputs.sha }}
+      failure-stage: ${{ steps.outcome.outputs.failure-stage }}
 
     steps:
+      - name: Check out trusted canary discovery and version verifier
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          ref: ${{ github.workflow_sha }}
+          persist-credentials: false
+          path: .version-verifier
+          sparse-checkout: |
+            ops/scripts/cli-args.cjs
+            ops/scripts/resolve-production-canary.cjs
+            ops/scripts/verify-deployment-version.cjs
+          sparse-checkout-cone-mode: false
+
       - name: Resolve exact deployed SHA
         id: source
         env:
           AUTOMATIC_DEPLOY_RUN_ID: ${{ inputs.automatic_deploy_run_id }}
           EVENT_NAME: ${{ github.event_name }}
+          CANARY_SCOPE: ${{ inputs.scope || 'post-deploy' }}
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
@@ -70,14 +85,15 @@ jobs:
               echo "::warning::Retrying GitHub deployment lookup after a transient error (attempt $attempt/3)." >&2
             done
           }
-          if [ "$EVENT_NAME" = schedule ]; then
-            # Discovery only: the selected run and canonical deploy job are
-            # independently verified below, then checked against the live site.
-            github_api_get "repos/${GITHUB_REPOSITORY}/actions/workflows/build-upload-deploy-prod.yml/runs?branch=main&event=workflow_dispatch&status=success&per_page=100" > "$RUNNER_TEMP/deploy-runs.json"
-            AUTOMATIC_DEPLOY_RUN_ID="$(jq -er '
-              [.workflow_runs[] | select(.status == "completed" and .conclusion == "success")]
-              | sort_by(.run_started_at) | last | .id // empty
-            ' "$RUNNER_TEMP/deploy-runs.json")"
+          if [ "$EVENT_NAME" = schedule ] || [ "$CANARY_SCOPE" = canary ]; then
+            # Bind discovery to the live SHA, then independently verify the
+            # selected run, canonical job, and live version as for manual runs.
+            discovered_deploy_run_id="$(node .version-verifier/ops/scripts/resolve-production-canary.cjs \
+              --repository "$GITHUB_REPOSITORY" \
+              --output "$RUNNER_TEMP/production-canary-source.json")"
+            if [ "$EVENT_NAME" = schedule ]; then
+              AUTOMATIC_DEPLOY_RUN_ID="$discovered_deploy_run_id"
+            fi
           fi
           [[ "$AUTOMATIC_DEPLOY_RUN_ID" =~ ^[1-9][0-9]{0,19}$ ]]
           github_api_get "repos/${GITHUB_REPOSITORY}/actions/runs/${AUTOMATIC_DEPLOY_RUN_ID}" > "$RUNNER_TEMP/deploy-run.json"
@@ -106,19 +122,11 @@ jobs:
               .conclusion == "success"
             )] | length == 1
           ' "$RUNNER_TEMP/deploy-jobs.json" >/dev/null
+          if [ "$EVENT_NAME" = schedule ] || [ "$CANARY_SCOPE" = canary ]; then
+            test "$deployed_sha" = "$(jq -er .sha "$RUNNER_TEMP/production-canary-source.json")"
+          fi
           echo "sha=$deployed_sha" >> "$GITHUB_OUTPUT"
           echo "deploy-run-id=$AUTOMATIC_DEPLOY_RUN_ID" >> "$GITHUB_OUTPUT"
-
-      - name: Check out trusted version verifier
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
-        with:
-          ref: main
-          persist-credentials: false
-          path: .version-verifier
-          sparse-checkout: |
-            ops/scripts/cli-args.cjs
-            ops/scripts/verify-deployment-version.cjs
-          sparse-checkout-cone-mode: false
 
       - name: Require the selected production deployment to still be live
         env:
@@ -295,6 +303,7 @@ jobs:
         run: ./bin/6529 exec playwright install chromium
 
       - name: Run read-only production packs
+        id: post-deploy-tests
         if: github.event_name != 'schedule' && inputs.scope != 'canary'
         env:
           MUSEUM_SELECTED_PACKS_JSON: ${{ steps.museum-selection.outputs.selected_packs }}
@@ -318,6 +327,7 @@ jobs:
             ./bin/6529 run e2e:packs -- "${args[@]}"
 
       - name: Run daily read-only production canary packs
+        id: canary-tests
         if: github.event_name == 'schedule' || inputs.scope == 'canary'
         env:
           MUSEUM_PUBLICATION_EXPECTED_COMMIT: ${{ steps.museum-publication.outputs.publication_commit }}
@@ -327,6 +337,23 @@ jobs:
             --env production --trigger cron \
             --artifact-root production-e2e-artifacts \
             --parallel 3 --retry-failed-packs 1
+
+      - name: Classify production validation outcome
+        id: outcome
+        if: always()
+        env:
+          CANARY_TEST_OUTCOME: ${{ steps.canary-tests.outcome }}
+          POST_DEPLOY_TEST_OUTCOME: ${{ steps.post-deploy-tests.outcome }}
+        run: |
+          set -euo pipefail
+          failure_stage=setup
+          if [ "$CANARY_TEST_OUTCOME" = failure ] || [ "$POST_DEPLOY_TEST_OUTCOME" = failure ]; then
+            failure_stage=browser-tests
+          elif [ "$CANARY_TEST_OUTCOME" = success ] || [ "$POST_DEPLOY_TEST_OUTCOME" = success ]; then
+            failure_stage=none
+          fi
+          echo "failure-stage=$failure_stage" >> "$GITHUB_OUTPUT"
+          echo "Production validation outcome: $failure_stage" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Preserve Museum selection and publication evidence
         if: always()
@@ -340,6 +367,11 @@ jobs:
             if [ -n "$evidence_file" ] && [ -f "$evidence_file" ]; then
               install -m 0644 "$evidence_file" \
                 "production-e2e-artifacts/$(basename "$evidence_file")"
+            fi
+          done
+          for evidence_file in production-canary-source.json manual-production-version.json deploy-run.json deploy-jobs.json; do
+            if [ -f "$RUNNER_TEMP/$evidence_file" ]; then
+              install -m 0644 "$RUNNER_TEMP/$evidence_file" "production-e2e-artifacts/$evidence_file"
             fi
           done
 
@@ -415,7 +447,10 @@ jobs:
           CI_PIPELINES_ALERT_TYPE: workflow
           CI_PIPELINES_TARGET_ENV: production
           CI_PIPELINES_STATUS: failure
-          CI_PIPELINES_TITLE: "Production E2E: read-only canary failed"
+          CI_PIPELINES_TITLE: >-
+            ${{ needs.readonly.outputs.failure-stage == 'browser-tests' && 'Production E2E: canary browser tests failed' || 'Production E2E: canary setup failed' }}
+          CI_PIPELINES_DESCRIPTION: >-
+            ${{ needs.readonly.outputs.failure-stage == 'browser-tests' && 'Read-only browser validation failed. Inspect the preserved pack evidence.' || 'Browser validation could not start. Inspect deployment discovery, live version, and setup evidence.' }}
           CI_PIPELINES_SERVICE: web-canary
           CI_PIPELINES_SHA: ${{ needs.readonly.outputs.expected-sha }}
         run: node .ci-wave-notifier/scripts/notify-ci-wave.mjs

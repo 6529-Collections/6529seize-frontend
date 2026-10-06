@@ -293,6 +293,7 @@ export function ExploreWaveCard({
 
   return (
     <Link
+      data-home-action="Open wave"
       href={waveHref}
       prefetch={false}
       className={`${compact ? "tw-flex-row" : "tw-flex-col"} tw-group tw-relative tw-flex tw-h-full tw-transform-gpu tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.05] tw-bg-iron-950 tw-text-left tw-no-underline tw-shadow-[0_10px_28px_rgba(0,0,0,0.2)] tw-transition-[transform,border-color,box-shadow] tw-duration-300 tw-ease-out focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/60 desktop-hover:hover:-tw-translate-y-1 desktop-hover:hover:tw-border-white/15 desktop-hover:hover:tw-shadow-[0_14px_34px_rgba(0,0,0,0.36)] motion-reduce:tw-transform-none motion-reduce:tw-transition-none`}

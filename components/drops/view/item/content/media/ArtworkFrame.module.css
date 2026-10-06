@@ -75,6 +75,12 @@
     max-height: none;
   }
 
+  /* The image must contribute height through its fill-positioned wrapper too. */
+  .homeImageFrame [data-drop-image-content] {
+    position: relative;
+    display: block;
+  }
+
   .homeImageFrame [data-artwork-image-frame] img {
     /* Override the shared image renderer's inline fill styles on mobile only. */
     position: relative !important;

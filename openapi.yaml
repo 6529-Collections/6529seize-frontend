@@ -11180,13 +11180,13 @@ paths:
     get:
       tags:
         - Minting Claims
-      summary: >-
-        Get supported minting claim action types for a contract (claims admin
-        only)
+      summary: Get supported minting claim action types for an authorized launch wallet
       description: >
         Returns the supported minting claim action names for the given contract.
-        Only CLAIMS_ADMIN_WALLETS can call this. Unsupported contracts return
-        400.
+        Authenticated CLAIMS_ADMIN_WALLETS and the mainnet Memes creator owner
+        or on-chain admins can call this. On-chain permission is checked fresh
+        per request; verification failures return 503. Unsupported contracts
+        return 400.
       operationId: getMintingClaimActionTypes
       parameters:
         - name: contract
@@ -11207,17 +11207,21 @@ paths:
         "401":
           description: Unauthorized - authentication required
         "403":
-          description: Forbidden - only claims admins can access
+          description: Forbidden - claims admin or creator admin access required
+        "503":
+          description: Creator admin permission could not be verified
   /minting-claims/actions/{contract}/{claim_id}:
     get:
       tags:
         - Minting Claims
-      summary: Get minting claim actions (claims admin only)
+      summary: Get minting claim actions for an authorized launch wallet
       description: >
         Returns the current action state for a minting claim. All supported
         actions for the contract are always returned; missing records are
-        represented as completed=false. Only CLAIMS_ADMIN_WALLETS can call this.
-        Unsupported contracts return 400.
+        represented as completed=false. Authenticated CLAIMS_ADMIN_WALLETS and
+        the mainnet Memes creator owner or on-chain admins can call this.
+        On-chain permission is checked fresh per request; verification failures
+        return 503. Unsupported contracts return 400.
       operationId: getMintingClaimActions
       parameters:
         - name: contract
@@ -11245,17 +11249,21 @@ paths:
         "401":
           description: Unauthorized - authentication required
         "403":
-          description: Forbidden - only claims admins can access
+          description: Forbidden - claims admin or creator admin access required
         "404":
           description: Claim not found
+        "503":
+          description: Creator admin permission could not be verified
     post:
       tags:
         - Minting Claims
-      summary: Upsert minting claim action state (claims admin only)
+      summary: Upsert minting claim action state for an authorized launch wallet
       description: >
         Creates or updates the current state of a minting claim action for the
-        given claim. The caller wallet is recorded as the actor. Only
-        CLAIMS_ADMIN_WALLETS can call this. Unsupported contracts or unsupported
+        given claim. The caller wallet is recorded as the actor. Authenticated
+        CLAIMS_ADMIN_WALLETS and the mainnet Memes creator owner or on-chain
+        admins can call this. On-chain permission is checked fresh per request;
+        verification failures return 503. Unsupported contracts or unsupported
         action names for the given contract return 400.
       operationId: postMintingClaimAction
       parameters:
@@ -11290,9 +11298,11 @@ paths:
         "401":
           description: Unauthorized - authentication required
         "403":
-          description: Forbidden - only claims admins can update
+          description: Forbidden - claims admin or creator admin access required
         "404":
           description: Claim not found
+        "503":
+          description: Creator admin permission could not be verified
   /nft-link:
     get:
       tags:
@@ -33580,6 +33590,12 @@ components:
           format: int64
         drop_type:
           $ref: "#/components/schemas/ApiDropMainType"
+        created_at:
+          type: integer
+          format: int64
+          description: >-
+            Original drop publication time in Unix milliseconds, for CHAT and
+            SUBMISSION drops.
         submission_status:
           $ref: "#/components/schemas/ApiSubmissionDropStatus"
         submitted_at:
@@ -36258,6 +36274,13 @@ components:
           type: string
         native_refresh_token:
           type: string
+        refresh_request_id:
+          type: string
+          format: uuid
+          description: >-
+            Persist a random UUID before refreshing and reuse it with the same
+            native refresh token after an interrupted request. A retry recovers
+            the already rotated token without rotating or extending it again.
     ApiSessionRefreshWebRequest:
       type: object
       required:

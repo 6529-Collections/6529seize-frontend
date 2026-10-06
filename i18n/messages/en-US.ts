@@ -1,4 +1,6 @@
 import emmaMessages from "@/i18n/messages/emma.en-US.json";
+import { EN_SUBMISSION_DISCOVERY_MESSAGES } from "@/i18n/messages/submission-discovery";
+import waveCreationMessages from "@/i18n/messages/wave-creation.en-US.json";
 import { COMPETITION_MESSAGES } from "@/i18n/messages/competitions";
 import { EN_US_DROP_METADATA_MESSAGES } from "@/i18n/messages/drop-metadata";
 import { EN_DROP_REQUIREMENT_MESSAGES } from "@/i18n/messages/drop-requirements";
@@ -56,6 +58,7 @@ import { ARTWORK_DOCUMENTATION_MESSAGES } from "@/i18n/messages/artwork-document
 import { ARTWORK_DOCUMENTATION_INTEGRATION_MESSAGES } from "@/i18n/messages/artwork-documentation-integration";
 import { COLLECT_MESSAGES } from "@/i18n/messages/collect";
 import { COLLECT_TDH_TARGET_MESSAGES } from "@/i18n/messages/collect-tdh-target";
+import { DROP_FORGE_ADMIN_MESSAGES } from "@/i18n/messages/drop-forge-admins";
 
 type MessageEntry = readonly [key: string, value: string];
 
@@ -468,10 +471,14 @@ const TITLE_CONTEXT_MESSAGES = objectMessages("titleContext", {
 } as const);
 
 const WAVE_NAVIGATION_MESSAGES = objectMessages("wave.navigation", {
+  about: "About",
   waveSections: "Wave sections",
   appSections: "App sections",
   loadingSections: "Loading wave sections",
   fallbackCuration: "Curation",
+  myVotes: "My Votes",
+  outcome: "Outcome",
+  faq: "FAQ",
 } as const);
 
 const MY_STREAM_CURATION_MESSAGES = objectMessages("waves.myStream.curation", {
@@ -1085,6 +1092,9 @@ const USER_PROFILE_IDENTITY_STATEMENTS_MESSAGES = objectMessages(
     retry: "Try again",
     add: "Add",
     walletChecker: "Wallet Checker",
+    addWallet: "Add another wallet",
+    addWalletDescription:
+      "Link another wallet you control. Your NFTs stay in their wallets.",
     delegationCenter: "Delegation Center",
     primary: "Primary",
     setPrimary: "Set primary",
@@ -2824,9 +2834,17 @@ const MEME_DATA_TABLE_MESSAGES = objectMessages("memeData", {
 const TOKEN_NUMBER_MESSAGE = "Token #{tokenId}";
 
 export const EN_US_MESSAGES = {
+  ...EN_SUBMISSION_DISCOVERY_MESSAGES,
+  ...waveCreationMessages,
   ...COMPETITION_MESSAGES,
   ...EN_DROP_REQUIREMENT_MESSAGES,
   ...EN_US_DROP_METADATA_MESSAGES,
+  "delegation.consolidation.instructions.title":
+    "Two wallets · two registrations",
+  "delegation.consolidation.instructions.steps":
+    "Register from this wallet, then connect the other wallet and register the return link. Each wallet needs ETH for gas.",
+  "delegation.consolidation.instructions.publicLink":
+    "The link is public. Existing profile data may be combined.",
   "drop.composer.image": "Image",
   "drop.composer.selectImage": "Select image",
   "drop.composer.removeImage": "Remove image",
@@ -2898,6 +2916,7 @@ export const EN_US_MESSAGES = {
   ...artworkShareMessages,
   ...COLLECT_MESSAGES,
   ...COLLECT_TDH_TARGET_MESSAGES,
+  ...DROP_FORGE_ADMIN_MESSAGES,
   ...profileCmsStudioMessages,
   ...profileCmsAgentMessages,
   ...studioTemplateDescriptions,

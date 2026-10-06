@@ -2,7 +2,7 @@
 import WavesLayout from "@/components/waves/layout/WavesLayout";
 import MyStreamWave from "@/components/brain/my-stream/MyStreamWave";
 import CompetitionHub from "./CompetitionHub";
-import CompetitionDetail from "./CompetitionDetail";
+import CompetitionWaveRoute from "./CompetitionWaveRoute";
 import CompetitionDraftRoute from "./CompetitionDraftRoute";
 
 export default function CompetitionRoute({
@@ -12,17 +12,14 @@ export default function CompetitionRoute({
   readonly waveId: string;
   readonly competitionId?: string;
 }) {
+  if (competitionId !== undefined && competitionId !== "new") {
+    return (
+      <CompetitionWaveRoute waveId={waveId} competitionId={competitionId} />
+    );
+  }
   let content = <CompetitionHub waveId={waveId} embedded />;
   if (competitionId === "new")
     content = <CompetitionDraftRoute waveId={waveId} />;
-  else if (competitionId !== undefined)
-    content = (
-      <CompetitionDetail
-        key={`${waveId}:${competitionId}`}
-        waveId={waveId}
-        competitionId={competitionId}
-      />
-    );
   return (
     <WavesLayout>
       <MyStreamWave waveId={waveId} competitionContent={content} />

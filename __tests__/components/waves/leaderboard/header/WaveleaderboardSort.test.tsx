@@ -10,9 +10,11 @@ import userEvent from "@testing-library/user-event";
 const commonDropdownMock = jest.fn((props: any) => (
   <button
     data-testid="sort-dropdown"
+    aria-label={`${props.filterLabel}: ${props.activeItem}`}
     onClick={() => props.setSelected(WaveDropsLeaderboardSort.CREATED_AT)}
   >
-    {props.filterLabel}: {props.activeItem}
+    {props.showFilterLabel && `${props.filterLabel}: `}
+    {props.activeItem}
   </button>
 ));
 
@@ -37,7 +39,11 @@ describe("WaveleaderboardSort", () => {
       />
     );
 
-    expect(screen.getByTestId("sort-dropdown")).toHaveTextContent("Sort: RANK");
+    expect(screen.getByTestId("sort-dropdown")).toHaveTextContent("RANK");
+    expect(screen.getByTestId("sort-dropdown")).not.toHaveTextContent("Sort:");
+    expect(screen.getByTestId("sort-dropdown")).toHaveAccessibleName(
+      "Sort: RANK"
+    );
     expect(screen.getByTestId("sort-dropdown").parentElement).toHaveClass(
       "tw-min-w-0"
     );
@@ -85,7 +91,7 @@ describe("WaveleaderboardSort", () => {
         filterLabel: "Sort",
         size: "sm",
         variant: "toolbar",
-        showFilterLabel: true,
+        showFilterLabel: false,
       })
     );
 

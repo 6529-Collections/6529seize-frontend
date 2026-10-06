@@ -13,7 +13,8 @@ import type {
 } from "./WebSocketTypes";
 import { setWebSocketMessageMetadata, WebSocketStatus } from "./WebSocketTypes";
 import { asNonEmptyString } from "@/lib/text/nonEmptyString";
-import { getAuthJwt } from "../auth/auth.utils";
+import { ensureActiveSession } from "../auth/session-readiness";
+import { getAuthJwt, isAuthJwtUsable } from "../auth/auth.utils";
 
 // Default values for reconnection
 const DEFAULT_RECONNECT_DELAY = 2000; // Start with 2 seconds
@@ -127,6 +128,7 @@ export function WebSocketProvider({
   const reconnectTimerRef = useRef<NodeJS.Timeout | null>(null);
   const authenticationTimerRef = useRef<NodeJS.Timeout | null>(null);
   const isManualDisconnectRef = useRef(false);
+  const connectionRequestRef = useRef(0);
   const reconnectTokenRef = useRef<string | undefined>(undefined);
   const rejectedCredentialMarkerRef = useRef<string | null>(null);
 
@@ -247,6 +249,24 @@ export function WebSocketProvider({
    */
   const connect = useCallback(
     function connectSocket(token?: string) {
+      const connectionRequest = ++connectionRequestRef.current;
+      if (token && !isAuthJwtUsable(token)) {
+        const rejectedToken = token;
+        void ensureActiveSession()
+          .then((freshToken) => {
+            if (
+              connectionRequestRef.current === connectionRequest &&
+              freshToken &&
+              freshToken !== rejectedToken &&
+              isAuthJwtUsable(freshToken) &&
+              getAuthJwt() === freshToken
+            ) {
+              connectSocket(freshToken);
+            }
+          })
+          .catch(() => undefined);
+        return;
+      }
       const useMessageAuth = !!token;
       const credentialMarker = token ? createCredentialMarker(token) : null;
 
@@ -388,6 +408,7 @@ export function WebSocketProvider({
    * Disconnect from WebSocket server
    */
   const disconnect = useCallback(() => {
+    connectionRequestRef.current += 1;
     // Set flag to indicate this is intentional
     isManualDisconnectRef.current = true;
 
@@ -456,6 +477,7 @@ export function WebSocketProvider({
   // Clean up on unmount
   useEffect(() => {
     return () => {
+      connectionRequestRef.current += 1;
       // Clear any pending reconnect
       clearReconnectTimer();
       clearAuthenticationTimer();

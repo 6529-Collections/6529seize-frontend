@@ -5,13 +5,23 @@
 Wave pages can expose a tab strip that switches the main content panel between
 wave sections such as `Chat`, `Leaderboard`, `Sales`, `Winners`, and other
 wave-dependent views. Named curations also appear here: each opens a selected
-collection of posts from the wave.
+collection of posts from the wave. The default competition shares this one row
+with Chat, and its views render directly below it. A separately opened non-default
+competition keeps its own detail navigation. See [Competitions](../competitions/feature-competitions.md)
+for default selection and switching. **About** is the final wave tab, with the
+competition’s **Configuration** immediately before it when a competition is
+available. Native and legacy defaults share this ordering on desktop, mobile
+web and the app.
 
 In the `My Votes` tab, non-image drops use a preview image from drop metadata when available, so rows render quickly and stay stable in list form.
-The web layout stores the last selected tab for each wave on the current device,
-then restores it when that wave is opened again and the tab is still available.
-In the native app, Back restores the wave section from that navigation-history
-entry. Opening another wave normally still uses its default section.
+Each wave remembers its last selected valid tab in this browser or app. Ordinary
+wave navigation restores that choice, including after a reload or reopening the
+app. Main Stage can remember Leaderboard while Maybes Bar independently remembers
+Chat. A wave with no valid remembered choice opens Chat. Background competition
+loading does not change a deliberate selection.
+Explicit tab, competition, curation and message links retain their destinations.
+Browser Back/Forward and native app Back restore the section from that visit
+when it is still available, ahead of the wave's latest remembered choice.
 
 ## Location in the Site
 
@@ -37,13 +47,22 @@ entry. Opening another wave normally still uses its default section.
    create actions.
 3. If multiple sections are available, the tab strip appears and selects the
    active tab:
-   - Most waves default to `Chat`.
-   - On web, Memes waves default to `Leaderboard` when that tab is available;
-     a fresh native-app visit defaults to `Chat` while voting is open.
-   - Web restores a previously saved valid tab. Native app Back restores the
-     section from that visit when it is still available.
+   - An ordinary wave visit restores its last selected valid tab. A first visit,
+     or a visit without a valid saved choice, opens `Chat`, including Memes and
+     completed competition waves on web and in the native app.
+   - Loading or refreshing the default competition does not change deliberate
+     Chat selections. A remembered competition view waits for its identity and
+     availability to be checked before opening.
+   - Explicit tab and competition links open their requested section. Native
+     app Back restores the section from that visit when it is still available.
 4. Select a tab to switch sections.
-5. The main content panel updates in place while staying on the same route.
+5. The main content panel updates. Competition views retain their competition
+   ID and selected tab in the URL so reload and Back/Forward restore the view.
+   When switching to a competition route, its controls appear after navigation
+   completes, so a newly opened sort sheet or form stays in that view.
+   App tabs and their content use the same availability rules. An unavailable
+   legacy competition section opens `Leaderboard`, or `Submissions` after
+   voting has ended, and selects that visible tab.
 6. When open polls still need the signed-in user's answer and the user can
    respond, the `Polls` tab shows an unread-style count badge.
 7. On the `My Votes` tab, each voted drop entry can show a preview thumbnail and
@@ -51,7 +70,7 @@ entry. Opening another wave normally still uses its default section.
    For non-image media, that thumbnail comes from a `preview_image` metadata value
    when present, and media interactions stay disabled in the row.
 8. If the active tab is no longer valid when entering a new wave, the active tab
-   resets to that wave’s first available tab.
+   resets to Chat.
 9. Eligible admins can open the `+` menu and select `New subwave`. The new
    subwave starts with the parent wave's admin group, which can still be changed
    in the `Groups` step before submission.
@@ -71,10 +90,13 @@ entry. Opening another wave normally still uses its default section.
   video, or interactive media is indicated with a small badge at the title row.
 - In `My Votes`, non-image drops show a static preview thumbnail in the row when
   `preview_image` metadata is valid.
-- On web, move between waves and return later to restore the saved valid tab.
+- Select Leaderboard in Main Stage, open Maybes Bar and select Chat, then return
+  to Main Stage through the wave list: Leaderboard reopens. Returning to Maybes
+  Bar reopens Chat. Explicit section links retain their own destinations.
 - In the native app, open an author profile from Leaderboard and use Back to
   return to Leaderboard. Repeated profile visits preserve the same behavior.
-- A link targeting a specific chat message still opens Chat.
+- A link targeting a specific chat message still opens Chat, even when it also
+  names another section.
 - Polls can allow every reader to respond or limit responses to people who can
   chat. Readers who cannot respond still see poll results, but vote controls are
   hidden.
@@ -98,8 +120,12 @@ entry. Opening another wave normally still uses its default section.
 - Chat waves with curations show their curation tabs. A single curation remains
   a named tab; waves with none have no curation tabs.
 - `Leaderboard` can disappear after voting has ended for a wave.
-- If local tab memory for a wave is unavailable or invalid, the wave opens with its
-  default tab.
+- Each wave's remembered choice survives background loading, reloads and app
+  restarts in the same browser or app. Clearing local browser/app data removes it.
+- A remembered competition view is scoped to the competition where it was
+  selected. If another competition has become the default, an ordinary wave
+  visit falls back to Chat. Explicit links to the earlier competition still
+  retain their destination.
 - `Winners` is shown only after the first decision has passed.
 - `Sales` appears in curation waves only.
 - `My Votes` appears in memes and curation waves; `FAQ` appears in memes waves
@@ -108,8 +134,9 @@ entry. Opening another wave normally still uses its default section.
   assistive technologies.
 - Mobile tab-scroll controls have direction-specific accessible names, remain
   keyboard operable, and avoid smooth motion when reduced motion is requested.
-- For memes waves, available tabs are evaluated to prefer `Leaderboard` first; if it
-  is unavailable, `Chat` becomes the fallback tab.
+- Memes wave tabs start with `Chat`, then `Leaderboard` (or `Submissions` after
+  voting ends), `Winners` when available, and `My Votes` for signed-in users.
+  Other available sections follow these tabs.
 - Curation waves do not expose an `Outcome` tab; `Sales` fills that dedicated
   results-slot instead.
 - In `My Votes`, non-image rows suppress inline media interaction even when the row
@@ -122,14 +149,14 @@ entry. Opening another wave normally still uses its default section.
 
 ## Failure and Recovery
 
-- If a selected tab becomes unavailable because wave state changes, the
-  interface moves to the first available tab.
+- If a selected tab becomes unavailable because wave state or permissions change,
+  the wave falls back to Chat. A completed legacy Leaderboard uses Submissions.
 - If a previously stored tab is no longer available for that wave, the UI falls
   back to the wave default.
 - If a saved or active `Sales` tab is revisited in a non-curation context, the
   UI falls back to that wave's first available tab.
 - If an unavailable tab is requested, tab state falls back to that wave’s first
-  available tab (typically `Leaderboard` for memes waves, otherwise `Chat`).
+  available tab: Chat for a wave, or Leaderboard/Submissions for competition detail.
 - If a wave becomes chat-only with no curations or other available sections,
   the web tab strip can be hidden and the chat panel remains available.
 - If a linked curation was deleted or does not belong to this wave, the wave returns
@@ -146,8 +173,9 @@ entry. Opening another wave normally still uses its default section.
 
 ## Limitations / Notes
 
-- Regular content-tab selection is UI state. Named curation selection is
-  encoded in the wave URL as `?curation={curationId}`.
+- Tab preferences are local to this browser or app and do not sync between
+  devices. Named curation selection is encoded in the wave URL as
+  `?curation={curationId}`.
 - Available tabs depend on wave type, curation settings, voting state, and
   first-decision status.
 - The app and web layouts present the tab row differently, but eligible root

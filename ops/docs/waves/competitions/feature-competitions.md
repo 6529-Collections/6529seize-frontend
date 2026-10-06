@@ -15,8 +15,8 @@ wave can run at the same time with different participation and voting rules.
 ## Entry Points
 
 Open **Competitions** from an eligible wave, follow a competition link, or open
-a competition notification. The collection, details, entry views and create/edit
-forms stay inside the wave's **Competitions** tab, with its header and tabs visible.
+a competition notification. The wave header and navigation stay visible. The
+collection and create/edit forms open from **Competitions**.
 The **Competitions** tab shows a count of active and upcoming competitions. The
 badge is hidden when there are none; drafts and completed competitions do not count.
 **Chat** returns to the wave's existing conversation. The collection has a second
@@ -28,9 +28,35 @@ Cards show the start date and, when set, the end date. Dates in the past use
 
 ## Default Competition
 
-Opening a wave without choosing a competition opens its default competition.
-Leaderboard, Winners, Outcomes and My votes use that competition. Chat remains
-shared by the whole wave, and Competitions still opens the collection.
+Ordinary wave navigation restores that wave's last selected valid tab in this
+browser or app. **Chat** is the fallback when there is no valid remembered choice,
+and loading or refreshing competition data does not override a deliberate Chat
+selection. Remembered competition views retain their competition identity; if
+another competition has become the default, ordinary entry falls back to Chat.
+Explicit destination links and Back/Forward retain their intended section.
+Selecting a competition tab uses the default competition unless a link or earlier
+explicit selection supplies another competition. See [Wave Content Tabs](../chat/feature-content-tabs.md)
+for the per-wave navigation contract.
+Chat and the competition views share one wave-level tab row, with the selected
+content directly below it. There is no second competition tab row or surrounding
+detail panel. This applies to single-competition waves and to the default in
+waves with multiple competitions. Native competitions also expose Voters in
+that same row. Both native and legacy defaults expose **Configuration** immediately
+before the final **About** tab. Configuration opens the selected competition’s
+existing rules and settings, with the same read and edit permissions. Chat remains
+shared by the whole wave.
+
+For a logged-in non-admin, **Competitions** is hidden when the default is the
+wave’s sole visible competition. The check includes current, past and future
+competitions: an active default plus a past or future competition keeps the tab
+visible. Wave administrators retain the tab for management. While the count or
+permissions are unresolved, the tab stays available; logged-out visibility is
+unchanged. A direct collection link remains readable when the tab is hidden.
+
+Explicitly opening a non-default competition from the collection or a direct
+link shows its title, an **All competitions** return link, and its own navigation
+inside the wave. Opening the default from the collection keeps the single-row
+layout.
 
 - One eligible competition is the default, including upcoming or completed history.
 - With running competitions, the earliest competition start wins. Paused
@@ -60,8 +86,8 @@ tabs. The collection lets you choose a different competition at any time.
    uses that entry's competition credit type and limits. Review its available, spent
    and remaining credit. Changing a vote replaces your current value; zero
    removes it. Negative votes are available only where the rules permit them.
-4. Competitions open on **Leaderboard**, with an underlined tab row for
-   Leaderboard, Winners, Outcomes, My votes, Voters and Configuration. The leaderboard
+4. Competitions open on **Leaderboard**. Use the wave tab row for the default,
+   or the competition detail row for an explicitly opened non-default. The leaderboard
    uses the familiar list/grid controls, sorting, rich drop cards and **Drop**
    action. Rank competitions show the schedule; Approve competitions show
    approval thresholds, progress and approved counts. Winners use the existing
@@ -73,6 +99,16 @@ tabs. The collection lets you choose a different competition at any time.
    then return through the competition collection or link.
 
 ## Common Scenarios
+
+- After a submission is accepted, its entry opens with a confirmation naming
+  the competition and **View my entry**. **My submissions** is available on the
+  leaderboard and direct-entry view for your own signed-in profile.
+  On the leaderboard, it is a text button beside **Drop**. When the toolbar
+  needs two rows, view and sort controls occupy the top row; **My submissions**
+  aligns left and **Drop** aligns right below.
+- **My submissions** lists your entries in the selected competition, including
+  their recorded status, with older entries available through **Load more**.
+  It keeps the selected competition, leaderboard sort and view unchanged.
 
 - Competition drops in shared chat show their competition name beneath the author,
   linked to that competition. They also show their current total, your vote, rank,
@@ -108,6 +144,12 @@ tabs. The collection lets you choose a different competition at any time.
   do not accept new entries or votes.
 
 ## Failure and Recovery
+
+- If a leaderboard load fails, use **Retry**. Already loaded rows remain visible
+  if a refresh fails. Entry recovery does not create another submission.
+- If a saved submission’s entry status cannot be loaded, use **Check again** or
+  **View artwork** before submitting another copy. A failed artwork load does
+  not undo a confirmed entry; retry the artwork load or use **My submissions**.
 
 - If default selection cannot load, retry while shared chat remains usable.
   Competition controls do not silently use a different competition.

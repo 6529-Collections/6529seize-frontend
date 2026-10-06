@@ -67,8 +67,10 @@ interface LeaderboardQueryKeyInput {
   readonly priceFilters: CanonicalPriceFilters;
 }
 
-interface LeaderboardParamsInput
-  extends Omit<LeaderboardQueryKeyInput, "maxPages"> {
+interface LeaderboardParamsInput extends Omit<
+  LeaderboardQueryKeyInput,
+  "maxPages"
+> {
   readonly pageParam: number | null;
   readonly pageSize: number;
 }
@@ -229,9 +231,7 @@ const getVisiblePageDrops = (
   sort: WaveDropsLeaderboardSort
 ) =>
   sort === WaveDropsLeaderboardSort.MY_REALTIME_VOTE
-    ? page.drops.filter(
-        (drop) => drop.context_profile_context?.rating !== 0
-      )
+    ? page.drops.filter((drop) => drop.context_profile_context?.rating !== 0)
     : page.drops;
 
 interface VisibleLeaderboardPage {
@@ -295,6 +295,8 @@ const useRemoveDropsQueryOnUnmount = ({
     return () => {
       queryClient.removeQueries({
         queryKey: [QueryKey.DROPS_LEADERBOARD, { waveId }],
+        // Other mounted views can share this wave's cache and in-flight requests.
+        predicate: (query) => query.getObserversCount() === 0,
       });
     };
   }, [waveId, queryClient]);
@@ -412,7 +414,7 @@ export function useWaveDropsLeaderboard({
     isError,
     isFetchNextPageError,
     isFetchPreviousPageError,
-    isFetching: isQueryEnabled && (isFetching || !hasInitialized),
+    isFetching: isQueryEnabled && (isFetching || (!hasInitialized && !isError)),
     isFetchingNextPage,
     isFetchingPreviousPage,
     refetch,

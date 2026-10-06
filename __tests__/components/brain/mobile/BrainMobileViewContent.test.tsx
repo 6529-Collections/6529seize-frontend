@@ -5,6 +5,7 @@ import { BrainView } from "@/components/brain/mobile/brainMobileViews";
 
 jest.mock("next/navigation", () => ({
   usePathname: () => "/waves",
+  useSearchParams: () => new URLSearchParams(),
 }));
 
 jest.mock("next/dynamic", () => (loader: () => Promise<unknown>) => {
@@ -17,6 +18,10 @@ jest.mock("next/dynamic", () => (loader: () => Promise<unknown>) => {
     modulePath: string,
     exportName?: string,
   ][] = [
+    [
+      "../right-sidebar/BrainRightSidebarConfiguration",
+      "@/components/brain/right-sidebar/BrainRightSidebarConfiguration",
+    ],
     ["./BrainMobileAbout", "@/components/brain/mobile/BrainMobileAbout"],
     [
       "@/components/competitions/CompetitionHub",
@@ -90,6 +95,14 @@ jest.mock("next/dynamic", () => (loader: () => Promise<unknown>) => {
 
   return MockDynamicComponent;
 });
+
+jest.mock(
+  "@/components/brain/right-sidebar/BrainRightSidebarConfiguration",
+  () => ({
+    __esModule: true,
+    default: () => <div data-testid="configuration" />,
+  })
+);
 
 const mockBrainMobileAbout = jest.fn(() => <div data-testid="about" />);
 jest.mock("@/components/competitions/CompetitionHub", () => ({
