@@ -213,7 +213,7 @@ export default function UserPageIdentityHeaderCICRate({
       className={`tw-relative tw-flex tw-w-full ${
         isTooltip
           ? "tw-mt-2 tw-max-w-[12rem]"
-          : "tw-mb-5 tw-mt-2"
+          : "tw-mt-2"
       }`}
     >
       <UserPageRateInput
@@ -231,7 +231,7 @@ export default function UserPageIdentityHeaderCICRate({
 
   const adjustmentHelper = (
     <UserRateAdjustmentHelper
-      inLineValues={isTooltip}
+      inLineValues={true}
       valueLayout="inline"
       originalValue={originalRating}
       adjustedValue={newRating}
