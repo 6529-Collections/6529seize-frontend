@@ -9,6 +9,7 @@ const stopBatchMock = jest.fn();
 const sendBatchMock = jest.fn();
 
 const mixpanelMock = {
+  _batch_requests: true,
   request_batchers: { events: { sendRequest: sendBatchMock } },
   persistence: {
     properties: () => ({ $initial_referrer: "legacy", mp_keyword: "legacy" }),
@@ -42,6 +43,7 @@ const loadModule = async ({
   startBatchMock.mockReset();
   stopBatchMock.mockReset();
   sendBatchMock.mockReset();
+  mixpanelMock._batch_requests = true;
   mixpanelMock.request_batchers.events.sendRequest = sendBatchMock;
 
   jest.doMock("@/config/env", () => ({
@@ -64,6 +66,50 @@ describe("mixpanel analytics wrapper", () => {
   });
   afterEach(() => {
     document.cookie = "performance-cookies-consent=; Max-Age=0; path=/";
+  });
+
+  it.each([true, false])(
+    "only allows a missing event batcher when SDK batching is disabled (%s)",
+    async (batching) => {
+      const analytics = await loadModule({
+        nodeEnv: "production",
+        token: "public-token",
+      });
+      const batcher = mixpanelMock.request_batchers.events;
+      mixpanelMock._batch_requests = batching;
+      Reflect.deleteProperty(mixpanelMock.request_batchers, "events");
+      try {
+        expect(analytics.initAnalytics()).toBe(!batching);
+        analytics.trackAnalyticsEvent("Product Event");
+        expect(startBatchMock).toHaveBeenCalledTimes(batching ? 0 : 1);
+        expect(trackMock).toHaveBeenCalledTimes(batching ? 0 : 1);
+      } finally {
+        mixpanelMock.request_batchers.events = batcher;
+      }
+    }
+  );
+
+  it("keeps delivery closed if persisted private properties cannot be scrubbed", async () => {
+    const analytics = await loadModule({
+      nodeEnv: "production",
+      token: "public-token",
+    });
+    const persistence = jest
+      .spyOn(mixpanelMock.persistence, "properties")
+      .mockImplementation(() => {
+        throw new Error("Persistence unavailable");
+      });
+    try {
+      expect(analytics.initAnalytics()).toBe(false);
+      expect(analytics.isAnalyticsTrackingAllowed()).toBe(false);
+      expect(startBatchMock).not.toHaveBeenCalled();
+      expect(() =>
+        analytics.trackAnalyticsEvent("Product Event")
+      ).not.toThrow();
+      expect(trackMock).not.toHaveBeenCalled();
+    } finally {
+      persistence.mockRestore();
+    }
   });
 
   it("fails closed without interrupting controls when cookie access throws", async () => {

@@ -141,10 +141,16 @@ const guardBatchDelivery = (): void => {
     ) => void;
   };
   const batchSdk = mixpanel as typeof mixpanel & {
+    _batch_requests: boolean;
     request_batchers: { events?: EventBatcher };
   };
   const batcher = batchSdk.request_batchers.events;
-  if (!batcher) return; // Direct delivery still passes through the SDK hook.
+  // In 2.76.0 init_batchers runs synchronously before persistence/loaded.
+  // Unsupported XHR/storage sets _batch_requests=false and uses the direct hook.
+  if (!batcher) {
+    if (batchSdk._batch_requests === false) return;
+    throw new Error("Mixpanel event batcher unavailable before startup");
+  }
   const sendRequest = batcher.sendRequest.bind(batcher);
   batcher.sendRequest = (events, options, onResponse) => {
     if (!isAnalyticsReady()) {

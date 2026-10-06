@@ -81,7 +81,11 @@ A send-time hook and final event batch transport guard strip the same fields,
 check current consent and allowlist Wave pilot envelope properties. The pinned
 SDK bypasses its hook for recovered orphaned queue entries, so batch senders
 start only after the final guard is installed. This narrow SDK integration
-must be checked when upgrading Mixpanel. Missing or malformed performance
+must be checked when upgrading Mixpanel. The pinned SDK creates batchers
+synchronously; an unexpected missing batcher keeps delivery closed. The SDK's
+explicit XHR/storage fallback uses direct delivery through the send-time hook.
+Failure to scrub persisted private properties also keeps delivery closed rather
+than silently continuing with uncleared storage. Missing or malformed performance
 consent cookies fail closed even while React consent state is stale. Existing
 Mixpanel identity and delivery metadata remain. Consent withdrawal synchronously
 closes the send gate, clears SDK batches and resets identity. Already dispatched

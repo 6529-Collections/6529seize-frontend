@@ -32,10 +32,11 @@ test.beforeEach(async ({ page, request, baseURL }) => {
   await page.route("**/*", async (route) => {
     const host = new URL(route.request().url()).hostname;
     if (host !== "127.0.0.1") {
-      await route.abort();
-      throw new Error(
+      errors.push(
         `The synthetic fixture attempted non-loopback traffic: ${host}`
       );
+      await route.abort();
+      return;
     }
     await route.continue();
   });
@@ -197,6 +198,7 @@ test("production SDK strips automatic and persisted navigation properties for ba
         (event) => event.event === "Synthetic Queued Product Event"
       );
       expect(queued?.properties).toMatchObject({
+        token: "synthetic-wave-feature-pilot",
         distinct_id: "529",
         path: "/waves/:waveId",
       });
@@ -212,17 +214,18 @@ test("production SDK strips automatic and persisted navigation properties for ba
       )
     ).toBe(true);
     for (const event of captured) {
+      expect(event.properties["token"]).toBe("synthetic-wave-feature-pilot");
       expect(event.properties).not.toHaveProperty("$current_url");
       expect(event.properties).not.toHaveProperty("$referrer");
       expect(event.properties).not.toHaveProperty("$initial_referrer");
       expect(event.properties).not.toHaveProperty("mp_keyword");
       expect(event.properties).not.toHaveProperty("utm_term");
       if (event.event.startsWith("Wave Feature")) {
+        expect(event.properties["$lib_version"]).toBe("2.76.0");
         expect(JSON.stringify(event)).not.toMatch(
           /private-(?:wave|wallet|handle|content)|raw_path|profile_handle/
         );
         expect(event.properties["route_family"]).toBe("/waves/:waveId");
-        expect(event.properties["token"]).toBe("synthetic-wave-feature-pilot");
       }
     }
     const persisted = await page.evaluate(() =>
