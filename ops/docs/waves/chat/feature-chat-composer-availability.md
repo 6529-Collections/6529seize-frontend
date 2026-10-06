@@ -60,6 +60,8 @@ availability. Submission availability is exposed through the Chat tab
   `Submit drop` action to see the submission restriction, submission group, and
   `View submission rules` link to Configuration. Public groups link to their
   criteria and members; hidden and direct-message groups show only `Private group`.
+- Following `View submission rules` and returning to Chat preserves an ordinary
+  text draft in the same browser tab. This does not save attachments or media.
 - Chatting or following a wave does not grant submission or voting access.
   Submission eligibility, timing, limits, and signing requirements still apply.
 - If submission is available, users enter it from `Submit drop` in the Chat tab

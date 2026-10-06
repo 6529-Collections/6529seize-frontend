@@ -3,6 +3,34 @@ import WaveAccessPreview from "@/components/waves/WaveAccessPreview";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 
 describe("WaveAccessPreview", () => {
+  it.each([
+    {
+      waveType: ApiWaveType.Chat,
+      groups: { canChat: null, canDrop: null },
+      expected: "People with wave access can chat.",
+    },
+    {
+      waveType: ApiWaveType.Rank,
+      groups: { canChat: null, canDrop: null },
+      expected:
+        "People with wave access can chat and submit. Voting access is separate.",
+    },
+    {
+      waveType: ApiWaveType.Rank,
+      groups: { canChat: "chat-club", canDrop: null },
+      expected:
+        "Chat is limited to its selected group. Submission group access is public. Voting access is separate.",
+    },
+  ])(
+    "explains the public access configuration: $expected",
+    ({ waveType, groups, expected }) => {
+      render(
+        <WaveAccessPreview waveType={waveType} groups={groups} chatEnabled />
+      );
+      expect(screen.getByRole("status")).toHaveTextContent(expected);
+    }
+  );
+
   it("updates the consequence when chat and submission groups diverge", () => {
     const { rerender } = render(
       <WaveAccessPreview

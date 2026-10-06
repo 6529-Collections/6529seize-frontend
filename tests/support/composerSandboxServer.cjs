@@ -741,8 +741,8 @@ const signatureWave = {
   },
 };
 
-// Read-only access fixture shared by SSR and client fetches. It adds no allowed
-// mutation shapes: attempts to post to this wave still fail closed.
+// Access fixture shared by SSR and client fetches. Only the existing notification
+// read acknowledgement is allowed; attempts to post to this wave fail closed.
 const accessWave = {
   ...localWave,
   id: SANDBOX_ACCESS_WAVE_ID,
@@ -940,6 +940,7 @@ const sandboxNotificationWaveIds = new Set([
   SANDBOX_NOTIFICATION_WAVE_ID,
   SANDBOX_CREATED_WAVE_ID,
   SANDBOX_SIGNATURE_WAVE_ID,
+  SANDBOX_ACCESS_WAVE_ID,
 ]);
 
 function notificationResponse(searchParams) {

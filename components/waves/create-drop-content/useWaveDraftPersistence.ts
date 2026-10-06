@@ -9,8 +9,8 @@ import {
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 
 /**
- * Persist an in-progress chat message across a full reload (e.g. the
- * new-version toast). Keyed by wave and scoped to the PRIMARY composer:
+ * Persist an in-progress chat message across a reload or a temporary tab
+ * change. Keyed by wave and scoped to the PRIMARY composer:
  * the stream composer is a single instance whose `activeDrop` can flip to
  * reply/quote (see MyStreamWaveChat), so `draftWaveId` is derived live.
  * The autosave effect early-returns whenever it is null, which is what
@@ -44,8 +44,10 @@ export const useWaveDraftPersistence = ({
   const [initialDraftJson] = useState<string | null>(() =>
     draftWaveId ? readRestorableWaveDraft(draftWaveId) : null
   );
+  const pendingSaveRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
+    pendingSaveRef.current = null;
     if (!draftWaveId) {
       return;
     }
@@ -55,7 +57,7 @@ export const useWaveDraftPersistence = ({
       clearWaveDraft(draftWaveId);
       return;
     }
-    const handle = setTimeout(() => {
+    const saveDraft = () => {
       if (!editorState) {
         clearWaveDraft(draftWaveId);
         return;
@@ -71,9 +73,27 @@ export const useWaveDraftPersistence = ({
       } else {
         clearWaveDraft(draftWaveId);
       }
+    };
+    // A mount's empty editor state must not erase a restored draft before
+    // Lexical has supplied its first state. Later empty states serialize and
+    // clear normally through writeWaveDraft.
+    pendingSaveRef.current = editorState ? saveDraft : null;
+    const handle = setTimeout(() => {
+      saveDraft();
+      pendingSaveRef.current = null;
     }, 400);
     return () => clearTimeout(handle);
   }, [editorState, draftWaveId, isMountEditor]);
+
+  useEffect(
+    () => () => {
+      // Switching to Configuration unmounts the composer. Save the latest
+      // primary draft even when the debounce has not elapsed yet.
+      pendingSaveRef.current?.();
+      pendingSaveRef.current = null;
+    },
+    []
+  );
 
   return { initialDraftJson: isMountEditor ? initialDraftJson : null };
 };

@@ -327,10 +327,11 @@ Surface matrix:
   form; upload and attachment endpoints still fail closed. It must run against a
   loopback base URL, but it is not a full network-isolation harness and is not a
   staging or production smoke pack.
-  A separate read-only Rank fixture also covers public chat with restricted
+  A separate Rank fixture also covers public chat with restricted
   submissions, on-demand submission-lock details, and draft preservation through
   Configuration. It also verifies that available chat has no access panel.
-  SSR and client requests receive the same fixture; it adds no allowed writes.
+  SSR and client requests receive the same fixture. Only the existing notification
+  read acknowledgement is allowed; posting to this fixture still fails closed.
 - `test:e2e:public-review-sandbox` runs the authenticated Stream review
   feedback flow on both baseline web projects. It verifies the responsive
   Show/Hide feedback control, the primary comment input, optional section,
