@@ -11,7 +11,7 @@ export default function UserPageCollectedFiltersSzn({
   readonly setSelected: (selected: MemeSeason | null) => void;
 }) {
   return (
-    <div className="tw-w-36">
+    <div className="tw-w-full tw-min-w-0">
       <MemeSeasonGridDropdown
         selected={selected}
         setSelected={setSelected}

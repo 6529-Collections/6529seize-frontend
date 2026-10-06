@@ -41,6 +41,7 @@ export default function UserPageCollectedFiltersNativeDropdown({
         "user.collected.filters.collection"
       )}
       setSelected={setSelected}
+      showFilterLabel
       size="sm"
     />
   );

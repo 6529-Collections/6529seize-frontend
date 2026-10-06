@@ -1,3 +1,7 @@
+import {
+  COLLECTED_COLLECTION_TYPE_TO_CONTRACT,
+  CollectedCollectionType,
+} from "@/entities/IProfile";
 import UserPageCollectedNetworkCards from "@/components/user/collected/cards/UserPageCollectedNetworkCards";
 import { useTokenMetadataQuery } from "@/hooks/useAlchemyNftQueries";
 import { t as translate } from "@/i18n/messages";
@@ -149,5 +153,49 @@ describe("UserPageCollectedNetworkCards", () => {
       tokens: [],
       enabled: false,
     });
+  });
+  it("opens known collections with the existing profile return context", () => {
+    render(
+      <UserPageCollectedNetworkCards
+        cards={[
+          {
+            ...cards[0],
+            contract:
+              COLLECTED_COLLECTION_TYPE_TO_CONTRACT[
+                CollectedCollectionType.MEMES
+              ],
+          },
+        ]}
+        page={2}
+        setPage={jest.fn()}
+        next={false}
+        returnTo="/punk6529/collected?collection=network&page=2"
+      />
+    );
+    const link = screen.getByRole("link", { name: "Open Token #101" });
+    const url = new URL(link.getAttribute("href")!, "https://6529.io");
+    expect(url.pathname).toBe("/the-memes/101");
+    expect(url.searchParams.get("returnTo")).toBe(
+      "/punk6529/collected?collection=network&page=2#collected-card-memes-101"
+    );
+    expect(link).not.toHaveAttribute("target");
+  });
+
+  it("labels an external marketplace destination for other contracts", () => {
+    render(
+      <UserPageCollectedNetworkCards
+        cards={cards}
+        page={1}
+        setPage={jest.fn()}
+        next={false}
+      />
+    );
+    const link = screen.getByRole("link", { name: /Token #101.*OpenSea/ });
+    expect(link).toHaveAttribute(
+      "href",
+      "https://opensea.io/assets/ethereum/0xabc/101"
+    );
+    expect(link).toHaveAttribute("target", "_blank");
+    expect(link).toHaveAttribute("rel", "noopener noreferrer");
   });
 });

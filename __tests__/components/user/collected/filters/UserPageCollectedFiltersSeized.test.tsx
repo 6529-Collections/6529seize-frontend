@@ -36,16 +36,16 @@ describe("UserPageCollectedFiltersSeized", () => {
         value: null,
       }),
       expect.objectContaining({
-        label: "Seized",
+        label: "Held",
         value: CollectionSeized.SEIZED,
       }),
       expect.objectContaining({
-        label: "Not Seized",
+        label: "Not held",
         value: CollectionSeized.NOT_SEIZED,
       }),
     ]);
     expect(capturedProps.activeItem).toBe(CollectionSeized.NOT_SEIZED);
-    expect(capturedProps.filterLabel).toBe("Seized");
+    expect(capturedProps.filterLabel).toBe("Holdings");
     expect(capturedProps.containerRef).toBe(ref);
   });
 });

@@ -32,6 +32,7 @@ jest.mock(
     function MockFilters(props: any) {
       return (
         <div data-testid="filters" data-collection={props.filters.collection}>
+          <button onClick={props.clearFilters}>Clear filters</button>
           <button
             data-testid="filters-set-szn"
             onClick={() => props.setSzn?.({ id: 2 })}
@@ -804,5 +805,48 @@ describe("UserPageCollected", () => {
         "2"
       )
     );
+  });
+  it("keeps filters available after a failed request and retries it", async () => {
+    const refetch = jest.fn();
+    useQueryMock.mockReturnValue({
+      isError: true,
+      isFetching: false,
+      isLoading: false,
+      refetch,
+    });
+    renderWithTransferProvider(<UserPageCollected profile={mockProfile} />);
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "Artwork could not be loaded"
+    );
+    expect(screen.getByTestId("filters")).toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Try again" }));
+    expect(refetch).toHaveBeenCalledTimes(1);
+    expect(screen.queryByTestId("cards")).not.toBeInTheDocument();
+  });
+
+  it("clears collection filters together while preserving unrelated query state", async () => {
+    const params = new URLSearchParams(
+      "collection=memes&szn=2&seized=not_seized&sort-by=tdh&sort-direction=asc&address=0x123&activity=distributions&source=test"
+    );
+    mockSearchParams.get.mockImplementation((key: string) => params.get(key));
+    mockSearchParams.toString.mockReturnValue(params.toString());
+    renderWithTransferProvider(<UserPageCollected profile={mockProfile} />);
+    await userEvent.click(
+      screen.getByRole("button", { name: "Clear filters" })
+    );
+    const result = getLastPushParams();
+    for (const key of [
+      "collection",
+      "szn",
+      "seized",
+      "sort-by",
+      "sort-direction",
+      "address",
+      "page",
+    ]) {
+      expect(result.has(key)).toBe(false);
+    }
+    expect(result.get("activity")).toBe("distributions");
+    expect(result.get("source")).toBe("test");
   });
 });

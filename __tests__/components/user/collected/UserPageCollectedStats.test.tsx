@@ -3,7 +3,7 @@ import type { UserPageStatsInitialData } from "@/components/user/stats/userPageS
 import { CollectedCollectionType } from "@/entities/IProfile";
 import { commonApiFetch } from "@/services/api/common-api";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ReactNode } from "react";
 import { useSearchParams } from "next/navigation";
@@ -148,13 +148,14 @@ describe("UserPageCollectedStats", () => {
         initialStatsData={buildInitialStatsData()}
       />
     );
+    fireEvent.click(screen.getByRole("button", { name: "Collection stats" }));
 
     expect(screen.getByText("NextGen")).toBeInTheDocument();
-    expect(screen.getByText("x62")).toBeInTheDocument();
+    expect(screen.getByText("62")).toBeInTheDocument();
     expect(screen.queryByText("Meme Sets")).not.toBeInTheDocument();
     expect(screen.getByText("Memes")).toBeInTheDocument();
-    expect(screen.getByText("x3,107")).toBeInTheDocument();
-    expect(screen.getByText("unique x465")).toBeInTheDocument();
+    expect(screen.getByText("3,107 editions")).toBeInTheDocument();
+    expect(screen.getByText("465 unique artworks")).toBeInTheDocument();
     expect(screen.getByText("Seasons")).toBeInTheDocument();
     expect(screen.getByText("2/3 started")).toBeInTheDocument();
     expect(screen.getByText("SZN1")).toBeInTheDocument();
@@ -200,13 +201,14 @@ describe("UserPageCollectedStats", () => {
         locale="de-DE"
       />
     );
+    fireEvent.click(screen.getByRole("button", { name: "Collection stats" }));
 
     expect(screen.getByText("NextGen")).toBeInTheDocument();
-    expect(screen.getByText("x1.200")).toBeInTheDocument();
+    expect(screen.getByText("1.200")).toBeInTheDocument();
     expect(screen.getByText("Memes")).toBeInTheDocument();
-    expect(screen.getByText("x3.107")).toBeInTheDocument();
-    expect(screen.getByText("unique x1.465")).toBeInTheDocument();
-    expect(screen.getByText("x1,76")).toBeInTheDocument();
+    expect(screen.getByText("3.107 editions")).toBeInTheDocument();
+    expect(screen.getByText("1.465 unique artworks")).toBeInTheDocument();
+    expect(screen.getByText("×1,76")).toBeInTheDocument();
     expect(screen.getByText("1.000/1.234 to set 1")).toBeInTheDocument();
   });
 
@@ -223,6 +225,7 @@ describe("UserPageCollectedStats", () => {
         onCollectionShortcut={onCollectionShortcut}
       />
     );
+    fireEvent.click(screen.getByRole("button", { name: "Collection stats" }));
 
     const nextGenButton = screen.getByRole("button", { name: /nextgen/i });
 
@@ -251,6 +254,7 @@ describe("UserPageCollectedStats", () => {
         onSeasonShortcut={onSeasonShortcut}
       />
     );
+    fireEvent.click(screen.getByRole("button", { name: "Collection stats" }));
 
     const seasonButton = screen.getByRole("button", { name: /szn2/i });
 
@@ -285,6 +289,7 @@ describe("UserPageCollectedStats", () => {
         />
       </QueryClientProvider>
     );
+    fireEvent.click(screen.getByRole("button", { name: "Collection stats" }));
 
     await user.hover(screen.getByRole("button", { name: /szn1/i }));
 
@@ -324,6 +329,7 @@ describe("UserPageCollectedStats", () => {
         activeSeasonNumber={2}
       />
     );
+    fireEvent.click(screen.getByRole("button", { name: "Collection stats" }));
 
     expect(screen.getByRole("button", { name: /szn2/i })).toBeInTheDocument();
     expect(
@@ -370,9 +376,10 @@ describe("UserPageCollectedStats", () => {
         })}
       />
     );
+    fireEvent.click(screen.getByRole("button", { name: "Collection stats" }));
 
     expect(screen.getByText("Meme Sets")).toBeInTheDocument();
-    expect(screen.getByText("x1")).toBeInTheDocument();
+    expect(screen.getByText("1")).toBeInTheDocument();
   });
 
   it("ignores invalid zero seasons in the header and counts", () => {
@@ -397,6 +404,7 @@ describe("UserPageCollectedStats", () => {
         })}
       />
     );
+    fireEvent.click(screen.getByRole("button", { name: "Collection stats" }));
 
     expect(screen.queryByText("SZN0")).not.toBeInTheDocument();
     expect(screen.getByText("2/3 started")).toBeInTheDocument();
@@ -513,6 +521,7 @@ describe("UserPageCollectedStats", () => {
           })}
         />
       );
+      fireEvent.click(screen.getByRole("button", { name: "Collection stats" }));
 
       await waitFor(() => {
         expect(
@@ -593,7 +602,8 @@ describe("UserPageCollectedStats", () => {
     );
 
     expect(apiMock).not.toHaveBeenCalled();
-    expect(screen.getByText("x62")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Collection stats" }));
+    expect(screen.getByText("62")).toBeInTheDocument();
     expect(screen.getByText("2/3 started")).toBeInTheDocument();
   });
 
@@ -631,8 +641,9 @@ describe("UserPageCollectedStats", () => {
         />
       </QueryClientProvider>
     );
+    fireEvent.click(screen.getByRole("button", { name: "Collection stats" }));
 
-    expect(screen.getByText("x62")).toBeInTheDocument();
+    expect(screen.getByText("62")).toBeInTheDocument();
     expect(screen.getByText("2/3 started")).toBeInTheDocument();
 
     rerender(
@@ -651,13 +662,22 @@ describe("UserPageCollectedStats", () => {
       </QueryClientProvider>
     );
 
-    await waitFor(() => expect(apiMock).toHaveBeenCalledTimes(1));
-    expect(screen.queryByText("x62")).not.toBeInTheDocument();
+    await waitFor(() =>
+      expect(apiMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          endpoint: "collected-stats/another-collector",
+        })
+      )
+    );
+    expect(screen.queryByText("62")).not.toBeInTheDocument();
     expect(screen.queryByText("2/3 started")).not.toBeInTheDocument();
 
     nextCollectedStatsDeferred.resolve(nextCollectedStats);
 
-    await waitFor(() => expect(screen.getAllByText("x99")).toHaveLength(2));
+    await waitFor(() =>
+      expect(screen.getByText("99 editions")).toBeInTheDocument()
+    );
+    expect(screen.getByText("99")).toBeInTheDocument();
   });
 
   it("starts legacy stats fetches only when details are opened", async () => {
@@ -674,7 +694,7 @@ describe("UserPageCollectedStats", () => {
 
     expect(apiMock).not.toHaveBeenCalled();
 
-    await user.click(screen.getByRole("button", { name: "Details" }));
+    await user.click(screen.getByRole("button", { name: "Collection stats" }));
 
     await waitFor(() => expect(apiMock).toHaveBeenCalledTimes(4));
 
@@ -710,7 +730,7 @@ describe("UserPageCollectedStats", () => {
       />
     );
 
-    await user.click(screen.getByRole("button", { name: "Details" }));
+    await user.click(screen.getByRole("button", { name: "Collection stats" }));
 
     expect(
       screen.getByText("Stats are unavailable for this profile.")
@@ -735,7 +755,7 @@ describe("UserPageCollectedStats", () => {
     await waitFor(() => expect(apiMock).toHaveBeenCalledTimes(4));
 
     expect(
-      screen.getByRole("button", { name: "Hide Details" })
+      screen.getByRole("button", { name: "Hide collection stats" })
     ).toBeInTheDocument();
     expect(screen.getByTestId("details")).toHaveAttribute(
       "data-locale",
@@ -822,7 +842,7 @@ describe("UserPageCollectedStats", () => {
       </QueryClientProvider>
     );
 
-    await user.click(screen.getByRole("button", { name: "Details" }));
+    await user.click(screen.getByRole("button", { name: "Collection stats" }));
 
     await waitFor(() =>
       expect(screen.getByTestId("details")).toHaveAttribute(

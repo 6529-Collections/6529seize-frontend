@@ -14,15 +14,12 @@ import {
 } from "@/components/nft-transfer/TransferState";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t as translate } from "@/i18n/messages";
-import {
-  getCollectedCardAnchorId,
-  isCollectedCardAnchorId,
-} from "@/helpers/profile-collected-navigation";
+import { getCollectedCardAnchorId } from "@/helpers/profile-collected-navigation";
 import type { ContractType } from "@/types/enums";
-import { useEffect, useRef } from "react";
+import { useCollectedCardScrollRestoration } from "../hooks/useCollectedCardScrollRestoration";
 
 const COLLECTED_CARDS_LIST_CLASS =
-  "tw-m-0 tw-grid tw-grid-cols-2 tw-gap-4 tw-pb-2 tw-pl-0 sm:tw-grid-cols-3 md:tw-grid-cols-4 lg:tw-gap-6";
+  "tw-m-0 tw-grid tw-grid-cols-[repeat(auto-fill,minmax(min(100%,9rem),1fr))] tw-gap-4 tw-pb-2 tw-pl-0 sm:tw-grid-cols-3 md:tw-grid-cols-4 lg:tw-gap-6";
 // CSS marker removal can cause Safari/VoiceOver to drop native list semantics.
 const COLLECTED_CARDS_LIST_COMPATIBILITY_PROPS = {
   role: "list",
@@ -54,30 +51,10 @@ export default function UserPageCollectedCards({
   const transfer = useTransfer();
   const isTransferEnabled = transfer.enabled;
   const listLabel = translate(locale, "user.collected.cards.listLabel");
-  const restoredAnchorRef = useRef<string | null>(null);
-
-  useEffect(() => {
-    const anchor = globalThis.location.hash.slice(1);
-    if (
-      !isCollectedCardAnchorId(anchor) ||
-      restoredAnchorRef.current === anchor
-    ) {
-      return;
-    }
-
-    const cardElement = globalThis.document.getElementById(anchor);
-    if (!cardElement) {
-      return;
-    }
-
-    restoredAnchorRef.current = anchor;
-    const cardLink = cardElement.querySelector<HTMLAnchorElement>("a[href]");
-    cardLink?.focus({ preventScroll: true });
-    cardElement.scrollIntoView({ block: "center" });
-  }, [cards]);
+  useCollectedCardScrollRestoration(cards);
 
   return (
-    <div>
+    <div className="tw-w-full tw-min-w-0">
       {cards.length ? (
         <div className="tw-flow-root">
           <ul
@@ -147,6 +124,7 @@ export default function UserPageCollectedCards({
           </ul>
           {totalPages > 1 && (
             <CommonTablePagination
+              className="[&>div>span]:tw-flex-wrap [&>div>span]:tw-gap-3 [&>div]:tw-flex-wrap [&>div]:tw-gap-3 [&_button]:tw-min-h-11"
               currentPage={page}
               setCurrentPage={setPage}
               totalPages={totalPages}

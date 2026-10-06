@@ -4,17 +4,13 @@ import TransferToggle from "@/components/nft-transfer/TransferToggle";
 import UserAddressesSelectDropdown from "@/components/user/utils/addresses-select/UserAddressesSelectDropdown";
 import type { CommonSelectItem } from "@/components/utils/select/CommonSelect";
 import CommonSelect from "@/components/utils/select/CommonSelect";
-import type { CollectionSeized, CollectionSort } from "@/entities/IProfile";
-import { CollectedCollectionType } from "@/entities/IProfile";
+import type { CollectionSeized } from "@/entities/IProfile";
+import { CollectedCollectionType, CollectionSort } from "@/entities/IProfile";
+import { SortDirection } from "@/entities/ISort";
 import type { MemeSeason } from "@/entities/ISeason";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import {
-  faChevronLeft,
-  faChevronRight,
-} from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import type { RefObject } from "react";
-import { useEffect, useRef, useState } from "react";
+import Button from "@/components/utils/button/Button";
 import type { ProfileCollectedFilters } from "../UserPageCollected";
 import { getCollectedFilterMessage } from "./user-page-collected-filter-labels";
 import { COLLECTED_COLLECTIONS_META } from "./user-page-collected-filters.helpers";
@@ -39,6 +35,7 @@ export default function UserPageCollectedFilters({
   setSzn,
   setSubcollection,
   showTransfer,
+  clearFilters,
 }: {
   readonly profile: ApiIdentity;
   readonly filters: ProfileCollectedFilters;
@@ -49,68 +46,8 @@ export default function UserPageCollectedFilters({
   readonly setSzn: (szn: MemeSeason | null) => void;
   readonly setSubcollection: (subcollection: string | null) => void;
   readonly showTransfer: boolean;
+  readonly clearFilters: () => void;
 }) {
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const contentContainerRef = useRef<HTMLDivElement>(null);
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(false);
-
-  const checkScroll = () => {
-    const container = scrollContainerRef.current;
-    if (!container) return;
-
-    const { scrollLeft, scrollWidth, clientWidth } = container;
-    setCanScrollLeft(scrollLeft > 0);
-    setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 1);
-  };
-
-  useEffect(() => {
-    const container = scrollContainerRef.current;
-    const contentContainer = contentContainerRef.current;
-    if (!container) return;
-
-    checkScroll();
-    container.addEventListener("scroll", checkScroll, { passive: true });
-    window.addEventListener("resize", checkScroll);
-
-    const resizeObserver = new ResizeObserver(() => {
-      checkScroll();
-    });
-    resizeObserver.observe(container);
-    if (contentContainer) {
-      resizeObserver.observe(contentContainer);
-    }
-
-    return () => {
-      container.removeEventListener("scroll", checkScroll);
-      window.removeEventListener("resize", checkScroll);
-      resizeObserver.disconnect();
-    };
-  }, []);
-
-  useEffect(() => {
-    const container = scrollContainerRef.current;
-    if (!container) return;
-
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        checkScroll();
-      });
-    });
-  }, [filters.collection]);
-
-  const scrollLeft = () => {
-    const container = scrollContainerRef.current;
-    if (!container) return;
-    container.scrollBy({ left: -150, behavior: "smooth" });
-  };
-
-  const scrollRight = () => {
-    const container = scrollContainerRef.current;
-    if (!container) return;
-    container.scrollBy({ left: 150, behavior: "smooth" });
-  };
-
   const getShowSeized = (
     collection: CollectedCollectionType | null
   ): boolean =>
@@ -147,110 +84,87 @@ export default function UserPageCollectedFilters({
     }
   };
 
+  const hasFilters =
+    filters.collection !== null ||
+    !filters.accountForConsolidations ||
+    filters.sortBy !== CollectionSort.TOKEN_ID ||
+    filters.sortDirection !== SortDirection.DESC;
+
   return (
-    <div className="tw-relative tw-w-full">
-      <div
-        ref={scrollContainerRef}
-        className="tw-w-full tw-overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:tw-hidden"
-      >
-        <div
-          ref={contentContainerRef}
-          className="tw-nowrap tw-flex tw-w-full tw-min-w-max tw-items-center tw-justify-between tw-gap-x-3 lg:tw-gap-x-4"
-        >
-          <div className="tw-nowrap tw-flex tw-flex-shrink-0 tw-items-center tw-gap-x-3 lg:tw-gap-x-4">
-            {showTransfer && <TransferToggle />}
-
-            <CommonSelect
-              items={mainTabItems}
-              activeItem={activeMainTab}
-              setSelected={handleMainTabChange}
-              filterLabel={getCollectedFilterMessage(
-                "user.collected.filters.view"
-              )}
-              size="sm"
-            />
-
-            {activeMainTab === MainTab.NATIVE && (
-              <UserPageCollectedFiltersNativeDropdown
-                selected={filters.collection}
-                setSelected={setCollection}
-              />
-            )}
-
-            {activeMainTab === MainTab.NETWORK && (
-              <UserPageCollectedFiltersNetworkCollection
-                identity={filters.handleOrWallet}
-                selected={filters.subcollection}
-                setSelected={setSubcollection}
-              />
-            )}
-
-            <UserPageCollectedFiltersSortBy
-              selected={filters.sortBy}
-              direction={filters.sortDirection}
-              collection={filters.collection}
-              setSelected={setSortBy}
-            />
-            {getShowSeized(filters.collection) && (
-              <UserPageCollectedFiltersSeized
-                selected={filters.seized}
-                containerRef={containerRef}
-                setSelected={setSeized}
-              />
-            )}
-            {getShowSzn(filters.collection) && (
-              <UserPageCollectedFiltersSzn
-                selected={filters.szn}
-                initialSeasonId={filters.initialSznId}
-                setSelected={setSzn}
-              />
-            )}
-          </div>
-          <div className="tw-flex-shrink-0">
-            {filters.collection !== CollectedCollectionType.NETWORK && (
-              <UserAddressesSelectDropdown
-                wallets={profile.wallets ?? []}
-                containerRef={containerRef}
-                onActiveAddress={() => undefined}
-              />
-            )}
-          </div>
-        </div>
+    <section
+      aria-label={getCollectedFilterMessage("user.collected.filters.heading")}
+      className="tw-space-y-3"
+    >
+      <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-2">
+        <h3 className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-200">
+          {getCollectedFilterMessage("user.collected.filters.heading")}
+        </h3>
+        {hasFilters && (
+          <Button
+            variant="tertiary"
+            size="sm"
+            className="tw-min-h-11"
+            onClick={clearFilters}
+          >
+            {getCollectedFilterMessage("user.collected.filters.clear")}
+          </Button>
+        )}
       </div>
-      {canScrollLeft && (
-        <>
-          <div className="tw-pointer-events-none tw-absolute tw-bottom-0 tw-left-0 tw-top-0 tw-z-10 tw-w-24 tw-bg-gradient-to-r tw-from-black tw-via-black/40 tw-to-black/0" />
-          <button
-            onClick={scrollLeft}
-            aria-label={getCollectedFilterMessage(
-              "user.collected.filters.scrollLeft"
-            )}
-            className="tw-group tw-absolute tw-left-0 tw-top-1/2 tw-z-20 tw-inline-flex tw-h-10 tw-w-10 tw--translate-y-1/2 tw-items-center tw-justify-start tw-border-none tw-bg-transparent tw-p-0 tw-outline-none"
-          >
-            <FontAwesomeIcon
-              icon={faChevronLeft}
-              className="tw-h-6 tw-w-6 tw-text-iron-200 tw-transition tw-duration-300 tw-ease-out group-hover:tw-text-iron-300"
-            />
-          </button>
-        </>
-      )}
-      {canScrollRight && (
-        <>
-          <div className="tw-pointer-events-none tw-absolute tw-bottom-0 tw-right-0 tw-top-0 tw-z-10 tw-w-24 tw-bg-gradient-to-l tw-from-black tw-via-black/40 tw-to-black/0" />
-          <button
-            onClick={scrollRight}
-            aria-label={getCollectedFilterMessage(
-              "user.collected.filters.scrollRight"
-            )}
-            className="tw-group tw-absolute tw-right-0 tw-top-1/2 tw-z-20 tw-inline-flex tw-h-10 tw-w-10 tw--translate-y-1/2 tw-items-center tw-justify-end tw-border-none tw-bg-transparent tw-p-0 tw-outline-none"
-          >
-            <FontAwesomeIcon
-              icon={faChevronRight}
-              className="tw-h-6 tw-w-6 tw-text-iron-200 tw-transition tw-duration-300 tw-ease-out group-hover:tw-text-iron-300"
-            />
-          </button>
-        </>
-      )}
-    </div>
+      <div className="tw-grid tw-grid-cols-1 tw-gap-3 min-[400px]:tw-grid-cols-2 xl:tw-grid-cols-3 [&_button]:tw-min-h-11">
+        <CommonSelect
+          items={mainTabItems}
+          activeItem={activeMainTab}
+          setSelected={handleMainTabChange}
+          filterLabel={getCollectedFilterMessage("user.collected.filters.view")}
+          size="sm"
+          showFilterLabel
+        />
+        {activeMainTab === MainTab.NATIVE ? (
+          <UserPageCollectedFiltersNativeDropdown
+            selected={filters.collection}
+            setSelected={setCollection}
+          />
+        ) : (
+          <UserPageCollectedFiltersNetworkCollection
+            identity={filters.handleOrWallet}
+            selected={filters.subcollection}
+            setSelected={setSubcollection}
+          />
+        )}
+        <UserPageCollectedFiltersSortBy
+          selected={filters.sortBy}
+          direction={filters.sortDirection}
+          collection={filters.collection}
+          setSelected={setSortBy}
+        />
+        {getShowSeized(filters.collection) && (
+          <UserPageCollectedFiltersSeized
+            selected={filters.seized}
+            containerRef={containerRef}
+            setSelected={setSeized}
+          />
+        )}
+        {getShowSzn(filters.collection) && (
+          <UserPageCollectedFiltersSzn
+            selected={filters.szn}
+            initialSeasonId={filters.initialSznId}
+            setSelected={setSzn}
+          />
+        )}
+        <UserAddressesSelectDropdown
+          wallets={profile.wallets ?? []}
+          containerRef={containerRef}
+          onActiveAddress={() => undefined}
+        />
+        {showTransfer && <TransferToggle />}
+      </div>
+      <p className="tw-m-0 tw-text-xs tw-leading-relaxed tw-text-iron-400">
+        {getCollectedFilterMessage(
+          activeMainTab === MainTab.NATIVE
+            ? "user.collected.filters.nativeContext"
+            : "user.collected.filters.networkContext"
+        )}
+      </p>
+    </section>
   );
 }

@@ -41,6 +41,7 @@ export default function UserPageCollectedFiltersSeized({
       filterLabel={getCollectedFilterMessage("user.collected.filters.seized")}
       containerRef={containerRef}
       setSelected={setSelected}
+      showFilterLabel
       size="sm"
     />
   );

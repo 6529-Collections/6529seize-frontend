@@ -5,7 +5,7 @@ import type { CollectedCollectionType } from "@/entities/IProfile";
 import { CollectionSort } from "@/entities/IProfile";
 import type { SortDirection } from "@/entities/ISort";
 import type { CommonSelectItem } from "@/components/utils/select/CommonSelect";
-import CommonSelect from "@/components/utils/select/CommonSelect";
+import CommonDropdown from "@/components/utils/select/dropdown/CommonDropdown";
 import {
   getCollectedFilterMessage,
   getCollectedSortLabel,
@@ -47,12 +47,13 @@ export default function UserPageCollectedFiltersSortBy({
   }, [collection]);
 
   return (
-    <CommonSelect
+    <CommonDropdown
       items={items}
       activeItem={selected}
       filterLabel={getCollectedFilterMessage("user.collected.filters.sortBy")}
       setSelected={setSelected}
       sortDirection={direction}
+      showFilterLabel
       size="sm"
     />
   );

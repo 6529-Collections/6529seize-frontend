@@ -5,13 +5,7 @@ import type { MemeSeason } from "@/entities/ISeason";
 import { SortDirection } from "@/entities/ISort";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
-import {
-  act,
-  fireEvent,
-  render,
-  screen,
-  waitFor,
-} from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import type { RefObject } from "react";
 
 jest.mock("@/components/nft-transfer/TransferToggle", () => {
@@ -241,6 +235,7 @@ describe("UserPageCollectedFilters", () => {
   };
 
   const mockSetters = {
+    clearFilters: jest.fn(),
     setCollection: jest.fn(),
     setSortBy: jest.fn(),
     setSeized: jest.fn(),
@@ -347,187 +342,43 @@ describe("UserPageCollectedFilters", () => {
     expect(mockSetters.setSortBy).toHaveBeenCalledWith(CollectionSort.TOKEN_ID);
   });
 
-  it("shows scroll arrows when filters are not fully visible", async () => {
-    const { container } = render(
+  it("keeps all controls visible and clears the selected filters", () => {
+    render(
       <UserPageCollectedFilters
         profile={mockProfile}
-        filters={mockFilters}
+        filters={{ ...mockFilters, collection: CollectedCollectionType.MEMES }}
         containerRef={mockContainerRef}
         {...mockSetters}
       />
     );
-
-    await waitFor(() => {
-      const scrollContainer = container.querySelector(
-        '[class*="tw-overflow-x-auto"]'
-      ) as HTMLDivElement;
-      expect(scrollContainer).toBeTruthy();
-    });
-
-    const scrollContainer = container.querySelector(
-      '[class*="tw-overflow-x-auto"]'
-    ) as HTMLDivElement;
-    if (!scrollContainer) {
-      throw new Error("Scroll container not found");
+    for (const id of [
+      "collection-filter",
+      "sort-by-filter",
+      "seized-filter",
+      "szn-filter",
+      "address-select",
+    ]) {
+      expect(screen.getByTestId(id)).toBeVisible();
     }
-
-    await act(async () => {
-      Object.defineProperty(scrollContainer, "scrollLeft", {
-        writable: true,
-        configurable: true,
-        value: 50,
-      });
-      Object.defineProperty(scrollContainer, "scrollWidth", {
-        writable: true,
-        configurable: true,
-        value: 300,
-      });
-      Object.defineProperty(scrollContainer, "clientWidth", {
-        writable: true,
-        configurable: true,
-        value: 100,
-      });
-
-      const scrollEvent = new Event("scroll", { bubbles: true });
-      scrollContainer.dispatchEvent(scrollEvent);
-
-      await new Promise((resolve) => setTimeout(resolve, 0));
-    });
-
-    await waitFor(() => {
-      expect(screen.getByLabelText("Scroll filters left")).toBeInTheDocument();
-      expect(screen.getByLabelText("Scroll filters right")).toBeInTheDocument();
-    });
+    fireEvent.click(screen.getByRole("button", { name: "Clear filters" }));
+    expect(mockSetters.clearFilters).toHaveBeenCalledTimes(1);
   });
 
-  it("calls scrollHorizontally when scroll arrows are clicked", async () => {
-    const scrollBySpy = jest.fn();
-    const { container } = render(
+  it("shows the active wallet scope in Network view too", () => {
+    render(
       <UserPageCollectedFilters
         profile={mockProfile}
-        filters={mockFilters}
+        filters={{
+          ...mockFilters,
+          collection: CollectedCollectionType.NETWORK,
+        }}
         containerRef={mockContainerRef}
         {...mockSetters}
       />
     );
-
-    await waitFor(() => {
-      const scrollContainer = container.querySelector(
-        '[class*="tw-overflow-x-auto"]'
-      ) as HTMLDivElement;
-      expect(scrollContainer).toBeTruthy();
-    });
-
-    const scrollContainer = container.querySelector(
-      '[class*="tw-overflow-x-auto"]'
-    ) as HTMLDivElement;
-    if (!scrollContainer) {
-      throw new Error("Scroll container not found");
-    }
-
-    scrollContainer.scrollBy = scrollBySpy;
-
-    await act(async () => {
-      Object.defineProperty(scrollContainer, "scrollLeft", {
-        writable: true,
-        configurable: true,
-        value: 50,
-      });
-      Object.defineProperty(scrollContainer, "scrollWidth", {
-        writable: true,
-        configurable: true,
-        value: 300,
-      });
-      Object.defineProperty(scrollContainer, "clientWidth", {
-        writable: true,
-        configurable: true,
-        value: 100,
-      });
-
-      const scrollEvent = new Event("scroll", { bubbles: true });
-      scrollContainer.dispatchEvent(scrollEvent);
-
-      await new Promise((resolve) => setTimeout(resolve, 0));
-    });
-
-    await waitFor(() => {
-      expect(screen.getByLabelText("Scroll filters left")).toBeInTheDocument();
-      expect(screen.getByLabelText("Scroll filters right")).toBeInTheDocument();
-    });
-
-    const leftArrow = screen.getByLabelText("Scroll filters left");
-    const rightArrow = screen.getByLabelText("Scroll filters right");
-
-    fireEvent.click(leftArrow);
-    expect(scrollBySpy).toHaveBeenCalledWith({
-      left: -150,
-      behavior: "smooth",
-    });
-
-    fireEvent.click(rightArrow);
-    expect(scrollBySpy).toHaveBeenCalledWith({ left: 150, behavior: "smooth" });
-  });
-
-  it("sets up event listeners on mount and cleans up on unmount", async () => {
-    const addEventListenerSpy = jest.spyOn(
-      HTMLDivElement.prototype,
-      "addEventListener"
-    );
-    const removeEventListenerSpy = jest.spyOn(
-      HTMLDivElement.prototype,
-      "removeEventListener"
-    );
-    const windowAddEventListenerSpy = jest.spyOn(
-      globalThis,
-      "addEventListener"
-    );
-    const windowRemoveEventListenerSpy = jest.spyOn(
-      globalThis,
-      "removeEventListener"
-    );
-
-    const { container, unmount } = render(
-      <UserPageCollectedFilters
-        profile={mockProfile}
-        filters={mockFilters}
-        containerRef={mockContainerRef}
-        {...mockSetters}
-      />
-    );
-
-    await waitFor(() => {
-      const scrollContainer = container.querySelector(
-        '[class*="tw-overflow-x-auto"]'
-      ) as HTMLDivElement;
-      expect(scrollContainer).toBeTruthy();
-    });
-
-    await waitFor(() => {
-      expect(addEventListenerSpy).toHaveBeenCalledWith(
-        "scroll",
-        expect.any(Function),
-        { passive: true }
-      );
-      expect(windowAddEventListenerSpy).toHaveBeenCalledWith(
-        "resize",
-        expect.any(Function)
-      );
-    });
-
-    unmount();
-
-    expect(removeEventListenerSpy).toHaveBeenCalledWith(
-      "scroll",
-      expect.any(Function)
-    );
-    expect(windowRemoveEventListenerSpy).toHaveBeenCalledWith(
-      "resize",
-      expect.any(Function)
-    );
-
-    addEventListenerSpy.mockRestore();
-    removeEventListenerSpy.mockRestore();
-    windowAddEventListenerSpy.mockRestore();
-    windowRemoveEventListenerSpy.mockRestore();
+    expect(screen.getByTestId("network-collection")).toBeVisible();
+    expect(screen.getByTestId("address-select")).toBeVisible();
+    expect(screen.queryByTestId("seized-filter")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("szn-filter")).not.toBeInTheDocument();
   });
 });

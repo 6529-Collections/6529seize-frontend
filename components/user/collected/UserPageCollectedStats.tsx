@@ -15,6 +15,8 @@ import { CollectedStatsSeasons } from "./stats/subcomponents/CollectedStatsSeaso
 import type { DisplaySeason } from "./stats/types";
 import { useCollectedStatsData } from "./stats/useCollectedStatsData";
 import { useDesktopSeasonRowCapacity } from "./stats/useDesktopSeasonRowCapacity";
+import Button from "@/components/utils/button/Button";
+import { ChartBarIcon } from "@heroicons/react/24/outline";
 import CollectEntryLink from "@/components/collect/CollectEntryLink";
 import ButtonLink from "@/components/utils/button/ButtonLink";
 import { t } from "@/i18n/messages";
@@ -184,61 +186,104 @@ export default function UserPageCollectedStats({
       : fallbackVisibleActiveSeasonId;
 
   return (
-    <section className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-black">
-      <div className="tw-p-4 sm:tw-p-5">
-        <CollectedStatsHeader
-          metrics={mainMetrics}
-          activeCollection={activeCollection}
-          isDetailsOpen={isDetailsOpen}
-          detailsId={detailsId}
-          locale={locale}
-          onToggleDetails={handleToggleDetails}
-          onCollectionShortcut={onCollectionShortcut}
-        />
-      </div>
-
-      <CollectedStatsSeasons
-        allSeasonCount={allSeasons.length}
-        startedSeasons={startedSeasons}
-        visibleStartedSeasons={visibleStartedSeasons}
-        hiddenStartedSeasonCount={hiddenStartedSeasonCount}
-        notStartedSeasons={notStartedSeasons}
-        activeSeasonId={activeSeasonId}
-        activeSeasonNumber={activeSeasonNumber}
-        locale={locale}
-        hasTouchScreen={hasTouchScreen}
-        isDesktopLayout={isDesktopSeasonsLayout}
-        isDesktopSeasonListExpanded={isDesktopSeasonListExpanded}
-        desktopSeasonsRef={desktopSeasonsRef}
-        onActivateSeason={(seasonId) =>
-          setPreferredSeasonPreview({
-            seasonId,
-            activeSeasonFilterId,
-          })
-        }
-        onSeasonShortcut={onSeasonShortcut}
-        onToggleExpanded={() =>
-          setIsDesktopSeasonListExpanded((current) => !current)
-        }
-      />
-
-      <div ref={detailsScrollTargetRef} className="tw-scroll-mt-24">
-        <div className="tw-flex tw-flex-wrap tw-gap-2 tw-px-4 tw-py-4 sm:tw-px-5">
-          <CollectEntryLink collection="memes" intent={activeSeasonNumber === null ? "full_set" : "season"} definitionId={activeSeasonNumber === null ? undefined : String(activeSeasonNumber)} locale={locale} complete />
-          <ButtonLink href="/collect/orders" variant="tertiary" size="sm" className="tw-min-h-11">{t(locale, "collect.entry.manage")}</ButtonLink>
+    <section ref={detailsScrollTargetRef} className="tw-scroll-mt-24">
+      <Button
+        variant="tertiary"
+        size="sm"
+        className="tw-min-h-11"
+        aria-expanded={isDetailsOpen}
+        aria-controls={detailsId}
+        onClick={handleToggleDetails}
+      >
+        <ChartBarIcon aria-hidden="true" className="tw-size-4" />
+        {t(
+          locale,
+          isDetailsOpen
+            ? "user.collected.stats.details.hide"
+            : "user.collected.stats.details.show"
+        )}
+      </Button>
+      <div
+        id={detailsId}
+        hidden={!isDetailsOpen}
+        className="tw-mt-3 tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-black"
+      >
+        <div className="tw-p-4 sm:tw-p-5">
+          <CollectedStatsHeader
+            metrics={mainMetrics}
+            activeCollection={activeCollection}
+            onCollectionShortcut={onCollectionShortcut}
+          />
         </div>
-        <CollectedStatsDetailsPanel
-          isOpen={isDetailsOpen}
-          detailsId={detailsId}
-          statsPath={statsPath}
-          profile={profile}
-          activeAddress={activeAddress}
-          seasons={seasons}
-          tdh={tdh}
-          ownerBalance={ownerBalance}
-          balanceMemes={balanceMemes}
-          locale={locale}
-        />
+        {isDetailsOpen && (
+          <CollectedStatsSeasons
+            allSeasonCount={allSeasons.length}
+            startedSeasons={startedSeasons}
+            visibleStartedSeasons={visibleStartedSeasons}
+            hiddenStartedSeasonCount={hiddenStartedSeasonCount}
+            notStartedSeasons={notStartedSeasons}
+            activeSeasonId={activeSeasonId}
+            activeSeasonNumber={activeSeasonNumber}
+            locale={locale}
+            hasTouchScreen={hasTouchScreen}
+            isDesktopLayout={isDesktopSeasonsLayout}
+            isDesktopSeasonListExpanded={isDesktopSeasonListExpanded}
+            desktopSeasonsRef={desktopSeasonsRef}
+            onActivateSeason={(seasonId) =>
+              setPreferredSeasonPreview({
+                seasonId,
+                activeSeasonFilterId,
+              })
+            }
+            onSeasonShortcut={onSeasonShortcut}
+            onToggleExpanded={() =>
+              setIsDesktopSeasonListExpanded((current) => !current)
+            }
+          />
+        )}
+
+        <div className="tw-scroll-mt-24">
+          {isDetailsOpen && (
+            <div className="tw-px-4 tw-py-4 sm:tw-px-5">
+              <p className="tw-mb-2 tw-text-sm tw-text-iron-300">
+                {t(locale, "user.collected.personalActions")}
+              </p>
+              <div className="tw-flex tw-flex-wrap tw-gap-2">
+                <CollectEntryLink
+                  collection="memes"
+                  intent={activeSeasonNumber === null ? "full_set" : "season"}
+                  definitionId={
+                    activeSeasonNumber === null
+                      ? undefined
+                      : String(activeSeasonNumber)
+                  }
+                  locale={locale}
+                  complete
+                />
+                <ButtonLink
+                  href="/collect/orders"
+                  variant="tertiary"
+                  size="sm"
+                  className="tw-min-h-11"
+                >
+                  {t(locale, "collect.entry.manage")}
+                </ButtonLink>
+              </div>
+            </div>
+          )}
+          <CollectedStatsDetailsPanel
+            isOpen={isDetailsOpen}
+            detailsId={`${detailsId}-activity`}
+            statsPath={statsPath}
+            profile={profile}
+            activeAddress={activeAddress}
+            seasons={seasons}
+            tdh={tdh}
+            ownerBalance={ownerBalance}
+            balanceMemes={balanceMemes}
+            locale={locale}
+          />
+        </div>
       </div>
     </section>
   );

@@ -73,7 +73,10 @@ const READONLY_SPECS = {
   ],
   adminGuards: ["tests/admin/admin-destructive-guards-readonly.spec.ts"],
   publicContent: ["tests/content/public-content-readonly.spec.ts"],
-  profileDeepLinks: ["tests/social/profile-deep-links-readonly.spec.ts"],
+  profileDeepLinks: [
+    "tests/social/profile-deep-links-readonly.spec.ts",
+    "tests/social/profile-collected-readonly.spec.ts",
+  ],
   searchWaves: ["tests/social/search-waves-readonly.spec.ts"],
   museumInstitutionalPractice: [
     "tests/museum/institutional-practice-readonly.spec.ts",
