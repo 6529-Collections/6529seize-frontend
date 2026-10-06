@@ -124,7 +124,16 @@ for (const { clientTime, tableName, firstMintTime } of [
   });
 }
 
-for (const path of ["/messages", "/waves/create"]) {
+for (const { path, walletHeading } of [
+  {
+    path: "/messages",
+    walletHeading: "This content is only available to connected wallets.",
+  },
+  {
+    path: "/waves/create",
+    walletHeading: "Connect to create a wave",
+  },
+]) {
   test(`keeps ${path} neutral until wallet restoration can run @critical-shell @readonly`, async ({
     page,
   }) => {
@@ -143,7 +152,7 @@ for (const path of ["/messages", "/waves/create"]) {
       ).toBeVisible();
       await expect(
         page.getByRole("heading", {
-          name: "This content is only available to connected wallets.",
+          name: walletHeading,
         })
       ).toHaveCount(0);
       await expect(
@@ -152,7 +161,7 @@ for (const path of ["/messages", "/waves/create"]) {
       releaseScripts();
       await expect(
         page.getByRole("heading", {
-          name: "This content is only available to connected wallets.",
+          name: walletHeading,
         })
       ).toBeVisible();
     } finally {

@@ -35,6 +35,7 @@ jest.mock(
       data-depth={String(props.depth)}
       data-can-expand={String(props.canExpand)}
       data-unread-subwaves={String(props.hasUnreadSubwaves)}
+      data-score-details-disabled={String(props.scoreDetailsDisabled)}
     ></div>
   )
 );
@@ -186,6 +187,30 @@ it("renders structure even when no waves", () => {
     screen.getByRole("link", { name: "Profile Waves Feed" })
   ).toHaveAttribute("href", "/waves?view=profile-feed");
   expect(screen.getByRole("button", { name: "Joined" })).toBeInTheDocument();
+});
+
+it("suppresses announcement and wave-row score details during an empty search", () => {
+  render(
+    <UnifiedWavesListWaves
+      waves={baseWaves}
+      onHover={jest.fn()}
+      scrollContainerRef={scrollRef}
+    />
+  );
+  const expectScoreDetailsDisabled = (disabled: boolean) => {
+    for (const row of screen.getAllByTestId(/^wave-/)) {
+      expect(row).toHaveAttribute(
+        "data-score-details-disabled",
+        String(disabled)
+      );
+    }
+  };
+  expectScoreDetailsDisabled(false);
+  fireEvent.click(screen.getByRole("button", { name: "Find a wave…" }));
+  expect(screen.getByRole("searchbox")).toHaveValue("");
+  expectScoreDetailsDisabled(true);
+  fireEvent.click(screen.getByRole("button", { name: "Close wave search" }));
+  expectScoreDetailsDisabled(false);
 });
 
 it("calculates how many highly rated preview avatars fit", () => {

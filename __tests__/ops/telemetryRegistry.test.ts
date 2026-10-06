@@ -18,6 +18,7 @@ jest.mock("mixpanel-browser", () => ({
 }));
 
 import registry from "@/ops/telemetry/registry.json";
+import { HOMEPAGE_EVENT_NAMES } from "@/components/home/homepageTracking";
 import { ART_BLOCKS_SIGNAL_NAMES } from "@/components/waves/ArtBlocksTokenCard";
 import {
   AUTH_IMPACT_EVENT_NAMES,
@@ -111,6 +112,7 @@ describe("frontend telemetry registry", () => {
 
   it("registers the runtime custom signal constants", () => {
     const runtimeSignalNames = [
+      ...Object.values(HOMEPAGE_EVENT_NAMES),
       PAGE_VIEW_EVENT_NAME,
       ...AUTH_IMPACT_EVENT_NAMES,
       ...PRODUCT_IMPACT_EVENT_NAMES,
@@ -181,7 +183,8 @@ describe("frontend telemetry registry", () => {
 
   it("contains no local absolute paths or private attribute names", () => {
     const serializedRegistry = JSON.stringify(registry);
-    expect(serializedRegistry).not.toMatch(/\/(?:Users|home)\//);
+    // A relative producer such as components/home/... is not a local path.
+    expect(serializedRegistry).not.toMatch(/(?<![\w./-])\/(?:Users|home)\//);
     expect(serializedRegistry).not.toMatch(/[A-Za-z]:\\/);
     expect(serializedRegistry).not.toContain("file://");
 

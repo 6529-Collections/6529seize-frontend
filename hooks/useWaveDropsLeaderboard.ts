@@ -414,7 +414,7 @@ export function useWaveDropsLeaderboard({
     isError,
     isFetchNextPageError,
     isFetchPreviousPageError,
-    isFetching: isQueryEnabled && (isFetching || !hasInitialized),
+    isFetching: isQueryEnabled && (isFetching || (!hasInitialized && !isError)),
     isFetchingNextPage,
     isFetchingPreviousPage,
     refetch,

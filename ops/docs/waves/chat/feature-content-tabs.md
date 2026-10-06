@@ -14,10 +14,14 @@ available. Native and legacy defaults share this ordering on desktop, mobile
 web and the app.
 
 In the `My Votes` tab, non-image drops use a preview image from drop metadata when available, so rows render quickly and stay stable in list form.
-On web, tab choices made during the current visit survive background data
-loading. A fresh visit opens Chat, even if another tab was selected earlier.
-In the native app, Back restores the wave section from that navigation-history
-entry. Opening another wave without an explicit destination opens Chat.
+Each wave remembers its last selected valid tab in this browser or app. Ordinary
+wave navigation restores that choice, including after a reload or reopening the
+app. Main Stage can remember Leaderboard while Maybes Bar independently remembers
+Chat. A wave with no valid remembered choice opens Chat. Background competition
+loading does not change a deliberate selection.
+Explicit tab, competition, curation and message links retain their destinations.
+Browser Back/Forward and native app Back restore the section from that visit
+when it is still available, ahead of the wave's latest remembered choice.
 
 ## Location in the Site
 
@@ -43,9 +47,12 @@ entry. Opening another wave without an explicit destination opens Chat.
    create actions.
 3. If multiple sections are available, the tab strip appears and selects the
    active tab:
-   - A fresh wave visit without an explicit destination opens `Chat`, including
-     Memes and completed competition waves on web and in the native app.
-   - Loading or refreshing the default competition does not change Chat.
+   - An ordinary wave visit restores its last selected valid tab. A first visit,
+     or a visit without a valid saved choice, opens `Chat`, including Memes and
+     completed competition waves on web and in the native app.
+   - Loading or refreshing the default competition does not change deliberate
+     Chat selections. A remembered competition view waits for its identity and
+     availability to be checked before opening.
    - Explicit tab and competition links open their requested section. Native
      app Back restores the section from that visit when it is still available.
 4. Select a tab to switch sections.
@@ -83,8 +90,9 @@ entry. Opening another wave without an explicit destination opens Chat.
   video, or interactive media is indicated with a small badge at the title row.
 - In `My Votes`, non-image drops show a static preview thumbnail in the row when
   `preview_image` metadata is valid.
-- Open an ordinary wave link to return to Chat; explicit section links retain
-  their destination.
+- Select Leaderboard in Main Stage, open Maybes Bar and select Chat, then return
+  to Main Stage through the wave list: Leaderboard reopens. Returning to Maybes
+  Bar reopens Chat. Explicit section links retain their own destinations.
 - In the native app, open an author profile from Leaderboard and use Back to
   return to Leaderboard. Repeated profile visits preserve the same behavior.
 - A link targeting a specific chat message still opens Chat, even when it also
@@ -112,8 +120,12 @@ entry. Opening another wave without an explicit destination opens Chat.
 - Chat waves with curations show their curation tabs. A single curation remains
   a named tab; waves with none have no curation tabs.
 - `Leaderboard` can disappear after voting has ended for a wave.
-- A fresh wave visit opens Chat even if another tab was selected on an earlier
-  visit. Choices made during the current visit survive background data loading.
+- Each wave's remembered choice survives background loading, reloads and app
+  restarts in the same browser or app. Clearing local browser/app data removes it.
+- A remembered competition view is scoped to the competition where it was
+  selected. If another competition has become the default, an ordinary wave
+  visit falls back to Chat. Explicit links to the earlier competition still
+  retain their destination.
 - `Winners` is shown only after the first decision has passed.
 - `Sales` appears in curation waves only.
 - `My Votes` appears in memes and curation waves; `FAQ` appears in memes waves
@@ -122,7 +134,9 @@ entry. Opening another wave without an explicit destination opens Chat.
   assistive technologies.
 - Mobile tab-scroll controls have direction-specific accessible names, remain
   keyboard operable, and avoid smooth motion when reduced motion is requested.
-- Memes waves keep their existing tab order while opening Chat by default.
+- Memes wave tabs start with `Chat`, then `Leaderboard` (or `Submissions` after
+  voting ends), `Winners` when available, and `My Votes` for signed-in users.
+  Other available sections follow these tabs.
 - Curation waves do not expose an `Outcome` tab; `Sales` fills that dedicated
   results-slot instead.
 - In `My Votes`, non-image rows suppress inline media interaction even when the row
@@ -135,8 +149,8 @@ entry. Opening another wave without an explicit destination opens Chat.
 
 ## Failure and Recovery
 
-- If a selected tab becomes unavailable because wave state changes, the
-  interface moves to the first available tab.
+- If a selected tab becomes unavailable because wave state or permissions change,
+  the wave falls back to Chat. A completed legacy Leaderboard uses Submissions.
 - If a previously stored tab is no longer available for that wave, the UI falls
   back to the wave default.
 - If a saved or active `Sales` tab is revisited in a non-curation context, the
@@ -159,8 +173,9 @@ entry. Opening another wave without an explicit destination opens Chat.
 
 ## Limitations / Notes
 
-- Regular content-tab selection is UI state. Named curation selection is
-  encoded in the wave URL as `?curation={curationId}`.
+- Tab preferences are local to this browser or app and do not sync between
+  devices. Named curation selection is encoded in the wave URL as
+  `?curation={curationId}`.
 - Available tabs depend on wave type, curation settings, voting state, and
   first-decision status.
 - The app and web layouts present the tab row differently, but eligible root

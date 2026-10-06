@@ -78,6 +78,7 @@ export function NextMintLeadingSection() {
         </p>
       </div>
       <Link
+        data-home-action="View all"
         href={getWaveRoute({
           waveId,
           isDirectMessage: false,
@@ -111,7 +112,7 @@ export function NextMintLeadingSection() {
   }
 
   return (
-    <section className={sectionClassName}>
+    <section data-home-section="Coming up" className={sectionClassName}>
       <div>
         {header}
         <div className="tw-grid tw-grid-cols-1 tw-gap-6 md:tw-grid-cols-2 lg:tw-grid-cols-3 lg:tw-gap-8">

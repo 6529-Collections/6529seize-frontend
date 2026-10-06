@@ -4,6 +4,13 @@ import type { ReadonlyURLSearchParams } from "next/navigation";
 import { useCallback, useMemo, useState } from "react";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { BrainView } from "./brainMobileViews";
+import {
+  hasWaveDestination,
+  getHistoryWaveTab,
+  getRememberedTab,
+  useWaveTabPreference,
+} from "@/hooks/useWaveTabPreference";
+import { waveCompetitionTabs } from "@/helpers/default-competition.helpers";
 import { isCompetitionPathname } from "@/helpers/competition.helpers";
 
 const GLOBAL_VIEWS = new Set([
@@ -52,6 +59,7 @@ interface UseBrainMobileActiveViewParams {
   readonly searchParams: ReadonlyURLSearchParams;
   readonly wave: ApiWave | null | undefined;
   readonly waveId: string | null;
+  readonly defaultSelectionEnabled?: boolean | undefined;
   readonly restoredView?: BrainView | null | undefined;
 }
 
@@ -234,6 +242,22 @@ interface ActiveViewSelection {
   readonly view: BrainView;
 }
 
+function getRememberedView(
+  remembered: ReturnType<typeof getHistoryWaveTab>,
+  searchParams: ReadonlyURLSearchParams,
+  defaultSelectionEnabled: boolean
+): BrainView | null {
+  const savedTab = getRememberedTab(remembered);
+  if (
+    hasWaveDestination(searchParams) ||
+    typeof remembered !== "string" ||
+    savedTab === undefined ||
+    (defaultSelectionEnabled && waveCompetitionTabs[savedTab])
+  )
+    return null;
+  return WAVE_TAB_VIEWS[savedTab.toLowerCase()] ?? null;
+}
+
 export function useBrainMobileActiveView({
   firstDecisionDone,
   isApp,
@@ -251,7 +275,9 @@ export function useBrainMobileActiveView({
   wave,
   waveId,
   restoredView = null,
+  defaultSelectionEnabled = false,
 }: UseBrainMobileActiveViewParams): UseBrainMobileActiveViewResult {
+  const { tabs } = useWaveTabPreference();
   const [selection, setSelection] = useState<ActiveViewSelection | null>(null);
   const hasWave = Boolean(waveId);
   const isCompetitionRoute = isCompetitionPathname(pathname);
@@ -280,7 +306,15 @@ export function useBrainMobileActiveView({
   );
   let baseView = routeDefaultView ?? BrainView.DEFAULT;
   if (hasWave) {
-    baseView = restoredView ?? BrainView.DEFAULT;
+    const remembered =
+      getHistoryWaveTab(waveId ?? undefined) ??
+      (waveId ? tabs[waveId] : undefined);
+    const savedView = getRememberedView(
+      remembered,
+      searchParams,
+      defaultSelectionEnabled
+    );
+    baseView = restoredView ?? savedView ?? BrainView.DEFAULT;
     if (serialNoParam !== null) baseView = BrainView.DEFAULT;
     if (serialNoParam === null && tabParam !== null)
       baseView = WAVE_TAB_VIEWS[tabParam] ?? baseView;

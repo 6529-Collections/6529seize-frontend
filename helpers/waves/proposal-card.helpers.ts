@@ -44,6 +44,8 @@ interface ProposalCardViewModel {
   readonly title: string | null;
   readonly excerpt: string | null;
   readonly previewImage: ProposalCardPreviewImage | null;
+  readonly hasVideo: boolean;
+  readonly showVideoPlaceholder: boolean;
   readonly partCount: number;
   readonly mediaCount: number;
   readonly attachmentCount: number;
@@ -218,12 +220,22 @@ export const getProposalCardViewModel = (
     0
   );
 
+  const previewImage = recipe.showMediaThumbnail
+    ? getProposalCardPreviewImage(drop)
+    : null;
+  const hasVideo = drop.parts.some((part) =>
+    part.media.some((media) =>
+      media.mime_type.toLowerCase().startsWith("video/")
+    )
+  );
+
   return {
     title,
     excerpt,
-    previewImage: recipe.showMediaThumbnail
-      ? getProposalCardPreviewImage(drop)
-      : null,
+    previewImage,
+    hasVideo,
+    showVideoPlaceholder:
+      recipe.showMediaThumbnail && hasVideo && !previewImage,
     partCount: Math.max(drop.parts_count, drop.parts.length),
     mediaCount,
     attachmentCount,
