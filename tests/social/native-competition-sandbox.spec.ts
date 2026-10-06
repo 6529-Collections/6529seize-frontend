@@ -5,11 +5,14 @@ import type { Page } from "@playwright/test";
 import { expect, expectNoHorizontalOverflow, test } from "../testHelpers";
 import {
   dismissNextDevTools,
+  expectNoUnsafeSandboxMutations,
   getSandboxApiOrigin,
+  LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
   useLocalSandboxMutationGuard,
 } from "../support/localSandbox";
 
 const WAVE = "00000000-0000-4000-8000-000000000529";
+const ACCESS_WAVE = "00000000-0000-4000-8000-000000000566";
 const PROFILE = "00000000-0000-4000-8000-000000000531";
 const MEMES_WAVE = composerSandboxConstants.linkedDropMemesWaveId;
 const entryDropId = (id: string) =>
@@ -549,6 +552,79 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     "PLAYWRIGHT_AUTH_SANDBOX",
     "Native competition tests require an isolated local mock API."
   );
+  for (const destination of ["shared-wave", "default-competition"] as const) {
+    test(`opens locked submission rules in the app and restores Chat (${destination})`, async ({
+      page,
+      baseURL,
+    }, testInfo) => {
+      test.skip(
+        testInfo.project.name !== "web-mobile-chromium",
+        "Native app simulation uses the mobile viewport."
+      );
+      const sandbox = await installCompetitionApi(
+        page,
+        false,
+        false,
+        ACCESS_WAVE
+      );
+      sandbox.onlyCompetition("alpha");
+      await sandbox.legacyPrimary("alpha");
+      if (destination === "shared-wave") sandbox.setDefault(null);
+      await installSurfaceSimulation(
+        page.context(),
+        "capacitor-ios-sim",
+        testInfo.project.use.baseURL
+      );
+      await page.goto(`/waves/${ACCESS_WAVE}?tab=chat`);
+      await dismissNextDevTools(page);
+      const navigation = page.getByRole("navigation", {
+        name: "Wave sections",
+      });
+      const chat = navigation.getByRole("button", {
+        name: "Chat",
+        exact: true,
+      });
+      await chat.click(); // Exercise an explicit mobile view selection as well.
+      await expect(chat).toHaveAttribute("aria-current", "true");
+      const draft = "Keep my chat draft when opening app submission rules.";
+      await page
+        .getByRole("textbox", { name: "Write a chat message" })
+        .last()
+        .fill(draft);
+      await page
+        .getByRole("button", { name: "Submit drop", exact: true })
+        .press("Enter");
+      const details = page.getByRole("dialog", { name: "Submit drop" });
+      await expect(details).toBeFocused();
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Tab");
+      await expect(
+        details.getByRole("link", { name: "View submission rules" })
+      ).toBeFocused();
+      await page.keyboard.press("Enter");
+
+      const configuration = navigation.getByRole("button", {
+        name: "Configuration",
+        exact: true,
+      });
+      await expect(page).toHaveURL(
+        destination === "shared-wave"
+          ? `/waves/${ACCESS_WAVE}?tab=configuration`
+          : `/waves/${ACCESS_WAVE}/competitions/alpha?tab=rules`,
+        { timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS }
+      );
+      await expect(configuration).toHaveAttribute("aria-current", "true");
+      await expect(configuration).toBeFocused();
+      await expect(chat).not.toHaveAttribute("aria-current", "true");
+      await chat.click();
+      await expect(chat).toHaveAttribute("aria-current", "true");
+      await expect(
+        page.getByRole("textbox", { name: "Write a chat message" }).last()
+      ).toContainText(draft, { timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
+      await expectNoHorizontalOverflow(page);
+      await expectNoUnsafeSandboxMutations(baseURL);
+    });
+  }
   test("isolates parallel votes and content and preserves back, forward and shared chat", async ({
     page,
   }, testInfo) => {

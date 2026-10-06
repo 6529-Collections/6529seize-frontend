@@ -31,6 +31,7 @@ const makeEditorState = (json: unknown) =>
 
 const renderPersistence = (
   initialProps: Partial<{
+    isDropMode: boolean;
     activeDrop: ActiveDropState | null;
     editorState: EditorState | null;
     dropEditorRefreshKey: number;
@@ -38,12 +39,14 @@ const renderPersistence = (
 ) =>
   renderHook(
     (props: {
+      isDropMode?: boolean;
       activeDrop: ActiveDropState | null;
       editorState: EditorState | null;
       dropEditorRefreshKey: number;
     }) =>
       useWaveDraftPersistence({
         waveId: WAVE_ID,
+        isDropMode: props.isDropMode ?? false,
         activeDrop: props.activeDrop,
         editorState: props.editorState,
         dropEditorRefreshKey: props.dropEditorRefreshKey,
@@ -111,6 +114,58 @@ describe("useWaveDraftPersistence", () => {
       WAVE_ID,
       JSON.stringify({ root: { text: "hello" } })
     );
+  });
+
+  it.each([0, 1000])(
+    "leaves the chat draft untouched when a submission closes after %i ms",
+    (elapsed) => {
+      readRestorableWaveDraftMock.mockReturnValue('{"root":{"text":"chat"}}');
+      const { result, unmount } = renderPersistence({
+        isDropMode: true,
+        editorState: makeEditorState({ root: { text: "submission" } }),
+      });
+
+      expect(result.current.initialDraftJson).toBeNull();
+      expect(readRestorableWaveDraftMock).not.toHaveBeenCalled();
+      act(() => jest.advanceTimersByTime(elapsed));
+      unmount();
+
+      expect(writeWaveDraftMock).not.toHaveBeenCalled();
+      expect(clearWaveDraftMock).not.toHaveBeenCalled();
+    }
+  );
+
+  it("does not seed or save a submission when the composer changes mode", () => {
+    readRestorableWaveDraftMock.mockReturnValue('{"root":{"text":"chat"}}');
+    const { result, rerender, unmount } = renderPersistence({
+      editorState: makeEditorState({ root: { text: "chat" } }),
+    });
+    rerender({
+      isDropMode: true,
+      activeDrop: null,
+      editorState: makeEditorState({ root: { text: "submission" } }),
+      dropEditorRefreshKey: 0,
+    });
+
+    expect(result.current.initialDraftJson).toBeNull();
+    unmount();
+    expect(writeWaveDraftMock).not.toHaveBeenCalled();
+    expect(clearWaveDraftMock).not.toHaveBeenCalled();
+  });
+
+  it("does not clear the chat draft when a submission resets", () => {
+    const { rerender, unmount } = renderPersistence({ isDropMode: true });
+    rerender({
+      isDropMode: true,
+      activeDrop: null,
+      editorState: null,
+      dropEditorRefreshKey: 1,
+    });
+    act(() => jest.advanceTimersByTime(1000));
+    unmount();
+
+    expect(clearWaveDraftMock).not.toHaveBeenCalled();
+    expect(writeWaveDraftMock).not.toHaveBeenCalled();
   });
 
   it("never saves while a reply or quote is active", () => {

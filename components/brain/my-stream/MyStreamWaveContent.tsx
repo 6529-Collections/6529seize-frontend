@@ -17,6 +17,7 @@ import {
   useHeaderContext,
 } from "@/contexts/HeaderContext";
 import { useContentTab } from "../ContentTabContext";
+import { useBrainMobileSubmissionRules } from "../mobile/BrainMobileSubmissionRulesContext";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import MyStreamWaveChat from "./MyStreamWaveChat";
 import MyStreamWaveCurationContent from "./curations/MyStreamWaveCurationContent";
@@ -109,6 +110,7 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
   const router = useRouter();
   const { flat } = useCompetitionNavigation();
   const { isApp } = useDeviceInfo();
+  const viewMobileSubmissionRules = useBrainMobileSubmissionRules();
   const queryClient = useQueryClient();
   const locale = useBrowserLocale();
   const { connectedProfile, activeProfileProxy, setToast } = useAuth();
@@ -446,9 +448,13 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
 
   /** Open existing rules and move focus out of the disappearing details card. */
   const viewSubmissionRules = useCallback(() => {
+    if (isApp && viewMobileSubmissionRules) {
+      viewMobileSubmissionRules();
+      return;
+    }
     focusSubmissionRulesRef.current = true;
     setActiveContentTab(MyStreamWaveTab.CONFIGURATION);
-  }, [setActiveContentTab]);
+  }, [isApp, setActiveContentTab, viewMobileSubmissionRules]);
 
   useLayoutEffect(() => {
     if (

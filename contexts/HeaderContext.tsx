@@ -29,10 +29,13 @@ interface HeaderContextType {
   refState: HTMLDivElement | null;
   waveDropAction: HeaderWaveDropAction | null;
   setWaveDropAction: (action: HeaderWaveDropAction | null) => void;
+  requestSubmissionRulesFocus: (waveId: string) => void;
+  consumeSubmissionRulesFocus: (waveId: string) => boolean;
 }
 
 const HeaderContext = createContext<HeaderContextType | undefined>(undefined);
 
+/** Share header actions and preserve their focus intent across route changes. */
 export const HeaderProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
@@ -41,6 +44,19 @@ export const HeaderProvider: React.FC<{ children: ReactNode }> = ({
   const [refState, setRefState] = useState<HTMLDivElement | null>(null);
   const [waveDropAction, setWaveDropAction] =
     useState<HeaderWaveDropAction | null>(null);
+  const submissionRulesFocusWaveIdRef = useRef<string | null>(null);
+
+  /** Keep a rules focus request across a Wave-to-competition route change. */
+  const requestSubmissionRulesFocus = useCallback((waveId: string) => {
+    submissionRulesFocusWaveIdRef.current = waveId;
+  }, []);
+
+  /** Consume the request only when that Wave's Configuration tab is mounted. */
+  const consumeSubmissionRulesFocus = useCallback((waveId: string): boolean => {
+    if (submissionRulesFocusWaveIdRef.current !== waveId) return false;
+    submissionRulesFocusWaveIdRef.current = null;
+    return true;
+  }, []);
 
   const setHeaderRef = useCallback((ref: HTMLDivElement | null) => {
     if (headerRefInternal.current !== ref) {
@@ -59,8 +75,16 @@ export const HeaderProvider: React.FC<{ children: ReactNode }> = ({
       refState: refState,
       waveDropAction,
       setWaveDropAction,
+      requestSubmissionRulesFocus,
+      consumeSubmissionRulesFocus,
     }),
-    [setHeaderRef, refState, waveDropAction]
+    [
+      setHeaderRef,
+      refState,
+      waveDropAction,
+      requestSubmissionRulesFocus,
+      consumeSubmissionRulesFocus,
+    ]
   );
 
   return (

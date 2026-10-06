@@ -163,6 +163,7 @@ export default function CreateDropLayout(props: CreateDropLayoutProps) {
   const { setToast } = useAuth();
   const { initialDraftJson } = useWaveDraftPersistence({
     waveId: wave.id,
+    isDropMode: props.isDropMode,
     activeDrop,
     editorState: props.editorState,
     dropEditorRefreshKey: props.dropEditorRefreshKey,
