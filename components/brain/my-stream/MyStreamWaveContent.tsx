@@ -213,7 +213,7 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
   const stableWaveKey = `wave-${waveId}`;
 
   // Get the active tab and utilities from global context
-  const { activeContentTab, setActiveContentTab } = useContentTab();
+  const { activeContentTab, availableTabs, setActiveContentTab } = useContentTab();
   const activeCurationId = competitionOnly
     ? null
     : searchParams.get("curation");
@@ -502,15 +502,20 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
       compactLabel: chatSubmitDropLabels.compactLabel,
       restrictionMessage: chatSubmitDropRestrictionMessage,
       accessWave: wave,
-      onViewRules: viewSubmissionRules,
+      onViewRules:
+        isApp || availableTabs.includes(MyStreamWaveTab.CONFIGURATION)
+          ? viewSubmissionRules
+          : undefined,
       onOpen: () => openChatSubmitDrop(null),
       onOpenWithCurationUrl: openChatSubmitDrop,
     }),
     [
+      availableTabs,
       canOpenChatSubmitDrop,
       chatSubmitDropLabels.compactLabel,
       chatSubmitDropLabels.label,
       chatSubmitDropRestrictionMessage,
+      isApp,
       viewSubmissionRules,
       wave,
       openChatSubmitDrop,
