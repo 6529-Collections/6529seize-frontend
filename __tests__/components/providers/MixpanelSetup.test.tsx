@@ -1,5 +1,5 @@
 import MixpanelSetup from "@/components/providers/MixpanelSetup";
-import { render } from "@testing-library/react";
+import { act, render } from "@testing-library/react";
 import React from "react";
 
 const clearIdentityMock = jest.fn();
@@ -45,6 +45,9 @@ jest.mock("@/services/analytics/mixpanel", () => ({
 }));
 
 describe("MixpanelSetup", () => {
+  afterEach(() => {
+    jest.useRealTimers();
+  });
   beforeEach(() => {
     connectedProfile = null;
     fetchingProfile = false;
@@ -138,6 +141,59 @@ describe("MixpanelSetup", () => {
     rerender(<MixpanelSetup />);
     expect(clearIdentityMock).toHaveBeenCalledTimes(1);
   });
+
+  it("reinitializes and retries a failed switch while the new profile remains selected", () => {
+    jest.useFakeTimers();
+    performanceConsent = true;
+    connectedProfile = { id: 42 };
+    const { rerender } = render(<MixpanelSetup />);
+
+    identifyMock.mockReturnValueOnce(false);
+    connectedProfile = { id: 43 };
+    rerender(<MixpanelSetup />);
+    act(() => jest.advanceTimersByTime(999));
+    expect(identifyMock).toHaveBeenCalledTimes(2);
+    act(() => jest.advanceTimersByTime(1));
+    expect(initAnalyticsMock).toHaveBeenCalledTimes(2);
+    expect(identifyMock).toHaveBeenNthCalledWith(3, "43");
+    act(() => jest.advanceTimersByTime(60000));
+    expect(identifyMock).toHaveBeenCalledTimes(3);
+  });
+
+  it("bounds retries when identity setup keeps failing", () => {
+    jest.useFakeTimers();
+    performanceConsent = true;
+    connectedProfile = { id: 42 };
+    identifyMock.mockReturnValue(false);
+    render(<MixpanelSetup />);
+
+    act(() => jest.advanceTimersByTime(60000));
+    expect(initAnalyticsMock).toHaveBeenCalledTimes(3);
+    expect(identifyMock).toHaveBeenCalledTimes(3);
+  });
+
+  it.each(["consent", "profile", "unmount"] as const)(
+    "cancels failed-profile retry after %s changes",
+    (change) => {
+      jest.useFakeTimers();
+      performanceConsent = true;
+      connectedProfile = { id: 42 };
+      identifyMock.mockReturnValueOnce(false);
+      const { rerender, unmount } = render(<MixpanelSetup />);
+
+      if (change === "unmount") {
+        unmount();
+      } else {
+        if (change === "consent") performanceConsent = false;
+        else connectedProfile = { id: 43 };
+        rerender(<MixpanelSetup />);
+      }
+      act(() => jest.advanceTimersByTime(60000));
+      expect(identifyMock.mock.calls.filter(([id]) => id === "42")).toHaveLength(1);
+      expect(initAnalyticsMock).toHaveBeenCalledTimes(1);
+      if (change === "profile") expect(identifyMock).toHaveBeenLastCalledWith("43");
+    }
+  );
 
   it("tracks drop detail views separately when the drop query changes", () => {
     performanceConsent = true;

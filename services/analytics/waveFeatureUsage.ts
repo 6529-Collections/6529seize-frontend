@@ -226,6 +226,8 @@ export function waveFeatureRouteFamily(
   pathname: string
 ): WaveFeatureContext["routeFamily"] {
   if (pathname === "/waves") return "/waves";
+  if (pathname === "/waves/create" || pathname.startsWith("/waves/create/"))
+    return "/other";
   if (pathname.startsWith("/waves/")) return "/waves/:waveId";
   if (pathname === "/my-stream") return "/my-stream";
   if (pathname === "/messages") return "/messages";

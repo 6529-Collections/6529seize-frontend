@@ -61,6 +61,7 @@ Platforms are `desktop_web`, `mobile_web`, `native`, `desktop_app`; viewer is
 `guest`, `profile`, or `proxy`. These are availability cohorts, not claims that
 the user can vote, submit or administer a Wave. Gates still determine which
 controls exist. Route families are Waves, My Stream, Messages, or `/other`.
+Wave creation uses `/other`, keeping its sidebar traffic outside Wave detail cohorts.
 
 Seen uses `selection_source=automatic` for default, restored, deep-linked,
 history-driven and other selections without a recorded action in the current
@@ -98,8 +99,10 @@ Logout clears local identity even when consent is missing or inaccessible;
 delivery stays closed until affirmative consent returns. If profile identity
 setup fails, delivery closes and local identity resets rather than attributing
 the new profile's activity to the previous profile. The provider caches only
-successful setup. Delivery resumes after analytics reinitializes and identity
-setup succeeds, for example after consent is granted again or a reload. Already dispatched
+successful setup. For the same profile, the provider retries initialization and
+identity setup after one second, then five seconds if needed. Profile or consent
+changes and unmount cancel pending retries. Delivery stays closed if both retries
+fail; a later consent grant or reload can retry again. Already dispatched
 network requests cannot be recalled. SDK and observer failures are best effort
 and must not interrupt controls.
 

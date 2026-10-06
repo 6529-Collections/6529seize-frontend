@@ -124,6 +124,8 @@ it("reads only known tab panel keys and normalizes dynamic route families", () =
   expect(
     waveFeatureRouteFamily("/waves/private-id/competitions/private-competition")
   ).toBe("/waves/:waveId");
+  expect(waveFeatureRouteFamily("/waves/create")).toBe("/other");
+  expect(waveFeatureRouteFamily("/waves/create/")).toBe("/other");
   expect(waveFeatureRouteFamily("/alice/private")).toBe("/other");
 });
 

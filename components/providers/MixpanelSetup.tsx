@@ -15,6 +15,8 @@ import { resetWaveFeatureVisit } from "@/services/analytics/waveFeatureUsage";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useRef } from "react";
 
+const IDENTITY_RETRY_DELAYS = [1000, 5000] as const;
+
 const getProfileRouteTarget = (pathname: string): string | null => {
   return pathname.split("/").find((segment) => segment.length > 0) ?? null;
 };
@@ -71,7 +73,26 @@ export default function MixpanelSetup() {
       return;
     }
 
-    identifiedProfileIdRef.current = identify(profileId) ? profileId : null;
+    let retryTimer: ReturnType<typeof setTimeout> | undefined;
+    let retryAttempt = 0;
+    const attemptIdentity = () => {
+      if (identify(profileId)) {
+        identifiedProfileIdRef.current = profileId;
+        return;
+      }
+      identifiedProfileIdRef.current = null;
+      const retryDelay = IDENTITY_RETRY_DELAYS.at(retryAttempt);
+      if (retryDelay === undefined) return;
+      retryAttempt += 1;
+      retryTimer = setTimeout(() => {
+        initAnalytics();
+        attemptIdentity();
+      }, retryDelay);
+    };
+    attemptIdentity();
+    return () => {
+      if (retryTimer !== undefined) clearTimeout(retryTimer);
+    };
   }, [connectedProfile?.id, hasConsent]);
 
   useEffect(() => {
