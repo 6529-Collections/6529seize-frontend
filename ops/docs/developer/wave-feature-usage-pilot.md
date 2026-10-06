@@ -85,8 +85,7 @@ send hooks and batch transports apply the same consent gate, including pending
 and recovered updates. Their `$set`/`$set_once` operations remove reserved SDK
 navigation/attribution fields while preserving explicit traits and identity
 metadata. The pinned SDK bypasses its hook for recovered orphaned queue entries,
-so batch senders
-start only after the final guard is installed. This narrow SDK integration
+so batch senders start only after the final guard is installed. This narrow SDK integration
 must be checked when upgrading Mixpanel. The pinned SDK creates batchers
 synchronously; an unexpected missing batcher keeps delivery closed. The SDK's
 explicit XHR/storage fallback uses direct delivery through the send-time hook.
@@ -96,7 +95,11 @@ consent cookies fail closed even while React consent state is stale. Existing
 Mixpanel identity and delivery metadata remain. Consent withdrawal synchronously
 closes the send gate, clears SDK batches and resets identity.
 Logout clears local identity even when consent is missing or inaccessible;
-delivery stays closed until affirmative consent returns. Already dispatched
+delivery stays closed until affirmative consent returns. If profile identity
+setup fails, delivery closes and local identity resets rather than attributing
+the new profile's activity to the previous profile. The provider caches only
+successful setup. Delivery resumes after analytics reinitializes and identity
+setup succeeds, for example after consent is granted again or a reload. Already dispatched
 network requests cannot be recalled. SDK and observer failures are best effort
 and must not interrupt controls.
 

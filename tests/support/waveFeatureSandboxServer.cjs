@@ -8,7 +8,7 @@ const tailwind = require("tailwindcss");
 const loadConfig = require("tailwindcss/loadConfig");
 const root = path.resolve(__dirname, "../..");
 const fixture = path.join(__dirname, "waveFeatureFixture.tsx");
-const port = Number(process.env.PORT || 3298);
+const port = Number(process.env.PORT || 3302);
 const fixtureExport = (names) =>
   `export { ${names} } from ${JSON.stringify(fixture)};`;
 const stubs = new Map([
@@ -164,6 +164,30 @@ async function start() {
       ],
     }),
   ]).process("@tailwind base; @tailwind utilities;", { from: undefined });
+  const captureDestination = (pathname) => {
+    if (pathname === "/people" || pathname.startsWith("/capture/engage"))
+      return people;
+    if (pathname === "/groups" || pathname.startsWith("/capture/groups"))
+      return groups;
+    return events;
+  };
+  const captureRequest = async (req, pathname) => {
+    let body = "";
+    for await (const chunk of req) body += chunk;
+    const params = new URLSearchParams(
+      body || new URL(req.url, "http://localhost").search
+    );
+    const data = params.get("data");
+    if (!data) return;
+    const json =
+      data.startsWith("{") || data.startsWith("[")
+        ? data
+        : Buffer.from(data, "base64").toString();
+    const decoded = JSON.parse(json);
+    captureDestination(pathname).push(
+      ...(Array.isArray(decoded) ? decoded : [decoded])
+    );
+  };
   const server = http.createServer(async (req, res) => {
     const pathname = new URL(req.url, `http://127.0.0.1:${port}`).pathname;
     if (pathname === "/fixture.js") {
@@ -178,13 +202,7 @@ async function start() {
     }
     if (["/events", "/people", "/groups"].includes(pathname)) {
       res.setHeader("Content-Type", "application/json");
-      const captured =
-        pathname === "/people"
-          ? people
-          : pathname === "/groups"
-            ? groups
-            : events;
-      res.end(JSON.stringify(captured));
+      res.end(JSON.stringify(captureDestination(pathname)));
       return;
     }
     if (pathname === "/clear") {
@@ -195,25 +213,7 @@ async function start() {
       return;
     }
     if (pathname.startsWith("/capture/")) {
-      let body = "";
-      for await (const chunk of req) body += chunk;
-      const params = new URLSearchParams(
-        body || new URL(req.url, "http://localhost").search
-      );
-      const data = params.get("data");
-      if (data) {
-        const decoded = JSON.parse(
-          data.startsWith("{") || data.startsWith("[")
-            ? data
-            : Buffer.from(data, "base64").toString()
-        );
-        const captured = pathname.startsWith("/capture/engage")
-          ? people
-          : pathname.startsWith("/capture/groups")
-            ? groups
-            : events;
-        captured.push(...(Array.isArray(decoded) ? decoded : [decoded]));
-      }
+      await captureRequest(req, pathname);
       res.setHeader("Content-Type", "application/json");
       res.end("1");
       return;

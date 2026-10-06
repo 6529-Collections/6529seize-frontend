@@ -453,6 +453,53 @@ describe("mixpanel analytics wrapper", () => {
     expect(unregisterMock).toHaveBeenCalledWith("mp_keyword");
   });
 
+  it.each(["scrub", "identify", "traits"] as const)(
+    "closes delivery after profile switching fails during %s and retries after reinitialization",
+    async (failure) => {
+      const analytics = await loadModule({
+        nodeEnv: "production",
+        token: "public-token",
+      });
+      analytics.initAnalytics();
+      expect(analytics.identify("42")).toBe(true);
+      const generation = analytics.getAnalyticsGeneration();
+      const operations = {
+        scrub: unregisterMock,
+        identify: identifyMock,
+        traits: peopleSetMock,
+      };
+      operations[failure].mockImplementationOnce(() => {
+        throw new Error("Synthetic profile transition failure");
+      });
+
+      expect(analytics.identify("43", { plan: "explicit" })).toBe(false);
+      expect(analytics.isAnalyticsTrackingAllowed()).toBe(false);
+      expect(analytics.getAnalyticsGeneration()).toBeGreaterThan(generation);
+      expect(stopBatchMock).toHaveBeenCalledTimes(1);
+      expect(resetMock).toHaveBeenCalledTimes(1);
+      expect(analytics.identify("43")).toBe(false);
+      analytics.trackAnalyticsEvent("Product Event");
+      expect(trackMock).not.toHaveBeenCalled();
+      const config = initMock.mock.calls[0]?.[1];
+      expect(
+        config.hooks.before_send_events({ event: "Product Event", properties: {} })
+      ).toBeNull();
+      expect(config.hooks.before_send_people({ $distinct_id: "42" })).toBeNull();
+      for (const kind of ["events", "people", "groups"] as const) {
+        mixpanelMock.request_batchers[kind].sendRequest([], {}, jest.fn());
+      }
+      expect(sendBatchMock).not.toHaveBeenCalled();
+      expect(sendPeopleMock).not.toHaveBeenCalled();
+      expect(sendGroupsMock).not.toHaveBeenCalled();
+
+      analytics.initAnalytics();
+      expect(analytics.identify("43")).toBe(true);
+      expect(identifyMock).toHaveBeenLastCalledWith("43");
+      analytics.trackAnalyticsEvent("Product Event");
+      expect(trackMock).toHaveBeenCalledTimes(1);
+    }
+  );
+
   it("guards orphaned batches at the final transport and drops them after consent withdrawal", async () => {
     const analytics = await loadModule({
       nodeEnv: "production",

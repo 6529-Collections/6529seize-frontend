@@ -100,6 +100,17 @@ function Fixture() {
   };
   window.featureFixture = {
     logout: clearIdentity,
+    switchProfile: identify,
+    resumeAnalytics: () => {
+      initAnalytics();
+    },
+    failIdentityOnce: () => {
+      const original = mixpanel.identify.bind(mixpanel);
+      mixpanel.identify = () => {
+        mixpanel.identify = original;
+        throw new Error("Synthetic identity failure");
+      };
+    },
     updateTraits: () => identify("529", { fixture_trait: "allowed" }),
     resetVisit: () => {
       history.pushState({}, "", "?drop=fixture-drop");

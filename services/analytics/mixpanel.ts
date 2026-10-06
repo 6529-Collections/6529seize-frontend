@@ -238,9 +238,9 @@ export const trackAnalyticsEvent = (
 export const identify = (
   profileId: number | string,
   traits?: AnalyticsProperties
-): void => {
+): boolean => {
   if (!isAnalyticsReady()) {
-    return;
+    return false;
   }
 
   const distinctId = String(profileId);
@@ -256,8 +256,11 @@ export const identify = (
       mixpanel.people.set(sanitizedTraits);
     }
     clearPrivateSuperProperties();
+    return true;
   } catch {
-    // Identity telemetry is also best effort.
+    // A failed profile transition must never deliver under the previous identity.
+    disableAnalytics();
+    return false;
   }
 };
 

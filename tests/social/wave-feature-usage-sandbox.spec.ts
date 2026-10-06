@@ -414,6 +414,61 @@ test("logout clears persisted identity without consent before anonymous delivery
   }
 });
 
+test("failed profile switching closes real SDK delivery until identity setup succeeds", async ({
+  page,
+}) => {
+  for (const transport of ["batch", "direct"]) {
+    await page.goto(`/waves/private-wave?transport=${transport}`);
+    await page
+      .getByRole("button", { name: "Enable synthetic telemetry" })
+      .click();
+    await expect
+      .poll(async () =>
+        (await events(page)).some(
+          (event) =>
+            event.event === "$identify" &&
+            event.properties["distinct_id"] === "529"
+        )
+      )
+      .toBe(true);
+    expect(
+      await page.evaluate(() => {
+        window.featureFixture.failIdentityOnce();
+        return window.featureFixture.switchProfile("530");
+      })
+    ).toBe(false);
+    await page.request.get("/clear");
+    await page.evaluate(() => window.featureFixture.lateEvent());
+    await visibleTab(page, "Winners").click();
+    await expect(
+      page.getByRole("status", { name: "Selected fixture state" })
+    ).toHaveText("WINNERS:RANK");
+    await page.waitForTimeout(1200);
+    expect(await events(page)).toHaveLength(0);
+    expect(await peopleUpdates(page)).toHaveLength(0);
+
+    expect(
+      await page.evaluate(() => {
+        window.featureFixture.resumeAnalytics();
+        return window.featureFixture.switchProfile("530");
+      })
+    ).toBe(true);
+    await page.evaluate(() => window.featureFixture.lateEvent());
+    await expect
+      .poll(async () =>
+        (await featureEvents(page, "Wave Feature Activated", "chat")).some(
+          (event) => event.properties["distinct_id"] === "530"
+        )
+      )
+      .toBe(true);
+    expect(
+      (await events(page)).some(
+        (event) => event.properties["distinct_id"] === "529"
+      )
+    ).toBe(false);
+  }
+});
+
 test("missing or malformed cookie blocks delivery despite stale UI consent", async ({
   page,
 }) => {

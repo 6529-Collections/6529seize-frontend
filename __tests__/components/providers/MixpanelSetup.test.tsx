@@ -53,7 +53,7 @@ describe("MixpanelSetup", () => {
     searchParams = new URLSearchParams();
     clearIdentityMock.mockReset();
     disableAnalyticsMock.mockReset();
-    identifyMock.mockReset();
+    identifyMock.mockReset().mockReturnValue(true);
     initAnalyticsMock.mockReset();
     trackPageViewMock.mockReset();
   });
@@ -113,6 +113,30 @@ describe("MixpanelSetup", () => {
       page_group: "notifications",
       route_pattern: "/notifications",
     });
+  });
+
+  it("caches only successful identity setup across profile changes", () => {
+    performanceConsent = true;
+    connectedProfile = { id: 42 };
+    identifyMock.mockReturnValueOnce(false);
+
+    const { rerender } = render(<MixpanelSetup />);
+
+    expect(identifyMock).toHaveBeenCalledTimes(1);
+    connectedProfile = null;
+    rerender(<MixpanelSetup />);
+    expect(clearIdentityMock).not.toHaveBeenCalled();
+    connectedProfile = { id: 42 };
+    rerender(<MixpanelSetup />);
+
+    expect(identifyMock).toHaveBeenCalledTimes(2);
+    expect(identifyMock).toHaveBeenNthCalledWith(1, "42");
+    expect(identifyMock).toHaveBeenNthCalledWith(2, "42");
+    rerender(<MixpanelSetup />);
+    expect(identifyMock).toHaveBeenCalledTimes(2);
+    connectedProfile = null;
+    rerender(<MixpanelSetup />);
+    expect(clearIdentityMock).toHaveBeenCalledTimes(1);
   });
 
   it("tracks drop detail views separately when the drop query changes", () => {

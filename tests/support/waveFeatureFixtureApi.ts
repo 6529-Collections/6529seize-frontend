@@ -3,6 +3,9 @@ declare global {
   interface Window {
     featureFixture: {
       logout: () => void;
+      switchProfile: (profileId: string) => boolean;
+      resumeAnalytics: () => void;
+      failIdentityOnce: () => void;
       updateTraits: () => void;
       resetVisit: () => void;
       revoke: () => void;

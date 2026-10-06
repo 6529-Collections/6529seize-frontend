@@ -71,8 +71,7 @@ export default function MixpanelSetup() {
       return;
     }
 
-    identify(profileId);
-    identifiedProfileIdRef.current = profileId;
+    identifiedProfileIdRef.current = identify(profileId) ? profileId : null;
   }, [connectedProfile?.id, hasConsent]);
 
   useEffect(() => {
