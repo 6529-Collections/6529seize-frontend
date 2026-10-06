@@ -112,6 +112,64 @@ describe("submissionMetadata", () => {
     );
   });
 
+  it.each<[boolean, string, string | undefined]>([
+    [
+      true,
+      "  An event if selected.\nNo ticket cost.  ",
+      "An event if selected.\nNo ticket cost.",
+    ],
+    [false, "A retained draft", undefined],
+    [true, "   ", undefined],
+  ])(
+    "saves a plan only for a marked action (%s)",
+    (isAdditionalActionPromised, plan, expected) => {
+      const metadata = buildSubmissionMetadata({
+        traits: mockTraits,
+        operationalData: {
+          ...mockOperationalData,
+          additional_action_plan: plan,
+        },
+        isAdditionalActionPromised,
+      });
+      expect(
+        metadata.find((item) => item.data_key === "additional_action_plan")
+          ?.data_value
+      ).toBe(expected);
+    }
+  );
+
+  it("enforces the plan limit only when it would be submitted", () => {
+    const input = {
+      traits: mockTraits,
+      operationalData: {
+        ...mockOperationalData,
+        additional_action_plan: "p".repeat(5001),
+      },
+    };
+    expect(
+      getSubmissionMetadataLengthValidation({
+        ...input,
+        isAdditionalActionPromised: true,
+      }).hasErrors
+    ).toBe(true);
+    expect(
+      getSubmissionMetadataLengthValidation({
+        ...input,
+        isAdditionalActionPromised: false,
+      }).hasErrors
+    ).toBe(false);
+    expect(
+      getSubmissionMetadataLengthValidation({
+        ...input,
+        isAdditionalActionPromised: true,
+        operationalData: {
+          ...mockOperationalData,
+          additional_action_plan: "p".repeat(5000),
+        },
+      }).hasErrors
+    ).toBe(false);
+  });
+
   it("uses key-specific metadata value limits", () => {
     const validation = getSubmissionMetadataLengthValidation({
       traits: buildTraits({

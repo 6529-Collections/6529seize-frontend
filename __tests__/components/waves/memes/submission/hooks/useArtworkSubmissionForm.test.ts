@@ -215,6 +215,26 @@ describe("useArtworkSubmissionForm", () => {
       result.current.setAdditionalActionPromised(true);
     });
     expect(result.current.isAdditionalActionPromised).toBe(true);
+    act(() => {
+      result.current.setAdditionalActionPlan(
+        "If selected, hold a free exhibition."
+      );
+      result.current.setAdditionalActionPromised(false);
+      result.current.handleContinueFromArtwork();
+      result.current.handleBackToArtwork();
+    });
+    expect(result.current.operationalData.additional_action_plan).toBe(
+      "If selected, hold a free exhibition."
+    );
+    act(() => {
+      result.current.setAdditionalActionPromised(true);
+    });
+    expect(result.current.getSubmissionData()).toMatchObject({
+      isAdditionalActionPromised: true,
+      operationalData: {
+        additional_action_plan: "If selected, hold a free exhibition.",
+      },
+    });
   });
 
   it("preserves draft fields while syncing the read-only submitting profile", () => {

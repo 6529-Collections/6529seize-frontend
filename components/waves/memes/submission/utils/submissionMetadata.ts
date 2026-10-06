@@ -1,10 +1,15 @@
 import type { ApiDropMetadata } from "@/generated/models/ApiDropMetadata";
-import type { OperationalData } from "../types/OperationalData";
+import {
+  MemesSubmissionAdditionalInfoKey,
+  type OperationalData,
+} from "../types/OperationalData";
 import type { TraitsData } from "../types/TraitsData";
 import { validateStrictAddress } from "./addressValidation";
 import { objectEntries } from "./objectEntries";
 
 const METADATA_VALUE_DEFAULT_MAX_LENGTH = 5000;
+export const ADDITIONAL_ACTION_PLAN_MAX_LENGTH =
+  METADATA_VALUE_DEFAULT_MAX_LENGTH;
 export const METADATA_VALUE_TITLE_MAX_LENGTH = 255;
 export const METADATA_VALUE_DESCRIPTION_MAX_LENGTH = 8000;
 const METADATA_VALUE_WARNING_THRESHOLD_RATIO = 0.9;
@@ -40,7 +45,8 @@ interface MetadataLengthValidationResult {
 }
 
 const buildOperationalMetadata = (
-  operationalData?: OperationalData
+  operationalData: OperationalData | undefined,
+  isAdditionalActionPromised: boolean
 ): ApiDropMetadata[] => {
   if (!operationalData) {
     return [];
@@ -60,6 +66,14 @@ const buildOperationalMetadata = (
       data_value: operationalData.about_artist,
     },
   ];
+
+  const plan = operationalData.additional_action_plan?.trim();
+  if (isAdditionalActionPromised && plan) {
+    operationalMetadata.push({
+      data_key: MemesSubmissionAdditionalInfoKey.ADDITIONAL_ACTION_PLAN,
+      data_value: plan,
+    });
+  }
 
   if (operationalData.airdrop_config.length > 0) {
     const validEntries = operationalData.airdrop_config.filter((entry) => {
@@ -98,9 +112,11 @@ const buildOperationalMetadata = (
 export const buildSubmissionMetadata = ({
   traits,
   operationalData,
+  isAdditionalActionPromised = false,
 }: {
   readonly traits: TraitsData;
   readonly operationalData?: OperationalData | undefined;
+  readonly isAdditionalActionPromised?: boolean | undefined;
 }): ApiDropMetadata[] => {
   const traitMetadata: ApiDropMetadata[] = objectEntries(traits)
     .map(([key, value]) => ({
@@ -109,7 +125,10 @@ export const buildSubmissionMetadata = ({
     }))
     .filter((metadata) => metadata.data_value.length > 0);
 
-  return [...traitMetadata, ...buildOperationalMetadata(operationalData)];
+  return [
+    ...traitMetadata,
+    ...buildOperationalMetadata(operationalData, isAdditionalActionPromised),
+  ];
 };
 
 const getMetadataValueLengthStatus = (
@@ -166,13 +185,16 @@ const validateMetadataValueLengths = (
 export const getSubmissionMetadataLengthValidation = ({
   traits,
   operationalData,
+  isAdditionalActionPromised = false,
 }: {
   readonly traits: TraitsData;
   readonly operationalData?: OperationalData | undefined;
+  readonly isAdditionalActionPromised?: boolean | undefined;
 }): MetadataLengthValidationResult =>
   validateMetadataValueLengths(
     buildSubmissionMetadata({
       traits,
       operationalData,
+      isAdditionalActionPromised,
     })
   );

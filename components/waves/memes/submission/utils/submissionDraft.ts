@@ -48,6 +48,7 @@ const getDefaultOperationalData = (): OperationalData => ({
   },
   commentary: "",
   about_artist: "",
+  additional_action_plan: "",
 });
 
 const parseJson = (value: string | undefined): unknown => {
@@ -209,6 +210,7 @@ const buildOperationalDataDraft = (drop: ApiDrop): OperationalData => {
     ),
     commentary: metadata.get("commentary") ?? "",
     about_artist: metadata.get("about_artist") ?? "",
+    additional_action_plan: metadata.get("additional_action_plan") ?? "",
   };
 };
 

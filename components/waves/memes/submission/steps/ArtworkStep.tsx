@@ -53,6 +53,8 @@ interface ArtworkStepProps {
   readonly setTraits: (traits: Partial<TraitsData>) => void;
   readonly isAdditionalActionPromised: boolean;
   readonly onAdditionalActionPromisedChange: (value: boolean) => void;
+  readonly additionalActionPlan: string;
+  readonly onAdditionalActionPlanChange: (value: string) => void;
   readonly isSubmitting?: boolean | undefined;
   readonly submissionPhase?: SubmissionPhase | undefined;
   readonly initialTraits?: TraitsData | undefined;
@@ -100,6 +102,8 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
   setTraits,
   isAdditionalActionPromised,
   onAdditionalActionPromisedChange,
+  additionalActionPlan,
+  onAdditionalActionPlanChange,
   isSubmitting = false,
   submissionPhase = "idle",
   initialTraits,
@@ -269,6 +273,8 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
       showAdditionalActionPromised={true}
       isAdditionalActionPromised={isAdditionalActionPromised}
       onAdditionalActionPromisedChange={onAdditionalActionPromisedChange}
+      additionalActionPlan={additionalActionPlan}
+      onAdditionalActionPlanChange={onAdditionalActionPlanChange}
     />
   );
 

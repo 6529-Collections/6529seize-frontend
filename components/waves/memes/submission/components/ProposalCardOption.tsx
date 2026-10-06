@@ -17,7 +17,7 @@ export function ProposalCardOption({
   const locale = useBrowserLocale();
   const id = useId();
   return (
-    <div className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900/50 tw-p-4">
+    <div className="tw-rounded-lg tw-bg-iron-900/70 tw-px-3 tw-py-3 tw-ring-1 tw-ring-iron-800 tw-transition-colors desktop-hover:hover:tw-ring-iron-700">
       <label
         className="tw-flex tw-min-h-11 tw-cursor-pointer tw-items-start tw-gap-3"
         htmlFor={id}
@@ -31,15 +31,15 @@ export function ProposalCardOption({
             onChange(event.target.checked ? "portrait" : null)
           }
           aria-describedby={`${id}-description`}
-          className="tw-mt-1 tw-size-5 tw-shrink-0 tw-accent-primary-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+          className="tw-form-checkbox tw-mt-0.5 tw-h-4 tw-w-4 tw-flex-shrink-0 tw-cursor-pointer tw-rounded tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-800 tw-text-primary-400 focus:tw-ring-primary-400 focus:tw-ring-offset-0"
         />
-        <span>
-          <span className="tw-block tw-text-sm tw-font-semibold tw-text-iron-100">
+        <span className="tw-flex tw-min-w-0 tw-flex-col tw-gap-1">
+          <span className="tw-text-sm tw-font-medium tw-text-iron-100">
             {t(locale, "memes.proposalFrame.enable")}
           </span>
           <span
             id={`${id}-description`}
-            className="tw-mt-1 tw-block tw-text-sm tw-text-iron-400"
+            className="tw-text-pretty tw-text-xs tw-leading-5 tw-text-iron-400"
           >
             {t(locale, "memes.proposalFrame.description")}
           </span>

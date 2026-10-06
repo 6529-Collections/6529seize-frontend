@@ -96,6 +96,7 @@ export const buildPreviewDrop = ({
   const metadata = buildSubmissionMetadata({
     traits,
     operationalData,
+    isAdditionalActionPromised,
   });
   const primaryAddress =
     connectedProfile?.primary_wallet ??

@@ -134,6 +134,10 @@ export function MemesArtSubmissionStepContent({
           setTraits={form.setTraits}
           isAdditionalActionPromised={form.isAdditionalActionPromised}
           onAdditionalActionPromisedChange={form.setAdditionalActionPromised}
+          additionalActionPlan={
+            form.operationalData.additional_action_plan ?? ""
+          }
+          onAdditionalActionPlanChange={form.setAdditionalActionPlan}
           isSubmitting={isSubmitting}
           submissionPhase={submissionPhase}
           uploadProgress={uploadProgress}
@@ -176,6 +180,10 @@ export function MemesArtSubmissionStepContent({
       return (
         <AdditionalInfoStep
           traits={form.traits}
+          isAdditionalActionPromised={form.isAdditionalActionPromised}
+          additionalActionPlan={
+            form.operationalData.additional_action_plan ?? ""
+          }
           airdropEntries={form.operationalData.airdrop_config}
           onAirdropEntriesChange={form.setAirdropConfig}
           paymentInfo={form.operationalData.payment_info}

@@ -13,6 +13,11 @@ import { fetchDropMetadataByIdV2 } from "@/services/api/wave-drops-v2-api";
 import { useQuery } from "@tanstack/react-query";
 import { useDropVoteSummary } from "./useDropVoteSummary";
 
+export interface DropMetadataState {
+  readonly status: "loading" | "error" | "ready";
+  readonly retry: () => void;
+}
+
 export const useSingleWaveDropData = (
   initialDrop: ExtendedDrop,
   onClose: () => void
@@ -26,7 +31,7 @@ export const useSingleWaveDropData = (
     onWaveNotFound,
   });
 
-  const { data: hydratedMetadata } = useQuery({
+  const metadataQuery = useQuery({
     queryKey: [
       QueryKey.DROP,
       {
@@ -39,10 +44,23 @@ export const useSingleWaveDropData = (
         dropId: initialDrop.id,
         priorityMetadata: initialDrop.metadata,
         signal,
+        throwOnError: true,
       }),
     enabled: initialDrop.id.trim().length > 0,
     staleTime: DROP_DETAIL_STALE_TIME_MS,
   });
+  const { data: hydratedMetadata, refetch: refetchMetadata } = metadataQuery;
+  const retryMetadata = useCallback(() => {
+    void refetchMetadata();
+  }, [refetchMetadata]);
+  let metadataStatus: DropMetadataState["status"] = "ready";
+  if (hydratedMetadata === undefined) {
+    metadataStatus = metadataQuery.isError ? "error" : "loading";
+  }
+  const metadataState: DropMetadataState = {
+    status: metadataStatus,
+    retry: retryMetadata,
+  };
 
   const voteSummary = useDropVoteSummary({
     dropId: initialDrop.id,
@@ -70,5 +88,5 @@ export const useSingleWaveDropData = (
     [drop, initialDrop.stableHash, initialDrop.stableKey]
   );
 
-  return { drop, wave, extendedDrop, voteSummary };
+  return { drop, wave, extendedDrop, voteSummary, metadataState };
 };

@@ -139,11 +139,13 @@ export const fetchDropMetadataByIdV2 = async ({
   headers,
   priorityMetadata = [],
   signal,
+  throwOnError = false,
 }: {
   readonly dropId: string;
   readonly headers?: Record<string, string> | undefined;
   readonly priorityMetadata?: readonly ApiDropMetadataResponse[] | undefined;
   readonly signal?: AbortSignal | undefined;
+  readonly throwOnError?: boolean | undefined;
 }): Promise<ApiDropMetadataResponse[]> => {
   try {
     const metadata = await commonApiFetch<ApiDropMetadataResponse[]>({
@@ -154,6 +156,9 @@ export const fetchDropMetadataByIdV2 = async ({
     return mergeMetadata(priorityMetadata, metadata);
   } catch (error) {
     rethrowAbortFetchError(error);
+    if (throwOnError) {
+      throw error;
+    }
     return [...priorityMetadata];
   }
 };

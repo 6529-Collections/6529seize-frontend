@@ -15,6 +15,8 @@ import { PreviewLeaderboardGalleryCase } from "./components/PreviewLeaderboardGa
 import { PreviewLeaderboardListCase } from "./components/PreviewLeaderboardListCase";
 import { ProposalCardPreview } from "../components/ProposalCardPreview";
 import type { ProposalCardDocumentInput } from "@/lib/proposal-card/document";
+import { AdditionalActionSummary } from "../components/AdditionalActionSummary";
+import { MemesSubmissionAdditionalInfoKey } from "../types/OperationalData";
 
 interface MemesSubmissionPreviewScreenProps {
   readonly proposalCard?: ProposalCardDocumentInput | undefined;
@@ -60,6 +62,19 @@ export function MemesSubmissionPreviewScreen({
             {t(locale, "memes.submission.preview.description")}
           </p>
         </div>
+
+        <AdditionalActionSummary
+          isAdditionalActionPromised={
+            previewDrop.is_additional_action_promised === true
+          }
+          plan={
+            previewDrop.metadata.find(
+              (item) =>
+                item.data_key ===
+                String(MemesSubmissionAdditionalInfoKey.ADDITIONAL_ACTION_PLAN)
+            )?.data_value
+          }
+        />
 
         {proposalCard && (
           <div className="tw-space-y-3">

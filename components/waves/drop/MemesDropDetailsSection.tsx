@@ -13,10 +13,12 @@ import type {
   MemesDropMedia,
 } from "./memesDropPanelTypes";
 import type { DropVoteSummaryState } from "./useDropVoteSummary";
+import type { DropMetadataState } from "./useSingleWaveDropData";
 
 interface MemesDropDetailsSectionProps {
   readonly drop: ExtendedDrop;
   readonly voteSummary: DropVoteSummaryState;
+  readonly metadataState?: DropMetadataState | undefined;
   readonly wave: ApiWave | null;
   readonly artworkMedia?: MemesDropMedia | null | undefined;
   readonly fileInfo: MemesDropFileInfo | null;
@@ -30,6 +32,7 @@ interface MemesDropDetailsSectionProps {
 export function MemesDropDetailsSection({
   drop,
   voteSummary,
+  metadataState,
   wave,
   artworkMedia,
   fileInfo,
@@ -48,7 +51,7 @@ export function MemesDropDetailsSection({
       <div className="tw-mx-auto tw-max-w-3xl tw-space-y-8">
         <SingleWaveDropTraits drop={drop} />
         <SingleWaveDropInfoDetails drop={drop} voteSummary={voteSummary} />
-        <WaveDropAdditionalInfo drop={drop} />
+        <WaveDropAdditionalInfo drop={drop} metadataState={metadataState} />
 
         {hasDownloads ? (
           <div className="tw-mt-8 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-8">

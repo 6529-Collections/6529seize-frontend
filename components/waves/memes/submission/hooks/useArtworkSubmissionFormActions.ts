@@ -84,6 +84,13 @@ export function useArtworkSubmissionFormActions({
     [dispatch]
   );
 
+  const setAdditionalActionPlan = useCallback(
+    (value: string) => {
+      dispatch({ type: "SET_ADDITIONAL_ACTION_PLAN", payload: value });
+    },
+    [dispatch]
+  );
+
   const setTraits = useCallback(
     (traitsUpdate: Partial<TraitsData>) => {
       dispatch({ type: "SET_MULTIPLE_TRAITS", payload: traitsUpdate });
@@ -172,6 +179,7 @@ export function useArtworkSubmissionFormActions({
     handleContinueFromTerms,
     setAboutArtist,
     setAdditionalActionPromised,
+    setAdditionalActionPlan,
     setAdditionalMedia,
     setAgreements,
     setAirdropConfig,

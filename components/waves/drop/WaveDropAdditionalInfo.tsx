@@ -13,6 +13,8 @@ import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useMemo } from "react";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import { AdditionalActionSummary } from "@/components/waves/memes/submission/components/AdditionalActionSummary";
+import type { DropMetadataState } from "./useSingleWaveDropData";
 
 const MAX_MEDIA = 4;
 const VIDEO_EXTENSIONS = new Set(["mp4", "mov", "m4v", "webm", "ogv"]);
@@ -62,10 +64,12 @@ const isVideoUrl = (url: string) => {
 
 interface WaveDropAdditionalInfoProps {
   readonly drop: ExtendedDrop;
+  readonly metadataState?: DropMetadataState | undefined;
 }
 
 export const WaveDropAdditionalInfo = ({
   drop,
+  metadataState,
 }: WaveDropAdditionalInfoProps) => {
   const locale = useBrowserLocale();
   const { commentary, aboutArtist, previewImage, promoVideo, mediaItems } =
@@ -122,7 +126,14 @@ export const WaveDropAdditionalInfo = ({
     }, [drop.metadata]);
 
   const displayedMedia = mediaItems.slice(0, MAX_MEDIA);
+  const hasAdditionalAction = drop.is_additional_action_promised === true;
+  const additionalActionPlan = drop.metadata.find(
+    (item) =>
+      item.data_key ===
+      String(MemesSubmissionAdditionalInfoKey.ADDITIONAL_ACTION_PLAN)
+  )?.data_value;
   const hasContent =
+    hasAdditionalAction ||
     previewImage ||
     promoVideo ||
     displayedMedia.length > 0 ||
@@ -135,6 +146,13 @@ export const WaveDropAdditionalInfo = ({
 
   return (
     <section className="tw-space-y-8">
+      {hasAdditionalAction && (
+        <AdditionalActionSummary
+          isAdditionalActionPromised={true}
+          plan={additionalActionPlan}
+          metadataState={metadataState}
+        />
+      )}
       {previewImage && (
         <div className="tw-space-y-2">
           <h3 className="tw-text-base tw-font-semibold tw-text-iron-100">

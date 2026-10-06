@@ -38,7 +38,11 @@ export const transformToApiRequest = (data: {
     ],
     referenced_nfts: [],
     mentioned_users: [],
-    metadata: buildSubmissionMetadata({ traits, operationalData }),
+    metadata: buildSubmissionMetadata({
+      traits,
+      operationalData,
+      isAdditionalActionPromised,
+    }),
     signature: null,
     is_safe_signature: isSafeSignature,
     signer_address: signerAddress,

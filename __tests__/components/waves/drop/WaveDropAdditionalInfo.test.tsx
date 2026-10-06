@@ -113,6 +113,99 @@ describe("WaveDropAdditionalInfo", () => {
     expect(screen.getByText("Process notes here.")).toBeInTheDocument();
   });
 
+  it("displays a marked plan separately from bio and preserves legacy blank declarations", () => {
+    const drop = {
+      ...buildDrop([
+        {
+          data_key: "additional_action_plan",
+          data_value: "An exhibition if selected.\nFree entry.",
+        },
+        { data_key: "about_artist", data_value: "Artist bio stays separate." },
+      ]),
+      is_additional_action_promised: true,
+    };
+    const { rerender } = render(<WaveDropAdditionalInfo drop={drop} />);
+    expect(
+      screen.getByRole("region", { name: "Additional Action" })
+    ).toHaveTextContent("An exhibition if selected.");
+    expect(screen.getByText("Artist bio stays separate.")).toBeInTheDocument();
+    rerender(<WaveDropAdditionalInfo drop={{ ...drop, metadata: [] }} />);
+    expect(
+      screen.getByText("Additional Action marked. No separate plan provided.")
+    ).toBeInTheDocument();
+    rerender(
+      <WaveDropAdditionalInfo
+        drop={{ ...drop, is_additional_action_promised: false }}
+      />
+    );
+    expect(
+      screen.queryByRole("region", { name: "Additional Action" })
+    ).not.toBeInTheDocument();
+    expect(screen.getByText("Artist bio stays separate.")).toBeInTheDocument();
+  });
+
+  it("does not claim a missing plan while metadata is loading or unavailable, and offers retry", () => {
+    const drop = { ...buildDrop([]), is_additional_action_promised: true };
+    const retry = jest.fn();
+    const { rerender } = render(
+      <WaveDropAdditionalInfo
+        drop={drop}
+        metadataState={{ status: "loading", retry }}
+      />
+    );
+    expect(screen.getByText("Loading the artist’s plan…")).toBeInTheDocument();
+    expect(
+      screen.queryByText("Additional Action marked. No separate plan provided.")
+    ).not.toBeInTheDocument();
+    rerender(
+      <WaveDropAdditionalInfo
+        drop={drop}
+        metadataState={{ status: "error", retry }}
+      />
+    );
+    expect(
+      screen.getByText("The artist’s plan could not be loaded.")
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Retry loading plan" }));
+    expect(retry).toHaveBeenCalledTimes(1);
+    rerender(
+      <WaveDropAdditionalInfo
+        drop={{
+          ...drop,
+          metadata: [
+            {
+              data_key: "additional_action_plan",
+              data_value: "Recovered plan",
+            },
+          ],
+        }}
+        metadataState={{ status: "ready", retry }}
+      />
+    );
+    expect(screen.getByText("Recovered plan")).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Retry loading plan" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("keeps a known plan visible if a metadata request fails", () => {
+    render(
+      <WaveDropAdditionalInfo
+        drop={{
+          ...buildDrop([
+            { data_key: "additional_action_plan", data_value: "Known plan" },
+          ]),
+          is_additional_action_promised: true,
+        }}
+        metadataState={{ status: "error", retry: jest.fn() }}
+      />
+    );
+    expect(screen.getByText("Known plan")).toBeInTheDocument();
+    expect(
+      screen.queryByText("The artist’s plan could not be loaded.")
+    ).not.toBeInTheDocument();
+  });
+
   it("renders up to four media items", () => {
     const additionalMedia = JSON.stringify({
       artist_profile_media: [],

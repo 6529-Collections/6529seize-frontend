@@ -858,6 +858,22 @@ describe("fetchDropV2ById", () => {
     jest.clearAllMocks();
   });
 
+  it("keeps metadata failures visible to strict detail consumers but preserves the default fallback", async () => {
+    const error = new Error("Metadata unavailable");
+    commonApiFetchMock.mockRejectedValueOnce(error);
+    await expect(
+      fetchDropMetadataByIdV2({
+        dropId: "drop-1",
+        priorityMetadata,
+        throwOnError: true,
+      })
+    ).rejects.toBe(error);
+    commonApiFetchMock.mockRejectedValueOnce(error);
+    await expect(
+      fetchDropMetadataByIdV2({ dropId: "drop-1", priorityMetadata })
+    ).resolves.toEqual(priorityMetadata);
+  });
+
   it("fetches drop metadata by id without fetching the drop detail", async () => {
     const fullMetadata = [{ data_key: "artist", data_value: "Alice" }];
     commonApiFetchMock.mockResolvedValueOnce(fullMetadata);

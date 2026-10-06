@@ -149,6 +149,9 @@ describe("MemesArtSubmissionContainer", () => {
       setTraits: jest.fn(),
       updateTraitField: jest.fn(),
       isAdditionalActionPromised: false,
+      setAdditionalActionPlan: jest.fn((value: string) => {
+        formState.operationalData.additional_action_plan = value;
+      }),
       setAdditionalActionPromised: jest.fn((value: boolean) => {
         formState.isAdditionalActionPromised = value;
       }),
@@ -448,6 +451,8 @@ describe("MemesArtSubmissionContainer", () => {
     const submitArtwork = jest.fn(async () => "result");
     formState.currentStep = SubmissionStep.ADDITIONAL_INFO;
     formState.isAdditionalActionPromised = true;
+    formState.operationalData.additional_action_plan =
+      "A free exhibition if selected.";
     formState.existingMedia = {
       url: "https://example.com/art.png",
       mimeType: "image/png",
@@ -469,6 +474,9 @@ describe("MemesArtSubmissionContainer", () => {
     expect(submitArtwork).toHaveBeenCalledWith(
       expect.objectContaining({
         isAdditionalActionPromised: true,
+        operationalData: expect.objectContaining({
+          additional_action_plan: "A free exhibition if selected.",
+        }),
         waveId: "w1",
         waveName: "The Memes",
         termsOfService: "t",

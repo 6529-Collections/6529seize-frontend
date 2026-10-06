@@ -3,6 +3,7 @@
 import { CheckCircleIcon } from "@heroicons/react/24/outline";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatInteger } from "@/i18n/format";
+import { t } from "@/i18n/messages";
 import type { SupportedLocale } from "@/i18n/locales";
 import React, { useCallback, useMemo, useRef } from "react";
 import FormSection from "../ui/FormSection";
@@ -10,6 +11,7 @@ import ValidationError from "../ui/ValidationError";
 import {
   METADATA_VALUE_DESCRIPTION_MAX_LENGTH,
   METADATA_VALUE_TITLE_MAX_LENGTH,
+  ADDITIONAL_ACTION_PLAN_MAX_LENGTH,
 } from "../utils/submissionMetadata";
 
 const TITLE_CHARACTER_DANGER_THRESHOLD = 245;
@@ -33,11 +35,15 @@ type ArtworkDetailsAdditionalActionProps =
       readonly showAdditionalActionPromised: true;
       readonly isAdditionalActionPromised: boolean;
       readonly onAdditionalActionPromisedChange: (value: boolean) => void;
+      readonly additionalActionPlan: string;
+      readonly onAdditionalActionPlanChange: (value: string) => void;
     }
   | {
       readonly showAdditionalActionPromised?: false | undefined;
       readonly isAdditionalActionPromised?: boolean | undefined;
       readonly onAdditionalActionPromisedChange?: undefined;
+      readonly additionalActionPlan?: undefined;
+      readonly onAdditionalActionPlanChange?: undefined;
     };
 
 type ArtworkDetailsProps = ArtworkDetailsBaseProps &
@@ -107,6 +113,7 @@ const AdditionalActionPromiseCheckbox = ({
   readonly checked: boolean;
   readonly onChange: (value: boolean) => void;
 }) => {
+  const locale = useBrowserLocale();
   const handleChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       onChange(event.currentTarget.checked);
@@ -117,7 +124,7 @@ const AdditionalActionPromiseCheckbox = ({
   return (
     <label
       htmlFor="field-additional-action-promised"
-      className="tw-mt-4 tw-flex tw-cursor-pointer tw-items-start tw-gap-3 tw-rounded-lg tw-bg-iron-900/70 tw-px-3 tw-py-3 tw-ring-1 tw-ring-iron-800 tw-transition-colors desktop-hover:hover:tw-ring-iron-700"
+      className="tw-flex tw-min-h-11 tw-cursor-pointer tw-items-start tw-gap-3"
     >
       <input
         id="field-additional-action-promised"
@@ -125,18 +132,82 @@ const AdditionalActionPromiseCheckbox = ({
         type="checkbox"
         checked={checked}
         onChange={handleChange}
+        aria-labelledby="additional-action-label"
+        aria-describedby="additional-action-help"
         className="tw-form-checkbox tw-mt-0.5 tw-h-4 tw-w-4 tw-flex-shrink-0 tw-cursor-pointer tw-rounded tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-800 tw-text-primary-400 focus:tw-ring-primary-400 focus:tw-ring-offset-0"
       />
-      <span className="tw-flex tw-flex-col tw-gap-1">
-        <span className="tw-text-sm tw-font-medium tw-text-iron-100">
-          Additional Action
+      <span className="tw-flex tw-min-w-0 tw-flex-col tw-gap-1">
+        <span
+          id="additional-action-label"
+          className="tw-text-sm tw-font-medium tw-text-iron-100"
+        >
+          {t(locale, "memes.additionalAction.label")}
         </span>
-        <span className="tw-text-pretty tw-text-xs tw-leading-5 tw-text-iron-400">
-          Check this if the submission includes a real-world commitment, such as
-          an event, donation, physical item, airdrop, or future deliverable.
+        <span
+          id="additional-action-help"
+          className="tw-text-pretty tw-text-xs tw-leading-5 tw-text-iron-400"
+        >
+          {t(locale, "memes.additionalAction.help")}
         </span>
       </span>
     </label>
+  );
+};
+
+const AdditionalActionPlanField = ({
+  value,
+  onChange,
+}: {
+  readonly value: string;
+  readonly onChange: (value: string) => void;
+}) => {
+  const locale = useBrowserLocale();
+  const hasError = value.trim().length > ADDITIONAL_ACTION_PLAN_MAX_LENGTH;
+  return (
+    <div className="tw-mt-3 tw-space-y-2">
+      <label
+        htmlFor="field-additional-action-plan"
+        className="tw-text-sm tw-font-medium tw-text-iron-100"
+      >
+        {t(locale, "memes.additionalAction.planLabel")}
+      </label>
+      <p
+        id="additional-action-plan-help"
+        className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400"
+      >
+        {t(locale, "memes.additionalAction.planHelp")}
+      </p>
+      <textarea
+        id="field-additional-action-plan"
+        name="additional_action_plan"
+        value={value}
+        onChange={(event) => onChange(event.currentTarget.value)}
+        rows={5}
+        maxLength={ADDITIONAL_ACTION_PLAN_MAX_LENGTH}
+        aria-invalid={hasError}
+        aria-describedby={`additional-action-plan-help additional-action-plan-count${hasError ? " additional-action-plan-error" : ""}`}
+        className={`tw-form-textarea tw-w-full tw-resize-y tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-3 tw-py-2.5 tw-text-base tw-text-iron-100 tw-outline-none tw-ring-1 sm:tw-text-sm ${getFieldStateClass(hasError, false)}`}
+      />
+      <div id="additional-action-plan-count" className="tw-flex tw-justify-end">
+        <FieldCharacterCount
+          length={value.length}
+          maxLength={ADDITIONAL_ACTION_PLAN_MAX_LENGTH}
+          dangerThreshold={4750}
+          locale={locale}
+        />
+      </div>
+      {hasError && (
+        <p
+          id="additional-action-plan-error"
+          role="alert"
+          className="tw-m-0 tw-text-sm tw-text-red"
+        >
+          {t(locale, "memes.additionalAction.tooLong", {
+            limit: formatInteger(locale, ADDITIONAL_ACTION_PLAN_MAX_LENGTH),
+          })}
+        </p>
+      )}
+    </div>
   );
 };
 
@@ -159,14 +230,6 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = (props) => {
     showRequiredMarkers = false,
     size = "default",
   } = props;
-  const additionalActionPromiseProps =
-    props.showAdditionalActionPromised === true
-      ? {
-          checked: props.isAdditionalActionPromised,
-          onChange: props.onAdditionalActionPromisedChange,
-        }
-      : null;
-
   // Refs to track input elements directly
   const titleRef = useRef<HTMLInputElement>(null);
   const descriptionRef = useRef<HTMLTextAreaElement>(null);
@@ -407,11 +470,19 @@ const ArtworkDetails: React.FC<ArtworkDetailsProps> = (props) => {
             </div>
           </div>
 
-          {additionalActionPromiseProps ? (
-            <AdditionalActionPromiseCheckbox
-              checked={additionalActionPromiseProps.checked}
-              onChange={additionalActionPromiseProps.onChange}
-            />
+          {props.showAdditionalActionPromised === true ? (
+            <div className="tw-mt-4 tw-rounded-lg tw-bg-iron-900/70 tw-px-3 tw-py-3 tw-ring-1 tw-ring-iron-800 tw-transition-colors desktop-hover:hover:tw-ring-iron-700">
+              <AdditionalActionPromiseCheckbox
+                checked={props.isAdditionalActionPromised}
+                onChange={props.onAdditionalActionPromisedChange}
+              />
+              {props.isAdditionalActionPromised && (
+                <AdditionalActionPlanField
+                  value={props.additionalActionPlan}
+                  onChange={props.onAdditionalActionPlanChange}
+                />
+              )}
+            </div>
           ) : null}
         </div>
       </div>

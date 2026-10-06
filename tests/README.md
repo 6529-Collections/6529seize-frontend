@@ -58,6 +58,14 @@ in `tests/packs.manifest.cjs`.
 
 ## Pack registry
 
+The social-readonly pack includes a local-development-only Additional Action
+component-preview case in `tests/social/waves-profile-readonly.spec.ts`. It checks
+the conditional optional plan, preserved checkbox draft, review text, keyboard
+exit, and horizontal overflow at desktop and phone widths. It skips deployed
+hosts because `/tools/additional-action-preview` is guarded to development and
+loopback hosts. This case does not prove authenticated signing or API persistence;
+metadata/resubmission contracts are covered by focused unit tests.
+
 `tests/packs.manifest.cjs` is the source of truth for Playwright package
 scripts, execution order, deployed-environment pack selection, aliases, safety
 classification, and per-pack timeouts. Run `seize run e2e-manifest:sync` after

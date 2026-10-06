@@ -61,6 +61,7 @@ export type FormAction =
   | { type: "SET_STEP"; payload: SubmissionStep }
   | { type: "SET_AGREEMENTS"; payload: SubmissionAgreement | null }
   | { type: "SET_ADDITIONAL_ACTION_PROMISED"; payload: boolean }
+  | { type: "SET_ADDITIONAL_ACTION_PLAN"; payload: string }
   | { type: "APPLY_PROFILE_DEFAULTS"; payload: ProfileDefaults }
   | {
       type: "SET_TRAIT_FIELD";
@@ -359,6 +360,7 @@ const getDefaultOperationalData = (): OperationalData => ({
   },
   commentary: "",
   about_artist: "",
+  additional_action_plan: "",
 });
 
 export interface CreateInitialStateInput {
@@ -414,6 +416,15 @@ export function formReducer(state: FormState, action: FormAction): FormState {
 
     case "SET_ADDITIONAL_ACTION_PROMISED":
       return { ...state, isAdditionalActionPromised: action.payload };
+
+    case "SET_ADDITIONAL_ACTION_PLAN":
+      return {
+        ...state,
+        operationalData: {
+          ...state.operationalData,
+          additional_action_plan: action.payload,
+        },
+      };
 
     case "APPLY_PROFILE_DEFAULTS":
       return reduceProfileDefaults(state, action.payload);

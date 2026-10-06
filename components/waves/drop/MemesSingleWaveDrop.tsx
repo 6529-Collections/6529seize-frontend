@@ -18,10 +18,8 @@ export const MemesSingleWaveDrop: React.FC<MemesSingleWaveDropProps> = ({
   drop: initialDrop,
   onClose,
 }) => {
-  const { drop, wave, extendedDrop, voteSummary } = useSingleWaveDropData(
-    initialDrop,
-    onClose
-  );
+  const { drop, wave, extendedDrop, voteSummary, metadataState } =
+    useSingleWaveDropData(initialDrop, onClose);
   const outcomesVisible = useWaveOutcomeVisibility(wave);
   const {
     winningThreshold,
@@ -50,6 +48,7 @@ export const MemesSingleWaveDrop: React.FC<MemesSingleWaveDropProps> = ({
         <MemesSingleWaveDropInfoPanel
           drop={extendedDrop}
           voteSummary={voteSummary}
+          metadataState={metadataState}
           wave={wave}
           onClose={onClose}
           isVotingClosed={isVotingClosed}

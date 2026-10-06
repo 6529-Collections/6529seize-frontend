@@ -143,6 +143,7 @@ export function useArtworkSubmissionForm(
     updateTraitField: formActions.updateTraitField,
     isAdditionalActionPromised: state.isAdditionalActionPromised,
     setAdditionalActionPromised: formActions.setAdditionalActionPromised,
+    setAdditionalActionPlan: formActions.setAdditionalActionPlan,
 
     operationalData: state.operationalData,
     setAirdropConfig: formActions.setAirdropConfig,
