@@ -41,7 +41,7 @@ export function useWaveFeatureUsage(
     else if (window.matchMedia("(max-width: 767px)").matches)
       platform = "mobile_web";
     return {
-      key: `${pathname}:${params.get("wave") ?? ""}:${params.get("competition") ?? ""}:${viewerKey}`,
+      key: `${pathname}:${params.get("wave") ?? ""}:${params.get("competition") ?? ""}:${params.get("drop") ?? ""}:${viewerKey}`,
       scope,
       routeFamily: waveFeatureRouteFamily(pathname),
       platform,

@@ -719,6 +719,56 @@ test("a visit reset with the same context cancels previously accumulated dwell",
     .toBe(1);
 });
 
+test("message drop navigation cancels dwell and starts fresh exposure visits", async ({
+  page,
+}) => {
+  await page.goto("/messages/private-wave");
+  await page
+    .getByRole("button", { name: "Enable synthetic telemetry" })
+    .click();
+  await page.waitForTimeout(600);
+  await page.evaluate(() => {
+    history.pushState({}, "", "?drop=private-drop-one");
+    window.dispatchEvent(new Event("resize"));
+  });
+  // The former dwell would have elapsed; the new visit has only 600ms.
+  await page.waitForTimeout(600);
+  expect(await featureEvents(page, "Wave Feature Seen", "chat")).toHaveLength(0);
+  await expect
+    .poll(
+      async () =>
+        (await featureEvents(page, "Wave Feature Seen", "chat")).length
+    )
+    .toBe(1);
+  await page.evaluate(() => {
+    history.pushState({}, "", "?drop=private-drop-two");
+    window.dispatchEvent(new Event("resize"));
+  });
+  await expect
+    .poll(
+      async () =>
+        (await featureEvents(page, "Wave Feature Seen", "chat")).length
+    )
+    .toBe(2);
+  await page.evaluate(() => {
+    history.pushState({}, "", "/messages/private-wave");
+    window.dispatchEvent(new Event("resize"));
+  });
+  await expect
+    .poll(
+      async () =>
+        (await featureEvents(page, "Wave Feature Seen", "chat")).length
+    )
+    .toBe(3);
+  const captured = (await events(page)).filter((event) =>
+    event.event.startsWith("Wave Feature")
+  );
+  for (const event of captured)
+    expect(event.properties["route_family"]).toBe("/messages/:waveId");
+  expect(JSON.stringify(captured)).not.toContain("private-wave");
+  expect(JSON.stringify(captured)).not.toContain("private-drop");
+});
+
 test("fast deliberate tab and sort selections work with mouse, touch and keyboard", async ({
   page,
   isMobile,

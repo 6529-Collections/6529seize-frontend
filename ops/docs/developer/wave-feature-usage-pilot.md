@@ -15,10 +15,12 @@ overlays. This is an exposure opportunity, not proof of attention. A deliberate
 fast action records Seen with `exposure_kind=direct_activation`; it does not
 pretend the one-second dwell occurred. Seen deduplicates responsive copies,
 repeated preview rows and child remounts within a route/viewer visit. It resets after
-navigation or a consent/identity generation change.
+navigation or a consent/identity generation change. Entering, switching or leaving
+a `drop` query view on Waves or Messages changes the internal visit key; the raw
+drop identifier stays in memory and never enters event properties.
 
 Visit resets invalidate pending dwell through an epoch and notify active
-observers, including query navigation that keeps the same feature context.
+observers even when the pathname and feature context stay the same.
 Scroll listeners cover each root, its ancestors and viewport scrolling;
 unrelated nested scroll events do not trigger those listeners. Scroll, resize,
 intersection and mutation checks share one animation frame across roots, with

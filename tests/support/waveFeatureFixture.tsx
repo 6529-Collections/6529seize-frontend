@@ -147,7 +147,6 @@ function Fixture() {
     },
     updateTraits: () => identify("529", { fixture_trait: "allowed" }),
     resetVisit: () => {
-      history.pushState({}, "", "?drop=fixture-drop");
       resetWaveFeatureVisit();
     },
     enable,

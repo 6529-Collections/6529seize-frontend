@@ -1,7 +1,11 @@
 import { useWaveFeatureUsage } from "@/hooks/useWaveFeatureUsage";
+import type { observeWaveFeatures } from "@/services/analytics/waveFeatureVisibility";
 import { render, screen } from "@testing-library/react";
 
-const mockObserve = jest.fn();
+const mockObserve = jest.fn<
+  ReturnType<typeof observeWaveFeatures>,
+  Parameters<typeof observeWaveFeatures>
+>();
 const mockCleanup = jest.fn();
 let mockConsent = true;
 
@@ -25,7 +29,8 @@ jest.mock("@/services/analytics/mixpanel", () => ({
   isAnalyticsTrackingAllowed: () => true,
 }));
 jest.mock("@/services/analytics/waveFeatureVisibility", () => ({
-  observeWaveFeatures: (...args: unknown[]) => mockObserve(...args),
+  observeWaveFeatures: (options: Parameters<typeof observeWaveFeatures>[0]) =>
+    mockObserve(options),
 }));
 
 function Root({
@@ -90,3 +95,28 @@ it("attaches an already mounted root after consent is granted", () => {
   rerender(<Root visible />);
   expect(mockObserve).toHaveBeenCalledTimes(1);
 });
+
+it.each(["/waves/private-wave", "/messages/private-wave"])(
+  "includes entering, switching and leaving drop views in the visit key on %s",
+  (pathname) => {
+    const originalUrl = window.location.href;
+    try {
+      window.history.replaceState({}, "", pathname);
+      render(<Root visible />);
+      const getContext = mockObserve.mock.calls[0]?.[0].getContext;
+      if (!getContext) throw new Error("Expected an observed telemetry root");
+      const initialKey = getContext()?.key;
+      expect(initialKey).toBeDefined();
+      window.history.replaceState({}, "", "?drop=private-drop-one");
+      const firstDropKey = getContext()?.key;
+      expect(firstDropKey).not.toBe(initialKey);
+      window.history.replaceState({}, "", "?drop=private-drop-two");
+      const secondDropKey = getContext()?.key;
+      expect(secondDropKey).not.toBe(firstDropKey);
+      window.history.replaceState({}, "", pathname);
+      expect(getContext()?.key).toBe(initialKey);
+    } finally {
+      window.history.replaceState({}, "", originalUrl);
+    }
+  }
+);
