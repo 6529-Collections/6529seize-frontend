@@ -69,6 +69,7 @@ const STEPS = [
   CreateWaveStep.REVIEW,
 ];
 
+/** Describe whether a competition draft is saving, server-saved, or retained locally. */
 function getSaveStatus(
   locale: ReturnType<typeof useBrowserLocale>,
   persistence: ReturnType<typeof useCompetitionDraftSave>
@@ -580,6 +581,7 @@ function DraftForm({
   );
 }
 
+/** Load an existing competition configuration or open a new viewer-scoped draft. */
 export default function CompetitionDraftEditor({
   wave,
   competition,
