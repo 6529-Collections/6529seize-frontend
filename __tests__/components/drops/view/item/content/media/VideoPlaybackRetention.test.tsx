@@ -137,13 +137,13 @@ describe("video playback across DM virtualization", () => {
     fireEvent.seeked(video);
   }
 
-  function dropContent(src = "long.mp4") {
+  function dropContent(src = "long.mp4", waveId = "wave", dropSerialNo = 1) {
     return (
       <ChatVideoPlaybackProvider>
         <VirtualScrollWrapper
           scrollContainerRef={{ current: null }}
-          dropSerialNo={1}
-          waveId="wave"
+          dropSerialNo={dropSerialNo}
+          waveId={waveId}
           type={DropSize.FULL}
         >
           <DropListItemContentMediaVideo src={src} />
@@ -286,6 +286,36 @@ describe("video playback across DM virtualization", () => {
     expect(fresh.currentTime).toBe(0);
     expect(fresh.muted).toBe(true);
   });
+
+  it.each([
+    ["wave", 2],
+    ["other-wave", 1],
+  ])(
+    "does not share playback for the same source in %s/drop %s",
+    (waveId, serialNo) => {
+      const { rerender } = render(dropContent());
+      const original = screen.getByLabelText<HTMLVideoElement>("Video player");
+      fireEvent.click(
+        screen.getAllByRole("button", { name: "Play video" })[0]!
+      );
+      metadata(original);
+      original.currentTime = 480;
+      fireEvent.seeked(original);
+      fireEvent.click(screen.getByRole("button", { name: "Unmute video" }));
+
+      rerender(dropContent("long.mp4", waveId, serialNo));
+      const fresh = screen.getByLabelText<HTMLVideoElement>("Video player");
+      expect(fresh).not.toBe(original);
+      expect(fresh).not.toHaveAttribute("src");
+      expect(fresh.paused).toBe(true);
+      fireEvent.click(
+        screen.getAllByRole("button", { name: "Play video" })[0]!
+      );
+      metadata(fresh);
+      expect(fresh.currentTime).toBe(0);
+      expect(fresh.muted).toBe(true);
+    }
+  );
 
   function chatVideos() {
     return (

@@ -85,6 +85,8 @@ it("retries position restoration on metadata when an early seek throws", () => {
     volume: 0.6,
   });
   expect(position).toBe(0);
+  expect(video.muted).toBe(false);
+  expect(video.volume).toBe(0.6);
   expect(video).toHaveAttribute("src", "clip.mp4");
   metadataReady = true;
   video.dispatchEvent(new Event("loadedmetadata"));

@@ -130,6 +130,14 @@ const MediaDisplayVideo: React.FC<Props> = ({
     };
   }, [isApp, isVideoFullscreen, videoRef]);
 
+  const onPlaybackRequest = chat.isChat
+    ? () => chat.requestPlayback({ playableUrl, isHls })
+    : undefined;
+  const preload = chat.isChat && !chat.requested ? "none" : undefined;
+  const actionProps = showControls
+    ? { onDownload: downloadMedia, onOpen: openMedia, openLabel }
+    : {};
+
   return (
     <div
       ref={wrapperRef}
@@ -142,21 +150,15 @@ const MediaDisplayVideo: React.FC<Props> = ({
     >
       <SeizeVideoPlayer
         videoRef={setVideoRef}
-        onPlaybackRequest={
-          chat.isChat
-            ? () => chat.requestPlayback({ playableUrl, isHls })
-            : undefined
-        }
-        preload={chat.isChat && !chat.requested ? "none" : undefined}
+        onPlaybackRequest={onPlaybackRequest}
+        preload={preload}
         data-url={src}
         template={isInertPreview ? "card-preview" : "ambient-media"}
         autoPlay={shouldAutoPlay}
         layout={fillContainer ? "fill" : "natural"}
         align={fillContainer ? "center" : "left"}
         showActions={showControls}
-        onDownload={showControls ? downloadMedia : undefined}
-        onOpen={showControls ? openMedia : undefined}
-        openLabel={showControls ? openLabel : undefined}
+        {...actionProps}
         isDownloading={isDownloading}
         locale={locale}
         onError={handlePlaybackError}
