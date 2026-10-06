@@ -212,6 +212,7 @@ describe("UserPageCollected", () => {
 
     renderWithTransferProvider(<UserPageCollected profile={mockProfile} />);
     expect(screen.getByTestId("loading")).toBeInTheDocument();
+    expect(screen.getByRole("status")).toHaveTextContent("Loading artwork");
   });
 
   it("renders filters and cards when data loaded", () => {
@@ -232,6 +233,9 @@ describe("UserPageCollected", () => {
 
     renderWithTransferProvider(<UserPageCollected profile={mockProfile} />);
 
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Showing 2 artworks. Page 1."
+    );
     expect(screen.getByTestId("stats-summary")).toBeInTheDocument();
     expect(screen.getByTestId("filters")).toBeInTheDocument();
     expect(screen.getByTestId("cards")).toBeInTheDocument();
@@ -815,7 +819,7 @@ describe("UserPageCollected", () => {
       refetch,
     });
     renderWithTransferProvider(<UserPageCollected profile={mockProfile} />);
-    expect(screen.getByRole("alert")).toHaveTextContent(
+    expect(screen.getByRole("status")).toHaveTextContent(
       "Artwork could not be loaded"
     );
     expect(screen.getByTestId("filters")).toBeInTheDocument();

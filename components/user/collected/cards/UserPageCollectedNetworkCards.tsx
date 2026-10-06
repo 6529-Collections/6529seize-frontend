@@ -62,12 +62,9 @@ export default function UserPageCollectedNetworkCards({
 
   if (cards.length === 0) {
     return (
-      <div
-        role="status"
-        className="tw-w-full tw-py-10 tw-text-center tw-text-iron-400"
-      >
+      <output className="tw-block tw-w-full tw-py-10 tw-text-center tw-text-iron-400">
         {emptyText}
-      </div>
+      </output>
     );
   }
 
@@ -108,6 +105,13 @@ export default function UserPageCollectedNetworkCards({
   );
 }
 
+function formatNetworkStat(value: number, locale: SupportedLocale): string {
+  if (!Number.isFinite(value)) return "-";
+  return formatNumber(locale, Math.floor(value * 10) / 10, {
+    maximumFractionDigits: 1,
+  });
+}
+
 function getNativeCollection(
   contract: string
 ): CollectedCollectionType | undefined {
@@ -123,7 +127,7 @@ function getNativeCollection(
 
 function getNetworkCardAnchor(card: ApiXTdhToken): string | undefined {
   const collection = getNativeCollection(card.contract);
-  return collection
+  return collection !== undefined
     ? getCollectedCardAnchorId({ collection, tokenId: card.token })
     : undefined;
 }
@@ -175,17 +179,18 @@ function NetworkCard({
   );
 
   const nativeCollection = getNativeCollection(card.contract);
-  const href = nativeCollection
-    ? buildCollectedCardHref({
-        tokenPath: `${COLLECTED_COLLECTIONS_META[nativeCollection].cardPath}/${card.token}`,
-        collection: nativeCollection,
-        tokenId: card.token,
-        returnTo,
-      })
-    : `https://opensea.io/assets/ethereum/${encodeURIComponent(card.contract)}/${encodeURIComponent(card.token)}`;
+  const href =
+    nativeCollection !== undefined
+      ? buildCollectedCardHref({
+          tokenPath: `${COLLECTED_COLLECTIONS_META[nativeCollection].cardPath}/${card.token}`,
+          collection: nativeCollection,
+          tokenId: card.token,
+          returnTo,
+        })
+      : `https://opensea.io/assets/ethereum/${encodeURIComponent(card.contract)}/${encodeURIComponent(card.token)}`;
   const openLabel = translate(
     locale,
-    nativeCollection
+    nativeCollection !== undefined
       ? "user.collected.networkCards.openArtwork"
       : "user.collected.networkCards.open"
   );
@@ -193,12 +198,12 @@ function NetworkCard({
   return (
     <Link
       href={href}
-      target={nativeCollection ? undefined : "_blank"}
+      target={nativeCollection !== undefined ? undefined : "_blank"}
       rel="noopener noreferrer"
       className="tw-group tw-relative tw-flex tw-flex-col tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.02] tw-no-underline tw-shadow-xl tw-transition-all tw-duration-300 hover:tw-border-white/30 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
       aria-label={translate(
         locale,
-        nativeCollection
+        nativeCollection !== undefined
           ? "user.collected.networkCards.openArtworkLabel"
           : "user.collected.networkCards.openLabel",
         { name: tokenName }
@@ -258,26 +263,19 @@ function NetworkCard({
           <div className="tw-flex tw-flex-wrap tw-justify-between tw-gap-x-2">
             <dt className="tw-font-normal tw-text-iron-400">{xtdhLabel}</dt>
             <dd className="tw-m-0 tw-break-all tw-font-semibold tw-tabular-nums tw-text-iron-200">
-              {formatNumber(locale, card.xtdh, {
-                maximumFractionDigits: 1,
-                roundingMode: "floor",
-              })}
+              {formatNetworkStat(card.xtdh, locale)}
             </dd>
           </div>
           <div className="tw-flex tw-flex-wrap tw-justify-between tw-gap-x-2">
             <dt className="tw-font-normal tw-text-iron-400">{xtdhRateLabel}</dt>
             <dd className="tw-m-0 tw-break-all tw-font-semibold tw-tabular-nums tw-text-iron-200">
-              {formatNumber(locale, card.xtdh_rate, {
-                maximumFractionDigits: 1,
-                roundingMode: "floor",
-              })}
+              {formatNetworkStat(card.xtdh_rate, locale)}
             </dd>
           </div>
         </dl>
         <span className="tw-mt-2 tw-inline-flex tw-min-h-11 tw-items-center tw-text-xs tw-font-medium tw-text-primary-300">
-          {" "}
-          {openLabel}{" "}
-          {!nativeCollection && (
+          {openLabel}
+          {nativeCollection === undefined && (
             <span aria-hidden="true" className="tw-ml-1">
               ↗
             </span>

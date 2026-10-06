@@ -3714,6 +3714,8 @@ export const EN_US_MESSAGES = {
   "user.collected.loadError":
     "Artwork could not be loaded. Your filters are still selected.",
   "user.collected.retry": "Try again",
+  "user.collected.loading": "Loading artwork…",
+  "user.collected.results": "Showing {count} artworks. Page {page}.",
   "user.collected.networkCards.imageUnavailable": "Image unavailable",
   "user.collected.networkCards.openArtwork": "Open artwork",
   "user.collected.networkCards.openArtworkLabel": "Open {name}",

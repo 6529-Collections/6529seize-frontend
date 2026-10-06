@@ -3,7 +3,7 @@
 import TransferToggle from "@/components/nft-transfer/TransferToggle";
 import UserAddressesSelectDropdown from "@/components/user/utils/addresses-select/UserAddressesSelectDropdown";
 import type { CommonSelectItem } from "@/components/utils/select/CommonSelect";
-import CommonSelect from "@/components/utils/select/CommonSelect";
+import CommonDropdown from "@/components/utils/select/dropdown/CommonDropdown";
 import type { CollectionSeized } from "@/entities/IProfile";
 import { CollectedCollectionType, CollectionSort } from "@/entities/IProfile";
 import { SortDirection } from "@/entities/ISort";
@@ -110,8 +110,8 @@ export default function UserPageCollectedFilters({
           </Button>
         )}
       </div>
-      <div className="tw-grid tw-grid-cols-1 tw-gap-3 min-[400px]:tw-grid-cols-2 xl:tw-grid-cols-3 [&_button]:tw-min-h-11">
-        <CommonSelect
+      <div className="tw-grid tw-grid-cols-[repeat(auto-fit,minmax(min(100%,10rem),1fr))] tw-gap-3 xl:tw-grid-cols-3 [&_button]:tw-min-h-11 [&_button]:tw-text-clip [&_button]:tw-whitespace-normal [&_button]:tw-break-words [&_button_.tw-text-iron-500]:tw-text-iron-400">
+        <CommonDropdown
           items={mainTabItems}
           activeItem={activeMainTab}
           setSelected={handleMainTabChange}

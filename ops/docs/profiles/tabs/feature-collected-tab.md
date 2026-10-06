@@ -3,16 +3,17 @@
 ## Overview
 
 The `Collected` tab at `/{user}/collected` combines profile holdings browsing
-with an integrated stats summary and an expandable details panel.
+with clearly labelled filters and an expandable `Collection stats` section.
+The heading names the profile whose collection you are viewing.
 
 It has two top-level views:
 
 - `Native`: profile card holdings for The Memes, Gradients, NextGen, and Meme Lab.
 - `Network`: xTDH token holdings by contract.
 
-The top stats block stays on this route in both views.
-`Details` expands holdings totals, activity overview, wallet activity,
-distributions, TDH history, and boost breakdown.
+`Collection stats` is collapsed by default in both views so artwork is easier
+to reach. It contains summary metrics, seasons, holdings totals, activity
+overview, wallet activity, distributions, TDH history, and boost breakdown.
 
 Transfer mode is part of the Native collected view (not a separate route).
 
@@ -29,8 +30,8 @@ Transfer mode is part of the Native collected view (not a separate route).
   - `sort-by=<token_id|tdh|rank|xtdh|xtdh_day>`
   - `sort-direction=<asc|desc>`: shared links can omit the default active sort
     (`token_id desc` in Native, `xtdh desc` in Network).
-  - `activity=wallet-activity|distributions|tdh-history`: Details-panel lower
-    section. Any present value opens `Details` on first render. Missing or
+  - `activity=wallet-activity|distributions|tdh-history`: Collection-stats lower
+    section. Any present value opens `Collection stats` on first render. Missing or
     unknown values default to `wallet-activity`.
   - `wallet-activity=all|airdrops|mints|sales|purchases|transfers|burns`:
     Wallet Activity filter. Missing or unknown values default to `all`.
@@ -46,18 +47,18 @@ Transfer mode is part of the Native collected view (not a separate route).
 - Switch to `Collected` from another profile tab.
 - Open a shared collected deep link with query parameters.
 - Open a deep link such as `/{user}/collected?activity=distributions` to land
-  with `Details` already expanded.
+  with `Collection stats` already expanded.
 
 ## User Journey
 
 1. Open `/{user}/collected`.
-   - If the URL already has `activity=...`, `Details` starts open and the lower
+   - If the URL already has `activity=...`, `Collection stats` starts open and the lower
      section selects that tab when the value is recognized.
-2. Review the top stats block:
+2. Open `Collection stats` when you want detailed collection information:
    - headline metrics can include `NextGen`, `Meme Sets`, `Memes`,
      `Gradients`, and `Boost`
-   - headline metric labels, multiplier values, unique-count copy, and the
-     `Details` toggle are message-backed from the source locale
+   - headline metric labels, edition counts, unique artwork counts, and the
+     `Collection stats` toggle are message-backed from the source locale
    - collection-backed metrics (`NextGen`, `Meme Sets`, `Memes`, `Gradients`)
      act as shortcuts into that collection; clicking the active metric clears
      that collection filter
@@ -73,8 +74,10 @@ Transfer mode is part of the Native collected view (not a separate route).
    - hover/focus previews a season tile's progress text; click applies or
      clears the Memes season filter
    - unopened Meme seasons can appear as `Unseized` chips
-3. Click `Details` to expand the integrated stats panel.
-4. In `Details`, review:
+3. Personal actions such as `Complete my set` and `Manage orders` are grouped
+   under `For your connected wallet`. They affect your wallet even when you are
+   viewing someone else’s collection.
+4. In `Collection stats`, review:
    - `Collected` totals and per-season Meme tables
      - collected details headings, table headers, row labels, and per-season
        labels are message-backed from the source locale
@@ -111,10 +114,14 @@ Transfer mode is part of the Native collected view (not a separate route).
 6. Apply filters:
    - Native collection: `All`, `The Memes`, `Gradients`, `NextGen`, `Meme Lab`.
    - Network collection: contract list from current xTDH collections.
-   - Memes-only filters: `Seized` and `Season`.
-   - Address filter (`All Addresses` or one wallet) is available in native view.
-   - View, collection, sort, seized, and filter-scroll control names are
-     message-backed from the source locale.
+   - Controls wrap into rows so every available filter can be found without
+     horizontally scrolling the toolbar. Mobile choices use the existing bottom panel.
+   - Each control shows its selected value.
+   - Memes-only filters: `Holdings` (`Held` or `Not held`) and `Season`.
+     Holdings refer to the viewed profile, not the connected wallet.
+   - Address filter (`All Addresses` or one wallet) is available in both views.
+   - `Clear filters` returns to all Native collections, all profile addresses,
+     the default sort, and page one. Activity-table state remains intact.
 7. Apply sort and browse pages.
    - Collection, filter, sort, and pagination changes add browser-history
      entries, so browser Back and Forward restore earlier collected views.
@@ -132,11 +139,15 @@ Transfer mode is part of the Native collected view (not a separate route).
      The native and mobile-web profile-return actions restore the originating
      Collected filters and page, then return keyboard focus and scroll position
      to the opened card when it is still on that page.
-9. In network view, review xTDH token holdings:
+9. In Network view, review tokens receiving xTDH for this profile:
    - Network card results render as a labelled `Collected network cards` list
      with one list item per token for assistive technologies.
-   - Network card copy and image alternatives are message-backed from the
-     source locale.
+   - Cards belonging to The Memes, Gradients, NextGen, or Meme Lab open their
+     existing 6529 artwork pages and preserve the same profile-return context.
+   - Other tokens show `Open on OpenSea` and open the marketplace separately.
+   - Unavailable images show `Image unavailable`; the token name and action
+     remain usable.
+   - Pagination stays below the cards, including on narrow screens.
 10. If transfer is available, click `Transfer`:
 
 - cards switch from links to selection controls
@@ -150,10 +161,10 @@ Transfer mode is part of the Native collected view (not a separate route).
 - Compare consolidated holdings (`All Addresses`) against one wallet (`address=...`).
 - Jump from the summary metrics directly into `NextGen`, `Gradients`, or Meme
   holdings without using the collection dropdown.
-- Open `Details` and switch between `Wallet Activity`, `Distributions`, and
+- Open `Collection stats` and switch between `Wallet Activity`, `Distributions`, and
   `TDH History`.
 - Share or reopen a collected deep link that jumps straight into
-  `Distributions` or `TDH History` with `Details` already open.
+  `Distributions` or `TDH History` with `Collection stats` already open.
 - Check how many full Meme sets exist and how far the active season is from the
   next set.
 - Preview season progress from the stats strip, then click a season tile to
@@ -167,13 +178,12 @@ Transfer mode is part of the Native collected view (not a separate route).
 
 ## Edge Cases
 
-- Any non-empty `activity` query opens `Details` immediately on first render.
-- If `activity` is unknown, `Details` still opens and the lower section falls
+- Any non-empty `activity` query opens `Collection stats` immediately on first render.
+- If `activity` is unknown, `Collection stats` still opens and the lower section falls
   back to `Wallet Activity`.
-- The top stats block still renders on `Network`; if an `address` query is
-  already present, it continues to scope both the stats block and Network
-  results even though the address dropdown is hidden there.
-- `Details` can open even when summary metrics are sparse; if the profile cannot
+- The address filter scopes both collection stats and artwork in Native and
+  Network views. The selected address remains visible in the filter controls.
+- `Collection stats` can open even when summary metrics are sparse; if the profile cannot
   produce a stats scope, the panel shows `Stats are unavailable for this profile.`.
 - The `Seasons` strip is hidden when there are no started Meme seasons.
 - A canonical direct token URL, including one created by the in-app share
@@ -187,7 +197,7 @@ Transfer mode is part of the Native collected view (not a separate route).
 - On desktop, the started-season row can collapse behind `+N more`; on
   touch/mobile, seasons stay horizontally scrollable. When a season filter is
   active, the collapsed desktop row keeps that season visible.
-- `page` is reserved for the main collected list. Details tables use their own
+- `page` is reserved for the main collected list. Stats tables use their own
   page params so they do not reset collected pagination state.
 - Clicking another profile tab keeps only `address` and drops collected-specific
   filters including `page`, plus `activity`, `wallet-activity`,
@@ -212,13 +222,12 @@ Transfer mode is part of the Native collected view (not a separate route).
 ## Failure and Recovery
 
 - Initial load shows skeleton placeholders.
-- If native collected data fails, the tab falls back to empty-state copy
-  (for example `No cards to display`). Empty-state copy is message-backed from
-  the source locale and announced as status text for assistive technologies.
-- If network token data fails, network cards can fall back to
-  `No network tokens found`. This copy follows the same message-backed status
-  pattern as the native collected view.
-- Inside `Details`:
+- If artwork data fails in either view, an error explains that the filters
+  remain selected. Use `Try again` to retry or change the filters.
+- A successful empty response shows the appropriate empty-state message, such
+  as `No cards to display` or `No network tokens found`, announced as status
+  text for assistive technologies.
+- Inside `Collection stats`:
   - Wallet Activity empty states are filter-specific (`No transactions`,
     `No sales`, `No burns`, and similar).
   - Distributions empty state: `No distributions found`.
@@ -235,11 +244,12 @@ Transfer mode is part of the Native collected view (not a separate route).
 ## Limitations / Notes
 
 - There is no standalone `/{user}/stats` route. Use `/{user}/collected` and
-  `Details` for profile stats behavior.
-- `Seized` and `Season` controls appear only when `Collection` is `The Memes`.
+  `Collection stats` for profile stats behavior.
+- `Holdings` and `Season` controls appear only when `Collection` is `The Memes`.
 - Season-tile shortcuts use the same route filters as the main controls; they do
   not create a separate stats-only state.
-- Network cards are informational in this tab and do not open token detail routes.
+- Network tokens outside the four Native collections use an external OpenSea
+  destination; 6529 does not provide an internal detail page for those tokens.
 - Transfer mode uses the connected wallet's transferable balance, not consolidated
   profile balance.
 - Transfer execution details are documented in:

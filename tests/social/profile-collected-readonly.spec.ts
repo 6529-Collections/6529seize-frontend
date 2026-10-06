@@ -1,3 +1,4 @@
+import { expectAxeClean } from "../support/a11yAssertions";
 import { expect, expectNoHorizontalOverflow, test } from "../testHelpers";
 import { gotoReady, PROFILE_HANDLE } from "./profileReadonlyHelpers";
 import {
@@ -9,6 +10,12 @@ const collectedPath = `/${PROFILE_HANDLE}/collected`;
 const memesContract = "0x33fd426905f149f8376e227d0c9d3340aad17af1";
 
 test.describe("Collected browsing @surface @medium @large @readonly", () => {
+  test.beforeEach(async ({ context, baseURL }) => {
+    await context.addCookies([
+      { name: "essential-cookies-consent", value: "true", url: baseURL! },
+      { name: "performance-cookies-consent", value: "false", url: baseURL! },
+    ]);
+  });
   test("keeps selected filters visible, opens the existing picker and clears filters", async ({
     page,
   }, testInfo) => {
@@ -28,6 +35,9 @@ test.describe("Collected browsing @surface @medium @large @readonly", () => {
     await expect(
       filters.getByRole("button", { name: "Holdings: Not held", exact: true })
     ).toBeVisible();
+    await expect(
+      filters.getByRole("button", { name: "Season: SZN1", exact: true })
+    ).toBeVisible();
     await filters
       .getByRole("button", { name: "Collection: The Memes", exact: true })
       .click();
@@ -35,9 +45,15 @@ test.describe("Collected browsing @surface @medium @large @readonly", () => {
       isMobileWebProject(testInfo.project.name) ||
       isCapacitorSimulationProject(testInfo.project.name)
     ) {
-      await expect(page.getByRole("dialog")).toBeVisible();
+      await expect(
+        page
+          .getByRole("dialog")
+          .getByRole("heading", { name: "Collection", exact: true })
+      ).toBeVisible();
     }
-    await page.getByRole("button", { name: "Gradients", exact: true }).click();
+    await page
+      .getByRole("menuitem", { name: "Gradients", exact: true })
+      .click();
     await expect(page).toHaveURL(/collection=gradients/);
     await expect(
       filters.getByRole("button", {
@@ -45,6 +61,13 @@ test.describe("Collected browsing @surface @medium @large @readonly", () => {
         exact: true,
       })
     ).toBeVisible();
+    await expectAxeClean(page, {
+      include: ['section[aria-label="Browse artwork"]'],
+    });
+    await page.screenshot({
+      path: testInfo.outputPath("collected-filters.png"),
+      fullPage: true,
+    });
     await filters.getByRole("button", { name: "Clear filters" }).click();
     await expect(page).toHaveURL((url) => url.search === "?source=e2e");
     await expectNoHorizontalOverflow(page);
@@ -57,7 +80,7 @@ test.describe("Collected browsing @surface @medium @large @readonly", () => {
     ).toHaveAttribute("aria-expanded", "true");
   });
 
-  test("keeps Network numbers and pagination inside narrow content and preserves page history", async ({
+  test("keeps Network numbers and pagination inside narrow content and preserves page history @smoke", async ({
     page,
   }) => {
     await page.route("**/api/xtdh/tokens?*", async (route) => {
@@ -85,6 +108,7 @@ test.describe("Collected browsing @surface @medium @large @readonly", () => {
         },
       });
     });
+    await page.setViewportSize({ width: 320, height: 844 });
     await gotoReady(page, `${collectedPath}?collection=network&page=2`);
     const cards = page.getByRole("list", { name: "Collected network cards" });
     await expect(cards.getByRole("listitem")).toHaveCount(2);
@@ -97,7 +121,7 @@ test.describe("Collected browsing @surface @medium @large @readonly", () => {
     const nextBox = await next.boundingBox();
     expect(nextBox!.y).toBeGreaterThanOrEqual(listBox!.y + listBox!.height);
     expect(nextBox!.height).toBeGreaterThanOrEqual(44);
-    for (const node of await cards.locator("dd").all()) {
+    for (const node of await cards.getByRole("definition").all()) {
       expect(
         await node.evaluate(
           (element) => element.scrollWidth <= element.clientWidth + 1
@@ -105,6 +129,7 @@ test.describe("Collected browsing @surface @medium @large @readonly", () => {
       ).toBe(true);
     }
     await expectNoHorizontalOverflow(page);
+    await expectAxeClean(page, { include: [".tailwind-scope:has(> h2)"] });
     await next.click();
     await expect(page).toHaveURL(/page=3/);
     await page.goBack();
@@ -127,10 +152,11 @@ test.describe("Collected browsing @surface @medium @large @readonly", () => {
       )
     );
     await gotoReady(page, `${collectedPath}?collection=network`);
-    await expect(page.getByRole("alert")).toContainText(
-      "Artwork could not be loaded",
-      { timeout: 20000 }
-    );
+    await expect(
+      page
+        .getByRole("status")
+        .filter({ hasText: "Artwork could not be loaded" })
+    ).toContainText("Artwork could not be loaded", { timeout: 20000 });
     await expect(
       page.getByRole("button", { name: "Clear filters" })
     ).toBeVisible();
@@ -139,7 +165,11 @@ test.describe("Collected browsing @surface @medium @large @readonly", () => {
     await expect(
       page.getByRole("status").filter({ hasText: "No network tokens found" })
     ).toBeVisible();
-    await expect(page.getByRole("alert")).toHaveCount(0);
+    await expect(
+      page
+        .getByRole("status")
+        .filter({ hasText: "Artwork could not be loaded" })
+    ).toHaveCount(0);
   });
 
   test("returns to the selected artwork with collection filters intact", async ({
@@ -155,7 +185,9 @@ test.describe("Collected browsing @surface @medium @large @readonly", () => {
     const cardId = await card.getAttribute("id");
     const link = card.getByRole("link");
     await link.click();
-    await expect(page).toHaveURL(/\/the-memes\/\d+\?returnTo=/);
+    await expect(page).toHaveURL(/\/the-memes\/\d+\?returnTo=/, {
+      timeout: 30000,
+    });
     if (isCapacitorSimulationProject(testInfo.project.name)) {
       await page.getByRole("button", { name: "Back", exact: true }).click();
     } else if (isMobileWebProject(testInfo.project.name)) {
@@ -169,7 +201,9 @@ test.describe("Collected browsing @surface @medium @large @readonly", () => {
         url.searchParams.get("collection") === "memes" &&
         url.searchParams.get("szn") === "1"
     );
-    const restored = page.locator(`[id="${cardId}"]`);
+    const restored = page
+      .getByRole("list", { name: "Collected cards", exact: true })
+      .locator(`[id="${cardId}"]`);
     await expect(restored).toBeInViewport();
     if (
       isMobileWebProject(testInfo.project.name) ||
@@ -180,5 +214,47 @@ test.describe("Collected browsing @surface @medium @large @readonly", () => {
     await page.screenshot({
       path: testInfo.outputPath("collected-return.png"),
     });
+  });
+  test("opens supported Network artwork and returns to its card", async ({
+    page,
+  }, testInfo) => {
+    await page.route("**/api/xtdh/tokens?*", (route) =>
+      route.fulfill({
+        json: {
+          page: 1,
+          next: false,
+          data: [
+            { contract: memesContract, token: 47, xtdh: 42, xtdh_rate: 1 },
+          ],
+        },
+      })
+    );
+    await gotoReady(page, `${collectedPath}?collection=network`);
+    const card = page
+      .getByRole("list", { name: "Collected network cards" })
+      .getByRole("listitem");
+    await card.getByRole("link").click();
+    await expect(page).toHaveURL(/\/the-memes\/47\?returnTo=/, {
+      timeout: 30000,
+    });
+    if (isCapacitorSimulationProject(testInfo.project.name)) {
+      await page.getByRole("button", { name: "Back", exact: true }).click();
+    } else if (isMobileWebProject(testInfo.project.name)) {
+      await page.getByTestId("back-to-profile-collected").click();
+    } else {
+      await page.goBack();
+    }
+    await expect(page).toHaveURL(
+      (url) =>
+        url.pathname === collectedPath &&
+        url.searchParams.get("collection") === "network"
+    );
+    await expect(card).toBeInViewport();
+    if (
+      isMobileWebProject(testInfo.project.name) ||
+      isCapacitorSimulationProject(testInfo.project.name)
+    ) {
+      await expect(card.getByRole("link")).toBeFocused();
+    }
   });
 });

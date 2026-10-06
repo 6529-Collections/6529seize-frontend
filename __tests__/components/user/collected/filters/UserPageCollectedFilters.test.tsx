@@ -14,7 +14,7 @@ jest.mock("@/components/nft-transfer/TransferToggle", () => {
   };
 });
 
-jest.mock("@/components/utils/select/CommonSelect", () => {
+jest.mock("@/components/utils/select/dropdown/CommonDropdown", () => {
   return {
     __esModule: true,
     default: function MockCommonSelect({

@@ -24,6 +24,7 @@ import type { Page } from "@/helpers/Types";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
 import Button from "@/components/utils/button/Button";
 import { t } from "@/i18n/messages";
+import { formatInteger } from "@/i18n/format";
 import { normalizeLocale } from "@/i18n/locales";
 import { fetchAllPages } from "@/services/6529api";
 import { commonApiFetch } from "@/services/api/common-api";
@@ -131,7 +132,9 @@ export default function UserPageCollected({
     };
   }, [searchParams, profile.handle, user]);
 
-  const [filters, setFilters] = useState<ProfileCollectedFilters>(getFilters());
+  const [filters, setFilters] = useState<ProfileCollectedFilters>(() =>
+    getFilters()
+  );
   const effectiveSeasonId = filters.szn?.id ?? filters.initialSznId;
 
   const createQueryString = useCallback(
@@ -565,36 +568,39 @@ export default function UserPageCollected({
     placeholderData: keepPreviousData,
   });
 
-  const totalPages = Math.max(
-    1,
-    Math.ceil((data?.count ?? 0) / filters.pageSize)
-  );
+  const totalPages = Math.max(1, Math.ceil((data?.count ?? 0) / PAGE_SIZE));
 
+  // The response can invalidate a deep-linked page without any user event.
+  /* eslint-disable react-you-might-not-need-an-effect/no-event-handler -- Synchronize the external URL with server pagination, preserving failed-request state. */
   useEffect(() => {
     if (
-      !isFetchingData &&
-      !isError &&
-      !isNetwork &&
-      filters.page > totalPages
-    ) {
-      void setPage(totalPages, "replace");
-    }
-  }, [isFetchingData, isError, isNetwork, filters.page, totalPages]);
+      !data ||
+      isFetchingData ||
+      isError ||
+      isNetwork ||
+      filters.page <= totalPages
+    )
+      return;
+    void updateFields(
+      [{ name: "page", value: totalPages.toString() }],
+      "replace"
+    );
+  }, [
+    data,
+    isFetchingData,
+    isError,
+    isNetwork,
+    filters.page,
+    totalPages,
+    updateFields,
+  ]);
+  /* eslint-enable react-you-might-not-need-an-effect/no-event-handler */
 
-  const getShowDataRow = (): boolean =>
-    filters.collection
+  const showDataRow =
+    !isNetwork &&
+    (filters.collection !== null
       ? COLLECTED_COLLECTIONS_META[filters.collection].showCardDataRow
-      : true;
-
-  const [showDataRow, setShowDataRow] = useState<boolean>(getShowDataRow());
-
-  useEffect(() => {
-    if (isNetwork) {
-      setShowDataRow(false);
-    } else {
-      setShowDataRow(getShowDataRow());
-    }
-  }, [filters.collection, isNetwork]);
+      : true);
 
   const clearFilters = () =>
     updateFields([
@@ -610,16 +616,24 @@ export default function UserPageCollected({
 
   const scrollContainer = useRef<HTMLDivElement>(null);
 
+  const getResultsAnnouncement = () => {
+    if (isLoading || isFetchingData) return t(locale, "user.collected.loading");
+    if (isError) return t(locale, "user.collected.loadError");
+    const count = (isNetwork ? dataNetwork?.data : data?.data)?.length ?? 0;
+    return t(locale, "user.collected.results", {
+      count: formatInteger(locale, count),
+      page: formatInteger(locale, filters.page),
+    });
+  };
+
   const renderCards = () => {
     if (isError)
       return (
-        <div
-          role="alert"
-          className="tw-space-y-3 tw-py-8 tw-text-center tw-text-iron-300"
-        >
+        <div className="tw-space-y-3 tw-py-8 tw-text-center tw-text-iron-300">
           <p>{t(locale, "user.collected.loadError")}</p>
           <Button
             variant="secondary"
+            disabled={isFetchingData}
             onClick={() => {
               void (isNetwork ? refetchNetwork() : refetchNative());
             }}
@@ -692,6 +706,9 @@ export default function UserPageCollected({
         />
       </div>
 
+      <output aria-live="polite" aria-atomic="true" className="tw-sr-only">
+        {getResultsAnnouncement()}
+      </output>
       <div className="tw-mt-6 tw-min-w-0" aria-busy={isFetchingData}>
         {renderCards()}
       </div>
