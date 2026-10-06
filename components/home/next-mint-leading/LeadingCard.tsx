@@ -96,6 +96,7 @@ export const LeadingCard = ({ drop, rank }: LeadingCardProps) => {
               size="sm"
             />
             <Link
+              data-home-action="Open drop"
               href={getWaveRoute({
                 waveId: drop.wave.id,
                 extraParams: { drop: drop.id },
@@ -108,6 +109,7 @@ export const LeadingCard = ({ drop, rank }: LeadingCardProps) => {
             </Link>
           </div>
           <Link
+            data-home-action="Open artist profile"
             href={`/${author.handle ?? author.primary_address}`}
             className="tw-flex tw-min-w-0 tw-items-center tw-gap-2 tw-no-underline"
           >

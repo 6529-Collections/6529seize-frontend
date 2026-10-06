@@ -53,6 +53,34 @@
   ],
   "signals": [
     {
+      "name": "Homepage section seen",
+      "kind": "event",
+      "question": "Which loaded homepage sections reach the visitor's screen?",
+      "owner": "mixpanel",
+      "producer": "components/home/useHomepageTracking.ts",
+      "destinations": ["mixpanel:owner"],
+      "sampling": "consented production sessions; once per section per homepage mount after at least 10% is visible for one continuous second in a visible tab",
+      "privacy": "fixed section label, logical page, layout version, screen-size bucket, signed-in and native booleans; no custom content, identifiers, or URL properties",
+      "externalUsage": "Homepage board; reports await deployment and first received events; see ops/telemetry/homepage.md",
+      "lifecycle": "keep",
+      "replacement": null,
+      "reviewBy": "2026-11-06"
+    },
+    {
+      "name": "Homepage action clicked",
+      "kind": "event",
+      "question": "Which main homepage links and buttons do visitors use?",
+      "owner": "mixpanel",
+      "producer": "components/home/useHomepageTracking.ts",
+      "destinations": ["mixpanel:owner"],
+      "sampling": "consented production sessions; every activation of an explicitly labelled homepage control",
+      "privacy": "fixed section and action labels, logical page, layout version, screen-size bucket, signed-in and native booleans; no text scraping, identifiers, or custom URL properties",
+      "externalUsage": "Homepage board; reports await deployment and first received events; see ops/telemetry/homepage.md",
+      "lifecycle": "keep",
+      "replacement": null,
+      "reviewBy": "2026-11-06"
+    },
+    {
       "name": "Page Viewed",
       "kind": "event",
       "question": "Which product route families are viewed?",
