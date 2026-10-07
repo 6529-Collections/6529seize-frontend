@@ -592,6 +592,114 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
     await expect(page.getByText("All Waves", { exact: true })).toBeVisible();
   });
 
+  test("Network filter keeps the focused input and action above the keyboard", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      !isCapacitorSimulationProject(testInfo.project.name),
+      "Keyboard geometry is covered on the Capacitor simulation projects"
+    );
+    await gotoReady(page, "/network");
+    const openFilters = page.getByRole("button", {
+      name: "Open group filters",
+      exact: true,
+    });
+    await openFilters.click();
+    const filter = page.getByRole("dialog", {
+      name: "Filter Network",
+      exact: true,
+    });
+    await filter
+      .getByRole("group", { name: "Filter Network", exact: true })
+      .getByRole("button", { name: "Level", exact: true })
+      .click();
+    const input = filter.getByRole("spinbutton", {
+      name: "Level at least",
+      exact: true,
+    });
+    const summary = filter.getByText("After editing", { exact: true });
+    const action = filter.getByRole("button", {
+      name: "Create and use new group",
+      exact: true,
+    });
+    await input.fill("10");
+    await expect(input).toBeFocused();
+    await expect(summary).toBeVisible();
+
+    // Exercise the same native overlay geometry as the Waves search contract.
+    await page.evaluate(() => {
+      const viewport = globalThis.visualViewport;
+      if (!viewport) throw new Error("Expected a visual viewport");
+      Object.defineProperty(viewport, "height", {
+        configurable: true,
+        value: globalThis.innerHeight - 320,
+      });
+      viewport.dispatchEvent(new Event("resize"));
+    });
+    await expect(page.locator("html")).toHaveAttribute(
+      "data-native-keyboard-visible",
+      "true"
+    );
+    await expect(summary).toBeHidden();
+    await expect
+      .poll(() =>
+        input.evaluate((element) => {
+          const viewport = globalThis.visualViewport;
+          if (!viewport) return false;
+          const bounds = element.getBoundingClientRect();
+          let top = viewport.offsetTop;
+          let bottom = top + viewport.height;
+          for (
+            let parent = element.parentElement;
+            parent;
+            parent = parent.parentElement
+          ) {
+            if (
+              !/(auto|scroll|hidden)/.test(getComputedStyle(parent).overflowY)
+            )
+              continue;
+            const clip = parent.getBoundingClientRect();
+            top = Math.max(top, clip.top);
+            bottom = Math.min(bottom, clip.bottom);
+          }
+          return bounds.top >= top && bounds.bottom <= bottom;
+        })
+      )
+      .toBe(true);
+    await expect
+      .poll(() =>
+        action.evaluate((element) => {
+          const viewport = globalThis.visualViewport;
+          if (!viewport) return false;
+          const bounds = element.getBoundingClientRect();
+          return (
+            bounds.top >= viewport.offsetTop &&
+            bounds.bottom <= viewport.offsetTop + viewport.height
+          );
+        })
+      )
+      .toBe(true);
+    await page.screenshot({
+      path: testInfo.outputPath("network-keyboard.png"),
+    });
+
+    await page.evaluate(() => {
+      const viewport = globalThis.visualViewport;
+      if (!viewport) throw new Error("Expected a visual viewport");
+      Reflect.deleteProperty(viewport, "height");
+      viewport.dispatchEvent(new Event("resize"));
+    });
+    await expect(page.locator("html")).not.toHaveAttribute(
+      "data-native-keyboard-visible",
+      "true"
+    );
+    await expect(summary).toBeVisible();
+    await expect(input).toHaveValue("10");
+    await filter.getByRole("button", { name: "Close", exact: true }).click();
+    await expect(openFilters).toBeFocused();
+    await expect(page).toHaveURL((url) => !url.searchParams.has("group"));
+  });
+
   test("iOS native simulation hides non-US subscription downloads", async ({
     page,
   }, testInfo) => {
