@@ -39,6 +39,7 @@ export default function UserPageCollectedFilters({
   setSzn,
   setSubcollection,
   showTransfer,
+  onAddressChange,
 }: {
   readonly profile: ApiIdentity;
   readonly filters: ProfileCollectedFilters;
@@ -49,6 +50,7 @@ export default function UserPageCollectedFilters({
   readonly setSzn: (szn: MemeSeason | null) => void;
   readonly setSubcollection: (subcollection: string | null) => void;
   readonly showTransfer: boolean;
+  readonly onAddressChange?: (() => void) | undefined;
 }) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const contentContainerRef = useRef<HTMLDivElement>(null);
@@ -212,6 +214,7 @@ export default function UserPageCollectedFilters({
                 wallets={profile.wallets ?? []}
                 containerRef={containerRef}
                 onActiveAddress={() => undefined}
+                onAddressChange={onAddressChange}
               />
             )}
           </div>

@@ -184,8 +184,16 @@ export default function UserPageCollectedStats({
       : fallbackVisibleActiveSeasonId;
 
   return (
-    <section className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-black">
-      <div className="tw-px-3 tw-py-2 md:tw-p-5">
+    <section
+      data-profile-section="Collection summary"
+      className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-black"
+    >
+      <div
+        data-profile-section-anchor={
+          mainMetrics.length > 0 ? "Collection summary" : undefined
+        }
+        className="tw-px-3 tw-py-2 md:tw-p-5"
+      >
         <CollectedStatsHeader
           metrics={mainMetrics}
           activeCollection={activeCollection}
@@ -224,18 +232,25 @@ export default function UserPageCollectedStats({
 
       <div ref={detailsScrollTargetRef} className="tw-scroll-mt-24">
         <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-2 tw-px-3 tw-py-2 md:tw-px-5 md:tw-py-4">
-          <CollectEntryLink
-            collection="memes"
-            intent={activeSeasonNumber === null ? "full_set" : "season"}
-            definitionId={
-              activeSeasonNumber === null
-                ? undefined
-                : String(activeSeasonNumber)
-            }
-            locale={locale}
-            complete
-          />
-          <ButtonLink href="/collect/orders" variant="tertiary" size="sm">
+          <span data-profile-action="Complete my set" className="tw-contents">
+            <CollectEntryLink
+              collection="memes"
+              intent={activeSeasonNumber === null ? "full_set" : "season"}
+              definitionId={
+                activeSeasonNumber === null
+                  ? undefined
+                  : String(activeSeasonNumber)
+              }
+              locale={locale}
+              complete
+            />
+          </span>
+          <ButtonLink
+            data-profile-action="Manage orders"
+            href="/collect/orders"
+            variant="tertiary"
+            size="sm"
+          >
             {t(locale, "collect.entry.manage")}
           </ButtonLink>
         </div>

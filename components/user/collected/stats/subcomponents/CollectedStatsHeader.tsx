@@ -161,6 +161,7 @@ export function CollectedStatsHeader({
       </div>
 
       <Button
+        data-profile-action={isDetailsOpen ? "Hide details" : "Details"}
         variant={isDetailsOpen ? "primary" : "tertiary"}
         size="sm"
         aria-expanded={isDetailsOpen}
