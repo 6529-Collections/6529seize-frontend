@@ -250,7 +250,7 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
         ? "00000000-0000-4000-8000-000000000530"
         : "74b13174-b34f-43e5-b302-23680f0d0b05");
     await gotoReady(page, `/punk6529?drop=${dropId}`);
-    const artwork = page.locator("[data-video-viewport]");
+    const artwork = page.getByRole("main").locator("[data-video-viewport]");
     await expect(artwork).toBeVisible({ timeout: 30_000 });
     await expect
       .poll(() =>
@@ -270,9 +270,12 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
       exact: true,
     });
     await expect(close).toBeInViewport({ ratio: 1 });
-    await expect(
-      artwork.getByRole("button", { name: "Share drop", exact: true })
-    ).toBeInViewport({ ratio: 1 });
+    const share = artwork.getByRole("button", {
+      name: "Share drop",
+      exact: true,
+    });
+    await expect(share).toBeInViewport({ ratio: 1 });
+    await share.click({ trial: true });
     await page.screenshot({
       path: testInfo.outputPath("native-profile-artwork.png"),
     });
