@@ -174,7 +174,7 @@ export default function CommonDropdown<T, U = unknown>(
             className={
               usesInlineContent
                 ? "tw-flex tw-min-w-0 tw-items-center tw-gap-1.5"
-                : ""
+                : "tw-inline-flex tw-items-center"
             }
           >
             {showFilterLabel && (
@@ -183,12 +183,15 @@ export default function CommonDropdown<T, U = unknown>(
               </span>
             )}
             <span className={valueClassName}>{computedLabel}</span>
+            {sortDirection !== undefined && (
+              <span className="tw-ml-2 tw-flex tw-shrink-0 tw-items-center">
+                <CommonTableSortIcon
+                  direction={sortDirection}
+                  isActive={true}
+                />
+              </span>
+            )}
           </span>
-          {sortDirection && (
-            <span className="-tw-mt-0.5 tw-ml-2">
-              <CommonTableSortIcon direction={sortDirection} isActive={true} />
-            </span>
-          )}
           <span className={chevronClassName}>
             <svg
               ref={iconScope}
