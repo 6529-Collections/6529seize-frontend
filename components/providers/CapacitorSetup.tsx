@@ -91,63 +91,36 @@ export default function CapacitorSetup() {
       return;
     }
 
-    // Keep the layout viewport and artwork dimensions stable. Scroll the host
-    // frame above the keyboard; its sandboxed controls remain artist-owned.
     let keyboardFrame: HTMLIFrameElement | null = null;
     let originalScrollMargin = "";
-    let scrollContainer: HTMLElement | null = null;
-    let originalPadding = "";
     const releaseFrame = () => {
-      if (keyboardFrame) {
-        keyboardFrame.style.scrollMarginBottom = originalScrollMargin;
-        keyboardFrame = null;
-      }
-      if (scrollContainer) {
-        scrollContainer.style.paddingBottom = originalPadding;
-        scrollContainer = null;
-      }
+      if (!keyboardFrame) return;
+      keyboardFrame.style.scrollMarginBottom = originalScrollMargin;
+      keyboardFrame = null;
     };
     const showListener = Keyboard.addListener(
-      "keyboardWillShow",
+      "keyboardDidShow",
       ({ keyboardHeight }) => {
         releaseFrame();
+        const frame = document.activeElement;
         if (
-          !(document.activeElement instanceof HTMLIFrameElement) ||
-          keyboardHeight <= 0
-        )
+          !(frame instanceof HTMLIFrameElement) ||
+          !frame.closest("[data-video-viewport]") ||
+          keyboardHeight <= 0 ||
+          frame.getBoundingClientRect().height <=
+            window.innerHeight - keyboardHeight
+        ) {
           return;
-        keyboardFrame = document.activeElement;
-        originalScrollMargin = keyboardFrame.style.scrollMarginBottom;
-        keyboardFrame.style.scrollMarginBottom = `${keyboardHeight}px`;
-        // Supply scroll space even when the frame is the last content item.
-        // Padding the scroll host preserves the artwork's own size and aspect ratio.
-        let parent = keyboardFrame.parentElement;
-        while (parent && parent !== document.body) {
-          const overflowY = getComputedStyle(parent).overflowY;
-          if (overflowY === "auto" || overflowY === "scroll") break;
-          parent = parent.parentElement;
         }
-        scrollContainer = parent ?? document.body;
-        originalPadding = scrollContainer.style.paddingBottom;
-        const padding =
-          Number.parseFloat(getComputedStyle(scrollContainer).paddingBottom) ||
-          0;
-        scrollContainer.style.paddingBottom = `${padding + keyboardHeight}px`;
+        // Chat already follows the keyboard. Only a large single-view frame
+        // needs scroll alignment; adding host padding creates blank space.
+        keyboardFrame = frame;
+        originalScrollMargin = frame.style.scrollMarginBottom;
+        frame.style.scrollMarginBottom = keyboardHeight + "px";
+        frame.scrollIntoView({ block: "end", behavior: "instant" });
       }
     );
-    const visibleListener = Keyboard.addListener("keyboardDidShow", () => {
-      if (
-        keyboardFrame?.isConnected &&
-        document.activeElement === keyboardFrame
-      ) {
-        keyboardFrame.scrollIntoView({ block: "end", behavior: "instant" });
-      }
-    });
     const hideListener = Keyboard.addListener("keyboardDidHide", releaseFrame);
-    const releaseForHostFocus = () => {
-      if (document.activeElement !== keyboardFrame) releaseFrame();
-    };
-    document.addEventListener("focusin", releaseForHostFocus);
     void (async () => {
       try {
         await Keyboard.setResizeMode({ mode: KeyboardResize.None });
@@ -160,15 +133,10 @@ export default function CapacitorSetup() {
     })();
 
     return () => {
-      document.removeEventListener("focusin", releaseForHostFocus);
       releaseFrame();
       void (async () => {
         try {
-          const listeners = await Promise.all([
-            showListener,
-            visibleListener,
-            hideListener,
-          ]);
+          const listeners = await Promise.all([showListener, hideListener]);
           await Promise.all(listeners.map((listener) => listener.remove()));
         } catch (error: unknown) {
           console.error(
