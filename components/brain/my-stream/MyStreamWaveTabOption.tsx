@@ -30,6 +30,7 @@ export function DesktopTabButton({
     <button
       onClick={() => onSelect(option.key)}
       role="tab"
+      data-wave-tab-value={option.key.toLowerCase()}
       aria-selected={activeKey === option.key}
       aria-controls={option.panelId}
       className={`tw-relative tw-whitespace-nowrap tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-border-solid tw-bg-transparent tw-py-3 tw-text-sm tw-font-medium tw-transition-all tw-duration-200 ${
