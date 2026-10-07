@@ -595,11 +595,11 @@ test("a chat-only Wave starts observing tabs that appear after content registrat
         (await featureEvents(page, "Wave Feature Seen", "chat")).length
     )
     .toBe(1);
-  await visibleTab(page, "About").click();
+  await visibleTab(page, "Polls").click();
   await expect
     .poll(
       async () =>
-        (await featureEvents(page, "Wave Feature Activated", "about")).length
+        (await featureEvents(page, "Wave Feature Activated", "polls")).length
     )
     .toBe(1);
 });

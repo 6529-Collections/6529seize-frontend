@@ -23,6 +23,24 @@ import CompetitionAppearance from "./CompetitionAppearance";
 import CompetitionPauseHistory from "./CompetitionPauseHistory";
 import { COMPETITION_BUTTON, COMPETITION_INPUT } from "./CompetitionState";
 
+function getLifecycleActions(
+  lifecycle: ApiCompetitionLifecycle,
+  legacy: boolean
+): CompetitionAction[] {
+  if (legacy) return [];
+  switch (lifecycle) {
+    case ApiCompetitionLifecycle.Draft:
+      return ["publish", "archive"];
+    case ApiCompetitionLifecycle.Published:
+      return [];
+    case ApiCompetitionLifecycle.Archived:
+      return ["clone"];
+    case ApiCompetitionLifecycle.Ended:
+    case ApiCompetitionLifecycle.Cancelled:
+      return ["archive", "clone"];
+  }
+}
+
 export default function CompetitionAdmin({
   paused,
   onEdit,
@@ -30,7 +48,8 @@ export default function CompetitionAdmin({
   readonly paused: boolean | null;
   readonly onEdit: () => void;
 }) {
-  const { competition } = useCompetition();
+  const { competition, hub } = useCompetition();
+  const legacy = hub.legacy_primary_competition_id === competition.id;
   const { requestAuth } = useAuth();
   const locale = useBrowserLocale();
   const router = useRouter();
@@ -50,13 +69,7 @@ export default function CompetitionAdmin({
   } | null>(null);
   const canAdminister =
     isMultiCompetitionEnabled() && competition.permissions.administer;
-  let actions: CompetitionAction[] = ["archive", "clone"];
-  if (competition.lifecycle === ApiCompetitionLifecycle.Draft)
-    actions = ["publish", "archive"];
-  else if (competition.lifecycle === ApiCompetitionLifecycle.Published)
-    actions = [];
-  else if (competition.lifecycle === ApiCompetitionLifecycle.Archived)
-    actions = ["clone"];
+  const actions = getLifecycleActions(competition.lifecycle, legacy);
   const openAction = (command: CompetitionAction) => {
     setActionVersion(competition.config_version);
     setReason("");

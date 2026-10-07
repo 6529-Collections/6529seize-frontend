@@ -15,6 +15,9 @@ import { formatDate, formatInteger, formatNumber } from "@/i18n/format";
 import { Time } from "@/helpers/time";
 import CompetitionOverview from "./CompetitionOverview";
 import CompetitionAccess from "./CompetitionAccess";
+import WaveApprovalThresholds from "@/components/waves/specs/WaveApprovalThresholds";
+import { useQueryClient } from "@tanstack/react-query";
+import { invalidateCompetition } from "@/services/api/competitions-api";
 
 function RuleRow({
   label,
@@ -62,7 +65,9 @@ function RulesSection({
 }
 
 export default function CompetitionRules() {
-  const { competition } = useCompetition();
+  const { competition, hub, wave } = useCompetition();
+  const legacy = hub.legacy_primary_competition_id === competition.id;
+  const client = useQueryClient();
   const locale = useBrowserLocale();
   const now = Time.currentMillis();
   const date = (value: number) =>
@@ -225,18 +230,37 @@ export default function CompetitionRules() {
           <RuleRow label={t(locale, "competitions.rulesLabel.maxWinners")}>
             {number(decisions.max_winners)}
           </RuleRow>
-          {competition.type === ApiCompetitionType.Approve && (
-            <>
-              <RuleRow label={t(locale, "competitions.rulesLabel.threshold")}>
-                {number(decisions.winning_min_threshold)}
-              </RuleRow>
-              <RuleRow label={t(locale, "competitions.rulesLabel.hold")}>
-                {decisions.winning_threshold_min_duration_ms
-                  ? duration(decisions.winning_threshold_min_duration_ms)
-                  : t(locale, "competitions.rulesLabel.immediate")}
-              </RuleRow>
-            </>
-          )}
+          {competition.type === ApiCompetitionType.Approve &&
+            (legacy ? (
+              <div className="tw-py-3">
+                <dt className="tw-sr-only">
+                  {t(locale, "competitions.decisions")}
+                </dt>
+                <dd className="tw-m-0">
+                  <WaveApprovalThresholds
+                    wave={wave}
+                    display="configuration"
+                    onSaved={() => {
+                      void invalidateCompetition(client, {
+                        waveId: competition.wave_id,
+                        competitionId: competition.id,
+                      });
+                    }}
+                  />
+                </dd>
+              </div>
+            ) : (
+              <>
+                <RuleRow label={t(locale, "competitions.rulesLabel.threshold")}>
+                  {number(decisions.winning_min_threshold)}
+                </RuleRow>
+                <RuleRow label={t(locale, "competitions.rulesLabel.hold")}>
+                  {decisions.winning_threshold_min_duration_ms
+                    ? duration(decisions.winning_threshold_min_duration_ms)
+                    : t(locale, "competitions.rulesLabel.immediate")}
+                </RuleRow>
+              </>
+            ))}
           {decisions.next_decision_time !== null && (
             <RuleRow label={t(locale, "competitions.rulesLabel.nextDecision")}>
               {date(decisions.next_decision_time)}

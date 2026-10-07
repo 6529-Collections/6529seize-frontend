@@ -21,17 +21,6 @@ jest.mock("@/components/waves/specs/WaveChatStatus", () => ({
     <div data-testid="chat-status-setting" data-display={display} />
   ),
 }));
-jest.mock("@/components/waves/groups/WaveConfigurationDisplay", () => ({
-  __esModule: true,
-  default: () => <div data-testid="display-configuration" />,
-}));
-jest.mock(
-  "@/components/waves/groups/WaveConfigurationReadOnlySections",
-  () => ({
-    __esModule: true,
-    default: () => <div data-testid="read-only-configuration" />,
-  })
-);
 jest.mock("@/components/waves/groups/WaveConfigurationRules", () => ({
   __esModule: true,
   default: () => <div data-testid="configuration-rules" />,
@@ -125,8 +114,12 @@ describe("WaveConfigurationSections", () => {
       "data-display",
       "configuration"
     );
-    expect(screen.getByTestId("display-configuration")).toBeInTheDocument();
-    expect(screen.getByTestId("read-only-configuration")).toBeInTheDocument();
+    expect(
+      screen.queryByTestId("display-configuration")
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId("read-only-configuration")
+    ).not.toBeInTheDocument();
     expect(screen.getByTestId("configuration-rules")).toBeInTheDocument();
     expect(screen.getByTestId("admin-settings")).toBeInTheDocument();
     expect(screen.getByTestId("delete-chat-history")).toBeInTheDocument();
@@ -145,15 +138,15 @@ describe("WaveConfigurationSections", () => {
     ).toBeTruthy();
   });
 
-  it("includes participation and voting access for competition waves", () => {
+  it("keeps competition access out of wave Configuration", () => {
     render(<WaveConfigurationSections wave={makeWave(ApiWaveType.Rank)} />);
 
     expect(
-      screen.getByTestId(`group-${WaveGroupType.DROP}`)
-    ).toBeInTheDocument();
+      screen.queryByTestId(`group-${WaveGroupType.DROP}`)
+    ).not.toBeInTheDocument();
     expect(
-      screen.getByTestId(`group-${WaveGroupType.VOTE}`)
-    ).toBeInTheDocument();
+      screen.queryByTestId(`group-${WaveGroupType.VOTE}`)
+    ).not.toBeInTheDocument();
     expect(screen.getByTestId("chat-status-setting")).toHaveAttribute(
       "data-display",
       "configuration"

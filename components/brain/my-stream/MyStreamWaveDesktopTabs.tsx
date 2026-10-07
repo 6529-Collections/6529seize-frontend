@@ -19,7 +19,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { TabToggle } from "@/components/common/TabToggle";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useCompetitionNavigation } from "@/contexts/CompetitionNavigationContext";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
@@ -112,9 +112,8 @@ const getEffectiveProfileCurationId = ({
 
 const AUTO_EXPAND_LIMIT = 5;
 const TRAILING_TABS = [
-  MyStreamWaveTab.COMPETITIONS,
   MyStreamWaveTab.CONFIGURATION,
-  MyStreamWaveTab.ABOUT,
+  MyStreamWaveTab.COMPETITIONS,
 ];
 
 const TAB_LABELS: Record<
@@ -131,7 +130,7 @@ const TAB_LABELS: Record<
   [MyStreamWaveTab.SALES]: "Sales",
   [MyStreamWaveTab.WINNERS]: "Winners",
   [MyStreamWaveTab.OUTCOME]: "Outcome",
-  [MyStreamWaveTab.MY_VOTES]: "My Votes",
+  [MyStreamWaveTab.MY_VOTES]: "Votes",
   [MyStreamWaveTab.POLLS]: "Polls",
   [MyStreamWaveTab.FAQ]: "FAQ",
 };
@@ -148,7 +147,7 @@ const getTabLabel = ({
   readonly locale: ReturnType<typeof useBrowserLocale>;
 }): string => {
   if (tab === MyStreamWaveTab.CONFIGURATION)
-    return t(locale, "competitions.configuration");
+    return t(locale, "competitions.settings");
   if (tab === MyStreamWaveTab.ABOUT) return t(locale, "wave.navigation.about");
   if (isApproveWave && tab === MyStreamWaveTab.LEADERBOARD) {
     return approveLabels.approvals;
@@ -158,6 +157,7 @@ const getTabLabel = ({
     return approveLabels.approved;
   }
 
+  if (tab === MyStreamWaveTab.MY_VOTES) return t(locale, "competitions.votes");
   return TAB_LABELS[tab];
 };
 
@@ -273,7 +273,6 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
   const searchParams = useSearchParams();
   const { ref: featureUsageRef } = useWaveFeatureUsage("wave_tabs", wave.id);
   const pathname = usePathname();
-  const router = useRouter();
   const locale = useBrowserLocale();
   const { flat, nativeCompetition } = useCompetitionNavigation();
   const nativeDefault = flat ? nativeCompetition : null;
@@ -285,7 +284,6 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
     searchParams.get("competition") ??
     defaultCompetitionId;
   const { activeProfileProxy, connectedProfile } = useAuth();
-  const hasAuthenticatedProfile = Boolean(connectedProfile?.handle);
   const {
     isChatWave,
     isApproveWave,
@@ -405,13 +403,12 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
         .filter((tab) => {
           if (tab === MyStreamWaveTab.MY_VOTES) {
             return (
+              isCompetitionWave ||
               isCurationWave ||
-              (hasAuthenticatedProfile &&
-                (isMemesWave ||
-                  isCompetitionWave ||
-                  Boolean(effectiveCompetitionId)))
+              Boolean(effectiveCompetitionId)
             );
           }
+          if (tab === MyStreamWaveTab.ABOUT) return false;
           if (tab === MyStreamWaveTab.SALES) {
             return isCurationWave;
           }
@@ -440,18 +437,10 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
             badgeCount,
           };
         }),
-      ...(nativeDefault
-        ? ["voters"].map((tab) => ({
-            key: tab,
-            label: t(locale, "competitions.voters"),
-            panelId: getContentTabPanelId(MyStreamWaveTab.COMPETITIONS),
-          }))
-        : []),
     ],
     [
       availableTabs,
       approveLabels,
-      hasAuthenticatedProfile,
       isApproveWave,
       isCompetitionWave,
       isMemesWave,
@@ -524,22 +513,14 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
     [standardOptions]
   );
   const options: TabOption[] = useMemo(
-    () => [...leadingOptions, ...curationOptions, ...trailingOptions],
+    () => [...leadingOptions, ...trailingOptions, ...curationOptions],
     [curationOptions, leadingOptions, trailingOptions]
   );
 
   let activeKey: string = activeTab;
-  const nativeTab =
-    searchParams.get("edit") === "1" ? "rules" : searchParams.get("tab");
-  if (nativeDefault && nativeTab !== null && nativeTab === "voters")
-    activeKey = nativeTab;
   if (activeCurationId) activeKey = getCurationTabKey(activeCurationId);
   const selectStandardTab = (key: string) => {
     onSelectCuration(null);
-    if (nativeDefault && key === "voters") {
-      router.push(`${pathname}?tab=${key}`, { scroll: false });
-      return;
-    }
     setActiveTab(key as MyStreamWaveTab);
   };
   const curationTabKeys = useMemo(
@@ -597,7 +578,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
     isChatWave &&
     !canManageCurations &&
     curations.length === 0 &&
-    standardOptions.length <= 1
+    standardOptions.length === 0
   ) {
     return null;
   }
@@ -649,6 +630,14 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
                 onSelect={selectStandardTab}
               />
             ))}
+            {trailingOptions.map((option) => (
+              <DesktopTabOption
+                key={option.key}
+                option={option}
+                activeKey={activeKey}
+                onSelect={selectStandardTab}
+              />
+            ))}
             <SortableContext
               items={curationTabKeys}
               strategy={horizontalListSortingStrategy}
@@ -676,14 +665,6 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
                 </React.Fragment>
               ))}
             </SortableContext>
-            {trailingOptions.map((option) => (
-              <DesktopTabOption
-                key={option.key}
-                option={option}
-                activeKey={activeKey}
-                onSelect={selectStandardTab}
-              />
-            ))}
           </div>
         </DndContext>
       </div>

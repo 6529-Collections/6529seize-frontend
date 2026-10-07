@@ -91,19 +91,19 @@ it("uses the original legacy wave content without mounting another wave shell", 
   expect(screen.queryByTestId("detail")).toBeNull();
 });
 
-it("retains detail navigation for an explicitly opened non-default competition", () => {
+it("renders every selected published competition in the main tab row", () => {
   mockDefaultId = "beta";
   render(<CompetitionWaveRoute waveId="wave" competitionId="alpha" />);
-  expect(screen.getByTestId("wave")).toHaveAttribute("data-flat", "false");
-  expect(screen.getByTestId("detail")).toBeVisible();
+  expect(screen.getByTestId("wave")).toHaveAttribute("data-flat", "true");
+  expect(screen.getByTestId("native")).toBeVisible();
 });
 
-it("waits for authoritative selection before classifying an explicit link", () => {
+it("renders explicit competition links while default selection is pending", () => {
   mockSelectionPending = true;
   const { rerender } = render(
     <CompetitionWaveRoute waveId="wave" competitionId="alpha" />
   );
-  expect(screen.getByRole("status")).toBeVisible();
+  expect(screen.getByTestId("native")).toBeVisible();
   mockSelectionPending = false;
   rerender(<CompetitionWaveRoute waveId="wave" competitionId="alpha" />);
   expect(screen.getByTestId("wave")).toHaveAttribute("data-flat", "true");
@@ -112,7 +112,7 @@ it("waits for authoritative selection before classifying an explicit link", () =
 it("keeps explicit reads usable when default selection fails", () => {
   mockSelectionError = true;
   render(<CompetitionWaveRoute waveId="wave" competitionId="alpha" />);
-  expect(screen.getByTestId("detail")).toBeVisible();
+  expect(screen.getByTestId("native")).toBeVisible();
 });
 
 it("preserves a mounted entry form and layout when the default changes or the command pins its URL", () => {
@@ -137,8 +137,8 @@ it("reclassifies navigation for a different viewer without retaining the previou
   mockViewer = "other-member";
   mockDefaultId = "beta";
   rerender(<CompetitionWaveRoute waveId="wave" competitionId="alpha" />);
-  expect(screen.getByTestId("detail")).toBeVisible();
-  expect(screen.queryByLabelText("Entry text")).toBeNull();
+  expect(screen.getByTestId("native")).toBeVisible();
+  expect(screen.getByLabelText("Entry text")).toHaveValue("");
 });
 
 it("keeps draft administration in the detail experience", () => {
@@ -146,3 +146,14 @@ it("keeps draft administration in the detail experience", () => {
   render(<CompetitionWaveRoute waveId="wave" competitionId="alpha" />);
   expect(screen.getByTestId("detail")).toBeVisible();
 });
+
+it.each(["rules", "votes", "voters"])(
+  "renders the shared configuration/votes page for legacy %s",
+  (tab) => {
+    mockPrimary = "alpha";
+    mockSearch = `tab=${tab}`;
+    render(<CompetitionWaveRoute waveId="wave" competitionId="alpha" />);
+    expect(screen.getByTestId("native")).toBeVisible();
+    expect(screen.getAllByTestId("wave")).toHaveLength(1);
+  }
+);
