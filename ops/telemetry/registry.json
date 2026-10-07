@@ -40,7 +40,7 @@
       "automatic": [],
       "sampling": "consented production sessions; no custom event sampler",
       "release": "not attached",
-      "notes": "autocapture and automatic page views are disabled"
+      "notes": "autocapture, automatic page views and replay are disabled; SDK URL, referrer, search and campaign properties are blocked after enrichment; Wave feature pilot envelopes also allowlist properties"
     },
     {
       "id": "google-tag",
@@ -52,6 +52,62 @@
     }
   ],
   "signals": [
+    {
+      "name": "Profile section seen",
+      "kind": "event",
+      "question": "Which ready sections of Collected reach the visitor's screen?",
+      "owner": "mixpanel",
+      "producer": "components/user/collected/useCollectedTracking.ts",
+      "destinations": ["mixpanel:owner"],
+      "sampling": "consented production sessions; once per section per profile visit and viewer identity after at least 10% of its anchor is visible for one continuous second in a visible tab",
+      "privacy": "fixed section, tab, logical page, page group, route family, platform and self/other/anonymous viewer group; no custom identifiers, content, filter values or URLs; existing SDK identity remains",
+      "externalUsage": "planned Profile board reports; deployment and live receipt unverified; see ops/telemetry/collected.md",
+      "lifecycle": "keep",
+      "replacement": null,
+      "reviewBy": "2026-11-07"
+    },
+    {
+      "name": "Profile action clicked",
+      "kind": "event",
+      "question": "Which buttons, links and filters do people use inside Collected?",
+      "owner": "mixpanel",
+      "producer": "components/user/collected/useCollectedTracking.ts",
+      "destinations": ["mixpanel:owner"],
+      "sampling": "consented production sessions; every activation of a labelled control or deliberate filter/pagination callback; automatic URL repairs excluded",
+      "privacy": "same bounded envelope as Profile section seen plus fixed action; never wallet addresses, handles, artwork names, collection contracts, URLs or selected filter values",
+      "externalUsage": "planned Profile board reports; deployment and live receipt unverified; see ops/telemetry/collected.md",
+      "lifecycle": "keep",
+      "replacement": null,
+      "reviewBy": "2026-11-07"
+    },
+    {
+      "name": "Wave Feature Seen",
+      "kind": "event",
+      "question": "Which available Wave controls were actually visible in a foreground session?",
+      "owner": "mixpanel",
+      "producer": "services/analytics/waveFeatureUsage.ts",
+      "destinations": ["mixpanel:owner"],
+      "sampling": "consented production sessions; one exposure per control value and placement per visit",
+      "privacy": "bounded feature, placement, value, platform, viewer, eligibility and route family; booleans and schema version; existing SDK identity and transport metadata",
+      "externalUsage": "new pilot; live dashboard unverified",
+      "lifecycle": "keep",
+      "replacement": null,
+      "reviewBy": "2026-11-10"
+    },
+    {
+      "name": "Wave Feature Activated",
+      "kind": "event",
+      "question": "Which exposed Wave controls did people deliberately use?",
+      "owner": "mixpanel",
+      "producer": "services/analytics/waveFeatureUsage.ts",
+      "destinations": ["mixpanel:owner"],
+      "sampling": "consented production sessions; semantic user actions only",
+      "privacy": "same bounded envelope as Wave Feature Seen plus an allowlisted action",
+      "externalUsage": "new pilot; live dashboard unverified",
+      "lifecycle": "keep",
+      "replacement": null,
+      "reviewBy": "2026-11-10"
+    },
     {
       "name": "Homepage section seen",
       "kind": "event",

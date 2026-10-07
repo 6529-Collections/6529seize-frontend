@@ -255,6 +255,9 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
       "content",
       /viewport-fit=cover/
     );
+    const viewport = page.locator('meta[name="viewport"]');
+    await expect(viewport).toHaveAttribute("content", /maximum-scale=1(?:,|$)/);
+    await expect(viewport).toHaveAttribute("content", /user-scalable=no/);
     await expect(await readShellRuntime(page)).toEqual({
       capacitorIsNative: true,
       capacitorPlatform: platform,
@@ -266,6 +269,14 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
       surface: `capacitor-${platform}-sim`,
       userAgentHasElectron: false,
     });
+
+    // A client-side navigation must not restore the web zoom limits.
+    await page
+      .getByRole("link", { name: "Open network health dashboard" })
+      .click();
+    await expect(page).toHaveURL(/\/network\/health$/, { timeout: 15_000 });
+    await expect(viewport).toHaveAttribute("content", /maximum-scale=1(?:,|$)/);
+    await expect(viewport).toHaveAttribute("content", /user-scalable=no/);
   });
 
   for (const reducedMotion of [false, true]) {

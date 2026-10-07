@@ -62,6 +62,7 @@ export default function UserPageCollectedNetworkCards({
       >
         {cards.map((card) => (
           <li
+            data-profile-section-anchor="Artwork"
             key={`${card.contract}-${card.token}`}
             className="tw-min-w-0 tw-list-none"
           >

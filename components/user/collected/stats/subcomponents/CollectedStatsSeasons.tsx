@@ -159,6 +159,7 @@ export function CollectedStatsSeasons({
                     aria-expanded
                     aria-label={showLess}
                     onClick={onToggleExpanded}
+                    data-profile-action="Show fewer seasons"
                     className={desktopToggleClassName}
                   >
                     {showLess}
@@ -169,6 +170,7 @@ export function CollectedStatsSeasons({
                     aria-expanded={false}
                     aria-label={showMoreAriaLabel}
                     onClick={onToggleExpanded}
+                    data-profile-action="Show more seasons"
                     className={desktopToggleClassName}
                   >
                     {showMore}

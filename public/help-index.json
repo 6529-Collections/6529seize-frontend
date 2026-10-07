@@ -94,6 +94,40 @@
       ]
     },
     {
+      "id": "media.interactive-text-entry",
+      "kind": "workflow",
+      "title": "Type inside interactive artwork on iPhone",
+      "aliases": [
+        "interactive game name field",
+        "iPhone zoom stuck",
+        "HTML artwork keyboard"
+      ],
+      "keywords": [
+        "interactive",
+        "HTML",
+        "artwork",
+        "iPhone",
+        "iPad",
+        "Safari",
+        "zoom",
+        "keyboard"
+      ],
+      "facts": [
+        "On iPhone and iPad Safari, focusing small text fields inside interactive artwork does not automatically enlarge the whole page. Pinch zoom remains available in Safari. The native mobile app keeps page scale at normal size through navigation.",
+        "In the iOS app, the artwork frame scrolls above the keyboard without changing its dimensions. Closing the keyboard keeps the page at normal scale. App-owned fields and the composer retain their existing keyboard behavior. Artists do not need to change their files, and the untrusted interactive frame keeps its existing sandbox restrictions."
+      ],
+      "canonical_path": "/waves",
+      "link_label": "Open Waves",
+      "related_paths": ["/", "/the-memes"],
+      "tags": ["media", "interactive", "mobile", "accessibility"],
+      "source_refs": [
+        "components/providers/CapacitorSetup.tsx",
+        "components/common/SandboxedExternalIframe.tsx",
+        "components/nft-image/renderers/NFTHTMLRenderer.tsx",
+        "ops/docs/shared/feature-browser-zoom-and-pinch-scaling.md"
+      ]
+    },
+    {
       "id": "media.video-player",
       "kind": "ui_affordance",
       "title": "Video playback controls and timeline",
@@ -1987,6 +2021,8 @@
         "Owners can update settings, including airdrop address and mode, and top up; read-only viewers can inspect visible subscription information.",
         "The owner profile header and connected Home subscription row show a compact coverage status with a contextual setup, manage, choose-drops, or top-up action.",
         "Subscription changes and top-ups must be received by 00:00 UTC on the day before a Meme Card mint. Once a card is closed, enabling Automatic mode or making a first top-up does not subscribe you to that card. Its saved subscription choice is retained; Automatic mode applies to later cards.",
+        "Upcoming Drops keeps a numeric quantity selector from 1 through eligibility when eligibility is positive. At zero eligibility, it displays a single 0 option and is disabled without changing the saved request. Untouched automatic subscriptions in Automatic / All eligible mode follow current eligibility when consolidated balances refresh. Choosing a quantity saves a manual request for that card, including future cards, which automatic updates never overwrite.",
+        "The displayed manual quantity is capped by current eligibility without changing the saved request. Manual 11 displays 10 / 10 at eligibility 10, then 11 / 12 when eligibility recovers to 12 and data is refreshed. Final allocation is also capped by available balance; historical finalized allocations are unchanged.",
         "Upcoming Drops shows No subscription allocation only for a subscribed first card whose distribution is published but whose finalized subscription list has no record for that profile. A phase-less finalized record remains pending; the message also stays silent for unsubscribed cards, unpublished distribution, or failed lookups.",
         "The tab keeps loading and empty states distinct, and its subscription controls, upcoming rows, and history panels adapt to narrow screens."
       ],

@@ -11,6 +11,8 @@ import {
   WAVE_HEADER_ACTION_CLASSES,
   WAVE_HEADER_ACTION_SURFACE_CLASSES,
 } from "../waves/WaveHeaderActions";
+import { useWaveFeatureUsage } from "@/hooks/useWaveFeatureUsage";
+import { waveFeatureAttributes } from "@/services/analytics/waveFeatureUsage";
 
 export const PROFILE_FEED_TOOLTIP_ID = "profile-feed-shortcut-tooltip";
 
@@ -66,6 +68,7 @@ export function WebProfileFeedShortcut({
   readonly mobile?: boolean;
 }) {
   const { activeWave } = useMyStream();
+  const { ref: featureUsageRef } = useWaveFeatureUsage("sidebar");
   const locale = useBrowserLocale();
   const isMobileLayoutViewport = useIsMobileLayoutViewport();
   const opensMobileFeed = mobile || isMobileLayoutViewport;
@@ -93,6 +96,8 @@ export function WebProfileFeedShortcut({
       >
         <Link
           href={href}
+          ref={featureUsageRef}
+          {...waveFeatureAttributes("sidebar_entry", "profile_feed")}
           prefetch={false}
           onClick={handleClick}
           aria-label={profileFeedLabel}
@@ -110,6 +115,8 @@ export function WebProfileFeedShortcut({
   return (
     <Link
       href={href}
+      ref={featureUsageRef}
+      {...waveFeatureAttributes("sidebar_entry", "profile_feed")}
       prefetch={false}
       onClick={handleClick}
       aria-label={profileFeedLabel}
