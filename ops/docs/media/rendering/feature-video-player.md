@@ -54,9 +54,12 @@ or resuming an unloaded video can take longer on a slow connection.
 
 Chat videos start only when you press Play, on desktop, mobile browsers, and
 in the app. Opening a chat or scrolling a video into view does not start it.
-The video source waits for Play, including videos without a poster. When a
-poster is provided it stays visible; otherwise the player shows its empty
-frame and Play control. Duration can remain `—` until the video loads.
+The video source waits for Play, including videos without a poster. Uploaded
+chat videos show a still preview once video processing finishes.
+The preview loads separately from the video, keeps its proportions, and stays
+behind the Play control. New uploads may briefly have no preview while they
+process. Older uploads and external videos without a preview show the empty
+frame and Play control. Duration can remain `—` until you press Play.
 
 Starting another chat video pauses the previous one. Scrolling away or hiding
 the tab pauses playback; fullscreen stays active while the app/tab is visible.

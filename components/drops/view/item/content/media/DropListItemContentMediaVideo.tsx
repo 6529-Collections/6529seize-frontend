@@ -4,6 +4,7 @@ import { useMobileBatterySavings } from "@/hooks/useMobileAppActivity";
 import { useInView } from "@/hooks/useInView";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useOptimizedVideo } from "@/hooks/useOptimizedVideo";
+import { useChatVideoPoster } from "@/hooks/useChatVideoPoster";
 import { useHlsPlayer } from "@/hooks/useHlsPlayer";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import clsx from "clsx";
@@ -51,6 +52,10 @@ function DropListItemContentMediaVideo({
   const locale = useBrowserLocale();
   const prefersReducedMotion = usePrefersReducedMotion();
   const chat = useChatVideoPlayback(src);
+  const poster = useChatVideoPoster(
+    src,
+    chat.isChat && inView && !chat.requested
+  );
   const savedPlayback = useRememberedVideoPlayback(src);
   const shouldLoadVideo =
     (loadStrategy === "eager" || inView) && (!chat.isChat || chat.requested);
@@ -177,6 +182,8 @@ function DropListItemContentMediaVideo({
         }
         preload={chat.isChat && !chat.requested ? "none" : undefined}
         data-url={src}
+        poster={poster?.url}
+        aspectRatioHint={poster?.aspectRatio}
         template="ambient-media"
         autoPlay={shouldAutoPlay}
         layout={fillContainer ? "fill" : videoLayout}

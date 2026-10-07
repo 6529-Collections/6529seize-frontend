@@ -8,6 +8,7 @@ interface VideoConversions {
   readonly MP4_1080P: string;
   readonly MP4_720P: string;
   readonly HLS: string;
+  readonly POSTER: string;
 }
 
 /**
@@ -59,6 +60,7 @@ export function getVideoConversions(
     HLS: `${buildRenditionUrl(
       `${beforeFileName}${fileName}`
     )}/hls/${fileName}.m3u8`,
+    POSTER: `${buildRenditionUrl(pathWithoutExtension)}/poster/${fileName}_poster.0000001.jpg`,
   };
 }
 
