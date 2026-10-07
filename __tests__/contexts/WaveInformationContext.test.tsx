@@ -185,11 +185,8 @@ it("uses one navigation entry when leaving information and preserves Back and Fo
   fireEvent.click(screen.getByText("Open mobile information"));
   const informationPush = window.history.pushState;
   const overlayHistoryLength = window.history.length;
-  window.history.pushState(
-    { ...window.history.state, nextTree: "profile" },
-    "",
-    "/profiles/creator"
-  );
+  const navigationState = { ...window.history.state, nextTree: "profile" };
+  window.history.pushState(navigationState, "", "/profiles/creator");
   rerender(
     <WaveInformationProvider>
       <Harness />
@@ -199,7 +196,8 @@ it("uses one navigation entry when leaving information and preserves Back and Fo
   expect(window.history.pushState).not.toBe(informationPush);
   expect(window.history.length).toBe(overlayHistoryLength);
   expect(window.history.state).toMatchObject({ nextTree: "profile" });
-  expect(window.history.state.waveInformation).toBeUndefined();
+  expect(window.history.state).not.toHaveProperty("waveInformation");
+  expect(navigationState).toHaveProperty("waveInformation");
   window.history.back();
   await waitFor(() =>
     expect(window.location.pathname + window.location.search).toBe(originalUrl)
@@ -211,5 +209,6 @@ it("uses one navigation entry when leaving information and preserves Back and Fo
     expect(window.location.pathname).toBe("/profiles/creator")
   );
   expect(window.history.state).toMatchObject({ nextTree: "profile" });
+  expect(window.history.state).not.toHaveProperty("waveInformation");
   expect(screen.queryByRole("dialog")).toBeNull();
 });

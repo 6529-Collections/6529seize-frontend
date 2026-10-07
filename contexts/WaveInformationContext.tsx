@@ -105,13 +105,17 @@ export function WaveInformationProvider({
       if (leavingView && ownsEntry) {
         // Navigation from About replaces its temporary entry, so Back returns
         // directly to the original view. Keep Next's state and history wrapper.
-        const nextState =
+        let nextState = data;
+        if (
           data !== null &&
           typeof data === "object" &&
           "waveInformation" in data &&
           data.waveInformation === request.id
-            ? { ...data, waveInformation: undefined }
-            : data;
+        ) {
+          const stateWithoutInformation = { ...data };
+          Reflect.deleteProperty(stateWithoutInformation, "waveInformation");
+          nextState = stateWithoutInformation;
+        }
         originalReplace(nextState, unused, url);
         return;
       }
