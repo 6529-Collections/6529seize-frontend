@@ -1,5 +1,74 @@
 import { expect, test, type Page } from "@playwright/test";
 import path from "node:path";
+import { installSectionTrackingFixture } from "../support/sectionTrackingFixture";
+
+test("Collected tracking follows nested scrolling and keyboard actions", async ({
+  page,
+}) => {
+  // Exercise real browser geometry and activation without sending analytics.
+  const { seen, clicked } = await installSectionTrackingFixture(
+    page,
+    `
+    <main aria-label="Collected test" style="height:240px;overflow:auto">
+      <section data-profile-section="Collection summary" style="height:110px">
+        <h1 data-profile-section-anchor="Collection summary">Collection</h1>
+        <button data-profile-action="Details">Details</button>
+        <span data-profile-action="Complete my set"><a href="/collect?address=private">Complete my set</a></span>
+      </section>
+      <section data-profile-section="Collection details" hidden style="height:110px">
+        <h2>Collection details</h2>
+      </section>
+      <div style="height:700px"></div>
+      <section data-profile-section="Artwork">
+        <article data-profile-section-anchor="Artwork" style="height:160px"><a href="/the-memes/1" data-profile-action="Open artwork">First artwork</a></article>
+        <div style="height:700px"></div>
+        <article data-profile-section-anchor="Artwork" style="height:160px"><a href="/the-memes/2" data-profile-action="Open artwork"><span>Artwork</span></a></article>
+      </section>
+    </main>
+  `,
+    `
+        import { COLLECTED_SECTIONS, getCollectedClick } from './components/user/collected/collectedTracking';
+        import { observeAnalyticsSections } from './services/analytics/sectionVisibility';
+        const root = document.querySelector('main');
+        observeAnalyticsSections({ root, attribute: 'data-profile-section-anchor', sections: COLLECTED_SECTIONS, seen: new Set(), onSeen: section => append('Sections seen', section) });
+        root.addEventListener('click', event => {
+          const click = getCollectedClick(root, event.target);
+          if (click) append('Actions clicked', click.section + ': ' + click.action);
+        }, true);
+        root.querySelector('button').addEventListener('click', event => {
+          event.stopPropagation();
+          const details = root.querySelector('[data-profile-section="Collection details"]');
+          details.hidden = false;
+          details.querySelector('h2').setAttribute('data-profile-section-anchor', 'Collection details');
+        });
+        root.querySelectorAll('a').forEach(link => link.addEventListener('click', event => event.preventDefault()));
+      `
+  );
+  await expect(seen).toHaveText(["Collection summary"]);
+  await page.getByRole("button", { name: "Details", exact: true }).focus();
+  await page.keyboard.press("Enter");
+  await expect(seen).toHaveText(["Collection summary", "Collection details"]);
+  await page.getByRole("link", { name: "Complete my set" }).click();
+  await page.getByRole("link", { name: "Artwork", exact: true }).click();
+  await expect(seen).toHaveText([
+    "Collection summary",
+    "Collection details",
+    "Artwork",
+  ]);
+  await expect(clicked).toHaveText([
+    "Collection summary: Details",
+    "Collection summary: Complete my set",
+    "Artwork: Open artwork",
+  ]);
+  await page
+    .getByRole("heading", { name: "Collection", exact: true })
+    .scrollIntoViewIfNeeded();
+  await expect(seen).toHaveText([
+    "Collection summary",
+    "Collection details",
+    "Artwork",
+  ]);
+});
 
 const MEMES = "0x33fd426905f149f8376e227d0c9d3340aad17af1";
 const ZERO = "0x0000000000000000000000000000000000000000";
@@ -678,9 +747,7 @@ test("artist choices stay scrollable and searchable on mobile and desktop", asyn
     await expect(
       choices.getByRole("option", { name: "Catalog artist 30" })
     ).toHaveCount(0);
-    await choices
-      .getByRole("option", { name: "Catalog artist 20" })
-      .click();
+    await choices.getByRole("option", { name: "Catalog artist 20" }).click();
     await expect(sheet).toHaveCount(0);
     await expect(artist).toContainText("Catalog artist 20");
     await expect(artist).toBeFocused();
