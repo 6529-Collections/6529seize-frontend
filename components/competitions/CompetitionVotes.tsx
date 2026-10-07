@@ -39,7 +39,7 @@ export default function CompetitionVotes() {
   const search = useSearchParams();
   const locale = useBrowserLocale();
   const requested =
-    search.get("tab") === "voters" ? "all" : search.get("voteTab");
+    search.get("voteTab") ?? (search.get("tab") === "voters" ? "all" : null);
   const active = VOTE_TABS.find((tab) => tab === requested) ?? "mine";
   const labels = {
     mine: t(locale, "competitions.myVotes"),

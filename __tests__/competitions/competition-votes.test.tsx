@@ -75,7 +75,7 @@ it("groups all three views under Votes and preserves the chosen competition and 
     { scroll: false }
   );
 });
-it("uses legacy controls for My Votes, resolves old voter links, and scopes panel IDs", () => {
+it("uses legacy controls, resolves voter links and explicit subtabs, and scopes panel IDs", () => {
   mockLegacy = "alpha";
   const { rerender } = render(<CompetitionVotes />);
   expect(screen.getByText("Legacy votes")).toBeVisible();
@@ -86,6 +86,13 @@ it("uses legacy controls for My Votes, resolves old voter links, and scopes pane
     "true"
   );
   expect(screen.getByText("Voters for selected competition")).toBeVisible();
+  mockSearch = "tab=voters&voteTab=activity";
+  rerender(<CompetitionVotes />);
+  expect(screen.getByRole("tab", { name: "Activity" })).toHaveAttribute(
+    "aria-selected",
+    "true"
+  );
+  expect(screen.getByText("Activity for selected competition")).toBeVisible();
   mockId = "beta";
   mockSearch = "tab=votes&voteTab=activity";
   rerender(<CompetitionVotes />);
