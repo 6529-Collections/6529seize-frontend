@@ -19,9 +19,10 @@ export default function CapacitorSetup() {
   }, [isCapacitor]);
 
   useEffect(() => {
+    const userAgent = navigator.userAgent;
     const isSafari =
       isAppleMobile &&
-      (/Version\/[\d.]+.*Safari\//.test(navigator.userAgent) ||
+      ((userAgent.includes("Version/") && userAgent.includes("Safari/")) ||
         (navigator as Navigator & { standalone?: boolean }).standalone ===
           true);
 
@@ -40,8 +41,9 @@ export default function CapacitorSetup() {
       const content = meta.getAttribute("content");
       const webContent = content ?? "width=device-width,initial-scale=1";
       // iOS Safari ignores scale limits for pinch zoom, but respects them for
-      // input focus zoom, including in cross-origin frames. Keep user-scalable
-      // enabled on the web. WKWebView retains the existing native scale lock.
+      // input focus zoom, including in cross-origin frames. Confirmed on iOS
+      // 26.6.2: focus stays at 1x while a user pinch still reaches >2x.
+      // Keep user-scalable enabled on the web. WKWebView retains the native lock.
       // https://webkit.org/blog/7367/new-interaction-behaviors-in-ios-10/
       let nextContent =
         "width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no,viewport-fit=cover";
@@ -121,7 +123,8 @@ export default function CapacitorSetup() {
         // Padding the scroll host preserves the artwork's own size and aspect ratio.
         let parent = keyboardFrame.parentElement;
         while (parent && parent !== document.body) {
-          if (/auto|scroll/.test(getComputedStyle(parent).overflowY)) break;
+          const overflowY = getComputedStyle(parent).overflowY;
+          if (overflowY === "auto" || overflowY === "scroll") break;
           parent = parent.parentElement;
         }
         scrollContainer = parent ?? document.body;
