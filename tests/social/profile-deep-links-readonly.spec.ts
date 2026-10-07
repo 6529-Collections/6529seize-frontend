@@ -19,9 +19,14 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
     await expectProfileShell(page, "Collected");
 
     const details = page.getByRole("button", { name: "Details", exact: true });
-    const header = details.locator("..");
-    const metrics = header.locator("[class~='tw-overflow-x-auto']");
-    const fade = metrics
+    const metrics = page
+      .getByRole("button", { name: "Details", exact: true })
+      .locator("..")
+      .locator("[class~='tw-overflow-x-auto']");
+    const fade = page
+      .getByRole("button", { name: "Details", exact: true })
+      .locator("..")
+      .locator("[class~='tw-overflow-x-auto']")
       .locator("..")
       .locator(":scope > div[aria-hidden='true']");
 
@@ -107,12 +112,15 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
     ).toHaveAttribute("aria-expanded", "true");
 
     for (const title of ["Collected", "Activity Overview"]) {
-      const section = page.getByRole("region", { name: title, exact: true });
-      const disclosures = section.locator("details");
+      const disclosures = page
+        .getByRole("region", { name: title, exact: true })
+        .locator("details");
       await expect(disclosures).toHaveCount(2);
       for (const disclosure of await disclosures.all()) {
         await expect(disclosure).not.toHaveAttribute("open");
-        const summary = disclosure.locator("summary");
+        const summary = disclosure
+          .getByText(/^(Overview|Memes Breakdown By Season)$/, { exact: true })
+          .locator("..");
         await expect(summary).toHaveCSS("font-size", "14px");
         await summary.press("Enter");
         await expect(disclosure).toHaveAttribute("open", "");
@@ -175,7 +183,12 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
         expect(actions.stackedLeftInset).toBeLessThanOrEqual(1);
         expect(actions.stackedGap).toBeGreaterThanOrEqual(8);
       }
-      await expect(boost.locator("..")).toHaveCSS("overflow-x", "auto");
+      await expect(
+        page.getByRole("region", {
+          name: "TDH boost breakdown by source",
+          exact: true,
+        })
+      ).toHaveCSS("overflow-x", "auto");
       const dimensions = await boost.evaluate((table) => ({
         tableWidth: table.getBoundingClientRect().width,
         availableWidth: table.parentElement!.clientWidth,
@@ -186,7 +199,11 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
       for (const header of await boost.getByRole("columnheader").all()) {
         await expect(header).toHaveCSS("font-size", "10px");
       }
-      for (const cell of await boost.locator("th, td").all()) {
+      const boostCells = boost
+        .getByRole("columnheader")
+        .or(boost.getByRole("rowheader"))
+        .or(boost.getByRole("cell"));
+      for (const cell of await boostCells.all()) {
         await expect(cell).toHaveCSS("white-space", "nowrap");
       }
       const tablist = page.getByRole("tablist", {
@@ -287,8 +304,10 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
 
     await page.setViewportSize({ width: 1280, height: 900 });
     for (const title of ["Collected", "Activity Overview"]) {
-      const section = page.getByRole("region", { name: title, exact: true });
-      for (const disclosure of await section.locator("details").all()) {
+      const disclosures = page
+        .getByRole("region", { name: title, exact: true })
+        .locator("details");
+      for (const disclosure of await disclosures.all()) {
         await expect(disclosure).toHaveAttribute("open", "");
         await expect(
           disclosure
@@ -408,7 +427,11 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
     for (const width of [360, 390, 767, 1023]) {
       await page.setViewportSize({ width, height: 844 });
       await expect(sort).toBeVisible();
-      await expect(sort.locator("svg")).toHaveCount(2);
+      await expect(
+        page
+          .getByRole("button", { name: "Sort By: Token ID", exact: true })
+          .locator("svg")
+      ).toHaveCount(2);
       const offsets = await sort.evaluate((button) => {
         const bounds = button.getBoundingClientRect();
         const center = bounds.y + bounds.height / 2;
