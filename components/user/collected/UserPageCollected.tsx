@@ -43,6 +43,7 @@ import UserPageCollectedFilters from "./filters/UserPageCollectedFilters";
 import { useXtdhTokensQuery } from "./hooks/useXtdhTokensQuery";
 import UserPageCollectedFirstLoading from "./UserPageCollectedFirstLoading";
 import UserPageCollectedStats from "./UserPageCollectedStats";
+import { useCollectedTracking } from "./useCollectedTracking";
 import {
   applyQueryUpdateItemsToState,
   convertCollection,
@@ -80,6 +81,7 @@ export default function UserPageCollected({
   const params = useParams();
   const router = useRouter();
   const user = params?.["user"]?.toString().toLowerCase() ?? "";
+  const { rootRef, onClickCapture, trackAction } = useCollectedTracking(user);
   const locale = normalizeLocale(searchParams.get("locale"));
   const collectedReturnTo = buildProfileCollectedReturnPath({
     pathname,
@@ -294,6 +296,13 @@ export default function UserPageCollected({
     collection: CollectedCollectionType | null
   ): Promise<void> => {
     if (filters.collection === null && collection === null) return;
+    trackAction(
+      "Filters",
+      collection === CollectedCollectionType.NETWORK ||
+        filters.collection === CollectedCollectionType.NETWORK
+        ? "Change view"
+        : "Change collection"
+    );
     const { nextFilters, updateItems } = getCollectionUpdate({
       collection,
       allowToggle: true,
@@ -305,6 +314,7 @@ export default function UserPageCollected({
   const setCollectionShortcut = async (
     collection: CollectedCollectionType
   ): Promise<void> => {
+    trackAction("Collection summary", "Change collection");
     const { nextFilters, updateItems } = getCollectionUpdate({
       collection,
       allowToggle: true,
@@ -314,6 +324,7 @@ export default function UserPageCollected({
   };
 
   const setSeasonShortcut = async (seasonNumber: number): Promise<void> => {
+    trackAction("Collection summary", "Change season");
     const isActiveSeasonShortcut =
       filters.collection === CollectedCollectionType.MEMES &&
       effectiveSeasonId === seasonNumber;
@@ -365,6 +376,7 @@ export default function UserPageCollected({
   };
 
   const setSortBy = async (sortBy: CollectionSort): Promise<void> => {
+    trackAction("Filters", "Change sort");
     const items: QueryUpdateInput[] = [
       {
         name: "sortBy",
@@ -387,6 +399,7 @@ export default function UserPageCollected({
   };
 
   const setSeized = async (seized: CollectionSeized | null): Promise<void> => {
+    trackAction("Filters", "Change seized filter");
     const items: QueryUpdateInput[] = [
       {
         name: "seized",
@@ -401,6 +414,7 @@ export default function UserPageCollected({
   };
 
   const setSzn = async (szn: MemeSeason | null): Promise<void> => {
+    trackAction("Filters", "Change season");
     const nextInitialSznId = szn?.id ?? null;
     setFilters((prev) => ({
       ...prev,
@@ -432,6 +446,7 @@ export default function UserPageCollected({
   const setSubcollection = async (
     subcollection: string | null
   ): Promise<void> => {
+    trackAction("Filters", "Change collection");
     const items: QueryUpdateInput[] = [
       {
         name: "subcollection",
@@ -460,6 +475,11 @@ export default function UserPageCollected({
       },
     ];
     await updateFields(items, historyMode);
+  };
+
+  const setPageFromControl = (page: number): Promise<void> => {
+    if (page !== filters.page) trackAction("Artwork", "Change page");
+    return setPage(page);
   };
 
   useEffect(() => {
@@ -604,7 +624,12 @@ export default function UserPageCollected({
   const scrollContainer = useRef<HTMLDivElement>(null);
 
   return (
-    <div className="tailwind-scope">
+    <div
+      ref={rootRef}
+      onClickCapture={onClickCapture}
+      onAuxClickCapture={onClickCapture}
+      className="tailwind-scope"
+    >
       <UserPageCollectedStats
         profile={profile}
         activeAddress={
@@ -625,7 +650,12 @@ export default function UserPageCollected({
         </div>
       ) : (
         <>
-          <div ref={scrollContainer} className="tw-mt-6">
+          <div
+            ref={scrollContainer}
+            data-profile-section="Filters"
+            data-profile-section-anchor="Filters"
+            className="tw-mt-6"
+          >
             <UserPageCollectedFilters
               profile={profile}
               filters={filters}
@@ -636,15 +666,16 @@ export default function UserPageCollected({
               setSzn={setSzn}
               setSubcollection={setSubcollection}
               showTransfer={showTransfer}
+              onAddressChange={() => trackAction("Filters", "Change address")}
             />
           </div>
 
-          <div className="tw-mt-6 tw-flex tw-gap-6">
+          <div data-profile-section="Artwork" className="tw-mt-6">
             {isNetwork ? (
               <UserPageCollectedNetworkCards
                 cards={dataNetwork?.data ?? []}
                 page={filters.page}
-                setPage={setPage}
+                setPage={setPageFromControl}
                 next={dataNetwork?.next ?? false}
                 locale={locale}
               />
@@ -655,7 +686,7 @@ export default function UserPageCollected({
                 page={filters.page}
                 showDataRow={showDataRow}
                 filters={filters}
-                setPage={setPage}
+                setPage={setPageFromControl}
                 dataTransfer={dataTransfer ?? []}
                 isTransferLoading={isFetchingTransfer}
                 locale={locale}
