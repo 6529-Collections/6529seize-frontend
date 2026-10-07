@@ -53,8 +53,8 @@ export default function CommonDropdownItem<T, U = unknown>(
       >
         <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-x-2">
           <span className="tw-truncate tw-text-sm tw-font-medium">{label}</span>
-          {sortDirection && (
-            <span className="-tw-mt-0.5">
+          {sortDirection !== undefined && (
+            <span className="tw-flex tw-shrink-0 tw-items-center">
               <CommonTableSortIcon
                 direction={isActive ? sortDirection : SortDirection.DESC}
                 isActive={isActive}

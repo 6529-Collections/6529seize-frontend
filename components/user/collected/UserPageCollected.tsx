@@ -639,7 +639,7 @@ export default function UserPageCollected({
             />
           </div>
 
-          <div className="tw-mt-6 tw-flex tw-gap-6">
+          <div className="tw-mt-6">
             {isNetwork ? (
               <UserPageCollectedNetworkCards
                 cards={dataNetwork?.data ?? []}

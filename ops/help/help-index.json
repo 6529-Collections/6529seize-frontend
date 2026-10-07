@@ -5826,8 +5826,11 @@
       "facts": [
         "The Collected tab lives at /{user}/collected.",
         "It shows collected NFT context, owner balances, stats summary, and transfer-mode behavior where available.",
+        "On mobile, swipe the headline statistics horizontally; a right-edge fade indicates more statistics, and Details stays visible beside the row.",
         "The expandable Details panel can show holdings totals, wallet activity, distributions, TDH history, and boost breakdown.",
-        "Wide tables in Details scroll horizontally on narrow screens while their first label column stays visible.",
+        "On mobile, both Overview and both Memes Breakdown By Season sections in Details start closed; tap their titles to open the tables. Desktop starts with these sections open.",
+        "Wallet Activity, Distributions, and TDH History tab labels stay on one line and scroll horizontally when needed. The selected tab stays visible, including when opened from a deep link.",
+        "Details table text stays on one line; tables scroll horizontally when their columns do not fit, including Boost Breakdown. The first label column of wide holdings and activity overview tables stays visible while scrolling.",
         "Native view covers The Memes, Gradients, NextGen, and Meme Lab holdings; Network view covers xTDH token holdings by contract.",
         "In the native app, The Memes, Gradients, NextGen, and Meme Lab tokens opened from a profile's Collected tab use the app-header Back chevron to restore the same profile filters, page, and opened card while retaining the detail page's collection link; mobile web shows an in-page return action, desktop uses browser Back, and direct token visits do not show a false return action, while NextGen can separately offer the current owner's holdings when available.",
         "Use collection route records for collection-level browsing and profile collected for a user's holdings."
@@ -5844,6 +5847,7 @@
         "app/[user]/collected/page.tsx",
         "ops/docs/profiles/tabs/feature-collected-tab.md",
         "components/user/collected/stats/useCollectedStatsData.ts",
+        "components/user/collected/stats/subcomponents/CollectedStatsHeader.tsx",
         "components/user/stats/UserPageStatsTableShared.tsx"
       ]
     },
