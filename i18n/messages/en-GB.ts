@@ -173,6 +173,18 @@ export const EN_GB_MESSAGES = {
   "network.groupInspection.bulkRep": "REP everyone matching criteria",
   "network.groupInspection.bulkNic": "NIC everyone matching criteria",
   "network.groupInspection.bulkActionsLabel": "Bulk rating actions",
+  "network.groupInspection.add": "Add",
+  "network.groupInspection.subtract": "Subtract",
+  "network.groupInspection.grant": "Grant",
+  "network.groupInspection.cancel": "Cancel",
+  "network.groupInspection.repCategory": "Rep Category",
+  "network.groupInspection.clearCategory": "Clear category",
+  "network.groupInspection.repCategoryRequired": "Please enter rep category",
+  "network.groupInspection.creditSummary":
+    "You can grant up to {credit} {matter} to each of {count} members of the group.",
+  "network.groupInspection.progress": "{matter} Progress",
+  "network.groupInspection.keepOpen":
+    "Keep this window open while we distribute credits across the group.",
   "network.groupInspection.bulkRepSuccess": "REP distributed.",
   "network.groupInspection.bulkNicSuccess": "NIC distributed.",
   "network.groupInspection.source": "Source: filters + optional manual list",
