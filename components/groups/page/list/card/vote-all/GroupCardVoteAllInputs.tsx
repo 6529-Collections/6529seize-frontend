@@ -1,8 +1,6 @@
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import { ApiRateMatter } from "@/generated/models/ApiRateMatter";
-import RepCategorySearch, {
-  RepCategorySearchSize,
-} from "@/components/utils/input/rep-category/RepCategorySearch";
+import RepCategorySearch from "@/components/utils/input/rep-category/RepCategorySearch";
 import type { CreditDirection } from "../GroupCard";
 import type { GroupCardRateMatter } from "../GroupCard";
 import GroupCardActionNumberInput from "../utils/GroupCardActionNumberInput";
@@ -30,7 +28,7 @@ export default function GroupCardVoteAllInputs({
 }) {
   const components: Record<GroupCardRateMatter, JSX.Element> = {
     [ApiRateMatter.Cic]: (
-      <div className="tw-w-full xl:tw-max-w-[17.156rem]">
+      <div className="tw-w-full">
         <GroupCardActionNumberInput
           label="NIC"
           componentId={`${group.id}_nic`}
@@ -42,10 +40,10 @@ export default function GroupCardVoteAllInputs({
       </div>
     ),
     [ApiRateMatter.Rep]: (
-      <div className="tw-flex tw-w-full tw-flex-wrap tw-gap-x-4 tw-gap-y-4 sm:tw-flex-nowrap">
-        <div className="tw-w-full md:tw-w-[58%]">
+      <div className="tw-flex tw-w-full tw-flex-col tw-gap-5">
+        <div className="tw-w-full">
           <GroupCardActionNumberInput
-            label="Rep"
+            label="REP"
             componentId={`${group.id}_rep`}
             amount={amountToAdd}
             creditDirection={creditDirection}
@@ -53,11 +51,11 @@ export default function GroupCardVoteAllInputs({
             setAmount={setAmountToAdd}
           />
         </div>
-        <div className="tw-w-full md:tw-w-[42%]">
+        <div className="tw-w-full">
           <RepCategorySearch
             category={category}
             setCategory={setCategory}
-            size={RepCategorySearchSize.SM}
+            variant="form"
           />
         </div>
       </div>

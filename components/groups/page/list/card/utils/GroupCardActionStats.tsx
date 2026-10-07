@@ -2,7 +2,9 @@
 
 import { useContext, useEffect, useState } from "react";
 import { ApiRateMatter } from "@/generated/models/ApiRateMatter";
-import { formatNumberWithCommas } from "@/helpers/Helpers";
+import { formatInteger } from "@/i18n/format";
+import { t, tRich } from "@/i18n/messages";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
@@ -23,9 +25,10 @@ export default function GroupCardActionStats({
   readonly membersCount: number | null;
   readonly loadingMembersCount: boolean;
 }) {
+  const locale = useBrowserLocale();
   const MATTER_LABEL: Record<GroupCardRateMatter, string> = {
-    [ApiRateMatter.Rep]: "Rep",
-    [ApiRateMatter.Cic]: "Nic",
+    [ApiRateMatter.Rep]: "REP",
+    [ApiRateMatter.Cic]: "NIC",
   };
 
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
@@ -33,8 +36,6 @@ export default function GroupCardActionStats({
   const [raterRepresentative, setRaterRepresentative] = useState<string | null>(
     null
   );
-
-  const [creditPerMember, setCreditPerMember] = useState<number>(0);
 
   useEffect(() => {
     if (!connectedProfile?.handle) {
@@ -51,40 +52,41 @@ export default function GroupCardActionStats({
     setRaterRepresentative(null);
   }, [connectedProfile, activeProfileProxy]);
 
-  const { data: creditLeft } = useQuery<ApiAvailableRatingCredit | null>({
-    queryKey: [
-      QueryKey.IDENTITY_AVAILABLE_CREDIT,
-      {
-        rater,
-        rater_representative: raterRepresentative,
+  const { data: creditLeft, isError } =
+    useQuery<ApiAvailableRatingCredit | null>({
+      queryKey: [
+        QueryKey.IDENTITY_AVAILABLE_CREDIT,
+        {
+          rater,
+          rater_representative: raterRepresentative,
+        },
+      ],
+      queryFn: async () => {
+        if (!rater) {
+          return null;
+        }
+        const params: {
+          rater: string;
+          rater_representative?: string | undefined;
+        } = {
+          rater,
+        };
+
+        if (raterRepresentative) {
+          params.rater_representative = raterRepresentative;
+        }
+
+        return await commonApiFetch<
+          ApiAvailableRatingCredit,
+          { rater: string; rater_representative?: string | undefined }
+        >({
+          endpoint: `ratings/credit`,
+          params,
+        });
       },
-    ],
-    queryFn: async () => {
-      if (!rater) {
-        return null;
-      }
-      const params: {
-        rater: string;
-        rater_representative?: string | undefined;
-      } = {
-        rater,
-      };
-
-      if (raterRepresentative) {
-        params.rater_representative = raterRepresentative;
-      }
-
-      return await commonApiFetch<
-        ApiAvailableRatingCredit,
-        { rater: string; rater_representative?: string | undefined }
-      >({
-        endpoint: `ratings/credit`,
-        params,
-      });
-    },
-    placeholderData: keepPreviousData,
-    enabled: !!rater,
-  });
+      placeholderData: keepPreviousData,
+      enabled: !!rater,
+    });
 
   const getCreditLeft = () => {
     switch (matter) {
@@ -98,51 +100,52 @@ export default function GroupCardActionStats({
     }
   };
 
-  useEffect(() => {
-    const credit = getCreditLeft();
-    if (
-      typeof credit === "number" &&
-      typeof membersCount === "number" &&
-      credit > 0 &&
-      membersCount > 0
-    ) {
-      const creditPerMember = credit / membersCount;
-      setCreditPerMember(creditPerMember);
-    } else {
-      setCreditPerMember(0);
-    }
-  }, [creditLeft, membersCount]);
-
-  const count =
-    typeof membersCount === "number"
-      ? formatNumberWithCommas(membersCount)
-      : null;
+  const credit = getCreditLeft();
+  const creditPerMember =
+    typeof credit === "number" &&
+    typeof membersCount === "number" &&
+    credit > 0 &&
+    membersCount > 0
+      ? credit / membersCount
+      : 0;
+  const creditPrefix = creditPerMember > 0 ? "±" : "";
+  const creditLabel =
+    credit === null || membersCount === null
+      ? "—"
+      : `${creditPrefix}${formatInteger(locale, +creditPerMember.toFixed(0))}`;
 
   return (
-    <div className="tw-mt-4">
-      <p className="tw-mb-0 tw-block tw-text-sm tw-font-medium tw-text-iron-50">
-        <img
-          src="/pepe-xglasses.png"
-          className="-tw-mt-0.5 tw-ml-1 tw-mr-1.5 tw-inline tw-h-4 tw-w-4 tw-flex-shrink-0 tw-object-contain"
-          alt="pepe-xglasses"
-        />
-        You can grant up to{" "}
-        <span className="tw-font-semibold tw-text-primary-400">
-          {creditPerMember > 0 && "+-"}
-          {formatNumberWithCommas(+creditPerMember.toFixed(0))}
-        </span>{" "}
-        {MATTER_LABEL[matter]} to each of
-        <span>
-          <span className="tw-font-semibold tw-text-primary-400">
-            {" "}
-            {loadingMembersCount ? (
-              <CircleLoader size={CircleLoaderSize.SMALL} />
-            ) : (
-              count
-            )}
-          </span>{" "}
-          members of the group.
-        </span>
+    <div
+      role="status"
+      aria-live="polite"
+      className="tw-mt-5 tw-rounded-lg tw-bg-iron-900/60 tw-p-3"
+    >
+      <p className="tw-m-0 tw-text-sm tw-font-normal tw-leading-6 tw-text-iron-400">
+        {isError
+          ? t(locale, "network.groupInspection.errorDescription")
+          : tRich(locale, "network.groupInspection.creditSummary", {
+              credit: (
+                <span
+                  key="credit"
+                  className="tw-font-medium tw-tabular-nums tw-text-iron-100"
+                >
+                  {creditLabel}
+                </span>
+              ),
+              matter: MATTER_LABEL[matter],
+              count: (
+                <span
+                  key="count"
+                  className="tw-font-medium tw-tabular-nums tw-text-iron-100"
+                >
+                  {loadingMembersCount ? (
+                    <CircleLoader size={CircleLoaderSize.SMALL} />
+                  ) : (
+                    formatInteger(locale, membersCount)
+                  )}
+                </span>
+              ),
+            })}
       </p>
     </div>
   );

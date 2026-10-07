@@ -47,10 +47,16 @@ pagination, and profile links.
   The filter does not offer saved-group search or `Hide criteria and members`.
 - When a signed-in user has an active Network scope with at least one
   criterion, the selected-group summary shows `REP everyone matching criteria`
-  and `NIC everyone matching criteria` directly below the group name.
+  and `NIC everyone matching criteria` below the wrapping criteria tags.
+- The selected-group summary also shows the group name and matching member
+  count. Criteria remain visible without a horizontal scroller.
 - The REP action requires an amount and category. The NIC action requires an
   amount. Both actions show the matching member count and available credit per
-  member before `Grant` becomes available.
+  member.
+  Both open a contained desktop dialog or mobile sheet with Add and Subtract
+  controls, fields, and Grant and Cancel together. During distribution, the
+  dialog shows progress and disables dismissal. Keep the page open until it
+  finishes.
 - `Sort` button is shown on small screens; desktop sorting is done by clicking table headers.
 - Clicking the same sort field toggles direction; switching to a different field starts at descending.
 - Changing sort or group scope resets `page` to `1`.
@@ -112,7 +118,8 @@ pagination, and profile links.
   explains that the group was not created.
 - If bulk rating authentication is cancelled, no credits are sent. A failed
   rating batch closes the form and shows an error toast; a completed action
-  shows `Rep distributed.` or `NIC distributed.`.
+  shows `REP distributed.` or `NIC distributed.`. A failed member-page fetch
+  also ends the run and shows the error notification.
 - Recovery path:
   - Refresh `/network`.
   - Clear or change `group`, `sort-by`, and `page`.

@@ -61,8 +61,19 @@ jest.mock(
 jest.mock(
   "@/components/community/CommunityMembersGroupDetails",
   () =>
-    ({ groupId, onClose }: { groupId: string; onClose: () => void }) => (
-      <div data-testid="group-details">
+    ({
+      groupId,
+      onClose,
+      membersCount,
+    }: {
+      groupId: string;
+      onClose: () => void;
+      membersCount: number | null;
+    }) => (
+      <div
+        data-testid="group-details"
+        data-members-count={membersCount ?? "pending"}
+      >
         {groupId}
         <button type="button" onClick={onClose}>
           Clear selected group
@@ -128,6 +139,28 @@ describe("CommunityMembers", () => {
       isAuthenticated: false,
     });
   });
+
+  it.each([
+    { queryGroup: "1", isError: false, expected: "100" },
+    { queryGroup: "other-group", isError: false, expected: "pending" },
+    { queryGroup: "1", isError: true, expected: "pending" },
+  ])(
+    "only passes the successful active-scope count: $queryGroup, error=$isError",
+    ({ queryGroup, isError, expected }) => {
+      searchParamsMock.set("group", queryGroup);
+      (useQuery as jest.Mock).mockReturnValue({
+        isLoading: false,
+        isFetching: false,
+        isError,
+        data: { page: 1, next: null, count: 100, data: [] },
+      });
+      renderComponent();
+      expect(screen.getByTestId("group-details")).toHaveAttribute(
+        "data-members-count",
+        expected
+      );
+    }
+  );
 
   it("shows skeleton while no members", () => {
     (useQuery as jest.Mock).mockReturnValue({

@@ -47,6 +47,14 @@ jest.mock(
       readonly viewerIdentityKey: string | null;
     }) => (
       <div
+        role="dialog"
+        aria-label={
+          matter === ApiRateMatter.Rep
+            ? "REP everyone matching criteria"
+            : "NIC everyone matching criteria"
+        }
+        tabIndex={-1}
+        ref={(node) => node?.focus()}
         data-testid="bulk-rate-form"
         data-matter={matter}
         data-viewer={viewerIdentityKey}
@@ -116,6 +124,28 @@ describe("CommunityMembersGroupDetails", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     useAuthMock.mockReturnValue({ connectedProfile: { handle: "viewer" } });
+  });
+
+  it.each([
+    [1234, "Members: 1,234"],
+    [0, "Members: 0"],
+    [null, "Members: -"],
+  ])("shows the scoped member count %s", (membersCount, expected) => {
+    useQueryMock.mockReturnValue({
+      data: createInspectableGroup(),
+      isLoading: false,
+      isError: false,
+    });
+    useAuthMock.mockReturnValue({ connectedProfile: null });
+    render(
+      <CommunityMembersGroupDetails
+        groupId="group-1"
+        onClose={jest.fn()}
+        viewerIdentityKey={null}
+        membersCount={membersCount as number | null}
+      />
+    );
+    expect(screen.getByRole("status")).toHaveTextContent(expected as string);
   });
 
   it("shows a stable loading state", () => {
@@ -260,12 +290,12 @@ describe("CommunityMembersGroupDetails", () => {
       screen.getByRole("button", {
         name: "REP everyone matching criteria",
       })
-    ).toHaveClass("tw-bg-white/[0.07]");
+    ).toHaveAttribute("aria-haspopup", "dialog");
     expect(
       screen.getByRole("button", {
         name: "NIC everyone matching criteria",
       })
-    ).toHaveClass("tw-bg-white/[0.07]");
+    ).toHaveAttribute("aria-haspopup", "dialog");
     fireEvent.click(
       screen.getByRole("button", { name: "Clear selected group" })
     );
@@ -293,7 +323,7 @@ describe("CommunityMembersGroupDetails", () => {
       })
     );
 
-    const bulkForm = screen.getByRole("region", {
+    const bulkForm = screen.getByRole("dialog", {
       name: "REP everyone matching criteria",
     });
     await waitFor(() => expect(bulkForm).toHaveFocus());
@@ -309,7 +339,7 @@ describe("CommunityMembersGroupDetails", () => {
       screen.queryByRole("button", {
         name: "NIC everyone matching criteria",
       })
-    ).not.toBeInTheDocument();
+    ).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Cancel bulk rating" }));
     const repButton = screen.getByRole("button", {

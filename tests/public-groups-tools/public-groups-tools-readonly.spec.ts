@@ -307,6 +307,12 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
         timeout: 30000,
       }
     );
+    const summary = page.getByRole("region", { name: groups[0]?.name ?? "" });
+    await expect(summary.getByRole("list")).toBeVisible();
+    await expect(summary.getByText(/^Members: [\d,.\s]+$/)).toBeVisible();
+    await expect(
+      summary.getByRole("button", { name: /Scroll (left|right)/ })
+    ).toHaveCount(0);
 
     // Clearing the group exercises the state transition back to null and
     // must drop the URL param.

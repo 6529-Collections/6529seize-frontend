@@ -1,13 +1,14 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { useMemo, useRef, useState } from "react";
+import { useId, useMemo, useRef, useState } from "react";
 import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
 import { commonApiFetch } from "@/services/api/common-api";
 import RepCategorySearchDropdown from "./RepCategorySearchDropdown";
-import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { isHelpBotCreditRepCategory } from "./repCategoryConstants";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 export enum RepCategorySearchSize {
   SM = "SM",
   MD = "MD",
@@ -23,6 +24,7 @@ export default function RepCategorySearch({
   hideDefaultError = false,
   inputClassName,
   labelClassName,
+  variant = "floating",
   setCategory,
 }: {
   readonly category: string | null;
@@ -31,6 +33,7 @@ export default function RepCategorySearch({
   readonly error?: boolean | undefined;
   readonly inputClassName?: string | undefined;
   readonly labelClassName?: string | undefined;
+  readonly variant?: "floating" | "form" | undefined;
   /**
    * Keep the error styling (ring/caret) but suppress the built-in message,
    * for callers that render their own — e.g. the create-wave outcome field
@@ -39,7 +42,9 @@ export default function RepCategorySearch({
   readonly hideDefaultError?: boolean | undefined;
   readonly setCategory: (category: string | null) => void;
 }) {
-  const randomId = getRandomObjectId();
+  const randomId = useId();
+  const locale = useBrowserLocale();
+  const formVariant = variant === "form";
   const INPUT_CLASSES: Record<RepCategorySearchSize, string> = {
     [RepCategorySearchSize.SM]: "tw-py-3",
     [RepCategorySearchSize.MD]: "tw-pb-3 tw-pt-3",
@@ -134,6 +139,14 @@ export default function RepCategorySearch({
         setIsOpen(false);
       }}
     >
+      {formVariant && (
+        <label
+          htmlFor={randomId}
+          className="tw-mb-2 tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-400"
+        >
+          {t(locale, "network.groupInspection.repCategory")}
+        </label>
+      )}
       <div className="tw-group tw-relative tw-w-full">
         <input
           type="text"
@@ -150,7 +163,7 @@ export default function RepCategorySearch({
             searchCriteria
               ? "tw-text-primary-400 focus:tw-text-white"
               : "tw-text-white"
-          } tw-peer tw-border-iron-700 tw-bg-iron-900 tw-py-3 tw-pl-10 tw-pr-4 tw-font-medium tw-shadow-sm tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-iron-500 focus:tw-bg-iron-900 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset ${inputClassName ?? ""}`}
+          } tw-peer tw-border-iron-700 tw-bg-iron-900 tw-py-3 tw-pl-10 tw-pr-4 tw-font-medium tw-shadow-sm tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-iron-500 focus:tw-bg-iron-900 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset ${formVariant ? "tw-h-[46px] !tw-pr-12 !tw-text-iron-100 !tw-caret-iron-100 !tw-ring-iron-700/60 focus:!tw-ring-iron-300" : ""} ${inputClassName ?? ""}`}
           placeholder=" "
         />
         <svg
@@ -169,8 +182,12 @@ export default function RepCategorySearch({
           <button
             type="button"
             onClick={() => onValueChange(null)}
-            aria-label="Clear category"
-            className="tw-absolute tw-right-3 tw-top-1/2 tw-flex tw-h-5 tw-w-5 -tw-translate-y-1/2 tw-cursor-pointer tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out hover:tw-text-error focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+            aria-label={
+              formVariant
+                ? t(locale, "network.groupInspection.clearCategory")
+                : "Clear category"
+            }
+            className={`tw-absolute tw-top-1/2 tw-flex -tw-translate-y-1/2 tw-cursor-pointer tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 ${formVariant ? "tw-right-0 tw-size-11 tw-rounded-lg hover:tw-text-iron-100 focus-visible:!tw-ring-iron-300" : "tw-right-3 tw-h-5 tw-w-5 hover:tw-text-error"}`}
           >
             <svg
               className="tw-h-5 tw-w-5"
@@ -189,16 +206,18 @@ export default function RepCategorySearch({
             </svg>
           </button>
         )}
-        <label
-          htmlFor={randomId}
-          className={`${LABEL_CLASSES[size]} ${
-            error
-              ? "peer-focus:tw-text-error"
-              : "peer-focus:tw-text-primary-400"
-          } tw-absolute tw-start-1 tw-top-2 tw-z-10 tw-ml-7 tw-origin-[0] -tw-translate-y-4 tw-scale-75 tw-transform tw-cursor-text tw-rounded-lg tw-bg-iron-900 tw-px-2 tw-font-medium tw-text-iron-500 tw-duration-300 peer-placeholder-shown:tw-top-1/2 peer-placeholder-shown:-tw-translate-y-1/2 peer-placeholder-shown:tw-scale-100 peer-focus:tw-top-2 peer-focus:-tw-translate-y-4 peer-focus:tw-scale-75 peer-focus:tw-bg-iron-900 peer-focus:tw-px-2 rtl:peer-focus:tw-left-auto rtl:peer-focus:tw-translate-x-1/4 ${labelClassName ?? ""}`}
-        >
-          Rep Category
-        </label>
+        {!formVariant && (
+          <label
+            htmlFor={randomId}
+            className={`${LABEL_CLASSES[size]} ${
+              error
+                ? "peer-focus:tw-text-error"
+                : "peer-focus:tw-text-primary-400"
+            } tw-absolute tw-start-1 tw-top-2 tw-z-10 tw-ml-7 tw-origin-[0] -tw-translate-y-4 tw-scale-75 tw-transform tw-cursor-text tw-rounded-lg tw-bg-iron-900 tw-px-2 tw-font-medium tw-text-iron-500 tw-duration-300 peer-placeholder-shown:tw-top-1/2 peer-placeholder-shown:-tw-translate-y-1/2 peer-placeholder-shown:tw-scale-100 peer-focus:tw-top-2 peer-focus:-tw-translate-y-4 peer-focus:tw-scale-75 peer-focus:tw-bg-iron-900 peer-focus:tw-px-2 rtl:peer-focus:tw-left-auto rtl:peer-focus:tw-translate-x-1/4 ${labelClassName ?? ""}`}
+          >
+            Rep Category
+          </label>
+        )}
         <RepCategorySearchDropdown
           open={isOpen}
           selected={category}

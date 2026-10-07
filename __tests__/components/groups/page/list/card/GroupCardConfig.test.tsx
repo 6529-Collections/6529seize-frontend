@@ -13,7 +13,7 @@ describe("GroupCardConfig", () => {
       />
     );
 
-    expect(screen.getByText("Rep:").parentElement).toHaveClass(
+    expect(screen.getByText("REP:").parentElement).toHaveClass(
       "tw-flex-shrink-0",
       "tw-whitespace-nowrap"
     );
@@ -26,17 +26,17 @@ describe("GroupCardConfig", () => {
     };
     const { rerender } = render(<GroupCardConfig config={config} quiet />);
 
-    expect(screen.getByText("Rep:").parentElement).toHaveClass(
+    expect(screen.getByText("REP:").parentElement).toHaveClass(
       "tw-font-normal",
       "tw-text-iron-300"
     );
     expect(screen.getByText(config.value)).toHaveClass(
       "tw-font-medium",
-      "tw-text-iron-200"
+      "tw-text-iron-100"
     );
 
     rerender(<GroupCardConfig config={config} />);
-    expect(screen.getByText("Rep:").parentElement).toHaveClass(
+    expect(screen.getByText("REP:").parentElement).toHaveClass(
       "tw-font-medium",
       "tw-text-iron-200"
     );

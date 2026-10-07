@@ -1,9 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import GroupCardActionFooter from "./utils/GroupCardActionFooter";
 import { ApiRateMatter } from "@/generated/models/ApiRateMatter";
 import type { GroupCardRateMatter } from "./GroupCard";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { formatInteger } from "@/i18n/format";
+import { t } from "@/i18n/messages";
 
 export default function GroupCardActionWrapper({
   loading,
@@ -27,48 +29,56 @@ export default function GroupCardActionWrapper({
 
   readonly children: React.ReactNode;
 }) {
+  const locale = useBrowserLocale();
   const MATTER_LABEL: Record<GroupCardRateMatter, string> = {
-    [ApiRateMatter.Rep]: "Rep",
+    [ApiRateMatter.Rep]: "REP",
     [ApiRateMatter.Cic]: "NIC",
   };
   const getProgress = (): string => {
     if (
       typeof membersCount !== "number" ||
-      typeof doneMembersCount !== "number"
+      typeof doneMembersCount !== "number" ||
+      membersCount <= 0
     ) {
       return "0%";
     }
-    return `${(doneMembersCount / membersCount) * 100}%`;
+    return `${Math.min(100, Math.max(0, (doneMembersCount / membersCount) * 100))}%`;
   };
 
-  const [progress, setProgress] = useState(getProgress());
-
-  useEffect(() => {
-    setProgress(getProgress());
-  }, [membersCount, doneMembersCount]);
+  const progress = getProgress();
   return (
-    <div className="tw-flex tw-h-full tw-flex-col tw-gap-y-5 tw-px-4 tw-py-5 sm:tw-px-5 sm:tw-py-6">
-      <div className="tw-flex-1">
+    <div className="tw-px-4 tw-pb-6 sm:tw-px-6">
+      <div className="tw-min-h-36">
         {addingRates ? (
-          <div className="tw-space-y-4">
+          <div role="status" aria-live="polite" className="tw-space-y-4">
             <div>
               <p className="tw-mb-0 tw-text-base tw-font-semibold tw-text-iron-50">
-                {MATTER_LABEL[matter]} Progress
+                {t(locale, "network.groupInspection.progress", {
+                  matter: MATTER_LABEL[matter],
+                })}
               </p>
               <p className="tw-mt-1 tw-text-sm tw-text-iron-300">
-                Keep this window open while we distribute credits across the
-                group.
+                {t(locale, "network.groupInspection.keepOpen")}
               </p>
             </div>
-            <p className="tw-mb-0 tw-text-xl tw-font-bold tw-text-primary-400">
-              {doneMembersCount}/{membersCount}
+            <p className="tw-mb-0 tw-text-xl tw-font-semibold tw-tabular-nums tw-text-iron-100">
+              {formatInteger(locale, doneMembersCount)}/
+              {formatInteger(locale, membersCount)}
             </p>
-            <div className="tw-h-3 tw-w-full tw-overflow-hidden tw-rounded-full tw-bg-white/5">
+            <div
+              role="progressbar"
+              aria-label={t(locale, "network.groupInspection.progress", {
+                matter: MATTER_LABEL[matter],
+              })}
+              aria-valuemin={0}
+              aria-valuemax={membersCount ?? 0}
+              aria-valuenow={Math.min(doneMembersCount ?? 0, membersCount ?? 0)}
+              className="tw-h-2 tw-w-full tw-overflow-hidden tw-rounded-full tw-bg-iron-800"
+            >
               <div
-                className="tw-h-3 tw-rounded-full tw-bg-primary-400"
+                className="tw-h-2 tw-rounded-full tw-bg-iron-300 tw-transition-[width] tw-duration-300 motion-reduce:tw-transition-none"
                 style={{
                   width: progress,
-                  transition: "width 0.5s ease-out",
                 }}
               ></div>
             </div>
