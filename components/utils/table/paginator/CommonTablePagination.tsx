@@ -35,9 +35,9 @@ export default function CommonTablePagination({
           : ""
       } tw-pb-3 tw-pt-4 ${className ?? ""}`}
     >
-      <div className="tw-flex tw-w-full tw-items-center tw-justify-between">
+      <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-justify-between tw-gap-y-3">
         {typeof totalPages === "number" ? (
-          <div className="tw-mr-3 tw-text-sm tw-font-medium tw-text-iron-300">
+          <div className="tw-mr-3 tw-whitespace-nowrap tw-text-sm tw-font-medium tw-text-iron-300">
             {t(locale, "common.pagination.pageOf", {
               current: formattedCurrentPage,
               total: formatInteger(locale, totalPages),

@@ -1,3 +1,7 @@
+jest.mock("@/hooks/useMediaQuery", () => ({
+  useMediaQuery: () => true,
+}));
+
 import { render, screen } from "@testing-library/react";
 import UserPageStatsCollected from "@/components/user/stats/UserPageStatsCollected";
 import { formatInteger, formatPercent } from "@/i18n/format";
