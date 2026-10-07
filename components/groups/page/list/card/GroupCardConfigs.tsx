@@ -93,7 +93,7 @@ export default function GroupCardConfigs({
     if (!value) {
       return null;
     }
-    let label = "TDH";
+    let label = "Tdh";
     if (tdh.inclusion_strategy === ApiGroupTdhInclusionStrategy.Xtdh) {
       label = "xTDH";
     } else if (tdh.inclusion_strategy === ApiGroupTdhInclusionStrategy.Both) {

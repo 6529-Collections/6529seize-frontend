@@ -256,6 +256,7 @@
     "__tests__/components/groups/page/list/card/GroupCardView.test.tsx": 3,
     "__tests__/components/groups/page/list/card/utils/GroupCardActionCreditDirection.test.tsx": 2,
     "__tests__/components/groups/page/list/card/utils/GroupCardActionStats.test.tsx": 1,
+    "__tests__/components/groups/page/list/card/vote-all/GroupCardVoteAll.test.tsx": 1,
     "__tests__/components/groups/page/list/card/vote-all/GroupCardVoteAllInputs.test.tsx": 1,
     "__tests__/components/header/AppHeader.test.tsx": 1,
     "__tests__/components/header/AppSidebar.test.tsx": 1,

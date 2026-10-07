@@ -53,7 +53,6 @@ type MobileWrapperDialogProps = {
   readonly showHeaderDivider?: boolean | undefined;
   readonly headerCloseButtonClassName?: string | undefined;
   readonly surfaceClassName?: string | undefined;
-  readonly overlayClassName?: string | undefined;
   readonly titleClassName?: string | undefined;
   readonly focusTitleOnOpen?: boolean | undefined;
   readonly backLabel?: string | undefined;
@@ -170,11 +169,9 @@ function getBeforeLeaveProps(onBeforeLeave?: (() => void) | undefined) {
 function MobileDialogOverlay({
   onBeforeLeave,
   onAfterLeave,
-  className,
 }: {
   readonly onBeforeLeave?: (() => void) | undefined;
   readonly onAfterLeave: () => void;
-  readonly className?: string | undefined;
 }) {
   return (
     <TransitionChild
@@ -183,12 +180,7 @@ function MobileDialogOverlay({
       {...getBeforeLeaveProps(onBeforeLeave)}
       afterLeave={onAfterLeave}
     >
-      <div
-        className={clsx(
-          "tw-fixed tw-inset-0 tw-transform-gpu",
-          className ?? "tw-bg-gray-700/60"
-        )}
-      />
+      <div className="tw-fixed tw-inset-0 tw-transform-gpu tw-bg-gray-700/60" />
     </TransitionChild>
   );
 }
@@ -421,7 +413,6 @@ export default function MobileWrapperDialog({
   showHeaderDivider,
   headerCloseButtonClassName,
   surfaceClassName,
-  overlayClassName,
   titleClassName,
   focusTitleOnOpen = false,
   backLabel,
@@ -551,7 +542,6 @@ export default function MobileWrapperDialog({
         {...(focusTitleOnOpen ? { initialFocus: titleRef } : {})}
       >
         <MobileDialogOverlay
-          className={overlayClassName}
           onBeforeLeave={onBeforeLeave}
           onAfterLeave={handleAfterLeave}
         />

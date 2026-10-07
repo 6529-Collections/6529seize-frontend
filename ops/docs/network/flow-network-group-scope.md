@@ -48,17 +48,12 @@ no standalone Network Groups page.
    Group links shared from supported app surfaces can also open
    `/network?group={groupId}` directly.
 4. Public groups and private groups available to the
-   current authenticated member or creator show wrapping criteria tags above
-   scoped member results. The selected group's name remains visible as context,
-   and the summary shows the member count once results load.
+   current authenticated member or creator show the selected group's name and
+   criteria above its scoped member results.
 5. Inspect both how membership is determined and the current member list in the
    same view. Signed-in users can also open `REP everyone matching criteria` or
    `NIC everyone matching criteria` from the summary when the group has active
    criteria.
-   The action opens a contained dialog on desktop and a sheet on mobile.
-   Enter an amount, choose Add or Subtract, and select a REP category when
-   granting REP. Grant and Cancel sit below the fields. Cancel or close the
-   dialog to return to the action that opened it.
 6. Use `Clear selected group` to close the group summary and return to the
    default Network member view.
 7. Open `/network/activity` to view activity under the same scope.
@@ -112,13 +107,6 @@ no standalone Network Groups page.
 - Scope persists in current app session/tab state, not as URL-only state.
 - `/network/activity` consumes scope but does not manage scope.
 - Membership counts in `/network` filter can refresh asynchronously after scope changes.
-- Bulk rating shows progress and the completed/total member count. Keep the
-  dialog and page open until distribution finishes; dismissal is disabled during
-  a run. Success or failure appears in a notification after the dialog closes.
-- The credit helper shows zero when there is no available credit or no matching
-  member. Grant remains unavailable when there are no matching members.
-- Loading and unavailable summaries reserve space and keep `Clear selected group`
-  available. Unavailable groups do not disclose a group name or criteria.
 - Private group details are inspectable only when the API makes the full group
   available to the current authenticated member or creator.
 - If a group is hidden from the current viewer, deleted, malformed, or

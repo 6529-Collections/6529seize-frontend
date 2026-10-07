@@ -1,20 +1,13 @@
-import { render, screen } from "@testing-library/react";
-import GroupCardActionWrapper from "@/components/groups/page/list/card/GroupCardActionWrapper";
-import { ApiRateMatter } from "@/generated/models/ApiRateMatter";
+import { render, screen } from '@testing-library/react';
+import GroupCardActionWrapper from '@/components/groups/page/list/card/GroupCardActionWrapper';
+import { ApiRateMatter } from '@/generated/models/ApiRateMatter';
 
-jest.mock(
-  "@/components/groups/page/list/card/utils/GroupCardActionFooter",
-  () => (props: any) => (
-    <div
-      data-testid="footer"
-      data-loading={props.loading}
-      data-disabled={props.disabled}
-    />
-  )
-);
+jest.mock('@/components/groups/page/list/card/utils/GroupCardActionFooter', () => (props: any) => (
+  <div data-testid="footer" data-loading={props.loading} data-disabled={props.disabled} />
+));
 
-describe("GroupCardActionWrapper", () => {
-  it("shows children when not adding rates", () => {
+describe('GroupCardActionWrapper', () => {
+  it('shows children when not adding rates', () => {
     render(
       <GroupCardActionWrapper
         loading={false}
@@ -29,10 +22,10 @@ describe("GroupCardActionWrapper", () => {
         <span data-testid="child" />
       </GroupCardActionWrapper>
     );
-    expect(screen.getByTestId("child")).toBeInTheDocument();
+    expect(screen.getByTestId('child')).toBeInTheDocument();
   });
 
-  it("shows progress when adding rates", () => {
+  it('shows progress when adding rates', () => {
     const { rerender } = render(
       <GroupCardActionWrapper
         loading={false}
@@ -47,13 +40,12 @@ describe("GroupCardActionWrapper", () => {
         <span />
       </GroupCardActionWrapper>
     );
-    expect(screen.getByText("REP Progress")).toBeInTheDocument();
-    expect(screen.getByText("5/10")).toBeInTheDocument();
-
-    const progressBar = screen.getByRole("progressbar")
-      .firstElementChild as HTMLElement;
+    expect(screen.getByText('Rep Progress')).toBeInTheDocument();
+    expect(screen.getByText('5/10')).toBeInTheDocument();
+    
+    const progressBar = document.querySelector('.tw-bg-primary-400') as HTMLElement;
     expect(progressBar).toBeInTheDocument();
-    expect(progressBar.style.width).toBe("50%");
+    expect(progressBar.style.width).toBe('50%');
 
     rerender(
       <GroupCardActionWrapper
@@ -69,10 +61,9 @@ describe("GroupCardActionWrapper", () => {
         <span />
       </GroupCardActionWrapper>
     );
-    expect(screen.getByText("10/10")).toBeInTheDocument();
-
-    const updatedProgressBar = screen.getByRole("progressbar")
-      .firstElementChild as HTMLElement;
-    expect(updatedProgressBar.style.width).toBe("100%");
+    expect(screen.getByText('10/10')).toBeInTheDocument();
+    
+    const updatedProgressBar = document.querySelector('.tw-bg-primary-400') as HTMLElement;
+    expect(updatedProgressBar.style.width).toBe('100%');
   });
 });

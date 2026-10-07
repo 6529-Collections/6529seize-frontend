@@ -26,7 +26,6 @@ import type { ApiBulkRateRequest } from "@/generated/models/ApiBulkRateRequest";
 import type { ApiBulkRateResponse } from "@/generated/models/ApiBulkRateResponse";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
-import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 
 export default function GroupCardVoteAll({
   matter,
@@ -49,9 +48,10 @@ export default function GroupCardVoteAll({
   const isMounted = useRef(true);
 
   useEffect(() => {
-    isMounted.current = true;
+    // Component did mount logic
 
     return () => {
+      // Component will unmount logic
       isMounted.current = false;
     };
   }, []);
@@ -94,18 +94,18 @@ export default function GroupCardVoteAll({
       }),
   });
 
-  const membersCount = members?.count ?? null;
+  const [membersCount, setMembersCount] = useState<number | null>(null);
+  useEffect(() => {
+    if (members) {
+      setMembersCount(members.count);
+    } else {
+      setMembersCount(null);
+    }
+  }, [members]);
 
   const [doingRates, setDoingRates] = useState<boolean>(false);
 
-  const loading = isFetching || doingRates;
-
-  useEffect(() => {
-    if (!doingRates) return;
-    const preventUnload = (event: BeforeUnloadEvent) => event.preventDefault();
-    globalThis.addEventListener("beforeunload", preventUnload);
-    return () => globalThis.removeEventListener("beforeunload", preventUnload);
-  }, [doingRates]);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const getIsDisabled = (): boolean => {
     if (typeof amountToAdd !== "number") {
@@ -126,7 +126,16 @@ export default function GroupCardVoteAll({
     return false;
   };
 
-  const disabled = getIsDisabled();
+  const [disabled, setDisabled] = useState<boolean>(getIsDisabled());
+
+  useEffect(
+    () => setLoading(isFetching || doingRates),
+    [isFetching, doingRates]
+  );
+  useEffect(
+    () => setDisabled(getIsDisabled()),
+    [amountToAdd, membersCount, loading, category]
+  );
 
   const bulkRateMutation = useMutation({
     mutationFn: async (body: ApiBulkRateRequest) =>
@@ -137,10 +146,11 @@ export default function GroupCardVoteAll({
     onError: (error) => {
       setToast({
         type: "error",
-        title: t(locale, "network.groupInspection.errorTitle"),
-        description: t(locale, "network.groupInspection.errorDescription"),
+        title: "Couldn't update group ratings.",
+        description: "Please try again.",
         details: getToastErrorDetails(error),
       });
+      throw error;
     },
   });
 
@@ -177,22 +187,7 @@ export default function GroupCardVoteAll({
 
     let haveNextPage = true;
     while (haveNextPage && isMounted.current) {
-      let membersPage: Page<ApiCommunityMemberOverview>;
-      try {
-        membersPage = await getMembersPage(page);
-      } catch (error) {
-        setToast({
-          type: "error",
-          title: t(locale, "network.groupInspection.errorTitle"),
-          description: t(locale, "network.groupInspection.errorDescription"),
-          details: getToastErrorDetails(error),
-        });
-        setDoingRates(false);
-        setDoneMembersCount(0);
-        onIdentityBulkRate();
-        onCancel();
-        return;
-      }
+      const membersPage = await getMembersPage(page);
       haveNextPage = membersPage.next !== null;
       page++;
       if (!membersPage.data.length) {
@@ -229,56 +224,33 @@ export default function GroupCardVoteAll({
     onCancel();
   };
   return (
-    <MobileWrapperDialog
-      isOpen
-      onClose={() => {
-        if (!doingRates) onCancel();
-      }}
-      title={t(
-        locale,
-        matter === ApiRateMatter.Rep
-          ? "network.groupInspection.bulkRep"
-          : "network.groupInspection.bulkNic"
-      )}
-      tabletModal
-      noPadding
-      maxWidthClass="md:tw-max-w-md"
-      headerVariant="minimal"
-      headerClassName="tw-pb-5 tw-pt-4"
-      headerCloseButtonClassName="!tw-size-11 focus-visible:!tw-ring-iron-300 desktop-hover:hover:!tw-text-iron-100"
-      overlayClassName="tw-bg-iron-950/80"
-      focusTitleOnOpen
-      dismissible={!doingRates}
-      preserveFocusOnEscape
+    <GroupCardActionWrapper
+      onCancel={onCancel}
+      loading={loading}
+      disabled={disabled}
+      addingRates={doingRates}
+      membersCount={membersCount}
+      doneMembersCount={doneMembersCount}
+      matter={matter}
+      onSave={onSave}
     >
-      <GroupCardActionWrapper
-        onCancel={onCancel}
-        loading={loading}
-        disabled={disabled}
-        addingRates={doingRates}
-        membersCount={membersCount}
-        doneMembersCount={doneMembersCount}
-        matter={matter}
-        onSave={onSave}
-      >
-        {group && (
-          <GroupCardVoteAllInputs
-            matter={matter}
-            category={category}
-            setCategory={setCategory}
-            group={group}
-            amountToAdd={amountToAdd}
-            creditDirection={creditDirection}
-            setCreditDirection={setCreditDirection}
-            setAmountToAdd={setAmountToAdd}
-          />
-        )}
-        <GroupCardActionStats
+      {group && (
+        <GroupCardVoteAllInputs
           matter={matter}
-          membersCount={membersCount}
-          loadingMembersCount={isFetching}
+          category={category}
+          setCategory={setCategory}
+          group={group}
+          amountToAdd={amountToAdd}
+          creditDirection={creditDirection}
+          setCreditDirection={setCreditDirection}
+          setAmountToAdd={setAmountToAdd}
         />
-      </GroupCardActionWrapper>
-    </MobileWrapperDialog>
+      )}
+      <GroupCardActionStats
+        matter={matter}
+        membersCount={membersCount}
+        loadingMembersCount={isFetching}
+      />
+    </GroupCardActionWrapper>
   );
 }

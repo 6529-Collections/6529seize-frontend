@@ -55,21 +55,6 @@ export default function GroupCardConfigsScroller({
     }
   };
 
-  if (quiet) {
-    return (
-      <ul
-        role="list"
-        className="tw-m-0 tw-flex tw-min-w-0 tw-list-none tw-flex-wrap tw-gap-2 tw-p-0"
-      >
-        {configs.map((config) => (
-          <li key={config.key} className="tw-min-w-0 tw-max-w-full">
-            <GroupCardConfig config={config} quiet />
-          </li>
-        ))}
-      </ul>
-    );
-  }
-
   return (
     <div className="tw-relative tw-flex tw-items-start tw-text-xs tw-text-iron-200 sm:tw-text-sm">
       <div className="tw-w-full tw-overflow-x-hidden">
@@ -106,7 +91,7 @@ export default function GroupCardConfigsScroller({
           onScroll={checkForHiddenContent}
         >
           {configs.map((config) => (
-            <GroupCardConfig config={config} key={config.key} />
+            <GroupCardConfig config={config} key={config.key} quiet={quiet} />
           ))}
         </div>
         {isRightHidden ? (

@@ -455,15 +455,9 @@ export default function CommunityMembers() {
       {activeGroupId && (
         <>
           <CommunityMembersGroupDetails
-            key={`${activeGroupId}:${viewerIdentityKey ?? "signed-out"}`}
             groupId={activeGroupId}
             onClose={() => setActiveGroupId(null)}
             viewerIdentityKey={viewerIdentityKey}
-            membersCount={
-              debouncedParams.group_id === activeGroupId && !isMembersError
-                ? (members?.count ?? null)
-                : null
-            }
           />
           <h2 className="tw-mb-0 tw-mt-5 !tw-text-lg !tw-font-semibold !tw-leading-6 !tw-text-iron-50">
             {t(locale, "network.groupInspection.membersTitle")}
