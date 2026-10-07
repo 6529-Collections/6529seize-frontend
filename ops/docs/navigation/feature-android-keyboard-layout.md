@@ -44,6 +44,12 @@ blank space.
   the keyboard is open.
 - Create Wave flow on iOS: extra bottom margin used in non-keyboard state is
   removed while typing.
+- Network filters on iOS and Android: the focused field scrolls into view,
+  and the `Create and use new group` action stays above the keyboard. Member
+  previews and draft details hide while typing and return after keyboard close;
+  entered criteria stay intact.
+- Selected-group bulk REP and NIC forms: focused amount and Rep Category fields
+  scroll into view when the keyboard opens or changes height.
 - AppKit wallet search on iOS and Android: the wallet sheet lifts by a capped
   amount while the keyboard is open, keeping search results reachable without
   forcing the sheet to the top of the screen.

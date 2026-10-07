@@ -1,6 +1,8 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { useMemo, useRef, useState } from "react";
 import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
 import { commonApiFetch } from "@/services/api/common-api";
@@ -39,6 +41,7 @@ export default function RepCategorySearch({
   readonly hideDefaultError?: boolean | undefined;
   readonly setCategory: (category: string | null) => void;
 }) {
+  const locale = useBrowserLocale();
   const randomId = getRandomObjectId();
   const INPUT_CLASSES: Record<RepCategorySearchSize, string> = {
     [RepCategorySearchSize.SM]: "tw-py-3",
@@ -169,7 +172,7 @@ export default function RepCategorySearch({
           <button
             type="button"
             onClick={() => onValueChange(null)}
-            aria-label="Clear category"
+            aria-label={t(locale, "network.groupInspection.clearCategory")}
             className="tw-absolute tw-right-3 tw-top-1/2 tw-flex tw-h-5 tw-w-5 -tw-translate-y-1/2 tw-cursor-pointer tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out hover:tw-text-error focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
           >
             <svg
@@ -197,7 +200,7 @@ export default function RepCategorySearch({
               : "peer-focus:tw-text-primary-400"
           } tw-absolute tw-start-1 tw-top-2 tw-z-10 tw-ml-7 tw-origin-[0] -tw-translate-y-4 tw-scale-75 tw-transform tw-cursor-text tw-rounded-lg tw-bg-iron-900 tw-px-2 tw-font-medium tw-text-iron-500 tw-duration-300 peer-placeholder-shown:tw-top-1/2 peer-placeholder-shown:-tw-translate-y-1/2 peer-placeholder-shown:tw-scale-100 peer-focus:tw-top-2 peer-focus:-tw-translate-y-4 peer-focus:tw-scale-75 peer-focus:tw-bg-iron-900 peer-focus:tw-px-2 rtl:peer-focus:tw-left-auto rtl:peer-focus:tw-translate-x-1/4 ${labelClassName ?? ""}`}
         >
-          Rep Category
+          {t(locale, "network.groupInspection.repCategory")}
         </label>
         <RepCategorySearchDropdown
           open={isOpen}
@@ -225,7 +228,7 @@ export default function RepCategorySearch({
             />
           </svg>
           <div className="tw-text-xs tw-font-medium tw-text-error">
-            Please enter rep category
+            {t(locale, "network.groupInspection.repCategoryRequired")}
           </div>
         </div>
       )}
