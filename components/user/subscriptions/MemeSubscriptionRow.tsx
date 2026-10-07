@@ -115,12 +115,6 @@ export default function MemeSubscriptionRow(
     setSelectedCount(subscribedCount);
   }, [subscribedCount]);
 
-  useEffect(() => {
-    if (selectedCount > props.eligibilityCount) {
-      setSelectedCount(Math.max(0, props.eligibilityCount));
-    }
-  }, [props.eligibilityCount, selectedCount]);
-
   const { final, hasNoAllocation } = useSubscriptionAllocationStatus({
     profileKey: props.profileKey,
     contract: props.subscription.contract,
@@ -294,6 +288,7 @@ export default function MemeSubscriptionRow(
     }
 
     const isCountSelectDisabled =
+      props.eligibilityCount < 1 ||
       (disableWhenSingleOption && props.eligibilityCount <= 1) ||
       props.readonly ||
       isSubmitting ||
@@ -304,13 +299,14 @@ export default function MemeSubscriptionRow(
         <span className="tw-relative tw-inline-flex tw-items-center">
           <select
             className={SUBSCRIPTION_COUNT_SELECT_CLASS}
-            value={selectedCount}
+            value={Math.max(0, Math.min(selectedCount, props.eligibilityCount))}
             disabled={isCountSelectDisabled}
             onChange={(e) => {
               handleCountChange(e.target.value).catch(() => undefined);
             }}
             aria-label={`Select subscription quantity for ${props.title}`}
           >
+            {props.eligibilityCount < 1 && <option value={0}>0</option>}
             {countOptions.map((num) => (
               <option key={num} value={num}>
                 {num}
