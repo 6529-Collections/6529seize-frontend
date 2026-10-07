@@ -1,12 +1,46 @@
+import Button from "@/components/utils/button/Button";
+import { MinusIcon, PlusIcon } from "@heroicons/react/24/outline";
+
 import { CreditDirection } from "../GroupCard";
 
 export default function GroupCardActionCreditDirection({
   creditDirection,
   setCreditDirection,
+  compact = false,
 }: {
   readonly creditDirection: CreditDirection;
   readonly setCreditDirection: (creditDirection: CreditDirection) => void;
+  readonly compact?: boolean | undefined;
 }) {
+  if (compact) {
+    return (
+      <div className="tw-flex tw-gap-x-2">
+        <Button
+          variant="negativeToggle"
+          size="xs"
+          className="tw-w-8 !tw-p-0"
+          title="Subtract"
+          aria-label="Subtract"
+          aria-pressed={creditDirection === CreditDirection.SUBTRACT}
+          onClick={() => setCreditDirection(CreditDirection.SUBTRACT)}
+        >
+          <MinusIcon className="tw-size-4" aria-hidden="true" />
+        </Button>
+        <Button
+          variant="positiveToggle"
+          size="xs"
+          className="tw-w-8 !tw-p-0"
+          title="Add"
+          aria-label="Add"
+          aria-pressed={creditDirection === CreditDirection.ADD}
+          onClick={() => setCreditDirection(CreditDirection.ADD)}
+        >
+          <PlusIcon className="tw-size-4" aria-hidden="true" />
+        </Button>
+      </div>
+    );
+  }
+
   const activeClasses: Record<CreditDirection, string> = {
     [CreditDirection.ADD]: "tw-border-green tw-text-green",
     [CreditDirection.SUBTRACT]: "tw-border-red tw-text-red",
@@ -25,8 +59,7 @@ export default function GroupCardActionCreditDirection({
           creditDirection === CreditDirection.SUBTRACT
             ? activeClasses[CreditDirection.SUBTRACT]
             : inactiveClasses
-        } tw-flex-shrink-0 tw-flex tw-items-center tw-justify-center tw-border tw-border-solid tw-rounded-lg tw-bg-iron-900 
-          tw-w-8 tw-h-8 tw-text-base tw-font-semibold  tw-shadow-sm hover:tw-bg-iron-800 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-700 tw-transition tw-duration-300 tw-ease-out`}
+        } tw-flex tw-h-8 tw-w-8 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-bg-iron-900 tw-text-base tw-font-semibold tw-shadow-sm tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-800 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-700`}
       >
         <svg
           className="tw-size-4 tw-flex-shrink-0"
@@ -51,8 +84,7 @@ export default function GroupCardActionCreditDirection({
           creditDirection === CreditDirection.ADD
             ? activeClasses[CreditDirection.ADD]
             : inactiveClasses
-        } tw-flex-shrink-0 tw-flex tw-items-center tw-justify-center tw-border tw-border-solid tw-rounded-lg tw-bg-iron-900 
-          tw-w-8 tw-h-8 tw-text-base tw-font-semibold  tw-shadow-sm hover:tw-bg-iron-800 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-700 tw-transition tw-duration-300 tw-ease-out`}
+        } tw-flex tw-h-8 tw-w-8 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-bg-iron-900 tw-text-base tw-font-semibold tw-shadow-sm tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-800 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-700`}
       >
         <svg
           className="tw-size-4 tw-flex-shrink-0"

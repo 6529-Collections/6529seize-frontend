@@ -15,6 +15,8 @@ export default function GroupCardActionWrapper({
   onSave,
   onCancel,
   children,
+  compact = false,
+  footerContent,
 }: {
   readonly loading: boolean;
   readonly disabled: boolean;
@@ -26,6 +28,8 @@ export default function GroupCardActionWrapper({
   readonly onCancel: () => void;
 
   readonly children: React.ReactNode;
+  readonly compact?: boolean | undefined;
+  readonly footerContent?: React.ReactNode;
 }) {
   const MATTER_LABEL: Record<GroupCardRateMatter, string> = {
     [ApiRateMatter.Rep]: "Rep",
@@ -47,7 +51,13 @@ export default function GroupCardActionWrapper({
     setProgress(getProgress());
   }, [membersCount, doneMembersCount]);
   return (
-    <div className="tw-flex tw-h-full tw-flex-col tw-gap-y-5 tw-px-4 tw-py-5 sm:tw-px-5 sm:tw-py-6">
+    <div
+      className={
+        compact
+          ? "tw-flex tw-min-w-0 tw-flex-col tw-gap-4"
+          : "tw-flex tw-h-full tw-flex-col tw-gap-y-5 tw-px-4 tw-py-5 sm:tw-px-5 sm:tw-py-6"
+      }
+    >
       <div className="tw-flex-1">
         {addingRates ? (
           <div className="tw-space-y-4">
@@ -78,11 +88,17 @@ export default function GroupCardActionWrapper({
         )}
       </div>
       <GroupCardActionFooter
+        compact={compact}
+        saveButtonVariant={
+          compact && matter === ApiRateMatter.Cic ? "success" : "action"
+        }
         onCancel={onCancel}
         loading={loading}
         disabled={disabled}
         onSave={onSave}
-      />
+      >
+        {footerContent}
+      </GroupCardActionFooter>
     </div>
   );
 }
