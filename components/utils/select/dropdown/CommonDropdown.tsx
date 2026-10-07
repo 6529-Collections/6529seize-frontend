@@ -161,6 +161,7 @@ export default function CommonDropdown<T, U = unknown>(
       <div className={triggerWrapperClassName}>
         <button
           ref={buttonRef}
+          {...props.buttonDataAttributes}
           type="button"
           aria-haspopup="true"
           aria-label={`${filterLabel}: ${computedLabel}`}
@@ -223,6 +224,7 @@ export default function CommonDropdown<T, U = unknown>(
       >
         {items.map((item, i) => (
           <CommonDropdownItem
+            onItemSelection={props.onItemSelection}
             key={item.key}
             item={item}
             itemIdx={i}

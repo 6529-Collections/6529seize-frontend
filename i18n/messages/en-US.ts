@@ -264,6 +264,9 @@ const REP_CATEGORY_MESSAGES = objectMessages("rep.categories", {
     "Memes submissions require {amount} REP in {category}.",
   "grant.submissionLookalikeInfo":
     '"{category}" is a separate category. Only {submissionCategory} counts for submissions.',
+  "grant.amountLabel": "REP amount",
+  "grant.availableRepLabel": "Your available REP:",
+  "grant.assignedRepLabel": "Your REP assigned to {name}:",
   "grant.availableRep": "Your available REP: {amount}",
   "grant.assignedRep": "Your REP assigned to {name}: {amount}",
   "grant.actions.grant": "Grant REP",
@@ -2198,6 +2201,15 @@ const NETWORK_GROUP_INSPECTION_MESSAGES = objectMessages(
 );
 
 const NETWORK_GROUP_FILTER_MESSAGES = objectMessages("network.groupFilter", {
+  filter: "Filter",
+  all: "All filters",
+  level: "Level",
+  tdh: "TDH",
+  nic: "NIC",
+  rep: "Rep",
+  nfts: "Required NFTs",
+  collections: "Collection Access",
+  xtdhGrant: "xTDH Grant",
   title: "Filter Network",
   suggestedName: "Network filter",
   defaultLabel: "All Network members",

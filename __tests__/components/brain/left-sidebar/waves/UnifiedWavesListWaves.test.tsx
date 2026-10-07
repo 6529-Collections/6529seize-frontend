@@ -13,6 +13,7 @@ import {
   getFittingPreviewCount,
   getHighlyRatedPreviewWaves,
   getVisibleHighlyRatedPreviewItems,
+  HighlyRatedWavesToggle,
   type HighlyRatedWavePreviewItem,
 } from "@/components/brain/left-sidebar/waves/HighlyRatedWavesToggle";
 import { SIDEBAR_SUBWAVE_ROW_EXIT_CLEANUP_MS } from "@/hooks/useAnimatedSidebarWaveRows";
@@ -23,6 +24,7 @@ import { useSeizeSettingsOptional } from "@/contexts/SeizeSettingsContext";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { createMockMinimalWave } from "@/__tests__/utils/mockFactories";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import { getWaveFeatureDescriptor } from "@/services/analytics/waveFeatureUsage";
 
 let mockDeviceInfo = { isApp: false, hasTouchScreen: false };
 
@@ -226,6 +228,39 @@ it("calculates how many highly rated preview avatars fit", () => {
       width: 224,
     })
   ).toBe(4);
+});
+
+it("exposes the current recommendation to accessibility and telemetry across selection changes", () => {
+  const item = createPreviewItem({
+    id: "selected-recommendation",
+    isActive: true,
+  });
+  item.wave.name = "Selected recommendation";
+  const { rerender } = render(
+    <HighlyRatedWavesToggle
+      previewItems={[item]}
+      paddingClassName="tw-px-0"
+      scoreDetailsDisabled
+    />
+  );
+  const link = screen.getByRole("link", { name: /Selected recommendation/ });
+  expect(link).toHaveAttribute("aria-current", "page");
+  expect(getWaveFeatureDescriptor(link, "sidebar")).toMatchObject({
+    value: "recommendations_wave",
+    selected: true,
+  });
+  rerender(
+    <HighlyRatedWavesToggle
+      previewItems={[{ ...item, isActive: false }]}
+      paddingClassName="tw-px-0"
+      scoreDetailsDisabled
+    />
+  );
+  expect(link).not.toHaveAttribute("aria-current");
+  expect(getWaveFeatureDescriptor(link, "sidebar")).toMatchObject({
+    value: "recommendations_wave",
+    selected: false,
+  });
 });
 
 it("keeps the active highly rated preview visible within the capped strip", () => {

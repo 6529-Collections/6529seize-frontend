@@ -473,6 +473,7 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
           <div ref={sortControlRef} className="tw-flex-shrink-0">
             <WaveleaderboardSort
               sort={sort}
+              telemetryScope={wave.id}
               onSortChange={onSortChange}
               mode={sortMode}
               items={sortItems}
