@@ -1,7 +1,6 @@
 "use client";
 
 import type { ApiWave } from "@/generated/models/ApiWave";
-import { useAuth } from "@/components/auth/Auth";
 import { useEffect } from "react";
 import { isMultiCompetitionEnabled } from "@/helpers/competition.helpers";
 import {
@@ -11,7 +10,6 @@ import {
 } from "./useCompetitionQueries";
 
 export function useWaveCompetitionsTab(wave: ApiWave | null | undefined) {
-  const { connectedProfile, isAuthenticated } = useAuth();
   const enabled =
     isMultiCompetitionEnabled() &&
     Boolean(wave) &&
@@ -71,8 +69,6 @@ export function useWaveCompetitionsTab(wave: ApiWave | null | undefined) {
   ]);
   const hideCompetitionsTab = Boolean(
     canReadCompetitions &&
-    isAuthenticated === true &&
-    connectedProfile?.id &&
     !hub.isFetching &&
     hub.data.permissions.administer === false &&
     competitions.isSuccess &&

@@ -35,6 +35,8 @@ import CompetitionResources from "./CompetitionResources";
 import CompetitionEntryForm from "./CompetitionEntryForm";
 import CompetitionDraftEditor from "./CompetitionDraftEditor";
 import CompetitionBackLink from "./CompetitionBackLink";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { useLayout } from "@/components/brain/my-stream/layout/LayoutContext";
 
 export function NativeCompetitionContent({
   embedded = false,
@@ -42,6 +44,8 @@ export function NativeCompetitionContent({
   readonly embedded?: boolean;
 }) {
   const { competition, wave } = useCompetition();
+  const { isApp } = useDeviceInfo();
+  const { waveViewStyle } = useLayout();
   const locale = useBrowserLocale();
   const pathname = usePathname();
   const router = useRouter();
@@ -70,7 +74,7 @@ export function NativeCompetitionContent({
       : selectedTab;
   const approveLabels = getApproveWaveTabLabelsFromMetadata(presentation);
   const tabLabel = (value: (typeof COMPETITION_TABS)[number]) => {
-    if (value === "rules") return t(locale, "competitions.configuration");
+    if (value === "rules") return t(locale, "competitions.settings");
     if (competition.type === ApiCompetitionType.Approve) {
       if (value === "leaderboard") return approveLabels.approvals;
       if (value === "decisions") return approveLabels.approved;
@@ -98,6 +102,7 @@ export function NativeCompetitionContent({
     );
   return (
     <div
+      style={embedded && isApp ? waveViewStyle : undefined}
       className={
         embedded
           ? "tw-h-full tw-min-h-0 tw-space-y-5 tw-overflow-y-auto tw-p-4"
@@ -187,6 +192,8 @@ export default function CompetitionDetail({
   readonly waveId: string;
   readonly competitionId: string;
 }) {
+  const search = useSearchParams();
+  const tab = getCompetitionTab(search.get("tab"));
   const wave = useWaveData({ waveId, onWaveNotFound: () => undefined });
   const hub = useCompetitionHub(waveId);
   const competition = useCompetitionDetail({ waveId, competitionId });
@@ -212,7 +219,9 @@ export default function CompetitionDetail({
           wave: wave.data,
         }}
       >
-        {hub.data.legacy_primary_competition_id === competitionId ? (
+        {hub.data.legacy_primary_competition_id === competitionId &&
+        tab !== "rules" &&
+        tab !== "votes" ? (
           <div className="tw-h-[70dvh]">
             <ContentTabProvider competitionOnly>
               <MyStreamWave waveId={waveId} competitionOnly />

@@ -8,6 +8,12 @@ import {
   waitForRouteReady,
 } from "../testHelpers";
 
+import { installLocalCountryCheck } from "../support/localCountryCheck";
+
+test.beforeEach(async ({ page, baseURL }) => {
+  await installLocalCountryCheck(page, baseURL);
+});
+
 type ConsoleDiagnostics = {
   consoleErrors: string[];
   pageErrors: string[];

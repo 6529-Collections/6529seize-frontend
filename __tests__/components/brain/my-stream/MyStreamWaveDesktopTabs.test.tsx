@@ -1,4 +1,10 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import React from "react";
 import { MyStreamWaveTab } from "@/types/waves.types";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
@@ -200,7 +206,7 @@ const setMobileScrollMetrics = (
 
 describe("MyStreamWaveDesktopTabs", () => {
   it.each(["pathname", "query"])(
-    "shows My Votes for an explicitly selected chat competition from the %s without default data",
+    "shows Votes for an explicitly selected chat competition from the %s without default data",
     (source) => {
       mockWaveInfo.isChatWave = true;
       mockAvailableTabs = [MyStreamWaveTab.CHAT, MyStreamWaveTab.MY_VOTES];
@@ -213,10 +219,46 @@ describe("MyStreamWaveDesktopTabs", () => {
       }
       renderComponent();
       expect(
-        screen.getAllByRole("tab", { name: "My Votes", hidden: true })
+        screen.getAllByRole("tab", { name: "Votes", hidden: true })
       ).toHaveLength(2);
     }
   );
+  it("places Settings and Competitions before curations in both tab rows", () => {
+    mockWaveInfo.isRankWave = true;
+    mockAvailableTabs = [
+      MyStreamWaveTab.CHAT,
+      MyStreamWaveTab.LEADERBOARD,
+      MyStreamWaveTab.MY_VOTES,
+      MyStreamWaveTab.CONFIGURATION,
+      MyStreamWaveTab.COMPETITIONS,
+    ];
+    mockCurations = [
+      {
+        id: "curation-1",
+        name: "Curators' choice",
+        wave_id: "wave-1",
+        group_id: "group-1",
+        priority_order: 1,
+        created_at: 1,
+        updated_at: 1,
+      },
+    ];
+    renderComponent();
+    for (const row of screen.getAllByRole("tablist")) {
+      expect(
+        within(row)
+          .getAllByRole("tab")
+          .map((tab) => tab.textContent)
+      ).toEqual([
+        "Chat",
+        "Leaderboard",
+        "Votes",
+        "Settings",
+        "Competitions",
+        "Curators' choice",
+      ]);
+    }
+  });
   it("keeps curations selectable in both desktop and mobile web tab strips", () => {
     mockCurations = [
       {
@@ -268,7 +310,7 @@ describe("MyStreamWaveDesktopTabs", () => {
     expect(screen.getAllByText("7").length).toBeGreaterThan(0);
   });
 
-  it("filters hidden My Votes without correcting the active tab", () => {
+  it("filters hidden Votes without correcting the active tab", () => {
     mockAvailableTabs = [
       MyStreamWaveTab.CHAT,
       MyStreamWaveTab.MY_VOTES,
@@ -277,11 +319,11 @@ describe("MyStreamWaveDesktopTabs", () => {
     renderComponent(MyStreamWaveTab.MY_VOTES);
     expect(screen.getAllByText("Chat").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Leaderboard").length).toBeGreaterThan(0);
-    expect(screen.queryByText("My Votes")).toBeNull();
+    expect(screen.queryByText("Votes")).toBeNull();
     expect(setActiveTab).not.toHaveBeenCalled();
   });
 
-  it("shows My Votes for curation waves", () => {
+  it("shows Votes for curation waves", () => {
     mockWaveInfo = {
       isChatWave: false,
       isApproveWave: false,
@@ -298,11 +340,11 @@ describe("MyStreamWaveDesktopTabs", () => {
     renderComponent(MyStreamWaveTab.MY_VOTES);
 
     expect(screen.getAllByText("Sales").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("My Votes").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Votes").length).toBeGreaterThan(0);
     expect(setActiveTab).not.toHaveBeenCalled();
   });
 
-  it("shows My Votes for authenticated normal rank waves", () => {
+  it("shows Votes for authenticated normal rank waves", () => {
     mockWaveInfo = {
       isChatWave: false,
       isApproveWave: false,
@@ -319,7 +361,7 @@ describe("MyStreamWaveDesktopTabs", () => {
 
     renderComponent(MyStreamWaveTab.MY_VOTES);
 
-    expect(screen.getAllByText("My Votes").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Votes").length).toBeGreaterThan(0);
   });
 
   it("shows Polls when available and activates it", () => {
@@ -332,7 +374,7 @@ describe("MyStreamWaveDesktopTabs", () => {
     expect(setActiveTab).toHaveBeenCalledWith(MyStreamWaveTab.POLLS);
   });
 
-  it("hides My Votes for guests on normal rank waves", () => {
+  it("shows Votes for guests on normal rank waves", () => {
     mockWaveInfo = {
       isChatWave: false,
       isApproveWave: false,
@@ -354,11 +396,11 @@ describe("MyStreamWaveDesktopTabs", () => {
 
     expect(screen.getAllByText("Chat").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Leaderboard").length).toBeGreaterThan(0);
-    expect(screen.queryByText("My Votes")).toBeNull();
+    expect(screen.getAllByText("Votes").length).toBeGreaterThan(0);
     expect(setActiveTab).not.toHaveBeenCalled();
   });
 
-  it("hides My Votes for guests on memes waves", () => {
+  it("omits Votes when the memes mock identifies neither a competition nor a curation", () => {
     mockWaveInfo = {
       isChatWave: false,
       isApproveWave: false,
@@ -381,11 +423,11 @@ describe("MyStreamWaveDesktopTabs", () => {
 
     expect(screen.getAllByText("Leaderboard").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Chat").length).toBeGreaterThan(0);
-    expect(screen.queryByText("My Votes")).toBeNull();
+    expect(screen.queryByText("Votes")).toBeNull();
     expect(setActiveTab).not.toHaveBeenCalled();
   });
 
-  it("shows My Votes for authenticated normal approve waves", () => {
+  it("shows Votes for authenticated normal approve waves", () => {
     mockWaveInfo = {
       isChatWave: false,
       isApproveWave: true,
@@ -403,10 +445,10 @@ describe("MyStreamWaveDesktopTabs", () => {
 
     renderComponent(MyStreamWaveTab.MY_VOTES);
 
-    expect(screen.getAllByText("My Votes").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Votes").length).toBeGreaterThan(0);
   });
 
-  it("hides My Votes for guests on normal approve waves", () => {
+  it("shows Votes for guests on normal approve waves", () => {
     mockWaveInfo = {
       isChatWave: false,
       isApproveWave: true,
@@ -429,7 +471,7 @@ describe("MyStreamWaveDesktopTabs", () => {
 
     expect(screen.getAllByText("Chat").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Proposals").length).toBeGreaterThan(0);
-    expect(screen.queryByText("My Votes")).toBeNull();
+    expect(screen.getAllByText("Votes").length).toBeGreaterThan(0);
     expect(setActiveTab).not.toHaveBeenCalled();
   });
 

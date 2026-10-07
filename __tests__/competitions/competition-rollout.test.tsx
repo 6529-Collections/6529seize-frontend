@@ -86,7 +86,7 @@ it("preserves native deep-link reads with edits and mutation controls hidden whe
   ).toBeVisible();
   expect(screen.getByText("Readable native entries")).toBeVisible();
   expect(screen.queryByRole("tab", { name: "Entries" })).toBeNull();
-  expect(screen.getByRole("tab", { name: "Configuration" })).toHaveAttribute(
+  expect(screen.getByRole("tab", { name: "Settings" })).toHaveAttribute(
     "aria-selected",
     "true"
   );
@@ -99,11 +99,11 @@ it("preserves native deep-link reads with edits and mutation controls hidden whe
     screen.queryByRole("button", { name: "Manage native competition" })
   ).toBeNull();
 });
-it("keeps published edit links in Configuration with the flag on", () => {
+it("keeps published edit links in Settings with the flag on", () => {
   mockEnabled = true;
   render(<CompetitionDetail waveId="wave" competitionId="native" />);
   expect(screen.queryByText("Native draft editor")).toBeNull();
-  expect(screen.getByRole("tabpanel", { name: "Configuration" })).toBeVisible();
+  expect(screen.getByRole("tabpanel", { name: "Settings" })).toBeVisible();
 });
 it("preserves the original primary experience with the flag off", () => {
   mockPrimary = "native";
@@ -140,9 +140,7 @@ it.each<[string, string, string, string]>([
     expect(
       screen.getByRole("tabpanel", { name: expectedApprovals })
     ).toBeVisible();
-    fireEvent.click(
-      screen.getByRole("tab", { name: expectedApproved })
-    );
+    fireEvent.click(screen.getByRole("tab", { name: expectedApproved }));
     expect(mockPush).toHaveBeenCalledWith(
       "/waves/wave/competitions/native?tab=decisions",
       { scroll: false }
@@ -152,16 +150,12 @@ it.each<[string, string, string, string]>([
     expect(
       screen.getByRole("tabpanel", { name: expectedApproved })
     ).toBeVisible();
-    expect(
-      screen.queryByRole("tab", { name: "Leaderboard" })
-    ).toBeNull();
-    expect(
-      screen.queryByRole("tab", { name: "Winners" })
-    ).toBeNull();
+    expect(screen.queryByRole("tab", { name: "Leaderboard" })).toBeNull();
+    expect(screen.queryByRole("tab", { name: "Winners" })).toBeNull();
   }
 );
 
-it("keeps the entry action in the competition view and exposes details and management through Configuration", () => {
+it("keeps the entry action in the competition view and exposes details and management through Settings", () => {
   mockEnabled = true;
   mockSearch = "";
   const { rerender } = render(
@@ -174,18 +168,18 @@ it("keeps the entry action in the competition view and exposes details and manag
     screen.queryByRole("button", { name: "Manage native competition" })
   ).toBeNull();
 
-  fireEvent.click(screen.getByRole("tab", { name: "Configuration" }));
+  fireEvent.click(screen.getByRole("tab", { name: "Settings" }));
   expect(mockPush).toHaveBeenCalledWith(
     "/waves/wave/competitions/native?tab=rules",
     { scroll: false }
   );
   mockSearch = "tab=rules";
   rerender(<CompetitionDetail waveId="wave" competitionId="native" />);
-  expect(screen.getByRole("tab", { name: "Configuration" })).toHaveAttribute(
+  expect(screen.getByRole("tab", { name: "Settings" })).toHaveAttribute(
     "aria-selected",
     "true"
   );
-  expect(screen.getByRole("tabpanel", { name: "Configuration" })).toBeVisible();
+  expect(screen.getByRole("tabpanel", { name: "Settings" })).toBeVisible();
   expect(
     screen.getByRole("button", { name: "Manage native competition" })
   ).toBeVisible();

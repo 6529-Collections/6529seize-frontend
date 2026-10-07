@@ -1160,9 +1160,7 @@ describe("AppHeader", () => {
       waveInfo: { isRankWave: false, isMemesWave: false, isDm: false },
     });
 
-    expect(
-      screen.getByRole("button", { name: "Show wave description" })
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /^About / })).toBeInTheDocument();
     const subtitle = screen.getByText("A chill place to discuss drops");
     expect(subtitle).toBeInTheDocument();
     expect(subtitle).toHaveClass("tw-truncate");
