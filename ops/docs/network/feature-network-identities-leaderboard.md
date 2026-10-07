@@ -29,11 +29,22 @@ pagination, and profile links.
 
 ## Controls and URL State
 
-- `Filter` opens the shared criteria builder with criteria creation open by
-  default. The Network version omits `Choose group` and `Hide criteria and
-  members`.
+- `Filter` opens `Filter Network` with all eight criteria visible in one list:
+  `Identities`, `Level`, `TDH`, `NIC`, `Rep`, `Required NFTs`,
+  `Collection Access`, and `xTDH Grant`. On wide screens, the selected editor
+  sits beside the list with `Identities` open first. On narrow screens,
+  selecting a criterion opens its editor; `All filters` returns to the list.
+  Switching keeps the draft's values. On phone widths, the trigger shows only
+  the filter icon.
+- `After editing` shows each selected criterion as a separate tag. Long tag
+  lists scroll within the summary, keeping `View members` and
+  `Create and use new group` visible. A valid draft offers `View members`;
+  incomplete criteria show `Not ready yet.` and its guidance directly.
+- `Before editing` shows the current scope. With a selected group, its
+  criteria, count, and `View members` are visible without changing the draft.
 - Applying new criteria creates a saved group and immediately uses it as the
-  Network scope. Choosing `All Network members` clears the group scope.
+  Network scope. `Clear selected group` above the results clears the scope.
+  The filter does not offer saved-group search or `Hide criteria and members`.
 - When a signed-in user has an active Network scope with at least one
   criterion, the selected-group summary shows `REP everyone matching criteria`
   and `NIC everyone matching criteria` directly below the group name.
@@ -52,8 +63,8 @@ pagination, and profile links.
 ## User Journey
 
 1. Open `/network`.
-2. (Optional) open `Filter` and build a group with identities, Level, TDH,
-   NIC, REP, required NFTs, collection access, or an xTDH grant.
+2. (Optional) open `Filter` and choose any of the eight criteria from the
+   visible list. All criteria can be combined.
 3. Select `Create and use new group` to save and apply the criteria.
 4. (Optional) use the REP or NIC criteria action in the selected-group summary
    to grant credits to every matching member.
