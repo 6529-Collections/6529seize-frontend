@@ -33,6 +33,7 @@ export const TabToggle: React.FC<TabToggleProps> = ({
       key={option.key}
       onClick={() => onSelect(option.key)}
       role="tab"
+      data-wave-tab-value={option.key.toLowerCase()}
       aria-selected={activeKey === option.key}
       aria-controls={option.panelId}
       style={style}

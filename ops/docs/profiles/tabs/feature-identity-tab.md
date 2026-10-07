@@ -106,20 +106,26 @@ Mobile (`< lg`):
 - Selecting an option validates availability before enabling the REP amount.
 - If availability fails, inline error is shown.
 - Editing text after category selection clears selected category and amount.
-- Amount accepts integers.
+- Amount accepts integers. Type the desired amount in Grant REP and Rate NIC.
+  The plus/minus symbols indicate signed amounts and are not buttons.
 - In non-proxy mode, amount clamps to allowed min/max on blur.
 - `Grant Rep` stays disabled until category is selected, amount changed, amount
   is valid, and submit is idle.
 
 ### Localization fallback debt
 
-- Surface: the Grant REP dialog under the profile Identity tab.
+- Surfaces: the Grant REP and Rate NIC dialogs under the profile Identity tab,
+  including their desktop/mobile entry points and Current / Adjustment summaries.
 - Current fallback: `rep.categories.grant.*` messages use the canonical `en-US`
-  source copy in locales without translated entries.
-- User impact: supported non-English locales can see English fallback copy while
-  the complete grant flow remains functional.
-- Owner/follow-up: frontend localization maintainers can add translated entries
-  during the next profile localization pass.
+  source copy in locales without translated entries, including the REP amount
+  label. Dialog titles, NIC labels and actions, unavailable-state Cancel buttons,
+  proxy labels, rating feedback, and adjustment summaries retain existing English
+  strings. Rating summaries retain the existing comma-separated number formatting.
+- User impact: supported non-English locales can see English copy and number
+  formatting while both rating flows remain functional.
+- Owner/follow-up: frontend localization maintainers can migrate the remaining
+  strings and number formatting and add translations during the next profile
+  localization pass.
 
 ## NIC and Statements Behavior
 
@@ -127,7 +133,7 @@ Mobile (`< lg`):
   count.
 - Desktop shows a `Rate NIC` CTA in the NIC section when rating is allowed.
 - Mobile shows `Rate NIC` only in the `NIC` subview when rating is allowed.
-- Desktop and mobile rating flows open a modal with `Save` and `Cancel`.
+- Desktop and mobile rating flows open a modal with `Rate` and `Cancel`.
 - `Rate` is enabled only when the value changed and is valid.
 
 Statement ownership in this tab:

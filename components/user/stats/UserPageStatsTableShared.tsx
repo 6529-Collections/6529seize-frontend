@@ -1,21 +1,22 @@
 "use client";
 
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import type { ReactNode } from "react";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 
 export const STATS_SECTION_HEADING_CLASS =
-  "tw-mb-0 tw-text-lg tw-font-semibold tw-text-iron-100";
+  "tw-m-0 tw-text-lg tw-font-semibold tw-text-iron-100";
 
 export const STATS_TABLE_CLASS =
-  "tw-w-full tw-border-collapse tw-text-left tw-text-sm";
+  "tw-w-full tw-border-collapse tw-whitespace-nowrap tw-text-left tw-text-sm [&_:is(thead,tbody,tr)::before]:tw-content-none [&_:is(thead,tbody,tr)::after]:tw-content-none";
 
 export const STATS_TABLE_HEAD_CLASS =
-  "tw-bg-white/[0.04] tw-text-[10px] tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-400";
+  "tw-bg-white/[0.04] tw-text-[10px] tw-font-semibold tw-uppercase tw-tracking-normal tw-text-iron-400 md:tw-tracking-wide";
 
 export const STATS_TABLE_HEADER_CELL_CLASS =
-  "tw-whitespace-nowrap tw-px-4 tw-py-3 tw-font-semibold";
+  "tw-whitespace-nowrap tw-px-2 tw-py-2 md:tw-px-4 md:tw-py-3 tw-font-semibold";
 
 export const STATS_TABLE_ROW_CLASS =
   "tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.06] last:tw-border-b-0";
@@ -24,15 +25,15 @@ export const STATS_TABLE_GROUP_START_ROW_CLASS =
   "tw-border-x-0 tw-border-b tw-border-t tw-border-solid tw-border-white/[0.08] last:tw-border-b-0";
 
 export const STATS_TABLE_ROW_HEADER_CLASS =
-  "tw-sticky tw-left-0 tw-z-[1] tw-whitespace-nowrap tw-bg-iron-950 tw-px-4 tw-py-3 tw-font-medium tw-text-iron-400";
+  "tw-sticky tw-left-0 tw-z-[1] tw-whitespace-nowrap tw-bg-iron-950 tw-px-2 tw-py-2 md:tw-px-4 md:tw-py-3 tw-font-medium tw-text-iron-400";
 
 export const STATS_TABLE_VALUE_CELL_CLASS =
-  "tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-right tw-font-medium tw-tabular-nums tw-text-iron-100";
+  "tw-whitespace-nowrap tw-px-2 tw-py-2 md:tw-px-4 md:tw-py-3 tw-text-right tw-font-medium tw-tabular-nums tw-text-iron-100";
 
 export const STATS_TABLE_MUTED_VALUE_CELL_CLASS =
-  "tw-whitespace-nowrap tw-px-4 tw-py-3 tw-text-right tw-tabular-nums tw-text-iron-500";
+  "tw-whitespace-nowrap tw-px-2 tw-py-2 md:tw-px-4 md:tw-py-3 tw-text-right tw-tabular-nums tw-text-iron-500";
 
-/** Renders a consistently styled, initially expanded Details subsection. */
+/** Keeps Details subsections collapsed initially on compact screens. */
 export function UserPageStatsDisclosure({
   title,
   children,
@@ -40,12 +41,14 @@ export function UserPageStatsDisclosure({
   title: string;
   children: ReactNode;
 }>) {
+  const isDesktop = useMediaQuery("(min-width: 768px)");
+
   return (
     <details
       className="tw-group tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.08] tw-bg-white/[0.02]"
-      open
+      open={isDesktop}
     >
-      <summary className="tw-flex tw-min-h-12 tw-w-full tw-cursor-pointer tw-list-none tw-items-center tw-justify-between tw-gap-3 tw-px-4 tw-py-3 tw-text-left tw-text-sm tw-font-semibold tw-text-iron-200 tw-transition-colors hover:tw-bg-white/[0.03] hover:tw-text-iron-50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-2px] focus-visible:tw-outline-primary-400 [&::-webkit-details-marker]:tw-hidden">
+      <summary className="tw-flex tw-min-h-11 tw-w-full tw-cursor-pointer tw-list-none tw-items-center tw-justify-between tw-gap-3 tw-px-3 tw-py-2 tw-text-left tw-text-sm tw-font-semibold tw-text-iron-200 tw-transition-colors hover:tw-bg-white/[0.03] hover:tw-text-iron-50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-2px] focus-visible:tw-outline-primary-400 md:tw-min-h-12 md:tw-px-4 md:tw-py-3 [&::-webkit-details-marker]:tw-hidden">
         <span>{title}</span>
         <ChevronDownIcon
           aria-hidden="true"
@@ -72,6 +75,23 @@ export function UserPageStatsTableScroll({
       aria-label={label}
       className="tw-overflow-x-auto tw-overscroll-x-contain tw-pb-1 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/70 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-2px] focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-scrollbar-thumb-iron-500"
       tabIndex={0 /* NOSONAR: keyboard-scrollable region */}
+      onKeyDown={(event) => {
+        if (
+          event.target !== event.currentTarget ||
+          event.altKey ||
+          event.ctrlKey ||
+          event.metaKey ||
+          event.shiftKey
+        ) {
+          return;
+        }
+        if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+          event.preventDefault();
+          event.currentTarget.scrollBy({
+            left: event.key === "ArrowRight" ? 40 : -40,
+          });
+        }
+      }}
     >
       {children}
     </section>
