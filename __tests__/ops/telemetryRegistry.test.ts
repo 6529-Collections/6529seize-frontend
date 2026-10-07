@@ -19,6 +19,7 @@ jest.mock("mixpanel-browser", () => ({
 
 import registry from "@/ops/telemetry/registry.json";
 import { HOMEPAGE_EVENT_NAMES } from "@/components/home/homepageTracking";
+import { PROFILE_EVENT_NAMES } from "@/components/user/collected/collectedTracking";
 import { ART_BLOCKS_SIGNAL_NAMES } from "@/components/waves/ArtBlocksTokenCard";
 import {
   AUTH_IMPACT_EVENT_NAMES,
@@ -122,6 +123,7 @@ describe("frontend telemetry registry", () => {
   it("registers the runtime custom signal constants", () => {
     const runtimeSignalNames = [
       ...Object.values(HOMEPAGE_EVENT_NAMES),
+      ...Object.values(PROFILE_EVENT_NAMES),
       PAGE_VIEW_EVENT_NAME,
       ...AUTH_IMPACT_EVENT_NAMES,
       ...PRODUCT_IMPACT_EVENT_NAMES,

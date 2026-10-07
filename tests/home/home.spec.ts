@@ -7,7 +7,7 @@ import {
 import { getAppEnvironment } from "../../config/appEnvironment";
 import { isDesktopWebProject } from "../support/surfaceSimulation";
 import { gateSidebarHydration } from "../support/sidebarHydration";
-import { buildSync } from "esbuild";
+import { installSectionTrackingFixture } from "../support/sectionTrackingFixture";
 
 test.describe("Home Page @smoke @medium @large", () => {
   test.beforeEach(async ({ page }) => {
@@ -61,7 +61,9 @@ test("homepage tracking follows nested scrolling and loaded sections @smoke @med
 }) => {
   // Exercise the production observer with real browser geometry, without
   // contacting Mixpanel or requiring production analytics configuration.
-  await page.setContent(`
+  const { seen, clicked } = await installSectionTrackingFixture(
+    page,
+    `
     <main aria-label="Homepage test" style="height:240px;overflow:auto">
       <section data-home-section="Introduction" style="height:180px">
         <h1>Introduction</h1>
@@ -71,52 +73,30 @@ test("homepage tracking follows nested scrolling and loaded sections @smoke @med
         <button data-home-action="Open wave">Open wave</button>
       </section>
     </main>
-    <ol aria-label="Sections seen"></ol>
-    <ol aria-label="Actions clicked"></ol>
-  `);
-  const script = buildSync({
-    stdin: {
-      resolveDir: process.cwd(),
-      contents: `
+  `,
+    `
         import { observeHomepageSections, getHomepageClick } from './components/home/homepageTracking';
         const root = document.querySelector('main');
-        const append = (label, text) => {
-          const item = document.createElement('li');
-          item.textContent = text;
-          document.querySelector('ol[aria-label="' + label + '"]').append(item);
-        };
         observeHomepageSections(root, section => append('Sections seen', section), new Set());
         root.addEventListener('click', event => {
           const click = getHomepageClick(root, event.target);
           if (click) append('Actions clicked', click.section + ': ' + click.action);
         }, true);
         root.querySelector('button').addEventListener('click', event => event.stopPropagation());
-      `,
-    },
-    bundle: true,
-    format: "iife",
-    write: false,
-  });
-  await page.addScriptTag({ content: script.outputFiles[0]!.text });
-  const seen = page
-    .getByRole("list", { name: "Sections seen" })
-    .getByRole("listitem");
+      `
+  );
   await expect(seen).toHaveText(["Introduction"]);
   const loading = page.getByRole("region", { name: "Loading section" });
   await loading.scrollIntoViewIfNeeded();
   await page.getByRole("button", { name: "Open wave", exact: true }).click();
-  await expect(
-    page.getByRole("list", { name: "Actions clicked" }).getByRole("listitem")
-  ).toHaveCount(0);
+  await expect(clicked).toHaveCount(0);
   await loading.evaluate((element) =>
     element.setAttribute("data-home-section", "Explore waves")
   );
   await expect(seen).toHaveText(["Introduction", "Explore waves"]);
   await page.getByRole("button", { name: "Open wave", exact: true }).focus();
   await page.keyboard.press("Enter");
-  await expect(
-    page.getByRole("list", { name: "Actions clicked" }).getByRole("listitem")
-  ).toHaveText(["Explore waves: Open wave"]);
+  await expect(clicked).toHaveText(["Explore waves: Open wave"]);
   await page
     .getByRole("heading", { name: "Introduction" })
     .scrollIntoViewIfNeeded();
