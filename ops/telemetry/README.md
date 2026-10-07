@@ -28,6 +28,13 @@ dated review.
 
 ## Current policy
 
+The [Wave feature usage pilot](../docs/developer/wave-feature-usage-pilot.md)
+adds foreground control exposure and deliberate-use events for a bounded subset
+of sidebar controls, tabs and leaderboard sorts. Its SDK privacy boundary also
+removes automatic and previously persisted URL/referrer attribution after
+enrichment. Existing event contracts remain; dashboards using the removed SDK
+attribution fields need migration. Live usage remains unverified.
+
 The repo Mixpanel runbook names the auth and Wave feed events, but live
 dashboard use could not be verified. Mixpanel therefore keeps every existing
 Wave event unsampled for consented production sessions. Routine Sentry Wave

@@ -67,6 +67,7 @@ export function SidebarActiveVotes({
       <section
         ref={scrollRef}
         aria-label={t(locale, "waves.discovery.voteList")}
+        data-wave-feature-list="active-votes"
         tabIndex={items.length > 3 && !collapsed ? 0 : -1}
         className="tw-max-h-36 tw-overflow-y-auto tw-overscroll-y-contain tw-rounded-lg [scrollbar-color:theme(colors.iron.700)_transparent] [scrollbar-width:thin] focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
       >
