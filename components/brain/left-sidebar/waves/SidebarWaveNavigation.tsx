@@ -12,6 +12,8 @@ import { getWaveRoute } from "@/helpers/navigation.helpers";
 import WavePicture from "@/components/waves/WavePicture";
 import { formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
+import { useWaveFeatureUsage } from "@/hooks/useWaveFeatureUsage";
+import { waveFeatureAttributes } from "@/services/analytics/waveFeatureUsage";
 
 const COLLECTION_LABELS = {
   pinned: "waves.sidebar.pinned",
@@ -28,6 +30,7 @@ export function SidebarWaveNavigationControls({
 }) {
   const locale = useBrowserLocale();
   const inputId = useId();
+  const { ref: featureUsageRef } = useWaveFeatureUsage("sidebar");
   const hasHydrated = useHasHydrated();
   const { searchOpen, setSearchOpen } = navigation;
   const toggleRef = useRef<HTMLButtonElement>(null);
@@ -50,7 +53,10 @@ export function SidebarWaveNavigationControls({
     (!navigation.queryEnabled || navigation.results.isFetching);
   return (
     <>
-      <div className="tailwind-scope tw-sticky tw-top-0 tw-z-30 tw-bg-[var(--wave-sidebar-background,#000)] tw-px-4 tw-py-2">
+      <div
+        ref={featureUsageRef}
+        className="tailwind-scope tw-sticky tw-top-0 tw-z-30 tw-bg-[var(--wave-sidebar-background,#000)] tw-px-4 tw-py-2"
+      >
         {searchOpen ? (
           <>
             <label htmlFor={inputId} className="tw-sr-only">
@@ -108,6 +114,7 @@ export function SidebarWaveNavigationControls({
                 {(["all", "pinned", "joined"] as const).map((tab) => (
                   <button
                     key={tab}
+                    {...waveFeatureAttributes("sidebar_collection", tab)}
                     type="button"
                     aria-label={t(locale, COLLECTION_LABELS[tab])}
                     aria-pressed={navigation.collection === tab}
@@ -125,6 +132,7 @@ export function SidebarWaveNavigationControls({
             )}
             <button
               ref={toggleRef}
+              {...waveFeatureAttributes("sidebar_entry", "search")}
               type="button"
               disabled={!hasHydrated}
               aria-label={findWaveLabel}

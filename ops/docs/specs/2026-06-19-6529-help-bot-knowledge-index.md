@@ -143,6 +143,11 @@ viewers from editors, describes read-only answers and source comparisons, and
 keeps questions, draft content and dated confirmed versions separate. Its
 control names must match the artist workspace and personal record list.
 
+The interactive text-entry record covers iPhone and iPad Safari focus behavior,
+continued Safari pinch zoom, and the native app's keyboard space for artwork
+frames. Its canonical answer links to Waves and its source includes the shared
+browser zoom guide. Artwork files and sandbox permissions stay unchanged.
+
 The artwork-sharing record covers the `Share artwork` icon in the existing
 media controls: over the artwork on individual Meme and Gradient pages, and
 in the strip below the artwork on NextGen pages. It covers canonical artwork
