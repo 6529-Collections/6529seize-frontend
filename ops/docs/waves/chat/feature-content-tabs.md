@@ -5,13 +5,17 @@
 Wave pages can expose a tab strip that switches the main content panel between
 wave sections such as `Chat`, `Leaderboard`, `Sales`, `Winners`, and other
 wave-dependent views. Named curations also appear here: each opens a selected
-collection of posts from the wave. The default competition shares this one row
-with Chat, and its views render directly below it. A separately opened non-default
-competition keeps its own detail navigation. See [Competitions](../competitions/feature-competitions.md)
-for default selection and switching. **About** is the final wave tab, with the
-competition’s **Configuration** immediately before it when a competition is
-available. Native and legacy defaults share this ordering on desktop, mobile
-web and the app.
+collection of posts from the wave. The selected competition shares this row with Chat and renders directly below
+it. Published competitions use the same row whether selected by default or an
+explicit link. The order is **Chat**, competition views, **Settings**, then
+**Competitions** when available, then named curations. **Settings** is the last
+competition tab. **Votes** contains **My Votes**, **All votes**, and **Activity**,
+all tied to the selected competition. See [Competitions](../competitions/feature-competitions.md)
+for default selection and switching.
+
+**About** and wave **Configuration** are available in the information panel.
+Select the wave name to open About in the desktop right sidebar or a mobile
+panel. Closing the mobile panel or using Back restores the underlying view.
 
 In the `My Votes` tab, non-image drops use a preview image from drop metadata when available, so rows render quickly and stay stable in list form.
 Each wave remembers its last selected valid tab in this browser or app. Ordinary
@@ -65,7 +69,7 @@ when it is still available, ahead of the wave's latest remembered choice.
    voting has ended, and selects that visible tab.
 6. When open polls still need the signed-in user's answer and the user can
    respond, the `Polls` tab shows an unread-style count badge.
-7. On the `My Votes` tab, each voted drop entry can show a preview thumbnail and
+7. In `Votes` → `My Votes`, each voted drop entry can show a preview thumbnail and
    an inline media format badge when that drop includes media metadata.
    For non-image media, that thumbnail comes from a `preview_image` metadata value
    when present, and media interactions stay disabled in the row.
@@ -82,10 +86,10 @@ when it is still available, ahead of the wave's latest remembered choice.
 
 - Switch between `Chat` and `Leaderboard` while a wave is active.
 - Open `Winners` once the first decision has passed.
-- In memes waves, move between `Leaderboard`, `My Votes`, `FAQ`, and other
+- In memes waves, move between `Leaderboard`, `Votes`, `FAQ`, and other
   available tabs.
 - In curation waves, move between `Chat`, `Leaderboard`, `Sales`, `Winners`,
-  and `My Votes` as those tabs become available.
+  and `Votes` as those tabs become available.
 - In the `My Votes` tab, users can quickly scan entries by format: image,
   video, or interactive media is indicated with a small badge at the title row.
 - In `My Votes`, non-image drops show a static preview thumbnail in the row when
@@ -128,14 +132,13 @@ when it is still available, ahead of the wave's latest remembered choice.
   retain their destination.
 - `Winners` is shown only after the first decision has passed.
 - `Sales` appears in curation waves only.
-- `My Votes` appears in memes and curation waves; `FAQ` appears in memes waves
-  only.
+- `Votes` appears when a competition is available; its personal view requires a connected profile. `FAQ` appears in memes waves only.
 - Tabs expose selected-state semantics and link to the active content panel for
   assistive technologies.
 - Mobile tab-scroll controls have direction-specific accessible names, remain
   keyboard operable, and avoid smooth motion when reduced motion is requested.
 - Memes wave tabs start with `Chat`, then `Leaderboard` (or `Submissions` after
-  voting ends), `Winners` when available, and `My Votes` for signed-in users.
+  voting ends), `Winners` when available, and `Votes`.
   Other available sections follow these tabs.
 - Curation waves do not expose an `Outcome` tab; `Sales` fills that dedicated
   results-slot instead.

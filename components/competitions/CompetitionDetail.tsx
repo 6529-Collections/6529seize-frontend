@@ -70,7 +70,7 @@ export function NativeCompetitionContent({
       : selectedTab;
   const approveLabels = getApproveWaveTabLabelsFromMetadata(presentation);
   const tabLabel = (value: (typeof COMPETITION_TABS)[number]) => {
-    if (value === "rules") return t(locale, "competitions.configuration");
+    if (value === "rules") return t(locale, "competitions.settings");
     if (competition.type === ApiCompetitionType.Approve) {
       if (value === "leaderboard") return approveLabels.approvals;
       if (value === "decisions") return approveLabels.approved;
@@ -187,6 +187,8 @@ export default function CompetitionDetail({
   readonly waveId: string;
   readonly competitionId: string;
 }) {
+  const search = useSearchParams();
+  const tab = getCompetitionTab(search.get("tab"));
   const wave = useWaveData({ waveId, onWaveNotFound: () => undefined });
   const hub = useCompetitionHub(waveId);
   const competition = useCompetitionDetail({ waveId, competitionId });
@@ -212,7 +214,9 @@ export default function CompetitionDetail({
           wave: wave.data,
         }}
       >
-        {hub.data.legacy_primary_competition_id === competitionId ? (
+        {hub.data.legacy_primary_competition_id === competitionId &&
+        tab !== "rules" &&
+        tab !== "votes" ? (
           <div className="tw-h-[70dvh]">
             <ContentTabProvider competitionOnly>
               <MyStreamWave waveId={waveId} competitionOnly />
