@@ -2,6 +2,7 @@ import { writeFile } from "node:fs/promises";
 import composerSandboxConstants from "../support/composerSandboxConstants.json";
 import { installSurfaceSimulation } from "../support/surfaceSimulation";
 import type { Page } from "@playwright/test";
+import { expectCompetitionScroll } from "../support/competitionScroll";
 import { expect, expectNoHorizontalOverflow, test } from "../testHelpers";
 import {
   dismissNextDevTools,
@@ -558,6 +559,89 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     "PLAYWRIGHT_AUTH_SANDBOX",
     "Native competition tests require an isolated local mock API."
   );
+  for (const legacy of [false, true]) {
+    test(`scrolls overflowing ${legacy ? "legacy" : "native"} Settings and vote Activity`, async ({
+      page,
+    }, testInfo) => {
+      const sandbox = await installCompetitionApi(page, false, false);
+      sandbox.onlyCompetition("alpha");
+      if (legacy) await sandbox.legacyPrimary("alpha");
+      const app = (testInfo.project.use.viewport?.width ?? 1280) < 640;
+      if (app)
+        await installSurfaceSimulation(
+          page.context(),
+          "capacitor-ios-sim",
+          testInfo.project.use.baseURL
+        );
+      const selected = competition("alpha", "Parallel Alpha");
+      selected.permissions.administer = false;
+      await page.route("**/v3/waves/*/competitions/alpha", (route) =>
+        route.fulfill({
+          json: {
+            ...selected,
+            participation: {
+              ...selected.participation,
+              terms: `${"Original artwork is required. ".repeat(160)}End of participation terms.`,
+            },
+          },
+        })
+      );
+      await page.route(
+        "**/v3/waves/*/competitions/alpha/activity?**",
+        (route) =>
+          route.fulfill({
+            json: Array.from({ length: 30 }, (_, index) => ({
+              id: `scroll-log-${index}`,
+              action: "DROP_VOTE_EDIT",
+              wave_id: WAVE,
+              drop_id: entryDropId("alpha"),
+              invoker: {
+                id: PROFILE,
+                handle: `scroll-voter-${index}`,
+                pfp: null,
+              },
+              created_at: "2026-10-01T12:00:00Z",
+              contents: { oldVote: 0, newVote: index + 1 },
+            })),
+          })
+      );
+      await page.goto(`${ROOT}/alpha?tab=rules`);
+      const rules = page.getByRole("main").locator("#competition-alpha-rules");
+      await expect(
+        rules.getByRole("heading", { name: "Participation", exact: true })
+      ).toBeVisible();
+      await expectCompetitionScroll(
+        page,
+        page
+          .getByRole("main")
+          .locator("#competition-alpha-rules")
+          .locator(".."),
+        rules.getByRole("heading").last()
+      );
+      await page.screenshot({
+        path: testInfo.outputPath("settings-scrolled.png"),
+      });
+      await page
+        .getByRole(app ? "button" : "tab", { name: "Votes", exact: true })
+        .click();
+      await page.getByRole("tab", { name: "Activity", exact: true }).click();
+      await expect(
+        page.getByRole("tab", { name: "Activity", exact: true })
+      ).toHaveAttribute("aria-selected", "true");
+      await expectCompetitionScroll(
+        page,
+        page
+          .getByRole("main")
+          .locator("#competition-alpha-votes")
+          .locator(".."),
+        page.getByRole("link", { name: "scroll-voter-29", exact: true })
+      );
+      await expectNoHorizontalOverflow(page);
+      await page.screenshot({
+        path: testInfo.outputPath("activity-scrolled.png"),
+      });
+    });
+  }
   for (const app of [false, true]) {
     test(`closes mobile ${app ? "app" : "web"} information back onto the selected Votes view`, async ({
       page,
