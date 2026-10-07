@@ -3,7 +3,11 @@ import CapacitorSetup from "@/components/providers/CapacitorSetup";
 import useCapacitor from "@/hooks/useCapacitor";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { Capacitor } from "@capacitor/core";
-import { Keyboard, KeyboardResize } from "@capacitor/keyboard";
+import {
+  Keyboard,
+  KeyboardResize,
+  type KeyboardInfo,
+} from "@capacitor/keyboard";
 
 jest.mock("@/hooks/useCapacitor");
 jest.mock("@/hooks/useDeviceInfo");
@@ -193,12 +197,17 @@ describe("native iframe keyboard visibility", () => {
     jest.mocked(Keyboard.setResizeMode).mockClear();
     jest
       .mocked(Keyboard.addListener)
-      .mockImplementation(async (event, callback) => {
-        listeners.set(event, (height = 300) =>
-          callback({ keyboardHeight: height })
-        );
-        return { remove };
-      });
+      .mockImplementation(
+        async (
+          event,
+          callback: ((info: KeyboardInfo) => void) | (() => void)
+        ) => {
+          listeners.set(event, (height = 300) =>
+            callback({ keyboardHeight: height })
+          );
+          return { remove };
+        }
+      );
     setDevice(true, true);
   });
 
