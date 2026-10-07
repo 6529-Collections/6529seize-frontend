@@ -8,7 +8,6 @@ import { getAppEnvironment } from "../../config/appEnvironment";
 import { isDesktopWebProject } from "../support/surfaceSimulation";
 import { gateSidebarHydration } from "../support/sidebarHydration";
 import { installSectionTrackingFixture } from "../support/sectionTrackingFixture";
-import { buildSync } from "esbuild";
 
 test.describe("Home Page @smoke @medium @large", () => {
   test.beforeEach(async ({ page }) => {
