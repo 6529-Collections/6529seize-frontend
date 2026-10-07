@@ -1,12 +1,14 @@
 import { expect, test, type Page } from "@playwright/test";
-import { buildSync } from "esbuild";
 import path from "node:path";
+import { installSectionTrackingFixture } from "../support/sectionTrackingFixture";
 
 test("Collected tracking follows nested scrolling and keyboard actions", async ({
   page,
 }) => {
   // Exercise real browser geometry and activation without sending analytics.
-  await page.setContent(`
+  const { seen, clicked } = await installSectionTrackingFixture(
+    page,
+    `
     <main aria-label="Collected test" style="height:240px;overflow:auto">
       <section data-profile-section="Collection summary" style="height:110px">
         <h1 data-profile-section-anchor="Collection summary">Collection</h1>
@@ -23,21 +25,11 @@ test("Collected tracking follows nested scrolling and keyboard actions", async (
         <article data-profile-section-anchor="Artwork" style="height:160px"><a href="/the-memes/2" data-profile-action="Open artwork"><span>Artwork</span></a></article>
       </section>
     </main>
-    <ol aria-label="Sections seen"></ol>
-    <ol aria-label="Actions clicked"></ol>
-  `);
-  const script = buildSync({
-    stdin: {
-      resolveDir: process.cwd(),
-      contents: `
+  `,
+    `
         import { COLLECTED_SECTIONS, getCollectedClick } from './components/user/collected/collectedTracking';
         import { observeAnalyticsSections } from './services/analytics/sectionVisibility';
         const root = document.querySelector('main');
-        const append = (label, text) => {
-          const item = document.createElement('li');
-          item.textContent = text;
-          document.querySelector('ol[aria-label="' + label + '"]').append(item);
-        };
         observeAnalyticsSections({ root, attribute: 'data-profile-section-anchor', sections: COLLECTED_SECTIONS, seen: new Set(), onSeen: section => append('Sections seen', section) });
         root.addEventListener('click', event => {
           const click = getCollectedClick(root, event.target);
@@ -50,19 +42,8 @@ test("Collected tracking follows nested scrolling and keyboard actions", async (
           details.querySelector('h2').setAttribute('data-profile-section-anchor', 'Collection details');
         });
         root.querySelectorAll('a').forEach(link => link.addEventListener('click', event => event.preventDefault()));
-      `,
-    },
-    bundle: true,
-    format: "iife",
-    write: false,
-  });
-  await page.addScriptTag({ content: script.outputFiles[0]!.text });
-  const seen = page
-    .getByRole("list", { name: "Sections seen" })
-    .getByRole("listitem");
-  const clicked = page
-    .getByRole("list", { name: "Actions clicked" })
-    .getByRole("listitem");
+      `
+  );
   await expect(seen).toHaveText(["Collection summary"]);
   await page.getByRole("button", { name: "Details", exact: true }).focus();
   await page.keyboard.press("Enter");

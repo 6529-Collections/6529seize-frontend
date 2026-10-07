@@ -77,6 +77,9 @@ consent cancels pending visibility timers and prevents further events.
 The existing Mixpanel wrapper also enforces the production and SDK gates and
 keeps failures from interrupting the action. Blocked or rejected events are
 not guaranteed to arrive; section counts are marked locally only when accepted.
+While a section stays visible, rejected counts get up to three attempts, one
+second apart, during the current observation period. Leaving the screen or
+withdrawing consent cancels pending attempts.
 
 Custom properties are fixed labels and route families. We do not scrape button
 text or send profile handles, wallet addresses, artwork names, URLs or filter

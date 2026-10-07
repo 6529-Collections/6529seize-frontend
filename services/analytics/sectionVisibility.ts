@@ -21,6 +21,8 @@ export function observeAnalyticsSections<Section extends string>({
   const observed = new Map<Element, Section>();
   const visible = new Set<Element>();
   const timers = new Map<Element, ReturnType<typeof setTimeout>>();
+  // Allow brief SDK readiness delays without retrying indefinitely.
+  const attempts = new Map<Section, number>();
   const cancel = (element: Element) => {
     clearTimeout(timers.get(element));
     timers.delete(element);
@@ -30,7 +32,11 @@ export function observeAnalyticsSections<Section extends string>({
     if (
       !section ||
       seen.has(section) ||
-      timers.has(element) ||
+      (attempts.get(section) ?? 0) >= 3 ||
+      // Several artwork anchors can be visible; attempt the section once at a time.
+      Array.from(timers.keys()).some(
+        (anchor) => observed.get(anchor) === section
+      ) ||
       document.visibilityState !== "visible"
     )
       return;
@@ -43,10 +49,13 @@ export function observeAnalyticsSections<Section extends string>({
           !visible.has(element) ||
           document.visibilityState !== "visible" ||
           seen.has(section) ||
+          (attempts.get(section) ?? 0) >= 3 ||
           element.getAttribute(attribute) !== section
         )
           return;
+        attempts.set(section, (attempts.get(section) ?? 0) + 1);
         if (onSeen(section) !== false) seen.add(section);
+        else start(element);
       }, 1000)
     );
   };
@@ -61,6 +70,7 @@ export function observeAnalyticsSections<Section extends string>({
           cancel(entry.target);
         }
       }
+      for (const element of visible) start(element);
     },
     { threshold: 0.1 }
   );
@@ -84,6 +94,7 @@ export function observeAnalyticsSections<Section extends string>({
         observer.observe(element);
       }
     }
+    for (const element of visible) start(element);
   };
   const onVisibilityChange = () => {
     for (const element of visible) {

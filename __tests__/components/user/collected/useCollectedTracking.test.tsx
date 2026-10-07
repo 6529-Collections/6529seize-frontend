@@ -34,9 +34,11 @@ const disconnect = jest.fn();
 function Fixture({
   target = "collector",
   ready = true,
+  extraAnchor = false,
 }: {
   readonly target?: string;
   readonly ready?: boolean;
+  readonly extraAnchor?: boolean;
 }) {
   const { rootRef, onClickCapture, trackAction } = useCollectedTracking(target);
   return (
@@ -52,6 +54,14 @@ function Fixture({
         >
           Collection
         </h2>
+        {extraAnchor && (
+          <h3
+            data-testid="extra-anchor"
+            data-profile-section-anchor="Collection summary"
+          >
+            Another summary anchor
+          </h3>
+        )}
         <button
           data-profile-action="Details"
           onClick={(event) => event.stopPropagation()}
@@ -110,8 +120,7 @@ function SignedInFixture({
   );
 }
 
-function intersect(ratio = 0.5) {
-  const target = screen.getByTestId("anchor");
+function intersect(ratio = 0.5, target = screen.getByTestId("anchor")) {
   const rect = target.getBoundingClientRect();
   act(() =>
     notify(
@@ -222,15 +231,60 @@ it("waits for ready content and one continuous second, then deduplicates rerende
   expect(track).toHaveBeenCalledTimes(1);
 });
 
-it("does not mark a section seen when the analytics SDK rejects it", () => {
+it("retries a rejected impression while the section stays visible", () => {
   track.mockReturnValueOnce(false);
   render(<Fixture />);
   intersect();
   advance();
+  expect(track).toHaveBeenCalledTimes(1);
+  advance();
+  expect(track).toHaveBeenCalledTimes(2);
+  advance(5000);
+  expect(track).toHaveBeenCalledTimes(2);
+});
+
+it("bounds rejected impressions at three attempts per section", () => {
+  track.mockReturnValue(false);
+  render(<Fixture />);
+  intersect();
+  advance(10000);
+  expect(track).toHaveBeenCalledTimes(3);
   intersect(0);
   intersect();
   advance();
+  expect(track).toHaveBeenCalledTimes(3);
+});
+
+it("spaces attempts even when several anchors for the section are visible", () => {
+  track.mockReturnValueOnce(false);
+  render(<Fixture extraAnchor />);
+  intersect();
+  intersect(0.5, screen.getByTestId("extra-anchor"));
+  advance();
+  expect(track).toHaveBeenCalledTimes(1);
+  advance();
   expect(track).toHaveBeenCalledTimes(2);
+});
+
+it("uses another visible anchor when the first leaves the screen", () => {
+  render(<Fixture extraAnchor />);
+  intersect();
+  intersect(0.5, screen.getByTestId("extra-anchor"));
+  advance(700);
+  intersect(0);
+  advance();
+  expect(track).toHaveBeenCalledTimes(1);
+});
+
+it("cancels a rejected impression retry when consent is withdrawn", () => {
+  track.mockReturnValue(false);
+  const { rerender } = render(<Fixture />);
+  intersect();
+  advance();
+  consent = false;
+  rerender(<Fixture />);
+  advance(5000);
+  expect(track).toHaveBeenCalledTimes(1);
 });
 
 it("keeps seen sections deduplicated if consent changes during the same visit", () => {
