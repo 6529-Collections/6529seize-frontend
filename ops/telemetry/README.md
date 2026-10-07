@@ -8,6 +8,9 @@ review date. Update it in the same change as any custom signal.
 See [Homepage tracking](homepage.md) for section visibility, main clicks, and
 next-page reports with simple labels.
 
+See [Collected tracking](collected.md) for Profile sections, buttons and filters,
+with separate own-profile and visitor groups.
+
 ## Provider ownership
 
 - AWS RUM owns real-user browser performance: Core Web Vitals,

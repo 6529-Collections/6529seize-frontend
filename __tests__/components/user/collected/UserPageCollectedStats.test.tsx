@@ -1,4 +1,5 @@
 import UserPageCollectedStats from "@/components/user/collected/UserPageCollectedStats";
+import { getCollectedClick } from "@/components/user/collected/collectedTracking";
 import type { UserPageStatsInitialData } from "@/components/user/stats/userPageStats.types";
 import { CollectedCollectionType } from "@/entities/IProfile";
 import { commonApiFetch } from "@/services/api/common-api";
@@ -537,6 +538,11 @@ describe("UserPageCollectedStats", () => {
         })
       ).not.toBeInTheDocument();
 
+      expect(showMoreButton).toHaveAttribute(
+        "data-profile-action",
+        "Show more seasons"
+      );
+
       await user.click(showMoreButton);
 
       expect(
@@ -544,6 +550,10 @@ describe("UserPageCollectedStats", () => {
           name: /szn6/i,
         })
       ).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "Show less" })).toHaveAttribute(
+        "data-profile-action",
+        "Show fewer seasons"
+      );
       expect(
         screen.getByRole("button", {
           name: "Show less",
@@ -663,7 +673,7 @@ describe("UserPageCollectedStats", () => {
   it("starts legacy stats fetches only when details are opened", async () => {
     const user = userEvent.setup();
 
-    renderWithQueryClient(
+    const { container } = renderWithQueryClient(
       <UserPageCollectedStats
         profile={profile}
         activeAddress={null}
@@ -674,7 +684,26 @@ describe("UserPageCollectedStats", () => {
 
     expect(apiMock).not.toHaveBeenCalled();
 
-    await user.click(screen.getByRole("button", { name: "Details" }));
+    expect(
+      getCollectedClick(
+        container,
+        screen.getByRole("link", { name: "Complete my set" })
+      )
+    ).toEqual({ section: "Collection summary", action: "Complete my set" });
+    expect(
+      getCollectedClick(
+        container,
+        screen.getByRole("link", { name: "Manage orders" })
+      )
+    ).toEqual({ section: "Collection summary", action: "Manage orders" });
+
+    const detailsButton = screen.getByRole("button", { name: "Details" });
+    expect(detailsButton).toHaveAttribute("data-profile-action", "Details");
+    await user.click(detailsButton);
+    expect(detailsButton).toHaveAttribute(
+      "data-profile-action",
+      "Hide details"
+    );
 
     await waitFor(() => expect(apiMock).toHaveBeenCalledTimes(4));
 

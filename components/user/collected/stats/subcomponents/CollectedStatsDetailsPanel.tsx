@@ -39,7 +39,7 @@ export function CollectedStatsDetailsPanel({
 
   return (
     <CommonAnimationHeight>
-      <div id={detailsId}>
+      <div id={detailsId} data-profile-section="Collection details">
         {isOpen && (
           <div className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800/90 tw-bg-gradient-to-b tw-from-iron-900/50 tw-via-iron-950/40 tw-to-black tw-px-4 tw-pb-5 tw-pt-4 tw-ring-1 tw-ring-inset tw-ring-white/[0.04] sm:tw-px-6 sm:tw-pb-6 sm:tw-pt-5">
             {statsPath === null ? (
