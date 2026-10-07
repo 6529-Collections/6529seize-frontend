@@ -145,7 +145,7 @@ export default function UserPageStatsCollected({
   return (
     <section
       aria-labelledby="collected-details-heading"
-      className="tw-space-y-3"
+      className="tw-space-y-2 md:tw-space-y-3"
     >
       <h3
         className={STATS_SECTION_HEADING_CLASS}

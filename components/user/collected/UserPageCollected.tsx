@@ -670,10 +670,7 @@ export default function UserPageCollected({
             />
           </div>
 
-          <div
-            data-profile-section="Artwork"
-            className="tw-mt-6 tw-flex tw-gap-6"
-          >
+          <div data-profile-section="Artwork" className="tw-mt-6">
             {isNetwork ? (
               <UserPageCollectedNetworkCards
                 cards={dataNetwork?.data ?? []}
