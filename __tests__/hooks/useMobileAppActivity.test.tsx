@@ -9,6 +9,7 @@ import {
   useMobileBatterySavings,
 } from "@/hooks/useMobileAppActivity";
 import { subscribeToTouchFirstChanges } from "@/helpers/touch-first.helpers";
+import { useVideoLoading } from "@/components/drops/view/item/content/media/useVideoLoading";
 
 let mockMobileBrowser = true;
 let mockCapabilitiesChanged: () => void;
@@ -137,5 +138,56 @@ it("hydrates before applying hidden mobile-browser activity", async () => {
     expect(container.textContent).toBe("true");
   } finally {
     act(() => root?.unmount());
+  }
+});
+
+it("hydrates a DOM-facing mobile policy consumer before applying hidden-tab loading", async () => {
+  function Video() {
+    const mobile = useMobileBatterySavings();
+    const active = useMobileAppActivity();
+    const { renderedSrc, videoPreload } = useVideoLoading({
+      directSrc: "clip.mp4",
+      videoElement: null,
+      isMobileEnvironment: mobile,
+      isAppActive: active,
+      isInView: false,
+      isAnyFullscreen: false,
+      openedSource: undefined,
+      poster: undefined,
+      isPosterGateClosed: false,
+      autoPlay: false,
+      preload: "metadata",
+    });
+    return createElement("video", {
+      src: renderedSrc,
+      preload: videoPreload,
+      "data-mobile": String(mobile),
+    });
+  }
+  const container = document.createElement("div");
+  container.innerHTML = renderToString(createElement(Video));
+  const video = container.querySelector("video")!;
+  expect(video).toHaveAttribute("data-mobile", "false");
+  expect(video).not.toHaveAttribute("src");
+  setVisibility("hidden");
+  const onRecoverableError = jest.fn();
+  const consoleError = jest
+    .spyOn(console, "error")
+    .mockImplementation(() => undefined);
+  let root: ReturnType<typeof hydrateRoot> | undefined;
+  try {
+    await act(async () => {
+      root = hydrateRoot(container, createElement(Video), {
+        onRecoverableError,
+      });
+    });
+    expect(onRecoverableError).not.toHaveBeenCalled();
+    expect(consoleError).not.toHaveBeenCalled();
+    expect(video).toHaveAttribute("data-mobile", "true");
+    expect(video).not.toHaveAttribute("src");
+    expect(video.preload).toBe("none");
+  } finally {
+    act(() => root?.unmount());
+    consoleError.mockRestore();
   }
 });

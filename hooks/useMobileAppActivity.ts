@@ -8,6 +8,8 @@ import {
 } from "@/services/app-activity/mobile-app-activity";
 
 const getServerActivity = () => true;
+// React also uses this snapshot for the first hydration render, then subscribes
+// to the actual device policy. No separate hydration state is needed here.
 const getServerMobile = () => false;
 
 /** Pause unnecessary work in hidden mobile browser tabs or inactive native apps. */
