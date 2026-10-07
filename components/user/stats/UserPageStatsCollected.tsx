@@ -150,6 +150,9 @@ export default function UserPageStatsCollected({
       <h3
         className={STATS_SECTION_HEADING_CLASS}
         id="collected-details-heading"
+        data-profile-section-anchor={
+          ownerBalance === undefined ? undefined : "Collection details"
+        }
       >
         {t(locale, "user.collected.stats.details.collected.title")}
       </h3>

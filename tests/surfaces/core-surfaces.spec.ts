@@ -153,6 +153,34 @@ test.describe("Core app surface coverage @surface @medium @large", () => {
     );
   });
 
+  test("iPhone Safari suppresses focus zoom without disabling web scaling", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      testInfo.project.name !== "web-mobile-chromium",
+      "This checks Safari policy in browser simulation; real iPhone gestures are tested separately"
+    );
+    await page.addInitScript(() => {
+      Object.defineProperty(navigator, "userAgent", {
+        configurable: true,
+        value:
+          "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 Version/18.0 Mobile/15E148 Safari/604.1",
+      });
+    });
+    await gotoReady(page, "/");
+    const viewport = page.locator('meta[name="viewport"]');
+    await expect(viewport).toHaveAttribute("content", /maximum-scale=1(?:,|$)/);
+    await expect(viewport).toHaveAttribute("content", /user-scalable=yes/);
+    await page
+      .getByRole("link", { name: "Open network health dashboard" })
+      .click();
+    await expect(page).toHaveURL(/\/network\/health$/, {
+      timeout: NAVIGATION_TIMEOUT_MS,
+    });
+    await expect(viewport).toHaveAttribute("content", /maximum-scale=1(?:,|$)/);
+    await expect(viewport).toHaveAttribute("content", /user-scalable=yes/);
+  });
+
   test("Capacitor simulations apply native viewport setup", async ({
     page,
   }, testInfo) => {
