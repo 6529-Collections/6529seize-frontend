@@ -36,9 +36,10 @@ available.
 5. While editing in native sessions and shared mobile dialogs, form fields keep
    at least `16px` text sizing plus `touch-action: manipulation` for more
    stable tap and focus behavior.
-6. When typing inside interactive artwork in the iOS app, the frame scrolls
-   above the keyboard without changing the artwork dimensions. Closing the
-   keyboard keeps the page at normal scale.
+6. In the iOS app, chat retains its existing keyboard handling. A large
+   single-view artwork frame can scroll above the keyboard without changing
+   artwork dimensions or adding extra page padding. Closing the keyboard
+   keeps the page at normal scale.
 
 ## Common Scenarios
 

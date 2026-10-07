@@ -181,20 +181,22 @@ describe("viewport focus zoom policy", () => {
   });
 });
 
-describe("native iframe keyboard visibility", () => {
+describe("native keyboard integration", () => {
   const listeners = new Map<string, (height?: number) => void>();
   const remove = jest.fn();
+  const originalHeight = window.innerHeight;
 
   beforeEach(() => {
     listeners.clear();
     remove.mockClear();
+    Object.defineProperty(window, "innerHeight", {
+      configurable: true,
+      value: 932,
+    });
     jest.spyOn(Capacitor, "isPluginAvailable").mockReturnValue(true);
-    // The shared Jest setup stubs computed styles without geometry properties.
-    jest
-      .spyOn(window, "getComputedStyle")
-      .mockImplementation((element) => (element as HTMLElement).style);
     jest.mocked(Keyboard.setResizeMode).mockResolvedValue();
     jest.mocked(Keyboard.setResizeMode).mockClear();
+    jest.mocked(Keyboard.addListener).mockClear();
     jest
       .mocked(Keyboard.addListener)
       .mockImplementation(
@@ -202,7 +204,7 @@ describe("native iframe keyboard visibility", () => {
           event,
           callback: ((info: KeyboardInfo) => void) | (() => void)
         ) => {
-          listeners.set(event, (height = 300) =>
+          listeners.set(event, (height = 386) =>
             callback({ keyboardHeight: height })
           );
           return { remove };
@@ -213,105 +215,80 @@ describe("native iframe keyboard visibility", () => {
 
   afterEach(() => {
     jest.restoreAllMocks();
+    Object.defineProperty(window, "innerHeight", {
+      configurable: true,
+      value: originalHeight,
+    });
     document.body.classList.remove("capacitor-native");
   });
 
-  it("scrolls the iframe above the keyboard without resizing artwork and releases listeners", async () => {
-    const { unmount } = render(
+  function renderFrame(singleView: boolean, height: number) {
+    const view = render(
       <>
         <CapacitorSetup />
         <div
-          data-testid="scroll-host"
+          data-video-viewport={singleView || undefined}
           style={{ overflowY: "auto", paddingBottom: "16px" }}
         >
-          <iframe title="Interactive artwork" />
+          <iframe
+            title="Interactive artwork"
+            style={{
+              width: "398px",
+              height: height + "px",
+              scrollMarginBottom: "12px",
+            }}
+          />
         </div>
       </>
     );
     const frame = document.querySelector("iframe")!;
-    const scrollHost = frame.parentElement!;
+    jest
+      .spyOn(frame, "getBoundingClientRect")
+      .mockReturnValue({ height } as DOMRect);
     frame.scrollIntoView = jest.fn();
-    frame.style.height = "460px";
-    frame.style.width = "100%";
-    frame.style.scrollMarginBottom = "12px";
     frame.focus();
-    act(() => listeners.get("keyboardWillShow")?.());
-    expect(frame.style.scrollMarginBottom).toBe("300px");
-    expect(scrollHost.style.paddingBottom).toBe("316px");
-    expect(frame.scrollIntoView).not.toHaveBeenCalled();
+    return { ...view, frame, host: frame.parentElement! };
+  }
+
+  it("aligns a large single-view frame without adding padding or changing artwork dimensions", async () => {
+    const { frame, host, unmount } = renderFrame(true, 640);
     act(() => listeners.get("keyboardDidShow")?.());
     expect(frame.scrollIntoView).toHaveBeenCalledWith({
       block: "end",
       behavior: "instant",
     });
-    expect(frame.style.height).toBe("460px");
-    expect(frame.style.width).toBe("100%");
-    expect(Keyboard.setResizeMode).toHaveBeenCalledTimes(1);
+    expect(frame.style.scrollMarginBottom).toBe("386px");
+    expect(host.style.paddingBottom).toBe("16px");
+    expect(document.body.style.paddingBottom).toBe("");
+    expect(frame.style.width).toBe("398px");
+    expect(frame.style.height).toBe("640px");
     expect(Keyboard.setResizeMode).toHaveBeenCalledWith({
       mode: KeyboardResize.None,
     });
-
     act(() => listeners.get("keyboardDidHide")?.());
     expect(frame.style.scrollMarginBottom).toBe("12px");
-    expect(scrollHost.style.paddingBottom).toBe("16px");
-    jest.mocked(frame.scrollIntoView).mockClear();
     act(() => listeners.get("keyboardDidShow")?.());
-    expect(frame.scrollIntoView).not.toHaveBeenCalled();
-    unmount();
-    await waitFor(() => expect(remove).toHaveBeenCalledTimes(3));
-  });
-
-  it("leaves artwork positioning alone for a zero-height keyboard event", () => {
-    render(
-      <>
-        <CapacitorSetup />
-        <iframe title="Interactive artwork" />
-      </>
-    );
-    const frame = document.querySelector("iframe")!;
-    frame.scrollIntoView = jest.fn();
-    frame.focus();
-    act(() => listeners.get("keyboardWillShow")?.(0));
-    act(() => listeners.get("keyboardDidShow")?.(0));
-    expect(frame.style.scrollMarginBottom).toBe("");
-    expect(frame.scrollIntoView).not.toHaveBeenCalled();
-  });
-
-  it("restores artwork scroll alignment if unmounted while typing", async () => {
-    const { unmount } = render(
-      <>
-        <CapacitorSetup />
-        <iframe title="Interactive artwork" />
-      </>
-    );
-    const frame = document.querySelector("iframe")!;
-    frame.style.scrollMarginBottom = "12px";
-    frame.focus();
-    act(() => listeners.get("keyboardWillShow")?.());
     unmount();
     expect(frame.style.scrollMarginBottom).toBe("12px");
-    expect(document.body.style.paddingBottom).toBe("");
-    await waitFor(() => expect(remove).toHaveBeenCalledTimes(3));
+    await waitFor(() => expect(remove).toHaveBeenCalledTimes(2));
   });
 
-  it("releases artwork scroll space when focus moves to an app-owned input", () => {
-    render(
-      <>
-        <CapacitorSetup />
-        <iframe title="Interactive artwork" />
-        <textarea aria-label="Composer" />
-      </>
-    );
-    const frame = document.querySelector("iframe")!;
-    frame.focus();
-    act(() => listeners.get("keyboardWillShow")?.());
-    expect(document.body.style.paddingBottom).toBe("300px");
-    document.querySelector("textarea")!.focus();
-    expect(frame.style.scrollMarginBottom).toBe("");
-    expect(document.body.style.paddingBottom).toBe("");
-  });
+  it.each([
+    ["chat frame", false, 640, 386],
+    ["single-view frame that fits above the keyboard", true, 224, 386],
+    ["zero-height keyboard", true, 640, 0],
+  ] as const)(
+    "leaves %s to the existing keyboard handling",
+    (_, singleView, height, keyboardHeight) => {
+      const { frame, host } = renderFrame(singleView, height);
+      act(() => listeners.get("keyboardDidShow")?.(keyboardHeight));
+      expect(frame.scrollIntoView).not.toHaveBeenCalled();
+      expect(frame.style.scrollMarginBottom).toBe("12px");
+      expect(host.style.paddingBottom).toBe("16px");
+    }
+  );
 
-  it("retains the composer resize mode for app-owned inputs", () => {
+  it("leaves app-owned text fields to the existing keyboard handling", () => {
     render(
       <>
         <CapacitorSetup />
@@ -319,16 +296,23 @@ describe("native iframe keyboard visibility", () => {
       </>
     );
     document.querySelector("textarea")!.focus();
-    act(() => listeners.get("keyboardWillShow")?.());
-    expect(Keyboard.setResizeMode).toHaveBeenLastCalledWith({
+    act(() => listeners.get("keyboardDidShow")?.());
+    expect(document.body.style.paddingBottom).toBe("");
+    expect(Keyboard.setResizeMode).toHaveBeenCalledWith({
       mode: KeyboardResize.None,
     });
   });
 
-  it("does not change Android keyboard handling", () => {
-    setDevice(true, false);
-    render(<CapacitorSetup />);
-    expect(listeners.size).toBe(0);
-    expect(Keyboard.setResizeMode).not.toHaveBeenCalled();
-  });
+  it.each(["web", "Android", "unavailable iOS plugin"])(
+    "does not configure keyboard resize for %s",
+    (platform) => {
+      if (platform === "web") setDevice(false, true);
+      if (platform === "Android") setDevice(true, false);
+      if (platform === "unavailable iOS plugin")
+        jest.mocked(Capacitor.isPluginAvailable).mockReturnValue(false);
+      render(<CapacitorSetup />);
+      expect(Keyboard.setResizeMode).not.toHaveBeenCalled();
+      expect(Keyboard.addListener).not.toHaveBeenCalled();
+    }
+  );
 });
