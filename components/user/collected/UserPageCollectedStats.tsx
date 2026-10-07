@@ -192,7 +192,7 @@ export default function UserPageCollectedStats({
         data-profile-section-anchor={
           mainMetrics.length > 0 ? "Collection summary" : undefined
         }
-        className="tw-p-4 sm:tw-p-5"
+        className="tw-px-3 tw-py-2 md:tw-p-5"
       >
         <CollectedStatsHeader
           metrics={mainMetrics}
@@ -231,7 +231,7 @@ export default function UserPageCollectedStats({
       />
 
       <div ref={detailsScrollTargetRef} className="tw-scroll-mt-24">
-        <div className="tw-flex tw-flex-wrap tw-gap-2 tw-px-4 tw-py-4 sm:tw-px-5">
+        <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-2 tw-px-3 tw-py-2 md:tw-px-5 md:tw-py-4">
           <span data-profile-action="Complete my set" className="tw-contents">
             <CollectEntryLink
               collection="memes"
@@ -250,7 +250,6 @@ export default function UserPageCollectedStats({
             href="/collect/orders"
             variant="tertiary"
             size="sm"
-            className="tw-min-h-11"
           >
             {t(locale, "collect.entry.manage")}
           </ButtonLink>

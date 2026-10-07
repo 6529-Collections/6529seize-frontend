@@ -23,7 +23,7 @@ export default function UserPageStatsActivityWalletTable({
 }) {
   return (
     <div className="tw-mt-4 tw-inline-block tw-min-w-full tw-px-4 tw-pb-2 tw-align-middle sm:tw-px-6">
-      <table className="tw-min-w-full">
+      <table className="tw-min-w-full tw-whitespace-nowrap">
         <caption className="tw-sr-only">
           {getWalletActivityMessage(
             "user.collected.stats.walletActivity.tableCaption",
