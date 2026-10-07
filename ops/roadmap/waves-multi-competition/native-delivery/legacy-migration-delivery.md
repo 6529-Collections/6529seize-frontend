@@ -10,12 +10,23 @@ A roadmap phase remains open until its production exit criteria are evidenced.
 
 ## Delivered capability
 
-The backend operator CLI targets exactly one immutable legacy competition UUID.
-It provides inspection, audited enrollment, bounded/resumable stages, durable
+The backend's `migrate-wave` command accepts one wave UUID and resolves its
+immutable legacy primary competition. The lower-level operator CLI targets that
+competition UUID. They provide inspection, audited enrollment, bounded/resumable stages, durable
 capture and ordered catch-up, full independent comparison windows, readiness,
 atomic guarded transfer, verification, reverse reconciliation and guarded rollback
-or repair review. It rejects wave/default/all/native-only targets. Schema rollout
+or repair review. The lower-level CLI rejects wave/default/all/native-only targets. Schema rollout
 is additive; no legacy table/history/receipt is dropped.
+
+The manually invoked `competitionMigrationLoop` Lambda provides the same guarded
+operation in staging and production through AWS Console JSON events, without
+operator shell or database access. It supports read-only inspection by default,
+inline reviewed environment acceptance, and bounded automatic continuation of
+one explicitly selected wave. Deployment creates no schedule or migration.
+Remote operation retains the completed-pilot and seven-window acceptance gates;
+local rehearsal retains independent parity without production attestations.
+Ordinary negative votes and retained legacy history are supported. Unsupported
+privileged, signed-vote, oversized and historical shapes remain owned stops.
 
 The permanent old GET facade reads the original migrated primary from native
 configuration, entries, votes, standings, decisions, winners, outcomes,
@@ -67,7 +78,7 @@ safe/guarded rollback. Local fixtures do not establish production acceptance.
 - Each exact UUID needs seven consecutive complete approved zero-mismatch
   comparison windows, fresh final-watermark parity and drained effects.
 - Completed nonprivileged cohorts precede active transfers. Complex, privileged,
-  active negative-credit, signed-vote, high-volume and unsupported rule shapes receive explicit owned
+  signed-vote, high-volume and unsupported rule shapes receive explicit owned
   stops pending reviewed adapter work; Main Stage remains last and blocked by a
   dedicated release-review gate.
 
@@ -79,7 +90,8 @@ separate from permission to deploy and from permission to operate the migration.
 Backend additive schema/views/capture first; compatible maintenance, identity and
 leaderboard writers next; decision worker and API after their dependencies.
 Only after backend health/revision checks merge/deploy the frontend, then require
-related E2E before promotion. The backend runbook lists exact service units and
+related E2E before promotion. Deploy the manual migration Lambda after compatible
+backend verification and configure the regional operator allowlist. The backend runbook lists exact service units and
 capture activation prerequisites. All services must use owner-aware code before
 any UUID is enrolled. Rollback retains native ownership after irreversible native
 decisions/effects and requires owned repair rather than blind flag reversal.
