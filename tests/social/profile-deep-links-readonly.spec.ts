@@ -329,7 +329,7 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
     );
   });
 
-  test("keeps Collected page counts on one line below the artwork", async ({
+  test("keeps Collected page counts on one line below Network artwork", async ({
     page,
   }) => {
     await page.setViewportSize({ width: 390, height: 844 });
@@ -365,7 +365,12 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
       expect(layout.lines).toBe(1);
       await expectNoHorizontalOverflow(page);
     }
+  });
 
+  test("keeps Native Collected page counts and pagination readable", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
     await gotoReady(
       page,
       `/${PROFILE_HANDLE}/collected?collection=memes&page=2`
