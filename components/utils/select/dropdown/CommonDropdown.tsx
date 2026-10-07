@@ -147,8 +147,7 @@ export default function CommonDropdown<T, U = unknown>(
   }
   let valueClassName = "";
   if (isEditorial) {
-    valueClassName =
-      "tw-truncate tw-text-iron-200 group-hover:tw-text-white";
+    valueClassName = "tw-truncate tw-text-iron-200 group-hover:tw-text-white";
   } else if (isToolbar) {
     valueClassName =
       "tw-min-w-0 tw-truncate tw-font-semibold tw-text-iron-200 group-hover:tw-text-white";
@@ -162,6 +161,7 @@ export default function CommonDropdown<T, U = unknown>(
       <div className={triggerWrapperClassName}>
         <button
           ref={buttonRef}
+          {...props.buttonDataAttributes}
           type="button"
           aria-haspopup="true"
           aria-label={`${filterLabel}: ${computedLabel}`}
@@ -221,6 +221,7 @@ export default function CommonDropdown<T, U = unknown>(
       >
         {items.map((item, i) => (
           <CommonDropdownItem
+            onItemSelection={props.onItemSelection}
             key={item.key}
             item={item}
             itemIdx={i}

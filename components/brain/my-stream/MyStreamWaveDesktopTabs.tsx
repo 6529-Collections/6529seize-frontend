@@ -55,6 +55,7 @@ import MyStreamActionTooltip from "./MyStreamActionTooltip";
 import MyStreamWaveCreateActionsMenu from "./tabs/MyStreamWaveCreateActionsMenu";
 import MyStreamWaveCurationTabMenu from "./tabs/MyStreamWaveCurationTabMenu";
 import MobileTabsScrollControls from "./MobileTabsScrollControls";
+import { useWaveFeatureUsage } from "@/hooks/useWaveFeatureUsage";
 
 interface MyStreamWaveDesktopTabsProps {
   readonly activeTab: MyStreamWaveTab;
@@ -270,6 +271,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
   competitionOnly = false,
 }) => {
   const searchParams = useSearchParams();
+  const { ref: featureUsageRef } = useWaveFeatureUsage("wave_tabs", wave.id);
   const pathname = usePathname();
   const router = useRouter();
   const locale = useBrowserLocale();
@@ -603,6 +605,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
   return (
     <div
       data-competition-navigation={flat ? "flat" : undefined}
+      ref={featureUsageRef}
       className="tw-flex tw-w-full tw-items-center tw-gap-3 tw-px-2 tw-@container/tabs sm:tw-px-4"
     >
       <div className="tw-relative tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-1 tw-overflow-hidden sm:tw-hidden">

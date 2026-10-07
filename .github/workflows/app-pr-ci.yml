@@ -214,6 +214,9 @@ jobs:
           if (plan.checks.playwright_native_competition?.required) {
             corePlaywrightLanes.push({ lane: "playwright-native-competition", label: "Native competitions desktop and mobile", runner: defaultRunner });
           }
+          if (plan.checks.playwright_wave_feature_usage?.required) {
+            corePlaywrightLanes.push({ lane: "playwright-wave-feature-usage", label: "Wave feature tracking desktop and mobile", runner: defaultRunner });
+          }
           const waveCreationBrowserRequired = plan.changed_files.some((file) =>
             /^(?:app\/waves\/create\/|components\/waves\/create-wave\/|components\/drops\/create\/|helpers\/waves\/create-wave|tests\/social\/create-wave-sandbox)/.test(file) ||
             ["components/brain/left-sidebar/web/WebUnifiedWavesListWaves.tsx", "components/shared/WavesMessagesWrapper.tsx", "components/user/utils/set-up-profile/UserPageSetUpProfile.tsx", "components/header/header-search/header-search-modal/constants.ts", "components/header/header-search/header-search-modal/pageSearch.ts", "i18n/messages/en-US.ts", "i18n/messages/wave-creation.en-US.json", ".github/workflows/app-pr-ci.yml"].includes(file)
@@ -418,6 +421,13 @@ jobs:
           PLAYWRIGHT_OUTPUT_DIR: "test-results/playwright/native-competition"
           PLAYWRIGHT_HTML_REPORT_DIR: "playwright-report/native-competition"
         run: ./bin/6529 run test:e2e:native-competition-sandbox
+
+      - name: Run isolated Wave feature tracking browser pack
+        if: matrix.lane == 'playwright-wave-feature-usage'
+        env:
+          PLAYWRIGHT_OUTPUT_DIR: "test-results/playwright/wave-feature-usage"
+          PLAYWRIGHT_HTML_REPORT_DIR: "playwright-report/wave-feature-usage"
+        run: ./bin/6529 run test:e2e:wave-feature-usage-sandbox
 
       - name: Run wave creation browser regression pack
         if: matrix.lane == 'playwright-wave-creation'
