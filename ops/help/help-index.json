@@ -5826,15 +5826,11 @@
       "facts": [
         "The Collected tab lives at /{user}/collected.",
         "It shows collected NFT context, owner balances, stats summary, and transfer-mode behavior where available.",
-        "The expandable Collection stats section can show holdings totals, wallet activity, distributions, TDH history, and boost breakdown.",
-        "Wide tables in Collection stats scroll horizontally on narrow screens while their first label column stays visible.",
+        "The expandable Details panel can show holdings totals, wallet activity, distributions, TDH history, and boost breakdown.",
+        "Wide tables in Details scroll horizontally on narrow screens while their first label column stays visible.",
         "Native view covers The Memes, Gradients, NextGen, and Meme Lab holdings; Network view covers xTDH token holdings by contract.",
         "In the native app, The Memes, Gradients, NextGen, and Meme Lab tokens opened from a profile's Collected tab use the app-header Back chevron to restore the same profile filters, page, and opened card while retaining the detail page's collection link; mobile web shows an in-page return action, desktop uses browser Back, and direct token visits do not show a false return action, while NextGen can separately offer the current owner's holdings when available.",
-        "Use collection route records for collection-level browsing and profile collected for a user's holdings.",
-        "The heading names whose collection you are viewing. Collection stats starts collapsed; expand it for metrics, seasons and activity. Complete my set and Manage orders are labelled For your connected wallet, including on visitor profiles.",
-        "Under Browse artwork, labelled filter controls wrap into visible rows and show selected values. Holdings means Held or Not held by the viewed profile. The address filter works in both Native and Network views. Clear filters resets collection, season, holdings, wallet scope, sort and artwork page while preserving activity-table state.",
-        "Network tokens from The Memes, Gradients, NextGen and Meme Lab open existing 6529 artwork pages with profile return context. Other tokens show Open on OpenSea and open separately. Pagination stays below the cards.",
-        "Failed artwork requests show an error and Try again while keeping filters selected. Successful empty results show an empty-collection message."
+        "Use collection route records for collection-level browsing and profile collected for a user's holdings."
       ],
       "canonical_path": "/{user}/collected",
       "related_paths": [
@@ -5848,10 +5844,7 @@
         "app/[user]/collected/page.tsx",
         "ops/docs/profiles/tabs/feature-collected-tab.md",
         "components/user/collected/stats/useCollectedStatsData.ts",
-        "components/user/stats/UserPageStatsTableShared.tsx",
-        "components/user/collected/UserPageCollected.tsx",
-        "components/user/collected/filters/UserPageCollectedFilters.tsx",
-        "components/user/collected/cards/UserPageCollectedNetworkCards.tsx"
+        "components/user/stats/UserPageStatsTableShared.tsx"
       ]
     },
     {

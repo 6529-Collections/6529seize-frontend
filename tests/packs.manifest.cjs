@@ -19,7 +19,6 @@ const SMOKE_SPECS = [
   "tests/home/home.spec.ts",
   "tests/pages/about.spec.ts",
   "tests/pages/the-memes.spec.ts",
-  "tests/social/profile-collected-readonly.spec.ts",
 ];
 
 const STAGING_READONLY_ENV = {
@@ -74,10 +73,7 @@ const READONLY_SPECS = {
   ],
   adminGuards: ["tests/admin/admin-destructive-guards-readonly.spec.ts"],
   publicContent: ["tests/content/public-content-readonly.spec.ts"],
-  profileDeepLinks: [
-    "tests/social/profile-deep-links-readonly.spec.ts",
-    "tests/social/profile-collected-readonly.spec.ts",
-  ],
+  profileDeepLinks: ["tests/social/profile-deep-links-readonly.spec.ts"],
   searchWaves: ["tests/social/search-waves-readonly.spec.ts"],
   museumInstitutionalPractice: [
     "tests/museum/institutional-practice-readonly.spec.ts",
@@ -209,7 +205,7 @@ const PACKS = [
   {
     ...localPack(
       "test:e2e:smoke",
-      "Fast @smoke subset of home, about, The Memes, and Collected layouts.",
+      "Fast @smoke subset of home, about, and The Memes.",
       SMOKE_SPECS,
       { grep: "@smoke", projects: [DESKTOP] }
     ),

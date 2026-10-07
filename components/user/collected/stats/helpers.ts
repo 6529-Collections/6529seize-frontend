@@ -111,9 +111,7 @@ const buildMainMetrics = (
     metrics.push({
       id: "memes",
       label: translate(locale, "user.collected.stats.metrics.memes"),
-      val: translate(locale, "user.collected.stats.metrics.copies", {
-        value: formatInteger(locale, collectedStats.memes_balance),
-      }),
+      val: formatMetricValue(collectedStats.memes_balance, locale),
       collection: CollectedCollectionType.MEMES,
       ...(uniqueSub ? { sub: uniqueSub } : {}),
     });
@@ -132,7 +130,7 @@ const buildMainMetrics = (
     metrics.push({
       id: "boost",
       label: translate(locale, "user.collected.stats.metrics.boost"),
-      val: translate(locale, "user.collected.stats.metric.multiplier", {
+      val: translate(locale, "user.collected.stats.metric.value", {
         value: formatNumber(
           locale,
           Number.parseFloat(collectedStats.boost.toFixed(2)),

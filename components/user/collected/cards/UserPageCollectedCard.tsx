@@ -310,22 +310,22 @@ export default function UserPageCollectedCard({
       </div>
 
       {/* Content */}
-      <div className="tw-flex tw-flex-col tw-gap-1.5 tw-p-3">
-        <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-2">
-          <span className="tw-mr-2 tw-truncate tw-text-xs tw-font-bold tw-uppercase tw-tracking-wider tw-text-iron-400">
+      <div className="tw-flex tw-flex-col tw-gap-1.5 tw-p-4">
+        <div className="tw-flex tw-items-center tw-justify-between">
+          <span className="tw-mr-2 tw-truncate tw-text-[10px] tw-font-bold tw-uppercase tw-tracking-wider tw-text-iron-500">
             {collectionMeta.label}
           </span>
-          <span className="tw-break-all tw-font-mono tw-text-xs tw-font-medium tw-text-iron-400">
+          <span className="tw-font-mono tw-text-[11px] tw-font-medium tw-text-iron-500">
             #{card.token_id}
           </span>
         </div>
 
         <div className="tw-flex tw-justify-between tw-gap-x-2">
-          <h3 className="tw-m-0 tw-line-clamp-2 tw-text-sm tw-font-semibold tw-leading-snug tw-text-iron-100 tw-transition-colors group-hover:tw-text-white">
+          <h3 className="tw-m-0 tw-line-clamp-1 tw-text-sm tw-font-semibold tw-leading-snug tw-text-iron-100 tw-transition-colors group-hover:tw-text-white">
             {card.token_name}
           </h3>
           {showSeizedCount && (
-            <span className="tw-flex tw-items-center tw-gap-0.5 tw-whitespace-nowrap tw-text-xs tw-font-medium tw-text-iron-400">
+            <span className="tw-flex tw-items-center tw-gap-0.5 tw-whitespace-nowrap tw-text-[11px] tw-font-medium tw-text-iron-500">
               {getSeizedCountDisplay()}x
               {hasBalanceMismatch && (
                 <>
@@ -349,16 +349,16 @@ export default function UserPageCollectedCard({
         </div>
 
         {showDataRow && (
-          <div className="tw-mt-2 tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.08] tw-pt-2.5">
-            <div className="tw-flex tw-flex-wrap tw-items-baseline tw-gap-1.5">
-              <span className="tw-break-all tw-text-[13px] tw-font-semibold tw-text-iron-300">
+          <div className="tw-mt-2 tw-flex tw-items-center tw-justify-between tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.08] tw-pt-2.5">
+            <div className="tw-flex tw-items-baseline tw-gap-1.5">
+              <span className="tw-text-[13px] tw-font-semibold tw-text-iron-300">
                 {getTdhDisplay()}
               </span>
-              <span className="tw-text-[13px] tw-font-semibold tw-text-iron-400">
+              <span className="tw-text-[13px] tw-font-semibold tw-text-iron-600">
                 {translate(locale, "transfer.card.tdh")}
               </span>
             </div>
-            <span className="tw-rounded-md tw-bg-white/[0.05] tw-px-2 tw-py-0.5 tw-text-xs tw-font-medium tw-text-iron-400">
+            <span className="tw-rounded-md tw-bg-white/[0.05] tw-px-2 tw-py-0.5 tw-text-[11px] tw-font-medium tw-text-iron-400">
               {translate(locale, "transfer.card.rank", {
                 rank: getRankDisplay(),
               })}

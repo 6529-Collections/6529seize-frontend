@@ -49,7 +49,6 @@ export default function UserPageCollectedFiltersNetworkCollection({
         "user.collected.filters.collection"
       )}
       setSelected={setSelected}
-      showFilterLabel
       size="sm"
     />
   );

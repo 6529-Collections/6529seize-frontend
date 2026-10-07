@@ -25,7 +25,6 @@ fallback dictionaries.
 | [Wave rules](wave-rules.md)                                         | Wave rule creation/rendering still includes direct English strings and non-localized formatting                               |
 | [Public wave sign-in](public-wave-sign-in.md) | New sign-in copy falls back to `en-US`; existing composer restriction messages remain English |
 | [EMMA entry and help](emma-entry-help.md) | EMMA entry, help, and plans header use source-locale copy with complete English fallback |
-| [Profile Collected](profile-collected.md) | Collected headings, filters, stats toggles and card actions use source-locale fallback; card numbers follow the selected locale |
 
 Remove a debt record only in the same change that completes its remediation and
 verifies the supported locale and accessible-name behavior described by the
