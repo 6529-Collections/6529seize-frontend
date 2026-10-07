@@ -35,6 +35,8 @@ import CompetitionResources from "./CompetitionResources";
 import CompetitionEntryForm from "./CompetitionEntryForm";
 import CompetitionDraftEditor from "./CompetitionDraftEditor";
 import CompetitionBackLink from "./CompetitionBackLink";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { useLayout } from "@/components/brain/my-stream/layout/LayoutContext";
 
 export function NativeCompetitionContent({
   embedded = false,
@@ -42,6 +44,8 @@ export function NativeCompetitionContent({
   readonly embedded?: boolean;
 }) {
   const { competition, wave } = useCompetition();
+  const { isApp } = useDeviceInfo();
+  const { waveViewStyle } = useLayout();
   const locale = useBrowserLocale();
   const pathname = usePathname();
   const router = useRouter();
@@ -98,6 +102,7 @@ export function NativeCompetitionContent({
     );
   return (
     <div
+      style={embedded && isApp ? waveViewStyle : undefined}
       className={
         embedded
           ? "tw-h-full tw-min-h-0 tw-space-y-5 tw-overflow-y-auto tw-p-4"
