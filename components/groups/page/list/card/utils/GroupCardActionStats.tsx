@@ -1,6 +1,8 @@
 "use client";
 
 import { useContext, useEffect, useState } from "react";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { tRich } from "@/i18n/messages";
 import { ApiRateMatter } from "@/generated/models/ApiRateMatter";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import CircleLoader, {
@@ -25,6 +27,7 @@ export default function GroupCardActionStats({
   readonly loadingMembersCount: boolean;
   readonly compact?: boolean | undefined;
 }) {
+  const locale = useBrowserLocale();
   const MATTER_LABEL: Record<GroupCardRateMatter, string> = {
     [ApiRateMatter.Rep]: "Rep",
     [ApiRateMatter.Cic]: "Nic",
@@ -139,35 +142,38 @@ export default function GroupCardActionStats({
           alt="pepe-xglasses"
         />
         <span className={compact ? "tw-min-w-0" : undefined}>
-          You can grant up to{" "}
-          <span
-            className={
-              compact
-                ? "tw-font-medium tw-text-primary-400"
-                : "tw-font-semibold tw-text-primary-400"
-            }
-          >
-            {creditPerMember > 0 && "+-"}
-            {formatNumberWithCommas(+creditPerMember.toFixed(0))}
-          </span>{" "}
-          {MATTER_LABEL[matter]} to each of
-          <span>
-            <span
-              className={
-                compact
-                  ? "tw-font-medium tw-text-primary-400"
-                  : "tw-font-semibold tw-text-primary-400"
-              }
-            >
-              {" "}
-              {loadingMembersCount ? (
-                <CircleLoader size={CircleLoaderSize.SMALL} />
-              ) : (
-                count
-              )}
-            </span>{" "}
-            members of the group.
-          </span>
+          {tRich(locale, "network.groupInspection.creditSummary", {
+            credit: (
+              <span
+                key="credit"
+                className={
+                  compact
+                    ? "tw-font-medium tw-text-primary-400"
+                    : "tw-font-semibold tw-text-primary-400"
+                }
+              >
+                {creditPerMember > 0 && "+-"}
+                {formatNumberWithCommas(+creditPerMember.toFixed(0))}
+              </span>
+            ),
+            matter: MATTER_LABEL[matter],
+            count: (
+              <span
+                key="count"
+                className={
+                  compact
+                    ? "tw-font-medium tw-text-primary-400"
+                    : "tw-font-semibold tw-text-primary-400"
+                }
+              >
+                {loadingMembersCount ? (
+                  <CircleLoader size={CircleLoaderSize.SMALL} />
+                ) : (
+                  count
+                )}
+              </span>
+            ),
+          })}
         </span>
       </p>
     </div>

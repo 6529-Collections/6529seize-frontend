@@ -1,3 +1,5 @@
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import Button from "@/components/utils/button/Button";
 import { MinusIcon, PlusIcon } from "@heroicons/react/24/outline";
 
@@ -12,6 +14,9 @@ export default function GroupCardActionCreditDirection({
   readonly setCreditDirection: (creditDirection: CreditDirection) => void;
   readonly compact?: boolean | undefined;
 }) {
+  const locale = useBrowserLocale();
+  const addLabel = t(locale, "network.groupInspection.add");
+  const subtractLabel = t(locale, "network.groupInspection.subtract");
   if (compact) {
     return (
       <div className="tw-flex tw-gap-x-2">
@@ -19,8 +24,8 @@ export default function GroupCardActionCreditDirection({
           variant="negativeToggle"
           size="xs"
           className="tw-w-8 !tw-p-0"
-          title="Subtract"
-          aria-label="Subtract"
+          title={subtractLabel}
+          aria-label={subtractLabel}
           aria-pressed={creditDirection === CreditDirection.SUBTRACT}
           onClick={() => setCreditDirection(CreditDirection.SUBTRACT)}
         >
@@ -30,8 +35,8 @@ export default function GroupCardActionCreditDirection({
           variant="positiveToggle"
           size="xs"
           className="tw-w-8 !tw-p-0"
-          title="Add"
-          aria-label="Add"
+          title={addLabel}
+          aria-label={addLabel}
           aria-pressed={creditDirection === CreditDirection.ADD}
           onClick={() => setCreditDirection(CreditDirection.ADD)}
         >
@@ -54,7 +59,7 @@ export default function GroupCardActionCreditDirection({
       <button
         onClick={() => setCreditDirection(CreditDirection.SUBTRACT)}
         type="button"
-        title="Subtract"
+        title={subtractLabel}
         className={`${
           creditDirection === CreditDirection.SUBTRACT
             ? activeClasses[CreditDirection.SUBTRACT]
@@ -79,7 +84,7 @@ export default function GroupCardActionCreditDirection({
       <button
         onClick={() => setCreditDirection(CreditDirection.ADD)}
         type="button"
-        title="Add"
+        title={addLabel}
         className={`${
           creditDirection === CreditDirection.ADD
             ? activeClasses[CreditDirection.ADD]

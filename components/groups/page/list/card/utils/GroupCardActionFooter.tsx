@@ -1,3 +1,5 @@
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import type { ReactNode } from "react";
 
 import Button from "@/components/utils/button/Button";
@@ -19,6 +21,7 @@ export default function GroupCardActionFooter({
   readonly saveButtonVariant?: "action" | "success" | undefined;
   readonly children?: ReactNode;
 }) {
+  const locale = useBrowserLocale();
   return (
     <div
       className={
@@ -48,7 +51,7 @@ export default function GroupCardActionFooter({
               : undefined
           }
         >
-          Cancel
+          {t(locale, "network.groupInspection.cancel")}
         </Button>
         <Button
           onClick={onSave}
@@ -62,7 +65,7 @@ export default function GroupCardActionFooter({
               : undefined
           }
         >
-          Grant
+          {t(locale, "network.groupInspection.grant")}
         </Button>
       </div>
     </div>

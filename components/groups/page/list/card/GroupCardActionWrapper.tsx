@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import GroupCardActionFooter from "./utils/GroupCardActionFooter";
 import { ApiRateMatter } from "@/generated/models/ApiRateMatter";
 import type { GroupCardRateMatter } from "./GroupCard";
@@ -31,6 +33,7 @@ export default function GroupCardActionWrapper({
   readonly compact?: boolean | undefined;
   readonly footerContent?: React.ReactNode;
 }) {
+  const locale = useBrowserLocale();
   const MATTER_LABEL: Record<GroupCardRateMatter, string> = {
     [ApiRateMatter.Rep]: "Rep",
     [ApiRateMatter.Cic]: "NIC",
@@ -63,11 +66,12 @@ export default function GroupCardActionWrapper({
           <div className="tw-space-y-4">
             <div>
               <p className="tw-mb-0 tw-text-base tw-font-semibold tw-text-iron-50">
-                {MATTER_LABEL[matter]} Progress
+                {t(locale, "network.groupInspection.progress", {
+                  matter: MATTER_LABEL[matter],
+                })}
               </p>
               <p className="tw-mt-1 tw-text-sm tw-text-iron-300">
-                Keep this window open while we distribute credits across the
-                group.
+                {t(locale, "network.groupInspection.keepOpen")}
               </p>
             </div>
             <p className="tw-mb-0 tw-text-xl tw-font-bold tw-text-primary-400">
