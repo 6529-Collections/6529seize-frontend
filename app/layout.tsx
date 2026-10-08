@@ -29,6 +29,10 @@ import {
   SIDEBAR_STARTUP_SCRIPT,
   SIDEBAR_STARTUP_STYLES,
 } from "@/components/layout/sidebarStartup";
+import {
+  SMALL_WEB_STARTUP_SCRIPT,
+  SMALL_WEB_STARTUP_STYLES,
+} from "@/components/layout/smallWebStartup";
 import Providers from "@/components/providers/Providers";
 import RuntimeFavicon from "@/components/providers/RuntimeFavicon";
 import { getAppMetadata } from "@/components/providers/metadata";
@@ -77,6 +81,11 @@ export default async function RootLayout({
         <script
           id="native-startup-bootstrap"
           dangerouslySetInnerHTML={{ __html: NATIVE_STARTUP_SCRIPT }}
+        />
+        <style dangerouslySetInnerHTML={{ __html: SMALL_WEB_STARTUP_STYLES }} />
+        <script
+          id="small-web-startup-bootstrap"
+          dangerouslySetInnerHTML={{ __html: SMALL_WEB_STARTUP_SCRIPT }}
         />
         <style dangerouslySetInnerHTML={{ __html: SIDEBAR_STARTUP_STYLES }} />
         <script
