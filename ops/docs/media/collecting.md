@@ -559,6 +559,9 @@ Orders checks live listings for later partial fills, sales, cancellation and
 expiry. A brief in-app status links to ongoing activity, while receipts remain
 available in Orders after navigation or reload.
 
+Orders aligns with Build your collection and keeps its rows within a readable
+width on large screens.
+
 ## Edge Cases
 
 - Listing discovery is incomplete. No supported exact offer does not mean that

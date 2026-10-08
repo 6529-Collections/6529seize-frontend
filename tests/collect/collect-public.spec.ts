@@ -781,13 +781,26 @@ test("collecting tools stay on one line and scroll into keyboard focus on narrow
   expect(mutations).toEqual([]);
 });
 
-test("orders uses the app font and keeps private activity wallet gated", async ({
+test("orders aligns with collecting, uses the app font and keeps private activity wallet gated", async ({
   page,
 }, info) => {
   const mutations = await mockCatalog(page);
+  if ((page.viewportSize()?.width ?? 0) > 600) {
+    await page.setViewportSize({ width: 1920, height: 900 });
+  }
+  await page.goto("/collect", { waitUntil: "domcontentloaded" });
+  const collectHeading = page.getByRole("heading", {
+    name: "Build your collection",
+    exact: true,
+  });
+  await expect(collectHeading).toHaveAttribute("data-client-ready", "true");
+  const collectBounds = await collectHeading.boundingBox();
   await page.goto("/collect/orders", { waitUntil: "domcontentloaded" });
   const heading = page.getByRole("heading", { name: "Orders", exact: true });
   await expect(heading).toBeVisible();
+  const ordersBounds = await heading.boundingBox();
+  expect(ordersBounds?.x).toBeCloseTo(collectBounds?.x ?? -1, 0);
+  expect(ordersBounds?.width).toBeLessThanOrEqual(1080);
   await page.evaluate(() => document.fonts.ready);
   await expect(heading).toHaveCSS("font-family", /Montserrat/);
   const main = page.getByRole("main");
