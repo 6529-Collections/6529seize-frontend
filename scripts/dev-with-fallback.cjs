@@ -71,12 +71,7 @@ async function run() {
       }
     );
 
-    child.on("exit", (code, signal) => {
-      if (process.env.PLAYWRIGHT_SERVER_DIAGNOSTICS === "1") {
-        console.error(
-          `[dev-server diagnostics] ${new Date().toISOString()} Next.js process exited: code=${code} signal=${signal}`
-        );
-      }
+    child.on("exit", (code) => {
       process.exit(code ?? 1);
     });
     child.on("error", (err) => {

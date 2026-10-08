@@ -101,9 +101,6 @@ const config = defineConfig({
     : {
         webServer: {
           command: webServerCommand,
-          ...(process.env["PLAYWRIGHT_SERVER_DIAGNOSTICS"] === "1"
-            ? { stdout: "pipe" as const, stderr: "pipe" as const }
-            : {}),
           env: {
             PORT: webServerPort,
           },

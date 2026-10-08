@@ -441,10 +441,7 @@ jobs:
         env:
           NEXT_DEV_DIST_DIR: ".next-playwright-critical-shell"
           PLAYWRIGHT_READONLY: "1"
-        run: |
-          set -o pipefail
-          mkdir -p test-results/critical-shell-diagnostics
-          ./bin/6529 exec node scripts/critical-shell-diagnostics.cjs 2>&1 | tee test-results/critical-shell-diagnostics/server.log
+        run: ./bin/6529 run test:e2e:critical-shell
 
       - name: Run session recovery browser regression pack
         if: matrix.lane == 'playwright-critical-shell'
