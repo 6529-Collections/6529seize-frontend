@@ -144,7 +144,10 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
     const narrowFilter = await page.evaluate(
       () => window.matchMedia("(max-width: 1023px)").matches
     );
-    const choices = filter.getByRole("group", { name: "Filter Network" });
+    const choices = filter.getByRole("group", {
+      name: "Filter Network",
+      includeHidden: true,
+    });
     const allFilters = filter.getByRole("button", { name: "All filters" });
     const openCriterion = async (name: string | RegExp) => {
       if (narrowFilter && (await allFilters.isVisible())) {
@@ -228,9 +231,11 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
       await expect(filter.getByRole("region", { name })).toBeVisible();
       await expect
         .poll(() =>
-          filter
-            .locator(".mobile-wrapper-dialog")
-            .evaluate((element) => element.getBoundingClientRect().height)
+          choices.evaluate(
+            (element) =>
+              element.closest(".mobile-wrapper-dialog")?.getBoundingClientRect()
+                .height
+          )
         )
         .toBeCloseTo(restingHeight ?? 0, 0);
       if (narrowFilter) {

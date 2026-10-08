@@ -643,6 +643,7 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
 
   test("Network filter keeps the focused input and action above the keyboard", async ({
     page,
+    browserName,
   }, testInfo) => {
     test.skip(
       !isCapacitorSimulationProject(testInfo.project.name) &&
@@ -737,7 +738,21 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
         "true"
       );
     }
-    await expect(summary).toBeHidden();
+    const summaryIsCompact = () =>
+      summary.evaluate((element) => {
+        const parent = element.parentElement;
+        if (!parent) return false;
+        const style = getComputedStyle(parent);
+        return (
+          style.position === "absolute" &&
+          style.clip !== "auto" &&
+          parent.getBoundingClientRect().width <= 1
+        );
+      });
+    await expect.poll(summaryIsCompact).toBe(true);
+    // Compact the visual footer without removing its summary from the
+    // accessibility tree; preview actions become visible when focused.
+    await expect.poll(() => filter.ariaSnapshot()).toContain("After editing");
     await expect
       .poll(() =>
         input.evaluate((element) => {
@@ -776,6 +791,16 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
         })
       )
       .toBe(true);
+    // WebKit uses Option-Tab to include buttons in keyboard navigation.
+    await input.press(browserName === "webkit" ? "Alt+Tab" : "Tab");
+    const preview = filter.getByRole("button", {
+      name: "View members",
+      exact: true,
+    });
+    await expect(preview).toBeFocused();
+    await expect(preview).toBeInViewport({ ratio: 1 });
+    await input.focus();
+    await expect.poll(summaryIsCompact).toBe(true);
     await filter
       .getByRole("button", { name: "All filters", exact: true })
       .click();

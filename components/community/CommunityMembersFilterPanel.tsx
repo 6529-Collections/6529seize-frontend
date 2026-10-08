@@ -173,7 +173,7 @@ export default function CommunityMembersFilterPanel(
           </span>
           {savedTarget && (
             <div
-              className={`${isKeyboardVisible ? "tw-hidden" : "tw-contents"} [[data-mobile-dialog-keyboard-visible=true]_&]:tw-hidden`}
+              className={`tw-flex ${isKeyboardVisible ? "tw-sr-only focus-within:tw-not-sr-only" : ""} [[data-mobile-dialog-keyboard-visible=true]_&]:tw-sr-only [[data-mobile-dialog-keyboard-visible=true]_&]:focus-within:tw-not-sr-only`}
             >
               <GroupMembersPreviewTrigger
                 target={savedTarget}
@@ -280,7 +280,7 @@ export default function CommunityMembersFilterPanel(
         </fieldset>
         <div className="tw-flex tw-shrink-0 tw-flex-col tw-gap-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-bg-iron-950 tw-px-4 tw-py-2 sm:tw-px-6 lg:tw-flex-row lg:tw-items-center lg:tw-gap-4">
           <div
-            className={`${isKeyboardVisible ? "tw-hidden" : "tw-flex"} tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-2 lg:tw-flex-1 [[data-mobile-dialog-keyboard-visible=true]_&]:tw-hidden`}
+            className={`tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-2 lg:tw-flex-1 ${isKeyboardVisible ? "tw-sr-only focus-within:tw-not-sr-only [&_ul]:tw-overflow-visible focus-within:[&_ul]:tw-overflow-y-auto" : ""} [[data-mobile-dialog-keyboard-visible=true]_&]:tw-sr-only [[data-mobile-dialog-keyboard-visible=true]_&]:focus-within:tw-not-sr-only [[data-mobile-dialog-keyboard-visible=true]_&]:[&_ul]:tw-overflow-visible [[data-mobile-dialog-keyboard-visible=true]_&]:focus-within:[&_ul]:tw-overflow-y-auto`}
           >
             <span
               className={`tw-shrink-0 tw-text-xs tw-font-medium tw-text-iron-400 ${draftSummaryParts.length ? "tw-basis-full" : ""}`}

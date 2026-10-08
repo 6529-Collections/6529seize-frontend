@@ -419,7 +419,7 @@ export default function CommunityMembers() {
               expanded={mobileFilterOpen}
               hasPopup
               onClick={() => setMobileFilterOpen(true)}
-              label="Open group filters"
+              label={t(locale, "network.actions.openFilters")}
             >
               <FunnelIcon className="tw-size-4" aria-hidden="true" />
               <span className="tw-hidden sm:tw-inline">
@@ -433,7 +433,7 @@ export default function CommunityMembers() {
                 expanded={mobileSortOpen}
                 hasPopup
                 onClick={() => setMobileSortOpen(true)}
-                label="Open sort options"
+                label={t(locale, "network.actions.openSort")}
               >
                 <BarsArrowDownIcon className="tw-size-4" />
               </NetworkHeaderActionButton>
@@ -443,7 +443,7 @@ export default function CommunityMembers() {
         <div className="tw-ml-auto tw-flex tw-flex-shrink-0 tw-items-center">
           <div className="tw-flex tw-items-center tw-rounded-lg tw-bg-iron-900/75 tw-p-1 tw-shadow-lg tw-shadow-black/30 tw-ring-1 tw-ring-inset tw-ring-white/10">
             <NetworkHeaderActionButton
-              label="Open Nerd view"
+              label={t(locale, "network.actions.openNerd")}
               onClick={goToNerd}
             >
               <span className="tw-whitespace-nowrap">Nerd view</span>
