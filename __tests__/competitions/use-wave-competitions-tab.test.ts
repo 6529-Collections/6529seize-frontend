@@ -250,9 +250,7 @@ it.each([
     permissions: { create_competition: false },
   },
   { name: "hub loading", hub: { isSuccess: false } },
-  { name: "hub refreshing", hub: { isFetching: true } },
   { name: "default loading", selection: { isSuccess: false } },
-  { name: "default refreshing", selection: { isFetching: true } },
   { name: "default error", selection: { isError: true } },
   {
     name: "no eligible default",
@@ -263,7 +261,6 @@ it.each([
     selection: { data: { competition_id: "other" } },
   },
   { name: "count loading", list: { isSuccess: false } },
-  { name: "count refreshing", list: { isFetching: true } },
   { name: "count error", list: { isError: true } },
   {
     name: "next page pending",
@@ -296,6 +293,101 @@ it.each([
       });
     const { result } = renderHook(() => useWaveCompetitionsTab(wave));
     expect(result.current.hideCompetitionsTab).toBe(Boolean(auth));
+  }
+);
+
+it.each([
+  ["permissions", useCompetitionHub],
+  ["default selection", useDefaultCompetition],
+  ["competition list", useCompetitionList],
+] as const)("keeps settled tabs ready while refreshing %s", (_name, query) => {
+  configureSingleCompetition();
+  const mockQuery = query as jest.Mock;
+  const settled = mockQuery.getMockImplementation()!();
+  const { result, rerender } = renderHook(() => useWaveCompetitionsTab(wave));
+  const beforeRefresh = result.current;
+  expect(beforeRefresh.hideCompetitionsTab).toBe(true);
+  expect(beforeRefresh.isPending).toBe(false);
+
+  mockQuery.mockReturnValue({ ...settled, isFetching: true });
+  rerender();
+  expect(result.current).toEqual(beforeRefresh);
+
+  mockQuery.mockReturnValue(settled);
+  rerender();
+  expect(result.current).toEqual(beforeRefresh);
+});
+
+it("keeps an empty wave empty during refresh and applies newly loaded competitions", () => {
+  configureSingleCompetition();
+  (useDefaultCompetition as jest.Mock).mockReturnValue({
+    isSuccess: true,
+    data: { competition_id: null },
+  });
+  const list = {
+    isSuccess: true,
+    isFetching: false,
+    hasNextPage: false,
+    data: { pages: [{ data: [] as { id: string }[], has_more: false }] },
+  };
+  (useCompetitionList as jest.Mock).mockReturnValue(list);
+  const { result, rerender } = renderHook(() => useWaveCompetitionsTab(wave));
+  const empty = result.current;
+  expect(empty.hasCompetitions).toBe(false);
+  expect(empty.isPending).toBe(false);
+
+  (useCompetitionList as jest.Mock).mockReturnValue({
+    ...list,
+    isFetching: true,
+  });
+  rerender();
+  expect(result.current).toEqual(empty);
+
+  list.data.pages[0]!.data.push({ id: "sole" }, { id: "new" });
+  (useCompetitionList as jest.Mock).mockReturnValue(list);
+  rerender();
+  expect(result.current.hasCompetitions).toBe(true);
+  expect(result.current.hideCompetitionsTab).toBe(false);
+  expect(result.current.isPending).toBe(false);
+});
+
+it("reveals the collection when a refresh changes the list or permissions", () => {
+  configureSingleCompetition();
+  const { result, rerender } = renderHook(() => useWaveCompetitionsTab(wave));
+  expect(result.current.hideCompetitionsTab).toBe(true);
+  const list = (useCompetitionList as jest.Mock).getMockImplementation()!();
+  (useCompetitionList as jest.Mock).mockReturnValue({
+    ...list,
+    data: {
+      pages: [{ data: [{ id: "sole" }, { id: "new" }], has_more: false }],
+    },
+  });
+  rerender();
+  expect(result.current.hideCompetitionsTab).toBe(false);
+
+  (useCompetitionList as jest.Mock).mockReturnValue(list);
+  (useCompetitionHub as jest.Mock).mockReturnValue({
+    isSuccess: true,
+    data: { permissions: { administer: true, create_competition: false } },
+  });
+  rerender();
+  expect(result.current.hideCompetitionsTab).toBe(false);
+});
+
+it.each([false, true])(
+  "waits for an incomplete collection (fetching: %s)",
+  (isFetching) => {
+    configureSingleCompetition();
+    (useCompetitionList as jest.Mock).mockReturnValue({
+      isSuccess: true,
+      isFetching,
+      hasNextPage: true,
+      fetchNextPage: jest.fn(),
+      data: { pages: [{ data: [{ id: "sole" }], has_more: true }] },
+    });
+    const { result } = renderHook(() => useWaveCompetitionsTab(wave));
+    expect(result.current.isPending).toBe(true);
+    expect(result.current.hideCompetitionsTab).toBe(false);
   }
 );
 

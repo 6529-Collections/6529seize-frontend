@@ -511,6 +511,10 @@ async function installCompetitionApi(
     setDefault: (id: string | null) => {
       defaultId = id;
     },
+    clearCompetitions: () => {
+      competitions.splice(0);
+      defaultId = null;
+    },
     onlyCompetition: (id: string) => {
       const selected = competitions.find((item) => item.id === id);
       expect(selected).toBeDefined();
@@ -2439,6 +2443,111 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     });
   }
 
+  for (const app of [false, true]) {
+    test(`keeps settled tabs still during an unchanged competition refresh (${app ? "app" : "web"})`, async ({
+      page,
+    }, testInfo) => {
+      test.skip(app && testInfo.project.name !== "web-mobile-chromium");
+      const sandbox = await installCompetitionApi(page, false, false);
+      sandbox.onlyCompetition("alpha");
+      sandbox.refreshAtBoundary();
+      if (app)
+        await installSurfaceSimulation(
+          page.context(),
+          "capacitor-ios-sim",
+          testInfo.project.use.baseURL
+        );
+      let holdRefresh = false;
+      let refreshStarted = false;
+      let releaseRefresh!: () => void;
+      const refreshGate = new Promise<void>((resolve) => {
+        releaseRefresh = resolve;
+      });
+      await page.route("**/v3/waves/**/default-competition", async (route) => {
+        if (holdRefresh) {
+          refreshStarted = true;
+          await refreshGate;
+        }
+        await route.fallback();
+      });
+      try {
+        await page.goto(`${ROOT}/alpha?tab=rules`);
+        const tabs = app
+          ? page.getByRole("navigation", { name: "Wave sections" })
+          : waveTabStrip(page).filter({ visible: true });
+        const settings = tabs.getByRole(app ? "button" : "tab", {
+          name: "Settings",
+          exact: true,
+        });
+        const collection = tabs.getByRole(app ? "button" : "tab", {
+          name: /^Competitions/,
+        });
+        await expect(settings).toHaveAttribute(
+          app ? "aria-current" : "aria-selected",
+          "true"
+        );
+        await expect(collection).toHaveCount(0);
+        await expect(settings).toBeVisible();
+        await tabs.screenshot({
+          path: testInfo.outputPath("tabs-before-refresh.png"),
+        });
+        const before = await settings.boundingBox();
+        expect(before).not.toBeNull();
+        // Observe the whole refresh, not only its endpoints, so a brief extra tab fails.
+        const monitor = await tabs.evaluateHandle((element) => {
+          const labels = () =>
+            Array.from(
+              element.querySelectorAll('button, [role="tab"]'),
+              (item) => item.textContent?.trim()
+            )
+              .filter(Boolean)
+              .join("|");
+          const initial = labels();
+          const changes: string[] = [];
+          const observer = new MutationObserver(() => {
+            const current = labels();
+            if (current !== initial) changes.push(current);
+          });
+          observer.observe(element, {
+            childList: true,
+            subtree: true,
+            characterData: true,
+          });
+          return { observer, changes };
+        });
+        holdRefresh = true;
+        await expect.poll(() => refreshStarted, { timeout: 10000 }).toBe(true);
+        await expect(collection).toHaveCount(0);
+        await tabs.screenshot({
+          path: testInfo.outputPath("tabs-during-refresh.png"),
+        });
+        expect((await settings.boundingBox())?.x).toBeCloseTo(before!.x, 0);
+        const response = page.waitForResponse(
+          "**/v3/waves/**/default-competition"
+        );
+        holdRefresh = false;
+        releaseRefresh();
+        await response;
+        await tabs.screenshot({
+          path: testInfo.outputPath("tabs-after-refresh.png"),
+        });
+        await expect(collection).toHaveCount(0);
+        expect((await settings.boundingBox())?.x).toBeCloseTo(before!.x, 0);
+        expect(
+          await monitor.evaluate(({ observer, changes }) => {
+            observer.disconnect();
+            return changes;
+          })
+        ).toEqual([]);
+        await monitor.dispose();
+        expect(sandbox.requests).toEqual([]);
+      } finally {
+        holdRefresh = false;
+        releaseRefresh();
+      }
+    });
+  }
+
   for (const phase of ["COMPLETED", "UPCOMING"]) {
     test(`retains the collection for a non-admin with an active default plus ${phase}`, async ({
       page,
@@ -3086,13 +3195,16 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
   test("keeps a zero-competition wave usable as shared chat", async ({
     page,
   }) => {
-    const sandbox = await installCompetitionApi(page);
-    sandbox.setDefault(null);
+    const sandbox = await installCompetitionApi(page, false, false);
+    sandbox.clearCompetitions();
     await page.goto(`/waves/${WAVE}`);
     await expect(
       page.getByRole("tab", { name: "Chat", exact: true })
     ).toBeVisible({ timeout: 30000 });
     await expect(page).toHaveURL(new RegExp(`/waves/${WAVE}$`));
+    await expect(
+      waveTabStrip(page).getByRole("tab", { name: /^Competitions/ })
+    ).toHaveCount(0);
     await expect(
       page.getByRole("heading", {
         name: /Parallel Alpha|Parallel Beta/,
