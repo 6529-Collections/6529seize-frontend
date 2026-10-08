@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Locator, type Page } from "@playwright/test";
 import path from "node:path";
 import AxeBuilder from "@axe-core/playwright";
 import { installSectionTrackingFixture } from "../support/sectionTrackingFixture";
@@ -781,7 +781,29 @@ test("collecting tools stay on one line and scroll into keyboard focus on narrow
   expect(mutations).toEqual([]);
 });
 
-test("orders aligns with collecting, uses the app font and keeps private activity wallet gated", async ({
+async function expectCenteredCollectPage(heading: Locator) {
+  const geometry = await heading.evaluate((element) => {
+    const container = element.closest("header")?.parentElement;
+    const parent = container?.parentElement;
+    if (!container || !parent) {
+      throw new Error("Collecting page container is missing");
+    }
+    const bounds = container.getBoundingClientRect();
+    const parentBounds = parent.getBoundingClientRect();
+    const style = getComputedStyle(parent);
+    const left = parentBounds.left + parseFloat(style.paddingLeft);
+    const right = parentBounds.right - parseFloat(style.paddingRight);
+    return {
+      width: bounds.width,
+      center: (bounds.left + bounds.right) / 2,
+      availableCenter: (left + right) / 2,
+    };
+  });
+  expect(geometry.width).toBeLessThanOrEqual(768);
+  expect(geometry.center).toBeCloseTo(geometry.availableCenter, 0);
+}
+
+test("collecting and orders center their content, use the app font and keep private activity wallet gated", async ({
   page,
 }, info) => {
   const mutations = await mockCatalog(page);
@@ -794,13 +816,15 @@ test("orders aligns with collecting, uses the app font and keeps private activit
     exact: true,
   });
   await expect(collectHeading).toHaveAttribute("data-client-ready", "true");
+  await expectCenteredCollectPage(collectHeading);
   const collectBounds = await collectHeading.boundingBox();
   await page.goto("/collect/orders", { waitUntil: "domcontentloaded" });
   const heading = page.getByRole("heading", { name: "Orders", exact: true });
   await expect(heading).toBeVisible();
+  await expectCenteredCollectPage(heading);
   const ordersBounds = await heading.boundingBox();
   expect(ordersBounds?.x).toBeCloseTo(collectBounds?.x ?? -1, 0);
-  expect(ordersBounds?.width).toBeLessThanOrEqual(1080);
+  expect(ordersBounds?.width).toBeLessThanOrEqual(768);
   await page.evaluate(() => document.fonts.ready);
   await expect(heading).toHaveCSS("font-family", /Montserrat/);
   const main = page.getByRole("main");
