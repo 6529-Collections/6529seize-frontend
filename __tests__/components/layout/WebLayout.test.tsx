@@ -1,5 +1,7 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { useEffect } from "react";
+import { renderToString } from "react-dom/server";
+import { hydrateRoot } from "react-dom/client";
 import WebLayout from "@/components/layout/WebLayout";
 import { useSidebarState } from "@/hooks/useSidebarState";
 
@@ -7,7 +9,11 @@ const mockRegisterRef = jest.fn();
 const mockSetHeaderRef = jest.fn();
 const mockMounted = jest.fn();
 const mockCleanup = jest.fn();
+const mockSearchMounted = jest.fn();
+const mockSearchCleanup = jest.fn();
 let mockWidth = 900;
+let mockTouchFirst = true;
+let mockSmallWebStartupExpected = true;
 type MediaListener =
   | EventListenerOrEventListenerObject
   | ((event: MediaQueryListEvent) => void);
@@ -25,7 +31,10 @@ jest.mock("next/navigation", () => ({
 }));
 jest.mock("@/hooks/useIsTouchDevice", () => ({
   __esModule: true,
-  default: () => true,
+  default: () => mockTouchFirst,
+}));
+jest.mock("@/components/layout/smallWebStartup", () => ({
+  isSmallWebStartupExpected: () => mockSmallWebStartupExpected,
 }));
 jest.mock("@/components/auth/Auth", () => ({
   useAuth: () => ({ connectedProfile: null }),
@@ -67,7 +76,13 @@ jest.mock("@/components/header/share/HeaderPageShareButton", () => ({
 }));
 jest.mock("@/components/header/header-search/HeaderSearchButton", () => ({
   __esModule: true,
-  default: () => null,
+  default: () => {
+    useEffect(() => {
+      mockSearchMounted();
+      return mockSearchCleanup;
+    }, []);
+    return null;
+  },
 }));
 jest.mock("@/components/header/header-search/HeaderSearchModal", () => ({
   __esModule: true,
@@ -124,6 +139,9 @@ beforeEach(() => {
   sessionStorage.clear();
   mediaChanges.clear();
   mockWidth = 900;
+  mockTouchFirst = true;
+  mockSmallWebStartupExpected = true;
+  delete document.documentElement.dataset["smallWebStartup"];
   window.matchMedia = jest.fn((query: string) => ({
     get matches() {
       return matches(query);
@@ -144,7 +162,88 @@ beforeEach(() => {
   }));
 });
 
+it("hydrates the server mobile header without registering hidden desktop chrome", async () => {
+  document.documentElement.dataset["smallWebStartup"] = "true";
+  const html = renderToString(
+    <WebLayout>
+      <h1>Public reading</h1>
+    </WebLayout>
+  );
+  const container = document.createElement("div");
+  container.innerHTML = html;
+  const header = container.querySelector("[data-web-small-header]");
+  expect(header).toHaveAttribute("hidden");
+  expect(header?.querySelector("header")).not.toBeNull();
+  expect(header?.querySelector("aside")).toBeNull();
+  expect(container.querySelector("[data-web-sidebar]")).not.toBeNull();
+  expect(container.querySelector("main h1")?.textContent).toBe(
+    "Public reading"
+  );
+  document.body.appendChild(container);
+  const onRecoverableError = jest.fn();
+  let root: ReturnType<typeof hydrateRoot> | undefined;
+  try {
+    await act(async () => {
+      root = hydrateRoot(
+        container,
+        <WebLayout>
+          <h1>Public reading</h1>
+        </WebLayout>,
+        { onRecoverableError }
+      );
+    });
+    expect(onRecoverableError).not.toHaveBeenCalled();
+    expect(container.querySelector("[data-web-small-header]")).toBe(header);
+    expect(screen.queryByRole("banner")).not.toBeInTheDocument();
+    expect(mockRegisterRef).not.toHaveBeenCalled();
+    expect(mockSetHeaderRef).not.toHaveBeenCalled();
+    expect(mockSearchMounted).not.toHaveBeenCalled();
+    // Hydration defaults are desktop; retain mobile paint until its real
+    // responsive props arrive rather than clearing the marker too early.
+    expect(document.documentElement.dataset["smallWebStartup"]).toBe("true");
+  } finally {
+    await act(async () => root?.unmount());
+    container.remove();
+  }
+});
+
+it("releases startup chrome if a tablet gains a mouse before mobile hydration", () => {
+  document.documentElement.dataset["smallWebStartup"] = "true";
+  const { rerender } = render(
+    <WebLayout>
+      <h1>Public reading</h1>
+    </WebLayout>
+  );
+  expect(document.documentElement.dataset["smallWebStartup"]).toBe("true");
+  mockTouchFirst = false;
+  mockSmallWebStartupExpected = false;
+  rerender(
+    <WebLayout>
+      <h1>Public reading</h1>
+    </WebLayout>
+  );
+  expect(document.documentElement).not.toHaveAttribute(
+    "data-small-web-startup"
+  );
+  expect(screen.queryByRole("banner")).not.toBeInTheDocument();
+  expect(mockSearchMounted).not.toHaveBeenCalled();
+});
+
+it("clears a stale mobile startup marker when React mounts on desktop", () => {
+  document.documentElement.dataset["smallWebStartup"] = "true";
+  mockSmallWebStartupExpected = false;
+  render(
+    <WebLayout>
+      <h1>Public reading</h1>
+    </WebLayout>
+  );
+  expect(document.documentElement).not.toHaveAttribute(
+    "data-small-web-startup"
+  );
+});
+
 it("adapts chrome and clears its overlay without remounting the editor or SidebarProvider", () => {
+  document.documentElement.setAttribute("data-small-web-startup", "true");
   const transfer = new AbortController();
   const { rerender, unmount } = render(
     <WebLayout isSmall>
@@ -152,6 +251,10 @@ it("adapts chrome and clears its overlay without remounting the editor or Sideba
     </WebLayout>
   );
   const input = screen.getByRole("textbox", { name: "Pending answer" });
+  expect(document.documentElement).not.toHaveAttribute(
+    "data-small-web-startup"
+  );
+  expect(mockSearchMounted).toHaveBeenCalledTimes(1);
   const main = input.closest("main");
   fireEvent.change(input, { target: { value: "Still writing" } });
   fireEvent.click(screen.getByRole("button", { name: "Open details" }));
@@ -183,6 +286,7 @@ it("adapts chrome and clears its overlay without remounting the editor or Sideba
     </WebLayout>
   );
   expect(screen.queryByRole("banner")).not.toBeInTheDocument();
+  expect(mockSearchCleanup).toHaveBeenCalledTimes(1);
   expect(mockRegisterRef).toHaveBeenLastCalledWith("header", null);
   expect(mockSetHeaderRef).toHaveBeenLastCalledWith(null);
   expect(
