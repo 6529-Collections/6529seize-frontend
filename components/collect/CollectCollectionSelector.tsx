@@ -10,7 +10,6 @@ import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { useId } from "react";
 import type { CollectCollection } from "./collect.types";
-import styles from "./marketplace-font.module.css";
 
 interface Props {
   readonly collection: CollectCollection;
@@ -50,7 +49,7 @@ export default function CollectCollectionSelector({
         </ListboxButton>
         <ListboxOptions
           anchor="bottom start"
-          className={`${styles["surface"] ?? ""} tailwind-scope tw-z-50 tw-w-[var(--button-width)] tw-overflow-auto tw-rounded-lg tw-bg-iron-900 tw-p-1 tw-text-sm tw-text-iron-100 tw-shadow-lg tw-ring-1 tw-ring-white/10 [--anchor-gap:0.5rem] focus:tw-outline-none`}
+          className="tailwind-scope tw-z-50 tw-w-[var(--button-width)] tw-overflow-auto tw-rounded-lg tw-bg-iron-900 tw-p-1 tw-text-sm tw-text-iron-100 tw-shadow-lg tw-ring-1 tw-ring-white/10 [--anchor-gap:0.5rem] focus:tw-outline-none"
         >
           {COLLECTIONS.map((value) => (
             <ListboxOption

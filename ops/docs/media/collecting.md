@@ -93,7 +93,8 @@ card page.
    Options show a loading state while the catalog arrives. If it cannot be
    loaded, choose **Try again**; a failed request does not mean the set is empty.
    Copies per NFT is the total you want to hold of each required NFT, including
-   copies already in your profile.
+   copies already in your profile. The hint below the inputs explains this total;
+   it is not the number of additional copies to buy.
    Leave the budget cap blank to estimate the full goal. An entered cap includes
    estimated gas. This is an analysis constraint; collecting still requires a fresh
    price review and wallet approval.

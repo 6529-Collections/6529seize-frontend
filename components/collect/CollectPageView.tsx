@@ -18,7 +18,6 @@ import CollectArtworkCard, {
   type CollectArtworkSelection,
 } from "./CollectArtworkCard";
 import CollectCollectionSelector from "./CollectCollectionSelector";
-import styles from "./marketplace-font.module.css";
 import { formatNumber } from "@/i18n/format";
 import CollectGoalNavigation from "./CollectGoalNavigation";
 import CollectPlanPanel from "./CollectPlanPanel";
@@ -184,7 +183,7 @@ export default function CollectPageView(props: CollectPageViewProps) {
   return (
     <div
       data-collect-page
-      className={`${styles["surface"] ?? ""} tailwind-scope tw-mx-auto tw-w-full tw-max-w-[1440px] tw-px-4 tw-pb-[calc(7rem+var(--native-keyboard-inset-bottom,0px))] tw-pt-5 tw-text-iron-100 md:tw-px-6 lg:tw-px-8`}
+      className="tailwind-scope tw-mx-auto tw-w-full tw-max-w-[1440px] tw-px-4 tw-pb-[calc(7rem+var(--native-keyboard-inset-bottom,0px))] tw-pt-5 tw-text-iron-100 md:tw-px-6 lg:tw-px-8"
     >
       <header className="tw-mb-5 tw-space-y-2">
         <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-6 tw-gap-y-2">
