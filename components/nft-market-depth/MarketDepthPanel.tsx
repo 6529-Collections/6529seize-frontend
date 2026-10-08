@@ -9,7 +9,6 @@ import { formatInteger as formatLocalizedInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { QueryKey } from "@/components/react-query-wrapper/query-keys";
-import marketplaceStyles from "@/components/collect/marketplace-font.module.css";
 import { useAutomaticMarketRefresh } from "@/components/collect/useAutomaticMarketRefresh";
 import { useAuth } from "@/components/auth/Auth";
 import { useConfirmedMarketPurchases } from "@/components/collect/market-activity-store";
@@ -512,7 +511,7 @@ export default function MarketDepthPanel({
       tabIndex={embedded ? -1 : undefined}
       aria-labelledby={`${id}-heading`}
       aria-busy={effectiveStatus === "loading"}
-      className={`${marketplaceStyles["surface"] ?? ""} ${embedded ? "tw-outline-none" : "tw-mt-8 tw-border-t tw-pt-5"} tw-min-w-0 tw-border-x-0 tw-border-b-0 tw-border-solid tw-border-white/10 tw-text-sm tw-leading-5 before:tw-content-none after:tw-content-none [&_*]:before:tw-content-none [&_*]:after:tw-content-none`}
+      className={`${embedded ? "tw-outline-none" : "tw-mt-8 tw-border-t tw-pt-5"} tw-min-w-0 tw-border-x-0 tw-border-b-0 tw-border-solid tw-border-white/10 tw-text-sm tw-leading-5 before:tw-content-none after:tw-content-none [&_*]:before:tw-content-none [&_*]:after:tw-content-none`}
     >
       <div className="tw-flex tw-flex-wrap tw-items-start tw-justify-between tw-gap-x-4 tw-gap-y-2">
         <div className="tw-min-w-0 tw-flex-1">
