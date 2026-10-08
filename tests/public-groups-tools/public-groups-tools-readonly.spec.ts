@@ -199,6 +199,10 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
           .height
     );
     if (narrowFilter) {
+      const availableHeight = await page.evaluate(
+        () => window.innerHeight - 64
+      );
+      expect(restingHeight).toBeCloseTo(Math.min(640, availableHeight), 0);
       const emptySpace = await choices.evaluate(
         (element) =>
           element.getBoundingClientRect().bottom -
