@@ -231,6 +231,8 @@ export const DE_DE_MESSAGES = {
   "waves.drop.actions.copyFailed": "Kopieren fehlgeschlagen",
   "waves.drop.actions.menuLabel": "Drop-Aktionen",
   "waves.drop.actions.reactionPickerLabel": "Reaktion zum Drop hinzufügen",
+  "waves.drop.actions.showMore": "Mehr anzeigen",
+  "waves.drop.actions.showLess": "Weniger anzeigen",
   "media.video.captions": "Untertitel",
   "media.video.download": "Medien herunterladen",
   "media.video.downloading": "Medien werden heruntergeladen",
