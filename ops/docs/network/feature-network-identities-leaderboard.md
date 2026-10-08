@@ -33,7 +33,8 @@ pagination, and profile links.
   `Identities`, `Level`, `TDH`, `NIC`, `Rep`, `Required NFTs`,
   `Collection Access`, and `xTDH Grant`. On wide screens, the selected editor
   sits beside the list with `Identities` open first. On narrow screens,
-  selecting a criterion opens its editor; `All filters` returns to the list.
+  selecting a criterion opens its editor. `All filters` stays above the scrolling
+  fields and returns to the list; the current criterion stays beside it.
   Switching keeps the draft's values. On phone widths, the trigger shows only
   the filter icon. The mobile sheet keeps a compact, consistent height between
   criteria. `Create and use new group` fills the content width on narrow screens.

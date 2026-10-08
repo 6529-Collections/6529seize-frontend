@@ -832,6 +832,19 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
         })
       )
       .toBe(true);
+    const back = filter.getByRole("button", {
+      name: "All filters",
+      exact: true,
+    });
+    await expect(back).toBeInViewport({ ratio: 1 });
+    const backBounds = await back.boundingBox();
+    const editorTop = await allowlists.evaluate(
+      (element) =>
+        element.closest("[tabindex='-1']")?.getBoundingClientRect().top
+    );
+    expect(
+      (backBounds?.y ?? 0) + (backBounds?.height ?? 0)
+    ).toBeLessThanOrEqual(editorTop ?? 0);
     await page.screenshot({
       path: testInfo.outputPath("network-keyboard.png"),
     });
