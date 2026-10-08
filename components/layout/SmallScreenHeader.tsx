@@ -74,8 +74,7 @@ export default function SmallScreenHeader({
           {interactive ? (
             <HeaderSearchButton wave={null} />
           ) : (
-            <span
-              role="status"
+            <output
               aria-label={t(locale, "header.navigation.loading")}
               className="tw-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-iron-800 tw-text-iron-300 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700"
             >
@@ -86,7 +85,7 @@ export default function SmallScreenHeader({
               <span className="tw-sr-only">
                 {t(locale, "header.navigation.loading")}
               </span>
-            </span>
+            </output>
           )}
           <button
             disabled={!interactive}

@@ -18,15 +18,19 @@ interface Device {
   readonly blockedStorage?: boolean;
 }
 
-function bootstrap(device: Device) {
-  const setAttribute = jest.fn();
-  const matches: Record<string, boolean> = {
+function mediaMatches(device: Device): Record<string, boolean> {
+  return {
     "(any-pointer: coarse)": device.coarse ?? false,
     "(any-pointer: fine)": device.fine ?? false,
     "(pointer: fine)": device.fine ?? false,
     "(any-hover: hover)": device.hover ?? false,
     "(hover: hover)": device.hover ?? false,
   };
+}
+
+function bootstrap(device: Device) {
+  const setAttribute = jest.fn();
+  const matches = mediaMatches(device);
   runInNewContext(SMALL_WEB_STARTUP_SCRIPT, {
     innerWidth: device.width ?? 390,
     navigator: {
@@ -51,7 +55,7 @@ function bootstrap(device: Device) {
   return setAttribute;
 }
 
-it.each<Device>([
+const mobileDevices: readonly Device[] = [
   { ua: "iPhone", touch: 5 },
   { ua: "Android Mobile", touch: 5 },
   { mobileHint: true, fine: true, hover: true },
@@ -60,14 +64,9 @@ it.each<Device>([
   { coarse: true, width: 900 },
   { coarse: true, blockedStorage: true },
   { ua: "Android Mobile", width: 1023 },
-])("prepares mobile web before React loads: %j", (device) => {
-  expect(bootstrap(device)).toHaveBeenCalledWith(
-    "data-small-web-startup",
-    "true"
-  );
-});
+];
 
-it.each<Device>([
+const desktopAndNativeDevices: readonly Device[] = [
   {},
   { ua: "Windows", touch: 10, fine: true, hover: true },
   { ua: "Windows", coarse: true, savedMouse: true },
@@ -75,8 +74,85 @@ it.each<Device>([
   { ua: "Android", mobileHint: false, touch: 5, fine: true },
   { ua: "iPhone", width: 1024 },
   { ua: "iPhone", native: true },
-])("preserves desktop and native layout choices: %j", (device) => {
-  expect(bootstrap(device)).not.toHaveBeenCalled();
+];
+
+it.each(mobileDevices)(
+  "prepares mobile web before React loads: %j",
+  (device) => {
+    expect(bootstrap(device)).toHaveBeenCalledWith(
+      "data-small-web-startup",
+      "true"
+    );
+  }
+);
+
+it.each(desktopAndNativeDevices)(
+  "preserves desktop and native layout choices: %j",
+  (device) => {
+    expect(bootstrap(device)).not.toHaveBeenCalled();
+  }
+);
+
+it.each<Device>([
+  ...mobileDevices,
+  ...desktopAndNativeDevices.filter((device) => !device.native),
+  { ua: "iPhone", mobileHint: false, touch: 5, fine: true },
+  { ua: "Android", touch: 5, fine: true, hover: true },
+  { ua: "Windows", coarse: true, savedMouse: true, blockedStorage: true },
+])("keeps startup and actual hydrated classification aligned: %j", (device) => {
+  const properties = {
+    userAgent: device.ua ?? "Mozilla/5.0",
+    userAgentData: { mobile: device.mobileHint },
+    maxTouchPoints: device.touch ?? 0,
+  };
+  const descriptors = Object.keys(properties).map(
+    (key) => [key, Object.getOwnPropertyDescriptor(navigator, key)] as const
+  );
+  const width = globalThis.innerWidth;
+  const originalMatchMedia = globalThis.matchMedia;
+  const matches = mediaMatches(device);
+  const storage = jest
+    .spyOn(Storage.prototype, "getItem")
+    .mockImplementation((key) => {
+      if (device.blockedStorage) throw new Error("Storage blocked");
+      return key === touchFirst.FINE_POINTER_STORAGE_KEY && device.savedMouse
+        ? "1"
+        : null;
+    });
+  try {
+    for (const [key, value] of Object.entries(properties)) {
+      Object.defineProperty(navigator, key, { configurable: true, value });
+    }
+    globalThis.innerWidth = device.width ?? 390;
+    globalThis.matchMedia = jest.fn((query: string) => ({
+      matches: matches[query] ?? false,
+      media: query,
+      onchange: null,
+      addListener: jest.fn(),
+      removeListener: jest.fn(),
+      addEventListener: jest.fn(),
+      removeEventListener: jest.fn(),
+      dispatchEvent: () => false,
+    }));
+    // Persisted mouse evidence is read at module initialization. Give each
+    // device a fresh production helper rather than mocking touch-first rules.
+    jest.isolateModules(() => {
+      const startup = jest.requireActual<
+        typeof import("@/components/layout/smallWebStartup")
+      >("@/components/layout/smallWebStartup");
+      expect(startup.isSmallWebStartupExpected()).toBe(
+        bootstrap(device).mock.calls.length > 0
+      );
+    });
+  } finally {
+    storage.mockRestore();
+    globalThis.innerWidth = width;
+    globalThis.matchMedia = originalMatchMedia;
+    for (const [key, descriptor] of descriptors) {
+      if (descriptor) Object.defineProperty(navigator, key, descriptor);
+      else Reflect.deleteProperty(navigator, key);
+    }
+  }
 });
 
 it("keeps the server content available when browser detection fails", () => {
