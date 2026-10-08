@@ -19,7 +19,8 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { TabToggle } from "@/components/common/TabToggle";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
+import { useWaveTabNavigation } from "@/hooks/useWaveTabNavigation";
 import { useCompetitionNavigation } from "@/contexts/CompetitionNavigationContext";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
@@ -271,7 +272,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
 }) => {
   const searchParams = useSearchParams();
   const pathname = usePathname();
-  const router = useRouter();
+  const navigateTab = useWaveTabNavigation();
   const locale = useBrowserLocale();
   const { flat, nativeCompetition } = useCompetitionNavigation();
   const nativeDefault = flat ? nativeCompetition : null;
@@ -535,7 +536,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
   const selectStandardTab = (key: string) => {
     onSelectCuration(null);
     if (nativeDefault && key === "voters") {
-      router.push(`${pathname}?tab=${key}`, { scroll: false });
+      navigateTab(`${pathname}?tab=${key}`);
       return;
     }
     setActiveTab(key as MyStreamWaveTab);
@@ -613,6 +614,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
         >
           <div className="tw-inline-flex tw-items-center tw-gap-1">
             <TabToggle
+              transition
               options={options}
               activeKey={activeKey}
               onSelect={(key) => {

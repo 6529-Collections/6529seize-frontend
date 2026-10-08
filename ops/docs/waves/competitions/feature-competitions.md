@@ -23,6 +23,9 @@ badge is hidden when there are none; drafts and completed competitions do not co
 row of tabs for **Active and upcoming**, **Completed**, and **All**;
 wave administrators can also see **Drafts**. **Add competition** sits alongside
 these tabs for users who can create competitions.
+In the app, this secondary row uses the same compact pills as **About**.
+**More** opens the remaining filters; choosing one shows its name on that pill.
+Desktop and mobile web retain the underlined tab row.
 Cards show the start date and, when set, the end date. Dates in the past use
 **Started** or **Ended**; future dates use **Starts** or **Ends**.
 
@@ -57,6 +60,10 @@ Explicitly opening a non-default competition from the collection or a direct
 link shows its title, an **All competitions** return link, and its own navigation
 inside the wave. Opening the default from the collection keeps the single-row
 layout.
+In the app, the non-default competition's own sections also use compact pills
+with a **More** menu. The selected section stays marked after reload or
+Back/Forward. Dismissing **More** without choosing leaves the current section
+unchanged. Default competitions keep their existing wave-level navigation.
 
 - One eligible competition is the default, including upcoming or completed history.
 - With running competitions, the earliest competition start wins. Paused

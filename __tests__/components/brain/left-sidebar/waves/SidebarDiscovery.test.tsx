@@ -225,6 +225,31 @@ it("uses the vote scroll area for pagination, guards duplicate loads, and render
   );
   expect(mockDisconnect).toHaveBeenCalled();
 });
+it("updates the active-votes fade on scroll without measuring layout for unrelated renders", () => {
+  const { rerender } = renderDiscovery();
+  const list = screen.getByRole("region", { name: "Active voting waves" });
+  let contentHeight = 300;
+  const readHeight = jest.fn(() => contentHeight);
+  Object.defineProperties(list, {
+    scrollHeight: { configurable: true, get: readHeight },
+    clientHeight: { configurable: true, get: () => 144 },
+    scrollTop: { configurable: true, get: () => 0 },
+  });
+  const fade = () => list.parentElement?.querySelector('[aria-hidden="true"]');
+
+  fireEvent.scroll(list);
+  expect(fade()).toBeInTheDocument();
+  readHeight.mockClear();
+
+  mockActiveWaveId = "QUORUM";
+  rerender(<SidebarDiscovery previewItems={[]} isTouchPreview={false} />);
+  expect(readHeight).not.toHaveBeenCalled();
+  expect(fade()).toBeInTheDocument();
+
+  contentHeight = 144;
+  fireEvent.scroll(list);
+  expect(fade()).toBeNull();
+});
 it("provides a keyboard-accessible load-more fallback and disables it while fetching", () => {
   const { rerender } = renderDiscovery();
   fireEvent.click(screen.getByRole("button", { name: "Load more" }));

@@ -17,6 +17,16 @@ shared chat, independent credits, native entry content, draft/publication and
 terminal lifecycle rules. It qualifies availability rather than promising
 controls in every deployment, and retains the original-wave experience in its
 navigation guidance. Backend runtime continues consuming the published corpus.
+Its setup guidance identifies the Competition type desktop dropdown and
+small-screen bottom sheet, including selection and dismissal behavior, and
+keyboard-aware name and description fields in the app's setup editor.
+Its navigation guidance distinguishes the app's compact secondary pills and
+More menu from web tabs and the unchanged default-competition wave row.
+
+The `waves.content-tabs` record describes the conditional pending indicator on
+a tapped tab, section-specific loading, and destination-bound competition
+controls. It also explains that app tabs already in view keep their position
+when selected. It does not promise instant data or a loading screen on every switch.
 
 The Wave discovery record describes the independent Active Votes and Worth Checking Out
 sidebar sections, their explanations and view-all destinations. It covers the

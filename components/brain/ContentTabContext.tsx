@@ -18,7 +18,8 @@ import {
   rememberHistoryWaveTab,
   useWaveTabPreference,
 } from "@/hooks/useWaveTabPreference";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
+import { useWaveTabNavigation } from "@/hooks/useWaveTabNavigation";
 import {
   getCompetitionRoute,
   getCompetitionsRoute,
@@ -202,7 +203,7 @@ export const ContentTabProvider: React.FC<{
   competitionOnly = false,
 }) => {
   const pathname = usePathname();
-  const router = useRouter();
+  const navigateTab = useWaveTabNavigation();
   const search = useSearchParams();
   const { flat, nativeCompetition } = useCompetitionNavigation();
   const isCompetitionRoute =
@@ -499,7 +500,7 @@ export const ContentTabProvider: React.FC<{
         const params = new URLSearchParams(search.toString());
         params.delete("default");
         params.set("tab", waveCompetitionTabs[tab] ?? tab.toLowerCase());
-        router.push(`${pathname}?${params}`, { scroll: false });
+        navigateTab(`${pathname}?${params}`);
       }
       const competitionTab = waveCompetitionTabs[tab];
       if (
@@ -507,7 +508,7 @@ export const ContentTabProvider: React.FC<{
         isCompetitionRoute &&
         tab === MyStreamWaveTab.COMPETITIONS
       ) {
-        router.push(getCompetitionsRoute(waveId), { scroll: false });
+        navigateTab(getCompetitionsRoute(waveId));
         return true;
       }
       if (
@@ -523,12 +524,12 @@ export const ContentTabProvider: React.FC<{
         const target = selectedId
           ? `${getCompetitionRoute(waveId, selectedId)}?tab=${competitionTab}`
           : `${getWavePathRoute(waveId)}?tab=${tab.toLowerCase()}`;
-        router.push(target, { scroll: false });
+        navigateTab(target);
         return true;
       }
       if (isCompetitionRoute && tab !== MyStreamWaveTab.COMPETITIONS) {
         const target = getSharedWaveTabRoute(pathname, tab);
-        if (target) router.push(target, { scroll: false });
+        if (target) navigateTab(target);
       }
       if (
         waveId &&
@@ -539,11 +540,11 @@ export const ContentTabProvider: React.FC<{
         const params = new URLSearchParams(search.toString());
         params.delete("default");
         params.set("tab", tab.toLowerCase());
-        router.replace(`${pathname}?${params}`, { scroll: false });
+        navigateTab(`${pathname}?${params}`, "replace");
       }
       return false;
     },
-    [competitionOnly, isCompetitionRoute, pathname, router, search]
+    [competitionOnly, isCompetitionRoute, pathname, navigateTab, search]
   );
 
   // Wrapper for setActiveContentTab that validates the tab
