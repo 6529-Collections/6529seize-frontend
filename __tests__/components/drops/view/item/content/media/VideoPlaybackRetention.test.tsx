@@ -11,6 +11,7 @@ import { Capacitor } from "@capacitor/core";
 import * as touchFirst from "@/helpers/touch-first.helpers";
 import * as config from "@/components/drops/view/item/content/media/SeizeVideoPlayer.config";
 import DropListItemContentMediaVideo from "@/components/drops/view/item/content/media/DropListItemContentMediaVideo";
+import SeizeVideoPlayer from "@/components/drops/view/item/content/media/SeizeVideoPlayer";
 import MediaDisplayVideo from "@/components/drops/view/item/content/media/MediaDisplayVideo";
 import { ChatVideoPlaybackProvider } from "@/components/drops/view/item/content/media/ChatVideoPlayback";
 import VirtualScrollWrapper from "@/components/waves/drops/VirtualScrollWrapper";
@@ -269,6 +270,48 @@ describe("video playback across DM virtualization", () => {
     expect(restored.currentTime).toBe(480);
     expect(restored.muted).toBe(false);
   });
+
+  it.each([480, 1200])(
+    "starts a revisited slideshow source at zero without chat memory (saved=%s)",
+    (position) => {
+      mockIsApp = false;
+      jest.spyOn(Capacitor, "isNativePlatform").mockReturnValue(false);
+      jest.spyOn(touchFirst, "isTouchFirstEnvironment").mockReturnValue(false);
+      const slideshowVideo = (src: string) => (
+        <SeizeVideoPlayer
+          src={src}
+          template="slideshow"
+          autoPlay
+          muted
+          loop={false}
+        />
+      );
+      const { rerender } = render(slideshowVideo("first.mp4"));
+      const first = screen.getByLabelText<HTMLVideoElement>("Video player");
+      metadata(first);
+      first.currentTime = position;
+      fireEvent.seeked(first);
+      first.muted = false;
+      first.volume = 0.6;
+      fireEvent.volumeChange(first);
+
+      rerender(slideshowVideo("second.mp4"));
+      const second = screen.getByLabelText<HTMLVideoElement>("Video player");
+      metadata(second);
+      second.currentTime = 100;
+      fireEvent.seeked(second);
+
+      rerender(slideshowVideo("first.mp4"));
+      const revisited = screen.getByLabelText<HTMLVideoElement>("Video player");
+      expect(revisited).not.toBe(first);
+      metadata(revisited);
+      expect(revisited.currentTime).toBe(0);
+      expect(revisited.muted).toBe(true);
+      expect(revisited.volume).toBe(1);
+      expect(revisited.autoplay).toBe(true);
+      expect(revisited.loop).toBe(false);
+    }
+  );
 
   it("clears remembered playback when the chat wrapper is removed", () => {
     jest.spyOn(Capacitor, "isNativePlatform").mockReturnValue(true);
