@@ -37,26 +37,26 @@ Explicit destination links and Back/Forward retain their intended section.
 Selecting a competition tab uses the default competition unless a link or earlier
 explicit selection supplies another competition. See [Wave Content Tabs](../chat/feature-content-tabs.md)
 for the per-wave navigation contract.
-Chat and the competition views share one wave-level tab row, with the selected
-content directly below it. There is no second competition tab row or surrounding
-detail panel. This applies to single-competition waves and to the default in
-waves with multiple competitions. Native competitions also expose Voters in
-that same row. Both native and legacy defaults expose **Configuration** immediately
-before the final **About** tab. Configuration opens the selected competition’s
-existing rules and settings, with the same read and edit permissions. Chat remains
-shared by the whole wave.
+Chat and the selected competition views share one wave-level tab row, with the
+content directly below it. This applies to the default and explicitly opened
+published competitions. The row starts with **Chat**, followed by the competition's
+leaderboard and results views, **Votes**, and **Settings**. **Settings** is the last
+competition tab, followed by **Competitions** when available and then named curations.
+**Votes** has **My Votes**, **All votes**, and **Activity** subtabs, all scoped to
+the selected competition. **Settings** opens its rules, access, appearance,
+administration and pause history with the existing read and edit permissions.
+Chat remains shared by the whole wave.
 
-For a logged-in non-admin, **Competitions** is hidden when the default is the
-wave’s sole visible competition. The check includes current, past and future
-competitions: an active default plus a past or future competition keeps the tab
-visible. Wave administrators retain the tab for management. While the count or
-permissions are unresolved, the tab stays available; logged-out visibility is
-unchanged. A direct collection link remains readable when the tab is hidden.
+**Competitions** is hidden for non-administrators when the default is the wave's
+sole visible competition, including for signed-out viewers. The count includes
+current, past and future competitions. Administrators retain it for management.
+Unknown counts or permissions keep it available. Direct collection links remain
+readable when the tab is hidden.
 
-Explicitly opening a non-default competition from the collection or a direct
-link shows its title, an **All competitions** return link, and its own navigation
-inside the wave. Opening the default from the collection keeps the single-row
-layout.
+Wave **About**, **REP**, and **Configuration** belong to the information panel.
+Select the wave name to open About: on desktop it opens the right sidebar; on
+mobile it opens a dismissible panel. Closing that panel or using Back returns
+to the original competition, tab, curation and scroll position.
 
 - One eligible competition is the default, including upcoming or completed history.
 - With running competitions, the earliest competition start wins. Paused
@@ -86,14 +86,13 @@ tabs. The collection lets you choose a different competition at any time.
    uses that entry's competition credit type and limits. Review its available, spent
    and remaining credit. Changing a vote replaces your current value; zero
    removes it. Negative votes are available only where the rules permit them.
-4. Competitions open on **Leaderboard**. Use the wave tab row for the default,
-   or the competition detail row for an explicitly opened non-default. The leaderboard
+4. Competitions open on **Leaderboard**. Use the wave tab row for the selected competition. The leaderboard
    uses the familiar list/grid controls, sorting, rich drop cards and **Drop**
    action. Rank competitions show the schedule; Approve competitions show
    approval thresholds, progress and approved counts. Winners use the existing
    podium or timeline for Rank and approved-drop cards for Approve. Outcomes
    use expandable reward cards; My votes shows editable vote rows and reset
-   controls; Voters shows profiles and vote totals. **Configuration** groups the settings
+   controls inside Votes; All votes shows profiles and vote totals and Activity shows vote changes. **Settings** groups the settings
    into Participation, Voting and Winners cards, below the competition description
    and guidelines. Administrators edit the name, description and guidelines directly in the overview card and use **Appearance and labels** beneath the cards for display settings. Select the wave's **Chat** tab to continue the wave's conversation,
    then return through the competition collection or link.
@@ -137,7 +136,7 @@ tabs. The collection lets you choose a different competition at any time.
   drops; administrators can do so when the wave enables administrator deletion.
   There are no Withdraw or Disqualify actions or entry-removal notifications.
   Winners also stop consuming active voting credit.
-- **Pause decisions**, beside **Pause history** in Configuration, pauses winner selection. The confirmation dialog requires a reason. Pause history shows each pause’s dates and reason, including after resuming. Participation and voting remain
+- **Pause decisions**, beside **Pause history** in Settings, pauses winner selection. The confirmation dialog requires a reason. Pause history shows each pause’s dates and reason, including after resuming. Participation and voting remain
   available when their dates and eligibility permit. Approve results can be
   finalized after voting closes if a threshold hold or pause is still pending.
 - Cancelled and archived competitions remain accessible through history. They

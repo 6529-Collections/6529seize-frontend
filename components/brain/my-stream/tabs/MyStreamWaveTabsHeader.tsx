@@ -1,4 +1,7 @@
 "use client";
+import { useWaveInformation } from "@/contexts/WaveInformationContext";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 
 import React, { useLayoutEffect, useRef, useState } from "react";
 import {
@@ -102,6 +105,7 @@ const getWavePictureContributors = (wave: ApiWave): WavePictureContributors =>
   }));
 
 interface MyStreamWaveHeaderIdentityProps {
+  readonly isRightSidebarOpen: boolean;
   readonly descriptionPreviewRef: React.RefObject<HTMLSpanElement | null>;
   readonly directMessageProfileHref: string | null;
   readonly isCompact: boolean;
@@ -128,6 +132,7 @@ function getWaveScoreLearnMoreHref({
 }
 
 function MyStreamWaveHeaderIdentity({
+  isRightSidebarOpen,
   descriptionPreviewRef,
   directMessageProfileHref,
   isCompact,
@@ -140,6 +145,8 @@ function MyStreamWaveHeaderIdentity({
   isDirectMessage,
 }: MyStreamWaveHeaderIdentityProps) {
   const seizeSettings = useSeizeSettingsOptional();
+  const information = useWaveInformation();
+  const locale = useBrowserLocale();
   const isAnnouncement = seizeSettings?.isAnnouncementsWave(wave.id) ?? false;
   const score =
     !isCompact && !isDirectMessage ? (
@@ -206,47 +213,60 @@ function MyStreamWaveHeaderIdentity({
         {!isCompact && (
           <div className="tw-flex tw-min-h-6 tw-min-w-0 tw-items-center tw-gap-x-1.5 lg:tw-min-h-7">
             <h1 className="tw-m-0 tw-min-w-0 tw-truncate tw-text-sm tw-font-semibold tw-tracking-tight tw-text-white/95 lg:tw-text-xl">
-              {wave.name}
+              <button
+                type="button"
+                onClick={() => information?.open(wave.id, false)}
+                aria-expanded={isRightSidebarOpen}
+                aria-controls={
+                  isRightSidebarOpen ? BRAIN_RIGHT_SIDEBAR_ID : undefined
+                }
+                aria-label={t(locale, "waves.information.open", {
+                  name: wave.name,
+                })}
+                className="tw-block tw-min-h-6 tw-max-w-full tw-truncate tw-rounded tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-text-inherit focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+              >
+                {wave.name}
+              </button>
             </h1>
             {score}
           </div>
         )}
-        {showDescriptionPreview ? (
+        {showDescriptionPreview && !isCompact ? (
           <WaveDescriptionPopover
             wave={wave}
             align="left"
             ariaLabel="Show wave description"
             triggerClassName="tw-group tw-flex tw-min-h-6 tw-min-w-0 tw-max-w-full tw-cursor-pointer tw-items-center tw-self-start tw-rounded-sm tw-border-0 tw-bg-transparent tw-p-0 tw-text-left focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 md:tw-max-w-[min(100%,20rem)]"
           >
-            {isCompact ? (
-              <h1 className="tw-m-0 tw-flex tw-min-w-0 tw-items-center tw-gap-x-1.5 tw-text-sm tw-font-semibold tw-tracking-tight tw-text-white/95">
-                <span className="tw-min-w-0 tw-truncate">{wave.name}</span>
+            <span className="tw-flex tw-w-full tw-min-w-0 tw-items-center tw-gap-x-1.5">
+              <span
+                ref={descriptionPreviewRef}
+                className="tw-min-w-0 tw-truncate tw-text-xs tw-font-normal tw-text-iron-400 tw-transition-colors group-hover:tw-text-iron-300"
+              >
+                {previewText}
+              </span>
+              {isDescriptionPreviewTruncated && (
                 <ChevronDownIcon
                   aria-hidden="true"
                   className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-300 tw-transition-colors group-hover:tw-text-white"
                 />
-              </h1>
-            ) : (
-              <span className="tw-flex tw-w-full tw-min-w-0 tw-items-center tw-gap-x-1.5">
-                <span
-                  ref={descriptionPreviewRef}
-                  className="tw-min-w-0 tw-truncate tw-text-xs tw-font-normal tw-text-iron-400 tw-transition-colors group-hover:tw-text-iron-300"
-                >
-                  {previewText}
-                </span>
-                {isDescriptionPreviewTruncated && (
-                  <ChevronDownIcon
-                    aria-hidden="true"
-                    className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-300 tw-transition-colors group-hover:tw-text-white"
-                  />
-                )}
-              </span>
-            )}
+              )}
+            </span>
           </WaveDescriptionPopover>
         ) : (
           isCompact && (
             <h1 className="tw-m-0 tw-truncate tw-text-sm tw-font-semibold tw-tracking-tight tw-text-white/95">
-              {wave.name}
+              <button
+                type="button"
+                onClick={() => information?.open(wave.id)}
+                aria-haspopup="dialog"
+                aria-label={t(locale, "waves.information.open", {
+                  name: wave.name,
+                })}
+                className="tw-block tw-min-h-6 tw-max-w-full tw-truncate tw-rounded tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-text-inherit focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+              >
+                {wave.name}
+              </button>
             </h1>
           )
         )}
@@ -455,6 +475,7 @@ export default function MyStreamWaveTabsHeader({
             </button>
           )}
           <MyStreamWaveHeaderIdentity
+            isRightSidebarOpen={isRightSidebarOpen}
             descriptionPreviewRef={descriptionPreviewRef}
             directMessageProfileHref={directMessageProfileHref}
             isCompact={isCompact}

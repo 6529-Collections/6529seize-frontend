@@ -7,7 +7,7 @@ manage them in place from the same consolidated view.
 
 Users can:
 
-- review `Visibility`, `Drop`, `Vote`, `Chat access`, and `Admins` scopes
+- review `Visibility`, `Chat access`, and `Admins` scopes; competition Drop and Vote access belong to Settings
 - follow visible `1 user` or `X users` counts to inspect both criteria and
   current members
 - open a prefilled group editor directly from each access-row gear
@@ -34,7 +34,7 @@ Users can:
 
 ## User Journey
 
-1. Open Wave details from the right sidebar or mobile wave-actions menu.
+1. Select the wave name to open About, or open the desktop right sidebar.
 2. Select `Configuration`, then review the access rows.
 3. Check current scope value:
    - no group: `Public`

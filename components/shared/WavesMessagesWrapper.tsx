@@ -1,4 +1,7 @@
 "use client";
+import { useWaveInformation } from "@/contexts/WaveInformationContext";
+import { useWaveById } from "@/hooks/useWaveById";
+import WaveInformationSheet from "@/components/brain/mobile/WaveInformationSheet";
 
 import useCreateModalState from "@/hooks/useCreateModalState";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
@@ -51,6 +54,12 @@ interface WavesMessagesWrapperProps {
   readonly showLeftSidebar?: boolean | undefined;
 }
 
+function getValidDropId(rawDropId: string | null): string | undefined {
+  return rawDropId && /^[a-zA-Z0-9-_]+$/.test(rawDropId)
+    ? rawDropId
+    : undefined;
+}
+
 const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
   children,
   defaultPath = "/waves",
@@ -66,19 +75,35 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
   const { contentContainerStyle } = useLayout();
 
   // Get global sidebar state
-  const { isRightSidebarOpen, closeRightSidebar } = useSidebarState();
+  const { isRightSidebarOpen, closeRightSidebar, openRightSidebar } =
+    useSidebarState();
+  const information = useWaveInformation();
   const { connectedProfile } = useAuth();
   const { isWaveModalOpen, close } = useCreateModalState();
 
   const [sidebarTab, setSidebarTab] = useState<SidebarTab>(SidebarTab.ABOUT);
 
-  const rawDropId = searchParams.get("drop") ?? undefined;
+  const rawDropId = searchParams.get("drop");
   const waveId =
     getActiveWaveIdFromUrl({ pathname, searchParams }) ?? undefined;
+  const informationOpen =
+    information?.request?.overlay && information.request.waveId === waveId;
+  const informationWave = useWaveById(waveId ?? null, {
+    enabled: Boolean(informationOpen),
+  });
+
+  useEffect(
+    () =>
+      information?.registerDesktopHandler((requestedWaveId) => {
+        if (requestedWaveId !== waveId) return;
+        setSidebarTab(SidebarTab.ABOUT);
+        openRightSidebar();
+      }),
+    [information, waveId, openRightSidebar, setSidebarTab]
+  );
 
   // Validate drop ID format (assuming alphanumeric + hyphens)
-  const dropId =
-    rawDropId && /^[a-zA-Z0-9-_]+$/.test(rawDropId) ? rawDropId : undefined;
+  const dropId = getValidDropId(rawDropId);
   const { effectiveDropId, beginClosingDrop } = useClosingDropId(dropId);
 
   // Check if we're on mobile (below LG breakpoint)
@@ -219,6 +244,13 @@ const WavesMessagesWrapper: React.FC<WavesMessagesWrapperProps> = ({
           isOpen={isWaveModalOpen}
           onClose={close}
           profile={connectedProfile}
+        />
+      )}
+      {informationOpen && informationWave.wave?.id === waveId && (
+        <WaveInformationSheet
+          key={information.request.id}
+          wave={informationWave.wave}
+          onClose={information.close}
         />
       )}
     </WaveChatScrollProvider>
