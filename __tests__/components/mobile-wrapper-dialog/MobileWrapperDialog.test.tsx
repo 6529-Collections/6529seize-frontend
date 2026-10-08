@@ -225,11 +225,78 @@ describe("MobileWrapperDialog", () => {
         "transform var(--native-keyboard-layout-transition-duration, 0ms) ease-out"
       );
       expect(surface?.style.maxHeight).toBe(
-        "min(calc(min(100vh, 100svh) - 10rem), max(0px, calc(min(100vh, 100svh) - 4rem - var(--mobile-wrapper-dialog-keyboard-inset, 0px))))"
+        "min(var(--mobile-wrapper-dialog-resting-height, calc(min(100vh, 100svh) - 10rem)), var(--mobile-wrapper-dialog-available-height, max(0px, calc(min(100vh, 100svh) - 4rem - var(--mobile-wrapper-dialog-keyboard-inset, 0px)))))"
       );
       expect(surface?.style.transition).toBe(
         "max-height var(--native-keyboard-layout-transition-duration, 0ms) ease-out"
       );
+    });
+
+    it("fits an opted-in browser sheet to the visible keyboard viewport", async () => {
+      const realViewport = globalThis.visualViewport;
+      const viewport = Object.assign(new EventTarget(), {
+        height: globalThis.innerHeight,
+        offsetTop: 0,
+      });
+      Object.defineProperty(globalThis, "visualViewport", {
+        configurable: true,
+        value: viewport,
+      });
+      try {
+        const { unmount } = render(
+          <MobileWrapperDialog {...defaultProps} isOpen fitVisualViewport />
+        );
+        const container = document.querySelector<HTMLElement>(
+          ".tw-pointer-events-none.tw-fixed.tw-inset-x-0"
+        );
+        await waitFor(() =>
+          expect(
+            container?.style.getPropertyValue(
+              "--mobile-wrapper-dialog-keyboard-inset"
+            )
+          ).toBe("0px")
+        );
+        act(() => {
+          viewport.height -= 300;
+          viewport.offsetTop = 20;
+          viewport.dispatchEvent(new Event("resize"));
+        });
+        expect(
+          container?.style.getPropertyValue(
+            "--mobile-wrapper-dialog-keyboard-inset"
+          )
+        ).toBe("280px");
+        expect(
+          container?.style.getPropertyValue(
+            "--mobile-wrapper-dialog-available-height"
+          )
+        ).toBe(`max(0px, calc(${viewport.height}px - 4rem))`);
+        expect(container).toHaveAttribute(
+          "data-mobile-dialog-keyboard-visible",
+          "true"
+        );
+        act(() => {
+          viewport.height = globalThis.innerHeight;
+          viewport.offsetTop = 0;
+          viewport.dispatchEvent(new Event("resize"));
+        });
+        expect(
+          container?.style.getPropertyValue(
+            "--mobile-wrapper-dialog-keyboard-inset"
+          )
+        ).toBe("0px");
+        unmount();
+        expect(
+          container?.style.getPropertyValue(
+            "--mobile-wrapper-dialog-keyboard-inset"
+          )
+        ).toBe("");
+      } finally {
+        Object.defineProperty(globalThis, "visualViewport", {
+          configurable: true,
+          value: realViewport,
+        });
+      }
     });
 
     it("animates keyboard resizing for fixed-height sheets", () => {

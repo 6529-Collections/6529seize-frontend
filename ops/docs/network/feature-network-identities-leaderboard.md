@@ -35,7 +35,10 @@ pagination, and profile links.
   sits beside the list with `Identities` open first. On narrow screens,
   selecting a criterion opens its editor; `All filters` returns to the list.
   Switching keeps the draft's values. On phone widths, the trigger shows only
-  the filter icon.
+  the filter icon. The mobile sheet keeps a compact, consistent height between
+  criteria. `Create and use new group` fills the content width on narrow screens.
+  Editors scroll above the keyboard, and EMMA allow-list results scroll within
+  the editor.
 - `After editing` shows each selected criterion as a separate tag. Long tag
   lists scroll within the summary, keeping `View members` and
   `Create and use new group` visible. A valid draft offers `View members`;

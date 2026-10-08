@@ -190,6 +190,34 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
     await expect(apply).toBeDisabled();
     await expect(apply).toBeInViewport({ ratio: 1 });
     await expect(filter.getByText("After editing")).toBeInViewport();
+    const restingHeight = await choices.evaluate(
+      (element) =>
+        element.closest(".mobile-wrapper-dialog")?.getBoundingClientRect()
+          .height
+    );
+    if (narrowFilter) {
+      const emptySpace = await choices.evaluate(
+        (element) =>
+          element.getBoundingClientRect().bottom -
+          (element.lastElementChild?.getBoundingClientRect().bottom ?? 0)
+      );
+      expect(emptySpace).toBeLessThan(80);
+    }
+    if (narrowFilter) {
+      const widths = await apply.evaluate((element) => ({
+        button: element.getBoundingClientRect().width,
+        content: element.parentElement
+          ? element.parentElement.getBoundingClientRect().width -
+            Number.parseFloat(
+              getComputedStyle(element.parentElement).paddingLeft
+            ) -
+            Number.parseFloat(
+              getComputedStyle(element.parentElement).paddingRight
+            )
+          : 0,
+      }));
+      expect(widths.button).toBeCloseTo(widths.content ?? 0, 0);
+    }
     for (const name of [
       "Identities",
       "Required NFTs",
@@ -198,6 +226,15 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
     ]) {
       await openCriterion(name);
       await expect(filter.getByRole("region", { name })).toBeVisible();
+      await expect
+        .poll(() =>
+          choices.evaluate(
+            (element) =>
+              element.closest(".mobile-wrapper-dialog")?.getBoundingClientRect()
+                .height
+          )
+        )
+        .toBeCloseTo(restingHeight ?? 0, 0);
       if (narrowFilter) {
         await expect(allFilters).toBeInViewport();
       } else {
