@@ -306,15 +306,12 @@ export function WebSocketProvider({
       // Update status to connecting
       setStatus(WebSocketStatus.CONNECTING);
 
-      // Build URL with optional token
-      let url = config.url;
-      if (token && !useMessageAuth) {
-        url += `?token=${encodeURIComponent(token)}`;
-      }
-
       try {
+        // Public capability only: old backends ignore it; auth stays message-based.
+        const url = new URL(config.url);
+        url.searchParams.set("delivery_capability", "durable_updates_v1");
         // Create new WebSocket connection
-        const ws = new WebSocket(url);
+        const ws = new WebSocket(url.toString());
 
         // Set up event handlers
         ws.onopen = () => {
