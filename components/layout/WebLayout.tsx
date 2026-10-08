@@ -6,6 +6,7 @@ import { useSidebarController } from "../../hooks/useSidebarController";
 import { SidebarProvider, useSidebarState } from "../../hooks/useSidebarState";
 import WebSidebar from "./sidebar/WebSidebar";
 import SmallScreenLayoutHeader from "./SmallScreenLayoutHeader";
+import { isSmallWebStartupExpected } from "./smallWebStartup";
 import type { CSSProperties, ReactNode } from "react";
 
 const DESKTOP_MAX_WIDTH = 1324;
@@ -34,6 +35,14 @@ const WebLayoutContent = ({ children, isSmall = false }: WebLayoutProps) => {
     closeOffcanvas();
   }, [isSmall, closeOffcanvas]);
 
+  useEffect(() => {
+    if (isSmall || !isSmallWebStartupExpected()) {
+      // Keep the override through the hydration defaults, but release it when
+      // React takes over or capabilities changed to desktop during loading.
+      delete document.documentElement.dataset["smallWebStartup"];
+    }
+  }, [isSmall, isMobile, isNarrow, isSidebarReady]);
+
   const cssVars = useMemo(
     () =>
       ({
@@ -60,13 +69,12 @@ const WebLayoutContent = ({ children, isSmall = false }: WebLayoutProps) => {
       data-small={isSmall ? "true" : "false"}
       data-sidebar-ready={isSidebarReady}
     >
-      {isSmall && (
-        <SmallScreenLayoutHeader
-          onMenuToggle={toggleCollapsed}
-          isMenuOpen={isOffcanvasOpen}
-        />
-      )}
-      <div className="tailwind-scope">
+      <SmallScreenLayoutHeader
+        active={isSmall}
+        onMenuToggle={toggleCollapsed}
+        isMenuOpen={isOffcanvasOpen}
+      />
+      <div className="tailwind-scope" data-web-sidebar="true">
         <WebSidebar
           key={isSmall ? "small" : "desktop"}
           isCollapsed={isSmall ? false : isCollapsed}
