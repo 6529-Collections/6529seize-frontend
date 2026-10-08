@@ -669,6 +669,7 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
       exact: true,
     });
     const summary = filter.getByText("After editing", { exact: true });
+    const currentSummary = filter.getByText("Before editing", { exact: true });
     const action = filter.getByRole("button", {
       name: "Create and use new group",
       exact: true,
@@ -738,21 +739,29 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
         "true"
       );
     }
-    const summaryIsCompact = () =>
-      summary.evaluate((element) => {
-        const parent = element.parentElement;
-        if (!parent) return false;
-        const style = getComputedStyle(parent);
-        return (
-          style.position === "absolute" &&
-          style.clip !== "auto" &&
-          parent.getBoundingClientRect().width <= 1
-        );
+    const summaryIsCompact = (target = summary) =>
+      target.evaluate((element) => {
+        for (
+          let parent = element.parentElement;
+          parent;
+          parent = parent.parentElement
+        ) {
+          const style = getComputedStyle(parent);
+          if (
+            style.position === "absolute" &&
+            style.clip !== "auto" &&
+            parent.getBoundingClientRect().width <= 1
+          )
+            return true;
+        }
+        return false;
       });
     await expect.poll(summaryIsCompact).toBe(true);
+    await expect.poll(() => summaryIsCompact(currentSummary)).toBe(true);
     // Compact the visual footer without removing its summary from the
     // accessibility tree; preview actions become visible when focused.
     await expect.poll(() => filter.ariaSnapshot()).toContain("After editing");
+    await expect.poll(() => filter.ariaSnapshot()).toContain("Before editing");
     await expect
       .poll(() =>
         input.evaluate((element) => {
@@ -860,6 +869,7 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
       "true"
     );
     await expect(summary).toBeVisible();
+    await expect.poll(() => summaryIsCompact(currentSummary)).toBe(false);
     await allowlists.blur();
     await allowlists.focus();
     await expect(allowlists).toHaveValue("keyboard-test-no-match");

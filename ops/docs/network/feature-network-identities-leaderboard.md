@@ -39,9 +39,9 @@ pagination, and profile links.
   the filter icon. The mobile sheet keeps a compact, consistent height between
   criteria. `Create and use new group` fills the content width on narrow screens.
   Editors scroll above the keyboard, and EMMA allow-list results scroll within
-  the editor. While typing, the visual summaries collapse; keyboard focus
-  reveals their member-preview controls, and status text remains available to
-  screen readers.
+  the editor. While typing, `Before editing` and `After editing` visually
+  collapse to leave room for the fields; keyboard focus reveals their
+  member-preview controls, and status text remains available to screen readers.
 - `After editing` shows each selected criterion as a separate tag. Long tag
   lists scroll within the summary, keeping `View members` and
   `Create and use new group` visible. A valid draft offers `View members`;

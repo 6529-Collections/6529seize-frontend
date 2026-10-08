@@ -168,25 +168,27 @@ export default function CommunityMembersFilterPanel(
         ref={panelRef}
         className="tw-flex tw-min-h-0 tw-flex-1 tw-flex-col tw-overflow-hidden"
       >
-        <div className="tw-flex tw-shrink-0 tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-1 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/5 tw-px-4 tw-py-3 sm:tw-px-6">
-          <span className="tw-text-xs tw-text-iron-400">
-            {t(locale, "waves.create.groups.currentGroup")}
-          </span>
-          <span className="tw-break-words tw-text-xs tw-font-medium tw-text-iron-200">
-            {currentGroupLabel}
-          </span>
-          {savedTarget && (
-            <div
-              className={`tw-flex ${isKeyboardVisible ? "tw-sr-only focus-within:tw-not-sr-only" : ""} [[data-mobile-dialog-keyboard-visible=true]_&]:tw-sr-only [[data-mobile-dialog-keyboard-visible=true]_&]:focus-within:tw-not-sr-only`}
-            >
-              <GroupMembersPreviewTrigger
-                target={savedTarget}
-                appearance="inline"
-                disabled={props.disabled ?? false}
-                onOpen={() => setPreviewTarget(savedTarget)}
-              />
-            </div>
-          )}
+        <div
+          className={`tw-shrink-0 ${isKeyboardVisible ? "tw-sr-only focus-within:tw-not-sr-only" : ""} [[data-mobile-dialog-keyboard-visible=true]_&]:tw-sr-only [[data-mobile-dialog-keyboard-visible=true]_&]:focus-within:tw-not-sr-only`}
+        >
+          <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-1 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/5 tw-px-4 tw-py-3 sm:tw-px-6">
+            <span className="tw-text-xs tw-text-iron-400">
+              {t(locale, "waves.create.groups.currentGroup")}
+            </span>
+            <span className="tw-break-words tw-text-xs tw-font-medium tw-text-iron-200">
+              {currentGroupLabel}
+            </span>
+            {savedTarget && (
+              <div className="tw-flex">
+                <GroupMembersPreviewTrigger
+                  target={savedTarget}
+                  appearance="inline"
+                  disabled={props.disabled ?? false}
+                  onOpen={() => setPreviewTarget(savedTarget)}
+                />
+              </div>
+            )}
+          </div>
         </div>
         <fieldset
           disabled={props.disabled ?? false}
