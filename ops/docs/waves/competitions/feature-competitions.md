@@ -56,6 +56,9 @@ sole visible competition, including for signed-out viewers. The count includes
 current, past and future competitions. Administrators retain it for management.
 Unknown counts or permissions keep it available. Direct collection links remain
 readable when the tab is hidden.
+Routine background refreshes keep the established tabs in place. The collection
+tab updates when the refreshed competition data or permissions change, not merely
+because another request starts.
 
 Wave **About**, **REP**, and **Configuration** belong to the information panel.
 Select the wave name to open About: on desktop it opens the right sidebar; on
