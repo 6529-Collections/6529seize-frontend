@@ -102,6 +102,80 @@ async function expectProfileShell(page: Page, activeTab: string | RegExp) {
 test.describe("Authenticated read-only route shells @auth @medium @readonly", () => {
   test.skip(!hasDevAuthConfig(), DEV_AUTH_SKIP_MESSAGE);
 
+  test("renders the protected Sentry snapshot without overflowing the route shell", async ({
+    page,
+  }) => {
+    const issue = {
+      id: "123",
+      short_id: "WEB-123",
+      project: "frontend",
+      title: `TypeError: ${"LongErrorIdentifier".repeat(8)}`,
+      occurrences: 1234,
+      first_seen: "2026-10-07T12:00:00Z",
+      last_seen: "2026-10-08T09:00:00Z",
+      url: "https://sentry.io/organizations/test-team/issues/123/",
+    };
+    await page.route("**/api/monitoring/sentry", async (route) => {
+      await route.fulfill({
+        json: {
+          status: "ready",
+          environment: "production",
+          period: "24h",
+          fetched_at: "2026-10-08T10:00:00Z",
+          window_start: "2026-10-07T10:00:00Z",
+          window_end: "2026-10-08T10:00:00Z",
+          projects: [
+            {
+              project: "frontend",
+              new_issues: [issue],
+              top_issues: [issue],
+              new_issues_has_more: false,
+              top_issues_has_more: false,
+            },
+            {
+              project: "seize-backend",
+              new_issues: [],
+              top_issues: [
+                {
+                  ...issue,
+                  id: "456",
+                  short_id: "SEIZE-BACKEND-Y6",
+                  project: "seize-backend",
+                  title: "Market refresh failed",
+                  occurrences: 2,
+                },
+              ],
+              new_issues_has_more: false,
+              top_issues_has_more: false,
+            },
+          ],
+        },
+      });
+    });
+    await gotoReady(page, "/tools/monitoring");
+    await expect(
+      page
+        .getByRole("region", { name: "frontend", exact: true })
+        .getByRole("heading", {
+          name: "Most frequent unresolved errors",
+          exact: true,
+        })
+    ).toBeVisible();
+    await expect(page.getByText("1,234 events in this window")).toHaveCount(2);
+    await expect(
+      page
+        .getByRole("link", {
+          name: `Open ${issue.title} in Sentry (opens in a new tab)`,
+        })
+        .first()
+    ).toHaveAttribute("href", issue.url);
+    await expect(page.getByText(/Snapshot collected/)).toContainText("UTC");
+    await expect(
+      page.getByRole("region", { name: "seize-backend", exact: true })
+    ).toContainText("Market refresh failed");
+    await expectNoHorizontalOverflow(page);
+  });
+
   test("opens EMMA plans directly from a restored session and keeps help public", async ({
     page,
   }) => {

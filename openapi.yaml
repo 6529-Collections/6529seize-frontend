@@ -11303,6 +11303,73 @@ paths:
           description: Claim not found
         "503":
           description: Creator admin permission could not be verified
+  /monitoring/access:
+    get:
+      tags:
+        - Monitoring
+      summary: Check monitoring access
+      description: >-
+        Requires a directly authenticated, non-proxy identity eligible for the
+        saved 6529 Dev Team group. The whole monitoring API section shares this
+        access guard. Responses are private and never cached.
+      operationId: getMonitoringAccess
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: monitoring
+        handler:
+          import: "@/api/monitoring/monitoring.handlers"
+          name: handleGetMonitoringAccess
+      responses:
+        "200":
+          description: Monitoring access granted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMonitoringAccess"
+        "401":
+          description: Wallet authentication required
+        "403":
+          description: Dev Team membership required; proxy sessions are denied
+        "503":
+          description: Membership verification temporarily unavailable
+  /monitoring/sentry:
+    get:
+      tags:
+        - Monitoring
+      summary: Read the Sentry monitoring overview
+      description: >-
+        Dev Team direct sessions only. Returns a server-side, five-minute cached
+        snapshot grouped by configured project and filtered environments.
+        Authorization is checked on every request, including cache hits. No
+        provider credentials are returned.
+      operationId: getMonitoringSentry
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: monitoring
+        handler:
+          import: "@/api/monitoring/monitoring.handlers"
+          name: handleGetMonitoringSentry
+      responses:
+        "200":
+          description: Sentry snapshot or explicit not-configured state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMonitoringSentryOverview"
+        "401":
+          description: Wallet authentication required
+        "403":
+          description: Dev Team membership required; proxy sessions are denied
+        "503":
+          description: Authorization or Sentry snapshot temporarily unavailable
   /nft-link:
     get:
       tags:
@@ -32854,6 +32921,109 @@ components:
           type: integer
           format: int64
           nullable: true
+    ApiMonitoringAccess:
+      type: object
+      required:
+        - access
+      properties:
+        access:
+          type: boolean
+          description: True after the monitoring section access guard succeeds
+    ApiMonitoringSentryIssue:
+      type: object
+      required:
+        - id
+        - short_id
+        - title
+        - project
+        - occurrences
+        - first_seen
+        - last_seen
+        - url
+      properties:
+        id:
+          type: string
+        short_id:
+          type: string
+        title:
+          type: string
+        project:
+          type: string
+        occurrences:
+          type: integer
+          minimum: 0
+          description: Error events in the snapshot window and environment
+        first_seen:
+          type: string
+          description: ISO timestamp of the first event in the snapshot window
+        last_seen:
+          type: string
+          description: ISO timestamp of the last event in the snapshot window
+        url:
+          type: string
+          description: Canonical Sentry issue link; Sentry login is required
+    ApiMonitoringSentryOverview:
+      type: object
+      required:
+        - status
+        - environment
+        - period
+        - projects
+      properties:
+        status:
+          type: string
+          enum:
+            - ready
+            - not_configured
+        environment:
+          type: string
+        period:
+          type: string
+          description: Snapshot window, currently 24h
+        fetched_at:
+          type: string
+          description: ISO timestamp when Sentry collection completed
+        window_start:
+          type: string
+        window_end:
+          type: string
+        projects:
+          type: array
+          description: >-
+            Separate summaries prevent busy projects from hiding other projects'
+            errors
+          items:
+            $ref: "#/components/schemas/ApiMonitoringSentryProjectOverview"
+    ApiMonitoringSentryProjectOverview:
+      type: object
+      required:
+        - project
+        - new_issues
+        - top_issues
+        - new_issues_has_more
+        - top_issues_has_more
+      properties:
+        project:
+          type: string
+          description: Configured Sentry project slug or ID
+        new_issues:
+          type: array
+          description: Up to five error issues first seen during the window, newest first
+          items:
+            $ref: "#/components/schemas/ApiMonitoringSentryIssue"
+        top_issues:
+          type: array
+          description: Up to five unresolved error issues, ranked by events in the window
+          items:
+            $ref: "#/components/schemas/ApiMonitoringSentryIssue"
+        new_issues_has_more:
+          type: boolean
+          description: Additional matching new issues exist beyond the displayed five
+        top_issues_has_more:
+          type: boolean
+          description: >-
+            Additional matching unresolved issues exist beyond the displayed
+            five
     ApiNft:
       type: object
       required:

@@ -94,6 +94,7 @@ private `/tools/6529bot/admin` operator page.
 5. [Memes Subscriptions Report](feature-memes-subscriptions-report.md)
 6. [App Wallets Management](feature-app-wallets.md)
 7. [6529bot Admin](feature-6529bot-admin.md)
+8. [Monitoring](feature-monitoring.md)
 
 ## Flows
 

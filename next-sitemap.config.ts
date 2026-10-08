@@ -75,6 +75,7 @@ const NEXTGEN_COLLECTION_SUBPAGES = [
 ] as const;
 
 const EXACT_EXCLUDED_PATHS = new Set([
+  "/tools/monitoring",
   "/accept-connection-sharing",
   "/access",
   "/artwork-documentation",
