@@ -474,6 +474,11 @@ const TITLE_CONTEXT_MESSAGES = objectMessages("titleContext", {
 } as const);
 
 const WAVE_NAVIGATION_MESSAGES = objectMessages("wave.navigation", {
+  chat: "Chat",
+  sales: "Sales",
+  myStream: "My Stream",
+  polls: "Polls",
+  loadingSection: "Loading section…",
   about: "About",
   waveSections: "Wave sections",
   appSections: "App sections",

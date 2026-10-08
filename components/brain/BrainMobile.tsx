@@ -12,6 +12,7 @@ import {
   rememberHistoryWaveTab,
 } from "@/hooks/useWaveTabPreference";
 import { useDefaultCompetitionNavigation } from "@/hooks/competitions/useDefaultCompetitionNavigation";
+import { useWaveTabNavigation } from "@/hooks/useWaveTabNavigation";
 
 import type { ReactNode } from "react";
 import React, {
@@ -100,6 +101,7 @@ function getWaveTab(view: BrainView): MyStreamWaveTab | undefined {
 
 const BrainMobileContent: React.FC<Props> = ({ children }) => {
   const router = useRouter();
+  const navigateTab = useWaveTabNavigation();
   const information = useWaveInformation();
   // react-doctor-disable-next-line react-doctor/nextjs-no-use-search-params-without-suspense covered by BrainMobile Suspense wrapper
   const searchParams = useSearchParams();
@@ -220,11 +222,10 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
           ? getCompetitionIdFromPathname(pathname)
           : (searchParams.get("competition") ?? defaultCompetitionId);
         rememberTab(waveId, view as unknown as MyStreamWaveTab, selectedId);
-        router.push(
+        navigateTab(
           selectedId
             ? `${getCompetitionRoute(waveId, selectedId)}?tab=${competitionTab}`
-            : `${getWavePathRoute(waveId)}?tab=${view.toLowerCase()}`,
-          { scroll: false }
+            : `${getWavePathRoute(waveId)}?tab=${view.toLowerCase()}`
         );
         return;
       }
@@ -247,7 +248,7 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
           tab: tab?.toLowerCase() ?? view.toLowerCase(),
         });
         if (competitionId) params.set("competition", competitionId);
-        router.push(`${getWavePathRoute(waveId)}?${params}`, { scroll: false });
+        navigateTab(`${getWavePathRoute(waveId)}?${params}`);
       }
     },
     [
@@ -257,7 +258,7 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
       waveId,
       rememberWaveView,
       pathname,
-      router,
+      navigateTab,
       defaultSelectionEnabled,
       defaultCompetitionId,
       searchParams,

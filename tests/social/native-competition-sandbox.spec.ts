@@ -511,6 +511,10 @@ async function installCompetitionApi(
     setDefault: (id: string | null) => {
       defaultId = id;
     },
+    clearCompetitions: () => {
+      competitions.splice(0);
+      defaultId = null;
+    },
     onlyCompetition: (id: string) => {
       const selected = competitions.find((item) => item.id === id);
       expect(selected).toBeDefined();
@@ -970,6 +974,466 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await expectNoHorizontalOverflow(page);
   });
 
+  test("uses About-style pills for app competition sub-navigation", async ({
+    page,
+  }, testInfo) => {
+    const app = testInfo.project.name === "web-mobile-chromium";
+    const sandbox = await installCompetitionApi(page);
+    if (app)
+      await installSurfaceSimulation(
+        page.context(),
+        "capacitor-ios-sim",
+        testInfo.project.use.baseURL
+      );
+    await page.goto(ROOT);
+    const collection = page.getByRole("region", {
+      name: "Competitions",
+      exact: true,
+    });
+    const active = collection.getByRole("tab", {
+      name: "Active and upcoming",
+      exact: true,
+    });
+    const collectionMore = collection.getByRole("button", {
+      name: "More tabs",
+      exact: true,
+    });
+    await expect(active).toHaveAttribute("aria-selected", "true");
+    await expect(active).toHaveAttribute(
+      "aria-controls",
+      `competition-collection-${WAVE}-active`
+    );
+    if (app) {
+      await expect(active).toHaveCSS("height", "32px");
+      await expect(active).toHaveCSS("border-radius", "9999px");
+      const viewport = page.viewportSize();
+      await page.setViewportSize({ width: 320, height: 780 });
+      await expect(collectionMore).toBeInViewport({ ratio: 1 });
+      if (viewport) await page.setViewportSize(viewport);
+      await collectionMore.tap();
+      await page.keyboard.press("Escape");
+      await expect(collectionMore).toBeFocused();
+      await expect(active).toHaveAttribute("aria-selected", "true");
+      await collectionMore.press("Enter");
+      await page.getByRole("menuitem", { name: "Drafts", exact: true }).tap();
+      await expect(collectionMore).toHaveText("Drafts");
+      await expect(collectionMore).toHaveAttribute("aria-expanded", "false");
+    } else {
+      await expect(collectionMore).toHaveCount(0);
+      await collection
+        .getByRole("tab", { name: "Drafts", exact: true })
+        .click();
+    }
+    await expect(
+      collection.getByRole("tabpanel", { name: "Drafts", exact: true })
+    ).toBeVisible();
+    await active.click();
+    await page.screenshot({
+      path: testInfo.outputPath("competition-collection-tabs.png"),
+      animations: "disabled",
+      style: "nextjs-portal { visibility: hidden; }",
+    });
+    await expect(
+      collection.getByRole("link", { name: "Add competition", exact: true })
+    ).toBeInViewport({ ratio: 1 });
+    await expectNoHorizontalOverflow(page);
+
+    // Published competitions share the primary row; Votes owns its secondary tabs.
+    await page.goto(`${ROOT}/beta?tab=votes`);
+    const mine = page.getByRole("tab", {
+      name: "My Votes",
+      exact: true,
+    });
+    const allVotes = page.getByRole("tab", { name: "All votes", exact: true });
+    await expect(mine).toHaveAttribute("aria-selected", "true");
+    await expect(mine).toHaveAttribute(
+      "aria-controls",
+      "competition-beta-votes-mine"
+    );
+    if (app) {
+      await expect(mine).toHaveCSS("border-radius", "9999px");
+      await expect(mine).toHaveCSS("height", "32px");
+    } else {
+      await expect(mine).toHaveCSS("border-bottom-width", "2px");
+    }
+    await allVotes.click();
+    await expect(page).toHaveURL(`${ROOT}/beta?tab=votes&voteTab=all`);
+    await expect(
+      page.getByRole("tabpanel", { name: "All votes", exact: true })
+    ).toBeVisible();
+    await page.reload();
+    await expect(allVotes).toHaveAttribute("aria-selected", "true");
+    await page.goBack();
+    await expect(page).toHaveURL(ROOT);
+    await expect(active).toHaveAttribute("aria-selected", "true");
+    await page.goForward();
+    await expect(allVotes).toHaveAttribute("aria-selected", "true");
+    await expect(
+      page.getByRole("tabpanel", { name: "All votes", exact: true })
+    ).toBeVisible();
+    await page.screenshot({
+      path: testInfo.outputPath("competition-vote-pills.png"),
+      animations: "disabled",
+      style: "nextjs-portal { visibility: hidden; }",
+    });
+    await expectNoHorizontalOverflow(page);
+    expect(sandbox.requests).toHaveLength(0);
+  });
+
+  test("aligns Waves collection filters with the search control", async ({
+    page,
+  }, testInfo) => {
+    const app = testInfo.project.name === "web-mobile-chromium";
+    const sandbox = await installCompetitionApi(page);
+    if (app)
+      await installSurfaceSimulation(
+        page.context(),
+        "capacitor-ios-sim",
+        testInfo.project.use.baseURL
+      );
+    await page.goto("/waves");
+    const filters = page
+      .getByRole("group", { name: "Wave list filter", exact: true })
+      .filter({ visible: true });
+    const search = page
+      .getByRole("button", { name: "Find a wave…", exact: true })
+      .filter({ visible: true });
+    const searchSurface = page
+      .getByRole("button", { name: "Find a wave…", exact: true })
+      .filter({ visible: true })
+      .locator("span");
+    await expect(filters).toHaveCSS("height", app ? "40px" : "36px");
+    await expect(searchSurface).toHaveCSS("height", app ? "40px" : "36px");
+    await expect
+      .poll(async () => {
+        const filterBox = await filters.boundingBox();
+        const searchBox = await searchSurface.boundingBox();
+        return filterBox && searchBox
+          ? Math.abs(filterBox.y - searchBox.y)
+          : Number.POSITIVE_INFINITY;
+      })
+      .toBeLessThanOrEqual(1);
+    if (app) await expect(search).toHaveCSS("height", "44px");
+    for (const name of ["Pinned", "Joined", "All"]) {
+      const filter = filters.getByRole("button", { name, exact: true });
+      await filter.click();
+      await expect(filter).toHaveAttribute("aria-pressed", "true");
+    }
+    await search.click();
+    const input = page.getByRole("searchbox", { name: "Find a wave…" });
+    await expect(input).toBeFocused();
+    await input.press("Escape");
+    await expect(search).toBeFocused();
+    await expect(filters).toBeVisible();
+    await expectNoHorizontalOverflow(page);
+    await page.screenshot({
+      path: testInfo.outputPath("wave-filter-search-alignment.png"),
+      animations: "disabled",
+      style: "nextjs-portal { visibility: hidden; }",
+    });
+    expect(sandbox.requests).toHaveLength(0);
+  });
+
+  test("keeps the draft editor footer flush with its scroll container", async ({
+    page,
+  }, testInfo) => {
+    const sandbox = await installCompetitionApi(page);
+    await page.goto(`${ROOT}/new`);
+    const name = page.getByLabel("Competition name", { exact: true });
+    await expect(name).toBeVisible({ timeout: 30000 });
+    const footer = page
+      .getByRole("button", { name: "Close editor", exact: true })
+      .locator("..");
+
+    for (const draft of ["new", "reopened"]) {
+      if (draft === "reopened") {
+        await name.fill("Footer layout draft");
+        await expect.poll(() => sandbox.requests.length).toBe(1);
+        await page.goto(`${ROOT}/draft`);
+        await expect(name).toHaveValue("Footer layout draft");
+      }
+      for (const progress of [0, 0.5, 1]) {
+        await expect
+          .poll(() =>
+            footer.evaluate((element, fraction) => {
+              let container = element.parentElement;
+              while (
+                container &&
+                !/(auto|scroll)/.test(getComputedStyle(container).overflowY)
+              ) {
+                container = container.parentElement;
+              }
+              if (!container) throw new Error("Draft scroll container missing");
+              container.scrollTop =
+                fraction * (container.scrollHeight - container.clientHeight);
+              return Math.abs(
+                container.getBoundingClientRect().bottom -
+                  element.getBoundingClientRect().bottom
+              );
+            }, progress)
+          )
+          .toBeLessThanOrEqual(1);
+        await expect(
+          footer.getByRole("button", { name: "Next", exact: true })
+        ).toBeInViewport({ ratio: 1 });
+        if (progress === 0.5) {
+          await page.screenshot({
+            path: testInfo.outputPath(`${draft}-draft-footer.png`),
+          });
+        }
+      }
+      await expect
+        .poll(() =>
+          footer.evaluate((element) => {
+            const fields = element
+              .closest("section")
+              ?.querySelector("fieldset");
+            if (!fields) throw new Error("Draft fields missing");
+            return (
+              fields.getBoundingClientRect().bottom -
+              element.getBoundingClientRect().top
+            );
+          })
+        )
+        .toBeLessThanOrEqual(0);
+      await expectNoHorizontalOverflow(page);
+    }
+  });
+
+  test("keeps competition fields above the app keyboard and restores the footer", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      testInfo.project.name !== "web-mobile-chromium",
+      "App keyboard layout"
+    );
+    const sandbox = await installCompetitionApi(page);
+    await installSurfaceSimulation(
+      page.context(),
+      "capacitor-ios-sim",
+      testInfo.project.use.baseURL
+    );
+    await page.goto(`${ROOT}/new`);
+    const name = page.getByLabel("Competition name", { exact: true });
+    const footer = page
+      .getByRole("button", { name: "Close editor", exact: true })
+      .locator("..");
+
+    for (const draft of ["new", "reopened"]) {
+      if (draft === "reopened") {
+        await name.fill("Keyboard layout draft");
+        await expect.poll(() => sandbox.requests.length).toBe(1);
+        await page.setViewportSize({ width: 375, height: 667 });
+        await page.goto(`${ROOT}/draft`);
+        await expect(name).toHaveValue("Keyboard layout draft");
+      }
+      await expect(name).toBeVisible({ timeout: 30000 });
+      const restingBottom = await footer.evaluate(
+        (element) => element.getBoundingClientRect().bottom
+      );
+      for (const label of ["Competition name", "Description"]) {
+        const field = page.getByLabel(label, { exact: true });
+        expect(
+          await field.evaluate((element) =>
+            Number.parseFloat(getComputedStyle(element).fontSize)
+          )
+        ).toBeGreaterThanOrEqual(16);
+        await field.tap();
+        for (const keyboardHeight of draft === "new"
+          ? [320, 400]
+          : [260, 320]) {
+          await page.evaluate((height) => {
+            const viewport = globalThis.visualViewport;
+            if (!viewport) throw new Error("Visual viewport missing");
+            Object.defineProperty(viewport, "height", {
+              configurable: true,
+              value: globalThis.innerHeight - height,
+            });
+            viewport.dispatchEvent(new Event("resize"));
+          }, keyboardHeight);
+          await expect(page.locator("html")).toHaveAttribute(
+            "data-native-keyboard-visible",
+            "true"
+          );
+          await expect(field).toBeFocused();
+          await expect
+            .poll(() =>
+              field.evaluate((element) => {
+                let container = element.parentElement;
+                while (
+                  container &&
+                  !/(auto|scroll)/.test(getComputedStyle(container).overflowY)
+                ) {
+                  container = container.parentElement;
+                }
+                if (!container)
+                  throw new Error("Draft scroll container missing");
+                const bounds = element.getBoundingClientRect();
+                return {
+                  aboveKeyboard:
+                    bounds.bottom <=
+                    (globalThis.visualViewport?.height ?? 0) - 8,
+                  belowHeader:
+                    bounds.top >= container.getBoundingClientRect().top + 8,
+                };
+              })
+            )
+            .toEqual({ aboveKeyboard: true, belowHeader: true });
+        }
+        await expect
+          .poll(
+            async () => {
+              const fieldBox = await field.boundingBox();
+              const footerBox = await footer.boundingBox();
+              return fieldBox && footerBox
+                ? fieldBox.y + fieldBox.height - footerBox.y
+                : Number.POSITIVE_INFINITY;
+            },
+            { message: `${draft} ${label} must not be covered by the footer` }
+          )
+          .toBeLessThanOrEqual(-8);
+      }
+      await page.screenshot({
+        path: testInfo.outputPath(`${draft}-description-keyboard.png`),
+        animations: "disabled",
+        style: "nextjs-portal { visibility: hidden; }",
+      });
+      await name.evaluate(() => {
+        if (document.activeElement instanceof HTMLElement)
+          document.activeElement.blur();
+        const viewport = globalThis.visualViewport;
+        if (!viewport) throw new Error("Visual viewport missing");
+        Reflect.deleteProperty(viewport, "height");
+        viewport.dispatchEvent(new Event("resize"));
+      });
+      await expect(page.locator("html")).not.toHaveAttribute(
+        "data-native-keyboard-visible",
+        "true"
+      );
+      await expect
+        .poll(() =>
+          footer.evaluate((element) => element.getBoundingClientRect().bottom)
+        )
+        .toBeCloseTo(restingBottom, 0);
+      await expectNoHorizontalOverflow(page);
+    }
+  });
+
+  test("uses the shared competition type dropdown and app bottom sheet", async ({
+    page,
+  }, testInfo) => {
+    const app = testInfo.project.name === "web-mobile-chromium";
+    await installCompetitionApi(page);
+    if (app) {
+      await installSurfaceSimulation(
+        page.context(),
+        "capacitor-ios-sim",
+        testInfo.project.use.baseURL
+      );
+    }
+    await page.goto(`${ROOT}/new`);
+    const trigger = page.getByRole("combobox", {
+      name: "Competition type",
+      exact: true,
+      includeHidden: true,
+    });
+    await expect(trigger).toHaveText("Rank");
+    await expect(trigger).toHaveAttribute(
+      "aria-haspopup",
+      app ? "dialog" : "listbox"
+    );
+    await expect
+      .poll(() =>
+        trigger.evaluate((element) => {
+          const icon = element.querySelector("svg");
+          if (!icon) throw new Error("Dropdown chevron missing");
+          return (
+            element.getBoundingClientRect().right -
+            icon.getBoundingClientRect().right
+          );
+        })
+      )
+      .toBeGreaterThanOrEqual(8);
+
+    if (app) await trigger.tap();
+    else await trigger.press("ArrowDown");
+    const choices = page.getByRole("listbox", {
+      name: "Competition type",
+      exact: true,
+    });
+    await expect(choices).toBeVisible();
+    await expect(
+      choices.getByRole("option", { name: "Rank", exact: true })
+    ).toHaveAttribute("aria-selected", "true");
+    if (app) {
+      const sheet = page.getByRole("dialog", {
+        name: "Competition type",
+        exact: true,
+      });
+      await expect(sheet).toHaveAttribute("aria-modal", "true");
+      await expect(sheet).toHaveAttribute(
+        "id",
+        (await trigger.getAttribute("aria-controls"))!
+      );
+      const sheetPanel = page
+        .getByRole("dialog", { name: "Competition type", exact: true })
+        .locator(".mobile-wrapper-dialog");
+      await expect(sheetPanel).toBeVisible();
+      await expect
+        .poll(() =>
+          sheetPanel.evaluate((element) =>
+            Math.abs(innerHeight - element.getBoundingClientRect().bottom)
+          )
+        )
+        .toBeLessThanOrEqual(1);
+    } else {
+      await expect(choices).toHaveAttribute(
+        "id",
+        (await trigger.getAttribute("aria-controls"))!
+      );
+      await expect(
+        page.getByRole("dialog", { name: "Competition type", exact: true })
+      ).toHaveCount(0);
+      await expect(
+        choices.getByRole("option", { name: "Rank", exact: true })
+      ).toBeFocused();
+    }
+    await page.screenshot({
+      path: testInfo.outputPath("competition-type-open.png"),
+      animations: "disabled",
+      style: "nextjs-portal { visibility: hidden; }",
+    });
+    if (app)
+      await choices.getByRole("option", { name: "Approve", exact: true }).tap();
+    else {
+      await page.keyboard.press("ArrowDown");
+      await expect(
+        choices.getByRole("option", { name: "Approve", exact: true })
+      ).toBeFocused();
+      await page.keyboard.press("Enter");
+    }
+    await expect(trigger).toHaveText("Approve");
+    await expect(choices).toBeHidden();
+    await expect(trigger).toBeFocused();
+    await expect(page.getByText("Ranking mode", { exact: true })).toHaveCount(
+      0
+    );
+    await trigger.click();
+    await expect(
+      choices.getByRole("option", { name: "Approve", exact: true })
+    ).toHaveAttribute("aria-selected", "true");
+    await page.keyboard.press("Escape");
+    await expect(choices).toBeHidden();
+    await expect(trigger).toHaveText("Approve");
+    await expect(trigger).toBeFocused();
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await trigger.click();
+    await choices.getByRole("option", { name: "Rank", exact: true }).click();
+    await expect(trigger).toHaveText("Rank");
+    await expect(choices).toBeHidden();
+    await expectNoHorizontalOverflow(page);
+  });
+
   test("protects an unfinished draft when browser storage is unavailable", async ({
     page,
   }) => {
@@ -988,7 +1452,8 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       .click();
     await page
       .getByRole("combobox", { name: "Competition type", exact: true })
-      .selectOption("APPROVE");
+      .click();
+    await page.getByRole("option", { name: "Approve", exact: true }).click();
     await page
       .getByLabel("Competition name", { exact: true })
       .fill("Unsaved approve draft");
@@ -1565,6 +2030,132 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     }
   });
 
+  for (const mode of ["native", "legacy", "app"] as const) {
+    test(`acknowledges tab navigation and avoids page requests for same-page tabs (${mode})`, async ({
+      page,
+    }, testInfo) => {
+      test.skip(
+        mode === "app" && testInfo.project.name !== "web-mobile-chromium",
+        "The app simulation uses the mobile viewport."
+      );
+      const sandbox = await installCompetitionApi(page);
+      if (mode !== "native") await sandbox.legacyPrimary("alpha");
+      if (mode === "app")
+        await installSurfaceSimulation(
+          page.context(),
+          "capacitor-ios-sim",
+          testInfo.project.use.baseURL
+        );
+      await page.goto(`/waves/${WAVE}`);
+      const role = mode === "app" ? "button" : "tab";
+      const selectedAttribute =
+        mode === "app" ? "aria-current" : "aria-selected";
+      const chat = page.getByRole(role, { name: "Chat", exact: true });
+      const leaderboard = page.getByRole(role, {
+        name: "Leaderboard",
+        exact: true,
+      });
+      await expect(chat).toHaveAttribute(selectedAttribute, "true");
+      await expect(leaderboard).toBeVisible();
+
+      let releaseNavigation!: () => void;
+      const navigation = new Promise<void>((resolve) => {
+        releaseNavigation = resolve;
+      });
+      await page.route(
+        `**/waves/${WAVE}/competitions/alpha?**`,
+        async (route) => {
+          if (new URL(route.request().url()).searchParams.has("_rsc"))
+            await navigation;
+          await route.continue();
+        }
+      );
+      try {
+        await page.emulateMedia({ reducedMotion: "reduce" });
+        const before = await leaderboard.boundingBox();
+        await leaderboard.click();
+        await expect(leaderboard).toHaveAttribute("aria-busy", "true");
+        await expect(chat).toHaveAttribute(selectedAttribute, "true");
+        const pending = await leaderboard.boundingBox();
+        expect(pending?.width).toBe(before?.width);
+        expect(pending?.height).toBe(before?.height);
+        const indicator = page
+          .getByRole(role, { name: "Leaderboard", exact: true })
+          .locator('[aria-hidden="true"]')
+          .last();
+        await expect(indicator).toBeVisible();
+        await expect(indicator).toHaveCSS("animation-name", "none");
+        await page.screenshot({ path: testInfo.outputPath("pending-tab.png") });
+        releaseNavigation();
+        await expect(page).toHaveURL(/alpha\?tab=leaderboard$/, {
+          timeout: 30000,
+        });
+        await expect(leaderboard).toHaveAttribute(selectedAttribute, "true");
+        await expect(leaderboard).not.toHaveAttribute("aria-busy", "true");
+        if (mode === "native")
+          await expect(
+            page.getByText("Immutable alpha entry content", { exact: true })
+          ).toBeVisible();
+        else await expectLegacySectionContent(page, "leaderboard");
+
+        const pageRequests: string[] = [];
+        page.on("request", (request) => {
+          const url = new URL(request.url());
+          if (url.pathname === `${ROOT}/alpha` && url.searchParams.has("_rsc"))
+            pageRequests.push(url.pathname);
+        });
+        const winners = page.getByRole(role, { name: "Winners", exact: true });
+        const outcome = page.getByRole(role, {
+          name: /^Outcomes?$/,
+          exact: true,
+        });
+        const outcomeContent = page.getByText(
+          mode === "native" ? "Nothing to show yet." : "No outcomes to show.",
+          { exact: true }
+        );
+        const winnersContent = page.getByText(
+          mode === "native" ? "No Winners to Display" : "No Winners Yet",
+          { exact: true }
+        );
+        await winners.click();
+        await expect(winners).toHaveAttribute(selectedAttribute, "true");
+        await expect(page).toHaveURL(/alpha\?tab=decisions$/);
+        await expect(winners).not.toHaveAttribute("aria-busy", "true");
+        await expect(winners).toBeFocused();
+        await expect(winnersContent).toBeVisible();
+        await outcome.click();
+        await expect(outcome).toHaveAttribute(selectedAttribute, "true");
+        await expect(page).toHaveURL(/alpha\?tab=outcomes$/);
+        await expect(outcomeContent).toBeVisible();
+        await expect(winnersContent).toHaveCount(0);
+        await page.goBack();
+        await expect(winners).toHaveAttribute(selectedAttribute, "true");
+        await expect(page).toHaveURL(/alpha\?tab=decisions$/);
+        await expect(winnersContent).toBeVisible();
+        await page.goForward();
+        await expect(outcome).toHaveAttribute(selectedAttribute, "true");
+        await expect(page).toHaveURL(/alpha\?tab=outcomes$/);
+        await expect(outcomeContent).toBeVisible();
+        // Two quick choices must settle on the last one, without a stuck cue.
+        await winners.evaluate((button) => {
+          (button as HTMLButtonElement).click();
+          const next = Array.from(document.querySelectorAll("button")).find(
+            (candidate) =>
+              /^Outcomes?$/.test(candidate.textContent?.trim() ?? "")
+          );
+          next?.click();
+        });
+        await expect(outcome).toHaveAttribute(selectedAttribute, "true");
+        await expect(page).toHaveURL(/alpha\?tab=outcomes$/);
+        await expect(winners).not.toHaveAttribute("aria-busy", "true");
+        await expect(outcomeContent).toBeVisible();
+        expect(pageRequests).toEqual([]);
+      } finally {
+        releaseNavigation();
+      }
+    });
+  }
+
   test("opens Chat on wave entry and preserves explicit tabs, reload, back and forward", async ({
     page,
   }, testInfo) => {
@@ -1852,6 +2443,111 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     });
   }
 
+  for (const app of [false, true]) {
+    test(`keeps settled tabs still during an unchanged competition refresh (${app ? "app" : "web"})`, async ({
+      page,
+    }, testInfo) => {
+      test.skip(app && testInfo.project.name !== "web-mobile-chromium");
+      const sandbox = await installCompetitionApi(page, false, false);
+      sandbox.onlyCompetition("alpha");
+      sandbox.refreshAtBoundary();
+      if (app)
+        await installSurfaceSimulation(
+          page.context(),
+          "capacitor-ios-sim",
+          testInfo.project.use.baseURL
+        );
+      let holdRefresh = false;
+      let refreshStarted = false;
+      let releaseRefresh!: () => void;
+      const refreshGate = new Promise<void>((resolve) => {
+        releaseRefresh = resolve;
+      });
+      await page.route("**/v3/waves/**/default-competition", async (route) => {
+        if (holdRefresh) {
+          refreshStarted = true;
+          await refreshGate;
+        }
+        await route.fallback();
+      });
+      try {
+        await page.goto(`${ROOT}/alpha?tab=rules`);
+        const tabs = app
+          ? page.getByRole("navigation", { name: "Wave sections" })
+          : waveTabStrip(page).filter({ visible: true });
+        const settings = tabs.getByRole(app ? "button" : "tab", {
+          name: "Settings",
+          exact: true,
+        });
+        const collection = tabs.getByRole(app ? "button" : "tab", {
+          name: /^Competitions/,
+        });
+        await expect(settings).toHaveAttribute(
+          app ? "aria-current" : "aria-selected",
+          "true"
+        );
+        await expect(collection).toHaveCount(0);
+        await expect(settings).toBeVisible();
+        await tabs.screenshot({
+          path: testInfo.outputPath("tabs-before-refresh.png"),
+        });
+        const before = await settings.boundingBox();
+        expect(before).not.toBeNull();
+        // Observe the whole refresh, not only its endpoints, so a brief extra tab fails.
+        const monitor = await tabs.evaluateHandle((element) => {
+          const labels = () =>
+            Array.from(
+              element.querySelectorAll('button, [role="tab"]'),
+              (item) => item.textContent?.trim()
+            )
+              .filter(Boolean)
+              .join("|");
+          const initial = labels();
+          const changes: string[] = [];
+          const observer = new MutationObserver(() => {
+            const current = labels();
+            if (current !== initial) changes.push(current);
+          });
+          observer.observe(element, {
+            childList: true,
+            subtree: true,
+            characterData: true,
+          });
+          return { observer, changes };
+        });
+        holdRefresh = true;
+        await expect.poll(() => refreshStarted, { timeout: 10000 }).toBe(true);
+        await expect(collection).toHaveCount(0);
+        await tabs.screenshot({
+          path: testInfo.outputPath("tabs-during-refresh.png"),
+        });
+        expect((await settings.boundingBox())?.x).toBeCloseTo(before!.x, 0);
+        const response = page.waitForResponse(
+          "**/v3/waves/**/default-competition"
+        );
+        holdRefresh = false;
+        releaseRefresh();
+        await response;
+        await tabs.screenshot({
+          path: testInfo.outputPath("tabs-after-refresh.png"),
+        });
+        await expect(collection).toHaveCount(0);
+        expect((await settings.boundingBox())?.x).toBeCloseTo(before!.x, 0);
+        expect(
+          await monitor.evaluate(({ observer, changes }) => {
+            observer.disconnect();
+            return changes;
+          })
+        ).toEqual([]);
+        await monitor.dispose();
+        expect(sandbox.requests).toEqual([]);
+      } finally {
+        holdRefresh = false;
+        releaseRefresh();
+      }
+    });
+  }
+
   for (const phase of ["COMPLETED", "UPCOMING"]) {
     test(`retains the collection for a non-admin with an active default plus ${phase}`, async ({
       page,
@@ -1924,6 +2620,95 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       fullPage: true,
     });
   });
+
+  for (const legacy of [false, true]) {
+    test(`keeps visible app tabs still when selecting Settings and Votes (${legacy ? "legacy" : "native"})`, async ({
+      page,
+    }, testInfo) => {
+      test.skip(testInfo.project.name !== "web-mobile-chromium");
+      // Match the server fixture's admin identity, keeping the create control stable.
+      const sandbox = await installCompetitionApi(page);
+      sandbox.onlyCompetition("alpha");
+      if (legacy) await sandbox.legacyPrimary("alpha");
+      await installSurfaceSimulation(
+        page.context(),
+        "capacitor-ios-sim",
+        testInfo.project.use.baseURL
+      );
+      await page.goto(`${ROOT}/alpha?tab=rules`);
+      const navigation = page.getByRole("navigation", {
+        name: "Wave sections",
+      });
+      const scroller = page
+        .getByRole("navigation", { name: "Wave sections" })
+        .locator('[data-wave-tabs-scroll="app"]');
+      const settings = navigation.getByRole("button", {
+        name: "Settings",
+        exact: true,
+      });
+      await expect(settings).toHaveAttribute("aria-current", "true");
+      // Match a user who has already swiped both target tabs into view.
+      const initialScrollLeft = await scroller.evaluate((element) => {
+        const votes = Array.from(element.querySelectorAll("button")).find(
+          (button) => button.textContent?.trim() === "Votes"
+        );
+        if (!votes) throw new Error("Votes tab missing");
+        element.scrollTo({
+          left:
+            element.scrollLeft +
+            votes.getBoundingClientRect().left -
+            element.getBoundingClientRect().left,
+          behavior: "instant",
+        });
+        return element.scrollLeft;
+      });
+      expect(initialScrollLeft).toBeGreaterThan(0);
+      const initialSettingsLeft = await settings.evaluate(
+        (element) => element.getBoundingClientRect().left
+      );
+
+      for (const name of ["Votes", "Settings"]) {
+        const tab = navigation.getByRole("button", { name, exact: true });
+        const buttonBounds = await tab.boundingBox();
+        const rowBounds = await scroller.boundingBox();
+        if (!buttonBounds || !rowBounds)
+          throw new Error("Tab row is not visible");
+        expect(buttonBounds.x).toBeGreaterThanOrEqual(rowBounds.x - 1);
+        expect(buttonBounds.x + buttonBounds.width).toBeLessThanOrEqual(
+          rowBounds.x + rowBounds.width + 1
+        );
+        // Tap where a finger would, without Playwright first scrolling the button.
+        await page.touchscreen.tap(
+          buttonBounds.x + buttonBounds.width / 2,
+          buttonBounds.y + buttonBounds.height / 2
+        );
+        await expect(tab).toHaveAttribute("aria-current", "true");
+        const movement = await settings.evaluate(async (element, initial) => {
+          let maximum = Math.abs(
+            element.getBoundingClientRect().left - initial
+          );
+          const until = performance.now() + 500;
+          await new Promise<void>((resolve) => {
+            const sample = () => {
+              maximum = Math.max(
+                maximum,
+                Math.abs(element.getBoundingClientRect().left - initial)
+              );
+              if (performance.now() < until) requestAnimationFrame(sample);
+              else resolve();
+            };
+            requestAnimationFrame(sample);
+          });
+          return maximum;
+        }, initialSettingsLeft);
+        expect(movement).toBeLessThanOrEqual(1);
+      }
+      await expectNoHorizontalOverflow(page);
+      await navigation.screenshot({
+        path: testInfo.outputPath("stable-app-tab-row.png"),
+      });
+    });
+  }
 
   test("retains sole legacy Configuration in the app on a wave URL without a competition selection", async ({
     page,
@@ -2410,13 +3195,16 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
   test("keeps a zero-competition wave usable as shared chat", async ({
     page,
   }) => {
-    const sandbox = await installCompetitionApi(page);
-    sandbox.setDefault(null);
+    const sandbox = await installCompetitionApi(page, false, false);
+    sandbox.clearCompetitions();
     await page.goto(`/waves/${WAVE}`);
     await expect(
       page.getByRole("tab", { name: "Chat", exact: true })
     ).toBeVisible({ timeout: 30000 });
     await expect(page).toHaveURL(new RegExp(`/waves/${WAVE}$`));
+    await expect(
+      waveTabStrip(page).getByRole("tab", { name: /^Competitions/ })
+    ).toHaveCount(0);
     await expect(
       page.getByRole("heading", {
         name: /Parallel Alpha|Parallel Beta/,
