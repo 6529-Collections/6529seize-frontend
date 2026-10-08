@@ -9,6 +9,7 @@ import {
   useMobileBatterySavings,
 } from "@/hooks/useMobileAppActivity";
 import { subscribeToTouchFirstChanges } from "@/helpers/touch-first.helpers";
+import { subscribeMobileAppActivity } from "@/services/app-activity/mobile-app-activity";
 import { useVideoLoading } from "@/components/drops/view/item/content/media/useVideoLoading";
 
 let mockMobileBrowser = true;
@@ -84,9 +85,55 @@ it("retains desktop activity and responds to device capability changes", () => {
   expect(result.current.active).toBe(true);
 });
 
+it("only listens to visibility while touch-first and cleans up capability transitions", () => {
+  mockMobileBrowser = false;
+  const add = jest.spyOn(document, "addEventListener");
+  const remove = jest.spyOn(document, "removeEventListener");
+  const notify = jest.fn();
+  const unsubscribe = subscribeMobileAppActivity(notify);
+  const visibilityAdds = () =>
+    add.mock.calls.filter(([type]) => type === "visibilitychange");
+  const visibilityRemoves = () =>
+    remove.mock.calls.filter(([type]) => type === "visibilitychange");
+  try {
+    expect(visibilityAdds()).toHaveLength(0);
+    expect(subscribeToTouchFirstChanges).toHaveBeenCalledTimes(1);
+    setVisibility("hidden");
+    expect(notify).not.toHaveBeenCalled();
+
+    mockMobileBrowser = true;
+    mockCapabilitiesChanged();
+    mockCapabilitiesChanged();
+    expect(visibilityAdds()).toHaveLength(1);
+    notify.mockClear();
+    setVisibility("visible");
+    expect(notify).toHaveBeenCalledTimes(1);
+
+    mockMobileBrowser = false;
+    mockCapabilitiesChanged();
+    expect(visibilityRemoves()).toHaveLength(1);
+    notify.mockClear();
+    setVisibility("hidden");
+    expect(notify).not.toHaveBeenCalled();
+
+    mockMobileBrowser = true;
+    mockCapabilitiesChanged();
+    expect(visibilityAdds()).toHaveLength(2);
+    expect(App.addListener).not.toHaveBeenCalled();
+    expect(App.getState).not.toHaveBeenCalled();
+  } finally {
+    unsubscribe();
+    expect(visibilityRemoves()).toHaveLength(2);
+    expect(mockRemoveCapabilities).toHaveBeenCalledTimes(1);
+    add.mockRestore();
+    remove.mockRestore();
+  }
+});
+
 it("still observes native app pauses when the document remains visible", async () => {
   jest.mocked(Capacitor.isNativePlatform).mockReturnValue(true);
   mockMobileBrowser = false;
+  const add = jest.spyOn(document, "addEventListener");
   let sendState: ((state: { isActive: boolean }) => void) | undefined;
   const remove = jest.fn().mockResolvedValue(undefined);
   jest.mocked(App.getState).mockResolvedValue({ isActive: true });
@@ -111,9 +158,13 @@ it("still observes native app pauses when the document remains visible", async (
   expect(first.result.current).toBe(false);
   expect(second.result.current).toBe(true);
   expect(App.addListener).toHaveBeenCalledTimes(1);
+  expect(
+    add.mock.calls.filter(([type]) => type === "visibilitychange")
+  ).toHaveLength(1);
   first.unmount();
   second.unmount();
   expect(remove).toHaveBeenCalledTimes(1);
+  add.mockRestore();
 });
 
 it("hydrates before applying hidden mobile-browser activity", async () => {

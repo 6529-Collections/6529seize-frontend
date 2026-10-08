@@ -19,11 +19,11 @@ export function getMobileBatterySavings(): boolean {
 }
 
 export function getMobileAppActivity(): boolean {
+  if (Capacitor.isNativePlatform()) return getNativeAppActivity();
   return (
     !getMobileBatterySavings() ||
-    (getNativeAppActivity() &&
-      (typeof document === "undefined" ||
-        document.visibilityState !== "hidden"))
+    typeof document === "undefined" ||
+    document.visibilityState !== "hidden"
   );
 }
 
@@ -31,20 +31,38 @@ function notifySubscribers(): void {
   subscribers.forEach((subscriber) => subscriber());
 }
 
+function listenToActivity(): () => void {
+  if (Capacitor.isNativePlatform()) {
+    return subscribeNativeAppActivity(notifySubscribers);
+  }
+  if (typeof document === "undefined") return () => undefined;
+  document.addEventListener("visibilitychange", notifySubscribers);
+  return () =>
+    document.removeEventListener("visibilitychange", notifySubscribers);
+}
+
 /** Share one visibility/capability subscription across all mobile consumers. */
 export function subscribeMobileAppActivity(subscriber: () => void): () => void {
   subscribers.add(subscriber);
   if (!stopListening) {
-    const unsubscribeNative = subscribeNativeAppActivity(notifySubscribers);
-    const unsubscribeCapabilities =
-      subscribeToTouchFirstChanges(notifySubscribers);
-    if (typeof document !== "undefined")
-      document.addEventListener("visibilitychange", notifySubscribers);
+    let unsubscribeActivity: (() => void) | undefined;
+    const reconcileActivity = () => {
+      if (getMobileBatterySavings()) {
+        unsubscribeActivity ??= listenToActivity();
+      } else {
+        unsubscribeActivity?.();
+        unsubscribeActivity = undefined;
+      }
+    };
+    reconcileActivity();
+    // Retain capability detection so hybrids can enter or leave touch-first mode.
+    const unsubscribeCapabilities = subscribeToTouchFirstChanges(() => {
+      reconcileActivity();
+      notifySubscribers();
+    });
     stopListening = () => {
-      unsubscribeNative();
       unsubscribeCapabilities();
-      if (typeof document !== "undefined")
-        document.removeEventListener("visibilitychange", notifySubscribers);
+      unsubscribeActivity?.();
     };
   }
   return () => {
