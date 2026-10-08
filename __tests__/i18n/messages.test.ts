@@ -89,6 +89,16 @@ const FILE_KIND_MESSAGE_KEYS = [
 ] as const;
 
 describe("frontend i18n helpers", () => {
+  it.each(SUPPORTED_LOCALES)("resolves wave tab copy for %s", (locale) => {
+    expect(t(locale, "wave.navigation.chat")).toBe("Chat");
+    expect(t(locale, "wave.navigation.sales")).toBe("Sales");
+    expect(t(locale, "wave.navigation.myStream")).toBe("My Stream");
+    expect(t(locale, "wave.navigation.polls")).toBe("Polls");
+    expect(t(locale, "wave.navigation.loadingSection")).toBe(
+      "Loading section…"
+    );
+  });
+
   it("keeps rich values in the message-defined order", () => {
     const artistLink = { type: "artist-link" } as const;
 

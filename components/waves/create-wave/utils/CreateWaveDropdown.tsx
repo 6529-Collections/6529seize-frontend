@@ -7,6 +7,8 @@ import type { KeyboardEvent } from "react";
 import { useClickAway } from "react-use";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
+import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
 
 interface CreateWaveDropdownOption<TValue extends string> {
   readonly value: TValue;
@@ -23,6 +25,8 @@ export default function CreateWaveDropdown<TValue extends string>({
   hasError = false,
   accentValue = false,
   rounding = "all",
+  disabled = false,
+  mobileSheet = false,
   onChange,
 }: {
   readonly value: TValue;
@@ -34,9 +38,13 @@ export default function CreateWaveDropdown<TValue extends string>({
   readonly hasError?: boolean | undefined;
   readonly accentValue?: boolean | undefined;
   readonly rounding?: "all" | "right" | undefined;
+  readonly disabled?: boolean | undefined;
+  readonly mobileSheet?: boolean | undefined;
   readonly onChange: (value: TValue) => void;
 }) {
   const locale = useBrowserLocale();
+  const isMobileViewport = useIsMobileLayoutViewport();
+  const useMobileSheet = mobileSheet && isMobileViewport;
   const [isOpen, setIsOpen] = useState(false);
   const [menuPlacement, setMenuPlacement] = useState<"top" | "bottom">(
     "bottom"
@@ -46,6 +54,8 @@ export default function CreateWaveDropdown<TValue extends string>({
   const menuRef = useRef<HTMLUListElement>(null);
   const optionRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const menuId = useId();
+  const dialogId = `${menuId}-dialog`;
+  const popupId = useMobileSheet ? dialogId : menuId;
   const valueDescriptionId = `${menuId}-value`;
   const selectedIndex = Math.max(
     0,
@@ -61,6 +71,7 @@ export default function CreateWaveDropdown<TValue extends string>({
   };
 
   const selectOption = (option: CreateWaveDropdownOption<TValue>) => {
+    if (disabled) return;
     onChange(option.value);
     closeMenu(true);
   };
@@ -120,10 +131,12 @@ export default function CreateWaveDropdown<TValue extends string>({
     }
   };
 
-  useClickAway(dropdownRef, () => closeMenu());
+  useClickAway(dropdownRef, () => {
+    if (!useMobileSheet) closeMenu();
+  });
 
   useLayoutEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen || useMobileSheet) return;
 
     const updatePlacement = () => {
       const dropdown = dropdownRef.current;
@@ -167,7 +180,10 @@ export default function CreateWaveDropdown<TValue extends string>({
       window.removeEventListener("resize", updatePlacement);
       window.removeEventListener("scroll", updatePlacement, true);
     };
-  }, [isOpen]);
+  }, [isOpen, useMobileSheet]);
+
+  // A disabled form must not reopen a previously open picker when it unlocks.
+  if (disabled && isOpen) setIsOpen(false);
 
   const stateClasses = hasError
     ? "tw-ring-error focus:tw-ring-error"
@@ -177,12 +193,55 @@ export default function CreateWaveDropdown<TValue extends string>({
     : "tw-text-iron-300";
   const roundingClasses =
     rounding === "right" ? "tw-rounded-r-lg" : "tw-rounded-lg";
+  const placementClasses =
+    menuPlacement === "top" ? "tw-bottom-full tw-mb-1" : "tw-top-full tw-mt-1";
+  const menuClasses = useMobileSheet
+    ? ""
+    : `tw-absolute tw-z-20 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-shadow-lg ${placementClasses}`;
+
+  const optionList = (
+    <ul
+      ref={menuRef}
+      id={menuId}
+      role="listbox"
+      aria-label={ariaLabel}
+      data-placement={useMobileSheet ? undefined : menuPlacement}
+      className={`tw-m-0 tw-w-full tw-list-none tw-bg-iron-950 tw-p-2 ${menuClasses}`}
+    >
+      {options.map((option, index) => (
+        <li key={option.value} role="none">
+          <button
+            ref={(element) => {
+              optionRefs.current[index] = element;
+            }}
+            type="button"
+            role="option"
+            aria-selected={option.value === value}
+            disabled={disabled}
+            onClick={() => selectOption(option)}
+            onKeyDown={(event) => onOptionKeyDown(event, index)}
+            className="tw-relative tw-flex tw-min-h-11 tw-w-full tw-cursor-pointer tw-select-none tw-items-center tw-justify-between tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-3 tw-py-2.5 tw-text-left tw-text-sm tw-font-medium tw-text-white tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-bg-white/[0.06] motion-reduce:tw-transition-none"
+          >
+            <span>{option.label}</span>
+            {option.value === value && (
+              <FontAwesomeIcon
+                icon={faCheck}
+                className="tw-ml-2 tw-size-4 tw-flex-shrink-0 tw-text-primary-300"
+                aria-hidden="true"
+              />
+            )}
+          </button>
+        </li>
+      ))}
+    </ul>
+  );
 
   return (
     <div
       className="tw-relative tw-w-full"
       ref={dropdownRef}
       onBlur={(event) => {
+        if (useMobileSheet) return;
         if (
           event.relatedTarget instanceof Node &&
           event.currentTarget.contains(event.relatedTarget)
@@ -203,18 +262,20 @@ export default function CreateWaveDropdown<TValue extends string>({
             : valueDescriptionId
         }
         aria-invalid={ariaInvalid || undefined}
-        aria-haspopup="listbox"
-        aria-expanded={isOpen}
-        aria-controls={isOpen ? menuId : undefined}
+        aria-haspopup={useMobileSheet ? "dialog" : "listbox"}
+        aria-expanded={isOpen && !disabled}
+        aria-controls={isOpen && !disabled ? popupId : undefined}
+        disabled={disabled}
         data-testid={dataTestId}
         onClick={() => setIsOpen((current) => !current)}
         onKeyDown={onTriggerKeyDown}
-        className={`${stateClasses} ${valueClasses} ${roundingClasses} tw-flex tw-h-11 tw-w-full tw-items-center tw-justify-between tw-border-0 tw-bg-iron-950 tw-px-3 tw-text-base tw-font-medium tw-shadow-inner tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-inset sm:tw-text-sm`}
+        className={`${stateClasses} ${valueClasses} ${roundingClasses} tw-flex tw-h-11 tw-w-full tw-items-center tw-justify-between tw-border-0 tw-bg-iron-950 tw-px-3 tw-text-base tw-font-medium tw-shadow-inner tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-inset disabled:tw-cursor-not-allowed disabled:tw-opacity-50 motion-reduce:tw-transition-none sm:tw-text-sm`}
       >
         <span>{selectedOption?.label}</span>
         <FontAwesomeIcon
           icon={faChevronDown}
-          className={`tw-ml-2 tw-size-4 tw-flex-shrink-0 tw-text-primary-400 tw-transition-transform tw-duration-300 ${
+          aria-hidden="true"
+          className={`tw-ml-2 tw-size-4 tw-flex-shrink-0 tw-text-primary-400 tw-transition-transform tw-duration-300 motion-reduce:tw-transition-none ${
             isOpen ? "tw-rotate-180" : ""
           }`}
         />
@@ -225,44 +286,17 @@ export default function CreateWaveDropdown<TValue extends string>({
         })}
       </span>
 
-      {isOpen && (
-        <ul
-          ref={menuRef}
-          id={menuId}
-          role="listbox"
-          aria-label={ariaLabel}
-          data-placement={menuPlacement}
-          className={`tw-absolute tw-z-20 tw-m-0 tw-w-full tw-list-none tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-p-2 tw-shadow-lg ${
-            menuPlacement === "top"
-              ? "tw-bottom-full tw-mb-1"
-              : "tw-top-full tw-mt-1"
-          }`}
+      {useMobileSheet ? (
+        <MobileWrapperDialog
+          id={dialogId}
+          title={ariaLabel}
+          isOpen={isOpen && !disabled}
+          onClose={() => closeMenu()}
         >
-          {options.map((option, index) => (
-            <li key={option.value} role="none">
-              <button
-                ref={(element) => {
-                  optionRefs.current[index] = element;
-                }}
-                type="button"
-                role="option"
-                aria-selected={option.value === value}
-                onClick={() => selectOption(option)}
-                onKeyDown={(event) => onOptionKeyDown(event, index)}
-                className="tw-relative tw-flex tw-min-h-11 tw-w-full tw-cursor-pointer tw-select-none tw-items-center tw-justify-between tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-3 tw-py-2.5 tw-text-left tw-text-sm tw-font-medium tw-text-white tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-bg-white/[0.06]"
-              >
-                <span>{option.label}</span>
-                {option.value === value && (
-                  <FontAwesomeIcon
-                    icon={faCheck}
-                    className="tw-ml-2 tw-size-4 tw-flex-shrink-0 tw-text-primary-300"
-                    aria-hidden="true"
-                  />
-                )}
-              </button>
-            </li>
-          ))}
-        </ul>
+          {optionList}
+        </MobileWrapperDialog>
+      ) : (
+        isOpen && !disabled && optionList
       )}
     </div>
   );

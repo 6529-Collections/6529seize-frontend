@@ -8,6 +8,8 @@ import {
   PlusIcon,
 } from "@heroicons/react/24/outline";
 import { TabToggle } from "@/components/common/TabToggle";
+import { TabToggleWithOverflow } from "@/components/common/TabToggleWithOverflow";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
 import type { ApiCompetition } from "@/generated/models/ApiCompetition";
 import type { ApiWaveV3 } from "@/generated/models/ApiWaveV3";
 import {
@@ -122,6 +124,7 @@ function CompetitionCard({
 }
 function CompetitionCollection({ hub }: { readonly hub: ApiWaveV3 }) {
   const locale = useBrowserLocale();
+  const { isApp } = useDeviceInfo();
   const [filter, setFilter] = useState<CompetitionCollectionFilter>("active");
   const query = useCompetitionList(hub.id, filter);
   const visible = query.data?.pages.flatMap((page) => page.data) ?? [];
@@ -151,22 +154,38 @@ function CompetitionCollection({ hub }: { readonly hub: ApiWaveV3 }) {
   if (hub.permissions.administer) filters.push("drafts");
   filters.push("all");
   const panelId = `competition-collection-${hub.id}-${filter}`;
+  const tabOptions = filters.map((value) => ({
+    key: value,
+    label: t(locale, `competitions.${value}`),
+    panelId: `competition-collection-${hub.id}-${value}`,
+  }));
+  const selectFilter = (key: string) => {
+    const selected = filters.find((value) => value === key);
+    if (selected) setFilter(selected);
+  };
   return (
     <>
-      <div className="tw-flex tw-shrink-0 tw-items-center tw-gap-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-px-2 sm:tw-px-4">
-        <div className="tw-min-w-0 tw-flex-1 tw-overflow-x-auto tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500">
-          <TabToggle
-            options={filters.map((value) => ({
-              key: value,
-              label: t(locale, `competitions.${value}`),
-              panelId: `competition-collection-${hub.id}-${value}`,
-            }))}
-            activeKey={filter}
-            onSelect={(key) => {
-              const selected = filters.find((value) => value === key);
-              if (selected) setFilter(selected);
-            }}
-          />
+      <div
+        className={`tw-flex tw-shrink-0 tw-items-center tw-gap-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-bg-iron-950 ${isApp ? "tw-border-white/5 tw-px-4 tw-py-2.5 md:tw-px-6" : "tw-border-iron-800 tw-px-2 sm:tw-px-4"}`}
+      >
+        <div
+          className={`tw-min-w-0 tw-flex-1 tw-overflow-x-auto ${isApp ? "tw-no-scrollbar tw-overscroll-x-contain" : "tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500"}`}
+        >
+          {isApp ? (
+            <TabToggleWithOverflow
+              variant="compactPills"
+              maxVisibleTabs={1}
+              options={tabOptions}
+              activeKey={filter}
+              onSelect={selectFilter}
+            />
+          ) : (
+            <TabToggle
+              options={tabOptions}
+              activeKey={filter}
+              onSelect={selectFilter}
+            />
+          )}
         </div>
         {isMultiCompetitionEnabled() && hub.permissions.create_competition && (
           <Link

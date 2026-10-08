@@ -20,6 +20,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { TabToggle } from "@/components/common/TabToggle";
 import { usePathname, useSearchParams } from "next/navigation";
+
 import { useCompetitionNavigation } from "@/contexts/CompetitionNavigationContext";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
@@ -273,6 +274,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
   const searchParams = useSearchParams();
   const { ref: featureUsageRef } = useWaveFeatureUsage("wave_tabs", wave.id);
   const pathname = usePathname();
+
   const locale = useBrowserLocale();
   const { flat, nativeCompetition } = useCompetitionNavigation();
   const nativeDefault = flat ? nativeCompetition : null;
@@ -521,6 +523,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
   if (activeCurationId) activeKey = getCurationTabKey(activeCurationId);
   const selectStandardTab = (key: string) => {
     onSelectCuration(null);
+
     setActiveTab(key as MyStreamWaveTab);
   };
   const curationTabKeys = useMemo(
@@ -597,6 +600,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
         >
           <div className="tw-inline-flex tw-items-center tw-gap-1">
             <TabToggle
+              transition
               options={options}
               activeKey={activeKey}
               onSelect={(key) => {

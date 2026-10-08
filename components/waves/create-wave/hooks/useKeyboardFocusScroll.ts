@@ -105,14 +105,12 @@ export default function useKeyboardFocusScroll(
       clearTimeout(timer);
     };
 
-    // Coalesce Network keyboard frames into one correction; keep the existing
-    // immediate centering behavior for other consumers.
+    // Coalesce Network keyboard frames into one correction. Centered fields
+    // also move immediately, then settle against the final scrollport height.
     const onViewportResize = () => {
-      if (mode === "nearest") {
-        scheduleReposition();
-      } else {
-        repositionActiveField();
-      }
+      if (!activeField) return;
+      if (mode === "center") repositionActiveField();
+      scheduleReposition();
     };
     const observer =
       mode === "nearest" ? new ResizeObserver(scheduleReposition) : null;
