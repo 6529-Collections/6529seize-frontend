@@ -1,4 +1,4 @@
-# Legacy migration implementation and acceptance
+# Legacy migration implementation
 
 [Phase 5 scope](../phase-5-legacy-data-migration.md) · [Master roadmap](../README.md)
 
@@ -13,7 +13,7 @@ promotion is separate; no production migration has been performed by this task.
 The backend's `migrate-wave` command accepts one wave UUID and resolves its
 immutable legacy primary competition. The lower-level operator CLI targets that
 competition UUID. They provide inspection, audited enrollment, bounded/resumable stages, durable
-capture and ordered catch-up, full independent comparison windows, readiness,
+capture and ordered catch-up, full independent comparisons, readiness,
 atomic guarded transfer, verification, reverse reconciliation and guarded rollback
 or repair review. The lower-level CLI rejects wave/default/all/native-only targets. Schema rollout
 is additive; no legacy table/history/receipt is dropped.
@@ -83,7 +83,7 @@ Backend additive schema/views/capture first; compatible maintenance, identity an
 leaderboard writers next; decision worker and API after their dependencies.
 Only after backend health/revision checks merge/deploy the frontend, then require
 related E2E before promotion. Deploy the manual migration Lambda after compatible
-backend verification . The backend runbook lists exact service units and
+backend verification. The backend runbook lists exact service units and
 capture activation prerequisites. All services must use owner-aware code before
 any UUID is enrolled. Rollback retains native ownership after irreversible native
 decisions/effects and requires owned repair rather than blind flag reversal.
