@@ -1,4 +1,22 @@
 import { SIDEBAR_MOBILE_BREAKPOINT } from "@/constants/sidebar";
+import {
+  FINE_POINTER_STORAGE_KEY,
+  isTouchFirstEnvironment,
+} from "@/helpers/touch-first.helpers";
+
+/** Keep startup chrome only while a small layout is still expected to hydrate. */
+export function isSmallWebStartupExpected(): boolean {
+  const nav = navigator as Navigator & {
+    readonly userAgentData?: { readonly mobile?: boolean };
+  };
+  const mobileDevice =
+    nav.userAgentData?.mobile ??
+    /Android|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i.test(nav.userAgent);
+  return (
+    globalThis.innerWidth < SIDEBAR_MOBILE_BREAKPOINT &&
+    (mobileDevice || isTouchFirstEnvironment())
+  );
+}
 
 // Runs before the app bundle can load touch-first.helpers.ts/useDeviceInfo.
 // Mirror their phone override, touch-first inputs, and persisted mouse evidence;
@@ -16,7 +34,7 @@ export const SMALL_WEB_STARTUP_SCRIPT = `(() => {
     const touch = (nav.maxTouchPoints ?? nav.msMaxTouchPoints ?? 0) > 0 || matches("(any-pointer: coarse)");
     let savedMouse = false;
     try {
-      savedMouse = !phone && globalThis.localStorage.getItem("6529-fine-pointer") === "1";
+      savedMouse = !phone && globalThis.localStorage.getItem(${JSON.stringify(FINE_POINTER_STORAGE_KEY)}) === "1";
     } catch {
       // Blocked storage does not disable capability detection.
     }

@@ -12,6 +12,8 @@ const mockCleanup = jest.fn();
 const mockSearchMounted = jest.fn();
 const mockSearchCleanup = jest.fn();
 let mockWidth = 900;
+let mockTouchFirst = true;
+let mockSmallWebStartupExpected = true;
 type MediaListener =
   | EventListenerOrEventListenerObject
   | ((event: MediaQueryListEvent) => void);
@@ -29,7 +31,10 @@ jest.mock("next/navigation", () => ({
 }));
 jest.mock("@/hooks/useIsTouchDevice", () => ({
   __esModule: true,
-  default: () => true,
+  default: () => mockTouchFirst,
+}));
+jest.mock("@/components/layout/smallWebStartup", () => ({
+  isSmallWebStartupExpected: () => mockSmallWebStartupExpected,
 }));
 jest.mock("@/components/auth/Auth", () => ({
   useAuth: () => ({ connectedProfile: null }),
@@ -134,6 +139,9 @@ beforeEach(() => {
   sessionStorage.clear();
   mediaChanges.clear();
   mockWidth = 900;
+  mockTouchFirst = true;
+  mockSmallWebStartupExpected = true;
+  delete document.documentElement.dataset["smallWebStartup"];
   window.matchMedia = jest.fn((query: string) => ({
     get matches() {
       return matches(query);
@@ -155,6 +163,7 @@ beforeEach(() => {
 });
 
 it("hydrates the server mobile header without registering hidden desktop chrome", async () => {
+  document.documentElement.dataset["smallWebStartup"] = "true";
   const html = renderToString(
     <WebLayout>
       <h1>Public reading</h1>
@@ -189,10 +198,48 @@ it("hydrates the server mobile header without registering hidden desktop chrome"
     expect(mockRegisterRef).not.toHaveBeenCalled();
     expect(mockSetHeaderRef).not.toHaveBeenCalled();
     expect(mockSearchMounted).not.toHaveBeenCalled();
+    // Hydration defaults are desktop; retain mobile paint until its real
+    // responsive props arrive rather than clearing the marker too early.
+    expect(document.documentElement.dataset["smallWebStartup"]).toBe("true");
   } finally {
     await act(async () => root?.unmount());
     container.remove();
   }
+});
+
+it("releases startup chrome if a tablet gains a mouse before mobile hydration", () => {
+  document.documentElement.dataset["smallWebStartup"] = "true";
+  const { rerender } = render(
+    <WebLayout>
+      <h1>Public reading</h1>
+    </WebLayout>
+  );
+  expect(document.documentElement.dataset["smallWebStartup"]).toBe("true");
+  mockTouchFirst = false;
+  mockSmallWebStartupExpected = false;
+  rerender(
+    <WebLayout>
+      <h1>Public reading</h1>
+    </WebLayout>
+  );
+  expect(document.documentElement).not.toHaveAttribute(
+    "data-small-web-startup"
+  );
+  expect(screen.queryByRole("banner")).not.toBeInTheDocument();
+  expect(mockSearchMounted).not.toHaveBeenCalled();
+});
+
+it("clears a stale mobile startup marker when React mounts on desktop", () => {
+  document.documentElement.dataset["smallWebStartup"] = "true";
+  mockSmallWebStartupExpected = false;
+  render(
+    <WebLayout>
+      <h1>Public reading</h1>
+    </WebLayout>
+  );
+  expect(document.documentElement).not.toHaveAttribute(
+    "data-small-web-startup"
+  );
 });
 
 it("adapts chrome and clears its overlay without remounting the editor or SidebarProvider", () => {

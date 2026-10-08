@@ -6,6 +6,7 @@ import { useSidebarController } from "../../hooks/useSidebarController";
 import { SidebarProvider, useSidebarState } from "../../hooks/useSidebarState";
 import WebSidebar from "./sidebar/WebSidebar";
 import SmallScreenLayoutHeader from "./SmallScreenLayoutHeader";
+import { isSmallWebStartupExpected } from "./smallWebStartup";
 import type { CSSProperties, ReactNode } from "react";
 
 const DESKTOP_MAX_WIDTH = 1324;
@@ -35,12 +36,12 @@ const WebLayoutContent = ({ children, isSmall = false }: WebLayoutProps) => {
   }, [isSmall, closeOffcanvas]);
 
   useEffect(() => {
-    if (isSmall) {
-      // React now owns the mobile chrome. Do not let startup CSS override a
-      // later tablet mouse/keyboard attachment or responsive layout change.
-      document.documentElement.removeAttribute("data-small-web-startup");
+    if (isSmall || !isSmallWebStartupExpected()) {
+      // Keep the override through the hydration defaults, but release it when
+      // React takes over or capabilities changed to desktop during loading.
+      delete document.documentElement.dataset["smallWebStartup"];
     }
-  }, [isSmall]);
+  }, [isSmall, isMobile, isNarrow, isSidebarReady]);
 
   const cssVars = useMemo(
     () =>

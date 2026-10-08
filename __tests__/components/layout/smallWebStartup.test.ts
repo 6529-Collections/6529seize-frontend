@@ -1,5 +1,9 @@
 import { runInNewContext } from "node:vm";
-import { SMALL_WEB_STARTUP_SCRIPT } from "@/components/layout/smallWebStartup";
+import {
+  isSmallWebStartupExpected,
+  SMALL_WEB_STARTUP_SCRIPT,
+} from "@/components/layout/smallWebStartup";
+import * as touchFirst from "@/helpers/touch-first.helpers";
 
 interface Device {
   readonly ua?: string;
@@ -82,4 +86,44 @@ it("keeps the server content available when browser detection fails", () => {
     document: { documentElement: { hasAttribute: () => false, setAttribute } },
   });
   expect(setAttribute).not.toHaveBeenCalled();
+});
+
+it.each([
+  { ua: "iPhone", touchFirst: false, width: 390, expected: true },
+  {
+    ua: "Android",
+    mobileHint: false,
+    touchFirst: false,
+    width: 900,
+    expected: false,
+  },
+  { ua: "Macintosh", touchFirst: true, width: 900, expected: true },
+  { ua: "Macintosh", touchFirst: false, width: 900, expected: false },
+  { ua: "iPhone", touchFirst: true, width: 1024, expected: false },
+])("uses current capabilities for the hydrated handoff: %j", (device) => {
+  const ua = Object.getOwnPropertyDescriptor(navigator, "userAgent");
+  const hints = Object.getOwnPropertyDescriptor(navigator, "userAgentData");
+  const width = globalThis.innerWidth;
+  const touch = jest
+    .spyOn(touchFirst, "isTouchFirstEnvironment")
+    .mockReturnValue(device.touchFirst);
+  try {
+    Object.defineProperty(navigator, "userAgent", {
+      configurable: true,
+      value: device.ua,
+    });
+    Object.defineProperty(navigator, "userAgentData", {
+      configurable: true,
+      value: { mobile: device.mobileHint },
+    });
+    globalThis.innerWidth = device.width;
+    expect(isSmallWebStartupExpected()).toBe(device.expected);
+  } finally {
+    touch.mockRestore();
+    globalThis.innerWidth = width;
+    if (ua) Object.defineProperty(navigator, "userAgent", ua);
+    else Reflect.deleteProperty(navigator, "userAgent");
+    if (hints) Object.defineProperty(navigator, "userAgentData", hints);
+    else Reflect.deleteProperty(navigator, "userAgentData");
+  }
 });

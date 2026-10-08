@@ -2858,6 +2858,9 @@ const MEME_DATA_TABLE_MESSAGES = objectMessages("memeData", {
 const TOKEN_NUMBER_MESSAGE = "Token #{tokenId}";
 
 export const EN_US_MESSAGES = {
+  "header.menu.open": "Open menu",
+  "header.menu.close": "Close menu",
+  "header.navigation.loading": "Loading navigation…",
   "waves.information.open": "About {name}",
   ...EN_SUBMISSION_DISCOVERY_MESSAGES,
   ...waveCreationMessages,

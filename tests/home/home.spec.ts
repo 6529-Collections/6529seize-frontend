@@ -65,6 +65,8 @@ test("mobile web starts with its header and full-width content before hydration 
   browserName,
   baseURL,
 }, testInfo) => {
+  // Phone emulation supports Chromium/WebKit. Native simulations exercise a
+  // different shell and Firefox has no supported mobile device context.
   test.skip(
     browserName === "firefox" ||
       (!isDesktopWebProject(testInfo.project.name) &&
@@ -94,6 +96,13 @@ test("mobile web starts with its header and full-width content before hydration 
       "false"
     );
     await expect(header).toBeVisible();
+    await expect(header).toHaveAttribute("aria-busy", "true");
+    await expect(
+      page.getByRole("status", { name: "Loading navigation…" })
+    ).toBeVisible();
+    await expect(
+      header.getByRole("button", { name: "Open menu" })
+    ).toBeDisabled();
     await expect(sidebar).toBeHidden();
     const initial = await main.boundingBox();
     expect(initial?.x).toBe(0);
@@ -110,6 +119,11 @@ test("mobile web starts with its header and full-width content before hydration 
       "true"
     );
     await expect(header).toBeVisible();
+    await expect(header).toHaveAttribute("aria-busy", "false");
+    await expect(header.getByRole("status")).toHaveCount(0);
+    await expect(
+      header.getByRole("button", { name: "Open menu" })
+    ).toBeEnabled();
     await expect(sidebar).toBeHidden();
     const hydrated = await main.boundingBox();
     expect(hydrated?.x).toBe(initial?.x);

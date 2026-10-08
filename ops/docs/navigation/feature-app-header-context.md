@@ -34,6 +34,8 @@ wallet startup finishes; browser pages still display their initial content
 immediately. On phones and touch-first tablets, the mobile browser header and
 full-width page appear before hydration; the desktop sidebar does not flash
 during initial loading. Touch laptops retain their desktop layout.
+While the browser loads navigation, a spinner marks the pending header and the
+menu stays disabled. Search and menu controls become available after hydration.
 
 1. Header renders for the current app route.
 2. Left control resolves:
