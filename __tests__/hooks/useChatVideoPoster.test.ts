@@ -13,7 +13,7 @@ jest.mock("@/helpers/video.helpers", () => ({
 const check = jest.mocked(checkVideoAvailability);
 const source = "https://d3lqz0a4bldqgf.cloudfront.net/drops/author/clip.mp4";
 const posterUrl =
-  "https://d3lqz0a4bldqgf.cloudfront.net/renditions/drops/author/clip/poster/clip_poster.0000001.jpg";
+  "https://d3lqz0a4bldqgf.cloudfront.net/renditions/drops/author/clip/poster/clip_poster.0000000.jpg";
 let images: HTMLImageElement[];
 
 beforeEach(() => {
@@ -142,7 +142,7 @@ it("does not apply an old image after a source change and aborts its load", asyn
   await flush();
   loaded(imageAt(1));
   expect(result.current?.url).toContain(
-    "/other/poster/other_poster.0000001.jpg"
+    "/other/poster/other_poster.0000000.jpg"
   );
 });
 

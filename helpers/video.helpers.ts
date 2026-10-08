@@ -60,7 +60,8 @@ export function getVideoConversions(
     HLS: `${buildRenditionUrl(
       `${beforeFileName}${fileName}`
     )}/hls/${fileName}.m3u8`,
-    POSTER: `${buildRenditionUrl(pathWithoutExtension)}/poster/${fileName}_poster.0000001.jpg`,
+    // The first MediaConvert frame capture is numbered zero.
+    POSTER: `${buildRenditionUrl(pathWithoutExtension)}/poster/${fileName}_poster.0000000.jpg`,
   };
 }
 
