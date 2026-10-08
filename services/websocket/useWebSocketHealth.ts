@@ -83,6 +83,7 @@ export function useWebSocketHealth() {
     token: string | null;
     reason: string | null;
   } => {
+    // Hidden browser tabs retain auth-driven checks, including token revocation.
     if (!isAppActiveRef.current && Capacitor.isNativePlatform()) {
       return { action: "none", token: null, reason: "native-app-inactive" };
     }

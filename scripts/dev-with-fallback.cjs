@@ -72,7 +72,7 @@ async function run() {
     );
 
     child.on("exit", (code) => {
-      process.exit(code ?? 0);
+      process.exit(code ?? 1);
     });
     child.on("error", (err) => {
       console.error("Failed to start Next.js dev server:", err);
