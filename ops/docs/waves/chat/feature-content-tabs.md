@@ -59,11 +59,15 @@ when it is still available, ahead of the wave's latest remembered choice.
      availability to be checked before opening.
    - Explicit tab and competition links open their requested section. Native
      app Back restores the section from that visit when it is still available.
-4. Select a tab to switch sections.
+4. Select a tab to switch sections. If opening the section takes time, the
+   tapped tab shows a small loading indicator. It clears when that view opens;
+   fast switches do not require a loading screen or a minimum waiting time.
 5. The main content panel updates. Competition views retain their competition
    ID and selected tab in the URL so reload and Back/Forward restore the view.
    When switching to a competition route, its controls appear after navigation
    completes, so a newly opened sort sheet or form stays in that view.
+   Switching sections within the same page does not reload the page. A section
+   can still show its own loading state when its data is not available yet.
    App tabs and their content use the same availability rules. An unavailable
    legacy competition section opens `Leaderboard`, or `Submissions` after
    voting has ended, and selects that visible tab.
@@ -115,7 +119,8 @@ when it is still available, ahead of the wave's latest remembered choice.
   be tapped to move through the tab row.
 - When many curations overflow the row, scroll horizontally to reach them.
   Touch layouts support swiping the tab row, and the active tab scrolls into
-  view.
+  view when it is hidden. In the app, selecting an already visible tab keeps
+  the row in place instead of centering it again.
 - A shared wave URL with a valid `?curation={curationId}` opens that curation
   directly.
 

@@ -14,12 +14,14 @@ import type { ApiCompetitionDraftInput } from "@/generated/models/ApiCompetition
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { useWaveConfig } from "@/components/waves/create-wave/hooks/useWaveConfig";
+import useKeyboardFocusScroll from "@/components/waves/create-wave/hooks/useKeyboardFocusScroll";
 import { useCompetitionDraftSave } from "@/hooks/competitions/useCompetitionDraftSave";
 import { readCompetitionEditorDraft } from "@/helpers/competition-editor-draft.helpers";
 import CreateWaveStepContent from "@/components/waves/create-wave/CreateWaveStepContent";
 import CreateWaveGroup from "@/components/waves/create-wave/groups/CreateWaveGroup";
 import CreateWaveDisplaySettings from "@/components/waves/create-wave/overview/CreateWaveDisplaySettings";
 import RankScheduleModeSelector from "@/components/waves/create-wave/overview/type/RankScheduleModeSelector";
+import CreateWaveDropdown from "@/components/waves/create-wave/utils/CreateWaveDropdown";
 import { CreateWaveStep, CreateWaveGroupConfigType } from "@/types/waves.types";
 import { getCreateWaveValidationErrors } from "@/helpers/waves/create-wave.validation";
 import {
@@ -131,6 +133,7 @@ function DraftForm({
   const inFlight = useRef(false);
   const conflictCopyKey = useRef<string | null>(null);
   const formRef = useRef<HTMLElement>(null);
+  useKeyboardFocusScroll(formRef);
   const [saveErrorFocusRequest, setSaveErrorFocusRequest] = useState(0);
   const votingErrors = getCreateWaveValidationErrors({
     config,
@@ -326,7 +329,7 @@ function DraftForm({
           <input
             required
             maxLength={250}
-            className={COMPETITION_INPUT}
+            className={`${COMPETITION_INPUT} tw-text-base sm:tw-text-sm`}
             value={config.overview.name}
             onChange={(event) =>
               controller.setOverview({
@@ -340,35 +343,36 @@ function DraftForm({
           <span>{t(locale, "competitions.description")}</span>
           <textarea
             rows={4}
-            className={COMPETITION_INPUT}
+            className={`${COMPETITION_INPUT} tw-text-base sm:tw-text-sm`}
             value={description}
             onChange={(event) => setDescription(event.target.value)}
           />
         </label>
-        <label className="tw-block tw-space-y-2 tw-text-sm tw-text-iron-300">
+        <div className="tw-space-y-2 tw-text-sm tw-text-iron-300">
           <span>{t(locale, "competitions.type")}</span>
-          <select
-            className={COMPETITION_INPUT}
-            disabled={published}
+          <CreateWaveDropdown
+            mobileSheet
+            ariaLabel={t(locale, "competitions.type")}
+            disabled={published || busy || displayedError === "conflict"}
             value={config.overview.type}
-            onChange={(event) =>
+            options={[
+              {
+                value: ApiWaveType.Rank,
+                label: t(locale, "competitions.rank"),
+              },
+              {
+                value: ApiWaveType.Approve,
+                label: t(locale, "competitions.approve"),
+              },
+            ]}
+            onChange={(type) =>
               controller.setOverview({
                 ...config.overview,
-                type:
-                  event.target.value === String(ApiWaveType.Approve)
-                    ? ApiWaveType.Approve
-                    : ApiWaveType.Rank,
+                type,
               })
             }
-          >
-            <option value={ApiWaveType.Rank}>
-              {t(locale, "competitions.rank")}
-            </option>
-            <option value={ApiWaveType.Approve}>
-              {t(locale, "competitions.approve")}
-            </option>
-          </select>
-        </label>
+          />
+        </div>
         {!lockedRules && config.overview.type === ApiWaveType.Rank && (
           <RankScheduleModeSelector
             isCompetition

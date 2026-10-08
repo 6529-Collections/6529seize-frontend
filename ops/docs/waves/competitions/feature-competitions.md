@@ -23,6 +23,9 @@ badge is hidden when there are none; drafts and completed competitions do not co
 row of tabs for **Active and upcoming**, **Completed**, and **All**;
 wave administrators can also see **Drafts**. **Add competition** sits alongside
 these tabs for users who can create competitions.
+In the app, this secondary row uses the same compact pills as **About**.
+**More** opens the remaining filters; choosing one shows its name on that pill.
+Desktop and mobile web retain the underlined tab row.
 Cards show the start date and, when set, the end date. Dates in the past use
 **Started** or **Ended**; future dates use **Starts** or **Ends**.
 
@@ -43,7 +46,8 @@ published competitions. The row starts with **Chat**, followed by the competitio
 leaderboard and results views, **Votes**, and **Settings**. **Settings** is the last
 competition tab, followed by **Competitions** when available and then named curations.
 **Votes** has **My Votes**, **All votes**, and **Activity** subtabs, all scoped to
-the selected competition. **Settings** opens its rules, access, appearance,
+the selected competition. In the app, these subtabs use the shared compact pill
+style; web keeps underlined tabs. **Settings** opens its rules, access, appearance,
 administration and pause history with the existing read and edit permissions.
 Chat remains shared by the whole wave.
 

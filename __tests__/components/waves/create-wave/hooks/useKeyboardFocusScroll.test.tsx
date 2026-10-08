@@ -184,4 +184,29 @@ describe("useKeyboardFocusScroll", () => {
     unmount();
     expect(observer.disconnect).toHaveBeenCalled();
   });
+
+  it("centers again after the last resize settles and cancels on unmount", () => {
+    const { getByLabelText, unmount } = render(<Harness />);
+    (getByLabelText("field") as HTMLInputElement).focus();
+    jest.advanceTimersByTime(400);
+    scrollIntoView.mockClear();
+    const viewport = window.visualViewport as unknown as {
+      dispatchResize: () => void;
+    };
+
+    viewport.dispatchResize();
+    jest.advanceTimersByTime(250);
+    viewport.dispatchResize();
+    jest.advanceTimersByTime(349);
+    expect(scrollIntoView).toHaveBeenCalledTimes(2);
+    jest.advanceTimersByTime(1);
+    expect(scrollIntoView).toHaveBeenCalledTimes(3);
+
+    viewport.dispatchResize();
+    unmount();
+    scrollIntoView.mockClear();
+    jest.advanceTimersByTime(400);
+    viewport.dispatchResize();
+    expect(scrollIntoView).not.toHaveBeenCalled();
+  });
 });
