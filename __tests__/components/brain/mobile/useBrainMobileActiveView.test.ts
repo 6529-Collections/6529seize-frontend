@@ -142,6 +142,8 @@ describe("useBrainMobileActiveView", () => {
       useBrainMobileActiveView(
         createProps({
           restoredView: BrainView.MY_VOTES,
+          isRankWave: false,
+          isApproveWave: false,
           wave: { id: "wave-1" } as UseBrainMobileActiveViewProps["wave"],
         })
       )
@@ -335,7 +337,7 @@ describe("useBrainMobileActiveView", () => {
     expect(result.current.activeView).toBe(BrainView.POLLS);
   });
 
-  it("resets My Votes for guests on normal rank waves", () => {
+  it("keeps Votes for guests on normal rank waves", () => {
     const { result } = renderHook(() =>
       useBrainMobileActiveView(
         createProps({
@@ -349,7 +351,7 @@ describe("useBrainMobileActiveView", () => {
       result.current.onViewChange(BrainView.MY_VOTES);
     });
 
-    expect(result.current.activeView).toBe(BrainView.DEFAULT);
+    expect(result.current.activeView).toBe(BrainView.MY_VOTES);
   });
 
   it("keeps My Votes for curation rank waves without requiring login", () => {
@@ -389,7 +391,7 @@ describe("useBrainMobileActiveView", () => {
     expect(result.current.activeView).toBe(BrainView.MY_VOTES);
   });
 
-  it("resets My Votes for guests on normal approve waves", () => {
+  it("keeps Votes for guests on normal approve waves", () => {
     const { result } = renderHook(() =>
       useBrainMobileActiveView(
         createProps({
@@ -404,7 +406,7 @@ describe("useBrainMobileActiveView", () => {
       result.current.onViewChange(BrainView.MY_VOTES);
     });
 
-    expect(result.current.activeView).toBe(BrainView.DEFAULT);
+    expect(result.current.activeView).toBe(BrainView.MY_VOTES);
   });
 });
 

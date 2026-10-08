@@ -2,9 +2,9 @@
 
 ## Overview
 
-Rank-wave voter rankings appear in two places:
+Voter rankings appear in two places:
 
-- wave-level `Voters` tab in the right sidebar
+- `Votes` → `All votes` for the selected competition
 - drop-level `Top voters` section in non-chat single-drop views
 
 Both lists use descending absolute vote totals and load `20` rows per page.
@@ -14,20 +14,20 @@ either list. Grid cards omit that highlight.
 ## Location in the Site
 
 - Rank-wave thread routes: `/waves/{waveId}` and `/messages/{waveId}`.
-- Right-sidebar `Voters` tab for rank waves.
+- `Votes` → `All votes` in the main competition view.
 - Non-chat single-drop overlay details in `?drop={dropId}` context.
 - Collapsible `Top voters` block inside single-drop info details.
 
 ## Entry Points
 
-- Open a rank wave and select `Voters` in the right sidebar.
+- Choose a competition and open `Votes` → `All votes`.
 - Open a non-chat single-drop view from the current thread route.
 - Select the single-drop info panel's `Top voters` header row, including its
   `View voters` indicator.
 
 ## User Journey
 
-1. Open the wave-level or drop-level voters surface.
+1. Open the competition-level or drop-level voters surface.
 2. If a connected profile handle is available, voter data loads in pages of
    `20`.
 3. Each row shows:
@@ -59,7 +59,7 @@ either list. Grid cards omit that highlight.
 
 ## Common Scenarios
 
-- The sidebar `Voters` tab ranks voters across the whole wave.
+- `All votes` ranks voters for the selected competition.
 - Single-drop `Top voters` ranks voters for that one drop.
 - The single-drop `Top voters` list starts collapsed. Select its header row,
   apart from the download control, to toggle it; the indicator reads `View voters`
@@ -80,11 +80,11 @@ either list. Grid cards omit that highlight.
 - Empty states show `Be the First to Make a Vote` with scope-specific guidance:
   - wave scope: `Vote on drops to see voter rankings appear here.`
   - drop scope: `Vote on this drop to see voter rankings appear here.`
-- `Voters` stays available on rank waves even after `Leaderboard` is removed.
+- `All votes` stays available for competitions even after `Leaderboard` is removed.
 
 ## Edge Cases
 
-- The right-sidebar `Voters` tab appears only for rank waves.
+- Switching competition changes the All votes list.
 - Single-drop `Top voters` renders only for non-chat drops. Its voter list is
   collapsed by default, while any available current-vote summary stays visible.
 - Drop-level handle text is truncated for Ethereum-style and auto-generated

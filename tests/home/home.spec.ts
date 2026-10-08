@@ -4,8 +4,12 @@ import {
   test,
   waitForRouteReady,
 } from "../testHelpers";
+import { devices } from "@playwright/test";
 import { getAppEnvironment } from "../../config/appEnvironment";
-import { isDesktopWebProject } from "../support/surfaceSimulation";
+import {
+  isDesktopWebProject,
+  isMobileWebProject,
+} from "../support/surfaceSimulation";
 import { gateSidebarHydration } from "../support/sidebarHydration";
 import { installSectionTrackingFixture } from "../support/sectionTrackingFixture";
 
@@ -53,6 +57,81 @@ test.describe("Home Page @smoke @medium @large", () => {
     }) => {
       await expect(page.locator('[aria-label^="Environment:"]')).toHaveCount(0);
     });
+  }
+});
+
+test("mobile web starts with its header and full-width content before hydration @smoke @medium @large", async ({
+  browser,
+  browserName,
+  baseURL,
+}, testInfo) => {
+  // Phone emulation supports Chromium/WebKit. Native simulations exercise a
+  // different shell and Firefox has no supported mobile device context.
+  test.skip(
+    browserName === "firefox" ||
+      (!isDesktopWebProject(testInfo.project.name) &&
+        !isMobileWebProject(testInfo.project.name)),
+    "Mobile browser startup contract"
+  );
+  if (!baseURL) throw new Error("The homepage test requires a base URL");
+  // The PR smoke lane selects desktop Chromium. A separate phone context keeps
+  // this mobile first-paint contract in that lane without expanding its pack.
+  const context = await browser.newContext({
+    ...devices[browserName === "webkit" ? "iPhone 14" : "Pixel 7"],
+    baseURL,
+  });
+  const page = await context.newPage();
+  const hydration = await gateSidebarHydration(page);
+  const main = page.getByRole("main").first();
+  const header = page.getByRole("banner");
+  const sidebar = page.getByLabel("Primary sidebar", { exact: true });
+  try {
+    await page.goto("/", { waitUntil: "commit" });
+    await expect(page.locator("html")).toHaveAttribute(
+      "data-small-web-startup",
+      "true"
+    );
+    await expect(page.getByRole("main").first().locator("..")).toHaveAttribute(
+      "data-small",
+      "false"
+    );
+    await expect(header).toBeVisible();
+    await expect(header).toHaveAttribute("aria-busy", "true");
+    await expect(
+      page.getByRole("status", { name: "Loading navigation…" })
+    ).toBeVisible();
+    await expect(
+      header.getByRole("button", { name: "Open menu" })
+    ).toBeDisabled();
+    await expect(sidebar).toBeHidden();
+    const initial = await main.boundingBox();
+    expect(initial?.x).toBe(0);
+    expect(initial?.width).toBe(await page.evaluate(() => innerWidth));
+    await expectNoHorizontalOverflow(page);
+    await hydration.waitForDownloads();
+    hydration.release();
+    await expect(page.getByRole("main").first().locator("..")).toHaveAttribute(
+      "data-small",
+      "true"
+    );
+    await expect(page.locator("html")).not.toHaveAttribute(
+      "data-small-web-startup",
+      "true"
+    );
+    await expect(header).toBeVisible();
+    await expect(header).toHaveAttribute("aria-busy", "false");
+    await expect(header.getByRole("status")).toHaveCount(0);
+    await expect(
+      header.getByRole("button", { name: "Open menu" })
+    ).toBeEnabled();
+    await expect(sidebar).toBeHidden();
+    const hydrated = await main.boundingBox();
+    expect(hydrated?.x).toBe(initial?.x);
+    expect(hydrated?.width).toBe(initial?.width);
+  } finally {
+    hydration.release();
+    await hydration.attachEvidence(testInfo);
+    await context.close();
   }
 });
 
