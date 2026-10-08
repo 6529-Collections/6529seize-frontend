@@ -56,9 +56,14 @@ Chat videos start only when you press Play, on desktop, mobile browsers, and
 in the app. Opening a chat or scrolling a video into view does not start it.
 The video source waits for Play, including videos without a poster. Uploaded
 chat videos show a still preview once video processing finishes.
-The preview loads separately from the video, keeps its proportions, and stays
-behind the Play control. New uploads may briefly have no preview while they
-process. Older uploads and external videos without a preview show the empty
+The preview loads separately from the video, keeps the same proportions and
+portrait/square width limits as playback, and stays behind the Play control.
+New previews use a frame around one second to avoid black opening frames, with
+the first frame retained for existing or very short videos. Clips still black
+at one second may have a black preview. New uploads may briefly have no preview while they
+process. Visible, active players discover late previews automatically with
+bounded retries that back off to one check per minute; no refresh is needed
+when processing finishes within that window. Older uploads and external videos without a preview show the empty
 frame and Play control. Duration can remain `—` until you press Play.
 
 Starting another chat video pauses the previous one. Scrolling away or hiding
