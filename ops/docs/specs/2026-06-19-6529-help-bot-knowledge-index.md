@@ -17,6 +17,17 @@ shared chat, independent credits, native entry content, draft/publication and
 terminal lifecycle rules. It qualifies availability rather than promising
 controls in every deployment, and retains the original-wave experience in its
 navigation guidance. Backend runtime continues consuming the published corpus.
+Its setup guidance identifies the Competition type desktop dropdown and
+small-screen bottom sheet, including selection and dismissal behavior, and
+keyboard-aware name and description fields in the app's setup editor.
+Its navigation guidance distinguishes the app's compact collection and Votes
+pills from web tabs and the shared published-competition wave row. The collection
+uses More for its remaining choices.
+
+The `waves.content-tabs` record describes the conditional pending indicator on
+a tapped tab, section-specific loading, and destination-bound competition
+controls. It also explains that app tabs already in view keep their position
+when selected. It does not promise instant data or a loading screen on every switch.
 
 The Wave discovery record describes the independent Active Votes and Worth Checking Out
 sidebar sections, their explanations and view-all destinations. It covers the
@@ -611,7 +622,6 @@ with RPC activation, worker sync, and scheduled TDH. It does not repeat download
 instructions or require account pairing. Explicit `answer_links` lists also
 govern ordinary knowledge answers: only those links appear in the final footer,
 and an empty list suppresses links. Related paths are not additional citations.
-
 
 Desktop progressive reconciliation uses `desktop-calculated` records with a
 non-negative safe-integer `reconciliation_min_block`. Their short answers contain

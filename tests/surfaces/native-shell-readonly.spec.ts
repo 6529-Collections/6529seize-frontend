@@ -643,10 +643,12 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
 
   test("Network filter keeps the focused input and action above the keyboard", async ({
     page,
+    browserName,
   }, testInfo) => {
     test.skip(
-      !isCapacitorSimulationProject(testInfo.project.name),
-      "Keyboard geometry is covered on the Capacitor simulation projects"
+      !isCapacitorSimulationProject(testInfo.project.name) &&
+        testInfo.project.name !== "web-mobile-chromium",
+      "Network keyboard behavior is covered on mobile web and Capacitor simulations"
     );
     await gotoReady(page, "/network");
     const openFilters = page.getByRole("button", {
@@ -667,6 +669,7 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
       exact: true,
     });
     const summary = filter.getByText("After editing", { exact: true });
+    const currentSummary = filter.getByText("Before editing", { exact: true });
     const action = filter.getByRole("button", {
       name: "Create and use new group",
       exact: true,
@@ -675,21 +678,90 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
     await expect(input).toBeFocused();
     await expect(summary).toBeVisible();
 
-    // Exercise the same native overlay geometry as the Waves search contract.
-    await page.evaluate(() => {
+    // A frame sequence catches repeated smooth-scroll requests during keyboard
+    // animation, in addition to the settled clipping checks below. This is a
+    // browser simulation, not evidence of a physical keyboard animation.
+    const animation = await input.evaluate(async (element) => {
       const viewport = globalThis.visualViewport;
       if (!viewport) throw new Error("Expected a visual viewport");
-      Object.defineProperty(viewport, "height", {
-        configurable: true,
-        value: globalThis.innerHeight - 320,
-      });
-      viewport.dispatchEvent(new Event("resize"));
+      const calls: string[] = [];
+      const scrollIntoView = Element.prototype.scrollIntoView;
+      const scrollBy = Element.prototype.scrollBy;
+      Element.prototype.scrollIntoView = function (options) {
+        calls.push(
+          typeof options === "object" ? (options.behavior ?? "auto") : "auto"
+        );
+        scrollIntoView.call(this, options);
+      };
+      Element.prototype.scrollBy = function (
+        options?: ScrollToOptions | number,
+        y?: number
+      ) {
+        calls.push(
+          typeof options === "object" ? (options.behavior ?? "auto") : "auto"
+        );
+        Reflect.apply(
+          scrollBy,
+          this,
+          typeof options === "number" ? [options, y ?? 0] : [options]
+        );
+      };
+      try {
+        const restingHeight = viewport.height;
+        for (let frame = 1; frame <= 12; frame++) {
+          Object.defineProperty(viewport, "height", {
+            configurable: true,
+            value: restingHeight - (320 * frame) / 12,
+          });
+          viewport.dispatchEvent(new Event("resize"));
+          await new Promise<void>((resolve) =>
+            requestAnimationFrame(() => resolve())
+          );
+        }
+        const callsDuringAnimation = calls.length;
+        await new Promise<void>((resolve) => setTimeout(resolve, 750));
+        return {
+          callsDuringAnimation,
+          calls,
+          focused: document.activeElement === element,
+        };
+      } finally {
+        Element.prototype.scrollIntoView = scrollIntoView;
+        Element.prototype.scrollBy = scrollBy;
+      }
     });
-    await expect(page.locator("html")).toHaveAttribute(
-      "data-native-keyboard-visible",
-      "true"
-    );
-    await expect(summary).toBeHidden();
+    expect(animation.callsDuringAnimation).toBe(0);
+    expect(animation.calls).not.toContain("smooth");
+    expect(animation.focused).toBe(true);
+    if (isCapacitorSimulationProject(testInfo.project.name)) {
+      await expect(page.locator("html")).toHaveAttribute(
+        "data-native-keyboard-visible",
+        "true"
+      );
+    }
+    const summaryIsCompact = (target = summary) =>
+      target.evaluate((element) => {
+        for (
+          let parent = element.parentElement;
+          parent;
+          parent = parent.parentElement
+        ) {
+          const style = getComputedStyle(parent);
+          if (
+            style.position === "absolute" &&
+            style.clip !== "auto" &&
+            parent.getBoundingClientRect().width <= 1
+          )
+            return true;
+        }
+        return false;
+      });
+    await expect.poll(summaryIsCompact).toBe(true);
+    await expect.poll(() => summaryIsCompact(currentSummary)).toBe(true);
+    // Compact the visual footer without removing its summary from the
+    // accessibility tree; preview actions become visible when focused.
+    await expect.poll(() => filter.ariaSnapshot()).toContain("After editing");
+    await expect.poll(() => filter.ariaSnapshot()).toContain("Before editing");
     await expect
       .poll(() =>
         input.evaluate((element) => {
@@ -728,6 +800,60 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
         })
       )
       .toBe(true);
+    // WebKit uses Option-Tab to include buttons in keyboard navigation.
+    await input.press(browserName === "webkit" ? "Alt+Tab" : "Tab");
+    const preview = filter.getByRole("button", {
+      name: "View members",
+      exact: true,
+    });
+    await expect(preview).toBeFocused();
+    await expect(preview).toBeInViewport({ ratio: 1 });
+    await input.focus();
+    await expect.poll(summaryIsCompact).toBe(true);
+    await filter
+      .getByRole("button", { name: "All filters", exact: true })
+      .click();
+    await filter
+      .getByRole("group", { name: "Filter Network", exact: true })
+      .getByRole("button", { name: "Identities", exact: true })
+      .click();
+    const allowlists = filter.getByRole("textbox", {
+      name: "Search allowlists",
+      exact: true,
+    });
+    await allowlists.fill("keyboard-test-no-match");
+    await expect(allowlists).toBeFocused();
+    await expect(allowlists).toHaveValue("keyboard-test-no-match");
+    await expect
+      .poll(() =>
+        allowlists.evaluate((element) => {
+          const viewport = globalThis.visualViewport;
+          const bounds = element.getBoundingClientRect();
+          const editor = element.closest("[tabindex='-1']");
+          const clip = editor?.getBoundingClientRect();
+          return (
+            !!viewport &&
+            !!clip &&
+            bounds.top >= Math.max(clip.top, viewport.offsetTop) &&
+            bounds.bottom <=
+              Math.min(clip.bottom, viewport.offsetTop + viewport.height)
+          );
+        })
+      )
+      .toBe(true);
+    const back = filter.getByRole("button", {
+      name: "All filters",
+      exact: true,
+    });
+    await expect(back).toBeInViewport({ ratio: 1 });
+    const backBounds = await back.boundingBox();
+    const editorTop = await allowlists.evaluate(
+      (element) =>
+        element.closest("[tabindex='-1']")?.getBoundingClientRect().top
+    );
+    expect(
+      (backBounds?.y ?? 0) + (backBounds?.height ?? 0)
+    ).toBeLessThanOrEqual(editorTop ?? 0);
     await page.screenshot({
       path: testInfo.outputPath("network-keyboard.png"),
     });
@@ -743,6 +869,17 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
       "true"
     );
     await expect(summary).toBeVisible();
+    await expect.poll(() => summaryIsCompact(currentSummary)).toBe(false);
+    await allowlists.blur();
+    await allowlists.focus();
+    await expect(allowlists).toHaveValue("keyboard-test-no-match");
+    await filter
+      .getByRole("button", { name: "All filters", exact: true })
+      .click();
+    await filter
+      .getByRole("group", { name: "Filter Network", exact: true })
+      .getByRole("button", { name: /^Level(?: Configured)?$/, exact: true })
+      .click();
     await expect(input).toHaveValue("10");
     await filter.getByRole("button", { name: "Close", exact: true }).click();
     await expect(openFilters).toBeFocused();
