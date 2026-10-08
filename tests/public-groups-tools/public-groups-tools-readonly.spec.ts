@@ -228,11 +228,9 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
       await expect(filter.getByRole("region", { name })).toBeVisible();
       await expect
         .poll(() =>
-          choices.evaluate(
-            (element) =>
-              element.closest(".mobile-wrapper-dialog")?.getBoundingClientRect()
-                .height
-          )
+          filter
+            .locator(".mobile-wrapper-dialog")
+            .evaluate((element) => element.getBoundingClientRect().height)
         )
         .toBeCloseTo(restingHeight ?? 0, 0);
       if (narrowFilter) {

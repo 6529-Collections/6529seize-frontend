@@ -242,6 +242,8 @@ describe("MobileWrapperDialog", () => {
         configurable: true,
         value: viewport,
       });
+      const addListener = jest.spyOn(viewport, "addEventListener");
+      const removeListener = jest.spyOn(viewport, "removeEventListener");
       try {
         const { unmount } = render(
           <MobileWrapperDialog {...defaultProps} isOpen fitVisualViewport />
@@ -291,6 +293,19 @@ describe("MobileWrapperDialog", () => {
             "--mobile-wrapper-dialog-keyboard-inset"
           )
         ).toBe("");
+        const resizeListener = addListener.mock.calls.find(
+          ([event]) => event === "resize"
+        )?.[1];
+        const scrollListener = addListener.mock.calls.find(
+          ([event]) => event === "scroll"
+        )?.[1];
+        expect(removeListener).toHaveBeenCalledWith("resize", resizeListener);
+        expect(removeListener).toHaveBeenCalledWith("scroll", scrollListener);
+        viewport.height -= 300;
+        viewport.dispatchEvent(new Event("resize"));
+        expect(container).not.toHaveAttribute(
+          "data-mobile-dialog-keyboard-visible"
+        );
       } finally {
         Object.defineProperty(globalThis, "visualViewport", {
           configurable: true,

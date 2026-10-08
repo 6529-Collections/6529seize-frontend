@@ -18,6 +18,9 @@ import MobileWrapperDialogCloseButton from "./MobileWrapperDialogCloseButton";
 import MobileWrapperDialogHeader from "./MobileWrapperDialogHeader";
 import { useMobileDialogDrag } from "./useMobileDialogDrag";
 
+// Browser chrome can resize the viewport slightly without opening a keyboard.
+const BROWSER_KEYBOARD_MIN_INSET = 100;
+
 const MOBILE_DIALOG_KEYBOARD_INSET =
   "var(--mobile-wrapper-dialog-keyboard-inset, 0px)";
 const NATIVE_KEYBOARD_LAYOUT_TRANSITION_DURATION =
@@ -534,7 +537,9 @@ export default function MobileWrapperDialog({
           "--mobile-wrapper-dialog-keyboard-inset",
           `${inset}px`
         );
-        container.dataset["mobileDialogKeyboardVisible"] = String(inset > 100);
+        container.dataset["mobileDialogKeyboardVisible"] = String(
+          inset > BROWSER_KEYBOARD_MIN_INSET
+        );
       };
       updateInset();
       viewport.addEventListener("resize", updateInset);

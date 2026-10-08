@@ -161,6 +161,14 @@ describe("useKeyboardFocusScroll", () => {
     expect(scrollIntoView).not.toHaveBeenCalled();
   });
 
+  it("corrects a field clipped above the editor without smooth scrolling", () => {
+    const { input, scrollBy } = setupNearest(-20, 20);
+    input.focus();
+    jest.advanceTimersByTime(400);
+    expect(scrollBy).toHaveBeenCalledWith({ top: -32, behavior: "instant" });
+    expect(scrollIntoView).not.toHaveBeenCalled();
+  });
+
   it("rechecks asynchronous results and releases observation on blur", () => {
     const { input, target, scrollBy, unmount } = setupNearest(480, 580);
     input.focus();
