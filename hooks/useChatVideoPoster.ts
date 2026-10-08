@@ -13,58 +13,96 @@ interface VideoPoster {
   readonly aspectRatio: number;
 }
 
-/** Load a small preview only; never attach or decode the video to get a frame. */
+const MAX_POSTER_CHECKS = 20;
+const MAX_FALLBACK_CHECKS = 4;
+
+/** Load small previews only; never attach or decode video to get a frame. */
 export function useChatVideoPoster(
   originalUrl: string,
   enabled: boolean
 ): VideoPoster | undefined {
   const active = useMobileAppActivity();
-  const url = isVideoUrl(originalUrl)
-    ? getVideoConversions(originalUrl)?.POSTER
+  const conversions = isVideoUrl(originalUrl)
+    ? getVideoConversions(originalUrl)
     : undefined;
+  const url = conversions?.POSTER;
+  const fallbackUrl = conversions?.FIRST_FRAME_POSTER;
   const [poster, setPoster] = useState<VideoPoster>();
-  const attempts = useRef({ url, count: 0 });
+  const loaded = useRef<VideoPoster | undefined>(undefined);
+  const attempts = useRef({ url, count: 0, fallbackCount: 0 });
 
   useEffect(() => {
-    if (attempts.current.url !== url) attempts.current = { url, count: 0 };
-    if (!url || !enabled || !active || poster?.url === url) return;
+    if (attempts.current.url !== url) {
+      attempts.current = { url, count: 0, fallbackCount: 0 };
+    }
+    if (
+      !url ||
+      !fallbackUrl ||
+      !enabled ||
+      !active ||
+      loaded.current?.url === url
+    )
+      return;
     let disposed = false;
-    const isCurrent = () => !disposed;
     let timeout: ReturnType<typeof setTimeout> | undefined;
     let image: HTMLImageElement | undefined;
 
     const retry = () => {
-      if (isCurrent() && attempts.current.count < 8) {
-        clearTimeout(timeout);
-        timeout = setTimeout(() => {
-          void check();
-        }, 15000);
-      }
-    };
-    const check = async () => {
-      if (!isCurrent() || attempts.current.count >= 8) return;
-      attempts.current.count += 1;
-      const available = await checkVideoAvailability(url);
-      if (!isCurrent()) return;
-      if (!available) {
-        retry();
+      if (
+        disposed ||
+        attempts.current.count >= MAX_POSTER_CHECKS ||
+        attempts.current.fallbackCount >= MAX_FALLBACK_CHECKS
+      )
         return;
-      }
+      // Conversion can outlast two minutes. Back off to one check per minute,
+      // retaining the shared HEAD cache and pausing outside view/background.
+      const delay = Math.min(15000 * 2 ** (attempts.current.count - 1), 60000);
+      clearTimeout(timeout);
+      timeout = setTimeout(() => {
+        void check();
+      }, delay);
+    };
+    const load = (imageUrl: string) => {
       const preview = new Image();
       image = preview;
       preview.onload = () => {
-        if (!isCurrent()) return;
+        if (disposed) return;
         if (preview.naturalWidth <= 0 || preview.naturalHeight <= 0) {
           retry();
           return;
         }
-        setPoster({
-          url,
+        const next = {
+          url: imageUrl,
           aspectRatio: preview.naturalWidth / preview.naturalHeight,
-        });
+        };
+        loaded.current = next;
+        setPoster(next);
+        if (imageUrl !== url) retry();
       };
       preview.onerror = retry;
-      preview.src = url;
+      preview.src = imageUrl;
+    };
+    const check = async () => {
+      if (
+        disposed ||
+        attempts.current.count >= MAX_POSTER_CHECKS ||
+        attempts.current.fallbackCount >= MAX_FALLBACK_CHECKS
+      )
+        return;
+      attempts.current.count += 1;
+      const hasFallback = loaded.current?.url === fallbackUrl;
+      if (hasFallback) attempts.current.fallbackCount += 1;
+      const available = await checkVideoAvailability(url);
+      if (disposed) return;
+      if (available) {
+        load(url);
+        return;
+      }
+      if (!hasFallback && (await checkVideoAvailability(fallbackUrl))) {
+        if (!disposed) load(fallbackUrl);
+        return;
+      }
+      retry();
     };
     void check();
     return () => {
@@ -76,7 +114,9 @@ export function useChatVideoPoster(
         image.removeAttribute("src");
       }
     };
-  }, [url, enabled, active, poster?.url]);
+  }, [url, fallbackUrl, enabled, active]);
 
-  return poster?.url === url ? poster : undefined;
+  return poster?.url === url || poster?.url === fallbackUrl
+    ? poster
+    : undefined;
 }

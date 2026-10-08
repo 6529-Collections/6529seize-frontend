@@ -1069,6 +1069,65 @@ describe("SeizeVideoPlayer", () => {
     }
   );
 
+  it.each([
+    [360, 640, "tw-w-[min(100%,24rem)]"],
+    [640, 640, "tw-w-[min(100%,32rem)]"],
+    [640, 360, "tw-w-full"],
+  ])(
+    "keeps natural poster and playback sizing for %s x %s",
+    (width, height, widthClass) => {
+      const { container } = render(
+        <SeizeVideoPlayer
+          src="clip.mp4"
+          poster="poster.jpg"
+          aspectRatioHint={width / height}
+          preload="none"
+        />
+      );
+      const player = container.firstElementChild as HTMLElement;
+      const video = container.querySelector("video")!;
+      expect(player).toHaveClass(widthClass);
+      const previewMaxWidth = player.style.maxWidth;
+      const previewMaxHeight = player.style.maxHeight;
+      Object.defineProperties(video, {
+        videoWidth: { value: width },
+        videoHeight: { value: height },
+      });
+      fireEvent.loadedMetadata(video);
+      expect(player).toHaveClass(widthClass);
+      expect(player.style.maxWidth).toBe(previewMaxWidth);
+      expect(player.style.maxHeight).toBe(previewMaxHeight);
+      expect(player.style.aspectRatio).toBe(`${width} / ${height}`);
+    }
+  );
+
+  it("discards natural sizing from the previous chat video", () => {
+    const { container, rerender } = render(
+      <SeizeVideoPlayer
+        data-url="first.mp4"
+        aspectRatioHint={1}
+        preload="none"
+      />
+    );
+    const video = container.querySelector("video")!;
+    Object.defineProperties(video, {
+      videoWidth: { value: 640 },
+      videoHeight: { value: 640 },
+    });
+    fireEvent.loadedMetadata(video);
+    const player = container.firstElementChild as HTMLElement;
+    expect(player).toHaveClass("tw-w-[min(100%,32rem)]");
+    rerender(
+      <SeizeVideoPlayer
+        data-url="second.mp4"
+        aspectRatioHint={16 / 9}
+        preload="none"
+      />
+    );
+    expect(player).toHaveClass("tw-w-full");
+    expect(player.style.aspectRatio).toBe(String(16 / 9));
+  });
+
   it("reserves known portrait dimensions before metadata and resets them for another source", () => {
     const { container, rerender } = render(
       <SeizeVideoPlayer

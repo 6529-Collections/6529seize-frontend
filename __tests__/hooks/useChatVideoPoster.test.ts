@@ -13,7 +13,7 @@ jest.mock("@/helpers/video.helpers", () => ({
 const check = jest.mocked(checkVideoAvailability);
 const source = "https://d3lqz0a4bldqgf.cloudfront.net/drops/author/clip.mp4";
 const posterUrl =
-  "https://d3lqz0a4bldqgf.cloudfront.net/renditions/drops/author/clip/poster/clip_poster.0000000.jpg";
+  "https://d3lqz0a4bldqgf.cloudfront.net/renditions/drops/author/clip/poster/clip_poster.0000001.jpg";
 let images: HTMLImageElement[];
 
 beforeEach(() => {
@@ -88,7 +88,10 @@ it("ignores external videos even when enabled", async () => {
 });
 
 it("bounds missing-preview retries and discovers a thumbnail that arrives later", async () => {
-  check.mockResolvedValueOnce(false).mockResolvedValueOnce(true);
+  check
+    .mockResolvedValueOnce(false)
+    .mockResolvedValueOnce(false)
+    .mockResolvedValueOnce(true);
   const { result } = renderHook(() => useChatVideoPoster(source, true));
   await flush();
   expect(images).toHaveLength(0);
@@ -97,19 +100,19 @@ it("bounds missing-preview retries and discovers a thumbnail that arrives later"
   });
   loaded(imageAt(0), 640, 360);
   expect(result.current?.aspectRatio).toBe(640 / 360);
-  expect(check).toHaveBeenCalledTimes(2);
+  expect(check).toHaveBeenCalledTimes(3);
 });
 
-it("stops after eight missing previews for older videos", async () => {
+it("stops after twenty missing previews for older videos", async () => {
   check.mockResolvedValue(false);
   renderHook(() => useChatVideoPoster(source, true));
   await flush();
-  for (let index = 0; index < 10; index += 1) {
+  for (let index = 0; index < 24; index += 1) {
     await act(async () => {
-      jest.advanceTimersByTime(15000);
+      jest.advanceTimersByTime(60000);
     });
   }
-  expect(check).toHaveBeenCalledTimes(8);
+  expect(check).toHaveBeenCalledTimes(40);
 });
 
 it("cleans up retries in background and resumes when active again", async () => {
@@ -121,11 +124,11 @@ it("cleans up retries in background and resumes when active again", async () => 
   await act(async () => {
     jest.advanceTimersByTime(15000);
   });
-  expect(check).toHaveBeenCalledTimes(1);
+  expect(check).toHaveBeenCalledTimes(2);
   mockActive = true;
   rerender();
   await flush();
-  expect(check).toHaveBeenCalledTimes(2);
+  expect(check).toHaveBeenCalledTimes(4);
 });
 
 it("does not apply an old image after a source change and aborts its load", async () => {
@@ -142,7 +145,7 @@ it("does not apply an old image after a source change and aborts its load", asyn
   await flush();
   loaded(imageAt(1));
   expect(result.current?.url).toContain(
-    "/other/poster/other_poster.0000000.jpg"
+    "/other/poster/other_poster.0000001.jpg"
   );
 });
 
@@ -161,4 +164,59 @@ it("keeps failed images out of the player and cancels work when leaving view", a
     jest.advanceTimersByTime(15000);
   });
   expect(check).toHaveBeenCalledTimes(1);
+});
+
+it("discovers a poster after a conversion takes more than two minutes without refresh", async () => {
+  check.mockResolvedValue(false);
+  const { result } = renderHook(() => useChatVideoPoster(source, true));
+  await flush();
+  for (const delay of [15000, 30000, 60000, 60000]) {
+    await act(async () => {
+      jest.advanceTimersByTime(delay);
+    });
+  }
+  expect(result.current).toBeUndefined();
+  check.mockResolvedValue(true);
+  await act(async () => {
+    jest.advanceTimersByTime(60000);
+  });
+  loaded(imageAt(0));
+  expect(result.current?.url).toBe(posterUrl);
+});
+
+it("supports existing and sub-second first-frame posters, then upgrades when the one-second frame arrives", async () => {
+  const fallbackUrl = posterUrl.replace("0000001", "0000000");
+  let preferredAvailable = false;
+  check.mockImplementation(
+    async (url) => url === fallbackUrl || preferredAvailable
+  );
+  const { result } = renderHook(() => useChatVideoPoster(source, true));
+  await flush();
+  loaded(imageAt(0));
+  expect(result.current?.url).toBe(fallbackUrl);
+  preferredAvailable = true;
+  await act(async () => {
+    jest.advanceTimersByTime(15000);
+  });
+  loaded(imageAt(1));
+  expect(result.current?.url).toBe(posterUrl);
+  await act(async () => {
+    jest.advanceTimersByTime(120000);
+  });
+  expect(check).toHaveBeenCalledTimes(3);
+});
+
+it("bounds preferred probes when an older or very short video only has its first frame", async () => {
+  const fallbackUrl = posterUrl.replace("0000001", "0000000");
+  check.mockImplementation(async (url) => url === fallbackUrl);
+  const { result } = renderHook(() => useChatVideoPoster(source, true));
+  await flush();
+  loaded(imageAt(0));
+  for (let index = 0; index < 8; index += 1) {
+    await act(async () => {
+      jest.advanceTimersByTime(60000);
+    });
+  }
+  expect(result.current?.url).toBe(fallbackUrl);
+  expect(check).toHaveBeenCalledTimes(6);
 });

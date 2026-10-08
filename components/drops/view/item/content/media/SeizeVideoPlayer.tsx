@@ -28,6 +28,7 @@ import {
   getResponsiveVideoStyle,
   getNaturalWidthClassName,
   getOrientation,
+  getVideoRatio,
   resolveSeizeVideoTemplate,
   useElementInView,
   usePrefersReducedMotion,
@@ -171,8 +172,6 @@ export default function SeizeVideoPlayer({
   const { savedPlayback, rememberUserControl, isUserControlled } =
     useVideoPlaybackMemory(videoElement, dataUrl ?? src ?? id);
   const muteIdentity = dataUrl ?? src ?? id;
-  const [aspectRatio, setAspectRatio] = useState<string | undefined>();
-  const [orientation, setOrientation] = useState("unknown");
   const [mutedState, setMutedState] = useState<{
     readonly src?: string | undefined;
     readonly prop?: boolean | undefined;
@@ -197,6 +196,7 @@ export default function SeizeVideoPlayer({
         readonly width: number;
         readonly height: number;
         readonly src: string | undefined;
+        readonly identity: string | undefined;
       }
     | undefined
   >();
@@ -366,9 +366,8 @@ export default function SeizeVideoPlayer({
       width: video.videoWidth,
       height: video.videoHeight,
       src: directSrc,
+      identity: muteIdentity,
     });
-    setAspectRatio(getAspectRatio(video.videoWidth, video.videoHeight));
-    setOrientation(getOrientation(video.videoWidth, video.videoHeight));
     updateProgress();
   }
 
@@ -557,6 +556,18 @@ export default function SeizeVideoPlayer({
       revealControls();
     };
 
+  const currentVideoSize =
+    videoSize?.src === directSrc && videoSize?.identity === muteIdentity
+      ? videoSize
+      : undefined;
+  const previewRatio =
+    layout === "natural" ? getVideoRatio(aspectRatioHint, 1) : undefined;
+  const orientation = currentVideoSize
+    ? getOrientation(currentVideoSize.width, currentVideoSize.height)
+    : getOrientation(previewRatio ?? 0, 1);
+  const aspectRatio = currentVideoSize
+    ? getAspectRatio(currentVideoSize.width, currentVideoSize.height)
+    : undefined;
   const isFillLayout = layout === "fill";
   const widthClassName = getNaturalWidthClassName(orientation, layout);
   const posterGateIdentity = poster ?? id ?? dataUrl ?? src ?? "";
@@ -594,7 +605,7 @@ export default function SeizeVideoPlayer({
   const responsiveMediaStyle = getResponsiveVideoStyle({
     layout,
     isFullscreen,
-    videoSize,
+    videoSize: currentVideoSize,
     directSrc,
     aspectRatioHint,
     aspectRatio,

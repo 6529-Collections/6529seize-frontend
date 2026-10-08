@@ -31,7 +31,7 @@ export function defineWaveVideoLayoutTests() {
     await video.scrollIntoViewIfNeeded();
     await expect(video).toHaveAttribute(
       "poster",
-      /\/poster\/portrait_poster\.0000000\.jpg$/
+      /\/poster\/portrait_poster\.0000001\.jpg$/
     );
     await expect(video).not.toHaveAttribute("src", /.+/);
     expect(videoRequests).toHaveLength(0);
@@ -46,11 +46,23 @@ export function defineWaveVideoLayoutTests() {
       };
     });
     expect(preview).toEqual({ width: 360, height: 640, paused: true });
+    const posterBox = await video.boundingBox();
+    expect(posterBox).not.toBeNull();
     await page
       .getByRole("button", { name: "Play video", exact: true })
       .first()
       .click();
     await expect.poll(() => videoRequests.length).toBeGreaterThan(0);
+    await expect
+      .poll(() =>
+        video.evaluate((element: HTMLVideoElement) => element.readyState)
+      )
+      .toBeGreaterThanOrEqual(1);
+    const playbackBox = await video.boundingBox();
+    expect(playbackBox).not.toBeNull();
+    for (const dimension of ["width", "height", "x", "y"] as const) {
+      expect(playbackBox![dimension]).toBeCloseTo(posterBox![dimension], 0);
+    }
   });
   test("retains video position and sound when a chat drop is virtualized", async ({
     page,

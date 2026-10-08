@@ -79,7 +79,7 @@ it.each([DropListItemContentMediaVideo, MediaDisplayVideo])(
       "poster",
       src.replace(
         "/drops/author/clip.mp4",
-        "/renditions/drops/author/clip/poster/clip_poster.0000000.jpg"
+        "/renditions/drops/author/clip/poster/clip_poster.0000001.jpg"
       )
     );
     expect(video).not.toHaveAttribute("src");

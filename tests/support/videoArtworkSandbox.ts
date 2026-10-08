@@ -74,7 +74,9 @@ export async function installLinkedDropVideoSandbox(
       `${cloudfront}/renditions/drops/video-fixture/portrait/**`,
       (route) => {
         if (
-          !route.request().url().endsWith("/poster/portrait_poster.0000000.jpg")
+          !/\/poster\/portrait_poster\.000000[01]\.jpg$/.test(
+            route.request().url()
+          )
         ) {
           return route.fulfill({ status: 404 });
         }
