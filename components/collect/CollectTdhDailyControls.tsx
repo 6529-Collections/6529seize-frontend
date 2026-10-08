@@ -103,7 +103,7 @@ export default function CollectTdhDailyControls({
                 onChange={(event) =>
                   onChange({ mode, value: event.target.value })
                 }
-                className="tw-block tw-min-h-11 tw-w-full tw-min-w-0 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-sm tw-tabular-nums tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+                className="tw-block tw-min-h-11 tw-w-full tw-min-w-0 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-sm tw-tabular-nums tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 touch-only:tw-text-base"
               />
               {calculated && (
                 <p
