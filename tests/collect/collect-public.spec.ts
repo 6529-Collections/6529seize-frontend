@@ -600,7 +600,13 @@ test("set planning is the default and navigation opens observed listings", async
     page.getByRole("heading", { name: "Build your collection", exact: true })
   ).toHaveCSS("font-family", /Montserrat/);
   expect(
-    await page.evaluate(() => document.fonts.check("16px Montserrat"))
+    await page.evaluate(() =>
+      Array.from(document.fonts).some(
+        (face) =>
+          (face.family === "Montserrat" || face.family === '"Montserrat"') &&
+          face.status === "loaded"
+      )
+    )
   ).toBe(true);
   await expect(
     page.getByRole("textbox", { name: "Copies per NFT", exact: true })
