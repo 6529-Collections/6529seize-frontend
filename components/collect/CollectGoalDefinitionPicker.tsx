@@ -104,7 +104,7 @@ export default function CollectGoalDefinitionPicker({
                 aria-errormessage={errorId}
                 aria-invalid={invalid}
                 autoComplete="off"
-                className="tw-block tw-min-h-11 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-py-2 tw-pl-3 tw-pr-12 tw-text-sm tw-text-iron-100 placeholder:tw-text-iron-500 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 disabled:tw-opacity-50"
+                className="tw-block tw-min-h-11 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-py-2 tw-pl-3 tw-pr-12 tw-text-sm tw-text-iron-100 placeholder:tw-text-iron-500 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 disabled:tw-opacity-50 touch-only:tw-text-base"
               />
               <ComboboxButton className="tw-absolute tw-inset-y-0 tw-right-0 tw-flex tw-w-11 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-r-lg tw-border-0 tw-bg-transparent tw-text-iron-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed">
                 <ChevronDownIcon aria-hidden="true" className="tw-size-4" />

@@ -21,7 +21,6 @@ import {
   type CollectKnownTransactionPurpose,
 } from "./collect-receipt.helpers";
 import type { MarketReviewChangeNotice } from "./market-review-change-description";
-import styles from "./marketplace-font.module.css";
 import type {
   CollectReviewFact,
   CollectTradeReview,
@@ -78,7 +77,7 @@ export function CollectTradeDialog({
       focusTitleOnOpen
       showScrollbar
     >
-      <div className={styles["surface"]}>{children}</div>
+      <div>{children}</div>
     </MobileWrapperDialog>
   );
 }
@@ -427,7 +426,7 @@ export default function CollectTradeSheet(props: CollectTradeSheetProps) {
   };
   const content = (
     <div
-      className={`${styles["surface"] ?? ""} tw-w-full tw-space-y-6 tw-text-iron-100 ${props.compact ? "" : "tw-px-5 md:tw-px-7"}`}
+      className={`tw-w-full tw-space-y-6 tw-text-iron-100 ${props.compact ? "" : "tw-px-5 md:tw-px-7"}`}
     >
       {renderReview()}
     </div>

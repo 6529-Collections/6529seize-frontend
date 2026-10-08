@@ -6,7 +6,6 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import type { CollectOrderView } from "./collect.types";
-import marketplaceFont from "./marketplace-font.module.css";
 
 interface CollectOrdersViewProps {
   readonly orders: readonly CollectOrderView[];
@@ -26,9 +25,7 @@ interface CollectOrdersViewProps {
 export default function CollectOrdersView(props: CollectOrdersViewProps) {
   const locale = useBrowserLocale();
   return (
-    <div
-      className={`${marketplaceFont["surface"] ?? ""} tailwind-scope tw-mx-auto tw-w-full tw-max-w-[1100px] tw-px-4 tw-py-6 tw-text-iron-100 md:tw-px-6 lg:tw-px-8`}
-    >
+    <div className="tailwind-scope tw-mx-auto tw-w-full tw-max-w-3xl tw-px-4 tw-py-6 tw-text-iron-100 md:tw-px-6 lg:tw-px-8">
       <header className="tw-mb-6">
         <h1 className="tw-m-0 tw-text-2xl tw-font-medium tw-tracking-tight">
           {t(locale, "collect.orders")}
