@@ -97,7 +97,7 @@ export default function CommunityMembersFilterPanel(
     useState<GroupMembersPreviewTarget | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const editorRef = useRef<HTMLDivElement>(null);
-  useKeyboardFocusScroll(editorRef);
+  useKeyboardFocusScroll(editorRef, "nearest");
   const configuredRules = new Set(
     getInlineGroupConfiguredRules(displayedBuilder.draft)
   );
@@ -172,7 +172,9 @@ export default function CommunityMembersFilterPanel(
             {currentGroupLabel}
           </span>
           {savedTarget && (
-            <div className={isKeyboardVisible ? "tw-hidden" : "tw-contents"}>
+            <div
+              className={`tw-flex ${isKeyboardVisible ? "tw-sr-only focus-within:tw-not-sr-only" : ""} [[data-mobile-dialog-keyboard-visible=true]_&]:tw-sr-only [[data-mobile-dialog-keyboard-visible=true]_&]:focus-within:tw-not-sr-only`}
+            >
               <GroupMembersPreviewTrigger
                 target={savedTarget}
                 appearance="inline"
@@ -276,9 +278,9 @@ export default function CommunityMembersFilterPanel(
             </section>
           </div>
         </fieldset>
-        <div className="tw-flex tw-shrink-0 tw-flex-col tw-gap-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-bg-iron-950 tw-px-4 tw-py-2 sm:tw-flex-row sm:tw-items-center sm:tw-gap-4 sm:tw-px-6">
+        <div className="tw-flex tw-shrink-0 tw-flex-col tw-gap-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-bg-iron-950 tw-px-4 tw-py-2 sm:tw-px-6 lg:tw-flex-row lg:tw-items-center lg:tw-gap-4">
           <div
-            className={`${isKeyboardVisible ? "tw-hidden" : "tw-flex"} tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-2 sm:tw-flex-1`}
+            className={`tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-2 lg:tw-flex-1 ${isKeyboardVisible ? "tw-sr-only focus-within:tw-not-sr-only [&_ul]:tw-overflow-visible focus-within:[&_ul]:tw-overflow-y-auto" : ""} [[data-mobile-dialog-keyboard-visible=true]_&]:tw-sr-only [[data-mobile-dialog-keyboard-visible=true]_&]:focus-within:tw-not-sr-only [[data-mobile-dialog-keyboard-visible=true]_&]:[&_ul]:tw-overflow-visible [[data-mobile-dialog-keyboard-visible=true]_&]:focus-within:[&_ul]:tw-overflow-y-auto`}
           >
             <span
               className={`tw-shrink-0 tw-text-xs tw-font-medium tw-text-iron-400 ${draftSummaryParts.length ? "tw-basis-full" : ""}`}
@@ -316,7 +318,7 @@ export default function CommunityMembersFilterPanel(
           <Button
             variant="action"
             size="md"
-            className="tw-min-h-11 tw-max-w-full tw-self-end !tw-whitespace-normal sm:tw-self-auto"
+            className="tw-min-h-11 tw-w-full tw-max-w-full !tw-whitespace-normal lg:tw-w-auto lg:tw-self-auto"
             disabled={!canCreateDraft}
             loading={isCreating}
             onClick={onCreateAndUse}
