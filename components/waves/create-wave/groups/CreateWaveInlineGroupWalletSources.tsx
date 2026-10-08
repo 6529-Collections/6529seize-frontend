@@ -202,6 +202,7 @@ function EmmaWalletSource({
         )}
       </p>
       <EmmaListSearch
+        resultsLayout={networkPresentation ? "inline" : "popover"}
         selectedId={selectedId}
         selectedName={sources.selectedAllowlist?.name ?? null}
         onSelect={onSelect}
