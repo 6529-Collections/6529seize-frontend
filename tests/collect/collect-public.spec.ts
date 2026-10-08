@@ -708,6 +708,7 @@ test("set planning is the default and navigation opens observed listings", async
 
 test("collecting tools stay on one line and scroll into keyboard focus on narrow screens", async ({
   page,
+  browserName,
 }, info) => {
   const mutations = await mockCatalog(page);
   await page.setViewportSize({ width: 320, height: 844 });
@@ -740,10 +741,14 @@ test("collecting tools stay on one line and scroll into keyboard focus on narrow
       (element) => element.scrollWidth > element.clientWidth
     )
   ).toBe(true);
+  // WebKit's default settings use Option-Tab to include clickable controls.
+  const nextToolKey = browserName === "webkit" ? "Alt+Tab" : "Tab";
+  const previousToolKey =
+    browserName === "webkit" ? "Alt+Shift+Tab" : "Shift+Tab";
   await completeSet.focus();
-  await page.keyboard.press("Tab");
+  await page.keyboard.press(nextToolKey);
   await expect(lowest).toBeFocused();
-  await page.keyboard.press("Tab");
+  await page.keyboard.press(nextToolKey);
   await expect(tdh).toBeFocused();
   await expect
     .poll(() => navigation.evaluate((element) => element.scrollLeft))
@@ -760,8 +765,8 @@ test("collecting tools stay on one line and scroll into keyboard focus on narrow
   await page.keyboard.press("Enter");
   await expect(tdh).toHaveAttribute("aria-pressed", "true");
   await expect(page).toHaveURL(/intent=tdh/);
-  await page.keyboard.press("Shift+Tab");
-  await page.keyboard.press("Shift+Tab");
+  await page.keyboard.press(previousToolKey);
+  await page.keyboard.press(previousToolKey);
   await expect(completeSet).toBeFocused();
   await expect
     .poll(() => navigation.evaluate((element) => element.scrollLeft))

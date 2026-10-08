@@ -56,7 +56,7 @@ export default function CollectGoalNavigation({
       data-collect-navigation
       role="group"
       aria-label={t(locale, "collect.navigation.label")}
-      className="-tw-mx-1 tw-mb-5 tw-flex tw-min-w-0 tw-gap-1 tw-overflow-x-auto tw-px-1 tw-py-1 sm:tw-gap-2"
+      className="-tw-mx-1 tw-mb-5 tw-flex tw-min-w-0 tw-scroll-px-1 tw-gap-1 tw-overflow-x-auto tw-px-1 tw-py-1 sm:tw-gap-2"
     >
       {groups.map(({ id, label, Icon, selected, defaultIntent }) => (
         <button
@@ -70,6 +70,12 @@ export default function CollectGoalNavigation({
           }`}
           onClick={() => {
             if (!selected) onIntentChange(defaultIntent);
+          }}
+          onFocus={(event) => {
+            event.currentTarget.scrollIntoView({
+              block: "nearest",
+              inline: "nearest",
+            });
           }}
         >
           <Icon aria-hidden="true" className="tw-size-4 tw-shrink-0" />
