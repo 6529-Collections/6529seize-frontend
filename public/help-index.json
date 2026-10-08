@@ -115,7 +115,8 @@
       ],
       "facts": [
         "On iPhone and iPad Safari, focusing small text fields inside interactive artwork does not automatically enlarge the whole page. Pinch zoom remains available in Safari. The native mobile app keeps page scale at normal size through navigation.",
-        "In the iOS app, the artwork frame scrolls above the keyboard without changing its dimensions. Closing the keyboard keeps the page at normal scale. App-owned fields and the composer retain their existing keyboard behavior. Artists do not need to change their files, and the untrusted interactive frame keeps its existing sandbox restrictions."
+        "In the iOS app, chat retains its existing keyboard handling. A large single-view artwork frame can scroll above the keyboard without changing artwork dimensions or adding extra page padding. Closing the keyboard keeps the page at normal scale. App-owned fields and the composer retain their existing keyboard behavior. Artists do not need to change their files, and the untrusted interactive frame keeps its existing sandbox restrictions.",
+        "In the native app, a single artwork opened from Active Submissions on a profile fills the screen, using the same safe-area toolbar position as the wave leaderboard."
       ],
       "canonical_path": "/waves",
       "link_label": "Open Waves",
@@ -125,7 +126,10 @@
         "components/providers/CapacitorSetup.tsx",
         "components/common/SandboxedExternalIframe.tsx",
         "components/nft-image/renderers/NFTHTMLRenderer.tsx",
-        "ops/docs/shared/feature-browser-zoom-and-pinch-scaling.md"
+        "ops/docs/shared/feature-browser-zoom-and-pinch-scaling.md",
+        "components/user/layout/UserPageDropModal.tsx",
+        "components/waves/drop/SingleWaveDropWrapper.tsx",
+        "ops/docs/waves/drop-actions/feature-artist-preview-modal.md"
       ]
     },
     {
