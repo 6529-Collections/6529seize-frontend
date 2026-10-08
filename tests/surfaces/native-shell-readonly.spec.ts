@@ -237,6 +237,56 @@ async function readNotificationHistoryPushCount(page: Page) {
 }
 
 test.describe("Native and Electron simulated shell read-only coverage @surface @medium @readonly", () => {
+  test("native profile artwork opens above the app header and closes back to the profile", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      !isCapacitorSimulationProject(testInfo.project.name),
+      "Native profile artwork geometry is covered on Capacitor simulations"
+    );
+    const dropId =
+      process.env["TARGET_DROP_ID"] ??
+      (process.env["PLAYWRIGHT_COMPOSER_SANDBOX"] === "1"
+        ? "00000000-0000-4000-8000-000000000530"
+        : "74b13174-b34f-43e5-b302-23680f0d0b05");
+    await gotoReady(page, `/punk6529?drop=${dropId}`);
+    const artwork = page.getByRole("main").locator("[data-video-viewport]");
+    await expect(artwork).toBeVisible({ timeout: 30_000 });
+    await expect
+      .poll(() =>
+        artwork.evaluate((element) => element.getBoundingClientRect().top)
+      )
+      .toBe(0);
+    await expect
+      .poll(() =>
+        artwork.evaluate(
+          (element) =>
+            element.getBoundingClientRect().height - window.innerHeight
+        )
+      )
+      .toBe(0);
+    const close = artwork.getByRole("button", {
+      name: "Close panel",
+      exact: true,
+    });
+    await expect(close).toBeInViewport({ ratio: 1 });
+    const share = artwork.getByRole("button", {
+      name: "Share drop",
+      exact: true,
+    });
+    await expect(share).toBeInViewport({ ratio: 1 });
+    await share.click({ trial: true });
+    await page.screenshot({
+      path: testInfo.outputPath("native-profile-artwork.png"),
+    });
+    await close.click();
+    await expect(artwork).toHaveCount(0);
+    await expect(page).toHaveURL((url) => !url.searchParams.has("drop"));
+    await expect(
+      page.getByRole("navigation", { name: "Profile sections" })
+    ).toBeVisible();
+  });
+
   test("Capacitor simulations expose native runtime signals", async ({
     page,
   }, testInfo) => {
