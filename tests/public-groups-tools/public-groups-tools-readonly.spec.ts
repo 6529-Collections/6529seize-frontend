@@ -363,6 +363,62 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
     await expectNoHorizontalOverflow(page);
   });
 
+  test("keeps All filters and Close visible while a narrow editor scrolls", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 620 });
+    await gotoReady(page, "/network");
+    await openGroupFilters(page);
+    const filter = page.getByRole("dialog", { name: "Filter Network" });
+    const choices = filter.getByRole("group", { name: "Filter Network" });
+    const back = filter.getByRole("button", {
+      name: "All filters",
+      exact: true,
+    });
+    const level = filter.getByRole("spinbutton", { name: "Level at least" });
+    await choices.getByRole("button", { name: "Level", exact: true }).click();
+    await level.fill("10");
+    await back.click();
+    await choices
+      .getByRole("button", { name: "Identities", exact: true })
+      .click();
+    const identities = filter.getByRole("region", {
+      name: "Identities",
+      exact: true,
+    });
+    const backBeforeScroll = await back.boundingBox();
+    // Mobile WebKit does not support mouse.wheel. Scroll the real editor
+    // directly and keep the same rendered-position and navigation guarantees.
+    await identities.evaluate((element) => {
+      const editor = element.parentElement;
+      if (!editor) throw new Error("Expected the criterion scroll container");
+      editor.scrollTo({ top: editor.scrollHeight });
+    });
+    await expect
+      .poll(() =>
+        identities.evaluate((element) => element.parentElement?.scrollTop)
+      )
+      .toBeGreaterThan(0);
+    await expect(back).toBeInViewport({ ratio: 1 });
+    await expect
+      .poll(async () => (await back.boundingBox())?.y)
+      .toBeCloseTo(backBeforeScroll?.y ?? 0, 0);
+    await expect(
+      filter.getByRole("button", { name: "Close", exact: true })
+    ).toBeInViewport({ ratio: 1 });
+    await expect(
+      filter.getByRole("button", { name: "Create and use new group" })
+    ).toBeInViewport({ ratio: 1 });
+    await back.click();
+    await expect(
+      choices.getByRole("button", { name: "Identities", exact: true })
+    ).toBeFocused();
+    await choices
+      .getByRole("button", { name: "Level Configured", exact: true })
+      .click();
+    await expect(level).toHaveValue("10");
+  });
+
   test("keeps the Network filter as a sheet at tablet and touch widths", async ({
     page,
   }) => {
