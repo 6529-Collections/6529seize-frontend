@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { useWaveInformation } from "./WaveInformationContext";
 import {
   createContext,
   useContext,
@@ -57,6 +58,7 @@ export const NavigationHistoryProvider: React.FC<{
   readonly children: ReactNode;
 }> = ({ children }) => {
   const { hardBack } = useViewContext();
+  const information = useWaveInformation();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -173,6 +175,10 @@ export const NavigationHistoryProvider: React.FC<{
   );
 
   const goBack = useCallback(() => {
+    if (information?.request?.overlay) {
+      information.close();
+      return;
+    }
     if (!canGoBack) return;
     let targetIndex = index - 1;
     const current = historyRef.current[index];
@@ -207,7 +213,7 @@ export const NavigationHistoryProvider: React.FC<{
       hardBack(target!.view);
     }
     setIndex(targetIndex);
-  }, [canGoBack, index, router, hardBack]);
+  }, [canGoBack, index, router, hardBack, information]);
 
   const goBackTo = useCallback(
     (path: string) => {
@@ -244,14 +250,22 @@ export const NavigationHistoryProvider: React.FC<{
 
   const value = useMemo(
     () => ({
-      canGoBack,
+      canGoBack: canGoBack || Boolean(information?.request?.overlay),
       goBack,
       goBackTo,
       pushView,
       currentWaveView,
       rememberWaveView,
     }),
-    [canGoBack, goBack, goBackTo, pushView, currentWaveView, rememberWaveView]
+    [
+      canGoBack,
+      goBack,
+      goBackTo,
+      pushView,
+      currentWaveView,
+      rememberWaveView,
+      information,
+    ]
   );
 
   return <Context.Provider value={value}>{children}</Context.Provider>;

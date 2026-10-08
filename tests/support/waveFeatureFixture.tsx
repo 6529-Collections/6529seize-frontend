@@ -119,9 +119,7 @@ function Fixture() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [recommendationActive, setRecommendationActive] = useState(true);
   const [availableTabs, setAvailableTabs] = useState(() =>
-    new URLSearchParams(location.search).has("late-tabs")
-      ? [MyStreamWaveTab.CHAT]
-      : tabs
+    new URLSearchParams(location.search).has("late-tabs") ? [] : tabs
   );
   const navigation = {
     collection,
@@ -148,7 +146,7 @@ function Fixture() {
   window.featureFixture = {
     ...queueFixture,
     showTabs: () =>
-      setAvailableTabs([MyStreamWaveTab.CHAT, MyStreamWaveTab.ABOUT]),
+      setAvailableTabs([MyStreamWaveTab.CHAT, MyStreamWaveTab.POLLS]),
     logout: clearIdentity,
     switchProfile: identify,
     resumeAnalytics: () => {

@@ -1,4 +1,4 @@
-# Wave My Votes Tab
+# Competition Votes
 
 ## Overview
 
@@ -6,27 +6,29 @@
 You can update votes one row at a time, reset selected rows to `0`, or open a
 prefilled reply for explaining a vote.
 
-The tab is available only on eligible rank-wave layouts:
-
-- memes waves
-- curation waves
+Open **Votes** in the wave's main row, then select **My Votes**. The other
+subtabs are **All votes**, with voter profiles and totals, and **Activity**, with
+vote changes. Each uses the selected competition, including the original
+competition in an older wave. Switching competition changes all three views.
+Signed-out viewers can inspect public All votes and Activity; personal votes
+require a connected profile.
 
 ## Location in the Site
 
 - Rank-wave thread routes: `/waves/{waveId}`
 - Rank-wave direct-message routes: `/messages/{waveId}`
-- Desktop and mobile wave tab rows when `My Votes` is available
+- Desktop and mobile wave tab rows when `Votes` is available
 
 ## Entry Points
 
 - Open an eligible wave.
-- Switch to `My Votes` from the wave tab row.
+- Switch to `Votes`, then `My Votes`.
 - Use rows or their checkboxes to select votes for reset, vote inputs to edit
   votes, and `Explain` actions to explain them.
 
 ## User Journey
 
-1. Open a wave and switch to `My Votes`.
+1. Open a wave and switch to `Votes` → `My Votes`.
 2. If no rows are found, the tab shows:
    `You haven't voted on any submissions in this wave yet.`
 3. Review each row: preview, title, rank (when available), author, total vote
@@ -100,7 +102,7 @@ The tab is available only on eligible rank-wave layouts:
   object or require dedicated backend support.
 - Vote totals, available votes, and maximum values use locale-aware number
   formatting. Focusing a vote input shows its editable digits without grouping.
-- Tab selection is UI state and is not encoded in a URL tab parameter.
+- Competition links use `tab=votes`; `voteTab=mine`, `voteTab=all`, or `voteTab=activity` preserves the subtab on reload and Back/Forward. Older `tab=voters` links open All votes.
 
 ## Related Pages
 

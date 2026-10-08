@@ -6362,6 +6362,73 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiCompetitionError"
+  /v3/waves/{wave_id}/competitions/{competition_id}/activity:
+    get:
+      tags:
+        - CompetitionsV3
+      summary: List vote activity for the selected competition
+      operationId: listCompetitionVoteActivityV3
+      security:
+        - bearerAuth: []
+        - {}
+      x-6529-router:
+        enabled: true
+        auth: optional
+        typeImportGroup: competitions-v3
+        handler:
+          import: "@/api/competitions/competitions-v3.handlers"
+          name: handleListCompetitionVoteActivityV3
+      parameters:
+        - name: wave_id
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 100
+        - name: competition_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            format: int32
+            minimum: 0
+            maximum: 100000
+            default: 0
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+            maximum: 100
+            default: 50
+      responses:
+        "200":
+          description: Most recent votes first, ordered by time then stable sequence
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiWaveLog"
+        "400":
+          description: Invalid pagination
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCompetitionError"
+        "404":
+          description: Masked parent or competition mismatch
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiCompetitionError"
   /v3/waves/{wave_id}/competitions/{competition_id}/pauses:
     get:
       tags:

@@ -134,7 +134,6 @@ function getRouteDefaultView({
 
 function getWaveViewAvailability({
   firstDecisionDone,
-  hasAuthenticatedProfile,
   hasPolls = false,
   hasCompetitions,
   isApproveWave,
@@ -155,8 +154,7 @@ function getWaveViewAvailability({
       isCompetitionWave && (isApproveWave || firstDecisionDone),
     [BrainView.OUTCOME]:
       isCompetitionWave && !isCurationWave && showOutcomeView,
-    [BrainView.MY_VOTES]:
-      isCompetitionWave && (isCurationWave || hasAuthenticatedProfile),
+    [BrainView.MY_VOTES]: isCompetitionWave,
     [BrainView.POLLS]: hasPolls,
     [BrainView.FAQ]: isMemesWave,
   };

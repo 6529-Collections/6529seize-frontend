@@ -274,7 +274,7 @@ it.each([
     list: { data: { pages: [{ data: [{ id: "sole" }], has_more: true }] } },
   },
 ])(
-  "retains the tab when $name",
+  "uses established server permissions when $name",
   ({ auth, permissions, hub, selection, list }) => {
     configureSingleCompetition();
     if (auth) mockAuth = auth as typeof mockAuth;
@@ -295,7 +295,7 @@ it.each([
         ...list,
       });
     const { result } = renderHook(() => useWaveCompetitionsTab(wave));
-    expect(result.current.hideCompetitionsTab).toBe(false);
+    expect(result.current.hideCompetitionsTab).toBe(Boolean(auth));
   }
 );
 
