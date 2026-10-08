@@ -710,12 +710,21 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
           })
         );
 
-    await expect(page).toHaveURL(
-      (url) =>
-        url.pathname === expectedPath ||
-        (expectedQueryWaveId !== null &&
-          url.searchParams.get("wave") === expectedQueryWaveId)
-    );
+    // The search dialog is ready; pending media must not make the URL check
+    // wait for the unrelated page load event.
+    await expect
+      .poll(
+        () => {
+          const url = new URL(page.url());
+          return (
+            url.pathname === expectedPath ||
+            (expectedQueryWaveId !== null &&
+              url.searchParams.get("wave") === expectedQueryWaveId)
+          );
+        },
+        { message: "Wave search must remain on the selected wave route" }
+      )
+      .toBe(true);
     await expect(searchInput).toHaveAttribute("placeholder", "Search messages");
     const minimumQueryMessage = page
       .locator("#wave-drops-search-idle-status")
