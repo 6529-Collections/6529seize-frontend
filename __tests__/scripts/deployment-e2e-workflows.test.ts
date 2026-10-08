@@ -264,7 +264,7 @@ describe("separate post-deploy E2E", () => {
     it.each([
       ["free", "", 0, ["check", "install"]],
       ["clears", "", 0, ["check", "wait", "check", "install"]],
-      ["expires", "", 124, []],
+      ["expires", "", 124, ["check", "wait"]],
       ["free", "77", 77, ["check", "install"]],
     ])(
       "handles a %s lock and installer exit %s",
@@ -280,7 +280,12 @@ describe("separate post-deploy E2E", () => {
             `#!/usr/bin/env bash
 [[ "$1" == 300 ]] || exit 99
 shift
-[[ "$LOCK_MODE" != expires ]] || exit 124
+if [[ "$LOCK_MODE" == expires ]]; then
+  "$@"
+  child_status=$?
+  [[ "$child_status" == 143 ]] || exit 99
+  exit 124
+fi
 exec "$@"
 `
           );
@@ -290,6 +295,7 @@ exec "$@"
             `#!/usr/bin/env bash
 [[ "$*" == '/var/lib/dpkg/lock-frontend /var/lib/dpkg/lock /var/lib/apt/lists/lock' ]] || exit 99
 echo check >> "$EVENTS"
+[[ "$LOCK_MODE" != expires ]] || exit 0
 if [[ "$LOCK_MODE" == clears && ! -f "$RELEASED" ]]; then
   touch "$RELEASED"
   exit 0
@@ -300,7 +306,11 @@ exit 1
           writeExecutable(
             root,
             "sleep",
-            '#!/usr/bin/env bash\necho wait >> "$EVENTS"\n'
+            `#!/usr/bin/env bash
+echo wait >> "$EVENTS"
+# Simulate timeout's termination after the held-lock loop reaches its wait.
+[[ "$LOCK_MODE" != expires ]] || kill -TERM "$PPID"
+`
           );
           writeExecutable(
             root,
