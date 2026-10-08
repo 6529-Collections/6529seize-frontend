@@ -29,9 +29,6 @@ import {
   commonApiPut,
 } from "@/services/api/common-api";
 import type { QueryClient } from "@tanstack/react-query";
-import { createCompetitionContextScheduler } from "./competition-context-scheduler";
-
-const scheduleDropContext = createCompetitionContextScheduler();
 
 export interface CompetitionIdentity {
   readonly waveId: string;
@@ -56,15 +53,11 @@ export async function fetchDropCompetitionContext(
   dropId: string,
   signal?: AbortSignal
 ) {
-  const context = await scheduleDropContext(
-    () =>
-      commonApiFetch<ApiDropCompetitionContext>({
-        endpoint: `v3/waves/${encodeURIComponent(waveId)}/drops/${encodeURIComponent(dropId)}/competition-context`,
-        signal,
-        errorMode: "structured",
-      }),
-    signal
-  );
+  const context = await commonApiFetch<ApiDropCompetitionContext>({
+    endpoint: `v3/waves/${encodeURIComponent(waveId)}/drops/${encodeURIComponent(dropId)}/competition-context`,
+    signal,
+    errorMode: "structured",
+  });
   if (context.competition === null && context.entry === null) return context;
   if (
     !context.competition ||
