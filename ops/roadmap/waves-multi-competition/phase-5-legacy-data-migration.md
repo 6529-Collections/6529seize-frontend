@@ -4,11 +4,12 @@
 
 ## Tracking
 
-- Status: Not started
-- Delivery target: To be selected
-- Owner: Unassigned
+- Status: Implementation under delivery Phase 2 review; production migration pending
+- Delivery target: Reviewed PRs and green required checks; no deployment in this task
+- Owner: Per-cohort named operations owner required before live enrollment
 - Evidence: [2026-10-01 production assessment](./native-delivery/production-status-2026-10-01.md).
-  No migration/cutover or retirement implementation is claimed by the native release.
+  The native release itself did not migrate legacy data. New implementation and
+  pending acceptance are tracked in [migration delivery evidence](./native-delivery/legacy-migration-delivery.md).
 
 ## Outcome
 
@@ -20,7 +21,7 @@ Legacy data remains available for rollback until the retirement phase.
 
 ## Current Starting Point
 
-This is the next migration development. The native runtime is in production,
+The complete migration tooling is the current development. The native runtime is in production,
 but old competition views/writes still rely on legacy data. Build the complete
 native-backed GET facade and storage-aware old mutation dispatch as part of
 migration preparation; neither is proved by the existing dual read interface.
