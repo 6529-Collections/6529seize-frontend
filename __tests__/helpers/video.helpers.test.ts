@@ -11,17 +11,20 @@ describe("video helpers", () => {
     expect(isVideoUrl("file.txt")).toBe(false);
   });
 
-  it("creates conversion urls", async () => {
-    const { getVideoConversions } = await import("@/helpers/video.helpers");
-    const url = "https://d3lqz0a4bldqgf.cloudfront.net/drops/foo/bar.mp4";
-    const result = getVideoConversions(url);
+  it.each(["mp4", "MP4"])(
+    "creates conversion URLs with the first frame poster for .%s",
+    async (extension) => {
+      const { getVideoConversions } = await import("@/helpers/video.helpers");
+      const url = `https://d3lqz0a4bldqgf.cloudfront.net/drops/foo/bar.${extension}`;
+      const result = getVideoConversions(url);
 
-    expect(result).not.toBeNull();
-    expect(result!.HLS).toContain("renditions");
-    expect(result!.POSTER).toBe(
-      "https://d3lqz0a4bldqgf.cloudfront.net/renditions/drops/foo/bar/poster/bar_poster.0000001.jpg"
-    );
-  });
+      expect(result).not.toBeNull();
+      expect(result!.HLS).toContain("renditions");
+      expect(result!.POSTER).toBe(
+        "https://d3lqz0a4bldqgf.cloudfront.net/renditions/drops/foo/bar/poster/bar_poster.0000000.jpg"
+      );
+    }
+  );
 
   it("checks availability using fetch", async () => {
     const { checkVideoAvailability } = await import("@/helpers/video.helpers");

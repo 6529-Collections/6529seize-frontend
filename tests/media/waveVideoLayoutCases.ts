@@ -31,7 +31,7 @@ export function defineWaveVideoLayoutTests() {
     await video.scrollIntoViewIfNeeded();
     await expect(video).toHaveAttribute(
       "poster",
-      /\/poster\/portrait_poster\.0000001\.jpg$/
+      /\/poster\/portrait_poster\.0000000\.jpg$/
     );
     await expect(video).not.toHaveAttribute("src", /.+/);
     expect(videoRequests).toHaveLength(0);
