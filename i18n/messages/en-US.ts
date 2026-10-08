@@ -2190,6 +2190,18 @@ const NETWORK_GROUP_INSPECTION_MESSAGES = objectMessages(
     bulkRep: "REP everyone matching criteria",
     bulkNic: "NIC everyone matching criteria",
     bulkActionsLabel: "Bulk rating actions",
+    add: "Add",
+    subtract: "Subtract",
+    grant: "Grant",
+    cancel: "Cancel",
+    repCategory: "Rep Category",
+    clearCategory: "Clear category",
+    repCategoryRequired: "Please enter rep category",
+    creditSummary:
+      "You can grant up to {credit} {matter} to each of {count} members of the group.",
+    progress: "{matter} Progress",
+    keepOpen:
+      "Keep this window open while we distribute credits across the group.",
     bulkRepSuccess: "REP distributed.",
     bulkNicSuccess: "NIC distributed.",
     source: "Source: filters + optional manual list",
@@ -2846,6 +2858,7 @@ const MEME_DATA_TABLE_MESSAGES = objectMessages("memeData", {
 const TOKEN_NUMBER_MESSAGE = "Token #{tokenId}";
 
 export const EN_US_MESSAGES = {
+  "waves.information.open": "About {name}",
   ...EN_SUBMISSION_DISCOVERY_MESSAGES,
   ...waveCreationMessages,
   ...COMPETITION_MESSAGES,

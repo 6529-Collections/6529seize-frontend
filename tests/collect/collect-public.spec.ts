@@ -1,6 +1,11 @@
 import { expect, test, type Page } from "@playwright/test";
 import path from "node:path";
 import { installSectionTrackingFixture } from "../support/sectionTrackingFixture";
+import { installLocalCountryCheck } from "../support/localCountryCheck";
+
+test.beforeEach(async ({ page, baseURL }) => {
+  await installLocalCountryCheck(page, baseURL);
+});
 
 test("Collected tracking follows nested scrolling and keyboard actions", async ({
   page,
@@ -497,6 +502,13 @@ test("listing selection carries across browsing and opens one wallet-gated purch
   await page.keyboard.press("Escape");
   await expect(dialog).toHaveCount(0);
   await expect(review).toBeFocused();
+  // The local Next.js issues badge can cover this bottom bar on a phone.
+  // Collapse the developer control without bypassing the product's click target.
+  const collapseIssues = page.getByRole("button", {
+    name: "Collapse issues badge",
+    exact: true,
+  });
+  if (await collapseIssues.isVisible()) await collapseIssues.click();
   await selection.getByRole("button", { name: "Clear", exact: true }).click();
   await expect(selection).toHaveCount(0);
   expect(mutations).toEqual([]);
