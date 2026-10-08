@@ -3,6 +3,8 @@
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCompetition } from "@/contexts/CompetitionContext";
 import { TabToggle } from "@/components/common/TabToggle";
+import { TabToggleWithOverflow } from "@/components/common/TabToggleWithOverflow";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { useCompetitionDropNavigation } from "@/hooks/competitions/useCompetitionDropNavigation";
@@ -34,6 +36,8 @@ function CompetitionPersonalVotes() {
 
 export default function CompetitionVotes() {
   const { competition } = useCompetition();
+  const { isApp } = useDeviceInfo();
+  const Tabs = isApp ? TabToggleWithOverflow : TabToggle;
   const pathname = usePathname();
   const router = useRouter();
   const search = useSearchParams();
@@ -48,7 +52,9 @@ export default function CompetitionVotes() {
   };
   return (
     <div className="tw-space-y-4" key={competition.id}>
-      <TabToggle
+      <Tabs
+        transition
+        variant="compactPills"
         options={VOTE_TABS.map((key) => ({
           key,
           label: labels[key],

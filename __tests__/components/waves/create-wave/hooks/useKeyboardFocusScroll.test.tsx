@@ -114,6 +114,32 @@ describe("useKeyboardFocusScroll", () => {
     jest.advanceTimersByTime(400);
     expect(scrollIntoView).not.toHaveBeenCalled();
   });
+
+  it("centers again after the last resize settles and cancels on unmount", () => {
+    const { getByLabelText, unmount } = render(<Harness />);
+    (getByLabelText("field") as HTMLInputElement).focus();
+    jest.advanceTimersByTime(400);
+    scrollIntoView.mockClear();
+    const viewport = window.visualViewport as unknown as {
+      dispatchResize: () => void;
+    };
+
+    viewport.dispatchResize();
+    jest.advanceTimersByTime(250);
+    viewport.dispatchResize();
+    jest.advanceTimersByTime(349);
+    expect(scrollIntoView).toHaveBeenCalledTimes(2);
+    jest.advanceTimersByTime(1);
+    expect(scrollIntoView).toHaveBeenCalledTimes(3);
+
+    viewport.dispatchResize();
+    unmount();
+    scrollIntoView.mockClear();
+    jest.advanceTimersByTime(400);
+    viewport.dispatchResize();
+    expect(scrollIntoView).not.toHaveBeenCalled();
+  });
+
   const setupNearest = (fieldTop = 480, targetBottom = 580) => {
     const view = render(<Harness mode="nearest" />);
     const input = view.getByLabelText("field");

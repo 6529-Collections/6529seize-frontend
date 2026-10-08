@@ -23,6 +23,12 @@ The **Competitions** tab follows the selected competition's **Settings** tab and
 1. Open **Add competition** as a wave administrator.
 2. Choose Rank or Approve and configure eligibility, dates, submission
    requirements, voting credits, decision rules, outcomes and presentation.
+   **Competition type** opens a dropdown on desktop and a bottom sheet on
+   smaller screens, including the app. The current choice is marked; choosing
+   another type closes the picker. Dismissing it leaves the choice unchanged.
+   In the app, the setup editor keeps the focused name or description field
+   above the keyboard and action bar. Closing the keyboard restores the editor's
+   full height.
 3. Changes save automatically. Incomplete settings are retained on this device;
    valid drafts sync to the server and are visible to wave administrators.
    Opening a draft returns directly to the setup wizard with saved settings

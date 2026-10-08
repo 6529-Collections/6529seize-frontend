@@ -8,6 +8,9 @@ import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { ActiveWaveVoteRow } from "@/components/waves/discovery/ActiveWaveVoteRow";
 import { t } from "@/i18n/messages";
 
+const hasMoreBelow = (element: HTMLElement) =>
+  element.scrollHeight - element.scrollTop - element.clientHeight > 1;
+
 export function SidebarActiveVotes({
   votes,
   collapsed,
@@ -22,6 +25,10 @@ export function SidebarActiveVotes({
   const scrollRef = useRef<HTMLElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
+  const overflowSnapshotRef = useRef<{
+    element: HTMLElement | null;
+    moreBelow: boolean;
+  }>({ element: null, moreBelow: false });
   const items = votes.data?.pages.flatMap((page) => page.data) ?? [];
   const isEmpty =
     !votes.isPending && !votes.isError && votes.data?.pages[0]?.count === 0;
@@ -41,21 +48,37 @@ export function SidebarActiveVotes({
     const element = scrollRef.current;
     const content = contentRef.current;
     if (!element || !content) return () => {};
-    const observer = new ResizeObserver(notify);
+    const updateOverflow = () => {
+      const moreBelow = hasMoreBelow(element);
+      if (
+        overflowSnapshotRef.current.element === element &&
+        overflowSnapshotRef.current.moreBelow === moreBelow
+      ) {
+        return;
+      }
+      overflowSnapshotRef.current = { element, moreBelow };
+      notify();
+    };
+    const observer = new ResizeObserver(updateOverflow);
     observer.observe(element);
     observer.observe(content);
-    element.addEventListener("scroll", notify, { passive: true });
+    element.addEventListener("scroll", updateOverflow, { passive: true });
+    updateOverflow();
     return () => {
       observer.disconnect();
-      element.removeEventListener("scroll", notify);
+      element.removeEventListener("scroll", updateOverflow);
     };
   }, []);
   const readOverflow = useCallback(() => {
     const element = scrollRef.current;
-    return (
-      element !== null &&
-      element.scrollHeight - element.scrollTop - element.clientHeight > 1
-    );
+    // A DOM layout read on every React snapshot can block unrelated Chat renders.
+    if (element !== overflowSnapshotRef.current.element) {
+      overflowSnapshotRef.current = {
+        element,
+        moreBelow: element !== null && hasMoreBelow(element),
+      };
+    }
+    return overflowSnapshotRef.current.moreBelow;
   }, []);
   const moreBelow = useSyncExternalStore(
     subscribeToOverflow,
