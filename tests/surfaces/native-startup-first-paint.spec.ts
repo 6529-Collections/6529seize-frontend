@@ -7,6 +7,10 @@ import {
   NATIVE_STARTUP_SCRIPT,
   NATIVE_STARTUP_STYLES,
 } from "../../components/layout/nativeStartup";
+import {
+  SMALL_WEB_STARTUP_SCRIPT,
+  SMALL_WEB_STARTUP_STYLES,
+} from "../../components/layout/smallWebStartup";
 
 // These browser tests use the real boundary markup and critical bootstrap/CSS.
 // They need no app server or wallet runtime. LayoutWrapper.hydration.test.tsx
@@ -35,10 +39,18 @@ for (const platform of ["ios", "android", "web"] as const) {
         <style>${NATIVE_STARTUP_STYLES}body { margin: 0; }</style>
         <script>globalThis.CapacitorCustomPlatform = { name: "${platform}" };</script>
         <script>${NATIVE_STARTUP_SCRIPT}</script>
+        <style>${SMALL_WEB_STARTUP_STYLES}</style>
+        <script>${SMALL_WEB_STARTUP_SCRIPT}</script>
         </head><body>${content}</body></html>`);
       const main = page.getByRole("main", { includeHidden: true });
       const placeholder = page.getByTestId("native-startup-placeholder");
       const nativePending = platform !== "web" && !isNativeLayout;
+      if (platform !== "web") {
+        await expect(page.locator("html")).not.toHaveAttribute(
+          "data-small-web-startup",
+          "true"
+        );
+      }
       if (nativePending) {
         await expect(main).toBeHidden();
         await expect(placeholder).toBeVisible();

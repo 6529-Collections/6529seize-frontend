@@ -57,6 +57,11 @@ export default function useKeyboardFocusScroll(
       }
     };
 
+    const repositionAfterKeyboardSettles = () => {
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(repositionActiveField, KEYBOARD_SETTLE_MS);
+    };
+
     const onFocusIn = (event: FocusEvent) => {
       const target = event.target;
       if (!(target instanceof HTMLElement)) {
@@ -67,10 +72,7 @@ export default function useKeyboardFocusScroll(
       }
 
       activeField = target;
-      if (timer) {
-        clearTimeout(timer);
-      }
-      timer = setTimeout(repositionActiveField, KEYBOARD_SETTLE_MS);
+      repositionAfterKeyboardSettles();
     };
 
     const onFocusOut = () => {
@@ -79,7 +81,13 @@ export default function useKeyboardFocusScroll(
 
     // The keyboard shrinking the viewport is a visualViewport resize; re-run
     // the reposition then so a late keyboard still tucks the field into view.
-    const onViewportResize = () => repositionActiveField();
+    const onViewportResize = () => {
+      if (!activeField) return;
+      repositionActiveField();
+      // The scrollport can still be resizing when this event fires. Reuse the
+      // settle timer so centering also uses its final keyboard-aware height.
+      repositionAfterKeyboardSettles();
+    };
 
     container.addEventListener("focusin", onFocusIn);
     container.addEventListener("focusout", onFocusOut);

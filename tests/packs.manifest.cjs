@@ -221,6 +221,22 @@ const PACKS = [
     triggers: ["pr-ci", "manual"],
   },
 
+  {
+    ...sandboxPack(
+      "test:e2e:wave-feature-usage-sandbox",
+      "Wave feature visibility and production SDK privacy with synthetic loopback data.",
+      ["tests/social/wave-feature-usage-sandbox.spec.ts"],
+      {
+        PLAYWRIGHT_BASE_URL: "http://127.0.0.1:3302",
+        PLAYWRIGHT_WEB_SERVER_URL: "http://127.0.0.1:3302",
+        PLAYWRIGHT_WEB_SERVER_COMMAND:
+          "node tests/support/waveFeatureSandboxServer.cjs",
+        PLAYWRIGHT_FORCE_WEB_SERVER: "1",
+      },
+      [DESKTOP, MOBILE]
+    ),
+    triggers: ["pr-ci", "manual"],
+  },
   localReadonlyPack(
     "test:e2e:social-readonly",
     "Waves and profile read-only journeys.",

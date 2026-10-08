@@ -1,5 +1,6 @@
 import type { Locator, Page } from "@playwright/test";
 import { installSurfaceSimulation } from "../support/surfaceSimulation";
+import { expectCompetitionScroll } from "../support/competitionScroll";
 import {
   gotoDocumentWithTransientRetry,
   RESPONSE_TIMEOUT_MS,
@@ -102,6 +103,81 @@ function getProfileFeed(page: Page): Locator {
 }
 
 test.describe("Waves and profile read-only coverage @surface @medium @large @readonly", () => {
+  test("scrolls Main Stage Settings and vote Activity in the app", async ({
+    page,
+  }, testInfo) => {
+    test.setTimeout(120000);
+    test.skip(
+      testInfo.project.name !== "web-mobile-chromium",
+      "The native app layout uses the mobile viewport."
+    );
+    await installSurfaceSimulation(
+      page.context(),
+      "capacitor-ios-sim",
+      testInfo.project.use.baseURL
+    );
+    const settingsResponse = page.waitForResponse(
+      (response) => new URL(response.url()).pathname === "/api/settings"
+    );
+    await gotoReady(page, "/waves");
+    const settings = await (await settingsResponse).json();
+    expect(settings.memes_wave_id).toMatch(/^[0-9a-f-]{36}$/i);
+    await gotoReady(page, `/waves/${settings.memes_wave_id}`);
+    await page
+      .getByRole("navigation", { name: "Wave sections" })
+      .getByRole("button", { name: "Settings", exact: true })
+      .click();
+    const rules = page
+      .getByRole("main")
+      .locator('section[id^="competition-"][id$="-rules"]');
+    await expect(
+      rules.getByRole("heading", { name: "Participation", exact: true })
+    ).toBeVisible();
+    await expectCompetitionScroll(
+      page,
+      page
+        .getByRole("main")
+        .locator('section[id^="competition-"][id$="-rules"]')
+        .locator(".."),
+      page
+        .getByRole("main")
+        .locator('section[id^="competition-"][id$="-rules"]')
+        .locator("dl > div")
+        .last()
+    );
+    await testInfo.attach("main-stage-settings-scrolled", {
+      body: await page.screenshot(),
+      contentType: "image/png",
+    });
+    const competitionPath = new URL(page.url()).pathname;
+    expect(competitionPath).toMatch(/\/competitions\/[^/]+$/);
+    await gotoReady(page, `${competitionPath}?tab=votes&voteTab=activity`);
+    const activity = page.getByRole("tabpanel", {
+      name: "Activity",
+      exact: true,
+    });
+    await expect(
+      activity
+        .getByRole("button", { name: "View drop in chat", exact: true })
+        .first()
+    ).toBeVisible();
+    await expectCompetitionScroll(
+      page,
+      page
+        .getByRole("main")
+        .locator('section[id^="competition-"][id$="-votes"]')
+        .locator(".."),
+      activity
+        .getByRole("button", { name: "View drop in chat", exact: true })
+        .last()
+    );
+    await expectNoHorizontalOverflow(page);
+    await testInfo.attach("main-stage-activity-scrolled", {
+      body: await page.screenshot(),
+      contentType: "image/png",
+    });
+  });
+
   for (const surface of ["web", "app"] as const) {
     test(`remembers Main Stage Leaderboard and another wave's Chat (${surface})`, async ({
       page,

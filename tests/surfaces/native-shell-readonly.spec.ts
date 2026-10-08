@@ -237,6 +237,56 @@ async function readNotificationHistoryPushCount(page: Page) {
 }
 
 test.describe("Native and Electron simulated shell read-only coverage @surface @medium @readonly", () => {
+  test("native profile artwork opens above the app header and closes back to the profile", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      !isCapacitorSimulationProject(testInfo.project.name),
+      "Native profile artwork geometry is covered on Capacitor simulations"
+    );
+    const dropId =
+      process.env["TARGET_DROP_ID"] ??
+      (process.env["PLAYWRIGHT_COMPOSER_SANDBOX"] === "1"
+        ? "00000000-0000-4000-8000-000000000530"
+        : "74b13174-b34f-43e5-b302-23680f0d0b05");
+    await gotoReady(page, `/punk6529?drop=${dropId}`);
+    const artwork = page.getByRole("main").locator("[data-video-viewport]");
+    await expect(artwork).toBeVisible({ timeout: 30_000 });
+    await expect
+      .poll(() =>
+        artwork.evaluate((element) => element.getBoundingClientRect().top)
+      )
+      .toBe(0);
+    await expect
+      .poll(() =>
+        artwork.evaluate(
+          (element) =>
+            element.getBoundingClientRect().height - window.innerHeight
+        )
+      )
+      .toBe(0);
+    const close = artwork.getByRole("button", {
+      name: "Close panel",
+      exact: true,
+    });
+    await expect(close).toBeInViewport({ ratio: 1 });
+    const share = artwork.getByRole("button", {
+      name: "Share drop",
+      exact: true,
+    });
+    await expect(share).toBeInViewport({ ratio: 1 });
+    await share.click({ trial: true });
+    await page.screenshot({
+      path: testInfo.outputPath("native-profile-artwork.png"),
+    });
+    await close.click();
+    await expect(artwork).toHaveCount(0);
+    await expect(page).toHaveURL((url) => !url.searchParams.has("drop"));
+    await expect(
+      page.getByRole("navigation", { name: "Profile sections" })
+    ).toBeVisible();
+  });
+
   test("Capacitor simulations expose native runtime signals", async ({
     page,
   }, testInfo) => {
@@ -254,6 +304,9 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
       "content",
       /viewport-fit=cover/
     );
+    const viewport = page.locator('meta[name="viewport"]');
+    await expect(viewport).toHaveAttribute("content", /maximum-scale=1(?:,|$)/);
+    await expect(viewport).toHaveAttribute("content", /user-scalable=no/);
     await expect(await readShellRuntime(page)).toEqual({
       capacitorIsNative: true,
       capacitorPlatform: platform,
@@ -265,6 +318,14 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
       surface: `capacitor-${platform}-sim`,
       userAgentHasElectron: false,
     });
+
+    // A client-side navigation must not restore the web zoom limits.
+    await page
+      .getByRole("link", { name: "Open network health dashboard" })
+      .click();
+    await expect(page).toHaveURL(/\/network\/health$/, { timeout: 15_000 });
+    await expect(viewport).toHaveAttribute("content", /maximum-scale=1(?:,|$)/);
+    await expect(viewport).toHaveAttribute("content", /user-scalable=no/);
   });
 
   for (const reducedMotion of [false, true]) {
@@ -578,6 +639,114 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
       .poll(() => scrollport.evaluate((element) => element.clientHeight))
       .toBeCloseTo(restingHeight, 0);
     await expect(page.getByText("All Waves", { exact: true })).toBeVisible();
+  });
+
+  test("Network filter keeps the focused input and action above the keyboard", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      !isCapacitorSimulationProject(testInfo.project.name),
+      "Keyboard geometry is covered on the Capacitor simulation projects"
+    );
+    await gotoReady(page, "/network");
+    const openFilters = page.getByRole("button", {
+      name: "Open group filters",
+      exact: true,
+    });
+    await openFilters.click();
+    const filter = page.getByRole("dialog", {
+      name: "Filter Network",
+      exact: true,
+    });
+    await filter
+      .getByRole("group", { name: "Filter Network", exact: true })
+      .getByRole("button", { name: "Level", exact: true })
+      .click();
+    const input = filter.getByRole("spinbutton", {
+      name: "Level at least",
+      exact: true,
+    });
+    const summary = filter.getByText("After editing", { exact: true });
+    const action = filter.getByRole("button", {
+      name: "Create and use new group",
+      exact: true,
+    });
+    await input.fill("10");
+    await expect(input).toBeFocused();
+    await expect(summary).toBeVisible();
+
+    // Exercise the same native overlay geometry as the Waves search contract.
+    await page.evaluate(() => {
+      const viewport = globalThis.visualViewport;
+      if (!viewport) throw new Error("Expected a visual viewport");
+      Object.defineProperty(viewport, "height", {
+        configurable: true,
+        value: globalThis.innerHeight - 320,
+      });
+      viewport.dispatchEvent(new Event("resize"));
+    });
+    await expect(page.locator("html")).toHaveAttribute(
+      "data-native-keyboard-visible",
+      "true"
+    );
+    await expect(summary).toBeHidden();
+    await expect
+      .poll(() =>
+        input.evaluate((element) => {
+          const viewport = globalThis.visualViewport;
+          if (!viewport) return false;
+          const bounds = element.getBoundingClientRect();
+          let top = viewport.offsetTop;
+          let bottom = top + viewport.height;
+          for (
+            let parent = element.parentElement;
+            parent;
+            parent = parent.parentElement
+          ) {
+            if (
+              !/(auto|scroll|hidden)/.test(getComputedStyle(parent).overflowY)
+            )
+              continue;
+            const clip = parent.getBoundingClientRect();
+            top = Math.max(top, clip.top);
+            bottom = Math.min(bottom, clip.bottom);
+          }
+          return bounds.top >= top && bounds.bottom <= bottom;
+        })
+      )
+      .toBe(true);
+    await expect
+      .poll(() =>
+        action.evaluate((element) => {
+          const viewport = globalThis.visualViewport;
+          if (!viewport) return false;
+          const bounds = element.getBoundingClientRect();
+          return (
+            bounds.top >= viewport.offsetTop &&
+            bounds.bottom <= viewport.offsetTop + viewport.height
+          );
+        })
+      )
+      .toBe(true);
+    await page.screenshot({
+      path: testInfo.outputPath("network-keyboard.png"),
+    });
+
+    await page.evaluate(() => {
+      const viewport = globalThis.visualViewport;
+      if (!viewport) throw new Error("Expected a visual viewport");
+      Reflect.deleteProperty(viewport, "height");
+      viewport.dispatchEvent(new Event("resize"));
+    });
+    await expect(page.locator("html")).not.toHaveAttribute(
+      "data-native-keyboard-visible",
+      "true"
+    );
+    await expect(summary).toBeVisible();
+    await expect(input).toHaveValue("10");
+    await filter.getByRole("button", { name: "Close", exact: true }).click();
+    await expect(openFilters).toBeFocused();
+    await expect(page).toHaveURL((url) => !url.searchParams.has("group"));
   });
 
   test("iOS native simulation hides non-US subscription downloads", async ({

@@ -159,11 +159,13 @@ for (const { path, walletHeading } of [
         page.getByText("You need to set up a profile to continue.")
       ).toHaveCount(0);
       releaseScripts();
+      // Cold hydration also loads the lazy wave layout. Match the public
+      // search readiness deadline without relaxing the neutral-state checks.
       await expect(
         page.getByRole("heading", {
           name: walletHeading,
         })
-      ).toBeVisible();
+      ).toBeVisible({ timeout: 15000 });
     } finally {
       releaseScripts();
     }

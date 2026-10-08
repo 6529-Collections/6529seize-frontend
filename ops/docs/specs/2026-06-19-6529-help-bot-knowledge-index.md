@@ -20,8 +20,9 @@ navigation guidance. Backend runtime continues consuming the published corpus.
 Its setup guidance identifies the Competition type desktop dropdown and
 small-screen bottom sheet, including selection and dismissal behavior, and
 keyboard-aware name and description fields in the app's setup editor.
-Its navigation guidance distinguishes the app's compact secondary pills and
-More menu from web tabs and the unchanged default-competition wave row.
+Its navigation guidance distinguishes the app's compact collection and Votes
+pills from web tabs and the shared published-competition wave row. The collection
+uses More for its remaining choices.
 
 The `waves.content-tabs` record describes the conditional pending indicator on
 a tapped tab, section-specific loading, and destination-bound competition
@@ -152,6 +153,11 @@ chapter controls, **Answer options**, deliberate examples, file preparation,
 viewers from editors, describes read-only answers and source comparisons, and
 keeps questions, draft content and dated confirmed versions separate. Its
 control names must match the artist workspace and personal record list.
+
+The interactive text-entry record covers iPhone and iPad Safari focus behavior,
+continued Safari pinch zoom, and the native app's keyboard space for artwork
+frames. Its canonical answer links to Waves and its source includes the shared
+browser zoom guide. Artwork files and sandbox permissions stay unchanged.
 
 The artwork-sharing record covers the `Share artwork` icon in the existing
 media controls: over the artwork on individual Meme and Gradient pages, and
@@ -616,7 +622,6 @@ with RPC activation, worker sync, and scheduled TDH. It does not repeat download
 instructions or require account pairing. Explicit `answer_links` lists also
 govern ordinary knowledge answers: only those links appear in the final footer,
 and an empty list suppresses links. Related paths are not additional citations.
-
 
 Desktop progressive reconciliation uses `desktop-calculated` records with a
 non-negative safe-integer `reconciliation_min_block`. Their short answers contain

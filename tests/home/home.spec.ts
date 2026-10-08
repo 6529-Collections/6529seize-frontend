@@ -4,10 +4,14 @@ import {
   test,
   waitForRouteReady,
 } from "../testHelpers";
+import { devices } from "@playwright/test";
 import { getAppEnvironment } from "../../config/appEnvironment";
-import { isDesktopWebProject } from "../support/surfaceSimulation";
+import {
+  isDesktopWebProject,
+  isMobileWebProject,
+} from "../support/surfaceSimulation";
 import { gateSidebarHydration } from "../support/sidebarHydration";
-import { buildSync } from "esbuild";
+import { installSectionTrackingFixture } from "../support/sectionTrackingFixture";
 
 test.describe("Home Page @smoke @medium @large", () => {
   test.beforeEach(async ({ page }) => {
@@ -56,12 +60,89 @@ test.describe("Home Page @smoke @medium @large", () => {
   }
 });
 
+test("mobile web starts with its header and full-width content before hydration @smoke @medium @large", async ({
+  browser,
+  browserName,
+  baseURL,
+}, testInfo) => {
+  // Phone emulation supports Chromium/WebKit. Native simulations exercise a
+  // different shell and Firefox has no supported mobile device context.
+  test.skip(
+    browserName === "firefox" ||
+      (!isDesktopWebProject(testInfo.project.name) &&
+        !isMobileWebProject(testInfo.project.name)),
+    "Mobile browser startup contract"
+  );
+  if (!baseURL) throw new Error("The homepage test requires a base URL");
+  // The PR smoke lane selects desktop Chromium. A separate phone context keeps
+  // this mobile first-paint contract in that lane without expanding its pack.
+  const context = await browser.newContext({
+    ...devices[browserName === "webkit" ? "iPhone 14" : "Pixel 7"],
+    baseURL,
+  });
+  const page = await context.newPage();
+  const hydration = await gateSidebarHydration(page);
+  const main = page.getByRole("main").first();
+  const header = page.getByRole("banner");
+  const sidebar = page.getByLabel("Primary sidebar", { exact: true });
+  try {
+    await page.goto("/", { waitUntil: "commit" });
+    await expect(page.locator("html")).toHaveAttribute(
+      "data-small-web-startup",
+      "true"
+    );
+    await expect(page.getByRole("main").first().locator("..")).toHaveAttribute(
+      "data-small",
+      "false"
+    );
+    await expect(header).toBeVisible();
+    await expect(header).toHaveAttribute("aria-busy", "true");
+    await expect(
+      page.getByRole("status", { name: "Loading navigation…" })
+    ).toBeVisible();
+    await expect(
+      header.getByRole("button", { name: "Open menu" })
+    ).toBeDisabled();
+    await expect(sidebar).toBeHidden();
+    const initial = await main.boundingBox();
+    expect(initial?.x).toBe(0);
+    expect(initial?.width).toBe(await page.evaluate(() => innerWidth));
+    await expectNoHorizontalOverflow(page);
+    await hydration.waitForDownloads();
+    hydration.release();
+    await expect(page.getByRole("main").first().locator("..")).toHaveAttribute(
+      "data-small",
+      "true"
+    );
+    await expect(page.locator("html")).not.toHaveAttribute(
+      "data-small-web-startup",
+      "true"
+    );
+    await expect(header).toBeVisible();
+    await expect(header).toHaveAttribute("aria-busy", "false");
+    await expect(header.getByRole("status")).toHaveCount(0);
+    await expect(
+      header.getByRole("button", { name: "Open menu" })
+    ).toBeEnabled();
+    await expect(sidebar).toBeHidden();
+    const hydrated = await main.boundingBox();
+    expect(hydrated?.x).toBe(initial?.x);
+    expect(hydrated?.width).toBe(initial?.width);
+  } finally {
+    hydration.release();
+    await hydration.attachEvidence(testInfo);
+    await context.close();
+  }
+});
+
 test("homepage tracking follows nested scrolling and loaded sections @smoke @medium @large", async ({
   page,
 }) => {
   // Exercise the production observer with real browser geometry, without
   // contacting Mixpanel or requiring production analytics configuration.
-  await page.setContent(`
+  const { seen, clicked } = await installSectionTrackingFixture(
+    page,
+    `
     <main aria-label="Homepage test" style="height:240px;overflow:auto">
       <section data-home-section="Introduction" style="height:180px">
         <h1>Introduction</h1>
@@ -71,52 +152,30 @@ test("homepage tracking follows nested scrolling and loaded sections @smoke @med
         <button data-home-action="Open wave">Open wave</button>
       </section>
     </main>
-    <ol aria-label="Sections seen"></ol>
-    <ol aria-label="Actions clicked"></ol>
-  `);
-  const script = buildSync({
-    stdin: {
-      resolveDir: process.cwd(),
-      contents: `
+  `,
+    `
         import { observeHomepageSections, getHomepageClick } from './components/home/homepageTracking';
         const root = document.querySelector('main');
-        const append = (label, text) => {
-          const item = document.createElement('li');
-          item.textContent = text;
-          document.querySelector('ol[aria-label="' + label + '"]').append(item);
-        };
         observeHomepageSections(root, section => append('Sections seen', section), new Set());
         root.addEventListener('click', event => {
           const click = getHomepageClick(root, event.target);
           if (click) append('Actions clicked', click.section + ': ' + click.action);
         }, true);
         root.querySelector('button').addEventListener('click', event => event.stopPropagation());
-      `,
-    },
-    bundle: true,
-    format: "iife",
-    write: false,
-  });
-  await page.addScriptTag({ content: script.outputFiles[0]!.text });
-  const seen = page
-    .getByRole("list", { name: "Sections seen" })
-    .getByRole("listitem");
+      `
+  );
   await expect(seen).toHaveText(["Introduction"]);
   const loading = page.getByRole("region", { name: "Loading section" });
   await loading.scrollIntoViewIfNeeded();
   await page.getByRole("button", { name: "Open wave", exact: true }).click();
-  await expect(
-    page.getByRole("list", { name: "Actions clicked" }).getByRole("listitem")
-  ).toHaveCount(0);
+  await expect(clicked).toHaveCount(0);
   await loading.evaluate((element) =>
     element.setAttribute("data-home-section", "Explore waves")
   );
   await expect(seen).toHaveText(["Introduction", "Explore waves"]);
   await page.getByRole("button", { name: "Open wave", exact: true }).focus();
   await page.keyboard.press("Enter");
-  await expect(
-    page.getByRole("list", { name: "Actions clicked" }).getByRole("listitem")
-  ).toHaveText(["Explore waves: Open wave"]);
+  await expect(clicked).toHaveText(["Explore waves: Open wave"]);
   await page
     .getByRole("heading", { name: "Introduction" })
     .scrollIntoViewIfNeeded();

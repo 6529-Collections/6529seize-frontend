@@ -38,6 +38,7 @@ describe("TabButton", () => {
 
     expect(tab).toHaveAttribute("aria-busy", "true");
     expect(tab).toHaveAttribute("aria-selected", "false");
+    expect(screen.getByRole("status")).toHaveTextContent("Loading section…");
     expect(tab.querySelector('[aria-hidden="true"]')).toBeInTheDocument();
     expect(screen.getByText("Current view")).toBeInTheDocument();
     expect(screen.queryByText("Loading view")).not.toBeInTheDocument();
@@ -50,6 +51,7 @@ describe("TabButton", () => {
 
     expect(tab).not.toHaveAttribute("aria-busy", "true");
     expect(tab).toHaveAttribute("aria-selected", "true");
+    expect(screen.getByRole("status")).toBeEmptyDOMElement();
     expect(tab.querySelector('[aria-hidden="true"]')).not.toBeInTheDocument();
     expect(screen.getByText("New view")).toBeInTheDocument();
   });
@@ -75,7 +77,7 @@ describe("TabButton", () => {
 
   it("clears pending feedback when a later choice supersedes a suspended view", () => {
     const destination = new Promise<void>(() => undefined);
-    function Winners() {
+    function Winners(): React.JSX.Element {
       throw destination;
     }
     function Tabs() {

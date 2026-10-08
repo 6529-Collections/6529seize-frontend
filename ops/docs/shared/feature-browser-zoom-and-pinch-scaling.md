@@ -7,7 +7,9 @@ Parent: [Shared Index](README.md)
 Browser sessions keep page zoom enabled. Capacitor native sessions lock page
 scale to `1`. Shared form styles in native sessions and
 `mobile-wrapper-dialog` keep text-entry controls readable and reduce
-focus-triggered zoom jumps.
+focus-triggered zoom jumps. On iPhone and iPad Safari, small text fields inside
+interactive artwork also avoid automatic page zoom while pinch zoom stays
+available.
 
 ## Location in the Site
 
@@ -34,6 +36,10 @@ focus-triggered zoom jumps.
 5. While editing in native sessions and shared mobile dialogs, form fields keep
    at least `16px` text sizing plus `touch-action: manipulation` for more
    stable tap and focus behavior.
+6. In the iOS app, chat retains its existing keyboard handling. A large
+   single-view artwork frame can scroll above the keyboard without changing
+   artwork dimensions or adding extra page padding. Closing the keyboard
+   keeps the page at normal scale.
 
 ## Common Scenarios
 
@@ -45,7 +51,10 @@ focus-triggered zoom jumps.
 ## Edge Cases
 
 - Very high web zoom can require horizontal scrolling in wide layouts.
-- Third-party embeds/iframes can apply their own internal zoom behavior.
+- Interactive artwork may have its own internal canvas or image zoom controls;
+  those controls are separate from app page scaling.
+- Very small artwork text stays at the size chosen by the artist. Safari pinch
+  zoom remains available when a closer view is needed.
 - Native wrapper sessions intentionally disable browser-style pinch/page zoom.
 
 ## Failure and Recovery
@@ -59,7 +68,9 @@ focus-triggered zoom jumps.
 
 ## Limitations / Notes
 
-- Web viewport zoom is capped at `maximumScale: 10`.
+- The default web viewport allows scaling up to `10`. iPhone and iPad Safari
+  use a focus-zoom limit of `1`; Safari still permits user pinch zoom.
+- Native scale protection stays active through client-side navigation.
 - Native wrapper viewport uses
   `width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no`.
 - This page covers browser/page zoom behavior, not media-viewer-specific zoom

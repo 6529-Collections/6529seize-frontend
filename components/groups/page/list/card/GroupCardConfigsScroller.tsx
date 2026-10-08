@@ -55,6 +55,16 @@ export default function GroupCardConfigsScroller({
     }
   };
 
+  if (quiet) {
+    return (
+      <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-2">
+        {configs.map((config) => (
+          <GroupCardConfig config={config} key={config.key} quiet />
+        ))}
+      </div>
+    );
+  }
+
   return (
     <div className="tw-relative tw-flex tw-items-start tw-text-xs tw-text-iron-200 sm:tw-text-sm">
       <div className="tw-w-full tw-overflow-x-hidden">
