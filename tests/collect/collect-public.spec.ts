@@ -706,6 +706,76 @@ test("set planning is the default and navigation opens observed listings", async
   expect(mutations).toEqual([]);
 });
 
+test("collecting tools stay on one line and scroll into keyboard focus on narrow screens", async ({
+  page,
+}, info) => {
+  const mutations = await mockCatalog(page);
+  await page.setViewportSize({ width: 320, height: 844 });
+  await page.goto("/collect", { waitUntil: "domcontentloaded" });
+  await waitForCollectClientReady(page);
+  await page.evaluate(() => document.fonts.ready);
+  const navigation = page.getByRole("group", { name: "Collecting tools" });
+  const completeSet = navigation.getByRole("button", {
+    name: "Complete a set",
+    exact: true,
+  });
+  const lowest = navigation.getByRole("button", {
+    name: "Lowest listings",
+    exact: true,
+  });
+  const tdh = navigation.getByRole("button", { name: "TDH", exact: true });
+  for (const name of ["Complete a set", "Lowest listings", "TDH"]) {
+    const button = navigation.getByRole("button", { name, exact: true });
+    const label = button.getByText(name, { exact: true });
+    await expect(label).toHaveCSS("white-space", "nowrap");
+    const dimensions = await label.evaluate((element) => ({
+      height: element.getBoundingClientRect().height,
+      lineHeight: Number.parseFloat(getComputedStyle(element).lineHeight),
+    }));
+    expect(dimensions.height).toBeLessThanOrEqual(dimensions.lineHeight + 1);
+    expect((await button.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+  }
+  expect(
+    await navigation.evaluate(
+      (element) => element.scrollWidth > element.clientWidth
+    )
+  ).toBe(true);
+  await completeSet.focus();
+  await page.keyboard.press("Tab");
+  await expect(lowest).toBeFocused();
+  await page.keyboard.press("Tab");
+  await expect(tdh).toBeFocused();
+  await expect
+    .poll(() => navigation.evaluate((element) => element.scrollLeft))
+    .toBeGreaterThan(0);
+  const navigationBox = (await navigation.boundingBox())!;
+  const tdhBox = (await tdh.boundingBox())!;
+  expect(tdhBox.x + tdhBox.width).toBeLessThanOrEqual(
+    navigationBox.x + navigationBox.width
+  );
+  await page.screenshot({
+    path: info.outputPath("collect-tools-scrolled-focus.png"),
+    fullPage: true,
+  });
+  await page.keyboard.press("Enter");
+  await expect(tdh).toHaveAttribute("aria-pressed", "true");
+  await expect(page).toHaveURL(/intent=tdh/);
+  await page.keyboard.press("Shift+Tab");
+  await page.keyboard.press("Shift+Tab");
+  await expect(completeSet).toBeFocused();
+  await expect
+    .poll(() => navigation.evaluate((element) => element.scrollLeft))
+    .toBe(0);
+  await page.keyboard.press("Enter");
+  await expect(completeSet).toHaveAttribute("aria-pressed", "true");
+  await noHorizontalOverflow(page);
+  await page.screenshot({
+    path: info.outputPath("collect-tools-one-line.png"),
+    fullPage: true,
+  });
+  expect(mutations).toEqual([]);
+});
+
 test("orders uses the app font and keeps private activity wallet gated", async ({
   page,
 }, info) => {

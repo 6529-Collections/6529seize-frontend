@@ -75,6 +75,8 @@ card page.
 ## User Journey
 
 1. Start in **Complete a set**, or choose **Lowest listings** or **TDH**.
+   These tool labels stay on one line. Swipe the tool row horizontally when it
+   does not fit on a narrow screen; keyboard focus also brings each tool into view.
    The shared **Collection** selector keeps The Memes, Gradients or Pebbles selected
    as you move between tools, including daily and future TDH. An incompatible goal
    switches to that collection's full-set or Pebbles-set options. The Memes offers
