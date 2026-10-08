@@ -73,6 +73,13 @@ export function useVideoPlaybackMemory(
   );
 
   useLayoutEffect(() => {
+    if (!sharedMemory) {
+      // Keep a source's offscreen state locally, but start fresh after switching
+      // sources outside a chat provider (for example, when a slideshow cycles).
+      for (const storedKey of memory.keys()) {
+        if (storedKey !== key) memory.delete(storedKey);
+      }
+    }
     // Callback-ref state may briefly still refer to the previous source's node.
     if (video?.dataset["playbackIdentity"] !== key) return;
     const saved = memory.get(key);
@@ -120,7 +127,7 @@ export function useVideoPlaybackMemory(
       );
       video.removeEventListener("emptied", emptied);
     };
-  }, [video, memory, key, remember]);
+  }, [video, memory, key, remember, sharedMemory]);
 
   const rememberUserControl = useCallback(
     (capturePreferences = false) => {

@@ -55,7 +55,9 @@ export async function installVideoArtworkSandbox(
 export async function installLinkedDropVideoSandbox(
   page: Page,
   baseURL: string | undefined,
-  withPoster = false
+  withPoster = false,
+  isPosterReady: () => boolean = () => true,
+  posterSource: "generated" | "device" = "generated"
 ): Promise<string> {
   const { apiOrigin, feed, source } = await loadSandboxSeed(
     page,
@@ -74,14 +76,19 @@ export async function installLinkedDropVideoSandbox(
       `${cloudfront}/renditions/drops/video-fixture/portrait/**`,
       (route) => {
         if (
-          !route.request().url().endsWith("/poster/portrait_poster.0000000.jpg")
+          !isPosterReady() ||
+          !(
+            posterSource === "device"
+              ? /\/poster\/portrait_device\.jpg$/
+              : /\/poster\/portrait_poster\.000000[01]\.jpg$/
+          ).test(route.request().url())
         ) {
           return route.fulfill({ status: 404 });
         }
         return route.fulfill({
           headers: { "access-control-allow-origin": "*" },
           contentType: "image/svg+xml",
-          body: '<svg xmlns="http://www.w3.org/2000/svg" width="360" height="640"><rect width="100%" height="100%" fill="#c19a49"/></svg>',
+          body: '<svg xmlns="http://www.w3.org/2000/svg" width="64" height="96"><rect width="100%" height="100%" fill="#c19a49"/></svg>',
         });
       }
     );

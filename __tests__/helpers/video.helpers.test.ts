@@ -12,7 +12,7 @@ describe("video helpers", () => {
   });
 
   it.each(["mp4", "MP4"])(
-    "creates conversion URLs with the first frame poster for .%s",
+    "creates conversion URLs with preferred and legacy posters for .%s",
     async (extension) => {
       const { getVideoConversions } = await import("@/helpers/video.helpers");
       const url = `https://d3lqz0a4bldqgf.cloudfront.net/drops/foo/bar.${extension}`;
@@ -21,7 +21,13 @@ describe("video helpers", () => {
       expect(result).not.toBeNull();
       expect(result!.HLS).toContain("renditions");
       expect(result!.POSTER).toBe(
+        "https://d3lqz0a4bldqgf.cloudfront.net/renditions/drops/foo/bar/poster/bar_poster.0000001.jpg"
+      );
+      expect(result!.FIRST_FRAME_POSTER).toBe(
         "https://d3lqz0a4bldqgf.cloudfront.net/renditions/drops/foo/bar/poster/bar_poster.0000000.jpg"
+      );
+      expect(result!.DEVICE_POSTER).toBe(
+        "https://d3lqz0a4bldqgf.cloudfront.net/renditions/drops/foo/bar/poster/bar_device.jpg"
       );
     }
   );

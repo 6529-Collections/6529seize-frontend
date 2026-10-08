@@ -14,7 +14,7 @@ import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { useVideoProgress } from "./useVideoProgress";
 import { useVideoPlaybackMemory } from "./useVideoPlaybackMemory";
-import { useVideoViewportHeight } from "./useVideoViewportHeight";
+import { useVideoSizing } from "./useVideoSizing";
 import React, {
   useCallback,
   useEffect,
@@ -24,10 +24,6 @@ import React, {
 } from "react";
 import {
   assignRef,
-  getAspectRatio,
-  getResponsiveVideoStyle,
-  getNaturalWidthClassName,
-  getOrientation,
   resolveSeizeVideoTemplate,
   useElementInView,
   usePrefersReducedMotion,
@@ -171,8 +167,6 @@ export default function SeizeVideoPlayer({
   const { savedPlayback, rememberUserControl, isUserControlled } =
     useVideoPlaybackMemory(videoElement, dataUrl ?? src ?? id);
   const muteIdentity = dataUrl ?? src ?? id;
-  const [aspectRatio, setAspectRatio] = useState<string | undefined>();
-  const [orientation, setOrientation] = useState("unknown");
   const [mutedState, setMutedState] = useState<{
     readonly src?: string | undefined;
     readonly prop?: boolean | undefined;
@@ -192,15 +186,6 @@ export default function SeizeVideoPlayer({
   const [userPausedAutoplaySrc, setUserPausedAutoplaySrc] = useState<
     string | null
   >(null);
-  const [videoSize, setVideoSize] = useState<
-    | {
-        readonly width: number;
-        readonly height: number;
-        readonly src: string | undefined;
-      }
-    | undefined
-  >();
-  const viewportHeight = useVideoViewportHeight();
   const [fallbackState, setFallbackState] = useState<{
     readonly originSrc?: string | undefined;
     readonly source?: string | undefined;
@@ -215,6 +200,14 @@ export default function SeizeVideoPlayer({
   const isInView = useElementInView(wrapperElement);
   const directSrc =
     fallbackState.originSrc === src ? (fallbackState.source ?? src) : src;
+  const { recordVideoSize, widthClassName, responsiveMediaStyle } =
+    useVideoSizing({
+      directSrc,
+      identity: muteIdentity,
+      layout,
+      aspectRatioHint,
+      isFullscreen,
+    });
 
   const {
     updateProgress,
@@ -362,13 +355,7 @@ export default function SeizeVideoPlayer({
   function handleMetadata(event: React.SyntheticEvent<HTMLVideoElement>) {
     const video = event.currentTarget;
     setOpenedSource(directSrc);
-    setVideoSize({
-      width: video.videoWidth,
-      height: video.videoHeight,
-      src: directSrc,
-    });
-    setAspectRatio(getAspectRatio(video.videoWidth, video.videoHeight));
-    setOrientation(getOrientation(video.videoWidth, video.videoHeight));
+    recordVideoSize(video);
     updateProgress();
   }
 
@@ -558,7 +545,6 @@ export default function SeizeVideoPlayer({
     };
 
   const isFillLayout = layout === "fill";
-  const widthClassName = getNaturalWidthClassName(orientation, layout);
   const posterGateIdentity = poster ?? id ?? dataUrl ?? src ?? "";
   const posterGateKey = `${template}:${posterGateIdentity}`;
   const isPosterGateClosed =
@@ -591,15 +577,6 @@ export default function SeizeVideoPlayer({
   const isAnyFullscreen = isFullscreen || isNativeFullscreen;
   const isWrapperFullscreen = isFullscreen;
   const controlsAreVisible = controlsVisible || isPaused || isAnyFullscreen;
-  const responsiveMediaStyle = getResponsiveVideoStyle({
-    layout,
-    isFullscreen,
-    videoSize,
-    directSrc,
-    aspectRatioHint,
-    aspectRatio,
-    viewportHeight,
-  });
   const autoplayIdentity = directSrc ?? dataUrl ?? id ?? "external-video";
   const hasUserPausedOwnedAutoplay = userPausedAutoplaySrc === autoplayIdentity;
   const labels = useMemo<SeizeVideoLabels>(
