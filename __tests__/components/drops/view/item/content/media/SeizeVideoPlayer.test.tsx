@@ -1097,9 +1097,30 @@ describe("SeizeVideoPlayer", () => {
       expect(player).toHaveClass(widthClass);
       expect(player.style.maxWidth).toBe(previewMaxWidth);
       expect(player.style.maxHeight).toBe(previewMaxHeight);
-      expect(player.style.aspectRatio).toBe(`${width} / ${height}`);
+      expect(player.style.aspectRatio).toBe(String(width / height));
     }
   );
+
+  it("retains the chat poster rectangle when rendition metadata includes padding", () => {
+    const { container } = render(
+      <SeizeVideoPlayer
+        data-url="portrait.mp4"
+        poster="poster.jpg"
+        aspectRatioHint={360 / 640}
+        preload="none"
+      />
+    );
+    const player = container.firstElementChild as HTMLElement;
+    const before = player.getAttribute("style");
+    const video = container.querySelector("video")!;
+    Object.defineProperties(video, {
+      videoWidth: { value: 1920 },
+      videoHeight: { value: 1080 },
+    });
+    fireEvent.loadedMetadata(video);
+    expect(player).toHaveClass("tw-w-[min(100%,24rem)]");
+    expect(player.getAttribute("style")).toBe(before);
+  });
 
   it("discards natural sizing from the previous chat video", () => {
     const { container, rerender } = render(

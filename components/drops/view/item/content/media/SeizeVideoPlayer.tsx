@@ -562,9 +562,10 @@ export default function SeizeVideoPlayer({
       : undefined;
   const previewRatio =
     layout === "natural" ? getVideoRatio(aspectRatioHint, 1) : undefined;
-  const orientation = currentVideoSize
-    ? getOrientation(currentVideoSize.width, currentVideoSize.height)
-    : getOrientation(previewRatio ?? 0, 1);
+  const sizingRatio =
+    previewRatio ??
+    getVideoRatio(currentVideoSize?.width, currentVideoSize?.height);
+  const orientation = getOrientation(sizingRatio ?? 0, 1);
   const aspectRatio = currentVideoSize
     ? getAspectRatio(currentVideoSize.width, currentVideoSize.height)
     : undefined;
