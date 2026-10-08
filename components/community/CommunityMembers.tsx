@@ -480,7 +480,7 @@ export default function CommunityMembers() {
         noPadding
         enableDragToClose
         showHeaderCloseButton
-        surfaceClassName={`[--mobile-wrapper-dialog-resting-height:38rem] tw-bg-iron-950 tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-shadow-2xl tw-shadow-black/60 ${centeredFilterModal ? "lg:!tw-h-[min(44rem,calc(100dvh-4rem))]" : ""}`}
+        surfaceClassName={`[--mobile-wrapper-dialog-resting-height:40rem] tw-bg-iron-950 tw-ring-1 tw-ring-inset tw-ring-iron-800 tw-shadow-2xl tw-shadow-black/60 ${centeredFilterModal ? "lg:!tw-h-[min(44rem,calc(100dvh-4rem))]" : ""}`}
         titleClassName="tw-text-base !tw-font-semibold !tw-text-iron-100 tw-tracking-tight"
         headerClassName={`${NETWORK_DIALOG_HEADER_CLASS_NAME} tw-shrink-0`}
         headerCloseButtonClassName="-tw-mt-1 !tw-size-11 max-md:!tw-inline-flex"
