@@ -54,11 +54,16 @@ or resuming an unloaded video can take longer on a slow connection.
 
 Chat videos start only when you press Play, on desktop, mobile browsers, and
 in the app. Opening a chat or scrolling a video into view does not start it.
-The video source waits for Play, including videos without a poster. Uploaded
-chat videos show a still preview once video processing finishes.
+The video source waits for Play, including videos without a poster. While uploading a video, the device attempts one local frame without adding
+an extra UI step. A successful small JPEG is sent with upload completion and
+stored before the video is posted, so chat can normally show a preview immediately.
+Capture is limited to eight seconds and stops on cancellation or backgrounding.
+If the device cannot decode the clip or storage fails, posting continues and
+the backend generates a preview during conversion.
 The preview loads separately from the video, keeps the same proportions and
 portrait/square width limits as playback, and stays behind the Play control.
-New previews use a frame around one second to avoid black opening frames, with
+Device previews use one second, or halfway through very short clips. Backend
+previews use a frame around one second to avoid black opening frames, with
 the first frame retained for existing or very short videos. Clips still black
 at one second may have a black preview. New uploads may briefly have no preview while they
 process. Visible, active players discover late previews automatically with

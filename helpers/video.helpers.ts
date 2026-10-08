@@ -10,6 +10,7 @@ interface VideoConversions {
   readonly HLS: string;
   readonly POSTER: string;
   readonly FIRST_FRAME_POSTER: string;
+  readonly DEVICE_POSTER: string;
 }
 
 /**
@@ -64,6 +65,7 @@ export function getVideoConversions(
     // Prefer the one-second capture; retain the first for older/short clips.
     POSTER: `${buildRenditionUrl(pathWithoutExtension)}/poster/${fileName}_poster.0000001.jpg`,
     FIRST_FRAME_POSTER: `${buildRenditionUrl(pathWithoutExtension)}/poster/${fileName}_poster.0000000.jpg`,
+    DEVICE_POSTER: `${buildRenditionUrl(pathWithoutExtension)}/poster/${fileName}_device.jpg`,
   };
 }
 

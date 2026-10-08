@@ -4,9 +4,13 @@ import {
   multipartUploadCore,
   toApiMediaUploadMimeType,
 } from "@/services/uploads/multipartUploadCore";
+import { captureVideoPoster } from "@/services/uploads/captureVideoPoster";
+jest.mock("@/services/uploads/captureVideoPoster", () => ({
+  captureVideoPoster: jest.fn().mockResolvedValue(undefined),
+}));
 import { toApiAttachmentUploadMimeType } from "@/services/uploads/attachmentUploadMimeType";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
-import axios from "axios";
+import axios, { CanceledError } from "axios";
 import { ApiDropMediaStatus } from "@/generated/models/ApiDropMediaStatus";
 
 jest.mock("@/services/api/common-api", () => ({
@@ -14,12 +18,14 @@ jest.mock("@/services/api/common-api", () => ({
   commonApiPost: jest.fn(),
 }));
 
-jest.mock("axios", () => ({
-  __esModule: true,
-  default: {
-    put: jest.fn(),
-  },
-}));
+jest.mock("axios", () => {
+  const actual = jest.requireActual("axios");
+  return {
+    ...actual,
+    __esModule: true,
+    default: { ...actual.default, put: jest.fn() },
+  };
+});
 
 const commonApiPostMock = commonApiPost as jest.Mock;
 const commonApiFetchMock = commonApiFetch as jest.Mock;
@@ -27,6 +33,98 @@ const axiosPutMock = axios.put as jest.Mock;
 
 beforeEach(() => {
   jest.clearAllMocks();
+  commonApiPostMock.mockReset();
+  commonApiFetchMock.mockReset();
+  axiosPutMock.mockReset();
+  jest.mocked(captureVideoPoster).mockReset().mockResolvedValue(undefined);
+});
+
+describe("device video poster upload", () => {
+  const endpoints = {
+    start: "drop-media/multipart-upload",
+    part: "drop-media/multipart-upload/part",
+    complete: "drop-media/multipart-upload/completion",
+  };
+  beforeEach(() => {
+    jest.mocked(captureVideoPoster).mockReset().mockResolvedValue(undefined);
+    commonApiPostMock
+      .mockResolvedValueOnce({
+        upload_id: "upload-1",
+        key: "drops/owner/clip.mp4",
+      })
+      .mockResolvedValueOnce({ upload_url: "https://s3.example/upload" })
+      .mockResolvedValueOnce({
+        media_url: "https://cdn.example/drops/owner/clip.mp4",
+      });
+    axiosPutMock.mockResolvedValue({ headers: { etag: '"etag"' } });
+  });
+  it("uploads video parts concurrently with capture, then includes the JPEG in completion", async () => {
+    let completeCapture: ((value: string | undefined) => void) | undefined;
+    jest.mocked(captureVideoPoster).mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          completeCapture = resolve;
+        })
+    );
+    const result = multipartUploadCore({
+      file: new File(["video"], "clip.mp4", { type: "video/mp4" }),
+      endpoints,
+    });
+    // Wait for the actual part transfer; the pending capture must not block it.
+    for (let index = 0; index < 10; index += 1) await Promise.resolve();
+    expect(axiosPutMock).toHaveBeenCalledTimes(1);
+    expect(commonApiPostMock).not.toHaveBeenCalledWith(
+      expect.objectContaining({ endpoint: endpoints.complete })
+    );
+    completeCapture?.("cG9zdGVy");
+    await result;
+    expect(commonApiPostMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        endpoint: endpoints.complete,
+        body: expect.objectContaining({ video_poster_base64: "cG9zdGVy" }),
+      })
+    );
+    const captureSignal = jest.mocked(captureVideoPoster).mock.calls[0]?.[1];
+    expect(captureSignal?.aborted).toBe(true);
+  });
+  it("completes normally without a poster when local capture fails", async () => {
+    await multipartUploadCore({
+      file: new File(["video"], "clip.mp4", { type: "video/mp4" }),
+      endpoints,
+    });
+    expect(commonApiPostMock.mock.calls.at(-1)?.[0].body).not.toHaveProperty(
+      "video_poster_base64"
+    );
+  });
+  it("does not decode image uploads", async () => {
+    await multipartUploadCore({
+      file: new File(["image"], "clip.jpg", { type: "image/jpeg" }),
+      endpoints,
+    });
+    expect(captureVideoPoster).not.toHaveBeenCalled();
+  });
+  it("aborts local capture when video upload fails", async () => {
+    axiosPutMock.mockRejectedValue(new CanceledError("aborted"));
+    let captureSignal: AbortSignal | undefined;
+    jest.mocked(captureVideoPoster).mockImplementation((_file, signal) => {
+      captureSignal = signal;
+      return new Promise((resolve) =>
+        signal.addEventListener("abort", () => resolve(undefined), {
+          once: true,
+        })
+      );
+    });
+    await expect(
+      multipartUploadCore({
+        file: new File(["video"], "clip.mp4", { type: "video/mp4" }),
+        endpoints,
+      })
+    ).rejects.toThrow();
+    expect(captureSignal?.aborted).toBe(true);
+    expect(commonApiPostMock).not.toHaveBeenCalledWith(
+      expect.objectContaining({ endpoint: endpoints.complete })
+    );
+  });
 });
 
 describe("multipartUploadCore MIME helpers", () => {

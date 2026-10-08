@@ -8,7 +8,9 @@ import { getResponsiveVideoStyle } from "@/components/drops/view/item/content/me
 
 jest.mock("@/helpers/video.helpers", () => ({
   ...jest.requireActual("@/helpers/video.helpers"),
-  checkVideoAvailability: jest.fn().mockResolvedValue(true),
+  checkVideoAvailability: jest.fn(
+    async (url: string) => !url.endsWith("_device.jpg")
+  ),
 }));
 jest.mock("@/hooks/useMobileAppActivity", () => ({
   useMobileAppActivity: () => true,

@@ -27,6 +27,7 @@ export function useChatVideoPoster(
     : undefined;
   const url = conversions?.POSTER;
   const fallbackUrl = conversions?.FIRST_FRAME_POSTER;
+  const deviceUrl = conversions?.DEVICE_POSTER;
   const [poster, setPoster] = useState<VideoPoster>();
   const loaded = useRef<VideoPoster | undefined>(undefined);
   const attempts = useRef({ url, count: 0, fallbackCount: 0 });
@@ -40,7 +41,8 @@ export function useChatVideoPoster(
       !fallbackUrl ||
       !enabled ||
       !active ||
-      loaded.current?.url === url
+      loaded.current?.url === url ||
+      loaded.current?.url === deviceUrl
     )
       return;
     let disposed = false;
@@ -63,13 +65,13 @@ export function useChatVideoPoster(
         void check();
       }, delay);
     };
-    const load = (imageUrl: string) => {
+    const load = (imageUrl: string, onError: () => void = retry) => {
       const preview = new Image();
       image = preview;
       preview.onload = () => {
         if (!isCurrent()) return;
         if (preview.naturalWidth <= 0 || preview.naturalHeight <= 0) {
-          retry();
+          onError();
           return;
         }
         const next = {
@@ -78,9 +80,11 @@ export function useChatVideoPoster(
         };
         loaded.current = next;
         setPoster(next);
-        if (imageUrl !== url) retry();
+        if (imageUrl === fallbackUrl) retry();
       };
-      preview.onerror = retry;
+      preview.onerror = () => {
+        if (isCurrent()) onError();
+      };
       preview.src = imageUrl;
     };
     const check = async () => {
@@ -93,6 +97,22 @@ export function useChatVideoPoster(
       attempts.current.count += 1;
       const hasFallback = loaded.current?.url === fallbackUrl;
       if (hasFallback) attempts.current.fallbackCount += 1;
+      // Retry with the same bounded/backed-off policy after transient delivery failures.
+      if (deviceUrl) {
+        const deviceAvailable = await checkVideoAvailability(deviceUrl);
+        if (!isCurrent()) return;
+        if (deviceAvailable) {
+          load(deviceUrl, () => {
+            void checkBackend();
+          });
+          return;
+        }
+      }
+      await checkBackend();
+    };
+    const checkBackend = async () => {
+      if (!isCurrent()) return;
+      const hasFallback = loaded.current?.url === fallbackUrl;
       const available = await checkVideoAvailability(url);
       if (!isCurrent()) return;
       if (available) {
@@ -115,9 +135,11 @@ export function useChatVideoPoster(
         image.removeAttribute("src");
       }
     };
-  }, [url, fallbackUrl, enabled, active]);
+  }, [url, fallbackUrl, deviceUrl, enabled, active]);
 
-  return poster?.url === url || poster?.url === fallbackUrl
+  return poster?.url === url ||
+    poster?.url === fallbackUrl ||
+    poster?.url === deviceUrl
     ? poster
     : undefined;
 }

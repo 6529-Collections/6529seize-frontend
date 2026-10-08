@@ -10,60 +10,68 @@ import {
 
 // Registered inside the composer sandbox suite, which supplies its local-only guard.
 export function defineWaveVideoLayoutTests() {
-  test("shows a chat preview without requesting video before Play", async ({
-    page,
-    baseURL,
-  }) => {
-    const fixturePath = await installLinkedDropVideoSandbox(
+  for (const posterSource of ["generated", "device"] as const) {
+    test(`shows a ${posterSource} chat preview without requesting video before Play`, async ({
       page,
       baseURL,
-      true
-    );
-    const videoRequests: string[] = [];
-    page.on("request", (request) => {
-      if (request.url().endsWith("/drops/video-fixture/portrait.mp4"))
-        videoRequests.push(request.url());
+    }) => {
+      const fixturePath = await installLinkedDropVideoSandbox(
+        page,
+        baseURL,
+        true,
+        () => true,
+        posterSource
+      );
+      const videoRequests: string[] = [];
+      page.on("request", (request) => {
+        if (request.url().endsWith("/drops/video-fixture/portrait.mp4"))
+          videoRequests.push(request.url());
+      });
+      await page.goto(fixturePath, { waitUntil: "domcontentloaded" });
+      await waitForRouteReady(page);
+      await dismissNextDevTools(page);
+      const video = page.getByLabel("Video player", { exact: true }).first();
+      await video.scrollIntoViewIfNeeded();
+      await expect(video).toHaveAttribute(
+        "poster",
+        posterSource === "device"
+          ? /\/poster\/portrait_device\.jpg$/
+          : /\/poster\/portrait_poster\.0000001\.jpg$/
+      );
+      await expect(video).not.toHaveAttribute("src", /.+/);
+      expect(videoRequests).toHaveLength(0);
+      const preview = await video.evaluate(
+        async (element: HTMLVideoElement) => {
+          const image = new Image();
+          image.src = element.poster;
+          await image.decode();
+          return {
+            width: image.naturalWidth,
+            height: image.naturalHeight,
+            paused: element.paused,
+          };
+        }
+      );
+      expect(preview).toEqual({ width: 64, height: 96, paused: true });
+      const posterBox = await video.boundingBox();
+      expect(posterBox).not.toBeNull();
+      await page
+        .getByRole("button", { name: "Play video", exact: true })
+        .first()
+        .click();
+      await expect.poll(() => videoRequests.length).toBeGreaterThan(0);
+      await expect
+        .poll(() =>
+          video.evaluate((element: HTMLVideoElement) => element.readyState)
+        )
+        .toBeGreaterThanOrEqual(1);
+      const playbackBox = await video.boundingBox();
+      expect(playbackBox).not.toBeNull();
+      for (const dimension of ["width", "height", "x", "y"] as const) {
+        expect(playbackBox![dimension]).toBeCloseTo(posterBox![dimension], 0);
+      }
     });
-    await page.goto(fixturePath, { waitUntil: "domcontentloaded" });
-    await waitForRouteReady(page);
-    await dismissNextDevTools(page);
-    const video = page.getByLabel("Video player", { exact: true }).first();
-    await video.scrollIntoViewIfNeeded();
-    await expect(video).toHaveAttribute(
-      "poster",
-      /\/poster\/portrait_poster\.0000001\.jpg$/
-    );
-    await expect(video).not.toHaveAttribute("src", /.+/);
-    expect(videoRequests).toHaveLength(0);
-    const preview = await video.evaluate(async (element: HTMLVideoElement) => {
-      const image = new Image();
-      image.src = element.poster;
-      await image.decode();
-      return {
-        width: image.naturalWidth,
-        height: image.naturalHeight,
-        paused: element.paused,
-      };
-    });
-    expect(preview).toEqual({ width: 360, height: 640, paused: true });
-    const posterBox = await video.boundingBox();
-    expect(posterBox).not.toBeNull();
-    await page
-      .getByRole("button", { name: "Play video", exact: true })
-      .first()
-      .click();
-    await expect.poll(() => videoRequests.length).toBeGreaterThan(0);
-    await expect
-      .poll(() =>
-        video.evaluate((element: HTMLVideoElement) => element.readyState)
-      )
-      .toBeGreaterThanOrEqual(1);
-    const playbackBox = await video.boundingBox();
-    expect(playbackBox).not.toBeNull();
-    for (const dimension of ["width", "height", "x", "y"] as const) {
-      expect(playbackBox![dimension]).toBeCloseTo(posterBox![dimension], 0);
-    }
-  });
+  }
 
   test("discovers a processed chat poster without refreshing or loading video", async ({
     page,

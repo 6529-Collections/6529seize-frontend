@@ -26,6 +26,9 @@ describe("video helpers", () => {
       expect(result!.FIRST_FRAME_POSTER).toBe(
         "https://d3lqz0a4bldqgf.cloudfront.net/renditions/drops/foo/bar/poster/bar_poster.0000000.jpg"
       );
+      expect(result!.DEVICE_POSTER).toBe(
+        "https://d3lqz0a4bldqgf.cloudfront.net/renditions/drops/foo/bar/poster/bar_device.jpg"
+      );
     }
   );
 

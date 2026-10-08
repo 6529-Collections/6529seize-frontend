@@ -1,3 +1,5 @@
+import { focusManager } from "@tanstack/react-query";
+
 type PendingLookup = {
   start: () => Promise<void>;
   cancel: () => void;
@@ -80,4 +82,22 @@ export function createCompetitionContextScheduler() {
       pump();
     },
   };
+}
+
+let dropContextScheduler:
+  | ReturnType<typeof createCompetitionContextScheduler>
+  | undefined;
+
+/** Bind focus only when a context lookup is actually requested, not on import. */
+export function scheduleDropCompetitionContext<T>(
+  request: () => Promise<T>,
+  signal?: AbortSignal
+): Promise<T> {
+  if (!dropContextScheduler) {
+    const scheduler = createCompetitionContextScheduler();
+    scheduler.setPaused(!focusManager.isFocused());
+    focusManager.subscribe((focused) => scheduler.setPaused(!focused));
+    dropContextScheduler = scheduler;
+  }
+  return dropContextScheduler.schedule(request, signal);
 }
