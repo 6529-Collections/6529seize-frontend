@@ -196,6 +196,7 @@ it("hydrates the server mobile header without registering hidden desktop chrome"
 });
 
 it("adapts chrome and clears its overlay without remounting the editor or SidebarProvider", () => {
+  document.documentElement.setAttribute("data-small-web-startup", "true");
   const transfer = new AbortController();
   const { rerender, unmount } = render(
     <WebLayout isSmall>
@@ -203,6 +204,9 @@ it("adapts chrome and clears its overlay without remounting the editor or Sideba
     </WebLayout>
   );
   const input = screen.getByRole("textbox", { name: "Pending answer" });
+  expect(document.documentElement).not.toHaveAttribute(
+    "data-small-web-startup"
+  );
   expect(mockSearchMounted).toHaveBeenCalledTimes(1);
   const main = input.closest("main");
   fireEvent.change(input, { target: { value: "Still writing" } });

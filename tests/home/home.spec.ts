@@ -4,6 +4,7 @@ import {
   test,
   waitForRouteReady,
 } from "../testHelpers";
+import { devices } from "@playwright/test";
 import { getAppEnvironment } from "../../config/appEnvironment";
 import {
   isDesktopWebProject,
@@ -60,12 +61,24 @@ test.describe("Home Page @smoke @medium @large", () => {
 });
 
 test("mobile web starts with its header and full-width content before hydration @smoke @medium @large", async ({
-  page,
+  browser,
+  browserName,
+  baseURL,
 }, testInfo) => {
   test.skip(
-    !isMobileWebProject(testInfo.project.name),
+    browserName === "firefox" ||
+      (!isDesktopWebProject(testInfo.project.name) &&
+        !isMobileWebProject(testInfo.project.name)),
     "Mobile browser startup contract"
   );
+  if (!baseURL) throw new Error("The homepage test requires a base URL");
+  // The PR smoke lane selects desktop Chromium. A separate phone context keeps
+  // this mobile first-paint contract in that lane without expanding its pack.
+  const context = await browser.newContext({
+    ...devices[browserName === "webkit" ? "iPhone 14" : "Pixel 7"],
+    baseURL,
+  });
+  const page = await context.newPage();
   const hydration = await gateSidebarHydration(page);
   const main = page.getByRole("main").first();
   const header = page.getByRole("banner");
@@ -92,6 +105,10 @@ test("mobile web starts with its header and full-width content before hydration 
       "data-small",
       "true"
     );
+    await expect(page.locator("html")).not.toHaveAttribute(
+      "data-small-web-startup",
+      "true"
+    );
     await expect(header).toBeVisible();
     await expect(sidebar).toBeHidden();
     const hydrated = await main.boundingBox();
@@ -100,6 +117,7 @@ test("mobile web starts with its header and full-width content before hydration 
   } finally {
     hydration.release();
     await hydration.attachEvidence(testInfo);
+    await context.close();
   }
 });
 

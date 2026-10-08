@@ -34,6 +34,14 @@ const WebLayoutContent = ({ children, isSmall = false }: WebLayoutProps) => {
     closeOffcanvas();
   }, [isSmall, closeOffcanvas]);
 
+  useEffect(() => {
+    if (isSmall) {
+      // React now owns the mobile chrome. Do not let startup CSS override a
+      // later tablet mouse/keyboard attachment or responsive layout change.
+      document.documentElement.removeAttribute("data-small-web-startup");
+    }
+  }, [isSmall]);
+
   const cssVars = useMemo(
     () =>
       ({
