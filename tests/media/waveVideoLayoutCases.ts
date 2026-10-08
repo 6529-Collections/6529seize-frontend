@@ -64,6 +64,50 @@ export function defineWaveVideoLayoutTests() {
       expect(playbackBox![dimension]).toBeCloseTo(posterBox![dimension], 0);
     }
   });
+
+  test("discovers a processed chat poster without refreshing or loading video", async ({
+    page,
+    baseURL,
+  }) => {
+    await page.clock.install();
+    let ready = false;
+    const fixturePath = await installLinkedDropVideoSandbox(
+      page,
+      baseURL,
+      true,
+      () => ready
+    );
+    const videoRequests: string[] = [];
+    let posterChecks = 0;
+    page.on("request", (request) => {
+      if (request.url().endsWith("/drops/video-fixture/portrait.mp4"))
+        videoRequests.push(request.url());
+      if (
+        request.method() === "HEAD" &&
+        request.url().includes("/poster/portrait_poster.")
+      )
+        posterChecks += 1;
+    });
+    await page.goto(fixturePath, { waitUntil: "domcontentloaded" });
+    await waitForRouteReady(page);
+    await dismissNextDevTools(page);
+    const video = page.getByLabel("Video player", { exact: true }).first();
+    await video.scrollIntoViewIfNeeded();
+    await expect.poll(() => posterChecks).toBeGreaterThanOrEqual(2);
+    await expect(video).not.toHaveAttribute("poster", /.+/);
+    const chatUrl = page.url();
+    ready = true;
+    // Expire the real negative HEAD cache without waiting a minute in the test.
+    await page.clock.fastForward(60000);
+    await expect(video).toHaveAttribute(
+      "poster",
+      /\/poster\/portrait_poster\.0000001\.jpg$/
+    );
+    expect(page.url()).toBe(chatUrl);
+    await expect(video).not.toHaveAttribute("src", /.+/);
+    expect(videoRequests).toHaveLength(0);
+  });
+
   test("retains video position and sound when a chat drop is virtualized", async ({
     page,
     baseURL,

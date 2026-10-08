@@ -55,7 +55,8 @@ export async function installVideoArtworkSandbox(
 export async function installLinkedDropVideoSandbox(
   page: Page,
   baseURL: string | undefined,
-  withPoster = false
+  withPoster = false,
+  isPosterReady: () => boolean = () => true
 ): Promise<string> {
   const { apiOrigin, feed, source } = await loadSandboxSeed(
     page,
@@ -74,6 +75,7 @@ export async function installLinkedDropVideoSandbox(
       `${cloudfront}/renditions/drops/video-fixture/portrait/**`,
       (route) => {
         if (
+          !isPosterReady() ||
           !/\/poster\/portrait_poster\.000000[01]\.jpg$/.test(
             route.request().url()
           )

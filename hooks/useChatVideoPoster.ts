@@ -44,12 +44,13 @@ export function useChatVideoPoster(
     )
       return;
     let disposed = false;
+    const isCurrent = () => !disposed;
     let timeout: ReturnType<typeof setTimeout> | undefined;
     let image: HTMLImageElement | undefined;
 
     const retry = () => {
       if (
-        disposed ||
+        !isCurrent() ||
         attempts.current.count >= MAX_POSTER_CHECKS ||
         attempts.current.fallbackCount >= MAX_FALLBACK_CHECKS
       )
@@ -66,7 +67,7 @@ export function useChatVideoPoster(
       const preview = new Image();
       image = preview;
       preview.onload = () => {
-        if (disposed) return;
+        if (!isCurrent()) return;
         if (preview.naturalWidth <= 0 || preview.naturalHeight <= 0) {
           retry();
           return;
@@ -84,7 +85,7 @@ export function useChatVideoPoster(
     };
     const check = async () => {
       if (
-        disposed ||
+        !isCurrent() ||
         attempts.current.count >= MAX_POSTER_CHECKS ||
         attempts.current.fallbackCount >= MAX_FALLBACK_CHECKS
       )
@@ -93,13 +94,13 @@ export function useChatVideoPoster(
       const hasFallback = loaded.current?.url === fallbackUrl;
       if (hasFallback) attempts.current.fallbackCount += 1;
       const available = await checkVideoAvailability(url);
-      if (disposed) return;
+      if (!isCurrent()) return;
       if (available) {
         load(url);
         return;
       }
       if (!hasFallback && (await checkVideoAvailability(fallbackUrl))) {
-        if (!disposed) load(fallbackUrl);
+        if (isCurrent()) load(fallbackUrl);
         return;
       }
       retry();
