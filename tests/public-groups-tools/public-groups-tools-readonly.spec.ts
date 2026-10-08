@@ -144,7 +144,10 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
     const narrowFilter = await page.evaluate(
       () => window.matchMedia("(max-width: 1023px)").matches
     );
-    const choices = filter.getByRole("group", { name: "Filter Network" });
+    const choices = filter.getByRole("group", {
+      name: "Filter Network",
+      includeHidden: true,
+    });
     const allFilters = filter.getByRole("button", { name: "All filters" });
     const openCriterion = async (name: string | RegExp) => {
       if (narrowFilter && (await allFilters.isVisible())) {
@@ -190,6 +193,38 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
     await expect(apply).toBeDisabled();
     await expect(apply).toBeInViewport({ ratio: 1 });
     await expect(filter.getByText("After editing")).toBeInViewport();
+    const restingHeight = await choices.evaluate(
+      (element) =>
+        element.closest(".mobile-wrapper-dialog")?.getBoundingClientRect()
+          .height
+    );
+    if (narrowFilter) {
+      const availableHeight = await page.evaluate(
+        () => window.innerHeight - 64
+      );
+      expect(restingHeight).toBeCloseTo(Math.min(640, availableHeight), 0);
+      const emptySpace = await choices.evaluate(
+        (element) =>
+          element.getBoundingClientRect().bottom -
+          (element.lastElementChild?.getBoundingClientRect().bottom ?? 0)
+      );
+      expect(emptySpace).toBeLessThan(80);
+    }
+    if (narrowFilter) {
+      const widths = await apply.evaluate((element) => ({
+        button: element.getBoundingClientRect().width,
+        content: element.parentElement
+          ? element.parentElement.getBoundingClientRect().width -
+            Number.parseFloat(
+              getComputedStyle(element.parentElement).paddingLeft
+            ) -
+            Number.parseFloat(
+              getComputedStyle(element.parentElement).paddingRight
+            )
+          : 0,
+      }));
+      expect(widths.button).toBeCloseTo(widths.content ?? 0, 0);
+    }
     for (const name of [
       "Identities",
       "Required NFTs",
@@ -198,6 +233,15 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
     ]) {
       await openCriterion(name);
       await expect(filter.getByRole("region", { name })).toBeVisible();
+      await expect
+        .poll(() =>
+          choices.evaluate(
+            (element) =>
+              element.closest(".mobile-wrapper-dialog")?.getBoundingClientRect()
+                .height
+          )
+        )
+        .toBeCloseTo(restingHeight ?? 0, 0);
       if (narrowFilter) {
         await expect(allFilters).toBeInViewport();
       } else {
@@ -323,6 +367,62 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
     await expectNoHorizontalOverflow(page);
   });
 
+  test("keeps All filters and Close visible while a narrow editor scrolls", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 620 });
+    await gotoReady(page, "/network");
+    await openGroupFilters(page);
+    const filter = page.getByRole("dialog", { name: "Filter Network" });
+    const choices = filter.getByRole("group", { name: "Filter Network" });
+    const back = filter.getByRole("button", {
+      name: "All filters",
+      exact: true,
+    });
+    const level = filter.getByRole("spinbutton", { name: "Level at least" });
+    await choices.getByRole("button", { name: "Level", exact: true }).click();
+    await level.fill("10");
+    await back.click();
+    await choices
+      .getByRole("button", { name: "Identities", exact: true })
+      .click();
+    const identities = filter.getByRole("region", {
+      name: "Identities",
+      exact: true,
+    });
+    const backBeforeScroll = await back.boundingBox();
+    // Mobile WebKit does not support mouse.wheel. Scroll the real editor
+    // directly and keep the same rendered-position and navigation guarantees.
+    await identities.evaluate((element) => {
+      const editor = element.parentElement;
+      if (!editor) throw new Error("Expected the criterion scroll container");
+      editor.scrollTo({ top: editor.scrollHeight });
+    });
+    await expect
+      .poll(() =>
+        identities.evaluate((element) => element.parentElement?.scrollTop)
+      )
+      .toBeGreaterThan(0);
+    await expect(back).toBeInViewport({ ratio: 1 });
+    await expect
+      .poll(async () => (await back.boundingBox())?.y)
+      .toBeCloseTo(backBeforeScroll?.y ?? 0, 0);
+    await expect(
+      filter.getByRole("button", { name: "Close", exact: true })
+    ).toBeInViewport({ ratio: 1 });
+    await expect(
+      filter.getByRole("button", { name: "Create and use new group" })
+    ).toBeInViewport({ ratio: 1 });
+    await back.click();
+    await expect(
+      choices.getByRole("button", { name: "Identities", exact: true })
+    ).toBeFocused();
+    await choices
+      .getByRole("button", { name: "Level Configured", exact: true })
+      .click();
+    await expect(level).toHaveValue("10");
+  });
+
   test("keeps the Network filter as a sheet at tablet and touch widths", async ({
     page,
   }) => {
@@ -333,8 +433,11 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
       .getByRole("dialog", { name: "Filter Network" })
       .locator(".mobile-wrapper-dialog");
     await expect
-      .poll(async () => (await sheet.boundingBox())?.y)
-      .toBeLessThan(100);
+      .poll(async () => {
+        const bounds = await sheet.boundingBox();
+        return (bounds?.y ?? 0) + (bounds?.height ?? 0);
+      })
+      .toBeCloseTo(900, 0);
     const tabletBounds = await sheet.boundingBox();
     expect(
       (tabletBounds?.y ?? 0) + (tabletBounds?.height ?? 0)
@@ -345,8 +448,11 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
     ) {
       await page.setViewportSize({ width: 1280, height: 900 });
       await expect
-        .poll(async () => (await sheet.boundingBox())?.y)
-        .toBeLessThan(100);
+        .poll(async () => {
+          const bounds = await sheet.boundingBox();
+          return (bounds?.y ?? 0) + (bounds?.height ?? 0);
+        })
+        .toBeCloseTo(900, 0);
       const touchBounds = await sheet.boundingBox();
       expect(
         (touchBounds?.y ?? 0) + (touchBounds?.height ?? 0)

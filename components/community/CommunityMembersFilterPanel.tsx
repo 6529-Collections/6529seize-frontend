@@ -93,11 +93,15 @@ export default function CommunityMembersFilterPanel(
   } = useCreateWaveGroupInlinePanel(props);
   const [view, setView] = useState<FilterView>("identities");
   const [showEditor, setShowEditor] = useState(false);
+  const viewLabel = t(
+    locale,
+    view === "identities" ? "waves.create.groups.identities" : RULE_LABELS[view]
+  );
   const [previewTarget, setPreviewTarget] =
     useState<GroupMembersPreviewTarget | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const editorRef = useRef<HTMLDivElement>(null);
-  useKeyboardFocusScroll(editorRef);
+  useKeyboardFocusScroll(editorRef, "nearest");
   const configuredRules = new Set(
     getInlineGroupConfiguredRules(displayedBuilder.draft)
   );
@@ -164,23 +168,27 @@ export default function CommunityMembersFilterPanel(
         ref={panelRef}
         className="tw-flex tw-min-h-0 tw-flex-1 tw-flex-col tw-overflow-hidden"
       >
-        <div className="tw-flex tw-shrink-0 tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-1 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/5 tw-px-4 tw-py-3 sm:tw-px-6">
-          <span className="tw-text-xs tw-text-iron-400">
-            {t(locale, "waves.create.groups.currentGroup")}
-          </span>
-          <span className="tw-break-words tw-text-xs tw-font-medium tw-text-iron-200">
-            {currentGroupLabel}
-          </span>
-          {savedTarget && (
-            <div className={isKeyboardVisible ? "tw-hidden" : "tw-contents"}>
-              <GroupMembersPreviewTrigger
-                target={savedTarget}
-                appearance="inline"
-                disabled={props.disabled ?? false}
-                onOpen={() => setPreviewTarget(savedTarget)}
-              />
-            </div>
-          )}
+        <div
+          className={`tw-shrink-0 ${isKeyboardVisible ? "tw-sr-only focus-within:tw-not-sr-only" : ""} [[data-mobile-dialog-keyboard-visible=true]_&]:tw-sr-only [[data-mobile-dialog-keyboard-visible=true]_&]:focus-within:tw-not-sr-only`}
+        >
+          <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-1 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/5 tw-px-4 tw-py-3 sm:tw-px-6">
+            <span className="tw-text-xs tw-text-iron-400">
+              {t(locale, "waves.create.groups.currentGroup")}
+            </span>
+            <span className="tw-break-words tw-text-xs tw-font-medium tw-text-iron-200">
+              {currentGroupLabel}
+            </span>
+            {savedTarget && (
+              <div className="tw-flex">
+                <GroupMembersPreviewTrigger
+                  target={savedTarget}
+                  appearance="inline"
+                  disabled={props.disabled ?? false}
+                  onOpen={() => setPreviewTarget(savedTarget)}
+                />
+              </div>
+            )}
+          </div>
         </div>
         <fieldset
           disabled={props.disabled ?? false}
@@ -219,66 +227,72 @@ export default function CommunityMembersFilterPanel(
             ))}
           </div>
           <div
-            ref={editorRef}
-            tabIndex={-1}
-            className={`${showEditor ? "tw-block" : "tw-hidden"} tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-overscroll-contain tw-p-4 sm:tw-p-6 lg:tw-block lg:tw-px-8 lg:tw-py-6`}
+            className={`${showEditor ? "tw-flex" : "tw-hidden"} tw-min-h-0 tw-min-w-0 tw-flex-1 tw-flex-col lg:tw-flex`}
           >
-            <button
-              type="button"
-              onClick={showFilterList}
-              className="tw-mb-5 tw-flex tw-min-h-10 tw-items-center tw-gap-1 tw-border-0 tw-bg-transparent tw-p-0 tw-text-sm tw-font-medium tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 lg:tw-hidden"
+            <div className="tw-flex tw-shrink-0 tw-items-center tw-justify-between tw-gap-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/5 tw-px-4 tw-py-1 sm:tw-px-6 lg:tw-hidden">
+              <button
+                type="button"
+                onClick={showFilterList}
+                className="tw-flex tw-min-h-11 tw-shrink-0 tw-items-center tw-gap-1 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-1 tw-text-sm tw-font-medium tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-iron-50"
+              >
+                <ChevronLeftIcon className="tw-size-4" aria-hidden="true" />
+                {t(locale, "network.groupFilter.all")}
+              </button>
+              <span className="tw-min-w-0 tw-text-right tw-text-xs tw-font-medium tw-text-iron-400">
+                {viewLabel}
+              </span>
+            </div>
+            <div
+              ref={editorRef}
+              tabIndex={-1}
+              className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-overscroll-contain tw-p-4 sm:tw-p-6 lg:tw-px-8 lg:tw-py-6"
             >
-              <ChevronLeftIcon className="tw-size-4" aria-hidden="true" />
-              {t(locale, "network.groupFilter.all")}
-            </button>
-            <section
-              aria-label={t(
-                locale,
-                view === "identities"
-                  ? "waves.create.groups.identities"
-                  : RULE_LABELS[view]
-              )}
-            >
-              {view === "identities" ? (
-                <>
-                  <h2 className="tw-mb-4 tw-mt-0 !tw-text-base !tw-font-semibold !tw-text-iron-100 lg:tw-sr-only">
-                    {t(locale, "waves.create.groups.identities")}
-                  </h2>
-                  <CreateWaveInlineGroupIdentities
-                    quiet
-                    networkPresentation
-                    includedIdentities={displayedBuilder.identities}
-                    excludedIdentities={displayedBuilder.excludedIdentities}
-                    includedWalletSources={
-                      displayedBuilder.includedWalletSources
-                    }
-                    excludedWalletSources={
-                      displayedBuilder.excludedWalletSources
-                    }
-                    onIncludedIdentitySelect={addIdentity}
-                    onIncludedIdentityRemove={removeIdentity}
-                    onExcludedIdentitySelect={addExcludedIdentity}
-                    onExcludedIdentityRemove={removeExcludedIdentity}
-                    onIncludedWalletSourcesChange={updateIncludedWalletSources}
-                    onExcludedWalletSourcesChange={updateExcludedWalletSources}
-                  />
-                </>
-              ) : (
-                <div className="[&>div]:tw-border-0 [&>div]:tw-bg-transparent [&>div]:tw-p-0 [&>div]:tw-shadow-none">
-                  <CreateWaveInlineGroupRuleEditor
-                    networkPresentation
-                    draft={displayedBuilder.draft}
-                    activeRule={view}
-                    onDraftChange={setDraft}
-                  />
-                </div>
-              )}
-            </section>
+              <section aria-label={viewLabel}>
+                {view === "identities" ? (
+                  <>
+                    <h2 className="tw-mb-4 tw-mt-0 !tw-text-base !tw-font-semibold !tw-text-iron-100 lg:tw-sr-only">
+                      {t(locale, "waves.create.groups.identities")}
+                    </h2>
+                    <CreateWaveInlineGroupIdentities
+                      quiet
+                      networkPresentation
+                      includedIdentities={displayedBuilder.identities}
+                      excludedIdentities={displayedBuilder.excludedIdentities}
+                      includedWalletSources={
+                        displayedBuilder.includedWalletSources
+                      }
+                      excludedWalletSources={
+                        displayedBuilder.excludedWalletSources
+                      }
+                      onIncludedIdentitySelect={addIdentity}
+                      onIncludedIdentityRemove={removeIdentity}
+                      onExcludedIdentitySelect={addExcludedIdentity}
+                      onExcludedIdentityRemove={removeExcludedIdentity}
+                      onIncludedWalletSourcesChange={
+                        updateIncludedWalletSources
+                      }
+                      onExcludedWalletSourcesChange={
+                        updateExcludedWalletSources
+                      }
+                    />
+                  </>
+                ) : (
+                  <div className="[&>div]:tw-border-0 [&>div]:tw-bg-transparent [&>div]:tw-p-0 [&>div]:tw-shadow-none">
+                    <CreateWaveInlineGroupRuleEditor
+                      networkPresentation
+                      draft={displayedBuilder.draft}
+                      activeRule={view}
+                      onDraftChange={setDraft}
+                    />
+                  </div>
+                )}
+              </section>
+            </div>
           </div>
         </fieldset>
-        <div className="tw-flex tw-shrink-0 tw-flex-col tw-gap-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-bg-iron-950 tw-px-4 tw-py-2 sm:tw-flex-row sm:tw-items-center sm:tw-gap-4 sm:tw-px-6">
+        <div className="tw-flex tw-shrink-0 tw-flex-col tw-gap-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-bg-iron-950 tw-px-4 tw-py-2 sm:tw-px-6 lg:tw-flex-row lg:tw-items-center lg:tw-gap-4">
           <div
-            className={`${isKeyboardVisible ? "tw-hidden" : "tw-flex"} tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-2 sm:tw-flex-1`}
+            className={`tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-2 lg:tw-flex-1 ${isKeyboardVisible ? "tw-sr-only focus-within:tw-not-sr-only [&_ul]:tw-overflow-visible focus-within:[&_ul]:tw-overflow-y-auto" : ""} [[data-mobile-dialog-keyboard-visible=true]_&]:tw-sr-only [[data-mobile-dialog-keyboard-visible=true]_&]:focus-within:tw-not-sr-only [[data-mobile-dialog-keyboard-visible=true]_&]:[&_ul]:tw-overflow-visible [[data-mobile-dialog-keyboard-visible=true]_&]:focus-within:[&_ul]:tw-overflow-y-auto`}
           >
             <span
               className={`tw-shrink-0 tw-text-xs tw-font-medium tw-text-iron-400 ${draftSummaryParts.length ? "tw-basis-full" : ""}`}
@@ -316,7 +330,7 @@ export default function CommunityMembersFilterPanel(
           <Button
             variant="action"
             size="md"
-            className="tw-min-h-11 tw-max-w-full tw-self-end !tw-whitespace-normal sm:tw-self-auto"
+            className="tw-min-h-11 tw-w-full tw-max-w-full !tw-whitespace-normal lg:tw-w-auto lg:tw-self-auto"
             disabled={!canCreateDraft}
             loading={isCreating}
             onClick={onCreateAndUse}

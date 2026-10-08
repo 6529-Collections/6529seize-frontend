@@ -2217,6 +2217,12 @@ const NETWORK_GROUP_INSPECTION_MESSAGES = objectMessages(
   } as const
 );
 
+const NETWORK_HEADER_ACTION_MESSAGES = objectMessages("network.actions", {
+  openFilters: "Open group filters",
+  openSort: "Open sort options",
+  openNerd: "Open Nerd view",
+} as const);
+
 const NETWORK_GROUP_FILTER_MESSAGES = objectMessages("network.groupFilter", {
   filter: "Filter",
   all: "All filters",
@@ -4247,6 +4253,7 @@ export const EN_US_MESSAGES = {
   ...WAVE_CHAT_SETTINGS_MESSAGES,
   ...NETWORK_GROUP_INSPECTION_MESSAGES,
   ...NETWORK_GROUP_FILTER_MESSAGES,
+  ...NETWORK_HEADER_ACTION_MESSAGES,
   ...WAVE_LOADING_MESSAGES,
   ...WAVE_DROPS_SEARCH_MODAL_MESSAGES,
   ...WAVE_GIF_PICKER_MESSAGES,
