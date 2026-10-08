@@ -692,14 +692,17 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
         scrollIntoView.call(this, options);
       };
       Element.prototype.scrollBy = function (
-        options: ScrollToOptions | number,
+        options?: ScrollToOptions | number,
         y?: number
       ) {
         calls.push(
           typeof options === "object" ? (options.behavior ?? "auto") : "auto"
         );
-        if (typeof options === "number") scrollBy.call(this, options, y ?? 0);
-        else scrollBy.call(this, options);
+        Reflect.apply(
+          scrollBy,
+          this,
+          typeof options === "number" ? [options, y ?? 0] : [options]
+        );
       };
       try {
         const restingHeight = viewport.height;

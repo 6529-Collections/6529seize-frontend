@@ -5,7 +5,14 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { Dialog, DialogPanel, TransitionChild } from "@headlessui/react";
 import clsx from "clsx";
-import { Fragment, useEffect, useLayoutEffect, useRef, useState } from "react";
+import {
+  Fragment,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import type { CSSProperties, ReactNode, RefObject } from "react";
 import MobileWrapperDialogCloseButton from "./MobileWrapperDialogCloseButton";
 import MobileWrapperDialogHeader from "./MobileWrapperDialogHeader";
@@ -431,7 +438,6 @@ export default function MobileWrapperDialog({
   const isTouchDevice = useIsTouchDevice();
   const titleRef = useRef<HTMLElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
-  const [container, setContainer] = useState<HTMLDivElement | null>(null);
   const [dialogMount, setDialogMount] = useState<HTMLSpanElement | null>(null);
   const resolvedBackLabel = backLabel ?? t(locale, "common.back");
   const resolvedCloseLabel = closeLabel ?? t(locale, "common.close");
@@ -498,56 +504,55 @@ export default function MobileWrapperDialog({
   const dialogOpen = isOpen && dialogMount !== null;
   useRetainedDialogFocus(keepMounted, dialogOpen, dialogRef);
 
-  useEffect(() => {
-    const viewport = globalThis.visualViewport;
-    if (
-      !dialogOpen ||
-      !fitVisualViewport ||
-      isCapacitor ||
-      !container ||
-      !viewport
-    ) {
-      return;
-    }
-    // Native shells already own this inset. Browsers expose their keyboard
-    // avoidance through the visual viewport instead of native plugin events.
-    const updateInset = () => {
-      const isZoomed = viewport.scale > 1;
-      const inset = isZoomed
-        ? 0
-        : Math.max(
-            0,
-            globalThis.innerHeight - viewport.height - viewport.offsetTop
+  const fitBrowserViewport = useCallback(
+    (container: HTMLDivElement | null) => {
+      const viewport = globalThis.visualViewport;
+      if (!fitVisualViewport || isCapacitor || !container || !viewport) {
+        return;
+      }
+      // Native shells already own this inset. Browsers expose their keyboard
+      // avoidance through the visual viewport instead of native plugin events.
+      const updateInset = () => {
+        const isZoomed = viewport.scale > 1;
+        const inset = isZoomed
+          ? 0
+          : Math.max(
+              0,
+              globalThis.innerHeight - viewport.height - viewport.offsetTop
+            );
+        if (isZoomed) {
+          container.style.removeProperty(
+            "--mobile-wrapper-dialog-available-height"
           );
-      if (isZoomed) {
+        } else {
+          container.style.setProperty(
+            "--mobile-wrapper-dialog-available-height",
+            `max(0px, calc(${viewport.height}px - 4rem))`
+          );
+        }
+        container.style.setProperty(
+          "--mobile-wrapper-dialog-keyboard-inset",
+          `${inset}px`
+        );
+        container.dataset["mobileDialogKeyboardVisible"] = String(inset > 100);
+      };
+      updateInset();
+      viewport.addEventListener("resize", updateInset);
+      viewport.addEventListener("scroll", updateInset, { passive: true });
+      return () => {
+        viewport.removeEventListener("resize", updateInset);
+        viewport.removeEventListener("scroll", updateInset);
+        container.style.removeProperty(
+          "--mobile-wrapper-dialog-keyboard-inset"
+        );
         container.style.removeProperty(
           "--mobile-wrapper-dialog-available-height"
         );
-      } else {
-        container.style.setProperty(
-          "--mobile-wrapper-dialog-available-height",
-          `max(0px, calc(${viewport.height}px - 4rem))`
-        );
-      }
-      container.style.setProperty(
-        "--mobile-wrapper-dialog-keyboard-inset",
-        `${inset}px`
-      );
-      container.dataset["mobileDialogKeyboardVisible"] = String(inset > 100);
-    };
-    updateInset();
-    viewport.addEventListener("resize", updateInset);
-    viewport.addEventListener("scroll", updateInset, { passive: true });
-    return () => {
-      viewport.removeEventListener("resize", updateInset);
-      viewport.removeEventListener("scroll", updateInset);
-      container.style.removeProperty("--mobile-wrapper-dialog-keyboard-inset");
-      container.style.removeProperty(
-        "--mobile-wrapper-dialog-available-height"
-      );
-      delete container.dataset["mobileDialogKeyboardVisible"];
-    };
-  }, [container, dialogOpen, fitVisualViewport, isCapacitor]);
+        delete container.dataset["mobileDialogKeyboardVisible"];
+      };
+    },
+    [fitVisualViewport, isCapacitor]
+  );
 
   useEffect(() => {
     if (!dialogOpen || !focusTitleOnOpen) {
@@ -613,7 +618,7 @@ export default function MobileWrapperDialog({
             onClick={(e) => e.stopPropagation()}
           >
             <div
-              ref={fitVisualViewport ? setContainer : undefined}
+              ref={fitVisualViewport ? fitBrowserViewport : undefined}
               className={containerClassNames}
               style={MOBILE_DIALOG_CONTAINER_STYLE}
             >
