@@ -2092,19 +2092,33 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
           name: /^Outcomes?$/,
           exact: true,
         });
+        const outcomeContent = page.getByText(
+          mode === "native" ? "Nothing to show yet." : "No outcomes to show.",
+          { exact: true }
+        );
+        const winnersContent = page.getByText(
+          mode === "native" ? "No Winners to Display" : "No Winners Yet",
+          { exact: true }
+        );
         await winners.click();
         await expect(winners).toHaveAttribute(selectedAttribute, "true");
         await expect(page).toHaveURL(/alpha\?tab=decisions$/);
         await expect(winners).not.toHaveAttribute("aria-busy", "true");
+        await expect(winners).toBeFocused();
+        await expect(winnersContent).toBeVisible();
         await outcome.click();
         await expect(outcome).toHaveAttribute(selectedAttribute, "true");
         await expect(page).toHaveURL(/alpha\?tab=outcomes$/);
+        await expect(outcomeContent).toBeVisible();
+        await expect(winnersContent).toHaveCount(0);
         await page.goBack();
         await expect(winners).toHaveAttribute(selectedAttribute, "true");
         await expect(page).toHaveURL(/alpha\?tab=decisions$/);
+        await expect(winnersContent).toBeVisible();
         await page.goForward();
         await expect(outcome).toHaveAttribute(selectedAttribute, "true");
         await expect(page).toHaveURL(/alpha\?tab=outcomes$/);
+        await expect(outcomeContent).toBeVisible();
         // Two quick choices must settle on the last one, without a stuck cue.
         await winners.evaluate((button) => {
           (button as HTMLButtonElement).click();
@@ -2117,6 +2131,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         await expect(outcome).toHaveAttribute(selectedAttribute, "true");
         await expect(page).toHaveURL(/alpha\?tab=outcomes$/);
         await expect(winners).not.toHaveAttribute("aria-busy", "true");
+        await expect(outcomeContent).toBeVisible();
         expect(pageRequests).toEqual([]);
       } finally {
         releaseNavigation();
