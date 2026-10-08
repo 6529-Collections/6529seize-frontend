@@ -18,6 +18,9 @@ describe("video helpers", () => {
 
     expect(result).not.toBeNull();
     expect(result!.HLS).toContain("renditions");
+    expect(result!.POSTER).toBe(
+      "https://d3lqz0a4bldqgf.cloudfront.net/renditions/drops/foo/bar/poster/bar_poster.0000001.jpg"
+    );
   });
 
   it("checks availability using fetch", async () => {

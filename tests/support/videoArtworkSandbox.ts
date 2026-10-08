@@ -54,7 +54,8 @@ export async function installVideoArtworkSandbox(
 /** Render a chat message that embeds the sandbox submission as a linked drop. */
 export async function installLinkedDropVideoSandbox(
   page: Page,
-  baseURL: string | undefined
+  baseURL: string | undefined,
+  withPoster = false
 ): Promise<string> {
   const { apiOrigin, feed, source } = await loadSandboxSeed(
     page,
@@ -62,7 +63,29 @@ export async function installLinkedDropVideoSandbox(
     "linked-video"
   );
 
-  const videoUrl = new URL("/__video-fixture/portrait.mp4", baseURL).href;
+  const cloudfront =
+    process.env["NEXT_PUBLIC_CLOUDFRONT_DOMAIN"] ??
+    "https://d3lqz0a4bldqgf.cloudfront.net";
+  const videoUrl = withPoster
+    ? `${cloudfront}/drops/video-fixture/portrait.mp4`
+    : new URL("/__video-fixture/portrait.mp4", baseURL).href;
+  if (withPoster) {
+    await page.route(
+      `${cloudfront}/renditions/drops/video-fixture/portrait/**`,
+      (route) => {
+        if (
+          !route.request().url().endsWith("/poster/portrait_poster.0000001.jpg")
+        ) {
+          return route.fulfill({ status: 404 });
+        }
+        return route.fulfill({
+          headers: { "access-control-allow-origin": "*" },
+          contentType: "image/svg+xml",
+          body: '<svg xmlns="http://www.w3.org/2000/svg" width="360" height="640"><rect width="100%" height="100%" fill="#c19a49"/></svg>',
+        });
+      }
+    );
+  }
   const linkedDrop: ApiDropV2 = {
     ...source,
     title: "Local linked video fixture",
@@ -110,6 +133,7 @@ export async function installLinkedDropVideoSandbox(
   );
   await page.route(videoUrl, (route) =>
     route.fulfill({
+      headers,
       contentType: "video/mp4",
       path: path.resolve("tests/media/fixtures/portrait.mp4"),
     })

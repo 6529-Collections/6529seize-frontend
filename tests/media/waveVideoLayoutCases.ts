@@ -10,6 +10,48 @@ import {
 
 // Registered inside the composer sandbox suite, which supplies its local-only guard.
 export function defineWaveVideoLayoutTests() {
+  test("shows a chat preview without requesting video before Play", async ({
+    page,
+    baseURL,
+  }) => {
+    const fixturePath = await installLinkedDropVideoSandbox(
+      page,
+      baseURL,
+      true
+    );
+    const videoRequests: string[] = [];
+    page.on("request", (request) => {
+      if (request.url().endsWith("/drops/video-fixture/portrait.mp4"))
+        videoRequests.push(request.url());
+    });
+    await page.goto(fixturePath, { waitUntil: "domcontentloaded" });
+    await waitForRouteReady(page);
+    await dismissNextDevTools(page);
+    const video = page.getByLabel("Video player", { exact: true }).first();
+    await video.scrollIntoViewIfNeeded();
+    await expect(video).toHaveAttribute(
+      "poster",
+      /\/poster\/portrait_poster\.0000001\.jpg$/
+    );
+    await expect(video).not.toHaveAttribute("src", /.+/);
+    expect(videoRequests).toHaveLength(0);
+    const preview = await video.evaluate(async (element: HTMLVideoElement) => {
+      const image = new Image();
+      image.src = element.poster;
+      await image.decode();
+      return {
+        width: image.naturalWidth,
+        height: image.naturalHeight,
+        paused: element.paused,
+      };
+    });
+    expect(preview).toEqual({ width: 360, height: 640, paused: true });
+    await page
+      .getByRole("button", { name: "Play video", exact: true })
+      .first()
+      .click();
+    await expect.poll(() => videoRequests.length).toBeGreaterThan(0);
+  });
   test("retains video position and sound when a chat drop is virtualized", async ({
     page,
     baseURL,

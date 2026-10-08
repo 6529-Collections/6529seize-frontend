@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useRef } from "react";
 import { useMobileBatterySavings } from "@/hooks/useMobileAppActivity";
 import { useInView } from "@/hooks/useInView";
 import { useOptimizedVideo } from "@/hooks/useOptimizedVideo";
+import { useChatVideoPoster } from "@/hooks/useChatVideoPoster";
 import { useHlsPlayer } from "@/hooks/useHlsPlayer";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
@@ -55,6 +56,10 @@ const MediaDisplayVideo: React.FC<Props> = ({
   const wasFullscreenRef = useRef(false);
   const locale = useBrowserLocale();
   const chat = useChatVideoPlayback(src);
+  const poster = useChatVideoPoster(
+    src,
+    chat.isChat && inView && !chat.requested
+  );
   const savedPlayback = useRememberedVideoPlayback(src);
   const shouldAutoPlay =
     inView && !isApp && !chat.isChat && !savedPlayback?.userControlled;
@@ -160,6 +165,8 @@ const MediaDisplayVideo: React.FC<Props> = ({
         onPlaybackRequest={onPlaybackRequest}
         preload={preload}
         data-url={src}
+        poster={poster?.url}
+        aspectRatioHint={poster?.aspectRatio}
         template={presentation.template}
         autoPlay={shouldAutoPlay}
         layout={presentation.layout}

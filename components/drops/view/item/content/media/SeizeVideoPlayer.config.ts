@@ -267,7 +267,9 @@ export function getResponsiveVideoStyle({
   }
 
   const style: CSSProperties = {};
-  style.aspectRatio = aspectRatio ?? "16 / 9";
+  const previewRatio =
+    layout === "natural" ? getVideoRatio(aspectRatioHint, 1) : undefined;
+  style.aspectRatio = aspectRatio ?? previewRatio?.toString() ?? "16 / 9";
 
   const fallbackViewportHeight = viewportHeight ?? 900;
   const maxViewportHeight =
@@ -283,6 +285,8 @@ export function getResponsiveVideoStyle({
   if (videoSize && videoSize.height > videoSize.width) {
     const ratio = videoSize.width / videoSize.height;
     style.maxWidth = `${Math.floor(maxHeight * ratio)}px`;
+  } else if (previewRatio !== undefined && previewRatio < 1) {
+    style.maxWidth = `${Math.floor(maxHeight * previewRatio)}px`;
   }
 
   return style;
