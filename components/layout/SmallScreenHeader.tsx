@@ -7,13 +7,16 @@ import { isPageShareSupported } from "@/components/header/share/page-share-suppo
 import EnvironmentBadge from "@/components/common/EnvironmentBadge";
 import { getActiveViewFromUrl } from "@/components/navigation/ViewContext";
 import { getActiveWaveIdFromUrl } from "@/helpers/navigation.helpers";
-import { Bars3Icon } from "@heroicons/react/24/outline";
+import { Bars3Icon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 
 interface SmallScreenHeaderProps {
+  readonly interactive?: boolean;
   readonly onMenuToggle: () => void;
   readonly isMenuOpen: boolean;
 }
@@ -32,6 +35,7 @@ function SmallScreenPageShareButton() {
 }
 
 export default function SmallScreenHeader({
+  interactive = true,
   onMenuToggle,
   isMenuOpen,
 }: SmallScreenHeaderProps) {
@@ -58,11 +62,24 @@ export default function SmallScreenHeader({
         </div>
         <div className="tw-flex tw-items-center tw-gap-3">
           {isHomeRoute && <NetworkHealthCTA />}
-          <Suspense fallback={null}>
-            <SmallScreenPageShareButton />
-          </Suspense>
-          <HeaderSearchButton wave={null} />
+          {interactive && (
+            <Suspense fallback={null}>
+              <SmallScreenPageShareButton />
+            </Suspense>
+          )}
+          {interactive ? (
+            <HeaderSearchButton wave={null} />
+          ) : (
+            <button
+              disabled
+              aria-label={t(DEFAULT_LOCALE, "headerSearch.inputLabel")}
+              className="tw-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-iron-800 tw-text-iron-300 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700"
+            >
+              <MagnifyingGlassIcon className="tw-size-5 tw-flex-shrink-0" />
+            </button>
+          )}
           <button
+            disabled={!interactive}
             onClick={onMenuToggle}
             className="tw-flex tw-h-10 tw-w-10 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-iron-800 tw-text-iron-300 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-bg-iron-700 desktop-hover:hover:tw-text-iron-50"
             aria-label={isMenuOpen ? "Close menu" : "Open menu"}

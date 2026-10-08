@@ -60,13 +60,12 @@ const WebLayoutContent = ({ children, isSmall = false }: WebLayoutProps) => {
       data-small={isSmall ? "true" : "false"}
       data-sidebar-ready={isSidebarReady}
     >
-      {isSmall && (
-        <SmallScreenLayoutHeader
-          onMenuToggle={toggleCollapsed}
-          isMenuOpen={isOffcanvasOpen}
-        />
-      )}
-      <div className="tailwind-scope">
+      <SmallScreenLayoutHeader
+        active={isSmall}
+        onMenuToggle={toggleCollapsed}
+        isMenuOpen={isOffcanvasOpen}
+      />
+      <div className="tailwind-scope" data-web-sidebar="true">
         <WebSidebar
           key={isSmall ? "small" : "desktop"}
           isCollapsed={isSmall ? false : isCollapsed}

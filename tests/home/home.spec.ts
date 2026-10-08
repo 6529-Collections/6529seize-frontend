@@ -5,7 +5,10 @@ import {
   waitForRouteReady,
 } from "../testHelpers";
 import { getAppEnvironment } from "../../config/appEnvironment";
-import { isDesktopWebProject } from "../support/surfaceSimulation";
+import {
+  isDesktopWebProject,
+  isMobileWebProject,
+} from "../support/surfaceSimulation";
 import { gateSidebarHydration } from "../support/sidebarHydration";
 import { installSectionTrackingFixture } from "../support/sectionTrackingFixture";
 
@@ -53,6 +56,50 @@ test.describe("Home Page @smoke @medium @large", () => {
     }) => {
       await expect(page.locator('[aria-label^="Environment:"]')).toHaveCount(0);
     });
+  }
+});
+
+test("mobile web starts with its header and full-width content before hydration @smoke @medium @large", async ({
+  page,
+}, testInfo) => {
+  test.skip(
+    !isMobileWebProject(testInfo.project.name),
+    "Mobile browser startup contract"
+  );
+  const hydration = await gateSidebarHydration(page);
+  const main = page.getByRole("main").first();
+  const header = page.getByRole("banner");
+  const sidebar = page.getByLabel("Primary sidebar", { exact: true });
+  try {
+    await page.goto("/", { waitUntil: "commit" });
+    await expect(page.locator("html")).toHaveAttribute(
+      "data-small-web-startup",
+      "true"
+    );
+    await expect(page.getByRole("main").first().locator("..")).toHaveAttribute(
+      "data-small",
+      "false"
+    );
+    await expect(header).toBeVisible();
+    await expect(sidebar).toBeHidden();
+    const initial = await main.boundingBox();
+    expect(initial?.x).toBe(0);
+    expect(initial?.width).toBe(await page.evaluate(() => innerWidth));
+    await expectNoHorizontalOverflow(page);
+    await hydration.waitForDownloads();
+    hydration.release();
+    await expect(page.getByRole("main").first().locator("..")).toHaveAttribute(
+      "data-small",
+      "true"
+    );
+    await expect(header).toBeVisible();
+    await expect(sidebar).toBeHidden();
+    const hydrated = await main.boundingBox();
+    expect(hydrated?.x).toBe(initial?.x);
+    expect(hydrated?.width).toBe(initial?.width);
+  } finally {
+    hydration.release();
+    await hydration.attachEvidence(testInfo);
   }
 });
 

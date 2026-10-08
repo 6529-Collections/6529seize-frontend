@@ -1,5 +1,7 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { useEffect } from "react";
+import { renderToString } from "react-dom/server";
+import { hydrateRoot } from "react-dom/client";
 import WebLayout from "@/components/layout/WebLayout";
 import { useSidebarState } from "@/hooks/useSidebarState";
 
@@ -7,6 +9,8 @@ const mockRegisterRef = jest.fn();
 const mockSetHeaderRef = jest.fn();
 const mockMounted = jest.fn();
 const mockCleanup = jest.fn();
+const mockSearchMounted = jest.fn();
+const mockSearchCleanup = jest.fn();
 let mockWidth = 900;
 type MediaListener =
   | EventListenerOrEventListenerObject
@@ -67,7 +71,13 @@ jest.mock("@/components/header/share/HeaderPageShareButton", () => ({
 }));
 jest.mock("@/components/header/header-search/HeaderSearchButton", () => ({
   __esModule: true,
-  default: () => null,
+  default: () => {
+    useEffect(() => {
+      mockSearchMounted();
+      return mockSearchCleanup;
+    }, []);
+    return null;
+  },
 }));
 jest.mock("@/components/header/header-search/HeaderSearchModal", () => ({
   __esModule: true,
@@ -144,6 +154,47 @@ beforeEach(() => {
   }));
 });
 
+it("hydrates the server mobile header without registering hidden desktop chrome", async () => {
+  const html = renderToString(
+    <WebLayout>
+      <h1>Public reading</h1>
+    </WebLayout>
+  );
+  const container = document.createElement("div");
+  container.innerHTML = html;
+  const header = container.querySelector("[data-web-small-header]");
+  expect(header).toHaveAttribute("hidden");
+  expect(header?.querySelector("header")).not.toBeNull();
+  expect(header?.querySelector("aside")).toBeNull();
+  expect(container.querySelector("[data-web-sidebar]")).not.toBeNull();
+  expect(container.querySelector("main h1")?.textContent).toBe(
+    "Public reading"
+  );
+  document.body.appendChild(container);
+  const onRecoverableError = jest.fn();
+  let root: ReturnType<typeof hydrateRoot> | undefined;
+  try {
+    await act(async () => {
+      root = hydrateRoot(
+        container,
+        <WebLayout>
+          <h1>Public reading</h1>
+        </WebLayout>,
+        { onRecoverableError }
+      );
+    });
+    expect(onRecoverableError).not.toHaveBeenCalled();
+    expect(container.querySelector("[data-web-small-header]")).toBe(header);
+    expect(screen.queryByRole("banner")).not.toBeInTheDocument();
+    expect(mockRegisterRef).not.toHaveBeenCalled();
+    expect(mockSetHeaderRef).not.toHaveBeenCalled();
+    expect(mockSearchMounted).not.toHaveBeenCalled();
+  } finally {
+    await act(async () => root?.unmount());
+    container.remove();
+  }
+});
+
 it("adapts chrome and clears its overlay without remounting the editor or SidebarProvider", () => {
   const transfer = new AbortController();
   const { rerender, unmount } = render(
@@ -152,6 +203,7 @@ it("adapts chrome and clears its overlay without remounting the editor or Sideba
     </WebLayout>
   );
   const input = screen.getByRole("textbox", { name: "Pending answer" });
+  expect(mockSearchMounted).toHaveBeenCalledTimes(1);
   const main = input.closest("main");
   fireEvent.change(input, { target: { value: "Still writing" } });
   fireEvent.click(screen.getByRole("button", { name: "Open details" }));
@@ -183,6 +235,7 @@ it("adapts chrome and clears its overlay without remounting the editor or Sideba
     </WebLayout>
   );
   expect(screen.queryByRole("banner")).not.toBeInTheDocument();
+  expect(mockSearchCleanup).toHaveBeenCalledTimes(1);
   expect(mockRegisterRef).toHaveBeenLastCalledWith("header", null);
   expect(mockSetHeaderRef).toHaveBeenLastCalledWith(null);
   expect(
