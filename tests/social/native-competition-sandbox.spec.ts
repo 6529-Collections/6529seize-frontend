@@ -1344,8 +1344,13 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     const trigger = page.getByRole("combobox", {
       name: "Competition type",
       exact: true,
+      includeHidden: true,
     });
     await expect(trigger).toHaveText("Rank");
+    await expect(trigger).toHaveAttribute(
+      "aria-haspopup",
+      app ? "dialog" : "listbox"
+    );
     await expect
       .poll(() =>
         trigger.evaluate((element) => {
@@ -1375,6 +1380,10 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         exact: true,
       });
       await expect(sheet).toHaveAttribute("aria-modal", "true");
+      await expect(sheet).toHaveAttribute(
+        "id",
+        (await trigger.getAttribute("aria-controls"))!
+      );
       const sheetPanel = page
         .getByRole("dialog", { name: "Competition type", exact: true })
         .locator(".mobile-wrapper-dialog");
@@ -1387,6 +1396,10 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         )
         .toBeLessThanOrEqual(1);
     } else {
+      await expect(choices).toHaveAttribute(
+        "id",
+        (await trigger.getAttribute("aria-controls"))!
+      );
       await expect(
         page.getByRole("dialog", { name: "Competition type", exact: true })
       ).toHaveCount(0);

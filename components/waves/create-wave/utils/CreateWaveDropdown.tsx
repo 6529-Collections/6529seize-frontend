@@ -54,6 +54,8 @@ export default function CreateWaveDropdown<TValue extends string>({
   const menuRef = useRef<HTMLUListElement>(null);
   const optionRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const menuId = useId();
+  const dialogId = `${menuId}-dialog`;
+  const popupId = useMobileSheet ? dialogId : menuId;
   const valueDescriptionId = `${menuId}-value`;
   const selectedIndex = Math.max(
     0,
@@ -180,6 +182,9 @@ export default function CreateWaveDropdown<TValue extends string>({
     };
   }, [isOpen, useMobileSheet]);
 
+  // A disabled form must not reopen a previously open picker when it unlocks.
+  if (disabled && isOpen) setIsOpen(false);
+
   const stateClasses = hasError
     ? "tw-ring-error focus:tw-ring-error"
     : "tw-ring-white/10 desktop-hover:hover:tw-ring-white/15 desktop-hover:hover:focus:tw-ring-primary-400 focus:tw-ring-primary-400";
@@ -257,9 +262,9 @@ export default function CreateWaveDropdown<TValue extends string>({
             : valueDescriptionId
         }
         aria-invalid={ariaInvalid || undefined}
-        aria-haspopup="listbox"
+        aria-haspopup={useMobileSheet ? "dialog" : "listbox"}
         aria-expanded={isOpen && !disabled}
-        aria-controls={isOpen && !disabled ? menuId : undefined}
+        aria-controls={isOpen && !disabled ? popupId : undefined}
         disabled={disabled}
         data-testid={dataTestId}
         onClick={() => setIsOpen((current) => !current)}
@@ -283,6 +288,7 @@ export default function CreateWaveDropdown<TValue extends string>({
 
       {useMobileSheet ? (
         <MobileWrapperDialog
+          id={dialogId}
           title={ariaLabel}
           isOpen={isOpen && !disabled}
           onClose={() => closeMenu()}
