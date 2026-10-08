@@ -19,7 +19,6 @@ import type {
   CollectTradeAction,
 } from "./collect.types";
 import CollectTradeActions from "./CollectTradeActions";
-import styles from "./marketplace-font.module.css";
 import { CollectTradeDialog } from "./CollectTradeSheet";
 import CollectOwnerAction from "./CollectOwnerAction";
 import { collectProfileWallets } from "./collect-recipient.helpers";
@@ -217,7 +216,7 @@ function DetailActions(props: CollectDetailActionsProps) {
     });
   };
   return (
-    <div className={`${styles["surface"] ?? ""} tw-w-full`}>
+    <div className="tw-w-full">
       <DetailTrade
         key={purchaseSession}
         collection={props.collection}

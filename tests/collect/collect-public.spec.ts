@@ -1,5 +1,6 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Locator, type Page } from "@playwright/test";
 import path from "node:path";
+import AxeBuilder from "@axe-core/playwright";
 import { installSectionTrackingFixture } from "../support/sectionTrackingFixture";
 import { installLocalCountryCheck } from "../support/localCountryCheck";
 
@@ -169,7 +170,12 @@ async function waitForCollectClientReady(page: Page) {
   });
 }
 
-async function mockCatalog(page: Page, state = { fail: false }) {
+async function mockCatalog(
+  page: Page,
+  state: { fail: boolean; empty?: boolean; waitForListings?: Promise<void> } = {
+    fail: false,
+  }
+) {
   const mutations: string[] = [];
   await page.route("**/*", async (route) => {
     const request = route.request();
@@ -248,6 +254,7 @@ async function mockCatalog(page: Page, state = { fail: false }) {
       return;
     }
     if (url.pathname === "/api/market/listings") {
+      await state.waitForListings;
       if (state.fail) {
         await route.fulfill({
           status: 503,
@@ -257,7 +264,9 @@ async function mockCatalog(page: Page, state = { fail: false }) {
       }
       await route.fulfill({
         json: {
-          entries: listingsFor(url.searchParams.get("family")),
+          entries: state.empty
+            ? []
+            : listingsFor(url.searchParams.get("family")),
           next: null,
           checked_at: new Date().toISOString(),
           complete: true,
@@ -426,6 +435,7 @@ test("listing selection carries across browsing and opens one wallet-gated purch
   const dialog = page.getByRole("dialog");
   await expect(dialog).toHaveCount(1);
   await expect(dialog).toHaveAttribute("aria-modal", "true");
+  await expect(dialog).toHaveCSS("font-family", /Montserrat/);
   const checkoutSurface = page
     .getByRole("dialog")
     .locator(":scope > div")
@@ -575,6 +585,7 @@ test("group offer prices remain per NFT and survive a return to browsing", async
 
 test("set planning is the default and navigation opens observed listings", async ({
   page,
+  isMobile,
 }, info) => {
   const mutations = await mockCatalog(page);
   await page.goto("/collect", {
@@ -584,6 +595,29 @@ test("set planning is the default and navigation opens observed listings", async
   await expect(
     page.getByRole("form", { name: "Complete a full set", exact: true })
   ).toBeVisible();
+  await page.evaluate(() => document.fonts.ready);
+  await expect(
+    page.getByRole("heading", { name: "Build your collection", exact: true })
+  ).toHaveCSS("font-family", /Montserrat/);
+  expect(
+    await page.evaluate(() =>
+      Array.from(document.fonts).some(
+        (face) =>
+          (face.family === "Montserrat" || face.family === '"Montserrat"') &&
+          face.status === "loaded"
+      )
+    )
+  ).toBe(true);
+  await expect(
+    page.getByRole("textbox", { name: "Copies per NFT", exact: true })
+  ).toHaveAccessibleDescription(
+    "Total copies to hold of each NFT, including copies already in your profile."
+  );
+  const accessibility = await new AxeBuilder({ page })
+    .include("[data-collect-page]")
+    .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])
+    .analyze();
+  expect(accessibility.violations).toEqual([]);
   await noHorizontalOverflow(page);
   await page.screenshot({
     path: info.outputPath("collect-default-planner.png"),
@@ -593,7 +627,8 @@ test("set planning is the default and navigation opens observed listings", async
     name: "Lowest listings",
     exact: true,
   });
-  await lowestListings.click();
+  if (isMobile) await lowestListings.tap();
+  else await lowestListings.click();
   await expect(lowestListings).toHaveAttribute("aria-pressed", "true", {
     timeout: ROUTE_TRANSITION_TIMEOUT_MS,
   });
@@ -671,7 +706,179 @@ test("set planning is the default and navigation opens observed listings", async
   expect(mutations).toEqual([]);
 });
 
-test("short set setups gain keyboard scroll clearance", async ({ page }) => {
+test("collecting tools stay on one line and scroll into keyboard focus on narrow screens", async ({
+  page,
+  browserName,
+}, info) => {
+  const mutations = await mockCatalog(page);
+  await page.setViewportSize({ width: 320, height: 844 });
+  await page.goto("/collect", { waitUntil: "domcontentloaded" });
+  await waitForCollectClientReady(page);
+  await page.evaluate(() => document.fonts.ready);
+  const navigation = page.getByRole("group", { name: "Collecting tools" });
+  const completeSet = navigation.getByRole("button", {
+    name: "Complete a set",
+    exact: true,
+  });
+  const lowest = navigation.getByRole("button", {
+    name: "Lowest listings",
+    exact: true,
+  });
+  const tdh = navigation.getByRole("button", { name: "TDH", exact: true });
+  for (const name of ["Complete a set", "Lowest listings", "TDH"]) {
+    const button = navigation.getByRole("button", { name, exact: true });
+    const label = button.getByText(name, { exact: true });
+    await expect(label).toHaveCSS("white-space", "nowrap");
+    const dimensions = await label.evaluate((element) => ({
+      height: element.getBoundingClientRect().height,
+      lineHeight: Number.parseFloat(getComputedStyle(element).lineHeight),
+    }));
+    expect(dimensions.height).toBeLessThanOrEqual(dimensions.lineHeight + 1);
+    expect((await button.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+  }
+  expect(
+    await navigation.evaluate(
+      (element) => element.scrollWidth > element.clientWidth
+    )
+  ).toBe(true);
+  // WebKit's default settings use Option-Tab to include clickable controls.
+  const nextToolKey = browserName === "webkit" ? "Alt+Tab" : "Tab";
+  const previousToolKey =
+    browserName === "webkit" ? "Alt+Shift+Tab" : "Shift+Tab";
+  await completeSet.focus();
+  await page.keyboard.press(nextToolKey);
+  await expect(lowest).toBeFocused();
+  await page.keyboard.press(nextToolKey);
+  await expect(tdh).toBeFocused();
+  await expect
+    .poll(() => navigation.evaluate((element) => element.scrollLeft))
+    .toBeGreaterThan(0);
+  const navigationBox = (await navigation.boundingBox())!;
+  const tdhBox = (await tdh.boundingBox())!;
+  expect(tdhBox.x + tdhBox.width).toBeLessThanOrEqual(
+    navigationBox.x + navigationBox.width
+  );
+  await page.screenshot({
+    path: info.outputPath("collect-tools-scrolled-focus.png"),
+    fullPage: true,
+  });
+  await page.keyboard.press("Enter");
+  await expect(tdh).toHaveAttribute("aria-pressed", "true");
+  await expect(page).toHaveURL(/intent=tdh/);
+  await page.keyboard.press(previousToolKey);
+  await page.keyboard.press(previousToolKey);
+  await expect(completeSet).toBeFocused();
+  await expect
+    .poll(() => navigation.evaluate((element) => element.scrollLeft))
+    .toBe(0);
+  await page.keyboard.press("Enter");
+  await expect(completeSet).toHaveAttribute("aria-pressed", "true");
+  await noHorizontalOverflow(page);
+  await page.screenshot({
+    path: info.outputPath("collect-tools-one-line.png"),
+    fullPage: true,
+  });
+  expect(mutations).toEqual([]);
+});
+
+async function expectCenteredCollectPage(heading: Locator) {
+  const geometry = await heading.evaluate((element) => {
+    const container = element.closest("header")?.parentElement;
+    const parent = container?.parentElement;
+    if (!container || !parent) {
+      throw new Error("Collecting page container is missing");
+    }
+    const bounds = container.getBoundingClientRect();
+    const parentBounds = parent.getBoundingClientRect();
+    const style = getComputedStyle(parent);
+    const left = parentBounds.left + parseFloat(style.paddingLeft);
+    const right = parentBounds.right - parseFloat(style.paddingRight);
+    return {
+      width: bounds.width,
+      center: (bounds.left + bounds.right) / 2,
+      availableCenter: (left + right) / 2,
+    };
+  });
+  expect(geometry.width).toBeLessThanOrEqual(768);
+  expect(geometry.center).toBeCloseTo(geometry.availableCenter, 0);
+}
+
+test("collecting and orders center their content, use the app font and keep private activity wallet gated", async ({
+  page,
+}, info) => {
+  const mutations = await mockCatalog(page);
+  if ((page.viewportSize()?.width ?? 0) > 600) {
+    await page.setViewportSize({ width: 1920, height: 900 });
+  }
+  await page.goto("/collect", { waitUntil: "domcontentloaded" });
+  const collectHeading = page.getByRole("heading", {
+    name: "Build your collection",
+    exact: true,
+  });
+  await expect(collectHeading).toHaveAttribute("data-client-ready", "true");
+  await expectCenteredCollectPage(collectHeading);
+  const collectBounds = await collectHeading.boundingBox();
+  await page.goto("/collect/orders", { waitUntil: "domcontentloaded" });
+  const heading = page.getByRole("heading", { name: "Orders", exact: true });
+  await expect(heading).toBeVisible();
+  await expectCenteredCollectPage(heading);
+  const ordersBounds = await heading.boundingBox();
+  expect(ordersBounds?.x).toBeCloseTo(collectBounds?.x ?? -1, 0);
+  expect(ordersBounds?.width).toBeLessThanOrEqual(768);
+  await page.evaluate(() => document.fonts.ready);
+  await expect(heading).toHaveCSS("font-family", /Montserrat/);
+  const main = page.getByRole("main");
+  await expect(
+    main.getByText("Connect to view your private order activity.", {
+      exact: true,
+    })
+  ).toBeVisible();
+  await expect(
+    main.getByRole("button", { name: "Connect wallet", exact: true })
+  ).toBeEnabled();
+  await expect(
+    main.getByRole("button", { name: "Cancel order", exact: true })
+  ).toHaveCount(0);
+  await noHorizontalOverflow(page);
+  await page.screenshot({
+    path: info.outputPath("collect-orders-guest.png"),
+    fullPage: true,
+  });
+  expect(mutations).toEqual([]);
+});
+
+test("returning from an artwork restores the collection and collecting mode", async ({
+  page,
+}) => {
+  const mutations = await mockCatalog(page);
+  await page.goto("/collect?collection=gradients&intent=lowest", {
+    waitUntil: "domcontentloaded",
+  });
+  await waitForCollectClientReady(page);
+  const artwork = page.getByRole("link", {
+    name: "View Catalog artwork 1",
+    exact: true,
+  });
+  await expect(artwork).toBeVisible();
+  await artwork.click();
+  await expect(page).toHaveURL(/\/6529-gradient\/0$/);
+  await page.goBack();
+  await waitForCollectClientReady(page);
+  await expect(
+    page.getByRole("button", { name: /^Collection\b/ })
+  ).toContainText("Gradients");
+  await expect(
+    page.getByRole("button", { name: "Lowest listings", exact: true })
+  ).toHaveAttribute("aria-pressed", "true");
+  await expect(artwork).toBeVisible();
+  await noHorizontalOverflow(page);
+  expect(mutations).toEqual([]);
+});
+
+test("short set setups gain keyboard scroll clearance", async ({
+  page,
+  isMobile,
+}) => {
   await mockCatalog(page);
   for (const intent of ["season", "full_set"] as const) {
     await page.goto(`/collect?collection=memes&intent=${intent}`, {
@@ -689,6 +896,12 @@ test("short set setups gain keyboard scroll clearance", async ({ page }) => {
       surface.evaluate((element) =>
         Number.parseFloat(getComputedStyle(element).paddingBottom)
       );
+    for (const name of ["Copies per NFT", "Budget cap (ETH, optional)"]) {
+      await expect(page.getByRole("textbox", { name, exact: true })).toHaveCSS(
+        "font-size",
+        isMobile ? "16px" : "14px"
+      );
+    }
     const restingPadding = await readPadding();
     await page.evaluate(() =>
       document.documentElement.style.setProperty(
@@ -802,6 +1015,7 @@ test("one collection selector stays available across set, listings and future TD
   await collection.focus();
   await collection.press("Enter");
   const options = page.getByRole("option");
+  await expect(options.first()).toHaveCSS("font-family", /Montserrat/);
   await expect(options).toHaveText([
     "The Memes",
     "Gradients",
@@ -857,6 +1071,49 @@ test("one collection selector stays available across set, listings and future TD
   await expect(
     page.getByRole("textbox", { name: "Copies per NFT", exact: true })
   ).toBeVisible();
+  expect(mutations).toEqual([]);
+});
+
+test("loading listings and an empty result stay clear without a wallet action", async ({
+  page,
+}, info) => {
+  let releaseListings: (() => void) | undefined;
+  const waitForListings = new Promise<void>((resolve) => {
+    releaseListings = resolve;
+  });
+  const mutations = await mockCatalog(page, {
+    fail: false,
+    empty: true,
+    waitForListings,
+  });
+  await page.goto("/collect?collection=memes&intent=lowest", {
+    waitUntil: "domcontentloaded",
+  });
+  await waitForCollectClientReady(page);
+  await expect(
+    page.getByRole("status", { name: "Loading artwork", exact: true })
+  ).toBeVisible();
+  await page.screenshot({
+    path: info.outputPath("collect-loading.png"),
+    fullPage: true,
+  });
+  releaseListings?.();
+  await expect(
+    page.getByRole("heading", { name: "No listings found", exact: true })
+  ).toBeVisible();
+  await expect(
+    page
+      .getByRole("region", { name: "Lowest listings", exact: true })
+      .getByRole("alert")
+  ).toHaveCount(0);
+  await expect(
+    page.getByRole("button", { name: "Review purchase", exact: true })
+  ).toHaveCount(0);
+  await noHorizontalOverflow(page);
+  await page.screenshot({
+    path: info.outputPath("collect-empty.png"),
+    fullPage: true,
+  });
   expect(mutations).toEqual([]);
 });
 
