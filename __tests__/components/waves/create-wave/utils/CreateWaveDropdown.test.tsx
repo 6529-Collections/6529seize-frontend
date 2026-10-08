@@ -35,7 +35,7 @@ it("does not open a disabled dropdown", () => {
   expect(onChange).not.toHaveBeenCalled();
 });
 
-it("removes open choices when the form becomes disabled", () => {
+it("closes choices when disabled and does not reopen on re-enable", () => {
   const onChange = jest.fn();
   const props = {
     value: "RANK",
@@ -51,6 +51,11 @@ it("removes open choices when the form becomes disabled", () => {
   expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
   expect(trigger).toHaveAttribute("aria-expanded", "false");
   expect(onChange).not.toHaveBeenCalled();
+  view.rerender(<CreateWaveDropdown {...props} />);
+  expect(trigger).toHaveAttribute("aria-expanded", "false");
+  expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
+  fireEvent.click(trigger);
+  expect(screen.getByRole("listbox")).toBeInTheDocument();
 });
 
 it("keeps existing callers inline on mobile unless they opt into a sheet", () => {

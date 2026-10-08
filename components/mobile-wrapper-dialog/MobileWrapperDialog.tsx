@@ -22,6 +22,7 @@ const MOBILE_DIALOG_CONTAINER_STYLE: CSSProperties = {
 };
 
 type MobileWrapperDialogProps = {
+  readonly id?: string | undefined;
   readonly title?: string | undefined;
   readonly ariaLabel?: string | undefined;
   readonly isOpen: boolean;
@@ -386,6 +387,7 @@ function DragHandle({
 }
 
 export default function MobileWrapperDialog({
+  id,
   title,
   ariaLabel,
   isOpen,
@@ -517,6 +519,7 @@ export default function MobileWrapperDialog({
           The stable callback ref also resets readiness when this surface hides. */}
       <span hidden aria-hidden="true" ref={setDialogMount} />
       <Dialog
+        id={id}
         ref={dialogRef}
         as="div"
         open={dialogOpen}
