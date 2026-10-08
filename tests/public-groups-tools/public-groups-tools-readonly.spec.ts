@@ -387,15 +387,13 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
       exact: true,
     });
     const backBeforeScroll = await back.boundingBox();
-    const editorBounds = await identities.evaluate((element) =>
-      element.parentElement?.getBoundingClientRect().toJSON()
-    );
-    expect(editorBounds).toBeDefined();
-    await page.mouse.move(
-      (editorBounds?.x ?? 0) + (editorBounds?.width ?? 0) / 2,
-      (editorBounds?.y ?? 0) + (editorBounds?.height ?? 0) / 2
-    );
-    await page.mouse.wheel(0, 600);
+    // Mobile WebKit does not support mouse.wheel. Scroll the real editor
+    // directly and keep the same rendered-position and navigation guarantees.
+    await identities.evaluate((element) => {
+      const editor = element.parentElement;
+      if (!editor) throw new Error("Expected the criterion scroll container");
+      editor.scrollTo({ top: editor.scrollHeight });
+    });
     await expect
       .poll(() =>
         identities.evaluate((element) => element.parentElement?.scrollTop)
