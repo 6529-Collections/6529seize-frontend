@@ -8,6 +8,9 @@ interface VideoConversions {
   readonly MP4_1080P: string;
   readonly MP4_720P: string;
   readonly HLS: string;
+  readonly POSTER: string;
+  readonly FIRST_FRAME_POSTER: string;
+  readonly DEVICE_POSTER: string;
 }
 
 /**
@@ -59,6 +62,10 @@ export function getVideoConversions(
     HLS: `${buildRenditionUrl(
       `${beforeFileName}${fileName}`
     )}/hls/${fileName}.m3u8`,
+    // Prefer the one-second capture; retain the first for older/short clips.
+    POSTER: `${buildRenditionUrl(pathWithoutExtension)}/poster/${fileName}_poster.0000001.jpg`,
+    FIRST_FRAME_POSTER: `${buildRenditionUrl(pathWithoutExtension)}/poster/${fileName}_poster.0000000.jpg`,
+    DEVICE_POSTER: `${buildRenditionUrl(pathWithoutExtension)}/poster/${fileName}_device.jpg`,
   };
 }
 

@@ -32,6 +32,53 @@ screen. Compact feed previews retain their smaller viewing areas.
 - The existing circular mute and fullscreen buttons remain on the right.
   Open and download actions appear on surfaces that provide them.
 
+## Mobile loading and backgrounding
+
+In the Capacitor app and mobile browsers, leaving the app or hiding the browser
+tab pauses videos and their loading. Moving a
+video outside the viewport also stops buffering; fullscreen video stays active
+until fullscreen closes or the app/tab goes into the background. Returning to the
+video retains its playback position. Manually started videos stay paused until
+you press play again. Ambient autoplay resumes only when the video is visible,
+reduced motion permits it, and you have not explicitly paused it.
+
+New videos in the Capacitor app and mobile browsers wait until visible and active before attaching
+their source, including videos without a poster. Existing posters stay visible
+before playback. Poster-gated videos with a poster
+attach their video source when you press play. Ambient videos with posters
+wait until visible before loading; videos with manual playback and posters avoid
+preloading video data. Duration can remain `—` until playback starts, and starting
+or resuming an unloaded video can take longer on a slow connection.
+
+## Wave and DM chat playback
+
+Chat videos start only when you press Play, on desktop, mobile browsers, and
+in the app. Opening a chat or scrolling a video into view does not start it.
+The video source waits for Play, including videos without a poster. While uploading a video, the device attempts one local frame without adding
+an extra UI step. A successful small JPEG is sent with upload completion and
+stored before the video is posted, so chat can normally show a preview immediately.
+Capture is limited to eight seconds and stops on cancellation or backgrounding.
+If the device cannot decode the clip or storage fails, posting continues and
+the backend generates a preview during conversion.
+The preview loads separately from the video, keeps the same proportions and
+portrait/square width limits as playback, and stays behind the Play control.
+Device previews use one second, or halfway through very short clips. Backend
+previews use a frame around one second to avoid black opening frames, with
+the first frame retained for existing or very short videos. Clips still black
+at one second may have a black preview. New uploads may briefly have no preview while they
+process. Visible, active players discover late previews automatically with
+bounded retries that back off to one check per minute; no refresh is needed
+when processing finishes within that window. Older uploads and external videos without a preview show the empty
+frame and Play control. Duration can remain `—` until you press Play.
+
+Starting another chat video pauses the previous one. Scrolling away or hiding
+the tab pauses playback; fullscreen stays active while the app/tab is visible.
+Returning to the message or tab waits for Play and retains position, mute
+choice, and volume, including when the message leaves the render window.
+These preferences last while the message remains in the open chat; leaving
+the chat or reloading can reset them. Desktop autoplay on NFT and submission
+pages follows those pages' existing playback rules.
+
 ## Seeking
 
 The timeline sits above the control row. Drag its small circular handle or

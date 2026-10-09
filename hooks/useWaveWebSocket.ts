@@ -1,6 +1,7 @@
 "use client";
 
 import { publicEnv } from "@/config/env";
+import { useMobileAppActivity } from "./useMobileAppActivity";
 import { WsMessageType } from "@/helpers/Types";
 import {
   AUTH_TOKEN_CHANGED_EVENT,
@@ -64,6 +65,9 @@ function messageType(event: MessageEvent<unknown>): string | null {
  * filtering and the typing sender's active-wave membership check can succeed.
  */
 export function useWaveWebSocket(waveId: string): UseWaveWebSocketResult {
+  const isAppActive = useMobileAppActivity();
+  const manuallyDisconnectedRef = useRef(false);
+  const activeWaveRef = useRef(waveId);
   const token = useSyncExternalStore(
     subscribeToAuthChanges,
     getAuthJwt,
@@ -79,7 +83,17 @@ export function useWaveWebSocket(waveId: string): UseWaveWebSocketResult {
   });
 
   useEffect(() => {
-    if (!waveId || (token && !isAuthJwtUsable(token))) return;
+    if (activeWaveRef.current !== waveId) {
+      activeWaveRef.current = waveId;
+      manuallyDisconnectedRef.current = false;
+    }
+    if (
+      !waveId ||
+      !isAppActive ||
+      manuallyDisconnectedRef.current ||
+      (token && !isAuthJwtUsable(token))
+    )
+      return;
 
     let disposed = false;
     let shouldReconnect = true;
@@ -180,12 +194,16 @@ export function useWaveWebSocket(waveId: string): UseWaveWebSocketResult {
       stop();
       stopRef.current = () => undefined;
     };
-  }, [waveId, token]);
+  }, [waveId, token, isAppActive]);
 
-  const isCurrent = connection.waveId === waveId && connection.token === token;
+  const isCurrent =
+    isAppActive && connection.waveId === waveId && connection.token === token;
   return {
     socket: isCurrent ? connection.socket : null,
     readyState: isCurrent ? connection.readyState : WebSocket.CLOSED,
-    disconnect: () => stopRef.current(),
+    disconnect: () => {
+      manuallyDisconnectedRef.current = true;
+      stopRef.current();
+    },
   };
 }

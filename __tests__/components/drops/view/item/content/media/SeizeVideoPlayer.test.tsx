@@ -7,8 +7,16 @@ import {
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Profiler } from "react";
+import { Capacitor } from "@capacitor/core";
+import * as touchFirst from "@/helpers/touch-first.helpers";
 
 import SeizeVideoPlayer from "@/components/drops/view/item/content/media/SeizeVideoPlayer";
+
+let mockAppActive = true;
+jest.mock("@/hooks/useMobileAppActivity", () => ({
+  ...jest.requireActual("@/hooks/useMobileAppActivity"),
+  useMobileAppActivity: () => mockAppActive,
+}));
 
 function installIntersectionObserverMock() {
   let callback: IntersectionObserverCallback | undefined;
@@ -66,6 +74,7 @@ function mockPrefersReducedMotion(matches: boolean) {
 
 describe("SeizeVideoPlayer", () => {
   beforeEach(() => {
+    mockAppActive = true;
     jest.restoreAllMocks();
     Object.defineProperty(HTMLElement.prototype, "setPointerCapture", {
       configurable: true,
@@ -90,6 +99,218 @@ describe("SeizeVideoPlayer", () => {
     jest
       .spyOn(HTMLMediaElement.prototype, "pause")
       .mockImplementation(() => undefined);
+  });
+
+  it("pauses native ambient playback and resumes without replacing the video or its position", () => {
+    const observer = installIntersectionObserverMock();
+    const { container, rerender } = render(
+      <SeizeVideoPlayer src="clip.mp4" autoPlay />
+    );
+    observer.trigger(true);
+    const video = container.querySelector("video")!;
+    video.currentTime = 12;
+    jest.mocked(HTMLMediaElement.prototype.play).mockClear();
+    jest.mocked(HTMLMediaElement.prototype.pause).mockClear();
+    mockAppActive = false;
+    rerender(<SeizeVideoPlayer src="clip.mp4" autoPlay />);
+    expect(HTMLMediaElement.prototype.pause).toHaveBeenCalled();
+    expect(HTMLMediaElement.prototype.play).not.toHaveBeenCalled();
+    expect(container.querySelector("video")).toBe(video);
+    expect(video.currentTime).toBe(12);
+    mockAppActive = true;
+    rerender(<SeizeVideoPlayer src="clip.mp4" autoPlay />);
+    expect(HTMLMediaElement.prototype.play).toHaveBeenCalled();
+    expect(video.currentTime).toBe(12);
+  });
+
+  it("pauses manually started video on inactivity without autoplaying it on return", () => {
+    const { rerender } = render(
+      <SeizeVideoPlayer src="clip.mp4" autoPlay={false} />
+    );
+    jest.mocked(HTMLMediaElement.prototype.play).mockClear();
+    mockAppActive = false;
+    rerender(<SeizeVideoPlayer src="clip.mp4" autoPlay={false} />);
+    expect(HTMLMediaElement.prototype.pause).toHaveBeenCalled();
+    mockAppActive = true;
+    rerender(<SeizeVideoPlayer src="clip.mp4" autoPlay={false} />);
+    expect(HTMLMediaElement.prototype.play).not.toHaveBeenCalled();
+  });
+
+  it("respects an explicit pause for a video whose source is owned by the HLS hook", async () => {
+    const observer = installIntersectionObserverMock();
+    const { container, rerender } = render(
+      <SeizeVideoPlayer autoPlay data-url="external.mp4" />
+    );
+    observer.trigger(true);
+    const video = container.querySelector("video")!;
+    Object.defineProperty(video, "paused", {
+      configurable: true,
+      value: false,
+    });
+    fireEvent.play(video);
+    await userEvent.click(screen.getByRole("button", { name: "Pause video" }));
+    jest.mocked(HTMLMediaElement.prototype.play).mockClear();
+    mockAppActive = false;
+    rerender(<SeizeVideoPlayer autoPlay data-url="external.mp4" />);
+    mockAppActive = true;
+    rerender(<SeizeVideoPlayer autoPlay data-url="external.mp4" />);
+    expect(HTMLMediaElement.prototype.play).not.toHaveBeenCalled();
+  });
+
+  it("defers poster-gated downloads until the play gesture attaches the source", async () => {
+    const { container } = render(
+      <SeizeVideoPlayer
+        src="clip.mp4"
+        poster="poster.jpg"
+        template="poster-gated"
+      />
+    );
+    const video = container.querySelector("video")!;
+    expect(video).not.toHaveAttribute("src");
+    expect(video.preload).toBe("none");
+    const sourceAndPlay: string[] = [];
+    const setAttribute = video.setAttribute.bind(video);
+    jest.spyOn(video, "setAttribute").mockImplementation((name, value) => {
+      if (name === "src") sourceAndPlay.push("src");
+      setAttribute(name, value);
+    });
+    jest
+      .mocked(HTMLMediaElement.prototype.play)
+      .mockImplementationOnce(function (this: HTMLMediaElement) {
+        sourceAndPlay.push("play");
+        expect(this.getAttribute("src")).toBe("clip.mp4");
+        return Promise.resolve();
+      });
+    await userEvent.click(
+      screen.getByRole("button", { name: "Play video preview" })
+    );
+    expect(video).toHaveAttribute("src", "clip.mp4");
+    expect(video).toHaveAttribute("controls");
+    expect(sourceAndPlay).toEqual(["src", "play"]);
+  });
+
+  it("defers native ambient video behind its poster until visible, then suspends offscreen buffering", () => {
+    jest.spyOn(Capacitor, "isNativePlatform").mockReturnValue(true);
+    const observer = installIntersectionObserverMock();
+    const { container, rerender } = render(
+      <SeizeVideoPlayer src="clip.mp4" poster="poster.jpg" autoPlay />
+    );
+    const video = container.querySelector("video")!;
+    expect(video).not.toHaveAttribute("src");
+    observer.trigger(true);
+    expect(video).toHaveAttribute("src", "clip.mp4");
+    fireEvent.loadedMetadata(video);
+    video.currentTime = 12;
+    observer.trigger(false);
+    expect(video).not.toHaveAttribute("src");
+    observer.trigger(true);
+    fireEvent.loadedMetadata(video);
+    expect(video.currentTime).toBe(12);
+    act(() => video.dispatchEvent(new Event("webkitbeginfullscreen")));
+    observer.trigger(false);
+    expect(video).toHaveAttribute("src");
+    mockAppActive = false;
+    rerender(<SeizeVideoPlayer src="clip.mp4" poster="poster.jpg" autoPlay />);
+    expect(video).not.toHaveAttribute("src");
+  });
+
+  it.each([true, false])(
+    "never attaches an unopened offscreen mobile source even without a poster (native=%s)",
+    (native) => {
+      jest.spyOn(Capacitor, "isNativePlatform").mockReturnValue(native);
+      jest.spyOn(touchFirst, "isTouchFirstEnvironment").mockReturnValue(true);
+      const observer = installIntersectionObserverMock();
+      const assignedSources: string[] = [];
+      const setAttribute = HTMLVideoElement.prototype.setAttribute;
+      jest
+        .spyOn(HTMLVideoElement.prototype, "setAttribute")
+        .mockImplementation(function (this: HTMLVideoElement, name, value) {
+          if (name === "src") assignedSources.push(value);
+          setAttribute.call(this, name, value);
+        });
+      const { container } = render(
+        <SeizeVideoPlayer src="clip.mp4" template="watch-media" />
+      );
+      const video = container.querySelector("video")!;
+      expect(video).not.toHaveAttribute("src");
+      expect(assignedSources).toEqual([]);
+      expect(HTMLMediaElement.prototype.load).not.toHaveBeenCalled();
+      observer.trigger(true);
+      expect(video).toHaveAttribute("src", "clip.mp4");
+      fireEvent.loadedMetadata(video);
+      video.currentTime = 12;
+      observer.trigger(false);
+      expect(video).not.toHaveAttribute("src");
+      observer.trigger(true);
+      fireEvent.loadedMetadata(video);
+      expect(video).toHaveAttribute("src", "clip.mp4");
+      expect(video.currentTime).toBe(12);
+    }
+  );
+
+  it("does not carry native fullscreen into a replacement offscreen video", () => {
+    jest.spyOn(Capacitor, "isNativePlatform").mockReturnValue(true);
+    const observer = installIntersectionObserverMock();
+    const { container, rerender } = render(
+      <SeizeVideoPlayer src="first.mp4" autoPlay />
+    );
+    observer.trigger(true);
+    const first = container.querySelector("video")!;
+    act(() => first.dispatchEvent(new Event("webkitbeginfullscreen")));
+    observer.trigger(false);
+    expect(first).toHaveAttribute("src");
+    rerender(<SeizeVideoPlayer src="second.mp4" autoPlay />);
+    const second = container.querySelector("video")!;
+    expect(second).not.toBe(first);
+    expect(second).not.toHaveAttribute("src");
+  });
+
+  it.each([true, false])(
+    "withholds an unopened mobile source while inactive and attaches it on return (native=%s)",
+    (native) => {
+      jest.spyOn(Capacitor, "isNativePlatform").mockReturnValue(native);
+      jest.spyOn(touchFirst, "isTouchFirstEnvironment").mockReturnValue(true);
+      mockAppActive = false;
+      const observer = installIntersectionObserverMock();
+      const { container, rerender } = render(
+        <SeizeVideoPlayer src="clip.mp4" template="watch-media" />
+      );
+      observer.trigger(true);
+      const video = container.querySelector("video")!;
+      expect(video).not.toHaveAttribute("src");
+      expect(HTMLMediaElement.prototype.load).not.toHaveBeenCalled();
+      mockAppActive = true;
+      rerender(<SeizeVideoPlayer src="clip.mp4" template="watch-media" />);
+      expect(video).toHaveAttribute("src", "clip.mp4");
+    }
+  );
+
+  it("retries suspended raw sources and surfaces errors after visibility returns", () => {
+    jest.spyOn(Capacitor, "isNativePlatform").mockReturnValue(true);
+    const observer = installIntersectionObserverMock();
+    const onError = jest.fn();
+    const { container } = render(
+      <SeizeVideoPlayer
+        src="broken.mp4"
+        fallbackSources={["fallback.mp4"]}
+        onError={onError}
+      />
+    );
+    observer.trigger(true);
+    const video = container.querySelector("video")!;
+    fireEvent.loadedMetadata(video);
+    observer.trigger(false);
+    fireEvent.error(video);
+    expect(video).not.toHaveAttribute("src");
+    expect(onError).not.toHaveBeenCalled();
+    jest.mocked(HTMLMediaElement.prototype.load).mockClear();
+    observer.trigger(true);
+    expect(video).toHaveAttribute("src", "broken.mp4");
+    expect(HTMLMediaElement.prototype.load).toHaveBeenCalled();
+    fireEvent.error(video);
+    expect(video).toHaveAttribute("src", "fallback.mp4");
+    fireEvent.error(video);
+    expect(onError).toHaveBeenCalledTimes(1);
   });
 
   it("reserves a stable aspect ratio before video metadata loads", () => {
@@ -848,6 +1069,86 @@ describe("SeizeVideoPlayer", () => {
     }
   );
 
+  it.each([
+    [360, 640, "tw-w-[min(100%,24rem)]"],
+    [640, 640, "tw-w-[min(100%,32rem)]"],
+    [640, 360, "tw-w-full"],
+  ])(
+    "keeps natural poster and playback sizing for %s x %s",
+    (width, height, widthClass) => {
+      const { container } = render(
+        <SeizeVideoPlayer
+          src="clip.mp4"
+          poster="poster.jpg"
+          aspectRatioHint={width / height}
+          preload="none"
+        />
+      );
+      const player = container.firstElementChild as HTMLElement;
+      const video = container.querySelector("video")!;
+      expect(player).toHaveClass(widthClass);
+      const previewMaxWidth = player.style.maxWidth;
+      const previewMaxHeight = player.style.maxHeight;
+      Object.defineProperties(video, {
+        videoWidth: { value: width },
+        videoHeight: { value: height },
+      });
+      fireEvent.loadedMetadata(video);
+      expect(player).toHaveClass(widthClass);
+      expect(player.style.maxWidth).toBe(previewMaxWidth);
+      expect(player.style.maxHeight).toBe(previewMaxHeight);
+      expect(player.style.aspectRatio).toBe(String(width / height));
+    }
+  );
+
+  it("retains the chat poster rectangle when rendition metadata includes padding", () => {
+    const { container } = render(
+      <SeizeVideoPlayer
+        data-url="portrait.mp4"
+        poster="poster.jpg"
+        aspectRatioHint={360 / 640}
+        preload="none"
+      />
+    );
+    const player = container.firstElementChild as HTMLElement;
+    const before = player.getAttribute("style");
+    const video = container.querySelector("video")!;
+    Object.defineProperties(video, {
+      videoWidth: { value: 1920 },
+      videoHeight: { value: 1080 },
+    });
+    fireEvent.loadedMetadata(video);
+    expect(player).toHaveClass("tw-w-[min(100%,24rem)]");
+    expect(player.getAttribute("style")).toBe(before);
+  });
+
+  it("discards natural sizing from the previous chat video", () => {
+    const { container, rerender } = render(
+      <SeizeVideoPlayer
+        data-url="first.mp4"
+        aspectRatioHint={1}
+        preload="none"
+      />
+    );
+    const video = container.querySelector("video")!;
+    Object.defineProperties(video, {
+      videoWidth: { value: 640 },
+      videoHeight: { value: 640 },
+    });
+    fireEvent.loadedMetadata(video);
+    const player = container.firstElementChild as HTMLElement;
+    expect(player).toHaveClass("tw-w-[min(100%,32rem)]");
+    rerender(
+      <SeizeVideoPlayer
+        data-url="second.mp4"
+        aspectRatioHint={16 / 9}
+        preload="none"
+      />
+    );
+    expect(player).toHaveClass("tw-w-full");
+    expect(player.style.aspectRatio).toBe(String(16 / 9));
+  });
+
   it("reserves known portrait dimensions before metadata and resets them for another source", () => {
     const { container, rerender } = render(
       <SeizeVideoPlayer
@@ -873,8 +1174,13 @@ describe("SeizeVideoPlayer", () => {
       />
     );
     expect(player.style.getPropertyValue("--video-ratio")).toBe("2");
-    Object.defineProperty(video, "videoWidth", { value: 1600 });
-    fireEvent.loadedMetadata(video);
+    const landscape = container.querySelector("video")!;
+    expect(landscape).not.toBe(video);
+    Object.defineProperties(landscape, {
+      videoWidth: { value: 1600 },
+      videoHeight: { value: 900 },
+    });
+    fireEvent.loadedMetadata(landscape);
     expect(player.style.getPropertyValue("--video-ratio")).toBe(
       String(1600 / 900)
     );

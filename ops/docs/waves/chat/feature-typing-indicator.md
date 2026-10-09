@@ -24,7 +24,7 @@ type in the current thread.
 2. When another participant types, a row fades in with three animated dots and
    a handle label.
 3. The label updates as people start typing, stop typing, or post.
-4. If no new typing signal arrives for about 5 to 6 seconds, the row fades out.
+4. If no new typing signal arrives for about 5 seconds, the row fades out.
 
 ## Label Rules
 
@@ -64,7 +64,11 @@ type in the current thread.
 
 - This indicator is a lightweight activity signal, not guaranteed presence or
   delivery state.
-- Label refresh is interval-based, so show/hide timing can lag briefly.
+- Labels update when typing or posting events arrive and expire after about five
+  seconds without a fresh signal. An idle thread needs no periodic typing refresh.
+- Backgrounding the Capacitor app or hiding a mobile browser tab clears typing
+  labels and pauses its subscription.
+  Returning starts a fresh subscription for the active thread.
 - There is no dedicated typing-connection error banner.
 
 ## Related Pages

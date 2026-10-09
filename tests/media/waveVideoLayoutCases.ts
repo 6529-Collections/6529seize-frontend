@@ -10,6 +10,205 @@ import {
 
 // Registered inside the composer sandbox suite, which supplies its local-only guard.
 export function defineWaveVideoLayoutTests() {
+  for (const posterSource of ["generated", "device"] as const) {
+    test(`shows a ${posterSource} chat preview without requesting video before Play`, async ({
+      page,
+      baseURL,
+    }) => {
+      const fixturePath = await installLinkedDropVideoSandbox(
+        page,
+        baseURL,
+        true,
+        () => true,
+        posterSource
+      );
+      const videoRequests: string[] = [];
+      page.on("request", (request) => {
+        if (request.url().endsWith("/drops/video-fixture/portrait.mp4"))
+          videoRequests.push(request.url());
+      });
+      await page.goto(fixturePath, { waitUntil: "domcontentloaded" });
+      await waitForRouteReady(page);
+      await dismissNextDevTools(page);
+      const video = page.getByLabel("Video player", { exact: true }).first();
+      await video.scrollIntoViewIfNeeded();
+      await expect(video).toHaveAttribute(
+        "poster",
+        posterSource === "device"
+          ? /\/poster\/portrait_device\.jpg$/
+          : /\/poster\/portrait_poster\.0000001\.jpg$/
+      );
+      await expect(video).not.toHaveAttribute("src", /.+/);
+      expect(videoRequests).toHaveLength(0);
+      const preview = await video.evaluate(
+        async (element: HTMLVideoElement) => {
+          const image = new Image();
+          image.src = element.poster;
+          await image.decode();
+          return {
+            width: image.naturalWidth,
+            height: image.naturalHeight,
+            paused: element.paused,
+          };
+        }
+      );
+      expect(preview).toEqual({ width: 64, height: 96, paused: true });
+      const posterBox = await video.boundingBox();
+      expect(posterBox).not.toBeNull();
+      await page
+        .getByRole("button", { name: "Play video", exact: true })
+        .first()
+        .click();
+      await expect.poll(() => videoRequests.length).toBeGreaterThan(0);
+      await expect
+        .poll(() =>
+          video.evaluate((element: HTMLVideoElement) => element.readyState)
+        )
+        .toBeGreaterThanOrEqual(1);
+      const playbackBox = await video.boundingBox();
+      expect(playbackBox).not.toBeNull();
+      for (const dimension of ["width", "height", "x", "y"] as const) {
+        expect(playbackBox![dimension]).toBeCloseTo(posterBox![dimension], 0);
+      }
+    });
+  }
+
+  test("discovers a processed chat poster without refreshing or loading video", async ({
+    page,
+    baseURL,
+  }) => {
+    await page.clock.install();
+    let ready = false;
+    const fixturePath = await installLinkedDropVideoSandbox(
+      page,
+      baseURL,
+      true,
+      () => ready
+    );
+    const videoRequests: string[] = [];
+    let posterChecks = 0;
+    page.on("request", (request) => {
+      if (request.url().endsWith("/drops/video-fixture/portrait.mp4"))
+        videoRequests.push(request.url());
+      if (
+        request.method() === "HEAD" &&
+        request.url().includes("/poster/portrait_poster.")
+      )
+        posterChecks += 1;
+    });
+    await page.goto(fixturePath, { waitUntil: "domcontentloaded" });
+    await waitForRouteReady(page);
+    await dismissNextDevTools(page);
+    const video = page.getByLabel("Video player", { exact: true }).first();
+    await video.scrollIntoViewIfNeeded();
+    await expect.poll(() => posterChecks).toBeGreaterThanOrEqual(2);
+    await expect(video).not.toHaveAttribute("poster", /.+/);
+    const chatUrl = page.url();
+    ready = true;
+    // Expire the real negative HEAD cache without waiting a minute in the test.
+    await page.clock.fastForward(60000);
+    await expect(video).toHaveAttribute(
+      "poster",
+      /\/poster\/portrait_poster\.0000001\.jpg$/
+    );
+    expect(page.url()).toBe(chatUrl);
+    await expect(video).not.toHaveAttribute("src", /.+/);
+    expect(videoRequests).toHaveLength(0);
+  });
+
+  test("retains video position and sound when a chat drop is virtualized", async ({
+    page,
+    baseURL,
+  }) => {
+    const fixturePath = await installLinkedDropVideoSandbox(page, baseURL);
+    await page.goto(fixturePath, { waitUntil: "domcontentloaded" });
+    await waitForRouteReady(page);
+    await dismissNextDevTools(page);
+    const video = page.getByLabel("Video player", { exact: true }).first();
+    await video.scrollIntoViewIfNeeded();
+    await expect(video).not.toHaveAttribute("src", /.+/);
+    expect(
+      await video.evaluate((element: HTMLVideoElement) => element.paused)
+    ).toBe(true);
+    await page
+      .getByRole("button", { name: "Play video", exact: true })
+      .first()
+      .click();
+    await expect
+      .poll(() =>
+        video.evaluate((element: HTMLVideoElement) => element.readyState)
+      )
+      .toBeGreaterThanOrEqual(1);
+    await page
+      .getByRole("button", { name: "Pause video", exact: true })
+      .first()
+      .click();
+    await page
+      .getByRole("button", { name: "Unmute video", exact: true })
+      .first()
+      .click();
+    await video.evaluate((element: HTMLVideoElement) => {
+      element.currentTime = 1;
+    });
+    await expect
+      .poll(() =>
+        video.evaluate((element: HTMLVideoElement) => element.currentTime)
+      )
+      .toBeCloseTo(1, 1);
+    // Move the drop beyond the real render window; its wrapper stays mounted
+    // while IntersectionObserver removes and then recreates the entire player.
+    const drop = page
+      .getByRole("main")
+      .locator('[id^="drop-"]')
+      .filter({ has: video });
+    const dropId = await drop.getAttribute("id");
+    if (!dropId)
+      throw new Error("Video fixture is missing its virtualized chat drop");
+    const anchor = page.getByRole("main").locator(`[id="${dropId}"]`);
+    const previousStyle = await anchor.getAttribute("style");
+    await anchor.evaluate((element: HTMLElement) => {
+      element.style.transform = "translateY(20000px)";
+    });
+    await expect(
+      anchor.getByLabel("Video player", { exact: true })
+    ).toHaveCount(0);
+    await anchor.evaluate((element, style) => {
+      if (style === null) element.removeAttribute("style");
+      else element.setAttribute("style", style);
+    }, previousStyle);
+    const restored = anchor.getByLabel("Video player", { exact: true });
+    await expect(restored).toBeVisible();
+    await expect(restored).not.toHaveAttribute("src", /.+/);
+    expect(
+      await restored.evaluate((element: HTMLVideoElement) => element.paused)
+    ).toBe(true);
+    expect(
+      await restored.evaluate((element: HTMLVideoElement) => element.muted)
+    ).toBe(false);
+    await anchor
+      .getByRole("button", { name: "Play video", exact: true })
+      .first()
+      .click();
+    await expect
+      .poll(() =>
+        restored.evaluate((element: HTMLVideoElement) => element.paused)
+      )
+      .toBe(false);
+    await expect
+      .poll(() =>
+        restored.evaluate((element: HTMLVideoElement) => element.currentTime)
+      )
+      .toBeGreaterThanOrEqual(0.9);
+    expect(
+      await restored.evaluate(
+        (element: HTMLVideoElement) => element.currentTime
+      )
+    ).toBeGreaterThanOrEqual(0.9);
+    expect(
+      await restored.evaluate((element: HTMLVideoElement) => element.muted)
+    ).toBe(false);
+  });
+
   test("contains linked-drop video and controls for every major aspect ratio", async ({
     page,
     baseURL,
@@ -31,6 +230,10 @@ export function defineWaveVideoLayoutTests() {
     });
     const video = card.getByLabel("Video player", { exact: true });
     await expect(video).toBeVisible();
+    await card
+      .getByRole("button", { name: "Play video", exact: true })
+      .first()
+      .click();
     await expect
       .poll(() =>
         video.evaluate((element: HTMLVideoElement) => element.videoWidth)

@@ -21,6 +21,7 @@ import type { ApiCompleteAttachmentMultipartUploadRequest } from "@/generated/mo
 import { getApiAttachmentUploadMimeType } from "@/services/uploads/attachmentUploadMimeType";
 import { t } from "@/i18n/messages";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { captureVideoPoster } from "./captureVideoPoster";
 
 const PART_SIZE = 5 * 1024 * 1024;
 const CONCURRENCY = 5;
@@ -290,15 +291,32 @@ export async function multipartUploadCore({
     throw new Error("Server did not return required upload_id or key");
   }
 
-  const uploadedParts = await uploadMultipartParts({
-    file,
-    uploadId: upload_id,
-    key,
-    contentType,
-    partEndpoint: endpoints.part,
-    onProgress,
-    signal,
-  });
+  const posterController = new AbortController();
+  const abortPoster = () => posterController.abort();
+  signal?.addEventListener("abort", abortPoster, { once: true });
+  if (signal?.aborted) abortPoster();
+  const poster =
+    endpoints.start === "drop-media/multipart-upload" &&
+    contentType.startsWith("video/")
+      ? captureVideoPoster(file, posterController.signal).catch(() => undefined)
+      : Promise.resolve(undefined);
+  let uploadedParts: Array<{ eTag: string; partNumber: number }>;
+  let videoPoster: string | undefined;
+  try {
+    uploadedParts = await uploadMultipartParts({
+      file,
+      uploadId: upload_id,
+      key,
+      contentType,
+      partEndpoint: endpoints.part,
+      onProgress,
+      signal,
+    });
+    videoPoster = await poster;
+  } finally {
+    posterController.abort();
+    signal?.removeEventListener("abort", abortPoster);
+  }
 
   onCompleting?.();
 
@@ -314,6 +332,7 @@ export async function multipartUploadCore({
         part_no: p.partNumber,
         etag: p.eTag,
       })),
+      ...(videoPoster ? { video_poster_base64: videoPoster } : {}),
     },
     ...(signal ? { signal } : {}),
   });

@@ -47,6 +47,10 @@ with a multi-select cause filter, grouped reactions, and inline drop previews.
 
 ## Feed Filters
 
+Unread counts keep their cached values while the Capacitor app is backgrounded
+or a mobile browser tab is hidden. Periodic count refreshes resume on return.
+Browser realtime notification delivery remains connected while the tab is hidden.
+
 - On native iOS when the detected country is not `US` or is unknown, subscription
   coverage alerts, the Subscriptions filter, and the device's Subscription
   Coverage settings entry are hidden. Social follow notifications remain
