@@ -1,4 +1,5 @@
 import emmaMessages from "@/i18n/messages/emma.en-US.json";
+import additionalActionMessages from "@/i18n/messages/additionalAction.en-US.json";
 import { EN_SUBMISSION_DISCOVERY_MESSAGES } from "@/i18n/messages/submission-discovery";
 import waveCreationMessages from "@/i18n/messages/wave-creation.en-US.json";
 import { COMPETITION_MESSAGES } from "@/i18n/messages/competitions";
@@ -2912,6 +2913,7 @@ export const EN_US_MESSAGES = {
   "header.navigation.loading": "Loading navigation…",
   "waves.information.open": "About {name}",
   ...EN_SUBMISSION_DISCOVERY_MESSAGES,
+  ...additionalActionMessages,
   ...waveCreationMessages,
   ...COMPETITION_MESSAGES,
   ...EN_DROP_REQUIREMENT_MESSAGES,

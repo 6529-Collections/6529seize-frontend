@@ -2262,6 +2262,10 @@
     "/tools/6529bot/admin": {
       "classification": "auth"
     },
+    "/tools/additional-action-preview": {
+      "classification": "exempt",
+      "exemptReason": "Local development component preview; the server rejects non-development environments and non-loopback hosts. Browser coverage lives in the local-only case in waves-profile-readonly.spec.ts."
+    },
     "/tools/agent-login": {
       "classification": "auth"
     },

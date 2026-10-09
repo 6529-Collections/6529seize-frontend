@@ -6,6 +6,7 @@ import type { OperationalData } from "../types/OperationalData";
 import type { TraitsData } from "../types/TraitsData";
 import { buildSubmissionMetadata } from "./submissionMetadata";
 
+/** Convert a validated artwork draft into the API request, preserving the action marker and its metadata. */
 export const transformToApiRequest = (data: {
   waveId: string;
   traits: TraitsData;
@@ -38,7 +39,11 @@ export const transformToApiRequest = (data: {
     ],
     referenced_nfts: [],
     mentioned_users: [],
-    metadata: buildSubmissionMetadata({ traits, operationalData }),
+    metadata: buildSubmissionMetadata({
+      traits,
+      operationalData,
+      isAdditionalActionPromised,
+    }),
     signature: null,
     is_safe_signature: isSafeSignature,
     signer_address: signerAddress,

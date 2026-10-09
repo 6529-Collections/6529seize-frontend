@@ -1,0 +1,18 @@
+{
+  "memes.additionalAction.label": "Additional Action",
+  "memes.additionalAction.help": "Check this if you’re promising an event, donation, physical item, airdrop, or another deliverable alongside the artwork.",
+  "memes.additionalAction.planLabel": "Your plan (optional)",
+  "memes.additionalAction.planHelp": "Describe what you’ll do if selected, who receives it, when it will happen, and any costs or conditions. This plan will be public with your submission.",
+  "memes.additionalAction.noAction": "No additional action marked.",
+  "memes.additionalAction.noPlan": "Additional Action marked. No separate plan provided.",
+  "memes.additionalAction.loading": "Loading the artist’s plan…",
+  "memes.additionalAction.loadError": "The artist’s plan could not be loaded.",
+  "memes.additionalAction.retry": "Retry loading plan",
+  "memes.additionalAction.loaded": "The artist’s plan has loaded.",
+  "memes.submission.resubmit.loading": "Loading the saved submission…",
+  "memes.submission.resubmit.loaded": "The saved submission has loaded.",
+  "memes.submission.resubmit.loadError": "The saved submission could not be loaded. Retry before editing to preserve its fields.",
+  "memes.submission.resubmit.retry": "Retry loading submission",
+  "memes.additionalAction.declaration": "This is the artist’s commitment. It does not confirm approval or delivery.",
+  "memes.additionalAction.tooLong": "Shorten your plan to {limit} characters or fewer."
+}

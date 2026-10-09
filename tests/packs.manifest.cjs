@@ -19,6 +19,7 @@ const SMOKE_SPECS = [
   "tests/home/home.spec.ts",
   "tests/pages/about.spec.ts",
   "tests/pages/the-memes.spec.ts",
+  "tests/pages/additional-action-preview.spec.ts",
 ];
 
 const STAGING_READONLY_ENV = {
@@ -205,7 +206,7 @@ const PACKS = [
   {
     ...localPack(
       "test:e2e:smoke",
-      "Fast @smoke subset of home, about, and The Memes.",
+      "Fast @smoke subset of home, about, The Memes, and the local Additional Action preview.",
       SMOKE_SPECS,
       { grep: "@smoke", projects: [DESKTOP] }
     ),
