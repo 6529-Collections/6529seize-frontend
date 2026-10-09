@@ -50,3 +50,26 @@ it("leaves loading and error content unmodified", () => {
   fireEvent.doubleClick(viewport);
   expect(content.style.zoom).toBe("");
 });
+
+it("keeps the gesture-start reading position through intermediate scroll adjustments", () => {
+  const viewport = document.createElement("div");
+  const content = document.createElement("div");
+  viewport.append(content);
+  viewport.scrollTop = 300;
+  renderHook(() =>
+    usePdfPinchZoom({ current: viewport }, { current: content }, true)
+  );
+  const touches = (distance: number) => [
+    { clientX: 150 - distance / 2, clientY: 200 },
+    { clientX: 150 + distance / 2, clientY: 200 },
+  ];
+  fireEvent.touchStart(viewport, { touches: touches(100) });
+  fireEvent.touchMove(viewport, { touches: touches(200) });
+  // The browser can adjust scrolling while zoom changes the document layout.
+  viewport.scrollTop = 600;
+  viewport.scrollLeft = 100;
+  fireEvent.touchMove(viewport, { touches: touches(300) });
+  expect(content.style.zoom).toBe("3");
+  expect(viewport.scrollTop).toBe(1300);
+  expect(viewport.scrollLeft).toBe(300);
+});

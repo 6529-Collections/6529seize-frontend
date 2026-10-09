@@ -205,6 +205,58 @@ test.describe("PDF attachment previews @local-only", () => {
             .count()
         )
         .toBeLessThan(12);
+      // A real pinch emits many moves across layout frames. Keep the same
+      // document point under the fingers near the end of a long PDF.
+      const pinchDrift = await scroller.evaluate(async (element) => {
+        const rect = element.getBoundingClientRect();
+        const x = rect.left + rect.width / 2;
+        const y = rect.top + rect.height / 2;
+        const sheet = Array.from(
+          element.querySelectorAll<HTMLElement>("[data-pdf-page]")
+        ).find((candidate) => {
+          const bounds = candidate.getBoundingClientRect();
+          return bounds.top <= y && bounds.bottom >= y;
+        });
+        if (!sheet) throw new Error("No PDF page under the pinch midpoint");
+        const initial = sheet.getBoundingClientRect();
+        const position = (y - initial.top) / initial.height;
+        const gesture = (type: string, distance: number) => {
+          const event = new Event(type, { bubbles: true, cancelable: true });
+          const touches = [
+            { clientX: x - distance / 2, clientY: y },
+            { clientX: x + distance / 2, clientY: y },
+          ];
+          Object.defineProperty(event, "touches", { value: touches });
+          Object.defineProperty(event, "changedTouches", { value: touches });
+          element.dispatchEvent(event);
+        };
+        let drift = 0;
+        gesture("touchstart", 70);
+        for (let distance = 80; distance <= 210; distance += 10) {
+          gesture("touchmove", distance);
+          await new Promise<void>((resolve) =>
+            requestAnimationFrame(() => resolve())
+          );
+          const bounds = sheet.getBoundingClientRect();
+          drift = Math.max(
+            drift,
+            Math.abs(bounds.top + bounds.height * position - y)
+          );
+        }
+        gesture("touchend", 210);
+        return drift;
+      });
+      expect(pinchDrift).toBeLessThan(3);
+      await expect(
+        reader.getByRole("button", { name: "Close", exact: true })
+      ).toBeInViewport();
+      await scroller.dblclick();
+      await scroller.evaluate((element) => {
+        element.scrollTop = element.scrollHeight;
+      });
+      await expect(
+        reader.getByText("Page 20 of 20", { exact: true })
+      ).toBeVisible();
       await page.setViewportSize({ width: 844, height: 390 });
       await expect
         .poll(() =>
