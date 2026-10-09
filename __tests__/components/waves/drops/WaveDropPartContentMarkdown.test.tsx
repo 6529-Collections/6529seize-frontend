@@ -1,7 +1,8 @@
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { AuthContext } from "@/components/auth/Auth";
 import WaveDropPartContentMarkdown from "@/components/waves/drops/WaveDropPartContentMarkdown";
+import { WaveDropContentExpansionProvider } from "@/components/waves/drops/WaveDropContentExpansionContext";
 import {
   buildQuorumProposalMarkdown,
   EMPTY_QUORUM_PROPOSAL_FORM_VALUES,
@@ -71,6 +72,39 @@ it("renders markdown only", () => {
   );
   expect(screen.getByTestId("md")).toHaveTextContent("hello");
   expect(screen.queryByTestId("quote")).toBeNull();
+});
+
+it("defers long markdown rendering in an enabled timeline", () => {
+  render(
+    <WaveDropContentExpansionProvider
+      enabled
+      scrollContainerRef={{ current: document.createElement("div") }}
+    >
+      <WaveDropPartContentMarkdown
+        mentionedUsers={[]}
+        mentionedWaves={[]}
+        referencedNfts={[]}
+        part={
+          {
+            part_id: 0,
+            content: "Long timeline post ".repeat(80),
+            quoted_drop: null,
+          } as any
+        }
+        wave={wave}
+        drop={createDrop()}
+        onQuoteClick={jest.fn()}
+      />
+    </WaveDropContentExpansionProvider>
+  );
+
+  expect(screen.queryByTestId("md")).not.toBeInTheDocument();
+  expect(markdownProps).toBeUndefined();
+
+  fireEvent.click(screen.getByRole("button", { name: "Show more" }));
+
+  expect(screen.getByTestId("md")).toHaveTextContent("Long timeline post");
+  expect(markdownProps.partContent).toContain("Long timeline post");
 });
 
 it("renders quoted drop", () => {
