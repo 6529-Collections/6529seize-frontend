@@ -31,6 +31,7 @@ import {
   mapMentionedWaves,
   mapPriorityMetadataV2ToDropMetadata,
   mapReplyToDrop,
+  mapSubmissionVotingV2,
   normalizeWaveMin,
 } from "@/services/api/drop-v2-mappers";
 import {
@@ -260,15 +261,8 @@ const hydrateDropV2 = async ({
     mentioned_groups: drop.mentioned_groups ?? [],
     mentioned_waves: mapMentionedWaves(drop, wave),
     metadata,
-    rating: voting?.current_calculated_vote ?? 0,
-    realtime_rating:
-      voting?.total_votes_given ?? voting?.current_calculated_vote ?? 0,
-    rating_prediction: voting?.predicted_final_vote ?? 0,
+    ...mapSubmissionVotingV2(voting),
     top_raters: topRaters,
-    raters_count: voting?.voters_count ?? 0,
-    ...(voting?.voters_count_available === undefined
-      ? {}
-      : { voters_count_available: voting.voters_count_available }),
     context_profile_context: getContextProfileContext(drop),
     ...(drop.viewer_context ? { viewer_context: drop.viewer_context } : {}),
     ...(drop.moderation ? { moderation: drop.moderation } : {}),
@@ -318,15 +312,8 @@ export const mapLeaderboardDropV2 = ({
     mentioned_groups: drop.mentioned_groups ?? [],
     mentioned_waves: mapMentionedWaves(drop, wave),
     metadata: mapPriorityMetadataV2ToDropMetadata(drop),
-    rating: voting?.current_calculated_vote ?? 0,
-    realtime_rating:
-      voting?.total_votes_given ?? voting?.current_calculated_vote ?? 0,
-    rating_prediction: voting?.predicted_final_vote ?? 0,
+    ...mapSubmissionVotingV2(voting),
     top_raters: [],
-    raters_count: voting?.voters_count ?? 0,
-    ...(voting?.voters_count_available === undefined
-      ? {}
-      : { voters_count_available: voting.voters_count_available }),
     context_profile_context: getContextProfileContext(drop),
     ...(drop.viewer_context ? { viewer_context: drop.viewer_context } : {}),
     ...(drop.moderation ? { moderation: drop.moderation } : {}),

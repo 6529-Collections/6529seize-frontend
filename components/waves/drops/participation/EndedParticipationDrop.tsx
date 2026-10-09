@@ -400,7 +400,7 @@ function EndedParticipationDropInner({
           )}
           {showInteractions &&
             drop.drop_type === ApiDropType.Participatory &&
-            drop.wave.voting_period_start != null && (
+            typeof drop.wave.voting_period_start === "number" && (
               <div
                 className={`${shouldOffsetRows ? "tw-ml-[3.25rem]" : ""} tw-py-2`}
               >
