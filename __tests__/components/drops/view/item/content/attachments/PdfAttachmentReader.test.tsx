@@ -15,6 +15,7 @@ import {
 } from "@/components/drops/view/item/content/attachments/fetchPdfPreview";
 
 let mockPageCount = 20;
+let mockDocumentPending = false;
 jest.mock(
   "@/components/drops/view/item/content/attachments/fetchPdfPreview",
   () => ({
@@ -35,10 +36,9 @@ jest.mock("react-pdf", () => {
       children: ReactNode;
       onLoadSuccess: (doc: { numPages: number }) => void;
     }) => {
-      React.useEffect(
-        () => onLoadSuccess({ numPages: mockPageCount }),
-        [onLoadSuccess]
-      );
+      React.useEffect(() => {
+        if (!mockDocumentPending) onLoadSuccess({ numPages: mockPageCount });
+      }, [onLoadSuccess]);
       return children;
     },
   };
@@ -58,6 +58,7 @@ const fetchPdf = jest.mocked(fetchPdfPreview);
 const originalObserver = globalThis.ResizeObserver;
 beforeEach(() => {
   mockPageCount = 20;
+  mockDocumentPending = false;
   fetchPdf.mockReset().mockResolvedValue(new Uint8Array([1]));
   globalThis.ResizeObserver = jest.fn().mockImplementation((callback) => ({
     observe: () => callback([{ contentRect: { width: 320, height: 600 } }]),
@@ -144,4 +145,20 @@ it("ends a stalled download with an actionable error", async () => {
   await act(async () => jest.advanceTimersByTime(PDF_PREVIEW_TIMEOUT_MS));
   await waitFor(() => expect(screen.getByRole("alert")).toBeInTheDocument());
   expect(screen.getByRole("button", { name: "Try again" })).toBeEnabled();
+});
+
+it("recovers when the PDF worker stalls after the download completes", async () => {
+  jest.useFakeTimers();
+  mockDocumentPending = true;
+  render(<PdfAttachmentReader url="https://example.test/stalled-worker.pdf" />);
+  await act(async () => {});
+  await act(async () => jest.advanceTimersByTime(PDF_PREVIEW_TIMEOUT_MS));
+  expect(screen.getByRole("alert")).toBeInTheDocument();
+  expect(screen.getByRole("link", { name: "Open full PDF" })).toBeVisible();
+  mockDocumentPending = false;
+  fireEvent.click(screen.getByRole("button", { name: "Try again" }));
+  await act(async () => {});
+  expect(screen.getAllByTestId("pdf-page")).toHaveLength(20);
+  await act(async () => jest.advanceTimersByTime(PDF_PREVIEW_TIMEOUT_MS));
+  expect(screen.queryByRole("alert")).not.toBeInTheDocument();
 });

@@ -98,6 +98,15 @@ function PdfReaderSession({
     };
   }, [url]);
 
+  useEffect(() => {
+    if (!file || pages > 0 || error) return;
+    const timeout = globalThis.setTimeout(
+      () => setError(PREVIEW_ERROR_KEY),
+      PDF_PREVIEW_TIMEOUT_MS
+    );
+    return () => globalThis.clearTimeout(timeout);
+  }, [file, pages, error]);
+
   const updateCurrentPage = useCallback((container: HTMLDivElement) => {
     // A rotation resizes the viewport before React has resized the pages. Keep
     // the reading position until both widths agree.
