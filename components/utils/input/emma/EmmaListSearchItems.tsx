@@ -13,15 +13,19 @@ export default function EmmaListSearchItems({
   searchCriteria,
   selectedId,
   onSelect,
-  loadingLabel = "Loading...",
-  noResultsLabel = "No results",
+  loadingLabel,
+  noResultsLabel,
+  resultsLayout = "popover",
+  resultsId,
 }: {
   readonly open: boolean;
   readonly searchCriteria: string | null;
   readonly selectedId: string | null;
   readonly onSelect: (item: AllowlistDescription) => void;
-  readonly loadingLabel?: string;
-  readonly noResultsLabel?: string;
+  readonly loadingLabel: string;
+  readonly noResultsLabel: string;
+  readonly resultsLayout?: "inline" | "popover";
+  readonly resultsId?: string;
 }) {
   const { connectedProfile, requestAuth } = useContext(AuthContext);
   const { data, isFetching } = useQuery<AllowlistDescription[]>({
@@ -51,31 +55,42 @@ export default function EmmaListSearchItems({
     const search = searchCriteria.toLowerCase();
     return data.filter((item) => item.name.toLowerCase().includes(search));
   }, [data, searchCriteria]);
+  const content = (
+    <div
+      id={resultsId}
+      className="tw-max-h-52 tw-overflow-y-auto tw-overflow-x-hidden tw-overscroll-contain tw-rounded-lg tw-bg-iron-800 tw-py-1 tw-shadow-xl tw-ring-1 tw-ring-white/10"
+    >
+      <ul className="tw-mx-0 tw-mb-0 tw-flex tw-list-none tw-flex-col tw-gap-y-1 tw-px-2">
+        <EmmaListSearchItemsContent
+          selectedId={selectedId}
+          loading={isFetching}
+          items={items}
+          onSelect={onSelect}
+          loadingLabel={loadingLabel}
+          noResultsLabel={noResultsLabel}
+        />
+      </ul>
+    </div>
+  );
+
+  // In the Network editor, results participate in the editor's scrolling,
+  // so the keyboard and footer cannot clip an absolute animated dropdown.
+  if (resultsLayout === "inline") {
+    return open ? <div className="tw-mt-1 tw-w-full">{content}</div> : null;
+  }
+
   return (
     <LazyMotion features={domAnimation}>
       <AnimatePresence mode="wait" initial={false}>
         {open && (
           <m.div
-            className="tw-absolute tw-z-10 tw-mt-1 tw-w-full tw-rounded-lg tw-bg-iron-800 tw-shadow-xl tw-ring-1 tw-ring-black tw-ring-opacity-5"
+            className="tw-absolute tw-z-10 tw-mt-1 tw-w-full"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.2 }}
           >
-            <div className="tw-absolute tw-z-10 tw-mt-1 tw-w-full tw-overflow-hidden tw-rounded-md tw-bg-iron-800 tw-shadow-2xl tw-ring-1 tw-ring-white/10">
-              <div className="tw-flow-root tw-overflow-y-auto tw-overflow-x-hidden tw-py-1">
-                <ul className="tw-mx-0 tw-mb-0 tw-flex tw-list-none tw-flex-col tw-gap-y-1 tw-px-2">
-                  <EmmaListSearchItemsContent
-                    selectedId={selectedId}
-                    loading={isFetching}
-                    items={items}
-                    onSelect={onSelect}
-                    loadingLabel={loadingLabel}
-                    noResultsLabel={noResultsLabel}
-                  />
-                </ul>
-              </div>
-            </div>
+            {content}
           </m.div>
         )}
       </AnimatePresence>

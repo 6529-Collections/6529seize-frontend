@@ -474,6 +474,11 @@ const TITLE_CONTEXT_MESSAGES = objectMessages("titleContext", {
 } as const);
 
 const WAVE_NAVIGATION_MESSAGES = objectMessages("wave.navigation", {
+  chat: "Chat",
+  sales: "Sales",
+  myStream: "My Stream",
+  polls: "Polls",
+  loadingSection: "Loading section…",
   about: "About",
   waveSections: "Wave sections",
   appSections: "App sections",
@@ -2211,6 +2216,12 @@ const NETWORK_GROUP_INSPECTION_MESSAGES = objectMessages(
       "This group may be private, deleted, or temporarily unavailable.",
   } as const
 );
+
+const NETWORK_HEADER_ACTION_MESSAGES = objectMessages("network.actions", {
+  openFilters: "Open group filters",
+  openSort: "Open sort options",
+  openNerd: "Open Nerd view",
+} as const);
 
 const NETWORK_GROUP_FILTER_MESSAGES = objectMessages("network.groupFilter", {
   filter: "Filter",
@@ -4242,6 +4253,7 @@ export const EN_US_MESSAGES = {
   ...WAVE_CHAT_SETTINGS_MESSAGES,
   ...NETWORK_GROUP_INSPECTION_MESSAGES,
   ...NETWORK_GROUP_FILTER_MESSAGES,
+  ...NETWORK_HEADER_ACTION_MESSAGES,
   ...WAVE_LOADING_MESSAGES,
   ...WAVE_DROPS_SEARCH_MODAL_MESSAGES,
   ...WAVE_GIF_PICKER_MESSAGES,
