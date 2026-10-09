@@ -4,6 +4,8 @@ Status: requirements proposal, 2026-10-09. This PR changes documentation only.
 Controls, routes, mention behavior, generated models, and current launch behavior
 are not changed. Backend execution requirements are tracked in the companion PR.
 
+Companion: [backend requirements PR #2143](https://github.com/6529-Collections/6529seize-backend/pull/2143).
+
 ## Purpose and confirmed scope
 
 Give operators a way to configure, arm, observe, and recover an unattended Drop
