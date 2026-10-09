@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { PROFILE_SWITCHED_EVENT } from "@/services/auth/auth.utils";
 import { useWaveWebSocket } from "./useWaveWebSocket";
 import type {
   WsDropUpdateMessage,
@@ -144,6 +145,17 @@ export function useWaveIsTyping(
 
   useEffect(() => {
     typersRef.current.clear();
+    const clearProfileTyping = () => {
+      typersRef.current.clear();
+      setTypingMessageState({ scopeKey, socket, message: "" });
+    };
+    globalThis.addEventListener(PROFILE_SWITCHED_EVENT, clearProfileTyping);
+    return () => {
+      globalThis.removeEventListener(
+        PROFILE_SWITCHED_EVENT,
+        clearProfileTyping
+      );
+    };
   }, [scopeKey, socket]);
 
   /* ----- 2. Handle incoming USER_IS_TYPING packets ----------------- */

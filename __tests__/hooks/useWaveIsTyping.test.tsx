@@ -1,6 +1,7 @@
 import { renderHook, act } from "@testing-library/react";
 import { useWaveIsTyping } from "@/hooks/useWaveIsTyping";
 import { WsMessageType } from "@/helpers/Types";
+import { PROFILE_SWITCHED_EVENT } from "@/services/auth/auth.utils";
 
 const listeners: any[] = [];
 const mockAddEventListener = jest.fn((_: string, cb: any) =>
@@ -125,4 +126,36 @@ test("clears labels immediately while the authenticated listener reconnects", ()
   expect(result.current).toBe("");
   act(() => jest.advanceTimersByTime(1000));
   expect(result.current).toBe("");
+});
+
+test("clears profile typing immediately even when the socket is unchanged", () => {
+  jest.useFakeTimers();
+  const removeListener = jest.spyOn(globalThis, "removeEventListener");
+  const { result, unmount } = renderHook(() => useWaveIsTyping("wave", null));
+  const receiveTyping = () => {
+    listeners[0]({
+      data: JSON.stringify({
+        type: WsMessageType.USER_IS_TYPING,
+        data: { wave_id: "wave", profile: { handle: "A", level: 1 } },
+      }),
+    });
+    jest.advanceTimersByTime(1000);
+  };
+
+  act(receiveTyping);
+  expect(result.current).toBe("A is typing");
+  act(() => globalThis.dispatchEvent(new CustomEvent(PROFILE_SWITCHED_EVENT)));
+  expect(result.current).toBe("");
+  act(() => jest.advanceTimersByTime(1000));
+  expect(result.current).toBe("");
+  expect(mockAddEventListener).toHaveBeenCalledTimes(1);
+
+  act(receiveTyping);
+  expect(result.current).toBe("A is typing");
+  unmount();
+  expect(removeListener).toHaveBeenCalledWith(
+    PROFILE_SWITCHED_EVENT,
+    expect.any(Function)
+  );
+  removeListener.mockRestore();
 });
