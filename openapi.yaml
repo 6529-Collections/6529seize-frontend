@@ -7796,6 +7796,8 @@ paths:
         - Drop Forge
       operationId: getDropForgeLaunch
       summary: getDropForgeLaunch
+      security:
+        - bearerAuth: []
       x-6529-router:
         enabled: true
         auth: required
@@ -7822,8 +7824,12 @@ paths:
                 $ref: "#/components/schemas/ApiDropForgeLaunch"
         "400":
           description: Invalid configuration or unsafe transition
+        "401":
+          description: Authentication required
         "403":
           description: Administrator access required
+        "404":
+          description: Launch or distribution job not found
         "409":
           description: Revision or existing launch conflict
     put:
@@ -7831,6 +7837,8 @@ paths:
         - Drop Forge
       operationId: putDropForgeLaunch
       summary: putDropForgeLaunch
+      security:
+        - bearerAuth: []
       x-6529-router:
         enabled: true
         auth: required
@@ -7863,6 +7871,8 @@ paths:
                 $ref: "#/components/schemas/ApiDropForgeLaunch"
         "400":
           description: Invalid configuration or unsafe transition
+        "401":
+          description: Authentication required
         "403":
           description: Administrator access required
         "409":
@@ -7873,6 +7883,8 @@ paths:
         - Drop Forge
       operationId: controlDropForgeLaunch
       summary: controlDropForgeLaunch
+      security:
+        - bearerAuth: []
       x-6529-router:
         enabled: true
         auth: required
@@ -7905,8 +7917,12 @@ paths:
                 $ref: "#/components/schemas/ApiDropForgeLaunch"
         "400":
           description: Invalid configuration or unsafe transition
+        "401":
+          description: Authentication required
         "403":
           description: Administrator access required
+        "404":
+          description: Launch or distribution job not found
         "409":
           description: Revision or existing launch conflict
   /drop-forge/distribution-jobs/{contract}/{claim_id}:
@@ -7915,6 +7931,8 @@ paths:
         - Drop Forge
       operationId: createDropForgeDistributionJob
       summary: createDropForgeDistributionJob
+      security:
+        - bearerAuth: []
       x-6529-router:
         enabled: true
         auth: required
@@ -7940,13 +7958,17 @@ paths:
               $ref: "#/components/schemas/ApiDropForgeJobRequest"
       responses:
         "200":
-          description: Current durable state
+          description: >-
+            Created job or existing job returned for the same request_id and
+            inputs
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiDropForgeJob"
         "400":
           description: Invalid configuration or unsafe transition
+        "401":
+          description: Authentication required
         "403":
           description: Administrator access required
         "409":
@@ -7957,6 +7979,8 @@ paths:
         - Drop Forge
       operationId: getDropForgeDistributionJob
       summary: getDropForgeDistributionJob
+      security:
+        - bearerAuth: []
       x-6529-router:
         enabled: true
         auth: required
@@ -7979,8 +8003,12 @@ paths:
                 $ref: "#/components/schemas/ApiDropForgeJob"
         "400":
           description: Invalid configuration or unsafe transition
+        "401":
+          description: Authentication required
         "403":
           description: Administrator access required
+        "404":
+          description: Launch or distribution job not found
         "409":
           description: Revision or existing launch conflict
   /light-drops:
@@ -28810,6 +28838,7 @@ components:
           nullable: true
     ApiDropForgeControlRequest:
       type: object
+      additionalProperties: false
       required:
         - revision
         - operation
@@ -28864,6 +28893,7 @@ components:
           format: int64
     ApiDropForgeJobRequest:
       type: object
+      additionalProperties: false
       required:
         - request_id
         - kind
@@ -28963,6 +28993,7 @@ components:
           type: string
     ApiDropForgePhaseInput:
       type: object
+      additionalProperties: false
       required:
         - name
         - start
@@ -28988,6 +29019,7 @@ components:
           type: boolean
     ApiDropForgePlanRequest:
       type: object
+      additionalProperties: false
       required:
         - revision
         - initialize_at
