@@ -305,6 +305,8 @@ test.describe("PDF attachment previews @local-only", () => {
       baseURL,
     }) => {
       // Track actual transferred PDF image bitmaps, not the browser's total heap.
+      // The worker message shape matches pinned pdfjs-dist 5.4.296; the
+      // received-image assertion fails if an upgrade breaks the instrumentation.
       await page.addInitScript(() => {
         const images = new WeakMap<ImageBitmap, number>();
         let retainedPixels = 0;
@@ -373,13 +375,20 @@ test.describe("PDF attachment previews @local-only", () => {
         30,
         60,
       ]) {
-        const sheet = scroller.locator(`[data-pdf-page="${number}"]`);
+        const sheet = reader
+          .getByRole("region", { name: "PDF pages" })
+          .locator(`[data-pdf-page="${number}"]`);
         await sheet.scrollIntoViewIfNeeded();
-        await expect(sheet.locator("canvas")).toBeVisible();
+        await expect(
+          reader
+            .getByRole("region", { name: "PDF pages" })
+            .locator(`[data-pdf-page="${number}"] canvas`)
+        ).toBeVisible();
         await expect(
           sheet.getByText(`Raster page ${number}`, { exact: true })
         ).toBeAttached();
-        // Only the viewport plus one screen above and below may retain images.
+        // At 390px width each page is ~609px high. Three 844px screens
+        // cover at most six intersecting page images (including partial pages).
         await expect.poll(retainedImages).toBeLessThanOrEqual(6);
       }
       expect(
