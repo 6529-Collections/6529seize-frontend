@@ -268,6 +268,13 @@ Surface matrix:
   baseline web projects.
 - `test:e2e:social-readonly` runs the public Waves/Profile read-only pack on
   both baseline web projects.
+  Its Main Stage app journey validates live vote Activity against a successful
+  API response: populated responses must render matching drop controls, and an
+  empty response must render the explicit empty state. It does not require live
+  votes or enough rows to overflow. Settings and Activity scrolling are covered
+  by `test:e2e:native-competition-sandbox` with long fixture terms and 30 vote
+  rows for both legacy and native competitions, including the iOS app simulation
+  on the mobile project.
 - `test:e2e:media-readonly` runs the public media, mint, and detail read-only
   pack on both baseline web projects. Exact ReMemes detail assertions are limited
   to the production pack until local and staging have a stable matching fixture.

@@ -3,6 +3,7 @@ import { installSurfaceSimulation } from "../support/surfaceSimulation";
 import { expectCompetitionScroll } from "../support/competitionScroll";
 import {
   gotoDocumentWithTransientRetry,
+  gotoReadyWithApiResponse,
   RESPONSE_TIMEOUT_MS,
 } from "../support/routeReadiness";
 
@@ -28,6 +29,8 @@ const PROFILE_FEED_DESCRIPTION =
 const APP_SECTIONS_LABEL =
   englishMessages["wave.navigation.appSections"] ?? "App sections";
 const PROFILE_FEED_TITLE = "Latest From Profile Waves";
+const EMPTY_COMPETITION_ACTIVITY =
+  englishMessages["competitions.emptyResource"] ?? "Nothing to show yet.";
 
 const PROFILE_TAB_PATHS = [
   {
@@ -103,7 +106,7 @@ function getProfileFeed(page: Page): Locator {
 }
 
 test.describe("Waves and profile read-only coverage @surface @medium @large @readonly", () => {
-  test("scrolls Main Stage Settings and vote Activity in the app", async ({
+  test("scrolls Main Stage Settings and validates live vote Activity in the app", async ({
     page,
   }, testInfo) => {
     test.setTimeout(120000);
@@ -151,28 +154,44 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     });
     const competitionPath = new URL(page.url()).pathname;
     expect(competitionPath).toMatch(/\/competitions\/[^/]+$/);
-    await gotoReady(page, `${competitionPath}?tab=votes&voteTab=activity`);
+    const activityResponse = await gotoReadyWithApiResponse(
+      page,
+      `${competitionPath}?tab=votes&voteTab=activity`,
+      (url) =>
+        url.pathname === `/api/v3${competitionPath}/activity` &&
+        url.searchParams.get("offset") === "0"
+    );
+    const logs: readonly unknown[] = await activityResponse.json();
+    expect(Array.isArray(logs), "Vote Activity must return an array").toBe(
+      true
+    );
     const activity = page.getByRole("tabpanel", {
       name: "Activity",
       exact: true,
     });
-    await expect(
-      activity
-        .getByRole("button", { name: "View drop in chat", exact: true })
-        .first()
-    ).toBeVisible();
-    await expectCompetitionScroll(
-      page,
-      page
-        .getByRole("main")
-        .locator('section[id^="competition-"][id$="-votes"]')
-        .locator(".."),
-      activity
-        .getByRole("button", { name: "View drop in chat", exact: true })
-        .last()
-    );
+    await expect(activity).toBeVisible();
+    await expect(activity.getByRole("alert")).toHaveCount(0);
+    const dropControls = activity.getByRole("button", {
+      name: "View drop in chat",
+      exact: true,
+    });
+    const emptyState = activity.getByText(EMPTY_COMPETITION_ACTIVITY, {
+      exact: true,
+    });
+    await expect(dropControls).toHaveCount(logs.length);
+    if (logs.length === 0) {
+      await expect(activity.getByRole("status")).toHaveText(
+        EMPTY_COMPETITION_ACTIVITY
+      );
+      await expect(emptyState).toBeVisible();
+    } else {
+      await expect(emptyState).toHaveCount(0);
+      await expect(dropControls.first()).toBeVisible();
+    }
+    // Live competitions can have no votes or too few rows to overflow. The
+    // native-competition sandbox exercises scrolling with 30 fixture rows.
     await expectNoHorizontalOverflow(page);
-    await testInfo.attach("main-stage-activity-scrolled", {
+    await testInfo.attach("main-stage-live-activity", {
       body: await page.screenshot(),
       contentType: "image/png",
     });
