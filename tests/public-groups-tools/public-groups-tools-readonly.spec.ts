@@ -432,16 +432,18 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
     const sheet = page
       .getByRole("dialog", { name: "Filter Network" })
       .locator(".mobile-wrapper-dialog");
+    // A compact sheet need not start near the top. Its bottom anchoring and
+    // stable height distinguish it from the centered desktop modal.
     await expect
       .poll(async () => {
         const bounds = await sheet.boundingBox();
-        return (bounds?.y ?? 0) + (bounds?.height ?? 0);
+        return bounds ? bounds.y + bounds.height : null;
       })
       .toBeCloseTo(900, 0);
     const tabletBounds = await sheet.boundingBox();
-    expect(
-      (tabletBounds?.y ?? 0) + (tabletBounds?.height ?? 0)
-    ).toBeGreaterThan(880);
+    expect(tabletBounds).not.toBeNull();
+    expect(tabletBounds?.y).toBeGreaterThanOrEqual(0);
+    expect(tabletBounds?.height).toBeGreaterThan(0);
 
     if (
       await page.evaluate(() => matchMedia("(any-pointer: coarse)").matches)
@@ -450,13 +452,12 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
       await expect
         .poll(async () => {
           const bounds = await sheet.boundingBox();
-          return (bounds?.y ?? 0) + (bounds?.height ?? 0);
+          return bounds ? bounds.y + bounds.height : null;
         })
         .toBeCloseTo(900, 0);
       const touchBounds = await sheet.boundingBox();
-      expect(
-        (touchBounds?.y ?? 0) + (touchBounds?.height ?? 0)
-      ).toBeGreaterThan(880);
+      expect(touchBounds?.y).toBeGreaterThanOrEqual(0);
+      expect(touchBounds?.height).toBeCloseTo(tabletBounds?.height ?? 0, 0);
     }
   });
 
