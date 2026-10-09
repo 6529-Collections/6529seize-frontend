@@ -113,6 +113,7 @@ Generated from `tests/packs.manifest.cjs` by
 | `test:e2e:museum-rights`                            | —                             | readonly | local       | pr-ci, manual             | 15m     | Network Museum rights education and object-license route sweep.                                       |
 | `test:e2e:museum-inside-system`                     | —                             | readonly | local       | pr-ci, manual             | 30m     | Network Museum Inside the System project and comparison sweep.                                        |
 | `test:e2e:artwork-documentation-sandbox`            | —                             | sandbox  | local       | pr-ci, manual             | 15m     | Artwork documentation saving and upload recovery through the real editor with isolated HTTP fixtures. |
+| `test:e2e:pdf-attachments-sandbox`                  | —                             | sandbox  | local       | pr-ci, manual             | 15m     | PDF attachment scrolling, recovery and touch layout in WebKit.                                        |
 | `test:e2e:composer-sandbox`                         | —                             | sandbox  | local       | manual                    | 15m     | Waves composer sandbox against the local mock API.                                                    |
 | `test:e2e:public-review-sandbox`                    | —                             | sandbox  | local       | manual                    | 15m     | Stream review feedback sandbox against the local mock API.                                            |
 | `test:e2e:reaction-sandbox`                         | —                             | sandbox  | local       | manual                    | 15m     | Drop reaction sandbox against the local mock API.                                                     |
@@ -268,6 +269,13 @@ Surface matrix:
   baseline web projects.
 - `test:e2e:social-readonly` runs the public Waves/Profile read-only pack on
   both baseline web projects.
+  Its Main Stage app journey validates live vote Activity against a successful
+  API response: populated responses must render matching drop controls, and an
+  empty response must render the explicit empty state. It does not require live
+  votes or enough rows to overflow. Settings and Activity scrolling are covered
+  by `test:e2e:native-competition-sandbox` with long fixture terms and 30 vote
+  rows for both legacy and native competitions, including the iOS app simulation
+  on the mobile project.
 - `test:e2e:media-readonly` runs the public media, mint, and detail read-only
   pack on both baseline web projects. Exact ReMemes detail assertions are limited
   to the production pack until local and staging have a stable matching fixture.

@@ -366,6 +366,24 @@ const PACKS = [
     ),
     triggers: ["pr-ci", "manual"],
   },
+  {
+    ...sandboxPack(
+      "test:e2e:pdf-attachments-sandbox",
+      "PDF attachment scrolling, recovery and touch layout in WebKit.",
+      ["tests/media/pdf-attachment-preview-sandbox.spec.ts"],
+      {
+        ...COMPOSER_SANDBOX_ENV,
+        PLAYWRIGHT_BASE_URL: "http://localhost:3296",
+        PLAYWRIGHT_WEB_SERVER_URL: "http://localhost:3296",
+        PLAYWRIGHT_COMPOSER_SANDBOX_API_PORT: "4296",
+        NEXT_DEV_DIST_DIR: ".next-playwright-pdf",
+        PLAYWRIGHT_WEB_SERVER_COMMAND:
+          "node --require ./scripts/prepare-pdfjs-assets.cjs tests/support/composerSandboxServer.cjs",
+      },
+      ["web-desktop-webkit"]
+    ),
+    triggers: ["pr-ci", "manual"],
+  },
   sandboxPack(
     "test:e2e:composer-sandbox",
     "Waves composer sandbox against the local mock API.",

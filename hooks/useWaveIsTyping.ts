@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { PROFILE_SWITCHED_EVENT } from "@/services/auth/auth.utils";
 import { useWaveWebSocket } from "./useWaveWebSocket";
 import { useMobileAppActivity } from "./useMobileAppActivity";
 import type {
@@ -23,6 +24,7 @@ interface TypingEntry {
 
 interface TypingMessageState {
   readonly scopeKey: string;
+  readonly socket: WebSocket | null;
   readonly message: string;
 }
 
@@ -136,20 +138,32 @@ export function useWaveIsTyping(
   const [typingMessageState, setTypingMessageState] =
     useState<TypingMessageState>({
       scopeKey,
+      socket,
       message: "",
     });
 
   // Reset the display when its subscription changes, including before a new
   // socket connects. Returning to the same Wave must not revive stale labels.
   if (typingMessageState.scopeKey !== scopeKey) {
-    setTypingMessageState({ scopeKey, message: "" });
+    setTypingMessageState({ scopeKey, socket, message: "" });
   }
 
   const typersRef = useRef<Map<string, TypingEntry>>(new Map());
 
   useEffect(() => {
     typersRef.current.clear();
-  }, [scopeKey]);
+    const clearProfileTyping = () => {
+      typersRef.current.clear();
+      setTypingMessageState({ scopeKey, socket, message: "" });
+    };
+    globalThis.addEventListener(PROFILE_SWITCHED_EVENT, clearProfileTyping);
+    return () => {
+      globalThis.removeEventListener(
+        PROFILE_SWITCHED_EVENT,
+        clearProfileTyping
+      );
+    };
+  }, [scopeKey, socket]);
 
   /* ----- 2. Handle incoming USER_IS_TYPING packets ----------------- */
   useEffect(() => {
@@ -169,9 +183,11 @@ export function useWaveIsTyping(
 
       const message = buildTypingString(Array.from(typersRef.current.values()));
       setTypingMessageState((previous) =>
-        previous.scopeKey === scopeKey && previous.message === message
+        previous.scopeKey === scopeKey &&
+        previous.socket === socket &&
+        previous.message === message
           ? previous
-          : { scopeKey, message }
+          : { scopeKey, socket, message }
       );
       // An idle Wave has no typing timer. Wake only when a typer expires.
       if (Number.isFinite(nextExpiry)) {
@@ -225,7 +241,10 @@ export function useWaveIsTyping(
     };
   }, [socket, waveId, myHandle, shouldSubscribe, scopeKey]);
 
-  return shouldSubscribe && typingMessageState.scopeKey === scopeKey
+  return shouldSubscribe &&
+    socket !== null &&
+    typingMessageState.socket === socket &&
+    typingMessageState.scopeKey === scopeKey
     ? typingMessageState.message
     : "";
 }
