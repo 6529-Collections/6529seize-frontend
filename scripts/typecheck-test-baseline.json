@@ -772,7 +772,6 @@
     "__tests__/hooks/useWaveCompetitionEntries.test.tsx": 2,
     "__tests__/hooks/useWaveRepAllocation.test.tsx": 2,
     "__tests__/hooks/useWaveTopVoters.test.ts": 2,
-    "__tests__/hooks/useWaveWebSocket.test.ts": 3,
     "__tests__/hooks/waves/useApprovalWaveStatus.test.ts": 1,
     "__tests__/hooks/waves/useSetWavePinnedDrop.test.tsx": 1,
     "__tests__/hooks/waves/useWaveOutcomeDistributionQuery.test.tsx": 1,
