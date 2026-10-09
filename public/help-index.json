@@ -6305,6 +6305,23 @@
       ]
     },
     {
+      "id": "waves.drop.pdf-preview",
+      "kind": "ui_affordance",
+      "title": "PDF attachment previews",
+      "aliases": ["PDF preview", "PDF first page", "read PDF", "PDF pages"],
+      "keywords": ["waves", "attachment", "PDF", "iPhone", "iPad", "preview"],
+      "facts": [
+        "Use the PDF attachment eye button to open its preview. On iPhone and iPad, including the iOS app, the reader fills the screen and shows the page count. Scroll through the pages and pinch to zoom. Close the reader to return to the wave.",
+        "The wave stays in place while the PDF reader is open. Close it to return to the attachment list and open another document.",
+        "Loading PDF and Loading page show progress states. If the PDF fails or times out, choose Try again or Open full PDF. Password-protected and oversized previews need Open full PDF.",
+        "Desktop keeps the browser PDF viewer. Download and Copy link remain in the attachment options menu. Restricted media-interaction views do not expose the reader."
+      ],
+      "canonical_path": "/waves",
+      "related_paths": ["/waves"],
+      "tags": ["waves", "attachments", "PDF"],
+      "source_refs": ["ops/docs/waves/drop-actions/feature-content-display.md"]
+    },
+    {
       "id": "waves.composer.image-uploads",
       "kind": "ui_affordance",
       "title": "Drop media uploads",
