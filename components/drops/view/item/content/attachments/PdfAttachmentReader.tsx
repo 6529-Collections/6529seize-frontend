@@ -38,6 +38,7 @@ export default function PdfAttachmentReader({ url }: { readonly url: string }) {
     <PdfReaderSession
       key={attempt}
       url={url}
+      focusOnMount={attempt > 0}
       onRetry={() => setAttempt((value) => value + 1)}
     />
   );
@@ -45,9 +46,11 @@ export default function PdfAttachmentReader({ url }: { readonly url: string }) {
 
 function PdfReaderSession({
   url,
+  focusOnMount,
   onRetry,
 }: {
   readonly url: string;
+  readonly focusOnMount: boolean;
   readonly onRetry: () => void;
 }) {
   const documentRef = useRef<HTMLDivElement>(null);
@@ -60,6 +63,10 @@ function PdfReaderSession({
   const [scrollRoot, setScrollRoot] = useState<HTMLDivElement | null>(null);
 
   usePdfPinchZoom(viewportRef, documentRef, pages > 0 && !error);
+
+  useEffect(() => {
+    if (focusOnMount) viewportRef.current?.focus();
+  }, [focusOnMount]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -185,10 +192,7 @@ function PdfReaderSession({
   return (
     <>
       {pages > 0 && !error && (
-        <p
-          role="status"
-          className="tw-m-0 tw-shrink-0 tw-px-4 tw-py-2 tw-text-center tw-text-xs tw-text-iron-300"
-        >
+        <p className="tw-m-0 tw-shrink-0 tw-px-4 tw-py-2 tw-text-center tw-text-xs tw-text-iron-300">
           {t(DEFAULT_LOCALE, "attachment.pdf.page", {
             page: formatInteger(DEFAULT_LOCALE, page),
             total: formatInteger(DEFAULT_LOCALE, pages),

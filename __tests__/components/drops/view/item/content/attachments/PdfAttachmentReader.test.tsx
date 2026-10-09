@@ -74,6 +74,7 @@ it("makes every page available by scrolling, without navigation or zoom controls
   await screen.findByText("Page 1 of 20");
   expect(screen.getAllByTestId("pdf-page")).toHaveLength(20);
   expect(screen.queryByRole("button")).not.toBeInTheDocument();
+  expect(screen.queryByRole("status")).not.toBeInTheDocument();
   expect(screen.queryByRole("spinbutton")).not.toBeInTheDocument();
   const scroller = screen.getByRole("region", { name: "PDF pages" });
   Object.defineProperties(scroller, {
@@ -124,6 +125,7 @@ it("shows loading, recovers a failed request, and aborts when closed", async () 
   await screen.findByRole("alert");
   await user.click(screen.getByRole("button", { name: "Try again" }));
   await screen.findByText("Page 1 of 20");
+  expect(screen.getByRole("region", { name: "PDF pages" })).toHaveFocus();
   const signal = fetchPdf.mock.calls.at(-1)?.[1];
   unmount();
   expect(signal?.aborted).toBe(true);

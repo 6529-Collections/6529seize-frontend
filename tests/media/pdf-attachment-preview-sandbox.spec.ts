@@ -91,7 +91,7 @@ test.describe("PDF attachment previews @local-only", () => {
     await installPdfDrop(page, baseURL);
     await openWave(page);
     await page.getByRole("button", { name: PREVIEW_BUTTON }).first().click();
-    const viewer = page.locator('iframe[title="first.pdf"]');
+    const viewer = page.getByTitle("first.pdf", { exact: true });
     await expect(viewer).toHaveAttribute("src", `${MEDIA_ROOT}first.pdf`);
     await expect(viewer).toHaveAttribute("referrerpolicy", "no-referrer");
   });
@@ -178,9 +178,15 @@ test.describe("PDF attachment previews @local-only", () => {
         )
         .toBeLessThanOrEqual(1);
       for (let number = 1; number <= 20; number += 1) {
-        const documentPage = scroller.locator(`[data-pdf-page="${number}"]`);
+        const documentPage = reader
+          .getByRole("region", { name: "PDF pages" })
+          .locator(`[data-pdf-page="${number}"]`);
         await documentPage.scrollIntoViewIfNeeded();
-        await expect(documentPage.locator("canvas")).toBeVisible();
+        await expect(
+          reader
+            .getByRole("region", { name: "PDF pages" })
+            .locator(`[data-pdf-page="${number}"] canvas`)
+        ).toBeVisible();
       }
       await scroller.evaluate((element) => {
         element.scrollTop = element.scrollHeight;
@@ -192,7 +198,12 @@ test.describe("PDF attachment previews @local-only", () => {
         reader.getByText("P1 Allowlist: 9,498 Addresses", { exact: true })
       ).toBeAttached();
       await expect
-        .poll(() => reader.locator("canvas").count())
+        .poll(() =>
+          reader
+            .getByRole("region", { name: "PDF pages" })
+            .locator("canvas")
+            .count()
+        )
         .toBeLessThan(12);
       await page.setViewportSize({ width: 844, height: 390 });
       await expect(
@@ -260,7 +271,9 @@ test.describe("PDF attachment previews @local-only", () => {
       await expect(
         reader.getByText("Page 1 of 1", { exact: true })
       ).toBeVisible();
-      await expect(reader.locator("canvas")).toBeVisible();
+      await expect(
+        reader.getByRole("region", { name: "PDF pages" }).locator("canvas")
+      ).toBeVisible();
       await expect(
         reader.getByText("Single-page PDF fixture", { exact: true })
       ).toBeAttached();
@@ -307,10 +320,17 @@ test.describe("PDF attachment previews @local-only", () => {
       await expect(
         reader.getByRole("link", { name: "Open full PDF" })
       ).toHaveAttribute("rel", "noopener noreferrer");
-      await reader.getByRole("button", { name: "Try again" }).click();
+      await reader.getByRole("button", { name: "Try again" }).focus();
+      await page.keyboard.press("Enter");
+      await expect(
+        reader.getByRole("region", { name: "PDF pages" })
+      ).toBeFocused();
       await expect(
         reader.getByText("Page 1 of 20", { exact: true })
       ).toBeVisible();
+      await expect(
+        reader.getByRole("region", { name: "PDF pages" })
+      ).toBeFocused();
     });
   });
 });
