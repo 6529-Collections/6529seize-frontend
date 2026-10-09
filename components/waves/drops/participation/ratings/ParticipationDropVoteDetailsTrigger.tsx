@@ -7,7 +7,7 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
-import { formatInteger } from "@/i18n/format";
+import { formatInteger, selectPluralCategory } from "@/i18n/format";
 import { t, tRich } from "@/i18n/messages";
 import {
   type MouseEvent as ReactMouseEvent,
@@ -382,17 +382,22 @@ export default function ParticipationDropVoteDetailsTrigger({
     triggerClassName,
     chevronClassName,
   } = getTriggerClassNames(density, visualVariant, isOpen);
-  const voterPluralCategory = new Intl.PluralRules(locale).select(
-    drop.raters_count
-  );
+  const voterPluralCategory = selectPluralCategory(locale, drop.raters_count);
   const voterMessageKey =
     voterPluralCategory === "one"
       ? "waves.leaderboard.grid.voters.one"
       : "waves.leaderboard.grid.voters.other";
-  const triggerLabelMessageKey =
+  const votersUnavailable = drop.voters_count_available === false;
+  const availableTriggerLabelMessageKey =
     voterPluralCategory === "one"
       ? "waves.voteDetails.trigger.one"
       : "waves.voteDetails.trigger.other";
+  const triggerLabelMessageKey = votersUnavailable
+    ? "waves.voteDetails.trigger.unavailable"
+    : availableTriggerLabelMessageKey;
+  const podiumTextClassName = votersUnavailable
+    ? "tw-min-w-0 tw-max-w-full tw-whitespace-normal"
+    : "tw-min-w-0 tw-max-w-full tw-whitespace-nowrap";
   const formattedVoterCount = formatInteger(locale, drop.raters_count);
 
   return (
@@ -410,18 +415,18 @@ export default function ParticipationDropVoteDetailsTrigger({
       >
         <span
           className={`${triggerTextClassName} ${labelTextColorClassName} ${
-            density === "podium"
-              ? "tw-min-w-0 tw-max-w-full tw-whitespace-nowrap"
-              : ""
+            density === "podium" ? podiumTextClassName : ""
           }`}
         >
-          {tRich(locale, voterMessageKey, {
-            count: (
-              <span key="count" className={countTextColorClassName}>
-                {formattedVoterCount}
-              </span>
-            ),
-          })}
+          {votersUnavailable
+            ? t(locale, "waves.voteDetails.voters.unavailable")
+            : tRich(locale, voterMessageKey, {
+                count: (
+                  <span key="count" className={countTextColorClassName}>
+                    {formattedVoterCount}
+                  </span>
+                ),
+              })}
         </span>
         <ChevronDownIcon aria-hidden="true" className={chevronClassName} />
       </button>

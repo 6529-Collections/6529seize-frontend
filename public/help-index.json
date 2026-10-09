@@ -3527,6 +3527,7 @@
         "If the API rejects the current session, the app starts one authentication recovery attempt for that session and temporarily disables reaction actions. The failed reaction is not automatically replayed.",
         "If a reaction request times out, the app briefly checks the saved state. If it matches the latest choice, the reaction stays without an error or rollback. If the choice cannot be confirmed, refresh and check before trying again: the request may have changed the reaction, and repeating the same choice can undo that change. The app never automatically retries the write.",
         "Rating controls clamp values to the drop's allowed min/max range and can be disabled when the viewer has no available credit.",
+        "Completed submission cards keep their score and voter summary. The voter count opens voter details and the vote log, while voting remains closed.",
         "Rank/Approve waves expose voting controls such as vote sliders and vote summaries when the user is eligible.",
         "The normal vote dialog can optionally post a standard drop reply with a generated vote rationale prefix; Vote with reply starts off and can be enabled directly or by editing the prefilled text.",
         "When Vote with reply is enabled, removing all rationale text blocks submission until text is added or the switch is turned off.",
@@ -6891,6 +6892,7 @@
       ],
       "facts": [
         "Wave Winners tab behavior is documented under leaderboard features.",
+        "When the winner voter list at decision time was not saved, the card shows Voters unavailable instead of zero. Select it for an explanation and open Vote log to inspect any recorded changes. The final score remains visible; current allocations cannot establish the historical voter list.",
         "Availability depends on wave decision state and whether the wave has winner outcomes.",
         "Single-decision and multi-decision waves have different winner display behavior.",
         "The single-decision podium shows first place raised in the center, second place on the left, and third place on the right. Card content wraps and grows to fit names, nomination details, vote totals, credit labels, voter counts, and outcomes. Missing places and loading use matching podium placeholders.",

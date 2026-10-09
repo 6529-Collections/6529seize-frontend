@@ -1,3 +1,4 @@
+import type { ApiSubmissionDropVoting } from "@/generated/models/ApiSubmissionDropVoting";
 import type { ApiDropContextProfileContext } from "@/generated/models/ApiDropContextProfileContext";
 import type { ApiDropMetadataResponse } from "@/generated/models/ApiDropMetadataResponse";
 import type { ApiDropPart } from "@/generated/models/ApiDropPart";
@@ -298,3 +299,18 @@ export const getContextProfileContext = (
     curated: false,
   };
 };
+
+export function mapSubmissionVotingV2(
+  voting: ApiSubmissionDropVoting | null | undefined
+) {
+  return {
+    rating: voting?.current_calculated_vote ?? 0,
+    realtime_rating:
+      voting?.total_votes_given ?? voting?.current_calculated_vote ?? 0,
+    rating_prediction: voting?.predicted_final_vote ?? 0,
+    raters_count: voting?.voters_count ?? 0,
+    ...(voting?.voters_count_available === undefined
+      ? {}
+      : { voters_count_available: voting.voters_count_available }),
+  };
+}

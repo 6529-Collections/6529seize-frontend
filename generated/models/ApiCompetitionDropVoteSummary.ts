@@ -16,6 +16,10 @@ import { HttpFile } from '../http/http';
 
 export class ApiCompetitionDropVoteSummary {
     /**
+    * False when a winner has no saved at-decision voter records. The voter count is then unknown, not zero. Omitted by older servers.
+    */
+    'voters_count_available'?: boolean;
+    /**
     * When this entry first continuously reached its approval threshold.
     */
     'over_threshold_since_ms'?: number | null;
@@ -32,6 +36,12 @@ export class ApiCompetitionDropVoteSummary {
     static readonly mapping: {[index: string]: string} | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
+        {
+            "name": "voters_count_available",
+            "baseName": "voters_count_available",
+            "type": "boolean",
+            "format": ""
+        },
         {
             "name": "over_threshold_since_ms",
             "baseName": "over_threshold_since_ms",
