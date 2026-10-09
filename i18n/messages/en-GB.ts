@@ -228,6 +228,8 @@ export const EN_GB_MESSAGES = {
   "linkPreview.twitter.article.read": "Read article: {title}",
   "waves.drop.actions.menuLabel": "Drop actions",
   "waves.drop.actions.reactionPickerLabel": "Add reaction to drop",
+  "waves.drop.actions.showMore": "Show more",
+  "waves.drop.actions.showLess": "Show less",
   "media.video.captions": "Captions",
   "media.video.download": "Download media",
   "media.video.downloading": "Downloading media",
