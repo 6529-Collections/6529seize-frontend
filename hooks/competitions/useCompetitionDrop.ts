@@ -5,19 +5,54 @@ import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import type { ApiDropCompetitionContext } from "@/generated/models/ApiDropCompetitionContext";
 import type { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import type { ApiWaveCreditScope } from "@/generated/models/ApiWaveCreditScope";
+import { ApiDropType } from "@/generated/models/ApiDropType";
+import { ApiCompetitionEntryStatus } from "@/generated/models/ApiCompetitionEntryStatus";
 import { QueryKey } from "@/components/react-query-wrapper/query-keys";
 import { fetchDropCompetitionContext } from "@/services/api/competitions-api";
 import { useCompetitionViewer } from "./useCompetitionQueries";
+
+function winnerContext(
+  drop: ExtendedDrop,
+  entry: NonNullable<ApiDropCompetitionContext["entry"]>
+) {
+  if (drop.winning_context) return drop.winning_context;
+  if (
+    entry.rank === null ||
+    !Number.isSafeInteger(entry.rank) ||
+    entry.rank < 1 ||
+    entry.won_at === null ||
+    !Number.isFinite(entry.won_at)
+  )
+    return null;
+  return { place: entry.rank, decision_time: entry.won_at, awards: [] };
+}
 
 export function applyCompetitionDropSummary(
   drop: ExtendedDrop,
   context: ApiDropCompetitionContext | undefined
 ): ExtendedDrop {
   const competition = context?.competition;
+  const entry = context?.entry;
   const summary = context?.vote_summary;
-  if (!competition || !summary) return drop;
-  return {
+  if (
+    !competition ||
+    !entry ||
+    !summary ||
+    entry.drop_id !== drop.id ||
+    entry.wave_id !== drop.wave.id ||
+    entry.competition_id !== competition.id ||
+    competition.wave_id !== drop.wave.id
+  )
+    return drop;
+  const isWinner = entry.status === ApiCompetitionEntryStatus.Winner;
+  if (!isWinner && entry.status !== ApiCompetitionEntryStatus.Active)
+    return drop;
+  const winningContext = isWinner ? winnerContext(drop, entry) : null;
+  if (isWinner && !winningContext) return drop;
+  const result = {
     ...drop,
+    drop_type: isWinner ? ApiDropType.Winner : ApiDropType.Participatory,
+    ...(winningContext ? { winning_context: winningContext } : {}),
     competition_id: competition.id,
     competition_title: competition.title,
     rating: summary.rating,
@@ -39,6 +74,8 @@ export function applyCompetitionDropSummary(
       voting_period_end: competition.voting.ends_at,
     },
   };
+  if (!isWinner) delete result.winning_context;
+  return result;
 }
 
 export function useCompetitionDrop(drop: ExtendedDrop) {
