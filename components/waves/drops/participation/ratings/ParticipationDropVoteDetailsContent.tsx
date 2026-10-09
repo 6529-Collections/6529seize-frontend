@@ -3,7 +3,6 @@
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ReactNode } from "react";
-import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
 import { useIntersectionObserver } from "@/hooks/useIntersectionObserver";
 import { useDropVoteLogs } from "@/hooks/useDropVoteLogs";
@@ -13,6 +12,9 @@ import {
   ParticipationDropVoteDetailsVoterRow,
 } from "./ParticipationDropVoteDetailsRows";
 import Button from "@/components/utils/button/Button";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { formatInteger, selectPluralCategory } from "@/i18n/format";
+import { t } from "@/i18n/messages";
 
 type VoteDetailsTab = "voters" | "logs";
 
@@ -29,15 +31,6 @@ interface VoteDetailsErrorStateProps {
   readonly label: string;
   readonly onRetry: () => void;
 }
-
-const getVoteValueLabel = (vote: number): string => {
-  if (vote === 0) {
-    return "0";
-  }
-
-  const sign = vote < 0 ? "-" : "";
-  return `${sign}${formatNumberWithCommas(Math.abs(vote))}`;
-};
 
 function LoadingBar() {
   return (
@@ -57,10 +50,8 @@ function VoteDetailsEmptyState({ label }: { readonly label: string }) {
   );
 }
 
-function VoteDetailsErrorState({
-  label,
-  onRetry,
-}: VoteDetailsErrorStateProps) {
+function VoteDetailsErrorState({ label, onRetry }: VoteDetailsErrorStateProps) {
+  const locale = useBrowserLocale();
   return (
     <div className="tw-flex tw-min-h-32 tw-flex-col tw-items-center tw-justify-center tw-gap-3 tw-px-4 tw-py-8">
       <span className="tw-text-center tw-text-sm tw-font-medium tw-text-rose-300">
@@ -74,7 +65,7 @@ function VoteDetailsErrorState({
         variant="tertiary"
         size="xs"
       >
-        Try again
+        {t(locale, "waves.voteDetails.retry")}
       </Button>
     </div>
   );
@@ -125,10 +116,21 @@ export function ParticipationDropVoteDetailsContent({
   onClose,
   showHeader,
 }: ParticipationDropVoteDetailsContentProps) {
+  const locale = useBrowserLocale();
+  const votersUnavailable = drop.voters_count_available === false;
   const creditLabel = WAVE_VOTING_LABELS[drop.wave.voting_credit_type];
+  const voterCountMessageKey =
+    selectPluralCategory(locale, drop.raters_count) === "one"
+      ? "waves.voteDetails.voters.one"
+      : "waves.voteDetails.voters.other";
+  const voterCountLabel = votersUnavailable
+    ? t(locale, "waves.voteDetails.voters.unavailable")
+    : t(locale, voterCountMessageKey, {
+        count: formatInteger(locale, drop.raters_count),
+      });
   const votersQuery = useDropVoters({
     dropId: drop.id,
-    enabled: isOpen && activeTab === "voters",
+    enabled: isOpen && activeTab === "voters" && !votersUnavailable,
   });
   const logsQuery = useDropVoteLogs({
     dropId: drop.id,
@@ -138,6 +140,7 @@ export function ParticipationDropVoteDetailsContent({
   const intersectionElementRef = useIntersectionObserver(() => {
     if (
       activeTab === "voters" &&
+      !votersUnavailable &&
       votersQuery.hasNextPage &&
       !votersQuery.isLoading &&
       !votersQuery.isFetchingNextPage
@@ -157,10 +160,19 @@ export function ParticipationDropVoteDetailsContent({
   });
 
   const renderVoters = () => {
+    if (votersUnavailable) {
+      return (
+        <VoteDetailsEmptyState
+          label={t(locale, "waves.voteDetails.voters.unavailableExplanation", {
+            voteLogTab: t(locale, "waves.voteDetails.logs.tab"),
+          })}
+        />
+      );
+    }
     if (votersQuery.isError) {
       return (
         <VoteDetailsErrorState
-          label="Could not load voters."
+          label={t(locale, "waves.voteDetails.voters.error")}
           onRetry={() => {
             void votersQuery.refetch();
           }}
@@ -169,11 +181,19 @@ export function ParticipationDropVoteDetailsContent({
     }
 
     if (votersQuery.voters.length === 0 && votersQuery.isLoading) {
-      return <VoteDetailsEmptyState label="Loading voters..." />;
+      return (
+        <VoteDetailsEmptyState
+          label={t(locale, "waves.voteDetails.voters.loading")}
+        />
+      );
     }
 
     if (votersQuery.voters.length === 0) {
-      return <VoteDetailsEmptyState label="No voters yet." />;
+      return (
+        <VoteDetailsEmptyState
+          label={t(locale, "waves.voteDetails.voters.empty")}
+        />
+      );
     }
 
     return (
@@ -193,7 +213,7 @@ export function ParticipationDropVoteDetailsContent({
     if (logsQuery.isError) {
       return (
         <VoteDetailsErrorState
-          label="Could not load vote log."
+          label={t(locale, "waves.voteDetails.logs.error")}
           onRetry={() => {
             void logsQuery.refetch();
           }}
@@ -202,11 +222,19 @@ export function ParticipationDropVoteDetailsContent({
     }
 
     if (logsQuery.logs.length === 0 && logsQuery.isLoading) {
-      return <VoteDetailsEmptyState label="Loading vote log..." />;
+      return (
+        <VoteDetailsEmptyState
+          label={t(locale, "waves.voteDetails.logs.loading")}
+        />
+      );
     }
 
     if (logsQuery.logs.length === 0) {
-      return <VoteDetailsEmptyState label="No vote changes yet." />;
+      return (
+        <VoteDetailsEmptyState
+          label={t(locale, "waves.voteDetails.logs.empty")}
+        />
+      );
     }
 
     return (
@@ -224,7 +252,8 @@ export function ParticipationDropVoteDetailsContent({
 
   const isLoadingMore =
     activeTab === "voters"
-      ? votersQuery.isFetchingNextPage || votersQuery.isLoading
+      ? !votersUnavailable &&
+        (votersQuery.isFetchingNextPage || votersQuery.isLoading)
       : logsQuery.isFetchingNextPage || logsQuery.isLoading;
 
   return (
@@ -235,11 +264,11 @@ export function ParticipationDropVoteDetailsContent({
       {showHeader && (
         <div className="tw-flex tw-items-center tw-justify-between tw-gap-4 tw-px-4 tw-pb-0 tw-pt-2">
           <h3 className="tw-mb-0 tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-50">
-            Votes
+            {t(locale, "waves.voteDetails.title")}
           </h3>
           <button
             type="button"
-            aria-label="Close votes"
+            aria-label={t(locale, "waves.voteDetails.close")}
             onClick={(event) => {
               event.stopPropagation();
               onClose();
@@ -253,33 +282,33 @@ export function ParticipationDropVoteDetailsContent({
 
       <div className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.06] tw-px-4 tw-pt-2">
         <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-text-xs tw-font-normal tw-leading-4 tw-text-iron-500">
-          <span>
-            {formatNumberWithCommas(drop.raters_count)}{" "}
-            {drop.raters_count === 1 ? "voter" : "voters"}
-          </span>
+          <span>{voterCountLabel}</span>
           <span aria-hidden="true" className="tw-text-iron-700">
             /
           </span>
           <span>
-            {getVoteValueLabel(drop.rating)} {creditLabel} total
+            {t(locale, "waves.voteDetails.total", {
+              value: formatInteger(locale, drop.rating),
+              unit: creditLabel,
+            })}
           </span>
         </div>
         <div
           role="tablist"
-          aria-label="Vote details"
+          aria-label={t(locale, "waves.voteDetails.tabsLabel")}
           className="tw-mt-2 tw-flex"
         >
           <TabButton
             active={activeTab === "voters"}
             onClick={() => onActiveTabChange("voters")}
           >
-            Voters
+            {t(locale, "waves.voteDetails.voters.tab")}
           </TabButton>
           <TabButton
             active={activeTab === "logs"}
             onClick={() => onActiveTabChange("logs")}
           >
-            Vote log
+            {t(locale, "waves.voteDetails.logs.tab")}
           </TabButton>
         </div>
       </div>
