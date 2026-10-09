@@ -12,6 +12,7 @@ import {
 } from "../support/surfaceSimulation";
 import { gateSidebarHydration } from "../support/sidebarHydration";
 import { installSectionTrackingFixture } from "../support/sectionTrackingFixture";
+import { installReadonlyMutationGuard } from "../support/readonlyMutationGuard";
 
 test.describe("Home Page @smoke @medium @large", () => {
   test.beforeEach(async ({ page }) => {
@@ -64,6 +65,7 @@ test("mobile web starts with its header and full-width content before hydration 
   browser,
   browserName,
   baseURL,
+  context: authenticatedContext,
 }, testInfo) => {
   // Phone emulation supports Chromium/WebKit. Native simulations exercise a
   // different shell and Firefox has no supported mobile device context.
@@ -79,7 +81,11 @@ test("mobile web starts with its header and full-width content before hydration 
   const context = await browser.newContext({
     ...devices[browserName === "webkit" ? "iPhone 14" : "Pixel 7"],
     baseURL,
+    // Preserve fixture-seeded staging access without navigating or hydrating
+    // before the first-paint assertions.
+    storageState: await authenticatedContext.storageState(),
   });
+  const guard = await installReadonlyMutationGuard(context, baseURL);
   const page = await context.newPage();
   const hydration = await gateSidebarHydration(page);
   const main = page.getByRole("main").first();
@@ -132,6 +138,7 @@ test("mobile web starts with its header and full-width content before hydration 
     hydration.release();
     await hydration.attachEvidence(testInfo);
     await context.close();
+    guard.assertNoBlockedRequests();
   }
 });
 
