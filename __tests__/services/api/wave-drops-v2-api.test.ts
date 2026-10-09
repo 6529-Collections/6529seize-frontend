@@ -509,7 +509,7 @@ describe("fetchWaveDropsFeedV2", () => {
       drop: {
         ...original,
         submission_context: { ...original.submission_context, voting },
-      },
+      } as unknown as ApiDropV2,
       wave: waveMin,
     });
     expect(mapped).toMatchObject({
