@@ -632,13 +632,23 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       await expect(
         page.getByRole("tab", { name: "Activity", exact: true })
       ).toHaveAttribute("aria-selected", "true");
+      const activity = page.getByRole("tabpanel", {
+        name: "Activity",
+        exact: true,
+      });
+      const dropControls = activity.getByRole("button", {
+        name: "View drop in chat",
+        exact: true,
+      });
+      await expect(dropControls).toHaveCount(30);
+      await expect(dropControls.first()).toBeVisible();
       await expectCompetitionScroll(
         page,
         page
           .getByRole("main")
           .locator("#competition-alpha-votes")
           .locator(".."),
-        page.getByRole("link", { name: "scroll-voter-29", exact: true })
+        dropControls.last()
       );
       await expectNoHorizontalOverflow(page);
       await page.screenshot({
