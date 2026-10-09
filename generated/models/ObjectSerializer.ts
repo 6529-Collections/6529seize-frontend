@@ -362,6 +362,14 @@ export * from '../models/ApiDropCompetitionContext';
 export * from '../models/ApiDropContextProfileContext';
 export * from '../models/ApiDropCuration';
 export * from '../models/ApiDropCurationRequest';
+export * from '../models/ApiDropForgeAction';
+export * from '../models/ApiDropForgeControlRequest';
+export * from '../models/ApiDropForgeJob';
+export * from '../models/ApiDropForgeJobRequest';
+export * from '../models/ApiDropForgeLaunch';
+export * from '../models/ApiDropForgePhase';
+export * from '../models/ApiDropForgePhaseInput';
+export * from '../models/ApiDropForgePlanRequest';
 export * from '../models/ApiDropGroupMention';
 export * from '../models/ApiDropHiddenState';
 export * from '../models/ApiDropId';
@@ -1255,6 +1263,14 @@ import { ApiDropCompetitionContext } from '../models/ApiDropCompetitionContext';
 import { ApiDropContextProfileContext } from '../models/ApiDropContextProfileContext';
 import { ApiDropCuration } from '../models/ApiDropCuration';
 import { ApiDropCurationRequest } from '../models/ApiDropCurationRequest';
+import { ApiDropForgeAction , ApiDropForgeActionKindEnum  , ApiDropForgeActionStateEnum         } from '../models/ApiDropForgeAction';
+import { ApiDropForgeControlRequest , ApiDropForgeControlRequestOperationEnum   } from '../models/ApiDropForgeControlRequest';
+import { ApiDropForgeJob   , ApiDropForgeJobKindEnum  , ApiDropForgeJobStatusEnum      } from '../models/ApiDropForgeJob';
+import { ApiDropForgeJobRequest , ApiDropForgeJobRequestKindEnum     } from '../models/ApiDropForgeJobRequest';
+import { ApiDropForgeLaunch  , ApiDropForgeLaunchStateEnum             } from '../models/ApiDropForgeLaunch';
+import { ApiDropForgePhase } from '../models/ApiDropForgePhase';
+import { ApiDropForgePhaseInput } from '../models/ApiDropForgePhaseInput';
+import { ApiDropForgePlanRequest } from '../models/ApiDropForgePlanRequest';
 import { ApiDropGroupMention } from '../models/ApiDropGroupMention';
 import { ApiDropHiddenState } from '../models/ApiDropHiddenState';
 import { ApiDropId } from '../models/ApiDropId';
@@ -1904,6 +1920,13 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiCreateConnectionShareResponseTargetClientTypeEnum",
     "ApiCreateLegacyDesktopConnectionShareRequestClientTypeEnum",
     "ApiDecentralizedMediaProtocol",
+    "ApiDropForgeActionKindEnum",
+    "ApiDropForgeActionStateEnum",
+    "ApiDropForgeControlRequestOperationEnum",
+    "ApiDropForgeJobKindEnum",
+    "ApiDropForgeJobStatusEnum",
+    "ApiDropForgeJobRequestKindEnum",
+    "ApiDropForgeLaunchStateEnum",
     "ApiDropGroupMention",
     "ApiDropMainType",
     "ApiDropMediaStatus",
@@ -2408,6 +2431,14 @@ let typeMap: {[index: string]: any} = {
     "ApiDropContextProfileContext": ApiDropContextProfileContext,
     "ApiDropCuration": ApiDropCuration,
     "ApiDropCurationRequest": ApiDropCurationRequest,
+    "ApiDropForgeAction": ApiDropForgeAction,
+    "ApiDropForgeControlRequest": ApiDropForgeControlRequest,
+    "ApiDropForgeJob": ApiDropForgeJob,
+    "ApiDropForgeJobRequest": ApiDropForgeJobRequest,
+    "ApiDropForgeLaunch": ApiDropForgeLaunch,
+    "ApiDropForgePhase": ApiDropForgePhase,
+    "ApiDropForgePhaseInput": ApiDropForgePhaseInput,
+    "ApiDropForgePlanRequest": ApiDropForgePlanRequest,
     "ApiDropHiddenState": ApiDropHiddenState,
     "ApiDropId": ApiDropId,
     "ApiDropMedia": ApiDropMedia,

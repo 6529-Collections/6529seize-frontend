@@ -1,8 +1,13 @@
+> Backend implementation is now in the companion PR. This frontend PR also
+> synchronizes its API models and recognizes the `@dropforgers6529` alert token.
+> Launch controls and EMMA job adoption remain requirements only.
+
 # Drop Forge Auto Launch — Frontend Requirements Analysis
 
-Status: requirements proposal, 2026-10-09. This PR changes documentation only.
-Controls, routes, mention behavior, generated models, and current launch behavior
-are not changed. Backend execution requirements are tracked in the companion PR.
+Status: requirements analysis plus backend API contract synchronization, 2026-10-09.
+Generated models and the existing mention-rendering helpers recognize the new
+backend contract and alert token. Launch controls, routes, and EMMA buttons remain
+unchanged; their adoption requirements are tracked below.
 
 Companion: [backend requirements PR #2143](https://github.com/6529-Collections/6529seize-backend/pull/2143).
 
