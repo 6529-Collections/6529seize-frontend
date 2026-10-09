@@ -494,7 +494,7 @@ async function installCompetitionApi(
         drop: {
           ...entryFixture.drops[0],
           id: dropId,
-          drop_type: "PARTICIPATORY",
+          drop_type: "CHAT",
           title: `Recorded ${owner.id} entry`,
           content: `Immutable ${owner.id} entry content`,
         },
@@ -917,6 +917,19 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         /hydration|hydrated|cannot be a (?:child|descendant)/i.test(error)
       )
     ).toEqual([]);
+  });
+
+  test("renders frozen CHAT deep links with submission voting controls", async ({
+    page,
+  }) => {
+    await installCompetitionApi(page);
+    await page.goto(`${ROOT}/alpha?drop=${entryDropId("alpha")}`);
+    await expect(
+      page.getByText("Recorded alpha entry", { exact: true })
+    ).toBeVisible({ timeout: 30000 });
+    await expect(
+      page.getByRole("button", { name: "Vote", exact: true })
+    ).toBeVisible();
   });
 
   test("saves and resumes a native draft through the existing configuration controls", async ({
