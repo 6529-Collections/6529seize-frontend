@@ -21,6 +21,7 @@ import {
   mapMentionedWaves,
   mapPriorityMetadataV2ToDropMetadata,
   mapReplyToDrop,
+  mapSubmissionVotingV2,
 } from "@/services/api/drop-v2-mappers";
 
 interface FetchWaveDecisionsV2Props {
@@ -89,12 +90,8 @@ const mapDecisionDropV2 = ({
     mentioned_groups: drop.mentioned_groups ?? [],
     mentioned_waves: mapMentionedWaves(drop, wave),
     metadata: mapPriorityMetadataV2ToDropMetadata(drop),
-    rating: voting?.current_calculated_vote ?? 0,
-    realtime_rating:
-      voting?.total_votes_given ?? voting?.current_calculated_vote ?? 0,
-    rating_prediction: voting?.predicted_final_vote ?? 0,
+    ...mapSubmissionVotingV2(voting),
     top_raters: [],
-    raters_count: voting?.voters_count ?? 0,
     context_profile_context: getContextProfileContext(drop),
     ...(drop.viewer_context ? { viewer_context: drop.viewer_context } : {}),
     ...(drop.moderation ? { moderation: drop.moderation } : {}),
