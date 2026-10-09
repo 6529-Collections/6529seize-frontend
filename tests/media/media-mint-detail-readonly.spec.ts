@@ -116,7 +116,7 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
     );
   });
 
-  test("renders The Memes mint page read-only", async ({ page }) => {
+  test("renders The Memes mint page read-only", async ({ page }, testInfo) => {
     await gotoReady(page, "/the-memes/mint");
 
     await expect(page).toHaveTitle(MEMES_MINT_TITLE_PATTERN);
@@ -126,9 +126,46 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
     await expect(
       page.locator("main a[href^='/the-memes/']").first()
     ).toBeVisible({ timeout: 15000 });
-    await expect(
-      page.locator("main [data-nft-media-renderer]").first()
-    ).toBeVisible();
+    const media = page.locator("main [data-nft-media-renderer]").first();
+    const readMediaState = () =>
+      media.evaluateAll((elements) => {
+        const element = elements[0];
+        if (!element) return { loaded: false, reason: "Missing mint artwork" };
+        const image = element instanceof HTMLImageElement ? element : null;
+        const bounds = element.getBoundingClientRect();
+        return {
+          loaded:
+            !image ||
+            (image.complete &&
+              image.naturalWidth > 0 &&
+              image.naturalHeight > 0),
+          tag: element.tagName,
+          src: image?.currentSrc ?? element.getAttribute("src"),
+          complete: image?.complete,
+          naturalWidth: image?.naturalWidth,
+          naturalHeight: image?.naturalHeight,
+          width: bounds.width,
+          height: bounds.height,
+        };
+      });
+    try {
+      // Mint data can be ready before the original gateway image has decoded.
+      await expect
+        .poll(readMediaState, {
+          timeout: 20000,
+          message: "Mint artwork image must finish loading successfully",
+        })
+        .toMatchObject({ loaded: true });
+      await expect(media).toBeVisible();
+    } finally {
+      const mediaState = await readMediaState().catch((error: unknown) => ({
+        error: String(error),
+      }));
+      await testInfo.attach("mint-artwork-state", {
+        body: Buffer.from(JSON.stringify(mediaState, null, 2)),
+        contentType: "application/json",
+      });
+    }
     await expect(
       page.getByRole("link", { name: "Distribution Plan" })
     ).toBeVisible();

@@ -318,33 +318,51 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       testInfo.project.use.baseURL
     );
     const settingsResponse = page.waitForResponse(
-      (response) => new URL(response.url()).pathname === "/api/settings"
+      (response) =>
+        response.request().method() === "GET" &&
+        new URL(response.url()).pathname === "/api/settings",
+      { timeout: RESPONSE_TIMEOUT_MS }
     );
     await gotoReady(page, "/waves");
-    const settings = await (await settingsResponse).json();
+    const settingsResult = await settingsResponse;
+    expect(
+      settingsResult.ok(),
+      `Main Stage settings returned HTTP ${settingsResult.status()}`
+    ).toBe(true);
+    const settings = await settingsResult.json();
     expect(settings.memes_wave_id).toMatch(/^[0-9a-f-]{36}$/i);
-    const leaderboardResponse = page.waitForResponse((response) => {
-      const url = new URL(response.url());
-      return (
-        url.pathname ===
-          `/api/v2/waves/${settings.memes_wave_id}/leaderboard` &&
-        url.searchParams.get("sort") === "RANK"
-      );
-    });
     await gotoReady(page, `/waves/${settings.memes_wave_id}`);
     const navigation = page.getByRole("navigation", { name: "Wave sections" });
     await expect(
       navigation.getByRole("button", { name: /^(Chat|Leaderboard|Winners)$/ })
-    ).toHaveText(["Chat", "Leaderboard", "Winners"]);
+    ).toHaveText(["Chat", "Leaderboard", "Winners"], {
+      timeout: RESPONSE_TIMEOUT_MS,
+    });
     await testInfo.attach("main-stage-chat-first-app-tabs", {
       body: await page.screenshot(),
       contentType: "image/png",
     });
-    await navigation
-      .getByRole("button", { name: "Leaderboard", exact: true })
-      .click();
-    const response = await leaderboardResponse;
-    expect(response.ok()).toBe(true);
+    const [response] = await Promise.all([
+      page.waitForResponse(
+        (candidate) => {
+          const url = new URL(candidate.url());
+          return (
+            candidate.request().method() === "GET" &&
+            url.pathname ===
+              `/api/v2/waves/${settings.memes_wave_id}/leaderboard` &&
+            url.searchParams.get("sort") === "RANK"
+          );
+        },
+        { timeout: RESPONSE_TIMEOUT_MS }
+      ),
+      navigation
+        .getByRole("button", { name: "Leaderboard", exact: true })
+        .click(),
+    ]);
+    expect(
+      response.ok(),
+      `Main Stage leaderboard returned HTTP ${response.status()}`
+    ).toBe(true);
     const data = await response.json();
     expect(data.wave.id).toBe(settings.memes_wave_id);
     await testInfo.attach("main-stage-leaderboard-counts", {

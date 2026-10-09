@@ -178,20 +178,17 @@ async function gotoReady(page: Page, path: string) {
 }
 
 async function firstVisible(locator: Locator) {
-  const count = await locator.count();
-  for (let index = 0; index < count; index += 1) {
-    const candidate = locator.nth(index);
-    if (await candidate.isVisible().catch(() => false)) {
-      return candidate;
-    }
-  }
-  throw new Error("Expected at least one visible locator match.");
+  // Server-rendered content can precede the interactive navigation shell.
+  const candidate = locator.filter({ visible: true }).first();
+  await expect(candidate).toBeVisible({ timeout: NAVIGATION_TIMEOUT_MS });
+  return candidate;
 }
 
 async function openHeaderSearch(page: Page) {
   const searchButton = await firstVisible(
     page.getByRole("button", { name: /^Search(?: 6529)?$/ })
   );
+  await expect(searchButton).toBeEnabled({ timeout: NAVIGATION_TIMEOUT_MS });
   await searchButton.click();
   const searchInput = page.locator("#header-search-input");
   await expect(searchInput).toBeVisible();
@@ -713,12 +710,21 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
           })
         );
 
-    await expect(page).toHaveURL(
-      (url) =>
-        url.pathname === expectedPath ||
-        (expectedQueryWaveId !== null &&
-          url.searchParams.get("wave") === expectedQueryWaveId)
-    );
+    // The search dialog is ready; pending media must not make the URL check
+    // wait for the unrelated page load event.
+    await expect
+      .poll(
+        () => {
+          const url = new URL(page.url());
+          return (
+            url.pathname === expectedPath ||
+            (expectedQueryWaveId !== null &&
+              url.searchParams.get("wave") === expectedQueryWaveId)
+          );
+        },
+        { message: "Wave search must remain on the selected wave route" }
+      )
+      .toBe(true);
     await expect(searchInput).toHaveAttribute("placeholder", "Search messages");
     const minimumQueryMessage = page
       .locator("#wave-drops-search-idle-status")
