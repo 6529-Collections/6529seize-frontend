@@ -6583,7 +6583,7 @@
       ],
       "facts": [
         "The bell button opens wave notification preferences after a connected non-proxy profile has joined the wave.",
-        "The notification menu has a Broadcast mentions option with an @ icon; it controls notifications for both @all and @contributors.",
+        "The notification menu has a Broadcast mentions option with an @ icon; it controls notifications for both @all and @contributors and preserves other group preferences such as @dropforgers6529.",
         "The notification menu has an All messages option for every-message notifications.",
         "When all-message notifications are over the follower limit, the notification menu shows an inline follower-limit note; if the option is already enabled, users can still turn it off.",
         "The speaker control mutes waves before or after joining.",

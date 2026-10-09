@@ -1,4 +1,5 @@
 import { useAuth } from "@/components/auth/Auth";
+import { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
 import type { ApiUpdateWaveNotificationPreferencesRequest } from "@/generated/models/ApiUpdateWaveNotificationPreferencesRequest";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiWaveNotificationPreferences } from "@/generated/models/ApiWaveNotificationPreferences";
@@ -77,13 +78,18 @@ export function useWavePreferenceSettings(wave: ApiWave) {
   );
 
   const toggleBroadcastMentions = useCallback(async () => {
+    const otherGroups = enabledGroupNotifications.filter(
+      (group) =>
+        group !== BROADCAST_MENTION_PREFERENCE &&
+        group !== ApiDropGroupMention.Contributors
+    );
     await updateNotificationPreferences({
       target: "broadcast-mentions",
       body: {
         subscribed: subscribedToAllDrops,
         enabled_group_notifications: broadcastMentionsEnabled
-          ? []
-          : [BROADCAST_MENTION_PREFERENCE],
+          ? otherGroups
+          : [BROADCAST_MENTION_PREFERENCE, ...otherGroups],
       },
       errorMessage: broadcastMentionsEnabled
         ? waveNotificationSettingsMessage(
@@ -95,6 +101,7 @@ export function useWavePreferenceSettings(wave: ApiWave) {
     });
   }, [
     broadcastMentionsEnabled,
+    enabledGroupNotifications,
     subscribedToAllDrops,
     updateNotificationPreferences,
   ]);

@@ -29,7 +29,8 @@ behavior across thread header controls and sidebar wave rows.
 
 - The bell button opens notification preferences.
 - The `Broadcast mentions` row, shown with the `@` icon, turns on notifications
-  for the admin-only `@all` and `@contributors` broadcasts.
+  for the admin-only `@all` and `@contributors` broadcasts. Toggling this row
+  preserves other group preferences, including `@dropforgers6529`.
 - The `All messages` row turns on notifications for every message.
 - If all-message notifications are unavailable by follower limit and not already
   enabled, the all-message row stays visible but disabled with an inline reason.
