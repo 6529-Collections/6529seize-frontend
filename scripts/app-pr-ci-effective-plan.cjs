@@ -162,6 +162,25 @@ function applyEffectiveAppPrCiPlan(plan) {
       ].includes(file)
   );
 
+  const playwrightPdfAttachments = files.some(
+    (file) =>
+      /^(?:components\/drops\/view\/item\/content\/attachments\/|__tests__\/components\/drops\/view\/item\/content\/attachments\/|tests\/media\/pdf-attachment|tests\/fixtures\/pdf\/)/u.test(
+        file
+      ) ||
+      [
+        "components/waves/drops/WaveDropPartContentAttachments.tsx",
+        "hooks/useDeviceInfo.ts",
+        "scripts/prepare-pdfjs-assets.cjs",
+        "proxy.ts",
+        "config/securityHeaders.ts",
+        "package.json",
+        "pnpm-lock.yaml",
+        "tests/packs.manifest.cjs",
+        "scripts/app-pr-ci-effective-plan.cjs",
+        ".github/workflows/app-pr-ci.yml",
+      ].includes(file)
+  );
+
   const checks = {
     ...plan.checks,
     install: check(
@@ -201,6 +220,10 @@ function applyEffectiveAppPrCiPlan(plan) {
       playwrightWaveFeatureUsage
         ? "Wave tracking controls or SDK policy require isolated desktop/mobile visibility and privacy coverage."
         : "No Wave feature tracking boundary changed."
+    ),
+    playwright_pdf_attachments: check(
+      playwrightPdfAttachments,
+      "PDF attachment reader or its browser/runtime dependencies changed."
     ),
     playwright_museum: check(
       playwrightMuseum,

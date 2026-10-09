@@ -13,6 +13,7 @@ type EffectivePlan = {
     playwright_artwork_documentation: { required: boolean };
     playwright_native_competition: { required: boolean };
     playwright_wave_feature_usage: { required: boolean };
+    playwright_pdf_attachments: { required: boolean };
     install: { required: boolean };
   };
 };
@@ -314,4 +315,21 @@ describe("effective App PR CI plan", () => {
   ])("rejects a malformed plan with %s", (_description, malformedPlan) => {
     expect(() => executeRawPlan(malformedPlan)).toThrow();
   });
+});
+
+it.each([
+  "components/drops/view/item/content/attachments/PdfAttachmentReader.tsx",
+  "scripts/prepare-pdfjs-assets.cjs",
+  "config/securityHeaders.ts",
+  "tests/media/pdf-attachment-preview-sandbox.spec.ts",
+  "tests/fixtures/pdf/one-page.pdf",
+])("selects PDF attachment WebKit coverage for %s", (file) => {
+  expect(executePlan([file]).checks.playwright_pdf_attachments.required).toBe(
+    true
+  );
+});
+it("does not select PDF coverage for unrelated content", () => {
+  expect(
+    executePlan(["README.md"]).checks.playwright_pdf_attachments.required
+  ).toBe(false);
 });
