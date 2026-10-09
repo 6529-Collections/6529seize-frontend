@@ -1,4 +1,5 @@
 import path from "node:path";
+import { createImageHeavyPdf } from "../fixtures/pdf/image-heavy";
 import { devices, type Page } from "@playwright/test";
 import type { ApiDropV2 } from "../../generated/models/ApiDropV2";
 import { ApiAttachmentKind } from "../../generated/models/ApiAttachmentKind";
@@ -297,6 +298,103 @@ test.describe("PDF attachment previews @local-only", () => {
       await second.getByRole("button", { name: "Close", exact: true }).click();
       expect(referrers.length).toBeGreaterThan(0);
       expect(referrers.every((referrer) => referrer === undefined)).toBe(true);
+    });
+
+    test("releases decoded page images while reading and revisiting a long scanned PDF", async ({
+      page,
+      baseURL,
+    }) => {
+      // Track actual transferred PDF image bitmaps, not the browser's total heap.
+      await page.addInitScript(() => {
+        const images = new WeakMap<ImageBitmap, number>();
+        let retainedPixels = 0;
+        let receivedImages = 0;
+        const report = () => {
+          document.documentElement.dataset["pdfRetainedPixels"] =
+            String(retainedPixels);
+          document.documentElement.dataset["pdfReceivedImages"] =
+            String(receivedImages);
+        };
+        const NativeWorker = globalThis.Worker;
+        globalThis.Worker = class extends NativeWorker {
+          constructor(url: string | URL, options?: WorkerOptions) {
+            super(url, options);
+            this.addEventListener("message", (event: MessageEvent) => {
+              if (
+                event.data?.action !== "obj" ||
+                event.data.data?.[2] !== "Image"
+              )
+                return;
+              const bitmap = event.data.data[3]?.bitmap;
+              if (!(bitmap instanceof ImageBitmap)) return;
+              const pixels = bitmap.width * bitmap.height;
+              images.set(bitmap, pixels);
+              retainedPixels += pixels;
+              receivedImages += 1;
+              report();
+            });
+          }
+        };
+        const close = ImageBitmap.prototype.close;
+        ImageBitmap.prototype.close = function () {
+          retainedPixels -= images.get(this) ?? 0;
+          images.delete(this);
+          close.call(this);
+          report();
+        };
+      });
+      await installPdfDrop(page, baseURL);
+      await page.route(`${MEDIA_ROOT}first.pdf`, (route) =>
+        route.fulfill({
+          headers: CORS_HEADERS,
+          contentType: "application/pdf",
+          body: createImageHeavyPdf(),
+        })
+      );
+      await openWave(page);
+      await page.getByRole("button", { name: PREVIEW_BUTTON }).first().click();
+      const reader = page.getByRole("dialog", {
+        name: "first.pdf",
+        exact: true,
+      });
+      const scroller = reader.getByRole("region", { name: "PDF pages" });
+      await expect(
+        reader.getByText("Page 1 of 60", { exact: true })
+      ).toBeVisible();
+      const retainedImages = () =>
+        page.evaluate(
+          () =>
+            Number(document.documentElement.dataset["pdfRetainedPixels"] ?? 0) /
+            (1024 * 1536)
+        );
+      for (const number of [
+        ...Array.from({ length: 60 }, (_, index) => index + 1),
+        1,
+        30,
+        60,
+      ]) {
+        const sheet = scroller.locator(`[data-pdf-page="${number}"]`);
+        await sheet.scrollIntoViewIfNeeded();
+        await expect(sheet.locator("canvas")).toBeVisible();
+        await expect(
+          sheet.getByText(`Raster page ${number}`, { exact: true })
+        ).toBeAttached();
+        // Only the viewport plus one screen above and below may retain images.
+        await expect.poll(retainedImages).toBeLessThanOrEqual(6);
+      }
+      expect(
+        await page.evaluate(() =>
+          Number(document.documentElement.dataset["pdfReceivedImages"])
+        )
+      ).toBeGreaterThanOrEqual(60);
+      await scroller.evaluate((element) => {
+        element.scrollTop = element.scrollHeight;
+      });
+      await expect(
+        reader.getByText("Page 60 of 60", { exact: true })
+      ).toBeVisible();
+      await reader.getByRole("button", { name: "Close", exact: true }).click();
+      await expect.poll(retainedImages).toBe(0);
     });
 
     test("opens the reader from the single-drop view", async ({
