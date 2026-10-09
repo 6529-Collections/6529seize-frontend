@@ -61,8 +61,7 @@ right sidebar, and what users see for loading and empty states.
 
 - `Winners` appears in sidebar tabs only after first decision time passes.
 - Loading state shows compact skeleton placeholders.
-- If no decision points are returned, sidebar empty state shows `No Winners
-Yet`.
+- If no decision points are returned, sidebar empty state shows `No Winners Yet`.
 - Single-decision waves render compact winners from the first decision.
 - Multi-decision waves show a decision selector with date/time and winner
   counts.

@@ -4,6 +4,7 @@ import UserCICAndLevel, {
   UserCICAndLevelSize,
 } from "@/components/user/utils/UserCICAndLevel";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import { ApiDropType } from "@/generated/models/ApiDropType";
 import { getTimeAgoShort } from "@/helpers/Helpers";
 import type { ImageScale } from "@/helpers/image.helpers";
 import { areSameProfileIdentity } from "@/helpers/ProfileHelpers";
@@ -397,17 +398,19 @@ function EndedParticipationDropInner({
               <WaveDropMetadata metadata={visibleMetadata} />
             </div>
           )}
-          {showInteractions && (
-            <div
-              className={`${shouldOffsetRows ? "tw-ml-[3.25rem]" : ""} tw-py-2`}
-            >
-              <ParticipationDropRatings
-                drop={drop}
-                rank={drop.rank}
-                isVotingClosed
-              />
-            </div>
-          )}
+          {showInteractions &&
+            drop.drop_type === ApiDropType.Participatory &&
+            drop.wave.voting_period_start != null && (
+              <div
+                className={`${shouldOffsetRows ? "tw-ml-[3.25rem]" : ""} tw-py-2`}
+              >
+                <ParticipationDropRatings
+                  drop={drop}
+                  rank={drop.rank}
+                  isVotingClosed
+                />
+              </div>
+            )}
           {showInteractions && (
             <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
               <WaveDropReactions drop={drop} />

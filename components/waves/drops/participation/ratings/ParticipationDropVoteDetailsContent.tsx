@@ -13,7 +13,7 @@ import {
 } from "./ParticipationDropVoteDetailsRows";
 import Button from "@/components/utils/button/Button";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import { formatInteger } from "@/i18n/format";
+import { formatInteger, selectPluralCategory } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 
 type VoteDetailsTab = "voters" | "logs";
@@ -120,7 +120,7 @@ export function ParticipationDropVoteDetailsContent({
   const votersUnavailable = drop.voters_count_available === false;
   const creditLabel = WAVE_VOTING_LABELS[drop.wave.voting_credit_type];
   const voterCountMessageKey =
-    new Intl.PluralRules(locale).select(drop.raters_count) === "one"
+    selectPluralCategory(locale, drop.raters_count) === "one"
       ? "waves.voteDetails.voters.one"
       : "waves.voteDetails.voters.other";
   const voterCountLabel = votersUnavailable
@@ -163,7 +163,9 @@ export function ParticipationDropVoteDetailsContent({
     if (votersUnavailable) {
       return (
         <VoteDetailsEmptyState
-          label={t(locale, "waves.voteDetails.voters.unavailableExplanation")}
+          label={t(locale, "waves.voteDetails.voters.unavailableExplanation", {
+            voteLogTab: t(locale, "waves.voteDetails.logs.tab"),
+          })}
         />
       );
     }

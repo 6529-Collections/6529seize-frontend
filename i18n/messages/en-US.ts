@@ -727,7 +727,7 @@ const WAVE_VOTE_DETAILS_MESSAGES = objectMessages("waves.voteDetails", {
     "View vote history; historical voter count unavailable",
   "voters.unavailable": "Voters unavailable",
   "voters.unavailableExplanation":
-    "The voter list at the time this winner was decided was not saved. The final score is available. Open Vote log to view any recorded changes.",
+    "The voter list at the time this winner was decided was not saved. The final score is available. Open {voteLogTab} to view any recorded changes.",
   "voters.one": "{count} voter",
   "voters.other": "{count} voters",
   "voters.tab": "Voters",

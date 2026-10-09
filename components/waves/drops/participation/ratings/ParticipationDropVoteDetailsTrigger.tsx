@@ -7,7 +7,7 @@ import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
-import { formatInteger } from "@/i18n/format";
+import { formatInteger, selectPluralCategory } from "@/i18n/format";
 import { t, tRich } from "@/i18n/messages";
 import {
   type MouseEvent as ReactMouseEvent,
@@ -382,9 +382,7 @@ export default function ParticipationDropVoteDetailsTrigger({
     triggerClassName,
     chevronClassName,
   } = getTriggerClassNames(density, visualVariant, isOpen);
-  const voterPluralCategory = new Intl.PluralRules(locale).select(
-    drop.raters_count
-  );
+  const voterPluralCategory = selectPluralCategory(locale, drop.raters_count);
   const voterMessageKey =
     voterPluralCategory === "one"
       ? "waves.leaderboard.grid.voters.one"
@@ -420,7 +418,7 @@ export default function ParticipationDropVoteDetailsTrigger({
             density === "podium" ? podiumTextClassName : ""
           }`}
         >
-          {drop.voters_count_available === false
+          {votersUnavailable
             ? t(locale, "waves.voteDetails.voters.unavailable")
             : tRich(locale, voterMessageKey, {
                 count: (

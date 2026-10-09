@@ -1,4 +1,4 @@
-import type { SupportedLocale } from "@/i18n/locales";
+import { normalizeLocale, type SupportedLocale } from "@/i18n/locales";
 
 const SHORT_DATE_FORMAT = {
   day: "numeric",
@@ -112,6 +112,16 @@ export function formatInteger(
   value: number | null | undefined
 ): string {
   return formatNumber(locale, value, { maximumFractionDigits: 0 });
+}
+
+export function selectPluralCategory(
+  locale: string | null | undefined,
+  value: number
+): Intl.LDMLPluralRule {
+  const finiteValue = toFiniteNumber(value);
+  return finiteValue === null
+    ? "other"
+    : new Intl.PluralRules(normalizeLocale(locale)).select(finiteValue);
 }
 
 export function formatPercent(

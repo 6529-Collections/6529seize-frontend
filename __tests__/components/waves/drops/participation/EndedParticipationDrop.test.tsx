@@ -2,6 +2,8 @@ import { act, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
 import EndedParticipationDrop from "@/components/waves/drops/participation/EndedParticipationDrop";
 import { ApiWaveParticipationSubmissionStrategyType } from "@/generated/models/ApiWaveParticipationSubmissionStrategyType";
+import { ApiDropType } from "@/generated/models/ApiDropType";
+import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { DropLocation } from "@/components/waves/drops/drop.types";
 
 jest.mock("next/navigation", () => ({
@@ -408,7 +410,18 @@ describe("EndedParticipationDrop", () => {
 });
 
 it("keeps scores and voters on an ended submission without enabling voting", () => {
-  const completed = { ...drop, rating: 187867, raters_count: 3, rank: 1 };
+  const completed = {
+    ...drop,
+    drop_type: ApiDropType.Participatory,
+    wave: {
+      ...drop.wave,
+      voting_period_start: 1,
+      voting_credit_type: ApiWaveCreditType.Tdh,
+    },
+    rating: 187867,
+    raters_count: 3,
+    rank: 1,
+  };
   render(
     <EndedParticipationDrop
       drop={completed}
@@ -428,3 +441,28 @@ it("keeps scores and voters on an ended submission without enabling voting", () 
     screen.queryByRole("button", { name: "Vote" })
   ).not.toBeInTheDocument();
 });
+
+it.each([ApiDropType.Chat, ApiDropType.Participatory])(
+  "omits vote summaries from an ended %s card without a voting period",
+  (dropType) => {
+    render(
+      <EndedParticipationDrop
+        drop={{
+          ...drop,
+          drop_type: dropType,
+          wave: { ...drop.wave, voting_period_start: null },
+        }}
+        contentPresentation="proposalCard"
+        showWaveInfo={false}
+        activeDrop={null}
+        showReplyAndQuote={false}
+        location={DropLocation.WAVE}
+        onReply={jest.fn()}
+        onQuoteClick={jest.fn()}
+      />
+    );
+    expect(
+      screen.queryByTestId("historical-vote-summary")
+    ).not.toBeInTheDocument();
+  }
+);
