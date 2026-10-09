@@ -55,6 +55,9 @@ function PdfReaderSession({
 }) {
   const documentRef = useRef<HTMLDivElement>(null);
   const viewportRef = useRef<HTMLDivElement>(null);
+  const currentPageRef = useRef(1);
+  const previousWidthRef = useRef(0);
+  const restorePageRef = useRef<number | null>(null);
   const [file, setFile] = useState<{ data: Uint8Array } | null>(null);
   const [error, setError] = useState<MessageKey | null>(null);
   const [pages, setPages] = useState(0);
@@ -96,6 +99,14 @@ function PdfReaderSession({
   }, [url]);
 
   const updateCurrentPage = useCallback((container: HTMLDivElement) => {
+    // A rotation resizes the viewport before React has resized the pages. Keep
+    // the reading position until both widths agree.
+    if (
+      Math.abs(
+        (documentRef.current?.offsetWidth ?? 0) - container.clientWidth
+      ) > 1
+    )
+      return;
     const elements = Array.from(
       container.querySelectorAll<HTMLElement>("[data-pdf-page]")
     );
@@ -111,33 +122,53 @@ function PdfReaderSession({
       : elements.findLast(
           (element) => element.getBoundingClientRect().top <= readingLine
         );
-    setPage(Number(current?.dataset["pdfPage"] ?? 1));
+    const nextPage = Number(current?.dataset["pdfPage"] ?? 1);
+    currentPageRef.current = nextPage;
+    setPage(nextPage);
   }, []);
 
-  const observeContainer = useCallback(
-    (container: HTMLDivElement | null) => {
-      viewportRef.current = container;
-      setScrollRoot(container);
-      if (!container) return;
-      const observer = new ResizeObserver(([entry]) => {
-        if (entry) {
-          setSize({
-            width: Math.floor(entry.contentRect.width),
-            height: entry.contentRect.height,
-          });
-          updateCurrentPage(container);
+  const observeContainer = useCallback((container: HTMLDivElement | null) => {
+    viewportRef.current = container;
+    setScrollRoot(container);
+    if (!container) return;
+    const observer = new ResizeObserver(([entry]) => {
+      if (entry) {
+        const width = Math.floor(entry.contentRect.width);
+        if (
+          previousWidthRef.current > 0 &&
+          width !== previousWidthRef.current
+        ) {
+          restorePageRef.current = currentPageRef.current;
         }
-      });
-      observer.observe(container);
-      return () => observer.disconnect();
-    },
-    [updateCurrentPage]
-  );
+        previousWidthRef.current = width;
+        setSize({
+          width,
+          height: entry.contentRect.height,
+        });
+      }
+    });
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, []);
   useLayoutEffect(() => {
-    if (!scrollRoot) return;
-    const frame = requestAnimationFrame(() => updateCurrentPage(scrollRoot));
+    const viewport = viewportRef.current;
+    if (!viewport) return;
+    const frame = requestAnimationFrame(() => {
+      if (restorePageRef.current !== null) {
+        const restoredPage = viewport.querySelector<HTMLElement>(
+          `[data-pdf-page="${restorePageRef.current}"]`
+        );
+        if (restoredPage) {
+          viewport.scrollTop +=
+            restoredPage.getBoundingClientRect().top -
+            viewport.getBoundingClientRect().top;
+        }
+        restorePageRef.current = null;
+      }
+      updateCurrentPage(viewport);
+    });
     return () => cancelAnimationFrame(frame);
-  }, [scrollRoot, size.width, size.height, pages, updateCurrentPage]);
+  }, [size.width, size.height, pages, updateCurrentPage]);
   const onPageError = useCallback(() => setError(PREVIEW_ERROR_KEY), []);
   const loading = (
     <p role="status" className="tw-p-4">

@@ -206,6 +206,15 @@ test.describe("PDF attachment previews @local-only", () => {
         )
         .toBeLessThan(12);
       await page.setViewportSize({ width: 844, height: 390 });
+      await expect
+        .poll(() =>
+          reader
+            .getByRole("region", { name: "PDF pages" })
+            .locator("[data-pdf-page]")
+            .first()
+            .evaluate((element) => element.clientWidth)
+        )
+        .toBe(844);
       await expect(
         reader.getByText("Page 20 of 20", { exact: true })
       ).toBeVisible();
