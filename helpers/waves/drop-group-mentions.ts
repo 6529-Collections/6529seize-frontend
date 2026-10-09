@@ -6,9 +6,12 @@ export const GROUP_MENTION_TEXT: Readonly<Record<ApiDropGroupMention, string>> =
     [ApiDropGroupMention.Contributors]: "@contributors",
     [ApiDropGroupMention.Admins]: "@admins",
     [ApiDropGroupMention.Devs6529]: "@devs6529",
+    [ApiDropGroupMention.DropForgers6529]: "@dropforgers6529",
   };
 
 const GROUP_MENTION_PATTERNS: Readonly<Record<ApiDropGroupMention, RegExp>> = {
+  [ApiDropGroupMention.DropForgers6529]:
+    /(?<![\p{L}\p{N}_@])(@dropforgers6529)(?![\p{L}\p{N}_@])/iu,
   [ApiDropGroupMention.All]: /(?<![\p{L}\p{N}_@])(@all)(?![\p{L}\p{N}_@])/iu,
   [ApiDropGroupMention.Contributors]:
     /(?<![\p{L}\p{N}_@])(@contributors)(?![\p{L}\p{N}_@])/iu,
@@ -21,6 +24,8 @@ const GROUP_MENTION_PATTERNS: Readonly<Record<ApiDropGroupMention, RegExp>> = {
 const GROUP_MENTION_MARK_PATTERN_FACTORIES: Readonly<
   Record<ApiDropGroupMention, () => RegExp>
 > = {
+  [ApiDropGroupMention.DropForgers6529]: () =>
+    /(?<![\p{L}\p{N}_@])(@dropforgers6529)(?![\p{L}\p{N}_@])/giu,
   [ApiDropGroupMention.All]: () =>
     /(?<![\p{L}\p{N}_@])(@all)(?![\p{L}\p{N}_@])/giu,
   [ApiDropGroupMention.Contributors]: () =>

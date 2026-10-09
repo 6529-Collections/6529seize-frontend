@@ -7790,6 +7790,227 @@ paths:
           description: Invalid request
         "403":
           description: Forbidden - not a Subscription Admin
+  /drop-forge/launches/{contract}/{claim_id}:
+    get:
+      tags:
+        - Drop Forge
+      operationId: getDropForgeLaunch
+      summary: getDropForgeLaunch
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/drop-forge/drop-forge.handlers"
+          name: getDropForgeLaunch
+      parameters:
+        - name: contract
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: claim_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Current durable state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDropForgeLaunch"
+        "400":
+          description: Invalid configuration or unsafe transition
+        "401":
+          description: Authentication required
+        "403":
+          description: Administrator access required
+        "404":
+          description: Launch or distribution job not found
+        "409":
+          description: Revision or existing launch conflict
+    put:
+      tags:
+        - Drop Forge
+      operationId: putDropForgeLaunch
+      summary: putDropForgeLaunch
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/drop-forge/drop-forge.handlers"
+          name: putDropForgeLaunch
+      parameters:
+        - name: contract
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: claim_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiDropForgePlanRequest"
+      responses:
+        "200":
+          description: Current durable state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDropForgeLaunch"
+        "400":
+          description: Invalid configuration or unsafe transition
+        "401":
+          description: Authentication required
+        "403":
+          description: Administrator access required
+        "409":
+          description: Revision or existing launch conflict
+  /drop-forge/launches/{contract}/{claim_id}/control:
+    post:
+      tags:
+        - Drop Forge
+      operationId: controlDropForgeLaunch
+      summary: controlDropForgeLaunch
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/drop-forge/drop-forge.handlers"
+          name: controlDropForgeLaunch
+      parameters:
+        - name: contract
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: claim_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiDropForgeControlRequest"
+      responses:
+        "200":
+          description: Current durable state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDropForgeLaunch"
+        "400":
+          description: Invalid configuration or unsafe transition
+        "401":
+          description: Authentication required
+        "403":
+          description: Administrator access required
+        "404":
+          description: Launch or distribution job not found
+        "409":
+          description: Revision or existing launch conflict
+  /drop-forge/distribution-jobs/{contract}/{claim_id}:
+    post:
+      tags:
+        - Drop Forge
+      operationId: createDropForgeDistributionJob
+      summary: createDropForgeDistributionJob
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/drop-forge/drop-forge.handlers"
+          name: createDropForgeDistributionJob
+      parameters:
+        - name: contract
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: claim_id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiDropForgeJobRequest"
+      responses:
+        "200":
+          description: >-
+            Created job or existing job returned for the same request_id and
+            inputs
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDropForgeJob"
+        "400":
+          description: Invalid configuration or unsafe transition
+        "401":
+          description: Authentication required
+        "403":
+          description: Administrator access required
+        "409":
+          description: Revision or existing launch conflict
+  /drop-forge/distribution-jobs/{job_id}:
+    get:
+      tags:
+        - Drop Forge
+      operationId: getDropForgeDistributionJob
+      summary: getDropForgeDistributionJob
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/drop-forge/drop-forge.handlers"
+          name: getDropForgeDistributionJob
+      parameters:
+        - name: job_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Current durable state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDropForgeJob"
+        "400":
+          description: Invalid configuration or unsafe transition
+        "401":
+          description: Authentication required
+        "403":
+          description: Administrator access required
+        "404":
+          description: Launch or distribution job not found
+        "409":
+          description: Revision or existing launch conflict
   /light-drops:
     get:
       tags:
@@ -28571,6 +28792,258 @@ components:
           type: integer
           format: int64
           minimum: 1
+    ApiDropForgeAction:
+      type: object
+      required:
+        - id
+        - kind
+        - state
+        - phase
+        - due
+        - deadline
+        - recipients
+      properties:
+        id:
+          type: string
+        kind:
+          type: string
+          enum:
+            - INITIALIZE
+            - AIRDROP
+            - UPDATE
+        state:
+          type: string
+          enum:
+            - PENDING
+            - RESERVED
+            - SIGNED
+            - CONFIRMED
+            - FAILED
+        phase:
+          type: integer
+        due:
+          type: integer
+          format: int64
+        deadline:
+          type: integer
+          format: int64
+        recipients:
+          type: integer
+          description: Recipient count; transaction bytes are never returned
+        hash:
+          type: string
+          nullable: true
+        block_number:
+          type: integer
+          nullable: true
+    ApiDropForgeControlRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - revision
+        - operation
+      properties:
+        revision:
+          type: integer
+          minimum: 1
+        operation:
+          type: string
+          enum:
+            - ARM
+            - PAUSE
+            - RESUME
+            - CANCEL
+    ApiDropForgeJob:
+      type: object
+      required:
+        - id
+        - contract
+        - claim_id
+        - kind
+        - status
+        - updated_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        contract:
+          type: string
+        claim_id:
+          type: integer
+        kind:
+          type: string
+          enum:
+            - PHASE
+            - FINALIZE
+        status:
+          type: string
+          enum:
+            - PENDING
+            - COMPLETED
+            - FAILED
+        result_json:
+          type: string
+          nullable: true
+          description: Durable download result serialized as JSON
+        error:
+          type: string
+          nullable: true
+        updated_at:
+          type: integer
+          format: int64
+    ApiDropForgeJobRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - request_id
+        - kind
+      properties:
+        request_id:
+          type: string
+          format: uuid
+          description: Stable client ID for retrying the same request
+        kind:
+          type: string
+          enum:
+            - PHASE
+            - FINALIZE
+        plan_id:
+          type: string
+          maxLength: 100
+        phase_id:
+          type: string
+          maxLength: 100
+          description: EMMA phase ID or public
+    ApiDropForgeLaunch:
+      type: object
+      required:
+        - id
+        - revision
+        - state
+        - chain_id
+        - contract
+        - claim_id
+        - signer
+        - payment_receiver
+        - distribution_hash
+        - phases
+        - actions
+        - updated_at
+      properties:
+        id:
+          type: string
+        revision:
+          type: integer
+        state:
+          type: string
+          enum:
+            - DRAFT
+            - ARMED
+            - RUNNING
+            - PAUSED
+            - BLOCKED
+            - COMPLETED
+            - CANCELLED
+        error:
+          type: string
+          nullable: true
+        chain_id:
+          type: integer
+        contract:
+          type: string
+        claim_id:
+          type: integer
+        signer:
+          type: string
+        payment_receiver:
+          type: string
+        distribution_hash:
+          type: string
+        phases:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiDropForgePhase"
+        actions:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiDropForgeAction"
+        updated_at:
+          type: integer
+          format: int64
+    ApiDropForgePhase:
+      type: object
+      required:
+        - name
+        - start
+        - end
+        - price_wei
+        - root
+      properties:
+        name:
+          type: string
+        start:
+          type: integer
+          format: int64
+        end:
+          type: integer
+          format: int64
+        price_wei:
+          type: string
+        root:
+          type: string
+    ApiDropForgePhaseInput:
+      type: object
+      additionalProperties: false
+      required:
+        - name
+        - start
+        - end
+        - price_wei
+        - is_public
+      properties:
+        name:
+          type: string
+          maxLength: 100
+        start:
+          type: integer
+          format: int64
+          description: Unix seconds
+        end:
+          type: integer
+          format: int64
+          description: Unix seconds
+        price_wei:
+          type: string
+          pattern: ^[0-9]+$
+        is_public:
+          type: boolean
+    ApiDropForgePlanRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - revision
+        - initialize_at
+        - phases
+        - include_artist_airdrops
+        - include_team_airdrops
+      properties:
+        revision:
+          type: integer
+          minimum: 0
+          description: Zero creates a new plan; otherwise must equal the current revision
+        initialize_at:
+          type: integer
+          format: int64
+        phases:
+          type: array
+          minItems: 1
+          maxItems: 20
+          items:
+            $ref: "#/components/schemas/ApiDropForgePhaseInput"
+        include_artist_airdrops:
+          type: boolean
+        include_team_airdrops:
+          type: boolean
     ApiDropGroupMention:
       type: string
       enum:
@@ -28578,6 +29051,7 @@ components:
         - CONTRIBUTORS
         - ADMINS
         - DEVS_6529
+        - DROP_FORGERS_6529
     ApiDropHiddenState:
       type: object
       required:

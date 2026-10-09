@@ -347,6 +347,43 @@ describe("WaveNotificationSettings", () => {
     expect(refetch).toHaveBeenCalled();
   });
 
+  it.each([true, false])(
+    "preserves Drop Forge preferences when broadcast enabled is %s",
+    async (enabled) => {
+      const { commonApiPost } = require("@/services/api/common-api");
+      mockUseWaveNotificationSubscription.mockReturnValue({
+        data: {
+          subscribed: true,
+          enabled_group_notifications: enabled
+            ? [
+                ApiDropGroupMention.All,
+                ApiDropGroupMention.Contributors,
+                ApiDropGroupMention.DropForgers6529,
+              ]
+            : [ApiDropGroupMention.DropForgers6529],
+        },
+        refetch: jest.fn(),
+      });
+      commonApiPost.mockResolvedValue({});
+      renderComponent();
+      await openNotificationMenu();
+      await userEvent.click(
+        screen.getByLabelText("Receive @all and @contributors notifications")
+      );
+      await waitFor(() =>
+        expect(commonApiPost).toHaveBeenCalledWith({
+          endpoint: "notifications/wave-subscription/wave-123",
+          body: {
+            subscribed: true,
+            enabled_group_notifications: enabled
+              ? [ApiDropGroupMention.DropForgers6529]
+              : [ApiDropGroupMention.All, ApiDropGroupMention.DropForgers6529],
+          },
+        })
+      );
+    }
+  );
+
   it("enables all-message notifications while preserving broadcast mention preference", async () => {
     const { commonApiPost } = require("@/services/api/common-api");
     const refetch = jest.fn();
