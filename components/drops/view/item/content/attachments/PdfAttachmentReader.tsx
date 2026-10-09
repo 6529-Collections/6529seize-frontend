@@ -127,7 +127,9 @@ function PdfReaderSession({
     [updateCurrentPage]
   );
   useLayoutEffect(() => {
-    if (scrollRoot) updateCurrentPage(scrollRoot);
+    if (!scrollRoot) return;
+    const frame = requestAnimationFrame(() => updateCurrentPage(scrollRoot));
+    return () => cancelAnimationFrame(frame);
   }, [scrollRoot, size.width, size.height, pages, updateCurrentPage]);
   const onPageError = useCallback(() => setError(PREVIEW_ERROR_KEY), []);
   const loading = (
