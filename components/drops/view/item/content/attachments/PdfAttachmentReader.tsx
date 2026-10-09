@@ -1,6 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import { Document, pdfjs } from "react-pdf";
 import "react-pdf/dist/Page/TextLayer.css";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
@@ -120,6 +126,9 @@ function PdfReaderSession({
     },
     [updateCurrentPage]
   );
+  useLayoutEffect(() => {
+    if (scrollRoot) updateCurrentPage(scrollRoot);
+  }, [scrollRoot, size.width, size.height, pages, updateCurrentPage]);
   const onPageError = useCallback(() => setError(PREVIEW_ERROR_KEY), []);
   const loading = (
     <p role="status" className="tw-p-4">

@@ -195,6 +195,9 @@ test.describe("PDF attachment previews @local-only", () => {
         .poll(() => reader.locator("canvas").count())
         .toBeLessThan(12);
       await page.setViewportSize({ width: 844, height: 390 });
+      await expect(
+        reader.getByText("Page 20 of 20", { exact: true })
+      ).toBeVisible();
       await expectNoHorizontalOverflow(page);
       await expect
         .poll(() =>
