@@ -214,6 +214,9 @@ jobs:
           if (plan.checks.playwright_native_competition?.required) {
             corePlaywrightLanes.push({ lane: "playwright-native-competition", label: "Native competitions desktop and mobile", runner: defaultRunner });
           }
+          if (plan.checks.playwright_pdf_attachments?.required) {
+            corePlaywrightLanes.push({ lane: "playwright-pdf-attachments", label: "PDF attachments in WebKit", runner: defaultRunner });
+          }
           if (plan.checks.playwright_wave_feature_usage?.required) {
             corePlaywrightLanes.push({ lane: "playwright-wave-feature-usage", label: "Wave feature tracking desktop and mobile", runner: defaultRunner });
           }
@@ -421,6 +424,13 @@ jobs:
           PLAYWRIGHT_OUTPUT_DIR: "test-results/playwright/native-competition"
           PLAYWRIGHT_HTML_REPORT_DIR: "playwright-report/native-competition"
         run: ./bin/6529 run test:e2e:native-competition-sandbox
+
+      - name: Run PDF attachment browser regression pack
+        if: matrix.lane == 'playwright-pdf-attachments'
+        env:
+          PLAYWRIGHT_OUTPUT_DIR: "test-results/playwright/pdf-attachments"
+          PLAYWRIGHT_HTML_REPORT_DIR: "playwright-report/pdf-attachments"
+        run: ./bin/6529 run test:e2e:pdf-attachments-sandbox
 
       - name: Run isolated Wave feature tracking browser pack
         if: matrix.lane == 'playwright-wave-feature-usage'

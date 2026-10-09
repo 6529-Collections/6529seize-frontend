@@ -2573,6 +2573,25 @@ const REVIEWBOT_USAGE_MESSAGES = objectMessages("reviewbotUsage", {
 } as const);
 
 const ATTACHMENT_MESSAGES = namespaceMessages("attachment", [
+  ["pdf.pages", "PDF pages"],
+  ["pdf.pageHeading", "Page {page}"],
+  ["pdf.loading", "Loading PDF…"],
+  ["pdf.loadingPage", "Loading page…"],
+  [
+    "pdf.error",
+    "This PDF could not be previewed. Try again or open the full PDF.",
+  ],
+  [
+    "pdf.tooLarge",
+    "This PDF is too large for this preview. Open the full PDF to read it.",
+  ],
+  [
+    "pdf.password",
+    "This PDF requires a password. Open the full PDF to read it.",
+  ],
+  ["pdf.open", "Open full PDF"],
+  ["pdf.retry", "Try again"],
+  ["pdf.page", "Page {page} of {total}"],
   ["safety.ariaLabel", "Scanned and validated attachment"],
   ["safety.badge", "Scanned and validated"],
   ["safety.heading", "Attachment safety"],

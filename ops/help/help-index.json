@@ -6211,9 +6211,9 @@
       "aliases": ["typing indicator", "someone is typing", "typing status"],
       "keywords": ["waves", "typing", "indicator", "status", "chat"],
       "facts": [
-        "Wave chat supports a typing indicator where available.",
-        "Typing indicator behavior depends on live updates and current wave context.",
-        "If typing status appears stale, realtime connectivity may be involved."
+        "Unmuted wave and direct-message chat shows who is typing in the current thread; your own typing is excluded.",
+        "Private-thread typing requires signing in with a profile that can view the thread.",
+        "Switching waves or profiles, signing out, or disconnecting clears typing labels; updates resume after the wave connection recovers."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/waves"],
@@ -6307,6 +6307,23 @@
         "ops/docs/waves/composer/feature-markdown-code-blocks.md",
         "ops/docs/waves/composer/feature-markdown-blank-line-preservation.md"
       ]
+    },
+    {
+      "id": "waves.drop.pdf-preview",
+      "kind": "ui_affordance",
+      "title": "PDF attachment previews",
+      "aliases": ["PDF preview", "PDF first page", "read PDF", "PDF pages"],
+      "keywords": ["waves", "attachment", "PDF", "iPhone", "iPad", "preview"],
+      "facts": [
+        "Use the PDF attachment eye button to open its preview. On iPhone and iPad, including the iOS app, the reader fills the screen and shows the page count. Scroll through the pages and pinch to zoom. Close the reader to return to the wave.",
+        "The wave stays in place while the PDF reader is open. Close it to return to the attachment list and open another document.",
+        "Loading PDF and Loading page show progress states. If the PDF fails or times out, choose Try again or Open full PDF. Password-protected and oversized previews need Open full PDF.",
+        "Desktop keeps the browser PDF viewer. Download and Copy link remain in the attachment options menu. Restricted media-interaction views do not expose the reader."
+      ],
+      "canonical_path": "/waves",
+      "related_paths": ["/waves"],
+      "tags": ["waves", "attachments", "PDF"],
+      "source_refs": ["ops/docs/waves/drop-actions/feature-content-display.md"]
     },
     {
       "id": "waves.composer.image-uploads",
