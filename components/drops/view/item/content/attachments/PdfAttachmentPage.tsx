@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Page } from "react-pdf";
 import type { PDFPageProxy } from "pdfjs-dist";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
@@ -20,10 +20,12 @@ export default function PdfAttachmentPage({
   readonly viewportHeight: number;
   readonly onError: () => void;
 }) {
+  const loadedPageRef = useRef<PDFPageProxy | null>(null);
   const [aspectRatio, setAspectRatio] = useState<number | null>(null);
   const [nearViewport, setNearViewport] = useState(false);
   const onLoad = useCallback(
     (loaded: PDFPageProxy) => {
+      loadedPageRef.current = loaded;
       const viewport = loaded.getViewport({ scale: 1 });
       const ratio = viewport.height / viewport.width;
       if (!Number.isFinite(ratio) || ratio <= 0) {
@@ -50,6 +52,15 @@ export default function PdfAttachmentPage({
     },
     [scrollRoot, viewportHeight]
   );
+  useEffect(() => {
+    if (!nearViewport) return;
+    return () => {
+      // Removing the canvas alone leaves decoded images and drawing commands
+      // cached in PDF.js. Release them when this page leaves the render window
+      // (or closes); PDF.js defers cleanup while a render is still in flight.
+      loadedPageRef.current?.cleanup();
+    };
+  }, [nearViewport]);
   const ratio = aspectRatio ?? Math.SQRT2;
   // Keep raster memory bounded on iPad and unusually shaped pages. Pages away
   // from the viewport retain their measured space, without canvases or text layers.
