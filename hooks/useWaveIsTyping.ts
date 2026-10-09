@@ -22,6 +22,7 @@ interface TypingEntry {
 
 interface TypingMessageState {
   readonly scopeKey: string;
+  readonly socket: WebSocket | null;
   readonly message: string;
 }
 
@@ -135,6 +136,7 @@ export function useWaveIsTyping(
   const [typingMessageState, setTypingMessageState] =
     useState<TypingMessageState>({
       scopeKey,
+      socket,
       message: "",
     });
 
@@ -142,7 +144,7 @@ export function useWaveIsTyping(
 
   useEffect(() => {
     typersRef.current.clear();
-  }, [scopeKey]);
+  }, [scopeKey, socket]);
 
   /* ----- 2. Handle incoming USER_IS_TYPING packets ----------------- */
   useEffect(() => {
@@ -211,16 +213,21 @@ export function useWaveIsTyping(
 
       // Only trigger re‑render if text actually changed
       setTypingMessageState((prev) =>
-        prev.scopeKey === scopeKey && prev.message === newMessage
+        prev.scopeKey === scopeKey &&
+        prev.socket === socket &&
+        prev.message === newMessage
           ? prev
-          : { scopeKey, message: newMessage }
+          : { scopeKey, socket, message: newMessage }
       );
     }, CLEANUP_INTERVAL_MS);
 
     return () => clearInterval(intervalId);
-  }, [scopeKey, shouldSubscribe]);
+  }, [scopeKey, shouldSubscribe, socket]);
 
-  return shouldSubscribe && typingMessageState.scopeKey === scopeKey
+  return shouldSubscribe &&
+    socket !== null &&
+    typingMessageState.socket === socket &&
+    typingMessageState.scopeKey === scopeKey
     ? typingMessageState.message
     : "";
 }

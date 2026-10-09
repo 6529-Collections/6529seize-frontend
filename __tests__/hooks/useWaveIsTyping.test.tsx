@@ -7,13 +7,13 @@ const mockAddEventListener = jest.fn((_: string, cb: any) =>
   listeners.push(cb)
 );
 const mockRemoveEventListener = jest.fn();
+let mockSocket = {
+  addEventListener: mockAddEventListener,
+  removeEventListener: mockRemoveEventListener,
+};
+let mockConnected = true;
 const mockUseWaveWebSocket = jest.fn((waveId: string) => ({
-  socket: waveId
-    ? {
-        addEventListener: mockAddEventListener,
-        removeEventListener: mockRemoveEventListener,
-      }
-    : null,
+  socket: waveId && mockConnected ? mockSocket : null,
 }));
 
 jest.mock("@/hooks/useWaveWebSocket", () => ({
@@ -21,6 +21,7 @@ jest.mock("@/hooks/useWaveWebSocket", () => ({
 }));
 
 beforeEach(() => {
+  mockConnected = true;
   listeners.length = 0;
   mockAddEventListener.mockClear();
   mockRemoveEventListener.mockClear();
@@ -97,4 +98,31 @@ test("skips websocket work while the deferred typing gate is disabled", () => {
 
   expect(result.current).toBe("");
   expect(listeners).toHaveLength(0);
+});
+
+test("clears labels immediately while the authenticated listener reconnects", () => {
+  jest.useFakeTimers();
+  const { result, rerender } = renderHook(() => useWaveIsTyping("wave", null));
+  act(() => {
+    listeners[0]({
+      data: JSON.stringify({
+        type: WsMessageType.USER_IS_TYPING,
+        data: { wave_id: "wave", profile: { handle: "A", level: 1 } },
+      }),
+    });
+    jest.advanceTimersByTime(1000);
+  });
+  expect(result.current).toBe("A is typing");
+  mockConnected = false;
+  rerender();
+  expect(result.current).toBe("");
+  mockSocket = {
+    addEventListener: mockAddEventListener,
+    removeEventListener: mockRemoveEventListener,
+  };
+  mockConnected = true;
+  rerender();
+  expect(result.current).toBe("");
+  act(() => jest.advanceTimersByTime(1000));
+  expect(result.current).toBe("");
 });
