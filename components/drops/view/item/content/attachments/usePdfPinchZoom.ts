@@ -15,14 +15,20 @@ export default function usePdfPinchZoom(
     let pinch: {
       distance: number;
       scale: number;
-      x: number;
-      y: number;
+      anchor: ReturnType<typeof anchorAt>;
     } | null = null;
-    const zoom = (next: number, x: number, y: number) => {
+    const anchorAt = (x: number, y: number) => ({
+      x,
+      y,
+      contentX: (viewport.scrollLeft + x) / scale,
+      contentY: (viewport.scrollTop + y) / scale,
+    });
+    const zoom = (next: number, anchor: ReturnType<typeof anchorAt>) => {
       const bounded = Math.min(4, Math.max(1, next));
-      const ratio = bounded / scale;
-      const left = (viewport.scrollLeft + x) * ratio - x;
-      const top = (viewport.scrollTop + y) * ratio - y;
+      // Reuse the gesture-start document point: WebKit can adjust scrolling
+      // between touch moves while the zoomed document is being laid out.
+      const left = anchor.contentX * bounded - anchor.x;
+      const top = anchor.contentY * bounded - anchor.y;
       content.style.zoom = String(bounded);
       viewport.scrollLeft = left;
       viewport.scrollTop = top;
@@ -40,8 +46,10 @@ export default function usePdfPinchZoom(
       pinch = {
         distance,
         scale,
-        x: (first.clientX + second.clientX) / 2 - rect.left,
-        y: (first.clientY + second.clientY) / 2 - rect.top,
+        anchor: anchorAt(
+          (first.clientX + second.clientX) / 2 - rect.left,
+          (first.clientY + second.clientY) / 2 - rect.top
+        ),
       };
       event.preventDefault();
     };
@@ -53,7 +61,7 @@ export default function usePdfPinchZoom(
         first.clientX - second.clientX,
         first.clientY - second.clientY
       );
-      zoom((pinch.scale * distance) / pinch.distance, pinch.x, pinch.y);
+      zoom((pinch.scale * distance) / pinch.distance, pinch.anchor);
     };
     const end = () => {
       pinch = null;
@@ -63,8 +71,7 @@ export default function usePdfPinchZoom(
       const rect = viewport.getBoundingClientRect();
       zoom(
         scale > 1 ? 1 : 2,
-        event.clientX - rect.left,
-        event.clientY - rect.top
+        anchorAt(event.clientX - rect.left, event.clientY - rect.top)
       );
     };
     viewport.addEventListener("touchstart", start, { passive: false });
