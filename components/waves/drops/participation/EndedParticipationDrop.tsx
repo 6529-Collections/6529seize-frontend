@@ -38,6 +38,7 @@ import {
   type DropContentPresentation,
 } from "../dropContentPresentation";
 import ParticipationIdentityProfileCard from "./ParticipationIdentityProfileCard";
+import { ParticipationDropRatings } from "./ParticipationDropRatings";
 import ProposalCardContextLabel from "../proposal/ProposalCardContextLabel";
 import ProposalCardDetachedHeader from "../proposal/ProposalCardDetachedHeader";
 import ProposalCardReadFullButton from "../proposal/ProposalCardReadFullButton";
@@ -394,6 +395,17 @@ function EndedParticipationDropInner({
           {visibleMetadata.length > 0 && (
             <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
               <WaveDropMetadata metadata={visibleMetadata} />
+            </div>
+          )}
+          {showInteractions && (
+            <div
+              className={`${shouldOffsetRows ? "tw-ml-[3.25rem]" : ""} tw-py-2`}
+            >
+              <ParticipationDropRatings
+                drop={drop}
+                rank={drop.rank}
+                isVotingClosed
+              />
             </div>
           )}
           {showInteractions && (

@@ -498,6 +498,27 @@ describe("fetchWaveDropsFeedV2", () => {
     ).toBeUndefined();
   });
 
+  it("preserves missing winner-history availability during leaderboard hydration", () => {
+    const original = createEnrichableDrop();
+    const voting = {
+      ...original.submission_context.voting,
+      voters_count: 0,
+      voters_count_available: false,
+    };
+    const mapped = mapLeaderboardDropV2({
+      drop: {
+        ...original,
+        submission_context: { ...original.submission_context, voting },
+      },
+      wave: waveMin,
+    });
+    expect(mapped).toMatchObject({
+      raters_count: 0,
+      voters_count_available: false,
+      rating: 10,
+    });
+  });
+
   it("maps V2 priority metadata into leaderboard legacy drops", () => {
     const priorityMetadata = [
       {

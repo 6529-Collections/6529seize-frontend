@@ -389,10 +389,17 @@ export default function ParticipationDropVoteDetailsTrigger({
     voterPluralCategory === "one"
       ? "waves.leaderboard.grid.voters.one"
       : "waves.leaderboard.grid.voters.other";
-  const triggerLabelMessageKey =
+  const votersUnavailable = drop.voters_count_available === false;
+  const availableTriggerLabelMessageKey =
     voterPluralCategory === "one"
       ? "waves.voteDetails.trigger.one"
       : "waves.voteDetails.trigger.other";
+  const triggerLabelMessageKey = votersUnavailable
+    ? "waves.voteDetails.trigger.unavailable"
+    : availableTriggerLabelMessageKey;
+  const podiumTextClassName = votersUnavailable
+    ? "tw-min-w-0 tw-max-w-full tw-whitespace-normal"
+    : "tw-min-w-0 tw-max-w-full tw-whitespace-nowrap";
   const formattedVoterCount = formatInteger(locale, drop.raters_count);
 
   return (
@@ -410,18 +417,18 @@ export default function ParticipationDropVoteDetailsTrigger({
       >
         <span
           className={`${triggerTextClassName} ${labelTextColorClassName} ${
-            density === "podium"
-              ? "tw-min-w-0 tw-max-w-full tw-whitespace-nowrap"
-              : ""
+            density === "podium" ? podiumTextClassName : ""
           }`}
         >
-          {tRich(locale, voterMessageKey, {
-            count: (
-              <span key="count" className={countTextColorClassName}>
-                {formattedVoterCount}
-              </span>
-            ),
-          })}
+          {drop.voters_count_available === false
+            ? t(locale, "waves.voteDetails.voters.unavailable")
+            : tRich(locale, voterMessageKey, {
+                count: (
+                  <span key="count" className={countTextColorClassName}>
+                    {formattedVoterCount}
+                  </span>
+                ),
+              })}
         </span>
         <ChevronDownIcon aria-hidden="true" className={chevronClassName} />
       </button>

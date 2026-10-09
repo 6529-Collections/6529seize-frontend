@@ -33,6 +33,10 @@ import { HttpFile } from '../http/http';
 
 export class ApiCurationDrop {
     'drop_priority_order': number | null;
+    /**
+    * False when a winner has no saved at-decision voter records. The voter count is then unknown, not zero. Omitted by older servers.
+    */
+    'voters_count_available'?: boolean;
     'id': string;
     /**
     * Sequence number of the drop in Seize
@@ -89,6 +93,12 @@ export class ApiCurationDrop {
             "baseName": "drop_priority_order",
             "type": "number",
             "format": "int64"
+        },
+        {
+            "name": "voters_count_available",
+            "baseName": "voters_count_available",
+            "type": "boolean",
+            "format": ""
         },
         {
             "name": "id",

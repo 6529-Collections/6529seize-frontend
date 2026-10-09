@@ -62,7 +62,7 @@ right sidebar, and what users see for loading and empty states.
 - `Winners` appears in sidebar tabs only after first decision time passes.
 - Loading state shows compact skeleton placeholders.
 - If no decision points are returned, sidebar empty state shows `No Winners
-  Yet`.
+Yet`.
 - Single-decision waves render compact winners from the first decision.
 - Multi-decision waves show a decision selector with date/time and winner
   counts.
@@ -96,6 +96,11 @@ right sidebar, and what users see for loading and empty states.
 - Winner rank labels use ordinal place formatting (`1st`, `2nd`, `3rd`,
   `4th`, and so on).
 - Winner rows can show your vote value when you voted on that drop.
+- If the voter list at the decision time was not saved, the winner shows
+  `Voters unavailable` instead of a zero voter count. Select it for an
+  explanation, then select `Vote log` to inspect any recorded changes. The
+  final score remains visible; current allocations do not reconstruct the
+  historical voter list.
 - On touch devices, winner-card actions use the touch action sheet instead of
   desktop hover/open controls.
 

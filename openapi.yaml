@@ -25680,6 +25680,11 @@ components:
         - rank
         - top_raters
       properties:
+        voters_count_available:
+          type: boolean
+          description: >-
+            False when a winner has no saved at-decision voter records. The
+            voter count is then unknown, not zero. Omitted by older servers.
         over_threshold_since_ms:
           type: integer
           format: int64
@@ -28316,6 +28321,11 @@ components:
         - is_additional_action_promised
         - hide_link_preview
       properties:
+        voters_count_available:
+          type: boolean
+          description: >-
+            False when a winner has no saved at-decision voter records. The
+            voter count is then unknown, not zero. Omitted by older servers.
         id:
           type: string
         serial_no:
@@ -29358,6 +29368,11 @@ components:
         - is_additional_action_promised
         - hide_link_preview
       properties:
+        voters_count_available:
+          type: boolean
+          description: >-
+            False when a winner has no saved at-decision voter records. The
+            voter count is then unknown, not zero. Omitted by older servers.
         id:
           type: string
         serial_no:
@@ -36494,6 +36509,11 @@ components:
         - voters_count
         - place
       properties:
+        voters_count_available:
+          type: boolean
+          description: >-
+            False when a winner has no saved at-decision voter records. The
+            voter count is then unknown, not zero. Omitted by older servers.
         largest_vote:
           description: >-
             Largest absolute current individual allocation, retaining its sign.

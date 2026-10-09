@@ -70,6 +70,16 @@ jest.mock(
   }
 );
 
+const mockRatings = jest.fn((_props: unknown) => (
+  <div data-testid="historical-vote-summary" />
+));
+jest.mock(
+  "@/components/waves/drops/participation/ParticipationDropRatings",
+  () => ({
+    ParticipationDropRatings: (props: unknown) => mockRatings(props),
+  })
+);
+
 const drop: any = {
   id: "d",
   created_at: 1,
@@ -395,4 +405,26 @@ describe("EndedParticipationDrop", () => {
       { data_key: "title", data_value: "drop title" },
     ]);
   });
+});
+
+it("keeps scores and voters on an ended submission without enabling voting", () => {
+  const completed = { ...drop, rating: 187867, raters_count: 3, rank: 1 };
+  render(
+    <EndedParticipationDrop
+      drop={completed}
+      showWaveInfo={false}
+      activeDrop={null}
+      showReplyAndQuote={false}
+      location={DropLocation.WAVE}
+      onReply={jest.fn()}
+      onQuoteClick={jest.fn()}
+    />
+  );
+  expect(screen.getByTestId("historical-vote-summary")).toBeInTheDocument();
+  expect(mockRatings).toHaveBeenLastCalledWith(
+    expect.objectContaining({ drop: completed, isVotingClosed: true })
+  );
+  expect(
+    screen.queryByRole("button", { name: "Vote" })
+  ).not.toBeInTheDocument();
 });

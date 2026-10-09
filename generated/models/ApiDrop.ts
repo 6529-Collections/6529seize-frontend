@@ -33,6 +33,10 @@ import { ApiWaveMin } from '../models/ApiWaveMin';
 import { HttpFile } from '../http/http';
 
 export class ApiDrop {
+    /**
+    * False when a winner has no saved at-decision voter records. The voter count is then unknown, not zero. Omitted by older servers.
+    */
+    'voters_count_available'?: boolean;
     'id': string;
     /**
     * Sequence number of the drop in Seize
@@ -85,6 +89,12 @@ export class ApiDrop {
     static readonly mapping: {[index: string]: string} | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
+        {
+            "name": "voters_count_available",
+            "baseName": "voters_count_available",
+            "type": "boolean",
+            "format": ""
+        },
         {
             "name": "id",
             "baseName": "id",

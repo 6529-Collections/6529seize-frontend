@@ -266,6 +266,9 @@ const hydrateDropV2 = async ({
     rating_prediction: voting?.predicted_final_vote ?? 0,
     top_raters: topRaters,
     raters_count: voting?.voters_count ?? 0,
+    ...(voting?.voters_count_available === undefined
+      ? {}
+      : { voters_count_available: voting.voters_count_available }),
     context_profile_context: getContextProfileContext(drop),
     ...(drop.viewer_context ? { viewer_context: drop.viewer_context } : {}),
     ...(drop.moderation ? { moderation: drop.moderation } : {}),
@@ -321,6 +324,9 @@ export const mapLeaderboardDropV2 = ({
     rating_prediction: voting?.predicted_final_vote ?? 0,
     top_raters: [],
     raters_count: voting?.voters_count ?? 0,
+    ...(voting?.voters_count_available === undefined
+      ? {}
+      : { voters_count_available: voting.voters_count_available }),
     context_profile_context: getContextProfileContext(drop),
     ...(drop.viewer_context ? { viewer_context: drop.viewer_context } : {}),
     ...(drop.moderation ? { moderation: drop.moderation } : {}),

@@ -49,6 +49,8 @@ export function applyCompetitionDropSummary(
     return drop;
   const winningContext = isWinner ? winnerContext(drop, entry) : null;
   if (isWinner && !winningContext) return drop;
+  const votersCountAvailable =
+    summary.voters_count_available ?? drop.voters_count_available;
   const result = {
     ...drop,
     drop_type: isWinner ? ApiDropType.Winner : ApiDropType.Participatory,
@@ -59,6 +61,9 @@ export function applyCompetitionDropSummary(
     realtime_rating: summary.realtime_rating,
     rating_prediction: summary.rating_prediction,
     raters_count: summary.raters_count,
+    ...(votersCountAvailable === undefined
+      ? {}
+      : { voters_count_available: votersCountAvailable }),
     rank: summary.rank,
     over_threshold_since_ms: summary.over_threshold_since_ms ?? null,
     top_raters: summary.top_raters,
