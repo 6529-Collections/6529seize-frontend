@@ -61,6 +61,12 @@ Multipart drops ("storms") stay in one card while users switch parts.
 - If a drop part contains `quoted_drop` data, a quoted-drop block renders below that part.
 - Edited drops show an `(edited)` marker below content.
 - Media attachments in the same part render under the text body in the same card.
+- Use a PDF attachment's eye button to open its preview. On iPhone and iPad,
+  including the iOS app, the reader fills the screen and shows the page count.
+  Scroll through the pages and pinch to zoom. Close the reader to return to the
+  wave; the wave stays in place while you read.
+- Desktop previews use the browser's PDF viewer. **Download** and **Copy link**
+  remain in the attachment options menu.
 - Drop-author profile pictures first request a scaled image variant when supported by the media host.
 - If that optimized avatar load fails, the card retries with an unoptimized load of the same source.
 - If both avatar attempts fail (or no avatar source exists), the card keeps layout with a neutral profile placeholder.
@@ -76,6 +82,11 @@ Multipart drops ("storms") stay in one card while users switch parts.
   curation marketplace clicks do not trigger parent-card navigation.
 
 ## Failure and Recovery
+
+- iOS PDF previews show **Loading PDF…** while downloading and **Loading page…**
+  while rendering. If loading fails or times out, choose **Try again** or
+  **Open full PDF**. Password-protected files and files above the preview
+  limit must be opened separately.
 
 - If smart-link rendering fails for a URL, the renderer falls back to a standard clickable link.
 - If syntax highlighting fails, code still renders as readable code text.
