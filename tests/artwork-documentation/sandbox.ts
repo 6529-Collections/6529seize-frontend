@@ -164,6 +164,7 @@ export async function installDocumentationSandbox(
   // exact local fixture socket open without connecting to a deployed service.
   const socketUrl = new URL(origin);
   socketUrl.protocol = "ws:";
+  socketUrl.searchParams.set("delivery_capability", "durable_updates_v1");
   await page.routeWebSocket(socketUrl.href, (socket) => {
     socket.onMessage(() => {});
   });
