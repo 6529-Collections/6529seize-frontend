@@ -6206,10 +6206,10 @@
       "aliases": ["typing indicator", "someone is typing", "typing status"],
       "keywords": ["waves", "typing", "indicator", "status", "chat"],
       "facts": [
-        "Wave chat supports a typing indicator where available.",
-        "Backgrounding the Capacitor app or hiding a mobile browser tab clears typing labels and pauses the typing subscription. Returning starts a fresh subscription for the active thread.",
-        "Typing indicator behavior depends on live updates and current wave context.",
-        "If typing status appears stale, realtime connectivity may be involved."
+        "Unmuted wave and direct-message chat shows who is typing in the current thread; your own typing is excluded.",
+        "Private-thread typing requires signing in with a profile that can view the thread.",
+        "Switching waves or profiles, signing out, or disconnecting clears typing labels; updates resume after the wave connection recovers.",
+        "Backgrounding the Capacitor app or hiding a mobile browser tab clears typing labels and pauses the typing subscription. Returning starts a fresh subscription for the active thread."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/waves"],
