@@ -1,7 +1,6 @@
 import TDHConsolidationPage from "@/app/network/tdh/consolidation/page.client";
 import { generateMetadata } from "@/app/network/tdh/consolidation/page";
 import { render, screen, within } from "@testing-library/react";
-import React from "react";
 
 jest.mock("@/components/about/AboutContentsDropdown", () => ({
   AboutContentsDropdown: () => <div data-testid="contents-dropdown" />,

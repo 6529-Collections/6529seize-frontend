@@ -26,7 +26,7 @@ interface ConfirmedLink {
   readonly afterStart: boolean;
 }
 
-export interface SimulatedStep {
+interface SimulatedStep {
   readonly signer: SimulatedWallet;
   readonly groups: readonly (readonly SimulatedWallet[])[];
   readonly existingMembersTogether: boolean;
