@@ -517,7 +517,7 @@ export default function WalletCheckerComponent(
     ConsolidatedWallet[] | null
   >(() => {
     if (consolidatedWalletsStatus === "success") {
-      return consolidatedWalletsResponse ?? [];
+      return consolidatedWalletsResponse;
     }
     return consolidatedWalletsStatus === "error" ? [] : null;
   }, [consolidatedWalletsStatus, consolidatedWalletsResponse]);
