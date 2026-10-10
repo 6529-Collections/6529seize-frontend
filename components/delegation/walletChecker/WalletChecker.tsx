@@ -33,6 +33,96 @@ import {
   DELEGATION_PAGE_TITLE_CLASS_NAME,
 } from "../delegation-ui";
 
+// A consolidation holds at most four wallets, so a grouped wallet has at most
+// three counterparties. The cap bounds requests for wallets that also carry
+// stray or superseded links.
+const MAX_LINKED_CONSOLIDATION_WALLETS = 6;
+
+function getConsolidationsUrl(address: string) {
+  return `${publicEnv.API_ENDPOINT}/api/consolidations/${address}?show_incomplete=true`;
+}
+
+async function fetchConsolidationRows(
+  address: string
+): Promise<WalletConsolidation[]> {
+  const response: DBResponse<WalletConsolidation> = await fetchUrl(
+    getConsolidationsUrl(address)
+  );
+  return response.data;
+}
+
+async function fetchLinkedConsolidationRows(
+  address: string
+): Promise<WalletConsolidation[]> {
+  try {
+    return await fetchConsolidationRows(address);
+  } catch (error) {
+    console.error(
+      `Failed to fetch consolidations for related wallet: ${address}`,
+      error
+    );
+    return [];
+  }
+}
+
+function getLinkedConsolidationWallets(
+  address: string,
+  rows: WalletConsolidation[]
+): string[] {
+  const seen = new Set([address.toLowerCase()]);
+  const linkedWallets: string[] = [];
+
+  // Confirmed links first, so group members are fetched before stray links.
+  const prioritizedRows = rows.toSorted(
+    (a, b) => Number(b.confirmed) - Number(a.confirmed)
+  );
+
+  for (const row of prioritizedRows) {
+    let counterparty: string | undefined;
+    if (areEqualAddresses(address, row.wallet1)) {
+      counterparty = row.wallet2;
+    } else if (areEqualAddresses(address, row.wallet2)) {
+      counterparty = row.wallet1;
+    }
+
+    if (!counterparty || seen.has(counterparty.toLowerCase())) {
+      continue;
+    }
+
+    seen.add(counterparty.toLowerCase());
+    linkedWallets.push(counterparty);
+    if (linkedWallets.length >= MAX_LINKED_CONSOLIDATION_WALLETS) {
+      break;
+    }
+  }
+
+  return linkedWallets;
+}
+
+function getConsolidationPairKey(row: WalletConsolidation) {
+  const wallet1 = row.wallet1.toLowerCase();
+  const wallet2 = row.wallet2.toLowerCase();
+  return wallet1 < wallet2 ? `${wallet1}-${wallet2}` : `${wallet2}-${wallet1}`;
+}
+
+// Every pair is returned by both of its wallets. Keep one row per pair and,
+// when copies disagree, the one from the latest block (its newest state).
+function dedupeConsolidationPairs(
+  rows: WalletConsolidation[]
+): WalletConsolidation[] {
+  const rowsByPair = new Map<string, WalletConsolidation>();
+
+  for (const row of rows) {
+    const key = getConsolidationPairKey(row);
+    const existing = rowsByPair.get(key);
+    if (!existing || row.block > existing.block) {
+      rowsByPair.set(key, row);
+    }
+  }
+
+  return [...rowsByPair.values()];
+}
+
 function resolveConsolidationDisplay(
   wallet: string,
   candidates: ConsolidationDisplay[]
@@ -403,36 +493,18 @@ export default function WalletCheckerComponent(
     queryKey: ["consolidations", submittedAddress],
     queryFn: async () => {
       try {
-        const baseUrl = `${publicEnv.API_ENDPOINT}/api/consolidations/${submittedAddress}?show_incomplete=true`;
-        const firstResponse: DBResponse<WalletConsolidation> =
-          await fetchUrl(baseUrl);
-        const firstData = firstResponse.data;
+        const firstData = await fetchConsolidationRows(submittedAddress);
+        // Load every linked wallet's rows so pairs between the other members
+        // of a group (e.g. C<->D when checking A) are shown too.
+        const linkedWallets = getLinkedConsolidationWallets(
+          submittedAddress,
+          firstData
+        );
+        const linkedData = await Promise.all(
+          linkedWallets.map((wallet) => fetchLinkedConsolidationRows(wallet))
+        );
 
-        if (firstData.length > 0) {
-          const firstConsolidation = firstData[0];
-          if (!firstConsolidation) {
-            return firstData;
-          }
-          const newWallet = areEqualAddresses(
-            submittedAddress,
-            firstConsolidation.wallet1
-          )
-            ? firstConsolidation.wallet2
-            : firstConsolidation.wallet1;
-          const nextUrl = `${publicEnv.API_ENDPOINT}/api/consolidations/${newWallet}?show_incomplete=true`;
-          try {
-            const secondResponse: DBResponse<WalletConsolidation> =
-              await fetchUrl(nextUrl);
-            return [...firstData, ...secondResponse.data];
-          } catch {
-            console.error(
-              `Failed to fetch consolidations for related wallet: ${newWallet}`
-            );
-            return firstData;
-          }
-        }
-
-        return firstData;
+        return dedupeConsolidationPairs([firstData, ...linkedData].flat());
       } catch (error) {
         console.error(
           `Failed to fetch consolidations for ${submittedAddress}`,
