@@ -163,6 +163,11 @@ const ABOUT_CONTENTS_NAV_GROUPS: readonly AboutContentsNavGroup[] = [
       "/network/tdh/historic-boosts",
       "tdhHistoricBoosts"
     ),
+    aboutRouteItem(
+      "network-tdh-consolidation",
+      "/network/tdh/consolidation",
+      "tdhConsolidation"
+    ),
   ]),
   aboutGroup("delegationWallets", [
     aboutSectionItem(AboutSection.GDRC1, "gdrc"),

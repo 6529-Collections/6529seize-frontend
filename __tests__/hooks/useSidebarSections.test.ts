@@ -154,6 +154,10 @@ describe("useSidebarSections", () => {
         name: "TDH Historic Boosts",
         href: "/network/tdh/historic-boosts",
       },
+      {
+        name: "Wallet Consolidation",
+        href: "/network/tdh/consolidation",
+      },
     ]);
     expect(aboutSection?.subsections[3]?.items).toEqual([
       { name: "GDRC", href: "/about/gdrc1" },

@@ -1240,7 +1240,8 @@
         "/network/health/network-tdh",
         "/network/nerd",
         "/network/prenodes",
-        "/network/tdh/historic-boosts"
+        "/network/tdh/historic-boosts",
+        "/network/tdh/consolidation"
       ],
       "tags": ["about", "navigation", "getting-started"],
       "source_refs": [
@@ -2223,6 +2224,7 @@
       "related_paths": [
         "/network/definitions",
         "/network/tdh/historic-boosts",
+        "/network/tdh/consolidation",
         "/network/health/network-tdh",
         "/network/levels"
       ],
@@ -2231,6 +2233,55 @@
         "ops/docs/network/feature-tdh-boost-rules.md",
         "ops/docs/network/feature-network-definitions.md"
       ]
+    },
+    {
+      "id": "network.tdh-consolidation",
+      "kind": "route",
+      "title": "Wallet Consolidation",
+      "aliases": [
+        "wallet consolidation",
+        "consolidation rules",
+        "four wallet consolidation",
+        "4 wallet consolidation",
+        "consolidate four wallets",
+        "fourth wallet",
+        "add a fourth wallet",
+        "consolidation security",
+        "consolidation analysis",
+        "why every pair",
+        "consolidation order"
+      ],
+      "keywords": [
+        "consolidation",
+        "consolidate",
+        "wallets",
+        "fourth",
+        "tdh",
+        "profile",
+        "mesh",
+        "order",
+        "batch",
+        "security"
+      ],
+      "facts": [
+        "The Wallet Consolidation page at /network/tdh/consolidation explains how up to four of one collector's wallets count as one for TDH and for their profile, with the rules, the transactions and the tested analysis behind the design.",
+        "Every pair of wallets in a consolidation registers a Consolidation (use case 999) in both directions on the NFTDelegation contract, on Any Collection or The Memes. Two wallets need 2 registrations, three need 6 and four need 12.",
+        "A consolidation holds up to four wallets. A fourth wallet counts only when its links to the other three were registered in both directions on or after 2026-10-15 00:00 UTC. Groups of two or three work as before.",
+        "Wallets are grouped from confirmed links, newest first, so completing a link with a new wallet moves a member out of its group.",
+        "With batchDelegations each wallet signs one transaction. To add a fourth wallet, the existing three each register one link to it first and the new wallet signs last with one batch, so adding a fourth takes four transactions.",
+        "Signing in the wrong order splits the consolidation temporarily; each split re-runs the profile merge and TDH-wave votes above the temporarily lower TDH are reduced and not restored.",
+        "Every wallet in a consolidation can sign in as the profile, set the primary address and redirect airdrops, so only one collector's own wallets should be consolidated.",
+        "The page compares the full-mesh rule with cheaper alternatives and shows that only full mesh stops any subset of a collector's wallets from adding an outside wallet. It includes an interactive signing-order simulator."
+      ],
+      "canonical_path": "/network/tdh/consolidation",
+      "related_paths": [
+        "/network/tdh",
+        "/delegation/consolidation-use-cases",
+        "/delegation/wallet-checker",
+        "/delegation/delegation-center"
+      ],
+      "tags": ["network", "tdh", "consolidation", "delegation"],
+      "source_refs": ["ops/docs/network/feature-tdh-consolidation.md"]
     },
     {
       "id": "network.definitions",

@@ -20,6 +20,10 @@ const REFERENCE_DESTINATIONS: readonly ReferenceDestination[] = [
     labelKey: "network.references.navigation.historicBoosts",
   },
   {
+    href: "/network/tdh/consolidation",
+    labelKey: "network.references.navigation.consolidation",
+  },
+  {
     href: "/network/definitions",
     labelKey: "network.references.navigation.definitions",
   },
