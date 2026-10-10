@@ -612,15 +612,39 @@ export default function WalletCheckerComponent(
       return [];
     }
 
+    // Only suggest completing links between wallets that belong with the
+    // checked wallet: itself, its active consolidation, or wallets it links
+    // to. Completing another member's link to an unrelated wallet would move
+    // that member out of the group, because the newest confirmed link wins.
+    const isKnownWallet = (address: string) =>
+      areEqualAddresses(address, fetchedAddress) ||
+      consolidatedWallets.some((wallet) =>
+        areEqualAddresses(wallet.address, address)
+      ) ||
+      consolidations.some(
+        (row) =>
+          (areEqualAddresses(row.from, fetchedAddress) &&
+            areEqualAddresses(row.to, address)) ||
+          (areEqualAddresses(row.to, fetchedAddress) &&
+            areEqualAddresses(row.from, address))
+      );
+
     return consolidations.filter(
       (candidate) =>
+        isKnownWallet(candidate.from) &&
+        isKnownWallet(candidate.to) &&
         !consolidations.some(
           (comparison) =>
             areEqualAddresses(comparison.to, candidate.from) &&
             areEqualAddresses(comparison.from, candidate.to)
         )
     );
-  }, [consolidationsLoaded, consolidations]);
+  }, [
+    consolidationsLoaded,
+    consolidations,
+    consolidatedWallets,
+    fetchedAddress,
+  ]);
 
   const resultsLoaded =
     !!fetchedAddress && delegationsLoaded && consolidationsLoaded;

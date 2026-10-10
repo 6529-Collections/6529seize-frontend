@@ -346,6 +346,42 @@ describe("WalletChecker consolidation groups", () => {
     }
   });
 
+  it("only suggests completing links that belong with the checked wallet", async () => {
+    // A, B and C are consolidated. D is being added: A and B registered to D.
+    // C also has an old one-way link to an unrelated wallet X.
+    const walletX = "0x9999999999999999999999999999999999999999";
+    const rows = [
+      pair(WALLET_A, WALLET_B, true),
+      pair(WALLET_A, WALLET_C, true),
+      pair(WALLET_B, WALLET_C, true),
+      pair(WALLET_A, WALLET_D, false),
+      pair(WALLET_B, WALLET_D, false),
+      pair(WALLET_C, walletX, false),
+    ];
+    mockConsolidationApi({
+      rowsFor: (wallet) => rows.filter((row) => involves(row, wallet)),
+      resolved: [WALLET_A, WALLET_B, WALLET_C],
+    });
+
+    renderCheckedWallet(WALLET_A);
+
+    expect(
+      await screen.findByText("Incomplete Consolidation")
+    ).toBeInTheDocument();
+    const actions = screen
+      .getAllByRole("listitem")
+      .map((item) => item.textContent);
+    // D's missing links are suggested; completing C's link to X would move C
+    // out of the group, so it is not.
+    expect(actions).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining("from d.eth to a.eth"),
+        expect.stringContaining("from d.eth to b.eth"),
+      ])
+    );
+    expect(actions).toHaveLength(2);
+  });
+
   it("caps linked wallet requests and fetches confirmed links first", async () => {
     const strays = Array.from(
       { length: 7 },

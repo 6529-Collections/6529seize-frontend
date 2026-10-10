@@ -28,9 +28,12 @@ It checks delegations, delegation managers, and consolidation relationships.
   first), so pairs between the other members of a group of up to 4 wallets
   are included. Each wallet pair is listed once, using its newest record.
 - `Active Consolidation`: shown only when a resolved multi-wallet consolidation set is found.
-- `Incomplete Consolidation`: shown only when reverse-direction consolidation is
-  missing for any listed pair, including pairs that do not involve the checked
-  wallet.
+- `Incomplete Consolidation`: shown when a listed pair is missing its
+  reverse direction and both wallets belong with the checked wallet (the checked
+  wallet itself, its active consolidation, or a wallet it links to). A member's
+  one-way link to an unrelated wallet stays in `Consolidations` but gets no
+  recommended action: completing it would move that member out of the group,
+  because the newest confirmed link wins.
 
 ## User Journey
 
