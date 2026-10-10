@@ -21,7 +21,7 @@ on:
       version:
         description: "Delegation docs package version"
         required: true
-        default: "delegation-docs-2026-06-16"
+        default: "delegation-docs-2026-10-15"
         type: string
 
 permissions:

@@ -1,0 +1,220 @@
+<div>
+  <p>
+    Consolidations are distinct from delegations. They are on-chain records
+    that let 6529 treat up to four addresses you control as one for calculating
+    wallet-related metrics such as total cards held, total unique cards held,
+    and TDH.
+  </p>
+  <p>
+    A consolidation of four addresses needs every pair of addresses linked in
+    both directions: six pairs and twelve registrations. Each registration is a
+    consolidation (use case 999) on "Any Collection" or "The Memes", and either
+    collection works for each direction. Consolidations do not expire.
+  </p>
+  <p>
+    A fourth address counts only for links registered on or after
+    15 October 2026 00:00 UTC. A group of four counts when one of its addresses
+    has all three of its links registered in both directions on or after that
+    time, which is normally the address you add as the fourth. Register those
+    links only after that time. Before then, a consolidation counts at most
+    three addresses.
+  </p>
+  <p>Assuming four sample addresses:</p>
+  <ul>
+    <li>Address A (vault)</li>
+    <li>Address B (second vault, for example a Safe)</li>
+    <li>Address C (transaction wallet)</li>
+    <li>Address D (minting wallet)</li>
+  </ul>
+</div>
+<h2>The Six Links</h2>
+<div style="overflow-x: auto">
+  <table style="border-collapse: collapse">
+    <caption style="caption-side: top; text-align: left; padding-bottom: 8px">
+      Every pair in a four-address consolidation registers both directions.
+    </caption>
+    <thead>
+      <tr>
+        <th scope="col" style="border: 1px solid rgba(255, 255, 255, 0.2); padding: 8px 12px; text-align: left">Pair</th>
+        <th scope="col" style="border: 1px solid rgba(255, 255, 255, 0.2); padding: 8px 12px; text-align: left">First direction</th>
+        <th scope="col" style="border: 1px solid rgba(255, 255, 255, 0.2); padding: 8px 12px; text-align: left">Second direction</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="border: 1px solid rgba(255, 255, 255, 0.2); padding: 8px 12px">A ↔ B</td>
+        <td style="border: 1px solid rgba(255, 255, 255, 0.2); padding: 8px 12px">A registers B</td>
+        <td style="border: 1px solid rgba(255, 255, 255, 0.2); padding: 8px 12px">B registers A</td>
+      </tr>
+      <tr>
+        <td style="border: 1px solid rgba(255, 255, 255, 0.2); padding: 8px 12px">A ↔ C</td>
+        <td style="border: 1px solid rgba(255, 255, 255, 0.2); padding: 8px 12px">A registers C</td>
+        <td style="border: 1px solid rgba(255, 255, 255, 0.2); padding: 8px 12px">C registers A</td>
+      </tr>
+      <tr>
+        <td style="border: 1px solid rgba(255, 255, 255, 0.2); padding: 8px 12px">A ↔ D</td>
+        <td style="border: 1px solid rgba(255, 255, 255, 0.2); padding: 8px 12px">A registers D</td>
+        <td style="border: 1px solid rgba(255, 255, 255, 0.2); padding: 8px 12px">D registers A</td>
+      </tr>
+      <tr>
+        <td style="border: 1px solid rgba(255, 255, 255, 0.2); padding: 8px 12px">B ↔ C</td>
+        <td style="border: 1px solid rgba(255, 255, 255, 0.2); padding: 8px 12px">B registers C</td>
+        <td style="border: 1px solid rgba(255, 255, 255, 0.2); padding: 8px 12px">C registers B</td>
+      </tr>
+      <tr>
+        <td style="border: 1px solid rgba(255, 255, 255, 0.2); padding: 8px 12px">B ↔ D</td>
+        <td style="border: 1px solid rgba(255, 255, 255, 0.2); padding: 8px 12px">B registers D</td>
+        <td style="border: 1px solid rgba(255, 255, 255, 0.2); padding: 8px 12px">D registers B</td>
+      </tr>
+      <tr>
+        <td style="border: 1px solid rgba(255, 255, 255, 0.2); padding: 8px 12px">C ↔ D</td>
+        <td style="border: 1px solid rgba(255, 255, 255, 0.2); padding: 8px 12px">C registers D</td>
+        <td style="border: 1px solid rgba(255, 255, 255, 0.2); padding: 8px 12px">D registers C</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<h2>Add a Fourth Address to an Existing Group</h2>
+<p>
+  If Addresses A, B and C are already consolidated, add Address D with four
+  transactions:
+</p>
+<ol>
+  <li>
+    Using Address A, register a consolidation with Address D: navigate to the
+    Delegation Center Section, click 'Register Consolidation,' choose the
+    collection, enter wallet Address D, and execute the transaction.
+  </li>
+  <li>Using Address B, register a consolidation with Address D.</li>
+  <li>Using Address C, register a consolidation with Address D.</li>
+  <li>
+    Using Address D, register consolidations with Addresses A, B and C in one
+    batch transaction, as described below. Address D signs last.
+  </li>
+</ol>
+<p>
+  Steps 1 to 3 can happen in any order and at any time, and nothing changes
+  until Address D signs. When Address D's batch confirms, the group becomes four
+  addresses in one step.
+</p>
+<p>
+  Do not let the new address sign first. If it signs before the existing
+  members, the group splits temporarily while the remaining links arrive. Each
+  split re-runs the profile split and merge, and TDH-wave votes above the
+  temporarily lower TDH are reduced and are not restored.
+</p>
+<h2>Create a New Group of Four</h2>
+<p>
+  If none of the addresses is consolidated yet, each address sends one batch
+  transaction to the other three, in any order. The group only grows.
+</p>
+<p>
+  If Addresses A and B are already consolidated and Addresses C and D are new,
+  the existing members go first: A sends one batch to C and D, B sends one batch
+  to C and D, and then C and D send theirs, in either order.
+</p>
+<h2>Register Several Links in One Transaction</h2>
+<p>
+  The NFTDelegation contract (0x2202CB9c00487e7e8EF21e6d8E914B32e709f43d on
+  Ethereum mainnet) has a batchDelegations function that registers up to five
+  links in one transaction. For example, to register Address D's links to
+  Addresses A, B and C, call batchDelegations from Address D with one entry per
+  link in each list, in the same order:
+</p>
+<div style="overflow-x: auto">
+  <table style="border-collapse: collapse">
+    <caption style="caption-side: top; text-align: left; padding-bottom: 8px">
+      batchDelegations values for consolidation links
+    </caption>
+    <thead>
+      <tr>
+        <th scope="col" style="border: 1px solid rgba(255, 255, 255, 0.2); padding: 8px 12px; text-align: left">Parameter</th>
+        <th scope="col" style="border: 1px solid rgba(255, 255, 255, 0.2); padding: 8px 12px; text-align: left">Value for each link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="border: 1px solid rgba(255, 255, 255, 0.2); padding: 8px 12px">_collectionAddresses</td>
+        <td style="border: 1px solid rgba(255, 255, 255, 0.2); padding: 8px 12px">0x8888888888888888888888888888888888888888 (Any Collection)</td>
+      </tr>
+      <tr>
+        <td style="border: 1px solid rgba(255, 255, 255, 0.2); padding: 8px 12px">_delegationAddresses</td>
+        <td style="border: 1px solid rgba(255, 255, 255, 0.2); padding: 8px 12px">The address to link with (Address A, Address B, Address C)</td>
+      </tr>
+      <tr>
+        <td style="border: 1px solid rgba(255, 255, 255, 0.2); padding: 8px 12px">_expiryDates</td>
+        <td style="border: 1px solid rgba(255, 255, 255, 0.2); padding: 8px 12px">64060588800 (no expiry)</td>
+      </tr>
+      <tr>
+        <td style="border: 1px solid rgba(255, 255, 255, 0.2); padding: 8px 12px">_useCases</td>
+        <td style="border: 1px solid rgba(255, 255, 255, 0.2); padding: 8px 12px">999 (Consolidation)</td>
+      </tr>
+      <tr>
+        <td style="border: 1px solid rgba(255, 255, 255, 0.2); padding: 8px 12px">_allTokens</td>
+        <td style="border: 1px solid rgba(255, 255, 255, 0.2); padding: 8px 12px">true</td>
+      </tr>
+      <tr>
+        <td style="border: 1px solid rgba(255, 255, 255, 0.2); padding: 8px 12px">_tokenIds</td>
+        <td style="border: 1px solid rgba(255, 255, 255, 0.2); padding: 8px 12px">0</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<p>
+  You can send this call from any tool that can call contract functions, such
+  as the Safe Transaction Builder described in
+  <a href="/delegation/delegation-faq/using-safe">How to Delegate using SAFE (formerly GNOSIS)?</a>
+  To register a single link, use the Register Consolidation form.
+</p>
+<h2>With a Delegation Manager</h2>
+<p>
+  A delegation manager (use case 998 on Any Collection) can register and revoke
+  consolidations for the address that appointed it. There is no batch for
+  managers, so a manager sends one transaction per link. Keep the same order:
+  links from the existing members first, links from the new address last.
+</p>
+<h2>Remove an Address</h2>
+<ul>
+  <li>
+    If the address still has its key, it sends one batchRevocations transaction
+    to all the other addresses. For each link, use the collection the link was
+    registered on, the address to unlink and use case 999. The links are
+    revoked together, in one step.
+  </li>
+  <li>
+    If its key is lost or compromised, every remaining address revokes its link
+    to it, one transaction each. Send them back to back: the removed address
+    keeps access to the profile until the last revocation lands.
+  </li>
+  <li>
+    To replace an address without ever dropping below three, add the new
+    address as the fourth first, then remove the old one. See Use Case 4 in
+    <a href="/delegation/consolidation-use-cases">Consolidation Use Cases</a>.
+  </li>
+</ul>
+<h2>Notes</h2>
+<ul>
+  <li>
+    When links conflict, the newest confirmed link wins. If an address in your
+    group completes a link in both directions with a new address, that link
+    moves it out of the group.
+  </li>
+  <li>
+    Every address in a consolidation is a full key to the profile: it can sign
+    in as the profile, set the primary address and redirect airdrops. When a
+    group forms, the profiles of its addresses merge and the merge cannot be
+    undone. Consolidations are for one person's addresses, not for multiple
+    individuals.
+  </li>
+  <li>
+    In the Delegation Center Section, click 'View/Manage' in the collection you
+    used and check the consolidation status in the Consolidations area.
+  </li>
+  <li>
+    Within the context of The Memes, the purpose of consolidation is to allow
+    you to consolidate any addresses that you own. We reserve the right to apply
+    penalties to you or change the system if we believe you are gaming it (e.g.
+    buying consolidation), such as removing your addresses from allowlists or
+    altering the methodology, at our discretion, in any way.
+  </li>
+</ul>

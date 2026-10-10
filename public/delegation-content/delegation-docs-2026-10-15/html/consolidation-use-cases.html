@@ -1,0 +1,290 @@
+<div>
+  <h2>Overview</h2>
+  <p>
+    Consolidation is a process to recognize that most NFT users use multiple
+    addresses for their NFTs. In fact, it is generally a good practice to
+    separate "vault", "transaction" and "minting" addresses. Please see an
+    example architecture of this type
+    <a href="/delegation/wallet-architecture" target="_blank" rel="noreferrer noopener">here</a>.
+  </p>
+  <p>
+    For the purposes of The Memes, we recognize up to 4 addresses as being
+    treated as one, for the purpose of calculating community metrics such as
+    total cards, unique cards, TDH and other metrics.
+  </p>
+  <p>
+    Every pair of addresses in a consolidation needs to register a
+    "consolidation" (use case 999) with each other, in both directions. Two
+    addresses need 2 registrations, three addresses need 6 and four addresses
+    need 12. Each direction can be registered on "Any Collection" or "The
+    Memes". Consolidation registrations do not expire. Details for how to sign
+    these transactions are in this
+    <a href="/delegation/delegation-faq" target="_blank" rel="noreferrer noopener">
+      Consolidation FAQ</a>.
+  </p>
+  <p>
+    The purpose and spirit of this approach is to support NFT collectors in
+    following safe wallet practices. It is not to support multiple individuals
+    consolidating their TDH. We reserve the right to change the algorithm in the
+    future, eliminate it altogether, apply manual overrides (if we think it is
+    abused) or not apply overrides (even if it is abused).
+  </p>
+  <p>
+    These are analytic metrics, not protocol functions, so the goal is to be
+    roughly right (say 80%) as with all other approaches of this type and should
+    be understood in this spirit. There will always be edge cases that fall
+    outside of the parameters of our approach and that is OK.
+  </p>
+  <h3>The Fourth Address</h3>
+  <p>
+    A fourth address counts only for links registered on or after
+    15 October 2026 00:00 UTC. A group of four counts when one of its addresses
+    has all three of its links registered in both directions on or after that
+    time. In practice, that is the address you add as the fourth, so register
+    its links only after that time. Before then, a group counts at most three
+    addresses. Groups of two or three addresses work as before, and their
+    existing registrations stay valid.
+  </p>
+  <h3>When Links Conflict</h3>
+  <p>
+    6529 builds groups from confirmed links, newest first, so the newest link
+    wins. If an address in a group completes a link in both directions with a
+    new address, that newer link moves it out of its current group. This is how
+    you leave a group or pair an address with a different one.
+  </p>
+  <h3>One Transaction per Address</h3>
+  <p>
+    The NFTDelegation contract's batchDelegations function registers up to five
+    links in one transaction, so each address can register all of its links at
+    once. The order of those transactions matters:
+  </p>
+  <ul>
+    <li>
+      Adding Address D to an existing group of Addresses A, B and C: A, B and C
+      each register one link to D first, in any order and at any time. Nothing
+      changes yet. D signs last, with one batch to A, B and C, and the group
+      becomes four addresses in one step.
+    </li>
+    <li>
+      Creating a new group of four: each address sends one batch to the other
+      three, in any order. The group only grows.
+    </li>
+    <li>
+      Adding Addresses C and D to an existing pair of Addresses A and B: the
+      existing members go first (A sends one batch to C and D, B sends one batch
+      to C and D), then C and D sign, in either order.
+    </li>
+    <li>
+      A delegation manager (use case 998 on Any Collection) can register and
+      revoke consolidations for the address that appointed it. There is no
+      batch for managers, so a manager sends one transaction per link.
+    </li>
+  </ul>
+  <h3>Why the Order Matters</h3>
+  <p>
+    If the new address signs before the existing members, the group splits
+    temporarily while the remaining links arrive. Each split re-runs the profile
+    split and merge, and TDH-wave votes above the temporarily lower TDH are
+    reduced and are not restored. Signing with the existing members first and
+    the new address last avoids this.
+  </p>
+  <h3>Removing an Address</h3>
+  <ul>
+    <li>
+      If the address still has its key, it sends one batchRevocations
+      transaction that revokes its links to all the other addresses at once.
+    </li>
+    <li>
+      If its key is lost or compromised, every remaining address revokes its
+      link to it, one transaction each. Send them back to back: the removed
+      address keeps access to the profile until the last revocation lands.
+    </li>
+  </ul>
+  <h3>What Joining a Consolidation Means</h3>
+  <ul>
+    <li>
+      Every address in a consolidation is a full key to the profile: it can sign
+      in as the profile, set the primary address (use case 997) and redirect
+      airdrops (use case 3). Only consolidate addresses that you control.
+    </li>
+    <li>
+      When a group forms, the profiles of its addresses merge, and the merge
+      cannot be undone. The handle and profile picture that remain come from the
+      member profile with the highest CIC, then the highest TDH.
+    </li>
+    <li>
+      Holdings across the consolidated addresses combine for TDH boosts such as
+      full sets, seasons, Genesis/Nakamoto and Gradients. Transfers between
+      addresses in the confirmed consolidation keep their acquisition time.
+    </li>
+    <li>
+      TDH updates within minutes of a change and fully at the next 00:00 UTC
+      snapshot.
+    </li>
+  </ul>
+</div>
+<br>
+<div>
+  <h2>Use Case 1</h2>
+  <p>Scenario</p>
+  <ul>
+    <li>I have 2 addresses (for example: vault and transaction)</li>
+    <li>I move my cards between the 2 addresses for various reasons</li>
+    <li>At any point in time any card can be in any of the 2 addresses</li>
+  </ul>
+  <p>Solution</p>
+  <ul>
+    <li>
+      Consolidate
+      <ul>
+        <li>Address A ↔ Address B</li>
+      </ul>
+    </li>
+    <li>
+      At all points in time, total cards, unique cards, TDH and other future
+      metrics are treated as if both addresses were consolidated into one
+      address
+    </li>
+  </ul>
+</div>
+<br>
+<div>
+  <h2>Use Case 2</h2>
+  <p>Scenario</p>
+  <ul>
+    <li>I have 3 addresses (for example: vault, transaction and mint)</li>
+    <li>I move my cards between the 3 addresses for various reasons</li>
+    <li>At any point in time any card can be in any of the 3 addresses</li>
+  </ul>
+  <p>Solution</p>
+  <ul>
+    <li>
+      Consolidate
+      <ul>
+        <li>Address A ↔ Address B</li>
+        <li>Address B ↔ Address C</li>
+        <li>Address C ↔ Address A</li>
+      </ul>
+    </li>
+    <li>
+      At all points in time, total cards, unique cards, TDH and other future
+      metrics are treated as if all three addresses were consolidated into one
+      address
+    </li>
+  </ul>
+</div>
+<br>
+<div>
+  <h2>Use Case 3</h2>
+  <p>Scenario</p>
+  <ul>
+    <li>I used to have my cards in my hot address (Address A)</li>
+    <li>I moved all my cards to my vault address (Address B)</li>
+    <li>
+      I am now minting cards from my new hot address (Address C) and tranferring
+      them to Address B some days later
+    </li>
+  </ul>
+  <p>Solution</p>
+  <ul>
+    <li>
+      Consolidate
+      <ul>
+        <li>Address A ↔ Address B</li>
+        <li>Address B ↔ Address C</li>
+        <li>Address C ↔ Address A</li>
+      </ul>
+    </li>
+    <li>
+      At all points in time, total cards, unique cards, TDH and other future
+      metrics are treated as if all three addresses were consolidated into one
+      address
+    </li>
+  </ul>
+</div>
+<br>
+<div>
+  <h2>Use Case 4</h2>
+  <p>Scenario</p>
+  <ul>
+    <li>
+      My 3 addresses are consolidated: vault (Address A), transaction (Address
+      B) and minting (Address C)
+    </li>
+    <li>
+      I want to replace Address C with a new address (Address D), for example a
+      new hot wallet
+    </li>
+    <li>I want my addresses to keep counting as one throughout</li>
+  </ul>
+  <p>Step 1: Add the New Address</p>
+  <ul>
+    <li>
+      Consolidate
+      <ul>
+        <li>Address A ↔ Address D</li>
+        <li>Address B ↔ Address D</li>
+        <li>Address C ↔ Address D</li>
+      </ul>
+    </li>
+    <li>
+      A, B and C each register their link to D first. D signs last, with one
+      batch to A, B and C, and the group becomes four addresses in one step.
+      Register these links on or after 15 October 2026 00:00 UTC so that the
+      fourth address counts.
+    </li>
+  </ul>
+  <p>Step 2: Remove the Old Address</p>
+  <ul>
+    <li>
+      Revoke
+      <ul>
+        <li>Address C → Address A, Address B, Address D</li>
+      </ul>
+    </li>
+    <li>
+      C sends one batch revocation to A, B and D. The group goes from four
+      addresses to three in one step and never drops below three, so total
+      cards, unique cards, TDH and other metrics keep treating the remaining
+      addresses as one.
+    </li>
+    <li>
+      If someone else may control Address C, remove it first instead of waiting
+      to add D: while C is in the group, it is a full key to your profile. If
+      C's key is lost, A, B and D each revoke their link to C, back to back.
+    </li>
+  </ul>
+</div>
+<br>
+<div>
+  <h2>Use Case 5</h2>
+  <p>Scenario</p>
+  <ul>
+    <li>
+      I have 4 addresses (for example: vault, a second vault such as a Safe,
+      transaction and mint)
+    </li>
+    <li>I move my cards between the 4 addresses for various reasons</li>
+    <li>At any point in time any card can be in any of the 4 addresses</li>
+  </ul>
+  <p>Solution</p>
+  <ul>
+    <li>
+      Consolidate
+      <ul>
+        <li>Address A ↔ Address B</li>
+        <li>Address A ↔ Address C</li>
+        <li>Address A ↔ Address D</li>
+        <li>Address B ↔ Address C</li>
+        <li>Address B ↔ Address D</li>
+        <li>Address C ↔ Address D</li>
+      </ul>
+    </li>
+    <li>
+      With the fourth address's links registered on or after 15 October 2026
+      00:00 UTC, total cards, unique cards, TDH and other future metrics are
+      treated as if all four addresses were consolidated into one address. See
+      <a href="/delegation/delegation-faq/reference-consolidations-4address">How to Register Consolidations (4 Addresses)?</a>
+    </li>
+  </ul>
+</div>
