@@ -23,10 +23,17 @@ It checks delegations, delegation managers, and consolidation relationships.
 - `Active Minting Delegation for The Memes`: shown when a matching active row is
   found for `The Memes` or `Any Collection` with use case `#2` (or `#1` fallback).
 - `Delegation Managers`: manager rows (`From`, `To`, `Collection`).
-- `Consolidations`: directional consolidation pairs (can include related-wallet
-  rows fetched from one linked consolidation wallet).
+- `Consolidations`: directional consolidation pairs for the checked wallet and
+  for every wallet linked to it (up to 6 linked wallets, confirmed links
+  first), so pairs between the other members of a group of up to 4 wallets
+  are included. Each wallet pair is listed once, using its newest record.
 - `Active Consolidation`: shown only when a resolved multi-wallet consolidation set is found.
-- `Incomplete Consolidation`: shown only when reverse-direction consolidation is missing.
+- `Incomplete Consolidation`: shown when a listed pair is missing its
+  reverse direction and both wallets belong with the checked wallet (the checked
+  wallet itself, its active consolidation, or a wallet it links to). A member's
+  one-way link to an unrelated wallet stays in `Consolidations` but gets no
+  recommended action: completing it would move that member out of the group,
+  because the newest confirmed link wins.
 
 ## User Journey
 
