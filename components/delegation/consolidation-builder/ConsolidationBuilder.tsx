@@ -20,19 +20,16 @@ import {
   selectExistingMembers,
 } from "./consolidation-groups";
 import {
-  buildConsolidationPlan,
   createDirectedLinkLookup,
   resolveConsolidationProgress,
   toWalletKey,
   validateConsolidationWallets,
-  type ConsolidationPlan,
   type ConsolidationStepProgress,
 } from "./consolidation-plan";
 import {
-  CONSOLIDATION_NOTICE_CLASS_NAME,
   ConsolidationBuilderWarnings,
   ConsolidationDepartureNotice,
-  ConsolidationFourthSlotNotice,
+  ConsolidationPlanNotices,
 } from "./ConsolidationBuilderNotices";
 import {
   ConsolidationBuilderSteps,
@@ -43,10 +40,8 @@ import {
   type ConsolidationGroupLookupState,
   type ConsolidationWalletEntry,
 } from "./ConsolidationBuilderWallets";
-import {
-  useConsolidationGroups,
-  useConsolidationLinkStatus,
-} from "./useConsolidationBuilderData";
+import { useConsolidationGroups } from "./useConsolidationBuilderData";
+import { useConsolidationPlan } from "./useConsolidationPlan";
 import { useConsolidationStepWrite } from "./useConsolidationStepWrite";
 
 interface Props {
@@ -59,17 +54,6 @@ interface Props {
 interface WalletDraft {
   readonly entries: readonly ConsolidationWalletEntry[];
   readonly nextId: number;
-}
-
-/**
- * On-chain link status captured when a wallet list is first planned. Step
- * numbering and order come from it, so confirmed steps stay in place while
- * live reads mark them done.
- */
-interface LinkBaseline {
-  readonly walletsKey: string;
-  readonly registeredLinkKeys: readonly string[];
-  readonly existingMembers: readonly string[];
 }
 
 const MIN_WALLET_ROWS = 2;
@@ -94,31 +78,6 @@ function createDraft(values: readonly string[]): WalletDraft {
   return {
     entries: rows.map((value, index) => ({ id: String(index), value })),
     nextId: rows.length,
-  };
-}
-
-function getNextBaseline(
-  current: LinkBaseline | undefined,
-  next: {
-    readonly walletsKey: string;
-    readonly registeredLinkKeys: readonly string[] | undefined;
-    readonly existingMembers: readonly string[];
-  }
-): LinkBaseline | undefined {
-  if (!next.registeredLinkKeys) {
-    return undefined;
-  }
-  if (current?.walletsKey === next.walletsKey) {
-    // Re-plan only when a direction the plan relied on has been revoked.
-    const live = new Set(next.registeredLinkKeys);
-    if (current.registeredLinkKeys.every((key) => live.has(key))) {
-      return undefined;
-    }
-  }
-  return {
-    walletsKey: next.walletsKey,
-    registeredLinkKeys: next.registeredLinkKeys,
-    existingMembers: next.existingMembers,
   };
 }
 
@@ -177,14 +136,10 @@ function getStepsState(input: {
     : { kind: "loading" };
 }
 
-function shouldShowPlanNotices(
-  plan: ConsolidationPlan,
+function hasUnfinishedStep(
   progress: readonly ConsolidationStepProgress[] | undefined
 ): boolean {
-  return (
-    plan.fourthSlotWait === "unreachable" ||
-    progress?.some((step) => step.status !== "complete") === true
-  );
+  return progress?.some((step) => step.status !== "complete") === true;
 }
 
 /**
@@ -238,59 +193,23 @@ export default function ConsolidationBuilder(props: Readonly<Props>) {
     [groups, groupsReady, wallets]
   );
 
-  const linkStatus = useConsolidationLinkStatus(
-    validation.isValid ? wallets : EMPTY_WALLETS
-  );
-  const [baseline, setBaseline] = useState<LinkBaseline>();
-  const nextBaseline =
-    validation.isValid && groupsReady
-      ? getNextBaseline(baseline, {
-          walletsKey,
-          registeredLinkKeys: linkStatus.registeredLinkKeys,
-          existingMembers,
-        })
-      : undefined;
-  if (nextBaseline) {
-    setBaseline(nextBaseline);
-  }
-  const activeBaseline =
-    validation.isValid && baseline?.walletsKey === walletsKey
-      ? baseline
-      : undefined;
-
-  const plan = useMemo<ConsolidationPlan | undefined>(
-    () =>
-      activeBaseline
-        ? buildConsolidationPlan({
-            wallets,
-            existingMembers: activeBaseline.existingMembers,
-            isRegistered: createDirectedLinkLookup(
-              activeBaseline.registeredLinkKeys
-            ),
-            nowMs,
-          })
-        : undefined,
-    [activeBaseline, nowMs, wallets]
-  );
-  const progress = useMemo(
-    () =>
-      plan && linkStatus.registeredLinkKeys
-        ? resolveConsolidationProgress({
-            plan,
-            isRegistered: createDirectedLinkLookup(
-              linkStatus.registeredLinkKeys
-            ),
-            connectedAddress: connectedKey,
-          })
-        : undefined,
-    [connectedKey, linkStatus.registeredLinkKeys, plan]
-  );
+  const planState = useConsolidationPlan({
+    wallets,
+    isValid: validation.isValid,
+    groupsReady,
+    existingMembers,
+    nowMs,
+  });
+  const { plan, registeredLinkKeys, freshLinkKeys } = planState;
 
   function refreshConsolidationData() {
-    linkStatus.refetch();
-    void queryClient.invalidateQueries({
-      queryKey: [QueryKey.CONSOLIDATION_GROUP],
-    });
+    planState.refetchLinks();
+    for (const key of [
+      QueryKey.CONSOLIDATION_GROUP,
+      QueryKey.CONSOLIDATION_REGISTRATIONS,
+    ]) {
+      void queryClient.invalidateQueries({ queryKey: [key] });
+    }
   }
 
   const stepWrite = useConsolidationStepWrite({
@@ -301,6 +220,21 @@ export default function ConsolidationBuilder(props: Readonly<Props>) {
       });
     },
   });
+  const { recordedLinkKeys } = stepWrite;
+
+  const progress = useMemo(
+    () =>
+      plan && registeredLinkKeys && freshLinkKeys
+        ? resolveConsolidationProgress({
+            plan,
+            isRegistered: createDirectedLinkLookup(registeredLinkKeys),
+            isFresh: createDirectedLinkLookup(freshLinkKeys),
+            recordedLinkKeys,
+            connectedAddress: connectedKey,
+          })
+        : undefined,
+    [connectedKey, freshLinkKeys, plan, recordedLinkKeys, registeredLinkKeys]
+  );
 
   function updateDraft(update: (current: WalletDraft) => WalletDraft) {
     setDraft((current) => update(current ?? defaultDraft));
@@ -380,11 +314,10 @@ export default function ConsolidationBuilder(props: Readonly<Props>) {
               draft === null && !!connectedKey && groupData.isPending,
             isValid: validation.isValid,
             hasGroupError: groupData.isError,
-            hasReadError: linkStatus.isError,
+            hasReadError: planState.hasReadError,
             progress,
           })}
           activationDate={activationDate}
-          fourthSlotWait={plan?.fourthSlotWait ?? "none"}
           walletResolving={props.walletResolving}
           isBusy={stepWrite.isBusy}
           busySigner={stepWrite.busySigner}
@@ -396,21 +329,12 @@ export default function ConsolidationBuilder(props: Readonly<Props>) {
           onConnect={props.onConnect}
           onRetry={refreshConsolidationData}
         >
-          {plan && shouldShowPlanNotices(plan, progress) && (
-            <>
-              <ConsolidationFourthSlotNotice
-                locale={locale}
-                wait={plan.fourthSlotWait}
-                activationDate={activationDate}
-              />
-              {plan.outOfOrder && (
-                <p
-                  className={`${CONSOLIDATION_NOTICE_CLASS_NAME} tw-mb-4 tw-mt-0`}
-                >
-                  {t(locale, "delegation.consolidationBuilder.outOfOrder")}
-                </p>
-              )}
-            </>
+          {plan && hasUnfinishedStep(progress) && (
+            <ConsolidationPlanNotices
+              locale={locale}
+              plan={plan}
+              activationDate={activationDate}
+            />
           )}
         </ConsolidationBuilderSteps>
       </div>

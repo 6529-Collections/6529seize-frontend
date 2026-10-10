@@ -14,19 +14,25 @@ import {
   parseConsolidationGroup,
   type ConsolidationGroups,
 } from "./consolidation-groups";
+import {
+  getFreshLinkKeys,
+  parseConsolidationRows,
+} from "./consolidation-registrations";
 
-const LINK_STATUS_REFETCH_INTERVAL_MS = 15_000;
+const REFETCH_INTERVAL_MS = 15_000;
 const GROUP_STALE_TIME_MS = 30_000;
 
-function getConsolidationGroupQueryKey(wallet: string) {
-  return [QueryKey.CONSOLIDATION_GROUP, wallet] as const;
-}
+type ConsolidationRows = ReturnType<typeof parseConsolidationRows>;
 
-function combineGroupResults(results: UseQueryResult<string[]>[]) {
+function combineResults<T>(results: UseQueryResult<T>[]) {
   return {
     data: results.map((result) => result.data),
     isPending: results.some((result) => result.isPending),
-    isError: results.some((result) => result.isError),
+    // A failed refetch keeps the last data, so only a lookup without data
+    // counts as an error.
+    isError: results.some(
+      (result) => result.isError && result.data === undefined
+    ),
   };
 }
 
@@ -37,7 +43,7 @@ function combineGroupResults(results: UseQueryResult<string[]>[]) {
 export function useConsolidationGroups(wallets: readonly string[]) {
   const combined = useQueries({
     queries: wallets.map((wallet) => ({
-      queryKey: getConsolidationGroupQueryKey(wallet),
+      queryKey: [QueryKey.CONSOLIDATION_GROUP, wallet],
       queryFn: async () =>
         parseConsolidationGroup(
           await fetchUrl(
@@ -47,7 +53,7 @@ export function useConsolidationGroups(wallets: readonly string[]) {
       staleTime: GROUP_STALE_TIME_MS,
       refetchOnWindowFocus: false,
     })),
-    combine: combineGroupResults,
+    combine: combineResults<string[]>,
   });
 
   const groups = useMemo<ConsolidationGroups>(() => {
@@ -78,7 +84,7 @@ export function useConsolidationLinkStatus(wallets: readonly string[]) {
     contracts,
     query: {
       enabled: contracts.length > 0,
-      refetchInterval: LINK_STATUS_REFETCH_INTERVAL_MS,
+      refetchInterval: REFETCH_INTERVAL_MS,
     },
   });
   const { refetch } = reads;
@@ -96,5 +102,41 @@ export function useConsolidationLinkStatus(wallets: readonly string[]) {
       reads.isError ||
       reads.data?.some((read) => read.status === "failure") === true,
     refetch: refetchLinks,
+  };
+}
+
+/**
+ * Directions between the wallets that 6529 recorded as registered at or
+ * after the fourth-slot activation, from each wallet's stored pair rows.
+ * Only four-wallet plans need it; pass no wallets otherwise.
+ */
+export function useConsolidationFreshLinks(wallets: readonly string[]) {
+  const combined = useQueries({
+    queries: wallets.map((wallet) => ({
+      queryKey: [QueryKey.CONSOLIDATION_REGISTRATIONS, wallet],
+      queryFn: async () =>
+        parseConsolidationRows(
+          await fetchUrl(
+            `${publicEnv.API_ENDPOINT}/api/consolidations/${wallet}?show_incomplete=true`
+          )
+        ),
+      refetchInterval: REFETCH_INTERVAL_MS,
+      refetchOnWindowFocus: false,
+    })),
+    combine: combineResults<ConsolidationRows>,
+  });
+
+  const freshLinkKeys = useMemo(() => {
+    const loaded = combined.data.filter(
+      (rows): rows is ConsolidationRows => rows !== undefined
+    );
+    return loaded.length === combined.data.length
+      ? getFreshLinkKeys(loaded, wallets)
+      : undefined;
+  }, [combined.data, wallets]);
+
+  return {
+    freshLinkKeys,
+    isError: combined.isError,
   };
 }

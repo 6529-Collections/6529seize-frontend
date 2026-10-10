@@ -39,12 +39,14 @@ function plan(input: {
   wallets: readonly string[];
   existingMembers?: readonly string[];
   links?: readonly Link[];
+  fresh?: readonly Link[];
   nowMs?: number;
 }) {
   return buildConsolidationPlan({
     wallets: input.wallets,
     existingMembers: input.existingMembers ?? [],
     isRegistered: lookup(input.links ?? []),
+    isFresh: lookup(input.fresh ?? []),
     nowMs: input.nowMs ?? AT_ACTIVATION,
   });
 }
@@ -148,6 +150,8 @@ describe("buildConsolidationPlan", () => {
     ]);
     expect(result.finalGroupSize).toBe(4);
     expect(result.needsFourthSlot).toBe(true);
+    expect(result.freshWallets).toEqual([D]);
+    expect(result.reregistersStaleLinks).toBe(false);
     expect(result.outOfOrder).toBe(false);
   });
 
@@ -160,13 +164,16 @@ describe("buildConsolidationPlan", () => {
       [C, [A, B, D]],
       [D, [A, B, C]],
     ]);
+    expect(result.freshWallets).toEqual([A, B, C, D]);
   });
 
   it("orders existing members first when two new wallets join a pair", () => {
+    const pair = both([A, B]);
     const result = plan({
       wallets: [C, A, D, B],
       existingMembers: [A, B],
-      links: both([A, B]),
+      links: pair,
+      fresh: pair,
     });
 
     expect(summarize(result.steps)).toEqual([
@@ -189,6 +196,7 @@ describe("buildConsolidationPlan", () => {
       [D, [A]],
     ]);
     expect(result.needsFourthSlot).toBe(false);
+    expect(result.freshWallets).toEqual([]);
   });
 
   it("drops directions that are already registered and wallets with nothing to do", () => {
@@ -222,32 +230,25 @@ describe("buildConsolidationPlan", () => {
     expect(result.steps).toEqual([]);
   });
 
-  describe("fourth-slot activation", () => {
-    it("holds only the final step before activation when it completes three links", () => {
+  describe("groups of two or three", () => {
+    it("use on-chain status only and never register a link again", () => {
       const result = plan({
-        wallets: [A, B, C, D],
-        existingMembers: [A, B, C],
-        links: both([A, B], [A, C], [B, C]),
-        nowMs: BEFORE_ACTIVATION,
-      });
-
-      expect(result.beforeFourthSlotActivation).toBe(true);
-      expect(result.fourthSlotWait).toBe("final-step");
-    });
-
-    it("does not hold any step at or after activation", () => {
-      const result = plan({
-        wallets: [A, B, C, D],
-        existingMembers: [A, B, C],
-        links: both([A, B], [A, C], [B, C]),
+        wallets: [A, B, C],
+        existingMembers: [A, B],
+        links: [...both([A, B]), [A, C]],
         nowMs: AT_ACTIVATION,
       });
 
-      expect(result.beforeFourthSlotActivation).toBe(false);
+      expect(summarize(result.steps)).toEqual([
+        [B, [C]],
+        [C, [A, B]],
+      ]);
+      expect(result.freshWallets).toEqual([]);
+      expect(result.reregistersStaleLinks).toBe(false);
       expect(result.fourthSlotWait).toBe("none");
     });
 
-    it("does not gate groups of three or fewer", () => {
+    it("are not held before activation", () => {
       const result = plan({
         wallets: [A, B, C],
         existingMembers: [A, B],
@@ -259,11 +260,167 @@ describe("buildConsolidationPlan", () => {
       expect(result.fourthSlotWait).toBe("none");
     });
 
-    it("puts the new wallet with fewer missing links first so the last signer completes three", () => {
+    it("flag a new wallet that registered before an existing member", () => {
+      const result = plan({
+        wallets: [A, B, C],
+        existingMembers: [A, B],
+        links: [...both([A, B]), [C, A]],
+      });
+
+      expect(summarize(result.steps)).toEqual([
+        [A, [C]],
+        [B, [C]],
+        [C, [B]],
+      ]);
+      expect(result.outOfOrder).toBe(true);
+    });
+  });
+
+  describe("four-wallet groups", () => {
+    it("hold every step before activation", () => {
       const result = plan({
         wallets: [A, B, C, D],
-        links: [[D, A]],
+        existingMembers: [A, B, C],
+        links: both([A, B], [A, C], [B, C]),
         nowMs: BEFORE_ACTIVATION,
+      });
+
+      expect(result.beforeFourthSlotActivation).toBe(true);
+      expect(result.fourthSlotWait).toBe("all-steps");
+    });
+
+    it("hold nothing at or after activation", () => {
+      const result = plan({
+        wallets: [A, B, C, D],
+        existingMembers: [A, B, C],
+        links: both([A, B], [A, C], [B, C]),
+        nowMs: AT_ACTIVATION,
+      });
+
+      expect(result.beforeFourthSlotActivation).toBe(false);
+      expect(result.fourthSlotWait).toBe("none");
+    });
+
+    it("register a member's older link to the joining wallet again in that member's step", () => {
+      const result = plan({
+        wallets: [A, B, C, D],
+        existingMembers: [A, B, C],
+        links: [...both([A, B], [A, C], [B, C]), [A, D]],
+      });
+
+      expect(summarize(result.steps)).toEqual([
+        [A, [D]],
+        [B, [D]],
+        [C, [D]],
+        [D, [A, B, C]],
+      ]);
+      expect(result.reregistersStaleLinks).toBe(true);
+      expect(result.outOfOrder).toBe(false);
+    });
+
+    it("register an older confirmed pair with the joining wallet again on both sides", () => {
+      const result = plan({
+        wallets: [A, B, C, D],
+        existingMembers: [A, B, C],
+        links: both([A, B], [A, C], [B, C], [A, D]),
+      });
+
+      expect(summarize(result.steps)).toEqual([
+        [A, [D]],
+        [B, [D]],
+        [C, [D]],
+        [D, [A, B, C]],
+      ]);
+      expect(result.reregistersStaleLinks).toBe(true);
+      expect(result.outOfOrder).toBe(true);
+    });
+
+    it("skip directions already registered from activation", () => {
+      const fresh: Link[] = [
+        [A, D],
+        [D, A],
+      ];
+      const result = plan({
+        wallets: [A, B, C, D],
+        existingMembers: [A, B, C],
+        links: [...both([A, B], [A, C], [B, C]), ...fresh],
+        fresh,
+      });
+
+      expect(summarize(result.steps)).toEqual([
+        [B, [D]],
+        [C, [D]],
+        [D, [B, C]],
+      ]);
+      expect(result.reregistersStaleLinks).toBe(false);
+    });
+
+    it("do not trust a recorded time for a direction that is no longer registered", () => {
+      const result = plan({
+        wallets: [A, B, C, D],
+        existingMembers: [A, B, C],
+        links: both([A, B], [A, C], [B, C]),
+        fresh: [[A, D]],
+      });
+
+      expect(summarize(result.steps)[0]).toEqual([A, [D]]);
+    });
+
+    it("leave links between existing members alone", () => {
+      const result = plan({
+        wallets: [A, B, C, D],
+        existingMembers: [A, B, C],
+        links: both([A, B], [A, C], [B, C]),
+        fresh: [],
+      });
+
+      expect(result.steps.flatMap((step) => step.targets)).toEqual([
+        D,
+        D,
+        D,
+        A,
+        B,
+        C,
+      ]);
+    });
+
+    it("require every link to be fresh when fewer than three current members are listed", () => {
+      const result = plan({
+        wallets: [A, B, C, D],
+        existingMembers: [A, B],
+        links: both([A, B], [C, D]),
+      });
+
+      expect(result.freshWallets).toEqual([A, B, C, D]);
+      expect(summarize(result.steps)).toEqual([
+        [A, [B, C, D]],
+        [B, [A, C, D]],
+        [C, [A, B, D]],
+        [D, [A, B, C]],
+      ]);
+      expect(result.reregistersStaleLinks).toBe(true);
+    });
+
+    it("need no fresh links when all four wallets are already consolidated", () => {
+      const result = plan({
+        wallets: [A, B, C, D],
+        existingMembers: [A, B, C, D],
+        links: both([A, B], [A, C], [B, C], [A, D], [B, D]),
+      });
+
+      expect(result.freshWallets).toEqual([]);
+      expect(summarize(result.steps)).toEqual([
+        [C, [D]],
+        [D, [C]],
+      ]);
+    });
+
+    it("let the joining wallet with fewer links left sign first", () => {
+      const fresh: Link[] = [[D, A]];
+      const result = plan({
+        wallets: [A, B, C, D],
+        links: fresh,
+        fresh,
       });
 
       expect(summarize(result.steps)).toEqual([
@@ -272,53 +429,42 @@ describe("buildConsolidationPlan", () => {
         [B, [A, C, D]],
         [C, [A, B, D]],
       ]);
-      expect(result.fourthSlotWait).toBe("final-step");
-    });
-
-    it("holds every step when the new wallet already signed out of order", () => {
-      const result = plan({
-        wallets: [A, B, C, D],
-        existingMembers: [A, B, C],
-        links: [...both([A, B], [A, C], [B, C]), [D, A], [D, B], [D, C]],
-        nowMs: BEFORE_ACTIVATION,
-      });
-
-      expect(summarize(result.steps)).toEqual([
-        [A, [D]],
-        [B, [D]],
-        [C, [D]],
-      ]);
-      expect(result.outOfOrder).toBe(true);
-      expect(result.fourthSlotWait).toBe("all-steps");
-    });
-
-    it("reports two merging pairs as unreachable before activation", () => {
-      const result = plan({
-        wallets: [A, B, C, D],
-        existingMembers: [A, B],
-        links: both([A, B], [C, D]),
-        nowMs: BEFORE_ACTIVATION,
-      });
-
-      expect(result.fourthSlotWait).toBe("unreachable");
     });
   });
 });
 
 describe("resolveConsolidationProgress", () => {
   const groupLinks = both([A, B], [A, C], [B, C]);
-  const addFourth = () =>
+  const addFourth = (nowMs = AT_ACTIVATION) =>
     plan({
       wallets: [A, B, C, D],
       existingMembers: [A, B, C],
       links: groupLinks,
-      nowMs: BEFORE_ACTIVATION,
+      nowMs,
     });
 
+  function progress(input: {
+    plan: ReturnType<typeof plan>;
+    links: readonly Link[];
+    fresh?: readonly Link[];
+    recorded?: readonly Link[];
+    connectedAddress: string | undefined;
+  }) {
+    return resolveConsolidationProgress({
+      plan: input.plan,
+      isRegistered: lookup(input.links),
+      isFresh: lookup(input.fresh ?? []),
+      recordedLinkKeys: new Set(
+        (input.recorded ?? []).map(([from, to]) => toDirectedLinkKey(from, to))
+      ),
+      connectedAddress: input.connectedAddress,
+    });
+  }
+
   it("lets only the first step's signer act and blocks later steps", () => {
-    const steps = resolveConsolidationProgress({
+    const steps = progress({
       plan: addFourth(),
-      isRegistered: lookup(groupLinks),
+      links: groupLinks,
       connectedAddress: A.toUpperCase().replace("0X", "0x"),
     });
 
@@ -338,14 +484,14 @@ describe("resolveConsolidationProgress", () => {
   });
 
   it("asks for the right wallet or a connection", () => {
-    const wrongWallet = resolveConsolidationProgress({
+    const wrongWallet = progress({
       plan: addFourth(),
-      isRegistered: lookup(groupLinks),
+      links: groupLinks,
       connectedAddress: D,
     });
-    const disconnected = resolveConsolidationProgress({
+    const disconnected = progress({
       plan: addFourth(),
-      isRegistered: lookup(groupLinks),
+      links: groupLinks,
       connectedAddress: undefined,
     });
 
@@ -359,10 +505,11 @@ describe("resolveConsolidationProgress", () => {
     });
   });
 
-  it("keeps step numbers and advances as links confirm on-chain", () => {
-    const steps = resolveConsolidationProgress({
+  it("keeps step numbers and advances once links are registered and recorded", () => {
+    const steps = progress({
       plan: addFourth(),
-      isRegistered: lookup([...groupLinks, [A, D]]),
+      links: [...groupLinks, [A, D]],
+      fresh: [[A, D]],
       connectedAddress: B,
     });
 
@@ -376,31 +523,71 @@ describe("resolveConsolidationProgress", () => {
     expect(steps[1]?.canSign).toBe(true);
   });
 
-  it("holds the final step before activation even for its signer", () => {
-    const steps = resolveConsolidationProgress({
+  it("keeps asking for a registered link that is not fresh yet unless it was just confirmed", () => {
+    const notRecorded = progress({
       plan: addFourth(),
-      isRegistered: lookup([...groupLinks, [A, D], [B, D], [C, D]]),
-      connectedAddress: D,
+      links: [...groupLinks, [A, D]],
+      connectedAddress: A,
+    });
+    const recorded = progress({
+      plan: addFourth(),
+      links: [...groupLinks, [A, D]],
+      recorded: [[A, D]],
+      connectedAddress: A,
     });
 
-    expect(steps[3]).toMatchObject({
+    expect(notRecorded[0]).toMatchObject({
       status: "current",
-      waitsForFourthSlot: true,
+      pendingTargets: [D],
+      canSign: true,
+    });
+    expect(recorded[0]).toMatchObject({
+      status: "recording",
+      pendingTargets: [],
+      canSign: false,
+    });
+    expect(recorded[1]).toMatchObject({
+      status: "current",
+      block: "wrong-wallet",
+    });
+  });
+
+  it("sends a just-confirmed link again if it is no longer registered", () => {
+    const steps = progress({
+      plan: addFourth(),
+      links: groupLinks,
+      recorded: [[A, D]],
+      connectedAddress: A,
+    });
+
+    expect(steps[0]).toMatchObject({ status: "current", pendingTargets: [D] });
+  });
+
+  it("holds every four-wallet step before activation, even for its signer", () => {
+    const steps = progress({
+      plan: addFourth(BEFORE_ACTIVATION),
+      links: groupLinks,
+      connectedAddress: A,
+    });
+
+    expect(steps.every((step) => step.waitsForFourthSlot)).toBe(true);
+    expect(steps[0]).toMatchObject({
+      status: "current",
       block: "fourth-slot",
       canSign: false,
     });
   });
 
-  it("opens the final step after activation", () => {
-    const afterActivation = plan({
-      wallets: [A, B, C, D],
-      existingMembers: [A, B, C],
-      links: groupLinks,
-      nowMs: AT_ACTIVATION,
-    });
-    const steps = resolveConsolidationProgress({
-      plan: afterActivation,
-      isRegistered: lookup([...groupLinks, [A, D], [B, D], [C, D]]),
+  it("opens the final step after activation with every link to send", () => {
+    const fresh: Link[] = [
+      [A, D],
+      [B, D],
+      [C, D],
+    ];
+    const steps = progress({
+      plan: addFourth(),
+      links: [...groupLinks, ...fresh],
+      fresh,
       connectedAddress: D,
     });
 
@@ -413,11 +600,11 @@ describe("resolveConsolidationProgress", () => {
     });
   });
 
-  it("sends only the directions still missing", () => {
+  it("sends only the directions still missing for smaller groups", () => {
     const fromScratch = plan({ wallets: [A, B, C] });
-    const steps = resolveConsolidationProgress({
+    const steps = progress({
       plan: fromScratch,
-      isRegistered: lookup([[A, C]]),
+      links: [[A, C]],
       connectedAddress: A,
     });
 
@@ -426,22 +613,5 @@ describe("resolveConsolidationProgress", () => {
       pendingTargets: [B],
       canSign: true,
     });
-  });
-
-  it("holds every step when activation is unreachable", () => {
-    const merging = plan({
-      wallets: [A, B, C, D],
-      existingMembers: [A, B],
-      links: both([A, B], [C, D]),
-      nowMs: BEFORE_ACTIVATION,
-    });
-    const steps = resolveConsolidationProgress({
-      plan: merging,
-      isRegistered: lookup(both([A, B], [C, D])),
-      connectedAddress: A,
-    });
-
-    expect(steps.every((step) => step.waitsForFourthSlot)).toBe(true);
-    expect(steps[0]).toMatchObject({ block: "fourth-slot", canSign: false });
   });
 });

@@ -11,12 +11,16 @@ import { isAddress, zeroAddress } from "viem";
  * use case 999 in both directions. The plan gives each wallet exactly one
  * transaction (all of its missing directions at once) and orders the
  * signers so that wallets already in the current consolidation sign first
- * and new wallets sign last. Signing in that order never splits the current
- * consolidation on the way to the final group.
+ * and joining wallets sign last. Signing in that order never splits the
+ * current consolidation on the way to the final group.
+ *
+ * A four-wallet group counts only when one member has all three of its
+ * links registered in both directions at or after
+ * CONSOLIDATION_FOURTH_WALLET_ACTIVATION_MS ("fresh"). Four-wallet plans
+ * therefore require every direction touching a joining wallet to be fresh,
+ * and register an older direction again in its signer's step.
  */
 
-// The group size that needs the fourth slot, which only counts for links
-// completed at or after CONSOLIDATION_FOURTH_WALLET_ACTIVATION_MS.
 const FOURTH_SLOT_GROUP_SIZE = 4;
 
 export type ConsolidationWalletIssue = "invalid" | "duplicate";
@@ -34,26 +38,16 @@ interface ConsolidationWalletValidation {
 interface ConsolidationPlanStep {
   /** Lowercased wallet that signs this step's single transaction. */
   readonly signer: string;
-  /** Lowercased wallets the signer still has to register toward. */
+  /** Lowercased wallets the signer has to register (or register again). */
   readonly targets: readonly string[];
   readonly isExistingMember: boolean;
 }
 
 /**
- * How the fourth-slot activation gate applies before activation:
- * - `none`: no gate (fewer than four wallets, or activation has passed).
- * - `final-step`: the last signer completes all three of its links in its
- *   own step, so only that step waits for activation.
- * - `all-steps`: no signer completes all of its links in one step, so every
- *   remaining step waits for activation.
- * - `unreachable`: every wallet already has a completed link from before
- *   activation, so no member can qualify the group as four wallets.
+ * `all-steps`: the plan forms a four-wallet group before activation, so
+ * every step waits; registrations made earlier would never count.
  */
-export type FourthSlotWait =
-  | "none"
-  | "final-step"
-  | "all-steps"
-  | "unreachable";
+export type FourthSlotWait = "none" | "all-steps";
 
 export interface ConsolidationPlan {
   readonly wallets: readonly string[];
@@ -62,13 +56,31 @@ export interface ConsolidationPlan {
   readonly needsFourthSlot: boolean;
   readonly beforeFourthSlotActivation: boolean;
   readonly fourthSlotWait: FourthSlotWait;
-  /** A new wallet registered toward an existing member that has not answered. */
+  /** Wallets whose every direction must be fresh (four-wallet plans only). */
+  readonly freshWallets: readonly string[];
+  /** Some directions are registered again because they predate activation. */
+  readonly reregistersStaleLinks: boolean;
+  /**
+   * A joining wallet already registered toward an existing member whose step
+   * registers back, so that step completes or renews the pair early.
+   */
   readonly outOfOrder: boolean;
 }
 
 type DirectedLinkLookup = (from: string, to: string) => boolean;
 
-export type ConsolidationStepStatus = "complete" | "current" | "upcoming";
+interface LinkStatus {
+  /** Direction registered on-chain. */
+  readonly isRegistered: DirectedLinkLookup;
+  /** Direction recorded by 6529 as registered at or after activation. */
+  readonly isFresh: DirectedLinkLookup;
+}
+
+export type ConsolidationStepStatus =
+  | "complete"
+  | "recording"
+  | "current"
+  | "upcoming";
 
 type ConsolidationStepBlock =
   | "earlier-steps"
@@ -80,8 +92,12 @@ export interface ConsolidationStepProgress {
   readonly index: number;
   readonly signer: string;
   readonly targets: readonly string[];
-  /** Targets still unregistered on-chain; the step's transaction sends these. */
+  /** Targets the step's transaction still has to send. */
   readonly pendingTargets: readonly string[];
+  /**
+   * `recording`: every remaining direction was confirmed in this session and
+   * waits for 6529 to record its registration time.
+   */
   readonly status: ConsolidationStepStatus;
   readonly waitsForFourthSlot: boolean;
   readonly block: ConsolidationStepBlock | undefined;
@@ -97,10 +113,10 @@ export function toDirectedLinkKey(from: string, to: string): string {
 }
 
 export function createDirectedLinkLookup(
-  registeredLinkKeys: Iterable<string>
+  linkKeys: Iterable<string>
 ): DirectedLinkLookup {
-  const registered = new Set(registeredLinkKeys);
-  return (from, to) => registered.has(toDirectedLinkKey(from, to));
+  const keys = new Set(linkKeys);
+  return (from, to) => keys.has(toDirectedLinkKey(from, to));
 }
 
 /** Every ordered pair of distinct wallets, in list order. */
@@ -110,6 +126,11 @@ export function getDirectedWalletPairs(
   return wallets.flatMap((from) =>
     wallets.filter((to) => to !== from).map((to) => [from, to] as const)
   );
+}
+
+/** Whether a group of this many wallets uses the fourth slot. */
+export function requiresFourthSlot(walletCount: number): boolean {
+  return walletCount >= FOURTH_SLOT_GROUP_SIZE;
 }
 
 function isValidWallet(value: string): boolean {
@@ -150,44 +171,43 @@ export function validateConsolidationWallets(
   };
 }
 
-function hasCompletedLink(
-  wallet: string,
+/**
+ * Joining wallets are those outside the current consolidation. With fewer
+ * than three current members listed, every wallet counts as joining.
+ */
+function getFreshWallets(
   wallets: readonly string[],
-  isRegistered: DirectedLinkLookup
-): boolean {
-  return wallets.some(
-    (other) =>
-      other !== wallet &&
-      isRegistered(wallet, other) &&
-      isRegistered(other, wallet)
-  );
+  existing: ReadonlySet<string>
+): string[] {
+  if (!requiresFourthSlot(wallets.length)) {
+    return [];
+  }
+  const members = wallets.filter((wallet) => existing.has(wallet));
+  return members.length >= FOURTH_SLOT_GROUP_SIZE - 1
+    ? wallets.filter((wallet) => !existing.has(wallet))
+    : [...wallets];
 }
 
-function getFourthSlotWait(
-  wallets: readonly string[],
-  steps: readonly ConsolidationPlanStep[],
-  isRegistered: DirectedLinkLookup
-): FourthSlotWait {
-  const hasQualifyingMember = wallets.some(
-    (wallet) => !hasCompletedLink(wallet, wallets, isRegistered)
-  );
-  if (!hasQualifyingMember) {
-    return "unreachable";
+function isLinkSatisfied(
+  status: LinkStatus,
+  freshWallets: ReadonlySet<string>,
+  from: string,
+  to: string
+): boolean {
+  if (!status.isRegistered(from, to)) {
+    return false;
   }
-  const finalStep = steps.at(-1);
-  if (finalStep?.targets.length === wallets.length - 1) {
-    return "final-step";
-  }
-  return "all-steps";
+  const needsFresh = freshWallets.has(from) || freshWallets.has(to);
+  return !needsFresh || status.isFresh(from, to);
 }
 
 function orderSteps(
   steps: readonly ConsolidationPlanStep[]
 ): ConsolidationPlanStep[] {
   const existing = steps.filter((step) => step.isExistingMember);
-  // New wallets may sign in any order; fewer targets first lets the final
-  // signer complete all of its links in one step whenever possible.
-  const added = steps
+  // Joining wallets may sign in any order; fewer targets first keeps the
+  // wallet with the most links last.
+  const joining = steps
     .filter((step) => !step.isExistingMember)
     .map((step, position) => ({ step, position }))
     .sort(
@@ -195,19 +215,19 @@ function orderSteps(
         a.step.targets.length - b.step.targets.length || a.position - b.position
     )
     .map(({ step }) => step);
-  return [...existing, ...added];
+  return [...existing, ...joining];
 }
 
 function isOutOfOrder(
-  wallets: readonly string[],
+  steps: readonly ConsolidationPlanStep[],
   existing: ReadonlySet<string>,
   isRegistered: DirectedLinkLookup
 ): boolean {
-  return wallets.some(
-    (added) =>
-      !existing.has(added) &&
-      [...existing].some(
-        (member) => isRegistered(added, member) && !isRegistered(member, added)
+  return steps.some(
+    (step) =>
+      step.isExistingMember &&
+      step.targets.some(
+        (target) => !existing.has(target) && isRegistered(target, step.signer)
       )
   );
 }
@@ -216,6 +236,7 @@ export function buildConsolidationPlan(input: {
   readonly wallets: readonly string[];
   readonly existingMembers: readonly string[];
   readonly isRegistered: DirectedLinkLookup;
+  readonly isFresh: DirectedLinkLookup;
   readonly nowMs: number;
 }): ConsolidationPlan {
   const wallets = [...new Set(input.wallets.map(toWalletKey))];
@@ -224,17 +245,20 @@ export function buildConsolidationPlan(input: {
       .map(toWalletKey)
       .filter((member) => wallets.includes(member))
   );
+  const freshWallets = getFreshWallets(wallets, existing);
+  const freshSet = new Set(freshWallets);
   const pendingSteps = wallets
     .map((signer) => ({
       signer,
       targets: wallets.filter(
-        (target) => target !== signer && !input.isRegistered(signer, target)
+        (target) =>
+          target !== signer && !isLinkSatisfied(input, freshSet, signer, target)
       ),
       isExistingMember: existing.has(signer),
     }))
     .filter((step) => step.targets.length > 0);
   const steps = orderSteps(pendingSteps);
-  const needsFourthSlot = wallets.length >= FOURTH_SLOT_GROUP_SIZE;
+  const needsFourthSlot = requiresFourthSlot(wallets.length);
   const beforeFourthSlotActivation =
     input.nowMs < CONSOLIDATION_FOURTH_WALLET_ACTIVATION_MS;
 
@@ -245,26 +269,13 @@ export function buildConsolidationPlan(input: {
     needsFourthSlot,
     beforeFourthSlotActivation,
     fourthSlotWait:
-      needsFourthSlot && beforeFourthSlotActivation
-        ? getFourthSlotWait(wallets, steps, input.isRegistered)
-        : "none",
-    outOfOrder: isOutOfOrder(wallets, existing, input.isRegistered),
+      needsFourthSlot && beforeFourthSlotActivation ? "all-steps" : "none",
+    freshWallets,
+    reregistersStaleLinks: steps.some((step) =>
+      step.targets.some((target) => input.isRegistered(step.signer, target))
+    ),
+    outOfOrder: isOutOfOrder(steps, existing, input.isRegistered),
   };
-}
-
-function stepWaitsForFourthSlot(
-  plan: Pick<ConsolidationPlan, "fourthSlotWait" | "steps">,
-  index: number
-): boolean {
-  switch (plan.fourthSlotWait) {
-    case "final-step":
-      return index === plan.steps.length - 1;
-    case "all-steps":
-    case "unreachable":
-      return true;
-    case "none":
-      return false;
-  }
 }
 
 function getCurrentStepBlock(
@@ -282,22 +293,35 @@ function getCurrentStepBlock(
 }
 
 /**
- * Applies live on-chain status to a plan. Steps stay numbered as planned;
- * only the first incomplete step is actionable, and only by its signer.
+ * Applies live status to a plan. Steps stay numbered as planned; only the
+ * first step with directions left to send is actionable, and only by its
+ * signer. A direction confirmed on-chain in this session that 6529 has not
+ * recorded as fresh yet is not sent again.
  */
 export function resolveConsolidationProgress(input: {
-  readonly plan: Pick<ConsolidationPlan, "fourthSlotWait" | "steps">;
+  readonly plan: Pick<
+    ConsolidationPlan,
+    "fourthSlotWait" | "steps" | "freshWallets"
+  >;
   readonly isRegistered: DirectedLinkLookup;
+  readonly isFresh: DirectedLinkLookup;
+  readonly recordedLinkKeys: ReadonlySet<string>;
   readonly connectedAddress: string | undefined;
 }): ConsolidationStepProgress[] {
-  const { plan, isRegistered, connectedAddress } = input;
+  const { plan, recordedLinkKeys, connectedAddress } = input;
+  const freshSet = new Set(plan.freshWallets);
+  const waitsForFourthSlot = plan.fourthSlotWait === "all-steps";
   let currentFound = false;
 
   return plan.steps.map((step, index) => {
-    const pendingTargets = step.targets.filter(
-      (target) => !isRegistered(step.signer, target)
+    const unsatisfied = step.targets.filter(
+      (target) => !isLinkSatisfied(input, freshSet, step.signer, target)
     );
-    const waitsForFourthSlot = stepWaitsForFourthSlot(plan, index);
+    const pendingTargets = unsatisfied.filter(
+      (target) =>
+        !input.isRegistered(step.signer, target) ||
+        !recordedLinkKeys.has(toDirectedLinkKey(step.signer, target))
+    );
     let status: ConsolidationStepStatus = "complete";
     let block: ConsolidationStepBlock | undefined;
 
@@ -311,6 +335,8 @@ export function resolveConsolidationProgress(input: {
             connectedAddress
           );
       currentFound = true;
+    } else if (unsatisfied.length > 0) {
+      status = "recording";
     }
 
     return {

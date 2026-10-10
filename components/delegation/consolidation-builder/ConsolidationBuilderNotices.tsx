@@ -6,13 +6,13 @@ import { t } from "@/i18n/messages";
 import Link from "next/link";
 import { DELEGATION_INLINE_LINK_CLASS_NAME } from "../delegation-ui";
 import type { ConsolidationDeparture } from "./consolidation-groups";
-import type { FourthSlotWait } from "./consolidation-plan";
+import type { ConsolidationPlan } from "./consolidation-plan";
 
 const CONSOLIDATION_TDH_EXPLAINER_PATH = "/network/tdh/consolidation";
 const CONSOLIDATION_GUIDE_PATH =
   "/delegation/delegation-faq/register-consolidation";
 
-export const CONSOLIDATION_NOTICE_CLASS_NAME =
+const CONSOLIDATION_NOTICE_CLASS_NAME =
   "tw-rounded-lg tw-border tw-border-solid tw-border-amber-400/40 tw-bg-amber-400/10 tw-p-4 tw-text-sm tw-leading-6 tw-text-amber-100";
 
 const WARNING_KEYS = [
@@ -21,12 +21,6 @@ const WARNING_KEYS = [
   "delegation.consolidationBuilder.warnings.order",
   "delegation.consolidationBuilder.warnings.leave",
 ] as const;
-
-const FOURTH_SLOT_MESSAGE_KEYS = {
-  "final-step": "delegation.consolidationBuilder.fourthSlot.finalStep",
-  "all-steps": "delegation.consolidationBuilder.fourthSlot.allSteps",
-  unreachable: "delegation.consolidationBuilder.fourthSlot.unreachable",
-} as const;
 
 /** What consolidating means, shown before any wallet is entered. */
 export function ConsolidationBuilderWarnings(
@@ -67,23 +61,44 @@ export function ConsolidationBuilderWarnings(
   );
 }
 
-/** Explains the fourth-slot activation gate when it holds steps back. */
-export function ConsolidationFourthSlotNotice(
+/**
+ * Explains why the plan's steps wait, why older links are registered again,
+ * and when the order of earlier registrations can split the consolidation.
+ */
+export function ConsolidationPlanNotices(
   props: Readonly<{
     locale: SupportedLocale;
-    wait: FourthSlotWait;
+    plan: Pick<
+      ConsolidationPlan,
+      "fourthSlotWait" | "reregistersStaleLinks" | "outOfOrder"
+    >;
     activationDate: string;
   }>
 ) {
-  if (props.wait === "none") {
-    return null;
-  }
+  const { locale, plan, activationDate } = props;
+  const notices = [
+    plan.fourthSlotWait === "all-steps" &&
+      t(locale, "delegation.consolidationBuilder.fourthSlot.waits", {
+        date: activationDate,
+      }),
+    plan.reregistersStaleLinks &&
+      t(locale, "delegation.consolidationBuilder.fourthSlot.staleLinks", {
+        date: activationDate,
+      }),
+    plan.outOfOrder && t(locale, "delegation.consolidationBuilder.outOfOrder"),
+  ].filter((notice): notice is string => typeof notice === "string");
+
   return (
-    <p className={`${CONSOLIDATION_NOTICE_CLASS_NAME} tw-mb-4 tw-mt-0`}>
-      {t(props.locale, FOURTH_SLOT_MESSAGE_KEYS[props.wait], {
-        date: props.activationDate,
-      })}
-    </p>
+    <>
+      {notices.map((notice) => (
+        <p
+          key={notice}
+          className={`${CONSOLIDATION_NOTICE_CLASS_NAME} tw-mb-4 tw-mt-0`}
+        >
+          {notice}
+        </p>
+      ))}
+    </>
   );
 }
 

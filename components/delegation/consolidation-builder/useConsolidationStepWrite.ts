@@ -10,12 +10,22 @@ import { getTransactionErrorToastMessage } from "../collection-delegation/collec
 import { getGasError } from "../delegation-shared";
 import type { DelegationToastState } from "../DelegationToast";
 import { getConsolidationStepWriteParams } from "./consolidation-contract";
+import { toDirectedLinkKey } from "./consolidation-plan";
 
 interface StepSubmission {
   readonly attempt: number;
   readonly signer: string;
+  readonly targets: readonly string[];
   readonly stepNumber: number;
 }
+
+interface RecordedLinks {
+  /** Transactions whose directions are already in `keys`. */
+  readonly hashes: readonly string[];
+  readonly keys: ReadonlySet<string>;
+}
+
+const NO_RECORDED_LINKS: RecordedLinks = { hashes: [], keys: new Set() };
 
 interface StepWriteSnapshot {
   readonly locale: SupportedLocale;
@@ -96,7 +106,9 @@ function getStepWriteToast(
 /**
  * Sends one consolidation step as a single transaction. Its wallet,
  * submission, confirmation, and failure states are derived as a toast that
- * the caller renders; dismissing hides it until the state changes.
+ * the caller renders; dismissing hides it until the state changes. The
+ * directions of every transaction confirmed in this session are kept in
+ * `recordedLinkKeys`.
  */
 export function useConsolidationStepWrite(options: {
   readonly onConfirmed: () => void;
@@ -110,6 +122,22 @@ export function useConsolidationStepWrite(options: {
   const [submission, setSubmission] = useState<StepSubmission>();
   const [gasError, setGasError] = useState<string>();
   const [dismissedToastKey, setDismissedToastKey] = useState<string>();
+  const [recorded, setRecorded] = useState<RecordedLinks>(NO_RECORDED_LINKS);
+
+  const confirmedHash = receipt.isSuccess ? write.data : undefined;
+  if (confirmedHash && submission && !recorded.hashes.includes(confirmedHash)) {
+    // Record the confirmed directions once per transaction, during render,
+    // so the step never asks for a signature it already has.
+    setRecorded({
+      hashes: [...recorded.hashes, confirmedHash],
+      keys: new Set([
+        ...recorded.keys,
+        ...submission.targets.map((target) =>
+          toDirectedLinkKey(submission.signer, target)
+        ),
+      ]),
+    });
+  }
 
   const toast = getStepWriteToast({
     locale,
@@ -152,6 +180,7 @@ export function useConsolidationStepWrite(options: {
     setSubmission((current) => ({
       attempt: (current?.attempt ?? 0) + 1,
       signer: step.signer,
+      targets: step.pendingTargets,
       stepNumber: step.index + 1,
     }));
     write.writeContract(getConsolidationStepWriteParams(step.pendingTargets), {
@@ -170,5 +199,6 @@ export function useConsolidationStepWrite(options: {
     toast,
     showToast: toast !== undefined && toastKey !== dismissedToastKey,
     dismissToast: () => setDismissedToastKey(toastKey),
+    recordedLinkKeys: recorded.keys,
   };
 }

@@ -43,12 +43,16 @@ const mockData: {
   groupsError: boolean;
   links: string[] | undefined;
   linksError: boolean;
+  fresh: string[];
+  freshError: boolean;
 } = {
   groups: new Map(),
   groupsPending: false,
   groupsError: false,
   links: [],
   linksError: false,
+  fresh: [],
+  freshError: false,
 };
 const mockRefetchLinks = jest.fn();
 
@@ -73,6 +77,11 @@ jest.mock(
       isError: mockData.linksError,
       refetch: mockRefetchLinks,
     }),
+    useConsolidationFreshLinks: (wallets: readonly string[]) => ({
+      freshLinkKeys:
+        wallets.length > 0 && mockData.freshError ? undefined : mockData.fresh,
+      isError: wallets.length > 0 && mockData.freshError,
+    }),
   })
 );
 
@@ -83,7 +92,8 @@ const mockWrite: {
     | { status: "success"; title: string; transactionHash: string }
     | undefined;
   gasError: string | undefined;
-} = { toast: undefined, gasError: undefined };
+  recordedLinkKeys: ReadonlySet<string>;
+} = { toast: undefined, gasError: undefined, recordedLinkKeys: new Set() };
 jest.mock(
   "@/components/delegation/consolidation-builder/useConsolidationStepWrite",
   () => ({
@@ -96,6 +106,7 @@ jest.mock(
       toast: mockWrite.toast,
       showToast: mockWrite.toast !== undefined,
       dismissToast: mockDismissToast,
+      recordedLinkKeys: mockWrite.recordedLinkKeys,
     }),
   })
 );
@@ -105,6 +116,8 @@ const B = `0x${"b".repeat(40)}`;
 const C = `0x${"c".repeat(40)}`;
 const D = `0x${"d".repeat(40)}`;
 const ACTIVATION_TEXT = "October 15, 2026 at 00:00 UTC";
+const AFTER_ACTIVATION_MS = CONSOLIDATION_FOURTH_WALLET_ACTIVATION_MS + 60_000;
+const BEFORE_ACTIVATION_MS = CONSOLIDATION_FOURTH_WALLET_ACTIVATION_MS - 60_000;
 
 function both(...pairs: readonly (readonly [string, string])[]): string[] {
   return pairs.flatMap(([x, y]) => [
@@ -163,9 +176,7 @@ function addFourthWallet() {
 
 beforeEach(() => {
   jest.clearAllMocks();
-  jest
-    .spyOn(Date, "now")
-    .mockReturnValue(CONSOLIDATION_FOURTH_WALLET_ACTIVATION_MS - 60_000);
+  jest.spyOn(Date, "now").mockReturnValue(AFTER_ACTIVATION_MS);
   mockData.groups = new Map([
     [A, [A, B, C]],
     [B, [A, B, C]],
@@ -175,8 +186,11 @@ beforeEach(() => {
   mockData.groupsError = false;
   mockData.links = [...GROUP_LINKS];
   mockData.linksError = false;
+  mockData.fresh = [];
+  mockData.freshError = false;
   mockWrite.toast = undefined;
   mockWrite.gasError = undefined;
+  mockWrite.recordedLinkKeys = new Set();
 });
 
 afterEach(() => {
@@ -288,6 +302,7 @@ describe("ConsolidationBuilder", () => {
     addFourthWallet();
 
     mockData.links = [...GROUP_LINKS, toDirectedLinkKey(A, D)];
+    mockData.fresh = [toDirectedLinkKey(A, D)];
     view.rerenderWith({ connectedAddress: B });
 
     expect(step(1).getByText("Confirmed")).toBeInTheDocument();
@@ -295,42 +310,124 @@ describe("ConsolidationBuilder", () => {
     expect(step(2).getByRole("button", { name: "Sign Step 2" })).toBeEnabled();
   });
 
-  it("holds the new wallet's final step until the fourth slot opens", () => {
-    const view = renderBuilder();
+  it("holds every step of a four-wallet group until the fourth slot opens", () => {
+    jest.spyOn(Date, "now").mockReturnValue(BEFORE_ACTIVATION_MS);
+    renderBuilder();
     addFourthWallet();
 
     expect(
       screen.getByText(
-        `Four-wallet consolidations count from ${ACTIVATION_TEXT}. You can sign the other steps now; the last step opens then.`
+        `Four-wallet consolidations count only for links registered from ${ACTIVATION_TEXT}. Every step for this group opens then.`
       )
     ).toBeInTheDocument();
-
-    mockData.links = [
-      ...GROUP_LINKS,
-      toDirectedLinkKey(A, D),
-      toDirectedLinkKey(B, D),
-      toDirectedLinkKey(C, D),
-    ];
-    view.rerenderWith({ connectedAddress: D });
-
     expect(
-      step(4).getByText(`Available from ${ACTIVATION_TEXT}.`)
+      step(1).getByText(`Available from ${ACTIVATION_TEXT}.`)
     ).toBeInTheDocument();
     expect(
-      screen.queryByRole("button", { name: "Sign Step 4" })
+      screen.queryByRole("button", { name: /^Sign Step/ })
     ).not.toBeInTheDocument();
   });
 
+  it("does not hold groups of three before activation", () => {
+    jest.spyOn(Date, "now").mockReturnValue(BEFORE_ACTIVATION_MS);
+    renderBuilder();
+    fireEvent.change(walletInput(3), { target: { value: D } });
+
+    expect(screen.queryByText(/Four-wallet consolidations/)).toBeNull();
+    expect(step(1).getByRole("button", { name: "Sign Step 1" })).toBeEnabled();
+  });
+
+  it("registers older links to the joining wallet again and explains why", () => {
+    mockData.links = [...GROUP_LINKS, toDirectedLinkKey(A, D)];
+    renderBuilder();
+    addFourthWallet();
+
+    expect(
+      screen.getByText(
+        `Some of these links were registered before ${ACTIVATION_TEXT}. They are registered again so they count for the fourth wallet.`
+      )
+    ).toBeInTheDocument();
+    fireEvent.click(step(1).getByRole("button", { name: "Sign Step 1" }));
+    expect(mockSubmit).toHaveBeenCalledWith(
+      expect.objectContaining({ signer: A, pendingTargets: [D] })
+    );
+  });
+
+  it("waits for 6529 to record a link confirmed in this session", () => {
+    const view = renderBuilder();
+    addFourthWallet();
+
+    mockData.links = [...GROUP_LINKS, toDirectedLinkKey(A, D)];
+    mockWrite.recordedLinkKeys = new Set([toDirectedLinkKey(A, D)]);
+    view.rerenderWith({ connectedAddress: A });
+
+    expect(step(1).getByText("Recording")).toBeInTheDocument();
+    expect(
+      step(1).getByText(
+        "Waiting for 6529 to record this link (usually about a minute)."
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Sign Step 1" })
+    ).not.toBeInTheDocument();
+    expect(step(2).getByText("Next")).toBeInTheDocument();
+    expect(
+      step(2).getByText(
+        `Switch your wallet to Wallet 2 (${getAddress(B)}) to sign this step.`
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText(/They are registered again/)
+    ).not.toBeInTheDocument();
+  });
+
+  it("plans again when a link it relied on is revoked or no longer fresh", () => {
+    const fresh = [toDirectedLinkKey(A, D), toDirectedLinkKey(D, A)];
+    mockData.links = [...GROUP_LINKS, ...fresh];
+    mockData.fresh = fresh;
+    const view = renderBuilder();
+    addFourthWallet();
+    expect(stepHeadings()).toEqual([
+      "Wallet 2 signs",
+      "Wallet 3 signs",
+      "Wallet 4 signs",
+    ]);
+
+    mockData.fresh = [toDirectedLinkKey(D, A)];
+    view.rerenderWith({ connectedAddress: A });
+    expect(stepHeadings()).toEqual([
+      "Wallet 1 signs",
+      "Wallet 2 signs",
+      "Wallet 3 signs",
+      "Wallet 4 signs",
+    ]);
+
+    mockData.links = [...GROUP_LINKS];
+    mockData.fresh = [];
+    view.rerenderWith({ connectedAddress: A });
+    expect(
+      step(4).getByText("Links to Wallet 1, Wallet 2, and Wallet 3")
+    ).toBeInTheDocument();
+  });
+
+  it("reports when registration times cannot be read", () => {
+    mockData.freshError = true;
+    renderBuilder();
+    addFourthWallet();
+
+    expect(
+      screen.getByText("Couldn’t check the registered links.")
+    ).toBeInTheDocument();
+  });
+
   it("opens the final step after activation", () => {
-    jest
-      .spyOn(Date, "now")
-      .mockReturnValue(CONSOLIDATION_FOURTH_WALLET_ACTIVATION_MS + 60_000);
-    mockData.links = [
-      ...GROUP_LINKS,
+    const fresh = [
       toDirectedLinkKey(A, D),
       toDirectedLinkKey(B, D),
       toDirectedLinkKey(C, D),
     ];
+    mockData.links = [...GROUP_LINKS, ...fresh];
+    mockData.fresh = fresh;
     renderBuilder({ connectedAddress: D });
     fireEvent.change(walletInput(2), { target: { value: A } });
     fireEvent.click(screen.getByRole("button", { name: "Add Wallet" }));
@@ -414,7 +511,7 @@ describe("ConsolidationBuilder", () => {
     renderBuilder();
 
     expect(
-      screen.getByText("Couldn’t read the registered links on-chain.")
+      screen.getByText("Couldn’t check the registered links.")
     ).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Try Again" }));
     expect(mockRefetchLinks).toHaveBeenCalled();
@@ -471,8 +568,6 @@ describe("ConsolidationBuilder", () => {
       screen.getByText("Loading your current consolidation…")
     ).toBeInTheDocument();
     expect(walletInput(1)).toHaveValue(A);
-    expect(
-      screen.getByText("Checking registered links on-chain…")
-    ).toBeInTheDocument();
+    expect(screen.getByText("Checking registered links…")).toBeInTheDocument();
   });
 });

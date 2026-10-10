@@ -1,3 +1,4 @@
+import { toDirectedLinkKey } from "@/components/delegation/consolidation-builder/consolidation-plan";
 import { useConsolidationStepWrite } from "@/components/delegation/consolidation-builder/useConsolidationStepWrite";
 import { act, renderHook } from "@testing-library/react";
 import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
@@ -124,6 +125,36 @@ describe("useConsolidationStepWrite", () => {
 
     rerender();
     expect(onConfirmed).toHaveBeenCalledTimes(1);
+  });
+
+  it("remembers the directions of every confirmed transaction", () => {
+    const { result, rerender } = renderWriteHook();
+    expect(result.current.recordedLinkKeys.size).toBe(0);
+
+    submitStep(result);
+    writeState.data = HASH;
+    receiptState.isLoading = true;
+    rerender();
+    expect(result.current.recordedLinkKeys.size).toBe(0);
+
+    receiptState.isLoading = false;
+    receiptState.isSuccess = true;
+    rerender();
+    expect([...result.current.recordedLinkKeys]).toEqual([
+      toDirectedLinkKey(A, D),
+    ]);
+
+    const B = `0x${"b".repeat(40)}`;
+    act(() => {
+      result.current.submit({ index: 1, signer: B, pendingTargets: [A, D] });
+    });
+    writeState.data = `0x${"2".repeat(64)}`;
+    rerender();
+    expect([...result.current.recordedLinkKeys]).toEqual([
+      toDirectedLinkKey(A, D),
+      toDirectedLinkKey(B, A),
+      toDirectedLinkKey(B, D),
+    ]);
   });
 
   it("hides a dismissed toast until the state changes", () => {

@@ -1,4 +1,5 @@
 import {
+  useConsolidationFreshLinks,
   useConsolidationGroups,
   useConsolidationLinkStatus,
 } from "@/components/delegation/consolidation-builder/useConsolidationBuilderData";
@@ -111,5 +112,53 @@ describe("useConsolidationLinkStatus", () => {
       contracts: [],
       query: { enabled: false },
     });
+  });
+});
+
+describe("useConsolidationFreshLinks", () => {
+  const AFTER = 1_792_022_400 + 60;
+
+  it("reads every wallet's pair rows and returns fresh directions", async () => {
+    jest.mocked(fetchUrl).mockImplementation(async (url: string) => ({
+      data: url.includes(A)
+        ? [
+            {
+              wallet1: A,
+              wallet2: B,
+              confirmed: true,
+              wallet1_registered_at: AFTER,
+              wallet2_registered_at: null,
+            },
+          ]
+        : [],
+    }));
+    const wallets = [A, B];
+
+    const { result } = renderHook(() => useConsolidationFreshLinks(wallets), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => expect(result.current.freshLinkKeys).toBeDefined());
+    expect(fetchUrl).toHaveBeenCalledWith(
+      `https://api.test/api/consolidations/${A}?show_incomplete=true`
+    );
+    expect(result.current.freshLinkKeys).toEqual([toDirectedLinkKey(A, B)]);
+    expect(result.current.isError).toBe(false);
+  });
+
+  it("returns no directions without wallets and reports failed reads", async () => {
+    const empty = renderHook(() => useConsolidationFreshLinks([]), {
+      wrapper: createWrapper(),
+    });
+    expect(empty.result.current.freshLinkKeys).toEqual([]);
+
+    jest.mocked(fetchUrl).mockRejectedValue(new Error("down"));
+    const wallets = [A];
+    const { result } = renderHook(() => useConsolidationFreshLinks(wallets), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => expect(result.current.isError).toBe(true));
+    expect(result.current.freshLinkKeys).toBeUndefined();
   });
 });

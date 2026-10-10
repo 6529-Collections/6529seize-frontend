@@ -8,7 +8,6 @@ import type { ReactNode } from "react";
 import type {
   ConsolidationStepProgress,
   ConsolidationStepStatus,
-  FourthSlotWait,
 } from "./consolidation-plan";
 
 export type ConsolidationStepsState =
@@ -24,7 +23,6 @@ export type ConsolidationStepsState =
 interface StepContext {
   readonly locale: SupportedLocale;
   readonly activationDate: string;
-  readonly fourthSlotWait: FourthSlotWait;
   readonly walletResolving: boolean;
   readonly isBusy: boolean;
   readonly busySigner: string | undefined;
@@ -44,6 +42,10 @@ const STATUS_STYLES: Record<
     item: "tw-border-white/[0.06] tw-bg-black/20",
     badge: "tw-border-success/40 tw-bg-success/10 tw-text-success",
   },
+  recording: {
+    item: "tw-border-white/[0.06] tw-bg-black/20",
+    badge: "tw-border-primary-400/30 tw-bg-primary-500/10 tw-text-primary-200",
+  },
   current: {
     item: "tw-border-primary-400/50 tw-bg-primary-500/[0.06]",
     badge: "tw-border-primary-400/50 tw-bg-primary-500/15 tw-text-primary-200",
@@ -56,6 +58,7 @@ const STATUS_STYLES: Record<
 
 const STATUS_MESSAGE_KEYS = {
   complete: "delegation.consolidationBuilder.steps.status.complete",
+  recording: "delegation.consolidationBuilder.steps.status.recording",
   current: "delegation.consolidationBuilder.steps.status.current",
   upcoming: "delegation.consolidationBuilder.steps.status.upcoming",
 } as const satisfies Record<ConsolidationStepStatus, string>;
@@ -73,14 +76,13 @@ function getStepHint(
   };
   switch (step.block) {
     case "fourth-slot":
-      return context.fourthSlotWait === "unreachable"
-        ? t(
-            locale,
-            "delegation.consolidationBuilder.steps.hint.fourthSlotUnreachable"
-          )
-        : t(locale, "delegation.consolidationBuilder.steps.hint.fourthSlot", {
-            date: context.activationDate,
-          });
+      return t(
+        locale,
+        "delegation.consolidationBuilder.steps.hint.fourthSlot",
+        {
+          date: context.activationDate,
+        }
+      );
     case "disconnected":
       return context.walletResolving
         ? t(locale, "delegation.consolidationBuilder.steps.hint.resolving")
@@ -126,6 +128,13 @@ function StepAction(
   if (step.status === "complete") {
     return null;
   }
+  if (step.status === "recording") {
+    return (
+      <p role="status" className={MESSAGE_CLASS_NAME}>
+        {t(locale, "delegation.consolidationBuilder.steps.hint.recording")}
+      </p>
+    );
+  }
   if (step.canSign) {
     return (
       <Button
@@ -170,7 +179,9 @@ function StepItem(
   const styles = STATUS_STYLES[step.status];
   const headingId = `consolidation-step-${step.index}`;
   const registrations =
-    step.status === "complete" ? step.targets : step.pendingTargets;
+    step.status === "current" || step.status === "upcoming"
+      ? step.pendingTargets
+      : step.targets;
   const showGasError =
     !!context.gasError && context.gasErrorSigner === step.signer;
 

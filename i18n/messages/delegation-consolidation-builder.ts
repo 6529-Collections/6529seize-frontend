@@ -46,10 +46,9 @@ export const DELEGATION_CONSOLIDATION_BUILDER_MESSAGES = {
     "One transaction per wallet. Wallets already in your consolidation sign first; new wallets sign last.",
   "delegation.consolidationBuilder.steps.incomplete":
     "Enter at least two valid wallets to see the steps.",
-  "delegation.consolidationBuilder.steps.loading":
-    "Checking registered links on-chain…",
+  "delegation.consolidationBuilder.steps.loading": "Checking registered links…",
   "delegation.consolidationBuilder.steps.readError":
-    "Couldn’t read the registered links on-chain.",
+    "Couldn’t check the registered links.",
   "delegation.consolidationBuilder.steps.groupError":
     "The steps appear once the current consolidations of these wallets load.",
   "delegation.consolidationBuilder.steps.nothingToDo":
@@ -65,6 +64,7 @@ export const DELEGATION_CONSOLIDATION_BUILDER_MESSAGES = {
   "delegation.consolidationBuilder.steps.status.complete": "Confirmed",
   "delegation.consolidationBuilder.steps.status.current": "Next",
   "delegation.consolidationBuilder.steps.status.upcoming": "Waiting",
+  "delegation.consolidationBuilder.steps.status.recording": "Recording",
   "delegation.consolidationBuilder.steps.sign": "Sign Step {step}",
   "delegation.consolidationBuilder.steps.connect": "Connect Wallet",
   "delegation.consolidationBuilder.steps.hint.disconnected":
@@ -75,16 +75,14 @@ export const DELEGATION_CONSOLIDATION_BUILDER_MESSAGES = {
     "Available once the earlier steps are confirmed.",
   "delegation.consolidationBuilder.steps.hint.fourthSlot":
     "Available from {date}.",
-  "delegation.consolidationBuilder.steps.hint.fourthSlotUnreachable":
-    "Not available: these wallets cannot form a four-wallet consolidation.",
   "delegation.consolidationBuilder.steps.hint.resolving":
     "Checking your wallet connection…",
-  "delegation.consolidationBuilder.fourthSlot.finalStep":
-    "Four-wallet consolidations count from {date}. You can sign the other steps now; the last step opens then.",
-  "delegation.consolidationBuilder.fourthSlot.allSteps":
-    "Four-wallet consolidations count from {date}. Some of these links were registered earlier, so the remaining steps open then.",
-  "delegation.consolidationBuilder.fourthSlot.unreachable":
-    "Four-wallet consolidations count from {date}, and one wallet’s three links must all be completed from then on. Every wallet here already has a completed link, so these steps cannot form a four-wallet consolidation.",
+  "delegation.consolidationBuilder.steps.hint.recording":
+    "Waiting for 6529 to record this link (usually about a minute).",
+  "delegation.consolidationBuilder.fourthSlot.waits":
+    "Four-wallet consolidations count only for links registered from {date}. Every step for this group opens then.",
+  "delegation.consolidationBuilder.fourthSlot.staleLinks":
+    "Some of these links were registered before {date}. They are registered again so they count for the fourth wallet.",
   "delegation.consolidationBuilder.outOfOrder":
     "Some new wallets registered links before the wallets already in your consolidation. Your consolidation may be split until the last step confirms, so sign the remaining steps back to back.",
   "delegation.consolidationBuilder.toast.title": "Consolidation Step {step}",
