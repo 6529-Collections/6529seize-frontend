@@ -33,6 +33,18 @@ describe("DelegationCenterComponent", () => {
     expect(setSection).not.toHaveBeenCalled();
   });
 
+  it("opens the guided consolidation flow from the consolidation card", async () => {
+    seizeCtx.isConnected = true;
+    const setSection = jest.fn();
+    render(<DelegationCenterComponent setSection={setSection} />);
+    fireEvent.click(screen.getByRole("button", { name: "Guided Setup" }));
+    await waitFor(() =>
+      expect(setSection).toHaveBeenCalledWith(
+        DelegationCenterSection.BUILD_CONSOLIDATION
+      )
+    );
+  });
+
   it("navigates to register delegation when connected", async () => {
     seizeCtx.isConnected = true;
     const setSection = jest.fn();

@@ -110,6 +110,7 @@ export enum DelegationCenterSection {
   REGISTER_DELEGATION = "register-delegation",
   REGISTER_SUB_DELEGATION = "register-sub-delegation",
   REGISTER_CONSOLIDATION = "register-consolidation",
+  BUILD_CONSOLIDATION = "build-consolidation",
   ASSIGN_PRIMARY_ADDRESS = "assign-primary-address",
   ANY_COLLECTION = "any-collection",
   MEMES_COLLECTION = "the-memes",

@@ -31,6 +31,26 @@ jest.mock("@/components/delegation/NewAssignPrimaryAddress", () => () => (
   <div />
 ));
 jest.mock("@/components/delegation/CollectionDelegation", () => () => <div />);
+const mockBuilderProps = jest.fn();
+jest.mock(
+  "@/components/delegation/consolidation-builder/ConsolidationBuilder",
+  () => {
+    return function MockConsolidationBuilder(props: {
+      connectedAddress: string | undefined;
+      walletResolving: boolean;
+    }) {
+      mockBuilderProps(props);
+      const [value, setValue] = jest.requireActual("react").useState("");
+      return (
+        <input
+          aria-label="Mock builder wallet"
+          value={value}
+          onChange={(event) => setValue(event.target.value)}
+        />
+      );
+    };
+  }
+);
 jest.mock("@/components/delegation/html/DelegationHTML", () => () => <div />);
 
 let mockConnectedAddress = "0xabc";
@@ -98,6 +118,7 @@ describe("DelegationCenterMenu links", () => {
     DelegationCenterSection.REGISTER_DELEGATION,
     DelegationCenterSection.REGISTER_SUB_DELEGATION,
     DelegationCenterSection.REGISTER_CONSOLIDATION,
+    DelegationCenterSection.BUILD_CONSOLIDATION,
     DelegationCenterSection.ASSIGN_PRIMARY_ADDRESS,
   ])("hides navigation on focused action route %s", async (section) => {
     const mod = await import("@/components/delegation/DelegationCenterMenu");
@@ -131,6 +152,39 @@ describe("DelegationCenterMenu links", () => {
     expect(
       screen.getByRole("textbox", { name: "Mock delegation address" })
     ).toHaveValue("");
+  });
+
+  it("keeps the guided consolidation flow mounted while signers switch wallets", async () => {
+    const mod = await import("@/components/delegation/DelegationCenterMenu");
+    const DelegationCenterMenu = mod.default;
+    const builderProps = {
+      ...props,
+      section: DelegationCenterSection.BUILD_CONSOLIDATION,
+    };
+    const { rerender } = render(<DelegationCenterMenu {...builderProps} />);
+    const input = screen.getByRole("textbox", { name: "Mock builder wallet" });
+    fireEvent.change(input, { target: { value: "0xplanned" } });
+    expect(mockBuilderProps).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        connectedAddress: "0xabc",
+        walletResolving: false,
+      })
+    );
+
+    mockConnectedAddress = "0xdef";
+    mockWalletPending = true;
+    rerender(<DelegationCenterMenu {...builderProps} />);
+
+    expect(
+      screen.getByRole("textbox", { name: "Mock builder wallet" })
+    ).toHaveValue("0xplanned");
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    expect(mockBuilderProps).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        connectedAddress: "0xdef",
+        walletResolving: true,
+      })
+    );
   });
 
   it("clears a primary-address query when the connected account changes", async () => {
