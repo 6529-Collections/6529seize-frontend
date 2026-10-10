@@ -4179,6 +4179,50 @@
       ]
     },
     {
+      "id": "delegation.build-consolidation",
+      "kind": "workflow",
+      "title": "Build a Consolidation (guided setup)",
+      "link_label": "Build a Consolidation",
+      "aliases": [
+        "build a consolidation",
+        "guided consolidation",
+        "guided setup",
+        "consolidate four wallets",
+        "add a fourth wallet",
+        "add a wallet to my consolidation",
+        "consolidation signing order",
+        "one transaction per wallet"
+      ],
+      "keywords": [
+        "consolidation",
+        "consolidate",
+        "guided",
+        "wallets",
+        "batch",
+        "order",
+        "fourth",
+        "sign",
+        "999"
+      ],
+      "facts": [
+        "Build a Consolidation is the Delegation Center's guided setup for linking up to 4 wallets you control. Open it from Guided Setup on the Consolidations card, from Add another wallet in ID Statements / Consolidated Addresses, or from the link in the Register Consolidation form.",
+        "Every pair of wallets in a consolidation registers use case 999 in both directions. The guide reads which directions are already registered on-chain (Any Collection or The Memes) and plans one transaction per wallet: a single registration for one missing link, or one batch for several.",
+        "The connected wallet and its current consolidation are prefilled. Wallets already in that consolidation sign first and new wallets sign last; signing out of order temporarily splits the consolidation and can reduce TDH-wave votes.",
+        "Each step can be signed only by its own wallet, and only after every earlier step is confirmed on-chain. Switch the connected wallet between steps; the wallet list stays in place.",
+        "Four-wallet consolidations count from 15 October 2026, 00:00 UTC. Before then the guide lets you sign the other steps and holds the step that completes the fourth wallet.",
+        "Every wallet in a consolidation can sign in as the profile and act for it, so only consolidate wallets you control. Profiles merge permanently, the profile with the highest CIC keeps its handle, and a wallet already in another consolidation leaves it."
+      ],
+      "canonical_path": "/delegation/build-consolidation",
+      "related_paths": [
+        "/delegation/register-consolidation",
+        "/delegation/delegation-faq/register-consolidation",
+        "/delegation/delegation-center",
+        "/delegation/wallet-checker"
+      ],
+      "tags": ["delegation", "consolidation", "wallet"],
+      "source_refs": ["ops/docs/delegation/feature-delegation-action-flows.md"]
+    },
+    {
       "id": "delegation.wallet-architecture",
       "kind": "workflow",
       "title": "Wallet Architecture",
@@ -5746,7 +5790,7 @@
         "On mobile, the add-statements sheet presents four compact statement groups, keeps public-visibility notes under About identity statements, and provides header close, back, backdrop, Escape, and swipe-down dismissal paths.",
         "On mobile web and Capacitor, deeper add-statement forms stay above the software keyboard and keep their focused fields and Save/Cancel actions reachable by scrolling.",
         "Consolidated wallet rows expand to show the full address and ENS name when available as full-field copy controls, plus labeled mobile links to Etherscan and OpenSea.",
-        "Add another wallet appears beside Wallet Checker for the connected profile owner when no proxy profile is active and a primary or consolidated wallet address is available. It opens /delegation/register-consolidation without prefilling Collection or Consolidating With; it is separate from Add for identity statements.",
+        "Consolidated Addresses shows how many of the 4 allowed wallets the profile has. Add another wallet appears beside Wallet Checker for the connected profile owner when no proxy profile is active, a primary or consolidated wallet address is available, and the profile has fewer than 4 wallets; it opens the guided Build a Consolidation flow at /delegation/build-consolidation. At 4 wallets the owner sees a maximum-reached note instead. It is separate from Add for identity statements.",
         "URL-capable statement rows open from the row and show a right-aligned external-link cue; Copy remains an independent inline action that does not open the destination, while eligible owners can also Delete.",
         "NFT Accounts includes Ninfa and Other. Other asks for a display name such as AOTM and a secure HTTPS URL, then shows the display name with the destination hostname.",
         "New NFT account links must use HTTPS, cannot contain URL credentials, reject duplicate normalized URLs, and are limited to 20 per profile; Ninfa links must use ninfa.io or a ninfa.io subdomain.",
@@ -5757,7 +5801,7 @@
       "related_paths": [
         "/{user}/identity",
         "/delegation/wallet-checker",
-        "/delegation/register-consolidation"
+        "/delegation/build-consolidation"
       ],
       "tags": ["profiles", "identity", "statements"],
       "source_refs": ["ops/docs/profiles/tabs/feature-identity-statements.md"]

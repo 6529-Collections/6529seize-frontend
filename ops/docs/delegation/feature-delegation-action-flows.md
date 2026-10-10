@@ -10,6 +10,7 @@ and submit/recovery behavior.
 
 - `/delegation/register-delegation`
 - `/delegation/register-consolidation`
+- `/delegation/build-consolidation` (guided consolidation setup)
 - `/delegation/register-sub-delegation`
 - `/delegation/assign-primary-address`
 
@@ -18,12 +19,15 @@ and submit/recovery behavior.
 - From `/delegation/delegation-center` action cards:
   - `Register Delegation` -> `/delegation/register-delegation`
   - `Register Consolidation` -> `/delegation/register-consolidation`
+  - `Guided Setup` on the `Consolidations` card ->
+    `/delegation/build-consolidation`
   - `Register Delegation Manager` -> `/delegation/register-sub-delegation`
 - Open write routes directly by URL.
 - Profile owners can select `Add another wallet` beside `Wallet Checker` in
   `ID Statements` → `Consolidated Addresses` to open
-  `/delegation/register-consolidation`. This entry is hidden while a proxy
-  profile is active.
+  `/delegation/build-consolidation`. This entry is hidden while a proxy
+  profile is active and once the profile has 4 wallets.
+- The normal `register-consolidation` form links to the guided setup.
 - Open prefilled links such as
   `/delegation/register-delegation?collection=<contract>&use_case=<id>`.
 - From collection routes (`/delegation/any-collection`, `/delegation/the-memes`,
@@ -40,6 +44,10 @@ and submit/recovery behavior.
   - Optional: `Tokens` (`All` or `Select Token ID`)
 - `register-consolidation`
   - Required: `Collection`, `Consolidating With`
+- `build-consolidation`
+  - Required: 2 to 4 wallet addresses (`0x` followed by 40 hexadecimal
+    characters); ENS names are not accepted
+  - Each step's own wallet must be connected to sign it
 - `register-sub-delegation`
   - Required: `Collection`, `Manager Address`
 - `assign-primary-address`
@@ -61,13 +69,63 @@ and submit/recovery behavior.
   UI note calls out current 6529.io support for `#1`, `#2`, and `#3`.
 - `register-consolidation` shows an on-page note that TDH consolidation should
   use `Any Collection` or `The Memes`.
-- The normal consolidation form explains the two registrations: register from
-  the connected wallet, then connect the other wallet and register the return
-  link. Each wallet needs ETH for gas. The ownership link is public, existing
-  profile data may be combined, and NFTs stay in their wallets.
+- The normal consolidation form explains that a consolidation holds up to 4
+  wallets and that every pair of wallets registers a link in both directions,
+  so every wallet signs and needs ETH for gas. The ownership link is public,
+  existing profile data may be combined, and NFTs stay in their wallets. The
+  block links to the guided setup.
 - Opening the form leaves `Collection` unselected and `Consolidating With`
-  empty. The two-wallet instruction block is omitted from manager-launched
-  forms, which use the delegation-manager signing path.
+  empty. The instruction block is omitted from manager-launched forms, which
+  use the delegation-manager signing path.
+
+## Guided Consolidation Setup
+
+`/delegation/build-consolidation` (`Build a Consolidation`) plans the fewest
+transactions for building or extending a consolidation: one transaction per
+wallet, in a safe order.
+
+- `Before you start` states that every consolidated wallet can sign in as the
+  profile and act for it, that profiles merge permanently with the
+  highest-CIC profile keeping its handle, that signing out of order
+  temporarily splits the consolidation and can reduce TDH-wave votes, and that
+  a wallet already in another consolidation leaves it. It links to the TDH
+  consolidation explainer and the consolidation FAQ article.
+- The connected wallet is prefilled, followed by the rest of its current
+  consolidation from the 6529 API. Up to 4 rows are allowed. Invalid and
+  duplicate addresses are flagged per row. Rows can be removed down to two.
+- The route does not require a connected wallet to plan. The wallet list stays
+  in place when the connected wallet changes, so each signer can connect in
+  turn.
+- If a listed wallet's current consolidation includes wallets that are not
+  listed, the page names the wallets that will leave it.
+- The page reads every direction on-chain. A direction counts when it is
+  registered with use case `999` on `Any Collection` or `The Memes`.
+- `Signing steps` lists one numbered step per wallet that still has links to
+  register. Wallets already in the current consolidation sign first and new
+  wallets sign last; new wallets with fewer missing links sign earlier. A step
+  with one missing link sends `registerDelegationAddress`; a step with several
+  sends one `batchDelegations` transaction. Both use `Any Collection`, no
+  expiry, and all tokens.
+- Only the first unconfirmed step is actionable, and only while its own wallet
+  is connected. Later steps show
+  `Available once the earlier steps are confirmed.`; the next step asks the
+  user to connect or switch to the named wallet, or shows the fourth-slot
+  hold. Confirmed steps stay numbered and show `Confirmed`.
+- Four-wallet consolidations count from 15 October 2026, 00:00 UTC. Before
+  then the final step that completes a 4-wallet group is held with
+  `Available from <date>.` and every other step can be signed. If earlier
+  out-of-order registrations mean no single step completes a wallet's three
+  links, every remaining step waits. If every wallet already has a completed
+  link, the page explains that these wallets cannot form a four-wallet
+  consolidation and holds every step.
+- If new wallets registered before the existing members, a note warns that the
+  consolidation may be split until the last step confirms.
+- Transaction progress uses the shared transaction dialog
+  (`Consolidation Step N`), and gas-estimation or network errors appear inside
+  the affected step. After confirmation the page re-reads links and the current
+  consolidation.
+- When every step is confirmed, the page notes that the consolidation updates
+  within minutes and TDH fully updates at the next 00:00 UTC snapshot.
 
 ## Query Parameter Behavior
 
@@ -114,9 +172,9 @@ and submit/recovery behavior.
 
 - These routes submit onchain writes and need wallet confirmation.
 - Final success state depends on transaction confirmation timing.
-- The new consolidation instructions use canonical `en-US` messages. Other
-  supported locales currently use English fallback copy; the remaining form
-  labels and validation messages are not fully localized.
+- The consolidation instructions and the guided setup use canonical `en-US`
+  messages. Other supported locales currently use English fallback copy; the
+  remaining form labels and validation messages are not fully localized.
 - Collection tables, lock controls, edit, and revoke flows are documented in
   [Delegation Collection Management](feature-delegation-collection-management.md).
 
