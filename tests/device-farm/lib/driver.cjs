@@ -13,9 +13,11 @@
 
 const path = require("node:path");
 const { remote } = require("webdriverio");
+const { ensureSafariWebInspector } = require("./safari-setup.cjs");
 
 const APPIUM_HOSTNAME = "127.0.0.1";
 const APPIUM_PORT = 4723;
+const SAFARI_BUNDLE_ID = "com.apple.mobilesafari";
 
 const APP_PACKAGE = "com.core6529.app";
 const APP_ACTIVITY = ".MainActivity";
@@ -71,14 +73,14 @@ function baseCapabilities() {
   return capabilities;
 }
 
-async function connect(capabilities) {
+async function connect(capabilities, connectionRetryCount = 2) {
   return remote({
     hostname: APPIUM_HOSTNAME,
     port: APPIUM_PORT,
     path: "/",
     logLevel: "warn",
     connectionRetryTimeout: 300000,
-    connectionRetryCount: 2,
+    connectionRetryCount,
     capabilities,
   });
 }
@@ -96,6 +98,22 @@ async function startWebSession() {
     // iOS 18.6.2 with "remote debugger did not return any connected web
     // applications after ~5s").
     capabilities["appium:webviewConnectTimeout"] = 30000;
+    // Create a native Safari session first: WDA's initialDeeplinkUrl path
+    // checks app.running immediately after opening the URL and raced Safari
+    // startup on the SE in run 36123141853. The ordinary app launch waits for
+    // XCTest startup; then we open the page and attach explicitly below.
+    const [major, minor = 0] = env("DEVICEFARM_DEVICE_OS_VERSION", "")
+      .split(".")
+      .map(Number);
+    // Older/unknown iOS retains browserName; 16.4+ uses bundleId + deepLink.
+    if (major > 16 || (major === 16 && minor >= 4)) {
+      delete capabilities.browserName;
+      capabilities["appium:bundleId"] = SAFARI_BUNDLE_ID;
+      capabilities["appium:autoWebview"] = false;
+      capabilities["appium:includeSafariInWebviews"] = true;
+      capabilities["appium:fullContextList"] = true;
+    }
+    capabilities["appium:showXcodeLog"] = true;
     const derivedDataPath = env("DEVICEFARM_APPIUM_WDA_DERIVED_DATA_PATH");
     if (derivedDataPath) {
       capabilities["appium:derivedDataPath"] = derivedDataPath;
@@ -103,13 +121,73 @@ async function startWebSession() {
     }
   } else {
     capabilities.browserName = "Chrome";
+    // Chrome's implicit load wait exceeded Appium's 240s proxy timeout in
+    // run 36401855670 before openPage could observe the rendered document.
+    // Let openPage own readiness: URL + complete document + visible content.
+    capabilities.pageLoadStrategy = "none";
     capabilities["appium:automationName"] = "UiAutomator2";
     const chromedriverDir = env("DEVICEFARM_CHROMEDRIVER_EXECUTABLE_DIR");
     if (chromedriverDir) {
       capabilities["appium:chromedriverExecutableDir"] = chromedriverDir;
     }
   }
-  return connect(capabilities);
+  // Surface the first failed session/command instead of replaying it silently.
+  // Fresh Device Farm allocations are the unit of reliability validation.
+  const driver = await connect(capabilities, 0);
+  if (capabilities["appium:bundleId"] === SAFARI_BUNDLE_ID) {
+    try {
+      await ensureSafariWebInspector(driver, env("DEVICEFARM_DEVICE_OS_VERSION"));
+      await attachSafariPage(driver);
+    } catch (error) {
+      await saveScreenshot(driver, "web-safari-setup-failed");
+      // The caller never receives this session if attachment fails.
+      await driver.deleteSession().catch(() => {});
+      throw error;
+    }
+  }
+  return driver;
+}
+
+async function attachSafariPage(driver) {
+  const pageUrl = new URL(targetUrl());
+  // mobile: deepLink requires iOS 16.4+. Safari is already running, so this
+  // opens the page without coupling cold launch to WDA session creation.
+  await driver.execute("mobile: deepLink", {
+    url: pageUrl.toString(),
+    bundleId: SAFARI_BUNDLE_ID,
+  });
+  let pageContext;
+  await driver.waitUntil(
+    async () => {
+      const contexts = await driver.getContexts();
+      pageContext = contexts.find((context) =>
+        isSafariPageContext(context, pageUrl)
+      );
+      return Boolean(pageContext);
+    },
+    {
+      timeout: 30000,
+      interval: 1000,
+      timeoutMsg: "Safari did not expose the target page context",
+    }
+  );
+  await driver.switchContext(pageContext.id);
+}
+
+function isSafariPageContext(context, pageUrl) {
+  if (
+    context.bundleId !== SAFARI_BUNDLE_ID ||
+    !context.id?.startsWith("WEBVIEW_") ||
+    !URL.canParse(context.url)
+  ) {
+    return false;
+  }
+  const contextUrl = new URL(context.url);
+  return (
+    contextUrl.origin === pageUrl.origin &&
+    contextUrl.pathname.replace(/\/$/, "") ===
+      pageUrl.pathname.replace(/\/$/, "")
+  );
 }
 
 /**
@@ -133,53 +211,128 @@ async function startNativeAndroidSession() {
 
 async function waitForDocumentReady(driver, timeout) {
   await driver.waitUntil(
-    async () => (await driver.execute(() => document.readyState)) === "complete",
-    { timeout, interval: 2000, timeoutMsg: "document never reached readyState=complete" }
+    async () =>
+      (await driver.execute(() => document.readyState)) === "complete",
+    {
+      timeout,
+      interval: 2000,
+      timeoutMsg: "document never reached readyState=complete",
+    }
   );
 }
 
 /**
  * Navigate and wait until the browser is really on the requested page with
  * rendered content. Safari's WebDriver `url()` can return before navigation
- * starts (observed on Device Farm iPhones: the previous page's readyState
- * satisfies a naive readiness check), so this waits for the expected pathname
- * and a non-empty body rather than trusting the first readyState=complete.
+ * starts. Retire the previous document before loading each independent smoke
+ * target so its hydration/router effects cannot race the next navigation.
  */
 async function openPage(driver, pageUrl, timeout) {
-  const expectedPath = new URL(pageUrl).pathname.replace(/\/$/, "") || "/";
-  const onExpectedPath = async () => {
-    const pathname = await driver.execute(() =>
-      window.location.pathname.replace(/\/$/, "")
-    );
-    return (pathname || "/") === expectedPath;
+  const navigation = {
+    navigationStage: "target-validation",
+    requestedUrl: pageUrl,
   };
-  // Safari on real devices occasionally swallows a navigation command
-  // outright (observed on Device Farm iPhones), so re-issue url() once if the
-  // pathname has not changed within half the budget.
-  await driver.url(pageUrl);
   try {
-    await driver.waitUntil(onExpectedPath, {
-      timeout: Math.floor(timeout / 2),
-      interval: 2000,
-    });
-  } catch {
-    console.warn(`navigation to ${expectedPath} did not start; retrying url()`);
-    await driver.url(pageUrl);
-    await driver.waitUntil(onExpectedPath, {
-      timeout: Math.floor(timeout / 2),
-      interval: 2000,
-      timeoutMsg: `browser never navigated to ${expectedPath} (after retry)`,
-    });
+    await navigateToPage(driver, pageUrl, timeout, navigation);
+    navigation.navigationStage = "connectivity";
+    const connectivity = await browserDiagnostics(driver);
+    if (connectivity.online === false) {
+      const error = new Error(
+        "Device browser reports offline after navigation"
+      );
+      error.code = "DEVICE_OFFLINE";
+      throw error;
+    }
+  } catch (error) {
+    // Diagnostic failures must never replace the original navigation error.
+    error.deviceFarmDiagnostics = {
+      ...(await browserDiagnostics(driver)),
+      ...navigation,
+    };
+    throw error;
   }
-  await waitForDocumentReady(driver, timeout);
+}
+
+async function browserDiagnostics(driver) {
+  try {
+    return await driver.execute(() => ({
+      online: navigator.onLine,
+      readyState: document.readyState,
+      origin: window.location.origin,
+      pathname: window.location.pathname,
+    }));
+  } catch {
+    return { unavailable: true };
+  }
+}
+
+async function retirePreviousAndroidTab(driver) {
+  const previous = await driver.getWindowHandle();
+  // Use the W3C command: WebdriverIO's newWindow helper rejects mobile.
+  // Creating a tab does not navigate the old document or give it an opener.
+  const { handle } = await driver.createWindow("tab");
+  if (!handle || handle === previous) {
+    throw new Error("Chrome did not create a distinct tab");
+  }
+  await driver.switchToWindow(previous);
+  const remaining = await driver.closeWindow();
+  if (remaining.includes(previous) || !remaining.includes(handle)) {
+    throw new Error("Chrome did not retire the previous tab");
+  }
+  await driver.switchToWindow(handle);
+}
+
+async function navigateToPage(driver, pageUrl, timeout, navigation) {
+  const expectedUrl = new URL(pageUrl);
+  const expectedPath = expectedUrl.pathname.replace(/\/$/, "") || "/";
+  // In run 36099676558, /the-memes initialized its query parameters after
+  // Appium accepted /network, leaving Safari on the old document. These are
+  // independent direct-load checks, not tests of in-app route transitions.
+  // Verify the neutral document has committed before issuing the target once.
+  if (isIos()) {
+    navigation.navigationStage = "blank-document";
+    await driver.url("about:blank");
+  } else {
+    // A15 acknowledged about:blank but stayed on Memes for 90s in run
+    // 36431891530. Remove the old browsing context before navigating once.
+    navigation.navigationStage = "tab-isolation";
+    await retirePreviousAndroidTab(driver);
+  }
+  navigation.navigationStage = "blank-document";
   await driver.waitUntil(
     async () =>
-      (await driver.execute(() => (document.body.innerText || "").trim()))
-        .length > 0,
+      await driver.execute(
+        () =>
+          window.location.href === "about:blank" &&
+          document.readyState === "complete"
+      ),
+    {
+      timeout,
+      interval: 500,
+      timeoutMsg: "previous document did not unload to about:blank",
+    }
+  );
+  navigation.navigationStage = "destination";
+  await driver.url(pageUrl);
+  await driver.waitUntil(
+    async () => {
+      const state = await driver.execute(() => ({
+        origin: window.location.origin,
+        pathname: window.location.pathname.replace(/\/$/, "") || "/",
+        ready: document.readyState === "complete",
+        hasContent: Boolean(document.body?.innerText?.trim()),
+      }));
+      return (
+        state.origin === expectedUrl.origin &&
+        state.pathname === expectedPath &&
+        state.ready &&
+        state.hasContent
+      );
+    },
     {
       timeout,
       interval: 2000,
-      timeoutMsg: `${expectedPath} never rendered visible body content`,
+      timeoutMsg: `${expectedUrl.origin}${expectedPath} never loaded with visible body content`,
     }
   );
 }
@@ -233,6 +386,37 @@ function assertNoCrashMarkers(assert, bodyText, where) {
   }
 }
 
+/** Wait for asynchronous page content without replaying navigation or errors. */
+async function assertPageBody(assert, driver, where, expectedText, timeout) {
+  let bodyText;
+  let readError;
+  await driver.waitUntil(
+    async () => {
+      try {
+        bodyText = await driver.execute(() => document.body?.innerText || "");
+      } catch (error) {
+        // waitUntil normally retries rejected predicates. Stop observing on
+        // the first command error and rethrow it outside that retry boundary.
+        readError = error;
+        return true;
+      }
+      // A crash is terminal even if content could appear in a later read.
+      return (
+        CRASH_MARKERS.some((marker) => bodyText.includes(marker)) ||
+        !expectedText ||
+        bodyText.toLowerCase().includes(expectedText.toLowerCase())
+      );
+    },
+    {
+      timeout,
+      interval: 1000,
+      timeoutMsg: `${where} body never mentioned "${expectedText}"`,
+    }
+  );
+  if (readError) throw readError;
+  assertNoCrashMarkers(assert, bodyText, where);
+}
+
 /**
  * Screenshots land in $DEVICEFARM_LOG_DIR so Device Farm collects them as
  * customer artifacts. Failures to capture never fail the test itself.
@@ -250,6 +434,7 @@ module.exports = {
   APP_PACKAGE,
   DEEP_LINK_SCHEME,
   assertNoCrashMarkers,
+  assertPageBody,
   isIos,
   longPress,
   openPage,
