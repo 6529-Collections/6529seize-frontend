@@ -28,100 +28,14 @@ import WalletCheckerResults, {
   type ConsolidationDisplay,
 } from "./WalletCheckerResults";
 import {
+  fetchConsolidationGroupRows,
+  selectConsolidationActions,
+} from "./walletCheckerConsolidations";
+import {
   DELEGATION_CARD_CLASS_NAME,
   DELEGATION_PAGE_DESCRIPTION_CLASS_NAME,
   DELEGATION_PAGE_TITLE_CLASS_NAME,
 } from "../delegation-ui";
-
-// A consolidation holds at most four wallets, so a grouped wallet has at most
-// three counterparties. The cap bounds requests for wallets that also carry
-// stray or superseded links.
-const MAX_LINKED_CONSOLIDATION_WALLETS = 6;
-
-function getConsolidationsUrl(address: string) {
-  return `${publicEnv.API_ENDPOINT}/api/consolidations/${address}?show_incomplete=true`;
-}
-
-async function fetchConsolidationRows(
-  address: string
-): Promise<WalletConsolidation[]> {
-  const response: DBResponse<WalletConsolidation> = await fetchUrl(
-    getConsolidationsUrl(address)
-  );
-  return response.data;
-}
-
-async function fetchLinkedConsolidationRows(
-  address: string
-): Promise<WalletConsolidation[]> {
-  try {
-    return await fetchConsolidationRows(address);
-  } catch (error) {
-    console.error(
-      `Failed to fetch consolidations for related wallet: ${address}`,
-      error
-    );
-    return [];
-  }
-}
-
-function getLinkedConsolidationWallets(
-  address: string,
-  rows: WalletConsolidation[]
-): string[] {
-  const seen = new Set([address.toLowerCase()]);
-  const linkedWallets: string[] = [];
-
-  // Confirmed links first, so group members are fetched before stray links.
-  const prioritizedRows = rows.toSorted(
-    (a, b) => Number(b.confirmed) - Number(a.confirmed)
-  );
-
-  for (const row of prioritizedRows) {
-    let counterparty: string | undefined;
-    if (areEqualAddresses(address, row.wallet1)) {
-      counterparty = row.wallet2;
-    } else if (areEqualAddresses(address, row.wallet2)) {
-      counterparty = row.wallet1;
-    }
-
-    if (!counterparty || seen.has(counterparty.toLowerCase())) {
-      continue;
-    }
-
-    seen.add(counterparty.toLowerCase());
-    linkedWallets.push(counterparty);
-    if (linkedWallets.length >= MAX_LINKED_CONSOLIDATION_WALLETS) {
-      break;
-    }
-  }
-
-  return linkedWallets;
-}
-
-function getConsolidationPairKey(row: WalletConsolidation) {
-  const wallet1 = row.wallet1.toLowerCase();
-  const wallet2 = row.wallet2.toLowerCase();
-  return wallet1 < wallet2 ? `${wallet1}-${wallet2}` : `${wallet2}-${wallet1}`;
-}
-
-// Every pair is returned by both of its wallets. Keep one row per pair and,
-// when copies disagree, the one from the latest block (its newest state).
-function dedupeConsolidationPairs(
-  rows: WalletConsolidation[]
-): WalletConsolidation[] {
-  const rowsByPair = new Map<string, WalletConsolidation>();
-
-  for (const row of rows) {
-    const key = getConsolidationPairKey(row);
-    const existing = rowsByPair.get(key);
-    if (!existing || row.block > existing.block) {
-      rowsByPair.set(key, row);
-    }
-  }
-
-  return [...rowsByPair.values()];
-}
 
 function resolveConsolidationDisplay(
   wallet: string,
@@ -493,18 +407,7 @@ export default function WalletCheckerComponent(
     queryKey: ["consolidations", submittedAddress],
     queryFn: async () => {
       try {
-        const firstData = await fetchConsolidationRows(submittedAddress);
-        // Load every linked wallet's rows so pairs between the other members
-        // of a group (e.g. C<->D when checking A) are shown too.
-        const linkedWallets = getLinkedConsolidationWallets(
-          submittedAddress,
-          firstData
-        );
-        const linkedData = await Promise.all(
-          linkedWallets.map((wallet) => fetchLinkedConsolidationRows(wallet))
-        );
-
-        return dedupeConsolidationPairs([firstData, ...linkedData].flat());
+        return await fetchConsolidationGroupRows(submittedAddress);
       } catch (error) {
         console.error(
           `Failed to fetch consolidations for ${submittedAddress}`,
@@ -607,44 +510,34 @@ export default function WalletCheckerComponent(
     return undefined;
   }, [delegationsLoaded, delegations, fetchedAddress]);
 
-  const consolidationActions = useMemo<ConsolidationDisplay[]>(() => {
-    if (!consolidationsLoaded) {
-      return [];
+  // Suggestions depend on the active consolidation, which loads separately.
+  // Wait until that request settles for this wallet so valid suggestions are
+  // never filtered against an empty or previous wallet's group.
+  const settledConsolidatedWallets = useMemo<
+    ConsolidatedWallet[] | null
+  >(() => {
+    if (consolidatedWalletsStatus === "success") {
+      return consolidatedWalletsResponse ?? [];
     }
+    return consolidatedWalletsStatus === "error" ? [] : null;
+  }, [consolidatedWalletsStatus, consolidatedWalletsResponse]);
 
-    // Only suggest completing links between wallets that belong with the
-    // checked wallet: itself, its active consolidation, or wallets it links
-    // to. Completing another member's link to an unrelated wallet would move
-    // that member out of the group, because the newest confirmed link wins.
-    const isKnownWallet = (address: string) =>
-      areEqualAddresses(address, fetchedAddress) ||
-      consolidatedWallets.some((wallet) =>
-        areEqualAddresses(wallet.address, address)
-      ) ||
-      consolidations.some(
-        (row) =>
-          (areEqualAddresses(row.from, fetchedAddress) &&
-            areEqualAddresses(row.to, address)) ||
-          (areEqualAddresses(row.to, fetchedAddress) &&
-            areEqualAddresses(row.from, address))
-      );
-
-    return consolidations.filter(
-      (candidate) =>
-        isKnownWallet(candidate.from) &&
-        isKnownWallet(candidate.to) &&
-        !consolidations.some(
-          (comparison) =>
-            areEqualAddresses(comparison.to, candidate.from) &&
-            areEqualAddresses(comparison.from, candidate.to)
-        )
-    );
-  }, [
-    consolidationsLoaded,
-    consolidations,
-    consolidatedWallets,
-    fetchedAddress,
-  ]);
+  const consolidationActions = useMemo<ConsolidationDisplay[]>(
+    () =>
+      consolidationsLoaded && settledConsolidatedWallets
+        ? selectConsolidationActions(
+            consolidations,
+            settledConsolidatedWallets,
+            fetchedAddress
+          )
+        : [],
+    [
+      consolidationsLoaded,
+      consolidations,
+      settledConsolidatedWallets,
+      fetchedAddress,
+    ]
+  );
 
   const resultsLoaded =
     !!fetchedAddress && delegationsLoaded && consolidationsLoaded;
