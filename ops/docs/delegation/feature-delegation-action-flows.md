@@ -101,29 +101,42 @@ wallet, in a safe order.
 - The page reads every direction on-chain. A direction counts when it is
   registered with use case `999` on `Any Collection` or `The Memes`.
 - `Signing steps` lists one numbered step per wallet that still has links to
-  register. Wallets already in the current consolidation sign first and new
-  wallets sign last; new wallets with fewer missing links sign earlier. A step
-  with one missing link sends `registerDelegationAddress`; a step with several
-  sends one `batchDelegations` transaction. Both use `Any Collection`, no
-  expiry, and all tokens.
-- Only the first unconfirmed step is actionable, and only while its own wallet
-  is connected. Later steps show
+  register. Wallets already in the current consolidation sign first and
+  joining wallets sign last; joining wallets with fewer links left sign
+  earlier. A step with one link sends `registerDelegationAddress`; a step with
+  several sends one `batchDelegations` transaction. Both use
+  `Any Collection`, no expiry, and all tokens.
+- Only the first step with links left to send is actionable, and only while
+  its own wallet is connected. Later steps show
   `Available once the earlier steps are confirmed.`; the next step asks the
   user to connect or switch to the named wallet, or shows the fourth-slot
   hold. Confirmed steps stay numbered and show `Confirmed`.
-- Four-wallet consolidations count from 15 October 2026, 00:00 UTC. Before
-  then the final step that completes a 4-wallet group is held with
-  `Available from <date>.` and every other step can be signed. If earlier
-  out-of-order registrations mean no single step completes a wallet's three
-  links, every remaining step waits. If every wallet already has a completed
-  link, the page explains that these wallets cannot form a four-wallet
-  consolidation and holds every step.
-- If new wallets registered before the existing members, a note warns that the
-  consolidation may be split until the last step confirms.
+- Groups of 2 or 3 wallets use the on-chain status only.
+- A group of 4 counts only when one member has all three of its links
+  registered in both directions from 15 October 2026, 00:00 UTC. For 4-wallet
+  plans the page also reads each wallet's stored pairs
+  (`/api/consolidations/{wallet}?show_incomplete=true`) for the time each
+  direction was registered. Every direction between a joining wallet and
+  another listed wallet must be registered from that date; an older
+  registration is registered again in its signer's step, and a note explains
+  that older links are registered again so they count for the fourth wallet.
+  Joining wallets are those outside the current consolidation; with fewer than
+  three current members listed, every wallet is joining.
+- Before 15 October 2026, 00:00 UTC every step of a 4-wallet plan waits and
+  shows `Available from <date>.`, with a note that four-wallet consolidations
+  count only for links registered from then.
+- After a step confirms in the session, a link that 6529 has not recorded yet
+  shows `Recording` and
+  `Waiting for 6529 to record this link (usually about a minute).` instead of
+  asking for another signature. The next step can proceed meanwhile.
+- If a joining wallet already registered toward an existing member whose step
+  registers back, a note warns that the consolidation may be split until the
+  last step confirms.
 - Transaction progress uses the shared transaction dialog
   (`Consolidation Step N`), and gas-estimation or network errors appear inside
-  the affected step. After confirmation the page re-reads links and the current
-  consolidation.
+  the affected step. On-chain status and stored registration times refresh
+  every 15 seconds and after each confirmed transaction, together with the
+  current consolidation.
 - When every step is confirmed, the page notes that the consolidation updates
   within minutes and TDH fully updates at the next 00:00 UTC snapshot.
 

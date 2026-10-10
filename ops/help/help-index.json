@@ -4148,8 +4148,7 @@
         "register consolidation form",
         "open register consolidation",
         "where is register consolidation",
-        "register a consolidation form",
-        "add another wallet"
+        "register a consolidation form"
       ],
       "keywords": [
         "consolidation",
@@ -4166,8 +4165,8 @@
       "facts": [
         "The Register Consolidation form is the Delegation Center action for connecting wallets you control for supported 6529 metrics.",
         "The form requires a connected wallet, Collection, and Consolidating With address.",
-        "Profile owners can open this form from Add another wallet beside Wallet Checker in ID Statements / Consolidated Addresses; the entry is hidden while a proxy profile is active.",
-        "The normal form explains registering from the connected wallet, then connecting the other wallet and registering the return link. Each wallet needs ETH for gas; the link is public and existing profile data may be combined. NFTs stay in their wallets.",
+        "Add another wallet in ID Statements / Consolidated Addresses opens the guided Build a Consolidation setup at /delegation/build-consolidation, not this form.",
+        "The normal form explains that a consolidation holds up to 4 wallets and every pair of wallets registers a link in both directions, so every wallet signs and needs ETH for gas; the link is public and existing profile data may be combined. NFTs stay in their wallets. It links to the guided setup.",
         "For TDH consolidation, use Any Collection or The Memes."
       ],
       "canonical_path": "/delegation/register-consolidation",
@@ -4196,6 +4195,7 @@
         "guided setup",
         "consolidate four wallets",
         "add a fourth wallet",
+        "add another wallet",
         "add a wallet to my consolidation",
         "consolidation signing order",
         "one transaction per wallet"
@@ -4216,7 +4216,8 @@
         "Every pair of wallets in a consolidation registers use case 999 in both directions. The guide reads which directions are already registered on-chain (Any Collection or The Memes) and plans one transaction per wallet: a single registration for one missing link, or one batch for several.",
         "The connected wallet and its current consolidation are prefilled. Wallets already in that consolidation sign first and new wallets sign last; signing out of order temporarily splits the consolidation and can reduce TDH-wave votes.",
         "Each step can be signed only by its own wallet, and only after every earlier step is confirmed on-chain. Switch the connected wallet between steps; the wallet list stays in place.",
-        "Four-wallet consolidations count from 15 October 2026, 00:00 UTC. Before then the guide lets you sign the other steps and holds the step that completes the fourth wallet.",
+        "A four-wallet consolidation counts only when one member has all three of its links registered in both directions from 15 October 2026, 00:00 UTC. Before then every step of a four-wallet plan waits; groups of two or three are not held.",
+        "For a four-wallet plan the guide also checks when 6529 recorded each link. A joining wallet's older links are registered again in the signer's step so they count. After a step confirms, a link 6529 has not recorded yet shows Waiting for 6529 to record this link (usually about a minute) instead of asking for another signature.",
         "Every wallet in a consolidation can sign in as the profile and act for it, so only consolidate wallets you control. Profiles merge permanently, the profile with the highest CIC keeps its handle, and a wallet already in another consolidation leaves it."
       ],
       "canonical_path": "/delegation/build-consolidation",
