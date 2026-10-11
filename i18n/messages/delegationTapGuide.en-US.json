@@ -86,7 +86,7 @@
   "delegation.tapGuide.caveats.description": "The honest fine print.",
   "delegation.tapGuide.caveats.manager": "A Delegation Manager cannot move your NFTs, but it can register anything in your vault's name: combine it with another wallet, redirect its minting and airdrops, set its primary address and appoint more managers. It can also revoke the vault's entries. Make it a hardware wallet.",
   "delegation.tapGuide.caveats.revoke": "Revoking a manager does not undo what it registered. Review those entries and revoke them too.",
-  "delegation.tapGuide.caveats.expiry": "The contract never enforces expiry dates. Apps that honor them, 6529 included, stop using an expired delegation, but the record stays until it is revoked. A manager's expiry date is ignored entirely.",
+  "delegation.tapGuide.caveats.expiry": "The contract never enforces expiry dates. An expiry date is only respected by apps that check it; the record itself stays until it is revoked. A manager's expiry date is ignored entirely.",
   "delegation.tapGuide.caveats.lock": "Your vault can lock consolidation for Any Collection. Then no wallet can be linked to it, not even with a stolen manager key, and its manager cannot unlock it. The vault has to unlock before you add a wallet.",
   "delegation.tapGuide.caveats.signIn": "Every combined wallet can sign in as your profile, including your social wallet. It still holds no NFTs.",
   "delegation.tapGuide.caveats.airdropAll": "If your vault delegates \"All\" to another wallet, airdrops follow that delegation unless an \"Airdrop\" delegation points at the vault.",
