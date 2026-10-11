@@ -133,7 +133,7 @@ test.describe("Delegation read-only coverage @surface @medium @large @readonly",
       ).toBeVisible();
     }
     await expect(
-      page.getByRole("button", { name: "Guided Setup", exact: true })
+      page.getByRole("link", { name: "Guided Setup", exact: true })
     ).toBeVisible();
 
     await expect(

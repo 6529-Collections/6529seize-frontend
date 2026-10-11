@@ -1,9 +1,9 @@
 export const DELEGATION_CONSOLIDATION_BUILDER_MESSAGES = {
   "delegation.consolidationBuilder.title": "Build a Consolidation",
   "delegation.consolidationBuilder.metadataDescription":
-    "Plan and sign the links between up to {limit} wallets you control, one transaction per wallet.",
+    "Plan and sign the links between up to {limit} wallets you control, one transaction per wallet. A manager signing for a cold vault sends one per link.",
   "delegation.consolidationBuilder.description":
-    "Every pair of wallets in a consolidation registers a link in both directions. Enter up to {limit} wallets you control, then sign one transaction per wallet in the order shown.",
+    "Every pair of wallets in a consolidation registers a link in both directions. Enter up to {limit} wallets you control, then sign one transaction per wallet in the order shown. A Delegation Manager signing for a cold vault sends one transaction per link instead.",
   "delegation.consolidationBuilder.closeTitle": "Consolidation",
   "delegation.consolidationBuilder.entry": "Guided Setup",
   "delegation.consolidationBuilder.warnings.title": "Before you start",
@@ -107,7 +107,7 @@ export const DELEGATION_CONSOLIDATION_BUILDER_MESSAGES = {
   "delegation.consolidationBuilder.steps.progress.recording":
     "Step {step} is confirmed. Waiting for 6529 to record it.",
   "delegation.consolidationBuilder.fourthSlot.waits":
-    "Four-wallet consolidations count only for links registered from {date}. Every step for this group opens then.",
+    "Four-wallet consolidations count only for links registered from {date}. Every step for this group opens at {opens}, a few minutes later, so no link can land before the start.",
   "delegation.consolidationBuilder.fourthSlot.staleLinks":
     "Some of these links were registered before {date}. They are registered again so they count for the fourth wallet.",
   "delegation.consolidationBuilder.outOfOrder":

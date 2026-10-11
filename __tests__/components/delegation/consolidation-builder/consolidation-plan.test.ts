@@ -5,6 +5,7 @@ import {
   resolveConsolidationProgress,
   toDirectedLinkKey,
   validateConsolidationWallets,
+  FOURTH_SLOT_SIGNING_OPENS_MS,
 } from "@/components/delegation/consolidation-builder/consolidation-plan";
 import {
   CONSOLIDATION_FOURTH_WALLET_ACTIVATION_MS,
@@ -18,7 +19,8 @@ const D = `0x${"d".repeat(40)}`;
 const E = `0x${"e".repeat(40)}`;
 
 const BEFORE_ACTIVATION = CONSOLIDATION_FOURTH_WALLET_ACTIVATION_MS - 1;
-const AT_ACTIVATION = CONSOLIDATION_FOURTH_WALLET_ACTIVATION_MS;
+const AT_ACTIVATION = FOURTH_SLOT_SIGNING_OPENS_MS;
+const IN_MARGIN = CONSOLIDATION_FOURTH_WALLET_ACTIVATION_MS + 60_000;
 
 type Link = readonly [string, string];
 
@@ -289,7 +291,19 @@ describe("buildConsolidationPlan", () => {
       expect(result.fourthSlotWait).toBe("all-steps");
     });
 
-    it("hold nothing at or after activation", () => {
+    it("keep holding for a few minutes after activation, so no link lands early", () => {
+      const result = plan({
+        wallets: [A, B, C, D],
+        existingMembers: [A, B, C],
+        links: both([A, B], [A, C], [B, C]),
+        nowMs: IN_MARGIN,
+      });
+
+      expect(result.beforeFourthSlotActivation).toBe(true);
+      expect(result.fourthSlotWait).toBe("all-steps");
+    });
+
+    it("hold nothing once signing opens", () => {
       const result = plan({
         wallets: [A, B, C, D],
         existingMembers: [A, B, C],

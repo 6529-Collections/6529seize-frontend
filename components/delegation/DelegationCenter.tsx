@@ -3,7 +3,7 @@
 import Image from "next/image";
 
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
-import Button from "@/components/utils/button/Button";
+import ButtonLink from "@/components/utils/button/ButtonLink";
 import PrimaryButton from "@/components/utils/button/PrimaryButton";
 import {
   DELEGATION_ALL_ADDRESS,
@@ -230,16 +230,15 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
                   {card.buttonLabel}
                 </PrimaryButton>
                 {"guidedSection" in card && (
-                  <Button
-                    type="button"
+                  <ButtonLink
+                    href={`/delegation/${card.guidedSection}`}
                     variant="secondary"
                     size="lg"
                     fullWidth
                     className="tw-mt-2"
-                    onClick={() => setRedirect(card.guidedSection)}
                   >
                     {t(locale, "delegation.consolidationBuilder.entry")}
-                  </Button>
+                  </ButtonLink>
                 )}
               </div>
             </div>
