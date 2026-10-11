@@ -269,7 +269,9 @@ describe("effective App PR CI plan", () => {
     "styles/museum.css",
     "public/museum/about-proposition.avif",
     ".github/workflows/staging-e2e.yml",
+    ".github/workflows/app-pr-ci.yml",
     "scripts/museum-release-selection.cjs",
+    "package.json",
   ])("requires the isolated Museum browser lane for %s", (file) => {
     const effective = executePlan([file]);
 
@@ -286,6 +288,9 @@ describe("effective App PR CI plan", () => {
     "ops/help/help-index.json",
     "public/museum.png",
     "README.md",
+    "__tests__/components/museum/MuseumShell.test.tsx",
+    "__tests__/scripts/museum-release-selection.test.ts",
+    ".github/workflows/deploy-staging.yml",
   ])("does not run Museum browser coverage for unrelated change %s", (file) => {
     expect(executePlan([file]).checks.playwright_museum.required).toBe(false);
   });
