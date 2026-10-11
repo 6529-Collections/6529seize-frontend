@@ -19,8 +19,8 @@ const DELEGATION_ACTIONS = [
 const ARTICLE_ROUTES = [
   {
     path: "/delegation/wallet-architecture",
-    heading: "Wallet Architecture",
-    title: "Wallet Architecture | 6529.io",
+    heading: "The Three Address Protocol",
+    title: "The Three Address Protocol (TAP) | 6529.io",
   },
   {
     path: "/delegation/delegation-faq",

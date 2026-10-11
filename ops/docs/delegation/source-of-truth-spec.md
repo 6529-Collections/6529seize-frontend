@@ -66,7 +66,8 @@ feature docs. This includes:
 
 Article body copy lives in the delegation content package. This includes:
 
-- Wallet Architecture.
+- Wallet Architecture (the legacy article, now served at
+  `/delegation/delegation-faq/reference-overview-wallet-architecture`).
 - Delegation FAQ landing.
 - Consolidation Use Cases.
 - All FAQ child article bodies.
@@ -78,6 +79,11 @@ the versioned public bundle under `public/delegation-content/{version}/html`.
 Article assets must stay in `content/delegation/assets` and be mirrored into
 the same versioned public bundle. Do not point reviewed articles at mutable S3
 screenshots, diagrams, ABI files, or other instructional assets.
+
+Exception: `/delegation/wallet-architecture` renders the TAP Guide, a native
+React page whose copy lives in `i18n/messages/delegationTapGuide.en-US.json`.
+It replaced the Wallet Architecture article on that route; the article itself is
+unchanged in the bundle.
 
 ## Delivery Architecture
 
@@ -171,7 +177,7 @@ Core route titles:
 | Route | Title |
 | --- | --- |
 | `/delegation/delegation-center` | Delegation Center |
-| `/delegation/wallet-architecture` | Wallet Architecture |
+| `/delegation/wallet-architecture` | The Three Address Protocol (TAP) |
 | `/delegation/delegation-faq` | Delegation FAQ |
 | `/delegation/consolidation-use-cases` | Consolidation Use Cases |
 | `/delegation/wallet-checker` | Wallet Checker |
@@ -263,8 +269,10 @@ content work, not normal frontend refactoring.
 
 Priority order:
 
-1. Wallet Architecture: add the TAP summary, three-wallet role table, and clear
-   security rule before the long explanation.
+1. Wallet Architecture: superseded. `/delegation/wallet-architecture` now
+   renders the native, message-backed TAP Guide
+   (`components/delegation/tap-guide/TapGuide.tsx`); the legacy article body is
+   kept unchanged in the bundle.
 2. Delegation FAQ: add orientation, group links by user goal, and keep labels
    singular and scannable.
 3. Consolidation Use Cases: replace generic use-case headings with descriptive
@@ -297,6 +305,7 @@ Use this status table before starting new delegation work.
 | Wallet Checker framing and states | Built | React UI |
 | Collection page intros and disconnected state | Built | React UI |
 | FAQ child wrapper navigation | Built | React wrapper |
+| TAP Guide (`/delegation/wallet-architecture`) | Built | React UI, `i18n/messages/delegationTapGuide.en-US.json` |
 | Repo-reviewed article package | Built | `content/delegation` |
 | Hash-verified runtime loader | Built | `delegationContent.ts` |
 | IPFS root CID publish | Built, pending credentials/config | `publish-delegation-docs-content.mjs` plus manual workflow |
@@ -307,15 +316,13 @@ Use this status table before starting new delegation work.
 
 Recommended next agent tickets:
 
-1. Rewrite Wallet Architecture in the versioned public bundle and regenerate
-   the manifest.
-2. Rewrite Delegation FAQ landing and Consolidation Use Cases.
-3. Rewrite the three registration FAQ articles.
-4. Add an article image alt/caption audit across all 26 article bodies.
-5. Publish the reviewed bundle to IPFS and update the manifest root CID.
-6. Configure optional CID/version-addressed CloudFront mirror and verify hash
+1. Rewrite Delegation FAQ landing and Consolidation Use Cases.
+2. Rewrite the three registration FAQ articles.
+3. Add an article image alt/caption audit across all 26 article bodies.
+4. Publish the reviewed bundle to IPFS and update the manifest root CID.
+5. Configure optional CID/version-addressed CloudFront mirror and verify hash
    behavior.
-7. Inventory other S3-rendered content areas and create separate migration
+6. Inventory other S3-rendered content areas and create separate migration
    specs.
 
 ## Out Of Scope

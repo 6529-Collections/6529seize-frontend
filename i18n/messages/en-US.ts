@@ -40,6 +40,7 @@ import safeCollectingMessages from "@/i18n/messages/safeCollecting.en-US.json";
 import networkTdhExampleMessages from "@/i18n/messages/networkTdhExample.en-US.json";
 import networkTdhProfileMessages from "@/i18n/messages/networkTdhProfile.en-US.json";
 import networkTdhRulesMessages from "@/i18n/messages/networkTdhRules.en-US.json";
+import delegationTapGuideMessages from "@/i18n/messages/delegationTapGuide.en-US.json";
 import toolsMessages from "@/i18n/messages/tools.en-US.json";
 import wavesRightPanelMessages from "@/i18n/messages/wavesRightPanel.en-US.json";
 import { QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
@@ -4353,6 +4354,7 @@ export const EN_US_MESSAGES = {
   ...networkTdhExampleMessages,
   ...networkTdhProfileMessages,
   ...networkTdhRulesMessages,
+  ...delegationTapGuideMessages,
   ...toolsMessages,
   ...ABOUT_TECH_MESSAGES,
   ...REVIEWBOT_USAGE_MESSAGES,

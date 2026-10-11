@@ -165,7 +165,7 @@ describe("useSidebarSections", () => {
       { name: "Primary Address", href: "/about/primary-address" },
       { name: "Safe Collecting", href: "/delegation/delegation-center" },
       {
-        name: "Wallet Architecture",
+        name: "TAP Guide",
         href: "/delegation/wallet-architecture",
       },
       { name: "Delegation FAQ", href: "/delegation/delegation-faq" },

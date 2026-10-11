@@ -35,6 +35,25 @@ state.
   - `assign-primary-address` has no center card; open it by URL or collection
     manager actions
 
+## TAP Guide
+
+- `/delegation/wallet-architecture` shows the `TAP Guide` tab: a native,
+  plain-language page titled `The Three Address Protocol` (browser title
+  `The Three Address Protocol (TAP) | 6529.io`).
+- It leads with one rule: never connect a wallet that holds your NFTs to a link
+  you saw on X or Discord. `Set up your wallets` opens
+  `/delegation/delegation-center#safe-setup`; `Combine your wallets` opens
+  `/network/tdh/consolidation`.
+- Sections: the three wallet roles (vault, transaction wallet, social wallet),
+  the optional fourth wallet for old or exposed addresses, hardware wallets vs
+  TAP, Good TAP and Great TAP, how 6529 helps (guided setup, Delegation Manager,
+  minting delegation, airdrops), honest caveats and links to Using a SAFE,
+  Delegation FAQ and Wallet Checker.
+- On Capacitor iOS outside the US (or with an unknown country), the social
+  wallet's job list omits paying for Meme subscriptions.
+- The earlier long-form article stays reachable at
+  `/delegation/delegation-faq/reference-overview-wallet-architecture`.
+
 ## Section Menu Behavior
 
 - Desktop (`> 1000px`): left menu stays beside content.

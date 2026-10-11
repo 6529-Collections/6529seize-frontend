@@ -29,9 +29,10 @@ collection actions stay blocked, or Wallet Checker output looks wrong.
 
 - `/delegation` opens not-found:
   use `/delegation/delegation-center`. Bare `/delegation` is not a valid page.
-- HTML-backed sections (`Delegation FAQ`, `Wallet Architecture`,
-  `Consolidation Use Cases`) show `404 | PAGE NOT FOUND`: fallback HTML could
-  not load. Reopen from menu and retry later.
+- HTML-backed sections (`Delegation FAQ`, `Consolidation Use Cases`) show
+  `404 | PAGE NOT FOUND`: fallback HTML could not load. Reopen from menu and
+  retry later. The `TAP Guide` (`/delegation/wallet-architecture`) is a native
+  page and does not load article HTML.
 - Clicking a Delegation Center card while disconnected does not navigate:
   wallet connect was canceled or closed before a successful connect.
 - Collection tables stay on `Fetching incoming ...` / `Fetching outgoing ...`:

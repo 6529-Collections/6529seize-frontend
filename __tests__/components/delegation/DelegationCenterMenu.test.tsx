@@ -52,7 +52,12 @@ jest.mock(
     };
   }
 );
-jest.mock("@/components/delegation/html/DelegationHTML", () => () => <div />);
+jest.mock("@/components/delegation/html/DelegationHTML", () => () => (
+  <div data-testid="delegation-html" />
+));
+jest.mock("@/components/delegation/tap-guide/TapGuide", () => () => (
+  <div data-testid="tap-guide" />
+));
 
 let mockConnectedAddress = "0xabc";
 let mockWalletPending = false;
@@ -112,6 +117,36 @@ describe("DelegationCenterMenu links", () => {
     fireEvent.click(screen.getAllByText("Wallet Checker")[0]);
     expect(props.setActiveSection).toHaveBeenCalledWith(
       DelegationCenterSection.CHECKER
+    );
+  });
+
+  it("opens the TAP guide from its tab", async () => {
+    const mod = await import("@/components/delegation/DelegationCenterMenu");
+    const DelegationCenterMenu = mod.default;
+    render(<DelegationCenterMenu {...props} />);
+    fireEvent.click(screen.getByRole("button", { name: "TAP Guide" }));
+    expect(props.setActiveSection).toHaveBeenCalledWith(
+      DelegationCenterSection.WALLET_ARCHITECTURE
+    );
+    expect(
+      screen.queryByRole("button", { name: "Wallet Architecture" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("renders the native TAP guide instead of the legacy article", async () => {
+    const mod = await import("@/components/delegation/DelegationCenterMenu");
+    const DelegationCenterMenu = mod.default;
+    render(
+      <DelegationCenterMenu
+        {...props}
+        section={DelegationCenterSection.WALLET_ARCHITECTURE}
+      />
+    );
+    expect(screen.getByTestId("tap-guide")).toBeInTheDocument();
+    expect(screen.queryByTestId("delegation-html")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "TAP Guide" })).toHaveAttribute(
+      "aria-current",
+      "page"
     );
   });
 

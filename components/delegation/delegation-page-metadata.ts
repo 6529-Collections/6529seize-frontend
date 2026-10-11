@@ -94,11 +94,9 @@ const SECTION_METADATA: Readonly<
     description: "Manage delegation records for 6529 Gradient.",
   },
   [DelegationCenterSection.WALLET_ARCHITECTURE]: {
-    title: "Wallet Architecture",
-    navLabel: "Wallet Architecture",
-    description:
-      "Understand vault, transaction, and minting wallet architecture.",
-    articleSlug: "reference-overview-wallet-architecture",
+    title: t(DEFAULT_LOCALE, "delegation.tapGuide.metadataTitle"),
+    navLabel: t(DEFAULT_LOCALE, "delegation.tapGuide.navLabel"),
+    description: t(DEFAULT_LOCALE, "delegation.tapGuide.metadataDescription"),
   },
   [DelegationCenterSection.FAQ]: {
     title: "Delegation FAQ",
