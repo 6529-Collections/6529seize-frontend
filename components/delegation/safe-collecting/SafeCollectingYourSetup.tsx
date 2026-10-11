@@ -147,6 +147,10 @@ function WalletRow({
       t(locale, "safeCollecting.yourSetup.airdropsTo", {
         wallets: names(locale, wallet.airdropsTo),
       }),
+    wallet.airdropsFrom.length > 0 &&
+      t(locale, "safeCollecting.yourSetup.airdropsFrom", {
+        wallets: names(locale, wallet.airdropsFrom),
+      }),
   ].filter((fact): fact is string => typeof fact === "string");
 
   return (

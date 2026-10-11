@@ -105,6 +105,25 @@ describe("SafeCollecting", () => {
     ).toBeInTheDocument();
   });
 
+  it("moves between setup tabs with the arrow, Home and End keys", () => {
+    renderHub();
+    const fresh = screen.getByRole("tab", { name: "Starting fresh" });
+    const existing = screen.getByRole("tab", { name: "Already collecting" });
+
+    fireEvent.keyDown(fresh, { key: "ArrowRight" });
+    expect(existing).toHaveAttribute("aria-selected", "true");
+    expect(existing).toHaveFocus();
+
+    fireEvent.keyDown(existing, { key: "ArrowLeft" });
+    expect(fresh).toHaveAttribute("aria-selected", "true");
+    expect(fresh).toHaveFocus();
+
+    fireEvent.keyDown(fresh, { key: "End" });
+    expect(existing).toHaveAttribute("aria-selected", "true");
+    fireEvent.keyDown(existing, { key: "Home" });
+    expect(fresh).toHaveAttribute("aria-selected", "true");
+  });
+
   it("asks to connect before showing a setup", () => {
     renderHub();
     fireEvent.click(screen.getByRole("button", { name: "Connect Wallet" }));
@@ -125,6 +144,7 @@ describe("SafeCollecting", () => {
           manages: [],
           mintsFor: [],
           airdropsTo: [],
+          airdropsFrom: [],
         },
         {
           wallet: SOCIAL,
@@ -134,6 +154,7 @@ describe("SafeCollecting", () => {
           manages: [{ wallet: VAULT, display: "vault.eth" }],
           mintsFor: [],
           airdropsTo: [],
+          airdropsFrom: [],
         },
       ],
       checklist: {

@@ -63,6 +63,7 @@ describe("getSetupWalletFacts", () => {
       { wallet: VAULT, display: "vault.eth" },
     ]);
     expect(social?.mintsFor).toEqual([{ wallet: VAULT, display: "vault.eth" }]);
+    expect(vault?.airdropsFrom).toEqual([]);
   });
 
   it("ignores expired delegations but keeps expired managers", () => {
@@ -104,6 +105,25 @@ describe("getSetupWalletFacts", () => {
 
     expect(facts[0]?.managedBy).toHaveLength(1);
   });
+});
+
+it("lists who sends airdrops to a wallet", () => {
+  const airdropRow = row(TRANSACTION, VAULT, 3);
+  const facts = getSetupWalletFacts(
+    wallets,
+    new Map([
+      [VAULT, [airdropRow]],
+      [TRANSACTION, [airdropRow]],
+    ]),
+    NOW
+  );
+
+  expect(facts[0]?.airdropsFrom).toEqual([
+    { wallet: TRANSACTION, display: TRANSACTION },
+  ]);
+  expect(facts[1]?.airdropsTo).toEqual([
+    { wallet: VAULT, display: "vault.eth" },
+  ]);
 });
 
 describe("getSetupChecklist", () => {

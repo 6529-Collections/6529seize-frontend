@@ -168,7 +168,9 @@ describe("Delegation page component", () => {
     const { rerender } = render(<DelegationPage {...props} />);
     fireEvent.click(screen.getByRole("button", { name: "Clear wallet" }));
     expect(replace).toHaveBeenCalledTimes(1);
-    expect(replace).toHaveBeenLastCalledWith("/delegation/wallet-checker");
+    expect(replace).toHaveBeenLastCalledWith("/delegation/wallet-checker", {
+      scroll: false,
+    });
 
     rerender(<DelegationPage {...props} addressQuery="" />);
     expect(replace).toHaveBeenCalledTimes(1);
@@ -178,7 +180,8 @@ describe("Delegation page component", () => {
     const nextAddress = "0x0000000000000000000000000000000000000529";
     expect(replace).toHaveBeenCalledTimes(2);
     expect(replace).toHaveBeenLastCalledWith(
-      `/delegation/wallet-checker?address=${nextAddress}`
+      `/delegation/wallet-checker?address=${nextAddress}`,
+      { scroll: false }
     );
 
     rerender(<DelegationPage {...props} addressQuery={nextAddress} />);

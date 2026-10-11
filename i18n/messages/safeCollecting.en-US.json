@@ -77,6 +77,7 @@
   "safeCollecting.yourSetup.manages": "Manages {wallets}",
   "safeCollecting.yourSetup.mintsFor": "Can mint for {wallets}",
   "safeCollecting.yourSetup.airdropsTo": "Airdrops go to {wallets}",
+  "safeCollecting.yourSetup.airdropsFrom": "Receives airdrops for {wallets}",
   "safeCollecting.yourSetup.checklistLabel": "Checklist",
   "safeCollecting.yourSetup.check.combined.done": "Your {count} wallets count as one collector.",
   "safeCollecting.yourSetup.check.combined.todo": "Combine your wallets so they count as one collector.",

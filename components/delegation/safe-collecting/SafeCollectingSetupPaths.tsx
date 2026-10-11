@@ -104,12 +104,22 @@ export default function SafeCollectingSetupPaths({
     existing: null,
   });
 
+  // Tablist keys: Left and Right move to the previous and next tab
+  // (wrapping), Home and End to the first and last.
   function onKeyDown(event: KeyboardEvent<HTMLButtonElement>) {
-    if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") {
+    const current = PATHS.indexOf(path);
+    const targets: Record<string, number> = {
+      ArrowLeft: (current - 1 + PATHS.length) % PATHS.length,
+      ArrowRight: (current + 1) % PATHS.length,
+      Home: 0,
+      End: PATHS.length - 1,
+    };
+    const index = targets[event.key];
+    if (index === undefined) {
       return;
     }
     event.preventDefault();
-    const next = PATHS[(PATHS.indexOf(path) + 1) % PATHS.length] ?? "fresh";
+    const next = PATHS[index] ?? "fresh";
     setPath(next);
     tabRefs.current[next]?.focus();
   }

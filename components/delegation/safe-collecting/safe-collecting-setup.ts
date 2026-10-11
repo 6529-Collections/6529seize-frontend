@@ -27,6 +27,8 @@ export interface SetupWalletFacts extends SetupWallet {
   readonly mintsFor: readonly SetupCounterpart[];
   /** Where this wallet's airdrops are delegated. */
   readonly airdropsTo: readonly SetupCounterpart[];
+  /** Wallets whose airdrops are delegated to this wallet. */
+  readonly airdropsFrom: readonly SetupCounterpart[];
 }
 
 export interface SetupChecklist {
@@ -66,6 +68,7 @@ interface FactLists {
   readonly manages: SetupCounterpart[];
   readonly mintsFor: SetupCounterpart[];
   readonly airdropsTo: SetupCounterpart[];
+  readonly airdropsFrom: SetupCounterpart[];
 }
 
 /** Adds what one delegation row says about `walletKey` to its fact lists. */
@@ -96,6 +99,7 @@ function addRowFacts(
       return;
     case USE_CASE_AIRDROPS:
       if (isFrom) addCounterpart(lists.airdropsTo, to, toDisplay);
+      if (isTo) addCounterpart(lists.airdropsFrom, from, fromDisplay);
       break;
   }
 }
@@ -122,6 +126,7 @@ export function getSetupWalletFacts(
       manages: [],
       mintsFor: [],
       airdropsTo: [],
+      airdropsFrom: [],
     };
     for (const row of delegationsByWallet.get(walletKey) ?? []) {
       if (isActive(row, nowSeconds)) {

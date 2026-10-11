@@ -97,7 +97,11 @@ export default function DelegationPageClient(props: {
       return;
     }
     const queryParams = getQueryParams(s);
-    router.replace(buildUrl(s, queryParams));
+    // Syncing query state must not drop an in-page anchor such as
+    // #safe-setup, or scroll the page back to the top.
+    router.replace(buildUrl(s, queryParams) + window.location.hash, {
+      scroll: false,
+    });
   };
 
   useEffect(() => {

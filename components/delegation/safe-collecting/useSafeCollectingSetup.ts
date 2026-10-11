@@ -144,10 +144,14 @@ export function useSafeCollectingSetup(): SafeCollectingSetupState {
   if (!ready) {
     return { kind: "loading" };
   }
+  // The generated type says primary_wallet is always set, but a new or
+  // incomplete profile can arrive without it.
+  const primaryWallet: string | null | undefined =
+    connectedProfile?.primary_wallet;
   return {
     kind: "ready",
     connectedWallet: address.toLowerCase(),
-    primaryWallet: connectedProfile?.primary_wallet.toLowerCase(),
+    primaryWallet: primaryWallet?.toLowerCase(),
     wallets: ready.facts,
     checklist: ready.checklist,
   };
