@@ -45,7 +45,7 @@ import SafeCollectingYourSetup from "./SafeCollectingYourSetup";
 
 type Icon = ComponentType<SVGProps<SVGSVGElement>>;
 
-export const SAFE_SETUP_ANCHOR = "safe-setup";
+const SAFE_SETUP_ANCHOR = "safe-setup";
 
 const delegation = (value: DelegationCenterSection) => `/delegation/${value}`;
 

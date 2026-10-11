@@ -1,9 +1,9 @@
 import type { Delegation } from "@/entities/IDelegation";
 
-export const USE_CASE_ALL = 1;
-export const USE_CASE_MINTING = 2;
-export const USE_CASE_AIRDROPS = 3;
-export const USE_CASE_MANAGER = 998;
+const USE_CASE_ALL = 1;
+const USE_CASE_MINTING = 2;
+const USE_CASE_AIRDROPS = 3;
+const USE_CASE_MANAGER = 998;
 
 export interface SetupWallet {
   /** Lowercased address. */

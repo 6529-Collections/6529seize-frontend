@@ -34,7 +34,7 @@ const REGISTER_DELEGATION = section(
   DelegationCenterSection.REGISTER_DELEGATION
 );
 
-export const SAFE_COLLECTING_STEPS: Record<Path, readonly Step[]> = {
+const SAFE_COLLECTING_STEPS: Record<Path, readonly Step[]> = {
   fresh: [
     { key: "wallets", primary: { key: "action", href: TAP_GUIDE } },
     {
