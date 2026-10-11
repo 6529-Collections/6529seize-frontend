@@ -25,7 +25,7 @@ describe("TDHConsolidationPage (collector's guide)", () => {
       expect(link).toHaveAttribute("href", "/delegation/build-consolidation");
     }
     expect(
-      screen.getByRole("img", {
+      screen.getByRole("figure", {
         name: "Up to four of your wallets count as one collector",
       })
     ).toBeInTheDocument();
