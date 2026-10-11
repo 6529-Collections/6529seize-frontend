@@ -301,6 +301,7 @@ export default function TDHConsolidationPage() {
               ...(
                 [
                   ["/network/tdh", "tdh"],
+                  ["/delegation/consolidation-use-cases", "guide"],
                   ["/delegation/wallet-checker", "checker"],
                   [SAFE_COLLECTING_HREF, "center"],
                 ] as const

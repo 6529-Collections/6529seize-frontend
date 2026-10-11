@@ -207,7 +207,7 @@
   "network.tdhConsolidation.related": "Related",
   "network.tdhConsolidation.related.tdh.title": "How TDH is calculated",
   "network.tdhConsolidation.related.tdh.description": "Holding days, edition weights, boosts and an exact breakdown of your profile's TDH.",
-  "network.tdhConsolidation.related.guide.title": "Consolidation guide",
+  "network.tdhConsolidation.related.guide.title": "Consolidation use cases",
   "network.tdhConsolidation.related.guide.description": "Step-by-step use cases for registering and changing consolidations.",
   "network.tdhConsolidation.related.checker.title": "Wallet Checker",
   "network.tdhConsolidation.related.checker.description": "See a wallet's consolidation links and any that are incomplete.",
