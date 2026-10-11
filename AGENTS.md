@@ -319,11 +319,12 @@ is available, use it; otherwise read the relevant files in
   distinct browser risk.
 - Keep exhaustive route inventories, static content, metadata, source mapping,
   link, and fail-closed invariants in fast Jest or other static contract tests.
-  The existing Museum institutional-practice sweep is a scoped exception:
-  retain its complete desktop/mobile route coverage, but schedule its isolated
-  PR and staging lanes only when the exact change set touches the Network
-  Museum route, component, publication, locale, environment-adapter, or E2E
-  paths declared by the CI classifier.
+  Museum browser packs run only for the Museum pages a change can affect:
+  `scripts/museum-release-selection.cjs` maps changed files to page surfaces
+  through `ops/testing-strategy/museum-surface-registry.v1.json` and selects
+  the packs whose specs visit them. Publication, shared-shell, and selection
+  changes, or anything it cannot map, run every pack. Keep each spec's
+  registered surfaces equal to the pages it visits.
 - Before adding or expanding an E2E pack, identify the browser-specific failure
   it catches and check that a lower test layer does not already cover it.
 

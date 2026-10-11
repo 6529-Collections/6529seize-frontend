@@ -765,10 +765,9 @@
         "museum.institutional.profile",
         "museum.research.source-table",
         "museum.artist",
-        "museum.project",
-        "museum.gift",
-        "museum.program",
-        "museum.object"
+        "museum.acquisition",
+        "museum.acquisition.program",
+        "museum.work"
       ]
     },
     {
@@ -782,12 +781,18 @@
         "museum.research",
         "museum.about.proposition",
         "museum.work",
-        "museum.organization"
+        "museum.organization",
+        "museum.project"
       ]
     },
     {
       "file": "tests/museum/rights-readonly.spec.ts",
-      "surface_ids": ["museum.rights", "museum.object", "museum.collection"]
+      "surface_ids": [
+        "museum.rights",
+        "museum.object",
+        "museum.collection",
+        "museum.work"
+      ]
     }
   ]
 }

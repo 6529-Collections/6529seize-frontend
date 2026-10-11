@@ -21,6 +21,7 @@ const museumPacks = [
   "museum-about",
   "museum-inside-system",
   "museum-rights",
+  "museum-network-ia",
 ];
 const bash = fs.existsSync("/opt/homebrew/bin/bash")
   ? "/opt/homebrew/bin/bash"

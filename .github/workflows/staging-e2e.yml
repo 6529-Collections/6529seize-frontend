@@ -27,6 +27,7 @@ on:
           - museum-about
           - museum-inside-system
           - museum-rights
+          - museum-network-ia
       automatic_deploy_run_id:
         description: Successful Web Deploy - STAGING run ID; supplied automatically, required for a manual rerun
         type: string
@@ -216,7 +217,7 @@ jobs:
             .environment == "staging" and
             .source_commit == $source_commit and
             (.selected_packs | type == "array") and
-            (.selected_packs | all(IN("museum-data-architecture", "museum-institutional-practice", "museum-about", "museum-inside-system", "museum-rights"))) and
+            (.selected_packs | all(IN("museum-data-architecture", "museum-institutional-practice", "museum-about", "museum-inside-system", "museum-rights", "museum-network-ia"))) and
             (.selection_digest | test("^[a-f0-9]{64}$"))
           ' "$selection_file" >/dev/null
           {
@@ -304,7 +305,7 @@ jobs:
           if [ "$SELECTED_PACK" != all ]; then
             args+=(--pack "$SELECTED_PACK")
           else
-            for alias in museum-data-architecture museum-institutional-practice museum-about museum-inside-system museum-rights; do
+            for alias in museum-data-architecture museum-institutional-practice museum-about museum-inside-system museum-rights museum-network-ia; do
               if ! jq -e --arg alias "$alias" 'index($alias) != null' <<< "$MUSEUM_SELECTED_PACKS_JSON" >/dev/null; then
                 args+=(--exclude-pack "$alias")
               fi
