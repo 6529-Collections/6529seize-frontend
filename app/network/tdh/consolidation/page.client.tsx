@@ -14,7 +14,7 @@ import {
   WalletIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
-import type { ComponentType, SVGProps } from "react";
+import { useId, type ComponentType, type SVGProps } from "react";
 import { AboutContentsDropdown } from "@/components/about/AboutContentsDropdown";
 import NetworkReferenceNavigation from "@/components/network/NetworkReferenceNavigation";
 import {
@@ -330,12 +330,15 @@ export default function TDHConsolidationPage() {
 }
 
 function WalletsFigure({ locale }: { readonly locale: SupportedLocale }) {
+  const captionId = useId();
   return (
     <figure
-      role="img"
-      aria-label={t(locale, "network.tdhConsolidation.figure.label")}
+      aria-labelledby={captionId}
       className={`${TDH_PANEL} tw-m-0 tw-p-5 sm:tw-p-6`}
     >
+      <figcaption id={captionId} className="tw-sr-only">
+        {t(locale, "network.tdhConsolidation.figure.label")}
+      </figcaption>
       <div
         aria-hidden="true"
         className="tw-grid tw-grid-cols-1 tw-items-center tw-gap-4 sm:tw-grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]"
