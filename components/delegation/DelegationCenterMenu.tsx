@@ -6,6 +6,8 @@ import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import Button from "@/components/utils/button/Button";
 import { DELEGATION_CONTRACT } from "@/constants/constants";
 import { areEqualAddresses } from "@/helpers/Helpers";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import { DelegationCenterSection } from "@/types/enums";
 import { faArrowUpRightFromSquare } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -30,6 +32,7 @@ import {
   MEME_LAB_COLLECTION,
 } from "./delegation-constants";
 import DelegationHTML from "./html/DelegationHTML";
+import TapGuide from "./tap-guide/TapGuide";
 import WalletCheckerComponent from "./walletChecker/WalletChecker";
 import {
   DELEGATION_CARD_CLASS_NAME,
@@ -48,7 +51,7 @@ const DELEGATION_MENU_ITEMS: ReadonlyArray<{
   },
   {
     section: DelegationCenterSection.WALLET_ARCHITECTURE,
-    label: "Wallet Architecture",
+    label: t(DEFAULT_LOCALE, "delegation.tapGuide.navLabel"),
   },
   {
     section: DelegationCenterSection.FAQ,
@@ -272,12 +275,7 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
           />
         );
       case DelegationCenterSection.WALLET_ARCHITECTURE:
-        return (
-          <DelegationHTML
-            title="Wallet Architecture"
-            path="reference-overview-wallet-architecture"
-          />
-        );
+        return <TapGuide />;
       case DelegationCenterSection.FAQ:
         return <DelegationHTML title="Delegation FAQ" path="delegation-faq" />;
       case DelegationCenterSection.CONSOLIDATION_USE_CASES:

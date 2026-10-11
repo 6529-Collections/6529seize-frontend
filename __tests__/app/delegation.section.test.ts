@@ -24,6 +24,38 @@ describe("delegation page server", () => {
     );
   });
 
+  it("titles the wallet architecture route as the TAP guide", async () => {
+    const metadata = await generateMetadata({
+      params: Promise.resolve({ section: ["wallet-architecture"] }),
+    });
+    expect(metadata).toEqual(
+      expect.objectContaining({
+        title: "The Three Address Protocol (TAP) | 6529.io",
+      })
+    );
+  });
+
+  it("keeps the legacy wallet architecture article under the FAQ", async () => {
+    const section = [
+      "delegation-faq",
+      "reference-overview-wallet-architecture",
+    ];
+    const element = await DelegationPage({
+      params: Promise.resolve({ section }),
+      searchParams: Promise.resolve({}),
+    });
+    expect(element.props).toMatchObject({
+      section: DelegationCenterSection.HTML,
+      path: section,
+    });
+    const metadata = await generateMetadata({
+      params: Promise.resolve({ section }),
+    });
+    expect(metadata).toEqual(
+      expect.objectContaining({ title: "Wallet Architecture | 6529.io" })
+    );
+  });
+
   it("returns html section for unknown path", async () => {
     const params = Promise.resolve({ section: ["unknown", "path"] });
     const element = await DelegationPage({

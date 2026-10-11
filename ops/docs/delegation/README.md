@@ -48,7 +48,7 @@ diagnostics.
 ## Route Coverage
 
 - Section routes: `/delegation/delegation-center`,
-  `/delegation/wallet-architecture`, `/delegation/delegation-faq`,
+  `/delegation/wallet-architecture` (`TAP Guide`), `/delegation/delegation-faq`,
   `/delegation/consolidation-use-cases`, `/delegation/wallet-checker`
 - Write routes: `/delegation/register-delegation`,
   `/delegation/register-consolidation`, `/delegation/register-sub-delegation`,
