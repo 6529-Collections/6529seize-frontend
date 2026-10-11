@@ -12,6 +12,8 @@ type EffectivePlan = {
     playwright_museum: { required: boolean };
     playwright_artwork_documentation: { required: boolean };
     playwright_native_competition: { required: boolean };
+    playwright_wave_feature_usage: { required: boolean };
+    playwright_pdf_attachments: { required: boolean };
     install: { required: boolean };
   };
 };
@@ -58,6 +60,27 @@ function executeRawPlan(rawPlan: unknown): EffectivePlan {
 function executePlan(changedFiles: string[]): EffectivePlan {
   return executeRawPlan(plan(changedFiles));
 }
+
+it.each([
+  "services/analytics/mixpanelPrivacy.ts",
+  "hooks/useWaveFeatureUsage.ts",
+  "components/brain/left-sidebar/waves/SidebarDiscovery.tsx",
+  "components/brain/my-stream/MyStreamWaveDesktopTabs.tsx",
+  "components/waves/leaderboard/header/WaveleaderboardSort.tsx",
+  "components/utils/select/dropdown/CommonDropdownItem.tsx",
+  "playwright.config.ts",
+  "tsconfig.playwright.json",
+])("selects the isolated Wave tracking browser lane for %s", (file) => {
+  expect(
+    executePlan([file]).checks.playwright_wave_feature_usage.required
+  ).toBe(true);
+});
+
+it("keeps the Wave tracking browser lane out of unrelated changes", () => {
+  expect(
+    executePlan(["README.md"]).checks.playwright_wave_feature_usage.required
+  ).toBe(false);
+});
 
 describe("effective App PR CI plan", () => {
   it.each([
@@ -292,4 +315,21 @@ describe("effective App PR CI plan", () => {
   ])("rejects a malformed plan with %s", (_description, malformedPlan) => {
     expect(() => executeRawPlan(malformedPlan)).toThrow();
   });
+});
+
+it.each([
+  "components/drops/view/item/content/attachments/PdfAttachmentReader.tsx",
+  "scripts/prepare-pdfjs-assets.cjs",
+  "config/securityHeaders.ts",
+  "tests/media/pdf-attachment-preview-sandbox.spec.ts",
+  "tests/fixtures/pdf/one-page.pdf",
+])("selects PDF attachment WebKit coverage for %s", (file) => {
+  expect(executePlan([file]).checks.playwright_pdf_attachments.required).toBe(
+    true
+  );
+});
+it("does not select PDF coverage for unrelated content", () => {
+  expect(
+    executePlan(["README.md"]).checks.playwright_pdf_attachments.required
+  ).toBe(false);
 });

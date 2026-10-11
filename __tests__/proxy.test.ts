@@ -89,6 +89,8 @@ describe("proxy", () => {
   );
 
   it.each([
+    "/pdfjs/5.4.296/pdf.worker.min.mjs",
+    "/pdfjs/5.4.296/cmaps/Adobe-Japan1-UCS2.bcmap",
     "/help-index.json",
     "/llms.txt",
     "/glossary.json",

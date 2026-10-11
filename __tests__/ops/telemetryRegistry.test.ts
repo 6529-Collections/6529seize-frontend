@@ -19,12 +19,14 @@ jest.mock("mixpanel-browser", () => ({
 
 import registry from "@/ops/telemetry/registry.json";
 import { HOMEPAGE_EVENT_NAMES } from "@/components/home/homepageTracking";
+import { PROFILE_EVENT_NAMES } from "@/components/user/collected/collectedTracking";
 import { ART_BLOCKS_SIGNAL_NAMES } from "@/components/waves/ArtBlocksTokenCard";
 import {
   AUTH_IMPACT_EVENT_NAMES,
   PAGE_VIEW_EVENT_NAME,
 } from "@/services/analytics/mixpanel";
 import { PRODUCT_IMPACT_EVENT_NAMES } from "@/services/analytics/productImpactTelemetry";
+import { WAVE_FEATURE_EVENT_NAMES } from "@/services/analytics/waveFeatureUsage";
 import { SESSION_REFRESH_SIGNAL_NAME } from "@/services/auth/session-refresh-telemetry.utils";
 import { DROP_OPEN_SIGNAL_NAMES } from "@/utils/monitoring/dropOpenTiming";
 import { MOBILE_LAUNCH_SIGNAL_NAME } from "@/utils/monitoring/mobileLaunchTiming";
@@ -56,6 +58,14 @@ function getSignal(name: string): RegistrySignal {
 }
 
 describe("frontend telemetry registry", () => {
+  it("registers both Wave feature pilot events with Mixpanel ownership", () => {
+    for (const name of WAVE_FEATURE_EVENT_NAMES) {
+      expect(getSignal(name)).toMatchObject({
+        owner: "mixpanel",
+        destinations: ["mixpanel:owner"],
+      });
+    }
+  });
   it("has schema-like required fields, valid dates, and unique signal names", () => {
     expect(registry.version).toBeGreaterThan(0);
     expect(registry.operationalOwner).toBeTruthy();
@@ -113,6 +123,7 @@ describe("frontend telemetry registry", () => {
   it("registers the runtime custom signal constants", () => {
     const runtimeSignalNames = [
       ...Object.values(HOMEPAGE_EVENT_NAMES),
+      ...Object.values(PROFILE_EVENT_NAMES),
       PAGE_VIEW_EVENT_NAME,
       ...AUTH_IMPACT_EVENT_NAMES,
       ...PRODUCT_IMPACT_EVENT_NAMES,

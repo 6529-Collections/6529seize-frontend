@@ -244,6 +244,135 @@ describe("separate post-deploy E2E", () => {
     expect(source).toContain("./bin/6529 exec playwright install chromium");
   });
 
+  describe.each([
+    ["staging", stagingE2e],
+    ["production", productionE2e],
+  ])("%s dependency installation recovery", (_environment, e2e) => {
+    const job =
+      e2e.workflow.jobs.readonly ?? e2e.workflow.jobs["staging-packs"];
+    const primary = job.steps.find(
+      (step: { id?: string }) => step.id === "playwright_dependencies_primary"
+    );
+    const retry = job.steps.find(
+      (step: { id?: string }) => step.id === "playwright_dependencies_retry"
+    );
+    const verify = job.steps.find(
+      (step: { name?: string }) =>
+        step.name === "Verify Playwright dependencies"
+    );
+
+    it.each([
+      ["free", "", 0, ["check", "install"]],
+      ["clears", "", 0, ["check", "wait", "check", "install"]],
+      ["expires", "", 124, ["check", "wait"]],
+      ["free", "77", 77, ["check", "install"]],
+    ])(
+      "handles a %s lock and installer exit %s",
+      (lock, installExit, status, events) => {
+        const root = fs.mkdtempSync(
+          path.join(os.tmpdir(), "e2e-dependencies-")
+        );
+        try {
+          writeExecutable(root, "sudo", '#!/usr/bin/env bash\nexec "$@"\n');
+          writeExecutable(
+            root,
+            "timeout",
+            `#!/usr/bin/env bash
+[[ "$1" == 300 ]] || exit 99
+shift
+if [[ "$LOCK_MODE" == expires ]]; then
+  "$@"
+  child_status=$?
+  [[ "$child_status" == 143 ]] || exit 99
+  exit 124
+fi
+exec "$@"
+`
+          );
+          writeExecutable(
+            root,
+            "fuser",
+            `#!/usr/bin/env bash
+[[ "$*" == '/var/lib/dpkg/lock-frontend /var/lib/dpkg/lock /var/lib/apt/lists/lock' ]] || exit 99
+echo check >> "$EVENTS"
+[[ "$LOCK_MODE" != expires ]] || exit 0
+if [[ "$LOCK_MODE" == clears && ! -f "$RELEASED" ]]; then
+  touch "$RELEASED"
+  exit 0
+fi
+exit 1
+`
+          );
+          writeExecutable(
+            root,
+            "sleep",
+            `#!/usr/bin/env bash
+echo wait >> "$EVENTS"
+# Simulate timeout's termination after the held-lock loop reaches its wait.
+[[ "$LOCK_MODE" != expires ]] || kill -TERM "$PPID"
+`
+          );
+          writeExecutable(
+            root,
+            "6529",
+            `#!/usr/bin/env bash
+[[ "$*" == 'exec playwright install-deps chromium' ]] || exit 99
+echo install >> "$EVENTS"
+exit "\${INSTALL_EXIT:-0}"
+`
+          );
+          const eventFile = path.join(root, "events");
+          const result = childProcess.spawnSync(bash, ["-c", retry.run], {
+            cwd: root,
+            encoding: "utf8",
+            timeout: 5000,
+            env: {
+              ...process.env,
+              PATH: `${path.join(root, "bin")}:${process.env["PATH"]}`,
+              LOCK_MODE: lock,
+              INSTALL_EXIT: installExit,
+              RELEASED: path.join(root, "released"),
+              EVENTS: eventFile,
+            },
+          });
+          expect(result.error).toBeUndefined();
+          expect(result.status).toBe(status);
+          expect(
+            fs.existsSync(eventFile)
+              ? fs.readFileSync(eventFile, "utf8").trim().split("\n")
+              : []
+          ).toEqual(events);
+        } finally {
+          fs.rmSync(root, { recursive: true, force: true });
+        }
+      }
+    );
+
+    it.each([
+      ["success", "skipped", 0],
+      ["failure", "success", 0],
+      ["failure", "failure", 1],
+    ])(
+      "keeps setup fatal unless an install succeeds (%s/%s)",
+      (first, second, status) => {
+        expect(primary["timeout-minutes"]).toBe(10);
+        expect(retry["timeout-minutes"]).toBe(15);
+        expect(retry.if).toBe(
+          "steps.playwright_dependencies_primary.outcome != 'success'"
+        );
+        const result = childProcess.spawnSync(bash, ["-c", verify.run], {
+          encoding: "utf8",
+          env: {
+            ...process.env,
+            PRIMARY_OUTCOME: first,
+            RETRY_OUTCOME: second,
+          },
+        });
+        expect(result.status).toBe(status);
+      }
+    );
+  });
+
   it("posts manual production E2E to the CI wave against the original deployment", () => {
     const notificationJob = productionE2e.workflow.jobs["notify-ci-wave"];
     const notification = notificationJob.steps.find(

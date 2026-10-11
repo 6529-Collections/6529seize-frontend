@@ -289,7 +289,11 @@ const DropsList = memo(
               previousDrop={previousDrop}
               nextDrop={nextDrop}
               showWaveInfo={getItemData.showWaveInfo}
-              activeDrop={getItemData.activeDrop}
+              activeDrop={
+                getItemData.activeDrop?.drop.id === drop.id
+                  ? getItemData.activeDrop
+                  : null
+              }
               onReply={getItemData.handleReply}
               location={location}
               showReplyAndQuote={getItemData.showReplyAndQuote}

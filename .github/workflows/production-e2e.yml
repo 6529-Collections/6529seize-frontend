@@ -277,16 +277,26 @@ jobs:
 
       - name: Install Playwright dependencies
         id: playwright_dependencies_primary
-        timeout-minutes: 3
+        timeout-minutes: 10
         continue-on-error: true
         run: ./bin/6529 exec playwright install-deps chromium
 
       - name: Retry Playwright dependencies
         if: steps.playwright_dependencies_primary.outcome != 'success'
         id: playwright_dependencies_retry
-        timeout-minutes: 3
+        timeout-minutes: 15
         continue-on-error: true
-        run: ./bin/6529 exec playwright install-deps chromium
+        run: |
+          set -euo pipefail
+          # A timed-out install can leave apt-get running. Wait for it rather
+          # than deleting locks or killing another package-manager process.
+          sudo timeout 300 bash -euc '
+            command -v fuser >/dev/null
+            while fuser /var/lib/dpkg/lock-frontend /var/lib/dpkg/lock /var/lib/apt/lists/lock >/dev/null 2>&1; do
+              sleep 2
+            done
+          '
+          ./bin/6529 exec playwright install-deps chromium
 
       - name: Verify Playwright dependencies
         env:

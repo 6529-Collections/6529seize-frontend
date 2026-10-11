@@ -145,13 +145,13 @@ export function CollectedStatsSeasonTile({
       onFocus={onPreview}
       onClick={onSelect}
       className={[
-        "tw-flex tw-w-[78px] tw-flex-none tw-cursor-pointer tw-flex-col tw-items-center tw-rounded-xl tw-border tw-border-solid tw-px-2 tw-py-2 tw-text-center tw-transition-all tw-duration-300 sm:tw-w-[88px]",
+        "tw-flex tw-w-[70px] tw-flex-none tw-cursor-pointer tw-flex-col tw-items-center tw-rounded-xl tw-border tw-border-solid tw-px-2 tw-py-1 tw-text-center tw-transition-all tw-duration-300 md:tw-w-[88px] md:tw-py-2",
         getButtonClassName(isSelected),
         "desktop-hover:hover:tw-scale-105",
         "focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500",
       ].join(" ")}
     >
-      <div className="tw-relative tw-mb-1 tw-flex tw-h-[52px] tw-w-[52px] tw-items-center tw-justify-center sm:tw-h-14 sm:tw-w-14">
+      <div className="tw-relative tw-mb-1 tw-flex tw-h-11 tw-w-11 tw-items-center tw-justify-center md:tw-h-14 md:tw-w-14">
         <svg
           className="tw-h-full tw-w-full tw--rotate-90"
           viewBox="0 0 56 56"

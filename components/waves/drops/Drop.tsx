@@ -22,6 +22,8 @@ import type {
 import ParticipationDrop from "./participation/ParticipationDrop";
 import WaveDrop from "./WaveDrop";
 import WinnerDrop from "./winner/WinnerDrop";
+import { isMultiCompetitionEnabled } from "@/helpers/competition.helpers";
+import { useCompetitionDrop } from "@/hooks/competitions/useCompetitionDrop";
 export type { DropInteractionParams } from "./drop.types";
 export { DropLocation } from "./drop.types";
 
@@ -66,7 +68,20 @@ interface DropProps {
   readonly moderationPresentation?: "default" | "profile-activity" | undefined;
 }
 
-export default function Drop({
+function CompetitionDrop(props: DropProps) {
+  const drop = useCompetitionDrop(props.drop);
+  return <DropContent {...props} drop={drop} />;
+}
+
+export default function Drop(props: DropProps) {
+  return isMultiCompetitionEnabled() ? (
+    <CompetitionDrop {...props} />
+  ) : (
+    <DropContent {...props} />
+  );
+}
+
+function DropContent({
   drop,
   previousDrop,
   nextDrop,

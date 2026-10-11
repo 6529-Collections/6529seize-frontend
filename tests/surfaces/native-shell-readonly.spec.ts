@@ -237,6 +237,56 @@ async function readNotificationHistoryPushCount(page: Page) {
 }
 
 test.describe("Native and Electron simulated shell read-only coverage @surface @medium @readonly", () => {
+  test("native profile artwork opens above the app header and closes back to the profile", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      !isCapacitorSimulationProject(testInfo.project.name),
+      "Native profile artwork geometry is covered on Capacitor simulations"
+    );
+    const dropId =
+      process.env["TARGET_DROP_ID"] ??
+      (process.env["PLAYWRIGHT_COMPOSER_SANDBOX"] === "1"
+        ? "00000000-0000-4000-8000-000000000530"
+        : "74b13174-b34f-43e5-b302-23680f0d0b05");
+    await gotoReady(page, `/punk6529?drop=${dropId}`);
+    const artwork = page.getByRole("main").locator("[data-video-viewport]");
+    await expect(artwork).toBeVisible({ timeout: 30_000 });
+    await expect
+      .poll(() =>
+        artwork.evaluate((element) => element.getBoundingClientRect().top)
+      )
+      .toBe(0);
+    await expect
+      .poll(() =>
+        artwork.evaluate(
+          (element) =>
+            element.getBoundingClientRect().height - window.innerHeight
+        )
+      )
+      .toBe(0);
+    const close = artwork.getByRole("button", {
+      name: "Close panel",
+      exact: true,
+    });
+    await expect(close).toBeInViewport({ ratio: 1 });
+    const share = artwork.getByRole("button", {
+      name: "Share drop",
+      exact: true,
+    });
+    await expect(share).toBeInViewport({ ratio: 1 });
+    await share.click({ trial: true });
+    await page.screenshot({
+      path: testInfo.outputPath("native-profile-artwork.png"),
+    });
+    await close.click();
+    await expect(artwork).toHaveCount(0);
+    await expect(page).toHaveURL((url) => !url.searchParams.has("drop"));
+    await expect(
+      page.getByRole("navigation", { name: "Profile sections" })
+    ).toBeVisible();
+  });
+
   test("Capacitor simulations expose native runtime signals", async ({
     page,
   }, testInfo) => {
@@ -254,6 +304,9 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
       "content",
       /viewport-fit=cover/
     );
+    const viewport = page.locator('meta[name="viewport"]');
+    await expect(viewport).toHaveAttribute("content", /maximum-scale=1(?:,|$)/);
+    await expect(viewport).toHaveAttribute("content", /user-scalable=no/);
     await expect(await readShellRuntime(page)).toEqual({
       capacitorIsNative: true,
       capacitorPlatform: platform,
@@ -265,6 +318,14 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
       surface: `capacitor-${platform}-sim`,
       userAgentHasElectron: false,
     });
+
+    // A client-side navigation must not restore the web zoom limits.
+    await page
+      .getByRole("link", { name: "Open network health dashboard" })
+      .click();
+    await expect(page).toHaveURL(/\/network\/health$/, { timeout: 15_000 });
+    await expect(viewport).toHaveAttribute("content", /maximum-scale=1(?:,|$)/);
+    await expect(viewport).toHaveAttribute("content", /user-scalable=no/);
   });
 
   for (const reducedMotion of [false, true]) {
@@ -578,6 +639,251 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
       .poll(() => scrollport.evaluate((element) => element.clientHeight))
       .toBeCloseTo(restingHeight, 0);
     await expect(page.getByText("All Waves", { exact: true })).toBeVisible();
+  });
+
+  test("Network filter keeps the focused input and action above the keyboard", async ({
+    page,
+    browserName,
+  }, testInfo) => {
+    test.skip(
+      !isCapacitorSimulationProject(testInfo.project.name) &&
+        testInfo.project.name !== "web-mobile-chromium",
+      "Network keyboard behavior is covered on mobile web and Capacitor simulations"
+    );
+    await gotoReady(page, "/network");
+    const openFilters = page.getByRole("button", {
+      name: "Open group filters",
+      exact: true,
+    });
+    await openFilters.click();
+    const filter = page.getByRole("dialog", {
+      name: "Filter Network",
+      exact: true,
+    });
+    await filter
+      .getByRole("group", { name: "Filter Network", exact: true })
+      .getByRole("button", { name: "Level", exact: true })
+      .click();
+    const input = filter.getByRole("spinbutton", {
+      name: "Level at least",
+      exact: true,
+    });
+    const summary = filter.getByText("After editing", { exact: true });
+    const currentSummary = filter.getByText("Before editing", { exact: true });
+    const action = filter.getByRole("button", {
+      name: "Create and use new group",
+      exact: true,
+    });
+    await input.fill("10");
+    await expect(input).toBeFocused();
+    await expect(summary).toBeVisible();
+
+    // A frame sequence catches repeated smooth-scroll requests during keyboard
+    // animation, in addition to the settled clipping checks below. This is a
+    // browser simulation, not evidence of a physical keyboard animation.
+    const animation = await input.evaluate(async (element) => {
+      const viewport = globalThis.visualViewport;
+      if (!viewport) throw new Error("Expected a visual viewport");
+      const calls: string[] = [];
+      const scrollIntoView = Element.prototype.scrollIntoView;
+      const scrollBy = Element.prototype.scrollBy;
+      Element.prototype.scrollIntoView = function (options) {
+        calls.push(
+          typeof options === "object" ? (options.behavior ?? "auto") : "auto"
+        );
+        scrollIntoView.call(this, options);
+      };
+      Element.prototype.scrollBy = function (
+        options?: ScrollToOptions | number,
+        y?: number
+      ) {
+        calls.push(
+          typeof options === "object" ? (options.behavior ?? "auto") : "auto"
+        );
+        Reflect.apply(
+          scrollBy,
+          this,
+          typeof options === "number" ? [options, y ?? 0] : [options]
+        );
+      };
+      try {
+        const restingHeight = viewport.height;
+        for (let frame = 1; frame <= 12; frame++) {
+          Object.defineProperty(viewport, "height", {
+            configurable: true,
+            value: restingHeight - (320 * frame) / 12,
+          });
+          viewport.dispatchEvent(new Event("resize"));
+          await new Promise<void>((resolve) =>
+            requestAnimationFrame(() => resolve())
+          );
+        }
+        const callsDuringAnimation = calls.length;
+        await new Promise<void>((resolve) => setTimeout(resolve, 750));
+        return {
+          callsDuringAnimation,
+          calls,
+          focused: document.activeElement === element,
+        };
+      } finally {
+        Element.prototype.scrollIntoView = scrollIntoView;
+        Element.prototype.scrollBy = scrollBy;
+      }
+    });
+    expect(animation.callsDuringAnimation).toBe(0);
+    expect(animation.calls).not.toContain("smooth");
+    expect(animation.focused).toBe(true);
+    if (isCapacitorSimulationProject(testInfo.project.name)) {
+      await expect(page.locator("html")).toHaveAttribute(
+        "data-native-keyboard-visible",
+        "true"
+      );
+    }
+    const summaryIsCompact = (target = summary) =>
+      target.evaluate((element) => {
+        for (
+          let parent = element.parentElement;
+          parent;
+          parent = parent.parentElement
+        ) {
+          const style = getComputedStyle(parent);
+          if (
+            style.position === "absolute" &&
+            style.clip !== "auto" &&
+            parent.getBoundingClientRect().width <= 1
+          )
+            return true;
+        }
+        return false;
+      });
+    await expect.poll(summaryIsCompact).toBe(true);
+    await expect.poll(() => summaryIsCompact(currentSummary)).toBe(true);
+    // Compact the visual footer without removing its summary from the
+    // accessibility tree; preview actions become visible when focused.
+    await expect.poll(() => filter.ariaSnapshot()).toContain("After editing");
+    await expect.poll(() => filter.ariaSnapshot()).toContain("Before editing");
+    await expect
+      .poll(() =>
+        input.evaluate((element) => {
+          const viewport = globalThis.visualViewport;
+          if (!viewport) return false;
+          const bounds = element.getBoundingClientRect();
+          let top = viewport.offsetTop;
+          let bottom = top + viewport.height;
+          for (
+            let parent = element.parentElement;
+            parent;
+            parent = parent.parentElement
+          ) {
+            if (
+              !/(auto|scroll|hidden)/.test(getComputedStyle(parent).overflowY)
+            )
+              continue;
+            const clip = parent.getBoundingClientRect();
+            top = Math.max(top, clip.top);
+            bottom = Math.min(bottom, clip.bottom);
+          }
+          return bounds.top >= top && bounds.bottom <= bottom;
+        })
+      )
+      .toBe(true);
+    await expect
+      .poll(() =>
+        action.evaluate((element) => {
+          const viewport = globalThis.visualViewport;
+          if (!viewport) return false;
+          const bounds = element.getBoundingClientRect();
+          return (
+            bounds.top >= viewport.offsetTop &&
+            bounds.bottom <= viewport.offsetTop + viewport.height
+          );
+        })
+      )
+      .toBe(true);
+    // WebKit uses Option-Tab to include buttons in keyboard navigation.
+    await input.press(browserName === "webkit" ? "Alt+Tab" : "Tab");
+    const preview = filter.getByRole("button", {
+      name: "View members",
+      exact: true,
+    });
+    await expect(preview).toBeFocused();
+    await expect(preview).toBeInViewport({ ratio: 1 });
+    await input.focus();
+    await expect.poll(summaryIsCompact).toBe(true);
+    await filter
+      .getByRole("button", { name: "All filters", exact: true })
+      .click();
+    await filter
+      .getByRole("group", { name: "Filter Network", exact: true })
+      .getByRole("button", { name: "Identities", exact: true })
+      .click();
+    const allowlists = filter.getByRole("textbox", {
+      name: "Search allowlists",
+      exact: true,
+    });
+    await allowlists.fill("keyboard-test-no-match");
+    await expect(allowlists).toBeFocused();
+    await expect(allowlists).toHaveValue("keyboard-test-no-match");
+    await expect
+      .poll(() =>
+        allowlists.evaluate((element) => {
+          const viewport = globalThis.visualViewport;
+          const bounds = element.getBoundingClientRect();
+          const editor = element.closest("[tabindex='-1']");
+          const clip = editor?.getBoundingClientRect();
+          return (
+            !!viewport &&
+            !!clip &&
+            bounds.top >= Math.max(clip.top, viewport.offsetTop) &&
+            bounds.bottom <=
+              Math.min(clip.bottom, viewport.offsetTop + viewport.height)
+          );
+        })
+      )
+      .toBe(true);
+    const back = filter.getByRole("button", {
+      name: "All filters",
+      exact: true,
+    });
+    await expect(back).toBeInViewport({ ratio: 1 });
+    const backBounds = await back.boundingBox();
+    const editorTop = await allowlists.evaluate(
+      (element) =>
+        element.closest("[tabindex='-1']")?.getBoundingClientRect().top
+    );
+    expect(
+      (backBounds?.y ?? 0) + (backBounds?.height ?? 0)
+    ).toBeLessThanOrEqual(editorTop ?? 0);
+    await page.screenshot({
+      path: testInfo.outputPath("network-keyboard.png"),
+    });
+
+    await page.evaluate(() => {
+      const viewport = globalThis.visualViewport;
+      if (!viewport) throw new Error("Expected a visual viewport");
+      Reflect.deleteProperty(viewport, "height");
+      viewport.dispatchEvent(new Event("resize"));
+    });
+    await expect(page.locator("html")).not.toHaveAttribute(
+      "data-native-keyboard-visible",
+      "true"
+    );
+    await expect(summary).toBeVisible();
+    await expect.poll(() => summaryIsCompact(currentSummary)).toBe(false);
+    await allowlists.blur();
+    await allowlists.focus();
+    await expect(allowlists).toHaveValue("keyboard-test-no-match");
+    await filter
+      .getByRole("button", { name: "All filters", exact: true })
+      .click();
+    await filter
+      .getByRole("group", { name: "Filter Network", exact: true })
+      .getByRole("button", { name: /^Level(?: Configured)?$/, exact: true })
+      .click();
+    await expect(input).toHaveValue("10");
+    await filter.getByRole("button", { name: "Close", exact: true }).click();
+    await expect(openFilters).toBeFocused();
+    await expect(page).toHaveURL((url) => !url.searchParams.has("group"));
   });
 
   test("iOS native simulation hides non-US subscription downloads", async ({

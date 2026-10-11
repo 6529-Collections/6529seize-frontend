@@ -6,6 +6,7 @@ import {
   formatNumber,
   formatRelativeTime,
   formatTime,
+  selectPluralCategory,
 } from "@/i18n/format";
 import {
   DEFAULT_LOCALE,
@@ -89,6 +90,16 @@ const FILE_KIND_MESSAGE_KEYS = [
 ] as const;
 
 describe("frontend i18n helpers", () => {
+  it.each(SUPPORTED_LOCALES)("resolves wave tab copy for %s", (locale) => {
+    expect(t(locale, "wave.navigation.chat")).toBe("Chat");
+    expect(t(locale, "wave.navigation.sales")).toBe("Sales");
+    expect(t(locale, "wave.navigation.myStream")).toBe("My Stream");
+    expect(t(locale, "wave.navigation.polls")).toBe("Polls");
+    expect(t(locale, "wave.navigation.loadingSection")).toBe(
+      "Loading section…"
+    );
+  });
+
   it("keeps rich values in the message-defined order", () => {
     const artistLink = { type: "artist-link" } as const;
 
@@ -663,5 +674,29 @@ describe("frontend i18n helpers", () => {
       );
       expect(new Set(labels).size).toBe(labels.length);
     }
+  });
+});
+
+describe("historical vote details localization", () => {
+  it.each(SUPPORTED_LOCALES)(
+    "keeps the explanation and tab label consistent in %s",
+    (locale) => {
+      const label = t(locale, "waves.voteDetails.logs.tab");
+      expect(
+        t(locale, "waves.voteDetails.voters.unavailableExplanation", {
+          voteLogTab: label,
+        })
+      ).toContain(`Open ${label}`);
+      expect(t(locale, "waves.voteDetails.voters.unavailable")).toBe(
+        "Voters unavailable"
+      );
+    }
+  );
+
+  it("normalizes plural locales and falls back for unsupported input", () => {
+    expect(selectPluralCategory("FR-fr", 0)).toBe("one");
+    expect(selectPluralCategory("unsupported", 0)).toBe("other");
+    expect(selectPluralCategory(null, 1)).toBe("one");
+    expect(selectPluralCategory("en-US", Number.NaN)).toBe("other");
   });
 });

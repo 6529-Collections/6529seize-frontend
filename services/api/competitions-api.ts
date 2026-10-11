@@ -319,6 +319,12 @@ async function invalidateCompetitionScope(
 ) {
   await Promise.all([
     client.invalidateQueries({
+      queryKey: [QueryKey.WAVE, { wave_id: waveId }],
+    }),
+    client.invalidateQueries({
+      queryKey: [QueryKey.WAVE_METADATA, { wave_id: waveId }],
+    }),
+    client.invalidateQueries({
       queryKey: [QueryKey.DEFAULT_COMPETITION, { wave_id: waveId }],
     }),
     client.invalidateQueries({

@@ -3,7 +3,6 @@
 import React, { type JSX } from "react";
 import clsx from "clsx";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import {
   TabToggleWithOverflow,
   type TabToggleWithOverflowVariant,
@@ -14,8 +13,6 @@ import BrainRightSidebarFollowers from "./BrainRightSidebarFollowers";
 import BrainRightSidebarConfiguration from "./BrainRightSidebarConfiguration";
 import { Mode, SidebarTab } from "./BrainRightSidebarTypes";
 import WaveRepDetails from "./WaveRepDetails";
-import { WaveLeaderboardRightSidebarVoters } from "@/components/waves/leaderboard/sidebar/WaveLeaderboardRightSidebarVoters";
-import { WaveLeaderboardRightSidebarActivityLogs } from "@/components/waves/leaderboard/sidebar/WaveLeaderboardRightSidebarActivityLogs";
 import { waveRightPanelText } from "@/helpers/waves/wave-right-panel.helpers";
 
 interface WaveContentProps {
@@ -36,7 +33,6 @@ interface TabOption {
 }
 
 interface WaveContentTabsProps {
-  readonly wave: ApiWave;
   readonly activeTab: SidebarTab;
   readonly setActiveTab: (tab: SidebarTab) => void;
   readonly maxVisibleTabs?: number | undefined;
@@ -45,16 +41,12 @@ interface WaveContentTabsProps {
 }
 
 export const WaveContentTabs: React.FC<WaveContentTabsProps> = ({
-  wave,
   activeTab,
   setActiveTab,
   maxVisibleTabs,
   variant = "underline",
   aboutTabLabel,
 }) => {
-  const isCompetitionWave =
-    wave.wave.type === ApiWaveType.Rank ||
-    wave.wave.type === ApiWaveType.Approve;
   const options: TabOption[] = [
     {
       key: SidebarTab.ABOUT,
@@ -70,18 +62,6 @@ export const WaveContentTabs: React.FC<WaveContentTabsProps> = ({
       key: SidebarTab.CONFIGURATION,
       label: waveRightPanelText("waves.sidebar.rightPanel.tabs.configuration"),
     },
-    ...(isCompetitionWave
-      ? [
-          {
-            key: SidebarTab.TOP_VOTERS,
-            label: waveRightPanelText("waves.sidebar.rightPanel.tabs.voters"),
-          },
-          {
-            key: SidebarTab.ACTIVITY_LOG,
-            label: waveRightPanelText("waves.sidebar.rightPanel.tabs.activity"),
-          },
-        ]
-      : []),
   ];
 
   return (
@@ -118,10 +98,7 @@ export const WaveContent: React.FC<WaveContentProps> = ({
   const onFollowersClick = () =>
     setMode(mode === Mode.FOLLOWERS ? Mode.CONTENT : Mode.FOLLOWERS);
 
-  const isRankWave = wave.wave.type === ApiWaveType.Rank;
-  const isApproveWave = wave.wave.type === ApiWaveType.Approve;
-  const isCompetitionWave = isRankWave || isApproveWave;
-  const visibleTabLimit = maxVisibleTabs ?? (isCompetitionWave ? 4 : undefined);
+  const visibleTabLimit = maxVisibleTabs;
 
   const sidebarTabComponents: Partial<Record<SidebarTab, JSX.Element>> = {
     [SidebarTab.ABOUT]: (
@@ -144,20 +121,6 @@ export const WaveContent: React.FC<WaveContentProps> = ({
     ),
     [SidebarTab.REP]: <WaveRepDetails wave={wave} />,
     [SidebarTab.CONFIGURATION]: <BrainRightSidebarConfiguration wave={wave} />,
-    ...(isCompetitionWave
-      ? {
-          [SidebarTab.TOP_VOTERS]: (
-            <div className="tw-min-w-0 tw-p-4">
-              <WaveLeaderboardRightSidebarVoters wave={wave} />
-            </div>
-          ),
-          [SidebarTab.ACTIVITY_LOG]: (
-            <div className="tw-min-w-0 tw-p-4">
-              <WaveLeaderboardRightSidebarActivityLogs wave={wave} />
-            </div>
-          ),
-        }
-      : {}),
   };
   const activeSidebarTab = sidebarTabComponents[activeTab]
     ? activeTab
@@ -168,7 +131,6 @@ export const WaveContent: React.FC<WaveContentProps> = ({
     <div className="tw-flex tw-h-full tw-min-h-0 tw-min-w-0 tw-flex-col tw-overflow-hidden tw-bg-iron-950">
       {showTabs && (
         <WaveContentTabs
-          wave={wave}
           activeTab={activeSidebarTab}
           setActiveTab={setActiveTab}
           maxVisibleTabs={visibleTabLimit}

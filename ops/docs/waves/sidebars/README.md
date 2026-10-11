@@ -20,11 +20,9 @@ Route scope:
 ### Right Sidebar (Thread View)
 
 - [Wave Right Sidebar Tabs](feature-right-sidebar-tabs.md):
-  sidebar tab order and the consolidated `Configuration` surface.
-- [Wave Right Sidebar Leaderboard](feature-right-sidebar-leaderboard.md)
+  desktop and mobile information sections and wave Configuration.
 - [Wave Right Sidebar Jump Actions](feature-right-sidebar-jump-actions.md):
-  canonical owner for serial-jump and drop-overlay open actions from
-  `Trending`, `Activity`, `Leaderboard`, and `Winners`.
+  serial jumps from Trending cards in About.
 - [Wave Right Sidebar Group and Curation Management](feature-right-sidebar-group-management.md)
 - [Wave Right Sidebar Trending Drops](feature-right-sidebar-trending-drops.md):
   boosted-drop ranking cards (`Day`, `Week`, `Month`) in `About`.

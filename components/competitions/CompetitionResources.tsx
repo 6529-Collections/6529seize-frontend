@@ -22,10 +22,9 @@ import type { CompetitionTab } from "@/helpers/competition.helpers";
 import { CompetitionState } from "./CompetitionState";
 import CompetitionEntryCard from "./CompetitionEntryCard";
 import CompetitionLeaderboard from "./CompetitionLeaderboard";
-import CompetitionMyVotes from "./CompetitionMyVotes";
+import CompetitionVotes from "./CompetitionVotes";
 import CompetitionWinners from "./CompetitionWinners";
 import CompetitionOutcomes from "./CompetitionOutcomes";
-import CompetitionVoters from "./CompetitionVoters";
 import CompetitionRules from "./CompetitionRules";
 
 const useIdentity = () => {
@@ -135,13 +134,11 @@ export default function CompetitionResources({
     case "leaderboard":
       return <CompetitionLeaderboard onCreateDrop={onCreateDrop} />;
     case "votes":
-      return <CompetitionMyVotes />;
+      return <CompetitionVotes />;
     case "decisions":
       return <CompetitionWinners />;
     case "outcomes":
       return <CompetitionOutcomes />;
-    case "voters":
-      return <CompetitionVoters />;
     case "rules":
       return <CompetitionRules />;
   }

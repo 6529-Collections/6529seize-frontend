@@ -36,13 +36,17 @@ describe("UserAddressesSelectDropdown", () => {
 
   it("updates query when selection changes", () => {
     const onActive = jest.fn();
+    const onAddressChange = jest.fn();
     render(
       <UserAddressesSelectDropdown
         wallets={[{ wallet: "0xdef", display: "d" } as any]}
         onActiveAddress={onActive}
+        onAddressChange={onAddressChange}
       />
     );
+    expect(onAddressChange).not.toHaveBeenCalled();
     capturedProps.setSelected("0xdef");
+    expect(onAddressChange).toHaveBeenCalledWith();
     expect(push).toHaveBeenCalledWith("/p?address=0xdef", { scroll: false });
     // The component receives the initial query value '0xabc' instead of '0xdef'
     expect(onActive).toHaveBeenCalledWith("0xabc");

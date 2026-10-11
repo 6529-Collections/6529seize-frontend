@@ -43,7 +43,9 @@ Badge state decides which section opens first.
    - selecting a winner card opens that drop in the current route context
      (`drop` query is set and existing query params are preserved)
    - selecting a prevote card follows its token link to `/the-memes/{tokenId}`
-5. The modal closes after opening a winner card through drop context.
+5. The modal closes after opening a submission or winner card through drop context.
+   In the native app, the single-artwork view fills the screen, with its own
+   safe-area toolbar, including when opened from a profile.
 6. Users can also close with close button or backdrop click/tap.
 7. In app-wrapper contexts, swipe-down close is also supported.
 
