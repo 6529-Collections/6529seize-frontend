@@ -167,14 +167,17 @@ All project commands must go through the repo-local `6529` wrapper.
   consistency, Tailwind-first styling migration, responsive layout, interaction
   states, media behavior, and browser evidence.
 - Every Network Museum PR that changes a public route, visible component,
-  layout, copy, or media must also pass the pre-PR full-page adversarial review
-  gate in `ops/standards/museum-visual-release-acceptance.md`. A PR must not be
-  opened until exact production-build screenshots of every changed Museum route
-  have been reviewed independently for museum/curatorial quality, visual/UX
-  quality, and copy/editorial quality, and all blocking findings have been fixed
-  and recaptured. Automated geometry, DOM, and accessibility checks do not
-  substitute for this gate.
+  layout, copy, or media must also pass the pre-PR Museum gate in
+  `ops/standards/museum-visual-release-acceptance.md`. The gate runs the
+  `fe-polish-judge` loop with the Museum profile: three independent lens reviews
+  (curatorial, visual/UX, copy/editorial) of full-page production-build
+  captures of every changed Museum route, sharing one findings ledger. A PR must
+  not be opened until the scoring script accepts the run. Automated geometry,
+  DOM, and accessibility checks do not substitute for this gate.
 - Use `ops/skills/design-ui-ux/SKILL.md` for frontend design and UX review.
+- Use `ops/skills/fe-polish-judge/SKILL.md` and
+  `ops/standards/frontend-polish-judge.md` when asked for a polish score or an
+  autonomous builder–judge loop on a page. It is opt-in and adds no PR gate.
 - Use `ops/skills/wcag-22-aa/SKILL.md` for accessibility audits and fixes.
 - Use `ops/skills/i18n-localization/SKILL.md` for progressive localization
   work.
@@ -296,6 +299,7 @@ is available, use it; otherwise read the relevant files in
     gates, and deploy gates.
   - `ops/skills/commit-docs-updater/SKILL.md` for user-facing docs updates.
   - `ops/skills/design-ui-ux/SKILL.md` for frontend design and UX review.
+  - `ops/skills/fe-polish-judge/SKILL.md` for scored builder–judge polish loops.
   - `ops/skills/react-doctor/SKILL.md` for React, Next.js, hook, routing, or UI
     state changes.
   - `ops/skills/sonar-guardrails/SKILL.md` for TS/JS quality-sensitive edits.
