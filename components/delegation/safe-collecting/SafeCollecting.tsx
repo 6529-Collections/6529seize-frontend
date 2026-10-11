@@ -337,7 +337,7 @@ export default function SafeCollecting({
         title={t(locale, "safeCollecting.tools.title")}
         description={t(locale, "safeCollecting.tools.description")}
       >
-        <DelegationCenterComponent setSection={setSection} embedded />
+        <DelegationCenterComponent setSection={setSection} />
       </SafeCollectingSection>
     </div>
   );
@@ -405,7 +405,10 @@ function SystemFigure({ locale }: { readonly locale: SupportedLocale }) {
       <span className="tw-min-w-0 tw-flex-1 tw-text-sm tw-leading-5 tw-text-iron-200">
         {t(locale, `safeCollecting.roles.${role}.name`)}
       </span>
-      <WalletIcon className="tw-hidden tw-size-4 tw-flex-shrink-0 tw-text-iron-500 sm:tw-block" />
+      <WalletIcon
+        aria-hidden="true"
+        className="tw-hidden tw-size-4 tw-flex-shrink-0 tw-text-iron-500 sm:tw-block"
+      />
     </div>
   );
   const connector = (
@@ -416,7 +419,10 @@ function SystemFigure({ locale }: { readonly locale: SupportedLocale }) {
       <span className="tw-text-xs tw-text-iron-400">
         {t(locale, `safeCollecting.figure.${key}`)}
       </span>
-      <IconComponent className="tw-size-4 tw-text-iron-500" />
+      <IconComponent
+        aria-hidden="true"
+        className="tw-size-4 tw-text-iron-500"
+      />
     </div>
   );
 
@@ -431,7 +437,7 @@ function SystemFigure({ locale }: { readonly locale: SupportedLocale }) {
         className="tw-rounded-xl tw-border tw-border-dashed tw-border-primary-400/30 tw-bg-primary-500/[0.03] tw-p-4"
       >
         <div className="tw-text-primary-200 tw-mb-3 tw-flex tw-items-center tw-gap-2 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide">
-          <LinkIcon className="tw-size-4" />
+          <LinkIcon aria-hidden="true" className="tw-size-4" />
           {t(locale, "safeCollecting.figure.oneCollector")}
         </div>
         <div className="tw-grid tw-grid-cols-1 tw-gap-2 min-[420px]:tw-grid-cols-2 min-[420px]:tw-gap-3">
@@ -446,7 +452,10 @@ function SystemFigure({ locale }: { readonly locale: SupportedLocale }) {
         </div>
         <div className="tw-mt-2 tw-rounded-lg tw-border tw-border-solid tw-border-sky-400/30 tw-bg-sky-500/[0.06] tw-p-3">
           <div className="tw-flex tw-items-center tw-gap-2">
-            <ShieldCheckIcon className="tw-size-5 tw-text-sky-300" />
+            <ShieldCheckIcon
+              aria-hidden="true"
+              className="tw-size-5 tw-text-sky-300"
+            />
             <span className="tw-text-sm tw-font-semibold tw-text-iron-50">
               {t(locale, "safeCollecting.roles.vault.name")}
             </span>
@@ -456,11 +465,17 @@ function SystemFigure({ locale }: { readonly locale: SupportedLocale }) {
           </div>
           <ul className="tw-m-0 tw-mt-2 tw-list-none tw-space-y-1 tw-p-0 tw-text-xs tw-text-iron-300">
             <li className="tw-flex tw-items-center tw-gap-1.5">
-              <NoSymbolIcon className="tw-size-3.5 tw-flex-shrink-0 tw-text-iron-500" />
+              <NoSymbolIcon
+                aria-hidden="true"
+                className="tw-size-3.5 tw-flex-shrink-0 tw-text-iron-500"
+              />
               {t(locale, "safeCollecting.figure.neverConnects")}
             </li>
             <li className="tw-flex tw-items-center tw-gap-1.5">
-              <ArrowsRightLeftIcon className="tw-size-3.5 tw-flex-shrink-0 tw-text-iron-500" />
+              <ArrowsRightLeftIcon
+                aria-hidden="true"
+                className="tw-size-3.5 tw-flex-shrink-0 tw-text-iron-500"
+              />
               {t(locale, "safeCollecting.figure.airdrops")}
             </li>
           </ul>

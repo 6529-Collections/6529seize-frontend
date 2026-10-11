@@ -47,7 +47,7 @@ const DELEGATION_MENU_ITEMS: ReadonlyArray<{
 }> = [
   {
     section: DelegationCenterSection.CENTER,
-    label: "Safe Collecting",
+    label: t(DEFAULT_LOCALE, "safeCollecting.navLabel"),
   },
   {
     section: DelegationCenterSection.WALLET_ARCHITECTURE,
@@ -344,7 +344,10 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
   return (
     <div className={DELEGATION_PAGE_CONTAINER_CLASS_NAME}>
       {showNavigation && (
-        <nav aria-label="Safe collecting" className="tw-mb-7 sm:tw-mb-8">
+        <nav
+          aria-label={t(DEFAULT_LOCALE, "safeCollecting.menuLabel")}
+          className="tw-mb-7 sm:tw-mb-8"
+        >
           <div className="tw-mb-3 tw-flex tw-flex-wrap tw-gap-x-5 tw-gap-y-2 sm:tw-justify-end">
             {printExternalLinkRows()}
           </div>

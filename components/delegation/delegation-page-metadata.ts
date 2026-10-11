@@ -37,10 +37,9 @@ const SECTION_METADATA: Readonly<
   >
 > = {
   [DelegationCenterSection.CENTER]: {
-    title: "Safe Collecting",
-    navLabel: "Safe Collecting",
-    description:
-      "Keep your NFTs in a vault that never connects, use 6529 from a hot wallet, and let consolidation, delegations and airdrops work for you.",
+    title: t(DEFAULT_LOCALE, "safeCollecting.pageTitle"),
+    navLabel: t(DEFAULT_LOCALE, "safeCollecting.navLabel"),
+    description: t(DEFAULT_LOCALE, "safeCollecting.metadataDescription"),
   },
   [DelegationCenterSection.REGISTER_DELEGATION]: {
     title: "Register Delegation",

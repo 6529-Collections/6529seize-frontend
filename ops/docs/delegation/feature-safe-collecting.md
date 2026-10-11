@@ -91,9 +91,14 @@ airdrops benefit switch to versions without subscriptions.
 
 ## Localization
 
-Copy is message-backed in `i18n/messages/safeCollecting.en-US.json`
-(`en-US` only); other locales fall back to English. The All tools cards keep
-their existing hard-coded English labels (pre-existing debt).
+- Copy is message-backed in `i18n/messages/safeCollecting.en-US.json` and
+  `i18n/messages/delegationTapGuide.en-US.json`, including the All tools cards,
+  the menu labels and the page metadata.
+- Only `en-US` exists. Readers using `en-GB`, `fr-FR`, `es-ES` or `de-DE` see
+  English text on Safe Collecting and the TAP Guide; numbers, lists and dates
+  still use their locale's formatting.
+- Follow-up: translate `safeCollecting.*` and `delegation.tapGuide.*` with the
+  other delegation pages, tracked in 6529-Collections/6529seize-frontend#4214.
 
 ## Source
 
