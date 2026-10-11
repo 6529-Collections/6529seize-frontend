@@ -40,7 +40,10 @@ import {
   type ConsolidationGroupLookupState,
   type ConsolidationWalletEntry,
 } from "./ConsolidationBuilderWallets";
-import { useConsolidationGroups } from "./useConsolidationBuilderData";
+import {
+  useConsolidationGroups,
+  useConsolidationManagedWallets,
+} from "./useConsolidationBuilderData";
 import { useConsolidationPlan } from "./useConsolidationPlan";
 import { useConsolidationStepWrite } from "./useConsolidationStepWrite";
 
@@ -151,6 +154,8 @@ function hasUnfinishedStep(
 /**
  * Guided consolidation: plans one transaction per wallet in the safe order
  * and lets each step's signer submit it once every earlier step confirms.
+ * A wallet's Delegation Manager can sign its step instead, one link at a
+ * time, so a vault never has to connect.
  */
 export default function ConsolidationBuilder(props: Readonly<Props>) {
   const locale = useBrowserLocale();
@@ -207,9 +212,14 @@ export default function ConsolidationBuilder(props: Readonly<Props>) {
     nowMs,
   });
   const { plan, registeredLinkKeys, freshLinkKeys } = planState;
+  const managers = useConsolidationManagedWallets(
+    validation.isValid ? wallets : EMPTY_WALLETS,
+    connectedKey
+  );
 
   function refreshConsolidationData() {
     planState.refetchLinks();
+    managers.refetch();
     for (const key of [
       QueryKey.CONSOLIDATION_GROUP,
       QueryKey.CONSOLIDATION_REGISTRATIONS,
@@ -237,9 +247,17 @@ export default function ConsolidationBuilder(props: Readonly<Props>) {
             isFresh: createDirectedLinkLookup(freshLinkKeys),
             recordedLinkKeys,
             connectedAddress: connectedKey,
+            managedWallets: managers.managedWallets,
           })
         : undefined,
-    [connectedKey, freshLinkKeys, plan, recordedLinkKeys, registeredLinkKeys]
+    [
+      connectedKey,
+      freshLinkKeys,
+      managers.managedWallets,
+      plan,
+      recordedLinkKeys,
+      registeredLinkKeys,
+    ]
   );
 
   function updateDraft(update: (current: WalletDraft) => WalletDraft) {
@@ -320,7 +338,7 @@ export default function ConsolidationBuilder(props: Readonly<Props>) {
               draft === null && !!connectedKey && groupData.isPending,
             isValid: validation.isValid,
             hasGroupError: groupData.isError,
-            hasReadError: planState.hasReadError,
+            hasReadError: planState.hasReadError || managers.isError,
             progress,
           })}
           activationDate={activationDate}

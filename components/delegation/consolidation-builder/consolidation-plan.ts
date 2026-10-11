@@ -82,17 +82,31 @@ export type ConsolidationStepStatus =
   | "current"
   | "upcoming";
 
+/**
+ * `checking-manager`: the connected wallet is not the signer and whether it
+ * manages the signer is still being read.
+ */
 type ConsolidationStepBlock =
   | "earlier-steps"
   | "fourth-slot"
   | "disconnected"
+  | "checking-manager"
   | "wrong-wallet";
+
+/**
+ * How the connected wallet can sign a step: as the step's own wallet, or as
+ * that wallet's Delegation Manager (one transaction per link).
+ */
+type ConsolidationSignMode = "self" | "manager";
 
 export interface ConsolidationStepProgress {
   readonly index: number;
   readonly signer: string;
   readonly targets: readonly string[];
-  /** Targets the step's transaction still has to send. */
+  /**
+   * Targets the step still has to send. Directions not yet confirmed in this
+   * session come first, so a manager sends each link once.
+   */
   readonly pendingTargets: readonly string[];
   /**
    * `recording`: every remaining direction was confirmed in this session and
@@ -102,6 +116,10 @@ export interface ConsolidationStepProgress {
   readonly waitsForFourthSlot: boolean;
   readonly block: ConsolidationStepBlock | undefined;
   readonly canSign: boolean;
+  /** Undefined when the connected wallet can sign this step in neither way. */
+  readonly signAs: ConsolidationSignMode | undefined;
+  /** 1-based number of the link a manager sends next, of `targets.length`. */
+  readonly nextLink: number;
 }
 
 export function toWalletKey(wallet: string): string {
@@ -278,25 +296,44 @@ export function buildConsolidationPlan(input: {
   };
 }
 
-function getCurrentStepBlock(
-  waitsForFourthSlot: boolean,
+function getSignMode(
   signer: string,
-  connectedAddress: string | undefined
-): ConsolidationStepBlock | undefined {
-  if (waitsForFourthSlot) {
+  connectedKey: string | undefined,
+  managedWallets: ReadonlySet<string> | undefined
+): ConsolidationSignMode | undefined {
+  if (!connectedKey) {
+    return undefined;
+  }
+  if (connectedKey === signer) {
+    return "self";
+  }
+  return managedWallets?.has(signer) ? "manager" : undefined;
+}
+
+function getCurrentStepBlock(input: {
+  readonly waitsForFourthSlot: boolean;
+  readonly signAs: ConsolidationSignMode | undefined;
+  readonly connectedKey: string | undefined;
+  readonly managedWallets: ReadonlySet<string> | undefined;
+}): ConsolidationStepBlock | undefined {
+  if (input.waitsForFourthSlot) {
     return "fourth-slot";
   }
-  if (!connectedAddress) {
+  if (!input.connectedKey) {
     return "disconnected";
   }
-  return toWalletKey(connectedAddress) === signer ? undefined : "wrong-wallet";
+  if (input.signAs) {
+    return undefined;
+  }
+  return input.managedWallets ? "wrong-wallet" : "checking-manager";
 }
 
 /**
  * Applies live status to a plan. Steps stay numbered as planned; only the
  * first step with directions left to send is actionable, and only by its
- * signer. A direction confirmed on-chain in this session that 6529 has not
- * recorded as fresh yet is not sent again.
+ * signer or by a wallet that manages the signer (`managedWallets`, undefined
+ * while it is read). A direction confirmed on-chain in this session that
+ * 6529 has not recorded as fresh yet is not sent again.
  */
 export function resolveConsolidationProgress(input: {
   readonly plan: Pick<
@@ -307,21 +344,34 @@ export function resolveConsolidationProgress(input: {
   readonly isFresh: DirectedLinkLookup;
   readonly recordedLinkKeys: ReadonlySet<string>;
   readonly connectedAddress: string | undefined;
+  readonly managedWallets: ReadonlySet<string> | undefined;
 }): ConsolidationStepProgress[] {
-  const { plan, recordedLinkKeys, connectedAddress } = input;
+  const { plan, recordedLinkKeys, managedWallets } = input;
+  const connectedKey = input.connectedAddress
+    ? toWalletKey(input.connectedAddress)
+    : undefined;
   const freshSet = new Set(plan.freshWallets);
   const waitsForFourthSlot = plan.fourthSlotWait === "all-steps";
   let currentFound = false;
 
   return plan.steps.map((step, index) => {
+    const isConfirmed = (target: string) =>
+      recordedLinkKeys.has(toDirectedLinkKey(step.signer, target));
     const unsatisfied = step.targets.filter(
       (target) => !isLinkSatisfied(input, freshSet, step.signer, target)
     );
-    const pendingTargets = unsatisfied.filter(
+    const pending = unsatisfied.filter(
       (target) =>
-        !input.isRegistered(step.signer, target) ||
-        !recordedLinkKeys.has(toDirectedLinkKey(step.signer, target))
+        !input.isRegistered(step.signer, target) || !isConfirmed(target)
     );
+    const pendingTargets = [
+      ...pending.filter((target) => !isConfirmed(target)),
+      ...pending.filter(isConfirmed),
+    ];
+    const sentCount = step.targets.filter(
+      (target) => !pending.includes(target) || isConfirmed(target)
+    ).length;
+    const signAs = getSignMode(step.signer, connectedKey, managedWallets);
     let status: ConsolidationStepStatus = "complete";
     let block: ConsolidationStepBlock | undefined;
 
@@ -329,11 +379,12 @@ export function resolveConsolidationProgress(input: {
       status = currentFound ? "upcoming" : "current";
       block = currentFound
         ? "earlier-steps"
-        : getCurrentStepBlock(
+        : getCurrentStepBlock({
             waitsForFourthSlot,
-            step.signer,
-            connectedAddress
-          );
+            signAs,
+            connectedKey,
+            managedWallets,
+          });
       currentFound = true;
     } else if (unsatisfied.length > 0) {
       status = "recording";
@@ -348,6 +399,8 @@ export function resolveConsolidationProgress(input: {
       waitsForFourthSlot,
       block,
       canSign: status === "current" && block === undefined,
+      signAs,
+      nextLink: Math.min(sentCount + 1, step.targets.length),
     };
   });
 }

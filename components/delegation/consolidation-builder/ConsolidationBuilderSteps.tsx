@@ -97,6 +97,12 @@ function getStepHint(
         "delegation.consolidationBuilder.steps.hint.wrongWallet",
         walletParams
       );
+    case "checking-manager":
+      return t(
+        locale,
+        "delegation.consolidationBuilder.steps.hint.checkingManager",
+        { wallet: walletParams.wallet }
+      );
     case "earlier-steps":
       return t(
         locale,
@@ -109,13 +115,68 @@ function getStepHint(
 
 function getRegistrationCountLabel(
   locale: SupportedLocale,
-  count: number
+  step: ConsolidationStepProgress
 ): string {
-  return count === 1
-    ? t(locale, "delegation.consolidationBuilder.steps.oneRegistration")
-    : t(locale, "delegation.consolidationBuilder.steps.batchRegistrations", {
-        count: formatInteger(locale, count),
-      });
+  // A manager sends every link of the step separately; a wallet signing for
+  // itself sends the links still missing in one transaction.
+  const asManager = step.signAs === "manager";
+  const sendsPending =
+    !asManager && (step.status === "current" || step.status === "upcoming");
+  const count = sendsPending ? step.pendingTargets.length : step.targets.length;
+  if (count === 1) {
+    return t(locale, "delegation.consolidationBuilder.steps.oneRegistration");
+  }
+  return t(
+    locale,
+    asManager
+      ? "delegation.consolidationBuilder.steps.managerRegistrations"
+      : "delegation.consolidationBuilder.steps.batchRegistrations",
+    { count: formatInteger(locale, count) }
+  );
+}
+
+function SignButton(
+  props: Readonly<{ step: ConsolidationStepProgress; context: StepContext }>
+) {
+  const { step, context } = props;
+  const { locale } = context;
+  const asManager = step.signAs === "manager";
+  const linkProgressId = `consolidation-step-${step.index}-link`;
+  const showLinkProgress = asManager && step.targets.length > 1;
+
+  return (
+    <>
+      <Button
+        type="button"
+        variant="primary"
+        size="lg"
+        className="tw-whitespace-normal"
+        loading={context.busySigner === step.signer}
+        disabled={context.isBusy}
+        aria-describedby={showLinkProgress ? linkProgressId : undefined}
+        onClick={() => context.onSign(step)}
+      >
+        {asManager
+          ? t(locale, "delegation.consolidationBuilder.steps.signAsManager", {
+              wallet: context.getWalletLabel(step.signer),
+            })
+          : t(locale, "delegation.consolidationBuilder.steps.sign", {
+              step: formatInteger(locale, step.index + 1),
+            })}
+      </Button>
+      {showLinkProgress && (
+        <span
+          id={linkProgressId}
+          className="tw-text-sm tw-font-semibold tw-leading-6 tw-text-iron-200"
+        >
+          {t(locale, "delegation.consolidationBuilder.steps.linkProgress", {
+            link: formatInteger(locale, step.nextLink),
+            total: formatInteger(locale, step.targets.length),
+          })}
+        </span>
+      )}
+    </>
+  );
 }
 
 function StepAction(
@@ -123,7 +184,6 @@ function StepAction(
 ) {
   const { step, context } = props;
   const { locale } = context;
-  const stepNumber = formatInteger(locale, step.index + 1);
 
   if (step.status === "complete") {
     return null;
@@ -136,21 +196,7 @@ function StepAction(
     );
   }
   if (step.canSign) {
-    return (
-      <Button
-        type="button"
-        variant="primary"
-        size="lg"
-        className="tw-whitespace-normal"
-        loading={context.busySigner === step.signer}
-        disabled={context.isBusy}
-        onClick={() => context.onSign(step)}
-      >
-        {t(locale, "delegation.consolidationBuilder.steps.sign", {
-          step: stepNumber,
-        })}
-      </Button>
-    );
+    return <SignButton step={step} context={context} />;
   }
 
   const showConnect = step.block === "disconnected" && !context.walletResolving;
@@ -178,10 +224,9 @@ function StepItem(
   const { locale } = context;
   const styles = STATUS_STYLES[step.status];
   const headingId = `consolidation-step-${step.index}`;
-  const registrations =
-    step.status === "current" || step.status === "upcoming"
-      ? step.pendingTargets
-      : step.targets;
+  const showManagerNote =
+    step.signAs === "manager" &&
+    (step.status === "current" || step.status === "upcoming");
   const showGasError =
     !!context.gasError && context.gasErrorSigner === step.signer;
 
@@ -202,9 +247,13 @@ function StepItem(
             id={headingId}
             className="tw-m-0 tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-100"
           >
-            {t(locale, "delegation.consolidationBuilder.steps.signs", {
-              wallet: context.getWalletLabel(step.signer),
-            })}
+            {t(
+              locale,
+              step.signAs === "manager"
+                ? "delegation.consolidationBuilder.steps.managerSigns"
+                : "delegation.consolidationBuilder.steps.signs",
+              { wallet: context.getWalletLabel(step.signer) }
+            )}
           </h4>
           <p className="tw-m-0 tw-break-all tw-font-mono tw-text-xs tw-leading-5 tw-text-iron-400">
             {context.getDisplayAddress(step.signer)}
@@ -222,8 +271,15 @@ function StepItem(
         })}
       </p>
       <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-500">
-        {getRegistrationCountLabel(locale, registrations.length)}
+        {getRegistrationCountLabel(locale, step)}
       </p>
+      {showManagerNote && (
+        <p className={`${MESSAGE_CLASS_NAME} tw-mt-2`}>
+          {t(locale, "delegation.consolidationBuilder.steps.managerNote", {
+            wallet: context.getWalletLabel(step.signer),
+          })}
+        </p>
+      )}
       {step.status !== "complete" && (
         <div className="tw-mt-3 tw-flex tw-flex-wrap tw-items-center tw-gap-3">
           <StepAction step={step} context={context} />
@@ -313,6 +369,42 @@ function StepsBody(
   );
 }
 
+function getCurrentStepAnnouncement(
+  current: ConsolidationStepProgress,
+  stepCount: number,
+  context: StepContext
+): string {
+  const { locale } = context;
+  const params = {
+    step: formatInteger(locale, current.index + 1),
+    total: formatInteger(locale, stepCount),
+    wallet: context.getWalletLabel(current.signer),
+  };
+  if (current.signAs !== "manager") {
+    return t(
+      locale,
+      "delegation.consolidationBuilder.steps.progress.current",
+      params
+    );
+  }
+  if (current.targets.length === 1) {
+    return t(
+      locale,
+      "delegation.consolidationBuilder.steps.progress.manager",
+      params
+    );
+  }
+  return t(
+    locale,
+    "delegation.consolidationBuilder.steps.progress.managerLink",
+    {
+      ...params,
+      link: formatInteger(locale, current.nextLink),
+      links: formatInteger(locale, current.targets.length),
+    }
+  );
+}
+
 /**
  * Text for the steps' persistent live region: the next step and its signer,
  * a confirmed step waiting to be recorded, or completion.
@@ -327,11 +419,7 @@ function getProgressAnnouncement(
   const { locale } = context;
   const current = state.steps.find((step) => step.status === "current");
   if (current) {
-    return t(locale, "delegation.consolidationBuilder.steps.progress.current", {
-      step: formatInteger(locale, current.index + 1),
-      total: formatInteger(locale, state.steps.length),
-      wallet: context.getWalletLabel(current.signer),
-    });
+    return getCurrentStepAnnouncement(current, state.steps.length, context);
   }
   const recording = state.steps.find((step) => step.status === "recording");
   if (recording) {
@@ -344,7 +432,10 @@ function getProgressAnnouncement(
   return t(locale, "delegation.consolidationBuilder.steps.allComplete");
 }
 
-/** Numbered signing steps; only the next step's signer can act. */
+/**
+ * Numbered signing steps; only the next step's signer, or a wallet that
+ * manages it, can act.
+ */
 export function ConsolidationBuilderSteps(
   props: Readonly<
     StepContext & {

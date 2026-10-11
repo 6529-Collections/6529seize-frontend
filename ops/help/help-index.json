@@ -4198,7 +4198,9 @@
         "add another wallet",
         "add a wallet to my consolidation",
         "consolidation signing order",
-        "one transaction per wallet"
+        "one transaction per wallet",
+        "consolidate a cold vault",
+        "sign consolidation as delegation manager"
       ],
       "keywords": [
         "consolidation",
@@ -4215,7 +4217,8 @@
         "Build a Consolidation is the Delegation Center's guided setup for linking up to 4 wallets you control. Open it from Guided Setup on the Consolidations card, from Add another wallet in ID Statements / Consolidated Addresses, or from the link in the Register Consolidation form.",
         "Every pair of wallets in a consolidation registers use case 999 in both directions. The guide reads which directions are already registered on-chain (Any Collection or The Memes) and plans one transaction per wallet: a single registration for one missing link, or one batch for several.",
         "The connected wallet and its current consolidation are prefilled. Wallets already in that consolidation sign first and new wallets sign last; signing out of order temporarily splits the consolidation and can reduce TDH-wave votes.",
-        "Each step can be signed only by its own wallet, and only after every earlier step is confirmed on-chain. Switch the connected wallet between steps; the wallet list stays in place.",
+        "Each step can be signed only by its own wallet or by that wallet's Delegation Manager, and only after every earlier step is confirmed on-chain. Switch the connected wallet between steps; the wallet list stays in place.",
+        "A vault never has to connect: if the connected wallet is the vault's Delegation Manager on Any Collection (use case 998), the vault's step shows Sign for Wallet N as its manager and the manager registers each of the vault's links as a separate transaction (Link n of total). A manager appointed only for The Memes cannot sign these links. Appoint one from the tip in Before you start (/delegation/register-sub-delegation).",
         "A four-wallet consolidation counts only when one member has all three of its links registered in both directions from 15 October 2026, 00:00 UTC. Before then every step of a four-wallet plan waits; groups of two or three are not held.",
         "For a four-wallet plan the guide also checks when 6529 recorded each link. A joining wallet's older links are registered again in the signer's step so they count. After a step confirms, a link 6529 has not recorded yet shows Waiting for 6529 to record this link (usually about a minute) instead of asking for another signature.",
         "Every wallet in a consolidation can sign in as the profile and act for it, so only consolidate wallets you control. Profiles merge permanently, the profile with the highest CIC keeps its handle, and a wallet already in another consolidation leaves it."
@@ -4225,7 +4228,8 @@
         "/delegation/register-consolidation",
         "/delegation/delegation-faq/register-consolidation",
         "/delegation/delegation-center",
-        "/delegation/wallet-checker"
+        "/delegation/wallet-checker",
+        "/delegation/register-sub-delegation"
       ],
       "tags": ["delegation", "consolidation", "wallet"],
       "source_refs": ["ops/docs/delegation/feature-delegation-action-flows.md"]

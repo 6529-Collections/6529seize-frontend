@@ -18,6 +18,10 @@ export const DELEGATION_CONSOLIDATION_BUILDER_MESSAGES = {
   "delegation.consolidationBuilder.warnings.tdhLink":
     "How consolidation affects TDH",
   "delegation.consolidationBuilder.warnings.docsLink": "Consolidation guide",
+  "delegation.consolidationBuilder.warnings.managerTip":
+    "Keeping a vault cold? Appoint a Delegation Manager for it on Any Collection first, so it never has to connect here.",
+  "delegation.consolidationBuilder.warnings.managerLink":
+    "Appoint a Delegation Manager",
   "delegation.consolidationBuilder.wallets.title": "Wallets",
   "delegation.consolidationBuilder.wallets.count": "{count} of {limit} wallets",
   "delegation.consolidationBuilder.wallets.label": "Wallet {position}",
@@ -57,30 +61,46 @@ export const DELEGATION_CONSOLIDATION_BUILDER_MESSAGES = {
     "All steps are confirmed. Your consolidation updates within minutes, and TDH fully updates at the next 00:00 UTC snapshot.",
   "delegation.consolidationBuilder.steps.step": "Step {step}",
   "delegation.consolidationBuilder.steps.signs": "{wallet} signs",
+  "delegation.consolidationBuilder.steps.managerSigns":
+    "Manager signs for {wallet}",
   "delegation.consolidationBuilder.steps.linksTo": "Links to {wallets}",
   "delegation.consolidationBuilder.steps.oneRegistration": "1 registration",
   "delegation.consolidationBuilder.steps.batchRegistrations":
     "{count} registrations in one transaction",
+  "delegation.consolidationBuilder.steps.managerRegistrations":
+    "{count} registrations, one transaction each",
+  "delegation.consolidationBuilder.steps.managerNote":
+    "{wallet} stays cold: its manager signs these links for it, one transaction per link.",
   "delegation.consolidationBuilder.steps.status.complete": "Confirmed",
   "delegation.consolidationBuilder.steps.status.current": "Next",
   "delegation.consolidationBuilder.steps.status.upcoming": "Waiting",
   "delegation.consolidationBuilder.steps.status.recording": "Recording",
   "delegation.consolidationBuilder.steps.sign": "Sign Step {step}",
+  "delegation.consolidationBuilder.steps.signAsManager":
+    "Sign for {wallet} as its manager",
+  "delegation.consolidationBuilder.steps.linkProgress":
+    "Link {link} of {total}",
   "delegation.consolidationBuilder.steps.connect": "Connect Wallet",
   "delegation.consolidationBuilder.steps.hint.disconnected":
-    "Connect {wallet} ({address}) to sign this step.",
+    "Connect {wallet} ({address}) or a wallet that manages it to sign this step.",
   "delegation.consolidationBuilder.steps.hint.wrongWallet":
-    "Switch your wallet to {wallet} ({address}) to sign this step.",
+    "Switch your wallet to {wallet} ({address}) or a wallet that manages it to sign this step.",
   "delegation.consolidationBuilder.steps.hint.earlierSteps":
     "Available once the earlier steps are confirmed.",
   "delegation.consolidationBuilder.steps.hint.fourthSlot":
     "Available from {date}.",
   "delegation.consolidationBuilder.steps.hint.resolving":
     "Checking your wallet connection…",
+  "delegation.consolidationBuilder.steps.hint.checkingManager":
+    "Checking whether the connected wallet manages {wallet}…",
   "delegation.consolidationBuilder.steps.hint.recording":
     "Waiting for 6529 to record this link (usually about a minute).",
   "delegation.consolidationBuilder.steps.progress.current":
     "Step {step} of {total} is next: {wallet} signs.",
+  "delegation.consolidationBuilder.steps.progress.manager":
+    "Step {step} of {total} is next: sign for {wallet} as its manager.",
+  "delegation.consolidationBuilder.steps.progress.managerLink":
+    "Step {step} of {total} is next: sign link {link} of {links} for {wallet} as its manager.",
   "delegation.consolidationBuilder.steps.progress.recording":
     "Step {step} is confirmed. Waiting for 6529 to record it.",
   "delegation.consolidationBuilder.fourthSlot.waits":
@@ -92,6 +112,10 @@ export const DELEGATION_CONSOLIDATION_BUILDER_MESSAGES = {
   "delegation.consolidationBuilder.toast.title": "Consolidation Step {step}",
   "delegation.consolidationBuilder.toast.failed":
     "Consolidation Step {step} Failed",
+  "delegation.consolidationBuilder.toast.linkTitle":
+    "Consolidation Step {step}, Link {link} of {total}",
+  "delegation.consolidationBuilder.toast.linkFailed":
+    "Consolidation Step {step}, Link {link} of {total} Failed",
   "delegation.consolidationBuilder.toast.startFailed":
     "Failed to start the transaction.",
   "delegation.consolidationBuilder.toast.confirmationFailed":

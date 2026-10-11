@@ -25,18 +25,25 @@ interface ConsolidationStepWriteParams {
   readonly address: `0x${string}`;
   readonly abi: typeof DELEGATION_ABI;
   readonly chainId: number;
-  readonly functionName: "registerDelegationAddress" | "batchDelegations";
+  readonly functionName:
+    | "registerDelegationAddress"
+    | "batchDelegations"
+    | "registerDelegationAddressUsingSubDelegation";
   readonly args: readonly unknown[];
 }
+
+const DELEGATION_CONTRACT_TARGET = {
+  address: DELEGATION_CONTRACT.contract,
+  abi: DELEGATION_ABI,
+  chainId: DELEGATION_CONTRACT.chain_id,
+} as const;
 
 export function getLinkStatusReadParams(
   wallets: readonly string[]
 ): DelegationReadParams[] {
   return getDirectedWalletPairs(wallets).flatMap(([from, to]) =>
     LINK_STATUS_COLLECTIONS.map((collection) => ({
-      address: DELEGATION_CONTRACT.contract,
-      abi: DELEGATION_ABI,
-      chainId: DELEGATION_CONTRACT.chain_id,
+      ...DELEGATION_CONTRACT_TARGET,
       functionName: "retrieveGlobalStatusOfDelegation",
       args: [from, collection, to, CONSOLIDATION_USE_CASE.use_case],
     }))
@@ -70,6 +77,66 @@ export function getRegisteredLinkKeys(
 }
 
 /**
+ * Delegation Manager (use case 998) checks of `manager` for each wallet.
+ * Steps register on Any Collection, and the contract accepts a manager
+ * appointed for the registration's collection or for Any Collection, so only
+ * an Any Collection appointment lets a manager sign these links.
+ */
+export function getManagerStatusReadParams(
+  wallets: readonly string[],
+  manager: string
+): DelegationReadParams[] {
+  return wallets.map((wallet) => ({
+    ...DELEGATION_CONTRACT_TARGET,
+    functionName: "retrieveSubDelegationStatus",
+    args: [wallet, DELEGATION_ALL_ADDRESS, manager],
+  }));
+}
+
+/**
+ * Wallets the manager manages, from `getManagerStatusReadParams` results.
+ * Returns undefined until every read has succeeded.
+ */
+export function getManagedWalletKeys(
+  wallets: readonly string[],
+  data: readonly ContractReadResult[] | undefined
+): string[] | undefined {
+  if (wallets.length === 0) {
+    return [];
+  }
+  if (
+    data?.length !== wallets.length ||
+    data.some((read) => read.status !== "success")
+  ) {
+    return undefined;
+  }
+  return wallets.filter((_wallet, index) => data[index]?.result === true);
+}
+
+/**
+ * One link registered by a Delegation Manager for the wallet it manages.
+ * The contract has no batch for managers, so each link is a transaction.
+ */
+export function getManagerLinkWriteParams(
+  delegator: string,
+  target: string
+): ConsolidationStepWriteParams {
+  return {
+    ...DELEGATION_CONTRACT_TARGET,
+    functionName: "registerDelegationAddressUsingSubDelegation",
+    args: [
+      delegator,
+      DELEGATION_ALL_ADDRESS,
+      target,
+      NEVER_DATE,
+      CONSOLIDATION_USE_CASE.use_case,
+      true,
+      0,
+    ],
+  };
+}
+
+/**
  * One transaction registering every target for the signer: a single
  * registration for one target, otherwise one batch with parallel arrays.
  */
@@ -82,11 +149,7 @@ export function getConsolidationStepWriteParams(
       `A consolidation step registers 1 to ${MAX_BULK_ACTIONS} links.`
     );
   }
-  const base = {
-    address: DELEGATION_CONTRACT.contract,
-    abi: DELEGATION_ABI,
-    chainId: DELEGATION_CONTRACT.chain_id,
-  };
+  const base = DELEGATION_CONTRACT_TARGET;
 
   if (targets.length === 1) {
     return {

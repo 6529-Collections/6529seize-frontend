@@ -45,6 +45,8 @@ const mockData: {
   linksError: boolean;
   fresh: string[];
   freshError: boolean;
+  managed: ReadonlySet<string> | undefined;
+  managersError: boolean;
 } = {
   groups: new Map(),
   groupsPending: false,
@@ -53,8 +55,11 @@ const mockData: {
   linksError: false,
   fresh: [],
   freshError: false,
+  managed: new Set(),
+  managersError: false,
 };
 const mockRefetchLinks = jest.fn();
+const mockRefetchManagers = jest.fn();
 
 jest.mock(
   "@/components/delegation/consolidation-builder/useConsolidationBuilderData",
@@ -81,6 +86,11 @@ jest.mock(
       freshLinkKeys:
         wallets.length > 0 && mockData.freshError ? undefined : mockData.fresh,
       isError: wallets.length > 0 && mockData.freshError,
+    }),
+    useConsolidationManagedWallets: () => ({
+      managedWallets: mockData.managed,
+      isError: mockData.managersError,
+      refetch: mockRefetchManagers,
     }),
   })
 );
@@ -190,6 +200,8 @@ beforeEach(() => {
   mockData.linksError = false;
   mockData.fresh = [];
   mockData.freshError = false;
+  mockData.managed = new Set();
+  mockData.managersError = false;
   mockWrite.toast = undefined;
   mockWrite.gasError = undefined;
   mockWrite.recordedLinkKeys = new Set();
@@ -233,6 +245,19 @@ describe("ConsolidationBuilder", () => {
       "href",
       "/delegation/delegation-faq/register-consolidation"
     );
+  });
+
+  it("suggests appointing a Delegation Manager to keep a vault cold", () => {
+    renderBuilder();
+
+    expect(
+      screen.getByText(
+        "Keeping a vault cold? Appoint a Delegation Manager for it on Any Collection first, so it never has to connect here."
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Appoint a Delegation Manager" })
+    ).toHaveAttribute("href", "/delegation/register-sub-delegation");
   });
 
   it("prefills the connected wallet and its current consolidation", () => {
@@ -291,7 +316,7 @@ describe("ConsolidationBuilder", () => {
     expect(walletInput(4)).toHaveValue(D);
     expect(
       step(1).getByText(
-        `Switch your wallet to Wallet 1 (${getAddress(A)}) to sign this step.`
+        `Switch your wallet to Wallet 1 (${getAddress(A)}) or a wallet that manages it to sign this step.`
       )
     ).toBeInTheDocument();
     expect(
@@ -313,6 +338,103 @@ describe("ConsolidationBuilder", () => {
     expect(
       screen.getByText("Step 2 of 4 is next: Wallet 2 signs.").tagName
     ).toBe("OUTPUT");
+  });
+
+  it("lets a manager sign a cold vault's step one link at a time", () => {
+    mockData.groups = new Map();
+    mockData.links = [];
+    mockData.managed = new Set([A]);
+    const view = renderBuilder({ connectedAddress: B });
+    fireEvent.change(walletInput(2), { target: { value: A } });
+    fireEvent.click(screen.getByRole("button", { name: "Add Wallet" }));
+    fireEvent.change(walletInput(3), { target: { value: C } });
+
+    expect(stepHeadings()).toEqual([
+      "Wallet 1 signs",
+      "Manager signs for Wallet 2",
+      "Wallet 3 signs",
+    ]);
+    expect(step(1).getByRole("button", { name: "Sign Step 1" })).toBeEnabled();
+    expect(
+      step(2).getByText(
+        "Wallet 2 stays cold: its manager signs these links for it, one transaction per link."
+      )
+    ).toBeInTheDocument();
+    expect(
+      step(2).getByText("2 registrations, one transaction each")
+    ).toBeInTheDocument();
+    expect(
+      step(3).getByText("2 registrations in one transaction")
+    ).toBeInTheDocument();
+
+    mockData.links = [toDirectedLinkKey(B, A), toDirectedLinkKey(B, C)];
+    view.rerenderWith({ connectedAddress: B });
+    const signAsManager = step(2).getByRole("button", {
+      name: "Sign for Wallet 2 as its manager",
+    });
+    expect(signAsManager).toHaveAccessibleDescription("Link 1 of 2");
+    expect(
+      screen.getByText(
+        "Step 2 of 3 is next: sign link 1 of 2 for Wallet 2 as its manager."
+      )
+    ).toBeInTheDocument();
+    fireEvent.click(signAsManager);
+    expect(mockSubmit).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        signer: A,
+        signAs: "manager",
+        pendingTargets: [B, C],
+        nextLink: 1,
+      })
+    );
+
+    mockData.links = [...mockData.links, toDirectedLinkKey(A, B)];
+    mockWrite.recordedLinkKeys = new Set([toDirectedLinkKey(A, B)]);
+    view.rerenderWith({ connectedAddress: B });
+    expect(step(2).getByText("Link 2 of 2")).toBeInTheDocument();
+    fireEvent.click(
+      step(2).getByRole("button", { name: "Sign for Wallet 2 as its manager" })
+    );
+    expect(mockSubmit).toHaveBeenLastCalledWith(
+      expect.objectContaining({ pendingTargets: [C], nextLink: 2 })
+    );
+
+    mockData.links = [...mockData.links, toDirectedLinkKey(A, C)];
+    view.rerenderWith({ connectedAddress: B });
+    expect(step(2).getByText("Confirmed")).toBeInTheDocument();
+    expect(
+      step(3).getByText(
+        `Switch your wallet to Wallet 3 (${getAddress(C)}) or a wallet that manages it to sign this step.`
+      )
+    ).toBeInTheDocument();
+  });
+
+  it("checks whether the connected wallet manages the next signer", () => {
+    mockData.managed = undefined;
+    const view = renderBuilder();
+    addFourthWallet();
+    expect(step(1).getByRole("button", { name: "Sign Step 1" })).toBeEnabled();
+
+    view.rerenderWith({ connectedAddress: D });
+    expect(
+      step(1).getByText(
+        "Checking whether the connected wallet manages Wallet 1…"
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /^Sign/ })
+    ).not.toBeInTheDocument();
+  });
+
+  it("reports a failed manager check with a retry", () => {
+    mockData.managersError = true;
+    renderBuilder();
+
+    expect(
+      screen.getByText("Couldn’t check the registered links.")
+    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Try Again" }));
+    expect(mockRefetchManagers).toHaveBeenCalled();
   });
 
   it("holds every step of a four-wallet group until the fourth slot opens", () => {
@@ -410,7 +532,7 @@ describe("ConsolidationBuilder", () => {
     ).toBeInTheDocument();
     expect(
       step(2).getByText(
-        `Switch your wallet to Wallet 2 (${getAddress(B)}) to sign this step.`
+        `Switch your wallet to Wallet 2 (${getAddress(B)}) or a wallet that manages it to sign this step.`
       )
     ).toBeInTheDocument();
     expect(
@@ -513,7 +635,7 @@ describe("ConsolidationBuilder", () => {
 
     expect(
       step(1).getByText(
-        `Connect Wallet 1 (${getAddress(A)}) to sign this step.`
+        `Connect Wallet 1 (${getAddress(A)}) or a wallet that manages it to sign this step.`
       )
     ).toBeInTheDocument();
     fireEvent.click(step(1).getByRole("button", { name: "Connect Wallet" }));

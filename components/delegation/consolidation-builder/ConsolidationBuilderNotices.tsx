@@ -11,6 +11,7 @@ import type { ConsolidationPlan } from "./consolidation-plan";
 const CONSOLIDATION_TDH_EXPLAINER_PATH = "/network/tdh/consolidation";
 const CONSOLIDATION_GUIDE_PATH =
   "/delegation/delegation-faq/register-consolidation";
+const REGISTER_MANAGER_PATH = "/delegation/register-sub-delegation";
 
 const CONSOLIDATION_NOTICE_CLASS_NAME =
   "tw-rounded-lg tw-border tw-border-solid tw-border-amber-400/40 tw-bg-amber-400/10 tw-p-4 tw-text-sm tw-leading-6 tw-text-amber-100";
@@ -43,6 +44,9 @@ export function ConsolidationBuilderWarnings(
           <li key={key}>{t(locale, key)}</li>
         ))}
       </ul>
+      <p className="tw-mb-3 tw-mt-0 tw-text-sm tw-leading-6 tw-text-iron-300">
+        {t(locale, "delegation.consolidationBuilder.warnings.managerTip")}
+      </p>
       <div className="tw-flex tw-flex-wrap tw-gap-x-5 tw-gap-y-2 tw-text-sm">
         <Link
           href={CONSOLIDATION_TDH_EXPLAINER_PATH}
@@ -55,6 +59,12 @@ export function ConsolidationBuilderWarnings(
           className={DELEGATION_INLINE_LINK_CLASS_NAME}
         >
           {t(locale, "delegation.consolidationBuilder.warnings.docsLink")}
+        </Link>
+        <Link
+          href={REGISTER_MANAGER_PATH}
+          className={DELEGATION_INLINE_LINK_CLASS_NAME}
+        >
+          {t(locale, "delegation.consolidationBuilder.warnings.managerLink")}
         </Link>
       </div>
     </section>
