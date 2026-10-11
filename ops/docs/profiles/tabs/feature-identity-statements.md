@@ -51,8 +51,9 @@ identity statements` when the public-visibility notes are needed.
    independent copy icon to copy its value; eligible owners can also delete it.
 8. On non-primary wallet rows, use `Set primary` when available.
 9. To link another wallet you control, select `Add another wallet` beside
-   `Wallet Checker`. This opens the existing
-   [Register Consolidation form](../../delegation/feature-delegation-action-flows.md).
+   `Wallet Checker`. This opens the guided setup at
+   `/delegation/build-consolidation`, which plans one transaction per wallet
+   (see [Delegation Write Action Routes](../../delegation/feature-delegation-action-flows.md)).
 
 ## Statement Types in Add Sheet or Dialog
 
