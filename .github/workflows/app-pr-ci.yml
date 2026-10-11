@@ -1240,6 +1240,8 @@ jobs:
           const selection = JSON.parse(
             fs.readFileSync("test-results/app-pr-ci/museum-release-selection.json", "utf8")
           );
+          // Network IA is not a PR pack: the lane always runs it first as the
+          // gate. Deployed workflows list museum-network-ia as a pack.
           const allowed = new Set([
             "test:e2e:museum-data-architecture",
             "test:e2e:museum-institutional-practice",

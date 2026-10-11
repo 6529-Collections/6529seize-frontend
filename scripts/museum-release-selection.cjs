@@ -159,15 +159,14 @@ function git(root, args) {
   });
 }
 
-// Source files under the Museum roots at `commit` that contain `needle`.
-function referencingFiles(root, commit, needle) {
+// Source files under the Museum roots at `commit` that contain any needle.
+function referencingFiles(root, commit, needles) {
   try {
     return git(root, [
       "grep",
       "-l",
       "-F",
-      "-e",
-      needle,
+      ...needles.flatMap((needle) => ["-e", needle]),
       commit,
       "--",
       ...SOURCE_ROOTS,
@@ -191,8 +190,13 @@ function messagesAt(root, commit) {
   }
 }
 
+// Exact string literals only, so a key never matches a longer key it prefixes.
+function quotedLiterals(value) {
+  return [`"${value}"`, `'${value}'`, `\`${value}\``];
+}
+
 // A copy edit affects the pages whose sources name the changed keys. Keys that
-// no Museum source names literally make the change unmappable.
+// no Museum source names as a literal make the change unmappable.
 function messageReferences(root, classification) {
   const before = messagesAt(root, classification.base_sha);
   const after = messagesAt(root, classification.head_sha);
@@ -201,7 +205,11 @@ function messageReferences(root, classification) {
     if (before[key] === after[key]) {
       continue;
     }
-    const found = referencingFiles(root, classification.head_sha, key);
+    const found = referencingFiles(
+      root,
+      classification.head_sha,
+      quotedLiterals(key)
+    );
     if (found.length === 0 && Object.hasOwn(after, key)) {
       return null;
     }
@@ -210,12 +218,14 @@ function messageReferences(root, classification) {
   return [...files];
 }
 
+// Assets are named either as a quoted file name or as the final segment of a
+// public URL; both anchors keep `a.svg` from matching `data.svg`.
 function assetReferences(root, classification, file) {
-  const found = referencingFiles(
-    root,
-    classification.head_sha,
-    path.posix.basename(file)
-  );
+  const name = path.posix.basename(file);
+  const found = referencingFiles(root, classification.head_sha, [
+    ...quotedLiterals(name),
+    `/${name}`,
+  ]);
   return found.length > 0 ? found : null;
 }
 

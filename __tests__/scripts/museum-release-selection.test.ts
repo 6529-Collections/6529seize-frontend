@@ -28,6 +28,7 @@ const selection = require("../../scripts/museum-release-selection.cjs") as {
     affected_pages: {
       affected_surfaces: string[];
       analysis_error?: string;
+      file_effects: Array<{ file: string; effect: string; reason: string }>;
     } | null;
     browser_scope: string;
     classification: { tier: string };
@@ -299,7 +300,8 @@ describe("Museum release selection", () => {
   describe("affected-page selection on synthetic ranges", () => {
     function selectRange(
       files: Record<string, string>,
-      environment: "pr" | "staging"
+      environment: "pr" | "staging",
+      baseFiles: Record<string, string> = {}
     ) {
       const root = fs.mkdtempSync(path.join(os.tmpdir(), "museum-affected-"));
       try {
@@ -313,6 +315,9 @@ describe("Museum release selection", () => {
           { cwd: root }
         );
         write(root, "README.md", "base\n");
+        for (const [file, source] of Object.entries(baseFiles)) {
+          write(root, file, source);
+        }
         const base = commit(root, "base");
         for (const [file, source] of Object.entries(files)) {
           write(root, file, source);
@@ -378,6 +383,38 @@ describe("Museum release selection", () => {
       );
       expect(result.selected_packs).toEqual(selection.PACKS["staging"]);
       expect(result.affected_pages?.analysis_error).toEqual(expect.any(String));
+    });
+
+    it("matches copy keys only as exact literals", () => {
+      const messages = JSON.stringify({ "museum.network.home": "Home" });
+      const prefixOnly = selectRange(
+        { "i18n/messages/museum.en-US.json": messages },
+        "pr",
+        {
+          "components/museum/MuseumHome.tsx":
+            'export const key = "museum.network.homeTitle";\n',
+        }
+      );
+      const effect = prefixOnly.affected_pages?.file_effects.find(
+        (entry) => entry.file === "i18n/messages/museum.en-US.json"
+      );
+      expect(effect).toMatchObject({
+        effect: "all",
+        reason: "The changed Museum file could not be mapped to a page.",
+      });
+      expect(prefixOnly.affected_pages?.analysis_error).toBeUndefined();
+
+      // An exact literal is found and handed to the surface registry, which
+      // this synthetic repository does not have.
+      const exact = selectRange(
+        { "i18n/messages/museum.en-US.json": messages },
+        "pr",
+        {
+          "components/museum/MuseumHome.tsx":
+            'export const key = "museum.network.home";\n',
+        }
+      );
+      expect(exact.affected_pages?.analysis_error).toEqual(expect.any(String));
     });
   });
 });
