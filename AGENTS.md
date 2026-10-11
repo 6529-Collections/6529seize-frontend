@@ -175,6 +175,9 @@ All project commands must go through the repo-local `6529` wrapper.
   and recaptured. Automated geometry, DOM, and accessibility checks do not
   substitute for this gate.
 - Use `ops/skills/design-ui-ux/SKILL.md` for frontend design and UX review.
+- Use `ops/skills/fe-polish-judge/SKILL.md` and
+  `ops/standards/frontend-polish-judge.md` when asked for a polish score or an
+  autonomous builder–judge loop on a page. It is opt-in and adds no PR gate.
 - Use `ops/skills/wcag-22-aa/SKILL.md` for accessibility audits and fixes.
 - Use `ops/skills/i18n-localization/SKILL.md` for progressive localization
   work.
@@ -296,6 +299,7 @@ is available, use it; otherwise read the relevant files in
     gates, and deploy gates.
   - `ops/skills/commit-docs-updater/SKILL.md` for user-facing docs updates.
   - `ops/skills/design-ui-ux/SKILL.md` for frontend design and UX review.
+  - `ops/skills/fe-polish-judge/SKILL.md` for scored builder–judge polish loops.
   - `ops/skills/react-doctor/SKILL.md` for React, Next.js, hook, routing, or UI
     state changes.
   - `ops/skills/sonar-guardrails/SKILL.md` for TS/JS quality-sensitive edits.
