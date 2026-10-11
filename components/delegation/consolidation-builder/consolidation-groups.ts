@@ -106,7 +106,11 @@ export function getConsolidationDepartures(
     if (group.length < 2 || separatedFrom.length === 0) {
       continue;
     }
-    const key = [...group].sort().join(",");
+    // Wallet keys are lowercase hex, so code-unit order is stable and
+    // locale-independent.
+    const key = [...group]
+      .sort((a, b) => (a < b ? -1 : Number(a > b)))
+      .join(",");
     const departure = departures.get(key);
     if (departure) {
       departure.wallets.push(wallet);

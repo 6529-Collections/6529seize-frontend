@@ -69,15 +69,12 @@ function GroupLookupStatus(
 ) {
   if (props.state === "loading") {
     return (
-      <p
-        role="status"
-        className="tw-mb-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-400"
-      >
+      <output className="tw-mb-0 tw-mt-3 tw-block tw-text-sm tw-leading-6 tw-text-iron-400">
         {t(
           props.locale,
           "delegation.consolidationBuilder.wallets.loadingGroup"
         )}
-      </p>
+      </output>
     );
   }
   if (props.state === "error") {

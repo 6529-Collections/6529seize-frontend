@@ -130,9 +130,9 @@ function StepAction(
   }
   if (step.status === "recording") {
     return (
-      <p role="status" className={MESSAGE_CLASS_NAME}>
+      <output className={`tw-block ${MESSAGE_CLASS_NAME}`}>
         {t(locale, "delegation.consolidationBuilder.steps.hint.recording")}
-      </p>
+      </output>
     );
   }
   if (step.canSign) {
@@ -260,9 +260,9 @@ function StepsBody(
       );
     case "loading":
       return (
-        <p role="status" className={MESSAGE_CLASS_NAME}>
+        <output className={`tw-block ${MESSAGE_CLASS_NAME}`}>
           {t(locale, "delegation.consolidationBuilder.steps.loading")}
-        </p>
+        </output>
       );
     case "error":
       return (
@@ -305,9 +305,9 @@ function StepsBody(
         ))}
       </ol>
       {allComplete && (
-        <p role="status" className={`${MESSAGE_CLASS_NAME} tw-mt-4`}>
+        <output className={`tw-block ${MESSAGE_CLASS_NAME} tw-mt-4`}>
           {t(locale, "delegation.consolidationBuilder.steps.allComplete")}
-        </p>
+        </output>
       )}
     </>
   );
