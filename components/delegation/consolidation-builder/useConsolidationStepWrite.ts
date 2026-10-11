@@ -9,15 +9,33 @@ import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 import { getTransactionErrorToastMessage } from "../collection-delegation/collection-delegation-helpers";
 import { getGasError } from "../delegation-shared";
 import type { DelegationToastState } from "../DelegationToast";
-import { getConsolidationStepWriteParams } from "./consolidation-contract";
-import { toDirectedLinkKey } from "./consolidation-plan";
+import {
+  getConsolidationStepWriteParams,
+  getManagerLinkWriteParams,
+} from "./consolidation-contract";
+import {
+  toDirectedLinkKey,
+  type ConsolidationStepProgress,
+} from "./consolidation-plan";
+
+interface StepLink {
+  readonly number: number;
+  readonly total: number;
+}
 
 interface StepSubmission {
   readonly attempt: number;
   readonly signer: string;
   readonly targets: readonly string[];
   readonly stepNumber: number;
+  /** The link a manager sends, when its step has several. */
+  readonly link: StepLink | undefined;
 }
+
+type StepSubmitInput = Pick<
+  ConsolidationStepProgress,
+  "index" | "signer" | "targets" | "pendingTargets" | "signAs" | "nextLink"
+>;
 
 interface RecordedLinks {
   /** Transactions whose directions are already in `keys`. */
@@ -41,8 +59,31 @@ interface StepWriteSnapshot {
   };
 }
 
-function getStepToastTitles(locale: SupportedLocale, stepNumber: number) {
-  const step = formatInteger(locale, stepNumber);
+function getStepToastTitles(
+  locale: SupportedLocale,
+  submission: Pick<StepSubmission, "stepNumber" | "link">
+) {
+  const step = formatInteger(locale, submission.stepNumber);
+  const { link } = submission;
+  if (link) {
+    const params = {
+      step,
+      link: formatInteger(locale, link.number),
+      total: formatInteger(locale, link.total),
+    };
+    return {
+      title: t(
+        locale,
+        "delegation.consolidationBuilder.toast.linkTitle",
+        params
+      ),
+      failedTitle: t(
+        locale,
+        "delegation.consolidationBuilder.toast.linkFailed",
+        params
+      ),
+    };
+  }
   return {
     title: t(locale, "delegation.consolidationBuilder.toast.title", { step }),
     failedTitle: t(locale, "delegation.consolidationBuilder.toast.failed", {
@@ -83,7 +124,7 @@ function getStepWriteToast(
   if (!submission) {
     return undefined;
   }
-  const titles = getStepToastTitles(locale, submission.stepNumber);
+  const titles = getStepToastTitles(locale, submission);
 
   if (writeError) {
     return {
@@ -104,7 +145,9 @@ function getStepWriteToast(
 }
 
 /**
- * Sends one consolidation step as a single transaction. Its wallet,
+ * Sends one consolidation step as a single transaction, or, for a manager
+ * signing for the step's wallet, its next link (the contract has no batch for
+ * managers, so each link is sent after the previous one). The wallet,
  * submission, confirmation, and failure states are derived as a toast that
  * the caller renders; dismissing hides it until the state changes. The
  * directions of every transaction confirmed in this session are kept in
@@ -171,21 +214,30 @@ export function useConsolidationStepWrite(options: {
     }
   }, [receipt.isSuccess, write.data]);
 
-  function submit(step: {
-    readonly index: number;
-    readonly signer: string;
-    readonly pendingTargets: readonly string[];
-  }) {
+  function submit(step: StepSubmitInput) {
+    const [nextTarget] = step.pendingTargets;
+    if (!nextTarget) {
+      return;
+    }
+    const asManager = step.signAs === "manager";
+    const targets = asManager ? [nextTarget] : step.pendingTargets;
     setGasError(undefined);
     setSubmission((current) => ({
       attempt: (current?.attempt ?? 0) + 1,
       signer: step.signer,
-      targets: step.pendingTargets,
+      targets,
       stepNumber: step.index + 1,
+      link:
+        asManager && step.targets.length > 1
+          ? { number: step.nextLink, total: step.targets.length }
+          : undefined,
     }));
-    write.writeContract(getConsolidationStepWriteParams(step.pendingTargets), {
-      onError: (error) => setGasError(getGasError(error)),
-    });
+    write.writeContract(
+      asManager
+        ? getManagerLinkWriteParams(step.signer, nextTarget)
+        : getConsolidationStepWriteParams(targets),
+      { onError: (error) => setGasError(getGasError(error)) }
+    );
   }
 
   const isBusy = write.isPending || receipt.isLoading;

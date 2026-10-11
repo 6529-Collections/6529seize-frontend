@@ -8,6 +8,8 @@ import { useCallback, useMemo } from "react";
 import { useReadContracts } from "wagmi";
 import {
   getLinkStatusReadParams,
+  getManagedWalletKeys,
+  getManagerStatusReadParams,
   getRegisteredLinkKeys,
 } from "./consolidation-contract";
 import {
@@ -102,6 +104,54 @@ export function useConsolidationLinkStatus(wallets: readonly string[]) {
       reads.isError ||
       reads.data?.some((read) => read.status === "failure") === true,
     refetch: refetchLinks,
+  };
+}
+
+/**
+ * Listed wallets that the connected wallet manages as their Delegation
+ * Manager on Any Collection, read on-chain. Undefined while the reads load
+ * or after one fails; empty without a connected wallet or other wallets.
+ */
+export function useConsolidationManagedWallets(
+  wallets: readonly string[],
+  connectedKey: string | undefined
+) {
+  const candidates = useMemo(
+    () =>
+      connectedKey ? wallets.filter((wallet) => wallet !== connectedKey) : [],
+    [connectedKey, wallets]
+  );
+  const contracts = useMemo(
+    () =>
+      connectedKey ? getManagerStatusReadParams(candidates, connectedKey) : [],
+    [candidates, connectedKey]
+  );
+  const reads = useReadContracts({
+    contracts,
+    query: {
+      enabled: contracts.length > 0,
+      refetchInterval: REFETCH_INTERVAL_MS,
+    },
+  });
+  const { refetch } = reads;
+  const managedWallets = useMemo(() => {
+    const keys = getManagedWalletKeys(candidates, reads.data);
+    return keys ? new Set(keys) : undefined;
+  }, [candidates, reads.data]);
+  const hasContracts = contracts.length > 0;
+  const refetchManagers = useCallback(() => {
+    if (hasContracts) {
+      refetch().catch(() => undefined);
+    }
+  }, [hasContracts, refetch]);
+
+  return {
+    managedWallets,
+    isError:
+      hasContracts &&
+      (reads.isError ||
+        reads.data?.some((read) => read.status === "failure") === true),
+    refetch: refetchManagers,
   };
 }
 

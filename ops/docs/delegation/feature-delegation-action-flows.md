@@ -47,7 +47,8 @@ and submit/recovery behavior.
 - `build-consolidation`
   - Required: 2 to 4 wallet addresses (`0x` followed by 40 hexadecimal
     characters); ENS names are not accepted
-  - Each step's own wallet must be connected to sign it
+  - Each step is signed by its own wallet or by that wallet's Delegation
+    Manager on `Any Collection`
 - `register-sub-delegation`
   - Required: `Collection`, `Manager Address`
 - `assign-primary-address`
@@ -88,8 +89,11 @@ wallet, in a safe order.
   profile and act for it, that profiles merge permanently with the
   highest-CIC profile keeping its handle, that signing out of order
   temporarily splits the consolidation and can reduce TDH-wave votes, and that
-  a wallet already in another consolidation leaves it. It links to the TDH
-  consolidation explainer and the consolidation FAQ article.
+  a wallet already in another consolidation leaves it. A tip suggests
+  appointing a Delegation Manager on `Any Collection` first to keep a vault
+  cold. It links to the TDH consolidation explainer, the consolidation FAQ
+  article, and `Appoint a Delegation Manager`
+  (`/delegation/register-sub-delegation`).
 - The connected wallet is prefilled, followed by the rest of its current
   consolidation from the 6529 API. Up to 4 rows are allowed. Invalid and
   duplicate addresses are flagged per row. Rows can be removed down to two.
@@ -107,10 +111,35 @@ wallet, in a safe order.
   several sends one `batchDelegations` transaction. Both use
   `Any Collection`, no expiry, and all tokens.
 - Only the first step with links left to send is actionable, and only while
-  its own wallet is connected. Later steps show
+  its own wallet or a wallet that manages it is connected. Later steps show
   `Available once the earlier steps are confirmed.`; the next step asks the
-  user to connect or switch to the named wallet, or shows the fourth-slot
-  hold. Confirmed steps stay numbered and show `Confirmed`.
+  user to connect or switch to the named wallet or a wallet that manages it,
+  or shows the fourth-slot hold. Confirmed steps stay numbered and show
+  `Confirmed`.
+- Manager signing: the page reads whether the connected wallet is the
+  Delegation Manager (use case `998`) on `Any Collection` of each other
+  listed wallet (`retrieveSubDelegationStatus`). The contract accepts a
+  manager appointed for the registration's collection or for
+  `Any Collection`, and the steps register on `Any Collection`, so a
+  manager appointed only for `The Memes` cannot sign them. While the check
+  loads, the next step shows
+  `Checking whether the connected wallet manages <wallet>…`.
+- A step the connected wallet manages is headed
+  `Manager signs for <wallet>`, explains that the wallet stays cold while its
+  manager signs its links, one transaction per link, and counts them as
+  `<n> registrations, one transaction each`. Its button reads
+  `Sign for <wallet> as its manager` and sends one
+  `registerDelegationAddressUsingSubDelegation` (same collection, expiry,
+  and tokens as the wallet's own registration) per selection. A step with
+  several links shows `Link <n> of <total>`; once a link confirms, the same
+  button sends the next one. 6529 records these links like the wallet's
+  own, including their registration times, so the plan and its order do not
+  change.
+- A connected Safe never signs its own step, because its transaction hash
+  only arrives after its co-signers approve; the page shows
+  `Safes sign through a manager here. ...` above the wallet list and in that
+  step, with links to `Appoint a Delegation Manager` and `Using a SAFE`
+  (`/delegation/delegation-faq/using-safe`).
 - Groups of 2 or 3 wallets use the on-chain status only.
 - A group of 4 counts only when one member has all three of its links
   registered in both directions from 15 October 2026, 00:00 UTC. For 4-wallet
@@ -133,7 +162,8 @@ wallet, in a safe order.
   registers back, a note warns that the consolidation may be split until the
   last step confirms.
 - Transaction progress uses the shared transaction dialog
-  (`Consolidation Step N`), and gas-estimation or network errors appear inside
+  (`Consolidation Step N`, or `Consolidation Step N, Link n of total` for a
+  manager's link), and gas-estimation or network errors appear inside
   the affected step. On-chain status and stored registration times refresh
   every 15 seconds and after each confirmed transaction, together with the
   current consolidation.

@@ -2,6 +2,7 @@ import {
   useConsolidationFreshLinks,
   useConsolidationGroups,
   useConsolidationLinkStatus,
+  useConsolidationManagedWallets,
 } from "@/components/delegation/consolidation-builder/useConsolidationBuilderData";
 import { toDirectedLinkKey } from "@/components/delegation/consolidation-builder/consolidation-plan";
 import { fetchUrl } from "@/services/6529api";
@@ -112,6 +113,78 @@ describe("useConsolidationLinkStatus", () => {
       contracts: [],
       query: { enabled: false },
     });
+  });
+});
+
+describe("useConsolidationManagedWallets", () => {
+  function mockReads(value: Partial<ReturnType<typeof useReadContracts>>) {
+    const refetch = jest.fn().mockResolvedValue(undefined);
+    jest.mocked(useReadContracts).mockReturnValue({
+      isError: false,
+      refetch,
+      ...value,
+    } as unknown as ReturnType<typeof useReadContracts>);
+    return refetch;
+  }
+
+  it("reads whether the connected wallet manages each other wallet", () => {
+    const refetch = mockReads({
+      data: [
+        { status: "success", result: true },
+        { status: "success", result: false },
+      ],
+    } as Partial<ReturnType<typeof useReadContracts>>);
+    const wallets = [A, B, C];
+
+    const { result } = renderHook(() =>
+      useConsolidationManagedWallets(wallets, B)
+    );
+
+    const call = jest.mocked(useReadContracts).mock.calls[0]?.[0] as {
+      contracts: { functionName: string; args: unknown[] }[];
+      query: { enabled: boolean };
+    };
+    expect(call.query.enabled).toBe(true);
+    expect(call.contracts.map((contract) => contract.args[0])).toEqual([A, C]);
+    expect(call.contracts[0]?.functionName).toBe("retrieveSubDelegationStatus");
+    expect([...(result.current.managedWallets ?? [])]).toEqual([A]);
+    expect(result.current.isError).toBe(false);
+    result.current.refetch();
+    expect(refetch).toHaveBeenCalled();
+  });
+
+  it("is unknown while loading and flags failed reads", () => {
+    mockReads({ data: undefined });
+    const wallets = [A, B];
+    const loading = renderHook(() =>
+      useConsolidationManagedWallets(wallets, B)
+    );
+    expect(loading.result.current.managedWallets).toBeUndefined();
+
+    mockReads({
+      data: [{ status: "failure", error: new Error("rpc") }],
+    } as Partial<ReturnType<typeof useReadContracts>>);
+    const failed = renderHook(() => useConsolidationManagedWallets(wallets, B));
+    expect(failed.result.current.isError).toBe(true);
+    expect(failed.result.current.managedWallets).toBeUndefined();
+  });
+
+  it("manages nothing and reads nothing without a connected wallet", () => {
+    const refetch = mockReads({ data: undefined });
+    const wallets = [A, B];
+
+    const { result } = renderHook(() =>
+      useConsolidationManagedWallets(wallets, undefined)
+    );
+
+    expect(jest.mocked(useReadContracts).mock.calls[0]?.[0]).toMatchObject({
+      contracts: [],
+      query: { enabled: false },
+    });
+    expect(result.current.managedWallets?.size).toBe(0);
+    expect(result.current.isError).toBe(false);
+    result.current.refetch();
+    expect(refetch).not.toHaveBeenCalled();
   });
 });
 

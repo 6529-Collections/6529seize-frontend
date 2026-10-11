@@ -2,6 +2,9 @@ import { DELEGATION_ABI } from "@/abis/abis";
 import {
   getConsolidationStepWriteParams,
   getLinkStatusReadParams,
+  getManagedWalletKeys,
+  getManagerLinkWriteParams,
+  getManagerStatusReadParams,
   getRegisteredLinkKeys,
 } from "@/components/delegation/consolidation-builder/consolidation-contract";
 import { toDirectedLinkKey } from "@/components/delegation/consolidation-builder/consolidation-plan";
@@ -102,5 +105,53 @@ describe("getConsolidationStepWriteParams", () => {
   it("refuses an empty step or more links than one batch allows", () => {
     expect(() => getConsolidationStepWriteParams([])).toThrow();
     expect(() => getConsolidationStepWriteParams([A, B, C, D, A, B])).toThrow();
+  });
+});
+
+describe("getManagerStatusReadParams", () => {
+  it("checks each wallet's Any Collection Delegation Manager", () => {
+    const params = getManagerStatusReadParams([A, B], D);
+
+    expect(params).toEqual([
+      {
+        address: DELEGATION_CONTRACT.contract,
+        abi: DELEGATION_ABI,
+        chainId: DELEGATION_CONTRACT.chain_id,
+        functionName: "retrieveSubDelegationStatus",
+        args: [A, DELEGATION_ALL_ADDRESS, D],
+      },
+      expect.objectContaining({ args: [B, DELEGATION_ALL_ADDRESS, D] }),
+    ]);
+  });
+});
+
+describe("getManagedWalletKeys", () => {
+  it("returns the wallets whose manager check passed", () => {
+    expect(
+      getManagedWalletKeys(
+        [A, B, C],
+        [success(true), success(false), success(true)]
+      )
+    ).toEqual([A, C]);
+  });
+
+  it("manages nothing without wallets and waits for every read", () => {
+    expect(getManagedWalletKeys([], undefined)).toEqual([]);
+    expect(getManagedWalletKeys([A], undefined)).toBeUndefined();
+    expect(
+      getManagedWalletKeys([A, B], [success(true), { status: "failure" }])
+    ).toBeUndefined();
+  });
+});
+
+describe("getManagerLinkWriteParams", () => {
+  it("registers one link for the managed wallet on Any Collection", () => {
+    expect(getManagerLinkWriteParams(A, B)).toEqual({
+      address: DELEGATION_CONTRACT.contract,
+      abi: DELEGATION_ABI,
+      chainId: DELEGATION_CONTRACT.chain_id,
+      functionName: "registerDelegationAddressUsingSubDelegation",
+      args: [A, DELEGATION_ALL_ADDRESS, B, NEVER_DATE, 999, true, 0],
+    });
   });
 });
