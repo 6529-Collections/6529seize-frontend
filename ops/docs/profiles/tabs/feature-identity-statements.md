@@ -52,9 +52,10 @@ identity statements` when the public-visibility notes are needed.
 8. On non-primary wallet rows, use `Set primary` when available.
 9. To link another wallet you control, select `Add another wallet` beside
    `Wallet Checker`. This opens the guided setup at
-   `/delegation/build-consolidation`. Each wallet signs one transaction that
-   batches all of its links; a Delegation Manager signing for a cold vault
-   sends one transaction per link instead (see
+   `/delegation/build-consolidation`. Each wallet signs one transaction for
+   its links: a single registration for one link, or one batch for several. A
+   Delegation Manager signing for a cold vault sends one transaction per link
+   instead (see
    [Delegation Write Action Routes](../../delegation/feature-delegation-action-flows.md)).
 
 ## Statement Types in Add Sheet or Dialog
