@@ -5,6 +5,16 @@ import {
 import { isAddress, zeroAddress } from "viem";
 
 /**
+ * Four-wallet steps open a few minutes after the activation time. The backend
+ * judges freshness by block time, so a client clock running ahead, or a link
+ * mined in the first seconds, could otherwise land before activation and
+ * never count.
+ */
+const FOURTH_SLOT_SIGNING_MARGIN_MS = 10 * 60 * 1000;
+export const FOURTH_SLOT_SIGNING_OPENS_MS =
+  CONSOLIDATION_FOURTH_WALLET_ACTIVATION_MS + FOURTH_SLOT_SIGNING_MARGIN_MS;
+
+/**
  * Pure planning rules for building or extending a consolidation.
  *
  * A consolidation is a set of wallets in which every pair has registered
@@ -280,8 +290,7 @@ export function buildConsolidationPlan(input: {
     .filter((step) => step.targets.length > 0);
   const steps = orderSteps(pendingSteps);
   const needsFourthSlot = requiresFourthSlot(wallets.length);
-  const beforeFourthSlotActivation =
-    input.nowMs < CONSOLIDATION_FOURTH_WALLET_ACTIVATION_MS;
+  const beforeFourthSlotActivation = input.nowMs < FOURTH_SLOT_SIGNING_OPENS_MS;
 
   return {
     wallets,

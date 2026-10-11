@@ -21,6 +21,7 @@ import {
 } from "./consolidation-groups";
 import {
   createDirectedLinkLookup,
+  FOURTH_SLOT_SIGNING_OPENS_MS,
   resolveConsolidationProgress,
   toWalletKey,
   validateConsolidationWallets,
@@ -95,7 +96,7 @@ function useFourthSlotClock(): number {
   const [nowMs, setNowMs] = useState(() => Date.now());
 
   useEffect(() => {
-    const remainingMs = CONSOLIDATION_FOURTH_WALLET_ACTIVATION_MS - nowMs;
+    const remainingMs = FOURTH_SLOT_SIGNING_OPENS_MS - nowMs;
     if (remainingMs <= 0) {
       return undefined;
     }
@@ -286,6 +287,11 @@ export default function ConsolidationBuilder(props: Readonly<Props>) {
     CONSOLIDATION_FOURTH_WALLET_ACTIVATION_MS,
     ACTIVATION_DATE_FORMAT
   );
+  const signingOpensDate = formatDate(
+    locale,
+    FOURTH_SLOT_SIGNING_OPENS_MS,
+    ACTIVATION_DATE_FORMAT
+  );
 
   return (
     <DelegationFormShell
@@ -351,7 +357,7 @@ export default function ConsolidationBuilder(props: Readonly<Props>) {
             hasReadError: planState.hasReadError || managers.isError,
             progress,
           })}
-          activationDate={activationDate}
+          activationDate={signingOpensDate}
           walletResolving={props.walletResolving}
           isBusy={stepWrite.isBusy}
           busySigner={stepWrite.busySigner}
@@ -368,6 +374,7 @@ export default function ConsolidationBuilder(props: Readonly<Props>) {
               locale={locale}
               plan={plan}
               activationDate={activationDate}
+              signingOpensDate={signingOpensDate}
             />
           )}
         </ConsolidationBuilderSteps>

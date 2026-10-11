@@ -1,5 +1,8 @@
 import ConsolidationBuilder from "@/components/delegation/consolidation-builder/ConsolidationBuilder";
-import { toDirectedLinkKey } from "@/components/delegation/consolidation-builder/consolidation-plan";
+import {
+  FOURTH_SLOT_SIGNING_OPENS_MS,
+  toDirectedLinkKey,
+} from "@/components/delegation/consolidation-builder/consolidation-plan";
 import { CONSOLIDATION_FOURTH_WALLET_ACTIVATION_MS } from "@/constants/consolidation.constants";
 import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import type { ComponentProps, ReactNode } from "react";
@@ -126,7 +129,8 @@ const B = `0x${"b".repeat(40)}`;
 const C = `0x${"c".repeat(40)}`;
 const D = `0x${"d".repeat(40)}`;
 const ACTIVATION_TEXT = "October 15, 2026 at 00:00 UTC";
-const AFTER_ACTIVATION_MS = CONSOLIDATION_FOURTH_WALLET_ACTIVATION_MS + 60_000;
+const SIGNING_OPENS_TEXT = "October 15, 2026 at 00:10 UTC";
+const AFTER_ACTIVATION_MS = FOURTH_SLOT_SIGNING_OPENS_MS + 60_000;
 const BEFORE_ACTIVATION_MS = CONSOLIDATION_FOURTH_WALLET_ACTIVATION_MS - 60_000;
 const DAY_MS = 24 * 60 * 60 * 1000;
 const MAX_TIMER_DELAY_MS = 2_147_483_647;
@@ -484,11 +488,11 @@ describe("ConsolidationBuilder", () => {
 
     expect(
       screen.getByText(
-        `Four-wallet consolidations count only for links registered from ${ACTIVATION_TEXT}. Every step for this group opens then.`
+        `Four-wallet consolidations count only for links registered from ${ACTIVATION_TEXT}. Every step for this group opens at ${SIGNING_OPENS_TEXT}, a few minutes later, so no link can land before the start.`
       )
     ).toBeInTheDocument();
     expect(
-      step(1).getByText(`Available from ${ACTIVATION_TEXT}.`)
+      step(1).getByText(`Available from ${SIGNING_OPENS_TEXT}.`)
     ).toBeInTheDocument();
     expect(
       screen.queryByRole("button", { name: /^Sign Step/ })
@@ -498,7 +502,7 @@ describe("ConsolidationBuilder", () => {
   it("opens a held group when activation passes in an open tab", () => {
     jest.useFakeTimers();
     try {
-      const startMs = CONSOLIDATION_FOURTH_WALLET_ACTIVATION_MS - 30 * DAY_MS;
+      const startMs = FOURTH_SLOT_SIGNING_OPENS_MS - 30 * DAY_MS;
       jest.setSystemTime(startMs);
       renderBuilder();
       addFourthWallet();

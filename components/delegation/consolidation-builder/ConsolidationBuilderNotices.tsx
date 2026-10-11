@@ -130,13 +130,15 @@ export function ConsolidationPlanNotices(
       "fourthSlotWait" | "reregistersStaleLinks" | "outOfOrder"
     >;
     activationDate: string;
+    signingOpensDate: string;
   }>
 ) {
-  const { locale, plan, activationDate } = props;
+  const { locale, plan, activationDate, signingOpensDate } = props;
   const notices = [
     plan.fourthSlotWait === "all-steps" &&
       t(locale, "delegation.consolidationBuilder.fourthSlot.waits", {
         date: activationDate,
+        opens: signingOpensDate,
       }),
     plan.reregistersStaleLinks &&
       t(locale, "delegation.consolidationBuilder.fourthSlot.staleLinks", {
