@@ -7,7 +7,8 @@ reference routes.
 
 - Main route family: `/network`, `/network/activity`, `/network/nerd/{focus?}`,
   `/network/health`, `/network/health/network-tdh`, `/network/tdh`,
-  `/network/tdh/historic-boosts`, `/network/definitions`, and
+  `/network/tdh/historic-boosts`, `/network/tdh/consolidation`,
+  `/network/definitions`, and
   `/network/levels`.
 - Adjacent xTDH routes owned here: `/network/xtdh` (rules reference) and
   `/xtdh` (live allocations dashboard).
@@ -39,6 +40,7 @@ reference routes.
 - [xTDH Rules and Distribution Formula](feature-xtdh-formulas.md)
 - [TDH Boost Rules](feature-tdh-boost-rules.md)
 - [TDH Historic Boosts](feature-tdh-historic-boosts.md)
+- [Wallet Consolidation](feature-tdh-consolidation.md)
 
 ## Flows
 

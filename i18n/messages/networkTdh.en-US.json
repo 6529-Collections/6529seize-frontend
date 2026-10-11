@@ -47,6 +47,8 @@
   "network.tdh.related.definitions.title": "Definitions",
   "network.tdh.related.ruleActionsAria": "TDH rule references",
   "network.tdh.related.destinationsAria": "Related TDH destinations",
+  "network.tdh.related.consolidation.title": "Wallet consolidation",
+  "network.tdh.related.consolidation.description": "How up to four of your wallets count as one, and the tested analysis behind the rules.",
   "network.tdh.related.stats.title": "Network TDH Stats",
   "network.tdh.related.stats.description": "Aggregate community activity, holdings, trading, and time-based metrics across the network.",
   "network.tdh.related.stats.action": "View Network TDH Stats",
