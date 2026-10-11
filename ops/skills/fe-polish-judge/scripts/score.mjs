@@ -60,7 +60,7 @@ function fail(message) {
 
 function readJson(file) {
   try {
-    return JSON.parse(fs.readFileSync(file, "utf8"));
+    return JSON.parse(fs.readFileSync(file, "utf8")); // NOSONAR S8707: operator-selected run directory, confined to the working directory by resolveRunDir.
   } catch (error) {
     return fail(`Cannot read ${file}: ${error.message}`);
   }
@@ -74,11 +74,12 @@ function roundOrder(name) {
 function loadRun(runDir) {
   const run = readJson(path.join(runDir, "run.json"));
   const roundsDir = path.join(runDir, "rounds");
-  if (!fs.existsSync(roundsDir)) {
+  const roundsExist = fs.existsSync(roundsDir); // NOSONAR S8707: derived from the run directory confined by resolveRunDir.
+  if (!roundsExist) {
     fail(`Missing ${roundsDir}`);
   }
   const files = fs
-    .readdirSync(roundsDir)
+    .readdirSync(roundsDir) // NOSONAR S8707: operator-selected rounds directory, confined to the working directory by resolveRunDir.
     .filter((name) => name.endsWith(".json"))
     .sort((a, b) => roundOrder(a) - roundOrder(b) || a.localeCompare(b));
   if (files.length === 0) {
