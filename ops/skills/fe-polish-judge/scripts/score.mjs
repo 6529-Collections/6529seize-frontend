@@ -6,6 +6,9 @@
 //
 // Usage: node ops/skills/fe-polish-judge/scripts/score.mjs <run-dir>
 //
+// Run from the repository root; <run-dir> must sit inside the current working
+// directory (for example ops/workstreams/<slug>/judge/<run-id>).
+//
 // <run-dir>/run.json holds the frozen run record; <run-dir>/rounds/*.json hold
 // one judge output per round, ordered by filename (00-baseline.json, 01.json,
 // ...). Prints the decision as JSON. Exits 2 on unreadable input.
@@ -18,6 +21,8 @@ const CALIBRATION_STATUS = "uncalibrated";
 const FLOOR = 8;
 const TARGET = 8.5;
 const DEFAULT_BUDGET = 6;
+const DEFAULT_STATE = "default";
+const DEFAULT_LOCALE = "en-US";
 const NO_PROGRESS_LIMIT = 2;
 
 const WEIGHTS = {
@@ -61,6 +66,11 @@ function readJson(file) {
   }
 }
 
+function roundOrder(name) {
+  const match = /^\d+/.exec(name);
+  return match ? Number(match[0]) : Number.POSITIVE_INFINITY;
+}
+
 function loadRun(runDir) {
   const run = readJson(path.join(runDir, "run.json"));
   const roundsDir = path.join(runDir, "rounds");
@@ -70,7 +80,7 @@ function loadRun(runDir) {
   const files = fs
     .readdirSync(roundsDir)
     .filter((name) => name.endsWith(".json"))
-    .sort((a, b) => a.localeCompare(b));
+    .sort((a, b) => roundOrder(a) - roundOrder(b) || a.localeCompare(b));
   if (files.length === 0) {
     fail(`No judge rounds in ${roundsDir}`);
   }
@@ -214,7 +224,11 @@ function evaluateChecks(run, output, findings, errors) {
   const unverified = [];
   for (const id of applicable) {
     const value = checks[id];
-    if (!CHECK_VALUES.has(value) || value === "not_applicable") {
+    if (value === "not_applicable") {
+      errors.push(`${id} applies to this run and cannot be not_applicable`);
+      continue;
+    }
+    if (!CHECK_VALUES.has(value)) {
       errors.push(`${id} must be pass, fail, or unverified`);
       continue;
     }
@@ -236,17 +250,64 @@ function evaluateChecks(run, output, findings, errors) {
   return { failed, unverified };
 }
 
-function evaluateCoverage(output, errors) {
-  const coverage = Array.isArray(output.coverage) ? output.coverage : [];
-  if (coverage.length === 0) {
-    errors.push("Coverage must list at least one pinned cell");
+function cellKey(cell) {
+  return [
+    cell.route,
+    cell.state ?? DEFAULT_STATE,
+    cell.viewport,
+    cell.locale ?? DEFAULT_LOCALE,
+  ].join(" · ");
+}
+
+// Pinned cells are routes x states x viewports x locales, unless the run
+// record lists non-Cartesian combinations in scope.cells.
+function expectedCells(run) {
+  const scope = run.scope ?? {};
+  if (Array.isArray(scope.cells)) {
+    return scope.cells.map(cellKey);
   }
+  const states = scope.states ?? [DEFAULT_STATE];
+  const locales = scope.locales ?? [DEFAULT_LOCALE];
+  return (scope.routes ?? []).flatMap((route) =>
+    states.flatMap((state) =>
+      (scope.viewports ?? []).flatMap((viewport) =>
+        locales.map((locale) => cellKey({ route, state, viewport, locale }))
+      )
+    )
+  );
+}
+
+function checkCoverageStatus(cell, key, errors, unverified) {
+  if (!COVERAGE_VALUES.has(cell.status)) {
+    errors.push(`Coverage cell ${key}: invalid status`);
+    return;
+  }
+  if (cell.status !== "verified" && !String(cell.reason ?? "").trim()) {
+    errors.push(`Coverage cell ${key}: ${cell.status} needs a reason`);
+  }
+  if (cell.status === "unverified") {
+    unverified.push(key);
+  }
+}
+
+function evaluateCoverage(run, output, errors) {
+  const coverage = Array.isArray(output.coverage) ? output.coverage : [];
+  const pinned = new Set(expectedCells(run));
+  const seen = new Set();
   const unverified = [];
   for (const cell of coverage) {
-    if (!COVERAGE_VALUES.has(cell.status)) {
-      errors.push(`Coverage cell ${cell.cell}: invalid status`);
-    } else if (cell.status === "unverified") {
-      unverified.push(cell.cell);
+    const key = cellKey(cell);
+    if (!pinned.has(key)) {
+      errors.push(`Coverage cell ${key} is outside the pinned scope`);
+    } else if (seen.has(key)) {
+      errors.push(`Coverage cell ${key} is listed twice`);
+    }
+    seen.add(key);
+    checkCoverageStatus(cell, key, errors, unverified);
+  }
+  for (const key of pinned) {
+    if (!seen.has(key)) {
+      errors.push(`Coverage is missing pinned cell ${key}`);
     }
   }
   return unverified;
@@ -267,8 +328,11 @@ function evaluateRound(run, output) {
     dims.unverified
   );
   const checks = evaluateChecks(run, output, findings, errors);
-  const coverageGaps = evaluateCoverage(output, errors);
+  const coverageGaps = evaluateCoverage(run, output, errors);
   const openRequired = findings.filter(isRequired).map((finding) => finding.id);
+  // The total is null while any dimension is unverified. Such a round cannot be
+  // accepted (it is incomplete), so the 8.5 consistency check waits until every
+  // applicable dimension is scored.
   if (total !== null && total < TARGET && openRequired.length === 0) {
     errors.push(
       `Total ${total.toFixed(3)} is below ${TARGET} with no open required finding`
@@ -357,6 +421,8 @@ function pickBest(results) {
   )[0];
 }
 
+// A repair batch is a new candidate. Rejudging the same candidate (after
+// invalid output or added evidence) records a round but spends no budget.
 function evaluateRun(run, rounds) {
   const results = [];
   let streak = 0;
@@ -364,15 +430,30 @@ function evaluateRun(run, rounds) {
     const result = evaluateRound(run, output);
     result.round = index;
     result.file = file;
+    result.batch = 0;
     const previous = results[index - 1];
     if (previous) {
       compareLedgers(previous, result, result.errors);
-      streak = madeProgress(previous, result) ? 0 : streak + 1;
+      const repaired = result.candidate !== previous.candidate;
+      result.batch = previous.batch + (repaired ? 1 : 0);
+      if (repaired) {
+        streak = madeProgress(previous, result) ? 0 : streak + 1;
+      }
     }
     result.noProgressStreak = streak;
     results.push(result);
   });
+  checkLatestCandidate(run, results.at(-1));
   return results;
+}
+
+function checkLatestCandidate(run, latest) {
+  const expected = run.candidate?.commit;
+  if (expected && latest.candidate !== expected) {
+    latest.errors.push(
+      `Latest round judged ${latest.candidate}, but run.json candidate is ${expected}`
+    );
+  }
 }
 
 function decide(latest, budget) {
@@ -384,7 +465,7 @@ function decide(latest, budget) {
     return "accepted";
   }
   const exhausted =
-    latest.round >= budget || latest.noProgressStreak > NO_PROGRESS_LIMIT;
+    latest.batch >= budget || latest.noProgressStreak > NO_PROGRESS_LIMIT;
   if (exhausted) {
     return "threshold_not_reached";
   }
@@ -415,8 +496,8 @@ function summarize(run, results) {
     errors: latest.errors,
     budget: {
       repair_batches: budget,
-      used: latest.round,
-      remaining: Math.max(budget - latest.round, 0),
+      used: latest.batch,
+      remaining: Math.max(budget - latest.batch, 0),
       no_progress_streak: latest.noProgressStreak,
       recovery_batch:
         decision === "repair" && latest.noProgressStreak === NO_PROGRESS_LIMIT,
@@ -425,14 +506,26 @@ function summarize(run, results) {
   };
 }
 
+function resolveRunDir(argument) {
+  const base = path.resolve(process.cwd());
+  const resolved = path.resolve(base, argument);
+  if (!resolved.startsWith(base + path.sep)) {
+    fail("The run directory must be inside the current working directory");
+  }
+  return resolved;
+}
+
 function main() {
   const runDir = process.argv[2];
   if (!runDir) {
     fail("Usage: score.mjs <run-dir>");
   }
-  const { run, rounds } = loadRun(path.resolve(runDir));
+  const { run, rounds } = loadRun(resolveRunDir(runDir));
   if (run.rubric_version !== RUBRIC_VERSION) {
     fail(`run.json rubric_version must be ${RUBRIC_VERSION}`);
+  }
+  if (expectedCells(run).length === 0) {
+    fail("run.json scope must pin routes and viewports, or list scope.cells");
   }
   const summary = summarize(run, evaluateRun(run, rounds));
   process.stdout.write(`${JSON.stringify(summary, null, 2)}\n`);

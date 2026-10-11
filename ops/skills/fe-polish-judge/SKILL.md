@@ -38,7 +38,8 @@ standard and `ops/standards/frontend-design-ui-ux.md` first.
    - `incomplete`: capture the missing evidence named in `unverified`, then
      rejudge.
    - `repair`: fix the open required findings in user-impact order as one
-     coherent batch, then repeat from step 2. When `budget.recovery_batch` is
+     coherent batch, commit, set `candidate.commit` in `run.json` to the new
+     head, then repeat from step 2. When `budget.recovery_batch` is
      true, target the single most promising required finding.
    - `accepted`: stop. Report the label `judge-accepted (uncalibrated)`.
    - `threshold_not_reached`: stop. Report the `best` round and its unresolved

@@ -98,7 +98,10 @@ Return only this JSON, saved by the coordinator as `rounds/NN.json`:
   "candidate": "<commit>",
   "coverage": [
     {
-      "cell": "/route · state · 390x844 · de-DE",
+      "route": "/route",
+      "state": "empty",
+      "viewport": "390x844",
+      "locale": "de-DE",
       "status": "verified | unverified | not_applicable",
       "evidence": "evidence/<file>",
       "reason": "<required when not verified>"
@@ -134,4 +137,6 @@ Return only this JSON, saved by the coordinator as `rounds/NN.json`:
 }
 ```
 
-Omit dimensions pinned N/A. Omit S checks when J13 is N/A.
+List every pinned coverage cell exactly once: each route, state, viewport, and
+locale combination from the run record's scope, or the cells it lists in
+`scope.cells`. Omit dimensions pinned N/A. Omit S checks when J13 is N/A.

@@ -24,15 +24,74 @@ const DIMENSIONS = [
   "J13",
 ];
 
-type Json = Record<string, unknown>;
-type Finding = Json & { id: string };
+type Finding = {
+  readonly id: string;
+  readonly targets: readonly string[];
+  readonly severity: string;
+  readonly status: string;
+  readonly admission?: string;
+  readonly reopen_reason?: string;
+};
+
+type Cell = {
+  readonly route: string;
+  readonly state: string;
+  readonly viewport: string;
+  readonly locale: string;
+  readonly status: string;
+  readonly reason?: string;
+};
+
+type Round = {
+  readonly rubric_version: string;
+  readonly candidate: string;
+  readonly coverage: readonly Cell[];
+  readonly dimensions: Record<string, { score?: number; status?: string }>;
+  readonly checks: Record<string, string>;
+  readonly findings: readonly Finding[];
+  readonly preserve: readonly string[];
+};
+
+type Run = {
+  readonly rubric_version: string;
+  readonly run_id: string;
+  readonly candidate: { commit: string };
+  readonly scope: {
+    routes: string[];
+    states: string[];
+    viewports: string[];
+    locales: string[];
+  };
+  readonly not_applicable: Record<string, string>;
+  readonly budget: { repair_batches: number };
+};
+
+type ScoreResult = {
+  readonly decision: string;
+  readonly label: string | null;
+  readonly errors: readonly string[];
+  readonly total: number | null;
+  readonly applicable_weight: number | null;
+  readonly failed_floors: readonly string[];
+  readonly failed_checks: readonly string[];
+  readonly open_required: readonly string[];
+  readonly budget: { remaining: number; recovery_batch: boolean };
+  readonly best: { round: number; candidate: string } | null;
+};
 
 const tempDirs: string[] = [];
 
-function makeRun(overrides: Json = {}): Json {
+function makeRun(overrides: Partial<Run> = {}): Run {
   return {
     rubric_version: RUBRIC,
     run_id: "test-run",
+    candidate: { commit: "abc123" },
+    scope: {
+      routes: ["/waves"],
+      states: ["empty"],
+      viewports: ["390x844"],
+      locales: ["en-US"],
+    },
     not_applicable: { J13: "No wallet interaction" },
     budget: { repair_batches: 6 },
     ...overrides,
@@ -44,15 +103,17 @@ function makeRound({
   checks = {},
   findings = [],
   coverage = "verified",
+  candidate = "abc123",
   cryptoApplies = false,
 }: {
   scores?: Record<string, number | string>;
   checks?: Record<string, string>;
   findings?: Finding[];
   coverage?: string;
+  candidate?: string;
   cryptoApplies?: boolean;
-} = {}): Json {
-  const dimensions: Record<string, Json> = {};
+} = {}): Round {
+  const dimensions: Round["dimensions"] = {};
   for (const id of DIMENSIONS) {
     if (id === "J13" && !cryptoApplies) {
       continue;
@@ -73,8 +134,17 @@ function makeRound({
   }
   return {
     rubric_version: RUBRIC,
-    candidate: "abc123",
-    coverage: [{ cell: "/waves · empty · 390x844 · en-US", status: coverage }],
+    candidate,
+    coverage: [
+      {
+        route: "/waves",
+        state: "empty",
+        viewport: "390x844",
+        locale: "en-US",
+        status: coverage,
+        ...(coverage === "verified" ? {} : { reason: "No fixture yet" }),
+      },
+    ],
     dimensions,
     checks: { ...baseChecks, ...checks },
     findings,
@@ -82,7 +152,7 @@ function makeRound({
   };
 }
 
-function finding(id: string, overrides: Json = {}): Finding {
+function finding(id: string, overrides: Partial<Finding> = {}): Finding {
   return {
     id,
     targets: ["J07"],
@@ -93,26 +163,22 @@ function finding(id: string, overrides: Json = {}): Finding {
   };
 }
 
-function score(run: Json, rounds: Json[]) {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "fe-judge-"));
-  tempDirs.push(dir);
-  fs.mkdirSync(path.join(dir, "rounds"));
-  fs.writeFileSync(path.join(dir, "run.json"), JSON.stringify(run));
+function score(run: Run, rounds: Round[]): ScoreResult {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "fe-judge-"));
+  tempDirs.push(root);
+  const roundsDir = path.join(root, "run", "rounds");
+  fs.mkdirSync(roundsDir, { recursive: true });
+  fs.writeFileSync(path.join(root, "run", "run.json"), JSON.stringify(run));
   rounds.forEach((round, index) => {
     const name = `${String(index).padStart(2, "0")}.json`;
-    fs.writeFileSync(path.join(dir, "rounds", name), JSON.stringify(round));
+    fs.writeFileSync(path.join(roundsDir, name), JSON.stringify(round));
   });
-  const result = spawnSync(process.execPath, [SCRIPT, dir], {
+  const result = spawnSync(process.execPath, [SCRIPT, "run"], {
+    cwd: root,
     encoding: "utf8",
   });
   expect(result.status).toBe(0);
-  return JSON.parse(result.stdout) as Json & {
-    decision: string;
-    errors: string[];
-    total: number | null;
-    budget: Json;
-    best: Json | null;
-  };
+  return JSON.parse(result.stdout) as ScoreResult;
 }
 
 afterAll(() => {
@@ -128,6 +194,15 @@ describe("fe-polish-judge score.mjs", () => {
     expect(result.label).toBe("judge-accepted (uncalibrated)");
     expect(result.total).toBe(9);
     expect(result.applicable_weight).toBe(90);
+  });
+
+  it("refuses a run directory outside the working directory", () => {
+    const result = spawnSync(process.execPath, [SCRIPT, os.tmpdir()], {
+      cwd: path.dirname(SCRIPT),
+      encoding: "utf8",
+    });
+    expect(result.status).toBe(2);
+    expect(result.stderr).toContain("inside the current working directory");
   });
 
   it("asks for repair when a required finding explains a failed floor", () => {
@@ -172,12 +247,48 @@ describe("fe-polish-judge score.mjs", () => {
 
   it("requires S checks when crypto usability applies", () => {
     const run = makeRun({ not_applicable: {} });
-    const missing = makeRound({ cryptoApplies: true });
-    delete (missing.checks as Record<string, string>).S3;
-    expect(score(run, [missing]).errors.join(" ")).toContain("S3");
-    expect(score(run, [makeRound({ cryptoApplies: true })]).decision).toBe(
-      "accepted"
+    const complete = makeRound({ cryptoApplies: true });
+    const checksWithoutS3 = Object.fromEntries(
+      Object.entries(complete.checks).filter(([id]) => id !== "S3")
     );
+    const missing = { ...complete, checks: checksWithoutS3 };
+    expect(score(run, [missing]).errors.join(" ")).toContain("S3");
+    expect(score(run, [complete]).decision).toBe("accepted");
+  });
+
+  it("validates coverage against the pinned scope and candidate", () => {
+    const wider = makeRun({
+      scope: {
+        routes: ["/waves"],
+        states: ["empty"],
+        viewports: ["1440x1000", "390x844"],
+        locales: ["en-US"],
+      },
+    });
+    expect(score(wider, [makeRound()]).errors.join(" ")).toContain(
+      "missing pinned cell /waves · empty · 1440x1000 · en-US"
+    );
+
+    const unexplained = makeRound({ coverage: "unverified" });
+    const withoutReason = {
+      ...unexplained,
+      coverage: unexplained.coverage.map((cell) => ({
+        route: cell.route,
+        state: cell.state,
+        viewport: cell.viewport,
+        locale: cell.locale,
+        status: cell.status,
+      })),
+    };
+    expect(score(makeRun(), [withoutReason]).errors.join(" ")).toContain(
+      "unverified needs a reason"
+    );
+
+    const stale = score(makeRun({ candidate: { commit: "def456" } }), [
+      makeRound(),
+    ]);
+    expect(stale.decision).toBe("invalid_judge_output");
+    expect(stale.errors.join(" ")).toContain("run.json candidate is def456");
   });
 
   it("reports incomplete coverage and unpinned N/A", () => {
@@ -243,28 +354,69 @@ describe("fe-polish-judge score.mjs", () => {
   });
 
   it("allows one recovery batch after two stalled batches, then stops", () => {
-    const stuck = makeRound({
-      scores: { J07: 7 },
-      findings: [finding("F-001")],
-    });
-    const recovery = score(makeRun(), [stuck, stuck, stuck]);
+    const stuck = (candidate: string) =>
+      makeRound({
+        candidate,
+        scores: { J07: 7 },
+        findings: [finding("F-001")],
+      });
+    const recovery = score(makeRun({ candidate: { commit: "c2" } }), [
+      stuck("c0"),
+      stuck("c1"),
+      stuck("c2"),
+    ]);
     expect(recovery.decision).toBe("repair");
     expect(recovery.budget.recovery_batch).toBe(true);
 
-    const stopped = score(makeRun(), [stuck, stuck, stuck, stuck]);
+    const stopped = score(makeRun({ candidate: { commit: "c3" } }), [
+      stuck("c0"),
+      stuck("c1"),
+      stuck("c2"),
+      stuck("c3"),
+    ]);
     expect(stopped.decision).toBe("threshold_not_reached");
-    expect(stopped.best).toEqual({ round: 3, candidate: "abc123" });
+    expect(stopped.best).toEqual({ round: 3, candidate: "c3" });
+
+    const resumed = score(makeRun({ candidate: { commit: "c3" } }), [
+      stuck("c0"),
+      stuck("c1"),
+      stuck("c2"),
+      makeRound({
+        candidate: "c3",
+        scores: { J06: 7 },
+        findings: [
+          finding("F-001", { status: "resolved" }),
+          finding("F-002", { targets: ["J06"], admission: "regression" }),
+        ],
+      }),
+    ]);
+    expect(resumed.decision).toBe("repair");
+    expect(resumed.budget.recovery_batch).toBe(false);
+  });
+
+  it("spends no budget when the same candidate is rejudged", () => {
+    const run = makeRun({ budget: { repair_batches: 1 } });
+    const result = score(run, [
+      makeRound({ coverage: "unverified" }),
+      makeRound({
+        scores: { J07: 7 },
+        findings: [finding("F-001", { admission: "resolved_unverified" })],
+      }),
+    ]);
+    expect(result.decision).toBe("repair");
+    expect(result.budget.remaining).toBe(1);
   });
 
   it("stops when the repair budget is exhausted", () => {
     const progressing = [7, 7.5].map((j07, index) =>
       makeRound({
+        candidate: `c${index}`,
         scores: { J07: j07, J06: index === 0 ? 8 : 8.5 },
         findings: [finding("F-001")],
       })
     );
     const result = score(
-      makeRun({ budget: { repair_batches: 1 } }),
+      makeRun({ candidate: { commit: "c1" }, budget: { repair_batches: 1 } }),
       progressing
     );
     expect(result.decision).toBe("threshold_not_reached");

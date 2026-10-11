@@ -61,7 +61,9 @@ Pin these before the baseline judgment. A genuine scope change starts a new run.
 - audience and primary task for each route
 - states in scope: loading, empty, populated, error, partial, denied, dense,
   plus the transaction lifecycle for crypto flows
-- viewports, locales, and auth context (see [Evidence](#evidence))
+- viewports, locales, and auth context (see [Evidence](#evidence)); the
+  coverage cells are the combinations of routes, states, viewports, and
+  locales, or an explicit list when only some combinations matter
 - dimensions marked N/A, each with a scope-based reason
 - reference surfaces and any approved product decisions or exclusions
 - repair budget (default six batches)
@@ -303,7 +305,8 @@ blocked.
 2. Each round, recapture the pinned evidence and give the judge the current
    ledger. The judge verifies each open finding's acceptance check, scans for
    regressions, and carries forward unaffected scores. Reuse the result for an
-   identical candidate; do not reroll until it passes.
+   identical candidate; do not reroll until it passes. A rejudge of the same
+   candidate after invalid output or added evidence spends no repair budget.
 3. Lower a score or reopen a finding only for an evidenced regression, changed
    conditions, or a corrected factual grading error. State the reason.
    Previously closed work cannot fail because the judge prefers another valid

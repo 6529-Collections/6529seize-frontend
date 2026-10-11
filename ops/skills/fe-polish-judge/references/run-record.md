@@ -2,7 +2,13 @@
 
 Save as `<run-dir>/run.json` before the baseline round. Fields other than
 `candidate` are frozen for the run; a genuine scope change starts a new run
-directory.
+directory. Update `candidate.commit` after each repair batch; the scoring script
+requires the latest round to judge that commit.
+
+The pinned coverage cells are every combination of `scope.routes`,
+`scope.states` (default `default`), `scope.viewports`, and `scope.locales`
+(default `en-US`). When only some combinations matter, list them instead as
+`scope.cells`, an array of `{ "route", "state", "viewport", "locale" }`.
 
 ## Full template
 
@@ -75,7 +81,9 @@ mobile; states are the ones the diff can affect.
   evidence/          screenshots and interaction notes, named route-state-viewport-locale
   rounds/
     00-baseline.json judge output, round 0
-    01.json          judge output after repair batch 1
+    01.json          judge output after repair batch 1 (names start with the
+                     round number; a rejudge of the same candidate is a new
+                     round but spends no repair budget)
   decisions.md       optional: scoring-script output and coordinator notes per round
 ```
 
