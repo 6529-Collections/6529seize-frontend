@@ -30,6 +30,7 @@ import {
   ConsolidationBuilderWarnings,
   ConsolidationDepartureNotice,
   ConsolidationPlanNotices,
+  ConsolidationSafeWalletNotice,
 } from "./ConsolidationBuilderNotices";
 import {
   ConsolidationBuilderSteps,
@@ -49,6 +50,8 @@ import { useConsolidationStepWrite } from "./useConsolidationStepWrite";
 
 interface Props {
   readonly connectedAddress: string | undefined;
+  /** The connected wallet is a Safe (smart-contract wallet). */
+  readonly isSafeWallet: boolean;
   readonly walletResolving: boolean;
   readonly onConnect: () => void;
   readonly onHide: () => void;
@@ -165,6 +168,7 @@ export default function ConsolidationBuilder(props: Readonly<Props>) {
     !props.walletResolving && props.connectedAddress
       ? toWalletKey(props.connectedAddress)
       : undefined;
+  const connectedIsSafe = connectedKey !== undefined && props.isSafeWallet;
 
   const [draft, setDraft] = useState<WalletDraft | null>(null);
   const defaultDraft = useMemo(
@@ -247,10 +251,12 @@ export default function ConsolidationBuilder(props: Readonly<Props>) {
             isFresh: createDirectedLinkLookup(freshLinkKeys),
             recordedLinkKeys,
             connectedAddress: connectedKey,
+            connectedIsSafe,
             managedWallets: managers.managedWallets,
           })
         : undefined,
     [
+      connectedIsSafe,
       connectedKey,
       freshLinkKeys,
       managers.managedWallets,
@@ -291,6 +297,10 @@ export default function ConsolidationBuilder(props: Readonly<Props>) {
       onHide={props.onHide}
     >
       <ConsolidationBuilderWarnings locale={locale} />
+      <ConsolidationSafeWalletNotice
+        locale={locale}
+        isSafeWallet={connectedIsSafe}
+      />
       <ConsolidationBuilderWallets
         locale={locale}
         entries={entries}

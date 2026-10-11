@@ -9,6 +9,7 @@ import type {
   ConsolidationStepProgress,
   ConsolidationStepStatus,
 } from "./consolidation-plan";
+import { ConsolidationSafeWalletLinks } from "./ConsolidationBuilderNotices";
 
 export type ConsolidationStepsState =
   | { readonly kind: "incomplete" }
@@ -97,6 +98,8 @@ function getStepHint(
         "delegation.consolidationBuilder.steps.hint.wrongWallet",
         walletParams
       );
+    case "safe-wallet":
+      return t(locale, "delegation.consolidationBuilder.safe.guidance");
     case "checking-manager":
       return t(
         locale,
@@ -203,6 +206,9 @@ function StepAction(
   return (
     <>
       <p className={MESSAGE_CLASS_NAME}>{getStepHint(step, context)}</p>
+      {step.block === "safe-wallet" && (
+        <ConsolidationSafeWalletLinks locale={locale} />
+      )}
       {showConnect && (
         <Button
           type="button"

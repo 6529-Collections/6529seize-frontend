@@ -135,6 +135,11 @@ wallet, in a safe order.
   button sends the next one. 6529 records these links like the wallet's
   own, including their registration times, so the plan and its order do not
   change.
+- A connected Safe never signs its own step, because its transaction hash
+  only arrives after its co-signers approve; the page shows
+  `Safes sign through a manager here. ...` above the wallet list and in that
+  step, with links to `Appoint a Delegation Manager` and `Using a SAFE`
+  (`/delegation/delegation-faq/using-safe`).
 - Groups of 2 or 3 wallets use the on-chain status only.
 - A group of 4 counts only when one member has all three of its links
   registered in both directions from 15 October 2026, 00:00 UTC. For 4-wallet

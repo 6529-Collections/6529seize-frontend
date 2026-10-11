@@ -451,6 +451,7 @@ describe("resolveConsolidationProgress", () => {
     connectedAddress: string | undefined;
     /** Wallets the connected wallet manages; null while being checked. */
     managed?: readonly string[] | null;
+    safe?: boolean;
   }) {
     const { managed = [] } = input;
     return resolveConsolidationProgress({
@@ -461,6 +462,7 @@ describe("resolveConsolidationProgress", () => {
         (input.recorded ?? []).map(([from, to]) => toDirectedLinkKey(from, to))
       ),
       connectedAddress: input.connectedAddress,
+      connectedIsSafe: input.safe ?? false,
       managedWallets: managed === null ? undefined : new Set(managed),
     });
   }
@@ -755,6 +757,52 @@ describe("resolveConsolidationProgress", () => {
       signAs: undefined,
       block: "wrong-wallet",
     });
+  });
+
+  it("does not let a connected Safe sign its own step", () => {
+    const steps = progress({
+      plan: addFourth(),
+      links: groupLinks,
+      connectedAddress: A,
+      safe: true,
+    });
+    const held = progress({
+      plan: addFourth(BEFORE_ACTIVATION),
+      links: groupLinks,
+      connectedAddress: A,
+      safe: true,
+    });
+
+    expect(steps[0]).toMatchObject({
+      status: "current",
+      signAs: undefined,
+      block: "safe-wallet",
+      canSign: false,
+    });
+    expect(held[0]).toMatchObject({ block: "fourth-slot", canSign: false });
+  });
+
+  it("keeps a Safe's manager path and other wallets' steps unchanged", () => {
+    const asManager = progress({
+      plan: addFourth(),
+      links: groupLinks,
+      connectedAddress: E,
+      managed: [A],
+      safe: true,
+    });
+    const otherStep = progress({
+      plan: addFourth(),
+      links: groupLinks,
+      connectedAddress: D,
+      safe: true,
+    });
+
+    expect(asManager[0]).toMatchObject({ signAs: "manager", canSign: true });
+    expect(otherStep[0]).toMatchObject({
+      block: "wrong-wallet",
+      canSign: false,
+    });
+    expect(otherStep[3]).toMatchObject({ block: "earlier-steps" });
   });
 
   it("sends only the directions still missing for smaller groups", () => {

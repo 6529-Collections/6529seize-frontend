@@ -139,9 +139,12 @@ function both(...pairs: readonly (readonly [string, string])[]): string[] {
 }
 
 const GROUP_LINKS = both([A, B], [A, C], [B, C]);
+const SAFE_GUIDANCE =
+  "Safes sign through a manager here. Appoint a Delegation Manager for this Safe on Any Collection, then connect the manager to sign these links.";
 
 const baseProps: ComponentProps<typeof ConsolidationBuilder> = {
   connectedAddress: A,
+  isSafeWallet: false,
   walletResolving: false,
   onConnect: jest.fn(),
   onHide: jest.fn(),
@@ -305,6 +308,43 @@ describe("ConsolidationBuilder", () => {
     expect(mockSubmit).toHaveBeenCalledWith(
       expect.objectContaining({ index: 0, signer: A, pendingTargets: [D] })
     );
+    expect(screen.queryByText(SAFE_GUIDANCE)).not.toBeInTheDocument();
+  });
+
+  it("sends a connected Safe to a manager instead of signing its own step", () => {
+    renderBuilder({ isSafeWallet: true });
+    addFourthWallet();
+
+    expect(
+      screen.queryByRole("button", { name: /^Sign/ })
+    ).not.toBeInTheDocument();
+    expect(step(1).getByText(SAFE_GUIDANCE)).toBeInTheDocument();
+    expect(
+      step(1).getByRole("link", { name: "Appoint a Delegation Manager" })
+    ).toHaveAttribute("href", "/delegation/register-sub-delegation");
+    expect(step(1).getByRole("link", { name: "Using a SAFE" })).toHaveAttribute(
+      "href",
+      "/delegation/delegation-faq/using-safe"
+    );
+    // Once in the step and once above the wallet list.
+    expect(screen.getAllByText(SAFE_GUIDANCE)).toHaveLength(2);
+    expect(screen.getAllByRole("link", { name: "Using a SAFE" })).toHaveLength(
+      2
+    );
+  });
+
+  it("keeps the next signer's step unchanged while a different Safe is connected", () => {
+    const view = renderBuilder();
+    addFourthWallet();
+    view.rerenderWith({ connectedAddress: D, isSafeWallet: true });
+
+    expect(
+      step(1).getByText(
+        `Switch your wallet to Wallet 1 (${getAddress(A)}) or a wallet that manages it to sign this step.`
+      )
+    ).toBeInTheDocument();
+    expect(step(1).queryByText(SAFE_GUIDANCE)).not.toBeInTheDocument();
+    expect(screen.getAllByText(SAFE_GUIDANCE)).toHaveLength(1);
   });
 
   it("keeps the list across wallet switches and asks for the next signer", () => {

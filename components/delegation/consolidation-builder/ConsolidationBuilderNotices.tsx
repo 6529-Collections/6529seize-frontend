@@ -12,6 +12,7 @@ const CONSOLIDATION_TDH_EXPLAINER_PATH = "/network/tdh/consolidation";
 const CONSOLIDATION_GUIDE_PATH =
   "/delegation/delegation-faq/register-consolidation";
 const REGISTER_MANAGER_PATH = "/delegation/register-sub-delegation";
+const USING_SAFE_PATH = "/delegation/delegation-faq/using-safe";
 
 const CONSOLIDATION_NOTICE_CLASS_NAME =
   "tw-rounded-lg tw-border tw-border-solid tw-border-amber-400/40 tw-bg-amber-400/10 tw-p-4 tw-text-sm tw-leading-6 tw-text-amber-100";
@@ -68,6 +69,52 @@ export function ConsolidationBuilderWarnings(
         </Link>
       </div>
     </section>
+  );
+}
+
+/** Where a Safe appoints a manager, and the Safe guide. */
+export function ConsolidationSafeWalletLinks(
+  props: Readonly<{ locale: SupportedLocale }>
+) {
+  const { locale } = props;
+  return (
+    <>
+      <Link
+        href={REGISTER_MANAGER_PATH}
+        className={DELEGATION_INLINE_LINK_CLASS_NAME}
+      >
+        {t(locale, "delegation.consolidationBuilder.warnings.managerLink")}
+      </Link>
+      <Link
+        href={USING_SAFE_PATH}
+        className={DELEGATION_INLINE_LINK_CLASS_NAME}
+      >
+        {t(locale, "delegation.consolidationBuilder.safe.faqLink")}
+      </Link>
+    </>
+  );
+}
+
+/**
+ * Shown while a Safe is connected: a Safe confirms transactions only after
+ * its co-signers approve, so its links are signed by its manager instead.
+ */
+export function ConsolidationSafeWalletNotice(
+  props: Readonly<{ locale: SupportedLocale; isSafeWallet: boolean }>
+) {
+  const { locale, isSafeWallet } = props;
+  if (!isSafeWallet) {
+    return null;
+  }
+  return (
+    <div className={`${CONSOLIDATION_NOTICE_CLASS_NAME} tw-mb-6`}>
+      <p className="tw-m-0">
+        {t(locale, "delegation.consolidationBuilder.safe.guidance")}
+      </p>
+      <div className="tw-mt-2 tw-flex tw-flex-wrap tw-gap-x-5 tw-gap-y-2">
+        <ConsolidationSafeWalletLinks locale={locale} />
+      </div>
+    </div>
   );
 }
 

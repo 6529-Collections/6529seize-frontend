@@ -22,6 +22,9 @@ export const DELEGATION_CONSOLIDATION_BUILDER_MESSAGES = {
     "Keeping a vault cold? Appoint a Delegation Manager for it on Any Collection first, so it never has to connect here.",
   "delegation.consolidationBuilder.warnings.managerLink":
     "Appoint a Delegation Manager",
+  "delegation.consolidationBuilder.safe.guidance":
+    "Safes sign through a manager here. Appoint a Delegation Manager for this Safe on Any Collection, then connect the manager to sign these links.",
+  "delegation.consolidationBuilder.safe.faqLink": "Using a SAFE",
   "delegation.consolidationBuilder.wallets.title": "Wallets",
   "delegation.consolidationBuilder.wallets.count": "{count} of {limit} wallets",
   "delegation.consolidationBuilder.wallets.label": "Wallet {position}",
