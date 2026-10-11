@@ -45,6 +45,15 @@ delegations for one collection scope.
   - `consolidation active`
   - `consolidation incomplete` with tooltip (`Incoming consolidation missing` or
     `Outgoing consolidation missing`)
+- Row status covers one pair of wallets. A consolidation group has up to 4
+  wallets and counts only when every pair in it is linked in both directions;
+  a fourth wallet counts only for links registered on or after
+  2026-10-15 00:00 UTC. When links conflict, the newest confirmed link wins.
+- 6529 ignores expiry for consolidations, so consolidation links do not expire.
+- To remove a wallet from a group while it still has its key, connect that
+  wallet, open the collection route where its links were registered, select its
+  outgoing consolidation rows to the other members, and use `Batch Revoke` to
+  revoke them in one transaction.
 - Revoke multiple stale outgoing rows at once with `Batch Revoke`.
 - Use outgoing `Edit` to open an inline update form:
   - standard delegations: update `New Delegate Address`, optional `Expiry Date`,

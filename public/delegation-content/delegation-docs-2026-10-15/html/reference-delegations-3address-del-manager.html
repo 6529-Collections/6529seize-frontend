@@ -1,0 +1,93 @@
+<div>
+
+  <br>Registering delegations allows you to mint any allowlist spots from your most convenient wallet.
+  The optimal method for setting delegations in <a href="/delegation/wallet-architecture">TAP</a> is described below.
+  <br>
+  <br> Assuming three sample addresses:<br>
+  <br>
+  <ul>
+    <li>Address A (vault) : 0xAcf42B85eCb77d9332584119FD78a3DE9953c2a0</li><br>
+    <li>Address B (transaction wallet) : 0x3558C942EeA9e9Bb9b1a6A02d272756EDD3A1Fe4</li><br>
+    <li>Address C (minting wallet) : 0xD0f03CB42Fe821c0654846E474c19484865c5B4a</li>
+  </ul>
+  </div>
+  <br>
+  <ol>
+    <br>
+    <li>
+      Connect to Seize.io with Address A (vault):
+      <ul>
+        <br>
+        <img src="../assets/diagrams/set-delegation-manager.png" alt="set delegation manager diagram">
+        <li>Set Address B (transaction) as the Subdelegate of Address A.</li><br>
+        <li>Go to the Delegation Center section and click the Register Delegation Manager (Sub-Delegation) button.</li><br>
+        <li>Choose 'Any Collection' and enter the wallet Address B.<br>
+          <br>
+          <img src="../assets/html/reference-delegation/proposed_set_delegation_step1__2.png" alt="proposed set delegation step1 2 screenshot">
+        </li><br>
+        <li>Click on 'Submit' and execute the transaction.</li>
+      </ul>
+      <br>Once completed, Address A will not need to connect to any service again, and further delegations can be made on its behalf by Address B.<br>
+    <br>
+    </li><li>
+      Connect to Seize.io with Address B (transaction):
+      <ol type="a">
+        <br>
+        <li>
+          Delegate Case 2 (minting/allowlist) to Address C (minting).<br>
+          <br>
+          <ul>
+            <li>Go to the Delegation Center section and click the Register Delegation button.</li><br>
+            <li>Choose 'Any Collection,' enter wallet Address C, and select Use Case #2 Minting / Allowlist.</li><br>
+            <li>Choose an expiry date (e.g., Never), specify if the delegation applies to all tokens owned by Address B or a specific token ID (it is recommended not to select a specific token ID).</li><br>
+            <li>Click on 'Submit' and execute the transaction.</li><br>
+          </ul>
+          <img src="../assets/html/reference-delegation/proposed_set_delegation_step2a__2.png" alt="proposed set delegation step2a 2 screenshot">
+        </li>
+        <br>
+        <li>
+          Delegate Case 2 (minting/allowlist) on behalf of Address A (vault) to Address C (minting).<br>
+          <br>
+          <img src="../assets/diagrams/register-using-delegation-manager.png" alt="register using delegation manager diagram">
+
+          <ul>
+            <li>Go to the Delegation Center section, click the View/Manage button on 'Any Collection,' and locate the incoming Delegation Manager under the Delegation Managers (Sub-delegations) area.
+              <br>
+              <img src="../assets/html/reference-delegation/proposed_set_delegation_step2b__1.png" alt="proposed set delegation step2b 1 screenshot">
+              <br>
+
+            </li><br>
+            <li>Select the Address of wallet A and click the Register Delegation button.
+              <br>
+              <img src="../assets/html/reference-delegation/proposed_set_delegation_step2b__2.png" alt="proposed set delegation step2b 2 screenshot">
+              <br>
+            </li><br>
+            <li>Complete the Register Delegation Using Delegation Management (Sub-delegation) Rights form:<br>
+              <br>
+              <ul>
+                <li>Choose 'Any Collection' and enter wallet Address C.</li><br>
+                <li>Select Use Case #2 Minting / Allowlist.</li><br>
+                <li>Choose an expiry date (e.g., Never) and specify if the delegation applies to all tokens owned by Address A or a specific token ID
+                  (it is recommended not to select a specific token ID).</li><br>
+                <li>Click on 'Submit' and execute the transaction.</li>
+              </ul>
+              <br>
+              <img src="../assets/html/reference-delegation/proposed_set_delegation_step2b__3.png" alt="proposed set delegation step2b 3 screenshot">
+            <br>
+            </li><br>
+          </ul>
+        <br>This will assign all allowlist spots for Addresses A, B, and C to Address C, which can mint on behalf of all three. Address B can continue to manage delegations for Address A.
+        <br>
+        <br>
+        </li><li>
+          Connect to Seize.io with Address C (minting):<br>
+          <br>
+          <ul>
+            <li>[To confirm] Go to the Delegation Center section, click on the View/Manage button on 'Any Collection,'
+              and view the two delegation addresses in the Delegations area: one for wallet A and one for wallet B.</li>
+          </ul>
+      </li></ol>
+    </li>
+    <br>
+  </ol>
+  <br>

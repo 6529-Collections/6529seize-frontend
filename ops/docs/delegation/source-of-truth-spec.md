@@ -1,7 +1,7 @@
 # Delegation Source Of Truth Spec
 
 Status: active
-Last updated: 2026-06-16
+Last updated: 2026-10-10
 
 This spec is the durable source of truth for delegation copy, help-article
 ownership, content delivery, and future agent work. It adopts the 5.5 Pro
@@ -32,20 +32,39 @@ text, docs, and tests.
   transfer ownership, grant custody, or give the delegate wallet control over
   assets in the delegator wallet.
 - Consolidation: use case `#999`. An onchain relationship record used by 6529
-  systems to understand that wallets you control belong to one collector setup.
-  It supports metrics such as TDH, total cards, and unique cards. It is not a
-  delegation and does not grant rights. It should be reciprocal when two
-  wallets are intended to be treated together.
+  systems to understand that wallets one person controls belong to one
+  collector setup. It supports metrics such as TDH, total cards, and unique
+  cards. A consolidation group has up to 4 wallets, and every pair in the group
+  must be linked in both directions (on Any Collection or The Memes; either
+  works for each direction). A fourth wallet counts only when one member's three
+  links were each registered in both directions on or after
+  2026-10-15 00:00 UTC; before that, groups count at most 3 wallets, and groups
+  of 2 or 3 keep their older registrations. When links conflict, the newest
+  confirmed link wins. Consolidation registrations do not expire. It is not a
+  delegation of NFT utility, but every wallet in a consolidation is a full key
+  to the profile: it can sign in as the profile, set the primary address, and
+  redirect airdrops. Consolidations are for one person's wallets, not for
+  multiple individuals.
+- Consolidation transactions: each wallet can register all of its links in one
+  `batchDelegations` transaction (up to 5 links). When adding a wallet to an
+  existing group, the existing members register their links to it first and
+  the new wallet signs last. The wrong order temporarily splits the group,
+  re-runs profile merges, and reduces TDH-wave votes, which are not restored.
+  To replace a wallet without dropping below three, add the new wallet as the
+  fourth, then remove the old one.
 - Delegation Manager: use case `#998`, also known as Sub-Delegation or
   Delegation Management. A manager wallet can maintain delegation and
-  consolidation records for the managed wallet within the selected scope. This
-  is more powerful than a normal delegation. It still does not move NFTs or
-  grant asset custody.
+  consolidation records for the managed wallet within the selected scope,
+  including registering and revoking consolidations on its behalf (one
+  transaction per link; managers have no batch option). This is more powerful
+  than a normal delegation. It still does not move NFTs or grant asset custody.
 - Primary Address: the address that represents a consolidated wallet set in
   supported 6529 displays and identity views.
 - Lock: an opt-out record that blocks incoming delegations for a wallet at a
   scope. Locks do not revoke outgoing delegations and do not remove existing
-  records by themselves.
+  records by themselves. A Consolidation (`#999`) use-case lock on Any
+  Collection refuses incoming consolidation registrations, including ones
+  submitted by managers.
 - Outgoing: records created by or on behalf of the current wallet.
 - Incoming: records where the current wallet is the target or beneficiary.
 
@@ -118,6 +137,22 @@ storage layer and must not become the editorial source of truth.
 ## Publish Workflow
 
 Use this workflow for article edits.
+
+Once a package version is published and pinned, its files are immutable. Ship
+article changes as a new package version instead of editing the pinned one:
+
+- Copy the current `html` directory to
+  `public/delegation-content/{new-version}/html` and edit the copy.
+- Add new articles to `articles` in `content/delegation/manifest.json` (title,
+  summary, and group; the build fills the rest). Manifest order sets the FAQ
+  previous/next order, and the Delegation FAQ index article must link each new
+  FAQ child article.
+- Update the default version in the build and publish scripts and the publish
+  workflow input, or set `DELEGATION_DOCS_VERSION`, before building.
+- Building without `DELEGATION_DOCS_IPFS_ROOT_CID` sets `rootCid` and
+  `cloudFrontBaseUrl` to `null`, so the site serves the hash-verified
+  same-origin bundle until the new version is published and its CID recorded.
+- Keep the previous version directory until nothing references it.
 
 1. Edit reviewed HTML in
    `public/delegation-content/{manifest.version}/html`.
@@ -258,7 +293,7 @@ Minimum gate:
 
 ## Article Rewrite Backlog
 
-The article package currently contains 26 articles. Rewriting is editorial
+The article package currently contains 27 articles. Rewriting is editorial
 content work, not normal frontend refactoring.
 
 Priority order:
@@ -268,9 +303,10 @@ Priority order:
 2. Delegation FAQ: add orientation, group links by user goal, and keep labels
    singular and scannable.
 3. Consolidation Use Cases: replace generic use-case headings with descriptive
-   headings and add the "only consolidate wallets you control" warning.
+   headings.
 4. Registration articles: Delegation, Delegation Manager, Consolidation.
-5. Architecture setup articles: two-address, TAP, manager-assisted TAP, Safe.
+5. Architecture setup articles: two-address, TAP, manager-assisted TAP,
+   four-address, Safe.
 6. View/manage articles: view, update, revoke.
 7. Manager-rights articles: register/revoke using manager rights.
 8. Lock/unlock articles: global, collection, and use-case variants.
@@ -278,7 +314,11 @@ Priority order:
 Each article rewrite must preserve these invariants:
 
 - Do not say delegation transfers NFTs or ownership.
-- Do not imply consolidation grants rights.
+- Do not imply consolidation moves NFTs or delegates NFT utility, and do not
+  understate it: every consolidated wallet is a full key to the profile.
+- Keep consolidation limits accurate: up to 4 wallets, every pair linked in
+  both directions, and a fourth wallet only for links registered on or after
+  2026-10-15 00:00 UTC.
 - Do not imply delegation manager rights are low-risk.
 - Do not imply locks revoke existing outgoing records.
 - Keep contract use-case numbers accurate.
@@ -311,7 +351,7 @@ Recommended next agent tickets:
    the manifest.
 2. Rewrite Delegation FAQ landing and Consolidation Use Cases.
 3. Rewrite the three registration FAQ articles.
-4. Add an article image alt/caption audit across all 26 article bodies.
+4. Add an article image alt/caption audit across all 27 article bodies.
 5. Publish the reviewed bundle to IPFS and update the manifest root CID.
 6. Configure optional CID/version-addressed CloudFront mirror and verify hash
    behavior.

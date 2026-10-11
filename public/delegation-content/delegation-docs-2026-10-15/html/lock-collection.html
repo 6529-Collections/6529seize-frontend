@@ -1,0 +1,21 @@
+<div>
+
+  <br> The primary purpose of a locking is to lock your wallet address from accepting inbound delegations such as someone delegating their rights to you.  While we do not think this will be a common case,
+  we could imagine people doing this to then try to socially engineer a third party by pretending your addresses are related.   Note that nobody can register a delegation from your wallet unless you sign it yourself or you have appointed them as your delegation manager (use case 998): a manager you appoint can register and revoke delegations and consolidations on your behalf. To refuse incoming consolidation registrations, including ones submitted by managers, lock the Consolidation use case (999) on Any Collection, as described in <a href="/delegation/delegation-faq/lock-use-case">How to Lock Your Wallet for a Specific Use Case on a Collection?</a>
+  <br>
+  <br>With a collection lock, your address will not accept incoming delegations for a specific collection (you should only do
+  this after you have made your own delegations, if you are certain that you do not plan to delegate any more addresses, as you would have to then unlock to accept your own delegations).
+  <br>
+</div>
+<br>
+The example below covers locking inbound delegation for a specific collection.
+<br>
+<br>
+To lock your wallet for a specific collection:<br>
+<br>
+<ol>
+  <li>Go to the Delegation Center Section and click the 'View/Manage' button for a specific collection (e.g., 'The Memes Collection').</li><br>
+  <li>At the bottom of the Manage/View Any Collection page, click the 'Lock Wallet' button.<br>
+    <img src="../assets/screenshots/lock_wallet_global_1.png" alt="lock wallet global 1 screenshot"></li><br>
+    <li>Execute the transaction.</li><br>
+</ol>

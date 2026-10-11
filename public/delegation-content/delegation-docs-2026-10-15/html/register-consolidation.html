@@ -1,0 +1,50 @@
+<div>
+
+  <br> A consolidation is used when you want to establish an ownership connection between two addresses, such as combining the Total Days Held (TDH) of multiple wallets that you control.
+  <br>
+  <br> To create a consolidation between two wallets (e.g., Wallet A and Wallet B), both wallets must register a consolidation with each other.
+  <br>
+  <br>This means that you need to register a delegation address with consolidation from Wallet A to Wallet B, and vice versa, from Wallet B to Wallet A.
+  <br>
+  <br> A consolidation can include up to four wallets. Larger groups need this for every pair of wallets: three wallets need six registrations and four wallets need twelve. A fourth wallet counts only for links registered in both directions on or after 15 October 2026 00:00 UTC.
+</div>
+<br>
+<div>
+  To register a consolidation:<br>
+  <br>
+  <ol>
+    <li>Go to the Delegation Center section and click the Register Consolidation button.
+      <div>
+        <img src="../assets/screenshots/how_to_register_consolidation_1.png" alt="how to register consolidation 1 screenshot">
+      </div>
+    </li>
+    <li>Complete the Register Consolidation Form: <br>
+      <br>
+    <ol type="A">
+      <li>Choose the collection for which you want to register a consolidation (e.g., ‘Any Collection’ for all collections or a specific collection such as 'The Memes Collection').</li><br>
+      <li>Enter the delegation address (e.g., a hot wallet address). </li><br>
+      <li>Click the 'Submit' button and execute the transaction.</li><br>
+    </ol>
+<div>
+  <img src="../assets/screenshots/how_to_register_consolidation_2.png" alt="how to register consolidation 2 screenshot">
+</div>
+Notes:<br>
+<br>
+<ol>
+<li>Please bear in mind that consolidation is marked as incomplete when you initiate only one transaction ex. from Wallet A to Wallet B.</li><br>
+<li>In order for the consolidation to be marked as complete you need to register consolidation also from Wallet B to Wallet A.</li><br>
+<li>For three or four wallets, every pair of wallets must be linked in both directions before they count together.</li><br>
+<li>Batch option: each wallet can register all of its links in one transaction with the NFTDelegation contract's batchDelegations function, which registers up to five links per call. When you add a wallet to an existing group, the existing wallets register their links to it first and the new wallet signs last. See <a href="/delegation/delegation-faq/reference-consolidations-4address">How to Register Consolidations (4 Addresses)?</a> for the values to use and <a href="/delegation/consolidation-use-cases">Consolidation Use Cases</a> for why the order matters.</li><br>
+<li>Consolidations do not expire.</li>
+</ol>
+<br>
+Learn More:<br>
+<br>
+<ol>
+  <li><a href="/delegation/delegation-faq/reference-consolidations-2address">How to Register Consolidations (2-Address Architecture)?</a></li><br>
+  <li><a href="/delegation/delegation-faq/reference-consolidations-3address">How to Register Consolidations (3-Address Reference Architecture)?</a></li><br>
+  <li><a href="/delegation/delegation-faq/reference-consolidations-3address-del-manager">How to Register Consolidations (3-Address Reference Architecture) with Delegation Manager?</a></li><br>
+  <li><a href="/delegation/delegation-faq/reference-consolidations-4address">How to Register Consolidations (4 Addresses)?</a></li>
+</ol>
+<br>
+</li></ol></div>
