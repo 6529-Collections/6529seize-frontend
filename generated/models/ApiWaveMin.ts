@@ -30,6 +30,10 @@ export class ApiWaveMin {
     'authenticated_user_eligible_to_vote': boolean;
     'authenticated_user_eligible_to_participate': boolean;
     'authenticated_user_eligible_to_chat': boolean;
+    /**
+    * Whether the authenticated user may reply to drops in this wave. Waves with open replies allow this outside the chat group.
+    */
+    'authenticated_user_eligible_to_reply'?: boolean;
     'authenticated_user_admin': boolean;
     'visibility_group_id': string | null;
     'participation_group_id': string | null;
@@ -102,6 +106,12 @@ export class ApiWaveMin {
         {
             "name": "authenticated_user_eligible_to_chat",
             "baseName": "authenticated_user_eligible_to_chat",
+            "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "authenticated_user_eligible_to_reply",
+            "baseName": "authenticated_user_eligible_to_reply",
             "type": "boolean",
             "format": ""
         },

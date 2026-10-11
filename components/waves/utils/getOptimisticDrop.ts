@@ -13,6 +13,7 @@ import type { ApiWaveMinWithChatLinkSettings } from "@/helpers/waves/wave.helper
 import { getBannerColorValue } from "@/helpers/profile-banner.helpers";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
 import { ActiveDropAction } from "@/types/dropInteractionTypes";
+import { getWaveReplyEligibility } from "@/helpers/waves/wave-chat-replies.helpers";
 
 const getOptimisticPoll = (
   dropRequest: ApiCreateDropRequest
@@ -90,6 +91,7 @@ export const getOptimisticDrop = (
         wave.voting.authenticated_user_eligible,
       authenticated_user_eligible_to_chat:
         wave.chat.authenticated_user_eligible,
+      authenticated_user_eligible_to_reply: getWaveReplyEligibility(wave.chat),
       voting_credit_type: wave.voting.credit_type,
       voting_credit_scope: wave.voting.credit_scope,
       voting_period_start: wave.voting.period?.min ?? null,

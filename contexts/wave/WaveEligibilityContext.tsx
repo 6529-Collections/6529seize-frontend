@@ -14,6 +14,8 @@ import type { ChatRestriction } from "@/hooks/useDropPriviledges";
 
 export interface WaveEligibility {
   authenticated_user_eligible_to_chat: boolean;
+  /** Replying can be open to people who can't start new chat drops. */
+  authenticated_user_eligible_to_reply?: boolean | undefined;
   authenticated_user_chat_restriction?: ChatRestriction | null;
   authenticated_user_eligible_to_vote: boolean;
   authenticated_user_eligible_to_participate: boolean;
@@ -66,6 +68,7 @@ export const WaveEligibilityProvider: React.FC<
     (waveId: string, newEligibility: Partial<WaveEligibility>) => {
       const updatesRawEligibility =
         "authenticated_user_eligible_to_chat" in newEligibility ||
+        "authenticated_user_eligible_to_reply" in newEligibility ||
         "authenticated_user_eligible_to_vote" in newEligibility ||
         "authenticated_user_eligible_to_participate" in newEligibility ||
         "authenticated_user_admin" in newEligibility;
@@ -106,6 +109,9 @@ export const WaveEligibilityProvider: React.FC<
 
         updateEligibility(waveId, {
           authenticated_user_eligible_to_chat:
+            wave.chat.authenticated_user_eligible,
+          authenticated_user_eligible_to_reply:
+            wave.chat.replies?.authenticated_user_eligible ??
             wave.chat.authenticated_user_eligible,
           authenticated_user_eligible_to_vote:
             wave.voting.authenticated_user_eligible,

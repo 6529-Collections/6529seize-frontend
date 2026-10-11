@@ -270,6 +270,7 @@ const hydrateDropV2 = async ({
     is_signed: drop.is_signed,
     reactions: mapDropReactionCountersV2(drop),
     boosts: drop.boosts,
+    ...(drop.replies_count ? { replies_count: drop.replies_count } : {}),
     is_additional_action_promised:
       drop.submission_context?.is_additional_action_promised ?? false,
     hide_link_preview: drop.hide_link_preview,

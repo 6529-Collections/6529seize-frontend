@@ -1,7 +1,11 @@
 import { isAuthResolving } from "@/components/auth/authResolution";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
-import type { ActiveDropState } from "@/types/dropInteractionTypes";
+import {
+  ActiveDropAction,
+  type ActiveDropState,
+} from "@/types/dropInteractionTypes";
+import { getWaveReplyEligibility } from "@/helpers/waves/wave-chat-replies.helpers";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { ChatRestriction, useDropPrivileges } from "@/hooks/useDropPriviledges";
 import { usePublicProfileModerationStatus } from "@/hooks/content-moderation/usePublicProfileModerationStatus";
@@ -131,11 +135,19 @@ export default function PrivilegedDropCreator({
       ? `/${address.toLowerCase()}`
       : undefined;
 
+  // Open replies let people outside the chat group answer a drop, so the
+  // composer opens for them only while a reply target is active.
+  const canReplyWithoutChat =
+    !wave.chat.authenticated_user_eligible &&
+    getWaveReplyEligibility(wave.chat);
+  const isReplying = activeDrop?.action === ActiveDropAction.REPLY;
   const { submissionRestriction, chatRestriction } = useDropPrivileges({
     isLoggedIn: hasProfile || isProfileLoadingForWallet,
     needsProfile: shouldOfferProfileSetup,
     isProxy: !!activeProfileProxy,
-    canChat: wave.chat.authenticated_user_eligible,
+    canChat:
+      wave.chat.authenticated_user_eligible ||
+      (canReplyWithoutChat && isReplying),
     canDrop: wave.participation.authenticated_user_eligible,
     chatDisabled: !wave.chat.enabled,
     slowModeCooldownMs: wave.chat.slow_mode_cooldown_ms ?? null,
@@ -176,6 +188,7 @@ export default function PrivilegedDropCreator({
         chatRestriction={blockingChatRestriction}
         submissionRestriction={submissionRestriction}
         profileSetupHref={profileSetupHref}
+        canReply={canReplyWithoutChat}
       />
     );
   }
@@ -186,6 +199,7 @@ export default function PrivilegedDropCreator({
         type="chat"
         chatRestriction={blockingChatRestriction}
         profileSetupHref={profileSetupHref}
+        canReply={canReplyWithoutChat}
       />
     );
   }
