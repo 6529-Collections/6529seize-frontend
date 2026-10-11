@@ -1,5 +1,8 @@
 # Delegation Center Layout and Section Navigation
 
+The landing page at `/delegation/delegation-center` is now Safe Collecting; see
+[Safe Collecting](feature-safe-collecting.md) for its content.
+
 ## Overview
 
 Use this page for how users move inside `/delegation/*`.
@@ -16,13 +19,14 @@ state.
 ## Entry Points
 
 - Sidebar: `About -> Delegation & Wallets`
-  - `/delegation/delegation-center`
+  - `/delegation/delegation-center` (Safe Collecting)
   - `/delegation/wallet-architecture`
   - `/delegation/delegation-faq`
   - `/delegation/consolidation-use-cases`
   - `/delegation/wallet-checker`
 - Direct URL to any `/delegation/<section>` route.
-- From `/delegation/delegation-center` cards:
+- From `/delegation/delegation-center` (Safe Collecting): setup steps, common
+  tasks and learn links, plus the All tools cards:
   - action routes: `/delegation/register-delegation`,
     `/delegation/register-consolidation`,
     `/delegation/register-sub-delegation`

@@ -373,7 +373,7 @@ describe("sync-agent-files", () => {
           expect.arrayContaining([
             "Connecting another wallet to the site is different from consolidating wallets so 6529 treats them together for supported metrics.",
             "Removing or replacing the currently connected wallet is different from changing an on-chain consolidation record.",
-            "If the goal is to stop wallets being treated together, open View/Manage in the Delegation Center and revoke the relevant consolidation record.",
+            "If the goal is to stop wallets being treated together, open Safe Collecting, go to All tools, Manage by Collection, and revoke the relevant consolidation record.",
             "If the goal is to replace an address on an existing consolidation record, use Update in View/Manage.",
           ])
         );

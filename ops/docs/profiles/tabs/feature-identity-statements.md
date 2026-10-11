@@ -102,7 +102,7 @@ OpenSea` actions. Desktop retains compact external-link actions.
   its current consolidation. At 4 wallets the owner sees
   `This consolidation has the maximum of 4 wallets.` instead. This is separate
   from `Add`, which adds identity statements.
-- `Delegation Center` link is shown only when the connected wallet appears in
+- `Safe Collecting` link (formerly `Delegation Center`) is shown only when the connected wallet appears in
   at least one consolidation relationship for that profile.
 - Statement rows are grouped by section and sorted newest first in each section.
 - Built-in NFT platforms appear before custom `Other` links. Newest links remain

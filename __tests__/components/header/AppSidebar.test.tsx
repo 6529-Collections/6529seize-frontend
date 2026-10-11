@@ -222,7 +222,7 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
         getChildGroup(aboutChildren, "Delegation & Wallets").children
       ).toEqual(
         expect.arrayContaining([
-          { label: "Delegation Center", path: "/delegation/delegation-center" },
+          { label: "Safe Collecting", path: "/delegation/delegation-center" },
           { label: "App Wallets", path: "/tools/app-wallets" },
         ])
       );

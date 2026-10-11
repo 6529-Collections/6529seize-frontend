@@ -17,7 +17,6 @@ import { useEnsName } from "wagmi";
 import { sepolia } from "wagmi/chains";
 import CollectionDelegationComponent from "./CollectionDelegation";
 import ConsolidationBuilder from "./consolidation-builder/ConsolidationBuilder";
-import DelegationCenterComponent from "./DelegationCenter";
 import { DelegationToast, useDelegationToast } from "./DelegationToast";
 import NewAssignPrimaryAddress from "./NewAssignPrimaryAddress";
 import NewConsolidationComponent from "./NewConsolidation";
@@ -30,6 +29,7 @@ import {
   MEME_LAB_COLLECTION,
 } from "./delegation-constants";
 import DelegationHTML from "./html/DelegationHTML";
+import SafeCollecting from "./safe-collecting/SafeCollecting";
 import WalletCheckerComponent from "./walletChecker/WalletChecker";
 import {
   DELEGATION_CARD_CLASS_NAME,
@@ -44,7 +44,7 @@ const DELEGATION_MENU_ITEMS: ReadonlyArray<{
 }> = [
   {
     section: DelegationCenterSection.CENTER,
-    label: "Delegation Center",
+    label: "Safe Collecting",
   },
   {
     section: DelegationCenterSection.WALLET_ARCHITECTURE,
@@ -136,7 +136,7 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
     switch (props.section) {
       case DelegationCenterSection.CENTER:
         return (
-          <DelegationCenterComponent
+          <SafeCollecting
             setSection={(section) => props.setActiveSection(section)}
           />
         );
@@ -345,7 +345,7 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
   return (
     <div className={DELEGATION_PAGE_CONTAINER_CLASS_NAME}>
       {showNavigation && (
-        <nav aria-label="Delegation center" className="tw-mb-7 sm:tw-mb-8">
+        <nav aria-label="Safe collecting" className="tw-mb-7 sm:tw-mb-8">
           <div className="tw-mb-3 tw-flex tw-flex-wrap tw-gap-x-5 tw-gap-y-2 sm:tw-justify-end">
             {printExternalLinkRows()}
           </div>

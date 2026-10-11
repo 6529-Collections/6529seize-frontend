@@ -52,7 +52,7 @@ describe("Tools index page", () => {
       screen.getByRole("heading", { level: 2, name: "Open Data" })
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("link", { name: /open tool: delegation center/i })
+      screen.getByRole("link", { name: /open tool: safe collecting/i })
     ).toHaveAttribute("href", "/delegation/delegation-center");
     expect(
       screen.getByRole("link", { name: /open tool: subscriptions report/i })

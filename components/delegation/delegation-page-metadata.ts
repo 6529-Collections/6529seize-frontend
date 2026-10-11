@@ -37,9 +37,10 @@ const SECTION_METADATA: Readonly<
   >
 > = {
   [DelegationCenterSection.CENTER]: {
-    title: "Delegation Center",
-    navLabel: "Delegation Center",
-    description: "Register, manage, and review NFT delegation records.",
+    title: "Safe Collecting",
+    navLabel: "Safe Collecting",
+    description:
+      "Keep your NFTs in a vault that never connects, use 6529 from a hot wallet, and let consolidation, delegations and airdrops work for you.",
   },
   [DelegationCenterSection.REGISTER_DELEGATION]: {
     title: "Register Delegation",

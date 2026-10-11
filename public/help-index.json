@@ -1648,7 +1648,7 @@
       ],
       "facts": [
         "The NFT Delegation about page lives at /about/nft-delegation.",
-        "The page sends users to the Delegation Center to get started with delegation."
+        "The page sends users to Safe Collecting to get started with delegation."
       ],
       "canonical_path": "/about/nft-delegation",
       "related_paths": [
@@ -4069,33 +4069,47 @@
     {
       "id": "delegation.overview",
       "kind": "route",
-      "title": "Delegation center",
+      "title": "Safe Collecting",
       "aliases": [
+        "safe collecting",
+        "collect safely",
+        "delegation center",
         "delegation",
         "delegate",
         "delegations",
-        "delegation center",
-        "delegation manager"
+        "delegation manager",
+        "vault setup",
+        "wallet setup",
+        "tap setup",
+        "keep my vault cold"
       ],
       "keywords": [
+        "safe",
+        "collecting",
         "delegation",
         "delegate",
         "wallet",
         "vault",
+        "manager",
         "airdrop",
-        "mapping",
-        "checker"
+        "consolidation",
+        "tap"
       ],
       "facts": [
-        "Delegation lets one wallet authorize another wallet for supported 6529 uses.",
-        "The delegation center provides wallet checking, action flows, collection management, and section navigation.",
-        "Delegation is useful for vault/hot-wallet patterns and airdrop-related workflows."
+        "Safe Collecting at /delegation/delegation-center (formerly the Delegation Center) explains and sets up 6529's safe collecting system: keep NFTs in a vault that never connects to anything, and use 6529 from a hot wallet, while TDH, delegations, airdrops and subscriptions keep working as if every wallet were one.",
+        "It follows the Three Address Protocol (TAP): a vault (ideally a SAFE with hardware-wallet signers, or a hardware wallet) that holds NFTs and never connects; a transaction wallet on a hardware wallet that buys, sells and trades and acts as the vault's Delegation Manager; a hot social wallet that signs in to 6529, votes, posts, mints and pays for subscriptions and holds no NFTs; and optionally an old, burned or exposed address kept combined for its TDH.",
+        "The recommended setup for new collectors: the vault signs once to set its ENS name and appoint the transaction wallet as Delegation Manager (use case 998) on Any Collection; the guided setup combines the wallets with the manager signing for the vault; optionally the manager delegates minting to the social wallet; airdrops without a delegation go to the wallet with the most TDH, usually the vault.",
+        "When a wallet is connected, the Your setup section lists the profile's wallets with TDH, primary and connected badges, which wallet manages which, minting and airdrop delegations, and a checklist with links to fix missing steps.",
+        "The page links to every tool: guided consolidation, appointing a manager, minting and airdrop delegations, primary address, locks, revoking, and the Wallet Checker. The original delegation, consolidation and Delegation Manager forms and Manage by Collection are under All tools.",
+        "A Delegation Manager cannot move NFTs but can register anything in the vault's name, including consolidations and more managers; an expiry date does not limit it, only revoking does, and revoking it does not undo what it registered."
       ],
       "canonical_path": "/delegation/delegation-center",
       "related_paths": [
+        "/delegation/wallet-architecture",
+        "/delegation/build-consolidation",
+        "/delegation/register-sub-delegation",
         "/delegation/wallet-checker",
-        "/delegation-mapping-tool",
-        "/consolidation-mapping-tool"
+        "/network/tdh/consolidation"
       ],
       "tags": ["delegation", "wallet", "glossary"],
       "source_refs": [
@@ -4206,7 +4220,7 @@
       "facts": [
         "A consolidation connects wallets you control so 6529 can treat them together for supported metrics such as TDH, total cards, and unique cards; it is consolidation use case #999.",
         "Natural phrases such as adding, linking, pairing, or setting up another wallet refer to this consolidation flow when the goal is for 6529 to treat wallets together for supported metrics.",
-        "To register a consolidation, open Register Consolidation from the Delegation Center, choose the collection, enter the Consolidating With address, submit, and execute the transaction.",
+        "To register a consolidation, open Register Consolidation from Safe Collecting, choose the collection, enter the Consolidating With address, submit, and execute the transaction.",
         "For TDH consolidation, use Any Collection or The Memes.",
         "Consolidation should be reciprocal when two wallets are intended to be treated together, and it is not a delegation and does not grant rights."
       ],
@@ -4246,7 +4260,7 @@
         "999"
       ],
       "facts": [
-        "The Register Consolidation form is the Delegation Center action for connecting wallets you control for supported 6529 metrics.",
+        "The Register Consolidation form is a Safe Collecting action for connecting wallets you control for supported 6529 metrics.",
         "The form requires a connected wallet, Collection, and Consolidating With address.",
         "Add another wallet in ID Statements / Consolidated Addresses opens the guided Build a Consolidation setup at /delegation/build-consolidation, not this form.",
         "The normal form explains that a consolidation holds up to 4 wallets and every pair of wallets registers a link in both directions, so every wallet signs and needs ETH for gas; the link is public and existing profile data may be combined. NFTs stay in their wallets. It links to the guided setup.",
@@ -4295,7 +4309,7 @@
         "999"
       ],
       "facts": [
-        "Build a Consolidation is the Delegation Center's guided setup for linking up to 4 wallets you control. Open it from Guided Setup on the Consolidations card, from Add another wallet in ID Statements / Consolidated Addresses, or from the link in the Register Consolidation form.",
+        "Build a Consolidation is Safe Collecting's guided setup for linking up to 4 wallets you control. Open it from Guided Setup on the Consolidations card, from Add another wallet in ID Statements / Consolidated Addresses, or from the link in the Register Consolidation form.",
         "Every pair of wallets in a consolidation registers use case 999 in both directions. The guide reads which directions are already registered on-chain (Any Collection or The Memes) and plans one transaction per wallet: a single registration for one missing link, or one batch for several.",
         "The connected wallet and its current consolidation are prefilled. Wallets already in that consolidation sign first and new wallets sign last; signing out of order temporarily splits the consolidation and can reduce TDH-wave votes.",
         "Each step can be signed only by its own wallet, and only after every earlier step is confirmed on-chain. Switch the connected wallet between steps; the wallet list stays in place.",
@@ -4471,7 +4485,7 @@
       ],
       "facts": [
         "It indexes how-to articles for registering delegations, delegation managers, consolidations, SAFE transaction-builder flows, supported use cases, viewing records, updating, revoking, locking, and unlocking wallets.",
-        "Use it when users ask broad Delegation Center how-to questions or ask where the delegation docs live."
+        "Use it when users ask broad Safe Collecting how-to questions or ask where the delegation docs live."
       ],
       "canonical_path": "/delegation/delegation-faq",
       "related_paths": [
@@ -4489,7 +4503,7 @@
       "id": "delegation.wallet-management-clarification",
       "kind": "workflow",
       "title": "Wallet Connection and Management Clarification",
-      "link_label": "Delegation Center",
+      "link_label": "Safe Collecting",
       "aliases": [
         "connected wallet or consolidation",
         "connect another wallet",
@@ -4501,7 +4515,7 @@
       "facts": [
         "Connecting another wallet to the site is different from consolidating wallets so 6529 treats them together for supported metrics.",
         "Removing or replacing the currently connected wallet is different from changing an on-chain consolidation record.",
-        "If the goal is to stop wallets being treated together, open View/Manage in the Delegation Center and revoke the relevant consolidation record.",
+        "If the goal is to stop wallets being treated together, open Safe Collecting, go to All tools, Manage by Collection, and revoke the relevant consolidation record.",
         "If the goal is to replace an address on an existing consolidation record, use Update in View/Manage.",
         "If the question is only about the site's currently connected wallet, clarify that it is a connection question rather than a consolidation change."
       ],
@@ -4552,7 +4566,7 @@
         "view"
       ],
       "facts": [
-        "To revoke a delegation, delegation manager, or consolidation, open the Delegation Center and choose View/Manage for the relevant collection.",
+        "To revoke a delegation, delegation manager, or consolidation, open Safe Collecting, go to All tools, Manage by Collection, and choose the relevant collection.",
         "On the Manage/View Collection page, find the address or record you want to revoke and click Revoke.",
         "Execute the transaction to remove the delegation, manager permission, or consolidation record."
       ],
@@ -4599,7 +4613,7 @@
         "manage"
       ],
       "facts": [
-        "To update a delegation, delegation manager, or consolidation, open View/Manage in the Delegation Center for the relevant collection.",
+        "To update a delegation, delegation manager, or consolidation, open Safe Collecting, go to All tools, Manage by Collection, and choose the relevant collection.",
         "Find the address or record you want to update, click Update, adjust the delegated wallet, expiry, or token scope, then submit.",
         "Execute the transaction to apply the update."
       ],
@@ -4636,7 +4650,7 @@
         "utility"
       ],
       "facts": [
-        "To register a delegation, open Delegation Center, choose Register Delegation, choose the collection, enter the delegate wallet, select a use case such as #1 All, choose expiry and token scope, then submit and execute the transaction.",
+        "To register a delegation, open Safe Collecting, choose Register Delegation, choose the collection, enter the delegate wallet, select a use case such as #1 All, choose expiry and token scope, then submit and execute the transaction.",
         "A delegation lets another wallet use NFT utility without moving the NFT from the delegator wallet."
       ],
       "canonical_path": "/delegation/delegation-faq/register-delegation",
@@ -8174,7 +8188,7 @@
       "facts": [
         "Delegation write action routes are documented under Delegation docs.",
         "Routes have input, validation, query-parameter, feedback, and transaction-state rules.",
-        "Users should start from the Delegation Center when unsure which delegation action to take."
+        "Users should start from Safe Collecting when unsure which delegation action to take."
       ],
       "canonical_path": "/delegation/delegation-center",
       "related_paths": ["/delegation-mapping-tool"],
@@ -8373,7 +8387,7 @@
       "keywords": ["delegation", "mapping", "tool", "wallet"],
       "facts": [
         "The Delegation Mapping Tool lives at /delegation-mapping-tool.",
-        "Use the Delegation Center for current delegation workflows and the mapping tool for delegation mapping context.",
+        "Use Safe Collecting for current delegation workflows and the mapping tool for delegation mapping context.",
         "Consolidation mapping is a separate tool at /consolidation-mapping-tool."
       ],
       "canonical_path": "/delegation-mapping-tool",

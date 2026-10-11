@@ -7,9 +7,10 @@ jest.mock("next/image", () => ({
   default: (props: ComponentProps<"img">) => <img {...props} />,
 }));
 
-jest.mock("@/components/delegation/DelegationCenter", () => () => (
-  <div data-testid="center" />
-));
+jest.mock(
+  "@/components/delegation/safe-collecting/SafeCollecting",
+  () => () => <div data-testid="center" />
+);
 jest.mock("@/components/delegation/walletChecker/WalletChecker", () => () => (
   <div />
 ));
@@ -127,7 +128,7 @@ describe("DelegationCenterMenu links", () => {
     render(<DelegationCenterMenu {...props} section={section} />);
 
     expect(
-      screen.queryByRole("navigation", { name: "Delegation center" })
+      screen.queryByRole("navigation", { name: "Safe collecting" })
     ).not.toBeInTheDocument();
   });
 
