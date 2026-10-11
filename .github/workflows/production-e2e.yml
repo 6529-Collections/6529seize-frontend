@@ -242,7 +242,7 @@ jobs:
             .environment == "production" and
             .source_commit == $source_commit and
             (.selected_packs | type == "array") and
-            (.selected_packs | all(IN("museum-data-architecture", "museum-institutional-practice", "museum-about", "museum-inside-system", "museum-rights"))) and
+            (.selected_packs | all(IN("museum-data-architecture", "museum-institutional-practice", "museum-about", "museum-inside-system", "museum-rights", "museum-network-ia"))) and
             (.selection_digest | test("^[a-f0-9]{64}$"))
           ' "$selection_file" >/dev/null
           {
@@ -328,7 +328,7 @@ jobs:
             --parallel 3
             --retry-failed-packs 1
           )
-          for alias in museum-data-architecture museum-institutional-practice museum-about museum-inside-system museum-rights; do
+          for alias in museum-data-architecture museum-institutional-practice museum-about museum-inside-system museum-rights museum-network-ia; do
             if ! jq -e --arg alias "$alias" 'index($alias) != null' <<< "$MUSEUM_SELECTED_PACKS_JSON" >/dev/null; then
               args+=(--exclude-pack "$alias")
             fi
