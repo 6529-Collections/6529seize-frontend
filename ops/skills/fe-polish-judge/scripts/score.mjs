@@ -47,6 +47,12 @@ const INTEGRITY_CHECKS = ["I1", "I2", "I3"];
 const CRYPTO_CHECKS = ["S1", "S2", "S3", "S4", "S5", "S6"];
 const MUSEUM_CHECKS = ["M1", "M2", "M3", "M4"];
 const PROFILES = new Set(["general", "museum"]);
+const MUSEUM_VIEWPORTS = Object.freeze(["1440x1000", "820x1000", "390x844"]);
+const LENS_PREFIXES = Object.freeze({
+  curatorial: "C-",
+  visual: "V-",
+  copy: "E-",
+});
 const LENSES = {
   curatorial: ["J01", "J14", ...MUSEUM_CHECKS],
   visual: [
@@ -364,8 +370,8 @@ function evaluateCoverage(run, output, errors) {
   return unverified;
 }
 
-// Each lens lists every pinned cell; a cell is a gap if any lens left it
-// unverified.
+// Each lens must list every pinned cell; an omitted cell is invalid output. A
+// cell that any lens marks unverified is a coverage gap.
 function evaluateRoundCoverage(run, output, errors) {
   if (!output.coverageByLens) {
     return evaluateCoverage(run, output, errors);
@@ -396,8 +402,27 @@ function mergeLensFindings(lens, owned, findings, merged, errors) {
     if (targetsOf(finding).some((target) => !owned.has(target))) {
       errors.push(`${finding.id}: ${lens} finding targets outside its lens`);
     }
+    if (!String(finding.id ?? "").startsWith(LENS_PREFIXES[lens])) {
+      errors.push(
+        `${finding.id}: ${lens} finding ids must start with ${LENS_PREFIXES[lens]}`
+      );
+    }
     merged.push({ ...finding, lens });
   }
+}
+
+// The Museum gate always reviews a production build at all three widths.
+function museumRunErrors(run) {
+  const viewports = run.scope?.viewports ?? [];
+  const missing = MUSEUM_VIEWPORTS.filter((size) => !viewports.includes(size));
+  const errors = [];
+  if (missing.length > 0) {
+    errors.push(`Museum runs must pin viewports ${missing.join(", ")}`);
+  }
+  if (run.candidate?.build !== "production") {
+    errors.push('Museum runs must judge a "production" build');
+  }
+  return errors;
 }
 
 function mergeLenses(lenses, errors) {
@@ -662,6 +687,12 @@ function main() {
   }
   if (run.profile !== undefined && !PROFILES.has(run.profile)) {
     fail(`run.json profile must be one of: ${[...PROFILES].join(", ")}`);
+  }
+  if (isMuseum(run)) {
+    const errors = museumRunErrors(run);
+    if (errors.length > 0) {
+      fail(`run.json: ${errors.join("; ")}`);
+    }
   }
   if (expectedCells(run).length === 0) {
     fail("run.json scope must pin routes and viewports, or list scope.cells");

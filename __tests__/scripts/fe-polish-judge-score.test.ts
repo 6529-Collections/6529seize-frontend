@@ -65,7 +65,7 @@ type Run = {
   readonly rubric_version: string;
   readonly profile?: string;
   readonly run_id: string;
-  readonly candidate: { commit: string };
+  readonly candidate: { commit: string; build?: string };
   readonly scope: {
     routes: string[];
     states: string[];
@@ -116,6 +116,7 @@ function makeRound({
   candidate = "abc123",
   cryptoApplies = false,
   museum = false,
+  viewports = ["390x844"],
 }: {
   scores?: Record<string, number | string>;
   checks?: Record<string, string>;
@@ -124,6 +125,7 @@ function makeRound({
   candidate?: string;
   cryptoApplies?: boolean;
   museum?: boolean;
+  viewports?: readonly string[];
 } = {}): Round {
   const dimensions: Round["dimensions"] = {};
   for (const id of museum ? [...DIMENSIONS, "J14"] : DIMENSIONS) {
@@ -152,16 +154,14 @@ function makeRound({
   return {
     rubric_version: RUBRIC,
     candidate,
-    coverage: [
-      {
-        route: "/waves",
-        state: "empty",
-        viewport: "390x844",
-        locale: "en-US",
-        status: coverage,
-        ...(coverage === "verified" ? {} : { reason: "No fixture yet" }),
-      },
-    ],
+    coverage: viewports.map((viewport) => ({
+      route: "/waves",
+      state: "empty",
+      viewport,
+      locale: "en-US",
+      status: coverage,
+      ...(coverage === "verified" ? {} : { reason: "No fixture yet" }),
+    })),
     dimensions,
     checks: { ...baseChecks, ...checks },
     findings,
@@ -224,7 +224,7 @@ function writeRound(roundsDir: string, name: string, round: Round | LensRound) {
   }
 }
 
-function score(run: Run, rounds: (Round | LensRound)[]): ScoreResult {
+function runScore(run: Run, rounds: (Round | LensRound)[]) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "fe-judge-"));
   tempDirs.push(root);
   const roundsDir = path.join(root, "run", "rounds");
@@ -233,10 +233,14 @@ function score(run: Run, rounds: (Round | LensRound)[]): ScoreResult {
   rounds.forEach((round, index) => {
     writeRound(roundsDir, String(index).padStart(2, "0"), round);
   });
-  const result = spawnSync(process.execPath, [SCRIPT, "run"], {
+  return spawnSync(process.execPath, [SCRIPT, "run"], {
     cwd: root,
     encoding: "utf8",
   });
+}
+
+function score(run: Run, rounds: (Round | LensRound)[]): ScoreResult {
+  const result = runScore(run, rounds);
   expect(result.status).toBe(0);
   return JSON.parse(result.stdout) as ScoreResult;
 }
@@ -491,8 +495,51 @@ describe("fe-polish-judge score.mjs", () => {
     expect(result.budget.remaining).toBe(0);
   });
   describe("Museum profile", () => {
-    const museumRun = makeRun({ profile: "museum" });
-    const accepted = () => toLenses(makeRound({ museum: true }));
+    const museumViewports = ["1440x1000", "820x1000", "390x844"];
+    const museumRun = makeRun({
+      profile: "museum",
+      candidate: { commit: "abc123", build: "production" },
+      scope: {
+        routes: ["/waves"],
+        states: ["empty"],
+        viewports: museumViewports,
+        locales: ["en-US"],
+      },
+    });
+    const museumRound = (options: Parameters<typeof makeRound>[0] = {}) =>
+      makeRound({ ...options, museum: true, viewports: museumViewports });
+    const accepted = () => toLenses(museumRound());
+
+    it("rejects Museum runs without all three widths or a production build", () => {
+      const narrow = runScore(
+        { ...museumRun, scope: { ...museumRun.scope, viewports: ["390x844"] } },
+        [{ lenses: accepted() }]
+      );
+      expect(narrow.status).toBe(2);
+      expect(narrow.stderr).toContain(
+        "Museum runs must pin viewports 1440x1000, 820x1000"
+      );
+
+      const dev = runScore(
+        { ...museumRun, candidate: { commit: "abc123", build: "dev" } },
+        [{ lenses: accepted() }]
+      );
+      expect(dev.status).toBe(2);
+      expect(dev.stderr).toContain(
+        'Museum runs must judge a "production" build'
+      );
+    });
+
+    it("requires lens-prefixed finding ids", () => {
+      const unprefixed = museumRound({
+        scores: { J01: 7 },
+        findings: [finding("F-001", { targets: ["J01"] })],
+      });
+      const result = score(museumRun, [{ lenses: toLenses(unprefixed) }]);
+      expect(result.errors.join(" ")).toContain(
+        "curatorial finding ids must start with C-"
+      );
+    });
 
     it("merges three lens files into one accepted ledger", () => {
       const result = score(museumRun, [{ lenses: accepted() }]);
@@ -501,7 +548,7 @@ describe("fe-polish-judge score.mjs", () => {
     });
 
     it("requires lens directories with all three lenses", () => {
-      const single = score(museumRun, [makeRound({ museum: true })]);
+      const single = score(museumRun, [museumRound()]);
       expect(single.errors.join(" ")).toContain("must be lens directories");
 
       const { curatorial, visual } = accepted();
@@ -524,7 +571,7 @@ describe("fe-polish-judge score.mjs", () => {
 
     it("treats a cell any lens left unverified as a coverage gap", () => {
       const lenses = accepted();
-      const gap = toLenses(makeRound({ museum: true, coverage: "unverified" }));
+      const gap = toLenses(museumRound({ coverage: "unverified" }));
       const result = score(museumRun, [
         { lenses: { ...lenses, visual: gap.visual } },
       ]);
@@ -532,8 +579,7 @@ describe("fe-polish-judge score.mjs", () => {
     });
 
     it("blocks on a failed Museum check until its finding closes", () => {
-      const failed = makeRound({
-        museum: true,
+      const failed = museumRound({
         checks: { M1: "fail" },
         findings: [finding("C-001", { targets: ["M1"], severity: "P1" })],
       });

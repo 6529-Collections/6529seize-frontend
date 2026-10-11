@@ -383,8 +383,9 @@ times:
 
 Save each round as a directory, `rounds/NN/`, holding `curatorial.json`,
 `visual.json`, and `copy.json`. Prefix finding ids by lens (`C-`, `V-`, `E-`).
-The scoring script merges the three files into one ledger and rejects a round
-that is missing a lens or crosses ownership.
+The scoring script merges the three files into one ledger. It rejects a round
+that is missing a lens, crosses ownership, or uses an unprefixed finding id,
+and a Museum run record that lacks the three widths or a production build.
 
 Evidence for the profile: a production build; full-page captures at
 `1440 x 1000`, `820 x 1000`, and `390 x 844`; and a contact sheet per viewport.
