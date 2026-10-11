@@ -41,6 +41,17 @@ const selection = require("../../scripts/museum-release-selection.cjs") as {
   verifySelectionDigest: (selection: unknown) => boolean;
 };
 
+const manifestMuseumPacks = (
+  require("../../tests/packs.manifest.cjs") as {
+    PACKS: Array<{
+      alias?: string;
+      changeScope?: string;
+      environments: string[];
+      scriptKey: string;
+    }>;
+  }
+).PACKS.filter((pack) => pack.changeScope === "museum");
+
 const shadowEvidence = JSON.parse(
   fs.readFileSync(
     path.join(
@@ -161,6 +172,29 @@ describe("Museum release selection", () => {
     expect(selection.PACKS["pr"]).not.toContain("test:e2e:museum-network-ia");
     expect(selection.PACKS["staging"]).toContain("museum-network-ia");
     expect(selection.PACKS["production"]).toContain("museum-network-ia");
+  });
+
+  // Deployed E2E workflows validate selections against the deployed manifest,
+  // so the selector must choose from exactly the packs that manifest defines.
+  it.each(["staging", "production"])(
+    "selects from exactly the %s Museum packs in the manifest",
+    (environment) => {
+      const manifestAliases = manifestMuseumPacks
+        .filter((pack) => pack.environments.includes(environment))
+        .map((pack) => pack.alias);
+      expect([...(selection.PACKS[environment] ?? [])].sort()).toEqual(
+        manifestAliases.sort()
+      );
+    }
+  );
+
+  it("selects from exactly the local Museum packs apart from the PR gate", () => {
+    const localScripts = manifestMuseumPacks
+      .filter((pack) => pack.environments.includes("local"))
+      .map((pack) => pack.scriptKey);
+    expect(
+      [...(selection.PACKS["pr"] ?? []), "test:e2e:museum-network-ia"].sort()
+    ).toEqual(localScripts.sort());
   });
 
   it.each([
