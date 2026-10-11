@@ -24,6 +24,13 @@ const DIMENSIONS = [
   "J13",
 ];
 
+type Lens = "curatorial" | "visual" | "copy";
+const LENSES: Record<Lens, readonly string[]> = {
+  curatorial: ["J01", "J14", "M1", "M2", "M3", "M4"],
+  visual: ["J02", "J03", "J04", "J05", "J06", "J08", "J09", "J10", "J11"],
+  copy: ["J07", "J12", "I1", "I2", "I3"],
+};
+
 type Finding = {
   readonly id: string;
   readonly targets: readonly string[];
@@ -52,8 +59,11 @@ type Round = {
   readonly preserve: readonly string[];
 };
 
+type LensRound = { readonly lenses: Partial<Record<Lens, Round>> };
+
 type Run = {
   readonly rubric_version: string;
+  readonly profile?: string;
   readonly run_id: string;
   readonly candidate: { commit: string };
   readonly scope: {
@@ -105,6 +115,7 @@ function makeRound({
   coverage = "verified",
   candidate = "abc123",
   cryptoApplies = false,
+  museum = false,
 }: {
   scores?: Record<string, number | string>;
   checks?: Record<string, string>;
@@ -112,9 +123,10 @@ function makeRound({
   coverage?: string;
   candidate?: string;
   cryptoApplies?: boolean;
+  museum?: boolean;
 } = {}): Round {
   const dimensions: Round["dimensions"] = {};
-  for (const id of DIMENSIONS) {
+  for (const id of museum ? [...DIMENSIONS, "J14"] : DIMENSIONS) {
     if (id === "J13" && !cryptoApplies) {
       continue;
     }
@@ -129,6 +141,11 @@ function makeRound({
   };
   if (cryptoApplies) {
     for (const id of ["S1", "S2", "S3", "S4", "S5", "S6"]) {
+      baseChecks[id] = "pass";
+    }
+  }
+  if (museum) {
+    for (const id of ["M1", "M2", "M3", "M4"]) {
       baseChecks[id] = "pass";
     }
   }
@@ -163,15 +180,58 @@ function finding(id: string, overrides: Partial<Finding> = {}): Finding {
   };
 }
 
-function score(run: Run, rounds: Round[]): ScoreResult {
+function pick<T>(
+  source: Record<string, T>,
+  ids: readonly string[]
+): Record<string, T> {
+  return Object.fromEntries(
+    Object.entries(source).filter(([id]) => ids.includes(id))
+  );
+}
+
+// Splits a merged round into the three lens outputs the Museum profile uses.
+function toLenses(round: Round): Record<Lens, Round> {
+  const split = (ids: readonly string[]): Round => ({
+    ...round,
+    dimensions: pick(round.dimensions, ids),
+    checks: pick(round.checks, ids),
+    findings: round.findings.filter((item) =>
+      item.targets.every((target) => ids.includes(target))
+    ),
+  });
+  return {
+    curatorial: split(LENSES.curatorial),
+    visual: split(LENSES.visual),
+    copy: split(LENSES.copy),
+  };
+}
+
+function writeRound(roundsDir: string, name: string, round: Round | LensRound) {
+  if (!("lenses" in round)) {
+    fs.writeFileSync(
+      path.join(roundsDir, `${name}.json`),
+      JSON.stringify(round)
+    );
+    return;
+  }
+  const lensDir = path.join(roundsDir, name);
+  fs.mkdirSync(lensDir);
+  for (const [lens, output] of Object.entries(round.lenses)) {
+    fs.writeFileSync(
+      path.join(lensDir, `${lens}.json`),
+      JSON.stringify(output)
+    );
+  }
+}
+
+function score(run: Run, rounds: (Round | LensRound)[]): ScoreResult {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "fe-judge-"));
   tempDirs.push(root);
   const roundsDir = path.join(root, "run", "rounds");
   fs.mkdirSync(roundsDir, { recursive: true });
   fs.writeFileSync(path.join(root, "run", "run.json"), JSON.stringify(run));
   rounds.forEach((round, index) => {
-    const name = `${String(index).padStart(2, "0")}.json`;
-    fs.writeFileSync(path.join(roundsDir, name), JSON.stringify(round));
+    writeRound(roundsDir, String(index).padStart(2, "0"), round);
   });
   const result = spawnSync(process.execPath, [SCRIPT, "run"], {
     cwd: root,
@@ -429,5 +489,64 @@ describe("fe-polish-judge score.mjs", () => {
     );
     expect(result.decision).toBe("threshold_not_reached");
     expect(result.budget.remaining).toBe(0);
+  });
+  describe("Museum profile", () => {
+    const museumRun = makeRun({ profile: "museum" });
+    const accepted = () => toLenses(makeRound({ museum: true }));
+
+    it("merges three lens files into one accepted ledger", () => {
+      const result = score(museumRun, [{ lenses: accepted() }]);
+      expect(result.decision).toBe("accepted");
+      expect(result.applicable_weight).toBe(100);
+    });
+
+    it("requires lens directories with all three lenses", () => {
+      const single = score(museumRun, [makeRound({ museum: true })]);
+      expect(single.errors.join(" ")).toContain("must be lens directories");
+
+      const { curatorial, visual } = accepted();
+      const missing = score(museumRun, [{ lenses: { curatorial, visual } }]);
+      expect(missing.decision).toBe("invalid_judge_output");
+      expect(missing.errors.join(" ")).toContain("missing copy.json");
+    });
+
+    it("rejects a lens that scores outside its ownership", () => {
+      const lenses = accepted();
+      const copy = {
+        ...lenses.copy,
+        dimensions: { ...lenses.copy.dimensions, J06: { score: 9 } },
+      };
+      const crossed = score(museumRun, [{ lenses: { ...lenses, copy } }]);
+      expect(crossed.errors.join(" ")).toContain(
+        "copy lens reported J06, which it does not own"
+      );
+    });
+
+    it("treats a cell any lens left unverified as a coverage gap", () => {
+      const lenses = accepted();
+      const gap = toLenses(makeRound({ museum: true, coverage: "unverified" }));
+      const result = score(museumRun, [
+        { lenses: { ...lenses, visual: gap.visual } },
+      ]);
+      expect(result.decision).toBe("incomplete");
+    });
+
+    it("blocks on a failed Museum check until its finding closes", () => {
+      const failed = makeRound({
+        museum: true,
+        checks: { M1: "fail" },
+        findings: [finding("C-001", { targets: ["M1"], severity: "P1" })],
+      });
+      const result = score(museumRun, [{ lenses: toLenses(failed) }]);
+      expect(result.decision).toBe("repair");
+      expect(result.failed_checks).toEqual(["M1"]);
+      expect(result.open_required).toEqual(["C-001"]);
+    });
+
+    it("keeps J14 and Museum checks out of general runs", () => {
+      const result = score(makeRun(), [makeRound()]);
+      expect(result.decision).toBe("accepted");
+      expect(result.applicable_weight).toBe(90);
+    });
   });
 });

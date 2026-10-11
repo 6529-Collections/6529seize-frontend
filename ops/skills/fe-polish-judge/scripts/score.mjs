@@ -9,9 +9,11 @@
 // Run from the repository root; <run-dir> must sit inside the current working
 // directory (for example ops/workstreams/<slug>/judge/<run-id>).
 //
-// <run-dir>/run.json holds the frozen run record; <run-dir>/rounds/*.json hold
-// one judge output per round, ordered by filename (00-baseline.json, 01.json,
-// ...). Prints the decision as JSON. Exits 2 on unreadable input.
+// <run-dir>/run.json holds the frozen run record. <run-dir>/rounds/ holds one
+// entry per round, ordered by its leading number (00-baseline.json, 01.json,
+// ...): a judge output file or, for lens reviews such as the Museum profile, a
+// directory with curatorial.json, visual.json, and copy.json that is merged into
+// one ledger. Prints the decision as JSON. Exits 2 on unreadable input.
 
 import fs from "node:fs";
 import path from "node:path";
@@ -39,9 +41,29 @@ const WEIGHTS = {
   J11: 5,
   J12: 6,
   J13: 10,
+  J14: 10,
 };
 const INTEGRITY_CHECKS = ["I1", "I2", "I3"];
 const CRYPTO_CHECKS = ["S1", "S2", "S3", "S4", "S5", "S6"];
+const MUSEUM_CHECKS = ["M1", "M2", "M3", "M4"];
+const PROFILES = new Set(["general", "museum"]);
+const LENSES = {
+  curatorial: ["J01", "J14", ...MUSEUM_CHECKS],
+  visual: [
+    "J02",
+    "J03",
+    "J04",
+    "J05",
+    "J06",
+    "J08",
+    "J09",
+    "J10",
+    "J11",
+    "J13",
+    ...CRYPTO_CHECKS,
+  ],
+  copy: ["J07", "J12", ...INTEGRITY_CHECKS],
+};
 const CHECK_VALUES = new Set(["pass", "fail", "unverified", "not_applicable"]);
 const COVERAGE_VALUES = new Set(["verified", "unverified", "not_applicable"]);
 const SEVERITIES = new Set(["P0", "P1", "P2", "P3"]);
@@ -71,6 +93,16 @@ function roundOrder(name) {
   return match ? Number(match[0]) : Number.POSITIVE_INFINITY;
 }
 
+function readLensRound(dir) {
+  const lenses = {};
+  for (const lens of Object.keys(LENSES)) {
+    const file = path.join(dir, `${lens}.json`);
+    const present = fs.existsSync(file); // NOSONAR S8707: lens file inside the confined run directory.
+    lenses[lens] = present ? readJson(file) : null;
+  }
+  return lenses;
+}
+
 function loadRun(runDir) {
   const run = readJson(path.join(runDir, "run.json"));
   const roundsDir = path.join(runDir, "rounds");
@@ -78,17 +110,22 @@ function loadRun(runDir) {
   if (!roundsExist) {
     fail(`Missing ${roundsDir}`);
   }
-  const files = fs
-    .readdirSync(roundsDir) // NOSONAR S8707: operator-selected rounds directory, confined to the working directory by resolveRunDir.
-    .filter((name) => name.endsWith(".json"))
-    .sort((a, b) => roundOrder(a) - roundOrder(b) || a.localeCompare(b));
-  if (files.length === 0) {
+  const entries = fs
+    .readdirSync(roundsDir, { withFileTypes: true }) // NOSONAR S8707: operator-selected rounds directory, confined to the working directory by resolveRunDir.
+    .filter((entry) => entry.isDirectory() || entry.name.endsWith(".json"))
+    .sort(
+      (a, b) =>
+        roundOrder(a.name) - roundOrder(b.name) || a.name.localeCompare(b.name)
+    );
+  if (entries.length === 0) {
     fail(`No judge rounds in ${roundsDir}`);
   }
-  const rounds = files.map((name) => ({
-    file: name,
-    output: readJson(path.join(roundsDir, name)),
-  }));
+  const rounds = entries.map((entry) => {
+    const location = path.join(roundsDir, entry.name);
+    return entry.isDirectory()
+      ? { file: entry.name, lenses: readLensRound(location) }
+      : { file: entry.name, output: readJson(location) };
+  });
   return { run, rounds };
 }
 
@@ -104,16 +141,28 @@ function targetsOf(finding) {
   return Array.isArray(finding.targets) ? finding.targets : [];
 }
 
-function applicableDimensions(run) {
-  const pinned = run.not_applicable ?? {};
-  return Object.keys(WEIGHTS).filter((id) => !(id in pinned));
+function isMuseum(run) {
+  return run.profile === "museum";
+}
+
+function pinnedNotApplicable(run) {
+  const pinned = { ...run.not_applicable };
+  if (!isMuseum(run)) {
+    pinned.J14 = "Museum profile only";
+  }
+  return pinned;
 }
 
 function applicableChecks(run) {
-  const cryptoApplies = applicableDimensions(run).includes("J13");
-  return cryptoApplies
-    ? [...INTEGRITY_CHECKS, ...CRYPTO_CHECKS]
-    : INTEGRITY_CHECKS;
+  const pinned = pinnedNotApplicable(run);
+  const checks = [...INTEGRITY_CHECKS];
+  if (!("J13" in pinned)) {
+    checks.push(...CRYPTO_CHECKS);
+  }
+  if (isMuseum(run)) {
+    checks.push(...MUSEUM_CHECKS);
+  }
+  return checks;
 }
 
 function isHalfStep(score) {
@@ -130,6 +179,7 @@ function validateFindings(findings, errors) {
     ...Object.keys(WEIGHTS),
     ...INTEGRITY_CHECKS,
     ...CRYPTO_CHECKS,
+    ...MUSEUM_CHECKS,
   ]);
   const ids = new Set();
   for (const finding of findings) {
@@ -177,7 +227,7 @@ function classifyDimension(id, entry, pinned) {
 }
 
 function scoreDimensions(run, output, findings, errors) {
-  const pinned = run.not_applicable ?? {};
+  const pinned = pinnedNotApplicable(run);
   const dimensions = output.dimensions ?? {};
   const scored = [];
   const unverified = [];
@@ -314,8 +364,88 @@ function evaluateCoverage(run, output, errors) {
   return unverified;
 }
 
-function evaluateRound(run, output) {
+// Each lens lists every pinned cell; a cell is a gap if any lens left it
+// unverified.
+function evaluateRoundCoverage(run, output, errors) {
+  if (!output.coverageByLens) {
+    return evaluateCoverage(run, output, errors);
+  }
+  const gaps = new Set();
+  for (const [lens, coverage] of Object.entries(output.coverageByLens)) {
+    const lensErrors = [];
+    for (const key of evaluateCoverage(run, { coverage }, lensErrors)) {
+      gaps.add(key);
+    }
+    errors.push(...lensErrors.map((error) => `${lens}: ${error}`));
+  }
+  return [...gaps];
+}
+
+function mergeOwned(lens, owned, source, target, errors) {
+  for (const [id, value] of Object.entries(source ?? {})) {
+    if (owned.has(id)) {
+      target[id] = value;
+    } else {
+      errors.push(`${lens} lens reported ${id}, which it does not own`);
+    }
+  }
+}
+
+function mergeLensFindings(lens, owned, findings, merged, errors) {
+  for (const finding of findings ?? []) {
+    if (targetsOf(finding).some((target) => !owned.has(target))) {
+      errors.push(`${finding.id}: ${lens} finding targets outside its lens`);
+    }
+    merged.push({ ...finding, lens });
+  }
+}
+
+function mergeLenses(lenses, errors) {
+  const merged = {
+    coverageByLens: {},
+    dimensions: {},
+    checks: {},
+    findings: [],
+    preserve: [],
+  };
+  const versions = new Set();
+  const candidates = new Set();
+  for (const [lens, ownedIds] of Object.entries(LENSES)) {
+    const output = lenses[lens];
+    if (!output) {
+      errors.push(`Lens round is missing ${lens}.json`);
+      continue;
+    }
+    const owned = new Set(ownedIds);
+    versions.add(output.rubric_version);
+    candidates.add(output.candidate);
+    mergeOwned(lens, owned, output.dimensions, merged.dimensions, errors);
+    mergeOwned(lens, owned, output.checks, merged.checks, errors);
+    mergeLensFindings(lens, owned, output.findings, merged.findings, errors);
+    merged.coverageByLens[lens] = output.coverage ?? [];
+    merged.preserve.push(...(output.preserve ?? []));
+  }
+  if (versions.size > 1 || candidates.size > 1) {
+    errors.push("Lens outputs disagree on rubric_version or candidate");
+  }
+  merged.rubric_version = [...versions][0];
+  merged.candidate = [...candidates][0];
+  return merged;
+}
+
+function roundOutput(run, round, errors) {
+  if (round.lenses) {
+    return mergeLenses(round.lenses, errors);
+  }
+  if (isMuseum(run)) {
+    errors.push("Museum profile rounds must be lens directories");
+  }
+  return round.output;
+}
+
+function evaluateRound(run, round) {
   const errors = [];
+  const output = roundOutput(run, round, errors);
   if (output.rubric_version !== run.rubric_version) {
     errors.push(
       `Round rubric ${output.rubric_version} does not match run ${run.rubric_version}`
@@ -334,7 +464,7 @@ function evaluateRound(run, output) {
     dims.unverified
   );
   const checks = evaluateChecks(run, output, findings, errors);
-  const coverageGaps = evaluateCoverage(run, output, errors);
+  const coverageGaps = evaluateRoundCoverage(run, output, errors);
   const openRequired = findings.filter(isRequired).map((finding) => finding.id);
   // The total is null while any dimension is unverified. Such a round cannot be
   // accepted (it is incomplete), so the 8.5 consistency check waits until every
@@ -432,10 +562,10 @@ function pickBest(results) {
 function evaluateRun(run, rounds) {
   const results = [];
   let streak = 0;
-  rounds.forEach(({ file, output }, index) => {
-    const result = evaluateRound(run, output);
+  rounds.forEach((round, index) => {
+    const result = evaluateRound(run, round);
     result.round = index;
-    result.file = file;
+    result.file = round.file;
     result.batch = 0;
     const previous = results[index - 1];
     if (previous) {
@@ -529,6 +659,9 @@ function main() {
   const { run, rounds } = loadRun(resolveRunDir(runDir));
   if (run.rubric_version !== RUBRIC_VERSION) {
     fail(`run.json rubric_version must be ${RUBRIC_VERSION}`);
+  }
+  if (run.profile !== undefined && !PROFILES.has(run.profile)) {
+    fail(`run.json profile must be one of: ${[...PROFILES].join(", ")}`);
   }
   if (expectedCells(run).length === 0) {
     fail("run.json scope must pin routes and viewports, or list scope.cells");
