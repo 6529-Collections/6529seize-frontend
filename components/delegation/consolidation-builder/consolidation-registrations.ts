@@ -72,6 +72,8 @@ export function parseConsolidationRows(response: unknown): ConsolidationRow[] {
   return data.flatMap((row) => parseRow(row) ?? []);
 }
 
+// Same rule as the backend's isPostActivationLink (consolidation-tools.ts):
+// block time in Unix seconds, inclusive of the activation second.
 function isFreshTime(registeredAt: number | undefined): boolean {
   return registeredAt !== undefined && registeredAt >= ACTIVATION_SECONDS;
 }

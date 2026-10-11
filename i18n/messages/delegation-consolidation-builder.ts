@@ -79,6 +79,10 @@ export const DELEGATION_CONSOLIDATION_BUILDER_MESSAGES = {
     "Checking your wallet connection…",
   "delegation.consolidationBuilder.steps.hint.recording":
     "Waiting for 6529 to record this link (usually about a minute).",
+  "delegation.consolidationBuilder.steps.progress.current":
+    "Step {step} of {total} is next: {wallet} signs.",
+  "delegation.consolidationBuilder.steps.progress.recording":
+    "Step {step} is confirmed. Waiting for 6529 to record it.",
   "delegation.consolidationBuilder.fourthSlot.waits":
     "Four-wallet consolidations count only for links registered from {date}. Every step for this group opens then.",
   "delegation.consolidationBuilder.fourthSlot.staleLinks":

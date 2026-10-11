@@ -81,18 +81,24 @@ function createDraft(values: readonly string[]): WalletDraft {
   };
 }
 
-/** Current time, refreshed once when the fourth slot activates. */
+/**
+ * Current time, refreshed when the fourth slot activates. Waits longer than
+ * the browser's timer limit are chained, so a long-open tab still flips.
+ */
 function useFourthSlotClock(): number {
   const [nowMs, setNowMs] = useState(() => Date.now());
 
   useEffect(() => {
     const remainingMs = CONSOLIDATION_FOURTH_WALLET_ACTIVATION_MS - nowMs;
-    if (remainingMs <= 0 || remainingMs > MAX_TIMER_DELAY_MS) {
+    if (remainingMs <= 0) {
       return undefined;
     }
-    const timer = globalThis.setTimeout(() => {
-      setNowMs(Date.now());
-    }, remainingMs);
+    const timer = globalThis.setTimeout(
+      () => {
+        setNowMs(Date.now());
+      },
+      Math.min(remainingMs, MAX_TIMER_DELAY_MS)
+    );
     return () => globalThis.clearTimeout(timer);
   }, [nowMs]);
 

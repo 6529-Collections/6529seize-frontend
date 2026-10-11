@@ -88,6 +88,52 @@ describe("parseConsolidationRows", () => {
   });
 });
 
+describe("backend contract", () => {
+  it("uses the backend's activation second", () => {
+    // CONSOLIDATION_FOURTH_WALLET_ACTIVATION_TIMESTAMP in the backend.
+    expect(ACTIVATION).toBe(1_792_022_400);
+  });
+
+  it("reads a GET /api/consolidations/{wallet}?show_incomplete=true response", () => {
+    // fetchConsolidationsForWallet returns `consolidations.*` plus ENS
+    // display names, wrapped by returnPaginatedResult. MySQL sends
+    // `confirmed` as 0/1 and the bigint times as numbers or strings.
+    const response = {
+      count: 2,
+      page: 1,
+      next: null,
+      data: [
+        {
+          created_at: "2026-10-15T00:01:12.000Z",
+          block: 23_600_000,
+          wallet1: A,
+          wallet2: D,
+          confirmed: 1,
+          wallet1_registered_at: ACTIVATION + 12,
+          wallet2_registered_at: `${AFTER}`,
+          wallet1_display: "alice.eth",
+          wallet2_display: null,
+        },
+        {
+          created_at: "2023-01-04T10:00:00.000Z",
+          block: 16_300_000,
+          wallet1: B,
+          wallet2: A,
+          confirmed: 0,
+          wallet1_registered_at: null,
+          wallet2_registered_at: null,
+          wallet1_display: null,
+          wallet2_display: null,
+        },
+      ],
+    };
+
+    expect(
+      getFreshLinkKeys([parseConsolidationRows(response)], [A, B, D])
+    ).toEqual([toDirectedLinkKey(A, D), toDirectedLinkKey(D, A)]);
+  });
+});
+
 describe("getFreshLinkKeys", () => {
   it("reads wallet1 -> wallet2 from wallet1's time and the reverse only when confirmed", () => {
     const keys = getFreshLinkKeys(

@@ -1,7 +1,7 @@
 import ConsolidationBuilder from "@/components/delegation/consolidation-builder/ConsolidationBuilder";
 import { toDirectedLinkKey } from "@/components/delegation/consolidation-builder/consolidation-plan";
 import { CONSOLIDATION_FOURTH_WALLET_ACTIVATION_MS } from "@/constants/consolidation.constants";
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import type { ComponentProps, ReactNode } from "react";
 import { getAddress } from "viem";
 
@@ -118,6 +118,8 @@ const D = `0x${"d".repeat(40)}`;
 const ACTIVATION_TEXT = "October 15, 2026 at 00:00 UTC";
 const AFTER_ACTIVATION_MS = CONSOLIDATION_FOURTH_WALLET_ACTIVATION_MS + 60_000;
 const BEFORE_ACTIVATION_MS = CONSOLIDATION_FOURTH_WALLET_ACTIVATION_MS - 60_000;
+const DAY_MS = 24 * 60 * 60 * 1000;
+const MAX_TIMER_DELAY_MS = 2_147_483_647;
 
 function both(...pairs: readonly (readonly [string, string])[]): string[] {
   return pairs.flatMap(([x, y]) => [
@@ -308,6 +310,9 @@ describe("ConsolidationBuilder", () => {
     expect(step(1).getByText("Confirmed")).toBeInTheDocument();
     expect(step(2).getByText("Next")).toBeInTheDocument();
     expect(step(2).getByRole("button", { name: "Sign Step 2" })).toBeEnabled();
+    expect(
+      screen.getByText("Step 2 of 4 is next: Wallet 2 signs.").tagName
+    ).toBe("OUTPUT");
   });
 
   it("holds every step of a four-wallet group until the fourth slot opens", () => {
@@ -326,6 +331,35 @@ describe("ConsolidationBuilder", () => {
     expect(
       screen.queryByRole("button", { name: /^Sign Step/ })
     ).not.toBeInTheDocument();
+  });
+
+  it("opens a held group when activation passes in an open tab", () => {
+    jest.useFakeTimers();
+    try {
+      const startMs = CONSOLIDATION_FOURTH_WALLET_ACTIVATION_MS - 30 * DAY_MS;
+      jest.setSystemTime(startMs);
+      renderBuilder();
+      addFourthWallet();
+      expect(
+        screen.queryByRole("button", { name: /^Sign Step/ })
+      ).not.toBeInTheDocument();
+
+      // Longer than one browser timer allows, so the wait is chained.
+      act(() => {
+        jest.advanceTimersByTime(MAX_TIMER_DELAY_MS);
+      });
+      expect(
+        screen.queryByRole("button", { name: /^Sign Step/ })
+      ).not.toBeInTheDocument();
+      act(() => {
+        jest.advanceTimersByTime(30 * DAY_MS - MAX_TIMER_DELAY_MS);
+      });
+      expect(
+        step(1).getByRole("button", { name: "Sign Step 1" })
+      ).toBeEnabled();
+    } finally {
+      jest.useRealTimers();
+    }
   });
 
   it("does not hold groups of three before activation", () => {
@@ -371,6 +405,9 @@ describe("ConsolidationBuilder", () => {
       screen.queryByRole("button", { name: "Sign Step 1" })
     ).not.toBeInTheDocument();
     expect(step(2).getByText("Next")).toBeInTheDocument();
+    expect(
+      screen.getByText("Step 2 of 4 is next: Wallet 2 signs.")
+    ).toBeInTheDocument();
     expect(
       step(2).getByText(
         `Switch your wallet to Wallet 2 (${getAddress(B)}) to sign this step.`

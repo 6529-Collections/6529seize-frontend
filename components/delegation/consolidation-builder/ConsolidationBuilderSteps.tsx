@@ -130,9 +130,9 @@ function StepAction(
   }
   if (step.status === "recording") {
     return (
-      <output className={`tw-block ${MESSAGE_CLASS_NAME}`}>
+      <p className={MESSAGE_CLASS_NAME}>
         {t(locale, "delegation.consolidationBuilder.steps.hint.recording")}
-      </output>
+      </p>
     );
   }
   if (step.canSign) {
@@ -305,12 +305,43 @@ function StepsBody(
         ))}
       </ol>
       {allComplete && (
-        <output className={`tw-block ${MESSAGE_CLASS_NAME} tw-mt-4`}>
+        <p className={`${MESSAGE_CLASS_NAME} tw-mt-4`}>
           {t(locale, "delegation.consolidationBuilder.steps.allComplete")}
-        </output>
+        </p>
       )}
     </>
   );
+}
+
+/**
+ * Text for the steps' persistent live region: the next step and its signer,
+ * a confirmed step waiting to be recorded, or completion.
+ */
+function getProgressAnnouncement(
+  state: ConsolidationStepsState,
+  context: StepContext
+): string {
+  if (state.kind !== "ready" || state.steps.length === 0) {
+    return "";
+  }
+  const { locale } = context;
+  const current = state.steps.find((step) => step.status === "current");
+  if (current) {
+    return t(locale, "delegation.consolidationBuilder.steps.progress.current", {
+      step: formatInteger(locale, current.index + 1),
+      total: formatInteger(locale, state.steps.length),
+      wallet: context.getWalletLabel(current.signer),
+    });
+  }
+  const recording = state.steps.find((step) => step.status === "recording");
+  if (recording) {
+    return t(
+      locale,
+      "delegation.consolidationBuilder.steps.progress.recording",
+      { step: formatInteger(locale, recording.index + 1) }
+    );
+  }
+  return t(locale, "delegation.consolidationBuilder.steps.allComplete");
 }
 
 /** Numbered signing steps; only the next step's signer can act. */
@@ -337,6 +368,9 @@ export function ConsolidationBuilderSteps(
       </p>
       {children}
       <StepsBody state={state} context={context} onRetry={onRetry} />
+      <output aria-atomic="true" className="tw-sr-only">
+        {getProgressAnnouncement(state, context)}
+      </output>
     </section>
   );
 }
