@@ -1,0 +1,84 @@
+# Run Record
+
+Save as `<run-dir>/run.json` before the baseline round. Fields other than
+`candidate` are frozen for the run; a genuine scope change starts a new run
+directory.
+
+## Full template
+
+Use for a new surface, a multi-route polish pass, or any crypto flow.
+
+```json
+{
+  "rubric_version": "fe-polish-judge/2.0",
+  "run_id": "2026-10-11-delegation-polish",
+  "candidate": { "commit": "<sha>", "build": "dev | production" },
+  "scope": {
+    "routes": ["/delegation/delegation-center"],
+    "audience": "Collector managing which wallets act for their vault",
+    "primary_task": "Register a delegation to a hot wallet and confirm it",
+    "states": [
+      "loading",
+      "empty",
+      "populated",
+      "error",
+      "wallet:confirm",
+      "wallet:submitted",
+      "wallet:confirmed",
+      "wallet:rejected",
+      "wallet:failed",
+      "wrong-network"
+    ],
+    "viewports": ["1440x1000", "390x844"],
+    "locales": ["en-US", "de-DE"],
+    "auth": "signed in via 6529-agent-login test wallet"
+  },
+  "not_applicable": {
+    "J11": "Copy and layout only; no data-loading or rendering path changed"
+  },
+  "references": ["/waves", "mint progress and success modals"],
+  "decisions": ["Fiat equivalents are out of scope for this run"],
+  "budget": { "repair_batches": 6 }
+}
+```
+
+## Lite template
+
+Use for one surface and a narrow change. Viewports default to desktop and
+mobile; states are the ones the diff can affect.
+
+```json
+{
+  "rubric_version": "fe-polish-judge/2.0",
+  "run_id": "2026-10-11-wave-empty-state",
+  "candidate": { "commit": "<sha>", "build": "dev" },
+  "scope": {
+    "routes": ["/waves"],
+    "primary_task": "Understand an empty wave list and start or join a wave",
+    "states": ["empty"],
+    "viewports": ["1440x1000", "390x844"],
+    "locales": ["en-US", "de-DE"]
+  },
+  "not_applicable": {
+    "J11": "Static empty-state copy and layout",
+    "J13": "No wallet or chain interaction"
+  },
+  "budget": { "repair_batches": 3 }
+}
+```
+
+## Run directory
+
+```text
+<run-dir>/
+  run.json
+  evidence/          screenshots and interaction notes, named route-state-viewport-locale
+  rounds/
+    00-baseline.json judge output, round 0
+    01.json          judge output after repair batch 1
+  decisions.md       optional: scoring-script output and coordinator notes per round
+```
+
+Keep run directories under the owning workstream, for example
+`ops/workstreams/<slug>/judge/<run-id>/`. Commit them only when the workstream
+retains evidence; otherwise keep them local.
