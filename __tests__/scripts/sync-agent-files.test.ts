@@ -238,10 +238,7 @@ describe("sync-agent-files", () => {
 
     it("publishes natural multi-wallet consolidation language", () => {
       const source = JSON.parse(
-        fs.readFileSync(
-          path.join(repoRoot, "ops/help/help-index.json"),
-          "utf8"
-        )
+        fs.readFileSync(path.join(repoRoot, "ops/help/help-index.json"), "utf8")
       );
       const published = JSON.parse(
         fs.readFileSync(path.join(repoRoot, "public/help-index.json"), "utf8")
@@ -328,9 +325,9 @@ describe("sync-agent-files", () => {
         );
         expect(consolidationUseCaseRecord?.facts).toEqual(
           expect.arrayContaining([
-            "For now, 6529 recognizes up to 3 addresses as one consolidation group for The Memes metrics.",
-            "More than 3 addresses can have consolidation records, but Seize only counts the last 3 addresses for consolidation purposes.",
-            "Registration capacity and effective counted group size are therefore different: users can create records involving more addresses, while no more than 3 addresses count together.",
+            "6529 recognizes up to 4 addresses as one consolidation group. A fourth address counts only when its links to the other three were registered in both directions on or after 2026-10-15 00:00 UTC; before then, up to 3 count.",
+            "More addresses can have consolidation records, but 6529 groups wallets from the newest confirmed links and counts at most 4 (3 before 2026-10-15), each linked both ways with every other member.",
+            "Registration capacity and effective counted group size are therefore different: users can create records involving more addresses, while no more than 4 addresses count together.",
           ])
         );
       });
