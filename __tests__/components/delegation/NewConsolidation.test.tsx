@@ -85,13 +85,20 @@ describe("NewConsolidationComponent", () => {
       );
       expect(screen.queryByTestId("original")).toBeNull();
       expect(
-        screen.getByRole("heading", { name: "Two wallets · two registrations" })
+        screen.getByRole("heading", {
+          name: "Every pair of wallets · both directions",
+        })
       ).toBeInTheDocument();
       expect(
         screen.getByText(
-          "Register from this wallet, then connect the other wallet and register the return link. Each wallet needs ETH for gas."
+          "A consolidation holds up to 4 wallets. Each wallet registers a link to every other wallet, so every wallet signs and needs ETH for gas."
         )
       ).toBeInTheDocument();
+      expect(
+        screen.getByRole("link", {
+          name: "Use guided setup: one transaction per wallet, in the safe order",
+        })
+      ).toHaveAttribute("href", "/delegation/build-consolidation");
       expect(
         screen.getByText(
           "The link is public. Existing profile data may be combined."
@@ -150,7 +157,12 @@ describe("NewConsolidationComponent", () => {
     );
     expect(screen.getByTestId("original")).toHaveTextContent("0xdef");
     expect(
-      screen.queryByRole("heading", { name: "Two wallets · two registrations" })
+      screen.queryByRole("heading", {
+        name: "Every pair of wallets · both directions",
+      })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: /guided setup/ })
     ).not.toBeInTheDocument();
 
     await user.selectOptions(screen.getByTestId("collection"), "1");

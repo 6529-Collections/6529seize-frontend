@@ -49,7 +49,7 @@ describe("UserPageIdentityStatementsConsolidatedAddresses", () => {
     ],
   } as any;
 
-  it("links owners to the existing consolidation form without prefills", () => {
+  it("links owners to the guided consolidation flow and shows the wallet count", () => {
     render(
       <AuthContext.Provider
         value={{ activeProfileProxy: null } as AuthContextType}
@@ -60,12 +60,75 @@ describe("UserPageIdentityStatementsConsolidatedAddresses", () => {
 
     expect(
       screen.getByRole("link", { name: "Add another wallet" })
-    ).toHaveAttribute("href", "/delegation/register-consolidation");
+    ).toHaveAttribute("href", "/delegation/build-consolidation");
     expect(
       screen.getByText(
         "Link another wallet you control. Your NFTs stay in their wallets."
       )
     ).toBeInTheDocument();
+    expect(screen.getByText("2 of 4 wallets")).toBeInTheDocument();
+    expect(
+      screen.queryByText("This consolidation has the maximum of 4 wallets.")
+    ).not.toBeInTheDocument();
+  });
+
+  it("replaces the wallet entry with a limit note at four wallets", () => {
+    const fullProfile = {
+      ...profile,
+      wallets: [
+        { wallet: "0x1", tdh: 1 },
+        { wallet: "0x2", tdh: 2 },
+        { wallet: "0x3", tdh: 3 },
+        { wallet: "0x4", tdh: 4 },
+      ],
+    } as ApiIdentity;
+    render(
+      <AuthContext.Provider
+        value={{ activeProfileProxy: null } as AuthContextType}
+      >
+        <UserPageIdentityStatementsConsolidatedAddresses
+          profile={fullProfile}
+        />
+      </AuthContext.Provider>
+    );
+
+    expect(screen.getByText("4 of 4 wallets")).toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: "Add another wallet" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByText("This consolidation has the maximum of 4 wallets.")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Wallet Checker" })
+    ).toBeInTheDocument();
+  });
+
+  it("shows the limit note only to the owner", () => {
+    mockIsOwner = false;
+    const fullProfile = {
+      ...profile,
+      wallets: [
+        { wallet: "0x1", tdh: 1 },
+        { wallet: "0x2", tdh: 2 },
+        { wallet: "0x3", tdh: 3 },
+        { wallet: "0x4", tdh: 4 },
+      ],
+    } as ApiIdentity;
+    render(
+      <AuthContext.Provider
+        value={{ activeProfileProxy: null } as AuthContextType}
+      >
+        <UserPageIdentityStatementsConsolidatedAddresses
+          profile={fullProfile}
+        />
+      </AuthContext.Provider>
+    );
+
+    expect(screen.getByText("4 of 4 wallets")).toBeInTheDocument();
+    expect(
+      screen.queryByText("This consolidation has the maximum of 4 wallets.")
+    ).not.toBeInTheDocument();
   });
 
   it.each(["visitor", "disconnected", "proxy"] as const)(

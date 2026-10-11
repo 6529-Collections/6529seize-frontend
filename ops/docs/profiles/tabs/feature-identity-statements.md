@@ -92,11 +92,16 @@ OpenSea` actions. Desktop retains compact external-link actions.
 - `Primary` badge marks the active primary wallet.
 - `Wallet Checker` is shown when the profile has a primary or consolidated
   wallet address.
+- The `Consolidated Addresses` header shows the wallet count against the
+  4-wallet limit, for example `2 of 4 wallets`.
 - `Add another wallet` is shown beside `Wallet Checker` only when the connected
-  wallet belongs to the viewed profile, no proxy profile is active, and a
-  primary or consolidated wallet address is available. It opens
-  `/delegation/register-consolidation` without preselecting a collection or
-  target address. This is separate from `Add`, which adds identity statements.
+  wallet belongs to the viewed profile, no proxy profile is active, a primary
+  or consolidated wallet address is available, and the profile has fewer than
+  4 wallets. It opens the guided `Build a Consolidation` setup at
+  `/delegation/build-consolidation`, prefilled with the connected wallet and
+  its current consolidation. At 4 wallets the owner sees
+  `This consolidation has the maximum of 4 wallets.` instead. This is separate
+  from `Add`, which adds identity statements.
 - `Delegation Center` link is shown only when the connected wallet appears in
   at least one consolidation relationship for that profile.
 - Statement rows are grouped by section and sorted newest first in each section.

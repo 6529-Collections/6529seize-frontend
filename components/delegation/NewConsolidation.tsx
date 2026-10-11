@@ -1,10 +1,13 @@
 "use client";
 
 import { DELEGATION_ABI } from "@/abis/abis";
+import { CONSOLIDATION_WALLET_LIMIT } from "@/constants/consolidation.constants";
 import { DELEGATION_CONTRACT, NEVER_DATE } from "@/constants/constants";
 import { isValidEthAddress } from "@/helpers/Helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
+import { DelegationCenterSection } from "@/types/enums";
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Link from "next/link";
@@ -27,6 +30,7 @@ import {
   DelegationFormShell,
   DelegationSubmitGroups,
 } from "./DelegationFormParts";
+import { DELEGATION_INLINE_LINK_CLASS_NAME } from "./delegation-ui";
 
 interface Props {
   address: string;
@@ -128,11 +132,19 @@ export default function NewConsolidationComponent(props: Readonly<Props>) {
             {t(locale, "delegation.consolidation.instructions.title")}
           </h3>
           <p className="tw-mb-2 tw-text-sm tw-leading-6 tw-text-iron-300">
-            {t(locale, "delegation.consolidation.instructions.steps")}
+            {t(locale, "delegation.consolidation.instructions.steps", {
+              limit: formatInteger(locale, CONSOLIDATION_WALLET_LIMIT),
+            })}
           </p>
-          <p className="tw-mb-0 tw-text-sm tw-leading-6 tw-text-iron-300">
+          <p className="tw-mb-2 tw-text-sm tw-leading-6 tw-text-iron-300">
             {t(locale, "delegation.consolidation.instructions.publicLink")}
           </p>
+          <Link
+            href={`/delegation/${DelegationCenterSection.BUILD_CONSOLIDATION}`}
+            className={`${DELEGATION_INLINE_LINK_CLASS_NAME} tw-text-sm tw-leading-6`}
+          >
+            {t(locale, "delegation.consolidation.instructions.guided")}
+          </Link>
         </div>
       )}
       <form>

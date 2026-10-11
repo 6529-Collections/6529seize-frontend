@@ -16,6 +16,7 @@ import { useEffect, useRef } from "react";
 import { useEnsName } from "wagmi";
 import { sepolia } from "wagmi/chains";
 import CollectionDelegationComponent from "./CollectionDelegation";
+import ConsolidationBuilder from "./consolidation-builder/ConsolidationBuilder";
 import DelegationCenterComponent from "./DelegationCenter";
 import { DelegationToast, useDelegationToast } from "./DelegationToast";
 import NewAssignPrimaryAddress from "./NewAssignPrimaryAddress";
@@ -67,6 +68,7 @@ const SECTIONS_WITHOUT_NAVIGATION = new Set<DelegationCenterSection>([
   DelegationCenterSection.REGISTER_DELEGATION,
   DelegationCenterSection.REGISTER_SUB_DELEGATION,
   DelegationCenterSection.REGISTER_CONSOLIDATION,
+  DelegationCenterSection.BUILD_CONSOLIDATION,
   DelegationCenterSection.ASSIGN_PRIMARY_ADDRESS,
   DelegationCenterSection.ANY_COLLECTION,
   DelegationCenterSection.MEMES_COLLECTION,
@@ -203,6 +205,19 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
               props.setActiveSection(DelegationCenterSection.CENTER);
             }}
             onSetToast={showDelegationToast}
+          />
+        );
+      case DelegationCenterSection.BUILD_CONSOLIDATION:
+        // Not keyed by account: each step's signer connects in turn, so the
+        // wallet list must survive account switches and reconnects.
+        return (
+          <ConsolidationBuilder
+            connectedAddress={hasConnectedWallet ? connectedAddress : undefined}
+            walletResolving={isWalletConnectionResolving(accountResolution)}
+            onConnect={accountResolution.seizeConnect}
+            onHide={() => {
+              props.setActiveSection(DelegationCenterSection.CENTER);
+            }}
           />
         );
       case DelegationCenterSection.ASSIGN_PRIMARY_ADDRESS:
