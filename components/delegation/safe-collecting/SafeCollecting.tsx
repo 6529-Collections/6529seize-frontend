@@ -28,7 +28,7 @@ import {
   XCircleIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
-import { useEffect, type ComponentType, type SVGProps } from "react";
+import { useEffect, useId, type ComponentType, type SVGProps } from "react";
 import DelegationCenterComponent from "../DelegationCenter";
 import SafeCollectingSection, {
   ROLE_DOT,
@@ -426,12 +426,15 @@ function SystemFigure({ locale }: { readonly locale: SupportedLocale }) {
     </div>
   );
 
+  const captionId = useId();
   return (
     <figure
-      role="img"
-      aria-label={t(locale, "safeCollecting.figure.label")}
+      aria-labelledby={captionId}
       className={`${SC_PANEL} tw-m-0 tw-p-5 sm:tw-p-6`}
     >
+      <figcaption id={captionId} className="tw-sr-only">
+        {t(locale, "safeCollecting.figure.label")}
+      </figcaption>
       <div
         aria-hidden="true"
         className="tw-rounded-xl tw-border tw-border-dashed tw-border-primary-400/30 tw-bg-primary-500/[0.03] tw-p-4"

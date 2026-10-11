@@ -53,7 +53,7 @@ describe("SafeCollecting", () => {
       screen.getByRole("link", { name: /Set up your wallets/ })
     ).toHaveAttribute("href", "#safe-setup");
     expect(
-      screen.getByRole("img", {
+      screen.getByRole("figure", {
         name: /work together as one collector/,
       })
     ).toBeInTheDocument();
