@@ -321,6 +321,11 @@ function evaluateRound(run, output) {
       `Round rubric ${output.rubric_version} does not match run ${run.rubric_version}`
     );
   }
+  // Repair batches are counted by candidate change, so every round must name
+  // the commit it judged.
+  if (typeof output.candidate !== "string" || output.candidate.trim() === "") {
+    errors.push("Round must name the candidate commit it judged");
+  }
   const findings = Array.isArray(output.findings) ? output.findings : [];
   validateFindings(findings, errors);
   const dims = scoreDimensions(run, output, findings, errors);

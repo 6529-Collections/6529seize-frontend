@@ -407,6 +407,14 @@ describe("fe-polish-judge score.mjs", () => {
     expect(result.budget.remaining).toBe(1);
   });
 
+  it("rejects a round that does not name its candidate", () => {
+    const unnamed = score(makeRun(), [makeRound({ candidate: "" })]);
+    expect(unnamed.decision).toBe("invalid_judge_output");
+    expect(unnamed.errors.join(" ")).toContain(
+      "Round must name the candidate commit it judged"
+    );
+  });
+
   it("stops when the repair budget is exhausted", () => {
     const progressing = [7, 7.5].map((j07, index) =>
       makeRound({
