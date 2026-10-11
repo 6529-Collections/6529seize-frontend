@@ -25,7 +25,8 @@ New frontend work must avoid adding accessibility, localization, or UI/UX debt.
 ## Review Standards
 
 - [Network Museum Visual Release Acceptance](museum-visual-release-acceptance.md)
-  is the blocking pre-PR gate for visible Museum changes.
+  is the blocking pre-PR gate for visible Museum changes. It runs the polish
+  judge loop with the Museum profile.
 - [Frontend Polish Judge](frontend-polish-judge.md) is an opt-in scored rubric
   and builder–judge loop for raising a surface to the 6529 bar, including
   network-state style and crypto usability and safety. It adds no PR gate.

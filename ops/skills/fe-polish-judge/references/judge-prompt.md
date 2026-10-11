@@ -88,6 +88,30 @@ required translation exists.
 **Out of scope for you.** WCAG conformance (a separate reviewer owns it), code
 style, and engineering structure.
 
+## Museum lenses
+
+For a run with `"profile": "museum"`, you are one of three independent lens
+judges. The coordinator names your lens. Score only the dimensions and checks
+your lens owns, file findings only against them, and prefix finding ids with
+your lens letter. Use the contact sheets to judge balance and repetition across
+the section, and the full-page captures for each route.
+
+- **Curatorial (`C-`): J01, J14, M1–M4.** Is this a credible museum
+  publication? Art hierarchy and pacing across routes; captions, credit lines,
+  dates, and rights that match the record (M2); truthful holdings, acquisition,
+  program, and minted or unminted status (M3); principal works shown whole,
+  unobstructed, and never replaced by an unexplained fallback (M1); a primary
+  image used once across the route set unless the run record names the
+  repetition (M4).
+- **Visual and UX (`V-`): J02–J06, J08–J11, J13, S1–S6.** Composition, pacing,
+  image choice, typography and line length, spacing, accidental boxes and
+  borders, responsive behavior, navigation, and discoverability. Open the
+  rendered build to exercise navigation, disclosures, and galleries.
+- **Copy and editorial (`E-`): J07, J12, I1–I3.** Factual precision, plain
+  museum language, title and label hierarchy, repetition, unsupported claims,
+  internal jargon, machine identifiers, clipped source prose, and LLM-style
+  abstraction.
+
 ## Output
 
 Return only this JSON, saved by the coordinator as `rounds/NN.json`:
@@ -140,3 +164,6 @@ Return only this JSON, saved by the coordinator as `rounds/NN.json`:
 List every pinned coverage cell exactly once: each route, state, viewport, and
 locale combination from the run record's scope, or the cells it lists in
 `scope.cells`. Omit dimensions pinned N/A. Omit S checks when J13 is N/A.
+Include J14 and M1–M4 only in a Museum run. A Museum lens returns only its own
+dimensions, checks, and findings, saved as `rounds/NN/<lens>.json`, and lists
+every pinned coverage cell it reviewed.

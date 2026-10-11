@@ -28,10 +28,8 @@ The judge applies the repo standards; it does not replace them:
   the accessibility reviewer. The judge does not audit, score, or claim
   conformance.
 - [Network Museum Visual Release Acceptance](museum-visual-release-acceptance.md)
-  remains the blocking gate for Museum routes. A judge pass never substitutes
-  for it. A judge run on the gate's exact screenshot set may serve as input to
-  the gate's visual/UX review; the gate's blocking dispositions stay
-  authoritative.
+  is the blocking gate for Museum routes. It runs this loop with the
+  [Museum profile](#museum-profile); an ordinary judge run does not satisfy it.
 - The Capacitor iOS NFT purchasing rule in the root `AGENTS.md` is a product
   requirement. Restricted surfaces must be fully omitted, not judged on polish.
 
@@ -96,7 +94,8 @@ reason pinned in the run record before scoring; applicable weights renormalize.
 
 Weights total 100. J13 applies whenever the surface touches wallets, signatures,
 transactions, addresses, ownership, delegation, consolidation, fees, or chain
-state; otherwise it is N/A and the remaining weights renormalize over 90.
+state; otherwise it is N/A and the remaining weights renormalize over 90. The
+[Museum profile](#museum-profile) adds J14.
 Engineering fit is deliberately absent: lint, type checks, Sonar, React Doctor,
 and code review already own it.
 
@@ -257,7 +256,7 @@ Severity:
 
 - **P0:** task blocked, funds or data at risk, or deception.
 - **P1:** major task failure, misleading state, or unusable pinned viewport or
-  locale. Every failed I or S check is P0 or P1.
+  locale. Every failed I, S, or M check is P0 or P1.
 - **P2:** a smaller deficit that holds a dimension below its floor or the total
   below 8.5.
 - **P3:** optional polish. Never blocks and never lowers the score.
@@ -281,7 +280,8 @@ The ledger decides acceptance; scores must be consistent with it.
 A candidate is **accepted** when:
 
 1. every pinned coverage cell is verified or pinned N/A;
-2. no required finding is open, including every I and S check passing; and
+2. no required finding is open, including every applicable I, S, and M check
+   passing; and
 3. the scores agree: every applicable dimension is at least 8 and the unrounded
    weighted total, `sum(weight × score) / sum(applicable weight)`, is at least
    8.5.
@@ -302,8 +302,9 @@ blocked.
 
 1. Freeze the rubric, scope, coverage matrix, references, and budget before the
    baseline.
-2. Each round, recapture the pinned evidence and give the judge the current
-   ledger. The judge verifies each open finding's acceptance check, scans for
+2. Each round, recapture the evidence the repair batch can affect, carry the
+   rest forward, and give the judge the current ledger. The judge verifies each
+   open finding's acceptance check, scans the recaptured evidence for
    regressions, and carries forward unaffected scores. Reuse the result for an
    identical candidate; do not reroll until it passes. A rejudge of the same
    candidate after invalid output or added evidence spends no repair budget.
@@ -328,7 +329,8 @@ the workstream folder; the judge may capture more. Defaults, adjustable in the
 run record:
 
 - **Viewports:** desktop `1440 x 1000` and mobile `390 x 844`; add tablet
-  `820 x 1000` when the layout changes between them and for every Museum route.
+  `820 x 1000` when the layout changes between them. The Museum profile always
+  uses all three.
 - **Locales:** `en-US` always; add `de-DE` for text expansion when the touched
   copy is message-backed; all five supported locales when the change is a
   localization change. The app reads the browser language, so set the browser
@@ -343,6 +345,53 @@ run record:
   build for the round you intend to accept when J11 applies, and always for
   Museum routes.
 - **Auth:** use the `6529-agent-login` skill for signed-in surfaces.
+
+## Museum Profile
+
+A run with `"profile": "museum"` implements the
+[Museum gate](museum-visual-release-acceptance.md). The profile adds a
+curatorial dimension and checks, splits the review across three independent
+lenses, and fixes the evidence matrix.
+
+| ID  | Dimension and observable standard                                                                                                                                       | Weight |
+| --- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -----: |
+| J14 | Curatorial quality: the section reads as a credible museum publication, with clear art hierarchy, pacing across routes, captioning depth, and proportionate scholarship |     10 |
+
+Blocking Museum checks, pass/fail like the I and S checks:
+
+- **M1 Art leads.** Principal works render at their correct aspect ratio,
+  unobstructed by chrome. No unexplained fallback panel stands in for a
+  principal work.
+- **M2 Records are accurate.** Titles, artists, dates, media, credit lines, and
+  rights statements match the record. Quotations and scholarship are attributed
+  to their sources.
+- **M3 Status is truthful.** Holdings, acquisitions, programs, minted and
+  unminted states, and works in progress match the public record.
+- **M4 No unintended repetition.** A primary image appears once across the
+  reviewed route set unless the run record names the repetition as a curatorial
+  decision. Check it on the contact sheets.
+
+Each lens is a separate fresh-context judge. It scores only what it owns and
+files findings only against what it owns, so one defect is not charged three
+times:
+
+| Lens         | Owns                         |
+| ------------ | ---------------------------- |
+| `curatorial` | J01, J14, M1–M4              |
+| `visual`     | J02–J06, J08–J11, J13, S1–S6 |
+| `copy`       | J07, J12, I1–I3              |
+
+Save each round as a directory, `rounds/NN/`, holding `curatorial.json`,
+`visual.json`, and `copy.json`. Prefix finding ids by lens (`C-`, `V-`, `E-`).
+The scoring script merges the three files into one ledger. It rejects a round
+that is missing a lens, crosses ownership, or uses an unprefixed finding id,
+and a Museum run record that lacks the three widths or a production build.
+
+Evidence for the profile: a production build; full-page captures at
+`1440 x 1000`, `820 x 1000`, and `390 x 844`; and a contact sheet per viewport.
+The visual lens also opens the rendered build to exercise navigation,
+disclosures, and galleries. Pin J08 N/A only for routes whose interaction is
+plain links.
 
 ## Calibration
 
