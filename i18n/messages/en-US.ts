@@ -59,6 +59,7 @@ import { ARTWORK_DOCUMENTATION_INTEGRATION_MESSAGES } from "@/i18n/messages/artw
 import { COLLECT_MESSAGES } from "@/i18n/messages/collect";
 import { COLLECT_TDH_TARGET_MESSAGES } from "@/i18n/messages/collect-tdh-target";
 import { DROP_FORGE_ADMIN_MESSAGES } from "@/i18n/messages/drop-forge-admins";
+import { DELEGATION_CONSOLIDATION_BUILDER_MESSAGES } from "@/i18n/messages/delegation-consolidation-builder";
 
 type MessageEntry = readonly [key: string, value: string];
 
@@ -1122,6 +1123,9 @@ const USER_PROFILE_IDENTITY_STATEMENTS_MESSAGES = objectMessages(
     addWallet: "Add another wallet",
     addWalletDescription:
       "Link another wallet you control. Your NFTs stay in their wallets.",
+    walletCount: "{count} of {limit} wallets",
+    walletLimitReached:
+      "This consolidation has the maximum of {limit} wallets.",
     delegationCenter: "Delegation Center",
     primary: "Primary",
     setPrimary: "Set primary",
@@ -2916,10 +2920,13 @@ export const EN_US_MESSAGES = {
   ...COMPETITION_MESSAGES,
   ...EN_DROP_REQUIREMENT_MESSAGES,
   ...EN_US_DROP_METADATA_MESSAGES,
+  ...DELEGATION_CONSOLIDATION_BUILDER_MESSAGES,
   "delegation.consolidation.instructions.title":
-    "Two wallets · two registrations",
+    "Every pair of wallets · both directions",
   "delegation.consolidation.instructions.steps":
-    "Register from this wallet, then connect the other wallet and register the return link. Each wallet needs ETH for gas.",
+    "A consolidation holds up to {limit} wallets. Each wallet registers a link to every other wallet, so every wallet signs and needs ETH for gas.",
+  "delegation.consolidation.instructions.guided":
+    "Use guided setup: one transaction per wallet, in the safe order",
   "delegation.consolidation.instructions.publicLink":
     "The link is public. Existing profile data may be combined.",
   "drop.composer.image": "Image",

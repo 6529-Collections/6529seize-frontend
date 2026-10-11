@@ -3,6 +3,7 @@
 import Image from "next/image";
 
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import Button from "@/components/utils/button/Button";
 import PrimaryButton from "@/components/utils/button/PrimaryButton";
 import {
   DELEGATION_ALL_ADDRESS,
@@ -11,6 +12,8 @@ import {
   MEMES_CONTRACT,
 } from "@/constants/constants";
 import { areEqualAddresses } from "@/helpers/Helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { DelegationCenterSection } from "@/types/enums";
 import {
   faLink,
@@ -48,6 +51,7 @@ function getCollectionSection(contract: string) {
 }
 
 export default function DelegationCenterComponent(props: Readonly<Props>) {
+  const locale = useBrowserLocale();
   const [redirect, setRedirect] = useState<DelegationCenterSection>();
   const { isConnected, seizeConnect, seizeConnectOpen } =
     useSeizeConnectContext();
@@ -157,6 +161,7 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
       ],
       buttonLabel: "Consolidation",
       section: DelegationCenterSection.REGISTER_CONSOLIDATION,
+      guidedSection: DelegationCenterSection.BUILD_CONSOLIDATION,
     },
     {
       title: "Delegation Management",
@@ -217,6 +222,18 @@ export default function DelegationCenterComponent(props: Readonly<Props>) {
                   />
                   {card.buttonLabel}
                 </PrimaryButton>
+                {"guidedSection" in card && (
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="lg"
+                    fullWidth
+                    className="tw-mt-2"
+                    onClick={() => setRedirect(card.guidedSection)}
+                  >
+                    {t(locale, "delegation.consolidationBuilder.entry")}
+                  </Button>
+                )}
               </div>
             </div>
           </article>
