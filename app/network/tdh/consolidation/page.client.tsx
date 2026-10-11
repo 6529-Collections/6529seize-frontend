@@ -54,18 +54,18 @@ const RULES = [
 // Registrations and transactions for each change; see the rules above. A
 // group of n wallets has n(n-1)/2 pairs, each registered in both directions.
 const CHANGES = [
-  { key: "newThree", registrations: 6, transactions: "3", order: "any" },
-  { key: "newFour", registrations: 12, transactions: "4", order: "any" },
-  { key: "addFourth", registrations: 6, transactions: "4", order: "newLast" },
+  { key: "newThree", registrations: 6, transactions: [3], order: "any" },
+  { key: "newFour", registrations: 12, transactions: [4], order: "any" },
+  { key: "addFourth", registrations: 6, transactions: [4], order: "newLast" },
   {
     key: "addTwo",
     registrations: 10,
-    transactions: "4",
+    transactions: [4],
     order: "newWalletsLast",
   },
-  { key: "leave", registrations: null, transactions: "1", order: "leave" },
-  { key: "replace", registrations: 6, transactions: "4 + 1", order: "replace" },
-  { key: "lost", registrations: null, transactions: "3", order: "lost" },
+  { key: "leave", registrations: null, transactions: [1], order: "leave" },
+  { key: "replace", registrations: 6, transactions: [4, 1], order: "replace" },
+  { key: "lost", registrations: null, transactions: [3], order: "lost" },
 ] as const;
 
 interface RuleComparison {
@@ -126,7 +126,9 @@ const PROTECTION_LABELS: Record<
 
 const FAQ = ["friend", "before", "tdh", "profile", "order", "expiry"] as const;
 
-// Public API snapshot used for the analysis on this page.
+// Point-in-time snapshot of the public API used for the analysis on this
+// page, taken before the fourth-wallet start date and shown with its date.
+// Refresh it if the analysis is re-run.
 const LIVE_SNAPSHOT = {
   date: Date.UTC(2026, 9, 10),
   total: 673,
@@ -424,7 +426,9 @@ function AddWalletSection({ locale }: { readonly locale: SupportedLocale }) {
                       : formatInteger(locale, change.registrations)}
                   </td>
                   <td className={`${TABLE_CELL} tw-whitespace-nowrap`}>
-                    {change.transactions}
+                    {change.transactions
+                      .map((count) => formatInteger(locale, count))
+                      .join(" + ")}
                   </td>
                   <td className={TABLE_CELL}>
                     {t(

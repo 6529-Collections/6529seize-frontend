@@ -70,6 +70,7 @@
   "network.tdhConsolidation.order.after": "After {wallet} signs",
   "network.tdhConsolidation.order.groups": "Groups: {groups}",
   "network.tdhConsolidation.order.split": "Split",
+  "network.tdhConsolidation.order.stepAnnouncement": "After {wallet} signs, the groups are {groups}. {state}.",
   "network.tdhConsolidation.order.together": "A, B and C together",
   "network.tdhConsolidation.order.safe": "No temporary split. A, B and C stay together, and D joins with the last transaction.",
   "network.tdhConsolidation.order.unsafe": "The group split in {count} of {total} steps before D joined. Each split re-runs the profile merge and can reduce TDH-wave votes.",

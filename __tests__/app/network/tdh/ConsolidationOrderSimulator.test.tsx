@@ -44,10 +44,12 @@ describe("ConsolidationOrderSimulator", () => {
     );
 
     expect(screen.getByText(/Signing order so far: A/)).toBeInTheDocument();
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "After A signs, the groups are A + B + C and D. A, B and C together."
+    );
     expect(
       within(picker).queryByRole("button", { name: "Wallet A: one link to D" })
     ).not.toBeInTheDocument();
-    expect(screen.getByRole("status")).toBeEmptyDOMElement();
 
     await user.click(screen.getByRole("button", { name: "Start again" }));
     expect(screen.getByText("Signing order so far: none")).toBeInTheDocument();

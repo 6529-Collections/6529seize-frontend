@@ -64,8 +64,17 @@ including what consolidation protects against and what it does not.
 - Static content; no loading or error states.
 - The simulator starts with no order chosen. `D signs last`, `D signs first`
   and `Start again` change the order. Each wallet button disappears once that
-  wallet has signed; the result is announced in a polite live region when all
-  four have signed.
+  wallet has signed. A polite live region announces each step's groups, and
+  the overall result when all four have signed.
+
+## Localization
+
+- Copy is message-backed in `en-US` only. Other supported locales fall back
+  to `en-US` for this page, as they do for the rest of the TDH pages.
+- Impact: readers using another locale see English text; dates and numbers
+  still use their locale's formatting.
+- Follow-up: translate `network.tdhConsolidation.*` with the other TDH pages
+  (tracked in 6529-Collections/6529seize-frontend#4214).
 
 ## Source
 

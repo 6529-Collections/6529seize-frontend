@@ -32,8 +32,15 @@ interface SimulatedStep {
   readonly existingMembersTogether: boolean;
 }
 
+// Wallet labels and pair keys are fixed ASCII, so plain code-unit order is
+// both deterministic and what the backend's ordering amounts to here.
+const compareCodeUnits = (a: string, b: string) => {
+  if (a === b) return 0;
+  return a < b ? -1 : 1;
+};
+
 const pairKey = (a: SimulatedWallet, b: SimulatedWallet) =>
-  [a, b].sort((x, y) => x.localeCompare(y)).join("-");
+  [a, b].sort(compareCodeUnits).join("-");
 
 function confirmedLinks(
   registrations: ReadonlyMap<string, Registration>
@@ -66,7 +73,7 @@ function groupSimulatedWallets(
   links: readonly ConfirmedLink[]
 ): SimulatedWallet[][] {
   const ordered = [...links].sort(
-    (a, b) => b.block - a.block || a.key.localeCompare(b.key)
+    (a, b) => b.block - a.block || compareCodeUnits(a.key, b.key)
   );
   const byKey = new Map(ordered.map((link) => [link.key, link]));
   const isAfterStart = (a: SimulatedWallet, b: SimulatedWallet) =>
@@ -111,7 +118,7 @@ function groupSimulatedWallets(
   for (const wallet of SIMULATED_SIGNERS) {
     if (!used.has(wallet)) groups.push([wallet]);
   }
-  return groups.map((group) => [...group].sort((a, b) => a.localeCompare(b)));
+  return groups.map((group) => [...group].sort(compareCodeUnits));
 }
 
 function joiningWallet(

@@ -43,6 +43,12 @@ export default function ConsolidationOrderSimulator({
       { type: "conjunction", style: "long" }
     );
 
+  const describeState = (step: (typeof steps)[number]) =>
+    step.existingMembersTogether
+      ? t(locale, "network.tdhConsolidation.order.together")
+      : t(locale, "network.tdhConsolidation.order.split");
+  const lastStep = steps.at(-1);
+
   return (
     <div className={`${TDH_PANEL} tw-space-y-5 tw-p-5`}>
       <div className="tw-flex tw-flex-wrap tw-gap-2">
@@ -121,17 +127,15 @@ export default function ConsolidationOrderSimulator({
                   {t(locale, "network.tdhConsolidation.order.groups", {
                     groups: describeGroups(step.groups),
                   })}
-                </p>
-                <p
-                  className={`tw-m-0 tw-mt-1 tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide ${
-                    step.existingMembersTogether
-                      ? "tw-text-iron-400"
-                      : "tw-text-error"
-                  }`}
-                >
-                  {step.existingMembersTogether
-                    ? t(locale, "network.tdhConsolidation.order.together")
-                    : t(locale, "network.tdhConsolidation.order.split")}
+                  <span
+                    className={`tw-mt-1 tw-block tw-text-xs tw-font-medium tw-uppercase tw-tracking-wide ${
+                      step.existingMembersTogether
+                        ? "tw-text-iron-400"
+                        : "tw-text-error"
+                    }`}
+                  >
+                    {describeState(step)}
+                  </span>
                 </p>
               </div>
             </li>
@@ -147,6 +151,15 @@ export default function ConsolidationOrderSimulator({
                 count: formatInteger(locale, splitCount),
                 total: formatInteger(locale, steps.length),
               }))}
+        {!complete && lastStep && (
+          <span className="tw-sr-only">
+            {t(locale, "network.tdhConsolidation.order.stepAnnouncement", {
+              wallet: lastStep.signer,
+              groups: describeGroups(lastStep.groups),
+              state: describeState(lastStep),
+            })}
+          </span>
+        )}
       </div>
 
       <p className="tw-m-0 tw-border-0 tw-border-l-2 tw-border-solid tw-border-iron-600 tw-pl-4 tw-text-sm tw-leading-6 tw-text-iron-400">
