@@ -140,6 +140,47 @@ describe("delegationContent", () => {
     ]);
   });
 
+  it("orders CloudFront, the primary gateway, fallbacks, then the local bundle once a CID is recorded", () => {
+    const article = getDelegationArticle("delegation-faq");
+    const syntheticCid = "bafybeigdyrsyntheticrootcidfortests";
+    const manifest = {
+      ...delegationContentManifest,
+      canonicalStorage: {
+        ...delegationContentManifest.canonicalStorage,
+        rootCid: syntheticCid,
+      },
+      acceleration: {
+        ...delegationContentManifest.acceleration,
+        cloudFrontBaseUrl: "https://cdn.example.test/delegation",
+      },
+    };
+
+    expect(article).toBeDefined();
+    expect(buildDelegationArticleUrls(article!, manifest)).toEqual([
+      "https://cdn.example.test/delegation/html/delegation-faq.html",
+      `${manifest.acceleration.primaryGatewayBaseUrl}/${syntheticCid}/html/delegation-faq.html`,
+      ...manifest.acceleration.fallbackGatewayBaseUrls.map(
+        (gateway) => `${gateway}/${syntheticCid}/html/delegation-faq.html`
+      ),
+      `${localBundleBaseUrl}/html/delegation-faq.html`,
+    ]);
+  });
+
+  it("keeps the build, publish, and workflow defaults on the manifest version", async () => {
+    const version = delegationContentManifest.version;
+    const sources = await Promise.all(
+      [
+        "ops/scripts/build-delegation-docs-content.mjs",
+        "ops/scripts/publish-delegation-docs-content.mjs",
+        ".github/workflows/publish-delegation-docs-content.yml",
+      ].map((file) => readFile(path.join(process.cwd(), file), "utf8"))
+    );
+
+    for (const source of sources) {
+      expect(source).toContain(`"${version}"`);
+    }
+  });
+
   it("records article source URIs under the canonical CID once published", () => {
     for (const article of Object.values(delegationContentManifest.articles)) {
       expect(article.sourceUri).toBe(
