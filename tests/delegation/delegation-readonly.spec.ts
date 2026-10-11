@@ -268,6 +268,9 @@ test.describe("Delegation read-only coverage @surface @medium @large @readonly",
     await expect(
       main.getByRole("link", { name: "How consolidation affects TDH" })
     ).toHaveAttribute("href", "/network/tdh/consolidation");
+    await expect(
+      main.getByRole("link", { name: "Appoint a Delegation Manager" })
+    ).toHaveAttribute("href", "/delegation/register-sub-delegation");
 
     const firstWallet = main.getByRole("textbox", {
       name: "Wallet 1 address",
@@ -295,9 +298,11 @@ test.describe("Delegation read-only coverage @surface @medium @large @readonly",
     await expect(
       main.getByText("A consolidation can hold up to 4 wallets.")
     ).toBeVisible();
-    await expect(main.getByRole("button", { name: /^Sign Step/ })).toHaveCount(
-      0
-    );
+    // Neither a signer's own step button nor the manager's "Sign for ..."
+    // button may appear without a connected wallet.
+    await expect(
+      main.getByRole("button", { name: /^Sign (Step|for) / })
+    ).toHaveCount(0);
     await expectNoHorizontalOverflow(page);
   });
 

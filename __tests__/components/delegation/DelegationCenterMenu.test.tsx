@@ -61,9 +61,11 @@ jest.mock("@/components/delegation/tap-guide/TapGuide", () => () => (
 
 let mockConnectedAddress = "0xabc";
 let mockWalletPending = false;
+let mockIsSafeWallet = false;
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: () => ({
     address: mockConnectedAddress,
+    isSafeWallet: mockIsSafeWallet,
     isWalletConnectionPending: mockWalletPending,
     isConnected: true,
     seizeConnect: jest.fn(),
@@ -93,6 +95,7 @@ describe("DelegationCenterMenu links", () => {
     jest.clearAllMocks();
     mockConnectedAddress = "0xabc";
     mockWalletPending = false;
+    mockIsSafeWallet = false;
   });
 
   it("renders resource links", async () => {
@@ -203,12 +206,14 @@ describe("DelegationCenterMenu links", () => {
     expect(mockBuilderProps).toHaveBeenLastCalledWith(
       expect.objectContaining({
         connectedAddress: "0xabc",
+        isSafeWallet: false,
         walletResolving: false,
       })
     );
 
     mockConnectedAddress = "0xdef";
     mockWalletPending = true;
+    mockIsSafeWallet = true;
     rerender(<DelegationCenterMenu {...builderProps} />);
 
     expect(
@@ -218,6 +223,7 @@ describe("DelegationCenterMenu links", () => {
     expect(mockBuilderProps).toHaveBeenLastCalledWith(
       expect.objectContaining({
         connectedAddress: "0xdef",
+        isSafeWallet: true,
         walletResolving: true,
       })
     );

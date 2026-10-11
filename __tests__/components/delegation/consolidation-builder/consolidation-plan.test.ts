@@ -449,7 +449,11 @@ describe("resolveConsolidationProgress", () => {
     fresh?: readonly Link[];
     recorded?: readonly Link[];
     connectedAddress: string | undefined;
+    /** Wallets the connected wallet manages; null while being checked. */
+    managed?: readonly string[] | null;
+    safe?: boolean;
   }) {
+    const { managed = [] } = input;
     return resolveConsolidationProgress({
       plan: input.plan,
       isRegistered: lookup(input.links),
@@ -458,6 +462,8 @@ describe("resolveConsolidationProgress", () => {
         (input.recorded ?? []).map(([from, to]) => toDirectedLinkKey(from, to))
       ),
       connectedAddress: input.connectedAddress,
+      connectedIsSafe: input.safe ?? false,
+      managedWallets: managed === null ? undefined : new Set(managed),
     });
   }
 
@@ -598,6 +604,205 @@ describe("resolveConsolidationProgress", () => {
       canSign: true,
       pendingTargets: [A, B, C],
     });
+  });
+
+  it("lets a wallet that manages the first signer sign its step", () => {
+    const steps = progress({
+      plan: addFourth(),
+      links: groupLinks,
+      connectedAddress: E,
+      managed: [A, C],
+    });
+
+    expect(
+      steps.map(({ signer, signAs, block, canSign }) => ({
+        signer,
+        signAs,
+        block,
+        canSign,
+      }))
+    ).toEqual([
+      { signer: A, signAs: "manager", block: undefined, canSign: true },
+      { signer: B, signAs: undefined, block: "earlier-steps", canSign: false },
+      { signer: C, signAs: "manager", block: "earlier-steps", canSign: false },
+      { signer: D, signAs: undefined, block: "earlier-steps", canSign: false },
+    ]);
+  });
+
+  it("signs as the wallet itself even when it also manages others", () => {
+    const steps = progress({
+      plan: addFourth(),
+      links: groupLinks,
+      connectedAddress: A,
+      managed: [B],
+    });
+
+    expect(steps[0]).toMatchObject({ signAs: "self", canSign: true });
+    expect(steps[1]).toMatchObject({
+      signAs: "manager",
+      block: "earlier-steps",
+      canSign: false,
+    });
+  });
+
+  it("asks for the signer or its manager when the connected wallet is neither", () => {
+    const wrongWallet = progress({
+      plan: addFourth(),
+      links: groupLinks,
+      connectedAddress: E,
+      managed: [B],
+    });
+    const checking = progress({
+      plan: addFourth(),
+      links: groupLinks,
+      connectedAddress: E,
+      managed: null,
+    });
+    const checkingSelf = progress({
+      plan: addFourth(),
+      links: groupLinks,
+      connectedAddress: A,
+      managed: null,
+    });
+    const disconnected = progress({
+      plan: addFourth(),
+      links: groupLinks,
+      connectedAddress: undefined,
+      managed: null,
+    });
+
+    expect(wrongWallet[0]).toMatchObject({
+      signAs: undefined,
+      block: "wrong-wallet",
+      canSign: false,
+    });
+    expect(checking[0]).toMatchObject({
+      signAs: undefined,
+      block: "checking-manager",
+      canSign: false,
+    });
+    expect(checkingSelf[0]).toMatchObject({ signAs: "self", canSign: true });
+    expect(disconnected[0]).toMatchObject({
+      signAs: undefined,
+      block: "disconnected",
+      canSign: false,
+    });
+  });
+
+  it("holds a manager's step before activation like the signer's own", () => {
+    const steps = progress({
+      plan: addFourth(BEFORE_ACTIVATION),
+      links: groupLinks,
+      connectedAddress: E,
+      managed: [A],
+    });
+
+    expect(steps[0]).toMatchObject({
+      signAs: "manager",
+      block: "fourth-slot",
+      canSign: false,
+    });
+  });
+
+  it("counts a manager's links and puts links confirmed in this session last", () => {
+    const fromScratch = plan({ wallets: [A, B, C] });
+    const start = progress({
+      plan: fromScratch,
+      links: [],
+      connectedAddress: E,
+      managed: [A],
+    });
+    const awaitingRead = progress({
+      plan: fromScratch,
+      links: [],
+      recorded: [[A, B]],
+      connectedAddress: E,
+      managed: [A],
+    });
+    const afterRead = progress({
+      plan: fromScratch,
+      links: [[A, B]],
+      recorded: [[A, B]],
+      connectedAddress: E,
+      managed: [A],
+    });
+    const done = progress({
+      plan: fromScratch,
+      links: [
+        [A, B],
+        [A, C],
+      ],
+      recorded: [
+        [A, B],
+        [A, C],
+      ],
+      connectedAddress: E,
+      managed: [A],
+    });
+
+    expect(start[0]).toMatchObject({
+      targets: [B, C],
+      pendingTargets: [B, C],
+      nextLink: 1,
+      canSign: true,
+    });
+    expect(awaitingRead[0]).toMatchObject({
+      pendingTargets: [C, B],
+      nextLink: 2,
+    });
+    expect(afterRead[0]).toMatchObject({ pendingTargets: [C], nextLink: 2 });
+    expect(done[0]).toMatchObject({ status: "complete", pendingTargets: [] });
+    expect(done[1]).toMatchObject({
+      status: "current",
+      signAs: undefined,
+      block: "wrong-wallet",
+    });
+  });
+
+  it("does not let a connected Safe sign its own step", () => {
+    const steps = progress({
+      plan: addFourth(),
+      links: groupLinks,
+      connectedAddress: A,
+      safe: true,
+    });
+    const held = progress({
+      plan: addFourth(BEFORE_ACTIVATION),
+      links: groupLinks,
+      connectedAddress: A,
+      safe: true,
+    });
+
+    expect(steps[0]).toMatchObject({
+      status: "current",
+      signAs: undefined,
+      block: "safe-wallet",
+      canSign: false,
+    });
+    expect(held[0]).toMatchObject({ block: "fourth-slot", canSign: false });
+  });
+
+  it("keeps a Safe's manager path and other wallets' steps unchanged", () => {
+    const asManager = progress({
+      plan: addFourth(),
+      links: groupLinks,
+      connectedAddress: E,
+      managed: [A],
+      safe: true,
+    });
+    const otherStep = progress({
+      plan: addFourth(),
+      links: groupLinks,
+      connectedAddress: D,
+      safe: true,
+    });
+
+    expect(asManager[0]).toMatchObject({ signAs: "manager", canSign: true });
+    expect(otherStep[0]).toMatchObject({
+      block: "wrong-wallet",
+      canSign: false,
+    });
+    expect(otherStep[3]).toMatchObject({ block: "earlier-steps" });
   });
 
   it("sends only the directions still missing for smaller groups", () => {

@@ -216,6 +216,7 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
         return (
           <ConsolidationBuilder
             connectedAddress={hasConnectedWallet ? connectedAddress : undefined}
+            isSafeWallet={hasConnectedWallet && accountResolution.isSafeWallet}
             walletResolving={isWalletConnectionResolving(accountResolution)}
             onConnect={accountResolution.seizeConnect}
             onHide={() => {
