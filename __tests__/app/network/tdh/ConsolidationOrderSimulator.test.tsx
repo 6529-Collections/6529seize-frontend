@@ -9,6 +9,10 @@ describe("ConsolidationOrderSimulator", () => {
 
     await user.click(screen.getByRole("button", { name: "D signs last" }));
 
+    // The final step is announced along with the verdict.
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "After D signs, the groups are A + B + C + D. A, B and C together."
+    );
     expect(screen.getByRole("status")).toHaveTextContent(
       "No temporary split. A, B and C stay together"
     );

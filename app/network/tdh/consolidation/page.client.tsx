@@ -65,6 +65,12 @@ const CHANGES = [
   },
   { key: "leave", registrations: null, transactions: [1], order: "leave" },
   { key: "replace", registrations: 6, transactions: [4, 1], order: "replace" },
+  {
+    key: "replaceInFour",
+    registrations: 6,
+    transactions: [1, 4],
+    order: "replaceInFour",
+  },
   { key: "lost", registrations: null, transactions: [3], order: "lost" },
 ] as const;
 

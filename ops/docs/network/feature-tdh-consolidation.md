@@ -42,9 +42,10 @@ including what consolidation protects against and what it does not.
    and sees the groups after each transaction. It reports whether A, B and C
    stayed together. The simulator uses the backend grouping rule.
 4. `Remove or replace a wallet`: one batch revocation for a wallet you
-   control, add-then-remove replacement, back-to-back revocations for a lost or
-   compromised wallet, and which part keeps the profile when a consolidation
-   splits.
+   control, replacement (add then remove in a group of two or three; remove
+   then add in a full group of four, where the other three stay consolidated
+   in between), back-to-back revocations for a lost or compromised wallet,
+   and which part keeps the profile when a consolidation splits.
 5. `Why every pair: the alternatives we tested`: the full-mesh rule compared
    with majority, fan-out and single-link rules, and a table of whether an
    outside wallet can be added when an attacker controls 0 to 3 of the

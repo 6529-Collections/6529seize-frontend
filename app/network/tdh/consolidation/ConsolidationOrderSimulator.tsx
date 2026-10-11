@@ -144,6 +144,15 @@ export default function ConsolidationOrderSimulator({
       )}
 
       <div role="status" aria-live="polite" className={TDH_TEXT}>
+        {lastStep && (
+          <span className="tw-sr-only">
+            {t(locale, "network.tdhConsolidation.order.stepAnnouncement", {
+              wallet: lastStep.signer,
+              groups: describeGroups(lastStep.groups),
+              state: describeState(lastStep),
+            })}{" "}
+          </span>
+        )}
         {complete &&
           (splitCount === 0
             ? t(locale, "network.tdhConsolidation.order.safe")
@@ -151,15 +160,6 @@ export default function ConsolidationOrderSimulator({
                 count: formatInteger(locale, splitCount),
                 total: formatInteger(locale, steps.length),
               }))}
-        {!complete && lastStep && (
-          <span className="tw-sr-only">
-            {t(locale, "network.tdhConsolidation.order.stepAnnouncement", {
-              wallet: lastStep.signer,
-              groups: describeGroups(lastStep.groups),
-              state: describeState(lastStep),
-            })}
-          </span>
-        )}
       </div>
 
       <p className="tw-m-0 tw-border-0 tw-border-l-2 tw-border-solid tw-border-iron-600 tw-pl-4 tw-text-sm tw-leading-6 tw-text-iron-400">
