@@ -1,32 +1,70 @@
-# Wallet Consolidation
+# Combine Your Wallets (Wallet Consolidation)
 
 Parent: [Network Index](README.md)
 
 ## Overview
 
-`/network/tdh/consolidation` explains how up to four of one collector's wallets
-count as one for TDH and for their profile. It sets out the rules, the
-transactions involved, and the tested analysis behind the full-mesh design,
-including what consolidation protects against and what it does not.
+Two pages explain wallet consolidation:
+
+- `/network/tdh/consolidation` is the collector's guide. It explains, in plain
+  words, why to combine wallets, which wallets to combine, how to do it with the
+  guided setup, and what to know first.
+- `/network/tdh/consolidation/design` is the technical page. It sets out the
+  exact rules, the transactions, an interactive signing-order simulator and the
+  tested analysis behind the four-wallet, full-mesh design, including what
+  consolidation protects against and what it does not.
 
 ## Location in the Site
 
-- Route: `/network/tdh/consolidation`
-- Page heading: `Wallet consolidation`
-- Browser title: `Wallet consolidation | Network`
-- About contents and sidebar: `Wallet Consolidation`, in the Network group
-  after `TDH Historic Boosts`
+- Guide route: `/network/tdh/consolidation`
+  - Page heading: `Combine your wallets`
+  - Browser title: `Combine your wallets | Network`
+  - About contents and sidebar: `Wallet Consolidation`, in the Network group
+    after `TDH Historic Boosts`
+- Design route: `/network/tdh/consolidation/design`
+  - Page heading: `How wallet consolidation works`
+  - Browser title: `How wallet consolidation works | Network`
+  - Reached from the guide's `Under the hood` section; not in the sidebar
 
 ## Entry Points
 
-- Open `/network/tdh/consolidation` directly.
+- Open either route directly.
 - Select `Wallet consolidation` in the `Explore the network` cards on
   `/network/tdh`.
 - Select `Wallet Consolidation` in `Explore Network references` on Network
-  reference pages.
-- Select `Wallet Consolidation` in the About contents menu or sidebar.
+  reference pages, or in the About contents menu or sidebar.
+- From the guide, select `Read how it works` to open the design page. The
+  design page links back with `Read the collector's guide`.
 
-## Page Sections
+## Guide Sections (`/network/tdh/consolidation`)
+
+1. Header: the promise (several wallets count as one collector; nothing moves),
+   the four-wallet limit and the fourth wallet's start date
+   (`2026-10-15 00:00 UTC`), a `Start guided setup` button to
+   `/delegation/build-consolidation`, and a link to the safe collecting setup.
+   A figure shows the vault, transaction, social and old wallets becoming one
+   collector.
+2. `Why combine`: the vault stays cold; TDH adds up; sets count across wallets;
+   moving cards keeps holding time; old wallets keep their TDH; one profile and
+   one collection (profile, leaderboards, Meme Card subscriptions).
+3. `Which wallets to combine`: the safe collecting roles, each with a
+   temperature dot: vault (holds NFTs, never connects), transaction wallet
+   (buys, sells and trades; can manage the vault), social wallet (the hot
+   wallet that signs in to 6529), and an optional old wallet (a burned or
+   exposed address kept for its TDH). Three wallets is enough to start.
+4. `How to set it up`: list your wallets, sign once per wallet (a vault with a
+   Delegation Manager is signed for by its manager), done. A note on signing
+   order and a second `Start guided setup` button.
+5. `Before you start`: every combined wallet can sign in as the profile;
+   profiles merge permanently; combining is public and moves nothing.
+6. `Changing it later`: add, remove, lost or hacked wallet, and replacing a
+   wallet when four are already combined.
+7. `Questions`: cost, moving NFTs, the limit, friends, wallets set up before
+   the start date, profiles, wrong order, where to see it, expiry.
+8. `Under the hood`: cards for the design page, the TDH explainer, the Wallet
+   Checker and the Delegation Center.
+
+## Design Page Sections (`/network/tdh/consolidation/design`)
 
 1. `The rules`: every pair of wallets registers use case `999` both ways; up to
    four wallets; a fourth wallet counts only for links registered in both
@@ -35,43 +73,32 @@ including what consolidation protects against and what it does not.
    what consolidation changes for TDH and profiles.
 2. `Add a wallet in four transactions`: the two steps (existing wallets each
    register one link to the new wallet, then the new wallet signs one
-   `batchDelegations` transaction last), why the order matters, and a table of
-   links and transactions for common changes. Links to the Delegation Center.
-3. `Try the signing order`: an interactive simulator. A, B and C are
-   consolidated and D joins; the reader picks the signing order (or a preset)
-   and sees the groups after each transaction. It reports whether A, B and C
-   stayed together. The simulator uses the backend grouping rule.
-4. `Remove or replace a wallet`: one batch revocation for a wallet you
-   control, replacement (add then remove in a group of two or three; remove
-   then add in a full group of four, where the other three stay consolidated
-   in between), back-to-back revocations for a lost or compromised wallet,
-   and which part keeps the profile when a consolidation splits.
+   `batchDelegations` transaction last), why the order matters, a table of
+   links and transactions for common changes, and a link to the guided setup.
+3. `Try the signing order`: an interactive simulator using the backend
+   grouping rule.
+4. `Remove or replace a wallet`: batch revocation, replacement order by group
+   size, revocations for a lost or compromised wallet, and which part keeps the
+   profile when a consolidation splits.
 5. `Why every pair: the alternatives we tested`: the full-mesh rule compared
    with majority, fan-out and single-link rules, and a table of whether an
-   outside wallet can be added when an attacker controls 0 to 3 of the
-   collector's wallets.
-6. `What consolidation protects, and what it does not`: admission needs every
-   wallet; old registrations cannot fill the fourth slot; every wallet is still
-   a full key to the profile; delegation managers; the use case `999` lock.
-7. `Why the fourth wallet has a start date`: the reason for the activation gate
-   and the 2026-10-10 live snapshot (673 consolidations; none change at
-   activation).
-8. `How it was tested`: the live-data check, exhaustive searches and property
-   tests, with links to the grouping source and the tracking issue.
-9. `Questions` and `Related` links.
+   outside wallet can be added when an attacker controls 0 to 3 wallets.
+6. `What consolidation protects, and what it does not`.
+7. `Why the fourth wallet has a start date`, with the 2026-10-10 live snapshot.
+8. `How it was tested`, with links to the grouping source and tracking issue.
+9. `Related` links, starting with the guide.
 
 ## States
 
-- Static content; no loading or error states.
+- Static content; no loading or error states on either page.
 - The simulator starts with no order chosen. `D signs last`, `D signs first`
-  and `Start again` change the order. Each wallet button disappears once that
-  wallet has signed. A polite live region announces each step's groups, and
-  the overall result when all four have signed.
+  and `Start again` change the order. A polite live region announces each
+  step's groups, and the overall result when all four have signed.
 
 ## Localization
 
 - Copy is message-backed in `en-US` only. Other supported locales fall back
-  to `en-US` for this page, as they do for the rest of the TDH pages.
+  to `en-US` for these pages, as they do for the rest of the TDH pages.
 - Impact: readers using another locale see English text; dates and numbers
   still use their locale's formatting.
 - Follow-up: translate `network.tdhConsolidation.*` with the other TDH pages
@@ -79,7 +106,8 @@ including what consolidation protects against and what it does not.
 
 ## Source
 
-- Route: `app/network/tdh/consolidation/`
+- Routes: `app/network/tdh/consolidation/` and
+  `app/network/tdh/consolidation/design/`
 - Copy: `i18n/messages/networkTdhConsolidation.en-US.json`
 - Shared rule constants: `constants/consolidation.constants.ts`
 - Backend grouping: `6529seize-backend` `src/consolidation-tools.ts`

@@ -1,5 +1,5 @@
-import TDHConsolidationPage from "@/app/network/tdh/consolidation/page.client";
-import { generateMetadata } from "@/app/network/tdh/consolidation/page";
+import TDHConsolidationDesignPage from "@/app/network/tdh/consolidation/design/page.client";
+import { generateMetadata } from "@/app/network/tdh/consolidation/design/page";
 import { render, screen, within } from "@testing-library/react";
 
 jest.mock("@/components/about/AboutContentsDropdown", () => ({
@@ -10,12 +10,15 @@ jest.mock("@/contexts/TitleContext", () => ({
   useSetTitle: jest.fn(),
 }));
 
-describe("TDHConsolidationPage", () => {
+describe("TDHConsolidationDesignPage", () => {
   it("renders the rules, the analysis tables and the simulator", () => {
-    render(<TDHConsolidationPage />);
+    render(<TDHConsolidationDesignPage />);
 
     expect(
-      screen.getByRole("heading", { level: 1, name: "Wallet consolidation" })
+      screen.getByRole("heading", {
+        level: 1,
+        name: "How wallet consolidation works",
+      })
     ).toBeInTheDocument();
     expect(
       screen.getByRole("heading", { level: 2, name: "The rules" })
@@ -41,8 +44,19 @@ describe("TDHConsolidationPage", () => {
     ).toBeInTheDocument();
   });
 
+  it("points collectors back to the guide and the guided setup", () => {
+    render(<TDHConsolidationDesignPage />);
+
+    expect(
+      screen.getByRole("link", { name: "Read the collector's guide" })
+    ).toHaveAttribute("href", "/network/tdh/consolidation");
+    expect(
+      screen.getByRole("link", { name: "Open the guided setup" })
+    ).toHaveAttribute("href", "/delegation/build-consolidation");
+  });
+
   it("links every on-page navigation item to a section", () => {
-    render(<TDHConsolidationPage />);
+    render(<TDHConsolidationDesignPage />);
     const nav = screen.getByRole("navigation", { name: "On this page" });
     for (const link of within(nav).getAllByRole("link")) {
       const id = link.getAttribute("href")?.slice(1) ?? "";
@@ -50,9 +64,11 @@ describe("TDHConsolidationPage", () => {
     }
   });
 
-  it("uses a canonical consolidation path in its metadata", () => {
+  it("uses its own canonical path in its metadata", () => {
     const metadata = generateMetadata();
-    expect(metadata.title).toContain("Wallet consolidation");
-    expect(JSON.stringify(metadata)).toContain("/network/tdh/consolidation");
+    expect(metadata.title).toContain("How wallet consolidation works");
+    expect(JSON.stringify(metadata)).toContain(
+      "/network/tdh/consolidation/design"
+    );
   });
 });

@@ -1834,6 +1834,10 @@
       "classification": "crawlable",
       "family": "network"
     },
+    "/network/tdh/consolidation/design": {
+      "classification": "crawlable",
+      "family": "network"
+    },
     "/network/tdh/historic-boosts": {
       "classification": "crawlable",
       "family": "network"
