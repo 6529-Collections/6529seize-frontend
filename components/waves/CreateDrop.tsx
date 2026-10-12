@@ -52,6 +52,8 @@ import type {
 import { getDropSubmissionErrorContent } from "./create-drop-content/drop-submission-error.helpers";
 import type { CreateDropProps } from "./create-drop-content/create-drop.types";
 import { reportDropSubmissionFailure } from "@/utils/monitoring/dropSubmissionMonitoring";
+import { removeTemporaryThreadReply } from "./drops/reply-threads/pending-replies";
+import { isWaveRepliesCollapsed } from "@/helpers/waves/collapsed-replies.helpers";
 
 export default function CreateDrop({
   activeDrop,
@@ -449,6 +451,12 @@ export default function CreateDrop({
     },
     onSuccess: (serverDrop, body) => {
       if (body.dropId) {
+        if (isWaveRepliesCollapsed(wave))
+          removeTemporaryThreadReply(
+            queryClient,
+            body.drop.wave_id,
+            body.dropId
+          );
         processDropRemoved(body.drop.wave_id, body.dropId);
       }
       startLocalSlowModeCooldown(body);
@@ -489,6 +497,12 @@ export default function CreateDrop({
         if (!body.dropId) {
           return;
         }
+        if (isWaveRepliesCollapsed(wave))
+          removeTemporaryThreadReply(
+            queryClient,
+            body.drop.wave_id,
+            body.dropId
+          );
 
         if (
           isContentModerationRejection &&
