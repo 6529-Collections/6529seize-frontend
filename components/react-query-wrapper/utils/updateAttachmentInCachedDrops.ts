@@ -1,4 +1,3 @@
-import { isOlderDropVersion } from "@/helpers/waves/drop-version";
 import type { QueryClient } from "@tanstack/react-query";
 import type { ApiAttachment } from "@/generated/models/ApiAttachment";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
@@ -174,7 +173,6 @@ function replaceDrop(
   }
 
   if (isMatchingDrop(value, drop.id)) {
-    if (isOlderDropVersion(drop, value)) return value;
     return replaceMatchingDrop(value, drop, options);
   }
 

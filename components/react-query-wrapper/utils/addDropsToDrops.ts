@@ -1,4 +1,3 @@
-import { isOlderDropVersion } from "@/helpers/waves/drop-version";
 import type { QueryClient } from "@tanstack/react-query";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiWaveDropsFeed } from "@/generated/models/ApiWaveDropsFeed";
@@ -164,8 +163,6 @@ function upsertDropInQueryData(
       existingDropIndex !== undefined &&
       existingDropIndex !== -1
     ) {
-      if (isOlderDropVersion(drop, pageDrops[existingDropIndex]))
-        return oldData;
       pageDrops[existingDropIndex] = reconcileFinalizedDropAttachments(
         drop,
         pageDrops[existingDropIndex]
@@ -190,23 +187,12 @@ export function upsertDropIntoMatchingDropsQueries(
     .getQueryCache()
     .findAll({ queryKey: [QueryKey.DROPS] });
 
-  const hasNewerRevision = queries.some((query) => {
-    const data = queryClient.getQueryData<DropsInfiniteData>(query.queryKey);
-    return data?.pages?.some((page) =>
-      page.drops?.some(
-        (cachedDrop) =>
-          cachedDrop.id === drop.id && isOlderDropVersion(drop, cachedDrop)
-      )
-    );
-  });
-  if (hasNewerRevision) return;
-
-  const matchingQueries = queries.filter((query) => {
+  for (const query of queries) {
     const params = readDropsQueryParams(query.queryKey);
-    return params !== null && isMatchingDropsQuery(params, drop);
-  });
+    if (!params || !isMatchingDropsQuery(params, drop)) {
+      continue;
+    }
 
-  for (const query of matchingQueries) {
     queryClient.setQueryData<DropsInfiniteData | undefined>(
       query.queryKey,
       (oldData) => upsertDropInQueryData(oldData, drop),
