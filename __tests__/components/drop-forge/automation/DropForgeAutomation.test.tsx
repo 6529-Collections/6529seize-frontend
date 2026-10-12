@@ -86,7 +86,9 @@ it.each([
   async (chain, explorer) => {
     const current = launch(true);
     current.chain_id = chain as number;
-    current.actions[0].hash = "0x" + "a".repeat(64);
+    const action = current.actions[0];
+    if (!action) throw new Error("Launch fixture must contain initialization");
+    action.hash = "0x" + "a".repeat(64);
     jest.mocked(getForgeLaunch).mockResolvedValue(current);
     renderUI(
       <DropForgeAutomationStatus
@@ -98,7 +100,7 @@ it.each([
     if (explorer)
       expect(
         screen.getByRole("link", { name: "View transaction" })
-      ).toHaveAttribute("href", `${explorer}/tx/${current.actions[0].hash}`);
+      ).toHaveAttribute("href", `${explorer}/tx/${action.hash}`);
     else
       expect(
         screen.queryByRole("link", { name: "View transaction" })

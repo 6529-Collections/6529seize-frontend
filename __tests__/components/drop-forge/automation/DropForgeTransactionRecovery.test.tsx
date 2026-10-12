@@ -2,7 +2,11 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import DropForgeTransactionRecovery from "@/components/drop-forge/launch/DropForgeTransactionRecovery";
 import { requestForgeRecovery } from "@/services/api/drop-forge-api";
 import type { ApiDropForgeLaunch } from "@/generated/models/ApiDropForgeLaunch";
-import type { ApiDropForgeAction } from "@/generated/models/ApiDropForgeAction";
+import {
+  ApiDropForgeActionStateEnum,
+  type ApiDropForgeAction,
+} from "@/generated/models/ApiDropForgeAction";
+import { ApiDropForgeRecoveryOutcomeEnum } from "@/generated/models/ApiDropForgeRecovery";
 jest.mock("@/services/api/drop-forge-api", () => ({
   requestForgeRecovery: jest.fn(),
 }));
@@ -95,19 +99,19 @@ it("reuses the exact request ID after an uncertain API result", async () => {
     screen.getByRole("button", { name: "Confirm recovery request" })
   );
   await screen.findByRole("alert");
-  const first = jest.mocked(requestForgeRecovery).mock.calls[0][2];
+  const [firstCall] = jest.mocked(requestForgeRecovery).mock.calls;
+  if (!firstCall) throw new Error("The first recovery request must be recorded");
+  const first = firstCall[2];
   fireEvent.click(
     screen.getByRole("button", { name: "Confirm recovery request" })
   );
   await waitFor(() => expect(requestForgeRecovery).toHaveBeenCalledTimes(2));
-  expect(jest.mocked(requestForgeRecovery).mock.calls[1][2]).toEqual(first);
+  expect(jest.mocked(requestForgeRecovery).mock.calls[1]?.[2]).toEqual(first);
 });
 it("offers no replay when the original action won, including a late winner after cancellation", () => {
   const f = fixture();
-  f.action.state = "CONFIRMED" as ApiDropForgeAction["state"];
-  f.action.recovery!.outcome = "EXECUTED" as NonNullable<
-    ApiDropForgeAction["recovery"]
-  >["outcome"];
+  f.action.state = ApiDropForgeActionStateEnum.Confirmed;
+  f.action.recovery!.outcome = ApiDropForgeRecoveryOutcomeEnum.Executed;
   render(<DropForgeTransactionRecovery {...f} />);
   expect(
     screen.getByText(/allocations will not be replayed/)
@@ -116,11 +120,9 @@ it("offers no replay when the original action won, including a late winner after
 });
 it("shows cancelled allocations as outstanding and offers explicit late delivery", () => {
   const f = fixture();
-  f.action.state = "CANCELLED" as ApiDropForgeAction["state"];
+  f.action.state = ApiDropForgeActionStateEnum.Cancelled;
   f.action.deadline = 1;
-  f.action.recovery!.outcome = "CANCELLED" as NonNullable<
-    ApiDropForgeAction["recovery"]
-  >["outcome"];
+  f.action.recovery!.outcome = ApiDropForgeRecoveryOutcomeEnum.Cancelled;
   render(<DropForgeTransactionRecovery {...f} />);
   expect(
     screen.getByText(/allocations remain outstanding/)
