@@ -29,7 +29,7 @@ export class ApiWaveOverviewContextProfileContext {
     'unread_drops': number;
     'first_unread_drop_serial_no'?: number;
     /**
-    * Unread drops across all visible subwaves, independent of whether the authenticated profile follows each subwave.
+    * Unread drops across visible subwaves that the authenticated profile follows and has not muted.
     */
     'subwave_unread_drops'?: number;
     'followed_subwaves_count'?: number;

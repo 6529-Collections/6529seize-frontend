@@ -1087,6 +1087,7 @@
       ],
       "facts": [
         "Every Stream editorial and technical reference page has one structured feedback composer connected to the server-resolved Stream review Wave destination.",
+        "In production, Stream review feedback posts to the public top-level 6529 Tech Feedback wave; the earlier Stream Feedback subwave is archived read-only. Staging uses its own review wave.",
         "Editorial pages place the current page's loaded comments and composer in one collapsible rail; closing and reopening it preserves the current draft, and the browser remembers the open or closed preference.",
         "The page-comments rail reads the most recent 50 Wave messages for the exact review version, shows entries attached to the current page, and can load older 50-message pages on request.",
         "Editorial feedback can reference a stable page section; technical feedback can reference an exact Solidity file and line range.",
@@ -1715,7 +1716,7 @@
       "facts": [
         "The Tech Updates page lives at /about/tech.",
         "It is a longer-form area for 6529 tech updates, repo work, bot notes, release context, and build reports.",
-        "Shorter live repo activity still belongs in Follow The Repo.",
+        "Follow The Repo is the dev team's live chat. Anyone can read it, and its subwaves carry the deploy and GitHub PR feeds; the Tech Updates page is the linkable longer-form shelf beside it.",
         "The page links active technical notes such as the wallet authentication upgrade and indexes longer tech reports."
       ],
       "canonical_path": "/about/tech",
@@ -1726,6 +1727,58 @@
       ],
       "tags": ["about", "tech", "reports"],
       "source_refs": ["components/about/tech/AboutTech.tsx"]
+    },
+    {
+      "id": "waves.tech-feedback-and-dev-team",
+      "kind": "workflow",
+      "title": "Report bugs and follow 6529 development",
+      "link_label": "6529 Tech Feedback",
+      "aliases": [
+        "report a bug",
+        "where do i report bugs",
+        "give feedback",
+        "6529 tech feedback",
+        "follow the repo",
+        "dev team chat",
+        "6529 releases",
+        "release notes",
+        "deploys production",
+        "github pr feed"
+      ],
+      "keywords": [
+        "bug",
+        "feedback",
+        "tech",
+        "dev",
+        "team",
+        "repo",
+        "releases",
+        "deploys",
+        "github",
+        "waves"
+      ],
+      "facts": [
+        "Report 6529 bugs and share product or tech feedback in 6529 Tech Feedback, a public top-level wave.",
+        "Follow The Repo is the 6529 dev team's live chat. Anyone can read it; the dev team posts there.",
+        "Follow The Repo's subwaves are bot feeds: Deploys · Production, Deploys · Staging, and GitHub PR Feed.",
+        "Per-deploy frontend and backend release notes post to Deploys · Production.",
+        "6529 Releases is a top-level wave that receives one AI-written daily release digest plus individual Desktop and mobile app release notes; /about/release-notes opens it.",
+        "Dev Team Chat, PR Summaries, and Stream Feedback are archived read-only waves outside Follow The Repo.",
+        "For suspected security vulnerabilities in 6529 apps or services, use private reporting under the repository security policy instead of a public wave."
+      ],
+      "canonical_path": "/waves/e933d8d6-0c78-4e8f-aa12-f67d8c11b4dc",
+      "related_paths": [
+        "/waves/49f0e595-ec7c-4235-8695-a527f61b69f4",
+        "/waves/05b14183-e153-4e47-bc66-42a0f49102d4",
+        "/about/tech"
+      ],
+      "tags": ["waves", "feedback", "dev-team", "releases"],
+      "source_refs": [
+        "components/about/tech/reports.ts",
+        "app/about/release-notes/route.ts",
+        "ops/docs/developer/deployment.md",
+        "SECURITY.md"
+      ]
     },
     {
       "id": "navigation.search",
@@ -2986,9 +3039,10 @@
       ],
       "keywords": ["waves", "subwaves", "unread", "new", "badge", "sidebar"],
       "facts": [
-        "The new badge beside a parent wave's subwave control totals unread drops across visible, unmuted subwaves where read state is available.",
-        "A subwave contributes to the parent badge whether or not the viewer has joined or followed it.",
-        "The total excludes the viewer's own drops and drops from muted profiles; muting the parent hides the aggregate."
+        "The new badge beside a parent wave's subwave control totals unread drops across visible subwaves that the viewer follows and has not muted.",
+        "Subwaves the viewer has not joined or followed do not add to the parent badge; muting a subwave removes its contribution.",
+        "The total excludes the viewer's own drops and drops from muted profiles; muting the parent hides the aggregate.",
+        "Expanded subwave lists and the mobile subwave bar show unmuted subwaves first and muted subwaves last, each group ordered by newest activity."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/waves"],

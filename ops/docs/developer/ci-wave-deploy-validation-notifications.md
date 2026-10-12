@@ -1,9 +1,10 @@
 # CI Wave Deploy And WEB E2E Notifications
 
-Frontend deploy and WEB E2E workflows post results to the staging or production
-CI wave through the backend CI alert endpoint. The backend owns message
-rendering, profile mentions, reply correlation, and drop creation; workflows
-send run identities and outcomes.
+Frontend deploy and WEB E2E workflows post results to the `Deploys · Staging`
+or `Deploys · Production` wave (formerly CI-STAGING and CI-PRODUCTION), bot-feed
+subwaves of Follow The Repo, through the backend CI alert endpoint. The backend
+owns message rendering, profile mentions, reply correlation, and drop creation;
+workflows send run identities and outcomes.
 
 ## Message Contract
 
@@ -22,8 +23,10 @@ identifiers. A successful WEB E2E result is one line with no mentions:
 ```
 
 Attempt 1 omits the suffix. Failed validation includes its mode, optional pack,
-deploy commit, run link, and `cc @devs6529`; it also mentions the mapped manual
-initiator and original deploy initiator when distinct.
+deploy commit, and run link; it also mentions the mapped manual initiator and
+original deploy initiator when distinct. Failed deploys and failed production
+WEB E2E add `cc @devs6529`; failed staging WEB E2E keeps the initiator mentions
+but no longer adds `cc @devs6529`.
 
 ## Correlation And Reruns
 
