@@ -784,11 +784,11 @@ describe("UserPageCollectedStats", () => {
     result.unmount();
     renderWithQueryClient(ui);
     expect(
-      screen.getByRole("button", { name: "Details", exact: true })
+      screen.getByRole("button", { name: "Details" })
     ).toHaveAttribute("aria-expanded", "false");
     expect(screen.queryByTestId("details")).not.toBeInTheDocument();
     await user.click(
-      screen.getByRole("button", { name: "Details", exact: true })
+      screen.getByRole("button", { name: "Details" })
     );
     expect(mockReplace.mock.lastCall?.[0]).toContain("details=open");
     expect(mockReplace.mock.lastCall?.[0]).toContain("wallet-activity-page=2");
