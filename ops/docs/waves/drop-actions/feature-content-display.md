@@ -64,7 +64,9 @@ Multipart drops ("storms") stay in one card while users switch parts.
 - Use a PDF attachment's eye button to open its preview. On iPhone and iPad,
   including the iOS app, the reader fills the screen and shows the page count.
   Scroll through the pages and pinch to zoom. Close the reader to return to the
-  wave; the wave stays in place while you read.
+  wave; the wave stays in place while you read. On supported hosts, the reader
+  fetches PDF data as needed and loads nearby pages. Some documents or hosts
+  still require the whole file before pages appear.
 - Desktop previews use the browser's PDF viewer. **Download** and **Copy link**
   remain in the attachment options menu.
 - Drop-author profile pictures first request a scaled image variant when supported by the media host.
@@ -83,8 +85,8 @@ Multipart drops ("storms") stay in one card while users switch parts.
 
 ## Failure and Recovery
 
-- iOS PDF previews show **Loading PDF…** while downloading and **Loading page…**
-  while rendering. If loading fails or times out, choose **Try again** or
+- iOS PDF previews show **Loading PDF…** while opening and **Loading page…**
+  while fetching or rendering a page. If loading fails or times out, choose **Try again** or
   **Open full PDF**. Password-protected files and files above the preview
   limit must be opened separately.
 
