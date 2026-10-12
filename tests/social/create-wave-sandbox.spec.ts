@@ -765,7 +765,7 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
       new RegExp(`/waves/${SANDBOX_CREATED_WAVE_ID}$`),
       { timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS }
     );
-    await checkProposalCardConfiguration(page);
+    await checkWaveConfiguration(page);
     await expectNoUnsafeSandboxMutations(baseURL);
   });
 
@@ -1466,7 +1466,7 @@ test.describe("Create wave mobile reachability @auth @medium @local-only", () =>
   });
 });
 
-async function checkProposalCardConfiguration(page: Page) {
+async function checkWaveConfiguration(page: Page) {
   const mobile = (page.viewportSize()?.width ?? 1280) < 768;
   await page
     .getByRole("button", {
@@ -1480,59 +1480,15 @@ async function checkProposalCardConfiguration(page: Page) {
   await details
     .getByRole("tab", { name: "Configuration", exact: true })
     .click();
-  const edit = page.getByRole("button", {
-    name: "Edit proposal card settings",
-  });
-  await edit.focus();
-  await page.keyboard.press("Enter");
-
-  const editor = page.getByRole("dialog", {
-    name: "Edit proposal card settings",
-  });
-  const full = editor.getByRole("radio", {
-    name: "Full proposal",
-    exact: true,
-  });
-  const summary = editor.getByRole("radio", {
-    name: "Summary card",
-    exact: true,
-  });
-  const initiallySummary = await summary.isChecked();
-  await expect(initiallySummary ? summary : full).toBeFocused();
   await expect(
-    editor.getByRole("button", { name: "Save", exact: true })
-  ).toBeDisabled();
-
-  if (mobile) {
-    await full.tap();
-    await summary.tap();
-  } else {
-    await full.check();
-    await page.keyboard.press("ArrowRight");
-  }
-  await expect(summary).toBeChecked();
-  const limit = editor.getByRole("spinbutton", { name: /Text preview limit/ });
-  await limit.fill("119");
-  await expect(limit).toHaveAttribute("aria-invalid", "true");
-  await expect(editor.getByRole("alert")).toContainText("120");
-  const save = editor.getByRole("button", { name: "Save", exact: true });
-  await expect(save).toBeDisabled();
-  await expect(save).toBeInViewport();
-  const bounds = await editor.boundingBox();
-  expect(bounds).not.toBeNull();
-  expect(bounds!.y + bounds!.height).toBeLessThanOrEqual(
-    page.viewportSize()!.height
-  );
+    details.getByRole("heading", { name: "Chat", exact: true })
+  ).toBeVisible();
+  // Proposal appearance now belongs to competition Settings; its validation
+  // and cancellation are covered by the native/legacy competition sandbox.
+  await expect(
+    details.getByRole("button", { name: "Edit proposal card settings" })
+  ).toHaveCount(0);
   await expectNoHorizontalOverflow(page);
-  await editor.getByRole("button", { name: "Cancel", exact: true }).click();
-  await expect(editor).toBeHidden();
-  await expect(edit).toBeFocused();
-
-  await edit.press("Enter");
-  await expect(initiallySummary ? summary : full).toBeChecked();
-  await page.keyboard.press("Escape");
-  await expect(editor).toBeHidden();
-  await expect(edit).toBeFocused();
 }
 
 async function gotoCreateWave(page: Page) {

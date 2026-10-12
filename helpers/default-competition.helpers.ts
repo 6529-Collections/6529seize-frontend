@@ -20,8 +20,11 @@ const competitionTabNames: readonly string[] = COMPETITION_TABS;
 export function getLegacyCompetitionTab(
   tab: string | null
 ): MyStreamWaveTab | undefined {
+  let normalized = tab;
+  if (tab === "voters") normalized = "votes";
+  if (tab === "settings") normalized = "rules";
   return Object.entries(waveCompetitionTabs).find(
-    ([, value]) => value === tab
+    ([, value]) => value === normalized
   )?.[0] as MyStreamWaveTab | undefined;
 }
 
@@ -51,6 +54,8 @@ export function shouldResolveDefault(
   return (
     tab !== null &&
     (competitionTabNames.includes(tab) ||
+      tab === "voters" ||
+      tab === "settings" ||
       Object.keys(waveCompetitionTabs).some((key) => key.toLowerCase() === tab))
   );
 }

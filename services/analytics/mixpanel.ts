@@ -1,5 +1,15 @@
 import { publicEnv } from "@/config/env";
 import mixpanel from "mixpanel-browser";
+import type { BeforeSendHookPayload } from "mixpanel-browser";
+import Cookies from "js-cookie";
+import { CONSENT_PERFORMANCE_COOKIE } from "@/constants/constants";
+import { guardMixpanelBatching, type BatchSdk } from "./mixpanelBatching";
+import {
+  MIXPANEL_PRIVATE_PROPERTIES,
+  MIXPANEL_PRIVACY_CONFIG,
+  sanitizeMixpanelEnvelope,
+  sanitizeMixpanelIdentityEnvelope,
+} from "./mixpanelPrivacy";
 
 export type AnalyticsProperties = Record<
   string,
@@ -67,7 +77,64 @@ const MIXPANEL_TOKEN = publicEnv.NEXT_PUBLIC_MIXPANEL_TOKEN;
 
 let hasInitialized = false;
 let identifiedDistinctId: string | null = null;
+let identityResetPending = false;
 let isTrackingAllowed = false;
+let analyticsGeneration = 0;
+let batchGuard: ReturnType<typeof guardMixpanelBatching> | undefined;
+let queueClearState: "ready" | "pending" | "failed" = "ready";
+let resumeRequested = false;
+const recoveryListeners = new Set<() => void>();
+
+export const subscribeAnalyticsRecovery = (
+  listener: () => void
+): (() => void) => {
+  recoveryListeners.add(listener);
+  return () => {
+    recoveryListeners.delete(listener);
+  };
+};
+
+const clearAnalyticsQueues = (): void => {
+  if (queueClearState === "pending") return;
+  queueClearState = "pending";
+  if (!batchGuard) {
+    queueClearState = "failed";
+    return;
+  }
+  void batchGuard.stopAndClear().then(
+    () => {
+      queueClearState = "ready";
+      if (!resumeRequested) return;
+      resumeRequested = false;
+      for (const listener of recoveryListeners) {
+        try {
+          listener();
+        } catch {
+          /* Optional telemetry recovery. */
+        }
+      }
+    },
+    () => {
+      queueClearState = "failed";
+    }
+  );
+};
+
+export const getAnalyticsGeneration = (): number => analyticsGeneration;
+export const isAnalyticsTrackingAllowed = (): boolean => isAnalyticsReady();
+
+const clearPrivateSuperProperties = (
+  sdk: Pick<typeof mixpanel, "unregister"> = mixpanel
+): void => {
+  // Exported by the pinned SDK; read once rather than rereading storage for every absent key.
+  const persistenceSdk = sdk as typeof sdk & {
+    persistence: { properties: () => Record<string, unknown> };
+  };
+  const persisted = persistenceSdk.persistence.properties();
+  for (const key of MIXPANEL_PRIVATE_PROPERTIES) {
+    if (Object.hasOwn(persisted, key)) sdk.unregister(key);
+  }
+};
 
 const sanitizeProperties = (
   properties: AnalyticsProperties = {}
@@ -92,95 +159,182 @@ const isAnalyticsEnvironmentSupported = (): boolean => {
 };
 
 const isAnalyticsReady = (): boolean => {
-  return (
-    hasInitialized && isTrackingAllowed && isAnalyticsEnvironmentSupported()
-  );
+  if (
+    !hasInitialized ||
+    !isTrackingAllowed ||
+    identityResetPending ||
+    queueClearState !== "ready" ||
+    !isAnalyticsEnvironmentSupported()
+  )
+    return false;
+  try {
+    return Cookies.get(CONSENT_PERFORMANCE_COOKIE) === "true";
+  } catch {
+    return false;
+  }
 };
+
+const guardIdentityDelivery = (payload: Record<string, unknown>) =>
+  isAnalyticsReady() ? sanitizeMixpanelIdentityEnvelope(payload) : null;
 
 export const initAnalytics = (): boolean => {
   const token = MIXPANEL_TOKEN;
   if (!isAnalyticsEnvironmentSupported() || !token) {
     return false;
   }
-  isTrackingAllowed = true;
+  if (queueClearState !== "ready") {
+    resumeRequested = true;
+    if (queueClearState === "failed") clearAnalyticsQueues();
+    return false;
+  }
+  try {
+    if (identityResetPending) {
+      mixpanel.reset();
+      identityResetPending = false;
+    }
+    if (!isTrackingAllowed) analyticsGeneration += 1;
+    isTrackingAllowed = true;
+    if (hasInitialized) {
+      mixpanel.start_batch_senders();
+      return false;
+    }
+    // Runtime People/groups hooks are supported in 2.76.0 but omitted from its types.
+    const hooks = {
+      before_send_events: (payload: BeforeSendHookPayload) =>
+        isAnalyticsReady() ? sanitizeMixpanelEnvelope(payload) : null,
+      before_send_people: guardIdentityDelivery,
+      before_send_groups: guardIdentityDelivery,
+    };
+    mixpanel.init(token, {
+      ...MIXPANEL_PRIVACY_CONFIG,
+      batch_autostart: false,
+      persistence: "localStorage",
+      loaded: (sdk) => {
+        clearPrivateSuperProperties(sdk);
+      },
+      hooks,
+    });
+    clearPrivateSuperProperties();
+    batchGuard = guardMixpanelBatching(
+      mixpanel as typeof mixpanel & BatchSdk,
+      isAnalyticsReady
+    );
+    hasInitialized = true;
+    mixpanel.start_batch_senders();
+    return true;
+  } catch {
+    isTrackingAllowed = false;
+    return false;
+  }
+};
 
-  if (hasInitialized) {
+const track = (
+  eventName: string,
+  properties?: AnalyticsProperties
+): boolean => {
+  if (!isAnalyticsReady()) {
     return false;
   }
 
-  mixpanel.init(token, {
-    autocapture: false,
-    persistence: "localStorage",
-    track_pageview: false,
-  });
-  hasInitialized = true;
-  return true;
-};
-
-const track = (eventName: string, properties?: AnalyticsProperties): void => {
-  if (!isAnalyticsReady()) {
-    return;
+  try {
+    clearPrivateSuperProperties();
+    // 2.76.0 documents an acceptance result, omitted from its bundled types.
+    const sdkTrack = mixpanel.track.bind(mixpanel) as (
+      name: string,
+      properties: ReturnType<typeof sanitizeProperties>
+    ) => unknown;
+    const accepted = sdkTrack(eventName, sanitizeProperties(properties));
+    // The SDK can repopulate search attribution while building an event.
+    clearPrivateSuperProperties();
+    return Boolean(accepted);
+  } catch {
+    // Telemetry must never interrupt a product action.
+    return false;
   }
-
-  mixpanel.track(eventName, sanitizeProperties(properties));
 };
 
 export const trackAnalyticsEvent = (
   eventName: string,
   properties?: AnalyticsProperties
-): void => {
-  track(eventName, properties);
+): boolean => {
+  return track(eventName, properties);
 };
 
 export const identify = (
   profileId: number | string,
   traits?: AnalyticsProperties
-): void => {
+): boolean => {
   if (!isAnalyticsReady()) {
-    return;
+    return false;
   }
 
   const distinctId = String(profileId);
-  if (identifiedDistinctId !== distinctId) {
-    mixpanel.identify(distinctId);
-    identifiedDistinctId = distinctId;
-  }
-
-  const sanitizedTraits = sanitizeProperties(traits);
-  if (Object.keys(sanitizedTraits).length > 0) {
-    mixpanel.people.set(sanitizedTraits);
+  try {
+    clearPrivateSuperProperties();
+    if (identifiedDistinctId !== distinctId) {
+      mixpanel.identify(distinctId);
+      identifiedDistinctId = distinctId;
+      analyticsGeneration += 1;
+    }
+    const sanitizedTraits = sanitizeProperties(traits);
+    if (Object.keys(sanitizedTraits).length > 0) {
+      mixpanel.people.set(sanitizedTraits);
+    }
+    clearPrivateSuperProperties();
+    return true;
+  } catch {
+    // A failed profile transition must never deliver under the previous identity.
+    disableAnalytics();
+    return false;
   }
 };
 
 export const clearIdentity = (): void => {
+  analyticsGeneration += 1;
   identifiedDistinctId = null;
 
-  if (!isAnalyticsReady()) {
+  // Logout must clear local identity even while the delivery gate is closed.
+  if (!hasInitialized || !isAnalyticsEnvironmentSupported()) {
     return;
   }
 
-  mixpanel.reset();
+  identityResetPending = true;
+  try {
+    mixpanel.reset();
+    identityResetPending = false;
+  } catch {
+    isTrackingAllowed = false;
+  }
 };
 
 export const disableAnalytics = (): void => {
+  analyticsGeneration += 1;
   isTrackingAllowed = false;
   identifiedDistinctId = null;
+  resumeRequested = false;
 
   if (!hasInitialized || !isAnalyticsEnvironmentSupported()) {
     return;
   }
 
-  mixpanel.reset();
+  identityResetPending = true;
+  clearAnalyticsQueues();
+  try {
+    mixpanel.reset();
+    identityResetPending = false;
+  } catch {
+    /* Delivery stays closed until queues clear and initialization resets identity. */
+  }
 };
 
 export const trackPageView = (
   path: string,
   properties?: AnalyticsProperties
-): void => {
+): boolean => {
   const sanitizedProperties = sanitizeProperties(properties);
   const { path: _ignoredPath, ...pageViewProperties } = sanitizedProperties;
 
-  track(PAGE_VIEW_EVENT_NAME, {
+  return track(PAGE_VIEW_EVENT_NAME, {
     ...pageViewProperties,
     path,
   });

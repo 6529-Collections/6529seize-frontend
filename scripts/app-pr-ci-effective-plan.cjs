@@ -3,7 +3,7 @@
 
 const fs = require("node:fs");
 const path = require("node:path");
-const { isMuseumPath, isPolicyPath } = require("./museum-release-tier.cjs");
+const { requiresMuseumLane } = require("./museum-release-tier.cjs");
 
 const PACKAGE_GOVERNANCE_FILES = new Set([
   ".npmrc",
@@ -99,13 +99,9 @@ function applyEffectiveAppPrCiPlan(plan) {
   const deploymentContract = files.some((file) =>
     DEPLOYMENT_CONTRACT_PATTERNS.some((pattern) => pattern.test(file))
   );
-  // Keep App PR lane activation at least as broad as the tier classifier.
-  // P1/P2 surface work and P3 policy/control-plane work must receive the
-  // complete Museum inventory rather than being omitted by the legacy,
-  // narrower ownership helper.
-  const playwrightMuseum = files.some(
-    (file) => isMuseumPath(file) || isPolicyPath(file)
-  );
+  // Start the Museum lane for any change that can affect a Museum page or the
+  // Museum lane itself. The selection tool then runs only the affected packs.
+  const playwrightMuseum = files.some(requiresMuseumLane);
 
   const playwrightArtworkDocumentation = files.some((file) =>
     ARTWORK_DOCUMENTATION_BROWSER_PATTERNS.some((pattern) => pattern.test(file))
@@ -138,6 +134,46 @@ function applyEffectiveAppPrCiPlan(plan) {
         ".github/workflows/app-pr-ci.yml",
         "scripts/app-pr-ci-effective-plan.cjs",
         "__tests__/scripts/app-pr-ci-effective-plan.test.ts",
+      ].includes(file)
+  );
+
+  const playwrightWaveFeatureUsage = files.some(
+    (file) =>
+      /^(?:services\/analytics\/(?:mixpanel|waveFeature)|hooks\/useWaveFeatureUsage|tests\/(?:social\/wave-feature-usage-sandbox|support\/waveFeature)|components\/brain\/left-sidebar\/waves\/(?:SidebarDiscovery|SidebarActiveVotes|SidebarWaveNavigation|HighlyRatedWavesToggle)|components\/utils\/select\/)/u.test(
+        file
+      ) ||
+      [
+        "components/brain/my-stream/MyStreamWaveDesktopTabs.tsx",
+        "components/brain/my-stream/MyStreamWaveTabOption.tsx",
+        "components/common/TabToggle.tsx",
+        "components/providers/MixpanelSetup.tsx",
+        "components/brain/left-sidebar/web/WebProfileFeedShortcut.tsx",
+        "components/waves/leaderboard/header/WaveleaderboardSort.tsx",
+        "components/waves/leaderboard/header/WaveleaderboardHeader.tsx",
+        "playwright.config.ts",
+        "tsconfig.playwright.json",
+        "tests/packs.manifest.cjs",
+        "scripts/app-pr-ci-effective-plan.cjs",
+        ".github/workflows/app-pr-ci.yml",
+      ].includes(file)
+  );
+
+  const playwrightPdfAttachments = files.some(
+    (file) =>
+      /^(?:components\/drops\/view\/item\/content\/attachments\/|__tests__\/components\/drops\/view\/item\/content\/attachments\/|tests\/media\/pdf-attachment|tests\/fixtures\/pdf\/)/u.test(
+        file
+      ) ||
+      [
+        "components/waves/drops/WaveDropPartContentAttachments.tsx",
+        "hooks/useDeviceInfo.ts",
+        "scripts/prepare-pdfjs-assets.cjs",
+        "proxy.ts",
+        "config/securityHeaders.ts",
+        "package.json",
+        "pnpm-lock.yaml",
+        "tests/packs.manifest.cjs",
+        "scripts/app-pr-ci-effective-plan.cjs",
+        ".github/workflows/app-pr-ci.yml",
       ].includes(file)
   );
 
@@ -174,6 +210,16 @@ function applyEffectiveAppPrCiPlan(plan) {
       playwrightNativeCompetition
         ? "Native competition changes require desktop and mobile sandbox browser coverage."
         : "No native competition surfaces changed."
+    ),
+    playwright_wave_feature_usage: check(
+      playwrightWaveFeatureUsage,
+      playwrightWaveFeatureUsage
+        ? "Wave tracking controls or SDK policy require isolated desktop/mobile visibility and privacy coverage."
+        : "No Wave feature tracking boundary changed."
+    ),
+    playwright_pdf_attachments: check(
+      playwrightPdfAttachments,
+      "PDF attachment reader or its browser/runtime dependencies changed."
     ),
     playwright_museum: check(
       playwrightMuseum,

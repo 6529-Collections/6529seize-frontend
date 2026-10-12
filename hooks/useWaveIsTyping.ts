@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { PROFILE_SWITCHED_EVENT } from "@/services/auth/auth.utils";
 import { useWaveWebSocket } from "./useWaveWebSocket";
 import type {
   WsDropUpdateMessage,
@@ -22,6 +23,7 @@ interface TypingEntry {
 
 interface TypingMessageState {
   readonly scopeKey: string;
+  readonly socket: WebSocket | null;
   readonly message: string;
 }
 
@@ -135,6 +137,7 @@ export function useWaveIsTyping(
   const [typingMessageState, setTypingMessageState] =
     useState<TypingMessageState>({
       scopeKey,
+      socket,
       message: "",
     });
 
@@ -142,7 +145,18 @@ export function useWaveIsTyping(
 
   useEffect(() => {
     typersRef.current.clear();
-  }, [scopeKey]);
+    const clearProfileTyping = () => {
+      typersRef.current.clear();
+      setTypingMessageState({ scopeKey, socket, message: "" });
+    };
+    globalThis.addEventListener(PROFILE_SWITCHED_EVENT, clearProfileTyping);
+    return () => {
+      globalThis.removeEventListener(
+        PROFILE_SWITCHED_EVENT,
+        clearProfileTyping
+      );
+    };
+  }, [scopeKey, socket]);
 
   /* ----- 2. Handle incoming USER_IS_TYPING packets ----------------- */
   useEffect(() => {
@@ -211,16 +225,21 @@ export function useWaveIsTyping(
 
       // Only trigger re‑render if text actually changed
       setTypingMessageState((prev) =>
-        prev.scopeKey === scopeKey && prev.message === newMessage
+        prev.scopeKey === scopeKey &&
+        prev.socket === socket &&
+        prev.message === newMessage
           ? prev
-          : { scopeKey, message: newMessage }
+          : { scopeKey, socket, message: newMessage }
       );
     }, CLEANUP_INTERVAL_MS);
 
     return () => clearInterval(intervalId);
-  }, [scopeKey, shouldSubscribe]);
+  }, [scopeKey, shouldSubscribe, socket]);
 
-  return shouldSubscribe && typingMessageState.scopeKey === scopeKey
+  return shouldSubscribe &&
+    socket !== null &&
+    typingMessageState.socket === socket &&
+    typingMessageState.scopeKey === scopeKey
     ? typingMessageState.message
     : "";
 }

@@ -75,6 +75,8 @@ card page.
 ## User Journey
 
 1. Start in **Complete a set**, or choose **Lowest listings** or **TDH**.
+   These tool labels stay on one line. Swipe the tool row horizontally when it
+   does not fit on a narrow screen; keyboard focus also brings each tool into view.
    The shared **Collection** selector keeps The Memes, Gradients or Pebbles selected
    as you move between tools, including daily and future TDH. An incompatible goal
    switches to that collection's full-set or Pebbles-set options. The Memes offers
@@ -93,7 +95,8 @@ card page.
    Options show a loading state while the catalog arrives. If it cannot be
    loaded, choose **Try again**; a failed request does not mean the set is empty.
    Copies per NFT is the total you want to hold of each required NFT, including
-   copies already in your profile.
+   copies already in your profile. The hint below the inputs explains this total;
+   it is not the number of additional copies to buy.
    Leave the budget cap blank to estimate the full goal. An entered cap includes
    estimated gas. This is an analysis constraint; collecting still requires a fresh
    price review and wallet approval.
@@ -555,6 +558,9 @@ no holdings or TDH to it.
 Orders checks live listings for later partial fills, sales, cancellation and
 expiry. A brief in-app status links to ongoing activity, while receipts remain
 available in Orders after navigation or reload.
+
+Build your collection and Orders use the same centered content column on large
+screens, with headings, controls, results and order rows aligned together.
 
 ## Edge Cases
 

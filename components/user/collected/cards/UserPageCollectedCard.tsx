@@ -375,6 +375,7 @@ export default function UserPageCollectedCard({
 
   return (
     <Link
+      data-profile-action="Open artwork"
       href={path}
       className="tw-block tw-rounded-xl tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black"
     >

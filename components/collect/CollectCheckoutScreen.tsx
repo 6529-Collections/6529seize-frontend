@@ -6,7 +6,6 @@ import { useRef, useState, type ReactNode } from "react";
 import { useRetainedDialogFocus } from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
-import styles from "./marketplace-font.module.css";
 
 /** A full-viewport checkout with one scrolling surface and a persistent back control. */
 export default function CollectCheckoutScreen({
@@ -35,7 +34,7 @@ export default function CollectCheckoutScreen({
           if (!busy) onClose();
         }}
         unmount={false}
-        className={`tailwind-scope tw-relative tw-z-[1000] ${styles["surface"] ?? ""}`}
+        className="tailwind-scope tw-relative tw-z-[1000]"
       >
         <div className="tw-fixed tw-inset-0 tw-overflow-y-auto tw-overscroll-contain tw-bg-iron-950 tw-scrollbar-thin tw-scrollbar-track-iron-950 tw-scrollbar-thumb-iron-700">
           <DialogPanel className="tw-min-h-dvh tw-pb-[env(safe-area-inset-bottom)]">

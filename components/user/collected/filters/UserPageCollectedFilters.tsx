@@ -39,6 +39,7 @@ export default function UserPageCollectedFilters({
   setSzn,
   setSubcollection,
   showTransfer,
+  onAddressChange,
 }: {
   readonly profile: ApiIdentity;
   readonly filters: ProfileCollectedFilters;
@@ -49,6 +50,7 @@ export default function UserPageCollectedFilters({
   readonly setSzn: (szn: MemeSeason | null) => void;
   readonly setSubcollection: (subcollection: string | null) => void;
   readonly showTransfer: boolean;
+  readonly onAddressChange?: (() => void) | undefined;
 }) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const contentContainerRef = useRef<HTMLDivElement>(null);
@@ -148,16 +150,16 @@ export default function UserPageCollectedFilters({
   };
 
   return (
-    <div className="tw-relative tw-w-full">
+    <div className="tw-relative tw-w-full desktop-hover:[&_button[aria-haspopup]:hover]:tw-bg-iron-900 [&_button[aria-haspopup]:not(:focus-visible)]:tw-ring-iron-800 [&_button[aria-haspopup]>:last-child>svg]:tw-size-4 [&_button[aria-haspopup]]:tw-h-10 [&_button[aria-haspopup]]:tw-bg-iron-950 [&_button[aria-haspopup]]:tw-py-2 [&_button[aria-haspopup]]:tw-pl-3 [&_button[aria-haspopup]]:tw-pr-7 [&_button[aria-haspopup]]:tw-shadow-none">
       <div
         ref={scrollContainerRef}
         className="tw-w-full tw-overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:tw-hidden"
       >
         <div
           ref={contentContainerRef}
-          className="tw-nowrap tw-flex tw-w-full tw-min-w-max tw-items-center tw-justify-between tw-gap-x-3 lg:tw-gap-x-4"
+          className="tw-nowrap tw-flex tw-w-full tw-min-w-max tw-items-center tw-justify-between tw-gap-x-2 lg:tw-gap-x-3"
         >
-          <div className="tw-nowrap tw-flex tw-flex-shrink-0 tw-items-center tw-gap-x-3 lg:tw-gap-x-4">
+          <div className="tw-nowrap tw-flex tw-flex-shrink-0 tw-items-center tw-gap-x-2 lg:tw-gap-x-3">
             {showTransfer && <TransferToggle />}
 
             <CommonSelect
@@ -212,6 +214,7 @@ export default function UserPageCollectedFilters({
                 wallets={profile.wallets ?? []}
                 containerRef={containerRef}
                 onActiveAddress={() => undefined}
+                onAddressChange={onAddressChange}
               />
             )}
           </div>
@@ -219,34 +222,36 @@ export default function UserPageCollectedFilters({
       </div>
       {canScrollLeft && (
         <>
-          <div className="tw-pointer-events-none tw-absolute tw-bottom-0 tw-left-0 tw-top-0 tw-z-10 tw-w-24 tw-bg-gradient-to-r tw-from-black tw-via-black/40 tw-to-black/0" />
+          <div className="tw-pointer-events-none tw-absolute tw-bottom-0 tw-left-0 tw-top-0 tw-z-10 tw-w-12 tw-bg-gradient-to-r tw-from-black tw-via-black/40 tw-to-black/0" />
           <button
+            type="button"
             onClick={scrollLeft}
             aria-label={getCollectedFilterMessage(
               "user.collected.filters.scrollLeft"
             )}
-            className="tw-group tw-absolute tw-left-0 tw-top-1/2 tw-z-20 tw-inline-flex tw-h-10 tw-w-10 tw--translate-y-1/2 tw-items-center tw-justify-start tw-border-none tw-bg-transparent tw-p-0 tw-outline-none"
+            className="tw-group tw-absolute tw-left-0 tw-top-1/2 tw-z-20 tw-inline-flex tw-h-10 tw-w-10 tw--translate-y-1/2 tw-items-center tw-justify-start tw-rounded-lg tw-border-none tw-bg-transparent tw-p-0 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-500"
           >
             <FontAwesomeIcon
               icon={faChevronLeft}
-              className="tw-h-6 tw-w-6 tw-text-iron-200 tw-transition tw-duration-300 tw-ease-out group-hover:tw-text-iron-300"
+              className="tw-h-4 tw-w-4 tw-text-iron-200 tw-transition tw-duration-300 tw-ease-out group-hover:tw-text-iron-300"
             />
           </button>
         </>
       )}
       {canScrollRight && (
         <>
-          <div className="tw-pointer-events-none tw-absolute tw-bottom-0 tw-right-0 tw-top-0 tw-z-10 tw-w-24 tw-bg-gradient-to-l tw-from-black tw-via-black/40 tw-to-black/0" />
+          <div className="tw-pointer-events-none tw-absolute tw-bottom-0 tw-right-0 tw-top-0 tw-z-10 tw-w-12 tw-bg-gradient-to-l tw-from-black tw-via-black/40 tw-to-black/0" />
           <button
+            type="button"
             onClick={scrollRight}
             aria-label={getCollectedFilterMessage(
               "user.collected.filters.scrollRight"
             )}
-            className="tw-group tw-absolute tw-right-0 tw-top-1/2 tw-z-20 tw-inline-flex tw-h-10 tw-w-10 tw--translate-y-1/2 tw-items-center tw-justify-end tw-border-none tw-bg-transparent tw-p-0 tw-outline-none"
+            className="tw-group tw-absolute tw-right-0 tw-top-1/2 tw-z-20 tw-inline-flex tw-h-10 tw-w-10 tw--translate-y-1/2 tw-items-center tw-justify-end tw-rounded-lg tw-border-none tw-bg-transparent tw-p-0 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-500"
           >
             <FontAwesomeIcon
               icon={faChevronRight}
-              className="tw-h-6 tw-w-6 tw-text-iron-200 tw-transition tw-duration-300 tw-ease-out group-hover:tw-text-iron-300"
+              className="tw-h-4 tw-w-4 tw-text-iron-200 tw-transition tw-duration-300 tw-ease-out group-hover:tw-text-iron-300"
             />
           </button>
         </>

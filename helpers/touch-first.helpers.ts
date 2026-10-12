@@ -76,7 +76,7 @@ const FINE_POINTER_BODY_ATTRIBUTE = "data-fine-pointer";
 // every page load on a capability-lying browser starts in touch mode and
 // visibly flips to desktop on the first cursor glide (mobile buttons flash
 // and disappear, and clicks land in a dead transitional window).
-const FINE_POINTER_STORAGE_KEY = "6529-fine-pointer";
+export const FINE_POINTER_STORAGE_KEY = "6529-fine-pointer";
 
 // A single event is not proof: some tools emit stray synthetic mouse events
 // on genuine touch devices, and jsdom/test events must never latch. Require

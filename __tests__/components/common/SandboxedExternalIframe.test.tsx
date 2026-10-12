@@ -33,6 +33,29 @@ describe("SandboxedExternalIframe", () => {
     globalThis.IntersectionObserver = originalIntersectionObserver;
   });
 
+  it("retains the isolated artwork sandbox and fullscreen permission", () => {
+    const { container } = render(
+      <SandboxedExternalIframe
+        src="https://example.com/media"
+        title="Artwork"
+      />
+    );
+    act(() =>
+      observerCallback?.(
+        [{ isIntersecting: true } as IntersectionObserverEntry],
+        new MockIntersectionObserver(
+          jest.fn()
+        ) as unknown as IntersectionObserver
+      )
+    );
+    const frame = container.querySelector("iframe");
+    expect(frame).toHaveAttribute("sandbox", "allow-scripts");
+    expect(frame).toHaveAttribute("allow", "fullscreen");
+    expect(frame).toHaveAttribute("allowfullscreen");
+    expect(frame).toHaveAttribute("referrerpolicy", "no-referrer");
+    expect(frame).toHaveAttribute("credentialless", "");
+  });
+
   it("uses the latest onVisible callback when the iframe becomes visible", () => {
     const firstOnVisible = jest.fn();
     const secondOnVisible = jest.fn();

@@ -2,6 +2,12 @@
 
 [Master roadmap](../README.md)
 
+This assessment preserves the 2026-10-01 audit. Later default-selection release
+evidence is in [default competition delivery](./default-competition-delivery.md);
+Phase 5 implementation and pending production gates are in
+[migration delivery](./legacy-migration-delivery.md). Statements below describe
+the audit date, not a new migration or current release claim.
+
 ## Delivery and Evidence
 
 Native multi-competition functionality is deployed and enabled in production.
@@ -9,16 +15,16 @@ Roadmap phases describe architectural milestones; delivery Phase 4 describes
 production promotion. Completing that delivery does not close every roadmap
 acceptance gate or migrate existing competitions.
 
-| Evidence | Result and boundary |
-| --- | --- |
-| [Backend PR #2125](https://github.com/6529-Collections/6529seize-backend/pull/2125) | Native commands, credits, runtime and downstream integrations merged. |
-| [Frontend PR #4116](https://github.com/6529-Collections/6529seize-frontend/pull/4116) | Competition context, creation, discovery and native interaction merged. |
-| [Frontend follow-up #4143](https://github.com/6529-Collections/6529seize-frontend/pull/4143) | Reviewed Sonar follow-up merged. |
-| [Backend production deployment](https://github.com/6529-Collections/6529seize-backend/actions/runs/36726828323) | Final API deployment succeeded at `64c94b79386b471396dcc88b9bf2b86f01f8165c`, after dependent services. |
-| [Frontend production deployment](https://github.com/6529-Collections/6529seize-frontend/actions/runs/36747875510) | Latest audited frontend deployment succeeded at `b0af0a37cb1cdca38c3e15cc89a9b55ebc27816c`. |
-| [Production E2E, attempt 3](https://github.com/6529-Collections/6529seize-frontend/actions/runs/36749984846/attempts/3) | All 16 packs passed on that frontend revision, with retries. This is read-only production compatibility coverage. |
-| Production activation record, 2026-09-30 | Unified reads, native writes, native execution and hub creation enabled after backend readiness; frontend production flag enabled. |
-| Read-only production audit, 2026-10-01 | API reports the backend revision above; database/Redis healthy. Main Stage v3 hub/competition reads and legacy leaderboard succeed; its original competition retains legacy ownership. |
+| Evidence                                                                                                                | Result and boundary                                                                                                                                                                    |
+| ----------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Backend PR #2125](https://github.com/6529-Collections/6529seize-backend/pull/2125)                                     | Native commands, credits, runtime and downstream integrations merged.                                                                                                                  |
+| [Frontend PR #4116](https://github.com/6529-Collections/6529seize-frontend/pull/4116)                                   | Competition context, creation, discovery and native interaction merged.                                                                                                                |
+| [Frontend follow-up #4143](https://github.com/6529-Collections/6529seize-frontend/pull/4143)                            | Reviewed Sonar follow-up merged.                                                                                                                                                       |
+| [Backend production deployment](https://github.com/6529-Collections/6529seize-backend/actions/runs/36726828323)         | Final API deployment succeeded at `64c94b79386b471396dcc88b9bf2b86f01f8165c`, after dependent services.                                                                                |
+| [Frontend production deployment](https://github.com/6529-Collections/6529seize-frontend/actions/runs/36747875510)       | Latest audited frontend deployment succeeded at `b0af0a37cb1cdca38c3e15cc89a9b55ebc27816c`.                                                                                            |
+| [Production E2E, attempt 3](https://github.com/6529-Collections/6529seize-frontend/actions/runs/36749984846/attempts/3) | All 16 packs passed on that frontend revision, with retries. This is read-only production compatibility coverage.                                                                      |
+| Production activation record, 2026-09-30                                                                                | Unified reads, native writes, native execution and hub creation enabled after backend readiness; frontend production flag enabled.                                                     |
+| Read-only production audit, 2026-10-01                                                                                  | API reports the backend revision above; database/Redis healthy. Main Stage v3 hub/competition reads and legacy leaderboard succeed; its original competition retains legacy ownership. |
 
 The release record includes real native Rank and Approve staging executions,
 162 API checks across 20 type/credit/scope combinations, and legacy Main Stage
@@ -77,14 +83,14 @@ a storage flag is insufficient.
 These gates remain open until linked evidence demonstrates them. A missing
 record is not proof that a deployed component is failing or an alarm is absent.
 
-| Gate | Current evidence / required closeout | Responsible role |
-| --- | --- | --- |
-| Representative native production completion | Staging native execution and production compatibility pass. Record representative production-native Rank/Approve completion and side-effect correctness before migrating legacy competitions. | Backend + operations |
-| Independent production parity | Independent comparison code is present. Record coverage and zero critical mismatches, plus seven consecutive full comparison windows without non-critical read mismatches before each storage-mode cutover. Old self-comparison samples do not qualify. | Backend + operations |
-| Performance and alerts | The audit found aggregate Lambda health, not recorded decision-lag p95/p99 budgets, endpoint GET p95/error budgets, or verified competition-specific backlog/duplicate-effect alerts. Attach measurements, thresholds and operational alert evidence. | Operations |
-| Original creation shortcut | The enabled UI uses separate hub/competition creation. The Phase 3 combined Rank/Approve shortcut remains unimplemented; implement it or record an explicit product amendment before closing that requirement. | Frontend + product |
-| Rollout acceptance | Record cohort outcomes, device/accessibility/support acceptance and known coverage limits. Shipped controls do not themselves prove all Phase 6 exit criteria. | Frontend + product + operations |
-| Migrated-client compatibility | Old primary views work against legacy data. Prove frozen GET contracts and supported old writes against native-backed migrated data during Phase 5. | Backend + frontend |
+| Gate                                        | Current evidence / required closeout                                                                                                                                                                                                                    | Responsible role                |
+| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------- |
+| Representative native production completion | Staging native execution and production compatibility pass. Record representative production-native Rank/Approve completion and side-effect correctness before migrating legacy competitions.                                                           | Backend + operations            |
+| Independent production parity               | Independent comparison code is present. Record coverage and zero critical mismatches, plus seven consecutive full comparison windows without non-critical read mismatches before each storage-mode cutover. Old self-comparison samples do not qualify. | Backend + operations            |
+| Performance and alerts                      | The audit found aggregate Lambda health, not recorded decision-lag p95/p99 budgets, endpoint GET p95/error budgets, or verified competition-specific backlog/duplicate-effect alerts. Attach measurements, thresholds and operational alert evidence.   | Operations                      |
+| Original creation shortcut                  | The enabled UI uses separate hub/competition creation. The Phase 3 combined Rank/Approve shortcut remains unimplemented; implement it or record an explicit product amendment before closing that requirement.                                          | Frontend + product              |
+| Rollout acceptance                          | Record cohort outcomes, device/accessibility/support acceptance and known coverage limits. Shipped controls do not themselves prove all Phase 6 exit criteria.                                                                                          | Frontend + product + operations |
+| Migrated-client compatibility               | Old primary views work against legacy data. Prove frozen GET contracts and supported old writes against native-backed migrated data during Phase 5.                                                                                                     | Backend + frontend              |
 
 The [baseline acceptance requirements](../phase-0/baseline-parity-plan.md#acceptance-thresholds)
 and [observability plan](../phase-0/rollout-rollback-observability.md) remain in

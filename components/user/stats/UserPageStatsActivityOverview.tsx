@@ -283,7 +283,7 @@ export default function UserPageStatsActivityOverview({
   return (
     <section
       aria-labelledby="activity-overview-heading"
-      className="tw-space-y-3"
+      className="tw-space-y-2 md:tw-space-y-3"
     >
       <h3
         className={STATS_SECTION_HEADING_CLASS}

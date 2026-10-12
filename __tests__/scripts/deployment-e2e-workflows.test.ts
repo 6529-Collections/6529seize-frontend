@@ -21,6 +21,16 @@ const museumPacks = [
   "museum-about",
   "museum-inside-system",
   "museum-rights",
+  "museum-network-ia",
+];
+// Deployed Museum pack aliases in manifest order, as the workflows derive them.
+const manifestMuseumPacks = [
+  "museum-data-architecture",
+  "museum-institutional-practice",
+  "museum-network-ia",
+  "museum-about",
+  "museum-inside-system",
+  "museum-rights",
 ];
 const bash = fs.existsSync("/opt/homebrew/bin/bash")
   ? "/opt/homebrew/bin/bash"
@@ -32,8 +42,17 @@ function writeExecutable(root: string, name: string, source: string) {
   fs.writeFileSync(destination, source, { mode: 0o755 });
 }
 
-function selectionFixture(environment: string, historyAvailable: boolean) {
+function selectionFixture(
+  environment: string,
+  historyAvailable: boolean,
+  manifestSource = fs.readFileSync(
+    path.join(process.cwd(), "tests/packs.manifest.cjs"),
+    "utf8"
+  )
+) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "deployment-selection-"));
+  fs.mkdirSync(path.join(root, "tests"));
+  fs.writeFileSync(path.join(root, "tests/packs.manifest.cjs"), manifestSource);
   const git = (...args: string[]) =>
     childProcess
       .execFileSync("git", args, {
@@ -108,6 +127,10 @@ fi
     root,
     "6529",
     `#!/usr/bin/env bash
+if [[ "$1" == exec && "$2" == node && "$3" == -e ]]; then
+  shift 2
+  exec "$NODE_BINARY" "$@"
+fi
 [[ "$1" == exec && "$2" == node && "$3" == scripts/museum-release-selection.cjs ]] || exit 1
 shift 3
 exec "$NODE_BINARY" "$MUSEUM_SELECTION_TOOL" "$@"
@@ -244,6 +267,135 @@ describe("separate post-deploy E2E", () => {
     expect(source).toContain("./bin/6529 exec playwright install chromium");
   });
 
+  describe.each([
+    ["staging", stagingE2e],
+    ["production", productionE2e],
+  ])("%s dependency installation recovery", (_environment, e2e) => {
+    const job =
+      e2e.workflow.jobs.readonly ?? e2e.workflow.jobs["staging-packs"];
+    const primary = job.steps.find(
+      (step: { id?: string }) => step.id === "playwright_dependencies_primary"
+    );
+    const retry = job.steps.find(
+      (step: { id?: string }) => step.id === "playwright_dependencies_retry"
+    );
+    const verify = job.steps.find(
+      (step: { name?: string }) =>
+        step.name === "Verify Playwright dependencies"
+    );
+
+    it.each([
+      ["free", "", 0, ["check", "install"]],
+      ["clears", "", 0, ["check", "wait", "check", "install"]],
+      ["expires", "", 124, ["check", "wait"]],
+      ["free", "77", 77, ["check", "install"]],
+    ])(
+      "handles a %s lock and installer exit %s",
+      (lock, installExit, status, events) => {
+        const root = fs.mkdtempSync(
+          path.join(os.tmpdir(), "e2e-dependencies-")
+        );
+        try {
+          writeExecutable(root, "sudo", '#!/usr/bin/env bash\nexec "$@"\n');
+          writeExecutable(
+            root,
+            "timeout",
+            `#!/usr/bin/env bash
+[[ "$1" == 300 ]] || exit 99
+shift
+if [[ "$LOCK_MODE" == expires ]]; then
+  "$@"
+  child_status=$?
+  [[ "$child_status" == 143 ]] || exit 99
+  exit 124
+fi
+exec "$@"
+`
+          );
+          writeExecutable(
+            root,
+            "fuser",
+            `#!/usr/bin/env bash
+[[ "$*" == '/var/lib/dpkg/lock-frontend /var/lib/dpkg/lock /var/lib/apt/lists/lock' ]] || exit 99
+echo check >> "$EVENTS"
+[[ "$LOCK_MODE" != expires ]] || exit 0
+if [[ "$LOCK_MODE" == clears && ! -f "$RELEASED" ]]; then
+  touch "$RELEASED"
+  exit 0
+fi
+exit 1
+`
+          );
+          writeExecutable(
+            root,
+            "sleep",
+            `#!/usr/bin/env bash
+echo wait >> "$EVENTS"
+# Simulate timeout's termination after the held-lock loop reaches its wait.
+[[ "$LOCK_MODE" != expires ]] || kill -TERM "$PPID"
+`
+          );
+          writeExecutable(
+            root,
+            "6529",
+            `#!/usr/bin/env bash
+[[ "$*" == 'exec playwright install-deps chromium' ]] || exit 99
+echo install >> "$EVENTS"
+exit "\${INSTALL_EXIT:-0}"
+`
+          );
+          const eventFile = path.join(root, "events");
+          const result = childProcess.spawnSync(bash, ["-c", retry.run], {
+            cwd: root,
+            encoding: "utf8",
+            timeout: 5000,
+            env: {
+              ...process.env,
+              PATH: `${path.join(root, "bin")}:${process.env["PATH"]}`,
+              LOCK_MODE: lock,
+              INSTALL_EXIT: installExit,
+              RELEASED: path.join(root, "released"),
+              EVENTS: eventFile,
+            },
+          });
+          expect(result.error).toBeUndefined();
+          expect(result.status).toBe(status);
+          expect(
+            fs.existsSync(eventFile)
+              ? fs.readFileSync(eventFile, "utf8").trim().split("\n")
+              : []
+          ).toEqual(events);
+        } finally {
+          fs.rmSync(root, { recursive: true, force: true });
+        }
+      }
+    );
+
+    it.each([
+      ["success", "skipped", 0],
+      ["failure", "success", 0],
+      ["failure", "failure", 1],
+    ])(
+      "keeps setup fatal unless an install succeeds (%s/%s)",
+      (first, second, status) => {
+        expect(primary["timeout-minutes"]).toBe(10);
+        expect(retry["timeout-minutes"]).toBe(15);
+        expect(retry.if).toBe(
+          "steps.playwright_dependencies_primary.outcome != 'success'"
+        );
+        const result = childProcess.spawnSync(bash, ["-c", verify.run], {
+          encoding: "utf8",
+          env: {
+            ...process.env,
+            PRIMARY_OUTCOME: first,
+            RETRY_OUTCOME: second,
+          },
+        });
+        expect(result.status).toBe(status);
+      }
+    );
+  });
+
   it("posts manual production E2E to the CI wave against the original deployment", () => {
     const notificationJob = productionE2e.workflow.jobs["notify-ci-wave"];
     const notification = notificationJob.steps.find(
@@ -305,6 +457,9 @@ describe("separate post-deploy E2E", () => {
         expect(evidence.selected_packs).toEqual(
           historyAvailable ? [] : museumPacks
         );
+        expect(
+          fs.readFileSync(path.join(fixture.root, "outputs"), "utf8")
+        ).toContain(`museum_packs=${JSON.stringify(manifestMuseumPacks)}`);
         expect(evidence.source_commit).toBe(fixture.env.MUSEUM_SOURCE_SHA);
         expect(evidence.classification.tier).toBe(
           historyAvailable ? "NONE" : "P3"
@@ -347,6 +502,7 @@ require('node:fs').writeFileSync(process.env.RESULT_PATH, JSON.stringify({
             DEPLOYED_SHA: "a".repeat(40),
             RESULT_PATH: path.join(root, "arguments.json"),
             MUSEUM_SELECTED_PACKS_JSON: JSON.stringify(["museum-about"]),
+            MUSEUM_AVAILABLE_PACKS_JSON: JSON.stringify(manifestMuseumPacks),
             MUSEUM_PUBLICATION_EXPECTED_COMMIT: "b".repeat(40),
             SELECTED_PACK: "all",
           },
@@ -361,7 +517,7 @@ require('node:fs').writeFileSync(process.env.RESULT_PATH, JSON.stringify({
             arg === "--exclude-pack" ? [invocation.args[index + 1]] : []
         );
         expect(excluded).toEqual(
-          museumPacks.filter((pack) => pack !== "museum-about")
+          manifestMuseumPacks.filter((pack) => pack !== "museum-about")
         );
         expect(runPacks.env.MUSEUM_PUBLICATION_EXPECTED_COMMIT).toBe(
           "${{ steps.museum-publication.outputs.publication_commit }}"
@@ -374,6 +530,85 @@ require('node:fs').writeFileSync(process.env.RESULT_PATH, JSON.stringify({
       } finally {
         fs.rmSync(root, { recursive: true, force: true });
       }
+    }
+  );
+  function runSelectionWithTool(
+    e2e: ReturnType<typeof parse>,
+    environment: string,
+    manifestSource: string,
+    selectedPacks: string[]
+  ) {
+    const job =
+      e2e.workflow.jobs.readonly ?? e2e.workflow.jobs["staging-packs"];
+    const selection = job.steps.find(
+      (step: { name?: string }) =>
+        step.name === "Select Museum packs for the deployed change"
+    );
+    const fixture = selectionFixture(environment, true, manifestSource);
+    const tool = path.join(fixture.root, "fake-selection.cjs");
+    fs.writeFileSync(
+      tool,
+      `const fs = require("node:fs");
+const args = process.argv.slice(2);
+const value = (name) => args[args.indexOf(name) + 1];
+fs.writeFileSync(value("--output"), JSON.stringify({
+  contract: "museum-release-selection-v1",
+  environment: value("--environment"),
+  source_commit: value("--source-commit"),
+  selected_packs: ${JSON.stringify(selectedPacks)},
+  selection_digest: "${"a".repeat(64)}"
+}));
+`
+    );
+    try {
+      return childProcess.spawnSync(bash, ["-c", selection.run], {
+        cwd: fixture.root,
+        env: { ...fixture.env, MUSEUM_SELECTION_TOOL: tool },
+        encoding: "utf8",
+        timeout: 10_000,
+      });
+    } finally {
+      fs.rmSync(fixture.root, { recursive: true, force: true });
+    }
+  }
+
+  const futureManifest = `module.exports = { PACKS: [
+  { alias: "museum-future", changeScope: "museum", environments: ["staging", "production"] },
+  { alias: "core", environments: ["staging", "production"] },
+] };
+`;
+
+  it.each([
+    ["staging", stagingE2e],
+    ["production", productionE2e],
+  ])(
+    "accepts %s Museum packs that only the deployed manifest defines",
+    (environment, e2e) => {
+      expect(
+        runSelectionWithTool(e2e, environment, futureManifest, [
+          "museum-future",
+        ]).status
+      ).toBe(0);
+      expect(
+        runSelectionWithTool(e2e, environment, futureManifest, ["museum-about"])
+          .status
+      ).not.toBe(0);
+    }
+  );
+
+  it.each([
+    ["staging", stagingE2e],
+    ["production", productionE2e],
+  ])(
+    "fails %s Museum selection closed when the deployed manifest has no Museum packs",
+    (environment, e2e) => {
+      const result = runSelectionWithTool(
+        e2e,
+        environment,
+        "module.exports = { PACKS: [] };\n",
+        []
+      );
+      expect(result.status).not.toBe(0);
     }
   );
 });

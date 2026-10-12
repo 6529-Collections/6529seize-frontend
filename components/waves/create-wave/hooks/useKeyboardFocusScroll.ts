@@ -20,21 +20,35 @@ const scrollFieldIntoVisibleViewport = (field: HTMLElement) => {
   field.scrollIntoView({ behavior: "smooth", block: "center" });
 };
 
-/**
- * On touch-first devices, deliberately scrolls whichever text field receives
- * focus inside the container into the visible region of the viewport once the
- * software keyboard has settled, instead of leaving the field wherever the
- * browser's default keyboard-avoidance dumped it.
- *
- * A single fixed delay is not enough: the keyboard can finish animating (and
- * the visual viewport finish shrinking) *after* that delay, especially on
- * slower devices, which leaves the field parked under the keyboard. So the
- * focused field is also re-positioned on every visualViewport resize while it
- * stays focused — that is the event that actually fires when the keyboard
- * arrives, however long it takes.
- */
+// Network corrects only its editor scroll position, after keyboard and result
+// layout changes settle. Other consumers retain their existing centering.
+const scrollFieldWithinContainer = (
+  container: HTMLElement,
+  field: HTMLElement
+) => {
+  const viewport = globalThis.visualViewport;
+  const bounds = container.getBoundingClientRect();
+  const top = Math.max(bounds.top, viewport?.offsetTop ?? 0) + 12;
+  const bottom =
+    Math.min(
+      bounds.bottom,
+      (viewport?.offsetTop ?? 0) + (viewport?.height ?? globalThis.innerHeight)
+    ) - 12;
+  const fieldBounds = field.getBoundingClientRect();
+  const target =
+    field.closest("[data-keyboard-scroll-target]")?.getBoundingClientRect() ??
+    fieldBounds;
+  const targetBottom = Math.min(target.bottom, fieldBounds.top + bottom - top);
+  let delta = Math.max(0, targetBottom - bottom);
+  if (fieldBounds.top - delta < top) delta = fieldBounds.top - top;
+  if (Math.abs(delta) > 1)
+    container.scrollBy({ top: delta, behavior: "instant" });
+};
+
+/** Position touch inputs after keyboard layout settles. */
 export default function useKeyboardFocusScroll(
-  containerRef: RefObject<HTMLElement | null>
+  containerRef: RefObject<HTMLElement | null>,
+  mode: "center" | "nearest" = "center"
 ) {
   const { hasTouchScreen } = useDeviceInfo();
 
@@ -46,6 +60,7 @@ export default function useKeyboardFocusScroll(
 
     let timer: ReturnType<typeof setTimeout> | undefined;
     let activeField: HTMLElement | null = null;
+    let activeTarget: Element | null = null;
 
     const repositionActiveField = () => {
       if (
@@ -53,8 +68,18 @@ export default function useKeyboardFocusScroll(
         document.activeElement === activeField &&
         activeField.isConnected
       ) {
-        scrollFieldIntoVisibleViewport(activeField);
+        if (mode === "center") {
+          scrollFieldIntoVisibleViewport(activeField);
+          return;
+        }
+
+        scrollFieldWithinContainer(container, activeField);
       }
+    };
+
+    const scheduleReposition = () => {
+      clearTimeout(timer);
+      timer = setTimeout(repositionActiveField, KEYBOARD_SETTLE_MS);
     };
 
     const onFocusIn = (event: FocusEvent) => {
@@ -66,31 +91,46 @@ export default function useKeyboardFocusScroll(
         return;
       }
 
+      if (activeTarget) observer?.unobserve(activeTarget);
       activeField = target;
-      if (timer) {
-        clearTimeout(timer);
-      }
-      timer = setTimeout(repositionActiveField, KEYBOARD_SETTLE_MS);
+      activeTarget = target.closest("[data-keyboard-scroll-target]") ?? target;
+      observer?.observe(activeTarget);
+      scheduleReposition();
     };
 
     const onFocusOut = () => {
+      if (activeTarget) observer?.unobserve(activeTarget);
+      activeTarget = null;
       activeField = null;
+      clearTimeout(timer);
     };
 
-    // The keyboard shrinking the viewport is a visualViewport resize; re-run
-    // the reposition then so a late keyboard still tucks the field into view.
-    const onViewportResize = () => repositionActiveField();
+    // Coalesce Network keyboard frames into one correction. Centered fields
+    // also move immediately, then settle against the final scrollport height.
+    const onViewportResize = () => {
+      if (!activeField) return;
+      if (mode === "center") repositionActiveField();
+      scheduleReposition();
+    };
+    const observer =
+      mode === "nearest" ? new ResizeObserver(scheduleReposition) : null;
+    observer?.observe(container);
 
     container.addEventListener("focusin", onFocusIn);
     container.addEventListener("focusout", onFocusOut);
     window.visualViewport?.addEventListener("resize", onViewportResize);
+    if (mode === "nearest") {
+      window.visualViewport?.addEventListener("scroll", scheduleReposition, {
+        passive: true,
+      });
+    }
     return () => {
       container.removeEventListener("focusin", onFocusIn);
       container.removeEventListener("focusout", onFocusOut);
       window.visualViewport?.removeEventListener("resize", onViewportResize);
-      if (timer) {
-        clearTimeout(timer);
-      }
+      window.visualViewport?.removeEventListener("scroll", scheduleReposition);
+      observer?.disconnect();
+      clearTimeout(timer);
     };
-  }, [hasTouchScreen, containerRef]);
+  }, [hasTouchScreen, containerRef, mode]);
 }

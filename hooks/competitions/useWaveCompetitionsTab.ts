@@ -1,7 +1,6 @@
 "use client";
 
 import type { ApiWave } from "@/generated/models/ApiWave";
-import { useAuth } from "@/components/auth/Auth";
 import { useEffect } from "react";
 import { isMultiCompetitionEnabled } from "@/helpers/competition.helpers";
 import {
@@ -11,7 +10,6 @@ import {
 } from "./useCompetitionQueries";
 
 export function useWaveCompetitionsTab(wave: ApiWave | null | undefined) {
-  const { connectedProfile, isAuthenticated } = useAuth();
   const enabled =
     isMultiCompetitionEnabled() &&
     Boolean(wave) &&
@@ -69,14 +67,11 @@ export function useWaveCompetitionsTab(wave: ApiWave | null | undefined) {
     isCompetitionsError,
     fetchMoreCompetitions,
   ]);
+  // Successful cached data still describes the tabs during a background refresh.
   const hideCompetitionsTab = Boolean(
     canReadCompetitions &&
-    isAuthenticated === true &&
-    connectedProfile?.id &&
-    !hub.isFetching &&
     hub.data.permissions.administer === false &&
     competitions.isSuccess &&
-    !isFetchingCompetitions &&
     !isCompetitionsError &&
     !hasMoreCompetitions &&
     // A missing next cursor is not proof of completeness: fail open if has_more disagrees.
@@ -84,7 +79,6 @@ export function useWaveCompetitionsTab(wave: ApiWave | null | undefined) {
     competitionIds.size === 1 &&
     !defaultCompetition.isError &&
     defaultCompetition.isSuccess &&
-    !defaultCompetition.isFetching &&
     defaultCompetition.data.competition_id !== null &&
     competitionIds.has(defaultCompetition.data.competition_id)
   );
@@ -97,8 +91,7 @@ export function useWaveCompetitionsTab(wave: ApiWave | null | undefined) {
         (canReadCompetitions &&
           !canCreate &&
           (competitions.isPending ||
-            (competitionIds.size < 2 &&
-              (hasMoreCompetitions || isFetchingCompetitions))))),
+            (competitionIds.size < 2 && hasMoreCompetitions)))),
     hideCompetitionsTab,
     defaultSelectionEnabled: enabled,
     defaultCompetitionId:

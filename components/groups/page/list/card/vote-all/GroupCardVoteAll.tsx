@@ -32,11 +32,13 @@ export default function GroupCardVoteAll({
   group,
   onCancel,
   viewerIdentityKey,
+  compact = false,
 }: {
   readonly matter: GroupCardRateMatter;
   readonly group?: ApiGroupFull | undefined;
   readonly onCancel: () => void;
   readonly viewerIdentityKey: string | null;
+  readonly compact?: boolean | undefined;
 }) {
   const locale = useBrowserLocale();
   const SUCCESS_LABEL: Record<GroupCardRateMatter, string> = {
@@ -225,6 +227,17 @@ export default function GroupCardVoteAll({
   };
   return (
     <GroupCardActionWrapper
+      compact={compact}
+      footerContent={
+        compact && !doingRates ? (
+          <GroupCardActionStats
+            compact
+            matter={matter}
+            membersCount={membersCount}
+            loadingMembersCount={isFetching}
+          />
+        ) : undefined
+      }
       onCancel={onCancel}
       loading={loading}
       disabled={disabled}
@@ -236,6 +249,7 @@ export default function GroupCardVoteAll({
     >
       {group && (
         <GroupCardVoteAllInputs
+          compact={compact}
           matter={matter}
           category={category}
           setCategory={setCategory}
@@ -246,11 +260,13 @@ export default function GroupCardVoteAll({
           setAmountToAdd={setAmountToAdd}
         />
       )}
-      <GroupCardActionStats
-        matter={matter}
-        membersCount={membersCount}
-        loadingMembersCount={isFetching}
-      />
+      {!compact && (
+        <GroupCardActionStats
+          matter={matter}
+          membersCount={membersCount}
+          loadingMembersCount={isFetching}
+        />
+      )}
     </GroupCardActionWrapper>
   );
 }
