@@ -1,3 +1,5 @@
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useAuth } from "@/components/auth/Auth";
 import CircleLoader, {
@@ -31,6 +33,7 @@ export default function MetadataSection({
   onPendingChange: (dirty: boolean) => void;
 }>) {
   const { setToast } = useAuth();
+  const locale = useBrowserLocale();
   const initialTraits = useMemo(() => claimToTraitsData(claim), [claim]);
   const [traits, setTraits] = useState<TraitsData>(initialTraits);
   const [externalUrl, setExternalUrl] = useState(claim.external_url ?? "");
@@ -143,15 +146,24 @@ export default function MetadataSection({
       noValidate
       className="tw-flex tw-flex-col tw-gap-4"
     >
-      <ArtworkDetails
-        title={traits.title}
-        description={traits.description}
-        onTitleChange={(title) => setTraits((prev) => ({ ...prev, title }))}
-        onDescriptionChange={(description) =>
-          setTraits((prev) => ({ ...prev, description }))
-        }
-      />
-
+      {claim.collaboration_credit && (
+        <p className="tw-m-0 tw-text-sm tw-text-iron-200">
+          {t(locale, "memes.collaborations.forge")}
+        </p>
+      )}
+      <fieldset
+        disabled={!!claim.collaboration_credit?.collab}
+        className="tw-m-0 tw-min-w-0 tw-border-0 tw-p-0"
+      >
+        <ArtworkDetails
+          title={traits.title}
+          description={traits.description}
+          onTitleChange={(title) => setTraits((prev) => ({ ...prev, title }))}
+          onDescriptionChange={(description) =>
+            setTraits((prev) => ({ ...prev, description }))
+          }
+        />
+      </fieldset>
       <div className="tw-group tw-relative tw-mt-2">
         <div className="tw-relative">
           <label
@@ -184,7 +196,13 @@ export default function MetadataSection({
             setTraits((prev) => ({ ...prev, ...partial }))
           }
           showTitle={false}
-          readOnlyOverrides={{ seizeArtistProfile: false }}
+          readOnlyOverrides={{
+            seizeArtistProfile: !!claim.collaboration_credit,
+            artist: !!claim.collaboration_credit,
+            collab: !!claim.collaboration_credit,
+            title: !!claim.collaboration_credit?.collab,
+            description: !!claim.collaboration_credit?.collab,
+          }}
         />
       </div>
       {traitsError && (

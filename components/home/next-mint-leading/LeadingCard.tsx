@@ -16,6 +16,7 @@ import {
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import Link from "next/link";
+import { MemeCollaboratorCredits } from "@/components/waves/memes/collaborations/MemeCollaboratorCredits";
 
 interface LeadingCardProps {
   readonly drop: ExtendedDrop;
@@ -122,6 +123,7 @@ export const LeadingCard = ({ drop, rank }: LeadingCardProps) => {
               {author.handle ?? "Anonymous"}
             </span>
           </Link>
+          <MemeCollaboratorCredits collaborators={drop.collaborators} />
         </div>
       </div>
     </div>

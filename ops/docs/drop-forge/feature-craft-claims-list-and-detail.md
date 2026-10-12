@@ -154,3 +154,17 @@ The craft surface combines:
 - [Drop Forge Craft-to-Launch Flow](flow-drop-forge-craft-to-launch.md)
 - [Drop Forge Access and Claim Operations](troubleshooting-drop-forge-access-and-claims.md)
 - [Docs Home](../README.md)
+
+## Managed collaborator credits
+
+Claims from new artwork submissions carry the artist roster saved at next-mint
+selection. Only accepted collaborators are credited; unanswered invitations do
+not block claim creation or publication. Artist, SEIZE Artist Profile, and Collab
+are read-only for these claims. Claims with accepted collaborators also lock the
+artwork, title and description reviewed during acceptance. Operational fields,
+including season and edition size, remain editable.
+
+The existing comma-separated SEIZE Artist Profile format is preserved for card
+links, metadata and announcements. Arweave publication verifies the saved
+credits and accepted artwork. Older claims without managed collaboration
+records retain their existing editing behavior.

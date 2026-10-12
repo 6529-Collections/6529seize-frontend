@@ -1,3 +1,4 @@
+import { MemeCollaboratorCredits } from "@/components/waves/memes/collaborations/MemeCollaboratorCredits";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { AdditionalActionPromiseBadge } from "@/components/waves/drops/AdditionalActionPromiseBadge";
 import { faAddressCard, faStar } from "@fortawesome/free-regular-svg-icons";
@@ -109,6 +110,9 @@ export function MemesDropSummarySection({
           )}
         </WaveDropMetaRow>
 
+        <div className="tw-mt-3">
+          <MemeCollaboratorCredits collaborators={drop.collaborators} />
+        </div>
         {hasMemeCard && (
           <div className="tw-mt-4 tw-flex tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-2">
             {manualOutcomes.map((outcome) => (

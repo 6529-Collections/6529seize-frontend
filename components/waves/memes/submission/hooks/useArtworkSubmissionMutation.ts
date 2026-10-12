@@ -1,4 +1,5 @@
 "use client";
+import type { ApiMemeCollaboratorProfile } from "@/generated/models/ApiMemeCollaboratorProfile";
 
 import { useAuth } from "@/components/auth/Auth";
 import { multiPartUpload } from "@/components/waves/create-wave/services/multiPartUpload";
@@ -30,6 +31,7 @@ import {
  * Interface for the artwork submission data
  */
 interface ArtworkSubmissionData {
+  collaborators?: ApiMemeCollaboratorProfile[];
   proposalFrame?: ProposalCardLayout | null | undefined;
   imageFile?: File | undefined;
   existingMedia?:
@@ -394,6 +396,7 @@ export function useArtworkSubmissionMutation() {
 
       // Step 2: Transform data to API format
       const transformedRequest = transformToApiRequest({
+        collaboratorIds: data.collaborators?.map((profile) => profile.id) ?? [],
         waveId: data.waveId,
         traits: data.traits,
         operationalData,

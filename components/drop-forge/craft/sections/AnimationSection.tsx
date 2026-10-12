@@ -259,11 +259,19 @@ export default function AnimationSection({
   const showAddFlow =
     !hasAnimation && !hasPendingAnimationChange && !hasPendingAnimationUpload;
   const showAnimationControls =
-    hasAnimation || hasPendingAnimationChange || hasPendingAnimationUpload;
+    (!claim.collaboration_credit?.collab && hasAnimation) ||
+    hasPendingAnimationChange ||
+    hasPendingAnimationUpload;
   const showAddChoice = showAddFlow && replaceMode === "choose";
-  const showAddLink = showAddFlow && replaceMode === "link";
+  const showAddLink =
+    !claim.collaboration_credit?.collab &&
+    showAddFlow &&
+    replaceMode === "link";
   const showReplaceLink =
-    showAnimationControls && !showAddFlow && replaceMode === "link";
+    !claim.collaboration_credit?.collab &&
+    showAnimationControls &&
+    !showAddFlow &&
+    replaceMode === "link";
   const animationActionLabel =
     pendingAnimation === null ? "Add animation" : "Replace";
   const linkEditor = (
@@ -424,7 +432,11 @@ export default function AnimationSection({
           <div className="tw-grid tw-grid-cols-2 tw-gap-2">
             <button
               type="submit"
-              disabled={saving || !hasPendingChanges}
+              disabled={
+                !!claim.collaboration_credit?.collab ||
+                saving ||
+                !hasPendingChanges
+              }
               className={`${BTN_SAVE} tw-w-full`}
             >
               {saving ? (

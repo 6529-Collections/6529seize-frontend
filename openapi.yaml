@@ -7790,6 +7790,65 @@ paths:
           description: Invalid request
         "403":
           description: Forbidden - not a Subscription Admin
+  /drops/{drop_id}/collaborations:
+    get:
+      operationId: getMemeCollaborationState
+      tags:
+        - Drops
+      x-6529-router:
+        enabled: true
+        auth: optional
+        handler:
+          import: "@/api/meme-collaborations/meme-collaborations.handlers"
+          name: getMemeCollaborationState
+      parameters:
+        - in: path
+          name: drop_id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Public accepted artists and viewer-scoped invitations.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMemeCollaborationState"
+  /drops/{drop_id}/collaborations/{invitation_id}/response:
+    post:
+      operationId: respondToMemeCollaboration
+      tags:
+        - Drops
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/meme-collaborations/meme-collaborations.handlers"
+          name: respondToMemeCollaboration
+      parameters:
+        - in: path
+          name: drop_id
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: invitation_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiMemeCollaborationResponseRequest"
+      responses:
+        "200":
+          description: Public accepted artists and viewer-scoped invitations.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMemeCollaborationState"
   /light-drops:
     get:
       tags:
@@ -27329,6 +27388,14 @@ components:
             $ref: "#/components/schemas/ApiDropGroupMention"
         poll:
           $ref: "#/components/schemas/ApiCreateDropPollRequest"
+        collaborator_ids:
+          type: array
+          maxItems: 20
+          description: >-
+            Profile IDs invited to collaborate. Included in the signed payload.
+            An empty array opts into managed artist credits.
+          items:
+            type: string
         hide_link_preview:
           type: boolean
           description: >-
@@ -28352,6 +28419,16 @@ components:
         - is_additional_action_promised
         - hide_link_preview
       properties:
+        submission_artist:
+          type: string
+          description: >-
+            Original submitter artist credit before accepted collaborator
+            credits are appended.
+        collaborators:
+          type: array
+          description: Accepted collaborators only. Pending invitations are private.
+          items:
+            $ref: "#/components/schemas/ApiMemeCollaboratorProfile"
         voters_count_available:
           type: boolean
           description: >-
@@ -29112,6 +29189,16 @@ components:
         - drop_type
         - hide_link_preview
       properties:
+        submission_artist:
+          type: string
+          description: >-
+            Original submitter artist credit before accepted collaborator
+            credits are appended.
+        collaborators:
+          type: array
+          description: Accepted collaborators only. Pending invitations are private.
+          items:
+            $ref: "#/components/schemas/ApiMemeCollaboratorProfile"
         id:
           type: string
         serial_no:
@@ -29405,6 +29492,15 @@ components:
         - is_additional_action_promised
         - hide_link_preview
       properties:
+        submission_artist:
+          type: string
+          description: >-
+            Original submitter artist credit before accepted collaborator
+            credits are appended.
+        collaborators:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiMemeCollaboratorProfile"
         voters_count_available:
           type: boolean
           description: >-
@@ -32100,6 +32196,127 @@ components:
           minimum: 1
         drop_id:
           type: string
+    ApiMemeCollaborationArtwork:
+      type: object
+      required:
+        - name
+        - description
+        - image_url
+        - animation_url
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        image_url:
+          type: string
+          nullable: true
+        animation_url:
+          type: string
+          nullable: true
+    ApiMemeCollaborationCredit:
+      type: object
+      required:
+        - artist
+        - artist_profiles
+        - collab
+      properties:
+        artist:
+          type: string
+        artist_profiles:
+          type: string
+        collab:
+          type: boolean
+    ApiMemeCollaborationInvitation:
+      type: object
+      required:
+        - id
+        - profile
+        - status
+      properties:
+        id:
+          type: string
+        profile:
+          $ref: "#/components/schemas/ApiMemeCollaboratorProfile"
+        status:
+          type: string
+          enum:
+            - PENDING
+            - ACCEPTED
+            - DECLINED
+            - CANCELLED
+            - CLOSED
+    ApiMemeCollaborationResponseRequest:
+      type: object
+      required:
+        - action
+        - artwork_hash
+        - terms_version
+      properties:
+        action:
+          type: string
+          enum:
+            - ACCEPT
+            - DECLINE
+            - CANCEL
+        artwork_hash:
+          type: string
+        terms_version:
+          type: string
+    ApiMemeCollaborationState:
+      type: object
+      required:
+        - managed
+        - closed
+        - artwork_hash
+        - terms_version
+        - acceptance_copy
+        - terms
+        - collaborators
+        - invitations
+      properties:
+        artwork:
+          $ref: "#/components/schemas/ApiMemeCollaborationArtwork"
+        managed:
+          type: boolean
+        closed:
+          type: boolean
+        artwork_hash:
+          type: string
+        terms_version:
+          type: string
+        acceptance_copy:
+          type: string
+        terms:
+          type: string
+          nullable: true
+        collaborators:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiMemeCollaboratorProfile"
+        invitations:
+          type: array
+          description: >-
+            All invitations for the submitter, otherwise only the viewer's own
+            invitations.
+          items:
+            $ref: "#/components/schemas/ApiMemeCollaborationInvitation"
+    ApiMemeCollaboratorProfile:
+      type: object
+      required:
+        - id
+        - handle
+        - display
+      properties:
+        id:
+          type: string
+        handle:
+          type: string
+        display:
+          type: string
+        pfp:
+          type: string
+          nullable: true
     ApiMemesExtendedData:
       type: object
       description: >-
@@ -33443,6 +33660,10 @@ components:
     ApiNotificationAdditionalContextV2:
       type: object
       properties:
+        invitation_id:
+          type: string
+        actor_id:
+          type: string
         event_id:
           type: string
           description: Stable idempotency identifier for COMPETITION_LIFECYCLE.
@@ -33573,6 +33794,7 @@ components:
         - PRIORITY_ALERT
         - SUBSCRIPTION_COVERAGE
         - COMPETITION_LIFECYCLE
+        - MEME_COLLABORATION
     ApiNotificationDropReactedReactor:
       type: object
       required:
@@ -39992,6 +40214,8 @@ components:
         - name
         - attributes
       properties:
+        collaboration_credit:
+          $ref: "#/components/schemas/ApiMemeCollaborationCredit"
         drop_id:
           type: string
         contract:
