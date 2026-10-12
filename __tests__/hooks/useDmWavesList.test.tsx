@@ -150,6 +150,36 @@ describe("useDmWavesList", () => {
     expect(refetch).not.toHaveBeenCalled();
   });
 
+  it("refreshes stale DMs on resync only while the DM query is enabled", () => {
+    const refetch = jest.fn();
+    const refetchIfStale = jest.fn();
+    useWavesV2Mock.mockReturnValue({
+      waves: [],
+      isFetching: false,
+      isFetchingNextPage: false,
+      hasNextPage: false,
+      fetchNextPage: jest.fn(),
+      status: "success",
+      refetch,
+      refetchIfStale,
+    });
+
+    const { result, rerender } = renderHook(
+      ({ enabled }: { readonly enabled: boolean }) =>
+        useDmWavesList({ enabled }),
+      { initialProps: { enabled: false } }
+    );
+
+    result.current.refreshStaleWaves();
+    expect(refetchIfStale).not.toHaveBeenCalled();
+
+    rerender({ enabled: true });
+    result.current.refreshStaleWaves();
+
+    expect(refetchIfStale).toHaveBeenCalledTimes(1);
+    expect(refetch).not.toHaveBeenCalled();
+  });
+
   it("re-enables the DM query after profile loading settles", () => {
     let fetchingProfile = true;
     useAuthMock.mockImplementation(() => ({
