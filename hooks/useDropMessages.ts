@@ -170,6 +170,7 @@ export function useDropMessages(
   }, [hasNextPage, fetchNextPage]);
 
   return {
+    data,
     drops,
     fetchNextPage,
     hasNextPage,
