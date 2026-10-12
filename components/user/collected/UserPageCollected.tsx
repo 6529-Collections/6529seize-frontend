@@ -750,7 +750,6 @@ export default function UserPageCollected({
                 filters={filters}
                 locale={locale}
                 onClearFilters={clearFilters}
-                onGoToFirstPage={() => setPageFromControl(1)}
                 isLoading={isFetchingData}
               />
             )}

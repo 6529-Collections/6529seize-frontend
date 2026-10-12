@@ -43,32 +43,22 @@ export default function UserPageCollectedCardsNoCards({
   filters,
   locale = DEFAULT_LOCALE,
   onClearFilters,
-  onGoToFirstPage,
   isLoading = false,
 }: {
   readonly filters: ProfileCollectedFilters;
   readonly locale?: SupportedLocale | undefined;
   readonly onClearFilters?: (() => void) | undefined;
-  readonly onGoToFirstPage?: (() => void) | undefined;
   readonly isLoading?: boolean | undefined;
 }) {
   const isNetwork = filters.collection === CollectedCollectionType.NETWORK;
   const hasActiveFilters =
     !filters.accountForConsolidations ||
     (isNetwork ? filters.subcollection !== null : filters.collection !== null);
-  const recoverPage =
-    isNetwork && filters.page > 1 ? onGoToFirstPage : undefined;
   const clearActiveFilters = hasActiveFilters ? onClearFilters : undefined;
-  let msg = getNoCardsMessage(filters, locale);
-  if (recoverPage) {
-    msg = translate(locale, "user.collected.empty.page");
-  } else if (
-    clearActiveFilters &&
-    filters.seized !== CollectionSeized.NOT_SEIZED
-  ) {
-    msg = translate(locale, "user.collected.empty.filtered");
-  }
-  const onRecover = recoverPage ?? clearActiveFilters;
+  const msg =
+    clearActiveFilters && filters.seized !== CollectionSeized.NOT_SEIZED
+      ? translate(locale, "user.collected.empty.filtered")
+      : getNoCardsMessage(filters, locale);
 
   return (
     <div className="tw-flex tw-flex-col tw-items-start tw-gap-4 tw-py-4">
@@ -78,19 +68,14 @@ export default function UserPageCollectedCardsNoCards({
       >
         {msg}
       </output>
-      {onRecover && (
+      {clearActiveFilters && (
         <Button
           variant="secondary"
           size="lg"
           loading={isLoading}
-          onClick={onRecover}
+          onClick={clearActiveFilters}
         >
-          {translate(
-            locale,
-            recoverPage
-              ? "user.collected.empty.firstPage"
-              : "user.collected.empty.clearFilters"
-          )}
+          {translate(locale, "user.collected.empty.clearFilters")}
         </Button>
       )}
     </div>

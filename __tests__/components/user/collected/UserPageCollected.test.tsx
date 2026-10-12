@@ -319,48 +319,30 @@ describe("UserPageCollected", () => {
     }
   );
 
-  it("returns an empty Network page to page 1 without clearing filters", async () => {
-    useSearchParamsMock.mockReturnValue(
-      new URLSearchParams(
-        "collection=network&page=99&address=0x123&subcollection=0xabc&sort-by=xtdh_day&sort-direction=asc&details=closed"
-      )
-    );
-    useQueryMock.mockReturnValue({
-      isSuccess: true,
-      isFetching: false,
-      isLoading: false,
-      isPlaceholderData: false,
-      data: { data: [], page: 99, next: false },
-    });
-    renderWithTransferProvider(<UserPageCollected profile={mockProfile} />);
-    expect(screen.getByRole("status")).toHaveTextContent(
-      "There are no artworks on this page."
-    );
-    expect(screen.queryByRole("button", { name: "Clear filters" })).toBeNull();
-    await userEvent.click(screen.getByRole("button", { name: "Go to page 1" }));
-    const query = getLastPushParams();
-    expect(query.has("page")).toBe(false);
-    expect(query.get("collection")).toBe("network");
-    expect(query.get("address")).toBe("0x123");
-    expect(query.get("subcollection")).toBe("0xabc");
-    expect(query.get("sort-by")).toBe("xtdh_day");
-    expect(query.get("sort-direction")).toBe("asc");
-    expect(query.get("details")).toBe("closed");
-    expect(routerReplace).not.toHaveBeenCalled();
-  });
-
-  it.each(["", "collection=network", "sort-direction=asc"])(
-    "does not offer Clear filters for unfiltered empty holdings: %s",
+  it.each([
+    "",
+    "collection=network",
+    "collection=network&page=99",
+    "sort-direction=asc",
+  ])(
+    "does not offer recovery buttons for unfiltered empty holdings: %s",
     (query) => {
-      useSearchParamsMock.mockReturnValue(new URLSearchParams(query));
+      const searchParams = new URLSearchParams(query);
+      useSearchParamsMock.mockReturnValue(searchParams);
       useQueryMock.mockReturnValue({
         isSuccess: true,
         isFetching: false,
         isLoading: false,
         isPlaceholderData: false,
-        data: { data: [], count: 0, page: 1, next: false },
+        data: {
+          data: [],
+          count: 0,
+          page: Number(searchParams.get("page") ?? 1),
+          next: false,
+        },
       });
       renderWithTransferProvider(<UserPageCollected profile={mockProfile} />);
+      expect(screen.getByRole("status")).toBeInTheDocument();
       expect(
         screen.queryByRole("button", { name: /Clear filters|Go to page 1/ })
       ).toBeNull();
