@@ -236,7 +236,7 @@ export default function CreateWaveInlineGroupXtdhGrant({
               : t(locale, "waves.create.groups.xtdhGrant.change")}
           </Button>
           <Button
-            variant="tertiary"
+            variant="destructiveOutline"
             size={presentation.actionSize}
             onClick={onRemoveGrant}
           >

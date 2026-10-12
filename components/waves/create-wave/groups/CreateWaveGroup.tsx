@@ -264,10 +264,8 @@ export default function CreateWaveGroup({
 
   return (
     <fieldset
-      className={`tw-m-0 tw-flex tw-min-w-0 tw-flex-col tw-gap-y-3 tw-rounded-lg ${
-        hasError
-          ? "tw-scroll-mb-32 tw-border tw-border-solid tw-border-error/70 tw-p-3"
-          : "tw-border-0 tw-p-0"
+      className={`tw-m-0 tw-flex tw-min-w-0 tw-flex-col tw-gap-y-3 tw-rounded-xl tw-border tw-border-solid tw-bg-iron-900/60 tw-p-4 sm:tw-p-5 ${
+        hasError ? "tw-scroll-mb-32 tw-border-error/70" : "tw-border-white/5"
       }`}
       aria-labelledby={labelId}
       aria-describedby={describedBy || undefined}
