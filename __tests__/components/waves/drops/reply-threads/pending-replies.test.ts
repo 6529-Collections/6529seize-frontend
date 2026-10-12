@@ -1,7 +1,9 @@
 import { QueryClient } from "@tanstack/react-query";
 import { QueryKey } from "@/components/react-query-wrapper/query-keys";
-import type { ApiDrop } from "@/generated/models/ApiDrop";
-import type { ApiWaveDropsFeed } from "@/generated/models/ApiWaveDropsFeed";
+import { ApiDrop } from "@/generated/models/ApiDrop";
+import { ApiWaveDropsFeed } from "@/generated/models/ApiWaveDropsFeed";
+import { ApiWaveMin } from "@/generated/models/ApiWaveMin";
+import { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import {
   convertApiDropToExtendedDrop,
   DropClientDeliveryState,
@@ -12,19 +14,33 @@ import {
 } from "@/components/waves/drops/reply-threads/pending-replies";
 
 const makeDrop = (id: string, parent = "root"): ApiDrop =>
-  ({
+  Object.assign(new ApiDrop(), {
     id,
     serial_no: 20,
     created_at: 100,
-    wave: { id: "wave" },
-    author: { id: "sender", handle: "sender" },
+    wave: Object.assign(new ApiWaveMin(), { id: "wave" }),
+    author: Object.assign(new ApiProfileMin(), {
+      id: "sender",
+      handle: "sender",
+    }),
     title: null,
     metadata: [],
-    parts: [{ content: "my reply", media: [] }],
+    parts: [
+      {
+        part_id: 1,
+        content: "my reply",
+        media: [],
+        attachments: [],
+        quoted_drop: null,
+      },
+    ],
     reply_to: { drop_id: parent, drop_part_id: 1, is_deleted: false },
-  }) as ApiDrop;
+  });
 const page = (drops: ApiDrop[]): ApiWaveDropsFeed =>
-  ({ wave: { id: "wave" }, drops }) as ApiWaveDropsFeed;
+  Object.assign(new ApiWaveDropsFeed(), {
+    wave: Object.assign(new ApiWaveMin(), { id: "wave" }),
+    drops,
+  });
 const visible = (stream: ApiDrop[], pages?: ApiWaveDropsFeed[]) =>
   getVisibleThreadReplies({
     pages,

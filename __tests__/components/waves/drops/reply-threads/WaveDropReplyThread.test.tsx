@@ -195,7 +195,15 @@ describe("WaveDropReplyThread", () => {
     const user = userEvent.setup();
     const reply = makeDrop("ready-reply", 11, {
       author: { id: "sender", handle: "sender" } as ExtendedDrop["author"],
-      parts: [{ content: "ready", media: [] }] as ExtendedDrop["parts"],
+      parts: [
+        {
+          part_id: 1,
+          content: "ready",
+          media: [],
+          attachments: [],
+          quoted_drop: null,
+        },
+      ],
       metadata: [],
       created_at: 100,
     });
@@ -216,7 +224,15 @@ describe("WaveDropReplyThread", () => {
   it("shows the sender's pending first reply when auto-opening an uncached thread", async () => {
     const pending = makeDrop("temp-new", 20, {
       author: { id: "sender", handle: "sender" } as ExtendedDrop["author"],
-      parts: [{ content: "my reply", media: [] }] as ExtendedDrop["parts"],
+      parts: [
+        {
+          part_id: 1,
+          content: "my reply",
+          media: [],
+          attachments: [],
+          quoted_drop: null,
+        },
+      ],
       metadata: [],
       created_at: 100,
       reply_to: { drop_id: "root", drop_part_id: 1, is_deleted: false },
