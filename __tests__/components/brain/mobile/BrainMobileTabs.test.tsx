@@ -24,9 +24,6 @@ const push = jest.fn();
 const replace = jest.fn();
 let searchParams = new URLSearchParams();
 let mockCurations: ApiWaveCuration[] = [];
-jest.mock("@/hooks/competitions/useCompetitionQueries", () => ({
-  useCompetitionHub: () => ({ data: undefined }),
-}));
 
 jest.mock("next/navigation", () => ({
   useRouter: () => ({ push, replace }),

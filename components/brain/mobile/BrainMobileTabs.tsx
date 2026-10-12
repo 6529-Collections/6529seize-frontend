@@ -195,6 +195,8 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
       waveId: wave?.id ?? "",
       enabled: shouldShowCurationTabs,
     });
+  const canManageCurations =
+    wave?.wave.authenticated_user_eligible_for_admin === true;
 
   // Local ref for component-specific needs
   const mobileTabsRef = useRef<HTMLDivElement | null>(null);
@@ -435,7 +437,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
       </TabButton>
     ) : null;
   const createActionsMenu =
-    isApp && wave ? (
+    isApp && wave && canManageCurations ? (
       <MyStreamWaveCreateActionsMenu
         wave={wave}
         variant="mobile"

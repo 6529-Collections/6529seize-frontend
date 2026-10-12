@@ -77,43 +77,43 @@ export function CompactMenuItemButton({
     </>
   );
 
-  if (item.href !== undefined && !item.disabled) {
-    return (
-      <MenuItem
-        as={Link}
-        href={item.href}
-        role={role}
-        aria-selected={item.ariaSelected}
-        aria-label={item.ariaLabel}
-        data-compact-menu-item="true"
-        data-menu-item-id={item.id}
-        data-active={isActive ? "true" : "false"}
-        data-testid={item["data-testid"]}
-        onClick={onClick}
-        className={className}
-      >
-        {contents}
-      </MenuItem>
-    );
-  }
-
   return (
-    <MenuItem
-      as="button"
-      type="button"
-      role={role}
-      aria-selected={item.ariaSelected}
-      aria-label={item.ariaLabel}
-      disabled={item.disabled}
-      data-compact-menu-item="true"
-      data-menu-item-id={item.id}
-      data-active={isActive ? "true" : "false"}
-      data-disabled={item.disabled ? "true" : undefined}
-      data-testid={item["data-testid"]}
-      onClick={onClick}
-      className={className}
-    >
-      {contents}
+    <MenuItem disabled={Boolean(item.disabled)}>
+      {({ focus }) =>
+        item.href !== undefined && !item.disabled ? (
+          <Link
+            href={item.href}
+            role={role}
+            aria-selected={item.ariaSelected}
+            aria-label={item.ariaLabel}
+            data-compact-menu-item="true"
+            data-menu-item-id={item.id}
+            data-active={isActive ? "true" : "false"}
+            data-testid={item["data-testid"]}
+            onClick={onClick}
+            className={className({ focus })}
+          >
+            {contents}
+          </Link>
+        ) : (
+          <button
+            type="button"
+            role={role}
+            aria-selected={item.ariaSelected}
+            aria-label={item.ariaLabel}
+            disabled={item.disabled}
+            data-compact-menu-item="true"
+            data-menu-item-id={item.id}
+            data-active={isActive ? "true" : "false"}
+            data-disabled={item.disabled ? "true" : undefined}
+            data-testid={item["data-testid"]}
+            onClick={onClick}
+            className={className({ focus })}
+          >
+            {contents}
+          </button>
+        )
+      }
     </MenuItem>
   );
 }
