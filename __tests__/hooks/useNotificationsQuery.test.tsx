@@ -210,6 +210,8 @@ describe("useNotificationsQuery", () => {
       const retry = getRetry();
 
       expect(retry(0, apiError(503))).toBe(true);
+      expect(retry(0, apiError(408))).toBe(true);
+      expect(retry(0, apiError(425))).toBe(false);
       expect(retry(2, new TypeError("Failed to fetch"))).toBe(true);
       expect(retry(3, apiError(503))).toBe(false);
     });

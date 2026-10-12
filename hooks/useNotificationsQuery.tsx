@@ -94,8 +94,11 @@ export function useNotificationsQuery({
 
       return undefined;
     },
-    // The fetcher rejects with structured API errors, so any 4xx (including
-    // 401 and 429) stops retrying; session recovery handles unauthorized.
+    // The fetcher rejects with structured API errors, so shouldRetryQuery stops
+    // on any 4xx (including 401 and 429). The isUnauthorized guard stays on
+    // purpose: it also catches unauthorized errors that carry no numeric status
+    // (a string or an Error whose message says so), which shouldRetryQuery
+    // cannot see. Do not remove it as redundant.
     retry: (failureCount, error: unknown) =>
       !getNotificationErrorDetails(error).isUnauthorized &&
       shouldRetryQuery(failureCount, error),

@@ -60,10 +60,6 @@ export const getQueryErrorStatus = (error: unknown): number | null => {
   return typeof status === "number" ? status : null;
 };
 
-export const isRateLimitQueryError = (error: unknown): boolean => {
-  return getQueryErrorStatus(error) === 429;
-};
-
 const SESSION_UPGRADE_ERROR_PATTERN =
   /(?:session[-_ ]?v2|session[-_ ]?upgrade|upgrade[^.]{0,40}session|structured[-_ ]?signature)/i;
 
@@ -111,10 +107,6 @@ export const isTerminalNotificationAuthQueryError = (
   );
 };
 
-export const shouldStopPollingRetry = (error: unknown): boolean => {
-  return isUnauthorizedQueryError(error) || isRateLimitQueryError(error);
-};
-
 type DefaultQueryRetryPolicy<TError> = {
   readonly retry: (failureCount: number, error: TError) => boolean;
   readonly retryDelay: (failureCount: number) => number;
@@ -122,16 +114,25 @@ type DefaultQueryRetryPolicy<TError> = {
 
 const DEFAULT_QUERY_RETRY_LIMIT = 3;
 
+const REQUEST_TIMEOUT_STATUS = 408;
+
 /**
  * A response status in the 4xx range, including 429, is deterministic for the
  * request that produced it, so repeating the identical request only adds load.
- * Only errors that expose a numeric status (`errorMode: "structured"` API
- * errors) can be recognised. Legacy string rejections, network failures and
- * 5xx responses carry no 4xx status and stay retryable.
+ * 408 is the exception: the server gave up waiting, which says nothing about
+ * the request itself. Only errors that expose a numeric status
+ * (`errorMode: "structured"` API errors) can be recognised. Legacy string
+ * rejections, network failures and 5xx responses carry no 4xx status and stay
+ * retryable.
  */
 const isClientErrorQueryError = (error: unknown): boolean => {
   const status = getQueryErrorStatus(error);
-  return status !== null && status >= 400 && status < 500;
+  return (
+    status !== null &&
+    status >= 400 &&
+    status < 500 &&
+    status !== REQUEST_TIMEOUT_STATUS
+  );
 };
 
 /**
@@ -159,8 +160,4 @@ export const getDefaultQueryRetry = <TError = Error>(
       return failureCount * 1000;
     },
   };
-};
-
-const isUnauthorizedQueryError = (error: unknown): boolean => {
-  return getQueryErrorStatus(error) === 401;
 };

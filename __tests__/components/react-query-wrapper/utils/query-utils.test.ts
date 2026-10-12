@@ -1,10 +1,8 @@
 import {
   getDefaultQueryRetry,
   getWaveDropsInitialLimit,
-  isRateLimitQueryError,
   isTerminalNotificationAuthQueryError,
   shouldRetryQuery,
-  shouldStopPollingRetry,
   WAVE_DROPS_NATIVE_INITIAL_PARAMS,
   WAVE_DROPS_PARAMS,
 } from "@/components/react-query-wrapper/utils/query-utils";
@@ -34,18 +32,6 @@ describe("default query retry policy", () => {
     expect(onRetryStopped).toHaveBeenCalledTimes(1);
   });
 
-  it("detects rate limits on nested response statuses", () => {
-    expect(isRateLimitQueryError({ response: { status: 429 } })).toBe(true);
-    expect(isRateLimitQueryError({ cause: { status: 429 } })).toBe(true);
-    expect(isRateLimitQueryError({ status: 500 })).toBe(false);
-  });
-
-  it("stops polling retries for auth and rate-limit responses", () => {
-    expect(shouldStopPollingRetry({ status: 401 })).toBe(true);
-    expect(shouldStopPollingRetry({ status: 429 })).toBe(true);
-    expect(shouldStopPollingRetry({ status: 500 })).toBe(false);
-  });
-
   it("scopes terminal 403 and session-upgrade handling to notification polling", () => {
     expect(isTerminalNotificationAuthQueryError({ status: 401 })).toBe(true);
     expect(isTerminalNotificationAuthQueryError({ status: 403 })).toBe(true);
@@ -63,8 +49,6 @@ describe("default query retry policy", () => {
     ).toBe(false);
     expect(isTerminalNotificationAuthQueryError({ status: 429 })).toBe(false);
     expect(isTerminalNotificationAuthQueryError({ status: 503 })).toBe(false);
-
-    expect(shouldStopPollingRetry({ status: 403 })).toBe(false);
   });
 
   it("keeps retrying non-rate-limit failures until the default retry count", () => {
@@ -102,7 +86,15 @@ describe("shared query retry decision", () => {
 
   it("reads the status from nested response and cause shapes", () => {
     expect(shouldRetryQuery(0, { response: { status: 429 } })).toBe(false);
+    expect(shouldRetryQuery(0, { cause: { status: 429 } })).toBe(false);
     expect(shouldRetryQuery(0, { cause: { status: 404 } })).toBe(false);
+  });
+
+  it("does not retry 425 but retries a 408 request timeout", () => {
+    expect(shouldRetryQuery(0, structuredError(425))).toBe(false);
+    expect(shouldRetryQuery(0, structuredError(408))).toBe(true);
+    expect(shouldRetryQuery(2, structuredError(408))).toBe(true);
+    expect(shouldRetryQuery(3, structuredError(408))).toBe(false);
   });
 
   it.each([500, 502, 503, 504])(

@@ -5,6 +5,9 @@ import {
   focusManager,
   QueryClient,
   QueryClientProvider,
+  type DefaultError,
+  type FetchQueryOptions,
+  type QueryKey,
 } from "@tanstack/react-query";
 import { Capacitor } from "@capacitor/core";
 import { shouldRetryQuery } from "@/components/react-query-wrapper/utils/query-utils";
@@ -14,8 +17,36 @@ import {
 } from "@/services/app-activity/native-app-activity";
 import { useEffect, useState } from "react";
 
+/**
+ * The default `retry` below is meant for observer-driven queries. React Query
+ * only keeps imperative fetches (`fetchQuery`, `prefetchQuery`,
+ * `ensureQueryData` and the infinite variants, which all go through
+ * `fetchQuery`) at no retries when no default exists, so they opt out
+ * explicitly here and keep failing fast. An explicit `retry` on the call still
+ * wins.
+ */
+class AppQueryClient extends QueryClient {
+  override fetchQuery<
+    TQueryFnData,
+    TError = DefaultError,
+    TData = TQueryFnData,
+    TQueryKey extends QueryKey = QueryKey,
+    TPageParam = never,
+  >(
+    options: FetchQueryOptions<
+      TQueryFnData,
+      TError,
+      TData,
+      TQueryKey,
+      TPageParam
+    >
+  ): Promise<TData> {
+    return super.fetchQuery({ ...options, retry: options.retry ?? false });
+  }
+}
+
 function createQueryClient() {
-  return new QueryClient({
+  return new AppQueryClient({
     defaultOptions: {
       queries: {
         staleTime: 10000,
