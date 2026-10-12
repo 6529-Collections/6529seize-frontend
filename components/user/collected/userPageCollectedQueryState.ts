@@ -52,7 +52,7 @@ export const SEARCH_PARAMS_FIELDS = {
 } as const;
 
 const DEFAULT_SORT_BY = CollectionSort.TOKEN_ID;
-export const DEFAULT_SORT_DIRECTION = SortDirection.DESC;
+const DEFAULT_SORT_DIRECTION = SortDirection.DESC;
 export const getNextCollectedSortDirection = ({
   newSortBy,
   currentSortBy,
