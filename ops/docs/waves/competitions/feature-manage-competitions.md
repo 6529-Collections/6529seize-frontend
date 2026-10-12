@@ -82,8 +82,8 @@ The **Competitions** tab follows the selected competition's **Settings** tab and
 
 ## Failure and Recovery
 
-If draft creation fails after a new hub was created, keep the hub and create
-the competition from its collection. If a lifecycle command fails, reload the
+If draft creation fails after a new hub was created, keep the hub and use
+**Create → New competition** to create the competition. If a lifecycle command fails, reload the
 competition before retrying. Server permissions are checked on every action;
 losing wave-administrator access also removes management authority.
 

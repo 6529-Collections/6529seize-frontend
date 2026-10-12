@@ -195,9 +195,9 @@ function CompetitionCollection({ hub }: { readonly hub: ApiWaveV3 }) {
           )}
         </div>
       </div>
-      <div
+      <section
         id={panelId}
-        role={useFilterDropdown ? "region" : "tabpanel"}
+        role={useFilterDropdown ? undefined : "tabpanel"}
         aria-label={t(locale, `competitions.${filter}`)}
         className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-p-4 sm:tw-p-6"
       >
@@ -216,7 +216,7 @@ function CompetitionCollection({ hub }: { readonly hub: ApiWaveV3 }) {
             </button>
           )}
         </div>
-      </div>
+      </section>
     </>
   );
 }

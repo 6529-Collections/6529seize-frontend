@@ -147,6 +147,24 @@ describe("BrainMobileTabs", () => {
     }
   );
 
+  it("hides Create when the viewer has no eligible creation actions", () => {
+    render(
+      <BrainMobileTabs
+        activeView={BrainView.DEFAULT}
+        onViewChange={onViewChange}
+        wave={createWave()}
+        waveActive={true}
+        showWavesTab={false}
+        showStreamBack={false}
+        isApp={true}
+      />
+    );
+
+    expect(
+      screen.queryByRole("button", { name: "Open create menu" })
+    ).not.toBeInTheDocument();
+  });
+
   it("switches native curation tabs while preserving other URL state", async () => {
     const user = userEvent.setup();
     searchParams = new URLSearchParams("curation=curation-1&filter=active");
