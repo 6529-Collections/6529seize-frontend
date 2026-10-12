@@ -14,7 +14,7 @@ import {
 } from "@/helpers/waves/drop.helpers";
 
 /** Embedded parents identify the original thread without another request. */
-export function getReplyAncestorIds(drop: ApiDropWithoutWave): string[] {
+function getReplyAncestorIds(drop: ApiDropWithoutWave): string[] {
   const parents = new Set<string>();
   let replyTo = drop.reply_to;
   while (replyTo && !parents.has(replyTo.drop_id)) {
@@ -78,7 +78,19 @@ export function removeTemporaryThreadReply(
   queryClient
     .getQueriesData<{
       pages: ApiWaveDropsFeed[];
-    }>({ queryKey: [QueryKey.DROPS, { waveId }] })
+    }>({
+      queryKey: [QueryKey.DROPS, { waveId }],
+      predicate: (query) => {
+        const params = query.queryKey[1];
+        return (
+          typeof params === "object" &&
+          params !== null &&
+          "dropId" in params &&
+          typeof params.dropId === "string" &&
+          params.dropId.length > 0
+        );
+      },
+    })
     .forEach(([key, data]) => {
       if (
         !data?.pages.some((page) =>

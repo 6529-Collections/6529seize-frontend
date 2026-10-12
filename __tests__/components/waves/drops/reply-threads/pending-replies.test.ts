@@ -110,6 +110,33 @@ describe("collapsed reply thread data", () => {
       )
     ).toEqual(["temp-nested"]);
   });
+  it("cleans ancestor threads without changing main-feed or other-wave caches", () => {
+    const client = new QueryClient();
+    const key = (waveId: string, dropId: string | null) => [
+      QueryKey.DROPS,
+      { waveId, dropId, limit: 50 },
+    ];
+    const mainKey = key("wave", null);
+    const otherWaveKey = key("other-wave", "root");
+    const cached = {
+      pages: [page([makeDrop("temp-nested")])],
+      pageParams: [null],
+    };
+    [mainKey, otherWaveKey, key("wave", "root"), key("wave", "child")].forEach(
+      (queryKey) => client.setQueryData(queryKey, cached)
+    );
+
+    removeTemporaryThreadReply(client, "wave", "temp-nested");
+
+    expect(client.getQueryData(mainKey)).toBe(cached);
+    expect(client.getQueryData(otherWaveKey)).toBe(cached);
+    ["root", "child"].forEach((parent) =>
+      expect(client.getQueryData(key("wave", parent))).toEqual({
+        pages: [page([])],
+        pageParams: [null],
+      })
+    );
+  });
   it("uses the retained moderation failure state from the existing stream", () => {
     const rejected = {
       ...convertApiDropToExtendedDrop(makeDrop("temp-first")),
