@@ -60,6 +60,36 @@ const sentRequest = (): Request => mockNativeFetch.mock.calls[0]?.[0];
 const sentInit = (): RequestInit | undefined =>
   mockNativeFetch.mock.calls[0]?.[1];
 
+/** What Node raises when the peer drops the connection mid-response. */
+const connectionReset = () =>
+  Object.assign(new Error("aborted"), { code: "ECONNRESET" });
+
+/** One chunk arrives, then the test decides when the connection resets. */
+const resettableBody = (
+  cancel: () => Promise<void> | void = () => undefined
+) => {
+  let controller!: ReadableStreamDefaultController<Uint8Array>;
+  const onCancel = jest.fn(cancel);
+  const body = new ReadableStream<Uint8Array>({
+    start(streamController) {
+      controller = streamController;
+      streamController.enqueue(new TextEncoder().encode('{"a":'));
+    },
+    cancel: onCancel,
+  });
+  return {
+    body,
+    cancel: onCancel,
+    reset: () => controller.error(connectionReset()),
+  };
+};
+
+/** Real macrotask turns, so a stray rejection or exception has surfaced. */
+const settle = async () => {
+  await new Promise<void>((resolve) => setImmediate(resolve));
+  await new Promise<void>((resolve) => setImmediate(resolve));
+};
+
 describe("ssrFetch", () => {
   const originalFetch = globalThis.fetch;
   let warnSpy: jest.SpyInstance;
@@ -402,6 +432,155 @@ describe("ssrFetch", () => {
       expect(sentInit()?.method).toBe("POST");
       expect(sentInit()?.body).toBe("{}");
       expect(sentInit()?.signal).toBeInstanceOf(AbortSignal);
+    });
+  });
+
+  describe("connection resets and late stream errors", () => {
+    // jest-circus listens for unhandledRejection and uncaughtException on the
+    // real process and fails the running test, so each case settles real
+    // macrotask turns and then simply finishes. (A listener added here would
+    // sit on the sandboxed process object and never fire.)
+    it("rejects the reader of a body that resets mid-transfer without a stray error", async () => {
+      const { body, reset } = resettableBody();
+      mockNativeFetch.mockResolvedValue(new Response(body, { status: 200 }));
+      const { ssrFetch } = await loadSsrFetch();
+
+      const response = await ssrFetch(API_URL);
+      const read = expect(response.text()).rejects.toMatchObject({
+        code: "ECONNRESET",
+      });
+      await settle();
+      reset();
+      await read;
+      await settle();
+      expect(jest.getTimerCount()).toBe(0);
+    });
+
+    it("tolerates a reset on a body nobody reads", async () => {
+      const { body, reset } = resettableBody();
+      mockNativeFetch.mockResolvedValue(new Response(body, { status: 200 }));
+      const { ssrFetch, SSR_API_TIMEOUT_MS } = await loadSsrFetch();
+
+      await ssrFetch(API_URL);
+      reset();
+      await settle();
+      await jest.advanceTimersByTimeAsync(SSR_API_TIMEOUT_MS);
+      await settle();
+      expect(jest.getTimerCount()).toBe(0);
+    });
+
+    describe.each([
+      ["already reset", false],
+      ["reset after it is discarded", true],
+    ])(
+      "a response that arrives after the deadline and is %s",
+      (_name, late) => {
+        it("is discarded without a stray error", async () => {
+          const { body, reset, cancel } = resettableBody();
+          if (!late) reset();
+          mockNativeFetch.mockImplementation(
+            () =>
+              new Promise<Response>((resolve) => {
+                setTimeout(() => resolve(new Response(body)), 10_000);
+              })
+          );
+          const { ssrFetch, SSR_API_TIMEOUT_MS } = await loadSsrFetch();
+
+          const outcome = expect(ssrFetch(API_URL)).rejects.toHaveProperty(
+            "name",
+            "TimeoutError"
+          );
+          await waitForNativeFetch();
+          await jest.advanceTimersByTimeAsync(SSR_API_TIMEOUT_MS);
+          await outcome;
+          await jest.advanceTimersByTimeAsync(10_000);
+          if (late) reset();
+          await settle();
+
+          // An already errored stream has nothing left to cancel upstream.
+          expect(cancel).toHaveBeenCalledTimes(late ? 1 : 0);
+          expect(jest.getTimerCount()).toBe(0);
+        });
+      }
+    );
+
+    it("discards a late response whose own cancellation fails", async () => {
+      const { body } = resettableBody(() => Promise.reject(connectionReset()));
+      mockNativeFetch.mockImplementation(
+        () =>
+          new Promise<Response>((resolve) => {
+            setTimeout(() => resolve(new Response(body)), 10_000);
+          })
+      );
+      const { ssrFetch, SSR_API_TIMEOUT_MS } = await loadSsrFetch();
+
+      const outcome = expect(ssrFetch(API_URL)).rejects.toHaveProperty(
+        "name",
+        "TimeoutError"
+      );
+      await waitForNativeFetch();
+      await jest.advanceTimersByTimeAsync(SSR_API_TIMEOUT_MS);
+      await outcome;
+      await jest.advanceTimersByTimeAsync(10_000);
+      await settle();
+    });
+
+    it.each([
+      ["a reader is waiting", true],
+      ["nobody is reading", false],
+    ])(
+      "cancels the body at the deadline when %s and survives the reset that follows",
+      async (_name, reading) => {
+        const { body, reset, cancel } = resettableBody();
+        mockNativeFetch.mockResolvedValue(new Response(body, { status: 200 }));
+        const { ssrFetch, SSR_API_TIMEOUT_MS } = await loadSsrFetch();
+
+        const response = await ssrFetch(API_URL);
+        const outcome = reading
+          ? expect(response.text()).rejects.toHaveProperty(
+              "name",
+              "TimeoutError"
+            )
+          : Promise.resolve();
+        await settle();
+        await jest.advanceTimersByTimeAsync(SSR_API_TIMEOUT_MS);
+        await outcome;
+        reset();
+        await settle();
+
+        expect(cancel).toHaveBeenCalledTimes(1);
+        expect(jest.getTimerCount()).toBe(0);
+      }
+    );
+
+    it("survives an upstream whose cancellation fails when the deadline cancels it", async () => {
+      const { body } = resettableBody(() => Promise.reject(connectionReset()));
+      mockNativeFetch.mockResolvedValue(new Response(body, { status: 200 }));
+      const { ssrFetch, SSR_API_TIMEOUT_MS } = await loadSsrFetch();
+
+      const response = await ssrFetch(API_URL);
+      const outcome = expect(response.text()).rejects.toHaveProperty(
+        "name",
+        "TimeoutError"
+      );
+      await settle();
+      await jest.advanceTimersByTimeAsync(SSR_API_TIMEOUT_MS);
+      await outcome;
+      await settle();
+    });
+
+    it("lets the consumer cancel a body and survives the reset that follows", async () => {
+      const { body, reset, cancel } = resettableBody();
+      mockNativeFetch.mockResolvedValue(new Response(body, { status: 200 }));
+      const { ssrFetch } = await loadSsrFetch();
+
+      const response = await ssrFetch(API_URL);
+      await response.body?.cancel(new Error("consumer gone"));
+      reset();
+      await settle();
+
+      expect(cancel).toHaveBeenCalledTimes(1);
+      expect(jest.getTimerCount()).toBe(0);
     });
   });
 });
