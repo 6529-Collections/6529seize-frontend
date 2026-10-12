@@ -9,6 +9,7 @@ import {
   buildImmutableMuseumRawUrl,
   buildMuseumMainBlobUrl,
   buildMuseumMainEditUrl,
+  isGitHubApiUrl,
 } from "@/lib/museum/publication";
 import { EXACT_COMMIT } from "./fixture";
 
@@ -124,6 +125,20 @@ describe("Museum publication security boundary", () => {
     );
     expect(buildMuseumMainEditUrl("docs/../RIGHTS.md")).toBeNull();
     expect(buildMuseumMainEditUrl("https://evil.test/README.md")).toBeNull();
+  });
+
+  it.each([
+    [
+      "https://api.github.com/repos/6529-Collections/6529networkmuseum/git/ref/heads/main",
+      true,
+    ],
+    ["https://api.github.com.evil.test/repos/a", false],
+    ["https://api.github.com@evil.test/repos/a", false],
+    ["http://api.github.com/repos/a", false],
+    ["https://raw.githubusercontent.com/6529-Collections/a", false],
+    ["api.github.com/repos/a", false],
+  ])("treats only the GitHub API origin as API: %s", (url, expected) => {
+    expect(isGitHubApiUrl(url)).toBe(expected);
   });
 
   it("rejects arbitrary GitHub and Art Blocks origins", () => {
