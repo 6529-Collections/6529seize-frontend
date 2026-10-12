@@ -1,4 +1,5 @@
 import type { Locator, Page } from "@playwright/test";
+import { expectUrlState } from "../support/urlState";
 import { installSurfaceSimulation } from "../support/surfaceSimulation";
 import { expectCompetitionScroll } from "../support/competitionScroll";
 import {
@@ -281,7 +282,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
             .filter({ visible: true })
             .first()
             .click();
-        await expect(page).toHaveURL((url) => url.pathname === "/waves");
+        await expectUrlState(page, (url) => url.pathname === "/waves");
       };
       await gotoReady(page, "/waves");
       // Staging has its own wave data and no Maybes Bar. Use its public chat
@@ -526,7 +527,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     const winners = page.getByRole("tabpanel");
     await expect(
       winners.getByRole("link", { name: /^The Memes #\d+$/ }).first()
-    ).toBeVisible();
+    ).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
     await expect(
       winners.getByText("Mint date:", { exact: true }).first()
     ).toBeVisible();
@@ -545,7 +546,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
   }) => {
     await gotoReady(page, "/waves");
 
-    await expect(page).toHaveURL((url) => url.pathname === "/waves");
+    await expectUrlState(page, (url) => url.pathname === "/waves");
     await expect(page).toHaveTitle(/Waves/i);
 
     const viewport = page.viewportSize();
@@ -590,7 +591,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       page.getByRole("region", {
         name: /All recent waves list|Regular waves list/,
       })
-    ).toBeVisible();
+    ).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
     // Global navigation can still expose Waves here. The list header is plain
     // text on web, so scope its navigation invariant to main without a heading.
     await expect(
@@ -611,7 +612,8 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     );
     await profileFeedLink.click();
 
-    await expect(page).toHaveURL(
+    await expectUrlState(
+      page,
       (url) =>
         url.pathname === "/waves" &&
         url.searchParams.get("view") === "profile-feed"
@@ -663,14 +665,16 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     const visibleFeedPost = feedPostButtons.nth(visibleFeedPostIndex);
     await visibleFeedPost.focus();
     await visibleFeedPost.press("Enter");
-    await expect(page).toHaveURL(
+    await expectUrlState(
+      page,
       (url) =>
         /^\/waves\/[0-9a-f-]{36}$/i.test(url.pathname) &&
         Boolean(url.searchParams.get("serialNo"))
     );
 
     await page.goBack();
-    await expect(page).toHaveURL(
+    await expectUrlState(
+      page,
       (url) =>
         url.pathname === "/waves" &&
         url.searchParams.get("view") === "profile-feed"
@@ -687,7 +691,8 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       .toBeGreaterThan(0);
 
     await page.goBack();
-    await expect(page).toHaveURL(
+    await expectUrlState(
+      page,
       (url) => url.pathname === "/waves" && !url.search
     );
     await expect(
@@ -716,9 +721,10 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       `Expected a link for Wave ${waveId}`
     ).not.toBeNull();
     await matchingWaveLink!.click();
-    await expect(page).toHaveURL((url) => url.pathname === `/waves/${waveId}`);
+    await expectUrlState(page, (url) => url.pathname === `/waves/${waveId}`);
     await page.goBack();
-    await expect(page).toHaveURL(
+    await expectUrlState(
+      page,
       (url) => url.pathname === "/waves" && !url.search
     );
 
@@ -896,9 +902,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
   }) => {
     await gotoReady(page, `/${PROFILE_HANDLE}`);
 
-    await expect(page).toHaveURL(
-      (url) => url.pathname === `/${PROFILE_HANDLE}`
-    );
+    await expectUrlState(page, (url) => url.pathname === `/${PROFILE_HANDLE}`);
     await expect(page).toHaveTitle(new RegExp(PROFILE_HANDLE, "i"));
     await expectProfileShell(page);
     await expectProfileTabLinks(page);
@@ -918,7 +922,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     test(`renders ${tab.path} read-only`, async ({ page }) => {
       await gotoReady(page, tab.path);
 
-      await expect(page).toHaveURL((url) => url.pathname === tab.path);
+      await expectUrlState(page, (url) => url.pathname === tab.path);
       await expect(page).toHaveTitle(tab.title);
       await expectProfileShell(page, tab.activeTab);
       await expectProfileTabLinks(page);

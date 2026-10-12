@@ -116,6 +116,7 @@ test("mobile web starts with its header and full-width content before hydration 
     await expectNoHorizontalOverflow(page);
     await hydration.waitForDownloads();
     hydration.release();
+    await hydration.waitForReady();
     await expect(page.getByRole("main").first().locator("..")).toHaveAttribute(
       "data-small",
       "true"
