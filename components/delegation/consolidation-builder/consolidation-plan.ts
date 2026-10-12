@@ -1,18 +1,5 @@
-import {
-  CONSOLIDATION_FOURTH_WALLET_ACTIVATION_MS,
-  CONSOLIDATION_WALLET_LIMIT,
-} from "@/constants/consolidation.constants";
+import { CONSOLIDATION_WALLET_LIMIT } from "@/constants/consolidation.constants";
 import { isAddress, zeroAddress } from "viem";
-
-/**
- * Four-wallet steps open a few minutes after the activation time. The backend
- * judges freshness by block time, so a client clock running ahead, or a link
- * mined in the first seconds, could otherwise land before activation and
- * never count.
- */
-const FOURTH_SLOT_SIGNING_MARGIN_MS = 10 * 60 * 1000;
-export const FOURTH_SLOT_SIGNING_OPENS_MS =
-  CONSOLIDATION_FOURTH_WALLET_ACTIVATION_MS + FOURTH_SLOT_SIGNING_MARGIN_MS;
 
 /**
  * Pure planning rules for building or extending a consolidation.
@@ -29,7 +16,7 @@ export const FOURTH_SLOT_SIGNING_OPENS_MS =
  *
  * A four-wallet group counts only when one member has all three of its
  * links registered in both directions at or after
- * CONSOLIDATION_FOURTH_WALLET_ACTIVATION_MS ("fresh"). Four-wallet plans
+ * the environment’s activation cutoff ("fresh"). Four-wallet plans
  * therefore require every direction touching a joining wallet to be fresh,
  * and register an older direction again in its signer's step.
  */
@@ -280,6 +267,7 @@ export function buildConsolidationPlan(input: {
   readonly isRegistered: DirectedLinkLookup;
   readonly isFresh: DirectedLinkLookup;
   readonly nowMs: number;
+  readonly signingOpensMs: number | null;
 }): ConsolidationPlan {
   const wallets = [...new Set(input.wallets.map(toWalletKey))];
   const existing = new Set(
@@ -310,7 +298,8 @@ export function buildConsolidationPlan(input: {
     .filter((step) => step.targets.length > 0);
   const steps = orderSteps(pendingSteps);
   const needsFourthSlot = requiresFourthSlot(wallets.length);
-  const beforeFourthSlotActivation = input.nowMs < FOURTH_SLOT_SIGNING_OPENS_MS;
+  const beforeFourthSlotActivation =
+    input.signingOpensMs === null || input.nowMs < input.signingOpensMs;
 
   return {
     wallets,

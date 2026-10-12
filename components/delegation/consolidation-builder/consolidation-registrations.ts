@@ -1,8 +1,5 @@
-import { CONSOLIDATION_FOURTH_WALLET_ACTIVATION_MS } from "@/constants/consolidation.constants";
 import { isAddress } from "viem";
 import { toDirectedLinkKey, toWalletKey } from "./consolidation-plan";
-
-const ACTIVATION_SECONDS = CONSOLIDATION_FOURTH_WALLET_ACTIVATION_MS / 1000;
 
 /**
  * One stored consolidation pair from
@@ -74,8 +71,11 @@ export function parseConsolidationRows(response: unknown): ConsolidationRow[] {
 
 // Same rule as the backend's isPostActivationLink (consolidation-tools.ts):
 // block time in Unix seconds, inclusive of the activation second.
-function isFreshTime(registeredAt: number | undefined): boolean {
-  return registeredAt !== undefined && registeredAt >= ACTIVATION_SECONDS;
+function isFreshTime(
+  registeredAt: number | undefined,
+  activationSeconds: number
+): boolean {
+  return registeredAt !== undefined && registeredAt >= activationSeconds;
 }
 
 /**
@@ -85,7 +85,8 @@ function isFreshTime(registeredAt: number | undefined): boolean {
  */
 export function getFreshLinkKeys(
   rowsByWallet: readonly (readonly ConsolidationRow[])[],
-  wallets: readonly string[]
+  wallets: readonly string[],
+  activationMs: number
 ): string[] {
   const listed = new Set(wallets.map(toWalletKey));
   const fresh = new Set<string>();
@@ -94,10 +95,13 @@ export function getFreshLinkKeys(
     if (!listed.has(row.wallet1) || !listed.has(row.wallet2)) {
       continue;
     }
-    if (isFreshTime(row.wallet1RegisteredAt)) {
+    if (isFreshTime(row.wallet1RegisteredAt, activationMs / 1000)) {
       fresh.add(toDirectedLinkKey(row.wallet1, row.wallet2));
     }
-    if (row.confirmed && isFreshTime(row.wallet2RegisteredAt)) {
+    if (
+      row.confirmed &&
+      isFreshTime(row.wallet2RegisteredAt, activationMs / 1000)
+    ) {
       fresh.add(toDirectedLinkKey(row.wallet2, row.wallet1));
     }
   }

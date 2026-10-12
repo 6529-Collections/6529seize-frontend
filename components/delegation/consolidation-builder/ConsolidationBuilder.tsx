@@ -1,10 +1,8 @@
 "use client";
 
+import { useConsolidationPolicy } from "@/hooks/useConsolidationPolicy";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import {
-  CONSOLIDATION_FOURTH_WALLET_ACTIVATION_MS,
-  CONSOLIDATION_WALLET_LIMIT,
-} from "@/constants/consolidation.constants";
+import { CONSOLIDATION_WALLET_LIMIT } from "@/constants/consolidation.constants";
 import { formatAddress } from "@/helpers/addressFormatting";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatDate, formatInteger } from "@/i18n/format";
@@ -21,7 +19,6 @@ import {
 } from "./consolidation-groups";
 import {
   createDirectedLinkLookup,
-  FOURTH_SLOT_SIGNING_OPENS_MS,
   resolveConsolidationProgress,
   toWalletKey,
   validateConsolidationWallets,
@@ -92,14 +89,14 @@ function createDraft(values: readonly string[]): WalletDraft {
  * Current time, refreshed when the fourth slot activates. Waits longer than
  * the browser's timer limit are chained, so a long-open tab still flips.
  */
-function useFourthSlotClock(): number {
+function useFourthSlotClock(signingOpensMs: number | undefined): number {
   const [nowMs, setNowMs] = useState(() => Date.now());
 
   useEffect(() => {
-    const remainingMs = FOURTH_SLOT_SIGNING_OPENS_MS - nowMs;
-    if (remainingMs <= 0) {
+    if (signingOpensMs === undefined || nowMs >= signingOpensMs) {
       return undefined;
     }
+    const remainingMs = Math.max(0, signingOpensMs - Date.now());
     const timer = globalThis.setTimeout(
       () => {
         setNowMs(Date.now());
@@ -107,7 +104,7 @@ function useFourthSlotClock(): number {
       Math.min(remainingMs, MAX_TIMER_DELAY_MS)
     );
     return () => globalThis.clearTimeout(timer);
-  }, [nowMs]);
+  }, [nowMs, signingOpensMs]);
 
   return nowMs;
 }
@@ -164,7 +161,12 @@ function hasUnfinishedStep(
 export default function ConsolidationBuilder(props: Readonly<Props>) {
   const locale = useBrowserLocale();
   const queryClient = useQueryClient();
-  const nowMs = useFourthSlotClock();
+  const {
+    policy,
+    isLoading: policyLoading,
+    reload: reloadPolicy,
+  } = useConsolidationPolicy();
+  const nowMs = useFourthSlotClock(policy?.signingOpensMs);
   const connectedKey =
     !props.walletResolving && props.connectedAddress
       ? toWalletKey(props.connectedAddress)
@@ -215,6 +217,7 @@ export default function ConsolidationBuilder(props: Readonly<Props>) {
     groupsReady,
     existingMembers,
     nowMs,
+    policy,
   });
   const { plan, registeredLinkKeys, freshLinkKeys } = planState;
   const managers = useConsolidationManagedWallets(
@@ -282,16 +285,12 @@ export default function ConsolidationBuilder(props: Readonly<Props>) {
         });
   }
 
-  const activationDate = formatDate(
-    locale,
-    CONSOLIDATION_FOURTH_WALLET_ACTIVATION_MS,
-    ACTIVATION_DATE_FORMAT
-  );
-  const signingOpensDate = formatDate(
-    locale,
-    FOURTH_SLOT_SIGNING_OPENS_MS,
-    ACTIVATION_DATE_FORMAT
-  );
+  const activationDate = policy
+    ? formatDate(locale, policy.activationMs, ACTIVATION_DATE_FORMAT)
+    : "";
+  const signingOpensDate = policy
+    ? formatDate(locale, policy.signingOpensMs, ACTIVATION_DATE_FORMAT)
+    : "";
 
   return (
     <DelegationFormShell
@@ -347,6 +346,30 @@ export default function ConsolidationBuilder(props: Readonly<Props>) {
         getShortAddress={(wallet) => formatAddress(getAddress(wallet))}
       />
       <div className="tw-mt-6 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-pt-6">
+        {validation.wallets.length === 4 && !policy && (
+          <div
+            role={policyLoading ? "status" : "alert"}
+            className="tw-mb-4 tw-text-sm tw-text-iron-300"
+          >
+            {t(
+              locale,
+              policyLoading
+                ? "delegation.consolidationBuilder.policy.loading"
+                : "delegation.consolidationBuilder.policy.unavailable"
+            )}
+            {!policyLoading && reloadPolicy && (
+              <button
+                type="button"
+                className="tw-ml-2 tw-underline"
+                onClick={() => {
+                  void reloadPolicy({ reset: true }).catch(() => undefined);
+                }}
+              >
+                {t(locale, "delegation.consolidationBuilder.retry")}
+              </button>
+            )}
+          </div>
+        )}
         <ConsolidationBuilderSteps
           locale={locale}
           state={getStepsState({

@@ -12,6 +12,7 @@
  */
 
 import { ApiAuthSettings } from '../models/ApiAuthSettings';
+import { ApiConsolidationPolicy } from '../models/ApiConsolidationPolicy';
 import { HttpFile } from '../http/http';
 
 export class ApiSeizeSettings {
@@ -23,6 +24,7 @@ export class ApiSeizeSettings {
     'announcements_wave_id': string | null;
     'quorum_wave_id': string | null;
     'auth': ApiAuthSettings;
+    'consolidation': ApiConsolidationPolicy;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -75,6 +77,12 @@ export class ApiSeizeSettings {
             "name": "auth",
             "baseName": "auth",
             "type": "ApiAuthSettings",
+            "format": ""
+        },
+        {
+            "name": "consolidation",
+            "baseName": "consolidation",
+            "type": "ApiConsolidationPolicy",
             "format": ""
         }    ];
 

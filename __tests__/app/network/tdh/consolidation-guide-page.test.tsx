@@ -1,3 +1,11 @@
+jest.mock("@/hooks/useConsolidationPolicy", () => ({
+  useConsolidationPolicy: () => ({
+    policy: {
+      activationMs: Date.parse("2026-10-12T00:00:00Z"),
+      signingOpensMs: Date.parse("2026-10-12T00:10:00Z"),
+    },
+  }),
+}));
 import TDHConsolidationPage from "@/app/network/tdh/consolidation/page.client";
 import { generateMetadata } from "@/app/network/tdh/consolidation/page";
 import { render, screen } from "@testing-library/react";
@@ -30,7 +38,7 @@ describe("TDHConsolidationPage (collector's guide)", () => {
       })
     ).toBeInTheDocument();
     expect(
-      screen.getByText(/The fourth can be added from October 15, 2026/)
+      screen.getByText(/The fourth requires fresh links from October 12, 2026/)
     ).toBeInTheDocument();
   });
 

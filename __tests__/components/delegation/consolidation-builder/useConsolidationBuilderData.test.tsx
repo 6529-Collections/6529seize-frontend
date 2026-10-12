@@ -207,9 +207,13 @@ describe("useConsolidationFreshLinks", () => {
     }));
     const wallets = [A, B];
 
-    const { result } = renderHook(() => useConsolidationFreshLinks(wallets), {
-      wrapper: createWrapper(),
-    });
+    const { result } = renderHook(
+      () =>
+        useConsolidationFreshLinks(wallets, Date.parse("2026-10-15T00:00:00Z")),
+      {
+        wrapper: createWrapper(),
+      }
+    );
 
     await waitFor(() => expect(result.current.freshLinkKeys).toBeDefined());
     expect(fetchUrl).toHaveBeenCalledWith(
@@ -220,16 +224,20 @@ describe("useConsolidationFreshLinks", () => {
   });
 
   it("returns no directions without wallets and reports failed reads", async () => {
-    const empty = renderHook(() => useConsolidationFreshLinks([]), {
+    const empty = renderHook(() => useConsolidationFreshLinks([], null), {
       wrapper: createWrapper(),
     });
     expect(empty.result.current.freshLinkKeys).toEqual([]);
 
     jest.mocked(fetchUrl).mockRejectedValue(new Error("down"));
     const wallets = [A];
-    const { result } = renderHook(() => useConsolidationFreshLinks(wallets), {
-      wrapper: createWrapper(),
-    });
+    const { result } = renderHook(
+      () =>
+        useConsolidationFreshLinks(wallets, Date.parse("2026-10-15T00:00:00Z")),
+      {
+        wrapper: createWrapper(),
+      }
+    );
 
     await waitFor(() => expect(result.current.isError).toBe(true));
     expect(result.current.freshLinkKeys).toBeUndefined();
