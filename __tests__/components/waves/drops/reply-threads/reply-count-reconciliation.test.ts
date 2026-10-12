@@ -71,6 +71,106 @@ describe("reply count reconciliation", () => {
     );
   });
 
+  it("does not lose a request while the final batch is settling", async () => {
+    const state = setup();
+    state.fetchDrop
+      .mockResolvedValueOnce(drop("root", 1))
+      .mockResolvedValue(drop("root", 2));
+    state.applyCount.mockImplementationOnce(() => {
+      queueMicrotask(() => state.reconciliation.request("root"));
+    });
+    state.reconciliation.request("root");
+    await waitFor(() =>
+      expect(state.applyCount).toHaveBeenLastCalledWith("root", 2)
+    );
+    expect(state.fetchDrop).toHaveBeenCalledTimes(2);
+  });
+
+  it("reports an application failure and allows a later refresh", async () => {
+    const state = setup();
+    const error = new Error("application");
+    state.fetchDrop.mockResolvedValue(drop("root", 2));
+    state.applyCount.mockImplementationOnce(() => {
+      throw error;
+    });
+    state.reconciliation.request("root");
+    await waitFor(() => expect(state.onError).toHaveBeenCalledWith(error));
+    state.reconciliation.request("root");
+    await waitFor(() => expect(state.applyCount).toHaveBeenCalledTimes(2));
+    expect(state.fetchDrop).toHaveBeenCalledTimes(2);
+  });
+
+  it("fetches independent paths concurrently and reads their shared ancestor once", async () => {
+    let resolveFirst!: (value: ApiDropV2View) => void;
+    let resolveLeft!: (value: ApiDropV2View) => void;
+    let resolveRight!: (value: ApiDropV2View) => void;
+    const state = setup();
+    state.fetchDrop.mockImplementation((id) => {
+      if (id === "first") {
+        return new Promise((resolve) => {
+          resolveFirst = resolve;
+        });
+      }
+      if (id === "left") {
+        return new Promise((resolve) => {
+          resolveLeft = resolve;
+        });
+      }
+      if (id === "right") {
+        return new Promise((resolve) => {
+          resolveRight = resolve;
+        });
+      }
+      return Promise.resolve(drop("root", 4));
+    });
+    state.reconciliation.request("first");
+    state.reconciliation.request("left");
+    state.reconciliation.request("right");
+    resolveFirst(drop("first", 1));
+    await waitFor(() => {
+      expect(state.fetchDrop).toHaveBeenCalledWith("left");
+      expect(state.fetchDrop).toHaveBeenCalledWith("right");
+    });
+    resolveRight(drop("right", 1, "root"));
+    await waitFor(() => expect(state.fetchDrop).toHaveBeenCalledWith("root"));
+    resolveLeft(drop("left", 1, "root"));
+    await waitFor(() =>
+      expect(state.applyCount).toHaveBeenCalledWith("root", 4)
+    );
+    expect(
+      state.fetchDrop.mock.calls.filter(([id]) => id === "root")
+    ).toHaveLength(1);
+    expect(state.applyCount).toHaveBeenCalledWith("left", 1);
+    expect(state.applyCount).toHaveBeenCalledWith("right", 1);
+  });
+
+  it("keeps successful paths when another path in the batch fails", async () => {
+    let resolveFirst!: (value: ApiDropV2View) => void;
+    const state = setup();
+    state.fetchDrop.mockImplementation((id) => {
+      if (id === "first") {
+        return new Promise((resolve) => {
+          resolveFirst = resolve;
+        });
+      }
+      return id === "failed"
+        ? Promise.reject(new Error("network"))
+        : Promise.resolve(drop("root", 2));
+    });
+    state.reconciliation.request("first");
+    state.reconciliation.request("failed");
+    state.reconciliation.request("root");
+    resolveFirst(drop("first", 1));
+    await waitFor(() =>
+      expect(state.applyCount).toHaveBeenCalledWith("root", 2)
+    );
+    expect(state.onError).toHaveBeenCalledTimes(1);
+    expect(state.applyCount).not.toHaveBeenCalledWith(
+      "failed",
+      expect.anything()
+    );
+  });
+
   it("does not apply late results after disposal", async () => {
     let resolveFetch!: (value: ApiDropV2View) => void;
     const state = setup();
