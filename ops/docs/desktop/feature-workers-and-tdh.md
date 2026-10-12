@@ -99,3 +99,7 @@ RPC URLs. Use the installed app's confirmation text before a recovery action.
 - [Get started](flow-getting-started.md)
 - [Sync and recovery](troubleshooting-sync-and-recovery.md)
 - [Wallets, IPFS, and About](feature-wallets-ipfs-and-about.md)
+
+### Waiting for consolidation settings
+
+Four-wallet native TDH uses the activation cutoff from the selected backend. If TDH reports that it is waiting for valid consolidation settings, prior results remain displayed. Check connectivity and that this backend exposes its consolidation policy, then retry `Recalculate TDH Now`. This is separate from an Ethereum archive RPC replay error. A changed cutoff or backend makes the next incremental calculation rebuild all groups under the new policy.

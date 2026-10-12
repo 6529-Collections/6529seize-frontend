@@ -9212,7 +9212,7 @@
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/eth-scanner/RpcProviders.tsx",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/db/db.ts",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/index.ts",
-        "https://github.com/6529-Collections/6529-core/blob/be11ca5536c4dadd82a7f5942890abe20d7e63c6/ops/docs/native-four-wallet-consolidation.md"
+        "https://github.com/6529-Collections/6529-core/blob/2e8b4b2c2e3f5464b9c3639fcbe5fd817b648ed3/ops/docs/native-four-wallet-consolidation.md"
       ],
       "brief_answer": "Open **6529 Desktop > ETH Transactions > RPC Providers > Providers List** and click **Set Active** on your provider. If none is saved, use **Add RPC Provider**, enter an Ethereum mainnet RPC URL, **Test** it, enter a Provider Name, then **Add** and **Set Active**. Saving alone does not activate it; never share a URL containing API credentials."
     },
@@ -9264,7 +9264,7 @@
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/scheduled-tasks/scheduler.ts",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/scheduled-tasks/scheduled-worker.ts",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/eth-scanner/Workers.tsx",
-        "https://github.com/6529-Collections/6529-core/blob/be11ca5536c4dadd82a7f5942890abe20d7e63c6/ops/docs/native-four-wallet-consolidation.md"
+        "https://github.com/6529-Collections/6529-core/blob/2e8b4b2c2e3f5464b9c3639fcbe5fd817b648ed3/ops/docs/native-four-wallet-consolidation.md"
       ],
       "brief_answer": "With an active RPC provider and the app open, 6529 Desktop workers sync automatically. Check their progress and Logs under **6529 Desktop > ETH Transactions**. Transactions and NFTDelegation must catch up before TDH calculation can finish. Which worker is stalled, and what status or redacted error does it show?"
     },
@@ -9319,7 +9319,7 @@
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/scheduled-tasks/workers/tdh-worker/index.ts",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/scheduled-tasks/workers/tdh-worker/tdh-worker.helpers.ts",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/tdh-calculation/TDHValidation.tsx",
-        "https://github.com/6529-Collections/6529-core/blob/be11ca5536c4dadd82a7f5942890abe20d7e63c6/ops/docs/native-four-wallet-consolidation.md"
+        "https://github.com/6529-Collections/6529-core/blob/2e8b4b2c2e3f5464b9c3639fcbe5fd817b648ed3/ops/docs/native-four-wallet-consolidation.md"
       ],
       "brief_answer": "6529 Desktop calculates TDH automatically at **00:15 UTC** while the app is open and its prerequisites are synced. View it under **6529 Desktop > TDH Calculation**. For a manual run, use the TDH worker’s **Advanced Options > Recalculate TDH Now**; it replaces the local TDH result and does not repair transaction history."
     },
@@ -9388,7 +9388,7 @@
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/scheduled-tasks/workers/transactions-worker/transaction-reconciliation.ts",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/scheduled-tasks/scheduled-worker.ts",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/index.ts",
-        "https://github.com/6529-Collections/6529-core/blob/be11ca5536c4dadd82a7f5942890abe20d7e63c6/ops/docs/native-four-wallet-consolidation.md"
+        "https://github.com/6529-Collections/6529-core/blob/2e8b4b2c2e3f5464b9c3639fcbe5fd817b648ed3/ops/docs/native-four-wallet-consolidation.md"
       ],
       "brief_answer": "In **6529 Desktop > TDH Calculation**, are the two **Last Block** values identical? Which row does not match: **TDH**, **Last Block**, or **Merkle Root**? Different blocks can explain different results; an unavailable reference root is not evidence of corruption."
     },
@@ -10613,6 +10613,8 @@
       "kind": "workflow",
       "title": "Desktop delegation index upgrade and replay",
       "aliases": [
+        "waiting for valid consolidation settings",
+        "desktop tdh settings unavailable",
         "desktop delegation replay",
         "nftdelegation upgrade",
         "waiting for native delegation timestamp scope replay",
@@ -10620,6 +10622,9 @@
         "archive rpc delegation error"
       ],
       "keywords": [
+        "settings",
+        "backend",
+        "activation",
         "desktop",
         "nftdelegation",
         "delegation",
@@ -10630,6 +10635,7 @@
         "tdh"
       ],
       "facts": [
+        "Core reads the four-wallet activation cutoff from its selected backend settings. When TDH waits for valid consolidation settings, previous results remain displayed; check connectivity and the backend’s settings availability, then retry Recalculate TDH Now. This wait is separate from historical Ethereum RPC replay. A changed backend or cutoff forces full TDH recalculation rather than mixing older groups with new incremental results.",
         "This procedure applies to desktop builds containing the native four-wallet delegation-index upgrade. Older installed builds do not gain native four-wallet support from a website renderer update alone.",
         "The first NFTDelegation worker run rebuilds its delegation history automatically while preserving live indexed rows and existing displayed TDH. TDH calculations wait for replay completion. Progress is saved; interruption resumes from the last committed chunk.",
         "Keep an archive-capable Ethereum RPC active. If NFTDelegation Logs report historical-state failures, switch to a suitable provider and rerun NFTDelegation to resume. Do not delete wallets or the app database to solve an archive RPC error.",
@@ -10642,8 +10648,8 @@
       "source_refs": [
         "ops/docs/desktop/feature-workers-and-tdh.md",
         "ops/docs/desktop/troubleshooting-sync-and-recovery.md",
-        "https://github.com/6529-Collections/6529-core/blob/be11ca5536c4dadd82a7f5942890abe20d7e63c6/ops/docs/native-four-wallet-consolidation.md",
-        "https://github.com/6529-Collections/6529-core/blob/be11ca5536c4dadd82a7f5942890abe20d7e63c6/electron-src/scheduled-tasks/workers/tdh-worker/index.ts"
+        "https://github.com/6529-Collections/6529-core/blob/2e8b4b2c2e3f5464b9c3639fcbe5fd817b648ed3/ops/docs/native-four-wallet-consolidation.md",
+        "https://github.com/6529-Collections/6529-core/blob/2e8b4b2c2e3f5464b9c3639fcbe5fd817b648ed3/electron-src/scheduled-tasks/workers/tdh-worker/index.ts"
       ]
     }
   ]

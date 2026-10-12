@@ -178,3 +178,7 @@ time and RPC access and does not change on-chain holdings. Let Transactions and
 NFTDelegation finish syncing before recalculating TDH. A continuing mismatch after
 reset/resync/recalculation moves to diagnostics, not repeated resets. NFT recovery
 and wallet recovery remain separate procedures.
+
+### Waiting for consolidation settings
+
+Four-wallet native TDH uses the activation cutoff from the selected backend. If TDH reports that it is waiting for valid consolidation settings, prior results remain displayed. Check connectivity and that this backend exposes its consolidation policy, then retry `Recalculate TDH Now`. This is separate from an Ethereum archive RPC replay error. A changed cutoff or backend makes the next incremental calculation rebuild all groups under the new policy.
