@@ -104,9 +104,9 @@ async function contactSheet(tiles, size, tileWidth) {
 async function automatedChecks(page) {
   return page.evaluate(() => {
     const doc = document.documentElement;
-    const main = document.querySelector("main") ?? document.body;
+    const root = document.querySelector("main") ?? document.body;
     const overflow = doc.scrollWidth - doc.clientWidth;
-    const images = [...main.querySelectorAll("img")].map((img) => ({
+    const images = [...root.querySelectorAll("img")].map((img) => ({
       src: img.currentSrc || img.src,
       complete: img.complete,
       naturalWidth: img.naturalWidth,
@@ -114,7 +114,7 @@ async function automatedChecks(page) {
     const brokenImages = images.filter(
       (i) => i.complete && i.naturalWidth === 0
     );
-    const clipped = [...main.querySelectorAll("h1,h2,h3,p,a,figcaption")]
+    const clipped = [...root.querySelectorAll("h1,h2,h3,p,a,figcaption")]
       .filter((el) => {
         const style = getComputedStyle(el);
         return (
@@ -127,7 +127,7 @@ async function automatedChecks(page) {
     const collectionLinks = [...document.querySelectorAll("a")]
       .filter((a) => a.getAttribute("href") === "/museum/network/collection")
       .map((a) => a.textContent.trim());
-    const sections = [...main.querySelectorAll("section")].map((section) => {
+    const sections = [...root.querySelectorAll("section")].map((section) => {
       const style = getComputedStyle(section);
       const heading = section.querySelector("h2");
       return {
