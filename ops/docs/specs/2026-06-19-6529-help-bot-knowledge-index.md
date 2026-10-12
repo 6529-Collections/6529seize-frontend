@@ -35,6 +35,14 @@ scrollable three-row voting window, pagination, compact empty/error states and
 independently persisted collapse preferences. Worth Checking Out comes first
 and retains its own compact preview height.
 
+The primary-address and consolidation records distinguish immediate primary
+selection from the roughly seven-day, 50,400-processed-block rule for profile
+retention after a split. The subscription record covers balance and setting
+merges, manual quantity precedence over All eligible, priority preservation,
+highest-TDH split routing, and finalized-allocation conflicts that need manual
+reconciliation. These remain frontend-owned facts published through the existing
+help-index sync and consumed by the existing backend loader.
+
 ## Problem Statement
 
 Users often ask practical product questions in Waves instead of finding the
