@@ -22,7 +22,7 @@ import type { ContractType } from "@/types/enums";
 import { useEffect, useRef } from "react";
 
 const COLLECTED_CARDS_LIST_CLASS =
-  "tw-m-0 tw-grid tw-grid-cols-2 tw-gap-4 tw-pb-2 tw-pl-0 sm:tw-grid-cols-3 md:tw-grid-cols-4 lg:tw-gap-6";
+  "tw-m-0 tw-grid tw-grid-cols-2 tw-gap-4 tw-pb-2 tw-pl-0 tw-outline-none focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 sm:tw-grid-cols-3 md:tw-grid-cols-4 lg:tw-gap-6";
 // CSS marker removal can cause Safari/VoiceOver to drop native list semantics.
 const COLLECTED_CARDS_LIST_COMPATIBILITY_PROPS = {
   role: "list",
@@ -39,6 +39,7 @@ export default function UserPageCollectedCards({
   isTransferLoading = false,
   locale = DEFAULT_LOCALE,
   returnTo,
+  isLoading = false,
 }: {
   readonly cards: CollectedCard[];
   readonly totalPages: number;
@@ -50,6 +51,7 @@ export default function UserPageCollectedCards({
   readonly isTransferLoading?: boolean | undefined;
   readonly locale?: SupportedLocale | undefined;
   readonly returnTo?: string | null | undefined;
+  readonly isLoading?: boolean | undefined;
 }) {
   const transfer = useTransfer();
   const isTransferEnabled = transfer.enabled;
@@ -83,6 +85,7 @@ export default function UserPageCollectedCards({
           <ul
             {...COLLECTED_CARDS_LIST_COMPATIBILITY_PROPS}
             aria-label={listLabel}
+            tabIndex={-1}
             className={COLLECTED_CARDS_LIST_CLASS}
           >
             {cards.map((card) => {
@@ -153,7 +156,7 @@ export default function UserPageCollectedCards({
               totalPages={totalPages}
               haveNextPage={page < totalPages}
               small={false}
-              loading={false}
+              loading={isLoading}
             />
           )}
         </div>

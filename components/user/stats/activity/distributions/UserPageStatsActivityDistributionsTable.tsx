@@ -81,6 +81,7 @@ export default function UserPageStatsActivityDistributionsTable({
         collection: getCollectionEnum(item.contract),
         tokenId: item.card_id,
         name: item.card_name,
+        walletAddress: item.wallet,
         wallet:
           profile.wallets?.find(
             (w) => w.wallet.toLowerCase() === item.wallet.toLowerCase()

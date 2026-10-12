@@ -9,7 +9,7 @@ import Image from "next/image";
 import { useMemo, useState } from "react";
 
 const NETWORK_CARDS_LIST_CLASS =
-  "tw-m-0 tw-grid tw-list-none tw-grid-cols-2 tw-gap-4 tw-pb-2 tw-pl-0 sm:tw-grid-cols-3 md:tw-grid-cols-4 lg:tw-gap-6";
+  "tw-m-0 tw-grid tw-list-none tw-grid-cols-2 tw-gap-4 tw-pb-2 tw-pl-0 tw-outline-none focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 sm:tw-grid-cols-3 md:tw-grid-cols-4 lg:tw-gap-6";
 // CSS marker removal can cause Safari/VoiceOver to drop native list semantics.
 const NETWORK_CARDS_LIST_COMPATIBILITY_PROPS = {
   role: "list",
@@ -21,12 +21,14 @@ export default function UserPageCollectedNetworkCards({
   setPage,
   next,
   locale = DEFAULT_LOCALE,
+  isLoading = false,
 }: {
   readonly cards: ApiXTdhToken[];
   readonly page: number;
   readonly setPage: (page: number) => void;
   readonly next: boolean;
   readonly locale?: SupportedLocale | undefined;
+  readonly isLoading?: boolean | undefined;
 }) {
   const tokens = useMemo(
     () =>
@@ -58,6 +60,7 @@ export default function UserPageCollectedNetworkCards({
       <ul
         {...NETWORK_CARDS_LIST_COMPATIBILITY_PROPS}
         aria-label={listLabel}
+        tabIndex={-1}
         className={NETWORK_CARDS_LIST_CLASS}
       >
         {cards.map((card) => (
@@ -77,7 +80,7 @@ export default function UserPageCollectedNetworkCards({
           totalPages={next ? page + 1 : page}
           haveNextPage={next}
           small={false}
-          loading={false}
+          loading={isLoading}
         />
       </div>
     </>
