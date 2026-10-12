@@ -132,6 +132,12 @@ export default function UserPageCollected({
   }, [searchParams, profile.handle, user]);
 
   const [filters, setFilters] = useState<ProfileCollectedFilters>(getFilters());
+  const artworkRef = useRef<HTMLDivElement>(null);
+  const pendingPageNavigation = useRef<{
+    from: string;
+    to: string;
+    page: number;
+  } | null>(null);
   const effectiveSeasonId = filters.szn?.id ?? filters.initialSznId;
 
   const createQueryString = useCallback(
@@ -478,7 +484,14 @@ export default function UserPageCollected({
   };
 
   const setPageFromControl = (page: number): Promise<void> => {
-    if (page !== filters.page) trackAction("Artwork", "Change page");
+    if (page !== filters.page) {
+      trackAction("Artwork", "Change page");
+      pendingPageNavigation.current = {
+        from: searchParams.toString(),
+        to: createQueryString([{ name: "page", value: page.toString() }]),
+        page,
+      };
+    }
     return setPage(page);
   };
 
@@ -495,6 +508,8 @@ export default function UserPageCollected({
   const {
     isFetching,
     isLoading: isInitialLoading,
+    isSuccess,
+    isPlaceholderData,
     data,
   } = useQuery<Page<CollectedCard>>({
     queryKey: [QueryKey.PROFILE_COLLECTED, filters],
@@ -536,6 +551,8 @@ export default function UserPageCollected({
     data: dataNetwork,
     isLoading: isNetworkLoading,
     isFetching: isNetworkFetching,
+    isSuccess: isNetworkSuccess,
+    isPlaceholderData: isNetworkPlaceholderData,
   } = useXtdhTokensQuery({
     identity: filters.handleOrWallet,
     page: filters.page,
@@ -547,6 +564,35 @@ export default function UserPageCollected({
   });
   const isFetchingData = isNetwork ? isNetworkFetching : isFetching;
   const isLoading = isNetwork ? isNetworkLoading : isInitialLoading;
+  const isPageReady = isNetwork
+    ? isNetworkSuccess && !isNetworkPlaceholderData
+    : isSuccess && !isPlaceholderData;
+  const loadedPage = isNetwork ? dataNetwork?.page : data?.page;
+
+  useEffect(() => {
+    const pending = pendingPageNavigation.current;
+    const query = searchParams.toString();
+    if (!pending || query === pending.from) return;
+    if (query !== pending.to) {
+      pendingPageNavigation.current = null;
+      return;
+    }
+    if (
+      // eslint-disable-next-line react-you-might-not-need-an-effect/no-event-handler -- Focus must wait for the requested query data to render, after router navigation.
+      !isPageReady ||
+      isFetchingData ||
+      filters.page !== pending.page ||
+      loadedPage !== pending.page
+    )
+      return;
+
+    pendingPageNavigation.current = null;
+    const list = artworkRef.current?.querySelector<HTMLUListElement>("ul");
+    if (!list) return;
+    const focusTarget = list.querySelector<HTMLAnchorElement>("a[href]") ?? list;
+    focusTarget.focus({ preventScroll: true });
+    artworkRef.current?.scrollIntoView({ block: "start" });
+  }, [searchParams, isPageReady, isFetchingData, filters.page, loadedPage]);
 
   const showTransfer =
     !isMobile &&
@@ -670,7 +716,12 @@ export default function UserPageCollected({
             />
           </div>
 
-          <div data-profile-section="Artwork" className="tw-mt-6">
+          <div
+            ref={artworkRef}
+            data-profile-section="Artwork"
+            aria-busy={isFetchingData}
+            className="tw-mt-6 tw-scroll-mt-24"
+          >
             {isNetwork ? (
               <UserPageCollectedNetworkCards
                 cards={dataNetwork?.data ?? []}
@@ -678,6 +729,7 @@ export default function UserPageCollected({
                 setPage={setPageFromControl}
                 next={dataNetwork?.next ?? false}
                 locale={locale}
+                isLoading={isFetchingData}
               />
             ) : (
               <UserPageCollectedCards
@@ -691,6 +743,7 @@ export default function UserPageCollected({
                 isTransferLoading={isFetchingTransfer}
                 locale={locale}
                 returnTo={collectedReturnTo}
+                isLoading={isFetchingData}
               />
             )}
           </div>
