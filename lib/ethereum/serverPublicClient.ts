@@ -34,6 +34,17 @@ function toGatewayError(url: string, error: unknown): HttpRequestError {
   });
 }
 
+function parseGatewayJsonData(url: string, text: string): unknown {
+  try {
+    return (JSON.parse(text) as { readonly data?: unknown } | null)?.data;
+  } catch {
+    throw new HttpRequestError({
+      url,
+      details: "Gateway returned invalid JSON.",
+    });
+  }
+}
+
 /**
  * Mirrors viem's default EIP-3668 gateway request, but only over HTTPS through
  * the guarded public-URL fetcher, with a deadline and a response size cap.
@@ -44,7 +55,7 @@ async function requestGateway(
 ): Promise<Hex> {
   const method = url.includes("{data}") ? "GET" : "POST";
   const gatewayUrl = parsePublicUrl(
-    url.replace("{sender}", sender.toLowerCase()).replace("{data}", data),
+    url.replaceAll("{sender}", sender.toLowerCase()).replaceAll("{data}", data),
     { allowedProtocols: ["https:"] }
   );
   const response = await fetchPublicUrl(
@@ -76,9 +87,7 @@ async function requestGateway(
     .get("content-type")
     ?.toLowerCase()
     .startsWith("application/json");
-  const result: unknown = isJson
-    ? (JSON.parse(text) as { readonly data?: unknown } | null)?.data
-    : text;
+  const result = isJson ? parseGatewayJsonData(url, text) : text;
 
   if (!isHex(result)) {
     throw new HttpRequestError({

@@ -47,6 +47,8 @@ function toAvatarUrl(value: unknown): string | null {
 
 /** Parses ENSIP-12 NFT avatar records (CAIP-22/29) for Ethereum mainnet. */
 function parseNftAvatar(record: string): NftAvatar | null {
+  // did:nft uses "_" separators; the eip155 erc721/erc1155 parts accepted
+  // below never contain "_", so mapping every "_" to "/" is lossless.
   const caip = record.startsWith("did:nft:")
     ? record.slice("did:nft:".length).replaceAll("_", "/")
     : record;
@@ -116,6 +118,9 @@ async function loadNftMetadata(
     nft.standard === "erc1155"
       ? nft.tokenId.toString(16).padStart(64, "0")
       : nft.tokenId.toString();
+  // IPFS/Arweave metadata URIs are intentionally rewritten to the first-party
+  // 6529 media resolver host, which is then fetched through the guarded fetcher
+  // like any other remote metadata URL.
   const metadataUrl = toAvatarUrl(
     uri.replaceAll(TOKEN_ID_PLACEHOLDER, tokenIdText)
   );

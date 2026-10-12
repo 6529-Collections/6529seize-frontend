@@ -107,6 +107,36 @@ describe("createServerPublicClient", () => {
     expect(init.body).toBeUndefined();
   });
 
+  it("substitutes every repeated {sender} and {data} placeholder", async () => {
+    mockFetch.mockResolvedValue(new Response("0xbeef"));
+
+    await expect(
+      lookupWith([
+        "https://gateway.example/{sender}/{data}?s={sender}&d={data}",
+      ])
+    ).resolves.toBe("0xbeef");
+    const [url, init] = mockFetch.mock.calls[0] as [string, RequestInit];
+    expect(url).toBe(
+      `https://gateway.example/${SENDER}/${CALL_DATA}?s=${SENDER}&d=${CALL_DATA}`
+    );
+    expect(init).toEqual(expect.objectContaining({ method: "GET" }));
+  });
+
+  it("reports invalid JSON gateway bodies as gateway errors", async () => {
+    mockFetch.mockResolvedValue(
+      new Response("{not json", {
+        headers: { "content-type": "application/json" },
+      })
+    );
+
+    await expect(
+      lookupWith(["https://gateway.example/lookup"])
+    ).rejects.toMatchObject({
+      name: "HttpRequestError",
+      details: "Gateway returned invalid JSON.",
+    });
+  });
+
   it("refuses non-HTTPS gateway URLs without resolving or requesting them", async () => {
     await expect(
       lookupWith(["http://gateway.example/{data}", "ftp://gateway.example/"])
