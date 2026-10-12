@@ -209,8 +209,8 @@ const createInlineGroupIdentityFromWallet = (
   wallet: string
 ): CommunityMemberMinimal => ({
   profile_id: null,
-  handle: wallet,
-  normalised_handle: wallet.toLowerCase(),
+  handle: null,
+  normalised_handle: null,
   primary_wallet: wallet,
   display: wallet,
   tdh: 0,

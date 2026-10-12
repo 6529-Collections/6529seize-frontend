@@ -456,6 +456,33 @@ describe("CreateWaveGroupInlinePanel", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("keeps identity and rule editors open when clicking outside the panel", async () => {
+    const user = userEvent.setup();
+    const onCreateGroup = jest.fn();
+    const onCriteriaReplacementChange = jest.fn();
+    renderInlinePanel({ onCreateGroup, onCriteriaReplacementChange });
+
+    await user.click(screen.getByRole("button", { name: "Edit" }));
+    await user.click(screen.getByRole("button", { name: "include identity" }));
+    await user.click(document.body);
+
+    expect(screen.getByTestId("identities-panel")).toBeVisible();
+    expect(
+      screen.getByTestId("restored-included-identities")
+    ).toHaveTextContent("0xABC");
+
+    await user.click(screen.getByRole("button", { name: "Rep" }));
+    await user.click(screen.getByRole("button", { name: "set rep min" }));
+    await user.click(document.body);
+
+    expect(screen.getByTestId("rule-rep")).toBeVisible();
+    expect(
+      screen.getByRole("button", { name: "Rep Configured" })
+    ).toHaveAttribute("aria-pressed", "true");
+    expect(onCriteriaReplacementChange.mock.calls).toEqual([[true]]);
+    expect(onCreateGroup).not.toHaveBeenCalled();
+  });
+
   it("cancels the criteria replacement from the header action", async () => {
     const user = userEvent.setup();
     const onCriteriaReplacementChange = jest.fn();
@@ -528,10 +555,15 @@ describe("CreateWaveGroupInlinePanel", () => {
     await user.click(screen.getByRole("button", { name: "set rep min" }));
 
     const configuredRep = screen.getByRole("button", {
-      name: "Rep, Configured",
+      name: "Rep Configured",
     });
     expect(configuredRep).toHaveAttribute("data-configured", "true");
-    expect(configuredRep).toHaveClass("tw-bg-primary-600");
+    expect(configuredRep).toHaveAttribute("aria-pressed", "true");
+    await user.click(
+      screen.getByRole("button", { name: "Level", exact: true })
+    );
+    expect(configuredRep).toHaveAttribute("aria-pressed", "false");
+    expect(configuredRep).toHaveAttribute("data-configured", "true");
   });
 
   it("shows all criteria buttons without a more-rules step", async () => {
@@ -647,7 +679,7 @@ describe("CreateWaveGroupInlinePanel", () => {
     ).toBeGreaterThan(0);
 
     expect(
-      screen.getByRole("button", { name: "Identities, Configured" })
+      screen.getByRole("button", { name: "Identities Configured" })
     ).toHaveAttribute("aria-pressed", "true");
 
     expect(
@@ -898,7 +930,7 @@ describe("CreateWaveGroupInlinePanel", () => {
       screen.getByRole("button", { name: "exclude CSV wallets" })
     );
     await user.click(
-      screen.getByRole("button", { name: "Identities, Configured" })
+      screen.getByRole("button", { name: "Identities Configured" })
     );
 
     expect(

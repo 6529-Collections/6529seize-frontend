@@ -64,11 +64,11 @@ export default function CommonProfileSearchItem({
               </div>
             )}
             <div className="tw-w-[12rem] tw-truncate">
-              <p className="tw-mb-0 tw-truncate tw-whitespace-nowrap tw-text-sm tw-font-medium tw-text-white">
+              <p className="tw-m-0 tw-truncate tw-whitespace-nowrap tw-text-sm tw-font-medium tw-text-white">
                 {title}
               </p>
               {secondaryText && (
-                <p className="tw-mb-0 tw-truncate tw-whitespace-nowrap tw-text-xs tw-font-medium tw-text-iron-400">
+                <p className="tw-m-0 tw-truncate tw-whitespace-nowrap tw-text-xs tw-font-medium tw-text-iron-400">
                   {secondaryText}
                 </p>
               )}

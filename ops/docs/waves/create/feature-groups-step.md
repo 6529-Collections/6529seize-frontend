@@ -70,11 +70,14 @@ waves show these controls inside `Optional settings` on the first screen.
 - Every wave access row offers one `Edit` action with a pencil icon. Wave access
   editors do not offer `Choose group`.
 - `Edit` opens the full criteria builder on `Identities`. `Level`, `TDH`, `NIC`,
-  `Rep`, `Required NFTs`, `Collection Access`, and `xTDH Grant` remain directly
-  available as prominent buttons.
-- The currently open criterion has a solid blue button with an underlined
-  label. A dot identifies each criterion that has a value, whether or not it is
-  open. Screen readers receive the configured state in the button name and the
+  `Rep`, `Required NFTs`, `Collection Access`, and `xTDH Grant` remain available beside the fields.
+- Criteria appear in a left-side list on desktop. On smaller screens they stay
+  in one horizontal row above the editor and scroll sideways when they do not
+  fit. Keyboard focus brings each option into view.
+  The currently open criterion has a calm filled background. A check identifies
+  each criterion that has a value, whether or not it is open.
+  Scrolling over an inline access editor scrolls the surrounding Create Wave form.
+  Screen readers receive the configured state in the button name and the
   open state as pressed.
 - While editing, `Before editing` shows the currently applied audience,
   including `Everyone`, and `After editing` shows the proposed audience and
@@ -88,13 +91,26 @@ waves show these controls inside `Optional settings` on the first screen.
 - `Save changes` creates a new group and assigns it to the row; the existing
   group is not mutated. `Next`, or `Review wave` for standalone Chat, remains
   unavailable while an edit is pending.
-- While an edit is open, the header action becomes `Cancel`. Cancel discards
+- While an edit is open, `Cancel` sits at the far right of the `Before editing`
+  header row, including on mobile. Cancel discards
   the draft and restores the applied audience. There is no separate Close,
   Discard draft, or Preview matches action.
 - Moving between identity and rule buttons keeps the current draft. Navigating
   to another wizard step clears an unapplied criteria replacement.
+- Clicking elsewhere in the Create Wave modal keeps an open criteria editor
+  and its draft available. You can return to the filters without cancelling.
 
 ## Identity Criteria
+
+- Included and Excluded use segmented tabs. Saved wallets resolve to profile
+  pictures and handles. Wallets without profiles show ENS when available or a
+  shortened wallet address with a neutral avatar.
+- Each saved wallet stays independently removable. A wallet label distinguishes
+  entries when several wallets belong to the same profile; saving preserves the
+  original wallet list unless you edit it.
+- Long lists show 20 wallets at a time with `Previous wallets` and `Next wallets`.
+  Profile loading does not block editing or saving. If a lookup fails, its wallet
+  remains available and `Retry profile lookup` retries it.
 
 - Identities can be explicitly included or excluded through profile search, an
   authenticated EMMA allowlist, or a dragged or selected CSV file.
