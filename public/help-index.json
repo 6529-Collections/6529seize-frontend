@@ -1731,12 +1731,13 @@
     {
       "id": "waves.tech-feedback-and-dev-team",
       "kind": "workflow",
-      "title": "Report bugs and follow 6529 development",
+      "title": "Report bugs, send suggestions, and follow 6529 development",
       "link_label": "6529 Tech Feedback",
       "aliases": [
         "report a bug",
         "where do i report bugs",
         "give feedback",
+        "app feature request",
         "6529 tech feedback",
         "follow the repo",
         "dev team chat",
@@ -1758,7 +1759,8 @@
         "waves"
       ],
       "facts": [
-        "Report 6529 bugs and share product or tech feedback in 6529 Tech Feedback, a public top-level wave.",
+        "Report 6529 bugs, app feature requests, and other tech feedback in 6529 Tech Feedback, a public top-level wave.",
+        "Send general, non-technical suggestions about the community, The Memes and other collections, the Network Museum, events, programs, or policies to 6529 Suggestion Box, a top-level wave that is open for anyone to post and moderated by the dev team.",
         "Follow The Repo is the 6529 dev team's live chat. Anyone can read it; the dev team posts there.",
         "Follow The Repo's subwaves are bot feeds: Deploys · Production, Deploys · Staging, and GitHub PR Feed.",
         "Per-deploy frontend and backend release notes post to Deploys · Production.",
@@ -1768,6 +1770,7 @@
       ],
       "canonical_path": "/waves/e933d8d6-0c78-4e8f-aa12-f67d8c11b4dc",
       "related_paths": [
+        "/waves/1853ebd4-d620-42b8-b091-854afd37ed8d",
         "/waves/49f0e595-ec7c-4235-8695-a527f61b69f4",
         "/waves/05b14183-e153-4e47-bc66-42a0f49102d4",
         "/about/tech"
@@ -1779,6 +1782,42 @@
         "ops/docs/developer/deployment.md",
         "SECURITY.md"
       ]
+    },
+    {
+      "id": "waves.suggestion-box",
+      "kind": "workflow",
+      "title": "Send a suggestion to 6529",
+      "link_label": "6529 Suggestion Box",
+      "aliases": [
+        "suggestion box",
+        "6529 suggestion box",
+        "make a suggestion",
+        "where do i send suggestions",
+        "community suggestion",
+        "idea for 6529"
+      ],
+      "keywords": [
+        "suggestion",
+        "idea",
+        "community",
+        "memes",
+        "museum",
+        "events",
+        "programs",
+        "policies",
+        "waves"
+      ],
+      "facts": [
+        "6529 Suggestion Box is a top-level wave for general, non-technical suggestions: the community, The Memes and other collections, the Network Museum, events, programs, and policies.",
+        "It is open for anyone to post, and the dev team moderates it.",
+        "Bugs and app feature requests go to 6529 Tech Feedback instead."
+      ],
+      "canonical_path": "/waves/1853ebd4-d620-42b8-b091-854afd37ed8d",
+      "related_paths": [
+        "/waves/e933d8d6-0c78-4e8f-aa12-f67d8c11b4dc",
+        "/waves"
+      ],
+      "tags": ["waves", "feedback", "suggestions"]
     },
     {
       "id": "navigation.search",
