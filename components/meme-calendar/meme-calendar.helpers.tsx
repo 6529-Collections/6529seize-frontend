@@ -103,6 +103,51 @@ const FIRST_MINT_DATE: Date = (() => {
   return nextMintDateOnOrAfter(phase?.startUtcDay);
 })();
 
+type ZoneWallClock = {
+  readonly year: number;
+  readonly month: number; // 1-12
+  readonly day: number;
+  readonly hour: number; // 0-23
+  readonly minute: number;
+};
+
+// Zone math must never depend on the viewer's locale: the default locale can
+// render "17.40" (fi-FI, da-DK, id-ID) or non-Latin digits (ar, fa). Read
+// numeric parts from a fixed en-US / latn / h23 formatter instead of comparing
+// formatted strings.
+let europeWallClockFormatter: Intl.DateTimeFormat | undefined;
+
+function getEuropeWallClockFormatter(): Intl.DateTimeFormat {
+  europeWallClockFormatter ??= new Intl.DateTimeFormat("en-US", {
+    timeZone: EUROPE_TZ,
+    calendar: "gregory",
+    numberingSystem: "latn",
+    hourCycle: "h23",
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
+    hour: "numeric",
+    minute: "numeric",
+  });
+  return europeWallClockFormatter;
+}
+
+function getEuropeWallClock(instant: Date): ZoneWallClock | null {
+  const parts = getEuropeWallClockFormatter().formatToParts(instant);
+  const read = (type: Intl.DateTimeFormatPartTypes): number =>
+    Number(parts.find((part) => part.type === type)?.value);
+
+  const wallClock: ZoneWallClock = {
+    year: read("year"),
+    month: read("month"),
+    day: read("day"),
+    // Some engines report midnight as 24 even with h23; normalise defensively.
+    hour: read("hour") % 24,
+    minute: read("minute"),
+  };
+  return Object.values(wallClock).every(Number.isFinite) ? wallClock : null;
+}
+
 export function wallTimeToUtcInstantInZone(
   utcDay: Date,
   hour: number,
@@ -118,15 +163,14 @@ export function wallTimeToUtcInstantInZone(
   const summerCandidate = mk(EUROPE_SUMMER_OFFSET_HOURS);
 
   const showsTargetWallTime = (d: Date) => {
-    const parts = new Intl.DateTimeFormat(undefined, {
-      timeZone: EUROPE_TZ,
-      hour12: false,
-      hour: "2-digit",
-      minute: "2-digit",
-    }).format(d);
+    const wallClock = getEuropeWallClock(d);
     return (
-      parts ===
-      `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`
+      wallClock !== null &&
+      wallClock.year === utcDay.getUTCFullYear() &&
+      wallClock.month === utcDay.getUTCMonth() + 1 &&
+      wallClock.day === utcDay.getUTCDate() &&
+      wallClock.hour === hour &&
+      wallClock.minute === minute
     );
   };
 
