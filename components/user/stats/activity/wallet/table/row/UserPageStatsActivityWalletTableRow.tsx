@@ -25,7 +25,7 @@ import {
   isNextgenContract,
 } from "@/helpers/Helpers";
 import { buildTooltipId, TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
-import Link from "next/link";
+import ProfileCollectedActivityLink from "@/components/user/collected/ProfileCollectedActivityLink";
 import { useEffect, useState } from "react";
 import { Tooltip } from "react-tooltip";
 import UserPageStatsActivityWalletTableRowGas from "./UserPageStatsActivityWalletTableRowGas";
@@ -332,12 +332,13 @@ export default function UserPageStatsActivityWalletTableRow({
             </span>
           )}
           <span className="tw-whitespace-nowrap tw-text-sm tw-font-medium sm:tw-text-base">
-            <Link
+            <ProfileCollectedActivityLink
+              activityKey={`wallet-${transaction.from_address}-${transaction.to_address}-${transaction.transaction}-${transaction.token_id}`}
               className="tw-text-iron-300 tw-transition-colors tw-duration-200 hover:tw-text-iron-100"
               href={getPath()}
             >
               {getLinkContent()}
-            </Link>
+            </ProfileCollectedActivityLink>
           </span>
           <img
             className="tw-ml-1 tw-h-auto tw-max-h-10 tw-w-auto tw-min-w-10 tw-flex-shrink-0 tw-rounded-sm tw-bg-iron-800 tw-object-contain tw-ring-1 tw-ring-white/10"

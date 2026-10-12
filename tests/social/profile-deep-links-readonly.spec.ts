@@ -367,6 +367,51 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
     }
   });
 
+  test("recovers empty Collected filters and restores them with browser Back", async ({
+    page,
+  }) => {
+    await gotoReady(
+      page,
+      "/simo/collected?collection=gradients&seized=seized&sort-direction=asc&details=closed&locale=fr-FR"
+    );
+    const clear = page.getByRole("button", {
+      name: "Clear filters",
+      exact: true,
+    });
+    await expect(
+      page
+        .getByRole("status")
+        .filter({ hasText: "No artwork matches these filters." })
+    ).toBeVisible();
+    for (const width of [375, 440, 1280]) {
+      await page.setViewportSize({ width, height: 900 });
+      await clear.scrollIntoViewIfNeeded();
+      const box = await clear.boundingBox();
+      expect(box?.height).toBeGreaterThanOrEqual(44);
+      await expectNoHorizontalOverflow(page);
+    }
+    await clear.click();
+    await expect(page).toHaveURL(
+      (url) =>
+        !url.searchParams.has("collection") &&
+        !url.searchParams.has("seized") &&
+        url.searchParams.get("sort-direction") === "asc" &&
+        url.searchParams.get("details") === "closed" &&
+        url.searchParams.get("locale") === "fr-FR"
+    );
+    const cards = page.getByRole("list", {
+      name: "Collected cards",
+      exact: true,
+    });
+    await expect(cards.getByRole("link").first()).toBeFocused();
+    await expect(cards.getByRole("link").first()).toBeInViewport();
+    await page.goBack();
+    await expect(clear).toBeVisible();
+    await expect(page).toHaveURL(
+      (url) => url.searchParams.get("collection") === "gradients"
+    );
+  });
+
   test("keeps Native Collected page counts and pagination readable", async ({
     page,
   }) => {
@@ -408,13 +453,110 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
     await expect(
       page.getByText(/^Page 3 of \d+$/, { exact: true })
     ).toBeVisible();
+    const cards = page.getByRole("list", {
+      name: "Collected cards",
+      exact: true,
+    });
+    await expect(cards.getByRole("link").first()).toBeFocused();
+    await expect(cards.getByRole("link").first()).toBeInViewport();
     await previous.click();
+    await expect(cards.getByRole("link").first()).toBeFocused();
+    await expect(cards.getByRole("link").first()).toBeInViewport();
     await expect(nativeCount).toBeVisible();
     await expect(page).toHaveURL(
       (url) =>
         url.searchParams.get("page") === "2" &&
         url.searchParams.get("collection") === "memes"
     );
+  });
+
+  test("keeps Details closed when returning from a collected artwork", async ({
+    page,
+    isMobile,
+  }) => {
+    await gotoReady(
+      page,
+      `/${PROFILE_HANDLE}/collected?collection=memes&page=2&activity=distributions`
+    );
+    await expect(
+      page.getByRole("list", { name: "Collected cards", exact: true })
+    ).toBeVisible();
+    await page
+      .getByRole("button", { name: "Hide Details", exact: true })
+      .click();
+    await expect(page).toHaveURL(
+      (url) => url.searchParams.get("details") === "closed"
+    );
+    const card = page
+      .getByRole("list", { name: "Collected cards", exact: true })
+      .getByRole("link")
+      .nth(6);
+    const href = await card.getAttribute("href");
+    expect(href).not.toBeNull();
+    await card.click();
+    await expect(page).toHaveURL((url) =>
+      url.pathname.startsWith("/the-memes/")
+    );
+    if (isMobile) {
+      await page
+        .getByRole("link", { name: `Back to ${PROFILE_HANDLE}'s collected` })
+        .click();
+      await expect(card).toBeFocused();
+    } else {
+      await page.goBack();
+    }
+    await expect(
+      page.getByRole("button", { name: "Details", exact: true })
+    ).toHaveAttribute("aria-expanded", "false");
+    await expect(page).toHaveURL(
+      (url) =>
+        url.searchParams.get("page") === "2" &&
+        url.searchParams.get("activity") === "distributions"
+    );
+    await expect(card).toHaveAttribute("href", href!);
+    await expect(card).toBeInViewport();
+  });
+
+  test("returns from a Details artwork to its distribution page and row", async ({
+    page,
+    isMobile,
+  }) => {
+    await gotoReady(
+      page,
+      `/${PROFILE_HANDLE}/collected?collection=memes&page=2&activity=distributions&distribution-page=2`
+    );
+    const panel = page.getByRole("tabpanel", {
+      name: "Distributions",
+      exact: true,
+    });
+    const artwork = panel
+      .getByRole("link", { name: /View The Memes token/ })
+      .nth(4);
+    await expect(artwork).toBeVisible();
+    const href = await artwork.getAttribute("href");
+    expect(href).toContain("returnTo=");
+    await artwork.click();
+    await expect(page).toHaveURL((url) =>
+      url.pathname.startsWith("/the-memes/")
+    );
+    if (isMobile) {
+      await page
+        .getByRole("link", { name: `Back to ${PROFILE_HANDLE}'s collected` })
+        .click();
+      await expect(artwork).toBeFocused();
+    } else {
+      await page.goBack();
+    }
+    await expect(page).toHaveURL(
+      (url) =>
+        url.searchParams.get("page") === "2" &&
+        url.searchParams.get("distribution-page") === "2"
+    );
+    await expect(
+      page.getByRole("button", { name: "Hide Details", exact: true })
+    ).toHaveAttribute("aria-expanded", "true");
+    await expect(artwork).toHaveAttribute("href", href!);
+    await expect(artwork).toBeInViewport();
   });
 
   test("centers the Token ID sort arrows without changing selection behavior", async ({
