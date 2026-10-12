@@ -1,3 +1,8 @@
+jest.mock("next/navigation", () => ({
+  usePathname: () => "/other",
+  useSearchParams: () => new URLSearchParams(),
+}));
+
 import { render, screen } from "@testing-library/react";
 import UserPageStatsActivityDistributionsTableItem from "@/components/user/stats/activity/distributions/UserPageStatsActivityDistributionsTableItem";
 import { DistributionCollection } from "@/components/user/stats/activity/distributions/distributions.types";
@@ -19,6 +24,7 @@ describe("UserPageStatsActivityDistributionsTableItem", () => {
     tokenId: 1000,
     name: "Test",
     wallet: "0x1",
+    walletAddress: "0x1",
     phases: [
       { phase: "phase1", amount: 1000 },
       { phase: "phase2", amount: 2000 },

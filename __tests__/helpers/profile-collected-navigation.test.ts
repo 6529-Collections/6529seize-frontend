@@ -99,6 +99,35 @@ describe("profile collected navigation", () => {
     expect(getProfileCollectedReturnContext(value)).toBeNull();
   });
 
+  it("preserves Details state and activity anchors while dropping unrelated query state", () => {
+    expect(
+      getProfileCollectedReturnContext(
+        "/Shelby/collected?details=closed&activity=distributions&distribution-page=2&unknown=value#collected-activity-distribution-MEMES-42-0xabc"
+      )?.href
+    ).toBe(
+      "/Shelby/collected?activity=distributions&details=closed&distribution-page=2#collected-activity-distribution-MEMES-42-0xabc"
+    );
+    for (const hash of [
+      "collected-activity-",
+      "collected-activity-a/b",
+      `collected-activity-${"a".repeat(257)}`,
+    ]) {
+      expect(
+        getProfileCollectedReturnContext(`/Shelby/collected#${hash}`)?.href
+      ).toBe("/Shelby/collected");
+    }
+  });
+
+  it("preserves wallet activity anchors with full addresses, transaction hash and a uint256 token ID", () => {
+    const address = `0x${"a".repeat(40)}`;
+    const transaction = `0x${"b".repeat(64)}`;
+    const tokenId = ((1n << 256n) - 1n).toString();
+    const anchor = `collected-activity-wallet-${address}-${address}-${transaction}-${tokenId}`;
+    const href = `/Shelby/collected?activity=wallet-activity#${anchor}`;
+
+    expect(getProfileCollectedReturnContext(href)?.href).toBe(href);
+  });
+
   it("builds stable collected card anchors", () => {
     expect(
       getCollectedCardAnchorId({
