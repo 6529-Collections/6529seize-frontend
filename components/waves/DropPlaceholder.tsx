@@ -30,6 +30,8 @@ interface DropPlaceholderProps {
   readonly chatRestriction?: ChatRestriction | undefined;
   readonly submissionRestriction?: SubmissionRestriction | undefined;
   readonly profileSetupHref?: string | undefined;
+  /** The user can't start drops here but can reply to existing ones. */
+  readonly canReply?: boolean | undefined;
 }
 
 function WaveSignInPrompt() {
@@ -167,6 +169,7 @@ export default function DropPlaceholder({
   chatRestriction,
   submissionRestriction,
   profileSetupHref,
+  canReply = false,
 }: DropPlaceholderProps) {
   const locale = useBrowserLocale();
 
@@ -203,6 +206,14 @@ export default function DropPlaceholder({
           </span>
         </span>
       );
+    }
+
+    if (
+      canReply &&
+      (type === "chat" || type === "both") &&
+      chatRestriction === ChatRestriction.NO_PERMISSION
+    ) {
+      return t(locale, "waves.chat.repliesOnlyPlaceholder");
     }
 
     if (type === "chat" && chatRestriction !== undefined) {

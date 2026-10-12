@@ -75,6 +75,7 @@ import {
   getChatSubmitDropRestrictionMessage,
   getMemesHeaderDropActionState,
 } from "./waveDropAction.helpers";
+import { getWaveReplyEligibility } from "@/helpers/waves/wave-chat-replies.helpers";
 
 export interface MyStreamWaveProps {
   readonly waveId: string;
@@ -157,6 +158,7 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
     updateEligibility(wave.id, {
       authenticated_user_eligible_to_chat:
         wave.chat.authenticated_user_eligible,
+      authenticated_user_eligible_to_reply: getWaveReplyEligibility(wave.chat),
       authenticated_user_eligible_to_vote:
         wave.voting.authenticated_user_eligible,
       authenticated_user_eligible_to_participate:

@@ -10,6 +10,11 @@ import type { ApiWaveScope } from "@/generated/models/ApiWaveScope";
 import { formatNumberWithCommas } from "@/helpers/Helpers";
 import { Time } from "@/helpers/time";
 import { formatSlowModeInterval } from "@/helpers/waves/slow-mode.helpers";
+import { waveRightPanelText } from "@/helpers/waves/wave-right-panel.helpers";
+import {
+  getWaveChatRepliesValueLabel,
+  type WaveChatRepliesSettings,
+} from "@/helpers/waves/wave-chat-replies.helpers";
 import { normalizeWaveCustomRules } from "@/helpers/waves/wave-metadata.helpers";
 import {
   WAVE_IDENTITY_DUPLICATES_COPY,
@@ -494,9 +499,11 @@ export const getWavePeriod = (period: ApiIntRange | null | undefined): string =>
 export const getChatWaveSection = ({
   linksDisabled,
   slowModeCooldownMs,
+  replies,
 }: {
   readonly linksDisabled: boolean;
   readonly slowModeCooldownMs: number | null | undefined;
+  readonly replies?: WaveChatRepliesSettings | undefined;
 }): WaveRuleSection => ({
   id: "chat",
   title: "Chat",
@@ -511,5 +518,16 @@ export const getChatWaveSection = ({
       label: "Slow mode",
       value: formatSlowModeInterval(slowModeCooldownMs),
     },
+    ...(replies
+      ? [
+          {
+            id: "chat-replies",
+            label: waveRightPanelText(
+              "waves.sidebar.rightPanel.configuration.chat.replies.label"
+            ),
+            value: getWaveChatRepliesValueLabel(replies),
+          },
+        ]
+      : []),
   ],
 });

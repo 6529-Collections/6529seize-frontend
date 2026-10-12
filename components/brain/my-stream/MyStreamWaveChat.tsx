@@ -5,6 +5,12 @@ import { useNotificationsContext } from "@/components/notifications/Notification
 import { CreateDropWaveWrapper } from "@/components/waves/CreateDropWaveWrapper";
 import { WaveDropsAllWithoutProvider } from "@/components/waves/drops/wave-drops-all";
 import {
+  useExpandedReplyThreadsStore,
+  WaveReplyThreadsProvider,
+} from "@/components/waves/drops/reply-threads/WaveReplyThreadsContext";
+import { useCollapsedReplyThreadTarget } from "@/components/waves/drops/reply-threads/useCollapsedReplyThreadTarget";
+import { isWaveRepliesCollapsed } from "@/helpers/waves/collapsed-replies.helpers";
+import {
   DropMode,
   type DropComposerDensity,
 } from "@/components/waves/dropComposer.types";
@@ -292,8 +298,26 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
     };
   });
 
-  const scrollTarget =
+  const requestedScrollTarget =
     initialDropState?.waveId === wave.id ? initialDropState.serialNo : null;
+  const collapseReplies = isWaveRepliesCollapsed(wave);
+  const replyThreadsStore = useExpandedReplyThreadsStore();
+  // A link to a collapsed reply opens its parent's thread instead.
+  const replyThreadTarget = useCollapsedReplyThreadTarget({
+    enabled: collapseReplies && viewMode !== "gallery",
+    waveId: wave.id,
+    serialNo: requestedScrollTarget,
+  });
+  const scrollTarget =
+    replyThreadTarget?.parentSerialNo ?? requestedScrollTarget;
+
+  useEffect(() => {
+    if (!replyThreadTarget) {
+      return;
+    }
+    replyThreadsStore.setExpanded(replyThreadTarget.parentDropId, true);
+    fetchAroundSerialNo(wave.id, replyThreadTarget.parentSerialNo);
+  }, [fetchAroundSerialNo, replyThreadTarget, replyThreadsStore, wave.id]);
 
   let dividerTarget = firstUnreadSerialNo;
   if (initialDropState?.waveId === wave.id) {
@@ -378,6 +402,19 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
   const onCancelReplyQuote = useCallback(() => {
     setActiveDropForWave(null);
   }, [setActiveDropForWave]);
+
+  const onDropAddedToQueue = useCallback(() => {
+    // Show a new reply where it lands: in its parent's thread.
+    const replyTarget = activeDropRef.current;
+    if (
+      collapseReplies &&
+      replyTarget?.action === ActiveDropAction.REPLY &&
+      !replyTarget.drop.reply_to
+    ) {
+      replyThreadsStore.setExpanded(replyTarget.drop.id, true);
+    }
+    setActiveDropForWave(null);
+  }, [collapseReplies, replyThreadsStore, setActiveDropForWave]);
 
   useWebSocketMessage<WsDropDeleteMessage["data"]>(
     WsMessageType.DROP_DELETE,
@@ -604,27 +641,37 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
             </div>
           </div>
         )}
-        <WaveDropsAllWithoutProvider
-          key={wave.id}
-          waveId={wave.id}
+        <WaveReplyThreadsProvider
+          enabled={collapseReplies}
           wave={wave}
-          onReply={handleReply}
-          activeDrop={activeDrop}
-          initialDrop={scrollTarget}
-          dividerSerialNo={dividerTarget}
-          unreadCount={
-            isDirectMessage
-              ? (dmUnreadConversation?.unread_count ?? 0)
-              : wave.metrics.your_unread_drops_count
-          }
-          dropId={null}
-          onDropContentClick={onDropClick}
-          isMuted={wave.metrics.muted}
-          winningThreshold={winningThreshold}
-          winningThresholdMinDurationMs={winningThresholdMinDurationMs}
-          isVotingClosed={isVotingClosed}
-          isVotingControlsLocked={isVotingControlsLocked}
-        />
+          store={replyThreadsStore}
+        >
+          <WaveDropsAllWithoutProvider
+            key={
+              replyThreadTarget
+                ? `${wave.id}-thread-${replyThreadTarget.parentSerialNo}`
+                : wave.id
+            }
+            waveId={wave.id}
+            wave={wave}
+            onReply={handleReply}
+            activeDrop={activeDrop}
+            initialDrop={scrollTarget}
+            dividerSerialNo={dividerTarget}
+            unreadCount={
+              isDirectMessage
+                ? (dmUnreadConversation?.unread_count ?? 0)
+                : wave.metrics.your_unread_drops_count
+            }
+            dropId={null}
+            onDropContentClick={onDropClick}
+            isMuted={wave.metrics.muted}
+            winningThreshold={winningThreshold}
+            winningThresholdMinDurationMs={winningThresholdMinDurationMs}
+            isVotingClosed={isVotingClosed}
+            isVotingControlsLocked={isVotingControlsLocked}
+          />
+        </WaveReplyThreadsProvider>
         {!(isApp && editingDropId) && (
           <div
             className={composerContainerClassName}
@@ -635,7 +682,7 @@ const MyStreamWaveChat: React.FC<MyStreamWaveChatProps> = ({
                 activeDrop={activeDrop}
                 onCancelReplyQuote={onCancelReplyQuote}
                 onReplyTargetUnavailable={onCancelReplyQuote}
-                onDropAddedToQueue={onCancelReplyQuote}
+                onDropAddedToQueue={onDropAddedToQueue}
                 wave={wave}
                 dropId={null}
                 fixedDropMode={fixedDropMode}
