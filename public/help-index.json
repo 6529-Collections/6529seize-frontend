@@ -6592,16 +6592,24 @@
     {
       "id": "waves.composer.body-length-limits",
       "kind": "business_rule",
-      "title": "Wave drop body length limits and storm rules",
+      "title": "Wave drop text and payload limits",
       "aliases": [
         "drop length limit",
         "body limit",
         "storm rules",
-        "too long drop"
+        "too long drop",
+        "drop payload limits",
+        "too many parts",
+        "too many mentions"
       ],
       "keywords": ["waves", "composer", "length", "limit", "storm", "drop"],
       "facts": [
         "A Wave drop part is limited to 25,000 UTF-16 code units and 65,535 UTF-8 bytes. A complete Storm is limited to 50,000 UTF-16 code units across all parts.",
+        "The server accepts at most 250 parts per drop, 20 media items and 20 attachments per part, and 100 media items and 100 attachments across all parts. The composer file tray still allows eight files across all Storm parts.",
+        "A drop may contain at most 100 metadata entries, 500 user mentions, 100 wave mentions, and 500 NFT references.",
+        "Media URLs allow up to 2,000 characters; MIME types, media upload IDs, and attachment IDs allow 100; NFT tokens allow 250; NFT names allow 500; and mentioned wave names allow 250.",
+        "Payload limits apply to new drops and edits, including wave description drops and competition submissions. Requests above a limit are rejected before saving. Existing drops remain readable, but edits must fit the current limits.",
+        "If a payload-limit error prevents posting, reduce the field named in the error and retry, or split a large Storm into separate posts.",
         "The composer should give feedback when content exceeds supported rules.",
         "Limits can affect submission even before backend posting succeeds."
       ],
