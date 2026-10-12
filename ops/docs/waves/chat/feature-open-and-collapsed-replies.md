@@ -77,6 +77,8 @@ main chat.
 - If `Reply` shows `You are not eligible to chat in this wave`, the wave does
   not have open replies, or you cannot see the wave.
 - If a thread looks out of date, close and reopen it, or refresh the wave.
+- If loading fails, the thread shows `Couldn't load replies.` and `Retry`.
+  Replies already loaded stay visible. Select `Retry` to load the thread again.
 
 ## Limitations / Notes
 

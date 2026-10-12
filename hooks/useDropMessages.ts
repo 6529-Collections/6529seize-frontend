@@ -59,6 +59,7 @@ export function useDropMessages(
     hasNextPage,
     isFetching,
     isFetchingNextPage,
+    isError,
     refetch,
   } = useInfiniteQuery({
     queryKey,
@@ -176,6 +177,7 @@ export function useDropMessages(
     hasNextPage,
     isFetching: isFetching ?? !init,
     isFetchingNextPage,
+    isError,
     refetch,
     manualFetch,
   };

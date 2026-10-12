@@ -37,6 +37,8 @@ export default function WaveDropReplyThreadList({
     hasNextPage,
     isFetching,
     isFetchingNextPage,
+    isError,
+    refetch,
   } = useDropMessages(waveId, parentDropId, wave);
   const replies = useMemo(
     () =>
@@ -83,7 +85,24 @@ export default function WaveDropReplyThreadList({
           </li>
         ))}
       </ul>
-      {replies.length === 0 && (
+      {isError && (
+        <div className="tw-py-1 tw-pl-3">
+          <p role="alert" className="tw-m-0 tw-text-xs tw-text-iron-300">
+            {t(locale, "waves.chat.replyThread.error")}
+          </p>
+          <button
+            type="button"
+            disabled={isFetching}
+            onClick={() => {
+              refetch().catch(() => undefined);
+            }}
+            className={THREAD_TEXT_BUTTON_CLASS_NAME}
+          >
+            {t(locale, "waves.chat.replyThread.retry")}
+          </button>
+        </div>
+      )}
+      {replies.length === 0 && (!isError || isFetching) && (
         <p className="tw-m-0 tw-py-1 tw-pl-3 tw-text-xs tw-text-iron-400">
           {isFetching
             ? t(locale, "waves.chat.replyThread.loading")

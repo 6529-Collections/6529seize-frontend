@@ -191,6 +191,68 @@ describe("WaveDropReplyThread", () => {
     ).toBeInTheDocument();
   });
 
+  it("offers retry after a failed load and shows empty only after a successful read", async () => {
+    const refetch = jest.fn().mockResolvedValue(undefined);
+    const response = {
+      drops: [],
+      hasNextPage: false,
+      isFetching: false,
+      isFetchingNextPage: false,
+      isError: true,
+      fetchNextPage: jest.fn(),
+      refetch,
+    };
+    useDropMessagesMock.mockReturnValue(response);
+    const view = render(
+      <Harness drop={makeDrop("root", 10, { replies_count: 1 })} />
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Show 1 reply" }));
+
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "Couldn't load replies."
+    );
+    expect(screen.queryByText("No replies to show.")).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Retry" }));
+    expect(refetch).toHaveBeenCalledTimes(1);
+
+    useDropMessagesMock.mockReturnValue({ ...response, isFetching: true });
+    view.rerender(
+      <Harness drop={makeDrop("root", 10, { replies_count: 1 })} />
+    );
+    expect(screen.getByRole("button", { name: "Retry" })).toBeDisabled();
+    expect(screen.getByText("Loading replies…")).toBeInTheDocument();
+    expect(screen.queryByText("No replies to show.")).not.toBeInTheDocument();
+
+    useDropMessagesMock.mockReturnValue({ ...response, isError: false });
+    view.rerender(
+      <Harness drop={makeDrop("root", 10, { replies_count: 1 })} />
+    );
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Retry" })
+    ).not.toBeInTheDocument();
+    expect(screen.getByText("No replies to show.")).toBeInTheDocument();
+  });
+
+  it("keeps loaded replies visible when a refresh fails", async () => {
+    useDropMessagesMock.mockReturnValue({
+      drops: [makeDrop("reply-1", 11)],
+      hasNextPage: false,
+      isFetching: false,
+      isFetchingNextPage: false,
+      isError: true,
+      fetchNextPage: jest.fn(),
+      refetch: jest.fn().mockResolvedValue(undefined),
+    });
+    render(<Harness drop={makeDrop("root", 10, { replies_count: 1 })} />);
+    await userEvent.click(screen.getByRole("button", { name: "Show 1 reply" }));
+    expect(screen.getByText("reply-1 after start")).toBeInTheDocument();
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "Couldn't load replies."
+    );
+    expect(screen.getByRole("button", { name: "Retry" })).toBeEnabled();
+  });
+
   it("renders a completed response before the hook's effect-delayed drop copy", async () => {
     const user = userEvent.setup();
     const reply = makeDrop("ready-reply", 11, {
