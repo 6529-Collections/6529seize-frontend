@@ -15,6 +15,10 @@ interface VideoPoster {
 
 const MAX_POSTER_CHECKS = 20;
 const MAX_FALLBACK_CHECKS = 4;
+const POSTER_CHECK_INTERVAL_MS = 5000;
+const POSTER_AVAILABILITY_OPTIONS = {
+  negativeCacheTtlMs: POSTER_CHECK_INTERVAL_MS,
+};
 
 /** Load small previews only; never attach or decode video to get a frame. */
 export function useChatVideoPoster(
@@ -57,9 +61,12 @@ export function useChatVideoPoster(
         attempts.current.fallbackCount >= MAX_FALLBACK_CHECKS
       )
         return;
-      // Conversion can outlast two minutes. Back off to one check per minute,
-      // retaining the shared HEAD cache and pausing outside view/background.
-      const delay = Math.min(15000 * 2 ** (attempts.current.count - 1), 60000);
+      // Discover newly generated images promptly, then back off for slow jobs.
+      // Missing-image cache entries expire before the next probe can run.
+      const delay = Math.min(
+        POSTER_CHECK_INTERVAL_MS * 2 ** (attempts.current.count - 1),
+        60000
+      );
       clearTimeout(timeout);
       timeout = setTimeout(() => {
         void check();
@@ -99,7 +106,10 @@ export function useChatVideoPoster(
       if (hasFallback) attempts.current.fallbackCount += 1;
       // Retry with the same bounded/backed-off policy after transient delivery failures.
       if (deviceUrl) {
-        const deviceAvailable = await checkVideoAvailability(deviceUrl);
+        const deviceAvailable = await checkVideoAvailability(
+          deviceUrl,
+          POSTER_AVAILABILITY_OPTIONS
+        );
         if (!isCurrent()) return;
         if (deviceAvailable) {
           load(deviceUrl, () => {
@@ -113,13 +123,19 @@ export function useChatVideoPoster(
     const checkBackend = async () => {
       if (!isCurrent()) return;
       const hasFallback = loaded.current?.url === fallbackUrl;
-      const available = await checkVideoAvailability(url);
+      const available = await checkVideoAvailability(
+        url,
+        POSTER_AVAILABILITY_OPTIONS
+      );
       if (!isCurrent()) return;
       if (available) {
         load(url);
         return;
       }
-      if (!hasFallback && (await checkVideoAvailability(fallbackUrl))) {
+      if (
+        !hasFallback &&
+        (await checkVideoAvailability(fallbackUrl, POSTER_AVAILABILITY_OPTIONS))
+      ) {
         if (isCurrent()) load(fallbackUrl);
         return;
       }

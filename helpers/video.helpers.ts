@@ -94,6 +94,7 @@ const MAX_HEAD_CACHE_ENTRIES = 500;
 
 interface HeadCacheEntry {
   readonly ok: boolean;
+  readonly checkedAt: number;
   readonly expiresAt: number;
 }
 
@@ -116,20 +117,29 @@ function pruneHeadCache(now: number): void {
   }
 }
 
-function setHeadCacheEntry(url: string, entry: HeadCacheEntry): void {
-  HEAD_CACHE.set(url, entry);
-  pruneHeadCache(Date.now());
+function setHeadCacheEntry(url: string, ok: boolean, ttl: number): void {
+  const checkedAt = Date.now();
+  HEAD_CACHE.set(url, { ok, checkedAt, expiresAt: checkedAt + ttl });
+  pruneHeadCache(checkedAt);
 }
 
 /**
  * HEAD request to see if a URL is present (200) or missing (404).
  * Uses a small in-memory cache to avoid repeat HEAD requests.
+ * Poster discovery can shorten miss caching, including previously cached misses.
  */
-export async function checkVideoAvailability(url: string): Promise<boolean> {
+export async function checkVideoAvailability(
+  url: string,
+  { negativeCacheTtlMs = NEGATIVE_HEAD_CACHE_TTL_MS } = {}
+): Promise<boolean> {
   const now = Date.now();
   pruneHeadCache(now);
   const cached = HEAD_CACHE.get(url);
-  if (cached && cached.expiresAt > now) {
+  if (
+    cached &&
+    cached.expiresAt > now &&
+    (cached.ok || cached.checkedAt + negativeCacheTtlMs > now)
+  ) {
     return cached.ok;
   }
   if (cached) {
@@ -147,16 +157,15 @@ export async function checkVideoAvailability(url: string): Promise<boolean> {
         method: "HEAD",
         cache: "no-store",
       });
-      const ttl = response.ok
-        ? POSITIVE_HEAD_CACHE_TTL_MS
-        : NEGATIVE_HEAD_CACHE_TTL_MS;
-      setHeadCacheEntry(url, { ok: response.ok, expiresAt: Date.now() + ttl });
+      const ttl = response.ok ? POSITIVE_HEAD_CACHE_TTL_MS : negativeCacheTtlMs;
+      setHeadCacheEntry(url, response.ok, ttl);
       return response.ok;
     } catch {
-      setHeadCacheEntry(url, {
-        ok: false,
-        expiresAt: Date.now() + NETWORK_FAILURE_HEAD_CACHE_TTL_MS,
-      });
+      setHeadCacheEntry(
+        url,
+        false,
+        Math.min(NETWORK_FAILURE_HEAD_CACHE_TTL_MS, negativeCacheTtlMs)
+      );
       return false;
     } finally {
       IN_FLIGHT_HEAD_CHECKS.delete(url);
