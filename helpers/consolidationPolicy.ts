@@ -23,7 +23,7 @@ function parseUtc(value: unknown): number | null {
 export function parseConsolidationPolicy(
   value: unknown
 ): ConsolidationPolicy | null {
-  if (!value || typeof value !== "object") return null;
+  if (value === null || typeof value !== "object") return null;
   const activationMs = parseUtc(
     Reflect.get(value, "four_wallet_activation_at")
   );
