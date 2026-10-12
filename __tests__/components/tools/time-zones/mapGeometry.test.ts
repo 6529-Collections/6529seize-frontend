@@ -76,8 +76,8 @@ describe("getOffsetColor", () => {
   });
 });
 
-function hexChannels(hex: string): number[] {
-  return [1, 3, 5].map((index) =>
-    Number.parseInt(hex.slice(index, index + 2), 16)
-  );
+function hexChannels(hex: string): [number, number, number] {
+  const channel = (index: number) =>
+    Number.parseInt(hex.slice(index, index + 2), 16);
+  return [channel(1), channel(3), channel(5)];
 }

@@ -28,12 +28,9 @@ describe("parseOffsetMinutes", () => {
     expect(parseOffsetMinutes(label)).toBe(minutes);
   });
 
-  it.each(["", "EST", "GMT+", "+05:30", "GMT+5:3"])(
-    "rejects %p",
-    (label) => {
-      expect(parseOffsetMinutes(label)).toBeNull();
-    }
-  );
+  it.each(["", "EST", "GMT+", "+05:30", "GMT+5:3"])("rejects %p", (label) => {
+    expect(parseOffsetMinutes(label)).toBeNull();
+  });
 });
 
 describe("zone formatting at fixed instants", () => {
@@ -58,22 +55,18 @@ describe("zone formatting at fixed instants", () => {
     expect(getDstStatus("Australia/Lord_Howe", JANUARY_NOON_UTC)).toBe(
       "daylight"
     );
-    expect(getDstStatus("Australia/Lord_Howe", JULY_NOON_UTC)).toBe(
-      "standard"
-    );
+    expect(getDstStatus("Australia/Lord_Howe", JULY_NOON_UTC)).toBe("standard");
   });
 
   it("derives northern-hemisphere daylight time from the year's offsets", () => {
     expect(getDstStatus("America/New_York", JULY_NOON_UTC)).toBe("daylight");
-    expect(getDstStatus("America/New_York", JANUARY_NOON_UTC)).toBe(
-      "standard"
-    );
+    expect(getDstStatus("America/New_York", JANUARY_NOON_UTC)).toBe("standard");
   });
 
   it("formats dates and generic names in the requested locale", () => {
-    expect(formatZoneDate("en-US", "Pacific/Kiritimati", JANUARY_NOON_UTC)).toBe(
-      "Fri, Jan 16"
-    );
+    expect(
+      formatZoneDate("en-US", "Pacific/Kiritimati", JANUARY_NOON_UTC)
+    ).toBe("Fri, Jan 16");
     expect(getGenericZoneName("en-US", "Asia/Kolkata", JANUARY_NOON_UTC)).toBe(
       "India Standard Time"
     );
@@ -106,14 +99,10 @@ describe("formatOffsetSuffix", () => {
 
 describe("haveSameYearClock", () => {
   it("matches an alias to its current IANA name", () => {
-    expect(haveSameYearClock("Asia/Calcutta", "Asia/Kolkata", 2026)).toBe(
-      true
-    );
+    expect(haveSameYearClock("Asia/Calcutta", "Asia/Kolkata", 2026)).toBe(true);
   });
 
   it("separates zones that agree only part of the year", () => {
-    expect(haveSameYearClock("Europe/Paris", "Africa/Lagos", 2026)).toBe(
-      false
-    );
+    expect(haveSameYearClock("Europe/Paris", "Africa/Lagos", 2026)).toBe(false);
   });
 });

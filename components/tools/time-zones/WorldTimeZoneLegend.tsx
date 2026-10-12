@@ -18,7 +18,10 @@ export default function WorldTimeZoneLegend({
       <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-400">
         {t(locale, "tools.timeZones.map.legend.label")}
       </p>
-      <div className="tw-mt-3 tw-flex tw-h-3 tw-overflow-hidden tw-rounded-full" aria-hidden="true">
+      <div
+        className="tw-mt-3 tw-flex tw-h-3 tw-overflow-hidden tw-rounded-full"
+        aria-hidden="true"
+      >
         {OFFSET_LEGEND_HOURS.map((hour) => (
           <span
             key={hour}

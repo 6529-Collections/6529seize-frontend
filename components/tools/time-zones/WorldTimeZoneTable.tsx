@@ -40,7 +40,10 @@ type SortState = {
 // Screen readers hear the result count only after typing pauses, and only
 // when the count changes; minute updates never announce.
 const ANNOUNCEMENT_DELAY_MS = 750;
-const SKELETON_ROW_COUNT = 8;
+const SKELETON_ROW_IDS = Array.from(
+  { length: 8 },
+  (_, position) => `skeleton-row-${position}`
+);
 // The unfiltered list starts short so the page stays scannable; search always
 // covers every zone and "Show all" expands in place.
 const INITIAL_ROW_LIMIT = 40;
@@ -129,8 +132,8 @@ function SortableHeader({
 }
 
 function SkeletonRows() {
-  return Array.from({ length: SKELETON_ROW_COUNT }, (_, index) => (
-    <tr key={index} aria-hidden="true">
+  return SKELETON_ROW_IDS.map((id) => (
+    <tr key={id} aria-hidden="true">
       <td colSpan={COLUMN_COUNT} className={CELL_CLASS_NAME}>
         <div className="tw-h-9 tw-animate-pulse tw-rounded-md tw-bg-iron-800/80 motion-reduce:tw-animate-none" />
       </td>
@@ -272,9 +275,10 @@ export default function WorldTimeZoneTable({
     () =>
       viewerTimeZone === null
         ? null
-        : (rows?.find((row) => row.id === viewerTimeZone) ??
-            rows?.find((row) => isSameTimeZone(row.id, viewerTimeZone)))
-            ?.id ?? null,
+        : ((
+            rows?.find((row) => row.id === viewerTimeZone) ??
+            rows?.find((row) => isSameTimeZone(row.id, viewerTimeZone))
+          )?.id ?? null),
     [rows, viewerTimeZone]
   );
   const announcement = useResultAnnouncement(countText, hasSearched);
@@ -295,7 +299,10 @@ export default function WorldTimeZoneTable({
       : "tools.timeZones.table.unsupported.other";
 
   return (
-    <section aria-labelledby="world-time-zones-table-heading" className="tw-mt-10">
+    <section
+      aria-labelledby="world-time-zones-table-heading"
+      className="tw-mt-10"
+    >
       <h2
         id="world-time-zones-table-heading"
         className="tw-m-0 tw-text-xl tw-font-semibold tw-leading-7 tw-tracking-tight tw-text-iron-50"
@@ -323,7 +330,10 @@ export default function WorldTimeZoneTable({
             }}
             className="tw-block tw-h-11 tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-3 tw-text-base tw-text-iron-50 tw-ring-1 tw-ring-inset tw-ring-iron-700 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400 sm:tw-text-sm"
           />
-          <p id={hintId} className="tw-m-0 tw-mt-1.5 tw-text-xs tw-text-iron-400">
+          <p
+            id={hintId}
+            className="tw-m-0 tw-mt-1.5 tw-text-xs tw-text-iron-400"
+          >
             {t(locale, "tools.timeZones.table.searchHint")}
           </p>
         </div>
@@ -390,7 +400,10 @@ export default function WorldTimeZoneTable({
               <tr>
                 <td
                   colSpan={COLUMN_COUNT}
-                  className={clsx(CELL_CLASS_NAME, "tw-py-6 tw-text-sm tw-text-iron-300")}
+                  className={clsx(
+                    CELL_CLASS_NAME,
+                    "tw-py-6 tw-text-sm tw-text-iron-300"
+                  )}
                 >
                   {t(locale, "tools.timeZones.table.empty", {
                     query: deferredQuery.trim(),
@@ -401,7 +414,9 @@ export default function WorldTimeZoneTable({
           </tbody>
         </table>
         {visibleRows === null ? (
-          <p className="tw-sr-only">{t(locale, "tools.timeZones.table.loading")}</p>
+          <p className="tw-sr-only">
+            {t(locale, "tools.timeZones.table.loading")}
+          </p>
         ) : null}
       </div>
       {canToggleRows ? (

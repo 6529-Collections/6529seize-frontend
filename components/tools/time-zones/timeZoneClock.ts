@@ -39,7 +39,7 @@ type OffsetRange = {
   readonly max: number;
 };
 
-export type SignedClock = {
+type SignedClock = {
   readonly sign: 1 | -1;
   readonly hours: number;
   readonly minutes: number | null;
@@ -190,7 +190,9 @@ export function formatZoneTimeWithSeconds(
   timeZone: string,
   date: Date
 ): string | null {
-  return getFormatter(locale, timeZone, "timeWithSeconds")?.format(date) ?? null;
+  return (
+    getFormatter(locale, timeZone, "timeWithSeconds")?.format(date) ?? null
+  );
 }
 
 export function formatZoneFullDate(

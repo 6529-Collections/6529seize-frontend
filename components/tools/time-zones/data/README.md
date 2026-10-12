@@ -12,11 +12,11 @@ loaded `/_next/static` chunk. Do not edit it by hand; regenerate it with
 - Release: [`2026e`](https://github.com/evansiroky/timezone-boundary-builder/releases/tag/2026e)
   (published 2026-10-11).
 
-| Release asset                          | SHA-256 (as downloaded)                                            | Used for                                   |
-| -------------------------------------- | ------------------------------------------------------------------ | ------------------------------------------ |
-| `timezones-with-oceans-now.geojson.zip` | `4807d56a629c4ade3648f49843376e7f41d32e90f9621d146d2682bbb5e20021` | Zone polygons (`zones[].d`)                |
-| `timezone-names-with-oceans-Now.json`  | `3cadd8f4d19546681d043c0c65406fceba506a41c084fc889a1bc6b1ae000cdc` | IANA zones per merged zone (`members`)     |
-| `timezones-now.geojson.zip`            | `a46516d04c43b32f5c527a2e5a3d5ad0308e65144730a57f04eec66c49ce59d0` | Land tint (`land`)                         |
+| Release asset                           | SHA-256 (as downloaded)                                            | Used for                               |
+| --------------------------------------- | ------------------------------------------------------------------ | -------------------------------------- |
+| `timezones-with-oceans-now.geojson.zip` | `4807d56a629c4ade3648f49843376e7f41d32e90f9621d146d2682bbb5e20021` | Zone polygons (`zones[].d`)            |
+| `timezone-names-with-oceans-Now.json`   | `3cadd8f4d19546681d043c0c65406fceba506a41c084fc889a1bc6b1ae000cdc` | IANA zones per merged zone (`members`) |
+| `timezones-now.geojson.zip`             | `a46516d04c43b32f5c527a2e5a3d5ad0308e65144730a57f04eec66c49ce59d0` | Land tint (`land`)                     |
 
 The digests match the ones GitHub publishes for each release asset.
 

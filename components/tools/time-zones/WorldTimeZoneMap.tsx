@@ -54,7 +54,10 @@ type ZonePathProps = {
   readonly zone: MapZoneView;
   readonly isActive: boolean;
   readonly isTabStop: boolean;
-  readonly registerPath: (zoneId: string, element: SVGPathElement | null) => void;
+  readonly registerPath: (
+    zoneId: string,
+    element: SVGPathElement | null
+  ) => void;
   readonly onPreview: (zoneId: string | null) => void;
   readonly onSelect: (zoneId: string) => void;
 };

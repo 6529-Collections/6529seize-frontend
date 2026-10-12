@@ -46,7 +46,12 @@ export default function WorldTimeZonesPage() {
           <h1 className={ABOUT_PAGE_TITLE_CLASS_NAME}>
             {t(locale, "tools.timeZones.title")}
           </h1>
-          <p className={clsx(ABOUT_LEAD_TEXT_CLASS_NAME, "tw-m-0 tw-mt-3 tw-max-w-3xl")}>
+          <p
+            className={clsx(
+              ABOUT_LEAD_TEXT_CLASS_NAME,
+              "tw-m-0 tw-mt-3 tw-max-w-3xl"
+            )}
+          >
             {t(locale, "tools.timeZones.lead")}
           </p>
         </header>

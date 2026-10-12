@@ -101,16 +101,21 @@ describe("zone naming", () => {
         mapZoneId: "Asia/Kolkata",
       },
     ]);
-    expect(ids(buildRowBasesFromIds(["UTC", "Etc/GMT-3", "Asia/Tokyo"]))).toEqual(
-      ["Asia/Tokyo"]
-    );
+    expect(
+      ids(buildRowBasesFromIds(["UTC", "Etc/GMT-3", "Asia/Tokyo"]))
+    ).toEqual(["Asia/Tokyo"]);
   });
 
   it("skips zones the browser does not know", () => {
     const date = new Date(Date.UTC(2026, 0, 15, 12));
     expect(
       buildTimeZoneRow(
-        { id: "Mars/Olympus_Mons", city: "Olympus Mons", regionKey: "other", mapZoneId: null },
+        {
+          id: "Mars/Olympus_Mons",
+          city: "Olympus Mons",
+          regionKey: "other",
+          mapZoneId: null,
+        },
         "en-US",
         date,
         "Other"
@@ -118,7 +123,12 @@ describe("zone naming", () => {
     ).toBeNull();
     expect(
       buildTimeZoneRow(
-        { id: "Asia/Kolkata", city: "Kolkata", regionKey: "asia", mapZoneId: null },
+        {
+          id: "Asia/Kolkata",
+          city: "Kolkata",
+          regionKey: "asia",
+          mapZoneId: null,
+        },
         "en-GB",
         date,
         "Asia"
@@ -159,23 +169,23 @@ describe("filterTimeZoneRows", () => {
     expect(ids(filterTimeZoneRows(ROWS, "gmt-03:00"))).toEqual([
       "America/Sao_Paulo",
     ]);
-    expect(ids(filterTimeZoneRows(ROWS, "−3"))).toEqual([
-      "America/Sao_Paulo",
-    ]);
+    expect(ids(filterTimeZoneRows(ROWS, "−3"))).toEqual(["America/Sao_Paulo"]);
     expect(ids(filterTimeZoneRows(ROWS, "utc"))).toEqual(["Europe/London"]);
   });
 });
 
 describe("sortTimeZoneRows", () => {
   it("sorts by offset west to east, then by city", () => {
-    expect(ids(sortTimeZoneRows(ROWS, "offset", "ascending", "en-US"))).toEqual([
-      "America/Sao_Paulo",
-      "Europe/London",
-      "Asia/Karachi",
-      "Asia/Kolkata",
-      "Asia/Kathmandu",
-      "Australia/Lord_Howe",
-    ]);
+    expect(ids(sortTimeZoneRows(ROWS, "offset", "ascending", "en-US"))).toEqual(
+      [
+        "America/Sao_Paulo",
+        "Europe/London",
+        "Asia/Karachi",
+        "Asia/Kolkata",
+        "Asia/Kathmandu",
+        "Australia/Lord_Howe",
+      ]
+    );
     expect(
       ids(sortTimeZoneRows(ROWS, "offset", "descending", "en-US"))[0]
     ).toBe("Australia/Lord_Howe");
