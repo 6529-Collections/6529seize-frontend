@@ -9,7 +9,10 @@ import {
   ApiMemeCollaborationResponseRequestActionEnum,
   type ApiMemeCollaborationResponseRequest,
 } from "@/generated/models/ApiMemeCollaborationResponseRequest";
-import type { ApiMemeCollaborationInvitation } from "@/generated/models/ApiMemeCollaborationInvitation";
+import {
+  ApiMemeCollaborationInvitationStatusEnum,
+  type ApiMemeCollaborationInvitation,
+} from "@/generated/models/ApiMemeCollaborationInvitation";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
@@ -24,6 +27,21 @@ const STATUS_MESSAGES = {
 } as const;
 const BUTTON_CLASS =
   "tw-min-h-11 tw-rounded-lg tw-border tw-border-iron-600 tw-bg-iron-800 tw-px-3 tw-text-sm tw-font-semibold tw-text-iron-100 disabled:tw-opacity-50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400";
+
+function reviewMediaUrls(state: ApiMemeCollaborationState): string[] {
+  return [state.artwork?.image_url, state.artwork?.animation_url]
+    .filter((url): url is string => !!url)
+    .map(resolveIpfsUrlSync)
+    .filter((url) => {
+      try {
+        return ["https:", "http:"].includes(
+          new URL(url, "https://6529.io").protocol
+        );
+      } catch {
+        return false;
+      }
+    });
+}
 
 export function MemeCollaborationPanel({
   dropId,
@@ -51,7 +69,7 @@ export function MemeCollaborationPanel({
     enabled: !!connectedProfile?.id,
   });
   const reviewVersion = data
-    ? `${connectedProfile?.id}:${dropId}:${data.artwork_hash}:${data.terms_version}`
+    ? `${connectedProfile?.id ?? ""}:${dropId}:${data.artwork_hash}:${data.terms_version}`
     : null;
   const [confirmedVersion, setConfirmedVersion] = useState<string | null>(null);
   const confirmed =
@@ -125,7 +143,8 @@ export function MemeCollaborationPanel({
   const ownPending =
     data.invitations.some(
       (item) =>
-        item.profile.id === connectedProfile.id && item.status === "PENDING"
+        item.profile.id === connectedProfile.id &&
+        item.status === ApiMemeCollaborationInvitationStatusEnum.Pending
     ) && !data.closed;
   return (
     <section
@@ -146,19 +165,17 @@ export function MemeCollaborationPanel({
               <p className="tw-whitespace-pre-wrap">
                 {data.artwork.description}
               </p>
-              {[data.artwork.image_url, data.artwork.animation_url]
-                .filter(Boolean)
-                .map((url) => (
-                  <a
-                    key={url}
-                    href={resolveIpfsUrlSync(url!)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="tw-block tw-text-primary-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
-                  >
-                    {t(locale, "memes.collaborations.reviewMedia")}
-                  </a>
-                ))}
+              {reviewMediaUrls(data).map((url) => (
+                <a
+                  key={url}
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="tw-block tw-text-primary-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+                >
+                  {t(locale, "memes.collaborations.reviewMedia")}
+                </a>
+              ))}
             </div>
           )}
           <p className="tw-text-sm tw-text-iron-200">{data.acceptance_copy}</p>
@@ -201,7 +218,8 @@ export function MemeCollaborationPanel({
               {t(locale, STATUS_MESSAGES[invitation.status])}
             </span>
             {!data.closed &&
-              invitation.status === "PENDING" &&
+              invitation.status ===
+                ApiMemeCollaborationInvitationStatusEnum.Pending &&
               (isAuthor ? (
                 <button
                   type="button"

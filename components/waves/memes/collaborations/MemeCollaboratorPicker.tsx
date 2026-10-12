@@ -85,6 +85,7 @@ export function MemeCollaboratorPicker({
             </span>
             <button
               type="button"
+              disabled={resolving}
               className="tw-min-h-10 tw-min-w-10 tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
               aria-label={t(locale, "memes.collaborations.remove", {
                 handle: profile.handle,

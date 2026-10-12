@@ -32,6 +32,11 @@ jest.mock("@/services/api/common-api", () => ({
 const fetchMock = jest.mocked(commonApiFetch);
 const postMock = jest.mocked(commonApiPost);
 const profile = { id: "B", handle: "artistB", display: "artistB", pfp: null };
+const pendingInvitation = {
+  id: "invitation",
+  profile,
+  status: ApiMemeCollaborationInvitationStatusEnum.Pending,
+};
 const pending: ApiMemeCollaborationState = {
   managed: true,
   closed: false,
@@ -40,13 +45,7 @@ const pending: ApiMemeCollaborationState = {
   acceptance_copy: "Acceptance is final.",
   terms: "Submission terms",
   collaborators: [],
-  invitations: [
-    {
-      id: "invitation",
-      profile,
-      status: ApiMemeCollaborationInvitationStatusEnum.Pending,
-    },
-  ],
+  invitations: [pendingInvitation],
 };
 function mount(data: ApiMemeCollaborationState = pending) {
   fetchMock.mockResolvedValue(data);
@@ -78,7 +77,7 @@ it("requires reviewing the terms and sends consent for the exact artwork version
     collaborators: [profile],
     invitations: [
       {
-        ...pending.invitations[0],
+        ...pendingInvitation,
         status: ApiMemeCollaborationInvitationStatusEnum.Accepted,
       },
     ],
@@ -145,7 +144,7 @@ it("does not expose pending names to public viewers or offer late acceptance", a
     closed: true,
     invitations: [
       {
-        ...pending.invitations[0],
+        ...pendingInvitation,
         status: ApiMemeCollaborationInvitationStatusEnum.Closed,
       },
     ],
@@ -172,4 +171,23 @@ it("renders all accepted collaborators as independent profile links", () => {
     "href",
     "/artistC"
   );
+});
+
+it("shows the exact review snapshot and opens only safe media links", async () => {
+  mount({
+    ...pending,
+    artwork: {
+      name: "Reviewed artwork",
+      description: "Reviewed description",
+      image_url: "https://media.example/art.png",
+      animation_url: "javascript:alert(1)",
+    },
+  });
+  expect(await screen.findByText("Reviewed artwork")).toBeInTheDocument();
+  expect(screen.getByText("Reviewed description")).toBeInTheDocument();
+  const links = screen.getAllByRole("link", {
+    name: "Open artwork media for review",
+  });
+  expect(links).toHaveLength(1);
+  expect(links[0]).toHaveAttribute("href", "https://media.example/art.png");
 });

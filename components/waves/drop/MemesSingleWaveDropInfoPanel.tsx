@@ -140,13 +140,15 @@ export const MemesSingleWaveDropInfoPanel = ({
           onVoteClick={handleOpenVoting}
         />
 
-        <div className="tw-mx-auto tw-max-w-3xl tw-px-4">
-          <MemeCollaborationPanel
-            key={drop.id}
-            dropId={drop.id}
-            authorId={drop.author.id}
-          />
-        </div>
+        {drop.submission_artist !== undefined && (
+          <div className="tw-mx-auto tw-max-w-3xl tw-px-4">
+            <MemeCollaborationPanel
+              key={drop.id}
+              dropId={drop.id}
+              authorId={drop.author.id}
+            />
+          </div>
+        )}
         <div className="tw-my-8 tw-h-px tw-w-full tw-bg-white/10 md:tw-my-10"></div>
 
         <MemesDropDetailsSection

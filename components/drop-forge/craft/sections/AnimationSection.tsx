@@ -258,11 +258,12 @@ export default function AnimationSection({
 
   const showAddFlow =
     !claim.collaboration_credit?.collab &&
-    !hasAnimation && !hasPendingAnimationChange && !hasPendingAnimationUpload;
+    !hasAnimation &&
+    !hasPendingAnimationChange &&
+    !hasPendingAnimationUpload;
   const showAnimationControls =
-    !claim.collaboration_credit?.collab && (hasAnimation ||
-    hasPendingAnimationChange ||
-    hasPendingAnimationUpload);
+    !claim.collaboration_credit?.collab &&
+    (hasAnimation || hasPendingAnimationChange || hasPendingAnimationUpload);
   const showAddChoice = showAddFlow && replaceMode === "choose";
   const showAddLink =
     !claim.collaboration_credit?.collab &&

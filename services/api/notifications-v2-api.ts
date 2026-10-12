@@ -344,7 +344,7 @@ const mapNotificationV2 = (
   if (notification.cause === ApiNotificationCause.MemeCollaboration) {
     const context = notification.additional_context;
     if (
-      !context?.wave_id ||
+      !context.wave_id ||
       !context.drop_id ||
       !context.invitation_id ||
       !context.event_type

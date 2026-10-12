@@ -11,7 +11,7 @@ export function MemeCollaboratorCredits({
   readonly collaborators?: ApiMemeCollaboratorProfile[] | undefined;
 }) {
   const locale = useBrowserLocale();
-  if (!collaborators?.length) return null;
+  if (!collaborators || collaborators.length === 0) return null;
   return (
     <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-text-sm">
       <span className="tw-text-iron-300">
