@@ -145,6 +145,40 @@ or an unavailable page. US iOS, web, and Android retain their existing behavior.
   - `Top Up History`
   - pagination when a section has more than 10 rows
 
+## Consolidation Changes
+
+When wallet groups merge, their subscription balances are added, including any
+existing destination balance once. The merged mode is `Automatic` if any source
+or the destination had it enabled. `All eligible` is retained if any source or
+the destination selected it, including a preference saved in `Manual` mode;
+otherwise the preference is `One edition`.
+
+For overlapping upcoming subscriptions to the same Meme Card:
+
+- The merged group is subscribed if either active row was subscribed.
+- A subscribed manual quantity takes precedence over automatic quantities,
+  even when smaller. For example, manual 2 and automatic 8 merge to manual 2,
+  even if the merged group uses `Automatic` / `All eligible`.
+- If several subscribed manual requests conflict, the largest manual request
+  is kept. With automatic requests only, the largest subscribed quantity is
+  kept and remains eligible for automatic updates.
+- The earliest priority timestamp among subscribed rows is kept. An
+  unsubscribed row does not override an active request.
+
+Distinct upcoming subscriptions, logs, and redeemed history move to the merged
+group. Finalized allocations remain separate: distinct allocations move with
+their existing delivery and allocation details; conflicting allocations for the
+same card stay under their old group for manual reconciliation. They are not
+automatically combined or discarded.
+
+On a split, subscriptions follow the resulting group with the highest TDH;
+they are not divided between the resulting groups. This can differ from the
+group that [keeps the existing profile](../about/feature-primary-address-reference-table.md#profile-retention-when-a-consolidation-splits).
+
+A failed subscription-group move rolls back that group's changes, preventing a
+partly moved group. These rules apply when affected consolidations are
+processed; they do not automatically recover rows stranded by earlier failures.
+
 ## Failure and Recovery
 
 - Balance, airdrop-address, upcoming-drop, and history content use stable

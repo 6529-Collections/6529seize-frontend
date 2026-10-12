@@ -11,14 +11,26 @@ describe("video helpers", () => {
     expect(isVideoUrl("file.txt")).toBe(false);
   });
 
-  it("creates conversion urls", async () => {
-    const { getVideoConversions } = await import("@/helpers/video.helpers");
-    const url = "https://d3lqz0a4bldqgf.cloudfront.net/drops/foo/bar.mp4";
-    const result = getVideoConversions(url);
+  it.each(["mp4", "MP4"])(
+    "creates conversion URLs with preferred and legacy posters for .%s",
+    async (extension) => {
+      const { getVideoConversions } = await import("@/helpers/video.helpers");
+      const url = `https://d3lqz0a4bldqgf.cloudfront.net/drops/foo/bar.${extension}`;
+      const result = getVideoConversions(url);
 
-    expect(result).not.toBeNull();
-    expect(result!.HLS).toContain("renditions");
-  });
+      expect(result).not.toBeNull();
+      expect(result!.HLS).toContain("renditions");
+      expect(result!.POSTER).toBe(
+        "https://d3lqz0a4bldqgf.cloudfront.net/renditions/drops/foo/bar/poster/bar_poster.0000001.jpg"
+      );
+      expect(result!.FIRST_FRAME_POSTER).toBe(
+        "https://d3lqz0a4bldqgf.cloudfront.net/renditions/drops/foo/bar/poster/bar_poster.0000000.jpg"
+      );
+      expect(result!.DEVICE_POSTER).toBe(
+        "https://d3lqz0a4bldqgf.cloudfront.net/renditions/drops/foo/bar/poster/bar_device.jpg"
+      );
+    }
+  );
 
   it("checks availability using fetch", async () => {
     const { checkVideoAvailability } = await import("@/helpers/video.helpers");
@@ -57,6 +69,31 @@ describe("video helpers", () => {
     expect(first).toBe(false);
     expect(second).toBe(false);
     expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps rendition misses cached for a minute while poster misses expire after five seconds", async () => {
+    jest.useFakeTimers();
+    try {
+      const { checkVideoAvailability } =
+        await import("@/helpers/video.helpers");
+      const fetchMock = jest.fn().mockResolvedValue({ ok: false });
+      globalThis.fetch = fetchMock;
+      const posterOptions = { negativeCacheTtlMs: 5000 };
+      await checkVideoAvailability("cached-rendition.mp4");
+      await checkVideoAvailability("new-poster.jpg", posterOptions);
+      fetchMock.mockResolvedValue({ ok: true });
+      jest.advanceTimersByTime(5000);
+      expect(await checkVideoAvailability("cached-rendition.mp4")).toBe(false);
+      expect(
+        await checkVideoAvailability("new-poster.jpg", posterOptions)
+      ).toBe(true);
+      expect(fetchMock).toHaveBeenCalledTimes(3);
+      jest.advanceTimersByTime(55000);
+      expect(await checkVideoAvailability("cached-rendition.mp4")).toBe(true);
+      expect(fetchMock).toHaveBeenCalledTimes(4);
+    } finally {
+      jest.useRealTimers();
+    }
   });
 
   it("evicts old availability cache entries when the cache grows too large", async () => {

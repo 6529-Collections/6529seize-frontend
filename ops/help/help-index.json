@@ -158,6 +158,7 @@
       "facts": [
         "The custom video player shows a timeline above its controls, with a small draggable handle and a larger interaction area. Drag the handle, select a position on the track, or focus the slider and use the keyboard to seek.",
         "The bottom-left capsule shows play or pause alongside elapsed time and total duration. Pausing keeps the capsule and time in place and also shows a central play button; either play button resumes playback. The time updates while seeking.",
+        "In the Capacitor app and mobile browsers, offscreen videos stop loading and retain their playback position. Backgrounding the app or hiding the mobile tab pauses media loading. New video sources wait until visible and active, including videos without posters. Wave and DM chat videos require Play on desktop, mobile browsers, and in the app; their video sources wait for that click, including videos without posters. While video parts upload, the device attempts one small JPEG frame with no extra UI step. A successful poster is stored before video completion and normally appears as soon as the video is posted, without loading video before Play. Capture stops after eight seconds, cancellation or backgrounding. Unsupported clips and capture/storage failures still post normally and use backend poster generation. Those uploads may initially have no preview while processing; visible, active chat players check again after five seconds and then back off to once a minute, with bounded retries and a five-second missing-preview cache. New previews prefer a frame around one second, with the first frame retained for very short and older videos. Older uploads and external videos may have no preview. Poster and playback keep the same proportions and width limits. Starting another chat video pauses the previous one. Scrolling away or hiding the tab pauses playback, and returning waits for Play. Chat videos retain position, mute choice, and volume through scrolling within the open chat. Desktop NFT and submission pages retain their existing autoplay rules. Leaving the chat or reloading can reset these preferences. Manually started videos stay paused on return until Play is pressed; ambient autoplay respects visibility, explicit pauses, and reduced motion. Reloading may delay playback on slow connections.",
         "Controls remain visible while paused, focused, or scrubbing and fade after inactivity during playback. Pointer interaction, keyboard focus, or a tap reveals them. Before duration is available, it shows a dash and seeking is disabled.",
         "Videos are shown without cropping or stretching. Homepage Next Drop, Latest Drop, The Memes detail, and Wave submission detail videos fit the available width up to 95% of the usable screen height in desktop browsers, mobile browsers, and the mobile app, allowing for headers, bottom navigation, and safe areas. Tall videos become narrower and stay centered. Fullscreen uses the full viewing area. Loading listing, subscription, or ownership panels does not resize the video. Homepage artwork stays vertically centered in its column. The Memes detail retains its full-column dark artwork background and centers the video inside it. Expanded wave submissions center the video in the available area below the overlay header. The timeline and controls stay inside the video frame. Submission detail reserves space for its overlay header and artwork padding. Mute and fullscreen keep circular buttons. Browser-native players retain their own controls.",
         "Still artwork preserves its proportions without cropping or stretching. On mobile browsers and the mobile app, homepage images fill the available width at their natural height, with no reserved blank space above or below; details follow directly beneath and tall images may extend beyond one screen. Desktop homepage images fit within the adjacent details section height and at most 95% of usable screen height. Individual Meme pages and expanded Wave submissions retain the usable-screen height limit. Meme detail images use a stable reserved frame so loading details or ownership panels does not move them. Submission images allow for the overlay header and padding. In these capped layouts, portrait images are normally limited by height, landscape images by width."
@@ -2012,7 +2013,11 @@
         "change subscription settings",
         "how long is my subscription funded",
         "when do i need to top up",
-        "subscription running low"
+        "subscription running low",
+        "what happens to subscriptions when wallets consolidate",
+        "subscription merge conflicts",
+        "all eligible after consolidation",
+        "manual quantity after consolidation"
       ],
       "keywords": [
         "profile",
@@ -2026,7 +2031,11 @@
         "upcoming",
         "coverage",
         "runway",
-        "funded"
+        "funded",
+        "consolidation",
+        "merge",
+        "manual override",
+        "all eligible"
       ],
       "facts": [
         "A user's Meme Card subscription controls and history live under /{user}/subscriptions.",
@@ -2039,7 +2048,12 @@
         "Upcoming Drops keeps a numeric quantity selector from 1 through eligibility when eligibility is positive. At zero eligibility, it displays a single 0 option and is disabled without changing the saved request. Untouched automatic subscriptions in Automatic / All eligible mode follow current eligibility when consolidated balances refresh. Choosing a quantity saves a manual request for that card, including future cards, which automatic updates never overwrite.",
         "The displayed manual quantity is capped by current eligibility without changing the saved request. Manual 11 displays 10 / 10 at eligibility 10, then 11 / 12 when eligibility recovers to 12 and data is refreshed. Final allocation is also capped by available balance; historical finalized allocations are unchanged.",
         "Upcoming Drops shows No subscription allocation only for a subscribed first card whose distribution is published but whose finalized subscription list has no record for that profile. A phase-less finalized record remains pending; the message also stays silent for unsubscribed cards, unpublished distribution, or failed lookups.",
-        "The tab keeps loading and empty states distinct, and its subscription controls, upcoming rows, and history panels adapt to narrow screens."
+        "The tab keeps loading and empty states distinct, and its subscription controls, upcoming rows, and history panels adapt to narrow screens.",
+        "When consolidation groups merge, subscription balances are added, including any existing destination balance once. Automatic mode stays enabled if any source or the destination had it enabled. All eligible is retained if any source or the destination selected it, including a preference saved in Manual mode; otherwise the merged preference is One edition.",
+        "For overlapping upcoming subscriptions to the same Meme Card, the merged group remains subscribed if either active row was subscribed. A subscribed manual quantity takes precedence over automatic quantities, even when it is smaller and the group uses All eligible. If several subscribed manual requests conflict, the largest manual request is retained; otherwise the largest subscribed automatic quantity is retained. The earliest priority timestamp among subscribed rows is preserved; unsubscribed rows do not override active requests.",
+        "Distinct upcoming subscriptions, subscription logs, and redeemed history move to the merged group. On a split, subscriptions follow the resulting group with the highest TDH; they are not divided between the resulting groups.",
+        "Finalized allocations are handled separately from upcoming requests. Distinct finalized allocations move without changing their delivery or allocation details. Conflicting finalized allocations for the same card are retained under their old group for manual reconciliation, not automatically combined or discarded.",
+        "If a subscription-group move fails, its changes are rolled back so that group is not left partly moved. These merge rules apply when affected consolidations are processed; they do not automatically recover subscription rows stranded by earlier failures."
       ],
       "canonical_path": "/{user}/subscriptions",
       "related_paths": ["/about/subscriptions", "/{user}/subscriptions"],
@@ -3629,6 +3643,54 @@
       ]
     },
     {
+      "id": "waves.replies",
+      "kind": "business_rule",
+      "title": "Open and collapsed wave replies",
+      "aliases": [
+        "who can reply in a wave",
+        "reply to announcements",
+        "open replies",
+        "collapsed replies",
+        "reply threads",
+        "show replies",
+        "hide replies",
+        "only chat members can start new drops"
+      ],
+      "keywords": [
+        "waves",
+        "replies",
+        "reply",
+        "thread",
+        "collapsed",
+        "open",
+        "chat",
+        "announcements",
+        "settings"
+      ],
+      "facts": [
+        "Wave admins set replies in About -> Configuration -> Chat -> Replies. The row reads Chat members or Everyone, then Inline or Collapsed.",
+        "With `Anyone who can see this wave can reply` on, everyone who can see the wave can reply to its drops, even outside the chat group. New top-level drops still need chat access.",
+        "Viewers who can only reply see `Only chat members can start new drops here. You can reply to any drop.` and use the drop's Reply action to open the composer.",
+        "With `Collapse replies under each drop` on, replies stay out of the main chat. A drop with replies shows `Show N replies`; selecting it opens the thread under the drop, oldest first, and `Hide replies` closes it.",
+        "The reply count includes replies to replies throughout the thread. Direct and nested replies refresh the original drop's count live; duplicate updates do not add extra replies.",
+        "Sending a reply opens its thread for the sender. The pending reply remains visible while saving and loading, then becomes the saved reply; unsuccessful sends are removed or show the existing moderation rejection state.",
+        "If loading a collapsed reply thread fails, it shows `Couldn't load replies.` and a Retry button. Already-loaded replies stay visible; Retry loads the thread again.",
+        "Slow mode and disabled links still apply to replies from non-admins. Emoji reactions stay open to everyone who can see the wave.",
+        "Collapsed replies do not count as unread and do not notify followers subscribed to every drop; the replied-to author and mentioned profiles are still notified.",
+        "Links and notifications to a collapsed reply jump to its parent drop and open that thread.",
+        "With open replies, the wave's creator, admins and chat members (when chat is limited to a group) can delete anyone's replies with the Delete action. Top-level drops keep the wave's normal admin deletion setting."
+      ],
+      "canonical_path": "/waves",
+      "related_paths": ["/waves?create=wave"],
+      "tags": ["waves", "chat", "settings"],
+      "source_refs": [
+        "components/waves/specs/WaveChatReplies.tsx",
+        "components/waves/drops/reply-threads/WaveDropReplyThread.tsx",
+        "components/waves/PrivilegedDropCreator.tsx",
+        "generated/models/ApiWaveChatRepliesConfig.ts"
+      ]
+    },
+    {
       "id": "waves.configuration-access-group-editor",
       "kind": "ui_affordance",
       "title": "Edit wave access groups from Configuration",
@@ -4043,7 +4105,11 @@
         "check delegations",
         "check consolidations",
         "active delegations",
-        "active consolidations"
+        "active consolidations",
+        "wallet checker missing consolidation link",
+        "wallet checker linked wallets",
+        "why is there no consolidation recommendation",
+        "incomplete consolidation recommendations"
       ],
       "keywords": [
         "wallet",
@@ -4057,14 +4123,23 @@
         "consolidations",
         "architecture",
         "address",
-        "ens"
+        "ens",
+        "linked wallets",
+        "reverse direction",
+        "recommendations",
+        "stray links",
+        "partial results"
       ],
       "facts": [
         "Wallet Checker lives at /delegation/wallet-checker.",
         "Wallet Checker is a read-only diagnostics page for one wallet.",
         "It checks delegations, delegation managers, and consolidation relationships for an entered Ethereum address or .eth ENS.",
         "It can show Delegations, Active Minting Delegation for The Memes, Delegation Managers, Consolidations, Active Consolidation, and Incomplete Consolidation.",
-        "Use Wallet Checker when users ask how to check or view active delegations, consolidations, delegation managers, or wallet-architecture-related setup for an address."
+        "Use Wallet Checker when users ask how to check or view active delegations, consolidations, delegation managers, or wallet-architecture-related setup for an address.",
+        "For consolidation checks, Wallet Checker loads the checked wallet and up to six wallets directly linked to it, prioritizing confirmed links. This reveals pair records between other group members, not just links involving the checked wallet. Repeated pair records are deduplicated across direction and address case; the newest block wins, and an unconfirmed copy wins a same-block disagreement.",
+        "Incomplete Consolidation recommends registering a missing reverse direction only when both wallets belong with the checked wallet: the checked wallet itself, its active consolidation, or wallets directly linked to it. A member's one-way link to an unrelated wallet stays visible without a recommendation; completing it could move that member out of the group.",
+        "Recommendations wait until the separately loaded active-consolidation request settles. A failed linked-wallet request keeps the successfully loaded records, so partial results do not prove that every link was checked.",
+        "Wallet Checker does not invent links: if a pair is entirely absent in both directions, it produces no recommendation for that pair. The six-linked-wallet cap can also limit coverage for a wallet with many stray links. Listed registrations are distinct from the backend's active counted consolidation; the checker neither registers links nor activates four-wallet support."
       ],
       "canonical_path": "/delegation/wallet-checker",
       "related_paths": [
@@ -4075,7 +4150,9 @@
       "tags": ["delegation", "wallet", "checker", "diagnostics"],
       "source_refs": [
         "ops/docs/delegation/feature-wallet-checker.md",
-        "components/delegation/delegation-page-metadata.ts"
+        "components/delegation/delegation-page-metadata.ts",
+        "components/delegation/walletChecker/WalletChecker.tsx",
+        "components/delegation/walletChecker/walletCheckerConsolidations.ts"
       ]
     },
     {
@@ -4125,17 +4202,21 @@
         "Natural phrases such as adding, linking, pairing, or setting up another wallet refer to this consolidation flow when the goal is for 6529 to treat wallets together for supported metrics.",
         "To register a consolidation, open Register Consolidation from the Delegation Center, choose the collection, enter the Consolidating With address, submit, and execute the transaction.",
         "For TDH consolidation, use Any Collection or The Memes.",
-        "Consolidation should be reciprocal when two wallets are intended to be treated together, and it is not a delegation and does not grant rights."
+        "Consolidation must be reciprocal: two wallets each register the link to the other, and groups of 3 or 4 wallets need every pair linked in both directions.",
+        "Each wallet signing for itself can register all of its links in one transaction with the NFTDelegation batchDelegations function (up to 5 links per call). A Delegation Manager sends one transaction per link. When adding a wallet to an existing group, the existing wallets register their links to it first and the new wallet sends its batch last. Existing return links or a manager sending the new wallet's links individually can still cause a temporary split and reduce TDH-wave votes.",
+        "A consolidation is not a delegation of NFT utility, but every wallet in it is a full key to the profile, so only consolidate your own wallets."
       ],
       "canonical_path": "/delegation/delegation-faq/register-consolidation",
       "related_paths": [
         "/delegation/wallet-architecture",
         "/delegation/consolidation-use-cases",
+        "/delegation/delegation-faq/reference-consolidations-4address",
         "/delegation/register-consolidation"
       ],
       "tags": ["delegation", "consolidation", "wallet", "faq"],
       "source_refs": [
-        "public/delegation-content/delegation-docs-2026-06-16/html/register-consolidation.html",
+        "public/delegation-content/delegation-docs-2026-10-15/html/register-consolidation.html",
+        "public/delegation-content/delegation-docs-2026-10-15/html/reference-consolidations-4address.html",
         "ops/docs/delegation/flow-delegation-center-to-onchain-actions.md"
       ]
     },
@@ -4277,7 +4358,7 @@
         "The docs call this the Three Address Protocol, or TAP, and explain how separate wallets reduce phishing, malware, and malicious-site risk.",
         "A higher-security version can use SAFE, formerly Gnosis Safe, as the vault wallet, while a more convenient minting wallet can be a hot or mobile wallet.",
         "Use the consolidation docs and Register Consolidation form when you want those wallets treated together for supported 6529 metrics.",
-        "For consolidation metrics, 6529 currently recognizes up to 3 addresses as one consolidation group."
+        "For consolidation metrics, 6529 recognizes up to 4 addresses as one consolidation group when every pair is linked in both directions; a fourth address counts only for links registered on or after 15 October 2026 00:00 UTC."
       ],
       "canonical_path": "/delegation/wallet-architecture",
       "related_paths": [
@@ -4289,7 +4370,7 @@
       ],
       "tags": ["delegation", "wallet", "security", "architecture"],
       "source_refs": [
-        "public/delegation-content/delegation-docs-2026-06-16/html/reference-overview-wallet-architecture.html",
+        "public/delegation-content/delegation-docs-2026-10-15/html/reference-overview-wallet-architecture.html",
         "components/delegation/delegation-page-metadata.ts"
       ]
     },
@@ -4322,8 +4403,14 @@
         "three wallet consolidation",
         "two wallet consolidation",
         "compromised wallet consolidation",
+        "add a fourth wallet to consolidation",
+        "add a 4th wallet to consolidation",
+        "rotate a consolidated wallet",
+        "consolidation order",
         "consolidation architecture",
-        "how do consolidations affect tdh"
+        "how do consolidations affect tdh",
+        "which group keeps my profile",
+        "profile after consolidation split"
       ],
       "keywords": [
         "consolidation",
@@ -4341,29 +4428,37 @@
         "maximum",
         "capacity",
         "allowed",
-        "counted"
+        "counted",
+        "profile retention",
+        "split"
       ],
       "facts": [
         "Consolidations help 6529 treat multiple wallets controlled by one collector together for metrics such as total cards, unique cards, TDH, and related collection metrics.",
-        "For now, 6529 recognizes up to 3 addresses as one consolidation group for The Memes metrics.",
-        "More than 3 addresses can have consolidation records, but Seize only counts the last 3 addresses for consolidation purposes.",
-        "Registration capacity and effective counted group size are therefore different: users can create records involving more addresses, while no more than 3 addresses count together.",
-        "The docs cover two-address and three-address patterns, plus a four-address compromised-wallet scenario where the user chooses which three-address set should count.",
-        "Each address generally needs reciprocal consolidation records with the other addresses it should be grouped with."
+        "6529 recognizes up to 4 addresses as one consolidation group, and every pair of addresses in the group must register consolidation use case #999 with each other in both directions.",
+        "The fourth address counts only for links registered on or after 15 October 2026 00:00 UTC: a group of 4 counts when one of its addresses has all three of its links registered in both directions from then. Before then, groups count at most 3 addresses; groups of 2 or 3 are unchanged and older registrations stay valid.",
+        "Registration capacity and effective counted group size are different: users can create records involving more addresses, but no more than 4 addresses count together, and when links conflict the newest confirmed link wins.",
+        "Each wallet signing for itself can register all of its links in one transaction with batchDelegations; a Delegation Manager sends one transaction per link. When adding a wallet to an existing group, the existing members register their links to it first and the new wallet sends its batch last. This avoids a temporary split when the new wallet has no existing return links. Old return links, signing out of order, or a manager sending the new wallet's links individually can temporarily split the group, re-run profile merges, and reduce TDH-wave votes above the lower TDH; those votes are not restored.",
+        "To replace a wallet without dropping below three, add the new wallet as the fourth, then remove the old one: if it still has its key, it sends one batch revocation to all the others; if the key is lost, each remaining wallet revokes its link to it.",
+        "Every wallet in a consolidation is a full key to the profile: it can sign in as the profile, set the primary address, and redirect airdrops. Consolidations are for one person's wallets, not for multiple individuals, and consolidation registrations do not expire.",
+        "When a consolidation splits, profile retention uses a mature primary-address delegation (50,400 processed blocks, roughly seven days) before TDH fallback. This does not delay primary-address changes. Subscription balances and upcoming choices have separate merge rules; on a split, subscriptions follow the highest-TDH resulting group rather than the profile-retention winner."
       ],
       "canonical_path": "/delegation/consolidation-use-cases",
       "related_paths": [
         "/delegation/wallet-architecture",
         "/delegation/delegation-faq/register-consolidation",
+        "/delegation/delegation-faq/reference-consolidations-4address",
         "/delegation/register-consolidation",
         "/delegation/delegation-faq",
         "/consolidation-mapping-tool"
       ],
       "tags": ["delegation", "consolidation", "wallet", "tdh"],
       "source_refs": [
-        "public/delegation-content/delegation-docs-2026-06-16/html/consolidation-use-cases.html",
-        "public/delegation-content/delegation-docs-2026-06-16/html/reference-consolidations-3address.html",
-        "public/delegation-content/delegation-docs-2026-06-16/html/reference-consolidations-3address-del-manager.html"
+        "public/delegation-content/delegation-docs-2026-10-15/html/consolidation-use-cases.html",
+        "public/delegation-content/delegation-docs-2026-10-15/html/reference-consolidations-3address.html",
+        "public/delegation-content/delegation-docs-2026-10-15/html/reference-consolidations-3address-del-manager.html",
+        "public/delegation-content/delegation-docs-2026-10-15/html/reference-consolidations-4address.html",
+        "ops/docs/profiles/about/feature-primary-address-reference-table.md",
+        "ops/docs/profiles/tabs/feature-subscriptions-tab.md"
       ]
     },
     {
@@ -4404,7 +4499,7 @@
       ],
       "tags": ["delegation", "faq", "docs"],
       "source_refs": [
-        "public/delegation-content/delegation-docs-2026-06-16/html/delegation-faq.html",
+        "public/delegation-content/delegation-docs-2026-10-15/html/delegation-faq.html",
         "components/delegation/html/delegationContent.ts"
       ]
     },
@@ -4436,8 +4531,8 @@
       ],
       "tags": ["delegation", "wallet", "consolidation", "management"],
       "source_refs": [
-        "public/delegation-content/delegation-docs-2026-06-16/html/manage-revoke.html",
-        "public/delegation-content/delegation-docs-2026-06-16/html/manage-update.html",
+        "public/delegation-content/delegation-docs-2026-10-15/html/manage-revoke.html",
+        "public/delegation-content/delegation-docs-2026-10-15/html/manage-update.html",
         "components/delegation/delegation-page-metadata.ts"
       ]
     },
@@ -4487,7 +4582,7 @@
       ],
       "tags": ["delegation", "workflow", "faq", "revoke"],
       "source_refs": [
-        "public/delegation-content/delegation-docs-2026-06-16/html/manage-revoke.html"
+        "public/delegation-content/delegation-docs-2026-10-15/html/manage-revoke.html"
       ]
     },
     {
@@ -4533,7 +4628,7 @@
       ],
       "tags": ["delegation", "workflow", "faq", "update"],
       "source_refs": [
-        "public/delegation-content/delegation-docs-2026-06-16/html/manage-update.html"
+        "public/delegation-content/delegation-docs-2026-10-15/html/manage-update.html"
       ]
     },
     {
@@ -4570,7 +4665,7 @@
       ],
       "tags": ["delegation", "workflow", "faq"],
       "source_refs": [
-        "public/delegation-content/delegation-docs-2026-06-16/html/register-delegation.html"
+        "public/delegation-content/delegation-docs-2026-10-15/html/register-delegation.html"
       ]
     },
     {
@@ -4609,8 +4704,8 @@
       ],
       "tags": ["delegation", "manager", "wallet", "faq"],
       "source_refs": [
-        "public/delegation-content/delegation-docs-2026-06-16/html/register-sub-delegation.html",
-        "public/delegation-content/delegation-docs-2026-06-16/html/register-delegation-using-sub-delegation.html"
+        "public/delegation-content/delegation-docs-2026-10-15/html/register-sub-delegation.html",
+        "public/delegation-content/delegation-docs-2026-10-15/html/register-delegation-using-sub-delegation.html"
       ]
     },
     {
@@ -4647,7 +4742,7 @@
       ],
       "tags": ["delegation", "safe", "wallet", "faq"],
       "source_refs": [
-        "public/delegation-content/delegation-docs-2026-06-16/html/using-safe.html"
+        "public/delegation-content/delegation-docs-2026-10-15/html/using-safe.html"
       ]
     },
     {
@@ -5502,7 +5597,8 @@
         "The Reactions filter includes voted, reacted, and boosted drop notifications; the Identity filter includes new follows and REP/NIC updates.",
         "The Subscriptions filter includes transition-based coverage alerts with runway, Meme context, authoritative deadline when available, and exact minimum top-up action.",
         "On native iOS when the detected country is not US or is unknown, subscription coverage feed items, their filter and the device settings entry are hidden; social follow notifications remain available.",
-        "Notification rows may be missing or stale if loading, permissions, or realtime connectivity are disrupted."
+        "Notification rows may be missing or stale if loading, permissions, or realtime connectivity are disrupted.",
+        "Unread-count polling pauses in backgrounded Capacitor apps and hidden mobile browser tabs, preserving cached counts and refreshing on return. Browser realtime notification delivery stays connected."
       ],
       "canonical_path": "/notifications",
       "related_paths": ["/waves"],
@@ -5830,7 +5926,11 @@
         "primary wallet",
         "set primary",
         "primary address table",
-        "current selected primary address"
+        "current selected primary address",
+        "which wallet keeps my profile after a consolidation split",
+        "seven day primary address rule",
+        "primary address maturity",
+        "profile retention after revoking consolidation"
       ],
       "keywords": [
         "primary",
@@ -5839,13 +5939,20 @@
         "consolidation",
         "table",
         "profile",
-        "set"
+        "set",
+        "split",
+        "retention",
+        "maturity",
+        "seven days"
       ],
       "facts": [
         "/about/primary-address is a public, read-only primary-address reference table.",
         "The full-width table shows Profile Handle, Current Selected Primary Address, and Primary Address Changed to columns loaded from /primary_address.csv; it scrolls vertically and stacks the same fields on smaller screens.",
         "Each profile handle links to /{current_primary}.",
-        "Non-primary consolidated wallet rows on profile identity statements can expose Set Primary when the connected wallet owns the profile and no proxy profile is active."
+        "Non-primary consolidated wallet rows on profile identity statements can expose Set Primary when the connected wallet owns the profile and no proxy profile is active.",
+        "Changing the primary address takes effect when processed; the roughly seven-day maturity rule does not delay setting a primary address. It governs which resulting group keeps the existing profile when a consolidation splits.",
+        "For profile retention on a split, the newest valid primary-address delegation that is at least 50,400 processed Ethereum blocks old (roughly seven days) takes priority. Maturity uses the last block processed by the delegations loop, so it is not an exact wall-clock countdown.",
+        "If no mature primary-address delegation applies, profile retention falls back to the resulting group with the highest TDH, then the previous primary address for a tie, then stable group-key ordering. A recently selected primary address alone does not guarantee retaining the profile."
       ],
       "canonical_path": "/about/primary-address",
       "related_paths": ["/{user}", "/delegation/assign-primary-address"],
@@ -5926,10 +6033,13 @@
         "It shows collected NFT context, owner balances, stats summary, and transfer-mode behavior where available.",
         "On mobile, swipe the headline statistics horizontally; a right-edge fade indicates more statistics, and Details stays visible beside the row.",
         "The expandable Details panel can show holdings totals, wallet activity, distributions, TDH history, and boost breakdown.",
+        "Closing Details preserves its activity tab, filters and page and keeps it closed when returning from artwork. Reopening restores those selections. Previous and Next below the artwork move to the start of the new results once loading finishes, with keyboard focus on the results.",
+        "Artwork links in Wallet Activity and Distributions include the mobile-web and native-app profile return action. It restores Details, the main grid page, the activity page and the originating activity link.",
         "On mobile, both Overview and both Memes Breakdown By Season sections in Details start closed; tap their titles to open the tables. Desktop starts with these sections open.",
         "Wallet Activity, Distributions, and TDH History tab labels stay on one line and scroll horizontally when needed. The selected tab stays visible, including when opened from a deep link.",
         "Details table text stays on one line; tables scroll horizontally when their columns do not fit, including Boost Breakdown. The first label column of wide holdings and activity overview tables stays visible while scrolling.",
         "Native view covers The Memes, Gradients, NextGen, and Meme Lab holdings; Network view covers xTDH token holdings by contract.",
+        "When filters return no artwork, Clear filters returns to page 1 with all addresses and collections in the current Native or Network view, preserving sorting and Details selections. Empty filtered results do not prove that the profile has no holdings.",
         "In the native app, The Memes, Gradients, NextGen, and Meme Lab tokens opened from a profile's Collected tab use the app-header Back chevron to restore the same profile filters, page, and opened card while retaining the detail page's collection link; mobile web shows an in-page return action, desktop uses browser Back, and direct token visits do not show a false return action, while NextGen can separately offer the current owner's holdings when available.",
         "Use collection route records for collection-level browsing and profile collected for a user's holdings."
       ],
@@ -6265,7 +6375,8 @@
       "facts": [
         "Unmuted wave and direct-message chat shows who is typing in the current thread; your own typing is excluded.",
         "Private-thread typing requires signing in with a profile that can view the thread.",
-        "Switching waves or profiles, signing out, or disconnecting clears typing labels; updates resume after the wave connection recovers."
+        "Switching waves or profiles, signing out, or disconnecting clears typing labels; updates resume after the wave connection recovers.",
+        "Backgrounding the Capacitor app or hiding a mobile browser tab clears typing labels and pauses the typing subscription. Returning starts a fresh subscription for the active thread."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/waves"],

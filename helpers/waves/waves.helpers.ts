@@ -6,6 +6,7 @@ import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import { commonApiPost } from "@/services/api/common-api";
 import { CreateWaveStepStatus } from "@/types/waves.types";
+import { getWaveChatRepliesUpdate } from "@/helpers/waves/wave-chat-replies.helpers";
 
 export const getCreateWaveStepStatus = ({
   stepIndex,
@@ -104,6 +105,7 @@ export const convertWaveToUpdateWave = (
     enabled: wave.chat.enabled,
     links_disabled: wave.chat.links_disabled === true,
     ...getSlowModeUpdate(wave.chat.slow_mode_cooldown_ms),
+    ...getWaveChatRepliesUpdate(wave.chat),
   },
   participation: {
     scope: {
