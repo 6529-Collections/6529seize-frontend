@@ -19,6 +19,7 @@ import {
   updateDropInCachedDrops,
 } from "@/components/react-query-wrapper/utils/updateAttachmentInCachedDrops";
 import { upsertDropIntoMatchingDropsQueries } from "@/components/react-query-wrapper/utils/addDropsToDrops";
+import type { ApiDropV2View } from "@/services/api/drop-v2-view.types";
 
 const HELP_BOT_HANDLE = "help6529";
 const HELP_BOT_FINAL_REACTIONS = new Set([":white_check_mark:", ":warning:"]);
@@ -259,9 +260,47 @@ const applyCanonicalDropUpdate = async ({
         type: DropSize.FULL,
         stableHash: existingDrop.stableHash,
         stableKey: existingDrop.stableKey,
+        ...getPreservedRepliesCount(reconciledApiDrop, existingDrop),
       },
     ],
   });
+};
+
+/**
+ * Realtime payloads use the v1 drop shape, which has no thread size. Keep the
+ * count the stream already has so collapsed-reply expanders stay visible.
+ */
+const getPreservedRepliesCount = (
+  drop: ApiDropV2View,
+  existingDrop: ExtendedDrop | null
+): { readonly replies_count?: number | undefined } => {
+  const repliesCount = drop.replies_count ?? existingDrop?.replies_count;
+  return repliesCount === undefined ? {} : { replies_count: repliesCount };
+};
+
+// Realtime payloads drop viewer-specific reply flags; keep what we know.
+const getPreservedReplyPermissions = (
+  drop: ApiDrop,
+  existingDrop: ExtendedDrop | null
+): {
+  readonly authenticated_user_eligible_to_reply?: boolean;
+  readonly authenticated_user_can_delete_replies?: boolean;
+} => {
+  const wave = existingDrop === null ? drop.wave : existingDrop.wave;
+  return {
+    ...(wave.authenticated_user_eligible_to_reply === undefined
+      ? {}
+      : {
+          authenticated_user_eligible_to_reply:
+            wave.authenticated_user_eligible_to_reply,
+        }),
+    ...(wave.authenticated_user_can_delete_replies === undefined
+      ? {}
+      : {
+          authenticated_user_can_delete_replies:
+            wave.authenticated_user_can_delete_replies,
+        }),
+  };
 };
 
 const buildOptimisticDrop = ({
@@ -318,6 +357,7 @@ const buildOptimisticDrop = ({
         existingDrop === null
           ? reconciledDrop.wave.authenticated_user_eligible_to_chat
           : existingDrop.wave.authenticated_user_eligible_to_chat,
+      ...getPreservedReplyPermissions(reconciledDrop, existingDrop),
       authenticated_user_admin:
         existingDrop === null
           ? reconciledDrop.wave.authenticated_user_admin
@@ -329,6 +369,7 @@ const buildOptimisticDrop = ({
       existingDrop === null
         ? (reconciledDrop.context_profile_context ?? null)
         : existingDrop.context_profile_context,
+    ...getPreservedRepliesCount(reconciledDrop, existingDrop),
   };
 };
 
