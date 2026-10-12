@@ -34,6 +34,7 @@ import {
 } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import UserPageCollectedCards from "./cards/UserPageCollectedCards";
+import UserPageCollectedCardsNoCards from "./cards/UserPageCollectedCardsNoCards";
 import UserPageCollectedNetworkCards from "./cards/UserPageCollectedNetworkCards";
 import {
   COLLECTED_COLLECTIONS_META,
@@ -495,6 +496,30 @@ export default function UserPageCollected({
     return setPage(page);
   };
 
+  const clearFilters = (): Promise<void> => {
+    trackAction("Filters", "Clear filters");
+    const items: QueryUpdateInput[] = [
+      { name: "address", value: null },
+      {
+        name: "collection",
+        value:
+          filters.collection === CollectedCollectionType.NETWORK
+            ? CollectedCollectionType.NETWORK
+            : null,
+      },
+      { name: "subcollection", value: null },
+      { name: "szn", value: null },
+      { name: "seized", value: DEFAULT_SEIZED },
+      { name: "page", value: "1" },
+    ];
+    pendingPageNavigation.current = {
+      from: searchParams.toString(),
+      to: createQueryString(items),
+      page: 1,
+    };
+    return updateFields(items);
+  };
+
   useEffect(() => {
     setFilters((prev) => {
       const newFilters = getFilters();
@@ -568,6 +593,14 @@ export default function UserPageCollected({
     ? isNetworkSuccess && !isNetworkPlaceholderData
     : isSuccess && !isPlaceholderData;
   const loadedPage = isNetwork ? dataNetwork?.page : data?.page;
+  const hasActiveFilters =
+    !filters.accountForConsolidations ||
+    (isNetwork ? filters.subcollection !== null : filters.collection !== null);
+  const isEmptyPage =
+    isPageReady &&
+    loadedPage === filters.page &&
+    (isNetwork ? dataNetwork?.data.length === 0 : data?.data.length === 0);
+  const currentFiltersQuery = createQueryString([]);
 
   useEffect(() => {
     const pending = pendingPageNavigation.current;
@@ -581,6 +614,7 @@ export default function UserPageCollected({
       // eslint-disable-next-line react-you-might-not-need-an-effect/no-event-handler -- Focus must wait for the requested query data to render, after router navigation.
       !isPageReady ||
       isFetchingData ||
+      currentFiltersQuery !== pending.to ||
       filters.page !== pending.page ||
       loadedPage !== pending.page
     )
@@ -588,11 +622,21 @@ export default function UserPageCollected({
 
     pendingPageNavigation.current = null;
     const list = artworkRef.current?.querySelector<HTMLUListElement>("ul");
-    if (!list) return;
-    const focusTarget = list.querySelector<HTMLAnchorElement>("a[href]") ?? list;
+    const focusTarget =
+      list?.querySelector<HTMLAnchorElement>("a[href]") ??
+      list ??
+      artworkRef.current?.querySelector<HTMLOutputElement>("output");
+    if (!focusTarget) return;
     focusTarget.focus({ preventScroll: true });
     artworkRef.current?.scrollIntoView({ block: "start" });
-  }, [searchParams, isPageReady, isFetchingData, filters.page, loadedPage]);
+  }, [
+    searchParams,
+    isPageReady,
+    isFetchingData,
+    filters.page,
+    loadedPage,
+    currentFiltersQuery,
+  ]);
 
   const showTransfer =
     !isMobile &&
@@ -722,7 +766,20 @@ export default function UserPageCollected({
             aria-busy={isFetchingData}
             className="tw-mt-6 tw-scroll-mt-24"
           >
-            {isNetwork ? (
+            {isEmptyPage && (
+              <UserPageCollectedCardsNoCards
+                filters={filters}
+                locale={locale}
+                onClearFilters={hasActiveFilters ? clearFilters : undefined}
+                onGoToFirstPage={
+                  isNetwork && filters.page > 1
+                    ? () => setPageFromControl(1)
+                    : undefined
+                }
+                isLoading={isFetchingData}
+              />
+            )}
+            {!isEmptyPage && isNetwork && (
               <UserPageCollectedNetworkCards
                 cards={dataNetwork?.data ?? []}
                 page={filters.page}
@@ -731,7 +788,8 @@ export default function UserPageCollected({
                 locale={locale}
                 isLoading={isFetchingData}
               />
-            ) : (
+            )}
+            {!isEmptyPage && !isNetwork && (
               <UserPageCollectedCards
                 cards={data?.data ?? []}
                 totalPages={totalPages}

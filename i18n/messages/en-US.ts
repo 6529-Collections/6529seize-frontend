@@ -3767,6 +3767,10 @@ export const EN_US_MESSAGES = {
   "user.collected.cards.listLabel": "Collected cards",
   "user.collected.navigation.backToCollected": "Back to {profile}'s collected",
   "user.collected.empty.noCards": "No cards to display",
+  "user.collected.empty.filtered": "No artwork matches these filters.",
+  "user.collected.empty.page": "There are no artworks on this page.",
+  "user.collected.empty.clearFilters": "Clear filters",
+  "user.collected.empty.firstPage": "Go to page 1",
   "user.collected.empty.fullSetter": "Congratulations, full setter!",
   "user.collected.empty.memesFullSetter":
     "Congratulations, The Memes full setter!",

@@ -234,7 +234,7 @@ describe("UserPageCollected", () => {
         isLoading: false,
         isSuccess: true,
         isPlaceholderData: false,
-        data: { data: [], count: 96, page: 1, next: true },
+        data: { data: [{ token_id: 1 }], count: 96, page: 1, next: true },
       };
       useQueryMock.mockImplementation(() => result);
       const view = renderWithTransferProvider(
@@ -281,6 +281,111 @@ describe("UserPageCollected", () => {
       rerender();
       expect(scroll).toHaveBeenCalledTimes(1);
       Element.prototype.scrollIntoView = originalScroll;
+    }
+  );
+
+  it.each([false, true])(
+    "clears empty-result filters within the current view (network=%s)",
+    async (network) => {
+      useSearchParamsMock.mockReturnValue(
+        new URLSearchParams(
+          `collection=${network ? "network&subcollection=0xabc" : "memes&szn=2&seized=seized"}&address=0x123&sort-direction=asc&details=open&activity=distributions&distribution-page=2&locale=fr-FR`
+        )
+      );
+      useQueryMock.mockReturnValue({
+        isSuccess: true,
+        isFetching: false,
+        isLoading: false,
+        isPlaceholderData: false,
+        data: { data: [], count: 0, page: 1, next: false },
+      });
+      renderWithTransferProvider(<UserPageCollected profile={mockProfile} />);
+      expect(screen.getByRole("status")).toHaveTextContent(
+        "No artwork matches these filters."
+      );
+      await userEvent.click(
+        screen.getByRole("button", { name: "Clear filters" })
+      );
+      const query = getLastPushParams();
+      expect(query.get("collection")).toBe(network ? "network" : null);
+      for (const key of ["address", "subcollection", "szn", "seized", "page"])
+        expect(query.has(key)).toBe(false);
+      expect(query.get("sort-direction")).toBe("asc");
+      expect(query.get("details")).toBe("open");
+      expect(query.get("activity")).toBe("distributions");
+      expect(query.get("distribution-page")).toBe("2");
+      expect(query.get("locale")).toBe("fr-FR");
+      expect(routerReplace).not.toHaveBeenCalled();
+    }
+  );
+
+  it("returns an empty Network page to page 1 without clearing filters", async () => {
+    useSearchParamsMock.mockReturnValue(
+      new URLSearchParams(
+        "collection=network&page=99&address=0x123&subcollection=0xabc&sort-by=xtdh_day&sort-direction=asc&details=closed"
+      )
+    );
+    useQueryMock.mockReturnValue({
+      isSuccess: true,
+      isFetching: false,
+      isLoading: false,
+      isPlaceholderData: false,
+      data: { data: [], page: 99, next: false },
+    });
+    renderWithTransferProvider(<UserPageCollected profile={mockProfile} />);
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "There are no artworks on this page."
+    );
+    expect(screen.queryByRole("button", { name: "Clear filters" })).toBeNull();
+    await userEvent.click(screen.getByRole("button", { name: "Go to page 1" }));
+    const query = getLastPushParams();
+    expect(query.has("page")).toBe(false);
+    expect(query.get("collection")).toBe("network");
+    expect(query.get("address")).toBe("0x123");
+    expect(query.get("subcollection")).toBe("0xabc");
+    expect(query.get("sort-by")).toBe("xtdh_day");
+    expect(query.get("sort-direction")).toBe("asc");
+    expect(query.get("details")).toBe("closed");
+    expect(routerReplace).not.toHaveBeenCalled();
+  });
+
+  it.each(["", "collection=network", "sort-direction=asc"])(
+    "does not offer Clear filters for unfiltered empty holdings: %s",
+    (query) => {
+      useSearchParamsMock.mockReturnValue(new URLSearchParams(query));
+      useQueryMock.mockReturnValue({
+        isSuccess: true,
+        isFetching: false,
+        isLoading: false,
+        isPlaceholderData: false,
+        data: { data: [], count: 0, page: 1, next: false },
+      });
+      renderWithTransferProvider(<UserPageCollected profile={mockProfile} />);
+      expect(
+        screen.queryByRole("button", { name: /Clear filters|Go to page 1/ })
+      ).toBeNull();
+    }
+  );
+
+  it.each([
+    { isSuccess: false, isPlaceholderData: false },
+    { isSuccess: true, isPlaceholderData: true },
+  ])(
+    "does not classify failed or placeholder data as empty filter results: %o",
+    (state) => {
+      useSearchParamsMock.mockReturnValue(
+        new URLSearchParams("collection=network&subcollection=0xabc&page=2")
+      );
+      useQueryMock.mockReturnValue({
+        ...state,
+        isFetching: false,
+        isLoading: false,
+        data: { data: [], page: 2, next: false },
+      });
+      renderWithTransferProvider(<UserPageCollected profile={mockProfile} />);
+      expect(
+        screen.queryByRole("button", { name: /Clear filters|Go to page 1/ })
+      ).toBeNull();
     }
   );
 

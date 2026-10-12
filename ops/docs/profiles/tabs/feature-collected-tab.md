@@ -232,6 +232,20 @@ Transfer mode is part of the Native collected view (not a separate route).
 ## Failure and Recovery
 
 - Initial load shows skeleton placeholders.
+- Empty filtered results show `No artwork matches these filters` and a
+  `Clear filters` button. Clearing returns to page 1 with all addresses and
+  collections in the current Native or Network view, preserving sorting and
+  Details selections. The existing full-set congratulations remain when the
+  Unseized filter finds no missing cards; `Clear filters` is available there too.
+- An empty Network page beyond page 1 shows `There are no artworks on this page`
+  and `Go to page 1`. This keeps the selected filters and sorting, and moves
+  focus to the loaded results. Browser Back restores the previous URL.
+- Recovery controls are shown only for a successful response for the current
+  page, and disabled while it refreshes. An unfiltered empty collection has
+  no redundant `Clear filters` button.
+- Recovery messages use the source-locale dictionary. Other supported locales
+  currently fall back to English for this copy; translation remains follow-up
+  work under the progressive localization standard.
 - If native collected data fails, the tab falls back to empty-state copy
   (for example `No cards to display`). Empty-state copy is message-backed from
   the source locale and announced as status text for assistive technologies.

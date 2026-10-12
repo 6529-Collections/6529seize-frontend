@@ -367,6 +367,96 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
     }
   });
 
+  test("recovers empty Collected filters and restores them with browser Back", async ({
+    page,
+  }) => {
+    await gotoReady(
+      page,
+      "/simo/collected?collection=gradients&seized=seized&sort-direction=asc&details=closed&locale=fr-FR"
+    );
+    const clear = page.getByRole("button", {
+      name: "Clear filters",
+      exact: true,
+    });
+    await expect(
+      page
+        .getByRole("status")
+        .filter({ hasText: "No artwork matches these filters." })
+    ).toBeVisible();
+    for (const width of [375, 440, 1280]) {
+      await page.setViewportSize({ width, height: 900 });
+      await clear.scrollIntoViewIfNeeded();
+      const box = await clear.boundingBox();
+      expect(box?.height).toBeGreaterThanOrEqual(44);
+      await expectNoHorizontalOverflow(page);
+    }
+    await clear.click();
+    await expect(page).toHaveURL(
+      (url) =>
+        !url.searchParams.has("collection") &&
+        !url.searchParams.has("seized") &&
+        url.searchParams.get("sort-direction") === "asc" &&
+        url.searchParams.get("details") === "closed" &&
+        url.searchParams.get("locale") === "fr-FR"
+    );
+    const cards = page.getByRole("list", {
+      name: "Collected cards",
+      exact: true,
+    });
+    await expect(cards.getByRole("link").first()).toBeFocused();
+    await expect(cards.getByRole("link").first()).toBeInViewport();
+    await page.goBack();
+    await expect(clear).toBeVisible();
+    await expect(page).toHaveURL(
+      (url) => url.searchParams.get("collection") === "gradients"
+    );
+  });
+
+  test("recovers an empty Network page without losing its view or sorting", async ({
+    page,
+  }) => {
+    await gotoReady(
+      page,
+      `/${PROFILE_HANDLE}/collected?collection=network&page=999999&sort-direction=asc&details=closed&locale=de-DE`
+    );
+    const firstPage = page.getByRole("button", {
+      name: "Go to page 1",
+      exact: true,
+    });
+    await expect(
+      page
+        .getByRole("status")
+        .filter({ hasText: "There are no artworks on this page." })
+    ).toBeVisible();
+    for (const width of [375, 440, 1280]) {
+      await page.setViewportSize({ width, height: 900 });
+      await firstPage.scrollIntoViewIfNeeded();
+      const box = await firstPage.boundingBox();
+      expect(box?.height).toBeGreaterThanOrEqual(44);
+      await expectNoHorizontalOverflow(page);
+    }
+    await firstPage.click();
+    await expect(page).toHaveURL(
+      (url) =>
+        url.searchParams.get("collection") === "network" &&
+        !url.searchParams.has("page") &&
+        url.searchParams.get("sort-direction") === "asc" &&
+        url.searchParams.get("details") === "closed" &&
+        url.searchParams.get("locale") === "de-DE"
+    );
+    const cards = page.getByRole("list", {
+      name: "Collected network cards",
+      exact: true,
+    });
+    await expect(cards).toBeFocused();
+    await expect(cards).toBeInViewport();
+    await page.goBack();
+    await expect(firstPage).toBeVisible();
+    await expect(page).toHaveURL(
+      (url) => url.searchParams.get("page") === "999999"
+    );
+  });
+
   test("keeps Native Collected page counts and pagination readable", async ({
     page,
   }) => {
