@@ -53,6 +53,22 @@ export const SEARCH_PARAMS_FIELDS = {
 
 const DEFAULT_SORT_BY = CollectionSort.TOKEN_ID;
 export const DEFAULT_SORT_DIRECTION = SortDirection.DESC;
+export const getNextCollectedSortDirection = ({
+  newSortBy,
+  currentSortBy,
+  currentSortDirection,
+}: {
+  newSortBy: CollectionSort;
+  currentSortBy: CollectionSort;
+  currentSortDirection: SortDirection;
+}): SortDirection => {
+  if (newSortBy === currentSortBy) {
+    return currentSortDirection === SortDirection.ASC
+      ? SortDirection.DESC
+      : SortDirection.ASC;
+  }
+  return DEFAULT_SORT_DIRECTION;
+};
 export const DEFAULT_SEIZED = CollectionSeized.SEIZED;
 export const PAGE_SIZE = 24;
 const COLLECTION_VALUES = Object.values(CollectedCollectionType);

@@ -53,7 +53,7 @@ import {
   convertSortedBy,
   convertSznId,
   DEFAULT_SEIZED,
-  DEFAULT_SORT_DIRECTION,
+  getNextCollectedSortDirection,
   getNormalizedCollectedQueryStateFromFilters,
   normalizePageNumber,
   PAGE_SIZE,
@@ -364,24 +364,6 @@ export default function UserPageCollected({
     await updateFields(items);
   };
 
-  const calculateSortDirection = ({
-    newSortBy,
-    currentSortBy,
-    currentSortDirection,
-  }: {
-    newSortBy: CollectionSort;
-    currentSortBy: CollectionSort;
-    currentSortDirection: SortDirection;
-  }): SortDirection | null => {
-    if (newSortBy === currentSortBy) {
-      if (currentSortDirection === SortDirection.ASC) {
-        return SortDirection.DESC;
-      }
-      return SortDirection.ASC;
-    }
-    return DEFAULT_SORT_DIRECTION;
-  };
-
   const setSortBy = async (sortBy: CollectionSort): Promise<void> => {
     trackAction("Filters", "Change sort");
     const items: QueryUpdateInput[] = [
@@ -391,7 +373,7 @@ export default function UserPageCollected({
       },
       {
         name: "sortDirection",
-        value: calculateSortDirection({
+        value: getNextCollectedSortDirection({
           newSortBy: sortBy,
           currentSortBy: filters.sortBy,
           currentSortDirection: filters.sortDirection,
@@ -593,9 +575,6 @@ export default function UserPageCollected({
     ? isNetworkSuccess && !isNetworkPlaceholderData
     : isSuccess && !isPlaceholderData;
   const loadedPage = isNetwork ? dataNetwork?.page : data?.page;
-  const hasActiveFilters =
-    !filters.accountForConsolidations ||
-    (isNetwork ? filters.subcollection !== null : filters.collection !== null);
   const isEmptyPage =
     isPageReady &&
     loadedPage === filters.page &&
@@ -611,7 +590,6 @@ export default function UserPageCollected({
       return;
     }
     if (
-      // eslint-disable-next-line react-you-might-not-need-an-effect/no-event-handler -- Focus must wait for the requested query data to render, after router navigation.
       !isPageReady ||
       isFetchingData ||
       currentFiltersQuery !== pending.to ||
@@ -770,12 +748,8 @@ export default function UserPageCollected({
               <UserPageCollectedCardsNoCards
                 filters={filters}
                 locale={locale}
-                onClearFilters={hasActiveFilters ? clearFilters : undefined}
-                onGoToFirstPage={
-                  isNetwork && filters.page > 1
-                    ? () => setPageFromControl(1)
-                    : undefined
-                }
+                onClearFilters={clearFilters}
+                onGoToFirstPage={() => setPageFromControl(1)}
                 isLoading={isFetchingData}
               />
             )}

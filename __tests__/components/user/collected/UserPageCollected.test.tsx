@@ -389,6 +389,39 @@ describe("UserPageCollected", () => {
     }
   );
 
+  it("focuses the status after clearing a genuinely empty collection without trapping keyboard navigation", async () => {
+    const scroll = jest.fn();
+    const originalScroll = Element.prototype.scrollIntoView;
+    Element.prototype.scrollIntoView = scroll;
+    let query = new URLSearchParams("collection=gradients");
+    useSearchParamsMock.mockImplementation(() => query);
+    useQueryMock.mockReturnValue({
+      isSuccess: true,
+      isFetching: false,
+      isLoading: false,
+      isPlaceholderData: false,
+      data: { data: [], count: 0, page: 1 },
+    });
+    const view = renderWithTransferProvider(
+      <UserPageCollected profile={mockProfile} />
+    );
+    await userEvent.click(
+      screen.getByRole("button", { name: "Clear filters" })
+    );
+    query = getLastPushParams();
+    view.rerender(
+      <TransferProvider>
+        <UserPageCollected profile={mockProfile} />
+      </TransferProvider>
+    );
+    expect(screen.getByRole("status")).toHaveFocus();
+    expect(screen.getByRole("status")).toHaveTextContent("No cards to display");
+    expect(scroll).toHaveBeenCalledTimes(1);
+    await userEvent.tab({ shift: true });
+    expect(screen.getByRole("button", { name: "Set The Memes" })).toHaveFocus();
+    Element.prototype.scrollIntoView = originalScroll;
+  });
+
   it("shows loading state initially", () => {
     useQueryMock.mockReturnValue({
       isFetching: false,
