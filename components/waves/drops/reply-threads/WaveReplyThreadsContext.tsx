@@ -3,9 +3,11 @@
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { WsDropUpdateMessage } from "@/helpers/Types";
-import { WsMessageType } from "@/helpers/Types";
+import { isWsDropUpdateRefData, WsMessageType } from "@/helpers/Types";
 import { DropSize } from "@/helpers/waves/drop.helpers";
+import { fetchDropByIdBatched } from "@/services/api/drop-api";
 import { useWebSocketMessage } from "@/services/websocket/useWebSocketMessage";
+import { createReplyCountReconciliation } from "./reply-count-reconciliation";
 import {
   createContext,
   useCallback,
@@ -63,40 +65,68 @@ const WaveReplyThreadsContext =
   createContext<WaveReplyThreadsContextValue | null>(null);
 
 /**
- * Bumps the parent's reply count when a new reply arrives. A later refetch of
- * the parent replaces the bumped count with the server count.
+ * Reconcile the original thread as well as the immediate parent when replies
+ * change. Compact events use the same API-backed ancestry traversal.
  */
 function useLiveReplyCounts(waveId: string, enabled: boolean) {
   const { applyOptimisticDropUpdate } = useMyStream();
-  const [mountedAt] = useState(() => Date.now());
-  const countedReplyIdsRef = useRef(new Set<string>());
+  const reconciliationRef = useRef<ReturnType<
+    typeof createReplyCountReconciliation
+  > | null>(null);
+
+  useEffect(() => {
+    if (!enabled) return;
+    const reconciliation = createReplyCountReconciliation({
+      waveId,
+      fetchDrop: fetchDropByIdBatched,
+      applyCount: (dropId, count) => {
+        applyOptimisticDropUpdate({
+          waveId,
+          dropId,
+          update: (draft) =>
+            draft.type === DropSize.FULL
+              ? { ...draft, replies_count: count }
+              : draft,
+        });
+      },
+      onError: (error) =>
+        console.error("Failed to refresh collapsed reply counts:", error),
+    });
+    reconciliationRef.current = reconciliation;
+    return () => {
+      reconciliation.dispose();
+      reconciliationRef.current = null;
+    };
+  }, [applyOptimisticDropUpdate, enabled, waveId]);
 
   useWebSocketMessage<WsDropUpdateMessage["data"]>(
     WsMessageType.DROP_UPDATE,
     useCallback(
       (drop) => {
         const parentDropId = drop.reply_to?.drop_id;
-        const isNewReply =
-          enabled &&
-          drop.wave.id === waveId &&
-          !!parentDropId &&
-          drop.updated_at === null &&
-          drop.created_at >= mountedAt &&
-          !countedReplyIdsRef.current.has(drop.id);
-        if (!isNewReply) {
+        if (!enabled || drop.wave.id !== waveId || !parentDropId) {
           return;
         }
-        countedReplyIdsRef.current.add(drop.id);
-        applyOptimisticDropUpdate({
-          waveId,
-          dropId: parentDropId,
-          update: (draft) =>
-            draft.type === DropSize.FULL
-              ? { ...draft, replies_count: (draft.replies_count ?? 0) + 1 }
-              : draft,
-        });
+        reconciliationRef.current?.request(parentDropId);
       },
-      [applyOptimisticDropUpdate, enabled, mountedAt, waveId]
+      [enabled, waveId]
+    )
+  );
+
+  useWebSocketMessage<unknown>(
+    WsMessageType.DROP_UPDATE_REF,
+    useCallback(
+      (message) => {
+        if (
+          enabled &&
+          isWsDropUpdateRefData(message) &&
+          message.wave_id === waveId &&
+          message.update_type === WsMessageType.DROP_UPDATE
+        ) {
+          reconciliationRef.current?.request(message.drop_id);
+        }
+      },
+      [enabled, waveId]
     )
   );
 }
