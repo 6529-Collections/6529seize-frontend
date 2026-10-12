@@ -10,6 +10,7 @@ describe("wave chat replies helpers", () => {
     open: true,
     collapsed: true,
     authenticated_user_eligible: true,
+    authenticated_user_can_delete: false,
   };
 
   it("reads reply settings and treats a missing config as closed", () => {

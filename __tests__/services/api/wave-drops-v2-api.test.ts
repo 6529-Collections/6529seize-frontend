@@ -424,7 +424,7 @@ describe("fetchWaveDropsFeedV2", () => {
       limit: 20,
     });
 
-    expect(result.drops[0]?.replies_count).toBe(3);
+    expect(result.drops[0]).toMatchObject({ replies_count: 3 });
     expect(result.drops[1]).not.toHaveProperty("replies_count");
   });
 

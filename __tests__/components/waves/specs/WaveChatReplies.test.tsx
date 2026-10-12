@@ -44,6 +44,7 @@ describe("WaveChatReplies", () => {
           open: true,
           collapsed: true,
           authenticated_user_eligible: true,
+          authenticated_user_can_delete: false,
         })}
       />
     );

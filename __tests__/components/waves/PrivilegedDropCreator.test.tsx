@@ -248,6 +248,7 @@ describe("PrivilegedDropCreator", () => {
           open: true,
           collapsed: true,
           authenticated_user_eligible: true,
+          authenticated_user_can_delete: false,
         },
       },
     } as React.ComponentProps<typeof PrivilegedDropCreator>["wave"];
@@ -302,6 +303,7 @@ describe("PrivilegedDropCreator", () => {
               open: false,
               collapsed: false,
               authenticated_user_eligible: false,
+              authenticated_user_can_delete: false,
             },
           },
         },
