@@ -6,6 +6,7 @@ Wave leaderboard surfaces switch between loading, populated, and empty states.
 State output depends on wave type, view mode, and current filter context.
 
 This page covers:
+
 - full `Leaderboard` tab states (list, grid, and memes gallery)
 - compact right-sidebar `Leaderboard` states for rank waves
 
@@ -32,6 +33,8 @@ This page covers:
 
 ## Common Scenarios
 
+- Completed submission cards retain their score and voter summary. Select the
+  voter count to inspect voters or the vote log; voting remains closed.
 - List first load shows `Loading drops...`.
 - Grid first load shows skeleton cards.
 - Memes gallery first load shows `Loading drops...` while first media results

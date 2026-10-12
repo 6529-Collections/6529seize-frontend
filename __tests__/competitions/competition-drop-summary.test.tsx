@@ -198,3 +198,23 @@ it("resolves scoped submission data before rendering a drop deep link", async ()
   );
   expect(await screen.findByText("PARTICIPATORY 120")).toBeInTheDocument();
 });
+
+it("carries winner history availability through the competition summary", () => {
+  const winnerContext = {
+    ...context,
+    entry: {
+      ...context.entry!,
+      status: ApiCompetitionEntryStatus.Winner,
+      rank: 1,
+      won_at: 100,
+    },
+    vote_summary: {
+      ...context.vote_summary!,
+      raters_count: 0,
+      voters_count_available: false,
+    },
+  };
+  expect(applyCompetitionDropSummary(drop, winnerContext)).toMatchObject({
+    voters_count_available: false,
+  });
+});
