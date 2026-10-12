@@ -77,8 +77,8 @@ const READONLY_SPECS = {
   searchWaves: ["tests/social/search-waves-readonly.spec.ts"],
   museumInstitutionalPractice: [
     "tests/museum/institutional-practice-readonly.spec.ts",
-    "tests/museum/network-ia-readonly.spec.ts",
   ],
+  museumNetworkIa: ["tests/museum/network-ia-readonly.spec.ts"],
   museumAbout: ["tests/museum/about-readonly.spec.ts"],
   museumInsideSystem: ["tests/museum/inside-system-readonly.spec.ts"],
   museumDataArchitecture: ["tests/museum/data-architecture-readonly.spec.ts"],
@@ -321,6 +321,15 @@ const PACKS = [
       READONLY_SPECS.museumInstitutionalPractice,
       { timeoutMinutes: 30 }
     ),
+    triggers: ["manual"],
+  }),
+  museumPack({
+    ...localReadonlyPack(
+      "test:e2e:museum-network-ia",
+      "Network Museum information-architecture gate across hubs, works, and acquisitions.",
+      READONLY_SPECS.museumNetworkIa
+    ),
+    // PR CI runs this spec directly as the always-on Museum lane gate.
     triggers: ["manual"],
   }),
   museumPack(
@@ -631,6 +640,14 @@ const PACKS = [
   ),
   museumPack(
     stagingPack(
+      "museum-network-ia",
+      "museum-network-ia",
+      "Staging Network Museum information-architecture gate across hubs, works, and acquisitions.",
+      READONLY_SPECS.museumNetworkIa
+    )
+  ),
+  museumPack(
+    stagingPack(
       "museum-about",
       "museum-about",
       "Staging Network Museum About proposition route smoke.",
@@ -734,6 +751,16 @@ const PACKS = [
   }),
   museumPack(
     productionPack(
+      "museum-network-ia",
+      "Production Network Museum information-architecture gate across hubs, works, and acquisitions.",
+      READONLY_SPECS.museumNetworkIa,
+      ["cron", "post-deploy", "manual"],
+      15,
+      [DESKTOP, MOBILE]
+    )
+  ),
+  museumPack(
+    productionPack(
       "museum-about",
       "Production Network Museum About proposition route smoke.",
       READONLY_SPECS.museumAbout,
@@ -780,6 +807,7 @@ const PACKS = [
       ...READONLY_SPECS.museumDataArchitecture,
       ...READONLY_SPECS.museumAbout,
       ...READONLY_SPECS.museumInstitutionalPractice,
+      ...READONLY_SPECS.museumNetworkIa,
       ...READONLY_SPECS.museumInsideSystem,
       ...READONLY_SPECS.museumRights,
     ],

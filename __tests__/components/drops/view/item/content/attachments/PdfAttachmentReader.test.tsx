@@ -34,10 +34,21 @@ jest.mock("react-pdf", () => {
       onLoadSuccess,
     }: {
       children: ReactNode;
-      onLoadSuccess: (doc: { numPages: number }) => void;
+      onLoadSuccess: (doc: {
+        numPages: number;
+        getPage: () => Promise<{
+          getViewport: () => { width: number; height: number };
+        }>;
+      }) => void;
     }) => {
       React.useEffect(() => {
-        if (!mockDocumentPending) onLoadSuccess({ numPages: mockPageCount });
+        if (!mockDocumentPending)
+          onLoadSuccess({
+            numPages: mockPageCount,
+            getPage: async () => ({
+              getViewport: () => ({ width: 1920, height: 1080 }),
+            }),
+          });
       }, [onLoadSuccess]);
       return children;
     },
@@ -59,7 +70,7 @@ const originalObserver = globalThis.ResizeObserver;
 beforeEach(() => {
   mockPageCount = 20;
   mockDocumentPending = false;
-  fetchPdf.mockReset().mockResolvedValue(new Uint8Array([1]));
+  fetchPdf.mockReset().mockResolvedValue({ data: new Uint8Array([1]) });
   globalThis.ResizeObserver = jest.fn().mockImplementation((callback) => ({
     observe: () => callback([{ contentRect: { width: 320, height: 600 } }]),
     disconnect: jest.fn(),
@@ -161,4 +172,17 @@ it("recovers when the PDF worker stalls after the download completes", async () 
   expect(screen.getAllByTestId("pdf-page")).toHaveLength(20);
   await act(async () => jest.advanceTimersByTime(PDF_PREVIEW_TIMEOUT_MS));
   expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+});
+
+it("recovers when a later page request fails", async () => {
+  const user = userEvent.setup();
+  render(<PdfAttachmentReader url="https://example.test/ranged.pdf" />);
+  await screen.findByText("Page 1 of 20");
+  const onError = fetchPdf.mock.calls[0]?.[2];
+  act(() => onError?.(new Error("Later range unavailable")));
+  expect(screen.getByRole("alert")).toBeInTheDocument();
+  await user.click(screen.getByRole("button", { name: "Try again" }));
+  await screen.findByText("Page 1 of 20");
+  expect(fetchPdf).toHaveBeenCalledTimes(2);
+  expect(fetchPdf.mock.calls[0]?.[1].aborted).toBe(true);
 });
