@@ -27,8 +27,8 @@ pinned drop with its content and media. Eligible viewers can add or edit REP.
 ## Common Scenarios
 
 - The section order is About, REP, Configuration.
-- Configuration owns wave access, chat availability, links, slow mode, curation
-  management, chat history deletion and personal display preferences.
+- Configuration owns wave access, chat availability, links, slow mode, replies,
+  curation management, chat history deletion and personal display preferences.
 - Shared changes use administrator gear controls. Personal controls retain their
   own authentication requirements.
 - Competition access, rules, appearance and pauses belong to **Settings** in the

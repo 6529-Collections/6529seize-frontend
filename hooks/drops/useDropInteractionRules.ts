@@ -117,8 +117,12 @@ export function useDropInteractionRules(drop: ApiDrop): DropInteractionRules {
   const isAdmin = drop.wave.authenticated_user_admin;
   const adminDropDeletionEnabled = drop.wave.admin_drop_deletion_enabled;
   const canDeleteAsAdmin = isAdmin && adminDropDeletionEnabled;
+  // Waves with open replies let posters and admins remove replies.
+  const canDeleteAsReplyModerator =
+    !!drop.reply_to && drop.wave.authenticated_user_can_delete_replies === true;
   // Delete rules
-  const canDelete = baseRules && (isAuthor || canDeleteAsAdmin);
+  const canDelete =
+    baseRules && (isAuthor || canDeleteAsAdmin || canDeleteAsReplyModerator);
   const canSetPinnedDrop = baseRules && isAdmin;
 
   // Check if voting has ended by comparing current time with voting period end time

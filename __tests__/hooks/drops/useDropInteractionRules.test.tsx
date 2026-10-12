@@ -71,6 +71,51 @@ describe("useDropInteractionRules", () => {
     expect(result.current.isVotingEnded).toBe(true);
   });
 
+  describe("reply deletion in waves with open replies", () => {
+    const moderatorCtx = {
+      connectedProfile: { handle: "moderator" },
+      activeProfileProxy: null,
+    };
+    const replyByOther = {
+      ...baseDrop,
+      drop_type: ApiDropType.Chat,
+      author: { handle: "replier" },
+      reply_to: { drop_id: "announcement", drop_part_id: 1 },
+      wave: { ...baseDrop.wave, authenticated_user_can_delete_replies: true },
+    };
+
+    it("lets reply moderators delete other people's replies", () => {
+      const { result } = renderHook(
+        () => useDropInteractionRules(replyByOther),
+        { wrapper: wrapper(moderatorCtx) }
+      );
+      expect(result.current.canDelete).toBe(true);
+    });
+
+    it("does not extend to top-level drops", () => {
+      const { result } = renderHook(
+        () => useDropInteractionRules({ ...replyByOther, reply_to: undefined }),
+        { wrapper: wrapper(moderatorCtx) }
+      );
+      expect(result.current.canDelete).toBe(false);
+    });
+
+    it("needs the wave's reply moderation permission", () => {
+      const { result } = renderHook(
+        () =>
+          useDropInteractionRules({
+            ...replyByOther,
+            wave: {
+              ...replyByOther.wave,
+              authenticated_user_can_delete_replies: false,
+            },
+          }),
+        { wrapper: wrapper(moderatorCtx) }
+      );
+      expect(result.current.canDelete).toBe(false);
+    });
+  });
+
   it("allows wave admins to set the pinned drop", () => {
     const drop = {
       ...baseDrop,

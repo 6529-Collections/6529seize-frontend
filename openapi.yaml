@@ -27644,6 +27644,28 @@ components:
           minimum: 1000
         links_disabled:
           type: boolean
+        replies:
+          $ref: "#/components/schemas/ApiCreateNewWaveChatRepliesConfig"
+    ApiCreateNewWaveChatRepliesConfig:
+      description: >-
+        Reply settings for the wave chat. When omitted on update, the existing
+        settings are kept.
+      type: object
+      required:
+        - open
+        - collapsed
+      properties:
+        open:
+          description: >-
+            When true, everyone who can view the wave may reply to drops, even
+            if they are not in the chat group. Top-level drops still require the
+            chat group.
+          type: boolean
+        collapsed:
+          description: >-
+            When true, replies are left out of the wave's main drop feed and are
+            shown as a thread under the drop they reply to.
+          type: boolean
     ApiCreateNewWaveParticipationConfig:
       type: object
       required:
@@ -29153,6 +29175,12 @@ components:
           items:
             $ref: "#/components/schemas/ApiDropReactionCounter"
         boosts:
+          type: integer
+          format: int64
+        replies_count:
+          description: >-
+            Number of replies in this drop's thread. Only provided for drops in
+            waves with collapsed replies, and omitted when there are none.
           type: integer
           format: int64
         reply_to_drop:
@@ -37725,6 +37753,8 @@ components:
           type: integer
           format: int64
           minimum: 1000
+        replies:
+          $ref: "#/components/schemas/ApiWaveChatRepliesConfig"
     ApiWaveChatHistoryPurgePlan:
       type: object
       additionalProperties: false
@@ -37734,6 +37764,34 @@ components:
         purge_token:
           type: string
           description: Opaque signed cutoff bound to the authenticated author and wave
+    ApiWaveChatRepliesConfig:
+      type: object
+      required:
+        - open
+        - collapsed
+        - authenticated_user_eligible
+        - authenticated_user_can_delete
+      properties:
+        open:
+          description: >-
+            When true, everyone who can view the wave may reply to drops, even
+            if they are not in the chat group. Top-level drops still require the
+            chat group.
+          type: boolean
+        collapsed:
+          description: >-
+            When true, replies are left out of the wave's main drop feed and are
+            shown as a thread under the drop they reply to.
+          type: boolean
+        authenticated_user_eligible:
+          description: Whether the authenticated user may reply in this wave
+          type: boolean
+        authenticated_user_can_delete:
+          description: >-
+            Whether the authenticated user may delete other people's replies.
+            With open replies, the wave creator, admins and chat group members
+            can.
+          type: boolean
     ApiWaveConfig:
       type: object
       required:
@@ -38305,6 +38363,17 @@ components:
           type: boolean
         authenticated_user_eligible_to_chat:
           type: boolean
+        authenticated_user_eligible_to_reply:
+          description: >-
+            Whether the authenticated user may reply to drops in this wave.
+            Waves with open replies allow this outside the chat group.
+          type: boolean
+        authenticated_user_can_delete_replies:
+          description: >-
+            Whether the authenticated user may delete other people's replies in
+            this wave. With open replies, the wave creator, admins and chat
+            group members can.
+          type: boolean
         authenticated_user_admin:
           type: boolean
         visibility_group_id:
@@ -38474,6 +38543,11 @@ components:
           type: boolean
         links_disabled:
           type: boolean
+        replies_collapsed:
+          description: >-
+            When true, replies are left out of the wave's main drop feed and are
+            shown as a thread under the drop they reply to.
+          type: boolean
         description_drop:
           $ref: "#/components/schemas/ApiWaveOverviewDescriptionDrop"
         total_drops_count:
@@ -38509,6 +38583,17 @@ components:
         pinned:
           type: boolean
         can_chat:
+          type: boolean
+        can_reply:
+          description: >-
+            Whether the profile may reply to drops in this wave. Waves with open
+            replies allow this outside the chat group.
+          type: boolean
+        can_delete_replies:
+          description: >-
+            Whether the profile may delete other people's replies in this wave.
+            With open replies, the wave creator, admins and chat group members
+            can.
           type: boolean
         next_drop_allowed:
           type: integer
