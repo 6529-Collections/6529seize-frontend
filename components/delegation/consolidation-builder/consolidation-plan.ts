@@ -22,7 +22,10 @@ export const FOURTH_SLOT_SIGNING_OPENS_MS =
  * transaction (all of its missing directions at once) and orders the
  * signers so that wallets already in the current consolidation sign first
  * and joining wallets sign last. Signing in that order never splits the
- * current consolidation on the way to the final group.
+ * current consolidation on the way to the final group, as long as each
+ * joining wallet sends its links in one batch. A Delegation Manager sends
+ * them one at a time, so each confirmed link can complete a pair with a
+ * current member and split the consolidation until the last one lands.
  *
  * A four-wallet group counts only when one member has all three of its
  * links registered in both directions at or after
@@ -51,6 +54,12 @@ interface ConsolidationPlanStep {
   /** Lowercased wallets the signer has to register (or register again). */
   readonly targets: readonly string[];
   readonly isExistingMember: boolean;
+  /**
+   * A joining wallet with several links, at least one to a current member.
+   * Sent one link at a time, as a Delegation Manager does, the step can split
+   * the current consolidation until its last link confirms.
+   */
+  readonly splitsIfSentSeparately: boolean;
 }
 
 /**
@@ -133,6 +142,8 @@ export interface ConsolidationStepProgress {
   readonly signAs: ConsolidationSignMode | undefined;
   /** 1-based number of the link a manager sends next, of `targets.length`. */
   readonly nextLink: number;
+  /** See `ConsolidationPlanStep.splitsIfSentSeparately`. */
+  readonly splitsIfSentSeparately: boolean;
 }
 
 export function toWalletKey(wallet: string): string {
@@ -279,14 +290,23 @@ export function buildConsolidationPlan(input: {
   const freshWallets = getFreshWallets(wallets, existing);
   const freshSet = new Set(freshWallets);
   const pendingSteps = wallets
-    .map((signer) => ({
-      signer,
-      targets: wallets.filter(
+    .map((signer) => {
+      const targets = wallets.filter(
         (target) =>
           target !== signer && !isLinkSatisfied(input, freshSet, signer, target)
-      ),
-      isExistingMember: existing.has(signer),
-    }))
+      );
+      const isExistingMember = existing.has(signer);
+      return {
+        signer,
+        targets,
+        isExistingMember,
+        splitsIfSentSeparately:
+          !isExistingMember &&
+          existing.size >= 2 &&
+          targets.length >= 2 &&
+          targets.some((target) => existing.has(target)),
+      };
+    })
     .filter((step) => step.targets.length > 0);
   const steps = orderSteps(pendingSteps);
   const needsFourthSlot = requiresFourthSlot(wallets.length);
@@ -431,6 +451,7 @@ export function resolveConsolidationProgress(input: {
       canSign: status === "current" && block === undefined,
       signAs,
       nextLink: Math.min(sentCount + 1, step.targets.length),
+      splitsIfSentSeparately: step.splitsIfSentSeparately,
     };
   });
 }

@@ -74,6 +74,8 @@ export const DELEGATION_CONSOLIDATION_BUILDER_MESSAGES = {
     "{count} registrations, one transaction each",
   "delegation.consolidationBuilder.steps.managerNote":
     "{wallet} stays cold: its manager signs these links for it, one transaction per link.",
+  "delegation.consolidationBuilder.steps.managerSplitNote":
+    "{wallet} stays cold: its manager signs these links for it, one transaction per link. Until the last one confirms, your consolidation can be split, which can reduce your TDH-wave votes. Send them back to back.",
   "delegation.consolidationBuilder.steps.status.complete": "Confirmed",
   "delegation.consolidationBuilder.steps.status.current": "Next",
   "delegation.consolidationBuilder.steps.status.upcoming": "Waiting",

@@ -384,6 +384,24 @@ describe("ConsolidationBuilder", () => {
     ).toBe("OUTPUT");
   });
 
+  it("warns that a manager sending a new wallet's links one at a time can split the group", () => {
+    mockData.managed = new Set([D]);
+    renderBuilder({ connectedAddress: B });
+    addFourthWallet();
+
+    expect(stepHeadings()).toEqual([
+      "Wallet 1 signs",
+      "Wallet 2 signs",
+      "Wallet 3 signs",
+      "Manager signs for Wallet 4",
+    ]);
+    expect(
+      step(4).getByText(
+        "Wallet 4 stays cold: its manager signs these links for it, one transaction per link. Until the last one confirms, your consolidation can be split, which can reduce your TDH-wave votes. Send them back to back."
+      )
+    ).toBeInTheDocument();
+  });
+
   it("lets a manager sign a cold vault's step one link at a time", () => {
     mockData.groups = new Map();
     mockData.links = [];

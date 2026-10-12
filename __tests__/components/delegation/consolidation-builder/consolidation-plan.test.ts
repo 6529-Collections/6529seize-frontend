@@ -150,6 +150,14 @@ describe("buildConsolidationPlan", () => {
       true,
       false,
     ]);
+    // Only the new wallet's links complete pairs with members, so only its
+    // step can split the group when a manager sends them one at a time.
+    expect(result.steps.map((step) => step.splitsIfSentSeparately)).toEqual([
+      false,
+      false,
+      false,
+      true,
+    ]);
     expect(result.finalGroupSize).toBe(4);
     expect(result.needsFourthSlot).toBe(true);
     expect(result.freshWallets).toEqual([D]);
@@ -167,6 +175,10 @@ describe("buildConsolidationPlan", () => {
       [D, [A, B, C]],
     ]);
     expect(result.freshWallets).toEqual([A, B, C, D]);
+    // With no current consolidation there is nothing to split.
+    expect(result.steps.some((step) => step.splitsIfSentSeparately)).toBe(
+      false
+    );
   });
 
   it("orders existing members first when two new wallets join a pair", () => {
