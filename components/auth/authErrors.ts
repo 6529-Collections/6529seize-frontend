@@ -24,3 +24,11 @@ export class NonceResponseValidationError extends Error {
     this.name = "NonceResponseValidationError";
   }
 }
+
+/** "Turn on signed messages" could not obtain a device-grant challenge. */
+export class DeviceGrantUnavailableError extends Error {
+  constructor() {
+    super("The sign-in challenge did not grant this device");
+    this.name = "DeviceGrantUnavailableError";
+  }
+}

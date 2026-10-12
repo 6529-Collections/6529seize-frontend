@@ -18,7 +18,6 @@ import {
 import { useSeizeSettingsOptional } from "@/contexts/SeizeSettingsContext";
 import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
 import { groupProfileProxies } from "@/helpers/profile-proxy.helpers";
-import { getProfileConnectedStatus } from "@/helpers/ProfileHelpers";
 import { useContentModerationStateScope } from "@/hooks/content-moderation/useContentModerationStateScope";
 import { useIdentity } from "@/hooks/useIdentity";
 import { useSecureSign } from "@/hooks/useSecureSign";
@@ -68,7 +67,6 @@ import {
   normalizeSessionV2MigrationDeadline,
 } from "./authSessionUpgrade";
 import type {
-  AuthContextType,
   AuthLoadingState,
   AuthRolloutSettings,
   SessionUpgradePromptStatus,
@@ -81,6 +79,7 @@ import {
 } from "./authValidation";
 import { useSeizeConnectContext } from "./SeizeConnectContext";
 import { useAuthChainGuard } from "./useAuthChainGuard";
+import { useAuthContextValue } from "./useAuthContextValue";
 import { useSessionRecovery } from "./useSessionRecovery";
 
 export default function Auth({
@@ -549,29 +548,33 @@ export default function Auth({
     setShowSignModal,
   });
 
-  const { onActiveProfileProxy, requestAuth, requestSessionUpgrade } =
-    createAuthRequestActions({
-      activeProfileProxy,
-      address,
-      authRolloutSettings,
-      canSignActiveWallet,
-      enableWalletAuthentication,
-      expireSessionUpgradeAuth,
-      invalidateAll,
-      isAddressAuthorized,
-      isActiveChainSupported: authChainGuard.isLatestChainSupported,
-      seizeDisconnect,
-      resetSessionUpgradeExpiryDedupe,
-      setActiveProfileProxy,
-      setAuthLoadingState,
-      setSessionUpgradeRequired,
-      setShowSignModal,
-      setSignModalReason,
-      setToast,
-      showSessionUpgradePrompt,
-      signMessage,
-      signModalReason,
-    });
+  const {
+    onActiveProfileProxy,
+    requestAuth,
+    requestSessionUpgrade,
+    requestSignedMessagesGrant,
+  } = createAuthRequestActions({
+    activeProfileProxy,
+    address,
+    authRolloutSettings,
+    canSignActiveWallet,
+    enableWalletAuthentication,
+    expireSessionUpgradeAuth,
+    invalidateAll,
+    isAddressAuthorized,
+    isActiveChainSupported: authChainGuard.isLatestChainSupported,
+    seizeDisconnect,
+    resetSessionUpgradeExpiryDedupe,
+    setActiveProfileProxy,
+    setAuthLoadingState,
+    setSessionUpgradeRequired,
+    setShowSignModal,
+    setSignModalReason,
+    setToast,
+    showSessionUpgradePrompt,
+    signMessage,
+    signModalReason,
+  });
 
   const navigateAfterProfileSwitchForRoute = useCallback(() => {
     navigateAfterProfileSwitch({ pathname, queryClient, router });
@@ -737,43 +740,23 @@ export default function Auth({
     onCancelSignRequest();
     router.push("/about/tech/wallet-authentication");
   };
-  const authContextValue = useMemo<AuthContextType>(
-    () => ({
-      requestAuth,
-      setToast,
-      connectedProfile: connectedProfile ?? null,
-      isAuthenticated: Boolean(connectedProfile?.handle && isAddressAuthorized),
-      fetchingProfile: isFetchingConnectedProfile,
-      receivedProfileProxies,
-      activeProfileProxy,
-      showWaves,
-      isDirectProfileSession,
-      sessionUpgradeRequired,
-      connectionStatus: getProfileConnectedStatus({
-        profile: connectedProfile ?? null,
-        isProxy: !!activeProfileProxy,
-      }),
-      requestSessionUpgrade,
-      ensureActiveSessionV2WebSession:
-        ensureActiveSessionV2WebSessionForActiveWallet,
-      setActiveProfileProxy: onActiveProfileProxy,
-    }),
-    [
-      activeProfileProxy,
-      connectedProfile,
+  const authContextValue = useAuthContextValue({
+    activeProfileProxy,
+    connectedProfile,
+    ensureActiveSessionV2WebSession:
       ensureActiveSessionV2WebSessionForActiveWallet,
-      isAddressAuthorized,
-      isFetchingConnectedProfile,
-      isDirectProfileSession,
-      onActiveProfileProxy,
-      receivedProfileProxies,
-      requestAuth,
-      requestSessionUpgrade,
-      sessionUpgradeRequired,
-      setToast,
-      showWaves,
-    ]
-  );
+    fetchingProfile: isFetchingConnectedProfile,
+    isAddressAuthorized,
+    isDirectProfileSession,
+    receivedProfileProxies,
+    requestAuth,
+    requestSessionUpgrade,
+    requestSignedMessagesGrant,
+    sessionUpgradeRequired,
+    setActiveProfileProxy: onActiveProfileProxy,
+    setToast,
+    showWaves,
+  });
   return (
     <AuthContext.Provider value={authContextValue}>
       {children}

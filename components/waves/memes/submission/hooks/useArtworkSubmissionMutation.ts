@@ -9,7 +9,7 @@ import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { useDropSignature } from "@/hooks/drops/useDropSignature";
-import { commonApiPost } from "@/services/api/common-api";
+import { postDrop } from "@/services/api/signed-drop-writes";
 import { getAuthStateFingerprint } from "@/services/auth/auth-token-fingerprint";
 import { getAuthJwt, getWalletAddress } from "@/services/auth/auth.utils";
 import { useMutation } from "@tanstack/react-query";
@@ -192,10 +192,7 @@ export function useArtworkSubmissionMutation() {
       }
 
       // Submit to API
-      return commonApiPost<ApiCreateDropRequest, ApiDrop>({
-        endpoint: "drops/",
-        body: data,
-      });
+      return postDrop(data, { endpoint: "drops/" });
     },
     onSuccess: (_, variables) => {
       updatePhase("success", variables.callbacks);
