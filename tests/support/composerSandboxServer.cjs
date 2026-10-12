@@ -43,6 +43,7 @@ const SANDBOX_CREATED_WAVE_DROP_ID = "00000000-0000-4000-8000-000000000538";
 const SANDBOX_SUBMITTED_CHAT_DROP_ID = "00000000-0000-4000-8000-000000000539";
 const SANDBOX_SUBMITTED_POLL_ID = "00000000-0000-4000-8000-000000000545";
 const SANDBOX_SIGNATURE_WAVE_ID = "00000000-0000-4000-8000-000000000540";
+const SANDBOX_ACCESS_WAVE_ID = "00000000-0000-4000-8000-000000000566";
 const SANDBOX_SIGNATURE_WAVE_DESCRIPTION_DROP_ID =
   "00000000-0000-4000-8000-000000000541";
 const SANDBOX_CREATED_WAVE_NAME = "Sandbox Created Wave";
@@ -740,6 +741,34 @@ const signatureWave = {
   },
 };
 
+// Access fixture shared by SSR and client fetches. Only the existing notification
+// read acknowledgement is allowed; attempts to post to this wave fail closed.
+const accessWave = {
+  ...localWave,
+  id: SANDBOX_ACCESS_WAVE_ID,
+  name: "Local Access Sandbox Wave",
+  participation: {
+    ...localWave.participation,
+    authenticated_user_eligible: false,
+    scope: {
+      group: {
+        id: "sandbox-submission-club",
+        name: "Sandbox Submission Club",
+        is_hidden: false,
+      },
+    },
+  },
+  wave: { ...localWave.wave, type: "RANK" },
+  metrics: { ...localWave.metrics, drops_count: 0 },
+};
+const accessWaveOverview = {
+  ...localWaveOverview,
+  id: SANDBOX_ACCESS_WAVE_ID,
+  name: accessWave.name,
+  total_drops_count: 0,
+  has_competition: true,
+};
+
 const dmWaveOverview = {
   ...localWaveOverview,
   id: SANDBOX_DM_WAVE_ID,
@@ -911,6 +940,7 @@ const sandboxNotificationWaveIds = new Set([
   SANDBOX_NOTIFICATION_WAVE_ID,
   SANDBOX_CREATED_WAVE_ID,
   SANDBOX_SIGNATURE_WAVE_ID,
+  SANDBOX_ACCESS_WAVE_ID,
 ]);
 
 function notificationResponse(searchParams) {
@@ -2548,6 +2578,11 @@ const mockApiExactReadRoutes = new Map([
         : [],
   ],
   [`/api/waves/${SANDBOX_DM_WAVE_ID}`, () => dmWave],
+  [`/api/waves/${SANDBOX_ACCESS_WAVE_ID}`, () => accessWave],
+  [
+    `/api/v2/waves/${SANDBOX_ACCESS_WAVE_ID}/drops`,
+    () => ({ wave: accessWaveOverview, drops: [] }),
+  ],
   [
     `/api/v2/waves/${SANDBOX_DM_WAVE_ID}/drops`,
     () => ({ wave: dmWaveOverview, drops: [currentDirectMessageDrop()] }),

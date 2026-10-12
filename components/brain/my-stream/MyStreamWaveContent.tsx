@@ -1,7 +1,14 @@
 "use client";
 import dynamic from "next/dynamic";
 
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/components/auth/Auth";
 import { useSetWaveData } from "@/contexts/TitleContext";
@@ -10,6 +17,7 @@ import {
   useHeaderContext,
 } from "@/contexts/HeaderContext";
 import { useContentTab } from "../ContentTabContext";
+import { useBrainMobileSubmissionRules } from "../mobile/BrainMobileSubmissionRulesContext";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import MyStreamWaveChat from "./MyStreamWaveChat";
 import MyStreamWaveCurationContent from "./curations/MyStreamWaveCurationContent";
@@ -86,11 +94,13 @@ const CompetitionHub = dynamic(
   () => import("@/components/competitions/CompetitionHub")
 );
 
+/** Give tabs and their panels the same stable accessibility identifier. */
 const getContentTabPanelId = (tab: MyStreamWaveTab): string =>
   `my-stream-wave-tabpanel-${tab.toLowerCase()}`;
 
 const useBreakpoint = createBreakpoint({ LG: 1024, S: 0 });
 
+/** Coordinate shared chat and competition views within the current wave. */
 const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
   waveId,
   competitionContent,
@@ -101,10 +111,16 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
   const router = useRouter();
   const { flat } = useCompetitionNavigation();
   const { isApp } = useDeviceInfo();
+  const viewMobileSubmissionRules = useBrainMobileSubmissionRules();
   const queryClient = useQueryClient();
   const locale = useBrowserLocale();
   const { connectedProfile, activeProfileProxy, setToast } = useAuth();
-  const { setWaveDropAction } = useHeaderContext();
+  const {
+    setWaveDropAction,
+    requestSubmissionRulesFocus,
+    consumeSubmissionRulesFocus,
+  } = useHeaderContext();
+  const contentRef = useRef<HTMLDivElement>(null);
   const {
     waves,
     directMessages,
@@ -197,7 +213,7 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
   const stableWaveKey = `wave-${waveId}`;
 
   // Get the active tab and utilities from global context
-  const { activeContentTab, setActiveContentTab } = useContentTab();
+  const { activeContentTab, availableTabs, setActiveContentTab } = useContentTab();
   const activeCurationId = competitionOnly
     ? null
     : searchParams.get("curation");
@@ -434,6 +450,50 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
     setAppMemesSubmitWaveId(null);
   }, []);
 
+  /** Open existing rules and move focus out of the disappearing details card. */
+  const viewSubmissionRules = useCallback(() => {
+    if (isApp && viewMobileSubmissionRules) {
+      viewMobileSubmissionRules();
+      return;
+    }
+    requestSubmissionRulesFocus(waveId);
+    setActiveContentTab(MyStreamWaveTab.CONFIGURATION);
+  }, [
+    isApp,
+    requestSubmissionRulesFocus,
+    setActiveContentTab,
+    viewMobileSubmissionRules,
+    waveId,
+  ]);
+
+  useLayoutEffect(() => {
+    if (isApp || activeContentTab !== MyStreamWaveTab.CONFIGURATION) {
+      return;
+    }
+    const tabs = contentRef.current?.querySelectorAll<HTMLButtonElement>(
+      `[role="tab"][aria-controls="${getContentTabPanelId(MyStreamWaveTab.CONFIGURATION)}"]`
+    );
+    const panel = contentRef.current?.querySelector<HTMLElement>(
+      `#${getContentTabPanelId(MyStreamWaveTab.CONFIGURATION)}`
+    );
+    // Routed rules render their content before the tab strip finishes loading.
+    const target = isCompetitionPathname(pathname)
+      ? panel
+      : (Array.from(tabs ?? []).find(
+          (tab) => tab.getClientRects().length > 0
+        ) ?? panel);
+    if (target && consumeSubmissionRulesFocus(waveId)) {
+      target.focus();
+    }
+  }, [
+    activeContentTab,
+    consumeSubmissionRulesFocus,
+    isApp,
+    loadedWaveId,
+    pathname,
+    waveId,
+  ]);
+
   const chatSubmitDropAction = useMemo<ChatSubmitDropAction>(
     () => ({
       isVisible: showChatSubmitDropAction,
@@ -441,14 +501,23 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
       label: chatSubmitDropLabels.label,
       compactLabel: chatSubmitDropLabels.compactLabel,
       restrictionMessage: chatSubmitDropRestrictionMessage,
+      accessWave: wave,
+      onViewRules:
+        isApp || availableTabs.includes(MyStreamWaveTab.CONFIGURATION)
+          ? viewSubmissionRules
+          : undefined,
       onOpen: () => openChatSubmitDrop(null),
       onOpenWithCurationUrl: openChatSubmitDrop,
     }),
     [
+      availableTabs,
       canOpenChatSubmitDrop,
       chatSubmitDropLabels.compactLabel,
       chatSubmitDropLabels.label,
       chatSubmitDropRestrictionMessage,
+      isApp,
+      viewSubmissionRules,
+      wave,
       openChatSubmitDrop,
       showChatSubmitDropAction,
     ]
@@ -484,6 +553,8 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
       label: chatSubmitDropAction.label,
       compactLabel: chatSubmitDropAction.compactLabel,
       restrictionMessage: chatSubmitDropAction.restrictionMessage,
+      accessWave: chatSubmitDropAction.accessWave,
+      onViewRules: chatSubmitDropAction.onViewRules,
       onOpen: chatSubmitDropAction.onOpen,
     };
   }, [
@@ -618,6 +689,7 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
 
   return (
     <div
+      ref={contentRef}
       className="tailwind-scope tw-relative tw-flex tw-h-full tw-min-h-0 tw-min-w-0 tw-flex-col"
       key={stableWaveKey}
     >
@@ -652,8 +724,9 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
         )}
 
       <div
-        className="tw-relative tw-min-h-0 tw-min-w-0 tw-flex-grow tw-overflow-hidden"
+        className="tw-relative tw-min-h-0 tw-min-w-0 tw-flex-grow tw-overflow-hidden focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-2px] focus-visible:tw-outline-primary-400"
         role={isApp && flat ? "region" : "tabpanel"}
+        tabIndex={-1}
         aria-label={isApp && flat ? wave.name : undefined}
         id={
           activeCurationId

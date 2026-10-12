@@ -19,6 +19,7 @@ type WaveConfigController = ReturnType<typeof useWaveConfig>;
 export default function CreateWaveStepContent({
   controller,
   isCompetition = false,
+  chatRestricted,
   overviewLeading,
   isSubwave = false,
   parentWaveName,
@@ -31,6 +32,7 @@ export default function CreateWaveStepContent({
   readonly controller: WaveConfigController;
   readonly stepOverride?: CreateWaveStep;
   readonly isCompetition?: boolean;
+  readonly chatRestricted?: boolean | undefined;
   /** Rendered above the Overview step's fields (e.g. saved drafts). */
   readonly overviewLeading?: ReactNode;
   readonly isSubwave?: boolean;
@@ -203,6 +205,7 @@ export default function CreateWaveStepContent({
       return (
         <CreateWaveReview
           isCompetition={isCompetition}
+          chatRestricted={chatRestricted}
           config={config}
           groupsCache={groupsCache}
           description={descriptionSnapshot}

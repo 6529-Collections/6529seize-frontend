@@ -18,10 +18,12 @@ enum BrainView {
   WAVES = "WAVES",
   MESSAGES = "MESSAGES",
   NOTIFICATIONS = "NOTIFICATIONS",
+  CONFIGURATION = "CONFIGURATION",
 }
 
 const push = jest.fn();
 const replace = jest.fn();
+const consumeSubmissionRulesFocus = jest.fn();
 let searchParams = new URLSearchParams();
 let mockCurations: ApiWaveCuration[] = [];
 
@@ -42,6 +44,10 @@ jest.mock("@/components/brain/my-stream/layout/LayoutContext", () => ({
 
 jest.mock("@/hooks/useWave", () => ({
   useWave: jest.fn(),
+}));
+
+jest.mock("@/contexts/HeaderContext", () => ({
+  useOptionalHeaderContext: () => ({ consumeSubmissionRulesFocus }),
 }));
 
 jest.mock("@/hooks/useUnreadIndicator", () => ({
@@ -104,6 +110,7 @@ describe("BrainMobileTabs", () => {
   const onViewChange = jest.fn();
   beforeEach(() => {
     jest.clearAllMocks();
+    consumeSubmissionRulesFocus.mockReturnValue(false);
     searchParams = new URLSearchParams();
     mockCurations = [];
     (useWave as jest.Mock).mockReturnValue({
@@ -143,6 +150,37 @@ describe("BrainMobileTabs", () => {
       }
     }
   );
+
+  it("renders one Settings action and focuses it when submission rules open", () => {
+    const onConfigurationButtonRef = jest.fn();
+    const props = {
+      onViewChange,
+      onConfigurationButtonRef,
+      wave: createWave(),
+      waveActive: true,
+      showWavesTab: false,
+      showStreamBack: false,
+      isApp: true,
+      hasDefaultCompetition: true,
+    };
+    const { rerender } = render(
+      <BrainMobileTabs {...props} activeView={BrainView.DEFAULT} />
+    );
+    const settings = screen.getByRole("button", {
+      name: /^Settings$/,
+    });
+    expect(onConfigurationButtonRef).toHaveBeenLastCalledWith(settings);
+    expect(
+      screen.queryByRole("button", { name: /^Configuration$/ })
+    ).not.toBeInTheDocument();
+    expect(settings).not.toHaveFocus();
+
+    consumeSubmissionRulesFocus.mockReturnValueOnce(true);
+    rerender(<BrainMobileTabs {...props} activeView={BrainView.CONFIGURATION} />);
+    expect(settings).toHaveAttribute("aria-current", "true");
+    expect(settings).toHaveFocus();
+    expect(consumeSubmissionRulesFocus).toHaveBeenCalledWith("1");
+  });
 
   it("switches native curation tabs while preserving other URL state", async () => {
     const user = userEvent.setup();

@@ -1,21 +1,28 @@
 "use client";
 
 import clsx from "clsx";
-import { useId, type ReactNode } from "react";
+import { Suspense, useId, type ReactNode } from "react";
 import HoverCard from "@/components/utils/tooltip/HoverCard";
+import type { ApiWave } from "@/generated/models/ApiWave";
+import WaveSubmissionAccessDetails from "../WaveSubmissionAccessDetails";
 
 interface WaveHeaderRestrictionButtonProps {
   readonly label: string;
   readonly reason: string;
+  readonly accessWave?: ApiWave | undefined;
+  readonly onViewRules?: (() => void) | undefined;
   readonly children: ReactNode;
   readonly className?: string | undefined;
   readonly "data-testid"?: string | undefined;
   readonly "data-full-width"?: string | undefined;
 }
 
+/** Explain a locked action on demand, with optional safe submission details. */
 export default function WaveHeaderRestrictionButton({
   label,
   reason,
+  accessWave,
+  onViewRules,
   children,
   className,
   "data-testid": testId,
@@ -34,6 +41,16 @@ export default function WaveHeaderRestrictionButton({
           <p className="tw-mb-0 tw-mt-1.5 tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-100">
             {reason}
           </p>
+          {accessWave && (
+            <div className="tw-mt-3">
+              <Suspense fallback={null}>
+                <WaveSubmissionAccessDetails
+                  wave={accessWave}
+                  onViewRules={onViewRules}
+                />
+              </Suspense>
+            </div>
+          )}
         </div>
       }
       placement="auto"
@@ -41,6 +58,7 @@ export default function WaveHeaderRestrictionButton({
       delayHide={0}
       offset={10}
       openOnClick={true}
+      focusOnKeyboardActivation
       triggerDisplay="inline-flex"
     >
       <button

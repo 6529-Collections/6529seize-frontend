@@ -118,4 +118,18 @@ describe("CreateWaveReview", () => {
     expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
     expect(screen.queryByRole("switch")).not.toBeInTheDocument();
   });
+
+  it("previews separate chat and submission access before creation", () => {
+    const baseConfig = getConfig(ApiWaveType.Approve);
+    const config: CreateWaveConfig = {
+      ...baseConfig,
+      groups: { ...baseConfig.groups, canDrop: "submission-club" },
+    };
+    render(
+      <CreateWaveReview config={config} groupsCache={{}} description={null} />
+    );
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "People with wave access can chat, but only the submission group can submit. Voting access is separate."
+    );
+  });
 });

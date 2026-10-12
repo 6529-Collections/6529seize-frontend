@@ -71,6 +71,7 @@ const STEPS = [
   CreateWaveStep.REVIEW,
 ];
 
+/** Describe whether a competition draft is saving, server-saved, or retained locally. */
 function getSaveStatus(
   locale: ReturnType<typeof useBrowserLocale>,
   persistence: ReturnType<typeof useCompetitionDraftSave>
@@ -85,6 +86,7 @@ function getSaveStatus(
   );
 }
 
+/** Edit competition rules while retaining the parent Wave's shared chat settings. */
 function DraftForm({
   wave,
   competition,
@@ -428,7 +430,20 @@ function DraftForm({
     content = (
       <CreateWaveStepContent
         isCompetition
-        controller={{ ...controller, errors: visibleErrors }}
+        chatRestricted={wave.chat.scope.group !== null}
+        controller={{
+          ...controller,
+          errors: visibleErrors,
+          config: {
+            ...config,
+            // Competitions share the parent chat; draft defaults cannot change it.
+            chat: { enabled: wave.chat.enabled },
+            groups: {
+              ...config.groups,
+              canChat: wave.chat.scope.group?.id ?? null,
+            },
+          },
+        }}
         descriptionSnapshot={null}
         onCriteriaReplacementChange={() => undefined}
         onGroupResolutionChange={() => undefined}
@@ -571,6 +586,7 @@ function DraftForm({
   );
 }
 
+/** Load an existing competition configuration or open a new viewer-scoped draft. */
 export default function CompetitionDraftEditor({
   wave,
   competition,

@@ -568,6 +568,54 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
     await expectNoUnsafeSandboxMutations(baseURL);
   });
 
+  test("previews public chat with restricted submissions before continuing", async ({
+    baseURL,
+    page,
+  }) => {
+    await gotoCreateWave(page);
+    await page
+      .getByLabel(/Wave Name/)
+      .fill("Sandbox Separate Permissions Wave");
+    await chooseWaveType(page, "Rank");
+    await nextStepButton(page).click();
+    await expect(
+      page
+        .getByRole("status")
+        .filter({ hasText: "People with wave access can chat and submit." })
+    ).toBeVisible();
+    await page
+      .getByRole("button", { name: /Customize other permissions/ })
+      .click();
+    const submissions = page.getByRole("group", { name: "Who can drop" });
+    await submissions
+      .getByRole("button", { name: "Edit", exact: true })
+      .click();
+    await submissions
+      .getByRole("button", { name: "Level", exact: true })
+      .click();
+    await submissions.getByLabel("Level at least").fill("3");
+    await submissions.getByRole("button", { name: "Save changes" }).click();
+    await expect(
+      page
+        .getByRole("status")
+        .filter({ hasText: "only the submission group can submit" })
+    ).toBeVisible();
+    await expect(
+      page
+        .getByRole("group", { name: "Who can chat" })
+        .getByText("Everyone", { exact: true })
+    ).toBeVisible();
+    await expectNoHorizontalOverflow(page);
+    await nextStepButton(page).click();
+    await previousStepButton(page).click();
+    await expect(
+      page
+        .getByRole("status")
+        .filter({ hasText: "only the submission group can submit" })
+    ).toBeVisible();
+    await expectNoUnsafeSandboxMutations(baseURL);
+  });
+
   test("shows the default rank schedule controls", async ({
     baseURL,
     page,
