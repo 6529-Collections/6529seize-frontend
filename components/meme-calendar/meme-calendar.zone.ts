@@ -60,7 +60,7 @@ function zoneOffsetMillis(instantMillis: number, timeZone: string): number {
     read("second")
   );
   if (!Number.isFinite(wallClockAsUtc)) {
-    throw new Error(
+    throw new TypeError(
       `Unable to derive the UTC offset of time zone "${timeZone}": Intl returned unreadable date parts`
     );
   }
