@@ -176,6 +176,32 @@ test.describe("Critical read-only route shells @critical-shell @medium @large", 
     await expectRouteShellHealthy(page, diagnostics);
   });
 
+  test("keeps monitoring private when signed out", async ({ page }) => {
+    const diagnostics = attachConsoleDiagnostics(page);
+
+    await page.goto("/tools/monitoring", { waitUntil: "domcontentloaded" });
+    await waitForRouteReady(page, { readySelector: "h1" });
+
+    const main = page.getByRole("main").last();
+    await expect(
+      main.getByRole("heading", { level: 1, name: "Monitoring" })
+    ).toBeVisible();
+    await expect(
+      main.getByRole("heading", { name: "Sign in required" })
+    ).toBeVisible();
+    await expect(
+      main.getByRole("button", { name: "Connect wallet" })
+    ).toBeVisible();
+    await expect(
+      main.getByRole("heading", { name: "Sentry", exact: true })
+    ).toHaveCount(0);
+    await expect(page.locator('meta[name="robots"]')).toHaveAttribute(
+      "content",
+      /noindex/
+    );
+    await expectRouteShellHealthy(page, diagnostics);
+  });
+
   test("keeps reviewbot admin protected without operator auth", async ({
     page,
   }) => {

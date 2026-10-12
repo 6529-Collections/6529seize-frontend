@@ -102,6 +102,239 @@ async function expectProfileShell(page: Page, activeTab: string | RegExp) {
 test.describe("Authenticated read-only route shells @auth @medium @readonly", () => {
   test.skip(!hasDevAuthConfig(), DEV_AUTH_SKIP_MESSAGE);
 
+  test("renders the protected Sentry snapshot without overflowing the route shell", async ({
+    page,
+  }) => {
+    const issue = {
+      id: "123",
+      short_id: "WEB-123",
+      project: "frontend",
+      title: `TypeError: ${"LongErrorIdentifier".repeat(8)}`,
+      occurrences: 1234,
+      level: "error",
+      priority: "high",
+      state: "ongoing",
+      first_seen: "2026-10-07T12:00:00Z",
+      last_seen: "2026-10-08T09:00:00Z",
+      url: "https://sentry.io/organizations/test-team/issues/123/",
+    };
+    await page.route("**/api/monitoring/sentry", async (route) => {
+      await route.fulfill({
+        json: {
+          status: "ready",
+          environment: "production",
+          period: "24h",
+          fetched_at: "2026-10-08T10:00:00Z",
+          window_start: "2026-10-07T10:00:00Z",
+          window_end: "2026-10-08T10:00:00Z",
+          projects: [
+            {
+              project: "frontend",
+              new_issues: [issue],
+              top_issues: [issue],
+              new_issues_has_more: false,
+              top_issues_has_more: false,
+              high_priority: {
+                issues: [issue],
+                count: 9,
+                count_exact: true,
+                has_more: true,
+              },
+              regressed: {
+                issues: [],
+                count: 0,
+                count_exact: true,
+                has_more: false,
+              },
+              escalating: {
+                issues: [],
+                count: 0,
+                count_exact: true,
+                has_more: false,
+              },
+              new_issues_total: 1,
+              new_issues_count_exact: true,
+              event_trend: { current_events: 1234, previous_events: 2000 },
+            },
+            {
+              project: "seize-backend",
+              new_issues: [],
+              top_issues: [
+                {
+                  ...issue,
+                  id: "456",
+                  short_id: "SEIZE-BACKEND-Y6",
+                  project: "seize-backend",
+                  title: "Market refresh failed",
+                  occurrences: 2,
+                },
+              ],
+              new_issues_has_more: false,
+              top_issues_has_more: false,
+              high_priority: {
+                issues: [
+                  {
+                    ...issue,
+                    id: "456",
+                    project: "seize-backend",
+                    title: "Market refresh failed",
+                    occurrences: 2,
+                  },
+                ],
+                count: 1,
+                count_exact: true,
+                has_more: false,
+              },
+              regressed: {
+                issues: [],
+                count: 0,
+                count_exact: true,
+                has_more: false,
+              },
+              escalating: {
+                issues: [],
+                count: 0,
+                count_exact: true,
+                has_more: false,
+              },
+              new_issues_total: 0,
+              new_issues_count_exact: true,
+              event_trend: { current_events: 2, previous_events: 3 },
+            },
+          ],
+        },
+      });
+    });
+    await page.route("**/api/monitoring/sentry/history", async (route) => {
+      await route.fulfill({
+        json: {
+          status: "ready",
+          environment: "production",
+          period: "30d",
+          timezone: "UTC",
+          projects: ["frontend", "seize-backend"].map((project, index) => ({
+            project,
+            days: Array.from({ length: 30 }, (_, day) => ({
+              date: new Date(Date.UTC(2026, 8, 8 + day))
+                .toISOString()
+                .slice(0, 10),
+              events: index === 0 && day === 4 ? null : (day + 1) * (index + 1),
+              issues: index === 0 && day === 4 ? null : index + 1,
+            })),
+          })),
+        },
+      });
+    });
+    await gotoReady(page, "/tools/monitoring");
+    const history = page.getByRole("region", {
+      name: "Daily history · 30 days",
+      exact: true,
+    });
+    const chart = history.getByRole("img");
+    await expect(chart).toBeVisible();
+    await expect(chart).toHaveAccessibleName(
+      /Daily Error occurrences by project/
+    );
+    expect(
+      await chart.evaluate((element) => element.getBoundingClientRect().width)
+    ).toBeGreaterThan(0);
+    const issuesMetric = history.getByRole("button", {
+      name: "Distinct issues",
+      exact: true,
+    });
+    await issuesMetric.focus();
+    await issuesMetric.press("Enter");
+    await expect(issuesMetric).toHaveAttribute("aria-pressed", "true");
+    await expect(chart).toHaveAccessibleName(
+      /Daily Distinct issues by project/
+    );
+    await history.getByText("Daily counts", { exact: true }).press("Enter");
+    const historyTable = history.getByRole("table", {
+      name: "frontend",
+      exact: true,
+    });
+    await expect(historyTable).toBeVisible();
+    await expect(historyTable.getByRole("row")).toHaveCount(31);
+    await expect(
+      historyTable.getByRole("row", {
+        name: "Sep 12 Unavailable Unavailable",
+        exact: true,
+      })
+    ).toBeVisible();
+    await expect(history.getByRole("status")).toContainText(
+      "Gaps mean unavailable data"
+    );
+    await expectNoHorizontalOverflow(page);
+    await history.getByText("Daily counts", { exact: true }).press("Enter");
+    await expect(
+      page.getByRole("region", { name: "Captured events · 24h", exact: true })
+    ).toContainText("1,236");
+    await expect(
+      page.getByRole("region", { name: "Captured events · 24h", exact: true })
+    ).toContainText("Down 38.3%");
+    await expect(
+      page.getByText("Needs attention", { exact: true }).locator("..")
+    ).toContainText("10");
+    await expect(
+      page.getByText("What changed", { exact: true }).locator("..")
+    ).toContainText("1 new · 0 returned · 0 spiking");
+    await expect(
+      page
+        .getByRole("heading", { name: "Most frequent unresolved errors" })
+        .first()
+    ).not.toBeVisible();
+    await page
+      .getByText("Needs attention", { exact: true })
+      .locator("..")
+      .press("Enter");
+    await expect(
+      page.getByRole("region", {
+        name: "seize-backend · High-priority issues",
+        exact: true,
+      })
+    ).toContainText("Market refresh failed");
+    await expectNoHorizontalOverflow(page);
+    await page
+      .getByText("Needs attention", { exact: true })
+      .locator("..")
+      .press("Enter");
+    await page.getByText("What changed", { exact: true }).click();
+    await expect(
+      page.getByRole("region", {
+        name: "frontend · Newly seen errors",
+        exact: true,
+      })
+    ).toContainText(issue.title);
+    await expectNoHorizontalOverflow(page);
+    await page.getByText("What changed", { exact: true }).click();
+    await page.getByText("All issue details", { exact: true }).click();
+    await expect(
+      page
+        .getByRole("region", { name: "frontend", exact: true })
+        .getByRole("heading", {
+          name: "Most frequent unresolved errors",
+          exact: true,
+        })
+    ).toBeVisible();
+    await expect(
+      page
+        .getByRole("region", { name: "frontend", exact: true })
+        .getByText("1,234 events in this window")
+    ).toHaveCount(2);
+    await expect(
+      page
+        .getByRole("link", {
+          name: `Open ${issue.title} in Sentry (opens in a new tab)`,
+        })
+        .first()
+    ).toHaveAttribute("href", issue.url);
+    await expect(page.getByText(/Snapshot collected/)).toContainText("UTC");
+    await expect(
+      page.getByRole("region", { name: "seize-backend", exact: true })
+    ).toContainText("Market refresh failed");
+    await expectNoHorizontalOverflow(page);
+  });
+
   test("opens EMMA plans directly from a restored session and keeps help public", async ({
     page,
   }) => {

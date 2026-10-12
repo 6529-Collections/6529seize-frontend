@@ -2289,6 +2289,9 @@
       "classification": "crawlable",
       "family": "tools"
     },
+    "/tools/monitoring": {
+      "classification": "auth"
+    },
     "/tools/subscriptions-report": {
       "classification": "crawlable",
       "family": "tools"
@@ -2307,13 +2310,6 @@
         "staging": "The production Releases wave ID is not a qualified staging fixture."
       }
     },
-    "/waves/create": {
-      "classification": "auth"
-    },
-    "/xtdh": {
-      "classification": "crawlable",
-      "family": "info"
-    },
     "/waves/[wave]/competitions": {
       "classification": "exempt",
       "family": "social",
@@ -2323,6 +2319,13 @@
       "classification": "exempt",
       "family": "social",
       "exemptReason": "Native competition rollout requires scoped competition fixtures."
+    },
+    "/waves/create": {
+      "classification": "auth"
+    },
+    "/xtdh": {
+      "classification": "crawlable",
+      "family": "info"
     }
   }
 }
