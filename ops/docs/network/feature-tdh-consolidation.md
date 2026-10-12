@@ -40,7 +40,7 @@ Two pages explain wallet consolidation:
 
 1. Header: the promise (several wallets count as one collector; nothing moves),
    the four-wallet limit and the fourth wallet's start date
-   (`2026-10-15 00:00 UTC`), a `Start guided setup` button to
+   (loaded from the current environment’s settings), a `Start guided setup` button to
    `/delegation/build-consolidation`, and a link to the safe collecting setup.
    A figure shows the vault, transaction, social and old wallets becoming one
    collector.
@@ -69,7 +69,7 @@ Two pages explain wallet consolidation:
 
 1. `The rules`: every pair of wallets registers use case `999` both ways; up to
    four wallets; a fourth wallet counts only for links registered in both
-   directions on or after `2026-10-15 00:00 UTC`; the newest confirmed link
+   directions on or after the cutoff supplied by the current environment; the newest confirmed link
    wins; consolidations are for one collector; registrations do not expire;
    what consolidation changes for TDH and profiles.
 2. `Add a wallet in four transactions`: the two steps (existing wallets each
@@ -115,3 +115,5 @@ Two pages explain wallet consolidation:
 - Copy: `i18n/messages/networkTdhConsolidation.en-US.json`
 - Shared rule constants: `constants/consolidation.constants.ts`
 - Backend grouping: `6529seize-backend` `src/consolidation-tools.ts`
+
+The guide and design page show the current environment’s cutoff; staging can open before production. Guided signing opens ten minutes later. If settings are unavailable, the pages refer visitors to Guided Setup for the activation time without substituting a production date. The simulator models post-cutoff transactions and labels that assumption with the same date.

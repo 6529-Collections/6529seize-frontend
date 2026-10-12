@@ -1,5 +1,7 @@
 "use client";
 
+import type { ConsolidationPolicy } from "@/helpers/consolidationPolicy";
+
 import { useMemo, useState } from "react";
 import {
   buildConsolidationPlan,
@@ -75,20 +77,23 @@ export function useConsolidationPlan(input: {
   readonly groupsReady: boolean;
   readonly existingMembers: readonly string[];
   readonly nowMs: number;
+  readonly policy: ConsolidationPolicy | null;
 }) {
-  const { wallets, isValid, groupsReady, existingMembers, nowMs } = input;
-  const walletsKey = wallets.join(",");
+  const { wallets, isValid, groupsReady, existingMembers, nowMs, policy } =
+    input;
+  const walletsKey = `${wallets.join(",")}:${policy?.activationMs ?? "unavailable"}`;
   const linkStatus = useConsolidationLinkStatus(isValid ? wallets : NO_WALLETS);
   // Only four-wallet plans depend on when each direction was registered.
   const needsFreshLinks = isValid && requiresFourthSlot(wallets.length);
   const freshLinks = useConsolidationFreshLinks(
-    needsFreshLinks ? wallets : NO_WALLETS
+    needsFreshLinks && policy ? wallets : NO_WALLETS,
+    policy?.activationMs ?? null
   );
   const freshLinkKeys = needsFreshLinks ? freshLinks.freshLinkKeys : NO_WALLETS;
 
   const [baseline, setBaseline] = useState<LinkBaseline>();
   const nextBaseline =
-    isValid && groupsReady
+    isValid && groupsReady && (!needsFreshLinks || policy)
       ? getNextBaseline(baseline, {
           walletsKey,
           registeredLinkKeys: linkStatus.registeredLinkKeys,
@@ -100,7 +105,11 @@ export function useConsolidationPlan(input: {
     setBaseline(nextBaseline);
   }
   const activeBaseline =
-    isValid && baseline?.walletsKey === walletsKey ? baseline : undefined;
+    isValid &&
+    (!needsFreshLinks || policy) &&
+    baseline?.walletsKey === walletsKey
+      ? baseline
+      : undefined;
 
   const plan = useMemo<ConsolidationPlan | undefined>(
     () =>
@@ -113,9 +122,10 @@ export function useConsolidationPlan(input: {
             ),
             isFresh: createDirectedLinkLookup(activeBaseline.freshLinkKeys),
             nowMs,
+            signingOpensMs: policy?.signingOpensMs ?? null,
           })
         : undefined,
-    [activeBaseline, nowMs, wallets]
+    [activeBaseline, nowMs, policy, wallets]
   );
 
   return {

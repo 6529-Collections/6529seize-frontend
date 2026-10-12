@@ -1,3 +1,11 @@
+jest.mock("@/hooks/useConsolidationPolicy", () => ({
+  useConsolidationPolicy: () => ({
+    policy: {
+      activationMs: Date.parse("2026-10-12T00:00:00Z"),
+      signingOpensMs: Date.parse("2026-10-12T00:10:00Z"),
+    },
+  }),
+}));
 import TDHConsolidationDesignPage from "@/app/network/tdh/consolidation/design/page.client";
 import { generateMetadata } from "@/app/network/tdh/consolidation/design/page";
 import { render, screen, within } from "@testing-library/react";
@@ -24,7 +32,7 @@ describe("TDHConsolidationDesignPage", () => {
       screen.getByRole("heading", { level: 2, name: "The rules" })
     ).toBeInTheDocument();
     expect(
-      screen.getAllByText(/October 15, 2026 at 00:00 UTC/).length
+      screen.getAllByText(/October 12, 2026 at 00:00 UTC/).length
     ).toBeGreaterThan(0);
 
     const matrix = screen.getByRole("table", {

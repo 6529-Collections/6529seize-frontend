@@ -1,12 +1,28 @@
 import ConsolidationBuilder from "@/components/delegation/consolidation-builder/ConsolidationBuilder";
+import { toDirectedLinkKey } from "@/components/delegation/consolidation-builder/consolidation-plan";
 import {
+  CONSOLIDATION_FOURTH_WALLET_ACTIVATION_MS,
   FOURTH_SLOT_SIGNING_OPENS_MS,
-  toDirectedLinkKey,
-} from "@/components/delegation/consolidation-builder/consolidation-plan";
-import { CONSOLIDATION_FOURTH_WALLET_ACTIVATION_MS } from "@/constants/consolidation.constants";
+} from "@/__tests__/helpers/consolidation-policy.fixture";
 import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import type { ComponentProps, ReactNode } from "react";
 import { getAddress } from "viem";
+
+const mockPolicyState: {
+  policy: { activationMs: number; signingOpensMs: number } | null;
+  isLoading: boolean;
+  reload: jest.Mock;
+} = {
+  policy: {
+    activationMs: CONSOLIDATION_FOURTH_WALLET_ACTIVATION_MS,
+    signingOpensMs: FOURTH_SLOT_SIGNING_OPENS_MS,
+  },
+  isLoading: false,
+  reload: jest.fn(),
+};
+jest.mock("@/hooks/useConsolidationPolicy", () => ({
+  useConsolidationPolicy: () => mockPolicyState,
+}));
 
 jest.mock("@/hooks/useBrowserLocale", () => ({
   useBrowserLocale: () => "en-US",
@@ -194,6 +210,11 @@ function addFourthWallet() {
 }
 
 beforeEach(() => {
+  mockPolicyState.policy = {
+    activationMs: CONSOLIDATION_FOURTH_WALLET_ACTIVATION_MS,
+    signingOpensMs: FOURTH_SLOT_SIGNING_OPENS_MS,
+  };
+  mockPolicyState.isLoading = false;
   jest.clearAllMocks();
   jest.spyOn(Date, "now").mockReturnValue(AFTER_ACTIVATION_MS);
   mockData.groups = new Map([
@@ -791,4 +812,53 @@ describe("ConsolidationBuilder", () => {
     expect(walletInput(1)).toHaveValue(A);
     expect(screen.getByText("Checking registered links…")).toBeInTheDocument();
   });
+});
+
+test.each([true, false])(
+  "keeps four-wallet signing closed while policy is unavailable (loading=%s)",
+  (isLoading) => {
+    mockPolicyState.policy = null;
+    mockPolicyState.isLoading = isLoading;
+    renderBuilder();
+    addFourthWallet();
+    expect(
+      screen.queryByRole("button", { name: /Sign Step/ })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByText(
+        isLoading
+          ? "Loading the four-wallet activation date…"
+          : "Couldn’t load the four-wallet activation date. Four-wallet signing is unavailable; try again."
+      )
+    ).toBeInTheDocument();
+  }
+);
+
+test("an unavailable policy does not hold a three-wallet plan", () => {
+  mockPolicyState.policy = null;
+  mockData.links = [];
+  renderBuilder();
+  expect(screen.getByRole("button", { name: "Sign Step 1" })).toBeEnabled();
+});
+
+test("changing the cutoff replans the stale links in an open session", () => {
+  mockData.links = [...GROUP_LINKS, ...both([A, D], [B, D], [C, D])];
+  mockData.fresh = [...both([A, D], [B, D], [C, D])];
+  const view = renderBuilder();
+  addFourthWallet();
+  expect(
+    screen.queryByRole("button", { name: /Sign Step/ })
+  ).not.toBeInTheDocument();
+  mockPolicyState.policy = {
+    activationMs: AFTER_ACTIVATION_MS + 1000,
+    signingOpensMs: AFTER_ACTIVATION_MS + 601000,
+  };
+  mockData.fresh = [];
+  view.rerenderWith({});
+  expect(
+    screen.getByText(/Some of these links were registered before/)
+  ).toBeInTheDocument();
+  expect(
+    screen.queryByRole("button", { name: /Sign Step/ })
+  ).not.toBeInTheDocument();
 });

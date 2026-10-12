@@ -5,7 +5,12 @@ import userEvent from "@testing-library/user-event";
 describe("ConsolidationOrderSimulator", () => {
   it("shows that signing with D last never splits the group", async () => {
     const user = userEvent.setup();
-    render(<ConsolidationOrderSimulator locale="en-US" />);
+    render(
+      <ConsolidationOrderSimulator
+        activationDate="12 October 2026, 00:00 UTC"
+        locale="en-US"
+      />
+    );
 
     await user.click(screen.getByRole("button", { name: "D signs last" }));
 
@@ -22,7 +27,12 @@ describe("ConsolidationOrderSimulator", () => {
 
   it("counts the temporary splits when D signs first", async () => {
     const user = userEvent.setup();
-    render(<ConsolidationOrderSimulator locale="en-US" />);
+    render(
+      <ConsolidationOrderSimulator
+        activationDate="12 October 2026, 00:00 UTC"
+        locale="en-US"
+      />
+    );
 
     await user.click(screen.getByRole("button", { name: "D signs first" }));
 
@@ -38,7 +48,12 @@ describe("ConsolidationOrderSimulator", () => {
 
   it("builds an order one signer at a time and can start again", async () => {
     const user = userEvent.setup();
-    render(<ConsolidationOrderSimulator locale="en-US" />);
+    render(
+      <ConsolidationOrderSimulator
+        activationDate="12 October 2026, 00:00 UTC"
+        locale="en-US"
+      />
+    );
 
     const picker = screen.getByRole("group", {
       name: "Choose the next wallet to sign",

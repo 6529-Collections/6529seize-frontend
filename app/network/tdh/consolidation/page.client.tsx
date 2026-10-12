@@ -22,10 +22,8 @@ import {
   NETWORK_REFERENCE_PAGE_CLASSES,
 } from "@/components/network/networkPageLayoutClasses";
 import ButtonLink from "@/components/utils/button/ButtonLink";
-import {
-  CONSOLIDATION_FOURTH_WALLET_ACTIVATION_MS,
-  CONSOLIDATION_WALLET_LIMIT,
-} from "@/constants/consolidation.constants";
+import { CONSOLIDATION_WALLET_LIMIT } from "@/constants/consolidation.constants";
+import { useConsolidationPolicy } from "@/hooks/useConsolidationPolicy";
 import { useSetTitle } from "@/contexts/TitleContext";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatDate, formatInteger } from "@/i18n/format";
@@ -78,11 +76,20 @@ const DISCLOSURE =
   "tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 last:tw-border-b-0";
 const SUMMARY = `tw-cursor-pointer tw-py-4 tw-text-sm tw-font-medium tw-leading-6 tw-text-iron-100 ${TDH_FOCUS}`;
 
-function activationDate(locale: SupportedLocale) {
-  return formatDate(locale, CONSOLIDATION_FOURTH_WALLET_ACTIVATION_MS, {
+function activationDate(
+  locale: SupportedLocale,
+  activationMs: number | undefined
+) {
+  if (activationMs === undefined)
+    return t(locale, "network.tdhConsolidation.policy.pendingDate");
+  return formatDate(locale, activationMs, {
     year: "numeric",
     month: "long",
     day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+    timeZoneName: "short",
     timeZone: "UTC",
   });
 }
@@ -90,7 +97,8 @@ function activationDate(locale: SupportedLocale) {
 export default function TDHConsolidationPage() {
   const locale = useBrowserLocale();
   useSetTitle(t(locale, "network.tdhConsolidation.pageTitle"));
-  const date = activationDate(locale);
+  const { policy } = useConsolidationPolicy();
+  const date = activationDate(locale, policy?.activationMs);
   const limit = formatInteger(locale, CONSOLIDATION_WALLET_LIMIT);
 
   return (

@@ -142,7 +142,7 @@ wallet, in a safe order.
   (`/delegation/delegation-faq/using-safe`).
 - Groups of 2 or 3 wallets use the on-chain status only.
 - A group of 4 counts only when one member has all three of its links
-  registered in both directions from 15 October 2026, 00:00 UTC. For 4-wallet
+  registered in both directions from the activation cutoff shown for the current environment. For 4-wallet
   plans the page also reads each wallet's stored pairs
   (`/api/consolidations/{wallet}?show_incomplete=true`) for the time each
   direction was registered. Every direction between a joining wallet and
@@ -151,11 +151,14 @@ wallet, in a safe order.
   that older links are registered again so they count for the fourth wallet.
   Joining wallets are those outside the current consolidation; with fewer than
   three current members listed, every wallet is joining.
-- Until 15 October 2026, 00:10 UTC every step of a 4-wallet plan waits and
+- Until ten minutes after that cutoff, every step of a 4-wallet plan waits and
   shows `Available from <date>.` with that time. A note gives both times:
-  four-wallet consolidations count only for links registered from 00:00 UTC,
-  and every step opens at 00:10 UTC, a few minutes later, so no link can land
+  four-wallet consolidations count only for links registered from the cutoff,
+  and every step opens ten minutes later, a few minutes later, so no link can land
   before the start.
+- The page loads the cutoff from this environment’s settings. Staging may
+  open before production. While settings are loading or unavailable, four-wallet
+  signing is unavailable and can be retried; two- and three-wallet plans continue.
 - After a step confirms in the session, a link that 6529 has not recorded yet
   shows `Recording` and
   `Waiting for 6529 to record this link (usually about a minute).` instead of
