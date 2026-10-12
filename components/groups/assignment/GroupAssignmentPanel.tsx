@@ -132,10 +132,12 @@ function GroupAssignmentActivePanel({
   if (
     ["identity", "rule-list", "rule-editor"].includes(displayedBuilder.panel)
   ) {
+    const identityView =
+      displayedBuilder.panel === "identity" ? "identities" : null;
     const view =
       displayedBuilder.panel === "rule-editor"
         ? (displayedBuilder.activeRule ?? "identities")
-        : "identities";
+        : identityView;
     return (
       <GroupCriteriaEditor
         draft={displayedBuilder.draft}
@@ -148,7 +150,7 @@ function GroupAssignmentActivePanel({
             : openRule(next)
         }
       >
-        {displayedBuilder.panel !== "rule-list" &&
+        {view !== null &&
           (view === "identities" ? (
             <CreateWaveInlineGroupIdentities
               includedIdentities={displayedBuilder.identities}

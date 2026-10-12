@@ -77,9 +77,9 @@ function SelectedWallet({
       />
       <div className="tw-min-w-0 tw-flex-1">
         {isLoading ? (
-          <span role="status" className="tw-text-xs tw-text-iron-400">
+          <output className="tw-text-xs tw-text-iron-400">
             {t(locale, "waves.create.groups.inlineIdentities.loadingProfiles")}
-          </span>
+          </output>
         ) : (
           <>
             <span className="tw-block tw-truncate tw-text-sm tw-font-medium tw-text-iron-100">
@@ -95,15 +95,12 @@ function SelectedWallet({
             )}
             {failed && (
               <div>
-                <p
-                  role="status"
-                  className="tw-my-1 tw-text-xs tw-text-iron-400"
-                >
+                <output className="tw-my-1 tw-block tw-text-xs tw-text-iron-400">
                   {t(
                     locale,
                     "waves.create.groups.inlineIdentities.profileError"
                   )}
-                </p>
+                </output>
                 <Button
                   variant="secondary"
                   size="xs"
@@ -153,6 +150,9 @@ export default function GroupIdentitySelectedList({
   const [page, setPage] = useState(0);
   const lastPage = Math.max(0, Math.ceil(identities.length / PAGE_SIZE) - 1);
   const currentPage = Math.min(page, lastPage);
+  if (page !== currentPage) {
+    setPage(currentPage);
+  }
   const start = currentPage * PAGE_SIZE;
   const visibleIdentities = identities.slice(start, start + PAGE_SIZE);
 
@@ -169,7 +169,7 @@ export default function GroupIdentitySelectedList({
       </ul>
       {identities.length > PAGE_SIZE && (
         <div className="tw-mt-3 tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-2">
-          <span role="status" className="tw-text-xs tw-text-iron-400">
+          <output className="tw-text-xs tw-text-iron-400">
             {t(locale, "waves.create.groups.inlineIdentities.page", {
               start: formatInteger(locale, start + 1),
               end: formatInteger(
@@ -178,7 +178,7 @@ export default function GroupIdentitySelectedList({
               ),
               total: formatInteger(locale, identities.length),
             })}
-          </span>
+          </output>
           <div className="tw-flex tw-gap-2">
             <Button
               variant="secondary"

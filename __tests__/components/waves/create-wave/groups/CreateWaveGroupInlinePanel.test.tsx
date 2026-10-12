@@ -438,9 +438,8 @@ describe("CreateWaveGroupInlinePanel", () => {
     expect(screen.getByText("Everyone")).toBeInTheDocument();
     expect(screen.getByText("After editing")).toBeInTheDocument();
     expect(screen.getByText("No criteria selected")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Cancel" })).toHaveAttribute(
-      "aria-pressed",
-      "true"
+    expect(screen.getByRole("button", { name: "Cancel" })).not.toHaveAttribute(
+      "aria-pressed"
     );
     expect(
       screen.queryByRole("button", { name: "Choose group" })
@@ -478,7 +477,7 @@ describe("CreateWaveGroupInlinePanel", () => {
     expect(screen.getByTestId("rule-rep")).toBeVisible();
     expect(
       screen.getByRole("button", { name: "Rep Configured" })
-    ).toHaveAttribute("aria-pressed", "true");
+    ).toHaveAttribute("aria-current", "true");
     expect(onCriteriaReplacementChange.mock.calls).toEqual([[true]]);
     expect(onCreateGroup).not.toHaveBeenCalled();
   });
@@ -533,7 +532,7 @@ describe("CreateWaveGroupInlinePanel", () => {
 
     expect(screen.getByTestId("identities-panel")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Identities" })).toHaveAttribute(
-      "aria-pressed",
+      "aria-current",
       "true"
     );
     expect(screen.getByRole("button", { name: "Cancel" })).toBeInTheDocument();
@@ -558,9 +557,9 @@ describe("CreateWaveGroupInlinePanel", () => {
       name: "Rep Configured",
     });
     expect(configuredRep).toHaveAttribute("data-configured", "true");
-    expect(configuredRep).toHaveAttribute("aria-pressed", "true");
+    expect(configuredRep).toHaveAttribute("aria-current", "true");
     await user.click(screen.getByRole("button", { name: "Level" }));
-    expect(configuredRep).toHaveAttribute("aria-pressed", "false");
+    expect(configuredRep).not.toHaveAttribute("aria-current");
     expect(configuredRep).toHaveAttribute("data-configured", "true");
   });
 
@@ -678,7 +677,7 @@ describe("CreateWaveGroupInlinePanel", () => {
 
     expect(
       screen.getByRole("button", { name: "Identities Configured" })
-    ).toHaveAttribute("aria-pressed", "true");
+    ).toHaveAttribute("aria-current", "true");
 
     expect(
       screen.getByTestId("restored-included-identities")

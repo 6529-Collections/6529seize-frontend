@@ -523,10 +523,10 @@ test.describe("Create wave local sandbox @auth @medium @local-only", () => {
       beforeEditingBounds!.y + beforeEditingBounds!.height / 2,
       0
     );
-    await expect(configuredLevel).toHaveAttribute("aria-pressed", "false");
+    await expect(configuredLevel).not.toHaveAttribute("aria-current");
     await configuredLevel.click();
     await expect(accessGroup.getByLabel("Level at least")).toHaveValue("3");
-    await expect(configuredLevel).toHaveAttribute("aria-pressed", "true");
+    await expect(configuredLevel).toHaveAttribute("aria-current", "true");
     await accessGroup
       .getByRole("button", { name: "Cancel", exact: true })
       .click();

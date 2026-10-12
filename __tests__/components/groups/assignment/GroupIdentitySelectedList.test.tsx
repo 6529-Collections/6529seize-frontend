@@ -112,6 +112,17 @@ it("retains editing after a lookup failure and supports retry", async () => {
   expect(await screen.findByText("recovered")).toBeVisible();
 });
 
+it("shows a missing profile as a usable wallet without retrying", async () => {
+  jest.mocked(commonApiFetch).mockRejectedValue({ status: 404 });
+  const { onRemove } = renderList([identity(1)]);
+  expect(await screen.findByText("Wallet 0x0000...0001")).toBeVisible();
+  expect(
+    screen.queryByRole("button", { name: "Retry profile lookup" })
+  ).not.toBeInTheDocument();
+  await userEvent.click(screen.getByRole("button", { name: /Remove.*0001/ }));
+  expect(onRemove).toHaveBeenCalledWith(wallet(1));
+});
+
 it("does not refetch freshly selected profiles", () => {
   renderList([{ ...identity(1), profile_id: "alpha", handle: "alpha" }]);
   expect(screen.getByText("alpha")).toBeVisible();
@@ -148,4 +159,29 @@ it("bounds rendering and concurrent requests for 10,000 wallets and reuses cache
   );
   expect(screen.getByText("Wallets 1–20 of 10,000")).toBeVisible();
   expect(commonApiFetch).toHaveBeenCalledTimes(40);
+});
+
+it("keeps the clamped page when wallets are removed and later added", async () => {
+  const identities = Array.from({ length: 41 }, (_, index) => ({
+    ...identity(index + 1),
+    handle: `profile-${index}`,
+  }));
+  const { client, rerender, onRemove } = renderList(identities);
+  const replaceIdentities = (next: readonly CommunityMemberMinimal[]) =>
+    rerender(
+      <QueryClientProvider client={client}>
+        <GroupIdentitySelectedList identities={next} onRemove={onRemove} />
+      </QueryClientProvider>
+    );
+  await userEvent.click(screen.getByRole("button", { name: "Next wallets" }));
+  await userEvent.click(screen.getByRole("button", { name: "Next wallets" }));
+  expect(screen.getByText("Wallets 41–41 of 41")).toBeVisible();
+
+  replaceIdentities(identities.slice(0, 2));
+  expect(screen.getByText("profile-0")).toBeVisible();
+  replaceIdentities(identities);
+  expect(screen.getByText("Wallets 1–20 of 41")).toBeVisible();
+  expect(
+    screen.getByRole("button", { name: "Previous wallets" })
+  ).toBeDisabled();
 });

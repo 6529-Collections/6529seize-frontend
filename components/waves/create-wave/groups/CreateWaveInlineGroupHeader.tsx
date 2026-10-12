@@ -69,7 +69,6 @@ export default function CreateWaveInlineGroupHeader({
             disabled={disabled}
             quiet={quiet}
             active
-            isToggle
             onClick={onCancel}
           />
         )}

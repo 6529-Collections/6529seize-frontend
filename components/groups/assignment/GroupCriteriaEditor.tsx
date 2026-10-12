@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, type ReactNode } from "react";
+import { useId, useRef, type ReactNode } from "react";
 import { CheckIcon } from "@heroicons/react/24/outline";
 import type { ApiCreateGroup } from "@/generated/models/ApiCreateGroup";
 import Button from "@/components/utils/button/Button";
@@ -65,7 +65,7 @@ export default function GroupCriteriaEditor({
   children,
 }: {
   readonly draft: ApiCreateGroup;
-  readonly view: GroupCriteriaView;
+  readonly view: GroupCriteriaView | null;
   readonly onViewChange: (view: GroupCriteriaView) => void;
   readonly disabled?: boolean;
   readonly scrollWithin?: boolean;
@@ -74,12 +74,9 @@ export default function GroupCriteriaEditor({
   readonly children: ReactNode;
 }) {
   const locale = useBrowserLocale();
-  const editorRef = useRef<HTMLDivElement>(null);
+  const editorId = useId();
+  const editorRef = useRef<HTMLElement>(null);
   useKeyboardFocusScroll(editorRef, scrollWithin ? "nearest" : "center");
-  const viewLabel = t(
-    locale,
-    view === "identities" ? "waves.create.groups.identities" : RULE_LABELS[view]
-  );
   const configuredRules = new Set(getInlineGroupConfiguredRules(draft));
   const identitiesConfigured =
     (draft.group.identity_addresses?.length ?? 0) > 0 ||
@@ -108,7 +105,7 @@ export default function GroupCriteriaEditor({
 
   return (
     <div className="tw-flex tw-min-h-0 tw-min-w-0 tw-flex-1 tw-flex-col">
-      {onClose && (
+      {onClose && view !== null && (
         <div className="tw-flex tw-justify-end">
           <Button variant="secondary" size="xs" onClick={onClose}>
             {t(locale, "common.close")}
@@ -119,17 +116,17 @@ export default function GroupCriteriaEditor({
         disabled={disabled}
         className={`tw-m-0 tw-flex tw-min-h-0 tw-min-w-0 tw-flex-1 tw-flex-col tw-border-0 tw-p-0 lg:tw-flex-row ${FILTER_INPUT_PRESENTATION_CLASS_NAME}`}
       >
-        <div
-          role="group"
+        <fieldset
           aria-label={label ?? t(locale, "waves.create.groups.criteriaLabel")}
-          className={`tw-flex tw-min-h-0 tw-min-w-0 tw-shrink-0 tw-flex-nowrap tw-gap-1 tw-overflow-x-auto tw-overscroll-x-contain tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/5 tw-py-1 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/60 lg:tw-flex-col lg:tw-overflow-y-auto lg:tw-overflow-x-hidden lg:tw-border-b-0 ${scrollWithin ? "tw-px-4 sm:tw-px-6 lg:tw-w-52 lg:tw-py-5" : "lg:tw-w-44 lg:tw-self-start lg:tw-py-0 lg:tw-pr-4"}`}
+          className={`tw-m-0 tw-flex tw-min-h-0 tw-min-w-0 tw-shrink-0 tw-flex-nowrap tw-gap-1 tw-overflow-x-auto tw-overscroll-x-contain tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/5 tw-py-1 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/60 lg:tw-flex-col lg:tw-overflow-y-auto lg:tw-overflow-x-hidden lg:tw-border-b-0 ${scrollWithin ? "tw-px-4 sm:tw-px-6 lg:tw-w-52 lg:tw-py-5" : "tw-px-0 lg:tw-w-44 lg:tw-self-start lg:tw-py-0 lg:tw-pr-4"}`}
         >
           {FILTER_VIEWS.map((rule) => (
             <button
               key={rule}
+              id={`${editorId}-${rule}`}
               type="button"
               aria-current={view === rule ? "true" : undefined}
-              aria-pressed={view === rule}
+              aria-controls={editorId}
               data-configured={
                 (rule === "identities"
                   ? identitiesConfigured
@@ -139,26 +136,33 @@ export default function GroupCriteriaEditor({
               className={`tw-flex tw-min-h-8 tw-shrink-0 tw-items-center tw-whitespace-nowrap tw-rounded-md tw-border-0 tw-px-2.5 tw-py-1 tw-text-left tw-text-sm tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:-tw-outline-offset-2 focus-visible:tw-outline-primary-400 ${view === rule ? "tw-bg-white/5 tw-font-medium tw-text-iron-50" : "tw-bg-transparent tw-font-normal tw-text-iron-400 desktop-hover:hover:tw-bg-white/[0.03] desktop-hover:hover:tw-text-iron-100"}`}
             >
               <span className="tw-flex tw-items-center tw-gap-1.5 lg:tw-w-full lg:tw-justify-between">
-                {t(
-                  locale,
-                  rule === "identities"
-                    ? "waves.create.groups.identities"
-                    : RULE_LABELS[rule]
-                )}
+                <span id={`${editorId}-${rule}-label`}>
+                  {t(
+                    locale,
+                    rule === "identities"
+                      ? "waves.create.groups.identities"
+                      : RULE_LABELS[rule]
+                  )}
+                </span>
                 {(rule === "identities"
                   ? identitiesConfigured
                   : configuredRules.has(rule)) && configuredMark}
               </span>
             </button>
           ))}
-        </div>
-        <div
+        </fieldset>
+        <section
+          id={editorId}
           ref={editorRef}
+          aria-labelledby={
+            view === null ? undefined : `${editorId}-${view}-label`
+          }
+          hidden={view === null}
           tabIndex={-1}
           className={`tw-min-h-0 tw-min-w-0 tw-py-4 lg:tw-flex-1 lg:tw-border-y-0 lg:tw-border-l lg:tw-border-r-0 lg:tw-border-solid lg:tw-border-white/5 ${scrollWithin ? "tw-flex-1 tw-overflow-y-auto tw-overscroll-contain tw-px-4 sm:tw-px-6 lg:tw-py-5" : "lg:tw-py-0 lg:tw-pl-6"}`}
         >
-          <section aria-label={viewLabel}>{children}</section>
-        </div>
+          {children}
+        </section>
       </fieldset>
     </div>
   );
