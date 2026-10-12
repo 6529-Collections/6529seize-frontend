@@ -48,6 +48,18 @@ Exact UI layout, endpoints, and several operational policies remain proposals.
 Reported timeout causes are not confirmed. Backend/upstream evidence is needed
 to distinguish request limits, heavy processing, and export problems.
 
+## Confirmed schedule and phase allocation
+
+The existing launch code uses Europe/Athens wall time with DST: Phase 0
+17:40–18:20, Phase 1 18:30–18:50, Phase 2 19:00–19:20, and public
+19:20–17:00 the following day. The automation plan keeps each phase's subscriber
+allocations separate. Phase 0 runs before its mint window; Phase 1 runs in the
+18:20–18:30 gap; Phase 2 and public subscription batches share the
+18:50–19:00 gap, matching the existing Phase 2 UI sections. Public activation
+has no gap and waits for an update transaction after Phase 2 closes. Exact
+initialization eligibility is the saved `initialize_at`; confirmation is due
+before 17:40. Display each batch's actual backend due/deadline and late status.
+
 ## FE-1: Configure and arm a launch
 
 1. Extend `/drop-forge/launch/{id}` with an automation section using existing
