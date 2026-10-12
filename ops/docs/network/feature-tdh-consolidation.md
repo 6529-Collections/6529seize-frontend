@@ -52,8 +52,9 @@ Two pages explain wallet consolidation:
    (buys, sells and trades; can manage the vault), social wallet (the hot
    wallet that signs in to 6529), and an optional old wallet (a burned or
    exposed address kept for its TDH). Three wallets is enough to start.
-4. `How to set it up`: list your wallets, sign once per wallet (a vault with a
-   Delegation Manager is signed for by its manager), done. A note on signing
+4. `How to set it up`: list your wallets and follow the signing steps. A wallet signing for itself
+   batches its links; a Delegation Manager sends one transaction per link
+   while the vault stays disconnected. A note on signing
    order and a second `Start guided setup` button.
 5. `Before you start`: every combined wallet can sign in as the profile;
    profiles merge permanently; combining is public and moves nothing.
@@ -75,8 +76,11 @@ Two pages explain wallet consolidation:
    register one link to the new wallet, then the new wallet signs one
    `batchDelegations` transaction last), why the order matters, a table of
    links and transactions for common changes, and a link to the guided setup.
+   Old return links and separate manager transactions can temporarily split
+   the group despite following that order.
 3. `Try the signing order`: an interactive simulator using the backend
-   grouping rule.
+   grouping rule. The example assumes no existing D return links and one
+   self-signed transaction per wallet.
 4. `Remove or replace a wallet`: batch revocation, replacement order by group
    size, revocations for a lost or compromised wallet, and which part keeps the
    profile when a consolidation splits.
