@@ -112,7 +112,7 @@ describe("getAccessVerdict", () => {
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
-  it("keeps verdicts for different auth values separate", async () => {
+  it("keys verdicts by auth value: same value hits, different values never share", async () => {
     const fetchMock = jest
       .spyOn(globalThis, "fetch")
       .mockImplementation(async (_url, init) => {
@@ -121,21 +121,37 @@ describe("getAccessVerdict", () => {
         return new Response(null, { status });
       });
     const { getAccessVerdict } = loadAccessProbe();
+    const verdictFor = (authValue: string) =>
+      getAccessVerdict({ apiEndpoint: API_ENDPOINT, authValue });
 
-    await expect(
-      getAccessVerdict({ apiEndpoint: API_ENDPOINT, authValue: "team-code" })
-    ).resolves.toBe("allow");
-    await expect(
-      getAccessVerdict({ apiEndpoint: API_ENDPOINT, authValue: "wrong-code" })
-    ).resolves.toBe("unauthorized");
-    await expect(
-      getAccessVerdict({ apiEndpoint: API_ENDPOINT, authValue: "" })
-    ).resolves.toBe("unauthorized");
-    await expect(
-      getAccessVerdict({ apiEndpoint: API_ENDPOINT, authValue: "team-code" })
-    ).resolves.toBe("allow");
+    await expect(verdictFor("team-code")).resolves.toBe("allow");
+    await expect(verdictFor("wrong-code")).resolves.toBe("unauthorized");
+    await expect(verdictFor("team-code2")).resolves.toBe("unauthorized");
+    await expect(verdictFor("Team-code")).resolves.toBe("unauthorized");
+    await expect(verdictFor("")).resolves.toBe("unauthorized");
+    await expect(verdictFor("team-code")).resolves.toBe("allow");
+    await expect(verdictFor("wrong-code")).resolves.toBe("unauthorized");
 
+    // One probe per distinct value; repeats come from the cache.
+    expect(fetchMock).toHaveBeenCalledTimes(5);
+  });
+
+  it("caches values up to 256 characters and never caches longer ones", async () => {
+    const fetchMock = mockFetchStatus(200);
+    const { getAccessVerdict } = loadAccessProbe();
+    const longest = { apiEndpoint: API_ENDPOINT, authValue: "a".repeat(256) };
+    const overlong = { apiEndpoint: API_ENDPOINT, authValue: "a".repeat(257) };
+
+    await getAccessVerdict(longest);
+    await getAccessVerdict(longest);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+
+    await expect(getAccessVerdict(overlong)).resolves.toBe("allow");
+    await expect(getAccessVerdict(overlong)).resolves.toBe("allow");
     expect(fetchMock).toHaveBeenCalledTimes(3);
+    expect(fetchMock.mock.calls[2]?.[1]?.headers).toEqual({
+      "x-6529-auth": "a".repeat(257),
+    });
   });
 
   it("shares one in-flight probe between concurrent requests", async () => {

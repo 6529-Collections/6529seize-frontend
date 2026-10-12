@@ -1,4 +1,3 @@
-import { createHash } from "node:crypto";
 import { getAppEnvironment } from "@/config/appEnvironment";
 import LruTtlCache from "@/lib/cache/lruTtl";
 import { discardResponse } from "@/lib/fetch/fetchDeadline";
@@ -14,6 +13,8 @@ const STAGING_HOSTNAME_PATTERN = /^[a-z0-9-]*staging\.6529\.io$/;
 const ACCESS_PROBE_TIMEOUT_MS = 1500;
 const ACCESS_VERDICT_TTL_MS = 60_000;
 const ACCESS_VERDICT_CACHE_MAX_ENTRIES = 500;
+// Longer x-6529-auth values are still probed, just never cached or shared.
+const MAX_CACHEABLE_AUTH_VALUE_LENGTH = 256;
 const UNAVAILABLE_LOG_INTERVAL_MS = 60_000;
 
 const verdictCache = new LruTtlCache<string, AccessVerdict>({
@@ -35,11 +36,16 @@ export function isStagingDeployment(baseEndpoint: string): boolean {
 
 /**
  * The probe forwards only `x-6529-auth`, so that value is the whole per-visitor
- * input to the API's decision. Key on a digest so raw credentials never sit in
- * memory as map keys.
+ * input to the API's decision and serves directly as the in-process cache key.
+ * It is not hashed: the process already holds these values (request cookies,
+ * `STAGING_API_KEY`), the map never leaves memory, and a hash or HMAC here is
+ * modelled by code scanning as weak password hashing. Capping the length
+ * bounds memory; overlong values are not cached.
  */
-function getVerdictCacheKey(authValue: string): string {
-  return createHash("sha256").update(authValue).digest("hex");
+function getVerdictCacheKey(authValue: string): string | undefined {
+  return authValue.length <= MAX_CACHEABLE_AUTH_VALUE_LENGTH
+    ? authValue
+    : undefined;
 }
 
 function classifyStatus(status: number): AccessVerdict {
@@ -64,7 +70,7 @@ function logUnavailable(reason: string): void {
 async function runAccessProbe(
   apiEndpoint: string,
   authValue: string,
-  cacheKey: string
+  cacheKey: string | undefined
 ): Promise<AccessVerdict> {
   let response: Response;
   try {
@@ -81,7 +87,7 @@ async function runAccessProbe(
   const verdict = classifyStatus(response.status);
   if (verdict === "unavailable") {
     logUnavailable(`status ${response.status}`);
-  } else {
+  } else if (cacheKey !== undefined) {
     verdictCache.set(cacheKey, verdict);
   }
   return verdict;
@@ -92,7 +98,7 @@ async function runAccessProbe(
  *
  * Definitive answers (2xx, 401, 403) are cached briefly, and concurrent
  * requests for the same value share one probe. Anything else is
- * `unavailable` and is never cached.
+ * `unavailable` and is never cached. Overlong values skip the cache.
  */
 export function getAccessVerdict({
   apiEndpoint,
@@ -102,6 +108,10 @@ export function getAccessVerdict({
   readonly authValue: string;
 }): Promise<AccessVerdict> {
   const cacheKey = getVerdictCacheKey(authValue);
+  if (cacheKey === undefined) {
+    return runAccessProbe(apiEndpoint, authValue, undefined);
+  }
+
   const cached = verdictCache.get(cacheKey);
   if (cached) {
     return Promise.resolve(cached);
