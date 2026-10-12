@@ -73,13 +73,16 @@ export function hashCanonicalString(canonical: string): {
 
 /**
  * Canonicalizes a request body as it travels on the wire: undefined members
- * vanish exactly as JSON.stringify drops them.
+ * vanish exactly as JSON.stringify drops them. This must be the JSON wire
+ * round trip, not a deep clone such as structuredClone, which would keep
+ * undefined members and so sign different bytes than the server receives.
  */
 export function canonicalizeBody(body: object | null): CanonicalBody {
   if (body === null) {
     return { canonical: null, bodyHash: ZERO_BODY_HASH, bodySize: 0 };
   }
-  const canonical = canonicalJson(JSON.parse(JSON.stringify(body)));
+  const wire = JSON.stringify(body);
+  const canonical = canonicalJson(JSON.parse(wire));
   return { canonical, ...hashCanonicalString(canonical) };
 }
 

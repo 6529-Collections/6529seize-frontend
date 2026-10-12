@@ -5,16 +5,19 @@ import { t } from "@/i18n/messages";
 import { isSignedMessagesEnabled } from "@/lib/device-signing/feature";
 import { FingerPrintIcon } from "@heroicons/react/24/outline";
 
-interface DropSignatureMenuItemProps {
-  readonly dropId: string;
+interface DropSignatureMenuButtonProps {
   readonly onSelect: () => void;
   readonly mobile?: boolean | undefined;
+}
+
+interface DropSignatureMenuItemProps extends DropSignatureMenuButtonProps {
+  readonly dropId: string;
 }
 
 function DropSignatureMenuButton({
   onSelect,
   mobile = false,
-}: DropSignatureMenuItemProps) {
+}: DropSignatureMenuButtonProps) {
   const locale = useBrowserLocale();
   return (
     <button
@@ -51,11 +54,13 @@ function DropSignatureMenuButton({
 }
 
 /** "Signature" drop menu item; hidden while signed messages are disabled. */
-export default function DropSignatureMenuItem(
-  props: DropSignatureMenuItemProps
-) {
-  if (!isSignedMessagesEnabled() || props.dropId.startsWith("temp-")) {
+export default function DropSignatureMenuItem({
+  dropId,
+  onSelect,
+  mobile,
+}: DropSignatureMenuItemProps) {
+  if (!isSignedMessagesEnabled() || dropId.startsWith("temp-")) {
     return null;
   }
-  return <DropSignatureMenuButton {...props} />;
+  return <DropSignatureMenuButton onSelect={onSelect} mobile={mobile} />;
 }
