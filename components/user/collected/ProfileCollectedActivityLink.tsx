@@ -23,9 +23,12 @@ export default function ProfileCollectedActivityLink({
   const returnContext = getProfileCollectedReturnContext(
     `${pathname}?${searchParams.toString()}#${anchor}`
   );
-  const params = new URLSearchParams({
-    [PROFILE_COLLECTED_RETURN_PARAM]: returnContext?.href ?? "",
-  });
+  const linkHref =
+    href && returnContext
+      ? `${href}?${new URLSearchParams({
+          [PROFILE_COLLECTED_RETURN_PARAM]: returnContext.href,
+        }).toString()}`
+      : href;
 
   useEffect(() => {
     if (globalThis.location.hash !== `#${anchor}`) return;
@@ -33,12 +36,5 @@ export default function ProfileCollectedActivityLink({
     linkRef.current?.scrollIntoView({ block: "center" });
   }, [anchor]);
 
-  return (
-    <Link
-      {...props}
-      ref={linkRef}
-      id={anchor}
-      href={href && returnContext ? `${href}?${params.toString()}` : href}
-    />
-  );
+  return <Link {...props} ref={linkRef} id={anchor} href={linkHref} />;
 }

@@ -39,7 +39,7 @@ describe("ProfileCollectedActivityLink", () => {
     const scroll = jest.fn();
     Element.prototype.scrollIntoView = scroll;
     globalThis.history.replaceState(null, "", "/#collected-activity-wallet-42");
-    render(
+    const view = render(
       <ProfileCollectedActivityLink
         href="/the-memes/42"
         activityKey="wallet-42"
@@ -49,20 +49,34 @@ describe("ProfileCollectedActivityLink", () => {
     );
     expect(screen.getByRole("link")).toHaveFocus();
     expect(scroll).toHaveBeenCalledWith({ block: "center" });
-    globalThis.history.replaceState(null, "", "/");
-    Element.prototype.scrollIntoView = originalScroll;
-  });
-
-  it("leaves token links outside Collected unchanged", () => {
-    jest.mocked(usePathname).mockReturnValue("/Shelby/identity");
-    render(
+    screen.getByRole("link").blur();
+    view.rerender(
       <ProfileCollectedActivityLink
         href="/the-memes/42"
         activityKey="wallet-42"
       >
-        Artwork
+        Updated artwork
       </ProfileCollectedActivityLink>
     );
-    expect(screen.getByRole("link")).toHaveAttribute("href", "/the-memes/42");
+    expect(screen.getByRole("link")).not.toHaveFocus();
+    expect(scroll).toHaveBeenCalledTimes(1);
+    globalThis.history.replaceState(null, "", "/");
+    Element.prototype.scrollIntoView = originalScroll;
   });
+
+  it.each(["/Shelby/identity", "/%2F/collected"])(
+    "leaves token links unchanged for an invalid return path: %s",
+    (pathname) => {
+      jest.mocked(usePathname).mockReturnValue(pathname);
+      render(
+        <ProfileCollectedActivityLink
+          href="/the-memes/42"
+          activityKey="wallet-42"
+        >
+          Artwork
+        </ProfileCollectedActivityLink>
+      );
+      expect(screen.getByRole("link")).toHaveAttribute("href", "/the-memes/42");
+    }
+  );
 });

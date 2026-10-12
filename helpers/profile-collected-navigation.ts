@@ -131,7 +131,7 @@ export const isCollectedCardAnchorId = (value: string): boolean => {
   );
 };
 
-export const isCollectedActivityAnchorId = (value: string): boolean =>
+const isCollectedActivityAnchorId = (value: string): boolean =>
   /^collected-activity-[a-zA-Z0-9-]{1,256}$/.test(value);
 
 interface ProfileCollectedReturnContext {

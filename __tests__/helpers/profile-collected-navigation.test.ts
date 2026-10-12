@@ -118,6 +118,16 @@ describe("profile collected navigation", () => {
     }
   });
 
+  it("preserves wallet activity anchors with full addresses, transaction hash and a uint256 token ID", () => {
+    const address = `0x${"a".repeat(40)}`;
+    const transaction = `0x${"b".repeat(64)}`;
+    const tokenId = ((1n << 256n) - 1n).toString();
+    const anchor = `collected-activity-wallet-${address}-${address}-${transaction}-${tokenId}`;
+    const href = `/Shelby/collected?activity=wallet-activity#${anchor}`;
+
+    expect(getProfileCollectedReturnContext(href)?.href).toBe(href);
+  });
+
   it("builds stable collected card anchors", () => {
     expect(
       getCollectedCardAnchorId({
