@@ -9,10 +9,19 @@ import {
   SUB_DELEGATION_USE_CASE,
 } from "./delegation-constants";
 
+/**
+ * Expiry state of an on-chain delegation. `expiresAt` is the raw Unix-seconds
+ * instant; views format it in the viewer's locale and time zone.
+ */
+export type ContractDelegationExpiry =
+  | { readonly status: "nonExpiring" }
+  | { readonly status: "expired" }
+  | { readonly status: "active"; readonly expiresAt: number };
+
 export interface ContractWalletDelegation {
   wallet: string;
   fetched?: boolean | undefined;
-  expiry?: string | undefined;
+  expiry?: ContractDelegationExpiry | undefined;
   all?: boolean | undefined;
   tokens?: number | bigint | undefined;
 }
@@ -51,14 +60,6 @@ type DelegationsResultTuple = readonly [
   readonly boolean[],
   readonly (number | bigint)[],
 ];
-
-function formatExpiry(myDate: number) {
-  const date = new Date(myDate * 1000);
-  const year = date.getUTCFullYear();
-  const month = String(date.getUTCMonth() + 1).padStart(2, "0");
-  const day = String(date.getUTCDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-}
 
 export function getParams(
   address: string | undefined,
@@ -112,6 +113,24 @@ export function getReadParams(
   return getParams(address, collection, functionName, useCases);
 }
 
+function getContractDelegationExpiry(
+  useCase: number,
+  expiresAt: number
+): ContractDelegationExpiry {
+  if (
+    useCase >= PRIMARY_ADDRESS_USE_CASE.use_case ||
+    expiresAt === 0 ||
+    expiresAt >= NEVER_DATE
+  ) {
+    return { status: "nonExpiring" };
+  }
+  // The contract treats a delegation as active while its expiry is later
+  // than the queried instant.
+  return Date.now() / 1000 < expiresAt
+    ? { status: "active", expiresAt }
+    : { status: "expired" };
+}
+
 export function getDelegationsFromData(data: readonly ContractReadResult[]) {
   const myDelegations: ContractDelegation[] = [];
   data.map((d, index) => {
@@ -133,20 +152,9 @@ export function getDelegationsFromData(data: readonly ContractReadResult[]) {
         // Number() keeps bigint/number comparisons uniform; expiries are far
         // below Number.MAX_SAFE_INTEGER, so the conversion is lossless.
         const myDate = Number(delegationsArray[1][i]);
-        let myDateDisplay = "";
-        if (useCase.use_case >= PRIMARY_ADDRESS_USE_CASE.use_case) {
-          myDateDisplay = `active - non-expiring`;
-        } else {
-          const isNonExpiring = myDate === 0 || myDate >= NEVER_DATE;
-          myDateDisplay = isNonExpiring
-            ? `active - non-expiring`
-            : new Date().getTime() / 1000 > myDate
-              ? `expired`
-              : `active - expires ${formatExpiry(myDate)}`;
-        }
         walletDelegations.push({
           wallet: wallet,
-          expiry: myDateDisplay,
+          expiry: getContractDelegationExpiry(useCase.use_case, myDate),
           all: delegationsArray[2][i],
           tokens: delegationsArray[3][i],
         });

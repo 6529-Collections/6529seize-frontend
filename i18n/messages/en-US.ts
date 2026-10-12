@@ -2718,6 +2718,9 @@ const COLLECTION_DELEGATION_MESSAGES = objectMessages("delegation.collection", {
   "row.status.incomplete": "consolidation incomplete",
   "row.status.unavailable": "consolidation status unavailable",
   "row.consolidationMissing": "{label} consolidation missing",
+  "row.expiry.nonExpiring": "active - non-expiring",
+  "row.expiry.expired": "expired",
+  "row.expiry.active": "active - expires {date}",
   "row.label.incoming": "Incoming",
   "row.label.outgoing": "Outgoing",
   "outgoing.selectBulk": "Select {wallet} for bulk revoke",
@@ -2800,6 +2803,17 @@ const COLLECTION_DELEGATION_MESSAGES = objectMessages("delegation.collection", {
   "walletChecker.recommendedActions": "Recommended Actions:",
   "walletChecker.registerConsolidation":
     "Register Consolidation from {from} to {to}",
+} as const);
+
+const DELEGATION_EXPIRY_MESSAGES = objectMessages("delegation.expiry", {
+  inputLabel: "Expiry Date",
+  timeZone:
+    "The delegation ends at the end of the selected day in your time zone ({zone}).",
+  preview: "Expires {local} ({utc})",
+  previewEmpty: "Select a date to see the exact expiry time.",
+  "error.missing": "Missing or invalid Expiry",
+  "error.tooSoon":
+    "Choose a later expiry date. The delegation must stay active for at least 1 hour after you submit.",
 } as const);
 
 const HEADER_SEARCH_MESSAGES = objectMessages("headerSearch", {
@@ -3162,6 +3176,7 @@ export const EN_US_MESSAGES = {
   ...IDENTITY_FILTER_MESSAGES,
   ...XTDH_COLLECTION_MESSAGES,
   ...COLLECTION_DELEGATION_MESSAGES,
+  ...DELEGATION_EXPIRY_MESSAGES,
   ...join6529Messages,
   "nextgen.brand": "NextGen",
   "nextgen.navigation.featured": "Featured",

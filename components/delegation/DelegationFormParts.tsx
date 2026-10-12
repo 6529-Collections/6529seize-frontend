@@ -5,11 +5,14 @@ import TooltipIconButton from "@/components/common/TooltipIconButton";
 import { DELEGATION_ALL_ADDRESS } from "@/constants/constants";
 import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 import { areEqualAddresses } from "@/helpers/Helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useEnsResolution } from "@/hooks/useEnsResolution";
+import { t } from "@/i18n/messages";
 import { faInfoCircle, faTimesCircle } from "@fortawesome/free-solid-svg-icons";
 import {
   useEffect,
   useEffectEvent,
+  useId,
   useState,
   type ComponentPropsWithoutRef,
   type ReactNode,
@@ -17,6 +20,13 @@ import {
 import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
 import type { DelegationCollection } from "./delegation-constants";
 import { SUPPORTED_COLLECTIONS } from "./delegation-constants";
+import {
+  formatDelegationExpiryPreview,
+  getMinDelegationExpiryDate,
+  getViewerTimeZone,
+  getZonedDateEndEpochSeconds,
+  type DelegationExpirySelection,
+} from "./delegation-expiry";
 import type {
   DelegationWriteParams,
   DelegationWriteSettledHandler,
@@ -536,27 +546,63 @@ export function DelegationSubmitGroups(
   );
 }
 
+/**
+ * Calendar date in the viewer's own time zone. The delegation expires at the
+ * end of that local day; the exact instant is previewed before signing.
+ */
 export function DelegationExpiryCalendar(
   props: Readonly<{
-    setDelegationDate: (date: Date | undefined) => void;
+    value: DelegationExpirySelection;
+    onChange: (value: DelegationExpirySelection) => void;
   }>
 ) {
+  const { value, onChange } = props;
+  const locale = useBrowserLocale();
+  const id = useId();
+  // Fixed for the life of the field so the input, preview and submitted
+  // value all use one zone and one minimum date.
+  const [{ timeZone, minDate }] = useState(() => {
+    const viewerTimeZone = getViewerTimeZone();
+    return {
+      timeZone: viewerTimeZone,
+      minDate: getMinDelegationExpiryDate(Date.now(), viewerTimeZone),
+    };
+  });
+  const zoneId = `${id}-zone`;
+  const previewId = `${id}-preview`;
+
   return (
-    <div className="tw-mt-3 tw-w-full sm:tw-max-w-xs">
+    <div className="tw-mt-3 tw-w-full">
       <DelegationFormInput
-        aria-label="Expiry Date"
-        min={new Date().toISOString().slice(0, 10)}
+        aria-label={t(locale, "delegation.expiry.inputLabel")}
+        aria-describedby={`${zoneId} ${previewId}`}
+        className="[color-scheme:dark] sm:tw-max-w-xs"
+        min={minDate}
         type="date"
-        placeholder="Expiry Date"
+        value={value.date}
         onChange={(e) => {
-          const value = e.target.value;
-          if (value) {
-            props.setDelegationDate(new Date(value));
-          } else {
-            props.setDelegationDate(undefined);
-          }
+          const date = e.target.value;
+          onChange({
+            date,
+            expiresAt: getZonedDateEndEpochSeconds(date, timeZone),
+          });
         }}
       />
+      <p
+        id={zoneId}
+        className="tw-mb-0 tw-mt-2 tw-break-words tw-text-sm tw-leading-5 tw-text-iron-400"
+      >
+        {t(locale, "delegation.expiry.timeZone", { zone: timeZone })}
+      </p>
+      <p
+        id={previewId}
+        aria-live="polite"
+        className="tw-mb-0 tw-mt-1 tw-break-words tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-100"
+      >
+        {value.expiresAt === null
+          ? t(locale, "delegation.expiry.previewEmpty")
+          : formatDelegationExpiryPreview(locale, value.expiresAt, timeZone)}
+      </p>
     </div>
   );
 }

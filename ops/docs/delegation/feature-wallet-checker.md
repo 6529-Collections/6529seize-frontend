@@ -20,6 +20,7 @@ It checks delegations, delegation managers, and consolidation relationships.
 ## What It Shows
 
 - `Delegations`: rows with `From`, `To`, `Collection`, `Use Case`, `Tokens`, and `Expiry`.
+  A dated expiry shows the exact date, time and time zone in your local time.
 - `Active Minting Delegation for The Memes`: shown when a matching active row is
   found for `The Memes` or `Any Collection` with use case `#2` (or `#1` fallback).
 - `Delegation Managers`: manager rows (`From`, `To`, `Collection`).
