@@ -40,7 +40,6 @@ it.each([
     render(<CompetitionHub waveId="wave" embedded />);
     const action = screen.queryByRole("link", {
       name: "Competition",
-      exact: true,
     });
     if (visible) {
       expect(action).toHaveAttribute("href", "/waves/wave/competitions/new");
