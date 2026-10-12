@@ -1,4 +1,8 @@
 export const DELEGATION_CONSOLIDATION_BUILDER_MESSAGES = {
+  "delegation.consolidationBuilder.policy.loading":
+    "Loading the four-wallet activation date…",
+  "delegation.consolidationBuilder.policy.unavailable":
+    "Couldn’t load the four-wallet activation date. Four-wallet signing is unavailable; try again.",
   "delegation.consolidationBuilder.title": "Build a Consolidation",
   "delegation.consolidationBuilder.metadataDescription":
     "Plan and sign the links between up to {limit} wallets you control, one transaction per wallet. A manager signing for a cold vault sends one per link.",

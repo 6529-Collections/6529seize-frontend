@@ -1,16 +1,16 @@
 import {
+  CONSOLIDATION_FOURTH_WALLET_ACTIVATION_MS,
+  FOURTH_SLOT_SIGNING_OPENS_MS,
+} from "@/__tests__/helpers/consolidation-policy.fixture";
+import {
   buildConsolidationPlan,
   createDirectedLinkLookup,
   getDirectedWalletPairs,
   resolveConsolidationProgress,
   toDirectedLinkKey,
   validateConsolidationWallets,
-  FOURTH_SLOT_SIGNING_OPENS_MS,
 } from "@/components/delegation/consolidation-builder/consolidation-plan";
-import {
-  CONSOLIDATION_FOURTH_WALLET_ACTIVATION_MS,
-  CONSOLIDATION_WALLET_LIMIT,
-} from "@/constants/consolidation.constants";
+import { CONSOLIDATION_WALLET_LIMIT } from "@/constants/consolidation.constants";
 
 const A = `0x${"a".repeat(40)}`;
 const B = `0x${"b".repeat(40)}`;
@@ -50,6 +50,7 @@ function plan(input: {
     isRegistered: lookup(input.links ?? []),
     isFresh: lookup(input.fresh ?? []),
     nowMs: input.nowMs ?? AT_ACTIVATION,
+    signingOpensMs: FOURTH_SLOT_SIGNING_OPENS_MS,
   });
 }
 
@@ -845,4 +846,29 @@ describe("resolveConsolidationProgress", () => {
       canSign: true,
     });
   });
+});
+
+test("uses staging's signing time independently of the production fixture", () => {
+  const input = {
+    wallets: [A, B, C, D],
+    existingMembers: [A, B, C],
+    isRegistered: lookup([]),
+    isFresh: lookup([]),
+    nowMs: Date.parse("2026-10-12T01:00:00Z"),
+  };
+  expect(
+    buildConsolidationPlan({
+      ...input,
+      signingOpensMs: Date.parse("2026-10-12T00:10:00Z"),
+    }).fourthSlotWait
+  ).toBe("none");
+  expect(
+    buildConsolidationPlan({
+      ...input,
+      signingOpensMs: FOURTH_SLOT_SIGNING_OPENS_MS,
+    }).fourthSlotWait
+  ).toBe("all-steps");
+  expect(
+    buildConsolidationPlan({ ...input, signingOpensMs: null }).fourthSlotWait
+  ).toBe("all-steps");
 });
