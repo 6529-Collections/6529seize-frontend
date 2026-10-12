@@ -2131,6 +2131,17 @@ const WAVE_CHAT_MESSAGES = objectMessages("waves.chat", {
   "replyTargetUnavailableToast.detailsKept":
     "Your current draft was not changed.",
   "replyTargetUnavailableToast.actionReviewDraft": "Review draft",
+  repliesOnlyPlaceholder:
+    "Only chat members can start new drops here. You can reply to any drop.",
+  "replyThread.showOne": "Show 1 reply",
+  "replyThread.showMany": "Show {count} replies",
+  "replyThread.hide": "Hide replies",
+  "replyThread.regionLabel": "Replies to this drop",
+  "replyThread.loading": "Loading replies…",
+  "replyThread.loadEarlier": "Show earlier replies",
+  "replyThread.empty": "No replies to show.",
+  "replyThread.error": "Couldn't load replies.",
+  "replyThread.retry": "Retry",
 } as const);
 
 const WAVE_COMPOSER_ACTION_MESSAGES = objectMessages("waves.composer.actions", {
@@ -3777,6 +3788,8 @@ export const EN_US_MESSAGES = {
   "user.collected.cards.listLabel": "Collected cards",
   "user.collected.navigation.backToCollected": "Back to {profile}'s collected",
   "user.collected.empty.noCards": "No cards to display",
+  "user.collected.empty.filtered": "No artwork matches these filters.",
+  "user.collected.empty.clearFilters": "Clear filters",
   "user.collected.empty.fullSetter": "Congratulations, full setter!",
   "user.collected.empty.memesFullSetter":
     "Congratulations, The Memes full setter!",

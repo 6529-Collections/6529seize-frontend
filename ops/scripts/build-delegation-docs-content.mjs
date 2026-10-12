@@ -10,9 +10,9 @@ import { fileURLToPath } from "node:url";
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(SCRIPT_DIR, "..", "..");
-const VERSION = process.env.DELEGATION_DOCS_VERSION ?? "delegation-docs-2026-06-16";
+const VERSION = process.env.DELEGATION_DOCS_VERSION ?? "delegation-docs-2026-10-15";
 const GENERATED_AT =
-  process.env.DELEGATION_DOCS_GENERATED_AT ?? "2026-06-16T00:00:00.000Z";
+  process.env.DELEGATION_DOCS_GENERATED_AT ?? "2026-10-15T00:00:00.000Z";
 const LEGACY_CONTENT_BASE_URL =
   "https://6529bucket.s3.eu-west-1.amazonaws.com/seize_html/delegations-center-getting-started";
 const LEGACY_S3_BASE_URL =

@@ -16,7 +16,7 @@ import {
 } from "@/services/auth/auth.utils";
 import { getAuthTokenFingerprint } from "@/services/auth/auth-token-fingerprint";
 import { commonApiFetch } from "@/services/api/common-api";
-import useCapacitor from "./useCapacitor";
+import { useMobileBatterySavings } from "./useMobileAppActivity";
 import { useNotificationRealtimeState } from "@/services/notifications/notification-realtime-state";
 
 type ConnectedAccountUnreadCounts = Readonly<Record<string, number>>;
@@ -151,7 +151,7 @@ const fetchUnreadCountForAccount = async (
 export function useConnectedAccountsUnreadNotifications(
   accounts: readonly ConnectedWalletAccount[]
 ): ConnectedAccountUnreadCounts {
-  const { isCapacitor } = useCapacitor();
+  const isMobileEnvironment = useMobileBatterySavings();
   const notificationRealtimeState = useNotificationRealtimeState();
   const queryClient = useQueryClient();
   const [terminalJwtFingerprintByAccount, setTerminalJwtFingerprintByAccount] =
@@ -278,7 +278,7 @@ export function useConnectedAccountsUnreadNotifications(
     refetchOnWindowFocus: true,
     refetchOnMount: true,
     refetchOnReconnect: true,
-    refetchIntervalInBackground: !isCapacitor,
+    refetchIntervalInBackground: !isMobileEnvironment,
     retry: (failureCount: number, error: unknown) => {
       const terminalAuthFailures = getTerminalAuthFailuresFromError(error);
       if (terminalAuthFailures.length > 0) {

@@ -320,6 +320,7 @@ export * from '../models/ApiCreateNewProfileProxyReadWaveAction';
 export * from '../models/ApiCreateNewWave';
 export * from '../models/ApiCreateNewWaveCardSetTdhVotingConfig';
 export * from '../models/ApiCreateNewWaveChatConfig';
+export * from '../models/ApiCreateNewWaveChatRepliesConfig';
 export * from '../models/ApiCreateNewWaveParticipationConfig';
 export * from '../models/ApiCreateNewWaveScope';
 export * from '../models/ApiCreateNewWaveStandardVotingConfig';
@@ -740,6 +741,7 @@ export * from '../models/ApiWalletDistributionAllocations';
 export * from '../models/ApiWave';
 export * from '../models/ApiWaveChatConfig';
 export * from '../models/ApiWaveChatHistoryPurgePlan';
+export * from '../models/ApiWaveChatRepliesConfig';
 export * from '../models/ApiWaveConfig';
 export * from '../models/ApiWaveContributorOverview';
 export * from '../models/ApiWaveCreditNft';
@@ -1213,6 +1215,7 @@ import { ApiCreateNewProfileProxyReadWaveAction   } from '../models/ApiCreateNew
 import { ApiCreateNewWave } from '../models/ApiCreateNewWave';
 import { ApiCreateNewWaveCardSetTdhVotingConfig          } from '../models/ApiCreateNewWaveCardSetTdhVotingConfig';
 import { ApiCreateNewWaveChatConfig } from '../models/ApiCreateNewWaveChatConfig';
+import { ApiCreateNewWaveChatRepliesConfig } from '../models/ApiCreateNewWaveChatRepliesConfig';
 import { ApiCreateNewWaveParticipationConfig } from '../models/ApiCreateNewWaveParticipationConfig';
 import { ApiCreateNewWaveScope } from '../models/ApiCreateNewWaveScope';
 import { ApiCreateNewWaveStandardVotingConfig          } from '../models/ApiCreateNewWaveStandardVotingConfig';
@@ -1289,7 +1292,7 @@ import { ApiDropSubscriptionActions } from '../models/ApiDropSubscriptionActions
 import { ApiDropSubscriptionTargetAction } from '../models/ApiDropSubscriptionTargetAction';
 import { ApiDropTraceItem } from '../models/ApiDropTraceItem';
 import { ApiDropType } from '../models/ApiDropType';
-import { ApiDropV2                             } from '../models/ApiDropV2';
+import { ApiDropV2                              } from '../models/ApiDropV2';
 import { ApiDropV2ContextProfileContext } from '../models/ApiDropV2ContextProfileContext';
 import { ApiDropV2Page } from '../models/ApiDropV2Page';
 import { ApiDropV2PageWithoutCount } from '../models/ApiDropV2PageWithoutCount';
@@ -1633,6 +1636,7 @@ import { ApiWalletDistributionAllocations } from '../models/ApiWalletDistributio
 import { ApiWave } from '../models/ApiWave';
 import { ApiWaveChatConfig } from '../models/ApiWaveChatConfig';
 import { ApiWaveChatHistoryPurgePlan } from '../models/ApiWaveChatHistoryPurgePlan';
+import { ApiWaveChatRepliesConfig } from '../models/ApiWaveChatRepliesConfig';
 import { ApiWaveConfig               } from '../models/ApiWaveConfig';
 import { ApiWaveContributorOverview } from '../models/ApiWaveContributorOverview';
 import { ApiWaveCreditNft } from '../models/ApiWaveCreditNft';
@@ -1659,7 +1663,7 @@ import { ApiWaveMentionSearchResult } from '../models/ApiWaveMentionSearchResult
 import { ApiWaveMetadata } from '../models/ApiWaveMetadata';
 import { ApiWaveMetadataType } from '../models/ApiWaveMetadataType';
 import { ApiWaveMetrics } from '../models/ApiWaveMetrics';
-import { ApiWaveMin                         } from '../models/ApiWaveMin';
+import { ApiWaveMin                           } from '../models/ApiWaveMin';
 import { ApiWaveNotificationPreferences } from '../models/ApiWaveNotificationPreferences';
 import { ApiWaveOutcome        } from '../models/ApiWaveOutcome';
 import { ApiWaveOutcomeCredit } from '../models/ApiWaveOutcomeCredit';
@@ -2367,6 +2371,7 @@ let typeMap: {[index: string]: any} = {
     "ApiCreateNewWave": ApiCreateNewWave,
     "ApiCreateNewWaveCardSetTdhVotingConfig": ApiCreateNewWaveCardSetTdhVotingConfig,
     "ApiCreateNewWaveChatConfig": ApiCreateNewWaveChatConfig,
+    "ApiCreateNewWaveChatRepliesConfig": ApiCreateNewWaveChatRepliesConfig,
     "ApiCreateNewWaveParticipationConfig": ApiCreateNewWaveParticipationConfig,
     "ApiCreateNewWaveScope": ApiCreateNewWaveScope,
     "ApiCreateNewWaveStandardVotingConfig": ApiCreateNewWaveStandardVotingConfig,
@@ -2748,6 +2753,7 @@ let typeMap: {[index: string]: any} = {
     "ApiWave": ApiWave,
     "ApiWaveChatConfig": ApiWaveChatConfig,
     "ApiWaveChatHistoryPurgePlan": ApiWaveChatHistoryPurgePlan,
+    "ApiWaveChatRepliesConfig": ApiWaveChatRepliesConfig,
     "ApiWaveConfig": ApiWaveConfig,
     "ApiWaveContributorOverview": ApiWaveContributorOverview,
     "ApiWaveCreditNft": ApiWaveCreditNft,
