@@ -12,12 +12,14 @@ export default function PdfAttachmentPage({
   width,
   scrollRoot,
   viewportHeight,
+  estimatedAspectRatio,
   onError,
 }: {
   readonly page: number;
   readonly width: number;
   readonly scrollRoot: HTMLDivElement;
   readonly viewportHeight: number;
+  readonly estimatedAspectRatio: number;
   readonly onError: () => void;
 }) {
   const loadedPageRef = useRef<PDFPageProxy | null>(null);
@@ -61,7 +63,7 @@ export default function PdfAttachmentPage({
       loadedPageRef.current?.cleanup();
     };
   }, [nearViewport]);
-  const ratio = aspectRatio ?? Math.SQRT2;
+  const ratio = aspectRatio ?? estimatedAspectRatio;
   // Keep raster memory bounded on iPad and unusually shaped pages. Pages away
   // from the viewport retain their measured space, without canvases or text layers.
   const pixelRatio = Math.min(
@@ -84,25 +86,25 @@ export default function PdfAttachmentPage({
           page: formatInteger(DEFAULT_LOCALE, page),
         })}
       </h3>
-      <Page
-        pageNumber={page}
-        width={width}
-        devicePixelRatio={pixelRatio}
-        renderMode={render ? "canvas" : "none"}
-        renderTextLayer={render}
-        renderAnnotationLayer={false}
-        onLoadSuccess={onLoad}
-        onLoadError={onError}
-        onRenderError={onError}
-        loading={
-          nearViewport ? (
+      {nearViewport && (
+        <Page
+          pageNumber={page}
+          width={width}
+          devicePixelRatio={pixelRatio}
+          renderMode={render ? "canvas" : "none"}
+          renderTextLayer={render}
+          renderAnnotationLayer={false}
+          onLoadSuccess={onLoad}
+          onLoadError={onError}
+          onRenderError={onError}
+          loading={
             <p role="status" className="tw-p-4 tw-text-iron-900">
               {t(DEFAULT_LOCALE, "attachment.pdf.loadingPage")}
             </p>
-          ) : null
-        }
-        error={null}
-      />
+          }
+          error={null}
+        />
+      )}
     </div>
   );
 }
