@@ -3,6 +3,7 @@ import PdfAttachmentPage from "@/components/drops/view/item/content/attachments/
 
 let mockWidth = 1920;
 let mockHeight = 1080;
+const mockCleanup = jest.fn();
 jest.mock("react-pdf", () => {
   const React = jest.requireActual<typeof import("react")>("react");
   return {
@@ -14,6 +15,7 @@ jest.mock("react-pdf", () => {
     }: {
       onLoadSuccess: (page: {
         getViewport: () => { width: number; height: number };
+        cleanup: () => void;
       }) => void;
       renderMode: string;
       renderTextLayer: boolean;
@@ -22,6 +24,7 @@ jest.mock("react-pdf", () => {
       React.useEffect(() => {
         onLoadSuccess({
           getViewport: () => ({ width: mockWidth, height: mockHeight }),
+          cleanup: mockCleanup,
         });
       }, [onLoadSuccess]);
       return (
@@ -42,6 +45,7 @@ beforeEach(() => {
   mockWidth = 1920;
   mockHeight = 1080;
   disconnect.mockClear();
+  mockCleanup.mockClear();
   globalThis.IntersectionObserver = jest.fn().mockImplementation((callback) => {
     notifyIntersection = callback;
     return { observe: jest.fn(), disconnect };
@@ -75,10 +79,20 @@ it("releases raster and text layers away from the viewport while keeping measure
   visible(true);
   expect(screen.getByTestId("page")).toHaveAttribute("data-render", "canvas");
   expect(screen.getByTestId("page")).toHaveAttribute("data-text", "true");
+  expect(mockCleanup).not.toHaveBeenCalled();
   visible(false);
+  expect(mockCleanup).toHaveBeenCalledTimes(1);
   expect(screen.getByTestId("page")).toHaveAttribute("data-render", "none");
   expect(screen.getByTestId("page")).toHaveAttribute("data-text", "false");
+  // Returning to a released page must still render it at its measured size.
+  visible(true);
+  expect(screen.getByTestId("page")).toHaveAttribute("data-render", "canvas");
+  expect((container.firstChild as HTMLElement).style.aspectRatio).toBe(
+    "1 / 0.5625"
+  );
+  expect(mockCleanup).toHaveBeenCalledTimes(1);
   unmount();
+  expect(mockCleanup).toHaveBeenCalledTimes(2);
   expect(disconnect).toHaveBeenCalled();
 });
 it("bounds canvas dimensions for unusually tall pages", () => {

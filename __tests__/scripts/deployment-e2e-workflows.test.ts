@@ -21,6 +21,16 @@ const museumPacks = [
   "museum-about",
   "museum-inside-system",
   "museum-rights",
+  "museum-network-ia",
+];
+// Deployed Museum pack aliases in manifest order, as the workflows derive them.
+const manifestMuseumPacks = [
+  "museum-data-architecture",
+  "museum-institutional-practice",
+  "museum-network-ia",
+  "museum-about",
+  "museum-inside-system",
+  "museum-rights",
 ];
 const bash = fs.existsSync("/opt/homebrew/bin/bash")
   ? "/opt/homebrew/bin/bash"
@@ -32,8 +42,17 @@ function writeExecutable(root: string, name: string, source: string) {
   fs.writeFileSync(destination, source, { mode: 0o755 });
 }
 
-function selectionFixture(environment: string, historyAvailable: boolean) {
+function selectionFixture(
+  environment: string,
+  historyAvailable: boolean,
+  manifestSource = fs.readFileSync(
+    path.join(process.cwd(), "tests/packs.manifest.cjs"),
+    "utf8"
+  )
+) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "deployment-selection-"));
+  fs.mkdirSync(path.join(root, "tests"));
+  fs.writeFileSync(path.join(root, "tests/packs.manifest.cjs"), manifestSource);
   const git = (...args: string[]) =>
     childProcess
       .execFileSync("git", args, {
@@ -108,6 +127,10 @@ fi
     root,
     "6529",
     `#!/usr/bin/env bash
+if [[ "$1" == exec && "$2" == node && "$3" == -e ]]; then
+  shift 2
+  exec "$NODE_BINARY" "$@"
+fi
 [[ "$1" == exec && "$2" == node && "$3" == scripts/museum-release-selection.cjs ]] || exit 1
 shift 3
 exec "$NODE_BINARY" "$MUSEUM_SELECTION_TOOL" "$@"
@@ -434,6 +457,9 @@ exit "\${INSTALL_EXIT:-0}"
         expect(evidence.selected_packs).toEqual(
           historyAvailable ? [] : museumPacks
         );
+        expect(
+          fs.readFileSync(path.join(fixture.root, "outputs"), "utf8")
+        ).toContain(`museum_packs=${JSON.stringify(manifestMuseumPacks)}`);
         expect(evidence.source_commit).toBe(fixture.env.MUSEUM_SOURCE_SHA);
         expect(evidence.classification.tier).toBe(
           historyAvailable ? "NONE" : "P3"
@@ -476,6 +502,7 @@ require('node:fs').writeFileSync(process.env.RESULT_PATH, JSON.stringify({
             DEPLOYED_SHA: "a".repeat(40),
             RESULT_PATH: path.join(root, "arguments.json"),
             MUSEUM_SELECTED_PACKS_JSON: JSON.stringify(["museum-about"]),
+            MUSEUM_AVAILABLE_PACKS_JSON: JSON.stringify(manifestMuseumPacks),
             MUSEUM_PUBLICATION_EXPECTED_COMMIT: "b".repeat(40),
             SELECTED_PACK: "all",
           },
@@ -490,7 +517,7 @@ require('node:fs').writeFileSync(process.env.RESULT_PATH, JSON.stringify({
             arg === "--exclude-pack" ? [invocation.args[index + 1]] : []
         );
         expect(excluded).toEqual(
-          museumPacks.filter((pack) => pack !== "museum-about")
+          manifestMuseumPacks.filter((pack) => pack !== "museum-about")
         );
         expect(runPacks.env.MUSEUM_PUBLICATION_EXPECTED_COMMIT).toBe(
           "${{ steps.museum-publication.outputs.publication_commit }}"
@@ -503,6 +530,85 @@ require('node:fs').writeFileSync(process.env.RESULT_PATH, JSON.stringify({
       } finally {
         fs.rmSync(root, { recursive: true, force: true });
       }
+    }
+  );
+  function runSelectionWithTool(
+    e2e: ReturnType<typeof parse>,
+    environment: string,
+    manifestSource: string,
+    selectedPacks: string[]
+  ) {
+    const job =
+      e2e.workflow.jobs.readonly ?? e2e.workflow.jobs["staging-packs"];
+    const selection = job.steps.find(
+      (step: { name?: string }) =>
+        step.name === "Select Museum packs for the deployed change"
+    );
+    const fixture = selectionFixture(environment, true, manifestSource);
+    const tool = path.join(fixture.root, "fake-selection.cjs");
+    fs.writeFileSync(
+      tool,
+      `const fs = require("node:fs");
+const args = process.argv.slice(2);
+const value = (name) => args[args.indexOf(name) + 1];
+fs.writeFileSync(value("--output"), JSON.stringify({
+  contract: "museum-release-selection-v1",
+  environment: value("--environment"),
+  source_commit: value("--source-commit"),
+  selected_packs: ${JSON.stringify(selectedPacks)},
+  selection_digest: "${"a".repeat(64)}"
+}));
+`
+    );
+    try {
+      return childProcess.spawnSync(bash, ["-c", selection.run], {
+        cwd: fixture.root,
+        env: { ...fixture.env, MUSEUM_SELECTION_TOOL: tool },
+        encoding: "utf8",
+        timeout: 10_000,
+      });
+    } finally {
+      fs.rmSync(fixture.root, { recursive: true, force: true });
+    }
+  }
+
+  const futureManifest = `module.exports = { PACKS: [
+  { alias: "museum-future", changeScope: "museum", environments: ["staging", "production"] },
+  { alias: "core", environments: ["staging", "production"] },
+] };
+`;
+
+  it.each([
+    ["staging", stagingE2e],
+    ["production", productionE2e],
+  ])(
+    "accepts %s Museum packs that only the deployed manifest defines",
+    (environment, e2e) => {
+      expect(
+        runSelectionWithTool(e2e, environment, futureManifest, [
+          "museum-future",
+        ]).status
+      ).toBe(0);
+      expect(
+        runSelectionWithTool(e2e, environment, futureManifest, ["museum-about"])
+          .status
+      ).not.toBe(0);
+    }
+  );
+
+  it.each([
+    ["staging", stagingE2e],
+    ["production", productionE2e],
+  ])(
+    "fails %s Museum selection closed when the deployed manifest has no Museum packs",
+    (environment, e2e) => {
+      const result = runSelectionWithTool(
+        e2e,
+        environment,
+        "module.exports = { PACKS: [] };\n",
+        []
+      );
+      expect(result.status).not.toBe(0);
     }
   );
 });

@@ -3,7 +3,7 @@
 
 const fs = require("node:fs");
 const path = require("node:path");
-const { isMuseumPath, isPolicyPath } = require("./museum-release-tier.cjs");
+const { requiresMuseumLane } = require("./museum-release-tier.cjs");
 
 const PACKAGE_GOVERNANCE_FILES = new Set([
   ".npmrc",
@@ -99,13 +99,9 @@ function applyEffectiveAppPrCiPlan(plan) {
   const deploymentContract = files.some((file) =>
     DEPLOYMENT_CONTRACT_PATTERNS.some((pattern) => pattern.test(file))
   );
-  // Keep App PR lane activation at least as broad as the tier classifier.
-  // P1/P2 surface work and P3 policy/control-plane work must receive the
-  // complete Museum inventory rather than being omitted by the legacy,
-  // narrower ownership helper.
-  const playwrightMuseum = files.some(
-    (file) => isMuseumPath(file) || isPolicyPath(file)
-  );
+  // Start the Museum lane for any change that can affect a Museum page or the
+  // Museum lane itself. The selection tool then runs only the affected packs.
+  const playwrightMuseum = files.some(requiresMuseumLane);
 
   const playwrightArtworkDocumentation = files.some((file) =>
     ARTWORK_DOCUMENTATION_BROWSER_PATTERNS.some((pattern) => pattern.test(file))
