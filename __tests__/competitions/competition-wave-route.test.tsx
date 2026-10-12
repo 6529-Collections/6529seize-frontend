@@ -353,7 +353,6 @@ it.each([
   render(routeTree(null));
   expect(useWaveData).toHaveBeenCalledWith({
     waveId: null,
-    structuredErrors: true,
   });
   expect(useCompetitionHub).toHaveBeenCalledWith("", false);
   expect(useCompetitionDetail).toHaveBeenCalledWith(

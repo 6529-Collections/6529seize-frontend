@@ -203,7 +203,6 @@ export default function CompetitionDetail({
   const wave = useWaveData({
     waveId,
     onWaveNotFound: () => undefined,
-    structuredErrors: true,
   });
   const hub = useCompetitionHub(waveId);
   const competition = useCompetitionDetail({ waveId, competitionId });

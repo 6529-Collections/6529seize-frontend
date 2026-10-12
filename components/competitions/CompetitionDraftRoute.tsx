@@ -25,7 +25,6 @@ export default function CompetitionDraftRoute({
   const wave = useWaveData({
     waveId,
     onWaveNotFound: () => undefined,
-    structuredErrors: true,
   });
   let content = <CompetitionState />;
   const accessRejected = [hub.error, wave.error].some(isCompetitionAccessError);

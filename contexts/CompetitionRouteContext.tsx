@@ -62,7 +62,7 @@ export function CompetitionRouteProvider({
   const enabled = Boolean(waveId && competitionId);
   const restoring = enabled && search.get("restore") === "1";
   const viewer = useCompetitionViewer();
-  const wave = useWaveData({ waveId, structuredErrors: true });
+  const wave = useWaveData({ waveId });
   const hub = useCompetitionHub(waveId ?? "", enabled);
   const competition = useCompetitionDetail(
     { waveId: waveId ?? "", competitionId: competitionId ?? "" },

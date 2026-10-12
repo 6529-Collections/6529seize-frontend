@@ -409,6 +409,7 @@ export async function fetchWaveById({
   return await commonApiFetch<ApiWave>({
     endpoint: `waves/${waveId}`,
     headers,
+    errorMode: "structured",
   });
 }
 

@@ -10,14 +10,12 @@ interface UseWaveDataProps {
   waveId: string | null;
   refetchInterval?: number | undefined;
   onWaveNotFound?: (() => void) | undefined;
-  structuredErrors?: boolean | undefined;
 }
 
 export const useWaveData = ({
   waveId,
   refetchInterval = Infinity,
   onWaveNotFound = () => {},
-  structuredErrors = false,
 }: UseWaveDataProps) => {
   return useQuery<ApiWave>({
     queryKey: getWaveQueryKey(waveId),
@@ -27,7 +25,7 @@ export const useWaveData = ({
       }
       return await commonApiFetch<ApiWave>({
         endpoint: `waves/${waveId}`,
-        ...(structuredErrors ? { errorMode: "structured" as const } : {}),
+        errorMode: "structured",
       });
     },
 
