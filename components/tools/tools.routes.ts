@@ -108,6 +108,11 @@ const TOOLS_CONTENTS_NAV_GROUPS = [
         href: "/tools/block-finder",
         labelKey: "tools.contents.pages.blockFinder",
       },
+      {
+        id: "time-zones",
+        href: "/tools/time-zones",
+        labelKey: "tools.contents.pages.timeZones",
+      },
     ],
   },
   {

@@ -38,6 +38,7 @@ export const STATIC_INDEXABLE_PATHS = [
   "/open-data",
   "/the-memes/mint",
   "/tools/api",
+  "/tools/time-zones",
   "/blog/from-fibonacci-to-fidenza",
   "/blog/disney-deekay-their-secret-to-animation",
   "/blog/a-tale-of-two-artists",
