@@ -173,6 +173,7 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
     activeCount: activeCompetitionCount,
     defaultCompetitionId,
     defaultSelectionEnabled,
+    isPending: isCompetitionsPending,
   } = useWaveCompetitionsTab(wave);
   useDefaultCompetitionNavigation(wave, true);
   const hasCompetitions =
@@ -192,7 +193,8 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
       wave &&
       !fetchingProfile &&
       !(isCompetitionWave && isWaveMetadataPending) &&
-      !isWavePollsPending
+      !isWavePollsPending &&
+      !isCompetitionsPending
     );
   const { activeView, onViewChange: selectView } = useBrainMobileActiveView({
     firstDecisionDone,
@@ -207,6 +209,7 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
     hasCompetitions,
     hasPolls,
     defaultSelectionEnabled,
+    waveNavigationReady,
     pathname,
     searchParams,
     wave,

@@ -19,13 +19,13 @@ a competition notification. The wave header and navigation stay visible. The
 collection and create/edit forms open from **Competitions**.
 The **Competitions** tab shows a count of active and upcoming competitions. The
 badge is hidden when there are none; drafts and completed competitions do not count.
-**Chat** returns to the wave's existing conversation. The collection has a second
-row of tabs for **Active and upcoming**, **Completed**, and **All**;
-wave administrators can also see **Drafts**. **Add competition** sits alongside
-these tabs for users who can create competitions.
-In the app, this secondary row uses the same compact pills as **About**.
-**More** opens the remaining filters; choosing one shows its name on that pill.
-Desktop and mobile web retain the underlined tab row.
+**Chat** returns to the wave's existing conversation. The collection offers
+**Active and upcoming**, **Completed**, and **All**; wave administrators also
+see **Drafts**. On mobile web and in the app, the filter shows its current
+selection. Open it to choose another filter; dismissing it keeps the selection.
+Desktop uses an underlined filter tab row.
+To create a competition, use **Create** beside the wave tabs, then
+**New competition**. The action appears when you have creation permission.
 Cards show the start date and, when set, the end date. Dates in the past use
 **Started** or **Ended**; future dates use **Starts** or **Ends**.
 

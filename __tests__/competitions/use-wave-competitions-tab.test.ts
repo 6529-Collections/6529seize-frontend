@@ -391,6 +391,22 @@ it.each([false, true])(
   }
 );
 
+it("settles navigation after a pagination error without hiding the collection", () => {
+  configureSingleCompetition();
+  const fetchNextPage = jest.fn();
+  (useCompetitionList as jest.Mock).mockReturnValue({
+    isError: true,
+    isPending: false,
+    hasNextPage: true,
+    fetchNextPage,
+    data: { pages: [{ data: [{ id: "sole" }], has_more: true }] },
+  });
+  const { result } = renderHook(() => useWaveCompetitionsTab(wave));
+  expect(result.current.isPending).toBe(false);
+  expect(result.current.hideCompetitionsTab).toBe(false);
+  expect(fetchNextPage).not.toHaveBeenCalled();
+});
+
 it("counts distinct IDs across completed pages without adding the legacy facade twice", () => {
   configureSingleCompetition();
   (useCompetitionList as jest.Mock).mockReturnValue({

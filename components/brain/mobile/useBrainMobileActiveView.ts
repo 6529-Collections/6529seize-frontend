@@ -61,6 +61,7 @@ interface UseBrainMobileActiveViewParams {
   readonly waveId: string | null;
   readonly defaultSelectionEnabled?: boolean | undefined;
   readonly restoredView?: BrainView | null | undefined;
+  readonly waveNavigationReady?: boolean | undefined;
 }
 
 interface UseBrainMobileActiveViewResult {
@@ -175,6 +176,7 @@ function normalizeActiveView({
   showOutcomeView = true,
   routeDefaultView,
   wave,
+  waveNavigationReady,
 }: {
   readonly activeView: BrainView;
   readonly firstDecisionDone: boolean;
@@ -190,6 +192,7 @@ function normalizeActiveView({
   readonly showOutcomeView?: boolean | undefined;
   readonly routeDefaultView: BrainView | null;
   readonly wave: ApiWave | null | undefined;
+  readonly waveNavigationReady: boolean;
 }): BrainView {
   const waveViewState: WaveViewState = {
     firstDecisionDone,
@@ -212,7 +215,7 @@ function normalizeActiveView({
     return activeView;
   }
 
-  if (!wave) {
+  if (!wave || !waveNavigationReady) {
     return activeView;
   }
 
@@ -274,6 +277,7 @@ export function useBrainMobileActiveView({
   waveId,
   restoredView = null,
   defaultSelectionEnabled = false,
+  waveNavigationReady = true,
 }: UseBrainMobileActiveViewParams): UseBrainMobileActiveViewResult {
   const { tabs } = useWaveTabPreference();
   const [selection, setSelection] = useState<ActiveViewSelection | null>(null);
@@ -346,6 +350,7 @@ export function useBrainMobileActiveView({
     showOutcomeView,
     routeDefaultView,
     wave,
+    waveNavigationReady,
   });
 
   return { activeView, onViewChange };

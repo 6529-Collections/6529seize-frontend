@@ -194,8 +194,6 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
       waveId: wave?.id ?? "",
       enabled: shouldShowCurationTabs,
     });
-  const canManageCurations =
-    wave?.wave.authenticated_user_eligible_for_admin === true;
 
   // Local ref for component-specific needs
   const mobileTabsRef = useRef<HTMLDivElement | null>(null);
@@ -433,13 +431,31 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
       </TabButton>
     ) : null;
   const createActionsMenu =
-    isApp && wave && canManageCurations ? (
+    isApp && wave ? (
       <MyStreamWaveCreateActionsMenu
         wave={wave}
         variant="mobile"
         onCreated={onCurationClick}
       />
     ) : null;
+
+  const chatTabButton = (
+    <ChatButton
+      {...getTabStateProps(isChatActive)}
+      ref={
+        isWaveNavigationLoading ? undefined : getActiveButtonRef(isChatActive)
+      }
+      onClick={onChatClick}
+      className={getTabButtonClassName(isChatActive)}
+    >
+      <span className={getTabTextClassName({ isActive: isChatActive })}>
+        {t(
+          locale,
+          waveActive ? "wave.navigation.chat" : "wave.navigation.myStream"
+        )}
+      </span>
+    </ChatButton>
+  );
 
   return (
     <nav
@@ -455,6 +471,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
       {isWaveNavigationLoading ? (
         <div className="tw-flex tw-min-h-12 tw-w-full tw-items-center tw-gap-1.5 tw-overflow-hidden tw-px-0.5">
           {streamBackButton}
+          {wave && chatTabButton}
           <output
             aria-label={t(locale, "wave.navigation.loadingSections")}
             aria-busy="true"
@@ -523,21 +540,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
                 </span>
               </button>
             )}
-            <ChatButton
-              {...getTabStateProps(isChatActive)}
-              ref={getActiveButtonRef(isChatActive)}
-              onClick={onChatClick}
-              className={getTabButtonClassName(isChatActive)}
-            >
-              <span className={getTabTextClassName({ isActive: isChatActive })}>
-                {t(
-                  locale,
-                  waveActive
-                    ? "wave.navigation.chat"
-                    : "wave.navigation.myStream"
-                )}
-              </span>
-            </ChatButton>
+            {chatTabButton}
             {waveActive && wave && hasPolls && (
               <TabButton
                 {...getTabStateProps(activeView === BrainView.POLLS)}

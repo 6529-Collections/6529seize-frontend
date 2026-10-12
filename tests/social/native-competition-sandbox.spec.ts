@@ -18,6 +18,26 @@ const entryDropId = (id: string) =>
     ? "00000000-0000-4000-8000-000000000532"
     : "00000000-0000-4000-8000-000000000533";
 const ROOT = `/waves/${WAVE}/competitions`;
+async function openNewCompetition(page: Page) {
+  await page
+    .getByRole("button", { name: "Open create menu", exact: true })
+    .click();
+  await page
+    .getByRole("menuitem", { name: /^New competition/ })
+    .or(page.getByRole("button", { name: /^New competition/ }))
+    .click();
+}
+async function selectCompetitionFilter(page: Page, name: string) {
+  const dropdown = page.getByRole("button", { name: /^Show competitions:/ });
+  const tab = page.getByRole("tab", { name, exact: true });
+  await expect(dropdown.or(tab)).toBeVisible();
+  if (await dropdown.isVisible()) {
+    await dropdown.click();
+    await page.getByRole("menuitem", { name, exact: true }).click();
+  } else {
+    await tab.click();
+  }
+}
 const competitionContent = (page: Page) =>
   page
     .getByRole("main")
@@ -947,9 +967,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
   }) => {
     const sandbox = await installCompetitionApi(page);
     await page.goto(ROOT);
-    await page
-      .getByRole("link", { name: "Add competition", exact: true })
-      .click();
+    await openNewCompetition(page);
     await expect(
       page.getByLabel("Competition name", { exact: true })
     ).toBeVisible({ timeout: 30000 });
@@ -974,7 +992,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       .getByRole("button", { name: "Close editor", exact: true })
       .click();
     await expect(page).toHaveURL(ROOT);
-    await page.getByRole("tab", { name: "Drafts", exact: true }).click();
+    await selectCompetitionFilter(page, "Drafts");
     await page
       .getByRole("link")
       .filter({
@@ -997,7 +1015,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await expectNoHorizontalOverflow(page);
   });
 
-  test("uses About-style pills for app competition sub-navigation", async ({
+  test("uses one Create menu and a mobile competition filter while preserving vote tabs", async ({
     page,
   }, testInfo) => {
     const app = testInfo.project.name === "web-mobile-chromium";
@@ -1013,44 +1031,61 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       name: "Competitions",
       exact: true,
     });
-    const active = collection.getByRole("tab", {
-      name: "Active and upcoming",
-      exact: true,
-    });
+    const active = app
+      ? collection.getByRole("button", {
+          name: "Show competitions: Active and upcoming",
+          exact: true,
+        })
+      : collection.getByRole("tab", {
+          name: "Active and upcoming",
+          exact: true,
+        });
     const collectionMore = collection.getByRole("button", {
       name: "More tabs",
       exact: true,
     });
-    await expect(active).toHaveAttribute("aria-selected", "true");
-    await expect(active).toHaveAttribute(
-      "aria-controls",
-      `competition-collection-${WAVE}-active`
-    );
     if (app) {
-      await expect(active).toHaveCSS("height", "32px");
-      await expect(active).toHaveCSS("border-radius", "9999px");
+      await expect(active).toHaveCSS("height", "44px");
+      await expect(collectionMore).toHaveCount(0);
       const viewport = page.viewportSize();
       await page.setViewportSize({ width: 320, height: 780 });
-      await expect(collectionMore).toBeInViewport({ ratio: 1 });
+      await expect(active).toBeInViewport({ ratio: 1 });
+      await expect(
+        page.getByRole("button", { name: "Open create menu", exact: true })
+      ).toBeInViewport({ ratio: 1 });
       if (viewport) await page.setViewportSize(viewport);
-      await collectionMore.tap();
+      await active.tap();
       await page.keyboard.press("Escape");
-      await expect(collectionMore).toBeFocused();
-      await expect(active).toHaveAttribute("aria-selected", "true");
-      await collectionMore.press("Enter");
+      await expect(active).toBeFocused();
+      await active.press("Enter");
       await page.getByRole("menuitem", { name: "Drafts", exact: true }).tap();
-      await expect(collectionMore).toHaveText("Drafts");
-      await expect(collectionMore).toHaveAttribute("aria-expanded", "false");
+      const selectedFilter = collection.getByRole("button", {
+        name: "Show competitions: Drafts",
+        exact: true,
+      });
+      await expect(selectedFilter).toHaveAttribute("aria-expanded", "false");
+      await expect(
+        collection.getByRole("region", { name: "Drafts", exact: true })
+      ).toBeVisible();
+      await selectedFilter.click();
+      await page
+        .getByRole("menuitem", { name: "Active and upcoming", exact: true })
+        .click();
     } else {
+      await expect(active).toHaveAttribute("aria-selected", "true");
+      await expect(active).toHaveAttribute(
+        "aria-controls",
+        `competition-collection-${WAVE}-active`
+      );
       await expect(collectionMore).toHaveCount(0);
       await collection
         .getByRole("tab", { name: "Drafts", exact: true })
         .click();
+      await expect(
+        collection.getByRole("tabpanel", { name: "Drafts", exact: true })
+      ).toBeVisible();
+      await active.click();
     }
-    await expect(
-      collection.getByRole("tabpanel", { name: "Drafts", exact: true })
-    ).toBeVisible();
-    await active.click();
     await page.screenshot({
       path: testInfo.outputPath("competition-collection-tabs.png"),
       animations: "disabled",
@@ -1058,7 +1093,53 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     });
     await expect(
       collection.getByRole("link", { name: "Add competition", exact: true })
-    ).toBeInViewport({ ratio: 1 });
+    ).toHaveCount(0);
+    const create = page.getByRole("button", {
+      name: "Open create menu",
+      exact: true,
+    });
+    await expect(create).toHaveCount(1);
+    await expect(create).toHaveText("Create");
+    await create.click();
+    const createOptions = app
+      ? page.getByRole("dialog", { name: "Create", exact: true })
+      : page.getByRole("menu");
+    await expect(
+      createOptions.getByText("New competition", { exact: true })
+    ).toBeVisible();
+    await expect(
+      createOptions.getByText("New curation", { exact: true })
+    ).toBeVisible();
+    await expect(
+      createOptions.getByText("Local Composer Sandbox Wave", { exact: true })
+    ).toHaveCount(0);
+    await page.screenshot({
+      path: testInfo.outputPath("wave-create-menu.png"),
+      animations: "disabled",
+      style: "nextjs-portal { visibility: hidden; }",
+    });
+    await page.keyboard.press("Escape");
+    await expect(create).toBeFocused();
+    await create.click();
+    await createOptions.getByText("New curation", { exact: true }).click();
+    const curationDialog = page.getByRole("dialog", {
+      name: "Create curation",
+      exact: true,
+    });
+    await expect(
+      curationDialog.getByRole("textbox", { name: "Name", exact: true })
+    ).toBeVisible();
+    await expect(page.getByRole("dialog")).toHaveCount(1);
+    await expect(
+      page.getByRole("dialog", { name: "Create", exact: true })
+    ).toHaveCount(0);
+    await page.screenshot({
+      path: testInfo.outputPath("wave-create-curation-handoff.png"),
+      animations: "disabled",
+      style: "nextjs-portal { visibility: hidden; }",
+    });
+    await page.keyboard.press("Escape");
+    await expect(page.getByRole("dialog")).toHaveCount(0);
     await expectNoHorizontalOverflow(page);
 
     // Published competitions share the primary row; Votes owns its secondary tabs.
@@ -1088,7 +1169,8 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await expect(allVotes).toHaveAttribute("aria-selected", "true");
     await page.goBack();
     await expect(page).toHaveURL(ROOT);
-    await expect(active).toHaveAttribute("aria-selected", "true");
+    if (app) await expect(active).toBeVisible();
+    else await expect(active).toHaveAttribute("aria-selected", "true");
     await page.goForward();
     await expect(allVotes).toHaveAttribute("aria-selected", "true");
     await expect(
@@ -1470,9 +1552,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     });
     const sandbox = await installCompetitionApi(page);
     await page.goto(ROOT);
-    await page
-      .getByRole("link", { name: "Add competition", exact: true })
-      .click();
+    await openNewCompetition(page);
     await page
       .getByRole("combobox", { name: "Competition type", exact: true })
       .click();
@@ -1785,6 +1865,18 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
           mode === "native-app" ? "aria-current" : "aria-selected",
           "true"
         );
+        if (mode === "native-app") {
+          await expect(
+            page.getByRole("status", { name: "Loading wave sections" })
+          ).toBeVisible();
+          await expect(
+            page.getByRole("button", { name: "Leaderboard", exact: true })
+          ).toHaveCount(0);
+          await page.screenshot({
+            path: testInfo.outputPath("wave-tabs-cold-start.png"),
+            animations: "disabled",
+          });
+        }
         releaseDefault();
         await (await selectionResponse).finished();
         if (mode.endsWith("single"))
@@ -1798,6 +1890,11 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
           { name: "Leaderboard", exact: true }
         );
         await expect(leaderboard).toBeVisible({ timeout: 30000 });
+        if (mode === "native-app") {
+          await expect(
+            page.getByRole("status", { name: "Loading wave sections" })
+          ).toHaveCount(0);
+        }
         await expect(chatContent).toBeVisible();
         await expect(chatTab).toHaveAttribute(
           mode === "native-app" ? "aria-current" : "aria-selected",
@@ -2585,7 +2682,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         .getByRole("tab", { name: /^Competitions/ })
         .click();
       await expect(page).toHaveURL(ROOT);
-      await page.getByRole("tab", { name: "All", exact: true }).click();
+      await selectCompetitionFilter(page, "All");
       await expect(
         page.getByRole("link", { name: /Parallel Beta/ })
       ).toBeVisible();

@@ -64,6 +64,7 @@ export const COMPETITION_MESSAGES = {
   "competitions.parallel":
     "Each competition has its own entries, voting credits, and results. All competitions share this wave’s chat.",
   "competitions.active": "Active and upcoming",
+  "competitions.filter": "Show competitions",
   "competitions.history": "Completed",
   "competitions.drafts": "Drafts",
   "competitions.all": "All",

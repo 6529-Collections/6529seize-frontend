@@ -5,21 +5,18 @@ import {
   ArrowRightIcon,
   CalendarDaysIcon,
   ClockIcon,
-  PlusIcon,
 } from "@heroicons/react/24/outline";
 import { TabToggle } from "@/components/common/TabToggle";
-import { TabToggleWithOverflow } from "@/components/common/TabToggleWithOverflow";
+import CommonDropdown from "@/components/utils/select/dropdown/CommonDropdown";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
+import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
 import type { ApiCompetition } from "@/generated/models/ApiCompetition";
 import type { ApiWaveV3 } from "@/generated/models/ApiWaveV3";
 import {
   useCompetitionHub,
   useCompetitionList,
 } from "@/hooks/competitions/useCompetitionQueries";
-import {
-  getCompetitionRoute,
-  isMultiCompetitionEnabled,
-} from "@/helpers/competition.helpers";
+import { getCompetitionRoute } from "@/helpers/competition.helpers";
 import { getWavePathRoute } from "@/helpers/navigation.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
@@ -125,6 +122,8 @@ function CompetitionCard({
 function CompetitionCollection({ hub }: { readonly hub: ApiWaveV3 }) {
   const locale = useBrowserLocale();
   const { isApp } = useDeviceInfo();
+  const isMobileViewport = useIsMobileLayoutViewport();
+  const useFilterDropdown = isApp || isMobileViewport;
   const [filter, setFilter] = useState<CompetitionCollectionFilter>("active");
   const query = useCompetitionList(hub.id, filter);
   const visible = query.data?.pages.flatMap((page) => page.data) ?? [];
@@ -166,18 +165,26 @@ function CompetitionCollection({ hub }: { readonly hub: ApiWaveV3 }) {
   return (
     <>
       <div
-        className={`tw-flex tw-shrink-0 tw-items-center tw-gap-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-bg-iron-950 ${isApp ? "tw-border-white/5 tw-px-4 tw-py-2.5 md:tw-px-6" : "tw-border-iron-800 tw-px-2 sm:tw-px-4"}`}
+        className={`tw-flex tw-shrink-0 tw-items-center tw-gap-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-bg-iron-950 ${useFilterDropdown ? "tw-border-white/5 tw-px-4 tw-py-2.5 md:tw-px-6" : "tw-border-iron-800 tw-px-2 sm:tw-px-4"}`}
       >
         <div
-          className={`tw-min-w-0 tw-flex-1 tw-overflow-x-auto ${isApp ? "tw-no-scrollbar tw-overscroll-x-contain" : "tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500"}`}
+          className={
+            useFilterDropdown
+              ? "tw-min-w-0 tw-max-w-full"
+              : "tw-min-w-0 tw-flex-1 tw-overflow-x-auto tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500"
+          }
         >
-          {isApp ? (
-            <TabToggleWithOverflow
-              variant="compactPills"
-              maxVisibleTabs={1}
-              options={tabOptions}
-              activeKey={filter}
-              onSelect={selectFilter}
+          {useFilterDropdown ? (
+            <CommonDropdown
+              variant="toolbar"
+              items={filters.map((value) => ({
+                key: value,
+                value,
+                label: t(locale, `competitions.${value}`),
+              }))}
+              activeItem={filter}
+              setSelected={setFilter}
+              filterLabel={t(locale, "competitions.filter")}
             />
           ) : (
             <TabToggle
@@ -187,23 +194,10 @@ function CompetitionCollection({ hub }: { readonly hub: ApiWaveV3 }) {
             />
           )}
         </div>
-        {isMultiCompetitionEnabled() && hub.permissions.create_competition && (
-          <Link
-            href={getCompetitionRoute(hub.id, "new")}
-            aria-label={t(locale, "competitions.add")}
-            title={t(locale, "competitions.add")}
-            className="tw-inline-flex tw-h-8 tw-shrink-0 tw-items-center tw-justify-center tw-gap-1.5 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-2 tw-text-xs tw-font-medium tw-text-iron-200 tw-no-underline hover:tw-bg-iron-800 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
-          >
-            <PlusIcon className="tw-size-4 tw-shrink-0" aria-hidden="true" />
-            <span className="tw-hidden sm:tw-inline">
-              {t(locale, "competitions.add")}
-            </span>
-          </Link>
-        )}
       </div>
       <div
         id={panelId}
-        role="tabpanel"
+        role={useFilterDropdown ? "region" : "tabpanel"}
         aria-label={t(locale, `competitions.${filter}`)}
         className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-p-4 sm:tw-p-6"
       >

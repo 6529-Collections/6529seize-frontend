@@ -24,6 +24,9 @@ const push = jest.fn();
 const replace = jest.fn();
 let searchParams = new URLSearchParams();
 let mockCurations: ApiWaveCuration[] = [];
+jest.mock("@/hooks/competitions/useCompetitionQueries", () => ({
+  useCompetitionHub: () => ({ data: undefined }),
+}));
 
 jest.mock("next/navigation", () => ({
   useRouter: () => ({ push, replace }),
@@ -244,7 +247,7 @@ describe("BrainMobileTabs", () => {
     expect(onViewChange).toHaveBeenCalledWith(BrainView.DEFAULT);
   });
 
-  it("keeps the back action visible while wave sections load", () => {
+  it("keeps back and Chat usable while the remaining wave sections load", () => {
     render(
       <BrainMobileTabs
         activeView={BrainView.DEFAULT}
@@ -264,7 +267,7 @@ describe("BrainMobileTabs", () => {
     expect(
       screen.getByRole("button", { name: /my stream/i })
     ).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /^chat$/i })).toBeNull();
+    expect(screen.getByRole("button", { name: /^chat$/i })).toBeEnabled();
   });
 
   it("keeps the mobile create menu outside the scrollable tabs", async () => {
@@ -292,14 +295,14 @@ describe("BrainMobileTabs", () => {
 
     expect(scrollableTabs).toBeInTheDocument();
     expect(scrollableTabs).not.toContainElement(createButton);
-    expect(createButton).toHaveClass("tw-size-11");
+    expect(createButton).toHaveClass("tw-min-h-11");
 
     await userEvent.click(createButton);
     expect(
-      screen.getByRole("menuitem", { name: "New curation" })
+      screen.getByRole("button", { name: /^New curation/ })
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("menuitem", { name: "New subwave" })
+      screen.getByRole("button", { name: /^New subwave/ })
     ).toBeInTheDocument();
   });
 

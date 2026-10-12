@@ -2,8 +2,26 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import MyStreamWaveCreateActionsMenu from "@/components/brain/my-stream/tabs/MyStreamWaveCreateActionsMenu";
 import { useAuth } from "@/components/auth/Auth";
+import { useCompetitionHub } from "@/hooks/competitions/useCompetitionQueries";
+import { isMultiCompetitionEnabled } from "@/helpers/competition.helpers";
+import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
 
 const createWaveModalMock = jest.fn();
+const mockPush = jest.fn();
+jest.mock("next/navigation", () => ({
+  useRouter: () => ({ push: mockPush }),
+}));
+jest.mock("@/hooks/competitions/useCompetitionQueries", () => ({
+  useCompetitionHub: jest.fn(),
+}));
+jest.mock("@/helpers/competition.helpers", () => ({
+  ...jest.requireActual("@/helpers/competition.helpers"),
+  isMultiCompetitionEnabled: jest.fn(),
+}));
+jest.mock("@/hooks/useIsMobileLayoutViewport", () => ({
+  __esModule: true,
+  default: jest.fn(),
+}));
 
 jest.mock("@/components/auth/Auth", () => ({
   useAuth: jest.fn(),
@@ -92,6 +110,13 @@ const createWave = ({
 describe("MyStreamWaveCreateActionsMenu", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    jest
+      .mocked(useCompetitionHub)
+      .mockReturnValue({ data: undefined } as ReturnType<
+        typeof useCompetitionHub
+      >);
+    jest.mocked(isMultiCompetitionEnabled).mockReturnValue(true);
+    jest.mocked(useIsMobileLayoutViewport).mockReturnValue(false);
     mockedUseAuth.mockReturnValue({
       connectedProfile: { handle: "alice" },
       activeProfileProxy: null,
@@ -110,9 +135,9 @@ describe("MyStreamWaveCreateActionsMenu", () => {
       screen.getByRole("button", { name: "Open create menu" })
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "New curation" })
+      screen.getByRole("button", { name: /^New curation/ })
     ).toBeInTheDocument();
-    await userEvent.click(screen.getByRole("button", { name: "New subwave" }));
+    await userEvent.click(screen.getByRole("button", { name: /^New subwave/ }));
 
     expect(screen.getByTestId("subwave-modal")).toBeInTheDocument();
     expect(createWaveModalMock).toHaveBeenLastCalledWith(
@@ -136,10 +161,16 @@ describe("MyStreamWaveCreateActionsMenu", () => {
         />
       );
 
+      if (variant === "mobile") {
+        await userEvent.click(
+          screen.getByRole("button", { name: "Open create menu" })
+        );
+      }
       await userEvent.click(
-        screen.getByRole("button", { name: "New subwave" })
+        screen.getByRole("button", { name: /^New subwave/ })
       );
 
+      await screen.findByTestId("subwave-modal");
       expect(createWaveModalMock).toHaveBeenLastCalledWith(
         expect.objectContaining({
           isOpen: true,
@@ -164,9 +195,9 @@ describe("MyStreamWaveCreateActionsMenu", () => {
 
     render(<MyStreamWaveCreateActionsMenu wave={wave} onCreated={jest.fn()} />);
 
-    expect(screen.queryByRole("button", { name: "New subwave" })).toBeNull();
+    expect(screen.queryByRole("button", { name: /^New subwave/ })).toBeNull();
     expect(
-      screen.getByRole("button", { name: "New curation" })
+      screen.getByRole("button", { name: /^New curation/ })
     ).toBeInTheDocument();
   });
 
@@ -203,6 +234,68 @@ describe("MyStreamWaveCreateActionsMenu", () => {
 
     expect(
       screen.getByRole("button", { name: "Open create menu" })
-    ).toHaveClass("tw-size-11");
+    ).toHaveClass("tw-min-h-11");
+  });
+
+  it("uses competition permissions independently of curation administration", async () => {
+    jest.mocked(useCompetitionHub).mockReturnValue({
+      data: { permissions: { create_competition: true } },
+    } as ReturnType<typeof useCompetitionHub>);
+    render(
+      <MyStreamWaveCreateActionsMenu
+        wave={createWave({ eligible: false })}
+        onCreated={jest.fn()}
+      />
+    );
+    expect(
+      screen.getByRole("button", { name: "Open create menu" })
+    ).toHaveTextContent("Create");
+    expect(screen.queryByRole("button", { name: /^New curation/ })).toBeNull();
+    await userEvent.click(
+      screen.getByRole("button", { name: /^New competition/ })
+    );
+    expect(mockPush).toHaveBeenCalledWith(
+      "/waves/parent-wave/competitions/new"
+    );
+  });
+
+  it.each(["feature disabled", "direct message"])(
+    "omits competition creation for %s",
+    (condition) => {
+      jest.mocked(useCompetitionHub).mockReturnValue({
+        data: { permissions: { create_competition: true } },
+      } as ReturnType<typeof useCompetitionHub>);
+      const wave = createWave();
+      if (condition === "feature disabled")
+        jest.mocked(isMultiCompetitionEnabled).mockReturnValue(false);
+      else wave.chat.scope.group.is_direct_message = true;
+      render(
+        <MyStreamWaveCreateActionsMenu wave={wave} onCreated={jest.fn()} />
+      );
+      expect(useCompetitionHub).toHaveBeenCalledWith(wave.id, false);
+      expect(
+        screen.queryByRole("button", { name: /^New competition/ })
+      ).toBeNull();
+    }
+  );
+
+  it("opens a concise sheet on mobile web and hands off after it closes", async () => {
+    jest.mocked(useIsMobileLayoutViewport).mockReturnValue(true);
+    render(
+      <MyStreamWaveCreateActionsMenu
+        wave={createWave()}
+        onCreated={jest.fn()}
+      />
+    );
+    await userEvent.click(
+      screen.getByRole("button", { name: "Open create menu" })
+    );
+    expect(screen.getByRole("dialog", { name: "Create" })).toBeInTheDocument();
+    expect(screen.queryByText("Parent Wave")).toBeNull();
+    await userEvent.click(
+      screen.getByRole("button", { name: /^New curation/ })
+    );
+    await screen.findByTestId("curation-dialog");
+    expect(screen.queryByRole("dialog", { name: "Create" })).toBeNull();
   });
 });
