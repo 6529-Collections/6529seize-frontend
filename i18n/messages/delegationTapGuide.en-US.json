@@ -45,6 +45,7 @@
   "delegation.tapGuide.old.retire.title": "Retire it, keep its TDH",
   "delegation.tapGuide.old.retire.body": "Some addresses should not be used again: an old hot wallet that was exposed, or a vault whose address became public. Stop using it, and combine it with your other wallets so its TDH keeps counting.",
   "delegation.tapGuide.old.retire.limit": "You can combine up to {limit} wallets. The fourth can be added from {date}.",
+  "delegation.tapGuide.old.retire.pendingDate": "the start time shown in Guided Setup",
   "delegation.tapGuide.old.creators.title": "Creators",
   "delegation.tapGuide.old.creators.body": "Create new work from a dedicated hardware-wallet address, and protect it as carefully as your vault.",
   "delegation.tapGuide.hardware.title": "Hardware wallets are a separate thing",

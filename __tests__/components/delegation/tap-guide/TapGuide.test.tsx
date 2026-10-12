@@ -1,3 +1,4 @@
+import { policy } from "@/__tests__/helpers/consolidation-policy.fixture";
 import TapGuide from "@/components/delegation/tap-guide/TapGuide";
 import { render, screen, within } from "@testing-library/react";
 
@@ -9,9 +10,34 @@ jest.mock("@/hooks/useNftPurchasingVisibility", () => ({
   }),
 }));
 
+let mockPolicy: typeof policy | null = policy;
+jest.mock("@/hooks/useConsolidationPolicy", () => ({
+  useConsolidationPolicy: () => ({ policy: mockPolicy, isLoading: false }),
+}));
+
 describe("TapGuide", () => {
   beforeEach(() => {
     mockHideNftPurchasing = false;
+    mockPolicy = policy;
+  });
+
+  it("dates the fourth wallet from the backend consolidation settings", () => {
+    render(<TapGuide />);
+    expect(
+      screen.getByText(
+        "You can combine up to 4 wallets. The fourth can be added from October 15, 2026."
+      )
+    ).toBeInTheDocument();
+  });
+
+  it("points to Guided Setup while the consolidation settings are unavailable", () => {
+    mockPolicy = null;
+    render(<TapGuide />);
+    expect(
+      screen.getByText(
+        "You can combine up to 4 wallets. The fourth can be added from the start time shown in Guided Setup."
+      )
+    ).toBeInTheDocument();
   });
 
   it("leads with the protocol, the one rule and the setup button", () => {

@@ -24,11 +24,9 @@ import TDHSection, {
   TDH_TEXT,
 } from "@/app/network/tdh/TDHSection";
 import ButtonLink from "@/components/utils/button/ButtonLink";
-import {
-  CONSOLIDATION_FOURTH_WALLET_ACTIVATION_MS,
-  CONSOLIDATION_WALLET_LIMIT,
-} from "@/constants/consolidation.constants";
+import { CONSOLIDATION_WALLET_LIMIT } from "@/constants/consolidation.constants";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useConsolidationPolicy } from "@/hooks/useConsolidationPolicy";
 import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import { formatDate, formatInteger } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
@@ -147,6 +145,7 @@ const LEARN_LINKS = [
 export default function TapGuide() {
   const locale = useBrowserLocale();
   const { hideNftPurchasing } = useNftPurchasingVisibility();
+  const { policy } = useConsolidationPolicy();
 
   return (
     <article
@@ -224,7 +223,7 @@ export default function TapGuide() {
             <p className="tw-mb-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-400">
               {t(locale, "delegation.tapGuide.old.retire.limit", {
                 limit: formatInteger(locale, CONSOLIDATION_WALLET_LIMIT),
-                date: fourthWalletDate(locale),
+                date: fourthWalletDate(locale, policy?.activationMs),
               })}
             </p>
           </IconPanel>
@@ -341,8 +340,16 @@ export default function TapGuide() {
   );
 }
 
-function fourthWalletDate(locale: SupportedLocale) {
-  return formatDate(locale, CONSOLIDATION_FOURTH_WALLET_ACTIVATION_MS, {
+// The start time comes from the backend's consolidation settings; while they
+// load or if they are unavailable, the guide points to Guided Setup instead.
+function fourthWalletDate(
+  locale: SupportedLocale,
+  activationMs: number | undefined
+) {
+  if (activationMs === undefined) {
+    return t(locale, "delegation.tapGuide.old.retire.pendingDate");
+  }
+  return formatDate(locale, activationMs, {
     year: "numeric",
     month: "long",
     day: "numeric",
