@@ -2,6 +2,7 @@
 
 import { isAuthResolving } from "@/components/auth/authResolution";
 import AuthLoadingPlaceholder from "@/components/auth/AuthLoadingPlaceholder";
+import { E2eeMessagesSection } from "@/components/e2ee/sidebar/E2eeMessagesSection";
 import useCreateModalState from "@/hooks/useCreateModalState";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
@@ -180,6 +181,9 @@ const WebDirectMessagesList: React.FC<WebDirectMessagesListProps> = ({
             )}
           </div>
         )}
+
+        {/* Encrypted chats (D109); renders nothing when the flag is off. */}
+        <E2eeMessagesSection collapsed={isCollapsed} />
 
         <div className="tw-flex tw-w-full tw-flex-1 tw-flex-col">
           {listContent}
