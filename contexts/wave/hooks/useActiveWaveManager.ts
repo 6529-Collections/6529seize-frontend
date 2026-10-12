@@ -9,7 +9,7 @@ import {
 import { waveCompetitionTabs } from "@/helpers/default-competition.helpers";
 import { useWaveTabPreference } from "@/hooks/useWaveTabPreference";
 import { useQueryClient } from "@tanstack/react-query";
-import { QueryKey } from "@/components/react-query-wrapper/query-keys";
+import { defaultCompetitionQueryKey } from "@/services/api/competitions-api";
 import { useCompetitionViewer } from "@/hooks/competitions/useCompetitionQueries";
 import type { ApiDefaultCompetition } from "@/generated/models/ApiDefaultCompetition";
 import {
@@ -88,10 +88,9 @@ export function useActiveWaveManager() {
         isMultiCompetitionEnabled() &&
         typeof remembered === "object"
       ) {
-        const selection = queryClient.getQueryData<ApiDefaultCompetition>([
-          QueryKey.DEFAULT_COMPETITION,
-          { wave_id: waveId, viewer },
-        ]);
+        const selection = queryClient.getQueryData<ApiDefaultCompetition>(
+          defaultCompetitionQueryKey(waveId, viewer)
+        );
         const tab = waveCompetitionTabs[remembered.tab];
         if (tab && selection?.competition_id === remembered.competitionId) {
           const params = new URLSearchParams({ tab, restore: "1" });

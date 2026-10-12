@@ -181,6 +181,8 @@ it.each(["loading", "error"])(
     );
     expect(screen.queryByTestId("native")).toBeNull();
     expect(screen.queryByText("Direct legacy content")).toBeNull();
+    // Retry refreshes the wave, hub and selected record together, even when
+    // only one read failed, to recover a coherent authorized presentation.
     fireEvent.click(screen.getByRole("button", { name: "Retry" }));
     expect(mockWaveQuery.refetch).toHaveBeenCalledTimes(1);
     expect(mockHubQuery.refetch).toHaveBeenCalledTimes(1);
@@ -240,13 +242,20 @@ it.each([401, 403, 404])(
   }
 );
 
-it.each(["wave", "hub"])(
-  "revokes cached content when its %s read rejects access",
-  (source) => {
+it.each([
+  ["wave", 401],
+  ["wave", 403],
+  ["wave", 404],
+  ["hub", 401],
+  ["hub", 403],
+  ["hub", 404],
+] as const)(
+  "revokes cached content when its %s read rejects access with %s",
+  (source, status) => {
     const { rerender } = render(routeTree());
     const result = source === "wave" ? mockWaveQuery : mockHubQuery;
     result.isError = true;
-    result.error = { status: 403 };
+    result.error = { status };
     rerender(routeTree());
     expect(screen.queryByTestId("native")).toBeNull();
     expect(screen.getByRole("status")).toHaveTextContent(
@@ -351,6 +360,7 @@ it.each([
     { waveId: "", competitionId: "" },
     false
   );
+  expect(useDefaultCompetition).toHaveBeenCalledWith("", false);
   expect(screen.getByTestId("persistent-shell")).toHaveAttribute(
     "data-ready",
     "false"

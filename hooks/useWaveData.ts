@@ -38,14 +38,14 @@ export const useWaveData = ({
       if (error?.message === "Attempted fetch with null waveId") {
         return false; // Don't retry our artificial error
       }
+      const status = getStructuredApiErrorStatus(error);
       if (
         (error as unknown) === `Wave ${waveId ?? ""} not found` ||
-        getStructuredApiErrorStatus(error) === 404
+        status === 404
       ) {
         onWaveNotFound();
         return false;
       }
-      const status = getStructuredApiErrorStatus(error);
       if (status === 401 || status === 403) return false;
       return failureCount < 3;
     },

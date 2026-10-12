@@ -616,7 +616,8 @@ export const ContentTabProvider: React.FC<{
     !hasWaveDestination(search) &&
     rememberedTab !== undefined &&
     isMultiCompetitionEnabled() &&
-    (registeredWaveId !== routeWaveId || !registeredTabsReady)
+    (registeredWaveId !== routeWaveId || !registeredTabsReady) &&
+    !(selection.routeToken === routeToken && selection.intentional)
   )
     activeContentTab = rememberedTab;
   if (isCompetitionRoute) {

@@ -1315,6 +1315,43 @@ describe("remembered wave entries", () => {
     jest.restoreAllMocks();
   });
 
+  it("honors a deliberate Chat selection while the destination tabs are still registering", () => {
+    jest
+      .spyOn(competitionHelpers, "isMultiCompetitionEnabled")
+      .mockReturnValue(true);
+    localStorage.setItem(
+      "memes_wave_last_tab_by_id",
+      JSON.stringify({
+        "main-stage": {
+          tab: MyStreamWaveTab.LEADERBOARD,
+          competitionId: "primary",
+        },
+      })
+    );
+    mockPathname = "/waves/chat";
+    const { result, rerender } = setup();
+    act(() =>
+      result.current.updateAvailableTabs({
+        ...rememberedWaveParams,
+        waveId: "chat",
+        isChatWave: true,
+      })
+    );
+    mockPathname = "/waves/main-stage";
+    rerender();
+    expect(result.current.activeContentTab).toBe(MyStreamWaveTab.LEADERBOARD);
+    act(() => result.current.setActiveContentTab(MyStreamWaveTab.CHAT));
+    expect(result.current.activeContentTab).toBe(MyStreamWaveTab.CHAT);
+    expect(mockPush).not.toHaveBeenCalled();
+    expect(mockReplace).not.toHaveBeenCalled();
+    mockPathname = "/waves/another";
+    rerender();
+    mockPathname = "/waves/main-stage";
+    rerender();
+    expect(result.current.activeContentTab).toBe(MyStreamWaveTab.LEADERBOARD);
+    jest.restoreAllMocks();
+  });
+
   it("honors an explicit pending leaderboard before wave registration without selecting Chat", () => {
     mockPathname = "/waves/main-stage";
     mockSearch = new URLSearchParams("tab=leaderboard");

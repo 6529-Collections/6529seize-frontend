@@ -48,6 +48,10 @@ export const competitionQueryKey = (
   identity: CompetitionIdentity,
   viewer: string | null
 ) => [QueryKey.COMPETITION, { ...competitionScope(identity), viewer }] as const;
+export const defaultCompetitionQueryKey = (
+  waveId: string,
+  viewer: string | null
+) => [QueryKey.DEFAULT_COMPETITION, { wave_id: waveId, viewer }] as const;
 
 export async function fetchDropCompetitionContext(
   waveId: string,

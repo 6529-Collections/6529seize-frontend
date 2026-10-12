@@ -1,6 +1,7 @@
 import { renderHook, act, waitFor } from "@testing-library/react";
 import { useActiveWaveManager } from "@/contexts/wave/hooks/useActiveWaveManager";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { defaultCompetitionQueryKey } from "@/services/api/competitions-api";
 
 const mockQueryData = jest.fn();
 jest.mock("@tanstack/react-query", () => ({
@@ -112,6 +113,7 @@ describe("useActiveWaveManager", () => {
 
     expect(push).toHaveBeenCalledWith("/waves/def?divider=42");
     expect(pushStateSpy).not.toHaveBeenCalled();
+    // Keep the visible source wave until the route-owned destination commits.
     expect(result.current.activeWaveId).toBe("abc");
   });
 
@@ -167,6 +169,9 @@ describe("useActiveWaveManager", () => {
     const pushStateSpy = jest.spyOn(globalThis.history, "pushState");
     const { result, rerender } = renderHook(() => useActiveWaveManager());
     act(() => result.current.setActiveWave("stage", { divider: 42 }));
+    expect(mockQueryData).toHaveBeenLastCalledWith(
+      defaultCompetitionQueryKey("stage", "member:self")
+    );
     expect(push).toHaveBeenCalledWith(
       "/waves/stage/competitions/primary?tab=leaderboard&restore=1&divider=42"
     );

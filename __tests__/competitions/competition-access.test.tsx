@@ -303,6 +303,19 @@ describe.each(["detail", "new"] as const)(
       expect(screen.queryByLabelText("Draft description")).toBeNull();
       expect(screen.getByRole("alert")).toBeVisible();
     });
+
+    it.each([401, 403, 404])(
+      "revokes cached editor content when its hub rejects access (%s)",
+      (status) => {
+        const { rerender } = render(draftRoute(surface));
+        expect(screen.getByLabelText("Draft description")).toBeVisible();
+        mockHubRead.isError = true;
+        mockHubRead.error = { status };
+        rerender(draftRoute(surface));
+        expect(screen.queryByLabelText("Draft description")).toBeNull();
+        expect(screen.getByRole("alert")).toBeVisible();
+      }
+    );
   }
 );
 
@@ -315,13 +328,16 @@ it("removes a new draft editor when refreshed creation permission is revoked", (
   expect(screen.getByRole("alert")).toBeVisible();
 });
 
-it("revokes a cached existing draft when its competition read rejects access", () => {
-  mockCompetition.lifecycle = "DRAFT";
-  const { rerender } = render(draftRoute("detail"));
-  expect(screen.getByLabelText("Draft description")).toBeVisible();
-  mockCompetitionRead.isError = true;
-  mockCompetitionRead.error = { status: 403 };
-  rerender(draftRoute("detail"));
-  expect(screen.queryByLabelText("Draft description")).toBeNull();
-  expect(screen.getByRole("alert")).toBeVisible();
-});
+it.each([401, 403, 404])(
+  "revokes a cached existing draft when its competition read rejects access (%s)",
+  (status) => {
+    mockCompetition.lifecycle = "DRAFT";
+    const { rerender } = render(draftRoute("detail"));
+    expect(screen.getByLabelText("Draft description")).toBeVisible();
+    mockCompetitionRead.isError = true;
+    mockCompetitionRead.error = { status };
+    rerender(draftRoute("detail"));
+    expect(screen.queryByLabelText("Draft description")).toBeNull();
+    expect(screen.getByRole("alert")).toBeVisible();
+  }
+);
