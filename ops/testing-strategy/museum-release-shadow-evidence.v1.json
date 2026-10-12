@@ -1,34 +1,26 @@
 {
   "contract": "museum-release-shadow-evidence-v1",
-  "purpose": "Exact historical code-range shadows for Museum tier selection. These are not production-release counts, performance claims, or fabricated evidence.",
+  "purpose": "Exact historical code-range shadows for Museum affected-page selection. These are not production-release counts, performance claims, or fabricated evidence.",
   "fixtures": [
     {
       "id": "museum-about-3628-p0",
       "base_sha": "55913450cbe360cba1195b680ab47bc6a2939825",
       "head_sha": "67068d87cdc78252d2d48d172f8386ceb1df82e7",
       "expected_tier": "P2",
-      "expected_pr_packs": [
-        "test:e2e:museum-data-architecture",
-        "test:e2e:museum-institutional-practice",
-        "test:e2e:museum-about",
-        "test:e2e:museum-inside-system",
-        "test:e2e:museum-rights"
-      ],
-      "note": "Exact historical About typography range. The head rewrites an existing focused assertion, so the strengthened retention proof correctly escalates the range to P2."
+      "expected_pr_packs": ["test:e2e:museum-about"],
+      "note": "Exact historical About typography range. The rewritten focused assertion keeps the range out of P0, and affected-page selection maps the component to the About page, which the About and Network IA specs visit.",
+      "expected_pr_browser_scope": "affected-pages",
+      "expected_staging_packs": ["museum-about", "museum-network-ia"]
     },
     {
       "id": "museum-about-3625-test-addition-p2",
       "base_sha": "9b90bf52828101faa09655f17cf2a3e541c89410",
       "head_sha": "98d6ee04e84b6ee553724537b8bc9fef9a65c56d",
       "expected_tier": "P2",
-      "expected_pr_packs": [
-        "test:e2e:museum-data-architecture",
-        "test:e2e:museum-institutional-practice",
-        "test:e2e:museum-about",
-        "test:e2e:museum-inside-system",
-        "test:e2e:museum-rights"
-      ],
-      "note": "Exact historical range with a focused test added rather than modified in place; it must not enter P0."
+      "expected_pr_packs": ["test:e2e:museum-about"],
+      "note": "Exact historical range with a focused test added rather than modified in place; it stays out of P0 and maps to the About page only.",
+      "expected_pr_browser_scope": "affected-pages",
+      "expected_staging_packs": ["museum-about", "museum-network-ia"]
     },
     {
       "id": "museum-classifier-control-plane-p3",
@@ -42,7 +34,45 @@
         "test:e2e:museum-inside-system",
         "test:e2e:museum-rights"
       ],
-      "note": "Exact historical classifier and release-policy range; policy changes remain P3 under the prior trusted policy."
+      "note": "Exact historical classifier and release-policy range; changes to the selection machinery run every Museum pack.",
+      "expected_pr_browser_scope": "all-museum-packs",
+      "expected_staging_packs": [
+        "museum-data-architecture",
+        "museum-institutional-practice",
+        "museum-about",
+        "museum-inside-system",
+        "museum-rights",
+        "museum-network-ia"
+      ]
+    },
+    {
+      "id": "museum-home-3815-gate-only",
+      "base_sha": "2ed9d2e45cfdd0c31b01c07403848c6de220006a",
+      "head_sha": "06ec3e736ea5a8dc131656eef70045916ed5372c",
+      "expected_tier": "P2",
+      "expected_pr_packs": [],
+      "expected_pr_browser_scope": "gate-only",
+      "expected_staging_packs": ["museum-network-ia"],
+      "note": "Exact historical homepage consolidation range. The page and its changed copy keys map to the Museum home, which only the Network IA gate visits."
+    },
+    {
+      "id": "museum-work-metadata-4045",
+      "base_sha": "ca0c506c04f79ccf4bae62a3743247fcfca91253",
+      "head_sha": "a9dcb517b5ba82584807a45e20b361bfa99ac4e2",
+      "expected_tier": "P2",
+      "expected_pr_packs": [
+        "test:e2e:museum-institutional-practice",
+        "test:e2e:museum-inside-system",
+        "test:e2e:museum-rights"
+      ],
+      "expected_pr_browser_scope": "affected-pages",
+      "expected_staging_packs": [
+        "museum-institutional-practice",
+        "museum-inside-system",
+        "museum-rights",
+        "museum-network-ia"
+      ],
+      "note": "Exact historical work-metadata range. The shared metadata helper reaches collection, object, and work pages, so only the packs that visit those pages run."
     }
   ]
 }

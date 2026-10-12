@@ -2,7 +2,10 @@ import { deflateSync } from "node:zlib";
 
 // Distinct page images expose retained decoded-image memory without committing
 // a large binary fixture. Each page decodes to a 1024 x 1536 RGB raster.
-export function createImageHeavyPdf(pageCount = 60): Buffer {
+export function createImageHeavyPdf(
+  pageCount = 60,
+  clusterPageMetadata = false
+): Buffer {
   const objects: Buffer[] = [];
   const add = (value: string | Buffer) => objects.push(Buffer.from(value));
   const stream = (dictionary: string, data: Buffer) =>
@@ -49,8 +52,18 @@ export function createImageHeavyPdf(pageCount = 60): Buffer {
   const parts = [Buffer.from("%PDF-1.7\n")];
   const offsets = [0];
   let length = parts[0]!.length;
-  objects.forEach((object, index) => {
-    offsets.push(length);
+  const entriesInFile = [...objects.entries()];
+  if (clusterPageMetadata) {
+    // Range loading also depends on PDF layout. Keep the page-tree metadata
+    // together, so looking up the final page does not read every image chunk.
+    const isPageMetadata = (index: number) => index < 3 || index % 3 === 0;
+    entriesInFile.sort(
+      ([left], [right]) =>
+        Number(isPageMetadata(right)) - Number(isPageMetadata(left))
+    );
+  }
+  entriesInFile.forEach(([index, object]) => {
+    offsets[index + 1] = length;
     const part = Buffer.concat([
       Buffer.from(`${index + 1} 0 obj\n`),
       object,

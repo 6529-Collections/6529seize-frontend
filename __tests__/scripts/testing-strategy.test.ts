@@ -778,7 +778,13 @@ describe("testing strategy CI plan", () => {
     expect(workflow).toContain("Restore Playwright browser");
     expect(workflow).toContain("node22-pr-production-nextjs");
 
-    for (const source of [workflow, stagingWorkflow, productionWorkflow]) {
+    // PR lanes retry quickly; deployed E2E allows slow downloads and waits for
+    // a timed-out apt-get before retrying.
+    for (const [source, installMinutes, retryMinutes] of [
+      [workflow, 3, 3],
+      [stagingWorkflow, 10, 15],
+      [productionWorkflow, 10, 15],
+    ] as const) {
       const workflowJobs = YAML.parse(source) as {
         jobs: Record<
           string,
@@ -800,13 +806,15 @@ describe("testing strategy CI plan", () => {
           expect.objectContaining({
             name: "Install Playwright dependencies",
             run: "./bin/6529 exec playwright install-deps chromium",
-            "timeout-minutes": 3,
+            "timeout-minutes": installMinutes,
             "continue-on-error": true,
           }),
           expect.objectContaining({
             name: "Retry Playwright dependencies",
-            run: "./bin/6529 exec playwright install-deps chromium",
-            "timeout-minutes": 3,
+            run: expect.stringContaining(
+              "./bin/6529 exec playwright install-deps chromium"
+            ),
+            "timeout-minutes": retryMinutes,
             "continue-on-error": true,
           }),
           expect.objectContaining({

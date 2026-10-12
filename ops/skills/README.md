@@ -18,6 +18,9 @@ This folder stores repo-local Codex skills and agent guidance.
 - [Design UI/UX](design-ui-ux/SKILL.md): guides frontend UI changes against
   repo-specific design, Tailwind-first migration, responsive layout,
   interaction-state, media, and visual evidence standards.
+- [FE Polish Judge](fe-polish-judge/SKILL.md): runs an independent judge loop
+  that scores a frontend surface against the 6529 polish rubric and drives
+  repairs to the 8.5 bar.
 - [I18n Localization](i18n-localization/SKILL.md): guides progressive
   frontend message extraction, locale formatting, and fallback review.
 - [Post 6529](post-6529/SKILL.md): publishes, verifies, edits, and deletes
