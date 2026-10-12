@@ -1,15 +1,26 @@
 import { toDirectedLinkKey } from "@/components/delegation/consolidation-builder/consolidation-plan";
 import {
-  getFreshLinkKeys,
+  getFreshLinkKeys as getFreshLinkKeysWithPolicy,
   parseConsolidationRows,
 } from "@/components/delegation/consolidation-builder/consolidation-registrations";
-import { CONSOLIDATION_FOURTH_WALLET_ACTIVATION_MS } from "@/constants/consolidation.constants";
+import { CONSOLIDATION_FOURTH_WALLET_ACTIVATION_MS } from "@/__tests__/helpers/consolidation-policy.fixture";
 
 const A = `0x${"a".repeat(40)}`;
 const B = `0x${"b".repeat(40)}`;
 const C = `0x${"c".repeat(40)}`;
 const D = `0x${"d".repeat(40)}`;
 const E = `0x${"e".repeat(40)}`;
+
+function getFreshLinkKeys(
+  rows: Parameters<typeof getFreshLinkKeysWithPolicy>[0],
+  wallets: readonly string[]
+) {
+  return getFreshLinkKeysWithPolicy(
+    rows,
+    wallets,
+    CONSOLIDATION_FOURTH_WALLET_ACTIVATION_MS
+  );
+}
 
 const ACTIVATION = CONSOLIDATION_FOURTH_WALLET_ACTIVATION_MS / 1000;
 const BEFORE = ACTIVATION - 1;
@@ -90,7 +101,7 @@ describe("parseConsolidationRows", () => {
 
 describe("backend contract", () => {
   it("uses the backend's activation second", () => {
-    // CONSOLIDATION_FOURTH_WALLET_ACTIVATION_TIMESTAMP in the backend.
+    // Production policy fixture; runtime cutoff is supplied by settings.
     expect(ACTIVATION).toBe(1_792_022_400);
   });
 

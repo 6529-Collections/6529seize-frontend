@@ -160,7 +160,10 @@ export function useConsolidationManagedWallets(
  * after the fourth-slot activation, from each wallet's stored pair rows.
  * Only four-wallet plans need it; pass no wallets otherwise.
  */
-export function useConsolidationFreshLinks(wallets: readonly string[]) {
+export function useConsolidationFreshLinks(
+  wallets: readonly string[],
+  activationMs: number | null
+) {
   const combined = useQueries({
     queries: wallets.map((wallet) => ({
       queryKey: [QueryKey.CONSOLIDATION_REGISTRATIONS, wallet],
@@ -180,10 +183,11 @@ export function useConsolidationFreshLinks(wallets: readonly string[]) {
     const loaded = combined.data.filter(
       (rows): rows is ConsolidationRows => rows !== undefined
     );
-    return loaded.length === combined.data.length
-      ? getFreshLinkKeys(loaded, wallets)
+    if (wallets.length === 0) return [];
+    return activationMs !== null && loaded.length === combined.data.length
+      ? getFreshLinkKeys(loaded, wallets, activationMs)
       : undefined;
-  }, [combined.data, wallets]);
+  }, [activationMs, combined.data, wallets]);
 
   return {
     freshLinkKeys,

@@ -26618,6 +26618,20 @@ components:
       enum:
         - boosted
         - unboosted
+    ApiConsolidationPolicy:
+      type: object
+      required:
+        - four_wallet_activation_at
+        - four_wallet_signing_opens_at
+      properties:
+        four_wallet_activation_at:
+          type: string
+          description: >-
+            Inclusive UTC block timestamp cutoff for fourth-wallet consent in
+            this environment.
+        four_wallet_signing_opens_at:
+          type: string
+          description: Guided signing opens ten minutes after the activation cutoff.
     ApiContentModerationAuditEntry:
       type: object
       required:
@@ -36198,6 +36212,7 @@ components:
         - announcements_wave_id
         - quorum_wave_id
         - auth
+        - consolidation
       properties:
         rememes_submission_tdh_threshold:
           type: integer
@@ -36224,6 +36239,8 @@ components:
           nullable: true
         auth:
           $ref: "#/components/schemas/ApiAuthSettings"
+        consolidation:
+          $ref: "#/components/schemas/ApiConsolidationPolicy"
     ApiSessionLoginRequest:
       type: object
       additionalProperties: false

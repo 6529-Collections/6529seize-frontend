@@ -38,7 +38,7 @@ text, docs, and tests.
   must be linked in both directions (on Any Collection or The Memes; either
   works for each direction). A fourth wallet counts only when one member's three
   links were each registered in both directions on or after
-  2026-10-15 00:00 UTC; before that, groups count at most 3 wallets, and groups
+  the activation cutoff supplied by this environment’s settings; before that, groups count at most 3 wallets, and groups
   of 2 or 3 keep their older registrations. When links conflict, the newest
   confirmed link wins. Consolidation registrations do not expire. It is not a
   delegation of NFT utility, but every wallet in a consolidation is a full key
@@ -322,7 +322,7 @@ Each article rewrite must preserve these invariants:
   understate it: every consolidated wallet is a full key to the profile.
 - Keep consolidation limits accurate: up to 4 wallets, every pair linked in
   both directions, and a fourth wallet only for links registered on or after
-  2026-10-15 00:00 UTC.
+  the activation cutoff supplied by this environment’s settings.
 - Do not imply delegation manager rights are low-risk.
 - Do not imply locks revoke existing outgoing records.
 - Keep contract use-case numbers accurate.
