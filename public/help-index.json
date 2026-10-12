@@ -4098,7 +4098,11 @@
         "check delegations",
         "check consolidations",
         "active delegations",
-        "active consolidations"
+        "active consolidations",
+        "wallet checker missing consolidation link",
+        "wallet checker linked wallets",
+        "why is there no consolidation recommendation",
+        "incomplete consolidation recommendations"
       ],
       "keywords": [
         "wallet",
@@ -4112,14 +4116,23 @@
         "consolidations",
         "architecture",
         "address",
-        "ens"
+        "ens",
+        "linked wallets",
+        "reverse direction",
+        "recommendations",
+        "stray links",
+        "partial results"
       ],
       "facts": [
         "Wallet Checker lives at /delegation/wallet-checker.",
         "Wallet Checker is a read-only diagnostics page for one wallet.",
         "It checks delegations, delegation managers, and consolidation relationships for an entered Ethereum address or .eth ENS.",
         "It can show Delegations, Active Minting Delegation for The Memes, Delegation Managers, Consolidations, Active Consolidation, and Incomplete Consolidation.",
-        "Use Wallet Checker when users ask how to check or view active delegations, consolidations, delegation managers, or wallet-architecture-related setup for an address."
+        "Use Wallet Checker when users ask how to check or view active delegations, consolidations, delegation managers, or wallet-architecture-related setup for an address.",
+        "For consolidation checks, Wallet Checker loads the checked wallet and up to six wallets directly linked to it, prioritizing confirmed links. This reveals pair records between other group members, not just links involving the checked wallet. Repeated pair records are deduplicated across direction and address case; the newest block wins, and an unconfirmed copy wins a same-block disagreement.",
+        "Incomplete Consolidation recommends registering a missing reverse direction only when both wallets belong with the checked wallet: the checked wallet itself, its active consolidation, or wallets directly linked to it. A member's one-way link to an unrelated wallet stays visible without a recommendation; completing it could move that member out of the group.",
+        "Recommendations wait until the separately loaded active-consolidation request settles. A failed linked-wallet request keeps the successfully loaded records, so partial results do not prove that every link was checked.",
+        "Wallet Checker does not invent links: if a pair is entirely absent in both directions, it produces no recommendation for that pair. The six-linked-wallet cap can also limit coverage for a wallet with many stray links. Listed registrations are distinct from the backend's active counted consolidation; the checker neither registers links nor activates four-wallet support."
       ],
       "canonical_path": "/delegation/wallet-checker",
       "related_paths": [
@@ -4130,7 +4143,9 @@
       "tags": ["delegation", "wallet", "checker", "diagnostics"],
       "source_refs": [
         "ops/docs/delegation/feature-wallet-checker.md",
-        "components/delegation/delegation-page-metadata.ts"
+        "components/delegation/delegation-page-metadata.ts",
+        "components/delegation/walletChecker/WalletChecker.tsx",
+        "components/delegation/walletChecker/walletCheckerConsolidations.ts"
       ]
     },
     {

@@ -1,8 +1,20 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import WalletChecker from "@/components/delegation/walletChecker/WalletChecker";
+import type { WalletConsolidation } from "@/entities/IDelegation";
 import { fetchUrl } from "@/services/6529api";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import React from "react";
+
+jest.mock(
+  "@/components/address/Address",
+  () =>
+    function MockAddress(props: {
+      wallets: string[];
+      display: string | undefined;
+    }) {
+      return <span>{props.display ?? props.wallets[0]}</span>;
+    }
+);
 
 jest.mock(
   "@/components/utils/input/ens-address/EnsAddressInput",
@@ -152,6 +164,302 @@ describe("WalletChecker", () => {
     expect(
       screen.queryByText("Enter a valid Ethereum address or ENS name.")
     ).not.toBeInTheDocument();
+  });
+});
+
+const API = "https://api.test.6529.io/api";
+const WALLET_A = "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+const WALLET_B = "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
+const WALLET_C = "0xcccccccccccccccccccccccccccccccccccccccc";
+const WALLET_D = "0xdddddddddddddddddddddddddddddddddddddddd";
+const DISPLAYS: Record<string, string> = {
+  [WALLET_A]: "a.eth",
+  [WALLET_B]: "b.eth",
+  [WALLET_C]: "c.eth",
+  [WALLET_D]: "d.eth",
+};
+
+function pair(
+  wallet1: string,
+  wallet2: string,
+  confirmed: boolean,
+  block = 100
+): WalletConsolidation {
+  return {
+    block,
+    wallet1,
+    wallet1_display: DISPLAYS[wallet1.toLowerCase()] ?? wallet1,
+    wallet2,
+    wallet2_display: DISPLAYS[wallet2.toLowerCase()] ?? wallet2,
+    confirmed,
+  };
+}
+
+function involves(row: WalletConsolidation, wallet: string) {
+  return (
+    row.wallet1.toLowerCase() === wallet.toLowerCase() ||
+    row.wallet2.toLowerCase() === wallet.toLowerCase()
+  );
+}
+
+function showIncompleteUrl(wallet: string) {
+  return `${API}/consolidations/${wallet}?show_incomplete=true`;
+}
+
+function countShowIncompleteCalls(wallet: string) {
+  const expected = showIncompleteUrl(wallet).toLowerCase();
+  return mockFetchUrl.mock.calls.filter(
+    ([url]) => String(url).toLowerCase() === expected
+  ).length;
+}
+
+function mockConsolidationApi(options: {
+  rowsFor(wallet: string): WalletConsolidation[];
+  resolved?: string[];
+  resolvedAfter?: Promise<void>;
+  failing?: string[];
+}) {
+  mockFetchUrl.mockImplementation(async (url: string) => {
+    const match =
+      /\/consolidations\/(0x[0-9a-fA-F]{40})(\?show_incomplete=true)?$/.exec(
+        url
+      );
+    if (!match) {
+      return { data: [] };
+    }
+    const wallet = match[1] ?? "";
+    if (!match[2]) {
+      await options.resolvedAfter;
+      return { data: options.resolved ?? [] };
+    }
+    if (options.failing?.includes(wallet.toLowerCase())) {
+      throw new Error(`failed ${wallet}`);
+    }
+    return { data: options.rowsFor(wallet) };
+  });
+}
+
+function renderCheckedWallet(address: string) {
+  return render(
+    <TestWrapper>
+      <WalletChecker address_query={address} setAddressQuery={jest.fn()} />
+    </TestWrapper>
+  );
+}
+
+describe("WalletChecker consolidation groups", () => {
+  beforeEach(() => {
+    mockFetchUrl.mockReset();
+  });
+
+  it("loads every linked wallet and flags an incomplete pair between other members", async () => {
+    // Four-wallet group checked from A: every pair is confirmed except C<->D,
+    // where only C has registered.
+    const rows = [
+      pair(WALLET_A, WALLET_B, true),
+      pair(WALLET_A, WALLET_C, true),
+      pair(WALLET_A, WALLET_D, true),
+      pair(WALLET_B, WALLET_C, true),
+      pair(WALLET_B, WALLET_D, true),
+      pair(WALLET_C, WALLET_D, false),
+    ];
+    mockConsolidationApi({
+      rowsFor: (wallet) => rows.filter((row) => involves(row, wallet)),
+      resolved: [WALLET_A, WALLET_B, WALLET_C],
+    });
+
+    renderCheckedWallet(WALLET_A);
+
+    expect(
+      await screen.findByText("Incomplete Consolidation")
+    ).toBeInTheDocument();
+    for (const wallet of [WALLET_A, WALLET_B, WALLET_C, WALLET_D]) {
+      expect(countShowIncompleteCalls(wallet)).toBe(1);
+    }
+    // 5 confirmed pairs in both directions plus the one registered C->D.
+    expect(screen.getByText("Consolidations (11)")).toBeInTheDocument();
+    const actions = screen.getAllByRole("listitem");
+    expect(actions).toHaveLength(1);
+    expect(actions[0]).toHaveTextContent(
+      "Register Consolidation from d.eth to c.eth"
+    );
+  });
+
+  it("keeps one row per wallet pair and fetches each linked wallet once", async () => {
+    const checksummedB = `0x${WALLET_B.slice(2).toUpperCase()}`;
+    mockConsolidationApi({
+      rowsFor: (wallet) => {
+        if (wallet.toLowerCase() === WALLET_A) {
+          // The same pair twice, in both directions and mixed case.
+          return [
+            pair(WALLET_A, WALLET_B, true, 100),
+            pair(checksummedB, WALLET_A, true, 100),
+          ];
+        }
+        // B's newer copy of the pair: A has since revoked, so only B->A
+        // remains registered.
+        return [pair(WALLET_B, WALLET_A, false, 200)];
+      },
+    });
+
+    renderCheckedWallet(WALLET_A);
+
+    expect(
+      await screen.findByText("Incomplete Consolidation")
+    ).toBeInTheDocument();
+    expect(countShowIncompleteCalls(WALLET_B)).toBe(1);
+    expect(screen.getByText("Consolidations (1)")).toBeInTheDocument();
+    const actions = screen.getAllByRole("listitem");
+    expect(actions).toHaveLength(1);
+    expect(actions[0]).toHaveTextContent(
+      "Register Consolidation from a.eth to b.eth"
+    );
+  });
+
+  it("keeps loaded rows when a linked wallet request fails", async () => {
+    const consoleError = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => undefined);
+    const rows = [
+      pair(WALLET_A, WALLET_B, true),
+      pair(WALLET_A, WALLET_C, true),
+      pair(WALLET_B, WALLET_C, true),
+    ];
+    mockConsolidationApi({
+      rowsFor: (wallet) => rows.filter((row) => involves(row, wallet)),
+      failing: [WALLET_C],
+    });
+
+    try {
+      renderCheckedWallet(WALLET_A);
+
+      expect(await screen.findByText("Consolidations (6)")).toBeInTheDocument();
+      expect(countShowIncompleteCalls(WALLET_B)).toBe(1);
+      expect(countShowIncompleteCalls(WALLET_C)).toBe(1);
+      expect(
+        screen.queryByText("Incomplete Consolidation")
+      ).not.toBeInTheDocument();
+      expect(consoleError).toHaveBeenCalledWith(
+        `Failed to fetch consolidations for related wallet: ${WALLET_C}`,
+        expect.any(Error)
+      );
+    } finally {
+      consoleError.mockRestore();
+    }
+  });
+
+  it("only suggests completing links that belong with the checked wallet", async () => {
+    // A, B and C are consolidated. D is being added: A and B registered to D.
+    // C also has an old one-way link to an unrelated wallet X.
+    const walletX = "0x9999999999999999999999999999999999999999";
+    const rows = [
+      pair(WALLET_A, WALLET_B, true),
+      pair(WALLET_A, WALLET_C, true),
+      pair(WALLET_B, WALLET_C, true),
+      pair(WALLET_A, WALLET_D, false),
+      pair(WALLET_B, WALLET_D, false),
+      pair(WALLET_C, walletX, false),
+    ];
+    mockConsolidationApi({
+      rowsFor: (wallet) => rows.filter((row) => involves(row, wallet)),
+      resolved: [WALLET_A, WALLET_B, WALLET_C],
+    });
+
+    renderCheckedWallet(WALLET_A);
+
+    expect(
+      await screen.findByText("Incomplete Consolidation")
+    ).toBeInTheDocument();
+    const actions = screen
+      .getAllByRole("listitem")
+      .map((item) => item.textContent);
+    // D's missing links are suggested; completing C's link to X would move C
+    // out of the group, so it is not.
+    expect(actions).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining("from d.eth to a.eth"),
+        expect.stringContaining("from d.eth to b.eth"),
+      ])
+    );
+    expect(actions).toHaveLength(2);
+  });
+
+  it("waits for the active consolidation before suggesting links", async () => {
+    // A is consolidated with B, A is linked with C, and B has registered
+    // towards C. The request for A's active consolidation answers after the
+    // link rows.
+    let releaseGroup: () => void = () => undefined;
+    const groupLoaded = new Promise<void>((resolve) => {
+      releaseGroup = resolve;
+    });
+    const rows = [
+      pair(WALLET_A, WALLET_B, true),
+      pair(WALLET_A, WALLET_C, true),
+      pair(WALLET_B, WALLET_C, false),
+    ];
+    mockConsolidationApi({
+      rowsFor: (wallet) => rows.filter((row) => involves(row, wallet)),
+      resolved: [WALLET_A, WALLET_B],
+      resolvedAfter: groupLoaded,
+    });
+
+    renderCheckedWallet(WALLET_A);
+
+    expect(await screen.findByText("Consolidations (5)")).toBeInTheDocument();
+    expect(
+      screen.queryByText("Incomplete Consolidation")
+    ).not.toBeInTheDocument();
+
+    releaseGroup();
+
+    expect(
+      await screen.findByText("Incomplete Consolidation")
+    ).toBeInTheDocument();
+    expect(screen.getAllByRole("listitem")[0]).toHaveTextContent(
+      "Register Consolidation from c.eth to b.eth"
+    );
+  });
+
+  it("prefers the unconfirmed copy when two copies share a block", async () => {
+    mockConsolidationApi({
+      rowsFor: (wallet) =>
+        wallet.toLowerCase() === WALLET_A
+          ? [pair(WALLET_A, WALLET_B, true, 100)]
+          : [pair(WALLET_B, WALLET_A, false, 100)],
+    });
+
+    renderCheckedWallet(WALLET_A);
+
+    expect(
+      await screen.findByText("Incomplete Consolidation")
+    ).toBeInTheDocument();
+  });
+
+  it("caps linked wallet requests and fetches confirmed links first", async () => {
+    const strays = Array.from(
+      { length: 7 },
+      (_, index) => `0x${String(index + 1).repeat(40)}`
+    );
+    const firstRows = [
+      ...strays.map((stray) => pair(WALLET_A, stray, false)),
+      pair(WALLET_A, WALLET_B, true),
+    ];
+    mockConsolidationApi({
+      rowsFor: (wallet) => (wallet.toLowerCase() === WALLET_A ? firstRows : []),
+    });
+
+    renderCheckedWallet(WALLET_A);
+
+    expect(
+      await screen.findByText("Incomplete Consolidation")
+    ).toBeInTheDocument();
+    const linkedRequests = mockFetchUrl.mock.calls.filter(
+      ([url]) =>
+        String(url).endsWith("?show_incomplete=true") &&
+        !String(url).includes(WALLET_A)
+    );
+    expect(linkedRequests).toHaveLength(6);
+    expect(countShowIncompleteCalls(WALLET_B)).toBe(1);
   });
 });
 
