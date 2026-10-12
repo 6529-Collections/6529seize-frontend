@@ -24,8 +24,8 @@ Its navigation guidance distinguishes the app's compact collection and Votes
 pills from web tabs and the shared published-competition wave row. The collection
 uses More for its remaining choices.
 
-The `waves.content-tabs` record describes the conditional pending indicator on
-a tapped tab, section-specific loading, and destination-bound competition
+The `waves.content-tabs` record describes steady tab rows with screen-reader
+loading announcements, section-specific loading, and destination-bound competition
 controls. It also explains that app tabs already in view keep their position
 when selected. It does not promise instant data or a loading screen on every switch.
 

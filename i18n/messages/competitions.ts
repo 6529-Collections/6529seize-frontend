@@ -49,6 +49,7 @@ export const COMPETITION_MESSAGES = {
   "competitions.title": "Competitions",
   "competitions.chat": "Shared chat",
   "competitions.new": "New competition",
+  "competitions.createAction": "Competition",
   "competitions.add": "Add competition",
   "competitions.createHub": "Create a wave",
   "competitions.first": "Configure the first competition",

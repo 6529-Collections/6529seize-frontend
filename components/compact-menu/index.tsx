@@ -31,6 +31,7 @@ export function CompactMenu({
   disabled,
   activeItemId,
   closeOnSelect,
+  autoFocusItem,
   "aria-label": ariaLabel,
   unstyledItems,
 }: Readonly<CompactMenuProps>) {
@@ -58,6 +59,7 @@ export function CompactMenu({
           disabled={disabled}
           activeItemId={activeItemId}
           closeOnSelect={closeOnSelect}
+          autoFocusItem={autoFocusItem}
           ariaLabel={ariaLabel}
           unstyledItems={unstyledItems}
           isOpen={open}
@@ -100,12 +102,16 @@ function CompactMenuContent({
   disabled = false,
   activeItemId,
   closeOnSelect = true,
+  autoFocusItem = true,
   ariaLabel,
   unstyledItems = false,
   isOpen,
   close,
 }: Readonly<CompactMenuContentProps>) {
-  const { menuItemsRef, focusInitialMenuItem } = useCompactMenuFocus(isOpen);
+  const { menuItemsRef, focusInitialMenuItem } = useCompactMenuFocus(
+    isOpen,
+    autoFocusItem
+  );
   const menuAnchor = anchor ?? DEFAULT_ANCHOR;
 
   return (
