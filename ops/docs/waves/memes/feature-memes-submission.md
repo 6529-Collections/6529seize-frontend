@@ -190,7 +190,7 @@ submitted. Voting starts immediately and does not wait for their replies.
 
 The submitter can see every invitation and cancel a pending invitation. Each
 invitee can review the submitted artwork, the final acceptance wording, and the
-submission/minting terms from the invitation notification or artwork details.
+submission/minting terms from **Notifications → Invites** or artwork details.
 They can accept or decline using their own profile; proxies cannot consent.
 Acceptance is final, with no withdrawal. The artwork and agreed artist credits
 are locked after acceptance; replacing the artwork requires a new submission
