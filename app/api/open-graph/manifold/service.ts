@@ -7,7 +7,10 @@ import { asNonEmptyString } from "../opensea/shared";
 const MANIFOLD_CACHE_TTL_MS = 5 * 60 * 1000;
 const MANIFOLD_HOST = "manifold.xyz";
 const LISTING_PATH_PATTERN = /^\/@([^/]+)\/id\/([^/?#]+)\/?$/i;
-const HYDRATE_WORK_PATTERN = /hydrateWorkPage\(\s*(\{[\s\S]*?\})\s*\);?/g;
+const HYDRATE_WORK_CALL = "hydrateWorkPage(";
+// Optional whitespace and the "{" that opens a payload, right after the call.
+const HYDRATE_WORK_PAYLOAD_START_PATTERN = /\s*\{/y;
+const HYDRATE_WORK_PAYLOAD_END_PATTERN = /\}\s*\)/g;
 
 type FetchHtmlResult = {
   readonly html: string;
@@ -68,25 +71,53 @@ const asNumberishString = (value: unknown): string | undefined => {
   return asNonEmptyString(value);
 };
 
+const parseHydratePayload = (
+  rawPayload: string
+): ManifoldHydratePayload | null => {
+  try {
+    return JSON.parse(rawPayload) as ManifoldHydratePayload;
+  } catch {
+    return null;
+  }
+};
+
+/**
+ * Collects `hydrateWorkPage({...})` payloads. A payload ends at the first "}"
+ * followed by ")", and every search resumes after the previous one, so the
+ * scan stays linear in the page size.
+ */
 const extractHydratePayloads = (
   html: string
 ): readonly ManifoldHydratePayload[] => {
   const payloads: ManifoldHydratePayload[] = [];
-  HYDRATE_WORK_PATTERN.lastIndex = 0;
-  let match: RegExpExecArray | null;
+  let callIndex = html.indexOf(HYDRATE_WORK_CALL);
 
-  while ((match = HYDRATE_WORK_PATTERN.exec(html))) {
-    const rawPayload = match[1];
-    if (!rawPayload) {
+  while (callIndex !== -1) {
+    HYDRATE_WORK_PAYLOAD_START_PATTERN.lastIndex =
+      callIndex + HYDRATE_WORK_CALL.length;
+    if (!HYDRATE_WORK_PAYLOAD_START_PATTERN.test(html)) {
+      callIndex = html.indexOf(HYDRATE_WORK_CALL, callIndex + 1);
       continue;
     }
 
-    try {
-      const parsed = JSON.parse(rawPayload) as ManifoldHydratePayload;
-      payloads.push(parsed);
-    } catch {
-      continue;
+    const payloadStart = HYDRATE_WORK_PAYLOAD_START_PATTERN.lastIndex - 1;
+    HYDRATE_WORK_PAYLOAD_END_PATTERN.lastIndex = payloadStart + 1;
+    const payloadEnd = HYDRATE_WORK_PAYLOAD_END_PATTERN.exec(html);
+    if (!payloadEnd) {
+      // Later calls cannot close their payloads either.
+      break;
     }
+
+    const payload = parseHydratePayload(
+      html.slice(payloadStart, payloadEnd.index + 1)
+    );
+    if (payload) {
+      payloads.push(payload);
+    }
+    callIndex = html.indexOf(
+      HYDRATE_WORK_CALL,
+      HYDRATE_WORK_PAYLOAD_END_PATTERN.lastIndex
+    );
   }
 
   return payloads;

@@ -15,6 +15,12 @@ import sharp, { type Metadata } from "sharp";
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
+// This route only rasterizes the raster formats sniffed below. Also disable
+// libvips' SVG loader so remote vector documents never reach a decoder, even
+// when their bytes are mistaken for another format. Next's image optimizer
+// shares this process but never hands SVG to sharp (dangerouslyAllowSVG is off).
+sharp.block({ operation: ["VipsForeignLoadSvg"] });
+
 const DEFAULT_WIDTH = 1200;
 const MAX_WIDTH = 1200;
 const MAX_HEIGHT = 12000;
@@ -30,7 +36,7 @@ const GIF_CONTENT_TYPE = "image/gif";
 const CACHE_CONTROL =
   "public, max-age=604800, s-maxage=2592000, stale-while-revalidate=2592000";
 const IMAGE_ACCEPT_HEADER =
-  "image/png,image/jpeg,image/gif,image/webp,image/svg+xml,*/*;q=0.5";
+  "image/png,image/jpeg,image/gif,image/webp,*/*;q=0.5";
 const USER_AGENT =
   "Mozilla/5.0 (compatible; 6529-og-image/1.0; +https://6529.io)";
 const IMAGE_TYPE_SIGNATURES = [
@@ -301,21 +307,9 @@ const fetchOversizedGifPreviewBuffer = async (url: URL): Promise<Buffer> => {
   return buffer;
 };
 
-const detectContentType = (buffer: Buffer): string | null => {
-  const signature = IMAGE_TYPE_SIGNATURES.find(({ matches }) =>
-    matches(buffer)
-  );
-  if (signature) {
-    return signature.contentType;
-  }
-
-  const prefix = buffer.subarray(0, 256).toString("utf8").trimStart();
-  if (prefix.startsWith("<svg") || prefix.startsWith("<?xml")) {
-    return "image/svg+xml";
-  }
-
-  return null;
-};
+const detectContentType = (buffer: Buffer): string | null =>
+  IMAGE_TYPE_SIGNATURES.find(({ matches }) => matches(buffer))?.contentType ??
+  null;
 
 const normalizeImage = async ({
   buffer,
@@ -327,8 +321,8 @@ const normalizeImage = async ({
   readonly allowAnimation: boolean;
 }): Promise<{ data: Buffer; contentType: string }> => {
   const detectedContentType = detectContentType(buffer);
-  if (!detectedContentType?.startsWith("image/")) {
-    throw new Error("Upstream response is not an image.");
+  if (!detectedContentType) {
+    throw new Error("Upstream response is not a supported raster image.");
   }
 
   const image = sharp(buffer, {
