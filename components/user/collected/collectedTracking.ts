@@ -21,6 +21,7 @@ const COLLECTED_ACTIONS = [
   "Change season",
   "Change sort",
   "Change seized filter",
+  "Clear filters",
   "Change address",
   "Change page",
   "Show more seasons",
