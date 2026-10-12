@@ -65,11 +65,10 @@ export async function monitorRememberedLeaderboard(
             isVisible(heading)
         );
         if (
-          targetMounted &&
-          (location.pathname === targetPath ||
-            location.pathname.startsWith(`${targetPath}/competitions`))
+          location.pathname === targetPath ||
+          location.pathname.startsWith(`${targetPath}/competitions`)
         ) {
-          frames += 1;
+          if (targetMounted) frames += 1;
           for (const section of document.querySelectorAll(
             '[role="tab"][aria-selected="true"], nav[aria-label="Wave sections"] button[aria-current="true"]'
           )) {

@@ -2048,6 +2048,145 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     });
   }
 
+  test("keeps one desktop wave sidebar while an unvisited wave page streams", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      testInfo.project.name !== "web-desktop-chromium",
+      "The page-loading sidebar is only rendered in the desktop layout."
+    );
+    const targetWaveId = "00000000-0000-4000-8000-000000000536";
+    const sandbox = await installCompetitionApi(page, false, false);
+    sandbox.onlyCompetition("alpha");
+    const response = await page.request.get(
+      `${getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"])}/api/v2/waves/${targetWaveId}/drops`
+    );
+    expect(response.ok()).toBe(true);
+    const { wave: overview } = await response.json();
+    const waves = [
+      { ...overview, id: WAVE, name: "Warmed Competition Wave" },
+      { ...overview, id: targetWaveId, name: "Previously Unvisited Wave" },
+    ];
+    await page.route(/\/api\/v2\/waves(?:\?|$)/, (route) =>
+      route.fulfill({ json: { data: waves, page: 1, next: false } })
+    );
+    await page.route("**/api/v2/official-waves", (route) =>
+      route.fulfill({ json: waves })
+    );
+    await page.goto(`${ROOT}/alpha?tab=leaderboard`);
+    const entry = page.getByText("Immutable alpha entry content", {
+      exact: true,
+    });
+    await expect(entry).toBeVisible();
+    const sidebar = await retainDesktopWaveSidebar(page);
+    const pane = page
+      .getByRole("region", {
+        name: /All recent waves list|Regular waves list/,
+      })
+      .filter({ visible: true })
+      .locator(
+        "xpath=ancestor::div[contains(concat(' ', normalize-space(@class), ' '), ' tw-h-full ') and contains(concat(' ', normalize-space(@class), ' '), ' tw-border-r ')][1]"
+      );
+    const monitor = await pane.evaluateHandle((retainedPane) => {
+      const loadingFrames: {
+        sidebarRight: number;
+        shellLeft: number;
+        placeholderAsideWidths: number[];
+      }[] = [];
+      let frameId = 0;
+      const sample = () => {
+        const paneRect = retainedPane.getBoundingClientRect();
+        if (retainedPane.isConnected && paneRect.width > 0) {
+          for (const shell of document.querySelectorAll(
+            '[data-testid="stream-route-loading-shell"]'
+          )) {
+            const shellRect = shell.getBoundingClientRect();
+            if (
+              shellRect.width > 0 &&
+              shellRect.height > 0 &&
+              shellRect.left >= paneRect.right - 1
+            ) {
+              loadingFrames.push({
+                sidebarRight: paneRect.right,
+                shellLeft: shellRect.left,
+                placeholderAsideWidths: Array.from(
+                  shell.querySelectorAll("aside"),
+                  (aside) => aside.getBoundingClientRect().width
+                ).filter((width) => width > 0),
+              });
+            }
+          }
+        }
+        frameId = requestAnimationFrame(sample);
+      };
+      frameId = requestAnimationFrame(sample);
+      return {
+        stop: () => {
+          cancelAnimationFrame(frameId);
+          return loadingFrames;
+        },
+      };
+    });
+    let releasePage!: () => void;
+    const pendingPage = new Promise<void>((resolve) => {
+      releasePage = resolve;
+    });
+    let pageHeld = false;
+    await page.route(
+      (url) =>
+        url.pathname === `/waves/${targetWaveId}` &&
+        url.searchParams.has("_rsc"),
+      async (route) => {
+        pageHeld = true;
+        await pendingPage;
+        await route.continue();
+      }
+    );
+    try {
+      await page
+        .getByRole("region", {
+          name: /All recent waves list|Regular waves list/,
+        })
+        .getByRole("link")
+        .filter({ hasText: "Previously Unvisited Wave" })
+        .first()
+        .click();
+      await expect.poll(() => pageHeld).toBe(true);
+      await expect(page).toHaveURL(`${ROOT}/alpha?tab=leaderboard`);
+      await expect(entry).toBeVisible();
+      await sidebar.expectRetained();
+      releasePage();
+      await expect(page).toHaveURL(`/waves/${targetWaveId}`);
+      await expect(
+        page.getByRole("region", {
+          name: "Wave chat file upload area",
+          exact: true,
+        })
+      ).toBeVisible();
+      await sidebar.expectRetained();
+      const loadingFrames = await monitor.evaluate(async (state) => {
+        await new Promise<void>((resolve) =>
+          requestAnimationFrame(() => resolve())
+        );
+        return state.stop();
+      });
+      await testInfo.attach("streamed-page-loading-frames", {
+        body: JSON.stringify(loadingFrames),
+        contentType: "application/json",
+      });
+      expect(
+        loadingFrames.filter((frame) => frame.placeholderAsideWidths.length),
+        "A page loader beside the mounted wave sidebar must not paint another sidebar"
+      ).toEqual([]);
+      expect(sandbox.requests).toEqual([]);
+    } finally {
+      releasePage();
+      await monitor.evaluate((state) => state.stop());
+      await monitor.dispose();
+      await sidebar.dispose();
+    }
+  });
+
   test("keeps the current Chat mounted while wave information is open and default data loads", async ({
     page,
   }, testInfo) => {
@@ -2547,10 +2686,77 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
   }
 
   for (const app of [false, true]) {
+    test(`recovers the selected Leaderboard after an initial missing wave metadata response (${app ? "app" : "web"})`, async ({
+      page,
+    }, testInfo) => {
+      test.skip(
+        app && testInfo.project.name !== "web-mobile-chromium",
+        "The native app layout is covered in the mobile project."
+      );
+      const sandbox = await installCompetitionApi(page, false, false);
+      sandbox.onlyCompetition("alpha");
+      if (app)
+        await installSurfaceSimulation(
+          page.context(),
+          "capacitor-ios-sim",
+          testInfo.project.use.baseURL
+        );
+      let waveMissing = true;
+      let metadataReads = 0;
+      await page.route(`**/api/waves/${WAVE}`, (route) => {
+        metadataReads += 1;
+        if (waveMissing)
+          return route.fulfill({
+            status: 404,
+            json: { message: `Wave ${WAVE} not found` },
+          });
+        return route.fallback();
+      });
+      await page.goto(`${ROOT}/alpha?tab=leaderboard`);
+      const unavailable = page
+        .getByRole("alert")
+        .filter({ hasText: "This competition could not be loaded" });
+      await expect(unavailable).toBeVisible();
+      expect(metadataReads).toBeGreaterThan(0);
+      await expect(page).toHaveURL(`${ROOT}/alpha?tab=leaderboard`);
+      const entry = page.getByText("Immutable alpha entry content", {
+        exact: true,
+      });
+      const chat = page.getByRole("region", {
+        name: "Wave chat file upload area",
+        exact: true,
+      });
+      await expect(entry).toHaveCount(0);
+      await expect(chat).toHaveCount(0);
+      waveMissing = false;
+      await unavailable
+        .getByRole("button", { name: "Try again", exact: true })
+        .click();
+      await expect(entry).toBeVisible();
+      await expect(unavailable).toHaveCount(0);
+      await expect(page).toHaveURL(`${ROOT}/alpha?tab=leaderboard`);
+      await expect(
+        page.getByRole(app ? "button" : "tab", {
+          name: "Leaderboard",
+          exact: true,
+        })
+      ).toHaveAttribute(app ? "aria-current" : "aria-selected", "true");
+      await expect(chat).toHaveCount(0);
+      await expect(
+        page.getByRole(app ? "button" : "tab", {
+          name: /^Competitions(?:\s+\d+\+?)?$/,
+        })
+      ).toHaveCount(0);
+      expect(sandbox.requests).toEqual([]);
+    });
+
     test(`keeps the selected Leaderboard during loading and transient refresh errors, and rejects revoked access (${app ? "app" : "web"})`, async ({
       page,
     }, testInfo) => {
-      test.skip(app && testInfo.project.name !== "web-mobile-chromium");
+      test.skip(
+        app && testInfo.project.name !== "web-mobile-chromium",
+        "The native app layout is covered in the mobile project."
+      );
       const sandbox = await installCompetitionApi(page, false, false);
       sandbox.onlyCompetition("alpha");
       await sandbox.legacyPrimary("alpha");
@@ -2665,7 +2871,10 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     test(`keeps settled tabs still during an unchanged competition refresh (${app ? "app" : "web"})`, async ({
       page,
     }, testInfo) => {
-      test.skip(app && testInfo.project.name !== "web-mobile-chromium");
+      test.skip(
+        app && testInfo.project.name !== "web-mobile-chromium",
+        "The native app layout is covered in the mobile project."
+      );
       const sandbox = await installCompetitionApi(page, false, false);
       sandbox.onlyCompetition("alpha");
       sandbox.refreshAtBoundary();

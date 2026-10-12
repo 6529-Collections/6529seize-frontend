@@ -24,6 +24,9 @@ jest.mock("@/components/waves/layout/WavesLayout", () => ({
 it("shows a neutral wave skeleton until the shared route can render", async () => {
   render(<WavesRouteLayout>Connect to create a wave</WavesRouteLayout>);
   expect(screen.getByRole("status", { name: "Loading waves" })).toBeVisible();
+  expect(
+    screen.getByTestId("stream-route-loading-shell").querySelector("aside")
+  ).toBeInTheDocument();
   expect(screen.queryByText("Connect to create a wave")).toBeNull();
   await act(async () => {
     mockSuspended = false;

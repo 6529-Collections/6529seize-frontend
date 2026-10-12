@@ -1,6 +1,12 @@
 "use client";
 
-import { createContext, useContext, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import {
   CompetitionProvider,
@@ -67,18 +73,29 @@ export function CompetitionRouteProvider({
   const accessRejected = [wave.error, hub.error, competition.error].some(
     isCompetitionAccessError
   );
-  let value: CompetitionContextValue | null = null;
-  if (
-    enabled &&
-    restored &&
-    !accessRejected &&
-    wave.data?.id === waveId &&
-    hub.data?.id === waveId &&
-    competition.data?.wave_id === waveId &&
-    competition.data.id === competitionId
-  ) {
-    value = { wave: wave.data, hub: hub.data, competition: competition.data };
-  }
+  const value = useMemo<CompetitionContextValue | null>(() => {
+    if (
+      enabled &&
+      restored &&
+      !accessRejected &&
+      wave.data?.id === waveId &&
+      hub.data?.id === waveId &&
+      competition.data?.wave_id === waveId &&
+      competition.data.id === competitionId
+    ) {
+      return { wave: wave.data, hub: hub.data, competition: competition.data };
+    }
+    return null;
+  }, [
+    enabled,
+    restored,
+    accessRejected,
+    wave.data,
+    hub.data,
+    competition.data,
+    waveId,
+    competitionId,
+  ]);
   const visit = `${waveId ?? ""}:${competitionId ?? ""}:${viewer ?? "anonymous"}`;
   const [presentation, setPresentation] = useState<{
     visit: string;
@@ -100,31 +117,53 @@ export function CompetitionRouteProvider({
     value && value.hub.legacy_primary_competition_id !== competitionId
       ? value.competition
       : null;
-  const state: CompetitionRouteState = {
-    waveId,
-    competitionId,
-    viewer,
-    value,
-    flat,
-    error:
-      value === null &&
-      (wave.isError ||
-        hub.isError ||
-        competition.isError ||
-        (restoring && selection.isError)),
-    retry: () => {
-      void wave.refetch();
-      void hub.refetch();
-      void competition.refetch();
-      if (restoring) void selection.refetch();
-    },
-  };
+  const error =
+    value === null &&
+    (wave.isError ||
+      hub.isError ||
+      competition.isError ||
+      (restoring && selection.isError));
+  const refetchWave = wave.refetch;
+  const refetchHub = hub.refetch;
+  const refetchCompetition = competition.refetch;
+  const refetchSelection = selection.refetch;
+  const state = useMemo<CompetitionRouteState>(
+    () => ({
+      waveId,
+      competitionId,
+      viewer,
+      value,
+      flat,
+      error,
+      retry: () => {
+        void refetchWave();
+        void refetchHub();
+        void refetchCompetition();
+        if (restoring) void refetchSelection();
+      },
+    }),
+    [
+      waveId,
+      competitionId,
+      viewer,
+      value,
+      flat,
+      error,
+      restoring,
+      refetchWave,
+      refetchHub,
+      refetchCompetition,
+      refetchSelection,
+    ]
+  );
+  const navigation = useMemo(
+    () => ({ flat, nativeCompetition }),
+    [flat, nativeCompetition]
+  );
   return (
     <CompetitionRouteContext.Provider value={state}>
       <CompetitionProvider value={value}>
-        <CompetitionNavigationContext.Provider
-          value={{ flat, nativeCompetition }}
-        >
+        <CompetitionNavigationContext.Provider value={navigation}>
           {children}
         </CompetitionNavigationContext.Provider>
       </CompetitionProvider>
