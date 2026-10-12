@@ -1,3 +1,4 @@
+import { ChatVideoPlaybackProvider } from "@/components/drops/view/item/content/media/ChatVideoPlayback";
 import DropsList from "@/components/drops/view/DropsList";
 import { WaveDropsReverseContainer } from "@/components/waves/drops/WaveDropsReverseContainer";
 import { WaveDropsScrollControls } from "@/components/waves/drops/WaveDropsScrollControls";
@@ -109,32 +110,34 @@ export const WaveDropsMessageListSection: React.FC<
         onTopIntersection={onTopIntersection}
         bottomPaddingClassName={bottomPaddingClassName}
       >
-        <DropsList
-          scrollContainerRef={scrollContainerRef}
-          onReplyClick={queueSerialTarget}
-          drops={waveMessages?.drops ?? []}
-          showWaveInfo={false}
-          onReply={onReply}
-          showReplyAndQuote={true}
-          activeDrop={activeDrop}
-          serialNo={serialTarget}
-          targetDropRef={targetDropRef}
-          onQuoteClick={onQuoteClick}
-          parentContainerRef={scrollContainerRef}
-          dropViewDropId={dropId}
-          onDropContentClick={onDropContentClick}
-          unreadDividerSerialNo={unreadDividerSerialNo}
-          boostedDrops={boostedDrops}
-          boostedDropsDisplayPreference={boostedDropsDisplayPreference}
-          onBoostedDropClick={onBoostedDropClick}
-          suspendLightDropHydration={suspendLightDropHydration}
-          virtualScrollRootMargin={virtualScrollRootMargin}
-          winningThreshold={winningThreshold}
-          winningThresholdMinDurationMs={winningThresholdMinDurationMs}
-          isVotingClosed={isVotingClosed}
-          isVotingControlsLocked={isVotingControlsLocked}
-          key="drops-list"
-        />
+        <ChatVideoPlaybackProvider>
+          <DropsList
+            scrollContainerRef={scrollContainerRef}
+            onReplyClick={queueSerialTarget}
+            drops={waveMessages?.drops ?? []}
+            showWaveInfo={false}
+            onReply={onReply}
+            showReplyAndQuote={true}
+            activeDrop={activeDrop}
+            serialNo={serialTarget}
+            targetDropRef={targetDropRef}
+            onQuoteClick={onQuoteClick}
+            parentContainerRef={scrollContainerRef}
+            dropViewDropId={dropId}
+            onDropContentClick={onDropContentClick}
+            unreadDividerSerialNo={unreadDividerSerialNo}
+            boostedDrops={boostedDrops}
+            boostedDropsDisplayPreference={boostedDropsDisplayPreference}
+            onBoostedDropClick={onBoostedDropClick}
+            suspendLightDropHydration={suspendLightDropHydration}
+            virtualScrollRootMargin={virtualScrollRootMargin}
+            winningThreshold={winningThreshold}
+            winningThresholdMinDurationMs={winningThresholdMinDurationMs}
+            isVotingClosed={isVotingClosed}
+            isVotingControlsLocked={isVotingControlsLocked}
+            key="drops-list"
+          />
+        </ChatVideoPlaybackProvider>
         <div ref={anchorRef} style={{ height: "1px" }} />
       </WaveDropsReverseContainer>
       {onScrollToUnread && (
