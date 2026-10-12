@@ -6,20 +6,32 @@ import type {
   MuseumPublicDocument,
   MuseumPublicWork,
 } from "@/lib/museum/publication";
+import {
+  MUSEUM_REPOSITORY_URL,
+  MUSEUM_SAFE_ETHERSCAN_URL,
+} from "@/lib/museum/types";
 
 jest.mock("@/components/museum/MuseumPublicMediaFigure", () => ({
   MuseumPublicMediaFigure: ({
     title,
     byline,
+    qualifier,
+    alignTitleToTop,
   }: {
     readonly title: string;
     readonly byline?: string;
+    readonly qualifier?: string;
+    readonly alignTitleToTop?: boolean;
   }) => (
-    <figure data-testid="museum-about-artwork">
+    <figure
+      data-testid="museum-about-artwork"
+      data-align-title-to-top={alignTitleToTop ? "true" : "false"}
+    >
       <div
         role="img"
         aria-label={byline === undefined ? title : `${title} by ${byline}`}
       />
+      {qualifier === undefined ? null : <figcaption>{qualifier}</figcaption>}
     </figure>
   ),
 }));
@@ -160,7 +172,9 @@ describe("MuseumNetworkProposition", () => {
       />
     );
 
-    expect(screen.getByTestId("museum-about-artwork")).toBeInTheDocument();
+    const figure = screen.getByTestId("museum-about-artwork");
+    expect(figure).toHaveTextContent("The Museum");
+    expect(figure).toHaveAttribute("data-align-title-to-top", "true");
     expect(
       screen.getByRole("heading", { name: "Works held and studied" })
     ).toBeInTheDocument();
@@ -210,5 +224,51 @@ describe("MuseumNetworkProposition", () => {
     expect(scholarship).toHaveClass(...dividerClasses);
     expect(care).toHaveClass(...dividerClasses);
     expect(care).not.toHaveClass("tw-border-y");
+  });
+
+  it("explains custody and links each institutional destination once", () => {
+    render(
+      <MuseumNetworkProposition
+        commit={"a".repeat(40)}
+        missionSourceUrl="https://example.test/mission"
+        openMuseum={document(
+          "open_museum_statement",
+          "docs/open-museum-statement.md"
+        )}
+        transition={document(
+          "onchain_transition",
+          "docs/onchain-transition.md"
+        )}
+      />
+    );
+
+    expect(
+      screen.getByRole("heading", { name: "Custody" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/more than one of its signers approves/u)
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "Status: planned. Contract design is in progress; deployment and activation remain pending."
+      )
+    ).toBeInTheDocument();
+
+    const hrefs = screen
+      .getAllByRole("link")
+      .map((link) => link.getAttribute("href"));
+    for (const href of [
+      MUSEUM_SAFE_ETHERSCAN_URL,
+      MUSEUM_REPOSITORY_URL,
+      "https://example.test/mission",
+    ]) {
+      expect(hrefs.filter((candidate) => candidate === href)).toHaveLength(1);
+    }
+    expect(
+      screen.getByRole("link", { name: "View the Museum Safe on Etherscan" })
+    ).toHaveAttribute("href", MUSEUM_SAFE_ETHERSCAN_URL);
+    expect(
+      screen.getByRole("link", { name: "View the public record on GitHub" })
+    ).toHaveAttribute("href", MUSEUM_REPOSITORY_URL);
   });
 });

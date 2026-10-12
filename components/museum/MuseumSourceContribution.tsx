@@ -61,8 +61,6 @@ const RELATED_SOURCE_LABEL_KEYS = {
     "museum.network.openMuseum.strip.relatedLabels.applicationProfile",
   collectionEssay:
     "museum.network.openMuseum.strip.relatedLabels.collectionEssay",
-  foundingPrinciples:
-    "museum.network.openMuseum.strip.relatedLabels.foundingPrinciples",
   giftNarrative: "museum.network.openMuseum.strip.relatedLabels.giftNarrative",
   keysAndGates: "museum.network.openMuseum.strip.relatedLabels.keysAndGates",
   machineRecord: "museum.network.openMuseum.strip.relatedLabels.machineRecord",
@@ -72,8 +70,6 @@ const RELATED_SOURCE_LABEL_KEYS = {
     "museum.network.openMuseum.strip.relatedLabels.implementationAudit",
   machineSchedule:
     "museum.network.openMuseum.strip.relatedLabels.machineSchedule",
-  onchainTransition:
-    "museum.network.openMuseum.strip.relatedLabels.onchainTransition",
   primarySourceRegister:
     "museum.network.openMuseum.strip.relatedLabels.primarySourceRegister",
   projectEssay: "museum.network.openMuseum.strip.relatedLabels.projectEssay",
