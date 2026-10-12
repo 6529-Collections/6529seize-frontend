@@ -187,9 +187,14 @@ const LOCALE_DATE_METHODS = [
   "toLocaleDateString",
   "toLocaleTimeString",
 ] as const;
+type LocaleDateMethod = (
+  this: Date,
+  locales?: Intl.LocalesArgument,
+  options?: Intl.DateTimeFormatOptions
+) => string;
 const REAL_DATE_METHODS = Object.fromEntries(
   LOCALE_DATE_METHODS.map((method) => [method, Date.prototype[method]])
-) as Record<(typeof LOCALE_DATE_METHODS)[number], (...args: any[]) => string>;
+) as Record<(typeof LOCALE_DATE_METHODS)[number], LocaleDateMethod>;
 
 /**
  * Makes every `undefined` locale resolve to `locale`, the way a browser whose
