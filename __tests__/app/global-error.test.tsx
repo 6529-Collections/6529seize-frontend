@@ -1,0 +1,233 @@
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
+import { renderToString } from "react-dom/server";
+
+import GlobalError from "@/app/global-error";
+import { publicEnv } from "@/config/env";
+
+const captureExceptionMock = jest.fn();
+
+jest.mock("@sentry/nextjs", () => ({
+  __esModule: true,
+  captureException: (...args: unknown[]) => captureExceptionMock(...args),
+}));
+
+const originalSentryDsn = publicEnv.SENTRY_DSN;
+const originalLanguagesDescriptor = Object.getOwnPropertyDescriptor(
+  globalThis.navigator,
+  "languages"
+);
+const originalLanguageDescriptor = Object.getOwnPropertyDescriptor(
+  globalThis.navigator,
+  "language"
+);
+
+const setNavigatorLanguages = (languages: readonly string[] | undefined) => {
+  Object.defineProperty(globalThis.navigator, "languages", {
+    configurable: true,
+    value: languages,
+  });
+  Object.defineProperty(globalThis.navigator, "language", {
+    configurable: true,
+    value: languages?.[0],
+  });
+};
+
+const restoreNavigatorProperty = (
+  property: "language" | "languages",
+  descriptor: PropertyDescriptor | undefined
+) => {
+  if (descriptor) {
+    Object.defineProperty(globalThis.navigator, property, descriptor);
+  } else {
+    Reflect.deleteProperty(globalThis.navigator, property);
+  }
+};
+
+const createError = (message = "Root layout exploded", digest?: string) => {
+  const error: Error & { digest?: string | undefined } = new Error(message);
+  error.stack = `Error: ${message}\n    at RootLayout (layout.tsx:1:1)`;
+  if (digest) {
+    error.digest = digest;
+  }
+  return error;
+};
+
+// GlobalError owns <html>/<body>, so it is rendered into the document itself,
+// with no provider wrapper of any kind.
+const renderGlobalError = (
+  props: Partial<Parameters<typeof GlobalError>[0]> = {}
+) => {
+  const unstableRetry = props.unstable_retry ?? jest.fn();
+  const result = render(
+    <GlobalError
+      error={props.error ?? createError()}
+      unstable_retry={unstableRetry}
+    />,
+    { container: document as unknown as HTMLElement }
+  );
+  return { ...result, unstableRetry };
+};
+
+describe("GlobalError", () => {
+  let consoleErrorSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    captureExceptionMock.mockClear();
+    publicEnv.SENTRY_DSN = undefined;
+    setNavigatorLanguages(["en-US"]);
+    // extractErrorDetails logs the full error outside production.
+    consoleErrorSpy = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => undefined);
+  });
+
+  afterEach(() => {
+    consoleErrorSpy.mockRestore();
+    publicEnv.SENTRY_DSN = originalSentryDsn;
+    restoreNavigatorProperty("languages", originalLanguagesDescriptor);
+    restoreNavigatorProperty("language", originalLanguageDescriptor);
+  });
+
+  it("renders the heading, recovery actions and support contact without any provider", () => {
+    renderGlobalError();
+
+    expect(
+      screen.getByRole("heading", {
+        level: 1,
+        name: "Welcome to the 6529 Page of Doom",
+      })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Try Again" })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Go to the 6529 home page" })
+    ).toHaveAttribute("href", "/");
+    expect(
+      screen.getByRole("link", { name: "support@6529.io" })
+    ).toHaveAttribute("href", "mailto:support@6529.io");
+    expect(document.title).toBe("6529 Error");
+    expect(document.documentElement).toHaveAttribute("lang", "en-US");
+  });
+
+  it("renders without React warnings", () => {
+    renderGlobalError({ error: createError("Boom", "abc123") });
+
+    // extractErrorDetails logs the raw error outside production; anything else
+    // on console.error would be a React warning (nesting, keys, attributes).
+    const unexpected = consoleErrorSpy.mock.calls.filter(
+      ([message]) => !String(message).startsWith("[GLOBAL_ERROR]")
+    );
+    expect(unexpected).toEqual([]);
+  });
+
+  it("server-renders the en-US document without touching browser APIs", () => {
+    const html = renderToString(
+      <GlobalError
+        error={createError("Boom", "abc123")}
+        unstable_retry={jest.fn()}
+      />
+    );
+
+    expect(html).toContain('<html lang="en-US">');
+    expect(html).toContain("Welcome to the 6529 Page of Doom");
+    expect(html).toContain("Try Again");
+    expect(html).toContain("<title>6529 Error</title>");
+    // Entities inside <style> are not decoded by browsers, so the stylesheet
+    // must not contain characters React would escape on the server.
+    const styleStart = html.indexOf("<style>") + "<style>".length;
+    const serverStyles = html.slice(styleStart, html.indexOf("</style>"));
+    expect(serverStyles).toContain(".global-error__retry");
+    expect(serverStyles).not.toMatch(/&(?:quot|amp|lt|gt|#x27);/);
+  });
+
+  it("calls the retry callback from the Try Again button", () => {
+    const { unstableRetry } = renderGlobalError();
+
+    fireEvent.click(screen.getByRole("button", { name: "Try Again" }));
+
+    expect(unstableRetry).toHaveBeenCalledTimes(1);
+  });
+
+  it("brings its own styles instead of relying on the app stylesheet", () => {
+    renderGlobalError();
+
+    const styleText = Array.from(document.querySelectorAll("style"))
+      .map((style) => style.textContent ?? "")
+      .join("\n");
+    expect(styleText).toContain(".global-error__retry");
+    expect(styleText).toContain(":focus-visible");
+  });
+
+  it("exposes the digest and stack trace in a native disclosure", () => {
+    renderGlobalError({ error: createError("Boom", "abc123") });
+
+    const summary = screen.getByText("Error details");
+    expect(summary.tagName).toBe("SUMMARY");
+    const trace = screen.getByRole("region", { name: "Error details" });
+    expect(trace).toHaveTextContent("Error ID: abc123");
+    expect(trace).toHaveTextContent("RootLayout (layout.tsx:1:1)");
+  });
+
+  it("renders without an error ID when the error has no digest", () => {
+    renderGlobalError({ error: createError("Boom") });
+
+    expect(
+      screen.getByRole("region", { name: "Error details" })
+    ).not.toHaveTextContent("Error ID");
+  });
+
+  it("does not report to Sentry when no DSN is configured", () => {
+    renderGlobalError();
+
+    expect(captureExceptionMock).not.toHaveBeenCalled();
+  });
+
+  it("reports the error to Sentry when a DSN is configured", () => {
+    publicEnv.SENTRY_DSN = "https://public@example.ingest.sentry.io/1";
+    const error = createError();
+
+    renderGlobalError({ error });
+
+    expect(captureExceptionMock).toHaveBeenCalledTimes(1);
+    expect(captureExceptionMock).toHaveBeenCalledWith(error);
+  });
+
+  it("uses the browser locale for its copy and document language", async () => {
+    setNavigatorLanguages(["fr-FR", "en-US"]);
+
+    renderGlobalError();
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("heading", {
+          level: 1,
+          name: "Bienvenue sur la Page de la Fatalité de 6529",
+        })
+      ).toBeInTheDocument();
+    });
+    expect(
+      screen.getByRole("button", { name: "Réessayer" })
+    ).toBeInTheDocument();
+    expect(document.documentElement).toHaveAttribute("lang", "fr-FR");
+    expect(document.title).toBe("6529 Erreur");
+  });
+
+  it("falls back to en-US when the browser locale is unsupported", async () => {
+    setNavigatorLanguages(["xx-XX"]);
+
+    renderGlobalError();
+
+    await act(async () => undefined);
+    expect(
+      screen.getByRole("button", { name: "Try Again" })
+    ).toBeInTheDocument();
+    expect(document.documentElement).toHaveAttribute("lang", "en-US");
+  });
+});
