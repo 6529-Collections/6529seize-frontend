@@ -1,17 +1,24 @@
 import type { Page } from "@playwright/test";
 import { expect } from "@playwright/test";
+import {
+  getActiveWaveIdFromUrl,
+  getWavePathRoute,
+} from "../../helpers/navigation.helpers";
 
-// The sidebar's list/search children can change while its scroll pane stays
-// mounted. Retain the pane itself to catch a route replacing the wave shell.
+// The search control mounts before the wave-list response and switches between
+// a button and an input. Retain their pane to catch a route replacing the shell.
 export async function retainDesktopWaveSidebar(page: Page) {
-  const pane = page
-    .getByRole("region", {
-      name: /All recent waves list|Regular waves list|Search results · All waves/,
-    })
+  const paneAncestor =
+    "xpath=ancestor::div[contains(concat(' ', normalize-space(@class), ' '), ' tw-h-full ') and contains(concat(' ', normalize-space(@class), ' '), ' tw-border-r ')][1]";
+  const buttonPane = page
+    .getByRole("button", { name: "Find a wave…", exact: true })
     .filter({ visible: true })
-    .locator(
-      "xpath=ancestor::div[contains(concat(' ', normalize-space(@class), ' '), ' tw-h-full ') and contains(concat(' ', normalize-space(@class), ' '), ' tw-border-r ')][1]"
-    );
+    .locator(paneAncestor);
+  const inputPane = page
+    .getByRole("searchbox", { name: "Find a wave…", exact: true })
+    .filter({ visible: true })
+    .locator(paneAncestor);
+  const pane = buttonPane.or(inputPane);
   await expect(pane).toBeVisible();
   const retainedPane = await pane.elementHandle();
   expect(retainedPane).not.toBeNull();
@@ -42,8 +49,15 @@ export async function monitorRememberedLeaderboard(
   wavePath: string,
   waveTitle: string
 ) {
+  const targetUrl = new URL(wavePath, page.url());
+  const targetWaveId = getActiveWaveIdFromUrl({
+    pathname: targetUrl.pathname,
+    searchParams: targetUrl.searchParams,
+  });
+  if (!targetWaveId)
+    throw new Error(`Expected a wave destination, received ${wavePath}`);
   const monitor = await page.evaluateHandle(
-    ({ targetPath, targetTitle }) => {
+    ({ targetPath, targetTitle, targetWaveId }) => {
       const isVisible = (element: Element) => {
         const style = getComputedStyle(element);
         return (
@@ -53,6 +67,7 @@ export async function monitorRememberedLeaderboard(
         );
       };
       let frames = 0;
+      let targetHeaderSeen = false;
       const unexpectedViews = new Set<string>();
       let frameId = 0;
       const sample = () => {
@@ -64,9 +79,12 @@ export async function monitorRememberedLeaderboard(
               heading.getAttribute("aria-label") === `About ${targetTitle}`) &&
             isVisible(heading)
         );
+        targetHeaderSeen ||= targetMounted;
         if (
           location.pathname === targetPath ||
-          location.pathname.startsWith(`${targetPath}/competitions`)
+          location.pathname.startsWith(`${targetPath}/competitions`) ||
+          (location.pathname === "/waves" &&
+            new URLSearchParams(location.search).get("wave") === targetWaveId)
         ) {
           if (targetMounted) frames += 1;
           for (const section of document.querySelectorAll(
@@ -88,26 +106,48 @@ export async function monitorRememberedLeaderboard(
         frameId = requestAnimationFrame(sample);
       };
       frameId = requestAnimationFrame(sample);
+      const read = () => ({
+        frames,
+        unexpectedViews: Array.from(unexpectedViews),
+        targetHeaderSeen,
+        pathname: location.pathname,
+        queryWaveId: new URLSearchParams(location.search).get("wave"),
+      });
       return {
+        read,
         stop: () => {
           cancelAnimationFrame(frameId);
-          return { frames, unexpectedViews: Array.from(unexpectedViews) };
+          return read();
         },
       };
     },
-    { targetPath: wavePath, targetTitle: waveTitle }
+    {
+      targetPath: getWavePathRoute(targetWaveId),
+      targetTitle: waveTitle,
+      targetWaveId,
+    }
   );
   return async () => {
-    const result = await monitor.evaluate(async (state) => {
-      await new Promise<void>((resolve) =>
-        requestAnimationFrame(() => resolve())
-      );
-      return state.stop();
-    });
-    await monitor.dispose();
+    let result = await monitor.evaluate((state) => state.read());
+    try {
+      // AppHeader can follow the ready content during a native view transition.
+      // Keep sampling early wrong views until a target header frame is observed;
+      // use the ordinary expect deadline rather than a longer journey timeout.
+      await expect
+        .poll(() => monitor.evaluate((state) => state.read()), {
+          message: "Expected to observe the returned wave rendering",
+        })
+        .not.toMatchObject({ frames: 0 });
+    } finally {
+      try {
+        result = await monitor.evaluate((state) => state.stop());
+      } finally {
+        await monitor.dispose();
+      }
+    }
     expect(
       result.frames,
-      "Expected to observe the returned wave rendering"
+      `Expected to observe the returned wave rendering: ${JSON.stringify(result)}`
     ).toBeGreaterThan(0);
     expect(
       result.unexpectedViews,
