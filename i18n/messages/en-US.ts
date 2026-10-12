@@ -2126,6 +2126,15 @@ const WAVE_CHAT_MESSAGES = objectMessages("waves.chat", {
   "replyTargetUnavailableToast.detailsKept":
     "Your current draft was not changed.",
   "replyTargetUnavailableToast.actionReviewDraft": "Review draft",
+  repliesOnlyPlaceholder:
+    "Only chat members can start new drops here. You can reply to any drop.",
+  "replyThread.showOne": "Show 1 reply",
+  "replyThread.showMany": "Show {count} replies",
+  "replyThread.hide": "Hide replies",
+  "replyThread.regionLabel": "Replies to this drop",
+  "replyThread.loading": "Loading replies…",
+  "replyThread.loadEarlier": "Show earlier replies",
+  "replyThread.empty": "No replies to show.",
 } as const);
 
 const WAVE_COMPOSER_ACTION_MESSAGES = objectMessages("waves.composer.actions", {
