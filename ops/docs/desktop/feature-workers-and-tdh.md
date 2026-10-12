@@ -20,7 +20,7 @@ An interrupted transaction reconciliation resumes from its saved range on restar
 
 ## Native four-wallet delegation-index upgrade
 
-Desktop builds that include Core PR #243 automatically replay NFTDelegation
+Desktop builds with native four-wallet indexing automatically replay NFTDelegation
 history to recover directional registration times and Safe/batch token scope.
 The previous live rows and displayed TDH remain available while replay runs.
 TDH waits for replay completion, even if the old checkpoint was caught up.

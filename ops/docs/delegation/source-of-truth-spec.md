@@ -182,6 +182,7 @@ article changes as a new package version instead of editing the pinned one:
 
    The manual GitHub workflow `Publish Delegation Docs Content` runs the same
    script with repository secrets/vars.
+
 7. Pin the root CID using 6529-controlled infrastructure. The publish script
    uses `pin=true` when calling the internal node.
 8. Save the receipt from `tmp/delegation-docs-publish`. It records the root CID,
@@ -213,21 +214,21 @@ Browser titles must follow:
 
 Core route titles:
 
-| Route | Title |
-| --- | --- |
-| `/delegation/delegation-center` | Delegation Center |
-| `/delegation/wallet-architecture` | The Three Address Protocol (TAP) |
-| `/delegation/delegation-faq` | Delegation FAQ |
-| `/delegation/consolidation-use-cases` | Consolidation Use Cases |
-| `/delegation/wallet-checker` | Wallet Checker |
-| `/delegation/register-delegation` | Register Delegation |
-| `/delegation/register-consolidation` | Register Consolidation |
-| `/delegation/register-sub-delegation` | Register Delegation Manager |
-| `/delegation/assign-primary-address` | Assign Primary Address |
-| `/delegation/any-collection` | Any Collection Delegations |
-| `/delegation/the-memes` | The Memes Delegations |
-| `/delegation/meme-lab` | Meme Lab Delegations |
-| `/delegation/6529-gradient` | 6529 Gradient Delegations |
+| Route                                 | Title                            |
+| ------------------------------------- | -------------------------------- |
+| `/delegation/delegation-center`       | Delegation Center                |
+| `/delegation/wallet-architecture`     | The Three Address Protocol (TAP) |
+| `/delegation/delegation-faq`          | Delegation FAQ                   |
+| `/delegation/consolidation-use-cases` | Consolidation Use Cases          |
+| `/delegation/wallet-checker`          | Wallet Checker                   |
+| `/delegation/register-delegation`     | Register Delegation              |
+| `/delegation/register-consolidation`  | Register Consolidation           |
+| `/delegation/register-sub-delegation` | Register Delegation Manager      |
+| `/delegation/assign-primary-address`  | Assign Primary Address           |
+| `/delegation/any-collection`          | Any Collection Delegations       |
+| `/delegation/the-memes`               | The Memes Delegations            |
+| `/delegation/meme-lab`                | Meme Lab Delegations             |
+| `/delegation/6529-gradient`           | 6529 Gradient Delegations        |
 
 Delegation Center must work as a decision page. The user should be able to
 distinguish:
@@ -340,23 +341,23 @@ Each article rewrite must preserve these invariants:
 
 Use this status table before starting new delegation work.
 
-| Work item | Status | Source of truth |
-| --- | --- | --- |
-| No-wallet write-route panels | Built | React UI |
-| Action-specific submit labels and intros | Built | React UI |
-| Route-specific metadata | Built | React route metadata |
-| Delegation Center decision copy | Built | React UI |
-| Wallet Checker framing and states | Built | React UI |
-| Collection page intros and disconnected state | Built | React UI |
-| FAQ child wrapper navigation | Built | React wrapper |
-| TAP Guide (`/delegation/wallet-architecture`) | Built | React UI, `i18n/messages/delegationTapGuide.en-US.json` |
-| Repo-reviewed article package | Built | `content/delegation` |
-| Hash-verified runtime loader | Built | `delegationContent.ts` |
-| IPFS root CID publish | Built, pending credentials/config | `publish-delegation-docs-content.mjs` plus manual workflow |
-| CloudFront/S3 acceleration mirror | Built optional path, pending config | CID/version-addressed mirror |
-| Full article body rewrite package | Pending | `public/delegation-content/{version}/html` |
-| Image caption/alt pass for article bodies | Pending | `public/delegation-content/{version}/html` |
-| Similar S3 content migrations outside delegation | Future | Separate specs |
+| Work item                                        | Status                              | Source of truth                                            |
+| ------------------------------------------------ | ----------------------------------- | ---------------------------------------------------------- |
+| No-wallet write-route panels                     | Built                               | React UI                                                   |
+| Action-specific submit labels and intros         | Built                               | React UI                                                   |
+| Route-specific metadata                          | Built                               | React route metadata                                       |
+| Delegation Center decision copy                  | Built                               | React UI                                                   |
+| Wallet Checker framing and states                | Built                               | React UI                                                   |
+| Collection page intros and disconnected state    | Built                               | React UI                                                   |
+| FAQ child wrapper navigation                     | Built                               | React wrapper                                              |
+| TAP Guide (`/delegation/wallet-architecture`)    | Built                               | React UI, `i18n/messages/delegationTapGuide.en-US.json`    |
+| Repo-reviewed article package                    | Built                               | `content/delegation`                                       |
+| Hash-verified runtime loader                     | Built                               | `delegationContent.ts`                                     |
+| IPFS root CID publish                            | Built, pending credentials/config   | `publish-delegation-docs-content.mjs` plus manual workflow |
+| CloudFront/S3 acceleration mirror                | Built optional path, pending config | CID/version-addressed mirror                               |
+| Full article body rewrite package                | Pending                             | `public/delegation-content/{version}/html`                 |
+| Image caption/alt pass for article bodies        | Pending                             | `public/delegation-content/{version}/html`                 |
+| Similar S3 content migrations outside delegation | Future                              | Separate specs                                             |
 
 Recommended next agent tickets:
 
