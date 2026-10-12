@@ -974,6 +974,8 @@ jobs:
         env:
           NODE_ENV: "production"
           BASE_ENDPOINT: "https://6529.io"
+          # Authenticates the Museum publication snapshot's ref lookup.
+          GITHUB_TOKEN: ${{ github.token }}
         # The CI build runs the generators explicitly without repeating the
         # full-repository lint already covered by changed-file lint.
         run: |

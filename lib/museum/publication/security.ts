@@ -234,6 +234,15 @@ export function assertApprovedGitHubUrl(url: string): void {
   }
 }
 
+/** Only the GitHub REST API origin may receive a build-time API token. */
+export function isGitHubApiUrl(url: string): boolean {
+  try {
+    return new URL(url).origin === GITHUB_API_ORIGIN;
+  } catch {
+    return false;
+  }
+}
+
 export function assertApprovedArtBlocksUrl(
   url: string,
   kind: "still" | "live"

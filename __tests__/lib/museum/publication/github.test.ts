@@ -56,6 +56,43 @@ describe("GitHub Museum publication source", () => {
     ).toBe(false);
   });
 
+  it.each([
+    ["a configured token", "ci-token", "Bearer ci-token"],
+    ["no token", undefined, undefined],
+    ["a blank token", "  ", undefined],
+  ])(
+    "authorizes only the API ref lookup with %s",
+    async (_label, githubApiToken, expectedApiAuthorization) => {
+      const fixture = createCaseyFixture();
+      const apiAuthorizations: (string | undefined)[] = [];
+      const rawAuthorizations: (string | undefined)[] = [];
+      const recordingFetch: typeof fetch = async (input, init) => {
+        const url = typeof input === "string" ? input : input.toString();
+        const headers = init?.headers as Record<string, string> | undefined;
+        (url.startsWith("https://api.github.com/")
+          ? apiAuthorizations
+          : rawAuthorizations
+        ).push(headers?.["Authorization"]);
+        return fixture.fetch(input, init);
+      };
+      const source = new GitHubMuseumPublicationSource({
+        ref: "main",
+        assembler: legacyCaseyPublicationAssembler,
+        fetch: recordingFetch,
+        ...(githubApiToken === undefined ? {} : { githubApiToken }),
+      });
+
+      await expect(source.load()).resolves.toMatchObject({
+        status: "current",
+      });
+      expect(apiAuthorizations).toEqual([expectedApiAuthorization]);
+      expect(rawAuthorizations).not.toHaveLength(0);
+      expect(rawAuthorizations.every((value) => value === undefined)).toBe(
+        true
+      );
+    }
+  );
+
   it("rejects a required file omitted from the manifest inventory", async () => {
     const fixture = createCaseyFixture({
       omittedManifestPath:

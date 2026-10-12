@@ -2,6 +2,7 @@ import { mkdir, rename, writeFile } from "node:fs/promises";
 import path from "node:path";
 import pRetry from "p-retry";
 
+import { getMuseumPublicationBuildGitHubToken } from "../config/museumPublicationEnv.server";
 import {
   createMuseumPublicationBuildSnapshot,
   MUSEUM_PUBLICATION_BUILD_SNAPSHOT_PATH,
@@ -14,10 +15,12 @@ const BUILD_SNAPSHOT_RETRIES = 2;
 const BUILD_SNAPSHOT_RETRY_DELAY_MS = 1_000;
 
 async function main(): Promise<void> {
+  const githubApiToken = getMuseumPublicationBuildGitHubToken();
   const source = new GitHubMuseumPublicationSource({
     ref: "main",
     assembler: legacyCaseyPublicationAssembler,
     catalogResolver: museumPublicationCatalogResolver,
+    ...(githubApiToken === undefined ? {} : { githubApiToken }),
   });
   const state = await pRetry(
     async () => {

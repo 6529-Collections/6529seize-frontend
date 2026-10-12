@@ -9,6 +9,7 @@ import {
   buildGitHubCommitResolutionUrl,
   buildImmutableMuseumRawUrl,
   isExactGitCommit,
+  isGitHubApiUrl,
   MUSEUM_MANIFEST_PATH,
   MUSEUM_REPOSITORY_NAME,
 } from "./security";
@@ -71,6 +72,11 @@ interface GitHubMuseumPublicationSourceOptions {
   readonly localFixtureAcceptedPaths?: readonly string[];
   /** Deferred-media catalog path boundary for a local review fixture only. */
   readonly localFixtureMediaAssetPaths?: readonly string[];
+  /**
+   * Build-time token for the mutable-ref API lookup only, so CI is not held to
+   * the shared unauthenticated rate limit. Never sent to raw content.
+   */
+  readonly githubApiToken?: string;
 }
 
 function sourceErrorCode(error: unknown): string {
@@ -148,6 +154,7 @@ export class GitHubMuseumPublicationSource implements MuseumPublicationSource {
     | undefined;
   private readonly localFixtureAcceptedPaths: ReadonlySet<string> | undefined;
   private readonly localFixtureMediaAssetPaths: ReadonlySet<string>;
+  private readonly githubApiToken: string | undefined;
   private readonly catalogCache = new Map<string, MuseumPublicationCatalog>();
 
   constructor(options: GitHubMuseumPublicationSourceOptions) {
@@ -158,6 +165,11 @@ export class GitHubMuseumPublicationSource implements MuseumPublicationSource {
     this.requestTimeoutMs =
       options.requestTimeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS;
     this.catalogResolver = options.catalogResolver;
+    const githubApiToken = options.githubApiToken?.trim();
+    this.githubApiToken =
+      githubApiToken === undefined || githubApiToken.length === 0
+        ? undefined
+        : githubApiToken;
     this.localFixtureDocumentTransform = options.localFixtureDocumentTransform;
     this.localFixtureAcceptedPaths =
       options.localFixtureAcceptedPaths === undefined
@@ -723,11 +735,15 @@ export class GitHubMuseumPublicationSource implements MuseumPublicationSource {
     accept: string
   ): Promise<Uint8Array> {
     assertApprovedGitHubUrl(url);
+    const headers: Record<string, string> = { Accept: accept };
+    if (this.githubApiToken !== undefined && isGitHubApiUrl(url)) {
+      headers["Authorization"] = `Bearer ${this.githubApiToken}`;
+    }
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), this.requestTimeoutMs);
     try {
       const response = await this.fetchImplementation(url, {
-        headers: { Accept: accept },
+        headers,
         redirect: "error",
         signal: controller.signal,
       });

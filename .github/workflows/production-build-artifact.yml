@@ -241,6 +241,8 @@ jobs:
           NEXT_PUBLIC_MIXPANEL_TOKEN: ${{ secrets.NEXT_PUBLIC_MIXPANEL_TOKEN }}
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+          # Authenticates the Museum publication snapshot's ref lookup.
+          GITHUB_TOKEN: ${{ github.token }}
         run: ./bin/6529 run build:ci
 
       - name: Package exact production bytes

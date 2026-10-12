@@ -82,3 +82,14 @@ export function getMuseumPublicationNodeEnvironment(): string | undefined {
   }
   return process.env["NODE_ENV"];
 }
+
+/**
+ * Read only by the build snapshot script; CI supplies the workflow token so the
+ * Museum ref lookup avoids GitHub's shared unauthenticated rate limit.
+ */
+export function getMuseumPublicationBuildGitHubToken(): string | undefined {
+  if (typeof process === "undefined" || !process.env) {
+    return undefined;
+  }
+  return process.env["GITHUB_TOKEN"];
+}

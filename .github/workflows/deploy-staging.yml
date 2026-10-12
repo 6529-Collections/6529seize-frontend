@@ -110,6 +110,9 @@ jobs:
             ${{ runner.os }}-node22-staging-nextjs-
 
       - name: Build and package exact staging bytes
+        env:
+          # Authenticates the Museum publication snapshot's ref lookup.
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           export VERSION_BUILD_TIMESTAMP="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
