@@ -1,3 +1,4 @@
+import { defineMobileVideoBatteryTest } from "../media/mobileVideoBatteryCases";
 import type { Locator, Page } from "@playwright/test";
 
 import { expect, test } from "../testHelpers";
@@ -1459,3 +1460,8 @@ test.describe("Native iPad drop actions @surface @medium @readonly", () => {
     await expect(copyTextAction).toBeHidden({ timeout: 10_000 });
   });
 });
+
+defineMobileVideoBatteryTest(
+  "native artwork video stops offscreen buffering and restores position after backgrounding",
+  isCapacitorSimulationProject
+);

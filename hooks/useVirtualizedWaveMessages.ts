@@ -1,12 +1,16 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useMyStreamWaveMessages } from "@/contexts/wave/MyStreamContext";
 
 import type { Drop } from "@/helpers/waves/drop.helpers";
 import type { WaveMessages } from "@/contexts/wave/hooks/types";
 import { useDropMessages } from "./useDropMessages";
 import type { ApiWave } from "@/generated/models/ApiWave";
+import {
+  isWaveRepliesCollapsed,
+  withoutCollapsedReplies,
+} from "@/helpers/waves/collapsed-replies.helpers";
 
 interface VirtualizedWaveMessages extends Omit<WaveMessages, "drops"> {
   readonly drops: Drop[];
@@ -146,7 +150,15 @@ export function useVirtualizedWaveMessages(
   pageSize: number = 50,
   wave?: ApiWave
 ): VirtualizedWaveMessages | undefined {
-  const fullWaveMessages = useMyStreamWaveMessages(waveId);
+  const storedWaveMessages = useMyStreamWaveMessages(waveId);
+  const collapseReplies = dropId === null && isWaveRepliesCollapsed(wave);
+  const fullWaveMessages = useMemo(
+    () =>
+      collapseReplies && storedWaveMessages
+        ? withoutCollapsedReplies(storedWaveMessages)
+        : storedWaveMessages,
+    [collapseReplies, storedWaveMessages]
+  );
   const fullWaveMessagesForDrop = useDropMessages(waveId, dropId, wave);
   const fetchNextPageForDrop = fullWaveMessagesForDrop.fetchNextPage;
 

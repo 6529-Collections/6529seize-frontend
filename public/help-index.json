@@ -158,6 +158,7 @@
       "facts": [
         "The custom video player shows a timeline above its controls, with a small draggable handle and a larger interaction area. Drag the handle, select a position on the track, or focus the slider and use the keyboard to seek.",
         "The bottom-left capsule shows play or pause alongside elapsed time and total duration. Pausing keeps the capsule and time in place and also shows a central play button; either play button resumes playback. The time updates while seeking.",
+        "In the Capacitor app and mobile browsers, offscreen videos stop loading and retain their playback position. Backgrounding the app or hiding the mobile tab pauses media loading. New video sources wait until visible and active, including videos without posters. Wave and DM chat videos require Play on desktop, mobile browsers, and in the app; their video sources wait for that click, including videos without posters. While video parts upload, the device attempts one small JPEG frame with no extra UI step. A successful poster is stored before video completion and normally appears as soon as the video is posted, without loading video before Play. Capture stops after eight seconds, cancellation or backgrounding. Unsupported clips and capture/storage failures still post normally and use backend poster generation. Those uploads may initially have no preview while processing; visible, active chat players check again after five seconds and then back off to once a minute, with bounded retries and a five-second missing-preview cache. New previews prefer a frame around one second, with the first frame retained for very short and older videos. Older uploads and external videos may have no preview. Poster and playback keep the same proportions and width limits. Starting another chat video pauses the previous one. Scrolling away or hiding the tab pauses playback, and returning waits for Play. Chat videos retain position, mute choice, and volume through scrolling within the open chat. Desktop NFT and submission pages retain their existing autoplay rules. Leaving the chat or reloading can reset these preferences. Manually started videos stay paused on return until Play is pressed; ambient autoplay respects visibility, explicit pauses, and reduced motion. Reloading may delay playback on slow connections.",
         "Controls remain visible while paused, focused, or scrubbing and fade after inactivity during playback. Pointer interaction, keyboard focus, or a tap reveals them. Before duration is available, it shows a dash and seeking is disabled.",
         "Videos are shown without cropping or stretching. Homepage Next Drop, Latest Drop, The Memes detail, and Wave submission detail videos fit the available width up to 95% of the usable screen height in desktop browsers, mobile browsers, and the mobile app, allowing for headers, bottom navigation, and safe areas. Tall videos become narrower and stay centered. Fullscreen uses the full viewing area. Loading listing, subscription, or ownership panels does not resize the video. Homepage artwork stays vertically centered in its column. The Memes detail retains its full-column dark artwork background and centers the video inside it. Expanded wave submissions center the video in the available area below the overlay header. The timeline and controls stay inside the video frame. Submission detail reserves space for its overlay header and artwork padding. Mute and fullscreen keep circular buttons. Browser-native players retain their own controls.",
         "Still artwork preserves its proportions without cropping or stretching. On mobile browsers and the mobile app, homepage images fill the available width at their natural height, with no reserved blank space above or below; details follow directly beneath and tall images may extend beyond one screen. Desktop homepage images fit within the adjacent details section height and at most 95% of usable screen height. Individual Meme pages and expanded Wave submissions retain the usable-screen height limit. Meme detail images use a stable reserved frame so loading details or ownership panels does not move them. Submission images allow for the overlay header and padding. In these capped layouts, portrait images are normally limited by height, landscape images by width."
@@ -3622,6 +3623,54 @@
       ]
     },
     {
+      "id": "waves.replies",
+      "kind": "business_rule",
+      "title": "Open and collapsed wave replies",
+      "aliases": [
+        "who can reply in a wave",
+        "reply to announcements",
+        "open replies",
+        "collapsed replies",
+        "reply threads",
+        "show replies",
+        "hide replies",
+        "only chat members can start new drops"
+      ],
+      "keywords": [
+        "waves",
+        "replies",
+        "reply",
+        "thread",
+        "collapsed",
+        "open",
+        "chat",
+        "announcements",
+        "settings"
+      ],
+      "facts": [
+        "Wave admins set replies in About -> Configuration -> Chat -> Replies. The row reads Chat members or Everyone, then Inline or Collapsed.",
+        "With `Anyone who can see this wave can reply` on, everyone who can see the wave can reply to its drops, even outside the chat group. New top-level drops still need chat access.",
+        "Viewers who can only reply see `Only chat members can start new drops here. You can reply to any drop.` and use the drop's Reply action to open the composer.",
+        "With `Collapse replies under each drop` on, replies stay out of the main chat. A drop with replies shows `Show N replies`; selecting it opens the thread under the drop, oldest first, and `Hide replies` closes it.",
+        "The reply count includes replies to replies throughout the thread. Direct and nested replies refresh the original drop's count live; duplicate updates do not add extra replies.",
+        "Sending a reply opens its thread for the sender. The pending reply remains visible while saving and loading, then becomes the saved reply; unsuccessful sends are removed or show the existing moderation rejection state.",
+        "If loading a collapsed reply thread fails, it shows `Couldn't load replies.` and a Retry button. Already-loaded replies stay visible; Retry loads the thread again.",
+        "Slow mode and disabled links still apply to replies from non-admins. Emoji reactions stay open to everyone who can see the wave.",
+        "Collapsed replies do not count as unread and do not notify followers subscribed to every drop; the replied-to author and mentioned profiles are still notified.",
+        "Links and notifications to a collapsed reply jump to its parent drop and open that thread.",
+        "With open replies, the wave's creator, admins and chat members (when chat is limited to a group) can delete anyone's replies with the Delete action. Top-level drops keep the wave's normal admin deletion setting."
+      ],
+      "canonical_path": "/waves",
+      "related_paths": ["/waves?create=wave"],
+      "tags": ["waves", "chat", "settings"],
+      "source_refs": [
+        "components/waves/specs/WaveChatReplies.tsx",
+        "components/waves/drops/reply-threads/WaveDropReplyThread.tsx",
+        "components/waves/PrivilegedDropCreator.tsx",
+        "generated/models/ApiWaveChatRepliesConfig.ts"
+      ]
+    },
+    {
       "id": "waves.configuration-access-group-editor",
       "kind": "ui_affordance",
       "title": "Edit wave access groups from Configuration",
@@ -5445,7 +5494,8 @@
         "The Reactions filter includes voted, reacted, and boosted drop notifications; the Identity filter includes new follows and REP/NIC updates.",
         "The Subscriptions filter includes transition-based coverage alerts with runway, Meme context, authoritative deadline when available, and exact minimum top-up action.",
         "On native iOS when the detected country is not US or is unknown, subscription coverage feed items, their filter and the device settings entry are hidden; social follow notifications remain available.",
-        "Notification rows may be missing or stale if loading, permissions, or realtime connectivity are disrupted."
+        "Notification rows may be missing or stale if loading, permissions, or realtime connectivity are disrupted.",
+        "Unread-count polling pauses in backgrounded Capacitor apps and hidden mobile browser tabs, preserving cached counts and refreshing on return. Browser realtime notification delivery stays connected."
       ],
       "canonical_path": "/notifications",
       "related_paths": ["/waves"],
@@ -5869,10 +5919,13 @@
         "It shows collected NFT context, owner balances, stats summary, and transfer-mode behavior where available.",
         "On mobile, swipe the headline statistics horizontally; a right-edge fade indicates more statistics, and Details stays visible beside the row.",
         "The expandable Details panel can show holdings totals, wallet activity, distributions, TDH history, and boost breakdown.",
+        "Closing Details preserves its activity tab, filters and page and keeps it closed when returning from artwork. Reopening restores those selections. Previous and Next below the artwork move to the start of the new results once loading finishes, with keyboard focus on the results.",
+        "Artwork links in Wallet Activity and Distributions include the mobile-web and native-app profile return action. It restores Details, the main grid page, the activity page and the originating activity link.",
         "On mobile, both Overview and both Memes Breakdown By Season sections in Details start closed; tap their titles to open the tables. Desktop starts with these sections open.",
         "Wallet Activity, Distributions, and TDH History tab labels stay on one line and scroll horizontally when needed. The selected tab stays visible, including when opened from a deep link.",
         "Details table text stays on one line; tables scroll horizontally when their columns do not fit, including Boost Breakdown. The first label column of wide holdings and activity overview tables stays visible while scrolling.",
         "Native view covers The Memes, Gradients, NextGen, and Meme Lab holdings; Network view covers xTDH token holdings by contract.",
+        "When filters return no artwork, Clear filters returns to page 1 with all addresses and collections in the current Native or Network view, preserving sorting and Details selections. Empty filtered results do not prove that the profile has no holdings.",
         "In the native app, The Memes, Gradients, NextGen, and Meme Lab tokens opened from a profile's Collected tab use the app-header Back chevron to restore the same profile filters, page, and opened card while retaining the detail page's collection link; mobile web shows an in-page return action, desktop uses browser Back, and direct token visits do not show a false return action, while NextGen can separately offer the current owner's holdings when available.",
         "Use collection route records for collection-level browsing and profile collected for a user's holdings."
       ],
@@ -6208,7 +6261,8 @@
       "facts": [
         "Unmuted wave and direct-message chat shows who is typing in the current thread; your own typing is excluded.",
         "Private-thread typing requires signing in with a profile that can view the thread.",
-        "Switching waves or profiles, signing out, or disconnecting clears typing labels; updates resume after the wave connection recovers."
+        "Switching waves or profiles, signing out, or disconnecting clears typing labels; updates resume after the wave connection recovers.",
+        "Backgrounding the Capacitor app or hiding a mobile browser tab clears typing labels and pauses the typing subscription. Returning starts a fresh subscription for the active thread."
       ],
       "canonical_path": "/waves",
       "related_paths": ["/waves"],

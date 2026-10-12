@@ -28,6 +28,12 @@ const getWaveEligibilityUpdate = (
   return {
     authenticated_user_eligible_to_chat:
       wave.authenticated_user_eligible_to_chat,
+    ...(wave.authenticated_user_eligible_to_reply === undefined
+      ? {}
+      : {
+          authenticated_user_eligible_to_reply:
+            wave.authenticated_user_eligible_to_reply,
+        }),
     authenticated_user_eligible_to_vote:
       wave.authenticated_user_eligible_to_vote,
     authenticated_user_eligible_to_participate:

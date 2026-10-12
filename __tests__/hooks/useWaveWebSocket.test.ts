@@ -2,6 +2,12 @@ import { act, renderHook } from "@testing-library/react";
 import { useWaveWebSocket } from "@/hooks/useWaveWebSocket";
 import { AUTH_TOKEN_CHANGED_EVENT } from "@/services/auth/auth.utils";
 
+let mockAppActive = true;
+jest.mock("@/hooks/useMobileAppActivity", () => ({
+  ...jest.requireActual("@/hooks/useMobileAppActivity"),
+  useMobileAppActivity: () => mockAppActive,
+}));
+
 let mockToken: string | null = null;
 let mockTokenUsable = true;
 jest.mock("@/services/auth/auth.utils", () => ({
@@ -54,6 +60,7 @@ function changeToken(token: string | null) {
 }
 
 beforeEach(() => {
+  mockAppActive = true;
   sockets = [];
   mockToken = null;
   mockTokenUsable = true;
@@ -214,4 +221,58 @@ it("manual disconnect prevents further reconnects", () => {
   expect(socket().close).toHaveBeenCalledTimes(1);
   expect(result.current.socket).toBeNull();
   expect(sockets).toHaveLength(1);
+});
+
+it("cancels authentication and retries in the background, then authenticates with the latest token", () => {
+  mockToken = "first-token";
+  const { result, rerender } = renderHook(() => useWaveWebSocket("wave"));
+  const first = socket();
+  act(() => first.open());
+  expect(jest.getTimerCount()).toBe(1);
+  mockAppActive = false;
+  rerender();
+  expect(first.close).toHaveBeenCalledTimes(1);
+  expect(result.current.socket).toBeNull();
+  expect(result.current.readyState).toBe(MockWebSocket.CLOSED);
+  act(() => changeToken("new-token"));
+  act(() => {
+    first.message({ type: "AUTHENTICATED" });
+    first.onclose?.();
+    jest.advanceTimersByTime(60000);
+  });
+  expect(sockets).toHaveLength(1);
+  expect(jest.getTimerCount()).toBe(0);
+  expect(first.send).toHaveBeenCalledTimes(1);
+  mockAppActive = true;
+  rerender();
+  expect(sockets).toHaveLength(2);
+  act(() => socket().open());
+  expect(socket().send).toHaveBeenLastCalledWith(
+    JSON.stringify({ type: "AUTHENTICATE", access_token: "new-token" })
+  );
+  act(() => socket().message({ type: "AUTHENTICATED" }));
+  expect(result.current.socket).toBe(socket());
+});
+
+it("retains manual disconnect across activity changes and permits a new wave", () => {
+  const { result, rerender } = renderHook(
+    ({ wave }) => useWaveWebSocket(wave),
+    { initialProps: { wave: "first" } }
+  );
+  act(() => result.current.disconnect());
+  mockAppActive = false;
+  rerender({ wave: "first" });
+  mockAppActive = true;
+  rerender({ wave: "first" });
+  act(() => jest.advanceTimersByTime(60000));
+  expect(sockets).toHaveLength(1);
+  expect(result.current.socket).toBeNull();
+  expect(result.current.readyState).toBe(MockWebSocket.CLOSED);
+  expect(jest.getTimerCount()).toBe(0);
+  rerender({ wave: "second" });
+  expect(sockets).toHaveLength(2);
+  act(() => socket().open());
+  expect(socket().send).toHaveBeenLastCalledWith(
+    JSON.stringify({ type: "SUBSCRIBE_TO_WAVE", wave_id: "second" })
+  );
 });
