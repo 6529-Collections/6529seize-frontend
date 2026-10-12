@@ -19,6 +19,7 @@ interface CompactMenuMobileBottomSheetProps {
   readonly items: readonly CompactMenuItem[];
   readonly trigger: ReactNode;
   readonly triggerClassName?: string | undefined;
+  readonly itemClassName?: string | undefined;
   readonly renderTriggerButton?:
     | ((props: MobileBottomSheetTriggerProps) => ReactNode)
     | undefined;
@@ -32,6 +33,7 @@ export default function CompactMenuMobileBottomSheet({
   items,
   trigger,
   triggerClassName,
+  itemClassName,
   renderTriggerButton,
   disabled = false,
   zIndexClassName = "tw-z-[1020]",
@@ -103,14 +105,20 @@ export default function CompactMenuMobileBottomSheet({
                 disabled={item.disabled}
                 onClick={() => selectAction(item.onSelect)}
                 className={clsx(
-                  "tw-flex tw-min-h-12 tw-w-full tw-items-center tw-gap-3 tw-rounded-xl tw-border-0 tw-bg-transparent tw-px-0 tw-py-3 tw-text-left tw-text-base tw-font-medium tw-text-iron-200 tw-transition-colors tw-duration-200 active:tw-bg-iron-800 disabled:tw-cursor-not-allowed disabled:tw-opacity-50",
+                  itemClassName ??
+                    "tw-flex tw-min-h-12 tw-w-full tw-items-center tw-gap-3 tw-rounded-xl tw-border-0 tw-bg-transparent tw-px-0 tw-py-3 tw-text-left tw-text-base tw-font-medium tw-text-iron-200 tw-transition-colors tw-duration-200 active:tw-bg-iron-800 disabled:tw-cursor-not-allowed disabled:tw-opacity-50",
                   item.className
                 )}
               >
                 {item.icon !== undefined &&
                 item.icon !== null &&
                 item.icon !== false ? (
-                  <span className="tw-flex tw-size-5 tw-flex-none tw-items-center tw-justify-center">
+                  <span
+                    className={
+                      item.iconClassName ??
+                      "tw-flex tw-size-5 tw-flex-none tw-items-center tw-justify-center"
+                    }
+                  >
                     {item.icon}
                   </span>
                 ) : null}

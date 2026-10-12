@@ -53,6 +53,10 @@ export class ApiDropV2 {
     'priority_metadata'?: Array<ApiDropMetadataV2>;
     'reactions'?: Array<ApiDropReactionCounter>;
     'boosts': number;
+    /**
+    * Number of replies in this drop\'s thread. Only provided for drops in waves with collapsed replies, and omitted when there are none.
+    */
+    'replies_count'?: number;
     'reply_to_drop'?: ApiReplyToDropV2;
     'submission_context'?: ApiSubmissionDropContext;
     'context_profile_context'?: ApiDropV2ContextProfileContext;
@@ -189,6 +193,12 @@ export class ApiDropV2 {
         {
             "name": "boosts",
             "baseName": "boosts",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "replies_count",
+            "baseName": "replies_count",
             "type": "number",
             "format": "int64"
         },

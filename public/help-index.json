@@ -69,15 +69,15 @@
         "Competition links use /waves/{waveId}/competitions/{competitionId}; an entry link adds ?entry={entryId}. Explicit competition and entry links preserve that competition across tabs, reload and Back/Forward even when another competition becomes the default.",
         "In competition setup, Competition type offers Rank and Approve in a desktop dropdown or a bottom sheet on smaller screens, including the app. The current choice is marked. Selecting a type closes the picker; dismissing it leaves the choice unchanged.",
         "In the app, the competition setup editor keeps the focused name or description field above the keyboard and action bar. Closing the keyboard restores the editor's full height.",
-        "In the native app, the competition collection filters and Votes subtabs use the same compact pills as wave information. More opens remaining collection choices and shows the selected choice's name after selection. Dismissing More leaves the selection unchanged. Desktop and mobile web retain underlined tabs; published competitions keep the shared wave-level navigation.",
+        "In the native app, the competition collection filters and Votes subtabs use the same compact pills as wave information. More opens remaining collection choices and shows the selected choice's name after selection. Dismissing More leaves the selection unchanged. Desktop and mobile web also use compact pills for collection filters, with all available filters visible. Votes subtabs retain underlined styling on web; published competitions keep the shared wave-level navigation.",
         "When switching to a competition route, its controls appear after navigation completes, so a newly opened sort sheet or form stays in that view.",
         "A wave link targeting a specific chat message remains in Chat even when the link also names another section. The message target takes priority over that conflicting destination.",
         "Ordinary wave navigation restores each wave’s last selected valid tab in the same browser or app, including after reloads or app restarts. Main Stage can remember Leaderboard while Maybes Bar independently remembers Chat. With no valid remembered choice, Chat is the fallback, including Memes and completed waves. Loading or refreshing competition data does not override deliberate Chat selections. Remembered competition views retain their competition identity; if the default changes, ordinary entry falls back to Chat. Explicit tab and competition links retain their destination. Competition tabs use the default unless an explicit selection supplies another competition. One eligible competition wins; otherwise the earliest-starting running competition wins, including paused decisions. With none running, the soonest upcoming wins over history; otherwise the most recently ended wins, including archived completed history. Drafts, archived never-published drafts and cancelled competitions are excluded. With none eligible, shared chat remains usable. Chat and every selected published competition share one wave-level row: Chat, competition views, Votes, Settings, then Competitions when available, then curations. Votes contains My Votes, All votes and Activity, scoped to the selected competition. Settings renders its access, rules, appearance and pause history, including original competitions stored in wave settings. About and wave Configuration live in the information panel. Select the wave name to open it; mobile Close or Back returns to the original competition, tab, curation and scroll. Administrators retain Competitions; other viewers see it for more than one visible competition. Unknown counts or permissions keep it available. Direct collection links remain readable. Explicit competition choices and open forms keep their original competition.",
         "Routine background competition refreshes keep established tabs in place. The Competitions tab updates when refreshed competition data or permissions change, not merely because another request starts.",
-        "Where the competition experience is available, creating a wave opens shared chat without creating a competition. The Competitions tab is available to wave administrators for management, and to other viewers with accessible competitions except for the logged-in sole-default case described above. Administrators open that tab and use Add competition to configure competitions afterward.",
+        "Where the competition experience is available, creating a wave opens shared chat without creating a competition. The Competitions tab is available to wave administrators for management, and to other viewers with accessible competitions except for the logged-in sole-default case described above. Users with competition creation permission open Competitions, then + Competition beside the collection filter pills, to configure a competition afterward.",
         "Wave administrators can create Rank or Approve drafts and publish them. Drafts are visible only to wave administrators. Approve requires a whole-number approval threshold greater than zero. The competition setup editor saves changes automatically. Incomplete input is retained on this device; valid drafts sync to the server. Next highlights invalid voting settings. Opening a draft goes directly to the setup wizard with saved settings prefilled. Close editor returns to the competition list and preserves the draft without publishing. The final step has Previous, Close editor and Publish; Publish saves the latest edits before publication. Whole competition means one voting budget across that competition’s entries. Competition guidelines apply to its entries and voting; chat guidelines belong to the shared wave. Published types cannot change; after the first entry, credit, signing, submission, timing, decision and outcome rules are fixed. Participation and voting access groups, title, description and presentation can still be updated while published.",
         "Each entry creates a dedicated competition drop that belongs to exactly one competition. Chat messages cannot become competition entries, and competition drops cannot be reused in another competition. Competition submissions cannot be edited, including unsigned submissions. Delete removes the entry from all competition views and direct entry links. There are no Withdraw or Disqualify actions. Existing drop-deletion permissions apply.",
-        "The wave header and tabs stay visible. Every selected published competition renders directly under the single wave tab row. The collection and create/edit forms open from Competitions. The Competitions tab shows a badge counting active and upcoming competitions, hidden at zero; drafts and completed competitions do not count. The collection has a second tab row for Active and upcoming, Completed, Drafts for administrators, and All. Add competition sits alongside these tabs for users who can create competitions. Competition cards show the start date and any configured end date, using Starts or Ends for future dates and Started or Ended for past dates. Competition views include Leaderboard, Winners, Outcomes, Votes and Settings. Votes has My Votes, All votes and Activity subtabs scoped to the chosen competition. The leaderboard uses the familiar schedule or approval-status bar, list/grid controls, sorting and rich drop cards with the Drop action. Winners use Rank podium/timeline or Approve result cards; Outcomes use expandable reward cards; My votes uses editable rows and reset controls; All votes shows profile rows and vote totals. Open Settings for an overview with the competition type, status, name, description and guidelines, followed by Participation, Voting and Winners settings cards. Administrators can use Edit competition details on the overview card to edit the name, description and guidelines together in place, then Save changes or Cancel. Published competitions no longer open a separate editing wizard. Administrators can use the gear beside Participation or Voting Access to edit its criteria, including after entries have been submitted. Access changes preserve existing entries, votes, outcomes and decision progress. Administrators can expand Appearance and labels below these cards to edit the submission button label, proposal card display, Approve tab labels and outcome visibility, with Save changes and Cancel in that section. Approve competitions default to Proposals and Approved; custom tab labels apply to that competition. Drafts also have Finish draft setup for unpublished execution settings. Select Chat to return to the conversation. Competition drop cards in shared chat show the competition name beneath the author, linked to that competition, plus the entry’s current total, your vote, rank, and voter count. The voter dropdown shows the entry’s voters and vote history. Voting credit is independent per competition. Voting on a competition drop from shared chat uses that entry’s competition credit type, available budget, and rules. A budget can be shared across that competition or apply per entry. Zero removes a vote; negative values depend on the rules. Winning or deleting an entry releases its active voting spend. Deleted entries and their votes no longer appear in competition views.",
+        "The wave header and tabs stay visible. Every selected published competition renders directly under the single wave tab row. The collection opens from Competitions. + Competition beside the collection filter pills opens setup directly; existing drafts open from their collection cards. The Competitions tab shows a badge counting active and upcoming competitions, hidden at zero; drafts and completed competitions do not count. The collection offers Active and upcoming, Completed, Drafts for administrators, and All. The app uses compact pills with More for remaining filters; desktop and mobile web show all available collection filters as compact pills. Create beside the wave tabs contains eligible New curation and New subwave actions. On desktop, mouse opening leaves actions unhighlighted; keyboard opening and arrow keys highlight options for selection. The separate + Competition action appears only in the Competitions collection for users with competition creation permission. Mobile uses a bottom sheet with short action descriptions; selecting an action closes the sheet before its form opens. Competition cards show the start date and any configured end date, using Starts or Ends for future dates and Started or Ended for past dates. Competition views include Leaderboard, Winners, Outcomes, Votes and Settings. Votes has My Votes, All votes and Activity subtabs scoped to the chosen competition. The leaderboard uses the familiar schedule or approval-status bar, list/grid controls, sorting and rich drop cards with the Drop action. Winners use Rank podium/timeline or Approve result cards; Outcomes use expandable reward cards; My votes uses editable rows and reset controls; All votes shows profile rows and vote totals. Open Settings for an overview with the competition type, status, name, description and guidelines, followed by Participation, Voting and Winners settings cards. Administrators can use Edit competition details on the overview card to edit the name, description and guidelines together in place, then Save changes or Cancel. Published competitions no longer open a separate editing wizard. Administrators can use the gear beside Participation or Voting Access to edit its criteria, including after entries have been submitted. Access changes preserve existing entries, votes, outcomes and decision progress. Administrators can expand Appearance and labels below these cards to edit the submission button label, proposal card display, Approve tab labels and outcome visibility, with Save changes and Cancel in that section. Approve competitions default to Proposals and Approved; custom tab labels apply to that competition. Drafts also have Finish draft setup for unpublished execution settings. Select Chat to return to the conversation. Competition drop cards in shared chat show the competition name beneath the author, linked to that competition, plus the entry’s current total, your vote, rank, and voter count. The voter dropdown shows the entry’s voters and vote history. Voting credit is independent per competition. Voting on a competition drop from shared chat uses that entry’s competition credit type, available budget, and rules. A budget can be shared across that competition or apply per entry. Zero removes a vote; negative values depend on the rules. Winning or deleting an entry releases its active voting spend. Deleted entries and their votes no longer appear in competition views.",
         "Competition winner notifications link to the relevant competition or entry. Competition status changes and entry deletion do not send notifications or appear in the notification feed.",
         "Pause decisions stops winner selection while otherwise eligible entries and votes remain available. In Settings, Pause decisions and Resume decisions sit beside Pause history, alongside the other Settings sections. Pausing requires a non-blank reason in the confirmation dialog. Anyone who can view the competition can see each pause’s dates and reason in Pause history, including after resuming. Older pauses without a reason show No reason recorded. Approve may finalize accepted votes after voting closes when a hold or pause finishes. Competitions complete through their configured rules; administrators cannot manually end or cancel them. Archive moves a draft or completed competition into history. Terminal competitions can be cloned into new drafts but cannot reopen.",
         "Main Stage privileges belong only to an explicitly designated competition. Other competitions in the same wave do not inherit them. A wave containing native competition history cannot be deleted, and ordinary chat-history deletion preserves competition content.",
@@ -2006,7 +2006,11 @@
         "change subscription settings",
         "how long is my subscription funded",
         "when do i need to top up",
-        "subscription running low"
+        "subscription running low",
+        "what happens to subscriptions when wallets consolidate",
+        "subscription merge conflicts",
+        "all eligible after consolidation",
+        "manual quantity after consolidation"
       ],
       "keywords": [
         "profile",
@@ -2020,7 +2024,11 @@
         "upcoming",
         "coverage",
         "runway",
-        "funded"
+        "funded",
+        "consolidation",
+        "merge",
+        "manual override",
+        "all eligible"
       ],
       "facts": [
         "A user's Meme Card subscription controls and history live under /{user}/subscriptions.",
@@ -2033,7 +2041,12 @@
         "Upcoming Drops keeps a numeric quantity selector from 1 through eligibility when eligibility is positive. At zero eligibility, it displays a single 0 option and is disabled without changing the saved request. Untouched automatic subscriptions in Automatic / All eligible mode follow current eligibility when consolidated balances refresh. Choosing a quantity saves a manual request for that card, including future cards, which automatic updates never overwrite.",
         "The displayed manual quantity is capped by current eligibility without changing the saved request. Manual 11 displays 10 / 10 at eligibility 10, then 11 / 12 when eligibility recovers to 12 and data is refreshed. Final allocation is also capped by available balance; historical finalized allocations are unchanged.",
         "Upcoming Drops shows No subscription allocation only for a subscribed first card whose distribution is published but whose finalized subscription list has no record for that profile. A phase-less finalized record remains pending; the message also stays silent for unsubscribed cards, unpublished distribution, or failed lookups.",
-        "The tab keeps loading and empty states distinct, and its subscription controls, upcoming rows, and history panels adapt to narrow screens."
+        "The tab keeps loading and empty states distinct, and its subscription controls, upcoming rows, and history panels adapt to narrow screens.",
+        "When consolidation groups merge, subscription balances are added, including any existing destination balance once. Automatic mode stays enabled if any source or the destination had it enabled. All eligible is retained if any source or the destination selected it, including a preference saved in Manual mode; otherwise the merged preference is One edition.",
+        "For overlapping upcoming subscriptions to the same Meme Card, the merged group remains subscribed if either active row was subscribed. A subscribed manual quantity takes precedence over automatic quantities, even when it is smaller and the group uses All eligible. If several subscribed manual requests conflict, the largest manual request is retained; otherwise the largest subscribed automatic quantity is retained. The earliest priority timestamp among subscribed rows is preserved; unsubscribed rows do not override active requests.",
+        "Distinct upcoming subscriptions, subscription logs, and redeemed history move to the merged group. On a split, subscriptions follow the resulting group with the highest TDH; they are not divided between the resulting groups.",
+        "Finalized allocations are handled separately from upcoming requests. Distinct finalized allocations move without changing their delivery or allocation details. Conflicting finalized allocations for the same card are retained under their old group for manual reconciliation, not automatically combined or discarded.",
+        "If a subscription-group move fails, its changes are rolled back so that group is not left partly moved. These merge rules apply when affected consolidations are processed; they do not automatically recover subscription rows stranded by earlier failures."
       ],
       "canonical_path": "/{user}/subscriptions",
       "related_paths": ["/about/subscriptions", "/{user}/subscriptions"],
@@ -2998,7 +3011,7 @@
       ],
       "keywords": ["waves", "subwaves", "create", "admin", "mobile", "plus"],
       "facts": [
-        "Eligible admins can open the + menu in a root wave's tab row and select New subwave on web or in the app.",
+        "Eligible admins can open Create in a root wave's tab row and select New subwave on web or in the app.",
         "New subwave is hidden in direct messages, inside an existing subwave, while using a profile proxy, when the parent has no reusable admin group, or when the profile cannot administer the parent.",
         "Subwave creation shows Create subwave of the parent wave name in both the modal header and Setup heading. Its first-step labels are Subwave Name, Subwave Profile Picture, and Subwave Type. Saved Drafts is hidden during subwave creation.",
         "A new subwave starts with the parent wave's exact access group. Chat and, for Rank and Approve waves, submission and voting default to that same group. A public parent's subwaves start public. Changing the wave type restores these defaults, but inherited groups are editable and do not have to match the parent's groups.",
@@ -3082,14 +3095,14 @@
         "Optional sections are named for their contents instead of repeating Advanced settings. They show Customized for non-default values and open automatically when a hidden field needs attention.",
         "The Access step initially shows one Who can access this wave control. By default, that group can also chat and, for Rank and Approve waves, submit and vote; only the creator can administer the wave.",
         "Customize other permissions expands the separate chat, submission, voting, and admin group controls when a wave needs different access rules.",
-        "Each Access row offers one Edit action with a pencil icon and no Choose group action. Edit opens Identities immediately alongside the rule choices, supports explicitly included and excluded identities, and Next or Review wave stays disabled until the pending replacement is saved or cancelled.",
+        "Each Access row offers one Edit action with a pencil icon and no Choose group action. Edit opens Identities immediately alongside the rule choices, supports explicitly included and excluded identities, and Next or Review wave stays disabled until the pending replacement is saved or cancelled. Clicking elsewhere in the Create Wave modal keeps the open criteria editor and its draft available; cancelling is not needed to return to the filters. Cancel sits at the far right of the Before editing header row, including on mobile, and discards the pending edit.",
         "The inline criteria editor includes a Hide criteria and members switch. Its tooltip explains that the criteria and member list remain visible to group members but are hidden from everyone else. The switch starts off for a new inline group, preserves the setting copied from the current assignment, and applies the current setting when Save changes is selected.",
         "The inline Identities editor can add either included or excluded identities through profile search, an authenticated EMMA allowlist, or a dragged or selected CSV file. Source wallets are normalized and deduplicated, source choices persist while the group remains an unsaved draft, and the latest include or exclude action wins when the same wallet appears on both sides.",
         "Inline group identity search ranks exact, prefix, and substring profile-handle matches before ENS-only matches, then orders each match group by profile level, highest first.",
         "An empty access, drop, vote, or chat scope is labeled Everyone. During editing, matching Before editing and After editing summaries compare the applied and proposed audiences.",
         "A selected saved access group shows its current eligible identity count; View members opens a paginated, searchable member browser without leaving wave creation.",
         "A valid draft exposes View members from its After editing summary; there is no separate Preview matches, Close, or Discard draft action.",
-        "The currently open criterion has a solid blue button with an underlined label and is announced as pressed. A dot plus an accessible Configured state marks criteria with values independently of which editor is open.",
+        "Criteria appear in a left-side list on desktop in Create Wave, Configuration access editors, and Network Filter. On smaller screens they stay in one horizontal row above the fields; scroll sideways when the options do not fit. Keyboard focus brings each option into view. The open criterion has a calm filled background and is announced as pressed. A check plus an accessible Configured state marks criteria with values independently of which editor is open. Scrolling over an inline access editor scrolls the surrounding Create Wave form.",
         "Make wave public changes access to Everyone and also changes chat, submission, or voting only when that row still matched access at click time; independently customized rows and Admins remain unchanged.",
         "A chat, submission, or voting row that differs from access offers Match wave access to copy the current access group and resume default synchronization.",
         "Group membership previews use current profile, reputation, and ownership data, so the matching identities can change over time.",
@@ -3237,7 +3250,7 @@
         "sidebar"
       ],
       "facts": [
-        "Desktop wave information sections live in the right sidebar in this order: About, REP, and Configuration. Open them with the Show right sidebar icon in the conversation header.",
+        "Desktop wave information sections live in the right sidebar in this order: About, REP, and Configuration. Open them with the Show right sidebar icon in the conversation header. These sections use the same compact pill styling on desktop and mobile.",
         "About shows the creator’s avatar and profile link, and the creation date on one line below the title, followed by the current pinned drop with its content and media. The pinned drop replaces the voting overview block and updates when an administrator uses Set as pinned drop.",
         "On desktop and tablet web, Add REP or Edit REP appears to the left of the conversation header icon buttons. It is also available in the right sidebar's About section, which is the REP entry point on compact web. The action appears for connected non-author, non-proxy profiles and is absent for DMs. A small shield and number beside the desktop wave name opens Wave Score details and Learn more.",
         "Wave Configuration contains wave access, chat availability, links, slow mode, curations, chat history deletion and personal display preferences. Selected competition access, rules, appearance and pauses belong to Settings in the main row.",
@@ -3623,6 +3636,54 @@
       ]
     },
     {
+      "id": "waves.replies",
+      "kind": "business_rule",
+      "title": "Open and collapsed wave replies",
+      "aliases": [
+        "who can reply in a wave",
+        "reply to announcements",
+        "open replies",
+        "collapsed replies",
+        "reply threads",
+        "show replies",
+        "hide replies",
+        "only chat members can start new drops"
+      ],
+      "keywords": [
+        "waves",
+        "replies",
+        "reply",
+        "thread",
+        "collapsed",
+        "open",
+        "chat",
+        "announcements",
+        "settings"
+      ],
+      "facts": [
+        "Wave admins set replies in About -> Configuration -> Chat -> Replies. The row reads Chat members or Everyone, then Inline or Collapsed.",
+        "With `Anyone who can see this wave can reply` on, everyone who can see the wave can reply to its drops, even outside the chat group. New top-level drops still need chat access.",
+        "Viewers who can only reply see `Only chat members can start new drops here. You can reply to any drop.` and use the drop's Reply action to open the composer.",
+        "With `Collapse replies under each drop` on, replies stay out of the main chat. A drop with replies shows `Show N replies`; selecting it opens the thread under the drop, oldest first, and `Hide replies` closes it.",
+        "The reply count includes replies to replies throughout the thread. Direct and nested replies refresh the original drop's count live; duplicate updates do not add extra replies.",
+        "Sending a reply opens its thread for the sender. The pending reply remains visible while saving and loading, then becomes the saved reply; unsuccessful sends are removed or show the existing moderation rejection state.",
+        "If loading a collapsed reply thread fails, it shows `Couldn't load replies.` and a Retry button. Already-loaded replies stay visible; Retry loads the thread again.",
+        "Slow mode and disabled links still apply to replies from non-admins. Emoji reactions stay open to everyone who can see the wave.",
+        "Collapsed replies do not count as unread and do not notify followers subscribed to every drop; the replied-to author and mentioned profiles are still notified.",
+        "Links and notifications to a collapsed reply jump to its parent drop and open that thread.",
+        "With open replies, the wave's creator, admins and chat members (when chat is limited to a group) can delete anyone's replies with the Delete action. Top-level drops keep the wave's normal admin deletion setting."
+      ],
+      "canonical_path": "/waves",
+      "related_paths": ["/waves?create=wave"],
+      "tags": ["waves", "chat", "settings"],
+      "source_refs": [
+        "components/waves/specs/WaveChatReplies.tsx",
+        "components/waves/drops/reply-threads/WaveDropReplyThread.tsx",
+        "components/waves/PrivilegedDropCreator.tsx",
+        "generated/models/ApiWaveChatRepliesConfig.ts"
+      ]
+    },
+    {
       "id": "waves.configuration-access-group-editor",
       "kind": "ui_affordance",
       "title": "Edit wave access groups from Configuration",
@@ -3652,9 +3713,10 @@
       ],
       "facts": [
         "Selecting an access-row gear in Wave Configuration opens the group editor directly without an intermediate context menu.",
-        "The Configuration modal opens on Identities in the same criteria editor as wave creation, including the privacy row, configured criteria chips, Before editing and After editing summaries, Cancel, and Save changes. Wave access editors do not offer Choose group. It preloads the row's rules, included and excluded identities, NFT and grant requirements, and criteria/member privacy setting.",
+        "The Configuration modal opens on Identities in the same criteria editor as wave creation, including the privacy row, configured criteria rows, Before editing and After editing summaries, Cancel, and Save changes. Wave access editors do not offer Choose group. It preloads the row's rules, included and excluded identities, NFT and grant requirements, and criteria/member privacy setting.",
         "A public access row starts a new criteria draft with the editor's primary wallet explicitly included by default; Include me can be turned off from Identities.",
         "An already restricted row keeps its saved included and excluded identities and does not add the editor automatically.",
+        "Included and Excluded use segmented tabs across Create Wave, Edit access, and Network Filter. Saved wallets resolve to profile pictures and handles, with ENS or a shortened wallet address for wallets without profiles. Each saved wallet remains independently removable and is labelled to distinguish multiple wallets belonging to one profile. Long lists show 20 wallets per page. Loading or failed lookups do not block editing or saving; Retry profile lookup retries a failed lookup.",
         "Saving edited criteria creates a separate group and normally updates only the selected access row; it does not mutate the original group or other access rows that use it.",
         "When Visibility, Drop, Vote, and Chat access are all public, assigning a Visibility group assigns that same group to all four non-admin access rows in one save and leaves Admins unchanged.",
         "The Visibility cascade does not run when any non-admin access row is already restricted; in that case only Visibility changes and normal containment validation applies.",
@@ -4037,7 +4099,11 @@
         "check delegations",
         "check consolidations",
         "active delegations",
-        "active consolidations"
+        "active consolidations",
+        "wallet checker missing consolidation link",
+        "wallet checker linked wallets",
+        "why is there no consolidation recommendation",
+        "incomplete consolidation recommendations"
       ],
       "keywords": [
         "wallet",
@@ -4051,14 +4117,23 @@
         "consolidations",
         "architecture",
         "address",
-        "ens"
+        "ens",
+        "linked wallets",
+        "reverse direction",
+        "recommendations",
+        "stray links",
+        "partial results"
       ],
       "facts": [
         "Wallet Checker lives at /delegation/wallet-checker.",
         "Wallet Checker is a read-only diagnostics page for one wallet.",
         "It checks delegations, delegation managers, and consolidation relationships for an entered Ethereum address or .eth ENS.",
         "It can show Delegations, Active Minting Delegation for The Memes, Delegation Managers, Consolidations, Active Consolidation, and Incomplete Consolidation.",
-        "Use Wallet Checker when users ask how to check or view active delegations, consolidations, delegation managers, or wallet-architecture-related setup for an address."
+        "Use Wallet Checker when users ask how to check or view active delegations, consolidations, delegation managers, or wallet-architecture-related setup for an address.",
+        "For consolidation checks, Wallet Checker loads the checked wallet and up to six wallets directly linked to it, prioritizing confirmed links. This reveals pair records between other group members, not just links involving the checked wallet. Repeated pair records are deduplicated across direction and address case; the newest block wins, and an unconfirmed copy wins a same-block disagreement.",
+        "Incomplete Consolidation recommends registering a missing reverse direction only when both wallets belong with the checked wallet: the checked wallet itself, its active consolidation, or wallets directly linked to it. A member's one-way link to an unrelated wallet stays visible without a recommendation; completing it could move that member out of the group.",
+        "Recommendations wait until the separately loaded active-consolidation request settles. A failed linked-wallet request keeps the successfully loaded records, so partial results do not prove that every link was checked.",
+        "Wallet Checker does not invent links: if a pair is entirely absent in both directions, it produces no recommendation for that pair. The six-linked-wallet cap can also limit coverage for a wallet with many stray links. Listed registrations are distinct from the backend's active counted consolidation; the checker neither registers links nor activates four-wallet support."
       ],
       "canonical_path": "/delegation/wallet-checker",
       "related_paths": [
@@ -4069,7 +4144,9 @@
       "tags": ["delegation", "wallet", "checker", "diagnostics"],
       "source_refs": [
         "ops/docs/delegation/feature-wallet-checker.md",
-        "components/delegation/delegation-page-metadata.ts"
+        "components/delegation/delegation-page-metadata.ts",
+        "components/delegation/walletChecker/WalletChecker.tsx",
+        "components/delegation/walletChecker/walletCheckerConsolidations.ts"
       ]
     },
     {
@@ -4119,17 +4196,21 @@
         "Natural phrases such as adding, linking, pairing, or setting up another wallet refer to this consolidation flow when the goal is for 6529 to treat wallets together for supported metrics.",
         "To register a consolidation, open Register Consolidation from the Delegation Center, choose the collection, enter the Consolidating With address, submit, and execute the transaction.",
         "For TDH consolidation, use Any Collection or The Memes.",
-        "Consolidation should be reciprocal when two wallets are intended to be treated together, and it is not a delegation and does not grant rights."
+        "Consolidation must be reciprocal: two wallets each register the link to the other, and groups of 3 or 4 wallets need every pair linked in both directions.",
+        "Each wallet signing for itself can register all of its links in one transaction with the NFTDelegation batchDelegations function (up to 5 links per call). A Delegation Manager sends one transaction per link. When adding a wallet to an existing group, the existing wallets register their links to it first and the new wallet sends its batch last. Existing return links or a manager sending the new wallet's links individually can still cause a temporary split and reduce TDH-wave votes.",
+        "A consolidation is not a delegation of NFT utility, but every wallet in it is a full key to the profile, so only consolidate your own wallets."
       ],
       "canonical_path": "/delegation/delegation-faq/register-consolidation",
       "related_paths": [
         "/delegation/wallet-architecture",
         "/delegation/consolidation-use-cases",
+        "/delegation/delegation-faq/reference-consolidations-4address",
         "/delegation/register-consolidation"
       ],
       "tags": ["delegation", "consolidation", "wallet", "faq"],
       "source_refs": [
-        "public/delegation-content/delegation-docs-2026-06-16/html/register-consolidation.html",
+        "public/delegation-content/delegation-docs-2026-10-15/html/register-consolidation.html",
+        "public/delegation-content/delegation-docs-2026-10-15/html/reference-consolidations-4address.html",
         "ops/docs/delegation/flow-delegation-center-to-onchain-actions.md"
       ]
     },
@@ -4220,7 +4301,7 @@
         "The docs call this the Three Address Protocol, or TAP, and explain how separate wallets reduce phishing, malware, and malicious-site risk.",
         "A higher-security version can use SAFE, formerly Gnosis Safe, as the vault wallet, while a more convenient minting wallet can be a hot or mobile wallet.",
         "Use the consolidation docs and Register Consolidation form when you want those wallets treated together for supported 6529 metrics.",
-        "For consolidation metrics, 6529 currently recognizes up to 3 addresses as one consolidation group."
+        "For consolidation metrics, 6529 recognizes up to 4 addresses as one consolidation group when every pair is linked in both directions; a fourth address counts only for links registered on or after 15 October 2026 00:00 UTC."
       ],
       "canonical_path": "/delegation/wallet-architecture",
       "related_paths": [
@@ -4232,7 +4313,7 @@
       ],
       "tags": ["delegation", "wallet", "security", "architecture"],
       "source_refs": [
-        "public/delegation-content/delegation-docs-2026-06-16/html/reference-overview-wallet-architecture.html",
+        "public/delegation-content/delegation-docs-2026-10-15/html/reference-overview-wallet-architecture.html",
         "components/delegation/delegation-page-metadata.ts"
       ]
     },
@@ -4265,8 +4346,14 @@
         "three wallet consolidation",
         "two wallet consolidation",
         "compromised wallet consolidation",
+        "add a fourth wallet to consolidation",
+        "add a 4th wallet to consolidation",
+        "rotate a consolidated wallet",
+        "consolidation order",
         "consolidation architecture",
-        "how do consolidations affect tdh"
+        "how do consolidations affect tdh",
+        "which group keeps my profile",
+        "profile after consolidation split"
       ],
       "keywords": [
         "consolidation",
@@ -4284,29 +4371,37 @@
         "maximum",
         "capacity",
         "allowed",
-        "counted"
+        "counted",
+        "profile retention",
+        "split"
       ],
       "facts": [
         "Consolidations help 6529 treat multiple wallets controlled by one collector together for metrics such as total cards, unique cards, TDH, and related collection metrics.",
-        "For now, 6529 recognizes up to 3 addresses as one consolidation group for The Memes metrics.",
-        "More than 3 addresses can have consolidation records, but Seize only counts the last 3 addresses for consolidation purposes.",
-        "Registration capacity and effective counted group size are therefore different: users can create records involving more addresses, while no more than 3 addresses count together.",
-        "The docs cover two-address and three-address patterns, plus a four-address compromised-wallet scenario where the user chooses which three-address set should count.",
-        "Each address generally needs reciprocal consolidation records with the other addresses it should be grouped with."
+        "6529 recognizes up to 4 addresses as one consolidation group, and every pair of addresses in the group must register consolidation use case #999 with each other in both directions.",
+        "The fourth address counts only for links registered on or after 15 October 2026 00:00 UTC: a group of 4 counts when one of its addresses has all three of its links registered in both directions from then. Before then, groups count at most 3 addresses; groups of 2 or 3 are unchanged and older registrations stay valid.",
+        "Registration capacity and effective counted group size are different: users can create records involving more addresses, but no more than 4 addresses count together, and when links conflict the newest confirmed link wins.",
+        "Each wallet signing for itself can register all of its links in one transaction with batchDelegations; a Delegation Manager sends one transaction per link. When adding a wallet to an existing group, the existing members register their links to it first and the new wallet sends its batch last. This avoids a temporary split when the new wallet has no existing return links. Old return links, signing out of order, or a manager sending the new wallet's links individually can temporarily split the group, re-run profile merges, and reduce TDH-wave votes above the lower TDH; those votes are not restored.",
+        "To replace a wallet without dropping below three, add the new wallet as the fourth, then remove the old one: if it still has its key, it sends one batch revocation to all the others; if the key is lost, each remaining wallet revokes its link to it.",
+        "Every wallet in a consolidation is a full key to the profile: it can sign in as the profile, set the primary address, and redirect airdrops. Consolidations are for one person's wallets, not for multiple individuals, and consolidation registrations do not expire.",
+        "When a consolidation splits, profile retention uses a mature primary-address delegation (50,400 processed blocks, roughly seven days) before TDH fallback. This does not delay primary-address changes. Subscription balances and upcoming choices have separate merge rules; on a split, subscriptions follow the highest-TDH resulting group rather than the profile-retention winner."
       ],
       "canonical_path": "/delegation/consolidation-use-cases",
       "related_paths": [
         "/delegation/wallet-architecture",
         "/delegation/delegation-faq/register-consolidation",
+        "/delegation/delegation-faq/reference-consolidations-4address",
         "/delegation/register-consolidation",
         "/delegation/delegation-faq",
         "/consolidation-mapping-tool"
       ],
       "tags": ["delegation", "consolidation", "wallet", "tdh"],
       "source_refs": [
-        "public/delegation-content/delegation-docs-2026-06-16/html/consolidation-use-cases.html",
-        "public/delegation-content/delegation-docs-2026-06-16/html/reference-consolidations-3address.html",
-        "public/delegation-content/delegation-docs-2026-06-16/html/reference-consolidations-3address-del-manager.html"
+        "public/delegation-content/delegation-docs-2026-10-15/html/consolidation-use-cases.html",
+        "public/delegation-content/delegation-docs-2026-10-15/html/reference-consolidations-3address.html",
+        "public/delegation-content/delegation-docs-2026-10-15/html/reference-consolidations-3address-del-manager.html",
+        "public/delegation-content/delegation-docs-2026-10-15/html/reference-consolidations-4address.html",
+        "ops/docs/profiles/about/feature-primary-address-reference-table.md",
+        "ops/docs/profiles/tabs/feature-subscriptions-tab.md"
       ]
     },
     {
@@ -4347,7 +4442,7 @@
       ],
       "tags": ["delegation", "faq", "docs"],
       "source_refs": [
-        "public/delegation-content/delegation-docs-2026-06-16/html/delegation-faq.html",
+        "public/delegation-content/delegation-docs-2026-10-15/html/delegation-faq.html",
         "components/delegation/html/delegationContent.ts"
       ]
     },
@@ -4379,8 +4474,8 @@
       ],
       "tags": ["delegation", "wallet", "consolidation", "management"],
       "source_refs": [
-        "public/delegation-content/delegation-docs-2026-06-16/html/manage-revoke.html",
-        "public/delegation-content/delegation-docs-2026-06-16/html/manage-update.html",
+        "public/delegation-content/delegation-docs-2026-10-15/html/manage-revoke.html",
+        "public/delegation-content/delegation-docs-2026-10-15/html/manage-update.html",
         "components/delegation/delegation-page-metadata.ts"
       ]
     },
@@ -4430,7 +4525,7 @@
       ],
       "tags": ["delegation", "workflow", "faq", "revoke"],
       "source_refs": [
-        "public/delegation-content/delegation-docs-2026-06-16/html/manage-revoke.html"
+        "public/delegation-content/delegation-docs-2026-10-15/html/manage-revoke.html"
       ]
     },
     {
@@ -4476,7 +4571,7 @@
       ],
       "tags": ["delegation", "workflow", "faq", "update"],
       "source_refs": [
-        "public/delegation-content/delegation-docs-2026-06-16/html/manage-update.html"
+        "public/delegation-content/delegation-docs-2026-10-15/html/manage-update.html"
       ]
     },
     {
@@ -4513,7 +4608,7 @@
       ],
       "tags": ["delegation", "workflow", "faq"],
       "source_refs": [
-        "public/delegation-content/delegation-docs-2026-06-16/html/register-delegation.html"
+        "public/delegation-content/delegation-docs-2026-10-15/html/register-delegation.html"
       ]
     },
     {
@@ -4552,8 +4647,8 @@
       ],
       "tags": ["delegation", "manager", "wallet", "faq"],
       "source_refs": [
-        "public/delegation-content/delegation-docs-2026-06-16/html/register-sub-delegation.html",
-        "public/delegation-content/delegation-docs-2026-06-16/html/register-delegation-using-sub-delegation.html"
+        "public/delegation-content/delegation-docs-2026-10-15/html/register-sub-delegation.html",
+        "public/delegation-content/delegation-docs-2026-10-15/html/register-delegation-using-sub-delegation.html"
       ]
     },
     {
@@ -4590,7 +4685,7 @@
       ],
       "tags": ["delegation", "safe", "wallet", "faq"],
       "source_refs": [
-        "public/delegation-content/delegation-docs-2026-06-16/html/using-safe.html"
+        "public/delegation-content/delegation-docs-2026-10-15/html/using-safe.html"
       ]
     },
     {
@@ -5775,7 +5870,11 @@
         "primary wallet",
         "set primary",
         "primary address table",
-        "current selected primary address"
+        "current selected primary address",
+        "which wallet keeps my profile after a consolidation split",
+        "seven day primary address rule",
+        "primary address maturity",
+        "profile retention after revoking consolidation"
       ],
       "keywords": [
         "primary",
@@ -5784,13 +5883,20 @@
         "consolidation",
         "table",
         "profile",
-        "set"
+        "set",
+        "split",
+        "retention",
+        "maturity",
+        "seven days"
       ],
       "facts": [
         "/about/primary-address is a public, read-only primary-address reference table.",
         "The full-width table shows Profile Handle, Current Selected Primary Address, and Primary Address Changed to columns loaded from /primary_address.csv; it scrolls vertically and stacks the same fields on smaller screens.",
         "Each profile handle links to /{current_primary}.",
-        "Non-primary consolidated wallet rows on profile identity statements can expose Set Primary when the connected wallet owns the profile and no proxy profile is active."
+        "Non-primary consolidated wallet rows on profile identity statements can expose Set Primary when the connected wallet owns the profile and no proxy profile is active.",
+        "Changing the primary address takes effect when processed; the roughly seven-day maturity rule does not delay setting a primary address. It governs which resulting group keeps the existing profile when a consolidation splits.",
+        "For profile retention on a split, the newest valid primary-address delegation that is at least 50,400 processed Ethereum blocks old (roughly seven days) takes priority. Maturity uses the last block processed by the delegations loop, so it is not an exact wall-clock countdown.",
+        "If no mature primary-address delegation applies, profile retention falls back to the resulting group with the highest TDH, then the previous primary address for a tie, then stable group-key ordering. A recently selected primary address alone does not guarantee retaining the profile."
       ],
       "canonical_path": "/about/primary-address",
       "related_paths": ["/{user}", "/delegation/assign-primary-address"],
@@ -6157,7 +6263,7 @@
       ],
       "facts": [
         "Wave content tabs organize the visible wave content area. App tabs and their content share the same availability rules. An unavailable legacy competition section opens Leaderboard, or Submissions after voting ends, and selects that visible tab.",
-        "If opening a section takes time, the tapped wave tab shows a small loading indicator until that view opens. Fast switches have no minimum waiting time or required loading screen. Switching only the section within the same page does not reload the page; the section can still show its own loading state when its data is not available. Competition controls become active after their destination opens, so sort sheets and forms stay in the selected view.",
+        "While a section opens, the tab row stays visually steady and screen readers announce loading when needed. Fast switches have no minimum waiting time or required loading screen. Switching only the section within the same page does not reload the page; the section can still show its own loading state when its data is not available. Competition controls become active after their destination opens, so sort sheets and forms stay in the selected view.",
         "Memes wave tabs start with Chat, followed by Leaderboard or Submissions after voting ends, Winners when available, and Votes, with My Votes, All votes and Activity subtabs. Other available sections follow these tabs.",
         "Some waves can switch between chat and gallery-style views.",
         "Available tabs depend on wave type, state, and content.",
@@ -7054,7 +7160,7 @@
         "controls"
       ],
       "facts": [
-        "Filter opens Filter Network with all eight criteria visible in one list: Identities, Level, TDH, NIC, Rep, Required NFTs, Collection Access, and xTDH Grant. Wide screens start with the Identities editor beside the list; narrow screens open an editor after one selection. All filters and the current criterion stay above the scrolling fields; All filters returns to the list, and Close dismisses the sheet. Switching criteria preserves the draft. The mobile sheet keeps a compact, consistent height between criteria, and Create and use new group fills the content width on narrow screens. Editors and EMMA allow-list results scroll above the keyboard. While typing, Before editing and After editing visually collapse to leave room for the fields; keyboard focus reveals member-preview controls, and status text stays available to screen readers.",
+        "Filter opens Filter Network on Identities with all eight criteria available: Identities, Level, TDH, NIC, Rep, Required NFTs, Collection Access, and xTDH Grant. Criteria form a left-side list on desktop. On smaller screens they stay in one horizontal row above the scrolling fields and scroll sideways when they do not fit. Close dismisses the sheet. Switching criteria preserves the draft. The mobile sheet keeps a compact, consistent height between criteria, and Create and use new group fills the content width on narrow screens. Editors and EMMA allow-list results scroll above the keyboard. While typing, Before editing and After editing visually collapse to leave room for the fields; keyboard focus reveals member-preview controls, and status text stays available to screen readers.",
         "After editing shows selected criteria as separate tags and View members for valid criteria. Long tag lists scroll while the preview and create action remain visible. Incomplete criteria show Not ready yet. and its guidance directly. Before editing shows the current scope and, with a selected group, its criteria, count, and View members without an extra disclosure step. Create and use new group saves the criteria as a new group and immediately applies it to the Network member list. Clear selected group above the results clears the scope.",
         "When a group is already active, reopening the filter prefills its criteria and identity lists. Saving edits creates a new group without mutating the original.",
         "Signed-in users with active Network criteria can use REP everyone matching criteria or NIC everyone matching criteria below the selected Network filter name to grant credits to every matching member.",

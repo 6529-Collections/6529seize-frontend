@@ -616,61 +616,68 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
         </div>
         <MobileTabsScrollControls scrollerRef={mobileTabsScrollerRef} />
       </div>
-      <div
-        ref={desktopTabsScrollerRef}
-        className="tw-hidden tw-min-w-0 tw-flex-1 tw-overflow-x-auto tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 hover:tw-scrollbar-thumb-iron-300 sm:tw-block"
-      >
-        <DndContext
-          sensors={sortableSensors}
-          collisionDetection={closestCenter}
-          onDragEnd={handleCurationDragEnd}
+      <div className="tw-relative tw-hidden tw-min-w-0 tw-flex-1 sm:tw-block">
+        <div
+          ref={desktopTabsScrollerRef}
+          data-wave-tabs-scroll="desktop"
+          className="tw-overflow-x-auto tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 hover:tw-scrollbar-thumb-iron-300"
         >
-          <div className="tw-flex tw-w-auto tw-gap-x-[13px]" role="tablist">
-            {leadingOptions.map((option) => (
-              <DesktopTabOption
-                key={option.key}
-                option={option}
-                activeKey={activeKey}
-                onSelect={selectStandardTab}
-              />
-            ))}
-            {trailingOptions.map((option) => (
-              <DesktopTabOption
-                key={option.key}
-                option={option}
-                activeKey={activeKey}
-                onSelect={selectStandardTab}
-              />
-            ))}
-            <SortableContext
-              items={curationTabKeys}
-              strategy={horizontalListSortingStrategy}
-            >
-              {curationOptions.map((option) => (
-                <React.Fragment key={option.key}>
-                  {canDragCurations ? (
-                    <SortableCurationTabOption
-                      option={option}
-                      activeKey={activeKey}
-                      isSortingDisabled={isCurationReorderPending}
-                      onSelect={(key) =>
-                        onSelectCuration(getCurationIdFromTabKey(key))
-                      }
-                    />
-                  ) : (
-                    <DesktopTabOption
-                      option={option}
-                      activeKey={activeKey}
-                      onSelect={(key) =>
-                        onSelectCuration(getCurationIdFromTabKey(key))
-                      }
-                    />
-                  )}
-                </React.Fragment>
+          <DndContext
+            sensors={sortableSensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleCurationDragEnd}
+          >
+            <div className="tw-flex tw-w-auto tw-gap-x-[13px]" role="tablist">
+              {leadingOptions.map((option) => (
+                <DesktopTabOption
+                  key={option.key}
+                  option={option}
+                  activeKey={activeKey}
+                  onSelect={selectStandardTab}
+                />
               ))}
-            </SortableContext>
-          </div>
-        </DndContext>
+              {trailingOptions.map((option) => (
+                <DesktopTabOption
+                  key={option.key}
+                  option={option}
+                  activeKey={activeKey}
+                  onSelect={selectStandardTab}
+                />
+              ))}
+              <SortableContext
+                items={curationTabKeys}
+                strategy={horizontalListSortingStrategy}
+              >
+                {curationOptions.map((option) => (
+                  <React.Fragment key={option.key}>
+                    {canDragCurations ? (
+                      <SortableCurationTabOption
+                        option={option}
+                        activeKey={activeKey}
+                        isSortingDisabled={isCurationReorderPending}
+                        onSelect={(key) =>
+                          onSelectCuration(getCurationIdFromTabKey(key))
+                        }
+                      />
+                    ) : (
+                      <DesktopTabOption
+                        option={option}
+                        activeKey={activeKey}
+                        onSelect={(key) =>
+                          onSelectCuration(getCurationIdFromTabKey(key))
+                        }
+                      />
+                    )}
+                  </React.Fragment>
+                ))}
+              </SortableContext>
+            </div>
+          </DndContext>
+        </div>
+        <MobileTabsScrollControls
+          scrollerRef={desktopTabsScrollerRef}
+          showButtons={false}
+        />
       </div>
       {showCreateActionsMenu && (
         <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-2 sm:tw-ml-auto">

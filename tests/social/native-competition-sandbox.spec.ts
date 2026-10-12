@@ -18,6 +18,20 @@ const entryDropId = (id: string) =>
     ? "00000000-0000-4000-8000-000000000532"
     : "00000000-0000-4000-8000-000000000533";
 const ROOT = `/waves/${WAVE}/competitions`;
+async function openNewCompetition(page: Page) {
+  await page.getByRole("link", { name: "Competition", exact: true }).click();
+}
+async function selectCompetitionFilter(page: Page, name: string) {
+  const more = page.getByRole("button", { name: "More tabs", exact: true });
+  const tab = page.getByRole("tab", { name, exact: true });
+  await expect(more.or(tab)).toBeVisible();
+  if (await more.isVisible()) {
+    await more.click();
+    await page.getByRole("menuitem", { name, exact: true }).click();
+  } else {
+    await tab.click();
+  }
+}
 const competitionContent = (page: Page) =>
   page
     .getByRole("main")
@@ -900,7 +914,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       }
     );
     await expect(
-      page.getByRole("link", { name: "Add competition", exact: true })
+      page.getByRole("link", { name: "Competition", exact: true })
     ).toHaveCount(0);
     const competitionsTab = page.getByRole("tab", {
       name: /^Competitions(?:\s+\d+\+?)?$/,
@@ -947,9 +961,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
   }) => {
     const sandbox = await installCompetitionApi(page);
     await page.goto(ROOT);
-    await page
-      .getByRole("link", { name: "Add competition", exact: true })
-      .click();
+    await openNewCompetition(page);
     await expect(
       page.getByLabel("Competition name", { exact: true })
     ).toBeVisible({ timeout: 30000 });
@@ -974,7 +986,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       .getByRole("button", { name: "Close editor", exact: true })
       .click();
     await expect(page).toHaveURL(ROOT);
-    await page.getByRole("tab", { name: "Drafts", exact: true }).click();
+    await selectCompetitionFilter(page, "Drafts");
     await page
       .getByRole("link")
       .filter({
@@ -997,7 +1009,115 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await expectNoHorizontalOverflow(page);
   });
 
-  test("uses About-style pills for app competition sub-navigation", async ({
+  test("fades overflowing wave tabs without covering Create or changing selection", async ({
+    page,
+  }, testInfo) => {
+    const app = testInfo.project.name === "web-mobile-chromium";
+    await installCompetitionApi(page);
+    if (app)
+      await installSurfaceSimulation(
+        page.context(),
+        "capacitor-ios-sim",
+        testInfo.project.use.baseURL
+      );
+    await page.setViewportSize({ width: app ? 390 : 720, height: 900 });
+    await page.goto(`${ROOT}/alpha?tab=rules`);
+    const selected = page.getByRole(app ? "button" : "tab", {
+      name: "Settings",
+      exact: true,
+    });
+    const scroller = page
+      .getByRole(app ? "button" : "tab", { name: "Settings", exact: true })
+      .locator("xpath=ancestor::div[@data-wave-tabs-scroll]");
+    const leftFade = page
+      .getByRole(app ? "button" : "tab", { name: "Settings", exact: true })
+      .locator("xpath=ancestor::div[@data-wave-tabs-scroll]/..")
+      .locator('[data-wave-tabs-fade="left"]');
+    const rightFade = page
+      .getByRole(app ? "button" : "tab", { name: "Settings", exact: true })
+      .locator("xpath=ancestor::div[@data-wave-tabs-scroll]/..")
+      .locator('[data-wave-tabs-fade="right"]');
+    await expect(selected).toHaveAttribute(
+      app ? "aria-current" : "aria-selected",
+      "true"
+    );
+    await expect(selected).toHaveText("Settings");
+    await expect
+      .poll(() =>
+        scroller.evaluate(
+          (element) => element.scrollWidth - element.clientWidth
+        )
+      )
+      .toBeGreaterThan(2);
+    await scroller.evaluate((element) =>
+      element.scrollTo({ left: 0, behavior: "instant" })
+    );
+    await expect(leftFade).toHaveCSS("opacity", "0");
+    await expect(rightFade).toHaveCSS("opacity", "1");
+    await expect(rightFade).toHaveCSS("pointer-events", "none");
+    const colors = await rightFade.evaluate((element) => {
+      let ancestor = element.parentElement;
+      while (ancestor) {
+        const background = getComputedStyle(ancestor).backgroundColor;
+        if (background !== "rgba(0, 0, 0, 0)" && background !== "transparent")
+          return {
+            background,
+            gradient: getComputedStyle(element).backgroundImage,
+          };
+        ancestor = ancestor.parentElement;
+      }
+      throw new Error("Tab strip background missing");
+    });
+    expect(colors.gradient).toContain(colors.background);
+    const create = page.getByRole("button", {
+      name: "Open create menu",
+      exact: true,
+    });
+    await expect(create).toBeInViewport({ ratio: 1 });
+    const fadeBounds = await rightFade.boundingBox();
+    const createBounds = await create.boundingBox();
+    expect(fadeBounds).not.toBeNull();
+    expect(createBounds).not.toBeNull();
+    expect(fadeBounds!.x + fadeBounds!.width).toBeLessThanOrEqual(
+      createBounds!.x
+    );
+    await page.screenshot({
+      path: testInfo.outputPath("wave-tabs-overflow-fade.png"),
+      animations: "disabled",
+      style: "nextjs-portal { visibility: hidden; }",
+    });
+    await scroller.evaluate((element) =>
+      element.scrollTo({ left: element.scrollWidth, behavior: "instant" })
+    );
+    await expect(leftFade).toHaveCSS("opacity", "1");
+    await expect(rightFade).toHaveCSS("opacity", "0");
+    await expect(selected).toHaveAttribute(
+      app ? "aria-current" : "aria-selected",
+      "true"
+    );
+    await expect(selected).toHaveText("Settings");
+    await create.click();
+    await expect(page.getByText("New curation", { exact: true })).toBeVisible();
+    await page.keyboard.press("Escape");
+    await page.setViewportSize({ width: 1920, height: 1080 });
+    await expect
+      .poll(() =>
+        scroller.evaluate(
+          (element) => element.scrollWidth - element.clientWidth
+        )
+      )
+      .toBeLessThanOrEqual(2);
+    await expect(leftFade).toHaveCSS("opacity", "0");
+    await expect(rightFade).toHaveCSS("opacity", "0");
+    await expect(selected).toHaveAttribute(
+      app ? "aria-current" : "aria-selected",
+      "true"
+    );
+    await expect(selected).toHaveText("Settings");
+    await expectNoHorizontalOverflow(page);
+  });
+
+  test("separates wave and competition creation while preserving the filter pills", async ({
     page,
   }, testInfo) => {
     const app = testInfo.project.name === "web-mobile-chromium";
@@ -1026,21 +1146,110 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       "aria-controls",
       `competition-collection-${WAVE}-active`
     );
+    await expect(active).toHaveCSS("height", "32px");
+    await expect(active).toHaveCSS("border-radius", "9999px");
+    const activePanel = collection.getByRole("tabpanel", {
+      name: "Active and upcoming",
+      exact: true,
+    });
+    const firstCard = activePanel.getByRole("listitem").first();
+    await expect(firstCard).toBeVisible();
+    const panelBounds = await activePanel.boundingBox();
+    const cardBounds = await firstCard.boundingBox();
+    expect(panelBounds).not.toBeNull();
+    expect(cardBounds).not.toBeNull();
+    expect(cardBounds!.y - panelBounds!.y).toBeCloseTo(16, 0);
     if (app) {
-      await expect(active).toHaveCSS("height", "32px");
-      await expect(active).toHaveCSS("border-radius", "9999px");
       const viewport = page.viewportSize();
       await page.setViewportSize({ width: 320, height: 780 });
+      const filtersScroller = page
+        .getByRole("region", { name: "Competitions", exact: true })
+        .locator("[data-competition-filters-scroll]");
+      const rightFade = page
+        .getByRole("region", { name: "Competitions", exact: true })
+        .locator("[data-competition-filters-scroll]")
+        .locator("..")
+        .locator('[data-wave-tabs-fade="right"]');
+      const leftFade = page
+        .getByRole("region", { name: "Competitions", exact: true })
+        .locator("[data-competition-filters-scroll]")
+        .locator("..")
+        .locator('[data-wave-tabs-fade="left"]');
+      await expect(rightFade).toHaveCSS("opacity", "1");
+      await expect(rightFade).toHaveCSS("pointer-events", "none");
+      await expect(leftFade).toHaveCSS("opacity", "0");
+      await page.screenshot({
+        path: testInfo.outputPath("competition-filter-fade.png"),
+        animations: "disabled",
+        style: "nextjs-portal { visibility: hidden; }",
+      });
+      const competitionAction = collection.getByRole("link", {
+        name: "Competition",
+        exact: true,
+      });
+      await expect(competitionAction).toBeInViewport({ ratio: 1 });
+      const filterBounds = await active.boundingBox();
+      const actionBounds = await competitionAction.boundingBox();
+      expect(filterBounds).not.toBeNull();
+      expect(actionBounds).not.toBeNull();
+      expect(
+        Math.abs(
+          filterBounds!.y +
+            filterBounds!.height / 2 -
+            (actionBounds!.y + actionBounds!.height / 2)
+        )
+      ).toBeLessThanOrEqual(1);
+      await collectionMore.scrollIntoViewIfNeeded();
       await expect(collectionMore).toBeInViewport({ ratio: 1 });
-      if (viewport) await page.setViewportSize(viewport);
+      await expect(rightFade).toHaveCSS("opacity", "0");
+      await expect(leftFade).toHaveCSS("opacity", "1");
+      await expect(active).toHaveAttribute("aria-selected", "true");
+      await expect(
+        page.getByRole("button", { name: "Open create menu", exact: true })
+      ).toBeInViewport({ ratio: 1 });
+      await page.setViewportSize({ width: 430, height: 932 });
       await collectionMore.tap();
       await page.keyboard.press("Escape");
       await expect(collectionMore).toBeFocused();
       await expect(active).toHaveAttribute("aria-selected", "true");
       await collectionMore.press("Enter");
+      await page
+        .getByRole("menuitem", { name: "Completed", exact: true })
+        .tap();
+      await expect(collectionMore).toHaveText("Completed");
+      await expect(
+        collection.getByRole("tabpanel", { name: "Completed", exact: true })
+      ).toBeVisible();
+      await expect
+        .poll(() =>
+          filtersScroller.evaluate(
+            (element) => element.scrollWidth - element.clientWidth
+          )
+        )
+        .toBeGreaterThan(0);
+      await expect
+        .poll(async () => {
+          const pill = await collectionMore.boundingBox();
+          const row = await filtersScroller.boundingBox();
+          return Boolean(
+            pill &&
+            row &&
+            pill.x >= row.x - 1 &&
+            pill.x + pill.width <= row.x + row.width + 1
+          );
+        })
+        .toBe(true);
+      await expect(rightFade).toHaveCSS("opacity", "0");
+      await page.screenshot({
+        path: testInfo.outputPath("completed-filter-in-view.png"),
+        animations: "disabled",
+        style: "nextjs-portal { visibility: hidden; }",
+      });
+      await collectionMore.press("Enter");
       await page.getByRole("menuitem", { name: "Drafts", exact: true }).tap();
       await expect(collectionMore).toHaveText("Drafts");
       await expect(collectionMore).toHaveAttribute("aria-expanded", "false");
+      if (viewport) await page.setViewportSize(viewport);
     } else {
       await expect(collectionMore).toHaveCount(0);
       await collection
@@ -1056,13 +1265,103 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       animations: "disabled",
       style: "nextjs-portal { visibility: hidden; }",
     });
+    const newCompetition = collection.getByRole("link", {
+      name: "Competition",
+      exact: true,
+    });
+    await expect(newCompetition).toBeVisible();
+    await expect(newCompetition).toHaveAttribute("href", `${ROOT}/new`);
+    const create = page.getByRole("button", {
+      name: "Open create menu",
+      exact: true,
+    });
+    await expect(create).toHaveCount(1);
+    await expect(create).toHaveText("Create");
+    await expect(create).toHaveCSS("height", app ? "44px" : "32px");
     await expect(
-      collection.getByRole("link", { name: "Add competition", exact: true })
-    ).toBeInViewport({ ratio: 1 });
+      page
+        .getByRole("button", { name: "Open create menu", exact: true })
+        .locator(":scope > span")
+    ).toHaveCSS("height", "32px");
+    await create.click();
+    const createOptions = app
+      ? page.getByRole("dialog", { name: "Create", exact: true })
+      : page.getByRole("menu");
+    await expect(
+      createOptions.getByText("New competition", { exact: true })
+    ).toHaveCount(0);
+    await expect(
+      createOptions.getByText("New curation", { exact: true })
+    ).toBeVisible();
+    await expect(
+      createOptions.getByText("Local Composer Sandbox Wave", { exact: true })
+    ).toHaveCount(0);
+    if (!app) {
+      await expect(createOptions).toHaveCSS("opacity", "1");
+      await expect(createOptions).toBeFocused();
+      await expect(createOptions).not.toHaveAttribute("aria-activedescendant");
+      await expect(page.getByRole("menu").locator("[data-focus]")).toHaveCount(
+        0
+      );
+    }
+    await page.screenshot({
+      path: testInfo.outputPath("wave-create-menu.png"),
+      animations: "disabled",
+      style: "nextjs-portal { visibility: hidden; }",
+    });
+    await page.keyboard.press("Escape");
+    await expect(createOptions).toBeHidden();
+    await expect(create).toBeFocused();
+    if (!app) {
+      for (const key of ["Enter", "ArrowDown"]) {
+        await create.press(key);
+        const curation = createOptions.getByRole("menuitem", {
+          name: /^New curation/,
+        });
+        await expect(curation).toHaveAttribute("data-focus", "");
+        await expect(createOptions).toHaveAttribute(
+          "aria-activedescendant",
+          (await curation.getAttribute("id")) ?? ""
+        );
+        await page.keyboard.press("Escape");
+        await expect(createOptions).toBeHidden();
+        await expect(create).toBeFocused();
+      }
+      await create.click();
+      await page.keyboard.press("ArrowDown");
+      await expect(
+        createOptions.getByRole("menuitem", { name: /^New curation/ })
+      ).toHaveAttribute("data-focus", "");
+      await page.keyboard.press("Enter");
+    } else {
+      await create.click();
+      await createOptions.getByText("New curation", { exact: true }).click();
+    }
+    const curationDialog = page.getByRole("dialog", {
+      name: "Create curation",
+      exact: true,
+    });
+    await expect(
+      curationDialog.getByRole("textbox", { name: "Name", exact: true })
+    ).toBeVisible();
+    await expect(page.getByRole("dialog")).toHaveCount(1);
+    await expect(
+      page.getByRole("dialog", { name: "Create", exact: true })
+    ).toHaveCount(0);
+    await page.screenshot({
+      path: testInfo.outputPath("wave-create-curation-handoff.png"),
+      animations: "disabled",
+      style: "nextjs-portal { visibility: hidden; }",
+    });
+    await page.keyboard.press("Escape");
+    await expect(page.getByRole("dialog")).toHaveCount(0);
     await expectNoHorizontalOverflow(page);
 
     // Published competitions share the primary row; Votes owns its secondary tabs.
     await page.goto(`${ROOT}/beta?tab=votes`);
+    await expect(
+      page.getByRole("link", { name: "Competition", exact: true })
+    ).toHaveCount(0);
     const mine = page.getByRole("tab", {
       name: "My Votes",
       exact: true,
@@ -1470,9 +1769,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     });
     const sandbox = await installCompetitionApi(page);
     await page.goto(ROOT);
-    await page
-      .getByRole("link", { name: "Add competition", exact: true })
-      .click();
+    await openNewCompetition(page);
     await page
       .getByRole("combobox", { name: "Competition type", exact: true })
       .click();
@@ -2102,12 +2399,11 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         const pending = await leaderboard.boundingBox();
         expect(pending?.width).toBe(before?.width);
         expect(pending?.height).toBe(before?.height);
-        const indicator = page
-          .getByRole(role, { name: "Leaderboard", exact: true })
-          .locator('[aria-hidden="true"]')
-          .last();
-        await expect(indicator).toBeVisible();
-        await expect(indicator).toHaveCSS("animation-name", "none");
+        await expect(
+          page
+            .getByRole(role, { name: "Leaderboard", exact: true })
+            .locator(':scope > [aria-hidden="true"]')
+        ).toHaveCount(0);
         await page.screenshot({ path: testInfo.outputPath("pending-tab.png") });
         releaseNavigation();
         await expect(page).toHaveURL(/alpha\?tab=leaderboard$/, {
@@ -2290,6 +2586,11 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await sandbox.legacyPrimary("alpha");
     await page.goto(`/waves/${WAVE}?tab=chat`);
     const information = await openWaveInformation(page);
+    for (const name of ["About", "REP", "Configuration"]) {
+      const section = information.getByRole("tab", { name, exact: true });
+      await expect(section).toHaveCSS("height", "32px");
+      await expect(section).toHaveCSS("border-radius", "9999px");
+    }
     await information
       .getByRole("tab", { name: "Configuration", exact: true })
       .click();
@@ -2585,7 +2886,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         .getByRole("tab", { name: /^Competitions/ })
         .click();
       await expect(page).toHaveURL(ROOT);
-      await page.getByRole("tab", { name: "All", exact: true }).click();
+      await selectCompetitionFilter(page, "All");
       await expect(
         page.getByRole("link", { name: /Parallel Beta/ })
       ).toBeVisible();

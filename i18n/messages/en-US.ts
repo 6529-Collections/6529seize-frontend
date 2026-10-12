@@ -1603,6 +1603,16 @@ const WAVE_CREATE_GROUPS_MESSAGES = objectMessages("waves.create.groups", {
   "validation.invalidTitle": "Some access groups need attention.",
   "validation.invalidDescription":
     "Every Drop, Vote, Chat, and Admins group member must also belong to the Visibility group.",
+  criteriaLabel: "Group criteria",
+  "inlineIdentities.loadingProfiles": "Loading profiles…",
+  "inlineIdentities.profileError":
+    "Some profiles could not be loaded. You can still edit their wallets.",
+  "inlineIdentities.retryProfiles": "Retry profile lookup",
+  "inlineIdentities.walletLabel": "Wallet {wallet}",
+  "inlineIdentities.removeWallet": "Remove {name}, wallet {wallet}",
+  "inlineIdentities.page": "Wallets {start}–{end} of {total}",
+  "inlineIdentities.previous": "Previous wallets",
+  "inlineIdentities.next": "Next wallets",
   "inlineIdentities.modeLabel": "Identity treatment",
   "inlineIdentities.included.label": "Included",
   "inlineIdentities.included.searchLabel": "Find an identity to include",
@@ -1859,6 +1869,8 @@ const WAVE_CREATE_ACTIONS_MESSAGES = objectMessages("waves.create.actions", {
   complete: "Complete",
   create: "Create",
   createMenuHeader: "Create",
+  curationDescription: "Collect drops in a custom view",
+  subwaveDescription: "Start a separate space within this wave",
   next: "Next",
   newCuration: "New curation",
   newSubwave: "New subwave",
@@ -2124,6 +2136,17 @@ const WAVE_CHAT_MESSAGES = objectMessages("waves.chat", {
   "replyTargetUnavailableToast.detailsKept":
     "Your current draft was not changed.",
   "replyTargetUnavailableToast.actionReviewDraft": "Review draft",
+  repliesOnlyPlaceholder:
+    "Only chat members can start new drops here. You can reply to any drop.",
+  "replyThread.showOne": "Show 1 reply",
+  "replyThread.showMany": "Show {count} replies",
+  "replyThread.hide": "Hide replies",
+  "replyThread.regionLabel": "Replies to this drop",
+  "replyThread.loading": "Loading replies…",
+  "replyThread.loadEarlier": "Show earlier replies",
+  "replyThread.empty": "No replies to show.",
+  "replyThread.error": "Couldn't load replies.",
+  "replyThread.retry": "Retry",
 } as const);
 
 const WAVE_COMPOSER_ACTION_MESSAGES = objectMessages("waves.composer.actions", {

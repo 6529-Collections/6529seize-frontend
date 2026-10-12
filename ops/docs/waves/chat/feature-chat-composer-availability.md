@@ -24,6 +24,11 @@ availability. Submission availability is exposed through the Chat tab
 ## Footer States
 
 - Composer visible: chat is allowed.
+- Reply-only panel: in a wave with open replies, viewers outside the chat
+  group see
+  `Only chat members can start new drops here. You can reply to any drop.`
+  Choosing `Reply` on a drop opens the composer for that reply. See
+  [Open and Collapsed Replies](feature-open-and-collapsed-replies.md).
 - Logged-out blocked panel: if chat is blocked because the viewer is not
   authenticated, footer offers a blue
   `Sign in to 6529 to post` button. The helper explains that new users sign a
