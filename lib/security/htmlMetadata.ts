@@ -51,6 +51,14 @@ interface HtmlMetadataOptions {
   readonly maxChars?: number | undefined;
 }
 
+/**
+ * Reads the code point at `index`, or -1 past the end. Scans still step one
+ * UTF-16 code unit at a time and only compare against ASCII values, which
+ * neither half of a surrogate pair (nor a combined astral code point) equals.
+ */
+const codeAt = (source: string, index: number): number =>
+  source.codePointAt(index) ?? -1;
+
 const isTagWhitespace = (code: number): boolean =>
   code === TAB ||
   code === LINE_FEED ||
@@ -76,7 +84,7 @@ function skipUntil(
   stop: (code: number) => boolean
 ): number {
   let index = start;
-  while (index < source.length && !stop(source.charCodeAt(index))) {
+  while (index < source.length && !stop(codeAt(source, index))) {
     index += 1;
   }
   return index;
@@ -92,7 +100,7 @@ function skipWhitespace(source: string, start: number): number {
  */
 function skipAttributeValue(source: string, start: number): number {
   const index = skipWhitespace(source, start);
-  const code = source.charCodeAt(index);
+  const code = codeAt(source, index);
   if (code === DOUBLE_QUOTE || code === SINGLE_QUOTE) {
     const closingQuote = source.indexOf(source.charAt(index), index + 1);
     return closingQuote === -1 ? -1 : closingQuote + 1;
@@ -108,7 +116,7 @@ function skipAttributeValue(source: string, start: number): number {
 function findTagEnd(source: string, start: number): number {
   let index = start;
   while (index < source.length) {
-    const code = source.charCodeAt(index);
+    const code = codeAt(source, index);
     if (code === GREATER_THAN) {
       return index;
     }
@@ -121,7 +129,7 @@ function findTagEnd(source: string, start: number): number {
       source,
       skipUntil(source, index + 1, endsAttributeName)
     );
-    if (source.charCodeAt(index) === EQUALS) {
+    if (codeAt(source, index) === EQUALS) {
       index = skipAttributeValue(source, index + 1);
       if (index === -1) {
         return -1;
@@ -152,10 +160,19 @@ const neutralizeStartTag = (tag: string): string =>
   `<${tag.slice(1).replaceAll("<", "&lt;")}`;
 
 /**
- * Prevents "<!--" from switching script text into the tokenizer's escaped
- * states, so the copied element always ends at its appended end tag. The
- * replacement is the same character in JSON strings, which is all metadata
- * scripts carry.
+ * Rewrites every "<!--" in copied script text with "<" spelled as its JSON
+ * string escape (a backslash, then "u003C").
+ *
+ * Guarantee: copied script text never contains a `</script` end tag (the scan
+ * stops at the first one followed by whitespace, "/", or ">") and, after this
+ * rewrite, never contains "<!--", the only sequence that moves the tokenizer
+ * into its escaped script states. So each copied script ends exactly at its
+ * appended `</script>` and cannot absorb the elements copied after it.
+ *
+ * Consumers only read script text as JSON (JSON-LD, `__NEXT_DATA__`). In valid
+ * JSON "<!--" can only occur inside strings, where the escape decodes back to
+ * "<", so the parsed value is unchanged. Text of other scripts may change;
+ * nothing reads it.
  */
 const neutralizeScriptText = (text: string): string =>
   text.replaceAll("<!--", ESCAPED_SCRIPT_COMMENT_OPEN);
@@ -230,8 +247,8 @@ function skipNonElementTag(source: string, start: number): number | null {
   }
 
   const isEndTag =
-    source.charCodeAt(start + 1) === SLASH &&
-    isAsciiLetter(source.charCodeAt(start + 2));
+    codeAt(source, start + 1) === SLASH &&
+    isAsciiLetter(codeAt(source, start + 2));
   const close = isEndTag
     ? findTagEnd(source, skipUntil(source, start + 2, endsTagName))
     : source.indexOf(">", start + 2);
@@ -239,7 +256,7 @@ function skipNonElementTag(source: string, start: number): number | null {
 }
 
 function readToken(source: string, start: number): ScannedToken | null {
-  const next = source.charCodeAt(start + 1);
+  const next = codeAt(source, start + 1);
   if (isAsciiLetter(next)) {
     return readStartTag(source, start);
   }

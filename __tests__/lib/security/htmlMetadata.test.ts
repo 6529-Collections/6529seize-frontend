@@ -82,6 +82,43 @@ describe("loadHtmlMetadata", () => {
     expect($('meta[name="after"]').attr("content")).toBe("kept");
   });
 
+  it("ends each copied script at its own end tag", () => {
+    const backslash = String.fromCodePoint(92);
+    const escapedCommentOpen = `${backslash}u003C!--`;
+    const preEscapedJson = `{"note":"${escapedCommentOpen} kept"}`;
+    const $ = loadHtmlMetadata(`
+      <script>var a = 1;</script\t><meta name="after-tab" content="1">
+      <script>var b = 2;</script/><link rel="icon" href="/after-slash.ico">
+      <script>var s = "</scriptx>";</script><title>After string</title>
+      <script>document.write("<!--<script>");</script><meta name="after-comment" content="2">
+      <script type="application/ld+json">${preEscapedJson}</script><meta name="last" content="3">
+    `);
+
+    expect(
+      $("script")
+        .map((_index, element) => $(element).text())
+        .get()
+    ).toEqual([
+      "var a = 1;",
+      "var b = 2;",
+      'var s = "</scriptx>";',
+      `document.write("${escapedCommentOpen}<script>");`,
+      preEscapedJson,
+    ]);
+    expect(JSON.parse($('script[type="application/ld+json"]').text())).toEqual({
+      note: "<!-- kept",
+    });
+    expect(
+      $("meta")
+        .map((_index, element) => $(element).attr("name"))
+        .get()
+    ).toEqual(["after-tab", "after-comment", "last"]);
+    expect($("link").attr("href")).toBe("/after-slash.ico");
+    expect($("title").text()).toBe("After string");
+    // html, head, and body, the five scripts, and the five later elements.
+    expect($("*")).toHaveLength(13);
+  });
+
   it("handles empty comments, end tag attributes, and plaintext", () => {
     const $ = loadHtmlMetadata(`
       <!--><meta name="after-empty-comment" content="1">

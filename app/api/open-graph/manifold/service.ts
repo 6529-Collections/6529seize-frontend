@@ -81,43 +81,63 @@ const parseHydratePayload = (
   }
 };
 
+/** Returns the index of the "{" that opens a call's payload, or -1. */
+const findPayloadStart = (html: string, afterCall: number): number => {
+  HYDRATE_WORK_PAYLOAD_START_PATTERN.lastIndex = afterCall;
+  return HYDRATE_WORK_PAYLOAD_START_PATTERN.test(html)
+    ? HYDRATE_WORK_PAYLOAD_START_PATTERN.lastIndex - 1
+    : -1;
+};
+
+/**
+ * Returns the first "})" at or after `from`. `previous` was the first one at
+ * or after an earlier position, so it is reused while it is not behind `from`.
+ */
+const findPayloadEnd = (
+  html: string,
+  from: number,
+  previous: RegExpExecArray | null
+): RegExpExecArray | null => {
+  if (previous && previous.index >= from) {
+    return previous;
+  }
+  HYDRATE_WORK_PAYLOAD_END_PATTERN.lastIndex = from;
+  return HYDRATE_WORK_PAYLOAD_END_PATTERN.exec(html);
+};
+
 /**
  * Collects `hydrateWorkPage({...})` payloads. A payload ends at the first "}"
- * followed by ")", and every search resumes after the previous one, so the
- * scan stays linear in the page size.
+ * followed by ")". A payload that runs into the next call is unclosed, so it
+ * is skipped and the next call is still read. Every search moves forward and
+ * parsed payloads never overlap, so the scan stays linear in the page size.
  */
 const extractHydratePayloads = (
   html: string
 ): readonly ManifoldHydratePayload[] => {
   const payloads: ManifoldHydratePayload[] = [];
+  let payloadEnd: RegExpExecArray | null = null;
   let callIndex = html.indexOf(HYDRATE_WORK_CALL);
 
   while (callIndex !== -1) {
-    HYDRATE_WORK_PAYLOAD_START_PATTERN.lastIndex =
-      callIndex + HYDRATE_WORK_CALL.length;
-    if (!HYDRATE_WORK_PAYLOAD_START_PATTERN.test(html)) {
-      callIndex = html.indexOf(HYDRATE_WORK_CALL, callIndex + 1);
-      continue;
-    }
+    const afterCall = callIndex + HYDRATE_WORK_CALL.length;
+    const nextCall = html.indexOf(HYDRATE_WORK_CALL, afterCall);
+    const payloadStart = findPayloadStart(html, afterCall);
+    if (payloadStart !== -1) {
+      payloadEnd = findPayloadEnd(html, payloadStart + 1, payloadEnd);
+      if (!payloadEnd) {
+        // No "})" follows, so no later payload can close either.
+        break;
+      }
 
-    const payloadStart = HYDRATE_WORK_PAYLOAD_START_PATTERN.lastIndex - 1;
-    HYDRATE_WORK_PAYLOAD_END_PATTERN.lastIndex = payloadStart + 1;
-    const payloadEnd = HYDRATE_WORK_PAYLOAD_END_PATTERN.exec(html);
-    if (!payloadEnd) {
-      // Later calls cannot close their payloads either.
-      break;
+      const closed = nextCall === -1 || nextCall > payloadEnd.index;
+      const payload = closed
+        ? parseHydratePayload(html.slice(payloadStart, payloadEnd.index + 1))
+        : null;
+      if (payload) {
+        payloads.push(payload);
+      }
     }
-
-    const payload = parseHydratePayload(
-      html.slice(payloadStart, payloadEnd.index + 1)
-    );
-    if (payload) {
-      payloads.push(payload);
-    }
-    callIndex = html.indexOf(
-      HYDRATE_WORK_CALL,
-      HYDRATE_WORK_PAYLOAD_END_PATTERN.lastIndex
-    );
+    callIndex = nextCall;
   }
 
   return payloads;

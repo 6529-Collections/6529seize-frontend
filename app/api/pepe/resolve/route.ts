@@ -132,8 +132,8 @@ async function scrapeNextData(url: string): Promise<ScrapeNextDataResult> {
     return { nextData: null, metaImages: [] };
   }
 
-  // The page is byte-capped when read, and Next.js renders __NEXT_DATA__ at
-  // the end of the body, so scan all of it.
+  // fetchText already capped the page at HTML_RESPONSE_MAX_BYTES, and Next.js
+  // renders __NEXT_DATA__ at the end of the body, so scan all of it.
   const $ = loadHtmlMetadata(html, { maxChars: html.length });
   const metaImageSelectors = [
     'meta[name="image"]',

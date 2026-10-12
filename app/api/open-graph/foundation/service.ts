@@ -122,8 +122,9 @@ const extractFoundationContext = (url: URL): FoundationContext | null => {
 };
 
 const extractNextData = (html: string): FoundationNextData | null => {
-  // The page is byte-capped when read, and Next.js renders __NEXT_DATA__ at
-  // the end of the body, so scan all of it.
+  // deps.fetchHtml (the open-graph route's capped reader) already limited the
+  // page to its byte cap, and Next.js renders __NEXT_DATA__ at the end of the
+  // body, so scan all of it.
   const rawPayload = loadHtmlMetadata(html, { maxChars: html.length })(
     "script#__NEXT_DATA__"
   )

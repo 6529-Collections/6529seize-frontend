@@ -17,8 +17,11 @@ export const runtime = "nodejs";
 
 // This route only rasterizes the raster formats sniffed below. Also disable
 // libvips' SVG loader so remote vector documents never reach a decoder, even
-// when their bytes are mistaken for another format. Next's image optimizer
-// shares this process but never hands SVG to sharp (dangerouslyAllowSVG is off).
+// when their bytes are mistaken for another format.
+// The block is process-global: it applies to every sharp call in this server
+// process, not just this route. That is safe because this route is the only
+// runtime sharp user, and Next's image optimizer never decodes SVG with sharp
+// while dangerouslyAllowSVG is off (the default here).
 sharp.block({ operation: ["VipsForeignLoadSvg"] });
 
 const DEFAULT_WIDTH = 1200;

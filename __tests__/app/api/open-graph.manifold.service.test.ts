@@ -145,6 +145,41 @@ describe("createManifoldPlan", () => {
     );
   });
 
+  it.each([
+    ["one unclosed call", 'hydrateWorkPage({"broken": ); '],
+    ["many unclosed calls", 'hydrateWorkPage({"a":1,'.repeat(100_000)],
+  ])("reads a later payload after %s", async (_label, unclosedCalls) => {
+    const payload = {
+      instanceData: {
+        type: "marketplace_listing",
+        metaTitle: "Later call",
+      },
+    };
+    fetchHtml.mockResolvedValue({
+      html: `<script>${unclosedCalls}hydrateWorkPage(${JSON.stringify(payload)});</script>`,
+      contentType: "text/html",
+      finalUrl: "https://manifold.xyz/@andrew-hooker/id/4098474224",
+    });
+
+    const plan = createManifoldPlan(
+      new URL("https://manifold.xyz/@andrew-hooker/id/4098474224"),
+      { fetchHtml, assertPublicUrl }
+    );
+
+    const startedAt = performance.now();
+    const result = await plan?.execute();
+    const elapsedMs = performance.now() - startedAt;
+
+    expect(result?.data).toEqual(
+      expect.objectContaining({
+        type: "manifold.listing",
+        title: "Later call",
+      })
+    );
+    // Generous bound: the forward scan finishes in milliseconds.
+    expect(elapsedMs).toBeLessThan(5000);
+  });
+
   it("falls back to generic metadata when payloads never close", async () => {
     fetchHtml.mockResolvedValue({
       html: `<title>Fallback title</title><script>${'hydrateWorkPage({"a":1,'.repeat(100_000)}</script>`,
