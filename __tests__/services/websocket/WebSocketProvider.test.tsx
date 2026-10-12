@@ -729,7 +729,8 @@ describe("WebSocketProvider", () => {
       act(() => {
         result.current.connect("token");
       });
-      const ws = (globalThis.WebSocket as jest.MockedFunction<typeof WebSocket>)
+      // The suite replaces globalThis.WebSocket with a jest.fn that builds MockWebSocket.
+      const ws = (globalThis.WebSocket as unknown as jest.Mock<MockWebSocket>)
         .mock.results[0]?.value as MockWebSocket;
       act(() => {
         ws.triggerOpen();
