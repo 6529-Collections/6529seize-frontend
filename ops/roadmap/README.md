@@ -146,8 +146,10 @@ Already addressed on `origin/main` and not listed below:
   paths.
 - The DNS rebinding gap in the public URL guard; main now validates DNS results
   and uses a pinned `undici` lookup dispatcher for guarded fetches.
-- The unbounded Alchemy token metadata batch path; main now has request body
-  limits, a 100-token cap, caching, and basic request rate limiting.
+- The Alchemy proxy routes (`app/api/alchemy/*`); they now validate inputs,
+  accept only supported networks, cap batch sizes, cache lookups briefly,
+  bound upstream time and response size, and rate limit each client through
+  `lib/security/clientRateLimit.ts`. The collection search route is retired.
 
 ### P1: Remove Secret-Like Values From Public Runtime Config
 
@@ -167,19 +169,6 @@ Remediation:
   values are enabled.
 - Rotate any credential-like values that were ever deployed through the public
   runtime bundle.
-
-### P2: Finish Hardening The Alchemy Proxy Routes
-
-The `app/api/alchemy/*` routes validate their inputs, accept only supported
-networks, cache lookups briefly, and rate limit each client through
-`lib/security/clientRateLimit.ts`. The collection search route is retired.
-Those limits live in each server process's memory.
-
-Remediation:
-
-- Add upstream request timeouts and bounded upstream response reads.
-- Consider requiring app auth or moving these calls behind the backend quota
-  layer if the frontend API key proxy is not intended to be public.
 
 ### P1: Stop Exposing Writable IPFS RPC From Browser Code
 

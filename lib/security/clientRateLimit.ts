@@ -6,9 +6,9 @@ import { isForbiddenAddress } from "@/lib/security/urlGuard";
 const DEFAULT_MAX_BUCKETS = 10_000;
 const UNIDENTIFIED_CLIENT_KEY = "unidentified";
 const UNIDENTIFIED_LIMIT_MULTIPLIER = 10;
-const IPV4_MAPPED_IPV6_PREFIX = "::ffff:";
-const IPV6_PREFIX_GROUPS = 4;
 const IPV6_GROUPS = 8;
+const IPV6_PREFIX_GROUPS = 4;
+const IPV6_GROUP_PATTERN = /^[\da-f]{1,4}$/;
 
 type RateLimitBucket = {
   count: number;
@@ -23,45 +23,91 @@ type ClientRateLimiterOptions = {
   readonly maxBuckets?: number | undefined;
 };
 
-function normaliseForwardedAddress(value: string | undefined): string | null {
-  const address = value?.trim().toLowerCase() ?? "";
-  if (address.startsWith(IPV4_MAPPED_IPV6_PREFIX)) {
-    const mapped = address.slice(IPV4_MAPPED_IPV6_PREFIX.length);
-    if (isIP(mapped) === 4) {
-      return mapped;
-    }
+type ForwardedAddress = {
+  /** The address to classify as public or private. */
+  readonly address: string;
+  /** The rate-limit bucket key for this address. */
+  readonly key: string;
+};
+
+/** Replaces a dotted IPv4 tail (as in `::ffff:1.2.3.4`) with two hex groups. */
+function expandEmbeddedIpv4(address: string): string | null {
+  const tailStart = address.lastIndexOf(":") + 1;
+  const tail = address.slice(tailStart);
+  if (!tail.includes(".")) {
+    return address;
   }
-  return isIP(address) === 0 ? null : address;
+  if (isIP(tail) !== 4) {
+    return null;
+  }
+  const [a = 0, b = 0, c = 0, d = 0] = tail.split(".").map(Number);
+  const high = ((a << 8) | b).toString(16);
+  const low = ((c << 8) | d).toString(16);
+  return `${address.slice(0, tailStart)}${high}:${low}`;
 }
 
-function toHexGroups(part: string): string[] {
-  return part
-    ? part.split(":").map((group) => Number.parseInt(group, 16).toString(16))
-    : [];
+/** Expands an IPv6 address to its eight 16-bit groups, or null if malformed. */
+function parseIpv6Groups(address: string): number[] | null {
+  const expanded = expandEmbeddedIpv4(address);
+  const halves = expanded?.split("::");
+  if (!halves || halves.length > 2) {
+    return null;
+  }
+  const [head = "", tail = ""] = halves;
+  const headGroups = head ? head.split(":") : [];
+  const tailGroups = tail ? tail.split(":") : [];
+  const missingGroups = IPV6_GROUPS - headGroups.length - tailGroups.length;
+  const isCompressed = halves.length === 2;
+  if (isCompressed ? missingGroups < 1 : missingGroups !== 0) {
+    return null;
+  }
+  const groups = [
+    ...headGroups,
+    ...Array.from({ length: isCompressed ? missingGroups : 0 }, () => "0"),
+    ...tailGroups,
+  ];
+  if (!groups.every((group) => IPV6_GROUP_PATTERN.test(group))) {
+    return null;
+  }
+  return groups.map((group) => Number.parseInt(group, 16));
 }
 
-/** One IPv6 subscriber usually controls a whole /64, so bucket by prefix. */
-function getIpv6NetworkKey(address: string): string {
-  const [head = "", tail] = address.split("::");
-  const headGroups = toHexGroups(head);
-  const tailGroups = toHexGroups(tail ?? "");
-  const zeroGroups =
-    tail === undefined
-      ? []
-      : Array.from(
-          {
-            length: Math.max(
-              0,
-              IPV6_GROUPS - headGroups.length - tailGroups.length
-            ),
-          },
-          () => "0"
-        );
-  const prefix = [...headGroups, ...zeroGroups, ...tailGroups].slice(
-    0,
-    IPV6_PREFIX_GROUPS
+function isIpv4MappedIpv6(groups: readonly number[]): boolean {
+  return (
+    groups.slice(0, 5).every((group) => group === 0) && groups[5] === 0xffff
   );
-  return `${prefix.join(":")}::/64`;
+}
+
+function toDottedIpv4(high: number, low: number): string {
+  return [high >> 8, high & 0xff, low >> 8, low & 0xff].join(".");
+}
+
+function parseForwardedAddress(
+  value: string | undefined
+): ForwardedAddress | null {
+  const address = value?.trim().toLowerCase() ?? "";
+  const family = isIP(address);
+  if (family === 4) {
+    return { address, key: address };
+  }
+  if (family !== 6) {
+    return null;
+  }
+  const groups = parseIpv6Groups(address);
+  if (!groups) {
+    return null;
+  }
+  if (isIpv4MappedIpv6(groups)) {
+    const ipv4 = toDottedIpv4(groups[6] ?? 0, groups[7] ?? 0);
+    return { address: ipv4, key: ipv4 };
+  }
+  // Classify the uncompressed form, and bucket by /64 because one IPv6
+  // subscriber usually controls a whole /64.
+  const canonical = groups.map((group) => group.toString(16));
+  return {
+    address: canonical.join(":"),
+    key: `${canonical.slice(0, IPV6_PREFIX_GROUPS).join(":")}::/64`,
+  };
 }
 
 /**
@@ -74,12 +120,12 @@ function getIpv6NetworkKey(address: string): string {
 function getClientKey(headers: Headers): string | null {
   const entries = headers.get("x-forwarded-for")?.split(",") ?? [];
   for (let index = entries.length - 1; index >= 0; index -= 1) {
-    const address = normaliseForwardedAddress(entries[index]);
-    if (!address) {
+    const forwarded = parseForwardedAddress(entries[index]);
+    if (!forwarded) {
       return null;
     }
-    if (!isForbiddenAddress(address)) {
-      return isIP(address) === 6 ? getIpv6NetworkKey(address) : address;
+    if (!isForbiddenAddress(forwarded.address)) {
+      return forwarded.key;
     }
   }
   return null;

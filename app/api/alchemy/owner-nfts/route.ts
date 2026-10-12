@@ -5,15 +5,18 @@ import { getAlchemyApiKey } from "@/config/alchemyEnv";
 import LruTtlCache from "@/lib/cache/lruTtl";
 import { createClientRateLimiter } from "@/lib/security/clientRateLimit";
 import { normaliseAddress } from "@/services/alchemy/utils";
+import { fetchAlchemyJson } from "../fetchAlchemyJson";
 
 const NO_STORE_HEADERS = { "Cache-Control": "no-store" };
 const CACHE_TTL_MS = 30 * 1000;
 // Matches the server-side owner NFT cache lifetime.
 const CACHEABLE_HEADERS = { "Cache-Control": "private, max-age=30" };
-// Owner pages can be large, so keep only a few recent ones.
-const MAX_CACHE_ENTRIES = 50;
+// A full 100-token NextGen page is about 0.5 MB; allow ample headroom.
+const MAX_RESPONSE_BYTES = 2 * 1024 * 1024;
+// Owner pages are large, so keep only a few recent ones.
+const MAX_CACHE_ENTRIES = 25;
 // Alchemy page keys are opaque base64-style cursors.
-const PAGE_KEY_PATTERN = /^[\w+/=:.-]{0,512}$/;
+const PAGE_KEY_PATTERN = /^[\w+/=:.-]{1,512}$/;
 
 // The NextGen chains Alchemy still serves: mainnet and Sepolia.
 const NETWORKS_BY_CHAIN_ID: ReadonlyMap<number, string> = new Map([
@@ -21,7 +24,8 @@ const NETWORKS_BY_CHAIN_ID: ReadonlyMap<number, string> = new Map([
   [11155111, "eth-sepolia"],
 ]);
 
-const ownerNftsCache = new LruTtlCache<string, unknown>({
+// Holds the upstream JSON text, which is smaller than the parsed payload.
+const ownerNftsCache = new LruTtlCache<string, string>({
   max: MAX_CACHE_ENTRIES,
   ttlMs: CACHE_TTL_MS,
 });
@@ -31,6 +35,12 @@ const enforceRateLimit = createClientRateLimiter({
   windowMs: 60 * 1000,
   errorMessage: "Too many owner NFT requests",
 });
+
+function jsonText(text: string): NextResponse {
+  return new NextResponse(text, {
+    headers: { ...CACHEABLE_HEADERS, "Content-Type": "application/json" },
+  });
+}
 
 function jsonError(message: string): NextResponse {
   return NextResponse.json(
@@ -44,7 +54,10 @@ export async function GET(request: NextRequest) {
   const chainIdRaw = searchParams.get("chainId");
   const contractRaw = searchParams.get("contract");
   const ownerRaw = searchParams.get("owner");
-  const pageKey = searchParams.get("pageKey") ?? undefined;
+  const pageKeyParam = searchParams.get("pageKey");
+  // An empty cursor means the first page, the same as an absent one.
+  const pageKey =
+    pageKeyParam === null || pageKeyParam === "" ? undefined : pageKeyParam;
 
   const chainId = chainIdRaw ? Number(chainIdRaw) : Number.NaN;
 
@@ -78,7 +91,7 @@ export async function GET(request: NextRequest) {
   const cacheKey = [network, owner, contract, pageKey ?? ""].join(":");
   const cached = ownerNftsCache.get(cacheKey);
   if (cached !== undefined) {
-    return NextResponse.json(cached, { headers: CACHEABLE_HEADERS });
+    return jsonText(cached);
   }
 
   try {
@@ -91,21 +104,20 @@ export async function GET(request: NextRequest) {
     }
     const url = `https://${network}.g.alchemy.com/nft/v3/${apiKey}/getNFTsForOwner?${params.toString()}`;
 
-    const response = await fetch(url, {
-      headers: { accept: "application/json" },
+    const result = await fetchAlchemyJson(url, {
+      maxBytes: MAX_RESPONSE_BYTES,
       signal: request.signal,
     });
 
-    if (!response.ok) {
+    if (!result.ok) {
       return NextResponse.json(
         { error: "Failed to fetch NFTs for owner" },
-        { status: response.status, headers: NO_STORE_HEADERS }
+        { status: result.status, headers: NO_STORE_HEADERS }
       );
     }
 
-    const payload: unknown = await response.json();
-    ownerNftsCache.set(cacheKey, payload);
-    return NextResponse.json(payload, { headers: CACHEABLE_HEADERS });
+    ownerNftsCache.set(cacheKey, result.text);
+    return jsonText(result.text);
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Failed to fetch NFTs for owner";

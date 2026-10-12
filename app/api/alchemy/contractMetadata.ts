@@ -1,9 +1,12 @@
 import LruTtlCache from "@/lib/cache/lruTtl";
 import { resolveNetwork } from "@/services/alchemy/utils";
 import type { SupportedChain } from "@/types/nft";
+import { fetchAlchemyJson } from "./fetchAlchemyJson";
 
 const CACHE_TTL_MS = 5 * 60 * 1000;
 const MAX_CACHE_ENTRIES = 500;
+// Contract metadata responses are a few kilobytes.
+const MAX_RESPONSE_BYTES = 256 * 1024;
 
 export type ContractMetadataEntry = {
   readonly address: `0x${string}`;
@@ -50,28 +53,28 @@ export async function fetchContractMetadata({
 
   const network = resolveNetwork(chain);
   const url = `https://${network}.g.alchemy.com/nft/v3/${apiKey}/getContractMetadata?contractAddress=${address}`;
-  const response = await fetch(url, {
-    headers: { Accept: "application/json" },
+  const result = await fetchAlchemyJson(url, {
+    maxBytes: MAX_RESPONSE_BYTES,
     signal,
   });
 
-  if (response.status === 404) {
+  if (!result.ok && result.status === 404) {
     const entry: ContractMetadataEntry = { address, chain, metadata: null };
     contractCache.set(cacheKey, entry);
     return entry;
   }
 
-  if (!response.ok) {
+  if (!result.ok) {
     return {
       address,
       chain,
       metadata: null,
       error: "Failed to fetch contract metadata",
-      status: response.status,
+      status: result.status,
     };
   }
 
-  const payload: unknown = await response.json();
+  const { payload } = result;
   if (!isRecord(payload)) {
     return {
       address,

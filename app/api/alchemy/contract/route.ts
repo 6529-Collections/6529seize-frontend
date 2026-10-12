@@ -63,7 +63,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(entry.metadata, { headers: CACHEABLE_HEADERS });
   } catch (error) {
     const message =
-      error instanceof Error ? error.message : "Failed to fetch contract metadata";
+      error instanceof Error
+        ? error.message
+        : "Failed to fetch contract metadata";
     return NextResponse.json(
       { error: message },
       { status: 400, headers: NO_STORE_HEADERS }

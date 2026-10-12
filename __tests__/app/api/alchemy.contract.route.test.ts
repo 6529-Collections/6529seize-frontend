@@ -16,11 +16,10 @@ function requestFor(query: string, clientIp = "8.8.8.8"): NextRequest {
 }
 
 function jsonResponse(body: unknown, status = 200): Response {
-  return {
-    ok: status >= 200 && status < 300,
+  return new Response(JSON.stringify(body), {
     status,
-    json: async () => body,
-  } as Response;
+    headers: { "content-type": "application/json" },
+  });
 }
 
 describe("app/api/alchemy/contract route", () => {
@@ -40,14 +39,17 @@ describe("app/api/alchemy/contract route", () => {
     ["", "address is required"],
     ["address=not-an-address", "address is required"],
     [`address=${CONTRACT}&chain=polygon`, "Unsupported chain"],
-  ])("rejects invalid input %p before calling Alchemy", async (query, error) => {
-    const response = await GET(requestFor(query));
+  ])(
+    "rejects invalid input %p before calling Alchemy",
+    async (query, error) => {
+      const response = await GET(requestFor(query));
 
-    expect(response.status).toBe(400);
-    expect(response.headers.get("cache-control")).toBe("no-store");
-    expect(await response.json()).toEqual({ error });
-    expect(mockFetch).not.toHaveBeenCalled();
-  });
+      expect(response.status).toBe(400);
+      expect(response.headers.get("cache-control")).toBe("no-store");
+      expect(await response.json()).toEqual({ error });
+      expect(mockFetch).not.toHaveBeenCalled();
+    }
+  );
 
   it("returns cached contract metadata with the checksum", async () => {
     mockFetch.mockResolvedValueOnce(
@@ -96,6 +98,34 @@ describe("app/api/alchemy/contract route", () => {
     expect(await failed.json()).toEqual({
       error: "Failed to fetch contract metadata",
     });
+  });
+
+  it("maps upstream timeouts to the upstream error shape", async () => {
+    jest.useFakeTimers();
+    mockFetch.mockImplementationOnce(
+      (_input, init) =>
+        new Promise<Response>((_resolve, reject) => {
+          init?.signal?.addEventListener("abort", () =>
+            reject(init.signal?.reason)
+          );
+        })
+    );
+
+    try {
+      const pending = GET(
+        requestFor("address=0x0000000000000000000000000000000000002005")
+      );
+      await jest.advanceTimersByTimeAsync(8000);
+      const response = await pending;
+
+      expect(response.status).toBe(504);
+      expect(response.headers.get("cache-control")).toBe("no-store");
+      expect(await response.json()).toEqual({
+        error: "Failed to fetch contract metadata",
+      });
+    } finally {
+      jest.useRealTimers();
+    }
   });
 
   it("rate limits each client after its per-minute budget", async () => {

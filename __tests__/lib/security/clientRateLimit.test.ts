@@ -84,17 +84,57 @@ describe("createClientRateLimiter", () => {
     ).toBe(2);
   });
 
-  it("buckets IPv4-mapped and IPv6 /64 addresses together", () => {
+  it("buckets IPv4-mapped IPv6 spellings with their IPv4 address", () => {
     const enforce = createLimiter(1);
 
-    expect(allowedCount(enforce, ["8.8.8.8", "::ffff:8.8.8.8"])).toBe(1);
     expect(
       allowedCount(enforce, [
-        "2001:4860:4860::8888",
-        "2001:4860:4860:0:abcd::1",
-        "2001:4860:4861::8888",
+        "8.8.8.8",
+        "::ffff:8.8.8.8",
+        "::ffff:808:808",
+        "0:0:0:0:0:ffff:0808:0808",
+      ])
+    ).toBe(1);
+  });
+
+  it("buckets IPv6 clients by /64 across compressed spellings", () => {
+    const enforce = createLimiter(1);
+
+    expect(
+      allowedCount(enforce, [
+        "2001:db8::abcd:1",
+        "2001:db8:0:0:1::",
+        "2001:0DB8:0000:0000:ffff:ffff:ffff:ffff",
+      ])
+    ).toBe(1);
+    expect(
+      allowedCount(enforce, ["2001:db8:0:1::1", "2001:db8:1::1", "2001:db9::"])
+    ).toBe(3);
+  });
+
+  it("expands embedded IPv4 tails before taking the /64", () => {
+    const enforce = createLimiter(1);
+
+    expect(
+      allowedCount(enforce, [
+        "64:ff9b::8.8.8.8",
+        "64:ff9b::1.1.1.1",
+        "64:ff9b:1::8.8.8.8",
       ])
     ).toBe(2);
+  });
+
+  it("skips private and loopback IPv6 hops in any spelling", () => {
+    const enforce = createLimiter(1);
+
+    expect(
+      allowedCount(enforce, [
+        "2001:db8:5::1, ::1",
+        "2001:db8:5::2, 0000:0000:0000:0000:0000:0000:0000:0001",
+        "2001:db8:5::3, fe80::1",
+        "2001:db8:5::4, fd00::1",
+      ])
+    ).toBe(1);
   });
 
   it("gives requests without a public client address one shared, larger budget", () => {
@@ -105,10 +145,11 @@ describe("createClientRateLimiter", () => {
       "::1",
       "10.0.0.1, 192.168.1.10",
       "8.8.8.8, not-an-address",
+      "2001:db8::1%eth0",
     ];
 
     expect(
-      allowedCount(enforce, [...unidentified, ...unidentified, undefined])
+      allowedCount(enforce, [...unidentified, ...unidentified.slice(0, 5)])
     ).toBe(10);
     expect(enforce(requestFrom("8.8.8.8"))).toBeNull();
   });

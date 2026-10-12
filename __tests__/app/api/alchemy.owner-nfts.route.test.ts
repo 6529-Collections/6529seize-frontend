@@ -35,11 +35,10 @@ function ownerQuery({
 }
 
 function jsonResponse(body: unknown, status = 200): Response {
-  return {
-    ok: status >= 200 && status < 300,
+  return new Response(JSON.stringify(body), {
     status,
-    json: async () => body,
-  } as Response;
+    headers: { "content-type": "application/json" },
+  });
 }
 
 describe("app/api/alchemy/owner-nfts route", () => {
@@ -70,14 +69,17 @@ describe("app/api/alchemy/owner-nfts route", () => {
     ],
     [ownerQuery({ pageKey: "a&b" }), "Invalid pageKey"],
     [ownerQuery({ pageKey: "a".repeat(513) }), "Invalid pageKey"],
-  ])("rejects invalid input %p before calling Alchemy", async (query, error) => {
-    const response = await GET(requestFor(query));
+  ])(
+    "rejects invalid input %p before calling Alchemy",
+    async (query, error) => {
+      const response = await GET(requestFor(query));
 
-    expect(response.status).toBe(400);
-    expect(response.headers.get("cache-control")).toBe("no-store");
-    expect(await response.json()).toEqual({ error });
-    expect(mockFetch).not.toHaveBeenCalled();
-  });
+      expect(response.status).toBe(400);
+      expect(response.headers.get("cache-control")).toBe("no-store");
+      expect(await response.json()).toEqual({ error });
+      expect(mockFetch).not.toHaveBeenCalled();
+    }
+  );
 
   it("fetches normalized owner NFTs on the requested network and caches them", async () => {
     const payload = { ownedNfts: [{ tokenId: "1" }], totalCount: 1 };
@@ -130,6 +132,38 @@ describe("app/api/alchemy/owner-nfts route", () => {
     });
     expect(retried.status).toBe(200);
     expect(mockFetch).toHaveBeenCalledTimes(2);
+  });
+
+  it("treats an empty pageKey as the first page", async () => {
+    mockFetch.mockResolvedValueOnce(jsonResponse({ ownedNfts: [] }));
+    const owner = "0x0000000000000000000000000000000000003004";
+
+    const empty = await GET(requestFor(ownerQuery({ owner, pageKey: "" })));
+    const absent = await GET(requestFor(ownerQuery({ owner })));
+
+    expect(empty.status).toBe(200);
+    expect(absent.status).toBe(200);
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+    const upstreamUrl = new URL(String(mockFetch.mock.calls[0]?.[0]));
+    expect(upstreamUrl.searchParams.has("pageKey")).toBe(false);
+  });
+
+  it("rejects oversized upstream pages with the upstream error shape", async () => {
+    mockFetch.mockResolvedValueOnce(
+      new Response(`"${"x".repeat(2 * 1024 * 1024)}"`)
+    );
+
+    const response = await GET(
+      requestFor(
+        ownerQuery({ owner: "0x0000000000000000000000000000000000003005" })
+      )
+    );
+
+    expect(response.status).toBe(502);
+    expect(response.headers.get("cache-control")).toBe("no-store");
+    expect(await response.json()).toEqual({
+      error: "Failed to fetch NFTs for owner",
+    });
   });
 
   it("rate limits each client after its per-minute budget", async () => {

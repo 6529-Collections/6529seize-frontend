@@ -113,12 +113,8 @@ describe("app/api/alchemy/token-metadata route", () => {
       tokenIds: ["1"],
     };
 
-    const first = (await POST(
-      requestFor(body, "8.8.8.10")
-    )) as RouteResponse;
-    const second = (await POST(
-      requestFor(body, "8.8.8.11")
-    )) as RouteResponse;
+    const first = (await POST(requestFor(body, "8.8.8.10"))) as RouteResponse;
+    const second = (await POST(requestFor(body, "8.8.8.11"))) as RouteResponse;
 
     expect(first.status).toBe(200);
     expect(second.status).toBe(200);

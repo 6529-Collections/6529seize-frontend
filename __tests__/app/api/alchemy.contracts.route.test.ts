@@ -1,3 +1,4 @@
+/** @jest-environment node */
 const mockNextResponseJson = jest.fn((body: unknown, init?: ResponseInit) => ({
   body,
   headers: init?.headers,
@@ -19,6 +20,7 @@ const CONTRACT_ONE = "0x0000000000000000000000000000000000000001";
 const CONTRACT_TWO = "0x0000000000000000000000000000000000000002";
 const CONTRACT_THREE = "0x0000000000000000000000000000000000000003";
 const CONTRACT_FOUR = "0x0000000000000000000000000000000000000004";
+const CONTRACT_FIVE = "0x0000000000000000000000000000000000000005";
 
 type MockBodyReadResult =
   | { readonly done: false; readonly value: Uint8Array }
@@ -72,12 +74,11 @@ function contractAddress(index: number): string {
   return `0x${(0x1000 + index).toString(16).padStart(40, "0")}`;
 }
 
-function jsonResponse<T>(body: T, status = 200): Response {
-  return {
-    ok: status >= 200 && status < 300,
+function jsonResponse(body: unknown, status = 200): Response {
+  return new Response(JSON.stringify(body), {
     status,
-    json: async () => body,
-  } as Response;
+    headers: { "content-type": "application/json" },
+  });
 }
 
 describe("app/api/alchemy/contracts route", () => {
@@ -195,6 +196,29 @@ describe("app/api/alchemy/contracts route", () => {
         },
         {
           address: CONTRACT_FOUR,
+          chain: "ethereum",
+          metadata: null,
+          error: "Failed to fetch contract metadata",
+          status: 502,
+        },
+      ],
+    });
+  });
+
+  it("reports oversized upstream metadata as a failed entry", async () => {
+    mockFetch.mockResolvedValueOnce(
+      new Response(`{"name":"${"x".repeat(256 * 1024)}"}`)
+    );
+
+    const response = (await POST(
+      requestFor({ contracts: [{ address: CONTRACT_FIVE }] })
+    )) as RouteResponse;
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual({
+      contracts: [
+        {
+          address: CONTRACT_FIVE,
           chain: "ethereum",
           metadata: null,
           error: "Failed to fetch contract metadata",
