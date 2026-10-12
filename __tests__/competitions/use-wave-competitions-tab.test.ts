@@ -20,6 +20,7 @@ let mockAuth = {
 };
 
 jest.mock("@/helpers/competition.helpers", () => ({
+  ...jest.requireActual("@/helpers/competition.helpers"),
   isMultiCompetitionEnabled: jest.fn(),
 }));
 jest.mock("@/hooks/competitions/useCompetitionQueries", () => ({
@@ -45,7 +46,7 @@ it.each([
   { canCreate: false, visibleCount: 0, enabled: true, expected: false },
   { canCreate: true, visibleCount: 1, enabled: false, expected: false },
 ])(
-  "shows the competitions tab for $canCreate / $visibleCount / $enabled",
+  "tracks competition availability for $canCreate / $visibleCount / $enabled",
   ({ canCreate, visibleCount, enabled, expected }) => {
     (isMultiCompetitionEnabled as jest.Mock).mockReturnValue(enabled);
     (useCompetitionHub as jest.Mock).mockReturnValue({
@@ -292,7 +293,9 @@ it.each([
         ...list,
       });
     const { result } = renderHook(() => useWaveCompetitionsTab(wave));
-    expect(result.current.hideCompetitionsTab).toBe(Boolean(auth));
+    expect(result.current.hideCompetitionsTab).toBe(
+      permissions?.administer !== true
+    );
   }
 );
 
@@ -387,7 +390,7 @@ it.each([false, true])(
     });
     const { result } = renderHook(() => useWaveCompetitionsTab(wave));
     expect(result.current.isPending).toBe(true);
-    expect(result.current.hideCompetitionsTab).toBe(false);
+    expect(result.current.hideCompetitionsTab).toBe(true);
   }
 );
 
@@ -405,4 +408,154 @@ it("counts distinct IDs across completed pages without adding the legacy facade 
   });
   const { result } = renderHook(() => useWaveCompetitionsTab(wave));
   expect(result.current.hideCompetitionsTab).toBe(true);
+});
+
+it.each([
+  ["permissions", useCompetitionHub],
+  ["default selection", useDefaultCompetition],
+  ["competition list", useCompetitionList],
+] as const)(
+  "keeps a cached sole competition hidden when %s refresh fails",
+  (_name, query) => {
+    configureSingleCompetition();
+    const mockQuery = query as jest.Mock;
+    const settled = mockQuery.getMockImplementation()!();
+    const { result, rerender } = renderHook(() => useWaveCompetitionsTab(wave));
+    mockQuery.mockReturnValue({
+      ...settled,
+      isSuccess: false,
+      isError: true,
+      error: { status: 503 },
+    });
+    rerender();
+    expect(result.current.hideCompetitionsTab).toBe(true);
+    expect(result.current.defaultCompetitionId).toBe("sole");
+    expect(result.current.hasCompetitions).toBe(true);
+    expect(result.current.isPending).toBe(false);
+  }
+);
+
+it.each([
+  ["permissions", useCompetitionHub],
+  ["default selection", useDefaultCompetition],
+  ["competition list", useCompetitionList],
+] as const)(
+  "retains the collection with two cached distinct records when %s refresh fails",
+  (_name, query) => {
+    configureSingleCompetition();
+    const list = (useCompetitionList as jest.Mock).getMockImplementation()!();
+    (useCompetitionList as jest.Mock).mockReturnValue({
+      ...list,
+      data: {
+        pages: [{ data: [{ id: "sole" }, { id: "second" }], has_more: false }],
+      },
+    });
+    const mockQuery = query as jest.Mock;
+    const settled = mockQuery.getMockImplementation()!();
+    const { result, rerender } = renderHook(() => useWaveCompetitionsTab(wave));
+    expect(result.current.hideCompetitionsTab).toBe(false);
+    mockQuery.mockReturnValue({
+      ...settled,
+      isSuccess: false,
+      isError: true,
+      error: { status: 429 },
+    });
+    rerender();
+    expect(result.current.hideCompetitionsTab).toBe(false);
+    expect(result.current.defaultCompetitionId).toBe("sole");
+  }
+);
+
+it.each([401, 403, 404])(
+  "does not retain a cached default ID after an access rejection (%s)",
+  (status) => {
+    configureSingleCompetition();
+    const selection = (
+      useDefaultCompetition as jest.Mock
+    ).getMockImplementation()!();
+    (useDefaultCompetition as jest.Mock).mockReturnValue({
+      ...selection,
+      isSuccess: false,
+      isError: true,
+      error: { status },
+    });
+    const { result } = renderHook(() => useWaveCompetitionsTab(wave));
+    expect(result.current.defaultCompetitionId).toBeNull();
+    expect(result.current.hideCompetitionsTab).toBe(true);
+  }
+);
+
+it.each([
+  ["permissions", useCompetitionHub],
+  ["competition list", useCompetitionList],
+] as const)(
+  "hides cached collection records when %s rejects access",
+  (_name, query) => {
+    configureSingleCompetition();
+    const list = (useCompetitionList as jest.Mock).getMockImplementation()!();
+    (useCompetitionList as jest.Mock).mockReturnValue({
+      ...list,
+      data: {
+        pages: [{ data: [{ id: "sole" }, { id: "second" }], has_more: false }],
+      },
+    });
+    const mockQuery = query as jest.Mock;
+    const settled = mockQuery.getMockImplementation()!();
+    const { result, rerender } = renderHook(() => useWaveCompetitionsTab(wave));
+    expect(result.current.hideCompetitionsTab).toBe(false);
+    mockQuery.mockReturnValue({
+      ...settled,
+      isSuccess: false,
+      isError: true,
+      error: { status: 403 },
+    });
+    rerender();
+    expect(result.current.hideCompetitionsTab).toBe(true);
+  }
+);
+
+it("hides the collection before administrator rights or multiple records are known", () => {
+  configureSingleCompetition();
+  (useCompetitionHub as jest.Mock).mockReturnValue({ isPending: true });
+  (useCompetitionList as jest.Mock).mockReturnValue({ isPending: true });
+  const { result } = renderHook(() => useWaveCompetitionsTab(wave));
+  expect(result.current.hideCompetitionsTab).toBe(true);
+  expect(result.current.isPending).toBe(true);
+});
+
+it("shows the collection for an established administrator without visible records", () => {
+  configureSingleCompetition();
+  (useCompetitionHub as jest.Mock).mockReturnValue({
+    data: { permissions: { administer: true, create_competition: true } },
+  });
+  (useCompetitionList as jest.Mock).mockReturnValue({ isPending: true });
+  const { result } = renderHook(() => useWaveCompetitionsTab(wave));
+  expect(result.current.hideCompetitionsTab).toBe(false);
+});
+
+it("keeps collection hidden for a non-admin with creation rights and one record", () => {
+  configureSingleCompetition();
+  (useCompetitionHub as jest.Mock).mockReturnValue({
+    data: { permissions: { administer: false, create_competition: true } },
+  });
+  const { result } = renderHook(() => useWaveCompetitionsTab(wave));
+  expect(result.current.hideCompetitionsTab).toBe(true);
+});
+
+it("reveals an incomplete collection as soon as two distinct records are known", () => {
+  configureSingleCompetition();
+  const fetchNextPage = jest.fn();
+  (useCompetitionList as jest.Mock).mockImplementation((_waveId, filter) => ({
+    hasNextPage: true,
+    isFetching: false,
+    fetchNextPage,
+    data: {
+      pages: [{ data: [{ id: "sole" }, { id: "second" }], has_more: true }],
+    },
+    isError: filter === "all",
+  }));
+  const { result } = renderHook(() => useWaveCompetitionsTab(wave));
+  expect(result.current.hideCompetitionsTab).toBe(false);
+  expect(result.current.isPending).toBe(false);
+  expect(fetchNextPage).toHaveBeenCalledTimes(1);
 });

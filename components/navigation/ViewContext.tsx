@@ -103,6 +103,7 @@ export const ViewProvider: React.FC<{ readonly children: ReactNode }> = ({
             await commonApiFetch<ApiWave>({
               endpoint: `waves/${targetWaveId}`,
               signal,
+              errorMode: "structured",
             }),
           staleTime: 60000,
         });

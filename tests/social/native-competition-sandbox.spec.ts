@@ -1,8 +1,12 @@
 import { writeFile } from "node:fs/promises";
 import composerSandboxConstants from "../support/composerSandboxConstants.json";
 import { installSurfaceSimulation } from "../support/surfaceSimulation";
-import type { Page } from "@playwright/test";
+import type { Frame, Page } from "@playwright/test";
 import { expectCompetitionScroll } from "../support/competitionScroll";
+import {
+  monitorRememberedLeaderboard,
+  retainDesktopWaveSidebar,
+} from "../support/waveNavigationContinuity";
 import { expect, expectNoHorizontalOverflow, test } from "../testHelpers";
 import {
   dismissNextDevTools,
@@ -568,7 +572,17 @@ async function installCompetitionApi(
 }
 
 test.describe("Native competition sandbox @auth @medium @local-only", () => {
-  test.afterEach(async ({ page }) => {
+  test.afterEach(async ({ page }, testInfo) => {
+    if (testInfo.status !== testInfo.expectedStatus) {
+      const failurePath = testInfo.outputPath(
+        "competition-sandbox-failure.png"
+      );
+      await page.screenshot({ path: failurePath });
+      await testInfo.attach("competition-sandbox-failure", {
+        path: failurePath,
+        contentType: "image/png",
+      });
+    }
     // Let fixture responses finish before Playwright disposes their request context.
     await page.unrouteAll({ behavior: "wait" });
   });
@@ -2140,6 +2154,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         );
       const BAR = "00000000-0000-4000-8000-000000000536";
       const mainStage = await installCompetitionApi(page, false, false, WAVE);
+      mainStage.onlyCompetition("alpha");
       if (mode !== "native") await mainStage.legacyPrimary("alpha");
       await page.route(`**/v3/waves/${BAR}**`, (route) => {
         const path = new URL(route.request().url()).pathname;
@@ -2177,6 +2192,24 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         name: "The Memes - Main Stage",
       };
       const bar = { ...overview, id: BAR, name: "The Memes - Maybes Bar" };
+      const waveResponse = await page.request.get(
+        `${getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"])}/api/waves/${WAVE}`
+      );
+      expect(waveResponse.ok()).toBe(true);
+      const wave = await waveResponse.json();
+      await page.route(`**/api/waves/${BAR}`, (route) =>
+        route.fulfill({
+          json: {
+            ...wave,
+            id: BAR,
+            name: bar.name,
+            description_drop: {
+              ...wave.description_drop,
+              wave: { ...wave.description_drop.wave, id: BAR, name: bar.name },
+            },
+          },
+        })
+      );
       await page.route(/\/api\/v2\/waves(?:\?|$)/, (route) =>
         route.fulfill({ json: { data: [main, bar], page: 1, next: false } })
       );
@@ -2216,6 +2249,13 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         exact: true,
       });
       await page.goto("/waves");
+      const desktopSidebar =
+        testInfo.project.name === "web-desktop-chromium"
+          ? await retainDesktopWaveSidebar(page)
+          : null;
+      const prepareWaveSwitch = async () => {
+        if (!desktopSidebar) await returnToList();
+      };
       await openWaveFromList("The Memes - Main Stage");
       await expect(chat).toBeVisible({ timeout: 30000 });
       await leaderboard.click();
@@ -2224,7 +2264,8 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
           page.getByText("Immutable alpha entry content", { exact: true })
         ).toBeVisible();
       else await expectLegacySectionContent(page, "leaderboard");
-      await returnToList();
+      await desktopSidebar?.expectRetained();
+      await prepareWaveSwitch();
       await openWaveFromList("The Memes - Maybes Bar");
       await expect(chat).toBeVisible({ timeout: 30000 });
       await page
@@ -2233,7 +2274,13 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
           exact: true,
         })
         .click();
-      await returnToList();
+      await desktopSidebar?.expectRetained();
+      await prepareWaveSwitch();
+      const expectNoDetour = await monitorRememberedLeaderboard(
+        page,
+        `/waves/${WAVE}`,
+        wave.name
+      );
       await openWaveFromList("The Memes - Main Stage");
       await expect(page).toHaveURL(
         new RegExp(`/waves/${WAVE}/competitions/alpha\\?tab=leaderboard$`)
@@ -2244,10 +2291,43 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         ).toBeVisible();
       else await expectLegacySectionContent(page, "leaderboard");
       await expect(chat).toHaveCount(0);
+      await expectNoDetour();
+      await desktopSidebar?.expectRetained();
+      if (mode === "app") {
+        try {
+          await expect(
+            leaderboard.getByText("Leaderboard", { exact: true })
+          ).toBeInViewport({ ratio: 1 });
+        } finally {
+          await testInfo.attach("remembered-app-tab-geometry", {
+            body: JSON.stringify(
+              await leaderboard.evaluate((button) => {
+                const row = button.closest('[data-wave-tabs-scroll="app"]');
+                const label = button.querySelector("span");
+                return {
+                  row: row?.getBoundingClientRect().toJSON(),
+                  button: button.getBoundingClientRect().toJSON(),
+                  label: label?.getBoundingClientRect().toJSON(),
+                  scrollLeft: row?.scrollLeft,
+                  scrollWidth: row?.scrollWidth,
+                  clientWidth: row?.clientWidth,
+                };
+              })
+            ),
+            contentType: "application/json",
+          });
+        }
+      }
+      await expect(
+        page.getByRole(mode === "app" ? "button" : "tab", {
+          name: /^Competitions(?:\s+\d+\+?)?$/,
+        })
+      ).toHaveCount(0);
       await page.screenshot({
         path: testInfo.outputPath(`remembered-${mode}-leaderboard.png`),
         fullPage: true,
       });
+      await desktopSidebar?.dispose();
       await page.reload();
       if (mode === "native")
         await expect(
@@ -2264,6 +2344,145 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       });
     });
   }
+
+  test("keeps one desktop wave sidebar while an unvisited wave page streams", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      testInfo.project.name !== "web-desktop-chromium",
+      "The page-loading sidebar is only rendered in the desktop layout."
+    );
+    const targetWaveId = "00000000-0000-4000-8000-000000000536";
+    const sandbox = await installCompetitionApi(page, false, false);
+    sandbox.onlyCompetition("alpha");
+    const response = await page.request.get(
+      `${getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"])}/api/v2/waves/${targetWaveId}/drops`
+    );
+    expect(response.ok()).toBe(true);
+    const { wave: overview } = await response.json();
+    const waves = [
+      { ...overview, id: WAVE, name: "Warmed Competition Wave" },
+      { ...overview, id: targetWaveId, name: "Previously Unvisited Wave" },
+    ];
+    await page.route(/\/api\/v2\/waves(?:\?|$)/, (route) =>
+      route.fulfill({ json: { data: waves, page: 1, next: false } })
+    );
+    await page.route("**/api/v2/official-waves", (route) =>
+      route.fulfill({ json: waves })
+    );
+    await page.goto(`${ROOT}/alpha?tab=leaderboard`);
+    const entry = page.getByText("Immutable alpha entry content", {
+      exact: true,
+    });
+    await expect(entry).toBeVisible();
+    const sidebar = await retainDesktopWaveSidebar(page);
+    const pane = page
+      .getByRole("region", {
+        name: /All recent waves list|Regular waves list/,
+      })
+      .filter({ visible: true })
+      .locator(
+        "xpath=ancestor::div[contains(concat(' ', normalize-space(@class), ' '), ' tw-h-full ') and contains(concat(' ', normalize-space(@class), ' '), ' tw-border-r ')][1]"
+      );
+    const monitor = await pane.evaluateHandle((retainedPane) => {
+      const loadingFrames: {
+        sidebarRight: number;
+        shellLeft: number;
+        placeholderAsideWidths: number[];
+      }[] = [];
+      let frameId = 0;
+      const sample = () => {
+        const paneRect = retainedPane.getBoundingClientRect();
+        if (retainedPane.isConnected && paneRect.width > 0) {
+          for (const shell of document.querySelectorAll(
+            '[data-testid="stream-route-loading-shell"]'
+          )) {
+            const shellRect = shell.getBoundingClientRect();
+            if (
+              shellRect.width > 0 &&
+              shellRect.height > 0 &&
+              shellRect.left >= paneRect.right - 1
+            ) {
+              loadingFrames.push({
+                sidebarRight: paneRect.right,
+                shellLeft: shellRect.left,
+                placeholderAsideWidths: Array.from(
+                  shell.querySelectorAll("aside"),
+                  (aside) => aside.getBoundingClientRect().width
+                ).filter((width) => width > 0),
+              });
+            }
+          }
+        }
+        frameId = requestAnimationFrame(sample);
+      };
+      frameId = requestAnimationFrame(sample);
+      return {
+        stop: () => {
+          cancelAnimationFrame(frameId);
+          return loadingFrames;
+        },
+      };
+    });
+    let releasePage!: () => void;
+    const pendingPage = new Promise<void>((resolve) => {
+      releasePage = resolve;
+    });
+    let pageHeld = false;
+    await page.route(
+      (url) =>
+        url.pathname === `/waves/${targetWaveId}` &&
+        url.searchParams.has("_rsc"),
+      async (route) => {
+        pageHeld = true;
+        await pendingPage;
+        await route.continue();
+      }
+    );
+    try {
+      await page
+        .getByRole("region", {
+          name: /All recent waves list|Regular waves list/,
+        })
+        .getByRole("link")
+        .filter({ hasText: "Previously Unvisited Wave" })
+        .first()
+        .click();
+      await expect.poll(() => pageHeld).toBe(true);
+      await expect(page).toHaveURL(`${ROOT}/alpha?tab=leaderboard`);
+      await expect(entry).toBeVisible();
+      await sidebar.expectRetained();
+      releasePage();
+      await expect(page).toHaveURL(`/waves/${targetWaveId}`);
+      await expect(
+        page.getByRole("region", {
+          name: "Wave chat file upload area",
+          exact: true,
+        })
+      ).toBeVisible();
+      await sidebar.expectRetained();
+      const loadingFrames = await monitor.evaluate(async (state) => {
+        await new Promise<void>((resolve) =>
+          requestAnimationFrame(() => resolve())
+        );
+        return state.stop();
+      });
+      await testInfo.attach("streamed-page-loading-frames", {
+        body: JSON.stringify(loadingFrames),
+        contentType: "application/json",
+      });
+      expect(
+        loadingFrames.filter((frame) => frame.placeholderAsideWidths.length),
+        "A page loader beside the mounted wave sidebar must not paint another sidebar"
+      ).toEqual([]);
+      expect(sandbox.requests).toEqual([]);
+    } finally {
+      releasePage();
+      await monitor.evaluate((state) => state.stop());
+      await monitor.dispose();
+      await sidebar.dispose();
+    }
+  });
 
   test("keeps the current Chat mounted while wave information is open and default data loads", async ({
     page,
@@ -2768,10 +2987,419 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
   }
 
   for (const app of [false, true]) {
+    test(`recovers the selected Leaderboard after an initial missing wave metadata response (${app ? "app" : "web"})`, async ({
+      page,
+    }, testInfo) => {
+      test.skip(
+        app && testInfo.project.name !== "web-mobile-chromium",
+        "The native app layout is covered in the mobile project."
+      );
+      const sandbox = await installCompetitionApi(page, false, false);
+      sandbox.onlyCompetition("alpha");
+      if (app)
+        await installSurfaceSimulation(
+          page.context(),
+          "capacitor-ios-sim",
+          testInfo.project.use.baseURL
+        );
+      let waveMissing = true;
+      let metadataReads = 0;
+      let releaseRecovery!: () => void;
+      const recoveryGate = new Promise<void>((resolve) => {
+        releaseRecovery = resolve;
+      });
+      await page.route(`**/api/waves/${WAVE}`, async (route) => {
+        metadataReads += 1;
+        if (waveMissing)
+          return route.fulfill({
+            status: 404,
+            json: { message: `Wave ${WAVE} not found` },
+          });
+        await recoveryGate;
+        return route.fallback();
+      });
+      try {
+        await page.goto(`${ROOT}/alpha?tab=leaderboard`);
+        const unavailable = page
+          .getByRole("alert")
+          .filter({ hasText: "This competition could not be loaded" });
+        const retry = unavailable.getByRole("button", {
+          name: "Try again",
+          exact: true,
+        });
+        await expect(unavailable).toBeVisible();
+        expect(metadataReads).toBeGreaterThan(0);
+        await expect(page).toHaveURL(`${ROOT}/alpha?tab=leaderboard`);
+        if (app)
+          await expect(
+            page.getByRole("button", { name: "Back", exact: true })
+          ).toBeVisible();
+        const entry = page.getByText("Immutable alpha entry content", {
+          exact: true,
+        });
+        const chat = page.getByRole("region", {
+          name: "Wave chat file upload area",
+          exact: true,
+        });
+        await expect(entry).toHaveCount(0);
+        await expect(chat).toHaveCount(0);
+        waveMissing = false;
+        // Keep successful metadata pending while late 404 observers settle.
+        // The user must retain the selected route and its retry action.
+        await page.waitForTimeout(500);
+        await expect(page).toHaveURL(`${ROOT}/alpha?tab=leaderboard`);
+        await expect(unavailable).toBeVisible();
+        await expect(retry).toBeVisible();
+        await expect(entry).toHaveCount(0);
+        await expect(chat).toHaveCount(0);
+        await page.screenshot({
+          path: testInfo.outputPath("selected-competition-metadata-error.png"),
+        });
+        await retry.click();
+        releaseRecovery();
+        await expect(entry).toBeVisible();
+        await expect(unavailable).toHaveCount(0);
+        await expect(page).toHaveURL(`${ROOT}/alpha?tab=leaderboard`);
+        await expect(
+          page.getByRole(app ? "button" : "tab", {
+            name: "Leaderboard",
+            exact: true,
+          })
+        ).toHaveAttribute(app ? "aria-current" : "aria-selected", "true");
+        await expect(chat).toHaveCount(0);
+        await expect(
+          page.getByRole(app ? "button" : "tab", {
+            name: /^Competitions(?:\s+\d+\+?)?$/,
+          })
+        ).toHaveCount(0);
+        expect(sandbox.requests).toEqual([]);
+      } finally {
+        releaseRecovery();
+      }
+    });
+
+    test(`ignores a previous ordinary wave's delayed missing metadata after another competition commits (${app ? "app" : "web"})`, async ({
+      page,
+    }, testInfo) => {
+      test.skip(
+        app && testInfo.project.name !== "web-mobile-chromium",
+        "The native app layout is covered in the mobile project."
+      );
+      const previousWave = "00000000-0000-4000-8000-000000000536";
+      const sandbox = await installCompetitionApi(page, false, false);
+      sandbox.onlyCompetition("alpha");
+      if (app)
+        await installSurfaceSimulation(
+          page.context(),
+          "capacitor-ios-sim",
+          testInfo.project.use.baseURL
+        );
+      await page.route(`**/v3/waves/${previousWave}**`, (route) => {
+        const path = new URL(route.request().url()).pathname;
+        if (path.endsWith("/default-competition"))
+          return route.fulfill({
+            json: {
+              competition_id: null,
+              evaluated_at: Date.now(),
+              next_refresh_at: null,
+            },
+          });
+        if (path.endsWith("/competitions"))
+          return route.fulfill({ json: pageResult([]) });
+        return route.fulfill({
+          json: {
+            id: previousWave,
+            name: "Pending ordinary wave",
+            legacy_primary_competition_id: null,
+            permissions: {
+              view: true,
+              administer: false,
+              create_competition: false,
+            },
+          },
+        });
+      });
+      const overviewResponse = await page.request.get(
+        `${getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"])}/api/v2/waves/${WAVE}/drops`
+      );
+      expect(overviewResponse.ok()).toBe(true);
+      const overview = (await overviewResponse.json()).wave;
+      const targetWave = {
+        ...overview,
+        id: WAVE,
+        name: "Selected competition wave",
+      };
+      await page.route(/\/api\/v2\/waves(?:\?|$)/, (route) =>
+        route.fulfill({ json: { data: [targetWave], page: 1, next: false } })
+      );
+      await page.route("**/api/v2/official-waves", (route) =>
+        route.fulfill({ json: [targetWave] })
+      );
+      const metadataResponse = await page.request.get(
+        `${getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"])}/api/waves/${WAVE}`
+      );
+      expect(metadataResponse.ok()).toBe(true);
+      const metadata = await metadataResponse.json();
+      const ordinaryWave = {
+        ...metadata,
+        id: previousWave,
+        name: "Pending ordinary wave",
+        description_drop: {
+          ...metadata.description_drop,
+          wave: {
+            ...metadata.description_drop.wave,
+            id: previousWave,
+            name: "Pending ordinary wave",
+          },
+        },
+      };
+      await page.clock.install();
+      let waveMissing = false;
+      let metadataPending = false;
+      let releaseMissing!: () => void;
+      const missingGate = new Promise<void>((resolve) => {
+        releaseMissing = resolve;
+      });
+      await page.route(`**/api/waves/${previousWave}`, async (route) => {
+        if (!waveMissing) return route.fulfill({ json: ordinaryWave });
+        metadataPending = true;
+        await missingGate;
+        return route.fulfill({
+          status: 404,
+          json: { message: `Wave ${previousWave} not found` },
+        });
+      });
+      const committedRoutes: string[] = [];
+      const observeRoute = (frame: Frame) => {
+        if (frame === page.mainFrame()) committedRoutes.push(page.url());
+      };
+      try {
+        await page.goto(`/waves/${previousWave}`);
+        await expect(
+          page.getByRole("button", {
+            name: "About Pending ordinary wave",
+            exact: true,
+          })
+        ).toBeVisible();
+        waveMissing = true;
+        // Reconnecting refetches mounted, stale metadata. Unlike a cold
+        // ViewContext lookup, this request survives leaving its view.
+        await page.clock.fastForward(60_100);
+        await page.context().setOffline(true);
+        await page.context().setOffline(false);
+        await expect.poll(() => metadataPending).toBe(true);
+        if (app) {
+          await page.getByRole("button", { name: "Back", exact: true }).click();
+          await expect(page).toHaveURL(/\/waves$/);
+        } else if (testInfo.project.name === "web-mobile-chromium") {
+          await page
+            .getByRole("button", { name: "Open menu", exact: true })
+            .click();
+          await page
+            .getByRole("navigation", {
+              name: "Desktop navigation",
+              exact: true,
+            })
+            .getByRole("link", { name: "Waves", exact: true })
+            .click();
+          await expect(page).toHaveURL(/\/waves$/);
+        }
+        await page
+          .getByRole("region", {
+            name: /All recent waves list|Regular waves list/,
+          })
+          .getByRole("link")
+          .filter({ hasText: targetWave.name })
+          .first()
+          .click();
+        const leaderboard = page.getByRole(app ? "button" : "tab", {
+          name: "Leaderboard",
+          exact: true,
+        });
+        await leaderboard.click();
+        const selectedUrl = `${ROOT}/alpha?tab=leaderboard`;
+        const entry = page.getByText("Immutable alpha entry content", {
+          exact: true,
+        });
+        await expect(page).toHaveURL(selectedUrl);
+        await expect(entry).toBeVisible();
+        await expect(leaderboard).toHaveAttribute(
+          app ? "aria-current" : "aria-selected",
+          "true"
+        );
+        const missingResponse = page.waitForResponse(
+          (response) =>
+            new URL(response.url()).pathname === `/api/waves/${previousWave}` &&
+            response.status() === 404
+        );
+        committedRoutes.push(page.url());
+        page.on("framenavigated", observeRoute);
+        releaseMissing();
+        const response = await missingResponse;
+        expect(await response.finished()).toBeNull();
+        // Exercise callbacks from the previous wave after the new route is ready.
+        await page.waitForTimeout(500);
+        await expect(page).toHaveURL(selectedUrl);
+        await expect(entry).toBeVisible();
+        await expect(leaderboard).toHaveAttribute(
+          app ? "aria-current" : "aria-selected",
+          "true"
+        );
+        page.off("framenavigated", observeRoute);
+        expect(committedRoutes).toEqual(
+          committedRoutes.map(() => new URL(selectedUrl, page.url()).href)
+        );
+        await writeFile(
+          testInfo.outputPath("stale-wave-response-sequence.json"),
+          JSON.stringify({
+            previousWave,
+            selectedUrl,
+            responseUrl: response.url(),
+            responseStatus: response.status(),
+            committedRoutes,
+          })
+        );
+        await expect(
+          page.getByRole("region", {
+            name: "Wave chat file upload area",
+            exact: true,
+          })
+        ).toHaveCount(0);
+        await page.screenshot({
+          path: testInfo.outputPath("selected-competition-after-stale-404.png"),
+        });
+        expect(sandbox.requests).toEqual([]);
+      } finally {
+        page.off("framenavigated", observeRoute);
+        releaseMissing();
+      }
+    });
+
+    test(`keeps the selected Leaderboard during loading and transient refresh errors, and rejects revoked access (${app ? "app" : "web"})`, async ({
+      page,
+    }, testInfo) => {
+      test.skip(
+        app && testInfo.project.name !== "web-mobile-chromium",
+        "The native app layout is covered in the mobile project."
+      );
+      const sandbox = await installCompetitionApi(page, false, false);
+      sandbox.onlyCompetition("alpha");
+      await sandbox.legacyPrimary("alpha");
+      if (app)
+        await installSurfaceSimulation(
+          page.context(),
+          "capacitor-ios-sim",
+          testInfo.project.use.baseURL
+        );
+      // Advance the actual query refresh interval without adding a 30-second
+      // sleep or loosening the test's timeout.
+      await page.clock.install();
+      let releaseInitial!: () => void;
+      const initialGate = new Promise<void>((resolve) => {
+        releaseInitial = resolve;
+      });
+      let loading = true;
+      let refreshStatus = 200;
+      await page.route("**/v3/waves/*/competitions/alpha", async (route) => {
+        if (loading) await initialGate;
+        if (refreshStatus !== 200)
+          return route.fulfill({
+            status: refreshStatus,
+            json: { message: "Selected competition refresh failed" },
+          });
+        return route.fallback();
+      });
+      const tabs = app
+        ? page.getByRole("navigation", { name: "Wave sections" })
+        : waveTabStrip(page).filter({ visible: true });
+      const leaderboard = tabs.getByRole(app ? "button" : "tab", {
+        name: "Leaderboard",
+        exact: true,
+      });
+      const collection = tabs.getByRole(app ? "button" : "tab", {
+        name: /^Competitions(?:\s+\d+\+?)?$/,
+      });
+      const modes = page.getByRole("tablist", {
+        name: "Leaderboard view modes",
+      });
+      const expectSelectedSection = async () => {
+        await expect(leaderboard).toHaveAttribute(
+          app ? "aria-current" : "aria-selected",
+          "true"
+        );
+        await expect(collection).toHaveCount(0);
+        await expect(
+          page.getByRole("region", {
+            name: "Wave chat file upload area",
+            exact: true,
+          })
+        ).toHaveCount(0);
+        await expect(page).toHaveURL(`${ROOT}/alpha?tab=leaderboard`);
+      };
+      try {
+        await page.goto(`${ROOT}/alpha?tab=leaderboard`);
+        await expect(
+          page.getByRole("status").filter({ hasText: "Loading competition…" })
+        ).toBeVisible({ timeout: 30000 });
+        await expectSelectedSection();
+        loading = false;
+        releaseInitial();
+        await expectLegacySectionContent(page, "leaderboard");
+        await expectSelectedSection();
+        const retainedModes = await modes.elementHandle();
+        expect(retainedModes).not.toBeNull();
+        const refresh = async (status: number) => {
+          refreshStatus = status;
+          const response = page.waitForResponse(
+            (candidate) =>
+              new URL(candidate.url()).pathname ===
+                `/api/v3/waves/${WAVE}/competitions/alpha` &&
+              candidate.status() === status
+          );
+          await page.clock.fastForward(30_100);
+          await (await response).finished();
+        };
+        await refresh(503);
+        await expectSelectedSection();
+        await expect(modes).toBeVisible();
+        expect(
+          await retainedModes!.evaluate((element) => element.isConnected),
+          "A transient refresh failure must retain the mounted Leaderboard"
+        ).toBe(true);
+        await expect(
+          page.getByText(/This competition could not be loaded/)
+        ).toHaveCount(0);
+        await refresh(403);
+        await expectSelectedSection();
+        await expect(
+          page.getByText(/This competition could not be loaded/)
+        ).toBeVisible();
+        await expect(modes).toHaveCount(0);
+        await expect(
+          page.getByText("No drops to show", { exact: true })
+        ).toHaveCount(0);
+        refreshStatus = 200;
+        await page
+          .getByRole("button", { name: "Try again", exact: true })
+          .click();
+        await expectLegacySectionContent(page, "leaderboard");
+        await expectSelectedSection();
+        await retainedModes!.dispose();
+        expect(sandbox.requests).toEqual([]);
+        await expectNoHorizontalOverflow(page);
+      } finally {
+        loading = false;
+        releaseInitial();
+      }
+    });
+
     test(`keeps settled tabs still during an unchanged competition refresh (${app ? "app" : "web"})`, async ({
       page,
     }, testInfo) => {
-      test.skip(app && testInfo.project.name !== "web-mobile-chromium");
+      test.skip(
+        app && testInfo.project.name !== "web-mobile-chromium",
+        "The native app layout is covered in the mobile project."
+      );
       const sandbox = await installCompetitionApi(page, false, false);
       sandbox.onlyCompetition("alpha");
       sandbox.refreshAtBoundary();
