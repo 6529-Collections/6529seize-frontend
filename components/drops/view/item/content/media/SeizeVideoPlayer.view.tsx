@@ -327,6 +327,7 @@ export function SeizeVideoElement({
   dataMime,
   dataTestId,
   dataUrl,
+  playbackIdentity,
   id,
   isMuted,
   isWrapperFullscreen,
@@ -367,6 +368,7 @@ export function SeizeVideoElement({
   readonly dataMime?: string | undefined;
   readonly dataTestId?: string | undefined;
   readonly dataUrl?: string | undefined;
+  readonly playbackIdentity: string | undefined;
   readonly id?: string | undefined;
   readonly isMuted: boolean;
   readonly isWrapperFullscreen: boolean;
@@ -440,6 +442,7 @@ export function SeizeVideoElement({
       data-testid={dataTestId}
       data-mime={dataMime}
       data-url={dataUrl}
+      data-playback-identity={playbackIdentity ?? ""}
       data-disable={dataDisable}
       data-nft-media-renderer={dataNftMediaRenderer}
     >
