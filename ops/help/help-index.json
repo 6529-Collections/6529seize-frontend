@@ -4779,7 +4779,8 @@
       ],
       "facts": [
         "To register a delegation, open Safe Collecting, choose Register Delegation, choose the collection, enter the delegate wallet, select a use case such as #1 All, choose expiry and token scope, then submit and execute the transaction.",
-        "A delegation lets another wallet use NFT utility without moving the NFT from the delegator wallet."
+        "A delegation lets another wallet use NFT utility without moving the NFT from the delegator wallet.",
+        "Ordinary minting and airdrop delegations are checked against their expiry by 6529 readers. A token-specific delegation is distinct from an all-token delegation. Safe and batch registrations retain their individual expiry and token scope; review Tokens and Expiry in Wallet Checker."
       ],
       "canonical_path": "/delegation/delegation-faq/register-delegation",
       "related_paths": [
@@ -4789,7 +4790,8 @@
       ],
       "tags": ["delegation", "workflow", "faq"],
       "source_refs": [
-        "public/delegation-content/delegation-docs-2026-10-15/html/register-delegation.html"
+        "public/delegation-content/delegation-docs-2026-10-15/html/register-delegation.html",
+        "ops/docs/delegation/feature-delegation-action-flows.md"
       ]
     },
     {
@@ -4818,7 +4820,8 @@
       ],
       "facts": [
         "A delegation manager gives a manager wallet permission to maintain delegations and consolidations for another wallet.",
-        "The docs describe registering a manager from the vault wallet to a delegated wallet, then using that delegated wallet to register future delegations or consolidations."
+        "The docs describe registering a manager from the vault wallet to a delegated wallet, then using that delegated wallet to register future delegations or consolidations.",
+        "A manager can register consolidations and additional managers within its authorized collection scope. Its expiry date does not end its contract authority: revoke the manager permission to remove it. Revoking a manager does not undo records it already created; review those separately."
       ],
       "canonical_path": "/delegation/delegation-faq/register-sub-delegation",
       "related_paths": [
@@ -4829,7 +4832,8 @@
       "tags": ["delegation", "manager", "wallet", "faq"],
       "source_refs": [
         "public/delegation-content/delegation-docs-2026-10-15/html/register-sub-delegation.html",
-        "public/delegation-content/delegation-docs-2026-10-15/html/register-delegation-using-sub-delegation.html"
+        "public/delegation-content/delegation-docs-2026-10-15/html/register-delegation-using-sub-delegation.html",
+        "ops/docs/delegation/feature-safe-collecting.md"
       ]
     },
     {
@@ -9202,7 +9206,8 @@
         "Invalid RPC URL means the test could not read the block/logs. Check the endpoint, network, provider credentials, and service availability. For throttling, rate-limit or history errors, inspect worker Logs and use an endpoint with adequate Ethereum historical log access and request allowance. Do not assume a paid provider is required.",
         "Deactivate leaves that provider saved but inactive. With no active provider, scheduled workers are disabled. Built-in default providers cannot be deleted; an inactive custom provider exposes Delete.",
         "RPC provider configuration is for the local Ethereum workers; it is different from the IPFS RPC port shown in About. The TDH page TestNet Mode Phase 1 label does not mean you should select an Ethereum testnet endpoint.",
-        "Do not post your full authenticated RPC URL or API key in chat or logs shared for support. Share the provider name and a redacted error instead."
+        "Do not post your full authenticated RPC URL or API key in chat or logs shared for support. Share the provider name and a redacted error instead.",
+        "Desktop releases with native four-wallet indexing require historical contract-state reads (archive eth_call), not just old transaction logs. A provider can pass the connection test but fail the delegation replay. Check NFTDelegation Logs, select an archive-capable Ethereum RPC and rerun that worker to resume."
       ],
       "canonical_path": "/about/6529-apps",
       "link_label": "6529 Apps",
@@ -9214,7 +9219,8 @@
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/eth-scanner/RpcProviderModal.tsx",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/eth-scanner/RpcProviders.tsx",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/db/db.ts",
-        "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/index.ts"
+        "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/index.ts",
+        "https://github.com/6529-Collections/6529-core/blob/be11ca5536c4dadd82a7f5942890abe20d7e63c6/ops/docs/native-four-wallet-consolidation.md"
       ],
       "brief_answer": "Open **6529 Desktop > ETH Transactions > RPC Providers > Providers List** and click **Set Active** on your provider. If none is saved, use **Add RPC Provider**, enter an Ethereum mainnet RPC URL, **Test** it, enter a Provider Name, then **Add** and **Set Active**. Saving alone does not activate it; never share a URL containing API credentials."
     },
@@ -9253,7 +9259,8 @@
         "Worker cards show their schedule, status, progress, and message. Expand Logs for details. Idle or Completed between runs is normal; Disabled calls for checking the active RPC provider. A waiting message can mean a prerequisite checkpoint or another worker must finish.",
         "Advanced Options > Run Now requests an immediate run without changing the schedule. Stop ends the current non-TDH execution, but the next scheduled run can start again; it is not a permanent disable switch.",
         "TDH is coordinated with NFT/delegation work and transaction repairs. Respect a busy or queued response rather than repeatedly clicking recovery actions. Transactions must reach the TDH target block, and NFTDelegation must reach it too.",
-        "An interrupted transaction reconciliation resumes from its saved range on restart with an active provider. An interrupted TDH calculation reruns from scratch on restart; it does not continue a partially calculated result."
+        "An interrupted transaction reconciliation resumes from its saved range on restart with an active provider. An interrupted TDH calculation reruns from scratch on restart; it does not continue a partially calculated result.",
+        "In desktop releases with the native four-wallet index upgrade, the first NFTDelegation run automatically replays delegation history. Progress is saved and resumes after interruption; live indexed rows remain available until the replay completes. A disabled NFTDelegation worker must be enabled or run manually for the upgrade."
       ],
       "canonical_path": "/about/6529-apps",
       "link_label": "6529 Apps",
@@ -9264,7 +9271,8 @@
         "ops/docs/desktop/feature-workers-and-tdh.md",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/scheduled-tasks/scheduler.ts",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/scheduled-tasks/scheduled-worker.ts",
-        "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/eth-scanner/Workers.tsx"
+        "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/eth-scanner/Workers.tsx",
+        "https://github.com/6529-Collections/6529-core/blob/be11ca5536c4dadd82a7f5942890abe20d7e63c6/ops/docs/native-four-wallet-consolidation.md"
       ],
       "brief_answer": "With an active RPC provider and the app open, 6529 Desktop workers sync automatically. Check their progress and Logs under **6529 Desktop > ETH Transactions**. Transactions and NFTDelegation must catch up before TDH calculation can finish. Which worker is stalled, and what status or redacted error does it show?"
     },
@@ -9305,7 +9313,8 @@
         "Compare Last Block first, then total TDH and Merkle Root. Different snapshot blocks can explain different values. A Merkle Root hashes the address/TDH results; a missing reference root is N/A and is not proof your node is wrong.",
         "The page describes TestNet Mode Phase 1: comparison with the 6529.io reference. Phase 2 node-only consensus is described as future behavior, not something already active. This label is separate from Live/Test backend builds and does not switch Ethereum to a testnet.",
         "Transaction repairs or resets can mark the existing result stale and show Transaction history changed — recalculation required. Recalculate after repair completes or wait for the next scheduled TDH run. Marking stale alone does not immediately start a fresh calculation.",
-        "If the app closes during TDH work, an active provider allows a fresh rerun on restart after worker guards permit it. The bot cannot read your local TDH values or fix your node remotely."
+        "If the app closes during TDH work, an active provider allows a fresh rerun on restart after worker guards permit it. The bot cannot read your local TDH values or fix your node remotely.",
+        "During the native four-wallet delegation-index upgrade, TDH waits for replay even if the previous checkpoint was caught up. Waiting for native delegation timestamp/scope replay to complete is expected. Existing displayed TDH can remain stale until replay finishes and a scheduled or manual recalculation runs."
       ],
       "canonical_path": "/about/6529-apps",
       "link_label": "6529 Apps",
@@ -9317,7 +9326,8 @@
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/scheduled-tasks/scheduler.ts",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/scheduled-tasks/workers/tdh-worker/index.ts",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/scheduled-tasks/workers/tdh-worker/tdh-worker.helpers.ts",
-        "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/tdh-calculation/TDHValidation.tsx"
+        "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/tdh-calculation/TDHValidation.tsx",
+        "https://github.com/6529-Collections/6529-core/blob/be11ca5536c4dadd82a7f5942890abe20d7e63c6/ops/docs/native-four-wallet-consolidation.md"
       ],
       "brief_answer": "6529 Desktop calculates TDH automatically at **00:15 UTC** while the app is open and its prerequisites are synced. View it under **6529 Desktop > TDH Calculation**. For a manual run, use the TDH worker’s **Advanced Options > Recalculate TDH Now**; it replaces the local TDH result and does not repair transaction history."
     },
@@ -9370,7 +9380,8 @@
         "Use Transactions > Advanced Options > Rebuild Ownership only when the stored transaction history is believed correct but local ownership balances are inconsistent. It cannot recover missing transfers. After history/ownership repairs complete, recalculate TDH.",
         "If NFTs or metadata are missing or inconsistent, use NFTs > Advanced Options > Full Refresh first; it refreshes chain/metadata without deleting local NFT rows. If rediscovery is needed, NFTs > Advanced Options > Reset opens Reset All NFTs, which deletes local NFT records and resyncs them. There is no button named Full Recovery.",
         "More disruptive transaction recovery is Transactions > Advanced Options > Reset to Block: it deletes transactions after the chosen block and rebuilds ownership before resync. Use Min Block in that dialog for a full resync from the earliest supported block; Transactions does not expose a separate Reset button. Read the confirmation, choose the smallest justified recovery, allow inputs to catch up, then recalculate TDH. These local repairs do not change on-chain holdings and are not reasons to delete wallets or the app database.",
-        "For a persistent failure, share app version and OS from 6529 Desktop > About, the two Last Block values, failing worker/status, and a redacted error or transaction hash. The bot cannot inspect the device; never share wallet secrets or credential-bearing RPC URLs."
+        "For a persistent failure, share app version and OS from 6529 Desktop > About, the two Last Block values, failing worker/status, and a redacted error or transaction hash. The bot cannot inspect the device; never share wallet secrets or credential-bearing RPC URLs.",
+        "For a desktop build with native four-wallet indexing, first check whether NFTDelegation is upgrading its index. Let an active replay finish; for historical-state errors, select an archive-capable RPC and rerun NFTDelegation. Recalculate TDH after replay, before escalating to transaction reconciliation or resets."
       ],
       "canonical_path": "/about/6529-apps",
       "link_label": "6529 Apps",
@@ -9384,7 +9395,8 @@
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/tdh-calculation/TDHValidation.tsx",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/scheduled-tasks/workers/transactions-worker/transaction-reconciliation.ts",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/scheduled-tasks/scheduled-worker.ts",
-        "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/index.ts"
+        "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/electron-src/index.ts",
+        "https://github.com/6529-Collections/6529-core/blob/be11ca5536c4dadd82a7f5942890abe20d7e63c6/ops/docs/native-four-wallet-consolidation.md"
       ],
       "brief_answer": "In **6529 Desktop > TDH Calculation**, are the two **Last Block** values identical? Which row does not match: **TDH**, **Last Block**, or **Merkle Root**? Different blocks can explain different results; an unavailable reference root is not evidence of corruption."
     },
@@ -10609,6 +10621,44 @@
       "brief_answer": "For the **{{percentage}}%** recovery range in **6529 Desktop**, check the TDH worker **Logs** and share the redacted error. Let any active work finish; do not widen reconciliation or start a reset because calculation failed. Once calculation completes successfully, do TDH and Merkle Root now match 6529.io at the same Last Block?\n\nRange: {{percentage}}% of blocks {{minimum_block}}–{{checkpoint}}.",
       "reconciliation_min_block": 13360860,
       "answer_links": []
+    },
+    {
+      "id": "desktop.delegation-index-upgrade",
+      "kind": "workflow",
+      "title": "Desktop delegation index upgrade and replay",
+      "aliases": [
+        "desktop delegation replay",
+        "nftdelegation upgrade",
+        "waiting for native delegation timestamp scope replay",
+        "desktop four wallet upgrade",
+        "archive rpc delegation error"
+      ],
+      "keywords": [
+        "desktop",
+        "nftdelegation",
+        "delegation",
+        "replay",
+        "upgrade",
+        "archive",
+        "historical state",
+        "tdh"
+      ],
+      "facts": [
+        "This procedure applies to desktop builds containing the native four-wallet delegation-index upgrade. Older installed builds do not gain native four-wallet support from a website renderer update alone.",
+        "The first NFTDelegation worker run rebuilds its delegation history automatically while preserving live indexed rows and existing displayed TDH. TDH calculations wait for replay completion. Progress is saved; interruption resumes from the last committed chunk.",
+        "Keep an archive-capable Ethereum RPC active. If NFTDelegation Logs report historical-state failures, switch to a suitable provider and rerun NFTDelegation to resume. Do not delete wallets or the app database to solve an archive RPC error.",
+        "After replay completes, run 6529 Desktop > TDH Calculation > Advanced Options > Recalculate TDH Now or allow the normal scheduled calculation. Compare Last Block before comparing TDH and Merkle Root.",
+        "NFTDelegation Reset restarts this upgrade replay; it does not itself scan Ethereum and should not be used merely because a replay is still progressing."
+      ],
+      "brief_answer": "In a desktop build with the native four-wallet index upgrade, NFTDelegation replays its history automatically and TDH waits. Let it finish. If Logs show a historical-state error, select an archive-capable Ethereum RPC and rerun NFTDelegation; saved replay progress resumes. Recalculate TDH after completion. Do not delete wallets or the app database.",
+      "canonical_path": "/about/6529-apps",
+      "tags": ["desktop-core"],
+      "source_refs": [
+        "ops/docs/desktop/feature-workers-and-tdh.md",
+        "ops/docs/desktop/troubleshooting-sync-and-recovery.md",
+        "https://github.com/6529-Collections/6529-core/blob/be11ca5536c4dadd82a7f5942890abe20d7e63c6/ops/docs/native-four-wallet-consolidation.md",
+        "https://github.com/6529-Collections/6529-core/blob/be11ca5536c4dadd82a7f5942890abe20d7e63c6/electron-src/scheduled-tasks/workers/tdh-worker/index.ts"
+      ]
     }
   ]
 }
