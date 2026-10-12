@@ -408,7 +408,13 @@ describe("Purchasing visibility", () => {
     }));
     useManifoldClaim.mockReturnValue(createMockClaimState());
 
-    render(<ManifoldMinting {...defaultProps} />);
+    render(
+      <ManifoldMinting
+        {...defaultProps}
+        abi={[]}
+        mintMetadata={{ tokenId: 123, metadata: {} }}
+      />
+    );
 
     expect(widget).not.toHaveBeenCalled();
     expect(screen.queryByTestId("widget")).not.toBeInTheDocument();
