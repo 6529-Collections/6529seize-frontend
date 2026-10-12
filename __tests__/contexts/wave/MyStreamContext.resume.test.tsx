@@ -1,4 +1,5 @@
 import { act, render } from "@testing-library/react";
+import WebBrainLeftSidebarWaves from "@/components/brain/left-sidebar/web/WebBrainLeftSidebarWaves";
 import { MyStreamProvider, useMyStream } from "@/contexts/wave/MyStreamContext";
 import { PROFILE_SWITCHED_EVENT } from "@/services/auth/auth.utils";
 
@@ -42,6 +43,11 @@ jest.mock("@/services/websocket/useWebSocketMessage", () => ({
 
 jest.mock("@/services/dm-unread/DmUnreadStateProvider", () => ({
   useDmUnreadConversations: jest.fn(() => ({})),
+}));
+
+jest.mock("@/components/brain/left-sidebar/web/WebUnifiedWavesList", () => ({
+  __esModule: true,
+  default: () => null,
 }));
 
 jest.mock("@/hooks/useMarkWaveNotificationsRead", () => ({
@@ -452,6 +458,49 @@ describe("MyStreamProvider resume sync", () => {
     expect(mainRefetch).toHaveBeenCalledTimes(1);
     expect(mainRefreshStale).not.toHaveBeenCalled();
     expect(mockResetAllWavesNewDropsCount).toHaveBeenCalled();
+  });
+
+  it("lets the real web sidebar request the list through the real provider", () => {
+    let context: ReturnType<typeof useMyStream> | null = null;
+    const renderTree = () => (
+      <MyStreamProvider>
+        <WebBrainLeftSidebarWaves scrollContainerRef={{ current: null }} />
+        <CaptureMyStream
+          onContext={(nextContext) => {
+            context = nextContext;
+          }}
+        />
+      </MyStreamProvider>
+    );
+
+    const getContext = () => {
+      if (!context) {
+        throw new Error("Expected MyStream context");
+      }
+      return context;
+    };
+
+    const { rerender } = render(renderTree());
+
+    expect(useWavesListMock).toHaveBeenLastCalledWith({ enabled: true });
+    const firstContext = getContext();
+    // Surfaces return these from effects, so each must return a cleanup function.
+    expect(typeof firstContext.requestMainWavesList()).toBe("function");
+    let releaseDirectMessagesList: unknown;
+    act(() => {
+      releaseDirectMessagesList = firstContext.requestDirectMessagesList();
+    });
+    expect(typeof releaseDirectMessagesList).toBe("function");
+
+    rerender(renderTree());
+
+    // Stable identities keep surface effects from re-requesting or releasing.
+    expect(getContext().requestMainWavesList).toBe(
+      firstContext.requestMainWavesList
+    );
+    expect(getContext().requestDirectMessagesList).toBe(
+      firstContext.requestDirectMessagesList
+    );
   });
 
   it("keeps loading the main Waves list on native non-detail routes without a request", () => {

@@ -11,6 +11,8 @@ export const refetchQueryIfStale = (
   queryClient: QueryClient,
   queryKey: QueryKey
 ): void => {
+  // Resync callers fire and forget. A failed fetch already lands in the
+  // query's own error state, so the catch only prevents an unhandled rejection.
   queryClient
     .refetchQueries(
       { queryKey, exact: true, type: "active", stale: true },

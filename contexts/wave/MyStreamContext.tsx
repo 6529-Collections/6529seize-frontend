@@ -420,7 +420,9 @@ export const MyStreamProvider: React.FC<MyStreamProviderProps> = ({
   });
 
   // Web reconnect and tab resume skip lists no surface has requested and
-  // refresh only data past its staleTime, reusing in-flight requests.
+  // refresh only data past its staleTime, reusing in-flight requests. These
+  // flags only pre-filter: each hook's own load guard (auth and profile
+  // readiness) stays the source of truth and no-ops while it is not ready.
   const syncActiveWaveAndRefreshStaleLists = useEffectEvent(() => {
     syncActiveWave();
     if (isMainWavesListEnabled) {
