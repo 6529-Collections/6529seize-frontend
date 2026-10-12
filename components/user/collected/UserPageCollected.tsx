@@ -590,6 +590,7 @@ export default function UserPageCollected({
       return;
     }
     if (
+      // eslint-disable-next-line react-you-might-not-need-an-effect/no-event-handler -- Focus must wait for the requested query data to render, after router navigation.
       !isPageReady ||
       isFetchingData ||
       currentFiltersQuery !== pending.to ||
