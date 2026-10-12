@@ -259,7 +259,7 @@ function HighlyRatedWavePreviewScoreBadge({
       >
         <path
           d="M16 2.15 28 6.15v6.7c0 5.45-4.35 9.5-12 11.2-7.65-1.7-12-5.75-12-11.2v-6.7L16 2.15Z"
-          className="tw-fill-iron-900 tw-stroke-white/25"
+          className="tw-fill-iron-900 tw-stroke-iron-800"
           strokeWidth="1.2"
           strokeLinejoin="round"
         />
@@ -270,7 +270,7 @@ function HighlyRatedWavePreviewScoreBadge({
           textAnchor="middle"
           fontSize={getScoreBadgeFontSize(scoreLabel)}
           fontWeight="700"
-          className="tw-fill-iron-50"
+          className="tw-fill-iron-300"
         >
           {scoreLabel}
         </text>
