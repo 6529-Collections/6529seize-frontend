@@ -103,7 +103,7 @@ export default function CommonProfileSearchItems({
                 id={resolvedListboxId}
                 role="listbox"
                 aria-label="Profile suggestions"
-                className="tw-mx-0 tw-mb-0 tw-flex tw-list-none tw-flex-col tw-gap-y-1 tw-px-2"
+                className="tw-m-0 tw-flex tw-list-none tw-flex-col tw-gap-y-1 tw-px-2"
               >
                 {optionMetadata.length ? (
                   optionMetadata.map((meta) => {

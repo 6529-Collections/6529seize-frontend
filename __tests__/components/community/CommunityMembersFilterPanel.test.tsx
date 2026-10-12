@@ -86,8 +86,8 @@ it("starts with Identities first and keeps all eight criteria and readiness guid
     "Identities"
   );
   expect(
-    screen.getByRole("button", { name: "All filters" })
-  ).toBeInTheDocument();
+    screen.queryByRole("button", { name: "All filters" })
+  ).not.toBeInTheDocument();
   expect(screen.getByRole("button", { name: "Identities" })).toHaveAttribute(
     "aria-current",
     "true"
