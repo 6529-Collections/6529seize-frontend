@@ -118,7 +118,9 @@ describe("MyStreamWaveCreateActionsMenu", () => {
     expect(
       screen.getByRole("button", { name: /^New curation/ })
     ).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /^New competition/ })).toBeNull();
+    expect(
+      screen.queryByRole("button", { name: /^New competition/ })
+    ).toBeNull();
     await userEvent.click(screen.getByRole("button", { name: /^New subwave/ }));
 
     expect(screen.getByTestId("subwave-modal")).toBeInTheDocument();
