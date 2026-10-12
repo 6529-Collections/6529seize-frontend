@@ -23,10 +23,18 @@ It checks delegations, delegation managers, and consolidation relationships.
 - `Active Minting Delegation for The Memes`: shown when a matching active row is
   found for `The Memes` or `Any Collection` with use case `#2` (or `#1` fallback).
 - `Delegation Managers`: manager rows (`From`, `To`, `Collection`).
-- `Consolidations`: directional consolidation pairs (can include related-wallet
-  rows fetched from one linked consolidation wallet).
+- `Consolidations`: directional consolidation pairs for the checked wallet and
+  for every wallet linked to it (up to 6 linked wallets, confirmed links
+  first), so pairs between the other members of a group of up to 4 wallets
+  are included. Repeated pair records are deduplicated using the newest block;
+  if copies disagree in the same block, the unconfirmed copy is retained.
 - `Active Consolidation`: shown only when a resolved multi-wallet consolidation set is found.
-- `Incomplete Consolidation`: shown only when reverse-direction consolidation is missing.
+- `Incomplete Consolidation`: shown when a listed pair is missing its
+  reverse direction and both wallets belong with the checked wallet (the checked
+  wallet itself, its active consolidation, or a wallet it links to). A member's
+  one-way link to an unrelated wallet stays in `Consolidations` but gets no
+  recommended action: completing it would move that member out of the group,
+  because the newest confirmed link wins.
 
 ## User Journey
 
@@ -66,6 +74,11 @@ It checks delegations, delegation managers, and consolidation relationships.
 
 ## Failure and Recovery
 
+- If a linked-wallet request fails, successfully loaded consolidation records
+  remain visible. Treat them as partial results and retry; their presence does
+  not prove that every link was checked.
+- Recommendations wait until the separately loaded active-consolidation request
+  settles.
 - If results are empty, confirm wallet/ENS input and rerun `Check Wallet`.
 - If the input is disabled after a previous run, select `Clear`, enter a new
   wallet, then run `Check Wallet`.
@@ -77,6 +90,12 @@ It checks delegations, delegation managers, and consolidation relationships.
 ## Limitations / Notes
 
 - Wallet Checker is diagnostic only and does not submit writes.
+- A pair absent in both directions produces no recommendation: the checker
+  does not invent links between wallets.
+- The six-linked-wallet cap can limit coverage for wallets with many stray
+  links.
+- Listed registrations and the backend's active counted consolidation are
+  different. The checker does not activate four-wallet support.
 - ENS/display labels depend on resolver/API availability.
 - Consolidation output is directional and may look partial until reverse writes
   are completed.
