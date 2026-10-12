@@ -6,7 +6,7 @@ import type { CollectedCollectionType } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
-import { useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useId, useMemo, useRef, useState } from "react";
 import { buildCollectedStatsViewModel } from "./stats/helpers";
 import { CollectedStatsDetailsPanel } from "./stats/subcomponents/CollectedStatsDetailsPanel";
@@ -85,10 +85,12 @@ export default function UserPageCollectedStats({
 }: Readonly<UserPageCollectedStatsProps>) {
   const { hasTouchScreen } = useDeviceInfo();
   const searchParams = useSearchParams();
-  const shouldAutoOpenDetails = Boolean(
-    searchParams.get(SEARCH_PARAM_ACTIVITY)
-  );
-  const [isDetailsOpen, setIsDetailsOpen] = useState(shouldAutoOpenDetails);
+  const pathname = usePathname();
+  const router = useRouter();
+  const details = searchParams.get("details");
+  const isDetailsOpen =
+    details === "open" ||
+    (details !== "closed" && Boolean(searchParams.get(SEARCH_PARAM_ACTIVITY)));
   const [preferredSeasonPreview, setPreferredSeasonPreview] =
     useState<PreferredSeasonPreview | null>(null);
   const [isDesktopSeasonListExpanded, setIsDesktopSeasonListExpanded] =
@@ -97,13 +99,10 @@ export default function UserPageCollectedStats({
   const detailsScrollTargetRef = useRef<HTMLDivElement>(null);
 
   const handleToggleDetails = () => {
-    if (isDetailsOpen) {
-      setIsDetailsOpen(false);
-      return;
-    }
-
-    setIsDetailsOpen(true);
-    if (!autoScrollDetailsOnOpen) {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("details", isDetailsOpen ? "closed" : "open");
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+    if (isDetailsOpen || !autoScrollDetailsOnOpen) {
       return;
     }
 

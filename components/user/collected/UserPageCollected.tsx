@@ -34,6 +34,7 @@ import {
 } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import UserPageCollectedCards from "./cards/UserPageCollectedCards";
+import UserPageCollectedCardsNoCards from "./cards/UserPageCollectedCardsNoCards";
 import UserPageCollectedNetworkCards from "./cards/UserPageCollectedNetworkCards";
 import {
   COLLECTED_COLLECTIONS_META,
@@ -52,7 +53,7 @@ import {
   convertSortedBy,
   convertSznId,
   DEFAULT_SEIZED,
-  DEFAULT_SORT_DIRECTION,
+  getNextCollectedSortDirection,
   getNormalizedCollectedQueryStateFromFilters,
   normalizePageNumber,
   PAGE_SIZE,
@@ -132,6 +133,12 @@ export default function UserPageCollected({
   }, [searchParams, profile.handle, user]);
 
   const [filters, setFilters] = useState<ProfileCollectedFilters>(getFilters());
+  const artworkRef = useRef<HTMLDivElement>(null);
+  const pendingPageNavigation = useRef<{
+    from: string;
+    to: string;
+    page: number;
+  } | null>(null);
   const effectiveSeasonId = filters.szn?.id ?? filters.initialSznId;
 
   const createQueryString = useCallback(
@@ -357,24 +364,6 @@ export default function UserPageCollected({
     await updateFields(items);
   };
 
-  const calculateSortDirection = ({
-    newSortBy,
-    currentSortBy,
-    currentSortDirection,
-  }: {
-    newSortBy: CollectionSort;
-    currentSortBy: CollectionSort;
-    currentSortDirection: SortDirection;
-  }): SortDirection | null => {
-    if (newSortBy === currentSortBy) {
-      if (currentSortDirection === SortDirection.ASC) {
-        return SortDirection.DESC;
-      }
-      return SortDirection.ASC;
-    }
-    return DEFAULT_SORT_DIRECTION;
-  };
-
   const setSortBy = async (sortBy: CollectionSort): Promise<void> => {
     trackAction("Filters", "Change sort");
     const items: QueryUpdateInput[] = [
@@ -384,7 +373,7 @@ export default function UserPageCollected({
       },
       {
         name: "sortDirection",
-        value: calculateSortDirection({
+        value: getNextCollectedSortDirection({
           newSortBy: sortBy,
           currentSortBy: filters.sortBy,
           currentSortDirection: filters.sortDirection,
@@ -478,8 +467,39 @@ export default function UserPageCollected({
   };
 
   const setPageFromControl = (page: number): Promise<void> => {
-    if (page !== filters.page) trackAction("Artwork", "Change page");
+    if (page !== filters.page) {
+      trackAction("Artwork", "Change page");
+      pendingPageNavigation.current = {
+        from: searchParams.toString(),
+        to: createQueryString([{ name: "page", value: page.toString() }]),
+        page,
+      };
+    }
     return setPage(page);
+  };
+
+  const clearFilters = (): Promise<void> => {
+    trackAction("Filters", "Clear filters");
+    const items: QueryUpdateInput[] = [
+      { name: "address", value: null },
+      {
+        name: "collection",
+        value:
+          filters.collection === CollectedCollectionType.NETWORK
+            ? CollectedCollectionType.NETWORK
+            : null,
+      },
+      { name: "subcollection", value: null },
+      { name: "szn", value: null },
+      { name: "seized", value: DEFAULT_SEIZED },
+      { name: "page", value: "1" },
+    ];
+    pendingPageNavigation.current = {
+      from: searchParams.toString(),
+      to: createQueryString(items),
+      page: 1,
+    };
+    return updateFields(items);
   };
 
   useEffect(() => {
@@ -495,6 +515,8 @@ export default function UserPageCollected({
   const {
     isFetching,
     isLoading: isInitialLoading,
+    isSuccess,
+    isPlaceholderData,
     data,
   } = useQuery<Page<CollectedCard>>({
     queryKey: [QueryKey.PROFILE_COLLECTED, filters],
@@ -536,6 +558,8 @@ export default function UserPageCollected({
     data: dataNetwork,
     isLoading: isNetworkLoading,
     isFetching: isNetworkFetching,
+    isSuccess: isNetworkSuccess,
+    isPlaceholderData: isNetworkPlaceholderData,
   } = useXtdhTokensQuery({
     identity: filters.handleOrWallet,
     page: filters.page,
@@ -547,6 +571,51 @@ export default function UserPageCollected({
   });
   const isFetchingData = isNetwork ? isNetworkFetching : isFetching;
   const isLoading = isNetwork ? isNetworkLoading : isInitialLoading;
+  const isPageReady = isNetwork
+    ? isNetworkSuccess && !isNetworkPlaceholderData
+    : isSuccess && !isPlaceholderData;
+  const loadedPage = isNetwork ? dataNetwork?.page : data?.page;
+  const isEmptyPage =
+    isPageReady &&
+    loadedPage === filters.page &&
+    (isNetwork ? dataNetwork?.data.length === 0 : data?.data.length === 0);
+  const currentFiltersQuery = createQueryString([]);
+
+  useEffect(() => {
+    const pending = pendingPageNavigation.current;
+    const query = searchParams.toString();
+    if (!pending || query === pending.from) return;
+    if (query !== pending.to) {
+      pendingPageNavigation.current = null;
+      return;
+    }
+    if (
+      // eslint-disable-next-line react-you-might-not-need-an-effect/no-event-handler -- Focus must wait for the requested query data to render, after router navigation.
+      !isPageReady ||
+      isFetchingData ||
+      currentFiltersQuery !== pending.to ||
+      filters.page !== pending.page ||
+      loadedPage !== pending.page
+    )
+      return;
+
+    pendingPageNavigation.current = null;
+    const list = artworkRef.current?.querySelector<HTMLUListElement>("ul");
+    const focusTarget =
+      list?.querySelector<HTMLAnchorElement>("a[href]") ??
+      list ??
+      artworkRef.current?.querySelector<HTMLOutputElement>("output");
+    if (!focusTarget) return;
+    focusTarget.focus({ preventScroll: true });
+    artworkRef.current?.scrollIntoView({ block: "start" });
+  }, [
+    searchParams,
+    isPageReady,
+    isFetchingData,
+    filters.page,
+    loadedPage,
+    currentFiltersQuery,
+  ]);
 
   const showTransfer =
     !isMobile &&
@@ -670,16 +739,31 @@ export default function UserPageCollected({
             />
           </div>
 
-          <div data-profile-section="Artwork" className="tw-mt-6">
-            {isNetwork ? (
+          <div
+            ref={artworkRef}
+            data-profile-section="Artwork"
+            aria-busy={isFetchingData}
+            className="tw-mt-6 tw-scroll-mt-24"
+          >
+            {isEmptyPage && (
+              <UserPageCollectedCardsNoCards
+                filters={filters}
+                locale={locale}
+                onClearFilters={clearFilters}
+                isLoading={isFetchingData}
+              />
+            )}
+            {!isEmptyPage && isNetwork && (
               <UserPageCollectedNetworkCards
                 cards={dataNetwork?.data ?? []}
                 page={filters.page}
                 setPage={setPageFromControl}
                 next={dataNetwork?.next ?? false}
                 locale={locale}
+                isLoading={isFetchingData}
               />
-            ) : (
+            )}
+            {!isEmptyPage && !isNetwork && (
               <UserPageCollectedCards
                 cards={data?.data ?? []}
                 totalPages={totalPages}
@@ -691,6 +775,7 @@ export default function UserPageCollected({
                 isTransferLoading={isFetchingTransfer}
                 locale={locale}
                 returnTo={collectedReturnTo}
+                isLoading={isFetchingData}
               />
             )}
           </div>
