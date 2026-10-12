@@ -27,6 +27,9 @@
 - Open a supported countdown card and select `Mint`.
 - On iOS with country `US`, use `Mint on 6529.io` to open the same mint route
   in a browser tab.
+- On native iOS when the detected country is not `US` or is unknown, the
+  countdown `Mint` button is absent and direct or deep-linked visits to
+  `/the-memes/mint` return to `/the-memes`.
 
 ## User Journey
 
@@ -143,7 +146,12 @@
   retry instead of submitting stale inputs.
 - On iOS:
   - Country `US`: shows `Mint on 6529.io` handoff button.
-  - Non-`US` or unknown country: mint controls are hidden.
+  - Non-`US` or unknown country: the mint page does not render. Direct and
+    deep-linked visits return to `/the-memes` without loading mint details,
+    recipient selection, mint count, or `SEIZE`, and without an unavailable
+    message. The server HTML and first hydration render omit the mint flow on
+    every platform until the client can check the native platform.
+  - Android and web keep the mint page in every country.
 - `Mint for fren` search starts after 3 typed characters.
 - If `Mint for fren` is selected without a recipient wallet, mint controls stay
   hidden until a wallet is selected.

@@ -2,6 +2,7 @@ import ManifoldMintingWidget from "@/components/manifold-minting/ManifoldMinting
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { MEMES_CONTRACT } from "@/constants/constants";
 import { ManifoldClaimStatus, ManifoldPhase } from "@/hooks/useManifoldClaim";
+import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import { act, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { mainnet } from "viem/chains";
@@ -16,6 +17,10 @@ jest.mock("wagmi");
 
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: jest.fn(),
+}));
+
+jest.mock("@/hooks/useNftPurchasingVisibility", () => ({
+  useNftPurchasingVisibility: jest.fn(),
 }));
 
 jest.mock(
@@ -122,6 +127,25 @@ describe("ManifoldMintingWidget", () => {
     (useReadContracts as jest.Mock).mockReturnValue({
       data: [{ result: false }],
     });
+    jest
+      .mocked(useNftPurchasingVisibility)
+      .mockReturnValue({ hideNftPurchasing: false, shouldRedirect: false });
+  });
+
+  it("omits recipient, mint count and SEIZE controls on restricted iOS", () => {
+    jest
+      .mocked(useNftPurchasingVisibility)
+      .mockReturnValue({ hideNftPurchasing: true, shouldRedirect: true });
+
+    const { container } = render(<ManifoldMintingWidget {...baseProps} />);
+
+    expect(container).toBeEmptyDOMElement();
+    expect(screen.queryByTestId("connect")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Mint count")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /SEIZE/i })
+    ).not.toBeInTheDocument();
+    expect(writeContract).not.toHaveBeenCalled();
   });
 
   it("shows mint button after address provided", async () => {

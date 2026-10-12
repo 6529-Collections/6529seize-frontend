@@ -4,10 +4,21 @@ import ManifoldMintingConnect from "@/components/manifold-minting/ManifoldMintin
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
+let mockCountry: string | undefined = "US";
+let mockPlatform: "ios" | "android" | "web" = "web";
+
 jest.mock("@/components/cookies/CookieConsentContext", () => ({
   __esModule: true,
   CookieConsentProvider: ({ children }: any) => <>{children}</>,
-  useCookieConsent: jest.fn(() => ({ country: "US" })),
+  useCookieConsent: jest.fn(() => ({ country: mockCountry })),
+}));
+
+jest.mock("@/hooks/useCapacitor", () => ({
+  __esModule: true,
+  default: () => ({
+    isIos: mockPlatform === "ios",
+    isAndroid: mockPlatform === "android",
+  }),
 }));
 
 jest.mock("@/components/header/user/HeaderUserConnect", () => () => (
@@ -249,4 +260,72 @@ it("keeps hidden mint connection controls hidden during restoration", () => {
   render(<ManifoldMintingConnect onMintFor={jest.fn()} hideConnect />);
   expect(screen.queryByRole("status")).not.toBeInTheDocument();
   expect(screen.queryByTestId("header-connect")).not.toBeInTheDocument();
+});
+
+describe("ManifoldMintingConnect purchasing visibility", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockPlatform = "web";
+    mockCountry = "US";
+  });
+
+  it.each([
+    ["non-US", "CY"],
+    ["empty", ""],
+    ["unknown", undefined],
+  ])(
+    "reports no recipient and omits mint controls on iOS with a %s country",
+    (_label, country) => {
+      mockPlatform = "ios";
+      mockCountry = country;
+
+      const { onMintFor, seizeCtx } = renderConnected();
+
+      expect(onMintFor).toHaveBeenCalledWith(null);
+      expect(onMintFor).not.toHaveBeenCalledWith(seizeCtx.address);
+      expect(
+        screen.queryByRole("link", { name: "Mint on 6529.io" })
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("button", { name: /Mint for me/i })
+      ).not.toBeInTheDocument();
+      expect(screen.queryByTestId("transfer-pfp")).not.toBeInTheDocument();
+    }
+  );
+
+  it("keeps the US iOS web mint handoff and connected recipient", () => {
+    mockPlatform = "ios";
+    mockCountry = "US";
+
+    const { onMintFor, seizeCtx } = renderConnected();
+
+    const handoff = screen.getByRole("link", { name: "Mint on 6529.io" });
+    expect(handoff).toHaveAttribute("target", "_blank");
+    expect(handoff).toHaveAttribute("rel", "noopener noreferrer");
+    expect(onMintFor).toHaveBeenCalledWith(seizeCtx.address);
+    expect(
+      screen.queryByRole("button", { name: /Mint for me/i })
+    ).not.toBeInTheDocument();
+  });
+
+  it.each([
+    ["Android", "android"],
+    ["web", "web"],
+  ] as const)(
+    "keeps recipient controls on %s outside the US",
+    (_label, platform) => {
+      mockPlatform = platform;
+      mockCountry = "CY";
+
+      const { onMintFor, seizeCtx } = renderConnected();
+
+      expect(onMintFor).toHaveBeenCalledWith(seizeCtx.address);
+      expect(
+        screen.getByRole("button", { name: /Mint for me/i })
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByRole("link", { name: "Mint on 6529.io" })
+      ).not.toBeInTheDocument();
+    }
+  );
 });

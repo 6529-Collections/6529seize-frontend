@@ -25,6 +25,13 @@ jest.mock("@/components/auth/SeizeConnectContext", () => ({
   }),
 }));
 
+jest.mock("@/hooks/useNftPurchasingVisibility", () => ({
+  useNftPurchasingVisibility: () => ({
+    hideNftPurchasing: false,
+    shouldRedirect: false,
+  }),
+}));
+
 const readContractsData = { data: [] };
 const mockWriteContract = jest.fn();
 jest.mock("wagmi", () => ({

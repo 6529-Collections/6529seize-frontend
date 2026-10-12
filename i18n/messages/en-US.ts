@@ -3629,6 +3629,7 @@ export const EN_US_MESSAGES = {
   "theMemes.description.collections": "Collections",
   "theMemes.mint.metadata.description":
     "View the latest mint from The Memes collection.",
+  "theMemes.mint.openWebMint": "Mint on 6529.io",
   "theMemes.title": "The Memes",
   "theMemes.sorting.regionLabel": "Meme sorting",
   "theMemes.sorting.sortBy": "Sort by",

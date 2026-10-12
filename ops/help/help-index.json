@@ -7454,6 +7454,7 @@
       ],
       "facts": [
         "The Memes mint route lives at /the-memes/mint.",
+        "On native iOS when the detected country is not US or is unknown, the mint page, recipient selection, mint count and SEIZE controls are absent and direct or deep-linked visits to /the-memes/mint return to /the-memes without an unavailable message; US iOS keeps the Mint on 6529.io handoff, and web and Android keep the mint page.",
         "Mint flow docs explain entry points, common scenarios, and recovery.",
         "If a remembered profile's authorized wallet is disconnected, the mint page hides the duplicate Connect control; selecting SEIZE opens wallet connection and continues when the same wallet reconnects and transaction details are unchanged.",
         "Selecting a different already-authenticated wallet switches the active profile and cancels the old pending mint so refreshed recipient, eligibility, price, and transaction details can be reviewed before selecting SEIZE again; an unauthenticated wallet must complete normal authentication first.",

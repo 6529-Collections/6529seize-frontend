@@ -5,11 +5,13 @@ import AuthLoadingPlaceholder from "@/components/auth/AuthLoadingPlaceholder";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import { areEqualAddresses } from "@/helpers/Helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import useCapacitor from "@/hooks/useCapacitor";
+import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
+import { t } from "@/i18n/messages";
 import { AuthContext } from "../auth/Auth";
 import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import RecipientSelector from "../common/RecipientSelector";
-import { useCookieConsent } from "../cookies/CookieConsentContext";
 import HeaderUserConnect from "../header/user/HeaderUserConnect";
 import TransferModalPfp from "../nft-transfer/TransferModalPfp";
 import ButtonLink from "../utils/button/ButtonLink";
@@ -25,8 +27,9 @@ export default function ManifoldMintingConnect(
   const { onMintFor, hideConnect } = props;
   const account = useSeizeConnectContext();
   const { connectedProfile } = useContext(AuthContext);
+  const locale = useBrowserLocale();
   const { isIos } = useCapacitor();
-  const { country } = useCookieConsent();
+  const { hideNftPurchasing } = useNftPurchasingVisibility();
 
   const [mintForFren, setMintForFren] = useState<boolean>(false);
   const [selectedFrenProfile, setSelectedFrenProfile] =
@@ -77,6 +80,12 @@ export default function ManifoldMintingConnect(
   }, [account.address, mintForFren]);
 
   useEffect(() => {
+    // Restricted iOS must not hand a mint recipient to the widget.
+    if (hideNftPurchasing) {
+      onMintFor(null);
+      return;
+    }
+
     if (mintForFren) {
       if (!selectedFrenWallet) {
         onMintFor(null);
@@ -95,6 +104,7 @@ export default function ManifoldMintingConnect(
 
     onMintFor(mintDestination);
   }, [
+    hideNftPurchasing,
     selectedFrenWallet,
     selectedMintForMeWallet,
     mintForFren,
@@ -181,23 +191,23 @@ export default function ManifoldMintingConnect(
 
   const mintOn6529Href = globalThis.window?.location?.href ?? "https://6529.io";
 
+  if (hideNftPurchasing) {
+    return null;
+  }
+
   if (isIos) {
-    if (country === "US") {
-      return (
-        <ButtonLink
-          href={mintOn6529Href}
-          variant="primary"
-          size="lg"
-          fullWidth
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Mint on 6529.io
-        </ButtonLink>
-      );
-    } else {
-      return <></>;
-    }
+    return (
+      <ButtonLink
+        href={mintOn6529Href}
+        variant="primary"
+        size="lg"
+        fullWidth
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        {t(locale, "theMemes.mint.openWebMint")}
+      </ButtonLink>
+    );
   }
 
   if (isWalletConnectionResolving(account))
