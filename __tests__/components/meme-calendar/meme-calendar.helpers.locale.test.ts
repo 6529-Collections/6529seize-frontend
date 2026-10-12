@@ -235,6 +235,161 @@ const PHASE_WALL_TIMES: ReadonlyArray<readonly [number, number]> = [
   [17, 0],
 ];
 
+// Other zones: explicit expectations (cross-checked against a brute-force
+// search of the zone's wall clock). Lord Howe changes by 30 minutes, Kolkata is
+// UTC+05:30 with no DST.
+const ZONE_CASES: ReadonlyArray<{
+  readonly zone: string;
+  readonly label: string;
+  readonly day: DayCase["day"];
+  readonly hour: number;
+  readonly minute: number;
+  readonly expectedUtc: string;
+}> = [
+  {
+    zone: "UTC",
+    label: "17:40 on 2026-10-26",
+    day: [2026, 9, 26],
+    hour: 17,
+    minute: 40,
+    expectedUtc: "2026-10-26T17:40:00.000Z",
+  },
+  {
+    zone: "America/New_York",
+    label: "12:00 in summer (EDT)",
+    day: [2026, 6, 1],
+    hour: 12,
+    minute: 0,
+    expectedUtc: "2026-07-01T16:00:00.000Z",
+  },
+  {
+    zone: "America/New_York",
+    label: "12:00 in winter (EST)",
+    day: [2026, 0, 15],
+    hour: 12,
+    minute: 0,
+    expectedUtc: "2026-01-15T17:00:00.000Z",
+  },
+  {
+    zone: "America/New_York",
+    label: "01:30 repeated on 2026-11-01 -> first (EDT)",
+    day: [2026, 10, 1],
+    hour: 1,
+    minute: 30,
+    expectedUtc: "2026-11-01T05:30:00.000Z",
+  },
+  {
+    zone: "America/New_York",
+    label: "12:00 after DST ends on 2026-11-01 (EST)",
+    day: [2026, 10, 1],
+    hour: 12,
+    minute: 0,
+    expectedUtc: "2026-11-01T17:00:00.000Z",
+  },
+  {
+    zone: "America/New_York",
+    label: "02:30 skipped on 2026-03-08 -> 03:30 EDT",
+    day: [2026, 2, 8],
+    hour: 2,
+    minute: 30,
+    expectedUtc: "2026-03-08T07:30:00.000Z",
+  },
+  {
+    zone: "Asia/Kolkata",
+    label: "17:40 in autumn (+05:30)",
+    day: [2026, 9, 26],
+    hour: 17,
+    minute: 40,
+    expectedUtc: "2026-10-26T12:10:00.000Z",
+  },
+  {
+    zone: "Asia/Kolkata",
+    label: "17:40 in summer (+05:30)",
+    day: [2026, 6, 1],
+    hour: 17,
+    minute: 40,
+    expectedUtc: "2026-07-01T12:10:00.000Z",
+  },
+  {
+    zone: "Australia/Lord_Howe",
+    label: "12:00 in southern summer (+11:00)",
+    day: [2026, 0, 15],
+    hour: 12,
+    minute: 0,
+    expectedUtc: "2026-01-15T01:00:00.000Z",
+  },
+  {
+    zone: "Australia/Lord_Howe",
+    label: "12:00 in southern winter (+10:30)",
+    day: [2026, 6, 15],
+    hour: 12,
+    minute: 0,
+    expectedUtc: "2026-07-15T01:30:00.000Z",
+  },
+  {
+    zone: "Australia/Lord_Howe",
+    label: "01:45 repeated on 2026-04-05 -> first (+11:00)",
+    day: [2026, 3, 5],
+    hour: 1,
+    minute: 45,
+    expectedUtc: "2026-04-04T14:45:00.000Z",
+  },
+  {
+    zone: "Australia/Lord_Howe",
+    label: "02:15 skipped on 2026-10-04 -> 02:45",
+    day: [2026, 9, 4],
+    hour: 2,
+    minute: 15,
+    expectedUtc: "2026-10-03T15:45:00.000Z",
+  },
+  {
+    zone: "Pacific/Auckland",
+    label: "02:30 repeated on 2026-04-05 -> first (NZDT)",
+    day: [2026, 3, 5],
+    hour: 2,
+    minute: 30,
+    expectedUtc: "2026-04-04T13:30:00.000Z",
+  },
+];
+
+// DST change days (2026-2027) per zone, for the brute-force comparison.
+const SWEEP_ZONE_DAYS: Record<string, ReadonlyArray<DayCase["day"]>> = {
+  "Europe/Athens": [
+    [2026, 2, 29],
+    [2026, 9, 25],
+    [2027, 2, 28],
+    [2027, 9, 31],
+  ],
+  "America/New_York": [
+    [2026, 2, 8],
+    [2026, 10, 1],
+    [2027, 2, 14],
+    [2027, 10, 7],
+  ],
+  "Australia/Lord_Howe": [
+    [2026, 3, 5],
+    [2026, 9, 4],
+    [2027, 3, 4],
+    [2027, 9, 3],
+  ],
+  "Pacific/Auckland": [
+    [2026, 3, 5],
+    [2026, 8, 27],
+    [2027, 3, 4],
+    [2027, 8, 26],
+  ],
+  "Asia/Kolkata": [[2026, 9, 25]],
+};
+
+const SWEEP_WALL_TIMES: ReadonlyArray<readonly [number, number]> = [
+  ...Array.from({ length: 24 }, (_, i): readonly [number, number] => [
+    Math.floor(i / 4),
+    (i % 4) * 15,
+  ]),
+  [12, 0],
+  [23, 45],
+];
+
 const REAL_DATE_TIME_FORMAT = Intl.DateTimeFormat;
 const LOCALE_DATE_METHODS = [
   "toLocaleString",
@@ -299,6 +454,57 @@ function restoreDefaultLocale(): void {
       writable: true,
     });
   }
+}
+
+/** Wall clock of `zone` at an instant, as milliseconds "as if UTC". */
+function createWallClockReader(
+  zone: string
+): (instantMillis: number) => number {
+  const formatter = new REAL_DATE_TIME_FORMAT("en-US", {
+    timeZone: zone,
+    calendar: "gregory",
+    numberingSystem: "latn",
+    hourCycle: "h23",
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
+    hour: "numeric",
+    minute: "numeric",
+    second: "numeric",
+  });
+  return (instantMillis) => {
+    const parts = formatter.formatToParts(new Date(instantMillis));
+    const read = (type: Intl.DateTimeFormatPartTypes): number =>
+      Number(parts.find((part) => part.type === type)?.value);
+    return Date.UTC(
+      read("year"),
+      read("month") - 1,
+      read("day"),
+      read("hour") % 24,
+      read("minute"),
+      read("second")
+    );
+  };
+}
+
+/**
+ * Independent oracle: every instant (15-minute grid, +/-16h around the wall
+ * time) at which the zone's clock shows `wallClockAsUtc`, earliest first.
+ */
+function bruteForceInstants(
+  readWallClock: (instantMillis: number) => number,
+  wallClockAsUtc: number
+): number[] {
+  const fifteenMinutes = 15 * 60 * 1000;
+  const matches: number[] = [];
+  for (
+    let instant = wallClockAsUtc - 16 * 60 * 60 * 1000;
+    instant <= wallClockAsUtc + 16 * 60 * 60 * 1000;
+    instant += fifteenMinutes
+  ) {
+    if (readWallClock(instant) === wallClockAsUtc) matches.push(instant);
+  }
+  return matches;
 }
 
 describe("meme calendar zone conversion is independent of the browser locale", () => {
@@ -444,62 +650,131 @@ describe("meme calendar zone conversion is independent of the browser locale", (
     );
   });
 
-  describe("when the Athens wall clock cannot be read", () => {
-    // Forces the fallback branch: unreadable parts make neither candidate
-    // "show" the target wall time, so the EU DST rule has to decide.
+  describe("when Intl cannot report the zone offset", () => {
+    // Unreadable date parts: the conversion must fail loudly rather than guess
+    // an offset (a guess is what showed winter mint times an hour early).
     beforeEach(() => {
       jest
         .spyOn(REAL_DATE_TIME_FORMAT.prototype, "formatToParts")
         .mockReturnValue([]);
     });
 
-    it("really exercises the fallback (harness guard)", () => {
+    it("really makes the date parts unreadable (harness guard)", () => {
       expect(
         new REAL_DATE_TIME_FORMAT("en-US").formatToParts(new Date())
       ).toEqual([]);
     });
 
-    it.each(DAY_CASES)(
-      "still picks the right offset for every phase wall time on $label",
-      ({ day, athensOffsetHours }) => {
-        for (const [hour, minute] of PHASE_WALL_TIMES) {
-          expect(
-            wallTimeToUtcInstantInZone(utcDay(day), hour, minute).toISOString()
-          ).toBe(utc(day, hour - athensOffsetHours, minute));
-        }
-      }
-    );
+    it("throws a descriptive error instead of guessing an offset", () => {
+      expect(() =>
+        wallTimeToUtcInstantInZone(new Date(Date.UTC(2026, 9, 26)), 17, 40)
+      ).toThrow(
+        'Unable to derive the UTC offset of time zone "Europe/Athens": Intl returned unreadable date parts'
+      );
+      expect(() =>
+        wallTimeToUtcInstantInZone(
+          new Date(Date.UTC(2026, 9, 26)),
+          17,
+          40,
+          "America/New_York"
+        )
+      ).toThrow(/"America\/New_York"/);
+    });
 
-    it.each(END_CASES)(
-      "still ends the window at 17:00 Athens the day after $label",
-      ({ day, endUtc }) => {
-        expect(mintEndInstantUtcForMintDay(utcDay(day)).toISOString()).toBe(
-          endUtc
-        );
-      }
-    );
+    it("surfaces the error through the mint helpers instead of returning a wrong time", () => {
+      expect(() =>
+        mintStartInstantUtcForMintDay(new Date(Date.UTC(2026, 9, 26)))
+      ).toThrow(/Unable to derive the UTC offset/);
+      expect(() =>
+        buildMemesPhases(Time.fromString("2026-10-26T00:00:00Z"))
+      ).toThrow(/Unable to derive the UTC offset/);
+      expect(() => getNextMintStart(new Date("2026-10-26T10:00:00Z"))).toThrow(
+        /Unable to derive the UTC offset/
+      );
+    });
+  });
 
-    it.each(TRANSITION_WALL_TIMES)(
-      "still maps $label to the right UTC instant",
-      ({ day, hour, minute, expectedUtc }) => {
+  it("rejects an unknown time zone", () => {
+    expect(() =>
+      wallTimeToUtcInstantInZone(
+        new Date(Date.UTC(2026, 9, 26)),
+        17,
+        40,
+        "Not/AZone"
+      )
+    ).toThrow(RangeError);
+  });
+
+  describe("other IANA zones (offsets come from Intl, not from Athens rules)", () => {
+    it.each(ZONE_CASES)(
+      "$zone: $label",
+      ({ zone, day, hour, minute, expectedUtc }) => {
         expect(
-          wallTimeToUtcInstantInZone(utcDay(day), hour, minute).toISOString()
+          wallTimeToUtcInstantInZone(
+            utcDay(day),
+            hour,
+            minute,
+            zone
+          ).toISOString()
         ).toBe(expectedUtc);
       }
     );
 
-    it("keeps winter mint times on EET and summer mint times on EEST", () => {
-      expect(
-        mintStartInstantUtcForMintDay(
-          new Date(Date.UTC(2026, 9, 26))
-        ).toISOString()
-      ).toBe("2026-10-26T15:40:00.000Z");
-      expect(
-        mintStartInstantUtcForMintDay(
-          new Date(Date.UTC(2026, 9, 23))
-        ).toISOString()
-      ).toBe("2026-10-23T14:40:00.000Z");
+    it("uses Europe/Athens by default", () => {
+      const day = utcDay([2026, 9, 26]);
+      expect(wallTimeToUtcInstantInZone(day, 17, 40).toISOString()).toBe(
+        wallTimeToUtcInstantInZone(day, 17, 40, "Europe/Athens").toISOString()
+      );
     });
+
+    it.each(Object.entries(SWEEP_ZONE_DAYS))(
+      "matches a brute-force search around the DST changes of %s",
+      (zone, days) => {
+        const readWallClock = createWallClockReader(zone);
+        let repeated = 0;
+        let skipped = 0;
+
+        for (const day of days) {
+          for (const [hour, minute] of SWEEP_WALL_TIMES) {
+            const wallClockAsUtc = Date.UTC(
+              day[0],
+              day[1],
+              day[2],
+              hour,
+              minute
+            );
+            const matches = bruteForceInstants(readWallClock, wallClockAsUtc);
+            const result = wallTimeToUtcInstantInZone(
+              utcDay(day),
+              hour,
+              minute,
+              zone
+            );
+
+            if (matches.length === 0) {
+              // skipped wall time: shifted forward, never backward
+              skipped++;
+              const shown = readWallClock(result.getTime());
+              expect(shown).toBeGreaterThan(wallClockAsUtc);
+              expect(shown - wallClockAsUtc).toBeLessThanOrEqual(
+                2 * 60 * 60 * 1000
+              );
+              continue;
+            }
+            if (matches.length > 1) repeated++;
+            // repeated wall time: the first (earlier) occurrence
+            expect(result.getTime()).toBe(matches[0]);
+          }
+        }
+
+        if (zone === "Asia/Kolkata") {
+          expect([repeated, skipped]).toEqual([0, 0]);
+        } else {
+          expect(repeated).toBeGreaterThan(0);
+          expect(skipped).toBeGreaterThan(0);
+        }
+      }
+    );
   });
 
   it("produces identical instants for every locale across the whole range", () => {
