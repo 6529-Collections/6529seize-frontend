@@ -161,6 +161,10 @@ wallet, in a safe order.
 - If a joining wallet already registered toward an existing member whose step
   registers back, a note warns that the consolidation may be split until the
   last step confirms.
+- When a Delegation Manager signs for a joining wallet with several links, the
+  step's note warns that the consolidation can be split until the last link
+  confirms, which can reduce TDH-wave votes, and asks to send the links back to
+  back.
 - Transaction progress uses the shared transaction dialog
   (`Consolidation Step N`, or `Consolidation Step N, Link n of total` for a
   manager's link), and gas-estimation or network errors appear inside

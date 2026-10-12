@@ -281,9 +281,13 @@ function StepItem(
       </p>
       {showManagerNote && (
         <p className={`${MESSAGE_CLASS_NAME} tw-mt-2`}>
-          {t(locale, "delegation.consolidationBuilder.steps.managerNote", {
-            wallet: context.getWalletLabel(step.signer),
-          })}
+          {t(
+            locale,
+            step.splitsIfSentSeparately
+              ? "delegation.consolidationBuilder.steps.managerSplitNote"
+              : "delegation.consolidationBuilder.steps.managerNote",
+            { wallet: context.getWalletLabel(step.signer) }
+          )}
         </p>
       )}
       {step.status !== "complete" && (
