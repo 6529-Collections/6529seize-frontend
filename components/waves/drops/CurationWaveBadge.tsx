@@ -78,7 +78,7 @@ export const CurationWaveBadge: React.FC<CurationWaveBadgeProps> = ({
     ? `Open ${normalizedWaveName}`
     : "Open featured wave";
   const sizeStyles = BADGE_SIZE_STYLES[size];
-  const buttonClassName = `tw-inline-flex ${sizeStyles.buttonClassName} tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-md tw-border tw-border-solid tw-border-white/15 tw-bg-white/5 tw-text-iron-200 tw-outline-none tw-ring-0 tw-transition-colors tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-white/20 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 desktop-hover:hover:tw-border-white/25 desktop-hover:hover:tw-bg-white/10 desktop-hover:hover:tw-text-iron-100`;
+  const buttonClassName = `tw-inline-flex ${sizeStyles.buttonClassName} tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-md tw-border tw-border-solid tw-border-white/15 tw-bg-white/5 tw-text-iron-200 tw-outline-none tw-ring-0 tw-transition-colors tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 desktop-hover:hover:tw-border-white/25 desktop-hover:hover:tw-bg-white/10 desktop-hover:hover:tw-text-iron-100`;
   const showImage = waveImageSrc !== null && failedImageSrc !== waveImageSrc;
   const imageSrc = showImage ? waveImageSrc : null;
   const usesSheetPreview = isClientHydrated && hasTouchScreen;

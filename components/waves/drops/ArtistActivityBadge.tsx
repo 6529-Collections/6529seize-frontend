@@ -10,10 +10,10 @@ import useDeviceInfo from "@/hooks/useDeviceInfo";
 import type { ArtistPreviewTab } from "@/hooks/useArtistPreviewModal";
 
 const PALETTE_BUTTON_CLASS =
-  "tw-relative tw-inline-flex tw-h-5 tw-w-5 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-blue-400/20 tw-bg-blue-500/10 tw-text-blue-400 tw-transition-colors tw-duration-200 tw-ease-out focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-blue-400/30 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 desktop-hover:hover:tw-border-blue-300/30 desktop-hover:hover:tw-bg-blue-500/15 desktop-hover:hover:tw-text-blue-300";
+  "tw-relative tw-inline-flex tw-h-5 tw-w-5 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-blue-400/20 tw-bg-blue-500/10 tw-text-blue-400 tw-transition-colors tw-duration-200 tw-ease-out focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 desktop-hover:hover:tw-border-blue-300/30 desktop-hover:hover:tw-bg-blue-500/15 desktop-hover:hover:tw-text-blue-300";
 
 const TROPHY_BUTTON_CLASS =
-  "tw-relative tw-inline-flex tw-h-5 tw-w-5 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-yellow-500/20 tw-bg-yellow-500/10 tw-text-[#ffc107] tw-transition-colors tw-duration-200 tw-ease-out focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-yellow-500/20 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 desktop-hover:hover:tw-border-yellow-400/30 desktop-hover:hover:tw-bg-yellow-500/15 desktop-hover:hover:tw-text-yellow-300";
+  "tw-relative tw-inline-flex tw-h-5 tw-w-5 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-border-yellow-500/20 tw-bg-yellow-500/10 tw-text-[#ffc107] tw-transition-colors tw-duration-200 tw-ease-out focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 desktop-hover:hover:tw-border-yellow-400/30 desktop-hover:hover:tw-bg-yellow-500/15 desktop-hover:hover:tw-text-yellow-300";
 
 const PALETTE_ICON_CLASS =
   "tw-h-2.5 tw-w-2.5 tw-flex-shrink-0 tw-text-blue-400";

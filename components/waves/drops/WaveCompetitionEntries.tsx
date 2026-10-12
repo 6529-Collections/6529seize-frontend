@@ -173,7 +173,7 @@ export const WaveCompetitionEntries = ({
                   title,
                 })}
                 onClick={() => onDropClick(drop)}
-                className={`tw-group tw-relative tw-flex tw-w-full tw-flex-1 tw-cursor-pointer tw-flex-col tw-overflow-hidden tw-border tw-border-solid tw-p-0 tw-text-left focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/60 ${
+                className={`tw-group tw-relative tw-flex tw-w-full tw-flex-1 tw-cursor-pointer tw-flex-col tw-overflow-hidden tw-border tw-border-solid tw-p-0 tw-text-left focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 ${
                   isApp
                     ? "tw-mb-2.5 tw-rounded-xl tw-border-white/[0.08] tw-bg-white/[0.02] tw-transition tw-duration-200 desktop-hover:hover:tw-border-white/15 desktop-hover:hover:tw-bg-white/[0.035]"
                     : "tw-mb-3 tw-rounded-lg tw-border-iron-800 tw-bg-iron-950/50 tw-shadow-lg tw-transition-all tw-duration-300 tw-ease-out desktop-hover:hover:tw-border-iron-700 desktop-hover:hover:tw-shadow-xl"
