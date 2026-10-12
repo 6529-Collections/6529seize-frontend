@@ -11370,6 +11370,41 @@ paths:
           description: Dev Team membership required; proxy sessions are denied
         "503":
           description: Authorization or Sentry snapshot temporarily unavailable
+  /monitoring/sentry/history:
+    get:
+      tags:
+        - Monitoring
+      summary: Read daily Sentry history
+      description: >-
+        Dev Team direct sessions only. Returns the last 30 completed UTC days by
+        configured project, including resolved and archived error issues. Failed
+        or incomplete days have null counts. A server-side 15-minute cache and
+        refresh lease bound provider work. Authorization is checked before every
+        cache read. No provider credentials are returned.
+      operationId: getMonitoringSentryHistory
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: monitoring
+        handler:
+          import: "@/api/monitoring/monitoring.handlers"
+          name: handleGetMonitoringSentryHistory
+      responses:
+        "200":
+          description: Daily history or explicit not-configured state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMonitoringSentryHistory"
+        "401":
+          description: Wallet authentication required
+        "403":
+          description: Dev Team membership required; proxy sessions are denied
+        "503":
+          description: Authorization or history temporarily unavailable
   /nft-link:
     get:
       tags:
@@ -32929,6 +32964,88 @@ components:
         access:
           type: boolean
           description: True after the monitoring section access guard succeeds
+    ApiMonitoringSentryEventTrend:
+      type: object
+      required:
+        - current_events
+        - previous_events
+      properties:
+        current_events:
+          type: integer
+          minimum: 0
+          nullable: true
+          description: >-
+            All error-issue events in the current 24 hours, including warnings;
+            null if collection is incomplete
+        previous_events:
+          type: integer
+          minimum: 0
+          nullable: true
+          description: >-
+            Same event query in the preceding 24 hours; null if collection is
+            incomplete
+    ApiMonitoringSentryHistory:
+      type: object
+      required:
+        - status
+        - environment
+        - period
+        - timezone
+        - projects
+      properties:
+        status:
+          type: string
+          enum:
+            - ready
+            - not_configured
+        environment:
+          type: string
+        period:
+          type: string
+          enum:
+            - 30d
+        timezone:
+          type: string
+          enum:
+            - UTC
+        fetched_at:
+          type: string
+          format: date-time
+        window_start:
+          type: string
+          format: date-time
+        window_end:
+          type: string
+          format: date-time
+          description: Exclusive end; today's incomplete UTC day is excluded
+        projects:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiMonitoringSentryProjectHistory"
+    ApiMonitoringSentryHistoryDay:
+      type: object
+      required:
+        - date
+        - events
+        - issues
+      properties:
+        date:
+          type: string
+          format: date
+        events:
+          type: integer
+          minimum: 0
+          nullable: true
+          description: >-
+            Captured error-issue occurrences in this UTC day, including
+            warnings; null if incomplete
+        issues:
+          type: integer
+          minimum: 0
+          nullable: true
+          description: >-
+            Distinct issues with matching events on this day, regardless of
+            current status; null if incomplete
     ApiMonitoringSentryIssue:
       type: object
       required:
@@ -32940,6 +33057,9 @@ components:
         - first_seen
         - last_seen
         - url
+        - level
+        - priority
+        - state
       properties:
         id:
           type: string
@@ -32962,6 +33082,53 @@ components:
         url:
           type: string
           description: Canonical Sentry issue link; Sentry login is required
+        level:
+          type: string
+          enum:
+            - fatal
+            - error
+            - warning
+            - info
+            - debug
+            - unknown
+        priority:
+          type: string
+          enum:
+            - high
+            - medium
+            - low
+            - unknown
+        state:
+          type: string
+          enum:
+            - new
+            - ongoing
+            - regressed
+            - escalating
+            - resolved
+            - archived
+            - unknown
+    ApiMonitoringSentryIssueGroup:
+      type: object
+      required:
+        - issues
+        - count
+        - count_exact
+        - has_more
+      properties:
+        issues:
+          type: array
+          description: Up to five matching issues, ranked by window event count
+          items:
+            $ref: "#/components/schemas/ApiMonitoringSentryIssue"
+        count:
+          type: integer
+          minimum: 0
+          description: Matching issue count, or a lower bound when count_exact is false
+        count_exact:
+          type: boolean
+        has_more:
+          type: boolean
     ApiMonitoringSentryOverview:
       type: object
       required:
@@ -32994,6 +33161,20 @@ components:
             errors
           items:
             $ref: "#/components/schemas/ApiMonitoringSentryProjectOverview"
+    ApiMonitoringSentryProjectHistory:
+      type: object
+      required:
+        - project
+        - days
+      properties:
+        project:
+          type: string
+        days:
+          type: array
+          minItems: 30
+          maxItems: 30
+          items:
+            $ref: "#/components/schemas/ApiMonitoringSentryHistoryDay"
     ApiMonitoringSentryProjectOverview:
       type: object
       required:
@@ -33002,6 +33183,12 @@ components:
         - top_issues
         - new_issues_has_more
         - top_issues_has_more
+        - high_priority
+        - regressed
+        - escalating
+        - new_issues_total
+        - new_issues_count_exact
+        - event_trend
       properties:
         project:
           type: string
@@ -33024,6 +33211,24 @@ components:
           description: >-
             Additional matching unresolved issues exist beyond the displayed
             five
+        high_priority:
+          $ref: "#/components/schemas/ApiMonitoringSentryIssueGroup"
+          description: Unresolved high-priority issues active during the window
+        regressed:
+          $ref: "#/components/schemas/ApiMonitoringSentryIssueGroup"
+          description: >-
+            Currently regressed issues active during the window; not necessarily
+            regressed within the last 24 hours
+        escalating:
+          $ref: "#/components/schemas/ApiMonitoringSentryIssueGroup"
+          description: Currently escalating issues active during the window
+        new_issues_total:
+          type: integer
+          minimum: 0
+        new_issues_count_exact:
+          type: boolean
+        event_trend:
+          $ref: "#/components/schemas/ApiMonitoringSentryEventTrend"
     ApiNft:
       type: object
       required:

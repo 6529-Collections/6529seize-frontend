@@ -1,8 +1,21 @@
 import { ApiMonitoringSentryOverviewStatusEnum } from "@/generated/models/ApiMonitoringSentryOverview";
 import MonitoringPageClient from "@/app/tools/monitoring/page.client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { act, render, screen, waitFor } from "@testing-library/react";
-import { fetchMonitoringSentryOverview } from "@/services/api/monitoring-api";
+import { act, fireEvent, render, screen, within } from "@testing-library/react";
+import {
+  ApiMonitoringSentryIssueLevelEnum,
+  ApiMonitoringSentryIssuePriorityEnum,
+  ApiMonitoringSentryIssueStateEnum,
+} from "@/generated/models/ApiMonitoringSentryIssue";
+import {
+  fetchMonitoringSentryOverview,
+  fetchMonitoringSentryHistory,
+} from "@/services/api/monitoring-api";
+import {
+  ApiMonitoringSentryHistoryStatusEnum,
+  ApiMonitoringSentryHistoryPeriodEnum,
+  ApiMonitoringSentryHistoryTimezoneEnum,
+} from "@/generated/models/ApiMonitoringSentryHistory";
 import { SUPPORTED_LOCALES } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 
@@ -27,10 +40,15 @@ jest.mock("@/components/auth/SeizeConnectContext", () => ({
 jest.mock("@/contexts/TitleContext", () => ({ useSetTitle: jest.fn() }));
 jest.mock("@/services/api/monitoring-api", () => ({
   fetchMonitoringSentryOverview: jest.fn(),
+  fetchMonitoringSentryHistory: jest.fn(),
 }));
+jest.mock("react-chartjs-2", () => ({ Line: () => null }));
 jest.mock("@/services/api/common-api", () => ({
   getStructuredApiErrorStatus: (error: { status?: number } | null) =>
     error?.status,
+  getStructuredApiErrorCode: (
+    error: { response?: { body?: { code?: string } } } | null
+  ) => error?.response?.body?.code,
 }));
 
 let client: QueryClient;
@@ -44,6 +62,13 @@ function page() {
 
 describe("monitoring entry access", () => {
   beforeEach(() => {
+    jest.mocked(fetchMonitoringSentryHistory).mockReset().mockResolvedValue({
+      status: ApiMonitoringSentryHistoryStatusEnum.Ready,
+      environment: "production",
+      period: ApiMonitoringSentryHistoryPeriodEnum._30d,
+      timezone: ApiMonitoringSentryHistoryTimezoneEnum.Utc,
+      projects: [],
+    });
     client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     mockAuth.connectedProfile = { id: "member" };
     mockAuth.isAuthenticated = true;
@@ -82,6 +107,7 @@ describe("monitoring entry access", () => {
       screen.getByRole("button", { name: "Connect wallet" })
     ).toBeInTheDocument();
     expect(fetchMonitoringSentryOverview).not.toHaveBeenCalled();
+    expect(fetchMonitoringSentryHistory).not.toHaveBeenCalled();
   });
 
   it("shows restricted access for signed-in non-members", async () => {
@@ -105,6 +131,7 @@ describe("monitoring entry access", () => {
       screen.getByRole("heading", { name: "Access restricted" })
     ).toBeInTheDocument();
     expect(fetchMonitoringSentryOverview).not.toHaveBeenCalled();
+    expect(fetchMonitoringSentryHistory).not.toHaveBeenCalled();
   });
 
   it("removes the allowed area immediately when the wallet changes", async () => {
@@ -167,6 +194,9 @@ describe("monitoring entry access", () => {
               short_id: "WEB-123",
               project: "web",
               title: "TypeError: failed",
+              level: ApiMonitoringSentryIssueLevelEnum.Error,
+              priority: ApiMonitoringSentryIssuePriorityEnum.High,
+              state: ApiMonitoringSentryIssueStateEnum.Ongoing,
               occurrences: 1234,
               first_seen: "2026-10-07T12:00:00Z",
               last_seen: "2026-10-08T09:00:00Z",
@@ -175,6 +205,27 @@ describe("monitoring entry access", () => {
           ],
           new_issues_has_more: false,
           top_issues_has_more: true,
+          high_priority: {
+            issues: [],
+            count: 9,
+            count_exact: true,
+            has_more: true,
+          },
+          regressed: {
+            issues: [],
+            count: 0,
+            count_exact: true,
+            has_more: false,
+          },
+          escalating: {
+            issues: [],
+            count: 0,
+            count_exact: true,
+            has_more: false,
+          },
+          new_issues_total: 0,
+          new_issues_count_exact: true,
+          event_trend: { current_events: 1234, previous_events: 2000 },
         },
         {
           project: "seize-backend",
@@ -185,6 +236,9 @@ describe("monitoring entry access", () => {
               short_id: "SEIZE-BACKEND-Y6",
               project: "seize-backend",
               title: "Market refresh failed",
+              level: ApiMonitoringSentryIssueLevelEnum.Error,
+              priority: ApiMonitoringSentryIssuePriorityEnum.High,
+              state: ApiMonitoringSentryIssueStateEnum.Ongoing,
               occurrences: 1,
               first_seen: "2026-10-08T02:00:00Z",
               last_seen: "2026-10-08T02:00:00Z",
@@ -193,32 +247,56 @@ describe("monitoring entry access", () => {
           ],
           new_issues_has_more: false,
           top_issues_has_more: false,
+          high_priority: {
+            issues: [],
+            count: 1,
+            count_exact: true,
+            has_more: false,
+          },
+          regressed: {
+            issues: [],
+            count: 0,
+            count_exact: true,
+            has_more: false,
+          },
+          escalating: {
+            issues: [],
+            count: 0,
+            count_exact: true,
+            has_more: false,
+          },
+          new_issues_total: 0,
+          new_issues_count_exact: true,
+          event_trend: { current_events: 1, previous_events: 3 },
         },
       ],
     });
     render(page());
+    await screen.findByText("All issue details");
+    fireEvent.click(screen.getByText("All issue details"));
     expect(
       await screen.findByText("1,234 events in this window")
     ).toBeInTheDocument();
     expect(screen.getByText("Last 24 hours · production")).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "web" })).toHaveTextContent(
+      "TypeError: failed"
+    );
     expect(
-      screen.getByRole("region", { name: "web", exact: true })
-    ).toHaveTextContent("TypeError: failed");
-    expect(
-      screen.getByRole("region", { name: "seize-backend", exact: true })
+      screen.getByRole("region", { name: "seize-backend" })
     ).toHaveTextContent("Market refresh failed");
     expect(screen.getByText("1 event in this window")).toBeInTheDocument();
     expect(
       screen.getAllByRole("heading", {
         name: "Most frequent unresolved errors",
-        exact: true,
       })
     ).toHaveLength(2);
     expect(
       screen.getAllByText("No matching errors in this window.")[0]
     ).toBeInTheDocument();
     expect(
-      screen.getByText("Showing the first five matching issues.")
+      within(screen.getByRole("region", { name: "web" })).getByText(
+        "Showing the first five matching issues."
+      )
     ).toBeInTheDocument();
     const link = screen.getByRole("link", {
       name: "Open TypeError: failed in Sentry (opens in a new tab)",
@@ -244,8 +322,26 @@ describe("monitoring entry access", () => {
       await screen.findByRole("heading", { name: "Access restricted" })
     ).toBeInTheDocument();
     expect(
-      screen.queryByRole("heading", { name: "Sentry", exact: true })
+      screen.queryByRole("heading", { name: "Sentry" })
     ).not.toBeInTheDocument();
+  });
+
+  it("hides the overview too when history cannot verify membership", async () => {
+    jest.mocked(fetchMonitoringSentryOverview).mockResolvedValue({
+      status: ApiMonitoringSentryOverviewStatusEnum.Ready,
+      environment: "production",
+      period: "24h",
+      projects: [],
+    });
+    jest.mocked(fetchMonitoringSentryHistory).mockRejectedValue({
+      status: 503,
+      response: { body: { code: "MONITORING_ACCESS_UNAVAILABLE" } },
+    });
+    render(page());
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Unable to load monitoring."
+    );
+    expect(screen.queryByText("All issue details")).not.toBeInTheDocument();
   });
 
   it.each(SUPPORTED_LOCALES)(
@@ -254,6 +350,46 @@ describe("monitoring entry access", () => {
       expect(t(locale, "monitoring.sentry.notConfigured")).toBe(
         "Sentry is not connected yet."
       );
+    }
+  );
+
+  it("starts history only after a ready overview grants access, and keeps the overview on history failure", async () => {
+    jest.mocked(fetchMonitoringSentryOverview).mockResolvedValue({
+      status: ApiMonitoringSentryOverviewStatusEnum.Ready,
+      environment: "production",
+      period: "24h",
+      projects: [],
+    });
+    jest
+      .mocked(fetchMonitoringSentryHistory)
+      .mockRejectedValue({ status: 503 });
+    render(page());
+    expect(fetchMonitoringSentryHistory).not.toHaveBeenCalled();
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Unable to load daily history."
+    );
+    expect(screen.getByText("All issue details")).toBeInTheDocument();
+    expect(fetchMonitoringSentryHistory).toHaveBeenCalledTimes(1);
+  });
+
+  it.each([401, 403])(
+    "hides both datasets when the history request rejects access with %s",
+    async (status) => {
+      jest.mocked(fetchMonitoringSentryOverview).mockResolvedValue({
+        status: ApiMonitoringSentryOverviewStatusEnum.Ready,
+        environment: "production",
+        period: "24h",
+        projects: [],
+      });
+      jest.mocked(fetchMonitoringSentryHistory).mockRejectedValue({ status });
+      render(page());
+      await screen.findByRole("heading", {
+        name: status === 401 ? "Sign in required" : "Access restricted",
+      });
+      expect(screen.queryByText("All issue details")).not.toBeInTheDocument();
+      expect(
+        screen.queryByText("Daily history · 30 days")
+      ).not.toBeInTheDocument();
     }
   );
 });

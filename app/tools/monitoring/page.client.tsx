@@ -11,11 +11,38 @@ import PrimaryButton from "@/components/utils/button/PrimaryButton";
 import { useSetTitle } from "@/contexts/TitleContext";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import { getStructuredApiErrorStatus } from "@/services/api/common-api";
-import { fetchMonitoringSentryOverview } from "@/services/api/monitoring-api";
+import {
+  getStructuredApiErrorStatus,
+  getStructuredApiErrorCode,
+} from "@/services/api/common-api";
+import {
+  fetchMonitoringSentryOverview,
+  fetchMonitoringSentryHistory,
+} from "@/services/api/monitoring-api";
+import { ApiMonitoringSentryOverviewStatusEnum } from "@/generated/models/ApiMonitoringSentryOverview";
+import type { ApiMonitoringSentryOverview } from "@/generated/models/ApiMonitoringSentryOverview";
 import { useQuery } from "@tanstack/react-query";
 
 import SentryOverview from "./sentry-overview";
+import SentryHistory from "./sentry-history";
+
+function canLoadHistory(
+  enabled: boolean,
+  accessGranted: boolean,
+  overview: ApiMonitoringSentryOverview | undefined
+) {
+  return (
+    enabled &&
+    accessGranted &&
+    overview?.status === ApiMonitoringSentryOverviewStatusEnum.Ready
+  );
+}
+
+function getAccessErrorStatus(overviewError: unknown, historyError: unknown) {
+  const historyStatus = getStructuredApiErrorStatus(historyError);
+  if (historyStatus === 401 || historyStatus === 403) return historyStatus;
+  return getStructuredApiErrorStatus(overviewError);
+}
 
 export default function MonitoringPageClient() {
   const locale = DEFAULT_LOCALE;
@@ -39,14 +66,14 @@ export default function MonitoringPageClient() {
     Boolean(connectedProfile?.id) &&
     !fetchingProfile &&
     !isWalletConnectionPending;
+  const sessionKey = [
+    address ?? null,
+    connectedProfile?.id ?? null,
+    activeProfileProxy?.id ?? null,
+    isDirectProfileSession,
+  ];
   const query = useQuery({
-    queryKey: [
-      QueryKey.MONITORING_SENTRY_OVERVIEW,
-      address ?? null,
-      connectedProfile?.id ?? null,
-      activeProfileProxy?.id ?? null,
-      isDirectProfileSession,
-    ],
+    queryKey: [QueryKey.MONITORING_SENTRY_OVERVIEW, ...sessionKey],
     queryFn: ({ signal }) => fetchMonitoringSentryOverview(signal),
     enabled,
     staleTime: 0,
@@ -55,9 +82,19 @@ export default function MonitoringPageClient() {
     refetchInterval: enabled ? 60_000 : false,
     refetchIntervalInBackground: false,
   });
+  const historyQuery = useQuery({
+    queryKey: [QueryKey.MONITORING_SENTRY_HISTORY, ...sessionKey],
+    queryFn: ({ signal }) => fetchMonitoringSentryHistory(signal),
+    enabled: canLoadHistory(enabled, query.isSuccess, query.data),
+    staleTime: 0,
+    gcTime: 0,
+    retry: false,
+    refetchInterval: enabled ? 60_000 : false,
+    refetchIntervalInBackground: false,
+  });
   useSetTitle(t(locale, "monitoring.title"));
 
-  const status = getStructuredApiErrorStatus(query.error);
+  const status = getAccessErrorStatus(query.error, historyQuery.error);
   const pending = fetchingProfile || isWalletConnectionPending;
   const signInRequired = !hasSession || status === 401;
   const restricted =
@@ -65,7 +102,11 @@ export default function MonitoringPageClient() {
   const checking =
     pending || (enabled && (query.isPending || query.isFetching));
   const allowed =
-    enabled && !query.isError && !checking && query.data !== undefined;
+    enabled &&
+    query.isSuccess &&
+    !checking &&
+    getStructuredApiErrorCode(historyQuery.error) !==
+      "MONITORING_ACCESS_UNAVAILABLE";
 
   const reportError = () => {
     setToast({ message: t(locale, "monitoring.unavailable"), type: "error" });
@@ -103,7 +144,19 @@ export default function MonitoringPageClient() {
       </>
     );
   } else if (allowed) {
-    content = <SentryOverview overview={query.data} locale={locale} />;
+    content = (
+      <SentryOverview overview={query.data} locale={locale}>
+        <SentryHistory
+          history={historyQuery.data}
+          loading={historyQuery.isPending || historyQuery.isFetching}
+          unavailable={historyQuery.isError}
+          locale={locale}
+          onRetry={() => {
+            void historyQuery.refetch().catch(reportError);
+          }}
+        />
+      </SentryOverview>
+    );
   } else {
     content = (
       <>
@@ -112,7 +165,9 @@ export default function MonitoringPageClient() {
           loading={false}
           disabled={!enabled}
           onClicked={() => {
-            void query.refetch().catch(reportError);
+            void Promise.all([query.refetch(), historyQuery.refetch()]).catch(
+              reportError
+            );
           }}
         >
           {t(locale, "monitoring.retry")}

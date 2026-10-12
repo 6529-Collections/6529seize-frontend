@@ -11,7 +11,9 @@
  * Do not edit the class manually.
  */
 
+import { ApiMonitoringSentryEventTrend } from "../models/ApiMonitoringSentryEventTrend";
 import { ApiMonitoringSentryIssue } from "../models/ApiMonitoringSentryIssue";
+import { ApiMonitoringSentryIssueGroup } from "../models/ApiMonitoringSentryIssueGroup";
 import { HttpFile } from "../http/http";
 
 export class ApiMonitoringSentryProjectOverview {
@@ -35,6 +37,12 @@ export class ApiMonitoringSentryProjectOverview {
    * Additional matching unresolved issues exist beyond the displayed five
    */
   "top_issues_has_more": boolean;
+  "high_priority": ApiMonitoringSentryIssueGroup;
+  "regressed": ApiMonitoringSentryIssueGroup;
+  "escalating": ApiMonitoringSentryIssueGroup;
+  "new_issues_total": number;
+  "new_issues_count_exact": boolean;
+  "event_trend": ApiMonitoringSentryEventTrend;
 
   static readonly discriminator: string | undefined = undefined;
 
@@ -74,6 +82,42 @@ export class ApiMonitoringSentryProjectOverview {
       name: "top_issues_has_more",
       baseName: "top_issues_has_more",
       type: "boolean",
+      format: "",
+    },
+    {
+      name: "high_priority",
+      baseName: "high_priority",
+      type: "ApiMonitoringSentryIssueGroup",
+      format: "",
+    },
+    {
+      name: "regressed",
+      baseName: "regressed",
+      type: "ApiMonitoringSentryIssueGroup",
+      format: "",
+    },
+    {
+      name: "escalating",
+      baseName: "escalating",
+      type: "ApiMonitoringSentryIssueGroup",
+      format: "",
+    },
+    {
+      name: "new_issues_total",
+      baseName: "new_issues_total",
+      type: "number",
+      format: "",
+    },
+    {
+      name: "new_issues_count_exact",
+      baseName: "new_issues_count_exact",
+      type: "boolean",
+      format: "",
+    },
+    {
+      name: "event_trend",
+      baseName: "event_trend",
+      type: "ApiMonitoringSentryEventTrend",
       format: "",
     },
   ];

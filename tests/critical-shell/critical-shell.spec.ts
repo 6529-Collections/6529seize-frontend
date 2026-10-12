@@ -176,7 +176,7 @@ test.describe("Critical read-only route shells @critical-shell @medium @large", 
     await page.goto("/tools/monitoring", { waitUntil: "domcontentloaded" });
     await waitForRouteReady(page, { readySelector: "h1" });
 
-    const main = page.locator("main");
+    const main = page.getByRole("main").last();
     await expect(
       main.getByRole("heading", { level: 1, name: "Monitoring" })
     ).toBeVisible();

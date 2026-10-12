@@ -34,6 +34,9 @@ export class ApiMonitoringSentryIssue {
    * Canonical Sentry issue link; Sentry login is required
    */
   "url": string;
+  "level": ApiMonitoringSentryIssueLevelEnum;
+  "priority": ApiMonitoringSentryIssuePriorityEnum;
+  "state": ApiMonitoringSentryIssueStateEnum;
 
   static readonly discriminator: string | undefined = undefined;
 
@@ -93,6 +96,24 @@ export class ApiMonitoringSentryIssue {
       type: "string",
       format: "",
     },
+    {
+      name: "level",
+      baseName: "level",
+      type: "ApiMonitoringSentryIssueLevelEnum",
+      format: "",
+    },
+    {
+      name: "priority",
+      baseName: "priority",
+      type: "ApiMonitoringSentryIssuePriorityEnum",
+      format: "",
+    },
+    {
+      name: "state",
+      baseName: "state",
+      type: "ApiMonitoringSentryIssueStateEnum",
+      format: "",
+    },
   ];
 
   static getAttributeTypeMap() {
@@ -100,4 +121,28 @@ export class ApiMonitoringSentryIssue {
   }
 
   public constructor() {}
+}
+
+export enum ApiMonitoringSentryIssueLevelEnum {
+  Fatal = "fatal",
+  Error = "error",
+  Warning = "warning",
+  Info = "info",
+  Debug = "debug",
+  Unknown = "unknown",
+}
+export enum ApiMonitoringSentryIssuePriorityEnum {
+  High = "high",
+  Medium = "medium",
+  Low = "low",
+  Unknown = "unknown",
+}
+export enum ApiMonitoringSentryIssueStateEnum {
+  New = "new",
+  Ongoing = "ongoing",
+  Regressed = "regressed",
+  Escalating = "escalating",
+  Resolved = "resolved",
+  Archived = "archived",
+  Unknown = "unknown",
 }
