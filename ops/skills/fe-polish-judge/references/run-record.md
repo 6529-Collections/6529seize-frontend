@@ -73,17 +73,48 @@ mobile; states are the ones the diff can affect.
 }
 ```
 
+## Museum template
+
+Use for every visible change to `/museum/network` routes. The profile adds J14
+and M1–M4, requires the three lens reviews, and fixes the viewports.
+
+```json
+{
+  "rubric_version": "fe-polish-judge/2.0",
+  "profile": "museum",
+  "run_id": "2026-10-11-museum-research-landing",
+  "candidate": { "commit": "<sha>", "build": "production" },
+  "scope": {
+    "routes": ["/museum/network/research", "/museum/network/stories"],
+    "audience": "Visitors reading the Museum's research and stories",
+    "primary_task": "Find a research essay and read it with its works and sources",
+    "release_intent": "Rebalance the Research landing and essay lead images",
+    "viewports": ["1440x1000", "820x1000", "390x844"],
+    "locales": ["en-US"]
+  },
+  "not_applicable": {
+    "J13": "No wallet or chain interaction"
+  },
+  "decisions": [
+    "The Keys and Gates lead image repeats on both routes by design"
+  ],
+  "budget": { "repair_batches": 6 }
+}
+```
+
 ## Run directory
 
 ```text
 <run-dir>/
   run.json
-  evidence/          screenshots and interaction notes, named route-state-viewport-locale
+  evidence/          screenshots and interaction notes, named route-state-viewport-locale;
+                     Museum runs add one contact sheet per viewport
   rounds/
     00-baseline.json judge output, round 0
     01.json          judge output after repair batch 1 (names start with the
                      round number; a rejudge of the same candidate is a new
                      round but spends no repair budget)
+    00/              Museum runs: curatorial.json, visual.json, copy.json
   decisions.md       optional: scoring-script output and coordinator notes per round
 ```
 

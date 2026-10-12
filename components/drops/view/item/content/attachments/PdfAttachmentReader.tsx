@@ -8,6 +8,7 @@ import {
   useState,
 } from "react";
 import { Document, pdfjs } from "react-pdf";
+import type { PDFDocumentProxy } from "pdfjs-dist";
 import "react-pdf/dist/Page/TextLayer.css";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { formatInteger } from "@/i18n/format";
@@ -19,6 +20,8 @@ import {
   fetchPdfPreview,
   PdfPreviewSizeError,
   PDF_PREVIEW_TIMEOUT_MS,
+  PDF_RANGE_CHUNK_SIZE,
+  type PdfPreviewFile,
 } from "./fetchPdfPreview";
 
 const assetBase = `/pdfjs/${pdfjs.version}/`;
@@ -29,6 +32,9 @@ const options = {
   wasmUrl: `${assetBase}wasm/`,
   isEvalSupported: false,
   useWasm: false,
+  disableAutoFetch: true,
+  disableStream: true,
+  rangeChunkSize: PDF_RANGE_CHUNK_SIZE,
 };
 const PREVIEW_ERROR_KEY = "attachment.pdf.error";
 
@@ -58,9 +64,12 @@ function PdfReaderSession({
   const currentPageRef = useRef(1);
   const previousWidthRef = useRef(0);
   const restorePageRef = useRef<number | null>(null);
-  const [file, setFile] = useState<{ data: Uint8Array } | null>(null);
+  const [file, setFile] = useState<PdfPreviewFile | null>(null);
   const [error, setError] = useState<MessageKey | null>(null);
-  const [pages, setPages] = useState(0);
+  const [{ pages, aspectRatio }, setDocument] = useState({
+    pages: 0,
+    aspectRatio: Math.SQRT2,
+  });
   const [page, setPage] = useState(1);
   const [size, setSize] = useState({ width: 0, height: 0 });
   const [scrollRoot, setScrollRoot] = useState<HTMLDivElement | null>(null);
@@ -78,18 +87,19 @@ function PdfReaderSession({
       () => controller.abort(),
       PDF_PREVIEW_TIMEOUT_MS
     );
-    void fetchPdfPreview(url, controller.signal)
-      .then((data) => {
-        if (!disposed) setFile({ data });
+    const onError = (cause: unknown) => {
+      if (!disposed)
+        setError(
+          cause instanceof PdfPreviewSizeError
+            ? "attachment.pdf.tooLarge"
+            : PREVIEW_ERROR_KEY
+        );
+    };
+    void fetchPdfPreview(url, controller.signal, onError)
+      .then((source) => {
+        if (!disposed) setFile(source);
       })
-      .catch((cause: unknown) => {
-        if (!disposed)
-          setError(
-            cause instanceof PdfPreviewSizeError
-              ? "attachment.pdf.tooLarge"
-              : PREVIEW_ERROR_KEY
-          );
-      })
+      .catch(onError)
       .finally(() => globalThis.clearTimeout(timeout));
     return () => {
       disposed = true;
@@ -179,6 +189,22 @@ function PdfReaderSession({
     return () => cancelAnimationFrame(frame);
   }, [size.width, size.height, pages, updateCurrentPage]);
   const onPageError = useCallback(() => setError(PREVIEW_ERROR_KEY), []);
+  const onDocumentLoad = useCallback((document: PDFDocumentProxy) => {
+    // Use the first page as the estimate for unvisited pages. Individual pages
+    // retain their measured size after they enter the viewport.
+    void document
+      .getPage(1)
+      .then((firstPage) => {
+        const viewport = firstPage.getViewport({ scale: 1 });
+        const ratio = viewport.height / viewport.width;
+        if (!Number.isFinite(ratio) || ratio <= 0) {
+          setError(PREVIEW_ERROR_KEY);
+          return;
+        }
+        setDocument({ pages: document.numPages, aspectRatio: ratio });
+      })
+      .catch(() => setError(PREVIEW_ERROR_KEY));
+  }, []);
   const loading = (
     <p role="status" className="tw-p-4">
       {t(DEFAULT_LOCALE, "attachment.pdf.loading")}
@@ -208,7 +234,7 @@ function PdfReaderSession({
         file={file}
         options={options}
         loading={loading}
-        onLoadSuccess={({ numPages }) => setPages(numPages)}
+        onLoadSuccess={onDocumentLoad}
         onLoadError={onPageError}
         onPassword={() => setError("attachment.pdf.password")}
         error={null}
@@ -221,6 +247,7 @@ function PdfReaderSession({
               page={index + 1}
               width={size.width}
               viewportHeight={size.height}
+              estimatedAspectRatio={aspectRatio}
               scrollRoot={scrollRoot}
               onError={onPageError}
             />
@@ -242,6 +269,14 @@ function PdfReaderSession({
       <div
         ref={observeContainer}
         onScroll={(event) => updateCurrentPage(event.currentTarget)}
+        onKeyDown={(event) => {
+          if (event.target !== event.currentTarget) return;
+          if (event.key !== "Home" && event.key !== "End") return;
+          // Keep keyboard boundary jumps immediate while pages mount lazily.
+          event.preventDefault();
+          event.currentTarget.scrollTop =
+            event.key === "Home" ? 0 : event.currentTarget.scrollHeight;
+        }}
         role="region"
         aria-label={t(DEFAULT_LOCALE, "attachment.pdf.pages")}
         tabIndex={0}

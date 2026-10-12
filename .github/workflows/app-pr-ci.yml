@@ -150,12 +150,14 @@ jobs:
               .toString("utf8")
               .split("\0")
               .filter(Boolean);
-            requiresMuseumLane = files.some(
-              (file) => tier.isMuseumPath(file) || tier.isPolicyPath(file)
-            );
+            const laneRequired =
+              typeof tier.requiresMuseumLane === "function"
+                ? tier.requiresMuseumLane
+                : (file) => tier.isMuseumPath(file) || tier.isPolicyPath(file);
+            requiresMuseumLane = files.some(laneRequired);
             reason = requiresMuseumLane
-              ? `Protected Museum policy ${process.env.CONTROL_SHA} requires the broad browser lane.`
-              : "Protected Museum policy found no Museum-owned or Museum-policy path."
+              ? `Protected Museum policy ${process.env.CONTROL_SHA} requires the Museum browser lane.`
+              : "Protected Museum policy found no change that can affect a Museum page."
           } catch {
             requiresMuseumLane = true;
           }
@@ -544,6 +546,13 @@ jobs:
               > "$control_dir/museum-release-selection.cjs"
             test -s "$control_dir/museum-release-selection.cjs"
             selection_available=true
+          fi
+          # Affected-page selection maps changes through the protected surface
+          # registry tool; without it the selection fails closed to every pack.
+          if git cat-file -e "$control_sha:scripts/museum-surface-registry.cjs"; then
+            git show "$control_sha:scripts/museum-surface-registry.cjs" \
+              > "$control_dir/museum-surface-registry.cjs"
+            test -s "$control_dir/museum-surface-registry.cjs"
           fi
 
           {
@@ -1231,6 +1240,8 @@ jobs:
           const selection = JSON.parse(
             fs.readFileSync("test-results/app-pr-ci/museum-release-selection.json", "utf8")
           );
+          // Network IA is not a PR pack: the lane always runs it first as the
+          // gate. Deployed workflows list museum-network-ia as a pack.
           const allowed = new Set([
             "test:e2e:museum-data-architecture",
             "test:e2e:museum-institutional-practice",
@@ -1284,7 +1295,11 @@ jobs:
           mapfile -t selected_packs < <(
             jq -r '.selected_packs[]' test-results/app-pr-ci/museum-release-selection.json
           )
-          test "${#selected_packs[@]}" -gt 0
+          browser_scope="$(jq -r '.browser_scope' test-results/app-pr-ci/museum-release-selection.json)"
+          if [ "$browser_scope" = none ]; then
+            echo "::notice::No Museum page can be affected by this change; Museum browser coverage is not required."
+            exit 0
+          fi
           museum_gate_spec=tests/museum/network-ia-readonly.spec.ts
           selected_specs=()
           for selected_pack in "${selected_packs[@]}"; do
@@ -1328,14 +1343,19 @@ jobs:
               --list \
               --reporter=json \
               > test-results/app-pr-ci/museum-tests-gate.json
-          PLAYWRIGHT_SKIP_WEB_SERVER=1 \
-            ./bin/6529 exec playwright test \
-              "${selected_specs[@]}" \
-              --project="$MUSEUM_PROJECT" \
-              --workers=1 \
-              --list \
-              --reporter=json \
-              > test-results/app-pr-ci/museum-tests-remaining.json
+          # Never list an empty selection: Playwright would list every spec.
+          if [ "${#selected_specs[@]}" -gt 0 ]; then
+            PLAYWRIGHT_SKIP_WEB_SERVER=1 \
+              ./bin/6529 exec playwright test \
+                "${selected_specs[@]}" \
+                --project="$MUSEUM_PROJECT" \
+                --workers=1 \
+                --list \
+                --reporter=json \
+                > test-results/app-pr-ci/museum-tests-remaining.json
+          else
+            printf '{"suites":[]}\n' > test-results/app-pr-ci/museum-tests-remaining.json
+          fi
           node <<'NODE'
           const fs = require("node:fs");
           const outputDir = "test-results/app-pr-ci";
@@ -1369,7 +1389,7 @@ jobs:
             if (!spec) throw new Error(`Unknown Museum pack in execution inventory: ${pack}`);
             expectedSpecs.add(spec);
           }
-          function collect(reportPath) {
+          function collect(reportPath, { allowEmpty = false } = {}) {
             const report = JSON.parse(fs.readFileSync(reportPath, "utf8"));
             const entries = [];
             const visit = (suite) => {
@@ -1391,7 +1411,9 @@ jobs:
               for (const child of suite.suites || []) visit(child);
             };
             for (const suite of report.suites || []) visit(suite);
-            if (entries.length === 0) throw new Error("Museum execution inventory is empty.");
+            if (entries.length === 0 && !allowEmpty) {
+              throw new Error("Museum execution inventory is empty.");
+            }
             const keys = new Set(entries.map((entry) => entry.key));
             if (keys.size !== entries.length) {
               throw new Error("Museum execution inventory contains duplicate test identities.");
@@ -1400,7 +1422,10 @@ jobs:
           }
           const full = collect(`${outputDir}/museum-tests-full.json`);
           const gate = collect(`${outputDir}/museum-tests-gate.json`);
-          const selected = collect(`${outputDir}/museum-tests-remaining.json`);
+          // A gate-only selection has no remaining packs.
+          const selected = collect(`${outputDir}/museum-tests-remaining.json`, {
+            allowEmpty: selection.selected_packs.length === 0,
+          });
           const rights = selected.filter((entry) => entry.file === "museum/rights-readonly.spec.ts");
           const remaining = selected.filter((entry) => entry.file !== "museum/rights-readonly.spec.ts");
           const fullKeys = new Set(full.map((entry) => entry.key));
@@ -1551,6 +1576,10 @@ jobs:
           # Release the complete gate server tree before starting a fresh rights
           # server. Rights and the other packs share the original 20-minute cap.
           cleanup_museum_server
+          if [ "${#selected_specs[@]}" -eq 0 ]; then
+            echo "Museum $MUSEUM_PROJECT selection is gate-only; no further packs are affected."
+            exit 0
+          fi
           museum_remaining_log="test-results/app-pr-ci/museum-coverage.log"
           set +e
           timeout --signal=TERM --kill-after=30s 20m \
