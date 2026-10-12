@@ -339,6 +339,10 @@ const DropsList = memo(
               type={drop.type}
               suspendLightDropHydration={suspendLightDropHydration}
               rootMargin={virtualScrollRootMargin}
+              enableLongContentCollapse={
+                location === DropLocation.WAVE &&
+                getItemData.dropViewDropId === null
+              }
             >
               {dropContent}
             </VirtualScrollWrapper>
