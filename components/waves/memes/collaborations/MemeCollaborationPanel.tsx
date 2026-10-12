@@ -205,7 +205,10 @@ export function MemeCollaborationPanel({
           </label>
         </>
       )}
-      <ul className="tw-m-0 tw-list-none tw-space-y-3 tw-p-0">
+      <ul
+        aria-live="polite"
+        className="tw-m-0 tw-list-none tw-space-y-3 tw-p-0"
+      >
         {data.invitations.map((invitation) => (
           <li
             key={invitation.id}
@@ -220,7 +223,7 @@ export function MemeCollaborationPanel({
             {!data.closed &&
               invitation.status ===
                 ApiMemeCollaborationInvitationStatusEnum.Pending &&
-              (isAuthor ? (
+              isAuthor && (
                 <button
                   type="button"
                   className={BUTTON_CLASS}
@@ -234,7 +237,12 @@ export function MemeCollaborationPanel({
                 >
                   {t(locale, "memes.collaborations.cancel")}
                 </button>
-              ) : (
+              )}
+            {!data.closed &&
+              invitation.status ===
+                ApiMemeCollaborationInvitationStatusEnum.Pending &&
+              !isAuthor &&
+              invitation.profile.id === connectedProfile.id && (
                 <>
                   <button
                     type="button"
@@ -263,7 +271,7 @@ export function MemeCollaborationPanel({
                     {t(locale, "memes.collaborations.decline")}
                   </button>
                 </>
-              ))}
+              )}
           </li>
         ))}
       </ul>

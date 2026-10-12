@@ -261,9 +261,10 @@ export default function AnimationSection({
     !hasAnimation &&
     !hasPendingAnimationChange &&
     !hasPendingAnimationUpload;
+  const showAnimationPreview =
+    hasAnimation || hasPendingAnimationChange || hasPendingAnimationUpload;
   const showAnimationControls =
-    !claim.collaboration_credit?.collab &&
-    (hasAnimation || hasPendingAnimationChange || hasPendingAnimationUpload);
+    !claim.collaboration_credit?.collab && showAnimationPreview;
   const showAddChoice = showAddFlow && replaceMode === "choose";
   const showAddLink =
     !claim.collaboration_credit?.collab &&
@@ -375,7 +376,7 @@ export default function AnimationSection({
             </div>
           </div>
         )}
-        {showAnimationControls && (
+        {showAnimationPreview && (
           <>
             {animationDisplayUrl && animationPreviewMimeType && (
               <div className="tw-relative tw-flex tw-aspect-video tw-w-full tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-lg tw-bg-iron-900 tw-ring-1 tw-ring-iron-800">

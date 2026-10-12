@@ -7,11 +7,15 @@ jest.mock("@/components/auth/Auth", () => ({
 }));
 jest.mock("@/components/drops/view/item/content/media/MediaDisplay", () => ({
   __esModule: true,
-  default: () => null,
+  default: ({ media_url }: { media_url: string }) => (
+    <div data-testid="animation-preview">{media_url}</div>
+  ),
 }));
 jest.mock("@/components/drop-forge/craft/MediaSourceLinkCard", () => ({
   __esModule: true,
-  default: () => null,
+  default: ({ url }: { url: string }) => (
+    <div data-testid="animation-source">{url}</div>
+  ),
 }));
 jest.mock("@/components/ipfs/IPFSContext", () => ({
   resolveIpfsUrlSync: (url: string) => url,
@@ -21,7 +25,7 @@ jest.mock("@/services/api/memes-minting-claims-api", () => ({
   uploadClaimMedia: jest.fn(),
 }));
 
-function renderAnimation(animationUrl: string | null) {
+function renderAnimation(animationUrl: string | null, collab = false) {
   const claim: MintingClaim = {
     claim_id: 1,
     drop_id: "drop-1",
@@ -30,6 +34,15 @@ function renderAnimation(animationUrl: string | null) {
     description: "Test animation",
     attributes: [],
     animation_url: animationUrl,
+    ...(collab
+      ? {
+          collaboration_credit: {
+            artist: "A, B",
+            artist_profiles: "A, B",
+            collab: true,
+          },
+        }
+      : {}),
   };
   return render(
     <AnimationSection
@@ -72,4 +85,20 @@ describe("AnimationSection file picker", () => {
     expect(screen.getByRole("button", { name: "Replace" })).toBeInTheDocument();
     expect(click).not.toHaveBeenCalled();
   });
+});
+
+it("keeps a collaborative claim's saved animation and source visible with no replacement controls", () => {
+  renderAnimation("https://example.com/animation.mp4", true);
+  expect(screen.getByTestId("animation-preview")).toHaveTextContent(
+    "https://example.com/animation.mp4"
+  );
+  expect(screen.getByTestId("animation-source")).toHaveTextContent(
+    "https://example.com/animation.mp4"
+  );
+  expect(
+    screen.queryByRole("button", { name: "Replace" })
+  ).not.toBeInTheDocument();
+  expect(
+    screen.queryByRole("button", { name: "Remove animation" })
+  ).not.toBeInTheDocument();
 });

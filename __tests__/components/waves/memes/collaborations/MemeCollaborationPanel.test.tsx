@@ -191,3 +191,22 @@ it("shows the exact review snapshot and opens only safe media links", async () =
   expect(links).toHaveLength(1);
   expect(links[0]).toHaveAttribute("href", "https://media.example/art.png");
 });
+
+it("offers response actions only for the connected invitee even if another pending invitation is returned", async () => {
+  mount({
+    ...pending,
+    invitations: [
+      pendingInvitation,
+      {
+        ...pendingInvitation,
+        id: "other",
+        profile: { ...profile, id: "C", handle: "artistC" },
+      },
+    ],
+  });
+  await screen.findByText("@artistC");
+  expect(
+    screen.getAllByRole("button", { name: "Accept collaboration" })
+  ).toHaveLength(1);
+  expect(screen.getAllByRole("button", { name: "Decline" })).toHaveLength(1);
+});

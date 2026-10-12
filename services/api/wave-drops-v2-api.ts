@@ -240,7 +240,7 @@ const hydrateDropV2 = async ({
 
   return {
     collaborators: drop.collaborators ?? [],
-    ...(drop.submission_artist
+    ...(drop.submission_artist !== undefined
       ? { submission_artist: drop.submission_artist }
       : {}),
     id: drop.id,
@@ -299,7 +299,7 @@ export const mapLeaderboardDropV2 = ({
 
   return {
     collaborators: drop.collaborators ?? [],
-    ...(drop.submission_artist
+    ...(drop.submission_artist !== undefined
       ? { submission_artist: drop.submission_artist }
       : {}),
     id: drop.id,
