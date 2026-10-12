@@ -93,7 +93,10 @@ export function useCompetitionPauseState(identity: CompetitionIdentity) {
   });
 }
 
-export function useCompetitionDetail(identity: CompetitionIdentity) {
+export function useCompetitionDetail(
+  identity: CompetitionIdentity,
+  enabled = true
+) {
   const viewer = useCompetitionViewer();
   return useQuery({
     queryKey: competitionQueryKey(identity, viewer),
@@ -101,6 +104,7 @@ export function useCompetitionDetail(identity: CompetitionIdentity) {
     retry: false,
     staleTime: 15_000,
     refetchInterval: 30_000,
+    enabled,
   });
 }
 
