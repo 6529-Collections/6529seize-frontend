@@ -30,6 +30,7 @@ test.describe("Access Page", () => {
     browser,
     baseURL,
   }) => {
+    // proxy.ts ACCESS_GATE_ENABLED: only staging deployments run the gate.
     test.skip(
       !isStagingDeployment(baseURL),
       "The access gate runs only on staging deployments."
@@ -47,6 +48,7 @@ test.describe("Access Page", () => {
     browser,
     baseURL,
   }) => {
+    // Staging targets are covered by the redirect check above instead.
     test.skip(
       isStagingDeployment(baseURL),
       "Staging deployments keep the access gate."

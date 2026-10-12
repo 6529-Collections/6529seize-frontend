@@ -22,7 +22,7 @@ import {
   persistBakedArtifacts,
 } from "@/config/runtimeConfig";
 import { sharedConfig } from "@/config/nextConfig";
-import { MISSING_NEXT_ASSET_REWRITES } from "@/lib/proxy/plainResponses";
+import { getMissingNextAssetRewriteConfig } from "@/lib/proxy/plainResponses";
 const require = createRequire(import.meta.url);
 const sentryEnabled = Boolean(process.env["SENTRY_DSN"]);
 
@@ -137,10 +137,8 @@ const nextConfigFactory = (phase: string): NextConfig => {
       async generateBuildId() {
         return VERSION;
       },
-      // Runs after real files are served, before dynamic routes can match.
-      async rewrites() {
-        return MISSING_NEXT_ASSET_REWRITES;
-      },
+      // Production builds only; runs after real files, before dynamic routes.
+      ...getMissingNextAssetRewriteConfig(phase),
     };
   }
 

@@ -8,8 +8,13 @@ import {
   unstable_doesMiddlewareMatch,
   unstable_getResponseFromNextConfig,
 } from "next/experimental/testing/server";
+import {
+  PHASE_DEVELOPMENT_SERVER,
+  PHASE_PRODUCTION_BUILD,
+} from "next/constants";
 import { GET as missingNextAsset } from "@/app/api/missing-next-asset/route";
 import {
+  getMissingNextAssetRewriteConfig,
   MISSING_NEXT_ASSET_REWRITES,
   MISSING_NEXT_ASSET_ROUTE,
 } from "@/lib/proxy/plainResponses";
@@ -41,7 +46,31 @@ describe("proxy matcher", () => {
 });
 
 describe("missing /_next asset rewrite", () => {
-  const nextConfig = { rewrites: async () => MISSING_NEXT_ASSET_REWRITES };
+  const nextConfig = getMissingNextAssetRewriteConfig(PHASE_PRODUCTION_BUILD);
+
+  it("is part of production builds", async () => {
+    await expect(nextConfig.rewrites?.()).resolves.toBe(
+      MISSING_NEXT_ASSET_REWRITES
+    );
+  });
+
+  it("is absent on the dev server, which serves chunks and HMR on demand", async () => {
+    const devConfig = getMissingNextAssetRewriteConfig(
+      PHASE_DEVELOPMENT_SERVER
+    );
+    expect(devConfig).toEqual({});
+
+    for (const url of [
+      "/_next/static/chunks/app/page.js",
+      "/_next/webpack-hmr",
+    ]) {
+      const response = await unstable_getResponseFromNextConfig({
+        url: `http://localhost:3001${url}`,
+        nextConfig: devConfig,
+      });
+      expect(isRewrite(response)).toBe(false);
+    }
+  });
 
   it.each([
     "/_next/static/chunks/old-build.js",
