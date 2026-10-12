@@ -105,8 +105,9 @@ export function defineWaveVideoLayoutTests() {
     await expect(video).not.toHaveAttribute("poster", /.+/);
     const chatUrl = page.url();
     ready = true;
-    // Expire the real negative HEAD cache without waiting a minute in the test.
-    await page.clock.fastForward(60000);
+    // Exercise prompt discovery through the real cache, without a refresh or
+    // skipping past the old sixty-second missing-image cache lifetime.
+    await page.clock.runFor(5000);
     await expect(video).toHaveAttribute(
       "poster",
       /\/poster\/portrait_poster\.0000001\.jpg$/

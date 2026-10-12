@@ -64,7 +64,7 @@ it("prefers a device poster and stops probing generated images after it loads", 
     jest.advanceTimersByTime(120000);
   });
   expect(check).toHaveBeenCalledTimes(1);
-  expect(check).toHaveBeenCalledWith(deviceUrl);
+  expect(check).toHaveBeenCalledWith(deviceUrl, { negativeCacheTtlMs: 5000 });
 });
 it("uses the generated poster if a device image exists but cannot decode", async () => {
   check.mockResolvedValue(true);
@@ -93,7 +93,7 @@ it("loads the JPEG and exposes its portrait ratio without fetching video", async
     { initialProps: { enabled: true } }
   );
   await flush();
-  expect(check).toHaveBeenCalledWith(posterUrl);
+  expect(check).toHaveBeenCalledWith(posterUrl, { negativeCacheTtlMs: 5000 });
   expect(imageAt(0).src).toBe(posterUrl);
   expect(result.current).toBeUndefined();
   loaded(imageAt(0));

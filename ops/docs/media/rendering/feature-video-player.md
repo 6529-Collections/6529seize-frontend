@@ -66,8 +66,10 @@ Device previews use one second, or halfway through very short clips. Backend
 previews use a frame around one second to avoid black opening frames, with
 the first frame retained for existing or very short videos. Clips still black
 at one second may have a black preview. New uploads may briefly have no preview while they
-process. Visible, active players discover late previews automatically with
-bounded retries that back off to one check per minute; no refresh is needed
+process. Visible, active players discover late previews automatically, retrying
+after five seconds and then backing off to one check per minute. Missing previews
+are cached for only five seconds so a ready preview can be discovered on the next
+retry; no refresh is needed
 when processing finishes within that window. Older uploads and external videos without a preview show the empty
 frame and Play control. Duration can remain `—` until you press Play.
 

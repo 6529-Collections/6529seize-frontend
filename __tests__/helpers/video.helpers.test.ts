@@ -71,6 +71,31 @@ describe("video helpers", () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
+  it("keeps rendition misses cached for a minute while poster misses expire after five seconds", async () => {
+    jest.useFakeTimers();
+    try {
+      const { checkVideoAvailability } =
+        await import("@/helpers/video.helpers");
+      const fetchMock = jest.fn().mockResolvedValue({ ok: false });
+      globalThis.fetch = fetchMock;
+      const posterOptions = { negativeCacheTtlMs: 5000 };
+      await checkVideoAvailability("cached-rendition.mp4");
+      await checkVideoAvailability("new-poster.jpg", posterOptions);
+      fetchMock.mockResolvedValue({ ok: true });
+      jest.advanceTimersByTime(5000);
+      expect(await checkVideoAvailability("cached-rendition.mp4")).toBe(false);
+      expect(
+        await checkVideoAvailability("new-poster.jpg", posterOptions)
+      ).toBe(true);
+      expect(fetchMock).toHaveBeenCalledTimes(3);
+      jest.advanceTimersByTime(55000);
+      expect(await checkVideoAvailability("cached-rendition.mp4")).toBe(true);
+      expect(fetchMock).toHaveBeenCalledTimes(4);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
   it("evicts old availability cache entries when the cache grows too large", async () => {
     const { checkVideoAvailability } = await import("@/helpers/video.helpers");
     const fetchMock = jest.fn().mockResolvedValue({ ok: true });
