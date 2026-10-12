@@ -92,7 +92,7 @@ export default function CraftLaunchActions({
       const saved = await requestForgeLaunch(contract, claimId, !!initialized);
       client.setQueryData(forgeLaunchKey(contract, claimId), saved);
     } catch (e) {
-      setError(getToastErrorDetails(e) ?? "Unable to request launch");
+      setError(getToastErrorDetails(e) ?? t(locale, "dropForge.launchError"));
       await query.refetch();
     } finally {
       setSubmitting(false);
@@ -139,7 +139,7 @@ export default function CraftLaunchActions({
       </div>
       {failure && (
         <p role="alert" className="tw-text-sm tw-text-error">
-          {error ?? launch?.error ?? getToastErrorDetails(query.error)}
+          {failure}
         </p>
       )}
     </div>

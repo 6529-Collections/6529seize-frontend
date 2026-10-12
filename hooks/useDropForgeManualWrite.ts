@@ -8,6 +8,8 @@ import {
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { useQueryClient } from "@tanstack/react-query";
 import { forgeLaunchKey } from "@/hooks/drop-forge-query-keys";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 type PendingManual = {
   attempt_id?: string;
   lease?: string | null;
@@ -20,6 +22,11 @@ type ManualAttempt = {
   lease: string | null;
   action: string | undefined;
   baselineHash: string | undefined;
+};
+type VolatileProof = {
+  key: string;
+  pending: PendingManual & { hash: string };
+  notified: boolean;
 };
 function pendingManual(key: string): PendingManual | null {
   const raw = localStorage.getItem(key);
@@ -38,8 +45,10 @@ export function useDropForgeManualWrite(
   fingerprint: string = ""
 ) {
   const { requestAuth, setToast } = useAuth();
+  const locale = useBrowserLocale();
   const client = useQueryClient();
   const attempt = useRef<ManualAttempt | null>(null);
+  const volatileProof = useRef<VolatileProof | null>(null);
   const context = useRef({ fingerprint, hash });
   useEffect(() => {
     context.current = { fingerprint, hash };
@@ -49,8 +58,13 @@ export function useDropForgeManualWrite(
     async (current: ManualAttempt) => {
       await finishForgeManual(contract, claim, current.lease);
       if (attempt.current?.id === current.id) attempt.current = null;
-      if (pendingManual(current.key)?.attempt_id === current.id)
-        localStorage.removeItem(current.key);
+      try {
+        if (pendingManual(current.key)?.attempt_id === current.id)
+          localStorage.removeItem(current.key);
+      } catch {
+        // Backend cancellation is acknowledged; stale local data cannot revive
+        // this attempt and must not turn cancellation into another submission.
+      }
     },
     [contract, claim]
   );
@@ -62,10 +76,14 @@ export function useDropForgeManualWrite(
         context.current.fingerprint !== captured
       )
         return;
-      if (pendingManual(key)?.hash)
-        throw new Error(
-          "Reconcile the previous manual transaction before starting another"
-        );
+      let saved: PendingManual | null;
+      try {
+        saved = pendingManual(key);
+      } catch {
+        throw new Error(t(locale, "dropForge.storageError"));
+      }
+      if (saved?.hash || volatileProof.current)
+        throw new Error(t(locale, "dropForge.previousManualError"));
       const granted = await beginForgeManual(contract, claim, label);
       // A null lease explicitly permits the legacy/unmanaged flow. Conflicts on
       // managed launches reject BEGIN rather than returning null.
@@ -96,31 +114,61 @@ export function useDropForgeManualWrite(
         throw error_;
       }
     },
-    [requestAuth, contract, claim, key, cancel]
+    [requestAuth, contract, claim, key, cancel, locale]
   );
   useEffect(() => {
     const current = attempt.current;
     if (!hash || current?.key !== key || hash === current.baselineHash) return;
-    const saved = pendingManual(key);
-    if (saved?.attempt_id !== current.id || saved.lease !== current.lease)
-      return;
-    localStorage.setItem(key, JSON.stringify({ ...saved, hash }));
+    const submitted: PendingManual & { hash: string } = {
+      attempt_id: current.id,
+      lease: current.lease,
+      ...(current.action !== undefined ? { action: current.action } : {}),
+      hash,
+    };
+    try {
+      const saved = pendingManual(key);
+      if (saved?.attempt_id !== current.id || saved.lease !== current.lease)
+        return;
+      localStorage.setItem(key, JSON.stringify(submitted));
+    } catch {
+      volatileProof.current = { key, pending: submitted, notified: false };
+    }
     attempt.current = null;
   }, [hash, key]);
   useEffect(() => {
     let stopped = false;
     let recovering = false;
-    function acknowledge(raw: string) {
-      if (!stopped && localStorage.getItem(key) === raw)
-        localStorage.removeItem(key);
+    function acknowledge(raw: string | null, held: VolatileProof | null) {
+      if (stopped) return;
+      if (held && volatileProof.current === held) volatileProof.current = null;
+      try {
+        const ownsStored = held
+          ? pendingManual(key)?.attempt_id === held.pending.attempt_id
+          : raw !== null && localStorage.getItem(key) === raw;
+        if (ownsStored) localStorage.removeItem(key);
+      } catch {
+        // Proof is already durable in the backend. Local cleanup is best effort.
+      }
+    }
+    function reportStorageFailure(held: VolatileProof | null) {
+      if (!held || held.notified || stopped) return;
+      held.notified = true;
+      setToast({
+        type: "error",
+        message: t(locale, "dropForge.hashStorageError", {
+          hash: held.pending.hash,
+        }),
+      });
     }
     async function recover() {
       if (stopped || recovering) return;
-      const raw = localStorage.getItem(key);
-      const saved = pendingManual(key);
-      if (!raw || !saved?.hash) return;
       recovering = true;
+      const held =
+        volatileProof.current?.key === key ? volatileProof.current : null;
       try {
+        const raw = held ? null : localStorage.getItem(key);
+        const saved = held?.pending ?? pendingManual(key);
+        if (!saved?.hash) return;
         await finishForgeManual(
           contract,
           claim,
@@ -128,12 +176,13 @@ export function useDropForgeManualWrite(
           saved.hash,
           saved.action
         );
-        acknowledge(raw);
+        acknowledge(raw, held);
         await client.invalidateQueries({
           queryKey: forgeLaunchKey(contract, claim),
         });
       } catch {
         /* Retain the exact proof for retry; never acquire a new lease. */
+        reportStorageFailure(held);
       } finally {
         recovering = false;
       }
@@ -146,7 +195,7 @@ export function useDropForgeManualWrite(
       stopped = true;
       clearInterval(timer);
     };
-  }, [contract, claim, key, hash, client]);
+  }, [contract, claim, key, hash, client, locale, setToast]);
   const rejectWallet = useEffectEvent((isActive: () => boolean) => {
     const code =
       typeof error === "object" && error !== null && "code" in error
@@ -159,7 +208,8 @@ export function useDropForgeManualWrite(
       setToast({
         type: "error",
         message:
-          getToastErrorDetails(error_) ?? "Manual operation requires recovery",
+          getToastErrorDetails(error_) ??
+          t(locale, "dropForge.manualRecoveryError"),
       });
     });
   });

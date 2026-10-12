@@ -21,6 +21,10 @@ import type { ApiDropForgeLaunch } from "@/generated/models/ApiDropForgeLaunch";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
+const explorers: Partial<Record<number, string>> = {
+  1: "https://etherscan.io",
+  11155111: "https://sepolia.etherscan.io",
+};
 function actionLabel(state: ActionState) {
   if (state === ActionState.Confirmed) return "dropForge.actionDone" as const;
   if (state === ActionState.Failed) return "dropForge.actionFailed" as const;
@@ -54,6 +58,7 @@ export default function DropForgeAutomationStatus({
     if (confirmed) confirmedWork();
   }, [confirmed]);
   if (!launch) return null;
+  const explorer = explorers[launch.chain_id];
   async function control(resume: boolean) {
     if (!launch) return;
     setBusy(true);
@@ -71,9 +76,7 @@ export default function DropForgeAutomationStatus({
       });
       await query.refetch();
     } catch (e) {
-      setError(
-        getToastErrorDetails(e) ?? "Unable to change automatic execution"
-      );
+      setError(getToastErrorDetails(e) ?? t(locale, "dropForge.controlError"));
     } finally {
       setBusy(false);
     }
@@ -91,7 +94,7 @@ export default function DropForgeAutomationStatus({
       );
       await query.refetch();
     } catch (e) {
-      setError(getToastErrorDetails(e) ?? "Unable to recover manual operation");
+      setError(getToastErrorDetails(e) ?? t(locale, "dropForge.recoveryError"));
     } finally {
       setBusy(false);
     }
@@ -122,12 +125,12 @@ export default function DropForgeAutomationStatus({
                   : launch.phases[action.phase]?.name)}
             </span>
             <span>{t(locale, actionLabel(action.state))}</span>
-            {action.hash && (
+            {action.hash && explorer && (
               <a
                 target="_blank"
                 rel="noopener noreferrer"
                 className="tw-text-primary-300"
-                href={`https://${launch.chain_id === 1 ? "" : "sepolia."}etherscan.io/tx/${action.hash}`}
+                href={`${explorer}/tx/${action.hash}`}
               >
                 {t(locale, "dropForge.transaction")}
               </a>

@@ -81,7 +81,7 @@ export function SubscriptionLinks({
       setToast({
         type: "error",
         message:
-          getToastErrorDetails(error) ?? "Unable to download completed lists",
+          getToastErrorDetails(error) ?? t(locale, "dropForge.downloadError"),
       });
     } finally {
       setDownloading(false);

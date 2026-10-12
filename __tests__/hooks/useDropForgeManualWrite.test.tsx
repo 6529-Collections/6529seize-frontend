@@ -19,6 +19,9 @@ jest.mock("@/services/api/drop-forge-api", () => ({
   beginForgeManual: jest.fn(),
   finishForgeManual: jest.fn(),
 }));
+jest.mock("@/hooks/useBrowserLocale", () => ({
+  useBrowserLocale: () => "en-US",
+}));
 const key = "drop-forge-manual:creator:123";
 type Props = { hash: string | undefined; error: unknown; fingerprint: string };
 function setup(initialHash?: string) {
@@ -39,6 +42,10 @@ beforeEach(() => {
   jest.clearAllMocks();
   jest.mocked(beginForgeManual).mockResolvedValue({ lease_id: "lease" });
   jest.mocked(finishForgeManual).mockResolvedValue({ lease_id: null });
+});
+afterEach(() => {
+  jest.restoreAllMocks();
+  jest.useRealTimers();
 });
 it("registers the new hash with the category and lease of its write, ignoring pre-existing data", async () => {
   const hook = setup("old-hash");
@@ -155,4 +162,84 @@ it("retains failed cancellation evidence without showing a toast after unmount",
   });
   expect(localStorage.getItem(key)).toBe(pending);
   expect(mockToast).not.toHaveBeenCalled();
+});
+
+it("blocks before acquiring a lease or prompting the wallet when storage cannot be read", async () => {
+  jest.spyOn(Storage.prototype, "getItem").mockImplementation(() => {
+    throw new Error("Storage denied");
+  });
+  const hook = setup();
+  const write = jest.fn();
+  await act(async () => {
+    await expect(hook.result.current(write, "phase0")).rejects.toThrow(
+      "Browser storage is unavailable"
+    );
+  });
+  expect(beginForgeManual).not.toHaveBeenCalled();
+  expect(write).not.toHaveBeenCalled();
+});
+
+it("keeps a submitted hash in memory and retries the same proof if browser persistence fails", async () => {
+  jest.useFakeTimers();
+  const hook = setup();
+  const write = jest.fn();
+  await act(async () => {
+    await hook.result.current(write, "phase1");
+  });
+  const originalWrite = Storage.prototype.setItem;
+  const storageWrite = jest
+    .spyOn(Storage.prototype, "setItem")
+    .mockImplementation(function (
+      this: Storage,
+      storageKey: string,
+      value: string
+    ) {
+      if (storageKey === key && value.includes("submitted-hash"))
+        throw new Error("Storage denied");
+      return originalWrite.call(this, storageKey, value);
+    });
+  jest
+    .mocked(finishForgeManual)
+    .mockRejectedValueOnce(new Error("Backend unavailable"));
+  await act(async () => {
+    hook.rerender({
+      hash: "submitted-hash",
+      error: null,
+      fingerprint: "original",
+    });
+  });
+  expect(storageWrite).toHaveBeenCalledWith(
+    key,
+    expect.stringContaining("submitted-hash")
+  );
+  expect(finishForgeManual).toHaveBeenCalledWith(
+    "creator",
+    123,
+    "lease",
+    "submitted-hash",
+    "phase1"
+  );
+  expect(finishForgeManual).toHaveBeenCalledTimes(1);
+  await waitFor(() =>
+    expect(mockToast).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: expect.stringContaining("submitted-hash"),
+      })
+    )
+  );
+  await act(async () => {
+    jest.advanceTimersByTime(5000);
+  });
+  expect(finishForgeManual).toHaveBeenCalledTimes(2);
+  expect(finishForgeManual).toHaveBeenLastCalledWith(
+    "creator",
+    123,
+    "lease",
+    "submitted-hash",
+    "phase1"
+  );
+  expect(beginForgeManual).toHaveBeenCalledTimes(1);
+  expect(write).toHaveBeenCalledTimes(1);
+  expect(localStorage.getItem(key)).toBeNull();
+  hook.unmount();
 });

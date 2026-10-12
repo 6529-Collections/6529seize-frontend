@@ -93,13 +93,12 @@ export function beginForgeManual(
   claim: number,
   label?: string
 ): Promise<ApiDropForgeManualResponse> {
+  const action = manualHint(label);
   return commonApiPost<ApiDropForgeManualRequest, ApiDropForgeManualResponse>({
     endpoint: `${claimPath(contract, claim)}/manual`,
     body: {
       operation: ApiDropForgeManualRequestOperationEnum.Begin,
-      ...(manualHint(label) !== undefined
-        ? { action: manualHint(label)! }
-        : {}),
+      ...(action !== undefined ? { action } : {}),
     },
   });
 }
@@ -110,15 +109,14 @@ export function finishForgeManual(
   hash?: string,
   label?: string
 ): Promise<ApiDropForgeManualResponse> {
+  const action = manualHint(label);
   return commonApiPost<ApiDropForgeManualRequest, ApiDropForgeManualResponse>({
     endpoint: `${claimPath(contract, claim)}/manual`,
     body: {
       operation: hash
         ? ApiDropForgeManualRequestOperationEnum.Submit
         : ApiDropForgeManualRequestOperationEnum.Cancel,
-      ...(manualHint(label) !== undefined
-        ? { action: manualHint(label)! }
-        : {}),
+      ...(action !== undefined ? { action } : {}),
       ...(leaseId ? { lease_id: leaseId } : {}),
       ...(hash ? { hash } : {}),
     },

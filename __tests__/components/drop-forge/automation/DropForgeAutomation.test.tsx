@@ -33,10 +33,16 @@ jest.mock("@/components/drop-forge/drop-forge-config", () => ({
 jest.mock("@/hooks/useBrowserLocale", () => ({
   useBrowserLocale: () => "en-US",
 }));
+const clients: QueryClient[] = [];
+afterEach(() => {
+  clients.forEach((client) => client.clear());
+  clients.length = 0;
+});
 function renderUI(element: React.ReactNode) {
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
   });
+  clients.push(client);
   return {
     client,
     ...render(
@@ -71,6 +77,34 @@ const launch = (initialized: boolean, metadata = "published") =>
     ],
   }) as ApiDropForgeLaunch;
 beforeEach(() => jest.clearAllMocks());
+it.each([
+  [1, "https://etherscan.io"],
+  [11155111, "https://sepolia.etherscan.io"],
+  [137, null],
+])(
+  "uses only the explicitly supported explorer for chain %i",
+  async (chain, explorer) => {
+    const current = launch(true);
+    current.chain_id = chain as number;
+    current.actions[0].hash = "0x" + "a".repeat(64);
+    jest.mocked(getForgeLaunch).mockResolvedValue(current);
+    renderUI(
+      <DropForgeAutomationStatus
+        claimId={123}
+        onConfirmedWork={() => undefined}
+      />
+    );
+    await screen.findByText("Initialized");
+    if (explorer)
+      expect(
+        screen.getByRole("link", { name: "View transaction" })
+      ).toHaveAttribute("href", `${explorer}/tx/${current.actions[0].hash}`);
+    else
+      expect(
+        screen.queryByRole("link", { name: "View transaction" })
+      ).not.toBeInTheDocument();
+  }
+);
 it("queues Launch once and shows durable initialization rather than a wallet transaction prompt", async () => {
   jest.mocked(getForgeLaunch).mockResolvedValue(null);
   jest.mocked(requestForgeLaunch).mockResolvedValue(launch(false));

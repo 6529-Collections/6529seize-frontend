@@ -2937,6 +2937,18 @@ export const EN_US_MESSAGES = {
   "dropForge.syncCurrent": "Published metadata is synchronized.",
   "dropForge.automation": "Automatic launch progress",
   "dropForge.initialized": "Initialized",
+  "dropForge.processError": "Unable to start processing",
+  "dropForge.launchError": "Unable to request launch",
+  "dropForge.controlError": "Unable to change automatic execution",
+  "dropForge.recoveryError": "Unable to recover manual operation",
+  "dropForge.downloadError": "Unable to download completed lists",
+  "dropForge.manualRecoveryError": "Manual operation requires recovery",
+  "dropForge.previousManualError":
+    "Reconcile the previous manual transaction before starting another",
+  "dropForge.storageError":
+    "Browser storage is unavailable. Manual transactions require recovery storage.",
+  "dropForge.hashStorageError":
+    "Unable to save transaction {hash}. Keep this hash for manual recovery.",
   "dropForge.transaction": "View transaction",
 
   "header.menu.open": "Open menu",

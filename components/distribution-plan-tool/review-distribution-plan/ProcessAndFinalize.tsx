@@ -62,7 +62,7 @@ export default function ProcessAndFinalize({
       );
       queryClient.setQueryData(forgeProcessKey(contract, claim, plan), saved);
     } catch (e) {
-      setError(getToastErrorDetails(e) ?? "Unable to start processing");
+      setError(getToastErrorDetails(e) ?? t(locale, "dropForge.processError"));
       await operation.refetch();
     } finally {
       setSubmitting(false);
@@ -102,7 +102,7 @@ export default function ProcessAndFinalize({
       </div>
       {failure && (
         <p role="alert" className="tw-max-w-lg tw-text-sm tw-text-error">
-          {error ?? job?.error ?? getToastErrorDetails(operation.error)}
+          {failure}
         </p>
       )}
     </div>
