@@ -208,6 +208,25 @@ describe("waves.helpers", () => {
       });
     });
 
+    it("preserves reply settings", () => {
+      const wave = makeWave();
+      wave.chat.replies = {
+        open: true,
+        collapsed: true,
+        authenticated_user_eligible: true,
+      };
+
+      const result = convertWaveToUpdateWave(wave);
+
+      expect(result.chat.replies).toEqual({ open: true, collapsed: true });
+    });
+
+    it("omits reply settings the wave response did not include", () => {
+      const result = convertWaveToUpdateWave(makeWave());
+
+      expect(result.chat).not.toHaveProperty("replies");
+    });
+
     it("preserves card-set TDH credit NFTs", () => {
       const creditNfts = [
         { contract: "0xmemes", token_id: 1 },

@@ -15,6 +15,10 @@ jest.mock("@/components/waves/specs/WaveSlowMode", () => ({
     <div data-testid="slow-mode-setting" data-display={display} />
   ),
 }));
+jest.mock("@/components/waves/specs/WaveChatReplies", () => ({
+  __esModule: true,
+  default: () => <div data-testid="replies-setting" />,
+}));
 jest.mock("@/components/waves/specs/WaveChatStatus", () => ({
   __esModule: true,
   default: ({ display }: { readonly display?: string }) => (
@@ -114,6 +118,7 @@ describe("WaveConfigurationSections", () => {
       "data-display",
       "configuration"
     );
+    expect(screen.getByTestId("replies-setting")).toBeInTheDocument();
     expect(
       screen.queryByTestId("display-configuration")
     ).not.toBeInTheDocument();
@@ -175,6 +180,7 @@ describe("WaveConfigurationSections", () => {
 
     expect(screen.queryByTestId("links-setting")).not.toBeInTheDocument();
     expect(screen.queryByTestId("slow-mode-setting")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("replies-setting")).not.toBeInTheDocument();
     expect(screen.queryByTestId("personal-display")).not.toBeInTheDocument();
     expect(screen.getByTestId("chat-status-setting")).toHaveAttribute(
       "data-display",

@@ -413,6 +413,21 @@ describe("fetchWaveDropsFeedV2", () => {
     expect(result.drops[0]?.poll).toEqual(poll);
   });
 
+  it("carries collapsed-thread reply counts onto hydrated drops", async () => {
+    commonApiFetchMock.mockResolvedValueOnce({
+      wave,
+      drops: [{ ...createDrop(1), replies_count: 3 }, createDrop(2)],
+    });
+
+    const result = await fetchWaveDropsFeedV2({
+      waveId: "wave-1",
+      limit: 20,
+    });
+
+    expect(result.drops[0]).toMatchObject({ replies_count: 3 });
+    expect(result.drops[1]).not.toHaveProperty("replies_count");
+  });
+
   it("preserves no-negative vote waves on feed and drop results", async () => {
     commonApiFetchMock.mockResolvedValueOnce({
       wave: {

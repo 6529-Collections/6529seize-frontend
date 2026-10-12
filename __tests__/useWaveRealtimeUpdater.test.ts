@@ -185,6 +185,43 @@ describe("useWaveRealtimeUpdater", () => {
     );
   });
 
+  it("keeps a collapsed thread's reply count when an update omits it", async () => {
+    const store = {
+      wave1: {
+        drops: [
+          {
+            id: "root",
+            serial_no: 5,
+            type: "FULL",
+            wave: { id: "wave1" },
+            author: {},
+            stableKey: "root",
+            stableHash: "root",
+            replies_count: 4,
+          },
+        ],
+        latestFetchedSerialNo: 10,
+      },
+    };
+    const props = baseProps(store);
+    renderHook(() => useWaveRealtimeUpdater(props));
+
+    emitWebSocketMessage(WsMessageType.DROP_UPDATE, {
+      id: "root",
+      serial_no: 5,
+      wave: { id: "wave1" },
+      author: {},
+    });
+    await flushPromises();
+
+    expect(props.updateData).toHaveBeenCalledWith(
+      expect.objectContaining({
+        key: "wave1",
+        drops: [expect.objectContaining({ id: "root", replies_count: 4 })],
+      })
+    );
+  });
+
   it("fetches the exact canonical drop for a valid compact reference", async () => {
     const store = { wave1: { drops: [], latestFetchedSerialNo: 10 } };
     const props = baseProps(store);
