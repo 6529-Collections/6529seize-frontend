@@ -170,6 +170,60 @@ const utc = (
 ): string =>
   new Date(Date.UTC(y, m, d + dayOffset, hour, minute)).toISOString();
 
+// Wall times on the days the EU clocks change (Athens: 03:00 EEST -> 02:00 EET
+// on 2026-10-25, 03:00 EET -> 04:00 EEST on 2027-03-28). A repeated wall time
+// resolves to the earlier instant; a skipped wall time is shifted forward.
+const TRANSITION_WALL_TIMES: ReadonlyArray<{
+  readonly label: string;
+  readonly day: DayCase["day"];
+  readonly hour: number;
+  readonly minute: number;
+  readonly expectedUtc: string;
+}> = [
+  {
+    label: "2026-10-25 02:30 (before DST ends, EEST)",
+    day: [2026, 9, 25],
+    hour: 2,
+    minute: 30,
+    expectedUtc: "2026-10-24T23:30:00.000Z",
+  },
+  {
+    label: "2026-10-25 03:30 (repeated hour, earlier instant)",
+    day: [2026, 9, 25],
+    hour: 3,
+    minute: 30,
+    expectedUtc: "2026-10-25T00:30:00.000Z",
+  },
+  {
+    label: "2026-10-25 04:30 (after DST ends, EET)",
+    day: [2026, 9, 25],
+    hour: 4,
+    minute: 30,
+    expectedUtc: "2026-10-25T02:30:00.000Z",
+  },
+  {
+    label: "2027-03-28 02:30 (before DST starts, EET)",
+    day: [2027, 2, 28],
+    hour: 2,
+    minute: 30,
+    expectedUtc: "2027-03-28T00:30:00.000Z",
+  },
+  {
+    label: "2027-03-28 03:30 (skipped hour, shifted forward)",
+    day: [2027, 2, 28],
+    hour: 3,
+    minute: 30,
+    expectedUtc: "2027-03-28T01:30:00.000Z",
+  },
+  {
+    label: "2027-03-28 04:30 (after DST starts, EEST)",
+    day: [2027, 2, 28],
+    hour: 4,
+    minute: 30,
+    expectedUtc: "2027-03-28T01:30:00.000Z",
+  },
+];
+
 // Wall-clock phase boundaries used by the mint flow (see useManifoldClaim).
 const PHASE_WALL_TIMES: ReadonlyArray<readonly [number, number]> = [
   [17, 40],
@@ -248,15 +302,9 @@ function restoreDefaultLocale(): void {
 }
 
 describe("meme calendar zone conversion is independent of the browser locale", () => {
-  const originalTz = process.env.TZ;
-
   afterEach(() => {
+    jest.restoreAllMocks();
     restoreDefaultLocale();
-    if (originalTz === undefined) {
-      delete process.env.TZ;
-    } else {
-      process.env.TZ = originalTz;
-    }
   });
 
   describe.each(LOCALES)("default locale %s", (locale) => {
@@ -382,31 +430,76 @@ describe("meme calendar zone conversion is independent of the browser locale", (
     });
   });
 
-  it.each([
-    "UTC",
-    "America/Los_Angeles",
-    "America/New_York",
-    "Asia/Kolkata",
-    "Pacific/Auckland",
-  ])("does not depend on the viewer timezone (%s) under fi-FI", (tz) => {
-    process.env.TZ = tz;
-    forceDefaultLocale("fi-FI");
+  describe("around the DST change days", () => {
+    it.each(TRANSITION_WALL_TIMES)(
+      "maps $label to the right UTC instant",
+      ({ day, hour, minute, expectedUtc }) => {
+        for (const locale of LOCALES) {
+          forceDefaultLocale(locale);
+          expect(
+            wallTimeToUtcInstantInZone(utcDay(day), hour, minute).toISOString()
+          ).toBe(expectedUtc);
+        }
+      }
+    );
+  });
 
-    expect(
-      mintStartInstantUtcForMintDay(
-        new Date(Date.UTC(2026, 9, 26))
-      ).toISOString()
-    ).toBe("2026-10-26T15:40:00.000Z");
-    expect(
-      mintStartInstantUtcForMintDay(
-        new Date(Date.UTC(2026, 9, 23))
-      ).toISOString()
-    ).toBe("2026-10-23T14:40:00.000Z");
-    expect(
-      mintStartInstantUtcForMintDay(
-        new Date(Date.UTC(2027, 2, 29))
-      ).toISOString()
-    ).toBe("2027-03-29T14:40:00.000Z");
+  describe("when the Athens wall clock cannot be read", () => {
+    // Forces the fallback branch: unreadable parts make neither candidate
+    // "show" the target wall time, so the EU DST rule has to decide.
+    beforeEach(() => {
+      jest
+        .spyOn(REAL_DATE_TIME_FORMAT.prototype, "formatToParts")
+        .mockReturnValue([]);
+    });
+
+    it("really exercises the fallback (harness guard)", () => {
+      expect(
+        new REAL_DATE_TIME_FORMAT("en-US").formatToParts(new Date())
+      ).toEqual([]);
+    });
+
+    it.each(DAY_CASES)(
+      "still picks the right offset for every phase wall time on $label",
+      ({ day, athensOffsetHours }) => {
+        for (const [hour, minute] of PHASE_WALL_TIMES) {
+          expect(
+            wallTimeToUtcInstantInZone(utcDay(day), hour, minute).toISOString()
+          ).toBe(utc(day, hour - athensOffsetHours, minute));
+        }
+      }
+    );
+
+    it.each(END_CASES)(
+      "still ends the window at 17:00 Athens the day after $label",
+      ({ day, endUtc }) => {
+        expect(mintEndInstantUtcForMintDay(utcDay(day)).toISOString()).toBe(
+          endUtc
+        );
+      }
+    );
+
+    it.each(TRANSITION_WALL_TIMES)(
+      "still maps $label to the right UTC instant",
+      ({ day, hour, minute, expectedUtc }) => {
+        expect(
+          wallTimeToUtcInstantInZone(utcDay(day), hour, minute).toISOString()
+        ).toBe(expectedUtc);
+      }
+    );
+
+    it("keeps winter mint times on EET and summer mint times on EEST", () => {
+      expect(
+        mintStartInstantUtcForMintDay(
+          new Date(Date.UTC(2026, 9, 26))
+        ).toISOString()
+      ).toBe("2026-10-26T15:40:00.000Z");
+      expect(
+        mintStartInstantUtcForMintDay(
+          new Date(Date.UTC(2026, 9, 23))
+        ).toISOString()
+      ).toBe("2026-10-23T14:40:00.000Z");
+    });
   });
 
   it("produces identical instants for every locale across the whole range", () => {

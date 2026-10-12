@@ -47,6 +47,41 @@ function getEuropeWallClock(instant: Date): ZoneWallClock | null {
   return Object.values(wallClock).every(Number.isFinite) ? wallClock : null;
 }
 
+// EU summer time (EEST, UTC+3 in Athens) runs from 01:00 UTC on the last Sunday
+// of March to 01:00 UTC on the last Sunday of October.
+const EU_DST_MARCH_MONTH_INDEX = 2;
+const EU_DST_OCTOBER_MONTH_INDEX = 9;
+
+function euDstTransitionMillis(year: number, monthIndex: number): number {
+  const lastDayOfMonth = new Date(Date.UTC(year, monthIndex + 1, 0));
+  // getUTCDay() is 0 on Sunday, so this steps back to the last Sunday.
+  return Date.UTC(
+    year,
+    monthIndex,
+    lastDayOfMonth.getUTCDate() - lastDayOfMonth.getUTCDay(),
+    1
+  );
+}
+
+function isEuSummerTime(instant: Date): boolean {
+  const year = instant.getUTCFullYear();
+  const millis = instant.getTime();
+  return (
+    millis >= euDstTransitionMillis(year, EU_DST_MARCH_MONTH_INDEX) &&
+    millis < euDstTransitionMillis(year, EU_DST_OCTOBER_MONTH_INDEX)
+  );
+}
+
+/**
+ * Converts a wall-clock time on the UTC calendar date of `utcDay` in
+ * Europe/Athens to the UTC instant at which a clock there shows it.
+ *
+ * Edge cases around the DST changes: a repeated wall time (the hour that
+ * occurs twice when summer time ends) resolves to the earlier instant. A wall
+ * time that does not exist (03:00-03:59 when summer time starts) is shifted
+ * forward by the skipped hour, so 03:30 maps to the instant that shows 04:30
+ * EEST. No caller uses such times: mint phases run 17:00-19:20.
+ */
 export function wallTimeToUtcInstantInZone(
   utcDay: Date,
   hour: number,
@@ -76,6 +111,9 @@ export function wallTimeToUtcInstantInZone(
   if (showsTargetWallTime(summerCandidate)) return summerCandidate;
   if (showsTargetWallTime(winterCandidate)) return winterCandidate;
 
-  // Fallback: prefer the offset that matches the zone's DST on that date (summer first);
-  return summerCandidate;
+  // Neither candidate shows the target wall time (a wall time inside the
+  // spring-forward gap, or wall-clock parts that could not be read). Decide by
+  // the EU DST rule instead of assuming summer time: use the summer offset only
+  // if that instant falls within the EU summer-time period.
+  return isEuSummerTime(summerCandidate) ? summerCandidate : winterCandidate;
 }
