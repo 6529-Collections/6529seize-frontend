@@ -168,19 +168,16 @@ Remediation:
 - Rotate any credential-like values that were ever deployed through the public
   runtime bundle.
 
-### P1: Put Server-Side Quotas Around Remaining Alchemy Proxy Routes
+### P2: Finish Hardening The Alchemy Proxy Routes
 
-`app/api/alchemy/collections/route.ts` and
-`app/api/alchemy/owner-nfts/route.ts` still proxy anonymous user input through
-the server Alchemy API key. The token metadata route has been capped, but these
-routes still need comparable controls.
+The `app/api/alchemy/*` routes validate their inputs, accept only supported
+networks, cache lookups briefly, and rate limit each client through
+`lib/security/clientRateLimit.ts`. The collection search route is retired.
+Those limits live in each server process's memory.
 
 Remediation:
 
-- Add rate limiting, bounded upstream response reads, and request timeouts.
-- Validate `owner`, `contract`, `chain`, and `pageKey` inputs before calling
-  Alchemy.
-- Restrict supported networks explicitly and reject unknown chain values.
+- Add upstream request timeouts and bounded upstream response reads.
 - Consider requiring app auth or moving these calls behind the backend quota
   layer if the frontend API key proxy is not intended to be public.
 
