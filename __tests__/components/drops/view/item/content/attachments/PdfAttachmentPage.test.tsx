@@ -68,11 +68,12 @@ it("releases raster and text layers away from the viewport while keeping measure
       page={4}
       width={430}
       viewportHeight={800}
+      estimatedAspectRatio={0.5625}
       scrollRoot={document.createElement("div")}
       onError={jest.fn()}
     />
   );
-  expect(screen.getByTestId("page")).toHaveAttribute("data-render", "none");
+  expect(screen.queryByTestId("page")).not.toBeInTheDocument();
   expect((container.firstChild as HTMLElement).style.aspectRatio).toBe(
     "1 / 0.5625"
   );
@@ -82,8 +83,7 @@ it("releases raster and text layers away from the viewport while keeping measure
   expect(mockCleanup).not.toHaveBeenCalled();
   visible(false);
   expect(mockCleanup).toHaveBeenCalledTimes(1);
-  expect(screen.getByTestId("page")).toHaveAttribute("data-render", "none");
-  expect(screen.getByTestId("page")).toHaveAttribute("data-text", "false");
+  expect(screen.queryByTestId("page")).not.toBeInTheDocument();
   // Returning to a released page must still render it at its measured size.
   visible(true);
   expect(screen.getByTestId("page")).toHaveAttribute("data-render", "canvas");
@@ -102,6 +102,7 @@ it("bounds canvas dimensions for unusually tall pages", () => {
       page={1}
       width={1200}
       viewportHeight={800}
+      estimatedAspectRatio={0.5625}
       scrollRoot={document.createElement("div")}
       onError={jest.fn()}
     />
@@ -119,6 +120,7 @@ it("reports invalid page dimensions instead of allocating an invalid canvas", ()
       page={1}
       width={430}
       viewportHeight={800}
+      estimatedAspectRatio={0.5625}
       scrollRoot={document.createElement("div")}
       onError={onError}
     />
