@@ -29,7 +29,7 @@ import { useCompetitionNavigation } from "@/contexts/CompetitionNavigationContex
 import { getLegacyCompetitionTab } from "@/helpers/default-competition.helpers";
 import { useContentTab } from "../ContentTabContext";
 import { ApiCompetitionType } from "@/generated/models/ApiCompetitionType";
-import { useOptionalHeaderContext } from "@/contexts/HeaderContext";
+import { useSubmissionRulesTabRef } from "./useSubmissionRulesTabRef";
 import {
   getApproveWaveTabLabelsFromMetadata,
   getWaveOutcomeVisibilityFromMetadata,
@@ -148,8 +148,6 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
   const searchParams = useSearchParams();
   const { flat, nativeCompetition } = useCompetitionNavigation();
   const { activeContentTab } = useContentTab();
-  const consumeSubmissionRulesFocus =
-    useOptionalHeaderContext()?.consumeSubmissionRulesFocus;
   const waveId = wave?.id;
   const locale = useBrowserLocale();
   const nativePresentation = useMemo(
@@ -264,31 +262,13 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
     [scrollActiveButtonIntoView]
   );
 
-  const isConfigurationActive = effectiveActiveView === BrainView.CONFIGURATION;
-  const setConfigurationButtonRef = useCallback(
-    (element: HTMLButtonElement | null) => {
-      onConfigurationButtonRef?.(element);
-      if (isConfigurationActive) {
-        scrollActiveButtonIntoView(element);
-        if (
-          isApp &&
-          element &&
-          waveId &&
-          consumeSubmissionRulesFocus?.(waveId)
-        ) {
-          element.focus();
-        }
-      }
-    },
-    [
-      onConfigurationButtonRef,
-      isConfigurationActive,
-      scrollActiveButtonIntoView,
-      consumeSubmissionRulesFocus,
-      isApp,
-      waveId,
-    ]
-  );
+  const setConfigurationButtonRef = useSubmissionRulesTabRef({
+    active: effectiveActiveView === BrainView.CONFIGURATION,
+    isApp,
+    waveId,
+    onButtonRef: onConfigurationButtonRef,
+    scrollIntoView: scrollActiveButtonIntoView,
+  });
 
   const restoreTabRowScroll = useCallback(
     (element: HTMLDivElement | null) => {
