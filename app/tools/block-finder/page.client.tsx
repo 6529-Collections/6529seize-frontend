@@ -123,7 +123,10 @@ export default function BlockFinderClient() {
     setPredictedBlocks(null);
     if (timeWindow !== BlockPickerTimeWindow.NONE && !blockNumberIncludes) {
       setToast({
-        message: "Add at least one block number when using a time window.",
+        message: t(
+          locale,
+          "tools.blockFinder.toast.timeWindowNeedsBlockNumbers"
+        ),
         type: "error",
       });
       return;
@@ -134,7 +137,7 @@ export default function BlockFinderClient() {
       !/^\d+(,\s*\d+)*$/.test(blockNumberIncludes.trim())
     ) {
       setToast({
-        message: "Enter block numbers separated by commas.",
+        message: t(locale, "tools.blockFinder.toast.invalidBlockNumbers"),
         type: "error",
       });
       return;
