@@ -115,5 +115,12 @@ export function sharedConfig(
       },
     },
     serverExternalPackages: ["@reown/appkit", "@reown/appkit-adapter-wagmi"],
+    experimental: {
+      // Next 16.3 defaults `next build` to the project-local `tsc` CLI, which
+      // checks the whole tsconfig.json project including `__tests__`. The
+      // TypeScript API checker keeps the previous behavior of skipping test
+      // files; tests are typechecked by the Jest ratchet, not by the build.
+      useTypeScriptCli: false,
+    },
   };
 }
