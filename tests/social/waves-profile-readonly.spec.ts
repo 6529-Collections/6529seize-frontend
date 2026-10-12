@@ -2,6 +2,10 @@ import type { Locator, Page } from "@playwright/test";
 import { installSurfaceSimulation } from "../support/surfaceSimulation";
 import { expectCompetitionScroll } from "../support/competitionScroll";
 import {
+  monitorRememberedLeaderboard,
+  retainDesktopWaveSidebar,
+} from "../support/waveNavigationContinuity";
+import {
   gotoDocumentWithTransientRetry,
   gotoReadyWithApiResponse,
   RESPONSE_TIMEOUT_MS,
@@ -284,6 +288,15 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
         await expect(page).toHaveURL((url) => url.pathname === "/waves");
       };
       await gotoReady(page, "/waves");
+      const desktopSidebar =
+        testInfo.project.name === "web-desktop-chromium"
+          ? await retainDesktopWaveSidebar(page)
+          : null;
+      const prepareWaveSwitch = async () => {
+        // Desktop users switch directly in the persistent left pane. Mobile
+        // returns to the wave list because detail views occupy its viewport.
+        if (!desktopSidebar) await returnToWaves();
+      };
       // Staging has its own wave data and no Maybes Bar. Use its public chat
       // counterpart; production and local production-data runs keep the exact journey.
       const chatWaveName =
@@ -294,18 +307,28 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       await expect(chat).toBeVisible({ timeout: 15000 });
       await section("Leaderboard").click();
       await expectLeaderboard();
-      await returnToWaves();
+      await desktopSidebar?.expectRetained();
+      await prepareWaveSwitch();
       const chatWave = await openWave(chatWaveName);
       expect(chatWave).not.toBe(mainStage);
       await expect(chat).toBeVisible({ timeout: 15000 });
       await section("Chat").click();
-      await returnToWaves();
+      await desktopSidebar?.expectRetained();
+      await prepareWaveSwitch();
+      const expectNoDetour = await monitorRememberedLeaderboard(
+        page,
+        mainStage!,
+        "The Memes - Main Stage"
+      );
       expect(await openWave("The Memes - Main Stage")).toBe(mainStage);
       await expectLeaderboard();
+      await expectNoDetour();
+      await desktopSidebar?.expectRetained();
       await page.screenshot({
         path: testInfo.outputPath(`remembered-${surface}-main-stage.png`),
         fullPage: true,
       });
+      await desktopSidebar?.dispose();
       await page.reload();
       await expectLeaderboard();
       await returnToWaves();

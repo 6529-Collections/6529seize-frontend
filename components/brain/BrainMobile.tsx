@@ -146,18 +146,21 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
     null;
   const { data: wave } = useWaveData({
     waveId: waveId,
-    onWaveNotFound: () => {
-      const params = new URLSearchParams(searchParams.toString() || "");
-      params.delete("wave");
-      const basePath = getWaveHomeRoute({
-        isDirectMessage: pathname.startsWith("/messages"),
-        isApp,
-      });
-      const newUrl = params.toString()
-        ? `${basePath}?${params.toString()}`
-        : basePath || getHomeRoute();
-      router.push(newUrl, { scroll: false });
-    },
+    structuredErrors: isCompetitionPathname(pathname),
+    onWaveNotFound: isCompetitionPathname(pathname)
+      ? undefined
+      : () => {
+          const params = new URLSearchParams(searchParams.toString() || "");
+          params.delete("wave");
+          const basePath = getWaveHomeRoute({
+            isDirectMessage: pathname.startsWith("/messages"),
+            isApp,
+          });
+          const newUrl = params.toString()
+            ? `${basePath}?${params.toString()}`
+            : basePath || getHomeRoute();
+          router.push(newUrl, { scroll: false });
+        },
   });
 
   const { isMemesWave, isCurationWave, isRankWave, isApproveWave } =

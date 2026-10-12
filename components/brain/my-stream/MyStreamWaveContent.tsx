@@ -115,18 +115,21 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
   const { updateEligibility } = useWaveEligibility();
   const { data: wave } = useWaveData({
     waveId,
-    onWaveNotFound: () => {
-      const params = new URLSearchParams(searchParams.toString() || "");
-      params.delete("wave");
-      const basePath = getWaveHomeRoute({
-        isDirectMessage: pathname.startsWith("/messages"),
-        isApp,
-      });
-      const newUrl = params.toString()
-        ? `${basePath}?${params.toString()}`
-        : basePath || getHomeRoute();
-      router.push(newUrl, { scroll: false });
-    },
+    structuredErrors: isCompetitionPathname(pathname),
+    onWaveNotFound: isCompetitionPathname(pathname)
+      ? undefined
+      : () => {
+          const params = new URLSearchParams(searchParams.toString() || "");
+          params.delete("wave");
+          const basePath = getWaveHomeRoute({
+            isDirectMessage: pathname.startsWith("/messages"),
+            isApp,
+          });
+          const newUrl = params.toString()
+            ? `${basePath}?${params.toString()}`
+            : basePath || getHomeRoute();
+          router.push(newUrl, { scroll: false });
+        },
   });
   const metadataWaveId = wave?.id;
   useWaveContentTabRegistration(wave, competitionOnly);
@@ -531,7 +534,9 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
 
   // Early return if no wave data - all hooks must be called before this
   if (!wave) {
-    return null;
+    return isCompetitionPathname(pathname)
+      ? (competitionContent ?? null)
+      : null;
   }
 
   const activeChatSubmitDropState: ChatSubmitDropState | null =

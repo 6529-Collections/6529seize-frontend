@@ -8,6 +8,7 @@ import {
 import BrainMobile from "@/components/brain/BrainMobile";
 import { BrainView } from "@/components/brain/mobile/brainMobileViews";
 import { SidebarTab } from "@/components/brain/right-sidebar/BrainRightSidebarTypes";
+import { useWaveData } from "@/hooks/useWaveData";
 import {
   getHistoryWaveTab,
   WAVE_TAB_STORAGE_KEY,
@@ -90,7 +91,7 @@ jest.mock("@tanstack/react-query", () => ({
 }));
 
 jest.mock("@/hooks/useWaveData", () => ({
-  useWaveData: () => ({ data: waveData }),
+  useWaveData: jest.fn(() => ({ data: waveData })),
 }));
 
 const mockUseWave = jest.fn();
@@ -414,6 +415,44 @@ describe("BrainMobile", () => {
     await waitFor(() => expect(screen.getByTestId("tabs")).toBeInTheDocument());
     rerender(<div />);
   });
+
+  it.each([
+    "/waves/1/competitions",
+    "/waves/1/competitions/alpha",
+    "/waves/1/competitions/new",
+  ])(
+    "preserves the selected competition route on a missing wave (%s)",
+    (pathname) => {
+      mockPathname = pathname;
+      mockActiveWaveId = "1";
+      render(<BrainMobile>child</BrainMobile>);
+      const options = jest.mocked(useWaveData).mock.calls.at(-1)![0];
+      expect(options.structuredErrors).toBe(true);
+      expect(options.onWaveNotFound).toBeUndefined();
+      act(() => options.onWaveNotFound?.());
+      expect(mockPush).not.toHaveBeenCalled();
+    }
+  );
+
+  it.each([
+    ["/waves/1", "/waves"],
+    ["/messages/1", "/messages"],
+  ])(
+    "retains ordinary app missing-wave navigation (%s)",
+    (pathname, destination) => {
+      mockPathname = pathname;
+      mockActiveWaveId = "1";
+      mockSearchParams = new URLSearchParams("wave=1&serialNo=23");
+      render(<BrainMobile>child</BrainMobile>);
+      const options = jest.mocked(useWaveData).mock.calls.at(-1)![0];
+      expect(options.structuredErrors).toBe(false);
+      expect(options.onWaveNotFound).toBeDefined();
+      act(() => options.onWaveNotFound?.());
+      expect(mockPush).toHaveBeenCalledWith(`${destination}?serialNo=23`, {
+        scroll: false,
+      });
+    }
+  );
 
   it.each([
     { pathname: "/messages", testId: "messages" },

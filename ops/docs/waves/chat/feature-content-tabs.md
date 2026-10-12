@@ -23,6 +23,9 @@ wave navigation restores that choice, including after a reload or reopening the
 app. Main Stage can remember Leaderboard while Maybes Bar independently remembers
 Chat. A wave with no valid remembered choice opens Chat. Background competition
 loading does not change a deliberate selection.
+The wave list stays in place when switching waves. The remembered section opens
+directly; pending data uses that section's loading state without opening Chat or
+Competitions first.
 Explicit tab, competition, curation and message links retain their destinations.
 Browser Back/Forward and native app Back restore the section from that visit
 when it is still available, ahead of the wave's latest remembered choice.
@@ -65,8 +68,8 @@ when it is still available, ahead of the wave's latest remembered choice.
      or a visit without a valid saved choice, opens `Chat`, including Memes and
      completed competition waves on web and in the native app.
    - Loading or refreshing the default competition does not change deliberate
-     Chat selections. A remembered competition view waits for its identity and
-     availability to be checked before opening.
+     Chat selections. A remembered competition view keeps its section selected
+     while its identity and availability are checked.
    - Explicit tab and competition links open their requested section. Native
      app Back restores the section from that visit when it is still available.
 4. Select a tab to switch sections. The tab row stays visually steady while
