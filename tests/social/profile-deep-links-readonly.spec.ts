@@ -542,7 +542,15 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
         url.pathname === "/api/distributions" &&
         url.searchParams.get("page") === "2"
     );
-    const distributions = await response.json();
+    expect(
+      response.headers()["content-type"],
+      "Expected /api/distributions to return JSON"
+    ).toContain("application/json");
+    const distributions: { readonly data?: unknown } | null =
+      await response.json();
+    if (!Array.isArray(distributions?.data)) {
+      throw new Error("Expected /api/distributions to return a data array");
+    }
     expect(
       distributions.data.length,
       "Expected the distribution fixture's fifth row"

@@ -21,18 +21,24 @@ describe("Browser URL state", () => {
   });
 
   it("waits for client navigation to update the URL", async () => {
-    let url = "https://6529.io/punk6529/collected?page=1";
-    const update = setTimeout(() => {
-      url =
-        "https://6529.io/punk6529/collected?page=2&distribution-page=2#distribution-memes-1";
-    }, 10);
-    try {
-      await expect(
-        expectUrlState({ url: () => url }, target)
-      ).resolves.toBeUndefined();
-    } finally {
-      clearTimeout(update);
-    }
+    // The first sample is always the previous URL, independent of timer load.
+    const url = jest
+      .fn()
+      .mockReturnValueOnce("https://6529.io/punk6529/collected?page=1")
+      .mockReturnValue(
+        "https://6529.io/punk6529/collected?page=2&distribution-page=2#distribution-memes-1"
+      );
+    await expect(expectUrlState({ url }, target)).resolves.toBeUndefined();
+    expect(url.mock.calls.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it("includes a caller's route description in timeout failures", async () => {
+    await expect(
+      expectUrlState({ url: () => "https://6529.io/waves" }, target, {
+        timeout: 25,
+        message: "Expected the distribution return URL and anchor",
+      })
+    ).rejects.toThrow("Expected the distribution return URL and anchor");
   });
 
   it.each([

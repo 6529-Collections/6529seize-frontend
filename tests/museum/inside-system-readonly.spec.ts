@@ -356,7 +356,11 @@ test.describe("Museum Inside the System @surface @readonly", () => {
               hash: url.hash,
             };
           },
-          { timeout: STUDY_READY_TIMEOUT_MS }
+          {
+            timeout: STUDY_READY_TIMEOUT_MS,
+            message:
+              "Expected the accession's full-system route and work anchor",
+          }
         )
         .toEqual({
           pathname: "/museum/network/projects/century/system",
