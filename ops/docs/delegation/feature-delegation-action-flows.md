@@ -151,9 +151,11 @@ wallet, in a safe order.
   that older links are registered again so they count for the fourth wallet.
   Joining wallets are those outside the current consolidation; with fewer than
   three current members listed, every wallet is joining.
-- Before 15 October 2026, 00:00 UTC every step of a 4-wallet plan waits and
-  shows `Available from <date>.`, with a note that four-wallet consolidations
-  count only for links registered from then.
+- Until 15 October 2026, 00:10 UTC every step of a 4-wallet plan waits and
+  shows `Available from <date>.` with that time. A note gives both times:
+  four-wallet consolidations count only for links registered from 00:00 UTC,
+  and every step opens at 00:10 UTC, a few minutes later, so no link can land
+  before the start.
 - After a step confirms in the session, a link that 6529 has not recorded yet
   shows `Recording` and
   `Waiting for 6529 to record this link (usually about a minute).` instead of
