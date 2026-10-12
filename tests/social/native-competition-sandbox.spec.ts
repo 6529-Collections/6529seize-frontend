@@ -1,7 +1,7 @@
 import { writeFile } from "node:fs/promises";
 import composerSandboxConstants from "../support/composerSandboxConstants.json";
 import { installSurfaceSimulation } from "../support/surfaceSimulation";
-import type { Page } from "@playwright/test";
+import type { Frame, Page } from "@playwright/test";
 import { expectCompetitionScroll } from "../support/competitionScroll";
 import {
   monitorRememberedLeaderboard,
@@ -3004,51 +3004,275 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         );
       let waveMissing = true;
       let metadataReads = 0;
-      await page.route(`**/api/waves/${WAVE}`, (route) => {
+      let releaseRecovery!: () => void;
+      const recoveryGate = new Promise<void>((resolve) => {
+        releaseRecovery = resolve;
+      });
+      await page.route(`**/api/waves/${WAVE}`, async (route) => {
         metadataReads += 1;
         if (waveMissing)
           return route.fulfill({
             status: 404,
             json: { message: `Wave ${WAVE} not found` },
           });
+        await recoveryGate;
         return route.fallback();
       });
-      await page.goto(`${ROOT}/alpha?tab=leaderboard`);
-      const unavailable = page
-        .getByRole("alert")
-        .filter({ hasText: "This competition could not be loaded" });
-      await expect(unavailable).toBeVisible();
-      expect(metadataReads).toBeGreaterThan(0);
-      await expect(page).toHaveURL(`${ROOT}/alpha?tab=leaderboard`);
-      const entry = page.getByText("Immutable alpha entry content", {
-        exact: true,
+      try {
+        await page.goto(`${ROOT}/alpha?tab=leaderboard`);
+        const unavailable = page
+          .getByRole("alert")
+          .filter({ hasText: "This competition could not be loaded" });
+        const retry = unavailable.getByRole("button", {
+          name: "Try again",
+          exact: true,
+        });
+        await expect(unavailable).toBeVisible();
+        expect(metadataReads).toBeGreaterThan(0);
+        await expect(page).toHaveURL(`${ROOT}/alpha?tab=leaderboard`);
+        if (app)
+          await expect(
+            page.getByRole("button", { name: "Back", exact: true })
+          ).toBeVisible();
+        const entry = page.getByText("Immutable alpha entry content", {
+          exact: true,
+        });
+        const chat = page.getByRole("region", {
+          name: "Wave chat file upload area",
+          exact: true,
+        });
+        await expect(entry).toHaveCount(0);
+        await expect(chat).toHaveCount(0);
+        waveMissing = false;
+        // Keep successful metadata pending while late 404 observers settle.
+        // The user must retain the selected route and its retry action.
+        await page.waitForTimeout(500);
+        await expect(page).toHaveURL(`${ROOT}/alpha?tab=leaderboard`);
+        await expect(unavailable).toBeVisible();
+        await expect(retry).toBeVisible();
+        await expect(entry).toHaveCount(0);
+        await expect(chat).toHaveCount(0);
+        await page.screenshot({
+          path: testInfo.outputPath("selected-competition-metadata-error.png"),
+        });
+        await retry.click();
+        releaseRecovery();
+        await expect(entry).toBeVisible();
+        await expect(unavailable).toHaveCount(0);
+        await expect(page).toHaveURL(`${ROOT}/alpha?tab=leaderboard`);
+        await expect(
+          page.getByRole(app ? "button" : "tab", {
+            name: "Leaderboard",
+            exact: true,
+          })
+        ).toHaveAttribute(app ? "aria-current" : "aria-selected", "true");
+        await expect(chat).toHaveCount(0);
+        await expect(
+          page.getByRole(app ? "button" : "tab", {
+            name: /^Competitions(?:\s+\d+\+?)?$/,
+          })
+        ).toHaveCount(0);
+        expect(sandbox.requests).toEqual([]);
+      } finally {
+        releaseRecovery();
+      }
+    });
+
+    test(`ignores a previous ordinary wave's delayed missing metadata after another competition commits (${app ? "app" : "web"})`, async ({
+      page,
+    }, testInfo) => {
+      test.skip(
+        app && testInfo.project.name !== "web-mobile-chromium",
+        "The native app layout is covered in the mobile project."
+      );
+      const previousWave = "00000000-0000-4000-8000-000000000536";
+      const sandbox = await installCompetitionApi(page, false, false);
+      sandbox.onlyCompetition("alpha");
+      if (app)
+        await installSurfaceSimulation(
+          page.context(),
+          "capacitor-ios-sim",
+          testInfo.project.use.baseURL
+        );
+      await page.route(`**/v3/waves/${previousWave}**`, (route) => {
+        const path = new URL(route.request().url()).pathname;
+        if (path.endsWith("/default-competition"))
+          return route.fulfill({
+            json: {
+              competition_id: null,
+              evaluated_at: Date.now(),
+              next_refresh_at: null,
+            },
+          });
+        if (path.endsWith("/competitions"))
+          return route.fulfill({ json: pageResult([]) });
+        return route.fulfill({
+          json: {
+            id: previousWave,
+            name: "Pending ordinary wave",
+            legacy_primary_competition_id: null,
+            permissions: {
+              view: true,
+              administer: false,
+              create_competition: false,
+            },
+          },
+        });
       });
-      const chat = page.getByRole("region", {
-        name: "Wave chat file upload area",
-        exact: true,
+      const overviewResponse = await page.request.get(
+        `${getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"])}/api/v2/waves/${WAVE}/drops`
+      );
+      expect(overviewResponse.ok()).toBe(true);
+      const overview = (await overviewResponse.json()).wave;
+      const targetWave = {
+        ...overview,
+        id: WAVE,
+        name: "Selected competition wave",
+      };
+      await page.route(/\/api\/v2\/waves(?:\?|$)/, (route) =>
+        route.fulfill({ json: { data: [targetWave], page: 1, next: false } })
+      );
+      await page.route("**/api/v2/official-waves", (route) =>
+        route.fulfill({ json: [targetWave] })
+      );
+      const metadataResponse = await page.request.get(
+        `${getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"])}/api/waves/${WAVE}`
+      );
+      expect(metadataResponse.ok()).toBe(true);
+      const metadata = await metadataResponse.json();
+      const ordinaryWave = {
+        ...metadata,
+        id: previousWave,
+        name: "Pending ordinary wave",
+        description_drop: {
+          ...metadata.description_drop,
+          wave: {
+            ...metadata.description_drop.wave,
+            id: previousWave,
+            name: "Pending ordinary wave",
+          },
+        },
+      };
+      await page.clock.install();
+      let waveMissing = false;
+      let metadataPending = false;
+      let releaseMissing!: () => void;
+      const missingGate = new Promise<void>((resolve) => {
+        releaseMissing = resolve;
       });
-      await expect(entry).toHaveCount(0);
-      await expect(chat).toHaveCount(0);
-      waveMissing = false;
-      await unavailable
-        .getByRole("button", { name: "Try again", exact: true })
-        .click();
-      await expect(entry).toBeVisible();
-      await expect(unavailable).toHaveCount(0);
-      await expect(page).toHaveURL(`${ROOT}/alpha?tab=leaderboard`);
-      await expect(
-        page.getByRole(app ? "button" : "tab", {
+      await page.route(`**/api/waves/${previousWave}`, async (route) => {
+        if (!waveMissing) return route.fulfill({ json: ordinaryWave });
+        metadataPending = true;
+        await missingGate;
+        return route.fulfill({
+          status: 404,
+          json: { message: `Wave ${previousWave} not found` },
+        });
+      });
+      const committedRoutes: string[] = [];
+      const observeRoute = (frame: Frame) => {
+        if (frame === page.mainFrame()) committedRoutes.push(page.url());
+      };
+      try {
+        await page.goto(`/waves/${previousWave}`);
+        await expect(
+          page.getByRole("button", {
+            name: "About Pending ordinary wave",
+            exact: true,
+          })
+        ).toBeVisible();
+        waveMissing = true;
+        // Reconnecting refetches mounted, stale metadata. Unlike a cold
+        // ViewContext lookup, this request survives leaving its view.
+        await page.clock.fastForward(60_100);
+        await page.context().setOffline(true);
+        await page.context().setOffline(false);
+        await expect.poll(() => metadataPending).toBe(true);
+        if (app) {
+          await page.getByRole("button", { name: "Back", exact: true }).click();
+          await expect(page).toHaveURL(/\/waves$/);
+        } else if (testInfo.project.name === "web-mobile-chromium") {
+          await page
+            .getByRole("button", { name: "Open menu", exact: true })
+            .click();
+          await page
+            .getByRole("navigation", {
+              name: "Desktop navigation",
+              exact: true,
+            })
+            .getByRole("link", { name: "Waves", exact: true })
+            .click();
+          await expect(page).toHaveURL(/\/waves$/);
+        }
+        await page
+          .getByRole("region", {
+            name: /All recent waves list|Regular waves list/,
+          })
+          .getByRole("link")
+          .filter({ hasText: targetWave.name })
+          .first()
+          .click();
+        const leaderboard = page.getByRole(app ? "button" : "tab", {
           name: "Leaderboard",
           exact: true,
-        })
-      ).toHaveAttribute(app ? "aria-current" : "aria-selected", "true");
-      await expect(chat).toHaveCount(0);
-      await expect(
-        page.getByRole(app ? "button" : "tab", {
-          name: /^Competitions(?:\s+\d+\+?)?$/,
-        })
-      ).toHaveCount(0);
-      expect(sandbox.requests).toEqual([]);
+        });
+        await leaderboard.click();
+        const selectedUrl = `${ROOT}/alpha?tab=leaderboard`;
+        const entry = page.getByText("Immutable alpha entry content", {
+          exact: true,
+        });
+        await expect(page).toHaveURL(selectedUrl);
+        await expect(entry).toBeVisible();
+        await expect(leaderboard).toHaveAttribute(
+          app ? "aria-current" : "aria-selected",
+          "true"
+        );
+        const missingResponse = page.waitForResponse(
+          (response) =>
+            new URL(response.url()).pathname === `/api/waves/${previousWave}` &&
+            response.status() === 404
+        );
+        committedRoutes.push(page.url());
+        page.on("framenavigated", observeRoute);
+        releaseMissing();
+        const response = await missingResponse;
+        expect(await response.finished()).toBeNull();
+        // Exercise callbacks from the previous wave after the new route is ready.
+        await page.waitForTimeout(500);
+        await expect(page).toHaveURL(selectedUrl);
+        await expect(entry).toBeVisible();
+        await expect(leaderboard).toHaveAttribute(
+          app ? "aria-current" : "aria-selected",
+          "true"
+        );
+        page.off("framenavigated", observeRoute);
+        expect(committedRoutes).toEqual(
+          committedRoutes.map(() => new URL(selectedUrl, page.url()).href)
+        );
+        await writeFile(
+          testInfo.outputPath("stale-wave-response-sequence.json"),
+          JSON.stringify({
+            previousWave,
+            selectedUrl,
+            responseUrl: response.url(),
+            responseStatus: response.status(),
+            committedRoutes,
+          })
+        );
+        await expect(
+          page.getByRole("region", {
+            name: "Wave chat file upload area",
+            exact: true,
+          })
+        ).toHaveCount(0);
+        await page.screenshot({
+          path: testInfo.outputPath("selected-competition-after-stale-404.png"),
+        });
+        expect(sandbox.requests).toEqual([]);
+      } finally {
+        page.off("framenavigated", observeRoute);
+        releaseMissing();
+      }
     });
 
     test(`keeps the selected Leaderboard during loading and transient refresh errors, and rejects revoked access (${app ? "app" : "web"})`, async ({

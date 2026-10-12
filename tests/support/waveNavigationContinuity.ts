@@ -5,9 +5,15 @@ import {
   getWavePathRoute,
 } from "../../helpers/navigation.helpers";
 
-// The search control mounts before the wave-list response and switches between
-// a button and an input. Retain their pane to catch a route replacing the shell.
+// Capture the interactive pane after hydration. The search control then switches
+// between a button and input without changing the sidebar's identity.
 export async function retainDesktopWaveSidebar(page: Page) {
+  const control = page
+    .getByRole("button", { name: "Find a wave…", exact: true })
+    .or(page.getByRole("searchbox", { name: "Find a wave…", exact: true }))
+    .filter({ visible: true });
+  await expect(control).toBeVisible();
+  await expect(control).toBeEnabled();
   const paneAncestor =
     "xpath=ancestor::div[contains(concat(' ', normalize-space(@class), ' '), ' tw-h-full ') and contains(concat(' ', normalize-space(@class), ' '), ' tw-border-r ')][1]";
   const buttonPane = page
@@ -58,6 +64,13 @@ export async function monitorRememberedLeaderboard(
     throw new Error(`Expected a wave destination, received ${wavePath}`);
   const monitor = await page.evaluateHandle(
     ({ targetPath, targetTitle, targetWaveId }) => {
+      // Accessible names collapse whitespace; API names can have trailing spaces.
+      const normalizeName = (value: string | null | undefined) =>
+        (value ?? "")
+          .replace(/[\u200b\u00ad]/g, "")
+          .replace(/\s+/g, " ")
+          .trim();
+      const expectedTitle = normalizeName(targetTitle);
       const isVisible = (element: Element) => {
         const style = getComputedStyle(element);
         return (
@@ -75,8 +88,9 @@ export async function monitorRememberedLeaderboard(
           document.querySelectorAll("h1, button[aria-label]")
         ).some(
           (heading) =>
-            (heading.textContent?.trim() === targetTitle ||
-              heading.getAttribute("aria-label") === `About ${targetTitle}`) &&
+            (normalizeName(heading.textContent) === expectedTitle ||
+              normalizeName(heading.getAttribute("aria-label")) ===
+                `About ${expectedTitle}`) &&
             isVisible(heading)
         );
         targetHeaderSeen ||= targetMounted;

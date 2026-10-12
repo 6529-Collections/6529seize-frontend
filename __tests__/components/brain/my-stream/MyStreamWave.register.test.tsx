@@ -308,6 +308,7 @@ describe("MyStreamWave registration", () => {
     mockResolvedWave = mockWave;
     mockSearchParams = new URLSearchParams();
     mockPathname = "/waves/wave-1";
+    window.history.replaceState(null, "", mockPathname);
   });
 
   it("registers the mounted wave for direct URL loads", async () => {
@@ -333,7 +334,6 @@ describe("MyStreamWave registration", () => {
       mockPathname = pathname;
       renderWave();
       const options = jest.mocked(useWaveData).mock.calls.at(-1)![0];
-      expect(options.structuredErrors).toBe(true);
       expect(options.onWaveNotFound).toBeUndefined();
       act(() => options.onWaveNotFound?.());
       expect(mockPush).not.toHaveBeenCalled();
@@ -382,14 +382,31 @@ describe("MyStreamWave registration", () => {
     (pathname, destination) => {
       mockPathname = pathname;
       mockSearchParams = new URLSearchParams("wave=wave-1&serialNo=23");
+      window.history.replaceState(null, "", `${pathname}?${mockSearchParams}`);
       renderWave();
       const options = jest.mocked(useWaveData).mock.calls.at(-1)![0];
-      expect(options.structuredErrors).toBe(false);
       expect(options.onWaveNotFound).toBeDefined();
       act(() => options.onWaveNotFound?.());
       expect(mockPush).toHaveBeenCalledWith(`${destination}?serialNo=23`, {
         scroll: false,
       });
+    }
+  );
+
+  it.each([
+    "/waves/wave-1/competitions/alpha?tab=leaderboard",
+    "/waves/wave-2?tab=chat",
+    "/network?wave=wave-1",
+  ])(
+    "ignores a captured missing-wave callback after moving to %s",
+    (target) => {
+      renderWave();
+      const callback = jest.mocked(useWaveData).mock.calls.at(-1)![0]
+        .onWaveNotFound;
+      expect(callback).toBeDefined();
+      window.history.replaceState(null, "", target);
+      act(() => callback?.());
+      expect(mockPush).not.toHaveBeenCalled();
     }
   );
 

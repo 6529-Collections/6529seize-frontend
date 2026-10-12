@@ -41,7 +41,6 @@ import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { useWaveEligibility } from "@/contexts/wave/WaveEligibilityContext";
 import { createBreakpoint } from "react-use";
 import {
-  getHomeRoute,
   getWaveHomeRoute,
   getWavePathRoute,
 } from "@/helpers/navigation.helpers";
@@ -76,6 +75,7 @@ import {
   getMemesHeaderDropActionState,
 } from "./waveDropAction.helpers";
 import { getWaveReplyEligibility } from "@/helpers/waves/wave-chat-replies.helpers";
+import { getMissingWaveNavigationRoute } from "@/helpers/waves/missing-wave-navigation.helpers";
 
 export interface MyStreamWaveProps {
   readonly waveId: string;
@@ -115,19 +115,20 @@ const MyStreamWaveContent: React.FC<MyStreamWaveProps> = ({
   const { updateEligibility } = useWaveEligibility();
   const { data: wave } = useWaveData({
     waveId,
-    structuredErrors: isCompetitionPathname(pathname),
     onWaveNotFound: isCompetitionPathname(pathname)
       ? undefined
       : () => {
-          const params = new URLSearchParams(searchParams.toString() || "");
+          const route = getMissingWaveNavigationRoute(waveId);
+          if (!route) return;
+          const params = route.searchParams;
           params.delete("wave");
           const basePath = getWaveHomeRoute({
-            isDirectMessage: pathname.startsWith("/messages"),
+            isDirectMessage: route.pathname.startsWith("/messages"),
             isApp,
           });
           const newUrl = params.toString()
             ? `${basePath}?${params.toString()}`
-            : basePath || getHomeRoute();
+            : basePath;
           router.push(newUrl, { scroll: false });
         },
   });

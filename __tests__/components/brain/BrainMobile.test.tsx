@@ -427,7 +427,6 @@ describe("BrainMobile", () => {
       mockActiveWaveId = "1";
       render(<BrainMobile>child</BrainMobile>);
       const options = jest.mocked(useWaveData).mock.calls.at(-1)![0];
-      expect(options.structuredErrors).toBe(true);
       expect(options.onWaveNotFound).toBeUndefined();
       act(() => options.onWaveNotFound?.());
       expect(mockPush).not.toHaveBeenCalled();
@@ -443,14 +442,35 @@ describe("BrainMobile", () => {
       mockPathname = pathname;
       mockActiveWaveId = "1";
       mockSearchParams = new URLSearchParams("wave=1&serialNo=23");
+      window.history.replaceState(null, "", `${pathname}?${mockSearchParams}`);
       render(<BrainMobile>child</BrainMobile>);
       const options = jest.mocked(useWaveData).mock.calls.at(-1)![0];
-      expect(options.structuredErrors).toBe(false);
       expect(options.onWaveNotFound).toBeDefined();
       act(() => options.onWaveNotFound?.());
       expect(mockPush).toHaveBeenCalledWith(`${destination}?serialNo=23`, {
         scroll: false,
       });
+    }
+  );
+
+  it.each([
+    "/waves/1/competitions/alpha?tab=leaderboard",
+    "/waves/2?tab=chat",
+    "/network?wave=1",
+  ])(
+    "ignores a captured missing-wave callback after moving to %s",
+    (target) => {
+      mockPathname = "/waves/1";
+      mockActiveWaveId = "1";
+      window.history.replaceState(null, "", mockPathname);
+      render(<BrainMobile>child</BrainMobile>);
+      const callback = jest.mocked(useWaveData).mock.calls.at(-1)![0]
+        .onWaveNotFound;
+      expect(callback).toBeDefined();
+      window.history.replaceState(null, "", target);
+      act(() => callback?.());
+      expect(mockPush).not.toHaveBeenCalled();
+      expect(mockSetActiveWave).not.toHaveBeenCalled();
     }
   );
 

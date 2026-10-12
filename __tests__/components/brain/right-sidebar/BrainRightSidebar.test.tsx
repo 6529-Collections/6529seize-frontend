@@ -19,7 +19,7 @@ jest.mock("@tanstack/react-query", () => ({
   keepPreviousData: {},
 }));
 
-const WaveContentMock = jest.fn((props: any) => <div data-testid="content" />);
+const WaveContentMock = jest.fn((_props: any) => <div data-testid="content" />);
 jest.mock("@/components/brain/right-sidebar/WaveContent", () => ({
   __esModule: true,
   WaveContent: (props: any) => WaveContentMock(props),
@@ -49,6 +49,12 @@ import {
 } from "@/components/brain/right-sidebar/BrainRightSidebarTypes";
 import { SidebarProvider } from "@/hooks/useSidebarState";
 import { useQuery } from "@tanstack/react-query";
+import { commonApiFetch } from "@/services/api/common-api";
+
+jest.mock("@/services/api/common-api", () => ({
+  ...jest.requireActual("@/services/api/common-api"),
+  commonApiFetch: jest.fn(),
+}));
 
 const mockUseQuery = useQuery as jest.Mock;
 
@@ -70,6 +76,18 @@ describe("BrainRightSidebar", () => {
   const renderSidebar = (ui: React.ReactNode) =>
     render(<SidebarProvider>{ui}</SidebarProvider>);
 
+  const inlineSidebar = (isOpen: boolean) => (
+    <SidebarProvider>
+      <BrainRightSidebar
+        isOpen={isOpen}
+        variant="inline"
+        waveId="1"
+        activeTab={SidebarTab.ABOUT}
+        setActiveTab={setActiveTab}
+      />
+    </SidebarProvider>
+  );
+
   it("renders WaveContent with fetched wave data", () => {
     renderSidebar(
       <BrainRightSidebar
@@ -88,6 +106,26 @@ describe("BrainRightSidebar", () => {
       })
     );
     expect(screen.getByTestId("content")).toBeInTheDocument();
+  });
+
+  it("keeps HTTP status on the shared right-sidebar wave query", async () => {
+    jest.mocked(commonApiFetch).mockResolvedValue(wave);
+    renderSidebar(
+      <BrainRightSidebar
+        isOpen={true}
+        waveId="1"
+        activeTab={SidebarTab.ABOUT}
+        setActiveTab={setActiveTab}
+      />
+    );
+    const { queryFn } = mockUseQuery.mock.calls[0][0] as {
+      queryFn: () => Promise<unknown>;
+    };
+    await expect(queryFn()).resolves.toBe(wave);
+    expect(commonApiFetch).toHaveBeenCalledWith({
+      endpoint: "waves/1",
+      errorMode: "structured",
+    });
   });
 
   it("toggles collapsed state when button clicked", async () => {
@@ -151,23 +189,12 @@ describe("BrainRightSidebar", () => {
   });
 
   it("keeps the inline panel mounted until its exit motion completes", async () => {
-    const sidebar = (isOpen: boolean) => (
-      <SidebarProvider>
-        <BrainRightSidebar
-          isOpen={isOpen}
-          variant="inline"
-          waveId="1"
-          activeTab={SidebarTab.ABOUT}
-          setActiveTab={setActiveTab}
-        />
-      </SidebarProvider>
-    );
-    const { rerender } = render(sidebar(true));
+    const { rerender } = render(inlineSidebar(true));
 
     const panel = screen.getByRole("complementary", {
       name: "Wave details",
     });
-    rerender(sidebar(false));
+    rerender(inlineSidebar(false));
 
     expect(screen.getByTestId("brain-right-sidebar-slot")).toHaveAttribute(
       "data-state",
@@ -257,20 +284,9 @@ describe("BrainRightSidebar", () => {
 
   it("removes the panel without movement when reduced motion is preferred", async () => {
     mockPrefersReducedMotion = true;
-    const sidebar = (isOpen: boolean) => (
-      <SidebarProvider>
-        <BrainRightSidebar
-          isOpen={isOpen}
-          variant="inline"
-          waveId="1"
-          activeTab={SidebarTab.ABOUT}
-          setActiveTab={setActiveTab}
-        />
-      </SidebarProvider>
-    );
-    const { rerender } = render(sidebar(true));
+    const { rerender } = render(inlineSidebar(true));
 
-    rerender(sidebar(false));
+    rerender(inlineSidebar(false));
 
     await waitFor(() => {
       expect(

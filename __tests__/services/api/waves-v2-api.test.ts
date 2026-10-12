@@ -6,6 +6,7 @@ import {
   createWaveMetadata,
   deleteWaveMetadata,
   fetchWaveMetadata,
+  fetchWaveById,
   fetchWavesV2Page,
   fetchWaveSubwavesPage,
   searchWavesByName,
@@ -211,6 +212,20 @@ describe("waves-v2-api", () => {
     expect(commonApiFetchMock).toHaveBeenCalledWith({
       endpoint: "v2/waves/wave-1/metadata",
       headers: undefined,
+    });
+  });
+
+  it("fetches the unchanged single-wave data shape with HTTP status preserved", async () => {
+    const wave = { id: "wave-1", name: "Wave 1" };
+    const headers = { "x-test-header": "fixture" };
+    commonApiFetchMock.mockResolvedValue(wave);
+    await expect(fetchWaveById({ waveId: "wave-1", headers })).resolves.toBe(
+      wave
+    );
+    expect(commonApiFetchMock).toHaveBeenCalledWith({
+      endpoint: "waves/wave-1",
+      headers,
+      errorMode: "structured",
     });
   });
 

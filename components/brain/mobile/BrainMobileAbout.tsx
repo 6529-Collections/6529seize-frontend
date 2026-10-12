@@ -27,6 +27,7 @@ const BrainMobileAbout: React.FC<BrainMobileAboutProps> = ({
     queryFn: async () =>
       await commonApiFetch<ApiWave>({
         endpoint: `waves/${activeWaveId}`,
+        errorMode: "structured",
       }),
     enabled: !!activeWaveId,
     staleTime: 60000,
