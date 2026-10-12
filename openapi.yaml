@@ -26353,6 +26353,15 @@ components:
           type: string
         key:
           type: string
+        video_poster_base64:
+          type: string
+          maxLength: 174764
+          description: >-
+            Optional base64 JPEG captured on the device for a drop video,
+            without a data URL prefix. Maximum decoded size 128 KiB and
+            dimensions 640 by 640. Validated and stored before video upload
+            completion; invalid or unavailable posters fall back to backend
+            generation. Ignored for other media.
         parts:
           type: array
           items:

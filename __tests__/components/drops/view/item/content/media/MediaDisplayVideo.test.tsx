@@ -1,6 +1,7 @@
 import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import MediaDisplayVideo from "@/components/drops/view/item/content/media/MediaDisplayVideo";
+import * as touchFirst from "@/helpers/touch-first.helpers";
 
 // mock hooks used inside component
 jest.mock("@/hooks/useInView", () => ({
@@ -54,6 +55,24 @@ beforeEach(() => {
 });
 
 describe("MediaDisplayVideo", () => {
+  it("uses the visible viewport boundary in a mobile browser", () => {
+    const mobile = jest
+      .spyOn(touchFirst, "isTouchFirstEnvironment")
+      .mockReturnValue(true);
+    mockUseInView.mockReturnValue([jest.fn(), false]);
+    try {
+      render(<MediaDisplayVideo src="foo.mp4" />);
+      expect(mockUseInView).toHaveBeenCalledWith(
+        expect.objectContaining({ rootMargin: "0px" })
+      );
+      expect(mockUseOptimizedVideo).toHaveBeenCalledWith(
+        "foo.mp4",
+        expect.objectContaining({ enabled: false })
+      );
+    } finally {
+      mobile.mockRestore();
+    }
+  });
   it("uses controlled playback instead of autoplay attribute", () => {
     const { container } = render(<MediaDisplayVideo src="foo.mp4" />);
     const video = container.querySelector("video") as HTMLVideoElement;
