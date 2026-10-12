@@ -3,11 +3,13 @@
 import ContentDisplay from "@/components/waves/drops/ContentDisplay";
 import {
   buildProcessedContent,
+  type ContentSegment,
   type ProcessedContent,
 } from "@/components/waves/drops/media-utils";
 import { getRandomColorWithSeed, getTimeAgoShort } from "@/helpers/Helpers";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
+import { markdownToPlainText } from "@/helpers/waves/waveDescriptionPreview";
 import type { SidebarWave } from "@/types/waves.types";
 import { formatInteger, formatNumber } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
@@ -454,5 +456,23 @@ function getWavePreviewContent(wave: SidebarWave): ProcessedContent | null {
     return null;
   }
 
-  return buildProcessedContent(combinedText || null, media);
+  const preview = buildProcessedContent(combinedText || null, media);
+  const segments = preview.segments.flatMap(toPlainTextSegment);
+
+  return segments.length === 0 && preview.apiMedia.length === 0
+    ? null
+    : { ...preview, segments };
+}
+
+// The preview is clamped plain text, so markdown syntax would show verbatim.
+function toPlainTextSegment(segment: ContentSegment): ContentSegment[] {
+  if (segment.type !== "text") {
+    return [segment];
+  }
+
+  const content = markdownToPlainText(segment.content, {
+    includeImageUrls: false,
+    includeLinkDestinations: false,
+  });
+  return content ? [{ ...segment, content }] : [];
 }

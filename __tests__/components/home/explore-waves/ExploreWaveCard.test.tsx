@@ -85,6 +85,56 @@ describe("ExploreWaveCard", () => {
     });
   });
 
+  it("strips markdown from the description preview", () => {
+    render(
+      <ExploreWaveCard
+        wave={createWave({
+          descriptionDrop: {
+            contents:
+              "**Punk6529's SciFi/NearFi Book List**\n\n**Background**\n\n" +
+              "See [The Memes - Artist Brief](https://docs.google.com/document/d/brief) " +
+              "for details.\n\n![cover](https://example.com/cover.png)",
+            media: [],
+          },
+        })}
+      />
+    );
+
+    const lastContentDisplayProps =
+      mockContentDisplay.mock.calls[
+        mockContentDisplay.mock.calls.length - 1
+      ][0];
+
+    expect(lastContentDisplayProps.content.segments).toEqual([
+      {
+        type: "text",
+        content:
+          "Punk6529's SciFi/NearFi Book List Background See The Memes - Artist Brief for details.",
+      },
+      expect.objectContaining({
+        type: "media",
+        mediaInfo: expect.objectContaining({
+          url: "https://example.com/cover.png",
+        }),
+      }),
+    ]);
+  });
+
+  it("keeps the empty preview slot when markdown leaves no text", () => {
+    render(
+      <ExploreWaveCard
+        wave={createWave({
+          descriptionDrop: {
+            contents: "[](https://example.com/empty-label)",
+            media: [],
+          },
+        })}
+      />
+    );
+
+    expect(mockContentDisplay).not.toHaveBeenCalled();
+  });
+
   it("shows empty state when latest drop is missing", () => {
     render(
       <ExploreWaveCard
