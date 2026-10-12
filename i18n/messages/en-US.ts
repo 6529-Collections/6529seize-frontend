@@ -2135,6 +2135,8 @@ const WAVE_CHAT_MESSAGES = objectMessages("waves.chat", {
   "replyThread.loading": "Loading replies…",
   "replyThread.loadEarlier": "Show earlier replies",
   "replyThread.empty": "No replies to show.",
+  "replyThread.error": "Couldn't load replies.",
+  "replyThread.retry": "Retry",
 } as const);
 
 const WAVE_COMPOSER_ACTION_MESSAGES = objectMessages("waves.composer.actions", {

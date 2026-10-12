@@ -42,6 +42,8 @@ main chat.
 4. In a wave with collapsed replies, the drop shows `Show N replies`. Selecting it
    opens the thread under the drop, oldest reply first. A new reply opens its
    parent's thread automatically for the person who sent it.
+   The sender's pending reply stays visible while saving and loading the thread;
+   it is replaced by the saved reply, or removed if sending fails.
 5. `Hide replies` closes the thread. Long threads show
    `Show earlier replies` at the top.
 
@@ -75,6 +77,8 @@ main chat.
 - If `Reply` shows `You are not eligible to chat in this wave`, the wave does
   not have open replies, or you cannot see the wave.
 - If a thread looks out of date, close and reopen it, or refresh the wave.
+- If loading fails, the thread shows `Couldn't load replies.` and `Retry`.
+  Replies already loaded stay visible. Select `Retry` to load the thread again.
 
 ## Limitations / Notes
 

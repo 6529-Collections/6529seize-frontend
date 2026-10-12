@@ -1,5 +1,6 @@
 import { act, render, screen, waitFor } from "@testing-library/react";
 import { useState } from "react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import userEvent from "@testing-library/user-event";
 import WaveDropReplyThread from "@/components/waves/drops/reply-threads/WaveDropReplyThread";
 import {
@@ -14,10 +15,15 @@ import { fetchDropByIdBatched } from "@/services/api/drop-api";
 import { WsMessageType } from "@/helpers/Types";
 
 const mockApplyOptimisticDropUpdate = jest.fn();
+const mockWaveMessages = jest.fn();
 jest.mock("@/contexts/wave/MyStreamContext", () => ({
+  useMyStreamWaveMessages: () => mockWaveMessages(),
   useMyStream: () => ({
     applyOptimisticDropUpdate: mockApplyOptimisticDropUpdate,
   }),
+}));
+jest.mock("@/components/auth/Auth", () => ({
+  useAuth: () => ({ connectedProfile: { id: "sender" } }),
 }));
 jest.mock("@/services/websocket/useWebSocketMessage", () => ({
   useWebSocketMessage: jest.fn(),
@@ -53,22 +59,32 @@ const makeDrop = (
 function Harness({
   drop,
   enabled = true,
+  simulateSend = false,
 }: {
   readonly drop: ExtendedDrop;
   readonly enabled?: boolean;
+  readonly simulateSend?: boolean;
 }) {
   const store = useExpandedReplyThreadsStore();
+  const [queryClient] = useState(() => new QueryClient());
   return (
-    <WaveReplyThreadsProvider enabled={enabled} wave={wave} store={store}>
-      <WaveDropReplyThread
-        drop={drop}
-        renderReply={({ reply, previousReply }) => (
-          <p>
-            {reply.id} after {previousReply?.id ?? "start"}
-          </p>
-        )}
-      />
-    </WaveReplyThreadsProvider>
+    <QueryClientProvider client={queryClient}>
+      {simulateSend && (
+        <button onClick={() => store.setExpanded(drop.id, true)}>
+          Send reply
+        </button>
+      )}
+      <WaveReplyThreadsProvider enabled={enabled} wave={wave} store={store}>
+        <WaveDropReplyThread
+          drop={drop}
+          renderReply={({ reply, previousReply }) => (
+            <p>
+              {reply.id} after {previousReply?.id ?? "start"}
+            </p>
+          )}
+        />
+      </WaveReplyThreadsProvider>
+    </QueryClientProvider>
   );
 }
 
@@ -85,6 +101,7 @@ function LiveHarness() {
 
 describe("WaveDropReplyThread", () => {
   beforeEach(() => {
+    mockWaveMessages.mockReturnValue(undefined);
     mockApplyOptimisticDropUpdate.mockReset();
     fetchDropMock.mockReset();
     useDropMessagesMock.mockReturnValue({
@@ -172,6 +189,129 @@ describe("WaveDropReplyThread", () => {
     expect(
       screen.getByRole("button", { name: "Show 1 reply" })
     ).toBeInTheDocument();
+  });
+
+  it("offers retry after a failed load and shows empty only after a successful read", async () => {
+    const refetch = jest.fn().mockResolvedValue(undefined);
+    const response = {
+      drops: [],
+      hasNextPage: false,
+      isFetching: false,
+      isFetchingNextPage: false,
+      isError: true,
+      fetchNextPage: jest.fn(),
+      refetch,
+    };
+    useDropMessagesMock.mockReturnValue(response);
+    const view = render(
+      <Harness drop={makeDrop("root", 10, { replies_count: 1 })} />
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Show 1 reply" }));
+
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "Couldn't load replies."
+    );
+    expect(screen.queryByText("No replies to show.")).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Retry" }));
+    expect(refetch).toHaveBeenCalledTimes(1);
+
+    useDropMessagesMock.mockReturnValue({ ...response, isFetching: true });
+    view.rerender(
+      <Harness drop={makeDrop("root", 10, { replies_count: 1 })} />
+    );
+    expect(screen.getByRole("button", { name: "Retry" })).toBeDisabled();
+    expect(screen.getByText("Loading replies…")).toBeInTheDocument();
+    expect(screen.queryByText("No replies to show.")).not.toBeInTheDocument();
+
+    useDropMessagesMock.mockReturnValue({ ...response, isError: false });
+    view.rerender(
+      <Harness drop={makeDrop("root", 10, { replies_count: 1 })} />
+    );
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Retry" })
+    ).not.toBeInTheDocument();
+    expect(screen.getByText("No replies to show.")).toBeInTheDocument();
+  });
+
+  it("keeps loaded replies visible when a refresh fails", async () => {
+    useDropMessagesMock.mockReturnValue({
+      drops: [makeDrop("reply-1", 11)],
+      hasNextPage: false,
+      isFetching: false,
+      isFetchingNextPage: false,
+      isError: true,
+      fetchNextPage: jest.fn(),
+      refetch: jest.fn().mockResolvedValue(undefined),
+    });
+    render(<Harness drop={makeDrop("root", 10, { replies_count: 1 })} />);
+    await userEvent.click(screen.getByRole("button", { name: "Show 1 reply" }));
+    expect(screen.getByText("reply-1 after start")).toBeInTheDocument();
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "Couldn't load replies."
+    );
+    expect(screen.getByRole("button", { name: "Retry" })).toBeEnabled();
+  });
+
+  it("renders a completed response before the hook's effect-delayed drop copy", async () => {
+    const user = userEvent.setup();
+    const reply = makeDrop("ready-reply", 11, {
+      author: { id: "sender", handle: "sender" } as ExtendedDrop["author"],
+      parts: [
+        {
+          part_id: 1,
+          content: "ready",
+          media: [],
+          attachments: [],
+          quoted_drop: null,
+        },
+      ],
+      metadata: [],
+      created_at: 100,
+    });
+    useDropMessagesMock.mockReturnValue({
+      data: { pages: [{ wave, drops: [reply] }] },
+      drops: [],
+      isFetching: false,
+      hasNextPage: false,
+      isFetchingNextPage: false,
+      fetchNextPage: jest.fn(),
+    });
+    render(<Harness drop={makeDrop("root", 10, { replies_count: 1 })} />);
+    await user.click(screen.getByRole("button", { name: "Show 1 reply" }));
+    expect(screen.getByText("ready-reply after start")).toBeInTheDocument();
+    expect(screen.queryByText("No replies to show.")).not.toBeInTheDocument();
+  });
+
+  it("shows the sender's pending first reply when auto-opening an uncached thread", async () => {
+    const pending = makeDrop("temp-new", 20, {
+      author: { id: "sender", handle: "sender" } as ExtendedDrop["author"],
+      parts: [
+        {
+          part_id: 1,
+          content: "my reply",
+          media: [],
+          attachments: [],
+          quoted_drop: null,
+        },
+      ],
+      metadata: [],
+      created_at: 100,
+      reply_to: { drop_id: "root", drop_part_id: 1, is_deleted: false },
+    });
+    mockWaveMessages.mockReturnValue({ drops: [pending] });
+    useDropMessagesMock.mockReturnValue({
+      data: { pages: [{ wave, drops: [] }] },
+      drops: [],
+      isFetching: false,
+      hasNextPage: false,
+      isFetchingNextPage: false,
+      fetchNextPage: jest.fn(),
+    });
+    render(<Harness drop={makeDrop("root", 10)} simulateSend />);
+    await userEvent.click(screen.getByRole("button", { name: "Send reply" }));
+    expect(screen.getByText("temp-new after start")).toBeInTheDocument();
+    expect(screen.queryByText("No replies to show.")).not.toBeInTheDocument();
   });
 
   it("loads earlier replies on request", async () => {
