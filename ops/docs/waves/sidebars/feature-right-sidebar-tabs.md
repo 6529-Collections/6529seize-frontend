@@ -26,7 +26,8 @@ pinned drop with its content and media. Eligible viewers can add or edit REP.
 
 ## Common Scenarios
 
-- The section order is About, REP, Configuration.
+- The section order is About, REP, Configuration. Desktop and mobile use the
+  same compact pill styling for these sections.
 - Configuration owns wave access, chat availability, links, slow mode, replies,
   curation management, chat history deletion and personal display preferences.
 - Shared changes use administrator gear controls. Personal controls retain their
